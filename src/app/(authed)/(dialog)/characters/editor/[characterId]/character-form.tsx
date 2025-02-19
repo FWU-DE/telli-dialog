@@ -29,6 +29,7 @@ import { cn } from '@/utils/tailwind';
 import { deepEqual } from '@/utils/object';
 import ChevronLeftIcon from '@/components/icons/chevron-left';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -57,7 +58,7 @@ export default function CharacterForm({
     register,
     handleSubmit,
     getValues,
-    formState: { defaultValues, isValid },
+    formState: { isValid },
   } = useForm<CharacterFormValues>({
     resolver: zodResolver(characterFormValuesSchema),
     defaultValues: {
@@ -66,6 +67,9 @@ export default function CharacterForm({
       learningContext: character.learningContext ?? '',
     },
   });
+
+  const t = useTranslations('characters.form');
+  const tCommon = useTranslations('common');
 
   const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
     character.accessLevel,
@@ -119,8 +123,8 @@ export default function CharacterForm({
       .then(() => {
         // do not show any toast if the avatar is being created
         if (!isCreating) {
+          toast.success('Der Dialogpartner wurde erfolgreich gelöscht.');
         }
-        toast.success('Der Dialogpartner wurde erfolgreich gelöscht.');
 
         router.push(backUrl);
       })
@@ -132,7 +136,12 @@ export default function CharacterForm({
   function handleAutoSave() {
     if (isCreating) return;
     const data = getValues();
-    const hasChanges = !deepEqual(data, defaultValues);
+    const hasChanges = !deepEqual(data, {
+      ...character,
+      description: character.description ?? '',
+      learningContext: character.learningContext ?? '',
+    });
+
     if (!hasChanges) return;
     onSubmit(data);
   }
@@ -152,23 +161,23 @@ export default function CharacterForm({
           className="flex gap-3 items-center text-primary hover:underline"
         >
           <ChevronLeftIcon />
-          <span>Alle Dialogpartner</span>
+          <span>{t('all-characters')}</span>
         </button>
       )}
       {!isCreating && (
         <Link href={backUrl} className="flex gap-3 text-primary hover:underline items-center">
           <ChevronLeftIcon />
-          <span>Alle Dialogpartner</span>
+          <span>{t('all-characters')}</span>
         </Link>
       )}
       <h1 className="text-2xl mt-4 font-medium">
-        {isCreating ? 'Dialogpartner erstellen' : character.name}
+        {isCreating ? t('create-character') : character.name}
       </h1>
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
           <div className="flex gap-8 flex-col">
             <label className={cn(labelClassName, 'text-sm')}>
-              Für wen soll der Dialogpartner freigegeben werden?
+              {t('character-visibility-label')}
             </label>
             <div className="flex max-sm:flex-col gap-4 sm:gap-8">
               <div className="flex gap-4">
@@ -183,7 +192,7 @@ export default function CharacterForm({
                     <CheckIcon className="text-primary w-6 h-4" />
                   </Checkbox.Indicator>
                 </Checkbox.Root>
-                <span>Keine Freigabe</span>
+                <span>{t('restriction-private')}</span>
               </div>
               <div className="flex gap-4">
                 <Checkbox.Root
@@ -197,11 +206,11 @@ export default function CharacterForm({
                     <CheckIcon className="text-primary w-6 h-4" />
                   </Checkbox.Indicator>
                 </Checkbox.Root>
-                <span>Für meine Schule</span>
+                <span>{t('restriction-school')}</span>
               </div>
             </div>
             <div className="flex flex-col gap-4">
-              <label className={cn(labelClassName, 'text-sm')}>Wie heißt die Person?</label>
+              <label className={cn(labelClassName, 'text-sm')}>{t('character-name-label')}</label>
               <input
                 {...register('name')}
                 className={cn(
@@ -209,12 +218,12 @@ export default function CharacterForm({
                   'focus:border-primary placeholder:text-gray-300',
                 )}
                 onBlur={handleAutoSave}
-                placeholder="König Ludwig XIV"
+                placeholder={t('character-name-placeholder')}
               />
             </div>
             <div className="flex flex-col gap-4">
               <label className={cn(labelClassName, 'text-sm')}>
-                Wie kann die Person in einem kurzen Satz beschrieben werden?
+                {t('character-description-label')}
               </label>
               <input
                 {...register('description')}
@@ -223,12 +232,12 @@ export default function CharacterForm({
                   'focus:border-primary placeholder:text-gray-300',
                 )}
                 onBlur={handleAutoSave}
-                placeholder="Absolutistischer König, bekannt für seine prunkvolle Herrschaft."
+                placeholder={t('character-description-placeholder')}
               />
             </div>
           </div>
           <section className="h-full">
-            <label className={cn(labelClassName, 'text-sm')}>Bild</label>
+            <label className={cn(labelClassName, 'text-sm')}>{tCommon('image')}</label>
             <div className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4">
               {maybeSignedPictureUrl ? (
                 <Image
@@ -260,65 +269,60 @@ export default function CharacterForm({
       </div>
       <div className="flex flex-col gap-4">
         <label className={cn(labelClassName, 'text-sm')}>
-          Was ist die konkrete Unterrichtssituation?
+          {t('character-learning-context-label')}
         </label>
         <textarea
           {...register('learningContext')}
           rows={5}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           onBlur={handleAutoSave}
-          placeholder='Die Lernenden sollen Ludwig XIV befragen, wie er zu seiner Aussage "Der Staat bin ich" kommt und was er damit konkret meint.'
+          placeholder={t('character-learning-context-placeholder')}
         />
       </div>
       <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>
-          Welche Kompetenzen sollen die Lernenden erwerben?
-        </label>
+        <label className={cn(labelClassName, 'text-sm')}>{t('character-competence-label')}</label>
         <textarea
           {...register('competence')}
           rows={5}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           onBlur={handleAutoSave}
-          placeholder="Die Lernenden sollen das Selbstverständnis und Staatsverständnis eines absolutistischen Herrschers verstehen."
+          placeholder={t('character-competence-placeholder')}
         />
       </div>
       <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>Was soll der Dialogpartner tun?</label>
+        <label className={cn(labelClassName, 'text-sm')}>
+          {t('character-specification-label')}
+        </label>
         <textarea
           {...register('specifications')}
           rows={5}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           onBlur={handleAutoSave}
-          placeholder="Antworte aus der Perspektive von König Ludwig XIV. Gib dich erhaben und stolz bzgl. deines Staatssystems."
+          placeholder={t('character-specification-placeholder')}
         />
       </div>
       <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>
-          Was soll der Dialogpartner nicht tun?
-        </label>
+        <label className={cn(labelClassName, 'text-sm')}>{t('character-restriction-label')}</label>
         <textarea
           {...register('restrictions')}
           rows={5}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           onBlur={handleAutoSave}
-          placeholder="Der Dialogpartner soll sich nicht außerhalb seiner Lebenswelt als Ludwig XIV bewegen und nicht außerhalb seines geschichtlichen Kontexts (Absolutismus im 17. Jahrhundert in Frankreich) antworten."
+          placeholder={t('character-restriction-placeholder')}
         />
       </div>
       {!isCreating && (
         <section className="mt-8">
-          <h3 className="font-medium">Dialogpartner löschen</h3>
-          <p className="mt-4">
-            Beim Löschen des Dialogpartners werden alle damit verbundenen Konversationen
-            unwiderruflich gelöscht.
-          </p>
+          <h3 className="font-medium">{t('delete-character')}</h3>
+          <p className="mt-4">{t('character-delete-description')}</p>
           <DestructiveActionButton
             className={cn(buttonDeleteClassName, 'mt-10')}
-            modalDescription="Bist du sicher, dass du diesen Dialogpartner löschen möchten? Dabei werden alle mit diesem Dialogpartner verbundenen Konversationen unwiderruflich gelöscht."
-            modalTitle="Dialogpartner löschen"
-            confirmText="Löschen"
+            modalDescription={t('character-delete-modal-description')}
+            modalTitle={t('delete-character')}
+            confirmText={tCommon('delete')}
             actionFn={handleDeleteCharacter}
           >
-            Dialogpartner endgültig löschen
+            {t('final-delete-character')}
           </DestructiveActionButton>
         </section>
       )}
@@ -332,7 +336,7 @@ export default function CharacterForm({
             onClick={handleDeleteCharacter}
             type="button"
           >
-            Abbrechen
+            {tCommon('cancel')}
           </button>
           <button
             className={cn(buttonPrimaryClassName)}
@@ -340,7 +344,7 @@ export default function CharacterForm({
             onClick={handleCreateCharacter}
             type="button"
           >
-            Dialogpartner erstellen
+            {t('create-character')}
           </button>
         </section>
       )}

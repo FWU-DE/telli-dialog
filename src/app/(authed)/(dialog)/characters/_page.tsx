@@ -15,6 +15,7 @@ import SearchBarInput from '@/components/search-bar';
 import { type UserAndContext } from '@/auth/types';
 import { CharacterAccessLevel } from '@/db/schema';
 import { buildCharactersUrl, CharacterWithImage } from './utils';
+import { useTranslations } from 'next-intl';
 
 export default function Page2({
   user,
@@ -31,8 +32,10 @@ export default function Page2({
 
   const filteredCharacters = filterCharacters(characters, input);
 
+  const t = useTranslations('characters');
+
   return (
-    <div className="flex flex-col gap-2 p-8">
+    <div className="flex flex-col gap-2 py-8 px-4">
       <HeaderPortal>
         <ToggleSidebarButton />
         <NewChatButton />
@@ -40,12 +43,8 @@ export default function Page2({
         <ProfileMenu {...user} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl mb-6">Dialogpartner</h1>
-        <span>
-          Entdecke faszinierende Dialogpartner, die Lernen zu einem spannenden Erlebnis machen.
-          Egal, ob du Fragen hast oder einfach neugierig bist – hier findest du den perfekten
-          Dialogpartner für deinen Schulltag.
-        </span>
+        <h1 className="text-3xl mb-6">{t('character')}</h1>
+        <span>{t('description')}</span>
       </div>
       <div className="flex flex-wrap-reverse justify-between gap-2 text-base mb-4 max-w-3xl mx-auto w-full mt-16">
         <SearchBarInput
@@ -54,7 +53,7 @@ export default function Page2({
           className={cn(
             'p-2 px-4 focus:outline-none disabled:bg-light-gray disabled:border-gray-100 disabled:cursor-not-allowed',
           )}
-          placeholder="Dialogpartner suchen..."
+          placeholder={t('search-placeholder')}
           disabled={filterDisabled}
         />
         <CreateNewCharacterButton />
@@ -68,7 +67,7 @@ export default function Page2({
             accessLevel === 'global' && 'underline',
           )}
         >
-          Öffentlich
+          {t('visibility-global')}
         </Link>
         <Link
           href={buildCharactersUrl('school')}
@@ -77,7 +76,7 @@ export default function Page2({
             accessLevel === 'school' && 'underline',
           )}
         >
-          Schulintern
+          {t('visibility-school')}
         </Link>
         <Link
           href={buildCharactersUrl('private')}
@@ -86,7 +85,7 @@ export default function Page2({
             accessLevel === 'private' && 'underline',
           )}
         >
-          Für mich
+          {t('visibility-private')}
         </Link>
       </div>
       <div className="max-w-3xl mx-auto w-full">

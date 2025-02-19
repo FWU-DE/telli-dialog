@@ -11,6 +11,7 @@ import Image from 'next/image';
 import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
 import { deleteCharacterAction } from './editor/[characterId]/actions';
+import { useTranslations } from 'next-intl';
 
 type CharacterContainerProps = CharacterModel & {
   currentUserId: string;
@@ -40,9 +41,13 @@ export default function CharacterContainer({
   }
 
   function handleNavigateToCharacterEditor(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
     e.stopPropagation();
     router.push(`/characters/editor/${id}`);
   }
+
+  const t = useTranslations('characters.form');
+  const tCommon = useTranslations('common');
 
   return (
     <Link
@@ -68,9 +73,9 @@ export default function CharacterContainer({
               <PenIcon className="w-3 h-3" />
             </button>
             <DestructiveActionButton
-              modalTitle="Dialogpartner löschen"
-              modalDescription="Bist du sicher, dass du diesen Dialogpartner löschen wollen? Dadurch werden auch alle mit diesem Dialogpartner begonnenen Konversationen gelöscht."
-              confirmText="Löschen"
+              modalTitle={t('delete-character')}
+              modalDescription={t('character-delete-modal-description')}
+              confirmText={tCommon('delete')}
               actionFn={handleDeleteCharacter}
               triggerButtonClassName="border-transparent justify-center flex flex-col p-2 rounded-enterprise-sm hover:bg-vidis-hover-green/20"
             >

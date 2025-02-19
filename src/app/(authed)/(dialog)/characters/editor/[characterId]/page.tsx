@@ -69,7 +69,7 @@ export default async function Page(context: {
         <div className="flex-grow"></div>
         <ProfileMenu {...user} />
       </HeaderPortal>
-      <div className="max-w-4xl mx-auto mt-4">
+      <div className="max-w-3xl mx-auto mt-4">
         <CharacterForm
           {...character}
           maybeSignedPictureUrl={maybeSignedPictureUrl}

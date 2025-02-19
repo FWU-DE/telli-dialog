@@ -2,7 +2,10 @@ name: Build and deploy staging
 
 on:
   push:
-    branches: [master]
+    branches: [main]
+  pull_request:
+    branches:
+      - main
 
 jobs:
   checks:
@@ -36,7 +39,7 @@ jobs:
     needs: checks
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code

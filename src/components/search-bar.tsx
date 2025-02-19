@@ -7,7 +7,7 @@ type SearchInputProps = React.InputHTMLAttributes<HTMLInputElement>;
 export default function SearchBarInput({ ...props }: SearchInputProps) {
   return (
     <div className="relative flex items-center border-[1px] disabled:cursor-not-allowed focus-within:border-primary rounded-enterprise-md overflow-hidden group">
-      <input {...props} />
+      <input {...props} className={cn(props.className, 'min-w-60 pr-10')} />
       <div
         className={cn(
           'pl-8 absolute right-4 bottom-3',

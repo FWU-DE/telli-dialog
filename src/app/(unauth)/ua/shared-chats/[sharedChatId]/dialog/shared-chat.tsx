@@ -22,6 +22,7 @@ import SelectLlmModel from '@/components/conversation/select-llm-model';
 import { generateUUID } from '@/utils/uuid';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import MarkdownDisplay from '@/components/chat/markdown-display';
+import { UnauthenticatedProfileMenu } from '@/components/navigation/profile-menu';
 
 export default function SharedChat({
   ...sharedSchoolChat
@@ -114,6 +115,8 @@ export default function SharedChat({
         )}
         <SelectLlmModel />
         {!chatActive && <p className="text-red-500">Der Chat ist abgelaufen</p>}
+        <div className="flex-grow" />
+        <UnauthenticatedProfileMenu />
       </header>
       <div className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden">
         <div

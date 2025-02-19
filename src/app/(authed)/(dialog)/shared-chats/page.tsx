@@ -10,7 +10,7 @@ export default async function Page() {
   const sharedChats = await dbGetSharedChatsByUserId({ userId: user.id });
 
   return (
-    <main className="w-full p-8">
+    <main className="w-full p-6">
       <Refresh />
       <SharedChatContainer sharedChats={sharedChats} user={user} />
     </main>

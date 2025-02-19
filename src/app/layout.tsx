@@ -9,8 +9,6 @@ import { getMessages, getLocale } from 'next-intl/server';
 
 import './globals.css';
 import './scrollbar.css';
-import { getHostByHeaders } from '@/utils/host';
-import { redirect } from 'next/navigation';
 
 const barlow = Barlow({
   weight: ['400', '500', '600', '700'],
@@ -32,12 +30,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     getLocale(),
     getMessages(),
   ]);
-
-  const host = await getHostByHeaders();
-
-  if (host === 'telli.schule') {
-    redirect('https://www.telli.schule');
-  }
 
   const fullSession =
     maybeUser !== null && maybeSession !== null ? { ...maybeSession, user: maybeUser } : null;
