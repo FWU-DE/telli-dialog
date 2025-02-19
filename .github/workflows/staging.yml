@@ -80,7 +80,7 @@ jobs:
           COMMIT_HASH=${{ github.sha }}
           echo "Updating Kubernetes deployment with image tag $COMMIT_HASH"
           kubectl set image deployment/telli-chatbot-staging \
-            chatbot-dialog=chatbot.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH
+            telli-chatbot-staging=telli.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH
 
       - name: Wait for rollout to complete
         run: |
