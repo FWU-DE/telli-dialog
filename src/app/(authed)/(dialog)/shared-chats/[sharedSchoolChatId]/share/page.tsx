@@ -55,15 +55,15 @@ export default async function Page(context: { params: Promise<{ sharedSchoolChat
   const leftTime = calculateTimeLeftBySharedChat(sharedSchoolChat);
 
   return (
-    <div className="w-full px-4 sm:px-8 overflow-auto">
+    <div className="w-full px-4 sm:px-8 overflow-auto flex flex-col h-full">
       <Link
         href={`/shared-chats/${sharedSchoolChat.id}`}
-        className="flex gap-2 items-center text-primary"
+        className="flex gap-2 items-center text-primary w-full"
       >
         <SidebarCloseIcon className="w-4 h-4" />
         <span className="text-base font-normal hover:underline">Zum Klassendialog</span>
       </Link>
-      <div className="mx-auto mt-10 sm:mt-16 flex flex-col justify-center items-center text-center">
+      <div className="mx-auto mt-10 sm:mt-16 flex flex-col justify-center items-center text-center w-full">
         <h1 className="text-4xl sm:text-7xl font-medium mb-10 sm:mb-16">
           Dem Klassendialog beitreten
         </h1>
@@ -102,9 +102,10 @@ export default async function Page(context: { params: Promise<{ sharedSchoolChat
             <QRCode className="w-64 h-64 sm:w-[400px] sm:h-[400px]" value={shareUrl} />
           </section>
         </main>
-        <hr className="w-full" />
-        <Footer />
       </div>
+      <div className="flex-grow" />
+      <hr className="w-full" />
+      <Footer />
     </div>
   );
 }

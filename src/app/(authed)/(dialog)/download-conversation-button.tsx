@@ -4,6 +4,7 @@ import WebDownloadIcon from '@/components/icons/web-download';
 import React from 'react';
 import Spinner from '@/components/icons/spinner';
 import { useToast } from '@/components/common/toast';
+import { useTranslations } from 'next-intl';
 
 type DownloadConversationButtonProps = {
   conversationId: string;
@@ -59,10 +60,12 @@ export default function DownloadConversationButton({
     }
   }
 
+  const t = useTranslations('conversation-download');
+
   return (
     <button
       className="hidden xs:flex justify-center items-center w-8 h-8 group disabled:bg-light-gray disabled:text-gray-100 group rounded-enterprise-sm hover:bg-vidis-hover-green/20"
-      title="Konversation herunterladen"
+      title={t('title')}
       onClick={handleDownload}
       disabled={disabled}
     >

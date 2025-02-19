@@ -1,7 +1,6 @@
 import { type UserAndContext } from '@/auth/types';
 
 export function getPriceLimitByUser(user: UserAndContext) {
-  return 2;
   if (user.school === undefined || user.federalState === undefined) return null;
 
   if (user.school.userRole === 'student') {

@@ -4,9 +4,11 @@ import { LogoutIcon } from '@/components/icons/logout';
 import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/utils/tailwind';
+import { useTranslations } from 'next-intl';
 
 export default function LogoutButton({ className, ...props }: React.ComponentProps<'button'>) {
   const router = useRouter();
+  const t = useTranslations('common');
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
@@ -20,7 +22,7 @@ export default function LogoutButton({ className, ...props }: React.ComponentPro
       {...props}
     >
       <LogoutIcon className="w-5 h-5" />
-      <p>Abmelden</p>
+      <p>{t('logout')}</p>
     </button>
   );
 }

@@ -56,7 +56,7 @@ export function SharedChatContainer({ sharedChats, user }: SharedChatContainerPr
             <span>{t('button-create')}</span>
           </Link>
         </div>
-        {sharedChats.length < 1 && <p className="text-dark-gray mt-6">{t('no-dialogs')}</p>}
+        {sharedChats.length < 1 && <p className="text-dark-gray mt-16">{t('no-dialogs')}</p>}
         {filteredSharedChats.length > 0 && (
           <div className="max-w-3xl mx-auto w-full flex gap-2 flex-col mt-6">
             {filteredSharedChats.map((sharedChat) => (

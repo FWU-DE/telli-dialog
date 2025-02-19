@@ -9,6 +9,51 @@
       "this-week": "Vorherige 7 Tage"
     }
   },
+  "conversation-download": {
+    "title": "Konversation herunterladen"
+  },
+  "legal": {
+    "privacy-policy": "Datenschutz",
+    "imprint": "Impressum"
+  },
+  "common": {
+    "logout": "Abmelden",
+    "delete": "Löschen",
+    "cancel": "Abbrechen",
+    "image": "Bild",
+    "upload-image": "Bild hochladen"
+  },
+  "characters": {
+    "character": "Dialogpartner",
+    "description": "Entdecke faszinierende Dialogpartner, die Lernen zu einem spannenden Erlebnis machen. Egal, ob du Fragen hast oder einfach neugierig bist – hier findest du den perfekten Dialogpartner für deinen Schulltag.",
+    "search-placeholder": "Dialogpartner suchen...",
+    "visibility-global": "Öffentlich",
+    "visibility-school": "Schulintern",
+    "visibility-private": "Für mich",
+    "form": {
+      "all-characters": "Alle Dialogpartner",
+      "restriction-private": "Keine Freigabe",
+      "restriction-school": "Für meine Schule",
+      "delete-character": "Dialogpartner löschen",
+      "final-delete-character": "Dialogpartner endgültig löschen",
+      "create-character": "Dialogpartner erstellen",
+      "character-visibility-label": "Für wen soll der Dialogpartner freigegeben werden?",
+      "character-name-label": "Wie heißt die Person?",
+      "character-name-placeholder": "König Ludwig XIV",
+      "character-description-label": "Wie kann die Person in einem kurzen Satz beschrieben werden?",
+      "character-description-placeholder": "Absolutistischer König, bekannt für seine prunkvolle Herrschaft.",
+      "character-learning-context-label": "Was ist die konkrete Unterrichtssituation?",
+      "character-learning-context-placeholder": "Die Lernenden sollen Ludwig XIV befragen, wie er zu seiner Aussage \"Der Staat bin ich\" kommt und was er damit konkret meint.",
+      "character-competence-label": "Welche Kompetenzen sollen die Lernenden erwerben?",
+      "character-competence-placeholder": "Die Lernenden sollen das Selbstverständnis und Staatsverständnis eines absolutistischen Herrschers verstehen.",
+      "character-specification-label": "Was soll der Dialogpartner tun?",
+      "character-specification-placeholder": "Antworte aus der Perspektive von König Ludwig XIV. Gib dich erhaben und stolz bzgl. deines Staatssystems.",
+      "character-restriction-label": "Was soll der Dialogpartner nicht tun?",
+      "character-restriction-placeholder": "Der Dialogpartner soll sich nicht außerhalb seiner Lebenswelt als Ludwig XIV bewegen und nicht außerhalb seines geschichtlichen Kontexts (Absolutismus im 17. Jahrhundert in Frankreich) antworten.",
+      "character-delete-description": "Beim Löschen des Dialogpartners werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
+      "character-delete-modal-description": "Bist du sicher, dass du diesen Dialogpartner löschen möchtest? Dabei werden alle mit diesem Dialogpartner verbundenen Konversationen unwiderruflich gelöscht."
+    }
+  },
   "Chat": {
     "send-message-placeholder": "Wie kann ich Dir helfen?",
     "information-disclaimer": "telli kann Fehler machen. Sei kritisch und überprüfe alle Informationen.",

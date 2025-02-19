@@ -47,7 +47,7 @@ export default async function Page(context: { params: Promise<{ sharedSchoolChat
   }
 
   return (
-    <div className="min-w-full p-8 overflow-auto">
+    <div className="w-full p-6 overflow-auto">
       <HeaderPortal>
         <ToggleSidebarButton />
         <div className="flex-grow"></div>

@@ -113,7 +113,7 @@ export default function Chat({
               </div>
             )
           ) : (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-8">
               {messages.map((message, index) => {
                 const isLastNonUser = index === messages.length - 1 && message.role !== 'user';
 

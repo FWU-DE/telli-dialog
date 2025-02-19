@@ -6,10 +6,13 @@ import { createNewCharacterAction } from './actions';
 import { useToast } from '@/components/common/toast';
 import { cn } from '@/utils/tailwind';
 import PlusIcon from '@/components/icons/plus';
+import { useTranslations } from 'next-intl';
 
 export default function CreateNewCharacterButton() {
   const router = useRouter();
   const toast = useToast();
+
+  const t = useTranslations('characters.form');
 
   function handleNewGPT() {
     createNewCharacterAction()
@@ -27,7 +30,7 @@ export default function CreateNewCharacterButton() {
       className={cn(buttonPrimaryClassName, 'flex gap-2 items-center group py-2')}
     >
       <PlusIcon className="fill-primary-text w-3 h-3 group-hover:fill-secondary-text" />
-      <span>Dialogpartner erstellen</span>
+      <span>{t('create-character')}</span>
     </button>
   );
 }
