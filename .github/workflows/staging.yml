@@ -1,0 +1,85 @@
+name: Build and deploy staging
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  checks:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Install PNPM
+        run: npm install -g pnpm@9.6.0
+
+      - name: Install dependencies
+        run: pnpm install
+      - name: Check formatting
+        run: pnpm format:check
+      - name: Check types
+        run: pnpm types
+      - name: Check linter
+        run: pnpm lint
+      - name: Check linter
+        run: pnpm test
+
+  build-staging:
+    name: Build and push docker image
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: |
+          COMMIT_HASH=${{ github.sha }}
+          docker build -f Dockerfile -t telli/chatbot:$COMMIT_HASH .
+          docker tag telli/chatbot:$COMMIT_HASH telli.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH
+
+      - name: Push Docker image to IONOS registry
+        run: |
+          echo "${{ secrets.IONOS_REGISTRY_TOKEN_GITHUB_PUSH }}" | docker login --username github-push --password-stdin telli.cr.de-fra.ionos.com
+          COMMIT_HASH=${{ github.sha }}
+          docker push telli.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH
+
+  deploy-staging:
+    name: Rollout staging
+    environment: Staging
+    timeout-minutes: 5
+    needs: build-staging
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set Kubernetes context
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBECONFIG_FILE }}
+          context: ''
+
+      - name: Update Kubernetes deployment
+        run: |
+          COMMIT_HASH=${{ github.sha }}
+          echo "Updating Kubernetes deployment with image tag $COMMIT_HASH"
+          kubectl set image deployment/telli-chatbot-staging \
+            chatbot-dialog=chatbot.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH
+
+      - name: Wait for rollout to complete
+        run: |
+          echo "Waiting for rollout to complete"
+          kubectl rollout status deployment/telli-chatbot-staging

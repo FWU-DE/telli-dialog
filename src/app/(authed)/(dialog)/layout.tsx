@@ -1,0 +1,53 @@
+import { SidebarVisibilityProvider } from '@/components/navigation/sidebar/sidebar-provider';
+import { dbGetConversations } from '@/db/functions/chat';
+import { getUser } from '@/auth/utils';
+import React from 'react';
+import DialogSidebar from './sidebar';
+import { HEADER_PORTAL_ID } from './header-portal';
+import { contentHeight } from '@/utils/tailwind/height';
+import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
+import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
+import { getPriceInCentByUser } from '@/app/school';
+import AutoLogout from '@/components/auth/auto-logout';
+import { getDefaultModelNameByCookies } from '@/utils/model';
+
+export const dynamic = 'force-dynamic';
+
+export default async function ChatLayout({ children }: { children: React.ReactNode }) {
+  const user = await getUser();
+  const models = await dbGetAndUpdateLlmModelsByFederalStateId({
+    federalStateId: user.federalState.id,
+  });
+
+  const defaultModelByCookie = await getDefaultModelNameByCookies();
+
+  const [conversations, priceInCent] = await Promise.all([
+    dbGetConversations(user.id),
+    getPriceInCentByUser({ user, models }),
+  ]);
+
+  return (
+    <div className="flex h-[100dvh] w-[100dvw]">
+      <AutoLogout />
+      <SidebarVisibilityProvider>
+        <LlmModelsProvider models={models} defaultLlmModelByCookie={defaultModelByCookie}>
+          <DialogSidebar
+            conversations={conversations}
+            user={user}
+            currentModelCosts={priceInCent ?? 0}
+          />
+          <div className="flex flex-col max-h-[100dvh] min-h-[100dvh] w-full overflow-auto">
+            <div
+              id={HEADER_PORTAL_ID}
+              className="sticky z-10 top-0 py-4 h-[4.75rem] px-6 flex gap-4 items-center justify-between bg-white"
+              style={{
+                position: '-webkit-sticky',
+              }}
+            ></div>
+            <div className={contentHeight}>{children}</div>
+          </div>
+        </LlmModelsProvider>
+      </SidebarVisibilityProvider>
+    </div>
+  );
+}

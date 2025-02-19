@@ -1,0 +1,42 @@
+import React from 'react';
+
+export type GenericFileUploadButtonProps = {
+  triggerButton: React.ReactNode;
+  triggerClassName?: string;
+  onSubmit(files: FileList): void;
+};
+
+export default function GenericFileUploadButton({
+  triggerButton,
+  triggerClassName,
+  onSubmit,
+}: GenericFileUploadButtonProps) {
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  function handleButtonClick() {
+    fileInputRef.current?.click();
+  }
+
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const files = event.target.files;
+
+    if (files === null) return;
+
+    onSubmit(files);
+  }
+
+  return (
+    <div className="flex items-center w-full">
+      <input
+        type="file"
+        accept="image/jpeg, image/png, image/webp"
+        className="hidden"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+      />
+      <button type="button" onClick={handleButtonClick} className={triggerClassName}>
+        {triggerButton}
+      </button>
+    </div>
+  );
+}

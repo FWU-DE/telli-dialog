@@ -1,0 +1,47 @@
+services:
+  telli_dialog_db:
+    image: postgres:16
+    container_name: telli_dialog_db
+    restart: always
+    environment:
+      POSTGRES_DB: telli_dialog_db
+      POSTGRES_USER: telli_dialog_db
+      POSTGRES_PASSWORD: test1234
+    volumes:
+      - postgres_data_telli_dialog:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - postgres_network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U telli_dialog_db -d telli_dialog_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  telli_dialog_app:
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+    container_name: telli_dialog_app
+    restart: always
+    env_file:
+      - ../../.env
+    environment:
+      DATABASE_URL: postgresql://telli_dialog_db:test1234@telli_dialog_db:5432/telli_dialog_db
+    depends_on:
+      telli_dialog_db:
+        condition: service_healthy
+    ports:
+      - '3000:3000'
+    networks:
+      - postgres_network
+
+networks:
+  postgres_network:
+    driver: bridge
+
+volumes:
+  postgres_data_telli_dialog:
+    driver: local

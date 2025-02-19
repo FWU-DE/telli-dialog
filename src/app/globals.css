@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.no-scroll {
+  overflow: hidden;
+}
+
+.truncate-custom {
+  display: block;
+  whitespace: nowrap;
+  overflow: hidden;
+  textoverflow: ellipsis;
+  minwidth: 0;
+}

@@ -1,0 +1,27 @@
+/* General scrollbar styles for Safari, Edge and Chrome */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* General scrollbar styles for Firefox */
+* {
+  scrollbar-color: #ccc transparent;
+  scrollbar-width: thin;
+}
+
+*:hover {
+  scrollbar-color: #555 transparent;
+}
