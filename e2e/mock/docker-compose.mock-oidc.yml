@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  oidc-server-mock:
+    container_name: oidc-server-mock
+    image: soluto/oidc-server-mock:0.8.6
+    ports:
+      - '4011:80'
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      SERVER_OPTIONS_INLINE: |
+        {
+          "AccessTokenJwtType": "JWT",
+          "Discovery": {
+            "ShowKeySet": true
+          },
+          "Authentication": {
+            "CookieSameSiteMode": "Lax",
+            "CheckSessionCookieSameSiteMode": "Lax"
+          }
+        }
+      LOGIN_OPTIONS_INLINE: |
+        {
+          "AllowRememberLogin": false
+        }
+      LOGOUT_OPTIONS_INLINE: |
+        {
+          "AutomaticRedirectAfterSignOut": true
+        }
+      API_SCOPES_INLINE: |
+        - Name: openid
+        - Name: profile
+        - Name: email
+      API_RESOURCES_INLINE: |
+        - Name: vidis
+          Scopes:
+            - openid
+            - profile
+            - email
+      USERS_CONFIGURATION_INLINE: |
+        [
+          {
+            "SubjectId": "1",
+            "Username": "testuser",
+            "Password": "password",
+            "Claims": [
+              { "Type": "exp", "Value": "1735689600", "ValueType": "integer" },
+              { "Type": "iat", "Value": "1735603200", "ValueType": "integer" },
+              { "Type": "auth_time", "Value": "1735603200", "ValueType": "integer" },
+              { "Type": "jti", "Value": "random-jti", "ValueType": "string" },
+              { "Type": "iss", "Value": "http://localhost:4011", "ValueType": "string" },
+              { "Type": "aud", "Value": "vidis-client", "ValueType": "string" },
+              { "Type": "sub", "Value": "1", "ValueType": "string" },
+              { "Type": "typ", "Value": "ID", "ValueType": "string" },
+              { "Type": "azp", "Value": "vidis-client", "ValueType": "string" },
+              { "Type": "session_state", "Value": "session-123", "ValueType": "string" },
+              { "Type": "at_hash", "Value": "at-hash-value", "ValueType": "string" },
+              { "Type": "sid", "Value": "session-id-123", "ValueType": "string" },
+              { "Type": "rolle", "Value": "Schueler", "ValueType": "string" },
+              { "Type": "schulkennung", "Value": "ABC123", "ValueType": "string" },
+              { "Type": "bundesland", "Value": "Bayern", "ValueType": "string" }
+            ]
+          }
+        ]
+      CLIENTS_CONFIGURATION_INLINE: |
+        [
+          {
+            "ClientId": "implicit-mock-client",
+            "Description": "Test client for implicit flow",
+            "AllowedGrantTypes": ["implicit"],
+            "AllowAccessTokensViaBrowser": true,
+            "RedirectUris": ["http://localhost:3000/auth/callback/vidis"],
+            "AllowedScopes": ["openid", "profile", "email"],
+            "IdentityTokenLifetime": 3600,
+            "AccessTokenLifetime": 3600
+          },
+          {
+            "ClientId": "client-credentials-mock-client",
+            "ClientSecrets": ["client-credentials-mock-client-secret"],
+            "Description": "Client for client credentials flow",
+            "AllowedGrantTypes": ["client_credentials"],
+            "AllowedScopes": ["openid", "profile", "email"],
+            "ClientClaimsPrefix": "",
+            "Claims": [
+              { "Type": "access_token", "Value": "mock-access-token", "ValueType": "string" },
+              { "Type": "expires_in", "Value": "3600", "ValueType": "integer" },
+              { "Type": "refresh_expires_in", "Value": "7200", "ValueType": "integer" },
+              { "Type": "refresh_token", "Value": "mock-refresh-token", "ValueType": "string" },
+              { "Type": "token_type", "Value": "bearer", "ValueType": "string" },
+              { "Type": "id_token", "Value": "mock-id-token", "ValueType": "string" },
+              { "Type": "session_state", "Value": "mock-session-state", "ValueType": "string" },
+              { "Type": "provider", "Value": "vidis", "ValueType": "string" }
+            ]
+          }
+        ]

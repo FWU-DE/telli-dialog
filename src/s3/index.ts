@@ -16,7 +16,8 @@ import { env } from '@/env';
 import { nanoid } from 'nanoid';
 
 const s3Client = new S3Client({
-  region: 'eu-de',
+  // region: 'eu-de',
+  region: 'eu-central-2',
   endpoint: `https://${env.otcS3Hostname}`,
   credentials: {
     accessKeyId: env.otcAccessKeyId,
@@ -104,20 +105,26 @@ export async function getSignedUrlFromS3Get({
 export async function getSignedUrlFromS3Put({
   key,
   fileType,
-  bucketName = 'dialog',
 }: {
   key: string;
   fileType: string;
   bucketName?: keyof typeof buckets;
 }) {
   const command = new PutObjectCommand({
-    Bucket: buckets[bucketName],
+    Bucket: env.otcBucketName,
     Key: key,
     ContentType: fileType,
   });
 
   try {
-    const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    const signedUrl = await getSignedUrl(s3Client, command, {
+      expiresIn: 3600,
+      signableHeaders: new Set([
+        'content-type',
+        'access-control-allow-header',
+        'access-control-allow-origin',
+      ]),
+    });
     return signedUrl;
   } catch (error) {
     console.error('Error generating signed PUT URL for S3:', error);
