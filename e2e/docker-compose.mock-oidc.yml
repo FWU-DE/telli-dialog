@@ -1,0 +1,80 @@
+services:
+  oidc-server-mock:
+    container_name: oidc-server-mock
+    image: ghcr.io/soluto/oidc-server-mock:latest
+    ports:
+      - "4011:4011"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      # Server settings including token type and discovery options
+      SERVER_OPTIONS_INLINE: |
+        {
+          "AccessTokenJwtType": "JWT",
+          "Discovery": {
+            "ShowKeySet": true
+          },
+          "Authentication": {
+            "CookieSameSiteMode": "Lax",
+            "CheckSessionCookieSameSiteMode": "Lax"
+          }
+        }
+      # Login options disable the "remember me" feature
+      LOGIN_OPTIONS_INLINE: |
+        {
+          "AllowRememberLogin": false
+        }
+      # Logout options automatically redirect after sign-out
+      LOGOUT_OPTIONS_INLINE: |
+        {
+          "AutomaticRedirectAfterSignOut": true
+        }
+      # Define API scopes (here a single test scope)
+      API_SCOPES_INLINE: |
+        - Name: test-scope
+      # Define API resources that use the above scope
+      API_RESOURCES_INLINE: |
+        - Name: test-app
+          Scopes:
+            - test-scope
+      # Provide one test user with claims; this user will return correct responses when used
+      USERS_CONFIGURATION_INLINE: |
+        [
+          {
+            "SubjectId": "1",
+            "Username": "TestUser",
+            "Password": "password",
+            "Claims": [
+              {
+                "Type": "name",
+                "Value": "Test User",
+                "ValueType": "string"
+              },
+              {
+                "Type": "email",
+                "Value": "test.user@example.com",
+                "ValueType": "string"
+              }
+            ]
+          }
+        ]
+      # Define a simple client configuration for implicit flow
+      CLIENTS_CONFIGURATION_INLINE: |
+        [
+          {
+            "ClientId": "test-client",
+            "Description": "Client for implicit flow",
+            "AllowedGrantTypes": ["implicit"],
+            "AllowAccessTokensViaBrowser": true,
+            "RedirectUris": ["http://localhost:3000/auth/callback"],
+            "AllowedScopes": ["openid", "profile", "email"],
+            "IdentityTokenLifetime": 3600,
+            "AccessTokenLifetime": 3600
+          }
+        ]
+      # Pass through forwarded headers
+      ASPNET_SERVICES_OPTIONS_INLINE: |
+        {
+          "ForwardedHeadersOptions": {
+            "ForwardedHeaders": "All"
+          }
+        }
