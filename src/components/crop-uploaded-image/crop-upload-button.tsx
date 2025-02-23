@@ -1,12 +1,11 @@
 import React from 'react';
 import { cn } from '@/utils/tailwind';
 import GenericFileUploadButton from '@/components/common/upload-file-button';
-import { getSignedUrlFromS3Put } from '@/s3';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import UploadImageIcon from '../icons/upload-image';
 import ImageCropModal from './crop-image-modal';
 import { CompressionOptions } from '@/utils/files/image-utils';
-import { cnanoid } from '@/utils/random';
+import { saveFileAction } from './actions';
 
 type UploadImageToBeCroppedButtonProps = {
   uploadDirPath: string;
@@ -15,15 +14,14 @@ type UploadImageToBeCroppedButtonProps = {
   compressionOptions?: CompressionOptions;
   file_prefix?: string;
   file_name?: string;
+  securityOptions: { characterId: string };
 };
 
 export default function UploadImageToBeCroppedButton({
-  uploadDirPath,
   aspect,
   onUploadComplete,
   compressionOptions,
-  file_prefix,
-  file_name,
+  securityOptions,
 }: UploadImageToBeCroppedButtonProps) {
   const [file, setFile] = React.useState<File | null>(null);
   const [imageSource, setImageSource] = React.useState<string | null>(null);
@@ -43,34 +41,35 @@ export default function UploadImageToBeCroppedButton({
   }
 
   async function handleCroppedImage(croppedBlob: Blob) {
-    if (!croppedBlob || !file) return;
+    if (file === null) return;
 
-    const fileName = file_name ?? `${file_prefix ?? ''}${cnanoid()}_${file.name}`;
+    const formData = new FormData();
+    formData.append('file', croppedBlob, file.name);
 
-    const imagePath = `${uploadDirPath}/${fileName}`;
-
-    const signedUploadUrl = await getSignedUrlFromS3Put({
-      key: imagePath,
-      fileType: croppedBlob.type,
-    });
-
-    const uploadResponse = await fetch(signedUploadUrl, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': croppedBlob.type,
-      },
-      body: croppedBlob,
-      cache: 'no-cache',
-    });
-
-    if (uploadResponse.ok) {
-      onUploadComplete(imagePath);
-      setShowCropModal(false);
-      setFile(null);
-      setImageSource(null);
-    } else {
-      console.error('Upload failed');
+    if (securityOptions.characterId) {
+      formData.append('characterId', securityOptions.characterId);
     }
+
+    const imagePath = await saveFileAction(formData);
+
+    // const signedUploadUrl = await getSignedUrlFromS3Put({
+    //   key: imagePath,
+    //   fileType: croppedBlob.type,
+    // });
+    //
+    // const uploadResponse = await fetch(signedUploadUrl, {
+    //   method: 'PUT',
+    //   headers: {
+    //     'Content-Type': croppedBlob.type,
+    //   },
+    //   body: croppedBlob,
+    //   cache: 'no-cache',
+    // });
+
+    onUploadComplete(imagePath);
+    setShowCropModal(false);
+    setFile(null);
+    setImageSource(null);
   }
 
   return (

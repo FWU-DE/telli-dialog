@@ -8,12 +8,16 @@ import DownloadConversationButton from './download-conversation-button';
 import HeaderPortal from './header-portal';
 import { getUser } from '@/auth/utils';
 import { getRandomPromptSuggestions } from '@/utils/prompt-suggestions/utils';
+import { getSignedUrlFromS3Get } from '@/s3';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
   const id = generateUUID();
   const user = await getUser();
+
+  const url = await getSignedUrlFromS3Get({ key: 'alex.jpg' });
+  console.debug({ url });
 
   const promptSuggestions = getRandomPromptSuggestions({ userRole: user.school.userRole });
 

@@ -15,7 +15,12 @@ const baseNextConfig = {
   // if you want to host it on vercel, remove this option
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/output#automatically-copying-traced-files
   output: 'standalone',
-  images: {
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2GB',
+    },
+  },
+  image: {
     dangerouslyAllowSVG: true,
     remotePatterns: [
       {

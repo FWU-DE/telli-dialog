@@ -125,3 +125,8 @@ export async function dbDeleteCharacterByIdAndUserId({
 
   return deletedCharacter;
 }
+
+export async function dbGetCharacterById({ id }: { id: string }) {
+  const [character] = await db.select().from(characterTable).where(eq(characterTable.id, id));
+  return character;
+}

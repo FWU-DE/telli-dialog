@@ -24,10 +24,7 @@ const s3Client = new S3Client({
   },
 });
 
-const buckets = {
-  api: 'dgpt-api-storage',
-  dialog: env.otcBucketName,
-};
+const BUCKET_NAME = env.otcBucketName;
 /**
  * Uploads a file to an S3 bucket.
  *
@@ -41,14 +38,16 @@ export async function uploadFileToS3({
   key,
   body,
   contentType,
+  Bucket = BUCKET_NAME,
 }: {
   key: string;
   body: Buffer | Uint8Array | Blob | string | Readable;
   contentType: string;
+  Bucket?: string;
 }) {
   const Key = key ?? nanoid();
   const uploadParams: PutObjectCommandInput = {
-    Bucket: buckets['api'],
+    Bucket,
     Key,
     Body: body,
     ContentType: contentType,
@@ -70,23 +69,23 @@ export async function getMaybeSignedUrlFromS3Get({ key }: { key: string | undefi
 
 export async function getSignedUrlFromS3Get({
   key,
-  bucketName = 'dialog',
   filename,
   contentType,
+  Bucket = BUCKET_NAME,
   attachment = true,
 }: {
   key: string;
-  bucketName?: keyof typeof buckets;
   filename?: string;
   contentType?: string;
   attachment?: boolean;
+  Bucket?: string;
 }) {
   let contentDisposition = attachment ? 'attachment;' : '';
   if (filename !== undefined) {
     contentDisposition = `${contentDisposition} filename=${filename}`;
   }
   const command = new GetObjectCommand({
-    Bucket: buckets[bucketName],
+    Bucket,
     Key: key,
     ...(contentDisposition !== '' ? { ResponseContentDisposition: contentDisposition } : {}),
     ...(contentType !== undefined ? { ResponseContentType: contentType } : {}),
@@ -104,14 +103,14 @@ export async function getSignedUrlFromS3Get({
 export async function getSignedUrlFromS3Put({
   key,
   fileType,
-  bucketName = 'dialog',
+  Bucket = BUCKET_NAME,
 }: {
   key: string;
   fileType: string;
-  bucketName?: keyof typeof buckets;
+  Bucket?: string;
 }) {
   const command = new PutObjectCommand({
-    Bucket: buckets[bucketName],
+    Bucket,
     Key: key,
     ContentType: fileType,
   });
@@ -134,13 +133,13 @@ export async function getSignedUrlFromS3Put({
  */
 export async function readFileFromS3({
   key,
-  bucketName = 'dialog',
+  Bucket = BUCKET_NAME,
 }: {
   key: string;
-  bucketName?: keyof typeof buckets;
+  Bucket?: string;
 }) {
   const getParams: GetObjectCommandInput = {
-    Bucket: buckets[bucketName],
+    Bucket,
     Key: key,
   };
 
@@ -161,13 +160,13 @@ export async function readFileFromS3({
 
 export async function streamFileFromS3({
   key,
-  bucketName = 'dialog',
+  Bucket = BUCKET_NAME,
 }: {
   key: string;
-  bucketName?: keyof typeof buckets;
+  Bucket?: string;
 }) {
   const getParams: GetObjectCommandInput = {
-    Bucket: buckets[bucketName],
+    Bucket,
     Key: key,
   };
 
@@ -195,13 +194,13 @@ export async function streamToBuffer(stream: Readable): Promise<Buffer> {
  */
 export async function deleteFileFromS3({
   key,
-  bucketName = 'dialog',
+  Bucket = BUCKET_NAME,
 }: {
   key: string;
-  bucketName?: keyof typeof buckets;
+  Bucket?: string;
 }) {
   const deleteParams: DeleteObjectCommandInput = {
-    Bucket: buckets[bucketName],
+    Bucket,
     Key: key,
   };
 

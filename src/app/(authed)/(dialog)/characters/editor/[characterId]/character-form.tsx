@@ -263,6 +263,7 @@ export default function CharacterForm({
               onUploadComplete={handlePictureUploadComplete}
               file_name="avatar"
               compressionOptions={{ maxHeight: 800 }}
+              securityOptions={{ characterId: character.id }}
             />
           </section>
         </div>
