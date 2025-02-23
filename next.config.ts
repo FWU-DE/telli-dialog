@@ -35,9 +35,9 @@ export default withSentryConfig(baseNextConfigWithNextIntl, {
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options
 
-  org: 'dgpt',
-  project: 'dgpt-dialog',
-  sentryUrl: 'https://sentry.logging.deutschlandgpt.de/',
+  org: 'sentry',
+  project: 'telli-chatbot',
+  sentryUrl: 'https://sentry.logging.eu-de.prod.deutschlandgpt.de/',
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
@@ -58,9 +58,6 @@ export default withSentryConfig(baseNextConfigWithNextIntl, {
   // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
   // side errors will fail.
   tunnelRoute: '/monitoring',
-
-  // Hides source maps from generated client bundles
-  // hideSourceMaps: true,
 
   // Automatically tree-shake Sentry logger statements to reduce bundle size
   disableLogger: true,
