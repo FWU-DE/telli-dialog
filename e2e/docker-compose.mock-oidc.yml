@@ -30,12 +30,12 @@ services:
         }
       # Define API scopes (here a single test scope)
       API_SCOPES_INLINE: |
-        - Name: test-scope
+        - Name: oidc 
       # Define API resources that use the above scope
       API_RESOURCES_INLINE: |
         - Name: test-app
           Scopes:
-            - test-scope
+            - oidc 
       # Provide one test user with claims; this user will return correct responses when used
       USERS_CONFIGURATION_INLINE: |
         [
@@ -66,7 +66,7 @@ services:
             "AllowedGrantTypes": ["implicit"],
             "AllowAccessTokensViaBrowser": true,
             "RedirectUris": ["http://localhost:3000/auth/callback"],
-            "AllowedScopes": ["openid", "profile", "email"],
+            "AllowedScopes": ["openid"],
             "IdentityTokenLifetime": 3600,
             "AccessTokenLifetime": 3600
           }

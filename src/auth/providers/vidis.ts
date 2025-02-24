@@ -26,11 +26,11 @@ export const signInVidisSchema = vidisUserInfoSchema.and(oAuthTokenResponseSchem
 const vidisAccountSchema = z.object({
   access_token: z.string(),
   expires_in: z.number(),
-  refresh_expires_in: z.number(),
-  refresh_token: z.string(),
+  // refresh_expires_in: z.number(),
+  // refresh_token: z.string(),
+  // session_state: z.string(),
   token_type: z.literal('bearer'),
   id_token: z.string(),
-  session_state: z.string(),
   provider: z.literal('vidis'),
 });
 
@@ -62,6 +62,7 @@ export async function handleVidisJWTCallback({
   token: JWT;
   account: Account;
 }) {
+  console.debug({ profile, token, account });
   const parsedProfile = vidisProfileSchema.parse(profile);
   const parsedAccount = vidisAccountSchema.parse(account);
 
