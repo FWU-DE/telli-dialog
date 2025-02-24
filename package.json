@@ -24,7 +24,8 @@
     "db:studio": "dotenv -e .env -- drizzle-kit studio --config=src/db/drizzle.config.ts",
     "e2e": "dotenv -e .env -- playwright test",
     "e2e:headed": "dotenv -e .env -- playwright test --headed",
-    "e2e:ui": "dotenv -e .env -- playwright test --ui"
+    "e2e:ui": "dotenv -e .env -- playwright test --ui",
+    "postinstall": "playwright install"
   },
   "packageManager": "pnpm@9.6.0",
   "dependencies": {

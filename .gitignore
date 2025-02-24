@@ -42,3 +42,6 @@ yarn-error.log*
 next-env.d.ts
 
 certificates
+
+playwright-report/
+test-results/

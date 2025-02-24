@@ -3,7 +3,7 @@ services:
     container_name: oidc-server-mock
     image: ghcr.io/soluto/oidc-server-mock:latest
     ports:
-      - "4011:4011"
+      - '4011:4011'
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       # Server settings including token type and discovery options
@@ -30,12 +30,12 @@ services:
         }
       # Define API scopes (here a single test scope)
       API_SCOPES_INLINE: |
-        - Name: oidc 
+        - Name: oidc
       # Define API resources that use the above scope
       API_RESOURCES_INLINE: |
         - Name: test-app
           Scopes:
-            - oidc 
+            - oidc
       # Provide one test user with claims; this user will return correct responses when used
       USERS_CONFIGURATION_INLINE: |
         [

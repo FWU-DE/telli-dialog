@@ -10,16 +10,15 @@ import { defineConfig, devices } from '@playwright/test';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: 'e2e',
+  testDir: './e2e/tests/',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: 1,
-  testMatch: 'test.list.ts',
   reporter: [['html'], ['json'], ['github'], ['list']],
   timeout: 0.5 * 60 * 1000,
   use: {
-    baseURL: 'http://127.0.0.1:3000',
+    baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'on',
   },
@@ -53,7 +52,7 @@ export default defineConfig({
   ],
   webServer: {
     command: 'pnpm build && node .next/standalone/server.js',
-    url: 'http://127.0.0.1:3000',
+    url: 'http://localhost:3000',
     reuseExistingServer: true,
   },
 });

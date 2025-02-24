@@ -35,9 +35,9 @@ export default withSentryConfig(baseNextConfigWithNextIntl, {
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options
 
-  org: 'dgpt',
-  project: 'dgpt-dialog',
-  sentryUrl: 'https://sentry.logging.deutschlandgpt.de/',
+  org: 'sentry',
+  project: 'telli-dialog',
+  sentryUrl: 'https://sentry.logging.eu-de.prod.telli.schule/',
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,

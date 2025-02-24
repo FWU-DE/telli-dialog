@@ -61,8 +61,7 @@ const providerConfig: Configuration = {
     },
   },
   claims: {
-    openid: ['sub'],
-    profile: ['rolle', 'schulkennung', 'bundesland'],
+    openid: ['sub', 'rolle', 'schulkennung', 'bundesland'],
   },
   // This helper finds the user account
   async findAccount(ctx: any, id: string) {
