@@ -64,7 +64,7 @@
       "search-placeholder": "Dialog suchen",
       "no-dialogs": "Es wurden noch keine Dialoge erstellt.",
       "form": {
-	"model-label": "Sprachmodell",
+        "model-label": "Sprachmodell",
         "all-dialogs": "Alle Dialoge",
         "title": "Klassendialog erstellen",
         "settings": "Einstellungen",
