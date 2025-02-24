@@ -36,6 +36,7 @@ const config = {
         'light-gray': '#f5f5f5',
         'semilight-gray': '#fafafa',
         coral: '#e94d52',
+        'dark-red': '#9f070d',
         'gray-50': '#F7F7F7',
         'gray-100': '#999999',
         'gray-200': '#E5E5E5',

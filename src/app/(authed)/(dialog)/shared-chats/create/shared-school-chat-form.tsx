@@ -21,7 +21,7 @@ export default function SharedSchoolChatCreateForm() {
   const router = useRouter();
 
   const { models, selectedModel: _selectedModel } = useLlmModels();
-  const t = useTranslations('Chat.shared-chats.create');
+  const t = useTranslations('Chat.shared-chats.form');
 
   const [selectedModel, setSelectedModel] = React.useState(_selectedModel?.id);
 
@@ -65,7 +65,9 @@ export default function SharedSchoolChatCreateForm() {
         </div>
 
         <div className="flex flex-col gap-4 h-full">
-          <label className="text-sm">Sprachmodel</label>
+          <label className="text-sm">
+            <span className="text-coral">*</span> {t('model-label')}
+          </label>
           <Select.Root
             onValueChange={(value) => setSelectedModel(value)}
             value={selectedModel}
@@ -99,7 +101,9 @@ export default function SharedSchoolChatCreateForm() {
         </div>
       </div>
       <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>{t('purpose')}</label>
+        <label className={cn(labelClassName, 'text-sm')}>
+          <span className="text-coral">*</span> {t('purpose')}
+        </label>
         <input
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('description')}
@@ -108,7 +112,9 @@ export default function SharedSchoolChatCreateForm() {
       </div>
       <div className="grid grid-cols-3 gap-4">
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>{t('school-type')}</label>
+          <label className={cn(labelClassName, 'text-sm')}>
+            <span className="text-coral">*</span> {t('school-type')}
+          </label>
           <input
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('schoolType')}
@@ -116,7 +122,9 @@ export default function SharedSchoolChatCreateForm() {
           />
         </div>
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>{t('grade')}</label>
+          <label className={cn(labelClassName, 'text-sm')}>
+            <span className="text-coral">*</span> {t('grade')}
+          </label>
           <input
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('gradeLevel')}
@@ -124,7 +132,9 @@ export default function SharedSchoolChatCreateForm() {
           />
         </div>
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>{t('subject')}</label>
+          <label className={cn(labelClassName, 'text-sm')}>
+            <span className="text-coral">*</span> {t('subject')}
+          </label>
           <input
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('subject')}
@@ -133,7 +143,9 @@ export default function SharedSchoolChatCreateForm() {
         </div>
       </div>
       <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>{t('learning-context')}</label>
+        <label className={cn(labelClassName, 'text-sm')}>
+          <span className="text-coral">*</span> {t('learning-context')}
+        </label>
         <textarea
           rows={5}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
