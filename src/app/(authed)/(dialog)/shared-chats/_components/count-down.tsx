@@ -28,7 +28,13 @@ export default function CountDownTimer({ leftTime, totalTime, className }: Count
   const textClassName = getColorByLeftAndTotalTime({ leftTime, totalTime });
 
   return (
-    <div className={cn('flex gap-2 items-center min-w-[5rem] p-2', className, textClassName)}>
+    <div
+      className={cn(
+        'flex gap-2 items-center min-w-[5rem] px-4 py-2 rounded-[0.75rem]',
+        className,
+        textClassName,
+      )}
+    >
       <StopWatchIcon />
       <span>{formatTime(timeRemaining)}</span>
     </div>
@@ -44,11 +50,8 @@ function formatTime(seconds: number) {
 function getColorByLeftAndTotalTime({ leftTime, totalTime }: CountDownTimerProps) {
   const percentage = leftTime / totalTime;
 
-  if (percentage > 0.3) {
-    return 'text-[#02A59B] bg-vidis-hover-green/20';
+  if (percentage > 0.2) {
+    return 'text-[#00594f] bg-[#6CE9D70D]';
   }
-  if (percentage > 0.1) {
-    return 'text-[rgba(254,229,133,1)] bg-[rgba(254,229,133,0.1)]';
-  }
-  return 'text-[rgba(233,77,82,1)] bg-[rgba(233,77,82,0.1)]';
+  return 'text-dark-red bg-light-red';
 }

@@ -56,7 +56,9 @@ export default function SharedSchoolChatCreateForm() {
       <h2 className="font-medium mt-8">{t('settings')}</h2>
       <div className="flex gap-4 w-full flex-wrap">
         <div className="flex flex-col gap-4 flex-grow">
-          <label className={cn(labelClassName, 'text-sm')}>{t('name')}</label>
+          <label className={cn(labelClassName, 'text-sm')}>
+            <span className="text-coral">*</span> {t('name')}
+          </label>
           <input
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('name')}
