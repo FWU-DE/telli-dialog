@@ -37,7 +37,7 @@ export default withSentryConfig(baseNextConfigWithNextIntl, {
 
   org: 'sentry',
   project: 'telli-chatbot',
-  sentryUrl: 'https://sentry.logging.eu-de.prod.deutschlandgpt.de/',
+  sentryUrl: 'https://sentry.logging.eu-de.prod.telli.schule/',
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
