@@ -84,7 +84,7 @@ export async function handleVidisLogout({ idToken }: { idToken: string }) {
     id_token_hint: idToken,
   });
   const response = await fetch(
-    `${env.vidisBaseUri}/auth/realms/vidis/protocol/openid-connect/logout?${searchParams.toString()}`,
+    `${env.vidisIssuerUri}/protocol/openid-connect/logout?${searchParams.toString()}`,
   );
   if (!response.ok) {
     console.error({ error: await response.text() });
@@ -95,11 +95,11 @@ export const vidisConfig = {
   id: 'vidis',
   name: 'vidis',
   type: 'oidc',
-  wellKnown: `${env.vidisBaseUri}/auth/realms/vidis/.well-known/openid-configuration`,
+  wellKnown: `${env.vidisIssuerUri}/.well-known/openid-configuration`,
   authorization: { params: { scope: 'openid' } },
   idToken: true,
   checks: ['pkce', 'state'],
   clientId: env.vidisClientId,
   clientSecret: env.vidisClientSecret,
-  issuer: `${env.vidisBaseUri}/auth/realms/vidis`,
+  issuer: env.vidisIssuerUri,
 } satisfies NextAuthConfig['providers'][number];

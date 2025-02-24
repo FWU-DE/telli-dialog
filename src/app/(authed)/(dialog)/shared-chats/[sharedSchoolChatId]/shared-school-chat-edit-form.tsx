@@ -18,6 +18,7 @@ import ShareContainer from './share-container';
 import * as Select from '@radix-ui/react-select';
 import ChevronDownIcon from '@/components/icons/chevron-down';
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 export default function SharedSchoolChatEditForm({
   ...sharedSchoolChat
@@ -25,6 +26,8 @@ export default function SharedSchoolChatEditForm({
   const toast = useToast();
   const router = useRouter();
   const { models } = useLlmModels();
+
+  const t = useTranslations('Chat.shared-chats.form');
 
   const [selectedModel, setSelectedModel] = React.useState(sharedSchoolChat.modelId);
 
@@ -83,7 +86,9 @@ export default function SharedSchoolChatEditForm({
       <h2 className="font-medium mt-8">Einstellungen</h2>
       <div className="flex flex-wrap gap-6">
         <div className="flex flex-col gap-4 h-full">
-          <label className="text-sm">Sprachmodel</label>
+          <label className="text-sm">
+            <span className="text-coral">*</span> {t('model-label')}
+          </label>
           <Select.Root
             onValueChange={(modelId) => {
               setSelectedModel(modelId);
@@ -120,7 +125,9 @@ export default function SharedSchoolChatEditForm({
         </div>
       </div>
       <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>Beschreibung</label>
+        <label className={cn(labelClassName, 'text-sm')}>
+          <span className="text-coral">*</span> {t('purpose')}
+        </label>
         <input
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('description')}
@@ -128,21 +135,27 @@ export default function SharedSchoolChatEditForm({
       </div>
       <div className="grid grid-cols-3 gap-6">
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>Schultyp</label>
+          <label className={cn(labelClassName, 'text-sm')}>
+            <span className="text-coral">*</span> {t('school-type')}
+          </label>
           <input
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('schoolType')}
           />
         </div>
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>Klassenstufe</label>
+          <label className={cn(labelClassName, 'text-sm')}>
+            <span className="text-coral">*</span> {t('grade')}
+          </label>
           <input
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('gradeLevel')}
           />
         </div>
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>Fach</label>
+          <label className={cn(labelClassName, 'text-sm')}>
+            <span className="text-coral">*</span> {t('subject')}
+          </label>
           <input
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('subject')}
@@ -151,7 +164,7 @@ export default function SharedSchoolChatEditForm({
       </div>
       <div className="flex flex-col gap-4">
         <label className={cn(labelClassName, 'text-sm')}>
-          Was ist die konkrete Unterrichtssituation?
+          <span className="text-coral">*</span> {t('learning-context')}
         </label>
         <textarea
           rows={5}
@@ -160,7 +173,7 @@ export default function SharedSchoolChatEditForm({
         />
       </div>
       <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>Was soll der KI-Chatbot tun?</label>
+        <label className={cn(labelClassName, 'text-sm')}>{t('specification')}</label>
         <textarea
           rows={5}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
@@ -168,7 +181,7 @@ export default function SharedSchoolChatEditForm({
         />
       </div>
       <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>Was soll der KI-Chatbot nicht tun?</label>
+        <label className={cn(labelClassName, 'text-sm')}>{t('restrictions')}</label>
         <textarea
           rows={5}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}

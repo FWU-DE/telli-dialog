@@ -90,11 +90,11 @@ export default function Chat({
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      <div className="flex flex-col flex-grow justify-between items-center w-full overflow-hidden">
-        <div ref={scrollRef} className="flex-grow w-full max-w-3xl overflow-y-auto p-4 sm:pb-12">
+      <div className="flex flex-col flex-grow justify-between w-full overflow-hidden">
+        <div ref={scrollRef} className="flex-grow overflow-y-auto">
           {messages.length === 0 ? (
             character !== undefined ? (
-              <div className="flex flex-col items-center justify-center h-full">
+              <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto p-4">
                 {imageSource !== undefined && (
                   <Image
                     src={imageSource}
@@ -113,7 +113,7 @@ export default function Chat({
               </div>
             )
           ) : (
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-8 max-w-3xl mx-auto p-4">
               {messages.map((message, index) => {
                 const isLastNonUser = index === messages.length - 1 && message.role !== 'user';
 
@@ -164,7 +164,7 @@ export default function Chat({
             </div>
           )}
         </div>
-        <div className="w-full max-w-3xl pb-4 px-4">
+        <div className="w-full max-w-3xl pb-4 px-4 mx-auto">
           <div className="relative flex flex-col">
             <PromptSuggestions
               suggestions={promptSuggestions}
@@ -200,10 +200,10 @@ export default function Chat({
                     type="submit"
                     title="Send message"
                     disabled={input.trim().length === 0}
-                    className="flex items-center self-end justify-center group disabled:cursor-not-allowed rounded-enterprise-sm me-2 py-2"
+                    className="my-2 mx-2 flex items-center self-end justify-center group disabled:cursor-not-allowed text-dark-gray hover:bg-secondary/20 disabled:bg-gray-200 disabled:text-gray-100 rounded-enterprise-sm text-primary"
                     aria-label="Send Message"
                   >
-                    <ArrowRightIcon className="w-9 h-9 text-dark-gray group-hover:bg-secondary/20 group-disabled:bg-gray-200 group-disabled:text-gray-100 rounded-enterprise-sm text-primary" />
+                    <ArrowRightIcon className="h-9 w-9" />
                   </button>
                 )}
               </div>

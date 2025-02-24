@@ -8,11 +8,8 @@ export default function TelliPointsProgressBar({
   const percentage = Math.max(Math.ceil(_percentage), 0);
 
   function getColorByProgress() {
-    if (percentage > 30) {
+    if (percentage > 20) {
       return '#02A59B';
-    }
-    if (percentage > 10) {
-      return '#FEE585';
     }
     return '#E94D52';
   }
