@@ -43,6 +43,7 @@ export default function UploadImageToBeCroppedButton({
   }
 
   async function handleCroppedImage(croppedBlob: Blob) {
+    console.debug('here');
     if (!croppedBlob || !file) return;
 
     const fileName = file_name ?? `${file_prefix ?? ''}${cnanoid()}_${file.name}`;
@@ -53,6 +54,7 @@ export default function UploadImageToBeCroppedButton({
       key: imagePath,
       fileType: croppedBlob.type,
     });
+    console.debug({ signedUploadUrl });
 
     const uploadResponse = await fetch(signedUploadUrl, {
       method: 'PUT',
@@ -62,6 +64,7 @@ export default function UploadImageToBeCroppedButton({
       body: croppedBlob,
       cache: 'no-cache',
     });
+    console.debug({ uploadResponse });
 
     if (uploadResponse.ok) {
       onUploadComplete(imagePath);
