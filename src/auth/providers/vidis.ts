@@ -26,28 +26,28 @@ export const signInVidisSchema = vidisUserInfoSchema.and(oAuthTokenResponseSchem
 const vidisAccountSchema = z.object({
   access_token: z.string(),
   expires_in: z.number(),
-  refresh_expires_in: z.number(),
-  refresh_token: z.string(),
+  // refresh_expires_in: z.number(),
+  // refresh_token: z.string(),
+  // session_state: z.string(),
   token_type: z.literal('bearer'),
   id_token: z.string(),
-  session_state: z.string(),
   provider: z.literal('vidis'),
 });
 
 const vidisProfileSchema = z.object({
   exp: z.number(),
   iat: z.number(),
-  auth_time: z.number(),
-  jti: z.string(),
+  // auth_time: z.number(),
+  // jti: z.string(),
   iss: z.string(),
   aud: z.string(),
   sub: z.string(),
-  typ: z.literal('ID'),
-  azp: z.string(),
-  session_state: z.string(),
+  // typ: z.literal('ID'),
+  // azp: z.string(),
+  // session_state: z.string(),
   at_hash: z.string(),
   // email: z.string(),
-  sid: z.string(),
+  // sid: z.string(),
   rolle: z.string(),
   schulkennung: z.string().or(z.array(z.string())),
   bundesland: z.string(),
@@ -62,6 +62,7 @@ export async function handleVidisJWTCallback({
   token: JWT;
   account: Account;
 }) {
+  console.debug({ profile, token, account });
   const parsedProfile = vidisProfileSchema.parse(profile);
   const parsedAccount = vidisAccountSchema.parse(account);
 
@@ -80,7 +81,7 @@ export async function handleVidisJWTCallback({
 export async function handleVidisLogout({ idToken }: { idToken: string }) {
   console.info('Performing logout handshare with vidis');
   const searchParams = new URLSearchParams({
-    post_logout_redirect_uri: (await getBaseUrlByHeaders()) ?? 'telli.schule',
+    post_logout_redirect_uri: (await getBaseUrlByHeaders()) ?? 'chat.telli.schule',
     id_token_hint: idToken,
   });
   const response = await fetch(
