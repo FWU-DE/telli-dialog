@@ -38,17 +38,15 @@ const clientConfig = {
 const providerConfig: Configuration = {
   clients: [clientConfig],
   pkce: {
-    methods: ['S256'], // Support PKCE
+    methods: ['S256'],
     required: () => true, // Require PKCE for all clients
   },
   features: {
     devInteractions: { enabled: true },
-    // Disable session management - this might be causing the issue
   },
   conformIdTokenClaims: false, // Allow custom claims in ID token
   cookies: {
     keys: ['some-secure-key'],
-    // Completely simplified cookie settings
     long: {
       httpOnly: true,
       sameSite: 'lax',
@@ -63,34 +61,33 @@ const providerConfig: Configuration = {
   claims: {
     openid: ['sub', 'rolle', 'schulkennung', 'bundesland'],
   },
-  // This helper finds the user account
-  async findAccount(ctx: any, id: string) {
+  async findAccount(ctx, id: string) {
     console.log('findAccount called with id:', id);
 
     const maybeAccount = accountIdAccountMapping[id];
     if (maybeAccount === undefined) {
       throw Error(`Expected teacher or student but got '${id}'`);
     }
-    // Return a mock account that matches your schema requirements
     return {
-      accountId: id, // This will be the 'sub' claim
+      accountId: id,
       async claims(use: string, scope: string) {
         console.log('claims called with use:', use, 'scope:', scope);
         return {
           sub: maybeAccount.sub,
           rolle: 'lehrer',
-          schulkennung: ['123456', '789012'], // Array as per your schema
+          schulkennung: ['123456', '789012'],
           bundesland: 'berlin',
         };
       },
     };
   },
-  // Add custom claims to the tokens
   async extraTokenClaims(ctx, token) {
     console.debug({ ctx, token });
     console.log('extraTokenClaims called');
+    // @ts-expect-error property exists
     const maybeAccount = accountIdAccountMapping[token.accountId];
     if (maybeAccount === undefined) {
+      // @ts-expect-error property exists
       throw Error(`Expected teacher or student but got '${token.accountId}'`);
     }
 
@@ -102,18 +99,13 @@ const providerConfig: Configuration = {
     };
   },
   jwks: {
-    keys: [], // Will be populated with generated keys
+    keys: [],
   },
-  // Add custom format types
-  formats: {
-    AccessToken: 'jwt',
-  },
-  // Simplify expiration times
   ttl: {
-    AccessToken: 60 * 60, // 1 hour
-    AuthorizationCode: 10 * 60, // 10 minutes
-    IdToken: 60 * 60, // 1 hour
-    RefreshToken: 14 * 24 * 60 * 60, // 14 days
+    AccessToken: 60 * 60,
+    AuthorizationCode: 10 * 60,
+    IdToken: 60 * 60,
+    RefreshToken: 14 * 24 * 60 * 60,
   },
 };
 
@@ -123,8 +115,8 @@ async function generateKeys() {
     modulusLength: 2048,
   });
 
-  const privateJwk = await jose.exportJWK(privateKey as any);
-  const publicJwk = await jose.exportJWK(publicKey as any);
+  const privateJwk = await jose.exportJWK(privateKey);
+  const publicJwk = await jose.exportJWK(publicKey);
 
   return {
     privateJwk: { ...privateJwk, use: 'sig', alg: 'RS256', kid: 'signing-key' },
@@ -132,14 +124,12 @@ async function generateKeys() {
   };
 }
 
-// Start the server
 async function startServer() {
-  // Generate keys and add to configuration
   const { privateJwk } = await generateKeys();
+  // @ts-expect-error propery exists
   providerConfig.jwks.keys = [privateJwk];
 
-  // Create provider instance
-  const issuerUrl = 'http://localhost:9000'; // Should match env.vidisIssuerUri in your next-auth config
+  const issuerUrl = 'http://localhost:9000';
   const provider = new Provider(issuerUrl, providerConfig);
 
   // Add detailed error event handlers
@@ -150,7 +140,6 @@ async function startServer() {
       method: ctx.method,
       url: ctx.url,
       headers: ctx.headers,
-      body: ctx.request.body,
     });
   });
 
@@ -167,14 +156,12 @@ async function startServer() {
   });
 
   // Add middleware to modify token responses to match the schema
-  provider.use(async (ctx: any, next: () => Promise<void>) => {
-    // Add request logging
+  provider.use(async (ctx, next: () => Promise<void>) => {
     console.log(`${ctx.method} ${ctx.url}`);
 
     try {
       await next();
 
-      // For token endpoint responses, add the 'provider' field
       if (ctx.oidc?.route === 'token' && ctx.body) {
         console.log('Modifying token response');
         ctx.body.provider = 'vidis';
@@ -188,10 +175,8 @@ async function startServer() {
     }
   });
 
-  // Mount the OIDC provider
   app.use('/', provider.callback());
 
-  // Start the server
   app.listen(9000, () => {
     console.log('OIDC Provider running on http://localhost:9000');
     console.log('OpenID Configuration at http://localhost:9000/.well-known/openid-configuration');
@@ -202,7 +187,6 @@ async function startServer() {
   });
 }
 
-// Run the server
 startServer().catch((err) => {
   console.error('Error starting server:', err);
   process.exit(1);
