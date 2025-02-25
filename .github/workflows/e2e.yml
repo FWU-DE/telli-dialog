@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - master
-  pull_request:
-    types: [opened, ready_for_review, synchronize]
-    branches:
-      - master
-  workflow_dispatch:
+  # pull_request:
+  #   types: [opened, ready_for_review, synchronize]
+  #   branches:
+  #     - master
+  # workflow_dispatch:
 
 jobs:
   e2e:
