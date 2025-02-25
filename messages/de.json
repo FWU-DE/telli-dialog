@@ -63,7 +63,8 @@
       "button-create": "Dialog erstellen",
       "search-placeholder": "Dialog suchen",
       "no-dialogs": "Es wurden noch keine Dialoge erstellt.",
-      "create": {
+      "form": {
+        "model-label": "Sprachmodell",
         "all-dialogs": "Alle Dialoge",
         "title": "Klassendialog erstellen",
         "settings": "Einstellungen",

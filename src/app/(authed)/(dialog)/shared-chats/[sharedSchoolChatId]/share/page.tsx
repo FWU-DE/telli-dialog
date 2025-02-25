@@ -93,7 +93,7 @@ export default async function Page(context: { params: Promise<{ sharedSchoolChat
               target="_blank"
               className={cn(buttonPrimaryClassName, 'mt-10 sm:mt-16')}
             >
-              Als Lehrkraft beitreten
+              Chat öffnen
             </Link>
           </section>
           <div className="hidden md:block w-1 border-r-[1px]" />
