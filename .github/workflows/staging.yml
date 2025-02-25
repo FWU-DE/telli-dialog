@@ -9,6 +9,7 @@ on:
 
 env:
   SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
 jobs:
   checks:
@@ -51,7 +52,7 @@ jobs:
       - name: Build Docker image
         run: |
           COMMIT_HASH=${{ github.sha }}
-          SENTRY_AUTH_TOKEN=${{ env.SENTRY_AUTH_TOKEN }} docker build -f Dockerfile -t telli/chatbot:$COMMIT_HASH .
+          SENTRY_AUTH_TOKEN=${{ env.SENTRY_AUTH_TOKEN }} SENTRY_ENVIRONMENT=staging SENTRY_DSN=${{ env.SENTRY_DSN }} docker build -f Dockerfile -t telli/chatbot:$COMMIT_HASH .
           docker tag telli/chatbot:$COMMIT_HASH telli.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH
 
       - name: Push Docker image to IONOS registry

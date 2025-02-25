@@ -81,7 +81,7 @@ export async function handleVidisJWTCallback({
 export async function handleVidisLogout({ idToken }: { idToken: string }) {
   console.info('Performing logout handshare with vidis');
   const searchParams = new URLSearchParams({
-    post_logout_redirect_uri: (await getBaseUrlByHeaders()) ?? 'telli.schule',
+    post_logout_redirect_uri: (await getBaseUrlByHeaders()) ?? 'chat.telli.schule',
     id_token_hint: idToken,
   });
   const response = await fetch(
