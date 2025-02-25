@@ -56,3 +56,7 @@ You can now start the application:
 ```sh
 pnpm dev
 ```
+
+## More
+
+You can find more docs in the [./docs](./docs) folder.
