@@ -31,4 +31,5 @@ export const env = createEnv({
     encryptionKey: process.env.ENCRYPTION_KEY,
     apiKey: process.env.API_KEY,
   },
+  skipValidation: true,
 });

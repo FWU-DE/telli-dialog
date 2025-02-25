@@ -38,6 +38,7 @@ export default withSentryConfig(baseNextConfigWithNextIntl, {
   org: 'sentry',
   project: 'telli-chatbot',
   sentryUrl: 'https://sentry.logging.eu-de.prod.telli.schule',
+  authToken: process.env.SENTRY_AUTH_TOKEN,
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
