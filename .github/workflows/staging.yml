@@ -7,7 +7,7 @@ on:
     branches:
       - main
 
-environment:
+env:
   SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
 jobs:
