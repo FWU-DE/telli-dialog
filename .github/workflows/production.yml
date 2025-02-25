@@ -1,0 +1,71 @@
+name: Deploy telli production
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_hash:
+        description: 'Commit hash to deploy'
+        required: true
+        default: ''
+
+env:
+  IONOS_DOCKER_REGISTRY_TOKEN: ${{ secrets.IONOS_DOCKER_REGISTRY_TOKEN }}
+
+jobs:
+  checks:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set timezone
+        run: sudo timedatectl set-timezone Europe/Warsaw
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Install PNPM
+        run: npm i -g pnpm@9.6.0
+
+      - name: Install dependencies
+        run: pnpm install
+      - name: Check formatting
+        run: pnpm format:check
+      - name: Check types
+        run: pnpm types
+      - name: Check linter
+        run: pnpm lint
+      - name: Run tests
+        run: pnpm test
+
+  deploy-production:
+    name: Rollout production
+    timeout-minutes: 5
+    needs: checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set Kubernetes context
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBECONFIG_FILE }}
+          context: ''
+
+      - name: Update Kubernetes deployment
+        run: |
+          COMMIT_HASH="${{ github.event.inputs.commit_hash }}"
+          echo "Updating Kubernetes deployment with image tag $COMMIT_HASH"
+          kubectl set image deployment/telli-chatbot-production \
+            telli-chatbot-production=telli.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH \
+
+      - name: Wait for rollout to complete
+        run: |
+          echo "Waiting for rollout to complete"
+          kubectl rollout status deployment/telli-chatbot-production

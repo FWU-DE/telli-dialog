@@ -42,7 +42,7 @@ jobs:
     needs: checks
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code
@@ -62,7 +62,6 @@ jobs:
 
   deploy-staging:
     name: Rollout staging
-    environment: Staging
     timeout-minutes: 5
     needs: build-staging
     runs-on: ubuntu-latest
