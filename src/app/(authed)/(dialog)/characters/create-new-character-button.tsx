@@ -7,6 +7,7 @@ import { useToast } from '@/components/common/toast';
 import { cn } from '@/utils/tailwind';
 import PlusIcon from '@/components/icons/plus';
 import { useTranslations } from 'next-intl';
+import { useLlmModels } from '@/components/providers/llm-model-provider';
 
 export default function CreateNewCharacterButton() {
   const router = useRouter();
@@ -14,8 +15,13 @@ export default function CreateNewCharacterButton() {
 
   const t = useTranslations('characters.form');
 
+  const { selectedModel } = useLlmModels();
+
   function handleNewGPT() {
-    createNewCharacterAction()
+    if (selectedModel === undefined) {
+      return;
+    }
+    createNewCharacterAction({ modelId: selectedModel })
       .then((newCharacter) => {
         router.push(`/characters/editor/${newCharacter.id}?create=true`);
       })

@@ -129,3 +129,51 @@ ORDER BY period, tracking.model_id
 
   return mappedRows;
 }
+
+export async function dbGetModelUsageBySharedCharacterChatId({
+  characterId,
+  startedAt,
+  maxUsageTimeLimit,
+}: {
+  characterId: string;
+  startedAt: Date;
+  maxUsageTimeLimit: number;
+}) {
+  const interval: Interval = 'year';
+  const startDate = startedAt;
+  const endDate = new Date(startedAt.getTime() + maxUsageTimeLimit * 60_000);
+
+  // @ts-expect-error weird typing errors
+  const rows: {
+    period: string;
+    model_id: string;
+    prompt_tokens: string;
+    completion_tokens: string;
+    nof_requests: string;
+    user_id: string;
+  }[] = (
+    await db.execute(sql`
+SELECT
+    DATE_TRUNC(${interval}, tracking.created_at) AS period,
+    tracking.model_id,
+    SUM(tracking.prompt_tokens) AS prompt_tokens,
+    SUM(tracking.completion_tokens) AS completion_tokens,
+    COUNT(tracking.completion_tokens) AS nof_requests
+FROM shared_character_chat_usage_tracking as tracking
+INNER JOIN character as conversation ON conversation.id = tracking.character_id
+WHERE tracking.created_at BETWEEN ${startDate.toISOString()} AND ${endDate.toISOString()} AND conversation.id = ${characterId}
+GROUP BY period, tracking.model_id
+ORDER BY period, tracking.model_id
+`)
+  ).rows;
+
+  const mappedRows = rows.map((row) => ({
+    period: new Date(row.period),
+    modelId: row.model_id,
+    promptTokens: Number(row.prompt_tokens),
+    completionTokens: Number(row.completion_tokens),
+    numberOfRequest: Number(row.nof_requests),
+  }));
+
+  return mappedRows;
+}

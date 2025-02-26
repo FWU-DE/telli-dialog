@@ -30,6 +30,9 @@ import { deepEqual } from '@/utils/object';
 import ChevronLeftIcon from '@/components/icons/chevron-left';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import SelectLlmModelForm from '../../../_components/select-llm-model';
+import { useLlmModels } from '@/components/providers/llm-model-provider';
+import ShareContainer from './share-container';
 
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -40,8 +43,13 @@ const characterFormValuesSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
   learningContext: z.string().min(1),
+  competence: z.string().min(1),
+
+  schoolType: z.string().min(1),
+  gradeLevel: z.string().min(1),
+  subject: z.string().min(1),
+
   specifications: z.string().nullable(),
-  competence: z.string().nullable(),
   restrictions: z.string().nullable(),
 });
 type CharacterFormValues = z.infer<typeof characterFormValuesSchema>;
@@ -54,6 +62,8 @@ export default function CharacterForm({
   const router = useRouter();
   const toast = useToast();
 
+  const { models, selectedModel: _selectedModel } = useLlmModels();
+
   const {
     register,
     handleSubmit,
@@ -65,8 +75,14 @@ export default function CharacterForm({
       ...character,
       description: character.description ?? '',
       learningContext: character.learningContext ?? '',
+      competence: character.competence ?? '',
+      schoolType: character.schoolType ?? '',
+      gradeLevel: character.gradeLevel ?? '',
+      subject: character.subject ?? '',
     },
   });
+
+  const [selectedModel, setSelectedModel] = React.useState(_selectedModel?.id);
 
   const t = useTranslations('characters.form');
   const tCommon = useTranslations('common');
@@ -100,21 +116,24 @@ export default function CharacterForm({
         router.refresh();
       })
       .catch(() => {
-        toast.error('Etwas ist beim Aktualisieren des Dialogpartners schief gelaufen.');
+        toast.error('Etwas ist beim Aktualisieren des Dialogavatars schief gelaufen.');
       });
   }
 
   function onSubmit(data: CharacterFormValues) {
-    updateCharacterAction({ characterId: character.id, ...data })
+    if (selectedModel === undefined) {
+      return;
+    }
+    updateCharacterAction({ characterId: character.id, modelId: selectedModel, ...data })
       .then(() => {
         if (!isCreating) {
-          toast.success('Der Dialogpartner wurde erfolgreich aktualisiert.');
+          toast.success('Der Dialogavatar wurde erfolgreich aktualisiert.');
         }
         router.refresh();
         // router.push(backUrl);
       })
       .catch(() => {
-        toast.error('Etwas ist beim Aktualisieren des Dialogpartners schief gelaufen.');
+        toast.error('Etwas ist beim Aktualisieren des Dialogavatars schief gelaufen.');
       });
   }
 
@@ -123,13 +142,13 @@ export default function CharacterForm({
       .then(() => {
         // do not show any toast if the avatar is being created
         if (!isCreating) {
-          toast.success('Der Dialogpartner wurde erfolgreich gelöscht.');
+          toast.success('Der Dialogavatar wurde erfolgreich gelöscht.');
         }
 
         router.push(backUrl);
       })
       .catch(() => {
-        toast.error('Etwas ist beim Löschen des Dialogpartners schief gelaufen.');
+        toast.error('Etwas ist beim Löschen des Dialogavatars schief gelaufen.');
       });
   }
 
@@ -149,12 +168,12 @@ export default function CharacterForm({
   function handleCreateCharacter() {
     const data = getValues();
     onSubmit(data);
-    toast.success('Der Dialogpartner wurde erfolgreich erstellt.');
+    toast.success('Der Dialogavatar wurde erfolgreich erstellt.');
     router.replace(backUrl);
   }
 
   return (
-    <form className="flex flex-col gap-8 mb-8" onSubmit={handleSubmit(onSubmit)}>
+    <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
       {isCreating && (
         <button
           onClick={handleDeleteCharacter}
@@ -173,44 +192,92 @@ export default function CharacterForm({
       <h1 className="text-2xl mt-4 font-medium">
         {isCreating ? t('create-character') : character.name}
       </h1>
-      <div className="flex flex-col gap-4">
+      {!isCreating && (
+        <fieldset className="mt-16">
+          <ShareContainer {...character} />
+        </fieldset>
+      )}
+      <fieldset className="mt-16 flex flex-col gap-4">
+        <h2 className="font-medium mb-8">{t('general-settings')}</h2>
+        <label className={cn(labelClassName, 'text-sm')}>{t('character-visibility-label')}</label>
+        <div className="flex max-sm:flex-col gap-4 sm:gap-8">
+          <div className="flex gap-4">
+            <Checkbox.Root
+              className="CheckboxRoot border hover:border-primary hover:bg-vidis-hover-green/20 data-[state=checked]:border-primary data-[state=checked]:bg-vidis-hover-green/20 rounded-enterprise-sm h-6 w-6"
+              id="c1"
+              aria-label="Privat"
+              checked={optimisticAccessLevel === 'private'}
+              onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'private')}
+            >
+              <Checkbox.Indicator className="CheckboxIndicator">
+                <CheckIcon className="text-primary w-6 h-4" />
+              </Checkbox.Indicator>
+            </Checkbox.Root>
+            <span>{t('restriction-private')}</span>
+          </div>
+          <div className="flex gap-4">
+            <Checkbox.Root
+              className="CheckboxRoot border hover:border-primary hover:bg-vidis-hover-green/20 data-[state=checked]:border-primary data-[state=checked]:bg-vidis-hover-green/20 rounded-enterprise-sm h-6 w-6"
+              id="c1"
+              aria-label="Schulspezifisch"
+              checked={optimisticAccessLevel === 'school'}
+              onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'school')}
+            >
+              <Checkbox.Indicator className="CheckboxIndicator">
+                <CheckIcon className="text-primary w-6 h-4" />
+              </Checkbox.Indicator>
+            </Checkbox.Root>
+            <span>{t('restriction-school')}</span>
+          </div>
+        </div>
+        <label className={labelClassName}>{tCommon('llm-model')}</label>
+        <SelectLlmModelForm
+          selectedModel={selectedModel}
+          onValueChange={(value) => setSelectedModel(value)}
+          models={models}
+        />
+
+        <div className="grid grid-cols-3 gap-4">
+          <div className="flex flex-col gap-4">
+            <label className={cn(labelClassName, 'text-sm')}>
+              <span className="text-coral">*</span> {t('school-type')}
+            </label>
+            <input
+              className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
+              {...register('schoolType')}
+              placeholder={t('school-type-placeholder')}
+            />
+          </div>
+          <div className="flex flex-col gap-4">
+            <label className={cn(labelClassName, 'text-sm')}>
+              <span className="text-coral">*</span> {t('grade')}
+            </label>
+            <input
+              className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
+              {...register('gradeLevel')}
+              placeholder={t('grade-placeholder')}
+            />
+          </div>
+          <div className="flex flex-col gap-4">
+            <label className={cn(labelClassName, 'text-sm')}>
+              <span className="text-coral">*</span> {t('subject')}
+            </label>
+            <input
+              className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
+              {...register('subject')}
+              placeholder={t('subject-placeholder')}
+            />
+          </div>
+        </div>
+      </fieldset>
+      <fieldset className="flex flex-col gap-4 mt-16">
+        <h2 className="font-medium mb-8">{t('character-settings')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
           <div className="flex gap-8 flex-col">
-            <label className={cn(labelClassName, 'text-sm')}>
-              {t('character-visibility-label')}
-            </label>
-            <div className="flex max-sm:flex-col gap-4 sm:gap-8">
-              <div className="flex gap-4">
-                <Checkbox.Root
-                  className="CheckboxRoot border hover:border-primary hover:bg-vidis-hover-green/20 data-[state=checked]:border-primary data-[state=checked]:bg-vidis-hover-green/20 rounded-enterprise-sm h-6 w-6"
-                  id="c1"
-                  aria-label="Privat"
-                  checked={optimisticAccessLevel === 'private'}
-                  onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'private')}
-                >
-                  <Checkbox.Indicator className="CheckboxIndicator">
-                    <CheckIcon className="text-primary w-6 h-4" />
-                  </Checkbox.Indicator>
-                </Checkbox.Root>
-                <span>{t('restriction-private')}</span>
-              </div>
-              <div className="flex gap-4">
-                <Checkbox.Root
-                  className="CheckboxRoot border hover:border-primary hover:bg-vidis-hover-green/20 data-[state=checked]:border-primary data-[state=checked]:bg-vidis-hover-green/20 rounded-enterprise-sm h-6 w-6"
-                  id="c1"
-                  aria-label="Schulspezifisch"
-                  checked={optimisticAccessLevel === 'school'}
-                  onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'school')}
-                >
-                  <Checkbox.Indicator className="CheckboxIndicator">
-                    <CheckIcon className="text-primary w-6 h-4" />
-                  </Checkbox.Indicator>
-                </Checkbox.Root>
-                <span>{t('restriction-school')}</span>
-              </div>
-            </div>
             <div className="flex flex-col gap-4">
-              <label className={cn(labelClassName, 'text-sm')}>{t('character-name-label')}</label>
+              <label className={cn(labelClassName, 'text-sm')}>
+                <span className="text-coral">*</span> {t('character-name-label')}
+              </label>
               <input
                 {...register('name')}
                 className={cn(
@@ -223,9 +290,10 @@ export default function CharacterForm({
             </div>
             <div className="flex flex-col gap-4">
               <label className={cn(labelClassName, 'text-sm')}>
-                {t('character-description-label')}
+                <span className="text-coral">*</span> {t('character-description-label')}
               </label>
-              <input
+              <textarea
+                rows={5}
                 {...register('description')}
                 className={cn(
                   inputFieldClassName,
@@ -266,51 +334,57 @@ export default function CharacterForm({
             />
           </section>
         </div>
-      </div>
-      <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>
-          {t('character-learning-context-label')}
-        </label>
-        <textarea
-          {...register('learningContext')}
-          rows={5}
-          className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-          onBlur={handleAutoSave}
-          placeholder={t('character-learning-context-placeholder')}
-        />
-      </div>
-      <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>{t('character-competence-label')}</label>
-        <textarea
-          {...register('competence')}
-          rows={5}
-          className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-          onBlur={handleAutoSave}
-          placeholder={t('character-competence-placeholder')}
-        />
-      </div>
-      <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>
-          {t('character-specification-label')}
-        </label>
-        <textarea
-          {...register('specifications')}
-          rows={5}
-          className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-          onBlur={handleAutoSave}
-          placeholder={t('character-specification-placeholder')}
-        />
-      </div>
-      <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>{t('character-restriction-label')}</label>
-        <textarea
-          {...register('restrictions')}
-          rows={5}
-          className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-          onBlur={handleAutoSave}
-          placeholder={t('character-restriction-placeholder')}
-        />
-      </div>
+      </fieldset>
+      <fieldset className="flex flex-col gap-6 mt-6">
+        <div className="flex flex-col gap-4">
+          <label className={cn(labelClassName, 'text-sm')}>
+            <span className="text-coral">*</span> {t('character-competence-label')}
+          </label>
+          <textarea
+            {...register('competence')}
+            rows={5}
+            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
+            onBlur={handleAutoSave}
+            placeholder={t('character-competence-placeholder')}
+          />
+        </div>
+        <div className="flex flex-col gap-4">
+          <label className={cn(labelClassName, 'text-sm')}>
+            <span className="text-coral">*</span> {t('character-learning-context-label')}
+          </label>
+          <textarea
+            {...register('learningContext')}
+            rows={5}
+            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
+            onBlur={handleAutoSave}
+            placeholder={t('character-learning-context-placeholder')}
+          />
+        </div>
+        <div className="flex flex-col gap-4">
+          <label className={cn(labelClassName, 'text-sm')}>
+            {t('character-specification-label')}
+          </label>
+          <textarea
+            {...register('specifications')}
+            rows={5}
+            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
+            onBlur={handleAutoSave}
+            placeholder={t('character-specification-placeholder')}
+          />
+        </div>
+        <div className="flex flex-col gap-4">
+          <label className={cn(labelClassName, 'text-sm')}>
+            {t('character-restriction-label')}
+          </label>
+          <textarea
+            {...register('restrictions')}
+            rows={5}
+            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
+            onBlur={handleAutoSave}
+            placeholder={t('character-restriction-placeholder')}
+          />
+        </div>
+      </fieldset>
       {!isCreating && (
         <section className="mt-8">
           <h3 className="font-medium">{t('delete-character')}</h3>

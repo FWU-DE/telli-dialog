@@ -42,7 +42,10 @@ export default function DialogSidebar({ conversations, user, currentModelCosts }
   }, [pathname]);
 
   // TODO: this is a dirty hack to remove the sidebar for shared chats
-  if (pathname.match(/^\/shared-chats\/[^/]+\/share$/)) {
+  if (
+    pathname.match(/^\/shared-chats\/[^/]+\/share$/) ||
+    pathname.match(/^\/characters\/editor\/[^/]+\/share$/)
+  ) {
     return null;
   }
 
@@ -98,11 +101,11 @@ export default function DialogSidebar({ conversations, user, currentModelCosts }
               <Link href="/shared-chats" className="w-full">
                 <div
                   className={cn(
-                    'flex items-center gap-2 stroke-main-900 text-primary hover:underline px-1 py-1.5 w-full',
+                    'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
                     pathname.startsWith('/shared-chats') && 'underline',
                   )}
                 >
-                  <SharedChatIcon className="w-4 h-4" />
+                  <SharedChatIcon className="w-6 h-6" />
                   <span className="text-base">{t('class-chats')}</span>
                 </div>
               </Link>
@@ -111,12 +114,12 @@ export default function DialogSidebar({ conversations, user, currentModelCosts }
             <Link href="/characters" className="w-full">
               <div
                 className={cn(
-                  'flex items-center gap-2 stroke-main-900 text-primary hover:underline px-1 py-1.5 w-full',
+                  'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
                   (pathname === '/characters' || pathname.includes('/characters/editor')) &&
                     'underline',
                 )}
               >
-                <CharacterAvatarIcon className="w-4 h-4" />
+                <CharacterAvatarIcon className="w-6 h-5" />
                 <span className="text-base">{t('characters')}</span>
               </div>
             </Link>

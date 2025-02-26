@@ -66,9 +66,9 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
         modalTitle="Klassendialog löschen"
         confirmText="Löschen"
         actionFn={handleDeleteSharedChat}
-        triggerButtonClassName="border-transparent justify-center flex flex-col p-2 rounded-enterprise-sm hover:bg-vidis-hover-green/20"
+        triggerButtonClassName="border-transparent justify-center flex flex-col rounded-enterprise-sm hover:bg-vidis-hover-green/20 p-0"
       >
-        <TrashIcon className="w-3 h-3 text-primary" />
+        <TrashIcon className="w-8 h-8 text-primary" />
       </DestructiveActionButton>
     </Link>
   );

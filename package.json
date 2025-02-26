@@ -22,6 +22,7 @@
     "db:migrate:envless": "drizzle-kit migrate --config=./src/db/drizzle.config.ts",
     "db:seed": "dotenv -e .env -- pnpm tsx src/db/seed/index.ts",
     "db:studio": "dotenv -e .env -- drizzle-kit studio --config=src/db/drizzle.config.ts",
+    "drizzle:up": "drizzle-kit up --config=src/db/drizzle.config.ts",
     "build:e2e": "next build --experimental-build-mode compile",
     "start:e2e": "dotenv -e .env.e2e -- next start",
     "e2e": "dotenv -e .env -- playwright test",

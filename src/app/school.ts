@@ -1,4 +1,5 @@
 import {
+  dbGetModelUsageBySharedCharacterChatId,
   dbGetModelUsageBySharedChatId,
   dbGetModelUsageOfChatsByUserId,
   dbGetModelUsageOfSharedChatsByUserId,
@@ -65,6 +66,42 @@ export async function getPriceInCentBySharedChat({
   let currentPrice = 0;
 
   for (const modelUsage of sharedChatUsagePerModel) {
+    const model = models.find((model) => model.id === modelUsage.modelId);
+    if (model === undefined) {
+      console.error(`Could not find model with id ${modelUsage.modelId}`);
+      continue;
+    }
+
+    // TODO: add image model here later
+    if (model.priceMetadata.type === 'text') {
+      currentPrice += calculatePriceByTextModelAndUsage({ ...modelUsage, model });
+    }
+  }
+
+  const priceInCent = currentPrice / PRICE_AND_CENT_MULTIPLIER;
+  return priceInCent;
+}
+
+export async function getPriceInCentBySharedCharacterChat({
+  models,
+  startedAt,
+  maxUsageTimeLimit,
+  characterId,
+}: {
+  characterId: string;
+  startedAt: Date;
+  maxUsageTimeLimit: number;
+  models: LlmModel[];
+}) {
+  const characterUsagePerModel = await dbGetModelUsageBySharedCharacterChatId({
+    characterId,
+    maxUsageTimeLimit,
+    startedAt,
+  });
+
+  let currentPrice = 0;
+
+  for (const modelUsage of characterUsagePerModel) {
     const model = models.find((model) => model.id === modelUsage.modelId);
     if (model === undefined) {
       console.error(`Could not find model with id ${modelUsage.modelId}`);

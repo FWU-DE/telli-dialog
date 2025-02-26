@@ -2,7 +2,7 @@
   "HomePage": {
     "navigation": {
       "class-chats": "Klassendialoge",
-      "characters": "Dialogpartner",
+      "characters": "Dialogavatar",
       "telli-points": "Deine Telli-Points",
       "today": "Heute",
       "yesterday": "Gestern",
@@ -21,23 +21,34 @@
     "delete": "Löschen",
     "cancel": "Abbrechen",
     "image": "Bild",
-    "upload-image": "Bild hochladen"
+    "upload-image": "Bild hochladen",
+    "llm-model": "Sprachmodell"
   },
   "characters": {
-    "character": "Dialogpartner",
-    "description": "Entdecke faszinierende Dialogpartner, die Lernen zu einem spannenden Erlebnis machen. Egal, ob du Fragen hast oder einfach neugierig bist – hier findest du den perfekten Dialogpartner für deinen Schulltag.",
-    "search-placeholder": "Dialogpartner suchen...",
+    "character": "Dialogavatar",
+    "description": "Gestalte deinen Unterricht lebendig und inspirierend mit individuell konfigurierbaren Dialogavataren. Kreiere fiktive Gesprächspartner, die Themen vertiefen und Schüler neugierig machen. Teile die Dialoge ganz einfach mit deiner Klasse und erwecke das Lernen zum Leben!",
+    "search-placeholder": "Dialogavatar suchen...",
     "visibility-global": "Öffentlich",
     "visibility-school": "Schulintern",
     "visibility-private": "Für mich",
+    "shared": {
+      "title": "Dialogavatar im Unterricht einsetzen",
+      "description": "Lege fest, wie viel deines Restbudgets an telli-Points durch diesen Chat beansprucht werden darf und wie lange der Chat aktiv benutzt werden kann.",
+      "max-usage": "Maximale Nutzungszeit",
+      "time": "Zeit",
+      "share": "Teilen",
+      "button-start": "Dialogavatar teilen"
+    },
     "form": {
-      "all-characters": "Alle Dialogpartner",
+      "general-settings": "Allgemeine Einstellungen",
+      "character-settings": "Dialogavatar-Einstellungen",
+      "all-characters": "Alle Dialogavatare",
       "restriction-private": "Keine Freigabe",
       "restriction-school": "Für meine Schule",
-      "delete-character": "Dialogpartner löschen",
-      "final-delete-character": "Dialogpartner endgültig löschen",
-      "create-character": "Dialogpartner erstellen",
-      "character-visibility-label": "Für wen soll der Dialogpartner freigegeben werden?",
+      "delete-character": "Dialogavatar löschen",
+      "final-delete-character": "Dialogavatar endgültig löschen",
+      "create-character": "Dialogavatar erstellen",
+      "character-visibility-label": "Für wen soll der Dialogavatar freigegeben werden?",
       "character-name-label": "Wie heißt die Person?",
       "character-name-placeholder": "König Ludwig XIV",
       "character-description-label": "Wie kann die Person in einem kurzen Satz beschrieben werden?",
@@ -46,12 +57,18 @@
       "character-learning-context-placeholder": "Die Lernenden sollen Ludwig XIV befragen, wie er zu seiner Aussage \"Der Staat bin ich\" kommt und was er damit konkret meint.",
       "character-competence-label": "Welche Kompetenzen sollen die Lernenden erwerben?",
       "character-competence-placeholder": "Die Lernenden sollen das Selbstverständnis und Staatsverständnis eines absolutistischen Herrschers verstehen.",
-      "character-specification-label": "Was soll der Dialogpartner tun?",
+      "character-specification-label": "Was soll der Dialogavatar tun?",
       "character-specification-placeholder": "Antworte aus der Perspektive von König Ludwig XIV. Gib dich erhaben und stolz bzgl. deines Staatssystems.",
-      "character-restriction-label": "Was soll der Dialogpartner nicht tun?",
-      "character-restriction-placeholder": "Der Dialogpartner soll sich nicht außerhalb seiner Lebenswelt als Ludwig XIV bewegen und nicht außerhalb seines geschichtlichen Kontexts (Absolutismus im 17. Jahrhundert in Frankreich) antworten.",
-      "character-delete-description": "Beim Löschen des Dialogpartners werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
-      "character-delete-modal-description": "Bist du sicher, dass du diesen Dialogpartner löschen möchtest? Dabei werden alle mit diesem Dialogpartner verbundenen Konversationen unwiderruflich gelöscht."
+      "character-restriction-label": "Was soll der Dialogavatar nicht tun?",
+      "character-restriction-placeholder": "Der Dialogavatar soll sich nicht außerhalb seiner Lebenswelt als Ludwig XIV bewegen und nicht außerhalb seines geschichtlichen Kontexts (Absolutismus im 17. Jahrhundert in Frankreich) antworten.",
+      "character-delete-description": "Beim Löschen des Dialogavatars werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
+      "character-delete-modal-description": "Bist du sicher, dass du diesen Dialogavatar löschen möchtest? Dabei werden alle mit diesem Dialogpartner verbundenen Konversationen unwiderruflich gelöscht.",
+      "school-type": "Schultyp",
+      "school-type-placeholder": "Gymnasium",
+      "grade": "Klassenstufe",
+      "grade-placeholder": "7.Klasse",
+      "subject": "Fach",
+      "subject-placeholder": "Geschichte"
     }
   },
   "Chat": {

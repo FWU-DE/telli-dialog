@@ -42,6 +42,7 @@ const config = {
         'gray-100': '#999999',
         'gray-200': '#E5E5E5',
         'gray-300': '#CDCDCD',
+        'gray-400': '#595959',
         'gray-600': '#9B9B9B',
         'vidis-hover-green': 'rgba(108, 233, 215, 1)',
         'vidis-hover-purple': 'rgba(70, 33, 126, 1)',

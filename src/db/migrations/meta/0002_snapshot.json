@@ -1,4 +1,6 @@
 {
+  "id": "b5815179-0e24-4673-85d3-2c0c4c549829",
+  "prevId": "12deade9-4f60-4007-87b2-48ac3aac91ff",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -19,6 +21,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "model_id": {
+          "name": "model_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
         "name": {
           "name": "name",
           "type": "text",
@@ -29,22 +37,46 @@
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "''"
         },
         "learning_context": {
           "name": "learning_context",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
-        },
-        "specifications": {
-          "name": "specifications",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "''"
         },
         "competence": {
           "name": "competence",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "school_type": {
+          "name": "school_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "grade_level": {
+          "name": "grade_level",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "subject": {
+          "name": "subject",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "specifications": {
+          "name": "specifications",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -75,6 +107,30 @@
           "primaryKey": false,
           "notNull": false
         },
+        "intelligence_points_limit": {
+          "name": "intelligence_points_limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_usage_time_limit": {
+          "name": "max_usage_time_limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "invite_code": {
+          "name": "invite_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -88,35 +144,56 @@
         "character_user_id_user_entity_id_fk": {
           "name": "character_user_id_user_entity_id_fk",
           "tableFrom": "character",
+          "tableTo": "user_entity",
           "columnsFrom": [
             "user_id"
           ],
-          "tableTo": "user_entity",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "character_model_id_llm_model_id_fk": {
+          "name": "character_model_id_llm_model_id_fk",
+          "tableFrom": "character",
+          "tableTo": "llm_model",
+          "columnsFrom": [
+            "model_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         },
         "character_school_id_school_id_fk": {
           "name": "character_school_id_school_id_fk",
           "tableFrom": "character",
+          "tableTo": "school",
           "columnsFrom": [
             "school_id"
           ],
-          "tableTo": "school",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "character_invite_code_unique": {
+          "name": "character_invite_code_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "invite_code"
+          ]
+        }
+      },
       "policies": {},
-      "isRLSEnabled": false,
-      "checkConstraints": {}
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.conversation_message": {
       "name": "conversation_message",
@@ -185,35 +262,35 @@
         "conversation_message_conversation_id_conversation_id_fk": {
           "name": "conversation_message_conversation_id_conversation_id_fk",
           "tableFrom": "conversation_message",
+          "tableTo": "conversation",
           "columnsFrom": [
             "conversation_id"
           ],
-          "tableTo": "conversation",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         },
         "conversation_message_user_id_user_entity_id_fk": {
           "name": "conversation_message_user_id_user_entity_id_fk",
           "tableFrom": "conversation_message",
+          "tableTo": "user_entity",
           "columnsFrom": [
             "user_id"
           ],
-          "tableTo": "user_entity",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
-      "isRLSEnabled": false,
-      "checkConstraints": {}
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.conversation": {
       "name": "conversation",
@@ -263,35 +340,35 @@
         "conversation_user_id_user_entity_id_fk": {
           "name": "conversation_user_id_user_entity_id_fk",
           "tableFrom": "conversation",
+          "tableTo": "user_entity",
           "columnsFrom": [
             "user_id"
           ],
-          "tableTo": "user_entity",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         },
         "conversation_character_id_character_id_fk": {
           "name": "conversation_character_id_character_id_fk",
           "tableFrom": "conversation",
+          "tableTo": "character",
           "columnsFrom": [
             "character_id"
           ],
-          "tableTo": "character",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
-      "isRLSEnabled": false,
-      "checkConstraints": {}
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.conversation_usage_tracking": {
       "name": "conversation_usage_tracking",
@@ -347,22 +424,22 @@
         "conversation_usage_tracking_model_id_llm_model_id_fk": {
           "name": "conversation_usage_tracking_model_id_llm_model_id_fk",
           "tableFrom": "conversation_usage_tracking",
+          "tableTo": "llm_model",
           "columnsFrom": [
             "model_id"
           ],
-          "tableTo": "llm_model",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
-      "isRLSEnabled": false,
-      "checkConstraints": {}
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.federal_state_llm_model_mapping": {
       "name": "federal_state_llm_model_mapping",
@@ -400,44 +477,44 @@
         "federal_state_llm_model_mapping_federal_state_id_federal_state_id_fk": {
           "name": "federal_state_llm_model_mapping_federal_state_id_federal_state_id_fk",
           "tableFrom": "federal_state_llm_model_mapping",
+          "tableTo": "federal_state",
           "columnsFrom": [
             "federal_state_id"
           ],
-          "tableTo": "federal_state",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         },
         "federal_state_llm_model_mapping_llm_model_id_llm_model_id_fk": {
           "name": "federal_state_llm_model_mapping_llm_model_id_llm_model_id_fk",
           "tableFrom": "federal_state_llm_model_mapping",
+          "tableTo": "llm_model",
           "columnsFrom": [
             "llm_model_id"
           ],
-          "tableTo": "llm_model",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "federal_state_llm_model_mapping_federal_state_id_llm_model_id_unique": {
           "name": "federal_state_llm_model_mapping_federal_state_id_llm_model_id_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "federal_state_id",
             "llm_model_id"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
       "policies": {},
-      "isRLSEnabled": false,
-      "checkConstraints": {}
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.federal_state": {
       "name": "federal_state",
@@ -482,8 +559,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
-      "isRLSEnabled": false,
-      "checkConstraints": {}
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.llm_model": {
       "name": "llm_model",
@@ -540,16 +617,16 @@
       "uniqueConstraints": {
         "llm_model_owner_name_unique": {
           "name": "llm_model_owner_name_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "owner",
             "name"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
       "policies": {},
-      "isRLSEnabled": false,
-      "checkConstraints": {}
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.school": {
       "name": "school",
@@ -580,22 +657,93 @@
         "school_federal_state_id_federal_state_id_fk": {
           "name": "school_federal_state_id_federal_state_id_fk",
           "tableFrom": "school",
+          "tableTo": "federal_state",
           "columnsFrom": [
             "federal_state_id"
           ],
-          "tableTo": "federal_state",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
-      "isRLSEnabled": false,
-      "checkConstraints": {}
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.shared_character_chat_usage_tracking": {
+      "name": "shared_character_chat_usage_tracking",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "model_id": {
+          "name": "model_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "character_id": {
+          "name": "character_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "completion_tokens": {
+          "name": "completion_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prompt_tokens": {
+          "name": "prompt_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "shared_character_chat_usage_tracking_model_id_llm_model_id_fk": {
+          "name": "shared_character_chat_usage_tracking_model_id_llm_model_id_fk",
+          "tableFrom": "shared_character_chat_usage_tracking",
+          "tableTo": "llm_model",
+          "columnsFrom": [
+            "model_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.shared_school_conversation": {
       "name": "shared_school_conversation",
@@ -712,43 +860,43 @@
         "shared_school_conversation_model_id_llm_model_id_fk": {
           "name": "shared_school_conversation_model_id_llm_model_id_fk",
           "tableFrom": "shared_school_conversation",
+          "tableTo": "llm_model",
           "columnsFrom": [
             "model_id"
           ],
-          "tableTo": "llm_model",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         },
         "shared_school_conversation_user_id_user_entity_id_fk": {
           "name": "shared_school_conversation_user_id_user_entity_id_fk",
           "tableFrom": "shared_school_conversation",
+          "tableTo": "user_entity",
           "columnsFrom": [
             "user_id"
           ],
-          "tableTo": "user_entity",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "shared_school_conversation_invite_code_unique": {
           "name": "shared_school_conversation_invite_code_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "invite_code"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
       "policies": {},
-      "isRLSEnabled": false,
-      "checkConstraints": {}
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.shared_school_conversation_usage_tracking": {
       "name": "shared_school_conversation_usage_tracking",
@@ -804,22 +952,22 @@
         "shared_school_conversation_usage_tracking_model_id_llm_model_id_fk": {
           "name": "shared_school_conversation_usage_tracking_model_id_llm_model_id_fk",
           "tableFrom": "shared_school_conversation_usage_tracking",
+          "tableTo": "llm_model",
           "columnsFrom": [
             "model_id"
           ],
-          "tableTo": "llm_model",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
-      "isRLSEnabled": false,
-      "checkConstraints": {}
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.user_school_mapping": {
       "name": "user_school_mapping",
@@ -864,44 +1012,44 @@
         "user_school_mapping_user_id_user_entity_id_fk": {
           "name": "user_school_mapping_user_id_user_entity_id_fk",
           "tableFrom": "user_school_mapping",
+          "tableTo": "user_entity",
           "columnsFrom": [
             "user_id"
           ],
-          "tableTo": "user_entity",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         },
         "user_school_mapping_school_id_school_id_fk": {
           "name": "user_school_mapping_school_id_school_id_fk",
           "tableFrom": "user_school_mapping",
+          "tableTo": "school",
           "columnsFrom": [
             "school_id"
           ],
-          "tableTo": "school",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "user_school_mapping_user_id_school_id_unique": {
           "name": "user_school_mapping_user_id_school_id_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "user_id",
             "school_id"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
       "policies": {},
-      "isRLSEnabled": false,
-      "checkConstraints": {}
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.user_entity": {
       "name": "user_entity",
@@ -946,15 +1094,15 @@
       "uniqueConstraints": {
         "user_entity_email_unique": {
           "name": "user_entity_email_unique",
+          "nullsNotDistinct": false,
           "columns": [
             "email"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
       "policies": {},
-      "isRLSEnabled": false,
-      "checkConstraints": {}
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {
@@ -996,15 +1144,13 @@
     }
   },
   "schemas": {},
-  "_meta": {
-    "schemas": {},
-    "tables": {},
-    "columns": {}
-  },
-  "id": "399c845b-27eb-4385-95dd-cbbbec096b89",
-  "prevId": "00000000-0000-0000-0000-000000000000",
   "sequences": {},
+  "roles": {},
   "policies": {},
   "views": {},
-  "roles": {}
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
 }

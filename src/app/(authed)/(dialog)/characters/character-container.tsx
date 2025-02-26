@@ -12,6 +12,12 @@ import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
 import { deleteCharacterAction } from './editor/[characterId]/actions';
 import { useTranslations } from 'next-intl';
+import CountDownTimer from '../shared-chats/_components/count-down';
+import ShareIcon from '@/components/icons/share';
+import TrashIcon from '@/components/icons/trash';
+import EditIcon from '@/components/icons/edit';
+import SharedChatIcon from '@/components/icons/shared-chat';
+import { calculateTimeLeftBySharedChat } from '../shared-chats/[sharedSchoolChatId]/utils';
 
 type CharacterContainerProps = CharacterModel & {
   currentUserId: string;
@@ -25,6 +31,7 @@ export default function CharacterContainer({
   userId,
   currentUserId,
   maybeSignedPictureUrl,
+  ...character
 }: CharacterContainerProps) {
   const router = useRouter();
   const toast = useToast();
@@ -46,83 +53,71 @@ export default function CharacterContainer({
     router.push(`/characters/editor/${id}`);
   }
 
+  function handleNavigateToShare(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/characters/editor/${id}/share`);
+  }
+
   const t = useTranslations('characters.form');
   const tCommon = useTranslations('common');
+
+  const timeLeft = calculateTimeLeftBySharedChat(character);
 
   return (
     <Link
       href={`/characters/d/${id}`}
-      className="rounded-enterprise-md border p-3 flex-col items-center gap-4 w-full hover:border-primary"
+      className="rounded-enterprise-md border p-6 flex items-center gap-4 w-full hover:border-primary"
     >
-      <figure className="flex border-[1px] border-light-gray rounded-[8px] items-center justify-center w-full relative overflow-hidden min-h-32 bg-light-gray">
+      <figure className="h-11 w-11 bg-light-gray items-center justify-center flex rounded-enterprise-sm">
         {maybeSignedPictureUrl !== undefined && (
-          <Image src={maybeSignedPictureUrl} alt={`${name} Avatar`} fill className="object-cover" />
+          <Image src={maybeSignedPictureUrl} alt={`${name} Avatar`} width={44} height={44} />
         )}
-        {maybeSignedPictureUrl === undefined && <EmptyImageIcon />}
+        {maybeSignedPictureUrl === undefined && <EmptyImageIcon className="w-4 h-4" />}
       </figure>
-      <div className="flex items-center gap-2 w-full mt-2">
-        <h3 className="text-truncate text-base font-medium truncate-custom">{name}</h3>
-        {currentUserId === userId && (
-          <>
-            <div className="flex-grow" />
-            <button
-              type="button"
-              onClick={handleNavigateToCharacterEditor}
-              className="flex flex-col items-center justify-center p-2 rounded-enterprise-sm text-primary hover:bg-vidis-hover-green/20"
-            >
-              <PenIcon className="w-3 h-3" />
-            </button>
-            <DestructiveActionButton
-              modalTitle={t('delete-character')}
-              modalDescription={t('character-delete-modal-description')}
-              confirmText={tCommon('delete')}
-              actionFn={handleDeleteCharacter}
-              triggerButtonClassName="border-transparent justify-center flex flex-col p-2 rounded-enterprise-sm hover:bg-vidis-hover-green/20"
-            >
-              <TrashIcon className="w-3 h-3 text-primary" />
-            </DestructiveActionButton>
-          </>
-        )}
+      <div className="flex flex-col gap-1 text-left">
+        <h2 className="font-medium leading-none">{name}</h2>
+        <span className={cn(truncateClassName, 'text-gray-400')}>{description}</span>
       </div>
-      <span className={cn('text-sm font-normal text-gray-100 max-w-[256px]', truncateClassName)}>
-        {description}
-      </span>
+      <div className="flex-grow" />
+      {timeLeft > 0 && character.maxUsageTimeLimit !== null && (
+        <CountDownTimer leftTime={timeLeft} totalTime={character.maxUsageTimeLimit} />
+      )}
+      {timeLeft > 0 && (
+        <button onClick={handleNavigateToShare}>
+          <ShareIcon className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm" />
+        </button>
+      )}
+      {timeLeft < 1 && (
+        <button
+          className='className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm'
+          type="button"
+        >
+          <SharedChatIcon className="w-8 h-8" />
+        </button>
+      )}
+      {currentUserId === userId && (
+        <>
+          {timeLeft < 1 && (
+            <button
+              onClick={handleNavigateToCharacterEditor}
+              type="button"
+              className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
+            >
+              <EditIcon className="w-8 h-8" />
+            </button>
+          )}
+          <DestructiveActionButton
+            modalTitle={t('delete-character')}
+            modalDescription={t('character-delete-modal-description')}
+            confirmText={tCommon('delete')}
+            actionFn={handleDeleteCharacter}
+            triggerButtonClassName="border-transparent justify-center flex flex-col rounded-enterprise-sm hover:bg-vidis-hover-green/20 p-0"
+          >
+            <TrashIcon className="w-8 h-8 text-primary" />
+          </DestructiveActionButton>
+        </>
+      )}
     </Link>
-  );
-}
-
-function PenIcon(props: React.ComponentProps<'svg'>) {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      <path
-        d="M11.805 2.69463C12.065 2.43466 12.065 2.00139 11.805 1.75476L10.2452 0.194973C9.99861 -0.064991 9.56534 -0.064991 9.30537 0.194973L8.07888 1.4148L10.5785 3.91446M0 9.50035V12H2.49965L9.87196 4.62103L7.37231 2.12137L0 9.50035Z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
-
-function TrashIcon(props: React.ComponentProps<'svg'>) {
-  return (
-    <svg
-      width="10"
-      height="12"
-      viewBox="0 0 10 12"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      <path
-        d="M9.33333 0.666667H7L6.33333 0H3L2.33333 0.666667H0V2H9.33333M0.666667 10.6667C0.666667 11.0203 0.807142 11.3594 1.05719 11.6095C1.30724 11.8595 1.64638 12 2 12H7.33333C7.68695 12 8.02609 11.8595 8.27614 11.6095C8.52619 11.3594 8.66667 11.0203 8.66667 10.6667V2.66667H0.666667V10.6667Z"
-        fill="currentColor"
-      />
-    </svg>
   );
 }

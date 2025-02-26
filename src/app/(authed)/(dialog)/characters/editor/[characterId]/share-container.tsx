@@ -1,37 +1,38 @@
 import { cn } from '@/utils/tailwind';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { labelClassName } from '@/utils/tailwind/input';
-import CountDownTimer from '../_components/count-down';
 import {
   intelliPointsPercentageValueSchema,
   SharedConversationShareFormValues,
-  sharedConversationFormValuesSchema,
   usageTimeValueSchema,
-} from './schema';
-import { SharedSchoolConversationModel } from '@/db/schema';
-import { handleInitiateSharedChatShareAction, handleStopSharedChatShareAction } from './actions';
+  sharedConversationFormValuesSchema,
+} from '../../../shared-chats/[sharedSchoolChatId]/schema';
+import { CharacterModel } from '@/db/schema';
+import { handleInitiateCharacterShareAction, handleStopCharacaterShareAction } from './actions';
 import {
   calculateTimeLeftBySharedChat,
   getIntelliPointsValueOrDefault,
   getMaxUsageTimeValueOrDefault,
-} from './utils';
+} from '../../../shared-chats/[sharedSchoolChatId]/utils';
 import { useToast } from '@/components/common/toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
+import ShareIcon from '@/components/icons/share';
 import { selectSVGBackground } from '@/utils/tailwind/select';
 import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { useTranslations } from 'next-intl';
+import CountDownTimer from '../../../shared-chats/_components/count-down';
 import FilledShareIcon from '@/components/icons/filled-share';
 
-type ShareContainerProps = SharedSchoolConversationModel;
+type ShareContainerProps = CharacterModel;
 
-export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerProps) {
+export default function ShareContainer({ ...character }: ShareContainerProps) {
   const toast = useToast();
   const router = useRouter();
-  const t = useTranslations('Chat.shared-chats.shared');
+  const t = useTranslations('characters.shared');
 
-  const sharedChatTimeLeft = calculateTimeLeftBySharedChat(sharedSchoolChat);
+  const sharedChatTimeLeft = calculateTimeLeftBySharedChat(character);
   const sharedChatActive = sharedChatTimeLeft > 0;
 
   const { register: registerShare, getValues: getValuesShare } =
@@ -39,34 +40,34 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
       resolver: zodResolver(sharedConversationFormValuesSchema),
       defaultValues: {
         intelliPointsPercentageLimit: getIntelliPointsValueOrDefault(
-          sharedSchoolChat.intelligencePointsLimit,
+          character.intelligencePointsLimit,
           '10',
         ),
-        usageTimeLimit: getMaxUsageTimeValueOrDefault(sharedSchoolChat.maxUsageTimeLimit, '45'),
+        usageTimeLimit: getMaxUsageTimeValueOrDefault(character.maxUsageTimeLimit, '45'),
       },
       disabled: sharedChatActive,
     });
 
-  const shareUILink = `/shared-chats/${sharedSchoolChat.id}/share`;
+  const shareUILink = `/characters/editor/${character.id}/share`;
 
   function handleStartSharing() {
     const data = getValuesShare();
 
-    handleInitiateSharedChatShareAction({ ...data, id: sharedSchoolChat.id })
+    handleInitiateCharacterShareAction({ ...data, id: character.id })
       .then(() => {
-        toast.success('Klassendialog erfolgreich geteilt.');
+        toast.success('Dialogavatar erfolgreich geteilt.');
         router.push(shareUILink);
         router.refresh();
       })
       .catch(() => {
-        toast.error('Etwas ist beim Teilen des Klassendialogs schief gelaufen.');
+        toast.error('Etwas ist beim Teilen des Dialogavatar schief gelaufen.');
       });
   }
 
   function handleStopSharing() {
-    handleStopSharedChatShareAction({ id: sharedSchoolChat.id })
+    handleStopCharacaterShareAction({ id: character.id })
       .then(() => {
-        toast.success('Klassendialog wird nicht mehr geteilt.');
+        toast.success('Dialogavatar wird nicht mehr geteilt.');
         router.refresh();
       })
       .catch(() => {
@@ -114,7 +115,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
             <label className={cn(labelClassName)}>{t('time')}</label>
             <CountDownTimer
               leftTime={sharedChatTimeLeft}
-              totalTime={sharedSchoolChat.maxUsageTimeLimit ?? 0}
+              totalTime={character.maxUsageTimeLimit ?? 0}
             />
           </div>
         )}
@@ -147,7 +148,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
                 className={cn(
                   'flex items-center justify-center',
                   buttonSecondaryClassName,
-                  'hover:border-primary hover:bg-vidis-hover-green/20 p-2.5 rounded-enterprise-sm',
+                  'hover:border-primary hover:bg-vidis-hover-green/20 rounded-enterprise-sm p-2.5',
                 )}
                 type="button"
                 onClick={() => router.push(shareUILink)}
