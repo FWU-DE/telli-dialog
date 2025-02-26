@@ -12,15 +12,8 @@
     {
       "idx": 1,
       "version": "7",
-      "when": 1740563770012,
-      "tag": "0001_mute_legion",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1740574597145,
-      "tag": "0002_simple_wilson_fisk",
+      "when": 1740576726856,
+      "tag": "0001_pretty_husk",
       "breakpoints": true
     }
   ]

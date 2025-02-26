@@ -88,26 +88,18 @@
         "character_user_id_user_entity_id_fk": {
           "name": "character_user_id_user_entity_id_fk",
           "tableFrom": "character",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user_entity",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "character_school_id_school_id_fk": {
           "name": "character_school_id_school_id_fk",
           "tableFrom": "character",
-          "columnsFrom": [
-            "school_id"
-          ],
+          "columnsFrom": ["school_id"],
           "tableTo": "school",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -185,26 +177,18 @@
         "conversation_message_conversation_id_conversation_id_fk": {
           "name": "conversation_message_conversation_id_conversation_id_fk",
           "tableFrom": "conversation_message",
-          "columnsFrom": [
-            "conversation_id"
-          ],
+          "columnsFrom": ["conversation_id"],
           "tableTo": "conversation",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "conversation_message_user_id_user_entity_id_fk": {
           "name": "conversation_message_user_id_user_entity_id_fk",
           "tableFrom": "conversation_message",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user_entity",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -263,26 +247,18 @@
         "conversation_user_id_user_entity_id_fk": {
           "name": "conversation_user_id_user_entity_id_fk",
           "tableFrom": "conversation",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user_entity",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "conversation_character_id_character_id_fk": {
           "name": "conversation_character_id_character_id_fk",
           "tableFrom": "conversation",
-          "columnsFrom": [
-            "character_id"
-          ],
+          "columnsFrom": ["character_id"],
           "tableTo": "character",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -347,13 +323,9 @@
         "conversation_usage_tracking_model_id_llm_model_id_fk": {
           "name": "conversation_usage_tracking_model_id_llm_model_id_fk",
           "tableFrom": "conversation_usage_tracking",
-          "columnsFrom": [
-            "model_id"
-          ],
+          "columnsFrom": ["model_id"],
           "tableTo": "llm_model",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -400,26 +372,18 @@
         "federal_state_llm_model_mapping_federal_state_id_federal_state_id_fk": {
           "name": "federal_state_llm_model_mapping_federal_state_id_federal_state_id_fk",
           "tableFrom": "federal_state_llm_model_mapping",
-          "columnsFrom": [
-            "federal_state_id"
-          ],
+          "columnsFrom": ["federal_state_id"],
           "tableTo": "federal_state",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "federal_state_llm_model_mapping_llm_model_id_llm_model_id_fk": {
           "name": "federal_state_llm_model_mapping_llm_model_id_llm_model_id_fk",
           "tableFrom": "federal_state_llm_model_mapping",
-          "columnsFrom": [
-            "llm_model_id"
-          ],
+          "columnsFrom": ["llm_model_id"],
           "tableTo": "llm_model",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -428,10 +392,7 @@
       "uniqueConstraints": {
         "federal_state_llm_model_mapping_federal_state_id_llm_model_id_unique": {
           "name": "federal_state_llm_model_mapping_federal_state_id_llm_model_id_unique",
-          "columns": [
-            "federal_state_id",
-            "llm_model_id"
-          ],
+          "columns": ["federal_state_id", "llm_model_id"],
           "nullsNotDistinct": false
         }
       },
@@ -540,10 +501,7 @@
       "uniqueConstraints": {
         "llm_model_owner_name_unique": {
           "name": "llm_model_owner_name_unique",
-          "columns": [
-            "owner",
-            "name"
-          ],
+          "columns": ["owner", "name"],
           "nullsNotDistinct": false
         }
       },
@@ -580,13 +538,9 @@
         "school_federal_state_id_federal_state_id_fk": {
           "name": "school_federal_state_id_federal_state_id_fk",
           "tableFrom": "school",
-          "columnsFrom": [
-            "federal_state_id"
-          ],
+          "columnsFrom": ["federal_state_id"],
           "tableTo": "federal_state",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -712,26 +666,18 @@
         "shared_school_conversation_model_id_llm_model_id_fk": {
           "name": "shared_school_conversation_model_id_llm_model_id_fk",
           "tableFrom": "shared_school_conversation",
-          "columnsFrom": [
-            "model_id"
-          ],
+          "columnsFrom": ["model_id"],
           "tableTo": "llm_model",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "shared_school_conversation_user_id_user_entity_id_fk": {
           "name": "shared_school_conversation_user_id_user_entity_id_fk",
           "tableFrom": "shared_school_conversation",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user_entity",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -740,9 +686,7 @@
       "uniqueConstraints": {
         "shared_school_conversation_invite_code_unique": {
           "name": "shared_school_conversation_invite_code_unique",
-          "columns": [
-            "invite_code"
-          ],
+          "columns": ["invite_code"],
           "nullsNotDistinct": false
         }
       },
@@ -804,13 +748,9 @@
         "shared_school_conversation_usage_tracking_model_id_llm_model_id_fk": {
           "name": "shared_school_conversation_usage_tracking_model_id_llm_model_id_fk",
           "tableFrom": "shared_school_conversation_usage_tracking",
-          "columnsFrom": [
-            "model_id"
-          ],
+          "columnsFrom": ["model_id"],
           "tableTo": "llm_model",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -864,26 +804,18 @@
         "user_school_mapping_user_id_user_entity_id_fk": {
           "name": "user_school_mapping_user_id_user_entity_id_fk",
           "tableFrom": "user_school_mapping",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "user_entity",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "user_school_mapping_school_id_school_id_fk": {
           "name": "user_school_mapping_school_id_school_id_fk",
           "tableFrom": "user_school_mapping",
-          "columnsFrom": [
-            "school_id"
-          ],
+          "columnsFrom": ["school_id"],
           "tableTo": "school",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -892,10 +824,7 @@
       "uniqueConstraints": {
         "user_school_mapping_user_id_school_id_unique": {
           "name": "user_school_mapping_user_id_school_id_unique",
-          "columns": [
-            "user_id",
-            "school_id"
-          ],
+          "columns": ["user_id", "school_id"],
           "nullsNotDistinct": false
         }
       },
@@ -946,9 +875,7 @@
       "uniqueConstraints": {
         "user_entity_email_unique": {
           "name": "user_entity_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "nullsNotDistinct": false
         }
       },
@@ -961,38 +888,22 @@
     "public.character_access_level": {
       "name": "character_access_level",
       "schema": "public",
-      "values": [
-        "private",
-        "school",
-        "global"
-      ]
+      "values": ["private", "school", "global"]
     },
     "public.conversation_role": {
       "name": "conversation_role",
       "schema": "public",
-      "values": [
-        "user",
-        "assistant",
-        "system",
-        "tool"
-      ]
+      "values": ["user", "assistant", "system", "tool"]
     },
     "public.llm_model_type": {
       "name": "llm_model_type",
       "schema": "public",
-      "values": [
-        "text",
-        "image",
-        "fc"
-      ]
+      "values": ["text", "image", "fc"]
     },
     "public.user_school_role": {
       "name": "user_school_role",
       "schema": "public",
-      "values": [
-        "student",
-        "teacher"
-      ]
+      "values": ["student", "teacher"]
     }
   },
   "schemas": {},

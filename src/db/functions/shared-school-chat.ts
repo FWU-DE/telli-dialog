@@ -1,8 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 import { db } from '..';
 import {
-  SharedCharacterChatUsageTrackingInsertModel,
-  sharedCharacterChatUsageTrackingTable,
   sharedSchoolConversationTable,
   sharedSchoolConversationUsageTracking,
   SharedSchoolConversationUsageTrackingInsertModel,
@@ -56,10 +54,10 @@ export async function dbGetSharedChatByIdAndInviteCode({
 }
 
 export async function dbUpdateTokenUsageBySharedChatId(
-  value: SharedCharacterChatUsageTrackingInsertModel,
+  value: SharedSchoolConversationUsageTrackingInsertModel,
 ) {
   const insertedUsage = (
-    await db.insert(sharedCharacterChatUsageTrackingTable).values(value).returning()
+    await db.insert(sharedSchoolConversationUsageTracking).values(value).returning()
   )[0];
   if (insertedUsage === undefined) {
     throw Error('Could not track the token usage');

@@ -43,6 +43,49 @@ ORDER BY period, tracking.model_id
   return mappedRows;
 }
 
+export async function dbGetModelUsageOfCharacterSharedChatsByUserId({
+  userId,
+}: {
+  userId: string;
+}) {
+  const interval: Interval = 'month';
+  const startDate = getStartOfCurrentMonth();
+  const endDate = getEndOfCurrentMonth();
+
+  // @ts-expect-error weird typing errors
+  const rows: {
+    period: string;
+    model_id: string;
+    prompt_tokens: string;
+    completion_tokens: string;
+    nof_requests: string;
+    user_id: string;
+  }[] = (
+    await db.execute(sql`
+SELECT
+    DATE_TRUNC(${interval}, tracking.created_at) AS period,
+    tracking.model_id,
+    SUM(tracking.prompt_tokens) AS prompt_tokens,
+    SUM(tracking.completion_tokens) AS completion_tokens,
+    COUNT(tracking.completion_tokens) AS nof_requests
+FROM shared_character_conversation_usage_tracking as tracking
+WHERE tracking.created_at BETWEEN ${startDate.toISOString()} AND ${endDate.toISOString()} AND tracking.user_id = ${userId}
+GROUP BY period, tracking.model_id
+ORDER BY period, tracking.model_id
+`)
+  ).rows;
+
+  const mappedRows = rows.map((row) => ({
+    period: new Date(row.period),
+    modelId: row.model_id,
+    promptTokens: Number(row.prompt_tokens),
+    completionTokens: Number(row.completion_tokens),
+    numberOfRequest: Number(row.nof_requests),
+  }));
+
+  return mappedRows;
+}
+
 export async function dbGetModelUsageOfChatsByUserId({ userId }: { userId: string }) {
   const interval: Interval = 'month';
   const startDate = getStartOfCurrentMonth();

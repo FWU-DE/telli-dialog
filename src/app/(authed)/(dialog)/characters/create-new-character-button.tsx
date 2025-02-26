@@ -18,10 +18,7 @@ export default function CreateNewCharacterButton() {
   const { selectedModel } = useLlmModels();
 
   function handleNewGPT() {
-    if (selectedModel === undefined) {
-      return;
-    }
-    createNewCharacterAction({ modelId: selectedModel })
+    createNewCharacterAction({ modelId: selectedModel?.id })
       .then((newCharacter) => {
         router.push(`/characters/editor/${newCharacter.id}?create=true`);
       })

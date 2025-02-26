@@ -18,7 +18,6 @@ import { useToast } from '@/components/common/toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import ShareIcon from '@/components/icons/share';
 import { selectSVGBackground } from '@/utils/tailwind/select';
 import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { useTranslations } from 'next-intl';

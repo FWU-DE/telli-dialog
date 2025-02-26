@@ -1,6 +1,7 @@
 import {
   dbGetModelUsageBySharedCharacterChatId,
   dbGetModelUsageBySharedChatId,
+  dbGetModelUsageOfCharacterSharedChatsByUserId,
   dbGetModelUsageOfChatsByUserId,
   dbGetModelUsageOfSharedChatsByUserId,
 } from '@/db/functions/intelli-points';
@@ -23,9 +24,17 @@ export async function getPriceInCentByUser({
       ? await dbGetModelUsageOfSharedChatsByUserId({ userId: user.id })
       : [];
 
+  const characterSharedChatsUsagePerModel = await dbGetModelUsageOfCharacterSharedChatsByUserId({
+    userId: user.id,
+  });
+
   const chatUsagePerModel = await dbGetModelUsageOfChatsByUserId({ userId: user.id });
 
-  const usagePerModel = [...sharedChatsUsagePerModel, ...chatUsagePerModel];
+  const usagePerModel = [
+    ...sharedChatsUsagePerModel,
+    ...chatUsagePerModel,
+    ...characterSharedChatsUsagePerModel,
+  ];
 
   let currentPrice = 0;
 
