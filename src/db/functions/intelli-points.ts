@@ -68,7 +68,7 @@ SELECT
     SUM(tracking.prompt_tokens) AS prompt_tokens,
     SUM(tracking.completion_tokens) AS completion_tokens,
     COUNT(tracking.completion_tokens) AS nof_requests
-FROM shared_character_conversation_usage_tracking as tracking
+FROM shared_character_chat_usage_tracking as tracking
 WHERE tracking.created_at BETWEEN ${startDate.toISOString()} AND ${endDate.toISOString()} AND tracking.user_id = ${userId}
 GROUP BY period, tracking.model_id
 ORDER BY period, tracking.model_id

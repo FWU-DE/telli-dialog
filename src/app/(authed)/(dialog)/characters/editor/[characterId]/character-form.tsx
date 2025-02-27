@@ -197,7 +197,7 @@ export default function CharacterForm({
           <ShareContainer {...character} />
         </fieldset>
       )}
-      <fieldset className="mt-16 flex flex-col gap-4">
+      <fieldset className="mt-16 flex flex-col gap-8">
         <h2 className="font-medium mb-8">{t('general-settings')}</h2>
         <label className={cn(labelClassName, 'text-sm')}>{t('character-visibility-label')}</label>
         <div className="flex max-sm:flex-col gap-4 sm:gap-8">
@@ -230,12 +230,14 @@ export default function CharacterForm({
             <span>{t('restriction-school')}</span>
           </div>
         </div>
-        <label className={labelClassName}>{tCommon('llm-model')}</label>
-        <SelectLlmModelForm
-          selectedModel={selectedModel}
-          onValueChange={(value) => setSelectedModel(value)}
-          models={models}
-        />
+        <div className="flex flex-col gap-4">
+          <label className={labelClassName}>{tCommon('llm-model')}</label>
+          <SelectLlmModelForm
+            selectedModel={selectedModel}
+            onValueChange={(value) => setSelectedModel(value)}
+            models={models}
+          />
+        </div>
 
         <div className="grid grid-cols-3 gap-4">
           <div className="flex flex-col gap-4">
