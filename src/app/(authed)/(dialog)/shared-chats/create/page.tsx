@@ -18,7 +18,7 @@ export default async function Page() {
         <div className="flex-grow"></div>
         <ProfileMenu {...user} />
       </HeaderPortal>
-      <div className="max-w-4xl mx-auto mt-4">
+      <div className="max-w-3xl mx-auto mt-4">
         <Link href="/shared-chats" className="flex gap-3 items-center text-primary">
           <ChevronLeftIcon />
           <span className="hover:underline">{t('all-dialogs')}</span>
