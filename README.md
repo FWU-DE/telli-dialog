@@ -21,15 +21,7 @@ pnpm i # installs the dependencies
 You will need environment variables to work with.
 Place those in the `.env` file.
 
-You can see an overview of required env variables in the `.env.example` file.
-
-Env variables are currently stores in the aws secrets manager (as neither ionos nor otc provide such a service)
-
-With the correct aws credentials you can run this command to automatically get local env variables.
-
-```sh
-aws secretsmanager get-secret-value --secret-id local/telli/chatbot --query 'SecretString' --output text | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' > .env
-```
+You can find the env variables [here](https://start.1password.com/open/i?a=ADERP2QHK5HBPLKMBFF2QU5CXI&v=jtidfrchgfg2sunjzwpzgendlq&i=a2khk5vx6hrqmtkta2gg7vonga&h=deutschlandgpt.1password.eu).
 
 ## Database
 

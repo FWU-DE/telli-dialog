@@ -32,6 +32,8 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=critical
       - name: Check formatting
         run: pnpm format:check
       - name: Check types
