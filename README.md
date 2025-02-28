@@ -52,3 +52,4 @@ pnpm dev
 ## More
 
 You can find more docs in the [./docs](./docs) folder.
+For information about the project structure, see [here](./docs/structure.md).
