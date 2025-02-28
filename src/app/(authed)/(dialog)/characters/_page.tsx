@@ -35,7 +35,7 @@ export default function Page2({
   const t = useTranslations('characters');
 
   return (
-    <div className="flex flex-col gap-2 py-8 px-4">
+    <div className="min-w-full p-6 overflow-auto">
       <HeaderPortal>
         <ToggleSidebarButton />
         <NewChatButton />
