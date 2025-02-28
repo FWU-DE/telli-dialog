@@ -24,13 +24,13 @@ export default async function Page(context: PageContext) {
     inviteCode: searchParams.inviteCode,
   });
 
-  if (!character) {
+  if (character === undefined) {
     return <NotFound />;
   }
 
   const model = await dbGetLlmModelById({ modelId: character.modelId });
 
-  if (!model) {
+  if (model === undefined) {
     return <NotFound />;
   }
 

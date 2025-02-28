@@ -94,36 +94,37 @@ export default function DialogSidebar({ conversations, user, currentModelCosts }
             <TelliIcon className="w-4 h-4 fill-primary" />
             <span className="text-base font-medium text-primary">telli</span>
           </Link>
-
           <hr className="w-full my-2" />
           <div className="w-full items-center flex flex-col gap-1 h-fit">
             {user.school.userRole === 'teacher' && (
-              <Link href="/shared-chats" className="w-full">
-                <div
-                  className={cn(
-                    'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
-                    pathname.startsWith('/shared-chats') && 'underline',
-                  )}
-                >
-                  <SharedChatIcon className="w-6 h-6" />
-                  <span className="text-base">{t('class-chats')}</span>
-                </div>
-              </Link>
-            )}
+              <>
+                <Link href="/shared-chats" className="w-full">
+                  <div
+                    className={cn(
+                      'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
+                      pathname.startsWith('/shared-chats') && 'underline',
+                    )}
+                  >
+                    <SharedChatIcon className="w-6 h-6" />
+                    <span className="text-base">{t('class-chats')}</span>
+                  </div>
+                </Link>
 
-            <Link href="/characters" className="w-full">
-              <div
-                className={cn(
-                  'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
-                  (pathname === '/characters' || pathname.includes('/characters/editor')) &&
-                    'underline',
-                )}
-              >
-                <CharacterAvatarIcon className="w-6 h-5" />
-                <span className="text-base">{t('characters')}</span>
-              </div>
-            </Link>
-            <hr className="w-full px-1 my-2" />
+                <Link href="/characters" className="w-full">
+                  <div
+                    className={cn(
+                      'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
+                      (pathname === '/characters' || pathname.includes('/characters/editor')) &&
+                        'underline',
+                    )}
+                  >
+                    <CharacterAvatarIcon className="w-6 h-5" />
+                    <span className="text-base">{t('characters')}</span>
+                  </div>
+                </Link>
+                <hr className="w-full px-1 my-2" />
+              </>
+            )}
             <div className="flex flex-col gap-2 w-full px-1 py-2 ml-1">
               <div className="flex gap-2 items-center w-full pb-2 text-primary">
                 <IntelliPointsIcon className="w-4 h-4" />

@@ -17,7 +17,7 @@ export default function SelectLlmModelForm({
     return <p>Keine Modelle verfügbar</p>;
   }
   return (
-    <Select.Root onValueChange={onValueChange} value={selectedModel} defaultValue={selectedModel}>
+    <Select.Root onValueChange={onValueChange} defaultValue={selectedModel}>
       <Select.Trigger className="flex items-center justify-between w-full py-2 pl-4 pr-4 bg-white border border-gray-200 focus:border-primary rounded-enterprise-md focus:outline-none max-w-min min-w-max">
         <Select.Value />
         <ChevronDownIcon className="w-4 h-4 text-primary ms-2" />

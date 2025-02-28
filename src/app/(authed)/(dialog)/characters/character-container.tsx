@@ -15,7 +15,6 @@ import { useTranslations } from 'next-intl';
 import CountDownTimer from '../shared-chats/_components/count-down';
 import ShareIcon from '@/components/icons/share';
 import TrashIcon from '@/components/icons/trash';
-import EditIcon from '@/components/icons/edit';
 import SharedChatIcon from '@/components/icons/shared-chat';
 import { calculateTimeLeftBySharedChat } from '../shared-chats/[sharedSchoolChatId]/utils';
 
@@ -39,18 +38,18 @@ export default function CharacterContainer({
   function handleDeleteCharacter() {
     deleteCharacterAction({ characterId: id })
       .then(() => {
-        toast.success('Dialogpartner wurde erfolgreich gelöscht.');
+        toast.success('Dialogavatar wurde erfolgreich gelöscht.');
         router.refresh();
       })
       .catch(() => {
-        toast.error('Etwas ist beim Löschen des Dialogpartners schief gelaufen.');
+        toast.error('Etwas ist beim Löschen des Dialogavatars schief gelaufen.');
       });
   }
 
-  function handleNavigateToCharacterEditor(e: React.MouseEvent<HTMLButtonElement>) {
+  function handleNavigateToNewUnsharedChat(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
     e.stopPropagation();
-    router.push(`/characters/editor/${id}`);
+    router.push(`/characters/d/${id}`);
   }
 
   function handleNavigateToShare(e: React.MouseEvent<HTMLButtonElement>) {
@@ -66,7 +65,7 @@ export default function CharacterContainer({
 
   return (
     <Link
-      href={`/characters/d/${id}`}
+      href={`/characters/editor/${id}`}
       className="rounded-enterprise-md border p-6 flex items-center gap-4 w-full hover:border-primary"
     >
       <figure className="h-11 w-11 bg-light-gray items-center justify-center flex rounded-enterprise-sm">
@@ -90,33 +89,23 @@ export default function CharacterContainer({
       )}
       {timeLeft < 1 && (
         <button
-          className='className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm'
           type="button"
+          onClick={handleNavigateToNewUnsharedChat}
+          className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
         >
           <SharedChatIcon className="w-8 h-8" />
         </button>
       )}
       {currentUserId === userId && (
-        <>
-          {timeLeft < 1 && (
-            <button
-              onClick={handleNavigateToCharacterEditor}
-              type="button"
-              className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
-            >
-              <EditIcon className="w-8 h-8" />
-            </button>
-          )}
-          <DestructiveActionButton
-            modalTitle={t('delete-character')}
-            modalDescription={t('character-delete-modal-description')}
-            confirmText={tCommon('delete')}
-            actionFn={handleDeleteCharacter}
-            triggerButtonClassName="border-transparent justify-center flex flex-col rounded-enterprise-sm hover:bg-vidis-hover-green/20 p-0"
-          >
-            <TrashIcon className="w-8 h-8 text-primary" />
-          </DestructiveActionButton>
-        </>
+        <DestructiveActionButton
+          modalTitle={t('delete-character')}
+          modalDescription={t('character-delete-modal-description')}
+          confirmText={tCommon('delete')}
+          actionFn={handleDeleteCharacter}
+          triggerButtonClassName="border-transparent justify-center flex flex-col rounded-enterprise-sm hover:bg-vidis-hover-green/20 p-0"
+        >
+          <TrashIcon className="w-8 h-8 text-primary" />
+        </DestructiveActionButton>
       )}
     </Link>
   );

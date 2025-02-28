@@ -10,7 +10,6 @@ import ReloadIcon from '@/components/icons/reload';
 import StopIcon from '@/components/icons/stop';
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { readFromLocalStorage, saveToLocalStorage } from '@/components/providers/local-storage';
 import { z } from 'zod';
 import TelliLogo from '@/components/icons/logo';
@@ -29,7 +28,6 @@ export default function CharacterSharedChat({
 }: CharacterModel & { inviteCode: string }) {
   const t = useTranslations('Chat');
   const [isCopied, setIsCopied] = React.useState(false);
-  const { selectedModel } = useLlmModels();
   const { id, inviteCode } = character;
 
   const timeLeft = calculateTimeLeftBySharedChat(character);
@@ -61,7 +59,7 @@ export default function CharacterSharedChat({
     api: endpoint,
     experimental_throttle: 100,
     maxSteps: 2,
-    body: { modelId: selectedModel?.id },
+    body: { modelId: character.modelId },
   });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);

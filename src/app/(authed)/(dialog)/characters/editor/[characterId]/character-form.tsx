@@ -44,7 +44,7 @@ const characterFormValuesSchema = z.object({
   description: z.string().min(1),
   learningContext: z.string().min(1),
   competence: z.string().min(1),
-
+  modelId: z.string(),
   schoolType: z.string().min(1),
   gradeLevel: z.string().min(1),
   subject: z.string().min(1),
@@ -62,12 +62,13 @@ export default function CharacterForm({
   const router = useRouter();
   const toast = useToast();
 
-  const { models, selectedModel: _selectedModel } = useLlmModels();
+  const { models } = useLlmModels();
 
   const {
     register,
     handleSubmit,
     getValues,
+    setValue,
     formState: { isValid },
   } = useForm<CharacterFormValues>({
     resolver: zodResolver(characterFormValuesSchema),
@@ -81,8 +82,6 @@ export default function CharacterForm({
       subject: character.subject ?? '',
     },
   });
-
-  const [selectedModel, setSelectedModel] = React.useState(_selectedModel?.id);
 
   const t = useTranslations('characters.form');
   const tCommon = useTranslations('common');
@@ -121,16 +120,12 @@ export default function CharacterForm({
   }
 
   function onSubmit(data: CharacterFormValues) {
-    if (selectedModel === undefined) {
-      return;
-    }
-    updateCharacterAction({ characterId: character.id, modelId: selectedModel, ...data })
+    updateCharacterAction({ characterId: character.id, ...data })
       .then(() => {
         if (!isCreating) {
           toast.success('Der Dialogavatar wurde erfolgreich aktualisiert.');
         }
         router.refresh();
-        // router.push(backUrl);
       })
       .catch(() => {
         toast.error('Etwas ist beim Aktualisieren des Dialogavatars schief gelaufen.');
@@ -198,7 +193,7 @@ export default function CharacterForm({
         </fieldset>
       )}
       <fieldset className="mt-16 flex flex-col gap-8">
-        <h2 className="font-medium mb-8">{t('general-settings')}</h2>
+        <h2 className="font-medium mb-2">{t('general-settings')}</h2>
         <label className={cn(labelClassName, 'text-sm')}>{t('character-visibility-label')}</label>
         <div className="flex max-sm:flex-col gap-4 sm:gap-8">
           <div className="flex gap-4">
@@ -233,8 +228,11 @@ export default function CharacterForm({
         <div className="flex flex-col gap-4">
           <label className={labelClassName}>{tCommon('llm-model')}</label>
           <SelectLlmModelForm
-            selectedModel={selectedModel}
-            onValueChange={(value) => setSelectedModel(value)}
+            selectedModel={character.modelId}
+            onValueChange={(value) => {
+              setValue('modelId', value);
+              handleAutoSave();
+            }}
             models={models}
           />
         </div>

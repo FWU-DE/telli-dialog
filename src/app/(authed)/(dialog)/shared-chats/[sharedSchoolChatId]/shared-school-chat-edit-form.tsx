@@ -25,16 +25,15 @@ export default function SharedSchoolChatEditForm({
 }: SharedSchoolConversationModel) {
   const toast = useToast();
   const router = useRouter();
-  const { models } = useLlmModels();
+  const { models, selectedModel } = useLlmModels();
 
   const t = useTranslations('Chat.shared-chats.form');
-
-  const [selectedModel, setSelectedModel] = React.useState(sharedSchoolChat.modelId);
 
   const {
     register,
     handleSubmit,
     getValues,
+    setValue,
     formState: { defaultValues },
   } = useForm<SharedSchoolChatFormValues>({
     resolver: zodResolver(sharedSchoolChatFormValuesSchema),
@@ -44,7 +43,7 @@ export default function SharedSchoolChatEditForm({
   });
 
   function onSubmit(data: SharedSchoolChatFormValues) {
-    updateSharedSchoolChat({ ...sharedSchoolChat, ...data, modelId: selectedModel })
+    updateSharedSchoolChat({ ...sharedSchoolChat, ...data })
       .then(() => {
         toast.success('Der Klassendialog wurde erfolgreich aktualisiert.');
         router.refresh();
@@ -90,12 +89,11 @@ export default function SharedSchoolChatEditForm({
             <span className="text-coral">*</span> {t('model-label')}
           </label>
           <Select.Root
-            onValueChange={(modelId) => {
-              setSelectedModel(modelId);
+            onValueChange={(value) => {
+              setValue('modelId', value);
               handleAutoSave();
             }}
-            value={selectedModel}
-            defaultValue={selectedModel}
+            defaultValue={sharedSchoolChat.modelId}
           >
             <Select.Trigger className="flex items-center justify-between w-full py-2 pl-4 pr-4 bg-white border border-gray-200 focus:border-primary rounded-enterprise-md focus:outline-none">
               <Select.Value />

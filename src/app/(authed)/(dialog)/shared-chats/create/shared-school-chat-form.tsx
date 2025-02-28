@@ -23,12 +23,11 @@ export default function SharedSchoolChatCreateForm() {
   const { models, selectedModel: _selectedModel } = useLlmModels();
   const t = useTranslations('Chat.shared-chats.form');
 
-  const [selectedModel, setSelectedModel] = React.useState(_selectedModel?.id);
-
   const {
     register,
     handleSubmit,
-    formState: { isValid },
+    setValue,
+    formState: { isValid, isSubmitting },
   } = useForm<SharedSchoolChatFormValues>({
     resolver: zodResolver(sharedSchoolChatFormValuesSchema),
     defaultValues: {
@@ -37,11 +36,14 @@ export default function SharedSchoolChatCreateForm() {
   });
 
   function onSubmit(data: SharedSchoolChatFormValues) {
-    if (selectedModel === undefined) {
+    console.debug({ data });
+
+    if (!data.modelId) {
       toast.error('Sie müssen ein Model auswählen.');
       return;
     }
-    createNewSharedSchoolChatAction({ ...data, modelId: selectedModel })
+
+    createNewSharedSchoolChatAction(data)
       .then((createdChat) => {
         toast.success('Der Klassendialog wurde erfolgreich erstellt.');
         router.push(`/shared-chats/${createdChat.id}`);
@@ -71,15 +73,13 @@ export default function SharedSchoolChatCreateForm() {
             <span className="text-coral">*</span> {t('model-label')}
           </label>
           <Select.Root
-            onValueChange={(value) => setSelectedModel(value)}
-            value={selectedModel}
-            defaultValue={selectedModel}
+            onValueChange={(value) => setValue('modelId', value)}
+            defaultValue={_selectedModel?.id || ''}
           >
             <Select.Trigger className="flex items-center justify-between w-full py-2 pl-4 pr-4 bg-white border border-gray-200 focus:border-primary rounded-enterprise-md focus:outline-none">
               <Select.Value />
               <ChevronDownIcon className="w-4 h-4 text-primary ms-2" />
             </Select.Trigger>
-
             <Select.Portal>
               <Select.Content className="bg-white border border-gray-200 rounded-enterprise-md shadow-dropdown w-full">
                 <Select.ScrollUpButton className="py-2 text-gray-500">▲</Select.ScrollUpButton>
@@ -183,7 +183,11 @@ export default function SharedSchoolChatCreateForm() {
         >
           Abbrechen
         </Link>
-        <button disabled={!isValid} className={buttonPrimaryClassName} type="submit">
+        <button
+          disabled={!isValid || isSubmitting}
+          className={buttonPrimaryClassName}
+          type="submit"
+        >
           {t('title')}
         </button>
       </div>

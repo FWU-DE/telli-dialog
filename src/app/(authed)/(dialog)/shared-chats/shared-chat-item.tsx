@@ -56,9 +56,9 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
       {timeLeft > 0 && (
         <Link
           href={`/shared-chats/${sharedSchoolChat.id}/share`}
-          className="p-1.5 rounded-enterprise-sm text-primary hover:bg-vidis-hover-green/20"
+          className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
         >
-          <ShareIcon className="w-4 h-4" />
+          <ShareIcon className="w-8 h-8" />
         </Link>
       )}
       <DestructiveActionButton

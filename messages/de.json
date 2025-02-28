@@ -62,7 +62,7 @@
       "character-restriction-label": "Was soll der Dialogavatar nicht tun?",
       "character-restriction-placeholder": "Der Dialogavatar soll sich nicht außerhalb seiner Lebenswelt als Ludwig XIV bewegen und nicht außerhalb seines geschichtlichen Kontexts (Absolutismus im 17. Jahrhundert in Frankreich) antworten.",
       "character-delete-description": "Beim Löschen des Dialogavatars werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
-      "character-delete-modal-description": "Bist du sicher, dass du diesen Dialogavatar löschen möchtest? Dabei werden alle mit diesem Dialogpartner verbundenen Konversationen unwiderruflich gelöscht.",
+      "character-delete-modal-description": "Bist du sicher, dass du diesen Dialogavatar löschen möchtest? Dabei werden alle mit diesem Dialogavatar verbundenen Konversationen unwiderruflich gelöscht.",
       "school-type": "Schultyp",
       "school-type-placeholder": "Gymnasium",
       "grade": "Klassenstufe",
