@@ -3,27 +3,25 @@ name: E2E Testing
 on:
   push:
     branches:
-      - master
-  # pull_request:
-  #   types: [opened, ready_for_review, synchronize]
-  #   branches:
-  #     - master
-  # workflow_dispatch:
+      - main
+  pull_request:
+    types: [opened, ready_for_review, synchronize]
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    environment: preview
-
     services:
       postgres:
         image: postgres:latest
         ports:
           - 5432:5432
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: 74JHVrorrZ3cuuov
-          POSTGRES_DB: testdb
+          POSTGRES_USER: telli_dialog_db
+          POSTGRES_PASSWORD: test1234
+          POSTGRES_DB: telli_dialog_db
         options: >-
           --health-cmd "pg_isready -U postgres"
           --health-interval 10s
@@ -32,7 +30,31 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+
+      - name: Load 1Password Secrets
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          NEXTAUTH_URL: op://Telli/.env.e2e telli-chatbot/NEXTAUTH_URL
+          DATABASE_URL: op://Telli/.env.e2e telli-chatbot/DATABASE_URL
+          AUTH_SECRET: op://Telli/.env.e2e telli-chatbot/AUTH_SECRET
+          OTC_SECRET_ACCESS_KEY: op://Telli/.env.e2e telli-chatbot/OTC_SECRET_ACCESS_KEY
+          OTC_ACCESS_KEY_ID: op://Telli/.env.e2e telli-chatbot/OTC_ACCESS_KEY_ID
+          OTC_S3_HOSTNAME: op://Telli/.env.e2e telli-chatbot/OTC_S3_HOSTNAME
+          OTC_BUCKET_NAME: op://Telli/.env.e2e telli-chatbot/OTC_BUCKET_NAME
+          SENTRY_AUTH_TOKEN: op://Telli/.env.e2e telli-chatbot/SENTRY_AUTH_TOKEN
+          # SENTRY_ENVIRONMENT: op://Telli/.env.e2e telli-chatbot/SENTRY_ENVIRONMENT
+          VIDIS_CLIENT_ID: op://Telli/.env.e2e telli-chatbot/VIDIS_CLIENT_ID
+          VIDIS_CLIENT_SECRET: op://Telli/.env.e2e telli-chatbot/VIDIS_CLIENT_SECRET
+          VIDIS_ISSUER_URI: op://Telli/.env.e2e telli-chatbot/VIDIS_ISSUER_URI
+          API_URL: op://Telli/.env.e2e telli-chatbot/API_URL
+          ENCRYPTION_KEY: op://Telli/.env.e2e telli-chatbot/ENCRYPTION_KEY
+          SENTRY_DSN: op://Telli/.env.e2e telli-chatbot/SENTRY_DSN
+          API_KEY: op://Telli/.env.e2e telli-chatbot/API_KEY
+          BAVARIA_API_KEY: op://Telli/.env.e2e telli-chatbot/BAVARIA_API_KEY
 
       - name: Use Node.js
         uses: actions/setup-node@v3
@@ -56,11 +78,11 @@ jobs:
           done
 
       - name: Run migrations or seed database (if applicable)
-        run: pnpm db:migrate
+        run: pnpm db:migrate && pnpm db:seed
 
       - name: Start application
         run: |
-          pnpm build
+          pnpm build:envless
           pnpm start &
           pnpm start:oidc &
 
@@ -69,7 +91,7 @@ jobs:
         env:
           CI: true
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report

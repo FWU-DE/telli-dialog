@@ -5,7 +5,7 @@ import { knotenpunktLlmModelSchema } from './schema';
 export async function fetchLlmModels({ apiKey }: { apiKey: string }) {
   const response = await fetch(`${env.apiUrl}/v1/models`, {
     headers: { Authorization: `Bearer ${apiKey}` },
-    next: { revalidate: 120 },
+    next: { revalidate: 60 },
   });
 
   if (!response.ok) {

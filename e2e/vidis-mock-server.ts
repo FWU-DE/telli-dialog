@@ -74,15 +74,14 @@ const providerConfig: Configuration = {
         console.log('claims called with use:', use, 'scope:', scope);
         return {
           sub: maybeAccount.sub,
-          rolle: 'lehrer',
-          schulkennung: ['123456', '789012'],
-          bundesland: 'berlin',
+          rolle: maybeAccount.rolle,
+          schulkennung: maybeAccount.schulkennung,
+          bundesland: maybeAccount.bundesland,
         };
       },
     };
   },
   async extraTokenClaims(ctx, token) {
-    console.debug({ ctx, token });
     console.log('extraTokenClaims called');
     // @ts-expect-error property exists
     const maybeAccount = accountIdAccountMapping[token.accountId];
