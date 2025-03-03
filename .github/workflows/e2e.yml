@@ -3,18 +3,19 @@ name: E2E Testing
 on:
   push:
     branches:
-      - master
-  # pull_request:
-  #   types: [opened, ready_for_review, synchronize]
-  #   branches:
-  #     - master
-  # workflow_dispatch:
+      - main 
+  pull_request:
+    types: [opened, ready_for_review, synchronize]
+    branches:
+      - main 
+  workflow_dispatch:
+
+env:
+  OP_SERVICE_ACCOUNT_TOKEN={{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
 
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    environment: preview
-
     services:
       postgres:
         image: postgres:latest
@@ -33,6 +34,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Setup 1Password CLI
+        uses: 1password/load-secrets-action/configure@v2
+        with:
+          service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
 
       - name: Use Node.js
         uses: actions/setup-node@v3
@@ -56,12 +61,12 @@ jobs:
           done
 
       - name: Run migrations or seed database (if applicable)
-        run: pnpm db:migrate && pnpm db:seed
+        run: pnpm db:migrate:op && pnpm db:seed:op
 
       - name: Start application
         run: |
-          pnpm build
-          pnpm start &
+          pnpm build:envless
+          pnpm start:op:e2e &
           pnpm start:oidc &
 
       - name: Run E2E tests
