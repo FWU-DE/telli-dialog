@@ -97,15 +97,30 @@ export const characterTable = pgTable('character', {
   userId: uuid('user_id')
     .references(() => userTable.id)
     .notNull(),
+  modelId: uuid('model_id')
+    .notNull()
+    .references(() => llmModelTable.id),
+  // required
   name: text('name').notNull(),
-  description: text('description'),
-  learningContext: text('learning_context'),
+  description: text('description').notNull().default(''),
+  learningContext: text('learning_context').notNull().default(''),
+  competence: text('competence').notNull().default(''),
+  // new
+  schoolType: text('school_type').notNull().default(''),
+  gradeLevel: text('grade_level').notNull().default(''),
+  subject: text('subject').default('').notNull(),
+  // not required
   specifications: text('specifications'),
-  competence: text('competence'),
   restrictions: text('restrictions'),
   pictureId: text('picture_id'),
   accessLevel: characterAccessLevelEnum('access_level').notNull().default('private'),
   schoolId: text('school_id').references(() => schoolTable.id),
+  // for sharing the character
+  intelligencePointsLimit: integer('intelligence_points_limit'),
+  maxUsageTimeLimit: integer('max_usage_time_limit'),
+  inviteCode: text('invite_code').unique(),
+  startedAt: timestamp('started_at', { withTimezone: true }),
+
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -212,3 +227,22 @@ export const conversationUsageTracking = pgTable('conversation_usage_tracking', 
 });
 export type ConversationUsageTrackingInsertModel = typeof conversationUsageTracking.$inferInsert;
 export type ConversationUsageTrackingModel = typeof conversationUsageTracking.$inferSelect;
+
+export const sharedCharacterChatUsageTrackingTable = pgTable(
+  'shared_character_chat_usage_tracking',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    modelId: uuid('model_id')
+      .notNull()
+      .references(() => llmModelTable.id),
+    characterId: uuid('character_id').notNull(),
+    userId: uuid('user_id').notNull(),
+    completionTokens: integer('completion_tokens').notNull(),
+    promptTokens: integer('prompt_tokens').notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  },
+);
+export type SharedCharacterChatUsageTrackingInsertModel =
+  typeof sharedCharacterChatUsageTrackingTable.$inferInsert;
+export type SharedCharacterChatUsageTrackingModel =
+  typeof sharedCharacterChatUsageTrackingTable.$inferSelect;

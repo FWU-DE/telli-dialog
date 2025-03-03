@@ -35,7 +35,7 @@ export default async function Page(context: { params: Promise<{ sharedSchoolChat
   }
 
   const { params } = parsedContext;
-  const [user, t] = await Promise.all([getUser(), getTranslations('Chat.shared-chats')]);
+  const [user, t] = await Promise.all([getUser(), getTranslations('shared-chats')]);
 
   const sharedSchoolChat = await dbGetSharedSchoolChatById({
     userId: user.id,

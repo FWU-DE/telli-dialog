@@ -3,8 +3,8 @@ import {
   dbGetAndUpdateLlmModelsByFederalStateId,
   getAvailableLlmModels,
 } from '@/db/functions/llm-model';
-import { getPriceInCentBySharedChat } from '@/app/school';
-import { type LlmModel, type SharedSchoolConversationModel } from '@/db/schema';
+import { getPriceInCentBySharedCharacterChat, getPriceInCentBySharedChat } from '@/app/school';
+import { CharacterModel, type LlmModel, type SharedSchoolConversationModel } from '@/db/schema';
 import { type UserAndContext } from '@/auth/types';
 import { getPriceInCentByUser } from '@/app/school';
 import { type LanguageModelUsage } from 'ai';
@@ -35,11 +35,9 @@ export async function trackChatUsage({
 
 export async function sharedChatHasReachedIntelliPointLimit({
   user,
-
   sharedChat,
 }: {
   user: UserAndContext | undefined;
-
   sharedChat: SharedSchoolConversationModel;
 }) {
   if (user === undefined || user.school === undefined || user.federalState === undefined) {
@@ -76,11 +74,57 @@ export async function sharedChatHasReachedIntelliPointLimit({
   return true;
 }
 
-export function sharedChatHasExpired(sharedChat: SharedSchoolConversationModel) {
-  const startedAt = sharedChat.startedAt;
-  const timeLeft = calculateTimeLeftBySharedChat(sharedChat);
+export async function sharedCharacterChatHasReachedIntelliPointLimit({
+  user,
+  character,
+}: {
+  user: UserAndContext | undefined;
+  character: CharacterModel;
+}) {
+  if (user === undefined || user.school === undefined || user.federalState === undefined) {
+    return true;
+  }
 
-  if (startedAt === null || timeLeft < 1 || sharedChat.maxUsageTimeLimit === null) {
+  if (sharedChatHasExpired(character)) {
+    return true;
+  }
+
+  const models = await getAvailableLlmModels();
+
+  if (character.startedAt === null || character.maxUsageTimeLimit === null) {
+    return true;
+  }
+
+  const priceInCent = await getPriceInCentBySharedCharacterChat({
+    models,
+    startedAt: character.startedAt,
+    maxUsageTimeLimit: character.maxUsageTimeLimit,
+    characterId: character.id,
+  });
+
+  const federalStateLimits = user.federalState;
+
+  if (
+    user.school.userRole === 'teacher' &&
+    character.intelligencePointsLimit !== null &&
+    priceInCent < (federalStateLimits.teacherPriceLimit * character.intelligencePointsLimit) / 100
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+export function sharedChatHasExpired({
+  startedAt,
+  maxUsageTimeLimit,
+}: {
+  startedAt: Date | null;
+  maxUsageTimeLimit: number | null;
+}) {
+  const timeLeft = calculateTimeLeftBySharedChat({ startedAt, maxUsageTimeLimit });
+
+  if (startedAt === null || timeLeft < 1 || maxUsageTimeLimit === null) {
     // the shared chat is no viable anymore so the limit is reached
     return true;
   }

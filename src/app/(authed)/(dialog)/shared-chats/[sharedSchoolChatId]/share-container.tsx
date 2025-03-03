@@ -4,8 +4,8 @@ import { labelClassName } from '@/utils/tailwind/input';
 import CountDownTimer from '../_components/count-down';
 import {
   intelliPointsPercentageValueSchema,
-  SharedSchoolChatShareFormValues,
-  sharedSchoolChatShareFormValuesSchema,
+  SharedConversationShareFormValues,
+  sharedConversationFormValuesSchema,
   usageTimeValueSchema,
 } from './schema';
 import { SharedSchoolConversationModel } from '@/db/schema';
@@ -19,24 +19,25 @@ import { useToast } from '@/components/common/toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import ShareIcon from '@/components/icons/share';
 import { selectSVGBackground } from '@/utils/tailwind/select';
 import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { useTranslations } from 'next-intl';
+import FilledShareIcon from '@/components/icons/filled-share';
 
 type ShareContainerProps = SharedSchoolConversationModel;
 
 export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerProps) {
   const toast = useToast();
   const router = useRouter();
-  const t = useTranslations('Chat.shared-chats.shared');
+  const t = useTranslations('shared-chats.shared');
+  const tToast = useTranslations('shared-chats.toasts');
 
   const sharedChatTimeLeft = calculateTimeLeftBySharedChat(sharedSchoolChat);
   const sharedChatActive = sharedChatTimeLeft > 0;
 
   const { register: registerShare, getValues: getValuesShare } =
-    useForm<SharedSchoolChatShareFormValues>({
-      resolver: zodResolver(sharedSchoolChatShareFormValuesSchema),
+    useForm<SharedConversationShareFormValues>({
+      resolver: zodResolver(sharedConversationFormValuesSchema),
       defaultValues: {
         intelliPointsPercentageLimit: getIntelliPointsValueOrDefault(
           sharedSchoolChat.intelligencePointsLimit,
@@ -54,23 +55,23 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
 
     handleInitiateSharedChatShareAction({ ...data, id: sharedSchoolChat.id })
       .then(() => {
-        toast.success('Klassendialog erfolgreich geteilt.');
+        toast.success(tToast('share-toast-success'));
         router.push(shareUILink);
         router.refresh();
       })
       .catch(() => {
-        toast.error('Etwas ist beim Teilen des Klassendialogs schief gelaufen.');
+        toast.error(tToast('share-toast-error'));
       });
   }
 
   function handleStopSharing() {
     handleStopSharedChatShareAction({ id: sharedSchoolChat.id })
       .then(() => {
-        toast.success('Klassendialog wird nicht mehr geteilt.');
+        toast.success(tToast('stop-share-toast-success'));
         router.refresh();
       })
       .catch(() => {
-        toast.error('Etwas ist beim Beenden des Teilens schief gelaufen.');
+        toast.error(tToast('stop-share-toast-error'));
       });
   }
 
@@ -83,8 +84,14 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
           <label className={cn(labelClassName, 'text-sm')}>Telli-Points</label>
           <select
             {...registerShare('intelliPointsPercentageLimit')}
-            className="py-2 pl-4 pr-8 bg-white border-[1px] rounded-enterprise-md border-gray-200"
-            style={{ WebkitAppearance: 'none', background: selectSVGBackground }}
+            className={cn(
+              'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600',
+              sharedChatActive && 'cursor-not-allowed',
+            )}
+            style={{
+              WebkitAppearance: 'none',
+              background: !sharedChatActive ? selectSVGBackground : undefined,
+            }}
           >
             {intelliPointsPercentageValueSchema.options.map((value) => (
               <option key={value} value={value}>
@@ -97,8 +104,14 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
           <label className={cn(labelClassName, 'text-sm')}>{t('max-usage')}</label>
           <select
             {...registerShare('usageTimeLimit')}
-            className="py-2 pl-4 pr-8 bg-white border-[1px] rounded-enterprise-md border-gray-200"
-            style={{ WebkitAppearance: 'none', background: selectSVGBackground }}
+            className={cn(
+              'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600',
+              sharedChatActive && 'cursor-not-allowed',
+            )}
+            style={{
+              WebkitAppearance: 'none',
+              background: !sharedChatActive ? selectSVGBackground : undefined,
+            }}
           >
             {usageTimeValueSchema.options.map((value) => (
               <option key={value} value={value}>
@@ -132,13 +145,13 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
                 onClick={handleStopSharing}
               >
                 <svg
-                  width="10"
-                  height="10"
-                  viewBox="0 0 10 10"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 12 12"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <rect width="10" height="10" fill="currentColor" />
+                  <rect width="12" height="12" rx="4" fill="#46217E" />
                 </svg>
               </button>
             )}
@@ -152,7 +165,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
                 type="button"
                 onClick={() => router.push(shareUILink)}
               >
-                <ShareIcon />
+                <FilledShareIcon className="w-4 h-4" />
               </button>
             )}
             {!sharedChatActive && (

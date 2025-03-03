@@ -6,6 +6,9 @@ import { CharacterAccessLevel, CharacterInsertModel, characterTable } from '@/db
 import { deleteFileFromS3 } from '@/s3';
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
+import { SharedConversationShareFormValues } from '../../../shared-chats/[sharedSchoolChatId]/schema';
+import { parseNumberOrThrow } from '@/utils/number';
+import { generateInviteCode } from '../../../shared-chats/[sharedSchoolChatId]/utils';
 
 export async function updateCharacterAccessLevelAction({
   characterId,
@@ -99,4 +102,72 @@ export async function deleteCharacterAction({ characterId }: { characterId: stri
   }
 
   return deletedCharacter;
+}
+
+export async function handleInitiateCharacterShareAction({
+  id,
+  intelliPointsPercentageLimit: _intelliPointsPercentageLimit,
+  usageTimeLimit: _usageTimeLimit,
+}: { id: string } & SharedConversationShareFormValues) {
+  const user = await getUser();
+
+  if (user.school === undefined) {
+    throw Error('User is not part of a school');
+  }
+
+  if (user.school.userRole !== 'teacher') {
+    throw Error('Only a teacher can share a character');
+  }
+
+  const intelliPointsPercentageLimit = parseNumberOrThrow(_intelliPointsPercentageLimit);
+  const usageTimeLimitInSeconds = parseNumberOrThrow(_usageTimeLimit);
+
+  const randomString = generateInviteCode();
+
+  const updatedSharedChat = (
+    await db
+      .update(characterTable)
+      .set({
+        intelligencePointsLimit: intelliPointsPercentageLimit,
+        maxUsageTimeLimit: usageTimeLimitInSeconds,
+        inviteCode: randomString.toUpperCase(),
+        startedAt: new Date(),
+      })
+      .where(and(eq(characterTable.id, id), eq(characterTable.userId, user.id)))
+      .returning()
+  )[0];
+
+  if (updatedSharedChat === undefined) {
+    throw Error('Could not character');
+  }
+
+  return updatedSharedChat;
+}
+
+export async function handleStopCharacaterShareAction({ id }: { id: string }) {
+  const user = await getUser();
+
+  if (user.school === undefined) {
+    throw Error('User is not part of a school');
+  }
+
+  if (user.school.userRole !== 'teacher') {
+    throw Error('Only a teacher can stop share a character');
+  }
+
+  const updatedCharacter = (
+    await db
+      .update(characterTable)
+      .set({
+        startedAt: null,
+      })
+      .where(and(eq(characterTable.id, id), eq(characterTable.userId, user.id)))
+      .returning()
+  )[0];
+
+  if (updatedCharacter === undefined) {
+    throw Error('Could not stop share character');
+  }
+
+  return updatedCharacter;
 }

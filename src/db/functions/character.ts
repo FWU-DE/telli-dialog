@@ -5,6 +5,8 @@ import {
   characterTable,
   conversationMessageTable,
   conversationTable,
+  SharedCharacterChatUsageTrackingInsertModel,
+  sharedCharacterChatUsageTrackingTable,
 } from '../schema';
 
 export async function dbGetCharacterByIdOrSchoolId({
@@ -78,6 +80,20 @@ export async function dbGetCharactersByUserId({
   return characters;
 }
 
+export async function dbGetCharacterByIdAndUserId({
+  characterId,
+  userId,
+}: {
+  characterId: string;
+  userId: string;
+}) {
+  const [row] = await db
+    .select()
+    .from(characterTable)
+    .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)));
+  return row;
+}
+
 export async function dbDeleteCharacterByIdAndUserId({
   characterId,
   userId,
@@ -124,4 +140,32 @@ export async function dbDeleteCharacterByIdAndUserId({
   });
 
   return deletedCharacter;
+}
+
+export async function dbGetCharacterByIdAndInviteCode({
+  id,
+  inviteCode,
+}: {
+  id: string;
+  inviteCode: string;
+}) {
+  return (
+    await db
+      .select()
+      .from(characterTable)
+      .where(and(eq(characterTable.id, id), eq(characterTable.inviteCode, inviteCode)))
+  )[0];
+}
+
+export async function dbUpdateTokenUsageByCharacterChatId(
+  value: SharedCharacterChatUsageTrackingInsertModel,
+) {
+  const insertedUsage = (
+    await db.insert(sharedCharacterChatUsageTrackingTable).values(value).returning()
+  )[0];
+  if (insertedUsage === undefined) {
+    throw Error('Could not track the token usage');
+  }
+
+  return insertedUsage;
 }

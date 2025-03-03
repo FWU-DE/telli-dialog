@@ -1,5 +1,4 @@
 import { SidebarVisibilityProvider } from '@/components/navigation/sidebar/sidebar-provider';
-import { dbGetConversations } from '@/db/functions/chat';
 import { getUser } from '@/auth/utils';
 import React from 'react';
 import DialogSidebar from './sidebar';
@@ -20,22 +19,14 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
   });
 
   const defaultModelByCookie = await getDefaultModelNameByCookies();
-
-  const [conversations, priceInCent] = await Promise.all([
-    dbGetConversations(user.id),
-    getPriceInCentByUser({ user, models }),
-  ]);
+  const priceInCent = await getPriceInCentByUser({ user, models });
 
   return (
     <div className="flex h-[100dvh] w-[100dvw]">
       <AutoLogout />
       <SidebarVisibilityProvider>
         <LlmModelsProvider models={models} defaultLlmModelByCookie={defaultModelByCookie}>
-          <DialogSidebar
-            conversations={conversations}
-            user={user}
-            currentModelCosts={priceInCent ?? 0}
-          />
+          <DialogSidebar user={user} currentModelCosts={priceInCent ?? 0} />
           <div className="flex flex-col max-h-[100dvh] min-h-[100dvh] w-full overflow-auto">
             <div
               id={HEADER_PORTAL_ID}

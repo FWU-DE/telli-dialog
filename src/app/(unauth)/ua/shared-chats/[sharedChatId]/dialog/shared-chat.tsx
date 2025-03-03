@@ -10,7 +10,6 @@ import ReloadIcon from '@/components/icons/reload';
 import StopIcon from '@/components/icons/stop';
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { readFromLocalStorage, saveToLocalStorage } from '@/components/providers/local-storage';
 import { z } from 'zod';
 import TelliLogo from '@/components/icons/logo';
@@ -23,13 +22,13 @@ import { generateUUID } from '@/utils/uuid';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import MarkdownDisplay from '@/components/chat/markdown-display';
 import { UnauthenticatedProfileMenu } from '@/components/navigation/profile-menu';
+import DownloadSharedConversationButton from '../../../dowload-shared-conversation-button';
 
 export default function SharedChat({
   ...sharedSchoolChat
 }: SharedSchoolConversationModel & { inviteCode: string }) {
-  const t = useTranslations('Chat');
+  const tCommon = useTranslations('common');
   const [isCopied, setIsCopied] = React.useState(false);
-  const { selectedModel } = useLlmModels();
   const { id, inviteCode } = sharedSchoolChat;
 
   const timeLeft = calculateTimeLeftBySharedChat(sharedSchoolChat);
@@ -61,7 +60,7 @@ export default function SharedChat({
     api: endpoint,
     experimental_throttle: 100,
     maxSteps: 2,
-    body: { modelId: selectedModel?.id },
+    body: { modelId: sharedSchoolChat.modelId },
   });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
@@ -107,15 +106,19 @@ export default function SharedChat({
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      <header className="flex gap-4 items-center p-4">
+      <header className="flex gap-4 items-center py-[1.15rem] px-6">
         {chatActive && (
           <button className={cn(buttonPrimaryClassName, 'p-2')} onClick={handleOpenNewChat}>
             <PlusIcon className="fill-primary-text h-5 w-5" />
           </button>
         )}
         <SelectLlmModel />
-        {!chatActive && <p className="text-red-500">Der Chat ist abgelaufen</p>}
+        {!chatActive && <p className="text-red-500">{tCommon('chat-expired')}</p>}
         <div className="flex-grow" />
+        <DownloadSharedConversationButton
+          conversationMessages={messages}
+          disabled={!chatActive || messages.length === 0}
+        />
         <UnauthenticatedProfileMenu />
       </header>
       <div className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden">
@@ -208,7 +211,7 @@ export default function SharedChat({
               <div className="flex items-center">
                 <AutoResizeTextarea
                   autoFocus
-                  placeholder={t('send-message-placeholder')}
+                  placeholder={tCommon('send-message-placeholder')}
                   className="w-full text-base focus:outline-none bg-transparent max-h-[10rem] sm:max-h-[15rem] overflow-y-auto placeholder-black p-2"
                   onChange={handleInputChange}
                   value={input}
@@ -239,7 +242,7 @@ export default function SharedChat({
               </div>
             </form>
             <span className="text-xs mt-2 font-normal text-main-900 flex self-center text-center">
-              {t('information-disclaimer')}
+              {tCommon('information-disclaimer')}
             </span>
           </div>
         </div>

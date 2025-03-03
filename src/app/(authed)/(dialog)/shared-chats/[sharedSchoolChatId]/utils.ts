@@ -1,4 +1,3 @@
-import { SharedSchoolConversationModel } from '@/db/schema';
 import {
   IntelliPointsPercentageValue,
   intelliPointsPercentageValueSchema,
@@ -10,7 +9,10 @@ import { customAlphabet } from 'nanoid';
 export function calculateTimeLeftBySharedChat({
   startedAt,
   maxUsageTimeLimit,
-}: SharedSchoolConversationModel) {
+}: {
+  startedAt: Date | null;
+  maxUsageTimeLimit: number | null;
+}) {
   if (startedAt === null || maxUsageTimeLimit === null) {
     return -1;
   }

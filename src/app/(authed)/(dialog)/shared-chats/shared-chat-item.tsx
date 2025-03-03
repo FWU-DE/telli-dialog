@@ -12,21 +12,24 @@ import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
 import { calculateTimeLeftBySharedChat } from './[sharedSchoolChatId]/utils';
 import CountDownTimer from './_components/count-down';
+import { useTranslations } from 'next-intl';
 
 type SharedChatItemProps = SharedSchoolConversationModel;
 
 export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemProps) {
   const toast = useToast();
   const router = useRouter();
+  const t = useTranslations('shared-chats');
+  const tCommon = useTranslations('common');
 
   function handleDeleteSharedChat() {
     deleteSharedChatAction({ id: sharedSchoolChat.id })
       .then(() => {
-        toast.success('Der Klassendialog wurde erfolgreich gelöscht.');
+        toast.success(t('toasts.delete-toast-success'));
         router.refresh();
       })
       .catch(() => {
-        toast.error('Der Klassendialog konnte nicht gelöscht werden.');
+        toast.error(t('toasts.delete-toast-error'));
       });
   }
 
@@ -56,19 +59,19 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
       {timeLeft > 0 && (
         <Link
           href={`/shared-chats/${sharedSchoolChat.id}/share`}
-          className="p-1.5 rounded-enterprise-sm text-primary hover:bg-vidis-hover-green/20"
+          className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
         >
-          <ShareIcon className="w-4 h-4" />
+          <ShareIcon className="w-8 h-8" />
         </Link>
       )}
       <DestructiveActionButton
-        modalDescription="Bist du sicher, dass du diesen Klassendialog löschen möchtest? Dabei werden alle mit diesem Dialog verbundenen Konversationen unwiderruflich gelöscht."
-        modalTitle="Klassendialog löschen"
-        confirmText="Löschen"
+        modalDescription={t('form.delete-description')}
+        modalTitle={t('form.delete-title')}
+        confirmText={tCommon('delete')}
         actionFn={handleDeleteSharedChat}
-        triggerButtonClassName="border-transparent justify-center flex flex-col p-2 rounded-enterprise-sm hover:bg-vidis-hover-green/20"
+        triggerButtonClassName="border-transparent justify-center flex flex-col rounded-enterprise-sm hover:bg-vidis-hover-green/20 p-0"
       >
-        <TrashIcon className="w-3 h-3 text-primary" />
+        <TrashIcon className="w-8 h-8 text-primary" />
       </DestructiveActionButton>
     </Link>
   );

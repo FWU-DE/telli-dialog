@@ -21,14 +21,15 @@ export default function SharedSchoolChatCreateForm() {
   const router = useRouter();
 
   const { models, selectedModel: _selectedModel } = useLlmModels();
-  const t = useTranslations('Chat.shared-chats.form');
-
-  const [selectedModel, setSelectedModel] = React.useState(_selectedModel?.id);
+  const t = useTranslations('shared-chats.form');
+  const tToast = useTranslations('shared-chats.toasts');
+  const tCommon = useTranslations('common');
 
   const {
     register,
     handleSubmit,
-    formState: { isValid },
+    setValue,
+    formState: { isValid, isSubmitting },
   } = useForm<SharedSchoolChatFormValues>({
     resolver: zodResolver(sharedSchoolChatFormValuesSchema),
     defaultValues: {
@@ -37,17 +38,20 @@ export default function SharedSchoolChatCreateForm() {
   });
 
   function onSubmit(data: SharedSchoolChatFormValues) {
-    if (selectedModel === undefined) {
+    console.debug({ data });
+
+    if (!data.modelId) {
       toast.error('Sie müssen ein Model auswählen.');
       return;
     }
-    createNewSharedSchoolChatAction({ ...data, modelId: selectedModel })
+
+    createNewSharedSchoolChatAction(data)
       .then((createdChat) => {
-        toast.success('Der Klassendialog wurde erfolgreich erstellt.');
+        toast.success(tToast('create-toast-success'));
         router.push(`/shared-chats/${createdChat.id}`);
       })
       .catch(() => {
-        toast.error('Der Klassendialog konnte nicht erstellt werden.');
+        toast.error(tToast('create-toast-error'));
       });
   }
 
@@ -71,15 +75,13 @@ export default function SharedSchoolChatCreateForm() {
             <span className="text-coral">*</span> {t('model-label')}
           </label>
           <Select.Root
-            onValueChange={(value) => setSelectedModel(value)}
-            value={selectedModel}
-            defaultValue={selectedModel}
+            onValueChange={(value) => setValue('modelId', value)}
+            defaultValue={_selectedModel?.id || ''}
           >
             <Select.Trigger className="flex items-center justify-between w-full py-2 pl-4 pr-4 bg-white border border-gray-200 focus:border-primary rounded-enterprise-md focus:outline-none">
               <Select.Value />
               <ChevronDownIcon className="w-4 h-4 text-primary ms-2" />
             </Select.Trigger>
-
             <Select.Portal>
               <Select.Content className="bg-white border border-gray-200 rounded-enterprise-md shadow-dropdown w-full">
                 <Select.ScrollUpButton className="py-2 text-gray-500">▲</Select.ScrollUpButton>
@@ -150,6 +152,7 @@ export default function SharedSchoolChatCreateForm() {
         </label>
         <textarea
           rows={5}
+          style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('learningContext')}
           placeholder={t('learning-context-placeholder')}
@@ -159,6 +162,7 @@ export default function SharedSchoolChatCreateForm() {
         <label className={cn(labelClassName, 'text-sm')}>{t('specification')}</label>
         <textarea
           rows={5}
+          style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('specification')}
           placeholder={t('specification-placeholder')}
@@ -168,6 +172,7 @@ export default function SharedSchoolChatCreateForm() {
         <label className={cn(labelClassName, 'text-sm')}>{t('restrictions')}</label>
         <textarea
           rows={5}
+          style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('restrictions')}
           placeholder={t('restrictions-placeholder')}
@@ -181,9 +186,13 @@ export default function SharedSchoolChatCreateForm() {
             'hover:border-primary hover:bg-vidis-hover-green/20',
           )}
         >
-          Abbrechen
+          {tCommon('cancel')}
         </Link>
-        <button disabled={!isValid} className={buttonPrimaryClassName} type="submit">
+        <button
+          disabled={!isValid || isSubmitting}
+          className={buttonPrimaryClassName}
+          type="submit"
+        >
           {t('title')}
         </button>
       </div>

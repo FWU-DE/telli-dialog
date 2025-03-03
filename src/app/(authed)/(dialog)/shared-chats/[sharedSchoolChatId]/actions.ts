@@ -5,7 +5,7 @@ import { SharedSchoolConversationModel, sharedSchoolConversationTable } from '@/
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
 import { parseNumberOrThrow } from '@/utils/number';
-import { SharedSchoolChatShareFormValues } from './schema';
+import { SharedConversationShareFormValues } from './schema';
 import { generateInviteCode } from './utils';
 
 export async function updateSharedSchoolChat({
@@ -46,7 +46,7 @@ export async function handleInitiateSharedChatShareAction({
   id,
   intelliPointsPercentageLimit: _intelliPointsPercentageLimit,
   usageTimeLimit: _usageTimeLimit,
-}: { id: string } & SharedSchoolChatShareFormValues) {
+}: { id: string } & SharedConversationShareFormValues) {
   const user = await getUser();
 
   if (user.school === undefined) {
