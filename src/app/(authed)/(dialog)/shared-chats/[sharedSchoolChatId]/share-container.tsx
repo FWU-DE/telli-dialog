@@ -31,7 +31,6 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
   const router = useRouter();
   const t = useTranslations('shared-chats.shared');
   const tToast = useTranslations('shared-chats.toasts');
-  const tCommon = useTranslations('common');
 
   const sharedChatTimeLeft = calculateTimeLeftBySharedChat(sharedSchoolChat);
   const sharedChatActive = sharedChatTimeLeft > 0;
