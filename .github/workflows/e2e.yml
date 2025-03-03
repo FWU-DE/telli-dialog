@@ -46,7 +46,7 @@ jobs:
           OTC_S3_HOSTNAME: op://Telli/.env.e2e telli-chatbot/OTC_S3_HOSTNAME
           OTC_BUCKET_NAME: op://Telli/.env.e2e telli-chatbot/OTC_BUCKET_NAME
           SENTRY_AUTH_TOKEN: op://Telli/.env.e2e telli-chatbot/SENTRY_AUTH_TOKEN
-          SENTRY_ENVIRONMENT: op://Telli/.env.e2e telli-chatbot/SENTRY_ENVIRONMENT
+          # SENTRY_ENVIRONMENT: op://Telli/.env.e2e telli-chatbot/SENTRY_ENVIRONMENT
           VIDIS_CLIENT_ID: op://Telli/.env.e2e telli-chatbot/VIDIS_CLIENT_ID
           VIDIS_CLIENT_SECRET: op://Telli/.env.e2e telli-chatbot/VIDIS_CLIENT_SECRET
           VIDIS_ISSUER_URI: op://Telli/.env.e2e telli-chatbot/VIDIS_ISSUER_URI
