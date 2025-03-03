@@ -65,7 +65,7 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
         </Link>
       )}
       <DestructiveActionButton
-        modalDescription={t('form.delete-modal-description')}
+        modalDescription={t('form.delete-description')}
         modalTitle={t('form.delete-title')}
         confirmText={tCommon('delete')}
         actionFn={handleDeleteSharedChat}

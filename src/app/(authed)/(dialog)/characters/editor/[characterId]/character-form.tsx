@@ -189,7 +189,7 @@ export default function CharacterForm({
         {isCreating ? t('create-character') : character.name}
       </h1>
       {!isCreating && (
-        <fieldset className="mt-16">
+        <fieldset className="mt-12">
           <ShareContainer {...character} />
         </fieldset>
       )}
