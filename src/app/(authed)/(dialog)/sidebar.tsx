@@ -3,7 +3,7 @@
 import CollapsibleSidebar from '@/components/navigation/sidebar/collapsible-sidebar';
 import SidebarItem from '@/components/navigation/sidebar/conversation-item';
 import { useSidebarVisibility } from '@/components/navigation/sidebar/sidebar-provider';
-import { type ConversationModel } from '@/db/types';
+
 import useBreakpoints from '@/components/hooks/use-breakpoints';
 import { usePathname, useRouter } from 'next/navigation';
 import { isToday, isYesterday, subDays, isAfter } from 'date-fns';
@@ -20,20 +20,38 @@ import deleteConversationAction, { updateConversationNameAction } from './action
 import { useToast } from '@/components/common/toast';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { fetchClientSideConversations } from './utils';
+import { smallButtonPrimaryClassName } from '@/utils/tailwind/button';
 
 type Props = {
-  conversations: ConversationModel[];
   user: UserAndContext;
   currentModelCosts: number;
 };
 
-export default function DialogSidebar({ conversations, user, currentModelCosts }: Props) {
+export default function DialogSidebar({ user, currentModelCosts }: Props) {
   const { isBelow } = useBreakpoints();
   const { toggle, isOpen } = useSidebarVisibility();
   const pathname = usePathname();
   const router = useRouter();
   const toast = useToast();
   const t = useTranslations('common');
+  const queryClient = useQueryClient();
+
+  const {
+    data: conversations = [],
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ['conversations'],
+    queryFn: fetchClientSideConversations,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+  });
+
+  function refetchConversations() {
+    queryClient.invalidateQueries({ queryKey: ['conversations'] });
+  }
 
   React.useEffect(() => {
     if (isOpen && isBelow.md) {
@@ -65,18 +83,20 @@ export default function DialogSidebar({ conversations, user, currentModelCosts }
   function handleDeleteConversation(conversationId: string) {
     deleteConversationAction({ conversationId })
       .then(() => {
-        toast.success(`Die Konversation wurde erfolgreich gelöscht.`);
+        toast.success(t('conversation-delete-toast-success'));
+        refetchConversations();
         router.refresh();
       })
       .catch((error) => {
         console.error({ error });
-        toast.error('Etwas ist beim Löschen der Konversation schief gelaufen.');
+        toast.error(t('conversation-delete-toast-error'));
       });
   }
 
   function handleUpdateConversation({ id, name }: { id: string; name: string }) {
     updateConversationNameAction({ conversationId: id, name })
       .then(() => {
+        refetchConversations();
         router.refresh();
       })
       .catch((error) => {
@@ -138,57 +158,84 @@ export default function DialogSidebar({ conversations, user, currentModelCosts }
           </div>
         </div>
         <div className="w-full items-center flex flex-col gap-1 h-full pt-4 overflow-y-auto overflow-x-hidden px-4">
-          {todayConversations.length > 0 && (
+          {conversations && (
             <>
-              <p className={cn('font-medium text-left text-sm ms-4 w-full text-main-black')}>
-                {t('today')}
-              </p>
-              {todayConversations.map((conversation) => (
-                <SidebarItem
-                  key={conversation.id}
-                  conversation={conversation}
-                  onDeleteConversation={handleDeleteConversation}
-                  onUpdateConversation={(name) =>
-                    handleUpdateConversation({ id: conversation.id, name })
-                  }
-                />
-              ))}
+              {todayConversations.length > 0 && (
+                <>
+                  <p className={cn('font-medium text-left text-sm ms-4 w-full text-main-black')}>
+                    {t('today')}
+                  </p>
+                  {todayConversations.map((conversation) => (
+                    <SidebarItem
+                      key={conversation.id}
+                      conversation={conversation}
+                      onDeleteConversation={handleDeleteConversation}
+                      onUpdateConversation={(name) =>
+                        handleUpdateConversation({ id: conversation.id, name })
+                      }
+                    />
+                  ))}
+                </>
+              )}
+
+              {yesterdayConversations.length > 0 && (
+                <>
+                  <p
+                    className={cn('font-medium text-sm text-left ms-4 mt-4 w-full text-main-black')}
+                  >
+                    {t('yesterday')}
+                  </p>
+                  {yesterdayConversations.map((conversation) => (
+                    <SidebarItem
+                      key={conversation.id}
+                      conversation={conversation}
+                      onDeleteConversation={handleDeleteConversation}
+                      onUpdateConversation={(name) =>
+                        handleUpdateConversation({ id: conversation.id, name })
+                      }
+                    />
+                  ))}
+                </>
+              )}
+
+              {last7DaysConversations.length > 0 && (
+                <>
+                  <p
+                    className={cn('font-medium text-sm text-left ms-4 mt-4 w-full text-main-black')}
+                  >
+                    {t('this-week')}
+                  </p>
+                  {last7DaysConversations.map((conversation) => (
+                    <SidebarItem
+                      key={conversation.id}
+                      conversation={conversation}
+                      onDeleteConversation={handleDeleteConversation}
+                      onUpdateConversation={(name) =>
+                        handleUpdateConversation({ id: conversation.id, name })
+                      }
+                    />
+                  ))}
+                </>
+              )}
             </>
           )}
 
-          {yesterdayConversations.length > 0 && (
-            <>
-              <p className={cn('font-medium text-sm text-left ms-4 mt-4 w-full text-main-black')}>
-                {t('yesterday')}
-              </p>
-              {yesterdayConversations.map((conversation) => (
-                <SidebarItem
-                  key={conversation.id}
-                  conversation={conversation}
-                  onDeleteConversation={handleDeleteConversation}
-                  onUpdateConversation={(name) =>
-                    handleUpdateConversation({ id: conversation.id, name })
-                  }
-                />
-              ))}
-            </>
+          {isLoading && (
+            <div className="flex flex-col gap-2 w-full items-center justify-center">
+              <p className="text-primary animate-pulse">Dialoge werden geladen...</p>
+            </div>
           )}
-          {last7DaysConversations.length > 0 && (
-            <>
-              <p className={cn('font-medium text-sm text-left ms-4 mt-4 w-full text-main-black')}>
-                {t('this-week')}
-              </p>
-              {last7DaysConversations.map((conversation) => (
-                <SidebarItem
-                  key={conversation.id}
-                  conversation={conversation}
-                  onDeleteConversation={handleDeleteConversation}
-                  onUpdateConversation={(name) =>
-                    handleUpdateConversation({ id: conversation.id, name })
-                  }
-                />
-              ))}
-            </>
+
+          {error && (
+            <div className="flex flex-col gap-2 w-full items-center justify-center">
+              <p className="text-primary">Etwas ist schiefgelaufen...</p>
+              <button
+                onClick={refetchConversations}
+                className={cn(smallButtonPrimaryClassName, 'mt-2')}
+              >
+                Dialoge neu laden
+              </button>
+            </div>
           )}
         </div>
       </nav>

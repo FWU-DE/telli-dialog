@@ -20,7 +20,9 @@
     "conversation-download": "Konversation herunterladen",
     "send-message-placeholder": "Wie kann ich Dir helfen?",
     "information-disclaimer": "telli kann Fehler machen. Sei kritisch und überprüfe alle Informationen.",
-    "chat-expired": "Der Chat ist abgelaufen"
+    "chat-expired": "Der Chat ist abgelaufen",
+    "conversation-delete-toast-success": "Die Konversation wurde erfolgreich gelöscht.",
+    "conversation-delete-toast-error": "Die Konversation konnte nicht gelöscht werden."
   },
   "characters": {
     "character": "Dialogavatar",
