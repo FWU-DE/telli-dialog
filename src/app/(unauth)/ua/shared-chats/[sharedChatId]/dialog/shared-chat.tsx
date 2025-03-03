@@ -22,6 +22,7 @@ import { generateUUID } from '@/utils/uuid';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import MarkdownDisplay from '@/components/chat/markdown-display';
 import { UnauthenticatedProfileMenu } from '@/components/navigation/profile-menu';
+import DownloadSharedConversationButton from '../../../dowload-shared-conversation-button';
 
 export default function SharedChat({
   ...sharedSchoolChat
@@ -114,6 +115,10 @@ export default function SharedChat({
         <SelectLlmModel />
         {!chatActive && <p className="text-red-500">Der Chat ist abgelaufen</p>}
         <div className="flex-grow" />
+        <DownloadSharedConversationButton
+          conversationMessages={messages}
+          disabled={!chatActive || messages.length === 0}
+        />
         <UnauthenticatedProfileMenu />
       </header>
       <div className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden">
