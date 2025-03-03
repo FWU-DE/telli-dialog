@@ -85,8 +85,14 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
           <label className={cn(labelClassName, 'text-sm')}>Telli-Points</label>
           <select
             {...registerShare('intelliPointsPercentageLimit')}
-            className="py-2 pl-4 pr-8 bg-white border-[1px] rounded-enterprise-md border-gray-200"
-            style={{ WebkitAppearance: 'none', background: selectSVGBackground }}
+            className={cn(
+              'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600',
+              sharedChatActive && 'cursor-not-allowed',
+            )}
+            style={{
+              WebkitAppearance: 'none',
+              background: !sharedChatActive ? selectSVGBackground : undefined,
+            }}
           >
             {intelliPointsPercentageValueSchema.options.map((value) => (
               <option key={value} value={value}>
@@ -99,12 +105,18 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
           <label className={cn(labelClassName, 'text-sm')}>{t('max-usage')}</label>
           <select
             {...registerShare('usageTimeLimit')}
-            className="py-2 pl-4 pr-8 bg-white border-[1px] rounded-enterprise-md border-gray-200"
-            style={{ WebkitAppearance: 'none', background: selectSVGBackground }}
+            className={cn(
+              'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600',
+              sharedChatActive && 'cursor-not-allowed',
+            )}
+            style={{
+              WebkitAppearance: 'none',
+              background: !sharedChatActive ? selectSVGBackground : undefined,
+            }}
           >
             {usageTimeValueSchema.options.map((value) => (
               <option key={value} value={value}>
-                {value} {tCommon('minutes')}
+                {value} Minuten
               </option>
             ))}
           </select>
