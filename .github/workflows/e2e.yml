@@ -10,9 +10,6 @@ on:
       - main 
   workflow_dispatch:
 
-env:
-  OP_SERVICE_ACCOUNT_TOKEN={{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-
 jobs:
   e2e:
     runs-on: ubuntu-latest
@@ -34,6 +31,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
       - name: Setup 1Password CLI
         uses: 1password/load-secrets-action/configure@v2
         with:
