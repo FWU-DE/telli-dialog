@@ -19,9 +19,9 @@ jobs:
         ports:
           - 5432:5432
         env:
-          POSTGRES_USER: telli_dialog_db 
-          POSTGRES_PASSWORD: test1234 
-          POSTGRES_DB: telli_dialog_db 
+          POSTGRES_USER: telli_dialog_db
+          POSTGRES_PASSWORD: test1234
+          POSTGRES_DB: telli_dialog_db
         options: >-
           --health-cmd "pg_isready -U postgres"
           --health-interval 10s
@@ -36,8 +36,8 @@ jobs:
         uses: 1password/load-secrets-action@v1
         with:
           export-env: true
-          service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
         env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           NEXTAUTH_URL: op://Telli/.env.e2e telli-chatbot/NEXTAUTH_URL
           DATABASE_URL: op://Telli/.env.e2e telli-chatbot/DATABASE_URL
           AUTH_SECRET: op://Telli/.env.e2e telli-chatbot/AUTH_SECRET
