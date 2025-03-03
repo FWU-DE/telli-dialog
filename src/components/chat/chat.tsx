@@ -17,6 +17,7 @@ import MarkdownDisplay from './markdown-display';
 import TelliClipboardButton from '../common/clipboard-button';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
 import { generateUUID } from '@/utils/uuid';
+import { useQueryClient } from '@tanstack/react-query';
 
 type ChatProps = {
   id: string;
@@ -33,10 +34,16 @@ export default function Chat({
   imageSource,
   promptSuggestions = [],
 }: ChatProps) {
-  const t = useTranslations('Chat');
+  const t = useTranslations('common');
   const { selectedModel } = useLlmModels();
   const conversationPath =
     character !== undefined ? `/characters/d/${character.id}/${id}` : `/d/${id}`;
+
+  const queryClient = useQueryClient();
+
+  function refetchConversations() {
+    queryClient.invalidateQueries({ queryKey: ['conversations'] });
+  }
 
   const {
     messages,
@@ -57,6 +64,20 @@ export default function Chat({
     body: { id, modelId: selectedModel?.id, characterId: character?.id },
     generateId: generateUUID,
     sendExtraMessageFields: true,
+    onResponse: () => {
+      if (messages.length > 1) {
+        return;
+      }
+
+      refetchConversations();
+    },
+    onFinish: () => {
+      if (messages.length > 1) {
+        return;
+      }
+
+      refetchConversations();
+    },
   });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);

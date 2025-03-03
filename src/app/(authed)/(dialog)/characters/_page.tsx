@@ -35,7 +35,7 @@ export default function Page2({
   const t = useTranslations('characters');
 
   return (
-    <div className="flex flex-col gap-2 py-8 px-4">
+    <div className="min-w-full p-6 overflow-auto">
       <HeaderPortal>
         <ToggleSidebarButton />
         <NewChatButton />
@@ -89,7 +89,7 @@ export default function Page2({
         </Link>
       </div>
       <div className="max-w-3xl mx-auto w-full">
-        <div className="grid grid-cols-1 sm:grid-cols-2 w-full gap-4">
+        <div className="flex flex-col gap-2 w-full">
           {filteredCharacters.map((character) => (
             <CharacterContainer {...character} currentUserId={user.id} key={character.id} />
           ))}

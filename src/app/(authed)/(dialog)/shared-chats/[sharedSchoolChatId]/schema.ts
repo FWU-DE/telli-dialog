@@ -5,8 +5,8 @@ export type IntelliPointsPercentageValue = z.infer<typeof intelliPointsPercentag
 export const usageTimeValueSchema = z.enum(['30', '45', '60', '90']);
 export type UsageTimeValue = z.infer<typeof usageTimeValueSchema>;
 
-export const sharedSchoolChatShareFormValuesSchema = z.object({
+export const sharedConversationFormValuesSchema = z.object({
   intelliPointsPercentageLimit: intelliPointsPercentageValueSchema,
   usageTimeLimit: usageTimeValueSchema,
 });
-export type SharedSchoolChatShareFormValues = z.infer<typeof sharedSchoolChatShareFormValuesSchema>;
+export type SharedConversationShareFormValues = z.infer<typeof sharedConversationFormValuesSchema>;

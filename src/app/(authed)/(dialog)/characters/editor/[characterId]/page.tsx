@@ -63,7 +63,7 @@ export default async function Page(context: {
   const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({ key: character.pictureId });
 
   return (
-    <div className="min-w-full p-4 overflow-auto">
+    <div className="min-w-full p-6 overflow-auto">
       <HeaderPortal>
         <ToggleSidebarButton />
         <div className="flex-grow"></div>

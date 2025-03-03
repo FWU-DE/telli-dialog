@@ -8,6 +8,13 @@
       "when": 1739639181471,
       "tag": "0000_loud_vapor",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1740576726856,
+      "tag": "0001_pretty_husk",
+      "breakpoints": true
     }
   ]
 }

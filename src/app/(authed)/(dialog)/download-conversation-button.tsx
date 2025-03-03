@@ -60,12 +60,12 @@ export default function DownloadConversationButton({
     }
   }
 
-  const t = useTranslations('conversation-download');
+  const t = useTranslations('common');
 
   return (
     <button
       className="hidden xs:flex justify-center items-center w-8 h-8 group disabled:bg-light-gray disabled:text-gray-100 group rounded-enterprise-sm hover:bg-vidis-hover-green/20"
-      title={t('title')}
+      title={t('conversation-download')}
       onClick={handleDownload}
       disabled={disabled}
     >

@@ -25,16 +25,18 @@ export default function SharedSchoolChatEditForm({
 }: SharedSchoolConversationModel) {
   const toast = useToast();
   const router = useRouter();
-  const { models } = useLlmModels();
 
-  const t = useTranslations('Chat.shared-chats.form');
+  const t = useTranslations('shared-chats.form');
+  const tToasts = useTranslations('shared-chats.toasts');
+  const tCommon = useTranslations('common');
 
-  const [selectedModel, setSelectedModel] = React.useState(sharedSchoolChat.modelId);
+  const { models, selectedModel } = useLlmModels();
 
   const {
     register,
     handleSubmit,
     getValues,
+    setValue,
     formState: { defaultValues },
   } = useForm<SharedSchoolChatFormValues>({
     resolver: zodResolver(sharedSchoolChatFormValuesSchema),
@@ -44,24 +46,24 @@ export default function SharedSchoolChatEditForm({
   });
 
   function onSubmit(data: SharedSchoolChatFormValues) {
-    updateSharedSchoolChat({ ...sharedSchoolChat, ...data, modelId: selectedModel })
+    updateSharedSchoolChat({ ...sharedSchoolChat, ...data })
       .then(() => {
-        toast.success('Der Klassendialog wurde erfolgreich aktualisiert.');
+        toast.success(tToasts('edit-toast-success'));
         router.refresh();
       })
       .catch(() => {
-        toast.error('Der Klassendialog konnte nicht aktualisiert werden.');
+        toast.error(tToasts('edit-toast-error'));
       });
   }
 
   function handleDeleteSharedChat() {
     deleteSharedChatAction({ id: sharedSchoolChat.id })
       .then(() => {
-        toast.success('Der Klassendialog wurde erfolgreich gelöscht.');
+        toast.success(tToasts('delete-toast-success'));
         router.push('/shared-chats');
       })
       .catch(() => {
-        toast.error('Der Klassendialog konnte nicht gelöscht werden.');
+        toast.error(tToasts('delete-toast-error'));
       });
   }
 
@@ -83,19 +85,18 @@ export default function SharedSchoolChatEditForm({
       onBlur={handleAutoSave}
     >
       <ShareContainer {...sharedSchoolChat} />
-      <h2 className="font-medium mt-8">Einstellungen</h2>
+      <h2 className="font-medium mt-8">{t('settings')}</h2>
       <div className="flex flex-wrap gap-6">
         <div className="flex flex-col gap-4 h-full">
           <label className="text-sm">
             <span className="text-coral">*</span> {t('model-label')}
           </label>
           <Select.Root
-            onValueChange={(modelId) => {
-              setSelectedModel(modelId);
+            onValueChange={(value) => {
+              setValue('modelId', value);
               handleAutoSave();
             }}
-            value={selectedModel}
-            defaultValue={selectedModel}
+            defaultValue={sharedSchoolChat.modelId}
           >
             <Select.Trigger className="flex items-center justify-between w-full py-2 pl-4 pr-4 bg-white border border-gray-200 focus:border-primary rounded-enterprise-md focus:outline-none">
               <Select.Value />
@@ -168,6 +169,7 @@ export default function SharedSchoolChatEditForm({
         </label>
         <textarea
           rows={5}
+          style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('learningContext')}
         />
@@ -176,6 +178,7 @@ export default function SharedSchoolChatEditForm({
         <label className={cn(labelClassName, 'text-sm')}>{t('specification')}</label>
         <textarea
           rows={5}
+          style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('specification')}
         />
@@ -184,24 +187,22 @@ export default function SharedSchoolChatEditForm({
         <label className={cn(labelClassName, 'text-sm')}>{t('restrictions')}</label>
         <textarea
           rows={5}
+          style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('restrictions')}
         />
       </div>
       <section>
-        <h3 className="font-medium mt-8">Dialog löschen</h3>
-        <p className="text-dark-gray mt-4">
-          Beim Löschen des Dialogs werden alle damit verbundenen Konversationen unwiderruflich
-          gelöscht.
-        </p>
+        <h3 className="font-medium mt-8">{t('delete-title')}</h3>
+        <p className="text-dark-gray mt-4">{t('delete-description')}</p>
         <DestructiveActionButton
           className={cn(buttonDeleteClassName, 'mt-10')}
-          modalDescription="Sind Sie sicher, dass Sie diesen Klassendialog löschen möchten? Dabei werden alle mit diesem Dialog verbundenen Konversationen unwiderruflich gelöscht."
-          modalTitle="Klassendialog löschen"
-          confirmText="Löschen"
+          modalDescription={t('delete-confirm')}
+          modalTitle={t('delete-title')}
+          confirmText={tCommon('delete')}
           actionFn={handleDeleteSharedChat}
         >
-          Dialog endgültig löschen
+          {t('delete-button')}
         </DestructiveActionButton>
       </section>
     </form>
