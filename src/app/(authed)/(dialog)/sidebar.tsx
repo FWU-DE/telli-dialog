@@ -3,7 +3,6 @@
 import CollapsibleSidebar from '@/components/navigation/sidebar/collapsible-sidebar';
 import SidebarItem from '@/components/navigation/sidebar/conversation-item';
 import { useSidebarVisibility } from '@/components/navigation/sidebar/sidebar-provider';
-
 import useBreakpoints from '@/components/hooks/use-breakpoints';
 import { usePathname, useRouter } from 'next/navigation';
 import { isToday, isYesterday, subDays, isAfter } from 'date-fns';
@@ -35,7 +34,8 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const toast = useToast();
-  const t = useTranslations('common');
+  const tCommon = useTranslations('common');
+  const t = useTranslations('sidebar');
   const queryClient = useQueryClient();
 
   const {
@@ -163,7 +163,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
               {todayConversations.length > 0 && (
                 <>
                   <p className={cn('font-medium text-left text-sm ms-4 w-full text-main-black')}>
-                    {t('today')}
+                    {tCommon('today')}
                   </p>
                   {todayConversations.map((conversation) => (
                     <SidebarItem
@@ -183,7 +183,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                   <p
                     className={cn('font-medium text-sm text-left ms-4 mt-4 w-full text-main-black')}
                   >
-                    {t('yesterday')}
+                    {tCommon('yesterday')}
                   </p>
                   {yesterdayConversations.map((conversation) => (
                     <SidebarItem
@@ -203,7 +203,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                   <p
                     className={cn('font-medium text-sm text-left ms-4 mt-4 w-full text-main-black')}
                   >
-                    {t('this-week')}
+                    {tCommon('this-week')}
                   </p>
                   {last7DaysConversations.map((conversation) => (
                     <SidebarItem
@@ -222,18 +222,18 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
 
           {isLoading && (
             <div className="flex flex-col gap-2 w-full items-center justify-center">
-              <p className="text-primary animate-pulse">Dialoge werden geladen...</p>
+              <p className="text-primary animate-pulse">{t('chats-loading')}</p>
             </div>
           )}
 
           {error && (
             <div className="flex flex-col gap-2 w-full items-center justify-center">
-              <p className="text-primary">Etwas ist schiefgelaufen...</p>
+              <p className="text-primary">{t('chats-error')}</p>
               <button
                 onClick={refetchConversations}
                 className={cn(smallButtonPrimaryClassName, 'mt-2')}
               >
-                Dialoge neu laden
+                {t('chats-reload')}
               </button>
             </div>
           )}

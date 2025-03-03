@@ -10,9 +10,6 @@
     "image": "Bild",
     "upload-image": "Bild hochladen",
     "llm-model": "Sprachmodell",
-    "class-chats": "Klassendialoge",
-    "characters": "Dialogavatar",
-    "telli-points": "Deine Telli-Points",
     "today": "Heute",
     "yesterday": "Gestern",
     "this-week": "Vorherige 7 Tage",
@@ -20,9 +17,17 @@
     "conversation-download": "Konversation herunterladen",
     "send-message-placeholder": "Wie kann ich Dir helfen?",
     "information-disclaimer": "telli kann Fehler machen. Sei kritisch und überprüfe alle Informationen.",
-    "chat-expired": "Der Chat ist abgelaufen",
+    "chat-expired": "Der Chat ist abgelaufen"
+  },
+  "sidebar": {
+    "class-chats": "Klassendialoge",
+    "characters": "Dialogavatar",
+    "telli-points": "Deine Telli-Points",
     "conversation-delete-toast-success": "Die Konversation wurde erfolgreich gelöscht.",
-    "conversation-delete-toast-error": "Die Konversation konnte nicht gelöscht werden."
+    "conversation-delete-toast-error": "Die Konversation konnte nicht gelöscht werden.",
+    "chats-loading": "Dialoge werden geladen...",
+    "chats-error": "Etwas ist schiefgelaufen...",
+    "chats-reload": "Dialoge neu laden"
   },
   "characters": {
     "character": "Dialogavatar",
@@ -37,11 +42,7 @@
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
       "share": "Teilen",
-      "button-start": "Dialogavatar teilen",
-      "share-toast-success": "Dialogavatar erfolgreich geteilt.",
-      "share-toast-error": "Etwas ist beim Teilen des Dialogavatar schief gelaufen.",
-      "stop-share-toast-success": "Dialogavatar wird nicht mehr geteilt.",
-      "stop-share-toast-error": "Etwas ist beim Beenden des Teilens schief gelaufen."
+      "button-start": "Dialogavatar teilen"
     },
     "share-page": {
       "back-button": "Zum Dialogavatar",
