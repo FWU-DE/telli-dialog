@@ -54,23 +54,23 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
 
     handleInitiateCharacterShareAction({ ...data, id: character.id })
       .then(() => {
-        toast.success('Dialogavatar erfolgreich geteilt.');
+        toast.success(t('share-toast-success'));
         router.push(shareUILink);
         router.refresh();
       })
       .catch(() => {
-        toast.error('Etwas ist beim Teilen des Dialogavatar schief gelaufen.');
+        toast.error(t('share-toast-error'));
       });
   }
 
   function handleStopSharing() {
     handleStopCharacaterShareAction({ id: character.id })
       .then(() => {
-        toast.success('Dialogavatar wird nicht mehr geteilt.');
+        toast.success(t('stop-share-toast-success'));
         router.refresh();
       })
       .catch(() => {
-        toast.error('Etwas ist beim Beenden des Teilens schief gelaufen.');
+        toast.error(t('stop-share-toast-error'));
       });
   }
 

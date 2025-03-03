@@ -25,9 +25,10 @@ export default function SharedSchoolChatEditForm({
 }: SharedSchoolConversationModel) {
   const toast = useToast();
   const router = useRouter();
-  const { models, selectedModel } = useLlmModels();
+  const t = useTranslations('shared-chats.form');
+  const tCommon = useTranslations('common');
 
-  const t = useTranslations('Chat.shared-chats.form');
+  const { models, selectedModel } = useLlmModels();
 
   const {
     register,
@@ -187,19 +188,16 @@ export default function SharedSchoolChatEditForm({
         />
       </div>
       <section>
-        <h3 className="font-medium mt-8">Dialog löschen</h3>
-        <p className="text-dark-gray mt-4">
-          Beim Löschen des Dialogs werden alle damit verbundenen Konversationen unwiderruflich
-          gelöscht.
-        </p>
+        <h3 className="font-medium mt-8">{t('delete-title')}</h3>
+        <p className="text-dark-gray mt-4">{t('delete-description')}</p>
         <DestructiveActionButton
           className={cn(buttonDeleteClassName, 'mt-10')}
-          modalDescription="Sind Sie sicher, dass Sie diesen Klassendialog löschen möchten? Dabei werden alle mit diesem Dialog verbundenen Konversationen unwiderruflich gelöscht."
-          modalTitle="Klassendialog löschen"
-          confirmText="Löschen"
+          modalDescription={t('delete-confirm')}
+          modalTitle={t('delete-title')}
+          confirmText={tCommon('delete')}
           actionFn={handleDeleteSharedChat}
         >
-          Dialog endgültig löschen
+          {t('delete-button')}
         </DestructiveActionButton>
       </section>
     </form>

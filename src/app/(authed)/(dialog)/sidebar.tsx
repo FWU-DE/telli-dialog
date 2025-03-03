@@ -33,7 +33,7 @@ export default function DialogSidebar({ conversations, user, currentModelCosts }
   const pathname = usePathname();
   const router = useRouter();
   const toast = useToast();
-  const t = useTranslations('HomePage.navigation');
+  const t = useTranslations('common');
 
   React.useEffect(() => {
     if (isOpen && isBelow.md) {

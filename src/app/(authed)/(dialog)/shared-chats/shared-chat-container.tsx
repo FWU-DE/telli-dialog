@@ -25,7 +25,7 @@ export function SharedChatContainer({ sharedChats, user }: SharedChatContainerPr
   const filterDisabled = sharedChats.length < 1;
 
   const filteredSharedChats = filterSharedChats(sharedChats, input);
-  const t = useTranslations('Chat.shared-chats');
+  const t = useTranslations('shared-chats');
 
   return (
     <div className={'flex flex-col gap-2 w-full'}>

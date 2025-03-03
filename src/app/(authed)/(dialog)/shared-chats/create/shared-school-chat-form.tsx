@@ -21,7 +21,8 @@ export default function SharedSchoolChatCreateForm() {
   const router = useRouter();
 
   const { models, selectedModel: _selectedModel } = useLlmModels();
-  const t = useTranslations('Chat.shared-chats.form');
+  const t = useTranslations('shared-chats.form');
+  const tCommon = useTranslations('common');
 
   const {
     register,
@@ -181,7 +182,7 @@ export default function SharedSchoolChatCreateForm() {
             'hover:border-primary hover:bg-vidis-hover-green/20',
           )}
         >
-          Abbrechen
+          {tCommon('cancel')}
         </Link>
         <button
           disabled={!isValid || isSubmitting}

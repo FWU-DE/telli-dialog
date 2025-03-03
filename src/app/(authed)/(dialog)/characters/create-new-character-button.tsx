@@ -23,7 +23,7 @@ export default function CreateNewCharacterButton() {
         router.push(`/characters/editor/${newCharacter.id}?create=true`);
       })
       .catch(() => {
-        toast.error('Es konnte kein neuer Charakter erstellt werden.');
+        toast.error(t('toast-error'));
       });
   }
 

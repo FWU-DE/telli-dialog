@@ -20,11 +20,13 @@ export default function DownloadSharedConversationButton({
 }: DownloadConversationButtonProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const toast = useToast();
+  const tCommon = useTranslations('common');
 
   async function handleDownload() {
     if (disabled) {
       return;
     }
+
     try {
       setIsLoading(true);
 
@@ -57,12 +59,10 @@ export default function DownloadSharedConversationButton({
     }
   }
 
-  const t = useTranslations('conversation-download');
-
   return (
     <button
       className="hidden xs:flex justify-center items-center w-8 h-8 group disabled:bg-light-gray disabled:text-gray-100 group rounded-enterprise-sm hover:bg-vidis-hover-green/20"
-      title={t('title')}
+      title={tCommon('conversation-download')}
       onClick={handleDownload}
       disabled={disabled}
     >

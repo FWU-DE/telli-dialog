@@ -27,7 +27,7 @@ import DownloadSharedConversationButton from '../../../dowload-shared-conversati
 export default function SharedChat({
   ...sharedSchoolChat
 }: SharedSchoolConversationModel & { inviteCode: string }) {
-  const t = useTranslations('Chat');
+  const tCommon = useTranslations('common');
   const [isCopied, setIsCopied] = React.useState(false);
   const { id, inviteCode } = sharedSchoolChat;
 
@@ -113,7 +113,7 @@ export default function SharedChat({
           </button>
         )}
         <SelectLlmModel />
-        {!chatActive && <p className="text-red-500">Der Chat ist abgelaufen</p>}
+        {!chatActive && <p className="text-red-500">{tCommon('chat-expired')}</p>}
         <div className="flex-grow" />
         <DownloadSharedConversationButton
           conversationMessages={messages}
@@ -211,7 +211,7 @@ export default function SharedChat({
               <div className="flex items-center">
                 <AutoResizeTextarea
                   autoFocus
-                  placeholder={t('send-message-placeholder')}
+                  placeholder={tCommon('send-message-placeholder')}
                   className="w-full text-base focus:outline-none bg-transparent max-h-[10rem] sm:max-h-[15rem] overflow-y-auto placeholder-black p-2"
                   onChange={handleInputChange}
                   value={input}
@@ -242,7 +242,7 @@ export default function SharedChat({
               </div>
             </form>
             <span className="text-xs mt-2 font-normal text-main-900 flex self-center text-center">
-              {t('information-disclaimer')}
+              {tCommon('information-disclaimer')}
             </span>
           </div>
         </div>

@@ -9,7 +9,7 @@ import { getTranslations } from 'next-intl/server';
 
 export default async function Page() {
   const user = await getUser();
-  const t = await getTranslations('Chat.shared-chats.form');
+  const t = await getTranslations('shared-chats.form');
 
   return (
     <div className="min-w-full p-6 overflow-auto">

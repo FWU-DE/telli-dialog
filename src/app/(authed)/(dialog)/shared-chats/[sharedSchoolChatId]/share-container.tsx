@@ -29,7 +29,8 @@ type ShareContainerProps = SharedSchoolConversationModel;
 export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerProps) {
   const toast = useToast();
   const router = useRouter();
-  const t = useTranslations('Chat.shared-chats.shared');
+  const t = useTranslations('shared-chats.shared');
+  const tCommon = useTranslations('common');
 
   const sharedChatTimeLeft = calculateTimeLeftBySharedChat(sharedSchoolChat);
   const sharedChatActive = sharedChatTimeLeft > 0;
@@ -54,23 +55,23 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
 
     handleInitiateSharedChatShareAction({ ...data, id: sharedSchoolChat.id })
       .then(() => {
-        toast.success('Klassendialog erfolgreich geteilt.');
+        toast.success(t('share-toast-success'));
         router.push(shareUILink);
         router.refresh();
       })
       .catch(() => {
-        toast.error('Etwas ist beim Teilen des Klassendialogs schief gelaufen.');
+        toast.error(t('share-toast-error'));
       });
   }
 
   function handleStopSharing() {
     handleStopSharedChatShareAction({ id: sharedSchoolChat.id })
       .then(() => {
-        toast.success('Klassendialog wird nicht mehr geteilt.');
+        toast.success(t('stop-share-toast-success'));
         router.refresh();
       })
       .catch(() => {
-        toast.error('Etwas ist beim Beenden des Teilens schief gelaufen.');
+        toast.error(t('stop-share-toast-error'));
       });
   }
 
@@ -102,7 +103,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
           >
             {usageTimeValueSchema.options.map((value) => (
               <option key={value} value={value}>
-                {value} Minuten
+                {value} {tCommon('minutes')}
               </option>
             ))}
           </select>
