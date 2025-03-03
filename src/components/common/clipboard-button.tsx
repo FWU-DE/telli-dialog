@@ -14,13 +14,13 @@ export default function TelliClipboardButton({ text }: TelliClipboardButtonProps
     <ClipboardButton
       text={text}
       clipIcon={
-        <div className="p-2 rounded-enterprise-sm hover:bg-vidis-hover-green/20">
-          <ClipboardLightIcon className="text-primary w-3.5 h-3.5" />
+        <div className="p-1.5 rounded-enterprise-sm hover:bg-vidis-hover-green/20">
+          <ClipboardLightIcon className="text-primary w-5 h-5" />
         </div>
       }
       checkIcon={
-        <div className="p-2 rounded-enterprise-sm hover:bg-secondary/20">
-          <CheckIcon className="text-primary w-3.5 h-3.5" />
+        <div className="p-1.5 rounded-enterprise-sm hover:bg-secondary/20">
+          <CheckIcon className="text-primary w-5 h-5" />
         </div>
       }
     />

@@ -52,7 +52,7 @@ export default function SelectLlmModel() {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 hover:bg-secondary/20 rounded-enterprise-md p-2">
       <span className="text-xs text-gray-100 hidden sm:block">Aktuelles Sprachmodell</span>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger
@@ -61,7 +61,9 @@ export default function SelectLlmModel() {
           className="cursor-pointer disabled:cursor-none"
         >
           <div className="flex items-center gap-2">
-            <span className="text-primary">{selectedModel?.displayName ?? 'Kein Modell'}</span>
+            <span className="text-primary text-base font-medium">
+              {selectedModel?.displayName ?? 'Kein Modell'}
+            </span>
             {isGreenModel({ model: selectedModel }) && <GreenLeafIcon />}
             {models.length > 1 && <ChevronDown className="text-primary" />}
           </div>
@@ -78,7 +80,7 @@ export default function SelectLlmModel() {
                 <React.Fragment key={model.id}>
                   <DropdownMenu.Item asChild>
                     <button
-                      className="hover:bg-gray-50 text-left text-primary py-2 px-4 outline-none flex flex-col"
+                      className="hover:bg-vidis-hover-green/20 text-left text-black py-2 px-4 outline-none flex flex-col"
                       onClick={() => handleSelectModel(model)}
                     >
                       <ModelSpan model={model} />
@@ -105,7 +107,7 @@ function ModelSpan({ model }: { model: LlmModel }) {
         <span>{model.displayName}</span>
         {isGreenModel({ model }) && <GreenLeafIcon />}
       </div>
-      {model.description && <span className="text-sm">{model.description}</span>}
+      {model.description && <span className="text-sm text-gray-400">{model.description}</span>}
     </>
   );
 }
