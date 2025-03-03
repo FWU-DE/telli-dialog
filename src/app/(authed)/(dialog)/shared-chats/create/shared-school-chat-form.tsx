@@ -152,6 +152,7 @@ export default function SharedSchoolChatCreateForm() {
         </label>
         <textarea
           rows={5}
+          style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('learningContext')}
           placeholder={t('learning-context-placeholder')}
@@ -161,6 +162,7 @@ export default function SharedSchoolChatCreateForm() {
         <label className={cn(labelClassName, 'text-sm')}>{t('specification')}</label>
         <textarea
           rows={5}
+          style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('specification')}
           placeholder={t('specification-placeholder')}
@@ -170,6 +172,7 @@ export default function SharedSchoolChatCreateForm() {
         <label className={cn(labelClassName, 'text-sm')}>{t('restrictions')}</label>
         <textarea
           rows={5}
+          style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('restrictions')}
           placeholder={t('restrictions-placeholder')}

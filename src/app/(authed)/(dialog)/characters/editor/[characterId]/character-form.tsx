@@ -295,6 +295,7 @@ export default function CharacterForm({
               </label>
               <textarea
                 rows={5}
+                style={{ resize: 'none' }}
                 {...register('description')}
                 className={cn(
                   inputFieldClassName,
@@ -344,6 +345,7 @@ export default function CharacterForm({
           <textarea
             {...register('competence')}
             rows={5}
+            style={{ resize: 'none' }}
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             onBlur={handleAutoSave}
             placeholder={t('character-competence-placeholder')}
@@ -356,6 +358,7 @@ export default function CharacterForm({
           <textarea
             {...register('learningContext')}
             rows={5}
+            style={{ resize: 'none' }}
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             onBlur={handleAutoSave}
             placeholder={t('character-learning-context-placeholder')}
@@ -368,6 +371,7 @@ export default function CharacterForm({
           <textarea
             {...register('specifications')}
             rows={5}
+            style={{ resize: 'none' }}
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             onBlur={handleAutoSave}
             placeholder={t('character-specification-placeholder')}
@@ -380,6 +384,7 @@ export default function CharacterForm({
           <textarea
             {...register('restrictions')}
             rows={5}
+            style={{ resize: 'none' }}
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             onBlur={handleAutoSave}
             placeholder={t('character-restriction-placeholder')}

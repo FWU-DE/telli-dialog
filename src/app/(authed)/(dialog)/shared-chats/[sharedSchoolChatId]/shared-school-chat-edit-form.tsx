@@ -169,6 +169,7 @@ export default function SharedSchoolChatEditForm({
         </label>
         <textarea
           rows={5}
+          style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('learningContext')}
         />
@@ -177,6 +178,7 @@ export default function SharedSchoolChatEditForm({
         <label className={cn(labelClassName, 'text-sm')}>{t('specification')}</label>
         <textarea
           rows={5}
+          style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('specification')}
         />
@@ -185,6 +187,7 @@ export default function SharedSchoolChatEditForm({
         <label className={cn(labelClassName, 'text-sm')}>{t('restrictions')}</label>
         <textarea
           rows={5}
+          style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('restrictions')}
         />
