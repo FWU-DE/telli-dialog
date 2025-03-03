@@ -25,11 +25,11 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
   function handleDeleteSharedChat() {
     deleteSharedChatAction({ id: sharedSchoolChat.id })
       .then(() => {
-        toast.success(t('shared.delete-toast-success'));
+        toast.success(t('toasts.delete-toast-success'));
         router.refresh();
       })
       .catch(() => {
-        toast.error(t('shared.delete-toast-error'));
+        toast.error(t('toasts.delete-toast-error'));
       });
   }
 

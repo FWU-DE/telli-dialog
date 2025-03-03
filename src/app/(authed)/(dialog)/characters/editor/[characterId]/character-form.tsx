@@ -84,6 +84,7 @@ export default function CharacterForm({
   });
 
   const t = useTranslations('characters.form');
+  const tToast = useTranslations('characters.toasts');
   const tCommon = useTranslations('common');
 
   const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
@@ -102,7 +103,7 @@ export default function CharacterForm({
         router.refresh();
       })
       .catch(() => {
-        toast.error('Etwas ist beim Aktualisieren schief gelaufen.');
+        toast.error(tToast('edit-toast-error'));
       });
   }
 
@@ -111,11 +112,11 @@ export default function CharacterForm({
   function handlePictureUploadComplete(picturePath: string) {
     updateCharacterPictureAction({ picturePath, characterId: character.id })
       .then(() => {
-        toast.success('Das Bild wurde erfolgreich hochgeladen.');
+        toast.success(tToast('image-toast-success'));
         router.refresh();
       })
       .catch(() => {
-        toast.error('Etwas ist beim Aktualisieren des Dialogavatars schief gelaufen.');
+        toast.error(tToast('edit-toast-error'));
       });
   }
 
@@ -123,12 +124,12 @@ export default function CharacterForm({
     updateCharacterAction({ characterId: character.id, ...data })
       .then(() => {
         if (!isCreating) {
-          toast.success('Der Dialogavatar wurde erfolgreich aktualisiert.');
+          toast.success(tToast('edit-toast-success'));
         }
         router.refresh();
       })
       .catch(() => {
-        toast.error('Etwas ist beim Aktualisieren des Dialogavatars schief gelaufen.');
+        toast.error(tToast('edit-toast-error'));
       });
   }
 
@@ -137,13 +138,13 @@ export default function CharacterForm({
       .then(() => {
         // do not show any toast if the avatar is being created
         if (!isCreating) {
-          toast.success('Der Dialogavatar wurde erfolgreich gelöscht.');
+          toast.success(tToast('delete-toast-success'));
         }
 
         router.push(backUrl);
       })
       .catch(() => {
-        toast.error('Etwas ist beim Löschen des Dialogavatars schief gelaufen.');
+        toast.error(tToast('delete-toast-error'));
       });
   }
 
@@ -163,7 +164,7 @@ export default function CharacterForm({
   function handleCreateCharacter() {
     const data = getValues();
     onSubmit(data);
-    toast.success('Der Dialogavatar wurde erfolgreich erstellt.');
+    toast.success(tToast('create-toast-success'));
     router.replace(backUrl);
   }
 

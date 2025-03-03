@@ -12,8 +12,7 @@ import { useLlmModels } from '@/components/providers/llm-model-provider';
 export default function CreateNewCharacterButton() {
   const router = useRouter();
   const toast = useToast();
-
-  const t = useTranslations('characters.form');
+  const t = useTranslations('characters');
 
   const { selectedModel } = useLlmModels();
 
@@ -23,7 +22,7 @@ export default function CreateNewCharacterButton() {
         router.push(`/characters/editor/${newCharacter.id}?create=true`);
       })
       .catch(() => {
-        toast.error(t('toast-error'));
+        toast.error(t('toasts.create-toast-error'));
       });
   }
 
@@ -33,7 +32,7 @@ export default function CreateNewCharacterButton() {
       className={cn(buttonPrimaryClassName, 'flex gap-2 items-center group py-2')}
     >
       <PlusIcon className="fill-primary-text w-3 h-3 group-hover:fill-secondary-text" />
-      <span>{t('create-character')}</span>
+      <span>{t('form.create-character')}</span>
     </button>
   );
 }

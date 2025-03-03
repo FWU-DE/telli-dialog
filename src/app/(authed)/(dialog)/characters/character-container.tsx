@@ -35,14 +35,16 @@ export default function CharacterContainer({
   const router = useRouter();
   const toast = useToast();
 
+  const tToast = useTranslations('characters.toasts');
+
   function handleDeleteCharacter() {
     deleteCharacterAction({ characterId: id })
       .then(() => {
-        toast.success('Dialogavatar wurde erfolgreich gelöscht.');
+        toast.success(tToast('delete-toast-success'));
         router.refresh();
       })
       .catch(() => {
-        toast.error('Etwas ist beim Löschen des Dialogavatars schief gelaufen.');
+        toast.error(tToast('delete-toast-error'));
       });
   }
 

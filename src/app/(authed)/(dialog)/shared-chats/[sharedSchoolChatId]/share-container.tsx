@@ -30,6 +30,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
   const toast = useToast();
   const router = useRouter();
   const t = useTranslations('shared-chats.shared');
+  const tToast = useTranslations('shared-chats.toasts');
   const tCommon = useTranslations('common');
 
   const sharedChatTimeLeft = calculateTimeLeftBySharedChat(sharedSchoolChat);
@@ -55,23 +56,23 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
 
     handleInitiateSharedChatShareAction({ ...data, id: sharedSchoolChat.id })
       .then(() => {
-        toast.success(t('share-toast-success'));
+        toast.success(tToast('share-toast-success'));
         router.push(shareUILink);
         router.refresh();
       })
       .catch(() => {
-        toast.error(t('share-toast-error'));
+        toast.error(tToast('share-toast-error'));
       });
   }
 
   function handleStopSharing() {
     handleStopSharedChatShareAction({ id: sharedSchoolChat.id })
       .then(() => {
-        toast.success(t('stop-share-toast-success'));
+        toast.success(tToast('stop-share-toast-success'));
         router.refresh();
       })
       .catch(() => {
-        toast.error(t('stop-share-toast-error'));
+        toast.error(tToast('stop-share-toast-error'));
       });
   }
 

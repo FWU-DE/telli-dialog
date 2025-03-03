@@ -84,7 +84,7 @@ export default async function Page(context: PageContext) {
           </section>
           <div className="hidden md:block w-1 border-r-[1px]" />
           <section className="flex flex-col justify-between items-center gap-8 sm:gap-12">
-            <h2 className="text-2xl sm:text-3xl text-center">Oder nutze den QR-Code</h2>
+            <h2 className="text-2xl sm:text-3xl text-center">{t('use-qr')}</h2>
             <QRCode className="w-64 h-64 sm:w-[400px] sm:h-[400px]" value={shareUrl} />
           </section>
         </main>

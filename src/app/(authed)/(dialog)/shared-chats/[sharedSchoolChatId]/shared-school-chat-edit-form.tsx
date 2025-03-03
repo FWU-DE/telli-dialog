@@ -25,7 +25,9 @@ export default function SharedSchoolChatEditForm({
 }: SharedSchoolConversationModel) {
   const toast = useToast();
   const router = useRouter();
+
   const t = useTranslations('shared-chats.form');
+  const tToasts = useTranslations('shared-chats.toasts');
   const tCommon = useTranslations('common');
 
   const { models, selectedModel } = useLlmModels();
@@ -46,22 +48,22 @@ export default function SharedSchoolChatEditForm({
   function onSubmit(data: SharedSchoolChatFormValues) {
     updateSharedSchoolChat({ ...sharedSchoolChat, ...data })
       .then(() => {
-        toast.success('Der Klassendialog wurde erfolgreich aktualisiert.');
+        toast.success(tToasts('edit-toast-success'));
         router.refresh();
       })
       .catch(() => {
-        toast.error('Der Klassendialog konnte nicht aktualisiert werden.');
+        toast.error(tToasts('edit-toast-error'));
       });
   }
 
   function handleDeleteSharedChat() {
     deleteSharedChatAction({ id: sharedSchoolChat.id })
       .then(() => {
-        toast.success('Der Klassendialog wurde erfolgreich gelöscht.');
+        toast.success(tToasts('delete-toast-success'));
         router.push('/shared-chats');
       })
       .catch(() => {
-        toast.error('Der Klassendialog konnte nicht gelöscht werden.');
+        toast.error(tToasts('delete-toast-error'));
       });
   }
 
@@ -83,7 +85,7 @@ export default function SharedSchoolChatEditForm({
       onBlur={handleAutoSave}
     >
       <ShareContainer {...sharedSchoolChat} />
-      <h2 className="font-medium mt-8">Einstellungen</h2>
+      <h2 className="font-medium mt-8">{t('settings')}</h2>
       <div className="flex flex-wrap gap-6">
         <div className="flex flex-col gap-4 h-full">
           <label className="text-sm">

@@ -78,8 +78,20 @@
       "grade": "Klassenstufe",
       "grade-placeholder": "7.Klasse",
       "subject": "Fach",
-      "subject-placeholder": "Geschichte",
-      "toast-error": "Es konnte kein neuer Charakter erstellt werden."
+      "subject-placeholder": "Geschichte"
+    },
+    "toasts": {
+      "create-toast-success": "Der Dialogavatar wurde erfolgreich erstellt.",
+      "create-toast-error": "Der Dialogavatar konnte nicht erstellt werden.",
+      "share-toast-success": "Dialogavatar erfolgreich geteilt.",
+      "share-toast-error": "Etwas ist beim Teilen des Dialogavatar schief gelaufen.",
+      "stop-share-toast-success": "Dialogavatar wird nicht mehr geteilt.",
+      "stop-share-toast-error": "Etwas ist beim Beenden des Teilens schief gelaufen.",
+      "delete-toast-success": "Der Dialogavatar wurde erfolgreich gelöscht.",
+      "delete-toast-error": "Der Dialogavatar konnte nicht gelöscht werden.",
+      "edit-toast-success": "Der Dialogavatar wurde erfolgreich aktualisiert.",
+      "edit-toast-error": "Etwas ist beim Aktualisieren des Dialogavatars schief gelaufen.",
+      "image-toast-success": "Das Bild wurde erfolgreich hochgeladen."
     }
   },
   "shared-chats": {
@@ -123,13 +135,7 @@
       "button-start": "Klassendialog starten",
       "invalid-code-toast": "Der Code der eingegeben wurde ist entweder abgelaufen oder ungültig.",
       "join-code": "Mit Code beitreten",
-      "enter-chat": "Zum Dialog",
-      "share-toast-success": "Klassendialog erfolgreich geteilt.",
-      "share-toast-error": "Etwas ist beim Teilen des Klassendialogs schief gelaufen.",
-      "stop-share-toast-success": "Klassendialog wird nicht mehr geteilt.",
-      "stop-share-toast-error": "Etwas ist beim Beenden des Teilens schief gelaufen.",
-      "delete-toast-success": "Der Klassendialog wurde erfolgreich gelöscht.",
-      "delete-toast-error": "Der Klassendialog konnte nicht gelöscht werden."
+      "enter-chat": "Zum Dialog"
     },
     "share-page": {
       "back-button": "Zum Klassendialog",
@@ -138,6 +144,18 @@
       "enter-code": "Gebe den Code ein",
       "open-chat": "Chat öffnen",
       "use-qr": "Oder nutze den QR-Code"
+    },
+    "toasts": {
+      "create-toast-success": "Der Klassendialog wurde erfolgreich erstellt.",
+      "create-toast-error": "Der Klassendialog konnte nicht erstellt werden.",
+      "share-toast-success": "Klassendialog erfolgreich geteilt.",
+      "share-toast-error": "Etwas ist beim Teilen des Klassendialogs schief gelaufen.",
+      "stop-share-toast-success": "Klassendialog wird nicht mehr geteilt.",
+      "stop-share-toast-error": "Etwas ist beim Beenden des Teilens schief gelaufen.",
+      "delete-toast-success": "Der Klassendialog wurde erfolgreich gelöscht.",
+      "delete-toast-error": "Der Klassendialog konnte nicht gelöscht werden.",
+      "edit-toast-success": "Der Klassendialog wurde erfolgreich aktualisiert.",
+      "edit-toast-error": "Der Klassendialog konnte nicht aktualisiert werden."
     }
   }
 }

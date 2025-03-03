@@ -22,6 +22,7 @@ export default function SharedSchoolChatCreateForm() {
 
   const { models, selectedModel: _selectedModel } = useLlmModels();
   const t = useTranslations('shared-chats.form');
+  const tToast = useTranslations('shared-chats.toasts');
   const tCommon = useTranslations('common');
 
   const {
@@ -46,11 +47,11 @@ export default function SharedSchoolChatCreateForm() {
 
     createNewSharedSchoolChatAction(data)
       .then((createdChat) => {
-        toast.success('Der Klassendialog wurde erfolgreich erstellt.');
+        toast.success(tToast('create-toast-success'));
         router.push(`/shared-chats/${createdChat.id}`);
       })
       .catch(() => {
-        toast.error('Der Klassendialog konnte nicht erstellt werden.');
+        toast.error(tToast('create-toast-error'));
       });
   }
 
