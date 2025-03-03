@@ -44,6 +44,7 @@ export async function getUser(): Promise<UserAndContext> {
   }
 
   const userAndContext = await getUserAndContextByUserId({ userId: user.id });
+  console.debug({ userAndContext });
 
   return userAndContext;
 }

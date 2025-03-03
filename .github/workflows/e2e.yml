@@ -56,7 +56,7 @@ jobs:
           done
 
       - name: Run migrations or seed database (if applicable)
-        run: pnpm db:migrate
+        run: pnpm db:migrate && pnpm db:seed
 
       - name: Start application
         run: |

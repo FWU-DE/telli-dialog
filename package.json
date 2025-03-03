@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:op": "op run --env-file=\"./.env.e2e\" -- next dev --turbo",
     "dev:turbo": "next dev --turbo",
     "dev:ssl": "next dev --experimental-https",
     "build": "next build",
@@ -19,8 +20,9 @@
     "format:check": "prettier --check .",
     "db:generate": "drizzle-kit generate --config=./src/db/drizzle.config.ts",
     "db:migrate": "dotenv -e .env -- drizzle-kit migrate --config=./src/db/drizzle.config.ts",
+    "db:migrate:op": "op run --env-file=\"./.env\" -- drizzle-kit migrate --config=./src/db/drizzle.config.ts",
     "db:migrate:envless": "drizzle-kit migrate --config=./src/db/drizzle.config.ts",
-    "db:seed": "dotenv -e .env -- pnpm tsx src/db/seed/index.ts",
+    "db:seed": "op run --env-file=\"./.env\" -- pnpm tsx src/db/seed/index.ts",
     "db:studio": "dotenv -e .env -- drizzle-kit studio --config=src/db/drizzle.config.ts",
     "build:e2e": "next build --experimental-build-mode compile",
     "start:e2e": "dotenv -e .env.e2e -- next start",

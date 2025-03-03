@@ -5,8 +5,6 @@ import * as Sentry from '@sentry/nextjs';
 
 const environment = process.env.SENTRY_ENVIRONMENT;
 
-console.info({ environment });
-
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
   integrations: [Sentry.captureConsoleIntegration({ levels: ['warn', 'error'] })],
