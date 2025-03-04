@@ -72,7 +72,13 @@ export default function CharacterContainer({
     >
       <figure className="h-11 w-11 bg-light-gray items-center justify-center flex rounded-enterprise-sm">
         {maybeSignedPictureUrl !== undefined && (
-          <Image src={maybeSignedPictureUrl} alt={`${name} Avatar`} width={44} height={44} />
+          <Image
+            src={maybeSignedPictureUrl}
+            alt={`${name} Avatar`}
+            width={44}
+            height={44}
+            className="rounded-enterprise-sm"
+          />
         )}
         {maybeSignedPictureUrl === undefined && <EmptyImageIcon className="w-4 h-4" />}
       </figure>

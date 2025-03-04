@@ -34,6 +34,7 @@ export default function SharedSchoolChatCreateForm() {
     resolver: zodResolver(sharedSchoolChatFormValuesSchema),
     defaultValues: {
       name: '',
+      modelId: _selectedModel?.id,
     },
   });
 

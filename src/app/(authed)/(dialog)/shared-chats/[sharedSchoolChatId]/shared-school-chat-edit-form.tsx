@@ -30,15 +30,9 @@ export default function SharedSchoolChatEditForm({
   const tToasts = useTranslations('shared-chats.toasts');
   const tCommon = useTranslations('common');
 
-  const { models, selectedModel } = useLlmModels();
+  const { models } = useLlmModels();
 
-  const {
-    register,
-    handleSubmit,
-    getValues,
-    setValue,
-    formState: { defaultValues },
-  } = useForm<SharedSchoolChatFormValues>({
+  const { register, handleSubmit, getValues, setValue } = useForm<SharedSchoolChatFormValues>({
     resolver: zodResolver(sharedSchoolChatFormValuesSchema),
     defaultValues: {
       ...sharedSchoolChat,
@@ -69,10 +63,10 @@ export default function SharedSchoolChatEditForm({
 
   function handleAutoSave() {
     const data = getValues();
-    const dataEquals = deepEqual(
-      { ...defaultValues, modelId: sharedSchoolChat.modelId },
-      { ...data, modelId: selectedModel },
-    );
+    const defaultData = { ...sharedSchoolChat, modelId: sharedSchoolChat.modelId };
+    const newData = { ...data };
+
+    const dataEquals = deepEqual(defaultData, newData);
 
     if (dataEquals) return;
     onSubmit(data);

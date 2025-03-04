@@ -153,7 +153,7 @@ export default function Chat({
                     >
                       <MarkdownDisplay>{message.content}</MarkdownDisplay>
                       {isLastNonUser && !isLoading && (
-                        <div className="flex items-center gap-1 mt-1">
+                        <div className="flex items-center gap-1">
                           <TelliClipboardButton text={message.content} />
                           <button
                             title="Reload last message"
@@ -174,7 +174,7 @@ export default function Chat({
             </div>
           )}
           {error && (
-            <div className="mx-4 p-4 gap-2 text-sm rounded-2xl bg-red-100 text-red-500 border border-red-500 text-right mt-8">
+            <div className="mx-4 p-4 gap-2 text-sm rounded-2xl bg-red-100 text-red-500 border border-red-500 text-right mt-8 max-w-3xl">
               <div className="flex justify-between items-center px-2">
                 {error.message || 'Etwas ist schiefgelaufen'}
                 <button

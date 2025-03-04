@@ -20,7 +20,7 @@ const baseNextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'dpgt-dialog.obs.otc.t-systems.com',
+        hostname: 'telli-dialog.obs.otc.t-systems.com',
         port: '',
       },
     ],

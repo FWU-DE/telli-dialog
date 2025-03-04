@@ -4,8 +4,6 @@ import AutoResizeTextarea from '@/components/common/auto-resize-textarea';
 import { cn } from '@/utils/tailwind';
 import { useChat } from '@ai-sdk/react';
 import ArrowRightIcon from '@/components/icons/arrow-right';
-import CheckIcon from '@/components/icons/check';
-import ClipboardLightIcon from '@/components/icons/clipboard-light';
 import ReloadIcon from '@/components/icons/reload';
 import StopIcon from '@/components/icons/stop';
 import React from 'react';
@@ -23,12 +21,12 @@ import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-ch
 import MarkdownDisplay from '@/components/chat/markdown-display';
 import { UnauthenticatedProfileMenu } from '@/components/navigation/profile-menu';
 import DownloadSharedConversationButton from '../../../dowload-shared-conversation-button';
+import TelliClipboardButton from '@/components/common/clipboard-button';
 
 export default function SharedChat({
   ...sharedSchoolChat
 }: SharedSchoolConversationModel & { inviteCode: string }) {
   const tCommon = useTranslations('common');
-  const [isCopied, setIsCopied] = React.useState(false);
   const { id, inviteCode } = sharedSchoolChat;
 
   const timeLeft = calculateTimeLeftBySharedChat(sharedSchoolChat);
@@ -90,15 +88,6 @@ export default function SharedChat({
     }
   }
 
-  function handleCopy(text: string) {
-    navigator.clipboard.writeText(text);
-    setIsCopied(true);
-
-    setTimeout(() => {
-      setIsCopied(false);
-    }, 1000);
-  }
-
   function handleOpenNewChat() {
     saveToLocalStorage(constructLocalStorageKey({ id, inviteCode }), '');
     setMessages([]);
@@ -132,7 +121,7 @@ export default function SharedChat({
               <TelliLogo className="text-primary" />
             </div>
           ) : (
-            <div className="flex flex-col gap-4 px-4">
+            <div className="flex flex-col gap-4">
               {messages.map((message, index) => {
                 const isLastNonUser = index === messages.length - 1 && message.role !== 'user';
 
@@ -149,29 +138,12 @@ export default function SharedChat({
                       <MarkdownDisplay>{message.content}</MarkdownDisplay>
 
                       {isLastNonUser && !isLoading && (
-                        <div className="flex items-center gap-1">
-                          <button
-                            title="Copy message"
-                            type="button"
-                            onClick={() => handleCopy(message.content)}
-                            className="rounded-full hover:text-primary mt-1"
-                            aria-label="Copy"
-                          >
-                            {isCopied ? (
-                              <div className="p-2 rounded-enterprise-sm hover:bg-secondary/20">
-                                <CheckIcon className="text-primary w-3.5 h-3.5" />
-                              </div>
-                            ) : (
-                              <div className="p-2 rounded-enterprise-sm hover:bg-vidis-hover-green/20">
-                                <ClipboardLightIcon className="text-primary w-3.5 h-3.5" />
-                              </div>
-                            )}
-                          </button>
+                        <div className="flex items-center gap-1 mt-1">
+                          <TelliClipboardButton text={message.content} />
                           <button
                             title="Reload last message"
                             type="button"
                             onClick={() => reload()}
-                            className="mt-1"
                             aria-label="Reload"
                           >
                             <div className="p-1.5 rounded-enterprise-sm hover:bg-vidis-hover-green/20">
@@ -202,7 +174,7 @@ export default function SharedChat({
           )}
         </div>
 
-        <div className="w-full fixed bottom-4 max-w-[25rem] md:max-w-[30rem] lg:max-w-[42rem] px-4">
+        <div className="w-full max-w-3xl mx-auto px-4 pb-4">
           <div className="flex flex-col">
             <form
               onSubmit={customHandleSubmit}
