@@ -91,8 +91,11 @@ export default function CharacterContainer({
         <CountDownTimer leftTime={timeLeft} totalTime={character.maxUsageTimeLimit} />
       )}
       {timeLeft > 0 && (
-        <button onClick={handleNavigateToShare}>
-          <ShareIcon className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm" />
+        <button
+          onClick={handleNavigateToShare}
+          className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
+        >
+          <ShareIcon className="w-8 h-8" />
         </button>
       )}
       {timeLeft < 1 && (

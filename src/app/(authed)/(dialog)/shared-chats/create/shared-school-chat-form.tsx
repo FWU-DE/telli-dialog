@@ -39,8 +39,6 @@ export default function SharedSchoolChatCreateForm() {
   });
 
   function onSubmit(data: SharedSchoolChatFormValues) {
-    console.debug({ data });
-
     if (!data.modelId) {
       toast.error('Sie müssen ein Model auswählen.');
       return;

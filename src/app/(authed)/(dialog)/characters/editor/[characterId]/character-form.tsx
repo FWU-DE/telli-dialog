@@ -232,6 +232,7 @@ export default function CharacterForm({
             <input
               className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
               {...register('schoolType')}
+              onBlur={handleAutoSave}
               placeholder={t('school-type-placeholder')}
             />
           </div>
@@ -243,6 +244,7 @@ export default function CharacterForm({
               className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
               {...register('gradeLevel')}
               placeholder={t('grade-placeholder')}
+              onBlur={handleAutoSave}
             />
           </div>
           <div className="flex flex-col gap-4">
@@ -252,6 +254,7 @@ export default function CharacterForm({
             <input
               className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
               {...register('subject')}
+              onBlur={handleAutoSave}
               placeholder={t('subject-placeholder')}
             />
           </div>
