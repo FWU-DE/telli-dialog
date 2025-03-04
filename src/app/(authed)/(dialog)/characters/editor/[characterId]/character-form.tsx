@@ -8,8 +8,6 @@ import {
 } from '@/utils/tailwind/button';
 import { inputFieldClassName, labelClassName } from '@/utils/tailwind/input';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as Checkbox from '@radix-ui/react-checkbox';
-import CheckIcon from '@/components/icons/check';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
@@ -20,7 +18,7 @@ import {
 } from './actions';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/common/toast';
-import React from 'react';
+import React, { startTransition } from 'react';
 import Image from 'next/image';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
@@ -33,6 +31,7 @@ import { useTranslations } from 'next-intl';
 import SelectLlmModelForm from '../../../_components/select-llm-model';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import ShareContainer from './share-container';
+import Checkbox from '@/components/common/checkbox';
 
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -94,7 +93,11 @@ export default function CharacterForm({
 
   function handleAccessLevelChange(value: boolean, accessLevel: CharacterAccessLevel) {
     if (!value) return;
-    addOptimisticAccessLevel(accessLevel);
+
+    startTransition(() => {
+      addOptimisticAccessLevel(accessLevel);
+    });
+
     updateCharacterAccessLevelAction({
       characterId: character.id,
       accessLevel,
@@ -197,34 +200,17 @@ export default function CharacterForm({
         <h2 className="font-medium mb-2">{t('general-settings')}</h2>
         <label className={cn(labelClassName, 'text-sm')}>{t('character-visibility-label')}</label>
         <div className="flex max-sm:flex-col gap-4 sm:gap-8">
-          <div className="flex gap-4">
-            <Checkbox.Root
-              className="CheckboxRoot border hover:border-primary hover:bg-vidis-hover-green/20 data-[state=checked]:border-primary data-[state=checked]:bg-vidis-hover-green/20 rounded-enterprise-sm h-6 w-6"
-              id="c1"
-              aria-label="Privat"
-              checked={optimisticAccessLevel === 'private'}
-              onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'private')}
-            >
-              <Checkbox.Indicator className="CheckboxIndicator">
-                <CheckIcon className="text-primary w-6 h-4" />
-              </Checkbox.Indicator>
-            </Checkbox.Root>
-            <span>{t('restriction-private')}</span>
-          </div>
-          <div className="flex gap-4">
-            <Checkbox.Root
-              className="CheckboxRoot border hover:border-primary hover:bg-vidis-hover-green/20 data-[state=checked]:border-primary data-[state=checked]:bg-vidis-hover-green/20 rounded-enterprise-sm h-6 w-6"
-              id="c1"
-              aria-label="Schulspezifisch"
-              checked={optimisticAccessLevel === 'school'}
-              onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'school')}
-            >
-              <Checkbox.Indicator className="CheckboxIndicator">
-                <CheckIcon className="text-primary w-6 h-4" />
-              </Checkbox.Indicator>
-            </Checkbox.Root>
-            <span>{t('restriction-school')}</span>
-          </div>
+          <Checkbox
+            label={t('restriction-private')}
+            checked={optimisticAccessLevel === 'private'}
+            onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'private')}
+          />
+
+          <Checkbox
+            label="Schulspezifisch"
+            checked={optimisticAccessLevel === 'school'}
+            onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'school')}
+          />
         </div>
         <div className="flex flex-col gap-4">
           <label className={labelClassName}>{tCommon('llm-model')}</label>

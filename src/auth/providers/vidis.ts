@@ -86,6 +86,7 @@ export async function handleVidisLogout({ idToken }: { idToken: string }) {
   const response = await fetch(
     `${env.vidisIssuerUri}/protocol/openid-connect/logout?${searchParams.toString()}`,
   );
+  console.info({ response });
   if (!response.ok) {
     console.error({ error: await response.text() });
   }

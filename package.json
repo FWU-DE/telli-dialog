@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:op": "op run --env-file=\"./.env.e2e\" -- next dev --turbo",
+    "dev:op": "op run --env-file=\"./.env\" -- next dev --turbo",
     "dev:turbo": "next dev --turbo",
     "dev:ssl": "next dev --experimental-https",
     "build": "next build",
