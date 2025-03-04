@@ -82,7 +82,7 @@ jobs:
 
       - name: Start application
         run: |
-          pnpm build:envless
+          NODE_ENV=test pnpm build:envless
           pnpm start &
           pnpm start:oidc &
 

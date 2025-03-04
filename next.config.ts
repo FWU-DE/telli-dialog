@@ -25,6 +25,7 @@ const baseNextConfig = {
       },
     ],
   },
+  productionBrowserSourceMaps: process.env.NODE_ENV !== 'test',
 } satisfies NextConfig;
 
 const withNextIntl = createNextIntlPlugin();
@@ -40,6 +41,9 @@ export default withSentryConfig(baseNextConfigWithNextIntl, {
   sentryUrl: 'https://sentry.logging.eu-de.prod.telli.schule',
   authToken: process.env.SENTRY_AUTH_TOKEN,
   debug: true,
+  sourcemaps: {
+    disable: process.env.NODE_ENV !== 'test',
+  },
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
@@ -48,7 +52,7 @@ export default withSentryConfig(baseNextConfigWithNextIntl, {
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
 
   // Upload a larger set of source maps for prettier stack traces (increases build time)
-  widenClientFileUpload: true,
+  // widenClientFileUpload: true,
 
   // Automatically annotate React components to show their full name in breadcrumbs and session replay
   reactComponentAnnotation: {
