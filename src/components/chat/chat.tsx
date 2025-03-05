@@ -153,7 +153,7 @@ export default function Chat({
                     >
                       <MarkdownDisplay>{message.content}</MarkdownDisplay>
                       {isLastNonUser && !isLoading && (
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 mt-1">
                           <TelliClipboardButton text={message.content} />
                           <button
                             title="Reload last message"

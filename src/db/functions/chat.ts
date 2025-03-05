@@ -63,7 +63,7 @@ export async function dbGetCoversationMessages({
       ),
     )
     .orderBy(conversationMessageTable.orderNumber);
-  return messages.map((message) => message.conversation_message);
+  return getLatestMessages(messages.map((message) => message.conversation_message));
 }
 
 export async function dbInsertChatContent(chatContent: InsertConversationMessageModel) {

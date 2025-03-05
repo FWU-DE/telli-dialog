@@ -85,7 +85,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
       .then(() => {
         toast.success(t('conversation-delete-toast-success'));
         refetchConversations();
-        router.refresh();
+        router.replace('/');
       })
       .catch((error) => {
         console.error({ error });

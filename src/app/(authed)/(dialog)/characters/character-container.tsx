@@ -70,7 +70,10 @@ export default function CharacterContainer({
       href={`/characters/editor/${id}`}
       className="rounded-enterprise-md border p-6 flex items-center gap-4 w-full hover:border-primary"
     >
-      <figure className="h-11 w-11 bg-light-gray items-center justify-center flex rounded-enterprise-sm">
+      <figure
+        className="w-11 h-11 bg-light-gray rounded-enterprise-sm flex justify-center items-center"
+        style={{ minWidth: '44px' }}
+      >
         {maybeSignedPictureUrl !== undefined && (
           <Image
             src={maybeSignedPictureUrl}
@@ -82,8 +85,8 @@ export default function CharacterContainer({
         )}
         {maybeSignedPictureUrl === undefined && <EmptyImageIcon className="w-4 h-4" />}
       </figure>
-      <div className="flex flex-col gap-1 text-left">
-        <h2 className="font-medium leading-none">{name}</h2>
+      <div className="flex flex-col gap-1 text-left min-w-0">
+        <h2 className={cn('font-medium leading-none', truncateClassName)}>{name}</h2>
         <span className={cn(truncateClassName, 'text-gray-400')}>{description}</span>
       </div>
       <div className="flex-grow" />
