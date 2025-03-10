@@ -24,6 +24,7 @@ export default function SharedSchoolChatCreateForm() {
   const t = useTranslations('shared-chats.form');
   const tToast = useTranslations('shared-chats.toasts');
   const tCommon = useTranslations('common');
+  const tGeneral = useTranslations('shared-chats');
 
   const {
     register,
@@ -192,7 +193,7 @@ export default function SharedSchoolChatCreateForm() {
           className={buttonPrimaryClassName}
           type="submit"
         >
-          {t('title')}
+          {tGeneral('button-create')}
         </button>
       </div>
     </form>
