@@ -10,23 +10,23 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import { readFromLocalStorage, saveToLocalStorage } from '@/components/providers/local-storage';
 import { z } from 'zod';
-import TelliLogo from '@/components/icons/logo';
 import { type SharedSchoolConversationModel } from '@/db/schema';
 import { messageRoleSchema } from '@/components/chat/schemas';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
-import PlusIcon from '@/components/icons/plus';
-import SelectLlmModel from '@/components/conversation/select-llm-model';
 import { generateUUID } from '@/utils/uuid';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import MarkdownDisplay from '@/components/chat/markdown-display';
 import { UnauthenticatedProfileMenu } from '@/components/navigation/profile-menu';
 import DownloadSharedConversationButton from '../../../dowload-shared-conversation-button';
 import TelliClipboardButton from '@/components/common/clipboard-button';
+import TrashFilledIcon from '@/components/icons/trash-filled';
+import DestructiveActionButton from '@/components/common/destructive-action-button';
 
 export default function SharedChat({
   ...sharedSchoolChat
 }: SharedSchoolConversationModel & { inviteCode: string }) {
+  const t = useTranslations('shared-chats.shared');
   const tCommon = useTranslations('common');
+
   const { id, inviteCode } = sharedSchoolChat;
 
   const timeLeft = calculateTimeLeftBySharedChat(sharedSchoolChat);
@@ -95,15 +95,28 @@ export default function SharedChat({
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      <header className="flex gap-4 items-center py-[1.15rem] px-6">
+      <header className="flex gap-4 justify-between items-center py-[1.15rem] px-6">
         {chatActive && (
-          <button className={cn(buttonPrimaryClassName, 'p-2')} onClick={handleOpenNewChat}>
-            <PlusIcon className="fill-primary-text h-5 w-5" />
-          </button>
+          <DestructiveActionButton
+            modalTitle={t('delete-chat-modal-title')}
+            confirmText={t('delete-chat-modal-confirm-button')}
+            modalDescription={t('delete-chat-modal-description')}
+            triggerButtonClassName="flex justify-center items-center w-8 h-8 group disabled:bg-light-gray disabled:text-gray-100 group !px-0 !py-0 !text-current !border-0 !rounded-enterprise-sm hover:!bg-vidis-hover-green/20"
+            actionFn={handleOpenNewChat}
+          >
+            <TrashFilledIcon className="text-primary h-4 w-4" />
+          </DestructiveActionButton>
         )}
-        <SelectLlmModel />
         {!chatActive && <p className="text-red-500">{tCommon('chat-expired')}</p>}
+
         <div className="flex-grow" />
+        {messages.length > 0 && (
+          <span className="ps-14 text-xl font-normal truncate max-w-sm">
+            {sharedSchoolChat.name}
+          </span>
+        )}
+        <div className="flex-grow" />
+
         <DownloadSharedConversationButton
           conversationMessages={messages}
           disabled={!chatActive || messages.length === 0}
@@ -118,7 +131,9 @@ export default function SharedChat({
         >
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
-              <TelliLogo className="text-primary" />
+              <span className="ps-14 text-3xl font-medium truncate max-w-sm">
+                {sharedSchoolChat.name}
+              </span>
             </div>
           ) : (
             <div className="flex flex-col gap-4">

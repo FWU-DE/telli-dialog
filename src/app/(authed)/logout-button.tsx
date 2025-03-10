@@ -10,10 +10,10 @@ export default function LogoutButton({ className, ...props }: React.ComponentPro
   const router = useRouter();
   const t = useTranslations('common');
 
-  const handleLogout = async () => {
+  async function handleLogout() {
     await signOut({ redirect: false });
     router.refresh();
-  };
+  }
 
   return (
     <button

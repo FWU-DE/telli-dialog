@@ -138,7 +138,10 @@
       "button-start": "Klassendialog starten",
       "invalid-code-toast": "Der Code der eingegeben wurde ist entweder abgelaufen oder ungültig.",
       "join-code": "Mit Code beitreten",
-      "enter-chat": "Zum Dialog"
+      "enter-chat": "Zum Dialog",
+      "delete-chat-modal-title": "Neuer Chat",
+      "delete-chat-modal-description": "Wenn du einen neuen Chat beginnst verfällt der aktuelle Chat unwiderruflich.",
+      "delete-chat-modal-confirm-button": "Aktuellen Chat verwerfen und neu beginnen"
     },
     "share-page": {
       "back-button": "Zum Klassendialog",
