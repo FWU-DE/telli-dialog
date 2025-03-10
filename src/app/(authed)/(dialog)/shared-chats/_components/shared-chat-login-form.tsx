@@ -4,7 +4,7 @@ import { useToast } from '@/components/common/toast';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { inputFieldClassName } from '@/utils/tailwind/input';
 import React from 'react';
-import { checkSharedChatInviteCodeAction } from './actions';
+import { checkCharacterChatInviteCodeAction, checkSharedChatInviteCodeAction } from './actions';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
@@ -15,15 +15,40 @@ export default function SharedChatLoginForm() {
   const router = useRouter();
   const t = useTranslations('shared-chats.shared');
 
-  function handleInviteCodeSubmit() {
-    checkSharedChatInviteCodeAction({ inviteCode: inviteCode.replace(/\s+/g, '').toUpperCase() })
-      .then((sharedChat) => {
-        const searchParams = new URLSearchParams({ inviteCode: sharedChat.inviteCode ?? '' });
-        router.push(`/ua/shared-chats/${sharedChat.id}/dialog?${searchParams.toString()}`);
-      })
-      .catch(() => {
-        toast.error(t('invalid-code-toast'));
-      });
+  async function getChatByInviteCode(formattedInviteCode: string) {
+    const sharedChat = await checkSharedChatInviteCodeAction({ inviteCode: formattedInviteCode });
+
+    if (sharedChat !== undefined) {
+      return { type: 'shared', chat: sharedChat };
+    }
+
+    const characterChat = await checkCharacterChatInviteCodeAction({
+      inviteCode: formattedInviteCode,
+    });
+
+    if (characterChat !== undefined) {
+      return { type: 'character', chat: characterChat };
+    }
+
+    return undefined;
+  }
+
+  async function handleInviteCodeSubmit() {
+    const formattedInviteCode = inviteCode.replace(/\s+/g, '').toUpperCase();
+    const result = await getChatByInviteCode(formattedInviteCode);
+
+    if (result !== undefined) {
+      const { type, chat } = result;
+      const searchParams = new URLSearchParams({ inviteCode: chat.inviteCode ?? '' });
+      const route =
+        type === 'shared'
+          ? `/ua/shared-chats/${chat.id}/dialog?${searchParams.toString()}`
+          : `/ua/characters/${chat.id}/dialog?${searchParams.toString()}`;
+      router.push(route);
+      return;
+    }
+
+    toast.error(t('invalid-code-toast'));
   }
 
   return (
