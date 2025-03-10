@@ -100,20 +100,29 @@ export default function SharedChat({
       <div className="flex flex-col h-full w-full overflow-hidden">
         <header className="flex gap-4 justify-between items-center py-[1.15rem] px-6">
           {chatActive && messages.length > 0 && (
-            <DestructiveActionButton
-              modalTitle={t('delete-chat-modal-title')}
-              confirmText={t('delete-chat-modal-confirm-button')}
-              modalDescription={t('delete-chat-modal-description')}
-              triggerButtonClassName="flex justify-center items-center w-8 h-8 group disabled:bg-light-gray disabled:text-gray-100 group !px-0 !py-0 !text-current !border-0 !rounded-enterprise-sm hover:!bg-vidis-hover-green/20"
-              actionFn={handleOpenNewChat}
-            >
-              <TrashFilledIcon className="text-primary h-4 w-4" />
-            </DestructiveActionButton>
+            <>
+              <DestructiveActionButton
+                modalTitle={t('delete-chat-modal-title')}
+                confirmText={t('delete-chat-modal-confirm-button')}
+                modalDescription={t('delete-chat-modal-description')}
+                triggerButtonClassName="flex justify-center items-center w-8 h-8 group disabled:bg-light-gray disabled:text-gray-100 group !px-0 !py-0 !text-current !border-0 !rounded-enterprise-sm hover:!bg-vidis-hover-green/20"
+                actionFn={handleOpenNewChat}
+              >
+                <TrashFilledIcon className="text-primary h-4 w-4" />
+              </DestructiveActionButton>
+
+              {/* This invisible button is a hack to get the chat name to be in the middle so 
+              that we don't neeed manual padding since there are two buttons on the right but 
+              only one on the left */}
+              <button className="flex justify-center invisible items-center w-8 h-8 group disabled:bg-light-gray disabled:text-gray-100 group !px-0 !py-0 !text-current !border-0 !rounded-enterprise-sm hover:!bg-vidis-hover-green/20">
+                <TrashFilledIcon className="text-primary h-4 w-4" />
+              </button>
+            </>
           )}
 
           {chatActive && <div className="flex-grow" />}
           {messages.length > 0 && (
-            <span className={cn('text-xl font-normal truncate max-w-sm', chatActive && 'ps-14')}>
+            <span className={cn('text-xl font-normal truncate max-w-sm')}>
               {sharedSchoolChat.name}
             </span>
           )}
