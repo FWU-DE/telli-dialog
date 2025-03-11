@@ -35,6 +35,8 @@ export default function CharacterContainer({
   const router = useRouter();
   const toast = useToast();
 
+  const t = useTranslations('characters');
+  const tCommon = useTranslations('common');
   const tToast = useTranslations('characters.toasts');
 
   function handleDeleteCharacter() {
@@ -59,9 +61,6 @@ export default function CharacterContainer({
     e.stopPropagation();
     router.push(`/characters/editor/${id}/share`);
   }
-
-  const t = useTranslations('characters.form');
-  const tCommon = useTranslations('common');
 
   const timeLeft = calculateTimeLeftBySharedChat(character);
 
@@ -95,30 +94,36 @@ export default function CharacterContainer({
       )}
       {timeLeft > 0 && (
         <button
+          aria-label={t('shared.share')}
           onClick={handleNavigateToShare}
           className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
         >
-          <ShareIcon className="w-8 h-8" />
+          <ShareIcon aria-hidden="true" className="w-8 h-8" />
+          <span className="sr-only">{t('shared.share')}</span>
         </button>
       )}
       {timeLeft < 1 && (
         <button
           type="button"
+          aria-label={tCommon('new-chat')}
           onClick={handleNavigateToNewUnsharedChat}
           className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
         >
-          <SharedChatIcon className="w-8 h-8" />
+          <SharedChatIcon aria-hidden="true" className="w-8 h-8" />
+          <span className="sr-only">{tCommon('new-chat')}</span>
         </button>
       )}
       {currentUserId === userId && (
         <DestructiveActionButton
-          modalTitle={t('delete-character')}
-          modalDescription={t('character-delete-modal-description')}
+          modalTitle={t('form.delete-character')}
+          modalDescription={t('form.character-delete-modal-description')}
           confirmText={tCommon('delete')}
           actionFn={handleDeleteCharacter}
+          aria-label={t('form.delete-character')}
           triggerButtonClassName="border-transparent justify-center flex flex-col rounded-enterprise-sm hover:bg-vidis-hover-green/20 p-0"
         >
-          <TrashIcon className="w-8 h-8 text-primary" />
+          <TrashIcon aria-hidden="true" className="w-8 h-8 text-primary" />
+          <span className="sr-only">{t('form.delete-character')}</span>
         </DestructiveActionButton>
       )}
     </Link>

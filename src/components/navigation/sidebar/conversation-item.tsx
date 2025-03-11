@@ -92,8 +92,8 @@ export default function ConversationItem({
         <div className={cn('md:invisible group-hover:visible group-focus-within:visible')}>
           <DropdownMenu.Root>
             {!isEditable && (
-              <DropdownMenu.Trigger asChild className="cursor-pointer">
-                <DotsHorizontalIcon className="h-5 w-5 sm:h-4 sm:w-4" />
+              <DropdownMenu.Trigger aria-label="Edit" asChild className="cursor-pointer">
+                <DotsHorizontalIcon aria-hidden="true" className="h-5 w-5 sm:h-4 sm:w-4" />
               </DropdownMenu.Trigger>
             )}
             <DropdownMenu.Content

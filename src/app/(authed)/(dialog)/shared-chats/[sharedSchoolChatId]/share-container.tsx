@@ -23,14 +23,17 @@ import { selectSVGBackground } from '@/utils/tailwind/select';
 import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { useTranslations } from 'next-intl';
 import FilledShareIcon from '@/components/icons/filled-share';
+import ChatStopIcon from '@/components/icons/chat-stop';
 
 type ShareContainerProps = SharedSchoolConversationModel;
 
 export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerProps) {
   const toast = useToast();
   const router = useRouter();
+
   const t = useTranslations('shared-chats.shared');
   const tToast = useTranslations('shared-chats.toasts');
+  const tCommon = useTranslations('common');
 
   const sharedChatTimeLeft = calculateTimeLeftBySharedChat(sharedSchoolChat);
   const sharedChatActive = sharedChatTimeLeft > 0;
@@ -83,6 +86,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
         <div className="flex flex-col gap-4">
           <label className={cn(labelClassName, 'text-sm')}>Telli-Points</label>
           <select
+            aria-label="Telli-Points"
             {...registerShare('intelliPointsPercentageLimit')}
             className={cn(
               'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600',
@@ -103,6 +107,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
         <div className="flex flex-col gap-4">
           <label className={cn(labelClassName, 'text-sm')}>{t('max-usage')}</label>
           <select
+            aria-label={t('max-usage')}
             {...registerShare('usageTimeLimit')}
             className={cn(
               'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600',
@@ -136,6 +141,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
           <div className="flex gap-3 justify-end">
             {sharedChatActive && (
               <button
+                aria-label={tCommon('stop')}
                 className={cn(
                   'flex items-center justify-center',
                   buttonSecondaryClassName,
@@ -144,19 +150,13 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
                 type="button"
                 onClick={handleStopSharing}
               >
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <rect width="12" height="12" rx="4" fill="#46217E" />
-                </svg>
+                <ChatStopIcon aria-hidden="true" className="text-primary" />
+                <span className="sr-only">{tCommon('stop')}</span>
               </button>
             )}
             {sharedChatActive && (
               <button
+                aria-label={t('share')}
                 className={cn(
                   'flex items-center justify-center',
                   buttonSecondaryClassName,
@@ -165,7 +165,8 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
                 type="button"
                 onClick={() => router.push(shareUILink)}
               >
-                <FilledShareIcon className="w-4 h-4" />
+                <FilledShareIcon aria-hidden="true" className="w-4 h-4" />
+                <span className="sr-only">{t('share')}</span>
               </button>
             )}
             {!sharedChatActive && (

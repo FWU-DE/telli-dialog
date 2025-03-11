@@ -60,10 +60,11 @@ export default function SharedSchoolChatCreateForm() {
       <h2 className="font-medium mt-8">{t('settings')}</h2>
       <div className="flex gap-4 w-full flex-wrap">
         <div className="flex flex-col gap-4 flex-grow">
-          <label className={cn(labelClassName, 'text-sm')}>
+          <label htmlFor="name" className={cn(labelClassName, 'text-sm')}>
             <span className="text-coral">*</span> {t('name')}
           </label>
           <input
+            id="name"
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('name')}
             placeholder={t('name-placeholder')}
@@ -78,9 +79,13 @@ export default function SharedSchoolChatCreateForm() {
             onValueChange={(value) => setValue('modelId', value)}
             defaultValue={_selectedModel?.id || ''}
           >
-            <Select.Trigger className="flex items-center justify-between w-full py-2 pl-4 pr-4 bg-white border border-gray-200 focus:border-primary rounded-enterprise-md focus:outline-none">
+            <Select.Trigger
+              aria-label={tCommon('llm-model')}
+              className="flex items-center justify-between w-full py-2 pl-4 pr-4 bg-white border border-gray-200 focus:border-primary rounded-enterprise-md focus:outline-none"
+            >
               <Select.Value />
-              <ChevronDownIcon className="w-4 h-4 text-primary ms-2" />
+              <ChevronDownIcon aria-hidden="true" className="w-4 h-4 text-primary ms-2" />
+              <span className="sr-only">{tCommon('llm-model')}</span>
             </Select.Trigger>
             <Select.Portal>
               <Select.Content className="bg-white border border-gray-200 rounded-enterprise-md shadow-dropdown w-full">
@@ -105,10 +110,11 @@ export default function SharedSchoolChatCreateForm() {
         </div>
       </div>
       <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>
+        <label htmlFor="purpose" className={cn(labelClassName, 'text-sm')}>
           <span className="text-coral">*</span> {t('purpose')}
         </label>
         <input
+          id="purpose"
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('description')}
           placeholder={t('purpose-placeholder')}
@@ -116,30 +122,33 @@ export default function SharedSchoolChatCreateForm() {
       </div>
       <div className="grid grid-cols-3 gap-4">
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>
+          <label htmlFor="school-type" className={cn(labelClassName, 'text-sm')}>
             <span className="text-coral">*</span> {t('school-type')}
           </label>
           <input
+            id="school-type"
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('schoolType')}
             placeholder={t('school-type-placeholder')}
           />
         </div>
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>
+          <label htmlFor="grade" className={cn(labelClassName, 'text-sm')}>
             <span className="text-coral">*</span> {t('grade')}
           </label>
           <input
+            id="grade"
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('gradeLevel')}
             placeholder={t('grade-placeholder')}
           />
         </div>
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>
+          <label htmlFor="subject" className={cn(labelClassName, 'text-sm')}>
             <span className="text-coral">*</span> {t('subject')}
           </label>
           <input
+            id="subject"
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('subject')}
             placeholder={t('subject-placeholder')}
@@ -147,10 +156,11 @@ export default function SharedSchoolChatCreateForm() {
         </div>
       </div>
       <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>
+        <label htmlFor="learning-context" className={cn(labelClassName, 'text-sm')}>
           <span className="text-coral">*</span> {t('learning-context')}
         </label>
         <textarea
+          id="learning-context"
           rows={5}
           style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
@@ -159,8 +169,11 @@ export default function SharedSchoolChatCreateForm() {
         />
       </div>
       <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>{t('specification')}</label>
+        <label htmlFor="specification" className={cn(labelClassName, 'text-sm')}>
+          {t('specification')}
+        </label>
         <textarea
+          id="specification"
           rows={5}
           style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
@@ -169,8 +182,11 @@ export default function SharedSchoolChatCreateForm() {
         />
       </div>
       <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>{t('restrictions')}</label>
+        <label htmlFor="restrictions" className={cn(labelClassName, 'text-sm')}>
+          {t('restrictions')}
+        </label>
         <textarea
+          id="restrictions"
           rows={5}
           style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}

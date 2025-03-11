@@ -11,7 +11,7 @@ export const buttonSecondaryClassNameB2C =
   'px-4 py-3 border-[1px] border-gray-200 text-black hover:border-black focus:bg-light-gray rounded-enterprise-full disabled:bg-gray-200 disabled:border-gray-100 disabled:text-gray-100';
 
 export const buttonDeleteClassName =
-  'px-4 py-3 text-coral border-[1px] border-coral rounded-enterprise-full hover:bg-[#FFF8F8]';
+  'px-4 py-3 text-dark-red border-[1px] border-dark-red rounded-enterprise-full hover:bg-[#FFF8F8]';
 
 export const smallButtonPrimaryClassName =
   'p-2 text-primary-text bg-primary hover:bg-secondary rounded-enterprise-full hover:text-secondary-text text-xs';

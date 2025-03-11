@@ -42,7 +42,7 @@ export default function SelectLlmModel() {
   if (models.length < 2) {
     return (
       <div className="flex flex-col">
-        <span className="text-xs text-gray-100">Aktuelles Sprachmodell</span>
+        <span className="text-xs text-gray-400">Aktuelles Sprachmodell</span>
         <div className="flex gap-2 items-center">
           <span className="text-primary">{selectedModel.displayName}</span>
           {isGreenModel({ model: selectedModel }) && <GreenLeafIcon />}
@@ -53,20 +53,23 @@ export default function SelectLlmModel() {
 
   return (
     <div className="flex flex-col gap-2 hover:bg-secondary/20 rounded-enterprise-md p-2">
-      <span className="text-xs text-gray-100 hidden sm:block">Aktuelles Sprachmodell</span>
+      <span className="text-xs text-gray-400 hidden sm:block">Aktuelles Sprachmodell</span>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger
           disabled={models.length < 2}
           asChild
           className="cursor-pointer disabled:cursor-none"
         >
-          <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="flex items-center gap-2 cursor-pointer disabled:cursor-none"
+          >
             <span className="text-primary text-base font-medium">
               {selectedModel?.displayName ?? 'Kein Modell'}
             </span>
             {isGreenModel({ model: selectedModel }) && <GreenLeafIcon />}
             {models.length > 1 && <ChevronDown className="text-primary" />}
-          </div>
+          </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content
           className="flex flex-col bg-white shadow-dropdown rounded-xl ml-0 sm:ml-44"

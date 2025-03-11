@@ -58,6 +58,7 @@ export function ToggleSidebarButton({ forceVisibility = false }: { forceVisibili
 
   return (
     <button
+      title="Sidebar"
       className={cn(
         'focus:outline-none group hover:bg-light-gray rounded-enterprise-sm hover:bg-vidis-hover-green/20',
       )}
