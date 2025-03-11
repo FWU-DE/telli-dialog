@@ -92,9 +92,13 @@ export default function SharedSchoolChatEditForm({
             }}
             defaultValue={sharedSchoolChat.modelId}
           >
-            <Select.Trigger className="flex items-center justify-between w-full py-2 pl-4 pr-4 bg-white border border-gray-200 focus:border-primary rounded-enterprise-md focus:outline-none">
+            <Select.Trigger
+              aria-label={tCommon('llm-model')}
+              className="flex items-center justify-between w-full py-2 pl-4 pr-4 bg-white border border-gray-200 focus:border-primary rounded-enterprise-md focus:outline-none"
+            >
               <Select.Value />
-              <ChevronDownIcon className="w-4 h-4 text-primary ms-2" />
+              <ChevronDownIcon aria-hidden="true" className="w-4 h-4 text-primary ms-2" />
+              <span className="sr-only">{tCommon('llm-model')}</span>
             </Select.Trigger>
 
             <Select.Portal>
@@ -120,48 +124,53 @@ export default function SharedSchoolChatEditForm({
         </div>
       </div>
       <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>
+        <label htmlFor="description" className={cn(labelClassName, 'text-sm')}>
           <span className="text-coral">*</span> {t('purpose')}
         </label>
         <input
+          id="description"
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('description')}
         />
       </div>
       <div className="grid grid-cols-3 gap-6">
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>
+          <label htmlFor="school-type" className={cn(labelClassName, 'text-sm')}>
             <span className="text-coral">*</span> {t('school-type')}
           </label>
           <input
+            id="school-type"
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('schoolType')}
           />
         </div>
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>
+          <label htmlFor="gradeLevel" className={cn(labelClassName, 'text-sm')}>
             <span className="text-coral">*</span> {t('grade')}
           </label>
           <input
+            id="gradeLevel"
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('gradeLevel')}
           />
         </div>
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>
+          <label htmlFor="subject" className={cn(labelClassName, 'text-sm')}>
             <span className="text-coral">*</span> {t('subject')}
           </label>
           <input
+            id="subject"
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('subject')}
           />
         </div>
       </div>
       <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>
+        <label htmlFor="learning-context" className={cn(labelClassName, 'text-sm')}>
           <span className="text-coral">*</span> {t('learning-context')}
         </label>
         <textarea
+          id="learning-context"
           rows={5}
           style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
@@ -169,8 +178,11 @@ export default function SharedSchoolChatEditForm({
         />
       </div>
       <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>{t('specification')}</label>
+        <label htmlFor="specification" className={cn(labelClassName, 'text-sm')}>
+          {t('specification')}
+        </label>
         <textarea
+          id="specification"
           rows={5}
           style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
@@ -178,8 +190,11 @@ export default function SharedSchoolChatEditForm({
         />
       </div>
       <div className="flex flex-col gap-4">
-        <label className={cn(labelClassName, 'text-sm')}>{t('restrictions')}</label>
+        <label htmlFor="restrictions" className={cn(labelClassName, 'text-sm')}>
+          {t('restrictions')}
+        </label>
         <textarea
+          id="restrictions"
           rows={5}
           style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}

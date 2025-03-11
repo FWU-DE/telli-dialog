@@ -41,12 +41,10 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
       className="flex gap-2 items-center border rounded-enterprise-md p-4 hover:border-primary"
     >
       <div className="min-w-0">
-        <h3 className={cn('font-medium text-primary', truncateClassName)}>
+        <h1 className={cn('font-medium text-primary', truncateClassName)}>
           {sharedSchoolChat.name}
-        </h3>
-        <span className={cn('text-gray-100', truncateClassName)}>
-          {sharedSchoolChat.description}
-        </span>
+        </h1>
+        <h2 className={cn('text-gray-400', truncateClassName)}>{sharedSchoolChat.description}</h2>
       </div>
       <div className="flex-grow" />
       {sharedSchoolChat.startedAt !== null && timeLeft > 0 && (
@@ -58,20 +56,24 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
       )}
       {timeLeft > 0 && (
         <Link
+          aria-label={t('shared.share')}
           href={`/shared-chats/${sharedSchoolChat.id}/share`}
           className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
         >
-          <ShareIcon className="w-8 h-8" />
+          <ShareIcon aria-hidden="true" className="w-8 h-8" />
+          <span className="sr-only">{t('shared.share')}</span>
         </Link>
       )}
       <DestructiveActionButton
+        aria-label={tCommon('delete')}
         modalDescription={t('form.delete-description')}
         modalTitle={t('form.delete-title')}
         confirmText={tCommon('delete')}
         actionFn={handleDeleteSharedChat}
         triggerButtonClassName="border-transparent justify-center flex flex-col rounded-enterprise-sm hover:bg-vidis-hover-green/20 p-0"
       >
-        <TrashIcon className="w-8 h-8 text-primary" />
+        <TrashIcon aria-hidden="true" className="w-8 h-8 text-primary" />
+        <span className="sr-only">{tCommon('delete')}</span>
       </DestructiveActionButton>
     </Link>
   );

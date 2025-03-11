@@ -29,8 +29,10 @@ type ShareContainerProps = CharacterModel;
 export default function ShareContainer({ ...character }: ShareContainerProps) {
   const toast = useToast();
   const router = useRouter();
+
   const t = useTranslations('characters.shared');
   const tToasts = useTranslations('characters.toasts');
+  const tCommon = useTranslations('common');
 
   const sharedChatTimeLeft = calculateTimeLeftBySharedChat(character);
   const sharedChatActive = sharedChatTimeLeft > 0;
@@ -83,6 +85,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
         <div className="flex flex-col gap-4">
           <label className={cn(labelClassName, 'text-sm')}>Telli-Points</label>
           <select
+            aria-label="Telli-Points"
             {...registerShare('intelliPointsPercentageLimit')}
             className={cn(
               'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600',
@@ -103,6 +106,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
         <div className="flex flex-col gap-4">
           <label className={cn(labelClassName, 'text-sm')}>{t('max-usage')}</label>
           <select
+            aria-label={t('max-usage')}
             {...registerShare('usageTimeLimit')}
             className={cn(
               'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600',
@@ -136,6 +140,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
           <div className="flex gap-3 justify-end">
             {sharedChatActive && (
               <button
+                aria-label={tCommon('stop')}
                 className={cn(
                   'flex items-center justify-center',
                   buttonSecondaryClassName,
@@ -145,6 +150,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
                 onClick={handleStopSharing}
               >
                 <svg
+                  aria-hidden="true"
                   width="12"
                   height="12"
                   viewBox="0 0 12 12"
@@ -153,10 +159,12 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
                 >
                   <rect width="12" height="12" rx="4" fill="#46217E" />
                 </svg>
+                <span className="sr-only">{tCommon('stop')}</span>
               </button>
             )}
             {sharedChatActive && (
               <button
+                aria-label={t('share')}
                 className={cn(
                   'flex items-center justify-center',
                   buttonSecondaryClassName,
@@ -165,7 +173,8 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
                 type="button"
                 onClick={() => router.push(shareUILink)}
               >
-                <FilledShareIcon className="w-4 h-4" />
+                <FilledShareIcon aria-hidden="true" className="w-4 h-4" />
+                <span className="sr-only">{t('share')}</span>
               </button>
             )}
             {!sharedChatActive && (

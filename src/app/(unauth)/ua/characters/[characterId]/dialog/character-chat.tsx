@@ -97,8 +97,13 @@ export default function CharacterSharedChat({
     <div className="flex flex-col h-full w-full overflow-hidden">
       <header className="flex gap-4 items-center py-[1.15rem] px-6">
         {chatActive && (
-          <button className={cn(buttonPrimaryClassName, 'p-2')} onClick={handleOpenNewChat}>
-            <PlusIcon className="fill-primary-text h-5 w-5" />
+          <button
+            aria-label={tCommon('new-chat')}
+            className={cn(buttonPrimaryClassName, 'p-2')}
+            onClick={handleOpenNewChat}
+          >
+            <PlusIcon aria-hidden="true" className="fill-primary-text h-5 w-5" />
+            <span className="sr-only">{tCommon('new-chat')}</span>
           </button>
         )}
         <SelectLlmModel />
