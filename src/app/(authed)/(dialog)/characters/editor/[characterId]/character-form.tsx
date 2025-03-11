@@ -226,10 +226,11 @@ export default function CharacterForm({
 
         <div className="grid grid-cols-3 gap-4">
           <div className="flex flex-col gap-4">
-            <label className={cn(labelClassName, 'text-sm')}>
+            <label htmlFor="school-type" className={cn(labelClassName, 'text-sm')}>
               <span className="text-coral">*</span> {t('school-type')}
             </label>
             <input
+              id="school-type"
               className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
               {...register('schoolType')}
               onBlur={handleAutoSave}
@@ -237,10 +238,11 @@ export default function CharacterForm({
             />
           </div>
           <div className="flex flex-col gap-4">
-            <label className={cn(labelClassName, 'text-sm')}>
+            <label htmlFor="grade" className={cn(labelClassName, 'text-sm')}>
               <span className="text-coral">*</span> {t('grade')}
             </label>
             <input
+              id="grade"
               className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
               {...register('gradeLevel')}
               placeholder={t('grade-placeholder')}
@@ -248,10 +250,11 @@ export default function CharacterForm({
             />
           </div>
           <div className="flex flex-col gap-4">
-            <label className={cn(labelClassName, 'text-sm')}>
+            <label htmlFor="subject" className={cn(labelClassName, 'text-sm')}>
               <span className="text-coral">*</span> {t('subject')}
             </label>
             <input
+              id="subject"
               className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
               {...register('subject')}
               onBlur={handleAutoSave}
@@ -265,10 +268,11 @@ export default function CharacterForm({
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
           <div className="flex gap-8 flex-col">
             <div className="flex flex-col gap-4">
-              <label className={cn(labelClassName, 'text-sm')}>
+              <label htmlFor="name" className={cn(labelClassName, 'text-sm')}>
                 <span className="text-coral">*</span> {t('character-name-label')}
               </label>
               <input
+                id="name"
                 {...register('name')}
                 className={cn(
                   inputFieldClassName,
@@ -279,10 +283,11 @@ export default function CharacterForm({
               />
             </div>
             <div className="flex flex-col gap-4">
-              <label className={cn(labelClassName, 'text-sm')}>
+              <label htmlFor="description" className={cn(labelClassName, 'text-sm')}>
                 <span className="text-coral">*</span> {t('character-description-label')}
               </label>
               <textarea
+                id="description"
                 rows={5}
                 style={{ resize: 'none' }}
                 {...register('description')}
@@ -296,8 +301,13 @@ export default function CharacterForm({
             </div>
           </div>
           <section className="h-full">
-            <label className={cn(labelClassName, 'text-sm')}>{tCommon('image')}</label>
-            <div className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4">
+            <label htmlFor="image" className={cn(labelClassName, 'text-sm')}>
+              {tCommon('image')}
+            </label>
+            <div
+              id="image"
+              className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4"
+            >
               {maybeSignedPictureUrl ? (
                 <Image
                   src={maybeSignedPictureUrl || ''}
@@ -328,10 +338,11 @@ export default function CharacterForm({
       </fieldset>
       <fieldset className="flex flex-col gap-6 mt-6">
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>
+          <label htmlFor="competence" className={cn(labelClassName, 'text-sm')}>
             <span className="text-coral">*</span> {t('character-competence-label')}
           </label>
           <textarea
+            id="competence"
             {...register('competence')}
             rows={5}
             style={{ resize: 'none' }}
@@ -341,10 +352,11 @@ export default function CharacterForm({
           />
         </div>
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>
+          <label htmlFor="learningContext" className={cn(labelClassName, 'text-sm')}>
             <span className="text-coral">*</span> {t('character-learning-context-label')}
           </label>
           <textarea
+            id="learningContext"
             {...register('learningContext')}
             rows={5}
             style={{ resize: 'none' }}
@@ -354,10 +366,11 @@ export default function CharacterForm({
           />
         </div>
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>
+          <label htmlFor="specifications" className={cn(labelClassName, 'text-sm')}>
             {t('character-specification-label')}
           </label>
           <textarea
+            id="specifications"
             {...register('specifications')}
             rows={5}
             style={{ resize: 'none' }}
@@ -367,10 +380,11 @@ export default function CharacterForm({
           />
         </div>
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>
+          <label htmlFor="restrictions" className={cn(labelClassName, 'text-sm')}>
             {t('character-restriction-label')}
           </label>
           <textarea
+            id="restrictions"
             {...register('restrictions')}
             rows={5}
             style={{ resize: 'none' }}

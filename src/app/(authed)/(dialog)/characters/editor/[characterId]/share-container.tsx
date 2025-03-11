@@ -88,7 +88,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
             aria-label="Telli-Points"
             {...registerShare('intelliPointsPercentageLimit')}
             className={cn(
-              'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600',
+              'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600 focus:outline-none',
               sharedChatActive && 'cursor-not-allowed',
             )}
             style={{
@@ -109,7 +109,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
             aria-label={t('max-usage')}
             {...registerShare('usageTimeLimit')}
             className={cn(
-              'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600',
+              'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600 focus:outline-none',
               sharedChatActive && 'cursor-not-allowed',
             )}
             style={{
@@ -117,11 +117,20 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
               background: !sharedChatActive ? selectSVGBackground : undefined,
             }}
           >
-            {usageTimeValueSchema.options.map((value) => (
-              <option key={value} value={value}>
-                {value} Minuten
-              </option>
-            ))}
+            {usageTimeValueSchema.options.map((value) => {
+              const minutes = parseInt(value, 10);
+              let displayLabel = `${value} Minuten`;
+              if (minutes >= 1440) {
+                const days = minutes / 1440;
+                displayLabel = days === 1 ? '1 Tag' : `${days} Tage`;
+              }
+
+              return (
+                <option key={value} value={value}>
+                  {displayLabel}
+                </option>
+              );
+            })}
           </select>
         </div>
         <div className="flex-grow" />

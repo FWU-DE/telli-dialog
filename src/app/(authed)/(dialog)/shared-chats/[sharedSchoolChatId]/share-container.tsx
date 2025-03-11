@@ -118,11 +118,20 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
               background: !sharedChatActive ? selectSVGBackground : undefined,
             }}
           >
-            {usageTimeValueSchema.options.map((value) => (
-              <option key={value} value={value}>
-                {value} Minuten
-              </option>
-            ))}
+            {usageTimeValueSchema.options.map((value) => {
+              const minutes = parseInt(value, 10);
+              let displayLabel = `${value} Minuten`;
+              if (minutes >= 1440) {
+                const days = minutes / 1440;
+                displayLabel = days === 1 ? '1 Tag' : `${days} Tage`;
+              }
+
+              return (
+                <option key={value} value={value}>
+                  {displayLabel}
+                </option>
+              );
+            })}
           </select>
         </div>
         <div className="flex-grow" />
