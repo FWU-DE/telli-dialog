@@ -20,7 +20,7 @@
     "chat-expired": "Der Chat ist abgelaufen"
   },
   "sidebar": {
-    "class-chats": "Klassendialoge",
+    "class-chats": "Lernszenarien",
     "characters": "Dialogavatar",
     "telli-points": "Deine Telli-Points",
     "conversation-delete-toast-success": "Die Konversation wurde erfolgreich gelöscht.",
@@ -98,19 +98,19 @@
     }
   },
   "shared-chats": {
-    "title": "Klassendialoge",
-    "description": "Erstelle thematische Dialoge, teile sie mit deiner Klasse und mache Lernen interaktiv und spannend – die zeitlich begrenzten Chats fördern gezielte Diskussionen, wobei die verbrauchten telli-Points automatisch vom Budget der Lehrkraft abgezogen werden.",
-    "button-create": "Dialog erstellen",
-    "search-placeholder": "Dialog suchen",
-    "no-dialogs": "Es wurden noch keine Dialoge erstellt.",
+    "title": "Lernszenarien",
+    "description": "Erstelle thematische Lernszenarien, teile sie mit deiner Klasse und mache Lernen interaktiv und spannend – die zeitlich begrenzten Chats fördern gezielte Diskussionen, wobei die verbrauchten telli-Points automatisch vom Budget der Lehrkraft abgezogen werden.",
+    "button-create": "Szenario erstellen",
+    "search-placeholder": "Szenario suchen",
+    "no-dialogs": "Es wurden noch keine Lernszenarien erstellt.",
     "form": {
       "model-label": "Sprachmodell",
-      "all-dialogs": "Alle Dialoge",
-      "title": "Klassendialog erstellen",
+      "all-dialogs": "Alle Lernszenarien",
+      "title": "Lernszenario erstellen",
       "settings": "Einstellungen",
-      "name": "Unter welchem Namen soll der Dialog abgespeichert werden?",
+      "name": "Unter welchem Namen soll das Lernszenario abgespeichert werden?",
       "name-placeholder": "Absolutismus unter Ludwig XIV - Gruppe 1 Soldaten",
-      "purpose": "Wie kann der Zweck des Dialogs kurz beschrieben werden?",
+      "purpose": "Wie kann der Zweck des Lernszenarios kurz beschrieben werden?",
       "purpose-placeholder": "Zwischen Absolutismus und Demokratie (Ludwig XIV)",
       "school-type": "Schultyp",
       "school-type-placeholder": "Gymnasium",
@@ -124,41 +124,45 @@
       "specification-placeholder": "Der KI-Chatbot soll aus der Perspektive eines Soldaten im Herrschaftsstsystem unter Ludwig XIV antworten.",
       "restrictions": "Was soll der KI-Chatbot nicht tun?",
       "restrictions-placeholder": "Der KI-Chatbot soll sich nicht auf Ereignisse eingehen, die außerhalb des thematischen Kontextes liegen.",
-      "delete-title": "Dialog löschen",
-      "delete-description": "Beim Löschen des Dialogs werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
-      "delete-button": "Dialog endgültig löschen",
-      "delete-confirm": "Bist du sicher, dass du diesen Klassendialog löschen möchtest? Dabei werden alle mit diesem Dialog verbundenen Konversationen unwiderruflich gelöscht."
+      "delete-title": "Lernszenario löschen",
+      "delete-description": "Beim Löschen des Lernszenarios werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
+      "delete-button": "Szenario endgültig löschen",
+      "delete-confirm": "Bist du sicher, dass du diesen Lernszenario löschen möchtest? Dabei werden alle mit diesem Dialog verbundenen Konversationen unwiderruflich gelöscht."
     },
     "shared": {
-      "title": "Klassendialog im Unterricht einsetzen",
+      "title": "Lernszenario im Unterricht einsetzen",
       "description": "Lege fest, wie viel deines Restbudgets an Telli-Points durch diesen Chat beansprucht werden darf und wie lange der Chat aktiv benutzt werden kann.",
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
       "share": "Teilen",
-      "button-start": "Klassendialog starten",
+      "button-start": "Szenario starten",
       "invalid-code-toast": "Der Code der eingegeben wurde ist entweder abgelaufen oder ungültig.",
       "join-code": "Mit Code beitreten",
-      "enter-chat": "Zum Dialog"
+      "enter-chat": "Zum Dialog",
+      "delete-chat-modal-title": "Neuer Chat",
+      "delete-chat-modal-description": "Wenn du einen neuen Chat beginnst verfällt der aktuelle Chat unwiderruflich.",
+      "delete-chat-modal-confirm-button": "Aktuellen Chat verwerfen und neu beginnen",
+      "expired-modal-description": "Der Dialog ist abgelaufen"
     },
     "share-page": {
-      "back-button": "Zum Klassendialog",
-      "join": "Dem Klassendialog beitreten",
+      "back-button": "Zum Lernszenario",
+      "join": "Dem Lernszenario beitreten",
       "go-to": "Gehe auf",
       "enter-code": "Gebe den Code ein",
       "open-chat": "Chat öffnen",
       "use-qr": "Oder nutze den QR-Code"
     },
     "toasts": {
-      "create-toast-success": "Der Klassendialog wurde erfolgreich erstellt.",
-      "create-toast-error": "Der Klassendialog konnte nicht erstellt werden.",
-      "share-toast-success": "Klassendialog erfolgreich geteilt.",
-      "share-toast-error": "Etwas ist beim Teilen des Klassendialogs schief gelaufen.",
-      "stop-share-toast-success": "Klassendialog wird nicht mehr geteilt.",
+      "create-toast-success": "Der Lernszenario wurde erfolgreich erstellt.",
+      "create-toast-error": "Der Lernszenario konnte nicht erstellt werden.",
+      "share-toast-success": "Lernszenario erfolgreich geteilt.",
+      "share-toast-error": "Etwas ist beim Teilen des Lernszenarios schief gelaufen.",
+      "stop-share-toast-success": "Lernszenario wird nicht mehr geteilt.",
       "stop-share-toast-error": "Etwas ist beim Beenden des Teilens schief gelaufen.",
-      "delete-toast-success": "Der Klassendialog wurde erfolgreich gelöscht.",
-      "delete-toast-error": "Der Klassendialog konnte nicht gelöscht werden.",
-      "edit-toast-success": "Der Klassendialog wurde erfolgreich aktualisiert.",
-      "edit-toast-error": "Der Klassendialog konnte nicht aktualisiert werden."
+      "delete-toast-success": "Der Lernszenario wurde erfolgreich gelöscht.",
+      "delete-toast-error": "Der Lernszenario konnte nicht gelöscht werden.",
+      "edit-toast-success": "Der Lernszenario wurde erfolgreich aktualisiert.",
+      "edit-toast-error": "Der Lernszenario konnte nicht aktualisiert werden."
     }
   }
 }

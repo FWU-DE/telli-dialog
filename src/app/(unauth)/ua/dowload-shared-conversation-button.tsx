@@ -6,17 +6,21 @@ import Spinner from '@/components/icons/spinner';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { Message } from 'ai';
+import { buttonPrimaryClassName } from '@/utils/tailwind/button';
+import { cn } from '@/utils/tailwind';
 
 type DownloadConversationButtonProps = {
   conversationMessages: Message[];
   className?: React.ComponentProps<'button'>['className'];
   iconClassName?: string;
   disabled: boolean;
+  primaryButton?: boolean;
 };
 
 export default function DownloadSharedConversationButton({
   conversationMessages,
   disabled = true,
+  primaryButton,
 }: DownloadConversationButtonProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const toast = useToast();
@@ -57,6 +61,26 @@ export default function DownloadSharedConversationButton({
     } finally {
       setIsLoading(false);
     }
+  }
+
+  if (primaryButton) {
+    return (
+      <button
+        className={cn(buttonPrimaryClassName, 'text-base font-normal')}
+        title={tCommon('conversation-download')}
+        onClick={handleDownload}
+        disabled={disabled}
+      >
+        <div className="flex items-center gap-1">
+          {isLoading ? (
+            <Spinner className="p-2 w-8 h-8" />
+          ) : (
+            <WebDownloadIcon className="group-disabled:text-gray-100 w-6 h-6" />
+          )}
+          Dialog herunterladen
+        </div>
+      </button>
+    );
   }
 
   return (

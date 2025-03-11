@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/db';
-import { sharedSchoolConversationTable } from '@/db/schema';
+import { sharedSchoolConversationTable, characterTable } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function checkSharedChatInviteCodeAction({ inviteCode }: { inviteCode: string }) {
@@ -12,9 +12,13 @@ export async function checkSharedChatInviteCodeAction({ inviteCode }: { inviteCo
       .where(eq(sharedSchoolConversationTable.inviteCode, inviteCode))
   )[0];
 
-  if (maybeSharedChat === undefined) {
-    throw Error('Could not find shared chat with this invite code');
-  }
-
   return maybeSharedChat;
+}
+
+export async function checkCharacterChatInviteCodeAction({ inviteCode }: { inviteCode: string }) {
+  const maybeCharacterChat = (
+    await db.select().from(characterTable).where(eq(characterTable.inviteCode, inviteCode))
+  )[0];
+
+  return maybeCharacterChat;
 }
