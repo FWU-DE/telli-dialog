@@ -174,8 +174,8 @@ export default function Chat({
             </div>
           )}
           {error && (
-            <div className="mx-4 p-4 gap-2 text-sm rounded-2xl bg-red-100 text-red-500 border border-red-500 text-right mt-8 max-w-3xl">
-              <div className="flex justify-between items-center px-2">
+            <div className="p-4 gap-2 mt-8 max-w-3xl mx-auto">
+              <div className="flex justify-between items-center text-sm rounded-2xl bg-red-100 text-red-500 border border-red-500 text-right p-4">
                 {error.message || 'Etwas ist schiefgelaufen'}
                 <button
                   onClick={() => reload()}

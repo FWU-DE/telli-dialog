@@ -118,7 +118,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
           <div className="w-full items-center flex flex-col gap-1 h-fit">
             {user.school.userRole === 'teacher' && (
               <>
-                <Link href="/shared-chats" className="w-full">
+                <Link prefetch href="/shared-chats" className="w-full">
                   <div
                     className={cn(
                       'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
@@ -130,7 +130,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                   </div>
                 </Link>
 
-                <Link href="/characters" className="w-full">
+                <Link prefetch href="/characters" className="w-full">
                   <div
                     className={cn(
                       'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',

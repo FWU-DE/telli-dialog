@@ -78,11 +78,12 @@ export async function POST(request: NextRequest) {
     modelName: definedModel.name,
     orderNumber: messages.length + 1,
   });
+  console.debug({ modelAndProvider, messages });
 
   const result = streamText({
     model: telliProvider,
     system: systemPrompt,
-    messages,
+    messages: messages.map((m) => ({ role: m.role, content: m.content })),
     experimental_generateMessageId: generateUUID,
     experimental_transform: smoothStream({ chunking: 'word', delayInMs: 20 }),
     async onFinish(assistantMessage) {
