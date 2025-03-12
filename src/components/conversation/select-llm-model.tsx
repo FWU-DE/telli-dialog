@@ -7,7 +7,11 @@ import { type LlmModel } from '@/db/schema';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { saveChatModelAsCookie } from '@/app/(authed)/(dialog)/actions';
 
-export default function SelectLlmModel() {
+type SelectLlmModelProps = {
+  isStudent?: boolean;
+};
+
+export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProps) {
   const { models, selectedModel: _selectedModel, setSelectedModel } = useLlmModels();
 
   function handleSelectModel(model: LlmModel) {
@@ -58,7 +62,7 @@ export default function SelectLlmModel() {
         <DropdownMenu.Trigger
           disabled={models.length < 2}
           asChild
-          className="cursor-pointer disabled:cursor-none"
+          className="cursor-pointer disabled:cursor-none focus:outline-none"
         >
           <button
             type="button"
@@ -78,6 +82,7 @@ export default function SelectLlmModel() {
           {models
             .filter((m) => m.priceMetadata.type === 'text')
             .filter((m) => m.id !== selectedModel?.id)
+            .filter((m) => !isStudent || !m.name.includes('mistral'))
             .map((model) => {
               return (
                 <React.Fragment key={model.id}>

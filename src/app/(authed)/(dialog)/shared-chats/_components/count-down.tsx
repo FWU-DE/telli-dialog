@@ -30,7 +30,7 @@ export default function CountDownTimer({ leftTime, totalTime, className }: Count
   return (
     <div
       className={cn(
-        'flex gap-2 items-center min-w-[6.5rem] px-4 py-2 rounded-[0.75rem]',
+        'flex gap-2 items-center min-w-[9rem] px-4 py-2 rounded-[0.75rem]',
         className,
         textClassName,
       )}
@@ -41,10 +41,19 @@ export default function CountDownTimer({ leftTime, totalTime, className }: Count
   );
 }
 
-function formatTime(seconds: number) {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${String(minutes).padStart(2, '0')} : ${String(remainingSeconds).padStart(2, '0')}`;
+function formatTime(totalSeconds: number) {
+  const days = Math.floor(totalSeconds / (24 * 3600));
+  const hours = Math.floor((totalSeconds % (24 * 3600)) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (days > 0) {
+    return `${days}d ${hours}h ${minutes}m`;
+  } else if (hours > 0) {
+    return `${hours}h ${minutes}m ${seconds}s`;
+  } else {
+    return `${String(minutes).padStart(2, '0')} : ${String(seconds).padStart(2, '0')}`;
+  }
 }
 
 function getColorByLeftAndTotalTime({ leftTime, totalTime }: CountDownTimerProps) {

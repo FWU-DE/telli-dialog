@@ -71,7 +71,7 @@ export default async function Page(context: {
       <HeaderPortal>
         <div className="flex w-full gap-4 justify-center items-center">
           <ToggleSidebarButton />
-          <SelectLlmModel />
+          <SelectLlmModel isStudent={user.school.userRole === 'student'} />
           <div className="flex-grow"></div>
           <ChatToggleButton />
           <DownloadConversationButton
