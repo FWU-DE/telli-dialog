@@ -15,6 +15,13 @@
       "when": 1740576726856,
       "tag": "0001_pretty_husk",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1741799722669,
+      "tag": "0002_complex_white_queen",
+      "breakpoints": true
     }
   ]
 }

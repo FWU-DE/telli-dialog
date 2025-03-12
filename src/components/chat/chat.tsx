@@ -10,7 +10,7 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
 import Image from 'next/image';
-import { type CharacterModel } from '@/db/schema';
+import { type CustomGptModel, type CharacterModel } from '@/db/schema';
 import TelliLogo from '../icons/logo';
 import PromptSuggestions from './prompt-suggestions';
 import MarkdownDisplay from './markdown-display';
@@ -18,10 +18,12 @@ import TelliClipboardButton from '../common/clipboard-button';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
 import { generateUUID } from '@/utils/uuid';
 import { useQueryClient } from '@tanstack/react-query';
+import RobotIcon from '../icons/robot';
 
 type ChatProps = {
   id: string;
   initialMessages: Message[];
+  customGpt?: CustomGptModel;
   character?: CharacterModel;
   imageSource?: string;
   promptSuggestions?: string[];
@@ -30,14 +32,20 @@ type ChatProps = {
 export default function Chat({
   id,
   initialMessages,
+  customGpt,
   character,
   imageSource,
   promptSuggestions = [],
 }: ChatProps) {
-  const t = useTranslations('common');
+  const tCommon = useTranslations('common');
+  const tHelpMode = useTranslations('help-mode');
+
   const { selectedModel } = useLlmModels();
-  const conversationPath =
-    character !== undefined ? `/characters/d/${character.id}/${id}` : `/d/${id}`;
+  const conversationPath = getConversationPath({
+    customGptId: customGpt?.id,
+    characterId: character?.id,
+    conversationId: id,
+  });
 
   const queryClient = useQueryClient();
 
@@ -61,7 +69,12 @@ export default function Chat({
     api: '/api/chat',
     experimental_throttle: 100,
     maxSteps: 2,
-    body: { id, modelId: selectedModel?.id, characterId: character?.id },
+    body: {
+      id,
+      modelId: selectedModel?.id,
+      characterId: character?.id,
+      customGptId: customGpt?.id,
+    },
     generateId: generateUUID,
     sendExtraMessageFields: true,
     onResponse: () => {
@@ -109,6 +122,10 @@ export default function Chat({
     }
   }
 
+  const chatSubHeading = tHelpMode('chat-subheading');
+  const markdownLink = `[FAQ Seite](https://telli.schule/#faq)`;
+  const formatedSubHeading = chatSubHeading.replace('$FAQ_LINK', markdownLink);
+
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
       <div className="flex flex-col flex-grow justify-between w-full overflow-hidden">
@@ -127,6 +144,21 @@ export default function Chat({
                 )}
                 <h1 className="text-2xl font-medium mt-8">{character.name}</h1>
                 <p className="max-w-72">{character.description}</p>
+              </div>
+            ) : customGpt !== undefined && customGpt.name === 'Hilfe-Assistent' ? (
+              <div className="flex flex-col items-center justify-center gap-6 h-full max-w-3xl mx-auto p-4">
+                <div className="pb-4">
+                  <RobotIcon className="w-14 h-14 text-primary" />
+                </div>
+                <div className="flex flex-col items-center justify-center gap-4">
+                  <span className="text-3xl font-medium text-center">
+                    {tHelpMode('chat-heading')}
+                  </span>
+                  <span className="text-base font-normal text-center max-w-2xl">
+                    <MarkdownDisplay>{formatedSubHeading}</MarkdownDisplay>
+                  </span>
+                </div>
+                <span className="text-base font-normal">{tHelpMode('chat-placeholder')}</span>
               </div>
             ) : (
               <div className="flex items-center justify-center h-full">
@@ -151,7 +183,18 @@ export default function Chat({
                       className=""
                       aria-label={`${message.role} message ${Math.floor(index / 2 + 1)}`}
                     >
-                      <MarkdownDisplay>{message.content}</MarkdownDisplay>
+                      <div className="flex items-start gap-2">
+                        {customGpt !== undefined &&
+                          customGpt.name === 'Hilfe-Assistent' &&
+                          message.role === 'assistant' && (
+                            <div className="p-1.5 rounded-enterprise-sm bg-secondary/5">
+                              <RobotIcon className="w-8 h-8 text-primary" />
+                            </div>
+                          )}
+
+                        <MarkdownDisplay>{message.content}</MarkdownDisplay>
+                      </div>
+
                       {isLastNonUser && !isLoading && (
                         <div className="flex items-center gap-1 mt-1">
                           <TelliClipboardButton text={message.content} />
@@ -202,7 +245,7 @@ export default function Chat({
               <div className="flex items-center">
                 <AutoResizeTextarea
                   autoFocus
-                  placeholder={t('send-message-placeholder')}
+                  placeholder={tCommon('send-message-placeholder')}
                   className="w-full text-base focus:outline-none bg-transparent max-h-[10rem] sm:max-h-[15rem] overflow-y-auto placeholder-black p-2"
                   onChange={handleInputChange}
                   value={input}
@@ -233,11 +276,31 @@ export default function Chat({
               </div>
             </form>
             <span className="text-xs mt-2 font-normal text-main-900 flex self-center text-center">
-              {t('information-disclaimer')}
+              {tCommon('information-disclaimer')}
             </span>
           </div>
         </div>
       </div>
     </div>
   );
+}
+
+function getConversationPath({
+  customGptId,
+  characterId,
+  conversationId,
+}: {
+  customGptId?: string;
+  characterId?: string;
+  conversationId: string;
+}) {
+  if (characterId !== undefined) {
+    return `/characters/d/${characterId}/${conversationId}`;
+  }
+
+  if (customGptId !== undefined) {
+    return `/custom/d/${customGptId}/${conversationId}`;
+  }
+
+  return `/d/${conversationId}`;
 }

@@ -27,15 +27,22 @@ export async function dbGetOrCreateConversation({
   conversationId,
   userId,
   characterId,
+  customGptId,
 }: {
   conversationId: string;
   userId: string;
   characterId?: string;
+  customGptId?: string;
 }) {
   return (
     await db
       .insert(conversationTable)
-      .values({ id: conversationId, userId, characterId: characterId ?? null })
+      .values({
+        id: conversationId,
+        userId,
+        characterId: characterId ?? null,
+        customGptId: customGptId ?? null,
+      })
       .onConflictDoUpdate({
         target: conversationTable.id,
         set: { id: conversationId },

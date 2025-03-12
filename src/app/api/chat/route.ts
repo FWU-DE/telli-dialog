@@ -7,11 +7,11 @@ import {
 import { NextRequest, NextResponse } from 'next/server';
 import { dbInsertChatContent } from '@/db/functions/chat';
 import { getUser } from '@/auth/utils';
-import { constructSchuleSystemPrompt, constructCharacterSystemPrompt } from './system-prompt';
 import { userHasReachedIntelliPointLimit, trackChatUsage } from './usage';
 import { getModelAndProviderWithResult } from '../utils';
 import { generateUUID } from '@/utils/uuid';
 import { getMostRecentUserMessage } from './utils';
+import { constructChatSystemPrompt } from './system-prompt';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -25,8 +25,16 @@ export async function POST(request: NextRequest) {
     messages,
     modelId,
     characterId,
-  }: { id: string; messages: Message[]; modelId: string; characterId?: string } =
-    await request.json();
+    customGptId,
+  }: {
+    id: string;
+    messages: Message[];
+    modelId: string;
+    characterId?: string;
+    customGptId: string;
+  } = await request.json();
+
+  console.debug({ characterId, customGptId });
 
   const [error, modelAndProvider] = await getModelAndProviderWithResult({
     modelId,
@@ -43,6 +51,7 @@ export async function POST(request: NextRequest) {
     conversationId: id,
     userId: user.id,
     characterId,
+    customGptId,
   });
 
   if (conversation === undefined) {
@@ -58,10 +67,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Could not get conversation object' }, { status: 404 });
   }
 
-  const systemPrompt =
-    characterId !== undefined
-      ? await constructCharacterSystemPrompt({ characterId })
-      : constructSchuleSystemPrompt();
+  const systemPrompt = await constructChatSystemPrompt({
+    characterId,
+    customGptId,
+    isTeacher: user.school.userRole === 'teacher',
+    federalStateSupportEmail: 'placeholder@email.com',
+  });
+
+  console.debug({ systemPrompt });
 
   const userMessage = getMostRecentUserMessage(messages);
 

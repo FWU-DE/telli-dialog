@@ -133,5 +133,10 @@ function buildConversationUrl({ conversation }: { conversation: ConversationMode
   if (conversation.characterId !== null) {
     return `/characters/d/${conversation.characterId}/${conversation.id}`;
   }
+
+  if (conversation.customGptId !== null) {
+    return `/custom/d/${conversation.customGptId}/${conversation.id}`;
+  }
+
   return `/d/${conversation.id}`;
 }
