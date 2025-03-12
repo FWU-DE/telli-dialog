@@ -74,8 +74,6 @@ export async function POST(request: NextRequest) {
     federalStateSupportEmail: 'placeholder@email.com',
   });
 
-  console.debug({ systemPrompt });
-
   const userMessage = getMostRecentUserMessage(messages);
 
   if (userMessage === undefined) {
