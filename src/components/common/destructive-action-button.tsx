@@ -29,6 +29,7 @@ export default function DestructiveActionButton({
     <AlertDialog.Root open={isOpen}>
       <AlertDialog.Trigger asChild>
         <button
+          id="destructive-button"
           className={cn(buttonDeleteClassName, triggerButtonClassName)}
           onClick={(event) => {
             event.stopPropagation();

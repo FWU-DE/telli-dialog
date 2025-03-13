@@ -206,6 +206,8 @@ export default function SharedSchoolChatCreateForm() {
           {tCommon('cancel')}
         </Link>
         <button
+          role="button"
+          title={tGeneral('button-create')}
           disabled={!isValid || isSubmitting}
           className={buttonPrimaryClassName}
           type="submit"

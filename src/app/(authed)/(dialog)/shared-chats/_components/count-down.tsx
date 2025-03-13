@@ -29,6 +29,7 @@ export default function CountDownTimer({ leftTime, totalTime, className }: Count
 
   return (
     <div
+      id="countdown-timer"
       className={cn(
         'flex gap-2 items-center min-w-[9rem] px-4 py-2 rounded-[0.75rem]',
         className,
