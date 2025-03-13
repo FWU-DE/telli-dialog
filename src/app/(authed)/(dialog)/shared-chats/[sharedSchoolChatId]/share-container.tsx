@@ -84,8 +84,11 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
       <p>{t('description')}</p>
       <div className="flex gap-6 items-center flex-wrap">
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>Telli-Points</label>
+          <label htmlFor="Telli-Points" className={cn(labelClassName, 'text-sm')}>
+            Telli-Points
+          </label>
           <select
+            id="Telli-Points"
             aria-label="Telli-Points"
             {...registerShare('intelliPointsPercentageLimit')}
             className={cn(
@@ -105,8 +108,11 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
           </select>
         </div>
         <div className="flex flex-col gap-4">
-          <label className={cn(labelClassName, 'text-sm')}>{t('max-usage')}</label>
+          <label htmlFor="maxUsage" className={cn(labelClassName, 'text-sm')}>
+            {t('max-usage')}
+          </label>
           <select
+            id="maxUsage"
             aria-label={t('max-usage')}
             {...registerShare('usageTimeLimit')}
             className={cn(
@@ -180,6 +186,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
             )}
             {!sharedChatActive && (
               <button
+                title={t('button-start')}
                 className={cn(
                   buttonPrimaryClassName,
                   'min-w-max max-w-min h-11 flex gap-2 items-center group',

@@ -84,7 +84,9 @@ export default async function Page(context: { params: Promise<{ sharedSchoolChat
             <div className="flex flex-col items-center gap-4">
               <p className="text-2xl sm:text-3xl">{t('enter-code')}</p>
               <div className="flex items-center gap-2">
-                <p className="text-3xl sm:text-5xl text-primary font-bold">{formattedInviteCode}</p>
+                <p id="join-code" className="text-3xl sm:text-5xl text-primary font-bold">
+                  {formattedInviteCode}
+                </p>
                 <CopyButton text={formattedInviteCode} iconClassName="w-7 h-7 sm:w-9 sm:h-9" />
               </div>
             </div>
@@ -99,7 +101,7 @@ export default async function Page(context: { params: Promise<{ sharedSchoolChat
           <div className="hidden md:block w-1 border-r-[1px]" />
           <section className="flex flex-col justify-between items-center gap-8 sm:gap-12">
             <h2 className="text-2xl sm:text-3xl text-center">{t('use-qr')}</h2>
-            <QRCode className="w-64 h-64 sm:w-[400px] sm:h-[400px]" value={shareUrl} />
+            <QRCode id="qr-code" className="w-64 h-64 sm:w-[400px] sm:h-[400px]" value={shareUrl} />
           </section>
         </main>
       </div>

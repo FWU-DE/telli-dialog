@@ -49,6 +49,7 @@ export function SharedChatContainer({ sharedChats, user }: SharedChatContainerPr
           />
           <div className="flex-grow" />
           <Link
+            title={t('button-create')}
             href="/shared-chats/create"
             className={cn(buttonPrimaryClassName, 'flex gap-2 items-center group py-2')}
           >
