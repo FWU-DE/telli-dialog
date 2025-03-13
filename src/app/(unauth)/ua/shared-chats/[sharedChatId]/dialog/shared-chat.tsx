@@ -131,6 +131,7 @@ export default function SharedChat({
           <DownloadSharedConversationButton
             conversationMessages={messages}
             disabled={!chatActive || messages.length === 0}
+            sharedConversationName={sharedSchoolChat.name}
           />
           <UnauthenticatedProfileMenu />
         </header>

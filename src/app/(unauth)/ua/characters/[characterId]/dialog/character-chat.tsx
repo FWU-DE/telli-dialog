@@ -112,6 +112,7 @@ export default function CharacterSharedChat({
         <DownloadSharedConversationButton
           conversationMessages={messages}
           disabled={!chatActive || messages.length === 0}
+          characterName={character.name}
         />
         <UnauthenticatedProfileMenu />
       </header>
