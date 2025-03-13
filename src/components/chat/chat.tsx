@@ -19,6 +19,7 @@ import { navigateWithoutRefresh } from '@/utils/navigation/router';
 import { generateUUID } from '@/utils/uuid';
 import { useQueryClient } from '@tanstack/react-query';
 import RobotIcon from '../icons/robot';
+import { useRouter } from 'next/navigation';
 
 type ChatProps = {
   id: string;
@@ -39,6 +40,7 @@ export default function Chat({
 }: ChatProps) {
   const tCommon = useTranslations('common');
   const tHelpMode = useTranslations('help-mode');
+  const router = useRouter();
 
   const { selectedModel } = useLlmModels();
   const conversationPath = getConversationPath({
@@ -90,6 +92,7 @@ export default function Chat({
       }
 
       refetchConversations();
+      router.refresh();
     },
   });
 
