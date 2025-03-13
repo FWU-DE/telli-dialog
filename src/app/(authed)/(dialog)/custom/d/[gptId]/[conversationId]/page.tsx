@@ -4,26 +4,23 @@ import { redirect } from 'next/navigation';
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import ProfileMenu from '@/components/navigation/profile-menu';
-import DownloadConversationButton from '@/app/(authed)/(dialog)/download-conversation-button';
 import { z } from 'zod';
-import { dbGetCharacterByIdOrSchoolId } from '@/db/functions/character';
-import SelectLlmModel from '@/components/conversation/select-llm-model';
 import { type Message } from 'ai';
 import Chat from '@/components/chat/chat';
+import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
+import DownloadConversationButton from '@/app/(authed)/(dialog)/download-conversation-button';
 import { NewChatButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 
 export const dynamic = 'force-dynamic';
 
 const pageContextSchema = z.object({
   params: z.object({
-    characterId: z.string(),
+    gptId: z.string(),
     conversationId: z.string(),
   }),
 });
 
-async function safeParse(context: {
-  params: Promise<{ characterId: string; conversationId: string }>;
-}) {
+async function safeParse(context: { params: Promise<{ gptId: string; conversationId: string }> }) {
   const resolvedParams = await context.params;
   const parseResult = pageContextSchema.safeParse({ params: resolvedParams });
 
@@ -35,13 +32,13 @@ async function safeParse(context: {
 }
 
 export default async function Page(context: {
-  params: Promise<{ characterId: string; conversationId: string }>;
+  params: Promise<{ gptId: string; conversationId: string }>;
 }) {
   const { params } = await safeParse(context);
 
   const [chat, user] = await Promise.all([dbGetConversationById(params.conversationId), getUser()]);
 
-  if (!chat) {
+  if (chat === undefined) {
     throw new Error('Chat not found');
   }
 
@@ -55,14 +52,10 @@ export default async function Page(context: {
     role: message.role === 'tool' ? 'data' : message.role,
   }));
 
-  const character = await dbGetCharacterByIdOrSchoolId({
-    characterId: params.characterId,
-    userId: user.id,
-    schoolId: user.school?.id ?? null,
-  });
+  const customGpt = await dbGetCustomGptById({ customGptId: params.gptId });
 
-  if (character === undefined) {
-    console.warn(`GPT with id ${params.characterId} not found`);
+  if (customGpt === undefined) {
+    console.warn(`GPT with id ${params.gptId} not found`);
     redirect('/');
   }
 
@@ -72,19 +65,19 @@ export default async function Page(context: {
         <div className="flex w-full gap-4 justify-center items-center">
           <ToggleSidebarButton />
           <NewChatButton />
-          <SelectLlmModel isStudent={user.school.userRole === 'student'} />
+          <span className="font-normal text-xl">{customGpt.name}</span>
           <div className="flex-grow"></div>
           <DownloadConversationButton
             conversationId={chat.id}
             className="flex items-center text-main-900 hover:text-main-600"
             iconClassName="h-6 w-6"
-            characterName={character.name}
+            characterName={customGpt.name}
             disabled={false}
           />
           <ProfileMenu {...user} />
         </div>
       </HeaderPortal>
-      <Chat id={chat.id} initialMessages={chatMessages} character={character} />
+      <Chat id={chat.id} initialMessages={chatMessages} customGpt={customGpt} />
     </>
   );
 }

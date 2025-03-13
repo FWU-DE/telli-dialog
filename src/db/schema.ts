@@ -21,6 +21,7 @@ export const conversationTable = pgTable('conversation', {
     .references(() => userTable.id)
     .notNull(),
   characterId: uuid('character_id').references(() => characterTable.id),
+  customGptId: uuid('custom_gpt_id').references(() => customGptTable.id),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
 });
@@ -246,3 +247,14 @@ export type SharedCharacterChatUsageTrackingInsertModel =
   typeof sharedCharacterChatUsageTrackingTable.$inferInsert;
 export type SharedCharacterChatUsageTrackingModel =
   typeof sharedCharacterChatUsageTrackingTable.$inferSelect;
+
+export const customGptTable = pgTable('custom_gpt', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: text('name').notNull(),
+  systemPrompt: text('system_prompt').notNull(),
+  userId: uuid('user_id').references(() => userTable.id),
+  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+});
+
+export type CustomGptModel = typeof customGptTable.$inferSelect;
+export type CustomGptInsertModel = typeof customGptTable.$inferInsert;

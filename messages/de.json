@@ -26,12 +26,18 @@
   "sidebar": {
     "class-chats": "Lernszenarien",
     "characters": "Dialogavatar",
+    "help-mode": "Hilfe-Assistent",
     "telli-points": "Deine Telli-Points",
     "conversation-delete-toast-success": "Die Konversation wurde erfolgreich gelöscht.",
     "conversation-delete-toast-error": "Die Konversation konnte nicht gelöscht werden.",
     "chats-loading": "Dialoge werden geladen...",
     "chats-error": "Etwas ist schiefgelaufen...",
     "chats-reload": "Dialoge neu laden"
+  },
+  "help-mode": {
+    "chat-heading": "Hallo, ich bin tellis Hilfe-Assistent",
+    "chat-subheading": "Ich kenne mich hier aus und kann dir hoffentlich Fragen beantworten oder dir bei Problemen weiterhelfen. Ansonsten kannst du auch gerne meine $FAQ_LINK besuchen.",
+    "chat-placeholder": "Wie kann ich dir helfen?"
   },
   "characters": {
     "character": "Dialogavatar",

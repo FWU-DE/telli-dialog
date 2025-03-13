@@ -15,12 +15,16 @@ type DownloadConversationButtonProps = {
   iconClassName?: string;
   disabled: boolean;
   primaryButton?: boolean;
+  sharedConversationName?: string;
+  characterName?: string;
 };
 
 export default function DownloadSharedConversationButton({
   conversationMessages,
   disabled = true,
   primaryButton,
+  sharedConversationName,
+  characterName,
 }: DownloadConversationButtonProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const toast = useToast();
@@ -39,8 +43,13 @@ export default function DownloadSharedConversationButton({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(conversationMessages),
+        body: JSON.stringify({
+          messages: conversationMessages,
+          characterName,
+          sharedConversationName,
+        }),
       });
+
       const encodedFileName = response.headers.get('X-Filename')?.toString();
 
       const fileName =

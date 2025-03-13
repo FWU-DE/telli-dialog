@@ -41,7 +41,7 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: 'blue' }}
+              style={{ color: '#46217E', textDecoration: 'underline', textUnderlineOffset: '4px' }}
               {...props}
             >
               {children}
