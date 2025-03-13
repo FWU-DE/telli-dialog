@@ -140,7 +140,10 @@ export default function CharacterSharedChat({
                         'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary/20 text-primary-foreground max-w-[70%] break-words',
                     )}
                   >
-                    <div className="">
+                    <div
+                      className=""
+                      aria-label={`${message.role} message ${Math.floor(index / 2 + 1)}`}
+                    >
                       <MarkdownDisplay>{message.content}</MarkdownDisplay>
 
                       {isLastNonUser && !isLoading && (
