@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { db } from '..';
 import { conversationMessageTable, conversationTable } from '../schema';
 
@@ -28,4 +28,35 @@ export async function dbDeleteConversationByIdAndUserId({
 
     return deletedConversation;
   });
+}
+
+export async function dbDeleteOutdatedConversations() {
+  const query = sql`
+WITH updated_conversations AS (
+  UPDATE conversation c
+  SET deleted_at = CURRENT_TIMESTAMP
+  FROM user_entity u
+  JOIN user_school_mapping usm ON u.id = usm.user_id
+  JOIN school s ON usm.school_id = s.id
+  JOIN federal_state fs ON s.federal_state_id = fs.id
+  WHERE c.user_id = u.id
+    AND c.deleted_at IS NULL
+    AND c.created_at < CURRENT_TIMESTAMP - (fs.chat_storage_time * INTERVAL '1 day')
+  RETURNING c.id
+),
+updated_messages AS (
+  UPDATE conversation_message cm
+  SET content = ''
+  FROM updated_conversations uc
+  WHERE cm.conversation_id = uc.id
+  RETURNING cm.id
+)
+SELECT
+  (SELECT COUNT(*) FROM updated_conversations) AS conversations_deleted,
+  (SELECT COUNT(*) FROM updated_messages) AS messages_emptied;`;
+
+  const result = await db.execute(query);
+
+  const deletedCount = Number(result.rows[0]?.['conversations_deleted']);
+  return deletedCount;
 }
