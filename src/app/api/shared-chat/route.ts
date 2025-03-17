@@ -10,6 +10,7 @@ import { dbGetSharedChatByIdAndInviteCode } from '@/db/functions/shared-school-c
 import { constructSystemPromptBySharedChat } from './system-prompt';
 import { dbUpdateTokenUsageBySharedChatId } from '@/db/functions/shared-school-chat';
 import { getModelAndProviderWithResult, getSearchParamsFromUrl } from '../utils';
+import { checkProductAccess } from '@/utils/vidis/access';
 
 export async function POST(request: NextRequest) {
   const { messages, modelId }: { messages: Array<Message>; modelId: string } = await request.json();
@@ -22,6 +23,12 @@ export async function POST(request: NextRequest) {
   }
 
   const teacherUserAndContext = await getUserAndContextByUserId({ userId: sharedChat.userId });
+  // check for product access
+  const productAccess = checkProductAccess(teacherUserAndContext);
+
+  if (!productAccess.hasAccess) {
+    return NextResponse.json({ error: productAccess.errorType }, { status: 403 });
+  }
 
   if (teacherUserAndContext.school.userRole !== 'teacher') {
     return NextResponse.json(

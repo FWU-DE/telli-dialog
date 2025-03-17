@@ -12,6 +12,7 @@ import {
   dbGetCharacterByIdAndInviteCode,
   dbUpdateTokenUsageByCharacterChatId,
 } from '@/db/functions/character';
+import { checkProductAccess } from '@/utils/vidis/access';
 
 export async function POST(request: NextRequest) {
   const { messages, modelId }: { messages: Array<Message>; modelId: string } = await request.json();
@@ -24,6 +25,11 @@ export async function POST(request: NextRequest) {
   }
 
   const teacherUserAndContext = await getUserAndContextByUserId({ userId: character.userId });
+  const productAccess = checkProductAccess(teacherUserAndContext);
+
+  if (!productAccess.hasAccess) {
+    return NextResponse.json({ error: productAccess.errorType }, { status: 403 });
+  }
 
   if (teacherUserAndContext.school.userRole !== 'teacher') {
     return NextResponse.json(

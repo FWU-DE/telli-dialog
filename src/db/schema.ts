@@ -1,4 +1,14 @@
-import { pgTable, text, timestamp, uuid, pgEnum, integer, unique, json } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  pgEnum,
+  integer,
+  unique,
+  json,
+  boolean,
+} from 'drizzle-orm/pg-core';
 import { z } from 'zod';
 import { type LlmModelPriceMetadata } from './types';
 import { conversationRoleSchema } from '@/utils/chat';
@@ -81,6 +91,12 @@ export const federalStateTable = pgTable('federal_state', {
   studentPriceLimit: integer('student_price_limit').notNull().default(200),
   encryptedApiKey: text('encrypted_api_key'),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  // vidis things
+  mandatoryCertificationTeacher: boolean('mandatory_certification_teacher').default(false),
+  chatStorageTime: integer('chat_storage_time').notNull().default(120),
+  supportContact: text('support_contact'),
+  trainingLink: text('training_link'),
+  studentAccess: boolean('student_access').default(true).notNull(),
 });
 
 export type FederalStateInsertModel = typeof federalStateTable.$inferInsert;
