@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
   const result = streamText({
     model: telliProvider,
     system: systemPrompt,
-    messages,
+    messages: messages.map((m) => ({ role: m.role, content: m.content })),
     experimental_generateMessageId: generateUUID,
     experimental_transform: smoothStream({ chunking: 'word', delayInMs: 20 }),
     async onFinish(assistantMessage) {
@@ -109,11 +109,10 @@ export async function POST(request: NextRequest) {
       if (messages.length === 1 || messages.length === 2 || conversation.name === null) {
         const { text } = await generateText({
           model: telliProvider,
-          system: `\n
-    - you will generate a short title based on the first message a user begins a conversation with
-    - ensure it is not more than 80 characters long
-    - the title should be a summary of the user's message
-    - do not use quotes or colons`,
+          system: `Du erstellst einen kurzen Titel basierend auf der ersten Nachricht eines Nutzers
+Stelle sicher, dass er nicht länger als 80 Zeichen ist
+Der Titel sollte eine Zusammenfassung der Nachricht sein
+Verwende keine Anführungszeichen oder Doppelpunkte`,
           messages,
         });
 
