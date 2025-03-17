@@ -1,0 +1,38 @@
+name: Delete Old Conversations
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  delete-conversations:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Load 1Password Secrets
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          API_KEY: op://Telli/.env.prod telli-chatbot/API_KEY
+
+      - name: Call Delete Conversations Endpoint
+        run: |
+          curl -X DELETE https://chat.telli.schule/v1/admin/delete-conversation \
+            -H "Authorization: Bearer ${{ env.API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -w "\n%{http_code}" \
+            -o /dev/null
+
+          # Check if the request was successful (2xx status code)
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE https://chat.telli.schule/v1/admin/delete-conversation -H "Authorization: Bearer ${{ env.API_KEY }}")
+          if [[ $STATUS_CODE -lt 200 || $STATUS_CODE -ge 300 ]]; then
+            echo "Error: Received status code $STATUS_CODE"
+            exit 1
+          fi
+
+          echo "Successfully deleted expired conversations"

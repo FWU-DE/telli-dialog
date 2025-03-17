@@ -9,6 +9,8 @@ import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-mode
 import { getPriceInCentByUser } from '@/app/school';
 import AutoLogout from '@/components/auth/auto-logout';
 import { getDefaultModelNameByCookies } from '@/utils/model';
+import { checkProductAccess } from '@/utils/vidis/access';
+import ProductAccessModal from '@/components/modals/product-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +22,8 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
 
   const defaultModelByCookie = await getDefaultModelNameByCookies();
   const priceInCent = await getPriceInCentByUser({ user, models });
+
+  const productAccess = checkProductAccess(user);
 
   return (
     <div className="flex h-[100dvh] w-[100dvw]">
@@ -39,6 +43,11 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
           </div>
         </LlmModelsProvider>
       </SidebarVisibilityProvider>
+      {!productAccess.hasAccess && (
+        <ProductAccessModal modalTitle={'Nutzung nicht möglich'}>
+          {productAccess.errorMessage}
+        </ProductAccessModal>
+      )}
     </div>
   );
 }

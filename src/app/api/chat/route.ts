@@ -12,9 +12,16 @@ import { getModelAndProviderWithResult } from '../utils';
 import { generateUUID } from '@/utils/uuid';
 import { getMostRecentUserMessage } from './utils';
 import { constructChatSystemPrompt } from './system-prompt';
+import { checkProductAccess } from '@/utils/vidis/access';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
+
+  const productAccess = checkProductAccess(user);
+
+  if (!productAccess.hasAccess) {
+    return NextResponse.json({ error: productAccess.errorType }, { status: 403 });
+  }
 
   if (await userHasReachedIntelliPointLimit({ user })) {
     return NextResponse.json({ error: 'User has reached intelli points limit' }, { status: 429 });

@@ -5,7 +5,7 @@ import SidebarItem from '@/components/navigation/sidebar/conversation-item';
 import { useSidebarVisibility } from '@/components/navigation/sidebar/sidebar-provider';
 import useBreakpoints from '@/components/hooks/use-breakpoints';
 import { usePathname, useRouter } from 'next/navigation';
-import { isToday, isYesterday, subDays, isAfter } from 'date-fns';
+import { isToday, isYesterday, subDays, isAfter, isBefore } from 'date-fns';
 import Link from 'next/link';
 import React from 'react';
 import { type UserAndContext } from '@/auth/types';
@@ -79,6 +79,11 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
   const last7DaysConversations = conversations.filter((conversation) => {
     const date = new Date(conversation.createdAt);
     return isAfter(date, subDays(new Date(), 7)) && !isToday(date) && !isYesterday(date);
+  });
+
+  const pastConversations = conversations.filter((conversation) => {
+    const date = new Date(conversation.createdAt);
+    return isBefore(date, subDays(new Date(), 7));
   });
 
   function handleDeleteConversation(conversationId: string) {
@@ -219,6 +224,26 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                     {tCommon('this-week')}
                   </p>
                   {last7DaysConversations.map((conversation) => (
+                    <SidebarItem
+                      key={conversation.id}
+                      conversation={conversation}
+                      onDeleteConversation={handleDeleteConversation}
+                      onUpdateConversation={(name) =>
+                        handleUpdateConversation({ id: conversation.id, name })
+                      }
+                    />
+                  ))}
+                </>
+              )}
+
+              {pastConversations.length > 0 && (
+                <>
+                  <p
+                    className={cn('font-medium text-sm text-left ms-4 mt-4 w-full text-main-black')}
+                  >
+                    {tCommon('past')}
+                  </p>
+                  {pastConversations.map((conversation) => (
                     <SidebarItem
                       key={conversation.id}
                       conversation={conversation}
