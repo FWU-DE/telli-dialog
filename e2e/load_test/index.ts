@@ -101,17 +101,19 @@ export default async function main() {
     // simulate user chilling
     await page.waitForTimeout(2000);
     // sleep(3);
-    const dropdownLocator = page.locator('button[aria-label="Select Llm Dropdown"]');
-    await dropdownLocator.waitFor();
-    await dropdownLocator.click();
+    if (userIndex % 2 === 0) {
+      const dropdownLocator = page.locator('button[aria-label="Select Llm Dropdown"]');
+      await dropdownLocator.waitFor();
+      await dropdownLocator.click();
 
-    await page.waitForTimeout(1000);
-    const modelLocator = page.locator(
-      'button[aria-label="Select meta-llama/Meta-Llama-3.1-8B-Instruct Model"]',
-    );
-    await modelLocator.waitFor();
-    await modelLocator.click();
-    await page.waitForTimeout(1000);
+      await page.waitForTimeout(1000);
+      const modelLocator = page.locator(
+        'button[aria-label="Select meta-llama/Meta-Llama-3.1-8B-Instruct Model"]',
+      );
+      await modelLocator.waitFor();
+      await modelLocator.click();
+      await page.waitForTimeout(1000);
+    }
 
     // send first message
     await sendMessage(DEFAULT_PROMPT, page);
