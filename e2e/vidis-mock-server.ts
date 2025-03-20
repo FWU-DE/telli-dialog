@@ -194,7 +194,13 @@ async function startServer() {
   });
 }
 
-startServer().catch((err) => {
-  console.error('Error starting server:', err);
-  process.exit(1);
-});
+startServer()
+  .then(() => {
+    if (process.send) {
+      process.send('ready');
+    }
+  })
+  .catch((err) => {
+    console.error('Error starting server:', err);
+    process.exit(1);
+  });
