@@ -10,13 +10,21 @@ export const LOAD_TEST_OPTIONS = {
   scenarios: {
     ui_with_browser: {
       executor: 'ramping-vus',
-      startVUs: 10,
+      startVUs: 100,
       stages: [
         { duration: '30s', target: 100 },
         { duration: '1m', target: 500 },
-        { duration: '1m', target: 1000 },
         { duration: '2m', target: 1000 },
-        { duration: '30s', target: 0 },
+        { duration: '3m', target: 2000 },
+        { duration: '4m', target: 3000 },
+        { duration: '5m', target: 4000 },
+        { duration: '6m', target: 5000 },
+        { duration: '7m', target: 6000 },
+        { duration: '8m', target: 7000 },
+        { duration: '9m', target: 8000 },
+        { duration: '10m', target: 9000 },
+        { duration: '11m', target: 10000 },
+        { duration: '3m', target: 0 },
       ],
       options: {
         browser: {
