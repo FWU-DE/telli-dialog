@@ -53,11 +53,3 @@ pnpm dev
 
 You can find more docs in the [./docs](./docs) folder.
 For information about the project structure, see [here](./docs/structure.md).
-
-## load tests
-
-If you need to load test, you need to install `k6`.
-
-```sh
-brew install k6
-```

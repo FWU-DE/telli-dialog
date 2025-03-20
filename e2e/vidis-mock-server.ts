@@ -6,7 +6,7 @@ import { readUserMappings } from './load_test/utils';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-const ISSUER_URL = isProduction ? 'https://titanom.ngrok.app' : 'http://localhost:9000';
+const ISSUER_URL = isProduction ? 'https://vidis-mock.dgpt.app' : 'http://localhost:9000';
 
 const VALID_REDIRECT_URLS = [
   'http://localhost:3000',
@@ -22,6 +22,8 @@ if (isProduction) {
 }
 
 const userAccountMapping = readUserMappings();
+
+let userCount = 0;
 
 // Create a simple PKCE-enabled client configuration
 const clientConfig = {
@@ -65,10 +67,7 @@ const providerConfig: Configuration = {
     openid: ['sub', 'rolle', 'schulkennung', 'bundesland'],
   },
   async findAccount(ctx, id: string) {
-    console.log('findAccount called with id:', id);
-
     const maybeAccount = userAccountMapping[id];
-    console.debug({ maybeAccount });
 
     if (maybeAccount === undefined) {
       throw Error(`Expected teacher or student but got '${id}'`);
@@ -76,7 +75,6 @@ const providerConfig: Configuration = {
     return {
       accountId: id,
       async claims(use: string, scope: string) {
-        console.log('claims called with use:', use, 'scope:', scope);
         return {
           sub: maybeAccount.sub,
           rolle: maybeAccount.rolle,
@@ -87,14 +85,14 @@ const providerConfig: Configuration = {
     };
   },
   async extraTokenClaims(ctx, token) {
-    console.log('extraTokenClaims called');
     // @ts-expect-error property exists
     const maybeAccount = userAccountMapping[token.accountId];
-    console.debug({ maybeAccount });
     if (maybeAccount === undefined) {
       // @ts-expect-error property exists
       throw Error(`Expected teacher or student but got '${token.accountId}'`);
     }
+    userCount = userCount + 1;
+    console.info({ userCount });
 
     return {
       typ: 'ID',
@@ -166,17 +164,17 @@ async function startServer() {
 
   // Add middleware to modify token responses to match the schema
   provider.use(async (ctx, next: () => Promise<void>) => {
-    console.log(`${ctx.method} ${ctx.url}`);
+    // console.log(`${ctx.method} ${ctx.url}`);
 
     try {
       await next();
 
       if (ctx.oidc?.route === 'token' && ctx.body) {
-        console.log('Modifying token response');
+        // console.log('Modifying token response');
         ctx.body.provider = 'vidis';
         ctx.body.token_type = 'bearer';
 
-        console.log('Token response:', JSON.stringify(ctx.body, null, 2));
+        // console.log('Token response:', JSON.stringify(ctx.body, null, 2));
       }
     } catch (err) {
       console.error('Middleware error:', err);
@@ -186,7 +184,7 @@ async function startServer() {
 
   app.use('/', provider.callback());
 
-  app.listen(9000, () => {
+  app.listen(process.env.PORT || 9000, () => {
     console.log(`OIDC Provider running on ${ISSUER_URL}`);
     console.log(`OpenID Configuration at ${ISSUER_URL}/.well-known/openid-configuration`);
     console.log('\nFor use with next-auth, set the following environment variables:');

@@ -7,11 +7,11 @@ export const LOAD_TEST_OPTIONS = {
       executor: 'ramping-vus',
       startVUs: 10,
       stages: [
-        { duration: '30s', target: 10 },
+        { duration: '30s', target: 100 },
         // { duration: '1m', target: 500 },
         // { duration: '1m', target: 1000 },
         // { duration: '2m', target: 1000 },
-        // { duration: '30s', target: 0 },
+        { duration: '30s', target: 0 },
       ],
       options: {
         browser: {
@@ -41,7 +41,10 @@ const TEST_OPTIONS = {
   },
 };
 
-export const options = TEST_OPTIONS;
+let errorFlows = 0;
+let successFlows = 0;
+
+export const options = __ENV.K6_BROWSER_HEADLESS === 'false' ? TEST_OPTIONS : LOAD_TEST_OPTIONS;
 
 function getUserNameByNumber(n: number) {
   if (n % 2 === 0) {
@@ -68,12 +71,13 @@ export default async function main() {
 
   try {
     await page.goto(`${BASE_URL}/login?mocklogin=true`);
+    await page.waitForTimeout(2000);
 
     // Take a screenshot to debug
-    await page.screenshot({ path: `debug-before-login-${userIndex}.png` });
+    // await page.screenshot({ path: `debug-before-login-${userIndex}.png` });
 
     // Use proper locator API instead of unsupported selectors
-    const loginButton = page.locator('button[aria-label="Login with VIDIS"]');
+    const loginButton = page.locator('button[aria-label="Mit VIDIS einloggen"]');
     await loginButton.waitFor();
     await loginButton.click();
 
@@ -95,18 +99,21 @@ export default async function main() {
 
     // send first message
     await sendMessage('Wieviel ist 2+2?', page);
-    await page.waitForTimeout(10000);
+    await page.waitForTimeout(5000);
     await sendMessage('Wieviel ist 3+3?', page);
-    await page.waitForTimeout(10000);
+    await page.waitForTimeout(5000);
 
-    // sleep(Math.random() * 5 + 3);
+    await page.screenshot({ path: `e2e/load_test/success-results/screenshot-${userIndex}.png` });
+    successFlows += successFlows + 1;
   } catch (error) {
+    errorFlows += errorFlows + 1;
     console.error('Error during test execution:', error);
     // Take screenshot on error
-    await page.screenshot({ path: `error-screenshot-${userIndex}.png` });
+    await page.screenshot({ path: `e2e/load_test/error-results/screenshot-${userIndex}.png` });
   } finally {
-    page.close();
-    context.close();
+    console.info({ successFlows, errorFlows });
+    await page.close();
+    await context.close();
   }
 }
 
