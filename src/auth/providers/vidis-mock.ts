@@ -1,7 +1,8 @@
 import { NextAuthConfig } from 'next-auth';
 
 // const BASE_URL = 'http://localhost:9000';
-const BASE_URL = 'https://titanom.ngrok.app';
+// const BASE_URL = 'https://titanom.ngrok.app';
+const BASE_URL = 'https://vidis-mock.dgpt.app';
 
 export const mockVidisConfig = {
   id: 'vidis-mock',
