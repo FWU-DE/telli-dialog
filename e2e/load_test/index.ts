@@ -17,10 +17,6 @@ export const LOAD_TEST_OPTIONS = {
         browser: {
           type: 'chromium',
         },
-        launchOptions: {
-          args: ['--no-sandbox', '--disable-setuid-sandbox'],
-          headless: true,
-        },
       },
     },
   },
