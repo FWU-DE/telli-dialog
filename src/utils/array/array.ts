@@ -66,6 +66,14 @@ export function getRandomElement<T>(array: T[], defaultValue: T): T {
   return array[randomIndex] ?? defaultValue;
 }
 
+export function getRandomElementWithoutDefault<T>(array: T[]): T | null {
+  if (array.length === 0) {
+    return null;
+  }
+  const randomIndex = Math.floor(Math.random() * array.length);
+  return array[randomIndex] ?? null;
+}
+
 /**
  * Shuffles an array in place using the Fisher-Yates (aka Knuth) shuffle algorithm.
  * This algorithm ensures each permutation of the array is equally likely.

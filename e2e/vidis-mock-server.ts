@@ -2,33 +2,36 @@ import Provider, { Configuration } from 'oidc-provider';
 import express from 'express';
 import crypto from 'crypto';
 import * as jose from 'jose';
+import { readUserMappings } from './load_test/utils';
 
-const accountIdAccountMapping: Record<
-  string,
-  { sub: string; schulkennung: string; rolle: string; bundesland: string }
-> = {
-  teacher: {
-    sub: 'f4830567-2ca9-4b9c-9c27-1900d443c07c',
-    schulkennung: 'school1',
-    rolle: 'LEHR',
-    bundesland: 'DE-BY',
-  },
-  student: {
-    sub: '322594dc-548c-45be-b880-fda58fe863d3b',
-    schulkennung: 'school1',
-    rolle: 'LERN',
-    bundesland: 'DE-BY',
-  },
-};
+const isProduction = process.env.NODE_ENV === 'production';
+
+const ISSUER_URL = isProduction ? 'https://titanom.ngrok.app' : 'http://localhost:9000';
+
+const VALID_REDIRECT_URLS = [
+  'http://localhost:3000',
+  'https://titanom.ngrok.app',
+  'https://chat.telli.schule',
+  'https://chat-staging.telli.schule',
+];
 
 // Create express app
-const app = express();
+let app = express();
+if (isProduction) {
+  app = app.set('trust-proxy', true);
+}
+
+const userAccountMapping = readUserMappings();
 
 // Create a simple PKCE-enabled client configuration
 const clientConfig = {
   client_id: 'vidis-client', // Should match env.vidisClientId in your next-auth config
   client_secret: 'vidis-secret', // Should match env.vidisClientSecret in your next-auth config
-  redirect_uris: ['http://localhost:3000/api/auth/callback/vidis'], // Update to match your next-auth callback
+  // redirect_uris: ['http://localhost:3000/api/auth/callback/vidis'], // Update to match your next-auth callback
+  redirect_uris: [
+    ...VALID_REDIRECT_URLS.map((u) => `${u}/api/auth/callback/vidis`),
+    ...VALID_REDIRECT_URLS.map((u) => `${u}/api/auth/callback/vidis-mock`),
+  ],
   response_types: ['code'],
   grant_types: ['authorization_code', 'refresh_token'],
   token_endpoint_auth_method: 'client_secret_basic',
@@ -50,12 +53,12 @@ const providerConfig: Configuration = {
     long: {
       httpOnly: true,
       sameSite: 'lax',
-      secure: false, // Explicitly set to false for local development
+      secure: isProduction, // Explicitly set to false for local development
     },
     short: {
       httpOnly: true,
       sameSite: 'lax',
-      secure: false, // Explicitly set to false for local development
+      secure: isProduction, // Explicitly set to false for local development
     },
   },
   claims: {
@@ -64,7 +67,9 @@ const providerConfig: Configuration = {
   async findAccount(ctx, id: string) {
     console.log('findAccount called with id:', id);
 
-    const maybeAccount = accountIdAccountMapping[id];
+    const maybeAccount = userAccountMapping[id];
+    console.debug({ maybeAccount });
+
     if (maybeAccount === undefined) {
       throw Error(`Expected teacher or student but got '${id}'`);
     }
@@ -84,7 +89,8 @@ const providerConfig: Configuration = {
   async extraTokenClaims(ctx, token) {
     console.log('extraTokenClaims called');
     // @ts-expect-error property exists
-    const maybeAccount = accountIdAccountMapping[token.accountId];
+    const maybeAccount = userAccountMapping[token.accountId];
+    console.debug({ maybeAccount });
     if (maybeAccount === undefined) {
       // @ts-expect-error property exists
       throw Error(`Expected teacher or student but got '${token.accountId}'`);
@@ -128,8 +134,12 @@ async function startServer() {
   // @ts-expect-error propery exists
   providerConfig.jwks.keys = [privateJwk];
 
-  const issuerUrl = 'http://localhost:9000';
+  const issuerUrl = ISSUER_URL;
   const provider = new Provider(issuerUrl, providerConfig);
+
+  if (isProduction) {
+    provider.proxy = true;
+  }
 
   // Add detailed error event handlers
   provider.on('server_error', (ctx, err) => {
@@ -177,10 +187,10 @@ async function startServer() {
   app.use('/', provider.callback());
 
   app.listen(9000, () => {
-    console.log('OIDC Provider running on http://localhost:9000');
-    console.log('OpenID Configuration at http://localhost:9000/.well-known/openid-configuration');
+    console.log(`OIDC Provider running on ${ISSUER_URL}`);
+    console.log(`OpenID Configuration at ${ISSUER_URL}/.well-known/openid-configuration`);
     console.log('\nFor use with next-auth, set the following environment variables:');
-    console.log(`VIDIS_ISSUER_URI=http://localhost:9000`);
+    console.log(`VIDIS_ISSUER_URI=${ISSUER_URL}`);
     console.log(`VIDIS_CLIENT_ID=${clientConfig.client_id}`);
     console.log(`VIDIS_CLIENT_SECRET=${clientConfig.client_secret}`);
   });

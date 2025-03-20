@@ -6,8 +6,11 @@ import { signIn } from 'next-auth/react';
 import React from 'react';
 import TelliLogo from '@/components/icons/logo';
 import { cn } from '@/utils/tailwind';
+import { useSearchParams } from 'next/navigation';
 
 export default function LoginForm() {
+  const mocklogin = useSearchParams().get('mocklogin')?.toString() === 'true';
+
   return (
     <main className="w-full flex flex-col justify-center items-center max-w-72 mx-auto py-4 h-full">
       <div className="my-auto flex flex-col items-center w-full">
@@ -23,7 +26,8 @@ export default function LoginForm() {
             buttonSecondaryClassName,
             'hover:border-primary hover:bg-vidis-hover-green/20 w-full',
           )}
-          onClick={() => signIn('vidis')}
+          onClick={() => signIn(mocklogin ? 'vidis-mock' : 'vidis')}
+          aria-label="Mit VIDIS einloggen"
         >
           Mit VIDIS einloggen
         </button>
