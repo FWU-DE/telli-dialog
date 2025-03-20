@@ -1,6 +1,11 @@
 import { browser, Page } from 'k6/browser';
 import { BASE_URL } from './const';
 
+const DEFAULT_PROMPT = `Ich bin Lehrer für Chemie in der 7. Klasse an einem Gymnasium in Bayern. Ich möchte eine Unterrichtsstunde zum Thema Wasserstoffreaktionen vorbereiten, die 90 Minuten dauert. Mein Ziel ist es, dass die Schüler am Ende der Stunde verstehen, warum Wasserstoff stark reaktiv ist und warum das Gemisch aus Wasserstoff und Sauerstoff bei Entzündung eine deutlich stärkere Reaktion auslöst. Die Klasse besteht aus 20 Schülern mit besonderem Interesse an interessanten Experimenten.
+Bitte erstelle für mich eine detaillierte Unterrichtsplanung. Gehe auf Konzepte ein, mit denen ich den Unterricht ansprechender machen kann, z.B. Gruppenarbeiten, Präsentationen usw…
+Gib mir zusätzlich kreative Ideen für den Unterrichtseinstieg oder anschauliche Beispiele, die das Thema greifbarer machen. Achte darauf, dass die Planung leicht umsetzbar ist.
+`;
+
 export const LOAD_TEST_OPTIONS = {
   scenarios: {
     ui_with_browser: {
@@ -8,9 +13,9 @@ export const LOAD_TEST_OPTIONS = {
       startVUs: 10,
       stages: [
         { duration: '30s', target: 100 },
-        // { duration: '1m', target: 500 },
-        // { duration: '1m', target: 1000 },
-        // { duration: '2m', target: 1000 },
+        { duration: '1m', target: 500 },
+        { duration: '1m', target: 1000 },
+        { duration: '2m', target: 1000 },
         { duration: '30s', target: 0 },
       ],
       options: {
@@ -96,11 +101,20 @@ export default async function main() {
     // simulate user chilling
     await page.waitForTimeout(2000);
     // sleep(3);
+    const dropdownLocator = page.locator('button[aria-label="Select Llm Dropdown"]');
+    await dropdownLocator.waitFor();
+    await dropdownLocator.click();
+
+    await page.waitForTimeout(1000);
+    const modelLocator = page.locator(
+      'button[aria-label="Select meta-llama/Meta-Llama-3.1-8B-Instruct Model"]',
+    );
+    await modelLocator.waitFor();
+    await modelLocator.click();
+    await page.waitForTimeout(1000);
 
     // send first message
-    await sendMessage('Wieviel ist 2+2?', page);
-    await page.waitForTimeout(5000);
-    await sendMessage('Wieviel ist 3+3?', page);
+    await sendMessage(DEFAULT_PROMPT, page);
     await page.waitForTimeout(5000);
 
     await page.screenshot({ path: `e2e/load_test/success-results/screenshot-${userIndex}.png` });
