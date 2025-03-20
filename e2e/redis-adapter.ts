@@ -1,4 +1,5 @@
-// npm i ioredis@^4.0.0
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-nocheck
 import Redis from 'ioredis'; // eslint-disable-line import/no-unresolved
 
 const client = new Redis(process.env.REDIS_URL, { keyPrefix: 'oidc:' });
