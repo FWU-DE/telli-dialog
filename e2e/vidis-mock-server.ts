@@ -6,7 +6,9 @@ import { readUserMappings } from './load_test/utils';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-const ISSUER_URL = isProduction ? 'https://vidis-mock.dgpt.app' : 'http://localhost:9000';
+const PORT = process.env.PORT || 9000;
+const ISSUER_URL = isProduction ? 'https://vidis-mock.dgpt.app' : `http://localhost:${PORT}`;
+console.info({ PORT, ISSUER_URL });
 
 const VALID_REDIRECT_URLS = [
   'http://localhost:3000',
@@ -184,8 +186,8 @@ async function startServer() {
 
   app.use('/', provider.callback());
 
-  app.listen(process.env.PORT || 9000, () => {
-    console.log(`OIDC Provider running on ${ISSUER_URL}`);
+  app.listen(PORT, () => {
+    console.log(`OIDC Provider running on ${ISSUER_URL}; PORT=${PORT}`);
     console.log(`OpenID Configuration at ${ISSUER_URL}/.well-known/openid-configuration`);
     console.log('\nFor use with next-auth, set the following environment variables:');
     console.log(`VIDIS_ISSUER_URI=${ISSUER_URL}`);
