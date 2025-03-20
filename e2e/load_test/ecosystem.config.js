@@ -7,8 +7,6 @@ module.exports = {
       instances: 50,
       exec_mode: 'fork',
       watch: false,
-      wait_ready: true, // Wait for ready signal
-      listen_timeout: 10000, // Give it 10 seconds to start up
       increment_var: 'PORT',
       env: {
         PORT: 9000,
