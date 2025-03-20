@@ -31,7 +31,7 @@
     "e2e:ui": "dotenv -e .env -- playwright test --ui",
     "k6:build": "node e2e/load_test/esbuild.k6.config.js",
     "k6:run:ui": "K6_BROWSER_HEADLESS=false pnpm k6:build && K6_BROWSER_HEADLESS=false k6 run e2e/load_test/index.js -e K6_BROWSER_HEADLESS=false",
-    "k6:run": "pnpm k6:build && K6_BROWSER_HEADLESS=true K6_BROWSER_ARGS=\"no-sandbox,disable-setuid-sandbox\" k6 run e2e/load_test/index.js -e K6_BROWSER_HEADLESS=true",
+    "k6:run": "pnpm k6:build && K6_BROWSER_HEADLESS=true K6_BROWSER_ARGS='no-sandbox' k6 run e2e/load_test/index.js -e K6_BROWSER_HEADLESS=true -e K6_BROWSER_ARGS='no-sandbox'",
     "postinstall": "playwright install",
     "start:cluster": "pm2 start e2e/load_test/ecosystem.config.js",
     "stop:cluster": "pm2 stop all",
