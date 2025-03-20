@@ -60,7 +60,7 @@ function getUserNameByNumber(n: number) {
 /**
  * Generate test users with random UUIDs
  */
-export function generateUsers(count = 1000) {
+export function generateUsers(count = 10000) {
   const userMapping: Record<string, Account> = {};
   const halfCount = Math.ceil(count / 2);
 
