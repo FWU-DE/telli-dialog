@@ -11,6 +11,7 @@ module.exports = {
       env: {
         PORT: 9000,
         NODE_ENV: 'production',
+        REDIS_URL: 'redis://localhost:6379',
       },
     },
   ],

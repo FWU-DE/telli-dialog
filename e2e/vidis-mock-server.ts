@@ -3,6 +3,7 @@ import express from 'express';
 import crypto from 'crypto';
 import * as jose from 'jose';
 import { readUserMappings } from './load_test/utils';
+import RedisAdapter from './redis-adapter';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -68,6 +69,7 @@ const providerConfig: Configuration = {
   claims: {
     openid: ['sub', 'rolle', 'schulkennung', 'bundesland'],
   },
+  adapter: isProduction ? RedisAdapter : undefined,
   async findAccount(ctx, id: string) {
     const maybeAccount = userAccountMapping[id];
 
