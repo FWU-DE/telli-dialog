@@ -1,0 +1,121 @@
+import { browser, Page } from 'k6/browser';
+import { BASE_URL } from './const';
+
+export const LOAD_TEST_OPTIONS = {
+  scenarios: {
+    ui_with_browser: {
+      executor: 'ramping-vus',
+      startVUs: 10,
+      stages: [
+        { duration: '30s', target: 10 },
+        // { duration: '1m', target: 500 },
+        // { duration: '1m', target: 1000 },
+        // { duration: '2m', target: 1000 },
+        // { duration: '30s', target: 0 },
+      ],
+      options: {
+        browser: {
+          type: 'chromium',
+        },
+      },
+    },
+  },
+  thresholds: {
+    checks: ['rate>0.9'], // 90% of checks must pass
+    http_req_duration: ['p(95)<5000'], // 95% of requests must complete within 5s
+  },
+};
+
+const TEST_OPTIONS = {
+  scenarios: {
+    ui_test: {
+      executor: 'constant-vus',
+      vus: 1, // Only run 1 user to see the UI
+      duration: '2m', // Run long enough for debugging
+      options: {
+        browser: {
+          type: 'chromium', // Required to enable browser execution
+        },
+      },
+    },
+  },
+};
+
+export const options = TEST_OPTIONS;
+
+function getUserNameByNumber(n: number) {
+  if (n % 2 === 0) {
+    return `teacher_test_${n}`;
+  }
+  if (n % 2 !== 0) {
+    return `student_test_${n}`;
+  }
+  throw Error('Math not mathing');
+}
+
+// const users = readUserMappings();
+// const users = JSON.parse(open('user-mappings.json'));
+
+export default async function main() {
+  const context = await browser.newContext({
+    // headless: false // For debugging
+  });
+  await context.clearCookies();
+  const page = await context.newPage();
+
+  const userIndex = __VU + __ITER;
+  const userName = getUserNameByNumber(userIndex);
+
+  try {
+    await page.goto(`${BASE_URL}/login?mocklogin=true`);
+
+    // Take a screenshot to debug
+    await page.screenshot({ path: `debug-before-login-${userIndex}.png` });
+
+    // Use proper locator API instead of unsupported selectors
+    const loginButton = page.locator('button[aria-label="Login with VIDIS"]');
+    await loginButton.waitFor();
+    await loginButton.click();
+
+    await page.fill('input[placeholder="Enter any login"]', userName);
+    await page.fill('input[placeholder="and password"]', 'test');
+
+    const signInButton = page.locator('button[type="submit"]');
+    await signInButton.waitFor();
+    await signInButton.click();
+    await page.waitForTimeout(1000);
+
+    const authorizeButton = page.locator('button[type="submit"]');
+    await authorizeButton.waitFor();
+    await authorizeButton.click();
+
+    // simulate user chilling
+    await page.waitForTimeout(2000);
+    // sleep(3);
+
+    // send first message
+    await sendMessage('Wieviel ist 2+2?', page);
+    await page.waitForTimeout(10000);
+    await sendMessage('Wieviel ist 3+3?', page);
+    await page.waitForTimeout(10000);
+
+    // sleep(Math.random() * 5 + 3);
+  } catch (error) {
+    console.error('Error during test execution:', error);
+    // Take screenshot on error
+    await page.screenshot({ path: `error-screenshot-${userIndex}.png` });
+  } finally {
+    page.close();
+    context.close();
+  }
+}
+
+async function sendMessage(text: string, page: Page) {
+  const inputField = page.locator('textarea[placeholder="Wie kann ich Dir helfen?"]');
+  await inputField.waitFor();
+  await inputField.fill(text);
+
+  const sendMessageButton = page.locator('button[aria-label="Send Message"]');
+  await sendMessageButton.waitFor();
+  await sendMessageButton.click();
+}

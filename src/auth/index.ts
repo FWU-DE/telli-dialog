@@ -1,11 +1,12 @@
 import NextAuth from 'next-auth';
 import { vidisConfig, handleVidisJWTCallback, handleVidisLogout } from './providers/vidis';
 import { dbGetUserById } from '@/db/functions/user';
+import { mockVidisConfig } from './providers/vidis-mock';
 
 const SESSION_LIFETIME = 60 * 60 * 8;
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  providers: [vidisConfig],
+  providers: [vidisConfig, mockVidisConfig],
   jwt: {
     maxAge: SESSION_LIFETIME,
   },
@@ -20,7 +21,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   callbacks: {
     async jwt({ token, account, profile, trigger }) {
-      if (trigger === 'signIn' && account?.provider === 'vidis' && profile !== undefined) {
+      if (
+        trigger === 'signIn' &&
+        (account?.provider === 'vidis' || account?.provider === 'vidis-mock') &&
+        profile !== undefined
+      ) {
         return await handleVidisJWTCallback({ account, profile, token });
       }
       return token;
