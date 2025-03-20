@@ -27,7 +27,7 @@ export default function LoginForm() {
             'hover:border-primary hover:bg-vidis-hover-green/20 w-full',
           )}
           onClick={() => signIn(mocklogin ? 'vidis-mock' : 'vidis')}
-          aria-label="Login with VIDIS"
+          aria-label="Mit VIDIS einloggen"
         >
           Mit VIDIS einloggen
         </button>

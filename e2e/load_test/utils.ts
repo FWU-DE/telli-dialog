@@ -90,8 +90,9 @@ export function generateUsers(count = 1000) {
 
   return userMapping;
 }
+const FILE_PATH = 'e2e/fixtures/user-mappings.json';
 
-export function writeUserMappings(users: Record<string, Account>, filePath = 'user-mappings.json') {
+export function writeUserMappings(users: Record<string, Account>, filePath = FILE_PATH) {
   try {
     fs.writeFileSync(filePath, JSON.stringify(users, null, 2));
     console.log(`User mappings successfully written to ${filePath}`);
@@ -105,7 +106,7 @@ export function writeUserMappings(users: Record<string, Account>, filePath = 'us
 /**
  * Read user mappings from a file
  */
-export function readUserMappings(filePath = 'user-mappings.json') {
+export function readUserMappings(filePath = FILE_PATH) {
   try {
     const fileContent = fs.readFileSync(filePath, 'utf8');
     const userMappings = JSON.parse(fileContent);
