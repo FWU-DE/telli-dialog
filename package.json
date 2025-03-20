@@ -12,6 +12,7 @@
     "clean": "find . -type d \\( -name node_modules -o -name dist -o -name .next \\) -not -path \"./.vercel/*\" -prune -exec rm -rf {} \\;",
     "start": "next start",
     "start:oidc": "tsx ./e2e/vidis-mock-server.ts",
+    "build:oidc": "node e2e/load_test/esbuild.oidc.config.js",
     "lint": "next lint",
     "types": "tsc",
     "test": "vitest run",

@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'vidis-mock-server',
       script: 'node',
-      args: './node_modules/tsx/cli.js ./e2e/vidis-mock-server.ts',
+      args: 'e2e/vidis-mock-server.js',
       instances: 1,
       exec_mode: 'fork',
       watch: false,

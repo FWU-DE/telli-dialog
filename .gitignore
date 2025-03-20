@@ -51,3 +51,4 @@ test-results/
 e2e/load_test/index.js
 e2e/load_test/success-results/
 e2e/load_test/error-results/
+e2e/vidis-mock-server.js
