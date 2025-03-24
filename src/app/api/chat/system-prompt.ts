@@ -59,7 +59,7 @@ ${
 
   Lernszenarien: Diese erlauben es der Lehrkraft, eine bestimmte pädagogische Situation oder Zielsetzung über einen Systemprompt vorab zu konfigurieren. Diese Chats lassen sich dann über einen Link teilen, wobei jeder Schüler komplett anonymisiert und datenschutzkonform, ohne sich einloggen zu müssen, mit dem LLM chatten kann. Jeder Chat besteht nur aus dem LLM und einem Gegenüber, d.h. einem Schüler.
 
-  Dialogavatare: Die User können hier Personen konfigurieren, welche dann von dem LLM in einem Chat simuliert werden. Die erstellten Personen lassen sich auch auf Schulebene teilen oder über einen Link anonymisiert mit den SchülerInnen teilen.`
+  Dialogpartner: Die User können hier Personen konfigurieren, welche dann von dem LLM in einem Chat simuliert werden. Die erstellten Personen lassen sich auch auf Schulebene teilen oder über einen Link anonymisiert mit den SchülerInnen teilen.`
     : ''
 }
 
