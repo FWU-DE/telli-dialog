@@ -3,9 +3,10 @@ import express from 'express';
 import crypto from 'crypto';
 import * as jose from 'jose';
 import { readUserMappings } from './load_test/utils';
-import RedisAdapter from './redis-adapter';
 
 const isProduction = process.env.NODE_ENV === 'production';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const RedisAdapter = isProduction ? require('./redis-adapter') : undefined;
 
 const PORT = process.env.PORT || 9000;
 const ISSUER_URL = isProduction ? 'https://vidis-mock.dgpt.app' : `http://localhost:${PORT}`;
