@@ -6,6 +6,8 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { type LlmModel } from '@/db/schema';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { saveChatModelAsCookie } from '@/app/(authed)/(dialog)/actions';
+import { useSidebarVisibility } from '../navigation/sidebar/sidebar-provider';
+import { cn } from '@/utils/tailwind';
 
 type SelectLlmModelProps = {
   isStudent?: boolean;
@@ -13,6 +15,7 @@ type SelectLlmModelProps = {
 
 export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProps) {
   const { models, selectedModel: _selectedModel, setSelectedModel } = useLlmModels();
+  const { isOpen } = useSidebarVisibility();
 
   function handleSelectModel(model: LlmModel) {
     startTransition(() => {
@@ -77,7 +80,10 @@ export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProp
           </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content
-          className="flex flex-col bg-white shadow-dropdown rounded-xl ml-0 sm:ml-44"
+          className={cn(
+            'flex flex-col bg-white shadow-dropdown rounded-xl ml-0',
+            isOpen ? 'sm:ml-64' : 'sm:ml-44',
+          )}
           sideOffset={10}
         >
           {models
