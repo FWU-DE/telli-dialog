@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../utils/login';
 
-test('teacher can login, create and join shared dialogavatar chat', async ({ page }) => {
+test('teacher can login, create and join shared dialogpartner chat', async ({ page }) => {
   await login(page, 'teacher');
 
   await page.goto('/characters');
   await page.waitForURL('/characters**');
 
-  const createButton = page.getByRole('button', { name: 'Dialogavatar erstellen' });
+  const createButton = page.getByRole('button', { name: 'Dialogpartner erstellen' });
   await expect(createButton).toBeVisible();
   await createButton.click();
 
@@ -33,14 +33,14 @@ test('teacher can login, create and join shared dialogavatar chat', async ({ pag
     .fill('Ein Dialog mit John Cena über Erfolg im Leben.');
 
   await page
-    .getByLabel('Was soll der Dialogavatar tun?')
+    .getByLabel('Wie soll der Dialogpartner antworten?')
     .fill('John Cena soll über seine Karriere und Erfolge sprechen.');
 
   await page
-    .getByLabel('Was soll der Dialogavatar nicht tun?')
+    .getByLabel('Wie soll der Dialogpartner nicht antworten?')
     .fill('John Cena soll nicht über sein Privatleben sprechen.');
 
-  const submitButton = page.getByRole('button', { name: 'Dialogavatar erstellen' });
+  const submitButton = page.getByRole('button', { name: 'Dialogpartner erstellen' });
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
@@ -56,7 +56,7 @@ test('teacher can login, create and join shared dialogavatar chat', async ({ pag
   // test share page
   await page.selectOption('#Telli-Points', '50');
   await page.selectOption('#maxUsage', '45');
-  await page.getByTitle('Dialogavatar teilen').click();
+  await page.getByTitle('Dialogpartner teilen').click();
 
   await page.waitForURL('/characters/editor/**/share');
   const code = await page.locator('#join-code').textContent();

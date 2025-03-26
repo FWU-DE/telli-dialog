@@ -85,7 +85,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
       <div className="flex gap-6 items-center flex-wrap">
         <div className="flex flex-col gap-4">
           <label htmlFor="Telli-Points" className={cn(labelClassName, 'text-sm')}>
-            Telli-Points
+            telli-Points
           </label>
           <select
             id="Telli-Points"

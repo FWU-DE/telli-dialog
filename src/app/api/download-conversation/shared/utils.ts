@@ -44,7 +44,7 @@ export async function generateSharedConversationDocxFiles({
 function getConversationMetadata() {
   return [
     new Paragraph({
-      children: [new TextRun({ text: `Telli Konversation`, bold: true, size: 40 })],
+      children: [new TextRun({ text: `telli Konversation`, bold: true, size: 40 })],
     }),
     new Paragraph({
       children: [
@@ -70,7 +70,7 @@ function getConversationMessages({
     new Paragraph({
       children: [
         new TextRun({
-          text: `${message.role === 'user' ? userFullName : 'Telli'}:`,
+          text: `${message.role === 'user' ? userFullName : 'telli'}:`,
           bold: true,
           size: 22,
         }),

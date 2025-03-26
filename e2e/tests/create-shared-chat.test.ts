@@ -11,7 +11,7 @@ test('teacher can login, create and join shared chat', async ({ page }) => {
 
   // configure form
   await page
-    .getByLabel('* Unter welchem Namen soll das Lernszenario abgespeichert werden?')
+    .getByLabel('* Titel des Lernszenarios')
     .fill('Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten');
 
   await page
@@ -23,17 +23,17 @@ test('teacher can login, create and join shared chat', async ({ page }) => {
   await page.getByLabel('* Fach').fill('Geschichte');
 
   await page
-    .getByLabel('* Was ist die konkrete Unterrichtssituation?')
+    .getByLabel('* In welchem Kontext findet das Lernszenario statt?')
     .fill('Schüler sollen den Unterschied zwischen Absolutismus und Demokratie verstehen.');
 
   await page
-    .getByLabel('Was soll der KI-Chatbot tun?')
+    .getByLabel('Wie soll telli antworten?')
     .fill(
       'Der Chatbot soll aus der Perspektive eines Soldaten im Herrschaftssystem unter Ludwig XIV antworten.',
     );
 
   await page
-    .getByLabel('Was soll der KI-Chatbot nicht tun?')
+    .getByLabel('Wie soll telli nicht antworten?')
     .fill('Keine Antworten außerhalb des thematischen Kontexts.');
 
   const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
@@ -86,7 +86,7 @@ test('teacher can login, create and delete shared chat, student can join chat', 
 
   // configure form
   await page
-    .getByLabel('* Unter welchem Namen soll das Lernszenario abgespeichert werden?')
+    .getByLabel('* Titel des Lernszenarios')
     .fill('Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten');
 
   await page
@@ -98,17 +98,17 @@ test('teacher can login, create and delete shared chat, student can join chat', 
   await page.getByLabel('* Fach').fill('Geschichte');
 
   await page
-    .getByLabel('* Was ist die konkrete Unterrichtssituation?')
+    .getByLabel('* In welchem Kontext findet das Lernszenario statt?')
     .fill('Schüler sollen den Unterschied zwischen Absolutismus und Demokratie verstehen.');
 
   await page
-    .getByLabel('Was soll der KI-Chatbot tun?')
+    .getByLabel('Wie soll telli antworten?')
     .fill(
       'Der Chatbot soll aus der Perspektive eines Soldaten im Herrschaftssystem unter Ludwig XIV antworten.',
     );
 
   await page
-    .getByLabel('Was soll der KI-Chatbot nicht tun?')
+    .getByLabel('Wie soll telli nicht antworten?')
     .fill('Keine Antworten außerhalb des thematischen Kontexts.');
 
   const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
