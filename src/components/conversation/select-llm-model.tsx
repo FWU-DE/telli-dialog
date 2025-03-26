@@ -67,6 +67,7 @@ export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProp
           <button
             type="button"
             className="flex items-center gap-2 cursor-pointer disabled:cursor-none"
+            aria-label="Select Llm Dropdown"
           >
             <span className="text-primary text-base font-medium">
               {selectedModel?.displayName ?? 'Kein Modell'}
@@ -90,6 +91,7 @@ export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProp
                     <button
                       className="hover:bg-vidis-hover-green/20 text-left text-black py-2 px-4 outline-none flex flex-col"
                       onClick={() => handleSelectModel(model)}
+                      aria-label={`Select ${model.name} Model`}
                     >
                       <ModelSpan model={model} />
                     </button>

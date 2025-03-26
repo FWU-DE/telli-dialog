@@ -31,7 +31,7 @@ const vidisAccountSchema = z.object({
   // session_state: z.string(),
   token_type: z.literal('bearer'),
   id_token: z.string(),
-  provider: z.literal('vidis'),
+  provider: z.literal('vidis').or(z.literal('vidis-mock')),
 });
 
 const vidisProfileSchema = z.object({
