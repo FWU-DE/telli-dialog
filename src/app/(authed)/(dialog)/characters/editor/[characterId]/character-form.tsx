@@ -207,7 +207,7 @@ export default function CharacterForm({
           />
 
           <Checkbox
-            label="Schulspezifisch"
+            label={t('restriction-school')}
             checked={optimisticAccessLevel === 'school'}
             onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'school')}
           />
