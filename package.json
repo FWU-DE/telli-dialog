@@ -22,7 +22,7 @@
     "db:generate": "drizzle-kit generate --config=./src/db/drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config=./src/db/drizzle.config.ts",
     "db:migrate:op": "op run --env-file=\"./.env\" -- drizzle-kit migrate --config=./src/db/drizzle.config.ts",
-    "db:seed": "dotenv -e .env.staging -- pnpm tsx src/db/seed/index.ts",
+    "db:seed": "tsx src/db/seed/index.ts",
     "db:seed:op": "op run --env-file=\"./.env\" -- pnpm tsx src/db/seed/index.ts",
     "db:studio": "dotenv -e .env -- drizzle-kit studio --config=src/db/drizzle.config.ts",
     "drizzle:up": "drizzle-kit up --config=src/db/drizzle.config.ts",
