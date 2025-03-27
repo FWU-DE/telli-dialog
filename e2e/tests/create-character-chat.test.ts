@@ -87,3 +87,20 @@ test('teacher can login, create and join shared dialogpartner chat', async ({ pa
 
   await expect(page.getByLabel('assistant message 1')).toContainText('John Cena');
 });
+
+test('teacher can delete character chat', async ({ page }) => {
+  await login(page, 'teacher');
+
+  await page.goto('/characters?visibility=private');
+  await page.waitForURL('/characters?visibility=private');
+
+  const deleteChatButton = page.locator('#destructive-button').first();
+  await expect(deleteChatButton).toBeVisible();
+  await deleteChatButton.click();
+
+  const deleteChatConfirmButton = page.getByRole('button', {
+    name: 'Löschen',
+  });
+  await expect(deleteChatConfirmButton).toBeVisible();
+  await deleteChatConfirmButton.click();
+});
