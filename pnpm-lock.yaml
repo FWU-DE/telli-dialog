@@ -46,7 +46,7 @@ importers:
         version: 1.2.6(@types/react-dom@19.0.2(@types/react@19.0.3))(@types/react@19.0.3)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@sentry/nextjs':
         specifier: 9.0.0
-        version: 9.0.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@15.2.3(@babel/core@7.26.9)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)(webpack@5.98.0(esbuild@0.19.12))
+        version: 9.0.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@15.2.3(@babel/core@7.26.9)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)(webpack@5.98.0(esbuild@0.25.1))
       '@t3-oss/env-nextjs':
         specifier: 0.10.1
         version: 0.10.1(typescript@5.7.2)(zod@3.22.4)
@@ -122,6 +122,9 @@ importers:
       qrcode.react:
         specifier: 4.2.0
         version: 4.2.0(react@19.0.0)
+      rabbitmq-client:
+        specifier: 5.0.2
+        version: 5.0.2
       react:
         specifier: 19.0.0
         version: 19.0.0
@@ -5381,6 +5384,10 @@ packages:
     resolution: {integrity: sha512-MX8gB7cVYTrYcFfAnfLlhRd0+Toyl8yX8uBx1MrX7K0jegiz9TumwOK27ldXrgDlHRdVi+MqU9Ssw6dr4BNreg==}
     engines: {node: '>=18'}
 
+  rabbitmq-client@5.0.2:
+    resolution: {integrity: sha512-rXEcDxBcGAokczKfVsyIhrIXdS4xcOqrMCMlBIMNEIxP43dNwApJWdt2PN3vKtjO/xCVAfOTT5r3rQAdXhuyyA==}
+    engines: {node: '>=16'}
+
   randombytes@2.1.0:
     resolution: {integrity: sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==}
 
@@ -8485,7 +8492,7 @@ snapshots:
 
   '@sentry/core@9.0.0': {}
 
-  '@sentry/nextjs@9.0.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@15.2.3(@babel/core@7.26.9)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)(webpack@5.98.0(esbuild@0.19.12))':
+  '@sentry/nextjs@9.0.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@15.2.3(@babel/core@7.26.9)(@opentelemetry/api@1.9.0)(@playwright/test@1.50.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)(webpack@5.98.0(esbuild@0.25.1))':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.30.0
@@ -12397,6 +12404,8 @@ snapshots:
   quick-lru@5.1.1: {}
 
   quick-lru@7.0.0: {}
+
+  rabbitmq-client@5.0.2: {}
 
   randombytes@2.1.0:
     dependencies:

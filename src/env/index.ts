@@ -31,3 +31,4 @@ export const env = createEnv({
   },
   skipValidation: true,
 });
+console.debug({ env });
