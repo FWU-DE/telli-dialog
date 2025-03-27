@@ -14,6 +14,7 @@ export const env = createEnv({
     apiUrl: z.string().min(1),
     encryptionKey: z.string().min(1),
     apiKey: z.string().min(1),
+    rabbitmqUri: z.string().min(1),
   },
   client: {},
   runtimeEnv: {
@@ -28,7 +29,7 @@ export const env = createEnv({
     apiUrl: process.env.API_URL,
     encryptionKey: process.env.ENCRYPTION_KEY,
     apiKey: process.env.API_KEY,
+    rabbitmqUri: process.env.RABBITMQ_URI,
   },
   skipValidation: true,
 });
-console.debug({ env });

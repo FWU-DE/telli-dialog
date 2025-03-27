@@ -1,5 +1,4 @@
 name: Delete Old Conversations
-
 on:
   schedule:
     - cron: '0 0 * * *'
@@ -11,7 +10,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
       - name: Load 1Password Secrets
         uses: 1password/load-secrets-action@v1
         with:
@@ -19,20 +17,23 @@ jobs:
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           API_KEY: op://Telli/.env.prod telli-chatbot/API_KEY
-
       - name: Call Delete Conversations Endpoint
         run: |
-          curl -X DELETE https://chat.telli.schule/v1/admin/delete-conversation \
+          # Make the API call and store the full response
+          RESPONSE=$(curl -s -X DELETE https://chat.telli.schule/api/v1/admin/delete-conversation \
             -H "Authorization: Bearer ${{ env.API_KEY }}" \
-            -H "Content-Type: application/json" \
-            -w "\n%{http_code}" \
-            -o /dev/null
+            -H "Content-Type: application/json")
 
-          # Check if the request was successful (2xx status code)
-          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE https://chat.telli.schule/v1/admin/delete-conversation -H "Authorization: Bearer ${{ env.API_KEY }}")
+          # Get the status code separately
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE https://chat.telli.schule/api/v1/admin/delete-conversation -H "Authorization: Bearer ${{ env.API_KEY }}")
+
+          # Check if the request was successful
           if [[ $STATUS_CODE -lt 200 || $STATUS_CODE -ge 300 ]]; then
             echo "Error: Received status code $STATUS_CODE"
+            echo "Response: $RESPONSE"
             exit 1
           fi
 
-          echo "Successfully deleted expired conversations"
+          # Extract and display the count
+          COUNT=$(echo $RESPONSE | jq '.count')
+          echo "Successfully deleted $COUNT expired conversations"

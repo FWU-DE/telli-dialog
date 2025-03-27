@@ -13,9 +13,9 @@ import { generateUUID } from '@/utils/uuid';
 import { getMostRecentUserMessage } from './utils';
 import { constructChatSystemPrompt } from './system-prompt';
 import { checkProductAccess } from '@/utils/vidis/access';
-import { sendRabbitmqEvent } from '@/app/rabbitmq/send';
-import { constructTelliNewMessageEvent } from '@/app/rabbitmq/events/new-message';
-import { constructTelliBudgetExceededEvent } from '@/app/rabbitmq/events/budget-exceeded';
+import { sendRabbitmqEvent } from '@/rabbitmq/send';
+import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
+import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();

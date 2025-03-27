@@ -1,5 +1,4 @@
 import { UserAndContext } from '@/auth/types';
-import { hashPassword } from '@/db/crypto';
 import { ConversationModel } from '@/db/types';
 import { CharacterModel, SharedSchoolConversationModel } from '@/db/schema';
 import { TelliNewChatMessageEventType } from '../schema';

@@ -11,9 +11,9 @@ import { constructSystemPromptBySharedChat } from './system-prompt';
 import { dbUpdateTokenUsageBySharedChatId } from '@/db/functions/shared-school-chat';
 import { getModelAndProviderWithResult, getSearchParamsFromUrl } from '../utils';
 import { checkProductAccess } from '@/utils/vidis/access';
-import { sendRabbitmqEvent } from '@/app/rabbitmq/send';
-import { constructTelliNewMessageEvent } from '@/app/rabbitmq/events/new-message';
-import { constructTelliBudgetExceededEvent } from '@/app/rabbitmq/events/budget-exceeded';
+import { sendRabbitmqEvent } from '@/rabbitmq/send';
+import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
+import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 
 export async function POST(request: NextRequest) {
   const { messages, modelId }: { messages: Array<Message>; modelId: string } = await request.json();
