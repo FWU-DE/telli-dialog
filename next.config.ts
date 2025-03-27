@@ -26,6 +26,7 @@ const baseNextConfig = {
     ],
   },
   productionBrowserSourceMaps: process.env.NODE_ENV !== 'test',
+  allowedDevOrigins: ['titanom.ngrok.app'],
 } satisfies NextConfig;
 
 const withNextIntl = createNextIntlPlugin();

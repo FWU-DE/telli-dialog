@@ -122,6 +122,9 @@ importers:
       qrcode.react:
         specifier: 4.2.0
         version: 4.2.0(react@19.0.0)
+      rabbitmq-client:
+        specifier: 5.0.2
+        version: 5.0.2
       react:
         specifier: 19.0.0
         version: 19.0.0
@@ -5380,6 +5383,10 @@ packages:
   quick-lru@7.0.0:
     resolution: {integrity: sha512-MX8gB7cVYTrYcFfAnfLlhRd0+Toyl8yX8uBx1MrX7K0jegiz9TumwOK27ldXrgDlHRdVi+MqU9Ssw6dr4BNreg==}
     engines: {node: '>=18'}
+
+  rabbitmq-client@5.0.2:
+    resolution: {integrity: sha512-rXEcDxBcGAokczKfVsyIhrIXdS4xcOqrMCMlBIMNEIxP43dNwApJWdt2PN3vKtjO/xCVAfOTT5r3rQAdXhuyyA==}
+    engines: {node: '>=16'}
 
   randombytes@2.1.0:
     resolution: {integrity: sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==}
@@ -12397,6 +12404,8 @@ snapshots:
   quick-lru@5.1.1: {}
 
   quick-lru@7.0.0: {}
+
+  rabbitmq-client@5.0.2: {}
 
   randombytes@2.1.0:
     dependencies:

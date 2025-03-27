@@ -11,6 +11,9 @@ import { constructSystemPromptBySharedChat } from './system-prompt';
 import { dbUpdateTokenUsageBySharedChatId } from '@/db/functions/shared-school-chat';
 import { getModelAndProviderWithResult, getSearchParamsFromUrl } from '../utils';
 import { checkProductAccess } from '@/utils/vidis/access';
+import { sendRabbitmqEvent } from '@/rabbitmq/send';
+import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
+import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 
 export async function POST(request: NextRequest) {
   const { messages, modelId }: { messages: Array<Message>; modelId: string } = await request.json();
@@ -68,6 +71,13 @@ export async function POST(request: NextRequest) {
   }
 
   if (intelliPointsLimitReached) {
+    await sendRabbitmqEvent(
+      constructTelliBudgetExceededEvent({
+        anonymous: true,
+        user: teacherUserAndContext,
+        sharedChat,
+      }),
+    );
     return NextResponse.json({ error: 'User has reached intelli points limit' }, { status: 429 });
   }
 
@@ -86,6 +96,16 @@ export async function POST(request: NextRequest) {
         sharedSchoolConversationId: sharedChat.id,
         userId: teacherUserAndContext.id,
       });
+
+      await sendRabbitmqEvent(
+        constructTelliNewMessageEvent({
+          user: teacherUserAndContext,
+          promptTokens: assistantMessage.usage.promptTokens,
+          completionTokens: assistantMessage.usage.completionTokens,
+          anonymous: true,
+          sharedChat,
+        }),
+      );
     },
   });
 

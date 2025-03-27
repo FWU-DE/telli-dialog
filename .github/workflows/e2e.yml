@@ -55,6 +55,7 @@ jobs:
           SENTRY_DSN: op://Telli/.env.e2e telli-chatbot/SENTRY_DSN
           API_KEY: op://Telli/.env.e2e telli-chatbot/API_KEY
           BAVARIA_API_KEY: op://Telli/.env.e2e telli-chatbot/BAVARIA_API_KEY
+          RABBITMQ_URI: op://Telli/.env.e2e telli-chatbot/RABBITMQ_URI
 
       - name: Use Node.js
         uses: actions/setup-node@v3

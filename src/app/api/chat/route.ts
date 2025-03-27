@@ -13,6 +13,9 @@ import { generateUUID } from '@/utils/uuid';
 import { getMostRecentUserMessage } from './utils';
 import { constructChatSystemPrompt } from './system-prompt';
 import { checkProductAccess } from '@/utils/vidis/access';
+import { sendRabbitmqEvent } from '@/rabbitmq/send';
+import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
+import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -87,6 +90,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No user message found' }, { status: 400 });
   }
 
+  const intelliPointsLimitReached = await userHasReachedIntelliPointLimit({ user });
+
+  if (intelliPointsLimitReached) {
+    await sendRabbitmqEvent(
+      constructTelliBudgetExceededEvent({
+        anonymous: false,
+        user,
+        conversation,
+      }),
+    );
+    return NextResponse.json({ error: 'User has reached intelli points limit' }, { status: 429 });
+  }
+
   await dbInsertChatContent({
     conversationId: conversation.id,
     id: userMessage.id,
@@ -138,6 +154,16 @@ Verwende keine Anführungszeichen oder Doppelpunkte`,
         model: definedModel,
         usage: assistantMessage.usage,
       });
+
+      await sendRabbitmqEvent(
+        constructTelliNewMessageEvent({
+          user,
+          promptTokens: assistantMessage.usage.promptTokens,
+          completionTokens: assistantMessage.usage.completionTokens,
+          anonymous: false,
+          conversation,
+        }),
+      );
     },
     async onError(error) {
       console.error({ error });
