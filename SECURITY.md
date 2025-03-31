@@ -4,7 +4,6 @@ We at telli and the FWU value the security community and believe that responsibl
 
 If you believe you have found a security vulnerability in telli, we encourage you to let us know right away. We will investigate all legitimate reports and do our best to quickly fix the problem. Before reporting though, please review our responsible disclosure policy, and those things that should not be reported.
 
-
 ## Responsible Disclosure Policy
 
 **Please do not report security vulnerabilities through public GitHub issues.**
@@ -13,19 +12,19 @@ Instead, whean reporting a security vulnerability, you have the following option
 
 - **Option 1: GitHub Private Vulnerability Reporting System**: We encourage you to use GitHub's Vulnerability Reporting system to report any security vulnerabilities you find. This allows us to receive vulnerability reports directly through GitHub. For more information on how to submit a security advisory report, please refer to the [GitHub Security documentation](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability).
 
-- **Option 2: Email**: Submit your report to [security@telli.schule](mailto:security@telli.schule) (one issue per report) and respond to the report with any updates. 
+- **Option 2: Email**: Submit your report to [security@telli.schule](mailto:security@telli.schule) (one issue per report) and respond to the report with any updates.
 
 Please do not contact employees directly or through other channels about a report.
 
 Please include the requested information listed below (as much as you can provide) to help us better understand the nature and scope of the possible issue:
 
-  * Type of issue (e.g. buffer overflow, SQL injection, cross-site scripting, etc.)
-  * Full paths of source file(s) related to the manifestation of the issue
-  * The location of the affected source code (tag/branch/commit or direct URL)
-  * Any special configuration required to reproduce the issue
-  * Step-by-step instructions to reproduce the issue
-  * Proof-of-concept or exploit code (if possible)
-  * Impact of the issue, including how an attacker might exploit the issue
+- Type of issue (e.g. buffer overflow, SQL injection, cross-site scripting, etc.)
+- Full paths of source file(s) related to the manifestation of the issue
+- The location of the affected source code (tag/branch/commit or direct URL)
+- Any special configuration required to reproduce the issue
+- Step-by-step instructions to reproduce the issue
+- Proof-of-concept or exploit code (if possible)
+- Impact of the issue, including how an attacker might exploit the issue
 
 This information will help us triage your report more quickly.
 

@@ -62,7 +62,6 @@ brew install k6
 You can find more docs in the [./docs](./docs) folder.
 For information about the project structure, see [here](./docs/structure.md).
 
-
 ## Security issues
 
 Please see [SECURITY.md](SECURITY.md) for guidance on reporting security-related issues.
