@@ -11,8 +11,9 @@ import AutoLogout from '@/components/auth/auto-logout';
 import { getDefaultModelNameByCookies } from '@/utils/model';
 import { checkProductAccess } from '@/utils/vidis/access';
 import ProductAccessModal from '@/components/modals/product-access';
-
-export const dynamic = 'force-dynamic';
+import TermsConditionsModal from '@/components/modals/terms-conditions-initial';
+import { showTermsFederalStates, VERSION } from '@/components/modals/static_content';
+import { setUserAcceptConditions } from './actions';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
@@ -22,9 +23,8 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
 
   const defaultModelByCookie = await getDefaultModelNameByCookies();
   const priceInCent = await getPriceInCentByUser({ user, models });
-
   const productAccess = checkProductAccess(user);
-
+  const userMustAccept = showTermsFederalStates.includes(user.federalState.id) || (user.versionAcceptedConditions !== null && user.versionAcceptedConditions < VERSION)
   return (
     <div className="flex h-[100dvh] w-[100dvw]">
       <AutoLogout />
@@ -48,6 +48,8 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
           {productAccess.errorMessage}
         </ProductAccessModal>
       )}
+      {userMustAccept ? <TermsConditionsModal handleAccept={setUserAcceptConditions}></TermsConditionsModal> : null
+      }
     </div>
   );
 }
