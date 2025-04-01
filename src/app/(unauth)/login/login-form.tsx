@@ -9,7 +9,11 @@ import { cn } from '@/utils/tailwind';
 import { useSearchParams } from 'next/navigation';
 
 export default function LoginForm() {
-  const mocklogin = useSearchParams().get('mocklogin')?.toString() === 'true';
+  const searchParams = useSearchParams() 
+  const mocklogin = searchParams.get('mocklogin')?.toString() === 'true';
+  const vidis_idp_hint = searchParams.get('vidis_idp_hint');
+  
+  const authParams = vidis_idp_hint!=null ? {"vidis_idp_hint":vidis_idp_hint}: undefined
 
   return (
     <main className="w-full flex flex-col justify-center items-center max-w-72 mx-auto py-4 h-full">
@@ -26,7 +30,7 @@ export default function LoginForm() {
             buttonSecondaryClassName,
             'hover:border-primary hover:bg-vidis-hover-green/20 w-full',
           )}
-          onClick={() => signIn(mocklogin ? 'vidis-mock' : 'vidis')}
+          onClick={() => signIn(mocklogin ? 'vidis-mock' : 'vidis', undefined, authParams)}
           aria-label="Mit VIDIS einloggen"
         >
           Mit VIDIS einloggen
