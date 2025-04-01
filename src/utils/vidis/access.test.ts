@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { checkProductAccess } from './access';
 import { UserAndContext } from '@/auth/types';
 import { UserModel, UserSchoolRole } from '@/db/schema';
-import { VERSION } from '@/components/modals/static_content';
 
 describe('checkProductAccess', () => {
   // Base test data
@@ -32,7 +31,7 @@ describe('checkProductAccess', () => {
     firstName: '',
     lastName: '',
     createdAt: new Date(),
-    versionAcceptedConditions: VERSION,
+    versionAcceptedConditions: null,
   } satisfies UserModel;
 
   it('should allow access when all conditions are met', () => {
