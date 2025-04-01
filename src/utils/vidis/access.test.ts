@@ -32,7 +32,7 @@ describe('checkProductAccess', () => {
     firstName: '',
     lastName: '',
     createdAt: new Date(),
-    versionAcceptedConditions: VERSION
+    versionAcceptedConditions: VERSION,
   } satisfies UserModel;
 
   it('should allow access when all conditions are met', () => {
