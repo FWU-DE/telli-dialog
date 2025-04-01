@@ -10,10 +10,9 @@ import { useSearchParams } from 'next/navigation';
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
-  const mocklogin = searchParams.get('mocklogin')?.toString() === 'true';
   const vidis_idp_hint = searchParams.get('vidis_idp_hint');
   if (vidis_idp_hint !== null) {
-    signIn(mocklogin ? 'vidis-mock' : 'vidis', undefined, { vidis_idp_hint: vidis_idp_hint });
+    signIn('vidis', undefined, { vidis_idp_hint: vidis_idp_hint });
   }
 
   return (
@@ -31,7 +30,7 @@ export default function LoginForm() {
             buttonSecondaryClassName,
             'hover:border-primary hover:bg-vidis-hover-green/20 w-full',
           )}
-          onClick={() => signIn(mocklogin ? 'vidis-mock' : 'vidis')}
+          onClick={() => signIn('vidis')}
           aria-label="Mit VIDIS einloggen"
         >
           Mit VIDIS einloggen
