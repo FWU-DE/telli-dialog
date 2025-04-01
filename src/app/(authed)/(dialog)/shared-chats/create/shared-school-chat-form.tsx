@@ -15,6 +15,7 @@ import * as Select from '@radix-ui/react-select';
 import ChevronDownIcon from '@/components/icons/chevron-down';
 import { useTranslations } from 'next-intl';
 import React from 'react';
+import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 
 export default function SharedSchoolChatCreateForm() {
   const toast = useToast();
@@ -68,6 +69,7 @@ export default function SharedSchoolChatCreateForm() {
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('name')}
             placeholder={t('name-placeholder')}
+            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
           />
         </div>
 
@@ -119,6 +121,7 @@ export default function SharedSchoolChatCreateForm() {
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('description')}
           placeholder={t('purpose-placeholder')}
+          maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
         />
       </div>
       <div className="grid grid-cols-3 gap-4">
@@ -131,6 +134,7 @@ export default function SharedSchoolChatCreateForm() {
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('schoolType')}
             placeholder={t('school-type-placeholder')}
+            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
           />
         </div>
         <div className="flex flex-col gap-4">
@@ -142,6 +146,7 @@ export default function SharedSchoolChatCreateForm() {
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('gradeLevel')}
             placeholder={t('grade-placeholder')}
+            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
           />
         </div>
         <div className="flex flex-col gap-4">
@@ -153,6 +158,7 @@ export default function SharedSchoolChatCreateForm() {
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('subject')}
             placeholder={t('subject-placeholder')}
+            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
           />
         </div>
       </div>
@@ -167,6 +173,7 @@ export default function SharedSchoolChatCreateForm() {
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('learningContext')}
           placeholder={t('learning-context-placeholder')}
+          maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
         />
       </div>
       <div className="flex flex-col gap-4">
@@ -180,6 +187,7 @@ export default function SharedSchoolChatCreateForm() {
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('specification')}
           placeholder={t('specification-placeholder')}
+          maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
         />
       </div>
       <div className="flex flex-col gap-4">
@@ -193,6 +201,7 @@ export default function SharedSchoolChatCreateForm() {
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('restrictions')}
           placeholder={t('restrictions-placeholder')}
+          maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
         />
       </div>
       <div className="flex gap-4 mt-12">

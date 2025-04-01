@@ -32,6 +32,7 @@ import SelectLlmModelForm from '../../../_components/select-llm-model';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import ShareContainer from './share-container';
 import Checkbox from '@/components/common/checkbox';
+import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -40,13 +41,13 @@ type CharacterFormProps = CharacterModel & {
 
 const characterFormValuesSchema = z.object({
   name: z.string().min(1),
-  description: z.string().min(1),
-  learningContext: z.string().min(1),
-  competence: z.string().min(1),
+  description: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  learningContext: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  competence: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   modelId: z.string(),
-  schoolType: z.string().min(1),
-  gradeLevel: z.string().min(1),
-  subject: z.string().min(1),
+  schoolType: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  gradeLevel: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  subject: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
 
   specifications: z.string().nullable(),
   restrictions: z.string().nullable(),
@@ -233,6 +234,7 @@ export default function CharacterForm({
               id="school-type"
               className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
               {...register('schoolType')}
+              maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
               onBlur={handleAutoSave}
               placeholder={t('school-type-placeholder')}
             />
@@ -245,6 +247,7 @@ export default function CharacterForm({
               id="grade"
               className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
               {...register('gradeLevel')}
+              maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
               placeholder={t('grade-placeholder')}
               onBlur={handleAutoSave}
             />
@@ -257,6 +260,7 @@ export default function CharacterForm({
               id="subject"
               className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
               {...register('subject')}
+              maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
               onBlur={handleAutoSave}
               placeholder={t('subject-placeholder')}
             />
@@ -274,6 +278,7 @@ export default function CharacterForm({
               <input
                 id="name"
                 {...register('name')}
+                maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
                 className={cn(
                   inputFieldClassName,
                   'focus:border-primary placeholder:text-gray-300',
@@ -291,6 +296,7 @@ export default function CharacterForm({
                 rows={5}
                 style={{ resize: 'none' }}
                 {...register('description')}
+                maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
                 className={cn(
                   inputFieldClassName,
                   'focus:border-primary placeholder:text-gray-300',
@@ -344,6 +350,7 @@ export default function CharacterForm({
           <textarea
             id="competence"
             {...register('competence')}
+            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT + 1}
             rows={5}
             style={{ resize: 'none' }}
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
@@ -358,6 +365,7 @@ export default function CharacterForm({
           <textarea
             id="learningContext"
             {...register('learningContext')}
+            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             rows={5}
             style={{ resize: 'none' }}
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
@@ -372,6 +380,7 @@ export default function CharacterForm({
           <textarea
             id="specifications"
             {...register('specifications')}
+            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             rows={5}
             style={{ resize: 'none' }}
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
@@ -386,6 +395,7 @@ export default function CharacterForm({
           <textarea
             id="restrictions"
             {...register('restrictions')}
+            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT +1}
             rows={5}
             style={{ resize: 'none' }}
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
