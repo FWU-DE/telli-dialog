@@ -15,12 +15,11 @@ export async function dbGetUserById({ userId }: { userId: string | undefined }) 
   return obscuredUser;
 }
 
-export async function dbUpdateUserTermsVersion({userId}:{userId:string}) {
+export async function dbUpdateUserTermsVersion({ userId }: { userId: string }) {
   const [updatedRow] = await db
     .update(userTable)
-    .set({versionAcceptedConditions : VERSION})
-    .where(
-      eq(userTable.id, userId)
-    ).returning()
-  return updatedRow
+    .set({ versionAcceptedConditions: VERSION })
+    .where(eq(userTable.id, userId))
+    .returning();
+  return updatedRow;
 }

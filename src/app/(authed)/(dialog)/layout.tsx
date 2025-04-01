@@ -24,7 +24,9 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
   const defaultModelByCookie = await getDefaultModelNameByCookies();
   const priceInCent = await getPriceInCentByUser({ user, models });
   const productAccess = checkProductAccess(user);
-  const userMustAccept = showTermsFederalStates.includes(user.federalState.id) || (user.versionAcceptedConditions !== null && user.versionAcceptedConditions < VERSION)
+  const userMustAccept =
+    showTermsFederalStates.includes(user.federalState.id) ||
+    (user.versionAcceptedConditions !== null && user.versionAcceptedConditions < VERSION);
   return (
     <div className="flex h-[100dvh] w-[100dvw]">
       <AutoLogout />
@@ -48,8 +50,9 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
           {productAccess.errorMessage}
         </ProductAccessModal>
       )}
-      {userMustAccept ? <TermsConditionsModal handleAccept={setUserAcceptConditions}></TermsConditionsModal> : null
-      }
+      {userMustAccept ? (
+        <TermsConditionsModal handleAccept={setUserAcceptConditions}></TermsConditionsModal>
+      ) : null}
     </div>
   );
 }

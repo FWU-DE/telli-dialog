@@ -10,5 +10,3 @@ export type UserAndContext = User & {
   school: UserSchoolProps;
   federalState: ObscuredFederalState;
 };
-
-export type AvailableStaticContentFiles = "usage-disclaimer-de" | "other"

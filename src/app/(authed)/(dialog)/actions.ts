@@ -40,9 +40,8 @@ export async function saveChatModelAsCookie(model: string) {
   cookieStore.set(LAST_USED_MODEL_COOKIE_NAME, model);
 }
 
-
 export async function setUserAcceptConditions(): Promise<boolean> {
-    const user = await getUser()
-    const updated = await dbUpdateUserTermsVersion({userId: user.id})
-    return updated?.versionAcceptedConditions === VERSION
+  const user = await getUser();
+  const updated = await dbUpdateUserTermsVersion({ userId: user.id });
+  return updated?.versionAcceptedConditions === VERSION;
 }
