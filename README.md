@@ -49,15 +49,19 @@ You can now start the application:
 pnpm dev
 ```
 
-## More
-
-You can find more docs in the [./docs](./docs) folder.
-For information about the project structure, see [here](./docs/structure.md).
-
-## load tests
+## Load Tests
 
 If you need to load test, you need to install `k6`.
 
 ```sh
 brew install k6
 ```
+
+## More
+
+You can find more docs in the [./docs](./docs) folder.
+For information about the project structure, see [here](./docs/structure.md).
+
+## Security issues
+
+Please see [SECURITY.md](SECURITY.md) for guidance on reporting security-related issues.
