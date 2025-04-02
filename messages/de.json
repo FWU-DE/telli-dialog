@@ -7,6 +7,9 @@
     "logout": "Abmelden",
     "delete": "Löschen",
     "cancel": "Abbrechen",
+    "continue": "Weiter",
+    "back": "Zurück",
+    "accept": "Akzeptieren",
     "image": "Bild",
     "upload-image": "Bild hochladen",
     "llm-model": "Sprachmodell",
@@ -23,6 +26,12 @@
     "stop": "Stop",
     "copy": "Kopieren",
     "copy-clipboard": "In die Zwischenablage kopieren"
+  },
+  "usage-disclaimer": {
+    "initial-title": "Willkommen bei telli!",
+    "terms-and-conditions-title": "Nutzungsbedingungen",
+    "initial-content": "Bitte lese und akzeptiere die Nutzungsbedingungen um fortzufahren",
+    "accept": "* Ich habe die Nutzungsbedingungen gelesen und akzeptiere sie."
   },
   "sidebar": {
     "class-chats": "Lernszenarien",
