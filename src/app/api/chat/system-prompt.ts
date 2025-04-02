@@ -2,6 +2,7 @@ import { formatDateToGermanTimestamp } from '@/utils/date';
 import { dbGetCharacterByIdOrSchoolId } from '@/db/functions/character';
 import { getUser } from '@/auth/utils';
 import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
+import { FederalStateModel } from '@/db/schema';
 
 export function constructSchuleSystemPrompt() {
   return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. Heute ist der ${formatDateToGermanTimestamp(new Date())}. Befolge folgende Anweisungen: Du sprichst immer die Sprache mit der du angesprochen wirst. Deine Standardsprache ist Deutsch, du duzt dein Gegenüber.`;
@@ -28,9 +29,11 @@ Folgende Dinge sollst du AUF KEINEN FALL tun: ${character.restrictions ?? ''}`;
 export function constructHelpModeSystemPrompt({
   isTeacher,
   federalStateSupportEmail,
+  chatStorageDuration,
 }: {
   isTeacher: boolean;
-  federalStateSupportEmail: string;
+  federalStateSupportEmail: string | null;
+  chatStorageDuration: number;
 }) {
   const systemPrompt = `
 Du bist der integrierte Hilfechat zu telli, dem datenschutzkonformen KI-Chatbot für den Schulunterricht. telli unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. telli wird vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. Heute ist der ${formatDateToGermanTimestamp(new Date())}. 
@@ -45,7 +48,7 @@ Der User hat ein limitiertes monetäres Budget pro Monat zur Verfügung, welches
 
 Die Tokenpreise der unterschiedlichen LLMs variieren. Der Verbrauch an telli-points hängt vom Tokenverbrauch und dem verwendeten LLM ab. Ressourcensparende Modelle sind mit einem grünen Blatt gekennzeichnet.
 
-Chats werden in telli für [x] Tage gespeichert. Vergangene Chats sind im Sideboard links gelistet, die Konversation kann jederzeit wieder aufgenommen werden.
+Chats werden in telli für ${chatStorageDuration} Tage gespeichert. Vergangene Chats sind im Sideboard links gelistet, die Konversation kann jederzeit wieder aufgenommen werden.
 
 Typische Anwendungsszenarien von telli sind:
 ${isTeacher ? 'Unterrichtsvorbereitung, Erstellen von Arbeitsblättern, Übersetzen von Aufgaben.../ Hilfe bei den Hausaufgaben, Übersetzen von Aufgaben' : ''}
@@ -75,7 +78,7 @@ Befolge folgende Anweisungen:
 - Gib knappe, klare und nicht zu technische Antworten. Erkläre erst auf Nachfragen detaillierter.
 - Passe dich dem Erfahrungsstand des Gegenübers an.
 - Biete weitere Hilfe nicht proaktiv an.
-- Kannst du nicht weiterhelfen, verweise auf den Support des Landes ${federalStateSupportEmail}.
+${federalStateSupportEmail !== null ? `- Kannst du nicht weiterhelfen, verweise auf den Support des Landes ${federalStateSupportEmail}.` : ''}
 - Du unterstützt die User auch bei der Erstellung von guten Prompts, beschränkst dich aber auf Hilfen zu telli und dem Einsatz von generativer KI.`;
 
   return systemPrompt;
@@ -85,12 +88,12 @@ export async function constructChatSystemPrompt({
   characterId,
   customGptId,
   isTeacher,
-  federalStateSupportEmail,
+  federalState,
 }: {
   characterId?: string;
   customGptId?: string;
   isTeacher: boolean;
-  federalStateSupportEmail: string;
+  federalState: Omit<FederalStateModel, 'encryptedApiKey'>;
 }) {
   const schoolSystemPrompt = constructSchuleSystemPrompt();
 
@@ -109,7 +112,8 @@ export async function constructChatSystemPrompt({
 
     const helpModeSystemPrompt = constructHelpModeSystemPrompt({
       isTeacher,
-      federalStateSupportEmail,
+      federalStateSupportEmail: federalState.supportContact,
+      chatStorageDuration: federalState.chatStorageTime,
     });
 
     if (customGpt.name !== 'Hilfe-Assistent') {

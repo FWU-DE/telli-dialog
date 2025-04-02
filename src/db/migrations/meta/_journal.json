@@ -29,6 +29,13 @@
       "when": 1742221179018,
       "tag": "0003_striped_tarot",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1743597508627,
+      "tag": "0004_fuzzy_human_torch",
+      "breakpoints": true
     }
   ]
 }

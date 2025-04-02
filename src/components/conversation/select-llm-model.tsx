@@ -5,24 +5,34 @@ import { useLlmModels } from '../providers/llm-model-provider';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { type LlmModel } from '@/db/schema';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
-import { saveChatModelAsCookie } from '@/app/(authed)/(dialog)/actions';
 import { useSidebarVisibility } from '../navigation/sidebar/sidebar-provider';
 import { cn } from '@/utils/tailwind';
+import { saveChatModelForUserAction } from '@/app/(authed)/(dialog)/actions';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 type SelectLlmModelProps = {
   isStudent?: boolean;
+  predefinedModel?: string;
+  model?: string;
 };
 
 export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProps) {
   const { models, selectedModel: _selectedModel, setSelectedModel } = useLlmModels();
   const { isOpen } = useSidebarVisibility();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   function handleSelectModel(model: LlmModel) {
     startTransition(() => {
       setOptimisticModelId(model.name);
-      saveChatModelAsCookie(model.name);
+      saveChatModelForUserAction(model.name);
     });
     setSelectedModel(model);
+
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('model', model.name);
+    router.push(`${pathname}?${newSearchParams.toString()}`);
   }
 
   const [optimisticModelId, setOptimisticModelId] = React.useOptimistic(
