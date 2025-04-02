@@ -60,7 +60,6 @@ test('teacher can login, create and join shared dialogpartner chat', async ({ pa
 
   await page.waitForURL('/characters/editor/**/share');
   const code = await page.locator('#join-code').textContent();
-  console.debug({ code });
 
   const countDown = page.locator('#countdown-timer');
   await expect(countDown).toBeVisible();

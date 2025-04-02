@@ -16,16 +16,20 @@ import ChevronDownIcon from '@/components/icons/chevron-down';
 import { useTranslations } from 'next-intl';
 import React from 'react';
 import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 
 export default function SharedSchoolChatCreateForm() {
   const toast = useToast();
   const router = useRouter();
 
-  const { models, selectedModel: _selectedModel } = useLlmModels();
+  const { models } = useLlmModels();
   const t = useTranslations('shared-chats.form');
   const tToast = useTranslations('shared-chats.toasts');
   const tCommon = useTranslations('common');
   const tGeneral = useTranslations('shared-chats');
+
+  const maybeDefaultModelId =
+    models.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? models[0]?.id;
 
   const {
     register,
@@ -36,7 +40,7 @@ export default function SharedSchoolChatCreateForm() {
     resolver: zodResolver(sharedSchoolChatFormValuesSchema),
     defaultValues: {
       name: '',
-      modelId: _selectedModel?.id,
+      modelId: maybeDefaultModelId,
     },
   });
 
@@ -79,7 +83,7 @@ export default function SharedSchoolChatCreateForm() {
           </label>
           <Select.Root
             onValueChange={(value) => setValue('modelId', value)}
-            defaultValue={_selectedModel?.id || ''}
+            defaultValue={maybeDefaultModelId}
           >
             <Select.Trigger
               aria-label={tCommon('llm-model')}

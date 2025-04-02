@@ -8,6 +8,9 @@ import DownloadConversationButton from './download-conversation-button';
 import HeaderPortal from './header-portal';
 import { getUser } from '@/auth/utils';
 import { getRandomPromptSuggestions } from '@/utils/prompt-suggestions/utils';
+import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
+import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
+import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,8 +20,15 @@ export default async function Page() {
 
   const promptSuggestions = getRandomPromptSuggestions({ userRole: user.school.userRole });
 
+  const models = await dbGetAndUpdateLlmModelsByFederalStateId({
+    federalStateId: user.federalState.id,
+  });
+
   return (
-    <>
+    <LlmModelsProvider
+      models={models}
+      defaultLlmModelByCookie={user.lastUsedModel ?? DEFAULT_CHAT_MODEL}
+    >
       <HeaderPortal>
         <div className="flex w-full gap-4 justify-center items-center z-30">
           <ToggleSidebarButton />
@@ -30,6 +40,6 @@ export default async function Page() {
         </div>
       </HeaderPortal>
       <Chat key={id} id={id} initialMessages={[]} promptSuggestions={promptSuggestions} />
-    </>
+    </LlmModelsProvider>
   );
 }

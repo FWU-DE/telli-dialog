@@ -18,6 +18,7 @@ export const userTable = pgTable('user_entity', {
   firstName: text('first_name').notNull(),
   lastName: text('last_name').notNull(),
   email: text('email').notNull().unique(),
+  lastUsedModel: text('last_used_model'),
   versionAcceptedConditions: integer(),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
 });

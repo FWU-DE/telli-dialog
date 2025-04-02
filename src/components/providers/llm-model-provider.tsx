@@ -3,7 +3,7 @@
 import { LlmModel } from '@/db/schema';
 import React from 'react';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
-import { saveChatModelAsCookie } from '@/app/(authed)/(dialog)/actions';
+import { saveChatModelForUserAction } from '@/app/(authed)/(dialog)/actions';
 
 type LlmModelsProviderProps = {
   models: LlmModel[];
@@ -14,7 +14,7 @@ type LlmModelsProviderProps = {
 type LlmModelsContextProps = {
   models: LlmModel[];
   selectedModel: LlmModel | undefined;
-  setSelectedModel: (model: LlmModel) => void;
+  setSelectedModel: (model: LlmModel) => Promise<void>;
 };
 
 const LlmModelsContext = React.createContext<LlmModelsContextProps | undefined>(undefined);
@@ -26,8 +26,8 @@ export function LlmModelsProvider({
 }: LlmModelsProviderProps) {
   const selectedModel = getSelectedModel({ models, defaultLlmModelByCookie });
 
-  function setSelectedModel(model: LlmModel) {
-    void saveChatModelAsCookie(model.name);
+  async function setSelectedModel(model: LlmModel) {
+    await saveChatModelForUserAction(model.name);
   }
 
   return (

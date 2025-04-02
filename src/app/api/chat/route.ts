@@ -16,6 +16,7 @@ import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
+import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -43,8 +44,6 @@ export async function POST(request: NextRequest) {
     characterId?: string;
     customGptId: string;
   } = await request.json();
-
-  console.debug({ characterId, customGptId });
 
   const [error, modelAndProvider] = await getModelAndProviderWithResult({
     modelId,
@@ -81,7 +80,7 @@ export async function POST(request: NextRequest) {
     characterId,
     customGptId,
     isTeacher: user.school.userRole === 'teacher',
-    federalStateSupportEmail: 'placeholder@email.com',
+    federalState: user.federalState,
   });
 
   const userMessage = getMostRecentUserMessage(messages);
@@ -112,6 +111,8 @@ export async function POST(request: NextRequest) {
     modelName: definedModel.name,
     orderNumber: messages.length + 1,
   });
+
+  await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
 
   const result = streamText({
     model: telliProvider,

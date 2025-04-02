@@ -32,7 +32,7 @@ import SelectLlmModelForm from '../../../_components/select-llm-model';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import ShareContainer from './share-container';
 import Checkbox from '@/components/common/checkbox';
-import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -64,6 +64,9 @@ export default function CharacterForm({
 
   const { models } = useLlmModels();
 
+  const maybeDefaultModelId =
+    models.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? models[0]?.id;
+
   const {
     register,
     handleSubmit,
@@ -80,6 +83,7 @@ export default function CharacterForm({
       schoolType: character.schoolType ?? '',
       gradeLevel: character.gradeLevel ?? '',
       subject: character.subject ?? '',
+      modelId: maybeDefaultModelId,
     },
   });
 
