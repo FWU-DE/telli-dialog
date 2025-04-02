@@ -31,6 +31,7 @@ describe('checkProductAccess', () => {
     firstName: '',
     lastName: '',
     createdAt: new Date(),
+    lastUsedModel: null,
     versionAcceptedConditions: null,
   } satisfies UserModel;
 

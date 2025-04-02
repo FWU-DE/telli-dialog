@@ -36,6 +36,13 @@
       "when": 1743440034819,
       "tag": "0004_loose_thunderbolt",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1743601854116,
+      "tag": "0005_rapid_wind_dancer",
+      "breakpoints": true
     }
   ]
 }

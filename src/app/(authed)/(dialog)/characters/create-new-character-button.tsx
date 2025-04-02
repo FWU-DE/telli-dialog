@@ -8,16 +8,20 @@ import { cn } from '@/utils/tailwind';
 import PlusIcon from '@/components/icons/plus';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
+import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 
 export default function CreateNewCharacterButton() {
   const router = useRouter();
   const toast = useToast();
   const t = useTranslations('characters');
 
-  const { selectedModel } = useLlmModels();
+  const { models } = useLlmModels();
+
+  const maybeDefaultModelId =
+    models.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? models[0]?.id;
 
   function handleNewGPT() {
-    createNewCharacterAction({ modelId: selectedModel?.id })
+    createNewCharacterAction({ modelId: maybeDefaultModelId })
       .then((newCharacter) => {
         router.push(`/characters/editor/${newCharacter.id}?create=true`);
       })

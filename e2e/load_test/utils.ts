@@ -82,7 +82,7 @@ export function generateUsers(count = 10000) {
   };
 
   userMapping['student'] = {
-    sub: '322594dc-548c-45be-b880-fda58fe863d3b',
+    sub: '322594dc-548c-45be-b880-fda58fe863d3',
     schulkennung: 'school1',
     rolle: 'LERN',
     bundesland: 'DE-BY',

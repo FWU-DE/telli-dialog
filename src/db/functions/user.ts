@@ -14,6 +14,20 @@ export async function dbGetUserById({ userId }: { userId: string | undefined }) 
 
   return obscuredUser;
 }
+export async function dbUpdateLastUsedModelByUserId({
+  modelName,
+  userId,
+}: {
+  modelName: string;
+  userId: string;
+}) {
+  const [updatedUser] = await db
+    .update(userTable)
+    .set({ lastUsedModel: modelName })
+    .where(eq(userTable.id, userId))
+    .returning();
+  return updatedUser;
+}
 
 export async function dbUpdateUserTermsVersion({ userId }: { userId: string }) {
   const [updatedRow] = await db

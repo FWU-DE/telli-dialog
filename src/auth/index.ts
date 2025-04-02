@@ -46,7 +46,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   events: {
     async signOut(message) {
-      console.debug({ message });
       if ('session' in message) return;
 
       const token = message.token;

@@ -53,7 +53,6 @@ test('teacher can login, create and join shared chat', async ({ page }) => {
 
   await page.waitForURL('/shared-chats/**/share');
   const code = await page.locator('#join-code').textContent();
-  console.debug({ code });
 
   const countDown = page.locator('#countdown-timer');
   await expect(countDown).toBeVisible();
@@ -125,7 +124,6 @@ test('teacher can login, create and delete shared chat, student can join chat', 
   // get code
   await page.waitForURL('/shared-chats/**/share');
   const code = await page.locator('#join-code').textContent();
-  console.debug({ code });
 
   // join chat as student
   await page.goto('/logout');

@@ -8,9 +8,11 @@ import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 import { getPriceInCentByUser } from '@/app/school';
 import AutoLogout from '@/components/auth/auto-logout';
-import { getDefaultModelNameByCookies } from '@/utils/model';
 import { checkProductAccess } from '@/utils/vidis/access';
 import ProductAccessModal from '@/components/modals/product-access';
+import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
+
+export const dynamic = 'force-dynamic';
 import TermsConditionsModal from '@/components/modals/terms-conditions-initial';
 import { showTermsFederalStates, VERSION } from '@/components/modals/static_content';
 import { setUserAcceptConditions } from './actions';
@@ -21,7 +23,6 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
     federalStateId: user.federalState.id,
   });
 
-  const defaultModelByCookie = await getDefaultModelNameByCookies();
   const priceInCent = await getPriceInCentByUser({ user, models });
   const productAccess = checkProductAccess(user);
   const userMustAccept =
@@ -32,7 +33,10 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
     <div className="flex h-[100dvh] w-[100dvw]">
       <AutoLogout />
       <SidebarVisibilityProvider>
-        <LlmModelsProvider models={models} defaultLlmModelByCookie={defaultModelByCookie}>
+        <LlmModelsProvider
+          models={models}
+          defaultLlmModelByCookie={user.lastUsedModel ?? DEFAULT_CHAT_MODEL}
+        >
           <DialogSidebar user={user} currentModelCosts={priceInCent ?? 0} />
           <div className="flex flex-col max-h-[100dvh] min-h-[100dvh] w-full overflow-auto">
             <div
