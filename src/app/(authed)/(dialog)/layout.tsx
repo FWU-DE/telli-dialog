@@ -25,9 +25,10 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
   const priceInCent = await getPriceInCentByUser({ user, models });
   const productAccess = checkProductAccess(user);
   const userMustAccept =
-    showTermsFederalStates.includes(user.federalState.id) ||
+    showTermsFederalStates.includes(user.federalState.id) &&
     (user.versionAcceptedConditions !== null && user.versionAcceptedConditions < VERSION);
-  return (
+  
+    return (
     <div className="flex h-[100dvh] w-[100dvw]">
       <AutoLogout />
       <SidebarVisibilityProvider>
