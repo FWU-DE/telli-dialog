@@ -20,7 +20,7 @@ import { generateUUID } from '@/utils/uuid';
 import { useQueryClient } from '@tanstack/react-query';
 import RobotIcon from '../icons/robot';
 import { useRouter } from 'next/navigation';
-import { CHAT_MESSAGE_LIMIT } from '@/configuration-text-inputs/const';
+import { CHAT_MESSAGE_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 
 type ChatProps = {
   id: string;
@@ -180,7 +180,7 @@ export default function Chat({
                     className={cn(
                       'w-full text-secondary-foreground',
                       message.role === 'user' &&
-                        'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary/20 text-primary-foreground max-w-[70%] break-words',
+                      'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary/20 text-primary-foreground max-w-[70%] break-words',
                     )}
                   >
                     <div
@@ -254,7 +254,7 @@ export default function Chat({
                   onChange={handleInputChange}
                   value={input}
                   onKeyDown={handleSubmitOnEnter}
-                  maxLength={CHAT_MESSAGE_LIMIT}
+                  maxLength={CHAT_MESSAGE_LENGTH_LIMIT}
                 />
                 {isLoading ? (
                   <button

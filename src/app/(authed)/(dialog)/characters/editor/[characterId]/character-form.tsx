@@ -350,7 +350,7 @@ export default function CharacterForm({
           <textarea
             id="competence"
             {...register('competence')}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT + 1}
+            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             rows={5}
             style={{ resize: 'none' }}
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
@@ -395,7 +395,7 @@ export default function CharacterForm({
           <textarea
             id="restrictions"
             {...register('restrictions')}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT +1}
+            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             rows={5}
             style={{ resize: 'none' }}
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}

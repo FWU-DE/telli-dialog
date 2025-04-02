@@ -1,1 +1,1 @@
-export const CONFIGURATION_FIELDS = 500 
+export const CONFIGURATION_FIELDS = 500;
