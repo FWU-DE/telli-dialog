@@ -5,6 +5,8 @@ import { getUser } from '@/auth/utils';
 import { dbUpdateConversationTitle } from '@/db/functions/chat';
 import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
 import { revalidatePath } from 'next/cache';
+import { dbUpdateUserTermsVersion } from '@/db/functions/user';
+import { VERSION } from '@/components/modals/static_content';
 
 export default async function deleteConversationAction({
   conversationId,
@@ -37,4 +39,10 @@ export async function saveChatModelForUserAction(modelName: string) {
   const user = await getUser();
   await dbUpdateLastUsedModelByUserId({ userId: user.id, modelName });
   revalidatePath('/');
+}
+
+export async function setUserAcceptConditions(): Promise<boolean> {
+  const user = await getUser();
+  const updated = await dbUpdateUserTermsVersion({ userId: user.id });
+  return updated?.versionAcceptedConditions === VERSION;
 }

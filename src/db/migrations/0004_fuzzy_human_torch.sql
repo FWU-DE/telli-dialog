@@ -1,1 +1,0 @@
-ALTER TABLE "user_entity" ADD COLUMN "last_used_model" text;

@@ -1,5 +1,5 @@
 {
-  "id": "bd991e29-f40c-4a85-b640-e92f01b4bb73",
+  "id": "2f83fbf6-edc6-4041-945a-a7ed281091ff",
   "prevId": "4fdf8f15-4bd1-4892-9d8b-d56262ec6f45",
   "version": "7",
   "dialect": "postgresql",
@@ -1102,9 +1102,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "last_used_model": {
-          "name": "last_used_model",
-          "type": "text",
+        "versionAcceptedConditions": {
+          "name": "versionAcceptedConditions",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },

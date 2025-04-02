@@ -13,6 +13,9 @@ import ProductAccessModal from '@/components/modals/product-access';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 
 export const dynamic = 'force-dynamic';
+import TermsConditionsModal from '@/components/modals/terms-conditions-initial';
+import { showTermsFederalStates, VERSION } from '@/components/modals/static_content';
+import { setUserAcceptConditions } from './actions';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
@@ -21,8 +24,10 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
   });
 
   const priceInCent = await getPriceInCentByUser({ user, models });
-
   const productAccess = checkProductAccess(user);
+  const userMustAccept =
+    showTermsFederalStates.includes(user.federalState.id) &&
+    (user.versionAcceptedConditions === null || user.versionAcceptedConditions < VERSION);
 
   return (
     <div className="flex h-[100dvh] w-[100dvw]">
@@ -50,6 +55,9 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
           {productAccess.errorMessage}
         </ProductAccessModal>
       )}
+      {userMustAccept ? (
+        <TermsConditionsModal handleAccept={setUserAcceptConditions}></TermsConditionsModal>
+      ) : null}
     </div>
   );
 }
