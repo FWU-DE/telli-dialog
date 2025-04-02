@@ -180,7 +180,7 @@ export default function Chat({
                     className={cn(
                       'w-full text-secondary-foreground',
                       message.role === 'user' &&
-                      'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary/20 text-primary-foreground max-w-[70%] break-words',
+                        'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary/20 text-primary-foreground max-w-[70%] break-words',
                     )}
                   >
                     <div
