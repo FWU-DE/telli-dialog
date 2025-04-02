@@ -33,6 +33,7 @@ import { useLlmModels } from '@/components/providers/llm-model-provider';
 import ShareContainer from './share-container';
 import Checkbox from '@/components/common/checkbox';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
+import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
