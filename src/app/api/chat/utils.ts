@@ -13,7 +13,7 @@ export function limitChatHistory({
   limit: number;
 }): Array<Message> {
   // Validate that limit is even
-  if (limit % 2 !== 0 || messages[0] === undefined ) {
+  if (limit % 2 !== 0 || messages[0] === undefined) {
     throw new Error(
       'Limit must be an even number to ensure equal distribution between user and assistant messages',
     );
@@ -22,7 +22,7 @@ export function limitChatHistory({
   if (messages.length <= limit) {
     return messages;
   }
-  const firstMessage: Message = messages[0]
+  const firstMessage: Message = messages[0];
   const userMessages: Message[] = [];
   const assistantMessages: Message[] = [];
   const messagesPerRole = limit / 2;
