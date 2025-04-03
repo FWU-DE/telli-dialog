@@ -19,6 +19,7 @@ import * as Select from '@radix-ui/react-select';
 import ChevronDownIcon from '@/components/icons/chevron-down';
 import React from 'react';
 import { useTranslations } from 'next-intl';
+import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 
 export default function SharedSchoolChatEditForm({
   ...sharedSchoolChat
@@ -132,6 +133,7 @@ export default function SharedSchoolChatEditForm({
           id="description"
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('description')}
+          maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
         />
       </div>
       <div className="grid grid-cols-3 gap-6">
@@ -143,6 +145,7 @@ export default function SharedSchoolChatEditForm({
             id="school-type"
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('schoolType')}
+            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
           />
         </div>
         <div className="flex flex-col gap-4">
@@ -153,6 +156,7 @@ export default function SharedSchoolChatEditForm({
             id="gradeLevel"
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('gradeLevel')}
+            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
           />
         </div>
         <div className="flex flex-col gap-4">
@@ -163,6 +167,7 @@ export default function SharedSchoolChatEditForm({
             id="subject"
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('subject')}
+            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
           />
         </div>
       </div>
@@ -176,6 +181,7 @@ export default function SharedSchoolChatEditForm({
           style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('learningContext')}
+          maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
         />
       </div>
       <div className="flex flex-col gap-4">
@@ -188,6 +194,7 @@ export default function SharedSchoolChatEditForm({
           style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('specification')}
+          maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
         />
       </div>
       <div className="flex flex-col gap-4">
@@ -200,6 +207,7 @@ export default function SharedSchoolChatEditForm({
           style={{ resize: 'none' }}
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('restrictions')}
+          maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
         />
       </div>
       <section>
