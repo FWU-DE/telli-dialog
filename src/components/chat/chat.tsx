@@ -20,6 +20,7 @@ import { generateUUID } from '@/utils/uuid';
 import { useQueryClient } from '@tanstack/react-query';
 import RobotIcon from '../icons/robot';
 import { useRouter } from 'next/navigation';
+import { CHAT_MESSAGE_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 
 type ChatProps = {
   id: string;
@@ -253,7 +254,7 @@ export default function Chat({
                   onChange={handleInputChange}
                   value={input}
                   onKeyDown={handleSubmitOnEnter}
-                  maxLength={20000}
+                  maxLength={CHAT_MESSAGE_LENGTH_LIMIT}
                 />
                 {isLoading ? (
                   <button
