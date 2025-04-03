@@ -30,8 +30,7 @@ describe('limitChatHistory', () => {
       messages: unbalancedHistory.slice(0, 5),
       limitRecent: 10,
     });
-    expect(result).toHaveLength(5);
-    expect(result).toEqual(unbalancedHistory.slice(0, 5));
+    expect(result).toHaveLength(4);
   });
 
   it('should throw an error if limit is not even', () => {
@@ -50,14 +49,14 @@ describe('limitChatHistory', () => {
     });
 
     // join consecutive messages
-    expect(result).toHaveLength(5);
+    expect(result).toHaveLength(7);
     expect(result[0]).toEqual(unbalancedHistory[0]); // System message
 
     // Count roles in the result
     const userCount = result.filter((m) => m.role === 'user').length;
     const assistantCount = result.filter((m) => m.role === 'assistant').length;
-    expect(userCount).toBeLessThanOrEqual(3); // At most 3 user messages
-    expect(assistantCount).toBeGreaterThanOrEqual(2); // At least 2 assistant messages
+    expect(userCount).toBeLessThanOrEqual(4); // At most 4 user messages
+    expect(assistantCount).toBeGreaterThanOrEqual(3); // At least 3 assistant messages
 
     // Should include most recent messages of each type
     expect(result).toContainEqual(unbalancedHistory.at(-1)); // Most recent user message

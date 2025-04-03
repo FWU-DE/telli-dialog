@@ -41,7 +41,7 @@ export function limitChatHistory({
       prevMessage.content += '\n\n' + currentMessage.content;
     } else {
       // Otherwise add as a new message
-      consolidatedMessages.push({ ...currentMessage });
+      consolidatedMessages.push(currentMessage);
     }
   }
 
@@ -78,10 +78,10 @@ export function limitChatHistory({
 
   // Combine the first n messages with the collected recent messages in their original order
   const limitedMessages: Message[] = [...firstNMessages];
-
-  for (let i = limitRecent; i < consolidatedMessages.length; i++) {
+  const lastMsgIndex = consolidatedMessages.length - limitRecent;
+  for (let i = lastMsgIndex; i < consolidatedMessages.length; i++) {
     const message = consolidatedMessages[i];
-    if (message === undefined) {
+    if (message === undefined || firstNMessages.includes(message)) {
       continue;
     }
     if ([...userMessages, ...assistantMessages].includes(message)) {
