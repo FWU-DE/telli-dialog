@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
   });
 
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
-  const prunedMessages = limitChatHistory({ messages, limit: 4 });
+  const prunedMessages = limitChatHistory({ messages, limitRecent: 4, limitFirst: 4 });
   console.log(prunedMessages);
   const result = streamText({
     model: telliProvider,
