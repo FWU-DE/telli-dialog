@@ -16,7 +16,7 @@ jobs:
           export-env: true
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          API_KEY: op://Telli/.env.production chatbot/API_KEY
+          API_KEY: op://telli Engineering/.env.production chatbot/API_KEY
       - name: Call Delete Conversations Endpoint
         run: |
           # Make the API call and store the full response
