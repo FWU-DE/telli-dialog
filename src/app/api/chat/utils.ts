@@ -20,10 +20,7 @@ export function limitChatHistory({
       'Limit must be an even number to ensure equal distribution between user and assistant messages',
     );
   }
-  // Always include the last user message even if limitRecent == 0
-  limitRecent = limitRecent + 1;
-  limitFirst = limitFirst - 1;
-  const indexRecent = messages.length - limitRecent;
+
   if (limitFirst < 0) {
     throw new Error('keepFirstN must be a non-negative number');
   }
@@ -47,6 +44,12 @@ export function limitChatHistory({
       consolidatedMessages.push({ ...currentMessage });
     }
   }
+
+  // Always include the last user message even if limitRecent == 0
+  limitRecent = limitRecent + 1;
+  limitFirst = limitFirst - 1;
+  const indexRecent = consolidatedMessages.length - limitRecent;
+
   const newMessages: Message[] = [];
 
   // Iterate from most recent to oldest, skipping the first n messages
