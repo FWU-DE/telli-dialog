@@ -12,7 +12,18 @@ export const TERM_AND_CONDITIONS = [
   '9. Diese Nutzungsbedingungen können jederzeit geändert werden. Nutzende werden durch eine Mitteilung auf dem Bildungsserver Berlin Brandenburg über Änderungen informiert. Die Nutzungsbedingung sind jederzeit auf den Seiten des Bildungsservers Berlin Brandenburg einsehbar.',
 ];
 
+export const EDUCATION_HINT = [
+  "Liebe Kollegin, Lieber Kollege,",
+  "wir freuen uns, dass Sie telli nutzen möchten. Als KI-Chatbot unterliegt telli der EU-Verordnung über den Einsatz von Künstlicher Intelligenz (KI-VO). Die KI-VO verpflichtet in Art. 4 alle Anbieter und Betrei-ber von KI-Systemen dafür Sorge zu tragen, dass Personen, die ihre Systeme nutzen über die Notwen-digen KI-Kompetenzen verfügen.",
+  "Für telli ist in Brandenburg vor der initialen Nutzung darum der Besuch eines Selbstlernkurses des LIBRA zum Thema KI verpflichtend.",
+  // TODO add link when available
+  // "Der Kurs ist abrufbar unter [LINK] und kann online absolviert werden.",
+  "Darüber hinaus bietet das LIBRA auf der Plattform „JWD“ (https://bildungsserver.berlin-branden-burg.de/jwd/startseite) zahlreiche Informationen, Hinweise und Tipps zum Thema KI und Schule und für den Einsatz von telli für Lehrkräfte.",
+  "Vielen Dank und viel Freude bei der Nutzung von telli.",
+  "Ihr telli-Team Brandenburg",
+]
+
 // increment this number to prompt renewed acceptance from all users
 export const VERSION = 1;
 // Ids of all States which explicitly have to accept to the terms & conditions
-export const showTermsFederalStates = ['DE-BB'];
+export const showTermsFederalStates = ['DE-BY'];
