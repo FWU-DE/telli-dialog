@@ -10,7 +10,7 @@ import { getUser } from '@/auth/utils';
 import { userHasReachedIntelliPointLimit, trackChatUsage } from './usage';
 import { getModelAndProviderWithResult } from '../utils';
 import { generateUUID } from '@/utils/uuid';
-import { getMostRecentUserMessage } from './utils';
+import { getMostRecentUserMessage, limitChatHistory } from './utils';
 import { constructChatSystemPrompt } from './system-prompt';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
@@ -113,11 +113,12 @@ export async function POST(request: NextRequest) {
   });
 
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
-
+  const prunedMessages = limitChatHistory({ messages, limitRecent: 4, limitFirst: 4 });
+  console.log(prunedMessages);
   const result = streamText({
     model: telliProvider,
     system: systemPrompt,
-    messages: messages.map((m) => ({ role: m.role, content: m.content })),
+    messages: prunedMessages.map((m) => ({ role: m.role, content: m.content })),
     experimental_generateMessageId: generateUUID,
     experimental_transform: smoothStream({ chunking: 'word', delayInMs: 20 }),
     async onFinish(assistantMessage) {
