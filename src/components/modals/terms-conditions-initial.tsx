@@ -87,15 +87,19 @@ export default function TermsConditionsModal({
             <h1 className="text-3xl font-medium p-1 mb-auto mt-auto">{currentTitle}</h1>
           </AlertDialog.Title>
           <div className="flex flex-col gap-5 items-start p-2">
-            <div className="overflow-y-auto max-h-[60vh] mt-4" ref={scrollRef} onScroll={handleScroll}>
+            <div
+              className="overflow-y-auto max-h-[60vh] mt-4"
+              ref={scrollRef}
+              onScroll={handleScroll}
+            >
               {currentContent}
             </div>
-              {showMainContent ? (
-                <Checkbox onCheckedChange={setChecked} label={tUsage('accept')}></Checkbox>
-              ) : null}
-              <div className="flex flex-wrap justify-end items-center gap-6 mt-auto self-end">
-                <AlertDialog.Action asChild>{navigationBar}</AlertDialog.Action>
-              </div>
+            {showMainContent ? (
+              <Checkbox onCheckedChange={setChecked} label={tUsage('accept')}></Checkbox>
+            ) : null}
+            <div className="flex flex-wrap justify-end items-center gap-6 mt-auto self-end">
+              <AlertDialog.Action asChild>{navigationBar}</AlertDialog.Action>
+            </div>
           </div>
         </AlertDialog.Content>
       </AlertDialog.Portal>
