@@ -37,7 +37,6 @@ export function limitChatHistory({
 
     // If this message has the same role as the previous one, merge them
     if (prevMessage && prevMessage.role === currentMessage?.role) {
-      // Assuming Message has a content property that's a string
       prevMessage.content += '\n\n' + currentMessage.content;
     } else {
       // Otherwise add as a new message
@@ -52,7 +51,6 @@ export function limitChatHistory({
 
   const newMessages: Message[] = [];
 
-  // Iterate from most recent to oldest, skipping the first n messages
   for (let i = 0; i <= messages.length; i++) {
     const message = consolidatedMessages[i];
     if ((i <= limitFirst || i >= indexRecent) && message !== undefined) {
