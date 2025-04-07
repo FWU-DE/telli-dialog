@@ -3,11 +3,11 @@
 import React, { useRef, useState } from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { buttonPrimaryClassName, buttonSecondaryClassName } from '@/utils/tailwind/button';
-import { EDUCATION_HINT, TERM_AND_CONDITIONS, TEST_CONTENT } from './const';
+import { EDUCATION_HINT, TERM_AND_CONDITIONS } from './const';
 import { useTranslations } from 'next-intl';
 import Checkbox from '../common/checkbox';
 import { useRouter } from 'next/navigation';
-import { DynamicParagraph } from '@/components/modals/dynamic-paragraph';
+
 import MarkdownDisplay from '../chat/markdown-display';
 
 type TermsConditionsModalProps = {
@@ -25,8 +25,8 @@ export default function TermsConditionsModal({
   const tUsage = useTranslations('usage-disclaimer');
   const tCommon = useTranslations('common');
   const initialContent = tUsage('initial-content');
-  const TermsConditionsContent = <MarkdownDisplay>{TERM_AND_CONDITIONS}</MarkdownDisplay>
-  const EducationHintContent = <MarkdownDisplay>{EDUCATION_HINT}</MarkdownDisplay>
+  const TermsConditionsContent = <MarkdownDisplay>{TERM_AND_CONDITIONS}</MarkdownDisplay>;
+  const EducationHintContent = <MarkdownDisplay>{EDUCATION_HINT}</MarkdownDisplay>;
   const nextPage = () => {
     setPageNumber(pageNumber + 1);
   };

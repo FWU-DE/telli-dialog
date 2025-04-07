@@ -1,5 +1,3 @@
-import fs from 'fs';
-
 export const TERM_AND_CONDITIONS = `telli ist ein Angebot des Instituts für Film und Bild in Wissenschaft und Unterricht (FWU) gGmbH, das in Brandenburg im Auftrag des Ministeriums für Bildung, Jugend und Sport des Landes Brandenburg zur Verfügung gestellt wird.
 
 1. Nur registrierte und für telli freigeschaltete Lehrkräfte („Nutzende“) können telli für dienstliche Zwecke nutzen. Eine private Nutzung ist nicht zulässig.
@@ -18,8 +16,7 @@ export const TERM_AND_CONDITIONS = `telli ist ein Angebot des Instituts für Fil
 
 8. Das Ministerium für Bildung, Jugend und Sport des Landes Brandenburg behält sich das Recht vor, diesen Dienst jederzeit ohne gesonderte Ankündigung einzustellen. Das MBJS behält sich außerdem das Recht vor, Nutzende bei wiederholter oder andauernder missbräuchlicher Nutzung vorübergehend oder dauerhaft von der Nutzung auszuschließen.
 
-9.  Diese Nutzungsbedingungen können jederzeit geändert werden. Nutzende werden durch eine Mittei-lung auf dem Bildungsserver Berlin Brandenburg über Änderungen informiert. Die Nutzungsbedingung sind jederzeit auf den Seiten des Bildungsservers Berlin Brandenburg einsehbar.`
-
+9.  Diese Nutzungsbedingungen können jederzeit geändert werden. Nutzende werden durch eine Mittei-lung auf dem Bildungsserver Berlin Brandenburg über Änderungen informiert. Die Nutzungsbedingung sind jederzeit auf den Seiten des Bildungsservers Berlin Brandenburg einsehbar.`;
 
 // TODO add link when available
 // "Der Kurs ist abrufbar unter [LINK] und kann online absolviert werden.
