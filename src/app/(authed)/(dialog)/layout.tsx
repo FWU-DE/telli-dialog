@@ -14,7 +14,7 @@ import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 
 export const dynamic = 'force-dynamic';
 import TermsConditionsModal from '@/components/modals/terms-conditions-initial';
-import { showTermsFederalStates, VERSION } from '@/components/modals/static_content';
+import { showTermsFederalStates, VERSION } from '@/components/modals/const';
 import { setUserAcceptConditions } from './actions';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {

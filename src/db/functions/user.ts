@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { db } from '..';
 import { userTable } from '../schema';
-import { VERSION } from '@/components/modals/static_content';
+import { VERSION } from '@/components/modals/const';
 
 export async function dbGetUserById({ userId }: { userId: string | undefined }) {
   if (userId === undefined) return undefined;
