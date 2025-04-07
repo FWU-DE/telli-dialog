@@ -7,6 +7,7 @@ import { EDUCATION_HINT, TERM_AND_CONDITIONS } from './const';
 import { useTranslations } from 'next-intl';
 import Checkbox from '../common/checkbox';
 import { useRouter } from 'next/navigation';
+import { DynamicParagraph } from '@/components/modals/dynamic-paragraph';
 
 type TermsConditionsModalProps = {
   handleAccept(): void;
@@ -34,7 +35,7 @@ export default function TermsConditionsModal({
   const EducationHintContent = EDUCATION_HINT.map((paragraph, index) => {
     return (
       <div key={index}>
-        <p className="text-normal w-full text-left">{paragraph}</p>
+        <DynamicParagraph index={index}>{paragraph}</DynamicParagraph>
         <br />
       </div>
     );
