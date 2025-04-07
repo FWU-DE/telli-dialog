@@ -26,6 +26,8 @@ export const EDUCATION_HINT = [
 ];
 
 // increment this number to prompt renewed acceptance from all users
-export const VERSION = 1;
+export const VERSION: number = 2;
 // Ids of all States which explicitly have to accept to the terms & conditions
 export const showTermsFederalStates = ['DE-BB'];
+
+if (!Number.isInteger(VERSION)) {throw Error(`Version must be set to an Integer, Value: ${VERSION}`)}
