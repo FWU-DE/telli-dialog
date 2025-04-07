@@ -1,4 +1,5 @@
 import { cn } from '@/utils/tailwind';
+import Link from 'next/link';
 import { ReactNode } from 'react';
 
 /**
@@ -63,7 +64,7 @@ export function DynamicParagraph({
     // Add protocol if missing
 
     parts.push(
-      <a
+      <Link
         key={`link-${index}-${parts.length}`}
         href={linkUrl}
         target="_blank"
@@ -71,7 +72,7 @@ export function DynamicParagraph({
         className="text-blue-600 underline hover:text-blue-800 cursor-pointer"
       >
         {linkText}
-      </a>,
+      </Link>,
     );
     lastIndex = match.index + match[0].length;
   }
