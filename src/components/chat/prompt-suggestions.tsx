@@ -16,7 +16,7 @@ export default function PromptSuggestions({
   return (
     <div
       className={cn(
-        'absolute bottom-28 sm:bottom-24 grid gap-4 grid-cols-2',
+        'relative sm:bottom-4 grid gap-4 grid-cols-2',
         suggestions.length < 2 && 'grid-cols-1',
       )}
     >

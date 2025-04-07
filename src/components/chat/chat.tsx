@@ -21,6 +21,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import RobotIcon from '../icons/robot';
 import { useRouter } from 'next/navigation';
 import { CHAT_MESSAGE_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import UploadFileButton from './upload-file-button';
+import { LocalFileState } from './send-message-form';
+import DisplayUploadedFile from './display-uploaded-file';
+import { deepCopy } from '@/utils/object';
 
 type ChatProps = {
   id: string;
@@ -129,6 +133,56 @@ export default function Chat({
   const chatSubHeading = tHelpMode('chat-subheading');
   const markdownLink = `[FAQ Seite](https://telli.schule/#faq)`;
   const formatedSubHeading = chatSubHeading.replace('$FAQ_LINK', markdownLink);
+
+  function handleDeattachFile(localFileId: string) {
+    setFiles((prev) => {
+      const newMap = deepCopy(prev);
+      const deleted = newMap.delete(localFileId);
+      if (!deleted) {
+        console.warn('Could not delete file');
+      }
+      return newMap;
+    });
+  }
+
+  const userInputTextArea = (
+    <AutoResizeTextarea
+      autoFocus
+      placeholder={tCommon('send-message-placeholder')}
+      className="w-full text-base focus:outline-none bg-transparent max-h-[10rem] sm:max-h-[15rem] overflow-y-auto placeholder-black p-2"
+      onChange={handleInputChange}
+      value={input}
+      onKeyDown={handleSubmitOnEnter}
+      maxLength={CHAT_MESSAGE_LENGTH_LIMIT}
+    />
+  );
+
+  /** Either Send or StopGeneration */
+  const userActionButton = isLoading ? (
+    <button
+      type="button"
+      title="Stop generating"
+      onClick={() => stop()}
+      className="p-1.5 my-2 flex items-center justify-center group disabled:cursor-not-allowed rounded-enterprise-sm hover:bg-secondary/20 me-2"
+      aria-label="Stop"
+    >
+      <StopIcon className="w-6 h-6 text-dark-gray group-disabled:bg-gray-200 group-disabled:text-gray-100 rounded-enterprise-sm text-primary group-hover:bg-secondary/20" />
+    </button>
+  ) : (
+    <button
+      type="submit"
+      title="Send message"
+      disabled={input.trim().length === 0}
+      className="my-2 mx-2 flex items-center self-end justify-center group disabled:cursor-not-allowed text-dark-gray hover:bg-secondary/20 disabled:bg-gray-200 disabled:text-gray-100 rounded-enterprise-sm text-primary"
+      aria-label="Send Message"
+    >
+      <ArrowRightIcon className="h-9 w-9" />
+    </button>
+  );
+
+  const [files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
+
+  const nofFiles = Array.from(files).length;
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
@@ -246,37 +300,24 @@ export default function Chat({
               onSubmit={customHandleSubmit}
               className="relative bg-white w-full p-1 border focus-within:border-primary rounded-xl"
             >
+              {nofFiles > 0 && (
+                <div className="mx-2 py-2 flex gap-1 overflow-x-auto">
+                  {Array.from(files).map(([localId, file]) => (
+                    <DisplayUploadedFile
+                      fileName={file.file.name}
+                      key={localId}
+                      status={file.status}
+                      onDeattachFile={() => handleDeattachFile(localId)}
+                    />
+                  ))}
+                </div>
+              )}
               <div className="flex items-center">
-                <AutoResizeTextarea
-                  autoFocus
-                  placeholder={tCommon('send-message-placeholder')}
-                  className="w-full text-base focus:outline-none bg-transparent max-h-[10rem] sm:max-h-[15rem] overflow-y-auto placeholder-black p-2"
-                  onChange={handleInputChange}
-                  value={input}
-                  onKeyDown={handleSubmitOnEnter}
-                  maxLength={CHAT_MESSAGE_LENGTH_LIMIT}
-                />
-                {isLoading ? (
-                  <button
-                    type="button"
-                    title="Stop generating"
-                    onClick={() => stop()}
-                    className="p-1.5 my-2 flex items-center justify-center group disabled:cursor-not-allowed rounded-enterprise-sm hover:bg-secondary/20 me-2"
-                    aria-label="Stop"
-                  >
-                    <StopIcon className="w-6 h-6 text-dark-gray group-disabled:bg-gray-200 group-disabled:text-gray-100 rounded-enterprise-sm text-primary group-hover:bg-secondary/20" />
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    title="Send message"
-                    disabled={input.trim().length === 0}
-                    className="my-2 mx-2 flex items-center self-end justify-center group disabled:cursor-not-allowed text-dark-gray hover:bg-secondary/20 disabled:bg-gray-200 disabled:text-gray-100 rounded-enterprise-sm text-primary"
-                    aria-label="Send Message"
-                  >
-                    <ArrowRightIcon className="h-9 w-9" />
-                  </button>
-                )}
+                {userInputTextArea}
+                {userActionButton}
+              </div>
+              <div className="flex flex-row gap-x-3">
+                <UploadFileButton className="hover:bg-light-gray" setFiles={setFiles} />
               </div>
             </form>
             <span className="text-xs mt-2 font-normal text-main-900 flex self-center text-center">
