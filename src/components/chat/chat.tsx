@@ -60,6 +60,7 @@ export default function Chat({
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
   }
 
+  const [files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   const {
     messages,
     input,
@@ -81,6 +82,7 @@ export default function Chat({
       modelId: selectedModel?.id,
       characterId: character?.id,
       customGptId: customGpt?.id,
+      fileIds: files.keys().toArray(),
     },
     generateId: generateUUID,
     sendExtraMessageFields: true,
@@ -114,7 +116,6 @@ export default function Chat({
 
     try {
       handleSubmit(e, {});
-
       navigateWithoutRefresh(conversationPath);
     } catch (error) {
       console.error(error);
@@ -179,8 +180,6 @@ export default function Chat({
       <ArrowRightIcon className="h-9 w-9" />
     </button>
   );
-
-  const [files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
 
   const nofFiles = Array.from(files).length;
 

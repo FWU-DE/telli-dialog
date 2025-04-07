@@ -277,7 +277,6 @@ export const customGptTable = pgTable('custom_gpt', {
 export type CustomGptModel = typeof customGptTable.$inferSelect;
 export type CustomGptInsertModel = typeof customGptTable.$inferInsert;
 
-
 export const fileTable = pgTable('file_table', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -289,15 +288,19 @@ export type FileModel = typeof fileTable.$inferSelect;
 export type FileModelAndUrl = FileModel & { signedUrl: string };
 export type FileInsertModel = typeof fileTable.$inferInsert;
 
-
-export const conversation_file_mapping = pgTable('conversation_file_mapping',{
-  id: uuid('id').defaultRandom().primaryKey(),
-  fileId:text('fileId').references(()=>fileTable.id).notNull(),
-  conversationId: uuid('conversationId').references(()=>conversationTable.id).notNull(),
-  createdAt:timestamp('created_at', {mode:'date', withTimezone:true}).defaultNow().notNull(),
-},
-  (table)=>({
-    unq: unique().on(table.conversationId, table.fileId)
-  })  
-
-)
+export const conversationFileMappingTable = pgTable(
+  'conversation_file_mapping',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    fileId: text('fileId')
+      .references(() => fileTable.id)
+      .notNull(),
+    conversationId: uuid('conversationId')
+      .references(() => conversationTable.id)
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    unq: unique().on(table.conversationId, table.fileId),
+  }),
+);

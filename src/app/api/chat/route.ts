@@ -17,6 +17,7 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
+// import { link_file_to_conversation } from '@/components/chat/upload-file-button';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -37,12 +38,14 @@ export async function POST(request: NextRequest) {
     modelId,
     characterId,
     customGptId,
+    fileIds,
   }: {
     id: string;
     messages: Message[];
     modelId: string;
     characterId?: string;
     customGptId: string;
+    fileIds?: string[];
   } = await request.json();
 
   const [error, modelAndProvider] = await getModelAndProviderWithResult({
@@ -62,7 +65,10 @@ export async function POST(request: NextRequest) {
     characterId,
     customGptId,
   });
-
+  console.log(fileIds)
+  if (fileIds !== undefined){
+    // await link_file_to_conversation({fileIds:fileIds, conversationId: id})
+  }
   if (conversation === undefined) {
     return NextResponse.json({ error: 'Could not get or create conversation' }, { status: 500 });
   }

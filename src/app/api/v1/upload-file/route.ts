@@ -1,14 +1,16 @@
-
 import { getUser } from '@/auth/utils';
 import { db } from '@/db';
 import { fileTable } from '@/db/schema';
-import { env } from '@/env';
+import { uploadFileToS3 } from '@/s3';
 import { getFileExtension } from '@/utils/files/generic';
 import { cnanoid } from '@/utils/random';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
-  await getUser();
+  const user = await getUser();
+  if (user === undefined) {
+    return NextResponse.json({ status: 403 });
+  }
   const formData = await req.formData();
 
   const file = formData.get('file');
@@ -24,7 +26,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
+
   const fileId = `file_${cnanoid()}`;
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
 
   const fileExtension = getFileExtension(file.name);
 
@@ -34,34 +39,16 @@ export async function POST(req: NextRequest) {
     file_name: file.name,
   });
 
-//   try {
-//     const v1FilesResponse = await fetch(
-//       `${env.completionServerUrl}/embed-file?${searchParams.toString()}`,
-//       {
-//         method: 'POST',
-//         headers: {
-//           Authorization: `Bearer ${env.completionApiKey}`,
-//         },
-//         body: formData,
-//       },
-//     );
+  await uploadFileToS3({
+    key: `message_attachments/${fileId}`,
+    body: buffer,
+    contentType: getFileExtension(file.name),
+  });
+  await db
+    .insert(fileTable)
+    .values({ id: fileId, name: file.name, size: file.size, type: file.type });
 
-//     if (!v1FilesResponse.ok) {
-//       const errorText = await v1FilesResponse.text();
-//       return NextResponse.json({ error: errorText }, { status: v1FilesResponse.status });
-//     }
 
-//     const result = await v1FilesResponse.json();
 
-//     await db
-//       .insert(fileTable)
-//       .values({ id: fileId, name: file.name, size: file.size, type: file.type });
-
-//     return NextResponse.json(result, { status: v1FilesResponse.status });
-//   } catch (error) {
-//     console.error('Error calling files upload route:', error);
-//     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
-//   }
-
-  return NextResponse.json({body:JSON.stringify({file_id:fileId}), status: 200})
+  return NextResponse.json({ body: JSON.stringify({ file_id: fileId }), status: 200 });
 }

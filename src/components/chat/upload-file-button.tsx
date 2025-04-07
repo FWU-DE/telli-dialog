@@ -7,6 +7,8 @@ import { ToastContextType, useToast } from '../common/toast';
 import { useConversation } from '../providers/conversation-provider';
 import AttachFileIcon from '../icons/attach-file';
 import { cn } from '@/utils/tailwind';
+import { db } from '@/db';
+import { conversationFileMappingTable } from '@/db/schema';
 
 export type FileUploadMetadata = {
   directoryId: string;
@@ -17,7 +19,6 @@ export type FileStatus = 'uploading' | 'processed' | 'failed';
 type UploadFileButtonProps = {
   setFiles: React.Dispatch<React.SetStateAction<Map<string, LocalFileState>>>;
   disabled?: boolean;
-  prevFileIds?: string[];
   isPrivateMode?: boolean;
   onFileUploaded?: (data: { id: string; name: string; file: File }) => void;
   triggerButton?: React.ReactNode;
@@ -42,10 +43,25 @@ const SUPPORTED_FILE_EXTENSIONS = [
   'html',
 ];
 
+export async function link_file_to_conversation({
+  conversationId,
+  fileIds,
+}: {
+  conversationId: string;
+  fileIds: string[];
+}) {
+  await Promise.all([
+    fileIds.map((fileId) =>
+      db
+        .insert(conversationFileMappingTable)
+        .values({ conversationId: conversationId, fileId: fileId }),
+    ),
+  ]);
+}
+
 const MAX_FILE_SIZE = 20_000_000; // 10MB
 export async function handleSingleFile({
   file,
-  prevFileIds,
   setFiles,
   fileUploadFn,
   directoryId,
@@ -96,8 +112,6 @@ export async function handleSingleFile({
             body: blobFile,
             contentType: file.type,
             fileName: file.name,
-            prevFileIds: prevFileIds,
-            directoryId: directoryId,
           });
     console.log(fileId);
     setFiles((prevFiles) => {
@@ -134,7 +148,6 @@ export async function handleSingleFile({
 
 export default function UploadFileButton({
   setFiles,
-  prevFileIds,
   disabled = false,
   isPrivateMode = false,
   onFileUploaded,
@@ -160,7 +173,6 @@ export default function UploadFileButton({
       files.map((f) =>
         handleSingleFile({
           file: f,
-          prevFileIds,
           setFiles,
           fileUploadFn,
           directoryId,
@@ -211,14 +223,7 @@ export default function UploadFileButton({
   );
 }
 
-export async function fetchUploadFile(data: {
-  body: Blob;
-  contentType: string;
-  fileName: string;
-  prevFileIds?: string[];
-  directoryId?: string;
-}) {
-  console.log('REQUESTING');
+export async function fetchUploadFile(data: { body: Blob; contentType: string; fileName: string }) {
   const formData = new FormData();
   formData.append('file', data.body, data.fileName);
   const response = await fetch('/api/v1/upload-file', {
