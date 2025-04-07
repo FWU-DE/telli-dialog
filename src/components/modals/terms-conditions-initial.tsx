@@ -3,11 +3,12 @@
 import React, { useRef, useState } from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { buttonPrimaryClassName, buttonSecondaryClassName } from '@/utils/tailwind/button';
-import { EDUCATION_HINT, TERM_AND_CONDITIONS } from './const';
+import { EDUCATION_HINT, TERM_AND_CONDITIONS, TEST_CONTENT } from './const';
 import { useTranslations } from 'next-intl';
 import Checkbox from '../common/checkbox';
 import { useRouter } from 'next/navigation';
 import { DynamicParagraph } from '@/components/modals/dynamic-paragraph';
+import MarkdownDisplay from '../chat/markdown-display';
 
 type TermsConditionsModalProps = {
   handleAccept(): void;
@@ -24,29 +25,15 @@ export default function TermsConditionsModal({
   const tUsage = useTranslations('usage-disclaimer');
   const tCommon = useTranslations('common');
   const initialContent = tUsage('initial-content');
-  const TermsConditionsContent = TERM_AND_CONDITIONS.map((paragraph, index) => {
-    return (
-      <div key={index}>
-        <p className="text-normal w-full text-left">{paragraph}</p>
-        <br />
-      </div>
-    );
-  });
-  const EducationHintContent = EDUCATION_HINT.map((paragraph, index) => {
-    return (
-      <div key={index}>
-        <DynamicParagraph index={index}>{paragraph}</DynamicParagraph>
-        <br />
-      </div>
-    );
-  });
+  const TermsConditionsContent = <MarkdownDisplay>{TERM_AND_CONDITIONS}</MarkdownDisplay>
+  const EducationHintContent = <MarkdownDisplay>{EDUCATION_HINT}</MarkdownDisplay>
   const nextPage = () => {
     setPageNumber(pageNumber + 1);
   };
   const prevPage = () => {
     setPageNumber(pageNumber - 1);
   };
-  const contents: Array<React.JSX.Element[] | string> = [
+  const contents: Array<React.JSX.Element | string> = [
     initialContent,
     TermsConditionsContent,
     EducationHintContent,
