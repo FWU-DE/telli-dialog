@@ -117,8 +117,8 @@ export async function POST(request: NextRequest) {
       conversationId: conversation.id,
     });
   }
-  const allFileIds = await dbGetAllFileIdByConversationId(conversation.id)
-  
+  const allFileIds = await dbGetAllFileIdByConversationId(conversation.id);
+
   attachedFiles = await process_files(allFileIds);
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
   const prunedMessages = limitChatHistory({ messages, limitRecent: 4, limitFirst: 4 });
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
     federalState: user.federalState,
     attachedFiles: attachedFiles,
   });
-  console.log(systemPrompt)
+  console.log(systemPrompt);
   const result = streamText({
     model: telliProvider,
     system: systemPrompt,

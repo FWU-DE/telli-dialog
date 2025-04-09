@@ -50,8 +50,8 @@ export default async function Page(context: PageContext) {
     conversationId: chat.id,
     userId: user.id,
   });
-  if (rawChatMessages === undefined){
-    throw new Error("no Chat messages found")
+  if (rawChatMessages === undefined) {
+    throw new Error('no Chat messages found');
   }
 
   const chatMessages: Message[] = rawChatMessages.map((message) => ({

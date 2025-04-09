@@ -100,9 +100,7 @@ export async function handleSingleFile({
       return updatedFiles;
     });
     if (fileIdAndWarning.warning !== null) {
-      toast.error(
-        fileIdAndWarning.warning,
-      );
+      toast.error(fileIdAndWarning.warning);
     }
     onFileUploaded?.({ id: fileIdAndWarning.fileId, name: file.name, file });
   } catch (error) {
@@ -218,7 +216,9 @@ export async function fetchUploadFile(data: {
   //   ? 'Die Datei wird abgeschnitten, da der Text Inhalt zu umfangreich ist'
   //   : undefined;
   const json = await response.json();
-  const parsedJson = z.object({ file_id: z.string(), warning: z.string().nullable() }).parse(JSON.parse(json?.body));
+  const parsedJson = z
+    .object({ file_id: z.string(), warning: z.string().nullable() })
+    .parse(JSON.parse(json?.body));
 
   return { fileId: parsedJson.file_id, warning: parsedJson.warning };
 }

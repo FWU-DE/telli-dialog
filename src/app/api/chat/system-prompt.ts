@@ -8,12 +8,12 @@ export function constructSchuleSystemPrompt() {
   return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. Heute ist der ${formatDateToGermanTimestamp(new Date())}. Befolge folgende Anweisungen: Du sprichst immer die Sprache mit der du angesprochen wirst. Deine Standardsprache ist Deutsch, du duzt dein Gegenüber.`;
 }
 
-export function constructSingleFilePrompt(fileEntity:FileModelAndContent){
+export function constructSingleFilePrompt(fileEntity: FileModelAndContent) {
   return `Dateiname: ${fileEntity.name} Was folgt ist der gesamte rohe Inhalt der Datei:
   --------- 
   ${fileEntity.content}
   ---------
-  `
+  `;
 }
 
 export async function constructCharacterSystemPrompt({ characterId }: { characterId: string }) {
@@ -93,7 +93,7 @@ ${federalStateSupportEmail !== null ? `- Kannst du nicht weiterhelfen, verweise 
 }
 
 const BASE_FILE_PROMPT = `Der Nutzer hat folgende Dateien bereitgestellt, berücksichtige den Inhalt dieser Dateien bei der Antwort 
-`
+`;
 
 export async function constructChatSystemPrompt({
   characterId,
@@ -106,14 +106,12 @@ export async function constructChatSystemPrompt({
   customGptId?: string;
   isTeacher: boolean;
   federalState: Omit<FederalStateModel, 'encryptedApiKey'>;
-  attachedFiles: FileModelAndContent[]
+  attachedFiles: FileModelAndContent[];
 }) {
   const schoolSystemPrompt = constructSchuleSystemPrompt();
-  let filePrompt = ""
-  if (attachedFiles?.length > 0){
-    filePrompt = BASE_FILE_PROMPT + attachedFiles.map(
-      (file) => constructSingleFilePrompt(file)
-    )
+  let filePrompt = '';
+  if (attachedFiles?.length > 0) {
+    filePrompt = BASE_FILE_PROMPT + attachedFiles.map((file) => constructSingleFilePrompt(file));
   }
   if (characterId !== undefined) {
     const characterSystemPrompt = await constructCharacterSystemPrompt({ characterId });

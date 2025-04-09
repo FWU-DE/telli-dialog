@@ -40,8 +40,8 @@ export default async function Page(context: PageContext) {
   if (conversationObject === undefined) {
     redirect('/');
   }
-  const fileMapping = await dbGetRelatedFiles(conversationId)
-  const refetchFileMapping = async () => await dbGetRelatedFiles(conversationId)
+  const fileMapping = await dbGetRelatedFiles(conversationId);
+  const refetchFileMapping = async () => await dbGetRelatedFiles(conversationId);
   const { conversation, messages } = conversationObject;
 
   const models = await dbGetAndUpdateLlmModelsByFederalStateId({
@@ -68,7 +68,11 @@ export default async function Page(context: PageContext) {
           <ProfileMenu {...user} />
         </div>
       </HeaderPortal>
-      <Chat id={conversation.id} initialMessages={convertMessageModelToMessage(messages)} fileMapping={fileMapping}/>
+      <Chat
+        id={conversation.id}
+        initialMessages={convertMessageModelToMessage(messages)}
+        fileMapping={fileMapping}
+      />
     </LlmModelsProvider>
   );
 }

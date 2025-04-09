@@ -49,7 +49,9 @@ export async function setUserAcceptConditions(): Promise<boolean> {
   return updated?.versionAcceptedConditions === VERSION;
 }
 
-export async function refetchFileMapping(conversationId:string): Promise<Map<string, FileModel[]>>{
+export async function refetchFileMapping(
+  conversationId: string,
+): Promise<Map<string, FileModel[]>> {
   const user = await getUser();
-  return await dbGetRelatedFiles(conversationId)
+  return await dbGetRelatedFiles(conversationId);
 }

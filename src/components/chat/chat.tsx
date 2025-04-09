@@ -34,7 +34,7 @@ type ChatProps = {
   character?: CharacterModel;
   imageSource?: string;
   promptSuggestions?: string[];
-  fileMapping?: Map<string, FileModel[]>
+  fileMapping?: Map<string, FileModel[]>;
 };
 
 export default function Chat({
@@ -55,8 +55,8 @@ export default function Chat({
     characterId: character?.id,
     conversationId: id,
   });
-  const [initialFiles, setInitialFiles] = React.useState<FileModel[]>()
-  const [fileMapping, setFileMapping] = React.useState<Map<string, FileModel[]>>()
+  const [initialFiles, setInitialFiles] = React.useState<FileModel[]>();
+  const [fileMapping, setFileMapping] = React.useState<Map<string, FileModel[]>>();
   const [files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   const [countOfFilesInChat, setCountOfFilesInChat] = React.useState(0);
   const queryClient = useQueryClient();
@@ -64,7 +64,6 @@ export default function Chat({
   function refetchConversations() {
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
   }
-
 
   const {
     messages,
@@ -95,7 +94,7 @@ export default function Chat({
     generateId: generateUUID,
     sendExtraMessageFields: true,
     onResponse: () => {
-      setCountOfFilesInChat(countOfFilesInChat +1)
+      setCountOfFilesInChat(countOfFilesInChat + 1);
       if (messages.length > 1) {
         return;
       }
@@ -114,13 +113,13 @@ export default function Chat({
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
 
-  useEffect( () => {
+  useEffect(() => {
     const fetchData = async () => {
-        setFileMapping(await refetchFileMapping(id))
-    }
-    console.log("TRIGGERED")
-    fetchData()
-  }, [countOfFilesInChat])
+      setFileMapping(await refetchFileMapping(id));
+    };
+    console.log('TRIGGERED');
+    fetchData();
+  }, [countOfFilesInChat]);
 
   React.useEffect(() => {
     if (scrollRef.current) {

@@ -54,7 +54,9 @@ export const conversationMessageTable = pgTable('conversation_message', {
   deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
 });
 
-export type ConversationModelWithFiles = typeof conversationTable.$inferSelect & {files: FileModel[]} 
+export type ConversationModelWithFiles = typeof conversationTable.$inferSelect & {
+  files: FileModel[];
+};
 
 export const userSchoolRoleSchema = z.enum(['student', 'teacher']);
 export const userSchoolRoleEnum = pgEnum('user_school_role', userSchoolRoleSchema.options);
@@ -288,7 +290,7 @@ export const fileTable = pgTable('file_table', {
 });
 export type FileModel = typeof fileTable.$inferSelect;
 export type FileModelAndUrl = FileModel & { signedUrl: string };
-export type FileModelAndContent = FileModel & { content?: string }
+export type FileModelAndContent = FileModel & { content?: string };
 export type FileInsertModel = typeof fileTable.$inferInsert;
 
 export const conversationMessgaeFileMappingTable = pgTable(
@@ -302,7 +304,9 @@ export const conversationMessgaeFileMappingTable = pgTable(
       .references(() => conversationMessageTable.id)
       .notNull(),
     // technically redundant but there files and conversations should be unique and it makes clean-up easier
-    conversationId: uuid('conversationId').references(()=> conversationTable.id).notNull(),
+    conversationId: uuid('conversationId')
+      .references(() => conversationTable.id)
+      .notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({

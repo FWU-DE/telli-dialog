@@ -19,10 +19,9 @@ export async function process_files(fileIds: string[]): Promise<FileModelAndCont
   for (const fileEnity of maybeFiles) {
     const content = fileContents[i];
     if (content === undefined) continue;
-    const fileType = getFileExtension(fileEnity.name)
-    fileEnity.content = await extractFile({fileContent: content, type: fileType});
+    const fileType = getFileExtension(fileEnity.name);
+    fileEnity.content = await extractFile({ fileContent: content, type: fileType });
     i++;
   }
   return maybeFiles;
 }
-
