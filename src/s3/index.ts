@@ -96,13 +96,7 @@ export async function getSignedUrlFromS3Get({
   }
 }
 
-export async function getSignedUrlFromS3Put({
-  key,
-  fileType,
-}: {
-  key: string;
-  fileType: string;
-}) {
+export async function getSignedUrlFromS3Put({ key, fileType }: { key: string; fileType: string }) {
   const command = new PutObjectCommand({
     Bucket: env.otcBucketName,
     Key: key,
@@ -132,11 +126,7 @@ export async function getSignedUrlFromS3Put({
  * @param key - The key (file name) of the file to read.
  * @returns The content of the file as a string.
  */
-export async function readFileFromS3({
-  key,
-}: {
-  key: string;
-}) {
+export async function readFileFromS3({ key }: { key: string }) {
   const getParams: GetObjectCommandInput = {
     Bucket: env.otcBucketName,
     Key: key,
@@ -157,12 +147,7 @@ export async function readFileFromS3({
   }
 }
 
-export async function streamFileFromS3({
-  key,
-}: {
-  key: string;
-
-}) {
+export async function streamFileFromS3({ key }: { key: string }) {
   const getParams: GetObjectCommandInput = {
     Bucket: env.otcBucketName,
     Key: key,
@@ -190,15 +175,10 @@ export async function streamToBuffer(stream: Readable): Promise<Buffer> {
  *
  * @param key - The key (file name) of the file to delete.
  */
-export async function deleteFileFromS3({
-  key,
-}: {
-  key: string;
-
-}) {
+export async function deleteFileFromS3({ key }: { key: string }) {
   const deleteParams: DeleteObjectCommandInput = {
     Bucket: env.otcBucketName,
-      Key: key,
+    Key: key,
   };
 
   try {

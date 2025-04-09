@@ -26,7 +26,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-
   const fileId = `file_${cnanoid()}`;
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
@@ -47,8 +46,6 @@ export async function POST(req: NextRequest) {
   await db
     .insert(fileTable)
     .values({ id: fileId, name: file.name, size: file.size, type: file.type });
-
-
 
   return NextResponse.json({ body: JSON.stringify({ file_id: fileId }), status: 200 });
 }

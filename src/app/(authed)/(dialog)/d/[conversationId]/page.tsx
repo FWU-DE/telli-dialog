@@ -15,6 +15,7 @@ import { awaitPageContext } from '@/utils/next/utils';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
+import { dbGetRelatedFiles } from '@/db/functions/files';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +40,7 @@ export default async function Page(context: PageContext) {
   if (conversationObject === undefined) {
     redirect('/');
   }
-
+  const fileMapping = await dbGetRelatedFiles(conversationId)
   const { conversation, messages } = conversationObject;
 
   const models = await dbGetAndUpdateLlmModelsByFederalStateId({
@@ -66,7 +67,7 @@ export default async function Page(context: PageContext) {
           <ProfileMenu {...user} />
         </div>
       </HeaderPortal>
-      <Chat id={conversation.id} initialMessages={convertMessageModelToMessage(messages)} />
+      <Chat id={conversation.id} initialMessages={convertMessageModelToMessage(messages)} fileMapping={fileMapping}/>
     </LlmModelsProvider>
   );
 }

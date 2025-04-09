@@ -14,6 +14,9 @@ importers:
       '@ai-sdk/react':
         specifier: 1.1.11
         version: 1.1.11(react@19.0.0)(zod@3.22.4)
+      '@ai-sdk/ui-utils':
+        specifier: 1.1.11
+        version: 1.1.11(zod@3.22.4)
       '@aws-sdk/client-s3':
         specifier: 3.744.0
         version: 3.744.0

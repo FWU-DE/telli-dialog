@@ -43,22 +43,6 @@ const SUPPORTED_FILE_EXTENSIONS = [
   'html',
 ];
 
-export async function link_file_to_conversation({
-  conversationId,
-  fileIds,
-}: {
-  conversationId: string;
-  fileIds: string[];
-}) {
-  await Promise.all([
-    fileIds.map((fileId) =>
-      db
-        .insert(conversationFileMappingTable)
-        .values({ conversationId: conversationId, fileId: fileId }),
-    ),
-  ]);
-}
-
 const MAX_FILE_SIZE = 20_000_000; // 10MB
 export async function handleSingleFile({
   file,
@@ -113,7 +97,6 @@ export async function handleSingleFile({
             contentType: file.type,
             fileName: file.name,
           });
-    console.log(fileId);
     setFiles((prevFiles) => {
       const updatedFiles = new Map(prevFiles);
       const fileState = updatedFiles.get(localId);

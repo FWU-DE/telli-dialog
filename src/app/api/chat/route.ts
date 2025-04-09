@@ -17,7 +17,7 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
-// import { link_file_to_conversation } from '@/components/chat/upload-file-button';
+import { link_file_to_conversation } from '@/db/functions/files';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -65,10 +65,7 @@ export async function POST(request: NextRequest) {
     characterId,
     customGptId,
   });
-  console.log(fileIds)
-  if (fileIds !== undefined){
-    // await link_file_to_conversation({fileIds:fileIds, conversationId: id})
-  }
+  
   if (conversation === undefined) {
     return NextResponse.json({ error: 'Could not get or create conversation' }, { status: 500 });
   }
@@ -94,7 +91,8 @@ export async function POST(request: NextRequest) {
   if (userMessage === undefined) {
     return NextResponse.json({ error: 'No user message found' }, { status: 400 });
   }
-
+  
+  
   const intelliPointsLimitReached = await userHasReachedIntelliPointLimit({ user });
 
   if (intelliPointsLimitReached) {
@@ -117,10 +115,15 @@ export async function POST(request: NextRequest) {
     modelName: definedModel.name,
     orderNumber: messages.length + 1,
   });
+  
+  if (fileIds !== undefined) {
+    await link_file_to_conversation({fileIds:fileIds, conversationMessageId: userMessage.id, conversationId: conversation.id})
+  }
+
 
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
   const prunedMessages = limitChatHistory({ messages, limitRecent: 4, limitFirst: 4 });
-  console.log(prunedMessages);
+
   const result = streamText({
     model: telliProvider,
     system: systemPrompt,

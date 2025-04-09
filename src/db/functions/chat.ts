@@ -2,9 +2,16 @@
 
 import { and, desc, eq, isNull } from 'drizzle-orm';
 import { db } from '..';
-import { conversationMessageTable, conversationTable } from '../schema';
+import {
+  ConversationMessageModelWithFiles,
+  conversationMessageTable,
+  conversationMessgaeFileMappingTable,
+  conversationTable,
+  FileModel,
+} from '../schema';
 import { ConversationMessageModel, InsertConversationMessageModel } from '../types';
 import { isNotNull } from '@/utils/guard';
+import { dbGetRelatedFiles } from './files';
 
 export async function dbCreateConversation({
   conversationId,
@@ -57,7 +64,7 @@ export async function dbGetCoversationMessages({
 }: {
   userId: string;
   conversationId: string;
-}) {
+}): Promise<[ConversationMessageModel[], Map<string, FileModel[]>]> {
   const messages = await db
     .select()
     .from(conversationMessageTable)
@@ -70,7 +77,13 @@ export async function dbGetCoversationMessages({
       ),
     )
     .orderBy(conversationMessageTable.orderNumber);
-  return getLatestMessages(messages.map((message) => message.conversation_message));
+
+  const relatedFiles = await dbGetRelatedFiles(conversationId);
+  const cleanedMessages = getLatestMessages(
+    messages.map((message) => message.conversation_message),
+  );
+
+  return [cleanedMessages, relatedFiles];
 }
 
 export async function dbInsertChatContent(chatContent: InsertConversationMessageModel) {
@@ -208,7 +221,6 @@ export async function dbGetConversationAndMessages({
   }
 
   const nonNullMessages = rows.map((r) => r.conversation_message).filter(isNotNull);
-
   return {
     conversation: firstRow.conversation,
     messages: getLatestMessages(nonNullMessages),
