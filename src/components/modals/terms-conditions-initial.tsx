@@ -32,6 +32,8 @@ export default function TermsConditionsModal({
   };
   const prevPage = () => {
     setPageNumber(pageNumber - 1);
+    setScrollFinished(false)
+    setChecked(false)
   };
   const contents: Array<React.JSX.Element | string> = [
     initialContent,
