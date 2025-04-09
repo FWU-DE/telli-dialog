@@ -1,6 +1,6 @@
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { db } from '..';
-import { conversationMessgaeFileMappingTable, FileModel, fileTable } from '../schema';
+import { conversationMessgaeFileMappingTable, FileModel, FileModelAndContent, fileTable } from '../schema';
 
 export async function link_file_to_conversation({
   conversationMessageId,
@@ -45,4 +45,16 @@ export async function dbGetRelatedFiles(conversationId: string): Promise<Map<str
 
   }
   return resultMap;
+}
+
+export async function dbGetFilesInIds(fileIds:string[]): Promise<FileModelAndContent[]> {
+  const maybeFiles = await db.select().from(fileTable).where(inArray(fileTable.id, fileIds));
+  return [...maybeFiles]
+}
+
+export async function dbGetAllFileIdByConversationId(conversationId:string) {
+  const fileMappings = await db.select().from(conversationMessgaeFileMappingTable).where(eq(conversationMessgaeFileMappingTable.conversationId, conversationId)).orderBy(conversationMessgaeFileMappingTable.createdAt);
+  return fileMappings.map(
+    (row) => row.fileId
+  )
 }

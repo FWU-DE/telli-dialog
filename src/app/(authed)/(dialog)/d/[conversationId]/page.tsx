@@ -41,6 +41,7 @@ export default async function Page(context: PageContext) {
     redirect('/');
   }
   const fileMapping = await dbGetRelatedFiles(conversationId)
+  const refetchFileMapping = async () => await dbGetRelatedFiles(conversationId)
   const { conversation, messages } = conversationObject;
 
   const models = await dbGetAndUpdateLlmModelsByFederalStateId({

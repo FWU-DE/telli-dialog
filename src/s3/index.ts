@@ -139,7 +139,7 @@ export async function readFileFromS3({ key }: { key: string }) {
     for await (const chunk of readableStream) {
       chunks.push(chunk);
     }
-    const content = Buffer.concat(chunks).toString('utf-8');
+    const content = Buffer.concat(chunks)
     return content;
   } catch (error) {
     console.error('Error reading file from S3:', error);

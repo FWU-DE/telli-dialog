@@ -53,7 +53,6 @@ export function ChatBox({
         ></DisplayUploadedFile>
       );
     });
-    console.log(filesElement);
     maybefileAttachment = (
       <div className="flex flex-row gap-2 pb-0 pt-0 overflow-auto self-end mb-4">
         {filesElement}

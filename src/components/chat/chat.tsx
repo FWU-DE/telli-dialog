@@ -1,12 +1,11 @@
 'use client';
 
 import AutoResizeTextarea from '@/components/common/auto-resize-textarea';
-import { cn } from '@/utils/tailwind';
 import { useChat, type Message } from '@ai-sdk/react';
 import ArrowRightIcon from '@/components/icons/arrow-right';
 import ReloadIcon from '@/components/icons/reload';
 import StopIcon from '@/components/icons/stop';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
 import Image from 'next/image';
@@ -14,7 +13,6 @@ import { type CustomGptModel, type CharacterModel, FileModel } from '@/db/schema
 import TelliLogo from '../icons/logo';
 import PromptSuggestions from './prompt-suggestions';
 import MarkdownDisplay from './markdown-display';
-import TelliClipboardButton from '../common/clipboard-button';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
 import { generateUUID } from '@/utils/uuid';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -27,7 +25,7 @@ import DisplayUploadedFile from './display-uploaded-file';
 import { deepCopy } from '@/utils/object';
 import { ChatBox } from './chat-box';
 import { getFileExtension } from '@/utils/files/generic';
-import { dbGetRelatedFiles } from '@/db/functions/files';
+import { refetchFileMapping } from '@/app/(authed)/(dialog)/actions';
 
 type ChatProps = {
   id: string;
@@ -46,7 +44,6 @@ export default function Chat({
   character,
   imageSource,
   promptSuggestions = [],
-  fileMapping
 }: ChatProps) {
   const tCommon = useTranslations('common');
   const tHelpMode = useTranslations('help-mode');
@@ -58,15 +55,17 @@ export default function Chat({
     characterId: character?.id,
     conversationId: id,
   });
-
+  const [initialFiles, setInitialFiles] = React.useState<FileModel[]>()
+  const [fileMapping, setFileMapping] = React.useState<Map<string, FileModel[]>>()
+  const [files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
+  const [countOfFilesInChat, setCountOfFilesInChat] = React.useState(0);
   const queryClient = useQueryClient();
 
   function refetchConversations() {
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
   }
 
-  const [files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
-  const [initialFiles, setInitialFiles] = React.useState<FileModel[]>();
+
   const {
     messages,
     input,
@@ -96,7 +95,7 @@ export default function Chat({
     generateId: generateUUID,
     sendExtraMessageFields: true,
     onResponse: () => {
-      // setInitialFiles([])
+      setCountOfFilesInChat(countOfFilesInChat +1)
       if (messages.length > 1) {
         return;
       }
@@ -114,6 +113,14 @@ export default function Chat({
   });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
+
+  useEffect( () => {
+    const fetchData = async () => {
+        setFileMapping(await refetchFileMapping(id))
+    }
+    console.log("TRIGGERED")
+    fetchData()
+  }, [countOfFilesInChat])
 
   React.useEffect(() => {
     if (scrollRef.current) {

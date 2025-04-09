@@ -17,7 +17,9 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
-import { link_file_to_conversation } from '@/db/functions/files';
+import { dbGetAllFileIdByConversationId, link_file_to_conversation } from '@/db/functions/files';
+import { process_files } from '../file-operations/process-file';
+import { FileModelAndContent } from '@/db/schema';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -38,7 +40,7 @@ export async function POST(request: NextRequest) {
     modelId,
     characterId,
     customGptId,
-    fileIds,
+    fileIds: currentFileIds,
   }: {
     id: string;
     messages: Message[];
@@ -65,7 +67,7 @@ export async function POST(request: NextRequest) {
     characterId,
     customGptId,
   });
-  
+
   if (conversation === undefined) {
     return NextResponse.json({ error: 'Could not get or create conversation' }, { status: 500 });
   }
@@ -79,20 +81,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Could not get conversation object' }, { status: 404 });
   }
 
-  const systemPrompt = await constructChatSystemPrompt({
-    characterId,
-    customGptId,
-    isTeacher: user.school.userRole === 'teacher',
-    federalState: user.federalState,
-  });
-
   const userMessage = getMostRecentUserMessage(messages);
 
   if (userMessage === undefined) {
     return NextResponse.json({ error: 'No user message found' }, { status: 400 });
   }
-  
-  
+
   const intelliPointsLimitReached = await userHasReachedIntelliPointLimit({ user });
 
   if (intelliPointsLimitReached) {
@@ -115,15 +109,27 @@ export async function POST(request: NextRequest) {
     modelName: definedModel.name,
     orderNumber: messages.length + 1,
   });
-  
-  if (fileIds !== undefined) {
-    await link_file_to_conversation({fileIds:fileIds, conversationMessageId: userMessage.id, conversationId: conversation.id})
+  let attachedFiles: FileModelAndContent[] = [];
+  if (currentFileIds !== undefined) {
+    await link_file_to_conversation({
+      fileIds: currentFileIds,
+      conversationMessageId: userMessage.id,
+      conversationId: conversation.id,
+    });
   }
-
-
+  const allFileIds = await dbGetAllFileIdByConversationId(conversation.id)
+  
+  attachedFiles = await process_files(allFileIds);
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
   const prunedMessages = limitChatHistory({ messages, limitRecent: 4, limitFirst: 4 });
-
+  const systemPrompt = await constructChatSystemPrompt({
+    characterId,
+    customGptId,
+    isTeacher: user.school.userRole === 'teacher',
+    federalState: user.federalState,
+    attachedFiles: attachedFiles,
+  });
+  console.log(systemPrompt)
   const result = streamText({
     model: telliProvider,
     system: systemPrompt,

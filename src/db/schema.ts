@@ -54,7 +54,7 @@ export const conversationMessageTable = pgTable('conversation_message', {
   deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
 });
 
-export type ConversationMessageModelWithFiles = typeof conversationTable.$inferSelect & {files: FileModel[]} 
+export type ConversationModelWithFiles = typeof conversationTable.$inferSelect & {files: FileModel[]} 
 
 export const userSchoolRoleSchema = z.enum(['student', 'teacher']);
 export const userSchoolRoleEnum = pgEnum('user_school_role', userSchoolRoleSchema.options);
@@ -288,6 +288,7 @@ export const fileTable = pgTable('file_table', {
 });
 export type FileModel = typeof fileTable.$inferSelect;
 export type FileModelAndUrl = FileModel & { signedUrl: string };
+export type FileModelAndContent = FileModel & { content?: string }
 export type FileInsertModel = typeof fileTable.$inferInsert;
 
 export const conversationMessgaeFileMappingTable = pgTable(
