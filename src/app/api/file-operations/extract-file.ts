@@ -1,4 +1,4 @@
-import { SUPPORTED_FILE_EXTENSIONS, SUPPORTED_FILE_TYPE as SupportedFiles } from '@/const';
+import { SUPPORTED_FILE_TYPE as SupportedFiles } from '@/const';
 import { extractTextFromWordDocument } from './parse-docx';
 import { extractTextFromPdfBuffer } from './parse-pdf';
 import { CHAT_MESSAGE_LENGTH_LIMIT } from '@/configuration-text-inputs/const';

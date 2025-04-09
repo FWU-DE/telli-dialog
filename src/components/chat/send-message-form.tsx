@@ -1,11 +1,10 @@
 'use client';
 
-import { z } from 'zod';
 import { FileStatus } from './upload-file-button';
 import { ConversationMessageMetadata } from '@/utils/chat';
 import { CustomGptModel } from '@/db/schema';
 
-type SendMessageProps = {
+export type SendMessageProps = {
   className?: string;
   disabled?: boolean;
   chatDisabled?: boolean;
@@ -21,10 +20,6 @@ type SendMessageProps = {
   customGpt?: CustomGptModel;
   hideStartMessages?: boolean;
 };
-
-const messageSchema = z.object({
-  message: z.string(),
-});
 
 export type LocalFileState = {
   file: File;

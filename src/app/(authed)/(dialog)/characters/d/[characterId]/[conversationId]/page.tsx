@@ -45,7 +45,7 @@ export default async function Page(context: {
     throw new Error('Chat not found');
   }
 
-  const [rawChatMessages, relatedFiles] = await dbGetCoversationMessages({
+  const rawChatMessages = await dbGetCoversationMessages({
     conversationId: chat.id,
     userId: user.id,
   });

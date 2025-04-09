@@ -4,10 +4,13 @@ export async function extractTextFromPdfBuffer(pdfBuffer: Buffer): Promise<strin
   const reader = new PdfReader();
 
   let textContent: string = '';
-  let lastItem: TextItem | null = null;
+  // TODO identify the type TextItem in lib
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let lastItem: any | null = null;
 
   return new Promise<string>((resolve, reject) => {
-    reader.parseBuffer(pdfBuffer, (err: Error | null, item: TextItem | null) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    reader.parseBuffer(pdfBuffer, (err: any, item: any | null) => {
       if (err) {
         reject(err);
         return;

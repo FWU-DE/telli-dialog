@@ -12,10 +12,7 @@ type TermsConditionsModalProps = {
   handleAccept(): void;
 } & React.ComponentProps<'button'>;
 
-export default function TermsConditionsModal({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  handleAccept,
-}: TermsConditionsModalProps) {
+export default function TermsConditionsModal({ handleAccept }: TermsConditionsModalProps) {
   const [showMainContent, setShowMainContent] = useState(false);
   const [scrollFinished, setScrollFinished] = useState(false);
   const [checked, setChecked] = useState(false);

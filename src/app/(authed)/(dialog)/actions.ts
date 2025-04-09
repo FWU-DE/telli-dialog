@@ -53,5 +53,6 @@ export async function refetchFileMapping(
   conversationId: string,
 ): Promise<Map<string, FileModel[]>> {
   const user = await getUser();
+  if (user === undefined) return new Map();
   return await dbGetRelatedFiles(conversationId);
 }

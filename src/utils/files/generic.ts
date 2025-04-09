@@ -1,10 +1,15 @@
-export function getFileExtension(fileName: string) {
+import { SUPPORTED_FILE_EXTENSIONS, SUPPORTED_FILE_TYPE } from '@/const';
+
+export function getFileExtension(fileName: string): SUPPORTED_FILE_TYPE {
   const parts = fileName.split('.');
 
   const lastPart = parts[parts.length - 1];
-
   if (lastPart === undefined) {
     return fileName;
+  }
+
+  if (SUPPORTED_FILE_EXTENSIONS.includes(lastPart.toString())) {
+    throw new Error('file type is not supported or missing');
   }
 
   return lastPart;

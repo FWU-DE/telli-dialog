@@ -1,4 +1,4 @@
-import { FileModelAndContent, fileTable } from '@/db/schema';
+import { FileModelAndContent } from '@/db/schema';
 import { readFileFromS3 } from '@/s3';
 import { dbGetFilesInIds } from '@/db/functions/files';
 import { extractFile } from './extract-file';
@@ -11,7 +11,7 @@ export async function process_files(fileIds: string[]): Promise<FileModelAndCont
       return readFileFromS3({ key: `message_attachments/${file.id}` });
     }),
   );
-  fileTable;
+
   if (maybeFiles[0] === undefined) {
     return [];
   }
@@ -20,7 +20,8 @@ export async function process_files(fileIds: string[]): Promise<FileModelAndCont
     const content = fileContents[i];
     if (content === undefined) continue;
     const fileType = getFileExtension(fileEnity.name);
-    fileEnity.content = await extractFile({ fileContent: content, type: fileType });
+    const extractedData = await extractFile({ fileContent: content, type: fileType });
+    fileEnity.content = extractedData.content;
     i++;
   }
   return maybeFiles;

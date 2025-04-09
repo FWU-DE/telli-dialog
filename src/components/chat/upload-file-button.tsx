@@ -37,10 +37,7 @@ export async function handleSingleFile({
   file,
   setFiles,
   fileUploadFn,
-  directoryId,
   onFileUploaded,
-  session,
-  conversation,
   toast,
 }: {
   file: File;
@@ -113,6 +110,7 @@ export async function handleSingleFile({
           status: 'failed',
         });
       }
+      console.error(error);
       toast.error(
         'Die Datei konnte leider nicht hochgeladen werden. Bitte versuchen Sie es erneut',
       );

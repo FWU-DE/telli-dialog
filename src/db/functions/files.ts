@@ -1,4 +1,4 @@
-import { arrayContains, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
+import { eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import { db } from '..';
 import {
   conversationMessgaeFileMappingTable,
@@ -47,7 +47,7 @@ export async function dbGetRelatedFiles(conversationId: string): Promise<Map<str
       createdAt: row.createdAt,
       type: row.type,
     };
-    let maybeFiles = resultMap.get(row.conversationMessageId);
+    const maybeFiles = resultMap.get(row.conversationMessageId);
     if (maybeFiles == null) {
       resultMap.set(row.conversationMessageId, [file]);
     }

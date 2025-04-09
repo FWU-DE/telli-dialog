@@ -1,4 +1,4 @@
-import { extractRawText, images } from 'mammoth';
+import { extractRawText } from 'mammoth';
 
 export async function extractTextFromWordDocument(buffer: Buffer): Promise<string> {
   try {

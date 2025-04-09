@@ -1,8 +1,5 @@
 import { getUser } from '@/auth/utils';
-import {
-  CHAT_MESSAGE_LENGTH_LIMIT,
-  USER_WARNING_FOR_TRUNCATED_FILES,
-} from '@/configuration-text-inputs/const';
+import { USER_WARNING_FOR_TRUNCATED_FILES } from '@/configuration-text-inputs/const';
 import { db } from '@/db';
 import { fileTable } from '@/db/schema';
 import { uploadFileToS3 } from '@/s3';
@@ -35,19 +32,13 @@ export async function POST(req: NextRequest) {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  const { content, truncated } = await extractFile({
+  const { truncated } = await extractFile({
     fileContent: buffer,
     type: getFileExtension(file.name),
   });
   const userWarning = truncated ? USER_WARNING_FOR_TRUNCATED_FILES : null;
 
   const fileExtension = getFileExtension(file.name);
-
-  const searchParams = new URLSearchParams({
-    file_type: fileExtension,
-    file_id: fileId,
-    file_name: file.name,
-  });
 
   await uploadFileToS3({
     key: `message_attachments/${fileId}`,
@@ -56,7 +47,7 @@ export async function POST(req: NextRequest) {
   });
   await db
     .insert(fileTable)
-    .values({ id: fileId, name: file.name, size: file.size, type: file.type });
+    .values({ id: fileId, name: file.name, size: file.size, type: fileExtension });
 
   return NextResponse.json({
     body: JSON.stringify({ file_id: fileId, warning: userWarning }),
