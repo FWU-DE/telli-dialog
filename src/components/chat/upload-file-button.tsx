@@ -7,11 +7,15 @@ import { ToastContextType, useToast } from '../common/toast';
 import { useConversation } from '../providers/conversation-provider';
 import AttachFileIcon from '../icons/attach-file';
 import { cn } from '@/utils/tailwind';
-import { db } from '@/db';
-import { conversationFileMappingTable } from '@/db/schema';
+import { SUPPORTED_FILE_EXTENSIONS } from '@/const';
 
 export type FileUploadMetadata = {
   directoryId: string;
+};
+
+export type FileUploadResponseWithWarning = {
+  fileId: string;
+  warning: string | null;
 };
 
 export type FileStatus = 'uploading' | 'processed' | 'failed';
@@ -22,28 +26,13 @@ type UploadFileButtonProps = {
   isPrivateMode?: boolean;
   onFileUploaded?: (data: { id: string; name: string; file: File }) => void;
   triggerButton?: React.ReactNode;
-  fileUploadFn?: (file: File) => Promise<string>;
+  fileUploadFn?: (file: File) => Promise<FileUploadResponseWithWarning>;
   onFileUploadStart?: () => void;
   className?: string;
   directoryId?: string;
 };
 
-const SUPPORTED_FILE_EXTENSIONS = [
-  'docx',
-  'doc',
-  'rtf',
-  'xlsx',
-  'xls',
-  'csv',
-  'pptx',
-  'ppt',
-  'pdf',
-  'md',
-  'txt',
-  'html',
-];
-
-const MAX_FILE_SIZE = 20_000_000; // 10MB
+const MAX_FILE_SIZE = 5_000_000; // 10MB
 export async function handleSingleFile({
   file,
   setFiles,
@@ -57,7 +46,7 @@ export async function handleSingleFile({
   file: File;
   prevFileIds?: string[];
   setFiles: React.Dispatch<React.SetStateAction<Map<string, LocalFileState>>>;
-  fileUploadFn?: (file: File) => Promise<string>;
+  fileUploadFn?: (file: File) => Promise<FileUploadResponseWithWarning>;
   directoryId?: string;
   onFileUploaded?: (data: { id: string; name: string; file: File }) => void;
   session: ReturnType<typeof useSession>;
@@ -89,7 +78,7 @@ export async function handleSingleFile({
   const blobFile = new Blob([file], { type: file.type });
 
   try {
-    const fileId =
+    const fileIdAndWarning =
       fileUploadFn !== undefined
         ? await fileUploadFn(file)
         : await fetchUploadFile({
@@ -97,6 +86,7 @@ export async function handleSingleFile({
             contentType: file.type,
             fileName: file.name,
           });
+    const fileId = fileIdAndWarning.fileId;
     setFiles((prevFiles) => {
       const updatedFiles = new Map(prevFiles);
       const fileState = updatedFiles.get(localId);
@@ -109,8 +99,12 @@ export async function handleSingleFile({
       }
       return updatedFiles;
     });
-
-    onFileUploaded?.({ id: fileId, name: file.name, file });
+    if (fileIdAndWarning.warning !== null) {
+      toast.error(
+        fileIdAndWarning.warning,
+      );
+    }
+    onFileUploaded?.({ id: fileIdAndWarning.fileId, name: file.name, file });
   } catch (error) {
     setFiles((prevFiles) => {
       const updatedFiles = new Map(prevFiles);
@@ -206,7 +200,11 @@ export default function UploadFileButton({
   );
 }
 
-export async function fetchUploadFile(data: { body: Blob; contentType: string; fileName: string }) {
+export async function fetchUploadFile(data: {
+  body: Blob;
+  contentType: string;
+  fileName: string;
+}): Promise<FileUploadResponseWithWarning> {
   const formData = new FormData();
   formData.append('file', data.body, data.fileName);
   const response = await fetch('/api/v1/upload-file', {
@@ -216,9 +214,11 @@ export async function fetchUploadFile(data: { body: Blob; contentType: string; f
   if (!response.ok) {
     throw Error('Could not upload file');
   }
-
+  // const warning = (await exceedsTokenLimit(data.body, data.fileName))
+  //   ? 'Die Datei wird abgeschnitten, da der Text Inhalt zu umfangreich ist'
+  //   : undefined;
   const json = await response.json();
-  const parsedJson = z.object({ file_id: z.string() }).parse(JSON.parse(json?.body));
+  const parsedJson = z.object({ file_id: z.string(), warning: z.string().nullable() }).parse(JSON.parse(json?.body));
 
-  return parsedJson.file_id;
+  return { fileId: parsedJson.file_id, warning: parsedJson.warning };
 }

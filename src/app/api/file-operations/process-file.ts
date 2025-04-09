@@ -1,8 +1,5 @@
-import { db } from '@/db';
 import { FileModelAndContent, fileTable } from '@/db/schema';
 import { readFileFromS3 } from '@/s3';
-import { eq, inArray } from 'drizzle-orm';
-import { extractTextFromPdfBuffer } from './parse-pdf';
 import { dbGetFilesInIds } from '@/db/functions/files';
 import { extractFile } from './extract-file';
 import { getFileExtension } from '@/utils/files/generic';

@@ -1,10 +1,12 @@
 import { getUser } from '@/auth/utils';
+import { CHAT_MESSAGE_LENGTH_LIMIT, USER_WARNING_FOR_TRUNCATED_FILES } from '@/configuration-text-inputs/const';
 import { db } from '@/db';
 import { fileTable } from '@/db/schema';
 import { uploadFileToS3 } from '@/s3';
 import { getFileExtension } from '@/utils/files/generic';
 import { cnanoid } from '@/utils/random';
 import { NextRequest, NextResponse } from 'next/server';
+import { extractFile } from '../../file-operations/extract-file';
 
 export async function POST(req: NextRequest) {
   const user = await getUser();
@@ -30,6 +32,9 @@ export async function POST(req: NextRequest) {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
+  const {content, truncated} = await extractFile({ fileContent: buffer, type: getFileExtension(file.name) });
+  const userWarning = truncated ? USER_WARNING_FOR_TRUNCATED_FILES: null
+
   const fileExtension = getFileExtension(file.name);
 
   const searchParams = new URLSearchParams({
@@ -47,5 +52,5 @@ export async function POST(req: NextRequest) {
     .insert(fileTable)
     .values({ id: fileId, name: file.name, size: file.size, type: file.type });
 
-  return NextResponse.json({ body: JSON.stringify({ file_id: fileId }), status: 200 });
+  return NextResponse.json({ body: JSON.stringify({ file_id: fileId, warning: userWarning} ), status: 200 });
 }
