@@ -13,8 +13,8 @@ import SearchBarInput from '@/components/search-bar';
 import { type UserAndContext } from '@/auth/types';
 import { CharacterAccessLevel, CustomGptModel } from '@/db/schema';
 import { useTranslations } from 'next-intl';
-import CustomGptContainer from './character-container';
-import { buildCharactersUrl } from '../characters/utils';
+import CustomGptContainer from './custom-gpt-container';
+import { buildCharactersUrl as buildRedirectUrl } from '../characters/utils';
 import CreateNewCustomGptButton from './create-new-customgpt-button';
 
 export default function Page2({
@@ -61,7 +61,7 @@ export default function Page2({
 
       <div className="flex gap-2 mt-4 text-base mb-4 max-w-3xl mx-auto w-full">
         <Link
-          href={buildCharactersUrl('global')}
+          href={buildRedirectUrl('global', "custom")}
           className={cn(
             'hover:underline px-2 p-1 text-primary',
             accessLevel === 'global' && 'underline',
@@ -70,7 +70,7 @@ export default function Page2({
           {t('visibility-global')}
         </Link>
         <Link
-          href={buildCharactersUrl('school')}
+          href={buildRedirectUrl('school',"custom")}
           className={cn(
             'hover:underline px-2 p-1 text-primary',
             accessLevel === 'school' && 'underline',
@@ -79,7 +79,7 @@ export default function Page2({
           {t('visibility-school')}
         </Link>
         <Link
-          href={buildCharactersUrl('private')}
+          href={buildRedirectUrl('private',"custom")}
           className={cn(
             'hover:underline px-2 p-1  text-primary',
             accessLevel === 'private' && 'underline',

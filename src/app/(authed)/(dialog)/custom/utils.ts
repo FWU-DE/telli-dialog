@@ -1,15 +1,15 @@
 import { CharacterAccessLevel, CharacterModel } from '@/db/schema';
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
 
-export function buildCharactersUrl(accessLevel: CharacterAccessLevel, route: string) {
+export function buildCharactersUrl(accessLevel: CharacterAccessLevel) {
   const searchParams = new URLSearchParams();
   searchParams.set('visibility', accessLevel);
-  return `/${route}?${searchParams.toString()}`;
+  return `/characters?${searchParams.toString()}`;
 }
 
 export type CharacterWithImage = CharacterModel & { maybeSignedPictureUrl: string | undefined };
 
-export async function enrichCharactersWithImage({
+export async function enrichGptWithImage({
   characters,
 }: {
   characters: CharacterModel[];

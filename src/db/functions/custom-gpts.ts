@@ -1,11 +1,12 @@
 import { db } from '..';
-import { eq, and, or } from 'drizzle-orm';
+import { eq, and, or, desc } from 'drizzle-orm';
 import {
   customGptTable,
   conversationMessageTable,
   conversationTable,
   type CustomGptModel,
   type CustomGptInsertModel,
+  CharacterAccessLevel,
 } from '../schema';
 
 export async function dbGetCustomGptsByUserId({
@@ -36,13 +37,50 @@ export async function dbGetCustomGptById({
   return customGpt;
 }
 
+export async function dbGetGlobalGpts(): Promise<CustomGptModel[]> {
+  const characters = await db
+    .select()
+    .from(customGptTable)
+    .where(eq(customGptTable.accessLevel, 'global'))
+    .orderBy(desc(customGptTable.createdAt));
+
+  return characters;
+}
+
+
+export async function dbGetGptsBySchoolId({
+  schoolId,
+}: {
+  schoolId: string;
+}): Promise<CustomGptModel[]> {
+  const characters = await db
+    .select()
+    .from(customGptTable)
+    .where(and(eq(customGptTable.schoolId, schoolId), eq(customGptTable.accessLevel, 'school')))
+    .orderBy(desc(customGptTable.createdAt));
+  return characters;
+}
+
+export async function dbGetGptsByUserId({
+  userId,
+}: {
+  userId: string;
+}): Promise<CustomGptModel[]> {
+  const characters = await db
+    .select()
+    .from(customGptTable)
+    .where(and(eq(customGptTable.userId, userId), eq(customGptTable.accessLevel, 'private')))
+    .orderBy(desc(customGptTable.createdAt));
+
+  return characters;
+}
 
 export async function dbGetCustomGptByIdOrSchoolId({
-  characterId,
+  customGptId: characterId,
   userId,
   schoolId,
 }: {
-  characterId: string;
+  customGptId: string;
   userId: string;
   schoolId: string | null;
 }) {

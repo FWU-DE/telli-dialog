@@ -15,6 +15,7 @@ import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-mode
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
+import SelectLlmModel from '@/components/conversation/select-llm-model';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,6 +83,7 @@ export default async function Page(context: PageContext) {
         <div className="flex w-full gap-4 justify-center items-center">
           <ToggleSidebarButton />
           <NewChatButton />
+          <SelectLlmModel isStudent={user.school.userRole === 'student'} />
           <span className="font-normal text-xl">{customGpt.name}</span>
           <div className="flex-grow"></div>
           <DownloadConversationButton

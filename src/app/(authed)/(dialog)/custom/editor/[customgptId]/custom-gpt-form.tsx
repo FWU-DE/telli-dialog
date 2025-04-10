@@ -1,6 +1,6 @@
 'use client';
 
-import { CharacterAccessLevel, CharacterModel, CustomGptModel } from '@/db/schema';
+import { CharacterAccessLevel, CustomGptModel } from '@/db/schema';
 import {
   buttonDeleteClassName,
   buttonPrimaryClassName,
@@ -8,12 +8,12 @@ import {
 } from '@/utils/tailwind/button';
 import { inputFieldClassName, labelClassName } from '@/utils/tailwind/input';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
   deleteCharacterAction,
   updateCharacterAccessLevelAction,
-  updateCharacterAction,
+  updateCustomGptAction,
   updateCharacterPictureAction,
 } from './actions';
 import { useRouter } from 'next/navigation';
@@ -24,16 +24,15 @@ import { EmptyImageIcon } from '@/components/icons/empty-image';
 import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
-import { deepEqual } from '@/utils/object';
 import ChevronLeftIcon from '@/components/icons/chevron-left';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
-import ShareContainer from './share-container';
 import Checkbox from '@/components/common/checkbox';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
-
+import TrashIcon from '@/components/icons/trash';
+import PlusIcon from '@/components/icons/plus';
 
 type CustomGptFormProps = CustomGptModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -44,15 +43,15 @@ const characterFormValuesSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   specification: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  modelId: z.string(),
-  promptSuggestions: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT).array().max(10),
+  promptSuggestions: z.array(z.object({ content: z.string() })),
 });
 type CharacterFormValues = z.infer<typeof characterFormValuesSchema>;
 
 export default function CustomGptForm({
   maybeSignedPictureUrl,
   isCreating = false,
-  ...character
+  promptSuggestions,
+  ...customGpt
 }: CustomGptFormProps) {
   const router = useRouter();
   const toast = useToast();
@@ -65,26 +64,28 @@ export default function CustomGptForm({
   const {
     register,
     handleSubmit,
+    control,
     getValues,
     setValue,
     formState: { isValid },
   } = useForm<CharacterFormValues>({
     resolver: zodResolver(characterFormValuesSchema),
     defaultValues: {
-      ...character,
-      description: character.description ?? '',
-      specification: character.specification ?? '',
-      promptSuggestions: character.promptSuggestions ?? [],
-      modelId: maybeDefaultModelId,
+      ...customGpt,
+      description: customGpt.description ?? '',
+      specification: customGpt.specification ?? '',
+      promptSuggestions:
+        promptSuggestions.length < 1
+          ? [{ content: '' }]
+          : promptSuggestions.map((p) => ({ content: p })),
     },
   });
-
-  const t = useTranslations('characters.form');
-  const tToast = useTranslations('characters.toasts');
+  const t = useTranslations('custom-gpt.form');
+  const tToast = useTranslations('custom-gpt.toasts');
   const tCommon = useTranslations('common');
 
   const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
-    character.accessLevel,
+    customGpt.accessLevel,
     (p, n: CharacterAccessLevel) => n,
   );
 
@@ -96,7 +97,7 @@ export default function CustomGptForm({
     });
 
     updateCharacterAccessLevelAction({
-      characterId: character.id,
+      characterId: customGpt.id,
       accessLevel,
     })
       .then(() => {
@@ -106,11 +107,55 @@ export default function CustomGptForm({
         toast.error(tToast('edit-toast-error'));
       });
   }
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'promptSuggestions',
+  });
 
-  const backUrl = `/characters?visibility=${character.accessLevel}`;
+  async function onSubmit(data: CharacterFormValues) {
+    updateCustomGptAction({
+      ...data,
+      promptSuggestions: data.promptSuggestions?.map((p) => p.content),
+      gptId:customGpt.id,
+    })
+      .then(() => {
+        router.refresh();
+      })
+      .catch(() => {
+        toast.error('Etwas ist beim Aktualisieren schief gelaufen.');
+      });
+  }
+
+  function cleanupPromptSuggestions(promptSuggestions: string[] | undefined) {
+    if (promptSuggestions === undefined) return undefined;
+    return promptSuggestions
+      .map((p) => p.trim())
+      .filter((p) => !!p)
+      .slice(0, 10);
+  }
+  
+
+  function updatePromptSuggestions() {
+    const _promptSuggestions = getValues('promptSuggestions');
+
+    const promptSuggestions = cleanupPromptSuggestions(_promptSuggestions.map((p) => p.content));
+
+    updateCustomGptAction({
+      gptId: customGpt.id,
+      promptSuggestions,
+    })
+      .then(() => {
+        router.refresh();
+      })
+      .catch((error) => {
+        console.error({ error });
+      });
+  }
+
+  const backUrl = `/custom?visibility=${customGpt.accessLevel}`;
 
   function handlePictureUploadComplete(picturePath: string) {
-    updateCharacterPictureAction({ picturePath, characterId: character.id })
+    updateCharacterPictureAction({ picturePath, characterId: customGpt.id })
       .then(() => {
         toast.success(tToast('image-toast-success'));
         router.refresh();
@@ -120,21 +165,9 @@ export default function CustomGptForm({
       });
   }
 
-  function onSubmit(data: CharacterFormValues) {
-    updateCharacterAction({ characterId: character.id, ...data })
-      .then(() => {
-        if (!isCreating) {
-          toast.success(tToast('edit-toast-success'));
-        }
-        router.refresh();
-      })
-      .catch(() => {
-        toast.error(tToast('edit-toast-error'));
-      });
-  }
 
   function handleDeleteCharacter() {
-    deleteCharacterAction({ characterId: character.id })
+    deleteCharacterAction({ characterId: customGpt.id })
       .then(() => {
         // do not show any toast if the avatar is being created
         if (!isCreating) {
@@ -148,17 +181,10 @@ export default function CustomGptForm({
       });
   }
 
-  function handleAutoSave() {
+  async function handleAutoSave() {
     if (isCreating) return;
     const data = getValues();
-    const hasChanges = !deepEqual(data, {
-      ...character,
-      description: character.description ?? '',
-      learningContext: character.learningContext ?? '',
-    });
-
-    if (!hasChanges) return;
-    onSubmit(data);
+    await onSubmit(data);
   }
 
   function handleCreateCharacter() {
@@ -167,7 +193,6 @@ export default function CustomGptForm({
     toast.success(tToast('create-toast-success'));
     router.replace(backUrl);
   }
-
   return (
     <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
       {isCreating && (
@@ -176,26 +201,23 @@ export default function CustomGptForm({
           className="flex gap-3 items-center text-primary hover:underline"
         >
           <ChevronLeftIcon />
-          <span>{t('all-characters')}</span>
+          <span>{t('all-gpts')}</span>
         </button>
       )}
       {!isCreating && (
         <Link href={backUrl} className="flex gap-3 text-primary hover:underline items-center">
           <ChevronLeftIcon />
-          <span>{t('all-characters')}</span>
+          <span>{t('all-gpts')}</span>
         </Link>
       )}
-      <h1 className="text-2xl mt-4 font-medium">
-        {isCreating ? t('create-character') : character.name}
-      </h1>
-      {!isCreating && (
+      <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>
+      {/* {!isCreating && (
         <fieldset className="mt-12">
           <ShareContainer {...character} />
         </fieldset>
-      )}
+      )} */}
       <fieldset className="mt-16 flex flex-col gap-8">
-        <h2 className="font-medium mb-2">{t('general-settings')}</h2>
-        <label className={cn(labelClassName, 'text-sm')}>{t('character-visibility-label')}</label>
+        <label className={cn(labelClassName, 'text-sm')}>{t('gpt-visibility-label')}</label>
         <div className="flex max-sm:flex-col gap-4 sm:gap-8">
           <Checkbox
             label={t('restriction-private')}
@@ -209,67 +231,13 @@ export default function CustomGptForm({
             onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'school')}
           />
         </div>
-        <div className="flex flex-col gap-4">
-          <label className={labelClassName}>{tCommon('llm-model')}</label>
-          <SelectLlmModelForm
-            selectedModel={character.modelId}
-            onValueChange={(value) => {
-              setValue('modelId', value);
-              handleAutoSave();
-            }}
-            models={models}
-          />
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          <div className="flex flex-col gap-4">
-            <label htmlFor="school-type" className={cn(labelClassName, 'text-sm')}>
-              <span className="text-coral">*</span> {t('school-type')}
-            </label>
-            <input
-              id="school-type"
-              className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-              {...register('schoolType')}
-              maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-              onBlur={handleAutoSave}
-              placeholder={t('school-type-placeholder')}
-            />
-          </div>
-          <div className="flex flex-col gap-4">
-            <label htmlFor="grade" className={cn(labelClassName, 'text-sm')}>
-              <span className="text-coral">*</span> {t('grade')}
-            </label>
-            <input
-              id="grade"
-              className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-              {...register('gradeLevel')}
-              maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-              placeholder={t('grade-placeholder')}
-              onBlur={handleAutoSave}
-            />
-          </div>
-          <div className="flex flex-col gap-4">
-            <label htmlFor="subject" className={cn(labelClassName, 'text-sm')}>
-              <span className="text-coral">*</span> {t('subject')}
-            </label>
-            <input
-              id="subject"
-              className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-              {...register('subject')}
-              maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-              onBlur={handleAutoSave}
-              placeholder={t('subject-placeholder')}
-            />
-          </div>
-        </div>
       </fieldset>
       <fieldset className="flex flex-col gap-4 mt-16">
-        <h2 className="font-medium mb-8">{t('character-settings')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
           <div className="flex gap-8 flex-col">
             <div className="flex flex-col gap-4">
               <label htmlFor="name" className={cn(labelClassName, 'text-sm')}>
-                <span className="text-coral">*</span> {t('character-name-label')}
+                <span className="text-coral">*</span> {t('gpt-name-label')}
               </label>
               <input
                 id="name"
@@ -280,12 +248,12 @@ export default function CustomGptForm({
                   'focus:border-primary placeholder:text-gray-300',
                 )}
                 onBlur={handleAutoSave}
-                placeholder={t('character-name-placeholder')}
+                placeholder={t('gpt-name-placeholder')}
               />
             </div>
             <div className="flex flex-col gap-4">
               <label htmlFor="description" className={cn(labelClassName, 'text-sm')}>
-                <span className="text-coral">*</span> {t('character-description-label')}
+                <span className="text-coral">*</span> {t('gpt-description-label')}
               </label>
               <textarea
                 id="description"
@@ -298,7 +266,7 @@ export default function CustomGptForm({
                   'focus:border-primary placeholder:text-gray-300',
                 )}
                 onBlur={handleAutoSave}
-                placeholder={t('character-description-placeholder')}
+                placeholder={t('gpt-description-placeholder')}
               />
             </div>
           </div>
@@ -329,7 +297,7 @@ export default function CustomGptForm({
               )}
             </div>
             <UploadImageToBeCroppedButton
-              uploadDirPath={`characters/${character.id}`}
+              uploadDirPath={`custom-gpts/${customGpt.id}`}
               aspect={1}
               onUploadComplete={handlePictureUploadComplete}
               file_name="avatar"
@@ -340,78 +308,87 @@ export default function CustomGptForm({
       </fieldset>
       <fieldset className="flex flex-col gap-6 mt-6">
         <div className="flex flex-col gap-4">
-          <label htmlFor="competence" className={cn(labelClassName, 'text-sm')}>
-            <span className="text-coral">*</span> {t('character-competence-label')}
-          </label>
-          <textarea
-            id="competence"
-            {...register('competence')}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-            rows={5}
-            style={{ resize: 'none' }}
-            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-            onBlur={handleAutoSave}
-            placeholder={t('character-competence-placeholder')}
-          />
-        </div>
-        <div className="flex flex-col gap-4">
-          <label htmlFor="learningContext" className={cn(labelClassName, 'text-sm')}>
-            <span className="text-coral">*</span> {t('character-learning-context-label')}
-          </label>
-          <textarea
-            id="learningContext"
-            {...register('learningContext')}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-            rows={5}
-            style={{ resize: 'none' }}
-            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-            onBlur={handleAutoSave}
-            placeholder={t('character-learning-context-placeholder')}
-          />
-        </div>
-        <div className="flex flex-col gap-4">
           <label htmlFor="specifications" className={cn(labelClassName, 'text-sm')}>
-            {t('character-specification-label')}
+            {t('gpt-specification-label')}
           </label>
           <textarea
-            id="specifications"
-            {...register('specifications')}
+            id="specification"
+            {...register('specification')}
             maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-            rows={5}
+            rows={7}
             style={{ resize: 'none' }}
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             onBlur={handleAutoSave}
-            placeholder={t('character-specification-placeholder')}
+            placeholder={t('gpt-specification-placeholder')}
           />
         </div>
-        <div className="flex flex-col gap-4">
-          <label htmlFor="restrictions" className={cn(labelClassName, 'text-sm')}>
-            {t('character-restriction-label')}
-          </label>
-          <textarea
-            id="restrictions"
-            {...register('restrictions')}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-            rows={5}
-            style={{ resize: 'none' }}
-            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-            onBlur={handleAutoSave}
-            placeholder={t('character-restriction-placeholder')}
-          />
-        </div>
+        <section className="mt-8 flex flex-col gap-3 w-full">
+            <h2 className="font-medium">Promptvorschläge hinzufügen</h2>
+            <p className="text-dark-gray">
+              Füge bis zu 10 Vorschläge für Prompts hinzu, die zufällig oberhalb des Eingabefelds im
+              Dialog angezeigt werden.
+            </p>
+            <div className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-4 w-full pr-4">
+              {fields.map((field, index) => {
+                return (
+                  <React.Fragment key={field.id}>
+                    <textarea
+                      rows={2}
+                      {...register(`promptSuggestions.${index}.content`)}
+                      className={cn(inputFieldClassName, 'resize-none')}
+                      placeholder={
+                        index === 0
+                          ? t('prompt-suggestion-placeholder')
+                          : undefined
+                      }
+                      onBlur={updatePromptSuggestions}
+                    />
+                    {index !== 0 && (
+                      <button
+                        onClick={() => {
+                          remove(index);
+                          updatePromptSuggestions();
+                        }}
+                        className="flex items-center justify-center first:hidden"
+                        type="button"
+                      >
+                        <TrashIcon />
+                      </button>
+                    )}
+                    {index === 0 && (
+                      <button
+                        onClick={() => {
+                          if (fields.length >= 10) {
+                            toast.error("Zuviel");
+                            return;
+                          }
+                          append({ content: '' });
+                        }}
+                        type="button"
+                        className=""
+                      >
+                        <PlusIcon className='text-primary'/>
+                      </button>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </section>
+          <section className="mt-8"></section>
       </fieldset>
       {!isCreating && (
         <section className="mt-8">
-          <h3 className="font-medium">{t('delete-character')}</h3>
-          <p className="mt-4">{t('character-delete-description')}</p>
+          <h3 className="font-medium">{t('delete-gpt')}</h3>
+          <p className="mt-4">{t('gpt-delete-description')}</p>
           <DestructiveActionButton
             className={cn(buttonDeleteClassName, 'mt-10')}
-            modalDescription={t('character-delete-modal-description')}
-            modalTitle={t('delete-character')}
+            modalDescription={t('gpt-delete-modal-description')}
+            modalTitle={t('delete-gpt')}
             confirmText={tCommon('delete')}
             actionFn={handleDeleteCharacter}
           >
-            {t('final-delete-character')}
+            {t('final-delete-gpt')}
           </DestructiveActionButton>
         </section>
       )}
@@ -433,7 +410,7 @@ export default function CustomGptForm({
             onClick={handleCreateCharacter}
             type="button"
           >
-            {t('create-character')}
+            {t('create-gpt')}
           </button>
         </section>
       )}

@@ -1,8 +1,8 @@
 import { formatDateToGermanTimestamp } from '@/utils/date';
 import { dbGetCharacterByIdOrSchoolId } from '@/db/functions/character';
 import { getUser } from '@/auth/utils';
-import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
-import { FederalStateModel, FileModelAndContent } from '@/db/schema';
+import { dbGetCustomGptById, dbGetCustomGptByIdOrSchoolId } from '@/db/functions/custom-gpts';
+import { CustomGptModel, FederalStateModel, FileModelAndContent } from '@/db/schema';
 
 export function constructSchuleSystemPrompt() {
   return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. Heute ist der ${formatDateToGermanTimestamp(new Date())}. Befolge folgende Anweisungen: Du sprichst immer die Sprache mit der du angesprochen wirst. Deine Standardsprache ist Deutsch, du duzt dein Gegenüber.`;
@@ -14,6 +14,12 @@ export function constructSingleFilePrompt(fileEntity: FileModelAndContent) {
   ${fileEntity.content}
   ---------
   `;
+}
+
+export function constructCustomGptSystemPrompt({ customGpt }: { customGpt: CustomGptModel }) {
+  return `Du bist ein hifreicher Assistent, der in einer Schule eingesetzt wird. Dein Name ist ${customGpt.name}. 
+Dein Ziel ist es hierbei zu assistieren: ${customGpt.description}
+Deine Aufgabe ist insbesondere: ${customGpt.specification ?? ''}`;
 }
 
 export async function constructCharacterSystemPrompt({ characterId }: { characterId: string }) {
@@ -118,25 +124,25 @@ export async function constructChatSystemPrompt({
 
     return characterSystemPrompt;
   }
-
   if (customGptId !== undefined) {
     const customGpt = await dbGetCustomGptById({ customGptId });
 
     if (customGpt === undefined) {
       throw new Error(`GPT with id ${customGptId} not found`);
     }
+    let additionalInstruction: string;
 
-    const helpModeSystemPrompt = constructHelpModeSystemPrompt({
-      isTeacher,
-      federalStateSupportEmail: federalState.supportContact,
-      chatStorageDuration: federalState.chatStorageTime,
-    });
-
-    if (customGpt.name !== 'Hilfe-Assistent') {
-      return customGpt.systemPrompt;
+    if (customGpt.name === 'Hilfe-Assistent')
+      additionalInstruction = constructHelpModeSystemPrompt({
+        isTeacher,
+        federalStateSupportEmail: federalState.supportContact,
+        chatStorageDuration: federalState.chatStorageTime,
+      });
+    else {
+      additionalInstruction = constructCustomGptSystemPrompt({ customGpt });
     }
 
-    const concatenatedHelpModeSystemPrompt = schoolSystemPrompt + helpModeSystemPrompt;
+    const concatenatedHelpModeSystemPrompt = schoolSystemPrompt + additionalInstruction;
 
     return concatenatedHelpModeSystemPrompt;
   }

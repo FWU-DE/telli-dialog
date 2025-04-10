@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 
 const pageContextSchema = z.object({
   params: z.object({
-    characterId: z.string(),
+    customgptId: z.string(),
   }),
   searchParams: z
     .object({
@@ -37,7 +37,6 @@ async function safeParse(context: {
   if (parseResult.success) {
     return parseResult.data;
   }
-
   return notFound();
 }
 
@@ -49,20 +48,20 @@ export default async function Page(context: {
   const { params, searchParams } = await safeParse(context);
 
   const isCreating = searchParams?.create === 'true';
-
+  
   const user = await getUser();
+ 
 
   const character = await dbGetCustomGptByIdOrSchoolId({
-    characterId: params.characterId,
+    customGptId: params.customgptId,
     userId: user.id,
     schoolId: user.school?.id ?? null,
   });
-
+  console.log(character)
   if (!character) {
     return notFound();
   }
-
-  //const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({ key: character.pictureId });
+  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({ key: character.pictureId });
 
   return (
     <div className="min-w-full p-6 overflow-auto">

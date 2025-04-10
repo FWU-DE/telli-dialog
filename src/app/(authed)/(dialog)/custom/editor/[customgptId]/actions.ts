@@ -2,7 +2,7 @@
 
 import { db } from '@/db';
 import { dbDeleteCharacterByIdAndUserId } from '@/db/functions/character';
-import { CharacterAccessLevel, CharacterInsertModel, characterTable } from '@/db/schema';
+import { CharacterAccessLevel, CharacterInsertModel, characterTable, CustomGptInsertModel, customGptTable } from '@/db/schema';
 import { deleteFileFromS3 } from '@/s3';
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
@@ -63,28 +63,28 @@ export async function updateCharacterPictureAction({
   return updatedCharacter;
 }
 
-export async function updateCharacterAction({
-  characterId,
-  ...character
-}: Omit<CharacterInsertModel, 'userId'> & { characterId: string }) {
+export async function updateCustomGptAction({
+  gptId,
+  ..._updatableProps
+}: Partial<CustomGptInsertModel> & { gptId: string }) {
   const user = await getUser();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, pictureId, accessLevel, schoolId, createdAt, ...updatableProps } = character;
+  const { id, createdAt, ...updatableProps } = _updatableProps;
 
-  const updatedCharacter = (
+  const updatedGpt = (
     await db
-      .update(characterTable)
+      .update(customGptTable)
       .set({ ...updatableProps })
-      .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, user.id)))
+      .where(and(eq(customGptTable.id, gptId), eq(customGptTable.userId, user.id)))
       .returning()
   )[0];
 
-  if (updatedCharacter === undefined) {
+  if (updatedGpt === undefined) {
     throw Error('Could not update the character');
   }
 
-  return updatedCharacter;
+  return updatedGpt;
 }
 
 export async function deleteCharacterAction({ characterId }: { characterId: string }) {

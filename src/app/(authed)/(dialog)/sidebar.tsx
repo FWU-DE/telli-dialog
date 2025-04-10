@@ -154,7 +154,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                   <div
                     className={cn(
                       'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
-                      pathname.startsWith('/custom/') && 'underline',
+                      !pathname.includes('e0c2f4a0-9a11-4271-bf3f-e3b368299e5f') && 'underline',
                     )}
                   >
                     <FourBoxes className="w-6 h-6" />
@@ -165,7 +165,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                   <div
                     className={cn(
                       'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
-                      pathname.startsWith('/custom/') && 'underline',
+                      pathname.includes('e0c2f4a0-9a11-4271-bf3f-e3b368299e5f') && 'underline',
                     )}
                   >
                     <RobotIcon className="w-6 h-6" />

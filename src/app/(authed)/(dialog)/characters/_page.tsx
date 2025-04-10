@@ -61,7 +61,7 @@ export default function Page2({
 
       <div className="flex gap-2 mt-4 text-base mb-4 max-w-3xl mx-auto w-full">
         <Link
-          href={buildCharactersUrl('global')}
+          href={buildCharactersUrl('global','characters')}
           className={cn(
             'hover:underline px-2 p-1 text-primary',
             accessLevel === 'global' && 'underline',
@@ -70,7 +70,7 @@ export default function Page2({
           {t('visibility-global')}
         </Link>
         <Link
-          href={buildCharactersUrl('school')}
+          href={buildCharactersUrl('school','characters')}
           className={cn(
             'hover:underline px-2 p-1 text-primary',
             accessLevel === 'school' && 'underline',
@@ -79,7 +79,7 @@ export default function Page2({
           {t('visibility-school')}
         </Link>
         <Link
-          href={buildCharactersUrl('private')}
+          href={buildCharactersUrl('private','characters')}
           className={cn(
             'hover:underline px-2 p-1  text-primary',
             accessLevel === 'private' && 'underline',

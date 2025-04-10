@@ -2,18 +2,16 @@ import { z } from 'zod';
 import {
   type CharacterAccessLevel,
   type CharacterModel,
+  CustomGptModel,
   characterAccessLevelSchema,
 } from '@/db/schema';
 import { redirect } from 'next/navigation';
 import { getUser } from '@/auth/utils';
 import React from 'react';
-import {
-  dbGetCharactersBySchoolId,
-  dbGetCharactersByUserId,
-  dbGetGlobalCharacters,
-} from '@/db/functions/character';
 import { buildCharactersUrl, enrichCharactersWithImage } from '../characters/utils';
 import Page2 from './_page';
+import { dbGetGlobalGpts, dbGetGptsBySchoolId, dbGetGptsByUserId } from '@/db/functions/custom-gpts';
+import { enrichGptWithImage } from './utils';
 
 
 
@@ -34,7 +32,7 @@ async function safeParse(context: { searchParams: Promise<{ visibility: string }
     return parseResult.data;
   }
 
-  return redirect(buildCharactersUrl('global'));
+  return redirect(buildCharactersUrl('global', 'custom'));
 }
 
 export default async function Page(context: { searchParams: Promise<{ visibility: string }> }) {
@@ -51,7 +49,7 @@ export default async function Page(context: { searchParams: Promise<{ visibility
   });
   const characters = _characters.filter((c) => c.name !== '');
 
-  const enrichedCharacters = await enrichCharactersWithImage({ characters });
+  const enrichedCharacters = await enrichGptWithImage({ characters });
 
   return <Page2 user={user} customGpts={enrichedCharacters} accessLevel={accessLevel} />;
 }
@@ -64,17 +62,18 @@ async function getCharacterByAccessLevel({
   accessLevel: CharacterAccessLevel;
   schoolId: string | undefined;
   userId: string;
-}): Promise<CharacterModel[]> {
+}): Promise<CustomGptModel[]> {
+  
   if (accessLevel === 'global') {
-    return await dbGetGlobalCharacters();
+    return await dbGetGlobalGpts();
   }
 
   if (accessLevel === 'school' && schoolId !== undefined) {
-    return await dbGetCharactersBySchoolId({ schoolId });
+    return await dbGetGptsBySchoolId({ schoolId });
   }
 
   if (accessLevel === 'private') {
-    return await dbGetCharactersByUserId({ userId });
+    return await dbGetGptsByUserId({ userId });
   }
 
   return [];

@@ -7,7 +7,7 @@ import {
   usageTimeValueSchema,
   sharedConversationFormValuesSchema,
 } from '../../../shared-chats/[sharedSchoolChatId]/schema';
-import { CharacterModel } from '@/db/schema';
+import { CharacterModel, CustomGptModel } from '@/db/schema';
 import { handleInitiateCharacterShareAction, handleStopCharacaterShareAction } from './actions';
 import {
   calculateTimeLeftBySharedChat,
@@ -24,7 +24,7 @@ import { useTranslations } from 'next-intl';
 import CountDownTimer from '../../../shared-chats/_components/count-down';
 import FilledShareIcon from '@/components/icons/filled-share';
 
-type ShareContainerProps = CharacterModel;
+type ShareContainerProps = CustomGptModel;
 
 export default function ShareContainer({ ...character }: ShareContainerProps) {
   const toast = useToast();
@@ -34,21 +34,21 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
   const tToasts = useTranslations('characters.toasts');
   const tCommon = useTranslations('common');
 
-  const sharedChatTimeLeft = calculateTimeLeftBySharedChat(character);
+  // const sharedChatTimeLeft = calculateTimeLeftBySharedChat(character);
   const sharedChatActive = sharedChatTimeLeft > 0;
 
-  const { register: registerShare, getValues: getValuesShare } =
-    useForm<SharedConversationShareFormValues>({
-      resolver: zodResolver(sharedConversationFormValuesSchema),
-      defaultValues: {
-        intelliPointsPercentageLimit: getIntelliPointsValueOrDefault(
-          character.intelligencePointsLimit,
-          '10',
-        ),
-        usageTimeLimit: getMaxUsageTimeValueOrDefault(character.maxUsageTimeLimit, '45'),
-      },
-      disabled: sharedChatActive,
-    });
+  // const { register: registerShare, getValues: getValuesShare } =
+  //   useForm<SharedConversationShareFormValues>({
+  //     resolver: zodResolver(sharedConversationFormValuesSchema),
+  //     defaultValues: {
+  //       intelliPointsPercentageLimit: getIntelliPointsValueOrDefault(
+  //         character.intelligencePointsLimit,
+  //         '10',
+  //       ),
+  //       usageTimeLimit: getMaxUsageTimeValueOrDefault(character.maxUsageTimeLimit, '45'),
+  //     },
+  //     disabled: sharedChatActive,
+  //   });
 
   const shareUILink = `/characters/editor/${character.id}/share`;
 

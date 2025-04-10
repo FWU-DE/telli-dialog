@@ -50,6 +50,13 @@
       "when": 1744098191245,
       "tag": "0006_stiff_eternity",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1744286343381,
+      "tag": "0007_mean_pyro",
+      "breakpoints": true
     }
   ]
 }

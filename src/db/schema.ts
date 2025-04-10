@@ -279,8 +279,9 @@ export const customGptTable = pgTable('custom_gpt', {
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   schoolId: text('school_id').references(() => schoolTable.id),
   accessLevel: characterAccessLevelEnum('access_level').notNull().default('private'),
-  description: text('description').notNull(),
-  specification: text('specification').notNull(),
+  pictureId: text('picture_id'),
+  description: text('description'),
+  specification: text('specification'),
   promptSuggestions: text('prompt_suggestions').array().notNull().default(sql`'{}'::text[]`),
 });
 

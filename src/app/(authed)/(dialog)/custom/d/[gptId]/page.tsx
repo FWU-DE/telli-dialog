@@ -41,16 +41,14 @@ export default async function Page({ params }: { params: Promise<{ gptId: string
         <div className="flex w-full gap-4 justify-center items-center z-30">
           <ToggleSidebarButton />
           <NewChatButton />
-          {customGpt.name === 'Hilfe-Assistent' && (
-            <SelectLlmModel isStudent={user.school.userRole === 'student'} />
-          )}
+          <SelectLlmModel isStudent={user.school.userRole === 'student'} />
           <span className="font-normal text-xl">{customGpt.name}</span>
           <div className="flex-grow"></div>
           <DownloadConversationButton conversationId={id} characterName={customGpt.name} disabled />
           <ProfileMenu {...user} />
         </div>
       </HeaderPortal>
-      <Chat key={id} id={id} initialMessages={[]} customGpt={customGpt} enableFileUpload={false} />
+      <Chat key={id} id={id} initialMessages={[]} customGpt={customGpt} enableFileUpload={false} promptSuggestions={customGpt.promptSuggestions}/>
     </LlmModelsProvider>
   );
 }
