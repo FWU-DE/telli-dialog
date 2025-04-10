@@ -49,6 +49,7 @@ export default async function Page({ params }: { params: Promise<{ characterId: 
         initialMessages={[]}
         character={character}
         imageSource={maybeSignedImageUrl}
+        enableFileUpload={false}
       />
     </>
   );

@@ -17,6 +17,9 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
+import { dbGetAllFileIdByConversationId, link_file_to_conversation } from '@/db/functions/files';
+import { process_files } from '../file-operations/process-file';
+import { FileModelAndContent } from '@/db/schema';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -37,12 +40,14 @@ export async function POST(request: NextRequest) {
     modelId,
     characterId,
     customGptId,
+    fileIds: currentFileIds,
   }: {
     id: string;
     messages: Message[];
     modelId: string;
     characterId?: string;
     customGptId: string;
+    fileIds?: string[];
   } = await request.json();
 
   const [error, modelAndProvider] = await getModelAndProviderWithResult({
@@ -76,13 +81,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Could not get conversation object' }, { status: 404 });
   }
 
-  const systemPrompt = await constructChatSystemPrompt({
-    characterId,
-    customGptId,
-    isTeacher: user.school.userRole === 'teacher',
-    federalState: user.federalState,
-  });
-
   const userMessage = getMostRecentUserMessage(messages);
 
   if (userMessage === undefined) {
@@ -111,10 +109,27 @@ export async function POST(request: NextRequest) {
     modelName: definedModel.name,
     orderNumber: messages.length + 1,
   });
+  let attachedFiles: FileModelAndContent[] = [];
+  if (currentFileIds !== undefined) {
+    await link_file_to_conversation({
+      fileIds: currentFileIds,
+      conversationMessageId: userMessage.id,
+      conversationId: conversation.id,
+    });
+  }
+  const allFileIds = await dbGetAllFileIdByConversationId(conversation.id);
 
+  attachedFiles = await process_files(allFileIds);
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
   const prunedMessages = limitChatHistory({ messages, limitRecent: 4, limitFirst: 4 });
-  console.log(prunedMessages);
+  const systemPrompt = await constructChatSystemPrompt({
+    characterId,
+    customGptId,
+    isTeacher: user.school.userRole === 'teacher',
+    federalState: user.federalState,
+    attachedFiles: attachedFiles,
+  });
+
   const result = streamText({
     model: telliProvider,
     system: systemPrompt,

@@ -43,6 +43,13 @@
       "when": 1743601854116,
       "tag": "0005_rapid_wind_dancer",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1744098191245,
+      "tag": "0006_stiff_eternity",
+      "breakpoints": true
     }
   ]
 }

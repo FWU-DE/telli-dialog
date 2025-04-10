@@ -6,6 +6,8 @@ import { dbUpdateConversationTitle } from '@/db/functions/chat';
 import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
 import { revalidatePath } from 'next/cache';
 import { dbUpdateUserTermsVersion } from '@/db/functions/user';
+import { dbGetRelatedFiles } from '@/db/functions/files';
+import { FileModel } from '@/db/schema';
 import { VERSION } from '@/components/modals/const';
 
 export default async function deleteConversationAction({
@@ -45,4 +47,12 @@ export async function setUserAcceptConditions(): Promise<boolean> {
   const user = await getUser();
   const updated = await dbUpdateUserTermsVersion({ userId: user.id });
   return updated?.versionAcceptedConditions === VERSION;
+}
+
+export async function refetchFileMapping(
+  conversationId: string,
+): Promise<Map<string, FileModel[]>> {
+  const user = await getUser();
+  if (user === undefined) return new Map();
+  return await dbGetRelatedFiles(conversationId);
 }

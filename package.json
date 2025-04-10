@@ -43,6 +43,7 @@
   "dependencies": {
     "@ai-sdk/openai": "1.1.9",
     "@ai-sdk/react": "1.1.11",
+    "@ai-sdk/ui-utils": "1.1.11",
     "@aws-sdk/client-s3": "3.744.0",
     "@aws-sdk/s3-request-presigner": "3.744.0",
     "@deutschlandgpt/core": "0.1.5",
@@ -68,6 +69,7 @@
     "ioredis": "5.6.0",
     "k6": "0.0.0",
     "katex": "0.16.21",
+    "mammoth": "1.9.0",
     "markdown-it": "14.1.0",
     "nanoid": "5.0.9",
     "next": "15.2.3",
@@ -76,6 +78,7 @@
     "next-intl": "3.26.3",
     "next-runtime-env": "3.2.2",
     "openai": "4.83.0",
+    "pdfreader": "3.0.7",
     "pg": "8.13.1",
     "pm2": "6.0.5",
     "qrcode.react": "4.2.0",
