@@ -50,6 +50,9 @@ export default async function Page(context: PageContext) {
     conversationId: chat.id,
     userId: user.id,
   });
+  if (rawChatMessages === undefined) {
+    throw new Error('no Chat messages found');
+  }
 
   const chatMessages: Message[] = rawChatMessages.map((message) => ({
     ...message,
@@ -91,7 +94,12 @@ export default async function Page(context: PageContext) {
           <ProfileMenu {...user} />
         </div>
       </HeaderPortal>
-      <Chat id={chat.id} initialMessages={chatMessages} customGpt={customGpt} />
+      <Chat
+        id={chat.id}
+        initialMessages={chatMessages}
+        customGpt={customGpt}
+        enableFileUpload={false}
+      />
     </LlmModelsProvider>
   );
 }

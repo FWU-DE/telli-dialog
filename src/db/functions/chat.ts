@@ -57,7 +57,7 @@ export async function dbGetCoversationMessages({
 }: {
   userId: string;
   conversationId: string;
-}) {
+}): Promise<ConversationMessageModel[]> {
   const messages = await db
     .select()
     .from(conversationMessageTable)
@@ -70,7 +70,12 @@ export async function dbGetCoversationMessages({
       ),
     )
     .orderBy(conversationMessageTable.orderNumber);
-  return getLatestMessages(messages.map((message) => message.conversation_message));
+
+  const cleanedMessages = getLatestMessages(
+    messages.map((message) => message.conversation_message),
+  );
+
+  return cleanedMessages;
 }
 
 export async function dbInsertChatContent(chatContent: InsertConversationMessageModel) {
@@ -208,7 +213,6 @@ export async function dbGetConversationAndMessages({
   }
 
   const nonNullMessages = rows.map((r) => r.conversation_message).filter(isNotNull);
-
   return {
     conversation: firstRow.conversation,
     messages: getLatestMessages(nonNullMessages),

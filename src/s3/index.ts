@@ -25,10 +25,6 @@ const s3Client = new S3Client({
   },
 });
 
-const buckets = {
-  api: 'dgpt-api-storage',
-  dialog: env.otcBucketName,
-};
 /**
  * Uploads a file to an S3 bucket.
  *
@@ -49,7 +45,7 @@ export async function uploadFileToS3({
 }) {
   const Key = key ?? nanoid();
   const uploadParams: PutObjectCommandInput = {
-    Bucket: buckets['api'],
+    Bucket: env.otcBucketName,
     Key,
     Body: body,
     ContentType: contentType,
@@ -71,13 +67,11 @@ export async function getMaybeSignedUrlFromS3Get({ key }: { key: string | undefi
 
 export async function getSignedUrlFromS3Get({
   key,
-  bucketName = 'dialog',
   filename,
   contentType,
   attachment = true,
 }: {
   key: string;
-  bucketName?: keyof typeof buckets;
   filename?: string;
   contentType?: string;
   attachment?: boolean;
@@ -87,7 +81,7 @@ export async function getSignedUrlFromS3Get({
     contentDisposition = `${contentDisposition} filename=${filename}`;
   }
   const command = new GetObjectCommand({
-    Bucket: buckets[bucketName],
+    Bucket: env.otcBucketName,
     Key: key,
     ...(contentDisposition !== '' ? { ResponseContentDisposition: contentDisposition } : {}),
     ...(contentType !== undefined ? { ResponseContentType: contentType } : {}),
@@ -102,14 +96,7 @@ export async function getSignedUrlFromS3Get({
   }
 }
 
-export async function getSignedUrlFromS3Put({
-  key,
-  fileType,
-}: {
-  key: string;
-  fileType: string;
-  bucketName?: keyof typeof buckets;
-}) {
+export async function getSignedUrlFromS3Put({ key, fileType }: { key: string; fileType: string }) {
   const command = new PutObjectCommand({
     Bucket: env.otcBucketName,
     Key: key,
@@ -139,15 +126,9 @@ export async function getSignedUrlFromS3Put({
  * @param key - The key (file name) of the file to read.
  * @returns The content of the file as a string.
  */
-export async function readFileFromS3({
-  key,
-  bucketName = 'dialog',
-}: {
-  key: string;
-  bucketName?: keyof typeof buckets;
-}) {
+export async function readFileFromS3({ key }: { key: string }) {
   const getParams: GetObjectCommandInput = {
-    Bucket: buckets[bucketName],
+    Bucket: env.otcBucketName,
     Key: key,
   };
 
@@ -158,7 +139,7 @@ export async function readFileFromS3({
     for await (const chunk of readableStream) {
       chunks.push(chunk);
     }
-    const content = Buffer.concat(chunks).toString('utf-8');
+    const content = Buffer.concat(chunks);
     return content;
   } catch (error) {
     console.error('Error reading file from S3:', error);
@@ -166,15 +147,9 @@ export async function readFileFromS3({
   }
 }
 
-export async function streamFileFromS3({
-  key,
-  bucketName = 'dialog',
-}: {
-  key: string;
-  bucketName?: keyof typeof buckets;
-}) {
+export async function streamFileFromS3({ key }: { key: string }) {
   const getParams: GetObjectCommandInput = {
-    Bucket: buckets[bucketName],
+    Bucket: env.otcBucketName,
     Key: key,
   };
 
@@ -200,15 +175,9 @@ export async function streamToBuffer(stream: Readable): Promise<Buffer> {
  *
  * @param key - The key (file name) of the file to delete.
  */
-export async function deleteFileFromS3({
-  key,
-  bucketName = 'dialog',
-}: {
-  key: string;
-  bucketName?: keyof typeof buckets;
-}) {
+export async function deleteFileFromS3({ key }: { key: string }) {
   const deleteParams: DeleteObjectCommandInput = {
-    Bucket: buckets[bucketName],
+    Bucket: env.otcBucketName,
     Key: key,
   };
 
