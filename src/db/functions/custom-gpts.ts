@@ -41,7 +41,16 @@ export async function dbInsertCustomGpt({
 }: {
   customGpt: CustomGptInsertModel;
 }): Promise<CustomGptModel | undefined> {
-  const insertedCustomGpt = (await db.insert(customGptTable).values(customGpt).returning())[0];
+  const insertedCustomGpt = (
+    await db
+      .insert(customGptTable)
+      .values(customGpt)
+      .onConflictDoUpdate({
+        target: customGptTable.id,
+        set: { ...customGpt },
+      })
+      .returning()
+  )[0];
 
   return insertedCustomGpt;
 }

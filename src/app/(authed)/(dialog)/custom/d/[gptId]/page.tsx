@@ -50,7 +50,7 @@ export default async function Page({ params }: { params: Promise<{ gptId: string
           <ProfileMenu {...user} />
         </div>
       </HeaderPortal>
-      <Chat key={id} id={id} initialMessages={[]} customGpt={customGpt} />
+      <Chat key={id} id={id} initialMessages={[]} customGpt={customGpt} enableFileUpload={false} />
     </LlmModelsProvider>
   );
 }

@@ -2,10 +2,18 @@ import { formatDateToGermanTimestamp } from '@/utils/date';
 import { dbGetCharacterByIdOrSchoolId } from '@/db/functions/character';
 import { getUser } from '@/auth/utils';
 import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
-import { FederalStateModel } from '@/db/schema';
+import { FederalStateModel, FileModelAndContent } from '@/db/schema';
 
 export function constructSchuleSystemPrompt() {
   return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. Heute ist der ${formatDateToGermanTimestamp(new Date())}. Befolge folgende Anweisungen: Du sprichst immer die Sprache mit der du angesprochen wirst. Deine Standardsprache ist Deutsch, du duzt dein Gegenüber.`;
+}
+
+export function constructSingleFilePrompt(fileEntity: FileModelAndContent) {
+  return `Dateiname: ${fileEntity.name} Was folgt ist der gesamte rohe Inhalt der Datei:
+  --------- 
+  ${fileEntity.content}
+  ---------
+  `;
 }
 
 export async function constructCharacterSystemPrompt({ characterId }: { characterId: string }) {
@@ -84,19 +92,27 @@ ${federalStateSupportEmail !== null ? `- Kannst du nicht weiterhelfen, verweise 
   return systemPrompt;
 }
 
+const BASE_FILE_PROMPT = `Der Nutzer hat folgende Dateien bereitgestellt, berücksichtige den Inhalt dieser Dateien bei der Antwort 
+`;
+
 export async function constructChatSystemPrompt({
   characterId,
   customGptId,
   isTeacher,
   federalState,
+  attachedFiles,
 }: {
   characterId?: string;
   customGptId?: string;
   isTeacher: boolean;
   federalState: Omit<FederalStateModel, 'encryptedApiKey'>;
+  attachedFiles: FileModelAndContent[];
 }) {
   const schoolSystemPrompt = constructSchuleSystemPrompt();
-
+  let filePrompt = '';
+  if (attachedFiles?.length > 0) {
+    filePrompt = BASE_FILE_PROMPT + attachedFiles.map((file) => constructSingleFilePrompt(file));
+  }
   if (characterId !== undefined) {
     const characterSystemPrompt = await constructCharacterSystemPrompt({ characterId });
 
@@ -125,5 +141,5 @@ export async function constructChatSystemPrompt({
     return concatenatedHelpModeSystemPrompt;
   }
 
-  return schoolSystemPrompt;
+  return schoolSystemPrompt + filePrompt;
 }

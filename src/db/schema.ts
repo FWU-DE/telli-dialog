@@ -54,6 +54,10 @@ export const conversationMessageTable = pgTable('conversation_message', {
   deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
 });
 
+export type ConversationModelWithFiles = typeof conversationTable.$inferSelect & {
+  files: FileModel[];
+};
+
 export const userSchoolRoleSchema = z.enum(['student', 'teacher']);
 export const userSchoolRoleEnum = pgEnum('user_school_role', userSchoolRoleSchema.options);
 export type UserSchoolRole = z.infer<typeof userSchoolRoleSchema>;
@@ -276,3 +280,36 @@ export const customGptTable = pgTable('custom_gpt', {
 
 export type CustomGptModel = typeof customGptTable.$inferSelect;
 export type CustomGptInsertModel = typeof customGptTable.$inferInsert;
+
+export const fileTable = pgTable('file_table', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  size: integer('size').notNull(),
+  type: text('type').notNull(),
+  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+});
+export type FileModel = typeof fileTable.$inferSelect;
+export type FileModelAndUrl = FileModel & { signedUrl: string };
+export type FileModelAndContent = FileModel & { content?: string };
+export type FileInsertModel = typeof fileTable.$inferInsert;
+
+export const conversationMessgaeFileMappingTable = pgTable(
+  'conversation_message_file_mapping',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    fileId: text('fileId')
+      .references(() => fileTable.id)
+      .notNull(),
+    conversationMessageId: uuid('conversationMessageId')
+      .references(() => conversationMessageTable.id)
+      .notNull(),
+    // technically redundant but there files and conversations should be unique and it makes clean-up easier
+    conversationId: uuid('conversationId')
+      .references(() => conversationTable.id)
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    unq: unique().on(table.conversationId, table.fileId),
+  }),
+);
