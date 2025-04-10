@@ -26,7 +26,7 @@ export default function DisplayUploadedFile({
   // TODO: this shoulld only be a button if the fileId is present and otherwise just a div
 
   return (
-    <div className="flex items-center justify-left gap-2 text-sm relative group py-4 pr-6 pl-4 shrink-0 max-w-[300px] min-w-[100px]">
+    <div className="flex items-center justify-left gap-2 text-sm relative group py-4 pr-6 pl-4 shrink-0 max-w-[250px] min-w-[100px]">
       <div className="absolute inset-0 opacity-5" style={{ backgroundColor }} />
       {onDeattachFile !== undefined && (
         <button onClick={onDeattachFile} className="absolute right-0 top-0 hover:bg-neutral-200">

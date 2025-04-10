@@ -8,7 +8,7 @@ export function getFileExtension(fileName: string): SUPPORTED_FILE_TYPE {
     return fileName;
   }
 
-  if (SUPPORTED_FILE_EXTENSIONS.includes(lastPart.toString())) {
+  if (!SUPPORTED_FILE_EXTENSIONS.includes(lastPart.toString())) {
     throw new Error('file type is not supported or missing');
   }
 
