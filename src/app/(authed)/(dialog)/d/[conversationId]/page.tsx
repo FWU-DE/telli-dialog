@@ -70,7 +70,8 @@ export default async function Page(context: PageContext) {
       <Chat
         id={conversation.id}
         initialMessages={convertMessageModelToMessage(messages)}
-        fileMapping={fileMapping}
+        initialFileMapping={fileMapping}
+        enableFileUpload={true}
       />
     </LlmModelsProvider>
   );

@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { extractTextFromPdfBuffer } from './parse-pdf';
+import { extractTextFromWordDocument } from './parse-docx';
 
-describe('extractTextFromPdfBuffer', () => {
+describe('extractTextFromWordBuffer', () => {
   let pdfBuffer: Buffer;
-  const fixturePath = path.resolve(__dirname, '../__fixtures__/Test Dokument.pdf');
+  const fixturePath = path.resolve(__dirname, '../__fixtures__/Test Dokument.docx');
 
   beforeAll(async () => {
     // Load the test PDF file once before all tests
@@ -18,15 +18,14 @@ describe('extractTextFromPdfBuffer', () => {
     expect(pdfBuffer.length).toBeGreaterThan(0);
   });
 
-  it('should extract text from a PDF buffer', async () => {
+  it('should extract text from a DOCX buffer', async () => {
     // This test uses the actual PDF reader with the real file
-    const text = await extractTextFromPdfBuffer(pdfBuffer);
+    const text = await extractTextFromWordDocument(pdfBuffer);
 
     // Basic validations for the extracted text
     expect(text).toBeDefined();
     expect(typeof text).toBe('string');
     expect(text.length).toBeGreaterThan(0);
-
     // Add assertions based on the expected content of your test document
     // For example:
     expect(text).toContain('Einige Beispielssätze');

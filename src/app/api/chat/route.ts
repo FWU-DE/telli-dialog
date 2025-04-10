@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
     federalState: user.federalState,
     attachedFiles: attachedFiles,
   });
-  console.log(systemPrompt);
+
   const result = streamText({
     model: telliProvider,
     system: systemPrompt,

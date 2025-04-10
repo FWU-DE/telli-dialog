@@ -94,7 +94,12 @@ export default async function Page(context: PageContext) {
           <ProfileMenu {...user} />
         </div>
       </HeaderPortal>
-      <Chat id={chat.id} initialMessages={chatMessages} customGpt={customGpt} />
+      <Chat
+        id={chat.id}
+        initialMessages={chatMessages}
+        customGpt={customGpt}
+        enableFileUpload={false}
+      />
     </LlmModelsProvider>
   );
 }

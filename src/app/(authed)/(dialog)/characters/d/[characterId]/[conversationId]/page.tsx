@@ -84,7 +84,12 @@ export default async function Page(context: {
           <ProfileMenu {...user} />
         </div>
       </HeaderPortal>
-      <Chat id={chat.id} initialMessages={chatMessages} character={character} />
+      <Chat
+        id={chat.id}
+        initialMessages={chatMessages}
+        character={character}
+        enableFileUpload={false}
+      />
     </>
   );
 }

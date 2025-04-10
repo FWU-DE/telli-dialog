@@ -34,7 +34,8 @@ type ChatProps = {
   character?: CharacterModel;
   imageSource?: string;
   promptSuggestions?: string[];
-  fileMapping?: Map<string, FileModel[]>;
+  initialFileMapping?: Map<string, FileModel[]>;
+  enableFileUpload: boolean;
 };
 
 export default function Chat({
@@ -44,6 +45,8 @@ export default function Chat({
   character,
   imageSource,
   promptSuggestions = [],
+  initialFileMapping,
+  enableFileUpload,
 }: ChatProps) {
   const tCommon = useTranslations('common');
   const tHelpMode = useTranslations('help-mode');
@@ -56,7 +59,9 @@ export default function Chat({
     conversationId: id,
   });
   const [initialFiles, setInitialFiles] = React.useState<FileModel[]>();
-  const [fileMapping, setFileMapping] = React.useState<Map<string, FileModel[]>>();
+  const [fileMapping, setFileMapping] = React.useState<Map<string, FileModel[]>>(
+    initialFileMapping ?? new Map(),
+  );
   const [files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   const [countOfFilesInChat, setCountOfFilesInChat] = React.useState(0);
   const queryClient = useQueryClient();
@@ -94,6 +99,7 @@ export default function Chat({
     generateId: generateUUID,
     sendExtraMessageFields: true,
     onResponse: () => {
+      // trigger refech of the fileMapping from the DB
       setCountOfFilesInChat(countOfFilesInChat + 1);
       if (messages.length > 1) {
         return;
@@ -117,7 +123,6 @@ export default function Chat({
     const fetchData = async () => {
       setFileMapping(await refetchFileMapping(id));
     };
-    console.log('TRIGGERED');
     fetchData();
   }, [countOfFilesInChat]);
 
@@ -321,9 +326,11 @@ export default function Chat({
                 {userInputTextArea}
                 {userActionButton}
               </div>
-              <div className="flex flex-row gap-x-3">
-                <UploadFileButton className="hover:bg-light-gray" setFiles={setFiles} />
-              </div>
+              {enableFileUpload && (
+                <div className="flex flex-row gap-x-3">
+                  <UploadFileButton className="hover:bg-light-gray" setFiles={setFiles} />
+                </div>
+              )}
             </form>
             <span className="text-xs mt-2 font-normal text-main-900 flex self-center text-center">
               {tCommon('information-disclaimer')}

@@ -14,11 +14,8 @@ export async function DELETE(req: NextRequest) {
   if (error !== null) {
     return NextResponse.json({ error: error.message }, { status: 403 });
   }
-  console.log('ENDPOINT TRIGGERED');
   const count = await dbDeleteOutdatedConversations();
-  console.log(count);
   const filesToDelete = (await dbGetDanglingFileIds()).map((file) => file.fileId);
-  console.log(filesToDelete);
   await dbDeleteFileAndDetachFromConversation(filesToDelete);
   for (const fileId of filesToDelete) {
     await deleteFileFromS3({ key: fileId });

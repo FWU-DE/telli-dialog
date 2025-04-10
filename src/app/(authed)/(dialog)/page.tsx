@@ -39,7 +39,13 @@ export default async function Page() {
           <ProfileMenu {...user} />
         </div>
       </HeaderPortal>
-      <Chat key={id} id={id} initialMessages={[]} promptSuggestions={promptSuggestions} />
+      <Chat
+        key={id}
+        id={id}
+        initialMessages={[]}
+        promptSuggestions={promptSuggestions}
+        enableFileUpload={true}
+      />
     </LlmModelsProvider>
   );
 }
