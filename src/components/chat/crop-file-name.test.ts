@@ -1,7 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { truncateFileName } from './utils';
 
-
 describe('truncateFileName', () => {
   // Basic functionality
   test('returns empty string for falsy input', () => {
@@ -33,17 +32,25 @@ describe('truncateFileName', () => {
 
   // Word preservation logic
   test('preserves words from beginning and end when possible', () => {
-    expect(truncateFileName({ name: 'first_second_third_fourth.txt', maxLen: 22 })).toBe('first_..._fourth');
+    expect(truncateFileName({ name: 'first_second_third_fourth.txt', maxLen: 22 })).toBe(
+      'first_..._fourth',
+    );
   });
 
   test('handles multiple delimiters consistently', () => {
-    expect(truncateFileName({ name: 'first-second_third fourth.txt', maxLen: 23 })).toBe('first-... fourth');
+    expect(truncateFileName({ name: 'first-second_third fourth.txt', maxLen: 23 })).toBe(
+      'first-... fourth',
+    );
   });
 
   // Specific cases with known outcomes
   test('truncates filename with specific maxLen values', () => {
-    expect(truncateFileName({ name: 'my_very_long_document_name.pdf', maxLen: 25 })).toBe('my_very_long_..._name');
-    expect(truncateFileName({ name: 'my_very_long_document_name.pdf', maxLen: 15 })).toBe('my_very_...');
+    expect(truncateFileName({ name: 'my_very_long_document_name.pdf', maxLen: 25 })).toBe(
+      'my_very_long_..._name',
+    );
+    expect(truncateFileName({ name: 'my_very_long_document_name.pdf', maxLen: 15 })).toBe(
+      'my_very_...',
+    );
   });
 
   test('handles filenames with only delimiters', () => {
@@ -53,10 +60,14 @@ describe('truncateFileName', () => {
 
   // Regression tests for specific behaviors
   test('keeps as many full words as possible within constraints', () => {
-    expect(truncateFileName({ name: 'one_two_three_four_five.txt', maxLen: 22 })).toBe('one_two_..._five');
+    expect(truncateFileName({ name: 'one_two_three_four_five.txt', maxLen: 22 })).toBe(
+      'one_two_..._five',
+    );
   });
 
   test('handles single-character words and delimiters', () => {
-    expect(truncateFileName({ name: 'a-b-c-d-e-f-g-h-i-j.txt', maxLen: 15 })).toBe('a-b-c-d-...-i-j');
+    expect(truncateFileName({ name: 'a-b-c-d-e-f-g-h-i-j.txt', maxLen: 15 })).toBe(
+      'a-b-c-d-...-i-j',
+    );
   });
 });
