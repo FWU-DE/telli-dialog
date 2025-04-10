@@ -23,6 +23,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchClientSideConversations } from './utils';
 import { smallButtonPrimaryClassName } from '@/utils/tailwind/button';
 import RobotIcon from '@/components/icons/robot';
+import FourBoxes from '@/components/icons/four-boxes';
 
 type Props = {
   user: UserAndContext;
@@ -149,6 +150,17 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                   </div>
                 </Link>
 
+                <Link href="/custom" className="w-full">
+                  <div
+                    className={cn(
+                      'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
+                      pathname.startsWith('/custom/') && 'underline',
+                    )}
+                  >
+                    <FourBoxes className="w-6 h-6" />
+                    <span className="text-base">{t('custom-gpt')}</span>
+                  </div>
+                </Link>
                 <Link href="/custom/d/e0c2f4a0-9a11-4271-bf3f-e3b368299e5f" className="w-full">
                   <div
                     className={cn(

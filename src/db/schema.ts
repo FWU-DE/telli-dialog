@@ -12,6 +12,7 @@ import {
 import { z } from 'zod';
 import { type LlmModelPriceMetadata } from './types';
 import { conversationRoleSchema } from '@/utils/chat';
+import { sql } from 'drizzle-orm';
 
 export const userTable = pgTable('user_entity', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -272,6 +273,11 @@ export const customGptTable = pgTable('custom_gpt', {
   systemPrompt: text('system_prompt').notNull(),
   userId: uuid('user_id').references(() => userTable.id),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  schoolId: text('school_id').references(() => schoolTable.id),
+  accessLevel: characterAccessLevelEnum('access_level').notNull().default('private'),
+  description: text('description').notNull(),
+  specification: text('specification').notNull(),
+  promptSuggestions: text('prompt_suggestions').array().notNull().default(sql`'{}'::text[]`),
 });
 
 export type CustomGptModel = typeof customGptTable.$inferSelect;

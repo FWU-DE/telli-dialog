@@ -1,5 +1,5 @@
 import { db } from '..';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, or } from 'drizzle-orm';
 import {
   customGptTable,
   conversationMessageTable,
@@ -35,6 +35,41 @@ export async function dbGetCustomGptById({
 
   return customGpt;
 }
+
+
+export async function dbGetCustomGptByIdOrSchoolId({
+  characterId,
+  userId,
+  schoolId,
+}: {
+  characterId: string;
+  userId: string;
+  schoolId: string | null;
+}) {
+  const [character] = await db
+    .select()
+    .from(customGptTable)
+    .where(
+      or(
+        and(
+          eq(customGptTable.id, characterId),
+          eq(customGptTable.userId, userId),
+          eq(customGptTable.accessLevel, 'private'),
+        ),
+        schoolId !== null
+          ? and(
+              eq(customGptTable.id, characterId),
+              eq(customGptTable.schoolId, schoolId),
+              eq(customGptTable.accessLevel, 'school'),
+            )
+          : undefined,
+        eq(customGptTable.accessLevel, 'global'),
+      ),
+    );
+
+  return character;
+}
+
 
 export async function dbInsertCustomGpt({
   customGpt,
