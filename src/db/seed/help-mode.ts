@@ -7,6 +7,12 @@ const hilfeModusGpt: CustomGptModel = {
   systemPrompt: '',
   userId: null,
   createdAt: new Date(),
+  accessLevel: 'global',
+  promptSuggestions: [],
+  description: null,
+  pictureId: null,
+  schoolId: null,
+  specification: null,
 };
 
 export async function insertHelpModeGpt({ skip = true }: { skip: boolean }) {
