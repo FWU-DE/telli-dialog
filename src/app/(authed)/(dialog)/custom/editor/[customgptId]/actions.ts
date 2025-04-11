@@ -1,66 +1,62 @@
 'use server';
 
 import { db } from '@/db';
-import { dbDeleteCharacterByIdAndUserId } from '@/db/functions/character';
-import { CharacterAccessLevel, CharacterInsertModel, characterTable, CustomGptInsertModel, customGptTable } from '@/db/schema';
+import { CharacterAccessLevel, CustomGptInsertModel, customGptTable } from '@/db/schema';
 import { deleteFileFromS3 } from '@/s3';
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
-import { parseNumberOrThrow } from '@/utils/number';
-import { SharedConversationShareFormValues } from '../../../shared-chats/[sharedSchoolChatId]/schema';
-import { generateInviteCode } from '../../../shared-chats/[sharedSchoolChatId]/utils';
+import { dbDeleteCustomGptByIdAndUserId } from '@/db/functions/custom-gpts';
 
-
-export async function updateCharacterAccessLevelAction({
-  characterId,
+export async function updateCustomGptAccessLevelAction({
+  gptId: gptId,
   accessLevel,
 }: {
-  characterId: string;
+  gptId: string;
   accessLevel: CharacterAccessLevel;
 }) {
   if (accessLevel === 'global') {
-    throw Error('Cannot update character to be global');
+    throw Error('Cannot update customGpt to be global');
   }
 
   const user = await getUser();
 
-  const updatedCharacter = (
+  const updatedCustomGpt = (
     await db
-      .update(characterTable)
+      .update(customGptTable)
       .set({ accessLevel })
-      .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, user.id)))
+      .where(and(eq(customGptTable.id, gptId), eq(customGptTable.userId, user.id)))
       .returning()
   )[0];
 
-  if (updatedCharacter === undefined) {
-    throw Error('Could not update the access level of the character');
+  if (updatedCustomGpt === undefined) {
+    throw Error('Could not update the access level of the customGpt');
   }
 
-  return updatedCharacter;
+  return updatedCustomGpt;
 }
 
-export async function updateCharacterPictureAction({
-  characterId,
+export async function updateCustomGptPictureAction({
+  gptId,
   picturePath,
 }: {
-  characterId: string;
+  gptId: string;
   picturePath: string;
 }) {
   const user = await getUser();
 
-  const updatedCharacter = (
+  const updatedCustomGpt = (
     await db
-      .update(characterTable)
+      .update(customGptTable)
       .set({ pictureId: picturePath })
-      .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, user.id)))
+      .where(and(eq(customGptTable.id, gptId), eq(customGptTable.userId, user.id)))
       .returning()
   )[0];
 
-  if (updatedCharacter === undefined) {
-    throw Error('Could not update the picture of the character');
+  if (updatedCustomGpt === undefined) {
+    throw Error('Could not update the picture of the customGpt');
   }
 
-  return updatedCharacter;
+  return updatedCustomGpt;
 }
 
 export async function updateCustomGptAction({
@@ -81,18 +77,18 @@ export async function updateCustomGptAction({
   )[0];
 
   if (updatedGpt === undefined) {
-    throw Error('Could not update the character');
+    throw Error('Could not update the customGpt');
   }
 
   return updatedGpt;
 }
 
-export async function deleteCharacterAction({ characterId }: { characterId: string }) {
+export async function deleteCustomGptAction({ gptId }: { gptId: string }) {
   const user = await getUser();
 
-  const deletedCharacter = await dbDeleteCharacterByIdAndUserId({ characterId, userId: user.id });
+  const deletedCustomGpt = await dbDeleteCustomGptByIdAndUserId({ gptId: gptId, userId: user.id });
 
-  const maybePictureId = deletedCharacter.pictureId;
+  const maybePictureId = deletedCustomGpt.pictureId;
 
   if (maybePictureId !== null) {
     try {
@@ -102,73 +98,5 @@ export async function deleteCharacterAction({ characterId }: { characterId: stri
     }
   }
 
-  return deletedCharacter;
-}
-
-export async function handleInitiateCharacterShareAction({
-  id,
-  intelliPointsPercentageLimit: _intelliPointsPercentageLimit,
-  usageTimeLimit: _usageTimeLimit,
-}: { id: string } & SharedConversationShareFormValues) {
-  const user = await getUser();
-
-  if (user.school === undefined) {
-    throw Error('User is not part of a school');
-  }
-
-  if (user.school.userRole !== 'teacher') {
-    throw Error('Only a teacher can share a character');
-  }
-
-  const intelliPointsPercentageLimit = parseNumberOrThrow(_intelliPointsPercentageLimit);
-  const usageTimeLimitInSeconds = parseNumberOrThrow(_usageTimeLimit);
-
-  const randomString = generateInviteCode();
-
-  const updatedSharedChat = (
-    await db
-      .update(characterTable)
-      .set({
-        intelligencePointsLimit: intelliPointsPercentageLimit,
-        maxUsageTimeLimit: usageTimeLimitInSeconds,
-        inviteCode: randomString.toUpperCase(),
-        startedAt: new Date(),
-      })
-      .where(and(eq(characterTable.id, id), eq(characterTable.userId, user.id)))
-      .returning()
-  )[0];
-
-  if (updatedSharedChat === undefined) {
-    throw Error('Could not character');
-  }
-
-  return updatedSharedChat;
-}
-
-export async function handleStopCharacaterShareAction({ id }: { id: string }) {
-  const user = await getUser();
-
-  if (user.school === undefined) {
-    throw Error('User is not part of a school');
-  }
-
-  if (user.school.userRole !== 'teacher') {
-    throw Error('Only a teacher can stop share a character');
-  }
-
-  const updatedCharacter = (
-    await db
-      .update(characterTable)
-      .set({
-        startedAt: null,
-      })
-      .where(and(eq(characterTable.id, id), eq(characterTable.userId, user.id)))
-      .returning()
-  )[0];
-
-  if (updatedCharacter === undefined) {
-    throw Error('Could not stop share character');
-  }
-
-  return updatedCharacter;
+  return deletedCustomGpt;
 }

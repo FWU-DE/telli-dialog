@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/db';
-import { characterTable, customGptTable } from '@/db/schema';
+import { customGptTable } from '@/db/schema';
 import { getUser } from '@/auth/utils';
 import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 
@@ -22,7 +22,7 @@ export async function createNewCustomGptAction({
     throw Error('Could not find any model');
   }
 
-  const insertedCharacter = (
+  const insertedCustomGpt = (
     await db
       .insert(customGptTable)
       .values({
@@ -37,9 +37,9 @@ export async function createNewCustomGptAction({
       .returning()
   )[0];
 
-  if (insertedCharacter === undefined) {
-    throw Error('Could not create a new character');
+  if (insertedCustomGpt === undefined) {
+    throw Error('Could not create a new CustomGpt');
   }
 
-  return insertedCharacter;
+  return insertedCustomGpt;
 }

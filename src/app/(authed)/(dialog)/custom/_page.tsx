@@ -11,11 +11,12 @@ import {
 } from '@/components/navigation/sidebar/collapsible-sidebar';
 import SearchBarInput from '@/components/search-bar';
 import { type UserAndContext } from '@/auth/types';
-import { CharacterAccessLevel, CustomGptModel } from '@/db/schema';
+import { CharacterAccessLevel } from '@/db/schema';
 import { useTranslations } from 'next-intl';
 import CustomGptContainer from './custom-gpt-container';
-import { buildCharactersUrl as buildRedirectUrl } from '../characters/utils';
+import { buildGenericUrl } from '../characters/utils';
 import CreateNewCustomGptButton from './create-new-customgpt-button';
+import { CustomGptWithImage } from './utils';
 
 export default function Page2({
   user,
@@ -23,14 +24,14 @@ export default function Page2({
   accessLevel,
 }: {
   user: UserAndContext;
-  customGpts: CustomGptModel[];
+  customGpts: CustomGptWithImage[];
   accessLevel: CharacterAccessLevel;
 }) {
   const [input, setInput] = React.useState('');
 
   const filterDisabled = customGpts.length < 1;
 
-  const filteredCharacters = filterCharacters(customGpts, input);
+  const filteredCustomGpt = filterCustomGpt(customGpts, input);
 
   const t = useTranslations('custom-gpt');
 
@@ -43,7 +44,7 @@ export default function Page2({
         <ProfileMenu {...user} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl mb-6">{t('character')}</h1>
+        <h1 className="text-3xl mb-6">{t('title')}</h1>
         <span>{t('description')}</span>
       </div>
       <div className="flex flex-wrap-reverse justify-between gap-2 text-base mb-4 max-w-3xl mx-auto w-full mt-16">
@@ -61,7 +62,7 @@ export default function Page2({
 
       <div className="flex gap-2 mt-4 text-base mb-4 max-w-3xl mx-auto w-full">
         <Link
-          href={buildRedirectUrl('global', "custom")}
+          href={buildGenericUrl('global', 'custom')}
           className={cn(
             'hover:underline px-2 p-1 text-primary',
             accessLevel === 'global' && 'underline',
@@ -70,7 +71,7 @@ export default function Page2({
           {t('visibility-global')}
         </Link>
         <Link
-          href={buildRedirectUrl('school',"custom")}
+          href={buildGenericUrl('school', 'custom')}
           className={cn(
             'hover:underline px-2 p-1 text-primary',
             accessLevel === 'school' && 'underline',
@@ -79,7 +80,7 @@ export default function Page2({
           {t('visibility-school')}
         </Link>
         <Link
-          href={buildRedirectUrl('private',"custom")}
+          href={buildGenericUrl('private', 'custom')}
           className={cn(
             'hover:underline px-2 p-1  text-primary',
             accessLevel === 'private' && 'underline',
@@ -90,8 +91,13 @@ export default function Page2({
       </div>
       <div className="max-w-3xl mx-auto w-full">
         <div className="flex flex-col gap-2 w-full">
-          {filteredCharacters.map((customGpt) => (
-            <CustomGptContainer {...customGpt} currentUserId={user.id} key={customGpt.id} />
+          {filteredCustomGpt.map((customGpt) => (
+            <CustomGptContainer
+              {...customGpt}
+              currentUserId={user.id}
+              key={customGpt.id}
+              maybeSignedPictureUrl={customGpt.maybeSignedPictureUrl}
+            />
           ))}
         </div>
       </div>
@@ -99,11 +105,11 @@ export default function Page2({
   );
 }
 
-function filterCharacters(customGpt: CustomGptModel[], input: string): CustomGptModel[] {
+function filterCustomGpt(customGpt: CustomGptWithImage[], input: string): CustomGptWithImage[] {
   const lowerCaseInput = input.toLowerCase();
 
-  return customGpt.filter((character) => {
-    const mainMatch = character.name.toLowerCase().includes(lowerCaseInput);
+  return customGpt.filter((gpt) => {
+    const mainMatch = gpt.name.toLowerCase().includes(lowerCaseInput);
 
     return mainMatch;
   });

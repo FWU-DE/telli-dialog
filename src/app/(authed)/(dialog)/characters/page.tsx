@@ -12,7 +12,7 @@ import {
   dbGetCharactersByUserId,
   dbGetGlobalCharacters,
 } from '@/db/functions/character';
-import { buildCharactersUrl, enrichCharactersWithImage } from './utils';
+import { buildGenericUrl, enrichCharactersWithImage } from './utils';
 import Page2 from './_page';
 
 export const dynamic = 'force-dynamic';
@@ -32,7 +32,7 @@ async function safeParse(context: { searchParams: Promise<{ visibility: string }
     return parseResult.data;
   }
 
-  return redirect(buildCharactersUrl('global', 'characters'));
+  return redirect(buildGenericUrl('global', 'characters'));
 }
 
 export default async function Page(context: { searchParams: Promise<{ visibility: string }> }) {

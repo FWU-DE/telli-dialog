@@ -11,10 +11,9 @@ import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
 import { useTranslations } from 'next-intl';
 import TrashIcon from '@/components/icons/trash';
-import { deleteCharacterAction } from '../characters/editor/[characterId]/actions';
-import ShareIcon from '@/components/icons/share';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import SharedChatIcon from '@/components/icons/shared-chat';
+import { deleteCustomGptAction } from './editor/[customgptId]/actions';
 
 type CustomGptContainerProps = CustomGptModel & {
   currentUserId: string;
@@ -28,7 +27,6 @@ export default function CustomGptContainer({
   userId,
   currentUserId,
   maybeSignedPictureUrl,
-  ...character
 }: CustomGptContainerProps) {
   const router = useRouter();
   const toast = useToast();
@@ -37,8 +35,8 @@ export default function CustomGptContainer({
   const tCommon = useTranslations('common');
   const tToast = useTranslations('custom-gpt.toasts');
 
-  function handleDeleteCharacter() {
-    deleteCharacterAction({ characterId: id })
+  function handleDeleteCustomGpt() {
+    deleteCustomGptAction({ gptId: id })
       .then(() => {
         toast.success(tToast('delete-toast-success'));
         router.refresh();
@@ -53,14 +51,6 @@ export default function CustomGptContainer({
     e.stopPropagation();
     router.push(`/custom/d/${id}`);
   }
-
-  function handleNavigateToShare(e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
-    e.stopPropagation();
-    router.push(`/custom/editor/${id}/share`);
-  }
-
-  // const timeLeft = calculateTimeLeftBySharedChat(character);
 
   return (
     <Link
@@ -103,7 +93,7 @@ export default function CustomGptContainer({
           modalTitle={t('form.delete-gpt')}
           modalDescription={t('form.gpt-delete-modal-description')}
           confirmText={tCommon('delete')}
-          actionFn={handleDeleteCharacter}
+          actionFn={handleDeleteCustomGpt}
           aria-label={t('form.delete-gpt')}
           triggerButtonClassName="border-transparent justify-center flex flex-col rounded-enterprise-sm hover:bg-vidis-hover-green/20 p-0"
         >

@@ -1,6 +1,5 @@
 import HeaderPortal from '../../../header-portal';
 import ProfileMenu from '@/components/navigation/profile-menu';
-import { dbGetCharacterByIdOrSchoolId } from '@/db/functions/character';
 import { getUser } from '@/auth/utils';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
@@ -24,7 +23,7 @@ const pageContextSchema = z.object({
 });
 
 async function safeParse(context: {
-  params: Promise<{ characterId: string }>;
+  params: Promise<{ gptId: string }>;
   searchParams: Promise<{ create?: string }>;
 }) {
   const resolvedParams = await context.params;
@@ -41,27 +40,25 @@ async function safeParse(context: {
 }
 
 export default async function Page(context: {
-  params: Promise<{ characterId: string }>;
+  params: Promise<{ gptId: string }>;
   searchParams: Promise<{ create?: string }>;
 }) {
-
   const { params, searchParams } = await safeParse(context);
 
   const isCreating = searchParams?.create === 'true';
-  
-  const user = await getUser();
- 
 
-  const character = await dbGetCustomGptByIdOrSchoolId({
+  const user = await getUser();
+
+  const customGpt = await dbGetCustomGptByIdOrSchoolId({
     customGptId: params.customgptId,
     userId: user.id,
     schoolId: user.school?.id ?? null,
   });
-  console.log(character)
-  if (!character) {
+
+  if (!customGpt) {
     return notFound();
   }
-  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({ key: character.pictureId });
+  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({ key: customGpt.pictureId });
 
   return (
     <div className="min-w-full p-6 overflow-auto">
@@ -72,7 +69,7 @@ export default async function Page(context: {
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
         <CustomGptForm
-          {...character}
+          {...customGpt}
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           isCreating={isCreating}
         />

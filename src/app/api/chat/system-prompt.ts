@@ -1,7 +1,7 @@
 import { formatDateToGermanTimestamp } from '@/utils/date';
 import { dbGetCharacterByIdOrSchoolId } from '@/db/functions/character';
 import { getUser } from '@/auth/utils';
-import { dbGetCustomGptById, dbGetCustomGptByIdOrSchoolId } from '@/db/functions/custom-gpts';
+import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
 import { CustomGptModel, FederalStateModel, FileModelAndContent } from '@/db/schema';
 
 export function constructSchuleSystemPrompt() {

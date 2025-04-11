@@ -51,13 +51,13 @@
     "chat-placeholder": "Wie kann ich helfen?"
   },
   "custom-gpt": {
-    "character": "Spezialanwendungen",
+    "title": "Spezialanwendungen",
     "description": "Entdecke sofort nutzbare Spezialanwendungen oder konfiguriere deine eigenen KI-Werkzeuge ganz nach deinem Bedarf. Hinterlege individuelle Anweisungen, lade Dateien hoch und teile deine Lösungen mit anderen. Klicke einfach auf eine Anwendung, um sofort loszulegen.",
     "visibility-global": "Öffentlich",
     "visibility-school": "Schulintern",
     "visibility-private": "Für mich",
     "search-placeholder": "Anwendung suchen...",
-    "form":{
+    "form": {
       "all-gpts": "Alle Anwendung",
       "restriction-private": "Keine Freigabe",
       "restriction-school": "Schulinterne Freigabe",

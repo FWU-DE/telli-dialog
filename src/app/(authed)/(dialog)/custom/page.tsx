@@ -1,19 +1,16 @@
 import { z } from 'zod';
-import {
-  type CharacterAccessLevel,
-  type CharacterModel,
-  CustomGptModel,
-  characterAccessLevelSchema,
-} from '@/db/schema';
+import { type CharacterAccessLevel, CustomGptModel, characterAccessLevelSchema } from '@/db/schema';
 import { redirect } from 'next/navigation';
 import { getUser } from '@/auth/utils';
 import React from 'react';
-import { buildCharactersUrl, enrichCharactersWithImage } from '../characters/utils';
+import { buildGenericUrl } from '../characters/utils';
 import Page2 from './_page';
-import { dbGetGlobalGpts, dbGetGptsBySchoolId, dbGetGptsByUserId } from '@/db/functions/custom-gpts';
+import {
+  dbGetGlobalGpts,
+  dbGetGptsBySchoolId,
+  dbGetGptsByUserId,
+} from '@/db/functions/custom-gpts';
 import { enrichGptWithImage } from './utils';
-
-
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +29,7 @@ async function safeParse(context: { searchParams: Promise<{ visibility: string }
     return parseResult.data;
   }
 
-  return redirect(buildCharactersUrl('global', 'custom'));
+  return redirect(buildGenericUrl('global', 'custom'));
 }
 
 export default async function Page(context: { searchParams: Promise<{ visibility: string }> }) {
@@ -42,19 +39,19 @@ export default async function Page(context: { searchParams: Promise<{ visibility
 
   const user = await getUser();
 
-  const _characters = await getCharacterByAccessLevel({
+  const _customGpts = await getCustomGptByAccessLevel({
     accessLevel,
     schoolId: user.school?.id,
     userId: user.id,
   });
-  const characters = _characters.filter((c) => c.name !== '');
+  const customGpts = _customGpts.filter((c) => c.name !== '');
 
-  const enrichedCharacters = await enrichGptWithImage({ characters });
+  const enrichedCustomGpts = await enrichGptWithImage({ customGpts });
 
-  return <Page2 user={user} customGpts={enrichedCharacters} accessLevel={accessLevel} />;
+  return <Page2 user={user} customGpts={enrichedCustomGpts} accessLevel={accessLevel} />;
 }
 
-async function getCharacterByAccessLevel({
+async function getCustomGptByAccessLevel({
   accessLevel,
   schoolId,
   userId,
@@ -63,7 +60,6 @@ async function getCharacterByAccessLevel({
   schoolId: string | undefined;
   userId: string;
 }): Promise<CustomGptModel[]> {
-  
   if (accessLevel === 'global') {
     return await dbGetGlobalGpts();
   }

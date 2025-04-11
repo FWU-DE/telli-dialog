@@ -22,8 +22,8 @@ export default function CreateNewCustomGptButton() {
 
   function handleNewGPT() {
     createNewCustomGptAction({ modelId: maybeDefaultModelId })
-      .then((newCharacter) => {
-        router.push(`/custom/editor/${newCharacter.id}?create=true`);
+      .then((newGpt) => {
+        router.push(`/custom/editor/${newGpt.id}?create=true`);
       })
       .catch(() => {
         toast.error(t('toasts.create-toast-error'));

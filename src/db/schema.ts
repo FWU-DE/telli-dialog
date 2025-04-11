@@ -282,7 +282,10 @@ export const customGptTable = pgTable('custom_gpt', {
   pictureId: text('picture_id'),
   description: text('description'),
   specification: text('specification'),
-  promptSuggestions: text('prompt_suggestions').array().notNull().default(sql`'{}'::text[]`),
+  promptSuggestions: text('prompt_suggestions')
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
 });
 
 export type CustomGptModel = typeof customGptTable.$inferSelect;

@@ -14,7 +14,7 @@ import {
 import SearchBarInput from '@/components/search-bar';
 import { type UserAndContext } from '@/auth/types';
 import { CharacterAccessLevel } from '@/db/schema';
-import { buildCharactersUrl, CharacterWithImage } from './utils';
+import { buildGenericUrl, CharacterWithImage } from './utils';
 import { useTranslations } from 'next-intl';
 
 export default function Page2({
@@ -61,7 +61,7 @@ export default function Page2({
 
       <div className="flex gap-2 mt-4 text-base mb-4 max-w-3xl mx-auto w-full">
         <Link
-          href={buildCharactersUrl('global','characters')}
+          href={buildGenericUrl('global', 'characters')}
           className={cn(
             'hover:underline px-2 p-1 text-primary',
             accessLevel === 'global' && 'underline',
@@ -70,7 +70,7 @@ export default function Page2({
           {t('visibility-global')}
         </Link>
         <Link
-          href={buildCharactersUrl('school','characters')}
+          href={buildGenericUrl('school', 'characters')}
           className={cn(
             'hover:underline px-2 p-1 text-primary',
             accessLevel === 'school' && 'underline',
@@ -79,7 +79,7 @@ export default function Page2({
           {t('visibility-school')}
         </Link>
         <Link
-          href={buildCharactersUrl('private','characters')}
+          href={buildGenericUrl('private', 'characters')}
           className={cn(
             'hover:underline px-2 p-1  text-primary',
             accessLevel === 'private' && 'underline',
