@@ -11,6 +11,10 @@ export async function dbGetLlmModelById({ modelId }: { modelId: string | undefin
   return (await db.select().from(llmModelTable).where(eq(llmModelTable.id, modelId)))[0];
 }
 
+export async function dbGetModelByName(name: string) {
+  return (await db.select().from(llmModelTable).where(eq(llmModelTable.name, name)))[0];
+}
+
 export async function getAvailableLlmModels() {
   return await db
     .select()

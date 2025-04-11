@@ -1,6 +1,7 @@
 import { and, desc, eq, inArray, or } from 'drizzle-orm';
 import { db } from '..';
 import {
+  CharacterInsertModel,
   CharacterModel,
   characterTable,
   conversationMessageTable,
@@ -8,6 +9,8 @@ import {
   SharedCharacterChatUsageTrackingInsertModel,
   sharedCharacterChatUsageTrackingTable,
 } from '../schema';
+import { dbGetModelByName } from './llm-model';
+import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 
 export async function dbGetCharacterByIdOrSchoolId({
   characterId,
@@ -40,6 +43,17 @@ export async function dbGetCharacterByIdOrSchoolId({
     );
 
   return character;
+}
+
+export async function dbCreateCharacter(character: Omit<CharacterInsertModel, 'modelId'>) {
+  const defaultModelId = await dbGetModelByName(DEFAULT_CHAT_MODEL)
+  if (defaultModelId === undefined) return
+  const created = await db
+    .insert(characterTable)
+    .values({ ...character, modelId: defaultModelId.id })
+    .onConflictDoUpdate({ target: characterTable.id, set: { ...character } })
+    .returning();
+  return created
 }
 
 export async function dbGetGlobalCharacters(): Promise<CharacterModel[]> {

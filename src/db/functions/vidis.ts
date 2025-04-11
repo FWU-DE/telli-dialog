@@ -2,8 +2,10 @@ import { VidisUserInfo } from '@/auth/providers/vidis';
 import { db } from '..';
 import {
   federalStateTable,
+  InsertUserModel,
   SchoolInsertModel,
   schoolTable,
+  UserModel,
   userSchoolMappingTable,
   UserSchoolRole,
   userTable,
@@ -21,6 +23,11 @@ function vidisRoleToUserSchoolRole(role: string): UserSchoolRole {
     default:
       return 'student';
   }
+}
+
+export async function dbCreateVidisUser(user: InsertUserModel) {
+  const insertedUser = await db.insert(userTable).values({...user}).onConflictDoUpdate({target:userTable.id, set: {...user}}).returning()
+  return insertedUser
 }
 
 export async function dbGetOrCreateVidisUser(userInfo: VidisUserInfo) {
