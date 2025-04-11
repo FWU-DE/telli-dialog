@@ -112,10 +112,11 @@ export default function CustomGptForm({
       gptId: customGpt.id,
     })
       .then(() => {
+        if (!isCreating) toast.success(tToast('edit-toast-success'));
         router.refresh();
       })
       .catch(() => {
-        toast.error('Etwas ist beim Aktualisieren schief gelaufen.');
+        toast.error(tToast('edit-toast-error'));
       });
   }
 
@@ -137,6 +138,8 @@ export default function CustomGptForm({
       promptSuggestions,
     })
       .then(() => {
+        if (!isCreating) toast.success(tToast('edit-toast-success'));
+        
         router.refresh();
       })
       .catch((error) => {
@@ -342,7 +345,7 @@ export default function CustomGptForm({
                     <button
                       onClick={() => {
                         if (fields.length >= 10) {
-                          toast.error('Zuviel');
+                          toast.error(tToast('too-many-suggestions'));
                           return;
                         }
                         append({ content: '' });
