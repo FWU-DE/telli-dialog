@@ -1,13 +1,14 @@
-import HeaderPortal from '../../../header-portal';
-import ProfileMenu from '@/components/navigation/profile-menu';
 import { getUser } from '@/auth/utils';
-import { notFound } from 'next/navigation';
-import { z } from 'zod';
-import CustomGptForm from './custom-gpt-form';
-import { getMaybeSignedUrlFromS3Get } from '@/s3';
-import React from 'react';
+import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import { dbGetCustomGptByIdOrSchoolId } from '@/db/functions/custom-gpts';
+import { getMaybeSignedUrlFromS3Get } from '@/s3';
+import { PageContext } from '@/utils/next/types';
+import { awaitPageContext } from '@/utils/next/utils';
+import { notFound } from 'next/navigation';
+import { z } from 'zod';
+import HeaderPortal from '../../../header-portal';
+import CustomGptForm from './custom-gpt-form';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,28 +23,8 @@ const pageContextSchema = z.object({
     .optional(),
 });
 
-async function safeParse(context: {
-  params: Promise<{ gptId: string }>;
-  searchParams: Promise<{ create?: string }>;
-}) {
-  const resolvedParams = await context.params;
-  const resolvedSearchParams = await context.searchParams;
-  const parseResult = pageContextSchema.safeParse({
-    params: resolvedParams,
-    searchParams: resolvedSearchParams,
-  });
-
-  if (parseResult.success) {
-    return parseResult.data;
-  }
-  return notFound();
-}
-
-export default async function Page(context: {
-  params: Promise<{ gptId: string }>;
-  searchParams: Promise<{ create?: string }>;
-}) {
-  const { params, searchParams } = await safeParse(context);
+export default async function Page(context: PageContext) {
+  const { params, searchParams } = pageContextSchema.parse(await awaitPageContext(context));
 
   const isCreating = searchParams?.create === 'true';
 

@@ -1,18 +1,18 @@
 'use client';
 
 import DestructiveActionButton from '@/components/common/destructive-action-button';
-import { CustomGptModel } from '@/db/schema';
-import Link from 'next/link';
-import React from 'react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/common/toast';
+import { EmptyImageIcon } from '@/components/icons/empty-image';
+import SharedChatIcon from '@/components/icons/shared-chat';
+import TrashIcon from '@/components/icons/trash';
+import { CustomGptModel } from '@/db/schema';
 import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
 import { useTranslations } from 'next-intl';
-import TrashIcon from '@/components/icons/trash';
-import { EmptyImageIcon } from '@/components/icons/empty-image';
-import SharedChatIcon from '@/components/icons/shared-chat';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import React from 'react';
 import { deleteCustomGptAction } from './editor/[customgptId]/actions';
 
 type CustomGptContainerProps = CustomGptModel & {
@@ -46,7 +46,7 @@ export default function CustomGptContainer({
       });
   }
 
-  function handleNavigateToNewUnsharedChat(e: React.MouseEvent<HTMLButtonElement>) {
+  function handleNavigateToNewChat(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
     e.stopPropagation();
     router.push(`/custom/d/${id}`);
@@ -81,7 +81,7 @@ export default function CustomGptContainer({
         <button
           type="button"
           aria-label={tCommon('new-chat')}
-          onClick={handleNavigateToNewUnsharedChat}
+          onClick={handleNavigateToNewChat}
           className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
         >
           <SharedChatIcon aria-hidden="true" className="w-8 h-8" />

@@ -1,13 +1,14 @@
-import HeaderPortal from '../../../header-portal';
-import ProfileMenu from '@/components/navigation/profile-menu';
-import { dbGetCharacterByIdOrSchoolId } from '@/db/functions/character';
 import { getUser } from '@/auth/utils';
+import ProfileMenu from '@/components/navigation/profile-menu';
+import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
+import { dbGetCharacterByIdOrSchoolId } from '@/db/functions/character';
+import { getMaybeSignedUrlFromS3Get } from '@/s3';
+import { PageContext } from '@/utils/next/types';
+import { awaitPageContext } from '@/utils/next/utils';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
+import HeaderPortal from '../../../header-portal';
 import CharacterForm from './character-form';
-import { getMaybeSignedUrlFromS3Get } from '@/s3';
-import React from 'react';
-import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,29 +23,10 @@ const pageContextSchema = z.object({
     .optional(),
 });
 
-async function safeParse(context: {
-  params: Promise<{ characterId: string }>;
-  searchParams: Promise<{ create?: string }>;
-}) {
-  const resolvedParams = await context.params;
-  const resolvedSearchParams = await context.searchParams;
-  const parseResult = pageContextSchema.safeParse({
-    params: resolvedParams,
-    searchParams: resolvedSearchParams,
-  });
-
-  if (parseResult.success) {
-    return parseResult.data;
-  }
-
-  return notFound();
-}
-
-export default async function Page(context: {
-  params: Promise<{ characterId: string }>;
-  searchParams: Promise<{ create?: string }>;
-}) {
-  const { params, searchParams } = await safeParse(context);
+export default async function Page(context: PageContext) {
+  const result = pageContextSchema.safeParse(await awaitPageContext(context));
+  if (!result.success) notFound();
+  const { params, searchParams } = result.data;
 
   const isCreating = searchParams?.create === 'true';
 

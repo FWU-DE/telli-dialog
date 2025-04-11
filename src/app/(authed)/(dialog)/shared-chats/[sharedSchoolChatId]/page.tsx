@@ -1,14 +1,16 @@
-import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import HeaderPortal from '../../header-portal';
-import ProfileMenu from '@/components/navigation/profile-menu';
 import { getUser } from '@/auth/utils';
-import Link from 'next/link';
 import ChevronLeftIcon from '@/components/icons/chevron-left';
-import SharedSchoolChatEditForm from './shared-school-chat-edit-form';
-import { z } from 'zod';
+import ProfileMenu from '@/components/navigation/profile-menu';
+import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import { dbGetSharedSchoolChatById } from '@/db/functions/shared-school-chat';
-import { notFound } from 'next/navigation';
+import { PageContext } from '@/utils/next/types';
+import { awaitPageContext } from '@/utils/next/utils';
 import { getTranslations } from 'next-intl/server';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { z } from 'zod';
+import HeaderPortal from '../../header-portal';
+import SharedSchoolChatEditForm from './shared-school-chat-edit-form';
 
 const pageContextSchema = z.object({
   params: z.object({
@@ -16,25 +18,11 @@ const pageContextSchema = z.object({
   }),
 });
 
-async function safeParse(context: { params: Promise<{ sharedSchoolChatId: string }> }) {
-  const resolvedParams = await context.params;
-  const parseResult = pageContextSchema.safeParse({ params: resolvedParams });
+export default async function Page(context: PageContext) {
+  const result = pageContextSchema.safeParse(await awaitPageContext(context));
+  if (!result.success) notFound();
 
-  if (parseResult.success) {
-    return parseResult.data;
-  }
-
-  return null;
-}
-
-export default async function Page(context: { params: Promise<{ sharedSchoolChatId: string }> }) {
-  const parsedContext = await safeParse(context);
-
-  if (!parsedContext) {
-    return notFound();
-  }
-
-  const { params } = parsedContext;
+  const { params } = result.data;
   const [user, t] = await Promise.all([getUser(), getTranslations('shared-chats')]);
 
   const sharedSchoolChat = await dbGetSharedSchoolChatById({

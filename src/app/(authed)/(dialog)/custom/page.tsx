@@ -1,15 +1,14 @@
-import { z } from 'zod';
-import { type CharacterAccessLevel, CustomGptModel, characterAccessLevelSchema } from '@/db/schema';
-import { redirect } from 'next/navigation';
 import { getUser } from '@/auth/utils';
-import React from 'react';
-import { buildGenericUrl } from '../characters/utils';
-import Page2 from './_page';
 import {
   dbGetGlobalGpts,
   dbGetGptsBySchoolId,
   dbGetGptsByUserId,
 } from '@/db/functions/custom-gpts';
+import { type CharacterAccessLevel, CustomGptModel, characterAccessLevelSchema } from '@/db/schema';
+import { PageContext } from '@/utils/next/types';
+import { awaitPageContext } from '@/utils/next/utils';
+import { z } from 'zod';
+import Page2 from './_page';
 import { enrichGptWithImage } from './utils';
 
 export const dynamic = 'force-dynamic';
@@ -20,23 +19,10 @@ const pageContextSchema = z.object({
   }),
 });
 
-async function safeParse(context: { searchParams: Promise<{ visibility: string }> }) {
-  const { searchParams } = context;
-  const resolvedSearchParams = await searchParams;
-  const parseResult = pageContextSchema.safeParse({ searchParams: resolvedSearchParams });
-
-  if (parseResult.success) {
-    return parseResult.data;
-  }
-
-  return redirect(buildGenericUrl('global', 'custom'));
-}
-
-export default async function Page(context: { searchParams: Promise<{ visibility: string }> }) {
+export default async function Page(context: PageContext) {
   const {
     searchParams: { visibility: accessLevel },
-  } = await safeParse(context);
-
+  } = pageContextSchema.parse(await awaitPageContext(context));
   const user = await getUser();
 
   const _customGpts = await getCustomGptByAccessLevel({

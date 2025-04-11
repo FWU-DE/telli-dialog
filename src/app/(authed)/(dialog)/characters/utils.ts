@@ -1,7 +1,7 @@
 import { CharacterAccessLevel, CharacterModel } from '@/db/schema';
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
 
-export function buildGenericUrl(accessLevel: CharacterAccessLevel, route: string) {
+export function buildGenericUrl(accessLevel: CharacterAccessLevel, route: 'characters' | 'custom') {
   const searchParams = new URLSearchParams();
   searchParams.set('visibility', accessLevel);
   return `/${route}?${searchParams.toString()}`;

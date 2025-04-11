@@ -1,8 +1,9 @@
-import { dbGetSharedChatByIdAndInviteCode } from '@/db/functions/shared-school-chat';
-import { z } from 'zod';
+import NotFound from '@/app/not-found';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelById } from '@/db/functions/llm-model';
-import NotFound from '@/app/not-found';
+import { dbGetSharedChatByIdAndInviteCode } from '@/db/functions/shared-school-chat';
+import { awaitPageContext } from '@/utils/next/utils';
+import { z } from 'zod';
 import SharedChat from './shared-chat';
 
 const pageContextSchema = z.object({
@@ -14,29 +15,14 @@ const pageContextSchema = z.object({
   }),
 });
 
-async function safeParse(context: {
-  params: Promise<{ sharedChatId: string }>;
-  searchParams: Promise<{ inviteCode: string }>;
-}) {
-  const resolvedParams = await context.params;
-  const resolvedSearchParams = await context.searchParams;
-  const parseResult = pageContextSchema.safeParse({
-    params: resolvedParams,
-    searchParams: resolvedSearchParams,
-  });
-
-  if (parseResult.success) {
-    return parseResult.data;
-  }
-
-  return null;
-}
-
 export default async function Page(context: {
   params: Promise<{ sharedChatId: string }>;
   searchParams: Promise<{ inviteCode: string }>;
 }) {
-  const parsedContext = await safeParse(context);
+  const result = pageContextSchema.safeParse(await awaitPageContext(context));
+  if (!result.success) return <NotFound />;
+
+  const parsedContext = result.data;
 
   if (!parsedContext) {
     return <NotFound />;

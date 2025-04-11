@@ -1,18 +1,20 @@
-import { getUser } from '@/auth/utils';
-import { z } from 'zod';
-import { dbGetSharedSchoolChatById } from '@/db/functions/shared-school-chat';
-import QRCode from './qr-code';
-import Link from 'next/link';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
-import { cn } from '@/utils/tailwind';
-import { calculateTimeLeftBySharedChat } from '../utils';
-import CountDownTimer from '../../_components/count-down';
 import NotFound from '@/app/not-found';
+import { getUser } from '@/auth/utils';
 import SidebarCloseIcon from '@/components/icons/sidebar-close';
-import CopyButton from './copy-button';
-import { getBaseUrlByHeaders, getHostByHeaders } from '@/utils/host';
 import Footer from '@/components/navigation/footer';
+import { dbGetSharedSchoolChatById } from '@/db/functions/shared-school-chat';
+import { getBaseUrlByHeaders, getHostByHeaders } from '@/utils/host';
+import { PageContext } from '@/utils/next/types';
+import { awaitPageContext } from '@/utils/next/utils';
+import { cn } from '@/utils/tailwind';
+import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { getTranslations } from 'next-intl/server';
+import Link from 'next/link';
+import { z } from 'zod';
+import CountDownTimer from '../../_components/count-down';
+import { calculateTimeLeftBySharedChat } from '../utils';
+import CopyButton from './copy-button';
+import QRCode from './qr-code';
 
 const pageContextSchema = z.object({
   params: z.object({
@@ -20,25 +22,11 @@ const pageContextSchema = z.object({
   }),
 });
 
-async function safeParse(context: { params: Promise<{ sharedSchoolChatId: string }> }) {
-  const resolvedParams = await context.params;
-  const parseResult = pageContextSchema.safeParse({ params: resolvedParams });
+export default async function Page(context: PageContext) {
+  const result = pageContextSchema.safeParse(await awaitPageContext(context));
+  if (!result.success) return <NotFound />;
 
-  if (parseResult.success) {
-    return parseResult.data;
-  }
-
-  return null;
-}
-
-export default async function Page(context: { params: Promise<{ sharedSchoolChatId: string }> }) {
-  const parsedContext = await safeParse(context);
-
-  if (!parsedContext) {
-    return <NotFound />;
-  }
-
-  const { params } = parsedContext;
+  const { params } = result.data;
   const user = await getUser();
 
   const sharedSchoolChat = await dbGetSharedSchoolChatById({

@@ -1,29 +1,29 @@
 'use client';
 
+import { type UserAndContext } from '@/auth/types';
+import { useToast } from '@/components/common/toast';
+import useBreakpoints from '@/components/hooks/use-breakpoints';
+import CharacterAvatarIcon from '@/components/icons/character-avatar';
+import FourBoxes from '@/components/icons/four-boxes';
+import RobotIcon from '@/components/icons/robot';
+import SharedChatIcon from '@/components/icons/shared-chat';
+import TelliIcon from '@/components/icons/telli';
+import IntelliPointsIcon from '@/components/icons/telli-points';
 import CollapsibleSidebar from '@/components/navigation/sidebar/collapsible-sidebar';
 import SidebarItem from '@/components/navigation/sidebar/conversation-item';
 import { useSidebarVisibility } from '@/components/navigation/sidebar/sidebar-provider';
-import useBreakpoints from '@/components/hooks/use-breakpoints';
-import { usePathname, useRouter } from 'next/navigation';
-import { isToday, isYesterday, subDays, isAfter, isBefore } from 'date-fns';
-import Link from 'next/link';
-import React from 'react';
-import { type UserAndContext } from '@/auth/types';
-import CharacterAvatarIcon from '@/components/icons/character-avatar';
-import SharedChatIcon from '@/components/icons/shared-chat';
-import IntelliPointsIcon from '@/components/icons/telli-points';
 import TelliPointsProgressBar from '@/components/telli-points-progress-bar';
-import { getPriceLimitByUser } from './utils';
-import TelliIcon from '@/components/icons/telli';
-import deleteConversationAction, { updateConversationNameAction } from './actions';
-import { useToast } from '@/components/common/toast';
+import { HELP_MODE_GPT_ID } from '@/db/seed/help-mode';
 import { cn } from '@/utils/tailwind';
-import { useTranslations } from 'next-intl';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchClientSideConversations } from './utils';
 import { smallButtonPrimaryClassName } from '@/utils/tailwind/button';
-import RobotIcon from '@/components/icons/robot';
-import FourBoxes from '@/components/icons/four-boxes';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { isAfter, isBefore, isToday, isYesterday, subDays } from 'date-fns';
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import React from 'react';
+import deleteConversationAction, { updateConversationNameAction } from './actions';
+import { fetchClientSideConversations, getPriceLimitByUser } from './utils';
 
 type Props = {
   user: UserAndContext;
@@ -155,7 +155,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                     className={cn(
                       'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
                       (pathname === '/custom' || pathname.includes('custom/editor')) &&
-                        !pathname.includes('e0c2f4a0-9a11-4271-bf3f-e3b368299e5f') &&
+                        !pathname.includes(HELP_MODE_GPT_ID) &&
                         'underline',
                     )}
                   >
@@ -163,11 +163,11 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                     <span className="text-base">{t('custom-gpt')}</span>
                   </div>
                 </Link>
-                <Link href="/custom/d/e0c2f4a0-9a11-4271-bf3f-e3b368299e5f" className="w-full">
+                <Link href={`/custom/d/${HELP_MODE_GPT_ID}}`} className="w-full">
                   <div
                     className={cn(
                       'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
-                      pathname.includes('e0c2f4a0-9a11-4271-bf3f-e3b368299e5f') && 'underline',
+                      pathname.includes(HELP_MODE_GPT_ID) && 'underline',
                     )}
                   >
                     <RobotIcon className="w-6 h-6" />
