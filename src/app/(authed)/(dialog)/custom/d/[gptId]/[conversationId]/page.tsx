@@ -1,20 +1,23 @@
-import { dbGetCoversationMessages, dbGetConversationById } from '@/db/functions/chat';
-import { getUser } from '@/auth/utils';
-import { redirect } from 'next/navigation';
-import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
-import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import ProfileMenu from '@/components/navigation/profile-menu';
-import { z } from 'zod';
-import { type Message } from 'ai';
-import Chat from '@/components/chat/chat';
-import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
 import DownloadConversationButton from '@/app/(authed)/(dialog)/download-conversation-button';
-import { NewChatButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
-import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
+import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
+import { getUser } from '@/auth/utils';
+import Chat from '@/components/chat/chat';
+import SelectLlmModel from '@/components/conversation/select-llm-model';
+import ProfileMenu from '@/components/navigation/profile-menu';
+import {
+  NewChatButton,
+  ToggleSidebarButton,
+} from '@/components/navigation/sidebar/collapsible-sidebar';
+import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
+import { dbGetConversationById, dbGetCoversationMessages } from '@/db/functions/chat';
+import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
+import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
+import { type Message } from 'ai';
+import { redirect } from 'next/navigation';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,18 +30,11 @@ const pageContextSchema = z.object({
   searchParams: z.object({ model: z.string().optional() }).optional(),
 });
 
-async function safeParse(context: PageContext) {
-  const parseResult = pageContextSchema.safeParse(await awaitPageContext(context));
-
-  if (parseResult.success) {
-    return parseResult.data;
-  }
-
-  redirect('/');
-}
-
 export default async function Page(context: PageContext) {
-  const { params, searchParams } = await safeParse(context);
+  const result = pageContextSchema.safeParse(await awaitPageContext(context));
+  if (!result.success) redirect('/');
+
+  const { params, searchParams } = result.data;
 
   const [chat, user] = await Promise.all([dbGetConversationById(params.conversationId), getUser()]);
 
@@ -82,6 +78,7 @@ export default async function Page(context: PageContext) {
         <div className="flex w-full gap-4 justify-center items-center">
           <ToggleSidebarButton />
           <NewChatButton />
+          <SelectLlmModel isStudent={user.school.userRole === 'student'} />
           <span className="font-normal text-xl">{customGpt.name}</span>
           <div className="flex-grow"></div>
           <DownloadConversationButton

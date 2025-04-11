@@ -252,6 +252,22 @@ export default function Chat({
         <span className="text-base font-normal">{tHelpMode('chat-placeholder')}</span>
       </div>
     );
+  } else if (customGpt !== undefined) {
+    placeholderElement = (
+      <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto p-4">
+        {imageSource !== undefined && (
+          <Image
+            src={imageSource}
+            width={100}
+            height={100}
+            alt={customGpt.name}
+            className="rounded-enterprise-md"
+          />
+        )}
+        <h1 className="text-2xl font-medium mt-8">{customGpt.name}</h1>
+        <p className="max-w-72">{customGpt.description}</p>
+      </div>
+    );
   } else {
     placeholderElement = (
       <div className="flex items-center justify-center h-full">

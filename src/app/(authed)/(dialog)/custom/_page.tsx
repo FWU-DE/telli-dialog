@@ -5,8 +5,6 @@ import React from 'react';
 import { cn } from '@/utils/tailwind';
 import HeaderPortal from '../header-portal';
 import ProfileMenu from '@/components/navigation/profile-menu';
-import CreateNewCharacterButton from './create-new-character-button';
-import CharacterContainer from './character-container';
 import {
   NewChatButton,
   ToggleSidebarButton,
@@ -14,25 +12,28 @@ import {
 import SearchBarInput from '@/components/search-bar';
 import { type UserAndContext } from '@/auth/types';
 import { CharacterAccessLevel } from '@/db/schema';
-import { buildGenericUrl, CharacterWithImage } from './utils';
 import { useTranslations } from 'next-intl';
+import CustomGptContainer from './custom-gpt-container';
+import { buildGenericUrl } from '../characters/utils';
+import CreateNewCustomGptButton from './create-new-customgpt-button';
+import { CustomGptWithImage } from './utils';
 
 export default function Page2({
   user,
-  characters,
+  customGpts,
   accessLevel,
 }: {
   user: UserAndContext;
-  characters: CharacterWithImage[];
+  customGpts: CustomGptWithImage[];
   accessLevel: CharacterAccessLevel;
 }) {
   const [input, setInput] = React.useState('');
 
-  const filterDisabled = characters.length < 1;
+  const filterDisabled = customGpts.length < 1;
 
-  const filteredCharacters = filterCharacters(characters, input);
+  const filteredCustomGpt = filterCustomGpt(customGpts, input);
 
-  const t = useTranslations('characters');
+  const t = useTranslations('custom-gpt');
 
   return (
     <div className="min-w-full p-6 overflow-auto">
@@ -43,7 +44,7 @@ export default function Page2({
         <ProfileMenu {...user} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl mb-6">{t('character')}</h1>
+        <h1 className="text-3xl mb-6">{t('title')}</h1>
         <span>{t('description')}</span>
       </div>
       <div className="flex flex-wrap-reverse justify-between gap-2 text-base mb-4 max-w-3xl mx-auto w-full mt-16">
@@ -56,12 +57,12 @@ export default function Page2({
           placeholder={t('search-placeholder')}
           disabled={filterDisabled}
         />
-        <CreateNewCharacterButton />
+        <CreateNewCustomGptButton />
       </div>
 
       <div className="flex gap-2 mt-4 text-base mb-4 max-w-3xl mx-auto w-full">
         <Link
-          href={buildGenericUrl('global', 'characters')}
+          href={buildGenericUrl('global', 'custom')}
           className={cn(
             'hover:underline px-2 p-1 text-primary',
             accessLevel === 'global' && 'underline',
@@ -70,7 +71,7 @@ export default function Page2({
           {t('visibility-global')}
         </Link>
         <Link
-          href={buildGenericUrl('school', 'characters')}
+          href={buildGenericUrl('school', 'custom')}
           className={cn(
             'hover:underline px-2 p-1 text-primary',
             accessLevel === 'school' && 'underline',
@@ -79,7 +80,7 @@ export default function Page2({
           {t('visibility-school')}
         </Link>
         <Link
-          href={buildGenericUrl('private', 'characters')}
+          href={buildGenericUrl('private', 'custom')}
           className={cn(
             'hover:underline px-2 p-1  text-primary',
             accessLevel === 'private' && 'underline',
@@ -90,8 +91,13 @@ export default function Page2({
       </div>
       <div className="max-w-3xl mx-auto w-full">
         <div className="flex flex-col gap-2 w-full">
-          {filteredCharacters.map((character) => (
-            <CharacterContainer {...character} currentUserId={user.id} key={character.id} />
+          {filteredCustomGpt.map((customGpt) => (
+            <CustomGptContainer
+              {...customGpt}
+              currentUserId={user.id}
+              key={customGpt.id}
+              maybeSignedPictureUrl={customGpt.maybeSignedPictureUrl}
+            />
           ))}
         </div>
       </div>
@@ -99,11 +105,11 @@ export default function Page2({
   );
 }
 
-function filterCharacters(characters: CharacterWithImage[], input: string): CharacterWithImage[] {
+function filterCustomGpt(customGpt: CustomGptWithImage[], input: string): CustomGptWithImage[] {
   const lowerCaseInput = input.toLowerCase();
 
-  return characters.filter((character) => {
-    const mainMatch = character.name.toLowerCase().includes(lowerCaseInput);
+  return customGpt.filter((gpt) => {
+    const mainMatch = gpt.name.toLowerCase().includes(lowerCaseInput);
 
     return mainMatch;
   });

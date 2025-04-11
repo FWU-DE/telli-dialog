@@ -1,16 +1,20 @@
-import { dbGetCoversationMessages, dbGetConversationById } from '@/db/functions/chat';
-import { getUser } from '@/auth/utils';
-import { redirect } from 'next/navigation';
-import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
-import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import ProfileMenu from '@/components/navigation/profile-menu';
 import DownloadConversationButton from '@/app/(authed)/(dialog)/download-conversation-button';
-import { z } from 'zod';
-import { dbGetCharacterByIdOrSchoolId } from '@/db/functions/character';
-import SelectLlmModel from '@/components/conversation/select-llm-model';
-import { type Message } from 'ai';
+import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
+import { getUser } from '@/auth/utils';
 import Chat from '@/components/chat/chat';
-import { NewChatButton } from '@/components/navigation/sidebar/collapsible-sidebar';
+import SelectLlmModel from '@/components/conversation/select-llm-model';
+import ProfileMenu from '@/components/navigation/profile-menu';
+import {
+  NewChatButton,
+  ToggleSidebarButton,
+} from '@/components/navigation/sidebar/collapsible-sidebar';
+import { dbGetCharacterByIdOrSchoolId } from '@/db/functions/character';
+import { dbGetConversationById, dbGetCoversationMessages } from '@/db/functions/chat';
+import { PageContext } from '@/utils/next/types';
+import { awaitPageContext } from '@/utils/next/utils';
+import { type Message } from 'ai';
+import { redirect } from 'next/navigation';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,24 +25,10 @@ const pageContextSchema = z.object({
   }),
 });
 
-async function safeParse(context: {
-  params: Promise<{ characterId: string; conversationId: string }>;
-}) {
-  const resolvedParams = await context.params;
-  const parseResult = pageContextSchema.safeParse({ params: resolvedParams });
-
-  if (parseResult.success) {
-    return parseResult.data;
-  }
-
-  redirect('/');
-}
-
-export default async function Page(context: {
-  params: Promise<{ characterId: string; conversationId: string }>;
-}) {
-  const { params } = await safeParse(context);
-
+export default async function Page(context: PageContext) {
+  const result = pageContextSchema.safeParse(await awaitPageContext(context));
+  if (!result.success) redirect('/');
+  const params = result.data.params;
   const [chat, user] = await Promise.all([dbGetConversationById(params.conversationId), getUser()]);
 
   if (!chat) {

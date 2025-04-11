@@ -1,19 +1,19 @@
-import { z } from 'zod';
-import {
-  type CharacterAccessLevel,
-  type CharacterModel,
-  characterAccessLevelSchema,
-} from '@/db/schema';
-import { redirect } from 'next/navigation';
 import { getUser } from '@/auth/utils';
-import React from 'react';
 import {
   dbGetCharactersBySchoolId,
   dbGetCharactersByUserId,
   dbGetGlobalCharacters,
 } from '@/db/functions/character';
-import { buildCharactersUrl, enrichCharactersWithImage } from './utils';
+import {
+  type CharacterAccessLevel,
+  type CharacterModel,
+  characterAccessLevelSchema,
+} from '@/db/schema';
+import { PageContext } from '@/utils/next/types';
+import { awaitPageContext } from '@/utils/next/utils';
+import { z } from 'zod';
 import Page2 from './_page';
+import { enrichCharactersWithImage } from './utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,22 +23,10 @@ const pageContextSchema = z.object({
   }),
 });
 
-async function safeParse(context: { searchParams: Promise<{ visibility: string }> }) {
-  const { searchParams } = context;
-  const resolvedSearchParams = await searchParams;
-  const parseResult = pageContextSchema.safeParse({ searchParams: resolvedSearchParams });
-
-  if (parseResult.success) {
-    return parseResult.data;
-  }
-
-  return redirect(buildCharactersUrl('global'));
-}
-
-export default async function Page(context: { searchParams: Promise<{ visibility: string }> }) {
+export default async function Page(context: PageContext) {
   const {
     searchParams: { visibility: accessLevel },
-  } = await safeParse(context);
+  } = pageContextSchema.parse(await awaitPageContext(context));
 
   const user = await getUser();
 

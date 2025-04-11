@@ -1,10 +1,10 @@
 import { CharacterAccessLevel, CharacterModel } from '@/db/schema';
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
 
-export function buildCharactersUrl(accessLevel: CharacterAccessLevel) {
+export function buildGenericUrl(accessLevel: CharacterAccessLevel, route: 'characters' | 'custom') {
   const searchParams = new URLSearchParams();
   searchParams.set('visibility', accessLevel);
-  return `/characters?${searchParams.toString()}`;
+  return `/${route}?${searchParams.toString()}`;
 }
 
 export type CharacterWithImage = CharacterModel & { maybeSignedPictureUrl: string | undefined };
