@@ -181,7 +181,7 @@ export async function dbDeleteCustomGptByIdAndUserId({
     const conversations = await tx
       .select({ id: conversationTable.id })
       .from(conversationTable)
-      .where(eq(conversationTable.characterId, customGpt.id));
+      .where(eq(conversationTable.customGptId, customGpt.id));
 
     if (conversations.length > 0) {
       await tx.delete(conversationMessageTable).where(
@@ -191,7 +191,7 @@ export async function dbDeleteCustomGptByIdAndUserId({
         ),
       );
     }
-    await tx.delete(conversationTable).where(eq(conversationTable.characterId, customGpt.id));
+    await tx.delete(conversationTable).where(eq(conversationTable.customGptId, customGpt.id));
 
     const deletedGpt = (
       await tx
