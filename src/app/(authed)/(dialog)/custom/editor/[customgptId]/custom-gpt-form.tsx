@@ -139,7 +139,7 @@ export default function CustomGptForm({
     })
       .then(() => {
         if (!isCreating) toast.success(tToast('edit-toast-success'));
-        
+
         router.refresh();
       })
       .catch((error) => {
