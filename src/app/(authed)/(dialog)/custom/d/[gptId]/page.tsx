@@ -12,6 +12,7 @@ import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import SelectLlmModel from '@/components/conversation/select-llm-model';
+import { getMaybeSignedUrlFromS3Get } from '@/s3';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,7 @@ export default async function Page({ params }: { params: Promise<{ gptId: string
   });
 
   const currentModel = user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
-
+  const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: customGpt.pictureId });
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
       <HeaderPortal>
@@ -55,6 +56,7 @@ export default async function Page({ params }: { params: Promise<{ gptId: string
         customGpt={customGpt}
         enableFileUpload={false}
         promptSuggestions={customGpt.promptSuggestions}
+        imageSource={maybeSignedImageUrl}
       />
     </LlmModelsProvider>
   );
