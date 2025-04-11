@@ -13,7 +13,7 @@ import CollapsibleSidebar from '@/components/navigation/sidebar/collapsible-side
 import SidebarItem from '@/components/navigation/sidebar/conversation-item';
 import { useSidebarVisibility } from '@/components/navigation/sidebar/sidebar-provider';
 import TelliPointsProgressBar from '@/components/telli-points-progress-bar';
-import { HELP_MODE_GPT_ID } from '@/db/seed/help-mode';
+
 import { cn } from '@/utils/tailwind';
 import { smallButtonPrimaryClassName } from '@/utils/tailwind/button';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -24,6 +24,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 import deleteConversationAction, { updateConversationNameAction } from './actions';
 import { fetchClientSideConversations, getPriceLimitByUser } from './utils';
+import { HELP_MODE_GPT_ID } from '@/db/const';
 
 type Props = {
   user: UserAndContext;
@@ -163,7 +164,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                     <span className="text-base">{t('custom-gpt')}</span>
                   </div>
                 </Link>
-                <Link href={`/custom/d/${HELP_MODE_GPT_ID}}`} className="w-full">
+                <Link href={`/custom/d/${HELP_MODE_GPT_ID}`} className="w-full">
                   <div
                     className={cn(
                       'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
