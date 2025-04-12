@@ -111,7 +111,7 @@ function filterCustomGpt(customGpt: CustomGptWithImage[], input: string): Custom
 
   return customGpt.filter((gpt) => {
     const mainMatch = gpt.name.toLowerCase().includes(lowerCaseInput);
-    const isHelpAssistant = gpt.id === HELP_MODE_GPT_ID
+    const isHelpAssistant = gpt.id === HELP_MODE_GPT_ID;
     return mainMatch && !isHelpAssistant;
   });
 }

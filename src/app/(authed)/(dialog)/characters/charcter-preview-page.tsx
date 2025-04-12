@@ -30,7 +30,7 @@ export default function CharacterPreviewPage({
 
   const filterDisabled = characters.length < 1;
 
-  const filteredCharacters = filterCharacters({ characters, input, accessLevel });
+  const filteredCharacters = filterCharacters({ characters, input });
 
   const t = useTranslations('characters');
 

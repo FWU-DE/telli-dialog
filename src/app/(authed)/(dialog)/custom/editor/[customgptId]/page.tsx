@@ -30,7 +30,7 @@ export default async function Page(context: PageContext) {
 
   const user = await getUser();
 
-  const customGpt = await dbGetCustomGptById({customGptId: params.customgptId});
+  const customGpt = await dbGetCustomGptById({ customGptId: params.customgptId });
 
   if (!customGpt) {
     return notFound();
