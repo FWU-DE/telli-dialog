@@ -1,7 +1,7 @@
 import { getUser } from '@/auth/utils';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { dbGetCustomGptByIdOrSchoolId } from '@/db/functions/custom-gpts';
+import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
@@ -30,11 +30,7 @@ export default async function Page(context: PageContext) {
 
   const user = await getUser();
 
-  const customGpt = await dbGetCustomGptByIdOrSchoolId({
-    customGptId: params.customgptId,
-    userId: user.id,
-    schoolId: user.school?.id ?? null,
-  });
+  const customGpt = await dbGetCustomGptById({customGptId: params.customgptId});
 
   if (!customGpt) {
     return notFound();

@@ -20,7 +20,7 @@ export default function PromptSuggestions({
         suggestions.length < 2 && 'grid-cols-1',
       )}
     >
-      {suggestions.map((suggestion, index) => (
+      {suggestions.filter((s)=> s.trim() !== '').map((suggestion, index) => (
         <button
           onClick={() => onSelectSuggestion(suggestion)}
           key={index}
