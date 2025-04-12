@@ -17,7 +17,6 @@ import ShareIcon from '@/components/icons/share';
 import TrashIcon from '@/components/icons/trash';
 import SharedChatIcon from '@/components/icons/shared-chat';
 import { calculateTimeLeftBySharedChat } from '../shared-chats/[sharedSchoolChatId]/utils';
-import CopyButton from '../shared-chats/[sharedSchoolChatId]/share/copy-button';
 import ClipboardIcon from '@/components/icons/clipboard';
 import { CreateNewCharacterFromTemplate } from './create-new-character-button';
 

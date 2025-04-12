@@ -45,7 +45,7 @@ export default async function Page(context: PageContext) {
     role: message.role === 'tool' ? 'data' : message.role,
   }));
 
-  const character = await dbGetCharactersById({characterId: params.characterId});
+  const character = await dbGetCharactersById({ characterId: params.characterId });
 
   if (character === undefined) {
     console.warn(`GPT with id ${params.characterId} not found`);

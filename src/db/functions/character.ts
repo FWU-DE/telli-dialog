@@ -44,7 +44,7 @@ export async function dbGetCharacterByIdOrSchoolId({
   return character;
 }
 
-export async function dbGetCharactersById({characterId}: {characterId:string}) {
+export async function dbGetCharactersById({ characterId }: { characterId: string }) {
   return (await db.select().from(characterTable).where(eq(characterTable.id, characterId)))[0];
 }
 
@@ -53,11 +53,11 @@ export async function dbGetCopyTemplateCharacter({
   characterId,
   userId,
 }: {
-  templateId: string,
+  templateId: string;
   characterId: string;
   userId: string;
 }): Promise<Omit<CharacterInsertModel, 'modelId'>> {
-  const character = await dbGetCharactersById({characterId: templateId});
+  const character = await dbGetCharactersById({ characterId: templateId });
   if (character?.name === undefined) {
     throw new Error('Invalid State Template Character must have a name');
   }

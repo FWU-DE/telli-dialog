@@ -5,7 +5,7 @@ import React from 'react';
 import { cn } from '@/utils/tailwind';
 import HeaderPortal from '../header-portal';
 import ProfileMenu from '@/components/navigation/profile-menu';
-import {CreateNewCharacterButton} from './create-new-character-button';
+import { CreateNewCharacterButton } from './create-new-character-button';
 import CharacterContainer from './character-container';
 import {
   NewChatButton,
@@ -102,11 +102,9 @@ export default function CharacterPreviewPage({
 function filterCharacters({
   characters,
   input,
-  accessLevel,
 }: {
   characters: CharacterWithImage[];
   input: string;
-  accessLevel: CharacterAccessLevel;
 }): CharacterWithImage[] {
   const lowerCaseInput = input.toLowerCase();
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { CharacterAccessLevel, CharacterInsertModel, CharacterModel } from '@/db/schema';
+import { CharacterAccessLevel, CharacterModel } from '@/db/schema';
 import {
   buttonDeleteClassName,
   buttonPrimaryClassName,

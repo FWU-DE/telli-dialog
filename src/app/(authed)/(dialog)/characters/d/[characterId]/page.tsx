@@ -7,7 +7,7 @@ import DownloadConversationButton from '../../../download-conversation-button';
 import HeaderPortal from '../../../header-portal';
 import { getUser } from '@/auth/utils';
 import { redirect } from 'next/navigation';
-import { dbGetCharacterByIdOrSchoolId, dbGetCharactersById } from '@/db/functions/character';
+import { dbGetCharactersById } from '@/db/functions/character';
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
 import Chat from '@/components/chat/chat';
 
@@ -18,7 +18,7 @@ export default async function Page({ params }: { params: Promise<{ characterId: 
   const id = generateUUID();
   const user = await getUser();
 
-  const character = await dbGetCharactersById({characterId});
+  const character = await dbGetCharactersById({ characterId });
 
   if (character === undefined) {
     console.warn(`GPT with id ${characterId} not found`);

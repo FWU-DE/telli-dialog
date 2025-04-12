@@ -5,7 +5,6 @@ import {
   InsertUserModel,
   SchoolInsertModel,
   schoolTable,
-  UserModel,
   userSchoolMappingTable,
   UserSchoolRole,
   userTable,
@@ -26,8 +25,12 @@ function vidisRoleToUserSchoolRole(role: string): UserSchoolRole {
 }
 
 export async function dbCreateVidisUser(user: InsertUserModel) {
-  const insertedUser = await db.insert(userTable).values({...user}).onConflictDoUpdate({target:userTable.id, set: {...user}}).returning()
-  return insertedUser
+  const insertedUser = await db
+    .insert(userTable)
+    .values({ ...user })
+    .onConflictDoUpdate({ target: userTable.id, set: { ...user } })
+    .returning();
+  return insertedUser;
 }
 
 export async function dbGetOrCreateVidisUser(userInfo: VidisUserInfo) {

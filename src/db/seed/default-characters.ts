@@ -1,5 +1,4 @@
-import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
-import { CharacterInsertModel, CharacterModel } from '../schema';
+import { CharacterInsertModel } from '../schema';
 import * as fs from 'fs';
 import * as path from 'path';
 import { uploadFileToS3 } from '@/s3';

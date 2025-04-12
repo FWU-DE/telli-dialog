@@ -20,13 +20,14 @@ insertHelpModeGpt({ skip: false })
     console.error({ error });
     process.exit(1);
   });
-insertDummyUser().then(() => {
-  console.log('helpMode seed successful');
-})
-.catch((error) => {
-  console.error({ error });
-  process.exit(1);
-});
+insertDummyUser()
+  .then(() => {
+    console.log('helpMode seed successful');
+  })
+  .catch((error) => {
+    console.error({ error });
+    process.exit(1);
+  });
 
 insertTemplateCharacters()
   .then(() => console.log('template character seed successful'))

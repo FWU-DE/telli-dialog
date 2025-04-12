@@ -9,10 +9,17 @@ import PlusIcon from '@/components/icons/plus';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
-import ClipboardIcon from '@/components/icons/clipboard';
-import { ReactNode } from 'react';
 
-export function CreateNewCharacterFromTemplate({templateId, children, className, ...props }: {children:React.ReactNode,className?:string, templateId: string }) {
+export function CreateNewCharacterFromTemplate({
+  templateId,
+  children,
+  className,
+  ...props
+}: {
+  children: React.ReactNode;
+  className?: string;
+  templateId: string;
+}) {
   const router = useRouter();
   const toast = useToast();
   const t = useTranslations('characters');
