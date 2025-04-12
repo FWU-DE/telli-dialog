@@ -1,5 +1,5 @@
 import { formatDateToGermanTimestamp } from '@/utils/date';
-import { dbGetCharacterByIdOrSchoolId } from '@/db/functions/character';
+import { dbGetCharacterByIdOrSchoolId, dbGetCharactersById } from '@/db/functions/character';
 import { getUser } from '@/auth/utils';
 import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
 import { CustomGptModel, FederalStateModel, FileModelAndContent } from '@/db/schema';
@@ -24,11 +24,7 @@ Deine Aufgabe ist insbesondere: ${customGpt.specification ?? ''}`;
 
 export async function constructCharacterSystemPrompt({ characterId }: { characterId: string }) {
   const user = await getUser();
-  const character = await dbGetCharacterByIdOrSchoolId({
-    characterId,
-    userId: user.id,
-    schoolId: user.school?.id ?? null,
-  });
+  const character = await dbGetCharactersById({characterId})
 
   if (character === undefined) {
     return '';

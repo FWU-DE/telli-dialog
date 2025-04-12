@@ -41,19 +41,52 @@ export async function dbGetCharacterByIdOrSchoolId({
         eq(characterTable.accessLevel, 'global'),
       ),
     );
-
   return character;
 }
 
+export async function dbGetCharactersById({characterId}: {characterId:string}) {
+  return (await db.select().from(characterTable).where(eq(characterTable.id, characterId)))[0];
+}
+
+export async function dbGetCopyTemplateCharacter({
+  templateId,
+  characterId,
+  userId,
+}: {
+  templateId: string,
+  characterId: string;
+  userId: string;
+}): Promise<Omit<CharacterInsertModel, 'modelId'>> {
+  const character = await dbGetCharactersById({characterId: templateId});
+  if (character?.name === undefined) {
+    throw new Error('Invalid State Template Character must have a name');
+  }
+  return {
+    id: characterId,
+    name: character.name,
+    description: character?.description,
+    learningContext: character?.learningContext,
+    competence: character?.competence,
+    schoolType: character?.schoolType,
+    gradeLevel: character?.gradeLevel,
+    subject: character?.subject,
+    specifications: character?.specifications,
+    restrictions: character?.restrictions,
+    pictureId: character?.pictureId,
+    accessLevel: 'private',
+    userId,
+  };
+}
+
 export async function dbCreateCharacter(character: Omit<CharacterInsertModel, 'modelId'>) {
-  const defaultModelId = await dbGetModelByName(DEFAULT_CHAT_MODEL)
-  if (defaultModelId === undefined) return
+  const defaultModelId = await dbGetModelByName(DEFAULT_CHAT_MODEL);
+  if (defaultModelId === undefined) return;
   const created = await db
     .insert(characterTable)
     .values({ ...character, modelId: defaultModelId.id })
     .onConflictDoUpdate({ target: characterTable.id, set: { ...character } })
     .returning();
-  return created
+  return created;
 }
 
 export async function dbGetGlobalCharacters(): Promise<CharacterModel[]> {

@@ -9,8 +9,37 @@ import PlusIcon from '@/components/icons/plus';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
+import ClipboardIcon from '@/components/icons/clipboard';
+import { ReactNode } from 'react';
 
-export default function CreateNewCharacterButton() {
+export function CreateNewCharacterFromTemplate({templateId, children, className, ...props }: {children:React.ReactNode,className?:string, templateId: string }) {
+  const router = useRouter();
+  const toast = useToast();
+  const t = useTranslations('characters');
+
+  const { models } = useLlmModels();
+
+  const maybeDefaultModelId =
+    models.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? models[0]?.id;
+
+  function handleNewGPT() {
+    createNewCharacterAction({ modelId: maybeDefaultModelId })
+      .then((newCharacter) => {
+        router.push(`/characters/editor/${newCharacter.id}?create=true&templateId=${templateId}`);
+      })
+      .catch(() => {
+        toast.error(t('toasts.create-toast-error'));
+      });
+  }
+
+  return (
+    <div {...props} onClick={handleNewGPT} className={className}>
+      {children}
+    </div>
+  );
+}
+
+export function CreateNewCharacterButton() {
   const router = useRouter();
   const toast = useToast();
   const t = useTranslations('characters');

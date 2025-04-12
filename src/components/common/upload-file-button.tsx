@@ -4,12 +4,14 @@ export type GenericFileUploadButtonProps = {
   triggerButton: React.ReactNode;
   triggerClassName?: string;
   onSubmit(files: FileList): void;
+  disabled?: boolean;
 };
 
 export default function GenericFileUploadButton({
   triggerButton,
   triggerClassName,
   onSubmit,
+  disabled = false,
 }: GenericFileUploadButtonProps) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -34,7 +36,12 @@ export default function GenericFileUploadButton({
         ref={fileInputRef}
         onChange={handleFileChange}
       />
-      <button type="button" onClick={handleButtonClick} className={triggerClassName}>
+      <button
+        type="button"
+        onClick={handleButtonClick}
+        className={triggerClassName}
+        disabled={disabled}
+      >
         {triggerButton}
       </button>
     </div>

@@ -7,25 +7,21 @@ import DownloadConversationButton from '../../../download-conversation-button';
 import HeaderPortal from '../../../header-portal';
 import { getUser } from '@/auth/utils';
 import { redirect } from 'next/navigation';
-import { dbGetCharacterByIdOrSchoolId } from '@/db/functions/character';
+import { dbGetCharacterByIdOrSchoolId, dbGetCharactersById } from '@/db/functions/character';
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
 import Chat from '@/components/chat/chat';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Page({ params }: { params: Promise<{ characterId: string }> }) {
-  const charId = (await params).characterId;
+  const characterId = (await params).characterId;
   const id = generateUUID();
   const user = await getUser();
 
-  const character = await dbGetCharacterByIdOrSchoolId({
-    characterId: charId,
-    userId: user.id,
-    schoolId: user.school?.id ?? null,
-  });
+  const character = await dbGetCharactersById({characterId});
 
   if (character === undefined) {
-    console.warn(`GPT with id ${charId} not found`);
+    console.warn(`GPT with id ${characterId} not found`);
     redirect('/');
   }
 

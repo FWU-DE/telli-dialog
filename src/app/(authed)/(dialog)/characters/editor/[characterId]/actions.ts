@@ -69,8 +69,8 @@ export async function updateCharacterAction({
   const user = await getUser();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, pictureId, accessLevel, schoolId, createdAt, ...updatableProps } = character;
-
+  const { id, accessLevel, schoolId, createdAt, ...updatableProps } = character;
+  console.log(`PIC ID ${updatableProps.pictureId}`)
   const updatedCharacter = (
     await db
       .update(characterTable)
