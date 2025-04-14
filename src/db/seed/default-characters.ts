@@ -6,7 +6,7 @@ import { dbCreateCharacter } from '../functions/character';
 import { DUMMY_USER_ID } from './user-entity';
 
 export async function insertTemplateCharacters() {
-  await processStaticJpegFiles('./public/template-character-assets');
+  await processStaticJpegFiles('./assets/template-characters');
   for (const templateCharacter of defaultCharacters) {
     await dbCreateCharacter(templateCharacter);
   }
