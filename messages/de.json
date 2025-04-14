@@ -25,7 +25,8 @@
     "new-chat": "Neuer Chat",
     "stop": "Stop",
     "copy": "Kopieren",
-    "copy-clipboard": "In die Zwischenablage kopieren"
+    "copy-clipboard": "In die Zwischenablage kopieren",
+    "regenerate-message": "Antwort erneut generieren"
   },
   "usage-disclaimer": {
     "initial-title": "Willkommen bei telli!",

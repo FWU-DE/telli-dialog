@@ -6,6 +6,7 @@ import TelliClipboardButton from '../common/clipboard-button';
 import ReloadIcon from '../icons/reload';
 import MarkdownDisplay from './markdown-display';
 import { cn } from '@/utils/tailwind';
+import { useTranslations } from 'next-intl';
 
 export function ChatBox({
   children,
@@ -27,7 +28,7 @@ export function ChatBox({
   initialFiles?: FileModel[];
 }) {
   let maybefileAttachment: React.JSX.Element | undefined = undefined;
-
+  const tCommon = useTranslations('common');
   const userClassName =
     children.role === 'user'
       ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary/20 text-primary-foreground max-w-[70%] break-words'
@@ -74,7 +75,7 @@ export function ChatBox({
       <div className="flex items-center gap-1 mt-1">
         <TelliClipboardButton text={children.content} />
         <button
-          title="Reload last message"
+          title={tCommon('regenerate-message')}
           type="button"
           onClick={() => regenerateMessage()}
           aria-label="Reload"

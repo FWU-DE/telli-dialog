@@ -95,11 +95,13 @@ export default function CharacterContainer({
         <CountDownTimer leftTime={timeLeft} totalTime={character.maxUsageTimeLimit} />
       )}
       {character.accessLevel === 'global' && (
-        <CreateNewCharacterFromTemplate templateId={id}>
-          <ClipboardIcon
-            aria-hidden="true"
-            className={cn('text-primary hover:text-secondary', 'min-w-8 min-h-8')}
-          />
+        <CreateNewCharacterFromTemplate
+          templateId={id}
+          {...{ title: t('form.copy-template'), type: 'button' }}
+        >
+          <button aria-label="copy-template">
+            <ClipboardIcon className={cn('text-primary hover:text-secondary', 'min-w-8 min-h-8')} />
+          </button>
         </CreateNewCharacterFromTemplate>
       )}
 
