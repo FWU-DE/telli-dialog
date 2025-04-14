@@ -60,7 +60,6 @@ export default function CharacterContainer({
   function handleNavigateToShare(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
     e.stopPropagation();
-    console.log(`ID: ${id}`);
     router.push(`/characters/editor/${id}/share`);
   }
 
@@ -97,6 +96,7 @@ export default function CharacterContainer({
       {character.accessLevel === 'global' && (
         <CreateNewCharacterFromTemplate
           templateId={id}
+          templatePictureId={character.pictureId ?? undefined}
           {...{ title: t('form.copy-template'), type: 'button' }}
         >
           <button aria-label="copy-template">

@@ -35,11 +35,11 @@ import Checkbox from '@/components/common/checkbox';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { CreateNewCharacterFromTemplate } from '../../create-new-character-button';
+import { copyFileInS3 } from '@/s3';
 
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
   isCreating?: boolean;
-  initialPictureId?: string;
 };
 
 const characterFormValuesSchema = z.object({
@@ -60,7 +60,6 @@ type CharacterFormValues = z.infer<typeof characterFormValuesSchema>;
 export default function CharacterForm({
   maybeSignedPictureUrl,
   isCreating = false,
-  initialPictureId,
   ...character
 }: CharacterFormProps) {
   const router = useRouter();
@@ -133,7 +132,7 @@ export default function CharacterForm({
   }
 
   function onSubmit(data: CharacterFormValues) {
-    updateCharacterAction({ characterId: character.id, ...data, pictureId: initialPictureId })
+    updateCharacterAction({ characterId: character.id, ...data })
       .then(() => {
         if (!isCreating) {
           toast.success(tToast('edit-toast-success'));
@@ -146,7 +145,10 @@ export default function CharacterForm({
   }
 
   function handleDeleteCharacter() {
-    deleteCharacterAction({ characterId: character.id })
+    deleteCharacterAction({
+      characterId: character.id,
+      pictureId: character.pictureId ?? undefined,
+    })
       .then(() => {
         // do not show any toast if the avatar is being created
         if (!isCreating) {
@@ -292,7 +294,10 @@ export default function CharacterForm({
         </h1>
 
         {readOnly && (
-          <CreateNewCharacterFromTemplate templateId={character.id}>
+          <CreateNewCharacterFromTemplate
+            templateId={character.id}
+            templatePictureId={character.pictureId ?? undefined}
+          >
             <button
               title={t('copy-template')}
               className={cn(

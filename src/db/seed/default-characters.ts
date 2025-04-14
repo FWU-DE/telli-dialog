@@ -41,8 +41,6 @@ async function findMatchingFiles(directoryPath: string, pattern: string): Promis
  */
 async function processStaticJpegFiles(rootFolder: string): Promise<void> {
   try {
-    console.log(`Scanning ${rootFolder} for files ending with 'Static.jpg'...`);
-
     // Find all matching files
     const matchingFiles = await findMatchingFiles(rootFolder, 'Static.jpg');
 
@@ -61,12 +59,11 @@ async function processStaticJpegFiles(rootFolder: string): Promise<void> {
       const fileName = fileNameWithSuffix.split('.')[0];
       const fileBuffer = fs.readFileSync(file);
       await uploadFileToS3({
-        key: `characters/characters/_templates/${fileName}`,
+        key: `characters/_templates/${fileName}`,
         body: fileBuffer,
         contentType: 'image/jpeg',
       });
     }
-
     console.log('\nAll uploads completed successfully!');
   } catch (error) {
     console.error('An error occurred:', error);

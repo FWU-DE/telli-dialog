@@ -14,11 +14,13 @@ export function CreateNewCharacterFromTemplate({
   templateId,
   children,
   className,
+  templatePictureId,
   ...props
 }: {
   children: React.ReactNode;
   className?: string;
   templateId: string;
+  templatePictureId?: string;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -30,7 +32,7 @@ export function CreateNewCharacterFromTemplate({
     models.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? models[0]?.id;
 
   function handleNewGPT() {
-    createNewCharacterAction({ modelId: maybeDefaultModelId })
+    createNewCharacterAction({ modelId: maybeDefaultModelId, templatePictureId })
       .then((newCharacter) => {
         router.push(`/characters/editor/${newCharacter.id}?create=true&templateId=${templateId}`);
       })
