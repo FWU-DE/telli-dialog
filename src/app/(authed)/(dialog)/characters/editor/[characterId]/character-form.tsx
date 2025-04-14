@@ -1,6 +1,17 @@
 'use client';
 
+import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
+import Checkbox from '@/components/common/checkbox';
+import DestructiveActionButton from '@/components/common/destructive-action-button';
+import { useToast } from '@/components/common/toast';
+import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
+import ChevronLeftIcon from '@/components/icons/chevron-left';
+import { EmptyImageIcon } from '@/components/icons/empty-image';
+import { useLlmModels } from '@/components/providers/llm-model-provider';
+import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { CharacterAccessLevel, CharacterModel } from '@/db/schema';
+import { deepEqual } from '@/utils/object';
+import { cn } from '@/utils/tailwind';
 import {
   buttonDeleteClassName,
   buttonPrimaryClassName,
@@ -8,34 +19,22 @@ import {
 } from '@/utils/tailwind/button';
 import { inputFieldClassName, labelClassName } from '@/utils/tailwind/input';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslations } from 'next-intl';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import React, { startTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import SelectLlmModelForm from '../../../_components/select-llm-model';
+import { CreateNewCharacterFromTemplate } from '../../create-new-character-button';
 import {
   deleteCharacterAction,
   updateCharacterAccessLevelAction,
   updateCharacterAction,
   updateCharacterPictureAction,
 } from './actions';
-import { useRouter } from 'next/navigation';
-import { useToast } from '@/components/common/toast';
-import React, { startTransition } from 'react';
-import Image from 'next/image';
-import { EmptyImageIcon } from '@/components/icons/empty-image';
-import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
-import DestructiveActionButton from '@/components/common/destructive-action-button';
-import { cn } from '@/utils/tailwind';
-import { deepEqual } from '@/utils/object';
-import ChevronLeftIcon from '@/components/icons/chevron-left';
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import SelectLlmModelForm from '../../../_components/select-llm-model';
-import { useLlmModels } from '@/components/providers/llm-model-provider';
 import ShareContainer from './share-container';
-import Checkbox from '@/components/common/checkbox';
-import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
-import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
-import { CreateNewCharacterFromTemplate } from '../../create-new-character-button';
-import { copyFileInS3 } from '@/s3';
 
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
