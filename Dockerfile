@@ -18,4 +18,4 @@ EXPOSE 3000
 ENV PORT 3000
 RUN cp -r /app/.next/standalone/* /app/
 
-CMD npm run db:migrate && npm run db:seed && HOSTNAME=0.0.0.0 node server.js
+CMD npm run db:migrate && HOSTNAME=0.0.0.0 node server.js
