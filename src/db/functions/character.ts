@@ -62,17 +62,8 @@ export async function dbGetCopyTemplateCharacter({
     throw new Error('Invalid State Template Character must have a name');
   }
   return {
+    ...character,
     id: characterId,
-    name: character.name,
-    description: character?.description,
-    learningContext: character?.learningContext,
-    competence: character?.competence,
-    schoolType: character?.schoolType,
-    gradeLevel: character?.gradeLevel,
-    subject: character?.subject,
-    specifications: character?.specifications,
-    restrictions: character?.restrictions,
-    pictureId: character?.pictureId,
     accessLevel: 'private',
     userId,
   };

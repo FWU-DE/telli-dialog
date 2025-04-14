@@ -63,7 +63,6 @@ export async function uploadFileToS3({
 }
 
 export async function copyFileInS3({ newKey, copySource }: { newKey: string; copySource: string }) {
-  // const Key = newKey ?? nanoid();
   const copyParams: CopyObjectCommandInput = {
     Bucket: env.otcBucketName,
     Key: newKey,

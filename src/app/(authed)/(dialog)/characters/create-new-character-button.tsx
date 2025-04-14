@@ -32,9 +32,13 @@ export function CreateNewCharacterFromTemplate({
     models.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? models[0]?.id;
 
   function handleNewGPT() {
+    const urlSearchParams = new URLSearchParams({
+      create: 'true',
+      templateId,
+    });
     createNewCharacterAction({ modelId: maybeDefaultModelId, templatePictureId })
       .then((newCharacter) => {
-        router.push(`/characters/editor/${newCharacter.id}?create=true&templateId=${templateId}`);
+        router.push(`/characters/editor/${newCharacter.id}?${urlSearchParams.toString()}`);
       })
       .catch(() => {
         toast.error(t('toasts.create-toast-error'));
