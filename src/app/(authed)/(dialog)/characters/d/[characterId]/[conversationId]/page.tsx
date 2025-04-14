@@ -8,7 +8,7 @@ import {
   NewChatButton,
   ToggleSidebarButton,
 } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { dbGetCharacterByIdOrSchoolId } from '@/db/functions/character';
+import { dbGetCharactersById } from '@/db/functions/character';
 import { dbGetConversationById, dbGetCoversationMessages } from '@/db/functions/chat';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
@@ -45,11 +45,7 @@ export default async function Page(context: PageContext) {
     role: message.role === 'tool' ? 'data' : message.role,
   }));
 
-  const character = await dbGetCharacterByIdOrSchoolId({
-    characterId: params.characterId,
-    userId: user.id,
-    schoolId: user.school?.id ?? null,
-  });
+  const character = await dbGetCharactersById({ characterId: params.characterId });
 
   if (character === undefined) {
     console.warn(`GPT with id ${params.characterId} not found`);

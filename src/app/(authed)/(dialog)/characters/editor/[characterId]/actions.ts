@@ -69,8 +69,7 @@ export async function updateCharacterAction({
   const user = await getUser();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, pictureId, accessLevel, schoolId, createdAt, ...updatableProps } = character;
-
+  const { id, accessLevel, schoolId, createdAt, ...updatableProps } = character;
   const updatedCharacter = (
     await db
       .update(characterTable)
@@ -86,14 +85,20 @@ export async function updateCharacterAction({
   return updatedCharacter;
 }
 
-export async function deleteCharacterAction({ characterId }: { characterId: string }) {
+export async function deleteCharacterAction({
+  characterId,
+  pictureId,
+}: {
+  characterId: string;
+  pictureId?: string;
+}) {
   const user = await getUser();
 
   const deletedCharacter = await dbDeleteCharacterByIdAndUserId({ characterId, userId: user.id });
 
-  const maybePictureId = deletedCharacter.pictureId;
+  const maybePictureId = deletedCharacter.pictureId ?? pictureId;
 
-  if (maybePictureId !== null) {
+  if (maybePictureId != null) {
     try {
       await deleteFileFromS3({ key: maybePictureId });
     } catch (error) {

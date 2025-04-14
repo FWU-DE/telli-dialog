@@ -1,6 +1,17 @@
 'use client';
 
+import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
+import Checkbox from '@/components/common/checkbox';
+import DestructiveActionButton from '@/components/common/destructive-action-button';
+import { useToast } from '@/components/common/toast';
+import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
+import ChevronLeftIcon from '@/components/icons/chevron-left';
+import { EmptyImageIcon } from '@/components/icons/empty-image';
+import { useLlmModels } from '@/components/providers/llm-model-provider';
+import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { CharacterAccessLevel, CharacterModel } from '@/db/schema';
+import { deepEqual } from '@/utils/object';
+import { cn } from '@/utils/tailwind';
 import {
   buttonDeleteClassName,
   buttonPrimaryClassName,
@@ -8,32 +19,22 @@ import {
 } from '@/utils/tailwind/button';
 import { inputFieldClassName, labelClassName } from '@/utils/tailwind/input';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslations } from 'next-intl';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import React, { startTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import SelectLlmModelForm from '../../../_components/select-llm-model';
+import { CreateNewCharacterFromTemplate } from '../../create-new-character-button';
 import {
   deleteCharacterAction,
   updateCharacterAccessLevelAction,
   updateCharacterAction,
   updateCharacterPictureAction,
 } from './actions';
-import { useRouter } from 'next/navigation';
-import { useToast } from '@/components/common/toast';
-import React, { startTransition } from 'react';
-import Image from 'next/image';
-import { EmptyImageIcon } from '@/components/icons/empty-image';
-import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
-import DestructiveActionButton from '@/components/common/destructive-action-button';
-import { cn } from '@/utils/tailwind';
-import { deepEqual } from '@/utils/object';
-import ChevronLeftIcon from '@/components/icons/chevron-left';
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import SelectLlmModelForm from '../../../_components/select-llm-model';
-import { useLlmModels } from '@/components/providers/llm-model-provider';
 import ShareContainer from './share-container';
-import Checkbox from '@/components/common/checkbox';
-import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
-import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -64,7 +65,7 @@ export default function CharacterForm({
   const toast = useToast();
 
   const { models } = useLlmModels();
-
+  const readOnly = character.accessLevel === 'global';
   const maybeDefaultModelId =
     models.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? models[0]?.id;
 
@@ -143,7 +144,10 @@ export default function CharacterForm({
   }
 
   function handleDeleteCharacter() {
-    deleteCharacterAction({ characterId: character.id })
+    deleteCharacterAction({
+      characterId: character.id,
+      pictureId: character.pictureId ?? undefined,
+    })
       .then(() => {
         // do not show any toast if the avatar is being created
         if (!isCreating) {
@@ -176,32 +180,37 @@ export default function CharacterForm({
     toast.success(tToast('create-toast-success'));
     router.replace(backUrl);
   }
+  let shareChatElement: React.JSX.Element | undefined;
+  let navigateBackElement: React.JSX.Element;
+  if (isCreating) {
+    navigateBackElement = (
+      <button
+        onClick={handleDeleteCharacter}
+        className="flex gap-3 items-center text-primary hover:underline"
+      >
+        <ChevronLeftIcon />
+        <span>{t('all-characters')}</span>
+      </button>
+    );
+  } else {
+    navigateBackElement = (
+      <Link href={backUrl} className="flex gap-3 text-primary hover:underline items-center">
+        <ChevronLeftIcon />
+        <span>{t('all-characters')}</span>
+      </Link>
+    );
+  }
+  if (!isCreating && !readOnly) {
+    shareChatElement = (
+      <fieldset className="mt-12">
+        <ShareContainer {...character} />
+      </fieldset>
+    );
+  }
+  let generalSettings: React.JSX.Element | undefined;
 
-  return (
-    <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
-      {isCreating && (
-        <button
-          onClick={handleDeleteCharacter}
-          className="flex gap-3 items-center text-primary hover:underline"
-        >
-          <ChevronLeftIcon />
-          <span>{t('all-characters')}</span>
-        </button>
-      )}
-      {!isCreating && (
-        <Link href={backUrl} className="flex gap-3 text-primary hover:underline items-center">
-          <ChevronLeftIcon />
-          <span>{t('all-characters')}</span>
-        </Link>
-      )}
-      <h1 className="text-2xl mt-4 font-medium">
-        {isCreating ? t('create-character') : character.name}
-      </h1>
-      {!isCreating && (
-        <fieldset className="mt-12">
-          <ShareContainer {...character} />
-        </fieldset>
-      )}
+  if (!readOnly) {
+    generalSettings = (
       <fieldset className="mt-16 flex flex-col gap-8">
         <h2 className="font-medium mb-2">{t('general-settings')}</h2>
         <label className={cn(labelClassName, 'text-sm')}>{t('character-visibility-label')}</label>
@@ -272,6 +281,36 @@ export default function CharacterForm({
           </div>
         </div>
       </fieldset>
+    );
+  }
+  return (
+    <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
+      {navigateBackElement}
+      {shareChatElement}
+      <div className="flex felx-col justify-between">
+        <h1 className="text-2xl mt-4 font-medium">
+          {isCreating ? t('create-character') : character.name}
+        </h1>
+
+        {readOnly && (
+          <CreateNewCharacterFromTemplate
+            templateId={character.id}
+            templatePictureId={character.pictureId ?? undefined}
+          >
+            <button
+              title={t('copy-template')}
+              className={cn(
+                buttonPrimaryClassName,
+                'min-w-max max-w-min h-11 flex gap-2 items-center',
+              )}
+              type="button"
+            >
+              <span>{t('copy-template')}</span>
+            </button>
+          </CreateNewCharacterFromTemplate>
+        )}
+      </div>
+      {generalSettings}
       <fieldset className="flex flex-col gap-4 mt-16">
         <h2 className="font-medium mb-8">{t('character-settings')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
@@ -282,6 +321,7 @@ export default function CharacterForm({
               </label>
               <input
                 id="name"
+                readOnly={readOnly}
                 {...register('name')}
                 maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
                 className={cn(
@@ -299,6 +339,7 @@ export default function CharacterForm({
               <textarea
                 id="description"
                 rows={5}
+                readOnly={readOnly}
                 style={{ resize: 'none' }}
                 {...register('description')}
                 maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
@@ -343,6 +384,7 @@ export default function CharacterForm({
               onUploadComplete={handlePictureUploadComplete}
               file_name="avatar"
               compressionOptions={{ maxHeight: 800 }}
+              disabled={readOnly}
             />
           </section>
         </div>
@@ -357,6 +399,7 @@ export default function CharacterForm({
             {...register('competence')}
             maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             rows={5}
+            readOnly={readOnly}
             style={{ resize: 'none' }}
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             onBlur={handleAutoSave}
@@ -372,6 +415,7 @@ export default function CharacterForm({
             {...register('learningContext')}
             maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             rows={5}
+            readOnly={readOnly}
             style={{ resize: 'none' }}
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             onBlur={handleAutoSave}
@@ -387,6 +431,7 @@ export default function CharacterForm({
             {...register('specifications')}
             maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             rows={5}
+            readOnly={readOnly}
             style={{ resize: 'none' }}
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             onBlur={handleAutoSave}
@@ -402,6 +447,7 @@ export default function CharacterForm({
             {...register('restrictions')}
             maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             rows={5}
+            readOnly={readOnly}
             style={{ resize: 'none' }}
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             onBlur={handleAutoSave}

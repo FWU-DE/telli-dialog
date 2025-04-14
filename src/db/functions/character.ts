@@ -1,6 +1,7 @@
 import { and, desc, eq, inArray, or } from 'drizzle-orm';
 import { db } from '..';
 import {
+  CharacterInsertModel,
   CharacterModel,
   characterTable,
   conversationMessageTable,
@@ -8,6 +9,8 @@ import {
   SharedCharacterChatUsageTrackingInsertModel,
   sharedCharacterChatUsageTrackingTable,
 } from '../schema';
+import { dbGetModelByName } from './llm-model';
+import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 
 export async function dbGetCharacterByIdOrSchoolId({
   characterId,
@@ -38,8 +41,43 @@ export async function dbGetCharacterByIdOrSchoolId({
         eq(characterTable.accessLevel, 'global'),
       ),
     );
-
   return character;
+}
+
+export async function dbGetCharactersById({ characterId }: { characterId: string }) {
+  return (await db.select().from(characterTable).where(eq(characterTable.id, characterId)))[0];
+}
+
+export async function dbGetCopyTemplateCharacter({
+  templateId,
+  characterId,
+  userId,
+}: {
+  templateId: string;
+  characterId: string;
+  userId: string;
+}): Promise<Omit<CharacterInsertModel, 'modelId'>> {
+  const character = await dbGetCharactersById({ characterId: templateId });
+  if (character?.name === undefined) {
+    throw new Error('Invalid State Template Character must have a name');
+  }
+  return {
+    ...character,
+    id: characterId,
+    accessLevel: 'private',
+    userId,
+  };
+}
+
+export async function dbCreateCharacter(character: Omit<CharacterInsertModel, 'modelId'>) {
+  const defaultModelId = await dbGetModelByName(DEFAULT_CHAT_MODEL);
+  if (defaultModelId === undefined) return;
+  const created = await db
+    .insert(characterTable)
+    .values({ ...character, modelId: defaultModelId.id })
+    .onConflictDoUpdate({ target: characterTable.id, set: { ...character } })
+    .returning();
+  return created;
 }
 
 export async function dbGetGlobalCharacters(): Promise<CharacterModel[]> {

@@ -5,7 +5,7 @@ import React from 'react';
 import { cn } from '@/utils/tailwind';
 import HeaderPortal from '../header-portal';
 import ProfileMenu from '@/components/navigation/profile-menu';
-import CreateNewCharacterButton from './create-new-character-button';
+import { CreateNewCharacterButton } from './create-new-character-button';
 import CharacterContainer from './character-container';
 import {
   NewChatButton,
@@ -17,7 +17,7 @@ import { CharacterAccessLevel } from '@/db/schema';
 import { buildGenericUrl, CharacterWithImage } from './utils';
 import { useTranslations } from 'next-intl';
 
-export default function Page2({
+export default function CharacterPreviewPage({
   user,
   characters,
   accessLevel,
@@ -30,7 +30,7 @@ export default function Page2({
 
   const filterDisabled = characters.length < 1;
 
-  const filteredCharacters = filterCharacters(characters, input);
+  const filteredCharacters = filterCharacters({ characters, input });
 
   const t = useTranslations('characters');
 
@@ -99,12 +99,17 @@ export default function Page2({
   );
 }
 
-function filterCharacters(characters: CharacterWithImage[], input: string): CharacterWithImage[] {
+function filterCharacters({
+  characters,
+  input,
+}: {
+  characters: CharacterWithImage[];
+  input: string;
+}): CharacterWithImage[] {
   const lowerCaseInput = input.toLowerCase();
 
   return characters.filter((character) => {
     const mainMatch = character.name.toLowerCase().includes(lowerCaseInput);
-
     return mainMatch;
   });
 }

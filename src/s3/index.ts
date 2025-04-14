@@ -9,6 +9,8 @@ import {
   GetObjectCommandInput,
   PutObjectCommand,
   PutObjectCommandInput,
+  CopyObjectCommand,
+  CopyObjectCommandInput,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -56,6 +58,22 @@ export async function uploadFileToS3({
     await s3Client.send(command);
   } catch (error) {
     console.error('Error uploading file to S3:', error);
+    throw error;
+  }
+}
+
+export async function copyFileInS3({ newKey, copySource }: { newKey: string; copySource: string }) {
+  const copyParams: CopyObjectCommandInput = {
+    Bucket: env.otcBucketName,
+    Key: newKey,
+    CopySource: `${env.otcBucketName}/${copySource}`,
+  };
+
+  try {
+    const command = new CopyObjectCommand(copyParams);
+    await s3Client.send(command);
+  } catch (error) {
+    console.error('Error copying file to S3:', error);
     throw error;
   }
 }

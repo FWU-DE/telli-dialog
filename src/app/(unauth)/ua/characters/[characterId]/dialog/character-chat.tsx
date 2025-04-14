@@ -150,7 +150,7 @@ export default function CharacterSharedChat({
                         <div className="flex items-center gap-1 mt-1">
                           <TelliClipboardButton text={message.content} />
                           <button
-                            title="Reload last message"
+                            title={tCommon('regenerate-message')}
                             type="button"
                             onClick={() => reload()}
                             aria-label="Reload"

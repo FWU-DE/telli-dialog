@@ -12,14 +12,14 @@ import {
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
 import { z } from 'zod';
-import Page2 from './_page';
+import CharacterPreviewPage from './charcter-preview-page';
 import { enrichCharactersWithImage } from './utils';
 
 export const dynamic = 'force-dynamic';
 
 const pageContextSchema = z.object({
   searchParams: z.object({
-    visibility: characterAccessLevelSchema.default('global'),
+    visibility: characterAccessLevelSchema.default('private'),
   }),
 });
 
@@ -39,7 +39,9 @@ export default async function Page(context: PageContext) {
 
   const enrichedCharacters = await enrichCharactersWithImage({ characters });
 
-  return <Page2 user={user} characters={enrichedCharacters} accessLevel={accessLevel} />;
+  return (
+    <CharacterPreviewPage user={user} characters={enrichedCharacters} accessLevel={accessLevel} />
+  );
 }
 
 async function getCharacterByAccessLevel({

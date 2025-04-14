@@ -15,6 +15,7 @@ type UploadImageToBeCroppedButtonProps = {
   compressionOptions?: CompressionOptions;
   file_prefix?: string;
   file_name?: string;
+  disabled?: boolean;
 };
 
 export default function UploadImageToBeCroppedButton({
@@ -24,6 +25,7 @@ export default function UploadImageToBeCroppedButton({
   compressionOptions,
   file_prefix,
   file_name,
+  disabled = false,
 }: UploadImageToBeCroppedButtonProps) {
   const [file, setFile] = React.useState<File | null>(null);
   const [imageSource, setImageSource] = React.useState<string | null>(null);
@@ -77,6 +79,7 @@ export default function UploadImageToBeCroppedButton({
     <div>
       <GenericFileUploadButton
         onSubmit={handleImageUpload}
+        disabled={disabled}
         triggerButton={
           <>
             <UploadImageIcon className="group-hover:text-secondary-text" />

@@ -17,6 +17,7 @@ import CustomGptContainer from './custom-gpt-container';
 import { buildGenericUrl } from '../characters/utils';
 import CreateNewCustomGptButton from './create-new-customgpt-button';
 import { CustomGptWithImage } from './utils';
+import { HELP_MODE_GPT_ID } from '@/db/const';
 
 export default function Page2({
   user,
@@ -110,7 +111,7 @@ function filterCustomGpt(customGpt: CustomGptWithImage[], input: string): Custom
 
   return customGpt.filter((gpt) => {
     const mainMatch = gpt.name.toLowerCase().includes(lowerCaseInput);
-
-    return mainMatch;
+    const isHelpAssistant = gpt.id === HELP_MODE_GPT_ID;
+    return mainMatch && !isHelpAssistant;
   });
 }

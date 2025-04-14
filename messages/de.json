@@ -25,7 +25,8 @@
     "new-chat": "Neuer Chat",
     "stop": "Stop",
     "copy": "Kopieren",
-    "copy-clipboard": "In die Zwischenablage kopieren"
+    "copy-clipboard": "In die Zwischenablage kopieren",
+    "regenerate-message": "Antwort erneut generieren"
   },
   "usage-disclaimer": {
     "initial-title": "Willkommen bei telli!",
@@ -53,7 +54,7 @@
   "custom-gpt": {
     "title": "Spezialanwendungen",
     "description": "Entdecke sofort nutzbare Spezialanwendungen oder konfiguriere deine eigenen KI-Werkzeuge ganz nach deinem Bedarf. Hinterlege individuelle Anweisungen, lade Dateien hoch und teile deine Lösungen mit anderen. Klicke einfach auf eine Anwendung, um sofort loszulegen.",
-    "visibility-global": "Öffentlich",
+    "visibility-global": "Vorlagen",
     "visibility-school": "Schulintern",
     "visibility-private": "Für mich",
     "search-placeholder": "Anwendung suchen...",
@@ -97,7 +98,7 @@
     "character": "Dialogpartner",
     "description": "Mit individuell konfigurierten Dialogpartnern wird das Lernen lebendig und inspirierend. Fiktive Gesprächspartner helfen dabei, Themen zu vertiefen, die Lernenden emotional anzusprechen und sie neugierig zu machen. Die zeitlich begrenzten Chats werden einfach einzeln oder gruppenweise mit den Lernenden geteilt.",
     "search-placeholder": "Dialogpartner suchen...",
-    "visibility-global": "Öffentlich",
+    "visibility-global": "Vorlagen",
     "visibility-school": "Schulintern",
     "visibility-private": "Für mich",
     "shared": {
@@ -117,6 +118,7 @@
       "use-qr": "Oder nutze den QR-Code"
     },
     "form": {
+      "copy-template": "Kopie bearbeiten",
       "general-settings": "Allgemeine Einstellungen",
       "character-settings": "Dialogpartner-Einstellungen",
       "all-characters": "Alle Dialogpartner",

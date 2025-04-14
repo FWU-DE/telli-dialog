@@ -12,12 +12,7 @@ export async function insertFederalStates({ skip = true }: { skip: boolean }) {
     await db
       .insert(federalStateTable)
       .values({ ...federalState })
-      .onConflictDoUpdate({
-        target: federalStateTable.id,
-        set: {
-          ...federalState,
-        },
-      });
+      .onConflictDoNothing();
 
     // upsert models per federal state
     const federalStateAndApiKey = await dbGetApiKeyByFederalStateId({

@@ -10,7 +10,49 @@ import { useTranslations } from 'next-intl';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 
-export default function CreateNewCharacterButton() {
+export function CreateNewCharacterFromTemplate({
+  templateId,
+  children,
+  className,
+  templatePictureId,
+  ...props
+}: {
+  children: React.ReactNode;
+  className?: string;
+  templateId: string;
+  templatePictureId?: string;
+}) {
+  const router = useRouter();
+  const toast = useToast();
+  const t = useTranslations('characters');
+
+  const { models } = useLlmModels();
+
+  const maybeDefaultModelId =
+    models.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? models[0]?.id;
+
+  function handleNewGPT() {
+    const urlSearchParams = new URLSearchParams({
+      create: 'true',
+      templateId,
+    });
+    createNewCharacterAction({ modelId: maybeDefaultModelId, templatePictureId })
+      .then((newCharacter) => {
+        router.push(`/characters/editor/${newCharacter.id}?${urlSearchParams.toString()}`);
+      })
+      .catch(() => {
+        toast.error(t('toasts.create-toast-error'));
+      });
+  }
+
+  return (
+    <div {...props} onClick={handleNewGPT} className={className}>
+      {children}
+    </div>
+  );
+}
+
+export function CreateNewCharacterButton() {
   const router = useRouter();
   const toast = useToast();
   const t = useTranslations('characters');

@@ -17,6 +17,8 @@ import ShareIcon from '@/components/icons/share';
 import TrashIcon from '@/components/icons/trash';
 import SharedChatIcon from '@/components/icons/shared-chat';
 import { calculateTimeLeftBySharedChat } from '../shared-chats/[sharedSchoolChatId]/utils';
+import ClipboardIcon from '@/components/icons/clipboard';
+import { CreateNewCharacterFromTemplate } from './create-new-character-button';
 
 type CharacterContainerProps = CharacterModel & {
   currentUserId: string;
@@ -49,7 +51,6 @@ export default function CharacterContainer({
         toast.error(tToast('delete-toast-error'));
       });
   }
-
   function handleNavigateToNewUnsharedChat(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
     e.stopPropagation();
@@ -92,6 +93,18 @@ export default function CharacterContainer({
       {timeLeft > 0 && character.maxUsageTimeLimit !== null && (
         <CountDownTimer leftTime={timeLeft} totalTime={character.maxUsageTimeLimit} />
       )}
+      {character.accessLevel === 'global' && (
+        <CreateNewCharacterFromTemplate
+          templateId={id}
+          templatePictureId={character.pictureId ?? undefined}
+          {...{ title: t('form.copy-template'), type: 'button' }}
+        >
+          <button aria-label="copy-template">
+            <ClipboardIcon className={cn('text-primary hover:text-secondary', 'min-w-8 min-h-8')} />
+          </button>
+        </CreateNewCharacterFromTemplate>
+      )}
+
       {timeLeft > 0 && (
         <button
           aria-label={t('shared.share')}
@@ -113,7 +126,8 @@ export default function CharacterContainer({
           <span className="sr-only">{tCommon('new-chat')}</span>
         </button>
       )}
-      {currentUserId === userId && (
+
+      {currentUserId === userId && character.accessLevel !== 'global' && (
         <DestructiveActionButton
           modalTitle={t('form.delete-character')}
           modalDescription={t('form.character-delete-modal-description')}
