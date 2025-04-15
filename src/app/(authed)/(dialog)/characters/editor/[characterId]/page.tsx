@@ -52,6 +52,7 @@ export default async function Page(context: PageContext) {
   const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
     key: character.pictureId ?? copyOfTemplatePicture,
   });
+
   return (
     <div className="min-w-full p-6 overflow-auto">
       <HeaderPortal>
