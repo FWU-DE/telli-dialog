@@ -18,9 +18,9 @@ export async function createNewCharacterAction({
 
   // Generate uuid before hand to avoid two db transactions for create and imediate update
   const characterId = generateUUID();
-  const copyOfTemplatePicture = `characters/${characterId}/avatar`;
-
+  let copyOfTemplatePicture;
   if (templatePictureId !== undefined) {
+    copyOfTemplatePicture = `characters/${characterId}/avatar`;
     await copyFileInS3({
       newKey: copyOfTemplatePicture,
       copySource: templatePictureId,

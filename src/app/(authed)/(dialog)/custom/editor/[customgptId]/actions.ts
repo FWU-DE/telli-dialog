@@ -6,6 +6,7 @@ import { deleteFileFromS3 } from '@/s3';
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
 import { dbDeleteCustomGptByIdAndUserId } from '@/db/functions/custom-gpts';
+import { removeNullValues } from '@/utils/generic/object-operations';
 
 export async function updateCustomGptAccessLevelAction({
   gptId: gptId,
@@ -43,7 +44,6 @@ export async function updateCustomGptPictureAction({
   picturePath: string;
 }) {
   const user = await getUser();
-
   const updatedCustomGpt = (
     await db
       .update(customGptTable)
@@ -66,7 +66,7 @@ export async function updateCustomGptAction({
   const user = await getUser();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, createdAt, ...updatableProps } = _updatableProps;
+  const { id, createdAt, ...updatableProps } = removeNullValues(_updatableProps);
 
   const updatedGpt = (
     await db

@@ -26,6 +26,7 @@ import { deepCopy } from '@/utils/object';
 import { ChatBox } from './chat-box';
 import { getFileExtension } from '@/utils/files/generic';
 import { refetchFileMapping } from '@/app/(authed)/(dialog)/actions';
+import { NUMBER_OF_FILES_LIMIT } from '@/utils/chat/const';
 
 type ChatProps = {
   id: string;
@@ -294,7 +295,7 @@ export default function Chat({
       ))}
     </div>
   );
-
+  console.log(`FILES ${files.values().toArray().length}`);
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
       <div className="flex flex-col flex-grow justify-between w-full overflow-hidden">
@@ -344,7 +345,11 @@ export default function Chat({
               </div>
               {enableFileUpload && (
                 <div className="flex flex-row gap-x-3">
-                  <UploadFileButton className="hover:bg-light-gray" setFiles={setFiles} />
+                  <UploadFileButton
+                    className="hover:bg-light-gray"
+                    setFiles={setFiles}
+                    disabled={files.values().toArray().length >= NUMBER_OF_FILES_LIMIT}
+                  />
                 </div>
               )}
             </form>

@@ -49,6 +49,7 @@ export default async function Page(context: PageContext) {
           {...customGpt}
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           isCreating={isCreating}
+          userRole={user.school.userRole}
         />
       </div>
     </div>

@@ -32,7 +32,7 @@ type UploadFileButtonProps = {
   directoryId?: string;
 };
 
-const MAX_FILE_SIZE = 5_000_000; // 10MB
+const MAX_FILE_SIZE = 5_000_000; // 5MB
 export async function handleSingleFile({
   file,
   setFiles,
@@ -140,7 +140,7 @@ export default function UploadFileButton({
     if (selectedFiles === null) return;
 
     const files = Array.from(selectedFiles);
-
+  
     onFileUploadStart?.();
     await Promise.all(
       files.map((f) =>
@@ -183,7 +183,7 @@ export default function UploadFileButton({
         className={className}
         disabled={disabled || isPrivateMode}
         type="button"
-        title={'Dateien hochladen'}
+        title={disabled ? 'Die Datei wurde bereits hochgeladen': 'Datei hochladen'}
       >
         {triggerButton ?? (
           <AttachFileIcon
