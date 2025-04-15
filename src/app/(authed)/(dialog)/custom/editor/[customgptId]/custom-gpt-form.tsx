@@ -152,7 +152,7 @@ export default function CustomGptForm({
   const backUrl = `/custom?visibility=${customGpt.accessLevel}`;
 
   function handlePictureUploadComplete(picturePath: string) {
-    customGpt.pictureId = picturePath
+    customGpt.pictureId = picturePath;
     updateCustomGptPictureAction({ picturePath, gptId: customGpt.id })
       .then(() => {
         toast.success(tToast('image-toast-success'));

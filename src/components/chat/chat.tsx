@@ -295,7 +295,6 @@ export default function Chat({
       ))}
     </div>
   );
-  console.log(`FILES ${files.values().toArray().length}`);
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
       <div className="flex flex-col flex-grow justify-between w-full overflow-hidden">

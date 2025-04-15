@@ -140,7 +140,7 @@ export default function UploadFileButton({
     if (selectedFiles === null) return;
 
     const files = Array.from(selectedFiles);
-  
+
     onFileUploadStart?.();
     await Promise.all(
       files.map((f) =>
@@ -183,7 +183,7 @@ export default function UploadFileButton({
         className={className}
         disabled={disabled || isPrivateMode}
         type="button"
-        title={disabled ? 'Die Datei wurde bereits hochgeladen': 'Datei hochladen'}
+        title={disabled ? 'Die Datei wurde bereits hochgeladen' : 'Datei hochladen'}
       >
         {triggerButton ?? (
           <AttachFileIcon
