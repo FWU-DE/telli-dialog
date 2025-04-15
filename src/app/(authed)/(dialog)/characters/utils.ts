@@ -1,3 +1,4 @@
+import { dbGetCopyTemplateCharacter } from '@/db/functions/character';
 import { CharacterAccessLevel, CharacterModel } from '@/db/schema';
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
 
@@ -20,4 +21,21 @@ export async function enrichCharactersWithImage({
       maybeSignedPictureUrl: await getMaybeSignedUrlFromS3Get({ key: character.pictureId }),
     })),
   );
+}
+
+export async function getMaybeDefaultTemplateCharater({
+  templateId,
+  characterId,
+  userId,
+}: {
+  templateId?: string;
+  characterId: string;
+  userId: string;
+}) {
+  if (templateId === undefined) return undefined;
+  return await dbGetCopyTemplateCharacter({
+    templateId,
+    characterId: characterId,
+    userId: userId,
+  });
 }

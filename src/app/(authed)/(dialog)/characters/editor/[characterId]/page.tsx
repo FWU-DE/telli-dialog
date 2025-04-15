@@ -1,7 +1,7 @@
 import { getUser } from '@/auth/utils';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { dbGetCharactersById, dbGetCopyTemplateCharacter } from '@/db/functions/character';
+import { dbGetCharactersById } from '@/db/functions/character';
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import HeaderPortal from '../../../header-portal';
 import CharacterForm from './character-form';
+import { getMaybeDefaultTemplateCharater } from '../../utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,16 +36,14 @@ export default async function Page(context: PageContext) {
   const character = await dbGetCharactersById({ characterId: params.characterId });
   if (character === undefined) return notFound();
 
-  let defaultTemplateCharacter;
-  let copyOfTemplatePicture;
+  const defaultTemplateCharacter = getMaybeDefaultTemplateCharater({
+    templateId: templateId,
+    characterId: character.id,
+    userId: user.id,
+  });
+  const copyOfTemplatePicture =
+    templateId !== undefined ? `characters/${character.id}/avatar` : undefined;
 
-  if (templateId !== undefined) {
-    defaultTemplateCharacter = await dbGetCopyTemplateCharacter({
-      templateId,
-      characterId: params.characterId,
-      userId: user.id,
-    });
-  }
   if (!character) {
     return notFound();
   }
