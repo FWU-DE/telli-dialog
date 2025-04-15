@@ -85,7 +85,7 @@ export default function CustomGptForm({
   );
 
   function handleEnableSharing(value: boolean) {
-    const accessLevel = value ? "school" : "private"
+    const accessLevel = value ? 'school' : 'private';
 
     startTransition(() => {
       addOptimisticAccessLevel(accessLevel);

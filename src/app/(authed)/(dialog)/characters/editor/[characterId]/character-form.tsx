@@ -99,12 +99,11 @@ export default function CharacterForm({
   );
 
   function handleAccessLevelChange(value: boolean) {
-      const accessLevel = value ? "school" : "private"
-   
-       startTransition(() => {
-         addOptimisticAccessLevel(accessLevel);
-       });
-   
+    const accessLevel = value ? 'school' : 'private';
+
+    startTransition(() => {
+      addOptimisticAccessLevel(accessLevel);
+    });
 
     updateCharacterAccessLevelAction({
       characterId: character.id,
