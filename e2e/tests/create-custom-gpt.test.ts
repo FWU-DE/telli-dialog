@@ -7,7 +7,7 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await page.goto('/custom');
   await page.waitForURL('/custom');
 
-  const createButton = page.getByRole('button', { name: 'Neue erstellen' });
+  const createButton = page.getByRole('button', { name: 'Neuen Assistent erstellen' });
   await expect(createButton).toBeVisible();
   await createButton.click();
 
@@ -36,7 +36,7 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await page.getByRole('textbox', { name: 'Erstelle einen' }).press('Tab');
   await page
     .getByRole('group')
-    .filter({ hasText: 'Was soll die Spezialanwendung' })
+    .filter({ hasText: 'Was soll der Assistent' })
     .getByRole('button')
     .click();
   await page
@@ -48,7 +48,7 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
     .fill('Was ist das aktuelle Zinsniveau');
   await page
     .getByRole('group')
-    .filter({ hasText: 'Was soll die Spezialanwendung' })
+    .filter({ hasText: 'Was soll der Assistent' })
     .getByRole('button')
     .first()
     .click();
@@ -59,12 +59,12 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   // delete one suggestion again
   await page
     .getByRole('group')
-    .filter({ hasText: 'Was soll die Spezialanwendung' })
+    .filter({ hasText: 'Was soll der Assistent' })
     .getByRole('button')
     .nth(1)
     .click();
 
-  const submitButton = await page.getByRole('button', { name: 'Neue erstellen' });
+  const submitButton = await page.getByRole('button', { name: 'Neuen Assistent erstellen' });
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
