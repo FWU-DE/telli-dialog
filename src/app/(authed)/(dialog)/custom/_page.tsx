@@ -71,15 +71,17 @@ export default function Page2({
         >
           {t('visibility-global')}
         </Link>
-        <Link
-          href={buildGenericUrl('school', 'custom')}
-          className={cn(
-            'hover:underline px-2 p-1 text-primary',
-            accessLevel === 'school' && 'underline',
-          )}
-        >
-          {t('visibility-school')}
-        </Link>
+        {user.school.userRole === 'teacher' && (
+          <Link
+            href={buildGenericUrl('school', 'custom')}
+            className={cn(
+              'hover:underline px-2 p-1 text-primary',
+              accessLevel === 'school' && 'underline',
+            )}
+          >
+            {t('visibility-school')}
+          </Link>
+        )}
         <Link
           href={buildGenericUrl('private', 'custom')}
           className={cn(

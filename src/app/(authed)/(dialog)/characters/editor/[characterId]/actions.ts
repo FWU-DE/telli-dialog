@@ -9,6 +9,7 @@ import { and, eq } from 'drizzle-orm';
 import { SharedConversationShareFormValues } from '../../../shared-chats/[sharedSchoolChatId]/schema';
 import { parseNumberOrThrow } from '@/utils/number';
 import { generateInviteCode } from '../../../shared-chats/[sharedSchoolChatId]/utils';
+import { removeNullValues } from '@/utils/generic/object-operations';
 
 export async function updateCharacterAccessLevelAction({
   characterId,
@@ -69,7 +70,7 @@ export async function updateCharacterAction({
   const user = await getUser();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, accessLevel, schoolId, createdAt, ...updatableProps } = character;
+  const { id, accessLevel, schoolId, createdAt, ...updatableProps } = removeNullValues(character);
   const updatedCharacter = (
     await db
       .update(characterTable)

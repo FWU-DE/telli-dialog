@@ -378,14 +378,15 @@ export default function CharacterForm({
                 <EmptyImageIcon className="w-10 h-10" />
               )}
             </div>
-            <UploadImageToBeCroppedButton
-              uploadDirPath={`characters/${character.id}`}
-              aspect={1}
-              onUploadComplete={handlePictureUploadComplete}
-              file_name="avatar"
-              compressionOptions={{ maxHeight: 800 }}
-              disabled={readOnly}
-            />
+            {!readOnly && (
+              <UploadImageToBeCroppedButton
+                uploadDirPath={`characters/${character.id}`}
+                aspect={1}
+                onUploadComplete={handlePictureUploadComplete}
+                file_name="avatar"
+                compressionOptions={{ maxHeight: 800 }}
+              />
+            )}
           </section>
         </div>
       </fieldset>

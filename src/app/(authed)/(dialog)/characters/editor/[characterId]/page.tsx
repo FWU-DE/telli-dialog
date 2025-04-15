@@ -12,6 +12,23 @@ import CharacterForm from './character-form';
 
 export const dynamic = 'force-dynamic';
 
+async function getMaybeDefaultTemplateCharater({
+  templateId,
+  characterId,
+  userId,
+}: {
+  templateId?: string;
+  characterId: string;
+  userId: string;
+}) {
+  if (templateId === undefined) return undefined;
+  return await dbGetCopyTemplateCharacter({
+    templateId,
+    characterId: characterId,
+    userId: userId,
+  });
+}
+
 const pageContextSchema = z.object({
   params: z.object({
     characterId: z.string(),
@@ -35,16 +52,14 @@ export default async function Page(context: PageContext) {
   const character = await dbGetCharactersById({ characterId: params.characterId });
   if (character === undefined) return notFound();
 
-  let defaultTemplateCharacter;
-  let copyOfTemplatePicture;
+  const defaultTemplateCharacter = await getMaybeDefaultTemplateCharater({
+    templateId: templateId,
+    characterId: character.id,
+    userId: user.id,
+  });
+  const copyOfTemplatePicture =
+    templateId !== undefined ? `characters/${character.id}/avatar` : undefined;
 
-  if (templateId !== undefined) {
-    defaultTemplateCharacter = await dbGetCopyTemplateCharacter({
-      templateId,
-      characterId: params.characterId,
-      userId: user.id,
-    });
-  }
   if (!character) {
     return notFound();
   }

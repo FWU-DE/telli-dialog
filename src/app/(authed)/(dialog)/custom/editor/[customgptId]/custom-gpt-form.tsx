@@ -1,6 +1,6 @@
 'use client';
 
-import { CharacterAccessLevel, CustomGptModel } from '@/db/schema';
+import { CharacterAccessLevel, CustomGptModel, UserSchoolRole } from '@/db/schema';
 import {
   buttonDeleteClassName,
   buttonPrimaryClassName,
@@ -35,6 +35,7 @@ import {
 
 type CustomGptFormProps = CustomGptModel & {
   maybeSignedPictureUrl: string | undefined;
+  userRole: UserSchoolRole;
   isCreating?: boolean;
 };
 
@@ -50,6 +51,7 @@ export default function CustomGptForm({
   maybeSignedPictureUrl,
   isCreating = false,
   promptSuggestions,
+  userRole,
   ...customGpt
 }: CustomGptFormProps) {
   const router = useRouter();
@@ -206,22 +208,24 @@ export default function CustomGptForm({
       )}
       <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>
 
-      <fieldset className="mt-16 flex flex-col gap-8">
-        <label className={cn(labelClassName, 'text-sm')}>{t('gpt-visibility-label')}</label>
-        <div className="flex max-sm:flex-col gap-4 sm:gap-8">
-          <Checkbox
-            label={t('restriction-private')}
-            checked={optimisticAccessLevel === 'private'}
-            onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'private')}
-          />
+      {userRole === 'teacher' && (
+        <fieldset className="mt-16 flex flex-col gap-8">
+          <label className={cn(labelClassName, 'text-sm')}>{t('gpt-visibility-label')}</label>
+          <div className="flex max-sm:flex-col gap-4 sm:gap-8">
+            <Checkbox
+              label={t('restriction-private')}
+              checked={optimisticAccessLevel === 'private'}
+              onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'private')}
+            />
 
-          <Checkbox
-            label={t('restriction-school')}
-            checked={optimisticAccessLevel === 'school'}
-            onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'school')}
-          />
-        </div>
-      </fieldset>
+            <Checkbox
+              label={t('restriction-school')}
+              checked={optimisticAccessLevel === 'school'}
+              onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'school')}
+            />
+          </div>
+        </fieldset>
+      )}
       <fieldset className="flex flex-col gap-4 mt-16">
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
           <div className="flex gap-8 flex-col">

@@ -8,6 +8,7 @@ import { useConversation } from '../providers/conversation-provider';
 import AttachFileIcon from '../icons/attach-file';
 import { cn } from '@/utils/tailwind';
 import { SUPPORTED_FILE_EXTENSIONS } from '@/const';
+import { useTranslations } from 'next-intl';
 
 export type FileUploadMetadata = {
   directoryId: string;
@@ -32,7 +33,7 @@ type UploadFileButtonProps = {
   directoryId?: string;
 };
 
-const MAX_FILE_SIZE = 5_000_000; // 10MB
+const MAX_FILE_SIZE = 5_000_000; // 5MB
 export async function handleSingleFile({
   file,
   setFiles,
@@ -133,7 +134,7 @@ export default function UploadFileButton({
   const toast = useToast();
   const session = useSession();
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
-
+  const t = useTranslations('file-interaction.upload');
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const selectedFiles = event.target.files;
 
@@ -183,7 +184,7 @@ export default function UploadFileButton({
         className={className}
         disabled={disabled || isPrivateMode}
         type="button"
-        title={'Dateien hochladen'}
+        title={disabled ? t('file-limit-reached') : t('upload-file-button')}
       >
         {triggerButton ?? (
           <AttachFileIcon

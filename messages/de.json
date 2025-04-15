@@ -46,6 +46,12 @@
     "chats-error": "Etwas ist schiefgelaufen...",
     "chats-reload": "Dialoge neu laden"
   },
+  "file-interaction": {
+    "upload": {
+      "upload-file-button": "Datei hochladen",
+      "file-limit-reached": "Es wurde bereits eine Datei hochgeladen"
+    }
+  },
   "help-mode": {
     "chat-heading": "Hallo, ich bin tellis Hilfe",
     "chat-subheading": "Ich kenne mich hier aus und kann Dir hoffentlich Fragen beantworten oder Dir bei Problemen weiterhelfen. Ansonsten kannst Du auch gerne meine $FAQ_LINK besuchen.",
