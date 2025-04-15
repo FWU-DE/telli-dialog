@@ -73,7 +73,7 @@ export default async function Page(context: PageContext) {
   const mergedCharacter = {
     ...removeNullValues(character),
     ...removeNullValues(defaultTemplateCharacter),
-  } as CharacterModel
+  } as CharacterModel;
 
   return (
     <div className="min-w-full p-6 overflow-auto">
