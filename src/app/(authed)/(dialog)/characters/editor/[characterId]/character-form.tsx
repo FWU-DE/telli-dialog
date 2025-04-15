@@ -98,8 +98,8 @@ export default function CharacterForm({
     (p, n: CharacterAccessLevel) => n,
   );
 
-  function handleAccessLevelChange(value: boolean, accessLevel: CharacterAccessLevel) {
-    if (!value) return;
+  function handleAccessLevelChange(value: boolean) {
+    const accessLevel = value ? 'school' : 'private';
 
     startTransition(() => {
       addOptimisticAccessLevel(accessLevel);
@@ -213,18 +213,11 @@ export default function CharacterForm({
     generalSettings = (
       <fieldset className="mt-16 flex flex-col gap-8">
         <h2 className="font-medium mb-2">{t('general-settings')}</h2>
-        <label className={cn(labelClassName, 'text-sm')}>{t('character-visibility-label')}</label>
         <div className="flex max-sm:flex-col gap-4 sm:gap-8">
-          <Checkbox
-            label={t('restriction-private')}
-            checked={optimisticAccessLevel === 'private'}
-            onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'private')}
-          />
-
           <Checkbox
             label={t('restriction-school')}
             checked={optimisticAccessLevel === 'school'}
-            onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'school')}
+            onCheckedChange={(value: boolean) => handleAccessLevelChange(value)}
           />
         </div>
         <div className="flex flex-col gap-4">

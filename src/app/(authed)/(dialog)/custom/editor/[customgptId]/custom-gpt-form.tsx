@@ -84,8 +84,8 @@ export default function CustomGptForm({
     (p, n: CharacterAccessLevel) => n,
   );
 
-  function handleAccessLevelChange(value: boolean, accessLevel: CharacterAccessLevel) {
-    if (!value) return;
+  function handleEnableSharing(value: boolean) {
+    const accessLevel = value ? 'school' : 'private';
 
     startTransition(() => {
       addOptimisticAccessLevel(accessLevel);
@@ -210,18 +210,11 @@ export default function CustomGptForm({
 
       {userRole === 'teacher' && (
         <fieldset className="mt-16 flex flex-col gap-8">
-          <label className={cn(labelClassName, 'text-sm')}>{t('gpt-visibility-label')}</label>
           <div className="flex max-sm:flex-col gap-4 sm:gap-8">
-            <Checkbox
-              label={t('restriction-private')}
-              checked={optimisticAccessLevel === 'private'}
-              onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'private')}
-            />
-
             <Checkbox
               label={t('restriction-school')}
               checked={optimisticAccessLevel === 'school'}
-              onCheckedChange={(value: boolean) => handleAccessLevelChange(value, 'school')}
+              onCheckedChange={(value: boolean) => handleEnableSharing(value)}
             />
           </div>
         </fieldset>
@@ -303,6 +296,7 @@ export default function CustomGptForm({
       <fieldset className="flex flex-col gap-6 mt-6">
         <div className="flex flex-col gap-4">
           <label htmlFor="specifications" className={cn(labelClassName, 'text-sm')}>
+            <span className="text-coral">*</span>
             {t('gpt-specification-label')}
           </label>
           <textarea
