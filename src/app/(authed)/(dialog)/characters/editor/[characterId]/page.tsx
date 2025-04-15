@@ -73,7 +73,7 @@ export default async function Page(context: PageContext) {
   const mergedCharacter = {
     ...removeNullValues(character),
     ...removeNullValues(defaultTemplateCharacter),
-    modelId: character.modelId
+    modelId: character.modelId,
   } as CharacterModel;
 
   return (
