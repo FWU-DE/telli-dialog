@@ -162,7 +162,7 @@ export default function CharacterForm({
   }
 
   function handleAutoSave() {
-    if (isCreating) return;
+    if (isCreating || readOnly) return;
     const data = getValues();
     const hasChanges = !deepEqual(data, {
       ...character,

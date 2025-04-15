@@ -61,12 +61,14 @@ export async function updateCustomGptPictureAction({
 
 export async function updateCustomGptAction({
   gptId,
-  ..._updatableProps
+  ...customGpt
 }: Partial<CustomGptInsertModel> & { gptId: string }) {
   const user = await getUser();
 
+  const cleanedCustomGpt = removeNullValues(customGpt);
+  if (cleanedCustomGpt === undefined) return;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, createdAt, ...updatableProps } = removeNullValues(_updatableProps);
+  const { id, createdAt, ...updatableProps } = cleanedCustomGpt;
 
   const updatedGpt = (
     await db

@@ -9,6 +9,8 @@ import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import HeaderPortal from '../../../header-portal';
 import CharacterForm from './character-form';
+import { removeNullValues } from '@/utils/generic/object-operations';
+import { CharacterModel } from '@/db/schema';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,6 +70,12 @@ export default async function Page(context: PageContext) {
     key: character.pictureId ?? copyOfTemplatePicture,
   });
 
+  const mergedCharacter = {
+    ...removeNullValues(character),
+    ...removeNullValues(defaultTemplateCharacter),
+    modelId: character.modelId,
+  } as CharacterModel;
+
   return (
     <div className="min-w-full p-6 overflow-auto">
       <HeaderPortal>
@@ -77,8 +85,7 @@ export default async function Page(context: PageContext) {
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
         <CharacterForm
-          {...character}
-          {...defaultTemplateCharacter}
+          {...mergedCharacter}
           pictureId={character.pictureId}
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           isCreating={isCreating}

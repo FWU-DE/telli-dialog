@@ -68,9 +68,10 @@ export async function updateCharacterAction({
   ...character
 }: Omit<CharacterInsertModel, 'userId'> & { characterId: string }) {
   const user = await getUser();
-
+  const cleanedCharacter = removeNullValues(character);
+  if (cleanedCharacter === undefined) return;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, accessLevel, schoolId, createdAt, ...updatableProps } = removeNullValues(character);
+  const { id, accessLevel, schoolId, createdAt, ...updatableProps } = cleanedCharacter;
   const updatedCharacter = (
     await db
       .update(characterTable)
