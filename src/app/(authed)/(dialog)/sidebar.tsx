@@ -113,9 +113,10 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
         console.error({ error });
       });
   }
-  const { disable_shared_chats, disable_characters, disable_customGpt } = getDisabledFederalFeatures({
-    id: user.federalState.id as FederalStateId,
-  });
+  const { disable_shared_chats, disable_characters, disable_customGpt } =
+    getDisabledFederalFeatures({
+      id: user.federalState.id as FederalStateId,
+    });
 
   return (
     <CollapsibleSidebar>
