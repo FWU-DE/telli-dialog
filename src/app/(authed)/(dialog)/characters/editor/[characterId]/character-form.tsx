@@ -27,7 +27,6 @@ import React, { startTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import SelectLlmModelForm from '../../../_components/select-llm-model';
-import { CreateNewCharacterFromTemplate } from '../../create-new-character-button';
 import {
   deleteCharacterAction,
   updateCharacterAccessLevelAction,
@@ -48,9 +47,9 @@ const characterFormValuesSchema = z.object({
   learningContext: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   competence: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   modelId: z.string(),
-  schoolType: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  gradeLevel: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  subject: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  schoolType: z.string().nullable(),
+  gradeLevel: z.string().nullable(),
+  subject: z.string().nullable(),
 
   specifications: z.string().nullable(),
   restrictions: z.string().nullable(),
@@ -88,6 +87,7 @@ export default function CharacterForm({
       subject: character.subject ?? '',
       modelId: maybeDefaultModelId,
     },
+    
   });
 
   const t = useTranslations('characters.form');

@@ -130,9 +130,9 @@ export const characterTable = pgTable('character', {
   learningContext: text('learning_context').notNull().default(''),
   competence: text('competence').notNull().default(''),
   // new
-  schoolType: text('school_type').notNull().default(''),
-  gradeLevel: text('grade_level').notNull().default(''),
-  subject: text('subject').default('').notNull(),
+  schoolType: text('school_type').default(''),
+  gradeLevel: text('grade_level').default(''),
+  subject: text('subject').default(''),
   // not required
   specifications: text('specifications'),
   restrictions: text('restrictions'),

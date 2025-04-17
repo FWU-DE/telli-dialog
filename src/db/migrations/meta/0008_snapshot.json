@@ -1,5 +1,5 @@
 {
-  "id": "ac7d844d-2d79-4f31-9c28-d074631cd7c4",
+  "id": "7c4926fc-1d37-4257-ad4d-6c48c49e84df",
   "prevId": "3fb3c547-5e1c-44fe-b510-1f7c40039f40",
   "version": "7",
   "dialect": "postgresql",
@@ -58,21 +58,21 @@
           "name": "school_type",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": "''"
         },
         "grade_level": {
           "name": "grade_level",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": "''"
         },
         "subject": {
           "name": "subject",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": "''"
         },
         "specifications": {
