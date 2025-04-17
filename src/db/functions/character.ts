@@ -78,12 +78,9 @@ export async function dbGetCharacterByIdWithShareData({
 /**
  * The returned entity has no Shared Data Attached! These are found in the SharedCharacterConversation Table
  */
-export async function dbGetCharacterById({characterId}: {characterId:string}) {
-  const [row] = await db
-  .select()
-  .from(characterTable)
-  .where(eq(characterTable.id, characterId));
-return row;
+export async function dbGetCharacterById({ characterId }: { characterId: string }) {
+  const [row] = await db.select().from(characterTable).where(eq(characterTable.id, characterId));
+  return row;
 }
 
 export async function dbGetCopyTemplateCharacter({
