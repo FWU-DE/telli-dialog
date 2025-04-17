@@ -344,7 +344,7 @@ export default function Chat({
                 {enableFileUpload && (
                 <div className="flex flex-row gap-x-3">
                   <UploadFileButton
-                    className="hover:bg-light-gray"
+                    className="hover:bg-vidis-hover-green/20"
                     setFiles={setFiles}
                     disabled={files.values().toArray().length >= NUMBER_OF_FILES_LIMIT}
                   />
