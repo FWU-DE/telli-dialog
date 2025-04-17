@@ -13,6 +13,7 @@ export function ChatBox({
   index,
   fileMapping,
   customGpt,
+  isLastUser,
   isLastNonUser,
   isLoading,
   regenerateMessage,
@@ -22,6 +23,7 @@ export function ChatBox({
   index: number;
   fileMapping?: Map<string, FileModel[]>;
   customGpt?: CustomGptModel;
+  isLastUser?: boolean;
   isLastNonUser: boolean;
   isLoading: boolean;
   regenerateMessage: () => void;
@@ -33,18 +35,12 @@ export function ChatBox({
     children.role === 'user'
       ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary/20 text-primary-foreground max-w-[70%] break-words'
       : '';
-
-  let allFiles: FileModel[] | undefined;
-
-  if (fileMapping?.get(children.id) !== undefined) {
-    allFiles = fileMapping?.get(children.id);
-  } else if (initialFiles !== undefined) {
-    allFiles = initialFiles;
-  }
+  const fileMatch = fileMapping?.get(children.id) !== undefined;
+  const allFiles = fileMatch ? fileMapping.get(children.id) : initialFiles;
 
   const margin = allFiles !== undefined ? 'm-0' : 'm-4';
 
-  if (allFiles !== undefined && children.role === 'user') {
+  if (allFiles !== undefined && children.role === 'user' && (isLastUser || fileMatch)) {
     const filesElement = allFiles.map((file) => {
       return (
         <DisplayUploadedFile

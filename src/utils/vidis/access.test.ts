@@ -16,6 +16,9 @@ describe('checkProductAccess', () => {
     supportContact: null,
     trainingLink: null,
     studentAccess: true,
+    enableCharacter: true,
+    enableSharedChats: true,
+    enableCustomGpt: true,
   };
 
   const baseSchool = {

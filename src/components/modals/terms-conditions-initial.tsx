@@ -3,7 +3,7 @@
 import React, { useRef, useState } from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { buttonPrimaryClassName, buttonSecondaryClassName } from '@/utils/tailwind/button';
-import { EDUCATION_HINT, TERM_AND_CONDITIONS } from './const';
+import { DisclaimerConfig } from './const';
 import { useTranslations } from 'next-intl';
 import Checkbox from '../common/checkbox';
 import { useRouter } from 'next/navigation';
@@ -12,10 +12,11 @@ import MarkdownDisplay from '../chat/markdown-display';
 
 type TermsConditionsModalProps = {
   handleAccept(): void;
+  disclaimerConfig: DisclaimerConfig;
 } & React.ComponentProps<'button'>;
 
 export default function TermsConditionsModal({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  disclaimerConfig,
   handleAccept,
 }: TermsConditionsModalProps) {
   const [pageNumber, setPageNumber] = useState(0);
@@ -24,9 +25,7 @@ export default function TermsConditionsModal({
   const router = useRouter();
   const tUsage = useTranslations('usage-disclaimer');
   const tCommon = useTranslations('common');
-  const initialContent = tUsage('initial-content');
-  const TermsConditionsContent = <MarkdownDisplay>{TERM_AND_CONDITIONS}</MarkdownDisplay>;
-  const EducationHintContent = <MarkdownDisplay>{EDUCATION_HINT}</MarkdownDisplay>;
+
   const nextPage = () => {
     setPageNumber(pageNumber + 1);
   };
@@ -35,11 +34,8 @@ export default function TermsConditionsModal({
     setScrollFinished(false);
     setChecked(false);
   };
-  const contents: Array<React.JSX.Element | string> = [
-    initialContent,
-    TermsConditionsContent,
-    EducationHintContent,
-  ];
+
+  const contents: Array<string> = disclaimerConfig.pageContents;
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const handleScroll = () => {
@@ -61,11 +57,11 @@ export default function TermsConditionsModal({
           {tCommon('back')}
         </button>
       ) : null}
-      {pageNumber === 2 ? (
+      {pageNumber === disclaimerConfig.pageContents.length - 1 ? (
         <button
           onClick={acceptAndClose}
           className={buttonPrimaryClassName}
-          disabled={!(checked && scrollFinished)}
+          disabled={!(checked && scrollFinished) && disclaimerConfig.showCheckBox}
         >
           {tCommon('accept')}
         </button>
@@ -83,7 +79,7 @@ export default function TermsConditionsModal({
 
   const currentTitle =
     pageNumber >= 1 ? tUsage('terms-and-conditions-title') : tUsage('initial-title');
-  const currentContent = contents[pageNumber];
+  const currentContent = <MarkdownDisplay>{contents[pageNumber] ?? ''}</MarkdownDisplay>;
 
   return (
     <AlertDialog.Root open defaultOpen>
@@ -101,9 +97,12 @@ export default function TermsConditionsModal({
             >
               {currentContent}
             </div>
-            {pageNumber === 2 ? (
-              <Checkbox onCheckedChange={setChecked} label={tUsage('accept')}></Checkbox>
-            ) : null}
+            {pageNumber === contents.length - 1 && disclaimerConfig.showCheckBox && (
+              <Checkbox
+                onCheckedChange={setChecked}
+                label={disclaimerConfig.acceptLabel}
+              ></Checkbox>
+            )}
             <div className="flex flex-wrap justify-end items-center gap-6 mt-auto self-end">
               <AlertDialog.Action asChild>{navigationBar}</AlertDialog.Action>
             </div>

@@ -18,16 +18,16 @@ export default function SharedChatLoginForm() {
   async function getChatByInviteCode(formattedInviteCode: string) {
     const sharedChat = await checkSharedChatInviteCodeAction({ inviteCode: formattedInviteCode });
 
+    console.log(sharedChat);
     if (sharedChat !== undefined) {
-      return { type: 'shared', chat: sharedChat };
+      return { type: 'shared-chats', chatMetaData: sharedChat };
     }
 
     const characterChat = await checkCharacterChatInviteCodeAction({
       inviteCode: formattedInviteCode,
     });
-
     if (characterChat !== undefined) {
-      return { type: 'character', chat: characterChat };
+      return { type: 'characters', chatMetaData: characterChat };
     }
 
     return undefined;
@@ -36,14 +36,11 @@ export default function SharedChatLoginForm() {
   async function handleInviteCodeSubmit() {
     const formattedInviteCode = inviteCode.replace(/\s+/g, '').toUpperCase();
     const result = await getChatByInviteCode(formattedInviteCode);
-
+    console.log(result);
     if (result !== undefined) {
-      const { type, chat } = result;
-      const searchParams = new URLSearchParams({ inviteCode: chat.inviteCode ?? '' });
-      const route =
-        type === 'shared'
-          ? `/ua/shared-chats/${chat.id}/dialog?${searchParams.toString()}`
-          : `/ua/characters/${chat.id}/dialog?${searchParams.toString()}`;
+      const { type, chatMetaData } = result;
+      const searchParams = new URLSearchParams({ inviteCode: chatMetaData.inviteCode ?? '' });
+      const route = `/ua/${type}/${chatMetaData.id}/dialog?${searchParams.toString()}`;
       router.push(route);
       return;
     }

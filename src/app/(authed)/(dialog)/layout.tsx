@@ -14,8 +14,9 @@ import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 
 export const dynamic = 'force-dynamic';
 import TermsConditionsModal from '@/components/modals/terms-conditions-initial';
-import { showTermsFederalStates, VERSION } from '@/components/modals/const';
+import { federalStateDisclaimers, VERSION } from '@/components/modals/const';
 import { setUserAcceptConditions } from './actions';
+import { FederalStateId } from '@/utils/vidis/const';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
@@ -25,8 +26,10 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
 
   const priceInCent = await getPriceInCentByUser({ user, models });
   const productAccess = checkProductAccess(user);
+  const federalStateDisclaimer =
+    federalStateDisclaimers[user.school.federalStateId as FederalStateId];
   const userMustAccept =
-    showTermsFederalStates.includes(user.federalState.id) &&
+    federalStateDisclaimer !== undefined &&
     (user.versionAcceptedConditions === null || user.versionAcceptedConditions < VERSION);
 
   return (
@@ -56,7 +59,10 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
         </ProductAccessModal>
       )}
       {userMustAccept ? (
-        <TermsConditionsModal handleAccept={setUserAcceptConditions}></TermsConditionsModal>
+        <TermsConditionsModal
+          handleAccept={setUserAcceptConditions}
+          disclaimerConfig={federalStateDisclaimer}
+        ></TermsConditionsModal>
       ) : null}
     </div>
   );

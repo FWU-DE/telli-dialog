@@ -126,7 +126,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
           <div className="w-full items-center flex flex-col gap-1 h-fit">
             {
               <>
-                {user.school.userRole === 'teacher' && (
+                {user.school.userRole === 'teacher' && user.federalState.enableSharedChats && (
                   <Link prefetch href="/shared-chats" className="w-full">
                     <div
                       className={cn(
@@ -139,7 +139,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                     </div>
                   </Link>
                 )}
-                {user.school.userRole === 'teacher' && (
+                {user.school.userRole === 'teacher' && user.federalState.enableCharacter && (
                   <Link prefetch href="/characters" className="w-full">
                     <div
                       className={cn(
@@ -167,7 +167,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                     <span className="text-base">{t('custom-gpt')}</span>
                   </div>
                 </Link>
-                {user.school.userRole === 'teacher' && (
+                {user.school.userRole === 'teacher' && user.federalState.enableCustomGpt && (
                   <Link href={`/custom/d/${HELP_MODE_GPT_ID}`} className="w-full">
                     <div
                       className={cn(

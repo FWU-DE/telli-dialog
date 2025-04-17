@@ -14,9 +14,9 @@ test('teacher can login, create and join shared dialogpartner chat', async ({ pa
   await page.waitForURL('/characters/editor/**');
 
   // configure form
-  await page.getByLabel('* Schultyp').fill('Gymnasium');
-  await page.getByLabel('* Klassenstufe').fill('10. Klasse');
-  await page.getByLabel('* Fach').fill('Geschichte');
+  await page.getByLabel('Schultyp').fill('Gymnasium');
+  await page.getByLabel('Klassenstufe').fill('10. Klasse');
+  await page.getByLabel('Fach').fill('Geschichte');
 
   await page.getByLabel('* Wie heißt die Person?').fill('John Cena');
 

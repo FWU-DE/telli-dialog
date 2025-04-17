@@ -93,11 +93,11 @@ export default function CharacterContainer({
       {timeLeft > 0 && character.maxUsageTimeLimit !== null && (
         <CountDownTimer leftTime={timeLeft} totalTime={character.maxUsageTimeLimit} />
       )}
-      {character.accessLevel === 'global' && (
+      {character.accessLevel === 'global' && !(timeLeft > 0) && (
         <CreateNewCharacterFromTemplate
           templateId={id}
           templatePictureId={character.pictureId ?? undefined}
-          {...{ title: t('form.copy-template'), type: 'button' }}
+          {...{ title: t('copy-page.copy-template'), type: 'button' }}
         >
           <button aria-label="copy-template">
             <ClipboardIcon className={cn('text-primary hover:text-secondary', 'min-w-8 min-h-8')} />

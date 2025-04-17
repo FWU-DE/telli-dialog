@@ -24,16 +24,14 @@ export default async function Page(context: PageContext) {
     inviteCode: searchParams.inviteCode,
   });
 
-  if (character === undefined) {
+  if (character === undefined || character?.userId === null) {
     return <NotFound />;
   }
-
   const model = await dbGetLlmModelById({ modelId: character.modelId });
 
   if (model === undefined) {
     return <NotFound />;
   }
-
   return (
     <main className="h-[100dvh] w-full">
       <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>

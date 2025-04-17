@@ -22,8 +22,7 @@ export async function POST(request: NextRequest) {
 
   const { sharedChatId, inviteCode } = getSearchParamsOrThrow(request.url);
   const character = await dbGetCharacterByIdAndInviteCode({ id: sharedChatId, inviteCode });
-
-  if (character === undefined) {
+  if (character?.userId === undefined || character.userId === null) {
     return NextResponse.json({ error: 'Could not get shared chat' }, { status: 404 });
   }
 

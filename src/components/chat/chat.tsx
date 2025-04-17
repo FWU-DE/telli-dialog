@@ -168,9 +168,8 @@ export default function Chat({
     }
   }
 
-  const chatSubHeading = tHelpMode('chat-subheading');
   const markdownLink = `[FAQ Seite](https://telli.schule/#faq)`;
-  const formatedSubHeading = chatSubHeading.replace('$FAQ_LINK', markdownLink);
+  const formatedSubHeading = tHelpMode('chat-subheading', { FAQ_LINK: markdownLink });
 
   function handleDeattachFile(localFileId: string) {
     setFiles((prev) => {
@@ -285,6 +284,7 @@ export default function Chat({
           index={index}
           fileMapping={fileMapping}
           customGpt={customGpt}
+          isLastUser={index === messages.length - 1 && message.role == 'user'}
           isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
           isLoading={isLoading}
           regenerateMessage={reload}
@@ -338,19 +338,20 @@ export default function Chat({
                   ))}
                 </div>
               )}
+
               <div className="flex items-center">
                 {userInputTextArea}
+                {enableFileUpload && (
+                  <div className="flex flex-row gap-x-3">
+                    <UploadFileButton
+                      className="hover:bg-vidis-hover-green/20"
+                      setFiles={setFiles}
+                      disabled={files.values().toArray().length >= NUMBER_OF_FILES_LIMIT}
+                    />
+                  </div>
+                )}
                 {userActionButton}
               </div>
-              {enableFileUpload && (
-                <div className="flex flex-row gap-x-3">
-                  <UploadFileButton
-                    className="hover:bg-light-gray"
-                    setFiles={setFiles}
-                    disabled={files.values().toArray().length >= NUMBER_OF_FILES_LIMIT}
-                  />
-                </div>
-              )}
             </form>
             <span className="text-xs mt-2 font-normal text-main-900 flex self-center text-center">
               {tCommon('information-disclaimer')}

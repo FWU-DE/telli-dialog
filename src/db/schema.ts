@@ -104,6 +104,9 @@ export const federalStateTable = pgTable('federal_state', {
   supportContact: text('support_contact'),
   trainingLink: text('training_link'),
   studentAccess: boolean('student_access').default(true).notNull(),
+  enableCharacter: boolean('enable_characters').default(true).notNull(),
+  enableSharedChats: boolean('enable_shared_chats').default(true).notNull(),
+  enableCustomGpt: boolean('enable_custom_gpts').default(true).notNull(),
 });
 
 export type FederalStateInsertModel = typeof federalStateTable.$inferInsert;
@@ -130,16 +133,16 @@ export const characterTable = pgTable('character', {
   learningContext: text('learning_context').notNull().default(''),
   competence: text('competence').notNull().default(''),
   // new
-  schoolType: text('school_type').notNull().default(''),
-  gradeLevel: text('grade_level').notNull().default(''),
-  subject: text('subject').default('').notNull(),
+  schoolType: text('school_type').default(''),
+  gradeLevel: text('grade_level').default(''),
+  subject: text('subject').default(''),
   // not required
   specifications: text('specifications'),
   restrictions: text('restrictions'),
   pictureId: text('picture_id'),
   accessLevel: characterAccessLevelEnum('access_level').notNull().default('private'),
   schoolId: text('school_id').references(() => schoolTable.id),
-  // for sharing the character
+  // for sharing the character. These Columns are unused, instead a MappingTable is being used
   intelligencePointsLimit: integer('intelligence_points_limit'),
   maxUsageTimeLimit: integer('max_usage_time_limit'),
   inviteCode: text('invite_code').unique(),
@@ -251,6 +254,21 @@ export const conversationUsageTracking = pgTable('conversation_usage_tracking', 
 });
 export type ConversationUsageTrackingInsertModel = typeof conversationUsageTracking.$inferInsert;
 export type ConversationUsageTrackingModel = typeof conversationUsageTracking.$inferSelect;
+
+export const sharedCharacterConversation = pgTable('shared_character_conversation', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  characterId: uuid('character_id').notNull(),
+  userId: uuid('user_id')
+    .references(() => userTable.id)
+    .notNull(),
+  intelligencePointsLimit: integer('intelligence_points_limit'),
+  maxUsageTimeLimit: integer('max_usage_time_limit'),
+  inviteCode: text('invite_code').unique(),
+  startedAt: timestamp('started_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+});
+
+// export type sharedCharacterConversation = typeof sharedCharacterConversation.$inferSelect;
 
 export const sharedCharacterChatUsageTrackingTable = pgTable(
   'shared_character_chat_usage_tracking',

@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, or } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, inArray, or } from 'drizzle-orm';
 import { db } from '..';
 import {
   CharacterInsertModel,
@@ -8,6 +8,7 @@ import {
   conversationTable,
   SharedCharacterChatUsageTrackingInsertModel,
   sharedCharacterChatUsageTrackingTable,
+  sharedCharacterConversation,
 } from '../schema';
 import { dbGetModelByName } from './llm-model';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
@@ -44,8 +45,42 @@ export async function dbGetCharacterByIdOrSchoolId({
   return character;
 }
 
-export async function dbGetCharactersById({ characterId }: { characterId: string }) {
-  return (await db.select().from(characterTable).where(eq(characterTable.id, characterId)))[0];
+/**
+ * needs userId because the meta data for shared chararters are both tied to the user and character, this is especially important for shared charcters (school wide or global)
+ */
+export async function dbGetCharacterByIdWithShareData({
+  characterId,
+  userId,
+}: {
+  characterId: string;
+  userId: string;
+}) {
+  const [row] = await db
+    .select({
+      ...getTableColumns(characterTable),
+      intelligencePointsLimit: sharedCharacterConversation.intelligencePointsLimit,
+      inviteCode: sharedCharacterConversation.inviteCode,
+      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
+      startedAt: sharedCharacterConversation.startedAt,
+    })
+    .from(characterTable)
+    .leftJoin(
+      sharedCharacterConversation,
+      and(
+        eq(sharedCharacterConversation.characterId, characterId),
+        eq(sharedCharacterConversation.userId, userId),
+      ),
+    )
+    .where(eq(characterTable.id, characterId));
+  return row;
+}
+
+/**
+ * The returned entity has no Shared Data Attached! These are found in the SharedCharacterConversation Table
+ */
+export async function dbGetCharacterById({ characterId }: { characterId: string }) {
+  const [row] = await db.select().from(characterTable).where(eq(characterTable.id, characterId));
+  return row;
 }
 
 export async function dbGetCopyTemplateCharacter({
@@ -57,7 +92,7 @@ export async function dbGetCopyTemplateCharacter({
   characterId: string;
   userId: string;
 }): Promise<Omit<CharacterInsertModel, 'modelId'>> {
-  const character = await dbGetCharactersById({ characterId: templateId });
+  const character = await dbGetCharacterByIdWithShareData({ characterId: templateId, userId });
   if (character?.name === undefined) {
     throw new Error('Invalid State Template Character must have a name');
   }
@@ -82,8 +117,18 @@ export async function dbCreateCharacter(character: Omit<CharacterInsertModel, 'm
 
 export async function dbGetGlobalCharacters(): Promise<CharacterModel[]> {
   const characters = await db
-    .select()
+    .select({
+      ...getTableColumns(characterTable),
+      intelligencePointsLimit: sharedCharacterConversation.intelligencePointsLimit,
+      inviteCode: sharedCharacterConversation.inviteCode,
+      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
+      startedAt: sharedCharacterConversation.startedAt,
+    })
     .from(characterTable)
+    .leftJoin(
+      sharedCharacterConversation,
+      eq(sharedCharacterConversation.characterId, characterTable.id),
+    )
     .where(eq(characterTable.accessLevel, 'global'))
     .orderBy(desc(characterTable.createdAt));
 
@@ -96,8 +141,18 @@ export async function dbGetCharactersBySchoolId({
   schoolId: string;
 }): Promise<CharacterModel[]> {
   const characters = await db
-    .select()
+    .select({
+      ...getTableColumns(characterTable),
+      intelligencePointsLimit: sharedCharacterConversation.intelligencePointsLimit,
+      inviteCode: sharedCharacterConversation.inviteCode,
+      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
+      startedAt: sharedCharacterConversation.startedAt,
+    })
     .from(characterTable)
+    .leftJoin(
+      sharedCharacterConversation,
+      eq(sharedCharacterConversation.characterId, characterTable.id),
+    )
     .where(and(eq(characterTable.schoolId, schoolId), eq(characterTable.accessLevel, 'school')))
     .orderBy(desc(characterTable.createdAt));
 
@@ -110,8 +165,18 @@ export async function dbGetCharactersByUserId({
   userId: string;
 }): Promise<CharacterModel[]> {
   const characters = await db
-    .select()
+    .select({
+      ...getTableColumns(characterTable),
+      intelligencePointsLimit: sharedCharacterConversation.intelligencePointsLimit,
+      inviteCode: sharedCharacterConversation.inviteCode,
+      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
+      startedAt: sharedCharacterConversation.startedAt,
+    })
     .from(characterTable)
+    .leftJoin(
+      sharedCharacterConversation,
+      eq(sharedCharacterConversation.characterId, characterTable.id),
+    )
     .where(and(eq(characterTable.userId, userId), eq(characterTable.accessLevel, 'private')))
     .orderBy(desc(characterTable.createdAt));
 
@@ -124,11 +189,25 @@ export async function dbGetCharacterByIdAndUserId({
 }: {
   characterId: string;
   userId: string;
-}) {
+}): Promise<CharacterModel | undefined> {
   const [row] = await db
-    .select()
+    .select({
+      ...getTableColumns(characterTable),
+      intelligencePointsLimit: sharedCharacterConversation.intelligencePointsLimit,
+      inviteCode: sharedCharacterConversation.inviteCode,
+      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
+      startedAt: sharedCharacterConversation.startedAt,
+    })
     .from(characterTable)
-    .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)));
+    .leftJoin(
+      sharedCharacterConversation,
+      and(
+        eq(sharedCharacterConversation.characterId, characterId),
+        eq(sharedCharacterConversation.userId, userId),
+      ),
+    )
+    .where(and(eq(characterTable.id, characterId), eq(sharedCharacterConversation.userId, userId)));
+  //.where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)));
   return row;
 }
 
@@ -186,13 +265,24 @@ export async function dbGetCharacterByIdAndInviteCode({
 }: {
   id: string;
   inviteCode: string;
-}) {
-  return (
-    await db
-      .select()
-      .from(characterTable)
-      .where(and(eq(characterTable.id, id), eq(characterTable.inviteCode, inviteCode)))
-  )[0];
+}): Promise<CharacterModel | undefined> {
+  const [row] = await db
+    .select({
+      ...getTableColumns(characterTable),
+      userId: sharedCharacterConversation.userId,
+      intelligencePointsLimit: sharedCharacterConversation.intelligencePointsLimit,
+      inviteCode: sharedCharacterConversation.inviteCode,
+      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
+      startedAt: sharedCharacterConversation.startedAt,
+    })
+    .from(characterTable)
+    .leftJoin(
+      sharedCharacterConversation,
+      eq(sharedCharacterConversation.characterId, characterTable.id),
+    )
+    .where(and(eq(characterTable.id, id), eq(sharedCharacterConversation.inviteCode, inviteCode)));
+
+  return row as CharacterModel;
 }
 
 export async function dbUpdateTokenUsageByCharacterChatId(

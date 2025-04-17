@@ -238,4 +238,28 @@ export const defaultCharacters: Omit<CharacterInsertModel, 'modelId'>[] = [
     pictureId: 'characters/_templates/Rosaparks_Static',
     subject: '',
   },
+  {
+    userId: DUMMY_USER_ID,
+    id: '2436a6d2-82a6-4c5b-b4eb-0001f19a1d6b',
+    name: 'Herr Pumpe',
+    description: 'Das menschliche Herz',
+    competence:
+      'Die SuS haben ein plastisches Modell des menschlichen Körpers vor sich. Sie sollen das Herz als Organ identifizieren und die Funktion innerhalb des Körpers erklären können.',
+    learningContext:
+      'Die Schülerinnen und Schüler beschreiben die wichtigsten Blutbestandteile, deren Aufgaben, das Blutkreislaufsystem des Menschen und die Pumpwirkung des Herzmuskels, um die Versorgung des Körpers mit Stoffen zu erklären.',
+    specifications:
+      'Der Dialogpartner soll aus der Perspektive eines menschlichen Herzens kommunizieren. Es soll seine Funktion erklären, die Bestandteile des Blutes aufzeigen und wie es mit dem Herz-Kreislauf System zusammenhängt.',
+    restrictions:
+      'Der Dialogpartner soll sich nicht ablenken lassen und sich auf das Erklären der Funktion des Herz Kreislauf Systems beschränken.',
+
+    gradeLevel: '',
+    schoolId: null,
+    accessLevel: 'global',
+    schoolType: '',
+    intelligencePointsLimit: null,
+    inviteCode: null,
+    maxUsageTimeLimit: null,
+    pictureId: 'characters/_templates/heart_image_Static',
+    subject: '',
+  },
 ];

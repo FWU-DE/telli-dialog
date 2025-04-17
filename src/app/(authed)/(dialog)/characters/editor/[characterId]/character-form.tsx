@@ -27,7 +27,6 @@ import React, { startTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import SelectLlmModelForm from '../../../_components/select-llm-model';
-import { CreateNewCharacterFromTemplate } from '../../create-new-character-button';
 import {
   deleteCharacterAction,
   updateCharacterAccessLevelAction,
@@ -35,6 +34,7 @@ import {
   updateCharacterPictureAction,
 } from './actions';
 import ShareContainer from './share-container';
+import { CopyContainer } from './copy-container';
 
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -47,9 +47,9 @@ const characterFormValuesSchema = z.object({
   learningContext: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   competence: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   modelId: z.string(),
-  schoolType: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  gradeLevel: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  subject: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  schoolType: z.string().nullable(),
+  gradeLevel: z.string().nullable(),
+  subject: z.string().nullable(),
 
   specifications: z.string().nullable(),
   restrictions: z.string().nullable(),
@@ -194,117 +194,102 @@ export default function CharacterForm({
     );
   } else {
     navigateBackElement = (
-      <Link href={backUrl} className="flex gap-3 text-primary hover:underline items-center">
+      <Link href={backUrl} className="flex gap-3 text-primary mb-4 hover:underline items-center">
         <ChevronLeftIcon />
         <span>{t('all-characters')}</span>
       </Link>
     );
   }
-  if (!isCreating && !readOnly) {
+  if (!isCreating) {
     shareChatElement = (
-      <fieldset className="mt-12">
+      <fieldset className="mt-8">
         <ShareContainer {...character} />
       </fieldset>
     );
   }
-  let generalSettings: React.JSX.Element | undefined;
+  const copyContainer = readOnly ? <CopyContainer character={character} /> : undefined;
 
-  if (!readOnly) {
-    generalSettings = (
-      <fieldset className="mt-16 flex flex-col gap-8">
-        <h2 className="font-medium mb-2">{t('general-settings')}</h2>
-        <div className="flex max-sm:flex-col gap-4 sm:gap-8">
-          <Checkbox
-            label={t('restriction-school')}
-            checked={optimisticAccessLevel === 'school'}
-            onCheckedChange={(value: boolean) => handleAccessLevelChange(value)}
+  const generalSettings = (
+    <fieldset className="mt-8 flex flex-col gap-8">
+      <h2 className="font-medium mb-2">{t('general-settings')}</h2>
+      <div className="flex max-sm:flex-col gap-4 sm:gap-8">
+        <Checkbox
+          label={t('restriction-school')}
+          checked={optimisticAccessLevel === 'school'}
+          onCheckedChange={(value: boolean) => handleAccessLevelChange(value)}
+        />
+      </div>
+      <div className="flex flex-col gap-4">
+        <label className={labelClassName}>{tCommon('llm-model')}</label>
+        <SelectLlmModelForm
+          selectedModel={character.modelId}
+          onValueChange={(value) => {
+            setValue('modelId', value);
+            handleAutoSave();
+          }}
+          models={models}
+        />
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
+        <div className="flex flex-col gap-4">
+          <label htmlFor="school-type" className={cn(labelClassName, 'text-sm')}>
+            {t('school-type')}
+          </label>
+          <input
+            id="school-type"
+            readOnly={readOnly}
+            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
+            {...register('schoolType')}
+            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+            onBlur={handleAutoSave}
+            placeholder={t('school-type-placeholder')}
           />
         </div>
         <div className="flex flex-col gap-4">
-          <label className={labelClassName}>{tCommon('llm-model')}</label>
-          <SelectLlmModelForm
-            selectedModel={character.modelId}
-            onValueChange={(value) => {
-              setValue('modelId', value);
-              handleAutoSave();
-            }}
-            models={models}
+          <label htmlFor="grade" className={cn(labelClassName, 'text-sm')}>
+            {t('grade')}
+          </label>
+          <input
+            id="grade"
+            readOnly={readOnly}
+            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
+            {...register('gradeLevel')}
+            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+            placeholder={t('grade-placeholder')}
+            onBlur={handleAutoSave}
           />
         </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          <div className="flex flex-col gap-4">
-            <label htmlFor="school-type" className={cn(labelClassName, 'text-sm')}>
-              <span className="text-coral">*</span> {t('school-type')}
-            </label>
-            <input
-              id="school-type"
-              className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-              {...register('schoolType')}
-              maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-              onBlur={handleAutoSave}
-              placeholder={t('school-type-placeholder')}
-            />
-          </div>
-          <div className="flex flex-col gap-4">
-            <label htmlFor="grade" className={cn(labelClassName, 'text-sm')}>
-              <span className="text-coral">*</span> {t('grade')}
-            </label>
-            <input
-              id="grade"
-              className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-              {...register('gradeLevel')}
-              maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-              placeholder={t('grade-placeholder')}
-              onBlur={handleAutoSave}
-            />
-          </div>
-          <div className="flex flex-col gap-4">
-            <label htmlFor="subject" className={cn(labelClassName, 'text-sm')}>
-              <span className="text-coral">*</span> {t('subject')}
-            </label>
-            <input
-              id="subject"
-              className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-              {...register('subject')}
-              maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-              onBlur={handleAutoSave}
-              placeholder={t('subject-placeholder')}
-            />
-          </div>
+        <div className="flex flex-col gap-4">
+          <label htmlFor="subject" className={cn(labelClassName, 'text-sm')}>
+            {t('subject')}
+          </label>
+          <input
+            id="subject"
+            readOnly={readOnly}
+            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
+            {...register('subject')}
+            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+            onBlur={handleAutoSave}
+            placeholder={t('subject-placeholder')}
+          />
         </div>
-      </fieldset>
-    );
-  }
+      </div>
+    </fieldset>
+  );
+
   return (
     <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
       {navigateBackElement}
+      {copyContainer}
       {shareChatElement}
-      <div className="flex felx-col justify-between">
-        <h1 className="text-2xl mt-4 font-medium">
+      <div className="flex felx-col mt-4 justify-between items-center">
+        <h1 className="text-2xl font-medium">
           {isCreating ? t('create-character') : character.name}
         </h1>
-
-        {readOnly && (
-          <CreateNewCharacterFromTemplate
-            templateId={character.id}
-            templatePictureId={character.pictureId ?? undefined}
-          >
-            <button
-              title={t('copy-template')}
-              className={cn(
-                buttonPrimaryClassName,
-                'min-w-max max-w-min h-11 flex gap-2 items-center',
-              )}
-              type="button"
-            >
-              <span>{t('copy-template')}</span>
-            </button>
-          </CreateNewCharacterFromTemplate>
-        )}
       </div>
       {generalSettings}
-      <fieldset className="flex flex-col gap-4 mt-16">
+      <fieldset className="flex flex-col gap-4 mt-12">
         <h2 className="font-medium mb-8">{t('character-settings')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
           <div className="flex gap-8 flex-col">
@@ -449,7 +434,7 @@ export default function CharacterForm({
           />
         </div>
       </fieldset>
-      {!isCreating && (
+      {!isCreating && !readOnly && (
         <section className="mt-8">
           <h3 className="font-medium">{t('delete-character')}</h3>
           <p className="mt-4">{t('character-delete-description')}</p>
