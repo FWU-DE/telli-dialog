@@ -23,7 +23,7 @@ export default async function Page(context: PageContext) {
     id: params.characterId,
     inviteCode: searchParams.inviteCode,
   });
-
+  
   if (character === undefined || character?.userId === null) {
     return <NotFound />;
   }

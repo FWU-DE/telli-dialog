@@ -1,7 +1,11 @@
 'use server';
 
 import { db } from '@/db';
-import { sharedSchoolConversationTable, characterTable } from '@/db/schema';
+import {
+  sharedSchoolConversationTable,
+  characterTable,
+  sharedCharacterConversation,
+} from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function checkSharedChatInviteCodeAction({ inviteCode }: { inviteCode: string }) {
@@ -11,14 +15,17 @@ export async function checkSharedChatInviteCodeAction({ inviteCode }: { inviteCo
       .from(sharedSchoolConversationTable)
       .where(eq(sharedSchoolConversationTable.inviteCode, inviteCode))
   )[0];
-
-  return maybeSharedChat;
+  if (maybeSharedChat === undefined) return undefined;
+  return { id: maybeSharedChat?.id, inviteCode: maybeSharedChat?.inviteCode };
 }
 
 export async function checkCharacterChatInviteCodeAction({ inviteCode }: { inviteCode: string }) {
   const maybeCharacterChat = (
-    await db.select().from(characterTable).where(eq(characterTable.inviteCode, inviteCode))
+    await db
+      .select()
+      .from(sharedCharacterConversation)
+      .where(eq(sharedCharacterConversation.inviteCode, inviteCode))
   )[0];
-
-  return maybeCharacterChat;
+  if (maybeCharacterChat === undefined) return undefined;
+  return { id: maybeCharacterChat?.characterId, inviteCode: maybeCharacterChat?.inviteCode };
 }
