@@ -1,5 +1,5 @@
 {
-  "id": "7c4926fc-1d37-4257-ad4d-6c48c49e84df",
+  "id": "b973791e-da3b-448c-96b5-a809625242dd",
   "prevId": "3fb3c547-5e1c-44fe-b510-1f7c40039f40",
   "version": "7",
   "dialect": "postgresql",
@@ -733,6 +733,27 @@
         },
         "student_access": {
           "name": "student_access",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "enable_characters": {
+          "name": "enable_characters",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "enable_shared_chats": {
+          "name": "enable_shared_chats",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "enable_custom_gpts": {
+          "name": "enable_custom_gpts",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,

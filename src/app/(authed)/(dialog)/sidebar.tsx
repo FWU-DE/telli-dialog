@@ -25,8 +25,6 @@ import React from 'react';
 import deleteConversationAction, { updateConversationNameAction } from './actions';
 import { fetchClientSideConversations, getPriceLimitByUser } from './utils';
 import { HELP_MODE_GPT_ID } from '@/db/const';
-import { FederalStateId } from '@/utils/vidis/const';
-import { getDisabledFederalFeatures } from '@/utils/feature-flags/get-features';
 
 type Props = {
   user: UserAndContext;
@@ -113,10 +111,6 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
         console.error({ error });
       });
   }
-  const { disable_shared_chats, disable_characters, disable_customGpt } =
-    getDisabledFederalFeatures({
-      id: user.federalState.id as FederalStateId,
-    });
 
   return (
     <CollapsibleSidebar>
@@ -132,7 +126,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
           <div className="w-full items-center flex flex-col gap-1 h-fit">
             {
               <>
-                {user.school.userRole === 'teacher' && !disable_shared_chats && (
+                {user.school.userRole === 'teacher' && user.federalState.enableSharedChats && (
                   <Link prefetch href="/shared-chats" className="w-full">
                     <div
                       className={cn(
@@ -145,7 +139,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                     </div>
                   </Link>
                 )}
-                {user.school.userRole === 'teacher' && !disable_characters && (
+                {user.school.userRole === 'teacher' && user.federalState.enableCharacter && (
                   <Link prefetch href="/characters" className="w-full">
                     <div
                       className={cn(
@@ -173,7 +167,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                     <span className="text-base">{t('custom-gpt')}</span>
                   </div>
                 </Link>
-                {user.school.userRole === 'teacher' && !disable_customGpt && (
+                {user.school.userRole === 'teacher' && user.federalState.enableCustomGpt && (
                   <Link href={`/custom/d/${HELP_MODE_GPT_ID}`} className="w-full">
                     <div
                       className={cn(

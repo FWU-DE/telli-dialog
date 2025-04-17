@@ -104,6 +104,9 @@ export const federalStateTable = pgTable('federal_state', {
   supportContact: text('support_contact'),
   trainingLink: text('training_link'),
   studentAccess: boolean('student_access').default(true).notNull(),
+  enableCharacter: boolean('enable_characters').default(true).notNull(),
+  enableSharedChats: boolean('enable_shared_chats').default(true).notNull(),
+  enableCustomGpt: boolean('enable_custom_gpts').default(true).notNull(),
 });
 
 export type FederalStateInsertModel = typeof federalStateTable.$inferInsert;
