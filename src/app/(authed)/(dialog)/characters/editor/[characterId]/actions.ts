@@ -2,7 +2,12 @@
 
 import { db } from '@/db';
 import { dbDeleteCharacterByIdAndUserId } from '@/db/functions/character';
-import { CharacterAccessLevel, CharacterInsertModel, characterTable, sharedCharacterConversation } from '@/db/schema';
+import {
+  CharacterAccessLevel,
+  CharacterInsertModel,
+  characterTable,
+  sharedCharacterConversation,
+} from '@/db/schema';
 import { deleteFileFromS3 } from '@/s3';
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
@@ -167,7 +172,12 @@ export async function handleStopCharacaterShareAction({ id }: { id: string }) {
   const updatedCharacter = (
     await db
       .delete(sharedCharacterConversation)
-      .where(and(eq(sharedCharacterConversation.characterId, id), eq(sharedCharacterConversation.userId, user.id)))
+      .where(
+        and(
+          eq(sharedCharacterConversation.characterId, id),
+          eq(sharedCharacterConversation.userId, user.id),
+        ),
+      )
       .returning()
   )[0];
 

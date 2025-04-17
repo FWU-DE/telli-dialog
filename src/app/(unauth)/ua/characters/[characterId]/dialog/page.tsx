@@ -4,7 +4,9 @@ import { dbGetLlmModelById } from '@/db/functions/llm-model';
 import NotFound from '@/app/not-found';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
-import { dbGetCharacterByIdAndInviteCode, dbGetCharacterByIdAndInviteCodeMod } from '@/db/functions/character';
+import {
+  dbGetCharacterByIdAndInviteCode,
+} from '@/db/functions/character';
 import CharacterSharedChat from './character-chat';
 
 const pageContextSchema = z.object({

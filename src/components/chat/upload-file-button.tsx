@@ -116,9 +116,7 @@ export async function handleSingleFile({
         });
       }
       console.error(error);
-      toast.error(
-        translations('toasts.upload-error'),
-      );
+      toast.error(translations('toasts.upload-error'));
       return updatedFiles;
     });
   }

@@ -1,7 +1,7 @@
 import { getUser } from '@/auth/utils';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { dbGetCharactersById, dbGetCopyTemplateCharacter } from '@/db/functions/character';
+import { dbGetCharacterByIdWithShareData, dbGetCopyTemplateCharacter } from '@/db/functions/character';
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
@@ -51,7 +51,7 @@ export default async function Page(context: PageContext) {
   const templateId = searchParams?.templateId;
   const user = await getUser();
 
-  const character = await dbGetCharactersById({ characterId: params.characterId, userId: user.id });
+  const character = await dbGetCharacterByIdWithShareData({ characterId: params.characterId, userId: user.id });
   if (character === undefined) return notFound();
 
   const defaultTemplateCharacter = await getMaybeDefaultTemplateCharater({

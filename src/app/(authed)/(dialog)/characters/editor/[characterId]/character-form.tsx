@@ -87,7 +87,6 @@ export default function CharacterForm({
       subject: character.subject ?? '',
       modelId: maybeDefaultModelId,
     },
-    
   });
 
   const t = useTranslations('characters.form');
@@ -98,7 +97,6 @@ export default function CharacterForm({
     character.accessLevel,
     (p, n: CharacterAccessLevel) => n,
   );
-
 
   function handleAccessLevelChange(value: boolean) {
     const accessLevel = value ? 'school' : 'private';
@@ -436,7 +434,7 @@ export default function CharacterForm({
           />
         </div>
       </fieldset>
-      {(!isCreating && !readOnly) && (
+      {!isCreating && !readOnly && (
         <section className="mt-8">
           <h3 className="font-medium">{t('delete-character')}</h3>
           <p className="mt-4">{t('character-delete-description')}</p>

@@ -45,7 +45,10 @@ export async function dbGetCharacterByIdOrSchoolId({
   return character;
 }
 
-export async function dbGetCharactersById({
+/**
+ * needs userId because the meta data for shared chararters are both tied to the user and character, this is especially important for shared charcters (school wide or global)
+ */
+export async function dbGetCharacterByIdWithShareData({
   characterId,
   userId,
 }: {
@@ -72,6 +75,17 @@ export async function dbGetCharactersById({
   return row;
 }
 
+/**
+ * The returned entity has no Shared Data Attached! These are found in the SharedCharacterConversation Table
+ */
+export async function dbGetCharacterById({characterId}: {characterId:string}) {
+  const [row] = await db
+  .select()
+  .from(characterTable)
+  .where(eq(characterTable.id, characterId));
+return row;
+}
+
 export async function dbGetCopyTemplateCharacter({
   templateId,
   characterId,
@@ -81,7 +95,7 @@ export async function dbGetCopyTemplateCharacter({
   characterId: string;
   userId: string;
 }): Promise<Omit<CharacterInsertModel, 'modelId'>> {
-  const character = await dbGetCharactersById({ characterId: templateId, userId });
+  const character = await dbGetCharacterByIdWithShareData({ characterId: templateId, userId });
   if (character?.name === undefined) {
     throw new Error('Invalid State Template Character must have a name');
   }
@@ -272,29 +286,6 @@ export async function dbGetCharacterByIdAndInviteCode({
     .where(and(eq(characterTable.id, id), eq(sharedCharacterConversation.inviteCode, inviteCode)));
 
   return row as CharacterModel;
-}
-
-export async function dbGetCharacterByIdAndInviteCodeMod({
-  id,
-  inviteCode,
-}: {
-  id: string;
-  inviteCode: string;
-}): Promise<CharacterModel | undefined> {
-  const [row] = await db
-    .select()
-    .from(characterTable)
-    .leftJoin(
-      sharedCharacterConversation,
-      eq(sharedCharacterConversation.characterId, characterTable.id),
-    )
-    .where(and(eq(characterTable.id, id), eq(sharedCharacterConversation.inviteCode, inviteCode)));
-  console.log(row);
-  if (row === undefined) return;
-  return {
-    ...row.character,
-    ...row.shared_character_conversation,
-  };
 }
 
 export async function dbUpdateTokenUsageByCharacterChatId(

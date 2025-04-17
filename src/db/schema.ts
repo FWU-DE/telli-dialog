@@ -252,20 +252,18 @@ export const conversationUsageTracking = pgTable('conversation_usage_tracking', 
 export type ConversationUsageTrackingInsertModel = typeof conversationUsageTracking.$inferInsert;
 export type ConversationUsageTrackingModel = typeof conversationUsageTracking.$inferSelect;
 
-
-export const sharedCharacterConversation = pgTable(
-  'shared_character_conversation',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    characterId: uuid('character_id').notNull(),
-    userId: uuid('user_id').references(()=> userTable.id).notNull(),
-    intelligencePointsLimit: integer('intelligence_points_limit'),
-    maxUsageTimeLimit: integer('max_usage_time_limit'),
-    inviteCode: text('invite_code').unique(),
-    startedAt: timestamp('started_at', { withTimezone: true }),
-    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-  },
-);
+export const sharedCharacterConversation = pgTable('shared_character_conversation', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  characterId: uuid('character_id').notNull(),
+  userId: uuid('user_id')
+    .references(() => userTable.id)
+    .notNull(),
+  intelligencePointsLimit: integer('intelligence_points_limit'),
+  maxUsageTimeLimit: integer('max_usage_time_limit'),
+  inviteCode: text('invite_code').unique(),
+  startedAt: timestamp('started_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+});
 
 // export type sharedCharacterConversation = typeof sharedCharacterConversation.$inferSelect;
 

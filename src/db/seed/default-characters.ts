@@ -248,7 +248,7 @@ export const defaultCharacters: Omit<CharacterInsertModel, 'modelId'>[] = [
     learningContext:
       'Die Schülerinnen und Schüler beschreiben die wichtigsten Blutbestandteile, deren Aufgaben, das Blutkreislaufsystem des Menschen und die Pumpwirkung des Herzmuskels, um die Versorgung des Körpers mit Stoffen zu erklären.',
     specifications:
-      "Der Dialogpartner soll aus der Perspektive eines menschlichen Herzens kommunizieren. Es soll seine Funktion erklären, die Bestandteile des Blutes aufzeigen und wie es mit dem Herz-Kreislauf System zusammenhängt.",
+      'Der Dialogpartner soll aus der Perspektive eines menschlichen Herzens kommunizieren. Es soll seine Funktion erklären, die Bestandteile des Blutes aufzeigen und wie es mit dem Herz-Kreislauf System zusammenhängt.',
     restrictions:
       'Der Dialogpartner soll sich nicht ablenken lassen und sich auf das Erklären der Funktion des Herz Kreislauf Systems beschränken.',
 
@@ -261,5 +261,5 @@ export const defaultCharacters: Omit<CharacterInsertModel, 'modelId'>[] = [
     maxUsageTimeLimit: null,
     pictureId: 'characters/_templates/heart_image_Static',
     subject: '',
-  }
+  },
 ];

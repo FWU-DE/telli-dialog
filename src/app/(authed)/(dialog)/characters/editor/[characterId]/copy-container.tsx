@@ -5,11 +5,7 @@ import { CreateNewCharacterFromTemplate } from '../../create-new-character-butto
 import { CharacterModel } from '@/db/schema';
 import { calculateTimeLeftBySharedChat } from '../../../shared-chats/[sharedSchoolChatId]/utils';
 
-export function CopyContainer({
-  character,
-}: {
-  character: CharacterModel;
-}) {
+export function CopyContainer({ character }: { character: CharacterModel }) {
   const t = useTranslations('characters.copy-page');
   const sharedChatTimeLeft = calculateTimeLeftBySharedChat(character);
   const sharedChatActive = sharedChatTimeLeft > 0;

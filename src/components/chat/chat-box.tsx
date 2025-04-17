@@ -35,8 +35,8 @@ export function ChatBox({
     children.role === 'user'
       ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary/20 text-primary-foreground max-w-[70%] break-words'
       : '';
-  const fileMatch = fileMapping?.get(children.id) !== undefined
-  const allFiles = fileMatch ? fileMapping.get(children.id) : initialFiles
+  const fileMatch = fileMapping?.get(children.id) !== undefined;
+  const allFiles = fileMatch ? fileMapping.get(children.id) : initialFiles;
 
   const margin = allFiles !== undefined ? 'm-0' : 'm-4';
 
