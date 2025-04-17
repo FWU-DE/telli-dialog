@@ -139,7 +139,7 @@ export const characterTable = pgTable('character', {
   pictureId: text('picture_id'),
   accessLevel: characterAccessLevelEnum('access_level').notNull().default('private'),
   schoolId: text('school_id').references(() => schoolTable.id),
-  // for sharing the character
+  // for sharing the character. These Columns are unused, instead a MappingTable is being used
   intelligencePointsLimit: integer('intelligence_points_limit'),
   maxUsageTimeLimit: integer('max_usage_time_limit'),
   inviteCode: text('invite_code').unique(),
@@ -251,6 +251,23 @@ export const conversationUsageTracking = pgTable('conversation_usage_tracking', 
 });
 export type ConversationUsageTrackingInsertModel = typeof conversationUsageTracking.$inferInsert;
 export type ConversationUsageTrackingModel = typeof conversationUsageTracking.$inferSelect;
+
+
+export const sharedCharacterConversation = pgTable(
+  'shared_character_conversation',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    characterId: uuid('character_id').notNull(),
+    userId: uuid('user_id').references(()=> userTable.id).notNull(),
+    intelligencePointsLimit: integer('intelligence_points_limit'),
+    maxUsageTimeLimit: integer('max_usage_time_limit'),
+    inviteCode: text('invite_code').unique(),
+    startedAt: timestamp('started_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  },
+);
+
+// export type sharedCharacterConversation = typeof sharedCharacterConversation.$inferSelect;
 
 export const sharedCharacterChatUsageTrackingTable = pgTable(
   'shared_character_chat_usage_tracking',

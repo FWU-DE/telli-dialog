@@ -51,7 +51,7 @@ export default async function Page(context: PageContext) {
   const templateId = searchParams?.templateId;
   const user = await getUser();
 
-  const character = await dbGetCharactersById({ characterId: params.characterId });
+  const character = await dbGetCharactersById({ characterId: params.characterId, userId: user.id });
   if (character === undefined) return notFound();
 
   const defaultTemplateCharacter = await getMaybeDefaultTemplateCharater({

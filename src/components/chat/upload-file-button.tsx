@@ -8,7 +8,7 @@ import { useConversation } from '../providers/conversation-provider';
 import AttachFileIcon from '../icons/attach-file';
 import { cn } from '@/utils/tailwind';
 import { SUPPORTED_FILE_EXTENSIONS } from '@/const';
-import { useTranslations } from 'next-intl';
+import { TranslationValues, useTranslations } from 'next-intl';
 
 export type FileUploadMetadata = {
   directoryId: string;
@@ -40,6 +40,7 @@ export async function handleSingleFile({
   fileUploadFn,
   onFileUploaded,
   toast,
+  translations,
 }: {
   file: File;
   prevFileIds?: string[];
@@ -50,14 +51,17 @@ export async function handleSingleFile({
   session: ReturnType<typeof useSession>;
   conversation: ReturnType<typeof useConversation>;
   toast: ToastContextType;
+  translations: (key: string, values?: TranslationValues) => string;
 }) {
   if (!file) {
     throw new Error('No files uploaded');
   }
-
   if (file.size > MAX_FILE_SIZE) {
     toast.error(
-      `Die Datei '${file.name}' ist zu groß. Das Limit liegt bei ${MAX_FILE_SIZE / 1_000_000} MB.`,
+      translations('toasts.file-too-large', {
+        file_name: file.name,
+        max_file_size: MAX_FILE_SIZE / 1_000_000,
+      }),
     );
     return;
   }
@@ -113,7 +117,7 @@ export async function handleSingleFile({
       }
       console.error(error);
       toast.error(
-        'Die Datei konnte leider nicht hochgeladen werden. Bitte versuchen Sie es erneut',
+        translations('toasts.upload-error'),
       );
       return updatedFiles;
     });
@@ -134,7 +138,7 @@ export default function UploadFileButton({
   const toast = useToast();
   const session = useSession();
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
-  const t = useTranslations('file-interaction.upload');
+  const t = useTranslations('file-interaction');
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const selectedFiles = event.target.files;
 
@@ -154,6 +158,7 @@ export default function UploadFileButton({
           session,
           conversation,
           toast,
+          translations: t,
         }),
       ),
     );
@@ -184,7 +189,7 @@ export default function UploadFileButton({
         className={className}
         disabled={disabled || isPrivateMode}
         type="button"
-        title={disabled ? t('file-limit-reached') : t('upload-file-button')}
+        title={disabled ? t('upload.file-limit-reached') : t('upload.upload-file-button')}
       >
         {triggerButton ?? (
           <AttachFileIcon
@@ -211,9 +216,7 @@ export async function fetchUploadFile(data: {
   if (!response.ok) {
     throw Error('Could not upload file');
   }
-  // const warning = (await exceedsTokenLimit(data.body, data.fileName))
-  //   ? 'Die Datei wird abgeschnitten, da der Text Inhalt zu umfangreich ist'
-  //   : undefined;
+
   const json = await response.json();
   const parsedJson = z
     .object({ file_id: z.string(), warning: z.string().nullable() })

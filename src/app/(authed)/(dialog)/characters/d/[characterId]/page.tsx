@@ -30,7 +30,7 @@ export default async function Page(context: PageContext) {
   const id = generateUUID();
   const user = await getUser();
 
-  const character = await dbGetCharactersById({ characterId });
+  const character = await dbGetCharactersById({ characterId, userId: user.id });
 
   if (character === undefined) {
     console.warn(`GPT with id ${characterId} not found`);

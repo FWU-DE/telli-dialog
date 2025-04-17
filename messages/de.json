@@ -50,11 +50,16 @@
     "upload": {
       "upload-file-button": "Datei hochladen",
       "file-limit-reached": "Es wurde bereits eine Datei hochgeladen"
+    },
+    "toasts": {
+      "upload-success": "Die Datei wurde erfolgreich hochgeladen",
+      "upload-error": "Die Datei konnte leider nicht hochgeladen werden. Bitte versuchen Sie es erneut",
+      "file-too-large": "Die Datei {file_name} ist zu groß. Das Limit liegt bei {max_file_size} MB."
     }
   },
   "help-mode": {
     "chat-heading": "Hallo, ich bin tellis Hilfe",
-    "chat-subheading": "Ich kenne mich hier aus und kann Dir hoffentlich Fragen beantworten oder Dir bei Problemen weiterhelfen. Ansonsten kannst Du auch gerne meine $FAQ_LINK besuchen.",
+    "chat-subheading": "Ich kenne mich hier aus und kann Dir hoffentlich Fragen beantworten oder Dir bei Problemen weiterhelfen. Ansonsten kannst Du auch gerne meine {FAQ_LINK} besuchen.",
     "chat-placeholder": "Wie kann ich helfen?"
   },
   "custom-gpt": {
@@ -123,8 +128,12 @@
       "open-chat": "Chat öffnen",
       "use-qr": "Oder nutze den QR-Code"
     },
+    "copy-page": {
+      "title": "Dialogavatar in eigenen Space Kopieren",
+      "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Dialogavatar in deinen privaten Space, um ihn anzupassen.",
+      "copy-template": "Dialogavatar bearbeiten"
+    },
     "form": {
-      "copy-template": "Kopie bearbeiten",
       "general-settings": "Allgemeine Einstellungen",
       "character-settings": "Dialogpartner-Einstellungen",
       "all-characters": "Alle Dialogpartner",

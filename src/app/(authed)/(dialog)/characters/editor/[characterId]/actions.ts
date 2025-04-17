@@ -2,7 +2,7 @@
 
 import { db } from '@/db';
 import { dbDeleteCharacterByIdAndUserId } from '@/db/functions/character';
-import { CharacterAccessLevel, CharacterInsertModel, characterTable } from '@/db/schema';
+import { CharacterAccessLevel, CharacterInsertModel, characterTable, sharedCharacterConversation } from '@/db/schema';
 import { deleteFileFromS3 } from '@/s3';
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
@@ -133,14 +133,16 @@ export async function handleInitiateCharacterShareAction({
 
   const updatedSharedChat = (
     await db
-      .update(characterTable)
-      .set({
+      .insert(sharedCharacterConversation)
+      .values({
+        userId: user.id,
+        characterId: id,
         intelligencePointsLimit: intelliPointsPercentageLimit,
         maxUsageTimeLimit: usageTimeLimitInSeconds,
         inviteCode: randomString.toUpperCase(),
         startedAt: new Date(),
       })
-      .where(and(eq(characterTable.id, id), eq(characterTable.userId, user.id)))
+      //.where(and(eq(sharedCharacterConversation.characterId, id), eq(sharedCharacterConversation.userId, user.id)))
       .returning()
   )[0];
 
@@ -164,11 +166,8 @@ export async function handleStopCharacaterShareAction({ id }: { id: string }) {
 
   const updatedCharacter = (
     await db
-      .update(characterTable)
-      .set({
-        startedAt: null,
-      })
-      .where(and(eq(characterTable.id, id), eq(characterTable.userId, user.id)))
+      .delete(sharedCharacterConversation)
+      .where(and(eq(sharedCharacterConversation.characterId, id), eq(sharedCharacterConversation.userId, user.id)))
       .returning()
   )[0];
 

@@ -57,6 +57,13 @@
       "when": 1744286343381,
       "tag": "0007_mean_pyro",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1744799654215,
+      "tag": "0008_certain_baron_strucker",
+      "breakpoints": true
     }
   ]
 }

@@ -4,7 +4,7 @@ import { dbGetLlmModelById } from '@/db/functions/llm-model';
 import NotFound from '@/app/not-found';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
-import { dbGetCharacterByIdAndInviteCode } from '@/db/functions/character';
+import { dbGetCharacterByIdAndInviteCode, dbGetCharacterByIdAndInviteCodeMod } from '@/db/functions/character';
 import CharacterSharedChat from './character-chat';
 
 const pageContextSchema = z.object({
@@ -24,16 +24,14 @@ export default async function Page(context: PageContext) {
     inviteCode: searchParams.inviteCode,
   });
 
-  if (character === undefined) {
+  if (character === undefined || character?.userId === null) {
     return <NotFound />;
   }
-
   const model = await dbGetLlmModelById({ modelId: character.modelId });
 
   if (model === undefined) {
     return <NotFound />;
   }
-
   return (
     <main className="h-[100dvh] w-full">
       <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
