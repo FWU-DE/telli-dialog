@@ -1,3 +1,5 @@
+import { FederalStateId } from '@/utils/vidis/const';
+
 export const TERM_AND_CONDITIONS = `telli ist ein Angebot des Instituts für Film und Bild in Wissenschaft und Unterricht (FWU) gGmbH, das in Brandenburg im Auftrag des Ministeriums für Bildung, Jugend und Sport des Landes Brandenburg zur Verfügung gestellt wird.
 
 1. Nur registrierte und für telli freigeschaltete Lehrkräfte („Nutzende“) können telli für dienstliche Zwecke nutzen. Eine private Nutzung ist nicht zulässig.
@@ -33,8 +35,30 @@ export const EDUCATION_HINT = `Liebe Kollegin, Lieber Kollege,
 
 // increment this number to prompt renewed acceptance from all users
 export const VERSION: number = 1;
+export type DisclaimerConfig = {
+  pageContents: string[];
+  showCheckBox?: boolean;
+  acceptLabel?: string;
+};
 // Ids of all States which explicitly have to accept to the terms & conditions
-export const showTermsFederalStates = ['DE-BB'];
+
+export const federalStateDisclaimers: Partial<Record<FederalStateId, DisclaimerConfig>> = {
+  'DE-BB': {
+    pageContents: [
+      'Bitte lese und akzeptiere die Nutzungsbedingungen um fortzufahren.',
+      TERM_AND_CONDITIONS,
+      EDUCATION_HINT,
+    ],
+    showCheckBox: true,
+    acceptLabel:
+      'Ich versichere, dass ich den Selbstlernkurs des LIBRA zum Umgang mit telli absolviert habe',
+  },
+  'DE-SL': {
+    pageContents: [
+      'KI-Tools neigen zu Halluzinationen und Vorurteilen. Bitte überprüfen Sie die Ausgaben des KI-Chatbots kritisch.',
+    ],
+  },
+};
 
 if (!Number.isInteger(VERSION)) {
   throw Error(`Version must be set to an Integer, Value: ${VERSION}`);
