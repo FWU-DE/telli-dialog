@@ -93,7 +93,7 @@ export default function CharacterContainer({
       {timeLeft > 0 && character.maxUsageTimeLimit !== null && (
         <CountDownTimer leftTime={timeLeft} totalTime={character.maxUsageTimeLimit} />
       )}
-      {character.accessLevel === 'global' && (
+      {character.accessLevel === 'global' && !(timeLeft > 0) && (
         <CreateNewCharacterFromTemplate
           templateId={id}
           templatePictureId={character.pictureId ?? undefined}
