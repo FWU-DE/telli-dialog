@@ -26,7 +26,8 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
 
   const priceInCent = await getPriceInCentByUser({ user, models });
   const productAccess = checkProductAccess(user);
-  const federalStateDisclaimer = federalStateDisclaimers[user.school.federalStateId as FederalStateId]
+  const federalStateDisclaimer =
+    federalStateDisclaimers[user.school.federalStateId as FederalStateId];
   const userMustAccept =
     federalStateDisclaimer !== undefined &&
     (user.versionAcceptedConditions === null || user.versionAcceptedConditions < VERSION);
@@ -58,7 +59,10 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
         </ProductAccessModal>
       )}
       {userMustAccept ? (
-        <TermsConditionsModal handleAccept={setUserAcceptConditions} disclaimerConfig={federalStateDisclaimer}></TermsConditionsModal>
+        <TermsConditionsModal
+          handleAccept={setUserAcceptConditions}
+          disclaimerConfig={federalStateDisclaimer}
+        ></TermsConditionsModal>
       ) : null}
     </div>
   );

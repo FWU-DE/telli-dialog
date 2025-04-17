@@ -1,11 +1,7 @@
 'use server';
 
 import { db } from '@/db';
-import {
-  sharedSchoolConversationTable,
-  characterTable,
-  sharedCharacterConversation,
-} from '@/db/schema';
+import { sharedSchoolConversationTable, sharedCharacterConversation } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function checkSharedChatInviteCodeAction({ inviteCode }: { inviteCode: string }) {

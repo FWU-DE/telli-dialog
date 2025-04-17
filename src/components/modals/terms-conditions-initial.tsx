@@ -3,7 +3,7 @@
 import React, { useRef, useState } from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { buttonPrimaryClassName, buttonSecondaryClassName } from '@/utils/tailwind/button';
-import { DisclaimerConfig, EDUCATION_HINT, TERM_AND_CONDITIONS } from './const';
+import { DisclaimerConfig } from './const';
 import { useTranslations } from 'next-intl';
 import Checkbox from '../common/checkbox';
 import { useRouter } from 'next/navigation';
@@ -57,11 +57,11 @@ export default function TermsConditionsModal({
           {tCommon('back')}
         </button>
       ) : null}
-      {pageNumber === (disclaimerConfig.pageContents.length - 1) ? (
+      {pageNumber === disclaimerConfig.pageContents.length - 1 ? (
         <button
           onClick={acceptAndClose}
           className={buttonPrimaryClassName}
-          disabled={!(checked && scrollFinished) && (disclaimerConfig.showCheckBox)}
+          disabled={!(checked && scrollFinished) && disclaimerConfig.showCheckBox}
         >
           {tCommon('accept')}
         </button>
@@ -79,7 +79,7 @@ export default function TermsConditionsModal({
 
   const currentTitle =
     pageNumber >= 1 ? tUsage('terms-and-conditions-title') : tUsage('initial-title');
-  const currentContent = <MarkdownDisplay>{contents[pageNumber] ?? ""}</MarkdownDisplay>
+  const currentContent = <MarkdownDisplay>{contents[pageNumber] ?? ''}</MarkdownDisplay>;
 
   return (
     <AlertDialog.Root open defaultOpen>
@@ -97,8 +97,11 @@ export default function TermsConditionsModal({
             >
               {currentContent}
             </div>
-            {(pageNumber === contents.length - 1 && disclaimerConfig.showCheckBox) && (
-              <Checkbox onCheckedChange={setChecked} label={disclaimerConfig.acceptLabel}></Checkbox>
+            {pageNumber === contents.length - 1 && disclaimerConfig.showCheckBox && (
+              <Checkbox
+                onCheckedChange={setChecked}
+                label={disclaimerConfig.acceptLabel}
+              ></Checkbox>
             )}
             <div className="flex flex-wrap justify-end items-center gap-6 mt-auto self-end">
               <AlertDialog.Action asChild>{navigationBar}</AlertDialog.Action>
