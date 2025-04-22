@@ -1,4 +1,4 @@
-import { CustomGptModel, FileModel } from '@/db/schema';
+import { FileModel } from '@/db/schema';
 import DisplayUploadedFile from './display-uploaded-file';
 import type { UIMessage } from '@ai-sdk/ui-utils';
 import RobotIcon from '../icons/robot';
@@ -12,22 +12,22 @@ export function ChatBox({
   children,
   index,
   fileMapping,
-  customGpt,
   isLastUser,
   isLastNonUser,
   isLoading,
   regenerateMessage,
   initialFiles,
+  isHelpGpt = false,
 }: {
   children: UIMessage;
   index: number;
   fileMapping?: Map<string, FileModel[]>;
-  customGpt?: CustomGptModel;
   isLastUser?: boolean;
   isLastNonUser: boolean;
   isLoading: boolean;
   regenerateMessage: () => void;
   initialFiles?: FileModel[];
+  isHelpGpt?: boolean;
 }) {
   let maybefileAttachment: React.JSX.Element | undefined = undefined;
   const tCommon = useTranslations('common');
@@ -58,7 +58,7 @@ export function ChatBox({
   }
 
   let assistantIcon = null;
-  if (children.role === 'assistant' && customGpt?.name === 'Hilfe-Assistent') {
+  if (children.role === 'assistant' && isHelpGpt) {
     assistantIcon = (
       <div className="p-1.5 rounded-enterprise-sm bg-secondary/5">
         <RobotIcon className="w-8 h-8 text-primary" />
