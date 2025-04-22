@@ -131,23 +131,35 @@ export async function handleInitiateCharacterShareAction({
     throw Error('Only a teacher can share a character');
   }
 
-  const intelliPointsPercentageLimit = parseNumberOrThrow(_intelliPointsPercentageLimit);
-  const usageTimeLimitInSeconds = parseNumberOrThrow(_usageTimeLimit);
-
-  const randomString = generateInviteCode();
-
+  const [maybeExistingEntry] = await db
+    .select()
+    .from(sharedCharacterConversation)
+    .where(
+      and(
+        eq(sharedCharacterConversation.userId, user.id),
+        eq(sharedCharacterConversation.characterId, id),
+      ),
+    );
+  const intelligencePointsLimit = parseNumberOrThrow(_intelliPointsPercentageLimit);
+  const maxUsageTimeLimit = parseNumberOrThrow(_usageTimeLimit);
+  const inviteCode = generateInviteCode();
+  const startedAt = new Date();
   const updatedSharedChat = (
     await db
       .insert(sharedCharacterConversation)
       .values({
+        id: maybeExistingEntry?.id,
         userId: user.id,
         characterId: id,
-        intelligencePointsLimit: intelliPointsPercentageLimit,
-        maxUsageTimeLimit: usageTimeLimitInSeconds,
-        inviteCode: randomString.toUpperCase(),
-        startedAt: new Date(),
+        intelligencePointsLimit,
+        maxUsageTimeLimit,
+        inviteCode,
+        startedAt,
       })
-      //.where(and(eq(sharedCharacterConversation.characterId, id), eq(sharedCharacterConversation.userId, user.id)))
+      .onConflictDoUpdate({
+        target: sharedCharacterConversation.id,
+        set: { inviteCode, startedAt, maxUsageTimeLimit },
+      })
       .returning()
   )[0];
 

@@ -127,9 +127,9 @@
       "use-qr": "Oder nutze den QR-Code"
     },
     "copy-page": {
-      "title": "Dialogavatar in eigenen Space Kopieren",
-      "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Dialogavatar in deinen privaten Space, um ihn anzupassen.",
-      "copy-template": "Dialogavatar bearbeiten"
+      "title": "Dialogpartner in eigenen Space Kopieren",
+      "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Dialogpartner in deinen privaten Space, um ihn anzupassen.",
+      "copy-template": "Dialogpartner bearbeiten"
     },
     "form": {
       "general-settings": "Allgemeine Einstellungen",
