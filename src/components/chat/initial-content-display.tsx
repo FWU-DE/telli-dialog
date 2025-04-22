@@ -20,8 +20,8 @@ export function InitialChatContentDisplay({
           className="rounded-enterprise-md"
         />
       )}
-      <h1 className="text-2xl font-medium mt-8">{title}</h1>
-      <p className="max-w-72">{description}</p>
+      <h1 className="text-2xl font-medium mt-8 text-center">{title}</h1>
+      <p className="max-w-full text-center">{description}</p>
     </div>
   );
 }

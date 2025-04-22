@@ -206,6 +206,13 @@ export default function Chat({
     );
   }
 
+  const assistantIcon =
+    customGpt?.id === HELP_MODE_GPT_ID ? (
+      <div className="rounded-enterprise-sm bg-secondary/5 w-8 h-8 place-self-start mt-1 mr-2">
+        <RobotIcon className="w-8 h-8 text-primary p-1" />
+      </div>
+    ) : undefined;
+
   const messagesContent = (
     <div className="flex flex-col gap-2 max-w-3xl mx-auto p-4">
       {messages.map((message, index) => (
@@ -219,6 +226,7 @@ export default function Chat({
           isLoading={isLoading}
           regenerateMessage={reload}
           initialFiles={initialFiles}
+          assistantIcon={assistantIcon}
         >
           {message}
         </ChatBox>

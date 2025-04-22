@@ -2,6 +2,7 @@
 import { useChat } from '@ai-sdk/react';
 import React from 'react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import {
   constructLocalStorageKey,
   getMaybeLocaleStorageChats,
@@ -18,8 +19,9 @@ import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-message';
 
 export default function CharacterSharedChat({
+  imageSource,
   ...character
-}: CharacterModel & { inviteCode: string }) {
+}: CharacterModel & { inviteCode: string; imageSource?: string }) {
   const { id, inviteCode } = character;
   const t = useTranslations('shared-chats.shared');
   const timeLeft = calculateTimeLeftBySharedChat(character);
@@ -77,6 +79,18 @@ export default function CharacterSharedChat({
     saveToLocalStorage(constructLocalStorageKey({ id, inviteCode }), '');
     setMessages([]);
   }
+  const assistantIcon =
+    imageSource !== undefined ? (
+      <div className="p-1.5 rounded-enterprise-sm mr-2">
+        <Image
+          src={imageSource}
+          width={30}
+          height={30}
+          alt={character.name}
+          className="rounded-enterprise-md"
+        />
+      </div>
+    ) : undefined;
 
   return (
     <>
@@ -90,6 +104,7 @@ export default function CharacterSharedChat({
           title={character.name}
           messages={messages}
         />
+
         <div className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden">
           <div
             ref={scrollRef}
@@ -97,7 +112,11 @@ export default function CharacterSharedChat({
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
             {messages.length === 0 ? (
-              <InitialChatContentDisplay title={character.name} />
+              <InitialChatContentDisplay
+                title={character.name}
+                description={character.description}
+                imageSource={imageSource}
+              />
             ) : (
               <div className="flex flex-col gap-4">
                 {messages.map((message, index) => {
@@ -109,6 +128,7 @@ export default function CharacterSharedChat({
                       isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
                       isLoading={isLoading}
                       regenerateMessage={reload}
+                      assistantIcon={assistantIcon}
                     >
                       {message}
                     </ChatBox>

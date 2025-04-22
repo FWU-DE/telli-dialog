@@ -82,8 +82,8 @@ export function SharedChatHeader({
 
       <div className="flex-grow"></div>
       {
-        <div className="flex  w-1/2">
-          {hasMessages && <span className="font-normal text-xl truncate">{title}</span>}
+        <div className="flex w-1/2 justify-center">
+          {hasMessages && <span className="text-xl truncate font-normal">{title}</span>}
         </div>
       }
       <div className="flex-grow"></div>

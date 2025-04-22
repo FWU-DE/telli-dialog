@@ -100,7 +100,10 @@ export default function SharedChat({
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
             {messages.length === 0 ? (
-              <InitialChatContentDisplay title={sharedSchoolChat.name} />
+              <InitialChatContentDisplay
+                title={sharedSchoolChat.name}
+                description={sharedSchoolChat.description}
+              />
             ) : (
               <div className="flex flex-col gap-4">
                 {messages.map((message, index) => {
