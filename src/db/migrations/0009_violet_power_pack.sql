@@ -1,0 +1,1 @@
+ALTER TABLE "shared_character_conversation" ADD CONSTRAINT "shared_character_conversation_character_id_user_id_unique" UNIQUE("character_id","user_id");
