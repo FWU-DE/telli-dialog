@@ -86,10 +86,7 @@ export default function Chat({
       modelId: selectedModel?.id,
       characterId: character?.id,
       customGptId: customGpt?.id,
-      fileIds: files
-        .values()
-        .toArray()
-        .map((file) => file.fileId),
+      fileIds: Array.from(files).map(([, file]) => file.fileId),
     },
     generateId: generateUUID,
     sendExtraMessageFields: true,
@@ -133,18 +130,15 @@ export default function Chat({
       handleSubmit(e, {});
       navigateWithoutRefresh(conversationPath);
       setInitialFiles(
-        files
-          .values()
-          .toArray()
-          .map((file) => {
-            return {
-              id: file.fileId ?? '',
-              name: file.file.name,
-              type: getFileExtension(file.file.name),
-              createdAt: new Date(),
-              size: file.file.size,
-            };
-          }),
+        Array.from(files).map(([, file]) => {
+          return {
+            id: file.fileId ?? '',
+            name: file.file.name,
+            type: getFileExtension(file.file.name),
+            createdAt: new Date(),
+            size: file.file.size,
+          };
+        }),
       );
       setFiles(new Map());
     } catch (error) {

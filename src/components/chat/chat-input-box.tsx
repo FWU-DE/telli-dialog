@@ -69,20 +69,18 @@ export function ChatInputBox({
         onSubmit={customHandleSubmit}
         className="relative bg-white w-full p-1 border focus-within:border-primary rounded-xl"
       >
-        {files !== undefined &&
-          handleDeattachFile !== undefined &&
-          files.values().toArray().length > 0 && (
-            <div className="mx-2 py-2 flex gap-1 overflow-x-auto">
-              {Array.from(files).map(([localId, file]) => (
-                <DisplayUploadedFile
-                  fileName={file.file.name}
-                  key={localId}
-                  status={file.status}
-                  onDeattachFile={() => handleDeattachFile(localId)}
-                />
-              ))}
-            </div>
-          )}
+        {files !== undefined && handleDeattachFile !== undefined && files.size > 0 && (
+          <div className="mx-2 py-2 flex gap-1 overflow-x-auto">
+            {Array.from(files).map(([localId, file]) => (
+              <DisplayUploadedFile
+                fileName={file.file.name}
+                key={localId}
+                status={file.status}
+                onDeattachFile={() => handleDeattachFile(localId)}
+              />
+            ))}
+          </div>
+        )}
         <div className="flex items-center">
           <AutoResizeTextarea
             autoFocus
@@ -98,7 +96,7 @@ export function ChatInputBox({
               <UploadFileButton
                 className="hover:bg-vidis-hover-green/20"
                 setFiles={setFiles}
-                disabled={files.values().toArray().length >= NUMBER_OF_FILES_LIMIT}
+                disabled={files.size >= NUMBER_OF_FILES_LIMIT}
               />
             </div>
           )}
