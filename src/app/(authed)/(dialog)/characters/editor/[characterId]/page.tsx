@@ -71,7 +71,7 @@ export default async function Page(context: PageContext) {
   if (!character) {
     return notFound();
   }
-
+  const readOnly = user.id !== character.userId;
   const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
     key: character.pictureId ?? copyOfTemplatePicture,
   });
@@ -95,6 +95,7 @@ export default async function Page(context: PageContext) {
           pictureId={character.pictureId}
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           isCreating={isCreating}
+          readOnly={readOnly}
         />
       </div>
     </div>
