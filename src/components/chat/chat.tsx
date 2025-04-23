@@ -220,7 +220,6 @@ export default function Chat({
           key={index}
           index={index}
           fileMapping={fileMapping}
-          isHelpGpt={customGpt?.id === HELP_MODE_GPT_ID}
           isLastUser={index === messages.length - 1 && message.role == 'user'}
           isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
           isLoading={isLoading}
