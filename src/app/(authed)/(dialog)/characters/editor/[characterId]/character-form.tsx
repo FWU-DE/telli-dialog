@@ -9,8 +9,8 @@ import ChevronLeftIcon from '@/components/icons/chevron-left';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
-import { CharacterAccessLevel, CharacterModel } from '@/db/schema';
-import { deepEqual } from '@/utils/object';
+import { CharacterAccessLevel, CharacterModel, FileModel } from '@/db/schema';
+import { deepCopy, deepEqual } from '@/utils/object';
 import { cn } from '@/utils/tailwind';
 import {
   buttonDeleteClassName,
@@ -35,6 +35,10 @@ import {
 } from './actions';
 import ShareContainer from './share-container';
 import { CopyContainer } from './copy-container';
+import { LocalFileState } from '@/components/chat/send-message-form';
+import { deleteFileMappingAndEntity, linkFileToCharacter } from '../../actions';
+import FileDrop from '@/components/forms/file-drop-area';
+import FilesTable from '@/components/forms/file-upload-table';
 
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -59,8 +63,9 @@ type CharacterFormValues = z.infer<typeof characterFormValuesSchema>;
 export default function CharacterForm({
   maybeSignedPictureUrl,
   isCreating = false,
+  existingFiles,
   ...character
-}: CharacterFormProps) {
+}: CharacterFormProps & { existingFiles: FileModel[] }) {
   const router = useRouter();
   const toast = useToast();
 
@@ -89,6 +94,8 @@ export default function CharacterForm({
     },
   });
 
+  const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
+  const [initialFiles, setInitialFiles] = React.useState<FileModel[]>(existingFiles);
   const t = useTranslations('characters.form');
   const tToast = useTranslations('characters.toasts');
   const tCommon = useTranslations('common');
@@ -115,6 +122,30 @@ export default function CharacterForm({
       .catch(() => {
         toast.error(tToast('edit-toast-error'));
       });
+  }
+
+  async function handleDeattachFile(localFileId: string) {
+    const fileId: string | undefined =
+      _files.get(localFileId)?.fileId ?? initialFiles.find((f) => f.id === localFileId)?.id;
+    if (fileId === undefined) return;
+
+    // update the FE state
+    setFiles((prev) => {
+      const newMap = deepCopy(prev);
+      const deleted = newMap.delete(localFileId);
+      if (!deleted) {
+        console.warn('Could not delete file');
+      }
+      return newMap;
+    });
+
+    setInitialFiles(initialFiles.filter((f) => f.id !== fileId));
+    await deleteFileMappingAndEntity({ fileId });
+  }
+  function handleNewFile(data: { id: string; name: string; file: File }) {
+    linkFileToCharacter({ fileId: data.id, characterId: character.id })
+      .then(() => console.log('Success'))
+      .catch(() => toast.error(tToast('edit-toast-error')));
   }
 
   const backUrl = `/characters?visibility=${character.accessLevel}`;
@@ -434,6 +465,16 @@ export default function CharacterForm({
           />
         </div>
       </fieldset>
+      <FileDrop setFiles={setFiles} onFileUploaded={handleNewFile} showUploadConfirmation={true} className='mt-8'/>
+      <FilesTable
+        files={initialFiles ?? []}
+        additionalFiles={_files}
+        onDeleteFile={handleDeattachFile}
+        toast={toast}
+        showUploadConfirmation={true}
+        className='mt-4'
+      />
+
       {!isCreating && !readOnly && (
         <section className="mt-8">
           <h3 className="font-medium">{t('delete-character')}</h3>

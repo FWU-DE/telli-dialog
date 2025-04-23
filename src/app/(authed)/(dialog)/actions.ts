@@ -6,9 +6,9 @@ import { dbUpdateConversationTitle } from '@/db/functions/chat';
 import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
 import { revalidatePath } from 'next/cache';
 import { dbUpdateUserTermsVersion } from '@/db/functions/user';
-import { dbGetRelatedSharedChatFiles } from '@/db/functions/files';
 import { FileModel } from '@/db/schema';
 import { VERSION } from '@/components/modals/const';
+import { dbGetAllFileIdByConversationId, dbGetRelatedFiles, dbGetRelatedSharedChatFiles } from '@/db/functions/files';
 
 export default async function deleteConversationAction({
   conversationId,
@@ -54,5 +54,5 @@ export async function refetchFileMapping(
 ): Promise<Map<string, FileModel[]>> {
   const user = await getUser();
   if (user === undefined) return new Map();
-  return await dbGetRelatedSharedChatFiles(conversationId);
+  return await dbGetRelatedFiles(conversationId);
 }

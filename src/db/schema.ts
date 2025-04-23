@@ -355,7 +355,7 @@ export const SharedSchoolConversationFileMapping= pgTable(
     fileId: text('fileId')
       .references(() => fileTable.id)
       .notNull(),
-    sharedSchoolConversationId: uuid('sharedSchoolConversationId')
+    sharedSchoolConversationId: uuid('shared_school_conversation_id')
       .references(() => sharedSchoolConversationTable.id)
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
@@ -369,31 +369,31 @@ export const CharacterFileMapping= pgTable(
   'character_file_mapping',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    fileId: text('fileId')
+    fileId: text('file_id')
       .references(() => fileTable.id)
       .notNull(),
-    conversationId: uuid('characterId')
+    characterId: uuid('character_id')
       .references(() => characterTable.id)
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
-    unq: unique().on(table.conversationId, table.fileId),
+    unq: unique().on(table.characterId, table.fileId),
   }),
 )
 export const CustomGptFileMapping= pgTable(
   'custom_gpt_file_mapping',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    fileId: text('fileId')
+    fileId: text('file_id')
       .references(() => fileTable.id)
       .notNull(),
-    conversationId: uuid('customGptId')
+    customGptId: uuid('custom_gpt_id')
       .references(() => customGptTable.id)
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
-    unq: unique().on(table.conversationId, table.fileId),
+    unq: unique().on(table.customGptId, table.fileId),
   }),
 )

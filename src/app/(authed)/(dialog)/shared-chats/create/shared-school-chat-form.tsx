@@ -19,8 +19,7 @@ import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/cons
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { LocalFileState } from '@/components/chat/send-message-form';
 import FilesTable from '@/components/forms/file-upload-table';
-import { SuccessLocalFileState, ErrorLocalFileState } from '@/utils/files/types';
-import { FileModel, FileModelAndUrl } from '@/db/schema';
+import { FileModel } from '@/db/schema';
 import FileDrop from '@/components/forms/file-drop-area';
 import { linkFileToSharedSchoolChat } from '../actions';
 import { deepCopy } from '@/utils/object';
@@ -58,7 +57,8 @@ export default function SharedSchoolChatCreateForm({
   const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   
   
-  function handleDeattachFile(localFileId: string) {
+  // no async action is called because so far the files are not linked in the db
+  async function handleDeattachFile(localFileId: string) {
     setFiles((prev) => {
       const newMap = deepCopy(prev);
       const deleted = newMap.delete(localFileId);
@@ -67,6 +67,7 @@ export default function SharedSchoolChatCreateForm({
       }
       return newMap;
     });
+    return
   }
   
   function onSubmit(data: SharedSchoolChatFormValues) {
@@ -243,8 +244,8 @@ export default function SharedSchoolChatCreateForm({
           maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
         />
       </div>
-      <FileDrop setFiles={setFiles} />
-      <FilesTable files={existingFiles ?? []} additionalFiles={_files} onDeleteFile={handleDeattachFile} />
+      <FileDrop setFiles={setFiles} showUploadConfirmation />
+      <FilesTable files={existingFiles ?? []} additionalFiles={_files} onDeleteFile={handleDeattachFile} toast={toast}/>
       <div className="flex gap-4 mt-12">
         <Link
           href="/shared-chats"

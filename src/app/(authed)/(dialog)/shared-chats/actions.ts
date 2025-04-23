@@ -36,7 +36,7 @@ export async function linkFileToSharedSchoolChat({
   const user = await getUser();
   const [insertedFileMapping] = await db
     .insert(SharedSchoolConversationFileMapping)
-    .values({ conversationId: schoolChatId, fileId: fileId })
+    .values({ sharedSchoolConversationId: schoolChatId, fileId: fileId })
     .returning();
   if (insertedFileMapping === undefined){
     throw new Error("Could not Link file to shared School Chat")

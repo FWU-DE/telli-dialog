@@ -14,6 +14,7 @@ import HeaderPortal from '../../../header-portal';
 import CharacterForm from './character-form';
 import { removeNullValues } from '@/utils/generic/object-operations';
 import { CharacterModel } from '@/db/schema';
+import { fetchFileMapping } from '../../actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,6 +69,7 @@ export default async function Page(context: PageContext) {
   const copyOfTemplatePicture =
     templateId !== undefined ? `characters/${character.id}/avatar` : undefined;
 
+  const relatedFiles = await fetchFileMapping(params.characterId)
   if (!character) {
     return notFound();
   }
@@ -95,6 +97,7 @@ export default async function Page(context: PageContext) {
           pictureId={character.pictureId}
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           isCreating={isCreating}
+          existingFiles={relatedFiles}
         />
       </div>
     </div>

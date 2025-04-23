@@ -134,20 +134,15 @@ export async function fetchFileMapping(id: string): Promise<FileModel[]> {
 }
 
 export async function deleteFileMappingAndEntity({
-  file_id,
-  shareSchoolChatId,
+  fileId,
+
 }: {
-  file_id: string;
-  shareSchoolChatId: string;
+  fileId: string;
+
 }) {
   const user = await getUser();
   await db
     .delete(SharedSchoolConversationFileMapping)
-    .where(
-      and(
-        eq(SharedSchoolConversationFileMapping.sharedSchoolConversationId, shareSchoolChatId),
-        eq(SharedSchoolConversationFileMapping.fileId, file_id),
-      ),
-    );
-  await db.delete(fileTable).where(eq(fileTable.id, file_id));
+    .where(eq(SharedSchoolConversationFileMapping.fileId, fileId)),
+    await db.delete(fileTable).where(eq(fileTable.id, fileId));
 }

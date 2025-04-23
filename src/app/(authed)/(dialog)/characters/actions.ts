@@ -1,11 +1,13 @@
 'use server';
 
 import { db } from '@/db';
-import { characterTable } from '@/db/schema';
+import { CharacterFileMapping, characterTable, FileModel, fileTable } from '@/db/schema';
 import { getUser } from '@/auth/utils';
 import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 import { copyFileInS3 } from '@/s3';
 import { generateUUID } from '@/utils/uuid';
+import { eq } from 'drizzle-orm';
+import { dbGetRelatedCharacterFiles, dbGetRelatedSharedChatFiles } from '@/db/functions/files';
 
 export async function createNewCharacterAction({
   modelId: _modelId,
@@ -55,4 +57,40 @@ export async function createNewCharacterAction({
   }
 
   return insertedCharacter;
+}
+export async function deleteFileMappingAndEntity({
+  fileId,
+
+}: {
+  fileId: string;
+
+}) {
+  const user = await getUser();
+  await db
+    .delete(CharacterFileMapping)
+    .where(eq(CharacterFileMapping.fileId, fileId)),
+    await db.delete(fileTable).where(eq(fileTable.id, fileId));
+}
+
+export async function fetchFileMapping(id: string): Promise<FileModel[]> {
+  const user = await getUser();
+  if (user === undefined) return [];
+  return await dbGetRelatedCharacterFiles(id);
+}
+
+export async function linkFileToCharacter({
+  fileId,
+  characterId,
+}: {
+  fileId: string;
+  characterId: string;
+}) {
+  const user = await getUser();
+  const [insertedFileMapping] = await db
+    .insert(CharacterFileMapping)
+    .values({ characterId: characterId, fileId: fileId })
+    .returning();
+  if (insertedFileMapping === undefined){
+    throw new Error("Could not Link file to character")
+  }
 }

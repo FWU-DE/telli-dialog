@@ -12,7 +12,7 @@ import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '..
 import { deleteFileMappingAndEntity, updateSharedSchoolChat } from './actions';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
-import { deleteSharedChatAction } from '../actions';
+import { deleteSharedChatAction, linkFileToSharedSchoolChat } from '../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
 import ShareContainer from './share-container';
 import * as Select from '@radix-ui/react-select';
@@ -34,7 +34,7 @@ export default function SharedSchoolChatEditForm({
   const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   const [initialFiles, setInitialFiles] = React.useState<FileModel[]>(existingFiles);
   const t = useTranslations('shared-chats.form');
-  const tToasts = useTranslations('shared-chats.toasts');
+  const tToast = useTranslations('shared-chats.toasts');
   const tCommon = useTranslations('common');
 
   const { models } = useLlmModels();
@@ -46,33 +46,48 @@ export default function SharedSchoolChatEditForm({
     },
   });
 
-  function handleDeattachFile(localFileId: string) {
-    const fileEntity = _files.find((f) => f.id === localFileId);
-    setFiles(_files.filter((f) => f.id !== localFileId));
-    console.log(fileEntity);
-    //deleteFileMappingAndEntity(fileEntity.id);
+  async function handleDeattachFile(localFileId: string) {
+    const fileId: string | undefined =
+      _files.get(localFileId)?.fileId ?? initialFiles.find((f) => f.id === localFileId)?.id;
+    if (fileId === undefined) return;
+
+    // update the FE state
+    setFiles((prev) => {
+      const newMap = deepCopy(prev);
+      const deleted = newMap.delete(localFileId);
+      if (!deleted) {
+        console.warn('Could not delete file');
+      }
+      return newMap;
+    });
+
+    setInitialFiles(initialFiles.filter((f) => f.id !== fileId));
+    await deleteFileMappingAndEntity({ fileId });
   }
-  function handleNewFile(fileId: string) {}
+  function handleNewFile(data: { id: string; name: string; file: File }) {
+    linkFileToSharedSchoolChat({ fileId: data.id, schoolChatId: sharedSchoolChat.id })
+      .then(() => console.log('Success'))
+      .catch(() => toast.error(tToast('edit-toast-error')));
+  }
 
   function onSubmit(data: SharedSchoolChatFormValues) {
     updateSharedSchoolChat({ ...sharedSchoolChat, ...data })
       .then(() => {
-        toast.success(tToasts('edit-toast-success'));
-        router.refresh();
+        toast.success(tToast('edit-toast-success'));
       })
       .catch(() => {
-        toast.error(tToasts('edit-toast-error'));
+        toast.error(tToast('edit-toast-error'));
       });
   }
 
   function handleDeleteSharedChat() {
     deleteSharedChatAction({ id: sharedSchoolChat.id })
       .then(() => {
-        toast.success(tToasts('delete-toast-success'));
+        toast.success(tToast('delete-toast-success'));
         router.push('/shared-chats');
       })
       .catch(() => {
-        toast.error(tToasts('delete-toast-error'));
+        toast.error(tToast('delete-toast-error'));
       });
   }
 
@@ -224,11 +239,14 @@ export default function SharedSchoolChatEditForm({
           maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
         />
       </div>
-      <FileDrop setFiles={setFiles} />
+      <FileDrop setFiles={setFiles} onFileUploaded={handleNewFile} showUploadConfirmation={true} />
       <FilesTable
         files={initialFiles ?? []}
         additionalFiles={_files}
         onDeleteFile={handleDeattachFile}
+        toast={toast}
+        showUploadConfirmation={true}
+        className="p-4"
       />
       <section>
         <h3 className="font-medium mt-8">{t('delete-title')}</h3>

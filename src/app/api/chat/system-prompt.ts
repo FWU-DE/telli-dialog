@@ -9,20 +9,35 @@ export function constructSchuleSystemPrompt() {
 }
 
 export function constructSingleFilePrompt(fileEntity: FileModelAndContent) {
-  return `Dateiname: ${fileEntity.name} Was folgt ist der gesamte rohe Inhalt der Datei:
+  return `Dateiname: ${fileEntity.name} 
+  Was folgt ist der gesamte rohe Inhalt der Datei:
   --------- 
   ${fileEntity.content}
   ---------
   `;
 }
 
-export function constructCustomGptSystemPrompt({ customGpt }: { customGpt: CustomGptModel }) {
+export function constructCustomGptSystemPrompt({
+  customGpt,
+  fileContentPrompt,
+}: {
+  customGpt: CustomGptModel;
+  fileContentPrompt?: string;
+}) {
   return `Du bist ein hifreicher Assistent, der in einer Schule eingesetzt wird. Dein Name ist ${customGpt.name}. 
 Dein Ziel ist es hierbei zu assistieren: ${customGpt.description}
-Deine Aufgabe ist insbesondere: ${customGpt.specification ?? ''}`;
+Deine Aufgabe ist insbesondere: ${customGpt.specification ?? ''}
+${fileContentPrompt ?? ''}
+`;
 }
 
-export async function constructCharacterSystemPrompt({ characterId }: { characterId: string }) {
+export async function constructCharacterSystemPrompt({
+  characterId,
+  fileContentPrompt,
+}: {
+  characterId: string;
+  fileContentPrompt: string;
+}) {
   await getUser();
   const character = await dbGetCharacterById({ characterId });
 
@@ -32,7 +47,9 @@ export async function constructCharacterSystemPrompt({ characterId }: { characte
 
   return `Du bist ein Dialogpartner, der in einer Schule eingesetzt wird. Du verkörperst ${character.name}. 
 Du wist aktuell im folgenden Lernkontext verwendet: ${character.learningContext ?? ''}
+${fileContentPrompt ?? ''}
 Du sollst folgendes beachten: ${character.specifications ?? ''}
+
 Folgende Dinge sollst du AUF KEINEN FALL tun: ${character.restrictions ?? ''}`;
 }
 
@@ -94,7 +111,7 @@ ${federalStateSupportEmail !== null ? `- Kannst du nicht weiterhelfen, verweise 
   return systemPrompt;
 }
 
-const BASE_FILE_PROMPT = `Der Nutzer hat folgende Dateien bereitgestellt, berücksichtige den Inhalt dieser Dateien bei der Antwort 
+export const BASE_FILE_PROMPT = `Der Nutzer hat folgende Dateien bereitgestellt, berücksichtige den Inhalt dieser Dateien bei der Antwort 
 `;
 
 export async function constructChatSystemPrompt({
@@ -111,14 +128,18 @@ export async function constructChatSystemPrompt({
   attachedFiles: FileModelAndContent[];
 }) {
   const schoolSystemPrompt = constructSchuleSystemPrompt();
-  let filePrompt = '';
-  if (attachedFiles?.length > 0) {
-    filePrompt = BASE_FILE_PROMPT + attachedFiles.map((file) => constructSingleFilePrompt(file));
-  }
-  if (characterId !== undefined) {
-    const characterSystemPrompt = await constructCharacterSystemPrompt({ characterId });
+  const fileContentPrompt =
+    attachedFiles?.length > 0
+      ? BASE_FILE_PROMPT + attachedFiles.map((file) => constructSingleFilePrompt(file))
+      : '';
 
-    return characterSystemPrompt;
+  if (characterId !== undefined) {
+    const characterSystemPrompt = await constructCharacterSystemPrompt({
+      characterId,
+      fileContentPrompt,
+    });
+
+    return characterSystemPrompt + fileContentPrompt;
   }
   if (customGptId !== undefined) {
     const customGpt = await dbGetCustomGptById({ customGptId });
@@ -135,7 +156,7 @@ export async function constructChatSystemPrompt({
         chatStorageDuration: federalState.chatStorageTime,
       });
     else {
-      additionalInstruction = constructCustomGptSystemPrompt({ customGpt });
+      additionalInstruction = constructCustomGptSystemPrompt({ customGpt, fileContentPrompt });
     }
 
     const concatenatedHelpModeSystemPrompt = schoolSystemPrompt + additionalInstruction;
@@ -143,5 +164,5 @@ export async function constructChatSystemPrompt({
     return concatenatedHelpModeSystemPrompt;
   }
 
-  return schoolSystemPrompt + filePrompt;
+  return schoolSystemPrompt + fileContentPrompt;
 }

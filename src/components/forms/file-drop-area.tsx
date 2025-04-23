@@ -8,17 +8,22 @@ import { useSession } from 'next-auth/react';
 import { useToast } from '../common/toast';
 import { SUPPORTED_FILE_EXTENSIONS } from '@/const';
 
-
-export function FileDrop({ onFileUploaded, setFiles, disabled, showUploadConfirmation=false }: UploadFileButtonProps) {
+export function FileDrop({
+  onFileUploaded,
+  setFiles,
+  disabled,
+  showUploadConfirmation = false,
+  ...restProps
+}: UploadFileButtonProps) {
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
   const session = useSession();
 
   const t = useTranslations('file-interaction');
-    async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>){
-        await handleFiles(event.target.files)
-    }    
+  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    await handleFiles(event.target.files);
+  }
 
   async function handleFiles(selectedFiles: FileList | undefined | null) {
     if (selectedFiles == null) return;
@@ -32,10 +37,11 @@ export function FileDrop({ onFileUploaded, setFiles, disabled, showUploadConfirm
           setFiles,
           onFileUploaded,
           translations: t,
+          showUploadConfirmation
         }),
-        toast.success(t('toasts.upload-success'))
       ),
     );
+    
 
     if (fileInputRef.current !== null) {
       fileInputRef.current.value = '';
@@ -81,7 +87,7 @@ export function FileDrop({ onFileUploaded, setFiles, disabled, showUploadConfirm
   };
 
   return (
-    <div className={`w-full`}>
+    <div {...restProps}>
       <div
         className={`border-2 border-dashed rounded-enterprise-sm p-6 text-center transition-colors ${
           isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'

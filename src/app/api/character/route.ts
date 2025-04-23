@@ -16,6 +16,8 @@ import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
+import { dbGetRelatedCharacterFiles } from '@/db/functions/files';
+import { process_files } from '../file-operations/process-file';
 
 export async function POST(request: NextRequest) {
   const { messages, modelId }: { messages: Array<Message>; modelId: string } = await request.json();
@@ -84,7 +86,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'User has reached intelli points limit' }, { status: 429 });
   }
 
-  const systemPrompt = constructSystemPromptByCharacterSharedChat({ character });
+  const allFileIds = await dbGetRelatedCharacterFiles(character.id);
+  const attachedFiles = await process_files(allFileIds.map((f) => f.id));
+  const systemPrompt = constructSystemPromptByCharacterSharedChat({ character, fileEntities: attachedFiles });
 
   const result = streamText({
     model: telliProvider,

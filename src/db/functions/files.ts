@@ -1,6 +1,7 @@
 import { eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import { db } from '..';
 import {
+  CharacterFileMapping,
   conversationMessgaeFileMappingTable,
   conversationTable,
   FileModel,
@@ -25,9 +26,7 @@ export async function link_file_to_conversation({
   }
 }
 
-export async function dbGetRelatedFiles(
-  conversationId: string,
-): Promise<Map<string, FileModel[]>> {
+export async function dbGetRelatedFiles(conversationId: string): Promise<Map<string, FileModel[]>> {
   const files = await db
     .select({
       foreignId: conversationMessgaeFileMappingTable.conversationMessageId,
@@ -41,14 +40,12 @@ export async function dbGetRelatedFiles(
     .innerJoin(fileTable, eq(conversationMessgaeFileMappingTable.fileId, fileTable.id))
     .where(eq(conversationMessgaeFileMappingTable.conversationId, conversationId));
 
-  const resultMap = convertToMap(files)
+  const resultMap = convertToMap(files);
   return resultMap;
 }
 
-
-export async function dbGetRelatedSharedChatFiles(
-  conversationId: string,
-): Promise<FileModel[]> {
+export async function dbGetRelatedSharedChatFiles(conversationId?: string): Promise<FileModel[]> {
+  if (conversationId === undefined) return []
   const files = await db
     .select({
       id: SharedSchoolConversationFileMapping.fileId,
@@ -64,7 +61,33 @@ export async function dbGetRelatedSharedChatFiles(
   return files;
 }
 
-function convertToMap(files: { foreignId: string; fileId: string; name: string; type: string; size: number; createdAt: Date; }[]) {
+export async function dbGetRelatedCharacterFiles(conversationId?: string): Promise<FileModel[]> {
+  if (conversationId === undefined) return []
+  const files = await db
+    .select({
+      id: CharacterFileMapping.fileId,
+      name: fileTable.name,
+      type: fileTable.type,
+      size: fileTable.size,
+      createdAt: fileTable.createdAt,
+    })
+    .from(CharacterFileMapping)
+    .innerJoin(fileTable, eq(CharacterFileMapping.fileId, fileTable.id))
+    .where(eq(CharacterFileMapping.characterId, conversationId));
+
+  return files;
+}
+
+function convertToMap(
+  files: {
+    foreignId: string;
+    fileId: string;
+    name: string;
+    type: string;
+    size: number;
+    createdAt: Date;
+  }[],
+) {
   const resultMap: Map<string, FileModel[]> = new Map();
   for (const row of files) {
     const file = {
@@ -90,13 +113,31 @@ export async function dbGetFilesInIds(fileIds: string[]): Promise<FileModelAndCo
   return [...maybeFiles];
 }
 
-export async function dbGetAllFileIdByConversationId(conversationId: string) {
+export async function dbGetAttachedFileByEntityId({
+  conversationId,
+  characterId,
+  sharedChatId,
+}: {
+  conversationId?: string;
+  characterId?: string;
+  sharedChatId?: string;
+}) {
+  const combinedFiles = await Promise.all([
+    dbGetRelatedSharedChatFiles(sharedChatId),
+    dbGetRelatedCharacterFiles(characterId),
+    dbGetAllFileIdByConversationId(conversationId),
+  ]);
+  return combinedFiles.flat().map((f) => f.id);
+}
+
+export async function dbGetAllFileIdByConversationId(conversationId?: string) {
+  if (conversationId === undefined) return []
   const fileMappings = await db
     .select()
     .from(conversationMessgaeFileMappingTable)
     .where(eq(conversationMessgaeFileMappingTable.conversationId, conversationId))
     .orderBy(conversationMessgaeFileMappingTable.createdAt);
-  return fileMappings.map((row) => row.fileId);
+  return fileMappings;
 }
 
 export async function dbGetDanglingFileIds() {

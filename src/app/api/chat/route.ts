@@ -17,7 +17,11 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
-import { dbGetAllFileIdByConversationId, link_file_to_conversation } from '@/db/functions/files';
+import {
+  dbGetAllFileIdByConversationId,
+  dbGetAttachedFileByEntityId,
+  link_file_to_conversation,
+} from '@/db/functions/files';
 import { process_files } from '../file-operations/process-file';
 import { FileModelAndContent } from '@/db/schema';
 
@@ -117,8 +121,7 @@ export async function POST(request: NextRequest) {
       conversationId: conversation.id,
     });
   }
-  const allFileIds = await dbGetAllFileIdByConversationId(conversation.id);
-
+  const allFileIds = await dbGetAttachedFileByEntityId({ conversationId: conversation.id, characterId });
   attachedFiles = await process_files(allFileIds);
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
   const prunedMessages = limitChatHistory({ messages, limitRecent: 4, limitFirst: 4 });
@@ -129,6 +132,7 @@ export async function POST(request: NextRequest) {
     federalState: user.federalState,
     attachedFiles: attachedFiles,
   });
+  console.log(systemPrompt)
   const result = streamText({
     model: telliProvider,
     system: systemPrompt,
