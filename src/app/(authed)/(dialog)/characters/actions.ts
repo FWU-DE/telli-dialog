@@ -58,17 +58,9 @@ export async function createNewCharacterAction({
 
   return insertedCharacter;
 }
-export async function deleteFileMappingAndEntity({
-  fileId,
-
-}: {
-  fileId: string;
-
-}) {
+export async function deleteFileMappingAndEntity({ fileId }: { fileId: string }) {
   const user = await getUser();
-  await db
-    .delete(CharacterFileMapping)
-    .where(eq(CharacterFileMapping.fileId, fileId)),
+  await db.delete(CharacterFileMapping).where(eq(CharacterFileMapping.fileId, fileId)),
     await db.delete(fileTable).where(eq(fileTable.id, fileId));
 }
 
@@ -90,7 +82,7 @@ export async function linkFileToCharacter({
     .insert(CharacterFileMapping)
     .values({ characterId: characterId, fileId: fileId })
     .returning();
-  if (insertedFileMapping === undefined){
-    throw new Error("Could not Link file to character")
+  if (insertedFileMapping === undefined) {
+    throw new Error('Could not Link file to character');
   }
 }

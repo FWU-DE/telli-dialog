@@ -4,6 +4,7 @@ import {
   CharacterFileMapping,
   conversationMessgaeFileMappingTable,
   conversationTable,
+  CustomGptFileMapping,
   FileModel,
   FileModelAndContent,
   fileTable,
@@ -78,6 +79,23 @@ export async function dbGetRelatedCharacterFiles(conversationId?: string): Promi
   return files;
 }
 
+export async function dbGetRelatedCustomGptFiles(customGptId?: string): Promise<FileModel[]> {
+  if (customGptId === undefined) return []
+  const files = await db
+    .select({
+      id: CustomGptFileMapping.fileId,
+      name: fileTable.name,
+      type: fileTable.type,
+      size: fileTable.size,
+      createdAt: fileTable.createdAt,
+    })
+    .from(CustomGptFileMapping)
+    .innerJoin(fileTable, eq(CustomGptFileMapping.fileId, fileTable.id))
+    .where(eq(CustomGptFileMapping.customGptId, customGptId));
+
+  return files;
+}
+
 function convertToMap(
   files: {
     foreignId: string;
@@ -117,15 +135,18 @@ export async function dbGetAttachedFileByEntityId({
   conversationId,
   characterId,
   sharedChatId,
+  customGptId,
 }: {
   conversationId?: string;
   characterId?: string;
   sharedChatId?: string;
+  customGptId?: string
 }) {
   const combinedFiles = await Promise.all([
     dbGetRelatedSharedChatFiles(sharedChatId),
     dbGetRelatedCharacterFiles(characterId),
     dbGetAllFileIdByConversationId(conversationId),
+    dbGetRelatedCustomGptFiles(customGptId)
   ]);
   return combinedFiles.flat().map((f) => f.id);
 }

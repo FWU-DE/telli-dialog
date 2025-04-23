@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
       conversationId: conversation.id,
     });
   }
-  const allFileIds = await dbGetAttachedFileByEntityId({ conversationId: conversation.id, characterId });
+  const allFileIds = await dbGetAttachedFileByEntityId({ conversationId: conversation.id, characterId, customGptId });
   attachedFiles = await process_files(allFileIds);
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
   const prunedMessages = limitChatHistory({ messages, limitRecent: 4, limitFirst: 4 });

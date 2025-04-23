@@ -122,7 +122,7 @@ export default function FilesTable({
                     confirmText="Datei löschen"
                     actionFn={() => handleDeleteFile(id)}
                   >
-                    <TrashIcon />
+                    <TrashIcon className='hover:bg-vidis-hover-green/20'/>
                   </DestructiveActionButton>
                 </td>
               </tr>
