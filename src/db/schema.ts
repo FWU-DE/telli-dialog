@@ -133,9 +133,9 @@ export const characterTable = pgTable('character', {
   learningContext: text('learning_context').notNull().default(''),
   competence: text('competence').notNull().default(''),
   // new
-  schoolType: text('school_type').default(''),
-  gradeLevel: text('grade_level').default(''),
-  subject: text('subject').default(''),
+  schoolType: text('school_type'),
+  gradeLevel: text('grade_level'),
+  subject: text('subject'),
   // not required
   specifications: text('specifications'),
   restrictions: text('restrictions'),
@@ -208,8 +208,8 @@ export const sharedSchoolConversationTable = pgTable('shared_school_conversation
   gradeLevel: text('grade_level').notNull().default(''),
   subject: text('subject').default('').notNull(),
   learningContext: text('learning_context').default('').notNull(),
-  specification: text('specification').default('').notNull(),
-  restrictions: text('restrictions').default('').notNull(),
+  specification: text('specification'),
+  restrictions: text('restrictions'),
   intelligencePointsLimit: integer('intelligence_points_limit'),
   maxUsageTimeLimit: integer('max_usage_time_limit'),
   inviteCode: text('invite_code').unique(),

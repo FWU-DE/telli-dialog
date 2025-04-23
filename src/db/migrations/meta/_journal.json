@@ -71,6 +71,13 @@
       "when": 1745306685280,
       "tag": "0009_violet_power_pack",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1745414372361,
+      "tag": "0010_nervous_cardiac",
+      "breakpoints": true
     }
   ]
 }

@@ -19,7 +19,10 @@ import * as Select from '@radix-ui/react-select';
 import ChevronDownIcon from '@/components/icons/chevron-down';
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import {
+  SMALL_TEXT_INPUT_FIELDS_LIMIT,
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+} from '@/configuration-text-inputs/const';
 
 export default function SharedSchoolChatEditForm({
   ...sharedSchoolChat
@@ -133,7 +136,7 @@ export default function SharedSchoolChatEditForm({
           id="description"
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('description')}
-          maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+          maxLength={SMALL_TEXT_INPUT_FIELDS_LIMIT}
         />
       </div>
       <div className="grid grid-cols-3 gap-6">
