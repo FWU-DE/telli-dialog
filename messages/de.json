@@ -47,7 +47,9 @@
   "file-interaction": {
     "upload": {
       "upload-file-button": "Datei hochladen",
-      "file-limit-reached": "Es wurde bereits eine Datei hochgeladen"
+      "file-limit-reached": "Es wurde bereits eine Datei hochgeladen",
+      "drop-area": "Datei per Drag & Drop hier ablegen",
+      "choice-word": "oder"
     },
     "toasts": {
       "upload-success": "Die Datei wurde erfolgreich hochgeladen",

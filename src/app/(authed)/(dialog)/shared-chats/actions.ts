@@ -1,6 +1,6 @@
 'use server';
 import { db } from '@/db';
-import { sharedSchoolConversationTable } from '@/db/schema';
+import { SharedSchoolConversationFileMapping, sharedSchoolConversationTable } from '@/db/schema';
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
 
@@ -24,4 +24,21 @@ export async function deleteSharedChatAction({ id }: { id: string }) {
   }
 
   return deletedSharedChat;
+}
+
+export async function linkFileToSharedSchoolChat({
+  fileId,
+  schoolChatId,
+}: {
+  fileId: string;
+  schoolChatId: string;
+}) {
+  const user = await getUser();
+  const [insertedFileMapping] = await db
+    .insert(SharedSchoolConversationFileMapping)
+    .values({ conversationId: schoolChatId, fileId: fileId })
+    .returning();
+  if (insertedFileMapping === undefined){
+    throw new Error("Could not Link file to shared School Chat")
+  }
 }

@@ -1,12 +1,19 @@
 'use server';
 
 import { db } from '@/db';
-import { SharedSchoolConversationModel, sharedSchoolConversationTable } from '@/db/schema';
+import {
+  FileModel,
+  fileTable,
+  SharedSchoolConversationFileMapping,
+  SharedSchoolConversationModel,
+  sharedSchoolConversationTable,
+} from '@/db/schema';
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
 import { parseNumberOrThrow } from '@/utils/number';
 import { SharedConversationShareFormValues } from './schema';
 import { generateInviteCode } from './utils';
+import { dbGetRelatedSharedChatFiles } from '@/db/functions/files';
 
 export async function updateSharedSchoolChat({
   id: sharedChatId,
@@ -118,4 +125,29 @@ export async function handleStopSharedChatShareAction({ id }: { id: string }) {
   }
 
   return updatedSharedChat;
+}
+
+export async function fetchFileMapping(id: string): Promise<FileModel[]> {
+  const user = await getUser();
+  if (user === undefined) return [];
+  return await dbGetRelatedSharedChatFiles(id);
+}
+
+export async function deleteFileMappingAndEntity({
+  file_id,
+  shareSchoolChatId,
+}: {
+  file_id: string;
+  shareSchoolChatId: string;
+}) {
+  const user = await getUser();
+  await db
+    .delete(SharedSchoolConversationFileMapping)
+    .where(
+      and(
+        eq(SharedSchoolConversationFileMapping.sharedSchoolConversationId, shareSchoolChatId),
+        eq(SharedSchoolConversationFileMapping.fileId, file_id),
+      ),
+    );
+  await db.delete(fileTable).where(eq(fileTable.id, file_id));
 }

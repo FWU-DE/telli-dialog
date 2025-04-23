@@ -6,6 +6,7 @@ import {
   FileModel,
   FileModelAndContent,
   fileTable,
+  SharedSchoolConversationFileMapping,
 } from '../schema';
 
 export async function link_file_to_conversation({
@@ -24,10 +25,12 @@ export async function link_file_to_conversation({
   }
 }
 
-export async function dbGetRelatedFiles(conversationId: string): Promise<Map<string, FileModel[]>> {
+export async function dbGetRelatedFiles(
+  conversationId: string,
+): Promise<Map<string, FileModel[]>> {
   const files = await db
     .select({
-      conversationMessageId: conversationMessgaeFileMappingTable.conversationMessageId,
+      foreignId: conversationMessgaeFileMappingTable.conversationMessageId,
       fileId: conversationMessgaeFileMappingTable.fileId,
       name: fileTable.name,
       type: fileTable.type,
@@ -38,6 +41,30 @@ export async function dbGetRelatedFiles(conversationId: string): Promise<Map<str
     .innerJoin(fileTable, eq(conversationMessgaeFileMappingTable.fileId, fileTable.id))
     .where(eq(conversationMessgaeFileMappingTable.conversationId, conversationId));
 
+  const resultMap = convertToMap(files)
+  return resultMap;
+}
+
+
+export async function dbGetRelatedSharedChatFiles(
+  conversationId: string,
+): Promise<FileModel[]> {
+  const files = await db
+    .select({
+      id: SharedSchoolConversationFileMapping.fileId,
+      name: fileTable.name,
+      type: fileTable.type,
+      size: fileTable.size,
+      createdAt: fileTable.createdAt,
+    })
+    .from(SharedSchoolConversationFileMapping)
+    .innerJoin(fileTable, eq(SharedSchoolConversationFileMapping.fileId, fileTable.id))
+    .where(eq(SharedSchoolConversationFileMapping.sharedSchoolConversationId, conversationId));
+
+  return files;
+}
+
+function convertToMap(files: { foreignId: string; fileId: string; name: string; type: string; size: number; createdAt: Date; }[]) {
   const resultMap: Map<string, FileModel[]> = new Map();
   for (const row of files) {
     const file = {
@@ -47,9 +74,9 @@ export async function dbGetRelatedFiles(conversationId: string): Promise<Map<str
       createdAt: row.createdAt,
       type: row.type,
     };
-    const maybeFiles = resultMap.get(row.conversationMessageId);
+    const maybeFiles = resultMap.get(row.foreignId);
     if (maybeFiles == null) {
-      resultMap.set(row.conversationMessageId, [file]);
+      resultMap.set(row.foreignId, [file]);
     }
     if (maybeFiles !== undefined) {
       maybeFiles.push(file);

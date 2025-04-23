@@ -56,3 +56,25 @@ export function getFileNameWithoutExtension(fileName: string) {
 
   return parts.slice(0, -1).join('.');
 }
+
+export function getFileNameAndFileExtention(fileName:string){
+  const parts = fileName.split('.');
+
+  if (parts.length === 1) {
+    return fileName;
+  }
+  const extention = parts[parts.length - 1];
+  const fileStem = parts.slice(0, -1).join('.') 
+  return [fileStem, extention];
+
+}
+
+export function hexToRGBA(hex: string, opacity = 1) {
+  const sanitizedHex = hex.replace('#', '');
+
+  const r = parseInt(sanitizedHex.substring(0, 2), 16);
+  const g = parseInt(sanitizedHex.substring(2, 4), 16);
+  const b = parseInt(sanitizedHex.substring(4, 6), 16);
+
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+}

@@ -6,7 +6,7 @@ import { dbUpdateConversationTitle } from '@/db/functions/chat';
 import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
 import { revalidatePath } from 'next/cache';
 import { dbUpdateUserTermsVersion } from '@/db/functions/user';
-import { dbGetRelatedFiles } from '@/db/functions/files';
+import { dbGetRelatedSharedChatFiles } from '@/db/functions/files';
 import { FileModel } from '@/db/schema';
 import { VERSION } from '@/components/modals/const';
 
@@ -54,5 +54,5 @@ export async function refetchFileMapping(
 ): Promise<Map<string, FileModel[]>> {
   const user = await getUser();
   if (user === undefined) return new Map();
-  return await dbGetRelatedFiles(conversationId);
+  return await dbGetRelatedSharedChatFiles(conversationId);
 }

@@ -11,6 +11,7 @@ import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import HeaderPortal from '../../header-portal';
 import SharedSchoolChatEditForm from './shared-school-chat-edit-form';
+import { fetchFileMapping } from './actions';
 
 const pageContextSchema = z.object({
   params: z.object({
@@ -33,6 +34,7 @@ export default async function Page(context: PageContext) {
   if (!sharedSchoolChat) {
     return notFound();
   }
+  const relatedFiles = await fetchFileMapping(params.sharedSchoolChatId)
 
   return (
     <div className="w-full p-6 overflow-auto">
@@ -47,7 +49,7 @@ export default async function Page(context: PageContext) {
           <span className="hover:underline">{t('form.all-dialogs')}</span>
         </Link>
         <h1 className="text-2xl mt-4 font-medium">{sharedSchoolChat.name}</h1>
-        <SharedSchoolChatEditForm {...sharedSchoolChat} />
+        <SharedSchoolChatEditForm {...sharedSchoolChat} existingFiles={relatedFiles} />
       </div>
     </div>
   );

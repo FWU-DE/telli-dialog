@@ -7,26 +7,32 @@ import { useForm } from 'react-hook-form';
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
-import { SharedSchoolConversationModel } from '@/db/schema';
+import { FileModel, SharedSchoolConversationModel } from '@/db/schema';
 import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../schema';
-import { updateSharedSchoolChat } from './actions';
+import { deleteFileMappingAndEntity, updateSharedSchoolChat } from './actions';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
 import { deleteSharedChatAction } from '../actions';
-import { deepEqual } from '@/utils/object';
+import { deepCopy, deepEqual } from '@/utils/object';
 import ShareContainer from './share-container';
 import * as Select from '@radix-ui/react-select';
 import ChevronDownIcon from '@/components/icons/chevron-down';
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import { LocalFileState } from '@/components/chat/send-message-form';
+import FileDrop from '@/components/forms/file-drop-area';
+import FilesTable from '@/components/forms/file-upload-table';
 
 export default function SharedSchoolChatEditForm({
+  existingFiles,
   ...sharedSchoolChat
-}: SharedSchoolConversationModel) {
+}: SharedSchoolConversationModel & { existingFiles: FileModel[] }) {
   const toast = useToast();
   const router = useRouter();
 
+  const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
+  const [initialFiles, setInitialFiles] = React.useState<FileModel[]>(existingFiles);
   const t = useTranslations('shared-chats.form');
   const tToasts = useTranslations('shared-chats.toasts');
   const tCommon = useTranslations('common');
@@ -39,6 +45,14 @@ export default function SharedSchoolChatEditForm({
       ...sharedSchoolChat,
     },
   });
+
+  function handleDeattachFile(localFileId: string) {
+    const fileEntity = _files.find((f) => f.id === localFileId);
+    setFiles(_files.filter((f) => f.id !== localFileId));
+    console.log(fileEntity);
+    //deleteFileMappingAndEntity(fileEntity.id);
+  }
+  function handleNewFile(fileId: string) {}
 
   function onSubmit(data: SharedSchoolChatFormValues) {
     updateSharedSchoolChat({ ...sharedSchoolChat, ...data })
@@ -210,6 +224,12 @@ export default function SharedSchoolChatEditForm({
           maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
         />
       </div>
+      <FileDrop setFiles={setFiles} />
+      <FilesTable
+        files={initialFiles ?? []}
+        additionalFiles={_files}
+        onDeleteFile={handleDeattachFile}
+      />
       <section>
         <h3 className="font-medium mt-8">{t('delete-title')}</h3>
         <p className="text-dark-gray mt-4">{t('delete-description')}</p>
