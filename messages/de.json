@@ -55,7 +55,8 @@
       "upload-success": "Die Datei wurde erfolgreich hochgeladen",
       "upload-error": "Die Datei konnte leider nicht hochgeladen werden. Bitte versuchen Sie es erneut",
       "file-too-large": "Die Datei {file_name} ist zu groß. Das Limit liegt bei {max_file_size} MB.",
-      "delete-from-form": "Die Datei wurde erfolgreich gelöscht"
+      "delete-from-form": "Die Datei wurde erfolgreich gelöscht",
+      "invalid-file-format": "Das Dateiformat wird nicht unterstützt, folgende Dateitypen können hochgeladen werden: {supported_formats}"
     }
   },
   "help-mode": {

@@ -144,7 +144,7 @@ export default function CharacterForm({
   }
   function handleNewFile(data: { id: string; name: string; file: File }) {
     linkFileToCharacter({ fileId: data.id, characterId: character.id })
-      .then(() => console.log('Success'))
+      .then()
       .catch(() => toast.error(tToast('edit-toast-error')));
   }
 
@@ -465,14 +465,19 @@ export default function CharacterForm({
           />
         </div>
       </fieldset>
-      <FileDrop setFiles={setFiles} onFileUploaded={handleNewFile} showUploadConfirmation={true} className='mt-8'/>
+      <FileDrop
+        setFiles={setFiles}
+        onFileUploaded={handleNewFile}
+        showUploadConfirmation={true}
+        className="mt-8"
+      />
       <FilesTable
         files={initialFiles ?? []}
         additionalFiles={_files}
         onDeleteFile={handleDeattachFile}
         toast={toast}
         showUploadConfirmation={true}
-        className='mt-4'
+        className="mt-4"
       />
 
       {!isCreating && !readOnly && (

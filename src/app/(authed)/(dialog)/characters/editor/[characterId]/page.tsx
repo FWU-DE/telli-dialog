@@ -69,7 +69,7 @@ export default async function Page(context: PageContext) {
   const copyOfTemplatePicture =
     templateId !== undefined ? `characters/${character.id}/avatar` : undefined;
 
-  const relatedFiles = await fetchFileMapping(params.characterId)
+  const relatedFiles = await fetchFileMapping(params.characterId);
   if (!character) {
     return notFound();
   }

@@ -88,7 +88,10 @@ export async function POST(request: NextRequest) {
 
   const allFileIds = await dbGetRelatedCharacterFiles(character.id);
   const attachedFiles = await process_files(allFileIds.map((f) => f.id));
-  const systemPrompt = constructSystemPromptByCharacterSharedChat({ character, fileEntities: attachedFiles });
+  const systemPrompt = constructSystemPromptByCharacterSharedChat({
+    character,
+    fileEntities: attachedFiles,
+  });
 
   const result = streamText({
     model: telliProvider,

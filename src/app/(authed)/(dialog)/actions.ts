@@ -8,7 +8,9 @@ import { revalidatePath } from 'next/cache';
 import { dbUpdateUserTermsVersion } from '@/db/functions/user';
 import { FileModel } from '@/db/schema';
 import { VERSION } from '@/components/modals/const';
-import { dbGetAllFileIdByConversationId, dbGetRelatedFiles, dbGetRelatedSharedChatFiles } from '@/db/functions/files';
+import {
+  dbGetRelatedFiles,
+} from '@/db/functions/files';
 
 export default async function deleteConversationAction({
   conversationId,

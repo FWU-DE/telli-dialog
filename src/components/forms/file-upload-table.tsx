@@ -24,7 +24,7 @@ type FilesTableProps = {
   onDeleteFile(fileId: string): Promise<void>;
   toast: ToastContextType;
   showUploadConfirmation?: boolean;
-  className?: string
+  className?: string;
 };
 
 export default function FilesTable({
@@ -33,7 +33,7 @@ export default function FilesTable({
   additionalFiles,
   showUploadConfirmation,
   toast,
-  className
+  className,
 }: FilesTableProps) {
   if (files.length < 1 && additionalFiles.size < 1) return null;
 
@@ -44,7 +44,6 @@ export default function FilesTable({
       if (showUploadConfirmation) toast.success(t('toasts.delete-from-form'));
     });
   }
-  console.log(additionalFiles);
   const mergedFiles = [
     ...files.map((f) => ({
       id: f.id,
@@ -57,16 +56,6 @@ export default function FilesTable({
         if (fileObject.file.type === 'image') {
           return null;
         }
-        if (fileObject.fileId == null) return null;
-        // filter all duplicate files
-        if (
-          fileObject.status === 'success' &&
-          fileObject.file.type === 'file' &&
-          files.map((f) => f.id).includes(fileObject.fileId)
-        ) {
-          return null;
-        }
-
         return {
           id,
           fileName: fileObject.file.name,
@@ -81,54 +70,52 @@ export default function FilesTable({
     size: number;
     status: FileStatus;
   }[];
-
   return (
-    
-      <table className={className}>
-        {/* <thead>
+    <table className={className}>
+      {/* <thead>
         <tr className="font-normal bg-light-gray w-full text-sm">
           <th className="font-medium text-left py-3 text-dark-gray pl-3">Name</th>
           <th className="font-medium text-left py-3 text-dark-gray">Dateigröße</th>
           <th className="font-medium text-center py-3 text-dark-gray min-w-[5rem]"></th>
         </tr>
       </thead> */}
-        <tbody>
-          {mergedFiles.map(({ id, fileName, size, status }) => {
-            const [fileStem, extention] = getFileNameAndFileExtention(fileName);
-            const { Icon, fillColor } = getFileIconByFileExtension(extention);
+      <tbody>
+        {mergedFiles.map(({ id, fileName, size, status }) => {
+          const [fileStem, extention] = getFileNameAndFileExtention(fileName);
+          const { Icon, fillColor } = getFileIconByFileExtension(extention);
 
-            return (
-              <tr key={id} className="border-b-[1px] last:border-b-0 border-[#D9D9D9]">
-                <td className="flex gap-2 items-center p-2">
-                  {status === 'processed' && (
-                    <Icon
-                      className="w-9 h-9 p-1.5"
-                      style={{ background: hexToRGBA(fillColor, 0.05) }}
-                    />
-                  )}
-                  {status === 'uploading' && <Spinner className="w-9 h-9 p-1.5" />}
-                  {status === 'failed' && <CrossIcon className="w-9 h-9 p-1.5 text-red-500" />}
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">{fileStem}</span>
-                    <span className="text-gray-600 text-xs">.{extention}</span>
-                  </div>
-                </td>
-                <td>{formatBytes(size)}</td>
-                <td className='w-8'>
-                  <DestructiveActionButton
-                    modalDescription="Möchten Sie diese Datei wirklich dauerhaft löschen? Dieser Vorgang kann nicht rückgängig gemacht werden."
-                    triggerButtonClassName="flex items-center border-none w-full justify-center hover:bg-transparent"
-                    modalTitle="Datei löschen"
-                    confirmText="Datei löschen"
-                    actionFn={() => handleDeleteFile(id)}
-                  >
-                    <TrashIcon className='hover:bg-vidis-hover-green/20'/>
-                  </DestructiveActionButton>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+          return (
+            <tr key={id} className="border-b-[1px] last:border-b-0 border-[#D9D9D9]">
+              <td className="flex gap-2 items-center p-2">
+                {status === 'processed' && (
+                  <Icon
+                    className="w-9 h-9 p-1.5"
+                    style={{ background: hexToRGBA(fillColor, 0.05) }}
+                  />
+                )}
+                {status === 'uploading' && <Spinner className="w-9 h-9 p-1.5" />}
+                {status === 'failed' && <CrossIcon className="w-9 h-9 p-1.5 text-red-500" />}
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">{fileStem}</span>
+                  <span className="text-gray-600 text-xs">.{extention}</span>
+                </div>
+              </td>
+              <td>{formatBytes(size)}</td>
+              <td className="w-8">
+                <DestructiveActionButton
+                  modalDescription="Möchten Sie diese Datei wirklich dauerhaft löschen? Dieser Vorgang kann nicht rückgängig gemacht werden."
+                  triggerButtonClassName="flex items-center border-none w-full justify-center hover:bg-transparent"
+                  modalTitle="Datei löschen"
+                  confirmText="Datei löschen"
+                  actionFn={() => handleDeleteFile(id)}
+                >
+                  <TrashIcon className="hover:bg-vidis-hover-green/20" />
+                </DestructiveActionButton>
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
   );
 }

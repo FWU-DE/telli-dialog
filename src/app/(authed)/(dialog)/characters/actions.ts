@@ -7,7 +7,7 @@ import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-mode
 import { copyFileInS3 } from '@/s3';
 import { generateUUID } from '@/utils/uuid';
 import { eq } from 'drizzle-orm';
-import { dbGetRelatedCharacterFiles, dbGetRelatedSharedChatFiles } from '@/db/functions/files';
+import { dbGetRelatedCharacterFiles } from '@/db/functions/files';
 
 export async function createNewCharacterAction({
   modelId: _modelId,
@@ -59,9 +59,9 @@ export async function createNewCharacterAction({
   return insertedCharacter;
 }
 export async function deleteFileMappingAndEntity({ fileId }: { fileId: string }) {
-  const user = await getUser();
-  await db.delete(CharacterFileMapping).where(eq(CharacterFileMapping.fileId, fileId)),
-    await db.delete(fileTable).where(eq(fileTable.id, fileId));
+  await getUser();
+  await db.delete(CharacterFileMapping).where(eq(CharacterFileMapping.fileId, fileId));
+  await db.delete(fileTable).where(eq(fileTable.id, fileId));
 }
 
 export async function fetchFileMapping(id: string): Promise<FileModel[]> {
@@ -77,7 +77,7 @@ export async function linkFileToCharacter({
   fileId: string;
   characterId: string;
 }) {
-  const user = await getUser();
+  await getUser();
   const [insertedFileMapping] = await db
     .insert(CharacterFileMapping)
     .values({ characterId: characterId, fileId: fileId })

@@ -348,7 +348,7 @@ export const conversationMessgaeFileMappingTable = pgTable(
   }),
 );
 
-export const SharedSchoolConversationFileMapping= pgTable(
+export const SharedSchoolConversationFileMapping = pgTable(
   'shared_conversation_file_mapping',
   {
     id: uuid('id').defaultRandom().primaryKey(),
@@ -363,9 +363,9 @@ export const SharedSchoolConversationFileMapping= pgTable(
   (table) => ({
     unq: unique().on(table.sharedSchoolConversationId, table.fileId),
   }),
-)
+);
 
-export const CharacterFileMapping= pgTable(
+export const CharacterFileMapping = pgTable(
   'character_file_mapping',
   {
     id: uuid('id').defaultRandom().primaryKey(),
@@ -380,8 +380,8 @@ export const CharacterFileMapping= pgTable(
   (table) => ({
     unq: unique().on(table.characterId, table.fileId),
   }),
-)
-export const CustomGptFileMapping= pgTable(
+);
+export const CustomGptFileMapping = pgTable(
   'custom_gpt_file_mapping',
   {
     id: uuid('id').defaultRandom().primaryKey(),
@@ -396,4 +396,4 @@ export const CustomGptFileMapping= pgTable(
   (table) => ({
     unq: unique().on(table.customGptId, table.fileId),
   }),
-)
+);

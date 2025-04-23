@@ -35,5 +35,4 @@ ${sharedChat.restrictions}
 
 ${filePrompt}
 `;
-
 }

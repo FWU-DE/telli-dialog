@@ -7,6 +7,7 @@ import { handleSingleFile, UploadFileButtonProps } from '../chat/upload-file-but
 import { useSession } from 'next-auth/react';
 import { useToast } from '../common/toast';
 import { SUPPORTED_FILE_EXTENSIONS } from '@/const';
+import { validateFileExtentsion as validateFileExtension } from '@/utils/files/generic';
 
 export function FileDrop({
   onFileUploaded,
@@ -25,6 +26,12 @@ export function FileDrop({
     await handleFiles(event.target.files);
   }
 
+  function validateFileExtensions(selectedFiles: FileList | undefined | null) {
+    if (selectedFiles == null) return;
+    const files = Array.from(selectedFiles);
+    return files.some((f) => validateFileExtension(f.name));
+  }
+
   async function handleFiles(selectedFiles: FileList | undefined | null) {
     if (selectedFiles == null) return;
     const files = Array.from(selectedFiles);
@@ -37,11 +44,10 @@ export function FileDrop({
           setFiles,
           onFileUploaded,
           translations: t,
-          showUploadConfirmation
+          showUploadConfirmation,
         }),
       ),
     );
-    
 
     if (fileInputRef.current !== null) {
       fileInputRef.current.value = '';
@@ -77,6 +83,12 @@ export function FileDrop({
     setIsDragging(false);
 
     const { files } = e.dataTransfer;
+    if (!validateFileExtensions(files)) {
+      toast.error(
+        t('toasts.invalid-file-format', { supported_formats: SUPPORTED_FILE_EXTENSIONS.join(',') }),
+      );
+      return;
+    }
     handleFiles(files);
   }, []);
 
@@ -113,7 +125,7 @@ export function FileDrop({
           <span className="text-gray-600">{t('upload.choice-word')}</span>
           <button
             className={cn(buttonPrimaryClassName)}
-            disabled={false}
+            disabled={disabled}
             onClick={handleButtonClick}
             type="button"
           >

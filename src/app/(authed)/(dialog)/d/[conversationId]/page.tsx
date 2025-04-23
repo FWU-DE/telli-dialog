@@ -15,7 +15,7 @@ import { awaitPageContext } from '@/utils/next/utils';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
-import { dbGetRelatedFiles, dbGetRelatedSharedChatFiles } from '@/db/functions/files';
+import { dbGetRelatedFiles } from '@/db/functions/files';
 
 export const dynamic = 'force-dynamic';
 

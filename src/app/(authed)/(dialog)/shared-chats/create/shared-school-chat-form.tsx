@@ -56,7 +56,7 @@ export default function SharedSchoolChatCreateForm({
 
   const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   
-  
+
   // no async action is called because so far the files are not linked in the db
   async function handleDeattachFile(localFileId: string) {
     setFiles((prev) => {
@@ -67,9 +67,9 @@ export default function SharedSchoolChatCreateForm({
       }
       return newMap;
     });
-    return
+    return;
   }
-  
+
   function onSubmit(data: SharedSchoolChatFormValues) {
     if (!data.modelId) {
       toast.error('Sie müssen ein Model auswählen.');
@@ -79,12 +79,10 @@ export default function SharedSchoolChatCreateForm({
     createNewSharedSchoolChatAction(data)
       .then((createdChat) => {
         toast.success(tToast('create-toast-success'));
-        for (const file of _files.values().toArray()) {
+        for (const [,file] of Array.from(_files)) {
           if (file.fileId === undefined) continue;
           linkFileToSharedSchoolChat({ fileId: file.fileId, schoolChatId: createdChat.id })
-            .then(() => {
-    
-            })
+            .then(() => {})
             .catch(() => {
               toast.error(`Etwas ist beim Hochladen der Datei schief gelaufen.`);
             });
@@ -245,7 +243,12 @@ export default function SharedSchoolChatCreateForm({
         />
       </div>
       <FileDrop setFiles={setFiles} showUploadConfirmation />
-      <FilesTable files={existingFiles ?? []} additionalFiles={_files} onDeleteFile={handleDeattachFile} toast={toast}/>
+      <FilesTable
+        files={existingFiles ?? []}
+        additionalFiles={_files}
+        onDeleteFile={handleDeattachFile}
+        toast={toast}
+      />
       <div className="flex gap-4 mt-12">
         <Link
           href="/shared-chats"

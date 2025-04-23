@@ -66,7 +66,7 @@ export default function SharedSchoolChatEditForm({
   }
   function handleNewFile(data: { id: string; name: string; file: File }) {
     linkFileToSharedSchoolChat({ fileId: data.id, schoolChatId: sharedSchoolChat.id })
-      .then(() => console.log('Success'))
+      .then()
       .catch(() => toast.error(tToast('edit-toast-error')));
   }
 

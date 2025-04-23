@@ -81,7 +81,6 @@ export default function CustomGptForm({
           : promptSuggestions.map((p) => ({ content: p })),
     },
   });
-  console.log(existingFiles)
   const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   const [initialFiles, setInitialFiles] = React.useState<FileModel[]>(existingFiles);
   const t = useTranslations('custom-gpt.form');
@@ -136,7 +135,7 @@ export default function CustomGptForm({
   }
   function handleNewFile(data: { id: string; name: string; file: File }) {
     linkFileToCustomGpt({ fileId: data.id, customGpt: customGpt.id })
-      .then(() => console.log('Success'))
+      .then()
       .catch(() => toast.error(tToast('edit-toast-error')));
   }
 

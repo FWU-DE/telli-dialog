@@ -5,7 +5,6 @@ import { db } from '@/db';
 import { dbGetRelatedCustomGptFiles } from '@/db/functions/files';
 import { CustomGptFileMapping, customGptTable, FileModel, fileTable } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { PgColumn } from 'drizzle-orm/pg-core';
 
 export async function createNewCustomGptAction() {
   const user = await getUser();
@@ -33,9 +32,9 @@ export async function createNewCustomGptAction() {
 }
 
 export async function deleteFileMappingAndEntity({ fileId }: { fileId: string }) {
-  const user = await getUser();
-  await db.delete(CustomGptFileMapping).where(eq(CustomGptFileMapping.fileId, fileId)),
-    await db.delete(fileTable).where(eq(fileTable.id, fileId));
+  await getUser();
+  await db.delete(CustomGptFileMapping).where(eq(CustomGptFileMapping.fileId, fileId));
+  await db.delete(fileTable).where(eq(fileTable.id, fileId));
 }
 
 export async function fetchFileMapping(id: string): Promise<FileModel[]> {
@@ -51,7 +50,7 @@ export async function linkFileToCustomGpt({
   fileId: string;
   customGpt: string;
 }) {
-  const user = await getUser();
+  await getUser();
   const [insertedFileMapping] = await db
     .insert(CustomGptFileMapping)
     .values({ customGptId: customGpt, fileId: fileId })

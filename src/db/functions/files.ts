@@ -46,7 +46,7 @@ export async function dbGetRelatedFiles(conversationId: string): Promise<Map<str
 }
 
 export async function dbGetRelatedSharedChatFiles(conversationId?: string): Promise<FileModel[]> {
-  if (conversationId === undefined) return []
+  if (conversationId === undefined) return [];
   const files = await db
     .select({
       id: SharedSchoolConversationFileMapping.fileId,
@@ -63,7 +63,7 @@ export async function dbGetRelatedSharedChatFiles(conversationId?: string): Prom
 }
 
 export async function dbGetRelatedCharacterFiles(conversationId?: string): Promise<FileModel[]> {
-  if (conversationId === undefined) return []
+  if (conversationId === undefined) return [];
   const files = await db
     .select({
       id: CharacterFileMapping.fileId,
@@ -80,7 +80,7 @@ export async function dbGetRelatedCharacterFiles(conversationId?: string): Promi
 }
 
 export async function dbGetRelatedCustomGptFiles(customGptId?: string): Promise<FileModel[]> {
-  if (customGptId === undefined) return []
+  if (customGptId === undefined) return [];
   const files = await db
     .select({
       id: CustomGptFileMapping.fileId,
@@ -140,19 +140,19 @@ export async function dbGetAttachedFileByEntityId({
   conversationId?: string;
   characterId?: string;
   sharedChatId?: string;
-  customGptId?: string
+  customGptId?: string;
 }) {
   const combinedFiles = await Promise.all([
     dbGetRelatedSharedChatFiles(sharedChatId),
     dbGetRelatedCharacterFiles(characterId),
     dbGetAllFileIdByConversationId(conversationId),
-    dbGetRelatedCustomGptFiles(customGptId)
+    dbGetRelatedCustomGptFiles(customGptId),
   ]);
   return combinedFiles.flat().map((f) => f.id);
 }
 
 export async function dbGetAllFileIdByConversationId(conversationId?: string) {
-  if (conversationId === undefined) return []
+  if (conversationId === undefined) return [];
   const fileMappings = await db
     .select()
     .from(conversationMessgaeFileMappingTable)

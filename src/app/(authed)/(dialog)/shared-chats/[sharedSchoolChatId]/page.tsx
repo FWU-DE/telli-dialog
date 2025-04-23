@@ -34,7 +34,7 @@ export default async function Page(context: PageContext) {
   if (!sharedSchoolChat) {
     return notFound();
   }
-  const relatedFiles = await fetchFileMapping(params.sharedSchoolChatId)
+  const relatedFiles = await fetchFileMapping(params.sharedSchoolChatId);
 
   return (
     <div className="w-full p-6 overflow-auto">
