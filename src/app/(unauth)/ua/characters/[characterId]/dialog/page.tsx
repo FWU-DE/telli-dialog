@@ -6,6 +6,7 @@ import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
 import { dbGetCharacterByIdAndInviteCode } from '@/db/functions/character';
 import CharacterSharedChat from './character-chat';
+import { getMaybeSignedUrlFromS3Get } from '@/s3';
 
 const pageContextSchema = z.object({
   params: z.object({
@@ -28,6 +29,7 @@ export default async function Page(context: PageContext) {
     return <NotFound />;
   }
   const model = await dbGetLlmModelById({ modelId: character.modelId });
+  const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: character.pictureId });
 
   if (model === undefined) {
     return <NotFound />;
@@ -35,7 +37,11 @@ export default async function Page(context: PageContext) {
   return (
     <main className="h-[100dvh] w-full">
       <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
-        <CharacterSharedChat {...character} inviteCode={searchParams.inviteCode} />
+        <CharacterSharedChat
+          {...character}
+          inviteCode={searchParams.inviteCode}
+          imageSource={maybeSignedImageUrl}
+        />
       </LlmModelsProvider>
     </main>
   );

@@ -39,6 +39,7 @@ import { CopyContainer } from './copy-container';
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
   isCreating?: boolean;
+  readOnly: boolean;
 };
 
 const characterFormValuesSchema = z.object({
@@ -59,13 +60,13 @@ type CharacterFormValues = z.infer<typeof characterFormValuesSchema>;
 export default function CharacterForm({
   maybeSignedPictureUrl,
   isCreating = false,
+  readOnly,
   ...character
 }: CharacterFormProps) {
   const router = useRouter();
   const toast = useToast();
 
   const { models } = useLlmModels();
-  const readOnly = character.accessLevel === 'global';
   const maybeDefaultModelId =
     models.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? models[0]?.id;
 

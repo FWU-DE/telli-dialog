@@ -54,5 +54,5 @@ export function getMaxUsageTimeValueOrDefault(
 
 export function generateInviteCode(length = 8) {
   const nanoid = customAlphabet('123456789ABCDEFGHIJKLMNPQRSTUVWXYZ', length);
-  return nanoid();
+  return nanoid().toUpperCase();
 }

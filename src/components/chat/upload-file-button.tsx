@@ -37,7 +37,6 @@ const MAX_FILE_SIZE = 5_000_000; // 5MB
 export async function handleSingleFile({
   file,
   setFiles,
-  fileUploadFn,
   onFileUploaded,
   toast,
   translations,
@@ -80,14 +79,11 @@ export async function handleSingleFile({
   const blobFile = new Blob([file], { type: file.type });
 
   try {
-    const fileIdAndWarning =
-      fileUploadFn !== undefined
-        ? await fileUploadFn(file)
-        : await fetchUploadFile({
-            body: blobFile,
-            contentType: file.type,
-            fileName: file.name,
-          });
+    const fileIdAndWarning = await fetchUploadFile({
+      body: blobFile,
+      contentType: file.type,
+      fileName: file.name,
+    });
     const fileId = fileIdAndWarning.fileId;
     setFiles((prevFiles) => {
       const updatedFiles = new Map(prevFiles);
