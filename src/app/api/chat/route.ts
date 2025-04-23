@@ -17,11 +17,7 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
-import {
-  dbGetAllFileIdByConversationId,
-  dbGetAttachedFileByEntityId,
-  link_file_to_conversation,
-} from '@/db/functions/files';
+import { dbGetAttachedFileByEntityId, link_file_to_conversation } from '@/db/functions/files';
 import { process_files } from '../file-operations/process-file';
 import { FileModelAndContent } from '@/db/schema';
 

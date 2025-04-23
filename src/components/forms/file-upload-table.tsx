@@ -1,5 +1,5 @@
 import DestructiveActionButton from '@/components/common/destructive-action-button';
-import { FileModel, FileModelAndUrl } from '@/db/schema';
+import { FileModel } from '@/db/schema';
 import React from 'react';
 
 import { isNotNull } from '@/utils/guard';
@@ -7,12 +7,7 @@ import Spinner from '../icons/spinner';
 import CrossIcon from '../icons/cross';
 import { LocalFileState } from '../chat/send-message-form';
 import { getFileIconByFileExtension } from '../icons/file-upload-icons/file-icons-dict';
-import {
-  formatBytes,
-  getFileExtension,
-  getFileNameAndFileExtention,
-  hexToRGBA,
-} from '@/utils/files/generic';
+import { formatBytes, getFileNameAndFileExtention, hexToRGBA } from '@/utils/files/generic';
 import { FileStatus } from '../chat/upload-file-button';
 import TrashIcon from '../icons/trash';
 import { ToastContextType } from '../common/toast';
@@ -35,9 +30,8 @@ export default function FilesTable({
   toast,
   className,
 }: FilesTableProps) {
-  if (files.length < 1 && additionalFiles.size < 1) return null;
-
   const t = useTranslations('file-interaction');
+  if (files.length < 1 && additionalFiles.size < 1) return null;
 
   function handleDeleteFile(file_id: string) {
     onDeleteFile(file_id).then(() => {

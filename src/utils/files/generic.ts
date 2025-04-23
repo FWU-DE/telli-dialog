@@ -15,13 +15,13 @@ export function getFileExtension(fileName: string): SUPPORTED_FILE_TYPE {
   return lastPart;
 }
 
-export function validateFileExtentsion(fileName:string):boolean{
+export function validateFileExtentsion(fileName: string): boolean {
   const parts = fileName.split('.');
   const lastPart = parts[parts.length - 1];
   if (lastPart === undefined) {
     return false;
   }
-  return SUPPORTED_FILE_EXTENSIONS.includes(lastPart.toString())
+  return SUPPORTED_FILE_EXTENSIONS.includes(lastPart.toString());
 }
 
 export async function blobToBuffer(blob: Blob) {

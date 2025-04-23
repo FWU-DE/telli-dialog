@@ -212,7 +212,7 @@ export default function Chat({
   );
 
   const nofFiles = Array.from(files).length;
-  
+
   let placeholderElement: React.JSX.Element;
 
   if (character !== undefined) {

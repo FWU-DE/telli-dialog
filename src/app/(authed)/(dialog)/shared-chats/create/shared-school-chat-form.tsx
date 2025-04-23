@@ -55,7 +55,6 @@ export default function SharedSchoolChatCreateForm({
   });
 
   const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
-  
 
   // no async action is called because so far the files are not linked in the db
   async function handleDeattachFile(localFileId: string) {
@@ -79,7 +78,7 @@ export default function SharedSchoolChatCreateForm({
     createNewSharedSchoolChatAction(data)
       .then((createdChat) => {
         toast.success(tToast('create-toast-success'));
-        for (const [,file] of Array.from(_files)) {
+        for (const [, file] of Array.from(_files)) {
           if (file.fileId === undefined) continue;
           linkFileToSharedSchoolChat({ fileId: file.fileId, schoolChatId: createdChat.id })
             .then(() => {})
