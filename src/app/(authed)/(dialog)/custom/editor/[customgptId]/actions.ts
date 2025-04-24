@@ -90,15 +90,5 @@ export async function deleteCustomGptAction({ gptId }: { gptId: string }) {
 
   const deletedCustomGpt = await dbDeleteCustomGptByIdAndUserId({ gptId: gptId, userId: user.id });
 
-  const maybePictureId = deletedCustomGpt.pictureId;
-
-  if (maybePictureId !== null) {
-    try {
-      await deleteFileFromS3({ key: maybePictureId });
-    } catch (error) {
-      console.error({ error });
-    }
-  }
-
   return deletedCustomGpt;
 }
