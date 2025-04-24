@@ -43,6 +43,7 @@ import FilesTable from '@/components/forms/file-upload-table';
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
   isCreating?: boolean;
+  readOnly: boolean;
 };
 
 const characterFormValuesSchema = z.object({
@@ -64,13 +65,13 @@ export default function CharacterForm({
   maybeSignedPictureUrl,
   isCreating = false,
   existingFiles,
+  readOnly,
   ...character
 }: CharacterFormProps & { existingFiles: FileModel[] }) {
   const router = useRouter();
   const toast = useToast();
 
   const { models } = useLlmModels();
-  const readOnly = character.accessLevel === 'global';
   const maybeDefaultModelId =
     models.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? models[0]?.id;
 
