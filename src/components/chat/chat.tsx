@@ -306,7 +306,7 @@ export function getAssistantIcon({
           className="rounded-enterprise-sm"
           // this is neccessarly for it rendering correctly in safari
           style={{
-            minWidth: '2.5rem'
+            minWidth: '2.5rem',
           }}
         />
       </div>
