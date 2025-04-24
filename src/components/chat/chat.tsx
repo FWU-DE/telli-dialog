@@ -290,20 +290,24 @@ export function getAssistantIcon({
 }) {
   if (customGptId === HELP_MODE_GPT_ID) {
     return (
-      <div className="rounded-enterprise-sm bg-secondary/5 w-8 h-8 place-self-start mt-1 mr-4">
+      <div className="rounded-enterprise-sm bg-secondary/5 w-8 h-8 place-self-start m-4 mt-1">
         <RobotIcon className="w-8 h-8 text-primary p-1" />
       </div>
     );
   }
   if (imageSource !== undefined && imageName !== undefined) {
     return (
-      <div className="p-1.5 mr-4 place-self-start min-w-10">
+      <div className="p-1.5 place-self-start m-4 mt-1 ">
         <Image
           src={imageSource}
           width={30}
           height={30}
           alt={imageName}
           className="rounded-enterprise-sm"
+          // this is neccessarly for it rendering correctly in safari
+          style={{
+            minWidth: '2.5rem'
+          }}
         />
       </div>
     );
