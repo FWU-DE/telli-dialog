@@ -15,6 +15,15 @@ export function getFileExtension(fileName: string): SUPPORTED_FILE_TYPE {
   return lastPart;
 }
 
+export function validateFileExtentsion(fileName: string): boolean {
+  const parts = fileName.split('.');
+  const lastPart = parts[parts.length - 1];
+  if (lastPart === undefined) {
+    return false;
+  }
+  return SUPPORTED_FILE_EXTENSIONS.includes(lastPart.toString());
+}
+
 export async function blobToBuffer(blob: Blob) {
   return new Promise<Buffer>((resolve, reject) => {
     const reader = new FileReader();
@@ -55,4 +64,25 @@ export function getFileNameWithoutExtension(fileName: string) {
   }
 
   return parts.slice(0, -1).join('.');
+}
+
+export function getFileNameAndFileExtention(fileName: string) {
+  const parts = fileName.split('.');
+
+  if (parts.length === 1) {
+    return fileName;
+  }
+  const extention = parts[parts.length - 1];
+  const fileStem = parts.slice(0, -1).join('.');
+  return [fileStem, extention];
+}
+
+export function hexToRGBA(hex: string, opacity = 1) {
+  const sanitizedHex = hex.replace('#', '');
+
+  const r = parseInt(sanitizedHex.substring(0, 2), 16);
+  const g = parseInt(sanitizedHex.substring(2, 4), 16);
+  const b = parseInt(sanitizedHex.substring(4, 6), 16);
+
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 }

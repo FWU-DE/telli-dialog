@@ -347,3 +347,53 @@ export const conversationMessgaeFileMappingTable = pgTable(
     unq: unique().on(table.conversationId, table.fileId),
   }),
 );
+
+export const SharedSchoolConversationFileMapping = pgTable(
+  'shared_conversation_file_mapping',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    fileId: text('fileId')
+      .references(() => fileTable.id)
+      .notNull(),
+    sharedSchoolConversationId: uuid('shared_school_conversation_id')
+      .references(() => sharedSchoolConversationTable.id)
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    unq: unique().on(table.sharedSchoolConversationId, table.fileId),
+  }),
+);
+
+export const CharacterFileMapping = pgTable(
+  'character_file_mapping',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    fileId: text('file_id')
+      .references(() => fileTable.id)
+      .notNull(),
+    characterId: uuid('character_id')
+      .references(() => characterTable.id)
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    unq: unique().on(table.characterId, table.fileId),
+  }),
+);
+export const CustomGptFileMapping = pgTable(
+  'custom_gpt_file_mapping',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    fileId: text('file_id')
+      .references(() => fileTable.id)
+      .notNull(),
+    customGptId: uuid('custom_gpt_id')
+      .references(() => customGptTable.id)
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    unq: unique().on(table.customGptId, table.fileId),
+  }),
+);

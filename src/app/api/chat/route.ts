@@ -17,7 +17,7 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
-import { dbGetAllFileIdByConversationId, link_file_to_conversation } from '@/db/functions/files';
+import { dbGetAttachedFileByEntityId, link_file_to_conversation } from '@/db/functions/files';
 import { process_files } from '../file-operations/process-file';
 import { FileModelAndContent } from '@/db/schema';
 
@@ -117,9 +117,12 @@ export async function POST(request: NextRequest) {
       conversationId: conversation.id,
     });
   }
-  const allFileIds = await dbGetAllFileIdByConversationId(conversation.id);
-
-  attachedFiles = await process_files(allFileIds);
+  const relatedFileEntities = await dbGetAttachedFileByEntityId({
+    conversationId: conversation.id,
+    characterId,
+    customGptId,
+  });
+  attachedFiles = await process_files(relatedFileEntities);
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
   const prunedMessages = limitChatHistory({ messages, limitRecent: 4, limitFirst: 4 });
   const systemPrompt = await constructChatSystemPrompt({

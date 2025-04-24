@@ -4,6 +4,7 @@ import Chat from '@/components/chat/chat';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
 import { dbGetCharacterByIdWithShareData } from '@/db/functions/character';
 import { dbGetConversationById, dbGetCoversationMessages } from '@/db/functions/chat';
+import { getMaybeSignedUrlFromS3Get } from '@/s3';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
 import { type Message } from 'ai';
@@ -46,6 +47,7 @@ export default async function Page(context: PageContext) {
     console.warn(`GPT with id ${params.characterId} not found`);
     redirect('/');
   }
+  const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: character.pictureId });
 
   return (
     <>
@@ -57,6 +59,7 @@ export default async function Page(context: PageContext) {
         initialMessages={chatMessages}
         character={character}
         enableFileUpload={false}
+        imageSource={maybeSignedImageUrl}
       />
     </>
   );

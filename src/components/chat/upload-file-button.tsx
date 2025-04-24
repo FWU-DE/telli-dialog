@@ -19,9 +19,9 @@ export type FileUploadResponseWithWarning = {
   warning: string | null;
 };
 
-export type FileStatus = 'uploading' | 'processed' | 'failed';
+export type FileStatus = 'uploading' | 'processed' | 'failed' | 'success';
 
-type UploadFileButtonProps = {
+export type UploadFileButtonProps = {
   setFiles: React.Dispatch<React.SetStateAction<Map<string, LocalFileState>>>;
   disabled?: boolean;
   isPrivateMode?: boolean;
@@ -31,6 +31,7 @@ type UploadFileButtonProps = {
   onFileUploadStart?: () => void;
   className?: string;
   directoryId?: string;
+  showUploadConfirmation?: boolean;
 };
 
 const MAX_FILE_SIZE = 5_000_000; // 5MB
@@ -40,6 +41,7 @@ export async function handleSingleFile({
   onFileUploaded,
   toast,
   translations,
+  showUploadConfirmation,
 }: {
   file: File;
   prevFileIds?: string[];
@@ -48,9 +50,10 @@ export async function handleSingleFile({
   directoryId?: string;
   onFileUploaded?: (data: { id: string; name: string; file: File }) => void;
   session: ReturnType<typeof useSession>;
-  conversation: ReturnType<typeof useConversation>;
+  conversation?: ReturnType<typeof useConversation>;
   toast: ToastContextType;
   translations: (key: string, values?: TranslationValues) => string;
+  showUploadConfirmation?: boolean;
 }) {
   if (!file) {
     throw new Error('No files uploaded');
@@ -65,7 +68,6 @@ export async function handleSingleFile({
     return;
   }
   const localId = nanoid();
-
   setFiles((prevFiles) => {
     const updatedFiles = new Map(prevFiles);
     updatedFiles.set(localId, {
@@ -101,6 +103,7 @@ export async function handleSingleFile({
       toast.error(fileIdAndWarning.warning);
     }
     onFileUploaded?.({ id: fileIdAndWarning.fileId, name: file.name, file });
+    if (showUploadConfirmation) toast.success(translations('toasts.upload-success'));
   } catch (error) {
     setFiles((prevFiles) => {
       const updatedFiles = new Map(prevFiles);

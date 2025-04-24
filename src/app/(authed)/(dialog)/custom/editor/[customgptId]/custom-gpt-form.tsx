@@ -1,6 +1,6 @@
 'use client';
 
-import { CharacterAccessLevel, CustomGptModel, UserSchoolRole } from '@/db/schema';
+import { CharacterAccessLevel, CustomGptModel, FileModel, UserSchoolRole } from '@/db/schema';
 import {
   buttonDeleteClassName,
   buttonPrimaryClassName,
@@ -32,6 +32,11 @@ import {
   updateCustomGptAction,
   updateCustomGptPictureAction,
 } from './actions';
+import { LocalFileState } from '@/components/chat/send-message-form';
+import { deleteFileMappingAndEntity, linkFileToCustomGpt } from '../../actions';
+import { deepCopy } from '@/utils/object';
+import FileDrop from '@/components/forms/file-drop-area';
+import FilesTable from '@/components/forms/file-upload-table';
 
 type CustomGptFormProps = CustomGptModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -52,8 +57,9 @@ export default function CustomGptForm({
   isCreating = false,
   promptSuggestions,
   userRole,
+  existingFiles,
   ...customGpt
-}: CustomGptFormProps) {
+}: CustomGptFormProps & { existingFiles: FileModel[] }) {
   const router = useRouter();
   const toast = useToast();
 
@@ -75,6 +81,8 @@ export default function CustomGptForm({
           : promptSuggestions.map((p) => ({ content: p })),
     },
   });
+  const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
+  const [initialFiles, setInitialFiles] = React.useState<FileModel[]>(existingFiles);
   const t = useTranslations('custom-gpt.form');
   const tToast = useTranslations('custom-gpt.toasts');
   const tCommon = useTranslations('common');
@@ -106,6 +114,30 @@ export default function CustomGptForm({
     control,
     name: 'promptSuggestions',
   });
+
+  async function handleDeattachFile(localFileId: string) {
+    const fileId: string | undefined =
+      _files.get(localFileId)?.fileId ?? initialFiles.find((f) => f.id === localFileId)?.id;
+    if (fileId === undefined) return;
+
+    // update the FE state
+    setFiles((prev) => {
+      const newMap = deepCopy(prev);
+      const deleted = newMap.delete(localFileId);
+      if (!deleted) {
+        console.warn('Could not delete file');
+      }
+      return newMap;
+    });
+
+    setInitialFiles(initialFiles.filter((f) => f.id !== fileId));
+    await deleteFileMappingAndEntity({ fileId });
+  }
+  function handleNewFile(data: { id: string; name: string; file: File }) {
+    linkFileToCustomGpt({ fileId: data.id, customGpt: customGpt.id })
+      .then()
+      .catch(() => toast.error(tToast('edit-toast-error')));
+  }
 
   async function onSubmit(data: CustomGptFormValues) {
     updateCustomGptAction({
@@ -361,6 +393,21 @@ export default function CustomGptForm({
         </section>
         <section className="mt-8"></section>
       </fieldset>
+      <FileDrop
+        setFiles={setFiles}
+        onFileUploaded={handleNewFile}
+        showUploadConfirmation={true}
+        className="mt-8"
+      />
+      <FilesTable
+        files={initialFiles ?? []}
+        additionalFiles={_files}
+        onDeleteFile={handleDeattachFile}
+        toast={toast}
+        showUploadConfirmation={true}
+        className="mt-4"
+      />
+
       {!isCreating && (
         <section className="mt-8">
           <h3 className="font-medium">{t('delete-gpt')}</h3>

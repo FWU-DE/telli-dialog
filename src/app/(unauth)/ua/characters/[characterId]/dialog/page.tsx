@@ -5,8 +5,9 @@ import NotFound from '@/app/not-found';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
 import { dbGetCharacterByIdAndInviteCode } from '@/db/functions/character';
-import CharacterSharedChat from './character-chat';
+
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
+import CharacterSharedChat from '@/components/chat/character-chat';
 
 const pageContextSchema = z.object({
   params: z.object({

@@ -18,9 +18,19 @@ import {
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
+import { LocalFileState } from '@/components/chat/send-message-form';
+import FilesTable from '@/components/forms/file-upload-table';
+import { FileModel } from '@/db/schema';
+import FileDrop from '@/components/forms/file-drop-area';
+import { linkFileToSharedSchoolChat } from '../actions';
+import { deepCopy } from '@/utils/object';
 import SelectLlmModelForm from '../../_components/select-llm-model';
 
-export default function SharedSchoolChatCreateForm() {
+export default function SharedSchoolChatCreateForm({
+  existingFiles,
+}: {
+  existingFiles?: FileModel[];
+}) {
   const toast = useToast();
   const router = useRouter();
 
@@ -46,6 +56,21 @@ export default function SharedSchoolChatCreateForm() {
     },
   });
 
+  const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
+
+  // no async action is called because so far the files are not linked in the db
+  async function handleDeattachFile(localFileId: string) {
+    setFiles((prev) => {
+      const newMap = deepCopy(prev);
+      const deleted = newMap.delete(localFileId);
+      if (!deleted) {
+        console.warn('Could not delete file');
+      }
+      return newMap;
+    });
+    return;
+  }
+
   function onSubmit(data: SharedSchoolChatFormValues) {
     if (!data.modelId) {
       toast.error('Sie müssen ein Model auswählen.');
@@ -55,6 +80,14 @@ export default function SharedSchoolChatCreateForm() {
     createNewSharedSchoolChatAction(data)
       .then((createdChat) => {
         toast.success(tToast('create-toast-success'));
+        for (const [, file] of Array.from(_files)) {
+          if (file.fileId === undefined) continue;
+          linkFileToSharedSchoolChat({ fileId: file.fileId, schoolChatId: createdChat.id })
+            .then(() => {})
+            .catch(() => {
+              toast.error(`Etwas ist beim Hochladen der Datei schief gelaufen.`);
+            });
+        }
         router.push(`/shared-chats/${createdChat.id}`);
       })
       .catch(() => {
@@ -185,6 +218,13 @@ export default function SharedSchoolChatCreateForm() {
           maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
         />
       </div>
+      <FileDrop setFiles={setFiles} showUploadConfirmation />
+      <FilesTable
+        files={existingFiles ?? []}
+        additionalFiles={_files}
+        onDeleteFile={handleDeattachFile}
+        toast={toast}
+      />
       <div className="flex gap-4 mt-12">
         <Link
           href="/shared-chats"

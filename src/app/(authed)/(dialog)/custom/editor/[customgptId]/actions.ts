@@ -2,7 +2,6 @@
 
 import { db } from '@/db';
 import { CharacterAccessLevel, CustomGptInsertModel, customGptTable } from '@/db/schema';
-import { deleteFileFromS3 } from '@/s3';
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
 import { dbDeleteCustomGptByIdAndUserId } from '@/db/functions/custom-gpts';
@@ -89,16 +88,6 @@ export async function deleteCustomGptAction({ gptId }: { gptId: string }) {
   const user = await getUser();
 
   const deletedCustomGpt = await dbDeleteCustomGptByIdAndUserId({ gptId: gptId, userId: user.id });
-
-  const maybePictureId = deletedCustomGpt.pictureId;
-
-  if (maybePictureId !== null) {
-    try {
-      await deleteFileFromS3({ key: maybePictureId });
-    } catch (error) {
-      console.error({ error });
-    }
-  }
 
   return deletedCustomGpt;
 }
