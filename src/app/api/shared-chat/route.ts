@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'User has reached intelli points limit' }, { status: 429 });
   }
   const allFileIds = await dbGetRelatedSharedChatFiles(sharedChat.id);
-  const attachedFiles = await process_files(allFileIds.map((f) => f.id));
+  const attachedFiles = await process_files(allFileIds);
   const systemPrompt = constructSystemPromptBySharedChat({
     sharedChat,
     fileEntities: attachedFiles,
