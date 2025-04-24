@@ -91,7 +91,12 @@
       "prompt-suggestion-placeholder": "Erstelle einen Unterrichtsplan zum Thema [...].",
       "suggestions-used": "Vorschläge",
       "gpt-delete-description": "Beim Löschen des Assistenten werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
-      "gpt-delete-modal-description": "Bist du sicher, dass du diesen Assistent löschen möchtest? Dabei werden alle mit diesem Assistenten verbundenen Konversationen unwiderruflich gelöscht."
+      "gpt-delete-modal-description": "Bist du sicher, dass du diesen Assistent löschen möchtest? Dabei werden alle mit diesem Assistenten verbundenen Konversationen unwiderruflich gelöscht.",
+      "copy-page": {
+        "title": "Assistent in eigenen Space Kopieren",
+        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Assistenten in deinen privaten Space, um ihn anzupassen.",
+        "copy-template": "Assistent bearbeiten"
+      }
     },
     "toasts": {
       "create-toast-success": "Der Assistent wurde erfolgreich erstellt.",
@@ -131,11 +136,6 @@
       "open-chat": "Chat öffnen",
       "use-qr": "Oder nutze den QR-Code"
     },
-    "copy-page": {
-      "title": "Dialogpartner in eigenen Space Kopieren",
-      "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Dialogpartner in deinen privaten Space, um ihn anzupassen.",
-      "copy-template": "Dialogpartner bearbeiten"
-    },
     "form": {
       "general-settings": "Allgemeine Einstellungen",
       "character-settings": "Dialogpartner-Einstellungen",
@@ -165,7 +165,12 @@
       "grade": "Klassenstufe",
       "grade-placeholder": "7.Klasse",
       "subject": "Fach",
-      "subject-placeholder": "Geschichte"
+      "subject-placeholder": "Geschichte",
+      "copy-page": {
+        "title": "Dialogpartner in eigenen Space Kopieren",
+        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Dialogpartner in deinen privaten Space, um ihn anzupassen.",
+        "copy-template": "Dialogpartner bearbeiten"
+      }
     },
     "toasts": {
       "create-toast-success": "Der Dialogpartner wurde erfolgreich erstellt.",

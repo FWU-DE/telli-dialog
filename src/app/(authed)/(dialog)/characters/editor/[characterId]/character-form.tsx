@@ -34,9 +34,9 @@ import {
   updateCharacterPictureAction,
 } from './actions';
 import ShareContainer from './share-container';
-import { CopyContainer } from './copy-container';
+import { CopyContainer } from '../../../_components/copy-container';
 import { LocalFileState } from '@/components/chat/send-message-form';
-import { deleteFileMappingAndEntity, linkFileToCharacter } from '../../actions';
+import { createNewCharacterAction, deleteFileMappingAndEntity, linkFileToCharacter } from '../../actions';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
 
@@ -239,7 +239,16 @@ export default function CharacterForm({
       </fieldset>
     );
   }
-  const copyContainer = readOnly ? <CopyContainer character={character} /> : undefined;
+  const copyContainer = readOnly ? (
+    <CopyContainer
+      templateId={character.id}
+      templatePictureId={character.pictureId ?? undefined}
+      startedAt={character.startedAt}
+      maxUsageTimeLimit={character.maxUsageTimeLimit}
+      translation={t}
+      redirectPath="characters"
+    />
+  ) : undefined;
 
   const generalSettings = (
     <fieldset className="mt-8 flex flex-col gap-8">

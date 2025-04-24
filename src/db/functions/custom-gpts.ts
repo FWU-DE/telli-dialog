@@ -104,7 +104,10 @@ export async function dbGetCustomGptByIdOrSchoolId({
   return character;
 }
 
-export async function dbInsertCustomGpt({
+/**
+ * Creates a new custom GPT or updates an existing one
+ */
+export async function dbCreateCustomGpt({
   customGpt,
 }: {
   customGpt: CustomGptInsertModel;
@@ -220,4 +223,26 @@ export async function dbDeleteCustomGptByIdAndUserId({
   });
 
   return deletedGpt;
+}
+
+export async function dbGetCopyTemplateCustomGpt({
+  templateId,
+  customGptId,
+  userId,
+}: {
+  templateId: string;
+  customGptId: string;
+  userId: string;
+}): Promise<CustomGptInsertModel> {
+  console.log(templateId, customGptId, userId);
+  const customGpt = await dbGetCustomGptById({ customGptId: templateId });
+  if (customGpt?.name === undefined) {
+    throw new Error(`Invalid State Template CustomGpt must have a name: provided values: ${JSON.stringify({ templateId, customGptId, userId })}`);
+  }
+  return {
+    ...customGpt,
+    id: customGptId,
+    accessLevel: 'private',
+    userId,
+  };
 }

@@ -37,11 +37,13 @@ import { deleteFileMappingAndEntity, linkFileToCustomGpt } from '../../actions';
 import { deepCopy } from '@/utils/object';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
+import { CopyContainer } from '../../../_components/copy-container';
 
 type CustomGptFormProps = CustomGptModel & {
   maybeSignedPictureUrl: string | undefined;
   userRole: UserSchoolRole;
   isCreating?: boolean;
+  readOnly: boolean;
 };
 
 const customGptFormValuesSchema = z.object({
@@ -58,6 +60,7 @@ export default function CustomGptForm({
   promptSuggestions,
   userRole,
   existingFiles,
+  readOnly,
   ...customGpt
 }: CustomGptFormProps & { existingFiles: FileModel[] }) {
   const router = useRouter();
@@ -214,32 +217,43 @@ export default function CustomGptForm({
     const data = getValues();
     await onSubmit(data);
   }
-
   function handleCreateCustomGpt() {
     const data = getValues();
     onSubmit(data);
     toast.success(tToast('create-toast-success'));
     router.replace(backUrl);
   }
+  
+  const copyContainer = readOnly ? (
+    <CopyContainer
+      templateId={customGpt.id}
+      templatePictureId={customGpt.pictureId ?? undefined}
+      startedAt={null}
+      maxUsageTimeLimit={null}
+      translation={t}
+      redirectPath="custom"
+    />
+  ) : undefined;
+
   return (
     <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
       {isCreating && (
         <button
-          onClick={handleDeleteCustomGpt}
-          className="flex gap-3 items-center text-primary hover:underline"
+        onClick={handleDeleteCustomGpt}
+        className="flex gap-3 items-center text-primary hover:underline"
         >
           <ChevronLeftIcon />
           <span>{t('all-gpts')}</span>
         </button>
       )}
       {!isCreating && (
-        <Link href={backUrl} className="flex gap-3 text-primary hover:underline items-center">
+        <Link href={backUrl} className="flex gap-3 text-primary hover:underline items-center mb-4">
           <ChevronLeftIcon />
           <span>{t('all-gpts')}</span>
         </Link>
       )}
+      {copyContainer}
       <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>
-
       {userRole === 'teacher' && (
         <fieldset className="mt-16 flex flex-col gap-8">
           <div className="flex max-sm:flex-col gap-4 sm:gap-8">
@@ -247,6 +261,7 @@ export default function CustomGptForm({
               label={t('restriction-school')}
               checked={optimisticAccessLevel === 'school'}
               onCheckedChange={(value: boolean) => handleEnableSharing(value)}
+              disabled={readOnly}
             />
           </div>
         </fieldset>
@@ -260,6 +275,7 @@ export default function CustomGptForm({
               </label>
               <input
                 id="name"
+                readOnly={readOnly}
                 {...register('name')}
                 maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
                 className={cn(
@@ -277,6 +293,7 @@ export default function CustomGptForm({
               <textarea
                 id="description"
                 rows={5}
+                readOnly={readOnly}
                 style={{ resize: 'none' }}
                 {...register('description')}
                 maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
@@ -321,6 +338,7 @@ export default function CustomGptForm({
               onUploadComplete={handlePictureUploadComplete}
               file_name="avatar"
               compressionOptions={{ maxHeight: 800 }}
+              disabled={readOnly}
             />
           </section>
         </div>
@@ -333,6 +351,7 @@ export default function CustomGptForm({
           </label>
           <textarea
             id="specification"
+            readOnly={readOnly}
             {...register('specification')}
             maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             rows={7}
@@ -342,73 +361,81 @@ export default function CustomGptForm({
             placeholder={t('gpt-specification-placeholder')}
           />
         </div>
-        <section className="mt-8 flex flex-col gap-3 w-full">
-          <h2 className="font-medium">Promptvorschläge hinzufügen</h2>
-          <p className="text-dark-gray">
-            Füge bis zu 10 Vorschläge für Prompts hinzu, die zufällig oberhalb des Eingabefelds im
-            Dialog angezeigt werden.
-          </p>
-          <div className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-4 w-full pr-4">
-            {fields.map((field, index) => {
-              return (
-                <React.Fragment key={field.id}>
-                  <textarea
-                    rows={2}
-                    {...register(`promptSuggestions.${index}.content`)}
-                    className={cn(inputFieldClassName, 'resize-none')}
-                    placeholder={index === 0 ? t('prompt-suggestion-placeholder') : undefined}
-                    onBlur={updatePromptSuggestions}
-                  />
-                  {index !== 0 && (
-                    <button
-                      onClick={() => {
-                        remove(index);
-                        updatePromptSuggestions();
-                      }}
-                      className="flex items-center justify-center first:hidden"
-                      type="button"
-                    >
-                      <TrashIcon />
-                    </button>
-                  )}
-                  {index === 0 && (
-                    <button
-                      onClick={() => {
-                        if (fields.length >= 10) {
-                          toast.error(tToast('too-many-suggestions'));
-                          return;
-                        }
-                        append({ content: '' });
-                      }}
-                      type="button"
-                      className=""
-                    >
-                      <PlusIcon className="text-primary" />
-                    </button>
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </div>
-        </section>
+        {!readOnly && (
+          <section className="mt-8 flex flex-col gap-3 w-full">
+            <h2 className="font-medium">Promptvorschläge hinzufügen</h2>
+            <p className="text-dark-gray">
+              Füge bis zu 10 Vorschläge für Prompts hinzu, die zufällig oberhalb des Eingabefelds im
+              Dialog angezeigt werden.
+            </p>
+            <div className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-4 w-full pr-4">
+              {fields.map((field, index) => {
+                return (
+                  <React.Fragment key={field.id}>
+                    <textarea
+                      rows={2}
+                      readOnly={readOnly}
+                      {...register(`promptSuggestions.${index}.content`)}
+                      className={cn(inputFieldClassName, 'resize-none')}
+                      placeholder={index === 0 ? t('prompt-suggestion-placeholder') : undefined}
+                      onBlur={updatePromptSuggestions}
+                    />
+                    {index !== 0 && (
+                      <button
+                        onClick={() => {
+                          remove(index);
+                          updatePromptSuggestions();
+                        }}
+                        className="flex items-center justify-center first:hidden"
+                        type="button"
+                      >
+                        <TrashIcon />
+                      </button>
+                    )}
+                    {index === 0 && (
+                      <button
+                        onClick={() => {
+                          if (fields.length >= 10) {
+                            toast.error(tToast('too-many-suggestions'));
+                            return;
+                          }
+                          append({ content: '' });
+                        }}
+                        type="button"
+                        className=""
+                      >
+                        <PlusIcon className="text-primary" />
+                      </button>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </section>
+        )}
         <section className="mt-8"></section>
       </fieldset>
-      <FileDrop
-        setFiles={setFiles}
-        onFileUploaded={handleNewFile}
-        showUploadConfirmation={true}
-        className="mt-8"
-      />
-      <FilesTable
-        files={initialFiles ?? []}
-        additionalFiles={_files}
-        onDeleteFile={handleDeattachFile}
-        toast={toast}
-        showUploadConfirmation={true}
-        className="mt-4"
-      />
+      {!readOnly && (
+        <FileDrop
+          setFiles={setFiles}
+          onFileUploaded={handleNewFile}
+          showUploadConfirmation={true}
+          className="mt-8"
+          disabled={readOnly}
+        />
+      )}
+      {!readOnly && (
+        <FilesTable
+          files={initialFiles ?? []}
+          additionalFiles={_files}
+          onDeleteFile={handleDeattachFile}
+          toast={toast}
+          showUploadConfirmation={true}
+          className="mt-4"
+        />
+      )}
 
-      {!isCreating && (
+      {!isCreating && !readOnly && (
         <section className="mt-8">
           <h3 className="font-medium">{t('delete-gpt')}</h3>
           <p className="mt-4">{t('gpt-delete-description')}</p>
@@ -423,7 +450,7 @@ export default function CustomGptForm({
           </DestructiveActionButton>
         </section>
       )}
-      {isCreating && (
+      {isCreating && !readOnly && (
         <section className="mt-8 flex gap-4 items-center">
           <button
             className={cn(

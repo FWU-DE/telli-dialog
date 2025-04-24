@@ -8,13 +8,50 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { createNewCustomGptAction } from './actions';
 
+export function CreateNewCustomGptFromTemplate({
+  templateId,
+  children,
+  className,
+  templatePictureId,
+  ...props
+}: {
+  children: React.ReactNode;
+  className?: string;
+  templateId: string;
+  templatePictureId?: string;
+}) {
+  const router = useRouter();
+  const toast = useToast();
+  const t = useTranslations('custom-gpt');
+
+  function handleNewGPT() {
+    const urlSearchParams = new URLSearchParams({
+      create: 'true',
+      templateId,
+    });
+    createNewCustomGptAction({ templatePictureId, templateId })
+      .then((newGpt) => {
+        router.push(`/custom/editor/${newGpt.id}?${urlSearchParams.toString()}`);
+      })
+      .catch(() => {
+        toast.error(t('toasts.create-toast-error'));
+      });
+  }
+
+  return (
+    <div {...props} onClick={handleNewGPT} className={className}>
+      {children}
+    </div>
+  );
+}
+
 export default function CreateNewCustomGptButton() {
   const router = useRouter();
   const toast = useToast();
   const t = useTranslations('custom-gpt');
 
   function handleNewGPT() {
-    createNewCustomGptAction()
+    createNewCustomGptAction({ templatePictureId: undefined })
       .then((newGpt) => {
         router.push(`/custom/editor/${newGpt.id}?create=true`);
       })

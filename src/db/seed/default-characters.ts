@@ -1,14 +1,22 @@
-import { CharacterInsertModel } from '../schema';
+import { CharacterInsertModel, CustomGptInsertModel } from '../schema';
 import * as fs from 'fs';
 import * as path from 'path';
 import { uploadFileToS3 } from '@/s3';
 import { dbCreateCharacter } from '../functions/character';
 import { DUMMY_USER_ID } from './user-entity';
+import { dbCreateCustomGpt } from '../functions/custom-gpts';
 
 export async function insertTemplateCharacters() {
-  await processStaticJpegFiles('./assets/template-characters');
+  await processStaticJpegFiles('./assets/template-characters', 'characters/_templates');
   for (const templateCharacter of defaultCharacters) {
     await dbCreateCharacter(templateCharacter);
+  }
+}
+
+export async function insertTemplateCustomGpt() {
+  await processStaticJpegFiles('./assets/template-custom-gpt', 'custom-gpts/_templates');
+  for (const templateCustomGpt of defaultCustomGpt) {
+    await dbCreateCustomGpt({ customGpt: templateCustomGpt });
   }
 }
 
@@ -39,7 +47,7 @@ async function findMatchingFiles(directoryPath: string, pattern: string): Promis
  * Main function to process files ending with 'Static.jpeg'
  * @param rootFolder - The root folder to start scanning from
  */
-async function processStaticJpegFiles(rootFolder: string): Promise<void> {
+async function processStaticJpegFiles(rootFolder: string, rootRemoteDir: string): Promise<void> {
   try {
     // Find all matching files
     const matchingFiles = await findMatchingFiles(rootFolder, 'Static.jpg');
@@ -59,7 +67,7 @@ async function processStaticJpegFiles(rootFolder: string): Promise<void> {
       const fileName = fileNameWithSuffix.split('.')[0];
       const fileBuffer = fs.readFileSync(file);
       await uploadFileToS3({
-        key: `characters/_templates/${fileName}`,
+        key: `${rootRemoteDir}/${fileName}`,
         body: fileBuffer,
         contentType: 'image/jpeg',
       });
@@ -261,5 +269,20 @@ export const defaultCharacters: Omit<CharacterInsertModel, 'modelId'>[] = [
     maxUsageTimeLimit: null,
     pictureId: 'characters/_templates/heart_image_Static',
     subject: '',
+  },
+];
+
+export const defaultCustomGpt: CustomGptInsertModel[] = [
+  {
+    id: 'f15a37aa-5670-4000-8a65-b2668519858e',
+    userId: DUMMY_USER_ID,
+    name: 'Vertretungsstundenplaner (Mittelschule Bayern)',
+    description: 'kurzfristig abrufbarer Vertretungsstundenplaner',
+
+    specification:
+      'Der Dialogpartner bezieht sich nur auf den Lehrplan der Mittelschule Bayern. Hierzu soll ein  detailliertes und umfangreiches Artikulationsschema mit pädagogischem Kommentar erstellt werden , ein  angemessenes Tafelbild und drei Arbeitsblätter mit Übungsaufgaben. Die Unterrichtsstunden sollen so gestaltet sein, dass man sie direkt halten kann. Dabei sollen immer drei umfangreiche Arbeitsblätter  erstellt werden, also jeweils ein Arbeitsblatt mit Niveau leicht, mittel und schwer. Die Arbeitsblätter sollen unterschiedliche Aufgabentypen bedienen und wenn möglich, mindestens 10 Aufgaben abbilden. Ergänzend dazu soll auch ein Lösungsblatt erstellt werden. Der Chatbot soll darauf achten, dass sich der Chat und eventuelle Formeln, mathematische Zeichen und Tafelbilder einfach nach Word exportieren lassen, damit diese auch dort lesbar sind.',
+    systemPrompt: '',
+    accessLevel: 'global',
+    pictureId: 'custom-gpts/_templates/Unterrichtsplaner_Static',
   },
 ];
