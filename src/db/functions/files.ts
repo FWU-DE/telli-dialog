@@ -148,17 +148,18 @@ export async function dbGetAttachedFileByEntityId({
     dbGetAllFileIdByConversationId(conversationId),
     dbGetRelatedCustomGptFiles(customGptId),
   ]);
-  return combinedFiles.flat().map((f) => f.id);
+  return combinedFiles.flat();
 }
 
-export async function dbGetAllFileIdByConversationId(conversationId?: string) {
+export async function dbGetAllFileIdByConversationId(conversationId?: string): Promise<FileModel[]> {
   if (conversationId === undefined) return [];
   const fileMappings = await db
     .select()
     .from(conversationMessgaeFileMappingTable)
     .where(eq(conversationMessgaeFileMappingTable.conversationId, conversationId))
+    .innerJoin(fileTable, eq(conversationMessgaeFileMappingTable.fileId, fileTable.id))
     .orderBy(conversationMessgaeFileMappingTable.createdAt);
-  return fileMappings;
+    return fileMappings.map((row)=>row.file_table);
 }
 
 export async function dbGetDanglingFileIds() {

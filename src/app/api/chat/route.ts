@@ -117,12 +117,12 @@ export async function POST(request: NextRequest) {
       conversationId: conversation.id,
     });
   }
-  const allFileIds = await dbGetAttachedFileByEntityId({
+  const relatedFileEntities = await dbGetAttachedFileByEntityId({
     conversationId: conversation.id,
     characterId,
     customGptId,
   });
-  attachedFiles = await process_files(allFileIds);
+  attachedFiles = await process_files(relatedFileEntities);
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
   const prunedMessages = limitChatHistory({ messages, limitRecent: 4, limitFirst: 4 });
   const systemPrompt = await constructChatSystemPrompt({

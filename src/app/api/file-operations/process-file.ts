@@ -4,8 +4,8 @@ import { dbGetFilesInIds } from '@/db/functions/files';
 import { extractFile } from './extract-file';
 import { getFileExtension } from '@/utils/files/generic';
 
-export async function process_files(fileIds: string[]): Promise<FileModelAndContent[]> {
-  const maybeFiles = await dbGetFilesInIds(fileIds);
+export async function process_files(maybeFiles: FileModelAndContent[]): Promise<FileModelAndContent[]> {
+  
   const fileContents = await Promise.all(
     maybeFiles.map((file) => {
       return readFileFromS3({ key: `message_attachments/${file.id}` });
