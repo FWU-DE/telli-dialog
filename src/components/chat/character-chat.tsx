@@ -63,7 +63,7 @@ export default function CharacterSharedChat({
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     }
-  }, [messages]);
+  }, [messages, id, inviteCode]);
 
   async function customHandleSubmit(e: React.FormEvent) {
     e.preventDefault();

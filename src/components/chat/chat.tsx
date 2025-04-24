@@ -116,7 +116,7 @@ export default function Chat({
       setFileMapping(await refetchFileMapping(id));
     };
     fetchData();
-  }, [countOfFilesInChat]);
+  }, [countOfFilesInChat, id]);
 
   React.useEffect(() => {
     if (scrollRef.current) {

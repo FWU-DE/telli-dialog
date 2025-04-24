@@ -2,7 +2,6 @@
 
 import { db } from '@/db';
 import { CharacterAccessLevel, CustomGptInsertModel, customGptTable } from '@/db/schema';
-import { deleteFileFromS3 } from '@/s3';
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
 import { dbDeleteCustomGptByIdAndUserId } from '@/db/functions/custom-gpts';

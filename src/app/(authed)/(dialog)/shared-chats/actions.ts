@@ -1,16 +1,15 @@
 'use server';
 import { db } from '@/db';
-import { SharedSchoolConversationFileMapping, sharedSchoolConversationTable } from '@/db/schema';
+import { SharedSchoolConversationFileMapping } from '@/db/schema';
 import { getUser } from '@/auth/utils';
-import { and, eq } from 'drizzle-orm';
 import { dbDeleteSharedSchoolChatByIdAndUserId } from '@/db/functions/shared-school-chat';
 
 export async function deleteSharedChatAction({ id }: { id: string }) {
   const user = await getUser();
 
-  const deletedSharedChat = await dbDeleteSharedSchoolChatByIdAndUserId({ 
-    sharedChatId: id, 
-    userId: user.id 
+  const deletedSharedChat = await dbDeleteSharedSchoolChatByIdAndUserId({
+    sharedChatId: id,
+    userId: user.id,
   });
 
   return deletedSharedChat;

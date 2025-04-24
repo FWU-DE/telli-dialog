@@ -22,6 +22,7 @@ export function FileDrop({
   const session = useSession();
 
   const t = useTranslations('file-interaction');
+
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     await handleFiles(event.target.files);
   }
@@ -32,7 +33,7 @@ export function FileDrop({
     return files.some((f) => validateFileExtension(f.name));
   }
 
-  async function handleFiles(selectedFiles: FileList | undefined | null) {
+  const handleFiles = useCallback(async (selectedFiles: FileList | undefined | null) => {
     if (selectedFiles == null) return;
     const files = Array.from(selectedFiles);
     await Promise.all(
@@ -52,7 +53,7 @@ export function FileDrop({
     if (fileInputRef.current !== null) {
       fileInputRef.current.value = '';
     }
-  }
+  }, [toast, session, setFiles, onFileUploaded, t, showUploadConfirmation]);
 
   const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
@@ -90,7 +91,7 @@ export function FileDrop({
       return;
     }
     handleFiles(files);
-  }, []);
+  }, [handleFiles, t, toast]);
 
   const handleButtonClick = (): void => {
     if (fileInputRef.current) {

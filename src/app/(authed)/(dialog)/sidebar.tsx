@@ -60,7 +60,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
     if (isOpen && isBelow.md) {
       toggle();
     }
-  }, [pathname]);
+  }, [pathname, isBelow.md, isOpen, toggle]);
 
   // TODO: this is a dirty hack to remove the sidebar for shared chats
   if (

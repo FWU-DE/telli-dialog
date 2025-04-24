@@ -80,7 +80,12 @@ export async function dbDeleteSharedSchoolChatByIdAndUserId({
   const [sharedChat] = await db
     .select()
     .from(sharedSchoolConversationTable)
-    .where(and(eq(sharedSchoolConversationTable.id, sharedChatId), eq(sharedSchoolConversationTable.userId, userId)));
+    .where(
+      and(
+        eq(sharedSchoolConversationTable.id, sharedChatId),
+        eq(sharedSchoolConversationTable.userId, userId),
+      ),
+    );
 
   if (sharedChat === undefined) {
     throw Error('Shared school chat does not exist');
@@ -106,7 +111,9 @@ export async function dbDeleteSharedSchoolChatByIdAndUserId({
       );
     }
     await tx.delete(conversationTable).where(eq(conversationTable.customGptId, sharedChat.id));
-    await tx.delete(SharedSchoolConversationFileMapping).where(eq(SharedSchoolConversationFileMapping.sharedSchoolConversationId, sharedChat.id));
+    await tx
+      .delete(SharedSchoolConversationFileMapping)
+      .where(eq(SharedSchoolConversationFileMapping.sharedSchoolConversationId, sharedChat.id));
     await tx.delete(fileTable).where(
       inArray(
         fileTable.id,
@@ -116,7 +123,12 @@ export async function dbDeleteSharedSchoolChatByIdAndUserId({
     const deletedSharedChat = (
       await tx
         .delete(sharedSchoolConversationTable)
-        .where(and(eq(sharedSchoolConversationTable.id, sharedChatId), eq(sharedSchoolConversationTable.userId, userId)))
+        .where(
+          and(
+            eq(sharedSchoolConversationTable.id, sharedChatId),
+            eq(sharedSchoolConversationTable.userId, userId),
+          ),
+        )
         .returning()
     )[0];
 
