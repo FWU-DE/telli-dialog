@@ -7,6 +7,7 @@ import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetConversationById, dbGetCoversationMessages } from '@/db/functions/chat';
 import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
 import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
+import { getMaybeSignedUrlFromS3Get } from '@/s3';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
 import { type Message } from 'ai';
@@ -66,6 +67,8 @@ export default async function Page(context: PageContext) {
   const currentModel =
     searchParams?.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
 
+  const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: customGpt.pictureId });
+
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
       <HeaderPortal>
@@ -76,6 +79,7 @@ export default async function Page(context: PageContext) {
         initialMessages={chatMessages}
         customGpt={customGpt}
         enableFileUpload={false}
+        imageSource={maybeSignedImageUrl}
       />
     </LlmModelsProvider>
   );

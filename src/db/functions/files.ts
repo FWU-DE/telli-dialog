@@ -151,7 +151,9 @@ export async function dbGetAttachedFileByEntityId({
   return combinedFiles.flat();
 }
 
-export async function dbGetAllFileIdByConversationId(conversationId?: string): Promise<FileModel[]> {
+export async function dbGetAllFileIdByConversationId(
+  conversationId?: string,
+): Promise<FileModel[]> {
   if (conversationId === undefined) return [];
   const fileMappings = await db
     .select()
@@ -159,7 +161,7 @@ export async function dbGetAllFileIdByConversationId(conversationId?: string): P
     .where(eq(conversationMessgaeFileMappingTable.conversationId, conversationId))
     .innerJoin(fileTable, eq(conversationMessgaeFileMappingTable.fileId, fileTable.id))
     .orderBy(conversationMessgaeFileMappingTable.createdAt);
-    return fileMappings.map((row)=>row.file_table);
+  return fileMappings.map((row) => row.file_table);
 }
 
 export async function dbGetDanglingFileIds() {

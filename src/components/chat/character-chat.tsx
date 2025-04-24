@@ -2,7 +2,6 @@
 import { useChat } from '@ai-sdk/react';
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
 import {
   constructLocalStorageKey,
   getMaybeLocaleStorageChats,
@@ -17,6 +16,7 @@ import { ChatBox } from '@/components/chat/chat-box';
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-message';
+import { getAssistantIcon } from './chat';
 
 export default function CharacterSharedChat({
   imageSource,
@@ -79,18 +79,10 @@ export default function CharacterSharedChat({
     saveToLocalStorage(constructLocalStorageKey({ id, inviteCode }), '');
     setMessages([]);
   }
-  const assistantIcon =
-    imageSource !== undefined ? (
-      <div className="p-1.5 rounded-enterprise-sm mr-2">
-        <Image
-          src={imageSource}
-          width={30}
-          height={30}
-          alt={character.name}
-          className="rounded-enterprise-md"
-        />
-      </div>
-    ) : undefined;
+  const assistantIcon = getAssistantIcon({
+    imageName: character.name,
+    imageSource,
+  });
 
   return (
     <>
