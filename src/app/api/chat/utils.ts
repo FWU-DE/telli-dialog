@@ -1,4 +1,3 @@
-import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { Message } from 'ai';
 
 export function getMostRecentUserMessage(messages: Array<Message>) {
