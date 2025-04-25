@@ -2,7 +2,10 @@ import { useTranslations } from 'next-intl';
 import AutoResizeTextarea from '../common/auto-resize-textarea';
 import DisplayUploadedFile from './display-uploaded-file';
 import { LocalFileState } from './send-message-form';
-import { CHAT_MESSAGE_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import {
+  CHAT_MESSAGE_LENGTH_LIMIT,
+  NUMBER_OF_FILES_LIMIT,
+} from '@/configuration-text-inputs/const';
 import StopIcon from '../icons/stop';
 import ArrowRightIcon from '../icons/arrow-right';
 import UploadFileButton from './upload-file-button';
@@ -95,7 +98,7 @@ export function ChatInputBox({
               <UploadFileButton
                 className="hover:bg-vidis-hover-green/20"
                 setFiles={setFiles}
-                countOfFiles={files.size}
+                disabled={files.size >= NUMBER_OF_FILES_LIMIT}
               />
             </div>
           )}

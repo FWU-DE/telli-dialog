@@ -42,6 +42,7 @@ type CustomGptFormProps = CustomGptModel & {
   maybeSignedPictureUrl: string | undefined;
   userRole: UserSchoolRole;
   isCreating?: boolean;
+  readOnly?: boolean;
 };
 
 const customGptFormValuesSchema = z.object({
@@ -58,6 +59,7 @@ export default function CustomGptForm({
   promptSuggestions,
   userRole,
   existingFiles,
+  readOnly,
   ...customGpt
 }: CustomGptFormProps & { existingFiles: FileModel[] }) {
   const router = useRouter();
@@ -393,23 +395,27 @@ export default function CustomGptForm({
         </section>
         <section className="mt-8"></section>
       </fieldset>
-      <FileDrop
-        setFiles={setFiles}
-        onFileUploaded={handleNewFile}
-        showUploadConfirmation={true}
-        countOfFiles={initialFiles.length + _files.size}
-        className="mt-8"
-      />
-      <FilesTable
-        files={initialFiles ?? []}
-        additionalFiles={_files}
-        onDeleteFile={handleDeattachFile}
-        toast={toast}
-        showUploadConfirmation={true}
-        className="mt-4"
-      />
 
-      {!isCreating && (
+      {!readOnly && (
+        <>
+          <FileDrop
+            setFiles={setFiles}
+            onFileUploaded={handleNewFile}
+            showUploadConfirmation={true}
+            countOfFiles={initialFiles.length + _files.size}
+            className="mt-8"
+          />
+          <FilesTable
+            files={initialFiles ?? []}
+            additionalFiles={_files}
+            onDeleteFile={handleDeattachFile}
+            toast={toast}
+            showUploadConfirmation={true}
+            className="mt-4"
+          />
+        </>
+      )}
+      {!isCreating && !readOnly && (
         <section className="mt-8">
           <h3 className="font-medium">{t('delete-gpt')}</h3>
           <p className="mt-4">{t('gpt-delete-description')}</p>
