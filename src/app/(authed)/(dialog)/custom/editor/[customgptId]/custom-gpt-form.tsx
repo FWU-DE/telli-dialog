@@ -397,6 +397,7 @@ export default function CustomGptForm({
         setFiles={setFiles}
         onFileUploaded={handleNewFile}
         showUploadConfirmation={true}
+        countOfFiles={initialFiles.length + _files.size}
         className="mt-8"
       />
       <FilesTable
