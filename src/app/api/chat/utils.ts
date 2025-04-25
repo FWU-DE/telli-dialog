@@ -64,28 +64,32 @@ export function limitChatHistory({
   const includedIndices = new Set<number>();
   const omittedIndices = new Set<number>();
 
+  let backIndex = consolidatedMessages.length - 1;
+  let frontIndex = 0;
   // Add messages from the front
-  for (let i = 0; i <= limitFirst; i++) {
-    const message = consolidatedMessages[i];
-    if (message === undefined) continue;
+  while (runningTotal < characterLimit && frontIndex < backIndex) {
+    const frontMessage = consolidatedMessages[frontIndex];
+    const backMessage = consolidatedMessages[backIndex];
 
-    runningTotal += message.content.length;
-    frontMessages.push(message);
-    includedIndices.add(i);
-  }
+    if (frontMessage === undefined) continue;
 
-  // Add messages from the back
-  for (
-    let i = consolidatedMessages.length - 1;
-    i >= consolidatedMessages.length - limitRecent;
-    i--
-  ) {
-    const message = consolidatedMessages[i];
-    if (message === undefined) continue;
+    runningTotal += frontMessage.content.length;
 
-    runningTotal += message.content.length;
-    backMessages.unshift(message);
-    includedIndices.add(i);
+    if (frontIndex <= limitFirst) {
+      frontMessages.push(frontMessage);
+      includedIndices.add(frontIndex);
+    }
+
+    if (backMessage === undefined) continue;
+
+    runningTotal += backMessage.content.length;
+    if (backIndex >= consolidatedMessages.length - limitRecent) {
+      backMessages.unshift(backMessage);
+      includedIndices.add(backIndex);
+    }
+
+    frontIndex++;
+    backIndex--;
   }
 
   // Mark all messages not in includedIndices as omitted
