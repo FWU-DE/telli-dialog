@@ -10,12 +10,12 @@ export function limitChatHistory({
   messages,
   limitRecent,
   limitFirst = 2,
-  characterLimit = TOTAL_CHAT_LENGTH_LIMIT,
+  characterLimit,
 }: {
   messages: Array<Message>;
   limitRecent: number;
   limitFirst?: number;
-  characterLimit?: number;
+  characterLimit: number;
 }): Array<Message> {
   // Validate inputs
   if (limitRecent % 2 !== 0 || messages.length === 0) {
@@ -58,9 +58,11 @@ export function limitChatHistory({
     const message = consolidatedMessages[i];
     if (message === undefined) continue;
     runningTotal = runningTotal + message.content.length;
-    if ((i <= limitFirst && runningTotal > characterLimit) || i >= indexRecent) {
-      newMessages.push(message);
+
+    if ((i > limitFirst || runningTotal > characterLimit) && i < indexRecent) {
+      continue;
     }
+    newMessages.push(message);
   }
   return newMessages;
 }

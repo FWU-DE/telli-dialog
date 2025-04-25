@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { limitChatHistory } from './utils';
 import { Message } from 'ai';
 
+const characterLimit = 20000;
+
 describe('limitChatHistory', () => {
   // Create a sample unbalanced conversation with more user messages than assistant messages
   const unbalancedHistory: Message[] = [
@@ -29,6 +31,7 @@ describe('limitChatHistory', () => {
     const result = limitChatHistory({
       messages: unbalancedHistory.slice(0, 5),
       limitRecent: 10,
+      characterLimit,
     });
     expect(result).toHaveLength(4);
   });
@@ -38,6 +41,7 @@ describe('limitChatHistory', () => {
       limitChatHistory({
         messages: unbalancedHistory,
         limitRecent: 5,
+        characterLimit,
       }),
     ).toThrow();
   });
@@ -46,6 +50,7 @@ describe('limitChatHistory', () => {
     const result = limitChatHistory({
       messages: unbalancedHistory,
       limitRecent: 6,
+      characterLimit,
     });
 
     // join consecutive messages
@@ -68,6 +73,7 @@ describe('limitChatHistory', () => {
       messages: unbalancedHistory,
       limitRecent: 8,
       limitFirst: 3,
+      characterLimit,
     });
 
     expect(result).toHaveLength(7);
@@ -132,6 +138,7 @@ describe('limitChatHistory', () => {
       messages: balancedHistory,
       limitRecent: 2,
       limitFirst: 2,
+      characterLimit,
     });
 
     expect(result).toHaveLength(5);
@@ -156,6 +163,7 @@ describe('limitChatHistory', () => {
       messages: balancedHistory,
       limitRecent: 2,
       limitFirst: 4,
+        characterLimit,
     });
 
     expect(result).toHaveLength(7);
@@ -179,6 +187,7 @@ describe('limitChatHistory', () => {
       messages: balancedHistory,
       limitRecent: 2,
       limitFirst: 4,
+      characterLimit,
     });
 
     expect(result).toHaveLength(7);
