@@ -32,6 +32,7 @@ export type UploadFileButtonProps = {
   className?: string;
   directoryId?: string;
   showUploadConfirmation?: boolean;
+  countOfFiles?: number;
 };
 
 const MAX_FILE_SIZE = 5_000_000; // 5MB

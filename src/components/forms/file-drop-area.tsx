@@ -8,12 +8,14 @@ import { useSession } from 'next-auth/react';
 import { useToast } from '../common/toast';
 import { SUPPORTED_FILE_EXTENSIONS } from '@/const';
 import { validateFileExtentsion as validateFileExtension } from '@/utils/files/generic';
+import { MAX_FILES } from '@/configuration-text-inputs/const';
 
 export function FileDrop({
   onFileUploaded,
   setFiles,
   disabled,
   showUploadConfirmation = false,
+  countOfFiles,
   ...restProps
 }: UploadFileButtonProps) {
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -37,6 +39,18 @@ export function FileDrop({
     async (selectedFiles: FileList | undefined | null) => {
       if (selectedFiles == null) return;
       const files = Array.from(selectedFiles);
+
+      const totalFileCount = countOfFiles ? countOfFiles + files.length : files.length;
+
+      if (totalFileCount > MAX_FILES) {
+        toast.error(
+          t('toasts.file-limit-exceeded', {
+            max_files: MAX_FILES,
+          }),
+        );
+        return;
+      }
+
       await Promise.all(
         files.map((f) =>
           handleSingleFile({
