@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
     limitFirst: 2,
     characterLimit: maxCharacterLimit,
   });
-  console.log('prunedMessages', prunedMessages.length, maxCharacterLimit);
+
   const systemPrompt = await constructChatSystemPrompt({
     characterId,
     customGptId,
