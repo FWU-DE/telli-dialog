@@ -36,10 +36,7 @@ import {
 import ShareContainer from './share-container';
 import { CopyContainer } from '../../../_components/copy-container';
 import { LocalFileState } from '@/components/chat/send-message-form';
-import {
-  deleteFileMappingAndEntity,
-  linkFileToCharacter,
-} from '../../actions';
+import { deleteFileMappingAndEntity, linkFileToCharacter } from '../../actions';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
 

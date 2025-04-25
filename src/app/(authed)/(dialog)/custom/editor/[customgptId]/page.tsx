@@ -94,7 +94,6 @@ export default async function Page(context: PageContext) {
           readOnly={readOnly}
           userRole={user.school.userRole}
           existingFiles={relatedFiles}
-          readOnly={readOnly}
         />
       </div>
     </div>
