@@ -50,19 +50,65 @@ export function limitChatHistory({
   // Always include the last user message even if limitRecent == 0
   limitRecent = limitRecent + 1;
   limitFirst = limitFirst - 1;
-  const indexRecent = consolidatedMessages.length - limitRecent;
+  
+  // If we have fewer messages than the limits, just return all messages
+  if (consolidatedMessages.length <= limitFirst + limitRecent) {
+    return consolidatedMessages;
+  }
 
-  const newMessages: Message[] = [];
+  // Initialize arrays for front and back messages
+  const frontMessages: Message[] = [];
+  const backMessages: Message[] = [];
   let runningTotal = 0;
-  for (let i = 0; i < messages.length; i++) {
+  
+  // Track which messages are included and which are omitted
+  const includedIndices = new Set<number>();
+  const omittedIndices = new Set<number>();
+  
+  // Add messages from the front
+  for (let i = 0; i <= limitFirst; i++) {
     const message = consolidatedMessages[i];
     if (message === undefined) continue;
-    runningTotal = runningTotal + message.content.length;
-
-    if ((i > limitFirst || runningTotal > characterLimit) && i < indexRecent) {
-      continue;
+    
+    runningTotal += message.content.length;
+    frontMessages.push(message);
+    includedIndices.add(i);
+    
+    // If we've exceeded the character limit, stop adding from the front
+    if (runningTotal > characterLimit) {
+      console.log(`Character limit exceeded after adding front message at index ${i}`);
+      break;
     }
-    newMessages.push(message);
   }
-  return newMessages;
+  
+  // Add messages from the back
+  for (let i = consolidatedMessages.length - 1; i >= consolidatedMessages.length - limitRecent; i--) {
+    const message = consolidatedMessages[i];
+    if (message === undefined) continue;
+    
+    runningTotal += message.content.length;
+    backMessages.unshift(message);
+    includedIndices.add(i);
+    
+    // If we've exceeded the character limit, stop adding from the back
+    if (runningTotal > characterLimit) {
+      console.log(`Character limit exceeded after adding back message at index ${i}`);
+      break;
+    }
+  }
+
+  
+  // Mark all messages not in includedIndices as omitted
+  for (let i = 0; i < consolidatedMessages.length; i++) {
+    if (!includedIndices.has(i)) {
+      omittedIndices.add(i);
+    }
+  }
+  
+  // Log which messages were omitted
+  console.log(`Omitted messages at indices: ${Array.from(omittedIndices).sort((a, b) => a - b).join(', ')}`);
+  console.log(`Total character count: ${runningTotal}, Character limit: ${characterLimit}`);
+  
+  // Combine front and back messages
+  return [...frontMessages, ...backMessages];
 }
