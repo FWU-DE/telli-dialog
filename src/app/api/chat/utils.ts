@@ -72,12 +72,6 @@ export function limitChatHistory({
     runningTotal += message.content.length;
     frontMessages.push(message);
     includedIndices.add(i);
-
-    // If we've exceeded the character limit, stop adding from the front
-    if (runningTotal > characterLimit) {
-      console.log(`Character limit exceeded after adding front message at index ${i}`);
-      break;
-    }
   }
 
   // Add messages from the back
@@ -92,12 +86,6 @@ export function limitChatHistory({
     runningTotal += message.content.length;
     backMessages.unshift(message);
     includedIndices.add(i);
-
-    // If we've exceeded the character limit, stop adding from the back
-    if (runningTotal > characterLimit) {
-      console.log(`Character limit exceeded after adding back message at index ${i}`);
-      break;
-    }
   }
 
   // Mark all messages not in includedIndices as omitted
@@ -106,14 +94,6 @@ export function limitChatHistory({
       omittedIndices.add(i);
     }
   }
-
-  // Log which messages were omitted
-  console.log(
-    `Omitted messages at indices: ${Array.from(omittedIndices)
-      .sort((a, b) => a - b)
-      .join(', ')}`,
-  );
-  console.log(`Total character count: ${runningTotal}, Character limit: ${characterLimit}`);
 
   // Combine front and back messages
   return [...frontMessages, ...backMessages];
