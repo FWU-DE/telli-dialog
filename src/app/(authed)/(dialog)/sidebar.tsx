@@ -60,7 +60,8 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
     if (isOpen && isBelow.md) {
       toggle();
     }
-  }, [pathname, isBelow.md, isOpen, toggle]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   // TODO: this is a dirty hack to remove the sidebar for shared chats
   if (

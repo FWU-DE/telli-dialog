@@ -91,6 +91,7 @@ export default async function Page(context: PageContext) {
           {...mergedCustomGpt}
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           isCreating={isCreating}
+          readOnly={readOnly}
           userRole={user.school.userRole}
           existingFiles={relatedFiles}
           readOnly={readOnly}

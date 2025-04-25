@@ -9,10 +9,12 @@ export function limitChatHistory({
   messages,
   limitRecent,
   limitFirst = 2,
+  characterLimit,
 }: {
   messages: Array<Message>;
   limitRecent: number;
   limitFirst?: number;
+  characterLimit: number;
 }): Array<Message> {
   // Validate inputs
   if (limitRecent % 2 !== 0 || messages.length === 0) {
@@ -47,15 +49,56 @@ export function limitChatHistory({
   // Always include the last user message even if limitRecent == 0
   limitRecent = limitRecent + 1;
   limitFirst = limitFirst - 1;
-  const indexRecent = consolidatedMessages.length - limitRecent;
 
-  const newMessages: Message[] = [];
+  // If we have fewer messages than the limits, just return all messages
+  if (consolidatedMessages.length <= limitFirst + limitRecent) {
+    return consolidatedMessages;
+  }
 
-  for (let i = 0; i <= messages.length; i++) {
-    const message = consolidatedMessages[i];
-    if ((i <= limitFirst || i >= indexRecent) && message !== undefined) {
-      newMessages.push(message);
+  // Initialize arrays for front and back messages
+  const frontMessages: Message[] = [];
+  const backMessages: Message[] = [];
+  let runningTotal = 0;
+
+  // Track which messages are included and which are omitted
+  const includedIndices = new Set<number>();
+  const omittedIndices = new Set<number>();
+
+  let backIndex = consolidatedMessages.length - 1;
+  let frontIndex = 0;
+  // Add messages from the front
+  while (runningTotal < characterLimit && frontIndex < backIndex) {
+    const frontMessage = consolidatedMessages[frontIndex];
+    const backMessage = consolidatedMessages[backIndex];
+
+    if (frontMessage === undefined) continue;
+
+    runningTotal += frontMessage.content.length;
+
+    if (frontIndex <= limitFirst) {
+      frontMessages.push(frontMessage);
+      includedIndices.add(frontIndex);
+    }
+
+    if (backMessage === undefined) continue;
+
+    runningTotal += backMessage.content.length;
+    if (backIndex >= consolidatedMessages.length - limitRecent) {
+      backMessages.unshift(backMessage);
+      includedIndices.add(backIndex);
+    }
+
+    frontIndex++;
+    backIndex--;
+  }
+
+  // Mark all messages not in includedIndices as omitted
+  for (let i = 0; i < consolidatedMessages.length; i++) {
+    if (!includedIndices.has(i)) {
+      omittedIndices.add(i);
     }
   }
-  return newMessages;
+
+  // Combine front and back messages
+  return [...frontMessages, ...backMessages];
 }
