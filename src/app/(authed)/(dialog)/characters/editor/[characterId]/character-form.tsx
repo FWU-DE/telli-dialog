@@ -244,7 +244,7 @@ export default function CharacterForm({
   const generalSettings = (
     <fieldset className="mt-8 flex flex-col gap-8">
       <h2 className="font-medium mb-2">{t('general-settings')}</h2>
-      <div className="flex max-sm:flex-col gap-4 sm:gap-8">
+      <div className="flex gap-4">
         <Checkbox
           label={t('restriction-school')}
           checked={optimisticAccessLevel === 'school'}
@@ -466,20 +466,25 @@ export default function CharacterForm({
           />
         </div>
       </fieldset>
-      <FileDrop
-        setFiles={setFiles}
-        onFileUploaded={handleNewFile}
-        showUploadConfirmation={true}
-        className="mt-8"
-      />
-      <FilesTable
-        files={initialFiles ?? []}
-        additionalFiles={_files}
-        onDeleteFile={handleDeattachFile}
-        toast={toast}
-        showUploadConfirmation={true}
-        className="mt-4"
-      />
+      {!readOnly && (
+        <>
+          <FileDrop
+            setFiles={setFiles}
+            countOfFiles={initialFiles.length + _files.size}
+            onFileUploaded={handleNewFile}
+            showUploadConfirmation={true}
+            className="mt-8"
+          />
+          <FilesTable
+            files={initialFiles ?? []}
+            additionalFiles={_files}
+            onDeleteFile={handleDeattachFile}
+            toast={toast}
+            showUploadConfirmation={true}
+            className="mt-4"
+          />
+        </>
+      )}
 
       {!isCreating && !readOnly && (
         <section className="mt-8">
