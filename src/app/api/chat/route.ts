@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
   });
   attachedFiles = await process_files(relatedFileEntities);
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
-  const prunedMessages = limitChatHistory({ messages, limitRecent: 4, limitFirst: 4 });
+  const prunedMessages = limitChatHistory({ messages, limitRecent: 10, limitFirst: 2 });
   const systemPrompt = await constructChatSystemPrompt({
     characterId,
     customGptId,

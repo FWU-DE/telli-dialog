@@ -1,3 +1,4 @@
+import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { Message } from 'ai';
 
 export function getMostRecentUserMessage(messages: Array<Message>) {
@@ -50,10 +51,12 @@ export function limitChatHistory({
   const indexRecent = consolidatedMessages.length - limitRecent;
 
   const newMessages: Message[] = [];
-
-  for (let i = 0; i <= messages.length; i++) {
+  let runningTotal = 0;
+  for (let i = 0; i < messages.length; i++) {
     const message = consolidatedMessages[i];
-    if ((i <= limitFirst || i >= indexRecent) && message !== undefined) {
+    if (message === undefined) continue;
+    runningTotal = runningTotal + message.content.length;
+    if ((i <= limitFirst && runningTotal > TOTAL_CHAT_LENGTH_LIMIT) || i >= indexRecent) {
       newMessages.push(message);
     }
   }
