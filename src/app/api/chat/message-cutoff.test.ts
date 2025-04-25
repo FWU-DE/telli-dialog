@@ -163,7 +163,7 @@ describe('limitChatHistory', () => {
       messages: balancedHistory,
       limitRecent: 2,
       limitFirst: 4,
-        characterLimit,
+      characterLimit,
     });
 
     expect(result).toHaveLength(7);
