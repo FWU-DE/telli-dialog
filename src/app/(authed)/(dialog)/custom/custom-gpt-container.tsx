@@ -14,10 +14,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import { deleteCustomGptAction } from './editor/[customgptId]/actions';
+import { createNewCustomGptAction } from './actions';
+import ClipboardIcon from '@/components/icons/clipboard';
+import { CreateNewCharacterFromTemplate } from '../characters/create-new-character-button';
 
 type CustomGptContainerProps = CustomGptModel & {
   currentUserId: string;
   maybeSignedPictureUrl: string | undefined;
+  accessLevel: 'global' | 'school' | 'private';
+  pictureId: string | null;
 };
 
 export default function CustomGptContainer({
@@ -27,6 +32,8 @@ export default function CustomGptContainer({
   userId,
   currentUserId,
   maybeSignedPictureUrl,
+  accessLevel,
+  pictureId,
 }: CustomGptContainerProps) {
   const router = useRouter();
   const toast = useToast();
@@ -77,6 +84,19 @@ export default function CustomGptContainer({
         <span className={cn(truncateClassName, 'text-gray-400')}>{description}</span>
       </div>
       <div className="flex-grow" />
+      {accessLevel === 'global' && (
+        <CreateNewCharacterFromTemplate
+          redirectPath="custom"
+          createInstanceCallback={createNewCustomGptAction}
+          templateId={id}
+          templatePictureId={pictureId ?? undefined}
+          {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
+        >
+          <button aria-label="copy-template">
+            <ClipboardIcon className={cn('text-primary hover:text-secondary', 'min-w-8 min-h-8')} />
+          </button>
+        </CreateNewCharacterFromTemplate>
+      )}
       {
         <button
           type="button"

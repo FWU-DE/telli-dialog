@@ -29,7 +29,7 @@ export function CreateNewCustomGptFromTemplate({
       create: 'true',
       templateId,
     });
-    createNewCustomGptAction({ templatePictureId, templateId })
+    createNewCustomGptAction({ templatePictureId })
       .then((newGpt) => {
         router.push(`/custom/editor/${newGpt.id}?${urlSearchParams.toString()}`);
       })

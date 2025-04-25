@@ -58,20 +58,20 @@ export default async function Page(context: PageContext) {
   if (!customGpt) {
     return notFound();
   }
-  
+
   const defaultTemplateCustomGpt = await getMaybeDefaultTemplateCustomGpt({
     templateId: templateId,
     customGptId: customGpt.id,
     userId: user.id,
   });
-  
+
   const copyOfTemplatePicture =
     templateId !== undefined ? `custom-gpts/${customGpt.id}/avatar` : undefined;
-    
-  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({ 
-    key: customGpt.pictureId ?? copyOfTemplatePicture 
+
+  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
+    key: customGpt.pictureId ?? copyOfTemplatePicture,
   });
-  
+
   const readOnly = customGpt.userId !== user.id;
 
   const mergedCustomGpt = {

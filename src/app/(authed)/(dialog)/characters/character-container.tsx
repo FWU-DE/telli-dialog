@@ -19,6 +19,7 @@ import SharedChatIcon from '@/components/icons/shared-chat';
 import { calculateTimeLeftBySharedChat } from '../shared-chats/[sharedSchoolChatId]/utils';
 import ClipboardIcon from '@/components/icons/clipboard';
 import { CreateNewCharacterFromTemplate } from './create-new-character-button';
+import { createNewCharacterAction } from './actions';
 
 type CharacterContainerProps = CharacterModel & {
   currentUserId: string;
@@ -95,9 +96,11 @@ export default function CharacterContainer({
       )}
       {character.accessLevel === 'global' && !(timeLeft > 0) && (
         <CreateNewCharacterFromTemplate
+          redirectPath="characters"
+          createInstanceCallback={createNewCharacterAction}
           templateId={id}
           templatePictureId={character.pictureId ?? undefined}
-          {...{ title: t('copy-page.copy-template'), type: 'button' }}
+          {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
         >
           <button aria-label="copy-template">
             <ClipboardIcon className={cn('text-primary hover:text-secondary', 'min-w-8 min-h-8')} />

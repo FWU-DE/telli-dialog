@@ -36,7 +36,10 @@ import {
 import ShareContainer from './share-container';
 import { CopyContainer } from '../../../_components/copy-container';
 import { LocalFileState } from '@/components/chat/send-message-form';
-import { createNewCharacterAction, deleteFileMappingAndEntity, linkFileToCharacter } from '../../actions';
+import {
+  deleteFileMappingAndEntity,
+  linkFileToCharacter,
+} from '../../actions';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
 
@@ -475,21 +478,24 @@ export default function CharacterForm({
           />
         </div>
       </fieldset>
-      <FileDrop
-        setFiles={setFiles}
-        onFileUploaded={handleNewFile}
-        showUploadConfirmation={true}
-        className="mt-8"
-      />
-      <FilesTable
-        files={initialFiles ?? []}
-        additionalFiles={_files}
-        onDeleteFile={handleDeattachFile}
-        toast={toast}
-        showUploadConfirmation={true}
-        className="mt-4"
-      />
-
+      {!readOnly && (
+        <>
+          <FileDrop
+            setFiles={setFiles}
+            onFileUploaded={handleNewFile}
+            showUploadConfirmation={true}
+            className="mt-8"
+          />
+          <FilesTable
+            files={initialFiles ?? []}
+            additionalFiles={_files}
+            onDeleteFile={handleDeattachFile}
+            toast={toast}
+            showUploadConfirmation={true}
+            className="mt-4"
+          />
+        </>
+      )}
       {!isCreating && !readOnly && (
         <section className="mt-8">
           <h3 className="font-medium">{t('delete-character')}</h3>

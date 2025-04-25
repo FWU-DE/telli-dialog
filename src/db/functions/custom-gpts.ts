@@ -237,7 +237,9 @@ export async function dbGetCopyTemplateCustomGpt({
   console.log(templateId, customGptId, userId);
   const customGpt = await dbGetCustomGptById({ customGptId: templateId });
   if (customGpt?.name === undefined) {
-    throw new Error(`Invalid State Template CustomGpt must have a name: provided values: ${JSON.stringify({ templateId, customGptId, userId })}`);
+    throw new Error(
+      `Invalid State Template CustomGpt must have a name: provided values: ${JSON.stringify({ templateId, customGptId, userId })}`,
+    );
   }
   return {
     ...customGpt,

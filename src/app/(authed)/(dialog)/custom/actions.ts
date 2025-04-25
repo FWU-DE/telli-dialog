@@ -3,7 +3,13 @@
 import { getUser } from '@/auth/utils';
 import { db } from '@/db';
 import { dbGetRelatedCustomGptFiles } from '@/db/functions/files';
-import { CustomGptFileMapping, customGptTable, FileModel, fileTable, CustomGptInsertModel } from '@/db/schema';
+import {
+  CustomGptFileMapping,
+  customGptTable,
+  FileModel,
+  fileTable,
+  CustomGptInsertModel,
+} from '@/db/schema';
 import { copyFileInS3 } from '@/s3';
 import { generateUUID } from '@/utils/uuid';
 import { eq } from 'drizzle-orm';
@@ -40,12 +46,7 @@ export async function createNewCustomGptAction({
     accessLevel: 'private',
   };
 
-  const insertedCustomGpt = (
-    await db
-      .insert(customGptTable)
-      .values(customGptData)
-      .returning()
-  )[0];
+  const insertedCustomGpt = (await db.insert(customGptTable).values(customGptData).returning())[0];
 
   if (insertedCustomGpt === undefined) {
     throw Error('Could not create a new CustomGpt');
