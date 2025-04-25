@@ -241,8 +241,8 @@ export default function CustomGptForm({
       <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>
 
       {userRole === 'teacher' && (
-        <fieldset className="mt-16 flex flex-col gap-8">
-          <div className="flex max-sm:flex-col gap-4 sm:gap-8">
+        <fieldset className="mt-16 gap-8">
+          <div className="flex gap-4">
             <Checkbox
               label={t('restriction-school')}
               checked={optimisticAccessLevel === 'school'}
