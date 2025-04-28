@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 
 const pageContextSchema = z.object({
   searchParams: z.object({
-    visibility: characterAccessLevelSchema.default('global'),
+    visibility: characterAccessLevelSchema.default('private'),
   }),
 });
 
