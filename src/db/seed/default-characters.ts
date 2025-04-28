@@ -170,28 +170,6 @@ export const defaultCharacters: Omit<CharacterInsertModel, 'modelId'>[] = [
   },
   {
     userId: DUMMY_USER_ID,
-    id: 'f571ed3f-391d-43f6-8987-7cf84252d5ef',
-    name: 'Vertretungsstundenplaner (Mittelschule Bayern)',
-    description: 'kurzfristig abrufbarer Vertretungsstundenplaner',
-    competence:
-      'Ich muss öfter an meiner Schule, einer Mittelschule mit M-Zug in Bayern, einzelne Stunden vertreten. Die Jahrgangsstufen sind zwischen 5. und 10. Jahrgangsstufe. Dazu brauche ich gängige Themen, die ich in abgewandelter Form in allen Jahrgangsstufen kurzfristig und ohne großen Kopieraufwand machen kann.',
-    learningContext: 'Die Vertretungsstunden sollen möglichst überfachliche Kompetenzen verwenden.',
-    specifications:
-      'Der Dialogpartner bezieht sich nur auf den Lehrplan der Mittelschule Bayern. Hierzu soll ein  detailliertes und umfangreiches Artikulationsschema mit pädagogischem Kommentar erstellt werden , ein  angemessenes Tafelbild und drei Arbeitsblätter mit Übungsaufgaben. Die Unterrichtsstunden sollen so gestaltet sein, dass man sie direkt halten kann. Dabei sollen immer drei umfangreiche Arbeitsblätter  erstellt werden, also jeweils ein Arbeitsblatt mit Niveau leicht, mittel und schwer. Die Arbeitsblätter sollen unterschiedliche Aufgabentypen bedienen und wenn möglich, mindestens 10 Aufgaben abbilden. Ergänzend dazu soll auch ein Lösungsblatt erstellt werden. Der Chatbot soll darauf achten, dass sich der Chat und eventuelle Formeln, mathematische Zeichen und Tafelbilder einfach nach Word exportieren lassen, damit diese auch dort lesbar sind.',
-    restrictions: '',
-
-    gradeLevel: '',
-    schoolId: null,
-    accessLevel: 'global',
-    schoolType: '',
-    intelligencePointsLimit: null,
-    inviteCode: null,
-    maxUsageTimeLimit: null,
-    pictureId: null,
-    subject: '',
-  },
-  {
-    userId: DUMMY_USER_ID,
     id: 'ef0d4882-fb94-486f-83a4-ef4adb31d5e5',
     name: 'George W. Bush',
     description: '43. Präsident der Vereinigten Staaten von Amerika',
