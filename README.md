@@ -50,7 +50,8 @@ pnpm dev
 ```
 
 ## E2E Tests
-We use playwright with a vidis mock server for e2e testing, refer to the [details](e2e/readme.md) for setup guide. 
+
+We use playwright with a vidis mock server for e2e testing, refer to the [details](e2e/readme.md) for setup guide.
 
 ## Load Tests
 

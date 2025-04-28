@@ -40,7 +40,7 @@ When being directed for the oidc provider page and the username and password, yo
 
 ## Run e2e
 
-Ensure that all the requried browsers are installed 
+Ensure that all the requried browsers are installed
 
 ```sh
 pnpm playwright install
