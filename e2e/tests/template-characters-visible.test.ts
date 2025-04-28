@@ -4,7 +4,6 @@ import { login } from '../utils/login';
 const templateCharactersIdentifier = [
   'Rosa Parks Civil rights',
   'George W. Bush 43. Präsident',
-  'Vertretungsstundenplaner (',
   'Anne Frank Intelligentes jü',
   'Johann Wolfgang von Goethe',
   'Frau Goß Schulinterne',
