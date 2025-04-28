@@ -1,6 +1,7 @@
 import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
+import path from 'path';
 
 const baseNextConfig = {
   typescript: {
@@ -27,6 +28,14 @@ const baseNextConfig = {
   },
   productionBrowserSourceMaps: process.env.NODE_ENV !== 'test',
   allowedDevOrigins: ['titanom.ngrok.app'],
+  webpack: (config, { isServer }) => {
+    // Ensure proper module resolution for path aliases
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, './src'),
+    };
+    return config;
+  },
 } satisfies NextConfig;
 
 const withNextIntl = createNextIntlPlugin();

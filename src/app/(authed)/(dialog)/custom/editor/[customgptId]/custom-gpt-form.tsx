@@ -42,6 +42,7 @@ type CustomGptFormProps = CustomGptModel & {
   maybeSignedPictureUrl: string | undefined;
   userRole: UserSchoolRole;
   isCreating?: boolean;
+  readOnly?: boolean;
 };
 
 const customGptFormValuesSchema = z.object({
@@ -58,6 +59,7 @@ export default function CustomGptForm({
   promptSuggestions,
   userRole,
   existingFiles,
+  readOnly,
   ...customGpt
 }: CustomGptFormProps & { existingFiles: FileModel[] }) {
   const router = useRouter();
@@ -241,8 +243,8 @@ export default function CustomGptForm({
       <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>
 
       {userRole === 'teacher' && (
-        <fieldset className="mt-16 flex flex-col gap-8">
-          <div className="flex max-sm:flex-col gap-4 sm:gap-8">
+        <fieldset className="mt-16 gap-8">
+          <div className="flex gap-4">
             <Checkbox
               label={t('restriction-school')}
               checked={optimisticAccessLevel === 'school'}
@@ -345,8 +347,7 @@ export default function CustomGptForm({
         <section className="mt-8 flex flex-col gap-3 w-full">
           <h2 className="font-medium">Promptvorschläge hinzufügen</h2>
           <p className="text-dark-gray">
-            Füge bis zu 10 Vorschläge für Prompts hinzu, die zufällig oberhalb des Eingabefelds im
-            Dialog angezeigt werden.
+            <span>{t('prompt-suggestions-description')}</span>
           </p>
           <div className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-4 w-full pr-4">
             {fields.map((field, index) => {
@@ -393,22 +394,27 @@ export default function CustomGptForm({
         </section>
         <section className="mt-8"></section>
       </fieldset>
-      <FileDrop
-        setFiles={setFiles}
-        onFileUploaded={handleNewFile}
-        showUploadConfirmation={true}
-        className="mt-8"
-      />
-      <FilesTable
-        files={initialFiles ?? []}
-        additionalFiles={_files}
-        onDeleteFile={handleDeattachFile}
-        toast={toast}
-        showUploadConfirmation={true}
-        className="mt-4"
-      />
 
-      {!isCreating && (
+      {!readOnly && (
+        <>
+          <FileDrop
+            setFiles={setFiles}
+            onFileUploaded={handleNewFile}
+            showUploadConfirmation={true}
+            countOfFiles={initialFiles.length + _files.size}
+            className="mt-8"
+          />
+          <FilesTable
+            files={initialFiles ?? []}
+            additionalFiles={_files}
+            onDeleteFile={handleDeattachFile}
+            toast={toast}
+            showUploadConfirmation={true}
+            className="mt-4"
+          />
+        </>
+      )}
+      {!isCreating && !readOnly && (
         <section className="mt-8">
           <h3 className="font-medium">{t('delete-gpt')}</h3>
           <p className="mt-4">{t('gpt-delete-description')}</p>

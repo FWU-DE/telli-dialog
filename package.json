@@ -32,7 +32,6 @@
     "k6:build": "node e2e/load_test/esbuild.k6.config.js",
     "k6:run:ui": "K6_BROWSER_HEADLESS=false pnpm k6:build && K6_BROWSER_HEADLESS=false k6 run e2e/load_test/index.js -e K6_BROWSER_HEADLESS=false",
     "k6:run": "pnpm k6:build && K6_BROWSER_HEADLESS=true K6_BROWSER_ARGS='no-sandbox' k6 run e2e/load_test/index.js -e K6_BROWSER_HEADLESS=true -e K6_BROWSER_ARGS='no-sandbox'",
-    "postinstall": "playwright install",
     "start:cluster": "pm2 start e2e/load_test/ecosystem.config.js",
     "stop:cluster": "pm2 stop all",
     "delete:cluster": "pm2 delete all",
@@ -64,6 +63,7 @@
     "clsx": "2.1.1",
     "date-fns": "4.1.0",
     "docx": "9.1.1",
+    "dotenv-cli": "7.4.1",
     "drizzle-orm": "0.39.3",
     "import-in-the-middle": "1.13.0",
     "ioredis": "5.6.0",
@@ -80,6 +80,7 @@
     "openai": "4.83.0",
     "pdfreader": "3.0.7",
     "pg": "8.13.1",
+    "postcss": "8.4.49",
     "pm2": "6.0.5",
     "qrcode.react": "4.2.0",
     "rabbitmq-client": "5.0.2",
@@ -95,7 +96,9 @@
     "remark-math": "6.0.0",
     "require-in-the-middle": "7.5.1",
     "tailwind-merge": "3.0.1",
+    "tailwindcss": "3.4.1",
     "tailwindcss-animate": "1.0.7",
+    "tsx": "4.7.2",
     "zod": "3.22.4"
   },
   "devDependencies": {
@@ -110,7 +113,6 @@
     "@types/react": "19.0.3",
     "@types/react-dom": "19.0.2",
     "@types/react-syntax-highlighter": "15.5.13",
-    "dotenv-cli": "7.4.1",
     "drizzle-kit": "0.30.4",
     "esbuild": "0.25.1",
     "eslint": "9.17.0",
@@ -118,10 +120,7 @@
     "express": "4.21.2",
     "jose": "6.0.6",
     "oidc-provider": "8.8.0",
-    "postcss": "8.4.49",
     "prettier": "3.4.2",
-    "tailwindcss": "3.4.1",
-    "tsx": "4.7.2",
     "typescript": "5.7.2",
     "vitest": "3.0.5"
   }

@@ -242,7 +242,12 @@ export default function SharedSchoolChatEditForm({
           maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
         />
       </div>
-      <FileDrop setFiles={setFiles} onFileUploaded={handleNewFile} showUploadConfirmation={true} />
+      <FileDrop
+        setFiles={setFiles}
+        onFileUploaded={handleNewFile}
+        showUploadConfirmation={true}
+        countOfFiles={initialFiles.length + _files.size}
+      />
       <FilesTable
         files={initialFiles ?? []}
         additionalFiles={_files}
