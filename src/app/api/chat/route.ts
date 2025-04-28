@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { dbInsertChatContent } from '@/db/functions/chat';
 import { getUser } from '@/auth/utils';
 import { userHasReachedIntelliPointLimit, trackChatUsage } from './usage';
-import { getModelAndProviderWithResult } from '../utils';
+import { getModelAndProviderWithResult, calculateCostsInCents } from '../utils';
 import { generateUUID } from '@/utils/uuid';
 import { getMostRecentUserMessage, limitChatHistory } from './utils';
 import { constructChatSystemPrompt } from './system-prompt';
@@ -191,6 +191,8 @@ Verwende keine Anführungszeichen oder Doppelpunkte`,
           user,
           promptTokens: assistantMessage.usage.promptTokens,
           completionTokens: assistantMessage.usage.completionTokens,
+          costsInCents: calculateCostsInCents(definedModel, assistantMessage.usage),
+          provider: definedModel.provider,
           anonymous: false,
           conversation,
         }),
