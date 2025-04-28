@@ -7,11 +7,11 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml* ./
 RUN corepack enable pnpm
 RUN pnpm i --prod
-ENV NODE_ENV=production
 
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 
 RUN npm run build:envless --verbose
 
