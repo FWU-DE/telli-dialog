@@ -347,8 +347,7 @@ export default function CustomGptForm({
         <section className="mt-8 flex flex-col gap-3 w-full">
           <h2 className="font-medium">Promptvorschläge hinzufügen</h2>
           <p className="text-dark-gray">
-            Füge bis zu 10 Vorschläge für Prompts hinzu, die zufällig oberhalb des Eingabefelds im
-            Dialog angezeigt werden.
+          <span>{t('prompt-suggestions-description')}</span>
           </p>
           <div className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-4 w-full pr-4">
             {fields.map((field, index) => {
