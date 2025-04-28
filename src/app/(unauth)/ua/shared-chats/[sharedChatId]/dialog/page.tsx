@@ -1,10 +1,10 @@
 import NotFound from '@/app/not-found';
+import SharedChat from '@/components/chat/shared-chat';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelById } from '@/db/functions/llm-model';
 import { dbGetSharedChatByIdAndInviteCode } from '@/db/functions/shared-school-chat';
 import { awaitPageContext } from '@/utils/next/utils';
 import { z } from 'zod';
-import SharedChat from './shared-chat';
 
 const pageContextSchema = z.object({
   params: z.object({

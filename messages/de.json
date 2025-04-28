@@ -47,18 +47,24 @@
   "file-interaction": {
     "upload": {
       "upload-file-button": "Datei hochladen",
-      "file-limit-reached": "Es wurde bereits eine Datei hochgeladen"
+      "file-limit-reached": "Es wurde bereits eine Datei hochgeladen",
+      "drop-area": "Datei per Drag & Drop hier ablegen",
+      "choice-word": "oder"
     },
     "toasts": {
       "upload-success": "Die Datei wurde erfolgreich hochgeladen",
       "upload-error": "Die Datei konnte leider nicht hochgeladen werden. Bitte versuchen Sie es erneut",
-      "file-too-large": "Die Datei {file_name} ist zu groß. Das Limit liegt bei {max_file_size} MB."
+      "file-too-large": "Die Datei {file_name} ist zu groß. Das Limit liegt bei {max_file_size} MB.",
+      "delete-from-form": "Die Datei wurde erfolgreich gelöscht",
+      "invalid-file-format": "Das Dateiformat wird nicht unterstützt, folgende Dateitypen können hochgeladen werden: {supported_formats}",
+      "file-limit-exceeded": "Es können maximal {max_files} Dateien hochgeladen werden."
     }
   },
   "help-mode": {
     "chat-heading": "Hallo, ich bin tellis Hilfe",
     "chat-subheading": "Ich kenne mich hier aus und kann Dir hoffentlich Fragen beantworten oder Dir bei Problemen weiterhelfen. Ansonsten kannst Du auch gerne meine {FAQ_LINK} besuchen.",
-    "chat-placeholder": "Wie kann ich helfen?"
+    "chat-placeholder": "Wie kann ich helfen?",
+    "faq-link": "[FAQ Seite](https://telli.schule/#faq)"
   },
   "custom-gpt": {
     "title": "Assistenten",

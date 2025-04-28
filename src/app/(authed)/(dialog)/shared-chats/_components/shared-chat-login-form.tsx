@@ -17,8 +17,6 @@ export default function SharedChatLoginForm() {
 
   async function getChatByInviteCode(formattedInviteCode: string) {
     const sharedChat = await checkSharedChatInviteCodeAction({ inviteCode: formattedInviteCode });
-
-    console.log(sharedChat);
     if (sharedChat !== undefined) {
       return { type: 'shared-chats', chatMetaData: sharedChat };
     }
@@ -36,7 +34,6 @@ export default function SharedChatLoginForm() {
   async function handleInviteCodeSubmit() {
     const formattedInviteCode = inviteCode.replace(/\s+/g, '').toUpperCase();
     const result = await getChatByInviteCode(formattedInviteCode);
-    console.log(result);
     if (result !== undefined) {
       const { type, chatMetaData } = result;
       const searchParams = new URLSearchParams({ inviteCode: chatMetaData.inviteCode ?? '' });

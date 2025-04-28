@@ -1,7 +1,6 @@
-import { CustomGptModel, FileModel } from '@/db/schema';
+import { FileModel } from '@/db/schema';
 import DisplayUploadedFile from './display-uploaded-file';
 import type { UIMessage } from '@ai-sdk/ui-utils';
-import RobotIcon from '../icons/robot';
 import TelliClipboardButton from '../common/clipboard-button';
 import ReloadIcon from '../icons/reload';
 import MarkdownDisplay from './markdown-display';
@@ -12,22 +11,22 @@ export function ChatBox({
   children,
   index,
   fileMapping,
-  customGpt,
   isLastUser,
   isLastNonUser,
   isLoading,
   regenerateMessage,
   initialFiles,
+  assistantIcon,
 }: {
   children: UIMessage;
   index: number;
   fileMapping?: Map<string, FileModel[]>;
-  customGpt?: CustomGptModel;
   isLastUser?: boolean;
   isLastNonUser: boolean;
   isLoading: boolean;
   regenerateMessage: () => void;
   initialFiles?: FileModel[];
+  assistantIcon?: React.JSX.Element;
 }) {
   let maybefileAttachment: React.JSX.Element | undefined = undefined;
   const tCommon = useTranslations('common');
@@ -57,14 +56,6 @@ export function ChatBox({
     );
   }
 
-  let assistantIcon = null;
-  if (children.role === 'assistant' && customGpt?.name === 'Hilfe-Assistent') {
-    assistantIcon = (
-      <div className="p-1.5 rounded-enterprise-sm bg-secondary/5">
-        <RobotIcon className="w-8 h-8 text-primary" />
-      </div>
-    );
-  }
   let maybeShowMessageIcons = null;
   if (isLastNonUser && !isLoading) {
     maybeShowMessageIcons = (
@@ -88,11 +79,13 @@ export function ChatBox({
     <>
       <div key={index} className={cn('w-full text-secondary-foreground', userClassName, margin)}>
         <div className="" aria-label={`${children.role} message ${Math.floor(index / 2 + 1)}`}>
-          <div className="flex items-start gap-2">
-            {assistantIcon}
-            <MarkdownDisplay>{children.content}</MarkdownDisplay>
+          <div className="flex flex-row">
+            {children.role === 'assistant' && assistantIcon}
+            <div className="flex flex-col items-start gap-2">
+              <MarkdownDisplay>{children.content}</MarkdownDisplay>
+              {maybeShowMessageIcons}
+            </div>
           </div>
-          {maybeShowMessageIcons}
         </div>
       </div>
       {maybefileAttachment}

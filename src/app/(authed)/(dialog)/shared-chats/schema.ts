@@ -9,8 +9,8 @@ export const sharedSchoolChatFormValuesSchema = z.object({
   gradeLevel: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   subject: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   learningContext: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  specification: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  restrictions: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  specification: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT).nullable(),
+  restrictions: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT).nullable(),
 });
 
 export type SharedSchoolChatFormValues = z.infer<typeof sharedSchoolChatFormValuesSchema>;

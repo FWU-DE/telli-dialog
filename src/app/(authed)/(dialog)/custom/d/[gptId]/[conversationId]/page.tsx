@@ -1,18 +1,13 @@
-import DownloadConversationButton from '@/app/(authed)/(dialog)/download-conversation-button';
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { getUser } from '@/auth/utils';
 import Chat from '@/components/chat/chat';
-import SelectLlmModel from '@/components/conversation/select-llm-model';
-import ProfileMenu from '@/components/navigation/profile-menu';
-import {
-  NewChatButton,
-  ToggleSidebarButton,
-} from '@/components/navigation/sidebar/collapsible-sidebar';
+import { ChatHeaderBar } from '@/components/chat/header-bar';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetConversationById, dbGetCoversationMessages } from '@/db/functions/chat';
 import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
 import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
+import { getMaybeSignedUrlFromS3Get } from '@/s3';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
 import { type Message } from 'ai';
@@ -72,30 +67,19 @@ export default async function Page(context: PageContext) {
   const currentModel =
     searchParams?.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
 
+  const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: customGpt.pictureId });
+
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
       <HeaderPortal>
-        <div className="flex w-full gap-4 justify-center items-center">
-          <ToggleSidebarButton />
-          <NewChatButton />
-          <SelectLlmModel isStudent={user.school.userRole === 'student'} />
-          <span className="font-normal text-xl">{customGpt.name}</span>
-          <div className="flex-grow"></div>
-          <DownloadConversationButton
-            conversationId={chat.id}
-            className="flex items-center text-main-900 hover:text-main-600"
-            iconClassName="h-6 w-6"
-            characterName={customGpt.name}
-            disabled={false}
-          />
-          <ProfileMenu {...user} />
-        </div>
+        <ChatHeaderBar chatId={chat.id} title={customGpt.name} user={user} />
       </HeaderPortal>
       <Chat
         id={chat.id}
         initialMessages={chatMessages}
         customGpt={customGpt}
         enableFileUpload={false}
+        imageSource={maybeSignedImageUrl}
       />
     </LlmModelsProvider>
   );

@@ -11,14 +11,26 @@ import { useRouter } from 'next/navigation';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../schema';
 import { cn } from '@/utils/tailwind';
-import * as Select from '@radix-ui/react-select';
-import ChevronDownIcon from '@/components/icons/chevron-down';
 import { useTranslations } from 'next-intl';
 import React from 'react';
-import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import {
+  SMALL_TEXT_INPUT_FIELDS_LIMIT,
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+} from '@/configuration-text-inputs/const';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
+import { LocalFileState } from '@/components/chat/send-message-form';
+import FilesTable from '@/components/forms/file-upload-table';
+import { FileModel } from '@/db/schema';
+import FileDrop from '@/components/forms/file-drop-area';
+import { linkFileToSharedSchoolChat } from '../actions';
+import { deepCopy } from '@/utils/object';
+import SelectLlmModelForm from '../../_components/select-llm-model';
 
-export default function SharedSchoolChatCreateForm() {
+export default function SharedSchoolChatCreateForm({
+  existingFiles,
+}: {
+  existingFiles?: FileModel[];
+}) {
   const toast = useToast();
   const router = useRouter();
 
@@ -44,6 +56,21 @@ export default function SharedSchoolChatCreateForm() {
     },
   });
 
+  const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
+
+  // no async action is called because so far the files are not linked in the db
+  async function handleDeattachFile(localFileId: string) {
+    setFiles((prev) => {
+      const newMap = deepCopy(prev);
+      const deleted = newMap.delete(localFileId);
+      if (!deleted) {
+        console.warn('Could not delete file');
+      }
+      return newMap;
+    });
+    return;
+  }
+
   function onSubmit(data: SharedSchoolChatFormValues) {
     if (!data.modelId) {
       toast.error('Sie müssen ein Model auswählen.');
@@ -53,6 +80,14 @@ export default function SharedSchoolChatCreateForm() {
     createNewSharedSchoolChatAction(data)
       .then((createdChat) => {
         toast.success(tToast('create-toast-success'));
+        for (const [, file] of Array.from(_files)) {
+          if (file.fileId === undefined) continue;
+          linkFileToSharedSchoolChat({ fileId: file.fileId, schoolChatId: createdChat.id })
+            .then(() => {})
+            .catch(() => {
+              toast.error(`Etwas ist beim Hochladen der Datei schief gelaufen.`);
+            });
+        }
         router.push(`/shared-chats/${createdChat.id}`);
       })
       .catch(() => {
@@ -73,7 +108,7 @@ export default function SharedSchoolChatCreateForm() {
             className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
             {...register('name')}
             placeholder={t('name-placeholder')}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+            maxLength={SMALL_TEXT_INPUT_FIELDS_LIMIT}
           />
         </div>
 
@@ -81,39 +116,14 @@ export default function SharedSchoolChatCreateForm() {
           <label className="text-sm">
             <span className="text-coral">*</span> {t('model-label')}
           </label>
-          <Select.Root
-            onValueChange={(value) => setValue('modelId', value)}
-            defaultValue={maybeDefaultModelId}
-          >
-            <Select.Trigger
-              aria-label={tCommon('llm-model')}
-              className="flex items-center justify-between w-full py-2 pl-4 pr-4 bg-white border border-gray-200 focus:border-primary rounded-enterprise-md focus:outline-none"
-            >
-              <Select.Value />
-              <ChevronDownIcon aria-hidden="true" className="w-4 h-4 text-primary ms-2" />
-              <span className="sr-only">{tCommon('llm-model')}</span>
-            </Select.Trigger>
-            <Select.Portal>
-              <Select.Content className="bg-white border border-gray-200 rounded-enterprise-md shadow-dropdown w-full">
-                <Select.ScrollUpButton className="py-2 text-gray-500">▲</Select.ScrollUpButton>
-                <Select.Viewport className="p-1">
-                  {models
-                    .filter((m) => m.priceMetadata.type === 'text')
-                    .filter((m) => !m.name.includes('mistral'))
-                    .map((model) => (
-                      <Select.Item
-                        key={model.id}
-                        value={model.id}
-                        className="px-4 py-2 cursor-pointer outline-none hover:bg-vidis-hover-green/20 rounded-enterprise-md transition"
-                      >
-                        <Select.ItemText>{model.displayName}</Select.ItemText>
-                      </Select.Item>
-                    ))}
-                </Select.Viewport>
-                <Select.ScrollDownButton className="py-2 text-gray-500">▼</Select.ScrollDownButton>
-              </Select.Content>
-            </Select.Portal>
-          </Select.Root>
+
+          <SelectLlmModelForm
+            selectedModel={maybeDefaultModelId}
+            onValueChange={(value) => {
+              setValue('modelId', value);
+            }}
+            models={models}
+          />
         </div>
       </div>
       <div className="flex flex-col gap-4">
@@ -208,6 +218,13 @@ export default function SharedSchoolChatCreateForm() {
           maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
         />
       </div>
+      <FileDrop setFiles={setFiles} showUploadConfirmation countOfFiles={existingFiles?.length} />
+      <FilesTable
+        files={existingFiles ?? []}
+        additionalFiles={_files}
+        onDeleteFile={handleDeattachFile}
+        toast={toast}
+      />
       <div className="flex gap-4 mt-12">
         <Link
           href="/shared-chats"

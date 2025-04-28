@@ -6,6 +6,8 @@ import {
   conversationTable,
   type CustomGptModel,
   type CustomGptInsertModel,
+  CustomGptFileMapping,
+  fileTable,
 } from '../schema';
 
 export async function dbGetCustomGptsByUserId({
@@ -174,10 +176,15 @@ export async function dbDeleteCustomGptByIdAndUserId({
     .where(and(eq(customGptTable.id, gptId), eq(customGptTable.userId, userId)));
 
   if (customGpt === undefined) {
-    throw Error('Character does not exist');
+    throw Error('Custom GPT does not exist');
   }
 
   const deletedGpt = await db.transaction(async (tx) => {
+    const relatedFiles = await tx
+      .select({ id: CustomGptFileMapping.fileId })
+      .from(CustomGptFileMapping)
+      .where(eq(CustomGptFileMapping.customGptId, customGpt.id));
+
     const conversations = await tx
       .select({ id: conversationTable.id })
       .from(conversationTable)
@@ -192,7 +199,13 @@ export async function dbDeleteCustomGptByIdAndUserId({
       );
     }
     await tx.delete(conversationTable).where(eq(conversationTable.customGptId, customGpt.id));
-
+    await tx.delete(CustomGptFileMapping).where(eq(CustomGptFileMapping.customGptId, customGpt.id));
+    await tx.delete(fileTable).where(
+      inArray(
+        fileTable.id,
+        relatedFiles.map((f) => f.id),
+      ),
+    );
     const deletedGpt = (
       await tx
         .delete(customGptTable)
@@ -201,7 +214,7 @@ export async function dbDeleteCustomGptByIdAndUserId({
     )[0];
 
     if (deletedGpt === undefined) {
-      throw Error('Could not delete character');
+      throw Error('Could not delete custom GPT');
     }
     return deletedGpt;
   });

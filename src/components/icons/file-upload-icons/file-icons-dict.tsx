@@ -12,13 +12,15 @@ import { DefaultCodeIcon } from './default-code-icon';
 import { DatabaseIcon } from './database-icon';
 import { ArchiveIcon } from './archive-icon';
 import { CSVFileIcon } from './csv-icon';
+import { MarkdownIcon } from './md-icon';
 
 export const FILE_ICONS_DICT = {
-  pdf: { Icon: PdfIcon, fillColor: '#F06A5D' },
-  docx: { Icon: WordIcon, fillColor: '#5E6CFF' },
+  pdf: { Icon: PdfIcon, fillColor: '#FFFFFF' },
+  docx: { Icon: WordIcon, fillColor: '#FFFFFF' },
   py: { Icon: PythonIcon, fillColor: '#A379D6' },
   js: { Icon: JavaScriptIcon, fillColor: '#A379D6' },
-  txt: { Icon: TextIcon, fillColor: '#5E6CFF' },
+  txt: { Icon: TextIcon, fillColor: '#FFFFFF' },
+  md: { Icon: MarkdownIcon, fillColor: '#FFFFFF' },
   xlsx: { Icon: XlsxIcon, fillColor: '#49AF74' },
   csv: { Icon: CSVFileIcon, fillColor: '#49AF74' },
   ppt: { Icon: PresentationIcon, fillColor: '#FF9766' },
@@ -37,11 +39,11 @@ export type FileIconExtension = keyof typeof FILE_ICONS_DICT;
 
 type FileIconType = React.ComponentType<React.ComponentProps<'svg'>>;
 
-export function getFileIconByFileExtension(fileExtension: string): {
+export function getFileIconByFileExtension(fileExtension?: string): {
   Icon: FileIconType;
   fillColor: string;
 } {
-  if (isValidFileExtension(fileExtension)) {
+  if (fileExtension !== undefined && isValidFileExtension(fileExtension)) {
     return FILE_ICONS_DICT[fileExtension];
   }
   return { Icon: DefaultIcon, fillColor: '#333333' };

@@ -133,9 +133,9 @@ export const characterTable = pgTable('character', {
   learningContext: text('learning_context').notNull().default(''),
   competence: text('competence').notNull().default(''),
   // new
-  schoolType: text('school_type').default(''),
-  gradeLevel: text('grade_level').default(''),
-  subject: text('subject').default(''),
+  schoolType: text('school_type'),
+  gradeLevel: text('grade_level'),
+  subject: text('subject'),
   // not required
   specifications: text('specifications'),
   restrictions: text('restrictions'),
@@ -208,8 +208,8 @@ export const sharedSchoolConversationTable = pgTable('shared_school_conversation
   gradeLevel: text('grade_level').notNull().default(''),
   subject: text('subject').default('').notNull(),
   learningContext: text('learning_context').default('').notNull(),
-  specification: text('specification').default('').notNull(),
-  restrictions: text('restrictions').default('').notNull(),
+  specification: text('specification'),
+  restrictions: text('restrictions'),
   intelligencePointsLimit: integer('intelligence_points_limit'),
   maxUsageTimeLimit: integer('max_usage_time_limit'),
   inviteCode: text('invite_code').unique(),
@@ -345,5 +345,55 @@ export const conversationMessgaeFileMappingTable = pgTable(
   },
   (table) => ({
     unq: unique().on(table.conversationId, table.fileId),
+  }),
+);
+
+export const SharedSchoolConversationFileMapping = pgTable(
+  'shared_conversation_file_mapping',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    fileId: text('fileId')
+      .references(() => fileTable.id)
+      .notNull(),
+    sharedSchoolConversationId: uuid('shared_school_conversation_id')
+      .references(() => sharedSchoolConversationTable.id)
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    unq: unique().on(table.sharedSchoolConversationId, table.fileId),
+  }),
+);
+
+export const CharacterFileMapping = pgTable(
+  'character_file_mapping',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    fileId: text('file_id')
+      .references(() => fileTable.id)
+      .notNull(),
+    characterId: uuid('character_id')
+      .references(() => characterTable.id)
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    unq: unique().on(table.characterId, table.fileId),
+  }),
+);
+export const CustomGptFileMapping = pgTable(
+  'custom_gpt_file_mapping',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    fileId: text('file_id')
+      .references(() => fileTable.id)
+      .notNull(),
+    customGptId: uuid('custom_gpt_id')
+      .references(() => customGptTable.id)
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    unq: unique().on(table.customGptId, table.fileId),
   }),
 );

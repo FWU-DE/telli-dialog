@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import HeaderPortal from '../../../header-portal';
 import CustomGptForm from './custom-gpt-form';
+import { fetchFileMapping } from '../../actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,11 +32,13 @@ export default async function Page(context: PageContext) {
   const user = await getUser();
 
   const customGpt = await dbGetCustomGptById({ customGptId: params.customgptId });
+  const relatedFiles = await fetchFileMapping(params.customgptId);
 
   if (!customGpt) {
     return notFound();
   }
   const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({ key: customGpt.pictureId });
+  const readOnly = customGpt.userId !== user.id;
 
   return (
     <div className="min-w-full p-6 overflow-auto">
@@ -49,7 +52,9 @@ export default async function Page(context: PageContext) {
           {...customGpt}
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           isCreating={isCreating}
+          readOnly={readOnly}
           userRole={user.school.userRole}
+          existingFiles={relatedFiles}
         />
       </div>
     </div>

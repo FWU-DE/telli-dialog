@@ -7,28 +7,37 @@ import { useForm } from 'react-hook-form';
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
-import { SharedSchoolConversationModel } from '@/db/schema';
+import { FileModel, SharedSchoolConversationModel } from '@/db/schema';
 import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../schema';
-import { updateSharedSchoolChat } from './actions';
+import { deleteFileMappingAndEntity, updateSharedSchoolChat } from './actions';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
-import { deleteSharedChatAction } from '../actions';
-import { deepEqual } from '@/utils/object';
+import { deleteSharedChatAction, linkFileToSharedSchoolChat } from '../actions';
+import { deepCopy, deepEqual } from '@/utils/object';
 import ShareContainer from './share-container';
 import * as Select from '@radix-ui/react-select';
 import ChevronDownIcon from '@/components/icons/chevron-down';
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import { LocalFileState } from '@/components/chat/send-message-form';
+import FileDrop from '@/components/forms/file-drop-area';
+import FilesTable from '@/components/forms/file-upload-table';
+import {
+  SMALL_TEXT_INPUT_FIELDS_LIMIT,
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+} from '@/configuration-text-inputs/const';
 
 export default function SharedSchoolChatEditForm({
+  existingFiles,
   ...sharedSchoolChat
-}: SharedSchoolConversationModel) {
+}: SharedSchoolConversationModel & { existingFiles: FileModel[] }) {
   const toast = useToast();
   const router = useRouter();
 
+  const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
+  const [initialFiles, setInitialFiles] = React.useState<FileModel[]>(existingFiles);
   const t = useTranslations('shared-chats.form');
-  const tToasts = useTranslations('shared-chats.toasts');
+  const tToast = useTranslations('shared-chats.toasts');
   const tCommon = useTranslations('common');
 
   const { models } = useLlmModels();
@@ -40,25 +49,48 @@ export default function SharedSchoolChatEditForm({
     },
   });
 
+  async function handleDeattachFile(localFileId: string) {
+    const fileId: string | undefined =
+      _files.get(localFileId)?.fileId ?? initialFiles.find((f) => f.id === localFileId)?.id;
+    if (fileId === undefined) return;
+
+    // update the FE state
+    setFiles((prev) => {
+      const newMap = deepCopy(prev);
+      const deleted = newMap.delete(localFileId);
+      if (!deleted) {
+        console.warn('Could not delete file');
+      }
+      return newMap;
+    });
+
+    setInitialFiles(initialFiles.filter((f) => f.id !== fileId));
+    await deleteFileMappingAndEntity({ fileId });
+  }
+  function handleNewFile(data: { id: string; name: string; file: File }) {
+    linkFileToSharedSchoolChat({ fileId: data.id, schoolChatId: sharedSchoolChat.id })
+      .then()
+      .catch(() => toast.error(tToast('edit-toast-error')));
+  }
+
   function onSubmit(data: SharedSchoolChatFormValues) {
     updateSharedSchoolChat({ ...sharedSchoolChat, ...data })
       .then(() => {
-        toast.success(tToasts('edit-toast-success'));
-        router.refresh();
+        toast.success(tToast('edit-toast-success'));
       })
       .catch(() => {
-        toast.error(tToasts('edit-toast-error'));
+        toast.error(tToast('edit-toast-error'));
       });
   }
 
   function handleDeleteSharedChat() {
     deleteSharedChatAction({ id: sharedSchoolChat.id })
       .then(() => {
-        toast.success(tToasts('delete-toast-success'));
+        toast.success(tToast('delete-toast-success'));
         router.push('/shared-chats');
       })
       .catch(() => {
-        toast.error(tToasts('delete-toast-error'));
+        toast.error(tToast('delete-toast-error'));
       });
   }
 
@@ -133,7 +165,7 @@ export default function SharedSchoolChatEditForm({
           id="description"
           className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
           {...register('description')}
-          maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+          maxLength={SMALL_TEXT_INPUT_FIELDS_LIMIT}
         />
       </div>
       <div className="grid grid-cols-3 gap-6">
@@ -210,6 +242,20 @@ export default function SharedSchoolChatEditForm({
           maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
         />
       </div>
+      <FileDrop
+        setFiles={setFiles}
+        onFileUploaded={handleNewFile}
+        showUploadConfirmation={true}
+        countOfFiles={initialFiles.length + _files.size}
+      />
+      <FilesTable
+        files={initialFiles ?? []}
+        additionalFiles={_files}
+        onDeleteFile={handleDeattachFile}
+        toast={toast}
+        showUploadConfirmation={true}
+        className="p-4"
+      />
       <section>
         <h3 className="font-medium mt-8">{t('delete-title')}</h3>
         <p className="text-dark-gray mt-4">{t('delete-description')}</p>

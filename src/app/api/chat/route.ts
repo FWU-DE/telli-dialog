@@ -17,9 +17,12 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
-import { dbGetAllFileIdByConversationId, link_file_to_conversation } from '@/db/functions/files';
+import { dbGetAttachedFileByEntityId, link_file_to_conversation } from '@/db/functions/files';
 import { process_files } from '../file-operations/process-file';
 import { FileModelAndContent } from '@/db/schema';
+import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import { SMALL_MODEL_MAX_CHARACTERS } from '@/configuration-text-inputs/const';
+import { SMALL_MODEL_LIST } from '@/configuration-text-inputs/const';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -117,11 +120,23 @@ export async function POST(request: NextRequest) {
       conversationId: conversation.id,
     });
   }
-  const allFileIds = await dbGetAllFileIdByConversationId(conversation.id);
-
-  attachedFiles = await process_files(allFileIds);
+  const relatedFileEntities = await dbGetAttachedFileByEntityId({
+    conversationId: conversation.id,
+    characterId,
+    customGptId,
+  });
+  attachedFiles = await process_files(relatedFileEntities);
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
-  const prunedMessages = limitChatHistory({ messages, limitRecent: 4, limitFirst: 4 });
+  const maxCharacterLimit = SMALL_MODEL_LIST.includes(definedModel.displayName)
+    ? SMALL_MODEL_MAX_CHARACTERS
+    : TOTAL_CHAT_LENGTH_LIMIT;
+  const prunedMessages = limitChatHistory({
+    messages,
+    limitRecent: 10,
+    limitFirst: 2,
+    characterLimit: maxCharacterLimit,
+  });
+
   const systemPrompt = await constructChatSystemPrompt({
     characterId,
     customGptId,

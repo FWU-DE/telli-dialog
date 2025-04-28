@@ -1,11 +1,13 @@
 import { and, desc, eq, getTableColumns, inArray, or } from 'drizzle-orm';
 import { db } from '..';
 import {
+  CharacterFileMapping,
   CharacterInsertModel,
   CharacterModel,
   characterTable,
   conversationMessageTable,
   conversationTable,
+  fileTable,
   SharedCharacterChatUsageTrackingInsertModel,
   sharedCharacterChatUsageTrackingTable,
   sharedCharacterConversation,
@@ -228,6 +230,11 @@ export async function dbDeleteCharacterByIdAndUserId({
   }
 
   const deletedCharacter = await db.transaction(async (tx) => {
+    const relatedFiles = await tx
+      .select({ id: CharacterFileMapping.fileId })
+      .from(CharacterFileMapping)
+      .where(eq(CharacterFileMapping.characterId, character.id));
+
     const conversations = await tx
       .select({ id: conversationTable.id })
       .from(conversationTable)
@@ -242,7 +249,13 @@ export async function dbDeleteCharacterByIdAndUserId({
       );
     }
     await tx.delete(conversationTable).where(eq(conversationTable.characterId, character.id));
-
+    await tx.delete(CharacterFileMapping).where(eq(CharacterFileMapping.characterId, character.id));
+    await tx.delete(fileTable).where(
+      inArray(
+        fileTable.id,
+        relatedFiles.map((f) => f.id),
+      ),
+    );
     const deletedCharacter = (
       await tx
         .delete(characterTable)
