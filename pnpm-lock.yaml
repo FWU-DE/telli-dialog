@@ -77,6 +77,9 @@ importers:
       docx:
         specifier: 9.1.1
         version: 9.1.1
+      dotenv-cli:
+        specifier: 7.4.1
+        version: 7.4.1
       drizzle-orm:
         specifier: 0.39.3
         version: 0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.11.11)(pg@8.13.1)(postgres@3.4.5)
@@ -128,6 +131,9 @@ importers:
       pm2:
         specifier: 6.0.5
         version: 6.0.5
+      postcss:
+        specifier: 8.4.49
+        version: 8.4.49
       qrcode.react:
         specifier: 4.2.0
         version: 4.2.0(react@19.0.0)
@@ -176,6 +182,9 @@ importers:
       tailwindcss-animate:
         specifier: 1.0.7
         version: 1.0.7(tailwindcss@3.4.1)
+      tsx:
+        specifier: 4.7.2
+        version: 4.7.2
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -213,9 +222,6 @@ importers:
       '@types/react-syntax-highlighter':
         specifier: 15.5.13
         version: 15.5.13
-      dotenv-cli:
-        specifier: 7.4.1
-        version: 7.4.1
       drizzle-kit:
         specifier: 0.30.4
         version: 0.30.4
@@ -237,15 +243,9 @@ importers:
       oidc-provider:
         specifier: 8.8.0
         version: 8.8.0
-      postcss:
-        specifier: 8.4.49
-        version: 8.4.49
       prettier:
         specifier: 3.4.2
         version: 3.4.2
-      tsx:
-        specifier: 4.7.2
-        version: 4.7.2
       typescript:
         specifier: 5.7.2
         version: 5.7.2
