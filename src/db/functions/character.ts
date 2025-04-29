@@ -295,6 +295,14 @@ export async function dbGetCharacterByIdAndInviteCode({
     )
     .where(and(eq(characterTable.id, id), eq(sharedCharacterConversation.inviteCode, inviteCode)));
 
+  // if the character is not shared, return the character
+  if (row === undefined) {
+    const [row] = await db
+      .select()
+      .from(characterTable)
+      .where(and(eq(characterTable.id, id)));
+    return row;
+  }
   return row as CharacterModel;
 }
 

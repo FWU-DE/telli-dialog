@@ -44,17 +44,25 @@ export async function dbGetSharedChatByIdAndInviteCode({
   id: string;
   inviteCode: string;
 }) {
-  return (
-    await db
+  const [row] = await db
+    .select()
+    .from(sharedSchoolConversationTable)
+    .where(
+      and(
+        eq(sharedSchoolConversationTable.id, id),
+        eq(sharedSchoolConversationTable.inviteCode, inviteCode),
+      ),
+    );
+
+  // if the school conversation is no longer shared, return the conversation entity
+  if (row === undefined) {
+    const [row] = await db
       .select()
       .from(sharedSchoolConversationTable)
-      .where(
-        and(
-          eq(sharedSchoolConversationTable.id, id),
-          eq(sharedSchoolConversationTable.inviteCode, inviteCode),
-        ),
-      )
-  )[0];
+      .where(eq(sharedSchoolConversationTable.id, id));
+    return row;
+  }
+  return row;
 }
 
 export async function dbUpdateTokenUsageBySharedChatId(
