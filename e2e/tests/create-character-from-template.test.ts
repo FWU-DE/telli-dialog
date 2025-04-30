@@ -12,7 +12,7 @@ test('test', async ({ page }) => {
   expect(copyButton).toBeEnabled();
   await copyButton.click();
   await page.waitForURL('/characters/editor/**');
-  await page.getByLabel('* Wie heißt die Person?').fill('Rosa Parks Individuell');
+  await page.getByLabel('Wie heißt die Person? *').fill('Rosa Parks Individuell');
   await page.getByRole('textbox', { name: 'Schultyp' }).click();
   await page.getByRole('textbox', { name: 'Schultyp' }).fill('Gymnasium');
   await page.getByRole('textbox', { name: 'Schultyp' }).press('Tab');

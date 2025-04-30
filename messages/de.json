@@ -132,9 +132,14 @@
       "open-chat": "Chat öffnen",
       "use-qr": "Oder nutze den QR-Code"
     },
+    "copy-modal": {
+      "title": "Dialogpartner kopieren",
+      "content": "Dieser Dialogpartner ist schreibgeschützt. Möchtest du eine Kopie in deinem eigenen Bereich erstellen? Danach kannst du ihn frei bearbeiten und anpassen.",
+      "copy-button": "Kopieren & bearbeiten"
+    },
     "copy-page": {
-      "title": "Dialogpartner in eigenen Space Kopieren",
-      "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Dialogpartner in deinen privaten Space, um ihn anzupassen.",
+      "title": "Dialogpartner in eigenen Bereich kopieren",
+      "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Dialogpartner in deinen privaten Bereich, um ihn anzupassen.",
       "copy-template": "Dialogpartner bearbeiten"
     },
     "form": {
@@ -221,7 +226,7 @@
       "time": "Zeit",
       "share": "Teilen",
       "button-start": "Szenario starten",
-      "invalid-code-toast": "Der Code der eingegeben wurde ist entweder abgelaufen oder ungültig.",
+      "invalid-code-toast": "Der Code der eingegeben wurde, ist entweder abgelaufen oder ungültig.",
       "join-code": "Mit Code beitreten",
       "enter-chat": "Zum Dialog",
       "delete-chat-modal-title": "Neuer Chat",

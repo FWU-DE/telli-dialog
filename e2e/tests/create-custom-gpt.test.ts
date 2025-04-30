@@ -14,14 +14,14 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await page.waitForURL('/custom/editor/**');
 
   // configure form
-  await page.getByRole('textbox', { name: '* Wie soll diese' }).click();
-  await page.getByRole('textbox', { name: '* Wie soll diese' }).fill('Hausbauplaner');
-  await page.getByRole('textbox', { name: '* Wie soll diese' }).press('Tab');
+  await page.getByRole('textbox', { name: 'Wie soll diese' }).click();
+  await page.getByRole('textbox', { name: 'Wie soll diese' }).fill('Hausbauplaner');
+  await page.getByRole('textbox', { name: 'Wie soll diese' }).press('Tab');
   await page
-    .getByRole('textbox', { name: '* Wie kann der Assistent kurz beschrieben werden?' })
+    .getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' })
     .fill('Hilft bei der Planung und Budget Rechnung beim Bau eines Einfamilienhauses');
   await page
-    .getByRole('textbox', { name: '* Wie kann der Assistent kurz beschrieben werden?' })
+    .getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' })
     .press('Tab');
   await page.getByRole('button', { name: 'Bild hochladen' }).press('Tab');
   await page

@@ -240,10 +240,10 @@ export default function CustomGptForm({
           <span>{t('all-gpts')}</span>
         </Link>
       )}
-      <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>
 
+      <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>
       {userRole === 'teacher' && (
-        <fieldset className="mt-16 gap-8">
+        <fieldset className="mt-8 gap-8">
           <div className="flex gap-4">
             <Checkbox
               label={t('restriction-school')}
@@ -253,12 +253,12 @@ export default function CustomGptForm({
           </div>
         </fieldset>
       )}
-      <fieldset className="flex flex-col gap-4 mt-16">
+      <fieldset className="flex flex-col gap-4 mt-8">
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
           <div className="flex gap-8 flex-col">
             <div className="flex flex-col gap-4">
               <label htmlFor="name" className={cn(labelClassName, 'text-sm')}>
-                <span className="text-coral">*</span> {t('gpt-name-label')}
+                {t('gpt-name-label')} <span className="text-coral">*</span>
               </label>
               <input
                 id="name"
@@ -274,7 +274,7 @@ export default function CustomGptForm({
             </div>
             <div className="flex flex-col gap-4">
               <label htmlFor="description" className={cn(labelClassName, 'text-sm')}>
-                <span className="text-coral">*</span> {t('gpt-description-label')}
+                {t('gpt-description-label')} <span className="text-coral">*</span>
               </label>
               <textarea
                 id="description"
@@ -330,8 +330,7 @@ export default function CustomGptForm({
       <fieldset className="flex flex-col gap-6 mt-6">
         <div className="flex flex-col gap-4">
           <label htmlFor="specifications" className={cn(labelClassName, 'text-sm')}>
-            <span className="text-coral">*</span>
-            {t('gpt-specification-label')}
+            {t('gpt-specification-label')} <span className="text-coral">*</span>
           </label>
           <textarea
             id="specification"
