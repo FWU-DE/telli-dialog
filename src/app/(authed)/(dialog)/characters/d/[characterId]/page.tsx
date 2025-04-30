@@ -1,9 +1,5 @@
 import { generateUUID } from '@/utils/uuid';
-import SelectLlmModel from '@/components/conversation/select-llm-model';
-import { NewChatButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import ProfileMenu from '@/components/navigation/profile-menu';
-import DownloadConversationButton from '../../../download-conversation-button';
+import { ChatHeaderBar } from '@/components/chat/header-bar';
 import HeaderPortal from '../../../header-portal';
 import { getUser } from '@/auth/utils';
 import { notFound, redirect } from 'next/navigation';
@@ -42,14 +38,7 @@ export default async function Page(context: PageContext) {
   return (
     <>
       <HeaderPortal>
-        <div className="flex w-full gap-4 justify-center items-center z-30">
-          <ToggleSidebarButton />
-          <NewChatButton />
-          <SelectLlmModel isStudent={user.school.userRole === 'student'} />
-          <div className="flex-grow"></div>
-          <DownloadConversationButton conversationId={id} characterName={character.name} disabled />
-          <ProfileMenu {...user} />
-        </div>
+        <ChatHeaderBar chatId={id} title={character.name} user={user} downloadButtonDisabled={true} />
       </HeaderPortal>
       <Chat
         key={id}

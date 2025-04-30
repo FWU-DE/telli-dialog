@@ -212,7 +212,11 @@ export default function CharacterForm({
     toast.success(tToast('create-toast-success'));
     router.replace(backUrl);
   }
-  let shareChatElement: React.JSX.Element | undefined;
+  const shareChatElement = !isCreating ? (
+    <fieldset className="mt-16">
+      <ShareContainer {...character} />
+    </fieldset>
+  ) : undefined;
   let navigateBackElement: React.JSX.Element;
   if (isCreating) {
     navigateBackElement = (
@@ -226,23 +230,21 @@ export default function CharacterForm({
     );
   } else {
     navigateBackElement = (
-      <Link href={backUrl} className="flex gap-3 text-primary mb-4 hover:underline items-center">
+      <Link href={backUrl} className="flex gap-3 text-primary hover:underline items-center">
         <ChevronLeftIcon />
         <span>{t('all-characters')}</span>
       </Link>
     );
   }
-  if (!isCreating) {
-    shareChatElement = (
-      <fieldset className="mt-8">
-        <ShareContainer {...character} />
-      </fieldset>
-    );
-  }
-  const copyContainer = readOnly ? <CopyContainer character={character} /> : undefined;
+
+  const copyContainer = readOnly ? (
+    <fieldset className="mt-16">
+      <CopyContainer character={character} />
+    </fieldset>
+  ) : undefined;
 
   const generalSettings = (
-    <fieldset className="mt-8 flex flex-col gap-8">
+    <fieldset className="mt-16 flex flex-col gap-8">
       <h2 className="font-medium mb-2">{t('general-settings')}</h2>
       <div className="flex gap-4">
         <Checkbox
@@ -313,13 +315,13 @@ export default function CharacterForm({
   return (
     <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
       {navigateBackElement}
+
+      <h1 className="text-2xl font-medium mt-4">
+        {isCreating ? t('create-character') : character.name}
+      </h1>
+
       {copyContainer}
       {shareChatElement}
-      <div className="flex felx-col mt-4 justify-between items-center">
-        <h1 className="text-2xl font-medium">
-          {isCreating ? t('create-character') : character.name}
-        </h1>
-      </div>
       {generalSettings}
       <fieldset className="flex flex-col gap-4 mt-12">
         <h2 className="font-medium mb-8">{t('character-settings')}</h2>
@@ -327,7 +329,7 @@ export default function CharacterForm({
           <div className="flex gap-8 flex-col">
             <div className="flex flex-col gap-4">
               <label htmlFor="name" className={cn(labelClassName, 'text-sm')}>
-                <span className="text-coral">*</span> {t('character-name-label')}
+                {t('character-name-label')} <span className="text-coral">*</span>
               </label>
               <input
                 id="name"
@@ -344,7 +346,7 @@ export default function CharacterForm({
             </div>
             <div className="flex flex-col gap-4">
               <label htmlFor="description" className={cn(labelClassName, 'text-sm')}>
-                <span className="text-coral">*</span> {t('character-description-label')}
+                {t('character-description-label')} <span className="text-coral">*</span>
               </label>
               <textarea
                 id="description"
@@ -403,7 +405,7 @@ export default function CharacterForm({
       <fieldset className="flex flex-col gap-6 mt-6">
         <div className="flex flex-col gap-4">
           <label htmlFor="competence" className={cn(labelClassName, 'text-sm')}>
-            <span className="text-coral">*</span> {t('character-competence-label')}
+            {t('character-competence-label')} <span className="text-coral">*</span>
           </label>
           <textarea
             id="competence"
@@ -419,7 +421,7 @@ export default function CharacterForm({
         </div>
         <div className="flex flex-col gap-4">
           <label htmlFor="learningContext" className={cn(labelClassName, 'text-sm')}>
-            <span className="text-coral">*</span> {t('character-learning-context-label')}
+            {t('character-learning-context-label')} <span className="text-coral">*</span>
           </label>
           <textarea
             id="learningContext"
