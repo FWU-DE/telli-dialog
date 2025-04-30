@@ -7,7 +7,7 @@ import ShareIcon from '@/components/icons/share';
 import TrashIcon from '@/components/icons/trash';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { deleteSharedChatAction } from './actions';
+import { dbDeleteSharedChatAction } from './actions';
 import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
 import { calculateTimeLeftBySharedChat } from './[sharedSchoolChatId]/utils';
@@ -23,7 +23,7 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
   const tCommon = useTranslations('common');
 
   function handleDeleteSharedChat() {
-    deleteSharedChatAction({ id: sharedSchoolChat.id })
+    dbDeleteSharedChatAction({ id: sharedSchoolChat.id })
       .then(() => {
         toast.success(t('toasts.delete-toast-success'));
         router.refresh();

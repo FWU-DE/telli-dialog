@@ -25,11 +25,14 @@ import FileDrop from '@/components/forms/file-drop-area';
 import { linkFileToSharedSchoolChat } from '../actions';
 import { deepCopy } from '@/utils/object';
 import SelectLlmModelForm from '../../_components/select-llm-model';
+import ChevronLeftIcon from '@/components/icons/chevron-left';
 
 export default function SharedSchoolChatCreateForm({
   existingFiles,
+  isCreating,
 }: {
   existingFiles?: FileModel[];
+  isCreating: boolean;
 }) {
   const toast = useToast();
   const router = useRouter();

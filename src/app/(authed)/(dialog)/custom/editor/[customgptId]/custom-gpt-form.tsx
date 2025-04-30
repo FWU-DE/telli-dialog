@@ -26,6 +26,7 @@ import Checkbox from '@/components/common/checkbox';
 import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import TrashIcon from '@/components/icons/trash';
 import PlusIcon from '@/components/icons/plus';
+import { TextInput } from '@/components/common/text-input';
 import {
   deleteCustomGptAction,
   updateCustomGptAccessLevelAction,
@@ -256,40 +257,28 @@ export default function CustomGptForm({
       <fieldset className="flex flex-col gap-4 mt-16">
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
           <div className="flex gap-8 flex-col">
-            <div className="flex flex-col gap-4">
-              <label htmlFor="name" className={cn(labelClassName, 'text-sm')}>
-                <span className="text-coral">*</span> {t('gpt-name-label')}
-              </label>
-              <input
-                id="name"
-                {...register('name')}
-                maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-                className={cn(
-                  inputFieldClassName,
-                  'focus:border-primary placeholder:text-gray-300',
-                )}
-                onBlur={handleAutoSave}
-                placeholder={t('gpt-name-placeholder')}
-              />
-            </div>
-            <div className="flex flex-col gap-4">
-              <label htmlFor="description" className={cn(labelClassName, 'text-sm')}>
-                <span className="text-coral">*</span> {t('gpt-description-label')}
-              </label>
-              <textarea
-                id="description"
-                rows={5}
-                style={{ resize: 'none' }}
-                {...register('description')}
-                maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-                className={cn(
-                  inputFieldClassName,
-                  'focus:border-primary placeholder:text-gray-300',
-                )}
-                onBlur={handleAutoSave}
-                placeholder={t('gpt-description-placeholder')}
-              />
-            </div>
+            <TextInput
+              label={t('gpt-name-label')}
+              required={true}
+              placeholder={t('gpt-name-placeholder')}
+              inputType="text"
+              {...register('name')}
+              rows={undefined}
+              readOnly={readOnly}
+              maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+              id="name"
+            />
+            <TextInput
+              label={t('gpt-description-label')}
+              required={true}
+              placeholder={t('gpt-description-placeholder')}
+              inputType="textarea"
+              {...register('description')}
+              rows={5}
+              readOnly={readOnly}
+              maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+              id="description"
+            />
           </div>
           <section className="h-full">
             <label htmlFor="image" className={cn(labelClassName, 'text-sm')}>
@@ -328,22 +317,17 @@ export default function CustomGptForm({
         </div>
       </fieldset>
       <fieldset className="flex flex-col gap-6 mt-6">
-        <div className="flex flex-col gap-4">
-          <label htmlFor="specifications" className={cn(labelClassName, 'text-sm')}>
-            <span className="text-coral">*</span>
-            {t('gpt-specification-label')}
-          </label>
-          <textarea
-            id="specification"
-            {...register('specification')}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-            rows={7}
-            style={{ resize: 'none' }}
-            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-            onBlur={handleAutoSave}
-            placeholder={t('gpt-specification-placeholder')}
-          />
-        </div>
+        <TextInput
+          label={t('gpt-specification-label')}
+          required={true}
+          placeholder={t('gpt-specification-placeholder')}
+          inputType="textarea"
+          {...register('specification')}
+          rows={7}
+          readOnly={readOnly}
+          maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+          id="specification"
+        />
         <section className="mt-8 flex flex-col gap-3 w-full">
           <h2 className="font-medium">Promptvorschläge hinzufügen</h2>
           <p className="text-dark-gray">
@@ -353,12 +337,17 @@ export default function CustomGptForm({
             {fields.map((field, index) => {
               return (
                 <React.Fragment key={field.id}>
-                  <textarea
-                    rows={2}
-                    {...register(`promptSuggestions.${index}.content`)}
-                    className={cn(inputFieldClassName, 'resize-none')}
+                  <TextInput
+                    label=""
+                    required={false}
                     placeholder={index === 0 ? t('prompt-suggestion-placeholder') : undefined}
+                    inputType="textarea"
+                    {...register(`promptSuggestions.${index}.content`)}
+                    rows={2}
                     onBlur={updatePromptSuggestions}
+                    readOnly={readOnly}
+                    maxLength={undefined}
+                    id={`promptSuggestions.${index}.content`}
                   />
                   {index !== 0 && (
                     <button
