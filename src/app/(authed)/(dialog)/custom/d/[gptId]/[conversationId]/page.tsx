@@ -72,7 +72,12 @@ export default async function Page(context: PageContext) {
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
       <HeaderPortal>
-        <ChatHeaderBar chatId={chat.id} title={customGpt.name} user={user} downloadButtonDisabled={false} />
+        <ChatHeaderBar
+          chatId={chat.id}
+          title={customGpt.name}
+          user={user}
+          downloadButtonDisabled={false}
+        />
       </HeaderPortal>
       <Chat
         id={chat.id}

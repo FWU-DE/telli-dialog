@@ -106,11 +106,7 @@ export default function SharedSchoolChatEditForm({
   }
 
   return (
-    <form
-      className="flex flex-col gap-8"
-      onSubmit={handleSubmit(onSubmit)}
-      onBlur={handleAutoSave}
-    >
+    <form className="flex flex-col gap-8" onSubmit={handleSubmit(onSubmit)} onBlur={handleAutoSave}>
       <fieldset className="mt-16">
         <ShareContainer {...sharedSchoolChat} />
       </fieldset>

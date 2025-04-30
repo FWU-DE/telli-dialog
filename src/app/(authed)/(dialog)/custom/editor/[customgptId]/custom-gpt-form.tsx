@@ -227,8 +227,8 @@ export default function CustomGptForm({
     <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
       {isCreating && (
         <button
-        onClick={handleDeleteCustomGpt}
-        className="flex gap-3 items-center text-primary hover:underline"
+          onClick={handleDeleteCustomGpt}
+          className="flex gap-3 items-center text-primary hover:underline"
         >
           <ChevronLeftIcon />
           <span>{t('all-gpts')}</span>
