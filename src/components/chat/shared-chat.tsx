@@ -83,7 +83,9 @@ export default function SharedChat({
 
   return (
     <>
-      {!chatActive && <ExpiredChatModal conversationMessages={messages} />}
+      {!chatActive && (
+        <ExpiredChatModal conversationMessages={messages} title={sharedSchoolChat.name} />
+      )}
       <div className="flex flex-col h-full w-full overflow-hidden">
         <SharedChatHeader
           chatActive={chatActive}
