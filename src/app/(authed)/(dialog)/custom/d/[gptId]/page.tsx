@@ -33,7 +33,7 @@ export default async function Page({ params }: { params: Promise<{ gptId: string
   const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: customGpt.pictureId });
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
-      <ChatHeaderBar chatId={id} user={user} />
+      <ChatHeaderBar chatId={id} user={user} downloadButtonDisabled={true} />
       <Chat
         key={id}
         id={id}

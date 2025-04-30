@@ -13,10 +13,12 @@ export function ChatHeaderBar({
   user,
   title,
   chatId,
+  downloadButtonDisabled,
 }: {
   user: UserAndContext;
   title?: string;
   chatId: string;
+  downloadButtonDisabled: boolean;
 }) {
   return (
     <HeaderPortal>
@@ -37,7 +39,7 @@ export function ChatHeaderBar({
             className="flex items-center text-main-900 hover:text-main-600"
             iconClassName="h-6 w-6"
             characterName={title}
-            disabled={false}
+            disabled={downloadButtonDisabled}
           />
           <ProfileMenu {...user} />
         </div>

@@ -9,9 +9,10 @@ import { useTranslations } from 'next-intl';
 
 type ExpiredChatModalProps = {
   conversationMessages: Message[];
+  title: string;
 };
 
-export default function ExpiredChatModal({ conversationMessages }: ExpiredChatModalProps) {
+export default function ExpiredChatModal({ conversationMessages, title }: ExpiredChatModalProps) {
   const t = useTranslations('shared-chats.shared');
 
   return (
@@ -32,6 +33,7 @@ export default function ExpiredChatModal({ conversationMessages }: ExpiredChatMo
               <div className="mt-6 mb-2">
                 <DownloadSharedConversationButton
                   primaryButton
+                  characterName={title}
                   conversationMessages={conversationMessages}
                   disabled={conversationMessages.length === 0}
                 />

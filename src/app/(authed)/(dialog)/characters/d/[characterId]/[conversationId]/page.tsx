@@ -52,7 +52,12 @@ export default async function Page(context: PageContext) {
   return (
     <>
       <HeaderPortal>
-        <ChatHeaderBar chatId={chat.id} title={character.name} user={user} />
+        <ChatHeaderBar
+          chatId={chat.id}
+          title={character.name}
+          user={user}
+          downloadButtonDisabled={false}
+        />
       </HeaderPortal>
       <Chat
         id={chat.id}

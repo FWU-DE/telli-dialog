@@ -104,7 +104,7 @@ export default function SharedSchoolChatCreateForm({
       <div className="flex gap-4 w-full flex-wrap">
         <div className="flex flex-col gap-4 flex-grow">
           <label htmlFor="name" className={cn(labelClassName, 'text-sm')}>
-            <span className="text-coral">*</span> {t('name')}
+            {t('name')} <span className="text-coral">*</span>
           </label>
           <input
             id="name"
@@ -131,7 +131,7 @@ export default function SharedSchoolChatCreateForm({
       </div>
       <div className="flex flex-col gap-4">
         <label htmlFor="purpose" className={cn(labelClassName, 'text-sm')}>
-          <span className="text-coral">*</span> {t('purpose')}
+          {t('purpose')} <span className="text-coral">*</span>
         </label>
         <input
           id="purpose"
@@ -144,7 +144,7 @@ export default function SharedSchoolChatCreateForm({
       <div className="grid grid-cols-3 gap-4">
         <div className="flex flex-col gap-4">
           <label htmlFor="school-type" className={cn(labelClassName, 'text-sm')}>
-            <span className="text-coral">*</span> {t('school-type')}
+            {t('school-type')} <span className="text-coral">*</span>
           </label>
           <input
             id="school-type"
@@ -156,7 +156,7 @@ export default function SharedSchoolChatCreateForm({
         </div>
         <div className="flex flex-col gap-4">
           <label htmlFor="grade" className={cn(labelClassName, 'text-sm')}>
-            <span className="text-coral">*</span> {t('grade')}
+            {t('grade')} <span className="text-coral">*</span>
           </label>
           <input
             id="grade"
@@ -168,7 +168,7 @@ export default function SharedSchoolChatCreateForm({
         </div>
         <div className="flex flex-col gap-4">
           <label htmlFor="subject" className={cn(labelClassName, 'text-sm')}>
-            <span className="text-coral">*</span> {t('subject')}
+            {t('subject')} <span className="text-coral">*</span>
           </label>
           <input
             id="subject"
@@ -181,7 +181,7 @@ export default function SharedSchoolChatCreateForm({
       </div>
       <div className="flex flex-col gap-4">
         <label htmlFor="learning-context" className={cn(labelClassName, 'text-sm')}>
-          <span className="text-coral">*</span> {t('learning-context')}
+          {t('learning-context')} <span className="text-coral">*</span>
         </label>
         <textarea
           id="learning-context"

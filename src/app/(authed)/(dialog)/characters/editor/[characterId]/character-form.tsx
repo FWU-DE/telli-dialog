@@ -239,7 +239,7 @@ export default function CharacterForm({
   const copyContainer = readOnly ? <CopyContainer character={character} /> : undefined;
 
   const generalSettings = (
-    <fieldset className="mt-8 flex flex-col gap-8">
+    <fieldset className="mt-16 flex flex-col gap-8">
       <h2 className="font-medium mb-2">{t('general-settings')}</h2>
       <div className="flex gap-4">
         <Checkbox
@@ -292,13 +292,13 @@ export default function CharacterForm({
   return (
     <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)} onBlur={handleAutoSave}>
       {navigateBackElement}
+
+      <h1 className="text-2xl font-medium mt-4">
+        {isCreating ? t('create-character') : character.name}
+      </h1>
+
       {copyContainer}
       {shareChatElement}
-      <div className="flex felx-col mt-4 justify-between items-center">
-        <h1 className="text-2xl font-medium">
-          {isCreating ? t('create-character') : character.name}
-        </h1>
-      </div>
       {generalSettings}
       <fieldset className="flex flex-col gap-4 mt-12">
         <h2 className="font-medium mb-8">{t('character-settings')}</h2>

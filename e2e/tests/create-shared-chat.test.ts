@@ -11,19 +11,19 @@ test('teacher can login, create and join shared chat', async ({ page }) => {
 
   // configure form
   await page
-    .getByLabel('* Titel des Lernszenarios')
+    .getByLabel('Titel des Lernszenarios *')
     .fill('Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten');
 
   await page
-    .getByLabel('* Wie kann der Zweck des Lernszenarios kurz beschrieben werden?')
+    .getByLabel('Wie kann der Zweck des Lernszenarios kurz beschrieben werden? *')
     .fill('Zwischen Absolutismus und Demokratie (Ludwig XIV)');
 
-  await page.getByLabel('* Schultyp').fill('Gymnasium');
-  await page.getByLabel('* Klassenstufe').fill('10. Klasse');
-  await page.getByLabel('* Fach').fill('Geschichte');
+  await page.getByLabel('Schultyp *').fill('Gymnasium');
+  await page.getByLabel('Klassenstufe *').fill('10. Klasse');
+  await page.getByLabel('Fach *').fill('Geschichte');
 
   await page
-    .getByLabel('* In welchem Kontext findet das Lernszenario statt?')
+    .getByLabel('In welchem Kontext findet das Lernszenario statt? *')
     .fill('Schüler sollen den Unterschied zwischen Absolutismus und Demokratie verstehen.');
 
   await page
@@ -85,19 +85,19 @@ test('teacher can login, create and delete shared chat, student can join chat', 
 
   // configure form
   await page
-    .getByLabel('* Titel des Lernszenarios')
+    .getByLabel('Titel des Lernszenarios *')
     .fill('Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten');
 
   await page
-    .getByLabel('* Wie kann der Zweck des Lernszenarios kurz beschrieben werden?')
+    .getByLabel('Wie kann der Zweck des Lernszenarios kurz beschrieben werden? *')
     .fill('Zwischen Absolutismus und Demokratie (Ludwig XIV)');
 
-  await page.getByLabel('* Schultyp').fill('Gymnasium');
-  await page.getByLabel('* Klassenstufe').fill('10. Klasse');
-  await page.getByLabel('* Fach').fill('Geschichte');
+  await page.getByLabel('Schultyp *').fill('Gymnasium');
+  await page.getByLabel('Klassenstufe *').fill('10. Klasse');
+  await page.getByLabel('Fach *').fill('Geschichte');
 
   await page
-    .getByLabel('* In welchem Kontext findet das Lernszenario statt?')
+    .getByLabel('In welchem Kontext findet das Lernszenario statt? *')
     .fill('Schüler sollen den Unterschied zwischen Absolutismus und Demokratie verstehen.');
 
   await page
