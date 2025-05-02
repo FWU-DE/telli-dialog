@@ -35,8 +35,8 @@ describe('limitChatHistory', () => {
 
     const result = limitChatHistory({
       messages,
-      limitRecent: 4,
-      limitFirst: 2,
+      limitRecent: 2,
+      limitFirst: 1,
       characterLimit,
     });
 
@@ -64,8 +64,8 @@ describe('limitChatHistory', () => {
 
     const result = limitChatHistory({
       messages,
-      limitRecent: 4,
-      limitFirst: 2,
+      limitRecent: 2,
+      limitFirst: 1,
       characterLimit: 500, // Set a lower character limit
     });
 
@@ -89,8 +89,8 @@ describe('limitChatHistory', () => {
 
     const result = limitChatHistory({
       messages,
-      limitRecent: 4,
-      limitFirst: 2,
+      limitRecent: 2,
+      limitFirst: 1,
       characterLimit: 1500, // Set a character limit that can't fit all mandatory messages
     });
 
