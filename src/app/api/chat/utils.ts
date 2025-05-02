@@ -5,29 +5,7 @@ export function getMostRecentUserMessage(messages: Array<Message>) {
   return userMessages.at(-1);
 }
 
-export function limitChatHistory({
-  messages,
-  limitRecent,
-  limitFirst = 2,
-  characterLimit,
-}: {
-  messages: Array<Message>;
-  limitRecent: number;
-  limitFirst?: number;
-  characterLimit: number;
-}): Array<Message> {
-  // Validate inputs
-  if (limitRecent % 2 !== 0 || messages.length === 0) {
-    throw new Error(
-      'Limit must be an even number to ensure equal distribution between user and assistant messages',
-    );
-  }
-
-  if (limitFirst < 0) {
-    throw new Error('keepFirstN must be a non-negative number');
-  }
-
-  // First consolidate consecutive messages from the same role
+export function consolidateMessages(messages: Array<Message>): Array<Message> {
   const consolidatedMessages: Array<Message> = [];
 
   for (let i = 0; i < messages.length; i++) {
@@ -46,9 +24,35 @@ export function limitChatHistory({
     }
   }
 
+  return consolidatedMessages;
+}
+
+/**
+ * Limits the chat history to the most recent messages, keeping the first N messages and the last N messages.
+ * @param messages - The messages to limit.
+ * @param limitRecent - The number of recent message-pairs to keep e.g. 2 means 2 user messages and 2 assistant messages.
+ * @param limitFirst - The number of first message-pairs to keep.
+ * @param characterLimit - The maximum number of characters to keep.
+ */
+export function limitChatHistory({
+  messages,
+  limitRecent,
+  limitFirst = 2,
+  characterLimit,
+}: {
+  messages: Array<Message>;
+  limitRecent: number;
+  limitFirst?: number;
+  characterLimit: number;
+}): Array<Message> {
+  // Validate inputs
+
+  // First consolidate consecutive messages from the same role
+  const consolidatedMessages = consolidateMessages(messages);
+
   // Always include the last user message even if limitRecent == 0
-  limitRecent = limitRecent + 1;
-  limitFirst = limitFirst - 1;
+  limitRecent = limitRecent * 2;
+  limitFirst = limitFirst * 2 - 1;
 
   // If we have fewer messages than the limits, just return all messages
   if (consolidatedMessages.length <= limitFirst + limitRecent) {
@@ -66,8 +70,12 @@ export function limitChatHistory({
 
   let backIndex = consolidatedMessages.length - 1;
   let frontIndex = 0;
+  let manadatoryMessagesIncluded = false;
   // Add messages from the front
-  while (runningTotal < characterLimit && frontIndex < backIndex) {
+  while (
+    (runningTotal < characterLimit || !manadatoryMessagesIncluded) &&
+    backMessages.length + frontMessages.length < consolidatedMessages.length
+  ) {
     const frontMessage = consolidatedMessages[frontIndex];
     const backMessage = consolidatedMessages[backIndex];
 
@@ -87,12 +95,13 @@ export function limitChatHistory({
       backMessages.unshift(backMessage);
       includedIndices.add(backIndex);
     }
-
-    frontIndex++;
+    manadatoryMessagesIncluded =
+      frontIndex > limitFirst && backIndex < consolidatedMessages.length - limitRecent;
     backIndex--;
+    frontIndex++;
   }
 
-  // Mark all messages not in includedIndices as omitted
+  // Mark all messages not in includedIndices as omitted this is left in for debugging purposes
   for (let i = 0; i < consolidatedMessages.length; i++) {
     if (!includedIndices.has(i)) {
       omittedIndices.add(i);
