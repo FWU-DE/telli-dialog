@@ -41,13 +41,13 @@ describe('limitChatHistory', () => {
     });
 
     // Should include first 2 and last 4 messages
-    expect(result.length).toBe(6);
+    expect(result.length).toBe(7);
     expect(result[0]?.content).toBe(messages?.[0]?.content);
     expect(result[1]?.content).toBe(messages?.[1]?.content);
-    expect(result[2]?.content).toBe(messages?.[4]?.content);
-    expect(result[3]?.content).toBe(messages?.[5]?.content);
-    expect(result[4]?.content).toBe(messages?.[6]?.content);
-    expect(result[5]?.content).toBe(messages?.[7]?.content);
+    expect(result[2]?.content).toBe(messages?.[3]?.content);
+    expect(result[3]?.content).toBe(messages?.[4]?.content);
+    expect(result[4]?.content).toBe(messages?.[5]?.content);
+    expect(result[5]?.content).toBe(messages?.[6]?.content);
   });
 
   it('should include most recent messages up to character limit after mandatory messages', () => {
@@ -70,7 +70,7 @@ describe('limitChatHistory', () => {
     });
 
     // Should include first 2 and as many of the last 4 as possible within character limit
-    expect(result.length).toBeLessThanOrEqual(6);
+    expect(result.length).toBeLessThanOrEqual(7);
     expect(result[0]?.content).toBe(messages?.[0]?.content);
     expect(result[1]?.content).toBe(messages?.[1]?.content);
   });
@@ -95,7 +95,7 @@ describe('limitChatHistory', () => {
     });
 
     // Should still include first 2 messages and as many of the last 4 as possible
-    expect(result.length).toBeLessThanOrEqual(6);
+    expect(result.length).toBeLessThanOrEqual(7);
     expect(result[0]?.content).toBe(messages?.[0]?.content);
     expect(result[1]?.content).toBe(messages?.[1]?.content);
   });

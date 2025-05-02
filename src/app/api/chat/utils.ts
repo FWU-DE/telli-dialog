@@ -74,8 +74,6 @@ export function limitChatHistory({
   // Add messages from the front
 
   while (
-    runningTotal < characterLimit &&
-    !manadatoryMessagesIncluded &&
     backMessages.length + frontMessages.length < consolidatedMessages.length
   ) {
     const frontMessage = consolidatedMessages[frontIndex];
@@ -97,7 +95,10 @@ export function limitChatHistory({
     includedIndices.add(backIndex);
 
     manadatoryMessagesIncluded =
-      frontIndex > limitFirst && backIndex < consolidatedMessages.length - limitRecent;
+      frontIndex >= limitFirst && backIndex <= consolidatedMessages.length - limitRecent;
+    if (manadatoryMessagesIncluded && runningTotal > characterLimit) {
+      break;
+    }
     backIndex--;
     frontIndex++;
   }
