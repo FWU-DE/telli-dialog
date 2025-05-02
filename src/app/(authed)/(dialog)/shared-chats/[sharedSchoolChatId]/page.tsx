@@ -15,7 +15,11 @@ const pageContextSchema = z.object({
   }),
 });
 
-export default function SharedSchoolChatPage({ params }: { params: { sharedSchoolChatId: string } }) {
+export default function SharedSchoolChatPage({
+  params,
+}: {
+  params: { sharedSchoolChatId: string };
+}) {
   const result = pageContextSchema.safeParse(await awaitPageContext(params));
   if (!result.success) notFound();
 

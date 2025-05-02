@@ -26,11 +26,7 @@ import { linkFileToSharedSchoolChat } from '../actions';
 import { deepCopy } from '@/utils/object';
 import SelectLlmModelForm from '../../_components/select-llm-model';
 
-export default function SharedSchoolChatForm({
-  existingFiles,
-}: {
-  existingFiles?: FileModel[];
-}) {
+export default function SharedSchoolChatForm({ existingFiles }: { existingFiles?: FileModel[] }) {
   const toast = useToast();
   const router = useRouter();
 
