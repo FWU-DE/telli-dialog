@@ -25,8 +25,7 @@ import {
 } from '@/configuration-text-inputs/const';
 import SelectLlmModelForm from '../../_components/select-llm-model';
 import { TextInput } from '@/components/common/text-input';
-import Link from 'next/link';
-import ChevronLeftIcon from '@/components/icons/chevron-left';
+import NavigateBack from '@/components/common/navigate-back';
 
 export default function SharedSchoolChatEditForm({
   existingFiles,
@@ -111,28 +110,21 @@ export default function SharedSchoolChatEditForm({
     onSubmit(data);
   }
 
-  function handleDeleteSharedSchoolChat() {
-    dbDeleteSharedChatAction({ id: sharedSchoolChat.id });
+  function handleNavigateBack(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    if (isCreating) {
+      handleDeleteSharedChat();
+    }
     router.push('/shared-chats');
   }
-  const backUrl = '/shared-chats';
-  const navigateBackElement: React.JSX.Element = isCreating ? (
-    <button
-      onClick={handleDeleteSharedSchoolChat}
-      className="flex gap-3 items-center text-primary hover:underline"
-    >
-      <ChevronLeftIcon />
-      <span>{t('all-dialogs')}</span>
-    </button>
-  ) : (
-    <Link href={backUrl} className="flex gap-3 text-primary mb-4 hover:underline items-center">
-      <ChevronLeftIcon />
-      <span>{t('all-dialogs')}</span>
-    </Link>
+
+  const navigateBackElement = (
+    <NavigateBack label={t('all-dialogs')} onClick={handleNavigateBack} />
   );
   return (
     <>
       {navigateBackElement}
+      <h1 className="text-2xl mt-4 font-medium mb-4">{sharedSchoolChat.name}</h1>
       <form
         className="flex flex-col gap-8 my-12"
         onSubmit={handleSubmit(onSubmit)}

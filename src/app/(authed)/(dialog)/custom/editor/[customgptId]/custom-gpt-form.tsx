@@ -38,6 +38,7 @@ import { deleteFileMappingAndEntity, linkFileToCustomGpt } from '../../actions';
 import { deepCopy } from '@/utils/object';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
+import NavigateBack from '@/components/common/navigate-back';
 
 type CustomGptFormProps = CustomGptModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -226,20 +227,17 @@ export default function CustomGptForm({
   }
   return (
     <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
-      {isCreating && (
-        <button
+      {isCreating ? (
+        <NavigateBack
+          href={backUrl}
+          label={t('all-gpts')}
           onClick={handleDeleteCustomGpt}
-          className="flex gap-3 items-center text-primary hover:underline"
-        >
-          <ChevronLeftIcon />
-          <span>{t('all-gpts')}</span>
-        </button>
-      )}
-      {!isCreating && (
-        <Link href={backUrl} className="flex gap-3 text-primary hover:underline items-center">
-          <ChevronLeftIcon />
-          <span>{t('all-gpts')}</span>
-        </Link>
+        />
+      ) : (
+        <NavigateBack
+          href={backUrl}
+          label={t('all-gpts')}
+        />
       )}
 
       <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>

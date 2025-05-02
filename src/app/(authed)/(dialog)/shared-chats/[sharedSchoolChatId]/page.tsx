@@ -44,11 +44,6 @@ export default async function Page(context: PageContext) {
         <ProfileMenu {...user} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
-        <Link href="/shared-chats" className="flex gap-3 items-center text-primary">
-          <ChevronLeftIcon />
-          <span className="hover:underline">{t('form.all-dialogs')}</span>
-        </Link>
-        <h1 className="text-2xl mt-4 font-medium">{sharedSchoolChat.name}</h1>
         <SharedSchoolChatEditForm {...sharedSchoolChat} existingFiles={relatedFiles} isCreating={false} />
       </div>
     </div>

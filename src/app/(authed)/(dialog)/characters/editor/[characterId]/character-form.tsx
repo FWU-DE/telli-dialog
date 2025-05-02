@@ -40,6 +40,7 @@ import { deleteFileMappingAndEntity, linkFileToCharacter } from '../../actions';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
 import { TextInput } from '@/components/common/text-input';
+import NavigateBack from '@/components/common/navigate-back';
 
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -152,6 +153,10 @@ export default function CharacterForm({
 
   const backUrl = `/characters?visibility=${character.accessLevel}`;
 
+  const navigateBackElement = (
+    <NavigateBack label={t('all-characters')} onClick={handleNavigateBack} />
+  );
+
   function handlePictureUploadComplete(picturePath: string) {
     updateCharacterPictureAction({ picturePath, characterId: character.id })
       .then(() => {
@@ -174,6 +179,15 @@ export default function CharacterForm({
       .catch(() => {
         toast.error(tToast('edit-toast-error'));
       });
+  }
+
+  function handleNavigateBack(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    if (isCreating) {
+      handleDeleteCharacter();
+      return;
+    }
+    router.push(backUrl);
   }
 
   function handleDeleteCharacter() {
@@ -213,29 +227,7 @@ export default function CharacterForm({
     toast.success(tToast('create-toast-success'));
     router.replace(backUrl);
   }
-  let shareChatElement: React.JSX.Element | undefined;
-  const navigateBackElement: React.JSX.Element = isCreating ? (
-    <button
-      onClick={handleDeleteCharacter}
-      className="flex gap-3 items-center text-primary hover:underline"
-      >
-        <ChevronLeftIcon />
-        <span>{t('all-characters')}</span>
-      </button>
-  ) : (
-    <Link href={backUrl} className="flex gap-3 text-primary mb-4 hover:underline items-center">
-      <ChevronLeftIcon />
-        <span>{t('all-characters')}</span>
-      </Link>
-  );
-
-  if (!isCreating) {
-    shareChatElement = (
-      <fieldset className="mt-8">
-        <ShareContainer {...character} />
-      </fieldset>
-    );
-  }
+  const shareChatElement = !isCreating ? <ShareContainer {...character} /> : undefined;
   const copyContainer = readOnly ? <CopyContainer character={character} /> : undefined;
 
   const generalSettings = (
@@ -425,7 +417,7 @@ export default function CharacterForm({
             modalDescription={t('character-delete-modal-description')}
             modalTitle={t('delete-character')}
             confirmText={tCommon('delete')}
-            actionFn={handleDeleteCharacter}
+            actionFn={handleNavigateBack}
           >
             {t('final-delete-character')}
           </DestructiveActionButton>
@@ -438,7 +430,7 @@ export default function CharacterForm({
               buttonSecondaryClassName,
               'hover:border-primary hover:bg-vidis-hover-green/20',
             )}
-            onClick={handleDeleteCharacter}
+            onClick={handleNavigateBack}
             type="button"
           >
             {tCommon('cancel')}
