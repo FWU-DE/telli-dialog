@@ -108,7 +108,6 @@ export function limitChatHistory({
       omittedIndices.add(i);
     }
   }
-  console.log(frontMessages.length, backMessages.length);
   // Combine front and back messages
   return [...frontMessages, ...backMessages];
 }
