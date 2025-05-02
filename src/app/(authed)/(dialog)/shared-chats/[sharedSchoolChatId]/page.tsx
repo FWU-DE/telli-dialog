@@ -8,6 +8,8 @@ import HeaderPortal from '../../header-portal';
 import SharedSchoolChatEditForm from './shared-school-chat-edit-form';
 import { fetchFileMapping } from './actions';
 import ProfileMenu from '@/components/navigation/profile-menu';
+import { PageContext } from '@/utils/next/types';
+import { getTranslations } from 'next-intl/server';
 
 const pageContextSchema = z.object({
   params: z.object({
@@ -15,26 +17,22 @@ const pageContextSchema = z.object({
   }),
 });
 
-export default function SharedSchoolChatPage({
-  params,
-}: {
-  params: { sharedSchoolChatId: string };
-}) {
-  const result = pageContextSchema.safeParse(await awaitPageContext(params));
+export default async function Page(context: PageContext) {
+  const result = pageContextSchema.safeParse(await awaitPageContext(context));
   if (!result.success) notFound();
 
-  const { params: parsedParams } = result.data;
-  const [user] = await Promise.all([getUser()]);
+  const { params } = result.data;
+  const [user, t] = await Promise.all([getUser(), getTranslations('shared-chats')]);
 
   const sharedSchoolChat = await dbGetSharedSchoolChatById({
     userId: user.id,
-    sharedChatId: parsedParams.sharedSchoolChatId,
+    sharedChatId: params.sharedSchoolChatId,
   });
 
   if (!sharedSchoolChat) {
     return notFound();
   }
-  const relatedFiles = await fetchFileMapping(parsedParams.sharedSchoolChatId);
+  const relatedFiles = await fetchFileMapping(params.sharedSchoolChatId);
 
   return (
     <div className="w-full p-6 overflow-auto">
@@ -44,11 +42,7 @@ export default function SharedSchoolChatPage({
         <ProfileMenu {...user} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
-        <SharedSchoolChatEditForm
-          {...sharedSchoolChat}
-          existingFiles={relatedFiles}
-          isCreating={false}
-        />
+        <SharedSchoolChatEditForm {...sharedSchoolChat} existingFiles={relatedFiles} isCreating={false} />
       </div>
     </div>
   );
