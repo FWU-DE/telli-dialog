@@ -5,7 +5,7 @@ import { awaitPageContext } from '@/utils/next/utils';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import HeaderPortal from '../../header-portal';
-import SharedSchoolChatEditForm from './shared-school-chat-edit-form';
+import SharedSchoolChatForm from './shared-school-chat-edit-form';
 import { fetchFileMapping } from './actions';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { PageContext } from '@/utils/next/types';
@@ -40,7 +40,7 @@ export default async function Page(context: PageContext) {
         <ProfileMenu {...user} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
-        <SharedSchoolChatEditForm
+        <SharedSchoolChatForm
           {...sharedSchoolChat}
           existingFiles={relatedFiles}
           isCreating={false}

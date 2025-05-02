@@ -31,7 +31,7 @@ import SelectLlmModelForm from '../../_components/select-llm-model';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
 
-export default function SharedSchoolChatEditForm({
+export default function SharedSchoolChatForm({
   existingFiles,
   isCreating,
   ...sharedSchoolChat

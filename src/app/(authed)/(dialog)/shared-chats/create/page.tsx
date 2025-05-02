@@ -4,7 +4,7 @@ import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { getTranslations } from 'next-intl/server';
 import { dbCreateSharedSchoolChat } from '../actions';
-import SharedSchoolChatEditForm from '../[sharedSchoolChatId]/shared-school-chat-edit-form';
+import SharedSchoolChatForm from '../[sharedSchoolChatId]/shared-school-chat-edit-form';
 
 export default async function Page() {
   const user = await getUser();
@@ -23,7 +23,7 @@ export default async function Page() {
         <ProfileMenu {...user} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
-        <SharedSchoolChatEditForm
+        <SharedSchoolChatForm
           {...defaultSharedSchoolChat}
           existingFiles={[]}
           isCreating={true}
