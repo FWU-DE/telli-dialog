@@ -54,11 +54,11 @@ async function getCharacterByAccessLevel({
   userId: string;
 }): Promise<CharacterModel[]> {
   if (accessLevel === 'global') {
-    return await dbGetGlobalCharacters();
+    return await dbGetGlobalCharacters({ userId });
   }
 
   if (accessLevel === 'school' && schoolId !== undefined) {
-    return await dbGetCharactersBySchoolId({ schoolId });
+    return await dbGetCharactersBySchoolId({ schoolId, userId });
   }
 
   if (accessLevel === 'private') {
