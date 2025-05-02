@@ -5,7 +5,6 @@ import Checkbox from '@/components/common/checkbox';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { useToast } from '@/components/common/toast';
 import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
-import ChevronLeftIcon from '@/components/icons/chevron-left';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
@@ -17,11 +16,10 @@ import {
   buttonPrimaryClassName,
   buttonSecondaryClassName,
 } from '@/utils/tailwind/button';
-import { inputFieldClassName, labelClassName } from '@/utils/tailwind/input';
+import { labelClassName } from '@/utils/tailwind/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { startTransition } from 'react';
 import { useForm } from 'react-hook-form';

@@ -7,7 +7,6 @@ import {
 import { cn } from '@/utils/tailwind';
 import { inputFieldClassName, labelClassName } from '@/utils/tailwind/input';
 import React from 'react';
-import TextareaAutosize from 'react-textarea-autosize';
 
 export type TextInputType = 'text' | 'textarea';
 
@@ -57,13 +56,13 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
             inputFieldClassName,
             'focus:border-primary placeholder:text-gray-300',
             customInputClassName,
-            'resize-none'
+            'resize-none',
           )}
           placeholder={placeholder}
           rows={rows}
           readOnly={readOnly}
           maxLength={effectiveMaxLength}
-          {...props as React.TextareaHTMLAttributes<HTMLTextAreaElement>}
+          {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
         />
       ) : (
         <input
@@ -76,7 +75,7 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
           placeholder={placeholder}
           readOnly={readOnly}
           maxLength={effectiveMaxLength}
-          {...props as React.InputHTMLAttributes<HTMLInputElement> }
+          {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
         />
       )}
     </div>

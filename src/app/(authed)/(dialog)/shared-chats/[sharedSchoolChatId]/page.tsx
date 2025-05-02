@@ -1,17 +1,13 @@
 import { getUser } from '@/auth/utils';
-import ChevronLeftIcon from '@/components/icons/chevron-left';
-import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import { dbGetSharedSchoolChatById } from '@/db/functions/shared-school-chat';
-import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
-import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import HeaderPortal from '../../header-portal';
 import SharedSchoolChatEditForm from './shared-school-chat-edit-form';
 import { fetchFileMapping } from './actions';
+import ProfileMenu from '@/components/navigation/profile-menu';
 
 const pageContextSchema = z.object({
   params: z.object({
@@ -19,22 +15,22 @@ const pageContextSchema = z.object({
   }),
 });
 
-export default async function Page(context: PageContext) {
-  const result = pageContextSchema.safeParse(await awaitPageContext(context));
+export default function SharedSchoolChatPage({ params }: { params: { sharedSchoolChatId: string } }) {
+  const result = pageContextSchema.safeParse(await awaitPageContext(params));
   if (!result.success) notFound();
 
-  const { params } = result.data;
-  const [user, t] = await Promise.all([getUser(), getTranslations('shared-chats')]);
+  const { params: parsedParams } = result.data;
+  const [user] = await Promise.all([getUser()]);
 
   const sharedSchoolChat = await dbGetSharedSchoolChatById({
     userId: user.id,
-    sharedChatId: params.sharedSchoolChatId,
+    sharedChatId: parsedParams.sharedSchoolChatId,
   });
 
   if (!sharedSchoolChat) {
     return notFound();
   }
-  const relatedFiles = await fetchFileMapping(params.sharedSchoolChatId);
+  const relatedFiles = await fetchFileMapping(parsedParams.sharedSchoolChatId);
 
   return (
     <div className="w-full p-6 overflow-auto">
@@ -44,7 +40,11 @@ export default async function Page(context: PageContext) {
         <ProfileMenu {...user} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
-        <SharedSchoolChatEditForm {...sharedSchoolChat} existingFiles={relatedFiles} isCreating={false} />
+        <SharedSchoolChatEditForm
+          {...sharedSchoolChat}
+          existingFiles={relatedFiles}
+          isCreating={false}
+        />
       </div>
     </div>
   );

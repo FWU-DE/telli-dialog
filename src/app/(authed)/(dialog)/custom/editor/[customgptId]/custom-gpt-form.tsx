@@ -6,7 +6,7 @@ import {
   buttonPrimaryClassName,
   buttonSecondaryClassName,
 } from '@/utils/tailwind/button';
-import { inputFieldClassName, labelClassName } from '@/utils/tailwind/input';
+import { labelClassName } from '@/utils/tailwind/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -19,8 +19,6 @@ import { EmptyImageIcon } from '@/components/icons/empty-image';
 import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
-import ChevronLeftIcon from '@/components/icons/chevron-left';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import Checkbox from '@/components/common/checkbox';
 import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
@@ -33,7 +31,6 @@ import {
   updateCustomGptAction,
   updateCustomGptPictureAction,
 } from './actions';
-import { LocalFileState } from '@/components/chat/send-message-form';
 import { deleteFileMappingAndEntity, linkFileToCustomGpt } from '../../actions';
 import { deepCopy } from '@/utils/object';
 import FileDrop from '@/components/forms/file-drop-area';
@@ -213,12 +210,6 @@ export default function CustomGptForm({
       });
   }
 
-  async function handleAutoSave() {
-    if (isCreating) return;
-    const data = getValues();
-    await onSubmit(data);
-  }
-
   function handleCreateCustomGpt() {
     const data = getValues();
     onSubmit(data);
@@ -228,16 +219,9 @@ export default function CustomGptForm({
   return (
     <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
       {isCreating ? (
-        <NavigateBack
-          href={backUrl}
-          label={t('all-gpts')}
-          onClick={handleDeleteCustomGpt}
-        />
+        <NavigateBack href={backUrl} label={t('all-gpts')} onClick={handleDeleteCustomGpt} />
       ) : (
-        <NavigateBack
-          href={backUrl}
-          label={t('all-gpts')}
-        />
+        <NavigateBack href={backUrl} label={t('all-gpts')} />
       )}
 
       <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>

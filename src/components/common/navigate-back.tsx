@@ -1,7 +1,5 @@
-import Link from 'next/link';
-import ChevronLeftIcon from '@/components/icons/chevron-left';
-import { useTranslations } from 'next-intl';
 import { cn } from '@/utils/tailwind';
+import ChevronLeftIcon from '@/components/icons/chevron-left';
 
 type NavigateBackProps = {
   label: string;
@@ -10,8 +8,6 @@ type NavigateBackProps = {
 };
 
 export default function NavigateBack({ label, onClick, className }: NavigateBackProps) {
-  const t = useTranslations('common');
-
   return (
     <button
       onClick={onClick}

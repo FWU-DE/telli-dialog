@@ -1,5 +1,4 @@
 import { getUser } from '@/auth/utils';
-import SharedSchoolChatCreateForm from './shared-school-chat-form';
 import HeaderPortal from '../../header-portal';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import ProfileMenu from '@/components/navigation/profile-menu';
