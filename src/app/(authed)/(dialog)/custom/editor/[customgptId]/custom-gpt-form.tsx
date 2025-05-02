@@ -36,6 +36,7 @@ import { deepCopy } from '@/utils/object';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
 import NavigateBack from '@/components/common/navigate-back';
+import { LocalFileState } from '@/components/chat/send-message-form';
 
 type CustomGptFormProps = CustomGptModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -194,6 +195,14 @@ export default function CustomGptForm({
         toast.error(tToast('edit-toast-error'));
       });
   }
+  function handleNavigateBack(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    if (isCreating) {
+      handleDeleteCustomGpt();
+      return;
+    }
+    router.push(backUrl);
+  }
 
   function handleDeleteCustomGpt() {
     deleteCustomGptAction({ gptId: customGpt.id })
@@ -218,11 +227,7 @@ export default function CustomGptForm({
   }
   return (
     <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
-      {isCreating ? (
-        <NavigateBack href={backUrl} label={t('all-gpts')} onClick={handleDeleteCustomGpt} />
-      ) : (
-        <NavigateBack href={backUrl} label={t('all-gpts')} />
-      )}
+      <NavigateBack label={t('all-gpts')} onClick={handleNavigateBack} />
 
       <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>
       {userRole === 'teacher' && (

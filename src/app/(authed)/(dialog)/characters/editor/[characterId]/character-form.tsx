@@ -151,9 +151,6 @@ export default function CharacterForm({
 
   const backUrl = `/characters?visibility=${character.accessLevel}`;
 
-  const navigateBackElement = (
-    <NavigateBack label={t('all-characters')} onClick={handleNavigateBack} />
-  );
 
   function handlePictureUploadComplete(picturePath: string) {
     updateCharacterPictureAction({ picturePath, characterId: character.id })
@@ -281,7 +278,7 @@ export default function CharacterForm({
 
   return (
     <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)} onBlur={handleAutoSave}>
-      {navigateBackElement}
+      <NavigateBack label={t('all-characters')} onClick={handleNavigateBack} />
 
       <h1 className="text-2xl font-medium mt-4">
         {isCreating ? t('create-character') : character.name}

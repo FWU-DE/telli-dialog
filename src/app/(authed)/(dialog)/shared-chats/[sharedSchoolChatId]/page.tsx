@@ -9,7 +9,6 @@ import SharedSchoolChatEditForm from './shared-school-chat-edit-form';
 import { fetchFileMapping } from './actions';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { PageContext } from '@/utils/next/types';
-import { getTranslations } from 'next-intl/server';
 
 const pageContextSchema = z.object({
   params: z.object({
@@ -22,8 +21,7 @@ export default async function Page(context: PageContext) {
   if (!result.success) notFound();
 
   const { params } = result.data;
-  const [user, t] = await Promise.all([getUser(), getTranslations('shared-chats')]);
-
+  const user = await getUser();
   const sharedSchoolChat = await dbGetSharedSchoolChatById({
     userId: user.id,
     sharedChatId: params.sharedSchoolChatId,
@@ -42,7 +40,11 @@ export default async function Page(context: PageContext) {
         <ProfileMenu {...user} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
-        <SharedSchoolChatEditForm {...sharedSchoolChat} existingFiles={relatedFiles} isCreating={false} />
+        <SharedSchoolChatEditForm
+          {...sharedSchoolChat}
+          existingFiles={relatedFiles}
+          isCreating={false}
+        />
       </div>
     </div>
   );
