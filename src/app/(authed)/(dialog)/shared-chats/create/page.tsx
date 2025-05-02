@@ -23,11 +23,7 @@ export default async function Page() {
         <ProfileMenu {...user} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
-        <SharedSchoolChatForm
-          {...defaultSharedSchoolChat}
-          existingFiles={[]}
-          isCreating={true}
-        />
+        <SharedSchoolChatForm {...defaultSharedSchoolChat} existingFiles={[]} isCreating={true} />
       </div>
     </div>
   );

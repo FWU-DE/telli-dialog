@@ -157,7 +157,7 @@ export default function SharedSchoolChatForm({
   return (
     <>
       <NavigateBack label={t('all-dialogs')} onClick={handleNavigateBack} />
-      
+
       <h1 className="text-2xl font-medium mt-4">
         {isCreating ? t('title') : sharedSchoolChat.name}
       </h1>
@@ -180,7 +180,7 @@ export default function SharedSchoolChatForm({
             models={models}
           />
         </div>
-        
+
         {isCreating && (
           <TextInput
             id="name"
