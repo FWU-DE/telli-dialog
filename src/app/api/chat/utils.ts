@@ -73,9 +73,7 @@ export function limitChatHistory({
   let manadatoryMessagesIncluded = false;
   // Add messages from the front
 
-  while (
-    backMessages.length + frontMessages.length < consolidatedMessages.length
-  ) {
+  while (backMessages.length + frontMessages.length < consolidatedMessages.length) {
     const frontMessage = consolidatedMessages[frontIndex];
     const backMessage = consolidatedMessages[backIndex];
 
