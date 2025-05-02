@@ -151,7 +151,6 @@ export default function CharacterForm({
 
   const backUrl = `/characters?visibility=${character.accessLevel}`;
 
-
   function handlePictureUploadComplete(picturePath: string) {
     updateCharacterPictureAction({ picturePath, characterId: character.id })
       .then(() => {
