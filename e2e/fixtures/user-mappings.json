@@ -59999,6 +59999,40 @@
     "rolle": "LEHR",
     "bundesland": "DE-BY"
   },
+  "teacher1-BY": {
+    "sub": "cf1cb1a1-221d-4bb4-8ab6-932eef73ee09",
+    "schulkennung": "school1-BY",
+    "rolle": "LEHR",
+    "bundesland": "DE-BY"
+  },
+  "teacher2-BY": {
+    "sub": "1f43838a-6eb2-4e5a-bbf4-11b43235b67a",
+    "schulkennung": "school1-BY",
+    "rolle": "LEHR",
+    "bundesland": "DE-BY"
+  },
+  "teacher1-SL": {
+    "sub": "4efd5aa8-32f1-4eff-baee-77cf6fb8e15d",
+    "schulkennung": "school1-SL",
+    "rolle": "LEHR",
+    "bundesland": "DE-SL"
+  },
+  "teacher1-BB": {
+    "sub": "3ea9309a-634e-4eb8-96c0-3d18c1356f88",
+    "schulkennung": "school1-BB",
+    "rolle": "LEHR",
+    "bundesland": "DE-BB"
+  },
+  "teacher1-ST": {
+    "sub": "3ea9309a-634e-4eb8-96c0-3d18c1356f88",
+    "schulkennung": "school1-ST",
+    "rolle": "LEHR",
+    "bundesland": "DE-ST"
+  },
+  
+  
+  
+
   "teacher": {
     "sub": "f4830567-2ca9-4b9c-9c27-1900d443c07c",
     "schulkennung": "school1",
