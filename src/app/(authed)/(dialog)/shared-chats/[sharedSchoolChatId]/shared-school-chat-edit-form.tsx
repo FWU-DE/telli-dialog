@@ -1,6 +1,10 @@
 'use client';
 
-import { buttonDeleteClassName } from '@/utils/tailwind/button';
+import {
+  buttonDeleteClassName,
+  buttonPrimaryClassName,
+  buttonSecondaryClassName,
+} from '@/utils/tailwind/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useToast } from '@/components/common/toast';
@@ -43,7 +47,13 @@ export default function SharedSchoolChatEditForm({
 
   const { models } = useLlmModels();
 
-  const { register, handleSubmit, getValues, setValue } = useForm<SharedSchoolChatFormValues>({
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    setValue,
+    formState: { isValid },
+  } = useForm<SharedSchoolChatFormValues>({
     resolver: zodResolver(sharedSchoolChatFormValuesSchema),
     defaultValues: {
       ...sharedSchoolChat,
@@ -91,7 +101,9 @@ export default function SharedSchoolChatEditForm({
   function handleDeleteSharedChat() {
     dbDeleteSharedChatAction({ id: sharedSchoolChat.id })
       .then(() => {
-        toast.success(tToast('delete-toast-success'));
+        if (!isCreating) {
+          toast.success(tToast('delete-toast-success'));
+        }
         router.push('/shared-chats');
       })
       .catch(() => {
@@ -100,6 +112,7 @@ export default function SharedSchoolChatEditForm({
   }
 
   function handleAutoSave() {
+    if (isCreating) return;
     const data = getValues();
     const defaultData = { ...sharedSchoolChat, modelId: sharedSchoolChat.modelId };
     const newData = { ...data };
@@ -109,7 +122,12 @@ export default function SharedSchoolChatEditForm({
     if (dataEquals) return;
     onSubmit(data);
   }
-
+  function handleCreateSharedChat() {
+    const data = getValues();
+    onSubmit(data);
+    toast.success(tToast('create-toast-success'));
+    router.replace('/shared-chats');
+  }
   function handleNavigateBack(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
     if (isCreating) {
@@ -118,19 +136,38 @@ export default function SharedSchoolChatEditForm({
     router.push('/shared-chats');
   }
 
-  const navigateBackElement = (
-    <NavigateBack label={t('all-dialogs')} onClick={handleNavigateBack} />
-  );
+  React.useEffect(() => {
+    if (!isCreating) return;
+
+    const handlePopState = (event: PopStateEvent) => {
+      // Optionally, you can add a confirmation dialog here
+      console.log('popstate');
+      handleDeleteSharedChat();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      setTimeout(() => {
+        window.removeEventListener('popstate', handlePopState);
+      }, 5);
+    };
+  }, [isCreating]); // Only set up the listener if isCreating is true
+
   return (
     <>
-      {navigateBackElement}
-      <h1 className="text-2xl mt-4 font-medium mb-4">{sharedSchoolChat.name}</h1>
+      <NavigateBack label={t('all-dialogs')} onClick={handleNavigateBack} />
+      
+      <h1 className="text-2xl font-medium mt-4">
+        {isCreating ? t('title') : sharedSchoolChat.name}
+      </h1>
+
       <form
         className="flex flex-col gap-8 my-12"
         onSubmit={handleSubmit(onSubmit)}
         onBlur={handleAutoSave}
       >
-        <ShareContainer {...sharedSchoolChat} />
+        {!isCreating && <ShareContainer {...sharedSchoolChat} />}
         <h2 className="font-medium mt-8">{t('settings')}</h2>
         <div className="flex flex-col gap-4">
           <label className="text-sm font-medium">{tCommon('llm-model')}</label>
@@ -143,6 +180,17 @@ export default function SharedSchoolChatEditForm({
             models={models}
           />
         </div>
+        
+        {isCreating && (
+          <TextInput
+            id="name"
+            label={t('name')}
+            inputType="text"
+            required={true}
+            {...register('name')}
+            maxLength={SMALL_TEXT_INPUT_FIELDS_LIMIT}
+          />
+        )}
 
         <TextInput
           id="description"
@@ -221,19 +269,43 @@ export default function SharedSchoolChatEditForm({
           showUploadConfirmation={true}
           className="p-4"
         />
-        <section>
-          <h3 className="font-medium mt-8">{t('delete-title')}</h3>
-          <p className="text-dark-gray mt-4">{t('delete-description')}</p>
-          <DestructiveActionButton
-            className={cn(buttonDeleteClassName, 'mt-10')}
-            modalDescription={t('delete-confirm')}
-            modalTitle={t('delete-title')}
-            confirmText={tCommon('delete')}
-            actionFn={handleDeleteSharedChat}
-          >
-            {t('delete-button')}
-          </DestructiveActionButton>
-        </section>
+        {!isCreating && (
+          <section className="mt-8">
+            <h3 className="font-medium">{t('delete-title')}</h3>
+            <p className="mt-4">{t('delete-description')}</p>
+            <DestructiveActionButton
+              className={cn(buttonDeleteClassName, 'mt-10')}
+              modalDescription={t('delete-confirm')}
+              modalTitle={t('delete-title')}
+              confirmText={tCommon('delete')}
+              actionFn={handleDeleteSharedChat}
+            >
+              {t('delete-button')}
+            </DestructiveActionButton>
+          </section>
+        )}
+        {isCreating && (
+          <section className="mt-8 flex gap-4 items-center">
+            <button
+              className={cn(
+                buttonSecondaryClassName,
+                'hover:border-primary hover:bg-vidis-hover-green/20',
+              )}
+              onClick={handleNavigateBack}
+              type="button"
+            >
+              {tCommon('cancel')}
+            </button>
+            <button
+              className={cn(buttonPrimaryClassName)}
+              disabled={!isValid}
+              onClick={handleCreateSharedChat}
+              type="button"
+            >
+              {t('button-create')}
+            </button>
+          </section>
+        )}
       </form>
     </>
   );

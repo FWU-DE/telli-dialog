@@ -49,12 +49,12 @@ export function SharedChatContainer({ sharedChats, user }: SharedChatContainerPr
           />
           <div className="flex-grow" />
           <Link
-            title={t('button-create')}
+            title={t('form.button-create')}
             href="/shared-chats/create"
             className={cn(buttonPrimaryClassName, 'flex gap-2 items-center group py-2')}
           >
             <PlusIcon className="fill-primary-text group-hover:fill-secondary-text" />
-            <span>{t('button-create')}</span>
+            <span>{t('form.button-create')}</span>
           </Link>
         </div>
         {sharedChats.length < 1 && <p className="text-dark-gray mt-16">{t('no-dialogs')}</p>}

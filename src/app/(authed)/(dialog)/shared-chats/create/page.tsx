@@ -23,7 +23,6 @@ export default async function Page() {
         <ProfileMenu {...user} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
-        <h1 className="text-2xl mt-4 font-medium">{t('title')}</h1>
         <SharedSchoolChatEditForm
           {...defaultSharedSchoolChat}
           existingFiles={[]}

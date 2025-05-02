@@ -411,7 +411,7 @@ export default function CharacterForm({
             modalDescription={t('character-delete-modal-description')}
             modalTitle={t('delete-character')}
             confirmText={tCommon('delete')}
-            actionFn={handleNavigateBack}
+            actionFn={handleDeleteCharacter}
           >
             {t('final-delete-character')}
           </DestructiveActionButton>
