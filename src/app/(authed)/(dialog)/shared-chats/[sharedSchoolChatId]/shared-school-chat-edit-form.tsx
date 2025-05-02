@@ -139,7 +139,7 @@ export default function SharedSchoolChatForm({
   React.useEffect(() => {
     if (!isCreating) return;
 
-    const handlePopState = (event: PopStateEvent) => {
+    const handlePopState = () => {
       // Optionally, you can add a confirmation dialog here
       console.log('popstate');
       handleDeleteSharedChat();

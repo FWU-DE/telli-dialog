@@ -2,13 +2,11 @@ import { getUser } from '@/auth/utils';
 import HeaderPortal from '../../header-portal';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import ProfileMenu from '@/components/navigation/profile-menu';
-import { getTranslations } from 'next-intl/server';
 import { dbCreateSharedSchoolChat } from '../actions';
 import SharedSchoolChatForm from '../[sharedSchoolChatId]/shared-school-chat-edit-form';
 
 export default async function Page() {
   const user = await getUser();
-  const t = await getTranslations('shared-chats.form');
   const defaultSharedSchoolChat = await dbCreateSharedSchoolChat({ userId: user.id });
 
   if (defaultSharedSchoolChat === undefined) {
