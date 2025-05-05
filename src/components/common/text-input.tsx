@@ -48,7 +48,7 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
   return (
     <div className={cn('flex flex-col gap-4', containerClassName, className)}>
       <label htmlFor={id} className={cn(labelClassName, 'text-sm', customLabelClassName)}>
-        {required && <span className="text-coral">*</span>} {label}
+        {label} {required && <span className="text-coral">*</span>}
       </label>
       {inputType === 'textarea' ? (
         <textarea

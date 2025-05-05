@@ -3,7 +3,7 @@ import HeaderPortal from '../../header-portal';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { dbCreateSharedSchoolChat } from '../actions';
-import SharedSchoolChatForm from '../[sharedSchoolChatId]/shared-school-chat-edit-form';
+import SharedSchoolChatForm from '../[sharedSchoolChatId]/shared-school-chat-form';
 
 export default async function Page() {
   const user = await getUser();

@@ -6,7 +6,7 @@ import {
   buttonSecondaryClassName,
 } from '@/utils/tailwind/button';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, useFormState } from 'react-hook-form';
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
@@ -30,7 +30,7 @@ import {
 import SelectLlmModelForm from '../../_components/select-llm-model';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
-
+import { usePreventNavigation } from './usePreventNavigation';
 export default function SharedSchoolChatForm({
   existingFiles,
   isCreating,
@@ -41,11 +41,18 @@ export default function SharedSchoolChatForm({
 
   const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   const [initialFiles, setInitialFiles] = React.useState<FileModel[]>(existingFiles);
+  const [showWarning, setShowWarning] = React.useState(false);
   const t = useTranslations('shared-chats.form');
   const tToast = useTranslations('shared-chats.toasts');
   const tCommon = useTranslations('common');
 
   const { models } = useLlmModels();
+
+  usePreventNavigation({
+    isDirty: true,
+    backHref: '/shared-chats',
+    resetData: () => {},
+  });
 
   const {
     register,
@@ -63,6 +70,8 @@ export default function SharedSchoolChatForm({
       restrictions: sharedSchoolChat.restrictions ?? '',
     },
   });
+
+  const isDirty = true;
 
   async function handleDeattachFile(localFileId: string) {
     const fileId: string | undefined =
@@ -128,35 +137,59 @@ export default function SharedSchoolChatForm({
     toast.success(tToast('create-toast-success'));
     router.replace('/shared-chats');
   }
-  function handleNavigateBack(e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
+  function handleNavigateBack() {
     if (isCreating) {
       handleDeleteSharedChat();
     }
     router.push('/shared-chats');
   }
 
-  React.useEffect(() => {
-    if (!isCreating) return;
+  // React.useEffect(() => {
+  //   if (!isCreating) return;
 
-    const handlePopState = () => {
-      // Optionally, you can add a confirmation dialog here
-      console.log('popstate');
-      handleDeleteSharedChat();
-    };
+  //   const onBeforeUnload = (e: BeforeUnloadEvent) => {
+  //     const confirm = window.confirm('Are you sure you want to leave this page?');
+  //     console.log('confirm', confirm);
+  //     if (confirm) {
+  //       console.log('routing back');
+  //       router.push('/shared-chats');
+  //     } else {
+  //       e.preventDefault();
+  //       e.returnValue = '';
+  //     }
+  //   };
+  //   const handleRouteChangeError = () => {
+  //     console.log('routeChangeError');
+  //     throw new Error('Route change error');
+  //   };
 
-    window.addEventListener('popstate', handlePopState);
-
-    return () => {
-      setTimeout(() => {
-        window.removeEventListener('popstate', handlePopState);
-      }, 5);
-    };
-  }, [isCreating]); // Only set up the listener if isCreating is true
+  //   window.addEventListener('popstate', onBeforeUnload);
+  //   window.addEventListener('beforeunload', onBeforeUnload);
+  //   window.addEventListener('routeChangeError', handleRouteChangeError);
+  //   return () => {
+  //     setTimeout(() => {
+  //       window.removeEventListener('beforeunload', onBeforeUnload);
+  //       window.removeEventListener('popstate', onBeforeUnload);
+  //       window.removeEventListener('routeChangeError', handleRouteChangeError);
+  //     }, 5);
+  //   };
+  // }, [isCreating]); // Only set up the listener if isCreating is true
 
   return (
     <>
-      <NavigateBack label={t('all-dialogs')} onClick={handleNavigateBack} />
+      {showWarning && (
+        <DestructiveActionButton
+          actionFn={handleDeleteSharedChat}
+          modalTitle={t('delete-title')}
+          modalDescription={t('delete-description')}
+          confirmText={tCommon('delete')}
+        />
+      )}
+      <NavigateBack
+        label={t('all-dialogs')}
+        actionFn={handleNavigateBack}
+        showWarning={showWarning}
+      />
 
       <h1 className="text-2xl font-medium mt-4">
         {isCreating ? t('title') : sharedSchoolChat.name}
@@ -194,7 +227,7 @@ export default function SharedSchoolChatForm({
 
         <TextInput
           id="description"
-          label={t('purpose')}
+          label={t('purpose-label')}
           inputType="text"
           required={true}
           {...register('description')}
@@ -204,7 +237,7 @@ export default function SharedSchoolChatForm({
         <div className="grid grid-cols-3 gap-6">
           <TextInput
             id="school-type"
-            label={t('school-type')}
+            label={t('school-type-label')}
             required={true}
             maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             {...register('schoolType')}
@@ -212,7 +245,7 @@ export default function SharedSchoolChatForm({
 
           <TextInput
             id="gradeLevel"
-            label={t('grade')}
+            label={t('grade-label')}
             required={true}
             maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             {...register('gradeLevel')}
@@ -220,7 +253,7 @@ export default function SharedSchoolChatForm({
 
           <TextInput
             id="subject"
-            label={t('subject')}
+            label={t('subject-label')}
             required={true}
             maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             {...register('subject')}
@@ -229,7 +262,7 @@ export default function SharedSchoolChatForm({
 
         <TextInput
           id="learning-context"
-          label={t('learning-context')}
+          label={t('learning-context-label')}
           required={true}
           inputType="textarea"
           rows={5}
@@ -239,7 +272,7 @@ export default function SharedSchoolChatForm({
 
         <TextInput
           id="specification"
-          label={t('specification')}
+          label={t('specification-label')}
           inputType="textarea"
           rows={5}
           maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
@@ -248,7 +281,7 @@ export default function SharedSchoolChatForm({
 
         <TextInput
           id="restrictions"
-          label={t('restrictions')}
+          label={t('restrictions-label')}
           inputType="textarea"
           rows={5}
           maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}

@@ -5,7 +5,7 @@ import { awaitPageContext } from '@/utils/next/utils';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import HeaderPortal from '../../header-portal';
-import SharedSchoolChatForm from './shared-school-chat-edit-form';
+import SharedSchoolChatForm from './shared-school-chat-form';
 import { fetchFileMapping } from './actions';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { PageContext } from '@/utils/next/types';

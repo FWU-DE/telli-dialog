@@ -336,19 +336,7 @@ export default function CustomGptForm({
                     maxLength={undefined}
                     id={`promptSuggestions.${index}.content`}
                   />
-                  {index !== 0 && (
-                    <button
-                      onClick={() => {
-                        remove(index);
-                        updatePromptSuggestions();
-                      }}
-                      className="flex items-center justify-center first:hidden"
-                      type="button"
-                    >
-                      <TrashIcon />
-                    </button>
-                  )}
-                  {index === 0 && (
+                  {index === 0 ? (
                     <button
                       onClick={() => {
                         if (fields.length >= 10) {
@@ -358,9 +346,21 @@ export default function CustomGptForm({
                         append({ content: '' });
                       }}
                       type="button"
-                      className=""
+                      aria-label="add prompt suggestion"
                     >
                       <PlusIcon className="text-primary" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        remove(index);
+                        updatePromptSuggestions();
+                      }}
+                      aria-label={`delete ${index} prompt suggestion`}
+                      className="flex items-center justify-center first:hidden"
+                      type="button"
+                    >
+                      <TrashIcon />
                     </button>
                   )}
                 </React.Fragment>
