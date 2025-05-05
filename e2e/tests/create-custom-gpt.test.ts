@@ -21,15 +21,12 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
     .getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' })
     .fill('Hilft bei der Planung und Budget Rechnung beim Bau eines Einfamilienhauses');
 
-
   await page
     .getByRole('textbox', { name: 'Welche konkreten Funktionen' })
     .fill('Die Währung ist US-Dollar, du berätst mich inwiefern sind ein Bausparkredit lohnt');
 
   // first Prompt Suggestion Box
-  await page
-    .getByPlaceholder('Erstelle einen')
-    .fill('Was kostet ein Grundstück in München?');
+  await page.getByPlaceholder('Erstelle einen').fill('Was kostet ein Grundstück in München?');
 
   // fill three more Suggestions and delete one of them afterwards
   await page.getByPlaceholder('Erstelle einen').press('Tab');
@@ -70,7 +67,8 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await page.waitForURL('/custom/**');
   await page
     .getByRole('link', { name: 'Hausbauplaner Hilft bei der' })
-    .getByLabel('Neuer Chat').first()
+    .getByLabel('Neuer Chat')
+    .first()
     .click();
   await page.waitForURL('/custom/d/**');
   await expect(page.getByRole('heading')).toContainText('Hausbauplaner');
