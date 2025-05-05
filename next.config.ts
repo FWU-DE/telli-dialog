@@ -34,12 +34,6 @@ const baseNextConfig = {
         hostname: 'telli-production.obs.eu-nl.otc.t-systems.com',
         port: '',
       },
-      // include both while transitioning to the new bucket
-      {
-        protocol: 'https',
-        hostname: 'telli-dialog.obs.otc.t-systems.com',
-        port: '',
-      },
     ],
   },
   productionBrowserSourceMaps: process.env.NODE_ENV !== 'test',
