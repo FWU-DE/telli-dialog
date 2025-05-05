@@ -30,6 +30,7 @@ import {
 import SelectLlmModelForm from '../../_components/select-llm-model';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
+import { navigateWithoutRefresh } from '@/utils/navigation/router';
 export default function SharedSchoolChatForm({
   existingFiles,
   isCreating,
@@ -129,7 +130,7 @@ export default function SharedSchoolChatForm({
     const data = getValues();
     onSubmit(data);
     toast.success(tToast('create-toast-success'));
-    router.push(`/shared-chats/${sharedSchoolChat.id}`);
+    navigateWithoutRefresh(`/shared-chats/${sharedSchoolChat.id}`);
   }
   function handleNavigateBack() {
     if (isCreating) {
