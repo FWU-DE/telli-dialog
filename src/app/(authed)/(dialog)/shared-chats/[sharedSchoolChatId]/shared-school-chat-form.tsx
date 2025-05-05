@@ -129,7 +129,7 @@ export default function SharedSchoolChatForm({
     const data = getValues();
     onSubmit(data);
     toast.success(tToast('create-toast-success'));
-    router.replace('/shared-chats');
+    router.push(`/shared-chats/${sharedSchoolChat.id}`);
   }
   function handleNavigateBack() {
     if (isCreating) {
