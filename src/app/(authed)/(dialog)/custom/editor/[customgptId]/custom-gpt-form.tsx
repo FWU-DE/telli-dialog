@@ -325,7 +325,7 @@ export default function CustomGptForm({
               return (
                 <React.Fragment key={field.id}>
                   <TextInput
-                    label=""
+                    label={`Promptvorschlag ${index + 1}`}
                     required={false}
                     placeholder={index === 0 ? t('prompt-suggestion-placeholder') : undefined}
                     inputType="textarea"
@@ -346,7 +346,7 @@ export default function CustomGptForm({
                         append({ content: '' });
                       }}
                       type="button"
-                      aria-label="add prompt suggestion"
+                      aria-label={t('prompt-suggestions-add-button')}
                     >
                       <PlusIcon className="text-primary" />
                     </button>
@@ -356,7 +356,7 @@ export default function CustomGptForm({
                         remove(index);
                         updatePromptSuggestions();
                       }}
-                      aria-label={`delete ${index} prompt suggestion`}
+                      aria-label={t('prompt-suggestions-delete-button', { index: index + 1 })}
                       className="flex items-center justify-center first:hidden"
                       type="button"
                     >

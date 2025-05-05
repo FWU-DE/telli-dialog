@@ -88,6 +88,8 @@
       "gpt-visibility-label": "Für wen soll der Dialogpartner freigegeben werden?",
       "gpt-name-label": "Wie soll dieser Assistent heißen?",
       "prompt-suggestions-label": "Promptvorschläge hinzufügen?",
+      "prompt-suggestions-add-button": "Promptvorschlag hinzufügen",
+      "prompt-suggestions-delete-button": "Promptvorschlag {index} löschen",
       "prompt-suggestions-description": "Füge bis zu 10 Vorschläge für Prompts hinzu, die zufällig oberhalb des Eingabefelds im Dialog angezeigt werden.",
       "prompt-suggestion-placeholder": "Erstelle einen Unterrichtsplan zum Thema [...].",
       "suggestions-used": "Vorschläge",
