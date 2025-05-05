@@ -21,6 +21,12 @@ const baseNextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: 'telli-development.obs.eu-nl.otc.t-systems.com',
+        port: '',
+      },
+      // include both while transitioning to the new bucket
+      {
+        protocol: 'https',
         hostname: 'telli-dialog.obs.otc.t-systems.com',
         port: '',
       },
