@@ -30,7 +30,6 @@ import {
 import SelectLlmModelForm from '../../_components/select-llm-model';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
-import { usePreventNavigation } from './usePreventNavigation';
 export default function SharedSchoolChatForm({
   existingFiles,
   isCreating,
@@ -48,11 +47,6 @@ export default function SharedSchoolChatForm({
 
   const { models } = useLlmModels();
 
-  usePreventNavigation({
-    isDirty: true,
-    backHref: '/shared-chats',
-    resetData: () => {},
-  });
 
   const {
     register,
@@ -144,52 +138,9 @@ export default function SharedSchoolChatForm({
     router.push('/shared-chats');
   }
 
-  // React.useEffect(() => {
-  //   if (!isCreating) return;
-
-  //   const onBeforeUnload = (e: BeforeUnloadEvent) => {
-  //     const confirm = window.confirm('Are you sure you want to leave this page?');
-  //     console.log('confirm', confirm);
-  //     if (confirm) {
-  //       console.log('routing back');
-  //       router.push('/shared-chats');
-  //     } else {
-  //       e.preventDefault();
-  //       e.returnValue = '';
-  //     }
-  //   };
-  //   const handleRouteChangeError = () => {
-  //     console.log('routeChangeError');
-  //     throw new Error('Route change error');
-  //   };
-
-  //   window.addEventListener('popstate', onBeforeUnload);
-  //   window.addEventListener('beforeunload', onBeforeUnload);
-  //   window.addEventListener('routeChangeError', handleRouteChangeError);
-  //   return () => {
-  //     setTimeout(() => {
-  //       window.removeEventListener('beforeunload', onBeforeUnload);
-  //       window.removeEventListener('popstate', onBeforeUnload);
-  //       window.removeEventListener('routeChangeError', handleRouteChangeError);
-  //     }, 5);
-  //   };
-  // }, [isCreating]); // Only set up the listener if isCreating is true
-
   return (
     <>
-      {showWarning && (
-        <DestructiveActionButton
-          actionFn={handleDeleteSharedChat}
-          modalTitle={t('delete-title')}
-          modalDescription={t('delete-description')}
-          confirmText={tCommon('delete')}
-        />
-      )}
-      <NavigateBack
-        label={t('all-dialogs')}
-        actionFn={handleNavigateBack}
-        showWarning={showWarning}
-      />
+      <NavigateBack label={t('all-dialogs')} onClick={handleNavigateBack} />
 
       <h1 className="text-2xl font-medium mt-4">
         {isCreating ? t('title') : sharedSchoolChat.name}
