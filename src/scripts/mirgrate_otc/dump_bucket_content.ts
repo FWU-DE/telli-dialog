@@ -1,5 +1,5 @@
 import { db } from '@/db';
-import { eq, isNotNull, and, ne } from 'drizzle-orm';
+import { isNotNull, and, ne } from 'drizzle-orm';
 import { characterTable, customGptTable, fileTable } from '@/db/schema';
 import { readFileFromS3 } from '@/s3';
 import fs from 'fs';
