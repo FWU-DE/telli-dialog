@@ -24,6 +24,16 @@ const baseNextConfig = {
         hostname: 'telli-development.obs.eu-nl.otc.t-systems.com',
         port: '',
       },
+      {
+        protocol: 'https',
+        hostname: 'telli-staging.obs.eu-nl.otc.t-systems.com',
+        port: '',
+      },
+      {
+        protocol: 'https',
+        hostname: 'telli-production.obs.eu-nl.otc.t-systems.com',
+        port: '',
+      },
       // include both while transitioning to the new bucket
       {
         protocol: 'https',
