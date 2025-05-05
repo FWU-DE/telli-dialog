@@ -6,6 +6,9 @@ import ReloadIcon from '../icons/reload';
 import MarkdownDisplay from './markdown-display';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
+import { parseHyperlinks } from '@/utils/chat';
+import { WebpageCard } from './webpage-card';
+import Citation from './sources/citation';
 
 export function ChatBox({
   children,
@@ -40,21 +43,27 @@ export function ChatBox({
   const margin = allFiles !== undefined ? 'm-0' : 'm-4';
 
   if (allFiles !== undefined && children.role === 'user' && (isLastUser || fileMatch)) {
-    const filesElement = allFiles.map((file) => {
-      return (
-        <DisplayUploadedFile
-          fileName={file.name}
-          status="processed"
-          key={file.id}
-        ></DisplayUploadedFile>
-      );
-    });
     maybefileAttachment = (
       <div className="flex flex-row gap-2 pb-0 pt-0 overflow-auto self-end mb-4">
-        {filesElement}
+        {allFiles.map((file) => {
+          return (
+            <DisplayUploadedFile
+              fileName={file.name}
+              status="processed"
+              key={file.id}
+            ></DisplayUploadedFile>
+          );
+        })}
       </div>
     );
   }
+  const urls = parseHyperlinks(children.content);
+  const maybeWebpageCard = urls ? 
+    <div className="relative flex flex-row gap-2 pb-0 pt-0 overflow-auto self-end mb-4">
+      {urls.map((url, index) => {
+        return <Citation key={`user-link-${index}`} source={{ name: url, link: url, content: '' }} />;
+      })}
+    </div> : null;
 
   let maybeShowMessageIcons = null;
   if (isLastNonUser && !isLoading) {
@@ -75,6 +84,8 @@ export function ChatBox({
     );
   }
 
+  const messageContent = <MarkdownDisplay>{children.content}</MarkdownDisplay>;
+
   return (
     <>
       <div key={index} className={cn('w-full text-secondary-foreground', userClassName, margin)}>
@@ -82,12 +93,13 @@ export function ChatBox({
           <div className="flex flex-row">
             {children.role === 'assistant' && assistantIcon}
             <div className="flex flex-col items-start gap-2">
-              <MarkdownDisplay>{children.content}</MarkdownDisplay>
+              {messageContent}
               {maybeShowMessageIcons}
             </div>
           </div>
         </div>
       </div>
+      {maybeWebpageCard}
       {maybefileAttachment}
     </>
   );
