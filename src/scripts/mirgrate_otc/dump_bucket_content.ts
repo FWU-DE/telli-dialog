@@ -25,7 +25,10 @@ export async function dumpBucketContent(exportDirectory: string) {
     fs.writeFileSync(`${exportDirectory}/characters/${characterId}/avatar`, contents);
   }
 
-  const activeCustomGpts = await db.select().from(customGptTable).where(isNotNull(customGptTable.pictureId));
+  const activeCustomGpts = await db
+    .select()
+    .from(customGptTable)
+    .where(isNotNull(customGptTable.pictureId));
   for (const customGpt of activeCustomGpts) {
     const customGptId = customGpt.id;
     const pictureId = customGpt.pictureId;
@@ -33,7 +36,9 @@ export async function dumpBucketContent(exportDirectory: string) {
       continue;
     }
     const contents = await readFileFromS3({ key: `${pictureId}` });
-    console.log(`dumping ${customGpt.name} to ${exportDirectory}/custom-gpts/${customGptId}/avatar`);
+    console.log(
+      `dumping ${customGpt.name} to ${exportDirectory}/custom-gpts/${customGptId}/avatar`,
+    );
     if (!fs.existsSync(`${exportDirectory}/custom-gpts/${customGptId}`)) {
       fs.mkdirSync(`${exportDirectory}/custom-gpts/${customGptId}`, { recursive: true });
     }
