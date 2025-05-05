@@ -6,7 +6,7 @@ import {
   buttonSecondaryClassName,
 } from '@/utils/tailwind/button';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, useFormState } from 'react-hook-form';
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
@@ -30,7 +30,6 @@ import {
 import SelectLlmModelForm from '../../_components/select-llm-model';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
-import { navigateWithoutRefresh } from '@/utils/navigation/router';
 export default function SharedSchoolChatForm({
   existingFiles,
   isCreating,
@@ -41,11 +40,13 @@ export default function SharedSchoolChatForm({
 
   const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   const [initialFiles, setInitialFiles] = React.useState<FileModel[]>(existingFiles);
+  const [showWarning, setShowWarning] = React.useState(false);
   const t = useTranslations('shared-chats.form');
   const tToast = useTranslations('shared-chats.toasts');
   const tCommon = useTranslations('common');
 
   const { models } = useLlmModels();
+
 
   const {
     register,
@@ -63,6 +64,8 @@ export default function SharedSchoolChatForm({
       restrictions: sharedSchoolChat.restrictions ?? '',
     },
   });
+
+  const isDirty = true;
 
   async function handleDeattachFile(localFileId: string) {
     const fileId: string | undefined =
@@ -126,7 +129,7 @@ export default function SharedSchoolChatForm({
     const data = getValues();
     onSubmit(data);
     toast.success(tToast('create-toast-success'));
-    navigateWithoutRefresh(`/shared-chats/${sharedSchoolChat.id}`);
+    router.push(`/shared-chats/${sharedSchoolChat.id}`);
   }
   function handleNavigateBack() {
     if (isCreating) {
