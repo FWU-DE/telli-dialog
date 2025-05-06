@@ -42,10 +42,6 @@ When being directed for the oidc provider page and the username and password, yo
 
 Ensure that all the requried browsers are installed
 
-## ATTENTION
-
-You need to copy the .env secrets manually to the env file in order for all e2e tests to pass
-
 ```sh
 pnpm playwright install
 ```
@@ -60,5 +56,5 @@ Those command are the same as `pnpm build:envless` but use the `.env.e2e` file a
 
 Then you can run the e2e tests. There are two main ways of doing it:
 
-1. `pnpm e2e` - This runs in headless mode and is also the command that is executed in the CI, you will most likely not be able to debug there.
+1. `pnpm e2e:op` - This runs in headless mode and is also the command that is executed in the CI, you will most likely not be able to debug there.
 2. `pnpm e2e:ui` - This starts a browser where the test are run it, so you can see live what is happening and debug.
