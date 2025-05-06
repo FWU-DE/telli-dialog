@@ -8,7 +8,6 @@ import {
 } from '../schema';
 import { deleteFileFromS3 } from '@/s3';
 
-
 export async function dbDeleteConversationByIdAndUserId({
   conversationId,
   userId,
