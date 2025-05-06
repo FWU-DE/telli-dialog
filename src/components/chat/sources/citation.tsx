@@ -2,23 +2,34 @@
 import './citation.css';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils/tailwind';
+import { useQuery } from '@tanstack/react-query';
 
 function parseHostname(uri: string) {
   return new URL(uri).hostname.replace(/^www\./, '');
+}
+
+async function fetchWebpageMetadata(url: string) {
+  const response = await fetch(`/api/webpage-metadata?url=${encodeURIComponent(url)}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch webpage metadata');
+  }
+  return response.json();
 }
 
 export default function Citation({
   source,
 }: {
   source: {
-    name: string;
     link: string;
-    content: string;
   };
 }) {
   const hostname = parseHostname(source.link);
-  const titleWithoutWebsiteAlias = source.name.split('|')[0];
-
+  const { data, error } = useQuery({
+    queryKey: ['webpageMetadata', source.link],
+    queryFn: () => fetchWebpageMetadata(source.link),
+  });
+  const titleWithoutWebsiteAlias = data?.title.split('|')[0];
+  console.log(data);
   return (
     <TooltipProvider skipDelayDuration={0} delayDuration={0}>
       <Tooltip>
@@ -36,7 +47,7 @@ export default function Citation({
               lineHeight: '12px',
             }}
           >
-            {source.name}
+            {titleWithoutWebsiteAlias}
           </span>
         </TooltipTrigger>
         <TooltipContent
@@ -57,9 +68,9 @@ export default function Citation({
             <span className="font-medium overflow-ellipsis text-sm line-clamp-2">
               {titleWithoutWebsiteAlias}
             </span>
-            {source.content && source.content !== '' && (
+            {data?.description && data.description !== '' && (
               <span className="text-gray-500 text-sm line-clamp-2 break-words">
-                {source.content.trim()}
+                {data.description.trim()}
               </span>
             )}
           </span>

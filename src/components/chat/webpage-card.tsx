@@ -1,32 +1,32 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { cn } from '@/utils/tailwind';
+import { useQuery } from '@tanstack/react-query';
 
 interface WebpageCardProps {
   url: string;
 }
 
+async function fetchWebpageMetadata(url: string) {
+  const response = await fetch(`/api/webpage-metadata?url=${encodeURIComponent(url)}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch webpage metadata');
+  }
+  return response.json();
+}
+
 export function WebpageCard({ url }: WebpageCardProps) {
-  const [title, setTitle] = useState<string>('');
   const [isHovered, setIsHovered] = useState(false);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchMetadata = async () => {
-      try {
-        const response = await fetch(`/api/webpage-metadata?url=${encodeURIComponent(url)}`);
-        const data = await response.json();
-        setTitle(data.title || 'Untitled Page');
-        setPreviewImage(data.image || null);
-      } catch (error) {
-        console.error('Error fetching webpage metadata:', error);
-        setTitle('Untitled Page');
-      }
-    };
+  const { data, error } = useQuery({
+    queryKey: ['webpageMetadata', url],
+    queryFn: () => fetchWebpageMetadata(url),
+  });
 
-    fetchMetadata();
-  }, [url]);
+  const title = data?.title || 'Untitled Page';
+  const previewImage = data?.image || null;
+
   console.log(`isHovered: ${isHovered}`);
   return (
     <div className="relative h-full w-full">
