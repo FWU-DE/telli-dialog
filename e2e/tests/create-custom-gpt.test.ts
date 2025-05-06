@@ -74,6 +74,7 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await page
     .getByRole('link', { name: 'Hausbauplaner Hilft bei der' })
     .getByLabel('Neuer Chat')
+    .first()
     .click();
   await page.waitForURL('/custom/d/**');
   await expect(page.getByRole('heading')).toContainText('Hausbauplaner');
