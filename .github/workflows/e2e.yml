@@ -56,6 +56,7 @@ jobs:
           API_KEY: op://telli Engineering/.env.e2e chatbot/API_KEY
           BAVARIA_API_KEY: op://telli Engineering/.env.e2e chatbot/BAVARIA_API_KEY
           RABBITMQ_URI: op://telli Engineering/.env.e2e chatbot/RABBITMQ_URI
+          OTC_REGION: op://telli Engineering/.env.e2e chatbot/OTC_REGION
 
       - name: Use Node.js
         uses: actions/setup-node@v3

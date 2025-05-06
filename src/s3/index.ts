@@ -19,7 +19,7 @@ import { nanoid } from 'nanoid';
 
 const s3Client = new S3Client({
   // region: 'eu-de',
-  region: 'eu-nl',
+  region: env.otcS3Region,
   endpoint: `https://${env.otcS3Hostname}`,
   credentials: {
     accessKeyId: env.otcAccessKeyId,
