@@ -42,6 +42,9 @@ When being directed for the oidc provider page and the username and password, yo
 
 Ensure that all the requried browsers are installed
 
+## ATTENTION
+You need to copy the .env secrets manually to the env file in order for all e2e tests to pass 
+
 ```sh
 pnpm playwright install
 ```

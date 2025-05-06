@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../utils/login';
+import { cleanUp } from '../utils/clean-up';
 
 test('should successfully upload a file and get response about its contents', async ({ page }) => {
   await login(page, 'teacher');
@@ -32,4 +33,10 @@ test('should successfully upload a file and get response about its contents', as
   const assistantMessage = page.getByLabel('assistant message').getByRole('paragraph');
   await expect(assistantMessage).toBeVisible();
   await expect(assistantMessage).toContainText('Napoleon Bonaparte');
+
+  // Delete the conversation
+  const conversationId = page.url().split('/').pop();
+  if (conversationId) {
+    await cleanUp({ conversationId: conversationId });
+  }
 });

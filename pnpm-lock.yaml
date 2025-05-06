@@ -77,6 +77,9 @@ importers:
       docx:
         specifier: 9.1.1
         version: 9.1.1
+      dotenv:
+        specifier: 16.4.5
+        version: 16.4.5
       dotenv-cli:
         specifier: 7.4.1
         version: 7.4.1
@@ -3428,8 +3431,8 @@ packages:
     resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
     engines: {node: '>=12'}
 
-  dotenv@16.4.7:
-    resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
+  dotenv@16.4.5:
+    resolution: {integrity: sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==}
     engines: {node: '>=12'}
 
   drizzle-kit@0.30.4:
@@ -8467,7 +8470,7 @@ snapshots:
       '@babel/core': 7.26.9
       '@sentry/babel-plugin-component-annotate': 3.1.2
       '@sentry/cli': 2.41.1
-      dotenv: 16.4.7
+      dotenv: 16.4.5
       find-up: 5.0.0
       glob: 9.3.5
       magic-string: 0.30.8
@@ -10037,13 +10040,13 @@ snapshots:
   dotenv-cli@7.4.1:
     dependencies:
       cross-spawn: 7.0.6
-      dotenv: 16.4.7
+      dotenv: 16.4.5
       dotenv-expand: 10.0.0
       minimist: 1.2.8
 
   dotenv-expand@10.0.0: {}
 
-  dotenv@16.4.7: {}
+  dotenv@16.4.5: {}
 
   drizzle-kit@0.30.4:
     dependencies:
