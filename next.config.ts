@@ -21,7 +21,17 @@ const baseNextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'telli-dialog.obs.otc.t-systems.com',
+        hostname: 'telli-development.obs.eu-nl.otc.t-systems.com',
+        port: '',
+      },
+      {
+        protocol: 'https',
+        hostname: 'telli-staging.obs.eu-nl.otc.t-systems.com',
+        port: '',
+      },
+      {
+        protocol: 'https',
+        hostname: 'telli-production.obs.eu-nl.otc.t-systems.com',
         port: '',
       },
     ],
