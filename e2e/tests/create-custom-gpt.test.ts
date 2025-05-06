@@ -7,20 +7,22 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await page.goto('/custom');
   await page.waitForURL('/custom');
 
-  const createButton = page.getByRole('button', { name: 'Neuen Assistent erstellen' });
+  const createButton = page.getByRole('button', { name: 'Assistent erstellen' });
   await expect(createButton).toBeVisible();
   await createButton.click();
 
   await page.waitForURL('/custom/editor/**');
 
   // configure form
-  await page.getByRole('textbox', { name: '* Wie soll diese' }).click();
-  await page.getByRole('textbox', { name: '* Wie soll diese' }).fill('Hausbauplaner');
-  await page.getByRole('textbox', { name: '* Wie soll diese' }).press('Tab');
+  await page.getByRole('textbox', { name: 'Wie soll diese' }).click();
+  await page.getByRole('textbox', { name: 'Wie soll diese' }).fill('Hausbauplaner');
+  await page.getByRole('textbox', { name: 'Wie soll diese' }).press('Tab');
   await page
-    .getByRole('textbox', { name: '* Wie kann ihr Zweck kurz' })
+    .getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' })
     .fill('Hilft bei der Planung und Budget Rechnung beim Bau eines Einfamilienhauses');
-  await page.getByRole('textbox', { name: '* Wie kann ihr Zweck kurz' }).press('Tab');
+  await page
+    .getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' })
+    .press('Tab');
   await page.getByRole('button', { name: 'Bild hochladen' }).press('Tab');
   await page
     .getByRole('textbox', { name: 'Unterrichtsplanner hilft' })
@@ -36,7 +38,7 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await page.getByRole('textbox', { name: 'Erstelle einen' }).press('Tab');
   await page
     .getByRole('group')
-    .filter({ hasText: 'Was soll der Assistent' })
+    .filter({ hasText: 'Welche konkreten Funktionen' })
     .getByRole('button')
     .click();
   await page
@@ -48,7 +50,7 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
     .fill('Was ist das aktuelle Zinsniveau');
   await page
     .getByRole('group')
-    .filter({ hasText: 'Was soll der Assistent' })
+    .filter({ hasText: 'Welche konkreten Funktionen' })
     .getByRole('button')
     .first()
     .click();
@@ -59,12 +61,12 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   // delete one suggestion again
   await page
     .getByRole('group')
-    .filter({ hasText: 'Was soll der Assistent' })
+    .filter({ hasText: 'Welche konkreten Funktionen' })
     .getByRole('button')
     .nth(1)
     .click();
 
-  const submitButton = await page.getByRole('button', { name: 'Neuen Assistent erstellen' });
+  const submitButton = await page.getByRole('button', { name: 'Assistent erstellen' });
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
@@ -72,6 +74,7 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await page
     .getByRole('link', { name: 'Hausbauplaner Hilft bei der' })
     .getByLabel('Neuer Chat')
+    .first()
     .click();
   await page.waitForURL('/custom/d/**');
   await expect(page.getByRole('heading')).toContainText('Hausbauplaner');

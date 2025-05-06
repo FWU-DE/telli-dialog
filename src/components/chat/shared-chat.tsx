@@ -83,7 +83,9 @@ export default function SharedChat({
 
   return (
     <>
-      {!chatActive && <ExpiredChatModal conversationMessages={messages} />}
+      {!chatActive && (
+        <ExpiredChatModal conversationMessages={messages} title={sharedSchoolChat.name} />
+      )}
       <div className="flex flex-col h-full w-full overflow-hidden">
         <SharedChatHeader
           chatActive={chatActive}
@@ -100,10 +102,7 @@ export default function SharedChat({
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
             {messages.length === 0 ? (
-              <InitialChatContentDisplay
-                title={sharedSchoolChat.name}
-                description={sharedSchoolChat.description}
-              />
+              <InitialChatContentDisplay title={sharedSchoolChat.name} />
             ) : (
               <div className="flex flex-col gap-4">
                 {messages.map((message, index) => {

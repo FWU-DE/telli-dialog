@@ -1,6 +1,7 @@
 import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
+import path from 'path';
 
 const baseNextConfig = {
   typescript: {
@@ -20,13 +21,31 @@ const baseNextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'telli-dialog.obs.otc.t-systems.com',
+        hostname: 'telli-development.obs.eu-nl.otc.t-systems.com',
+        port: '',
+      },
+      {
+        protocol: 'https',
+        hostname: 'telli-staging.obs.eu-nl.otc.t-systems.com',
+        port: '',
+      },
+      {
+        protocol: 'https',
+        hostname: 'telli-production.obs.eu-nl.otc.t-systems.com',
         port: '',
       },
     ],
   },
   productionBrowserSourceMaps: process.env.NODE_ENV !== 'test',
   allowedDevOrigins: ['titanom.ngrok.app'],
+  webpack: (config, { isServer }) => {
+    // Ensure proper module resolution for path aliases
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, './src'),
+    };
+    return config;
+  },
 } satisfies NextConfig;
 
 const withNextIntl = createNextIntlPlugin();

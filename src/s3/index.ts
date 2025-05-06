@@ -19,7 +19,7 @@ import { nanoid } from 'nanoid';
 
 const s3Client = new S3Client({
   // region: 'eu-de',
-  region: 'eu-central-2',
+  region: 'eu-nl',
   endpoint: `https://${env.otcS3Hostname}`,
   credentials: {
     accessKeyId: env.otcAccessKeyId,
@@ -201,8 +201,8 @@ export async function deleteFileFromS3({ key }: { key: string }) {
 
   try {
     const command = new DeleteObjectCommand(deleteParams);
-    await s3Client.send(command);
-    console.log(`File with key ${key} deleted successfully`);
+    const result = await s3Client.send(command);
+    console.log(`File with key ${key} deleted successfully`, result);
   } catch (error) {
     console.error('Error deleting file from S3:', error);
     throw error;
