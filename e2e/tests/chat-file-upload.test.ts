@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../utils/login';
-import { cleanUp } from '../utils/clean-up';
 
 test('should successfully upload a file and get response about its contents', async ({ page }) => {
   await login(page, 'teacher');
@@ -38,5 +37,4 @@ test('should successfully upload a file and get response about its contents', as
   await page.waitForTimeout(500);
   await dropDownMenu.click();
   await page.getByRole('menuitem', { name: 'Löschen' }).click();
-
 });
