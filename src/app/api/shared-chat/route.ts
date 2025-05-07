@@ -9,7 +9,11 @@ import {
 import { dbGetSharedChatByIdAndInviteCode } from '@/db/functions/shared-school-chat';
 import { constructSystemPromptBySharedChat } from './system-prompt';
 import { dbUpdateTokenUsageBySharedChatId } from '@/db/functions/shared-school-chat';
-import { getModelAndProviderWithResult, getSearchParamsFromUrl } from '../utils';
+import {
+  getModelAndProviderWithResult,
+  getSearchParamsFromUrl,
+  calculateCostsInCents,
+} from '../utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
@@ -105,8 +109,10 @@ export async function POST(request: NextRequest) {
       await sendRabbitmqEvent(
         constructTelliNewMessageEvent({
           user: teacherUserAndContext,
+          provider: modelAndProvider.definedModel.provider,
           promptTokens: assistantMessage.usage.promptTokens,
           completionTokens: assistantMessage.usage.completionTokens,
+          costsInCents: calculateCostsInCents(definedModel, assistantMessage.usage),
           anonymous: true,
           sharedChat,
         }),
