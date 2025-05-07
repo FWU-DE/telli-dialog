@@ -7,7 +7,11 @@ import {
   userHasReachedIntelliPointLimit,
 } from '../chat/usage';
 import { constructSystemPromptByCharacterSharedChat } from './system-prompt';
-import { getModelAndProviderWithResult, getSearchParamsFromUrl } from '../utils';
+import {
+  getModelAndProviderWithResult,
+  getSearchParamsFromUrl,
+  calculateCostsInCents,
+} from '../utils';
 import {
   dbGetCharacterByIdAndInviteCode,
   dbUpdateTokenUsageByCharacterChatId,
@@ -106,11 +110,17 @@ export async function POST(request: NextRequest) {
         characterId: character.id,
         userId: teacherUserAndContext.id,
       });
+      console.log(
+        'calculateCostsInCents',
+        calculateCostsInCents(definedModel, assistantMessage.usage),
+      );
       await sendRabbitmqEvent(
         constructTelliNewMessageEvent({
           user: teacherUserAndContext,
           promptTokens: assistantMessage.usage.promptTokens,
           completionTokens: assistantMessage.usage.completionTokens,
+          costsInCents: calculateCostsInCents(definedModel, assistantMessage.usage),
+          provider: definedModel.provider,
           anonymous: true,
           character,
         }),

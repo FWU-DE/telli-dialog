@@ -7,6 +7,8 @@ export const telliNewChatMessageEventSchema = z.object({
   input_tokens: z.coerce.number(),
   output_tokens: z.coerce.number(),
   federal_state: z.string(),
+  provider: z.string(),
+  cost_in_cent: z.coerce.number(),
   school_id: z.string(),
   user_role: z.string(),
   chat_type: z.string(),
