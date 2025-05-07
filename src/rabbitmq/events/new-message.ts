@@ -9,6 +9,8 @@ type CommonProps = {
   anonymous: boolean;
   promptTokens: number;
   completionTokens: number;
+  costsInCents: number;
+  provider: string;
 };
 
 type FunctionProps =
@@ -27,6 +29,8 @@ export function constructTelliNewMessageEvent(props: FunctionProps): TelliNewCha
     event_type: 'telli_new_chat_message' as const,
     school_id: props.user.school.id,
     federal_state: props.user.federalState.id,
+    provider: props.provider,
+    cost_in_cent: props.costsInCents,
     timestamp: new Date(),
     user_role: props.anonymous ? 'anonymous' : props.user.school.userRole,
     input_tokens: props.promptTokens,
