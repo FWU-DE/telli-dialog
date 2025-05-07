@@ -23,7 +23,6 @@ import { HELP_MODE_GPT_ID } from '@/db/const';
 import { ChatInputBox } from './chat-input-box';
 import { ErrorChatPlaceholder } from './error-message';
 import Image from 'next/image';
-import { parseHyperlinks } from '@/utils/chat';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 type ChatProps = {
   id: string;

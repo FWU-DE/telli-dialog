@@ -71,7 +71,7 @@ export default async function Page(context: PageContext) {
   const convertedMessages = convertMessageModelToMessage(messages);
   const webSourceMapping = new Map<string, WebsearchSource[]>();
 
-  for (const [index, message] of convertedMessages.entries()) {
+  for (const message of convertedMessages) {
     const urls = parseHyperlinks(message.content);
     if (urls === undefined) {
       continue;
