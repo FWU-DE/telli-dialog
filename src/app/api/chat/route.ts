@@ -128,14 +128,20 @@ export async function POST(request: NextRequest) {
     customGptId,
   });
 
-  const urls = [userMessage, ...messages].map((message) => parseHyperlinks(message.content) ?? []).flat();
-  const websearchSources = await Promise.all(urls.map(async (url) => {
-    return await webScraperExecutable(url);
-  }));
-  console.log("websearchSources", websearchSources);
-  const websearchSourcesString = websearchSources.map((source) => {
-    return `Titel der Website: ${source.hostname}\nInhalt: ${source.content}\n Titel der Seite: ${source.name}\n Quelle: ${source.link}`;
-  }).join('\n');
+  const urls = [userMessage, ...messages]
+    .map((message) => parseHyperlinks(message.content) ?? [])
+    .flat();
+  const websearchSources = await Promise.all(
+    urls.map(async (url) => {
+      return await webScraperExecutable(url);
+    }),
+  );
+  console.log('websearchSources', websearchSources);
+  const websearchSourcesString = websearchSources
+    .map((source) => {
+      return `Titel der Website: ${source.hostname}\nInhalt: ${source.content}\n Titel der Seite: ${source.name}\n Quelle: ${source.link}`;
+    })
+    .join('\n');
 
   attachedFiles = await process_files(relatedFileEntities);
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });

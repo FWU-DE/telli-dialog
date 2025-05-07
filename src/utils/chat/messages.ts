@@ -1,7 +1,6 @@
 import { ConversationMessageModel } from '@/db/types';
 import { Message } from 'ai';
 
-
 export function convertMessageModelToMessage(
   messages: Array<ConversationMessageModel>,
 ): Array<Message> {
@@ -15,5 +14,3 @@ export function convertMessageModelToMessage(
       createdAt: message.createdAt,
     }));
 }
-
-

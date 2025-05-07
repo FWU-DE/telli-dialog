@@ -29,7 +29,6 @@ type BraveSearchResponse = {
 
 const MAXIMAL_CHARACTER_COUNT = 60_000;
 
-
 export function parseHostname(uri: string) {
   return new URL(uri).hostname.replace(/^www\./, '');
 }
@@ -178,7 +177,6 @@ const headers = {
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
 };
 
-
 /**
  * Checks if the URL is valid and then fetches the main content of the website.
  * Uses Mozilla's Readability to extract the main content.
@@ -209,12 +207,17 @@ export async function webScraperExecutable(url: string): Promise<WebsearchSource
     } catch (error) {
       console.error(`Request timed out for URL: ${url}`);
       return { content: 'Kein Inhalt gefunden', type: 'websearch', name: '', link: '', hostname };
-      
     }
 
     if (!response.ok) {
       console.error(`HTTP error! status: ${response.status}`);
-      return { content: `${errorContent} Status Code: ${response.status}`, type: 'websearch', name: errorName, link: '', hostname };
+      return {
+        content: `${errorContent} Status Code: ${response.status}`,
+        type: 'websearch',
+        name: errorName,
+        link: '',
+        hostname,
+      };
     }
 
     const responseClone = response.clone();
@@ -229,7 +232,7 @@ export async function webScraperExecutable(url: string): Promise<WebsearchSource
     // Use the first available title source
     let title = 'Untitled Page';
     title = ogTitleMatch?.[1]?.trim() || metaTitleMatch?.[1]?.trim() || 'Untitled Page';
-  
+
     let info = '';
     try {
       info = extractArticleContent(html, url);
@@ -243,8 +246,7 @@ export async function webScraperExecutable(url: string): Promise<WebsearchSource
         hostname,
       };
     }
-    
-    
+
     // Normalize and clean the content
     // eslint-disable-next-line no-control-regex
     const normalizedInfo = info.normalize('NFKD').replace(/[^\x00-\x7F]/g, '');

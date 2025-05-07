@@ -215,7 +215,9 @@ export default function Chat({
       {messages.map((message, index) => {
         // get the urls from the previous user message
         const urls = parseHyperlinks(messages[index - 1]?.content ?? '');
-        const currentWebsearchSources = webSourceMapping?.get(message.id) ?? urls?.map(url => ({link: url,name:'', type: 'websearch', content: ''}));
+        const currentWebsearchSources =
+          webSourceMapping?.get(message.id) ??
+          urls?.map((url) => ({ link: url, name: '', type: 'websearch', content: '' }));
         return (
           <ChatBox
             key={index}
@@ -223,14 +225,14 @@ export default function Chat({
             fileMapping={fileMapping}
             isLastUser={index === messages.length - 1 && message.role == 'user'}
             isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
-          isLoading={isLoading}
-          regenerateMessage={reload}
-          initialFiles={initialFiles}
-          assistantIcon={assistantIcon}
-          websearchSources={currentWebsearchSources}
-        >
-          {message}
-        </ChatBox>
+            isLoading={isLoading}
+            regenerateMessage={reload}
+            initialFiles={initialFiles}
+            assistantIcon={assistantIcon}
+            websearchSources={currentWebsearchSources}
+          >
+            {message}
+          </ChatBox>
         );
       })}
     </div>

@@ -26,19 +26,17 @@ const pageContext = z.object({
   searchParams: z.object({ model: z.string().optional() }).optional(),
 });
 
-
 export function parseHyperlinks(content: string): string[] | undefined {
-  
-  const urlPattern = /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+  const urlPattern =
+    /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
   const matches = content.match(urlPattern) || [];
-  console.log(`matches: ${matches}`); 
+  console.log(`matches: ${matches}`);
   if (matches[0] === undefined) {
     return undefined;
   }
 
   return matches;
 }
-
 
 export default async function Page(context: PageContext) {
   const {
@@ -71,14 +69,13 @@ export default async function Page(context: PageContext) {
   const convertedMessages = convertMessageModelToMessage(messages);
   const webSourceMapping = new Map<string, WebsearchSource[]>();
 
-
   for (const [index, message] of convertedMessages.entries()) {
     const urls = parseHyperlinks(message.content);
     if (urls === undefined) {
       continue;
     }
-    
-    const webSearchPromises = urls?.map( webScraperExecutable);
+
+    const webSearchPromises = urls?.map(webScraperExecutable);
     const websearchSources = await Promise.all(webSearchPromises ?? []);
     if (websearchSources == undefined || websearchSources.length === 0) {
       continue;

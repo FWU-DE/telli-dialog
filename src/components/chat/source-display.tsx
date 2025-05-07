@@ -10,7 +10,6 @@ type HoverDisplayProps = {
   className?: string;
 };
 
-
 function getWebsiteAlias(title: string, hostname: string): string {
   const partsByPipe = title.split(' | ');
   const partsByDash = title.split(' - ');

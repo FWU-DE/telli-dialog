@@ -134,9 +134,10 @@ export async function constructChatSystemPrompt({
     attachedFiles?.length > 0
       ? BASE_FILE_PROMPT + attachedFiles.map((file) => constructSingleFilePrompt(file))
       : '';
-  const websearchSourcesPrompt = websearchSources?.length > 0
-    ? `Der Nutzer hat folgende Quellen bereitgestellt, berücksichtige den Inhalt dieser Quellen bei der Antwort: ${websearchSources}`
-    : '';
+  const websearchSourcesPrompt =
+    websearchSources?.length > 0
+      ? `Der Nutzer hat folgende Quellen bereitgestellt, berücksichtige den Inhalt dieser Quellen bei der Antwort: ${websearchSources}`
+      : '';
 
   if (characterId !== undefined) {
     const characterSystemPrompt = await constructCharacterSystemPrompt({
