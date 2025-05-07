@@ -23,6 +23,8 @@ import { FileModelAndContent } from '@/db/schema';
 import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { SMALL_MODEL_MAX_CHARACTERS } from '@/configuration-text-inputs/const';
 import { SMALL_MODEL_LIST } from '@/configuration-text-inputs/const';
+import { parseHyperlinks } from '@/utils/chat';
+import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -125,6 +127,16 @@ export async function POST(request: NextRequest) {
     characterId,
     customGptId,
   });
+
+  const urls = [userMessage, ...messages].map((message) => parseHyperlinks(message.content) ?? []).flat();
+  const websearchSources = await Promise.all(urls.map(async (url) => {
+    return await webScraperExecutable(url);
+  }));
+  console.log("websearchSources", websearchSources);
+  const websearchSourcesString = websearchSources.map((source) => {
+    return `Titel der Website: ${source.hostname}\nInhalt: ${source.content}\n Titel der Seite: ${source.name}\n Quelle: ${source.link}`;
+  }).join('\n');
+
   attachedFiles = await process_files(relatedFileEntities);
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
   const maxCharacterLimit = SMALL_MODEL_LIST.includes(definedModel.displayName)
@@ -142,6 +154,7 @@ export async function POST(request: NextRequest) {
     isTeacher: user.school.userRole === 'teacher',
     federalState: user.federalState,
     attachedFiles: attachedFiles,
+    websearchSources: websearchSourcesString,
   });
   const result = streamText({
     model: telliProvider,

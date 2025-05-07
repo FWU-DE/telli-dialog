@@ -1,5 +1,6 @@
 'use client';
 
+import { parseHostname } from '@/app/api/conversation/tools/websearch/search-web';
 import { cn } from '@/utils/tailwind';
 
 type HoverDisplayProps = {
@@ -9,9 +10,6 @@ type HoverDisplayProps = {
   className?: string;
 };
 
-function parseHostname(uri: string) {
-  return new URL(uri).hostname.replace(/^www\./, '');
-}
 
 function getWebsiteAlias(title: string, hostname: string): string {
   const partsByPipe = title.split(' | ');

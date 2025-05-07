@@ -6,9 +6,8 @@ import ReloadIcon from '../icons/reload';
 import MarkdownDisplay from './markdown-display';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
-import { parseHyperlinks } from '@/utils/chat';
-import { WebpageCard } from './webpage-card';
 import Citation from './sources/citation';
+import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 
 export function ChatBox({
   children,
@@ -20,6 +19,7 @@ export function ChatBox({
   regenerateMessage,
   initialFiles,
   assistantIcon,
+  websearchSources,
 }: {
   children: UIMessage;
   index: number;
@@ -30,6 +30,7 @@ export function ChatBox({
   regenerateMessage: () => void;
   initialFiles?: FileModel[];
   assistantIcon?: React.JSX.Element;
+  websearchSources?: WebsearchSource[];
 }) {
   let maybefileAttachment: React.JSX.Element | undefined = undefined;
   const tCommon = useTranslations('common');
@@ -57,13 +58,15 @@ export function ChatBox({
       </div>
     );
   }
-  const urls = parseHyperlinks(children.content);
-  const maybeWebpageCard = urls ? 
-    <div className="relative flex flex-row gap-2 pb-0 pt-0 overflow-auto self-end mb-4">
-      {urls.map((url, index) => {
-        return <Citation key={`user-link-${index}`} source={{ name: url, link: url, content: '' }} />;
-      })}
-    </div> : null;
+
+  const maybeWebpageCard =
+    websearchSources && (!isLoading || !isLastNonUser) ? (
+      <div className="relative flex flex-row gap-2 pb-0 pt-0 overflow-auto self-start">
+        {websearchSources?.map((source, index) => {
+          return <Citation key={`user-link-${index}`} source={source} />;
+        })}
+      </div>
+    ) : null;
 
   let maybeShowMessageIcons = null;
   if (isLastNonUser && !isLoading) {
@@ -94,12 +97,12 @@ export function ChatBox({
             {children.role === 'assistant' && assistantIcon}
             <div className="flex flex-col items-start gap-2">
               {messageContent}
+              {maybeWebpageCard}
               {maybeShowMessageIcons}
             </div>
           </div>
         </div>
       </div>
-      {maybeWebpageCard}
       {maybefileAttachment}
     </>
   );

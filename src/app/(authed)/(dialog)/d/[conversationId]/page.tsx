@@ -9,6 +9,7 @@ import DownloadConversationButton from '../../download-conversation-button';
 import HeaderPortal from '../../header-portal';
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import { redirect } from 'next/navigation';
+import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { z } from 'zod';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
@@ -16,6 +17,7 @@ import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { dbGetRelatedFiles } from '@/db/functions/files';
+import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +25,20 @@ const pageContext = z.object({
   params: z.object({ conversationId: z.string() }),
   searchParams: z.object({ model: z.string().optional() }).optional(),
 });
+
+
+export function parseHyperlinks(content: string): string[] | undefined {
+  
+  const urlPattern = /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+  const matches = content.match(urlPattern) || [];
+  console.log(`matches: ${matches}`); 
+  if (matches[0] === undefined) {
+    return undefined;
+  }
+
+  return matches;
+}
+
 
 export default async function Page(context: PageContext) {
   const {
@@ -52,6 +68,24 @@ export default async function Page(context: PageContext) {
   const currentModel =
     searchParams?.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
 
+  const convertedMessages = convertMessageModelToMessage(messages);
+  const webSourceMapping = new Map<string, WebsearchSource[]>();
+
+
+  for (const [index, message] of convertedMessages.entries()) {
+    const urls = parseHyperlinks(message.content);
+    if (urls === undefined) {
+      continue;
+    }
+    
+    const webSearchPromises = urls?.map( webScraperExecutable);
+    const websearchSources = await Promise.all(webSearchPromises ?? []);
+    if (websearchSources == undefined || websearchSources.length === 0) {
+      continue;
+    }
+    webSourceMapping.set(messages?.[index + 1]?.id ?? '', Array.from(websearchSources));
+  }
+
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
       <HeaderPortal>
@@ -69,9 +103,10 @@ export default async function Page(context: PageContext) {
       </HeaderPortal>
       <Chat
         id={conversation.id}
-        initialMessages={convertMessageModelToMessage(messages)}
+        initialMessages={convertedMessages}
         initialFileMapping={fileMapping}
         enableFileUpload={true}
+        webSourceMapping={webSourceMapping}
       />
     </LlmModelsProvider>
   );

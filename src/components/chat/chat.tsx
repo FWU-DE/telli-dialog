@@ -23,7 +23,8 @@ import { HELP_MODE_GPT_ID } from '@/db/const';
 import { ChatInputBox } from './chat-input-box';
 import { ErrorChatPlaceholder } from './error-message';
 import Image from 'next/image';
-
+import { parseHyperlinks } from '@/utils/chat';
+import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 type ChatProps = {
   id: string;
   initialMessages: Message[];
@@ -33,6 +34,7 @@ type ChatProps = {
   promptSuggestions?: string[];
   initialFileMapping?: Map<string, FileModel[]>;
   enableFileUpload: boolean;
+  webSourceMapping?: Map<string, WebsearchSource[]>;
 };
 
 export default function Chat({
@@ -44,6 +46,7 @@ export default function Chat({
   promptSuggestions = [],
   initialFileMapping,
   enableFileUpload,
+  webSourceMapping,
 }: ChatProps) {
   const tHelpMode = useTranslations('help-mode');
   const router = useRouter();
@@ -209,21 +212,27 @@ export default function Chat({
 
   const messagesContent = (
     <div className="flex flex-col gap-2 max-w-3xl mx-auto p-4">
-      {messages.map((message, index) => (
-        <ChatBox
-          key={index}
-          index={index}
-          fileMapping={fileMapping}
-          isLastUser={index === messages.length - 1 && message.role == 'user'}
-          isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
+      {messages.map((message, index) => {
+        // get the urls from the previous user message
+        const urls = parseHyperlinks(messages[index - 1]?.content ?? '');
+        const currentWebsearchSources = webSourceMapping?.get(message.id) ?? urls?.map(url => ({link: url,name:'', type: 'websearch', content: ''}));
+        return (
+          <ChatBox
+            key={index}
+            index={index}
+            fileMapping={fileMapping}
+            isLastUser={index === messages.length - 1 && message.role == 'user'}
+            isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
           isLoading={isLoading}
           regenerateMessage={reload}
           initialFiles={initialFiles}
           assistantIcon={assistantIcon}
+          websearchSources={currentWebsearchSources}
         >
           {message}
         </ChatBox>
-      ))}
+        );
+      })}
     </div>
   );
 
