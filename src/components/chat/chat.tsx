@@ -213,11 +213,6 @@ export default function Chat({
   const messagesContent = (
     <div className="flex flex-col gap-2 max-w-3xl mx-auto p-4">
       {messages.map((message, index) => {
-        // get the urls from the previous user message
-        const urls = parseHyperlinks(messages[index - 1]?.content ?? '');
-        const currentWebsearchSources =
-          webSourceMapping?.get(message.id) ??
-          urls?.map((url) => ({ link: url, name: '', type: 'websearch', content: '' }));
         return (
           <ChatBox
             key={index}
@@ -229,7 +224,7 @@ export default function Chat({
             regenerateMessage={reload}
             initialFiles={initialFiles}
             assistantIcon={assistantIcon}
-            websearchSources={currentWebsearchSources}
+            websearchSources={webSourceMapping?.get(message.id)}
           >
             {message}
           </ChatBox>

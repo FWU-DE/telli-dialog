@@ -1,13 +1,13 @@
 'use client';
-import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import './citation.css';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils/tailwind';
-import { useQuery } from '@tanstack/react-query';
 import SearchIcon from '@/components/icons/search';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { useToast } from '@/components/common/toast';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { parseHostname } from '@/utils/web-search/parsing';
+import { defaultErrorSource } from './const';
 
 function truncateText(text: string, maxLength: number) {
   return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
@@ -15,6 +15,7 @@ function truncateText(text: string, maxLength: number) {
 
 async function fetchWebpageContent(url: string): Promise<WebsearchSource> {
   const response = await fetch(`/api/webpage-content?url=${encodeURIComponent(url)}`);
+  console.log('response', response);
   if (!response.ok) {
     throw new Error('Failed to fetch webpage content');
   }
@@ -22,20 +23,30 @@ async function fetchWebpageContent(url: string): Promise<WebsearchSource> {
 }
 
 export default function Citation({ source }: { source: WebsearchSource }) {
-  const { data, error } = useQuery({
-    queryKey: ['webpageContent', source.link],
-    queryFn: () => fetchWebpageContent(source.link),
-  });
-  // Prepare the display name for the source
+  const [data, setData] = useState<WebsearchSource | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const toast = useToast();
   const displayHostname = source.hostname || data?.hostname;
-  const displayTitle = truncateText(source.name || data?.name || `Titel: ${source.hostname}`, 25);
-
+  const displayTitle = truncateText(source.name || data?.name || '', 25);
+  console.log('source', source.link);
   useEffect(() => {
-    if (data?.name?.includes('Inhalt nicht verfügbar')) {
-      toast.error('Fehler beim Laden der Seite');
-    }
-  }, [data?.name]);
+    const fetchData = async () => {
+      try {
+        const result = await fetchWebpageContent(source.link);
+        setData(result);
+      } catch (err) {
+        setData({
+          ...defaultErrorSource,
+          link: source.link,
+          hostname: parseHostname(source.link),
+        });
+        setError(err as Error);
+        toast.error('Fehler beim Laden der Seite');
+      }
+    };
+
+    fetchData();
+  }, [source.link]);
 
   return (
     <TooltipProvider skipDelayDuration={0} delayDuration={0}>
@@ -57,17 +68,21 @@ export default function Citation({ source }: { source: WebsearchSource }) {
             'p-4 flex flex-col border-0 bg-white w-60 cursor-pointer text-start citation overflow-hidden',
           )}
         >
-          <span
-            role="button"
-            onClick={() => window.open(source.link, '_blank', 'noopener noreferrer')}
-          >
-            <span className="font-medium overflow-ellipsis text-sm line-clamp-2">{data?.name}</span>
-            {data?.content && data.content !== '' && (
-              <span className="text-gray-500 text-sm line-clamp-2 break-words">
-                {data.content.trim()}
+          {!error && (
+            <span
+              role="button"
+              onClick={() => window.open(source.link, '_blank', 'noopener noreferrer')}
+            >
+              <span className="font-medium overflow-ellipsis text-sm line-clamp-2">
+                {data?.name}
               </span>
-            )}
-          </span>
+              {data?.content && data.content !== '' && (
+                <span className="text-gray-500 text-sm line-clamp-2 break-words">
+                  {data.content.trim()}
+                </span>
+              )}
+            </span>
+          )}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

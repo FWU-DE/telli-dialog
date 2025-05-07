@@ -11,11 +11,14 @@ export async function GET(request: Request) {
   }
 
   try {
-    const content = await webScraperExecutable(url);
-
-    return NextResponse.json(content);
+    const { result, error } = await webScraperExecutable(url);
+    if (error) {
+      console.error('Error fetching webpage content:', error);
+      return NextResponse.json({ error: 'Failed to fetch webpage content' }, { status: 500 });
+    }
+    return NextResponse.json(result);
   } catch (error) {
-    console.error('Error fetching webpage metadata:', error);
-    return NextResponse.json({ error: 'Failed to fetch webpage metadata' }, { status: 500 });
+    console.error('Error fetching webpage content:', error);
+    return NextResponse.json({ error: 'Failed to fetch webpage content' }, { status: 500 });
   }
 }

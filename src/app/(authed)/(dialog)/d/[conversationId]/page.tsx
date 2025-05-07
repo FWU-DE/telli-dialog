@@ -18,6 +18,8 @@ import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-mode
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { dbGetRelatedFiles } from '@/db/functions/files';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
+import { parseHostname } from '@/utils/web-search/parsing';
+import { defaultErrorSource } from '@/components/chat/sources/const';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,11 +78,33 @@ export default async function Page(context: PageContext) {
     }
 
     const webSearchPromises = urls?.map(webScraperExecutable);
-    const websearchSources = await Promise.all(webSearchPromises ?? []);
-    if (websearchSources == undefined || websearchSources.length === 0) {
-      continue;
+
+    try {
+      const websearchSources = await Promise.all(webSearchPromises ?? []);
+      if (websearchSources == undefined || websearchSources.length === 0) {
+        continue;
+      }
+      webSourceMapping.set(
+        message.id,
+        websearchSources.map((source) => {
+          if (source.error) {
+            return {
+              ...defaultErrorSource,
+              link: source.result.link,
+              hostname: parseHostname(source.result.link),
+            };
+          }
+          return source.result;
+        }),
+      );
+    } catch (error) {
+      // The error case should never happen, but we're handling it here to avoid the app crashing.
+      webSourceMapping.set(
+        message.id,
+        urls?.map((url) => ({ ...defaultErrorSource, link: url, hostname: parseHostname(url) })),
+      );
+      console.error('Error fetching webpage content:', error);
     }
-    webSourceMapping.set(messages?.[index + 1]?.id ?? '', Array.from(websearchSources));
   }
 
   return (

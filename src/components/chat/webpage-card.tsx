@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { cn } from '@/utils/tailwind';
 import { useQuery } from '@tanstack/react-query';
 
 interface WebpageCardProps {
@@ -19,13 +18,12 @@ async function fetchWebpageMetadata(url: string) {
 export function WebpageCard({ url }: WebpageCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
-  const { data, error } = useQuery({
+  const { data } = useQuery({
     queryKey: ['webpageMetadata', url],
     queryFn: () => fetchWebpageMetadata(url),
   });
 
   const title = data?.title || 'Untitled Page';
-  const previewImage = data?.image || null;
 
   console.log(`isHovered: ${isHovered}`);
   return (

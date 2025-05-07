@@ -61,7 +61,7 @@ export function ChatBox({
 
   const maybeWebpageCard =
     websearchSources && (!isLoading || !isLastNonUser) ? (
-      <div className="relative flex flex-row gap-2 pb-0 pt-0 overflow-auto self-start">
+      <div className="relative flex gap-2 flex-row overflow-auto self-end">
         {websearchSources?.map((source, index) => {
           return <Citation key={`user-link-${index}`} source={source} />;
         })}
@@ -97,12 +97,12 @@ export function ChatBox({
             {children.role === 'assistant' && assistantIcon}
             <div className="flex flex-col items-start gap-2">
               {messageContent}
-              {maybeWebpageCard}
               {maybeShowMessageIcons}
             </div>
           </div>
         </div>
       </div>
+      {maybeWebpageCard}
       {maybefileAttachment}
     </>
   );
