@@ -27,7 +27,7 @@ export default function Citation({ source }: { source: WebsearchSource }) {
   const [error, setError] = useState<Error | null>(null);
   const toast = useToast();
   const displayHostname = source.hostname || data?.hostname;
-  const displayTitle = truncateText(source.name || data?.name || '', 25);
+  const displayTitle = truncateText(source.name || data?.name || '', 30);
   console.log('source', source.link);
   useEffect(() => {
     const fetchData = async () => {
@@ -52,8 +52,12 @@ export default function Citation({ source }: { source: WebsearchSource }) {
     <TooltipProvider skipDelayDuration={0} delayDuration={0}>
       <Tooltip>
         <TooltipTrigger asChild>
+          
           <div
-            className="flex flex-row items-center bg-secondary/20 mr-4 gap-1 p-1.5"
+            className="flex flex-row  items-center bg-secondary/20 gap-1 p-1.5"
+            style={{
+              direction: 'ltr',
+            }}
             role="button"
             onClick={() => window.open(source.link, '_blank', 'noopener noreferrer')}
           >
@@ -72,12 +76,15 @@ export default function Citation({ source }: { source: WebsearchSource }) {
             <span
               role="button"
               onClick={() => window.open(source.link, '_blank', 'noopener noreferrer')}
+              // overwrite direction from parent
+              dir="ltr"
             >
-              <span className="font-medium overflow-ellipsis text-sm line-clamp-2">
+              <span className="font-medium overflow-ellipsis text-sm line-clamp-1">
                 {data?.name}
               </span>
               {data?.content && data.content !== '' && (
-                <span className="text-gray-500 text-sm line-clamp-2 break-words">
+                <span className="text-gray-500 text-sm line-clamp-1 break-words"
+                >
                   {data.content.trim()}
                 </span>
               )}
