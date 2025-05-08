@@ -9,7 +9,7 @@ import SharedSchoolChatForm from './shared-school-chat-form';
 import { fetchFileMapping } from './actions';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { PageContext } from '@/utils/next/types';
-
+import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 const pageContextSchema = z.object({
   params: z.object({
     sharedSchoolChatId: z.string(),
@@ -31,6 +31,7 @@ export default async function Page(context: PageContext) {
     return notFound();
   }
   const relatedFiles = await fetchFileMapping(params.sharedSchoolChatId);
+  const initalLinks = await Promise.all(sharedSchoolChat.attachedLinks.filter((l)  => l !== '').map(webScraperExecutable));
 
   return (
     <div className="w-full p-6 overflow-auto">
@@ -44,6 +45,7 @@ export default async function Page(context: PageContext) {
           {...sharedSchoolChat}
           existingFiles={relatedFiles}
           isCreating={false}
+          initalLinks={initalLinks}
         />
       </div>
     </div>

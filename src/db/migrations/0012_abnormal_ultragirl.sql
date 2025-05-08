@@ -1,0 +1,1 @@
+ALTER TABLE "shared_school_conversation" ADD COLUMN "attached_links" text[] DEFAULT '{}'::text[] NOT NULL;

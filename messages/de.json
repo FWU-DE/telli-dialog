@@ -49,6 +49,9 @@
       "title": "Nicht verfügbar",
       "content": "Die Seite konnte nicht geladen werden. Es ist ein Fehler aufgetreten {status_code_info}. Nenne keinen Fehlercode und gib folgende Hinweise an den Nutzer weiter: Bitte stelle sicher, dass:\n- die Seite öffentlich zugänglich ist\n- keine Anmeldung erforderlich ist\n- es sich um eine gültige URL handelt"
     },
+    "action": {
+      "delete": "Link entfernen"
+    },
     "toasts": {
       "error-loading-page": "Verarbeitung des Links fehlgeschlagen"
     }
@@ -225,6 +228,9 @@
       "specification-placeholder": "Der KI-Chatbot soll aus der Perspektive eines Soldaten im Herrschaftsstsystem unter Ludwig XIV antworten.",
       "restrictions-label": "Wie soll telli nicht antworten?",
       "restrictions-placeholder": "Der KI-Chatbot soll sich nicht auf Ereignisse eingehen, die außerhalb des thematischen Kontextes liegen.",
+      "attached-links-label": "Welche Webquellen dienen telli als Grundlage?",
+      "attached-links-placeholder": "URL der Webseiten",
+      "add-link": "Link hinzufügen",
       "delete-title": "Lernszenario löschen",
       "delete-description": "Beim Löschen des Lernszenarios werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
       "delete-button": "Szenario endgültig löschen",
@@ -263,7 +269,8 @@
       "delete-toast-success": "Der Lernszenario wurde erfolgreich gelöscht.",
       "delete-toast-error": "Der Lernszenario konnte nicht gelöscht werden.",
       "edit-toast-success": "Der Lernszenario wurde erfolgreich aktualisiert.",
-      "edit-toast-error": "Der Lernszenario konnte nicht aktualisiert werden."
+      "edit-toast-error": "Der Lernszenario konnte nicht aktualisiert werden.",
+      "invalid-url": "Die eingegebene URL ist ungültig."
     }
   }
 }

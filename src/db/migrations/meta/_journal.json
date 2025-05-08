@@ -85,6 +85,13 @@
       "when": 1745495438516,
       "tag": "0011_yielding_hercules",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1746697921487,
+      "tag": "0012_abnormal_ultragirl",
+      "breakpoints": true
     }
   ]
 }
