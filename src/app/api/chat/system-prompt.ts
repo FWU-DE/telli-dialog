@@ -120,17 +120,23 @@ export async function constructChatSystemPrompt({
   isTeacher,
   federalState,
   attachedFiles,
+  websearchSources,
 }: {
   characterId?: string;
   customGptId?: string;
   isTeacher: boolean;
   federalState: Omit<FederalStateModel, 'encryptedApiKey'>;
   attachedFiles: FileModelAndContent[];
+  websearchSources: string;
 }) {
   const schoolSystemPrompt = constructSchuleSystemPrompt();
   const fileContentPrompt =
     attachedFiles?.length > 0
       ? BASE_FILE_PROMPT + attachedFiles.map((file) => constructSingleFilePrompt(file))
+      : '';
+  const websearchSourcesPrompt =
+    websearchSources?.length > 0
+      ? `Der Nutzer hat folgende Quellen bereitgestellt, berücksichtige den Inhalt dieser Quellen bei der Antwort: ${websearchSources}`
       : '';
 
   if (characterId !== undefined) {
@@ -164,5 +170,5 @@ export async function constructChatSystemPrompt({
     return concatenatedHelpModeSystemPrompt;
   }
 
-  return schoolSystemPrompt + fileContentPrompt;
+  return schoolSystemPrompt + fileContentPrompt + websearchSourcesPrompt;
 }

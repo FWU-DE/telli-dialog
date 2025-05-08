@@ -6,6 +6,8 @@ import ReloadIcon from '../icons/reload';
 import MarkdownDisplay from './markdown-display';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
+import Citation from './sources/citation';
+import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 
 export function ChatBox({
   children,
@@ -17,6 +19,7 @@ export function ChatBox({
   regenerateMessage,
   initialFiles,
   assistantIcon,
+  websearchSources,
 }: {
   children: UIMessage;
   index: number;
@@ -27,8 +30,8 @@ export function ChatBox({
   regenerateMessage: () => void;
   initialFiles?: FileModel[];
   assistantIcon?: React.JSX.Element;
+  websearchSources?: WebsearchSource[];
 }) {
-  let maybefileAttachment: React.JSX.Element | undefined = undefined;
   const tCommon = useTranslations('common');
   const userClassName =
     children.role === 'user'
@@ -37,28 +40,45 @@ export function ChatBox({
   const fileMatch = fileMapping?.get(children.id) !== undefined;
   const allFiles = fileMatch ? fileMapping.get(children.id) : initialFiles;
 
-  const margin = allFiles !== undefined ? 'm-0' : 'm-4';
-
-  if (allFiles !== undefined && children.role === 'user' && (isLastUser || fileMatch)) {
-    const filesElement = allFiles.map((file) => {
-      return (
-        <DisplayUploadedFile
-          fileName={file.name}
-          status="processed"
-          key={file.id}
-        ></DisplayUploadedFile>
-      );
-    });
-    maybefileAttachment = (
+  const maybefileAttachment =
+    allFiles !== undefined && children.role === 'user' && (isLastUser || fileMatch) ? (
       <div className="flex flex-row gap-2 pb-0 pt-0 overflow-auto self-end mb-4">
-        {filesElement}
+        {allFiles.map((file) => {
+          return (
+            <DisplayUploadedFile
+              fileName={file.name}
+              status="processed"
+              key={file.id}
+            ></DisplayUploadedFile>
+          );
+        })}
       </div>
-    );
-  }
+    ) : null;
 
-  let maybeShowMessageIcons = null;
-  if (isLastNonUser && !isLoading) {
-    maybeShowMessageIcons = (
+  const maybeWebpageCard =
+    websearchSources && (!isLoading || !isLastNonUser) ? (
+      <div
+        className="relative flex flex-wrap overflow-ellipsis gap-2 self-end mt-1 w-[70%]"
+        dir="rtl"
+      >
+        {websearchSources?.map((source, sourceIndex) => {
+          return (
+            <Citation
+              key={`user-link-${index}-${sourceIndex}`}
+              source={source}
+              index={index}
+              sourceIndex={sourceIndex}
+            />
+          );
+        })}
+      </div>
+    ) : null;
+
+  const webSourceAvailable = websearchSources !== undefined && websearchSources.length !== 0;
+  const margin = allFiles !== undefined || webSourceAvailable ? 'm-0' : 'm-4';
+
+  const maybeShowMessageIcons =
+    isLastNonUser && !isLoading ? (
       <div className="flex items-center gap-1 mt-1">
         <TelliClipboardButton text={children.content} />
         <button
@@ -72,8 +92,9 @@ export function ChatBox({
           </div>
         </button>
       </div>
-    );
-  }
+    ) : null;
+
+  const messageContent = <MarkdownDisplay>{children.content}</MarkdownDisplay>;
 
   return (
     <>
@@ -82,12 +103,13 @@ export function ChatBox({
           <div className="flex flex-row">
             {children.role === 'assistant' && assistantIcon}
             <div className="flex flex-col items-start gap-2">
-              <MarkdownDisplay>{children.content}</MarkdownDisplay>
+              {messageContent}
               {maybeShowMessageIcons}
             </div>
           </div>
         </div>
       </div>
+      {maybeWebpageCard}
       {maybefileAttachment}
     </>
   );

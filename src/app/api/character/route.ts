@@ -110,10 +110,6 @@ export async function POST(request: NextRequest) {
         characterId: character.id,
         userId: teacherUserAndContext.id,
       });
-      console.log(
-        'calculateCostsInCents',
-        calculateCostsInCents(definedModel, assistantMessage.usage),
-      );
       await sendRabbitmqEvent(
         constructTelliNewMessageEvent({
           user: teacherUserAndContext,
