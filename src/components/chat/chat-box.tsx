@@ -61,8 +61,15 @@ export function ChatBox({
         className="relative flex flex-wrap overflow-ellipsis gap-2 self-end mt-1 w-[70%]"
         dir="rtl"
       >
-        {websearchSources?.map((source, index) => {
-          return <Citation key={`user-link-${index}`} source={source} />;
+        {websearchSources?.map((source, sourceIndex) => {
+          return (
+            <Citation
+              key={`user-link-${index}-${sourceIndex}`}
+              source={source}
+              index={index}
+              sourceIndex={sourceIndex}
+            />
+          );
         })}
       </div>
     ) : null;

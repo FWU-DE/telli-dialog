@@ -23,7 +23,15 @@ async function fetchWebpageContent(
   return { value: (await response.json()) as WebsearchSource };
 }
 
-export default function Citation({ source }: { source: WebsearchSource }) {
+export default function Citation({
+  source,
+  index,
+  sourceIndex,
+}: {
+  source: WebsearchSource;
+  index: number;
+  sourceIndex: number;
+}) {
   const t = useTranslations('websearch');
   const [data, setData] = useState<WebsearchSource | null>(null);
   const toast = useToast();
@@ -60,8 +68,18 @@ export default function Citation({ source }: { source: WebsearchSource }) {
             onClick={() => window.open(source.link, '_blank', 'noopener noreferrer')}
           >
             <SearchIcon className="w-3 h-3 ml-1" />
-            <span className="flex overflow-ellipsis text-xs line-clamp-1">{displayTitle} | </span>
-            <span className="flex-1 overflow-ellipsis text-xs line-clamp-1">{displayHostname}</span>
+            <span
+              className="flex overflow-ellipsis text-xs line-clamp-1"
+              aria-label={`Source Title ${index} ${sourceIndex}`}
+            >
+              {displayTitle} |{' '}
+            </span>
+            <span
+              className="flex-1 overflow-ellipsis text-xs line-clamp-1"
+              aria-label={`Source Hostname ${index} ${sourceIndex}`}
+            >
+              {displayHostname}
+            </span>
           </div>
         </TooltipTrigger>
         <TooltipContent
