@@ -50,9 +50,6 @@ export default function SharedSchoolChatForm({
 
   const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   const [initialFiles, setInitialFiles] = React.useState<FileModel[]>(existingFiles);
-  const [resolvedLinks, setResolvedLinks] = React.useState<Map<string, WebsearchSource>>(
-    new Map(initalLinks.map((l) => [l.link, l])),
-  );
 
   const [currentAttachedLinks, setCurrentAttachedLinks] = React.useState<string>('');
 
@@ -62,9 +59,6 @@ export default function SharedSchoolChatForm({
 
   const { models } = useLlmModels();
 
-  const addResolvedLink = (source: WebsearchSource) => {
-    setResolvedLinks(new Map(resolvedLinks.set(source.link, source)));
-  };
 
   const {
     register,
@@ -362,7 +356,6 @@ export default function SharedSchoolChatForm({
                   handleDelete={() => handleDeleteLink(index)}
                   index={index}
                   sourceIndex={0}
-                  addResolvedLink={addResolvedLink}
                 />
               </div>
             ))}

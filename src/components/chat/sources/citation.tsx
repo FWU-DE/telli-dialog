@@ -31,14 +31,12 @@ export default function Citation({
   index,
   sourceIndex,
   handleDelete,
-  addResolvedLink,
   className,
 }: {
   source: WebsearchSource;
   index: number;
   sourceIndex: number;
   handleDelete?: () => void;
-  addResolvedLink?: (source: WebsearchSource) => void;
   className?: string;
 }) {
   const t = useTranslations('websearch');
@@ -49,7 +47,6 @@ export default function Citation({
     queryFn: async () => {
       const result = await fetchWebpageContent(source.link);
       if (!result.error && result.value) {
-        addResolvedLink?.(result.value);
         return result.value;
       }
       const errorSource = {
