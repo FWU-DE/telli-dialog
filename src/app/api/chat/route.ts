@@ -23,10 +23,9 @@ import { FileModelAndContent } from '@/db/schema';
 import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { SMALL_MODEL_MAX_CHARACTERS } from '@/configuration-text-inputs/const';
 import { SMALL_MODEL_LIST } from '@/configuration-text-inputs/const';
-import { parseHyperlinks } from '@/utils/chat';
+import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
-import { defaultErrorSource } from '@/components/chat/sources/const';
-import { parseHostname } from '@/utils/web-search/parsing';
+import { WebsearchSource } from '../conversation/tools/websearch/types';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -133,21 +132,17 @@ export async function POST(request: NextRequest) {
   const urls = [userMessage, ...messages]
     .map((message) => parseHyperlinks(message.content) ?? [])
     .flat();
-  const websearchSources = await Promise.all(
-    urls.map(async (url) => {
-      const { result, error } = await webScraperExecutable(url);
-      if (error) {
-        console.error('Error fetching webpage metadata:', error);
-        return {
-          ...defaultErrorSource,
-          link: url,
-          hostname: parseHostname(url),
-        };
-      }
-      return result;
-    }),
-  );
-  console.log('websearchSources', websearchSources);
+
+  let websearchSources: WebsearchSource[] = [];
+  try {
+    websearchSources = await Promise.all(
+      urls.map(async (url) => {
+        return await webScraperExecutable(url);
+      }),
+    );
+  } catch (error) {
+    console.error('Unhandled error while fetching website', error);
+  }
   const websearchSourcesString = websearchSources
     .map((source) => {
       return `Titel der Website: ${source.hostname}\nInhalt: ${source.content}\n Titel der Seite: ${source.name}\n Quelle: ${source.link}`;

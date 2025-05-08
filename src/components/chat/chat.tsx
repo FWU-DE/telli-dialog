@@ -223,7 +223,9 @@ export default function Chat({
             regenerateMessage={reload}
             initialFiles={initialFiles}
             assistantIcon={assistantIcon}
-            websearchSources={webSourceMapping?.get(message.id)}
+            websearchSources={
+              message.role === 'user' ? webSourceMapping?.get(message.id) : undefined
+            }
           >
             {message}
           </ChatBox>

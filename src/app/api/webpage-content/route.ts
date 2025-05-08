@@ -11,11 +11,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const { result, error } = await webScraperExecutable(url);
-    if (error) {
-      console.error('Error fetching webpage content:', error);
-      return NextResponse.json({ error: 'Failed to fetch webpage content' }, { status: 500 });
-    }
+    const result = await webScraperExecutable(url);
     return NextResponse.json(result);
   } catch (error) {
     console.error('Error fetching webpage content:', error);

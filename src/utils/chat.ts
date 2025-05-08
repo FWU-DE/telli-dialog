@@ -23,15 +23,3 @@ export const conversationMessageSchema = z.object({
   metadata: conversationMessageMetadataSchema.optional().nullable(),
 });
 export type ConversationMessage = z.infer<typeof conversationMessageSchema>;
-
-export function parseHyperlinks(content: string): string[] | undefined {
-  const urlPattern =
-    /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
-  const matches = content.match(urlPattern) || [];
-  console.log(`matches: ${matches}`);
-  if (matches[0] === undefined) {
-    return undefined;
-  }
-
-  return matches;
-}

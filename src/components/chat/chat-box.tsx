@@ -66,7 +66,9 @@ export function ChatBox({
         })}
       </div>
     ) : null;
-  const margin = allFiles !== undefined || websearchSources !== undefined ? 'm-0' : 'm-4';
+
+  const webSourceAvailable = websearchSources !== undefined && websearchSources.length !== 0;
+  const margin = allFiles !== undefined || webSourceAvailable ? 'm-0' : 'm-4';
 
   const maybeShowMessageIcons =
     isLastNonUser && !isLoading ? (

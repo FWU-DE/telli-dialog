@@ -18,8 +18,7 @@ import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-mode
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { dbGetRelatedFiles } from '@/db/functions/files';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
-import { parseHostname } from '@/utils/web-search/parsing';
-import { defaultErrorSource } from '@/components/chat/sources/const';
+import { parseHyperlinks } from '@/utils/web-search/parsing';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,18 +26,6 @@ const pageContext = z.object({
   params: z.object({ conversationId: z.string() }),
   searchParams: z.object({ model: z.string().optional() }).optional(),
 });
-
-export function parseHyperlinks(content: string): string[] | undefined {
-  const urlPattern =
-    /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
-  const matches = content.match(urlPattern) || [];
-  console.log(`matches: ${matches}`);
-  if (matches[0] === undefined) {
-    return undefined;
-  }
-
-  return matches;
-}
 
 export default async function Page(context: PageContext) {
   const {
@@ -76,7 +63,6 @@ export default async function Page(context: PageContext) {
     if (urls === undefined) {
       continue;
     }
-
     const webSearchPromises = urls?.map(webScraperExecutable);
 
     try {
@@ -87,22 +73,10 @@ export default async function Page(context: PageContext) {
       webSourceMapping.set(
         message.id,
         websearchSources.map((source) => {
-          if (source.error) {
-            return {
-              ...defaultErrorSource,
-              link: source.result.link,
-              hostname: parseHostname(source.result.link),
-            };
-          }
-          return source.result;
+          return source;
         }),
       );
     } catch (error) {
-      // The error case should never happen, but we're handling it here to avoid the app crashing.
-      webSourceMapping.set(
-        message.id,
-        urls?.map((url) => ({ ...defaultErrorSource, link: url, hostname: parseHostname(url) })),
-      );
       console.error('Error fetching webpage content:', error);
     }
   }

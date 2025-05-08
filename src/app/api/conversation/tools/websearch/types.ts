@@ -9,6 +9,7 @@ export type WebsearchSource = {
   link: string;
   content: string;
   hostname?: string;
+  error?: boolean;
 };
 
 export type WebsearchToolResult =

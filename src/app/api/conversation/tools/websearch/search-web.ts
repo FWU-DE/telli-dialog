@@ -4,6 +4,7 @@ import { JSDOM } from 'jsdom';
 import { CHAT_MESSAGE_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { parseHostname } from '@/utils/web-search/parsing';
 import { defaultErrorSource } from '@/components/chat/sources/const';
+import { getTranslations } from 'next-intl/server';
 
 const headers = {
   'User-Agent':
@@ -17,13 +18,12 @@ const headers = {
  * @param url The URL to fetch and parse.
  * @returns A summary of the most important information from the page.
  */
-export async function webScraperExecutable(
-  url: string,
-): Promise<{ result: WebsearchSource; error: Error | null }> {
+export async function webScraperExecutable(url: string): Promise<WebsearchSource> {
   let hostname = '';
 
   hostname = parseHostname(url);
   console.info(`Requesting webcontent for url: ${url}`);
+  const t = await getTranslations({ namespace: 'websearch' });
   let response: Response;
   try {
     // Set up a timeout for the fetch request
@@ -37,15 +37,19 @@ export async function webScraperExecutable(
   } catch {
     console.error(`Request timed out for URL: ${url}`);
     return {
-      result: { ...defaultErrorSource, link: url, hostname },
-      error: new Error(`Request timed out for URL: ${url}`),
+      ...defaultErrorSource({ status_code: 408, t }),
+      link: url,
+      hostname,
+      type: 'websearch',
     };
   }
 
   if (!response.ok) {
     return {
-      result: { ...defaultErrorSource, link: url, hostname },
-      error: new Error(`HTTP error! status: ${response.status}`),
+      ...defaultErrorSource({ status_code: response.status, t }),
+      link: url,
+      hostname,
+      type: 'websearch',
     };
   }
 
@@ -66,18 +70,23 @@ export async function webScraperExecutable(
   } catch {
     console.error('Error in web parsing tool');
     return {
-      result: { ...defaultErrorSource, link: url, hostname },
-      error: new Error('Fehler beim Laden der Seite'),
+      ...defaultErrorSource({ status_code: 408, t }),
+      link: url,
+      hostname,
+      type: 'websearch',
     };
   }
 
   // Normalize and clean the content
   const normalizedInfo = info.normalize('NFKD').replace(/[^\x00-\x7F]/g, '');
   const trimmedInfo = normalizedInfo.substring(0, CHAT_MESSAGE_LENGTH_LIMIT);
-  console.log(title);
+
   return {
-    result: { content: trimmedInfo, name: title, link: url, hostname, type: 'websearch' },
-    error: null,
+    content: trimmedInfo,
+    name: title,
+    link: url,
+    hostname,
+    type: 'websearch',
   };
 }
 
