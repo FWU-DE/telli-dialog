@@ -40,10 +40,12 @@ test('teacher can login, create and join shared chat', async ({ page }) => {
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
-  await page.waitForTimeout(3000);
+  await page.waitForURL('/shared-chats/**');
 
   // check if created with right name
-  const sharedChatName = page.getByText('Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten');
+  const sharedChatName = page
+    .getByText('Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten')
+    .first();
   await expect(sharedChatName).toBeVisible();
 
   // test share page
@@ -114,7 +116,7 @@ test('teacher can login, create and delete shared chat, student can join chat', 
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
-  await page.waitForTimeout(3000);
+  await page.waitForURL('/shared-chats/**');
 
   // test share page
   await page.selectOption('#Telli-Points', '25');

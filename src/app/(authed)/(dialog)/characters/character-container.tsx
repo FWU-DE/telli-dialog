@@ -85,8 +85,8 @@ export default function CharacterContainer({
         )}
         {maybeSignedPictureUrl === undefined && <EmptyImageIcon className="w-4 h-4" />}
       </figure>
-      <div className="flex flex-col gap-1 text-left min-w-0">
-        <h2 className={cn('font-medium leading-none', truncateClassName)}>{name}</h2>
+      <div className="flex flex-col gap-0 text-left min-w-0">
+        <h2 className={cn('font-medium leading-none min-h-5', truncateClassName)}>{name}</h2>
         <span className={cn(truncateClassName, 'text-gray-400')}>{description}</span>
       </div>
       <div className="flex-grow" />

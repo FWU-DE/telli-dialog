@@ -17,7 +17,7 @@ export function CopyContainer({ character }: { character: CharacterModel }) {
     >
       <div
         className={cn(
-          'flex flex-col gap-4 border-[1px] rounded-enterprise-md border-gray-200 p-6',
+          'flex flex-col gap-4 border-[1px] mt-16 rounded-enterprise-md border-gray-200 p-6',
           containerBg,
         )}
       >

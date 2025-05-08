@@ -78,7 +78,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4 border-[1px] rounded-enterprise-md border-gray-200 p-6">
+    <div className="flex flex-col gap-4 border-[1px] mt-16 rounded-enterprise-md border-gray-200 p-6">
       <h2 className="font-medium">{t('title')}</h2>
       <p>{t('description')}</p>
       <div className="flex gap-6 items-center flex-wrap">
