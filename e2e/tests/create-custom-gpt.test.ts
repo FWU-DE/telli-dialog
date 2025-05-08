@@ -20,22 +20,16 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await page
     .getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' })
     .fill('Hilft bei der Planung und Budget Rechnung beim Bau eines Einfamilienhauses');
+
   await page
-    .getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' })
-    .press('Tab');
-  await page.getByRole('button', { name: 'Bild hochladen' }).press('Tab');
-  await page
-    .getByRole('textbox', { name: 'Unterrichtsplanner hilft' })
+    .getByRole('textbox', { name: 'Welche konkreten Funktionen' })
     .fill('Die Währung ist US-Dollar, du berätst mich inwiefern sind ein Bausparkredit lohnt');
-  await page.getByRole('textbox', { name: 'Unterrichtsplanner hilft' }).press('Tab');
 
   // first Prompt Suggestion Box
-  await page
-    .getByRole('textbox', { name: 'Erstelle einen' })
-    .fill('Was kostet ein Grundstück in München?');
+  await page.getByPlaceholder('Erstelle einen').fill('Was kostet ein Grundstück in München?');
 
   // fill three more Suggestions and delete one of them afterwards
-  await page.getByRole('textbox', { name: 'Erstelle einen' }).press('Tab');
+  await page.getByPlaceholder('Erstelle einen').press('Tab');
   await page
     .getByRole('group')
     .filter({ hasText: 'Welche konkreten Funktionen' })
