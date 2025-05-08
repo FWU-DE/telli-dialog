@@ -52,7 +52,6 @@ export default function Citation({ source }: { source: WebsearchSource }) {
     <TooltipProvider skipDelayDuration={0} delayDuration={0}>
       <Tooltip>
         <TooltipTrigger asChild>
-          
           <div
             className="flex flex-row  items-center bg-secondary/20 gap-1 p-1.5"
             style={{
@@ -83,8 +82,7 @@ export default function Citation({ source }: { source: WebsearchSource }) {
                 {data?.name}
               </span>
               {data?.content && data.content !== '' && (
-                <span className="text-gray-500 text-sm line-clamp-1 break-words"
-                >
+                <span className="text-gray-500 text-sm line-clamp-1 break-words">
                   {data.content.trim()}
                 </span>
               )}
