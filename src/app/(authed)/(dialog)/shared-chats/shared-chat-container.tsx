@@ -3,7 +3,6 @@
 import HeaderPortal from '../header-portal';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import ProfileMenu from '@/components/navigation/profile-menu';
-import { SharedSchoolConversationModel } from '@/db/schema';
 import React from 'react';
 import { cn } from '@/utils/tailwind';
 import Link from 'next/link';

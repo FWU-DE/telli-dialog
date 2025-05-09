@@ -2,7 +2,6 @@
 
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { useToast } from '@/components/common/toast';
-import { SharedSchoolConversationModel } from '@/db/schema';
 import ShareIcon from '@/components/icons/share';
 import TrashIcon from '@/components/icons/trash';
 import Link from 'next/link';
@@ -23,7 +22,6 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
   const t = useTranslations('shared-chats');
   const tCommon = useTranslations('common');
 
-
   function handleDeleteSharedChat() {
     dbDeleteSharedChatAction({ id: sharedSchoolChat.id })
       .then(() => {
@@ -42,7 +40,7 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
       href={`/shared-chats/${sharedSchoolChat.id}`}
       className="flex gap-2 items-center border rounded-enterprise-md p-4 hover:border-primary"
     >
-        <figure
+      <figure
         className="w-11 h-11 bg-light-gray rounded-enterprise-sm flex justify-center items-center"
         style={{ minWidth: '44px' }}
       >
@@ -55,7 +53,9 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
             className="rounded-enterprise-sm"
           />
         )}
-        {sharedSchoolChat.maybeSignedPictureUrl === undefined && <EmptyImageIcon className="w-4 h-4" />}
+        {sharedSchoolChat.maybeSignedPictureUrl === undefined && (
+          <EmptyImageIcon className="w-4 h-4" />
+        )}
       </figure>
       <div className="min-w-0">
         <h1 className={cn('font-medium text-primary', truncateClassName)}>

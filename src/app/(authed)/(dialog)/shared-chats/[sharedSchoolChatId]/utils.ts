@@ -8,8 +8,9 @@ import {
 import { customAlphabet } from 'nanoid';
 import { SharedSchoolConversationModel } from '@/db/schema';
 
-export type SharedChatWithImage = SharedSchoolConversationModel & { maybeSignedPictureUrl: string | undefined };
-
+export type SharedChatWithImage = SharedSchoolConversationModel & {
+  maybeSignedPictureUrl: string | undefined;
+};
 
 export function calculateTimeLeftBySharedChat({
   startedAt,
@@ -67,9 +68,10 @@ export async function enrichSharedChatWithPictureUrl({
 }: {
   sharedChats: SharedSchoolConversationModel[];
 }): Promise<SharedChatWithImage[]> {
-  return await Promise.all(sharedChats.map(async (sharedChat) => ({
-    ...sharedChat,
-    maybeSignedPictureUrl: await getMaybeSignedUrlFromS3Get({
+  return await Promise.all(
+    sharedChats.map(async (sharedChat) => ({
+      ...sharedChat,
+      maybeSignedPictureUrl: await getMaybeSignedUrlFromS3Get({
         key: sharedChat.pictureId ? `shared-chats/${sharedChat.id}/avatar` : undefined,
       }),
     })),
