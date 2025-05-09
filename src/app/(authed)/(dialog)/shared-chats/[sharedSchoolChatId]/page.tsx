@@ -11,6 +11,7 @@ import ProfileMenu from '@/components/navigation/profile-menu';
 import { PageContext } from '@/utils/next/types';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
+import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 const pageContextSchema = z.object({
   params: z.object({
     sharedSchoolChatId: z.string(),
@@ -43,10 +44,9 @@ export default async function Page(context: PageContext) {
         .filter((l) => l !== '')
         .map((url) => ({
           link: url,
-          content: '',
-          error: false,
           type: 'websearch',
-        }));
+          error: false,
+        } as WebsearchSource));
 
   const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
     key: `shared-chats/${sharedSchoolChat.id}/avatar`,

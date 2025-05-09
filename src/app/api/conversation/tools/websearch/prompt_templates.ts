@@ -1,3 +1,4 @@
+import { parseHostname } from '@/utils/web-search/parsing';
 import { WebsearchSource } from './types';
 
 export const WEBSEARCH_PROMPT = `Der Nutzer hat folgende Quellen bereitgestellt, berücksichtige den Inhalt dieser Quellen bei der Antwort: `;
@@ -14,5 +15,6 @@ export function constructWebsearchPrompt({
 }
 
 function constructSingleWebsearchPrompt(source: WebsearchSource) {
-  return `Titel der Website: ${source.hostname}\nInhalt: ${source.content}\n Titel der Seite: ${source.name}\n Quelle: ${source.link}`;
+  const hostname = parseHostname(source.link);
+  return `Titel der Website: ${hostname}\nInhalt: ${source.content}\n Titel der Seite: ${source.name}\n Quelle: ${source.link}`;
 }
