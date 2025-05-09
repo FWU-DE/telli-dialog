@@ -52,7 +52,7 @@ export default async function Page(context: PageContext) {
         );
 
   const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
-    key: `shared-chats/${sharedSchoolChat.id}/avatar`,
+    key: sharedSchoolChat.pictureId ? `shared-chats/${sharedSchoolChat.id}/avatar` : undefined,
   });
   return (
     <div className="w-full p-6 overflow-auto">

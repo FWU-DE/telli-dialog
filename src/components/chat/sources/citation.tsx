@@ -48,7 +48,7 @@ export default function Citation({
 
   const displayHostname = parseHostname(source.link);
   let displayTitle = '';
-  if (isLoading && source.name === undefined) {
+  if (isLoading && !source.name) {
     displayTitle = 'Titel wird geladen...';
   } else {
     displayTitle = truncateText(source.name || data?.name || '', 30);

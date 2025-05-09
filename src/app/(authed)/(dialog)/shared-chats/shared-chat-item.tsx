@@ -2,7 +2,6 @@
 
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { useToast } from '@/components/common/toast';
-import { SharedSchoolConversationModel } from '@/db/schema';
 import ShareIcon from '@/components/icons/share';
 import TrashIcon from '@/components/icons/trash';
 import Link from 'next/link';
@@ -10,11 +9,12 @@ import { useRouter } from 'next/navigation';
 import { dbDeleteSharedChatAction } from './actions';
 import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
-import { calculateTimeLeftBySharedChat } from './[sharedSchoolChatId]/utils';
+import { calculateTimeLeftBySharedChat, SharedChatWithImage } from './[sharedSchoolChatId]/utils';
 import CountDownTimer from './_components/count-down';
 import { useTranslations } from 'next-intl';
-
-type SharedChatItemProps = SharedSchoolConversationModel;
+import { EmptyImageIcon } from '@/components/icons/empty-image';
+import Image from 'next/image';
+type SharedChatItemProps = SharedChatWithImage;
 
 export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemProps) {
   const toast = useToast();
@@ -34,12 +34,29 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
   }
 
   const timeLeft = calculateTimeLeftBySharedChat(sharedSchoolChat);
-
+  console.log(sharedSchoolChat.maybeSignedPictureUrl);
   return (
     <Link
       href={`/shared-chats/${sharedSchoolChat.id}`}
       className="flex gap-2 items-center border rounded-enterprise-md p-4 hover:border-primary"
     >
+      <figure
+        className="w-11 h-11 bg-light-gray rounded-enterprise-sm flex justify-center items-center"
+        style={{ minWidth: '44px' }}
+      >
+        {sharedSchoolChat.maybeSignedPictureUrl !== undefined && (
+          <Image
+            src={sharedSchoolChat.maybeSignedPictureUrl}
+            alt={`${sharedSchoolChat.name} Avatar`}
+            width={44}
+            height={44}
+            className="rounded-enterprise-sm"
+          />
+        )}
+        {sharedSchoolChat.maybeSignedPictureUrl === undefined && (
+          <EmptyImageIcon className="w-4 h-4" />
+        )}
+      </figure>
       <div className="min-w-0">
         <h1 className={cn('font-medium text-primary', truncateClassName)}>
           {sharedSchoolChat.name}
