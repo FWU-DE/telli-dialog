@@ -1,5 +1,5 @@
 {
-  "id": "30d55399-91f1-4a2c-963e-dce477a2b291",
+  "id": "9ee69da4-6a5a-401a-8115-50828bd5a43d",
   "prevId": "6974aa3a-ec4d-4f0f-b2aa-bc2881e97196",
   "version": "7",
   "dialect": "postgresql",
@@ -1476,6 +1476,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'{}'::text[]"
+        },
+        "picture_id": {
+          "name": "picture_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "invite_code": {
           "name": "invite_code",

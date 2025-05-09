@@ -4,6 +4,7 @@ import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { dbCreateSharedSchoolChat } from '../actions';
 import SharedSchoolChatForm from '../[sharedSchoolChatId]/shared-school-chat-form';
+import { getMaybeSignedUrlFromS3Get } from '@/s3';
 
 export default async function Page() {
   const user = await getUser();
@@ -12,7 +13,9 @@ export default async function Page() {
   if (defaultSharedSchoolChat === undefined) {
     throw new Error('Could not create default shared school chat');
   }
-
+  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
+    key: `shared-chats/${defaultSharedSchoolChat.id}/avatar`,
+  });
   return (
     <div className="min-w-full p-6 overflow-auto">
       <HeaderPortal>
@@ -21,7 +24,13 @@ export default async function Page() {
         <ProfileMenu {...user} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
-        <SharedSchoolChatForm {...defaultSharedSchoolChat} existingFiles={[]} isCreating={true} />
+        <SharedSchoolChatForm
+          {...defaultSharedSchoolChat}
+          existingFiles={[]}
+          isCreating={true}
+          readOnly={false}
+          initalLinks={[]}
+        />
       </div>
     </div>
   );

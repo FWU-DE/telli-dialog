@@ -289,7 +289,7 @@ export default function CharacterForm({
       <fieldset className="flex flex-col gap-4 mt-12">
         <h2 className="font-medium mb-8">{t('character-settings')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
-          <div className="flex gap-8 flex-col">
+          <div className="flex gap-4 flex-col">
             <TextInput
               id="name"
               label={t('character-name-label')}

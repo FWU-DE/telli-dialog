@@ -10,6 +10,7 @@ import { fetchFileMapping } from './actions';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { PageContext } from '@/utils/next/types';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
+import { getMaybeSignedUrlFromS3Get } from '@/s3';
 const pageContextSchema = z.object({
   params: z.object({
     sharedSchoolChatId: z.string(),
@@ -33,6 +34,9 @@ export default async function Page(context: PageContext) {
   const relatedFiles = await fetchFileMapping(params.sharedSchoolChatId);
   const initalLinks = await Promise.all(sharedSchoolChat.attachedLinks.filter((l)  => l !== '').map(webScraperExecutable));
 
+  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
+    key: `shared-chats/${sharedSchoolChat.id}/avatar`,
+  });
   return (
     <div className="w-full p-6 overflow-auto">
       <HeaderPortal>
@@ -46,6 +50,8 @@ export default async function Page(context: PageContext) {
           existingFiles={relatedFiles}
           isCreating={false}
           initalLinks={initalLinks}
+          maybeSignedPictureUrl={maybeSignedPictureUrl}
+          readOnly={false}
         />
       </div>
     </div>

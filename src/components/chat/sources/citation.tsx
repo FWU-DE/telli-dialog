@@ -10,7 +10,6 @@ import { parseHostname } from '@/utils/web-search/parsing';
 import { defaultErrorSource } from './const';
 import { useTranslations } from 'next-intl';
 import TrashIcon from '@/components/icons/trash';
-import { useState } from 'react';
 
 function truncateText(text: string, maxLength: number) {
   return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
@@ -41,7 +40,6 @@ export default function Citation({
 }) {
   const t = useTranslations('websearch');
   const toast = useToast();
-  const [deleteHover, setDeleteHover] = useState(false);
   const { data } = useQuery({
     queryKey: ['webpage-content', source.link],
     queryFn: async () => {
@@ -97,7 +95,7 @@ export default function Citation({
               'p-2 flex flex-col border-0 bg-white w-60 cursor-pointer text-start citation overflow-hidden',
             )}
           >
-            {!source.error && !data?.error && !deleteHover && (
+            {!source.error && !data?.error && (
               <span
                 role="button"
                 onClick={() => window.open(source.link, '_blank', 'noopener noreferrer')}
@@ -120,12 +118,6 @@ export default function Citation({
           <button
             type="button"
             className="text-gray-500 text-sm h-fit"
-            onMouseEnter={(e) => {
-              setDeleteHover(true);
-            }}
-            onMouseLeave={(e) => {
-              setDeleteHover(false);
-            }}
             onClick={(e) => {
               e.stopPropagation();
               handleDelete?.();

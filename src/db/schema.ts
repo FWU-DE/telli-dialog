@@ -213,6 +213,7 @@ export const sharedSchoolConversationTable = pgTable('shared_school_conversation
   intelligencePointsLimit: integer('intelligence_points_limit'),
   maxUsageTimeLimit: integer('max_usage_time_limit'),
   attachedLinks: text('attached_links').array().notNull().default(sql`'{}'::text[]`),
+  pictureId: text('picture_id'),
   inviteCode: text('invite_code').unique(),
   startedAt: timestamp('started_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
