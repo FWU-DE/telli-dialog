@@ -28,9 +28,7 @@ import { useTranslations } from 'next-intl';
 import { LocalFileState } from '@/components/chat/send-message-form';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
-import {
-  TEXT_INPUT_FIELDS_LENGTH_LIMIT,
-} from '@/configuration-text-inputs/const';
+import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import SelectLlmModelForm from '../../_components/select-llm-model';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
