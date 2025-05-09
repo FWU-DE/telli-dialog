@@ -45,7 +45,7 @@ export function ChatBox({
 
   for (const url of urls) {
     if (websearchSources.find((source) => source.link === url) === undefined) {
-      websearchSources.push({ link: url, type: 'websearch', name: '', content: '' });
+      websearchSources.push({ link: url, type: 'websearch' });
     }
   }
   const maybefileAttachment =
@@ -84,7 +84,7 @@ export function ChatBox({
     ) : null;
 
   const webSourceAvailable = initialWebsources !== undefined && initialWebsources.length !== 0;
-  const margin = allFiles !== undefined || webSourceAvailable ? 'm-0' : 'm-4';
+  const margin = allFiles !== undefined || webSourceAvailable ? 'm-0 mt-4' : 'm-4';
 
   const maybeShowMessageIcons =
     isLastNonUser && !isLoading ? (

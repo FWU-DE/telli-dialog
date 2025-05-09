@@ -45,9 +45,10 @@
     "chats-reload": "Dialoge neu laden"
   },
   "websearch": {
-    "source-display-invalid": {
-      "title": "Nicht verfügbar",
-      "content": "Die Seite konnte nicht geladen werden. Es ist ein Fehler aufgetreten {status_code_info}. Nenne keinen Fehlercode und gib folgende Hinweise an den Nutzer weiter: Bitte stelle sicher, dass:\n- die Seite öffentlich zugänglich ist\n- keine Anmeldung erforderlich ist\n- es sich um eine gültige URL handelt"
+    "placeholders": {
+      "loading": "Titel wird geladen...",
+      "not-available": "Nicht verfügbar",
+      "error-content": "Die Seite konnte nicht geladen werden. Es ist ein Fehler aufgetreten {status_code_info}. Nenne keinen Fehlercode und gib folgende Hinweise an den Nutzer weiter: Bitte stelle sicher, dass:\n- die Seite öffentlich zugänglich ist\n- keine Anmeldung erforderlich ist\n- es sich um eine gültige URL handelt"
     },
     "action": {
       "delete": "Link entfernen"

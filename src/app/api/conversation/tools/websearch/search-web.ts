@@ -2,7 +2,6 @@ import { WebsearchSource } from './types';
 import { Readability } from '@mozilla/readability';
 import { JSDOM } from 'jsdom';
 import { CHAT_MESSAGE_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
-import { parseHostname } from '@/utils/web-search/parsing';
 import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
 import he from 'he';
@@ -22,7 +21,6 @@ const headers = {
 export async function webScraperExecutable(url: string): Promise<WebsearchSource> {
   let hostname = '';
 
-  hostname = parseHostname(url);
   console.info(`Requesting webcontent for url: ${url}`);
   const t = await getTranslations({ namespace: 'websearch' });
   let response: Response;
@@ -40,7 +38,6 @@ export async function webScraperExecutable(url: string): Promise<WebsearchSource
     return {
       ...defaultErrorSource({ status_code: 408, t }),
       link: url,
-      hostname,
       type: 'websearch',
     };
   }
@@ -49,7 +46,6 @@ export async function webScraperExecutable(url: string): Promise<WebsearchSource
     return {
       ...defaultErrorSource({ status_code: response.status, t }),
       link: url,
-      hostname,
       type: 'websearch',
     };
   }
@@ -77,7 +73,6 @@ export async function webScraperExecutable(url: string): Promise<WebsearchSource
     return {
       ...defaultErrorSource({ status_code: 408, t }),
       link: url,
-      hostname,
       type: 'websearch',
     };
   }
@@ -90,7 +85,6 @@ export async function webScraperExecutable(url: string): Promise<WebsearchSource
     content: trimmedInfo,
     name: title,
     link: url,
-    hostname,
     type: 'websearch',
   };
 }

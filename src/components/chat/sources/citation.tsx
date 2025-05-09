@@ -7,7 +7,6 @@ import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { useToast } from '@/components/common/toast';
 import { useQuery } from '@tanstack/react-query';
 import { parseHostname } from '@/utils/web-search/parsing';
-import { defaultErrorSource } from './const';
 import { useTranslations } from 'next-intl';
 import TrashIcon from '@/components/icons/trash';
 
@@ -17,12 +16,9 @@ function truncateText(text: string, maxLength: number) {
 
 async function fetchWebpageContent(
   url: string,
-): Promise<{ value?: WebsearchSource; error?: Response | null }> {
+): Promise <WebsearchSource> {
   const response = await fetch(`/api/webpage-content?url=${encodeURIComponent(url)}`);
-  if (!response.ok) {
-    return { error: response };
-  }
-  return { value: (await response.json()) as WebsearchSource };
+  return (await response.json()) as WebsearchSource;
 }
 
 export default function Citation({
@@ -40,26 +36,28 @@ export default function Citation({
 }) {
   const t = useTranslations('websearch');
   const toast = useToast();
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['webpage-content', source.link],
     queryFn: async () => {
-      const result = await fetchWebpageContent(source.link);
-      if (!result.error && result.value) {
-        return result.value;
+      if (source.content !== undefined) {
+        return source;
       }
-      const errorSource = {
-        ...defaultErrorSource({ status_code: result.error?.status, t }),
-        link: source.link,
-        hostname: parseHostname(source.link),
-      };
-      toast.error(t('toasts.error-loading-page'));
-      return errorSource;
+      const result = await fetchWebpageContent(source.link);
+      if (result.error === true) {
+        toast.error(t('toasts.error-loading-page'));
+      }
+      return result;
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 10 * 60 * 1000,
   });
 
-  const displayHostname = source.hostname || data?.hostname;
-  const displayTitle = truncateText(source.name || data?.name || '', 30);
+  const displayHostname = parseHostname(source.link)
+  let displayTitle = '';
+  if (isLoading && source.name === undefined) {
+    displayTitle = "Titel wird geladen..."
+  } else {
+    displayTitle = truncateText(source.name || data?.name || '', 30);
+  }
 
   return (
     <TooltipProvider skipDelayDuration={0} delayDuration={0}>

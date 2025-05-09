@@ -12,6 +12,7 @@ export async function GET(request: Request) {
 
   try {
     const result = await webScraperExecutable(url);
+    console.log('result', result);
     return NextResponse.json(result);
   } catch (error) {
     console.error('Error fetching webpage content:', error);
