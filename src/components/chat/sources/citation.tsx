@@ -14,9 +14,7 @@ function truncateText(text: string, maxLength: number) {
   return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
 }
 
-async function fetchWebpageContent(
-  url: string,
-): Promise <WebsearchSource> {
+async function fetchWebpageContent(url: string): Promise<WebsearchSource> {
   const response = await fetch(`/api/webpage-content?url=${encodeURIComponent(url)}`);
   return (await response.json()) as WebsearchSource;
 }
@@ -51,10 +49,10 @@ export default function Citation({
     staleTime: 10 * 60 * 1000,
   });
 
-  const displayHostname = parseHostname(source.link)
+  const displayHostname = parseHostname(source.link);
   let displayTitle = '';
   if (isLoading && source.name === undefined) {
-    displayTitle = "Titel wird geladen..."
+    displayTitle = 'Titel wird geladen...';
   } else {
     displayTitle = truncateText(source.name || data?.name || '', 30);
   }

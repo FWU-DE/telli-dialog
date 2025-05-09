@@ -29,7 +29,6 @@ import { LocalFileState } from '@/components/chat/send-message-form';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
 import {
-  SMALL_TEXT_INPUT_FIELDS_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
 import SelectLlmModelForm from '../../_components/select-llm-model';
@@ -89,7 +88,7 @@ export default function SharedSchoolChatForm({
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields } = useFieldArray({
     control,
     name: 'attachedLinks',
   });

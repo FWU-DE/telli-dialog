@@ -30,6 +30,5 @@ export default function TrashIcon(props: React.ComponentProps<'svg'>) {
         strokeLinejoin="round"
       />
     </svg>
-    
   );
 }

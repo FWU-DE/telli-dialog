@@ -26,7 +26,6 @@ import { SMALL_MODEL_LIST } from '@/configuration-text-inputs/const';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
-import { constructWebsearchPrompt } from '../conversation/tools/websearch/prompt_templates';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();

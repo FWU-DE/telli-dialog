@@ -32,7 +32,9 @@ export default async function Page(context: PageContext) {
     return notFound();
   }
   const relatedFiles = await fetchFileMapping(params.sharedSchoolChatId);
-  const initalLinks = await Promise.all(sharedSchoolChat.attachedLinks.filter((l)  => l !== '').map(webScraperExecutable));
+  const initalLinks = await Promise.all(
+    sharedSchoolChat.attachedLinks.filter((l) => l !== '').map(webScraperExecutable),
+  );
 
   const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
     key: `shared-chats/${sharedSchoolChat.id}/avatar`,

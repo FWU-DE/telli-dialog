@@ -53,7 +53,11 @@ export default async function Page(context: {
   return (
     <main className="h-[100dvh] w-full">
       <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
-        <SharedChat {...sharedSchoolChat} inviteCode={searchParams.inviteCode} maybeSignedPictureUrl={maybeSignedPictureUrl} />
+        <SharedChat
+          {...sharedSchoolChat}
+          inviteCode={searchParams.inviteCode}
+          maybeSignedPictureUrl={maybeSignedPictureUrl}
+        />
       </LlmModelsProvider>
     </main>
   );

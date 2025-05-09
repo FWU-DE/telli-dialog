@@ -14,7 +14,6 @@ import { parseNumberOrThrow } from '@/utils/number';
 import { SharedConversationShareFormValues } from './schema';
 import { generateInviteCode } from './utils';
 import { dbGetRelatedSharedChatFiles } from '@/db/functions/files';
-import { useToast } from '@/components/common/toast';
 
 export async function updateSharedSchoolChat({
   id: sharedChatId,
@@ -53,7 +52,10 @@ export async function updateSharedSchoolChat({
 export async function updateSharedSchoolChatPictureAction({
   id: sharedChatId,
   picturePath,
-}: { id: string; picturePath: string }) {
+}: {
+  id: string;
+  picturePath: string;
+}) {
   const user = await getUser();
 
   const updatedSharedChat = (

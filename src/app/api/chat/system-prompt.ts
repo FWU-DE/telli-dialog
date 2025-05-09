@@ -136,7 +136,7 @@ export async function constructChatSystemPrompt({
     attachedFiles?.length > 0
       ? BASE_FILE_PROMPT + attachedFiles.map((file) => constructSingleFilePrompt(file))
       : '';
-  const websearchSourcesPrompt = constructWebsearchPrompt({websearchSources});
+  const websearchSourcesPrompt = constructWebsearchPrompt({ websearchSources });
   if (characterId !== undefined) {
     const characterSystemPrompt = await constructCharacterSystemPrompt({
       characterId,

@@ -19,8 +19,6 @@ const headers = {
  * @returns A summary of the most important information from the page.
  */
 export async function webScraperExecutable(url: string): Promise<WebsearchSource> {
-  let hostname = '';
-
   console.info(`Requesting webcontent for url: ${url}`);
   const t = await getTranslations({ namespace: 'websearch' });
   let response: Response;
@@ -58,7 +56,6 @@ export async function webScraperExecutable(url: string): Promise<WebsearchSource
   const ogTitleMatch = html.match(/<meta[^>]*property="og:title"[^>]*content="([^"]*)"/i);
   const metaTitleMatch = html.match(/<meta[^>]*name="title"[^>]*content="([^"]*)"/i);
 
-  
   // Use the first available title source and decode HTML entities
   let title = 'Untitled Page';
   const rawTitle = ogTitleMatch?.[1]?.trim() || metaTitleMatch?.[1]?.trim() || 'Untitled Page';
