@@ -42,11 +42,14 @@ export default async function Page(context: PageContext) {
       )
     : sharedSchoolChat.attachedLinks
         .filter((l) => l !== '')
-        .map((url) => ({
-          link: url,
-          type: 'websearch',
-          error: false,
-        } as WebsearchSource));
+        .map(
+          (url) =>
+            ({
+              link: url,
+              type: 'websearch',
+              error: false,
+            }) as WebsearchSource,
+        );
 
   const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
     key: `shared-chats/${sharedSchoolChat.id}/avatar`,
