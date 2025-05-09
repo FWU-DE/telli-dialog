@@ -25,7 +25,6 @@ export function WebpageCard({ url }: WebpageCardProps) {
 
   const title = data?.title || 'Untitled Page';
 
-  console.log(`isHovered: ${isHovered}`);
   return (
     <div className="relative h-full w-full">
       <div

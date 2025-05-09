@@ -37,9 +37,6 @@ export default function Citation({
   const { data, isLoading } = useQuery({
     queryKey: ['webpage-content', source.link],
     queryFn: async () => {
-      if (source.content !== undefined) {
-        return source;
-      }
       const result = await fetchWebpageContent(source.link);
       if (result.error === true) {
         toast.error(t('toasts.error-loading-page'));

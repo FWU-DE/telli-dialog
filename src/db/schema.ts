@@ -204,9 +204,9 @@ export const sharedSchoolConversationTable = pgTable('shared_school_conversation
   userId: uuid('user_id')
     .references(() => userTable.id)
     .notNull(),
-  schoolType: text('school_type').notNull().default(''),
-  gradeLevel: text('grade_level').notNull().default(''),
-  subject: text('subject').default('').notNull(),
+  schoolType: text('school_type'),
+  gradeLevel: text('grade_level'),
+  subject: text('subject'),
   learningContext: text('learning_context').default('').notNull(),
   specification: text('specification'),
   restrictions: text('restrictions'),

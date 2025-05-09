@@ -17,6 +17,8 @@ const pageContextSchema = z.object({
   }),
 });
 
+const PREFETCH_ENABLED = false;
+
 export default async function Page(context: PageContext) {
   const result = pageContextSchema.safeParse(await awaitPageContext(context));
   if (!result.success) notFound();
@@ -32,9 +34,19 @@ export default async function Page(context: PageContext) {
     return notFound();
   }
   const relatedFiles = await fetchFileMapping(params.sharedSchoolChatId);
-  const initalLinks = await Promise.all(
-    sharedSchoolChat.attachedLinks.filter((l) => l !== '').map(webScraperExecutable),
-  );
+
+  const initalLinks = PREFETCH_ENABLED
+    ? await Promise.all(
+        sharedSchoolChat.attachedLinks.filter((l) => l !== '').map(webScraperExecutable),
+      )
+    : sharedSchoolChat.attachedLinks
+        .filter((l) => l !== '')
+        .map((url) => ({
+          link: url,
+          content: '',
+          error: false,
+          type: 'websearch',
+        }));
 
   const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
     key: `shared-chats/${sharedSchoolChat.id}/avatar`,
