@@ -20,6 +20,7 @@ import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbGetRelatedSharedChatFiles } from '@/db/functions/files';
 import { process_files } from '../file-operations/process-file';
+import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 
 export async function POST(request: NextRequest) {
   const { messages, modelId }: { messages: Array<Message>; modelId: string } = await request.json();
@@ -86,10 +87,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'User has reached intelli points limit' }, { status: 429 });
   }
   const allFileIds = await dbGetRelatedSharedChatFiles(sharedChat.id);
+  const urls = sharedChat.attachedLinks.filter((l) => l !== '').map(webScraperExecutable);
   const attachedFiles = await process_files(allFileIds);
+  const websearchSources = await Promise.all(urls);
   const systemPrompt = constructSystemPromptBySharedChat({
     sharedChat,
     fileEntities: attachedFiles,
+    websearchSources,
   });
 
   const result = streamText({

@@ -19,8 +19,9 @@ import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-message';
 
 export default function SharedChat({
+  maybeSignedPictureUrl,
   ...sharedSchoolChat
-}: SharedSchoolConversationModel & { inviteCode: string }) {
+}: SharedSchoolConversationModel & { inviteCode: string; maybeSignedPictureUrl?: string }) {
   const t = useTranslations('shared-chats.shared');
 
   const { id, inviteCode } = sharedSchoolChat;
@@ -102,7 +103,10 @@ export default function SharedChat({
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
             {messages.length === 0 ? (
-              <InitialChatContentDisplay title={sharedSchoolChat.name} />
+              <InitialChatContentDisplay
+                title={sharedSchoolChat.name}
+                imageSource={maybeSignedPictureUrl}
+              />
             ) : (
               <div className="flex flex-col gap-4">
                 {messages.map((message, index) => {

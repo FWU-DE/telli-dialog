@@ -15,11 +15,10 @@ export function defaultErrorSource({
 }): WebsearchSource {
   const statusCodeInfo = status_code ? `(Statuscode: ${status_code})` : '';
   return {
-    content: t('source-display-invalid.content', { status_code_info: statusCodeInfo }),
+    content: t('placeholders.error-content', { status_code_info: statusCodeInfo }),
     type: 'websearch',
-    name: t('source-display-invalid.title'),
+    name: t('placeholders.not-available'),
     error: true,
     link: '',
-    hostname: '',
   };
 }

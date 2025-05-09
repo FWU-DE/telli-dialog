@@ -12,7 +12,6 @@ export default async function Page() {
   if (defaultSharedSchoolChat === undefined) {
     throw new Error('Could not create default shared school chat');
   }
-
   return (
     <div className="min-w-full p-6 overflow-auto">
       <HeaderPortal>
@@ -21,7 +20,13 @@ export default async function Page() {
         <ProfileMenu {...user} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
-        <SharedSchoolChatForm {...defaultSharedSchoolChat} existingFiles={[]} isCreating={true} />
+        <SharedSchoolChatForm
+          {...defaultSharedSchoolChat}
+          existingFiles={[]}
+          isCreating={true}
+          readOnly={false}
+          initalLinks={[]}
+        />
       </div>
     </div>
   );

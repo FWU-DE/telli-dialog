@@ -336,33 +336,36 @@ export default function CustomGptForm({
                     maxLength={undefined}
                     id={`promptSuggestions.${index}.content`}
                   />
-                  {index === 0 ? (
-                    <button
-                      onClick={() => {
-                        if (fields.length >= 10) {
-                          toast.error(tToast('too-many-suggestions'));
-                          return;
-                        }
-                        append({ content: '' });
-                      }}
-                      type="button"
-                      aria-label={t('prompt-suggestions-add-button')}
-                    >
-                      <PlusIcon className="text-primary" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        remove(index);
-                        updatePromptSuggestions();
-                      }}
-                      aria-label={t('prompt-suggestions-delete-button', { index: index + 1 })}
-                      className="flex items-center justify-center first:hidden"
-                      type="button"
-                    >
-                      <TrashIcon />
-                    </button>
-                  )}
+                  <div className="flex items-center justify-center">
+                    {index === 0 ? (
+                      <button
+                        onClick={() => {
+                          if (fields.length >= 10) {
+                            toast.error(tToast('too-many-suggestions'));
+                            return;
+                          }
+                          append({ content: '' });
+                        }}
+                        type="button"
+                        className="flex items-center justify-center"
+                        aria-label={t('prompt-suggestions-add-button')}
+                      >
+                        <PlusIcon className="fill-secondary-text hover:bg-vidis-hover-green/20" />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          remove(index);
+                          updatePromptSuggestions();
+                        }}
+                        aria-label={t('prompt-suggestions-delete-button', { index: index + 1 })}
+                        className="flex items-center justify-center"
+                        type="button"
+                      >
+                        <TrashIcon className="hover:bg-vidis-hover-green/20" />
+                      </button>
+                    )}
+                  </div>
                 </React.Fragment>
               );
             })}

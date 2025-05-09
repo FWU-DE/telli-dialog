@@ -3,6 +3,7 @@ import SharedChat from '@/components/chat/shared-chat';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelById } from '@/db/functions/llm-model';
 import { dbGetSharedChatByIdAndInviteCode } from '@/db/functions/shared-school-chat';
+import { getMaybeSignedUrlFromS3Get } from '@/s3';
 import { awaitPageContext } from '@/utils/next/utils';
 import { z } from 'zod';
 
@@ -45,10 +46,18 @@ export default async function Page(context: {
     return <NotFound />;
   }
 
+  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
+    key: sharedSchoolChat.pictureId,
+  });
+
   return (
     <main className="h-[100dvh] w-full">
       <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
-        <SharedChat {...sharedSchoolChat} inviteCode={searchParams.inviteCode} />
+        <SharedChat
+          {...sharedSchoolChat}
+          inviteCode={searchParams.inviteCode}
+          maybeSignedPictureUrl={maybeSignedPictureUrl}
+        />
       </LlmModelsProvider>
     </main>
   );

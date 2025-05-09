@@ -5,10 +5,9 @@ export const WEBSEARCH_TOOL_NAME = 'websearch' as const;
 
 export type WebsearchSource = {
   type: 'websearch';
-  name: string;
+  name?: string;
   link: string;
-  content: string;
-  hostname?: string;
+  content?: string;
   error?: boolean;
 };
 

@@ -8,6 +8,7 @@ import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
 import Citation from './sources/citation';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { parseHyperlinks } from '@/utils/web-search/parsing';
 
 export function ChatBox({
   children,
@@ -19,7 +20,7 @@ export function ChatBox({
   regenerateMessage,
   initialFiles,
   assistantIcon,
-  websearchSources,
+  initialWebsources,
 }: {
   children: UIMessage;
   index: number;
@@ -30,7 +31,7 @@ export function ChatBox({
   regenerateMessage: () => void;
   initialFiles?: FileModel[];
   assistantIcon?: React.JSX.Element;
-  websearchSources?: WebsearchSource[];
+  initialWebsources?: WebsearchSource[];
 }) {
   const tCommon = useTranslations('common');
   const userClassName =
@@ -39,7 +40,14 @@ export function ChatBox({
       : '';
   const fileMatch = fileMapping?.get(children.id) !== undefined;
   const allFiles = fileMatch ? fileMapping.get(children.id) : initialFiles;
+  const urls = parseHyperlinks(children.content) ?? [];
+  const websearchSources = [...(initialWebsources ?? [])];
 
+  for (const url of urls) {
+    if (websearchSources.find((source) => source.link === url) === undefined) {
+      websearchSources.push({ link: url, type: 'websearch' });
+    }
+  }
   const maybefileAttachment =
     allFiles !== undefined && children.role === 'user' && (isLastUser || fileMatch) ? (
       <div className="flex flex-row gap-2 pb-0 pt-0 overflow-auto self-end mb-4">
@@ -56,14 +64,15 @@ export function ChatBox({
     ) : null;
 
   const maybeWebpageCard =
-    websearchSources && (!isLoading || !isLastNonUser) ? (
+    websearchSources.length > 0 && (!isLoading || !isLastNonUser) ? (
       <div
-        className="relative flex flex-wrap overflow-ellipsis gap-2 self-end mt-1 w-[70%]"
+        className="relative flex flex-wrap overflow-ellipsis gap-2 self-end mt-1 mb-2 w-[70%]"
         dir="rtl"
       >
         {websearchSources?.map((source, sourceIndex) => {
           return (
             <Citation
+              className="bg-vidis-hover-green/20 rounded-md p-0"
               key={`user-link-${index}-${sourceIndex}`}
               source={source}
               index={index}
@@ -74,8 +83,8 @@ export function ChatBox({
       </div>
     ) : null;
 
-  const webSourceAvailable = websearchSources !== undefined && websearchSources.length !== 0;
-  const margin = allFiles !== undefined || webSourceAvailable ? 'm-0' : 'm-4';
+  const webSourceAvailable = initialWebsources !== undefined && initialWebsources.length !== 0;
+  const margin = allFiles !== undefined || webSourceAvailable ? 'm-0 mt-4' : 'm-4';
 
   const maybeShowMessageIcons =
     isLastNonUser && !isLoading ? (

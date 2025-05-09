@@ -143,11 +143,6 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Unhandled error while fetching website', error);
   }
-  const websearchSourcesString = websearchSources
-    .map((source) => {
-      return `Titel der Website: ${source.hostname}\nInhalt: ${source.content}\n Titel der Seite: ${source.name}\n Quelle: ${source.link}`;
-    })
-    .join('\n');
 
   attachedFiles = await process_files(relatedFileEntities);
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
@@ -166,7 +161,7 @@ export async function POST(request: NextRequest) {
     isTeacher: user.school.userRole === 'teacher',
     federalState: user.federalState,
     attachedFiles: attachedFiles,
-    websearchSources: websearchSourcesString,
+    websearchSources: websearchSources,
   });
   const result = streamText({
     model: telliProvider,

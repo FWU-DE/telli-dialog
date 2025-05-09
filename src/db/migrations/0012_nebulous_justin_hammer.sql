@@ -1,0 +1,2 @@
+ALTER TABLE "shared_school_conversation" ADD COLUMN "attached_links" text[] DEFAULT '{}'::text[] NOT NULL;--> statement-breakpoint
+ALTER TABLE "shared_school_conversation" ADD COLUMN "picture_id" text;

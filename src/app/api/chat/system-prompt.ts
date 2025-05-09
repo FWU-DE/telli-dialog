@@ -3,6 +3,8 @@ import { dbGetCharacterById } from '@/db/functions/character';
 import { getUser } from '@/auth/utils';
 import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
 import { CustomGptModel, FederalStateModel, FileModelAndContent } from '@/db/schema';
+import { constructWebsearchPrompt } from '../conversation/tools/websearch/prompt_templates';
+import { WebsearchSource } from '../conversation/tools/websearch/types';
 
 export function constructSchuleSystemPrompt() {
   return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. Heute ist der ${formatDateToGermanTimestamp(new Date())}. Befolge folgende Anweisungen: Du sprichst immer die Sprache mit der du angesprochen wirst. Deine Standardsprache ist Deutsch, du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die die Paardform (Beidnennung) z.B. Bürgerinnen und Bürger.`;
@@ -114,8 +116,8 @@ ${federalStateSupportEmail !== null ? `- Kannst du nicht weiterhelfen, verweise 
   return systemPrompt;
 }
 
-export const BASE_FILE_PROMPT = `Der Nutzer hat folgende Dateien bereitgestellt, berücksichtige den Inhalt dieser Dateien bei der Antwort 
-`;
+export const BASE_FILE_PROMPT = `Der Nutzer hat folgende Dateien bereitgestellt, berücksichtige den Inhalt dieser Dateien bei der Antwort`;
+export const BASE_WEBSEARCH_PROMPT = `Der Nutzer hat folgende Quellen bereitgestellt, berücksichtige den Inhalt dieser Quellen bei der Antwort: `;
 
 export async function constructChatSystemPrompt({
   characterId,
@@ -130,18 +132,14 @@ export async function constructChatSystemPrompt({
   isTeacher: boolean;
   federalState: Omit<FederalStateModel, 'encryptedApiKey'>;
   attachedFiles: FileModelAndContent[];
-  websearchSources: string;
+  websearchSources: WebsearchSource[];
 }) {
   const schoolSystemPrompt = constructSchuleSystemPrompt();
   const fileContentPrompt =
     attachedFiles?.length > 0
       ? BASE_FILE_PROMPT + attachedFiles.map((file) => constructSingleFilePrompt(file))
       : '';
-  const websearchSourcesPrompt =
-    websearchSources?.length > 0
-      ? `Der Nutzer hat folgende Quellen bereitgestellt, berücksichtige den Inhalt dieser Quellen bei der Antwort: ${websearchSources}`
-      : '';
-
+  const websearchSourcesPrompt = constructWebsearchPrompt({ websearchSources });
   if (characterId !== undefined) {
     const characterSystemPrompt = await constructCharacterSystemPrompt({
       characterId,

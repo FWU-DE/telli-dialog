@@ -223,7 +223,7 @@ export default function Chat({
             regenerateMessage={reload}
             initialFiles={initialFiles}
             assistantIcon={assistantIcon}
-            websearchSources={
+            initialWebsources={
               message.role === 'user' ? webSourceMapping?.get(message.id) : undefined
             }
           >

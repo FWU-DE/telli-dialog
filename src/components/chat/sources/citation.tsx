@@ -5,108 +5,121 @@ import { cn } from '@/utils/tailwind';
 import SearchIcon from '@/components/icons/search';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { useToast } from '@/components/common/toast';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { parseHostname } from '@/utils/web-search/parsing';
-import { defaultErrorSource } from './const';
 import { useTranslations } from 'next-intl';
+import TrashIcon from '@/components/icons/trash';
+
 function truncateText(text: string, maxLength: number) {
   return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
 }
 
-async function fetchWebpageContent(
-  url: string,
-): Promise<{ value?: WebsearchSource; error?: Response | null }> {
+async function fetchWebpageContent(url: string): Promise<WebsearchSource> {
   const response = await fetch(`/api/webpage-content?url=${encodeURIComponent(url)}`);
-  if (!response.ok) {
-    return { error: response };
-  }
-  return { value: (await response.json()) as WebsearchSource };
+  return (await response.json()) as WebsearchSource;
 }
 
 export default function Citation({
   source,
   index,
   sourceIndex,
+  handleDelete,
+  className,
 }: {
   source: WebsearchSource;
   index: number;
   sourceIndex: number;
+  handleDelete?: () => void;
+  className?: string;
 }) {
   const t = useTranslations('websearch');
-  const [data, setData] = useState<WebsearchSource | null>(null);
   const toast = useToast();
-  const displayHostname = source.hostname || data?.hostname;
-  const displayTitle = truncateText(source.name || data?.name || '', 30);
-  useEffect(() => {
-    const fetchData = async () => {
+  const { data, isLoading } = useQuery({
+    queryKey: ['webpage-content', source.link],
+    queryFn: async () => {
       const result = await fetchWebpageContent(source.link);
-      if (!result.error && !data?.error && result.value) {
-        setData(result.value);
-      } else {
-        setData({
-          ...defaultErrorSource({ status_code: result.error?.status, t }),
-          link: source.link,
-          hostname: parseHostname(source.link),
-        });
+      if (result.error === true) {
         toast.error(t('toasts.error-loading-page'));
       }
-    };
+      return result;
+    },
+    staleTime: 10 * 60 * 1000,
+  });
 
-    fetchData();
-  }, [data?.link]);
+  const displayHostname = parseHostname(source.link);
+  let displayTitle = '';
+  if (isLoading && source.name === undefined) {
+    displayTitle = 'Titel wird geladen...';
+  } else {
+    displayTitle = truncateText(source.name || data?.name || '', 30);
+  }
 
   return (
     <TooltipProvider skipDelayDuration={0} delayDuration={0}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div
-            className="flex flex-row  items-center bg-secondary/20 gap-1 p-1.5"
-            style={{
-              direction: 'ltr',
-            }}
-            role="button"
-            onClick={() => window.open(source.link, '_blank', 'noopener noreferrer')}
-          >
-            <SearchIcon className="w-3 h-3 ml-1" />
-            <span
-              className="flex overflow-ellipsis text-xs line-clamp-1"
-              aria-label={`Source Title ${index} ${sourceIndex}`}
-            >
-              {displayTitle} |{' '}
-            </span>
-            <span
-              className="flex-1 overflow-ellipsis text-xs line-clamp-1"
-              aria-label={`Source Hostname ${index} ${sourceIndex}`}
-            >
-              {displayHostname}
-            </span>
-          </div>
-        </TooltipTrigger>
-        <TooltipContent
-          asChild
-          className={cn(
-            'p-4 flex flex-col border-0 bg-white w-60 cursor-pointer text-start citation overflow-hidden',
-          )}
-        >
-          {!source.error && !data?.error && (
-            <span
-              role="button"
-              onClick={() => window.open(source.link, '_blank', 'noopener noreferrer')}
-              // overwrite direction from parent
-              dir="ltr"
-            >
-              <span className="font-medium overflow-ellipsis text-sm line-clamp-2">
-                {data?.name}
+      <div
+        className={cn('flex flex-row  items-center gap-0 p-1', className)}
+        style={{
+          direction: 'ltr',
+        }}
+        role="button"
+        onClick={() => window.open(source.link, '_blank', 'noopener noreferrer')}
+      >
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex flex-row items-center gap-1 p-1.5">
+              <SearchIcon className="w-3 h-3 ml-1" />
+              <span
+                className="flex overflow-ellipsis text-xs line-clamp-1"
+                aria-label={`Source Title ${index} ${sourceIndex}`}
+              >
+                {displayTitle} |{' '}
               </span>
-              {data?.content && data.content !== '' && (
-                <span className="text-gray-500 text-sm line-clamp-3 break-words">
-                  {data.content.trim()}
+              <span
+                className="flex-1 overflow-ellipsis text-xs line-clamp-1"
+                aria-label={`Source Hostname ${index} ${sourceIndex}`}
+              >
+                {displayHostname}
+              </span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent
+            asChild
+            className={cn(
+              'p-2 flex flex-col border-0 bg-white w-60 cursor-pointer text-start citation overflow-hidden',
+            )}
+          >
+            {!source.error && !data?.error && (
+              <span
+                role="button"
+                onClick={() => window.open(source.link, '_blank', 'noopener noreferrer')}
+                // overwrite direction from parent
+                dir="ltr"
+              >
+                <span className="font-medium overflow-ellipsis text-sm line-clamp-2">
+                  {data?.name}
                 </span>
-              )}
-            </span>
-          )}
-        </TooltipContent>
-      </Tooltip>
+                {data?.content && data.content !== '' && (
+                  <span className="text-gray-500 text-sm line-clamp-3 break-words">
+                    {data.content.trim()}
+                  </span>
+                )}
+              </span>
+            )}
+          </TooltipContent>
+        </Tooltip>
+        {handleDelete !== undefined && (
+          <button
+            type="button"
+            className="text-gray-500 text-sm h-fit"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete?.();
+            }}
+          >
+            <TrashIcon className="w-6 h-6 hover:fill-vidis-hover-purple" />
+          </button>
+        )}
+      </div>
     </TooltipProvider>
   );
 }

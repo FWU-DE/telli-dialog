@@ -2,9 +2,9 @@ import { WebsearchSource } from './types';
 import { Readability } from '@mozilla/readability';
 import { JSDOM } from 'jsdom';
 import { CHAT_MESSAGE_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
-import { parseHostname } from '@/utils/web-search/parsing';
 import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
+import he from 'he';
 
 const headers = {
   'User-Agent':
@@ -19,9 +19,6 @@ const headers = {
  * @returns A summary of the most important information from the page.
  */
 export async function webScraperExecutable(url: string): Promise<WebsearchSource> {
-  let hostname = '';
-
-  hostname = parseHostname(url);
   console.info(`Requesting webcontent for url: ${url}`);
   const t = await getTranslations({ namespace: 'websearch' });
   let response: Response;
@@ -39,7 +36,6 @@ export async function webScraperExecutable(url: string): Promise<WebsearchSource
     return {
       ...defaultErrorSource({ status_code: 408, t }),
       link: url,
-      hostname,
       type: 'websearch',
     };
   }
@@ -48,7 +44,6 @@ export async function webScraperExecutable(url: string): Promise<WebsearchSource
     return {
       ...defaultErrorSource({ status_code: response.status, t }),
       link: url,
-      hostname,
       type: 'websearch',
     };
   }
@@ -60,9 +55,12 @@ export async function webScraperExecutable(url: string): Promise<WebsearchSource
   // Extract title from meta tags or Open Graph tags first, as they're more reliable
   const ogTitleMatch = html.match(/<meta[^>]*property="og:title"[^>]*content="([^"]*)"/i);
   const metaTitleMatch = html.match(/<meta[^>]*name="title"[^>]*content="([^"]*)"/i);
-  // Use the first available title source
+
+  // Use the first available title source and decode HTML entities
   let title = 'Untitled Page';
-  title = ogTitleMatch?.[1]?.trim() || metaTitleMatch?.[1]?.trim() || 'Untitled Page';
+  const rawTitle = ogTitleMatch?.[1]?.trim() || metaTitleMatch?.[1]?.trim() || 'Untitled Page';
+  // decode html special characters like &amp; etc.
+  title = he.decode(rawTitle);
 
   let info = '';
   try {
@@ -72,7 +70,6 @@ export async function webScraperExecutable(url: string): Promise<WebsearchSource
     return {
       ...defaultErrorSource({ status_code: 408, t }),
       link: url,
-      hostname,
       type: 'websearch',
     };
   }
@@ -85,7 +82,6 @@ export async function webScraperExecutable(url: string): Promise<WebsearchSource
     content: trimmedInfo,
     name: title,
     link: url,
-    hostname,
     type: 'websearch',
   };
 }
