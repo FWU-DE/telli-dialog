@@ -13,9 +13,9 @@ import SharedChatItem from './shared-chat-item';
 import SearchBarInput from '@/components/search-bar';
 import { type UserAndContext } from '@/auth/types';
 import { useTranslations } from 'next-intl';
-
+import { SharedChatWithImage } from './[sharedSchoolChatId]/utils';
 type SharedChatContainerProps = {
-  sharedChats: SharedSchoolConversationModel[];
+  sharedChats: SharedChatWithImage[];
   user: UserAndContext;
 };
 
@@ -70,7 +70,7 @@ export function SharedChatContainer({ sharedChats, user }: SharedChatContainerPr
   );
 }
 
-function filterSharedChats(sharedChats: SharedSchoolConversationModel[], input: string) {
+function filterSharedChats(sharedChats: SharedChatWithImage[], input: string) {
   const lowerCaseInput = input.toLowerCase();
 
   return sharedChats.filter((sharedChat) => {
