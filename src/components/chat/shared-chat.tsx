@@ -38,8 +38,7 @@ export default function SharedChat({
   const searchParams = new URLSearchParams({ id, inviteCode });
   const endpoint = `/api/shared-chat?${searchParams.toString()}`;
 
-  let localStorageChats: Message[];
-  localStorageChats = (getMaybeLocaleStorageChats({ id, inviteCode }) ?? [])
+  const localStorageChats = (getMaybeLocaleStorageChats({ id, inviteCode }) ?? [])
     .filter((message) => message.role === 'user' || message.role === 'assistant')
     .map(
       (message): Message => ({
