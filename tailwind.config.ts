@@ -46,6 +46,7 @@ const config = {
         'gray-600': '#9B9B9B',
         'vidis-hover-green': 'rgba(108, 233, 215, 1)',
         'vidis-hover-purple': 'rgba(70, 33, 126, 1)',
+        'vidis-user-chat-background': 'rgba(225, 251, 247, 1)',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

@@ -34,7 +34,6 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
   }
 
   const timeLeft = calculateTimeLeftBySharedChat(sharedSchoolChat);
-  console.log(sharedSchoolChat.maybeSignedPictureUrl);
   return (
     <Link
       href={`/shared-chats/${sharedSchoolChat.id}`}

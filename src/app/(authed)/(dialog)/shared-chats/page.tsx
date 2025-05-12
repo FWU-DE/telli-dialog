@@ -11,7 +11,6 @@ export default async function Page() {
   const _sharedChats = await dbGetSharedChatsByUserId({ userId: user.id });
   const sharedChats = _sharedChats.filter((c) => c.name !== '');
   const enrichedSharedChats = await enrichSharedChatWithPictureUrl({ sharedChats });
-  console.log(enrichedSharedChats);
   return (
     <main className="w-full p-6">
       <Refresh />

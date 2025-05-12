@@ -133,6 +133,7 @@
     "visibility-private": "Für mich",
     "shared": {
       "title": "Dialogpartner im Unterricht einsetzen",
+      "loading-chat": "Der Dialogpartner wird geladen...",
       "description": "Lege fest, wie viel deines Restbudgets an telli-Points durch diesen Chat beansprucht werden darf und wie lange der Chat aktiv benutzt werden kann.",
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
@@ -215,7 +216,7 @@
       "settings": "Lernszenario-Einstellungen",
       "name": "Wie heißt das Szenario?",
       "name-placeholder": "Absolutismus unter Ludwig XIV",
-      "purpose-label": "Wie lautet der Untertitel?",
+      "purpose-label": "Wie kann das Szenario kurz beschrieben werden?",
       "purpose-placeholder": "Herrschaft und Alltag im Frankreich des 17. Jahrhunderts",
       "school-type-label": "Schultyp",
       "school-type-placeholder": "Gymnasium",
@@ -242,6 +243,7 @@
     },
     "shared": {
       "title": "Lernszenario einsetzen",
+      "loading-chat": "Der Dialog wird geladen...",
       "description": "Lege fest, wie viel deines Restbudgets an telli-Points durch diesen Chat beansprucht werden darf und wie lange der Chat aktiv benutzt werden kann.",
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
@@ -276,7 +278,10 @@
       "delete-toast-error": "Der Lernszenario konnte nicht gelöscht werden.",
       "edit-toast-success": "Der Lernszenario wurde erfolgreich aktualisiert.",
       "edit-toast-error": "Der Lernszenario konnte nicht aktualisiert werden.",
-      "invalid-url": "Die eingegebene URL ist ungültig."
+      "invalid-url": "Die eingegebene URL ist ungültig.",
+      "duplicate-url": "Diese URL wurde bereits hinzugefügt",
+      "max-links-reached": "Es können maximal {max_links} Links hinzugefügt werden",
+      "empty-url": "Es wurde keine URL eingegeben"
     }
   }
 }

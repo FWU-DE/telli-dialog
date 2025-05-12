@@ -1,6 +1,6 @@
 'use client';
 import { useChat } from '@ai-sdk/react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   constructLocalStorageKey,
@@ -17,13 +17,20 @@ import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-message';
 import { getAssistantIcon } from './chat';
+import Spinner from '../icons/spinner';
 
 export default function CharacterSharedChat({
   imageSource,
   ...character
 }: CharacterModel & { inviteCode: string; imageSource?: string }) {
   const { id, inviteCode } = character;
-  const t = useTranslations('shared-chats.shared');
+  const t = useTranslations('characters.shared');
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const timeLeft = calculateTimeLeftBySharedChat(character);
   const chatActive = timeLeft > 0;
 
@@ -84,6 +91,39 @@ export default function CharacterSharedChat({
     imageSource,
   });
 
+  const innerContent = isClient ? (
+    localStorageChats.length === 0 ? (
+      <InitialChatContentDisplay
+        title={character.name}
+        description={character.description}
+        imageSource={imageSource}
+      />
+    ) : (
+      <div className="flex flex-col gap-4">
+        {messages.map((message, index) => {
+          return (
+            <ChatBox
+              key={index}
+              index={index}
+              isLastUser={index === messages.length - 1 && message.role == 'user'}
+              isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
+              isLoading={isLoading}
+              regenerateMessage={reload}
+              assistantIcon={assistantIcon}
+            >
+              {message}
+            </ChatBox>
+          );
+        })}
+      </div>
+    )
+  ) : (
+    <div className="flex flex-col h-full w-full items-center justify-center">
+      <Spinner />
+      <p className="mt-2 text-gray-500">{t('loading-chat')}</p>
+    </div>
+  );
+
   return (
     <>
       {!chatActive && <ExpiredChatModal conversationMessages={messages} title={character.name} />}
@@ -103,31 +143,7 @@ export default function CharacterSharedChat({
             className="flex-grow w-full max-w-[50rem] overflow-y-auto p-4 pb-[5rem]"
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
-            {messages.length === 0 ? (
-              <InitialChatContentDisplay
-                title={character.name}
-                description={character.description}
-                imageSource={imageSource}
-              />
-            ) : (
-              <div className="flex flex-col gap-4">
-                {messages.map((message, index) => {
-                  return (
-                    <ChatBox
-                      key={index}
-                      index={index}
-                      isLastUser={index === messages.length - 1 && message.role == 'user'}
-                      isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
-                      isLoading={isLoading}
-                      regenerateMessage={reload}
-                      assistantIcon={assistantIcon}
-                    >
-                      {message}
-                    </ChatBox>
-                  );
-                })}
-              </div>
-            )}
+            {innerContent}
             <ErrorChatPlaceholder error={error} handleReload={reload} />
           </div>
 

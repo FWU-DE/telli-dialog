@@ -32,13 +32,12 @@ import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/cons
 import SelectLlmModelForm from '../../_components/select-llm-model';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
-import PlusIcon from '@/components/icons/plus';
-import { inputFieldClassName, labelClassName } from '@/utils/tailwind/input';
-import Citation from '@/components/chat/sources/citation';
-import { parseHyperlinks } from '@/utils/web-search/parsing';
+import { labelClassName } from '@/utils/tailwind/input';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
+import { AttachedLinks } from '@/components/forms/attached-links';
+
 export default function SharedSchoolChatForm({
   existingFiles,
   isCreating,
@@ -58,8 +57,6 @@ export default function SharedSchoolChatForm({
 
   const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   const [initialFiles, setInitialFiles] = React.useState<FileModel[]>(existingFiles);
-
-  const [currentAttachedLinks, setCurrentAttachedLinks] = React.useState<string>('');
 
   const t = useTranslations('shared-chats.form');
   const tToast = useTranslations('shared-chats.toasts');
@@ -94,8 +91,6 @@ export default function SharedSchoolChatForm({
   async function handleDeattachFile(localFileId: string) {
     const fileId: string | undefined =
       _files.get(localFileId)?.fileId ?? initialFiles.find((f) => f.id === localFileId)?.id;
-    if (fileId === undefined) return;
-
     // update the FE state
     setFiles((prev) => {
       const newMap = deepCopy(prev);
@@ -107,7 +102,9 @@ export default function SharedSchoolChatForm({
     });
 
     setInitialFiles(initialFiles.filter((f) => f.id !== fileId));
-    await deleteFileMappingAndEntity({ fileId });
+    if (fileId) {
+      await deleteFileMappingAndEntity({ fileId });
+    }
   }
   function handleNewFile(data: { id: string; name: string; file: File }) {
     linkFileToSharedSchoolChat({ fileId: data.id, schoolChatId: sharedSchoolChat.id })
@@ -129,51 +126,11 @@ export default function SharedSchoolChatForm({
       });
   }
 
-  function appendLink(content: string) {
-    const currentValues = getValues('attachedLinks');
-    const isValidUrl = parseHyperlinks(content);
-    if (!isValidUrl) {
-      toast.error(tToast('invalid-url'));
-      return;
-    }
-    setValue('attachedLinks', [
-      ...currentValues,
-      { link: content, name: '', type: 'websearch', content: '', hostname: '', error: false },
-    ]);
-    updateSharedSchoolChat({
-      ...sharedSchoolChat,
-      attachedLinks: [content, ...currentValues.map((p) => p.link)],
-    })
-      .then(() => {
-        toast.success(tToast('edit-toast-success'));
-        setCurrentAttachedLinks('');
-      })
-      .catch(() => {
-        toast.error(tToast('edit-toast-error'));
-      });
-  }
-
   function handlePictureUploadComplete(picturePath: string) {
     updateSharedSchoolChatPictureAction({ picturePath, id: sharedSchoolChat.id })
       .then(() => {
         toast.success(tToast('image-toast-success'));
         router.refresh();
-      })
-      .catch(() => {
-        toast.error(tToast('edit-toast-error'));
-      });
-  }
-
-  function handleDeleteLink(index: number) {
-    const currentValues = getValues('attachedLinks');
-    const newValues = currentValues.filter((_, i) => i !== index);
-    setValue('attachedLinks', newValues);
-    updateSharedSchoolChat({
-      ...sharedSchoolChat,
-      attachedLinks: newValues.map((p) => p.link),
-    })
-      .then(() => {
-        toast.success(tToast('edit-toast-success'));
       })
       .catch(() => {
         toast.error(tToast('edit-toast-error'));
@@ -310,7 +267,6 @@ export default function SharedSchoolChatForm({
           id="learning-context"
           label={t('learning-context-label')}
           placeholder={t('learning-context-placeholder')}
-          required={true}
           inputType="textarea"
           rows={5}
           maxLength={1000}
@@ -323,7 +279,6 @@ export default function SharedSchoolChatForm({
           placeholder={t('specification-placeholder')}
           inputType="textarea"
           rows={5}
-          required={true}
           maxLength={2000}
           {...register('specification')}
         />
@@ -333,7 +288,6 @@ export default function SharedSchoolChatForm({
             label={t('school-type-label')}
             placeholder={t('school-type-placeholder')}
             required={false}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             {...register('schoolType')}
           />
 
@@ -342,7 +296,6 @@ export default function SharedSchoolChatForm({
             label={t('grade-label')}
             placeholder={t('grade-placeholder')}
             required={false}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             {...register('gradeLevel')}
           />
 
@@ -351,7 +304,6 @@ export default function SharedSchoolChatForm({
             label={t('subject-label')}
             placeholder={t('subject-placeholder')}
             required={false}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             {...register('subject')}
           />
         </div>
@@ -374,52 +326,15 @@ export default function SharedSchoolChatForm({
             showUploadConfirmation={true}
             className="p-4"
           />
-          <label className={cn(labelClassName, 'text-sm')}>{t('attached-links-label')}</label>
-          <div className="flex flex-row gap-2">
-            <input
-              type="url"
-              className={cn(
-                inputFieldClassName,
-                'focus:border-primary placeholder:text-gray-300 flex-1',
-              )}
-              placeholder={t('attached-links-placeholder')}
-              // prevent form default behavior of showing the toast
-              onBlur={(e) => {
-                e.stopPropagation();
-              }}
-              maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-              onChange={(e) => {
-                setCurrentAttachedLinks(e.target.value);
-              }}
-              value={currentAttachedLinks}
-            />
-            <button
-              type="button"
-              className={cn(buttonPrimaryClassName, 'flex items-center gap-2 py-1 my-0')}
-              onClick={(e) => {
-                e.stopPropagation();
-                appendLink(currentAttachedLinks);
-              }}
-            >
-              <PlusIcon className="fill-primary-text" />
-              {t('add-link')}
-            </button>
-          </div>
-          <div>
-            <div className="flex flex-wrap gap-2">
-              {fields.map((field, index) => (
-                <div className="flex flex-row gap-2" key={`${field.id}-${index}`}>
-                  <Citation
-                    source={field}
-                    className="bg-secondary/40 rounded-enterprise-md h-10"
-                    handleDelete={() => handleDeleteLink(index)}
-                    index={index}
-                    sourceIndex={0}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          <AttachedLinks
+            fields={fields}
+            getValues={() => getValues('attachedLinks')}
+            setValue={(value) => setValue('attachedLinks', value)}
+            t={t}
+            tToast={tToast}
+            readOnly={readOnly}
+            handleAutosave={handleAutoSave}
+          />
         </div>
         {!isCreating && (
           <section className="mt-8">

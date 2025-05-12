@@ -15,7 +15,7 @@ test('teacher can login, create and join shared chat', async ({ page }) => {
     .fill('Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten');
 
   await page
-    .getByLabel('Wie lautet der Untertitel? *')
+    .getByLabel('Wie kann das Szenario kurz beschrieben werden? *')
     .fill('Zwischen Absolutismus und Demokratie (Ludwig XIV)');
 
   await page.getByLabel('Schultyp').fill('Gymnasium');
@@ -23,7 +23,7 @@ test('teacher can login, create and join shared chat', async ({ page }) => {
   await page.getByLabel('Fach').fill('Geschichte');
 
   await page
-    .getByLabel('Wie lautet der Auftrag an die Lernenden? *')
+    .getByLabel('Wie lautet der Auftrag an die Lernenden?')
     .fill('Schüler sollen den Unterschied zwischen Absolutismus und Demokratie verstehen.');
 
   await page
@@ -87,7 +87,7 @@ test('teacher can login, create and delete shared chat, student can join chat', 
     .fill('Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten');
 
   await page
-    .getByLabel('Wie lautet der Untertitel? *')
+    .getByLabel('Wie kann das Szenario kurz beschrieben werden? *')
     .fill('Zwischen Absolutismus und Demokratie (Ludwig XIV)');
 
   await page.getByLabel('Schultyp').fill('Gymnasium');
@@ -95,7 +95,7 @@ test('teacher can login, create and delete shared chat, student can join chat', 
   await page.getByLabel('Fach').fill('Geschichte');
 
   await page
-    .getByLabel('Wie lautet der Auftrag an die Lernenden? *')
+    .getByLabel('Wie lautet der Auftrag an die Lernenden?')
     .fill('Schüler sollen den Unterschied zwischen Absolutismus und Demokratie verstehen.');
 
   await page
@@ -132,6 +132,10 @@ test('teacher can login, create and delete shared chat, student can join chat', 
   await page.waitForURL('/ua/shared-chats/**/dialog?inviteCode=*');
 
   // send first message
+  const startButton = page.getByRole('button', { name: 'Dialog starten' });
+  await expect(startButton).toBeVisible();
+  await startButton.click();
+
   await page.getByPlaceholder('Wie kann ich Dir helfen?').fill('Was lernen wir hier?');
   await page.getByLabel('Send Message').click();
   await page.getByTitle('Kopieren').click();

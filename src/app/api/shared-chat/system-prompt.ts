@@ -17,7 +17,6 @@ export function constructSystemPromptBySharedChat({
       : '';
 
   const websearchPrompt = constructWebsearchPrompt({ websearchSources });
-  console.log('websearchPrompt', websearchPrompt);
   return `
 Du bist ein KI-Chatbot, der in einer Schulklasse eingesetzt wird, um Schülerinnen und Schüler zu unterstützen. Verwende eine Sprache, Tonalität und Inhalte, die für den Einsatz in der jeweiligen Klasse geeignet ist. Vermeide komplizierte Fachbegriffe, es sei denn, sie sind notwendig und werden erklärt. Beachte die folgenden Regeln:
  
