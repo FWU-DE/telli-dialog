@@ -333,7 +333,6 @@ export default function SharedSchoolChatForm({
             label={t('school-type-label')}
             placeholder={t('school-type-placeholder')}
             required={false}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             {...register('schoolType')}
           />
 
@@ -342,7 +341,6 @@ export default function SharedSchoolChatForm({
             label={t('grade-label')}
             placeholder={t('grade-placeholder')}
             required={false}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             {...register('gradeLevel')}
           />
 
@@ -351,7 +349,6 @@ export default function SharedSchoolChatForm({
             label={t('subject-label')}
             placeholder={t('subject-placeholder')}
             required={false}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             {...register('subject')}
           />
         </div>

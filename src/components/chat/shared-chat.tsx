@@ -17,6 +17,7 @@ import { InitialChatContentDisplay } from '@/components/chat/initial-content-dis
 import { ChatBox } from '@/components/chat/chat-box';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-message';
+import { FloatingText } from './floating-text';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
@@ -25,7 +26,6 @@ export default function SharedChat({
   const t = useTranslations('shared-chats.shared');
 
   const { id, inviteCode } = sharedSchoolChat;
-
   const timeLeft = calculateTimeLeftBySharedChat(sharedSchoolChat);
   const chatActive = timeLeft > 0;
 
@@ -38,6 +38,7 @@ export default function SharedChat({
       id: generateUUID(),
     }),
   );
+  const [dialogStarted, setDialogStarted] = React.useState(localStorageChats.length > 0);
 
   const {
     messages,
@@ -59,6 +60,7 @@ export default function SharedChat({
   });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     saveToLocalStorage(constructLocalStorageKey({ id, inviteCode }), JSON.stringify(messages));
@@ -90,22 +92,28 @@ export default function SharedChat({
       <div className="flex flex-col h-full w-full overflow-hidden">
         <SharedChatHeader
           chatActive={chatActive}
-          hasMessages={messages.length > 0}
+          hasMessages={dialogStarted}
           t={t}
           handleOpenNewChat={handleOpenNewChat}
           title={sharedSchoolChat.name}
           messages={messages}
         />
-        <div className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden">
+        <div
+          ref={containerRef}
+          className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden"
+        >
           <div
             ref={scrollRef}
-            className="flex-grow w-full max-w-[50rem] overflow-y-auto p-4 pb-[5rem]"
+            className="flex-grow w-full max-w-[50rem] overflow-y-hidden p-4 pb-[5rem]"
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
-            {messages.length === 0 ? (
+            {messages.length === 0 && !dialogStarted ? (
               <InitialChatContentDisplay
                 title={sharedSchoolChat.name}
+                description={sharedSchoolChat.description}
+                excersiseDescription={sharedSchoolChat.learningContext}
                 imageSource={maybeSignedPictureUrl}
+                setDialogStarted={setDialogStarted}
               />
             ) : (
               <div className="flex flex-col gap-4">
@@ -128,17 +136,25 @@ export default function SharedChat({
             <ErrorChatPlaceholder error={error} handleReload={reload} />
           </div>
           <div className="w-full max-w-3xl mx-auto px-4 pb-4">
-            <div className="flex flex-col">
-              <ChatInputBox
-                customHandleSubmit={customHandleSubmit}
-                handleStopGeneration={stop}
-                input={input}
-                isLoading={isLoading}
-                handleInputChange={handleInputChange}
-              />
-            </div>
+            {dialogStarted && (
+              <div className="flex flex-col">
+                <ChatInputBox
+                  customHandleSubmit={customHandleSubmit}
+                  handleStopGeneration={stop}
+                  input={input}
+                  isLoading={isLoading}
+                  handleInputChange={handleInputChange}
+                />
+              </div>
+            )}
           </div>
         </div>
+          <FloatingText
+            learningContext={sharedSchoolChat.learningContext ?? ''}
+            dialogStarted={dialogStarted}
+            title={'Arbeitsauftrag'}
+            parentRef={containerRef}
+          />
       </div>
     </>
   );
