@@ -98,40 +98,6 @@ export function FloatingText({
 
   if (!isAtLeast.md || !show || !dialogStarted) return null;
 
-  if (isMinimized) {
-    return (
-      <div
-        ref={containerRef}
-        className={cn(
-          "absolute z-50 bg-vidis-hover-green/40 shadow-lg rounded-xl border border-gray-200 select-none flex items-center px-4 py-2",
-          `max-w-[420px]`
-        )}
-        style={{ left: position.x, top: position.y }}
-        title={title}
-        onMouseDown={handleMouseDown}
-        >
-        <span className="font-semibold text-base cursor-grab ">{title}</span>
-        <ChevronDownIcon className="ml-2 cursor-pointer w-5 h-5"  
-          onClick={() => {
-            setIsMinimized(false);
-            setTimeout(() => {
-              if (containerRef.current && parentRef.current) {
-                const rect = containerRef.current.getBoundingClientRect();
-                const parentRect = parentRef.current.getBoundingClientRect();
-                const newPos = {
-                  x: Math.max(0, Math.min(position.x, parentRect.width - rect.width)),
-                  y: Math.max(0, Math.min(position.y, parentRect.height - rect.height)),
-                };
-                if (newPos.x !== position.x || newPos.y !== position.y) {
-                  setPosition(newPos);
-                }
-              }
-            }, 0);
-          }}
-        />
-      </div>
-    );
-  }
 
   return (
     <div
@@ -152,18 +118,24 @@ export function FloatingText({
         <span className="font-semibold text-base">{title}</span>
         <button
           aria-label="Minimize"
-          onClick={() => setIsMinimized(true)}
+          onClick={() => setIsMinimized(!isMinimized)}
           className="bg-none border-none cursor-pointer p-0"
         >
-          <ChevronLeftIcon className="w-4 h-4" />
+          {isMinimized ? (
+            <ChevronDownIcon className="w-4 h-4" />
+          ) : (
+            <ChevronLeftIcon className="w-4 h-4" />
+          )}
         </button>
       </div>
-      <div className={cn(
-        "p-4 overflow-y-auto",
+      {!isMinimized && (
+        <div className={cn(
+          "p-4 overflow-y-auto",
+        )}
+        >
+          <MarkdownDisplay>{learningContext ?? ''}</MarkdownDisplay>
+        </div>
       )}
-      >
-        <MarkdownDisplay>{learningContext ?? ''}</MarkdownDisplay>
-      </div>
     </div>
   );
 }
