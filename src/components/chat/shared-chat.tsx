@@ -116,22 +116,30 @@ export default function SharedChat({
                 setDialogStarted={setDialogStarted}
               />
             ) : (
-              <div className="flex flex-col gap-4">
-                {messages.map((message, index) => {
-                  return (
-                    <ChatBox
-                      key={index}
-                      index={index}
-                      isLastUser={index === messages.length - 1 && message.role == 'user'}
-                      isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
-                      isLoading={isLoading}
-                      regenerateMessage={reload}
-                    >
-                      {message}
-                    </ChatBox>
-                  );
-                })}
-              </div>
+              <>
+                <FloatingText
+                  learningContext={sharedSchoolChat.learningContext ?? ''}
+                  dialogStarted={dialogStarted}
+                  title={'Arbeitsauftrag'}
+                  parentRef={containerRef as React.RefObject<HTMLDivElement>}
+                />
+                <div className="flex flex-col gap-4">
+                  {messages.map((message, index) => {
+                    return (
+                      <ChatBox
+                        key={index}
+                        index={index}
+                        isLastUser={index === messages.length - 1 && message.role == 'user'}
+                        isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
+                        isLoading={isLoading}
+                        regenerateMessage={reload}
+                      >
+                        {message}
+                      </ChatBox>
+                    );
+                  })}
+                </div>
+              </>
             )}
             <ErrorChatPlaceholder error={error} handleReload={reload} />
           </div>
@@ -149,12 +157,6 @@ export default function SharedChat({
             )}
           </div>
         </div>
-          <FloatingText
-            learningContext={sharedSchoolChat.learningContext ?? ''}
-            dialogStarted={dialogStarted}
-            title={'Arbeitsauftrag'}
-            parentRef={containerRef}
-          />
       </div>
     </>
   );

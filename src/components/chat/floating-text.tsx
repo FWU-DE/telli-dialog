@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import useBreakpoints from '../hooks/use-breakpoints';
 import React from 'react';
@@ -26,7 +26,6 @@ export function FloatingText({
   parentRef: React.RefObject<HTMLDivElement>;
 }) {
   const { isAtLeast } = useBreakpoints();
-  const [show, setShow] = React.useState(true);
   const [isMinimized, setIsMinimized] = React.useState(false);
   const [position, setPosition] = React.useState({ x: 0, y: 0 });
   const [dragging, setDragging] = React.useState(false);
@@ -46,8 +45,6 @@ export function FloatingText({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parentRef.current]);
 
-  console.log(parentRef.current?.getBoundingClientRect());
-
   React.useEffect(() => {
     function onMouseMove(e: MouseEvent) {
       if (!dragging || !rel) return;
@@ -59,12 +56,18 @@ export function FloatingText({
       const containerWidth = containerRect.width;
       const containerHeight = containerRect.height;
 
-      let newX = e.clientX - rel.x ;
-      let newY = e.clientY - rel.y ;
+      let newX = e.clientX - rel.x;
+      let newY = e.clientY - rel.y;
 
       // Clamp values within parent
-      newX = Math.max(parentRect.x, Math.min(newX, parentRect.width + parentRect.x - containerWidth));
-      newY = Math.max(parentRect.y, Math.min(newY, parentRect.height + parentRect.y - containerHeight));
+      newX = Math.max(
+        parentRect.x,
+        Math.min(newX, parentRect.width + parentRect.x - containerWidth),
+      );
+      newY = Math.max(
+        parentRect.y,
+        Math.min(newY, parentRect.height + parentRect.y - containerHeight),
+      );
 
       setPosition({
         x: newX,
@@ -75,16 +78,56 @@ export function FloatingText({
       setDragging(false);
       setRel(null);
     }
+    // Touch event handlers
+    function onTouchMove(e: TouchEvent) {
+      if (!dragging || !rel) return;
+      if (!containerRef.current || !parentRef.current) return;
+      if (e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      const parentRect = parentRef.current.getBoundingClientRect();
+      const container = containerRef.current;
+      const containerRect = container.getBoundingClientRect();
+      const containerWidth = containerRect.width;
+      const containerHeight = containerRect.height;
+
+      let newX = touch?.clientX ?? 0 - rel.x;
+      let newY = touch?.clientY ?? 0 - rel.y;
+
+      // Clamp values within parent
+      newX = Math.max(
+        parentRect.x,
+        Math.min(newX, parentRect.width + parentRect.x - containerWidth),
+      );
+      newY = Math.max(
+        parentRect.y,
+        Math.min(newY, parentRect.height + parentRect.y - containerHeight),
+      );
+
+      setPosition({
+        x: newX,
+        y: newY,
+      });
+    }
+    function onTouchEnd() {
+      setDragging(false);
+      setRel(null);
+    }
     if (dragging) {
       window.addEventListener('mousemove', onMouseMove);
       window.addEventListener('mouseup', onMouseUp);
+      window.addEventListener('touchmove', onTouchMove);
+      window.addEventListener('touchend', onTouchEnd);
     } else {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
     }
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
     };
   }, [dragging, rel, parentRef]);
 
@@ -96,29 +139,63 @@ export function FloatingText({
     }
   }
 
-  if (!isAtLeast.md || !show || !dialogStarted) return null;
+  // Touch start handler
+  function handleTouchStart(e: React.TouchEvent<HTMLDivElement>) {
+    if (containerRef.current && e.touches.length === 1) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const touch = e.touches[0];
+      if (!touch) return;
+      setDragging(true);
+      setRel({ x: touch.clientX - rect.left, y: touch.clientY - rect.top });
+    }
+  }
 
+  console.log(isAtLeast);
+
+  if (!dialogStarted) return null;
 
   return (
     <div
       ref={containerRef}
       className={cn(
-        "absolute z-50 bg-vidis-user-chat-background rounded-xl border border-gray-200 select-none",
-        `max-w-[${MAX_WIDTH}px]`,
+        'z-50 bg-vidis-user-chat-background rounded-xl border border-gray-200 select-none',
+        isAtLeast.lg ? `absolute max-w-[${MAX_WIDTH}px]` : 'w-[100%]',
         `min-w-[${MAX_WIDTH}px]`,
         `max-h-[${MAX_HEIGHT}px]`,
-        dragging ? "cursor-grabbing" : "cursor-grab"
+        dragging ? 'cursor-grabbing' : 'cursor-grab',
       )}
       style={{ left: position.x, top: position.y }}
     >
       <div
         className="flex items-center justify-between px-4 py-2 border-b border-gray-200 rounded-t-xl"
         onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
       >
         <span className="font-semibold text-base">{title}</span>
         <button
           aria-label="Minimize"
-          onClick={() => setIsMinimized(!isMinimized)}
+          onClick={() => {
+            setIsMinimized(!isMinimized);
+            setTimeout(() => {
+              if (containerRef.current && parentRef.current) {
+                const rect = containerRef.current.getBoundingClientRect();
+                const parentRect = parentRef.current.getBoundingClientRect();
+                const newPos = {
+                  x: Math.max(
+                    0,
+                    Math.min(position.x, parentRect.width + parentRect.x - rect.width),
+                  ),
+                  y: Math.max(
+                    0,
+                    Math.min(position.y, parentRect.height + parentRect.y - rect.height),
+                  ),
+                };
+                if (newPos.x !== position.x || newPos.y !== position.y) {
+                  setPosition(newPos);
+                }
+              }
+            }, 0);
+          }}
           className="bg-none border-none cursor-pointer p-0"
         >
           {isMinimized ? (
@@ -129,10 +206,7 @@ export function FloatingText({
         </button>
       </div>
       {!isMinimized && (
-        <div className={cn(
-          "p-4 overflow-y-auto",
-        )}
-        >
+        <div className={cn('p-4 overflow-y-auto')}>
           <MarkdownDisplay>{learningContext ?? ''}</MarkdownDisplay>
         </div>
       )}
