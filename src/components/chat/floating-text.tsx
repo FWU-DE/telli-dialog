@@ -87,7 +87,7 @@ export function FloatingText({
       const parentRect = parentRef.current.getBoundingClientRect();
       const container = containerRef.current;
       const containerRect = container.getBoundingClientRect();
-      const containerWidth = containerRect.width;
+      const containerWidth = MAX_WIDTH;
       const containerHeight = containerRect.height;
 
       let newX = touch?.clientX ?? 0 - rel.x;
@@ -150,18 +150,16 @@ export function FloatingText({
     }
   }
 
-  console.log(isAtLeast);
-
   if (!dialogStarted) return null;
 
   return (
     <div
       ref={containerRef}
       className={cn(
-        'z-50 bg-vidis-user-chat-background rounded-xl border border-gray-200 select-none',
-        isAtLeast.lg ? `absolute max-w-[${MAX_WIDTH}px]` : 'w-[100%]',
-        `min-w-[${MAX_WIDTH}px]`,
-        `max-h-[${MAX_HEIGHT}px]`,
+        'z-50 bg-vidis-user-chat-background rounded-xl border border-gray-200 select-none max-h-1/3',
+        isAtLeast.lg ? `absolute` : 'static',
+        // This is broken up on purpose, tailwind does not support dynamic class names like 'absolute w-[420px]'
+        isAtLeast.lg ? `w-[${MAX_WIDTH}px]` : 'w-[100%]',
         dragging ? 'cursor-grabbing' : 'cursor-grab',
       )}
       style={{ left: position.x, top: position.y }}
@@ -206,7 +204,7 @@ export function FloatingText({
         </button>
       </div>
       {!isMinimized && (
-        <div className={cn('p-4 overflow-y-auto')}>
+        <div className={cn('p-4')}>
           <MarkdownDisplay>{learningContext ?? ''}</MarkdownDisplay>
         </div>
       )}

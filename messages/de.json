@@ -215,7 +215,7 @@
       "settings": "Lernszenario-Einstellungen",
       "name": "Wie heißt das Szenario?",
       "name-placeholder": "Absolutismus unter Ludwig XIV",
-      "purpose-label": "Wie lautet der Untertitel?",
+      "purpose-label": "Wie kann das Szenario kurz beschrieben werden?",
       "purpose-placeholder": "Herrschaft und Alltag im Frankreich des 17. Jahrhunderts",
       "school-type-label": "Schultyp",
       "school-type-placeholder": "Gymnasium",
@@ -276,7 +276,10 @@
       "delete-toast-error": "Der Lernszenario konnte nicht gelöscht werden.",
       "edit-toast-success": "Der Lernszenario wurde erfolgreich aktualisiert.",
       "edit-toast-error": "Der Lernszenario konnte nicht aktualisiert werden.",
-      "invalid-url": "Die eingegebene URL ist ungültig."
+      "invalid-url": "Die eingegebene URL ist ungültig.",
+      "duplicate-url": "Diese URL wurde bereits hinzugefügt",
+      "max-links-reached": "Es können maximal {max_links} Links hinzugefügt werden",
+      "empty-url": "Es wurde keine URL eingegeben"
     }
   }
 }
