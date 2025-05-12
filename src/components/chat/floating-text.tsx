@@ -204,7 +204,7 @@ export function FloatingText({
         </button>
       </div>
       {!isMinimized && (
-        <div className={cn('p-4')}>
+        <div className={cn('p-4 cursor-text select-text')}>
           <MarkdownDisplay>{learningContext ?? ''}</MarkdownDisplay>
         </div>
       )}

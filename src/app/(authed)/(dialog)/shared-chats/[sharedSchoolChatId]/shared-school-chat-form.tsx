@@ -90,8 +90,7 @@ export default function SharedSchoolChatForm({
 
   async function handleDeattachFile(localFileId: string) {
     const fileId: string | undefined =
-      _files.get(localFileId)?.fileId ??
-      initialFiles.find((f) => f.id === localFileId)?.id;
+      _files.get(localFileId)?.fileId ?? initialFiles.find((f) => f.id === localFileId)?.id;
     // update the FE state
     setFiles((prev) => {
       const newMap = deepCopy(prev);
@@ -280,7 +279,6 @@ export default function SharedSchoolChatForm({
           placeholder={t('specification-placeholder')}
           inputType="textarea"
           rows={5}
-
           maxLength={2000}
           {...register('specification')}
         />
@@ -330,9 +328,8 @@ export default function SharedSchoolChatForm({
           />
           <AttachedLinks
             fields={fields}
-            getValues={getValues}
-            setValue={setValue}
-            toast={toast}
+            getValues={() => getValues('attachedLinks')}
+            setValue={(value) => setValue('attachedLinks', value)}
             t={t}
             tToast={tToast}
             readOnly={readOnly}

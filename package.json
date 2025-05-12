@@ -13,7 +13,7 @@
     "start": "next start",
     "start:op": "op run --env-file=\"./.env\" -- next start",
     "start:e2e": "ENVIRONMENT=e2e pnpm op -- next start",
-    "start:oidc": "tsx ./e2e/vidis-mock-server.ts", 
+    "start:oidc": "tsx ./e2e/vidis-mock-server.ts",
     "build:oidc": "node e2e/load_test/esbuild.oidc.config.js",
     "lint": "next lint",
     "types": "tsc",

@@ -136,7 +136,7 @@ export default function CharacterContainer({
           aria-label={t('form.delete-character')}
           triggerButtonClassName="border-transparent justify-center flex flex-col rounded-enterprise-sm hover:bg-vidis-hover-green/20 p-0"
         >
-          <TrashIcon aria-hidden="true" className="w-4 h-4 text-primary" />
+          <TrashIcon aria-hidden="true" className="text-primary" />
           <span className="sr-only">{t('form.delete-character')}</span>
         </DestructiveActionButton>
       )}

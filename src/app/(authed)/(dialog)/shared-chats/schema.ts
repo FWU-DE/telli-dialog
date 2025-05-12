@@ -1,4 +1,7 @@
-import { SMALL_TEXT_INPUT_FIELDS_LIMIT, TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import {
+  SMALL_TEXT_INPUT_FIELDS_LIMIT,
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+} from '@/configuration-text-inputs/const';
 import { z } from 'zod';
 export const sharedSchoolChatFormValuesSchema = z.object({
   name: z.string().min(1).max(SMALL_TEXT_INPUT_FIELDS_LIMIT),
@@ -13,9 +16,9 @@ export const sharedSchoolChatFormValuesSchema = z.object({
   attachedLinks: z.array(
     z.object({
       type: z.literal('websearch'),
-      name: z.string(),
+      name: z.string().optional(),
       link: z.string(),
-      content: z.string(),
+      content: z.string().optional(),
       hostname: z.string().optional(),
       error: z.boolean().optional(),
     }),

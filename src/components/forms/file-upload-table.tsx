@@ -74,41 +74,43 @@ export default function FilesTable({
         </tr>
       </thead> */}
       <tbody>
-        {mergedFiles.filter(({status}) => status!=='failed').map(({ id, fileName, size, status }) => {
-          const [fileStem, extention] = getFileNameAndFileExtention(fileName);
-          const { Icon, fillColor } = getFileIconByFileExtension(extention);
+        {mergedFiles
+          .filter(({ status }) => status !== 'failed')
+          .map(({ id, fileName, size, status }) => {
+            const [fileStem, extention] = getFileNameAndFileExtention(fileName);
+            const { Icon, fillColor } = getFileIconByFileExtension(extention);
 
-          return (
-            <tr key={id} className="border-b-[1px] last:border-b-0 border-[#D9D9D9]">
-              <td className="flex gap-2 items-center p-2">
-                {status === 'processed' && (
-                  <Icon
-                    className="w-9 h-9 p-1.5"
-                    style={{ background: hexToRGBA(fillColor, 0.05) }}
-                  />
-                )}
-                {status === 'uploading' && <Spinner className="w-9 h-9 p-1.5" />}
-                {status === 'failed' && <CrossIcon className="w-9 h-9 p-1.5 text-red-500" />}
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium">{fileStem}</span>
-                  <span className="text-gray-600 text-xs">.{extention}</span>
-                </div>
-              </td>
-              <td>{formatBytes(size)}</td>
-              <td className="w-8">
-                <DestructiveActionButton
-                  modalDescription="Möchten Sie diese Datei wirklich dauerhaft löschen? Dieser Vorgang kann nicht rückgängig gemacht werden."
-                  triggerButtonClassName="flex items-center border-none w-full justify-center hover:bg-transparent"
-                  modalTitle="Datei löschen"
-                  confirmText="Datei löschen"
-                  actionFn={() => handleDeleteFile(id)}
-                >
-                  <TrashIcon className="hover:bg-vidis-hover-green/20" />
-                </DestructiveActionButton>
-              </td>
-            </tr>
-          );
-        })}
+            return (
+              <tr key={id} className="border-b-[1px] last:border-b-0 border-[#D9D9D9]">
+                <td className="flex gap-2 items-center p-2">
+                  {status === 'processed' && (
+                    <Icon
+                      className="w-9 h-9 p-1.5"
+                      style={{ background: hexToRGBA(fillColor, 0.05) }}
+                    />
+                  )}
+                  {status === 'uploading' && <Spinner className="w-9 h-9 p-1.5" />}
+                  {status === 'failed' && <CrossIcon className="w-9 h-9 p-1.5 text-red-500" />}
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">{fileStem}</span>
+                    <span className="text-gray-600 text-xs">.{extention}</span>
+                  </div>
+                </td>
+                <td>{formatBytes(size)}</td>
+                <td className="w-8">
+                  <DestructiveActionButton
+                    modalDescription="Möchten Sie diese Datei wirklich dauerhaft löschen? Dieser Vorgang kann nicht rückgängig gemacht werden."
+                    triggerButtonClassName="flex items-center border-none w-full justify-center hover:bg-transparent"
+                    modalTitle="Datei löschen"
+                    confirmText="Datei löschen"
+                    actionFn={() => handleDeleteFile(id)}
+                  >
+                    <TrashIcon className="hover:bg-vidis-hover-green/20" />
+                  </DestructiveActionButton>
+                </td>
+              </tr>
+            );
+          })}
       </tbody>
     </table>
   );

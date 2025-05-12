@@ -12,7 +12,7 @@ export function InitialChatContentDisplay({
   imageSource?: string;
   description?: string;
   excersiseDescription?: string;
-  setDialogStarted: (dialogStarted: boolean) => void;
+  setDialogStarted?: (dialogStarted: boolean) => void;
 }) {
   return (
     <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto p-4 gap-1">
@@ -27,9 +27,11 @@ export function InitialChatContentDisplay({
       )}
       <h1 className="text-2xl font-medium mt-8 text-center">{title}</h1>
       <p className="max-w-full text-center">{description}</p>
-      <div className="max-w-full min-w-[50%] m-4 border-primary border-2 rounded-enterprise-md p-4 ">
-        <MarkdownDisplay>{excersiseDescription ?? ''}</MarkdownDisplay>
-      </div>
+      {excersiseDescription !== undefined && (
+        <div className="max-w-full min-w-[50%] m-4 border-primary border-2 rounded-enterprise-md p-4 ">
+          <MarkdownDisplay>{excersiseDescription}</MarkdownDisplay>
+        </div>
+      )}
       {setDialogStarted !== undefined && (
         <button
           className="bg-primary text-white px-4 py-2 rounded-enterprise-full"

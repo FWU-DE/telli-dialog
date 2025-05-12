@@ -1,5 +1,5 @@
 import React from 'react';
-import { UseFormGetValues, UseFormSetValue, FieldArrayWithId } from 'react-hook-form';
+import { FieldArrayWithId } from 'react-hook-form';
 import { cn } from '@/utils/tailwind';
 import { inputFieldClassName, labelClassName } from '@/utils/tailwind/input';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
@@ -8,35 +8,34 @@ import PlusIcon from '@/components/icons/plus';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { useToast } from '../common/toast';
+import { TranslationValues } from 'next-intl';
 
 const MAX_LINKS = 5;
 
 type AttachedLinksProps = {
   fields: FieldArrayWithId<WebsearchSource, never, 'id'>[];
-  getValues: UseFormGetValues<any>;
-  setValue: UseFormSetValue<any>;
-  toast: any;
+  getValues: () => WebsearchSource[];
+  setValue: (value: WebsearchSource[]) => void;
   t: (key: string) => string;
-  tToast: (key: string, params?: any) => string;
+  tToast: (key: string, values?: TranslationValues) => string;
   readOnly?: boolean;
   handleAutosave: () => void;
-}
+};
 
 export function AttachedLinks({
   fields,
   getValues,
   setValue,
   handleAutosave,
-  toast,
   t,
   tToast,
   readOnly = false,
 }: AttachedLinksProps) {
-
   const [currentAttachedLink, setCurrentAttachedLink] = React.useState('');
-
+  const toast = useToast();
   function appendLink(content: string) {
-    const currentValues = (getValues('attachedLinks') || []) as WebsearchSource[];
+    const currentValues = getValues() || [];
 
     if (currentValues.length >= MAX_LINKS) {
       toast.error(tToast('max-links-reached', { max_links: MAX_LINKS }));
@@ -59,20 +58,20 @@ export function AttachedLinks({
       toast.error(tToast('invalid-url'));
       return;
     }
-    setValue('attachedLinks', [
+    setValue([
       ...currentValues,
-      { link: content, name: '', type: 'websearch', content: '', hostname: '', error: false },
+      { link: content, name: '', type: 'websearch', content: '', error: false },
     ]);
     setCurrentAttachedLink('');
   }
 
   function handleDeleteLink(index: number) {
-    const currentValues = getValues('attachedLinks');
-    const newValues = currentValues.filter((_: any, i: number) => i !== index);
-    setValue('attachedLinks', newValues);
+    const currentValues = getValues();
+    const newValues = currentValues.filter((_: WebsearchSource, i: number) => i !== index);
+    setValue(newValues);
     handleAutosave();
   }
-  const maxLinksReached = (getValues('attachedLinks') || []).length >= MAX_LINKS;
+  const maxLinksReached = (getValues() || []).length >= MAX_LINKS;
   return (
     <div className="flex flex-col gap-4">
       <label className={cn(labelClassName, 'text-sm')}>{t('attached-links-label')}</label>
@@ -126,4 +125,4 @@ export function AttachedLinks({
       </div>
     </div>
   );
-};
+}
