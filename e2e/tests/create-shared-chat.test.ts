@@ -15,7 +15,7 @@ test('teacher can login, create and join shared chat', async ({ page }) => {
     .fill('Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten');
 
   await page
-    .getByLabel('Wie kann das Szenario kurz beschrieben werden? *')
+    .getByLabel('Wie kann das Szenario kurz beschrieben werden?')
     .fill('Zwischen Absolutismus und Demokratie (Ludwig XIV)');
 
   await page.getByLabel('Schultyp').fill('Gymnasium');
@@ -27,7 +27,7 @@ test('teacher can login, create and join shared chat', async ({ page }) => {
     .fill('Schüler sollen den Unterschied zwischen Absolutismus und Demokratie verstehen.');
 
   await page
-    .getByLabel('Wie verhält sich telli im Lernszenario?')
+    .getByLabel('Wie verhält sich telli im Lernszenario? *')
     .fill(
       'Der Chatbot soll aus der Perspektive eines Soldaten im Herrschaftssystem unter Ludwig XIV antworten.',
     );
@@ -87,7 +87,7 @@ test('teacher can login, create and delete shared chat, student can join chat', 
     .fill('Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten');
 
   await page
-    .getByLabel('Wie kann das Szenario kurz beschrieben werden? *')
+    .getByLabel('Wie kann das Szenario kurz beschrieben werden?')
     .fill('Zwischen Absolutismus und Demokratie (Ludwig XIV)');
 
   await page.getByLabel('Schultyp').fill('Gymnasium');
@@ -99,7 +99,7 @@ test('teacher can login, create and delete shared chat, student can join chat', 
     .fill('Schüler sollen den Unterschied zwischen Absolutismus und Demokratie verstehen.');
 
   await page
-    .getByLabel('Wie verhält sich telli im Lernszenario?')
+    .getByLabel('Wie verhält sich telli im Lernszenario? *')
     .fill(
       'Der Chatbot soll aus der Perspektive eines Soldaten im Herrschaftssystem unter Ludwig XIV antworten.',
     );

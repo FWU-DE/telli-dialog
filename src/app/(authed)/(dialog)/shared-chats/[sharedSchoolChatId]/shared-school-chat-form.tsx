@@ -216,7 +216,6 @@ export default function SharedSchoolChatForm({
               <TextInput
                 id="description"
                 label={t('purpose-label')}
-                required={true}
                 inputType="text"
                 readOnly={readOnly}
                 {...register('description')}
@@ -278,6 +277,7 @@ export default function SharedSchoolChatForm({
           label={t('specification-label')}
           placeholder={t('specification-placeholder')}
           inputType="textarea"
+          required={true}
           rows={5}
           maxLength={2000}
           {...register('specification')}
