@@ -171,10 +171,7 @@ export function FloatingText({
         onTouchStart={handleTouchStart}
       >
         <span
-          className={cn(
-            dragging ? 'cursor-grabbing' : 'cursor-grab',
-            'font-semibold text-base',
-          )}
+          className={cn(dragging ? 'cursor-grabbing' : 'cursor-grab', 'font-semibold text-base')}
         >
           {title}
         </span>
@@ -204,11 +201,7 @@ export function FloatingText({
           }}
           className="flex items-center justify-center bg-none border-none cursor-pointer w-6 h-6"
         >
-          {isMinimized ? (
-            <ChevronRightIcon />
-          ) : (
-            <ChevronDownIcon />
-          )}
+          {isMinimized ? <ChevronRightIcon /> : <ChevronDownIcon />}
         </button>
       </div>
       {!isMinimized && (
