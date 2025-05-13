@@ -104,7 +104,7 @@ export function FloatingText({
       );
 
       setPosition({
-        x: newX ,
+        x: newX,
         y: newY,
       });
     }
