@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 const MAX_WIDTH = 420;
 const MAX_HEIGHT = 300;
 const INITIAL_MARGIN = 32;
-
+const MIN_MARGIN = 16;
 // Floating, minimizable, movable learning context dialog (desktop only)
 export function FloatingText({
   learningContext,
@@ -61,12 +61,12 @@ export function FloatingText({
 
       // Clamp values within parent
       newX = Math.max(
-        parentRect.x,
-        Math.min(newX, parentRect.width + parentRect.x - containerWidth),
+        parentRect.x + MIN_MARGIN,
+        Math.min(newX, parentRect.width + parentRect.x - containerWidth) - MIN_MARGIN,
       );
       newY = Math.max(
-        parentRect.y,
-        Math.min(newY, parentRect.height + parentRect.y - containerHeight),
+        parentRect.y + MIN_MARGIN,
+        Math.min(newY, parentRect.height + parentRect.y - containerHeight) - MIN_MARGIN,
       );
 
       setPosition({
@@ -104,7 +104,7 @@ export function FloatingText({
       );
 
       setPosition({
-        x: newX,
+        x: newX ,
         y: newY,
       });
     }
