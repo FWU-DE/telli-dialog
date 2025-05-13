@@ -50,14 +50,13 @@ export function FloatingText({
       if (!dragging || !rel) return;
       if (!containerRef.current || !parentRef.current) return;
 
-      const parentRect = parentRef.current.getBoundingClientRect();
       const container = containerRef.current;
       const containerRect = container.getBoundingClientRect();
       const containerWidth = containerRect.width;
       const containerHeight = containerRect.height;
 
-      let newX = e.clientX - rel.x;
-      let newY = e.clientY - rel.y;
+      const newX = e.clientX - rel.x;
+      const newY = e.clientY - rel.y;
 
       // Clamp values within parent
       const clamped = clampPosition({ x: newX, y: newY, containerWidth, containerHeight });
@@ -79,8 +78,8 @@ export function FloatingText({
       const containerWidth = containerRect.width;
       const containerHeight = containerRect.height;
 
-      let newX = touch.clientX - rel.x;
-      let newY = touch.clientY - rel.y;
+      const newX = touch.clientX - rel.x;
+      const newY = touch.clientY - rel.y;
 
       // Clamp values within parent
       const clamped = clampPosition({ x: newX, y: newY, containerWidth, containerHeight });
@@ -118,14 +117,24 @@ export function FloatingText({
   }
 
   // Helper to clamp position within parent bounds
-  function clampPosition({ x, y, containerWidth, containerHeight }: { x: number; y: number; containerWidth: number; containerHeight: number }) {
+  function clampPosition({
+    x,
+    y,
+    containerWidth,
+    containerHeight,
+  }: {
+    x: number;
+    y: number;
+    containerWidth: number;
+    containerHeight: number;
+  }) {
     if (!parentRef.current) return { x, y };
     const parentRect = parentRef.current.getBoundingClientRect();
-    let newX = Math.max(
+    const newX = Math.max(
       parentRect.x + MIN_MARGIN,
       Math.min(x, parentRect.width + parentRect.x - containerWidth - MIN_MARGIN),
     );
-    let newY = Math.max(
+    const newY = Math.max(
       parentRect.y + MIN_MARGIN,
       Math.min(y, parentRect.height + parentRect.y - containerHeight - MIN_MARGIN),
     );
@@ -183,7 +192,10 @@ export function FloatingText({
                   ),
                   y: Math.max(
                     0,
-                    Math.min(position.y, parentRect.height + parentRect.y - rect.height - MIN_MARGIN),
+                    Math.min(
+                      position.y,
+                      parentRect.height + parentRect.y - rect.height - MIN_MARGIN,
+                    ),
                   ),
                 };
                 if (newPos.x !== position.x || newPos.y !== position.y) {
