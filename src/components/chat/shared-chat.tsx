@@ -104,12 +104,6 @@ export default function SharedChat({
       />
     ) : (
       <>
-        <FloatingText
-          learningContext={sharedSchoolChat.learningContext ?? ''}
-          dialogStarted={dialogStarted}
-          title={'Arbeitsauftrag'}
-          parentRef={containerRef as React.RefObject<HTMLDivElement>}
-        />
         <div className="flex flex-col gap-4">
           {messages.map((message, index) => {
             return (
@@ -140,7 +134,7 @@ export default function SharedChat({
       {!chatActive && (
         <ExpiredChatModal conversationMessages={messages} title={sharedSchoolChat.name} />
       )}
-      <div className="flex flex-col h-full w-full overflow-hidden">
+      <div className="flex flex-col h-full w-full">
         <SharedChatHeader
           chatActive={chatActive}
           hasMessages={dialogStarted}
@@ -155,9 +149,15 @@ export default function SharedChat({
         >
           <div
             ref={scrollRef}
-            className="flex-grow w-full max-w-[50rem] overflow-y-hidden p-4 pb-[5rem]"
+            className="flex-grow w-full max-w-[50rem] overflow-y-auto"
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
+            <FloatingText
+              learningContext={sharedSchoolChat.learningContext ?? ''}
+              dialogStarted={dialogStarted}
+              title={'Arbeitsauftrag'}
+              parentRef={containerRef as React.RefObject<HTMLDivElement>}
+            />
             {innerContent}
             <ErrorChatPlaceholder error={error} handleReload={reload} />
           </div>

@@ -138,7 +138,11 @@
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
       "share": "Teilen",
-      "button-start": "Dialogpartner teilen"
+      "button-start": "Dialogpartner teilen",
+      "delete-chat-modal-title": "Neuer Chat",
+      "delete-chat-modal-description": "Wenn du einen neuen Chat beginnst verfällt der aktuelle Chat unwiderruflich.",
+      "delete-chat-modal-confirm-button": "Aktuellen Chat verwerfen und neu beginnen",
+      "expired-modal-description": "Der Dialog ist abgelaufen"
     },
     "share-page": {
       "back-button": "Zum Dialogpartner",
