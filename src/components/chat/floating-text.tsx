@@ -60,19 +60,8 @@ export function FloatingText({
       let newY = e.clientY - rel.y;
 
       // Clamp values within parent
-      newX = Math.max(
-        parentRect.x + MIN_MARGIN,
-        Math.min(newX, parentRect.width + parentRect.x - containerWidth) - MIN_MARGIN,
-      );
-      newY = Math.max(
-        parentRect.y + MIN_MARGIN,
-        Math.min(newY, parentRect.height + parentRect.y - containerHeight) - MIN_MARGIN,
-      );
-
-      setPosition({
-        x: newX,
-        y: newY,
-      });
+      const clamped = clampPosition({ x: newX, y: newY, containerWidth, containerHeight });
+      setPosition(clamped);
     }
     function onMouseUp() {
       setDragging(false);
@@ -84,29 +73,18 @@ export function FloatingText({
       if (!containerRef.current || !parentRef.current) return;
       if (e.touches.length !== 1) return;
       const touch = e.touches[0];
-      const parentRect = parentRef.current.getBoundingClientRect();
+      if (!touch?.clientX || !touch?.clientY) return;
       const container = containerRef.current;
       const containerRect = container.getBoundingClientRect();
-      const containerWidth = MAX_WIDTH;
+      const containerWidth = containerRect.width;
       const containerHeight = containerRect.height;
 
-      let newX = touch?.clientX ?? 0 - rel.x;
-      let newY = touch?.clientY ?? 0 - rel.y;
+      let newX = touch.clientX - rel.x;
+      let newY = touch.clientY - rel.y;
 
       // Clamp values within parent
-      newX = Math.max(
-        parentRect.x,
-        Math.min(newX, parentRect.width + parentRect.x - containerWidth),
-      );
-      newY = Math.max(
-        parentRect.y,
-        Math.min(newY, parentRect.height + parentRect.y - containerHeight),
-      );
-
-      setPosition({
-        x: newX,
-        y: newY,
-      });
+      const clamped = clampPosition({ x: newX, y: newY, containerWidth, containerHeight });
+      setPosition(clamped);
     }
     function onTouchEnd() {
       setDragging(false);
@@ -137,6 +115,21 @@ export function FloatingText({
       setDragging(true);
       setRel({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     }
+  }
+
+  // Helper to clamp position within parent bounds
+  function clampPosition({ x, y, containerWidth, containerHeight }: { x: number; y: number; containerWidth: number; containerHeight: number }) {
+    if (!parentRef.current) return { x, y };
+    const parentRect = parentRef.current.getBoundingClientRect();
+    let newX = Math.max(
+      parentRect.x + MIN_MARGIN,
+      Math.min(x, parentRect.width + parentRect.x - containerWidth - MIN_MARGIN),
+    );
+    let newY = Math.max(
+      parentRect.y + MIN_MARGIN,
+      Math.min(y, parentRect.height + parentRect.y - containerHeight - MIN_MARGIN),
+    );
+    return { x: newX, y: newY };
   }
 
   // Touch start handler
@@ -181,16 +174,16 @@ export function FloatingText({
             setIsMinimized(!isMinimized);
             setTimeout(() => {
               if (containerRef.current && parentRef.current) {
-                const rect = containerRef.current.getBoundingClientRect();
                 const parentRect = parentRef.current.getBoundingClientRect();
+                const rect = containerRef.current.getBoundingClientRect();
                 const newPos = {
                   x: Math.max(
                     0,
-                    Math.min(position.x, parentRect.width + parentRect.x - rect.width),
+                    Math.min(position.x, parentRect.width + parentRect.x - rect.width - MIN_MARGIN),
                   ),
                   y: Math.max(
                     0,
-                    Math.min(position.y, parentRect.height + parentRect.y - rect.height),
+                    Math.min(position.y, parentRect.height + parentRect.y - rect.height - MIN_MARGIN),
                   ),
                 };
                 if (newPos.x !== position.x || newPos.y !== position.y) {
