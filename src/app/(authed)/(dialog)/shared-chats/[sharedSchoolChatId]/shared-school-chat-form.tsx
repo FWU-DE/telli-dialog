@@ -175,7 +175,6 @@ export default function SharedSchoolChatForm({
     }
     router.push('/shared-chats');
   }
-  console.log(errors);
 
   return (
     <>
