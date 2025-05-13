@@ -5,12 +5,12 @@ import React from 'react';
 import MarkdownDisplay from './markdown-display';
 import { cn } from '@/utils/tailwind';
 import ChevronDownIcon from '../icons/chevron-down';
-import ChevronLeftIcon from '../icons/chevron-left';
+import ChevronRightIcon from '../icons/chevron-right';
 
 export const dynamic = 'force-dynamic';
 
-const MAX_WIDTH = 420;
-const MAX_HEIGHT = 300;
+const MAX_WIDTH = 400;
+const MAX_HEIGHT = 450;
 const INITIAL_MARGIN = 32;
 const MIN_MARGIN = 16;
 // Floating, minimizable, movable learning context dialog (desktop only)
@@ -156,20 +156,28 @@ export function FloatingText({
     <div
       ref={containerRef}
       className={cn(
-        'z-50 bg-vidis-user-chat-background rounded-xl border select-none max-h-1/3 m-1',
+        'flex flex-col z-50 bg-vidis-user-chat-background rounded-xl border select-none',
+        `max-h-[${MAX_HEIGHT}px]`,
         isAtLeast.lg ? `absolute` : 'sticky',
         // This is broken up on purpose, tailwind does not support dynamic class names like 'absolute w-[420px]'
-        isAtLeast.lg ? `w-[${MAX_WIDTH}px]` : 'w-[100%]',
+        isAtLeast.lg ? `max-w-[${MAX_WIDTH}px]` : 'w-[100%]',
         dragging ? 'cursor-grabbing' : 'cursor-grab',
       )}
       style={{ left: position.x, top: isAtLeast.lg ? position.y : 0 }}
     >
       <div
-        className="flex items-center justify-between px-4 py-2 rounded-t-xl"
+        className="flex items-center justify-between pl-4 py-2 rounded-t-xl mr-1"
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
       >
-        <span className="font-semibold text-base">{title}</span>
+        <span
+          className={cn(
+            dragging ? 'cursor-grabbing' : 'cursor-grab',
+            'font-semibold text-base',
+          )}
+        >
+          {title}
+        </span>
         <button
           aria-label="Minimize"
           onClick={() => {
@@ -194,17 +202,17 @@ export function FloatingText({
               }
             }, 0);
           }}
-          className="bg-none border-none cursor-pointer p-0"
+          className="flex items-center justify-center bg-none border-none cursor-pointer w-6 h-6"
         >
           {isMinimized ? (
-            <ChevronDownIcon className="w-4 h-4" />
+            <ChevronRightIcon />
           ) : (
-            <ChevronLeftIcon className="w-4 h-4" />
+            <ChevronDownIcon />
           )}
         </button>
       </div>
       {!isMinimized && (
-        <div className={cn('p-4 cursor-text select-text')}>
+        <div className="flex-1 ml-2 p-2 cursor-text select-text overflow-auto">
           <MarkdownDisplay>{learningContext ?? ''}</MarkdownDisplay>
         </div>
       )}
