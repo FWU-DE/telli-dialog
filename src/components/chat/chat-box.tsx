@@ -36,8 +36,8 @@ export function ChatBox({
   const tCommon = useTranslations('common');
   const userClassName =
     children.role === 'user'
-      ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary/20 text-primary-foreground max-w-[70%] break-words'
-      : '';
+      ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-vidis-user-chat-background text-primary-foreground max-w-[70%] break-words'
+      : 'w-fit';
   const fileMatch = fileMapping?.get(children.id) !== undefined;
   const allFiles = fileMatch ? fileMapping.get(children.id) : initialFiles;
   const urls = parseHyperlinks(children.content) ?? [];

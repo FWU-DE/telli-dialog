@@ -98,18 +98,12 @@ export default function SharedChat({
       <InitialChatContentDisplay
         title={sharedSchoolChat.name}
         description={sharedSchoolChat.description}
-        excersiseDescription={sharedSchoolChat.learningContext}
+        excerciseDescription={sharedSchoolChat.learningContext}
         imageSource={maybeSignedPictureUrl}
         setDialogStarted={setDialogStarted}
       />
     ) : (
       <>
-        <FloatingText
-          learningContext={sharedSchoolChat.learningContext ?? ''}
-          dialogStarted={dialogStarted}
-          title={'Arbeitsauftrag'}
-          parentRef={containerRef as React.RefObject<HTMLDivElement>}
-        />
         <div className="flex flex-col gap-4">
           {messages.map((message, index) => {
             return (
@@ -140,7 +134,7 @@ export default function SharedChat({
       {!chatActive && (
         <ExpiredChatModal conversationMessages={messages} title={sharedSchoolChat.name} />
       )}
-      <div className="flex flex-col h-full w-full overflow-hidden">
+      <div className="flex flex-col h-full w-full">
         <SharedChatHeader
           chatActive={chatActive}
           hasMessages={dialogStarted}
@@ -155,13 +149,22 @@ export default function SharedChat({
         >
           <div
             ref={scrollRef}
-            className="flex-grow w-full max-w-[50rem] overflow-y-hidden p-4 pb-[5rem]"
+            className="flex-grow w-full max-w-5xl overflow-y-auto"
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
+            {sharedSchoolChat.learningContext !== undefined &&
+              sharedSchoolChat.learningContext.trim() !== '' && (
+                <FloatingText
+                  learningContext={sharedSchoolChat.learningContext ?? ''}
+                  dialogStarted={dialogStarted}
+                  title={t('excersise-title')}
+                  parentRef={containerRef as React.RefObject<HTMLDivElement>}
+                />
+              )}
             {innerContent}
             <ErrorChatPlaceholder error={error} handleReload={reload} />
           </div>
-          <div className="w-full max-w-3xl mx-auto px-4 pb-4">
+          <div className="w-full max-w-5xl mx-auto px-4 pb-4">
             {dialogStarted && (
               <div className="flex flex-col">
                 <ChatInputBox

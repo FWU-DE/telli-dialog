@@ -5,13 +5,13 @@ export function InitialChatContentDisplay({
   title,
   imageSource,
   description,
-  excersiseDescription,
+  excerciseDescription,
   setDialogStarted,
 }: {
   title: string;
   imageSource?: string;
   description?: string;
-  excersiseDescription?: string;
+  excerciseDescription?: string;
   setDialogStarted?: (dialogStarted: boolean) => void;
 }) {
   return (
@@ -26,10 +26,12 @@ export function InitialChatContentDisplay({
         />
       )}
       <h1 className="text-2xl font-medium mt-8 text-center">{title}</h1>
-      <p className="max-w-full text-center">{description}</p>
-      {excersiseDescription !== undefined && (
+      {description !== undefined && description.trim() !== '' && (
+        <p className="max-w-full text-center">{description}</p>
+      )}
+      {excerciseDescription !== undefined && excerciseDescription.trim() !== '' && (
         <div className="max-w-full min-w-[50%] m-4 border-primary border-2 rounded-enterprise-md p-4 ">
-          <MarkdownDisplay>{excersiseDescription}</MarkdownDisplay>
+          <MarkdownDisplay>{excerciseDescription}</MarkdownDisplay>
         </div>
       )}
       {setDialogStarted !== undefined && (

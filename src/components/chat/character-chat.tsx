@@ -140,14 +140,14 @@ export default function CharacterSharedChat({
         <div className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden">
           <div
             ref={scrollRef}
-            className="flex-grow w-full max-w-[50rem] overflow-y-auto p-4 pb-[5rem]"
+            className="flex-grow w-full max-w-5xl overflow-y-auto p-4 pb-[5rem]"
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
             {innerContent}
             <ErrorChatPlaceholder error={error} handleReload={reload} />
           </div>
 
-          <div className="w-full max-w-3xl mx-auto px-4 pb-4">
+          <div className="w-full max-w-5xl mx-auto px-4 pb-4">
             <div className="flex flex-col">
               <ChatInputBox
                 handleStopGeneration={stop}

@@ -2,6 +2,7 @@ import { cn } from '@/utils/tailwind';
 import { buttonDeleteClassName, buttonSecondaryClassName } from '@/utils/tailwind/button';
 import React from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
+import { useQueryClient } from '@tanstack/react-query';
 
 type DestructiveActionButtonProps = {
   triggerButtonClassName?: string;
@@ -24,6 +25,12 @@ export default function DestructiveActionButton({
   ...buttonProps
 }: DestructiveActionButtonProps) {
   const [isOpen, setIsOpen] = React.useState(false);
+
+  const queryClient = useQueryClient();
+
+  function refetchConversations() {
+    queryClient.invalidateQueries({ queryKey: ['conversations'] });
+  }
 
   return (
     <AlertDialog.Root open={isOpen}>
@@ -75,6 +82,7 @@ export default function DestructiveActionButton({
                   event.preventDefault();
                   actionFn();
                   setIsOpen(false);
+                  refetchConversations();
                 }}
               >
                 {confirmText ?? 'Löschen'}

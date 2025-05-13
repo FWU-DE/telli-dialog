@@ -138,7 +138,11 @@
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
       "share": "Teilen",
-      "button-start": "Dialogpartner teilen"
+      "button-start": "Dialogpartner teilen",
+      "delete-chat-modal-title": "Neuer Chat",
+      "delete-chat-modal-description": "Wenn du einen neuen Chat beginnst verfällt der aktuelle Chat unwiderruflich.",
+      "delete-chat-modal-confirm-button": "Aktuellen Chat verwerfen und neu beginnen",
+      "expired-modal-description": "Der Dialog ist abgelaufen"
     },
     "share-page": {
       "back-button": "Zum Dialogpartner",
@@ -242,6 +246,7 @@
       "delete-confirm": "Bist du sicher, dass du diesen Lernszenario löschen möchtest? Dabei werden alle mit diesem Dialog verbundenen Konversationen unwiderruflich gelöscht."
     },
     "shared": {
+      "excersise-title": "Arbeitsauftrag",
       "title": "Lernszenario einsetzen",
       "loading-chat": "Der Dialog wird geladen...",
       "description": "Lege fest, wie viel deines Restbudgets an telli-Points durch diesen Chat beansprucht werden darf und wie lange der Chat aktiv benutzt werden kann.",

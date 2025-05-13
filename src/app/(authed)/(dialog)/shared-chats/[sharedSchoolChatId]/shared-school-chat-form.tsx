@@ -116,7 +116,8 @@ export default function SharedSchoolChatForm({
     updateSharedSchoolChat({
       ...sharedSchoolChat,
       ...data,
-      attachedLinks: data.attachedLinks.map((p) => p.link),
+      attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
+      description: data.description ?? '',
     })
       .then(() => {
         toast.success(tToast('edit-toast-success'));
@@ -218,6 +219,7 @@ export default function SharedSchoolChatForm({
                 label={t('purpose-label')}
                 inputType="text"
                 readOnly={readOnly}
+                required={false}
                 {...register('description')}
                 maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
                 placeholder={t('purpose-placeholder')}
@@ -267,6 +269,7 @@ export default function SharedSchoolChatForm({
           label={t('learning-context-label')}
           placeholder={t('learning-context-placeholder')}
           inputType="textarea"
+          required={false}
           rows={5}
           maxLength={1000}
           {...register('learningContext')}
