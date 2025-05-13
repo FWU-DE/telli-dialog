@@ -9,7 +9,7 @@ import ChevronRightIcon from '../icons/chevron-right';
 
 export const dynamic = 'force-dynamic';
 
-const MAX_WIDTH = 400;
+const MAX_WIDTH = 450;
 const MAX_HEIGHT = 450;
 const INITIAL_MARGIN = 32;
 const MIN_MARGIN = 16;
@@ -32,11 +32,35 @@ export function FloatingText({
   const [rel, setRel] = React.useState<{ x: number; y: number } | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
+  // Helper to clamp position within parent bounds
+  function clampPosition({
+    x,
+    y,
+    containerWidth,
+    containerHeight,
+  }: {
+    x: number;
+    y: number;
+    containerWidth: number;
+    containerHeight: number;
+  }) {
+    if (!parentRef.current) return { x, y };
+    const parentRect = parentRef.current.getBoundingClientRect();
+    const newX = Math.max(
+      parentRect.x + MIN_MARGIN,
+      Math.min(x, parentRect.width + parentRect.x - containerWidth - MIN_MARGIN),
+    );
+    const newY = Math.max(
+      parentRect.y + MIN_MARGIN,
+      Math.min(y, parentRect.height + parentRect.y - containerHeight - MIN_MARGIN),
+    );
+    return { x: newX, y: newY };
+  }
+
   React.useEffect(() => {
     // Set initial position within parent
     if (parentRef.current) {
       const parentRect = parentRef.current.getBoundingClientRect();
-      // move to the bottom right of the parent
       setPosition({
         x: parentRect.width + parentRect.x - MAX_WIDTH - INITIAL_MARGIN,
         y: parentRect.height + parentRect.y - MAX_HEIGHT - INITIAL_MARGIN,
@@ -116,31 +140,6 @@ export function FloatingText({
     }
   }
 
-  // Helper to clamp position within parent bounds
-  function clampPosition({
-    x,
-    y,
-    containerWidth,
-    containerHeight,
-  }: {
-    x: number;
-    y: number;
-    containerWidth: number;
-    containerHeight: number;
-  }) {
-    if (!parentRef.current) return { x, y };
-    const parentRect = parentRef.current.getBoundingClientRect();
-    const newX = Math.max(
-      parentRect.x + MIN_MARGIN,
-      Math.min(x, parentRect.width + parentRect.x - containerWidth - MIN_MARGIN),
-    );
-    const newY = Math.max(
-      parentRect.y + MIN_MARGIN,
-      Math.min(y, parentRect.height + parentRect.y - containerHeight - MIN_MARGIN),
-    );
-    return { x: newX, y: newY };
-  }
-
   // Touch start handler
   function handleTouchStart(e: React.TouchEvent<HTMLDivElement>) {
     if (containerRef.current && e.touches.length === 1) {
@@ -159,10 +158,10 @@ export function FloatingText({
       ref={containerRef}
       className={cn(
         'flex flex-col z-50 bg-vidis-user-chat-background rounded-xl border select-none',
-        `max-h-[${MAX_HEIGHT}px]`,
+        // using string interpolations is extremly flaky, so we're using a static class name
+        'max-h-[450px]',
         isAtLeast.lg ? `absolute` : 'sticky',
-        // This is broken up on purpose, tailwind does not support dynamic class names like 'absolute w-[420px]'
-        isAtLeast.lg ? `max-w-[${MAX_WIDTH}px]` : 'w-[100%]',
+        isAtLeast.lg ? `max-w-[450px]` : 'w-[100%]',
         dragging ? 'cursor-grabbing' : 'cursor-grab',
       )}
       style={{ left: position.x, top: isAtLeast.lg ? position.y : 0 }}
