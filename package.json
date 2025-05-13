@@ -27,6 +27,7 @@
     "db:seed": "tsx src/db/seed/index.ts",
     "db:seed:op": "op run --env-file=\"./.env\" -- pnpm tsx src/db/seed/index.ts",
     "db:studio": "dotenv -e .env -- drizzle-kit studio --config=src/db/drizzle.config.ts",
+    "otc:dump": "dotenv -e .env -- pnpm tsx src/scripts/mirgrate_otc/index.ts",
     "drizzle:up": "drizzle-kit up --config=src/db/drizzle.config.ts",
     "e2e": "dotenv -e .env -- playwright test",
     "e2e:op": "ENVIRONMENT=e2e pnpm op -- playwright test",

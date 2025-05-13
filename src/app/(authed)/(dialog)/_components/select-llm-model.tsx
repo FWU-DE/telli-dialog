@@ -27,7 +27,7 @@ export default function SelectLlmModelForm({
         className="flex items-center justify-between w-full py-2 pl-4 pr-4 bg-white border border-gray-200 focus:border-primary rounded-enterprise-md focus:outline-none max-w-min min-w-max"
       >
         <Select.Value />
-        <ChevronDownIcon aria-hidden="true" className="w-4 h-4 text-primary ms-2" />
+        <ChevronDownIcon aria-hidden="true" className="text-primary ms-2" />
         <span className="sr-only">{tCommon('llm-model')}</span>
       </Select.Trigger>
 
