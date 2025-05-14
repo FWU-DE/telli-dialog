@@ -35,7 +35,9 @@ test('teacher can login, create and join shared chat', async ({ page }) => {
   const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
   await expect(submitButton).toBeVisible();
   await submitButton.click();
-
+  const firstSharedChat = page.getByRole('link', { name: 'Absolutismus unter Ludwig XIV' }).first();
+  await expect(firstSharedChat).toBeVisible();
+  await firstSharedChat.click();
   await page.waitForURL('/shared-chats/**');
 
   // check if created with right name
@@ -108,6 +110,10 @@ test('teacher can login, create and delete shared chat, student can join chat', 
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
+  const firstSharedChat = page.getByRole('link', { name: 'Absolutismus unter Ludwig XIV' }).first();
+  await expect(firstSharedChat).toBeVisible();
+  await firstSharedChat.click();
+
   await page.waitForURL('/shared-chats/**');
 
   // test share page
@@ -137,7 +143,7 @@ test('teacher can login, create and delete shared chat, student can join chat', 
   await startButton.click();
 
   await page.getByPlaceholder('Wie kann ich Dir helfen?').fill('Was lernen wir hier?');
-  await page.getByLabel('Send Message').click();
+  await page.keyboard.press('Enter');
   await page.getByTitle('Kopieren').click();
 
   await expect(page.getByLabel('assistant message 1')).toContainText('Ludwig XIV');
