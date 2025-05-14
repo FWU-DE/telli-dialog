@@ -45,7 +45,11 @@ test('teacher can login, create and join shared chat', async ({ page }) => {
     .getByText('Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten')
     .first();
   await expect(sharedChatName).toBeVisible();
-
+  
+  const stopSharingButton = page.getByRole('button', { name: 'Stop' });
+  if (await stopSharingButton.isVisible()) {
+    await stopSharingButton.click();
+  }
   // test share page
   await page.selectOption('#Telli-Points', '50');
   await page.selectOption('#maxUsage', '30');
