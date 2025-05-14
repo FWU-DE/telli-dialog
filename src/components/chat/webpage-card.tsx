@@ -3,9 +3,9 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-interface WebpageCardProps {
+type WebpageCardProps = {
   url: string;
-}
+};
 
 async function fetchWebpageMetadata(url: string) {
   const response = await fetch(`/api/webpage-metadata?url=${encodeURIComponent(url)}`);

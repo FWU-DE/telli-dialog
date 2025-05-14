@@ -18,6 +18,7 @@ import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-message';
 import { getAssistantIcon } from './chat';
 import Spinner from '../icons/spinner';
+import { LOCAL_STORAGE_ENABLED } from '@/const';
 
 export default function CharacterSharedChat({
   imageSource,
@@ -37,12 +38,12 @@ export default function CharacterSharedChat({
   const searchParams = new URLSearchParams({ id, inviteCode });
   const endpoint = `/api/character?${searchParams.toString()}`;
 
-  const localStorageChats = (getMaybeLocaleStorageChats({ id, inviteCode }) ?? []).map(
-    (message) => ({
-      ...message,
-      id: generateUUID(),
-    }),
-  );
+  const localStorageChats = LOCAL_STORAGE_ENABLED
+    ? (getMaybeLocaleStorageChats({ id, inviteCode }) ?? []).map((message) => ({
+        ...message,
+        id: generateUUID(),
+      }))
+    : [];
 
   const {
     messages,
@@ -83,7 +84,9 @@ export default function CharacterSharedChat({
   }
 
   function handleOpenNewChat() {
-    saveToLocalStorage(constructLocalStorageKey({ id, inviteCode }), '');
+    if (LOCAL_STORAGE_ENABLED) {
+      saveToLocalStorage(constructLocalStorageKey({ id, inviteCode }), '');
+    }
     setMessages([]);
   }
   const assistantIcon = getAssistantIcon({

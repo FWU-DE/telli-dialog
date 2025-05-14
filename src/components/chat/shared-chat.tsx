@@ -19,6 +19,7 @@ import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-message';
 import { FloatingText } from './floating-text';
 import Spinner from '@/components/icons/spinner';
+import { LOCAL_STORAGE_ENABLED } from '@/const';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
@@ -72,7 +73,9 @@ export default function SharedChat({
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    saveToLocalStorage(constructLocalStorageKey({ id, inviteCode }), JSON.stringify(messages));
+    if (LOCAL_STORAGE_ENABLED) {
+      saveToLocalStorage(constructLocalStorageKey({ id, inviteCode }), JSON.stringify(messages));
+    }
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     }
@@ -89,7 +92,9 @@ export default function SharedChat({
   }
 
   function handleOpenNewChat() {
-    saveToLocalStorage(constructLocalStorageKey({ id, inviteCode }), '');
+    if (LOCAL_STORAGE_ENABLED) {
+      saveToLocalStorage(constructLocalStorageKey({ id, inviteCode }), '');
+    }
     setMessages([]);
   }
 
