@@ -144,7 +144,7 @@ export default function SharedSchoolChatForm({
         if (!isCreating) {
           toast.success(tToast('delete-toast-success'));
         }
-        // replace instead of push to avoid the back button to show a 404 when navigating back to the now non existing shared chat
+        // replace instead of push to avoid showing a 404 when navigating back to the now non existing shared chat
         router.replace(backUrl);
       })
       .catch(() => {
