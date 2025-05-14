@@ -133,7 +133,6 @@
     "visibility-private": "Für mich",
     "shared": {
       "title": "Dialogpartner im Unterricht einsetzen",
-      "loading-chat": "Der Dialogpartner wird geladen...",
       "description": "Lege fest, wie viel deines Restbudgets an telli-Points durch diesen Chat beansprucht werden darf und wie lange der Chat aktiv benutzt werden kann.",
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
@@ -248,7 +247,6 @@
     "shared": {
       "excersise-title": "Dein Arbeitsauftrag",
       "title": "Lernszenario einsetzen",
-      "loading-chat": "Der Dialog wird geladen...",
       "description": "Lege fest, wie viel deines Restbudgets an telli-Points durch diesen Chat beansprucht werden darf und wie lange der Chat aktiv benutzt werden kann.",
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",

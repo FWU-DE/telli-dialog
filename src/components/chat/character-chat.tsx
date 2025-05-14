@@ -1,14 +1,8 @@
 'use client';
 import { useChat } from '@ai-sdk/react';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useTranslations } from 'next-intl';
-import {
-  constructLocalStorageKey,
-  getMaybeLocaleStorageChats,
-  saveToLocalStorage,
-} from '@/components/providers/local-storage';
 import { CharacterModel } from '@/db/schema';
-import { generateUUID } from '@/utils/uuid';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import { SharedChatHeader } from '@/components/chat/header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
@@ -17,7 +11,6 @@ import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-message';
 import { getAssistantIcon } from './chat';
-import Spinner from '../icons/spinner';
 
 export default function CharacterSharedChat({
   imageSource,
@@ -25,24 +18,12 @@ export default function CharacterSharedChat({
 }: CharacterModel & { inviteCode: string; imageSource?: string }) {
   const { id, inviteCode } = character;
   const t = useTranslations('characters.shared');
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const timeLeft = calculateTimeLeftBySharedChat(character);
   const chatActive = timeLeft > 0;
 
   const searchParams = new URLSearchParams({ id, inviteCode });
   const endpoint = `/api/character?${searchParams.toString()}`;
-
-  const localStorageChats = (getMaybeLocaleStorageChats({ id, inviteCode }) ?? []).map(
-    (message) => ({
-      ...message,
-      id: generateUUID(),
-    }),
-  );
 
   const {
     messages,
@@ -56,7 +37,7 @@ export default function CharacterSharedChat({
     error,
   } = useChat({
     id,
-    initialMessages: localStorageChats,
+    initialMessages: [],
     api: endpoint,
     experimental_throttle: 100,
     maxSteps: 2,
@@ -66,7 +47,6 @@ export default function CharacterSharedChat({
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
-    saveToLocalStorage(constructLocalStorageKey({ id, inviteCode }), JSON.stringify(messages));
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     }
@@ -83,7 +63,6 @@ export default function CharacterSharedChat({
   }
 
   function handleOpenNewChat() {
-    saveToLocalStorage(constructLocalStorageKey({ id, inviteCode }), '');
     setMessages([]);
   }
   const assistantIcon = getAssistantIcon({
@@ -91,8 +70,8 @@ export default function CharacterSharedChat({
     imageSource,
   });
 
-  const innerContent = isClient ? (
-    localStorageChats.length === 0 ? (
+  const innerContent =
+    messages.length === 0 ? (
       <InitialChatContentDisplay
         title={character.name}
         description={character.description}
@@ -116,14 +95,7 @@ export default function CharacterSharedChat({
           );
         })}
       </div>
-    )
-  ) : (
-    <div className="flex flex-col h-full w-full items-center justify-center">
-      <Spinner />
-      <p className="mt-2 text-gray-500">{t('loading-chat')}</p>
-    </div>
-  );
-
+    );
   return (
     <>
       {!chatActive && <ExpiredChatModal conversationMessages={messages} title={character.name} />}
