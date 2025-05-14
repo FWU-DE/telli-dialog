@@ -194,8 +194,8 @@ export default function CharacterForm({
         if (!isCreating) {
           toast.success(tToast('delete-toast-success'));
         }
-
-        router.push(backUrl);
+        // replace instead of push to avoid the back button to show a 404 when navigating back to the now non existing character
+        router.replace(backUrl);
       })
       .catch(() => {
         toast.error(tToast('delete-toast-error'));

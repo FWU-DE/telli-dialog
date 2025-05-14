@@ -131,6 +131,10 @@ export default function SharedChat({
                   dialogStarted={dialogStarted}
                   title={t('excersise-title')}
                   parentRef={containerRef as React.RefObject<HTMLDivElement>}
+                  maxWidth={600}
+                  maxHeight={600}
+                  initialMargin={32}
+                  minMargin={16}
                 />
               )}
             {innerContent}
