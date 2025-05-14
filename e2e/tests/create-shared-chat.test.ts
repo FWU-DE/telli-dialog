@@ -115,7 +115,10 @@ test('teacher can login, create and delete shared chat, student can join chat', 
   await firstSharedChat.click();
 
   await page.waitForURL('/shared-chats/**');
-
+  const stopSharingButton = page.getByRole('button', { name: 'Stop' });
+  if (await stopSharingButton.isVisible()) {
+    await stopSharingButton.click();
+  }
   // test share page
   await page.selectOption('#Telli-Points', '25');
   await page.selectOption('#maxUsage', '30');
