@@ -1,5 +1,7 @@
 import { getUser } from '@/auth/utils';
 import { USER_WARNING_FOR_TRUNCATED_FILES } from '@/configuration-text-inputs/const';
+import { embed } from 'ai';
+import { openai } from '@ai-sdk/openai';
 import { db } from '@/db';
 import { fileTable } from '@/db/schema';
 import { uploadFileToS3 } from '@/s3';
@@ -7,6 +9,8 @@ import { getFileExtension } from '@/utils/files/generic';
 import { cnanoid } from '@/utils/random';
 import { NextRequest, NextResponse } from 'next/server';
 import { extractFile } from '../../file-operations/extract-file';
+import { chunkText } from '../../file-operations/process-chunks';
+import { embedBatchAndSave } from '../../file-operations/embedding';
 
 export async function POST(req: NextRequest) {
   const user = await getUser();
@@ -32,11 +36,22 @@ export async function POST(req: NextRequest) {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  const { truncated } = await extractFile({
+  const { content, truncated } = await extractFile({
     fileContent: buffer,
     type: getFileExtension(file.name),
   });
   const userWarning = truncated ? USER_WARNING_FOR_TRUNCATED_FILES : null;
+
+  const textChunks = chunkText({
+    text: content,
+    sentenceChunkOverlap: 1,
+    lowerBoundWordCount: 200,
+  });
+
+  await embedBatchAndSave({
+    values: textChunks,
+    fileId,
+  });
 
   const fileExtension = getFileExtension(file.name);
 

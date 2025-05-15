@@ -8,6 +8,7 @@ import {
   unique,
   json,
   boolean,
+  vector,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
 import { type LlmModelPriceMetadata } from './types';
@@ -402,3 +403,16 @@ export const CustomGptFileMapping = pgTable(
     unq: unique().on(table.customGptId, table.fileId),
   }),
 );
+
+export const textChunkTable = pgTable('text_chunk', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  fileId: text('file_id').references(() => fileTable.id).notNull(),
+  embedding: vector('embedding', { dimensions: 1024 }).notNull(),
+  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  content: text('content').notNull(),
+  orderIndex: integer('order_index').notNull(),
+  pageNumber: integer('page_number'),
+});
+
+export type TextChunkModel = typeof textChunkTable.$inferSelect;
+export type TextChunkInsertModel = typeof textChunkTable.$inferInsert;

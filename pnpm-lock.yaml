@@ -188,6 +188,9 @@ importers:
       require-in-the-middle:
         specifier: 7.5.1
         version: 7.5.1
+      sentence-splitter:
+        specifier: ^5.0.0
+        version: 5.0.0
       tailwind-merge:
         specifier: 3.0.1
         version: 3.0.1
@@ -2474,6 +2477,9 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
+  '@textlint/ast-node-types@13.4.1':
+    resolution: {integrity: sha512-qrZyhCh8Ekk6nwArx3BROybm9BnX6vF7VcZbijetV/OM3yfS4rTYhoMWISmhVEP2H2re0CtWEyMl/XF+WdvVLQ==}
+
   '@tootallnate/quickjs-emscripten@0.23.0':
     resolution: {integrity: sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA==}
 
@@ -3108,6 +3114,9 @@ packages:
   body-parser@1.20.3:
     resolution: {integrity: sha512-7rAxByjUMqQ3/bHJy7D6OGXvx/MMc4IqBn/X0fcM1QUcAItpZrBEYhWGem+tzXH90c+G01ypMcYJBO9Y30203g==}
     engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
+
+  boundary@2.0.0:
+    resolution: {integrity: sha512-rJKn5ooC9u8q13IMCrW0RSp31pxBCHE3y9V/tp3TdWSLf8Em3p6Di4NBpfzbJge9YjjFEsD0RtFEjtvHL5VyEA==}
 
   bowser@2.11.0:
     resolution: {integrity: sha512-AlcaJBi/pqqJBIQ8U9Mcpc9i8Aqxn88Skv5d+xBX006BY5u8N3mGLHa5Lgppa7L/HfwgwLgZ6NYs+Ag6uUmJRA==}
@@ -5819,6 +5828,9 @@ packages:
     resolution: {integrity: sha512-dW41u5VfLXu8SJh5bwRmyYUbAoSB3c9uQh6L8h/KtsFREPWpbX1lrljJo186Jc4nmci/sGUZ9a0a0J2zgfq2hw==}
     engines: {node: '>= 0.8.0'}
 
+  sentence-splitter@5.0.0:
+    resolution: {integrity: sha512-9Mvf7L8vwpPzkH0/HtXzCbmVkyj4aQXdeG7h8ighRvO0hvcZEy2OUEjeIlnM/z4EX4vBacEfpESC65Oa2rWOig==}
+
   serialize-javascript@6.0.2:
     resolution: {integrity: sha512-Saa1xPByTTq2gdeFZYLLo+RFE35NHZkAbqZeWNd3BpzppeVisAqpDjcp8dyf6uIvEqJRd46jemmyA4iFIeVk8g==}
 
@@ -6019,6 +6031,9 @@ packages:
 
   strnum@1.0.5:
     resolution: {integrity: sha512-J8bbNyKKXl5qYcR36TIO8W3mVGVHrmmxsd5PAItGkmyzwJvybiw2IVq5nqd0i4LSNSkB/sx9VHllbfFdr9k1JA==}
+
+  structured-source@4.0.0:
+    resolution: {integrity: sha512-qGzRFNJDjFieQkl/sVOI2dUjHKRyL9dAJi2gCPGJLbJHBIkyOHxjuocpIEfbLioX+qSJpvbYdT49/YCdMznKxA==}
 
   style-to-object@1.0.8:
     resolution: {integrity: sha512-xT47I/Eo0rwJmaXC4oilDGDWLohVhR6o/xAQcPQN8q6QBuZVL8qMYL85kLmST5cPjAorwvqIA4qXTRQoYHaL6g==}
@@ -9217,6 +9232,8 @@ snapshots:
       '@tanstack/query-core': 5.66.0
       react: 19.0.0
 
+  '@textlint/ast-node-types@13.4.1': {}
+
   '@tootallnate/quickjs-emscripten@0.23.0': {}
 
   '@tybys/wasm-util@0.9.0':
@@ -9941,6 +9958,8 @@ snapshots:
       unpipe: 1.0.0
     transitivePeerDependencies:
       - supports-color
+
+  boundary@2.0.0: {}
 
   bowser@2.11.0: {}
 
@@ -13210,6 +13229,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  sentence-splitter@5.0.0:
+    dependencies:
+      '@textlint/ast-node-types': 13.4.1
+      structured-source: 4.0.0
+
   serialize-javascript@6.0.2:
     dependencies:
       randombytes: 2.1.0
@@ -13467,6 +13491,10 @@ snapshots:
   strip-json-comments@3.1.1: {}
 
   strnum@1.0.5: {}
+
+  structured-source@4.0.0:
+    dependencies:
+      boundary: 2.0.0
 
   style-to-object@1.0.8:
     dependencies:
