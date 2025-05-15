@@ -212,7 +212,8 @@ export default function CustomGptForm({
           toast.success(tToast('delete-toast-success'));
         }
 
-        router.push(backUrl);
+        // replace instead of push to avoid showing a 404 when navigating back to the now non existing custom gpt
+        router.replace(backUrl);
       })
       .catch(() => {
         toast.error(tToast('delete-toast-error'));

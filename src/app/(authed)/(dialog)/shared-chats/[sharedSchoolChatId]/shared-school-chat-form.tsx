@@ -82,7 +82,7 @@ export default function SharedSchoolChatForm({
       attachedLinks: initalLinks,
     },
   });
-
+  const backUrl = '/shared-chats';
   const { fields } = useFieldArray({
     control,
     name: 'attachedLinks',
@@ -144,7 +144,8 @@ export default function SharedSchoolChatForm({
         if (!isCreating) {
           toast.success(tToast('delete-toast-success'));
         }
-        router.push('/shared-chats');
+        // replace instead of push to avoid showing a 404 when navigating back to the now non existing shared chat
+        router.replace(backUrl);
       })
       .catch(() => {
         toast.error(tToast('delete-toast-error'));
@@ -167,13 +168,13 @@ export default function SharedSchoolChatForm({
     const data = getValues();
     onSubmit(data);
     toast.success(tToast('create-toast-success'));
-    router.push(`/shared-chats/${sharedSchoolChat.id}`);
+    router.replace(backUrl);
   }
   function handleNavigateBack() {
     if (isCreating) {
       handleDeleteSharedChat();
     }
-    router.push('/shared-chats');
+    router.push(backUrl);
   }
 
   return (
