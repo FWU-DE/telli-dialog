@@ -76,13 +76,12 @@ export default function SharedSchoolChatForm({
     defaultValues: {
       ...sharedSchoolChat,
       description: sharedSchoolChat.description ?? '',
-      learningContext: sharedSchoolChat.learningContext ?? '',
-      specification: sharedSchoolChat.specification ?? '',
-      restrictions: sharedSchoolChat.restrictions ?? '',
+      studentExcercise: sharedSchoolChat.studentExcercise ?? '',
+      additionalInstructions: sharedSchoolChat.additionalInstructions ?? '',
       attachedLinks: initalLinks,
     },
   });
-
+  const backUrl = '/shared-chats';
   const { fields } = useFieldArray({
     control,
     name: 'attachedLinks',
@@ -144,7 +143,8 @@ export default function SharedSchoolChatForm({
         if (!isCreating) {
           toast.success(tToast('delete-toast-success'));
         }
-        router.push('/shared-chats');
+        // replace instead of push to avoid showing a 404 when navigating back to the now non existing shared chat
+        router.replace(backUrl);
       })
       .catch(() => {
         toast.error(tToast('delete-toast-error'));
@@ -167,13 +167,13 @@ export default function SharedSchoolChatForm({
     const data = getValues();
     onSubmit(data);
     toast.success(tToast('create-toast-success'));
-    router.push(`/shared-chats/${sharedSchoolChat.id}`);
+    router.replace(backUrl);
   }
   function handleNavigateBack() {
     if (isCreating) {
       handleDeleteSharedChat();
     }
-    router.push('/shared-chats');
+    router.push(backUrl);
   }
 
   return (
@@ -265,25 +265,25 @@ export default function SharedSchoolChatForm({
         </fieldset>
 
         <TextInput
-          id="learning-context"
-          label={t('learning-context-label')}
-          placeholder={t('learning-context-placeholder')}
+          id="student-excercise"
+          label={t('student-excercise-label')}
+          placeholder={t('student-excercise-placeholder')}
           inputType="textarea"
           required={false}
           rows={5}
           maxLength={1000}
-          {...register('learningContext')}
+          {...register('studentExcercise')}
         />
 
         <TextInput
-          id="specification"
-          label={t('specification-label')}
-          placeholder={t('specification-placeholder')}
+          id="additional-instructions"
+          label={t('additional-instructions-label')}
+          placeholder={t('additional-instructions-placeholder')}
           inputType="textarea"
           required={true}
           rows={5}
           maxLength={2000}
-          {...register('specification')}
+          {...register('additionalInstructions')}
         />
         <div className="grid grid-cols-3 gap-6">
           <TextInput

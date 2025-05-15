@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const knotenpunktPriceMetadata = z.object({
-  type: z.literal('text'),
+  type: z.literal('text').or(z.literal('embedding')),
   completionTokenPrice: z.number(),
   promptTokenPrice: z.number(),
 });

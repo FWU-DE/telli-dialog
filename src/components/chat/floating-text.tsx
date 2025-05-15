@@ -9,21 +9,25 @@ import ChevronRightIcon from '../icons/chevron-right';
 
 export const dynamic = 'force-dynamic';
 
-const MAX_WIDTH = 450;
-const MAX_HEIGHT = 450;
-const INITIAL_MARGIN = 32;
-const MIN_MARGIN = 16;
-// Floating, minimizable, movable learning context dialog (desktop only)
+// Floating, minimizable, movable learning context dialog (desktop only) on mobile it's sticky on the top
 export function FloatingText({
   learningContext,
   dialogStarted,
   title,
   parentRef,
+  maxWidth,
+  maxHeight,
+  initialMargin,
+  minMargin,
 }: {
   learningContext: string;
   dialogStarted: boolean;
   title: string;
   parentRef: React.RefObject<HTMLDivElement>;
+  maxWidth: number;
+  maxHeight: number;
+  initialMargin: number;
+  minMargin: number;
 }) {
   const { isAtLeast } = useBreakpoints();
   const [isMinimized, setIsMinimized] = React.useState(false);
@@ -47,23 +51,24 @@ export function FloatingText({
     if (!parentRef.current) return { x, y };
     const parentRect = parentRef.current.getBoundingClientRect();
     const newX = Math.max(
-      parentRect.x + MIN_MARGIN,
-      Math.min(x, parentRect.width + parentRect.x - containerWidth - MIN_MARGIN),
+      parentRect.x + minMargin,
+      Math.min(x, parentRect.width + parentRect.x - containerWidth - minMargin),
     );
     const newY = Math.max(
-      parentRect.y + MIN_MARGIN,
-      Math.min(y, parentRect.height + parentRect.y - containerHeight - MIN_MARGIN),
+      parentRect.y + minMargin,
+      Math.min(y, parentRect.height + parentRect.y - containerHeight - minMargin),
     );
     return { x: newX, y: newY };
   }
 
   React.useEffect(() => {
     // Set initial position within parent
-    if (parentRef.current) {
+    if (parentRef.current && containerRef.current) {
       const parentRect = parentRef.current.getBoundingClientRect();
+      const containerRect = containerRef.current.getBoundingClientRect();
       setPosition({
-        x: parentRect.width + parentRect.x - MAX_WIDTH - INITIAL_MARGIN,
-        y: parentRect.height + parentRect.y - MAX_HEIGHT - INITIAL_MARGIN,
+        x: parentRect.width + parentRect.x - (containerRect?.width ?? maxWidth) - initialMargin,
+        y: parentRect.height + parentRect.y - (containerRect?.height ?? maxHeight) - initialMargin,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -159,12 +164,15 @@ export function FloatingText({
       className={cn(
         'flex flex-col z-50 bg-vidis-user-chat-background rounded-xl border select-none',
         // using string interpolations is extremly flaky, so we're using a static class name
-        'max-h-[450px]',
         isAtLeast.lg ? `absolute` : 'sticky',
-        isAtLeast.lg ? `max-w-[450px]` : 'w-[100%]',
         dragging ? 'cursor-grabbing' : 'cursor-grab',
       )}
-      style={{ left: position.x, top: isAtLeast.lg ? position.y : 0 }}
+      style={{
+        left: position.x,
+        top: isAtLeast.lg ? position.y : 0,
+        maxWidth: isAtLeast.lg ? maxWidth : '100%',
+        maxHeight: isAtLeast.lg ? maxHeight : '40%',
+      }}
     >
       <div
         className="flex items-center justify-between pl-4 py-2 rounded-t-xl mr-1"
@@ -187,13 +195,13 @@ export function FloatingText({
                 const newPos = {
                   x: Math.max(
                     0,
-                    Math.min(position.x, parentRect.width + parentRect.x - rect.width - MIN_MARGIN),
+                    Math.min(position.x, parentRect.width + parentRect.x - rect.width - minMargin),
                   ),
                   y: Math.max(
                     0,
                     Math.min(
                       position.y,
-                      parentRect.height + parentRect.y - rect.height - MIN_MARGIN,
+                      parentRect.height + parentRect.y - rect.height - minMargin,
                     ),
                   ),
                 };
