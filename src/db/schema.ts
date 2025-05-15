@@ -207,9 +207,9 @@ export const sharedSchoolConversationTable = pgTable('shared_school_conversation
   schoolType: text('school_type'),
   gradeLevel: text('grade_level'),
   subject: text('subject'),
-  learningContext: text('learning_context').default('').notNull(),
-  specification: text('specification'),
-  restrictions: text('restrictions'),
+  studentExcercise: text('student_excercise').default('').notNull(),
+  additionalInstructions: text('additional_instructions'),
+  restrictions: text('restrictions'), // Not used anymore
   intelligencePointsLimit: integer('intelligence_points_limit'),
   maxUsageTimeLimit: integer('max_usage_time_limit'),
   attachedLinks: text('attached_links')

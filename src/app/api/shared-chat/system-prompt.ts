@@ -29,7 +29,7 @@ Du bist ein KI-Chatbot, der in einer Schulklasse eingesetzt wird, um Schülerinn
  
 ## Anweisungen
 Folgendes sollst du tun:
-${sharedChat.specification}
+${sharedChat.additionalInstructions}
 
 ${filePrompt}
 ${websearchPrompt}
