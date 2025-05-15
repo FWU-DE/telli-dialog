@@ -23,7 +23,7 @@ export type CustomTool = {
 
 export type LlmModelPriceMetadata =
   | {
-      type: 'text';
+      type: 'text' | 'embedding';
       completionTokenPrice: number;
       promptTokenPrice: number;
     }
