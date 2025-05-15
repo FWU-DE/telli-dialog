@@ -76,9 +76,8 @@ export default function SharedSchoolChatForm({
     defaultValues: {
       ...sharedSchoolChat,
       description: sharedSchoolChat.description ?? '',
-      learningContext: sharedSchoolChat.learningContext ?? '',
-      specification: sharedSchoolChat.specification ?? '',
-      restrictions: sharedSchoolChat.restrictions ?? '',
+      studentExcercise: sharedSchoolChat.studentExcercise ?? '',
+      additionalInstructions: sharedSchoolChat.additionalInstructions ?? '',
       attachedLinks: initalLinks,
     },
   });
@@ -266,25 +265,25 @@ export default function SharedSchoolChatForm({
         </fieldset>
 
         <TextInput
-          id="learning-context"
-          label={t('learning-context-label')}
-          placeholder={t('learning-context-placeholder')}
+          id="student-excercise"
+          label={t('student-excercise-label')}
+          placeholder={t('student-excercise-placeholder')}
           inputType="textarea"
           required={false}
           rows={5}
           maxLength={1000}
-          {...register('learningContext')}
+          {...register('studentExcercise')}
         />
 
         <TextInput
-          id="specification"
-          label={t('specification-label')}
-          placeholder={t('specification-placeholder')}
+          id="additional-instructions"
+          label={t('additional-instructions-label')}
+          placeholder={t('additional-instructions-placeholder')}
           inputType="textarea"
           required={true}
           rows={5}
           maxLength={2000}
-          {...register('specification')}
+          {...register('additionalInstructions')}
         />
         <div className="grid grid-cols-3 gap-6">
           <TextInput
