@@ -1,4 +1,4 @@
-import { eq, inArray, isNotNull, isNull } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import { db } from '..';
 import {
   CharacterFileMapping,
@@ -10,6 +10,7 @@ import {
   fileTable,
   SharedSchoolConversationFileMapping,
 } from '../schema';
+import { deleteFileFromS3 } from '@/s3';
 
 export async function link_file_to_conversation({
   conversationMessageId,
@@ -164,7 +165,7 @@ export async function dbGetAllFileIdByConversationId(
   return fileMappings.map((row) => row.file_table);
 }
 
-export async function dbGetDanglingFileIds() {
+export async function dbGetDanglingConversationFileIds() {
   const fileIds = await db
     .select({ fileId: conversationMessgaeFileMappingTable.fileId })
     .from(conversationMessgaeFileMappingTable)
@@ -180,6 +181,7 @@ export async function dbDeleteFileAndDetachFromConversation(filesToDelete: strin
   await db
     .delete(conversationMessgaeFileMappingTable)
     .where(inArray(conversationMessgaeFileMappingTable.fileId, filesToDelete));
+  await db.delete(CharacterFileMapping);
   await db.delete(fileTable).where(inArray(fileTable.id, filesToDelete));
 }
 
@@ -191,12 +193,21 @@ export async function dbDeleteDanglingFiles() {
       conversationMessgaeFileMappingTable,
       eq(fileTable.id, conversationMessgaeFileMappingTable.fileId),
     )
-    .where(isNull(conversationMessgaeFileMappingTable.fileId));
-
-  await db.delete(fileTable).where(
-    inArray(
-      fileTable.id,
-      fileIds.map((f) => f.fileId),
-    ),
-  );
+    .leftJoin(CharacterFileMapping, eq(fileTable.id, CharacterFileMapping.fileId))
+    .leftJoin(CustomGptFileMapping, eq(fileTable.id, CustomGptFileMapping.fileId))
+    .leftJoin(
+      SharedSchoolConversationFileMapping,
+      eq(fileTable.id, SharedSchoolConversationFileMapping.fileId),
+    )
+    .where(
+      and(
+        isNull(conversationMessgaeFileMappingTable.fileId),
+        isNull(CharacterFileMapping.fileId),
+        isNull(CustomGptFileMapping.fileId),
+        isNull(SharedSchoolConversationFileMapping.fileId),
+      ),
+    );
+  const fileIdsToDelete = fileIds.map((f) => f.fileId);
+  await db.delete(fileTable).where(inArray(fileTable.id, fileIdsToDelete));
+  return fileIdsToDelete;
 }
