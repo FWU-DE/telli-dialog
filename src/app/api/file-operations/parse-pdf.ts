@@ -1,38 +1,35 @@
-import { PdfReader } from 'pdfreader';
+import { DataEntry, PdfReader } from 'pdfreader';
 
 export async function extractTextFromPdfBuffer(pdfBuffer: Buffer): Promise<string> {
   const reader = new PdfReader();
 
   let textContent: string = '';
-  // TODO identify the type TextItem in lib
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let lastItem: any | null = null;
+  let lastItem: DataEntry | null = null;
 
   return new Promise<string>((resolve, reject) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    reader.parseBuffer(pdfBuffer, (err: any, item: any | null) => {
+    reader.parseBuffer(pdfBuffer, (err: any, dataEntry: DataEntry | null) => {
       if (err) {
         reject(err);
         return;
       }
 
-      if (!item) {
+      if (!dataEntry) {
         // End of file, resolve the promise with the accumulated text
         resolve(textContent);
         return;
       }
 
-      if (item.text) {
+      if (dataEntry.text) {
         // Check if this is a new line
-        if (lastItem && lastItem.y !== item.y) {
+        if (lastItem && lastItem.page !== dataEntry.page) {
           textContent += '\n';
-        } else if (lastItem && lastItem.x !== item.x) {
+        } else if (lastItem && lastItem.page === dataEntry.page) {
           // If on same line but different x position, add a space
           textContent += ' ';
         }
 
-        textContent += item.text;
-        lastItem = item;
+        textContent += dataEntry.text;
+        lastItem = dataEntry;
       }
     });
   });

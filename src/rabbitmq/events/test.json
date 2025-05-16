@@ -1,0 +1,16 @@
+[
+    {
+        "c3": {
+            "chat_id": "671be36f-9c3a-44a4-a419-a4865f3af172",
+            "chat_type": "classdialog",
+            "school_id": "school1",
+            "timestamp": "2025-05-10T16:07:17.158Z",
+            "user_role": "anonymous",
+            "event_type": "telli_new_chat_message",
+            "input_tokens": 7664,
+            "pseudonym_id": "637f793969e1c4245b28e8245017213d9dc31776739c96dd36b431f094ab976f",
+            "federal_state": "DE-BY",
+            "output_tokens": 339
+        }
+    }
+]

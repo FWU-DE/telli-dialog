@@ -43,6 +43,7 @@ export async function getModelAndProvider({
     baseUrl: `${env.apiUrl}/v1`,
   });
 
+
   return { telliProvider: telliConfiguration(definedModel.name), definedModel };
 }
 

@@ -1,5 +1,5 @@
 {
-  "id": "368d41d9-914d-4dc0-a9a8-f362cc69b7db",
+  "id": "d334b792-62f7-49d5-9d37-054c2734890b",
   "prevId": "b14ec4cc-59ed-48b1-a8d9-cb2c0ad06d3f",
   "version": "7",
   "dialect": "postgresql",
@@ -1661,6 +1661,16 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false
+        },
+        "content_tsv": {
+          "name": "content_tsv",
+          "type": "tsvector",
+          "primaryKey": false,
+          "notNull": true,
+          "generated": {
+            "as": "to_tsvector('german', content)",
+            "type": "stored"
+          }
         }
       },
       "indexes": {},

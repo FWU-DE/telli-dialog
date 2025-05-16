@@ -7,8 +7,8 @@ CREATE TABLE "text_chunk" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"content" text NOT NULL,
 	"order_index" integer NOT NULL,
-	"page_number" integer
+	"page_number" integer,
+	"content_tsv" "tsvector" GENERATED ALWAYS AS (to_tsvector('german', content)) STORED NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "shared_school_conversation" ADD COLUMN "restrictions" text;--> statement-breakpoint
 ALTER TABLE "text_chunk" ADD CONSTRAINT "text_chunk_file_id_file_table_id_fk" FOREIGN KEY ("file_id") REFERENCES "public"."file_table"("id") ON DELETE no action ON UPDATE no action;

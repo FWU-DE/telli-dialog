@@ -143,8 +143,13 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Unhandled error while fetching website', error);
   }
+  // TODO: condense chat history to search query to use for vector search and text retrieval
 
-  attachedFiles = await process_files(relatedFileEntities);
+  // TODO:preform vector search and text retrieval
+
+  // TODO: post process retrieved text chunks and insert to template
+
+  
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
   const maxCharacterLimit = SMALL_MODEL_LIST.includes(definedModel.displayName)
     ? SMALL_MODEL_MAX_CHARACTERS

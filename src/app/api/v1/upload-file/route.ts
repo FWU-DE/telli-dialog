@@ -36,9 +36,10 @@ export async function POST(req: NextRequest) {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
+  const fileExtension = getFileExtension(file.name);
   const { content, truncated } = await extractFile({
     fileContent: buffer,
-    type: getFileExtension(file.name),
+    type: fileExtension,
   });
   const userWarning = truncated ? USER_WARNING_FOR_TRUNCATED_FILES : null;
 
@@ -47,22 +48,23 @@ export async function POST(req: NextRequest) {
     sentenceChunkOverlap: 1,
     lowerBoundWordCount: 200,
   });
+  await db
+    .insert(fileTable)
+    .values({ id: fileId, name: file.name, size: file.size, type: fileExtension });
 
   await embedBatchAndSave({
     values: textChunks,
     fileId,
+    federalStateId: user.federalState.id,
+    modelName: 'BAAI/bge-m3',
   });
 
-  const fileExtension = getFileExtension(file.name);
 
   await uploadFileToS3({
     key: `message_attachments/${fileId}`,
     body: buffer,
     contentType: getFileExtension(file.name),
   });
-  await db
-    .insert(fileTable)
-    .values({ id: fileId, name: file.name, size: file.size, type: fileExtension });
 
   return NextResponse.json({
     body: JSON.stringify({ file_id: fileId, warning: userWarning }),
