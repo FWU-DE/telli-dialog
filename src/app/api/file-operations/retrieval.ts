@@ -23,6 +23,10 @@ export async function searchTextChunks({
   minSimilarity = 0.7,
 }: SearchOptions) {
   // Build the base query
+  if (embedding.length === 0) {
+    return [];
+  }
+
   const embeddingResults = await db
     .select({
       id: textChunkTable.id,

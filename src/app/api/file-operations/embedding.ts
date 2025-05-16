@@ -1,35 +1,24 @@
 import { dbCreateManyTextChunks } from '@/db/functions/text-chunk';
 import { OpenAI } from 'openai';
-import { embedMany } from 'ai';
+import { embedMany, LanguageModelV1 } from 'ai';
 import { getModelAndProviderWithResult } from '../utils';
 import { dbGetApiKeyByFederalStateIdWithResult } from '@/db/functions/federal-state';
 import { env } from '@/env';
 import { dbGetModelByIdAndFederalStateId, dbGetModelByName } from '@/db/functions/llm-model';
 
-export async function embedBatchAndSave({
-  values,
-  fileId,
+export async function embedText({
+  text,
   federalStateId,
-  modelName,
 }: {
-  values: string[];
-  fileId: string;
+  text: string[];
   federalStateId: string;
-  modelName: string;
 }) {
-
-
   const [error, federalStateObject] = await dbGetApiKeyByFederalStateIdWithResult({
     federalStateId,
   });
 
-  const definedModel = await dbGetModelByName(modelName);
-
-  if (error !== null || definedModel === undefined) {
-    if (definedModel === undefined) {
-      throw new Error(`Model ${modelName} not found`);
-    }
-    throw new Error(error?.message ?? 'Error fetching model');
+  if (error !== null || federalStateObject === undefined) {
+    throw new Error(error?.message ?? 'Error fetching federal state');
   }
 
   const client = new OpenAI({
@@ -37,20 +26,31 @@ export async function embedBatchAndSave({
     baseURL: `${env.apiUrl}/v1`,
   })
 
-
-  if (error !== null) {
-    throw new Error(error);
-  }
-
   const result = await client.embeddings.create({
-    model: definedModel.name,
-    input: values,
+    model: 'BAAI/bge-m3',
+    input: text,
   });
-  console.log(result.data.length)
+
+  return result.data.map((element) => element.embedding);
+}
+
+export async function embedBatchAndSave({
+  values,
+  fileId,
+  federalStateId,
+}: {
+  values: string[];
+  fileId: string;
+  federalStateId: string;
+}) {
+  const embeddings = await embedText({
+    text: values,
+    federalStateId,
+  });
   await dbCreateManyTextChunks({
-    chunks: result.data.map((embedding, index) => ({
+    chunks: embeddings.map((embedding, index) => ({
       content: values[index] ?? '',
-      embedding: embedding.embedding,
+      embedding,
       fileId,
       orderIndex: index,
     })),

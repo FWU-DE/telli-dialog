@@ -1,4 +1,5 @@
-import { Message } from 'ai';
+import { generateText, LanguageModelV1, type Message } from 'ai';
+import type { LlmModel } from '@/db/schema';
 
 export function getMostRecentUserMessage(messages: Array<Message>) {
   const userMessages = messages.filter((message) => message.role === 'user');
@@ -109,4 +110,45 @@ export function limitChatHistory({
   }
   // Combine front and back messages
   return [...frontMessages, ...backMessages];
+}
+
+/**
+ * Condenses chat history into a search query for vector search and text retrieval
+ * @param messages - The chat messages to condense
+ * @param model - The LLM model to use for condensing
+ * @returns A string representing the search query
+ */
+export async function condenseChatHistory({
+  messages,
+  model,
+}: {
+  messages: Array<Message>;
+  model: LanguageModelV1;
+}): Promise<string> {
+  // Use only the most recent messages for generating the search query
+  const recentMessages = limitChatHistory({
+    messages,
+    limitRecent: 6,
+    limitFirst: 3,
+    characterLimit: 2000,
+  });
+
+  try {
+    const { text } = await generateText({
+      model,
+      system: `Du bist ein hilfreicher Assistent, der Suchanfragen erstellt.
+Basierend auf dem Chatverlauf, erstelle eine präzise Suchanfrage.
+Die Suchanfrage sollte die Hauptfrage oder das Hauptthema des Benutzers erfassen.
+Halte die Suchanfrage kurz und prägnant (maximal 200 Zeichen).
+Gib NUR die Suchanfrage zurück, ohne zusätzliche Erklärungen oder Formatierungen.`,
+      messages: recentMessages.map((m) => ({ role: m.role, content: m.content })),
+    });
+
+    return text.trim();
+  } catch (error) {
+    console.error('Error condensing chat history:', error);
+    // Fallback: Use the last user message as the search query
+    const lastUserMessage = messages.findLast((m) => m.role === 'user');
+    return lastUserMessage?.content.slice(0, 200) || '';
+  }
 }

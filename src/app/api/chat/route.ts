@@ -26,6 +26,9 @@ import { SMALL_MODEL_LIST } from '@/configuration-text-inputs/const';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
+import { condenseChatHistory } from './utils';
+import { searchTextChunks } from '../file-operations/retrieval';
+import { embedText } from '../file-operations/embedding';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -143,11 +146,36 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Unhandled error while fetching website', error);
   }
-  // TODO: condense chat history to search query to use for vector search and text retrieval
+  // Condense chat history to search query to use for vector search and text retrieval
+  const searchQuery = await condenseChatHistory({
+    messages,
+    model: telliProvider,
+  });
+  console.log(`Search query: ${searchQuery}`);
+  const [queryEmbedding] = await embedText({
+    text: [searchQuery],
+    federalStateId: user.federalState.id,
+  });
 
-  // TODO:preform vector search and text retrieval
 
-  // TODO: post process retrieved text chunks and insert to template
+  // Placeholder for vector search and text retrieval
+  // TODO: Implement actual vector search here when the functionality is available
+  const retrievedTextChunks = await searchTextChunks({
+    query: searchQuery,
+    embedding: queryEmbedding ?? [],
+    fileIds: relatedFileEntities.map((file) => file.id),
+  });
+
+  
+
+  const retrievedTextChunksString = retrievedTextChunks.map((chunk) => chunk.content).join('\n\n');
+  console.log(`Retrieved text chunks: ${retrievedTextChunksString}`);
+  
+  // Placeholder for post-processing retrieved text chunks
+  // This will be expanded when vector search is implemented
+  const processedRetrievedText = retrievedTextChunks.length > 0 
+    ? `\n\nRelevant information:\n${retrievedTextChunks.join('\n\n')}`
+    : '';
 
   
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });

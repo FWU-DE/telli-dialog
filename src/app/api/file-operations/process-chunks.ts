@@ -85,3 +85,33 @@ export function chunkText({
   
     return chunks;
   }
+
+/**
+ * Groups retrieved text chunks by fileId and sorts them by orderIndex within each group
+ * @param chunks Array of text chunks with fileId and orderIndex properties
+ * @returns Object with fileIds as keys and arrays of sorted chunks as values
+ */
+export function groupAndSortChunks(chunks: Array<{
+  id: string;
+  content: string;
+  fileId: string;
+  pageNumber: number | null;
+  orderIndex: number;
+  [key: string]: any; // Allow for additional properties like embeddingSimilarity, textRank, etc.
+}>) {
+  // Group chunks by fileId
+  const groupedChunks = chunks.reduce((acc, chunk) => {
+    if (!acc[chunk.fileId]) {
+      acc[chunk.fileId] = [];
+    }
+    acc[chunk.fileId].push(chunk);
+    return acc;
+  }, {} as Record<string, typeof chunks>);
+
+  // Sort each group by orderIndex
+  Object.keys(groupedChunks).forEach(fileId => {
+    groupedChunks[fileId].sort((a, b) => a.orderIndex - b.orderIndex);
+  });
+
+  return groupedChunks;
+}

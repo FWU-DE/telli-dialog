@@ -56,7 +56,6 @@ export async function POST(req: NextRequest) {
     values: textChunks,
     fileId,
     federalStateId: user.federalState.id,
-    modelName: 'BAAI/bge-m3',
   });
 
 
