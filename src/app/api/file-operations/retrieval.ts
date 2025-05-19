@@ -1,10 +1,10 @@
 import { db } from '@/db';
 import { FileModelAndContent, fileTable, textChunkTable } from '@/db/schema';
 import { eq, sql, inArray, desc, SQL, and } from 'drizzle-orm';
-import { groupAndSortChunks } from './process-chunks';
+import { chunkText, groupAndSortChunks } from './process-chunks';
 import { condenseChatHistory } from '../chat/utils';
 import { getKeywordsFromQuery } from '../chat/utils';
-import { embedText } from './embedding';
+import { embedBatchAndSave, embedText } from './embedding';
 import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { Message } from '@ai-sdk/react';
 import { getAuxiliaryModel } from '@/app/(authed)/(dialog)/shared-chats/actions';
@@ -56,12 +56,43 @@ export async function getRelevantFileContent({
     federalStateId: user.federalState.id,
   });
 
-  const retrievedTextChunks = await searchTextChunks({
+  let retrievedTextChunks = await searchTextChunks({
     keywords,
     embedding: queryEmbedding ?? [],
     fileIds: relatedFileEntities.map((file) => file.id),
     limit: FILE_SEARCH_LIMIT,
   });
+
+  // Fallback: If no chunks found, process files ad-hoc and try search again
+  if (retrievedTextChunks.length === 0) {
+    console.log('No text chunks found, attempting ad-hoc file processing...');
+
+    // Process each file that hasn't been processed yet
+    for (const file of relatedFileEntities) {
+      const textChunks = chunkText({
+        text: file.content ?? '',
+        sentenceChunkOverlap: 1,
+        lowerBoundWordCount: 200,
+      });
+      await db
+        .insert(fileTable)
+        .values({ id: file.id, name: file.name, size: file.size, type: file.type });
+
+      await embedBatchAndSave({
+        values: textChunks,
+        fileId: file.id,
+        federalStateId: user.federalState.id,
+      });
+    }
+
+    // Try search again after processing
+    retrievedTextChunks = await searchTextChunks({
+      keywords,
+      embedding: queryEmbedding ?? [],
+      fileIds: relatedFileEntities.map((file) => file.id),
+      limit: FILE_SEARCH_LIMIT,
+    });
+  }
 
   const orderedChunks = groupAndSortChunks(retrievedTextChunks);
 
