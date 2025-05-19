@@ -18,14 +18,10 @@ function splitLongSentence(sentence: string, maxSentenceWords: number): string[]
 export function chunkText({
   text,
   sentenceChunkOverlap,
-  fallBackChunkSize = 250,
-  fallBackChunkOverlap = 50,
   lowerBoundWordCount = 200,
 }: {
   text: string;
   sentenceChunkOverlap: number;
-  fallBackChunkSize?: number;
-  fallBackChunkOverlap?: number;
   lowerBoundWordCount?: number;
 }){
   // Helper to count words
@@ -46,14 +42,14 @@ export function chunkText({
           .map((child) => child.value)
           .join('');
       });
-  } catch (e) {
+  } catch {
     sentences = [];
   }
 
   // Ensure each sentence is below 100 words
   const maxSentenceWords = 100;
 
-  let pseudoSentences: string[] = [];
+  const pseudoSentences: string[] = [];
   for (const sentence of sentences) {
     pseudoSentences.push(...splitLongSentence(sentence, maxSentenceWords));
   }

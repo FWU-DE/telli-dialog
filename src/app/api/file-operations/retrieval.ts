@@ -1,14 +1,72 @@
 import { db } from '@/db';
 import { fileTable, textChunkTable } from '@/db/schema';
 import { eq, sql, inArray, desc, SQL, and } from 'drizzle-orm';
-import util from 'node:util';
+import { groupAndSortChunks } from './process-chunks';
+import { condenseChatHistory } from '../chat/utils';
+import { getKeywordsFromQuery } from '../chat/utils';
+import { embedText } from './embedding';
+import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
+import { Message } from '@ai-sdk/react';
+import { getAuxiliaryModel } from '@/app/(authed)/(dialog)/shared-chats/actions';
+import { getModelAndProviderWithResult } from '../utils';
+import { UserAndContext } from '@/auth/types';
+
 type SearchOptions = {
   keywords: string[];
   embedding: number[];
   fileIds?: string[];
   limit?: number;
-  minSimilarity?: number;
 };
+
+export async function getRelevantFileContent({
+  messages,
+  user,
+  relatedFileEntities,
+}: {
+  messages: Message[];
+  user: UserAndContext;
+  relatedFileEntities: FileModelAndContent[];
+}) {
+  const auxiliaryModel = await getAuxiliaryModel();
+
+  const [errorAuxiliaryModel, auxiliaryModelAndProvider] = await getModelAndProviderWithResult({
+    modelId: auxiliaryModel.id,
+    federalStateId: user.federalState.id,
+  });
+
+  if (errorAuxiliaryModel !== null) {
+    throw new Error(errorAuxiliaryModel.message);
+  }
+
+  const [searchQuery, keywords] = await Promise.all([
+    condenseChatHistory({
+      messages,
+      model: auxiliaryModelAndProvider.telliProvider,
+    }),
+    getKeywordsFromQuery({
+      messages,
+      model: auxiliaryModelAndProvider.telliProvider,
+    }),
+  ]);
+
+  console.log(`Search query: ${searchQuery}`);
+  console.log(`Keywords: ${keywords}`);
+  const [queryEmbedding] = await embedText({
+    text: [searchQuery],
+    federalStateId: user.federalState.id,
+  });
+
+  const retrievedTextChunks = await searchTextChunks({
+    keywords,
+    embedding: queryEmbedding ?? [],
+    fileIds: relatedFileEntities.map((file) => file.id),
+    limit: FILE_SEARCH_LIMIT,
+  });
+
+  const orderedChunks = groupAndSortChunks(retrievedTextChunks);
+
+  return orderedChunks;
+}
 
 /**
  * Search for relevant text chunks using both embedding similarity and full-text search
@@ -20,7 +78,6 @@ export async function searchTextChunks({
   embedding,
   fileIds,
   limit = 10,
-  minSimilarity = 0.7,
 }: SearchOptions) {
   // Build the base query
   if (embedding.length === 0) {
@@ -49,7 +106,7 @@ export async function searchTextChunks({
     .orderBy((t) => [desc(t.embeddingSimilarity)]);
 
   // Calculate text rank for each chunk see documentation https://orm.drizzle.team/docs/guides/postgresql-full-text-search
-  
+
   const textRankResults = await db
     .select({
       id: textChunkTable.id,

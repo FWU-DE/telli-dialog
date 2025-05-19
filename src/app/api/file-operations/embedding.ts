@@ -1,10 +1,7 @@
 import { dbCreateManyTextChunks } from '@/db/functions/text-chunk';
 import { OpenAI } from 'openai';
-import { embedMany, LanguageModelV1 } from 'ai';
-import { getModelAndProviderWithResult } from '../utils';
-import { dbGetApiKeyByFederalStateIdWithResult } from '@/db/functions/federal-state';
 import { env } from '@/env';
-import { dbGetModelByIdAndFederalStateId, dbGetModelByName } from '@/db/functions/llm-model';
+import { dbGetApiKeyByFederalStateIdWithResult } from '@/db/functions/federal-state';
 
 export async function embedText({
   text,

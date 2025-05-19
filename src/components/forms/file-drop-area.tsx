@@ -69,6 +69,7 @@ export function FileDrop({
         fileInputRef.current.value = '';
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [toast, session, setFiles, onFileUploaded, t, showUploadConfirmation],
   );
 

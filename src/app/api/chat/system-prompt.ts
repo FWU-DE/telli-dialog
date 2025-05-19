@@ -2,7 +2,7 @@ import { formatDateToGermanTimestamp } from '@/utils/date';
 import { dbGetCharacterById } from '@/db/functions/character';
 import { getUser } from '@/auth/utils';
 import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
-import { CustomGptModel, FederalStateModel, FileModelAndContent } from '@/db/schema';
+import { CustomGptModel, FederalStateModel } from '@/db/schema';
 import { constructWebsearchPrompt } from '../conversation/tools/websearch/prompt_templates';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { ChunkResult } from '../file-operations/process-chunks';

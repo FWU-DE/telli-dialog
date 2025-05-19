@@ -1,7 +1,5 @@
 import { getUser } from '@/auth/utils';
 import { USER_WARNING_FOR_TRUNCATED_FILES } from '@/configuration-text-inputs/const';
-import { embed } from 'ai';
-import { openai } from '@ai-sdk/openai';
 import { db } from '@/db';
 import { fileTable } from '@/db/schema';
 import { uploadFileToS3 } from '@/s3';

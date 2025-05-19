@@ -1,19 +1,20 @@
-import { FileModel, type SharedSchoolConversationModel } from '@/db/schema';
+import { type SharedSchoolConversationModel } from '@/db/schema';
 import { BASE_FILE_PROMPT, constructSingleFilePrompt } from '../chat/system-prompt';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { constructWebsearchPrompt } from '../conversation/tools/websearch/prompt_templates';
+import { ChunkResult } from '../file-operations/process-chunks';
 export function constructSystemPromptBySharedChat({
   sharedChat,
-  fileEntities,
+  retrievedTextChunks,
   websearchSources,
 }: {
   sharedChat: SharedSchoolConversationModel;
-  fileEntities?: FileModel[];
+  retrievedTextChunks: Record<string, ChunkResult[]>;
   websearchSources?: WebsearchSource[];
 }) {
   const filePrompt =
-    fileEntities !== undefined
-      ? BASE_FILE_PROMPT + fileEntities.map((file) => constructSingleFilePrompt(file))
+    retrievedTextChunks !== undefined && Object.keys(retrievedTextChunks).length > 0
+      ? BASE_FILE_PROMPT + Object.keys(retrievedTextChunks).map((fileId) => constructSingleFilePrompt(retrievedTextChunks?.[fileId] ?? []))
       : '';
 
   const websearchPrompt = constructWebsearchPrompt({ websearchSources });
