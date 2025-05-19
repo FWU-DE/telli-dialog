@@ -10,6 +10,7 @@ import { Message } from '@ai-sdk/react';
 import { getAuxiliaryModel } from '@/app/(authed)/(dialog)/shared-chats/actions';
 import { getModelAndProviderWithResult } from '../utils';
 import { UserAndContext } from '@/auth/types';
+import { processFiles } from './process-file';
 
 type SearchOptions = {
   keywords: string[];
@@ -66,9 +67,10 @@ export async function getRelevantFileContent({
   // Fallback: If no chunks found, process files ad-hoc and try search again
   if (retrievedTextChunks.length === 0) {
     console.log('No text chunks found, attempting ad-hoc file processing...');
-
+    const processedFiles = await processFiles(relatedFileEntities);
     // Process each file that hasn't been processed yet
-    for (const file of relatedFileEntities) {
+    for (const file of processedFiles) {
+      console.log('file', file);
       const textChunks = chunkText({
         text: file.content ?? '',
         sentenceChunkOverlap: 1,
@@ -76,8 +78,8 @@ export async function getRelevantFileContent({
       });
       await db
         .insert(fileTable)
-        .values({ id: file.id, name: file.name, size: file.size, type: file.type });
-
+        .values({ id: file.id, name: file.name, size: file.size, type: file.type })
+        .onConflictDoNothing();
       await embedBatchAndSave({
         values: textChunks,
         fileId: file.id,

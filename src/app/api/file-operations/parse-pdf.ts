@@ -8,7 +8,8 @@ export async function extractTextFromPdfBuffer(pdfBuffer: Buffer): Promise<strin
 
   return new Promise<string>((resolve, reject) => {
     reader.parseBuffer(pdfBuffer, (err: string | null, dataEntry: DataEntry | null) => {
-      if (err !== null) {
+      if (err != null) {
+        console.error('Error parsing PDF:', err);
         reject(new Error(err));
         return;
       }

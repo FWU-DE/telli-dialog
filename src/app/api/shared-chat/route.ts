@@ -19,7 +19,7 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbGetRelatedSharedChatFiles } from '@/db/functions/files';
-import { process_files } from '../file-operations/process-file';
+import { processFiles } from '../file-operations/process-file';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
   }
   const allFileIds = await dbGetRelatedSharedChatFiles(sharedChat.id);
   const urls = sharedChat.attachedLinks.filter((l) => l !== '').map(webScraperExecutable);
-  const attachedFiles = await process_files(allFileIds);
+  const attachedFiles = await processFiles(allFileIds);
   const retrievedTextChunks = await getRelevantFileContent({
     messages,
     user: teacherUserAndContext,

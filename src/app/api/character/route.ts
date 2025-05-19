@@ -21,7 +21,7 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbGetRelatedCharacterFiles } from '@/db/functions/files';
-import { process_files } from '../file-operations/process-file';
+import { processFiles } from '../file-operations/process-file';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 
 export async function POST(request: NextRequest) {
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
   }
 
   const allFileIds = await dbGetRelatedCharacterFiles(character.id);
-  const attachedFiles = await process_files(allFileIds);
+  const attachedFiles = await processFiles(allFileIds);
   const retrievedTextChunks = await getRelevantFileContent({
     messages,
     user: teacherUserAndContext,
