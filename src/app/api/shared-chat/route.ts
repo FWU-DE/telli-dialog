@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     user: teacherUserAndContext,
     relatedFileEntities: attachedFiles,
   });
-  
+
   const websearchSources = await Promise.all(urls);
   const systemPrompt = constructSystemPromptBySharedChat({
     sharedChat,
