@@ -1,10 +1,10 @@
 'use server';
 
 import { db } from '@/db';
-import { SharedSchoolConversationFileMapping, sharedSchoolConversationTable } from '@/db/schema';
+import { LlmModel, SharedSchoolConversationFileMapping, sharedSchoolConversationTable } from '@/db/schema';
 import { getUser } from '@/auth/utils';
 import { dbDeleteSharedSchoolChatByIdAndUserId } from '@/db/functions/shared-school-chat';
-import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
+import { DEFAULT_AUXILIARY_MODEL, DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 
 export async function dbDeleteSharedChatAction({ id }: { id: string }) {
@@ -16,6 +16,22 @@ export async function dbDeleteSharedChatAction({ id }: { id: string }) {
   });
 
   return deletedSharedChat;
+}
+
+/**
+ * Get the auxiliary model for the user's federal state
+ * @returns The auxiliary model for the user's federal state
+ */
+export async function getAuxiliaryModel(): Promise<LlmModel> {
+  const user = await getUser();
+  const llmModels = await dbGetAndUpdateLlmModelsByFederalStateId({
+    federalStateId: user.federalState.id,
+  });
+  const auxiliaryModel = llmModels.find((m) => m.name === DEFAULT_AUXILIARY_MODEL) ?? llmModels[0];
+  if (auxiliaryModel === undefined) {
+    throw new Error('No auxiliary model found');
+  }
+  return auxiliaryModel;
 }
 
 export async function dbCreateSharedSchoolChat({ userId }: { userId: string }) {

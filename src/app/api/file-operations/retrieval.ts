@@ -1,14 +1,14 @@
 import { db } from '@/db';
-import { textChunkTable } from '@/db/schema';
-import { sql, inArray, desc, SQL } from 'drizzle-orm';
-
-interface SearchOptions {
-  query: string;
+import { fileTable, textChunkTable } from '@/db/schema';
+import { eq, sql, inArray, desc, SQL, and } from 'drizzle-orm';
+import util from 'node:util';
+type SearchOptions = {
+  keywords: string[];
   embedding: number[];
   fileIds?: string[];
   limit?: number;
   minSimilarity?: number;
-}
+};
 
 /**
  * Search for relevant text chunks using both embedding similarity and full-text search
@@ -16,7 +16,7 @@ interface SearchOptions {
  * @returns Array of text chunks sorted by relevance
  */
 export async function searchTextChunks({
-  query,
+  keywords,
   embedding,
   fileIds,
   limit = 10,
@@ -27,40 +27,70 @@ export async function searchTextChunks({
     return [];
   }
 
+  const cleaned_keywords = keywords.map((keyword) => keyword.replace(/[^a-zA-Z0-9]/g, ''));
   const embeddingResults = await db
     .select({
       id: textChunkTable.id,
       content: textChunkTable.content,
       fileId: textChunkTable.fileId,
       pageNumber: textChunkTable.pageNumber,
+      fileName: fileTable.name,
       orderIndex: textChunkTable.orderIndex,
+      leadingOverlap: textChunkTable.leadingOverlap,
+      trailingOverlap: textChunkTable.trailingOverlap,
       // Calculate embedding similarity score (cosine similarity)
       embeddingSimilarity:
         sql`1 - (${textChunkTable.embedding} <=> ${JSON.stringify(embedding)})` as SQL<number>,
     })
     .from(textChunkTable)
+    .leftJoin(fileTable, eq(textChunkTable.fileId, fileTable.id))
     .where(inArray(textChunkTable.fileId, fileIds ?? []))
     .limit(limit)
     .orderBy((t) => [desc(t.embeddingSimilarity)]);
 
   // Calculate text rank for each chunk see documentation https://orm.drizzle.team/docs/guides/postgresql-full-text-search
+  
   const textRankResults = await db
     .select({
       id: textChunkTable.id,
       content: textChunkTable.content,
       fileId: textChunkTable.fileId,
+      fileName: fileTable.name,
+      leadingOverlap: textChunkTable.leadingOverlap,
+      trailingOverlap: textChunkTable.trailingOverlap,
       pageNumber: textChunkTable.pageNumber,
       orderIndex: textChunkTable.orderIndex,
       textRank:
-        sql`ts_rank_cd(${textChunkTable.contentTsv}, to_tsquery('german', ${query.replace(/\s+/g, ' & ')}))` as SQL<number>,
+        sql`ts_rank_cd(${textChunkTable.contentTsv}, to_tsquery('german', ${cleaned_keywords.join(' | ')}))` as SQL<number>,
     })
     .from(textChunkTable)
-    .where(inArray(textChunkTable.fileId, fileIds ?? []))
+    .leftJoin(fileTable, eq(textChunkTable.fileId, fileTable.id))
+    .where(
+      and(
+        inArray(textChunkTable.fileId, fileIds ?? []),
+        sql`ts_rank_cd(${textChunkTable.contentTsv}, to_tsquery('german', ${cleaned_keywords.join(' | ')})) > 0`,
+      ),
+    )
     .limit(limit)
     .orderBy((t) => [desc(t.textRank)]);
 
   // Create a map to store all unique results
-  const combinedResultsMap = new Map();
+  const combinedResultsMap: Map<
+    string,
+    {
+      id: string;
+      content: string;
+      fileId: string;
+      pageNumber: number | null;
+      orderIndex: number;
+      embeddingRank: number;
+      textRank: number;
+      combinedRankScore: number;
+      fileName: string;
+      leadingOverlap: string | null;
+      trailingOverlap: string | null;
+    }
+  > = new Map();
 
   // Process embedding results with rank position
   embeddingResults.forEach((result, index) => {
@@ -69,6 +99,9 @@ export async function searchTextChunks({
       embeddingRank: index + 1, // 1-based rank
       textRank: Number.MAX_SAFE_INTEGER, // Default rank if not in text results
       combinedRankScore: 0, // Will be calculated after both lists are processed
+      fileName: result.fileName ?? '',
+      leadingOverlap: result.leadingOverlap ?? null,
+      trailingOverlap: result.trailingOverlap ?? null,
     });
   });
 
@@ -77,13 +110,19 @@ export async function searchTextChunks({
     if (combinedResultsMap.has(result.id)) {
       // Update existing entry with text rank position
       const existingEntry = combinedResultsMap.get(result.id);
-      existingEntry.textRank = index + 1; // 1-based rank
+      if (existingEntry) {
+        existingEntry.textRank = index + 1; // 1-based rank
+      }
     } else {
       // Add new entry
       combinedResultsMap.set(result.id, {
         ...result,
         embeddingRank: Number.MAX_SAFE_INTEGER, // Default rank if not in embedding results
         textRank: index + 1, // 1-based rank
+        combinedRankScore: 0, // Will be calculated after both lists are processed
+        fileName: result.fileName ?? '', // Filename must be defined
+        leadingOverlap: result.leadingOverlap ?? null,
+        trailingOverlap: result.trailingOverlap ?? null,
       });
     }
   });
@@ -99,5 +138,5 @@ export async function searchTextChunks({
     .sort((a, b) => a.combinedRankScore - b.combinedRankScore)
     .slice(0, limit);
 
-  return combinedResults;
+  return combinedResults.slice(0, limit);
 }

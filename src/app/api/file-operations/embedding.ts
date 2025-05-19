@@ -39,20 +39,26 @@ export async function embedBatchAndSave({
   fileId,
   federalStateId,
 }: {
-  values: string[];
+  values: {
+    content: string;
+    leadingOverlap?: string;
+    trailingOverlap?: string;
+  }[];
   fileId: string;
   federalStateId: string;
 }) {
   const embeddings = await embedText({
-    text: values,
+    text: values.map((value) => `${value.leadingOverlap ?? ''}${value.content}${value.trailingOverlap ?? ''}`),
     federalStateId,
   });
   await dbCreateManyTextChunks({
     chunks: embeddings.map((embedding, index) => ({
-      content: values[index] ?? '',
+      content: values[index]?.content ?? '',
       embedding,
       fileId,
       orderIndex: index,
+      leadingOverlap: values[index]?.leadingOverlap ?? undefined,
+      trailingOverlap: values[index]?.trailingOverlap ?? undefined,
     })),
   });
 }

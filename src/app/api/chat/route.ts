@@ -10,7 +10,7 @@ import { getUser } from '@/auth/utils';
 import { userHasReachedIntelliPointLimit, trackChatUsage } from './usage';
 import { getModelAndProviderWithResult, calculateCostsInCents } from '../utils';
 import { generateUUID } from '@/utils/uuid';
-import { getMostRecentUserMessage, limitChatHistory } from './utils';
+import { getKeywordsFromQuery, getMostRecentUserMessage, limitChatHistory } from './utils';
 import { constructChatSystemPrompt } from './system-prompt';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
@@ -18,9 +18,8 @@ import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
 import { dbGetAttachedFileByEntityId, link_file_to_conversation } from '@/db/functions/files';
-import { process_files } from '../file-operations/process-file';
 import { FileModelAndContent } from '@/db/schema';
-import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import { FILE_SEARCH_LIMIT, TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { SMALL_MODEL_MAX_CHARACTERS } from '@/configuration-text-inputs/const';
 import { SMALL_MODEL_LIST } from '@/configuration-text-inputs/const';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
@@ -29,6 +28,9 @@ import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { condenseChatHistory } from './utils';
 import { searchTextChunks } from '../file-operations/retrieval';
 import { embedText } from '../file-operations/embedding';
+import { groupAndSortChunks } from '../file-operations/process-chunks';
+import util from 'node:util';
+import { getAuxiliaryModel } from '@/app/(authed)/(dialog)/shared-chats/actions';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -63,12 +65,23 @@ export async function POST(request: NextRequest) {
     modelId,
     federalStateId: user.federalState.id,
   });
+  const auxiliaryModel = await getAuxiliaryModel();
+
+  const [errorAuxiliaryModel, auxiliaryModelAndProvider] = await getModelAndProviderWithResult({
+    modelId: auxiliaryModel.id,
+    federalStateId: user.federalState.id,
+  });
+
+  if (errorAuxiliaryModel !== null) {
+    return NextResponse.json({ error: errorAuxiliaryModel.message }, { status: 500 });
+  }
 
   if (error !== null) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
   const { telliProvider, definedModel } = modelAndProvider;
+  const { telliProvider: auxiliaryTelliProvider } = auxiliaryModelAndProvider;
 
   const conversation = await dbGetOrCreateConversation({
     conversationId: id,
@@ -118,7 +131,7 @@ export async function POST(request: NextRequest) {
     modelName: definedModel.name,
     orderNumber: messages.length + 1,
   });
-  let attachedFiles: FileModelAndContent[] = [];
+  
   if (currentFileIds !== undefined) {
     await link_file_to_conversation({
       fileIds: currentFileIds,
@@ -147,36 +160,34 @@ export async function POST(request: NextRequest) {
     console.error('Unhandled error while fetching website', error);
   }
   // Condense chat history to search query to use for vector search and text retrieval
-  const searchQuery = await condenseChatHistory({
-    messages,
-    model: telliProvider,
-  });
+  const [searchQuery, keywords] = await Promise.all([
+    condenseChatHistory({
+      messages,
+      model: auxiliaryTelliProvider,
+    }),
+    getKeywordsFromQuery({
+      messages,
+      model: auxiliaryTelliProvider,
+    }),
+  ]);
+
+
   console.log(`Search query: ${searchQuery}`);
+  console.log(`Keywords: ${keywords}`);
   const [queryEmbedding] = await embedText({
     text: [searchQuery],
     federalStateId: user.federalState.id,
   });
 
-
-  // Placeholder for vector search and text retrieval
-  // TODO: Implement actual vector search here when the functionality is available
   const retrievedTextChunks = await searchTextChunks({
-    query: searchQuery,
+    keywords,
     embedding: queryEmbedding ?? [],
     fileIds: relatedFileEntities.map((file) => file.id),
+    limit: FILE_SEARCH_LIMIT,
   });
 
-  
 
-  const retrievedTextChunksString = retrievedTextChunks.map((chunk) => chunk.content).join('\n\n');
-  console.log(`Retrieved text chunks: ${retrievedTextChunksString}`);
-  
-  // Placeholder for post-processing retrieved text chunks
-  // This will be expanded when vector search is implemented
-  const processedRetrievedText = retrievedTextChunks.length > 0 
-    ? `\n\nRelevant information:\n${retrievedTextChunks.join('\n\n')}`
-    : '';
-
+  const orderedChunks = groupAndSortChunks(retrievedTextChunks);
   
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
   const maxCharacterLimit = SMALL_MODEL_LIST.includes(definedModel.displayName)
@@ -193,8 +204,8 @@ export async function POST(request: NextRequest) {
     customGptId,
     isTeacher: user.school.userRole === 'teacher',
     federalState: user.federalState,
-    attachedFiles: attachedFiles,
     websearchSources: websearchSources,
+    retrievedTextChunks: orderedChunks,
   });
   const result = streamText({
     model: telliProvider,

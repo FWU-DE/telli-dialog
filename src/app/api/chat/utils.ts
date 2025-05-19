@@ -1,5 +1,4 @@
 import { generateText, LanguageModelV1, type Message } from 'ai';
-import type { LlmModel } from '@/db/schema';
 
 export function getMostRecentUserMessage(messages: Array<Message>) {
   const userMessages = messages.filter((message) => message.role === 'user');
@@ -140,7 +139,15 @@ export async function condenseChatHistory({
 Basierend auf dem Chatverlauf, erstelle eine präzise Suchanfrage.
 Die Suchanfrage sollte die Hauptfrage oder das Hauptthema des Benutzers erfassen.
 Halte die Suchanfrage kurz und prägnant (maximal 200 Zeichen).
-Gib NUR die Suchanfrage zurück, ohne zusätzliche Erklärungen oder Formatierungen.`,
+
+ACHTUNG: Gib NUR die Suchanfrage zurück, ohne zusätzliche Erklärungen oder Formatierungen.
+Beantworte NICHT die Frage des Benutzers, sondern erstelle eine präzise Suchanfrage.
+
+Beispiel:
+
+Benutzer: "Ich möchte wissen, ob ich in meinem Bundesland einen Anspruch auf Elterngeld habe."
+Suchanfrage: "Elterngeld Anspruch"
+`,
       messages: recentMessages.map((m) => ({ role: m.role, content: m.content })),
     });
 
@@ -151,4 +158,40 @@ Gib NUR die Suchanfrage zurück, ohne zusätzliche Erklärungen oder Formatierun
     const lastUserMessage = messages.findLast((m) => m.role === 'user');
     return lastUserMessage?.content.slice(0, 200) || '';
   }
+}
+
+
+export async function getKeywordsFromQuery({
+  messages,
+  model,
+}: {
+  messages: Array<Message>;
+  model: LanguageModelV1;
+}): Promise<string[]> {
+  const { text } = await generateText({
+    model,
+    system: `Du bist ein Experte für die präzise Extraktion von Schlüsselwörtern. Deine Aufgabe ist es, die relevantesten Schlüsselwörter aus der gegebenen Suchanfrage (der letzten Benutzernachricht im Chatverlauf) zu extrahieren.
+
+Regeln:
+1. Extrahiere nur die wichtigsten, fachspezifischen Schlüsselwörter
+2. Entferne allgemeine Wörter, Artikel und Präpositionen
+3. Behalte zusammengesetzte Begriffe als einzelne Schlüsselwörter
+4. Verwende die Grundform der Wörter
+5. Gib die Schlüsselwörter als kommaseparierte Liste zurück
+6. Maximal 5 Schlüsselwörter pro Anfrage
+7. Schlüsselwörter sollten spezifisch und aussagekräftig sein
+
+Beispiele:
+Eingabe: "Wie kann ich einen Antrag auf Elterngeld stellen?"
+Ausgabe: "Elterngeld,Antrag,Anspruch"
+
+Eingabe: "Was sind die Voraussetzungen für Arbeitslosengeld?"
+Ausgabe: "Arbeitslosengeld,Voraussetzungen,Berechtigung"
+
+Eingabe: "Wo finde ich Informationen über Kindergeld?"
+Ausgabe: "Kindergeld,Informationen,Leitfaden"
+`,
+    messages,
+  });
+  return text.trim().split(',');
 }

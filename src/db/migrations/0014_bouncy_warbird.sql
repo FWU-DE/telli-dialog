@@ -6,6 +6,8 @@ CREATE TABLE "text_chunk" (
 	"embedding" vector(1024) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"content" text NOT NULL,
+	"leading_overlap" text,
+	"trailing_overlap" text,
 	"order_index" integer NOT NULL,
 	"page_number" integer,
 	"content_tsv" "tsvector" GENERATED ALWAYS AS (to_tsvector('german', content)) STORED NOT NULL

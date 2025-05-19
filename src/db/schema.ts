@@ -423,6 +423,8 @@ export const textChunkTable = pgTable(
     embedding: vector('embedding', { dimensions: 1024 }).notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     content: text('content').notNull(),
+    leadingOverlap: text('leading_overlap'),
+    trailingOverlap: text('trailing_overlap'),
     orderIndex: integer('order_index').notNull(),
     pageNumber: integer('page_number'),
     contentTsv: tsvector('content_tsv').notNull().generatedAlwaysAs(

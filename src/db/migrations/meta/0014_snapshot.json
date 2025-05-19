@@ -1,5 +1,5 @@
 {
-  "id": "d334b792-62f7-49d5-9d37-054c2734890b",
+  "id": "ed1e663b-22c0-4614-8a04-2f1a1096df4c",
   "prevId": "b14ec4cc-59ed-48b1-a8d9-cb2c0ad06d3f",
   "version": "7",
   "dialect": "postgresql",
@@ -1649,6 +1649,18 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "leading_overlap": {
+          "name": "leading_overlap",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "trailing_overlap": {
+          "name": "trailing_overlap",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "order_index": {
           "name": "order_index",

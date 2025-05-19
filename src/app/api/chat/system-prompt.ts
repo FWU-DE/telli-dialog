@@ -5,16 +5,26 @@ import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
 import { CustomGptModel, FederalStateModel, FileModelAndContent } from '@/db/schema';
 import { constructWebsearchPrompt } from '../conversation/tools/websearch/prompt_templates';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
+import { ChunkResult } from '../file-operations/process-chunks';
 
 export function constructSchuleSystemPrompt() {
   return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. Heute ist der ${formatDateToGermanTimestamp(new Date())}. Befolge folgende Anweisungen: Du sprichst immer die Sprache mit der du angesprochen wirst. Deine Standardsprache ist Deutsch, du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die die Paardform (Beidnennung) z.B. Bürgerinnen und Bürger.`;
 }
 
-export function constructSingleFilePrompt(fileEntity: FileModelAndContent) {
-  return `Dateiname: ${fileEntity.name} 
-  Was folgt ist der gesamte rohe Inhalt der Datei:
+function formatTextChunk(textChunk: ChunkResult) {
+  return `Seite ${textChunk.pageNumber}: ${textChunk.content}`;
+}
+
+export function constructSingleFilePrompt(textChunks: ChunkResult[]) {
+  if (textChunks.length === 0) {
+    return '';
+  }
+
+  return `Dateiname: ${textChunks[0]?.fileName ?? ''} 
+  Was folgt sind die relevanten Informationen aus der Datei:
   --------- 
-  ${fileEntity.content}
+  ${textChunks.map(formatTextChunk).join('\n\n')}
+
   ---------
   `;
 }
@@ -124,21 +134,22 @@ export async function constructChatSystemPrompt({
   customGptId,
   isTeacher,
   federalState,
-  attachedFiles,
   websearchSources,
+  retrievedTextChunks,
 }: {
   characterId?: string;
   customGptId?: string;
   isTeacher: boolean;
   federalState: Omit<FederalStateModel, 'encryptedApiKey'>;
-  attachedFiles: FileModelAndContent[];
   websearchSources: WebsearchSource[];
+  retrievedTextChunks: Record<string, ChunkResult[]>;
 }) {
   const schoolSystemPrompt = constructSchuleSystemPrompt();
   const fileContentPrompt =
-    attachedFiles?.length > 0
-      ? BASE_FILE_PROMPT + attachedFiles.map((file) => constructSingleFilePrompt(file))
+    retrievedTextChunks !== undefined && Object.keys(retrievedTextChunks).length > 0
+      ? BASE_FILE_PROMPT + Object.keys(retrievedTextChunks).map((fileId) => constructSingleFilePrompt(retrievedTextChunks?.[fileId] ?? []))
       : '';
+  // console.log(`File content prompt: ${fileContentPrompt}`);
   const websearchSourcesPrompt = constructWebsearchPrompt({ websearchSources });
   if (characterId !== undefined) {
     const characterSystemPrompt = await constructCharacterSystemPrompt({
