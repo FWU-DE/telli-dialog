@@ -60,7 +60,6 @@ export async function POST(request: NextRequest) {
     federalStateId: user.federalState.id,
   });
 
-
   if (error !== null) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -115,7 +114,7 @@ export async function POST(request: NextRequest) {
     modelName: definedModel.name,
     orderNumber: messages.length + 1,
   });
-  
+
   if (currentFileIds !== undefined) {
     await link_file_to_conversation({
       fileIds: currentFileIds,
@@ -128,7 +127,7 @@ export async function POST(request: NextRequest) {
     characterId,
     customGptId,
   });
-  const orderedChunks = await getRelevantFileContent({messages, user, relatedFileEntities});
+  const orderedChunks = await getRelevantFileContent({ messages, user, relatedFileEntities });
 
   const urls = [userMessage, ...messages]
     .map((message) => parseHyperlinks(message.content) ?? [])
@@ -146,7 +145,6 @@ export async function POST(request: NextRequest) {
   }
   // Condense chat history to search query to use for vector search and text retrieval
 
-  
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
   const maxCharacterLimit = SMALL_MODEL_LIST.includes(definedModel.displayName)
     ? SMALL_MODEL_MAX_CHARACTERS

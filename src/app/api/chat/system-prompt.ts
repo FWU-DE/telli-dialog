@@ -147,7 +147,10 @@ export async function constructChatSystemPrompt({
   const schoolSystemPrompt = constructSchuleSystemPrompt();
   const fileContentPrompt =
     retrievedTextChunks !== undefined && Object.keys(retrievedTextChunks).length > 0
-      ? BASE_FILE_PROMPT + Object.keys(retrievedTextChunks).map((fileId) => constructSingleFilePrompt(retrievedTextChunks?.[fileId] ?? []))
+      ? BASE_FILE_PROMPT +
+        Object.keys(retrievedTextChunks).map((fileId) =>
+          constructSingleFilePrompt(retrievedTextChunks?.[fileId] ?? []),
+        )
       : '';
   // console.log(`File content prompt: ${fileContentPrompt}`);
   const websearchSourcesPrompt = constructWebsearchPrompt({ websearchSources });

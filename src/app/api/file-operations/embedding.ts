@@ -21,7 +21,7 @@ export async function embedText({
   const client = new OpenAI({
     apiKey: federalStateObject.decryptedApiKey,
     baseURL: `${env.apiUrl}/v1`,
-  })
+  });
 
   const result = await client.embeddings.create({
     model: 'BAAI/bge-m3',
@@ -45,7 +45,9 @@ export async function embedBatchAndSave({
   federalStateId: string;
 }) {
   const embeddings = await embedText({
-    text: values.map((value) => `${value.leadingOverlap ?? ''}${value.content}${value.trailingOverlap ?? ''}`),
+    text: values.map(
+      (value) => `${value.leadingOverlap ?? ''}${value.content}${value.trailingOverlap ?? ''}`,
+    ),
     federalStateId,
   });
   await dbCreateManyTextChunks({

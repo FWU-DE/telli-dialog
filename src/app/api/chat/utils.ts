@@ -160,7 +160,6 @@ Suchanfrage: "Elterngeld Anspruch"
   }
 }
 
-
 export async function getKeywordsFromQuery({
   messages,
   model,

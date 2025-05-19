@@ -427,9 +427,9 @@ export const textChunkTable = pgTable(
     trailingOverlap: text('trailing_overlap'),
     orderIndex: integer('order_index').notNull(),
     pageNumber: integer('page_number'),
-    contentTsv: tsvector('content_tsv').notNull().generatedAlwaysAs(
-      sql`to_tsvector('german', content)`,
-    ),
+    contentTsv: tsvector('content_tsv')
+      .notNull()
+      .generatedAlwaysAs(sql`to_tsvector('german', content)`),
   },
   () => {
     return {

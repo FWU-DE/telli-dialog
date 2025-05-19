@@ -56,7 +56,6 @@ export async function POST(req: NextRequest) {
     federalStateId: user.federalState.id,
   });
 
-
   await uploadFileToS3({
     key: `message_attachments/${fileId}`,
     body: buffer,

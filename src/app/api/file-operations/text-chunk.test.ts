@@ -47,7 +47,7 @@ describe('chunkText', () => {
       'Sentence two with a lot of words.',
       'Sentence three with a lot of words.',
       'Sentence four with a lot of words.',
-      'Sentence five with a lot of words.'
+      'Sentence five with a lot of words.',
     ].join(' ');
     const chunks = chunkText({ text, sentenceChunkOverlap: 1, lowerBoundWordCount: 10 });
     // The last chunk should include the last and the previous sentence
@@ -62,10 +62,13 @@ describe('chunkText', () => {
       'Short two.',
       'Short three.',
       'Short four.',
-      'Short five.'
+      'Short five.',
     ];
-    const longSentence = 'This is a very long sentence. '.repeat(20) +
-      'It keeps going and going, with more and more words, to ensure it is well over two hundred words. '.repeat(10);
+    const longSentence =
+      'This is a very long sentence. '.repeat(20) +
+      'It keeps going and going, with more and more words, to ensure it is well over two hundred words. '.repeat(
+        10,
+      );
     const text = [...shortSentences, longSentence].join(' ');
     const chunks = chunkText({ text, sentenceChunkOverlap: 1, lowerBoundWordCount: 50 });
     // Should create multiple chunks due to the long sentence
@@ -89,4 +92,4 @@ describe('chunkText', () => {
     // The last chunk should contain part of the long sentence
     expect(chunks[chunks.length - 1]?.content).toContain('going, with more and more words');
   });
-}); 
+});

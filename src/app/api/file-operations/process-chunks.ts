@@ -1,7 +1,9 @@
 import { split as splitSentences, SentenceSplitterSyntax } from 'sentence-splitter';
 import { TextChunkModel } from '@/db/schema';
 
-export type ChunkResult = Omit<TextChunkModel, 'embedding' | 'contentTsv' | 'createdAt'> & {fileName: string};
+export type ChunkResult = Omit<TextChunkModel, 'embedding' | 'contentTsv' | 'createdAt'> & {
+  fileName: string;
+};
 
 function splitLongSentence(sentence: string, maxSentenceWords: number): string[] {
   const words = sentence.trim().split(/\s+/);
@@ -23,7 +25,7 @@ export function chunkText({
   text: string;
   sentenceChunkOverlap: number;
   lowerBoundWordCount?: number;
-}){
+}) {
   // Helper to count words
   function countWords(str: string) {
     return str.trim().split(/\s+/).length;

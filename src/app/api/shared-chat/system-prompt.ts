@@ -14,7 +14,10 @@ export function constructSystemPromptBySharedChat({
 }) {
   const filePrompt =
     retrievedTextChunks !== undefined && Object.keys(retrievedTextChunks).length > 0
-      ? BASE_FILE_PROMPT + Object.keys(retrievedTextChunks).map((fileId) => constructSingleFilePrompt(retrievedTextChunks?.[fileId] ?? []))
+      ? BASE_FILE_PROMPT +
+        Object.keys(retrievedTextChunks).map((fileId) =>
+          constructSingleFilePrompt(retrievedTextChunks?.[fileId] ?? []),
+        )
       : '';
 
   const websearchPrompt = constructWebsearchPrompt({ websearchSources });

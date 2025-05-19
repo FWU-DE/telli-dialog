@@ -93,7 +93,11 @@ export async function POST(request: NextRequest) {
 
   const allFileIds = await dbGetRelatedCharacterFiles(character.id);
   const attachedFiles = await process_files(allFileIds);
-  const retrievedTextChunks = await getRelevantFileContent({messages, user: teacherUserAndContext, relatedFileEntities: attachedFiles});
+  const retrievedTextChunks = await getRelevantFileContent({
+    messages,
+    user: teacherUserAndContext,
+    relatedFileEntities: attachedFiles,
+  });
   const systemPrompt = constructSystemPromptByCharacterSharedChat({
     character,
     retrievedTextChunks,
