@@ -21,7 +21,7 @@ export async function process_files(
     if (content === undefined) continue;
     const fileType = getFileExtension(fileEnity.name);
     const extractedData = await extractFile({ fileContent: content, type: fileType });
-    fileEnity.content = extractedData.content;
+    fileEnity.content = extractedData;
     i++;
   }
   return maybeFiles;

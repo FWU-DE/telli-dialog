@@ -7,9 +7,9 @@ export async function extractTextFromPdfBuffer(pdfBuffer: Buffer): Promise<strin
   let lastItem: DataEntry | null = null;
 
   return new Promise<string>((resolve, reject) => {
-    reader.parseBuffer(pdfBuffer, (err: Error | null, dataEntry: DataEntry | null) => {
-      if (err) {
-        reject(err);
+    reader.parseBuffer(pdfBuffer, (err: string | null, dataEntry: DataEntry | null) => {
+      if (err !== null) {
+        reject(new Error(err));
         return;
       }
 

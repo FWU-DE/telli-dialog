@@ -14,9 +14,8 @@ export type FileUploadMetadata = {
   directoryId: string;
 };
 
-export type FileUploadResponseWithWarning = {
+export type FileUploadResponse = {
   fileId: string;
-  warning: string | null;
 };
 
 export type FileStatus = 'uploading' | 'processed' | 'failed' | 'success';
@@ -27,7 +26,7 @@ export type UploadFileButtonProps = {
   isPrivateMode?: boolean;
   onFileUploaded?: (data: { id: string; name: string; file: File }) => void;
   triggerButton?: React.ReactNode;
-  fileUploadFn?: (file: File) => Promise<FileUploadResponseWithWarning>;
+  fileUploadFn?: (file: File) => Promise<FileUploadResponse>;
   onFileUploadStart?: () => void;
   className?: string;
   directoryId?: string;
@@ -47,7 +46,7 @@ export async function handleSingleFile({
   file: File;
   prevFileIds?: string[];
   setFiles: React.Dispatch<React.SetStateAction<Map<string, LocalFileState>>>;
-  fileUploadFn?: (file: File) => Promise<FileUploadResponseWithWarning>;
+  fileUploadFn?: (file: File) => Promise<FileUploadResponse>;
   directoryId?: string;
   onFileUploaded?: (data: { id: string; name: string; file: File }) => void;
   session: ReturnType<typeof useSession>;
@@ -82,12 +81,11 @@ export async function handleSingleFile({
   const blobFile = new Blob([file], { type: file.type });
 
   try {
-    const fileIdAndWarning = await fetchUploadFile({
+    const fileId = await fetchUploadFile({
       body: blobFile,
       contentType: file.type,
       fileName: file.name,
     });
-    const fileId = fileIdAndWarning.fileId;
     setFiles((prevFiles) => {
       const updatedFiles = new Map(prevFiles);
       const fileState = updatedFiles.get(localId);
@@ -100,10 +98,7 @@ export async function handleSingleFile({
       }
       return updatedFiles;
     });
-    if (fileIdAndWarning.warning !== null) {
-      toast.error(fileIdAndWarning.warning);
-    }
-    onFileUploaded?.({ id: fileIdAndWarning.fileId, name: file.name, file });
+    onFileUploaded?.({ id: fileId, name: file.name, file });
     if (showUploadConfirmation) toast.success(translations('toasts.upload-success'));
   } catch (error) {
     setFiles((prevFiles) => {
@@ -204,7 +199,7 @@ export async function fetchUploadFile(data: {
   body: Blob;
   contentType: string;
   fileName: string;
-}): Promise<FileUploadResponseWithWarning> {
+}): Promise<string> {
   const formData = new FormData();
   formData.append('file', data.body, data.fileName);
   const response = await fetch('/api/v1/upload-file', {
@@ -216,9 +211,7 @@ export async function fetchUploadFile(data: {
   }
 
   const json = await response.json();
-  const parsedJson = z
-    .object({ file_id: z.string(), warning: z.string().nullable() })
-    .parse(JSON.parse(json?.body));
+  const parsedJson = z.object({ file_id: z.string() }).parse(JSON.parse(json?.body));
 
-  return { fileId: parsedJson.file_id, warning: parsedJson.warning };
+  return parsedJson.file_id;
 }

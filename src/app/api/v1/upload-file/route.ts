@@ -1,5 +1,4 @@
 import { getUser } from '@/auth/utils';
-import { USER_WARNING_FOR_TRUNCATED_FILES } from '@/configuration-text-inputs/const';
 import { db } from '@/db';
 import { fileTable } from '@/db/schema';
 import { uploadFileToS3 } from '@/s3';
@@ -35,11 +34,10 @@ export async function POST(req: NextRequest) {
   const buffer = Buffer.from(bytes);
 
   const fileExtension = getFileExtension(file.name);
-  const { content, truncated } = await extractFile({
+  const content = await extractFile({
     fileContent: buffer,
     type: fileExtension,
   });
-  const userWarning = truncated ? USER_WARNING_FOR_TRUNCATED_FILES : null;
 
   const textChunks = chunkText({
     text: content,
@@ -63,7 +61,7 @@ export async function POST(req: NextRequest) {
   });
 
   return NextResponse.json({
-    body: JSON.stringify({ file_id: fileId, warning: userWarning }),
+    body: JSON.stringify({ file_id: fileId }),
     status: 200,
   });
 }
