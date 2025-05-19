@@ -66,11 +66,10 @@ export async function getRelevantFileContent({
 
   // Fallback: If no chunks found, process files ad-hoc and try search again
   if (retrievedTextChunks.length === 0) {
-    console.log('No text chunks found, attempting ad-hoc file processing...');
+    console.warn('No text chunks found, attempting ad-hoc file processing...');
     const processedFiles = await processFiles(relatedFileEntities);
     // Process each file that hasn't been processed yet
     for (const file of processedFiles) {
-      console.log('file', file);
       const textChunks = chunkText({
         text: file.content ?? '',
         sentenceChunkOverlap: 1,

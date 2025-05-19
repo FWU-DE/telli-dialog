@@ -22,7 +22,6 @@ export async function embedText({
     apiKey: federalStateObject.decryptedApiKey,
     baseURL: `${env.apiUrl}/v1`,
   });
-  console.log('text', text);
   const result = await client.embeddings.create({
     model: 'BAAI/bge-m3',
     input: text,
@@ -50,7 +49,6 @@ export async function embedBatchAndSave({
     ),
     federalStateId,
   });
-  console.log('embeddings', embeddings);
   await dbCreateManyTextChunks({
     chunks: embeddings.map((embedding, index) => ({
       content: values[index]?.content ?? '',

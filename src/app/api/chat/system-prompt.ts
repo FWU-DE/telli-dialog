@@ -152,7 +152,7 @@ export async function constructChatSystemPrompt({
           constructSingleFilePrompt(retrievedTextChunks?.[fileId] ?? []),
         )
       : '';
-  // console.log(`File content prompt: ${fileContentPrompt}`);
+
   const websearchSourcesPrompt = constructWebsearchPrompt({ websearchSources });
   if (characterId !== undefined) {
     const characterSystemPrompt = await constructCharacterSystemPrompt({

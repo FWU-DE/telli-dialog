@@ -48,7 +48,6 @@ export async function POST(req: NextRequest) {
     .insert(fileTable)
     .values({ id: fileId, name: file.name, size: file.size, type: fileExtension });
 
-  console.log('textChunks', textChunks);
   await embedBatchAndSave({
     values: textChunks,
     fileId,
