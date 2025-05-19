@@ -90,12 +90,13 @@ export async function POST(request: NextRequest) {
   const allFileIds = await dbGetRelatedSharedChatFiles(sharedChat.id);
   const urls = sharedChat.attachedLinks.filter((l) => l !== '').map(webScraperExecutable);
   const attachedFiles = await processFiles(allFileIds);
+
   const retrievedTextChunks = await getRelevantFileContent({
     messages,
     user: teacherUserAndContext,
     relatedFileEntities: attachedFiles,
   });
-
+  
   const websearchSources = await Promise.all(urls);
   const systemPrompt = constructSystemPromptBySharedChat({
     sharedChat,

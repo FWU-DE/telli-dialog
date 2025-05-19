@@ -9,7 +9,7 @@ export function constructSystemPromptBySharedChat({
   websearchSources,
 }: {
   sharedChat: SharedSchoolConversationModel;
-  retrievedTextChunks: Record<string, ChunkResult[]>;
+  retrievedTextChunks?: Record<string, ChunkResult[]>;
   websearchSources?: WebsearchSource[];
 }) {
   const filePrompt =

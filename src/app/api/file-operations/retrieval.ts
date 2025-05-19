@@ -28,7 +28,7 @@ export async function getRelevantFileContent({
   user: UserAndContext;
   relatedFileEntities: FileModelAndContent[];
 }) {
-  const auxiliaryModel = await getAuxiliaryModel();
+  const auxiliaryModel = await getAuxiliaryModel(user);
 
   const [errorAuxiliaryModel, auxiliaryModelAndProvider] = await getModelAndProviderWithResult({
     modelId: auxiliaryModel.id,

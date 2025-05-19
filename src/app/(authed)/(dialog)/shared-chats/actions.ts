@@ -10,6 +10,7 @@ import { getUser } from '@/auth/utils';
 import { dbDeleteSharedSchoolChatByIdAndUserId } from '@/db/functions/shared-school-chat';
 import { DEFAULT_AUXILIARY_MODEL, DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
+import { UserAndContext } from '@/auth/types';
 
 export async function dbDeleteSharedChatAction({ id }: { id: string }) {
   const user = await getUser();
@@ -26,8 +27,7 @@ export async function dbDeleteSharedChatAction({ id }: { id: string }) {
  * Get the auxiliary model for the user's federal state
  * @returns The auxiliary model for the user's federal state
  */
-export async function getAuxiliaryModel(): Promise<LlmModel> {
-  const user = await getUser();
+export async function getAuxiliaryModel(user: UserAndContext): Promise<LlmModel> {
   const llmModels = await dbGetAndUpdateLlmModelsByFederalStateId({
     federalStateId: user.federalState.id,
   });

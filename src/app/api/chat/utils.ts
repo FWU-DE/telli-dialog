@@ -179,6 +179,7 @@ Regeln:
 5. Gib die Schlüsselwörter als kommaseparierte Liste zurück
 6. Maximal 5 Schlüsselwörter pro Anfrage
 7. Schlüsselwörter sollten spezifisch und aussagekräftig sein
+8. Falls keine Schlüsselwörter gefunden werden können, gib ein Leerzeichen zurück
 
 Beispiele:
 Eingabe: "Wie kann ich einen Antrag auf Elterngeld stellen?"
@@ -189,6 +190,9 @@ Ausgabe: "Arbeitslosengeld,Voraussetzungen,Berechtigung"
 
 Eingabe: "Wo finde ich Informationen über Kindergeld?"
 Ausgabe: "Kindergeld,Informationen,Leitfaden"
+
+Eingabe: "qwertz"
+Ausgabe: " "
 `,
     messages,
   });
