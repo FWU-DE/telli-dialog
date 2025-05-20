@@ -7,7 +7,7 @@ export function constructSystemPromptByCharacterSharedChat({
   retrievedTextChunks,
 }: {
   character: CharacterModel;
-  retrievedTextChunks: Record<string, ChunkResult[]>;
+  retrievedTextChunks?: Record<string, ChunkResult[]>;
 }) {
   const filePrompt =
     retrievedTextChunks !== undefined && Object.keys(retrievedTextChunks).length > 0

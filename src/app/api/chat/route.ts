@@ -127,6 +127,7 @@ export async function POST(request: NextRequest) {
     characterId,
     customGptId,
   });
+
   const orderedChunks = await getRelevantFileContent({ messages, user, relatedFileEntities });
 
   const urls = [userMessage, ...messages]

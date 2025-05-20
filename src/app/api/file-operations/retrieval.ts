@@ -7,8 +7,7 @@ import { getKeywordsFromQuery } from '../chat/utils';
 import { embedBatchAndSave, embedText } from './embedding';
 import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { Message } from '@ai-sdk/react';
-import { getAuxiliaryModel } from '@/app/(authed)/(dialog)/shared-chats/actions';
-import { getModelAndProviderWithResult } from '../utils';
+import { getAuxiliaryModel, getModelAndProviderWithResult } from '../utils';
 import { UserAndContext } from '@/auth/types';
 import { processFiles } from './process-file';
 
@@ -28,6 +27,9 @@ export async function getRelevantFileContent({
   user: UserAndContext;
   relatedFileEntities: FileModelAndContent[];
 }) {
+  if (relatedFileEntities.length === 0) {
+    return undefined;
+  }
   const auxiliaryModel = await getAuxiliaryModel(user);
 
   const [errorAuxiliaryModel, auxiliaryModelAndProvider] = await getModelAndProviderWithResult({

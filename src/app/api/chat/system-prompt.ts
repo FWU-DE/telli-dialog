@@ -142,7 +142,7 @@ export async function constructChatSystemPrompt({
   isTeacher: boolean;
   federalState: Omit<FederalStateModel, 'encryptedApiKey'>;
   websearchSources: WebsearchSource[];
-  retrievedTextChunks: Record<string, ChunkResult[]>;
+  retrievedTextChunks?: Record<string, ChunkResult[]>;
 }) {
   const schoolSystemPrompt = constructSchuleSystemPrompt();
   const fileContentPrompt =

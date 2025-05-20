@@ -23,20 +23,6 @@ export async function dbDeleteSharedChatAction({ id }: { id: string }) {
   return deletedSharedChat;
 }
 
-/**
- * Get the auxiliary model for the user's federal state
- * @returns The auxiliary model for the user's federal state
- */
-export async function getAuxiliaryModel(user: UserAndContext): Promise<LlmModel> {
-  const llmModels = await dbGetAndUpdateLlmModelsByFederalStateId({
-    federalStateId: user.federalState.id,
-  });
-  const auxiliaryModel = llmModels.find((m) => m.name === DEFAULT_AUXILIARY_MODEL) ?? llmModels[0];
-  if (auxiliaryModel === undefined) {
-    throw new Error('No auxiliary model found');
-  }
-  return auxiliaryModel;
-}
 
 export async function dbCreateSharedSchoolChat({ userId }: { userId: string }) {
   const user = await getUser();
