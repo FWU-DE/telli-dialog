@@ -37,6 +37,7 @@ import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
 import NavigateBack from '@/components/common/navigate-back';
 import { LocalFileState } from '@/components/chat/send-message-form';
+import { iconClassName } from '@/utils/tailwind/icon';
 
 type CustomGptFormProps = CustomGptModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -348,10 +349,13 @@ export default function CustomGptForm({
                           append({ content: '' });
                         }}
                         type="button"
-                        className="flex items-center justify-center"
+                        className={cn(
+                          'flex items-center justify-center',
+                          iconClassName
+                        )}
                         aria-label={t('prompt-suggestions-add-button')}
                       >
-                        <PlusIcon className="fill-secondary-text hover:bg-vidis-hover-green/20" />
+                        <PlusIcon/>
                       </button>
                     ) : (
                       <button
@@ -360,10 +364,13 @@ export default function CustomGptForm({
                           updatePromptSuggestions();
                         }}
                         aria-label={t('prompt-suggestions-delete-button', { index: index + 1 })}
-                        className="flex items-center justify-center"
+                        className={cn(
+                          'flex items-center justify-center',
+                          iconClassName
+                        )}
                         type="button"
                       >
-                        <TrashIcon className="hover:bg-vidis-hover-green/20" />
+                        <TrashIcon />
                       </button>
                     )}
                   </div>
@@ -399,7 +406,7 @@ export default function CustomGptForm({
           <h3 className="font-medium">{t('delete-gpt')}</h3>
           <p className="mt-4">{t('gpt-delete-description')}</p>
           <DestructiveActionButton
-            className={cn(buttonDeleteClassName, 'mt-10')}
+            triggerButtonClassName={cn(buttonDeleteClassName, 'mt-10')}
             modalDescription={t('gpt-delete-modal-description')}
             modalTitle={t('delete-gpt')}
             confirmText={tCommon('delete')}
@@ -414,7 +421,7 @@ export default function CustomGptForm({
           <button
             className={cn(
               buttonSecondaryClassName,
-              'hover:border-primary hover:bg-vidis-hover-green/20',
+              'hover:border-primary hover:bg-primary-hover',
             )}
             onClick={handleDeleteCustomGpt}
             type="button"

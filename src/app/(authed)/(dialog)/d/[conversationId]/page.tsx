@@ -19,6 +19,8 @@ import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { dbGetRelatedFiles } from '@/db/functions/files';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
+import Logo from '@/components/common/logo';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -57,7 +59,7 @@ export default async function Page(context: PageContext) {
 
   const convertedMessages = convertMessageModelToMessage(messages);
   const webSourceMapping = new Map<string, WebsearchSource[]>();
-
+  const logoElement = <Logo federalStateId={user.school.federalStateId} />;
   for (const message of convertedMessages) {
     const urls = parseHyperlinks(message.content);
     if (urls === undefined) {
@@ -102,6 +104,7 @@ export default async function Page(context: PageContext) {
         initialFileMapping={fileMapping}
         enableFileUpload={true}
         webSourceMapping={webSourceMapping}
+        logoElement={logoElement}
       />
     </LlmModelsProvider>
   );

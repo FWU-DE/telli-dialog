@@ -34,6 +34,7 @@ type ChatProps = {
   initialFileMapping?: Map<string, FileModel[]>;
   enableFileUpload: boolean;
   webSourceMapping?: Map<string, WebsearchSource[]>;
+  logoElement: React.ReactNode;
 };
 
 export default function Chat({
@@ -46,6 +47,7 @@ export default function Chat({
   initialFileMapping,
   enableFileUpload,
   webSourceMapping,
+  logoElement,
 }: ChatProps) {
   const tHelpMode = useTranslations('help-mode');
   const router = useRouter();
@@ -197,9 +199,7 @@ export default function Chat({
     );
   } else {
     placeholderElement = (
-      <div className="flex items-center justify-center h-full">
-        <TelliLogo className="text-primary" />
-      </div>
+      <div className="flex items-center justify-center h-full">{logoElement}</div>
     );
   }
 

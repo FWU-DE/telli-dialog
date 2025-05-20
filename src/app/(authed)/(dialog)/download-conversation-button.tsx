@@ -5,6 +5,8 @@ import React from 'react';
 import Spinner from '@/components/icons/spinner';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
+import { cn } from '@/utils/tailwind';
+import { iconClassName } from '@/utils/tailwind/icon';
 
 type DownloadConversationButtonProps = {
   conversationId: string;
@@ -64,7 +66,7 @@ export default function DownloadConversationButton({
 
   return (
     <button
-      className="hidden xs:flex justify-center items-center w-8 h-8 group disabled:bg-light-gray disabled:text-gray-100 group rounded-enterprise-sm hover:bg-vidis-hover-green/20"
+      className={cn("hidden xs:flex justify-center items-center w-8 h-8 group", iconClassName)}
       title={t('conversation-download')}
       onClick={handleDownload}
       disabled={disabled}
@@ -72,7 +74,7 @@ export default function DownloadConversationButton({
       {isLoading ? (
         <Spinner className="p-2 w-8 h-8" />
       ) : (
-        <WebDownloadIcon className="text-primary group-disabled:text-gray-100" />
+        <WebDownloadIcon />
       )}
     </button>
   );

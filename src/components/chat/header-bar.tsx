@@ -8,6 +8,8 @@ import { Message } from 'ai';
 import DestructiveActionButton from '../common/destructive-action-button';
 import TrashFilledIcon from '../icons/trash-filled';
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
+import { cn } from '@/utils/tailwind';
+import { iconClassName } from '@/utils/tailwind/icon';
 
 export function ChatHeaderBar({
   user,
@@ -74,10 +76,14 @@ export function SharedChatHeader({
             modalTitle={t('delete-chat-modal-title')}
             confirmText={t('delete-chat-modal-confirm-button')}
             modalDescription={t('delete-chat-modal-description')}
-            triggerButtonClassName="flex justify-center items-center w-8 h-8 group disabled:bg-light-gray disabled:text-gray-100 group !px-0 !py-0 !text-current !border-0 !rounded-enterprise-sm hover:!bg-vidis-hover-green/20"
+            triggerButtonClassName={cn(
+              'flex justify-center items-center w-8 h-8',
+              iconClassName,
+              'disabled:bg-light-gray group !px-0 !py-0 !text-current !border-0 '
+            )}
             actionFn={handleOpenNewChat}
           >
-            <TrashFilledIcon className="text-primary h-4 w-4" />
+            <TrashFilledIcon className="h-4 w-4" />
           </DestructiveActionButton>
         </>
       )}

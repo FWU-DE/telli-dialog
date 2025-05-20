@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { checkProductAccess } from './access';
 import { UserAndContext } from '@/auth/types';
 import { UserModel, UserSchoolRole } from '@/db/schema';
+import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/types';
 
 describe('checkProductAccess', () => {
   // Base test data
@@ -19,6 +20,7 @@ describe('checkProductAccess', () => {
     enableCharacter: true,
     enableSharedChats: true,
     enableCustomGpt: true,
+    designConfiguration: DEFAULT_DESIGN_CONFIGURATION,
   };
 
   const baseSchool = {

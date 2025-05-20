@@ -32,12 +32,12 @@ export default function CopyButton({ text, buttonClassName, iconClassName }: Cop
       {isCopied ? (
         <CheckIcon
           aria-hidden="true"
-          className={cn('text-secondary', iconClassName ?? 'w-4 h-4')}
+          className={cn(iconClassName ?? 'w-4 h-4')}
         />
       ) : (
         <ClipboardIcon
           aria-hidden="true"
-          className={cn('text-primary hover:text-secondary', iconClassName ?? 'w-4 h-4')}
+          className={cn(iconClassName ?? 'w-4 h-4')}
         />
       )}
       <span className="sr-only">{tCommon('copy-clipboard')}</span>

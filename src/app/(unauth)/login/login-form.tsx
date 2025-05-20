@@ -28,7 +28,7 @@ export default function LoginForm() {
         <button
           className={cn(
             buttonSecondaryClassName,
-            'hover:border-primary hover:bg-vidis-hover-green/20 w-full',
+            'hover:border-primary hover:bg-primary-hover w-full',
           )}
           onClick={() => signIn('vidis')}
           aria-label="Mit VIDIS einloggen"

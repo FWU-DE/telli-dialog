@@ -12,6 +12,9 @@ import { FileStatus } from '../chat/upload-file-button';
 import TrashIcon from '../icons/trash';
 import { ToastContextType } from '../common/toast';
 import { useTranslations } from 'next-intl';
+import { iconClassName } from '@/utils/tailwind/icon';
+import { cn } from '@/utils/tailwind';
+import { buttonDeleteClassName } from '@/utils/tailwind/button';
 
 type FilesTableProps = {
   files: FileModel[];
@@ -100,12 +103,15 @@ export default function FilesTable({
                 <td className="w-8">
                   <DestructiveActionButton
                     modalDescription="Möchten Sie diese Datei wirklich dauerhaft löschen? Dieser Vorgang kann nicht rückgängig gemacht werden."
-                    triggerButtonClassName="flex items-center border-none w-full justify-center hover:bg-transparent"
+                    triggerButtonClassName={cn(
+                      'flex items-center',
+                      iconClassName
+                    )}
                     modalTitle="Datei löschen"
                     confirmText="Datei löschen"
                     actionFn={() => handleDeleteFile(id)}
                   >
-                    <TrashIcon className="hover:bg-vidis-hover-green/20" />
+                    <TrashIcon />
                   </DestructiveActionButton>
                 </td>
               </tr>

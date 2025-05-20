@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl';
 import Citation from './sources/citation';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
+import { iconClassName } from '@/utils/tailwind/icon';
 
 export function ChatBox({
   children,
@@ -96,8 +97,8 @@ export function ChatBox({
           onClick={() => regenerateMessage()}
           aria-label="Reload"
         >
-          <div className="p-1.5 rounded-enterprise-sm hover:bg-vidis-hover-green/20">
-            <ReloadIcon className="text-primary w-5 h-5" />
+          <div className={cn('p-1.5 rounded-enterprise-sm', iconClassName)}>
+            <ReloadIcon className="w-5 h-5" />
           </div>
         </button>
       </div>

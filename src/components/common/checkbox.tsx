@@ -12,7 +12,7 @@ export default function Checkbox(props: CheckboxProps) {
   return (
     <div className="flex items-center gap-3 justify-center">
       <_Checkbox.Root
-        // className="border hover:border-primary hover:bg-vidis-hover-green/20 data-[state=checked]:border-primary data-[state=checked]:bg-vidis-hover-green/20 rounded-enterprise-sm h-6 w-6"
+        // className="border hover:border-primary hover:bg-primary-hover data-[state=checked]:border-primary data-[state=checked]:bg-vidis-hover-green/20 rounded-enterprise-sm h-6 w-6"
         {...props}
         aria-label={props['aria-label'] ?? props.label ?? ''}
         className={cn(

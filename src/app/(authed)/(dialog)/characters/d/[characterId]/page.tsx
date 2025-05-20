@@ -9,6 +9,7 @@ import Chat from '@/components/chat/chat';
 import { z } from 'zod';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
+import Logo from '@/components/common/logo';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,7 @@ export default async function Page(context: PageContext) {
   }
 
   const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: character.pictureId });
-
+  const logoElement = <Logo federalStateId={user.federalState.id} />; 
   return (
     <>
       <HeaderPortal>
@@ -52,6 +53,7 @@ export default async function Page(context: PageContext) {
         character={character}
         imageSource={maybeSignedImageUrl}
         enableFileUpload={false}
+        logoElement={logoElement}
       />
     </>
   );

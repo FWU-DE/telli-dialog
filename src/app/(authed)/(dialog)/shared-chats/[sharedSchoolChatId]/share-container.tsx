@@ -24,6 +24,7 @@ import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { useTranslations } from 'next-intl';
 import FilledShareIcon from '@/components/icons/filled-share';
 import ChatStopIcon from '@/components/icons/chat-stop';
+import { iconClassName } from '@/utils/tailwind/icon';
 
 type ShareContainerProps = SharedSchoolConversationModel;
 
@@ -160,12 +161,13 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
                 className={cn(
                   'flex items-center justify-center',
                   buttonSecondaryClassName,
-                  'hover:border-primary hover:bg-vidis-hover-green/20 p-3 rounded-enterprise-sm',
+                  iconClassName,
+                  'p-3 rounded-enterprise-sm',
                 )}
                 type="button"
                 onClick={handleStopSharing}
               >
-                <ChatStopIcon aria-hidden="true" className="text-primary" />
+                <ChatStopIcon aria-hidden="true" />
                 <span className="sr-only">{tCommon('stop')}</span>
               </button>
             )}
@@ -175,12 +177,13 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
                 className={cn(
                   'flex items-center justify-center',
                   buttonSecondaryClassName,
-                  'hover:border-primary hover:bg-vidis-hover-green/20 p-2.5 rounded-enterprise-sm',
+                  'p-2.5 rounded-enterprise-sm',
+                  iconClassName
                 )}
                 type="button"
                 onClick={() => router.push(shareUILink)}
               >
-                <FilledShareIcon aria-hidden="true" className="w-4 h-4" />
+                <FilledShareIcon aria-hidden="true"/>
                 <span className="sr-only">{t('share')}</span>
               </button>
             )}

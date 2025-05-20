@@ -23,6 +23,7 @@ import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { useTranslations } from 'next-intl';
 import CountDownTimer from '../../../shared-chats/_components/count-down';
 import FilledShareIcon from '@/components/icons/filled-share';
+import { iconClassName } from '@/utils/tailwind/icon';
 
 type ShareContainerProps = CharacterModel;
 
@@ -159,7 +160,8 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
                 className={cn(
                   'flex items-center justify-center',
                   buttonSecondaryClassName,
-                  'hover:border-primary hover:bg-vidis-hover-green/20 p-3 rounded-enterprise-sm',
+                  'p-3 rounded-enterprise-sm',
+                  iconClassName
                 )}
                 type="button"
                 onClick={handleStopSharing}
@@ -172,7 +174,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <rect width="12" height="12" rx="4" fill="#46217E" />
+                  <rect width="12" height="12" rx="4" fill="currentColor" />
                 </svg>
                 <span className="sr-only">{tCommon('stop')}</span>
               </button>
@@ -183,7 +185,8 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
                 className={cn(
                   'flex items-center justify-center',
                   buttonSecondaryClassName,
-                  'hover:border-primary hover:bg-vidis-hover-green/20 rounded-enterprise-sm p-2.5',
+                  'rounded-enterprise-sm p-2.5',
+                  iconClassName
                 )}
                 type="button"
                 onClick={() => router.push(shareUILink)}

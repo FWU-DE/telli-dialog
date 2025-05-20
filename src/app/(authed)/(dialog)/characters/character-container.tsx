@@ -19,7 +19,7 @@ import SharedChatIcon from '@/components/icons/shared-chat';
 import { calculateTimeLeftBySharedChat } from '../shared-chats/[sharedSchoolChatId]/utils';
 import ClipboardIcon from '@/components/icons/clipboard';
 import { CreateNewCharacterFromTemplate } from './create-new-character-button';
-
+import { iconClassName } from '@/utils/tailwind/icon';
 type CharacterContainerProps = CharacterModel & {
   currentUserId: string;
   maybeSignedPictureUrl: string | undefined;
@@ -100,7 +100,10 @@ export default function CharacterContainer({
           {...{ title: t('copy-page.copy-template'), type: 'button' }}
         >
           <button aria-label="copy-template">
-            <ClipboardIcon className={cn('text-primary hover:text-secondary', 'min-w-8 min-h-8')} />
+            <ClipboardIcon className={cn(
+              'min-w-8 min-h-8 rounded-enterprise-sm',
+              iconClassName
+            )} />
           </button>
         </CreateNewCharacterFromTemplate>
       )}
@@ -109,7 +112,10 @@ export default function CharacterContainer({
         <button
           aria-label={t('shared.share')}
           onClick={handleNavigateToShare}
-          className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
+          className={cn(
+            'rounded-enterprise-sm',
+            iconClassName
+          )}
         >
           <ShareIcon aria-hidden="true" className="w-8 h-8" />
           <span className="sr-only">{t('shared.share')}</span>
@@ -120,7 +126,10 @@ export default function CharacterContainer({
           type="button"
           aria-label={tCommon('new-chat')}
           onClick={handleNavigateToNewUnsharedChat}
-          className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
+          className={cn(
+            'rounded-enterprise-sm',
+            iconClassName
+          )}
         >
           <SharedChatIcon aria-hidden="true" className="w-8 h-8" />
           <span className="sr-only">{tCommon('new-chat')}</span>
@@ -134,9 +143,12 @@ export default function CharacterContainer({
           confirmText={tCommon('delete')}
           actionFn={handleDeleteCharacter}
           aria-label={t('form.delete-character')}
-          triggerButtonClassName="border-transparent justify-center flex flex-col rounded-enterprise-sm hover:bg-vidis-hover-green/20 p-0"
+          triggerButtonClassName={cn(
+            'border-transparent justify-center flex flex-col p-0',
+            iconClassName
+          )}
         >
-          <TrashIcon aria-hidden="true" className="text-primary" />
+          <TrashIcon aria-hidden="true" className="w-8 h-8" />
           <span className="sr-only">{t('form.delete-character')}</span>
         </DestructiveActionButton>
       )}

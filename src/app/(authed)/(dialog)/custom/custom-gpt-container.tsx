@@ -82,7 +82,7 @@ export default function CustomGptContainer({
           type="button"
           aria-label={tCommon('new-chat')}
           onClick={handleNavigateToNewChat}
-          className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
+          className="text-vidis-hover-purple hover:bg-primary-hover rounded-enterprise-sm"
         >
           <SharedChatIcon aria-hidden="true" className="w-8 h-8" />
           <span className="sr-only">{tCommon('new-chat')}</span>
@@ -95,7 +95,8 @@ export default function CustomGptContainer({
           confirmText={tCommon('delete')}
           actionFn={handleDeleteCustomGpt}
           aria-label={t('form.delete-gpt')}
-          triggerButtonClassName="border-transparent justify-center flex flex-col rounded-enterprise-sm hover:bg-vidis-hover-green/20 p-0"
+          triggerButtonClassName="border-transparent justify-center flex flex-col p-0"
+          iconClassName
         >
           <TrashIcon aria-hidden="true" className="w-8 h-8 text-primary" />
           <span className="sr-only">{t('form.delete-gpt')}</span>

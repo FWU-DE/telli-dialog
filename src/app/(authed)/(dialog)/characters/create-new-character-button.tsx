@@ -77,7 +77,7 @@ export function CreateNewCharacterButton() {
       onClick={handleNewGPT}
       className={cn(buttonPrimaryClassName, 'flex gap-2 items-center group py-2')}
     >
-      <PlusIcon className="fill-primary-text group-hover:fill-secondary-text" />
+      <PlusIcon className="fill-button-primary-text group-hover:fill-secondary-text" />
       <span>{t('form.create-character')}</span>
     </button>
   );

@@ -9,6 +9,7 @@ import { useSidebarVisibility } from '../navigation/sidebar/sidebar-provider';
 import { cn } from '@/utils/tailwind';
 import { saveChatModelForUserAction } from '@/app/(authed)/(dialog)/actions';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { iconClassName } from '@/utils/tailwind/icon';
 
 type SelectLlmModelProps = {
   isStudent?: boolean;
@@ -105,7 +106,10 @@ export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProp
                 <React.Fragment key={model.id}>
                   <DropdownMenu.Item asChild>
                     <button
-                      className="hover:bg-vidis-hover-green/20 text-left text-black py-2 px-4 outline-none flex flex-col"
+                      className={cn(
+                        'hover:bg-primary-hover text-left py-2 px-4 outline-none flex flex-col',
+                        iconClassName,
+                      )}
                       onClick={() => handleSelectModel(model)}
                       aria-label={`Select ${model.name} Model`}
                     >

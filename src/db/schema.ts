@@ -12,7 +12,7 @@ import {
   customType,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
-import { type LlmModelPriceMetadata } from './types';
+import { DesignConfiguration, type LlmModelPriceMetadata } from './types';
 import { conversationRoleSchema } from '@/utils/chat';
 import { sql } from 'drizzle-orm';
 
@@ -113,6 +113,9 @@ export const federalStateTable = pgTable('federal_state', {
   chatStorageTime: integer('chat_storage_time').notNull().default(120),
   supportContact: text('support_contact'),
   trainingLink: text('training_link'),
+  // whitelabel configuration
+  designConfiguration: json('design_configuration').$type<DesignConfiguration>(),
+  // feature flags
   studentAccess: boolean('student_access').default(true).notNull(),
   enableCharacter: boolean('enable_characters').default(true).notNull(),
   enableSharedChats: boolean('enable_shared_chats').default(true).notNull(),

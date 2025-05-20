@@ -37,7 +37,7 @@ export default function DestructiveActionButton({
       <AlertDialog.Trigger asChild>
         <button
           id="destructive-button"
-          className={cn(buttonDeleteClassName, triggerButtonClassName)}
+          className={triggerButtonClassName}
           onClick={(event) => {
             event.stopPropagation();
             event.preventDefault();
@@ -66,8 +66,7 @@ export default function DestructiveActionButton({
                 setIsOpen(false);
               }}
               className={cn(
-                buttonSecondaryClassName,
-                'hover:border-primary max-lg:w-full hover:bg-vidis-hover-green/20',
+                buttonSecondaryClassName
               )}
               type="button"
             >
@@ -83,7 +82,7 @@ export default function DestructiveActionButton({
                   actionFn();
                   setIsOpen(false);
                   refetchConversations();
-                }}
+                }}  
               >
                 {confirmText ?? 'Löschen'}
               </button>
