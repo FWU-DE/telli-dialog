@@ -1,5 +1,8 @@
 import { dbGetApiKeyByFederalStateIdWithResult } from '@/db/functions/federal-state';
-import { dbGetModelByIdAndFederalStateId, dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
+import {
+  dbGetModelByIdAndFederalStateId,
+  dbGetAndUpdateLlmModelsByFederalStateId,
+} from '@/db/functions/llm-model';
 import { createTelliConfiguration } from './chat/custom-model-config';
 import { env } from '@/env';
 import { errorifyAsyncFn } from '@/utils/error';

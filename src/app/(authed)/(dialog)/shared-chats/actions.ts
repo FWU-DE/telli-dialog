@@ -2,15 +2,13 @@
 
 import { db } from '@/db';
 import {
-  LlmModel,
   SharedSchoolConversationFileMapping,
   sharedSchoolConversationTable,
 } from '@/db/schema';
 import { getUser } from '@/auth/utils';
 import { dbDeleteSharedSchoolChatByIdAndUserId } from '@/db/functions/shared-school-chat';
-import { DEFAULT_AUXILIARY_MODEL, DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
+import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
-import { UserAndContext } from '@/auth/types';
 
 export async function dbDeleteSharedChatAction({ id }: { id: string }) {
   const user = await getUser();
@@ -22,7 +20,6 @@ export async function dbDeleteSharedChatAction({ id }: { id: string }) {
 
   return deletedSharedChat;
 }
-
 
 export async function dbCreateSharedSchoolChat({ userId }: { userId: string }) {
   const user = await getUser();
