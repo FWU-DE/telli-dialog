@@ -8,11 +8,21 @@ import {
   unique,
   json,
   boolean,
+  vector,
+  customType,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
 import { type LlmModelPriceMetadata } from './types';
 import { conversationRoleSchema } from '@/utils/chat';
 import { sql } from 'drizzle-orm';
+
+export const tsvector = customType<{
+  data: string;
+}>({
+  dataType() {
+    return `tsvector`;
+  },
+});
 
 export const userTable = pgTable('user_entity', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -402,3 +412,32 @@ export const CustomGptFileMapping = pgTable(
     unq: unique().on(table.customGptId, table.fileId),
   }),
 );
+
+export const textChunkTable = pgTable(
+  'text_chunk',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    fileId: text('file_id')
+      .references(() => fileTable.id)
+      .notNull(),
+    embedding: vector('embedding', { dimensions: 1024 }).notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    content: text('content').notNull(),
+    leadingOverlap: text('leading_overlap'),
+    trailingOverlap: text('trailing_overlap'),
+    orderIndex: integer('order_index').notNull(),
+    pageNumber: integer('page_number'),
+    contentTsv: tsvector('content_tsv')
+      .notNull()
+      .generatedAlwaysAs(sql`to_tsvector('german', content)`),
+  },
+  () => {
+    return {
+      embeddingIdx: sql`CREATE INDEX IF NOT EXISTS text_chunk_embedding_idx ON text_chunk USING hnsw (embedding vector_cosine_ops)`,
+      contentTsvIdx: sql`CREATE INDEX IF NOT EXISTS text_chunk_content_tsv_idx ON text_chunk USING GIN (contentTsv)`,
+    };
+  },
+);
+
+export type TextChunkModel = typeof textChunkTable.$inferSelect;
+export type TextChunkInsertModel = typeof textChunkTable.$inferInsert;

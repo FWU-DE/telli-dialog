@@ -1,16 +1,20 @@
-import { CharacterModel, FileModel } from '@/db/schema';
+import { CharacterModel } from '@/db/schema';
 import { BASE_FILE_PROMPT, constructSingleFilePrompt } from '../chat/system-prompt';
+import { ChunkResult } from '../file-operations/process-chunks';
 
 export function constructSystemPromptByCharacterSharedChat({
   character,
-  fileEntities,
+  retrievedTextChunks,
 }: {
   character: CharacterModel;
-  fileEntities?: FileModel[];
+  retrievedTextChunks?: Record<string, ChunkResult[]>;
 }) {
   const filePrompt =
-    fileEntities !== undefined
-      ? BASE_FILE_PROMPT + fileEntities.map((file) => constructSingleFilePrompt(file))
+    retrievedTextChunks !== undefined && Object.keys(retrievedTextChunks).length > 0
+      ? BASE_FILE_PROMPT +
+        Object.keys(retrievedTextChunks).map((fileId) =>
+          constructSingleFilePrompt(retrievedTextChunks?.[fileId] ?? []),
+        )
       : '';
   return `
 Du bist ein KI-Chatbot, der in einer Schulklasse eingesetzt wird, um Schülerinnen und Schüler zu unterstützen. Verwende eine Sprache, Tonalität und Inhalte, die für den Einsatz in der jeweiligen Klasse geeignet ist. Vermeide komplizierte Fachbegriffe, es sei denn, sie sind notwendig und werden erklärt. Beachte die folgenden Regeln:

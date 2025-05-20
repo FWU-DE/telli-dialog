@@ -18,14 +18,13 @@ import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
 import { dbGetAttachedFileByEntityId, link_file_to_conversation } from '@/db/functions/files';
-import { process_files } from '../file-operations/process-file';
-import { FileModelAndContent } from '@/db/schema';
 import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { SMALL_MODEL_MAX_CHARACTERS } from '@/configuration-text-inputs/const';
 import { SMALL_MODEL_LIST } from '@/configuration-text-inputs/const';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
+import { getRelevantFileContent } from '../file-operations/retrieval';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -115,7 +114,7 @@ export async function POST(request: NextRequest) {
     modelName: definedModel.name,
     orderNumber: messages.length + 1,
   });
-  let attachedFiles: FileModelAndContent[] = [];
+
   if (currentFileIds !== undefined) {
     await link_file_to_conversation({
       fileIds: currentFileIds,
@@ -128,6 +127,8 @@ export async function POST(request: NextRequest) {
     characterId,
     customGptId,
   });
+
+  const orderedChunks = await getRelevantFileContent({ messages, user, relatedFileEntities });
 
   const urls = [userMessage, ...messages]
     .map((message) => parseHyperlinks(message.content) ?? [])
@@ -143,8 +144,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Unhandled error while fetching website', error);
   }
+  // Condense chat history to search query to use for vector search and text retrieval
 
-  attachedFiles = await process_files(relatedFileEntities);
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
   const maxCharacterLimit = SMALL_MODEL_LIST.includes(definedModel.displayName)
     ? SMALL_MODEL_MAX_CHARACTERS
@@ -160,8 +161,8 @@ export async function POST(request: NextRequest) {
     customGptId,
     isTeacher: user.school.userRole === 'teacher',
     federalState: user.federalState,
-    attachedFiles: attachedFiles,
     websearchSources: websearchSources,
+    retrievedTextChunks: orderedChunks,
   });
   const result = streamText({
     model: telliProvider,

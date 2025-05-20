@@ -5,6 +5,7 @@ import {
   conversationMessgaeFileMappingTable,
   conversationTable,
   fileTable,
+  textChunkTable,
 } from '../schema';
 import { deleteFileFromS3 } from '@/s3';
 
@@ -45,6 +46,7 @@ export async function dbDeleteConversationByIdAndUserId({
     await tx
       .delete(conversationMessgaeFileMappingTable)
       .where(inArray(conversationMessgaeFileMappingTable.fileId, filesToDelete));
+    await tx.delete(textChunkTable).where(inArray(textChunkTable.fileId, filesToDelete));
     await tx.delete(fileTable).where(inArray(fileTable.id, filesToDelete));
 
     return deletedConversation;
