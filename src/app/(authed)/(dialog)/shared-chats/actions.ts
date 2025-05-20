@@ -1,10 +1,7 @@
 'use server';
 
 import { db } from '@/db';
-import {
-  SharedSchoolConversationFileMapping,
-  sharedSchoolConversationTable,
-} from '@/db/schema';
+import { SharedSchoolConversationFileMapping, sharedSchoolConversationTable } from '@/db/schema';
 import { getUser } from '@/auth/utils';
 import { dbDeleteSharedSchoolChatByIdAndUserId } from '@/db/functions/shared-school-chat';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
