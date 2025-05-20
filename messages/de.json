@@ -26,7 +26,8 @@
     "stop": "Stop",
     "copy": "Kopieren",
     "copy-clipboard": "In die Zwischenablage kopieren",
-    "regenerate-message": "Antwort erneut generieren"
+    "regenerate-message": "Antwort erneut generieren",
+    "file-limit-reached": "Es können maximal {max_files} Dateien hochgeladen werden."
   },
   "usage-disclaimer": {
     "initial-title": "Willkommen bei telli!",
@@ -60,7 +61,7 @@
   "file-interaction": {
     "upload": {
       "upload-file-button": "Datei hochladen",
-      "file-limit-reached": "Es wurde bereits eine Datei hochgeladen",
+      "file-limit-reached": "Es können maximal {max_files} Dateien hochgeladen werden.",
       "drop-area": "Datei per Drag & Drop hier ablegen",
       "choice-word": "oder"
     },
