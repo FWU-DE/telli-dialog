@@ -9,7 +9,7 @@ import { getMessages, getLocale } from 'next-intl/server';
 
 import './globals.css';
 import './scrollbar.css';
-import { DEFAULT_DESIGN_CONFIGURATION, DesignConfiguration  } from '@/db/types';
+import { DEFAULT_DESIGN_CONFIGURATION, DesignConfiguration } from '@/db/types';
 import { dbGetFederalStateByIdWithResult } from '@/db/functions/federal-state';
 import { getMaybeLogoFromS3 } from '@/s3';
 const barlow = Barlow({

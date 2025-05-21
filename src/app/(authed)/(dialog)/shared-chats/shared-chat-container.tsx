@@ -5,9 +5,6 @@ import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible
 import ProfileMenu from '@/components/navigation/profile-menu';
 import React from 'react';
 import { cn } from '@/utils/tailwind';
-import Link from 'next/link';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
-import PlusIcon from '@/components/icons/plus';
 import SharedChatItem from './shared-chat-item';
 import SearchBarInput from '@/components/search-bar';
 import { type UserAndContext } from '@/auth/types';

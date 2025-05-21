@@ -2,7 +2,6 @@ import * as Select from '@radix-ui/react-select';
 import ChevronDownIcon from '@/components/icons/chevron-down';
 import { LlmModel } from '@/db/schema';
 import { useTranslations } from 'next-intl';
-import { iconClassName } from '@/utils/tailwind/icon';
 import { cn } from '@/utils/tailwind';
 
 type SelectLlmFormProps = {

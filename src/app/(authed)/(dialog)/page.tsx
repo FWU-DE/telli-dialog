@@ -11,9 +11,6 @@ import { getRandomPromptSuggestions } from '@/utils/prompt-suggestions/utils';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
-import { getMaybeLogoFromS3 } from '@/s3';
-import TelliLogo from '@/components/icons/logo';
-import Image from 'next/image';
 import Logo from '@/components/common/logo';
 export const dynamic = 'force-dynamic';
 

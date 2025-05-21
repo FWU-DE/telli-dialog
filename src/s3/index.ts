@@ -75,7 +75,7 @@ export async function getMaybeLogoFromS3(federalStateId: string | undefined) {
       }),
     );
     return await getSignedUrlFromS3Get({ key });
-  } catch (error) {
+  } catch {
     return undefined;
   }
 }
