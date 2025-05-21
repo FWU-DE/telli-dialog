@@ -13,6 +13,7 @@ import SearchBarInput from '@/components/search-bar';
 import { type UserAndContext } from '@/auth/types';
 import { useTranslations } from 'next-intl';
 import { SharedChatWithImage } from './[sharedSchoolChatId]/utils';
+import { CreateNewSharedChatButton } from './create-new-shared-chat';
 type SharedChatContainerProps = {
   sharedChats: SharedChatWithImage[];
   user: UserAndContext;
@@ -47,14 +48,7 @@ export function SharedChatContainer({ sharedChats, user }: SharedChatContainerPr
             disabled={filterDisabled}
           />
           <div className="flex-grow" />
-          <Link
-            title={t('form.button-create')}
-            href="/shared-chats/create"
-            className={cn(buttonPrimaryClassName, 'flex gap-2 items-center group py-2')}
-          >
-            <PlusIcon className="fill-button-primary-text group-hover:fill-secondary-text" />
-            <span>{t('form.button-create')}</span>
-          </Link>
+          <CreateNewSharedChatButton />
         </div>
         {sharedChats.length < 1 && <p className="text-dark-gray mt-16">{t('no-dialogs')}</p>}
         {filteredSharedChats.length > 0 && (
