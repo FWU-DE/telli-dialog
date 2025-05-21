@@ -103,10 +103,7 @@ export default function FilesTable({
                 <td className="w-8">
                   <DestructiveActionButton
                     modalDescription="Möchten Sie diese Datei wirklich dauerhaft löschen? Dieser Vorgang kann nicht rückgängig gemacht werden."
-                    triggerButtonClassName={cn(
-                      'flex items-center',
-                      iconClassName
-                    )}
+                    triggerButtonClassName={cn('flex items-center', iconClassName)}
                     modalTitle="Datei löschen"
                     confirmText="Datei löschen"
                     actionFn={() => handleDeleteFile(id)}

@@ -9,7 +9,11 @@ import { getMessages, getLocale } from 'next-intl/server';
 
 import './globals.css';
 import './scrollbar.css';
-import { DEFAULT_DESIGN_CONFIGURATION, DesignConfiguration, SL_DESIGN_CONFIGURATION } from '@/db/types';
+import {
+  DEFAULT_DESIGN_CONFIGURATION,
+  DesignConfiguration,
+  SL_DESIGN_CONFIGURATION,
+} from '@/db/types';
 import { dbGetFederalStateByIdWithResult } from '@/db/functions/federal-state';
 import { getMaybeLogoFromS3 } from '@/s3';
 const barlow = Barlow({
@@ -45,7 +49,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         <PublicEnvScript />
       </head>
-      <body style={constructRootLayoutStyle({ designConfiguration: federalState?.designConfiguration ?? SL_DESIGN_CONFIGURATION })}>
+      <body
+        style={constructRootLayoutStyle({
+          designConfiguration: federalState?.designConfiguration ?? SL_DESIGN_CONFIGURATION,
+        })}
+      >
         <NextIntlClientProvider messages={messages}>
           <ClientProvider session={fullSession}>{children}</ClientProvider>
         </NextIntlClientProvider>
@@ -54,7 +62,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   );
 }
 
-function constructRootLayoutStyle({ designConfiguration }: { designConfiguration: DesignConfiguration }) {
+function constructRootLayoutStyle({
+  designConfiguration,
+}: {
+  designConfiguration: DesignConfiguration;
+}) {
   return {
     '--primary': designConfiguration?.primaryColor,
     '--primary-text': designConfiguration?.primaryTextColor,

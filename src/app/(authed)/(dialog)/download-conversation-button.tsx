@@ -66,16 +66,12 @@ export default function DownloadConversationButton({
 
   return (
     <button
-      className={cn("hidden xs:flex justify-center items-center w-8 h-8 group", iconClassName)}
+      className={cn('hidden xs:flex justify-center items-center w-8 h-8 group', iconClassName)}
       title={t('conversation-download')}
       onClick={handleDownload}
       disabled={disabled}
     >
-      {isLoading ? (
-        <Spinner className="p-2 w-8 h-8" />
-      ) : (
-        <WebDownloadIcon />
-      )}
+      {isLoading ? <Spinner className="p-2 w-8 h-8" /> : <WebDownloadIcon />}
     </button>
   );
 }

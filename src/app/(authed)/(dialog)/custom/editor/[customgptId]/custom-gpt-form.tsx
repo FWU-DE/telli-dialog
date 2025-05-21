@@ -349,13 +349,10 @@ export default function CustomGptForm({
                           append({ content: '' });
                         }}
                         type="button"
-                        className={cn(
-                          'flex items-center justify-center',
-                          iconClassName
-                        )}
+                        className={cn('flex items-center justify-center', iconClassName)}
                         aria-label={t('prompt-suggestions-add-button')}
                       >
-                        <PlusIcon/>
+                        <PlusIcon />
                       </button>
                     ) : (
                       <button
@@ -364,10 +361,7 @@ export default function CustomGptForm({
                           updatePromptSuggestions();
                         }}
                         aria-label={t('prompt-suggestions-delete-button', { index: index + 1 })}
-                        className={cn(
-                          'flex items-center justify-center',
-                          iconClassName
-                        )}
+                        className={cn('flex items-center justify-center', iconClassName)}
                         type="button"
                       >
                         <TrashIcon />
@@ -419,10 +413,7 @@ export default function CustomGptForm({
       {isCreating && (
         <section className="mt-8 flex gap-4 items-center">
           <button
-            className={cn(
-              buttonSecondaryClassName,
-              'hover:border-primary hover:bg-primary-hover',
-            )}
+            className={cn(buttonSecondaryClassName, 'hover:border-primary hover:bg-primary-hover')}
             onClick={handleDeleteCustomGpt}
             type="button"
           >

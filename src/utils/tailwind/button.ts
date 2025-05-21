@@ -14,4 +14,4 @@ export const buttonDeleteClassName =
   'px-4 py-3 text-dark-red border-[1px] border-dark-red rounded-enterprise-full hover:bg-[#FFF8F8]';
 
 export const smallButtonPrimaryClassName =
-  'p-2 text-primary-text bg-primary hover:bg-secondary rounded-enterprise-full hover:text-secondary-text text-xs';
+  'p-2 text-button-primary-text bg-primary hover:bg-secondary rounded-enterprise-full hover:text-secondary-text text-xs';

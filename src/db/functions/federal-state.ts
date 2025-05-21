@@ -45,7 +45,10 @@ export async function dbGetFederalStateById(id: string | undefined) {
   if (id === undefined) {
     return undefined;
   }
-  const [federalState] = await db.select().from(federalStateTable).where(eq(federalStateTable.id, id));
+  const [federalState] = await db
+    .select()
+    .from(federalStateTable)
+    .where(eq(federalStateTable.id, id));
 
   if (federalState === undefined) {
     throw Error(`Could not find federal state with id ${id}`);

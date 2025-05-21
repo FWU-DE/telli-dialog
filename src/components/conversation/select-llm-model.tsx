@@ -137,7 +137,9 @@ function ModelSpan({ model }: { model: LlmModel }) {
         <span>{model.displayName}</span>
         {isGreenModel({ model }) && <GreenLeafIcon />}
       </div>
-      {model.description && <span className="text-sm text-gray-400">{model.description}</span>}
+      {model.description && (
+        <span className="text-sm hover:text-text-secondary">{model.description}</span>
+      )}
     </>
   );
 }

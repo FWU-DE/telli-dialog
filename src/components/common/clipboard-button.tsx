@@ -16,18 +16,12 @@ export default function TelliClipboardButton({ text }: TelliClipboardButtonProps
     <ClipboardButton
       text={text}
       clipIcon={
-        <div className={cn(
-          'p-1.5 rounded-enterprise-sm',
-          iconClassName
-        )}>
+        <div className={cn('p-1.5 rounded-enterprise-sm', iconClassName)}>
           <ClipboardLightIcon className="w-5 h-5" />
         </div>
       }
       checkIcon={
-        <div className={cn(
-          'p-1.5 rounded-enterprise-sm',
-          iconClassName
-        )}>
+        <div className={cn('p-1.5 rounded-enterprise-sm', iconClassName)}>
           <CheckIcon className="w-5 h-5" />
         </div>
       }

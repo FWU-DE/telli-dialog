@@ -65,9 +65,7 @@ export default function DestructiveActionButton({
                 event.preventDefault();
                 setIsOpen(false);
               }}
-              className={cn(
-                buttonSecondaryClassName
-              )}
+              className={cn(buttonSecondaryClassName)}
               type="button"
             >
               Abbrechen
@@ -82,7 +80,7 @@ export default function DestructiveActionButton({
                   actionFn();
                   setIsOpen(false);
                   refetchConversations();
-                }}  
+                }}
               >
                 {confirmText ?? 'Löschen'}
               </button>

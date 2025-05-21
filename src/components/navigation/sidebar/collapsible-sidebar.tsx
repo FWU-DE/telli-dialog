@@ -62,12 +62,12 @@ export function ToggleSidebarButton({ forceVisibility = false }: { forceVisibili
       title="Sidebar"
       className={cn(
         'focus:outline-none group hover:bg-light-gray rounded-enterprise-sm',
-        iconClassName
+        iconClassName,
       )}
       onClick={() => toggle()}
       aria-label="sidebar-toggle-close"
     >
-      <SidebarToggleIcon/>
+      <SidebarToggleIcon />
     </button>
   );
 }
@@ -90,7 +90,7 @@ export function NewChatButton({ forceVisibility = false }: { forceVisibility?: b
       onClick={handleOpenNewChat}
       className={cn(
         'focus:outline-none group hover:bg-light-gray rounded-enterprise-sm',
-        iconClassName
+        iconClassName,
       )}
       aria-label="Neuer Chat"
       title="Neuer Chat"

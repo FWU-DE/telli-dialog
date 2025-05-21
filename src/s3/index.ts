@@ -68,10 +68,12 @@ export async function getMaybeLogoFromS3(federalStateId: string | undefined) {
   }
   const key = `whitelabels/${federalStateId}/logo.jpg`;
   try {
-    await s3Client.send(new GetObjectCommand({
-      Bucket: env.otcBucketName,
-      Key: key,
-    }));
+    await s3Client.send(
+      new GetObjectCommand({
+        Bucket: env.otcBucketName,
+        Key: key,
+      }),
+    );
     return await getSignedUrlFromS3Get({ key });
   } catch (error) {
     return undefined;

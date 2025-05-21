@@ -21,7 +21,6 @@ import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/sea
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import Logo from '@/components/common/logo';
 
-
 export const dynamic = 'force-dynamic';
 
 const pageContext = z.object({

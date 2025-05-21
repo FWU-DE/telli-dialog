@@ -97,13 +97,11 @@ export default function CharacterContainer({
         <CreateNewCharacterFromTemplate
           templateId={id}
           templatePictureId={character.pictureId ?? undefined}
+          className={'w-8 h-8'}
           {...{ title: t('copy-page.copy-template'), type: 'button' }}
         >
-          <button aria-label="copy-template">
-            <ClipboardIcon className={cn(
-              'min-w-8 min-h-8 rounded-enterprise-sm',
-              iconClassName
-            )} />
+          <button aria-label="copy-template" className={cn(iconClassName)}>
+            <ClipboardIcon className="w-8 h-8" />
           </button>
         </CreateNewCharacterFromTemplate>
       )}
@@ -112,12 +110,9 @@ export default function CharacterContainer({
         <button
           aria-label={t('shared.share')}
           onClick={handleNavigateToShare}
-          className={cn(
-            'rounded-enterprise-sm',
-            iconClassName
-          )}
+          className={cn(iconClassName)}
         >
-          <ShareIcon aria-hidden="true" className="w-8 h-8" />
+          <ShareIcon aria-hidden="true" className="min-w-8 min-h-8" />
           <span className="sr-only">{t('shared.share')}</span>
         </button>
       )}
@@ -126,12 +121,9 @@ export default function CharacterContainer({
           type="button"
           aria-label={tCommon('new-chat')}
           onClick={handleNavigateToNewUnsharedChat}
-          className={cn(
-            'rounded-enterprise-sm',
-            iconClassName
-          )}
+          className={cn(iconClassName, 'min-w-8 min-h-8')}
         >
-          <SharedChatIcon aria-hidden="true" className="w-8 h-8" />
+          <SharedChatIcon aria-hidden="true" className="min-w-8 min-h-8" />
           <span className="sr-only">{tCommon('new-chat')}</span>
         </button>
       )}
@@ -143,12 +135,9 @@ export default function CharacterContainer({
           confirmText={tCommon('delete')}
           actionFn={handleDeleteCharacter}
           aria-label={t('form.delete-character')}
-          triggerButtonClassName={cn(
-            'border-transparent justify-center flex flex-col p-0',
-            iconClassName
-          )}
+          triggerButtonClassName={cn('border-transparent p-0', iconClassName)}
         >
-          <TrashIcon aria-hidden="true" className="w-8 h-8" />
+          <TrashIcon aria-hidden="true" className="min-w-8 min-h-8" />
           <span className="sr-only">{t('form.delete-character')}</span>
         </DestructiveActionButton>
       )}

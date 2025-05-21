@@ -44,7 +44,10 @@ export default function SelectLlmModelForm({
                 <Select.Item
                   key={model.id}
                   value={model.id}
-                  className="px-4 py-2 cursor-pointer outline-none hover:bg-vidis-hover-green/20 rounded-enterprise-md transition"
+                  className={cn(
+                    'px-4 py-2 cursor-pointer outline-none transition',
+                    'hover:bg-primary-hover hover:text-primary-hover-text',
+                  )}
                 >
                   <Select.ItemText>{model.displayName}</Select.ItemText>
                 </Select.Item>

@@ -75,10 +75,7 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
         <Link
           aria-label={t('shared.share')}
           href={`/shared-chats/${sharedSchoolChat.id}/share`}
-          className={cn(
-            'rounded-enterprise-sm',
-            iconClassName,
-          )}
+          className={cn('rounded-enterprise-sm', iconClassName)}
         >
           <ShareIcon aria-hidden="true" className="w-8 h-8" />
           <span className="sr-only">{t('shared.share')}</span>

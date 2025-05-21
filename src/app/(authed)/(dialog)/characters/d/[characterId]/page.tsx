@@ -35,7 +35,7 @@ export default async function Page(context: PageContext) {
   }
 
   const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: character.pictureId });
-  const logoElement = <Logo federalStateId={user.federalState.id} />; 
+  const logoElement = <Logo federalStateId={user.federalState.id} />;
   return (
     <>
       <HeaderPortal>

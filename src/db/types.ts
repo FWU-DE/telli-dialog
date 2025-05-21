@@ -23,14 +23,13 @@ export type DesignConfiguration = {
   buttonPrimaryTextColor: string;
 };
 
-
 export const DEFAULT_DESIGN_CONFIGURATION: DesignConfiguration = {
   primaryColor: 'rgba(70, 33, 126, 1)', // vidis-purple
-  primaryTextColor: 'rgba(255, 255, 255, 1)', // primary-text
+  primaryTextColor: 'rgba(70, 33, 126, 1)', // primary-text
   secondaryColor: 'rgba(108, 233, 215, 1)', // vidis-hover-green
-  secondaryTextColor: 'rgba(70, 33, 126, 1)', // secondary-text
+  secondaryTextColor: 'rgba(238, 238, 238, 1)', // secondary-text
   primaryHoverColor: 'rgba(226, 251, 247, 1)', // primary with slight opacity for hover
-  primaryHoverTextColor: 'rgba(255, 255, 255, 1)', // primary with slight opacity for hover
+  primaryHoverTextColor: 'rgba(70, 33, 126, 1)', // primary with slight opacity for hover
   chatMessageBackgroundColor: 'rgba(245, 245, 245, 1)', // chat-message-background
   buttonPrimaryTextColor: 'rgba(70, 33, 126, 1)', // button-primary-text
 };

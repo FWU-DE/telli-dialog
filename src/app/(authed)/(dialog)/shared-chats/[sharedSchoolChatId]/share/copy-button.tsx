@@ -30,15 +30,9 @@ export default function CopyButton({ text, buttonClassName, iconClassName }: Cop
   return (
     <button aria-label={tCommon('copy')} onClick={copyToClipboard} className={buttonClassName}>
       {isCopied ? (
-        <CheckIcon
-          aria-hidden="true"
-          className={cn(iconClassName ?? 'w-4 h-4')}
-        />
+        <CheckIcon aria-hidden="true" className={cn(iconClassName, 'w-4 h-4')} />
       ) : (
-        <ClipboardIcon
-          aria-hidden="true"
-          className={cn(iconClassName ?? 'w-4 h-4')}
-        />
+        <ClipboardIcon aria-hidden="true" className={cn(iconClassName, 'w-4 h-4')} />
       )}
       <span className="sr-only">{tCommon('copy-clipboard')}</span>
     </button>

@@ -161,7 +161,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
                   'flex items-center justify-center',
                   buttonSecondaryClassName,
                   'p-3 rounded-enterprise-sm',
-                  iconClassName
+                  iconClassName,
                 )}
                 type="button"
                 onClick={handleStopSharing}
@@ -186,7 +186,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
                   'flex items-center justify-center',
                   buttonSecondaryClassName,
                   'rounded-enterprise-sm p-2.5',
-                  iconClassName
+                  iconClassName,
                 )}
                 type="button"
                 onClick={() => router.push(shareUILink)}

@@ -36,10 +36,7 @@ export function InitialChatContentDisplay({
         </div>
       )}
       {setDialogStarted !== undefined && (
-        <button
-          className={buttonPrimaryClassName}
-          onClick={() => setDialogStarted(true)}
-        >
+        <button className={buttonPrimaryClassName} onClick={() => setDialogStarted(true)}>
           Dialog starten
         </button>
       )}

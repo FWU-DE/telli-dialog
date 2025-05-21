@@ -178,12 +178,12 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
                   'flex items-center justify-center',
                   buttonSecondaryClassName,
                   'p-2.5 rounded-enterprise-sm',
-                  iconClassName
+                  iconClassName,
                 )}
                 type="button"
                 onClick={() => router.push(shareUILink)}
               >
-                <FilledShareIcon aria-hidden="true"/>
+                <FilledShareIcon aria-hidden="true" />
                 <span className="sr-only">{t('share')}</span>
               </button>
             )}

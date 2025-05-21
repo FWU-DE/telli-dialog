@@ -420,9 +420,7 @@ export default function CharacterForm({
       {isCreating && (
         <section className="mt-8 flex gap-4 items-center">
           <button
-            className={cn(
-              buttonSecondaryClassName,
-            )}
+            className={cn(buttonSecondaryClassName)}
             onClick={handleNavigateBack}
             type="button"
           >

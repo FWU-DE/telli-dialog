@@ -6,7 +6,8 @@ type SearchInputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
 export default function SearchBarInput({ ...props }: SearchInputProps) {
   return (
-    <div className={cn(
+    <div
+      className={cn(
         'relative flex items-center border-[1px] disabled:cursor-not-allowed disabled:bg-light-gray disabled:border-gray-100 focus-within:border-primary rounded-enterprise-md overflow-hidden group',
         props.disabled && 'bg-light-gray border-gray-100',
       )}

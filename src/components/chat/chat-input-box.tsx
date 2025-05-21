@@ -50,10 +50,13 @@ export function ChatInputBox({
       type="button"
       title="Stop generating"
       onClick={handleStopGeneration}
-      className="p-1.5 my-2 flex items-center justify-center group disabled:cursor-not-allowed rounded-enterprise-sm hover:bg-secondary/20 me-2"
+      className={cn(
+        'p-1.5 my-2 flex items-center justify-center group disabled:cursor-not-allowed me-2',
+        iconClassName,
+      )}
       aria-label="Stop"
     >
-      <StopIcon className={cn("w-6 h-6", iconClassName)} />
+      <StopIcon className={cn('w-6 h-6')} />
     </button>
   ) : (
     <button
@@ -61,12 +64,12 @@ export function ChatInputBox({
       title="Send message"
       disabled={input.trim().length === 0}
       className={cn(
+        iconClassName,
         'my-2 mx-2 flex items-center self-end justify-center group disabled:cursor-not-allowed text-dark-gray',
-        iconClassName
       )}
       aria-label="Send Message"
     >
-      <ArrowRightIcon className={cn("h-9 w-9", iconClassName)} />
+      <ArrowRightIcon className={cn('h-9 w-9', iconClassName)} />
     </button>
   );
 

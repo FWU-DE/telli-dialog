@@ -79,7 +79,7 @@ export function SharedChatHeader({
             triggerButtonClassName={cn(
               'flex justify-center items-center w-8 h-8',
               iconClassName,
-              'disabled:bg-light-gray group !px-0 !py-0 !text-current !border-0 '
+              'disabled:bg-light-gray group !px-0 !py-0 !text-current !border-0 ',
             )}
             actionFn={handleOpenNewChat}
           >
