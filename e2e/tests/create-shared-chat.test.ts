@@ -229,46 +229,46 @@ test('data is autosaved on blur', async ({ page }) => {
 
   // Description
   await page.getByLabel('Wie kann das Szenario kurz beschrieben werden?').fill('New Description');
+  await page.getByLabel('Wie kann das Szenario kurz beschrieben werden?').press('Tab');
   await page.waitForTimeout(1000);
   await page.reload();
-  await page.getByLabel('Wie kann das Szenario kurz beschrieben werden?').press('Tab');
   await expect(page.getByLabel('Wie kann das Szenario kurz beschrieben werden?')).toHaveValue(
     'New Description',
   );
 
   // School Type
   await page.getByLabel('Schultyp').fill('Realschule');
+  await page.getByLabel('Schultyp').press('Tab');
   await page.waitForTimeout(1000);
   await page.reload();
-  await page.getByLabel('Schultyp').press('Tab');
   await expect(page.getByLabel('Schultyp')).toHaveValue('Realschule');
 
   // Grade Level
   await page.getByLabel('Klassenstufe').fill('9. Klasse');
+  await page.getByLabel('Klassenstufe').press('Tab');
   await page.waitForTimeout(1000);
   await page.reload();
-  await page.getByLabel('Klassenstufe').press('Tab');
   await expect(page.getByLabel('Klassenstufe')).toHaveValue('9. Klasse');
 
   // Subject
   await page.getByLabel('Fach').fill('Mathematik');
+  await page.getByLabel('Fach').press('Tab');
   await page.waitForTimeout(1000);
   await page.reload();
-  await page.getByLabel('Fach').press('Tab');
   await expect(page.getByLabel('Fach')).toHaveValue('Mathematik');
 
   // Task
   await page.getByLabel('Wie lautet der Auftrag an die Lernenden?').fill('New Task');
+  await page.getByLabel('Wie lautet der Auftrag an die Lernenden?').press('Tab');
   await page.waitForTimeout(1000);
   await page.reload();
-  await page.getByLabel('Wie lautet der Auftrag an die Lernenden?').press('Tab');
   await expect(page.getByLabel('Wie lautet der Auftrag an die Lernenden?')).toHaveValue('New Task');
 
   // Behavior
   await page.getByLabel('Wie verhält sich telli im Lernszenario? *').fill('New Behavior');
+  await page.getByLabel('Wie verhält sich telli im Lernszenario? *').press('Tab');
   await page.waitForTimeout(1000);
   await page.reload();
-  await page.getByLabel('Wie verhält sich telli im Lernszenario? *').press('Tab');
   await expect(page.getByLabel('Wie verhält sich telli im Lernszenario? *')).toHaveValue(
     'New Behavior',
   );
