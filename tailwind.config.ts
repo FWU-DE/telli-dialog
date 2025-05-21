@@ -47,7 +47,7 @@ const config = {
         'primary-hover': 'var(--primary-hover)',
         'primary-hover-text': 'var(--primary-hover-text)',
         'secondary-hover': 'var(--secondary-hover)',
-        'vidis-user-chat-background': 'rgba(225, 251, 247, 1)',
+        'secondary-light': 'var(--secondary-light)',
         'button-primary-text': 'var(--button-primary-text)',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',

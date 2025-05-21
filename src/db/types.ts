@@ -18,6 +18,7 @@ export type DesignConfiguration = {
   secondaryColor: string;
   secondaryTextColor: string;
   secondaryDarkColor: string;
+  secondaryLightColor: string;
   primaryHoverColor: string;
   primaryHoverTextColor: string;
   chatMessageBackgroundColor: string;

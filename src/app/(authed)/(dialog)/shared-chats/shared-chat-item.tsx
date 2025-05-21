@@ -69,6 +69,7 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
           className="p-1 me-2"
           leftTime={timeLeft}
           totalTime={sharedSchoolChat.maxUsageTimeLimit ?? 0}
+          stopWatchClassName="w-4 h-4"
         />
       )}
       {timeLeft > 0 && (

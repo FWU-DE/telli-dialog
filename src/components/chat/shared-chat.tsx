@@ -109,7 +109,7 @@ export default function SharedChat({
       <div className="flex flex-col h-full w-full">
         <SharedChatHeader
           chatActive={chatActive}
-          hasMessages={dialogStarted}
+          hasMessages={messages.length > 0}
           t={t}
           handleOpenNewChat={handleOpenNewChat}
           title={sharedSchoolChat.name}

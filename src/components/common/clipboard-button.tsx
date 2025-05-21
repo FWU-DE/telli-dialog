@@ -9,20 +9,21 @@ import { cn } from '@/utils/tailwind';
 
 type TelliClipboardButtonProps = {
   text: string;
+  className?: string;
 };
 
-export default function TelliClipboardButton({ text }: TelliClipboardButtonProps) {
+export default function TelliClipboardButton({ text, className }: TelliClipboardButtonProps) {
   return (
     <ClipboardButton
       text={text}
       clipIcon={
         <div className={cn('p-1.5 rounded-enterprise-sm', iconClassName)}>
-          <ClipboardLightIcon className="w-5 h-5" />
+          <ClipboardLightIcon className={className}/>
         </div>
       }
       checkIcon={
         <div className={cn('p-1.5 rounded-enterprise-sm', iconClassName)}>
-          <CheckIcon className="w-5 h-5" />
+          <CheckIcon className={className}/>
         </div>
       }
     />

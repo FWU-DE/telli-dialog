@@ -352,7 +352,7 @@ export default function CustomGptForm({
                         className={cn('flex items-center justify-center', iconClassName)}
                         aria-label={t('prompt-suggestions-add-button')}
                       >
-                        <PlusIcon />
+                        <PlusIcon className="w-8 h-8" />
                       </button>
                     ) : (
                       <button

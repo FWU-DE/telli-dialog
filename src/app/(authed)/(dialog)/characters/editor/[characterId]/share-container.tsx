@@ -148,6 +148,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
             <CountDownTimer
               leftTime={sharedChatTimeLeft}
               totalTime={character.maxUsageTimeLimit ?? 0}
+              stopWatchClassName="w-4 h-4"
             />
           </div>
         )}

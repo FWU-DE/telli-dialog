@@ -95,7 +95,7 @@ export function NewChatButton({ forceVisibility = false }: { forceVisibility?: b
       aria-label="Neuer Chat"
       title="Neuer Chat"
     >
-      <NewDialogIcon />
+      <NewDialogIcon className="w-8 h-8" />
     </button>
   );
 }

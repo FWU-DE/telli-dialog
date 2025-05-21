@@ -6,10 +6,10 @@ import ProfileMenu, { UnauthenticatedProfileMenu } from '../navigation/profile-m
 import DownloadSharedConversationButton from '@/app/(unauth)/ua/dowload-shared-conversation-button';
 import { Message } from 'ai';
 import DestructiveActionButton from '../common/destructive-action-button';
-import TrashFilledIcon from '../icons/trash-filled';
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import { cn } from '@/utils/tailwind';
 import { iconClassName } from '@/utils/tailwind/icon';
+import TrashIcon from '../icons/trash';
 
 export function ChatHeaderBar({
   user,
@@ -68,6 +68,7 @@ export function SharedChatHeader({
   title: string;
   messages: Message[];
 }) {
+  console.log(hasMessages);
   return (
     <header className="flex gap-4 justify-between items-center py-[1.15rem] px-6">
       {chatActive && hasMessages && (
@@ -79,11 +80,11 @@ export function SharedChatHeader({
             triggerButtonClassName={cn(
               'flex justify-center items-center w-8 h-8',
               iconClassName,
-              'disabled:bg-light-gray group !px-0 !py-0 !text-current !border-0 ',
+              'disabled:bg-light-gray group !px-0 !py-0 !border-0 ',
             )}
             actionFn={handleOpenNewChat}
           >
-            <TrashFilledIcon className="h-4 w-4" />
+            <TrashIcon className="h-8 w-8" solid/>
           </DestructiveActionButton>
         </>
       )}

@@ -37,7 +37,7 @@ export function ChatBox({
   const tCommon = useTranslations('common');
   const userClassName =
     children.role === 'user'
-      ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-vidis-user-chat-background text-primary-foreground max-w-[70%] break-words'
+      ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary-light text-primary-foreground max-w-[70%] break-words'
       : 'w-fit';
   const fileMatch = fileMapping?.get(children.id) !== undefined;
   const allFiles = fileMatch ? fileMapping.get(children.id) : initialFiles;
@@ -90,7 +90,7 @@ export function ChatBox({
   const maybeShowMessageIcons =
     isLastNonUser && !isLoading ? (
       <div className="flex items-center gap-1 mt-1">
-        <TelliClipboardButton text={children.content} />
+        <TelliClipboardButton text={children.content} className='w-5 h-5'/>
         <button
           title={tCommon('regenerate-message')}
           type="button"

@@ -70,6 +70,7 @@ function constructRootLayoutStyle({
     '--secondary': designConfiguration?.secondaryColor,
     '--secondary-dark': designConfiguration?.secondaryDarkColor,
     '--secondary-text': designConfiguration?.secondaryTextColor,
+    '--secondary-light': designConfiguration?.secondaryLightColor,
     '--primary-hover': designConfiguration?.primaryHoverColor,
     '--primary-hover-text': designConfiguration?.primaryHoverTextColor,
     '--button-primary-text': designConfiguration?.buttonPrimaryTextColor,

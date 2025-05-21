@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import { Message } from 'ai';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { cn } from '@/utils/tailwind';
+import { iconClassName } from '@/utils/tailwind/icon';
 
 type DownloadConversationButtonProps = {
   conversationMessages: Message[];
@@ -94,7 +95,10 @@ export default function DownloadSharedConversationButton({
 
   return (
     <button
-      className="flex justify-center items-center w-8 h-8 group disabled:bg-light-gray disabled:text-gray-100 group rounded-enterprise-sm hover:bg-primary-hover"
+      className={cn(
+        'flex justify-center items-center w-8 h-8',
+        iconClassName,
+      )}
       title={tCommon('conversation-download')}
       onClick={handleDownload}
       disabled={disabled}
@@ -102,7 +106,7 @@ export default function DownloadSharedConversationButton({
       {isLoading ? (
         <Spinner className="p-2 w-8 h-8" />
       ) : (
-        <WebDownloadIcon className="text-primary group-disabled:text-gray-100" />
+        <WebDownloadIcon className="group-disabled:text-gray-100" />
       )}
     </button>
   );
