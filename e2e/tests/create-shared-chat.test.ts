@@ -84,7 +84,7 @@ test('teacher can login, create and delete shared chat, student can join chat', 
 
   await page.goto('/shared-chats');
   await page.waitForURL('/shared-chats');
-  await page.getByTitle('Szenario erstellen').click();
+  await page.getByRole('button', { name: 'Szenario erstellen' }).click();
   await page.waitForURL('/shared-chats/**');
 
   // configure form
