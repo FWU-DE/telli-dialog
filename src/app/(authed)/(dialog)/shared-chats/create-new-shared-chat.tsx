@@ -2,12 +2,12 @@ import PlusIcon from '@/components/icons/plus';
 import { cn } from '@/utils/tailwind';
 
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
-import { createNewSharedSchoolChatAction } from './create/actions';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
+import { createNewSharedSchoolChatAction } from './actions';
 
 export function CreateNewSharedChatButton() {
   const router = useRouter();
