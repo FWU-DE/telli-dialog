@@ -127,6 +127,7 @@ export default function SharedSchoolChatForm({
   }
 
   function handlePictureUploadComplete(picturePath: string) {
+    setValue('pictureId', picturePath);
     updateSharedSchoolChatPictureAction({ picturePath, id: sharedSchoolChat.id })
       .then(() => {
         toast.success(tToast('image-toast-success'));
@@ -155,7 +156,12 @@ export default function SharedSchoolChatForm({
     if (isCreating) return;
     const data = getValues();
     const defaultData = { ...sharedSchoolChat, modelId: sharedSchoolChat.modelId };
-    const newData = { ...data, attachedLinks: data.attachedLinks.map((p) => p.link) };
+    const newData = {
+      ...defaultData,
+      ...data,
+      attachedLinks: data.attachedLinks.map((p) => p.link),
+      description: data.description ?? '',
+    };
 
     const dataEquals = deepEqual(defaultData, newData);
 
