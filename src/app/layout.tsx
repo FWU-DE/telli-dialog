@@ -9,11 +9,7 @@ import { getMessages, getLocale } from 'next-intl/server';
 
 import './globals.css';
 import './scrollbar.css';
-import {
-  DEFAULT_DESIGN_CONFIGURATION,
-  DesignConfiguration,
-  SL_DESIGN_CONFIGURATION,
-} from '@/db/types';
+import { DEFAULT_DESIGN_CONFIGURATION, DesignConfiguration  } from '@/db/types';
 import { dbGetFederalStateByIdWithResult } from '@/db/functions/federal-state';
 import { getMaybeLogoFromS3 } from '@/s3';
 const barlow = Barlow({
@@ -51,7 +47,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body
         style={constructRootLayoutStyle({
-          designConfiguration: federalState?.designConfiguration ?? SL_DESIGN_CONFIGURATION,
+          designConfiguration: federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION,
         })}
       >
         <NextIntlClientProvider messages={messages}>
@@ -71,6 +67,7 @@ function constructRootLayoutStyle({
     '--primary': designConfiguration?.primaryColor,
     '--primary-text': designConfiguration?.primaryTextColor,
     '--secondary': designConfiguration?.secondaryColor,
+    '--secondary-dark': designConfiguration?.secondaryDarkColor,
     '--secondary-text': designConfiguration?.secondaryTextColor,
     '--primary-hover': designConfiguration?.primaryHoverColor,
     '--primary-hover-text': designConfiguration?.primaryHoverTextColor,

@@ -57,6 +57,7 @@ const config = {
         primary: 'var(--primary)',
         'secondary-text': 'var(--secondary-text)',
         secondary: 'var(--secondary)',
+        'secondary-dark': 'var(--secondary-dark)',
         foreground: 'hsl(var(--foreground))',
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
