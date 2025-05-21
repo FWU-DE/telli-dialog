@@ -79,7 +79,6 @@ export default function SharedSchoolChatForm({
       studentExcercise: sharedSchoolChat.studentExcercise ?? '',
       additionalInstructions: sharedSchoolChat.additionalInstructions ?? '',
       attachedLinks: initalLinks,
-      pictureId: sharedSchoolChat.pictureId ?? '',
     },
   });
   const backUrl = '/shared-chats';
