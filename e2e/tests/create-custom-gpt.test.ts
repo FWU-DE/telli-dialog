@@ -134,13 +134,9 @@ test('data is autosaved on blur', async ({ page }) => {
   await submitButton.click();
 
   await page.waitForURL('/custom/**');
-  await page
-    .getByRole('link', { name: 'Autosave Test GPT' })
-    .first()
-    .click();
-  await page.waitForURL('/custom/editor/**');  
+  await page.getByRole('link', { name: 'Autosave Test GPT' }).first().click();
+  await page.waitForURL('/custom/editor/**');
 
-  
   // change title to new value
   await page.getByRole('textbox', { name: 'Wie soll diese' }).fill('New Title');
   // unfocus the textbox
@@ -149,18 +145,24 @@ test('data is autosaved on blur', async ({ page }) => {
   await expect(page.getByRole('textbox', { name: 'Wie soll diese' })).toHaveValue('New Title');
 
   // change description to new value
-  await page.getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' }).fill('New Description');
+  await page
+    .getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' })
+    .fill('New Description');
   await page.waitForTimeout(1000);
-  await page.getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' }).press('Tab');
-  await expect(page.getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' }))
-    .toHaveValue('New Description');
+  await page
+    .getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' })
+    .press('Tab');
+  await expect(
+    page.getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' }),
+  ).toHaveValue('New Description');
 
   // change functions to new value
   await page.getByRole('textbox', { name: 'Welche konkreten Funktionen' }).fill('New Functions');
   await page.waitForTimeout(1000);
   await page.getByRole('textbox', { name: 'Welche konkreten Funktionen' }).press('Tab');
-  await expect(page.getByRole('textbox', { name: 'Welche konkreten Funktionen' }))
-    .toHaveValue('New Functions');
+  await expect(page.getByRole('textbox', { name: 'Welche konkreten Funktionen' })).toHaveValue(
+    'New Functions',
+  );
 
   // change prompt suggestion to new value
   await page.getByPlaceholder('Erstelle einen').fill('New Prompt Suggestion');

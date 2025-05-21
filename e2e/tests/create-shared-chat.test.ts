@@ -193,9 +193,7 @@ test('data is autosaved on blur', async ({ page }) => {
   await page.waitForURL('/shared-chats/**');
 
   // Fill out the form initially
-  await page
-    .getByLabel('Wie heißt das Szenario? *')
-    .fill('Autosave Test Scenario');
+  await page.getByLabel('Wie heißt das Szenario? *').fill('Autosave Test Scenario');
 
   await page
     .getByLabel('Wie kann das Szenario kurz beschrieben werden?')
@@ -232,7 +230,9 @@ test('data is autosaved on blur', async ({ page }) => {
   await page.getByLabel('Wie kann das Szenario kurz beschrieben werden?').fill('New Description');
   await page.waitForTimeout(1000);
   await page.getByLabel('Wie kann das Szenario kurz beschrieben werden?').press('Tab');
-  await expect(page.getByLabel('Wie kann das Szenario kurz beschrieben werden?')).toHaveValue('New Description');
+  await expect(page.getByLabel('Wie kann das Szenario kurz beschrieben werden?')).toHaveValue(
+    'New Description',
+  );
 
   // School Type
   await page.getByLabel('Schultyp').fill('Realschule');
@@ -262,5 +262,7 @@ test('data is autosaved on blur', async ({ page }) => {
   await page.getByLabel('Wie verhält sich telli im Lernszenario? *').fill('New Behavior');
   await page.waitForTimeout(1000);
   await page.getByLabel('Wie verhält sich telli im Lernszenario? *').press('Tab');
-  await expect(page.getByLabel('Wie verhält sich telli im Lernszenario? *')).toHaveValue('New Behavior');
+  await expect(page.getByLabel('Wie verhält sich telli im Lernszenario? *')).toHaveValue(
+    'New Behavior',
+  );
 });
