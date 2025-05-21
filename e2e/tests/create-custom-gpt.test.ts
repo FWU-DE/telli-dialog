@@ -142,24 +142,27 @@ test('data is autosaved on blur', async ({ page }) => {
   // unfocus the textbox
   await page.getByRole('textbox', { name: 'Wie soll diese' }).press('Tab');
   await page.waitForTimeout(1000);
+  await page.reload();
   await expect(page.getByRole('textbox', { name: 'Wie soll diese' })).toHaveValue('New Title');
 
   // change description to new value
   await page
     .getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' })
     .fill('New Description');
-  await page.waitForTimeout(1000);
   await page
     .getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' })
     .press('Tab');
+  await page.waitForTimeout(1000);
+  await page.reload();
   await expect(
     page.getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' }),
   ).toHaveValue('New Description');
 
   // change functions to new value
   await page.getByRole('textbox', { name: 'Welche konkreten Funktionen' }).fill('New Functions');
-  await page.waitForTimeout(1000);
   await page.getByRole('textbox', { name: 'Welche konkreten Funktionen' }).press('Tab');
+  await page.waitForTimeout(1000);
+  await page.reload();
   await expect(page.getByRole('textbox', { name: 'Welche konkreten Funktionen' })).toHaveValue(
     'New Functions',
   );
