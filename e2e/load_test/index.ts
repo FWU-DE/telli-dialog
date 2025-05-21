@@ -138,7 +138,7 @@ async function sendMessage(text: string, page: Page) {
   await inputField.waitFor();
   await inputField.fill(text);
 
-  const sendMessageButton = page.locator('button[aria-label="Send Message"]');
+  const sendMessageButton = page.locator('button[aria-label="Nachricht abschicken"]');
   await sendMessageButton.waitFor();
   await sendMessageButton.click();
 }

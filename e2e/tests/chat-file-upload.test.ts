@@ -23,7 +23,7 @@ test('should successfully upload a file and get response about its contents', as
   const messageInput = page.getByRole('textbox', { name: 'Wie kann ich Dir helfen?' });
   await messageInput.click();
   await messageInput.fill('Wie heißt die Hauptperson die in dieser Datei genannnt wird?');
-  await page.getByLabel('Send Message').click();
+  await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
 
   // Wait for navigation and response
   await page.waitForURL('/d/**');

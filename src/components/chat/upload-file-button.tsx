@@ -9,6 +9,7 @@ import AttachFileIcon from '../icons/attach-file';
 import { cn } from '@/utils/tailwind';
 import { SUPPORTED_FILE_EXTENSIONS } from '@/const';
 import { TranslationValues, useTranslations } from 'next-intl';
+import { NUMBER_OF_FILES_LIMIT } from '@/configuration-text-inputs/const';
 
 export type FileUploadMetadata = {
   directoryId: string;
@@ -182,7 +183,11 @@ export default function UploadFileButton({
         className={className}
         disabled={disabled || isPrivateMode}
         type="button"
-        title={disabled ? t('upload.file-limit-reached') : t('upload.upload-file-button')}
+        title={
+          disabled
+            ? t('upload.file-limit-reached', { max_files: NUMBER_OF_FILES_LIMIT })
+            : t('upload.upload-file-button')
+        }
       >
         {triggerButton ?? (
           <AttachFileIcon
