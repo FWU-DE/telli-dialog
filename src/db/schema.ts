@@ -115,6 +115,7 @@ export const federalStateTable = pgTable('federal_state', {
   trainingLink: text('training_link'),
   // whitelabel configuration
   designConfiguration: json('design_configuration').$type<DesignConfiguration>(),
+  telliName: text('telli_name'),
   // feature flags
   studentAccess: boolean('student_access').default(true).notNull(),
   enableCharacter: boolean('enable_characters').default(true).notNull(),
