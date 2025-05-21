@@ -16,6 +16,11 @@ const pageContextSchema = z.object({
   params: z.object({
     sharedSchoolChatId: z.string(),
   }),
+  searchParams: z
+    .object({
+      create: z.string().optional(),
+    })
+    .optional(),
 });
 
 const PREFETCH_ENABLED = false;
@@ -24,7 +29,8 @@ export default async function Page(context: PageContext) {
   const result = pageContextSchema.safeParse(await awaitPageContext(context));
   if (!result.success) notFound();
 
-  const { params } = result.data;
+  const { params, searchParams } = result.data;
+  const isCreating = searchParams?.create === 'true';
   const user = await getUser();
   const sharedSchoolChat = await dbGetSharedSchoolChatById({
     userId: user.id,
@@ -65,7 +71,7 @@ export default async function Page(context: PageContext) {
         <SharedSchoolChatForm
           {...sharedSchoolChat}
           existingFiles={relatedFiles}
-          isCreating={false}
+          isCreating={isCreating}
           initalLinks={initalLinks}
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           readOnly={false}

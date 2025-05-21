@@ -102,3 +102,69 @@ test('teacher can delete customgpt with chat', async ({ page }) => {
   await expect(deleteChatConfirmButton).toBeVisible();
   await deleteChatConfirmButton.click();
 });
+
+test('data is autosaved on blur', async ({ page }) => {
+  await login(page, 'teacher');
+
+  await page.goto('/custom');
+  await page.waitForURL('/custom');
+
+  const createButton = page.getByRole('button', { name: 'Assistent erstellen' });
+  await expect(createButton).toBeVisible();
+  await createButton.click();
+
+  await page.waitForURL('/custom/editor/**');
+
+  // Fill out the form
+  await page.getByRole('textbox', { name: 'Wie soll diese' }).click();
+  await page.getByRole('textbox', { name: 'Wie soll diese' }).fill('Autosave Test GPT');
+  await page.getByRole('textbox', { name: 'Wie soll diese' }).press('Tab');
+  await page
+    .getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' })
+    .fill('Test description for autosave validation');
+
+  await page
+    .getByRole('textbox', { name: 'Welche konkreten Funktionen' })
+    .fill('Test functions for autosave validation');
+
+  // Add a prompt suggestion
+  await page.getByPlaceholder('Erstelle einen').fill('Test prompt suggestion');
+  let submitButton = await page.getByRole('button', { name: 'Assistent erstellen' });
+  await expect(submitButton).toBeVisible();
+  await submitButton.click();
+
+  await page.waitForURL('/custom/**');
+  await page
+    .getByRole('link', { name: 'Autosave Test GPT' })
+    .first()
+    .click();
+  await page.waitForURL('/custom/editor/**');  
+
+  
+  // change title to new value
+  await page.getByRole('textbox', { name: 'Wie soll diese' }).fill('New Title');
+  // unfocus the textbox
+  await page.getByRole('textbox', { name: 'Wie soll diese' }).press('Tab');
+  await page.waitForTimeout(1000);
+  await expect(page.getByRole('textbox', { name: 'Wie soll diese' })).toHaveValue('New Title');
+
+  // change description to new value
+  await page.getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' }).fill('New Description');
+  await page.waitForTimeout(1000);
+  await page.getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' }).press('Tab');
+  await expect(page.getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' }))
+    .toHaveValue('New Description');
+
+  // change functions to new value
+  await page.getByRole('textbox', { name: 'Welche konkreten Funktionen' }).fill('New Functions');
+  await page.waitForTimeout(1000);
+  await page.getByRole('textbox', { name: 'Welche konkreten Funktionen' }).press('Tab');
+  await expect(page.getByRole('textbox', { name: 'Welche konkreten Funktionen' }))
+    .toHaveValue('New Functions');
+
+  // change prompt suggestion to new value
+  await page.getByPlaceholder('Erstelle einen').fill('New Prompt Suggestion');
+  await page.waitForTimeout(1000);
+  await page.getByPlaceholder('Erstelle einen').press('Tab');
+  await expect(page.getByPlaceholder('Erstelle einen')).toHaveValue('New Prompt Suggestion');
+});

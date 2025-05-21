@@ -220,6 +220,12 @@ export default function CustomGptForm({
       });
   }
 
+  async function handleAutoSave() {
+    if (isCreating) return;
+    const data = getValues();
+    await onSubmit(data);
+  }
+
   function handleCreateCustomGpt() {
     const data = getValues();
     onSubmit(data);
@@ -227,7 +233,7 @@ export default function CustomGptForm({
     router.replace(backUrl);
   }
   return (
-    <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
+    <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)} onBlur={handleAutoSave}>
       <NavigateBack label={t('all-gpts')} onClick={handleNavigateBack} />
 
       <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>
