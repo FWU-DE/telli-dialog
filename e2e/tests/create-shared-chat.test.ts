@@ -6,8 +6,8 @@ test('teacher can login, create and join shared chat', async ({ page }) => {
 
   await page.goto('/shared-chats');
   await page.waitForURL('/shared-chats');
-  await page.getByTitle('Szenario erstellen').click();
-  await page.waitForURL('/shared-chats/create');
+  await page.getByRole('button', { name: 'Szenario erstellen' }).click();
+  await page.waitForURL('/shared-chats/**');
 
   // configure form
   await page
@@ -84,8 +84,8 @@ test('teacher can login, create and delete shared chat, student can join chat', 
 
   await page.goto('/shared-chats');
   await page.waitForURL('/shared-chats');
-  await page.getByTitle('Szenario erstellen').click();
-  await page.waitForURL('/shared-chats/create');
+  await page.getByRole('button', { name: 'Szenario erstellen' }).click();
+  await page.waitForURL('/shared-chats/**');
 
   // configure form
   await page
@@ -182,4 +182,94 @@ test('teacher can delete shared chat', async ({ page }) => {
   });
   await expect(deleteChatConfirmButton).toBeVisible();
   await deleteChatConfirmButton.click();
+});
+
+test('data is autosaved on blur', async ({ page }) => {
+  await login(page, 'teacher');
+
+  await page.goto('/shared-chats');
+  await page.waitForURL('/shared-chats');
+  await page.getByRole('button', { name: 'Szenario erstellen' }).click();
+  await page.waitForURL('/shared-chats/**');
+
+  // Fill out the form initially
+  await page.getByLabel('Wie heißt das Szenario? *').fill('Autosave Test Scenario');
+
+  await page
+    .getByLabel('Wie kann das Szenario kurz beschrieben werden?')
+    .fill('Test description for autosave validation');
+
+  await page.getByLabel('Schultyp').fill('Gymnasium');
+  await page.getByLabel('Klassenstufe').fill('10. Klasse');
+  await page.getByLabel('Fach').fill('Geschichte');
+
+  await page
+    .getByLabel('Wie lautet der Auftrag an die Lernenden?')
+    .fill('Test task for autosave validation');
+
+  await page
+    .getByLabel('Wie verhält sich telli im Lernszenario? *')
+    .fill('Test behavior for autosave validation');
+
+  const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
+  await expect(submitButton).toBeVisible();
+  await submitButton.click();
+
+  await page.waitForURL('/shared-chats/**');
+  await page.getByRole('link', { name: 'Autosave Test Scenario' }).first().click();
+  await page.waitForURL('/shared-chats/**');
+
+  // Edit and verify autosave for each field
+  // Title
+  await page.getByLabel('Wie heißt das Szenario? *').fill('New Title');
+  await page.getByLabel('Wie heißt das Szenario? *').press('Tab');
+  await page.waitForTimeout(1000);
+  await page.reload();
+  await expect(page.getByLabel('Wie heißt das Szenario? *')).toHaveValue('New Title');
+
+  // Description
+  await page.getByLabel('Wie kann das Szenario kurz beschrieben werden?').fill('New Description');
+  await page.getByLabel('Wie kann das Szenario kurz beschrieben werden?').press('Tab');
+  await page.waitForTimeout(1000);
+  await page.reload();
+  await expect(page.getByLabel('Wie kann das Szenario kurz beschrieben werden?')).toHaveValue(
+    'New Description',
+  );
+
+  // School Type
+  await page.getByLabel('Schultyp').fill('Realschule');
+  await page.getByLabel('Schultyp').press('Tab');
+  await page.waitForTimeout(1000);
+  await page.reload();
+  await expect(page.getByLabel('Schultyp')).toHaveValue('Realschule');
+
+  // Grade Level
+  await page.getByLabel('Klassenstufe').fill('9. Klasse');
+  await page.getByLabel('Klassenstufe').press('Tab');
+  await page.waitForTimeout(1000);
+  await page.reload();
+  await expect(page.getByLabel('Klassenstufe')).toHaveValue('9. Klasse');
+
+  // Subject
+  await page.getByLabel('Fach').fill('Mathematik');
+  await page.getByLabel('Fach').press('Tab');
+  await page.waitForTimeout(1000);
+  await page.reload();
+  await expect(page.getByLabel('Fach')).toHaveValue('Mathematik');
+
+  // Task
+  await page.getByLabel('Wie lautet der Auftrag an die Lernenden?').fill('New Task');
+  await page.getByLabel('Wie lautet der Auftrag an die Lernenden?').press('Tab');
+  await page.waitForTimeout(1000);
+  await page.reload();
+  await expect(page.getByLabel('Wie lautet der Auftrag an die Lernenden?')).toHaveValue('New Task');
+
+  // Behavior
+  await page.getByLabel('Wie verhält sich telli im Lernszenario? *').fill('New Behavior');
+  await page.getByLabel('Wie verhält sich telli im Lernszenario? *').press('Tab');
+  await page.waitForTimeout(1000);
+  await page.reload();
+  await expect(page.getByLabel('Wie verhält sich telli im Lernszenario? *')).toHaveValue(
+    'New Behavior',
+  );
 });

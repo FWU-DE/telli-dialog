@@ -79,7 +79,7 @@ export async function copyFileInS3({ newKey, copySource }: { newKey: string; cop
 }
 
 export async function getMaybeSignedUrlFromS3Get({ key }: { key: string | undefined | null }) {
-  if (key === undefined || key === null) return undefined;
+  if (key === undefined || key === null || key === '') return undefined;
   return await getSignedUrlFromS3Get({ key });
 }
 
