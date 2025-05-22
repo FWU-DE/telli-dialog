@@ -90,7 +90,7 @@ export function ChatBox({
   const maybeShowMessageIcons =
     isLastNonUser && !isLoading ? (
       <div className="flex items-center gap-1 mt-1">
-        <TelliClipboardButton text={children.content} className='w-5 h-5'/>
+        <TelliClipboardButton text={children.content} className="w-5 h-5" />
         <button
           title={tCommon('regenerate-message')}
           type="button"

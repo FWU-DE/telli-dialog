@@ -95,10 +95,7 @@ export default function DownloadSharedConversationButton({
 
   return (
     <button
-      className={cn(
-        'flex justify-center items-center w-8 h-8',
-        iconClassName,
-      )}
+      className={cn('flex justify-center items-center w-8 h-8', iconClassName)}
       title={tCommon('conversation-download')}
       onClick={handleDownload}
       disabled={disabled}

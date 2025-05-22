@@ -75,7 +75,10 @@ export default async function Page(context: PageContext) {
                 <p id="join-code" className="text-3xl sm:text-5xl text-primary font-bold">
                   {formattedInviteCode}
                 </p>
-                <TelliClipboardButton text={formattedInviteCode} className="w-7 h-7 sm:w-9 sm:h-9"/>
+                <TelliClipboardButton
+                  text={formattedInviteCode}
+                  className="w-7 h-7 sm:w-9 sm:h-9"
+                />
               </div>
             </div>
             <Link

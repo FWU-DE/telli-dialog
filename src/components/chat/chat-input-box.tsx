@@ -9,6 +9,8 @@ import {
 import StopIcon from '../icons/stop';
 import ArrowRightIcon from '../icons/arrow-right';
 import UploadFileButton from './upload-file-button';
+import { useToast } from '../common/toast';
+import { useEffect } from 'react';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { cn } from '@/utils/tailwind';
 
@@ -34,6 +36,19 @@ export function ChatInputBox({
   enableFileUpload?: boolean;
 }) {
   const tCommon = useTranslations('common');
+  const tFileInteraction = useTranslations('file-interaction');
+  const toast = useToast();
+
+  useEffect(() => {
+    if (files && setFiles && files.size > NUMBER_OF_FILES_LIMIT) {
+      toast.error(
+        tFileInteraction('upload.file-limit-reached', { max_files: NUMBER_OF_FILES_LIMIT }),
+      );
+      const trimmedFiles = new Map(Array.from(files.entries()).slice(0, NUMBER_OF_FILES_LIMIT));
+      setFiles(trimmedFiles);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [files]);
 
   async function handleSubmitOnEnter(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !isLoading && !e.shiftKey) {
@@ -61,13 +76,13 @@ export function ChatInputBox({
   ) : (
     <button
       type="submit"
-      title="Send message"
+      title="Nachricht abschicken"
       disabled={input.trim().length === 0}
       className={cn(
         iconClassName,
         'my-2 mx-2 flex items-center self-end justify-center group disabled:cursor-not-allowed text-dark-gray',
       )}
-      aria-label="Send Message"
+      aria-label="Nachricht abschicken"
     >
       <ArrowRightIcon className={cn('h-9 w-9', iconClassName)} />
     </button>
@@ -102,7 +117,7 @@ export function ChatInputBox({
             maxLength={CHAT_MESSAGE_LENGTH_LIMIT}
           />
           {enableFileUpload && files !== undefined && setFiles !== undefined && (
-            <div className="flex flex-row gap-x-3">
+            <div className="flex flex-row gap-x-3 rounded-enterprise-sm">
               <UploadFileButton
                 className={iconClassName}
                 setFiles={setFiles}

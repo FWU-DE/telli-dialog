@@ -1,6 +1,6 @@
 export default function NewDialogIcon(props: React.ComponentProps<'svg'>) {
   return (
-    <svg      
+    <svg
       preserveAspectRatio="xMidYMid meet"
       viewBox="0 0 32 32"
       fill="none"

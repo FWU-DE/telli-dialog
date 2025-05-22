@@ -84,7 +84,7 @@ export function SharedChatHeader({
             )}
             actionFn={handleOpenNewChat}
           >
-            <TrashIcon className="h-8 w-8" solid/>
+            <TrashIcon className="h-8 w-8" solid />
           </DestructiveActionButton>
         </>
       )}

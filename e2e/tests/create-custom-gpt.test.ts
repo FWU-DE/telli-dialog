@@ -80,7 +80,7 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await expect(page.locator('body')).toContainText('Wo kann man günstig Baugrund erwerben');
   await page.getByRole('textbox', { name: 'Wie kann ich Dir helfen?' }).click();
   await page.getByRole('textbox', { name: 'Wie kann ich Dir helfen?' }).fill('Wer bist du?');
-  await page.getByLabel('Send Message').click();
+  await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
   await page.getByTitle('Kopieren').click();
 
   await expect(page.getByLabel('assistant message 1')).toContainText('Hausbauplaner');

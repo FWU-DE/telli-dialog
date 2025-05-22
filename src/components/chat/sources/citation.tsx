@@ -116,7 +116,7 @@ export default function Citation({
               handleDelete?.();
             }}
           >
-            <TrashIcon className="w-6 h-6 text-primary" fillOnHover/>
+            <TrashIcon className="w-6 h-6 text-primary" fillOnHover />
           </button>
         )}
       </div>

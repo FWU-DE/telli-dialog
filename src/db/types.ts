@@ -25,7 +25,6 @@ export type DesignConfiguration = {
   buttonPrimaryTextColor: string;
 };
 
-
 export type CustomTool = {
   type: 'function';
   function: {

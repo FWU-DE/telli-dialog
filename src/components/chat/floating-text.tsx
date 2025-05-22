@@ -217,7 +217,7 @@ export function FloatingText({
           {isMinimized ? (
             <ChevronRightIcon className="w-4 h-4" />
           ) : (
-            <ChevronDownIcon className="w-4 h-4" /> 
+            <ChevronDownIcon className="w-4 h-4" />
           )}
         </button>
       </div>
