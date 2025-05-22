@@ -91,7 +91,10 @@ export default function CharacterContainer({
       </div>
       <div className="flex-grow" />
       {timeLeft > 0 && character.maxUsageTimeLimit !== null && (
-        <CountDownTimer leftTime={timeLeft} totalTime={character.maxUsageTimeLimit} />
+        <CountDownTimer leftTime={timeLeft} totalTime={character.maxUsageTimeLimit}
+         className="p-1 me-2"
+         stopWatchClassName="w-4 h-4"
+        />
       )}
       {character.accessLevel === 'global' && !(timeLeft > 0) && (
         <CreateNewCharacterFromTemplate
