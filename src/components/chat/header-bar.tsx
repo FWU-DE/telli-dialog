@@ -1,3 +1,5 @@
+'use client';
+
 import { UserAndContext } from '@/auth/types';
 import SelectLlmModel from '../conversation/select-llm-model';
 import { NewChatButton, ToggleSidebarButton } from '../navigation/sidebar/collapsible-sidebar';
