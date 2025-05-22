@@ -8,7 +8,12 @@ import { Message } from 'ai';
 import DestructiveActionButton from '../common/destructive-action-button';
 import TrashFilledIcon from '../icons/trash-filled';
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
-
+import useBreakpoints from '@/components/hooks/use-breakpoints';
+import { ThreeDotsProfileMenu } from '../navigation/profile-menu';
+import Image from 'next/image';
+import { cn } from '@/utils/tailwind';
+import { breakpoints } from '@/components/hooks/use-breakpoints';
+import { useTranslations } from 'next-intl';
 export function ChatHeaderBar({
   user,
   title,
@@ -58,6 +63,8 @@ export function SharedChatHeader({
   handleOpenNewChat,
   title,
   messages,
+  imageSource,
+  reductionBreakpoint = 'sm',
 }: {
   chatActive: boolean;
   hasMessages: boolean;
@@ -65,36 +72,95 @@ export function SharedChatHeader({
   handleOpenNewChat: () => void;
   title: string;
   messages: Message[];
+  imageSource?: string;
+  reductionBreakpoint?: keyof typeof breakpoints;
 }) {
-  return (
-    <header className="flex gap-4 justify-between items-center py-[1.15rem] px-6">
-      {chatActive && hasMessages && (
-        <>
-          <DestructiveActionButton
-            modalTitle={t('delete-chat-modal-title')}
-            confirmText={t('delete-chat-modal-confirm-button')}
-            modalDescription={t('delete-chat-modal-description')}
-            triggerButtonClassName="flex justify-center items-center w-8 h-8 group disabled:bg-light-gray disabled:text-gray-100 group !px-0 !py-0 !text-current !border-0 !rounded-enterprise-sm hover:!bg-vidis-hover-green/20"
-            actionFn={handleOpenNewChat}
-          >
-            <TrashFilledIcon className="text-primary h-4 w-4" />
-          </DestructiveActionButton>
-        </>
-      )}
+  const { isBelow } = useBreakpoints();
+  const tCommon = useTranslations('common');
 
+  const handleDownload = () => {
+    // Trigger download functionality
+    const downloadButton = document.querySelector('[data-download-button]');
+    if (downloadButton instanceof HTMLElement) {
+      downloadButton.click();
+    }
+  };
+  console.log(isBelow.sm);
+  const showCompressedHeader = isBelow[reductionBreakpoint];
+
+  const deleteChatElement = (
+    <DestructiveActionButton
+      modalTitle={t('delete-chat-modal-title')}
+      confirmText={t('delete-chat-modal-confirm-button')}
+      modalDescription={t('delete-chat-modal-description')}
+      triggerButtonClassName={cn(
+        'justify-center items-center disabled:bg-light-gray disabled:text-gray-100 text-current !border-0 !rounded-enterprise-sm hover:!bg-vidis-hover-green/20',
+        isBelow.sm && 'items-center justify-start',
+      )}
+      actionFn={handleOpenNewChat}
+    >
+      <span className="flex items-center gap-2">
+        <TrashFilledIcon className="text-primary h-4 w-4" />
+        {showCompressedHeader ? tCommon('delete') : ''}
+      </span>
+    </DestructiveActionButton>
+  );
+
+  return (
+    <header
+      className={cn(
+        'flex gap-4 justify-between items-center py-[1.15rem] px-2',
+        isBelow[reductionBreakpoint] && 'justify-start',
+      )}
+    >
+      {!showCompressedHeader && deleteChatElement}
       <div className="flex-grow"></div>
       {
-        <div className="flex w-1/2 justify-center">
-          {hasMessages && <span className="text-xl truncate font-normal">{title}</span>}
-        </div>
+        <span className="flex justify-start text-xl overflow-ellipsis truncate items-center gap-2">
+          {hasMessages && imageSource && (
+            <Image
+              src={imageSource ?? ''}
+              alt={title}
+              width={30}
+              height={30}
+              className="rounded-enterprise-sm"
+            />
+          )}
+          {hasMessages && <span className="truncate">{title}</span>}
+        </span>
       }
       <div className="flex-grow"></div>
-      <DownloadSharedConversationButton
-        conversationMessages={messages}
-        disabled={!chatActive || !hasMessages}
-        sharedConversationName={title}
-      />
-      <UnauthenticatedProfileMenu />
+
+      {!showCompressedHeader && (
+        <DownloadSharedConversationButton
+          conversationMessages={messages}
+          disabled={!chatActive || !hasMessages}
+          sharedConversationName={title}
+          showText={false}
+          buttonClassName={cn(showCompressedHeader && 'ml-2 w-full items-center justify-start')}
+        />
+      )}
+
+      {showCompressedHeader ? (
+        <ThreeDotsProfileMenu
+          onDelete={chatActive && hasMessages ? handleOpenNewChat : undefined}
+          onDownload={chatActive && hasMessages ? handleDownload : undefined}
+          chatActive={chatActive}
+          hasMessages={hasMessages}
+          downloadButtonJSX={
+            <DownloadSharedConversationButton
+              conversationMessages={messages}
+              disabled={!chatActive || !hasMessages}
+              sharedConversationName={title}
+              showText={false}
+              buttonClassName={cn(showCompressedHeader && 'ml-2 w-full items-center justify-start')}
+            />
+          }
+          deleteButtonJSX={deleteChatElement}
+        />
+      ) : (
+        <UnauthenticatedProfileMenu />
+      )}
     </header>
   );
 }

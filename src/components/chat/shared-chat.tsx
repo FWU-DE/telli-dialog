@@ -115,6 +115,7 @@ export default function SharedChat({
           title={sharedSchoolChat.name}
           messages={messages}
         />
+        <hr className="w-full border-gray-200 mb-2" />
         <div
           ref={containerRef}
           className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden"

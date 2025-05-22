@@ -11,6 +11,9 @@ import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-message';
 import { getAssistantIcon } from './chat';
+import useBreakpoints from '../hooks/use-breakpoints';
+
+const reductionBreakpoint = 'sm';
 
 export default function CharacterSharedChat({
   imageSource,
@@ -45,6 +48,7 @@ export default function CharacterSharedChat({
   });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  const { isBelow } = useBreakpoints();
 
   React.useEffect(() => {
     if (scrollRef.current) {
@@ -88,7 +92,7 @@ export default function CharacterSharedChat({
               isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
               isLoading={isLoading}
               regenerateMessage={reload}
-              assistantIcon={assistantIcon}
+              assistantIcon={isBelow[reductionBreakpoint] ? undefined : assistantIcon}
             >
               {message}
             </ChatBox>
@@ -96,6 +100,7 @@ export default function CharacterSharedChat({
         })}
       </div>
     );
+
   return (
     <>
       {!chatActive && <ExpiredChatModal conversationMessages={messages} title={character.name} />}
@@ -107,8 +112,10 @@ export default function CharacterSharedChat({
           handleOpenNewChat={handleOpenNewChat}
           title={character.name}
           messages={messages}
+          imageSource={imageSource}
+          reductionBreakpoint={reductionBreakpoint}
         />
-
+        <hr className="w-full border-gray-200" />
         <div className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden">
           <div
             ref={scrollRef}
