@@ -4,7 +4,6 @@ import { UserAndContext } from '@/auth/types';
 import { UserModel, UserSchoolRole } from '@/db/schema';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 
-
 describe('checkProductAccess', () => {
   // Base test data
   const baseDate = new Date();
