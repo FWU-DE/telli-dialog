@@ -8,6 +8,7 @@ import { type UserAndContext } from '@/auth/types';
 import Link from 'next/link';
 import { IMPRESSUM_URL, PRIVACY_POLICY_URL } from './const';
 import { useTranslations } from 'next-intl';
+import DotsHorizontalIcon from '@/components/icons/dots-horizontal';
 
 type ProfileMenuProps = UserAndContext;
 
@@ -53,6 +54,66 @@ export default function ProfileMenu({ email, school }: ProfileMenuProps) {
           <div className="p-2 pl-4">
             <LogoutButton className="w-full text-primary hover:underline" />
           </div>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  );
+}
+
+export function ThreeDotsProfileMenu({
+  onDelete,
+  onDownload,
+  chatActive,
+  hasMessages,
+  downloadButtonJSX,
+  deleteButtonJSX,
+}: {
+  onDelete?: () => void;
+  onDownload?: () => void;
+  chatActive: boolean;
+  hasMessages: boolean;
+  downloadButtonJSX: React.ReactNode;
+  deleteButtonJSX: React.ReactNode;
+}) {
+  const tLegal = useTranslations('legal');
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <button
+          aria-label="More actions"
+          className="flex flex-shrink-0 focus:outline-none group hover:bg-light-gray rounded-enterprise-sm hover:bg-vidis-hover-green/20"
+          title="More actions"
+        >
+          <DotsHorizontalIcon className="text-primary h-6 w-6" />
+        </button>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          align="end"
+          sideOffset={10}
+          className="z-20 flex flex-col gap-2 py-2 w-[256px] rounded-enterprise-md mb-4 bg-white shadow-dropdown"
+        >
+          {chatActive && hasMessages && onDelete && (
+            <DropdownMenu.Item asChild>{deleteButtonJSX}</DropdownMenu.Item>
+          )}
+          {chatActive && hasMessages && onDownload && (
+            <DropdownMenu.Item asChild>{downloadButtonJSX}</DropdownMenu.Item>
+          )}
+          {chatActive && hasMessages && <hr className="border-gray-200 mx-2" />}
+          <Link
+            href={PRIVACY_POLICY_URL}
+            target="_blank"
+            className="text-vidis-hover-purple py-2 px-4 hover:underline"
+          >
+            {tLegal('privacy-policy')}
+          </Link>
+          <Link
+            href={IMPRESSUM_URL}
+            className="text-vidis-hover-purple py-2 px-4 hover:underline"
+            target="_blank"
+          >
+            {tLegal('imprint')}
+          </Link>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
