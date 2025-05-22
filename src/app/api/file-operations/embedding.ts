@@ -2,7 +2,7 @@ import { dbCreateManyTextChunks } from '@/db/functions/text-chunk';
 import { OpenAI } from 'openai';
 import { env } from '@/env';
 import { dbGetApiKeyByFederalStateIdWithResult } from '@/db/functions/federal-state';
-
+import { EMBEDDING_BATCH_SIZE } from '@/const';
 export async function embedText({
   text,
   federalStateId,
@@ -43,20 +43,43 @@ export async function embedBatchAndSave({
   fileId: string;
   federalStateId: string;
 }) {
-  const embeddings = await embedText({
-    text: values.map(
+  let tempChunks: {
+    content: string;
+    embedding: number[];
+    fileId: string;
+    orderIndex: number;
+    leadingOverlap?: string;
+    trailingOverlap?: string;
+  }[];
+
+  console.log(`Embedding ${values.length} chunks`);
+  // Process chunks in batches of 200
+  for (let i = 0; i < values.length; i += EMBEDDING_BATCH_SIZE) {
+    tempChunks = [];
+    const batch = values.slice(i, i + EMBEDDING_BATCH_SIZE);
+    const batchTexts = batch.map(
       (value) => `${value.leadingOverlap ?? ''}${value.content}${value.trailingOverlap ?? ''}`,
-    ),
-    federalStateId,
-  });
-  await dbCreateManyTextChunks({
-    chunks: embeddings.map((embedding, index) => ({
-      content: values[index]?.content ?? '',
-      embedding,
-      fileId,
-      orderIndex: index,
-      leadingOverlap: values[index]?.leadingOverlap ?? undefined,
-      trailingOverlap: values[index]?.trailingOverlap ?? undefined,
-    })),
-  });
+    );
+
+    const batchEmbeddings = await embedText({
+      text: batchTexts,
+      federalStateId,
+    });
+
+    // Add the processed batch to our chunks array
+    batchEmbeddings.forEach((embedding, batchIndex) => {
+      const originalIndex = i + batchIndex;
+      tempChunks.push({
+        content: values[originalIndex]?.content ?? '',
+        embedding,
+        fileId,
+        orderIndex: originalIndex,
+        leadingOverlap: values[originalIndex]?.leadingOverlap ?? undefined,
+        trailingOverlap: values[originalIndex]?.trailingOverlap ?? undefined,
+      });
+    });
+    await dbCreateManyTextChunks({
+      chunks: tempChunks,
+    });
+  }
 }
