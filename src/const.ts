@@ -5,4 +5,4 @@ export type SUPPORTED_FILE_TYPE = (typeof SUPPORTED_FILE_EXTENSIONS)[number];
 export const LOCAL_STORAGE_ENABLED = false;
 
 export const MAX_FILE_SIZE = 20_000_000; // 20MB
-export const EMBEDDING_BATCH_SIZE = 200;
+export const EMBEDDING_BATCH_SIZE = 100;
