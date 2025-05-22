@@ -8,7 +8,7 @@ import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-mode
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
-
+import Logo from '@/components/common/logo';
 export const dynamic = 'force-dynamic';
 
 export default async function Page({ params }: { params: Promise<{ gptId: string }> }) {
@@ -24,7 +24,7 @@ export default async function Page({ params }: { params: Promise<{ gptId: string
     console.error(`GPT with id ${customGpt} not found`);
     redirect('/');
   }
-
+  const logoElement = <Logo federalStateId={user.federalState.id} />;
   const models = await dbGetAndUpdateLlmModelsByFederalStateId({
     federalStateId: user.federalState.id,
   });
@@ -42,6 +42,7 @@ export default async function Page({ params }: { params: Promise<{ gptId: string
         enableFileUpload={false}
         promptSuggestions={customGpt.promptSuggestions}
         imageSource={maybeSignedImageUrl}
+        logoElement={logoElement}
       />
     </LlmModelsProvider>
   );

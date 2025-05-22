@@ -11,7 +11,7 @@ import { getRandomPromptSuggestions } from '@/utils/prompt-suggestions/utils';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
-
+import Logo from '@/components/common/logo';
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
@@ -24,6 +24,7 @@ export default async function Page() {
     federalStateId: user.federalState.id,
   });
 
+  const logoElement = <Logo federalStateId={user.school.federalStateId} />;
   return (
     <LlmModelsProvider
       models={models}
@@ -45,6 +46,7 @@ export default async function Page() {
         initialMessages={[]}
         promptSuggestions={promptSuggestions}
         enableFileUpload={true}
+        logoElement={logoElement}
       />
     </LlmModelsProvider>
   );

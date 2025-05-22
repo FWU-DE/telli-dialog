@@ -1,9 +1,8 @@
 export default function TelliLogo(props: React.ComponentProps<'svg'>) {
   return (
     <svg
+      preserveAspectRatio="xMidYMid meet"
       xmlns="http://www.w3.org/2000/svg"
-      width="160"
-      height="52"
       viewBox="0 0 160 52"
       fill="none"
       {...props}

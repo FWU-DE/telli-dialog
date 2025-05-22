@@ -407,7 +407,7 @@ export default function CharacterForm({
           <h3 className="font-medium">{t('delete-character')}</h3>
           <p className="mt-4">{t('character-delete-description')}</p>
           <DestructiveActionButton
-            className={cn(buttonDeleteClassName, 'mt-10')}
+            triggerButtonClassName={cn(buttonDeleteClassName, 'mt-10')}
             modalDescription={t('character-delete-modal-description')}
             modalTitle={t('delete-character')}
             confirmText={tCommon('delete')}
@@ -420,10 +420,7 @@ export default function CharacterForm({
       {isCreating && (
         <section className="mt-8 flex gap-4 items-center">
           <button
-            className={cn(
-              buttonSecondaryClassName,
-              'hover:border-primary hover:bg-vidis-hover-green/20',
-            )}
+            className={cn(buttonSecondaryClassName)}
             onClick={handleNavigateBack}
             type="button"
           >

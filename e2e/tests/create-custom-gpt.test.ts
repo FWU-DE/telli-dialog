@@ -38,16 +38,11 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await page
     .locator('textarea[name="promptSuggestions\\.1\\.content"]')
     .fill('Wie kann man den Bau am besten finanzieren');
-  await page.getByRole('button').filter({ hasText: /^$/ }).nth(3).click();
+  await page.getByRole('button', { name: 'Promptvorschlag hinzufügen' }).click();
   await page
     .locator('textarea[name="promptSuggestions\\.2\\.content"]')
     .fill('Was ist das aktuelle Zinsniveau');
-  await page
-    .getByRole('group')
-    .filter({ hasText: 'Welche konkreten Funktionen' })
-    .getByRole('button')
-    .first()
-    .click();
+  await page.getByRole('button', { name: 'Promptvorschlag hinzufügen' }).click();
   await page
     .locator('textarea[name="promptSuggestions\\.3\\.content"]')
     .fill('Wo kann man günstig Baugrund erwerben');

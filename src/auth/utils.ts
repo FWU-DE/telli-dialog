@@ -30,9 +30,9 @@ export async function getMaybeUser() {
 
   const dbUser = await dbGetUserById({ userId: user.id });
 
-  if (dbUser === undefined) return null;
-
-  return dbUser;
+  if (dbUser === undefined || dbUser.id === undefined) return null;
+  const userAndContext = await getUserAndContextByUserId({ userId: dbUser.id });
+  return userAndContext;
 }
 
 export async function getUser(): Promise<UserAndContext> {

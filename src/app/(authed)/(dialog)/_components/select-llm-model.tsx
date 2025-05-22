@@ -2,6 +2,7 @@ import * as Select from '@radix-ui/react-select';
 import ChevronDownIcon from '@/components/icons/chevron-down';
 import { LlmModel } from '@/db/schema';
 import { useTranslations } from 'next-intl';
+import { cn } from '@/utils/tailwind';
 
 type SelectLlmFormProps = {
   selectedModel: string | undefined;
@@ -27,7 +28,7 @@ export default function SelectLlmModelForm({
         className="flex items-center justify-between w-full py-2 pl-4 pr-4 bg-white border border-gray-200 focus:border-primary rounded-enterprise-md focus:outline-none max-w-min min-w-max"
       >
         <Select.Value />
-        <ChevronDownIcon aria-hidden="true" className="text-primary ms-2" />
+        <ChevronDownIcon aria-hidden="true" className="text-primary ms-2 w-4 h-2" />
         <span className="sr-only">{tCommon('llm-model')}</span>
       </Select.Trigger>
 
@@ -42,7 +43,10 @@ export default function SelectLlmModelForm({
                 <Select.Item
                   key={model.id}
                   value={model.id}
-                  className="px-4 py-2 cursor-pointer outline-none hover:bg-vidis-hover-green/20 rounded-enterprise-md transition"
+                  className={cn(
+                    'px-4 py-2 cursor-pointer outline-none transition',
+                    'hover:bg-primary-hover hover:text-primary-hover-text',
+                  )}
                 >
                   <Select.ItemText>{model.displayName}</Select.ItemText>
                 </Select.Item>

@@ -19,6 +19,8 @@ describe('checkProductAccess', () => {
     enableCharacter: true,
     enableSharedChats: true,
     enableCustomGpt: true,
+    designConfiguration: null,
+    telliName: 'telli',
   };
 
   const baseSchool = {

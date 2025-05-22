@@ -14,6 +14,7 @@ import CountDownTimer from './_components/count-down';
 import { useTranslations } from 'next-intl';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import Image from 'next/image';
+import { iconClassName } from '@/utils/tailwind/icon';
 type SharedChatItemProps = SharedChatWithImage;
 
 export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemProps) {
@@ -68,13 +69,14 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
           className="p-1 me-2"
           leftTime={timeLeft}
           totalTime={sharedSchoolChat.maxUsageTimeLimit ?? 0}
+          stopWatchClassName="w-4 h-4"
         />
       )}
       {timeLeft > 0 && (
         <Link
           aria-label={t('shared.share')}
           href={`/shared-chats/${sharedSchoolChat.id}/share`}
-          className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
+          className={cn('rounded-enterprise-sm', iconClassName)}
         >
           <ShareIcon aria-hidden="true" className="w-8 h-8" />
           <span className="sr-only">{t('shared.share')}</span>
@@ -86,9 +88,12 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
         modalTitle={t('form.delete-title')}
         confirmText={tCommon('delete')}
         actionFn={handleDeleteSharedChat}
-        triggerButtonClassName="border-transparent justify-center flex flex-col rounded-enterprise-sm hover:bg-vidis-hover-green/20 p-0"
+        triggerButtonClassName={cn(
+          'border-transparent justify-center flex flex-col rounded-enterprise-sm p-0',
+          iconClassName,
+        )}
       >
-        <TrashIcon aria-hidden="true" className="w-8 h-8 text-primary" />
+        <TrashIcon aria-hidden="true" className="w-8 h-8" />
         <span className="sr-only">{tCommon('delete')}</span>
       </DestructiveActionButton>
     </Link>

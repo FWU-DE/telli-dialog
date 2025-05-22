@@ -164,7 +164,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                         'underline',
                     )}
                   >
-                    <FourBoxes className="w-6 h-6" />
+                    <FourBoxes className="w-6 h-5" />
                     <span className="text-base">{t('custom-gpt')}</span>
                   </div>
                 </Link>
@@ -176,7 +176,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                         pathname.includes(HELP_MODE_GPT_ID) && 'underline',
                       )}
                     >
-                      <RobotIcon className="w-6 h-6" />
+                      <RobotIcon className="w-6 h-5" />
                       <span className="text-base">{t('help-mode')}</span>
                     </div>
                   </Link>

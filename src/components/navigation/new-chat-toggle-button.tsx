@@ -15,7 +15,7 @@ export default function ChatToggleButton() {
 
   return (
     <Link href="/" className={cn(buttonPrimaryClassName, 'group p-3.5')}>
-      <PlusIcon className="fill-primary-text group-hover:fill-secondary-text" />
+      <PlusIcon className="fill-primary-text group-hover:fill-secondary-text w-8 h-8" />
     </Link>
   );
 }

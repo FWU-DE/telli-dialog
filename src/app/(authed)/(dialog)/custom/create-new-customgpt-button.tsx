@@ -28,7 +28,7 @@ export default function CreateNewCustomGptButton() {
       onClick={handleNewGPT}
       className={cn(buttonPrimaryClassName, 'flex gap-2 items-center group py-2')}
     >
-      <PlusIcon className="fill-white group-hover:fill-secondary-text" />
+      <PlusIcon className="fill-white group-hover:fill-secondary-text w-8 h-8" />
       <span>{t('form.create-gpt')}</span>
     </button>
   );

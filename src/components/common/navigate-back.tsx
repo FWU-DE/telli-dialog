@@ -13,7 +13,7 @@ export default function NavigateBack({ label, onClick, className }: NavigateBack
       onClick={onClick}
       className={cn('flex gap-3 items-center text-primary hover:underline', className)}
     >
-      <ChevronLeftIcon />
+      <ChevronLeftIcon className="w-4 h-4" />
       <span>{label}</span>
     </button>
   );

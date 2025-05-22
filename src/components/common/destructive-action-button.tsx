@@ -37,7 +37,7 @@ export default function DestructiveActionButton({
       <AlertDialog.Trigger asChild>
         <button
           id="destructive-button"
-          className={cn(buttonDeleteClassName, triggerButtonClassName)}
+          className={triggerButtonClassName}
           onClick={(event) => {
             event.stopPropagation();
             event.preventDefault();
@@ -65,10 +65,7 @@ export default function DestructiveActionButton({
                 event.preventDefault();
                 setIsOpen(false);
               }}
-              className={cn(
-                buttonSecondaryClassName,
-                'hover:border-primary max-lg:w-full hover:bg-vidis-hover-green/20',
-              )}
+              className={cn(buttonSecondaryClassName)}
               type="button"
             >
               Abbrechen

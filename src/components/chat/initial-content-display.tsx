@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import MarkdownDisplay from './markdown-display';
+import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 
 export function InitialChatContentDisplay({
   title,
@@ -35,10 +36,7 @@ export function InitialChatContentDisplay({
         </div>
       )}
       {setDialogStarted !== undefined && (
-        <button
-          className="bg-primary text-white px-4 py-2 rounded-enterprise-full"
-          onClick={() => setDialogStarted(true)}
-        >
+        <button className={buttonPrimaryClassName} onClick={() => setDialogStarted(true)}>
           Dialog starten
         </button>
       )}
