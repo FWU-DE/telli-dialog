@@ -12,7 +12,6 @@ import { awaitPageContext } from '@/utils/next/utils';
 import { PageContext } from '@/utils/next/types';
 import { dbGetCharacterByIdAndUserId } from '@/db/functions/character';
 import CountDownTimer from '@/app/(authed)/(dialog)/shared-chats/_components/count-down';
-import CopyButton from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/share/copy-button';
 import QRCode from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/share/qr-code';
 import { getTranslations } from 'next-intl/server';
 import TelliClipboardButton from '@/components/common/clipboard-button';

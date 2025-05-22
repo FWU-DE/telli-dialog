@@ -5,7 +5,6 @@ import React, { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
 import { type CustomGptModel, type CharacterModel, FileModel } from '@/db/schema';
-import TelliLogo from '../icons/logo';
 import PromptSuggestions from './prompt-suggestions';
 import MarkdownDisplay from './markdown-display';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';

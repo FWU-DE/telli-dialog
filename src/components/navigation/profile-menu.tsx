@@ -8,7 +8,6 @@ import { type UserAndContext } from '@/auth/types';
 import Link from 'next/link';
 import { IMPRESSUM_URL, PRIVACY_POLICY_URL } from './const';
 import { useTranslations } from 'next-intl';
-import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { cn } from '@/utils/tailwind';
 import { iconClassName } from '@/utils/tailwind/icon';
 type ProfileMenuProps = UserAndContext;

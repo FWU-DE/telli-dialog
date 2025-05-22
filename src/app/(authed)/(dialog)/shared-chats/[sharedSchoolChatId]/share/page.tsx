@@ -13,7 +13,6 @@ import Link from 'next/link';
 import { z } from 'zod';
 import CountDownTimer from '../../_components/count-down';
 import { calculateTimeLeftBySharedChat } from '../utils';
-import CopyButton from './copy-button';
 import QRCode from './qr-code';
 import TelliClipboardButton from '@/components/common/clipboard-button';
 

@@ -14,7 +14,6 @@ import { ToastContextType } from '../common/toast';
 import { useTranslations } from 'next-intl';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { cn } from '@/utils/tailwind';
-import { buttonDeleteClassName } from '@/utils/tailwind/button';
 
 type FilesTableProps = {
   files: FileModel[];
