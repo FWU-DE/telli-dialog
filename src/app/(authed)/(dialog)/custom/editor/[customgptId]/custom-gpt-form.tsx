@@ -345,7 +345,7 @@ export default function CustomGptForm({
                     id={`promptSuggestions.${index}.content`}
                   />
                   <div className="flex items-center justify-center">
-                    {index === 0 ? (
+                    {index === fields.length - 1 ? (
                       <button
                         onClick={() => {
                           if (fields.length >= 10) {
@@ -370,7 +370,7 @@ export default function CustomGptForm({
                         className={cn('flex items-center justify-center', iconClassName)}
                         type="button"
                       >
-                        <TrashIcon />
+                        <TrashIcon className="w-8 h-8" />
                       </button>
                     )}
                   </div>

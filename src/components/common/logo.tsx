@@ -7,7 +7,7 @@ export default async function Logo({ federalStateId }: { federalStateId: string 
   const logoElement = logoPath ? (
     <Image src={logoPath} alt="logo" width={150} height={150} />
   ) : (
-    <TelliLogo className="text-primary" />
+    <TelliLogo className="text-primary" width={150} height={150} />
   );
   return logoElement;
 }
