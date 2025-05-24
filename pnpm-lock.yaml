@@ -137,6 +137,9 @@ importers:
       openai:
         specifier: 4.83.0
         version: 4.83.0(ws@8.18.1)(zod@3.22.4)
+      pdf2json:
+        specifier: ^3.1.5
+        version: 3.1.5
       pdfreader:
         specifier: 3.0.7
         version: 3.0.7
@@ -203,6 +206,9 @@ importers:
       tsx:
         specifier: 4.19.4
         version: 4.19.4
+      unpdf:
+        specifier: 1.0.5
+        version: 1.0.5
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -5262,6 +5268,13 @@ packages:
     bundledDependencies:
       - '@xmldom/xmldom'
 
+  pdf2json@3.1.5:
+    resolution: {integrity: sha512-djZPInDLNuJU+o6GaJNvcoUh6MtUAx3IYTQCTxywHzeg1jC5YWgz/XzlgmduxxBblpMTqY2fjcWwvyRdGPTyrQ==}
+    engines: {node: '>=20.18.0', npm: '>=10.8.2'}
+    hasBin: true
+    bundledDependencies:
+      - '@xmldom/xmldom'
+
   pdfreader@3.0.7:
     resolution: {integrity: sha512-68Htw7su6HDJGGKv9tkjilRyf8zaHulEKRCgCwx4FE8krcMB8iBtM46Smjjez0jFm45dUKYXJzThyLwCqfQlCQ==}
     engines: {node: '>=14'}
@@ -6295,6 +6308,14 @@ packages:
   universalify@0.2.0:
     resolution: {integrity: sha512-CJ1QgKmNg3CwvAv/kOFmtnEN05f0D/cn9QntgNOQlQF9dgvVTHj3t+8JPdjqawCHk7V/KA+fbUqzZ9XWhcqPUg==}
     engines: {node: '>= 4.0.0'}
+
+  unpdf@1.0.5:
+    resolution: {integrity: sha512-f06b1bT0Cu96UpQmU4wQbir4nJrZ8kMU9dC3zUg7Ac+Sy5iKuh/aHq58rlyk6ggue0xjhed2Q5uu0AJVSl7qHA==}
+    peerDependencies:
+      '@napi-rs/canvas': ^0.1.69
+    peerDependenciesMeta:
+      '@napi-rs/canvas':
+        optional: true
 
   unpipe@1.0.0:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
@@ -12542,6 +12563,8 @@ snapshots:
 
   pdf2json@3.1.4: {}
 
+  pdf2json@3.1.5: {}
+
   pdfreader@3.0.7:
     dependencies:
       pdf2json: 3.1.4
@@ -13788,6 +13811,8 @@ snapshots:
       unist-util-visit-parents: 6.0.1
 
   universalify@0.2.0: {}
+
+  unpdf@1.0.5: {}
 
   unpipe@1.0.0: {}
 
