@@ -137,9 +137,6 @@ importers:
       openai:
         specifier: 4.83.0
         version: 4.83.0(ws@8.18.1)(zod@3.22.4)
-      pdfreader:
-        specifier: 3.0.7
-        version: 3.0.7
       pg:
         specifier: 8.13.1
         version: 8.13.1
@@ -203,6 +200,9 @@ importers:
       tsx:
         specifier: 4.19.4
         version: 4.19.4
+      unpdf:
+        specifier: 1.0.5
+        version: 1.0.5
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -5255,17 +5255,6 @@ packages:
     resolution: {integrity: sha512-vE7JKRyES09KiunauX7nd2Q9/L7lhok4smP9RZTDeD4MVs72Dp2qNFVz39Nz5a0FVEW0BJR6C0DYrq6unoziZA==}
     engines: {node: '>= 14.16'}
 
-  pdf2json@3.1.4:
-    resolution: {integrity: sha512-rS+VapXpXZr+5lUpHmRh3ugXdFXp24p1RyG24yP1DMpqP4t0mrYNGpLtpSbWD42PnQ59GIXofxF+yWb7M+3THg==}
-    engines: {node: '>=18.12.1', npm: '>=8.19.2'}
-    hasBin: true
-    bundledDependencies:
-      - '@xmldom/xmldom'
-
-  pdfreader@3.0.7:
-    resolution: {integrity: sha512-68Htw7su6HDJGGKv9tkjilRyf8zaHulEKRCgCwx4FE8krcMB8iBtM46Smjjez0jFm45dUKYXJzThyLwCqfQlCQ==}
-    engines: {node: '>=14'}
-
   pg-cloudflare@1.1.1:
     resolution: {integrity: sha512-xWPagP/4B6BgFO+EKz3JONXv3YDgvkbVrGw2mTo3D6tVDQRh1e7cqVGvyR3BE+eQgAvx1XhW/iEASj4/jCWl3Q==}
 
@@ -6295,6 +6284,14 @@ packages:
   universalify@0.2.0:
     resolution: {integrity: sha512-CJ1QgKmNg3CwvAv/kOFmtnEN05f0D/cn9QntgNOQlQF9dgvVTHj3t+8JPdjqawCHk7V/KA+fbUqzZ9XWhcqPUg==}
     engines: {node: '>= 4.0.0'}
+
+  unpdf@1.0.5:
+    resolution: {integrity: sha512-f06b1bT0Cu96UpQmU4wQbir4nJrZ8kMU9dC3zUg7Ac+Sy5iKuh/aHq58rlyk6ggue0xjhed2Q5uu0AJVSl7qHA==}
+    peerDependencies:
+      '@napi-rs/canvas': ^0.1.69
+    peerDependenciesMeta:
+      '@napi-rs/canvas':
+        optional: true
 
   unpipe@1.0.0:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
@@ -12540,12 +12537,6 @@ snapshots:
 
   pathval@2.0.0: {}
 
-  pdf2json@3.1.4: {}
-
-  pdfreader@3.0.7:
-    dependencies:
-      pdf2json: 3.1.4
-
   pg-cloudflare@1.1.1:
     optional: true
 
@@ -13788,6 +13779,8 @@ snapshots:
       unist-util-visit-parents: 6.0.1
 
   universalify@0.2.0: {}
+
+  unpdf@1.0.5: {}
 
   unpipe@1.0.0: {}
 
