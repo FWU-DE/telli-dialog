@@ -22,17 +22,17 @@ describe('extractTextFromPdfBuffer', () => {
 
   it('should extract text from a PDF buffer', async () => {
     // This test uses the actual PDF reader with the real file
-    const { text, totalPages } = await extractTextFromPdfBufferAlt(pdfBuffer);
+    const { pageElement, totalPages } = await extractTextFromPdfBufferAlt(pdfBuffer);
 
     // Basic validations for the extracted text
-    expect(text).toBeDefined();
+    expect(pageElement).toBeDefined();
     expect(totalPages).toBe(1);
-    expect(typeof text[0]).toBe('string');
-    expect(text?.[0]?.length).toBeGreaterThan(0);
+    expect(typeof pageElement?.[0]?.text).toBe('string');
+    expect(pageElement?.[0]?.text.length).toBeGreaterThan(0);
 
     // Add assertions based on the expected content of your test document
     // For example:
-    expect(text?.[0]).toContain('Einige Beispielssätze');
+    expect(pageElement?.[0]?.text).toContain('Einige Beispielssätze');
   });
 });
 
@@ -44,12 +44,12 @@ describe('extractTextFromPdfBufferAlt', () => {
   });
   
   it('should extract text from a PDF buffer', async () => {
-    const { text, totalPages } = await extractTextFromPdfBufferAlt(pdfBuffer);
+    const { pageElement, totalPages } = await extractTextFromPdfBufferAlt(pdfBuffer);
 
-    expect(text).toBeDefined();
+    expect(pageElement).toBeDefined();
     expect(totalPages).toBe(26);
-    expect(typeof text[0]).toBe('string');
-    expect(text?.[0]?.length).toBeGreaterThan(0);
+    expect(typeof pageElement?.[0]?.text).toBe('string');
+    expect(pageElement?.[0]?.text.length).toBeGreaterThan(0);
   });
 
   it('should extract the table of contents from a PDF buffer', async () => {

@@ -1,40 +1,12 @@
 import { extractText, getDocumentProxy } from 'unpdf';
 
 /**
- * Extract text from PDF buffer using unpdf library
- * This is a modern alternative using Mozilla's PDF.js under the hood
- */
-export async function extractTextFromPdfBuffer(
-  pdfBuffer: Buffer,
-): Promise<{ totalPages: number; text: string[] }> {
-  try {
-    // Convert Buffer to Uint8Array as required by unpdf
-    const uint8Array = new Uint8Array(pdfBuffer);
-
-    // Extract text with pages merged into a single string
-    const pdf = await getDocumentProxy(uint8Array);
-
-    const result = await extractText(pdf, { mergePages: false });
-    // replace softwrap hyphen if applicable
-    return {
-      totalPages: result.totalPages,
-      text: result.text.map((page) => page.replace(/-\n/g, '')),
-    };
-  } catch (error) {
-    console.error('Error parsing PDF with unpdf:', error);
-    throw new Error(
-      `Failed to parse PDF: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    );
-  }
-}
-
-/**
  * Extract text from PDF buffer with page-by-page breakdown using unpdf library
  * Returns an array of objects with page number and text content
  */
-export async function extractTextFromPdfBufferWithPages(
+export async function extractTextFromPdfBuffer(
   pdfBuffer: Buffer,
-): Promise<{ page: number; text: string }[]> {
+): Promise<{ totalPages: number; pageElement: { page: number; text: string }[] }> {
   try {
     // Convert Buffer to Uint8Array as required by unpdf
     const uint8Array = new Uint8Array(pdfBuffer);
@@ -43,15 +15,14 @@ export async function extractTextFromPdfBufferWithPages(
     const { text, totalPages } = await extractText(uint8Array, { mergePages: false });
 
     // If text is a string array (one per page), map it to the expected format
-    if (Array.isArray(text)) {
-      return text.map((pageText, index) => ({
-        page: index + 1,
-        text: pageText.trim(),
-      }));
-    }
 
-    // If text is a single string, treat it as one page
-    return [{ page: 1, text: (text as string).trim() }];
+    return {
+      totalPages,
+      pageElement: text.map((pageText, index) => ({
+        page: index + 1,
+        text: pageText.replace(/-\n/g, '').trim(),
+      })),
+    };
   } catch (error) {
     console.error('Error parsing PDF with unpdf (pages):', error);
     throw new Error(
