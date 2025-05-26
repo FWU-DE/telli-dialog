@@ -143,7 +143,7 @@ export default function CustomGptForm({
       .catch(() => toast.error(tToast('edit-toast-error')));
   }
 
-  async function onSubmit(data: CustomGptFormValues) {
+  function onSubmit(data: CustomGptFormValues) {
     updateCustomGptAction({
       ...data,
       promptSuggestions: data.promptSuggestions?.map((p) => p.content),
@@ -168,12 +168,12 @@ export default function CustomGptForm({
 
   function updatePromptSuggestions() {
     const _promptSuggestions = getValues('promptSuggestions');
-
-    const promptSuggestions = cleanupPromptSuggestions(_promptSuggestions.map((p) => p.content));
-
+    const newPromptSuggestions = cleanupPromptSuggestions(_promptSuggestions.map((p) => p.content));
+    const dataEquals = deepEqual(promptSuggestions, newPromptSuggestions);
+    if (dataEquals) return;
     updateCustomGptAction({
       gptId: customGpt.id,
-      promptSuggestions,
+      promptSuggestions: newPromptSuggestions,
     })
       .then(() => {
         if (!isCreating) toast.success(tToast('edit-toast-success'));
@@ -225,15 +225,15 @@ export default function CustomGptForm({
   function handleAutoSave() {
     if (isCreating) return;
     const data = getValues();
-    const defaultData = { ...customGpt };
+    const defaultData = { ...customGpt, promptSuggestions: [] };
     const newData = {
       ...defaultData,
       ...data,
+      promptSuggestions: [],
     };
     const dataEquals = deepEqual(defaultData, newData);
-
     if (dataEquals) return;
-    await onSubmit(data);
+    onSubmit(data);
   }
 
   function handleCreateCustomGpt() {
@@ -263,7 +263,6 @@ export default function CustomGptForm({
           <div className="flex gap-8 flex-col">
             <TextInput
               label={t('gpt-name-label')}
-              required={true}
               placeholder={t('gpt-name-placeholder')}
               inputType="text"
               getValue={() => getValues('name') ?? ''}
@@ -277,7 +276,6 @@ export default function CustomGptForm({
             />
             <TextInput
               label={t('gpt-description-label')}
-              required={true}
               placeholder={t('gpt-description-placeholder')}
               inputType="textarea"
               getValue={() => getValues('description') ?? ''}
@@ -329,7 +327,6 @@ export default function CustomGptForm({
       <fieldset className="flex flex-col gap-6 mt-6">
         <TextInput
           label={t('gpt-specification-label')}
-          required={true}
           placeholder={t('gpt-specification-placeholder')}
           inputType="textarea"
           getValue={() => getValues('specification') ?? ''}
@@ -352,7 +349,6 @@ export default function CustomGptForm({
                 <React.Fragment key={field.id}>
                   <TextInput
                     label={`Promptvorschlag ${index + 1}`}
-                    required={false}
                     placeholder={index === 0 ? t('prompt-suggestion-placeholder') : undefined}
                     inputType="textarea"
                     getValue={() => getValues(`promptSuggestions.${index}.content`) ?? ''}

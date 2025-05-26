@@ -164,7 +164,7 @@ export default function SharedSchoolChatForm({
       attachedLinks: data.attachedLinks.map((p) => p.link),
       description: data.description ?? '',
     };
-    
+
     const dataEquals = deepEqual(defaultData, newData);
     console.log('data', data);
     if (dataEquals) return;
@@ -194,10 +194,7 @@ export default function SharedSchoolChatForm({
         {isCreating ? t('title') : sharedSchoolChat.name}
       </h1>
 
-      <form
-        className="flex flex-col gap-8 my-12"
-        onSubmit={handleSubmit(onSubmit)}
-      >
+      <form className="flex flex-col gap-8 my-12" onSubmit={handleSubmit(onSubmit)}>
         {!isCreating && <ShareContainer {...sharedSchoolChat} />}
         <fieldset className="flex flex-col gap-4 mt-8">
           <h2 className="font-medium mb-8">{t('settings')}</h2>

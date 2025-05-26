@@ -7,8 +7,6 @@ import {
 import { cn } from '@/utils/tailwind';
 import { inputFieldClassName, labelClassName } from '@/utils/tailwind/input';
 import React from 'react';
-import { useToast } from './toast';
-import { useTranslations } from 'next-intl';
 
 export type TextInputType = 'text' | 'textarea';
 
@@ -25,7 +23,7 @@ export type TextInputProps<T extends HTMLTextAreaElement | HTMLInputElement> = O
   className?: string;
   containerClassName?: string;
   labelClassName?: string;
-    inputClassName?: string;
+  inputClassName?: string;
 };
 
 export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
@@ -44,18 +42,13 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
   const defaultMaxLength =
     inputType === 'textarea' ? TEXT_INPUT_FIELDS_LENGTH_LIMIT : SMALL_TEXT_INPUT_FIELDS_LIMIT;
 
-  const tCommon = useTranslations('common');
-
   const effectiveMaxLength: number | undefined = props.maxLength ?? defaultMaxLength;
-  const toast = useToast();
   const [invalid, setInvalid] = React.useState(false);
-  const [localValue, setLocalValue] = React.useState(getValue());
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
     const newValue = e.target.value;
-    setLocalValue(newValue);
     console.log('newValue', newValue);
     if (newValue.trim().length === 0 && props.required) {
       setInvalid(true);
@@ -70,11 +63,8 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const currentValue = getValue();
-    console.log('currentValue', currentValue);
-    if (
-      currentValue.trim().length === 0 &&
-      props.required
-    ) {
+    // if (currentValue === e.target.value) return;
+    if (currentValue.trim().length === 0 && props.required) {
       console.log('currentValue is empty');
       e.preventDefault();
       e.stopPropagation();
@@ -128,7 +118,6 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
             onBlur={handleBlur}
           />
         )}
-        
       </div>
     </div>
   );

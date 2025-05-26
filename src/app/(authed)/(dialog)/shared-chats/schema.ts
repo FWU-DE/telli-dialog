@@ -1,7 +1,7 @@
 /**
  * This schema is used to validate the form values for the shared school chat form.
  *
- * When setting the max length for the text input fields, because the input element set maxLength as a hard limit, 
+ * When setting the max length for the text input fields, because the input element set maxLength as a hard limit,
  * in order trigger the onChange event, we need to subtract 1 from the max length.
  */
 
