@@ -142,7 +142,6 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
           </select>
         </div>
         <div className="flex-grow" />
-        {!sharedChatActive && <div />}
         {sharedChatActive && (
           <div className="flex flex-col gap-4">
             <label className={cn(labelClassName)}>{t('time')}</label>
@@ -168,7 +167,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
                 type="button"
                 onClick={handleStopSharing}
               >
-                <ChatStopIcon aria-hidden="true" />
+                <ChatStopIcon aria-hidden="true" className="w-3 h-3" />
                 <span className="sr-only">{tCommon('stop')}</span>
               </button>
             )}
@@ -184,7 +183,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
                 type="button"
                 onClick={() => router.push(shareUILink)}
               >
-                <FilledShareIcon aria-hidden="true" />
+                <FilledShareIcon aria-hidden="true" className="w-3 h-3" />
                 <span className="sr-only">{t('share')}</span>
               </button>
             )}
