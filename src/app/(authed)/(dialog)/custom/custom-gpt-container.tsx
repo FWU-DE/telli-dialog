@@ -52,10 +52,12 @@ export default function CustomGptContainer({
     e.stopPropagation();
     router.push(`/custom/d/${id}`);
   }
-
+  const queryParams = new URLSearchParams({
+    create: 'false',
+  });
   return (
     <Link
-      href={`/custom/editor/${id}`}
+      href={`/custom/editor/${id}?${queryParams.toString()}`}
       className="rounded-enterprise-md border p-6 flex items-center gap-4 w-full hover:border-primary"
     >
       <figure

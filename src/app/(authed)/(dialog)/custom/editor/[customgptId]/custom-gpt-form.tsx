@@ -143,8 +143,6 @@ export default function CustomGptForm({
   }
 
   async function onSubmit(data: CustomGptFormValues) {
-    const dataChanged = !deepEqual(data, getValues());
-    if (!dataChanged && !isCreating) return;
     updateCustomGptAction({
       ...data,
       promptSuggestions: data.promptSuggestions?.map((p) => p.content),
@@ -226,6 +224,14 @@ export default function CustomGptForm({
   async function handleAutoSave() {
     if (isCreating) return;
     const data = getValues();
+    const defaultData = { ...customGpt };
+    const newData = {
+      ...defaultData,
+      ...data,
+    };
+    const dataEquals = deepEqual(defaultData, newData);
+
+    if (dataEquals) return;
     await onSubmit(data);
   }
 
