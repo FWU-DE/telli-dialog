@@ -137,12 +137,6 @@ importers:
       openai:
         specifier: 4.83.0
         version: 4.83.0(ws@8.18.1)(zod@3.22.4)
-      pdf2json:
-        specifier: ^3.1.5
-        version: 3.1.5
-      pdfreader:
-        specifier: 3.0.7
-        version: 3.0.7
       pg:
         specifier: 8.13.1
         version: 8.13.1
@@ -5260,24 +5254,6 @@ packages:
   pathval@2.0.0:
     resolution: {integrity: sha512-vE7JKRyES09KiunauX7nd2Q9/L7lhok4smP9RZTDeD4MVs72Dp2qNFVz39Nz5a0FVEW0BJR6C0DYrq6unoziZA==}
     engines: {node: '>= 14.16'}
-
-  pdf2json@3.1.4:
-    resolution: {integrity: sha512-rS+VapXpXZr+5lUpHmRh3ugXdFXp24p1RyG24yP1DMpqP4t0mrYNGpLtpSbWD42PnQ59GIXofxF+yWb7M+3THg==}
-    engines: {node: '>=18.12.1', npm: '>=8.19.2'}
-    hasBin: true
-    bundledDependencies:
-      - '@xmldom/xmldom'
-
-  pdf2json@3.1.5:
-    resolution: {integrity: sha512-djZPInDLNuJU+o6GaJNvcoUh6MtUAx3IYTQCTxywHzeg1jC5YWgz/XzlgmduxxBblpMTqY2fjcWwvyRdGPTyrQ==}
-    engines: {node: '>=20.18.0', npm: '>=10.8.2'}
-    hasBin: true
-    bundledDependencies:
-      - '@xmldom/xmldom'
-
-  pdfreader@3.0.7:
-    resolution: {integrity: sha512-68Htw7su6HDJGGKv9tkjilRyf8zaHulEKRCgCwx4FE8krcMB8iBtM46Smjjez0jFm45dUKYXJzThyLwCqfQlCQ==}
-    engines: {node: '>=14'}
 
   pg-cloudflare@1.1.1:
     resolution: {integrity: sha512-xWPagP/4B6BgFO+EKz3JONXv3YDgvkbVrGw2mTo3D6tVDQRh1e7cqVGvyR3BE+eQgAvx1XhW/iEASj4/jCWl3Q==}
@@ -12560,14 +12536,6 @@ snapshots:
   pathe@2.0.3: {}
 
   pathval@2.0.0: {}
-
-  pdf2json@3.1.4: {}
-
-  pdf2json@3.1.5: {}
-
-  pdfreader@3.0.7:
-    dependencies:
-      pdf2json: 3.1.4
 
   pg-cloudflare@1.1.1:
     optional: true
