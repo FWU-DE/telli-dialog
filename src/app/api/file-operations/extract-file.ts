@@ -1,6 +1,6 @@
 import { SUPPORTED_FILE_TYPE as SupportedFiles } from '@/const';
 import { extractTextFromWordDocument } from './parse-docx';
-import { extractTextFromPdfBuffer } from './parse-pdf-alt';
+import { extractTextFromPdfBuffer } from './parse-pdf';
 
 type TextElement = {
   page: number;
@@ -13,10 +13,10 @@ export async function extractFile({
 }: {
   fileContent: Buffer;
   type: SupportedFiles;
-}): Promise<TextElement[]>  {
+}): Promise<TextElement[]> {
   let content: TextElement[] = [];
   if (type === 'pdf') {
-    const { pageElement, totalPages } = await extractTextFromPdfBuffer(fileContent);
+    const { pageElement } = await extractTextFromPdfBuffer(fileContent);
     content = pageElement;
   } else if (type === 'docx') {
     const result = await extractTextFromWordDocument(fileContent);

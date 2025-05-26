@@ -1,174 +1,205 @@
-import { DataEntry, PdfReader } from 'pdfreader';
-import PDFParser, { Output } from 'pdf2json';
-import { Text } from 'pdf2json';
+import { extractText, getDocumentProxy } from 'unpdf';
 
+type OutlineItem = {
+  title: string;
+  bold: boolean;
+  italic: boolean;
+  color: Uint8ClampedArray<ArrayBufferLike>;
+  dest: string | unknown[] | null;
+  url: string | null;
+  unsafeUrl: string | undefined;
+  newWindow: boolean | undefined;
+  count: number | undefined;
+  items: OutlineItem[];
+};
 
-function removeRepetitiveCharacters(text: string, character: string): string {
-  while (text.includes(character + character)) {
-    text = text.replace(character + character, character);
-  }
-  return text;
-}
-function parsePdfData(pdfData: Output) {
-  const pages: { page: number; text: string }[] = [];
-
-  for (const [pageIndex, page] of pdfData.Pages.entries()) {
-    let pageText = '';
-
-    if (!page.Texts || !Array.isArray(page.Texts)) {
-      continue;
-    }
-    pageText = parseTextElementWithHeuristics(page.Texts);
-
-    pageText = removeRepetitiveCharacters(pageText, '\n');
-    pageText = removeRepetitiveCharacters(pageText, ' ');
-    pageText = pageText.trim();
-
-    pages.push({
-      page: pageIndex + 1,
-      text: pageText,
-    });
-  }
-  return pages;
-}
-
-export async function extractTextFromPdfBuffer(pdfBuffer: Buffer): Promise<string> {
-  const reader = new PdfReader();
-
-  let textContent: string = '';
-  let lastItem: DataEntry | null = null;
-
-  return new Promise<string>((resolve, reject) => {
-    reader.parseBuffer(pdfBuffer, (err: string | null, dataEntry: DataEntry | null) => {
-      if (err != null) {
-        console.error('Error parsing PDF:', err);
-        reject(new Error(err));
-        return;
-      }
-
-      if (!dataEntry) {
-        // End of file, resolve the promise with the accumulated text
-        resolve(textContent);
-        return;
-      }
-
-      if (dataEntry.text) {
-        // Check if this is a new line
-        if (lastItem && lastItem.page !== dataEntry.page) {
-          textContent += '\n';
-        } else if (lastItem && lastItem.page === dataEntry.page) {
-          // If on same line but different x position, add a space
-          textContent += ' ';
-        }
-
-        textContent += dataEntry.text;
-        lastItem = dataEntry;
-      }
-    });
-  });
-}
 /**
- * Alternative implementation using pdf2json library
- * This version leverages pdf2json's built-in text extraction capabilities
+ * Extract text from PDF buffer with page-by-page breakdown using unpdf library
+ * Returns an array of objects with page number and text content
  */
-export async function extractTextFromPdfBufferWithPdf2json(
+export async function extractTextFromPdfBuffer(
   pdfBuffer: Buffer,
-): Promise<{ page: number; text: string }[]> {
-  const pdfParser = new PDFParser();
-  
-  return new Promise((resolve, reject) => {
-    // Set up error handler
-    pdfParser.on('pdfParser_dataError', (errData) => {
-      console.error('Error parsing PDF with pdf2json:', errData.parserError);
-      reject(new Error(errData.parserError?.message || 'Unknown PDF parsing error'));
-    });
+): Promise<{ totalPages: number; pageElement: { page: number; text: string }[] }> {
+  try {
+    // Convert Buffer to Uint8Array as required by unpdf
+    const uint8Array = new Uint8Array(pdfBuffer);
 
-    // Set up success handler
-    pdfParser.on('pdfParser_dataReady', (pdfData: Output) => {
-      try {
-        const parsedPages = parsePdfData(pdfData);
-        resolve(parsedPages);
-      } catch (error) {
-        reject(error);
-      }
-    });
+    // Extract text without merging pages to get individual page content
+    const { text, totalPages } = await extractText(uint8Array, { mergePages: false });
 
-    // Parse the buffer
-    try {
-      pdfParser.parseBuffer(pdfBuffer);
-    } catch (error) {
-      console.error('Error parsing PDF buffer:', error);
-      reject(new Error('Failed to parse PDF buffer'));
-    }
-  });
+    // If text is a string array (one per page), map it to the expected format
+
+    return {
+      totalPages,
+      pageElement: text.map((pageText, index) => ({
+        page: index + 1,
+        text: pageText.replace(/-\n/g, '').trim(),
+      })),
+    };
+  } catch (error) {
+    console.error('Error parsing PDF with unpdf (pages):', error);
+    throw new Error(
+      `Failed to parse PDF: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
+  }
 }
 
 /**
- * Analyze spatial proximity between text elements to determine word boundaries
+ * Extract table of contents (TOC) from PDF buffer using unpdf library
+ * This function extracts the PDF outline/bookmarks and returns them as a flat list
+ * with page numbers and text content
  */
-function parseTextElementWithHeuristics(elements: Text[]): string {
-  if (elements.length === 0) return '';
-  if (elements.length === 1) return elements[0]?.R?.[0]?.T || '';
+export async function extractTOC(
+  pdfBuffer: Buffer,
+): Promise<{ page: number; title: string; fullPath: string; level: number }[]> {
+  try {
+    // Convert Buffer to Uint8Array as required by unpdf
+    const uint8Array = new Uint8Array(pdfBuffer);
 
-  let result = '';
-  for (const [index, currentElement] of elements.entries()) {
-    const nextElement = elements[index + 1];
-    const spacing = determineSpacing(currentElement, nextElement);
-    const decodedText = decodeURIComponent(currentElement.R[0]?.T || '');
-    switch (spacing) {
-      case 'join':
-        // Direct concatenation - likely same word split
-        result += decodedText;
-        break;
-      case 'space':
-        // Normal word boundary
-        result += ' ' + decodedText;
-        break;
-      case 'newline':
-        // if the next element will be on a new line, truncate the hyphen if it exists
-        if (decodedText.slice(-1) === '-') {
-          result += decodedText.slice(0, -1);
-        } else {
-          result += decodedText + '\n ';
+    // Get the PDF document proxy to access the outline
+    const pdf = await getDocumentProxy(uint8Array);
+
+    // Get the outline from the PDF
+    const outline = await pdf.getOutline();
+
+    if (!outline || outline.length === 0) {
+      // No outline/TOC found in the PDF
+      return [];
+    }
+
+    const tocItems: { page: number; title: string; fullPath: string; level: number }[] = [];
+
+    // Recursive function to process outline items
+    const processOutlineItems = async (
+      items: OutlineItem[],
+      level = 0,
+      parentTitle: string = '',
+    ): Promise<void> => {
+      for (const item of items) {
+        try {
+          let pageNumber = 1; // Default page number
+
+          // Try to get the page number from the destination
+          if (item.dest) {
+            try {
+              let destination;
+              if (typeof item.dest === 'string') {
+                // If dest is a string, get the destination reference
+                destination = await pdf.getDestination(item.dest);
+              } else {
+                // If dest is already an array/object, use it directly
+                destination = item.dest;
+              }
+
+              if (destination && Array.isArray(destination) && destination[0]) {
+                // Get page index from the destination reference
+                const pageIndex = await pdf.getPageIndex(destination[0]);
+                pageNumber = pageIndex + 1; // Page numbers are 1-based
+              }
+            } catch (destError) {
+              console.warn(
+                'Failed to resolve destination for outline item:',
+                item.title,
+                destError,
+              );
+              // Continue with default page number
+            }
+          }
+
+          // Add the outline item to our TOC list
+          // Add indentation to show hierarchy level
+
+          tocItems.push({
+            page: pageNumber,
+            level,
+            title: item.title,
+            fullPath: parentTitle ? `${parentTitle} / ${item.title}` : item.title,
+          });
+          // Recursively process child items if they exist
+          if (item.items && Array.isArray(item.items) && item.items.length > 0) {
+            await processOutlineItems(item.items, level + 1, item.title);
+          }
+        } catch (itemError) {
+          console.warn('Failed to process outline item:', item.title, itemError);
+          // Continue with other items
         }
-        break;
-    }
+      }
+    };
+
+    // Process all outline items
+    await processOutlineItems(outline);
+
+    return tocItems;
+  } catch (error) {
+    console.error('Error extracting TOC from PDF with unpdf:', error);
+    throw new Error(
+      `Failed to extract TOC from PDF: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
   }
-
-  return decodeURIComponent(result);
-}
-
-function parseTextElementNatively(elements: Text[]): string {
-  return elements.map((element) => decodeURIComponent(element.R?.[0]?.T || '')).join(' ');
 }
 
 /**
- * Determine appropriate spacing between two text elements based on their positions
+ * Create a mapping from page numbers to chapter paths
+ * This inverts the TOC to provide easy lookup of which chapter/section each page belongs to.
+ * The index is 1-based, so the first page has index 1, the second page has index 2, etc.
+ * Some pages might not have a chapter, e.g. the table of contents itself or the cover page.
  */
-function determineSpacing(current: Text, next: Text | undefined): 'join' | 'space' | 'newline' {
-  if (!next) {
-    return 'newline';
+export async function createPageToChapterMapping(
+  tocData: { page: number; title: string; fullPath: string; level: number }[],
+  totalPages: number,
+): Promise<Record<number, string>> {
+  try {
+    if (tocData.length === 0) {
+      return {};
+    }
+
+    // Sort TOC items by page number to ensure proper ordering
+    const sortedToc = [...tocData].sort((a, b) => a.page - b.page);
+
+    const pageToChapterMapping: Record<number, string> = {};
+
+    // For each page, find the most specific chapter/section it belongs to
+    for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+      let currentChapter = '';
+      let maxLevel = -1;
+
+      // Find all TOC items that start at or before this page
+      const applicableItems = sortedToc.filter((item) => item.page <= pageNum);
+
+      if (applicableItems.length === 0) {
+        continue; // No chapter found for this page
+      }
+
+      // For each applicable item, check if it's the most specific one for this page
+      for (const item of applicableItems) {
+        // Find the next item at the same or higher level to determine the range
+        const nextItemIndex = sortedToc.findIndex(
+          (nextItem, index) => index > sortedToc.indexOf(item) && nextItem.level <= item.level,
+        );
+
+        const nextItem = nextItemIndex >= 0 ? sortedToc[nextItemIndex] : null;
+        const itemEndPage = nextItem ? nextItem.page - 1 : totalPages;
+
+        // Check if this page falls within this item's range
+        if (pageNum >= item.page && pageNum <= itemEndPage) {
+          // Use the most specific (deepest level) chapter for this page
+          if (item.level > maxLevel) {
+            maxLevel = item.level;
+            currentChapter = item.fullPath;
+          }
+        }
+      }
+
+      if (currentChapter) {
+        pageToChapterMapping[pageNum] = currentChapter;
+      }
+    }
+
+    return pageToChapterMapping;
+  } catch (error) {
+    console.error('Error creating page to chapter mapping:', error);
+    throw new Error(
+      `Failed to create page to chapter mapping: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
   }
-  const horizontalDistance = next.x - current.x;
-  const verticalDistance = Math.abs(next.y - current.y);
-
-  // Estimate character width based on font size (rough approximation)
-  const avgCharWidth = current.w * 0.6;
-
-  // Estimate line height from font size in TextRun TS array
-  // TS format: [fontFaceId, fontSize, bold, italic]
-  const fontSize = current.R?.[0]?.TS?.[1] || 12; // Default to 12 if no font size found
-  const lineHeight = fontSize * 1.2; // Typical line height is 1.2x font size
-
-  if (verticalDistance > 0 && horizontalDistance < 0) {
-    return 'newline';
-  }
-
-  // If horizontal distance is very small or negative, likely same word
-  if (horizontalDistance <= avgCharWidth * 0.3) {
-    return 'join';
-  }
-
-  // Large gap - treat as space but could be tabular data
-  return 'space';
 }

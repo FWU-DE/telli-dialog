@@ -36,7 +36,7 @@ export async function embedBatchAndSave({
   fileId,
   federalStateId,
 }: {
-  values: Omit<TextChunkInsertModel, 'embedding'> [];
+  values: Omit<TextChunkInsertModel, 'embedding'>[];
   fileId: string;
   federalStateId: string;
 }) {
@@ -64,6 +64,7 @@ export async function embedBatchAndSave({
         embedding,
         fileId,
         orderIndex: originalIndex,
+        pageNumber: values[originalIndex]?.pageNumber ?? 0,
         leadingOverlap: values[originalIndex]?.leadingOverlap ?? undefined,
         trailingOverlap: values[originalIndex]?.trailingOverlap ?? undefined,
       });
