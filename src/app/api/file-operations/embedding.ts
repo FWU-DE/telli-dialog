@@ -3,6 +3,7 @@ import { OpenAI } from 'openai';
 import { env } from '@/env';
 import { dbGetApiKeyByFederalStateIdWithResult } from '@/db/functions/federal-state';
 import { EMBEDDING_BATCH_SIZE } from '@/const';
+import { TextChunkInsertModel } from '@/db/schema';
 export async function embedText({
   text,
   federalStateId,
@@ -35,22 +36,11 @@ export async function embedBatchAndSave({
   fileId,
   federalStateId,
 }: {
-  values: {
-    content: string;
-    leadingOverlap?: string;
-    trailingOverlap?: string;
-  }[];
+  values: Omit<TextChunkInsertModel, 'embedding'>[];
   fileId: string;
   federalStateId: string;
 }) {
-  let tempChunks: {
-    content: string;
-    embedding: number[];
-    fileId: string;
-    orderIndex: number;
-    leadingOverlap?: string;
-    trailingOverlap?: string;
-  }[];
+  let tempChunks: TextChunkInsertModel[] = [];
 
   console.log(`Embedding ${values.length} chunks`);
   // Process chunks in batches of 200
@@ -74,6 +64,7 @@ export async function embedBatchAndSave({
         embedding,
         fileId,
         orderIndex: originalIndex,
+        pageNumber: values[originalIndex]?.pageNumber ?? 0,
         leadingOverlap: values[originalIndex]?.leadingOverlap ?? undefined,
         trailingOverlap: values[originalIndex]?.trailingOverlap ?? undefined,
       });

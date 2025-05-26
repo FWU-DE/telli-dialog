@@ -1,5 +1,5 @@
 // PRICES are in cent * 10 to not have any comma values
-// prices are given per 1 Million tokens
+// prices are given per 1 Million tokens.
 
 import { DesignConfiguration } from './types';
 

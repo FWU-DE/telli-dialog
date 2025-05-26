@@ -77,12 +77,21 @@ export async function getRelevantFileContent({
         sentenceChunkOverlap: 1,
         lowerBoundWordCount: 200,
       });
+
+      // Enrich chunks with required properties
+      const enrichedChunks = textChunks.map((chunk, index) => ({
+        ...chunk,
+        fileId: file.id,
+        orderIndex: index,
+        pageNumber: 0, // Default page number for non-PDF files
+      }));
+
       await db
         .insert(fileTable)
         .values({ id: file.id, name: file.name, size: file.size, type: file.type })
         .onConflictDoNothing();
       await embedBatchAndSave({
-        values: textChunks,
+        values: enrichedChunks,
         fileId: file.id,
         federalStateId: user.federalState.id,
       });

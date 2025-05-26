@@ -2,20 +2,27 @@ import { SUPPORTED_FILE_TYPE as SupportedFiles } from '@/const';
 import { extractTextFromWordDocument } from './parse-docx';
 import { extractTextFromPdfBuffer } from './parse-pdf';
 
+type TextElement = {
+  page: number;
+  text: string;
+};
+
 export async function extractFile({
   fileContent,
   type,
 }: {
   fileContent: Buffer;
   type: SupportedFiles;
-}): Promise<string> {
-  let content: string = '';
+}): Promise<TextElement[]> {
+  let content: TextElement[] = [];
   if (type === 'pdf') {
-    content = await extractTextFromPdfBuffer(fileContent);
+    const { pageElement } = await extractTextFromPdfBuffer(fileContent);
+    content = pageElement;
   } else if (type === 'docx') {
-    content = await extractTextFromWordDocument(fileContent);
+    const result = await extractTextFromWordDocument(fileContent);
+    content = [{ page: 0, text: result }];
   } else if (type === 'md' || type === 'txt') {
-    content = new TextDecoder('utf-8').decode(fileContent);
+    content = [{ page: 0, text: new TextDecoder('utf-8').decode(fileContent) }];
   }
   return content;
 }
