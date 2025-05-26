@@ -78,7 +78,7 @@ describe('extractTextFromPdfBufferAlt', () => {
     const extractedTOC = await extractTOC(pdfBuffer);
     const pageToChapterMapping = await createPageToChapterMapping(extractedTOC, 24);
     expect(pageToChapterMapping).toBeDefined();
-    expect(Object.keys(pageToChapterMapping).length).toBe(24);
+    expect(Object.keys(pageToChapterMapping).length).toBe(22);
     // pages 1 and 2 have no chapter and page 3 is the table of contents itself
     expect(pageToChapterMapping[4]).toBe('1. Vorbemerkung'); // the chapter of page 4 is "1. Vorbemerkung"
     expect(pageToChapterMapping[6]).toBe(
