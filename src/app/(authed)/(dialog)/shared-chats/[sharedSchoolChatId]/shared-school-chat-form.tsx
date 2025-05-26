@@ -38,6 +38,7 @@ import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { AttachedLinks } from '@/components/forms/attached-links';
 
+import { getZodFieldMetadataFn } from '@/components/forms/utils';
 export default function SharedSchoolChatForm({
   existingFiles,
   isCreating,
@@ -70,7 +71,7 @@ export default function SharedSchoolChatForm({
     getValues,
     setValue,
     control,
-    formState: { isValid },
+    formState: { isValid, isDirty },
   } = useForm<SharedSchoolChatFormValues>({
     resolver: zodResolver(sharedSchoolChatFormValuesSchema),
     defaultValues: {
@@ -154,6 +155,7 @@ export default function SharedSchoolChatForm({
 
   function handleAutoSave() {
     if (isCreating) return;
+    console.log('isDirty', isDirty);
     const data = getValues();
     const defaultData = { ...sharedSchoolChat, modelId: sharedSchoolChat.modelId };
     const newData = {
@@ -181,6 +183,8 @@ export default function SharedSchoolChatForm({
     }
     router.push(backUrl);
   }
+
+  const getZodFieldMetadata = getZodFieldMetadataFn(sharedSchoolChatFormValuesSchema);
 
   return (
     <>
@@ -214,9 +218,10 @@ export default function SharedSchoolChatForm({
               <TextInput
                 id="name"
                 label={t('name')}
-                required={true}
                 readOnly={readOnly}
+                getValue={() => getValues('name')}
                 {...register('name')}
+                {...getZodFieldMetadata('name')}
                 placeholder={t('name-placeholder')}
               />
 
@@ -225,9 +230,9 @@ export default function SharedSchoolChatForm({
                 label={t('purpose-label')}
                 inputType="text"
                 readOnly={readOnly}
-                required={false}
+                getValue={() => getValues('description')}
                 {...register('description')}
-                maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+                {...getZodFieldMetadata('description')}
                 placeholder={t('purpose-placeholder')}
               />
             </div>
@@ -271,14 +276,15 @@ export default function SharedSchoolChatForm({
         </fieldset>
 
         <TextInput
-          id="student-excercise"
-          label={t('student-excercise-label')}
-          placeholder={t('student-excercise-placeholder')}
+          id="learning-context"
+          label={t('learning-context-label')}
+          placeholder={t('learning-context-placeholder')}
+          getValue={() => getValues('learningContext')}
           inputType="textarea"
           required={false}
           rows={5}
-          maxLength={1000}
-          {...register('studentExcercise')}
+          {...register('learningContext')}
+          {...getZodFieldMetadata('learningContext')}
         />
 
         <TextInput
@@ -286,33 +292,36 @@ export default function SharedSchoolChatForm({
           label={t('additional-instructions-label')}
           placeholder={t('additional-instructions-placeholder')}
           inputType="textarea"
-          required={true}
           rows={5}
-          maxLength={2000}
-          {...register('additionalInstructions')}
+          getValue={() => getValues('specification') ?? ''}
+          {...register('specification')}
+          {...getZodFieldMetadata('specification')}
         />
         <div className="grid grid-cols-3 gap-6">
           <TextInput
             id="school-type"
             label={t('school-type-label')}
             placeholder={t('school-type-placeholder')}
-            required={false}
+            getValue={() => getValues('schoolType') ?? ''}
             {...register('schoolType')}
+            {...getZodFieldMetadata('schoolType')}
           />
 
           <TextInput
             id="gradeLevel"
             label={t('grade-label')}
             placeholder={t('grade-placeholder')}
-            required={false}
+            getValue={() => getValues('gradeLevel') ?? ''}
             {...register('gradeLevel')}
+            {...getZodFieldMetadata('gradeLevel')}
           />
 
           <TextInput
             id="subject"
             label={t('subject-label')}
             placeholder={t('subject-placeholder')}
-            required={false}
+            getValue={() => getValues('subject') ?? ''}
+            {...getZodFieldMetadata('subject')}
             {...register('subject')}
           />
         </div>

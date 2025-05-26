@@ -7,6 +7,8 @@ import {
 import { cn } from '@/utils/tailwind';
 import { inputFieldClassName, labelClassName } from '@/utils/tailwind/input';
 import React from 'react';
+import { useToast } from './toast';
+import { useTranslations } from 'next-intl';
 
 export type TextInputType = 'text' | 'textarea';
 
@@ -14,9 +16,8 @@ export type TextInputProps<T extends HTMLTextAreaElement | HTMLInputElement> = O
   React.InputHTMLAttributes<T>,
   'type'
 > & {
+  getValue: () => string;
   label: string;
-  required?: boolean;
-  placeholder?: string;
   inputType?: TextInputType;
   readOnly?: boolean;
   maxLength?: number;
@@ -29,55 +30,87 @@ export type TextInputProps<T extends HTMLTextAreaElement | HTMLInputElement> = O
 
 export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
   label,
-  required = false,
-  placeholder,
   inputType = 'text',
   readOnly = false,
-  maxLength,
   className,
   rows = 5,
   containerClassName,
   labelClassName: customLabelClassName,
   inputClassName: customInputClassName,
+  getValue,
   ...props
 }: TextInputProps<T>) {
   const id = props.id || props.name;
   const defaultMaxLength =
     inputType === 'textarea' ? TEXT_INPUT_FIELDS_LENGTH_LIMIT : SMALL_TEXT_INPUT_FIELDS_LIMIT;
-  const effectiveMaxLength: number | undefined = maxLength ?? defaultMaxLength;
+
+  const tCommon = useTranslations('common');
+
+  const effectiveMaxLength: number | undefined = props.maxLength ?? defaultMaxLength;
+  const toast = useToast();
+  const [hasExceeded, setHasExceeded] = React.useState(false);
+  const [localValue, setLocalValue] = React.useState(getValue());
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    const newValue = e.target.value;
+    setLocalValue(newValue);
+    if (newValue.trim().length === 0) {
+      return;
+    }
+    if (effectiveMaxLength && newValue.length >= effectiveMaxLength) {
+      setHasExceeded(true);
+    }
+    if (props.onChange) {
+      props.onChange(e as React.ChangeEvent<T>);
+    }
+  };
+
+  const borderErrorClass = hasExceeded ? 'border-coral focus:border-coral' : '';
+
   return (
     <div className={cn('flex flex-col gap-4', containerClassName, className)}>
       <label htmlFor={id} className={cn(labelClassName, 'text-sm', customLabelClassName)}>
-        {label} {required && <span className="text-coral">*</span>}
+        {label} {props.required && <span className="text-coral">*</span>}
       </label>
-      {inputType === 'textarea' ? (
-        <textarea
-          className={cn(
-            inputFieldClassName,
-            'focus:border-primary placeholder:text-gray-300',
-            customInputClassName,
-            'resize-none',
-          )}
-          placeholder={placeholder}
-          rows={rows}
-          readOnly={readOnly}
-          maxLength={effectiveMaxLength}
-          {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
-        />
-      ) : (
-        <input
-          type="text"
-          className={cn(
-            inputFieldClassName,
-            'focus:border-primary placeholder:text-gray-300',
-            customInputClassName,
-          )}
-          placeholder={placeholder}
-          readOnly={readOnly}
-          maxLength={effectiveMaxLength}
-          {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
-        />
-      )}
+      <div>
+        {inputType === 'textarea' ? (
+          <textarea
+            className={cn(
+              'w-full',
+              inputFieldClassName,
+              'focus:border-primary placeholder:text-gray-300',
+              customInputClassName,
+              'resize-none',
+              borderErrorClass,
+            )}
+            rows={rows}
+            readOnly={readOnly}
+            maxLength={effectiveMaxLength}
+            {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
+            onChange={handleChange}
+          />
+        ) : (
+          <input
+            type="text"
+            className={cn(
+              'w-full',
+              inputFieldClassName,
+              'focus:border-primary placeholder:text-gray-300',
+              customInputClassName,
+              borderErrorClass,
+            )}
+            readOnly={readOnly}
+            {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
+            maxLength={effectiveMaxLength}
+            onChange={handleChange}
+          />
+        )}
+        <div className={cn('text-right p-2 text-xs text-gray-400', hasExceeded && 'text-coral')}>
+          {typeof localValue === 'string' ? localValue.length : 0}/{effectiveMaxLength}
+        </div>
+      </div>
     </div>
   );
 }
