@@ -8,14 +8,12 @@ import ProfileMenu, { UnauthenticatedProfileMenu } from '../navigation/profile-m
 import DownloadSharedConversationButton from '@/app/(unauth)/ua/dowload-shared-conversation-button';
 import { Message } from 'ai';
 import DestructiveActionButton from '../common/destructive-action-button';
-import TrashFilledIcon from '../icons/trash-filled';
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
-import useBreakpoints from '@/components/hooks/use-breakpoints';
 import { ThreeDotsProfileMenu } from '../navigation/profile-menu';
 import Image from 'next/image';
 import { cn } from '@/utils/tailwind';
-import { breakpoints } from '@/components/hooks/use-breakpoints';
-import { useTranslations } from 'next-intl';
+import TrashFilledIcon from '../icons/trash-filled';
+
 export function ChatHeaderBar({
   user,
   title,

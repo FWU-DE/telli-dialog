@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl';
 import Citation from './sources/citation';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
+import { iconClassName } from '@/utils/tailwind/icon';
 
 export function ChatBox({
   children,
@@ -36,7 +37,7 @@ export function ChatBox({
   const tCommon = useTranslations('common');
   const userClassName =
     children.role === 'user'
-      ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-vidis-user-chat-background text-primary-foreground max-w-[70%] break-words'
+      ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary-light text-primary-foreground max-w-[70%] break-words'
       : 'w-fit';
   const fileMatch = fileMapping?.get(children.id) !== undefined;
   const allFiles = fileMatch ? fileMapping.get(children.id) : initialFiles;
@@ -72,7 +73,7 @@ export function ChatBox({
         {websearchSources?.map((source, sourceIndex) => {
           return (
             <Citation
-              className="bg-vidis-hover-green/20 rounded-md p-0"
+              className="bg-secondary-dark rounded-enterprise-sm p-0"
               key={`user-link-${index}-${sourceIndex}`}
               source={source}
               index={index}
@@ -89,15 +90,15 @@ export function ChatBox({
   const maybeShowMessageIcons =
     isLastNonUser && !isLoading ? (
       <div className="flex items-center gap-1 mt-1">
-        <TelliClipboardButton text={children.content} />
+        <TelliClipboardButton text={children.content} className="w-5 h-5" />
         <button
           title={tCommon('regenerate-message')}
           type="button"
           onClick={() => regenerateMessage()}
           aria-label="Reload"
         >
-          <div className="p-1.5 rounded-enterprise-sm hover:bg-vidis-hover-green/20">
-            <ReloadIcon className="text-primary w-5 h-5" />
+          <div className={cn('p-1.5 rounded-enterprise-sm', iconClassName)}>
+            <ReloadIcon className="w-5 h-5" />
           </div>
         </button>
       </div>

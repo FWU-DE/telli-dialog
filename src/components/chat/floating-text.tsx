@@ -163,7 +163,7 @@ export function FloatingText({
     <div
       ref={containerRef}
       className={cn(
-        'flex flex-col z-10 bg-vidis-user-chat-background rounded-xl border select-none',
+        'flex flex-col z-10 bg-secondary-light rounded-xl border select-none',
         // using string interpolations is extremly flaky, so we're using a static class name
         isAtLeast.lg ? `absolute` : 'sticky',
         dragging ? 'cursor-grabbing' : 'cursor-grab',
@@ -214,7 +214,11 @@ export function FloatingText({
           }}
           className="flex items-center justify-center bg-none border-none cursor-pointer w-6 h-6"
         >
-          {isMinimized ? <ChevronRightIcon /> : <ChevronDownIcon />}
+          {isMinimized ? (
+            <ChevronRightIcon className="w-4 h-4" />
+          ) : (
+            <ChevronDownIcon className="w-4 h-4" />
+          )}
         </button>
       </div>
       {!isMinimized && (

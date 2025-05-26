@@ -10,6 +10,8 @@ import { IMPRESSUM_URL, PRIVACY_POLICY_URL } from './const';
 import { useTranslations } from 'next-intl';
 import DotsHorizontalIcon from '@/components/icons/dots-horizontal';
 
+import { cn } from '@/utils/tailwind';
+import { iconClassName } from '@/utils/tailwind/icon';
 type ProfileMenuProps = UserAndContext;
 
 export default function ProfileMenu({ email, school }: ProfileMenuProps) {
@@ -19,10 +21,10 @@ export default function ProfileMenu({ email, school }: ProfileMenuProps) {
       <DropdownMenu.Trigger asChild>
         <button
           aria-label="profileDropdown"
-          className="focus:outline-none group hover:bg-light-gray rounded-enterprise-sm hover:bg-vidis-hover-green/20"
+          className={cn('focus:outline-none group rounded-enterprise-sm', iconClassName)}
           title="Profil"
         >
-          <UserIcon className="text-primary" />
+          <UserIcon />
         </button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
@@ -128,10 +130,10 @@ export function UnauthenticatedProfileMenu() {
       <DropdownMenu.Trigger asChild>
         <button
           aria-label="profileDropdown"
-          className="focus:outline-none group hover:bg-light-gray rounded-enterprise-sm hover:bg-vidis-hover-green/20"
+          className="focus:outline-none group hover:bg-light-gray rounded-enterprise-sm hover:bg-primary-hover"
           title="Profil"
         >
-          <UserIcon className="text-primary" />
+          <UserIcon className={iconClassName} />
         </button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>

@@ -1,6 +1,6 @@
 import { getUser } from '@/auth/utils';
 import { db } from '@/db';
-import { fileTable } from '@/db/schema';
+import { fileTable, TextChunkInsertModel } from '@/db/schema';
 import { uploadFileToS3 } from '@/s3';
 import { getFileExtension } from '@/utils/files/generic';
 import { cnanoid } from '@/utils/random';
@@ -39,17 +39,31 @@ export async function POST(req: NextRequest) {
     type: fileExtension,
   });
 
-  const textChunks = chunkText({
-    text: content,
-    sentenceChunkOverlap: 1,
-    lowerBoundWordCount: 200,
-  });
+  const enrichedChunks: Omit<TextChunkInsertModel, 'embedding'>[] = [];
+  for (const element of content) {
+    const textChunks = chunkText({
+      text: element.text,
+      sentenceChunkOverlap: 1,
+      lowerBoundWordCount: 200,
+    });
+    textChunks.forEach((chunk, index) => {
+      enrichedChunks.push({
+        pageNumber: element.page,
+        fileId,
+        orderIndex: index,
+        content: chunk.content,
+        leadingOverlap: chunk.leadingOverlap,
+        trailingOverlap: chunk.trailingOverlap,
+      });
+    });
+  }
+
   await db
     .insert(fileTable)
     .values({ id: fileId, name: file.name, size: file.size, type: fileExtension });
 
   await embedBatchAndSave({
-    values: textChunks,
+    values: enrichedChunks,
     fileId,
     federalStateId: user.federalState.id,
   });
