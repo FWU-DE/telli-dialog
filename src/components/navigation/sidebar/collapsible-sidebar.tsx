@@ -8,6 +8,7 @@ import NewDialogIcon from '@/components/icons/sidebar/new-dialog';
 import SidebarToggleIcon from '@/components/icons/sidebar/sidebar-toggle';
 import { cn } from '@/utils/tailwind';
 import { useRouter } from 'next/navigation';
+import { iconClassName } from '@/utils/tailwind/icon';
 
 export default function CollapsibleSidebar({ children }: { children: React.ReactNode }) {
   const { isOpen, toggle } = useSidebarVisibility();
@@ -60,12 +61,13 @@ export function ToggleSidebarButton({ forceVisibility = false }: { forceVisibili
     <button
       title="Sidebar"
       className={cn(
-        'focus:outline-none group hover:bg-light-gray rounded-enterprise-sm hover:bg-vidis-hover-green/20',
+        'focus:outline-none group hover:bg-light-gray rounded-enterprise-sm',
+        iconClassName,
       )}
       onClick={() => toggle()}
       aria-label="sidebar-toggle-close"
     >
-      <SidebarToggleIcon className="text-primary" />
+      <SidebarToggleIcon />
     </button>
   );
 }
@@ -87,12 +89,13 @@ export function NewChatButton({ forceVisibility = false }: { forceVisibility?: b
     <button
       onClick={handleOpenNewChat}
       className={cn(
-        'focus:outline-none group hover:bg-light-gray rounded-enterprise-sm hover:bg-vidis-hover-green/20',
+        'focus:outline-none group hover:bg-light-gray rounded-enterprise-sm',
+        iconClassName,
       )}
       aria-label="Neuer Chat"
       title="Neuer Chat"
     >
-      <NewDialogIcon className="text-primary" />
+      <NewDialogIcon className="w-8 h-8" />
     </button>
   );
 }
