@@ -77,7 +77,7 @@ export async function getRelevantFileContent({
         sentenceChunkOverlap: 1,
         lowerBoundWordCount: 200,
       });
-      
+
       // Enrich chunks with required properties
       const enrichedChunks = textChunks.map((chunk, index) => ({
         ...chunk,
@@ -85,7 +85,7 @@ export async function getRelevantFileContent({
         orderIndex: index,
         pageNumber: 0, // Default page number for non-PDF files
       }));
-      
+
       await db
         .insert(fileTable)
         .values({ id: file.id, name: file.name, size: file.size, type: file.type })
