@@ -25,7 +25,7 @@ export type TextInputProps<T extends HTMLTextAreaElement | HTMLInputElement> = O
   className?: string;
   containerClassName?: string;
   labelClassName?: string;
-  inputClassName?: string;
+    inputClassName?: string;
 };
 
 export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
@@ -48,7 +48,7 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
 
   const effectiveMaxLength: number | undefined = props.maxLength ?? defaultMaxLength;
   const toast = useToast();
-  const [hasExceeded, setHasExceeded] = React.useState(false);
+  const [invalid, setInvalid] = React.useState(false);
   const [localValue, setLocalValue] = React.useState(getValue());
 
   const handleChange = (
@@ -56,18 +56,37 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
   ) => {
     const newValue = e.target.value;
     setLocalValue(newValue);
-    if (newValue.trim().length === 0) {
+    console.log('newValue', newValue);
+    if (newValue.trim().length === 0 && props.required) {
+      setInvalid(true);
       return;
     }
-    if (effectiveMaxLength && newValue.length >= effectiveMaxLength) {
-      setHasExceeded(true);
-    }
+
+    setInvalid(false);
     if (props.onChange) {
       props.onChange(e as React.ChangeEvent<T>);
     }
   };
 
-  const borderErrorClass = hasExceeded ? 'border-coral focus:border-coral' : '';
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const currentValue = getValue();
+    console.log('currentValue', currentValue);
+    if (
+      currentValue.trim().length === 0 &&
+      props.required
+    ) {
+      console.log('currentValue is empty');
+      e.preventDefault();
+      e.stopPropagation();
+      setInvalid(true);
+      return;
+    }
+    if (props.onBlur !== undefined) {
+      props.onBlur(e as React.FocusEvent<T, Element>);
+    }
+  };
+
+  const borderErrorClass = invalid ? 'border-coral focus:border-coral' : '';
 
   return (
     <div className={cn('flex flex-col gap-4', containerClassName, className)}>
@@ -90,6 +109,7 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
             maxLength={effectiveMaxLength}
             {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
             onChange={handleChange}
+            onBlur={handleBlur}
           />
         ) : (
           <input
@@ -105,11 +125,10 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
             {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
             maxLength={effectiveMaxLength}
             onChange={handleChange}
+            onBlur={handleBlur}
           />
         )}
-        <div className={cn('text-right p-2 text-xs text-gray-400', hasExceeded && 'text-coral')}>
-          {typeof localValue === 'string' ? localValue.length : 0}/{effectiveMaxLength}
-        </div>
+        
       </div>
     </div>
   );

@@ -28,7 +28,6 @@ import { useTranslations } from 'next-intl';
 import { LocalFileState } from '@/components/chat/send-message-form';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
-import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import SelectLlmModelForm from '../../_components/select-llm-model';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
@@ -80,6 +79,7 @@ export default function SharedSchoolChatForm({
       studentExcercise: sharedSchoolChat.studentExcercise ?? '',
       additionalInstructions: sharedSchoolChat.additionalInstructions ?? '',
       attachedLinks: initalLinks,
+      pictureId: sharedSchoolChat.pictureId ?? '',
     },
   });
   const backUrl = '/shared-chats';
@@ -164,9 +164,9 @@ export default function SharedSchoolChatForm({
       attachedLinks: data.attachedLinks.map((p) => p.link),
       description: data.description ?? '',
     };
-
+    
     const dataEquals = deepEqual(defaultData, newData);
-
+    console.log('data', data);
     if (dataEquals) return;
     onSubmit(data);
     router.refresh();
@@ -197,7 +197,6 @@ export default function SharedSchoolChatForm({
       <form
         className="flex flex-col gap-8 my-12"
         onSubmit={handleSubmit(onSubmit)}
-        onBlur={handleAutoSave}
       >
         {!isCreating && <ShareContainer {...sharedSchoolChat} />}
         <fieldset className="flex flex-col gap-4 mt-8">
@@ -223,6 +222,7 @@ export default function SharedSchoolChatForm({
                 {...register('name')}
                 {...getZodFieldMetadata('name')}
                 placeholder={t('name-placeholder')}
+                onBlur={handleAutoSave}
               />
 
               <TextInput
@@ -230,10 +230,11 @@ export default function SharedSchoolChatForm({
                 label={t('purpose-label')}
                 inputType="text"
                 readOnly={readOnly}
-                getValue={() => getValues('description')}
+                getValue={() => getValues('description') ?? ''}
                 {...register('description')}
                 {...getZodFieldMetadata('description')}
                 placeholder={t('purpose-placeholder')}
+                onBlur={handleAutoSave}
               />
             </div>
             <section className="h-full">
@@ -276,15 +277,15 @@ export default function SharedSchoolChatForm({
         </fieldset>
 
         <TextInput
-          id="learning-context"
-          label={t('learning-context-label')}
-          placeholder={t('learning-context-placeholder')}
-          getValue={() => getValues('learningContext')}
+          id="student-excercise"
+          label={t('student-excercise-label')}
+          placeholder={t('student-excercise-placeholder')}
+          getValue={() => getValues('studentExcercise') ?? ''}
           inputType="textarea"
-          required={false}
           rows={5}
-          {...register('learningContext')}
-          {...getZodFieldMetadata('learningContext')}
+          {...register('studentExcercise')}
+          {...getZodFieldMetadata('studentExcercise')}
+          onBlur={handleAutoSave}
         />
 
         <TextInput
@@ -293,9 +294,10 @@ export default function SharedSchoolChatForm({
           placeholder={t('additional-instructions-placeholder')}
           inputType="textarea"
           rows={5}
-          getValue={() => getValues('specification') ?? ''}
-          {...register('specification')}
-          {...getZodFieldMetadata('specification')}
+          getValue={() => getValues('additionalInstructions') ?? ''}
+          {...register('additionalInstructions')}
+          {...getZodFieldMetadata('additionalInstructions')}
+          onBlur={handleAutoSave}
         />
         <div className="grid grid-cols-3 gap-6">
           <TextInput
@@ -305,6 +307,7 @@ export default function SharedSchoolChatForm({
             getValue={() => getValues('schoolType') ?? ''}
             {...register('schoolType')}
             {...getZodFieldMetadata('schoolType')}
+            onBlur={handleAutoSave}
           />
 
           <TextInput
@@ -314,6 +317,7 @@ export default function SharedSchoolChatForm({
             getValue={() => getValues('gradeLevel') ?? ''}
             {...register('gradeLevel')}
             {...getZodFieldMetadata('gradeLevel')}
+            onBlur={handleAutoSave}
           />
 
           <TextInput
@@ -323,6 +327,7 @@ export default function SharedSchoolChatForm({
             getValue={() => getValues('subject') ?? ''}
             {...getZodFieldMetadata('subject')}
             {...register('subject')}
+            onBlur={handleAutoSave}
           />
         </div>
         <div className="flex flex-col gap-4">

@@ -12,13 +12,14 @@ import {
 import { z } from 'zod';
 export const sharedSchoolChatFormValuesSchema = z.object({
   name: z.string().min(1).max(SMALL_TEXT_INPUT_FIELDS_LIMIT),
-  description: z.string().min(1).max(SMALL_TEXT_INPUT_FIELDS_LIMIT),
+  description: z.string().min(1).max(SMALL_TEXT_INPUT_FIELDS_LIMIT).nullable(),
+  pictureId: z.string().nullable(),
   modelId: z.string(),
   schoolType: z.string().max(SMALL_TEXT_INPUT_FIELDS_LIMIT).nullable(),
   gradeLevel: z.string().max(SMALL_TEXT_INPUT_FIELDS_LIMIT).nullable(),
   subject: z.string().max(SMALL_TEXT_INPUT_FIELDS_LIMIT).nullable(),
-  learningContext: z.string().min(1).max(1000),
-  specification: z.string().max(2000).nullable(),
+  studentExcercise: z.string().min(1).max(1000),
+  additionalInstructions: z.string().max(2000).nullable(),
   restrictions: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT).nullable(),
   attachedLinks: z.array(
     z.object({
