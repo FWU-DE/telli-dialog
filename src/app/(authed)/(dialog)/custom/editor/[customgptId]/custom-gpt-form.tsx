@@ -32,12 +32,13 @@ import {
   updateCustomGptPictureAction,
 } from './actions';
 import { deleteFileMappingAndEntity, linkFileToCustomGpt } from '../../actions';
-import { deepCopy } from '@/utils/object';
+import { deepCopy, deepEqual } from '@/utils/object';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
 import NavigateBack from '@/components/common/navigate-back';
 import { LocalFileState } from '@/components/chat/send-message-form';
 import { getZodFieldMetadataFn } from '@/components/forms/utils';
+import { iconClassName } from '@/utils/tailwind/icon';
 
 type CustomGptFormProps = CustomGptModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -224,7 +225,15 @@ export default function CustomGptForm({
   function handleAutoSave() {
     if (isCreating) return;
     const data = getValues();
-    onSubmit(data);
+    const defaultData = { ...customGpt };
+    const newData = {
+      ...defaultData,
+      ...data,
+    };
+    const dataEquals = deepEqual(defaultData, newData);
+
+    if (dataEquals) return;
+    await onSubmit(data);
   }
 
   function handleCreateCustomGpt() {
@@ -356,7 +365,7 @@ export default function CustomGptForm({
                     id={`promptSuggestions.${index}.content`}
                   />
                   <div className="flex items-center justify-center">
-                    {index === 0 ? (
+                    {index === fields.length - 1 ? (
                       <button
                         onClick={() => {
                           if (fields.length >= 10) {
@@ -366,10 +375,10 @@ export default function CustomGptForm({
                           append({ content: '' });
                         }}
                         type="button"
-                        className="flex items-center justify-center"
+                        className={cn('flex items-center justify-center', iconClassName)}
                         aria-label={t('prompt-suggestions-add-button')}
                       >
-                        <PlusIcon className="fill-secondary-text hover:bg-vidis-hover-green/20" />
+                        <PlusIcon className="w-8 h-8" />
                       </button>
                     ) : (
                       <button
@@ -378,10 +387,10 @@ export default function CustomGptForm({
                           updatePromptSuggestions();
                         }}
                         aria-label={t('prompt-suggestions-delete-button', { index: index + 1 })}
-                        className="flex items-center justify-center"
+                        className={cn('flex items-center justify-center', iconClassName)}
                         type="button"
                       >
-                        <TrashIcon className="hover:bg-vidis-hover-green/20" />
+                        <TrashIcon className="w-8 h-8" />
                       </button>
                     )}
                   </div>
@@ -417,7 +426,7 @@ export default function CustomGptForm({
           <h3 className="font-medium">{t('delete-gpt')}</h3>
           <p className="mt-4">{t('gpt-delete-description')}</p>
           <DestructiveActionButton
-            className={cn(buttonDeleteClassName, 'mt-10')}
+            triggerButtonClassName={cn(buttonDeleteClassName, 'mt-10')}
             modalDescription={t('gpt-delete-modal-description')}
             modalTitle={t('delete-gpt')}
             confirmText={tCommon('delete')}
@@ -430,10 +439,7 @@ export default function CustomGptForm({
       {isCreating && (
         <section className="mt-8 flex gap-4 items-center">
           <button
-            className={cn(
-              buttonSecondaryClassName,
-              'hover:border-primary hover:bg-vidis-hover-green/20',
-            )}
+            className={cn(buttonSecondaryClassName, 'hover:border-primary hover:bg-primary-hover')}
             onClick={handleDeleteCustomGpt}
             type="button"
           >

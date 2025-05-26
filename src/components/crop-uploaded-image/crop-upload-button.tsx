@@ -82,7 +82,7 @@ export default function UploadImageToBeCroppedButton({
         disabled={disabled}
         triggerButton={
           <>
-            <UploadImageIcon className="group-hover:text-secondary-text" />
+            <UploadImageIcon className="group-hover:text-secondary-text w-4 h-4" />
             <span>Bild hochladen</span>
           </>
         }

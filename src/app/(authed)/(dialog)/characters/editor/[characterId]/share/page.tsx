@@ -12,9 +12,9 @@ import { awaitPageContext } from '@/utils/next/utils';
 import { PageContext } from '@/utils/next/types';
 import { dbGetCharacterByIdAndUserId } from '@/db/functions/character';
 import CountDownTimer from '@/app/(authed)/(dialog)/shared-chats/_components/count-down';
-import CopyButton from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/share/copy-button';
 import QRCode from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/share/qr-code';
 import { getTranslations } from 'next-intl/server';
+import TelliClipboardButton from '@/components/common/clipboard-button';
 
 const pageContextSchema = z.object({
   params: z.object({
@@ -56,6 +56,7 @@ export default async function Page(context: PageContext) {
         <CountDownTimer
           leftTime={Math.max(leftTime, 0)}
           totalTime={character.maxUsageTimeLimit ?? 0}
+          stopWatchClassName="w-4 h-4"
         />
         <main className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] w-full gap-6 mt-6 sm:mt-8 mb-12 sm:mb-16">
           <section className="flex flex-col justify-between gap-4 items-center">
@@ -73,7 +74,10 @@ export default async function Page(context: PageContext) {
                 <p id="join-code" className="text-3xl sm:text-5xl text-primary font-bold">
                   {formattedInviteCode}
                 </p>
-                <CopyButton text={formattedInviteCode} iconClassName="w-7 h-7 sm:w-9 sm:h-9" />
+                <TelliClipboardButton
+                  text={formattedInviteCode}
+                  className="w-7 h-7 sm:w-9 sm:h-9"
+                />
               </div>
             </div>
             <Link

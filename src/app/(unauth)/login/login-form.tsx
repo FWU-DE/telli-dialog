@@ -26,10 +26,7 @@ export default function LoginForm() {
           <hr className="flex-grow border-t border-gray-200" />
         </div>
         <button
-          className={cn(
-            buttonSecondaryClassName,
-            'hover:border-primary hover:bg-vidis-hover-green/20 w-full',
-          )}
+          className={cn(buttonSecondaryClassName, 'w-full')}
           onClick={() => signIn('vidis')}
           aria-label="Mit VIDIS einloggen"
         >

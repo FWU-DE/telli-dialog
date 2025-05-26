@@ -364,7 +364,7 @@ export default function SharedSchoolChatForm({
             <h3 className="font-medium">{t('delete-title')}</h3>
             <p className="mt-4">{t('delete-description')}</p>
             <DestructiveActionButton
-              className={cn(buttonDeleteClassName, 'mt-10')}
+              triggerButtonClassName={cn(buttonDeleteClassName, 'mt-10')}
               modalDescription={t('delete-confirm')}
               modalTitle={t('delete-title')}
               confirmText={tCommon('delete')}
@@ -379,7 +379,7 @@ export default function SharedSchoolChatForm({
             <button
               className={cn(
                 buttonSecondaryClassName,
-                'hover:border-primary hover:bg-vidis-hover-green/20',
+                'hover:border-primary hover:bg-primary-hover',
               )}
               onClick={handleNavigateBack}
               type="button"

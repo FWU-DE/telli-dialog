@@ -8,8 +8,14 @@ type CountDownTimerProps = {
   leftTime: number;
   totalTime: number;
   className?: string;
+  stopWatchClassName?: string;
 };
-export default function CountDownTimer({ leftTime, totalTime, className }: CountDownTimerProps) {
+export default function CountDownTimer({
+  leftTime,
+  totalTime,
+  className,
+  stopWatchClassName,
+}: CountDownTimerProps) {
   const [timeRemaining, setTimeRemaining] = React.useState(leftTime);
 
   React.useEffect(() => {
@@ -31,12 +37,12 @@ export default function CountDownTimer({ leftTime, totalTime, className }: Count
     <div
       id="countdown-timer"
       className={cn(
-        'flex gap-2 items-center min-w-[9rem] px-4 py-2 rounded-[0.75rem]',
+        'flex gap-2 items-center min-w-[9rem] px-4 py-2 rounded-[0.75rem] justify-center',
         className,
         textClassName,
       )}
     >
-      <StopWatchIcon />
+      <StopWatchIcon className={stopWatchClassName} />
       <span>{formatTime(timeRemaining)}</span>
     </div>
   );
