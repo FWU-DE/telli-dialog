@@ -32,7 +32,7 @@ import {
   updateCustomGptPictureAction,
 } from './actions';
 import { deleteFileMappingAndEntity, linkFileToCustomGpt } from '../../actions';
-import { deepCopy } from '@/utils/object';
+import { deepCopy, deepEqual } from '@/utils/object';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
 import NavigateBack from '@/components/common/navigate-back';
@@ -143,6 +143,8 @@ export default function CustomGptForm({
   }
 
   async function onSubmit(data: CustomGptFormValues) {
+    const dataChanged = !deepEqual(data, getValues());
+    if (!dataChanged) return;
     updateCustomGptAction({
       ...data,
       promptSuggestions: data.promptSuggestions?.map((p) => p.content),
