@@ -66,7 +66,11 @@ export default function DownloadConversationButton({
 
   return (
     <button
-      className={cn('hidden xs:flex justify-center items-center w-8 h-8 group', iconClassName)}
+      className={cn(
+        'hidden xs:flex justify-center items-center w-8 h-8 group',
+        iconClassName,
+        'disabled:hover:bg-transparent',
+      )}
       title={t('conversation-download')}
       onClick={handleDownload}
       disabled={disabled}
