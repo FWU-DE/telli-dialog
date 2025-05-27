@@ -118,6 +118,7 @@ export default function SharedSchoolChatForm({
       ...data,
       attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
       description: data.description ?? '',
+      studentExcercise: data.studentExcercise ?? '',
     })
       .then(() => {
         toast.success(tToast('edit-toast-success'));
@@ -162,6 +163,7 @@ export default function SharedSchoolChatForm({
       ...data,
       attachedLinks: data.attachedLinks.map((p) => p.link),
       description: data.description ?? '',
+      studentExcercise: data.studentExcercise ?? '',
     };
 
     const dataEquals = deepEqual(defaultData, newData);
