@@ -103,7 +103,7 @@ export function AttachedLinks({
               appendLink(currentAttachedLink);
             }}
           >
-            <PlusIcon className="fill-primary-text" />
+            <PlusIcon className="fill-primary-text w-8 h-8" />
             {t('add-link')}
           </button>
         )}
@@ -114,7 +114,7 @@ export function AttachedLinks({
             <div className="flex flex-row gap-2" key={`${field.id}-${index}`}>
               <Citation
                 source={field as unknown as WebsearchSource}
-                className="bg-secondary/40 rounded-enterprise-md h-10"
+                className="bg-secondary-dark rounded-enterprise-sm h-10"
                 handleDelete={() => handleDeleteLink(index)}
                 index={index}
                 sourceIndex={0}

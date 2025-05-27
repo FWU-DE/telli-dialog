@@ -21,7 +21,7 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbGetRelatedCharacterFiles } from '@/db/functions/files';
-import { process_files } from '../file-operations/process-file';
+import { getRelevantFileContent } from '../file-operations/retrieval';
 
 export async function POST(request: NextRequest) {
   const { messages, modelId }: { messages: Array<Message>; modelId: string } = await request.json();
@@ -90,11 +90,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'User has reached intelli points limit' }, { status: 429 });
   }
 
-  const allFileIds = await dbGetRelatedCharacterFiles(character.id);
-  const attachedFiles = await process_files(allFileIds);
+  const relatedFileEntities = await dbGetRelatedCharacterFiles(character.id);
+  const orderedChunks = await getRelevantFileContent({
+    messages,
+    user: teacherUserAndContext,
+    relatedFileEntities,
+  });
   const systemPrompt = constructSystemPromptByCharacterSharedChat({
     character,
-    fileEntities: attachedFiles,
+    retrievedTextChunks: orderedChunks,
   });
 
   const result = streamText({

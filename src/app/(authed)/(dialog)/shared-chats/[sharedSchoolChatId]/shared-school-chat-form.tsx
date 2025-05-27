@@ -28,7 +28,6 @@ import { useTranslations } from 'next-intl';
 import { LocalFileState } from '@/components/chat/send-message-form';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
-import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import SelectLlmModelForm from '../../_components/select-llm-model';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
@@ -38,6 +37,7 @@ import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { AttachedLinks } from '@/components/forms/attached-links';
 
+import { getZodFieldMetadataFn } from '@/components/forms/utils';
 export default function SharedSchoolChatForm({
   existingFiles,
   isCreating,
@@ -79,6 +79,7 @@ export default function SharedSchoolChatForm({
       studentExcercise: sharedSchoolChat.studentExcercise ?? '',
       additionalInstructions: sharedSchoolChat.additionalInstructions ?? '',
       attachedLinks: initalLinks,
+      pictureId: sharedSchoolChat.pictureId ?? '',
     },
   });
   const backUrl = '/shared-chats';
@@ -117,6 +118,7 @@ export default function SharedSchoolChatForm({
       ...data,
       attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
       description: data.description ?? '',
+      studentExcercise: data.studentExcercise ?? '',
     })
       .then(() => {
         toast.success(tToast('edit-toast-success'));
@@ -127,6 +129,7 @@ export default function SharedSchoolChatForm({
   }
 
   function handlePictureUploadComplete(picturePath: string) {
+    setValue('pictureId', picturePath);
     updateSharedSchoolChatPictureAction({ picturePath, id: sharedSchoolChat.id })
       .then(() => {
         toast.success(tToast('image-toast-success'));
@@ -155,10 +158,15 @@ export default function SharedSchoolChatForm({
     if (isCreating) return;
     const data = getValues();
     const defaultData = { ...sharedSchoolChat, modelId: sharedSchoolChat.modelId };
-    const newData = { ...data, attachedLinks: data.attachedLinks.map((p) => p.link) };
+    const newData = {
+      ...defaultData,
+      ...data,
+      attachedLinks: data.attachedLinks.map((p) => p.link),
+      description: data.description ?? '',
+      studentExcercise: data.studentExcercise ?? '',
+    };
 
     const dataEquals = deepEqual(defaultData, newData);
-
     if (dataEquals) return;
     onSubmit(data);
     router.refresh();
@@ -176,6 +184,8 @@ export default function SharedSchoolChatForm({
     router.push(backUrl);
   }
 
+  const getZodFieldMetadata = getZodFieldMetadataFn(sharedSchoolChatFormValuesSchema);
+
   return (
     <>
       <NavigateBack label={t('all-dialogs')} onClick={handleNavigateBack} />
@@ -184,11 +194,7 @@ export default function SharedSchoolChatForm({
         {isCreating ? t('title') : sharedSchoolChat.name}
       </h1>
 
-      <form
-        className="flex flex-col gap-8 my-12"
-        onSubmit={handleSubmit(onSubmit)}
-        onBlur={handleAutoSave}
-      >
+      <form className="flex flex-col gap-8 my-12" onSubmit={handleSubmit(onSubmit)}>
         {!isCreating && <ShareContainer {...sharedSchoolChat} />}
         <fieldset className="flex flex-col gap-4 mt-8">
           <h2 className="font-medium mb-8">{t('settings')}</h2>
@@ -208,10 +214,12 @@ export default function SharedSchoolChatForm({
               <TextInput
                 id="name"
                 label={t('name')}
-                required={true}
                 readOnly={readOnly}
+                getValue={() => getValues('name')}
                 {...register('name')}
+                {...getZodFieldMetadata('name')}
                 placeholder={t('name-placeholder')}
+                onBlur={handleAutoSave}
               />
 
               <TextInput
@@ -219,10 +227,11 @@ export default function SharedSchoolChatForm({
                 label={t('purpose-label')}
                 inputType="text"
                 readOnly={readOnly}
-                required={false}
+                getValue={() => getValues('description') ?? ''}
                 {...register('description')}
-                maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+                {...getZodFieldMetadata('description')}
                 placeholder={t('purpose-placeholder')}
+                onBlur={handleAutoSave}
               />
             </div>
             <section className="h-full">
@@ -268,11 +277,12 @@ export default function SharedSchoolChatForm({
           id="student-excercise"
           label={t('student-excercise-label')}
           placeholder={t('student-excercise-placeholder')}
+          getValue={() => getValues('studentExcercise') ?? ''}
           inputType="textarea"
-          required={false}
           rows={5}
-          maxLength={1000}
           {...register('studentExcercise')}
+          {...getZodFieldMetadata('studentExcercise')}
+          onBlur={handleAutoSave}
         />
 
         <TextInput
@@ -280,34 +290,41 @@ export default function SharedSchoolChatForm({
           label={t('additional-instructions-label')}
           placeholder={t('additional-instructions-placeholder')}
           inputType="textarea"
-          required={true}
           rows={5}
-          maxLength={2000}
+          getValue={() => getValues('additionalInstructions') ?? ''}
           {...register('additionalInstructions')}
+          {...getZodFieldMetadata('additionalInstructions')}
+          onBlur={handleAutoSave}
         />
         <div className="grid grid-cols-3 gap-6">
           <TextInput
             id="school-type"
             label={t('school-type-label')}
             placeholder={t('school-type-placeholder')}
-            required={false}
+            getValue={() => getValues('schoolType') ?? ''}
             {...register('schoolType')}
+            {...getZodFieldMetadata('schoolType')}
+            onBlur={handleAutoSave}
           />
 
           <TextInput
             id="gradeLevel"
             label={t('grade-label')}
             placeholder={t('grade-placeholder')}
-            required={false}
+            getValue={() => getValues('gradeLevel') ?? ''}
             {...register('gradeLevel')}
+            {...getZodFieldMetadata('gradeLevel')}
+            onBlur={handleAutoSave}
           />
 
           <TextInput
             id="subject"
             label={t('subject-label')}
             placeholder={t('subject-placeholder')}
-            required={false}
+            getValue={() => getValues('subject') ?? ''}
+            {...getZodFieldMetadata('subject')}
             {...register('subject')}
+            onBlur={handleAutoSave}
           />
         </div>
         <div className="flex flex-col gap-4">
@@ -344,7 +361,7 @@ export default function SharedSchoolChatForm({
             <h3 className="font-medium">{t('delete-title')}</h3>
             <p className="mt-4">{t('delete-description')}</p>
             <DestructiveActionButton
-              className={cn(buttonDeleteClassName, 'mt-10')}
+              triggerButtonClassName={cn(buttonDeleteClassName, 'mt-10')}
               modalDescription={t('delete-confirm')}
               modalTitle={t('delete-title')}
               confirmText={tCommon('delete')}
@@ -359,7 +376,7 @@ export default function SharedSchoolChatForm({
             <button
               className={cn(
                 buttonSecondaryClassName,
-                'hover:border-primary hover:bg-vidis-hover-green/20',
+                'hover:border-primary hover:bg-primary-hover',
               )}
               onClick={handleNavigateBack}
               type="button"

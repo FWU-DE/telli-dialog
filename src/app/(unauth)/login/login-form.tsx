@@ -18,7 +18,7 @@ export default function LoginForm() {
   return (
     <main className="w-full flex flex-col justify-center items-center max-w-72 mx-auto py-4 h-full">
       <div className="my-auto flex flex-col items-center w-full">
-        <TelliLogo className="text-primary my-8 sm:my-16" />
+        <TelliLogo className="text-primary my-8 sm:my-16 w-40" />
         <SharedChatLoginForm />
         <div className="flex gap-2 items-center w-full justify-center py-8">
           <hr className="flex-grow border-t border-gray-200" />
@@ -26,10 +26,7 @@ export default function LoginForm() {
           <hr className="flex-grow border-t border-gray-200" />
         </div>
         <button
-          className={cn(
-            buttonSecondaryClassName,
-            'hover:border-primary hover:bg-vidis-hover-green/20 w-full',
-          )}
+          className={cn(buttonSecondaryClassName, 'w-full')}
           onClick={() => signIn('vidis')}
           aria-label="Mit VIDIS einloggen"
         >

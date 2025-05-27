@@ -62,6 +62,24 @@ export async function uploadFileToS3({
   }
 }
 
+export async function getMaybeLogoFromS3(federalStateId: string | undefined) {
+  if (federalStateId === undefined) {
+    return undefined;
+  }
+  const key = `whitelabels/${federalStateId}/logo.jpg`;
+  try {
+    await s3Client.send(
+      new GetObjectCommand({
+        Bucket: env.otcBucketName,
+        Key: key,
+      }),
+    );
+    return await getSignedUrlFromS3Get({ key });
+  } catch {
+    return undefined;
+  }
+}
+
 export async function copyFileInS3({ newKey, copySource }: { newKey: string; copySource: string }) {
   const copyParams: CopyObjectCommandInput = {
     Bucket: env.otcBucketName,
@@ -79,7 +97,7 @@ export async function copyFileInS3({ newKey, copySource }: { newKey: string; cop
 }
 
 export async function getMaybeSignedUrlFromS3Get({ key }: { key: string | undefined | null }) {
-  if (key === undefined || key === null) return undefined;
+  if (key === undefined || key === null || key === '') return undefined;
   return await getSignedUrlFromS3Get({ key });
 }
 

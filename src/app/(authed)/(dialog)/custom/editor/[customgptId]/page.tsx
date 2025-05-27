@@ -30,7 +30,6 @@ export default async function Page(context: PageContext) {
   const isCreating = searchParams?.create === 'true';
 
   const user = await getUser();
-
   const customGpt = await dbGetCustomGptById({ customGptId: params.customgptId });
   const relatedFiles = await fetchFileMapping(params.customgptId);
 

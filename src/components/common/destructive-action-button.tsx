@@ -3,6 +3,8 @@ import { buttonDeleteClassName, buttonSecondaryClassName } from '@/utils/tailwin
 import React from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTheme } from '@/hooks/use-theme';
+import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
 
 type DestructiveActionButtonProps = {
   triggerButtonClassName?: string;
@@ -31,13 +33,13 @@ export default function DestructiveActionButton({
   function refetchConversations() {
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
   }
-
+  const { designConfiguration } = useTheme();
   return (
     <AlertDialog.Root open={isOpen}>
       <AlertDialog.Trigger asChild>
         <button
           id="destructive-button"
-          className={cn(buttonDeleteClassName, triggerButtonClassName)}
+          className={triggerButtonClassName}
           onClick={(event) => {
             event.stopPropagation();
             event.preventDefault();
@@ -51,7 +53,10 @@ export default function DestructiveActionButton({
       </AlertDialog.Trigger>
       <AlertDialog.Portal>
         <AlertDialog.Overlay className="fixed inset-0 bg-[#333333] z-30 opacity-30 shadow-[0px_0px_80px_0px_rgba(0,41,102,0.1)]" />
-        <AlertDialog.Content className="z-50 fixed left-1/2 top-1/2 max-h-[85vh] -translate-x-1/2 -translate-y-1/2 rounded-enterprise-md bg-white p-10 w-[350px] lg:w-[564px] max-w-xl">
+        <AlertDialog.Content
+          className="z-50 fixed left-1/2 top-1/2 max-h-[85vh] -translate-x-1/2 -translate-y-1/2 rounded-enterprise-md bg-white p-10 w-[350px] lg:w-[564px] max-w-xl"
+          style={constructRootLayoutStyle({ designConfiguration })}
+        >
           <AlertDialog.Title asChild>
             <h1 className="text-3xl font-medium">{modalTitle}</h1>
           </AlertDialog.Title>
@@ -65,10 +70,7 @@ export default function DestructiveActionButton({
                 event.preventDefault();
                 setIsOpen(false);
               }}
-              className={cn(
-                buttonSecondaryClassName,
-                'hover:border-primary max-lg:w-full hover:bg-vidis-hover-green/20',
-              )}
+              className={cn(buttonSecondaryClassName, 'max-lg:w-full')}
               type="button"
             >
               Abbrechen

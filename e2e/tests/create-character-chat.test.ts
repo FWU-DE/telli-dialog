@@ -81,7 +81,7 @@ test('teacher can login, create and join shared dialogpartner chat', async ({ pa
 
   // send first message
   await page.getByPlaceholder('Wie kann ich Dir helfen?').fill('Wer bist du?');
-  await page.getByLabel('Send Message').click();
+  await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
   await page.getByTitle('Kopieren').click();
 
   await expect(page.getByLabel('assistant message 1')).toContainText('John Cena');

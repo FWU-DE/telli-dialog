@@ -6,6 +6,7 @@ import { env } from '@/env';
 import { errorifyAsyncFn } from '@/utils/error';
 
 export const dbGetApiKeyByFederalStateIdWithResult = errorifyAsyncFn(dbGetApiKeyByFederalStateId);
+export const dbGetFederalStateByIdWithResult = errorifyAsyncFn(dbGetFederalStateById);
 export async function dbGetApiKeyByFederalStateId({
   federalStateId,
 }: {
@@ -38,6 +39,22 @@ export async function dbGetApiKeyByFederalStateId({
 
 export async function dbGetAllFederalStates() {
   return await db.select().from(federalStateTable);
+}
+
+export async function dbGetFederalStateById(id: string | undefined) {
+  if (id === undefined) {
+    return undefined;
+  }
+  const [federalState] = await db
+    .select()
+    .from(federalStateTable)
+    .where(eq(federalStateTable.id, id));
+
+  if (federalState === undefined) {
+    throw Error(`Could not find federal state with id ${id}`);
+  }
+
+  return federalState;
 }
 
 export async function dbUpsertFederalState(federalState: FederalStateInsertModel) {

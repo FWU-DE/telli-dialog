@@ -14,6 +14,8 @@ import { cn } from '@/utils/tailwind';
 import { usePathname } from 'next/navigation';
 import { type ConversationModel } from '@/db/types';
 import Link from 'next/link';
+import { useTheme } from '@/hooks/use-theme';
+import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
 
 const renameSchema = z.object({
   name: z.string().min(1),
@@ -42,6 +44,7 @@ export default function ConversationItem({
   const pathname = usePathname();
   const { isBelow } = useBreakpoints();
   const { toggle } = useSidebarVisibility();
+  const { designConfiguration } = useTheme();
 
   async function onSubmit(data: RenameData) {
     toggleEditable();
@@ -105,6 +108,7 @@ export default function ConversationItem({
               className={cn(
                 'z-20 flex flex-col w-[256px] bg-white shadow-dropdown rounded-enterprise-md',
               )}
+              style={constructRootLayoutStyle({ designConfiguration })}
             >
               <DropdownMenu.Item asChild>
                 <button

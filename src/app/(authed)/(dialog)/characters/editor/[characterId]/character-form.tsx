@@ -39,6 +39,7 @@ import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
+import { getZodFieldMetadataFn } from '@/components/forms/utils';
 
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -100,6 +101,7 @@ export default function CharacterForm({
   const t = useTranslations('characters.form');
   const tToast = useTranslations('characters.toasts');
   const tCommon = useTranslations('common');
+  const getZodFieldMetadata = getZodFieldMetadataFn(characterFormValuesSchema);
 
   const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
     character.accessLevel,
@@ -251,32 +253,41 @@ export default function CharacterForm({
           id="school-type"
           label={t('school-type')}
           inputType="text"
+          getValue={() => getValues('schoolType') ?? ''}
+          {...getZodFieldMetadata('schoolType')}
           readOnly={readOnly}
           {...register('schoolType')}
           placeholder={t('school-type-placeholder')}
+          onBlur={handleAutoSave}
         />
         <TextInput
           id="grade"
           label={t('grade')}
           inputType="text"
           readOnly={readOnly}
+          getValue={() => getValues('gradeLevel') ?? ''}
+          {...getZodFieldMetadata('gradeLevel')}
           {...register('gradeLevel')}
           placeholder={t('grade-placeholder')}
+          onBlur={handleAutoSave}
         />
         <TextInput
           id="subject"
           label={t('subject')}
           inputType="text"
           readOnly={readOnly}
+          getValue={() => getValues('subject') ?? ''}
+          {...getZodFieldMetadata('subject')}
           {...register('subject')}
           placeholder={t('subject-placeholder')}
+          onBlur={handleAutoSave}
         />
       </div>
     </fieldset>
   );
 
   return (
-    <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)} onBlur={handleAutoSave}>
+    <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
       <NavigateBack label={t('all-characters')} onClick={handleNavigateBack} />
 
       <h1 className="text-2xl font-medium mt-4">
@@ -293,19 +304,23 @@ export default function CharacterForm({
             <TextInput
               id="name"
               label={t('character-name-label')}
-              required={true}
               readOnly={readOnly}
+              getValue={() => getValues('name') ?? ''}
+              {...getZodFieldMetadata('name')}
               {...register('name')}
               placeholder={t('character-name-placeholder')}
+              onBlur={handleAutoSave}
             />
             <TextInput
               id="description"
               label={t('character-description-label')}
-              required={true}
               inputType="textarea"
               readOnly={readOnly}
+              getValue={() => getValues('description') ?? ''}
+              {...getZodFieldMetadata('description')}
               {...register('description')}
               placeholder={t('character-description-placeholder')}
+              onBlur={handleAutoSave}
             />
           </div>
           <section className="h-full">
@@ -352,34 +367,46 @@ export default function CharacterForm({
           label={t('character-competence-label')}
           required={true}
           inputType="textarea"
+          getValue={() => getValues('competence') ?? ''}
+          {...getZodFieldMetadata('competence')}
           {...register('competence')}
           readOnly={readOnly}
           placeholder={t('character-competence-placeholder')}
+          onBlur={handleAutoSave}
         />
         <TextInput
           id="learningContext"
           label={t('character-learning-context-label')}
           required={true}
           inputType="textarea"
+          getValue={() => getValues('learningContext') ?? ''}
+          {...getZodFieldMetadata('learningContext')}
           {...register('learningContext')}
           readOnly={readOnly}
           placeholder={t('character-learning-context-placeholder')}
+          onBlur={handleAutoSave}
         />
         <TextInput
           id="specifications"
           label={t('character-specification-label')}
           inputType="textarea"
+          getValue={() => getValues('specifications') ?? ''}
+          {...getZodFieldMetadata('specifications')}
           {...register('specifications')}
           readOnly={readOnly}
           placeholder={t('character-specification-placeholder')}
+          onBlur={handleAutoSave}
         />
         <TextInput
           id="restrictions"
           label={t('character-restriction-label')}
           inputType="textarea"
+          getValue={() => getValues('restrictions') ?? ''}
+          {...getZodFieldMetadata('restrictions')}
           {...register('restrictions')}
           readOnly={readOnly}
           placeholder={t('character-restriction-placeholder')}
+          onBlur={handleAutoSave}
         />
       </fieldset>
       {!readOnly && (
@@ -407,7 +434,7 @@ export default function CharacterForm({
           <h3 className="font-medium">{t('delete-character')}</h3>
           <p className="mt-4">{t('character-delete-description')}</p>
           <DestructiveActionButton
-            className={cn(buttonDeleteClassName, 'mt-10')}
+            triggerButtonClassName={cn(buttonDeleteClassName, 'mt-10')}
             modalDescription={t('character-delete-modal-description')}
             modalTitle={t('delete-character')}
             confirmText={tCommon('delete')}
@@ -420,10 +447,7 @@ export default function CharacterForm({
       {isCreating && (
         <section className="mt-8 flex gap-4 items-center">
           <button
-            className={cn(
-              buttonSecondaryClassName,
-              'hover:border-primary hover:bg-vidis-hover-green/20',
-            )}
+            className={cn(buttonSecondaryClassName)}
             onClick={handleNavigateBack}
             type="button"
           >
