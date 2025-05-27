@@ -18,8 +18,8 @@ export const sharedSchoolChatFormValuesSchema = z.object({
   schoolType: z.string().max(SMALL_TEXT_INPUT_FIELDS_LIMIT).nullable(),
   gradeLevel: z.string().max(SMALL_TEXT_INPUT_FIELDS_LIMIT).nullable(),
   subject: z.string().max(SMALL_TEXT_INPUT_FIELDS_LIMIT).nullable(),
-  studentExcercise: z.string().min(1).max(1000),
-  additionalInstructions: z.string().max(2000).nullable(),
+  studentExcercise: z.string().min(1).max(1000).nullable(),
+  additionalInstructions: z.string().max(2000),
   restrictions: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT).nullable(),
   attachedLinks: z.array(
     z.object({
