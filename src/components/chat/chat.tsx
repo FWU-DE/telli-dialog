@@ -23,6 +23,7 @@ import { ChatInputBox } from './chat-input-box';
 import { ErrorChatPlaceholder } from './error-message';
 import Image from 'next/image';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { cn } from '@/utils/tailwind';
 type ChatProps = {
   id: string;
   initialMessages: Message[];
@@ -289,10 +290,12 @@ export function getAssistantIcon({
   customGptId: customGptId,
   imageName,
   imageSource,
+  className,
 }: {
   customGptId?: string;
   imageName?: string;
   imageSource?: string;
+  className?: string;
 }) {
   if (customGptId === HELP_MODE_GPT_ID) {
     return (
@@ -303,7 +306,7 @@ export function getAssistantIcon({
   }
   if (imageSource !== undefined && imageName !== undefined) {
     return (
-      <div className="p-1.5 place-self-start m-4 mt-1 ">
+      <div className={cn('p-1.5 place-self-start mx-4 mt-1 ', className)}>
         <Image
           src={imageSource}
           width={30}

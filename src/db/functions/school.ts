@@ -19,3 +19,27 @@ export async function dbGetSchoolAndMappingAndFederalStateByUserId({ userId }: {
     federalState: result.federal_state,
   };
 }
+
+export async function dbGetFederalStateBySchoolId({ schoolId }: { schoolId: string | null }) {
+  if (schoolId === null) return undefined;
+
+  const [result] = await db
+    .select({ federalState: federalStateTable })
+    .from(schoolTable)
+    .innerJoin(federalStateTable, eq(federalStateTable.id, schoolTable.federalStateId))
+    .where(eq(schoolTable.id, schoolId));
+
+  return result?.federalState;
+}
+
+export async function dbGetFederalStateByUserId({ userId }: { userId: string }) {
+  const [result] = await db
+    .select({ federalState: federalStateTable })
+    .from(userTable)
+    .innerJoin(userSchoolMappingTable, eq(userSchoolMappingTable.userId, userTable.id))
+    .innerJoin(schoolTable, eq(schoolTable.id, userSchoolMappingTable.schoolId))
+    .innerJoin(federalStateTable, eq(federalStateTable.id, schoolTable.federalStateId))
+    .where(eq(userTable.id, userId));
+
+  return result?.federalState;
+}

@@ -8,6 +8,9 @@ import { dbGetCharacterByIdAndInviteCode } from '@/db/functions/character';
 
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
 import CharacterSharedChat from '@/components/chat/character-chat';
+import { ThemeProvider } from '@/components/providers/theme-provider';
+import { dbGetFederalStateBySchoolId } from '@/db/functions/school';
+import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 
 const pageContextSchema = z.object({
   params: z.object({
@@ -35,14 +38,19 @@ export default async function Page(context: PageContext) {
   if (model === undefined) {
     return <NotFound />;
   }
+  const federalState = await dbGetFederalStateBySchoolId({ schoolId: character.schoolId });
+  const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
+
   return (
     <main className="h-[100dvh] w-full">
       <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
-        <CharacterSharedChat
-          {...character}
-          inviteCode={searchParams.inviteCode}
-          imageSource={maybeSignedImageUrl}
-        />
+        <ThemeProvider designConfiguration={designConfiguration}>
+          <CharacterSharedChat
+            {...character}
+            inviteCode={searchParams.inviteCode}
+            imageSource={maybeSignedImageUrl}
+          />
+        </ThemeProvider>
       </LlmModelsProvider>
     </main>
   );

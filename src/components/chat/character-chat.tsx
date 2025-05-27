@@ -4,13 +4,16 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import { CharacterModel } from '@/db/schema';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
-import { SharedChatHeader } from '@/components/chat/header-bar';
+import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
 import { ChatBox } from '@/components/chat/chat-box';
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-message';
 import { getAssistantIcon } from './chat';
+import useBreakpoints from '../hooks/use-breakpoints';
+
+const reductionBreakpoint = 'sm';
 
 export default function CharacterSharedChat({
   imageSource,
@@ -45,6 +48,7 @@ export default function CharacterSharedChat({
   });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  const { isBelow } = useBreakpoints();
 
   React.useEffect(() => {
     if (scrollRef.current) {
@@ -68,6 +72,7 @@ export default function CharacterSharedChat({
   const assistantIcon = getAssistantIcon({
     imageName: character.name,
     imageSource,
+    className: isBelow[reductionBreakpoint] ? 'mt-0 mx-0' : undefined,
   });
 
   const innerContent =
@@ -96,6 +101,7 @@ export default function CharacterSharedChat({
         })}
       </div>
     );
+
   return (
     <>
       {!chatActive && <ExpiredChatModal conversationMessages={messages} title={character.name} />}
@@ -107,8 +113,9 @@ export default function CharacterSharedChat({
           handleOpenNewChat={handleOpenNewChat}
           title={character.name}
           messages={messages}
+          reductionBreakpoint={reductionBreakpoint}
         />
-
+        <hr className="w-full border-gray-200" />
         <div className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden">
           <div
             ref={scrollRef}

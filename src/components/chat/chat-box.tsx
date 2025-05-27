@@ -10,6 +10,7 @@ import Citation from './sources/citation';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { iconClassName } from '@/utils/tailwind/icon';
+import useBreakpoints from '../hooks/use-breakpoints';
 
 export function ChatBox({
   children,
@@ -35,6 +36,8 @@ export function ChatBox({
   initialWebsources?: WebsearchSource[];
 }) {
   const tCommon = useTranslations('common');
+  const { isAtLeast } = useBreakpoints();
+
   const userClassName =
     children.role === 'user'
       ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary-light text-primary-foreground max-w-[70%] break-words'
@@ -110,7 +113,7 @@ export function ChatBox({
     <>
       <div key={index} className={cn('w-full text-secondary-foreground', userClassName, margin)}>
         <div className="" aria-label={`${children.role} message ${Math.floor(index / 2 + 1)}`}>
-          <div className="flex flex-row">
+          <div className={cn('flex flex-row', isAtLeast.sm ? 'flex-row' : 'flex-col')}>
             {children.role === 'assistant' && assistantIcon}
             <div className="flex flex-col items-start gap-2">
               {messageContent}

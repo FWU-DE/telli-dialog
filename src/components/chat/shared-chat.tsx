@@ -7,7 +7,7 @@ import { type SharedSchoolConversationModel } from '@/db/schema';
 
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
-import { SharedChatHeader } from '@/components/chat/header-bar';
+import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
 import { ChatBox } from '@/components/chat/chat-box';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
@@ -115,6 +115,7 @@ export default function SharedChat({
           title={sharedSchoolChat.name}
           messages={messages}
         />
+        <hr className="w-full border-gray-200 mb-2" />
         <div
           ref={containerRef}
           className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden"
