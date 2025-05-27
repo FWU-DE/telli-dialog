@@ -4,7 +4,7 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import { CharacterModel } from '@/db/schema';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
-import { SharedChatHeader } from '@/components/chat/header-bar';
+import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
 import { ChatBox } from '@/components/chat/chat-box';
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
