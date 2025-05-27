@@ -12,7 +12,11 @@ import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import { ThreeDotsProfileMenu } from '../navigation/profile-menu';
 import Image from 'next/image';
 import { cn } from '@/utils/tailwind';
-import TrashFilledIcon from '../icons/trash-filled';
+import useBreakpoints from '../hooks/use-breakpoints';
+import { breakpoints } from '../hooks/use-breakpoints';
+import { useTranslations } from 'next-intl';
+import { iconClassName } from '@/utils/tailwind/icon';
+import TrashIcon from '../icons/trash';
 
 export function ChatHeaderBar({
   user,
@@ -85,7 +89,6 @@ export function SharedChatHeader({
       downloadButton.click();
     }
   };
-  console.log(isBelow.sm);
   const showCompressedHeader = isBelow[reductionBreakpoint];
 
   const deleteChatElement = (
@@ -94,13 +97,14 @@ export function SharedChatHeader({
       confirmText={t('delete-chat-modal-confirm-button')}
       modalDescription={t('delete-chat-modal-description')}
       triggerButtonClassName={cn(
-        'justify-center items-center disabled:bg-light-gray disabled:text-gray-100 text-current !border-0 !rounded-enterprise-sm hover:!bg-vidis-hover-green/20',
+        'justify-center items-center',
+        iconClassName,
         isBelow.sm && 'items-center justify-start',
       )}
       actionFn={handleOpenNewChat}
     >
-      <span className="flex items-center gap-2">
-        <TrashFilledIcon className="text-primary h-4 w-4" />
+      <span className="flex items-center gap-1">
+        <TrashIcon className="h-8 w-8" solid={true} />
         {showCompressedHeader ? tCommon('delete') : ''}
       </span>
     </DestructiveActionButton>
@@ -137,7 +141,7 @@ export function SharedChatHeader({
           disabled={!chatActive || !hasMessages}
           sharedConversationName={title}
           showText={false}
-          buttonClassName={cn(showCompressedHeader && 'ml-2 w-full items-center justify-start')}
+          buttonClassName={cn(showCompressedHeader && 'w-full items-center justify-start')}
         />
       )}
 
@@ -152,8 +156,8 @@ export function SharedChatHeader({
               conversationMessages={messages}
               disabled={!chatActive || !hasMessages}
               sharedConversationName={title}
-              showText={false}
-              buttonClassName={cn(showCompressedHeader && 'ml-2 w-full items-center justify-start')}
+              showText={true}
+              buttonClassName={cn(showCompressedHeader && 'w-full items-center justify-start')}
             />
           }
           deleteButtonJSX={deleteChatElement}

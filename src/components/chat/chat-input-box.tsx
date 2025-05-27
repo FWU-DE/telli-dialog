@@ -84,7 +84,7 @@ export function ChatInputBox({
       )}
       aria-label="Nachricht abschicken"
     >
-      <ArrowRightIcon className={cn('h-9 w-9', iconClassName)} />
+      <ArrowRightIcon className={cn('h-9 w-9')} />
     </button>
   );
 
