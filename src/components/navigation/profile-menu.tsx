@@ -18,6 +18,7 @@ type ProfileMenuProps = UserAndContext;
 
 export default function ProfileMenu({ email, school }: ProfileMenuProps) {
   const t = useTranslations('legal');
+  const { designConfiguration } = useTheme();
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
@@ -34,6 +35,7 @@ export default function ProfileMenu({ email, school }: ProfileMenuProps) {
           align="end"
           sideOffset={10}
           className="z-20 flex flex-col gap-2 py-2 w-[256px] rounded-enterprise-md mb-4 bg-white shadow-dropdown"
+          style={constructRootLayoutStyle({ designConfiguration })}
         >
           <Link
             href={PRIVACY_POLICY_URL}
@@ -128,7 +130,7 @@ export function ThreeDotsProfileMenu({
 
 export function UnauthenticatedProfileMenu() {
   const t = useTranslations('legal');
-
+  const { designConfiguration } = useTheme();
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
@@ -145,6 +147,7 @@ export function UnauthenticatedProfileMenu() {
           align="end"
           sideOffset={10}
           className="z-20 flex flex-col gap-2 py-2 w-[256px] rounded-enterprise-md mb-4 bg-white shadow-dropdown"
+          style={constructRootLayoutStyle({ designConfiguration })}
         >
           <Link
             href={PRIVACY_POLICY_URL}
