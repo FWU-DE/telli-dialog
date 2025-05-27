@@ -155,7 +155,6 @@ export default function SharedSchoolChatForm({
 
   function handleAutoSave() {
     if (isCreating) return;
-    console.log('isDirty', isDirty);
     const data = getValues();
     const defaultData = { ...sharedSchoolChat, modelId: sharedSchoolChat.modelId };
     const newData = {
@@ -166,7 +165,6 @@ export default function SharedSchoolChatForm({
     };
 
     const dataEquals = deepEqual(defaultData, newData);
-    console.log('data', data);
     if (dataEquals) return;
     onSubmit(data);
     router.refresh();
