@@ -114,6 +114,8 @@ export default function CharacterSharedChat({
           title={character.name}
           messages={messages}
           reductionBreakpoint={reductionBreakpoint}
+          // currently this is redundant, due to the inconsisitency with the shared school chat inital page
+          dialogStarted={messages.length > 0}
         />
         <hr className="w-full border-gray-200" />
         <div className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden">
