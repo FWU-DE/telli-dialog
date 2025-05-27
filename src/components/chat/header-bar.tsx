@@ -4,19 +4,8 @@ import { UserAndContext } from '@/auth/types';
 import SelectLlmModel from '../conversation/select-llm-model';
 import { NewChatButton, ToggleSidebarButton } from '../navigation/sidebar/collapsible-sidebar';
 import DownloadConversationButton from '@/app/(authed)/(dialog)/download-conversation-button';
-import ProfileMenu, { UnauthenticatedProfileMenu } from '../navigation/profile-menu';
-import DownloadSharedConversationButton from '@/app/(unauth)/ua/dowload-shared-conversation-button';
-import { Message } from 'ai';
-import DestructiveActionButton from '../common/destructive-action-button';
+import ProfileMenu from '../navigation/profile-menu';
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
-import { ThreeDotsProfileMenu } from '../navigation/profile-menu';
-import Image from 'next/image';
-import { cn } from '@/utils/tailwind';
-import useBreakpoints from '../hooks/use-breakpoints';
-import { breakpoints } from '../hooks/use-breakpoints';
-import { useTranslations } from 'next-intl';
-import { iconClassName } from '@/utils/tailwind/icon';
-import TrashIcon from '../icons/trash';
 
 export function ChatHeaderBar({
   user,
