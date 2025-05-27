@@ -70,7 +70,7 @@ export default function SharedSchoolChatForm({
     getValues,
     setValue,
     control,
-    formState: { isValid, isDirty },
+    formState: { isValid },
   } = useForm<SharedSchoolChatFormValues>({
     resolver: zodResolver(sharedSchoolChatFormValuesSchema),
     defaultValues: {
