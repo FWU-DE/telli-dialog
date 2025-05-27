@@ -99,7 +99,12 @@ export default function DownloadSharedConversationButton({
 
   return (
     <button
-      className={cn('flex items-center gap-1', iconClassName, buttonClassName)}
+      className={cn(
+        'flex items-center gap-1',
+        iconClassName,
+        buttonClassName,
+        'disabled:hover:bg-transparent',
+      )}
       title={tCommon('conversation-download')}
       onClick={handleDownload}
       disabled={disabled}

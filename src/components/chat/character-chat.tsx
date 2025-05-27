@@ -72,6 +72,7 @@ export default function CharacterSharedChat({
   const assistantIcon = getAssistantIcon({
     imageName: character.name,
     imageSource,
+    className: isBelow[reductionBreakpoint] ? 'mt-0 mx-0' : undefined,
   });
 
   const innerContent =
@@ -92,7 +93,7 @@ export default function CharacterSharedChat({
               isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
               isLoading={isLoading}
               regenerateMessage={reload}
-              assistantIcon={isBelow[reductionBreakpoint] ? undefined : assistantIcon}
+              assistantIcon={assistantIcon}
             >
               {message}
             </ChatBox>
@@ -112,7 +113,6 @@ export default function CharacterSharedChat({
           handleOpenNewChat={handleOpenNewChat}
           title={character.name}
           messages={messages}
-          imageSource={imageSource}
           reductionBreakpoint={reductionBreakpoint}
         />
         <hr className="w-full border-gray-200" />
