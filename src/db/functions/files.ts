@@ -11,7 +11,6 @@ import {
   SharedSchoolConversationFileMapping,
   TextChunkTable,
 } from '../schema';
-import { deleteFileFromS3 } from '@/s3';
 
 export async function link_file_to_conversation({
   conversationMessageId,
