@@ -14,14 +14,21 @@ export async function DELETE(req: NextRequest) {
   if (error !== null) {
     return NextResponse.json({ error: error.message }, { status: 403 });
   }
-  const count = await dbDeleteOutdatedConversations();
+  const countDeletedConversations = await dbDeleteOutdatedConversations();
   const danglingConversationFiles = (await dbGetDanglingConversationFileIds()).map(
     (file) => file.fileId,
   );
   await dbDeleteFileAndDetachFromConversation(danglingConversationFiles);
+  // from other entities character, custom gpt, shared school chat
   const danglingFiles = await dbDeleteDanglingFiles();
   for (const fileId of [...danglingConversationFiles, ...danglingFiles]) {
     await deleteFileFromS3({ key: fileId });
   }
-  return NextResponse.json({ message: 'Ok', count }, { status: 200 });
+  const response = {
+    message: 'Ok',
+    countDeletedConversations,
+    danglingConversationFiles,
+    danglingFiles,
+  };
+  return NextResponse.json(response, { status: 200 });
 }

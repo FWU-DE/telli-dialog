@@ -346,7 +346,7 @@ export type FileModelAndUrl = FileModel & { signedUrl: string };
 export type FileModelAndContent = FileModel & { content?: string };
 export type FileInsertModel = typeof fileTable.$inferInsert;
 
-export const conversationMessgaeFileMappingTable = pgTable(
+export const ConversationMessgaeFileMappingTable = pgTable(
   'conversation_message_file_mapping',
   {
     id: uuid('id').defaultRandom().primaryKey(),
@@ -417,7 +417,7 @@ export const CustomGptFileMapping = pgTable(
   }),
 );
 
-export const textChunkTable = pgTable(
+export const TextChunkTable = pgTable(
   'text_chunk',
   {
     id: uuid('id').defaultRandom().primaryKey(),
@@ -443,5 +443,5 @@ export const textChunkTable = pgTable(
   },
 );
 
-export type TextChunkModel = typeof textChunkTable.$inferSelect;
-export type TextChunkInsertModel = typeof textChunkTable.$inferInsert;
+export type TextChunkModel = typeof TextChunkTable.$inferSelect;
+export type TextChunkInsertModel = typeof TextChunkTable.$inferInsert;

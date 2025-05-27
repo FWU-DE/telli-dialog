@@ -2,10 +2,10 @@ import { and, eq, inArray, sql } from 'drizzle-orm';
 import { db } from '..';
 import {
   conversationMessageTable,
-  conversationMessgaeFileMappingTable,
+  ConversationMessgaeFileMappingTable,
   conversationTable,
   fileTable,
-  textChunkTable,
+  TextChunkTable,
 } from '../schema';
 import { deleteFileFromS3 } from '@/s3';
 
@@ -35,18 +35,18 @@ export async function dbDeleteConversationByIdAndUserId({
 
     const filesToDelete = (
       await tx
-        .select({ fileId: conversationMessgaeFileMappingTable.fileId })
-        .from(conversationMessgaeFileMappingTable)
-        .where(eq(conversationMessgaeFileMappingTable.conversationId, conversationId))
+        .select({ fileId: ConversationMessgaeFileMappingTable.fileId })
+        .from(ConversationMessgaeFileMappingTable)
+        .where(eq(ConversationMessgaeFileMappingTable.conversationId, conversationId))
     ).map((f) => f.fileId);
 
     for (const fileId of filesToDelete) {
       await deleteFileFromS3({ key: fileId });
     }
     await tx
-      .delete(conversationMessgaeFileMappingTable)
-      .where(inArray(conversationMessgaeFileMappingTable.fileId, filesToDelete));
-    await tx.delete(textChunkTable).where(inArray(textChunkTable.fileId, filesToDelete));
+      .delete(ConversationMessgaeFileMappingTable)
+      .where(inArray(ConversationMessgaeFileMappingTable.fileId, filesToDelete));
+    await tx.delete(TextChunkTable).where(inArray(TextChunkTable.fileId, filesToDelete));
     await tx.delete(fileTable).where(inArray(fileTable.id, filesToDelete));
 
     return deletedConversation;

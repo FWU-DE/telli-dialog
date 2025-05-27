@@ -2,13 +2,14 @@ import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import { db } from '..';
 import {
   CharacterFileMapping,
-  conversationMessgaeFileMappingTable,
+  ConversationMessgaeFileMappingTable,
   conversationTable,
   CustomGptFileMapping,
   FileModel,
   FileModelAndContent,
   fileTable,
   SharedSchoolConversationFileMapping,
+  TextChunkTable,
 } from '../schema';
 import { deleteFileFromS3 } from '@/s3';
 
@@ -23,7 +24,7 @@ export async function link_file_to_conversation({
 }) {
   for (const fileId of fileIds) {
     await db
-      .insert(conversationMessgaeFileMappingTable)
+      .insert(ConversationMessgaeFileMappingTable)
       .values({ conversationMessageId, fileId, conversationId });
   }
 }
@@ -31,16 +32,16 @@ export async function link_file_to_conversation({
 export async function dbGetRelatedFiles(conversationId: string): Promise<Map<string, FileModel[]>> {
   const files = await db
     .select({
-      foreignId: conversationMessgaeFileMappingTable.conversationMessageId,
-      fileId: conversationMessgaeFileMappingTable.fileId,
+      foreignId: ConversationMessgaeFileMappingTable.conversationMessageId,
+      fileId: ConversationMessgaeFileMappingTable.fileId,
       name: fileTable.name,
       type: fileTable.type,
       size: fileTable.size,
       createdAt: fileTable.createdAt,
     })
-    .from(conversationMessgaeFileMappingTable)
-    .innerJoin(fileTable, eq(conversationMessgaeFileMappingTable.fileId, fileTable.id))
-    .where(eq(conversationMessgaeFileMappingTable.conversationId, conversationId));
+    .from(ConversationMessgaeFileMappingTable)
+    .innerJoin(fileTable, eq(ConversationMessgaeFileMappingTable.fileId, fileTable.id))
+    .where(eq(ConversationMessgaeFileMappingTable.conversationId, conversationId));
 
   const resultMap = convertToMap(files);
   return resultMap;
@@ -158,56 +159,64 @@ export async function dbGetAllFileIdByConversationId(
   if (conversationId === undefined) return [];
   const fileMappings = await db
     .select()
-    .from(conversationMessgaeFileMappingTable)
-    .where(eq(conversationMessgaeFileMappingTable.conversationId, conversationId))
-    .innerJoin(fileTable, eq(conversationMessgaeFileMappingTable.fileId, fileTable.id))
-    .orderBy(conversationMessgaeFileMappingTable.createdAt);
+    .from(ConversationMessgaeFileMappingTable)
+    .where(eq(ConversationMessgaeFileMappingTable.conversationId, conversationId))
+    .innerJoin(fileTable, eq(ConversationMessgaeFileMappingTable.fileId, fileTable.id))
+    .orderBy(ConversationMessgaeFileMappingTable.createdAt);
   return fileMappings.map((row) => row.file_table);
 }
 
 export async function dbGetDanglingConversationFileIds() {
   const fileIds = await db
-    .select({ fileId: conversationMessgaeFileMappingTable.fileId })
-    .from(conversationMessgaeFileMappingTable)
+    .select({ fileId: ConversationMessgaeFileMappingTable.fileId })
+    .from(ConversationMessgaeFileMappingTable)
     .innerJoin(
       conversationTable,
-      eq(conversationTable.id, conversationMessgaeFileMappingTable.conversationId),
+      eq(conversationTable.id, ConversationMessgaeFileMappingTable.conversationId),
     )
     .where(isNotNull(conversationTable.deletedAt));
   return fileIds;
 }
 
 export async function dbDeleteFileAndDetachFromConversation(filesToDelete: string[]) {
-  await db
-    .delete(conversationMessgaeFileMappingTable)
-    .where(inArray(conversationMessgaeFileMappingTable.fileId, filesToDelete));
-  await db.delete(CharacterFileMapping);
-  await db.delete(fileTable).where(inArray(fileTable.id, filesToDelete));
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(ConversationMessgaeFileMappingTable)
+      .where(inArray(ConversationMessgaeFileMappingTable.fileId, filesToDelete));
+    await tx
+      .delete(ConversationMessgaeFileMappingTable)
+      .where(inArray(ConversationMessgaeFileMappingTable.fileId, filesToDelete));
+    await tx.delete(fileTable).where(inArray(fileTable.id, filesToDelete));
+  });
 }
 
 export async function dbDeleteDanglingFiles() {
-  const fileIds = await db
-    .select({ fileId: fileTable.id })
-    .from(fileTable)
-    .leftJoin(
-      conversationMessgaeFileMappingTable,
-      eq(fileTable.id, conversationMessgaeFileMappingTable.fileId),
-    )
-    .leftJoin(CharacterFileMapping, eq(fileTable.id, CharacterFileMapping.fileId))
-    .leftJoin(CustomGptFileMapping, eq(fileTable.id, CustomGptFileMapping.fileId))
-    .leftJoin(
-      SharedSchoolConversationFileMapping,
-      eq(fileTable.id, SharedSchoolConversationFileMapping.fileId),
-    )
-    .where(
-      and(
-        isNull(conversationMessgaeFileMappingTable.fileId),
-        isNull(CharacterFileMapping.fileId),
-        isNull(CustomGptFileMapping.fileId),
-        isNull(SharedSchoolConversationFileMapping.fileId),
-      ),
-    );
-  const fileIdsToDelete = fileIds.map((f) => f.fileId);
-  await db.delete(fileTable).where(inArray(fileTable.id, fileIdsToDelete));
-  return fileIdsToDelete;
+  return await db.transaction(async (tx) => {
+    const fileIds = await tx
+      .select({ fileId: fileTable.id })
+      .from(fileTable)
+      .leftJoin(
+        ConversationMessgaeFileMappingTable,
+        eq(fileTable.id, ConversationMessgaeFileMappingTable.fileId),
+      )
+      .leftJoin(CharacterFileMapping, eq(fileTable.id, CharacterFileMapping.fileId))
+      .leftJoin(CustomGptFileMapping, eq(fileTable.id, CustomGptFileMapping.fileId))
+      .leftJoin(
+        SharedSchoolConversationFileMapping,
+        eq(fileTable.id, SharedSchoolConversationFileMapping.fileId),
+      )
+      .where(
+        and(
+          isNull(ConversationMessgaeFileMappingTable.fileId),
+          isNull(CharacterFileMapping.fileId),
+          isNull(CustomGptFileMapping.fileId),
+          isNull(SharedSchoolConversationFileMapping.fileId),
+        ),
+      );
+    const fileIdsToDelete = fileIds.map((f) => f.fileId);
+    console.log('fileIdsToDelete', fileIdsToDelete);
+    await tx.delete(TextChunkTable).where(inArray(TextChunkTable.fileId, fileIdsToDelete));
+    await tx.delete(fileTable).where(inArray(fileTable.id, fileIdsToDelete));
+    return fileIdsToDelete;
+  });
 }

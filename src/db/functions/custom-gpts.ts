@@ -8,7 +8,7 @@ import {
   type CustomGptInsertModel,
   CustomGptFileMapping,
   fileTable,
-  textChunkTable,
+  TextChunkTable,
 } from '../schema';
 
 export async function dbGetCustomGptsByUserId({
@@ -201,9 +201,9 @@ export async function dbDeleteCustomGptByIdAndUserId({
     }
     await tx.delete(conversationTable).where(eq(conversationTable.customGptId, customGpt.id));
     await tx.delete(CustomGptFileMapping).where(eq(CustomGptFileMapping.customGptId, customGpt.id));
-    await tx.delete(textChunkTable).where(
+    await tx.delete(TextChunkTable).where(
       inArray(
-        textChunkTable.fileId,
+        TextChunkTable.fileId,
         relatedFiles.map((f) => f.id),
       ),
     );
