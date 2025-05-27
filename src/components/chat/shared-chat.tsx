@@ -114,6 +114,8 @@ export default function SharedChat({
           handleOpenNewChat={handleOpenNewChat}
           title={sharedSchoolChat.name}
           messages={messages}
+          dialogStarted={dialogStarted}
+          imageSource={maybeSignedPictureUrl}
         />
         <hr className="w-full border-gray-200 mb-2" />
         <div

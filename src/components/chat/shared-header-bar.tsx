@@ -20,6 +20,7 @@ export function SharedChatHeader({
   title,
   messages,
   imageSource,
+  dialogStarted,
   reductionBreakpoint = 'sm',
 }: {
   chatActive: boolean;
@@ -29,6 +30,7 @@ export function SharedChatHeader({
   title: string;
   messages: Message[];
   imageSource?: string;
+  dialogStarted: boolean;
   reductionBreakpoint?: keyof typeof breakpoints;
 }) {
   const { isBelow } = useBreakpoints();
@@ -73,7 +75,7 @@ export function SharedChatHeader({
       <div className="flex-grow"></div>
       {
         <span className="flex justify-start text-xl overflow-ellipsis truncate items-center gap-2">
-          {hasMessages && imageSource && (
+          {dialogStarted && imageSource && (
             <Image
               src={imageSource ?? ''}
               alt={title}
@@ -82,7 +84,7 @@ export function SharedChatHeader({
               className="rounded-enterprise-sm"
             />
           )}
-          {hasMessages && <span className="truncate">{title}</span>}
+          {dialogStarted && <span className="truncate">{title}</span>}
         </span>
       }
       <div className="flex-grow"></div>
