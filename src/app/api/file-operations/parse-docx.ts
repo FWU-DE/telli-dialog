@@ -1,15 +1,18 @@
-import { extractRawText } from 'mammoth';
+import { parseOfficeAsync } from 'officeparser';
 
 export async function extractTextFromWordDocument(buffer: Buffer): Promise<string> {
   try {
-    // Use mammoth to convert the document to plain text
-    // The {includeDefaultStyleMap: true} option ensures we get proper text formatting
-    const result = await extractRawText({
-      buffer: buffer,
+    // Use officeparser to extract text from the document buffer
+    // parseOfficeAsync supports file buffers and returns a promise with the extracted text
+    const extractedText = await parseOfficeAsync(buffer, {
+      ignoreNotes: true,
+      newlineDelimiter: '\n',
+      outputErrorToConsole: false,
+      putNotesAtLast: true,
     });
 
-    // result.value contains the extracted text
-    return result.value;
+    // Return the extracted text
+    return extractedText;
   } catch (error) {
     // Proper error handling
     console.error('Error extracting text from Word document:', error);
