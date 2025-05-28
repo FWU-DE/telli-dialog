@@ -10,7 +10,7 @@ import StopIcon from '../icons/stop';
 import ArrowRightIcon from '../icons/arrow-right';
 import UploadFileButton from './upload-file-button';
 import { useToast } from '../common/toast';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { cn } from '@/utils/tailwind';
 
@@ -38,7 +38,7 @@ export function ChatInputBox({
   const tCommon = useTranslations('common');
   const tFileInteraction = useTranslations('file-interaction');
   const toast = useToast();
-
+  const [fileUploading, setFileUploading] = useState(false);
   useEffect(() => {
     if (files && setFiles && files.size > NUMBER_OF_FILES_LIMIT) {
       toast.error(
@@ -46,6 +46,7 @@ export function ChatInputBox({
       );
       const trimmedFiles = new Map(Array.from(files.entries()).slice(0, NUMBER_OF_FILES_LIMIT));
       setFiles(trimmedFiles);
+      setFileUploading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [files]);
@@ -77,7 +78,7 @@ export function ChatInputBox({
     <button
       type="submit"
       title="Nachricht abschicken"
-      disabled={input.trim().length === 0}
+      disabled={input.trim().length === 0 || fileUploading}
       className={cn(
         iconClassName,
         'my-2 mx-2 flex items-center self-end justify-center group disabled:cursor-not-allowed text-dark-gray',
@@ -122,6 +123,7 @@ export function ChatInputBox({
                 className={iconClassName}
                 setFiles={setFiles}
                 disabled={files.size >= NUMBER_OF_FILES_LIMIT}
+                setFileUploading={setFileUploading}
               />
             </div>
           )}

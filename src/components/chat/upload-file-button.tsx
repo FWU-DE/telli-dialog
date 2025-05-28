@@ -33,6 +33,7 @@ export type UploadFileButtonProps = {
   directoryId?: string;
   showUploadConfirmation?: boolean;
   countOfFiles?: number;
+  setFileUploading?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export async function handleSingleFile({
@@ -127,6 +128,7 @@ export default function UploadFileButton({
   className,
   onFileUploadStart,
   directoryId,
+  setFileUploading,
 }: UploadFileButtonProps) {
   const toast = useToast();
   const session = useSession();
@@ -138,7 +140,7 @@ export default function UploadFileButton({
     if (selectedFiles === null) return;
 
     const files = Array.from(selectedFiles);
-
+    setFileUploading?.(true);
     onFileUploadStart?.();
     await Promise.all(
       files.map((f) =>
@@ -155,7 +157,7 @@ export default function UploadFileButton({
         }),
       ),
     );
-
+    setFileUploading?.(false);
     if (fileInputRef.current !== null) {
       fileInputRef.current.value = '';
     }
