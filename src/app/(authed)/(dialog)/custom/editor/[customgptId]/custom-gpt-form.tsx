@@ -428,7 +428,7 @@ export default function CustomGptForm({
             confirmText={tCommon('delete')}
             actionFn={handleDeleteCustomGpt}
           >
-            {t('final-delete-gpt')}
+            {t('delete-gpt')}
           </DestructiveActionButton>
         </section>
       )}
