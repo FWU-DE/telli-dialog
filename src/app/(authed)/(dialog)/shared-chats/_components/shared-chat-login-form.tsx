@@ -52,6 +52,12 @@ export default function SharedChatLoginForm() {
         id="login-invite-code"
         value={inviteCode}
         onChange={(e) => setInviteCode(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            handleInviteCodeSubmit();
+          }
+        }}
         className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
       />
       <button
