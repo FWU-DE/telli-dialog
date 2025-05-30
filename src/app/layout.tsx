@@ -20,13 +20,13 @@ const barlow = Barlow({
 
 export async function generateMetadata(): Promise<Metadata> {
   const maybeUser = await getMaybeUser();
-  const maybeLogoPath = await getMaybeLogoFromS3(maybeUser?.school.federalStateId);
+  const faviconPath = await getMaybeLogoFromS3(maybeUser?.school.federalStateId, 'favicon.svg');
   const [, federalState] = await dbGetFederalStateByIdWithResult(maybeUser?.school.federalStateId);
 
   return {
     title: federalState?.telliName ?? 'telli',
     description: 'Der datenschutzkonforme KI-Chatbot für die Schule',
-    icons: { icon: maybeLogoPath ?? '/telli.svg' },
+    icons: { icon: faviconPath ?? '/telli.svg' },
   };
 }
 
