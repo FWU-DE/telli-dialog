@@ -15,9 +15,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 403 });
   }
   const countDeletedConversations = await dbDeleteOutdatedConversations();
-  const danglingConversationFiles = (await dbGetDanglingConversationFileIds()).map(
-    (file) => file.fileId,
-  );
+  const danglingConversationFiles = await dbGetDanglingConversationFileIds();
   await dbDeleteFileAndDetachFromConversation(danglingConversationFiles);
   // from other entities character, custom gpt, shared school chat
   const danglingFiles = await dbDeleteDanglingFiles();

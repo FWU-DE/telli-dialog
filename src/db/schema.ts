@@ -346,7 +346,7 @@ export type FileModelAndUrl = FileModel & { signedUrl: string };
 export type FileModelAndContent = FileModel & { content?: string };
 export type FileInsertModel = typeof fileTable.$inferInsert;
 
-export const ConversationMessgaeFileMappingTable = pgTable(
+export const ConversationMessageFileMappingTable = pgTable(
   'conversation_message_file_mapping',
   {
     id: uuid('id').defaultRandom().primaryKey(),

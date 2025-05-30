@@ -2,7 +2,7 @@ import { and, eq, inArray, sql } from 'drizzle-orm';
 import { db } from '..';
 import {
   conversationMessageTable,
-  ConversationMessgaeFileMappingTable,
+  ConversationMessageFileMappingTable,
   conversationTable,
   fileTable,
   TextChunkTable,
@@ -35,17 +35,17 @@ export async function dbDeleteConversationByIdAndUserId({
 
     const filesToDelete = (
       await tx
-        .select({ fileId: ConversationMessgaeFileMappingTable.fileId })
-        .from(ConversationMessgaeFileMappingTable)
-        .where(eq(ConversationMessgaeFileMappingTable.conversationId, conversationId))
+        .select({ fileId: ConversationMessageFileMappingTable.fileId })
+        .from(ConversationMessageFileMappingTable)
+        .where(eq(ConversationMessageFileMappingTable.conversationId, conversationId))
     ).map((f) => f.fileId);
 
     for (const fileId of filesToDelete) {
       await deleteFileFromS3({ key: fileId });
     }
     await tx
-      .delete(ConversationMessgaeFileMappingTable)
-      .where(inArray(ConversationMessgaeFileMappingTable.fileId, filesToDelete));
+      .delete(ConversationMessageFileMappingTable)
+      .where(inArray(ConversationMessageFileMappingTable.fileId, filesToDelete));
     await tx.delete(TextChunkTable).where(inArray(TextChunkTable.fileId, filesToDelete));
     await tx.delete(fileTable).where(inArray(fileTable.id, filesToDelete));
 
