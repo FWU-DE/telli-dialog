@@ -62,11 +62,11 @@ export async function uploadFileToS3({
   }
 }
 
-export async function getMaybeLogoFromS3(federalStateId: string | undefined) {
+export async function getMaybeLogoFromS3(federalStateId: string | undefined, asset: string) {
   if (federalStateId === undefined) {
     return undefined;
   }
-  const key = `whitelabels/${federalStateId}/logo.jpg`;
+  const key = `whitelabels/${federalStateId}/${asset}`;
   try {
     await s3Client.send(
       new GetObjectCommand({
