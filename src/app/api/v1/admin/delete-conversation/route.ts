@@ -2,7 +2,7 @@ import { dbDeleteOutdatedConversations } from '@/db/functions/conversation';
 import {
   dbDeleteDanglingFiles,
   dbDeleteFileAndDetachFromConversation,
-  dbGetDanglingFileIds,
+  dbGetDanglingConversationFileIds,
 } from '@/db/functions/files';
 import { validateApiKeyByHeadersWithResult } from '@/db/utils';
 import { deleteFileFromS3 } from '@/s3';
@@ -14,12 +14,19 @@ export async function DELETE(req: NextRequest) {
   if (error !== null) {
     return NextResponse.json({ error: error.message }, { status: 403 });
   }
-  const count = await dbDeleteOutdatedConversations();
-  const filesToDelete = (await dbGetDanglingFileIds()).map((file) => file.fileId);
-  await dbDeleteFileAndDetachFromConversation(filesToDelete);
-  for (const fileId of filesToDelete) {
+  const countDeletedConversations = await dbDeleteOutdatedConversations();
+  const danglingConversationFiles = await dbGetDanglingConversationFileIds();
+  await dbDeleteFileAndDetachFromConversation(danglingConversationFiles);
+  // from other entities character, custom gpt, shared school chat
+  const danglingFiles = await dbDeleteDanglingFiles();
+  for (const fileId of [...danglingConversationFiles, ...danglingFiles]) {
     await deleteFileFromS3({ key: fileId });
   }
-  await dbDeleteDanglingFiles();
-  return NextResponse.json({ message: 'Ok', count }, { status: 200 });
+  const response = {
+    message: 'Ok',
+    countDeletedConversations,
+    danglingConversationFiles,
+    danglingFiles,
+  };
+  return NextResponse.json(response, { status: 200 });
 }

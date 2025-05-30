@@ -1,5 +1,5 @@
 import { db } from '@/db';
-import { FileModelAndContent, fileTable, textChunkTable } from '@/db/schema';
+import { FileModelAndContent, fileTable, TextChunkTable } from '@/db/schema';
 import { eq, sql, inArray, desc, SQL, and } from 'drizzle-orm';
 import { chunkText, groupAndSortChunks } from './process-chunks';
 import { condenseChatHistory } from '../chat/utils';
@@ -130,21 +130,21 @@ export async function searchTextChunks({
   const cleaned_keywords = keywords.map((keyword) => keyword.replace(/[^a-zA-Z0-9]/g, ''));
   const embeddingResults = await db
     .select({
-      id: textChunkTable.id,
-      content: textChunkTable.content,
-      fileId: textChunkTable.fileId,
-      pageNumber: textChunkTable.pageNumber,
+      id: TextChunkTable.id,
+      content: TextChunkTable.content,
+      fileId: TextChunkTable.fileId,
+      pageNumber: TextChunkTable.pageNumber,
       fileName: fileTable.name,
-      orderIndex: textChunkTable.orderIndex,
-      leadingOverlap: textChunkTable.leadingOverlap,
-      trailingOverlap: textChunkTable.trailingOverlap,
+      orderIndex: TextChunkTable.orderIndex,
+      leadingOverlap: TextChunkTable.leadingOverlap,
+      trailingOverlap: TextChunkTable.trailingOverlap,
       // Calculate embedding similarity score (cosine similarity)
       embeddingSimilarity:
-        sql`1 - (${textChunkTable.embedding} <=> ${JSON.stringify(embedding)})` as SQL<number>,
+        sql`1 - (${TextChunkTable.embedding} <=> ${JSON.stringify(embedding)})` as SQL<number>,
     })
-    .from(textChunkTable)
-    .leftJoin(fileTable, eq(textChunkTable.fileId, fileTable.id))
-    .where(inArray(textChunkTable.fileId, fileIds ?? []))
+    .from(TextChunkTable)
+    .leftJoin(fileTable, eq(TextChunkTable.fileId, fileTable.id))
+    .where(inArray(TextChunkTable.fileId, fileIds ?? []))
     .limit(limit)
     .orderBy((t) => [desc(t.embeddingSimilarity)]);
 
@@ -152,23 +152,23 @@ export async function searchTextChunks({
 
   const textRankResults = await db
     .select({
-      id: textChunkTable.id,
-      content: textChunkTable.content,
-      fileId: textChunkTable.fileId,
+      id: TextChunkTable.id,
+      content: TextChunkTable.content,
+      fileId: TextChunkTable.fileId,
       fileName: fileTable.name,
-      leadingOverlap: textChunkTable.leadingOverlap,
-      trailingOverlap: textChunkTable.trailingOverlap,
-      pageNumber: textChunkTable.pageNumber,
-      orderIndex: textChunkTable.orderIndex,
+      leadingOverlap: TextChunkTable.leadingOverlap,
+      trailingOverlap: TextChunkTable.trailingOverlap,
+      pageNumber: TextChunkTable.pageNumber,
+      orderIndex: TextChunkTable.orderIndex,
       textRank:
-        sql`ts_rank_cd(${textChunkTable.contentTsv}, to_tsquery('german', ${cleaned_keywords.join(' | ')}))` as SQL<number>,
+        sql`ts_rank_cd(${TextChunkTable.contentTsv}, to_tsquery('german', ${cleaned_keywords.join(' | ')}))` as SQL<number>,
     })
-    .from(textChunkTable)
-    .leftJoin(fileTable, eq(textChunkTable.fileId, fileTable.id))
+    .from(TextChunkTable)
+    .leftJoin(fileTable, eq(TextChunkTable.fileId, fileTable.id))
     .where(
       and(
-        inArray(textChunkTable.fileId, fileIds ?? []),
-        sql`ts_rank_cd(${textChunkTable.contentTsv}, to_tsquery('german', ${cleaned_keywords.join(' | ')})) > 0`,
+        inArray(TextChunkTable.fileId, fileIds ?? []),
+        sql`ts_rank_cd(${TextChunkTable.contentTsv}, to_tsquery('german', ${cleaned_keywords.join(' | ')})) > 0`,
       ),
     )
     .limit(limit)
