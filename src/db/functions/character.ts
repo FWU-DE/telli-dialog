@@ -11,7 +11,7 @@ import {
   SharedCharacterChatUsageTrackingInsertModel,
   sharedCharacterChatUsageTrackingTable,
   sharedCharacterConversation,
-  textChunkTable,
+  TextChunkTable,
 } from '../schema';
 import { dbGetModelByName } from './llm-model';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
@@ -274,9 +274,9 @@ export async function dbDeleteCharacterByIdAndUserId({
     }
     await tx.delete(conversationTable).where(eq(conversationTable.characterId, character.id));
     await tx.delete(CharacterFileMapping).where(eq(CharacterFileMapping.characterId, character.id));
-    await tx.delete(textChunkTable).where(
+    await tx.delete(TextChunkTable).where(
       inArray(
-        textChunkTable.fileId,
+        TextChunkTable.fileId,
         relatedFiles.map((f) => f.id),
       ),
     );

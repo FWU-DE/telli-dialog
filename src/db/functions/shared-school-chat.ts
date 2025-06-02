@@ -8,7 +8,7 @@ import {
   conversationTable,
   conversationMessageTable,
   fileTable,
-  textChunkTable,
+  TextChunkTable,
 } from '../schema';
 
 export async function dbGetSharedChatsByUserId({ userId }: { userId: string }) {
@@ -123,9 +123,9 @@ export async function dbDeleteSharedSchoolChatByIdAndUserId({
     await tx
       .delete(SharedSchoolConversationFileMapping)
       .where(eq(SharedSchoolConversationFileMapping.sharedSchoolConversationId, sharedChat.id));
-    await tx.delete(textChunkTable).where(
+    await tx.delete(TextChunkTable).where(
       inArray(
-        textChunkTable.fileId,
+        TextChunkTable.fileId,
         relatedFiles.map((f) => f.id),
       ),
     );

@@ -1,14 +1,15 @@
-import { eq, inArray, isNotNull, isNull } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import { db } from '..';
 import {
   CharacterFileMapping,
-  conversationMessgaeFileMappingTable,
+  ConversationMessageFileMappingTable,
   conversationTable,
   CustomGptFileMapping,
   FileModel,
   FileModelAndContent,
   fileTable,
   SharedSchoolConversationFileMapping,
+  TextChunkTable,
 } from '../schema';
 
 export async function link_file_to_conversation({
@@ -22,7 +23,7 @@ export async function link_file_to_conversation({
 }) {
   for (const fileId of fileIds) {
     await db
-      .insert(conversationMessgaeFileMappingTable)
+      .insert(ConversationMessageFileMappingTable)
       .values({ conversationMessageId, fileId, conversationId });
   }
 }
@@ -30,16 +31,16 @@ export async function link_file_to_conversation({
 export async function dbGetRelatedFiles(conversationId: string): Promise<Map<string, FileModel[]>> {
   const files = await db
     .select({
-      foreignId: conversationMessgaeFileMappingTable.conversationMessageId,
-      fileId: conversationMessgaeFileMappingTable.fileId,
+      foreignId: ConversationMessageFileMappingTable.conversationMessageId,
+      fileId: ConversationMessageFileMappingTable.fileId,
       name: fileTable.name,
       type: fileTable.type,
       size: fileTable.size,
       createdAt: fileTable.createdAt,
     })
-    .from(conversationMessgaeFileMappingTable)
-    .innerJoin(fileTable, eq(conversationMessgaeFileMappingTable.fileId, fileTable.id))
-    .where(eq(conversationMessgaeFileMappingTable.conversationId, conversationId));
+    .from(ConversationMessageFileMappingTable)
+    .innerJoin(fileTable, eq(ConversationMessageFileMappingTable.fileId, fileTable.id))
+    .where(eq(ConversationMessageFileMappingTable.conversationId, conversationId));
 
   const resultMap = convertToMap(files);
   return resultMap;
@@ -157,46 +158,64 @@ export async function dbGetAllFileIdByConversationId(
   if (conversationId === undefined) return [];
   const fileMappings = await db
     .select()
-    .from(conversationMessgaeFileMappingTable)
-    .where(eq(conversationMessgaeFileMappingTable.conversationId, conversationId))
-    .innerJoin(fileTable, eq(conversationMessgaeFileMappingTable.fileId, fileTable.id))
-    .orderBy(conversationMessgaeFileMappingTable.createdAt);
+    .from(ConversationMessageFileMappingTable)
+    .where(eq(ConversationMessageFileMappingTable.conversationId, conversationId))
+    .innerJoin(fileTable, eq(ConversationMessageFileMappingTable.fileId, fileTable.id))
+    .orderBy(ConversationMessageFileMappingTable.createdAt);
   return fileMappings.map((row) => row.file_table);
 }
 
-export async function dbGetDanglingFileIds() {
-  const fileIds = await db
-    .select({ fileId: conversationMessgaeFileMappingTable.fileId })
-    .from(conversationMessgaeFileMappingTable)
+export async function dbGetDanglingConversationFileIds(): Promise<string[]> {
+  const fileMappings = await db
+    .select({ fileId: ConversationMessageFileMappingTable.fileId })
+    .from(ConversationMessageFileMappingTable)
     .innerJoin(
       conversationTable,
-      eq(conversationTable.id, conversationMessgaeFileMappingTable.conversationId),
+      eq(conversationTable.id, ConversationMessageFileMappingTable.conversationId),
     )
     .where(isNotNull(conversationTable.deletedAt));
-  return fileIds;
+  return fileMappings.map((row) => row.fileId);
 }
 
 export async function dbDeleteFileAndDetachFromConversation(filesToDelete: string[]) {
-  await db
-    .delete(conversationMessgaeFileMappingTable)
-    .where(inArray(conversationMessgaeFileMappingTable.fileId, filesToDelete));
-  await db.delete(fileTable).where(inArray(fileTable.id, filesToDelete));
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(ConversationMessageFileMappingTable)
+      .where(inArray(ConversationMessageFileMappingTable.fileId, filesToDelete));
+    await tx
+      .delete(ConversationMessageFileMappingTable)
+      .where(inArray(ConversationMessageFileMappingTable.fileId, filesToDelete));
+    await tx.delete(fileTable).where(inArray(fileTable.id, filesToDelete));
+  });
 }
 
 export async function dbDeleteDanglingFiles() {
-  const fileIds = await db
-    .select({ fileId: fileTable.id })
-    .from(fileTable)
-    .leftJoin(
-      conversationMessgaeFileMappingTable,
-      eq(fileTable.id, conversationMessgaeFileMappingTable.fileId),
-    )
-    .where(isNull(conversationMessgaeFileMappingTable.fileId));
-
-  await db.delete(fileTable).where(
-    inArray(
-      fileTable.id,
-      fileIds.map((f) => f.fileId),
-    ),
-  );
+  return await db.transaction(async (tx) => {
+    const fileIds = await tx
+      .select({ fileId: fileTable.id })
+      .from(fileTable)
+      .leftJoin(
+        ConversationMessageFileMappingTable,
+        eq(fileTable.id, ConversationMessageFileMappingTable.fileId),
+      )
+      .leftJoin(CharacterFileMapping, eq(fileTable.id, CharacterFileMapping.fileId))
+      .leftJoin(CustomGptFileMapping, eq(fileTable.id, CustomGptFileMapping.fileId))
+      .leftJoin(
+        SharedSchoolConversationFileMapping,
+        eq(fileTable.id, SharedSchoolConversationFileMapping.fileId),
+      )
+      .where(
+        and(
+          isNull(ConversationMessageFileMappingTable.fileId),
+          isNull(CharacterFileMapping.fileId),
+          isNull(CustomGptFileMapping.fileId),
+          isNull(SharedSchoolConversationFileMapping.fileId),
+        ),
+      );
+    const fileIdsToDelete = fileIds.map((f) => f.fileId);
+    console.log('fileIdsToDelete', fileIdsToDelete);
+    await tx.delete(TextChunkTable).where(inArray(TextChunkTable.fileId, fileIdsToDelete));
+    await tx.delete(fileTable).where(inArray(fileTable.id, fileIdsToDelete));
+    return fileIdsToDelete;
+  });
 }
