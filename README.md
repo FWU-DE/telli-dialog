@@ -40,7 +40,12 @@ psql "postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db"
 If you start with a fresh database, do not forget to apply migrations, otherwise the application will not work.
 
 ```sh
+# with proper values in .env file
 pnpm db:migrate
+
+# with use of 1password-cli
+pnpm op:signin
+pnpm db:migrate:op
 ```
 
 You can now start the application:
