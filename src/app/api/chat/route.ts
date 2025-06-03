@@ -89,7 +89,7 @@ function formatMessagesWithImages(messages: Message[], images: Array<{
     // Convert string content to array format with text and images
     const textContent = typeof lastMessage.content === 'string' ? lastMessage.content : 
       Array.isArray(lastMessage.content) ? 
-        lastMessage.content.find(part => part.type === 'text')?.text || '' :
+        (lastMessage.content as Array<{ type: 'text'; text: string }>).find(part => part.type === 'text')?.text || '' :
         String(lastMessage.content);
 
     const textPart = {
