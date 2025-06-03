@@ -165,8 +165,7 @@ export default function UploadFileButton({
     }
   }
   const currentSupportedFileFormats =
-    selectedModel?.supportedImageFormats &&
-    selectedModel.supportedImageFormats.length > 0
+    selectedModel?.supportedImageFormats && selectedModel.supportedImageFormats.length > 0
       ? [...SUPPORTED_FILE_EXTENSIONS, ...selectedModel.supportedImageFormats]
       : SUPPORTED_FILE_EXTENSIONS;
 

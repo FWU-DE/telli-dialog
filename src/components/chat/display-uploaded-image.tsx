@@ -38,7 +38,7 @@ export default function DisplayUploadedImage({
 
   console.log('file', file);
   console.log('imageUrl', imageUrl);
-  
+
   if (status === 'uploading') {
     return (
       <div className="flex items-center justify-center gap-2 text-sm relative group py-4 pr-6 pl-4 shrink-0 max-w-[250px] min-w-[100px] bg-gray-50 rounded-lg">
@@ -99,11 +99,9 @@ export default function DisplayUploadedImage({
           <p className="truncate" title={file.name}>
             {file.name}
           </p>
-          <p className="text-gray-300">
-            {(file.size / 1024 / 1024).toFixed(1)} MB
-          </p>
+          <p className="text-gray-300">{(file.size / 1024 / 1024).toFixed(1)} MB</p>
         </div>
       </div>
     </div>
   );
-} 
+}

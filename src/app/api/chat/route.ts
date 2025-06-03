@@ -25,34 +25,40 @@ import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { getRelevantFileContent } from '../file-operations/retrieval';
-import { SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
-import { readFileFromS3 } from '@/s3';
-import { isImageFile } from '@/utils/files/image-utils';
+import { getMaybeSignedUrlFromS3Get, readFileFromS3 } from '@/s3';
+import { isImageFile } from '@/utils/files/generic';
+import { FileModel } from '@/db/schema';
+
+type ImageAttachment = {
+  type: 'image';
+  mimeType?: string;
+  url: string;
+  id: string;
+  conversationMessageId?: string;
+};
 
 /**
  * Extract images from attached files and convert them to base64
  */
-async function extractImagesAsBase64(relatedFileEntities: any[]): Promise<Array<{
-  type: 'image';
-  image: string;
-  mimeType?: string;
-}>> {
-  const imageFiles = relatedFileEntities.filter(file => isImageFile(file.name));
-  
+async function extractImagesAndUrl(
+  relatedFileEntities: (FileModel & { conversationMessageId?: string })[],
+): Promise<ImageAttachment[]> {
+  const imageFiles = relatedFileEntities.filter((file) => isImageFile(file.name));
+
   if (imageFiles.length === 0) {
     return [];
   }
 
   const imagePromises = imageFiles.map(async (file) => {
     try {
-      const buffer = await readFileFromS3({ key: `message_attachments/${file.id}` });
-      const base64 = buffer.toString('base64');
-      const dataUrl = `data:${file.type || 'image/jpeg'};base64,${base64}`;
-      
+      const url = await getMaybeSignedUrlFromS3Get({ key: `message_attachments/${file.id}` });
+
       return {
         type: 'image' as const,
-        image: dataUrl,
-        mimeType: file.type || 'image/jpeg',
+        url,
+        mimeType: `image/${file.type}`,
+        id: file.id,
+        conversationMessageId: file.conversationMessageId,
       };
     } catch (error) {
       console.error(`Failed to process image file ${file.id}:`, error);
@@ -61,46 +67,37 @@ async function extractImagesAsBase64(relatedFileEntities: any[]): Promise<Array<
   });
 
   const images = await Promise.all(imagePromises);
-  return images.filter((img) => img !== null) as Array<{
-    type: 'image';
-    image: string;
-    mimeType: string;
-  }>;
+  return images.filter((img) => img != null) as ImageAttachment[];
 }
 
 /**
  * Format messages to include images for models that support vision
  */
-function formatMessagesWithImages(messages: Message[], images: Array<{
-  type: 'image';
-  image: string;
-  mimeType?: string;
-}>, modelSupportsImages: boolean): Message[] {
+function formatMessagesWithImages(
+  messages: Message[],
+  images: ImageAttachment[],
+  modelSupportsImages: boolean,
+): Message[] {
   if (!modelSupportsImages || images.length === 0) {
     return messages;
   }
 
-  // Add images to the most recent user message
   const messagesWithImages = [...messages];
-  const lastMessageIndex = messagesWithImages.length - 1;
-  const lastMessage = messagesWithImages[lastMessageIndex];
 
-  if (lastMessage && lastMessage.role === 'user') {
-    // Convert string content to array format with text and images
-    const textContent = typeof lastMessage.content === 'string' ? lastMessage.content : 
-      Array.isArray(lastMessage.content) ? 
-        (lastMessage.content as Array<{ type: 'text'; text: string }>).find(part => part.type === 'text')?.text || '' :
-        String(lastMessage.content);
+  for (const message of messagesWithImages) {
+    if (message.role !== 'user') {
+      continue;
+    }
 
-    const textPart = {
-      type: 'text' as const,
-      text: textContent
-    };
-
-    messagesWithImages[lastMessageIndex] = {
-      ...lastMessage,
-      content: [textPart, ...images]
-    };
+    const messageImages = images.filter((image) => image.conversationMessageId === message.id);
+    if (messageImages.length === 0) {
+      continue;
+    }
+    message.experimental_attachments = messageImages.map((image) => ({
+      contentType: image.mimeType,
+      url: image.url,
+      type: 'image',
+    }));
   }
 
   return messagesWithImages;
@@ -211,15 +208,20 @@ export async function POST(request: NextRequest) {
   const orderedChunks = await getRelevantFileContent({ messages, user, relatedFileEntities });
 
   // Extract images from attached files and convert to base64
-  const extractedImages = await extractImagesAsBase64(relatedFileEntities);
+  const extractedImages = await extractImagesAndUrl(relatedFileEntities);
 
   // Check if the model supports images based on supportedImageFormats
-  const modelSupportsImages = definedModel.supportedImageFormats && 
+  const modelSupportsImages =
+    definedModel.supportedImageFormats &&
     definedModel.supportedImageFormats.length > 0 &&
     extractedImages.length > 0;
 
-  console.log(`Extracted ${extractedImages.length} images from ${relatedFileEntities.length} files`);
-  console.log(`Model ${definedModel.displayName} supports images: ${!!definedModel.supportedImageFormats?.length}`);
+  console.log(
+    `Extracted ${extractedImages.length} images from ${relatedFileEntities.length} files`,
+  );
+  console.log(
+    `Model ${definedModel.displayName} supports images: ${!!definedModel.supportedImageFormats?.length}`,
+  );
   console.log(`Using images in chat: ${modelSupportsImages}`);
 
   const urls = [userMessage, ...messages]
@@ -258,12 +260,16 @@ export async function POST(request: NextRequest) {
   });
 
   // Format messages with images if the model supports vision
-  const messagesWithImages = formatMessagesWithImages(prunedMessages, extractedImages, modelSupportsImages);
-
+  const messagesWithImages = await formatMessagesWithImages(
+    prunedMessages,
+    extractedImages,
+    modelSupportsImages ?? false,
+  );
+  console.log('messagesWithImages', require('util').inspect(messagesWithImages, { depth: null }));
   const result = streamText({
     model: telliProvider,
     system: systemPrompt,
-    messages: messagesWithImages.map((m) => ({ role: m.role, content: m.content })),
+    messages: messagesWithImages,
     experimental_generateMessageId: generateUUID,
     experimental_transform: smoothStream({ chunking: 'word', delayInMs: 20 }),
     async onFinish(assistantMessage) {

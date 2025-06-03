@@ -12,7 +12,7 @@ import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { iconClassName } from '@/utils/tailwind/icon';
 import useBreakpoints from '../hooks/use-breakpoints';
-import { isImageFile } from '@/utils/files/image-utils';
+import { isImageFile } from '@/utils/files/generic';
 
 export function ChatBox({
   children,
@@ -56,8 +56,8 @@ export function ChatBox({
   }
 
   // Separate image files from non-image files
-  const imageFiles = allFiles?.filter(file => isImageFile(file.name)) ?? [];
-  const nonImageFiles = allFiles?.filter(file => !isImageFile(file.name)) ?? [];
+  const imageFiles = allFiles?.filter((file) => isImageFile(file.name)) ?? [];
+  const nonImageFiles = allFiles?.filter((file) => !isImageFile(file.name)) ?? [];
 
   const maybefileAttachment =
     allFiles !== undefined && children.role === 'user' && (isLastUser || fileMatch) ? (
@@ -66,11 +66,7 @@ export function ChatBox({
         {imageFiles.length > 0 && (
           <div className="flex flex-row gap-2 overflow-auto">
             {imageFiles.map((file) => (
-              <DisplayUploadedImage
-                file={file}
-                status="processed"
-                key={file.id}
-              />
+              <DisplayUploadedImage file={file} status="processed" key={file.id} />
             ))}
           </div>
         )}
@@ -78,11 +74,7 @@ export function ChatBox({
         {nonImageFiles.length > 0 && (
           <div className="flex flex-row gap-2 overflow-auto">
             {nonImageFiles.map((file) => (
-              <DisplayUploadedFile
-                fileName={file.name}
-                status="processed"
-                key={file.id}
-              />
+              <DisplayUploadedFile fileName={file.name} status="processed" key={file.id} />
             ))}
           </div>
         )}

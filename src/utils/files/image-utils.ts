@@ -197,12 +197,3 @@ export function getConvertedPixelCrop(
   const { width, height } = image;
   return convertToPixelCrop(percentCrop, width, height);
 }
-
-export function isImageFile(fileName: string): boolean {
-  try {
-    const extension = getFileExtension(fileName);
-    return SUPPORTED_IMAGE_EXTENSIONS.includes(extension as any);
-  } catch {
-    return false;
-  }
-}

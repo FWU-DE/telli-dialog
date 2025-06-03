@@ -142,7 +142,7 @@ export async function dbGetAttachedFileByEntityId({
   characterId?: string;
   sharedChatId?: string;
   customGptId?: string;
-}) {
+}): Promise<(FileModel & { conversationMessageId?: string })[]> {
   const combinedFiles = await Promise.all([
     dbGetRelatedSharedChatFiles(sharedChatId),
     dbGetRelatedCharacterFiles(characterId),
@@ -154,7 +154,7 @@ export async function dbGetAttachedFileByEntityId({
 
 export async function dbGetAllFileIdByConversationId(
   conversationId?: string,
-): Promise<FileModel[]> {
+): Promise<(FileModel & { conversationMessageId?: string })[]> {
   if (conversationId === undefined) return [];
   const fileMappings = await db
     .select()
@@ -162,7 +162,10 @@ export async function dbGetAllFileIdByConversationId(
     .where(eq(ConversationMessageFileMappingTable.conversationId, conversationId))
     .innerJoin(fileTable, eq(ConversationMessageFileMappingTable.fileId, fileTable.id))
     .orderBy(ConversationMessageFileMappingTable.createdAt);
-  return fileMappings.map((row) => row.file_table);
+  return fileMappings.map((row) => ({
+    ...row.file_table,
+    conversationMessageId: row.conversation_message_file_mapping.conversationMessageId,
+  }));
 }
 
 export async function dbGetDanglingConversationFileIds(): Promise<string[]> {

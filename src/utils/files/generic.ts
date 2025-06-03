@@ -1,4 +1,8 @@
-import { SUPPORTED_FILE_EXTENSIONS, SUPPORTED_FILE_TYPE, SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
+import {
+  SUPPORTED_FILE_EXTENSIONS,
+  SUPPORTED_FILE_TYPE,
+  SUPPORTED_IMAGE_EXTENSIONS,
+} from '@/const';
 
 export function getFileExtension(fileName: string): SUPPORTED_FILE_TYPE {
   const parts = fileName.split('.');
@@ -8,11 +12,23 @@ export function getFileExtension(fileName: string): SUPPORTED_FILE_TYPE {
     return fileName;
   }
 
-  if (!SUPPORTED_FILE_EXTENSIONS.includes(lastPart.toString()) && !SUPPORTED_IMAGE_EXTENSIONS.includes(lastPart.toString())) {
+  if (
+    !SUPPORTED_FILE_EXTENSIONS.includes(lastPart.toString()) &&
+    !SUPPORTED_IMAGE_EXTENSIONS.includes(lastPart.toString())
+  ) {
     throw new Error('file type is not supported or missing');
   }
 
   return lastPart;
+}
+
+export function isImageFile(fileName: string): boolean {
+  try {
+    const extension = getFileExtension(fileName);
+    return SUPPORTED_IMAGE_EXTENSIONS.includes(extension as any);
+  } catch {
+    return false;
+  }
 }
 
 export function validateFileExtentsion(fileName: string): boolean {
