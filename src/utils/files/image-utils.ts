@@ -1,4 +1,6 @@
 import { convertToPixelCrop, PercentCrop, PixelCrop } from 'react-image-crop';
+import { SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
+import { getFileExtension } from './generic';
 
 export type CompressionOptions =
   | { quality: number }
@@ -194,4 +196,13 @@ export function getConvertedPixelCrop(
 ): PixelCrop {
   const { width, height } = image;
   return convertToPixelCrop(percentCrop, width, height);
+}
+
+export function isImageFile(fileName: string): boolean {
+  try {
+    const extension = getFileExtension(fileName);
+    return SUPPORTED_IMAGE_EXTENSIONS.includes(extension as any);
+  } catch {
+    return false;
+  }
 }

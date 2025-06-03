@@ -1,5 +1,6 @@
 import { FileModel } from '@/db/schema';
 import DisplayUploadedFile from './display-uploaded-file';
+import DisplayUploadedImage from './display-uploaded-image';
 import type { UIMessage } from '@ai-sdk/ui-utils';
 import TelliClipboardButton from '../common/clipboard-button';
 import ReloadIcon from '../icons/reload';
@@ -11,6 +12,7 @@ import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { iconClassName } from '@/utils/tailwind/icon';
 import useBreakpoints from '../hooks/use-breakpoints';
+import { isImageFile } from '@/utils/files/image-utils';
 
 export function ChatBox({
   children,
@@ -52,18 +54,38 @@ export function ChatBox({
       websearchSources.push({ link: url, type: 'websearch' });
     }
   }
+
+  // Separate image files from non-image files
+  const imageFiles = allFiles?.filter(file => isImageFile(file.name)) ?? [];
+  const nonImageFiles = allFiles?.filter(file => !isImageFile(file.name)) ?? [];
+
   const maybefileAttachment =
     allFiles !== undefined && children.role === 'user' && (isLastUser || fileMatch) ? (
-      <div className="flex flex-row gap-2 pb-0 pt-0 overflow-auto self-end mb-4">
-        {allFiles.map((file) => {
-          return (
-            <DisplayUploadedFile
-              fileName={file.name}
-              status="processed"
-              key={file.id}
-            ></DisplayUploadedFile>
-          );
-        })}
+      <div className="flex flex-col gap-4 pb-0 pt-0 self-end mb-4">
+        {/* Display images */}
+        {imageFiles.length > 0 && (
+          <div className="flex flex-row gap-2 overflow-auto">
+            {imageFiles.map((file) => (
+              <DisplayUploadedImage
+                file={file}
+                status="processed"
+                key={file.id}
+              />
+            ))}
+          </div>
+        )}
+        {/* Display non-image files */}
+        {nonImageFiles.length > 0 && (
+          <div className="flex flex-row gap-2 overflow-auto">
+            {nonImageFiles.map((file) => (
+              <DisplayUploadedFile
+                fileName={file.name}
+                status="processed"
+                key={file.id}
+              />
+            ))}
+          </div>
+        )}
       </div>
     ) : null;
 

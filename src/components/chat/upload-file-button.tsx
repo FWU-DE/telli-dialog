@@ -10,6 +10,7 @@ import { cn } from '@/utils/tailwind';
 import { SUPPORTED_FILE_EXTENSIONS, MAX_FILE_SIZE } from '@/const';
 import { TranslationValues, useTranslations } from 'next-intl';
 import { NUMBER_OF_FILES_LIMIT } from '@/configuration-text-inputs/const';
+import { useLlmModels } from '../providers/llm-model-provider';
 
 export type FileUploadMetadata = {
   directoryId: string;
@@ -134,6 +135,7 @@ export default function UploadFileButton({
   const session = useSession();
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const t = useTranslations('file-interaction');
+  const { selectedModel } = useLlmModels();
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const selectedFiles = event.target.files;
 
@@ -162,6 +164,11 @@ export default function UploadFileButton({
       fileInputRef.current.value = '';
     }
   }
+  const currentSupportedFileFormats =
+    selectedModel?.supportedImageFormats &&
+    selectedModel.supportedImageFormats.length > 0
+      ? [...SUPPORTED_FILE_EXTENSIONS, ...selectedModel.supportedImageFormats]
+      : SUPPORTED_FILE_EXTENSIONS;
 
   const conversation = useConversation();
 
@@ -177,7 +184,7 @@ export default function UploadFileButton({
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}
-        accept={SUPPORTED_FILE_EXTENSIONS.map((e) => `.${e}`).join(',')}
+        accept={currentSupportedFileFormats.map((e) => `.${e}`).join(',')}
       />
       <button
         onClick={handleUploadClick}

@@ -25,6 +25,86 @@ import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { getRelevantFileContent } from '../file-operations/retrieval';
+import { SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
+import { readFileFromS3 } from '@/s3';
+import { isImageFile } from '@/utils/files/image-utils';
+
+/**
+ * Extract images from attached files and convert them to base64
+ */
+async function extractImagesAsBase64(relatedFileEntities: any[]): Promise<Array<{
+  type: 'image';
+  image: string;
+  mimeType?: string;
+}>> {
+  const imageFiles = relatedFileEntities.filter(file => isImageFile(file.name));
+  
+  if (imageFiles.length === 0) {
+    return [];
+  }
+
+  const imagePromises = imageFiles.map(async (file) => {
+    try {
+      const buffer = await readFileFromS3({ key: `message_attachments/${file.id}` });
+      const base64 = buffer.toString('base64');
+      const dataUrl = `data:${file.type || 'image/jpeg'};base64,${base64}`;
+      
+      return {
+        type: 'image' as const,
+        image: dataUrl,
+        mimeType: file.type || 'image/jpeg',
+      };
+    } catch (error) {
+      console.error(`Failed to process image file ${file.id}:`, error);
+      return null;
+    }
+  });
+
+  const images = await Promise.all(imagePromises);
+  return images.filter((img) => img !== null) as Array<{
+    type: 'image';
+    image: string;
+    mimeType: string;
+  }>;
+}
+
+/**
+ * Format messages to include images for models that support vision
+ */
+function formatMessagesWithImages(messages: Message[], images: Array<{
+  type: 'image';
+  image: string;
+  mimeType?: string;
+}>, modelSupportsImages: boolean): Message[] {
+  if (!modelSupportsImages || images.length === 0) {
+    return messages;
+  }
+
+  // Add images to the most recent user message
+  const messagesWithImages = [...messages];
+  const lastMessageIndex = messagesWithImages.length - 1;
+  const lastMessage = messagesWithImages[lastMessageIndex];
+
+  if (lastMessage && lastMessage.role === 'user') {
+    // Convert string content to array format with text and images
+    const textContent = typeof lastMessage.content === 'string' ? lastMessage.content : 
+      Array.isArray(lastMessage.content) ? 
+        lastMessage.content.find(part => part.type === 'text')?.text || '' :
+        String(lastMessage.content);
+
+    const textPart = {
+      type: 'text' as const,
+      text: textContent
+    };
+
+    messagesWithImages[lastMessageIndex] = {
+      ...lastMessage,
+      content: [textPart, ...images]
+    };
+  }
+
+  return messagesWithImages;
+}
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -130,6 +210,18 @@ export async function POST(request: NextRequest) {
 
   const orderedChunks = await getRelevantFileContent({ messages, user, relatedFileEntities });
 
+  // Extract images from attached files and convert to base64
+  const extractedImages = await extractImagesAsBase64(relatedFileEntities);
+
+  // Check if the model supports images based on supportedImageFormats
+  const modelSupportsImages = definedModel.supportedImageFormats && 
+    definedModel.supportedImageFormats.length > 0 &&
+    extractedImages.length > 0;
+
+  console.log(`Extracted ${extractedImages.length} images from ${relatedFileEntities.length} files`);
+  console.log(`Model ${definedModel.displayName} supports images: ${!!definedModel.supportedImageFormats?.length}`);
+  console.log(`Using images in chat: ${modelSupportsImages}`);
+
   const urls = [userMessage, ...messages]
     .map((message) => parseHyperlinks(message.content) ?? [])
     .flat();
@@ -164,10 +256,14 @@ export async function POST(request: NextRequest) {
     websearchSources: websearchSources,
     retrievedTextChunks: orderedChunks,
   });
+
+  // Format messages with images if the model supports vision
+  const messagesWithImages = formatMessagesWithImages(prunedMessages, extractedImages, modelSupportsImages);
+
   const result = streamText({
     model: telliProvider,
     system: systemPrompt,
-    messages: prunedMessages.map((m) => ({ role: m.role, content: m.content })),
+    messages: messagesWithImages.map((m) => ({ role: m.role, content: m.content })),
     experimental_generateMessageId: generateUUID,
     experimental_transform: smoothStream({ chunking: 'word', delayInMs: 20 }),
     async onFinish(assistantMessage) {
