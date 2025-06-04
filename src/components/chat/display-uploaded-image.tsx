@@ -7,6 +7,7 @@ import { FileStatus } from './upload-file-button';
 import DeattachFileIcon from '../icons/file-upload-icons/deattach-file-icon';
 import Spinner from '../icons/spinner';
 import CrossIcon from '../icons/cross';
+import { EmptyImageIcon } from '../icons/empty-image';
 
 type DisplayUploadedImageProps = {
   file: FileModel;
@@ -60,7 +61,7 @@ export default function DisplayUploadedImage({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center gap-2 text-sm relative group py-4 pr-6 pl-4 shrink-0 max-w-[250px] min-w-[100px] bg-gray-50 rounded-lg">
-        <Spinner className="w-5 h-5" />
+        <EmptyImageIcon className="w-12 h-12 text-gray-300 animate-pulse" />
         <span>Loading image...</span>
       </div>
     );
