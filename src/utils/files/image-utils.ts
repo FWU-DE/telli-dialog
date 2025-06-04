@@ -1,6 +1,4 @@
 import { convertToPixelCrop, PercentCrop, PixelCrop } from 'react-image-crop';
-import { SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
-import { getFileExtension } from './generic';
 
 export type CompressionOptions =
   | { quality: number }

@@ -25,7 +25,7 @@ export function getFileExtension(fileName: string): SUPPORTED_FILE_TYPE {
 export function isImageFile(fileName: string): boolean {
   try {
     const extension = getFileExtension(fileName);
-    return SUPPORTED_IMAGE_EXTENSIONS.includes(extension as any);
+    return SUPPORTED_IMAGE_EXTENSIONS.includes(extension);
   } catch {
     return false;
   }

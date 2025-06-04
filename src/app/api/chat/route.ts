@@ -25,7 +25,7 @@ import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { getRelevantFileContent } from '../file-operations/retrieval';
-import { getMaybeSignedUrlFromS3Get, readFileFromS3 } from '@/s3';
+import { getMaybeSignedUrlFromS3Get } from '@/s3';
 import { isImageFile } from '@/utils/files/generic';
 import { FileModel } from '@/db/schema';
 
@@ -216,14 +216,6 @@ export async function POST(request: NextRequest) {
     definedModel.supportedImageFormats.length > 0 &&
     extractedImages.length > 0;
 
-  console.log(
-    `Extracted ${extractedImages.length} images from ${relatedFileEntities.length} files`,
-  );
-  console.log(
-    `Model ${definedModel.displayName} supports images: ${!!definedModel.supportedImageFormats?.length}`,
-  );
-  console.log(`Using images in chat: ${modelSupportsImages}`);
-
   const urls = [userMessage, ...messages]
     .map((message) => parseHyperlinks(message.content) ?? [])
     .flat();
@@ -264,8 +256,7 @@ export async function POST(request: NextRequest) {
     prunedMessages,
     extractedImages,
     modelSupportsImages ?? false,
-  );
-  console.log('messagesWithImages', require('util').inspect(messagesWithImages, { depth: null }));
+  );  
   const result = streamText({
     model: telliProvider,
     system: systemPrompt,

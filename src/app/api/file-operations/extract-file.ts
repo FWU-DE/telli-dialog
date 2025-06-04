@@ -2,7 +2,6 @@ import { SUPPORTED_FILE_TYPE as SupportedFiles, SUPPORTED_IMAGE_EXTENSIONS } fro
 import { extractTextFromWordDocument } from './parse-docx';
 import { extractTextFromPdfBuffer } from './parse-pdf';
 import { FileMetadata } from '@/db/schema';
-import sharp from 'sharp';
 import { preprocessImage } from './prepocess-image';
 
 type TextElement = {

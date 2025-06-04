@@ -1,6 +1,6 @@
 import { getUser } from '@/auth/utils';
 import { db } from '@/db';
-import { FileMetadata, fileTable, TextChunkInsertModel } from '@/db/schema';
+import { fileTable, TextChunkInsertModel } from '@/db/schema';
 import { uploadFileToS3 } from '@/s3';
 import { getFileExtension } from '@/utils/files/generic';
 import { cnanoid } from '@/utils/random';
