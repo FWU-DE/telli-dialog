@@ -25,83 +25,8 @@ import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { getRelevantFileContent } from '../file-operations/retrieval';
-import { getMaybeSignedUrlFromS3Get } from '@/s3';
-import { isImageFile } from '@/utils/files/generic';
-import { FileModel } from '@/db/schema';
-
-type ImageAttachment = {
-  type: 'image';
-  mimeType?: string;
-  url: string;
-  id: string;
-  conversationMessageId?: string;
-};
-
-/**
- * Extract images from attached files and convert them to base64
- */
-async function extractImagesAndUrl(
-  relatedFileEntities: (FileModel & { conversationMessageId?: string })[],
-): Promise<ImageAttachment[]> {
-  const imageFiles = relatedFileEntities.filter((file) => isImageFile(file.name));
-
-  if (imageFiles.length === 0) {
-    return [];
-  }
-
-  const imagePromises = imageFiles.map(async (file) => {
-    try {
-      const url = await getMaybeSignedUrlFromS3Get({ key: `message_attachments/${file.id}` });
-
-      return {
-        type: 'image' as const,
-        url,
-        mimeType: `image/${file.type}`,
-        id: file.id,
-        conversationMessageId: file.conversationMessageId,
-      };
-    } catch (error) {
-      console.error(`Failed to process image file ${file.id}:`, error);
-      return null;
-    }
-  });
-
-  const images = await Promise.all(imagePromises);
-  return images.filter((img) => img != null) as ImageAttachment[];
-}
-
-/**
- * Format messages to include images for models that support vision
- */
-function formatMessagesWithImages(
-  messages: Message[],
-  images: ImageAttachment[],
-  modelSupportsImages: boolean,
-): Message[] {
-  if (!modelSupportsImages || images.length === 0) {
-    return messages;
-  }
-
-  const messagesWithImages = [...messages];
-
-  for (const message of messagesWithImages) {
-    if (message.role !== 'user') {
-      continue;
-    }
-
-    const messageImages = images.filter((image) => image.conversationMessageId === message.id);
-    if (messageImages.length === 0) {
-      continue;
-    }
-    message.experimental_attachments = messageImages.map((image) => ({
-      contentType: image.mimeType,
-      url: image.url,
-      type: 'image',
-    }));
-  }
-
-  return messagesWithImages;
-}
+import { extractImagesAndUrl } from '../file-operations/prepocess-image';
+import { formatMessagesWithImages } from './utils';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -212,9 +137,7 @@ export async function POST(request: NextRequest) {
 
   // Check if the model supports images based on supportedImageFormats
   const modelSupportsImages =
-    definedModel.supportedImageFormats &&
-    definedModel.supportedImageFormats.length > 0 &&
-    extractedImages.length > 0;
+    definedModel.supportedImageFormats !== null && definedModel.supportedImageFormats.length > 0;
 
   const urls = [userMessage, ...messages]
     .map((message) => parseHyperlinks(message.content) ?? [])
@@ -252,11 +175,11 @@ export async function POST(request: NextRequest) {
   });
 
   // Format messages with images if the model supports vision
-  const messagesWithImages = await formatMessagesWithImages(
+  const messagesWithImages = formatMessagesWithImages(
     prunedMessages,
     extractedImages,
-    modelSupportsImages ?? false,
-  );  
+    modelSupportsImages,
+  );
   const result = streamText({
     model: telliProvider,
     system: systemPrompt,
