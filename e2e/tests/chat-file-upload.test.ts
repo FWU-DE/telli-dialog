@@ -39,7 +39,9 @@ test('should successfully upload a file and get response about its contents', as
   await page.getByRole('menuitem', { name: 'Löschen' }).click();
 });
 
-test('should successfully upload an image and get response about its contents', async ({ page }) => {
+test('should successfully upload an image and get response about its contents', async ({
+  page,
+}) => {
   await login(page, 'teacher');
 
   const fileInput = page.locator('input[type="file"]');
@@ -71,7 +73,7 @@ test('should successfully upload an image and get response about its contents', 
   await expect(assistantMessage).toBeVisible();
   // Note: You may need to adjust this expectation based on what's actually in the lazy.webp image
   await expect(assistantMessage).toContainText('Bürostuhl');
-  
+
   // Clean up by deleting the conversation
   const dropDownMenu = page.locator('div[aria-label="Conversation actions"]').first();
   await dropDownMenu.hover({ force: true });
