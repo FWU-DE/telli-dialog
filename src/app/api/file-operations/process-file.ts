@@ -20,6 +20,9 @@ export async function processFiles(
     const content = fileContents[i];
     if (content === undefined) continue;
     const fileType = getFileExtension(fileEnity.name);
+    if (fileType === undefined) {
+      continue;
+    }
     const extractResult = await extractFile({ fileContent: content, type: fileType });
     fileEnity.content = extractResult.content.map((element) => element.text).join('\n\n');
     i++;
