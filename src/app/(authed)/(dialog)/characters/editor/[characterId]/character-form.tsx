@@ -48,10 +48,10 @@ type CharacterFormProps = CharacterModel & {
 };
 
 const characterFormValuesSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  learningContext: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  competence: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  name: z.string(),
+  description: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  learningContext: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  competence: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   modelId: z.string(),
   schoolType: z.string().nullable(),
   gradeLevel: z.string().nullable(),

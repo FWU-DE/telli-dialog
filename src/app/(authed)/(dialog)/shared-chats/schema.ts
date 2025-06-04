@@ -11,14 +11,14 @@ import {
 } from '@/configuration-text-inputs/const';
 import { z } from 'zod';
 export const sharedSchoolChatFormValuesSchema = z.object({
-  name: z.string().min(1).max(SMALL_TEXT_INPUT_FIELDS_LIMIT),
-  description: z.string().min(1).max(SMALL_TEXT_INPUT_FIELDS_LIMIT).nullable(),
+  name: z.string().max(SMALL_TEXT_INPUT_FIELDS_LIMIT),
+  description: z.string().max(SMALL_TEXT_INPUT_FIELDS_LIMIT),
   pictureId: z.string().nullable(),
   modelId: z.string(),
   schoolType: z.string().max(SMALL_TEXT_INPUT_FIELDS_LIMIT).nullable(),
   gradeLevel: z.string().max(SMALL_TEXT_INPUT_FIELDS_LIMIT).nullable(),
   subject: z.string().max(SMALL_TEXT_INPUT_FIELDS_LIMIT).nullable(),
-  studentExcercise: z.string().min(1).max(1000).nullable(),
+  studentExcercise: z.string().max(1000).nullable(),
   additionalInstructions: z.string().max(2000),
   restrictions: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT).nullable(),
   attachedLinks: z.array(
