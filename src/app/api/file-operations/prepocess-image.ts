@@ -1,3 +1,4 @@
+import { TRUNCATE_IMAGE_HEIGHT } from '@/const';
 import { FileMetadata, FileModel } from '@/db/schema';
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
 import { isImageFile } from '@/utils/files/generic';
@@ -44,9 +45,9 @@ export async function preprocessImage(
 
   let width = metadata.width ?? 0;
   let height = metadata.height ?? 0;
-  if (height > 720) {
+  if (height > TRUNCATE_IMAGE_HEIGHT) {
     const aspectRatio = width / height;
-    height = 720;
+    height = TRUNCATE_IMAGE_HEIGHT;
     width = Math.round(height * aspectRatio);
 
     // Process the image with scaling
