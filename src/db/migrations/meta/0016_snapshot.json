@@ -1,5 +1,5 @@
 {
-  "id": "952adc10-9883-4c46-9169-17ba1dd1ea93",
+  "id": "501dd36f-59c5-41e2-ada3-debd615d6274",
   "prevId": "7042ea71-e876-464e-be23-b1927155b3f7",
   "version": "7",
   "dialect": "postgresql",
@@ -1092,6 +1092,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -1154,8 +1160,7 @@
           "name": "supported_image_formats",
           "type": "json",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'[]'::json"
+          "notNull": false
         }
       },
       "indexes": {},

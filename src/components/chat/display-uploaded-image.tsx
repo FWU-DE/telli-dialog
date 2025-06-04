@@ -8,18 +8,23 @@ import DeattachFileIcon from '../icons/file-upload-icons/deattach-file-icon';
 import Spinner from '../icons/spinner';
 import CrossIcon from '../icons/cross';
 import { EmptyImageIcon } from '../icons/empty-image';
+import { cn } from '@/utils/tailwind';
+import { useTranslations } from 'next-intl';
 
 type DisplayUploadedImageProps = {
   file: FileModel;
   status: FileStatus;
   onDeattachFile?: () => void;
+  showBanner?: boolean;
 };
 
 export default function DisplayUploadedImage({
   file,
   status,
   onDeattachFile,
+  showBanner = true,
 }: DisplayUploadedImageProps) {
+  const t = useTranslations();
   const {
     data: imageUrl,
     isLoading,
@@ -37,9 +42,6 @@ export default function DisplayUploadedImage({
     gcTime: 10 * 60 * 1000, // 10 minutes garbage collection time
   });
 
-  console.log('file', file);
-  console.log('imageUrl', imageUrl);
-
   if (status === 'uploading') {
     return (
       <div className="flex items-center justify-center gap-2 text-sm relative group py-4 pr-6 pl-4 shrink-0 max-w-[250px] min-w-[100px] bg-gray-50 rounded-lg">
@@ -48,21 +50,10 @@ export default function DisplayUploadedImage({
       </div>
     );
   }
-
-  if (status === 'failed') {
-    return (
-      <div className="flex items-center justify-center gap-2 text-sm relative group py-4 pr-6 pl-4 shrink-0 max-w-[250px] min-w-[100px] bg-red-50 rounded-lg">
-        <CrossIcon className="w-5 h-5 text-red-500" />
-        <span className="text-red-700">Upload failed</span>
-      </div>
-    );
-  }
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center gap-2 text-sm relative group py-4 pr-6 pl-4 shrink-0 max-w-[250px] min-w-[100px] bg-gray-50 rounded-lg">
-        <EmptyImageIcon className="w-12 h-12 text-gray-300 animate-pulse" />
-        <span>Loading image...</span>
+        <EmptyImageIcon className={cn(`w-[200px]`, 'text-gray-300 animate-pulse')} />
       </div>
     );
   }
@@ -71,11 +62,10 @@ export default function DisplayUploadedImage({
     return (
       <div className="flex items-center justify-center gap-2 text-sm relative group py-4 pr-6 pl-4 shrink-0 max-w-[250px] min-w-[100px] bg-red-50 rounded-lg">
         <CrossIcon className="w-5 h-5 text-red-500" />
-        <span className="text-red-700">Failed to load image</span>
+        <span className="text-red-700">{t('common.image-load-failed')}</span>
       </div>
     );
   }
-
   return (
     <div className="relative group max-w-xs rounded-lg overflow-hidden">
       {onDeattachFile !== undefined && (
@@ -91,17 +81,20 @@ export default function DisplayUploadedImage({
         <Image
           src={imageUrl}
           alt={file.name}
-          width={300}
+          width={200}
           height={200}
+          loading="eager"
           className="w-full h-auto max-h-48 object-cover rounded-enterprise-md"
           unoptimized={true} // Since we're using signed URLs from S3
         />
-        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2 rounded-enterprise-md">
-          <p className="truncate" title={file.name}>
-            {file.name}
-          </p>
-          <p className="text-gray-300">{(file.size / 1024 / 1024).toFixed(1)} MB</p>
-        </div>
+        {showBanner && (
+          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2 rounded-enterprise-md">
+            <p className="truncate" title={file.name}>
+              {file.name}
+            </p>
+            <p className="text-gray-300">{(file.size / 1024 / 1024).toFixed(1)} MB</p>
+          </div>
+        )}
       </div>
     </div>
   );

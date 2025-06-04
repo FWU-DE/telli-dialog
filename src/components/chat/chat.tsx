@@ -142,6 +142,7 @@ export default function Chat({
             type: getFileExtension(file.file.name),
             createdAt: new Date(),
             size: file.file.size,
+            metadata: null,
           };
         }),
       );

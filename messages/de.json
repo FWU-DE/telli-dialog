@@ -28,7 +28,8 @@
     "copy": "Kopieren",
     "copy-clipboard": "In die Zwischenablage kopieren",
     "regenerate-message": "Antwort erneut generieren",
-    "file-limit-reached": "Es können maximal {max_files} Dateien hochgeladen werden."
+    "file-limit-reached": "Es können maximal {max_files} Dateien hochgeladen werden.",
+    "image-load-failed": "Bild konnte nicht geladen werden"
   },
   "usage-disclaimer": {
     "initial-title": "Willkommen bei telli!",

@@ -24,6 +24,12 @@ export const tsvector = customType<{
   },
 });
 
+// can be expanded to include other metadata of other file types
+export type FileMetadata = {
+  width?: number;
+  height?: number;
+};
+
 export const userTable = pgTable('user_entity', {
   id: uuid('id').defaultRandom().primaryKey(),
   firstName: text('first_name').notNull(),
@@ -341,6 +347,7 @@ export const fileTable = pgTable('file_table', {
   size: integer('size').notNull(),
   type: text('type').notNull(),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  metadata: json('metadata').$type<FileMetadata>(),
 });
 export type FileModel = typeof fileTable.$inferSelect;
 export type FileModelAndUrl = FileModel & { signedUrl: string };

@@ -1,1 +1,0 @@
-ALTER TABLE "llm_model" ADD COLUMN "supported_image_formats" json DEFAULT '[]'::json NOT NULL;

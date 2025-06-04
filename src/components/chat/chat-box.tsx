@@ -66,7 +66,12 @@ export function ChatBox({
         {imageFiles.length > 0 && (
           <div className="flex flex-row gap-2 overflow-auto">
             {imageFiles.map((file) => (
-              <DisplayUploadedImage file={file} status="processed" key={file.id} />
+              <DisplayUploadedImage
+                file={file}
+                status="processed"
+                key={file.id}
+                showBanner={false}
+              />
             ))}
           </div>
         )}
