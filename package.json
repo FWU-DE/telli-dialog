@@ -22,7 +22,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:generate": "drizzle-kit generate --config=./src/db/drizzle.config.ts",
-    "db:migrate": "dotenv -e .env.local -- drizzle-kit migrate --config=./src/db/drizzle.config.ts",
+    "db:migrate": "drizzle-kit migrate --config=./src/db/drizzle.config.ts",
     "db:migrate:op": "ENVIRONMENT=development op run --env-file=\"./.env\" -- drizzle-kit migrate --config=./src/db/drizzle.config.ts",
     "db:seed": "tsx src/db/seed/index.ts",
     "db:seed:op": "op run --env-file=\"./.env\" -- pnpm tsx src/db/seed/index.ts",
