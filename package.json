@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "op": "op run --env-file=\"./.env\" --no-masking",
-    "op:signin": "eval $(op signin)",
     "dev": "ENVIRONMENT=development pnpm op -- next dev --turbo",
     "dev:e2e": "ENVIRONMENT=e2e pnpm op -- next dev --turbo",
     "dev:ssl": "next dev --experimental-https",

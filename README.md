@@ -19,7 +19,7 @@ pnpm i # installs the dependencies
 ## Environment variables
 
 You will need environment variables to work with.
-Place those in the `.env` file.
+Place those in the `.env` file **or** use the [1password cli](https://developer.1password.com/docs/cli/).
 
 You can find the env variables [here](https://start.1password.com/open/i?a=ADERP2QHK5HBPLKMBFF2QU5CXI&v=jtidfrchgfg2sunjzwpzgendlq&i=a2khk5vx6hrqmtkta2gg7vonga&h=deutschlandgpt.1password.eu).
 
@@ -44,7 +44,7 @@ If you start with a fresh database, do not forget to apply migrations, otherwise
 pnpm db:migrate
 
 # with use of 1password-cli
-pnpm op:signin
+eval $(op signin)
 pnpm db:migrate:op
 ```
 
