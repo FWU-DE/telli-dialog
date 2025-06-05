@@ -35,6 +35,7 @@ export type UploadFileButtonProps = {
   countOfFiles?: number;
   setFileUploading?: React.Dispatch<React.SetStateAction<boolean>>;
   files?: Map<string, LocalFileState>;
+  disabled?: boolean;
 };
 
 export async function handleSingleFile({
