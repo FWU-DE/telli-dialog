@@ -1,7 +1,7 @@
 import test, { APIRequestContext, expect } from '@playwright/test';
 import { authorizationHeader } from '../../../../../utils/authorizationHeader';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
-import { generateRandomString } from '../../../../../utils/random';
+import { cnanoid } from '@/utils/random';
 
 const federalStateRoute = '/api/v1/admin/federal-states';
 
@@ -10,7 +10,7 @@ test('should create a new federal state with correct default values', async ({
 }: {
   request: APIRequestContext;
 }) => {
-  const id = 'Test-' + generateRandomString(10);
+  const id = 'Test-' + cnanoid(10);
   const response = await request.post(federalStateRoute, {
     headers: { ...authorizationHeader },
     data: {
@@ -44,7 +44,7 @@ test('should create a new federal state with all values set', async ({
 }: {
   request: APIRequestContext;
 }) => {
-  const id = 'Test-' + generateRandomString(10);
+  const id = 'Test-' + cnanoid(10);
   const newFederalState = {
     id,
     teacherPriceLimit: 1000,
