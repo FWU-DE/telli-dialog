@@ -65,11 +65,7 @@ export async function dbUpsertFederalState(federalState: FederalStateInsertModel
     .values(_federalState)
     .onConflictDoUpdate({
       target: federalStateTable.id,
-      set: {
-        encryptedApiKey: _federalState.encryptedApiKey,
-        studentPriceLimit: _federalState.studentPriceLimit,
-        teacherPriceLimit: _federalState.teacherPriceLimit,
-      },
+      set: { ..._federalState },
     })
     .returning();
 
