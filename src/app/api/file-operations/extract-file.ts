@@ -30,7 +30,7 @@ export async function extractFile({
   } else if (type === 'md' || type === 'txt') {
     content = [{ page: 0, text: new TextDecoder('utf-8').decode(fileContent) }];
   } else if (isImageFile(type)) {
-    const imageResult = await preprocessImage(fileContent);
+    const imageResult = await preprocessImage(fileContent, type);
     metadata = imageResult.metadata;
     processedBuffer = imageResult.buffer;
     // Images don't have text content, so content remains empty

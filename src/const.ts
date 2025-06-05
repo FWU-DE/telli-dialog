@@ -2,7 +2,7 @@ export const SUPPORTED_DOCUMENTS_EXTENSIONS = ['docx', 'pdf', 'md', 'txt'];
 export type SUPPORTED_DOCUMENTS_TYPE = (typeof SUPPORTED_DOCUMENTS_EXTENSIONS)[number];
 
 /** This is currently only used to check if a file is an image */
-export const SUPPORTED_IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp'] as const;
+export const SUPPORTED_IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp', 'svg'] as const;
 export type SUPPORTED_IMAGE_TYPE = (typeof SUPPORTED_IMAGE_EXTENSIONS)[number];
 
 export const TRUNCATE_IMAGE_HEIGHT = 720;

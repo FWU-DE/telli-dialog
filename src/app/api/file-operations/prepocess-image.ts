@@ -1,4 +1,4 @@
-import { TRUNCATE_IMAGE_HEIGHT } from '@/const';
+import { SUPPORTED_DOCUMENTS_TYPE, TRUNCATE_IMAGE_HEIGHT } from '@/const';
 import { FileMetadata, FileModel } from '@/db/schema';
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
 import { isImageFile } from '@/utils/files/generic';
@@ -40,8 +40,20 @@ export async function extractImagesAndUrl(
 
 export async function preprocessImage(
   fileContent: Buffer,
+  type: SUPPORTED_DOCUMENTS_TYPE,
 ): Promise<{ buffer: Buffer; metadata: FileMetadata }> {
-  const metadata = await sharp(fileContent).metadata();
+  // Convert SVG to PNG if needed
+  let processedBuffer = fileContent;
+  if (type === 'svg') {
+    try {
+      processedBuffer = await sharp(fileContent).png().toBuffer();
+    } catch (error) {
+      console.error('Failed to convert SVG to PNG:', error);
+      throw new Error('Failed to convert SVG to PNG');
+    }
+  }
+
+  const metadata = await sharp(processedBuffer).metadata();
 
   let width = metadata.width ?? 0;
   let height = metadata.height ?? 0;
@@ -51,7 +63,7 @@ export async function preprocessImage(
     width = Math.round(height * aspectRatio);
 
     // Process the image with scaling
-    const processedBuffer = await sharp(fileContent)
+    const finalBuffer = await sharp(processedBuffer)
       .resize(width, height, {
         fit: 'inside',
         withoutEnlargement: true,
@@ -59,14 +71,14 @@ export async function preprocessImage(
       .toBuffer();
 
     return {
-      buffer: processedBuffer,
+      buffer: finalBuffer,
       metadata: { width, height },
     };
   }
 
-  // Return original buffer if no scaling needed
+  // Return processed buffer (converted from SVG if needed) if no scaling needed
   return {
-    buffer: fileContent,
+    buffer: processedBuffer,
     metadata: { width, height },
   };
 }

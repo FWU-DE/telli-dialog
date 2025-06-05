@@ -7,7 +7,7 @@ import { ToastContextType, useToast } from '../common/toast';
 import { useConversation } from '../providers/conversation-provider';
 import AttachFileIcon from '../icons/attach-file';
 import { cn } from '@/utils/tailwind';
-import { SUPPORTED_DOCUMENTS_EXTENSIONS, MAX_FILE_SIZE } from '@/const';
+import { SUPPORTED_DOCUMENTS_EXTENSIONS, MAX_FILE_SIZE, SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
 import { TranslationValues, useTranslations } from 'next-intl';
 import { NUMBER_OF_FILES_LIMIT, NUMBER_OF_IMAGES_LIMIT } from '@/configuration-text-inputs/const';
 import { useLlmModels } from '../providers/llm-model-provider';
@@ -143,7 +143,7 @@ export default function UploadFileButton({
   const totalNumberOfFiles = Array.from(files?.values() ?? []).length;
   const allowedImageFormats =
     numberOfImages < NUMBER_OF_IMAGES_LIMIT && selectedModel?.supportedImageFormats
-      ? selectedModel.supportedImageFormats
+      ? SUPPORTED_IMAGE_EXTENSIONS
       : [];
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
