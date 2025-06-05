@@ -69,6 +69,16 @@ export async function dbUpsertFederalState(federalState: FederalStateInsertModel
         encryptedApiKey: _federalState.encryptedApiKey,
         studentPriceLimit: _federalState.studentPriceLimit,
         teacherPriceLimit: _federalState.teacherPriceLimit,
+        mandatoryCertificationTeacher: _federalState.mandatoryCertificationTeacher,
+        chatStorageTime: _federalState.chatStorageTime,
+        supportContact: _federalState.supportContact,
+        trainingLink: _federalState.trainingLink,
+        studentAccess: _federalState.studentAccess,
+        enableCharacter: _federalState.enableCharacter,
+        enableCustomGpt: _federalState.enableCustomGpt,
+        enableSharedChats: _federalState.enableSharedChats,
+        designConfiguration: _federalState.designConfiguration,
+        telliName: _federalState.telliName,
       },
     })
     .returning();
