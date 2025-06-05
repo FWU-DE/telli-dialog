@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "k6.k6",
+    "esbenp.prettier-vscode",
+    "rvest.vs-code-prettier-eslint",
+    "bradlc.vscode-tailwindcss",
+    "vitest.explorer",
+    "ms-azuretools.vscode-docker"
+  ]
+}
