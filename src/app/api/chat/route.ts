@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
 
   const orderedChunks = await getRelevantFileContent({ messages, user, relatedFileEntities });
 
-  // Extract images from attached files and convert to base64
+  // attach the image url to each of the image files within relatedFileEntities
   const extractedImages = await extractImagesAndUrl(relatedFileEntities);
 
   // Check if the model supports images based on supportedImageFormats
