@@ -84,3 +84,20 @@ test('should create a new federal state with all values set', async ({
     telliName: 'myTelliName',
   });
 });
+
+test('should return 403 because authorization header is missing', async ({
+  request,
+}: {
+  request: APIRequestContext;
+}) => {
+  const id = 'Test-' + cnanoid(10);
+  const response = await request.post(federalStateRoute, {
+    data: {
+      id,
+      teacherPriceLimit: 1000,
+      studentPriceLimit: 100,
+      decryptedApiKey: 'test-api-key',
+    },
+  });
+  expect(response.status()).toBe(403);
+});

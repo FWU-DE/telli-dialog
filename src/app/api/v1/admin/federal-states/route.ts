@@ -1,7 +1,7 @@
 import { decryptMaybeValue, encrypt } from '@/db/crypto';
 import { dbGetAllFederalStates, dbUpsertFederalState } from '@/db/functions/federal-state';
 import { DesignConfiguration } from '@/db/types';
-import { validateApiKeyByHeadersWithResult, validateApiKeyByHeadersWithThrow403 } from '@/db/utils';
+import { validateApiKeyByHeadersWithResult } from '@/db/utils';
 import { env } from '@/env';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
   if (error !== null) {
     return NextResponse.json({ error: error.message }, { status: 403 });
   }
+
   const federalStates = await dbGetAllFederalStates();
 
   return NextResponse.json(
@@ -65,7 +66,10 @@ const federalStateCreateSchema = z.object({
  * @returns 201 on success, 403 on forbidden, 500 on error
  */
 export async function POST(request: NextRequest) {
-  validateApiKeyByHeadersWithThrow403(request.headers);
+  const [error] = validateApiKeyByHeadersWithResult(request.headers);
+  if (error !== null) {
+    return NextResponse.json({ error: error.message }, { status: 403 });
+  }
 
   const body = await request.json();
   const federalStateToCreate = federalStateCreateSchema.parse(body);

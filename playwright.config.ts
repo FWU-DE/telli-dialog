@@ -23,6 +23,7 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'on',
   },
+  globalSetup: './e2e/global-setup.ts',
   /* Configure projects for major browsers */
   projects: [
     {

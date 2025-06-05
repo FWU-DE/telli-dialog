@@ -1,6 +1,5 @@
 import { env } from '@/env';
 import { errorifyFn } from '@/utils/error';
-import { NextResponse } from 'next/server';
 
 export const validateApiKeyByHeadersWithResult = errorifyFn(validateApiKeyByHeaders);
 export function validateApiKeyByHeaders(headers: Headers) {
@@ -17,16 +16,4 @@ export function validateApiKeyByHeaders(headers: Headers) {
   }
 
   return true;
-}
-
-export function validateApiKeyByHeadersWithThrow403(headers: Headers) {
-  try {
-    validateApiKeyByHeaders(headers);
-  } catch (error) {
-    if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 403 });
-    } else {
-      return NextResponse.json({ error: 'Unknown error' }, { status: 403 });
-    }
-  }
 }
