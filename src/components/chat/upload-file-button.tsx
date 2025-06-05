@@ -25,8 +25,6 @@ export type FileStatus = 'uploading' | 'processed' | 'failed' | 'success';
 
 export type UploadFileButtonProps = {
   setFiles: React.Dispatch<React.SetStateAction<Map<string, LocalFileState>>>;
-  disabled?: boolean;
-  isPrivateMode?: boolean;
   onFileUploaded?: (data: { id: string; name: string; file: File }) => void;
   triggerButton?: React.ReactNode;
   fileUploadFn?: (file: File) => Promise<FileUploadResponse>;
@@ -123,8 +121,6 @@ export async function handleSingleFile({
 
 export default function UploadFileButton({
   setFiles,
-  disabled = false,
-  isPrivateMode = false,
   onFileUploaded,
   triggerButton,
   fileUploadFn,
@@ -199,15 +195,16 @@ export default function UploadFileButton({
       <button
         onClick={handleUploadClick}
         className={cn(className, 'disabled:cursor-not-allowed')}
-        disabled={isUploadLimitReached || isPrivateMode}
+        disabled={isUploadLimitReached}
         type="button"
-        title={isUploadLimitReached ? t('upload.file-limit-reached', { max_files: NUMBER_OF_FILES_LIMIT }) : t('upload.upload-file-button')}
+        title={
+          isUploadLimitReached
+            ? t('upload.file-limit-reached', { max_files: NUMBER_OF_FILES_LIMIT })
+            : t('upload.upload-file-button')
+        }
       >
         {triggerButton ?? (
-          <AttachFileIcon
-            className={cn('sm:w-10 sm:h-10 w-8 h-8')}
-            stroke={isPrivateMode ? 'white' : 'black'}
-          />
+          <AttachFileIcon className={cn('sm:w-10 sm:h-10 w-8 h-8')} stroke="black" />
         )}
       </button>
     </>

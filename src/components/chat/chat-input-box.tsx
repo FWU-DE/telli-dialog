@@ -44,19 +44,30 @@ export function ChatInputBox({
   useEffect(() => {
     if (files && setFiles && files.size > NUMBER_OF_FILES_LIMIT) {
       toast.error(
-        tFileInteraction('upload.file-limit-reached', { max_files: NUMBER_OF_FILES_LIMIT, files_exceeded: files.size - NUMBER_OF_FILES_LIMIT }),
+        tFileInteraction('upload.file-limit-reached', {
+          max_files: NUMBER_OF_FILES_LIMIT,
+          files_exceeded: files.size - NUMBER_OF_FILES_LIMIT,
+        }),
       );
       const trimmedFiles = new Map(Array.from(files.entries()).slice(0, NUMBER_OF_FILES_LIMIT));
       setFiles(trimmedFiles);
       setFileUploading(false);
     }
-    const imageEntries = Array.from(files?.entries() ?? []).filter(([_, file]) => isImageFile(file.file.name));
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const imageEntries = Array.from(files?.entries() ?? []).filter(([_, file]) =>
+      isImageFile(file.file.name),
+    );
     const numberOfImages = imageEntries.length;
 
     if (files && setFiles && numberOfImages > NUMBER_OF_IMAGES_LIMIT) {
       const newFiles = new Map(files);
       const imagesExceedingLimit = imageEntries.slice(NUMBER_OF_IMAGES_LIMIT);
-      toast.error(tFileInteraction('upload.image-limit-reached', { max_images: NUMBER_OF_IMAGES_LIMIT, images_exceeded: imagesExceedingLimit.length }));
+      toast.error(
+        tFileInteraction('upload.image-limit-reached', {
+          max_images: NUMBER_OF_IMAGES_LIMIT,
+          images_exceeded: imagesExceedingLimit.length,
+        }),
+      );
       // pop off all images exceeding the limit
       imagesExceedingLimit.forEach(([localId]) => {
         newFiles.delete(localId);
