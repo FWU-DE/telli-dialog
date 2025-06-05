@@ -1,11 +1,11 @@
 import {
-  SUPPORTED_FILE_EXTENSIONS,
-  SUPPORTED_FILE_TYPE,
+  SUPPORTED_DOCUMENTS_EXTENSIONS,
+  SUPPORTED_DOCUMENTS_TYPE,
   SUPPORTED_IMAGE_EXTENSIONS,
   SUPPORTED_IMAGE_TYPE,
 } from '@/const';
 
-export function getFileExtension(fileName: string): SUPPORTED_FILE_TYPE {
+export function getFileExtension(fileName: string): SUPPORTED_DOCUMENTS_TYPE {
   const parts = fileName.split('.');
 
   const lastPart = parts[parts.length - 1];
@@ -14,7 +14,7 @@ export function getFileExtension(fileName: string): SUPPORTED_FILE_TYPE {
   }
 
   if (
-    !SUPPORTED_FILE_EXTENSIONS.includes(lastPart.toString()) &&
+    !SUPPORTED_DOCUMENTS_EXTENSIONS.includes(lastPart.toString()) &&
     !SUPPORTED_IMAGE_EXTENSIONS.includes(lastPart as SUPPORTED_IMAGE_TYPE)
   ) {
     throw new Error('file type is not supported or missing');
@@ -38,7 +38,7 @@ export function validateFileExtentsion(fileName: string): boolean {
   if (lastPart === undefined) {
     return false;
   }
-  return SUPPORTED_FILE_EXTENSIONS.includes(lastPart.toString());
+  return SUPPORTED_DOCUMENTS_EXTENSIONS.includes(lastPart.toString());
 }
 
 export async function blobToBuffer(blob: Blob) {

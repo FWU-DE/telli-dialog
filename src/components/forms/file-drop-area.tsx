@@ -6,7 +6,7 @@ import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { handleSingleFile, UploadFileButtonProps } from '../chat/upload-file-button';
 import { useSession } from 'next-auth/react';
 import { useToast } from '../common/toast';
-import { SUPPORTED_FILE_EXTENSIONS } from '@/const';
+import { SUPPORTED_DOCUMENTS_EXTENSIONS } from '@/const';
 import { validateFileExtentsion as validateFileExtension } from '@/utils/files/generic';
 import { FORM_NUMBER_FILES_LIMIT } from '@/configuration-text-inputs/const';
 
@@ -106,7 +106,7 @@ export function FileDrop({
       if (!validateFileExtensions(files)) {
         toast.error(
           t('toasts.invalid-file-format', {
-            supported_formats: SUPPORTED_FILE_EXTENSIONS.join(','),
+            supported_formats: SUPPORTED_DOCUMENTS_EXTENSIONS.join(','),
           }),
         );
         return;
@@ -140,7 +140,7 @@ export function FileDrop({
           type="file"
           className="hidden"
           onChange={handleFileChange}
-          accept={SUPPORTED_FILE_EXTENSIONS.map((e) => `.${e}`).join(',')}
+          accept={SUPPORTED_DOCUMENTS_EXTENSIONS.map((e) => `.${e}`).join(',')}
           multiple
         />
         <div className="mt-4 flex flex-col text-sm gap-4 items-center">

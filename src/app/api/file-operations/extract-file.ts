@@ -1,4 +1,4 @@
-import { SUPPORTED_FILE_TYPE } from '@/const';
+import { SUPPORTED_DOCUMENTS_TYPE } from '@/const';
 import { extractTextFromWordDocument } from './parse-docx';
 import { extractTextFromPdfBuffer } from './parse-pdf';
 import { FileMetadata } from '@/db/schema';
@@ -15,7 +15,7 @@ export async function extractFile({
   type,
 }: {
   fileContent: Buffer;
-  type: SUPPORTED_FILE_TYPE;
+  type: SUPPORTED_DOCUMENTS_TYPE;
 }): Promise<{ content: TextElement[]; metadata: FileMetadata; processedBuffer?: Buffer }> {
   let content: TextElement[] = [];
   let metadata: FileMetadata = {};

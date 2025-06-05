@@ -7,10 +7,11 @@ import { ToastContextType, useToast } from '../common/toast';
 import { useConversation } from '../providers/conversation-provider';
 import AttachFileIcon from '../icons/attach-file';
 import { cn } from '@/utils/tailwind';
-import { SUPPORTED_FILE_EXTENSIONS, MAX_FILE_SIZE } from '@/const';
+import { SUPPORTED_DOCUMENTS_EXTENSIONS, MAX_FILE_SIZE } from '@/const';
 import { TranslationValues, useTranslations } from 'next-intl';
-import { NUMBER_OF_FILES_LIMIT } from '@/configuration-text-inputs/const';
+import { NUMBER_OF_FILES_LIMIT, NUMBER_OF_IMAGES_LIMIT } from '@/configuration-text-inputs/const';
 import { useLlmModels } from '../providers/llm-model-provider';
+import { isImageFile } from '@/utils/files/generic';
 
 export type FileUploadMetadata = {
   directoryId: string;
@@ -35,6 +36,7 @@ export type UploadFileButtonProps = {
   showUploadConfirmation?: boolean;
   countOfFiles?: number;
   setFileUploading?: React.Dispatch<React.SetStateAction<boolean>>;
+  files?: Map<string, LocalFileState>;
 };
 
 export async function handleSingleFile({
@@ -130,12 +132,23 @@ export default function UploadFileButton({
   onFileUploadStart,
   directoryId,
   setFileUploading,
+  files,
 }: UploadFileButtonProps) {
   const toast = useToast();
   const session = useSession();
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const t = useTranslations('file-interaction');
   const { selectedModel } = useLlmModels();
+
+  const numberOfImages = Array.from(files?.values() ?? []).filter(
+    (file) => file.status === 'processed' && isImageFile(file.file.name),
+  ).length;
+  const totalNumberOfFiles = Array.from(files?.values() ?? []).length;
+  const allowedImageFormats =
+    numberOfImages < NUMBER_OF_IMAGES_LIMIT && selectedModel?.supportedImageFormats
+      ? selectedModel.supportedImageFormats
+      : [];
+
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const selectedFiles = event.target.files;
 
@@ -164,10 +177,8 @@ export default function UploadFileButton({
       fileInputRef.current.value = '';
     }
   }
-  const currentSupportedFileFormats =
-    selectedModel?.supportedImageFormats && selectedModel.supportedImageFormats.length > 0
-      ? [...SUPPORTED_FILE_EXTENSIONS, ...selectedModel.supportedImageFormats]
-      : SUPPORTED_FILE_EXTENSIONS;
+  const currentSupportedFileFormats = [...SUPPORTED_DOCUMENTS_EXTENSIONS, ...allowedImageFormats];
+  const isUploadLimitReached = totalNumberOfFiles >= NUMBER_OF_FILES_LIMIT;
 
   const conversation = useConversation();
 
@@ -187,14 +198,10 @@ export default function UploadFileButton({
       />
       <button
         onClick={handleUploadClick}
-        className={className}
-        disabled={disabled || isPrivateMode}
+        className={cn(className, 'disabled:cursor-not-allowed')}
+        disabled={isUploadLimitReached || isPrivateMode}
         type="button"
-        title={
-          disabled
-            ? t('upload.file-limit-reached', { max_files: NUMBER_OF_FILES_LIMIT })
-            : t('upload.upload-file-button')
-        }
+        title={isUploadLimitReached ? t('upload.file-limit-reached', { max_files: NUMBER_OF_FILES_LIMIT }) : t('upload.upload-file-button')}
       >
         {triggerButton ?? (
           <AttachFileIcon
