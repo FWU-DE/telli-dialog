@@ -19,7 +19,7 @@ pnpm i # installs the dependencies
 ## Environment variables
 
 You will need environment variables to work with.
-Place those in the `.env` file.
+Place those in the `.env` file **or** use the [1password cli](https://developer.1password.com/docs/cli/).
 
 You can find the env variables [here](https://start.1password.com/open/i?a=ADERP2QHK5HBPLKMBFF2QU5CXI&v=jtidfrchgfg2sunjzwpzgendlq&i=a2khk5vx6hrqmtkta2gg7vonga&h=deutschlandgpt.1password.eu).
 
@@ -40,7 +40,12 @@ psql "postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db"
 If you start with a fresh database, do not forget to apply migrations, otherwise the application will not work.
 
 ```sh
+# with proper values in .env file
 pnpm db:migrate
+
+# with use of 1password-cli
+eval $(op signin)
+pnpm db:migrate:op
 ```
 
 You can now start the application:
