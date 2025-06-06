@@ -112,8 +112,8 @@
       "gpt-delete-description": "Beim Löschen des Assistenten werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
       "gpt-delete-modal-description": "Bist du sicher, dass du diesen Assistent löschen möchtest? Dabei werden alle mit diesem Assistenten verbundenen Konversationen unwiderruflich gelöscht.",
       "copy-page": {
-        "title": "Assistent in eigenen Space Kopieren",
-        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Assistenten in deinen privaten Space, um ihn anzupassen.",
+        "title": "Assistent in eigenen Bereich kopieren",
+        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Assistenten in deinen privaten Bereich, um ihn anzupassen.",
         "copy-template": "Assistent bearbeiten"
       }
     },
@@ -164,11 +164,7 @@
       "content": "Dieser Dialogpartner ist schreibgeschützt. Möchtest du eine Kopie in deinem eigenen Bereich erstellen? Danach kannst du ihn frei bearbeiten und anpassen.",
       "copy-button": "Kopieren & bearbeiten"
     },
-    "copy-page": {
-      "title": "Dialogpartner in eigenen Bereich kopieren",
-      "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Dialogpartner in deinen privaten Bereich, um ihn anzupassen.",
-      "copy-template": "Dialogpartner bearbeiten"
-    },
+  
     "form": {
       "general-settings": "Allgemeine Einstellungen",
       "character-settings": "Dialogpartner-Einstellungen",
@@ -200,8 +196,8 @@
       "subject": "Fach",
       "subject-placeholder": "Geschichte",
       "copy-page": {
-        "title": "Dialogpartner in eigenen Space Kopieren",
-        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Dialogpartner in deinen privaten Space, um ihn anzupassen.",
+        "title": "Dialogpartner in eigenen Bereich kopieren",
+        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Dialogpartner in deinen privaten Bereich, um ihn anzupassen.",
         "copy-template": "Dialogpartner bearbeiten"
       }
     },

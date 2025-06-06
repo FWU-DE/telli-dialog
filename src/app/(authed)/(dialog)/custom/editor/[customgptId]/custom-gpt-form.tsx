@@ -257,8 +257,8 @@ export default function CustomGptForm({
   return (
     <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
       <NavigateBack label={t('all-gpts')} onClick={handleNavigateBack} />
-
       <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>
+      {copyContainer}
       {userRole === 'teacher' && (
         <fieldset className="mt-8 gap-8">
           <div className="flex gap-4">
@@ -388,7 +388,7 @@ export default function CustomGptForm({
                         className={cn('flex items-center justify-center', iconClassName)}
                         aria-label={t('prompt-suggestions-add-button')}
                       >
-                        <PlusIcon className="w-8 h-8" />
+                        {!readOnly && <PlusIcon className="w-8 h-8" />}
                       </button>
                     ) : (
                       <button
@@ -400,7 +400,7 @@ export default function CustomGptForm({
                         className={cn('flex items-center justify-center', iconClassName)}
                         type="button"
                       >
-                        <TrashIcon className="w-8 h-8" />
+                        {!readOnly && <TrashIcon className="w-8 h-8" />}
                       </button>
                     )}
                   </div>
