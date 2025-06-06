@@ -142,7 +142,7 @@ export default function UploadFileButton({
   ).length;
   const totalNumberOfFiles = Array.from(files?.values() ?? []).length;
   const allowedImageFormats =
-    numberOfImages < NUMBER_OF_IMAGES_LIMIT && selectedModel?.supportedImageFormats
+    numberOfImages < NUMBER_OF_IMAGES_LIMIT && selectedModel?.supportedImageFormats?.length !== 0
       ? SUPPORTED_IMAGE_EXTENSIONS
       : [];
 

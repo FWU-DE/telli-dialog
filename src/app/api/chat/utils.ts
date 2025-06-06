@@ -232,3 +232,25 @@ Ausgabe: " "
   });
   return text.trim().split(',');
 }
+
+export async function getChatTitle({
+  messages,
+  model,
+}: {
+  messages: Array<Message>;
+  model: LanguageModelV1;
+}): Promise<string> {
+  const { text } = await generateText({
+    model,
+    system: `Du erstellst einen kurzen Titel basierend auf der ersten Nachricht eines Nutzers
+    Gehe nur auf die erste Nachricht des Nutzers ein.
+  
+Regeln:
+1. Der Titel sollte eine Zusammenfassung der Nachricht sein
+2. Verwende keine Anführungszeichen oder Doppelpunkte
+3. Der Titel sollte nicht länger als 80 Zeichen sein
+`,
+    messages,
+  });
+  return text.trim();
+}

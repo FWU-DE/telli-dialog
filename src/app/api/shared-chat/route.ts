@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
   const urls = sharedChat.attachedLinks.filter((l) => l !== '').map(webScraperExecutable);
 
   const retrievedTextChunks = await getRelevantFileContent({
+    model: telliProvider,
     messages,
     user: teacherUserAndContext,
     relatedFileEntities,
