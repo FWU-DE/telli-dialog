@@ -243,7 +243,6 @@ export async function getChatTitle({
   const { text } = await generateText({
     model,
     system: `Du erstellst einen kurzen Titel basierend auf der ersten Nachricht eines Nutzers
-    Gehe nur auf die erste Nachricht des Nutzers ein.
   
 Regeln:
 1. Der Titel sollte eine Zusammenfassung der Nachricht sein
@@ -251,6 +250,7 @@ Regeln:
 3. Der Titel sollte nicht länger als 80 Zeichen sein
 `,
     messages,
+    maxTokens: 30,
   });
   return text.trim();
 }
