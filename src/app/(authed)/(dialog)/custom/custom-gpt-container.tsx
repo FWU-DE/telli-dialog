@@ -15,7 +15,6 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 import { deleteCustomGptAction } from './editor/[customgptId]/actions';
 import { createNewCustomGptAction } from './actions';
-import ClipboardIcon from '@/components/icons/clipboard';
 import { CreateNewCharacterFromTemplate } from '../characters/create-new-character-button';
 import { iconClassName } from '@/utils/tailwind/icon';
 import TelliClipboardButton from '@/components/common/clipboard-button';

@@ -240,6 +240,7 @@ export async function getMaybeSignedUrlIfExists({
     // If no error is thrown, the object exists, so generate the signed URL
     return await getSignedUrlFromS3Get({ key, filename, contentType, attachment });
   } catch (error) {
+    console.error('Error getting signed URL from S3:', error);
     // If an error is thrown, the object doesn't exist
     return undefined;
   }
