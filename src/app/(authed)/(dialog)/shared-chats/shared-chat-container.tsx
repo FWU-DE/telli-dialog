@@ -3,19 +3,16 @@
 import HeaderPortal from '../header-portal';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import ProfileMenu from '@/components/navigation/profile-menu';
-import { SharedSchoolConversationModel } from '@/db/schema';
 import React from 'react';
 import { cn } from '@/utils/tailwind';
-import Link from 'next/link';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
-import PlusIcon from '@/components/icons/plus';
 import SharedChatItem from './shared-chat-item';
 import SearchBarInput from '@/components/search-bar';
 import { type UserAndContext } from '@/auth/types';
 import { useTranslations } from 'next-intl';
-
+import { SharedChatWithImage } from './[sharedSchoolChatId]/utils';
+import { CreateNewSharedChatButton } from './create-new-shared-chat';
 type SharedChatContainerProps = {
-  sharedChats: SharedSchoolConversationModel[];
+  sharedChats: SharedChatWithImage[];
   user: UserAndContext;
 };
 
@@ -48,14 +45,7 @@ export function SharedChatContainer({ sharedChats, user }: SharedChatContainerPr
             disabled={filterDisabled}
           />
           <div className="flex-grow" />
-          <Link
-            title={t('button-create')}
-            href="/shared-chats/create"
-            className={cn(buttonPrimaryClassName, 'flex gap-2 items-center group py-2')}
-          >
-            <PlusIcon className="fill-primary-text group-hover:fill-secondary-text" />
-            <span>{t('button-create')}</span>
-          </Link>
+          <CreateNewSharedChatButton />
         </div>
         {sharedChats.length < 1 && <p className="text-dark-gray mt-16">{t('no-dialogs')}</p>}
         {filteredSharedChats.length > 0 && (
@@ -70,7 +60,7 @@ export function SharedChatContainer({ sharedChats, user }: SharedChatContainerPr
   );
 }
 
-function filterSharedChats(sharedChats: SharedSchoolConversationModel[], input: string) {
+function filterSharedChats(sharedChats: SharedChatWithImage[], input: string) {
   const lowerCaseInput = input.toLowerCase();
 
   return sharedChats.filter((sharedChat) => {

@@ -6,9 +6,9 @@ import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { handleSingleFile, UploadFileButtonProps } from '../chat/upload-file-button';
 import { useSession } from 'next-auth/react';
 import { useToast } from '../common/toast';
-import { SUPPORTED_FILE_EXTENSIONS } from '@/const';
+import { SUPPORTED_DOCUMENTS_EXTENSIONS } from '@/const';
 import { validateFileExtentsion as validateFileExtension } from '@/utils/files/generic';
-import { MAX_FILES } from '@/configuration-text-inputs/const';
+import { FORM_NUMBER_FILES_LIMIT } from '@/configuration-text-inputs/const';
 
 export function FileDrop({
   onFileUploaded,
@@ -42,10 +42,10 @@ export function FileDrop({
 
       const totalFileCount = countOfFiles ? countOfFiles + files.length : files.length;
 
-      if (totalFileCount > MAX_FILES) {
+      if (totalFileCount > FORM_NUMBER_FILES_LIMIT) {
         toast.error(
           t('toasts.file-limit-exceeded', {
-            max_files: MAX_FILES,
+            max_files: FORM_NUMBER_FILES_LIMIT,
           }),
         );
         return;
@@ -69,6 +69,7 @@ export function FileDrop({
         fileInputRef.current.value = '';
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [toast, session, setFiles, onFileUploaded, t, showUploadConfirmation],
   );
 
@@ -105,7 +106,7 @@ export function FileDrop({
       if (!validateFileExtensions(files)) {
         toast.error(
           t('toasts.invalid-file-format', {
-            supported_formats: SUPPORTED_FILE_EXTENSIONS.join(','),
+            supported_formats: SUPPORTED_DOCUMENTS_EXTENSIONS.join(','),
           }),
         );
         return;
@@ -139,11 +140,11 @@ export function FileDrop({
           type="file"
           className="hidden"
           onChange={handleFileChange}
-          accept={SUPPORTED_FILE_EXTENSIONS.map((e) => `.${e}`).join(',')}
+          accept={SUPPORTED_DOCUMENTS_EXTENSIONS.map((e) => `.${e}`).join(',')}
           multiple
         />
         <div className="mt-4 flex flex-col text-sm gap-4 items-center">
-          <FileUploadIcon className="" />
+          <FileUploadIcon className="w-8 h-8 text-primary" />
           <span className="text-xl">{t('upload.drop-area')}</span>
           <span className="text-gray-600">{t('upload.choice-word')}</span>
           <button

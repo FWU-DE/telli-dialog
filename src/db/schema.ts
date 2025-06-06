@@ -8,11 +8,27 @@ import {
   unique,
   json,
   boolean,
+  vector,
+  customType,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
-import { type LlmModelPriceMetadata } from './types';
+import { DesignConfiguration, type LlmModelPriceMetadata } from './types';
 import { conversationRoleSchema } from '@/utils/chat';
 import { sql } from 'drizzle-orm';
+
+export const tsvector = customType<{
+  data: string;
+}>({
+  dataType() {
+    return `tsvector`;
+  },
+});
+
+// can be expanded to include other metadata of other file types
+export type FileMetadata = {
+  width?: number;
+  height?: number;
+};
 
 export const userTable = pgTable('user_entity', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -103,6 +119,10 @@ export const federalStateTable = pgTable('federal_state', {
   chatStorageTime: integer('chat_storage_time').notNull().default(120),
   supportContact: text('support_contact'),
   trainingLink: text('training_link'),
+  // whitelabel configuration
+  designConfiguration: json('design_configuration').$type<DesignConfiguration>(),
+  telliName: text('telli_name'),
+  // feature flags
   studentAccess: boolean('student_access').default(true).notNull(),
   enableCharacter: boolean('enable_characters').default(true).notNull(),
   enableSharedChats: boolean('enable_shared_chats').default(true).notNull(),
@@ -168,6 +188,7 @@ export const llmModelTable = pgTable(
     description: text('description').notNull().default(''),
     priceMetadata: json('price_metada').$type<LlmModelPriceMetadata>().notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    supportedImageFormats: json('supported_image_formats').$type<string[]>(),
   },
   (table) => ({
     unq: unique().on(table.provider, table.name),
@@ -204,14 +225,19 @@ export const sharedSchoolConversationTable = pgTable('shared_school_conversation
   userId: uuid('user_id')
     .references(() => userTable.id)
     .notNull(),
-  schoolType: text('school_type').notNull().default(''),
-  gradeLevel: text('grade_level').notNull().default(''),
-  subject: text('subject').default('').notNull(),
-  learningContext: text('learning_context').default('').notNull(),
-  specification: text('specification'),
-  restrictions: text('restrictions'),
+  schoolType: text('school_type'),
+  gradeLevel: text('grade_level'),
+  subject: text('subject'),
+  studentExcercise: text('student_excercise').default('').notNull(),
+  additionalInstructions: text('additional_instructions'),
+  restrictions: text('restrictions'), // Not used anymore
   intelligencePointsLimit: integer('intelligence_points_limit'),
   maxUsageTimeLimit: integer('max_usage_time_limit'),
+  attachedLinks: text('attached_links')
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
+  pictureId: text('picture_id'),
   inviteCode: text('invite_code').unique(),
   startedAt: timestamp('started_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
@@ -321,13 +347,14 @@ export const fileTable = pgTable('file_table', {
   size: integer('size').notNull(),
   type: text('type').notNull(),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  metadata: json('metadata').$type<FileMetadata>(),
 });
 export type FileModel = typeof fileTable.$inferSelect;
 export type FileModelAndUrl = FileModel & { signedUrl: string };
 export type FileModelAndContent = FileModel & { content?: string };
 export type FileInsertModel = typeof fileTable.$inferInsert;
 
-export const conversationMessgaeFileMappingTable = pgTable(
+export const ConversationMessageFileMappingTable = pgTable(
   'conversation_message_file_mapping',
   {
     id: uuid('id').defaultRandom().primaryKey(),
@@ -397,3 +424,32 @@ export const CustomGptFileMapping = pgTable(
     unq: unique().on(table.customGptId, table.fileId),
   }),
 );
+
+export const TextChunkTable = pgTable(
+  'text_chunk',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    fileId: text('file_id')
+      .references(() => fileTable.id)
+      .notNull(),
+    embedding: vector('embedding', { dimensions: 1024 }).notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    content: text('content').notNull(),
+    leadingOverlap: text('leading_overlap'),
+    trailingOverlap: text('trailing_overlap'),
+    orderIndex: integer('order_index').notNull(),
+    pageNumber: integer('page_number'),
+    contentTsv: tsvector('content_tsv')
+      .notNull()
+      .generatedAlwaysAs(sql`to_tsvector('german', content)`),
+  },
+  () => {
+    return {
+      embeddingIdx: sql`CREATE INDEX IF NOT EXISTS text_chunk_embedding_idx ON text_chunk USING hnsw (embedding vector_cosine_ops)`,
+      contentTsvIdx: sql`CREATE INDEX IF NOT EXISTS text_chunk_content_tsv_idx ON text_chunk USING GIN (contentTsv)`,
+    };
+  },
+);
+
+export type TextChunkModel = typeof TextChunkTable.$inferSelect;
+export type TextChunkInsertModel = typeof TextChunkTable.$inferInsert;

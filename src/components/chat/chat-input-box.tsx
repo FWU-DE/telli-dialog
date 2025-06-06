@@ -5,10 +5,16 @@ import { LocalFileState } from './send-message-form';
 import {
   CHAT_MESSAGE_LENGTH_LIMIT,
   NUMBER_OF_FILES_LIMIT,
+  NUMBER_OF_IMAGES_LIMIT,
 } from '@/configuration-text-inputs/const';
 import StopIcon from '../icons/stop';
 import ArrowRightIcon from '../icons/arrow-right';
 import UploadFileButton from './upload-file-button';
+import { useToast } from '../common/toast';
+import { useEffect, useState } from 'react';
+import { iconClassName } from '@/utils/tailwind/icon';
+import { cn } from '@/utils/tailwind';
+import { isImageFile } from '@/utils/files/generic';
 
 export function ChatInputBox({
   files,
@@ -32,6 +38,46 @@ export function ChatInputBox({
   enableFileUpload?: boolean;
 }) {
   const tCommon = useTranslations('common');
+  const tFileInteraction = useTranslations('file-interaction');
+  const toast = useToast();
+  const [fileUploading, setFileUploading] = useState(false);
+  useEffect(() => {
+    if (files && setFiles && files.size > NUMBER_OF_FILES_LIMIT) {
+      toast.error(
+        tFileInteraction('upload.file-limit-reached', {
+          max_files: NUMBER_OF_FILES_LIMIT,
+          files_exceeded: files.size - NUMBER_OF_FILES_LIMIT,
+        }),
+      );
+      const trimmedFiles = new Map(Array.from(files.entries()).slice(0, NUMBER_OF_FILES_LIMIT));
+      setFiles(trimmedFiles);
+      setFileUploading(false);
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const imageEntries = Array.from(files?.entries() ?? []).filter(([_, file]) =>
+      isImageFile(file.file.name),
+    );
+    const numberOfImages = imageEntries.length;
+
+    if (files && setFiles && numberOfImages > NUMBER_OF_IMAGES_LIMIT) {
+      const newFiles = new Map(files);
+      const imagesExceedingLimit = imageEntries.slice(NUMBER_OF_IMAGES_LIMIT);
+      toast.error(
+        tFileInteraction('upload.image-limit-reached', {
+          max_images: NUMBER_OF_IMAGES_LIMIT,
+          images_exceeded: imagesExceedingLimit.length,
+        }),
+      );
+      // pop off all images exceeding the limit
+      imagesExceedingLimit.forEach(([localId]) => {
+        newFiles.delete(localId);
+      });
+      setFiles(newFiles);
+      setFileUploading(false);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [files]);
 
   async function handleSubmitOnEnter(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !isLoading && !e.shiftKey) {
@@ -48,20 +94,26 @@ export function ChatInputBox({
       type="button"
       title="Stop generating"
       onClick={handleStopGeneration}
-      className="p-1.5 my-2 flex items-center justify-center group disabled:cursor-not-allowed rounded-enterprise-sm hover:bg-secondary/20 me-2"
+      className={cn(
+        'p-1.5 my-2 flex items-center justify-center group disabled:cursor-not-allowed me-2',
+        iconClassName,
+      )}
       aria-label="Stop"
     >
-      <StopIcon className="w-6 h-6 text-dark-gray group-disabled:bg-gray-200 group-disabled:text-gray-100 rounded-enterprise-sm text-primary group-hover:bg-secondary/20" />
+      <StopIcon className={cn('w-6 h-6')} />
     </button>
   ) : (
     <button
       type="submit"
-      title="Send message"
-      disabled={input.trim().length === 0}
-      className="my-2 mx-2 flex items-center self-end justify-center group disabled:cursor-not-allowed text-dark-gray hover:bg-secondary/20 disabled:bg-gray-200 disabled:text-gray-100 rounded-enterprise-sm text-primary"
-      aria-label="Send Message"
+      title="Nachricht abschicken"
+      disabled={input.trim().length === 0 || fileUploading}
+      className={cn(
+        iconClassName,
+        'my-2 mx-2 flex items-center self-end justify-center group disabled:cursor-not-allowed text-dark-gray',
+      )}
+      aria-label="Nachricht abschicken"
     >
-      <ArrowRightIcon className="h-9 w-9" />
+      <ArrowRightIcon className={cn('h-9 w-9')} />
     </button>
   );
 
@@ -94,11 +146,12 @@ export function ChatInputBox({
             maxLength={CHAT_MESSAGE_LENGTH_LIMIT}
           />
           {enableFileUpload && files !== undefined && setFiles !== undefined && (
-            <div className="flex flex-row gap-x-3">
+            <div className="flex flex-row gap-x-3 rounded-enterprise-sm">
               <UploadFileButton
-                className="hover:bg-vidis-hover-green/20"
+                className={iconClassName}
                 setFiles={setFiles}
-                disabled={files.size >= NUMBER_OF_FILES_LIMIT}
+                files={files}
+                setFileUploading={setFileUploading}
               />
             </div>
           )}

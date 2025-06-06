@@ -1,6 +1,13 @@
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { db } from '..';
-import { conversationMessageTable, conversationTable } from '../schema';
+import {
+  conversationMessageTable,
+  ConversationMessageFileMappingTable,
+  conversationTable,
+  fileTable,
+  TextChunkTable,
+} from '../schema';
+import { deleteFileFromS3 } from '@/s3';
 
 export async function dbDeleteConversationByIdAndUserId({
   conversationId,
@@ -25,6 +32,22 @@ export async function dbDeleteConversationByIdAndUserId({
     if (deletedConversation === undefined) {
       throw Error('Could not delete the conversation');
     }
+
+    const filesToDelete = (
+      await tx
+        .select({ fileId: ConversationMessageFileMappingTable.fileId })
+        .from(ConversationMessageFileMappingTable)
+        .where(eq(ConversationMessageFileMappingTable.conversationId, conversationId))
+    ).map((f) => f.fileId);
+
+    for (const fileId of filesToDelete) {
+      await deleteFileFromS3({ key: fileId });
+    }
+    await tx
+      .delete(ConversationMessageFileMappingTable)
+      .where(inArray(ConversationMessageFileMappingTable.fileId, filesToDelete));
+    await tx.delete(TextChunkTable).where(inArray(TextChunkTable.fileId, filesToDelete));
+    await tx.delete(fileTable).where(inArray(fileTable.id, filesToDelete));
 
     return deletedConversation;
   });

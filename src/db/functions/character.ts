@@ -1,4 +1,4 @@
-import { and, desc, eq, getTableColumns, inArray, or } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, inArray, isNull, or } from 'drizzle-orm';
 import { db } from '..';
 import {
   CharacterFileMapping,
@@ -11,6 +11,7 @@ import {
   SharedCharacterChatUsageTrackingInsertModel,
   sharedCharacterChatUsageTrackingTable,
   sharedCharacterConversation,
+  TextChunkTable,
 } from '../schema';
 import { dbGetModelByName } from './llm-model';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
@@ -117,30 +118,10 @@ export async function dbCreateCharacter(character: Omit<CharacterInsertModel, 'm
   return created;
 }
 
-export async function dbGetGlobalCharacters(): Promise<CharacterModel[]> {
-  const characters = await db
-    .select({
-      ...getTableColumns(characterTable),
-      intelligencePointsLimit: sharedCharacterConversation.intelligencePointsLimit,
-      inviteCode: sharedCharacterConversation.inviteCode,
-      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
-      startedAt: sharedCharacterConversation.startedAt,
-    })
-    .from(characterTable)
-    .leftJoin(
-      sharedCharacterConversation,
-      eq(sharedCharacterConversation.characterId, characterTable.id),
-    )
-    .where(eq(characterTable.accessLevel, 'global'))
-    .orderBy(desc(characterTable.createdAt));
-
-  return characters;
-}
-
-export async function dbGetCharactersBySchoolId({
-  schoolId,
+export async function dbGetGlobalCharacters({
+  userId,
 }: {
-  schoolId: string;
+  userId: string;
 }): Promise<CharacterModel[]> {
   const characters = await db
     .select({
@@ -155,7 +136,50 @@ export async function dbGetCharactersBySchoolId({
       sharedCharacterConversation,
       eq(sharedCharacterConversation.characterId, characterTable.id),
     )
-    .where(and(eq(characterTable.schoolId, schoolId), eq(characterTable.accessLevel, 'school')))
+    .where(
+      and(
+        eq(characterTable.accessLevel, 'global'),
+        or(
+          eq(sharedCharacterConversation.userId, userId),
+          isNull(sharedCharacterConversation.userId),
+        ),
+      ),
+    )
+    .orderBy(desc(characterTable.createdAt));
+
+  return characters;
+}
+
+export async function dbGetCharactersBySchoolId({
+  schoolId,
+  userId,
+}: {
+  schoolId: string;
+  userId: string;
+}): Promise<CharacterModel[]> {
+  const characters = await db
+    .select({
+      ...getTableColumns(characterTable),
+      intelligencePointsLimit: sharedCharacterConversation.intelligencePointsLimit,
+      inviteCode: sharedCharacterConversation.inviteCode,
+      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
+      startedAt: sharedCharacterConversation.startedAt,
+    })
+    .from(characterTable)
+    .leftJoin(
+      sharedCharacterConversation,
+      eq(sharedCharacterConversation.characterId, characterTable.id),
+    )
+    .where(
+      and(
+        eq(characterTable.schoolId, schoolId),
+        eq(characterTable.accessLevel, 'school'),
+        or(
+          eq(sharedCharacterConversation.userId, userId),
+          isNull(sharedCharacterConversation.userId),
+        ),
+      ),
+    )
     .orderBy(desc(characterTable.createdAt));
 
   return characters;
@@ -250,6 +274,12 @@ export async function dbDeleteCharacterByIdAndUserId({
     }
     await tx.delete(conversationTable).where(eq(conversationTable.characterId, character.id));
     await tx.delete(CharacterFileMapping).where(eq(CharacterFileMapping.characterId, character.id));
+    await tx.delete(TextChunkTable).where(
+      inArray(
+        TextChunkTable.fileId,
+        relatedFiles.map((f) => f.id),
+      ),
+    );
     await tx.delete(fileTable).where(
       inArray(
         fileTable.id,
@@ -295,6 +325,14 @@ export async function dbGetCharacterByIdAndInviteCode({
     )
     .where(and(eq(characterTable.id, id), eq(sharedCharacterConversation.inviteCode, inviteCode)));
 
+  // if the character is not shared, return the character
+  if (row === undefined) {
+    const [row] = await db
+      .select()
+      .from(characterTable)
+      .where(and(eq(characterTable.id, id)));
+    return row;
+  }
   return row as CharacterModel;
 }
 

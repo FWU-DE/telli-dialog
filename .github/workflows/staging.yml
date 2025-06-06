@@ -65,7 +65,7 @@ jobs:
 
   deploy-staging:
     name: Rollout staging
-    timeout-minutes: 10
+    timeout-minutes: 20
     needs: build-staging
     runs-on: ubuntu-latest
 

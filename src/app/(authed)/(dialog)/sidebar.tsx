@@ -121,7 +121,9 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
 
           <Link href="/" className="w-full flex gap-2 items-center hover:underline px-2 py-1.5">
             <TelliIcon className="w-4 h-4 fill-primary" />
-            <span className="text-base font-medium text-primary">telli</span>
+            <span className="text-base font-medium text-primary">
+              {user.federalState.telliName ?? 'telli'}
+            </span>
           </Link>
           <hr className="w-full my-2" />
           <div className="w-full items-center flex flex-col gap-1 h-fit">
@@ -164,7 +166,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                         'underline',
                     )}
                   >
-                    <FourBoxes className="w-6 h-6" />
+                    <FourBoxes className="w-6 h-5" />
                     <span className="text-base">{t('custom-gpt')}</span>
                   </div>
                 </Link>
@@ -176,7 +178,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                         pathname.includes(HELP_MODE_GPT_ID) && 'underline',
                       )}
                     >
-                      <RobotIcon className="w-6 h-6" />
+                      <RobotIcon className="w-6 h-5" />
                       <span className="text-base">{t('help-mode')}</span>
                     </div>
                   </Link>

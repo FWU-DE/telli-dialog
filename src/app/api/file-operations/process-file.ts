@@ -3,7 +3,7 @@ import { readFileFromS3 } from '@/s3';
 import { extractFile } from './extract-file';
 import { getFileExtension } from '@/utils/files/generic';
 
-export async function process_files(
+export async function processFiles(
   maybeFiles: FileModelAndContent[],
 ): Promise<FileModelAndContent[]> {
   const fileContents = await Promise.all(
@@ -20,8 +20,11 @@ export async function process_files(
     const content = fileContents[i];
     if (content === undefined) continue;
     const fileType = getFileExtension(fileEnity.name);
-    const extractedData = await extractFile({ fileContent: content, type: fileType });
-    fileEnity.content = extractedData.content;
+    if (fileType === undefined) {
+      continue;
+    }
+    const extractResult = await extractFile({ fileContent: content, type: fileType });
+    fileEnity.content = extractResult.content.map((element) => element.text).join('\n\n');
     i++;
   }
   return maybeFiles;

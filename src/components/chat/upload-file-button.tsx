@@ -7,35 +7,37 @@ import { ToastContextType, useToast } from '../common/toast';
 import { useConversation } from '../providers/conversation-provider';
 import AttachFileIcon from '../icons/attach-file';
 import { cn } from '@/utils/tailwind';
-import { SUPPORTED_FILE_EXTENSIONS } from '@/const';
+import { SUPPORTED_DOCUMENTS_EXTENSIONS, MAX_FILE_SIZE, SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
 import { TranslationValues, useTranslations } from 'next-intl';
+import { NUMBER_OF_FILES_LIMIT, NUMBER_OF_IMAGES_LIMIT } from '@/configuration-text-inputs/const';
+import { useLlmModels } from '../providers/llm-model-provider';
+import { isImageFile } from '@/utils/files/generic';
 
 export type FileUploadMetadata = {
   directoryId: string;
 };
 
-export type FileUploadResponseWithWarning = {
+export type FileUploadResponse = {
   fileId: string;
-  warning: string | null;
 };
 
 export type FileStatus = 'uploading' | 'processed' | 'failed' | 'success';
 
 export type UploadFileButtonProps = {
   setFiles: React.Dispatch<React.SetStateAction<Map<string, LocalFileState>>>;
-  disabled?: boolean;
-  isPrivateMode?: boolean;
   onFileUploaded?: (data: { id: string; name: string; file: File }) => void;
   triggerButton?: React.ReactNode;
-  fileUploadFn?: (file: File) => Promise<FileUploadResponseWithWarning>;
+  fileUploadFn?: (file: File) => Promise<FileUploadResponse>;
   onFileUploadStart?: () => void;
   className?: string;
   directoryId?: string;
   showUploadConfirmation?: boolean;
   countOfFiles?: number;
+  setFileUploading?: React.Dispatch<React.SetStateAction<boolean>>;
+  files?: Map<string, LocalFileState>;
+  disabled?: boolean;
 };
 
-const MAX_FILE_SIZE = 5_000_000; // 5MB
 export async function handleSingleFile({
   file,
   setFiles,
@@ -47,7 +49,7 @@ export async function handleSingleFile({
   file: File;
   prevFileIds?: string[];
   setFiles: React.Dispatch<React.SetStateAction<Map<string, LocalFileState>>>;
-  fileUploadFn?: (file: File) => Promise<FileUploadResponseWithWarning>;
+  fileUploadFn?: (file: File) => Promise<FileUploadResponse>;
   directoryId?: string;
   onFileUploaded?: (data: { id: string; name: string; file: File }) => void;
   session: ReturnType<typeof useSession>;
@@ -82,12 +84,11 @@ export async function handleSingleFile({
   const blobFile = new Blob([file], { type: file.type });
 
   try {
-    const fileIdAndWarning = await fetchUploadFile({
+    const fileId = await fetchUploadFile({
       body: blobFile,
       contentType: file.type,
       fileName: file.name,
     });
-    const fileId = fileIdAndWarning.fileId;
     setFiles((prevFiles) => {
       const updatedFiles = new Map(prevFiles);
       const fileState = updatedFiles.get(localId);
@@ -100,10 +101,7 @@ export async function handleSingleFile({
       }
       return updatedFiles;
     });
-    if (fileIdAndWarning.warning !== null) {
-      toast.error(fileIdAndWarning.warning);
-    }
-    onFileUploaded?.({ id: fileIdAndWarning.fileId, name: file.name, file });
+    onFileUploaded?.({ id: fileId, name: file.name, file });
     if (showUploadConfirmation) toast.success(translations('toasts.upload-success'));
   } catch (error) {
     setFiles((prevFiles) => {
@@ -124,26 +122,37 @@ export async function handleSingleFile({
 
 export default function UploadFileButton({
   setFiles,
-  disabled = false,
-  isPrivateMode = false,
   onFileUploaded,
   triggerButton,
   fileUploadFn,
   className,
   onFileUploadStart,
   directoryId,
+  setFileUploading,
+  files,
 }: UploadFileButtonProps) {
   const toast = useToast();
   const session = useSession();
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const t = useTranslations('file-interaction');
+  const { selectedModel } = useLlmModels();
+
+  const numberOfImages = Array.from(files?.values() ?? []).filter(
+    (file) => file.status === 'processed' && isImageFile(file.file.name),
+  ).length;
+  const totalNumberOfFiles = Array.from(files?.values() ?? []).length;
+  const allowedImageFormats =
+    numberOfImages < NUMBER_OF_IMAGES_LIMIT && selectedModel?.supportedImageFormats
+      ? SUPPORTED_IMAGE_EXTENSIONS
+      : [];
+
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const selectedFiles = event.target.files;
 
     if (selectedFiles === null) return;
 
     const files = Array.from(selectedFiles);
-
+    setFileUploading?.(true);
     onFileUploadStart?.();
     await Promise.all(
       files.map((f) =>
@@ -160,11 +169,13 @@ export default function UploadFileButton({
         }),
       ),
     );
-
+    setFileUploading?.(false);
     if (fileInputRef.current !== null) {
       fileInputRef.current.value = '';
     }
   }
+  const currentSupportedFileFormats = [...SUPPORTED_DOCUMENTS_EXTENSIONS, ...allowedImageFormats];
+  const isUploadLimitReached = totalNumberOfFiles >= NUMBER_OF_FILES_LIMIT;
 
   const conversation = useConversation();
 
@@ -180,20 +191,21 @@ export default function UploadFileButton({
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}
-        accept={SUPPORTED_FILE_EXTENSIONS.map((e) => `.${e}`).join(',')}
+        accept={currentSupportedFileFormats.map((e) => `.${e}`).join(',')}
       />
       <button
         onClick={handleUploadClick}
-        className={className}
-        disabled={disabled || isPrivateMode}
+        className={cn(className, 'disabled:cursor-not-allowed')}
+        disabled={isUploadLimitReached}
         type="button"
-        title={disabled ? t('upload.file-limit-reached') : t('upload.upload-file-button')}
+        title={
+          isUploadLimitReached
+            ? t('upload.file-limit-reached', { max_files: NUMBER_OF_FILES_LIMIT })
+            : t('upload.upload-file-button')
+        }
       >
         {triggerButton ?? (
-          <AttachFileIcon
-            className={cn('sm:w-10 sm:h-10 w-8 h-8')}
-            stroke={isPrivateMode ? 'white' : 'black'}
-          />
+          <AttachFileIcon className={cn('sm:w-10 sm:h-10 w-8 h-8')} stroke="black" />
         )}
       </button>
     </>
@@ -204,7 +216,7 @@ export async function fetchUploadFile(data: {
   body: Blob;
   contentType: string;
   fileName: string;
-}): Promise<FileUploadResponseWithWarning> {
+}): Promise<string> {
   const formData = new FormData();
   formData.append('file', data.body, data.fileName);
   const response = await fetch('/api/v1/upload-file', {
@@ -216,9 +228,7 @@ export async function fetchUploadFile(data: {
   }
 
   const json = await response.json();
-  const parsedJson = z
-    .object({ file_id: z.string(), warning: z.string().nullable() })
-    .parse(JSON.parse(json?.body));
+  const parsedJson = z.object({ file_id: z.string() }).parse(JSON.parse(json?.body));
 
-  return { fileId: parsedJson.file_id, warning: parsedJson.warning };
+  return parsedJson.file_id;
 }

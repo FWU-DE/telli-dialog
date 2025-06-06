@@ -17,6 +17,7 @@ import { deleteCustomGptAction } from './editor/[customgptId]/actions';
 import { createNewCustomGptAction } from './actions';
 import ClipboardIcon from '@/components/icons/clipboard';
 import { CreateNewCharacterFromTemplate } from '../characters/create-new-character-button';
+import { iconClassName } from '@/utils/tailwind/icon';
 
 type CustomGptContainerProps = CustomGptModel & {
   currentUserId: string;
@@ -58,10 +59,12 @@ export default function CustomGptContainer({
     e.stopPropagation();
     router.push(`/custom/d/${id}`);
   }
-
+  const queryParams = new URLSearchParams({
+    create: 'false',
+  });
   return (
     <Link
-      href={`/custom/editor/${id}`}
+      href={`/custom/editor/${id}?${queryParams.toString()}`}
       className="rounded-enterprise-md border p-6 flex items-center gap-4 w-full hover:border-primary"
     >
       <figure
@@ -102,7 +105,7 @@ export default function CustomGptContainer({
           type="button"
           aria-label={tCommon('new-chat')}
           onClick={handleNavigateToNewChat}
-          className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
+          className={cn(iconClassName, 'border-transparent p-0')}
         >
           <SharedChatIcon aria-hidden="true" className="w-8 h-8" />
           <span className="sr-only">{tCommon('new-chat')}</span>
@@ -115,9 +118,9 @@ export default function CustomGptContainer({
           confirmText={tCommon('delete')}
           actionFn={handleDeleteCustomGpt}
           aria-label={t('form.delete-gpt')}
-          triggerButtonClassName="border-transparent justify-center flex flex-col rounded-enterprise-sm hover:bg-vidis-hover-green/20 p-0"
+          triggerButtonClassName={cn('border-transparent p-0', iconClassName)}
         >
-          <TrashIcon aria-hidden="true" className="w-8 h-8 text-primary" />
+          <TrashIcon aria-hidden="true" className="w-8 h-8" />
           <span className="sr-only">{t('form.delete-gpt')}</span>
         </DestructiveActionButton>
       )}

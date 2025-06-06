@@ -1,8 +1,12 @@
 import NotFound from '@/app/not-found';
 import SharedChat from '@/components/chat/shared-chat';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
+import { ThemeProvider } from '@/components/providers/theme-provider';
+import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 import { dbGetLlmModelById } from '@/db/functions/llm-model';
+import { dbGetFederalStateByUserId } from '@/db/functions/school';
 import { dbGetSharedChatByIdAndInviteCode } from '@/db/functions/shared-school-chat';
+import { getMaybeSignedUrlFromS3Get } from '@/s3';
 import { awaitPageContext } from '@/utils/next/utils';
 import { z } from 'zod';
 
@@ -45,10 +49,23 @@ export default async function Page(context: {
     return <NotFound />;
   }
 
+  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
+    key: sharedSchoolChat.pictureId,
+  });
+
+  const federalState = await dbGetFederalStateByUserId({ userId: sharedSchoolChat.userId });
+  const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
+
   return (
     <main className="h-[100dvh] w-full">
       <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
-        <SharedChat {...sharedSchoolChat} inviteCode={searchParams.inviteCode} />
+        <ThemeProvider designConfiguration={designConfiguration}>
+          <SharedChat
+            {...sharedSchoolChat}
+            inviteCode={searchParams.inviteCode}
+            maybeSignedPictureUrl={maybeSignedPictureUrl}
+          />
+        </ThemeProvider>
       </LlmModelsProvider>
     </main>
   );

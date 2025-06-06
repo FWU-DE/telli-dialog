@@ -9,6 +9,7 @@ import DownloadConversationButton from '../../download-conversation-button';
 import HeaderPortal from '../../header-portal';
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import { redirect } from 'next/navigation';
+import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { z } from 'zod';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
@@ -16,6 +17,9 @@ import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { dbGetRelatedFiles } from '@/db/functions/files';
+import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
+import { parseHyperlinks } from '@/utils/web-search/parsing';
+import Logo from '@/components/common/logo';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +56,32 @@ export default async function Page(context: PageContext) {
   const currentModel =
     searchParams?.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
 
+  const convertedMessages = convertMessageModelToMessage(messages);
+  const webSourceMapping = new Map<string, WebsearchSource[]>();
+  const logoElement = <Logo federalStateId={user.school.federalStateId} />;
+  for (const message of convertedMessages) {
+    const urls = parseHyperlinks(message.content);
+    if (urls === undefined) {
+      continue;
+    }
+    const webSearchPromises = urls?.map(webScraperExecutable);
+
+    try {
+      const websearchSources = await Promise.all(webSearchPromises ?? []);
+      if (websearchSources == undefined || websearchSources.length === 0) {
+        continue;
+      }
+      webSourceMapping.set(
+        message.id,
+        websearchSources.map((source) => {
+          return source;
+        }),
+      );
+    } catch (error) {
+      console.error('Error fetching webpage content:', error);
+    }
+  }
+
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
       <HeaderPortal>
@@ -69,9 +99,11 @@ export default async function Page(context: PageContext) {
       </HeaderPortal>
       <Chat
         id={conversation.id}
-        initialMessages={convertMessageModelToMessage(messages)}
+        initialMessages={convertedMessages}
         initialFileMapping={fileMapping}
         enableFileUpload={true}
+        webSourceMapping={webSourceMapping}
+        logoElement={logoElement}
       />
     </LlmModelsProvider>
   );

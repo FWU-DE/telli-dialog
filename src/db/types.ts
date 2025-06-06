@@ -12,6 +12,19 @@ export type InsertConversationModel = typeof conversationTable.$inferInsert;
 export type ConversationMessageModel = typeof conversationMessageTable.$inferSelect;
 export type InsertConversationMessageModel = typeof conversationMessageTable.$inferInsert;
 
+export type DesignConfiguration = {
+  primaryColor: string;
+  primaryTextColor: string;
+  secondaryColor: string;
+  secondaryTextColor: string;
+  secondaryDarkColor: string;
+  secondaryLightColor: string;
+  primaryHoverColor: string;
+  primaryHoverTextColor: string;
+  chatMessageBackgroundColor: string;
+  buttonPrimaryTextColor: string;
+};
+
 export type CustomTool = {
   type: 'function';
   function: {
@@ -23,7 +36,7 @@ export type CustomTool = {
 
 export type LlmModelPriceMetadata =
   | {
-      type: 'text';
+      type: 'text' | 'embedding';
       completionTokenPrice: number;
       promptTokenPrice: number;
     }

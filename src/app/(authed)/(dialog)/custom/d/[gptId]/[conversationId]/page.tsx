@@ -3,6 +3,7 @@ import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { getUser } from '@/auth/utils';
 import Chat from '@/components/chat/chat';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
+import Logo from '@/components/common/logo';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetConversationById, dbGetCoversationMessages } from '@/db/functions/chat';
 import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
@@ -61,6 +62,8 @@ export default async function Page(context: PageContext) {
     federalStateId: user.federalState.id,
   });
 
+  const logoElement = <Logo federalStateId={user.federalState.id} />;
+
   const lastUsedModelInChat =
     rawChatMessages.at(rawChatMessages.length - 1)?.modelName ?? undefined;
 
@@ -72,7 +75,12 @@ export default async function Page(context: PageContext) {
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
       <HeaderPortal>
-        <ChatHeaderBar chatId={chat.id} title={customGpt.name} user={user} />
+        <ChatHeaderBar
+          chatId={chat.id}
+          title={customGpt.name}
+          user={user}
+          downloadButtonDisabled={false}
+        />
       </HeaderPortal>
       <Chat
         id={chat.id}
@@ -80,6 +88,7 @@ export default async function Page(context: PageContext) {
         customGpt={customGpt}
         enableFileUpload={false}
         imageSource={maybeSignedImageUrl}
+        logoElement={logoElement}
       />
     </LlmModelsProvider>
   );

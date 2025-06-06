@@ -28,7 +28,6 @@ export async function insertFederalStates({ skip = true }: { skip: boolean }) {
       federalStateId: federalStateAndApiKey.id,
     });
   }
-  console.info('Inserted federal states');
 }
 
 export const FEDERAL_STATES = [

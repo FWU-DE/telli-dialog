@@ -17,10 +17,9 @@ import ShareIcon from '@/components/icons/share';
 import TrashIcon from '@/components/icons/trash';
 import SharedChatIcon from '@/components/icons/shared-chat';
 import { calculateTimeLeftBySharedChat } from '../shared-chats/[sharedSchoolChatId]/utils';
-import ClipboardIcon from '@/components/icons/clipboard';
 import { CreateNewCharacterFromTemplate } from './create-new-character-button';
-import { createNewCharacterAction } from './actions';
-
+import { iconClassName } from '@/utils/tailwind/icon';
+import TelliClipboardButton from '@/components/common/clipboard-button';
 type CharacterContainerProps = CharacterModel & {
   currentUserId: string;
   maybeSignedPictureUrl: string | undefined;
@@ -86,13 +85,18 @@ export default function CharacterContainer({
         )}
         {maybeSignedPictureUrl === undefined && <EmptyImageIcon className="w-4 h-4" />}
       </figure>
-      <div className="flex flex-col gap-1 text-left min-w-0">
-        <h2 className={cn('font-medium leading-none', truncateClassName)}>{name}</h2>
+      <div className="flex flex-col gap-0 text-left min-w-0">
+        <h2 className={cn('font-medium leading-none min-h-5', truncateClassName)}>{name}</h2>
         <span className={cn(truncateClassName, 'text-gray-400')}>{description}</span>
       </div>
       <div className="flex-grow" />
       {timeLeft > 0 && character.maxUsageTimeLimit !== null && (
-        <CountDownTimer leftTime={timeLeft} totalTime={character.maxUsageTimeLimit} />
+        <CountDownTimer
+          leftTime={timeLeft}
+          totalTime={character.maxUsageTimeLimit}
+          className="p-1 me-2"
+          stopWatchClassName="w-4 h-4"
+        />
       )}
       {character.accessLevel === 'global' && !(timeLeft > 0) && (
         <CreateNewCharacterFromTemplate
@@ -100,10 +104,11 @@ export default function CharacterContainer({
           createInstanceCallback={createNewCharacterAction}
           templateId={id}
           templatePictureId={character.pictureId ?? undefined}
-          {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
+          className={'w-8 h-8'}
+          {...{ title: t('copy-page.copy-template'), type: 'button' }}
         >
-          <button aria-label="copy-template">
-            <ClipboardIcon className={cn('text-primary hover:text-secondary', 'min-w-8 min-h-8')} />
+          <button aria-label="copy-template" className={cn(iconClassName, 'w-8 h-8')}>
+            <TelliClipboardButton text={t('copy-page.copy-template')} className="w-6 h-6" />
           </button>
         </CreateNewCharacterFromTemplate>
       )}
@@ -112,9 +117,9 @@ export default function CharacterContainer({
         <button
           aria-label={t('shared.share')}
           onClick={handleNavigateToShare}
-          className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
+          className={cn(iconClassName)}
         >
-          <ShareIcon aria-hidden="true" className="w-8 h-8" />
+          <ShareIcon aria-hidden="true" className="min-w-8 min-h-8" />
           <span className="sr-only">{t('shared.share')}</span>
         </button>
       )}
@@ -123,9 +128,9 @@ export default function CharacterContainer({
           type="button"
           aria-label={tCommon('new-chat')}
           onClick={handleNavigateToNewUnsharedChat}
-          className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
+          className={cn(iconClassName, 'min-w-8 min-h-8')}
         >
-          <SharedChatIcon aria-hidden="true" className="w-8 h-8" />
+          <SharedChatIcon aria-hidden="true" className="min-w-8 min-h-8" />
           <span className="sr-only">{tCommon('new-chat')}</span>
         </button>
       )}
@@ -137,9 +142,9 @@ export default function CharacterContainer({
           confirmText={tCommon('delete')}
           actionFn={handleDeleteCharacter}
           aria-label={t('form.delete-character')}
-          triggerButtonClassName="border-transparent justify-center flex flex-col rounded-enterprise-sm hover:bg-vidis-hover-green/20 p-0"
+          triggerButtonClassName={cn('border-transparent p-0', iconClassName)}
         >
-          <TrashIcon aria-hidden="true" className="w-8 h-8 text-primary" />
+          <TrashIcon aria-hidden="true" className="min-w-8 min-h-8" />
           <span className="sr-only">{t('form.delete-character')}</span>
         </DestructiveActionButton>
       )}

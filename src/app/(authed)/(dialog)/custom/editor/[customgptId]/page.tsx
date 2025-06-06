@@ -51,7 +51,6 @@ export default async function Page(context: PageContext) {
   const templateId = searchParams?.templateId;
 
   const user = await getUser();
-
   const customGpt = await dbGetCustomGptById({ customGptId: params.customgptId });
   const relatedFiles = await fetchFileMapping(params.customgptId);
 

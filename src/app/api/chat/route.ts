@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { dbInsertChatContent } from '@/db/functions/chat';
 import { getUser } from '@/auth/utils';
 import { userHasReachedIntelliPointLimit, trackChatUsage } from './usage';
-import { getModelAndProviderWithResult } from '../utils';
+import { getModelAndProviderWithResult, calculateCostsInCents } from '../utils';
 import { generateUUID } from '@/utils/uuid';
 import { getMostRecentUserMessage, limitChatHistory } from './utils';
 import { constructChatSystemPrompt } from './system-prompt';
@@ -18,11 +18,15 @@ import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
 import { dbGetAttachedFileByEntityId, link_file_to_conversation } from '@/db/functions/files';
-import { process_files } from '../file-operations/process-file';
-import { FileModelAndContent } from '@/db/schema';
 import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { SMALL_MODEL_MAX_CHARACTERS } from '@/configuration-text-inputs/const';
 import { SMALL_MODEL_LIST } from '@/configuration-text-inputs/const';
+import { parseHyperlinks } from '@/utils/web-search/parsing';
+import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
+import { WebsearchSource } from '../conversation/tools/websearch/types';
+import { getRelevantFileContent } from '../file-operations/retrieval';
+import { extractImagesAndUrl } from '../file-operations/prepocess-image';
+import { formatMessagesWithImages } from './utils';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -112,7 +116,7 @@ export async function POST(request: NextRequest) {
     modelName: definedModel.name,
     orderNumber: messages.length + 1,
   });
-  let attachedFiles: FileModelAndContent[] = [];
+
   if (currentFileIds !== undefined) {
     await link_file_to_conversation({
       fileIds: currentFileIds,
@@ -125,7 +129,32 @@ export async function POST(request: NextRequest) {
     characterId,
     customGptId,
   });
-  attachedFiles = await process_files(relatedFileEntities);
+
+  const orderedChunks = await getRelevantFileContent({ messages, user, relatedFileEntities });
+
+  // attach the image url to each of the image files within relatedFileEntities
+  const extractedImages = await extractImagesAndUrl(relatedFileEntities);
+
+  // Check if the model supports images based on supportedImageFormats
+  const modelSupportsImages =
+    definedModel.supportedImageFormats !== null && definedModel.supportedImageFormats.length > 0;
+
+  const urls = [userMessage, ...messages]
+    .map((message) => parseHyperlinks(message.content) ?? [])
+    .flat();
+
+  let websearchSources: WebsearchSource[] = [];
+  try {
+    websearchSources = await Promise.all(
+      urls.map(async (url) => {
+        return await webScraperExecutable(url);
+      }),
+    );
+  } catch (error) {
+    console.error('Unhandled error while fetching website', error);
+  }
+  // Condense chat history to search query to use for vector search and text retrieval
+
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
   const maxCharacterLimit = SMALL_MODEL_LIST.includes(definedModel.displayName)
     ? SMALL_MODEL_MAX_CHARACTERS
@@ -136,18 +165,25 @@ export async function POST(request: NextRequest) {
     limitFirst: 2,
     characterLimit: maxCharacterLimit,
   });
-
   const systemPrompt = await constructChatSystemPrompt({
     characterId,
     customGptId,
     isTeacher: user.school.userRole === 'teacher',
     federalState: user.federalState,
-    attachedFiles: attachedFiles,
+    websearchSources: websearchSources,
+    retrievedTextChunks: orderedChunks,
   });
+
+  // Format messages with images if the model supports vision
+  const messagesWithImages = formatMessagesWithImages(
+    prunedMessages,
+    extractedImages,
+    modelSupportsImages,
+  );
   const result = streamText({
     model: telliProvider,
     system: systemPrompt,
-    messages: prunedMessages.map((m) => ({ role: m.role, content: m.content })),
+    messages: messagesWithImages,
     experimental_generateMessageId: generateUUID,
     experimental_transform: smoothStream({ chunking: 'word', delayInMs: 20 }),
     async onFinish(assistantMessage) {
@@ -191,6 +227,8 @@ Verwende keine Anführungszeichen oder Doppelpunkte`,
           user,
           promptTokens: assistantMessage.usage.promptTokens,
           completionTokens: assistantMessage.usage.completionTokens,
+          costsInCents: calculateCostsInCents(definedModel, assistantMessage.usage),
+          provider: definedModel.provider,
           anonymous: false,
           conversation,
         }),

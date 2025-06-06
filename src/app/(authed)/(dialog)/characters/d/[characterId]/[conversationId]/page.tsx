@@ -2,6 +2,7 @@ import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import { getUser } from '@/auth/utils';
 import Chat from '@/components/chat/chat';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
+import Logo from '@/components/common/logo';
 import { dbGetCharacterByIdWithShareData } from '@/db/functions/character';
 import { dbGetConversationById, dbGetCoversationMessages } from '@/db/functions/chat';
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
@@ -48,11 +49,16 @@ export default async function Page(context: PageContext) {
     redirect('/');
   }
   const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: character.pictureId });
-
+  const logoElement = <Logo federalStateId={user.federalState.id} />;
   return (
     <>
       <HeaderPortal>
-        <ChatHeaderBar chatId={chat.id} title={character.name} user={user} />
+        <ChatHeaderBar
+          chatId={chat.id}
+          title={character.name}
+          user={user}
+          downloadButtonDisabled={false}
+        />
       </HeaderPortal>
       <Chat
         id={chat.id}
@@ -60,6 +66,7 @@ export default async function Page(context: PageContext) {
         character={character}
         enableFileUpload={false}
         imageSource={maybeSignedImageUrl}
+        logoElement={logoElement}
       />
     </>
   );

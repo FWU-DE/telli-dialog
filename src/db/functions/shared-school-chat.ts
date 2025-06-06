@@ -8,6 +8,7 @@ import {
   conversationTable,
   conversationMessageTable,
   fileTable,
+  TextChunkTable,
 } from '../schema';
 
 export async function dbGetSharedChatsByUserId({ userId }: { userId: string }) {
@@ -44,17 +45,25 @@ export async function dbGetSharedChatByIdAndInviteCode({
   id: string;
   inviteCode: string;
 }) {
-  return (
-    await db
+  const [row] = await db
+    .select()
+    .from(sharedSchoolConversationTable)
+    .where(
+      and(
+        eq(sharedSchoolConversationTable.id, id),
+        eq(sharedSchoolConversationTable.inviteCode, inviteCode),
+      ),
+    );
+
+  // if the school conversation is no longer shared, return the conversation entity
+  if (row === undefined) {
+    const [row] = await db
       .select()
       .from(sharedSchoolConversationTable)
-      .where(
-        and(
-          eq(sharedSchoolConversationTable.id, id),
-          eq(sharedSchoolConversationTable.inviteCode, inviteCode),
-        ),
-      )
-  )[0];
+      .where(eq(sharedSchoolConversationTable.id, id));
+    return row;
+  }
+  return row;
 }
 
 export async function dbUpdateTokenUsageBySharedChatId(
@@ -114,6 +123,12 @@ export async function dbDeleteSharedSchoolChatByIdAndUserId({
     await tx
       .delete(SharedSchoolConversationFileMapping)
       .where(eq(SharedSchoolConversationFileMapping.sharedSchoolConversationId, sharedChat.id));
+    await tx.delete(TextChunkTable).where(
+      inArray(
+        TextChunkTable.fileId,
+        relatedFiles.map((f) => f.id),
+      ),
+    );
     await tx.delete(fileTable).where(
       inArray(
         fileTable.id,

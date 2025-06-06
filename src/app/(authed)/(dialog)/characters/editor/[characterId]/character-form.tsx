@@ -5,7 +5,6 @@ import Checkbox from '@/components/common/checkbox';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { useToast } from '@/components/common/toast';
 import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
-import ChevronLeftIcon from '@/components/icons/chevron-left';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
@@ -17,11 +16,10 @@ import {
   buttonPrimaryClassName,
   buttonSecondaryClassName,
 } from '@/utils/tailwind/button';
-import { inputFieldClassName, labelClassName } from '@/utils/tailwind/input';
+import { labelClassName } from '@/utils/tailwind/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { startTransition } from 'react';
 import { useForm } from 'react-hook-form';
@@ -39,6 +37,9 @@ import { LocalFileState } from '@/components/chat/send-message-form';
 import { deleteFileMappingAndEntity, linkFileToCharacter } from '../../actions';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
+import { TextInput } from '@/components/common/text-input';
+import NavigateBack from '@/components/common/navigate-back';
+import { getZodFieldMetadataFn } from '@/components/forms/utils';
 
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -47,10 +48,10 @@ type CharacterFormProps = CharacterModel & {
 };
 
 const characterFormValuesSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  learningContext: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  competence: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  name: z.string(),
+  description: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  learningContext: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  competence: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   modelId: z.string(),
   schoolType: z.string().nullable(),
   gradeLevel: z.string().nullable(),
@@ -100,6 +101,7 @@ export default function CharacterForm({
   const t = useTranslations('characters.form');
   const tToast = useTranslations('characters.toasts');
   const tCommon = useTranslations('common');
+  const getZodFieldMetadata = getZodFieldMetadataFn(characterFormValuesSchema);
 
   const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
     character.accessLevel,
@@ -175,6 +177,15 @@ export default function CharacterForm({
       });
   }
 
+  function handleNavigateBack(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    if (isCreating) {
+      handleDeleteCharacter();
+      return;
+    }
+    router.push(backUrl);
+  }
+
   function handleDeleteCharacter() {
     deleteCharacterAction({
       characterId: character.id,
@@ -185,8 +196,8 @@ export default function CharacterForm({
         if (!isCreating) {
           toast.success(tToast('delete-toast-success'));
         }
-
-        router.push(backUrl);
+        // replace instead of push to avoid showing a 404 when navigating back to the now non existing character
+        router.replace(backUrl);
       })
       .catch(() => {
         toast.error(tToast('delete-toast-error'));
@@ -212,46 +223,11 @@ export default function CharacterForm({
     toast.success(tToast('create-toast-success'));
     router.replace(backUrl);
   }
-  let shareChatElement: React.JSX.Element | undefined;
-  let navigateBackElement: React.JSX.Element;
-  if (isCreating) {
-    navigateBackElement = (
-      <button
-        onClick={handleDeleteCharacter}
-        className="flex gap-3 items-center text-primary hover:underline"
-      >
-        <ChevronLeftIcon />
-        <span>{t('all-characters')}</span>
-      </button>
-    );
-  } else {
-    navigateBackElement = (
-      <Link href={backUrl} className="flex gap-3 text-primary mb-4 hover:underline items-center">
-        <ChevronLeftIcon />
-        <span>{t('all-characters')}</span>
-      </Link>
-    );
-  }
-  if (!isCreating) {
-    shareChatElement = (
-      <fieldset className="mt-8">
-        <ShareContainer {...character} />
-      </fieldset>
-    );
-  }
-  const copyContainer = readOnly ? (
-    <CopyContainer
-      templateId={character.id}
-      templatePictureId={character.pictureId ?? undefined}
-      startedAt={character.startedAt}
-      maxUsageTimeLimit={character.maxUsageTimeLimit}
-      translation={t}
-      redirectPath="characters"
-    />
-  ) : undefined;
+  const shareChatElement = !isCreating ? <ShareContainer {...character} /> : undefined;
+  const copyContainer = readOnly ? <CopyContainer character={character} /> : undefined;
 
   const generalSettings = (
-    <fieldset className="mt-8 flex flex-col gap-8">
+    <fieldset className="mt-16 flex flex-col gap-8">
       <h2 className="font-medium mb-2">{t('general-settings')}</h2>
       <div className="flex gap-4">
         <Checkbox
@@ -273,103 +249,79 @@ export default function CharacterForm({
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <div className="flex flex-col gap-4">
-          <label htmlFor="school-type" className={cn(labelClassName, 'text-sm')}>
-            {t('school-type')}
-          </label>
-          <input
-            id="school-type"
-            readOnly={readOnly}
-            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-            {...register('schoolType')}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-            onBlur={handleAutoSave}
-            placeholder={t('school-type-placeholder')}
-          />
-        </div>
-        <div className="flex flex-col gap-4">
-          <label htmlFor="grade" className={cn(labelClassName, 'text-sm')}>
-            {t('grade')}
-          </label>
-          <input
-            id="grade"
-            readOnly={readOnly}
-            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-            {...register('gradeLevel')}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-            placeholder={t('grade-placeholder')}
-            onBlur={handleAutoSave}
-          />
-        </div>
-        <div className="flex flex-col gap-4">
-          <label htmlFor="subject" className={cn(labelClassName, 'text-sm')}>
-            {t('subject')}
-          </label>
-          <input
-            id="subject"
-            readOnly={readOnly}
-            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-            {...register('subject')}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-            onBlur={handleAutoSave}
-            placeholder={t('subject-placeholder')}
-          />
-        </div>
+        <TextInput
+          id="school-type"
+          label={t('school-type')}
+          inputType="text"
+          getValue={() => getValues('schoolType') ?? ''}
+          {...getZodFieldMetadata('schoolType')}
+          readOnly={readOnly}
+          {...register('schoolType')}
+          placeholder={t('school-type-placeholder')}
+          onBlur={handleAutoSave}
+        />
+        <TextInput
+          id="grade"
+          label={t('grade')}
+          inputType="text"
+          readOnly={readOnly}
+          getValue={() => getValues('gradeLevel') ?? ''}
+          {...getZodFieldMetadata('gradeLevel')}
+          {...register('gradeLevel')}
+          placeholder={t('grade-placeholder')}
+          onBlur={handleAutoSave}
+        />
+        <TextInput
+          id="subject"
+          label={t('subject')}
+          inputType="text"
+          readOnly={readOnly}
+          getValue={() => getValues('subject') ?? ''}
+          {...getZodFieldMetadata('subject')}
+          {...register('subject')}
+          placeholder={t('subject-placeholder')}
+          onBlur={handleAutoSave}
+        />
       </div>
     </fieldset>
   );
 
   return (
     <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
-      {navigateBackElement}
+      <NavigateBack label={t('all-characters')} onClick={handleNavigateBack} />
+
+      <h1 className="text-2xl font-medium mt-4">
+        {isCreating ? t('create-character') : character.name}
+      </h1>
+
       {copyContainer}
       {shareChatElement}
-      <div className="flex felx-col mt-4 justify-between items-center">
-        <h1 className="text-2xl font-medium">
-          {isCreating ? t('create-character') : character.name}
-        </h1>
-      </div>
       {generalSettings}
       <fieldset className="flex flex-col gap-4 mt-12">
         <h2 className="font-medium mb-8">{t('character-settings')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
-          <div className="flex gap-8 flex-col">
-            <div className="flex flex-col gap-4">
-              <label htmlFor="name" className={cn(labelClassName, 'text-sm')}>
-                <span className="text-coral">*</span> {t('character-name-label')}
-              </label>
-              <input
-                id="name"
-                readOnly={readOnly}
-                {...register('name')}
-                maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-                className={cn(
-                  inputFieldClassName,
-                  'focus:border-primary placeholder:text-gray-300',
-                )}
-                onBlur={handleAutoSave}
-                placeholder={t('character-name-placeholder')}
-              />
-            </div>
-            <div className="flex flex-col gap-4">
-              <label htmlFor="description" className={cn(labelClassName, 'text-sm')}>
-                <span className="text-coral">*</span> {t('character-description-label')}
-              </label>
-              <textarea
-                id="description"
-                rows={5}
-                readOnly={readOnly}
-                style={{ resize: 'none' }}
-                {...register('description')}
-                maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-                className={cn(
-                  inputFieldClassName,
-                  'focus:border-primary placeholder:text-gray-300',
-                )}
-                onBlur={handleAutoSave}
-                placeholder={t('character-description-placeholder')}
-              />
-            </div>
+          <div className="flex gap-4 flex-col">
+            <TextInput
+              id="name"
+              label={t('character-name-label')}
+              readOnly={readOnly}
+              getValue={() => getValues('name') ?? ''}
+              {...getZodFieldMetadata('name')}
+              {...register('name')}
+              placeholder={t('character-name-placeholder')}
+              onBlur={handleAutoSave}
+            />
+            <TextInput
+              id="description"
+              label={t('character-description-label')}
+              inputType="textarea"
+              readOnly={readOnly}
+              getValue={() => getValues('description') ?? ''}
+              {...getZodFieldMetadata('description')}
+              {...register('description')}
+              placeholder={t('character-description-placeholder')}
+              onBlur={handleAutoSave}
+            />
           </div>
           <section className="h-full">
             <label htmlFor="image" className={cn(labelClassName, 'text-sm')}>
@@ -410,70 +362,52 @@ export default function CharacterForm({
         </div>
       </fieldset>
       <fieldset className="flex flex-col gap-6 mt-6">
-        <div className="flex flex-col gap-4">
-          <label htmlFor="competence" className={cn(labelClassName, 'text-sm')}>
-            <span className="text-coral">*</span> {t('character-competence-label')}
-          </label>
-          <textarea
-            id="competence"
-            {...register('competence')}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-            rows={5}
-            readOnly={readOnly}
-            style={{ resize: 'none' }}
-            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-            onBlur={handleAutoSave}
-            placeholder={t('character-competence-placeholder')}
-          />
-        </div>
-        <div className="flex flex-col gap-4">
-          <label htmlFor="learningContext" className={cn(labelClassName, 'text-sm')}>
-            <span className="text-coral">*</span> {t('character-learning-context-label')}
-          </label>
-          <textarea
-            id="learningContext"
-            {...register('learningContext')}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-            rows={5}
-            readOnly={readOnly}
-            style={{ resize: 'none' }}
-            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-            onBlur={handleAutoSave}
-            placeholder={t('character-learning-context-placeholder')}
-          />
-        </div>
-        <div className="flex flex-col gap-4">
-          <label htmlFor="specifications" className={cn(labelClassName, 'text-sm')}>
-            {t('character-specification-label')}
-          </label>
-          <textarea
-            id="specifications"
-            {...register('specifications')}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-            rows={5}
-            readOnly={readOnly}
-            style={{ resize: 'none' }}
-            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-            onBlur={handleAutoSave}
-            placeholder={t('character-specification-placeholder')}
-          />
-        </div>
-        <div className="flex flex-col gap-4">
-          <label htmlFor="restrictions" className={cn(labelClassName, 'text-sm')}>
-            {t('character-restriction-label')}
-          </label>
-          <textarea
-            id="restrictions"
-            {...register('restrictions')}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-            rows={5}
-            readOnly={readOnly}
-            style={{ resize: 'none' }}
-            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-            onBlur={handleAutoSave}
-            placeholder={t('character-restriction-placeholder')}
-          />
-        </div>
+        <TextInput
+          id="competence"
+          label={t('character-competence-label')}
+          required={true}
+          inputType="textarea"
+          getValue={() => getValues('competence') ?? ''}
+          {...getZodFieldMetadata('competence')}
+          {...register('competence')}
+          readOnly={readOnly}
+          placeholder={t('character-competence-placeholder')}
+          onBlur={handleAutoSave}
+        />
+        <TextInput
+          id="learningContext"
+          label={t('character-learning-context-label')}
+          required={true}
+          inputType="textarea"
+          getValue={() => getValues('learningContext') ?? ''}
+          {...getZodFieldMetadata('learningContext')}
+          {...register('learningContext')}
+          readOnly={readOnly}
+          placeholder={t('character-learning-context-placeholder')}
+          onBlur={handleAutoSave}
+        />
+        <TextInput
+          id="specifications"
+          label={t('character-specification-label')}
+          inputType="textarea"
+          getValue={() => getValues('specifications') ?? ''}
+          {...getZodFieldMetadata('specifications')}
+          {...register('specifications')}
+          readOnly={readOnly}
+          placeholder={t('character-specification-placeholder')}
+          onBlur={handleAutoSave}
+        />
+        <TextInput
+          id="restrictions"
+          label={t('character-restriction-label')}
+          inputType="textarea"
+          getValue={() => getValues('restrictions') ?? ''}
+          {...getZodFieldMetadata('restrictions')}
+          {...register('restrictions')}
+          readOnly={readOnly}
+          placeholder={t('character-restriction-placeholder')}
+          onBlur={handleAutoSave}
+        />
       </fieldset>
       {!readOnly && (
         <>
@@ -500,7 +434,7 @@ export default function CharacterForm({
           <h3 className="font-medium">{t('delete-character')}</h3>
           <p className="mt-4">{t('character-delete-description')}</p>
           <DestructiveActionButton
-            className={cn(buttonDeleteClassName, 'mt-10')}
+            triggerButtonClassName={cn(buttonDeleteClassName, 'mt-10')}
             modalDescription={t('character-delete-modal-description')}
             modalTitle={t('delete-character')}
             confirmText={tCommon('delete')}
@@ -513,11 +447,8 @@ export default function CharacterForm({
       {isCreating && (
         <section className="mt-8 flex gap-4 items-center">
           <button
-            className={cn(
-              buttonSecondaryClassName,
-              'hover:border-primary hover:bg-vidis-hover-green/20',
-            )}
-            onClick={handleDeleteCharacter}
+            className={cn(buttonSecondaryClassName)}
+            onClick={handleNavigateBack}
             type="button"
           >
             {tCommon('cancel')}

@@ -18,18 +18,18 @@ test('teacher can login, create and join shared dialogpartner chat', async ({ pa
   await page.getByLabel('Klassenstufe').fill('10. Klasse');
   await page.getByLabel('Fach').fill('Geschichte');
 
-  await page.getByLabel('* Wie heißt die Person?').fill('John Cena');
+  await page.getByLabel('Wie heißt die Person? *').fill('John Cena');
 
   await page
-    .getByLabel('* Wie kann die Person in einem kurzen Satz beschrieben werden?')
-    .fill('Er ist bekannt für seinen Spruch „You can’t see me“ und seine Wrestling-Karriere.');
+    .getByLabel('Wie kann die Person in einem kurzen Satz beschrieben werden? *')
+    .fill('Er ist bekannt für seinen Spruch „You can`t see me“ und seine Wrestling-Karriere.');
 
   await page
-    .getByLabel('* Welche Kompetenzen sollen die Lernenden erwerben?')
+    .getByLabel('Welche Kompetenzen sollen die Lernenden erwerben? *')
     .fill('Gut wrestlen können');
 
   await page
-    .getByLabel('* Was ist die konkrete Unterrichtssituation?')
+    .getByLabel('Was ist die konkrete Unterrichtssituation? *')
     .fill('Ein Dialog mit John Cena über Erfolg im Leben.');
 
   await page
@@ -81,7 +81,7 @@ test('teacher can login, create and join shared dialogpartner chat', async ({ pa
 
   // send first message
   await page.getByPlaceholder('Wie kann ich Dir helfen?').fill('Wer bist du?');
-  await page.getByLabel('Send Message').click();
+  await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
   await page.getByTitle('Kopieren').click();
 
   await expect(page.getByLabel('assistant message 1')).toContainText('John Cena');

@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import { Message } from 'ai';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { cn } from '@/utils/tailwind';
+import { iconClassName } from '@/utils/tailwind/icon';
 
 type DownloadConversationButtonProps = {
   conversationMessages: Message[];
@@ -17,6 +18,8 @@ type DownloadConversationButtonProps = {
   primaryButton?: boolean;
   sharedConversationName?: string;
   characterName?: string;
+  buttonClassName?: string;
+  showText?: boolean;
 };
 
 export default function DownloadSharedConversationButton({
@@ -25,6 +28,8 @@ export default function DownloadSharedConversationButton({
   primaryButton,
   sharedConversationName,
   characterName,
+  buttonClassName,
+  showText = true,
 }: DownloadConversationButtonProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const toast = useToast();
@@ -75,7 +80,7 @@ export default function DownloadSharedConversationButton({
   if (primaryButton) {
     return (
       <button
-        className={cn(buttonPrimaryClassName, 'text-base font-normal')}
+        className={cn(buttonPrimaryClassName, 'text-base font-normal', buttonClassName)}
         title={tCommon('conversation-download')}
         onClick={handleDownload}
         disabled={disabled}
@@ -84,9 +89,9 @@ export default function DownloadSharedConversationButton({
           {isLoading ? (
             <Spinner className="p-2 w-8 h-8" />
           ) : (
-            <WebDownloadIcon className="group-disabled:text-gray-100 w-6 h-6" />
+            <WebDownloadIcon className="w-8 h-8" />
           )}
-          Dialog herunterladen
+          {showText && tCommon('conversation-download')}
         </div>
       </button>
     );
@@ -94,16 +99,18 @@ export default function DownloadSharedConversationButton({
 
   return (
     <button
-      className="flex justify-center items-center w-8 h-8 group disabled:bg-light-gray disabled:text-gray-100 group rounded-enterprise-sm hover:bg-vidis-hover-green/20"
+      className={cn(
+        'flex items-center gap-1',
+        iconClassName,
+        buttonClassName,
+        'disabled:hover:bg-transparent',
+      )}
       title={tCommon('conversation-download')}
       onClick={handleDownload}
       disabled={disabled}
     >
-      {isLoading ? (
-        <Spinner className="p-2 w-8 h-8" />
-      ) : (
-        <WebDownloadIcon className="text-primary group-disabled:text-gray-100" />
-      )}
+      {isLoading ? <Spinner className="p-2 w-8 h-8" /> : <WebDownloadIcon className="w-8 h-8" />}
+      {showText && tCommon('conversation-download')}
     </button>
   );
 }

@@ -2,19 +2,20 @@
 
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { useToast } from '@/components/common/toast';
-import { SharedSchoolConversationModel } from '@/db/schema';
 import ShareIcon from '@/components/icons/share';
 import TrashIcon from '@/components/icons/trash';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { deleteSharedChatAction } from './actions';
+import { dbDeleteSharedChatAction } from './actions';
 import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
-import { calculateTimeLeftBySharedChat } from './[sharedSchoolChatId]/utils';
+import { calculateTimeLeftBySharedChat, SharedChatWithImage } from './[sharedSchoolChatId]/utils';
 import CountDownTimer from './_components/count-down';
 import { useTranslations } from 'next-intl';
-
-type SharedChatItemProps = SharedSchoolConversationModel;
+import { EmptyImageIcon } from '@/components/icons/empty-image';
+import Image from 'next/image';
+import { iconClassName } from '@/utils/tailwind/icon';
+type SharedChatItemProps = SharedChatWithImage;
 
 export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemProps) {
   const toast = useToast();
@@ -23,7 +24,7 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
   const tCommon = useTranslations('common');
 
   function handleDeleteSharedChat() {
-    deleteSharedChatAction({ id: sharedSchoolChat.id })
+    dbDeleteSharedChatAction({ id: sharedSchoolChat.id })
       .then(() => {
         toast.success(t('toasts.delete-toast-success'));
         router.refresh();
@@ -34,12 +35,28 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
   }
 
   const timeLeft = calculateTimeLeftBySharedChat(sharedSchoolChat);
-
   return (
     <Link
       href={`/shared-chats/${sharedSchoolChat.id}`}
       className="flex gap-2 items-center border rounded-enterprise-md p-4 hover:border-primary"
     >
+      <figure
+        className="w-11 h-11 bg-light-gray rounded-enterprise-sm flex justify-center items-center"
+        style={{ minWidth: '44px' }}
+      >
+        {sharedSchoolChat.maybeSignedPictureUrl !== undefined && (
+          <Image
+            src={sharedSchoolChat.maybeSignedPictureUrl}
+            alt={`${sharedSchoolChat.name} Avatar`}
+            width={44}
+            height={44}
+            className="rounded-enterprise-sm"
+          />
+        )}
+        {sharedSchoolChat.maybeSignedPictureUrl === undefined && (
+          <EmptyImageIcon className="w-4 h-4" />
+        )}
+      </figure>
       <div className="min-w-0">
         <h1 className={cn('font-medium text-primary', truncateClassName)}>
           {sharedSchoolChat.name}
@@ -52,13 +69,14 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
           className="p-1 me-2"
           leftTime={timeLeft}
           totalTime={sharedSchoolChat.maxUsageTimeLimit ?? 0}
+          stopWatchClassName="w-4 h-4"
         />
       )}
       {timeLeft > 0 && (
         <Link
           aria-label={t('shared.share')}
           href={`/shared-chats/${sharedSchoolChat.id}/share`}
-          className="text-vidis-hover-purple hover:bg-vidis-hover-green/20 rounded-enterprise-sm"
+          className={cn('rounded-enterprise-sm', iconClassName)}
         >
           <ShareIcon aria-hidden="true" className="w-8 h-8" />
           <span className="sr-only">{t('shared.share')}</span>
@@ -70,9 +88,12 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
         modalTitle={t('form.delete-title')}
         confirmText={tCommon('delete')}
         actionFn={handleDeleteSharedChat}
-        triggerButtonClassName="border-transparent justify-center flex flex-col rounded-enterprise-sm hover:bg-vidis-hover-green/20 p-0"
+        triggerButtonClassName={cn(
+          'border-transparent justify-center flex flex-col rounded-enterprise-sm p-0',
+          iconClassName,
+        )}
       >
-        <TrashIcon aria-hidden="true" className="w-8 h-8 text-primary" />
+        <TrashIcon aria-hidden="true" className="w-8 h-8" />
         <span className="sr-only">{tCommon('delete')}</span>
       </DestructiveActionButton>
     </Link>

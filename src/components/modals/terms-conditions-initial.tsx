@@ -9,6 +9,8 @@ import Checkbox from '../common/checkbox';
 import { useRouter } from 'next/navigation';
 
 import MarkdownDisplay from '../chat/markdown-display';
+import { useTheme } from '@/hooks/use-theme';
+import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
 
 type TermsConditionsModalProps = {
   handleAccept(): void;
@@ -25,6 +27,7 @@ export default function TermsConditionsModal({
   const router = useRouter();
   const tUsage = useTranslations('usage-disclaimer');
   const tCommon = useTranslations('common');
+  const { designConfiguration } = useTheme();
 
   const nextPage = () => {
     setPageNumber(pageNumber + 1);
@@ -85,7 +88,10 @@ export default function TermsConditionsModal({
     <AlertDialog.Root open defaultOpen>
       <AlertDialog.Portal>
         <AlertDialog.Overlay className="fixed inset-0 bg-[#333333] z-30 opacity-30 shadow-[0px_0px_80px_0px_rgba(0,41,102,0.1)]" />
-        <AlertDialog.Content className="z-50 fixed left-1/2 top-1/2 max-h-[100vh] -translate-x-1/2 -translate-y-1/2 rounded-enterprise-md bg-white p-10 w-[450px] lg:w-[720px]">
+        <AlertDialog.Content
+          className="z-50 fixed left-1/2 top-1/2 max-h-[100vh] -translate-x-1/2 -translate-y-1/2 rounded-enterprise-md bg-white p-10 w-[450px] lg:w-[720px]"
+          style={constructRootLayoutStyle({ designConfiguration })}
+        >
           <AlertDialog.Title asChild>
             <h1 className="text-3xl font-medium p-1 mb-auto mt-auto">{currentTitle}</h1>
           </AlertDialog.Title>

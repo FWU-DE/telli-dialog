@@ -21,12 +21,14 @@
     "conversation-download": "Konversation herunterladen",
     "send-message-placeholder": "Wie kann ich Dir helfen?",
     "information-disclaimer": "telli kann Fehler machen. Sei kritisch und überprüfe alle Informationen.",
+    "character-limit-reached": "Zeichenlimit erreicht",
     "chat-expired": "Der Chat ist abgelaufen",
     "new-chat": "Neuer Chat",
     "stop": "Stop",
     "copy": "Kopieren",
     "copy-clipboard": "In die Zwischenablage kopieren",
-    "regenerate-message": "Antwort erneut generieren"
+    "regenerate-message": "Antwort erneut generieren",
+    "image-load-failed": "Bild konnte nicht geladen werden"
   },
   "usage-disclaimer": {
     "initial-title": "Willkommen bei telli!",
@@ -44,17 +46,31 @@
     "chats-error": "Etwas ist schiefgelaufen...",
     "chats-reload": "Dialoge neu laden"
   },
+  "websearch": {
+    "placeholders": {
+      "loading": "Titel wird geladen...",
+      "not-available": "Nicht verfügbar",
+      "error-content": "Die Seite konnte nicht geladen werden. Es ist ein Fehler aufgetreten {status_code_info}. Nenne keinen Fehlercode und gib folgende Hinweise an den Nutzer weiter: Bitte stelle sicher, dass:\n- die Seite öffentlich zugänglich ist\n- keine Anmeldung erforderlich ist\n- es sich um eine gültige URL handelt"
+    },
+    "action": {
+      "delete": "Link entfernen"
+    },
+    "toasts": {
+      "error-loading-page": "Verarbeitung des Links fehlgeschlagen"
+    }
+  },
   "file-interaction": {
     "upload": {
       "upload-file-button": "Datei hochladen",
-      "file-limit-reached": "Es wurde bereits eine Datei hochgeladen",
+      "file-limit-reached": "Es können maximal {max_files} Dateien hochgeladen werden. {files_exceeded} Dateien wurden nicht hochgeladen.",
+      "image-limit-reached": "Es können maximal {max_images} Bilder hochgeladen werden. {images_exceeded} Bilder wurden nicht hochgeladen.",
       "drop-area": "Datei per Drag & Drop hier ablegen",
       "choice-word": "oder"
     },
     "toasts": {
       "upload-success": "Die Datei wurde erfolgreich hochgeladen",
       "upload-error": "Die Datei konnte leider nicht hochgeladen werden. Bitte versuchen Sie es erneut",
-      "file-too-large": "Die Datei {file_name} ist zu groß. Das Limit liegt bei {max_file_size} MB.",
+      "file-too-large": "Die Datei {file_name} ist zu groß. Es sind maximal {max_file_size} MB erlaubt. Versuche die Datei zu verkleinern.",
       "delete-from-form": "Die Datei wurde erfolgreich gelöscht",
       "invalid-file-format": "Das Dateiformat wird nicht unterstützt, folgende Dateitypen können hochgeladen werden: {supported_formats}",
       "file-limit-exceeded": "Es können maximal {max_files} Dateien hochgeladen werden."
@@ -68,26 +84,28 @@
   },
   "custom-gpt": {
     "title": "Assistenten",
-    "description": "Entdecke sofort nutzbare Assistenten oder konfiguriere deine eigenen KI-Werkzeuge ganz nach deinem Bedarf. Hinterlege individuelle Anweisungen, lade Dateien hoch und teile deine Lösungen mit anderen. Klicke einfach auf eine Anwendung, um sofort loszulegen.",
+    "description": "Die Assistenten erleichtern den schulischen Alltag. Sie können je nach Situation individuell konfiguriert werden. Bereits fertige Assistenten stehen als Vorlagen sofort nutzbar zur Verfügung. Diese können in den eigenen Bereich kopiert und dann wunschgemäß angepasst werden.",
     "visibility-global": "Vorlagen",
     "visibility-school": "Schulintern",
     "visibility-private": "Für mich",
-    "search-placeholder": "Anwendung suchen...",
+    "search-placeholder": "Assistent suchen...",
     "form": {
-      "all-gpts": "Alle Anwendung",
+      "all-gpts": "Alle Assistenten",
       "restriction-private": "Keine Freigabe",
       "restriction-school": "schulintern freigeben",
-      "delete-gpt": "Dialogpartner löschen",
-      "final-delete-gpt": "Dialogpartner endgültig löschen",
-      "create-gpt": "Neuen Assistent erstellen",
+      "delete-gpt": "Assistenten löschen",
+      "final-delete-gpt": "Assistent endgültig löschen",
+      "create-gpt": "Assistent erstellen",
       "gpt-name-placeholder": "Unterrichtsplaner",
-      "gpt-description-label": "Wie kann ihr Zweck kurz beschrieben werden",
+      "gpt-description-label": "Wie kann der Assistent kurz beschrieben werden?",
       "gpt-description-placeholder": "Hift bei der Unterrichtsplanung und Erstellung von Unterrichtsmaterialien.",
-      "gpt-specification-label": "Was soll der Assistent konkret tun?",
+      "gpt-specification-label": "Welche konkreten Funktionen soll der Assistent erfüllen?",
       "gpt-specification-placeholder": "Unterrichtsplanner hilft dabei, Unterrichtseinheiten strukturiert zu gliedern, klare Lernziele zu definieren und einen sinnvollen Ablauf festzulegen. Zusätzlich werden relevante Unterrichtsmaterialien, digitale Tools und weiterführende Ressourcen vorgeschlagen, die zur Vertiefung des Lehrstoffs beitragen können. Durch die Automatisierung repetitiver Planungsprozesse liefert der Unterrichtsplanner sofort anwendbare Konzepte, sodass Lehrkräfte mehr Zeit für die individuelle Betreuung ihrer Schülerinnen und Schüler haben",
       "gpt-visibility-label": "Für wen soll der Dialogpartner freigegeben werden?",
       "gpt-name-label": "Wie soll dieser Assistent heißen?",
       "prompt-suggestions-label": "Promptvorschläge hinzufügen?",
+      "prompt-suggestions-add-button": "Promptvorschlag hinzufügen",
+      "prompt-suggestions-delete-button": "Promptvorschlag {index} löschen",
       "prompt-suggestions-description": "Füge bis zu 10 Vorschläge für Prompts hinzu, die zufällig oberhalb des Eingabefelds im Dialog angezeigt werden.",
       "prompt-suggestion-placeholder": "Erstelle einen Unterrichtsplan zum Thema [...].",
       "suggestions-used": "Vorschläge",
@@ -127,15 +145,29 @@
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
       "share": "Teilen",
-      "button-start": "Dialogpartner teilen"
+      "button-start": "Dialogpartner teilen",
+      "delete-chat-modal-title": "Neuer Chat",
+      "delete-chat-modal-description": "Wenn du einen neuen Chat beginnst verfällt der aktuelle Chat unwiderruflich.",
+      "delete-chat-modal-confirm-button": "Aktuellen Chat verwerfen und neu beginnen",
+      "expired-modal-description": "Der Dialog ist abgelaufen"
     },
     "share-page": {
       "back-button": "Zum Dialogpartner",
       "join": "Dem Dialog beitreten",
       "go-to": "Gehe auf",
-      "enter-code": "Gebe den Code ein",
+      "enter-code": "Gib den Code ein",
       "open-chat": "Chat öffnen",
       "use-qr": "Oder nutze den QR-Code"
+    },
+    "copy-modal": {
+      "title": "Dialogpartner kopieren",
+      "content": "Dieser Dialogpartner ist schreibgeschützt. Möchtest du eine Kopie in deinem eigenen Bereich erstellen? Danach kannst du ihn frei bearbeiten und anpassen.",
+      "copy-button": "Kopieren & bearbeiten"
+    },
+    "copy-page": {
+      "title": "Dialogpartner in eigenen Bereich kopieren",
+      "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Dialogpartner in deinen privaten Bereich, um ihn anzupassen.",
+      "copy-template": "Dialogpartner bearbeiten"
     },
     "form": {
       "general-settings": "Allgemeine Einstellungen",
@@ -190,43 +222,48 @@
   "shared-chats": {
     "title": "Lernszenarien",
     "description": "Im Dialog mit telli setzen sich Lernende mit einem konkreten Thema auseinander und erarbeiten sich so einen Lerngegenstand interaktiv und selbstständig. Die zeitlich begrenzten Chats können einfach einzeln oder gruppenweise mit Lernenden geteilt werden.",
-    "button-create": "Szenario erstellen",
     "search-placeholder": "Szenario suchen",
     "no-dialogs": "Es wurden noch keine Lernszenarien erstellt.",
     "form": {
+      "button-create": "Szenario erstellen",
       "model-label": "Sprachmodell",
       "all-dialogs": "Alle Lernszenarien",
       "title": "Lernszenario erstellen",
-      "settings": "Einstellungen",
-      "name": "Titel des Lernszenarios",
-      "name-placeholder": "Absolutismus unter Ludwig XIV - Gruppe 1 Soldaten",
-      "purpose": "Wie kann der Zweck des Lernszenarios kurz beschrieben werden?",
-      "purpose-placeholder": "Zwischen Absolutismus und Demokratie (Ludwig XIV)",
-      "school-type": "Schultyp",
+      "settings": "Lernszenario-Einstellungen",
+      "name": "Wie heißt das Szenario?",
+      "name-placeholder": "Absolutismus unter Ludwig XIV",
+      "purpose-label": "Wie kann das Szenario kurz beschrieben werden?",
+      "purpose-placeholder": "Herrschaft und Alltag im Frankreich des 17. Jahrhunderts",
+      "school-type-label": "Schultyp",
       "school-type-placeholder": "Gymnasium",
-      "grade": "Klassenstufe",
+      "grade-label": "Klassenstufe",
       "grade-placeholder": "7.Klasse",
-      "subject": "Fach",
+      "subject-label": "Fach",
       "subject-placeholder": "Geschichte",
-      "learning-context": "In welchem Kontext findet das Lernszenario statt?",
-      "learning-context-placeholder": "Die Schülerinnen und Schüler sollen am Beispiel der Herrschaft von Ludwig XIV die Gegensätze zwischen Absolutismus und der Demokratie nennen können und ein Verständnis dafür entwickeln, dass Absolutismus nur durch ein auf Unterdrückung der Bevölkerung basierendes Staatsmodell möglich ist.",
-      "specification": "Wie soll telli antworten?",
-      "specification-placeholder": "Der KI-Chatbot soll aus der Perspektive eines Soldaten im Herrschaftsstsystem unter Ludwig XIV antworten.",
-      "restrictions": "Wie soll telli nicht antworten?",
-      "restrictions-placeholder": "Der KI-Chatbot soll sich nicht auf Ereignisse eingehen, die außerhalb des thematischen Kontextes liegen.",
+      "student-excercise-label": "Wie lautet der Auftrag an die Lernenden?",
+      "student-excercise-placeholder": "1. Betrachte ein bekanntes Porträt von Ludwig XIV. (z.B. das Krönungsgemälde) und beschreibe, wie der König sich selbst darstellt. Welche Symbole nutzt er, um seine Macht zu zeigen?\n2. Erarbeite die wichtigsten Merkmale des absolutistischen Herrschaftssystems und vergleiche sie mit der Staatsform eines heutigen demokratischen Staates. Wo liegen die größten Unterschiede?",
+      "additional-instructions-label": "Wie verhält sich telli im Lernszenario?",
+      "additional-instructions-placeholder": "Erstelle ein historisch korrektes Lernszenario über Ludwig XIV., das für die 8. Klasse geeignet ist. Der Fokus soll auf den Begriff 'Absolutismus' und seine gesellschaftlichen Auswirkungen liegen. Verwende einfache, aber präzise Sprache.",
+      "additional-assets-label": "Hintergrundwissen für telli",
+      "additional-assets-content": "Füge jeweils bis zu fünf Dateien und  Links hinzu. telli nutzt diese Informationen, um das Lernszenario besser auf das Thema abzustimmen.",
+      "attached-files-label": "Welche Dateien dienen telli als Grundlage?",
+      "attached-links-label": "Welche Webquellen dienen telli als Grundlage?",
+      "attached-links-placeholder": "URL der Webseiten",
+      "add-link": "Link hinzufügen",
       "delete-title": "Lernszenario löschen",
       "delete-description": "Beim Löschen des Lernszenarios werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
       "delete-button": "Szenario endgültig löschen",
       "delete-confirm": "Bist du sicher, dass du diesen Lernszenario löschen möchtest? Dabei werden alle mit diesem Dialog verbundenen Konversationen unwiderruflich gelöscht."
     },
     "shared": {
+      "excersise-title": "Dein Arbeitsauftrag",
       "title": "Lernszenario einsetzen",
       "description": "Lege fest, wie viel deines Restbudgets an telli-Points durch diesen Chat beansprucht werden darf und wie lange der Chat aktiv benutzt werden kann.",
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
       "share": "Teilen",
       "button-start": "Szenario starten",
-      "invalid-code-toast": "Der Code der eingegeben wurde ist entweder abgelaufen oder ungültig.",
+      "invalid-code-toast": "Der Code der eingegeben wurde, ist entweder abgelaufen oder ungültig.",
       "join-code": "Mit Code beitreten",
       "enter-chat": "Zum Dialog",
       "delete-chat-modal-title": "Neuer Chat",
@@ -243,16 +280,22 @@
       "use-qr": "Scanne den QR-Code."
     },
     "toasts": {
-      "create-toast-success": "Der Lernszenario wurde erfolgreich erstellt.",
-      "create-toast-error": "Der Lernszenario konnte nicht erstellt werden.",
+      "create-toast-success": "Das Lernszenario wurde erfolgreich erstellt.",
+      "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
+      "image-toast-error": "Das Bild konnte nicht hochgeladen werden.",
+      "create-toast-error": "Das Lernszenario konnte nicht erstellt werden.",
       "share-toast-success": "Lernszenario erfolgreich geteilt.",
       "share-toast-error": "Etwas ist beim Teilen des Lernszenarios schief gelaufen.",
       "stop-share-toast-success": "Lernszenario wird nicht mehr geteilt.",
       "stop-share-toast-error": "Etwas ist beim Beenden des Teilens schief gelaufen.",
-      "delete-toast-success": "Der Lernszenario wurde erfolgreich gelöscht.",
-      "delete-toast-error": "Der Lernszenario konnte nicht gelöscht werden.",
-      "edit-toast-success": "Der Lernszenario wurde erfolgreich aktualisiert.",
-      "edit-toast-error": "Der Lernszenario konnte nicht aktualisiert werden."
+      "delete-toast-success": "Das Lernszenario wurde erfolgreich gelöscht.",
+      "delete-toast-error": "Das Lernszenario konnte nicht gelöscht werden.",
+      "edit-toast-success": "Das Lernszenario wurde erfolgreich aktualisiert.",
+      "edit-toast-error": "Das Lernszenario konnte nicht aktualisiert werden.",
+      "invalid-url": "Die eingegebene URL ist ungültig.",
+      "duplicate-url": "Diese URL wurde bereits hinzugefügt",
+      "max-links-reached": "Es können maximal {max_links} Links hinzugefügt werden",
+      "empty-url": "Es wurde keine URL eingegeben"
     }
   }
 }

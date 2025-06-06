@@ -5,7 +5,6 @@ import React, { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
 import { type CustomGptModel, type CharacterModel, FileModel } from '@/db/schema';
-import TelliLogo from '../icons/logo';
 import PromptSuggestions from './prompt-suggestions';
 import MarkdownDisplay from './markdown-display';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
@@ -23,7 +22,8 @@ import { HELP_MODE_GPT_ID } from '@/db/const';
 import { ChatInputBox } from './chat-input-box';
 import { ErrorChatPlaceholder } from './error-message';
 import Image from 'next/image';
-
+import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { cn } from '@/utils/tailwind';
 type ChatProps = {
   id: string;
   initialMessages: Message[];
@@ -33,6 +33,8 @@ type ChatProps = {
   promptSuggestions?: string[];
   initialFileMapping?: Map<string, FileModel[]>;
   enableFileUpload: boolean;
+  webSourceMapping?: Map<string, WebsearchSource[]>;
+  logoElement: React.ReactNode;
 };
 
 export default function Chat({
@@ -44,6 +46,8 @@ export default function Chat({
   promptSuggestions = [],
   initialFileMapping,
   enableFileUpload,
+  webSourceMapping,
+  logoElement,
 }: ChatProps) {
   const tHelpMode = useTranslations('help-mode');
   const router = useRouter();
@@ -138,6 +142,7 @@ export default function Chat({
             type: getFileExtension(file.file.name),
             createdAt: new Date(),
             size: file.file.size,
+            metadata: null,
           };
         }),
       );
@@ -195,9 +200,7 @@ export default function Chat({
     );
   } else {
     placeholderElement = (
-      <div className="flex items-center justify-center h-full">
-        <TelliLogo className="text-primary" />
-      </div>
+      <div className="flex items-center justify-center h-full">{logoElement}</div>
     );
   }
 
@@ -209,21 +212,26 @@ export default function Chat({
 
   const messagesContent = (
     <div className="flex flex-col gap-2 max-w-3xl mx-auto p-4">
-      {messages.map((message, index) => (
-        <ChatBox
-          key={index}
-          index={index}
-          fileMapping={fileMapping}
-          isLastUser={index === messages.length - 1 && message.role == 'user'}
-          isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
-          isLoading={isLoading}
-          regenerateMessage={reload}
-          initialFiles={initialFiles}
-          assistantIcon={assistantIcon}
-        >
-          {message}
-        </ChatBox>
-      ))}
+      {messages.map((message, index) => {
+        return (
+          <ChatBox
+            key={index}
+            index={index}
+            fileMapping={fileMapping}
+            isLastUser={index === messages.length - 1 && message.role == 'user'}
+            isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
+            isLoading={isLoading}
+            regenerateMessage={reload}
+            initialFiles={initialFiles}
+            assistantIcon={assistantIcon}
+            initialWebsources={
+              message.role === 'user' ? webSourceMapping?.get(message.id) : undefined
+            }
+          >
+            {message}
+          </ChatBox>
+        );
+      })}
     </div>
   );
 
@@ -283,10 +291,12 @@ export function getAssistantIcon({
   customGptId: customGptId,
   imageName,
   imageSource,
+  className,
 }: {
   customGptId?: string;
   imageName?: string;
   imageSource?: string;
+  className?: string;
 }) {
   if (customGptId === HELP_MODE_GPT_ID) {
     return (
@@ -297,7 +307,7 @@ export function getAssistantIcon({
   }
   if (imageSource !== undefined && imageName !== undefined) {
     return (
-      <div className="p-1.5 place-self-start m-4 mt-1 ">
+      <div className={cn('p-1.5 place-self-start mx-4 mt-1 ', className)}>
         <Image
           src={imageSource}
           width={30}

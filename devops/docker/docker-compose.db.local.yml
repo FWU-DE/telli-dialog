@@ -1,6 +1,6 @@
 services:
   telli_dialog_db:
-    image: postgres:16
+    image: pgvector/pgvector:pg16
     container_name: telli_dialog_db
     restart: always
     environment:

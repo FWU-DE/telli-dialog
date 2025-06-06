@@ -19,7 +19,7 @@ import { nanoid } from 'nanoid';
 
 const s3Client = new S3Client({
   // region: 'eu-de',
-  region: 'eu-central-2',
+  region: 'eu-nl',
   endpoint: `https://${env.otcS3Hostname}`,
   credentials: {
     accessKeyId: env.otcAccessKeyId,
@@ -62,6 +62,24 @@ export async function uploadFileToS3({
   }
 }
 
+export async function getMaybeLogoFromS3(federalStateId: string | undefined, asset: string) {
+  if (federalStateId === undefined) {
+    return undefined;
+  }
+  const key = `whitelabels/${federalStateId}/${asset}`;
+  try {
+    await s3Client.send(
+      new GetObjectCommand({
+        Bucket: env.otcBucketName,
+        Key: key,
+      }),
+    );
+    return await getSignedUrlFromS3Get({ key });
+  } catch {
+    return undefined;
+  }
+}
+
 export async function copyFileInS3({ newKey, copySource }: { newKey: string; copySource: string }) {
   const copyParams: CopyObjectCommandInput = {
     Bucket: env.otcBucketName,
@@ -79,7 +97,7 @@ export async function copyFileInS3({ newKey, copySource }: { newKey: string; cop
 }
 
 export async function getMaybeSignedUrlFromS3Get({ key }: { key: string | undefined | null }) {
-  if (key === undefined || key === null) return undefined;
+  if (key === undefined || key === null || key === '') return undefined;
   return await getSignedUrlFromS3Get({ key });
 }
 
@@ -201,8 +219,8 @@ export async function deleteFileFromS3({ key }: { key: string }) {
 
   try {
     const command = new DeleteObjectCommand(deleteParams);
-    await s3Client.send(command);
-    console.log(`File with key ${key} deleted successfully`);
+    const result = await s3Client.send(command);
+    console.log(`File with key ${key} deleted successfully`, result);
   } catch (error) {
     console.error('Error deleting file from S3:', error);
     throw error;

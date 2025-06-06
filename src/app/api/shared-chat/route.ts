@@ -9,13 +9,18 @@ import {
 import { dbGetSharedChatByIdAndInviteCode } from '@/db/functions/shared-school-chat';
 import { constructSystemPromptBySharedChat } from './system-prompt';
 import { dbUpdateTokenUsageBySharedChatId } from '@/db/functions/shared-school-chat';
-import { getModelAndProviderWithResult, getSearchParamsFromUrl } from '../utils';
+import {
+  getModelAndProviderWithResult,
+  getSearchParamsFromUrl,
+  calculateCostsInCents,
+} from '../utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbGetRelatedSharedChatFiles } from '@/db/functions/files';
-import { process_files } from '../file-operations/process-file';
+import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
+import { getRelevantFileContent } from '../file-operations/retrieval';
 
 export async function POST(request: NextRequest) {
   const { messages, modelId }: { messages: Array<Message>; modelId: string } = await request.json();
@@ -81,11 +86,20 @@ export async function POST(request: NextRequest) {
     );
     return NextResponse.json({ error: 'User has reached intelli points limit' }, { status: 429 });
   }
-  const allFileIds = await dbGetRelatedSharedChatFiles(sharedChat.id);
-  const attachedFiles = await process_files(allFileIds);
+  const relatedFileEntities = await dbGetRelatedSharedChatFiles(sharedChat.id);
+  const urls = sharedChat.attachedLinks.filter((l) => l !== '').map(webScraperExecutable);
+
+  const retrievedTextChunks = await getRelevantFileContent({
+    messages,
+    user: teacherUserAndContext,
+    relatedFileEntities,
+  });
+
+  const websearchSources = await Promise.all(urls);
   const systemPrompt = constructSystemPromptBySharedChat({
     sharedChat,
-    fileEntities: attachedFiles,
+    retrievedTextChunks,
+    websearchSources,
   });
 
   const result = streamText({
@@ -105,8 +119,10 @@ export async function POST(request: NextRequest) {
       await sendRabbitmqEvent(
         constructTelliNewMessageEvent({
           user: teacherUserAndContext,
+          provider: modelAndProvider.definedModel.provider,
           promptTokens: assistantMessage.usage.promptTokens,
           completionTokens: assistantMessage.usage.completionTokens,
+          costsInCents: calculateCostsInCents(definedModel, assistantMessage.usage),
           anonymous: true,
           sharedChat,
         }),

@@ -1,11 +1,18 @@
 import { FileModel } from '@/db/schema';
 import DisplayUploadedFile from './display-uploaded-file';
+import DisplayUploadedImage from './display-uploaded-image';
 import type { UIMessage } from '@ai-sdk/ui-utils';
 import TelliClipboardButton from '../common/clipboard-button';
 import ReloadIcon from '../icons/reload';
 import MarkdownDisplay from './markdown-display';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
+import Citation from './sources/citation';
+import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { parseHyperlinks } from '@/utils/web-search/parsing';
+import { iconClassName } from '@/utils/tailwind/icon';
+import useBreakpoints from '../hooks/use-breakpoints';
+import { isImageFile } from '@/utils/files/generic';
 
 export function ChatBox({
   children,
@@ -17,6 +24,7 @@ export function ChatBox({
   regenerateMessage,
   initialFiles,
   assistantIcon,
+  initialWebsources,
 }: {
   children: UIMessage;
   index: number;
@@ -27,67 +35,113 @@ export function ChatBox({
   regenerateMessage: () => void;
   initialFiles?: FileModel[];
   assistantIcon?: React.JSX.Element;
+  initialWebsources?: WebsearchSource[];
 }) {
-  let maybefileAttachment: React.JSX.Element | undefined = undefined;
   const tCommon = useTranslations('common');
+  const { isAtLeast } = useBreakpoints();
+
   const userClassName =
     children.role === 'user'
-      ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary/20 text-primary-foreground max-w-[70%] break-words'
-      : '';
+      ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary-light text-primary-foreground max-w-[70%] break-words'
+      : 'w-fit';
   const fileMatch = fileMapping?.get(children.id) !== undefined;
   const allFiles = fileMatch ? fileMapping.get(children.id) : initialFiles;
+  const urls = parseHyperlinks(children.content) ?? [];
+  const websearchSources = [...(initialWebsources ?? [])];
 
-  const margin = allFiles !== undefined ? 'm-0' : 'm-4';
-
-  if (allFiles !== undefined && children.role === 'user' && (isLastUser || fileMatch)) {
-    const filesElement = allFiles.map((file) => {
-      return (
-        <DisplayUploadedFile
-          fileName={file.name}
-          status="processed"
-          key={file.id}
-        ></DisplayUploadedFile>
-      );
-    });
-    maybefileAttachment = (
-      <div className="flex flex-row gap-2 pb-0 pt-0 overflow-auto self-end mb-4">
-        {filesElement}
-      </div>
-    );
+  for (const url of urls) {
+    if (websearchSources.find((source) => source.link === url) === undefined) {
+      websearchSources.push({ link: url, type: 'websearch' });
+    }
   }
 
-  let maybeShowMessageIcons = null;
-  if (isLastNonUser && !isLoading) {
-    maybeShowMessageIcons = (
+  // Separate image files from non-image files
+  const imageFiles = allFiles?.filter((file) => isImageFile(file.name)) ?? [];
+  const nonImageFiles = allFiles?.filter((file) => !isImageFile(file.name)) ?? [];
+
+  const maybefileAttachment =
+    allFiles !== undefined && children.role === 'user' && (isLastUser || fileMatch) ? (
+      <div className="flex flex-col gap-4 pb-0 pt-0 self-end mb-4">
+        {/* Display images */}
+        {imageFiles.length > 0 && (
+          <div className="flex flex-row gap-2 overflow-auto">
+            {imageFiles.map((file) => (
+              <DisplayUploadedImage
+                file={file}
+                status="processed"
+                key={file.id}
+                showBanner={false}
+              />
+            ))}
+          </div>
+        )}
+        {/* Display non-image files */}
+        {nonImageFiles.length > 0 && (
+          <div className="flex flex-row gap-2 overflow-auto">
+            {nonImageFiles.map((file) => (
+              <DisplayUploadedFile fileName={file.name} status="processed" key={file.id} />
+            ))}
+          </div>
+        )}
+      </div>
+    ) : null;
+
+  const maybeWebpageCard =
+    websearchSources.length > 0 && (!isLoading || !isLastNonUser) ? (
+      <div
+        className="relative flex flex-wrap overflow-ellipsis gap-2 self-end mt-1 mb-2 w-[70%]"
+        dir="rtl"
+      >
+        {websearchSources?.map((source, sourceIndex) => {
+          return (
+            <Citation
+              className="bg-secondary-dark rounded-enterprise-sm p-0"
+              key={`user-link-${index}-${sourceIndex}`}
+              source={source}
+              index={index}
+              sourceIndex={sourceIndex}
+            />
+          );
+        })}
+      </div>
+    ) : null;
+
+  const webSourceAvailable = initialWebsources !== undefined && initialWebsources.length !== 0;
+  const margin = allFiles !== undefined || webSourceAvailable ? 'm-0 mt-4' : 'm-4';
+
+  const maybeShowMessageIcons =
+    isLastNonUser && !isLoading ? (
       <div className="flex items-center gap-1 mt-1">
-        <TelliClipboardButton text={children.content} />
+        <TelliClipboardButton text={children.content} className="w-5 h-5" />
         <button
           title={tCommon('regenerate-message')}
           type="button"
           onClick={() => regenerateMessage()}
           aria-label="Reload"
         >
-          <div className="p-1.5 rounded-enterprise-sm hover:bg-vidis-hover-green/20">
-            <ReloadIcon className="text-primary w-5 h-5" />
+          <div className={cn('p-1.5 rounded-enterprise-sm', iconClassName)}>
+            <ReloadIcon className="w-5 h-5" />
           </div>
         </button>
       </div>
-    );
-  }
+    ) : null;
+
+  const messageContent = <MarkdownDisplay>{children.content}</MarkdownDisplay>;
 
   return (
     <>
       <div key={index} className={cn('w-full text-secondary-foreground', userClassName, margin)}>
         <div className="" aria-label={`${children.role} message ${Math.floor(index / 2 + 1)}`}>
-          <div className="flex flex-row">
+          <div className={cn('flex flex-row', isAtLeast.sm ? 'flex-row' : 'flex-col')}>
             {children.role === 'assistant' && assistantIcon}
             <div className="flex flex-col items-start gap-2">
-              <MarkdownDisplay>{children.content}</MarkdownDisplay>
+              {messageContent}
               {maybeShowMessageIcons}
             </div>
           </div>
         </div>
       </div>
+      {maybeWebpageCard}
       {maybefileAttachment}
     </>
   );

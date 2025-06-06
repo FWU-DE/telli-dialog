@@ -6,7 +6,7 @@ import {
   buttonPrimaryClassName,
   buttonSecondaryClassName,
 } from '@/utils/tailwind/button';
-import { inputFieldClassName, labelClassName } from '@/utils/tailwind/input';
+import { labelClassName } from '@/utils/tailwind/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -19,25 +19,27 @@ import { EmptyImageIcon } from '@/components/icons/empty-image';
 import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
-import ChevronLeftIcon from '@/components/icons/chevron-left';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import Checkbox from '@/components/common/checkbox';
 import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import TrashIcon from '@/components/icons/trash';
 import PlusIcon from '@/components/icons/plus';
+import { TextInput } from '@/components/common/text-input';
 import {
   deleteCustomGptAction,
   updateCustomGptAccessLevelAction,
   updateCustomGptAction,
   updateCustomGptPictureAction,
 } from './actions';
-import { LocalFileState } from '@/components/chat/send-message-form';
 import { deleteFileMappingAndEntity, linkFileToCustomGpt } from '../../actions';
-import { deepCopy } from '@/utils/object';
+import { deepCopy, deepEqual } from '@/utils/object';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
 import { CopyContainer } from '../../../_components/copy-container';
+import NavigateBack from '@/components/common/navigate-back';
+import { LocalFileState } from '@/components/chat/send-message-form';
+import { getZodFieldMetadataFn } from '@/components/forms/utils';
+import { iconClassName } from '@/utils/tailwind/icon';
 
 type CustomGptFormProps = CustomGptModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -47,9 +49,9 @@ type CustomGptFormProps = CustomGptModel & {
 };
 
 const customGptFormValuesSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  specification: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  name: z.string(),
+  description: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  specification: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   promptSuggestions: z.array(z.object({ content: z.string() })),
 });
 type CustomGptFormValues = z.infer<typeof customGptFormValuesSchema>;
@@ -89,7 +91,7 @@ export default function CustomGptForm({
   const t = useTranslations('custom-gpt.form');
   const tToast = useTranslations('custom-gpt.toasts');
   const tCommon = useTranslations('common');
-
+  const getZodFieldMetadata = getZodFieldMetadataFn(customGptFormValuesSchema);
   const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
     customGpt.accessLevel,
     (p, n: CharacterAccessLevel) => n,
@@ -142,7 +144,7 @@ export default function CustomGptForm({
       .catch(() => toast.error(tToast('edit-toast-error')));
   }
 
-  async function onSubmit(data: CustomGptFormValues) {
+  function onSubmit(data: CustomGptFormValues) {
     updateCustomGptAction({
       ...data,
       promptSuggestions: data.promptSuggestions?.map((p) => p.content),
@@ -167,12 +169,12 @@ export default function CustomGptForm({
 
   function updatePromptSuggestions() {
     const _promptSuggestions = getValues('promptSuggestions');
-
-    const promptSuggestions = cleanupPromptSuggestions(_promptSuggestions.map((p) => p.content));
-
+    const newPromptSuggestions = cleanupPromptSuggestions(_promptSuggestions.map((p) => p.content));
+    const dataEquals = deepEqual(promptSuggestions, newPromptSuggestions);
+    if (dataEquals) return;
     updateCustomGptAction({
       gptId: customGpt.id,
-      promptSuggestions,
+      promptSuggestions: newPromptSuggestions,
     })
       .then(() => {
         if (!isCreating) toast.success(tToast('edit-toast-success'));
@@ -196,6 +198,14 @@ export default function CustomGptForm({
         toast.error(tToast('edit-toast-error'));
       });
   }
+  function handleNavigateBack(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    if (isCreating) {
+      handleDeleteCustomGpt();
+      return;
+    }
+    router.push(backUrl);
+  }
 
   function handleDeleteCustomGpt() {
     deleteCustomGptAction({ gptId: customGpt.id })
@@ -205,17 +215,26 @@ export default function CustomGptForm({
           toast.success(tToast('delete-toast-success'));
         }
 
-        router.push(backUrl);
+        // replace instead of push to avoid showing a 404 when navigating back to the now non existing custom gpt
+        router.replace(backUrl);
       })
       .catch(() => {
         toast.error(tToast('delete-toast-error'));
       });
   }
 
-  async function handleAutoSave() {
+  function handleAutoSave() {
     if (isCreating) return;
     const data = getValues();
-    await onSubmit(data);
+    const defaultData = { ...customGpt, promptSuggestions: [] };
+    const newData = {
+      ...defaultData,
+      ...data,
+      promptSuggestions: [],
+    };
+    const dataEquals = deepEqual(defaultData, newData);
+    if (dataEquals) return;
+    onSubmit(data);
   }
   function handleCreateCustomGpt() {
     const data = getValues();
@@ -237,25 +256,11 @@ export default function CustomGptForm({
 
   return (
     <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
-      {isCreating && (
-        <button
-          onClick={handleDeleteCustomGpt}
-          className="flex gap-3 items-center text-primary hover:underline"
-        >
-          <ChevronLeftIcon />
-          <span>{t('all-gpts')}</span>
-        </button>
-      )}
-      {!isCreating && (
-        <Link href={backUrl} className="flex gap-3 text-primary hover:underline items-center mb-4">
-          <ChevronLeftIcon />
-          <span>{t('all-gpts')}</span>
-        </Link>
-      )}
-      {copyContainer}
+      <NavigateBack label={t('all-gpts')} onClick={handleNavigateBack} />
+
       <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>
       {userRole === 'teacher' && (
-        <fieldset className="mt-16 gap-8">
+        <fieldset className="mt-8 gap-8">
           <div className="flex gap-4">
             <Checkbox
               label={t('restriction-school')}
@@ -266,45 +271,35 @@ export default function CustomGptForm({
           </div>
         </fieldset>
       )}
-      <fieldset className="flex flex-col gap-4 mt-16">
+      <fieldset className="flex flex-col gap-4 mt-8">
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
           <div className="flex gap-8 flex-col">
-            <div className="flex flex-col gap-4">
-              <label htmlFor="name" className={cn(labelClassName, 'text-sm')}>
-                <span className="text-coral">*</span> {t('gpt-name-label')}
-              </label>
-              <input
-                id="name"
-                readOnly={readOnly}
-                {...register('name')}
-                maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-                className={cn(
-                  inputFieldClassName,
-                  'focus:border-primary placeholder:text-gray-300',
-                )}
-                onBlur={handleAutoSave}
-                placeholder={t('gpt-name-placeholder')}
-              />
-            </div>
-            <div className="flex flex-col gap-4">
-              <label htmlFor="description" className={cn(labelClassName, 'text-sm')}>
-                <span className="text-coral">*</span> {t('gpt-description-label')}
-              </label>
-              <textarea
-                id="description"
-                rows={5}
-                readOnly={readOnly}
-                style={{ resize: 'none' }}
-                {...register('description')}
-                maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-                className={cn(
-                  inputFieldClassName,
-                  'focus:border-primary placeholder:text-gray-300',
-                )}
-                onBlur={handleAutoSave}
-                placeholder={t('gpt-description-placeholder')}
-              />
-            </div>
+            <TextInput
+              label={t('gpt-name-label')}
+              placeholder={t('gpt-name-placeholder')}
+              inputType="text"
+              getValue={() => getValues('name') ?? ''}
+              {...getZodFieldMetadata('name')}
+              {...register('name')}
+              rows={undefined}
+              readOnly={readOnly}
+              maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+              id="name"
+              onBlur={handleAutoSave}
+            />
+            <TextInput
+              label={t('gpt-description-label')}
+              placeholder={t('gpt-description-placeholder')}
+              inputType="textarea"
+              getValue={() => getValues('description') ?? ''}
+              {...getZodFieldMetadata('description')}
+              {...register('description')}
+              rows={5}
+              readOnly={readOnly}
+              maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+              id="description"
+              onBlur={handleAutoSave}
+            />
           </div>
           <section className="h-full">
             <label htmlFor="image" className={cn(labelClassName, 'text-sm')}>
@@ -344,55 +339,43 @@ export default function CustomGptForm({
         </div>
       </fieldset>
       <fieldset className="flex flex-col gap-6 mt-6">
-        <div className="flex flex-col gap-4">
-          <label htmlFor="specifications" className={cn(labelClassName, 'text-sm')}>
-            <span className="text-coral">*</span>
-            {t('gpt-specification-label')}
-          </label>
-          <textarea
-            id="specification"
-            readOnly={readOnly}
-            {...register('specification')}
-            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-            rows={7}
-            style={{ resize: 'none' }}
-            className={cn(inputFieldClassName, 'focus:border-primary placeholder:text-gray-300')}
-            onBlur={handleAutoSave}
-            placeholder={t('gpt-specification-placeholder')}
-          />
-        </div>
-        {!readOnly && (
-          <section className="mt-8 flex flex-col gap-3 w-full">
-            <h2 className="font-medium">Promptvorschläge hinzufügen</h2>
-            <p className="text-dark-gray">
-              Füge bis zu 10 Vorschläge für Prompts hinzu, die zufällig oberhalb des Eingabefelds im
-              Dialog angezeigt werden.
-            </p>
-            <div className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-4 w-full pr-4">
-              {fields.map((field, index) => {
-                return (
-                  <React.Fragment key={field.id}>
-                    <textarea
-                      rows={2}
-                      readOnly={readOnly}
-                      {...register(`promptSuggestions.${index}.content`)}
-                      className={cn(inputFieldClassName, 'resize-none')}
-                      placeholder={index === 0 ? t('prompt-suggestion-placeholder') : undefined}
-                      onBlur={updatePromptSuggestions}
-                    />
-                    {index !== 0 && (
-                      <button
-                        onClick={() => {
-                          remove(index);
-                          updatePromptSuggestions();
-                        }}
-                        className="flex items-center justify-center first:hidden"
-                        type="button"
-                      >
-                        <TrashIcon />
-                      </button>
-                    )}
-                    {index === 0 && (
+        <TextInput
+          label={t('gpt-specification-label')}
+          placeholder={t('gpt-specification-placeholder')}
+          inputType="textarea"
+          getValue={() => getValues('specification') ?? ''}
+          {...getZodFieldMetadata('specification')}
+          {...register('specification')}
+          rows={7}
+          readOnly={readOnly}
+          maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+          id="specification"
+          onBlur={handleAutoSave}
+        />
+        <section className="mt-8 flex flex-col gap-3 w-full">
+          <h2 className="font-medium">Promptvorschläge hinzufügen</h2>
+          <p className="text-dark-gray">
+            <span>{t('prompt-suggestions-description')}</span>
+          </p>
+          <div className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-4 w-full pr-4">
+            {fields.map((field, index) => {
+              return (
+                <React.Fragment key={field.id}>
+                  <TextInput
+                    label={`Promptvorschlag ${index + 1}`}
+                    placeholder={index === 0 ? t('prompt-suggestion-placeholder') : undefined}
+                    inputType="textarea"
+                    getValue={() => getValues(`promptSuggestions.${index}.content`) ?? ''}
+                    {...getZodFieldMetadata(`promptSuggestions.${index}.content`)}
+                    {...register(`promptSuggestions.${index}.content`)}
+                    rows={2}
+                    onBlur={updatePromptSuggestions}
+                    readOnly={readOnly}
+                    maxLength={undefined}
+                    id={`promptSuggestions.${index}.content`}
+                  />
+                  <div className="flex items-center justify-center">
+                    {index === fields.length - 1 ? (
                       <button
                         onClick={() => {
                           if (fields.length >= 10) {
@@ -402,17 +385,30 @@ export default function CustomGptForm({
                           append({ content: '' });
                         }}
                         type="button"
-                        className=""
+                        className={cn('flex items-center justify-center', iconClassName)}
+                        aria-label={t('prompt-suggestions-add-button')}
                       >
-                        <PlusIcon className="text-primary" />
+                        <PlusIcon className="w-8 h-8" />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          remove(index);
+                          updatePromptSuggestions();
+                        }}
+                        aria-label={t('prompt-suggestions-delete-button', { index: index + 1 })}
+                        className={cn('flex items-center justify-center', iconClassName)}
+                        type="button"
+                      >
+                        <TrashIcon className="w-8 h-8" />
                       </button>
                     )}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-          </section>
-        )}
+                  </div>
+                </React.Fragment>
+              );
+            })}
+          </div>
+        </section>
         <section className="mt-8"></section>
       </fieldset>
 
@@ -440,23 +436,20 @@ export default function CustomGptForm({
           <h3 className="font-medium">{t('delete-gpt')}</h3>
           <p className="mt-4">{t('gpt-delete-description')}</p>
           <DestructiveActionButton
-            className={cn(buttonDeleteClassName, 'mt-10')}
+            triggerButtonClassName={cn(buttonDeleteClassName, 'mt-10')}
             modalDescription={t('gpt-delete-modal-description')}
             modalTitle={t('delete-gpt')}
             confirmText={tCommon('delete')}
             actionFn={handleDeleteCustomGpt}
           >
-            {t('final-delete-gpt')}
+            {t('delete-gpt')}
           </DestructiveActionButton>
         </section>
       )}
       {isCreating && !readOnly && (
         <section className="mt-8 flex gap-4 items-center">
           <button
-            className={cn(
-              buttonSecondaryClassName,
-              'hover:border-primary hover:bg-vidis-hover-green/20',
-            )}
+            className={cn(buttonSecondaryClassName, 'hover:border-primary hover:bg-primary-hover')}
             onClick={handleDeleteCustomGpt}
             type="button"
           >
