@@ -107,7 +107,7 @@ export default function FilesTable({
                     confirmText="Datei löschen"
                     actionFn={() => handleDeleteFile(id)}
                   >
-                    <TrashIcon />
+                    <TrashIcon className="w-9 h-9" />
                   </DestructiveActionButton>
                 </td>
               </tr>
