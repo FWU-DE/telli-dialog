@@ -7,9 +7,9 @@ import { getKeywordsFromQuery } from '../chat/utils';
 import { embedBatchAndSave, embedText } from './embedding';
 import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { Message } from '@ai-sdk/react';
-import { getAuxiliaryModel, getModelAndProviderWithResult } from '../utils';
 import { UserAndContext } from '@/auth/types';
 import { processFiles } from './process-file';
+import { LanguageModelV1 } from 'ai';
 
 type SearchOptions = {
   keywords: string[];
@@ -19,10 +19,12 @@ type SearchOptions = {
 };
 
 export async function getRelevantFileContent({
+  model,
   messages,
   user,
   relatedFileEntities,
 }: {
+  model: LanguageModelV1;
   messages: Message[];
   user: UserAndContext;
   relatedFileEntities: FileModelAndContent[];
@@ -30,25 +32,15 @@ export async function getRelevantFileContent({
   if (relatedFileEntities.length === 0) {
     return undefined;
   }
-  const auxiliaryModel = await getAuxiliaryModel(user);
-
-  const [errorAuxiliaryModel, auxiliaryModelAndProvider] = await getModelAndProviderWithResult({
-    modelId: auxiliaryModel.id,
-    federalStateId: user.federalState.id,
-  });
-
-  if (errorAuxiliaryModel !== null) {
-    throw new Error(errorAuxiliaryModel.message);
-  }
 
   const [searchQuery, keywords] = await Promise.all([
     condenseChatHistory({
       messages,
-      model: auxiliaryModelAndProvider.telliProvider,
+      model,
     }),
     getKeywordsFromQuery({
       messages,
-      model: auxiliaryModelAndProvider.telliProvider,
+      model,
     }),
   ]);
 
