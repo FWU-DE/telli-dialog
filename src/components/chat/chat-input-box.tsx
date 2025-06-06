@@ -5,6 +5,7 @@ import { LocalFileState } from './send-message-form';
 import {
   CHAT_MESSAGE_LENGTH_LIMIT,
   NUMBER_OF_FILES_LIMIT,
+  NUMBER_OF_IMAGES_LIMIT,
 } from '@/configuration-text-inputs/const';
 import StopIcon from '../icons/stop';
 import ArrowRightIcon from '../icons/arrow-right';
@@ -13,6 +14,7 @@ import { useToast } from '../common/toast';
 import { useEffect, useState } from 'react';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { cn } from '@/utils/tailwind';
+import { isImageFile } from '@/utils/files/generic';
 
 export function ChatInputBox({
   files,
@@ -42,12 +44,38 @@ export function ChatInputBox({
   useEffect(() => {
     if (files && setFiles && files.size > NUMBER_OF_FILES_LIMIT) {
       toast.error(
-        tFileInteraction('upload.file-limit-reached', { max_files: NUMBER_OF_FILES_LIMIT }),
+        tFileInteraction('upload.file-limit-reached', {
+          max_files: NUMBER_OF_FILES_LIMIT,
+          files_exceeded: files.size - NUMBER_OF_FILES_LIMIT,
+        }),
       );
       const trimmedFiles = new Map(Array.from(files.entries()).slice(0, NUMBER_OF_FILES_LIMIT));
       setFiles(trimmedFiles);
       setFileUploading(false);
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const imageEntries = Array.from(files?.entries() ?? []).filter(([_, file]) =>
+      isImageFile(file.file.name),
+    );
+    const numberOfImages = imageEntries.length;
+
+    if (files && setFiles && numberOfImages > NUMBER_OF_IMAGES_LIMIT) {
+      const newFiles = new Map(files);
+      const imagesExceedingLimit = imageEntries.slice(NUMBER_OF_IMAGES_LIMIT);
+      toast.error(
+        tFileInteraction('upload.image-limit-reached', {
+          max_images: NUMBER_OF_IMAGES_LIMIT,
+          images_exceeded: imagesExceedingLimit.length,
+        }),
+      );
+      // pop off all images exceeding the limit
+      imagesExceedingLimit.forEach(([localId]) => {
+        newFiles.delete(localId);
+      });
+      setFiles(newFiles);
+      setFileUploading(false);
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [files]);
 
@@ -122,7 +150,7 @@ export function ChatInputBox({
               <UploadFileButton
                 className={iconClassName}
                 setFiles={setFiles}
-                disabled={files.size >= NUMBER_OF_FILES_LIMIT}
+                files={files}
                 setFileUploading={setFileUploading}
               />
             </div>

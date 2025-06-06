@@ -60041,5 +60041,11 @@
     "schulkennung": "school1",
     "rolle": "LERN",
     "bundesland": "DE-BY"
+  },
+  "teacher-local": {
+    "sub": "02bc9c83-defa-4aef-9cf5-0cf2b0b3b20a",
+    "schulkennung": "school-local",
+    "rolle": "LEHR",
+    "bundesland": "DE-TEST"
   }
 }

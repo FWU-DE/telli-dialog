@@ -1,4 +1,38 @@
+import { ImageAttachment } from '@/utils/files/types';
 import { generateText, LanguageModelV1, type Message } from 'ai';
+
+/**
+ * Format messages to include images for models that support vision
+ */
+export function formatMessagesWithImages(
+  messages: Message[],
+  images: ImageAttachment[],
+  modelSupportsImages: boolean,
+): Message[] {
+  if (!modelSupportsImages || images.length === 0) {
+    return messages;
+  }
+
+  const messagesWithImages = [...messages];
+
+  for (const message of messagesWithImages) {
+    if (message.role !== 'user') {
+      continue;
+    }
+
+    const messageImages = images.filter((image) => image.conversationMessageId === message.id);
+    if (messageImages.length === 0) {
+      continue;
+    }
+    message.experimental_attachments = messageImages.map((image) => ({
+      contentType: image.mimeType,
+      url: image.url,
+      type: 'image',
+    }));
+  }
+
+  return messagesWithImages;
+}
 
 export function getMostRecentUserMessage(messages: Array<Message>) {
   const userMessages = messages.filter((message) => message.role === 'user');

@@ -25,6 +25,8 @@ import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { getRelevantFileContent } from '../file-operations/retrieval';
+import { extractImagesAndUrl } from '../file-operations/prepocess-image';
+import { formatMessagesWithImages } from './utils';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -130,6 +132,13 @@ export async function POST(request: NextRequest) {
 
   const orderedChunks = await getRelevantFileContent({ messages, user, relatedFileEntities });
 
+  // attach the image url to each of the image files within relatedFileEntities
+  const extractedImages = await extractImagesAndUrl(relatedFileEntities);
+
+  // Check if the model supports images based on supportedImageFormats
+  const modelSupportsImages =
+    definedModel.supportedImageFormats !== null && definedModel.supportedImageFormats.length > 0;
+
   const urls = [userMessage, ...messages]
     .map((message) => parseHyperlinks(message.content) ?? [])
     .flat();
@@ -164,10 +173,17 @@ export async function POST(request: NextRequest) {
     websearchSources: websearchSources,
     retrievedTextChunks: orderedChunks,
   });
+
+  // Format messages with images if the model supports vision
+  const messagesWithImages = formatMessagesWithImages(
+    prunedMessages,
+    extractedImages,
+    modelSupportsImages,
+  );
   const result = streamText({
     model: telliProvider,
     system: systemPrompt,
-    messages: prunedMessages.map((m) => ({ role: m.role, content: m.content })),
+    messages: messagesWithImages,
     experimental_generateMessageId: generateUUID,
     experimental_transform: smoothStream({ chunking: 'word', delayInMs: 20 }),
     async onFinish(assistantMessage) {

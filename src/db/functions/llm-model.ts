@@ -100,6 +100,7 @@ export async function dbUpsertLlmModelsByModelsAndFederalStateId({
           provider: model.provider,
           description: model.description,
           priceMetadata: model.priceMetadata,
+          supportedImageFormats: model.supportedImageFormats,
         },
       });
     insertedModels.push(model);

@@ -1,6 +1,9 @@
-import { SUPPORTED_FILE_TYPE as SupportedFiles } from '@/const';
+import { SUPPORTED_DOCUMENTS_TYPE } from '@/const';
 import { extractTextFromWordDocument } from './parse-docx';
 import { extractTextFromPdfBuffer } from './parse-pdf';
+import { FileMetadata } from '@/db/schema';
+import { preprocessImage } from './prepocess-image';
+import { isImageFile } from '@/utils/files/generic';
 
 type TextElement = {
   page: number;
@@ -12,9 +15,12 @@ export async function extractFile({
   type,
 }: {
   fileContent: Buffer;
-  type: SupportedFiles;
-}): Promise<TextElement[]> {
+  type: SUPPORTED_DOCUMENTS_TYPE;
+}): Promise<{ content: TextElement[]; metadata: FileMetadata; processedBuffer?: Buffer }> {
   let content: TextElement[] = [];
+  let metadata: FileMetadata = {};
+  let processedBuffer: Buffer | undefined;
+
   if (type === 'pdf') {
     const { pageElement } = await extractTextFromPdfBuffer(fileContent);
     content = pageElement;
@@ -23,6 +29,13 @@ export async function extractFile({
     content = [{ page: 0, text: result }];
   } else if (type === 'md' || type === 'txt') {
     content = [{ page: 0, text: new TextDecoder('utf-8').decode(fileContent) }];
+  } else if (isImageFile(type)) {
+    const imageResult = await preprocessImage(fileContent, type);
+    metadata = imageResult.metadata;
+    processedBuffer = imageResult.buffer;
+    // Images don't have text content, so content remains empty
+    content = [];
   }
-  return content;
+
+  return { content, metadata, processedBuffer };
 }

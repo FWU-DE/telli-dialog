@@ -34,13 +34,13 @@ export async function POST(req: NextRequest) {
   const buffer = Buffer.from(bytes);
 
   const fileExtension = getFileExtension(file.name);
-  const content = await extractFile({
+  const extractResult = await extractFile({
     fileContent: buffer,
     type: fileExtension,
   });
 
   const enrichedChunks: Omit<TextChunkInsertModel, 'embedding'>[] = [];
-  for (const element of content) {
+  for (const element of extractResult.content) {
     const textChunks = chunkText({
       text: element.text,
       sentenceChunkOverlap: 1,
@@ -58,9 +58,13 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  await db
-    .insert(fileTable)
-    .values({ id: fileId, name: file.name, size: file.size, type: fileExtension });
+  await db.insert(fileTable).values({
+    id: fileId,
+    name: file.name,
+    size: extractResult.processedBuffer ? extractResult.processedBuffer.length : file.size,
+    type: fileExtension,
+    metadata: extractResult.metadata,
+  });
 
   await embedBatchAndSave({
     values: enrichedChunks,
@@ -68,9 +72,12 @@ export async function POST(req: NextRequest) {
     federalStateId: user.federalState.id,
   });
 
+  // Use processed buffer for images, original buffer for other files
+  const bufferToUpload = extractResult.processedBuffer || buffer;
+
   await uploadFileToS3({
     key: `message_attachments/${fileId}`,
-    body: buffer,
+    body: bufferToUpload,
     contentType: getFileExtension(file.name),
   });
 
