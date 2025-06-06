@@ -1,4 +1,4 @@
-import { generateText, type Message, smoothStream, streamText } from 'ai';
+import { type Message, smoothStream, streamText } from 'ai';
 import {
   dbGetConversationAndMessages,
   dbGetOrCreateConversation,
@@ -8,9 +8,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { dbInsertChatContent } from '@/db/functions/chat';
 import { getUser } from '@/auth/utils';
 import { userHasReachedIntelliPointLimit, trackChatUsage } from './usage';
-import { getModelAndProviderWithResult, calculateCostsInCents } from '../utils';
+import { getModelAndProviderWithResult, calculateCostsInCents, getAuxiliaryModel } from '../utils';
 import { generateUUID } from '@/utils/uuid';
-import { getMostRecentUserMessage, limitChatHistory } from './utils';
+import { getChatTitle, getMostRecentUserMessage, limitChatHistory } from './utils';
 import { constructChatSystemPrompt } from './system-prompt';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
@@ -61,6 +61,17 @@ export async function POST(request: NextRequest) {
     modelId,
     federalStateId: user.federalState.id,
   });
+
+  const auxiliaryModel = await getAuxiliaryModel(user);
+
+  const [errorAuxiliaryModel, auxiliaryModelAndProvider] = await getModelAndProviderWithResult({
+    modelId: auxiliaryModel.id,
+    federalStateId: user.federalState.id,
+  });
+
+  if (errorAuxiliaryModel !== null) {
+    throw new Error(errorAuxiliaryModel.message);
+  }
 
   if (error !== null) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -130,7 +141,12 @@ export async function POST(request: NextRequest) {
     customGptId,
   });
 
-  const orderedChunks = await getRelevantFileContent({ messages, user, relatedFileEntities });
+  const orderedChunks = await getRelevantFileContent({
+    messages,
+    user,
+    relatedFileEntities,
+    model: auxiliaryModelAndProvider.telliProvider,
+  });
 
   // attach the image url to each of the image files within relatedFileEntities
   const extractedImages = await extractImagesAndUrl(relatedFileEntities);
@@ -197,22 +213,20 @@ export async function POST(request: NextRequest) {
       });
 
       if (messages.length === 1 || messages.length === 2 || conversation.name === null) {
-        const { text } = await generateText({
-          model: telliProvider,
-          system: `Du erstellst einen kurzen Titel basierend auf der ersten Nachricht eines Nutzers
-Stelle sicher, dass er nicht länger als 80 Zeichen ist
-Der Titel sollte eine Zusammenfassung der Nachricht sein
-Verwende keine Anführungszeichen oder Doppelpunkte`,
-          messages,
-        });
-
-        if (text || conversation.name === null) {
-          await dbUpdateConversationTitle({
-            name: text,
-            conversationId: conversation.id,
-            userId: user.id,
+        let chatTitle = 'Neue Konversation';
+        try {
+          chatTitle = await getChatTitle({
+            model: auxiliaryModelAndProvider.telliProvider,
+            messages,
           });
+        } catch (error) {
+          console.error('Unhandled error while generating conversation title', error);
         }
+        await dbUpdateConversationTitle({
+          name: chatTitle,
+          conversationId: conversation.id,
+          userId: user.id,
+        });
       }
 
       await trackChatUsage({

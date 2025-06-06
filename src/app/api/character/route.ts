@@ -95,6 +95,7 @@ export async function POST(request: NextRequest) {
     messages,
     user: teacherUserAndContext,
     relatedFileEntities,
+    model: telliProvider,
   });
   const systemPrompt = constructSystemPromptByCharacterSharedChat({
     character,
