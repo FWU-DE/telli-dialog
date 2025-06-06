@@ -36,7 +36,7 @@ export default async function Page(context: PageContext) {
     userId: user.id,
   });
   const characters = _characters.filter((c) => c.name !== '');
-  console.log('characters', _characters);
+
   const enrichedCharacters = await enrichCharactersWithImage({ characters });
 
   return (
