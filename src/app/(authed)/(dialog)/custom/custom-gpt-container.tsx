@@ -18,6 +18,7 @@ import { createNewCustomGptAction } from './actions';
 import ClipboardIcon from '@/components/icons/clipboard';
 import { CreateNewCharacterFromTemplate } from '../characters/create-new-character-button';
 import { iconClassName } from '@/utils/tailwind/icon';
+import TelliClipboardButton from '@/components/common/clipboard-button';
 
 type CustomGptContainerProps = CustomGptModel & {
   currentUserId: string;
@@ -93,10 +94,15 @@ export default function CustomGptContainer({
           createInstanceCallback={createNewCustomGptAction}
           templateId={id}
           templatePictureId={pictureId ?? undefined}
+          className="w-8 h-8"
           {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
         >
-          <button aria-label="copy-template">
-            <ClipboardIcon className={cn('text-primary hover:text-secondary', 'min-w-8 min-h-8')} />
+          <button aria-label="copy-template" className={cn(iconClassName, 'w-8 h-8')}>
+            <TelliClipboardButton
+              text={t('form.copy-page.copy-template')}
+              className="w-6 h-6"
+              outerDivClassName="p-0 rounded-enterprise-sm"
+            />
           </button>
         </CreateNewCharacterFromTemplate>
       )}

@@ -66,18 +66,7 @@ export async function getMaybeLogoFromS3(federalStateId: string | undefined, ass
   if (federalStateId === undefined) {
     return undefined;
   }
-  const key = `whitelabels/${federalStateId}/${asset}`;
-  try {
-    await s3Client.send(
-      new GetObjectCommand({
-        Bucket: env.otcBucketName,
-        Key: key,
-      }),
-    );
-    return await getSignedUrlFromS3Get({ key });
-  } catch {
-    return undefined;
-  }
+  return await getMaybeSignedUrlIfExists({ key: `whitelabels/${federalStateId}/${asset}` });
 }
 
 export async function copyFileInS3({ newKey, copySource }: { newKey: string; copySource: string }) {
@@ -224,5 +213,34 @@ export async function deleteFileFromS3({ key }: { key: string }) {
   } catch (error) {
     console.error('Error deleting file from S3:', error);
     throw error;
+  }
+}
+
+export async function getMaybeSignedUrlIfExists({
+  key,
+  filename,
+  contentType,
+  attachment = true,
+}: {
+  key?: string;
+  filename?: string;
+  contentType?: string;
+  attachment?: boolean;
+}) {
+  if (key === undefined || key === null || key === '') return undefined;
+  try {
+    // Check if the object exists by attempting to get its metadata
+    await s3Client.send(
+      new GetObjectCommand({
+        Bucket: env.otcBucketName,
+        Key: key,
+      }),
+    );
+
+    // If no error is thrown, the object exists, so generate the signed URL
+    return await getSignedUrlFromS3Get({ key, filename, contentType, attachment });
+  } catch (error) {
+    // If an error is thrown, the object doesn't exist
+    return undefined;
   }
 }

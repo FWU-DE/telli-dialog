@@ -25,7 +25,7 @@ export function CopyContainer({
   const containerBg = !sharedChatActive ? 'bg-secondary/10' : 'bg-gray-100/10';
   const createInstanceCallback =
     redirectPath === 'characters' ? createNewCharacterAction : createNewCustomGptAction;
-  console.log(`templateId: ${templateId}, templatePictureId: ${templatePictureId}`);
+
   return (
     <CreateNewCharacterFromTemplate
       templateId={templateId}

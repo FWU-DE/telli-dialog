@@ -252,15 +252,40 @@ export const defaultCharacters: Omit<CharacterInsertModel, 'modelId'>[] = [
 
 export const defaultCustomGpt: CustomGptInsertModel[] = [
   {
-    id: 'f15a37aa-5670-4000-8a65-b2668519858e',
+    id: 'edb34bca-9868-4948-af68-7e80810806ac',
     userId: DUMMY_USER_ID,
-    name: 'Vertretungsstundenplaner (Mittelschule Bayern)',
-    description: 'kurzfristig abrufbarer Vertretungsstundenplaner',
+    name: 'Schulorganisationsassistent',
+    description: 'Planer für organisatorische Aufgaben innerhalb der Schule',
 
     specification:
-      'Der Dialogpartner bezieht sich nur auf den Lehrplan der Mittelschule Bayern. Hierzu soll ein  detailliertes und umfangreiches Artikulationsschema mit pädagogischem Kommentar erstellt werden , ein  angemessenes Tafelbild und drei Arbeitsblätter mit Übungsaufgaben. Die Unterrichtsstunden sollen so gestaltet sein, dass man sie direkt halten kann. Dabei sollen immer drei umfangreiche Arbeitsblätter  erstellt werden, also jeweils ein Arbeitsblatt mit Niveau leicht, mittel und schwer. Die Arbeitsblätter sollen unterschiedliche Aufgabentypen bedienen und wenn möglich, mindestens 10 Aufgaben abbilden. Ergänzend dazu soll auch ein Lösungsblatt erstellt werden. Der Chatbot soll darauf achten, dass sich der Chat und eventuelle Formeln, mathematische Zeichen und Tafelbilder einfach nach Word exportieren lassen, damit diese auch dort lesbar sind.',
+      'Der Assistent soll mich in meiner täglichen organisatorischen Arbeit unterstützen. Er soll Vorlagen für Elternbriefe, Elternabende, Rundschreiben, Vorlagen für Protokolle für Elterngespräche, Bewertungsvorlagen für Schüler:innenarbeiten etc. generieren, die ich mir einfach anpassen kann. Das Format sollte so gewählt sein, dass ich es einfach exportieren kann, ohne große Formatänderungen vornehmen zu müssen.',
     systemPrompt: '',
     accessLevel: 'global',
-    pictureId: 'custom-gpts/_templates/Unterrichtsplaner_Static',
+    pictureId: 'custom-gpts/_templates/Schulorganisationsassistent_Static',
+    promptSuggestions: [
+      'Erstelle mir einen Elternbrief zu einem Wandertag.',
+      'Erstelle mir eine Vorlage für ein Gesprächsprotokoll für ein Elterngespräch.',
+      'Erstelle mir einen Bewertungsbogen für ein Referat in tabellarischer Form.',
+      'Erstelle mir einen Elternbrief zur Einladung für den Elternsprechabend in leichter Sprache (Deutsch, Kroatisch, Arabisch, Albanisch und Englisch).',
+      'Erstelle mir einen Ablauf für einen 90-minütigen Elternabend.',
+    ],
+  },
+  {
+    id: 'd45246b9-af96-4c3b-9443-dec8c20dacdf',
+    userId: DUMMY_USER_ID,
+    name: 'Vertretungsstundenplaner',
+    description: 'kurzfristig abrufbarer Vertretungsstundenassistent für die Mittelschule Bayern',
+
+    specification:
+      'Der Dialogpartner bezieht sich nur auf den Lehrplan der Mittelschule Bayern. Hierzu soll ein detailliertes und umfangreiches Artikulationsschema mit pädagogischem Kommentar erstellt werden ,ein  angemessenes Tafelbild, drei Arbeitsblätter mit einer angemessenen und abwechslungsreichen Anzahl an Übungsaufgaben (Niveaustufen: leicht, mittel und schwer) und die Lösungen. Falls die Stunde eine Textarbeit einschließt, soll ein entsprechender Übungstext mit generiert werden.',
+    systemPrompt: '',
+    accessLevel: 'global',
+    pictureId: 'custom-gpts/_templates/Vertretungsstundenplaner_Static',
+    promptSuggestions: [
+      'Erstelle mir eine Mathestunde für die 7.Klasse.',
+      'Erstelle mir eine Englischstunde für die 10.Klasse.',
+      'Erstelle mir eine DaZ-Stunde für die 5.Klasse.',
+      'Erstelle mir eine Doppelstunde für Natur und Technik für die 8.Klasse.',
+    ],
   },
 ];

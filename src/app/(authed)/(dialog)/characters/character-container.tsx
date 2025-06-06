@@ -20,6 +20,7 @@ import { calculateTimeLeftBySharedChat } from '../shared-chats/[sharedSchoolChat
 import { CreateNewCharacterFromTemplate } from './create-new-character-button';
 import { iconClassName } from '@/utils/tailwind/icon';
 import TelliClipboardButton from '@/components/common/clipboard-button';
+import { createNewCharacterAction } from './actions';
 type CharacterContainerProps = CharacterModel & {
   currentUserId: string;
   maybeSignedPictureUrl: string | undefined;
@@ -64,6 +65,7 @@ export default function CharacterContainer({
   }
 
   const timeLeft = calculateTimeLeftBySharedChat(character);
+  console.log(maybeSignedPictureUrl);
 
   return (
     <Link
