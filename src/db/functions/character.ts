@@ -134,7 +134,10 @@ export async function dbGetGlobalCharacters({
     .from(characterTable)
     .leftJoin(
       sharedCharacterConversation,
-      eq(sharedCharacterConversation.characterId, characterTable.id),
+      and(
+        eq(sharedCharacterConversation.characterId, characterTable.id),
+        eq(sharedCharacterConversation.userId, userId),
+      ),
     )
     .where(
       and(

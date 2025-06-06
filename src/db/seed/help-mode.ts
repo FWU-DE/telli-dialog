@@ -1,5 +1,5 @@
 import { HELP_MODE_GPT_ID } from '../const';
-import { dbInsertCustomGpt } from '../functions/custom-gpts';
+import { dbCreateCustomGpt } from '../functions/custom-gpts';
 import { type CustomGptModel } from '../schema';
 
 const hilfeModusGpt: CustomGptModel = {
@@ -19,5 +19,5 @@ const hilfeModusGpt: CustomGptModel = {
 export async function insertHelpModeGpt({ skip = true }: { skip: boolean }) {
   if (skip) return;
 
-  return await dbInsertCustomGpt({ customGpt: hilfeModusGpt });
+  return await dbCreateCustomGpt({ customGpt: hilfeModusGpt });
 }

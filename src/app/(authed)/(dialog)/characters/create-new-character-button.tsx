@@ -15,12 +15,22 @@ export function CreateNewCharacterFromTemplate({
   children,
   className,
   templatePictureId,
+  redirectPath,
+  createInstanceCallback,
   ...props
 }: {
   children: React.ReactNode;
   className?: string;
   templateId: string;
   templatePictureId?: string;
+  redirectPath: 'characters' | 'custom';
+  createInstanceCallback: ({
+    modelId,
+    templatePictureId,
+  }: {
+    modelId?: string;
+    templatePictureId?: string;
+  }) => Promise<{ id: string }>;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -36,9 +46,10 @@ export function CreateNewCharacterFromTemplate({
       create: 'true',
       templateId,
     });
-    createNewCharacterAction({ modelId: maybeDefaultModelId, templatePictureId })
-      .then((newCharacter) => {
-        router.push(`/characters/editor/${newCharacter.id}?${urlSearchParams.toString()}`);
+
+    createInstanceCallback({ modelId: maybeDefaultModelId, templatePictureId })
+      .then((newInstance) => {
+        router.push(`/${redirectPath}/editor/${newInstance.id}?${urlSearchParams.toString()}`);
       })
       .catch(() => {
         toast.error(t('toasts.create-toast-error'));
