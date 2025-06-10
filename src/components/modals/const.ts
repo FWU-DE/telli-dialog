@@ -18,11 +18,11 @@ export const TERM_AND_CONDITIONS = `telli ist ein Angebot des Instituts für Fil
 
 8. Das Ministerium für Bildung, Jugend und Sport des Landes Brandenburg behält sich das Recht vor, diesen Dienst jederzeit ohne gesonderte Ankündigung einzustellen. Das MBJS behält sich außerdem das Recht vor, Nutzende bei wiederholter oder andauernder missbräuchlicher Nutzung vorübergehend oder dauerhaft von der Nutzung auszuschließen.
 
-9.  Diese Nutzungsbedingungen können jederzeit geändert werden. Nutzende werden durch eine Mitteilung auf dem Bildungsserver Berlin Brandenburg über Änderungen informiert. Die Nutzungsbedingung sind jederzeit auf den Seiten des Bildungsservers Berlin Brandenburg einsehbar.`;
+9. Diese Nutzungsbedingungen können jederzeit geändert werden. Nutzende werden durch eine Mitteilung auf dem Bildungsserver Berlin Brandenburg über Änderungen informiert. Die Nutzungsbedingung sind jederzeit auf den Seiten des Bildungsservers Berlin Brandenburg einsehbar.`;
 
 // TODO add link when available
 // "Der Kurs ist abrufbar unter [LINK] und kann online absolviert werden.
-export const EDUCATION_HINT = `Liebe Kollegin, Lieber Kollege,
+export const EDUCATION_HINT_BB = `Liebe Kollegin, Lieber Kollege,
   wir freuen uns, dass Sie telli nutzen möchten. Als KI-Chatbot unterliegt telli der EU-Verordnung über den Einsatz von Künstlicher Intelligenz (KI-VO). Die KI-VO verpflichtet in Art. 4 alle Anbieter und Betreiber von KI-Systemen dafür Sorge zu tragen, dass Personen, die ihre Systeme nutzen über die Notwendigen KI-Kompetenzen verfügen.'
   
   Für telli ist in Brandenburg vor der initialen Nutzung darum der Besuch eines Selbstlernkurses des LIBRA zum Thema KI verpflichtend.
@@ -32,6 +32,18 @@ export const EDUCATION_HINT = `Liebe Kollegin, Lieber Kollege,
   Vielen Dank und viel Freude bei der Nutzung von telli.
   
   Ihr telli-Team Brandenburg`;
+
+export const EDUCATION_HINT_HB = `Liebe Kollegin, lieber Kollege,
+  wir freuen uns, dass Sie telli nutzen möchten. Als KI-Chatbot unterliegt telli der EU-Verordnung über den Einsatz von Künstlicher Intelligenz (KI-VO). Die KI-VO verpflichtet in Art. 4 alle Anbieter und Betreiber von KI-Systemen dafür Sorge zu tragen, dass Personen, die ihre Systeme nutzen über die notwendigen KI-Kompetenzen verfügen.
+
+  Deshalb ist in Bremen der Besuch eines itslearning Selbstlernkurses zum Thema KI vor der initialen Nutzung von telli verpflichtend.
+
+  Alle Informationen zum Selbstlernkurs sind unter [LINK](https://www.bildung.bremen.de/einfuhrung-des-chatbots-telli-im-land-bremen-458348) abrufbar.
+
+  Dort finden Sie hilfreiche Informationen, Hinweise und Tipps zum Thema KI und Schule im Allgemeinen sowie speziell zum Einsatz von telli.
+
+  Vielen Dank und viel Freude bei der Nutzung von telli.
+  Ihr Referat 10 Medien und Bildung in der digitalen Welt`;
 
 // increment this number to prompt renewed acceptance from all users
 export const VERSION: number = 1;
@@ -47,11 +59,19 @@ export const federalStateDisclaimers: Partial<Record<FederalStateId, DisclaimerC
     pageContents: [
       'Bitte lese und akzeptiere die Nutzungsbedingungen um fortzufahren.',
       TERM_AND_CONDITIONS,
-      EDUCATION_HINT,
+      EDUCATION_HINT_BB,
     ],
     showCheckBox: true,
     acceptLabel:
-      'Ich versichere, dass ich den Selbstlernkurs des LIBRA zum Umgang mit telli absolviert habe',
+      'Ich versichere, dass ich den Selbstlernkurs des LIBRA zum Umgang mit telli absolviert habe.',
+  },
+  'DE-HB': {
+    pageContents: [
+      'Bitte lese und akzeptiere die Nutzungsbedingungen um fortzufahren.',
+      EDUCATION_HINT_HB,
+    ],
+    showCheckBox: true,
+    acceptLabel: 'Ich versichere, dass ich den Selbstlernkurs zum Umgang mit KI absolviert habe.',
   },
   'DE-SL': {
     pageContents: [
