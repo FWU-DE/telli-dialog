@@ -10,10 +10,7 @@ const templateCharactersIdentifier = [
   'Polizeioberkommissarin Julia',
 ];
 
-const templateCustomGptsIdentifier = [
-  'Schulorganisationsassistent',
-  'Vertretungsstundenplaner',
-];
+const templateCustomGptsIdentifier = ['Schulorganisationsassistent', 'Vertretungsstundenplaner'];
 
 test('all predefined characters are visible for everyone', async ({ page }) => {
   await login(page, 'teacher');
