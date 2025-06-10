@@ -66,7 +66,10 @@ export async function getMaybeLogoFromS3(federalStateId: string | undefined, ass
   if (federalStateId === undefined) {
     return undefined;
   }
-  return await getMaybeSignedUrlIfExists({ key: `whitelabels/${federalStateId}/${asset}`, suppressError: true });
+  return await getMaybeSignedUrlIfExists({
+    key: `whitelabels/${federalStateId}/${asset}`,
+    suppressError: true,
+  });
 }
 
 export async function copyFileInS3({ newKey, copySource }: { newKey: string; copySource: string }) {
