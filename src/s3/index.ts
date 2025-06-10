@@ -66,7 +66,7 @@ export async function getMaybeLogoFromS3(federalStateId: string | undefined, ass
   if (federalStateId === undefined) {
     return undefined;
   }
-  return await getMaybeSignedUrlIfExists({ key: `whitelabels/${federalStateId}/${asset}` });
+  return await getMaybeSignedUrlIfExists({ key: `whitelabels/${federalStateId}/${asset}`, suppressError: true });
 }
 
 export async function copyFileInS3({ newKey, copySource }: { newKey: string; copySource: string }) {
@@ -221,11 +221,13 @@ export async function getMaybeSignedUrlIfExists({
   filename,
   contentType,
   attachment = true,
+  suppressError = false,
 }: {
   key?: string;
   filename?: string;
   contentType?: string;
   attachment?: boolean;
+  suppressError?: boolean;
 }) {
   if (key === undefined || key === null || key === '') return undefined;
   try {
@@ -240,7 +242,9 @@ export async function getMaybeSignedUrlIfExists({
     // If no error is thrown, the object exists, so generate the signed URL
     return await getSignedUrlFromS3Get({ key, filename, contentType, attachment });
   } catch (error) {
-    console.error('Error getting signed URL from S3:', error);
+    if (!suppressError) {
+      console.error('Error getting signed URL from S3:', error);
+    }
     // If an error is thrown, the object doesn't exist
     return undefined;
   }
