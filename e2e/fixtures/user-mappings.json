@@ -60023,6 +60023,24 @@
     "rolle": "LEHR",
     "bundesland": "DE-BB"
   },
+  "teacher2-BB": {
+    "sub": "7c2e5d1f-3b8a-4f6d-b2e9-44a76598c12f",
+    "schulkennung": "school1-BB",
+    "rolle": "LEHR",
+    "bundesland": "DE-BB"
+  },
+  "teacher1-HB": {
+    "sub": "3a9f7b2c-8d4e-4c3b-a9f1-22c54367d89b",
+    "schulkennung": "school1-HB",
+    "rolle": "LEHR",
+    "bundesland": "DE-HB"
+  },
+  "teacher2-HB": {
+    "sub": "5d3a8f9b-2c7e-4a1d-b3f2-55e87643a90c",
+    "schulkennung": "school1-HB",
+    "rolle": "LEHR",
+    "bundesland": "DE-HB"
+  },
   "teacher1-ST": {
     "sub": "3ea9309a-634e-4eb8-96c0-3d18c1356f88",
     "schulkennung": "school1-ST",

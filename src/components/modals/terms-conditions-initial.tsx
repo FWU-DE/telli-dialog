@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { buttonPrimaryClassName, buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { DisclaimerConfig } from './const';
@@ -83,6 +83,14 @@ export default function TermsConditionsModal({
   const currentTitle =
     pageNumber >= 1 ? tUsage('terms-and-conditions-title') : tUsage('initial-title');
   const currentContent = <MarkdownDisplay>{contents[pageNumber] ?? ''}</MarkdownDisplay>;
+
+  // Check if the scrollable content is already fully visible
+  useEffect(() => {
+    const div = scrollRef.current;
+    if (div && div.scrollHeight <= div.clientHeight) {
+      setScrollFinished(true);
+    }
+  }, [pageNumber, contents]);
 
   return (
     <AlertDialog.Root open defaultOpen>
