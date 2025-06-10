@@ -6,7 +6,7 @@ test('test', async ({ page }) => {
   await page.goto('/characters?visibility=global');
   const copyButton = page
     .getByRole('link', { name: 'Rosa Parks Civil rights' })
-    .getByLabel('copy-template');
+    .getByRole('button', { name: 'Kopieren' });
 
   expect(copyButton).toBeVisible();
   expect(copyButton).toBeEnabled();

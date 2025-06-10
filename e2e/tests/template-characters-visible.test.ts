@@ -10,7 +10,7 @@ const templateCharactersIdentifier = [
   'Polizeioberkommissarin Julia',
 ];
 
-test('alle predefined characters are visible for everyone', async ({ page }) => {
+test('all predefined characters are visible for everyone', async ({ page }) => {
   await login(page, 'teacher');
   await page.goto('/characters?visibility=global');
 
