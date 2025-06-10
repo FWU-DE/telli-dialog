@@ -3,7 +3,7 @@ import { insertFederalStates } from './federal-state';
 import { insertHelpModeGpt } from './help-mode';
 import { insertDummyUser } from './user-entity';
 
-insertFederalStates({ skip: true })
+insertFederalStates({ skip: false })
   .then(() => {
     console.info('federalState seed successful');
   })
@@ -12,7 +12,7 @@ insertFederalStates({ skip: true })
     process.exit(1);
   });
 
-insertHelpModeGpt({ skip: true })
+insertHelpModeGpt({ skip: false })
   .then(() => {
     console.log('helpMode seed successful');
   })
