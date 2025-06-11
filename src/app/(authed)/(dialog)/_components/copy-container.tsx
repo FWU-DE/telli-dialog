@@ -4,22 +4,24 @@ import { CreateNewCharacterFromTemplate } from '../characters/create-new-charact
 import { calculateTimeLeftBySharedChat } from '../shared-chats/[sharedSchoolChatId]/utils';
 import { createNewCharacterAction } from '../characters/actions';
 import { createNewCustomGptAction } from '../custom/actions';
+import { useTranslations } from 'next-intl';
 
 export function CopyContainer({
   templateId,
   templatePictureId,
   startedAt,
   maxUsageTimeLimit,
-  translation,
+  translation_path,
   redirectPath,
 }: {
   templateId: string;
   templatePictureId?: string;
   startedAt: Date | null;
   maxUsageTimeLimit: number | null;
-  translation: (key: string) => string;
+  translation_path: string;
   redirectPath: 'characters' | 'custom';
 }) {
+  const t = useTranslations(translation_path);
   const sharedChatTimeLeft = calculateTimeLeftBySharedChat({ startedAt, maxUsageTimeLimit });
   const sharedChatActive = sharedChatTimeLeft > 0;
   const containerBg = !sharedChatActive ? 'bg-secondary/10' : 'bg-gray-100/10';
@@ -39,18 +41,18 @@ export function CopyContainer({
           containerBg,
         )}
       >
-        <h2 className="font-medium">{translation('copy-page.title')}</h2>
-        <div>{translation('copy-page.content')}</div>
+        <h2 className="font-medium">{t('copy-page.title')}</h2>
+        <div>{t('copy-page.content')}</div>
         <button
           disabled={sharedChatActive}
-          title={translation('copy-page.copy-template')}
+          title={t('copy-page.copy-template')}
           className={cn(
             buttonPrimaryClassName,
             'min-w-max max-w-min h-11 flex gap-2 items-center group self-end',
           )}
           type="button"
         >
-          <span>{translation('copy-page.copy-template')}</span>
+          <span>{t('copy-page.copy-template')}</span>
         </button>
       </div>
     </CreateNewCharacterFromTemplate>

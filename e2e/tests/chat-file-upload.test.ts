@@ -68,7 +68,6 @@ test('should successfully upload an image and get response about its contents', 
   // Wait for navigation and response
   await page.waitForURL('/d/**');
 
-  await page.waitForTimeout(5000);
   // Verify the response contains the expected content
   const assistantMessage = page.getByLabel('assistant message').getByRole('paragraph');
   await expect(assistantMessage).toBeVisible();

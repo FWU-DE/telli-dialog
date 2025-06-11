@@ -249,7 +249,7 @@ export default function CustomGptForm({
       templatePictureId={customGpt.pictureId ?? undefined}
       startedAt={null}
       maxUsageTimeLimit={null}
-      translation={t}
+      translation_path="custom-gpt"
       redirectPath="custom"
     />
   ) : undefined;

@@ -230,7 +230,7 @@ export default function CharacterForm({
       templatePictureId={character.pictureId ?? undefined}
       startedAt={character.startedAt}
       maxUsageTimeLimit={character.maxUsageTimeLimit}
-      translation={t}
+      translation_path="characters"
       redirectPath="characters"
     />
   ) : undefined;
