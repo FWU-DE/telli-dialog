@@ -23,10 +23,6 @@ const characterTemplateSchema = baseCharacterInsertSchema
     createdAt: true,
     userId: true,
   })
-  .refine((data: CharacterInsertModel) => data.name.trim().length > 0, {
-    message: 'Name cannot be empty',
-    path: ['name'],
-  });
 
 const characterTemplateArraySchema = z.array(characterTemplateSchema);
 

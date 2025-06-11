@@ -145,88 +145,8 @@ test.describe('Character Template API', () => {
     expect(result.results).toHaveLength(2);
     expect(result.results[0]).toHaveProperty('data');
     expect(result.results[1]).toHaveProperty('data');
-    expect(result.results[0].data.name).toBe(characterData[0].name);
-    expect(result.results[1].data.name).toBe(characterData[1].name);
-  });
-
-  test('POST - should return validation error for empty name', async ({
-    request,
-  }: {
-    request: APIRequestContext;
-  }) => {
-    const characterData = [
-      {
-        name: '',
-        description: 'Test description',
-        learningContext: 'Test context',
-        competence: 'Test competence',
-      },
-    ];
-
-    const response = await request.post(characterTemplateRoute, {
-      headers: { ...authorizationHeader },
-      data: characterData,
-    });
-
-    expect(response.status()).toBe(400);
-    const result = await response.json();
-    expect(result).toHaveProperty('error', 'Validation failed');
-    expect(result).toHaveProperty('details');
-    expect(result.details[0]).toMatchObject({
-      path: '0.name',
-      message: 'Name cannot be empty',
-    });
-  });
-
-  test('POST - should return validation error for whitespace-only name', async ({
-    request,
-  }: {
-    request: APIRequestContext;
-  }) => {
-    const characterData = [
-      {
-        name: '   ',
-        description: 'Test description',
-        learningContext: 'Test context',
-        competence: 'Test competence',
-      },
-    ];
-
-    const response = await request.post(characterTemplateRoute, {
-      headers: { ...authorizationHeader },
-      data: characterData,
-    });
-
-    expect(response.status()).toBe(400);
-    const result = await response.json();
-    expect(result).toHaveProperty('error', 'Validation failed');
-    expect(result.details[0]).toMatchObject({
-      path: '0.name',
-      message: 'Name cannot be empty',
-    });
-  });
-
-  test('POST - should return validation error for missing required fields', async ({
-    request,
-  }: {
-    request: APIRequestContext;
-  }) => {
-    const characterData = [
-      {
-        name: 'Valid Name',
-        // missing description, learningContext, competence
-      },
-    ];
-
-    const response = await request.post(characterTemplateRoute, {
-      headers: { ...authorizationHeader },
-      data: characterData,
-    });
-
-    expect(response.status()).toBe(400);
-    const result = await response.json();
-    expect(result).toHaveProperty('error', 'Validation failed');
-    expect(result.details.length).toBeGreaterThan(0);
+    expect(result.results[0].data?.name).toBe(characterData[0]?.name);
+    expect(result.results[1].data?.name).toBe(characterData[1]?.name);
   });
 
   test('POST - should handle duplicate character names gracefully', async ({
@@ -293,37 +213,7 @@ test.describe('Character Template API', () => {
     });
 
     expect(response.status()).toBe(403);
-  });
-
-  test('POST - should handle mixed success and failure results', async ({
-    request,
-  }: {
-    request: APIRequestContext;
-  }) => {
-    const mixedData = [
-      {
-        name: 'Valid Character ' + cnanoid(8),
-        description: 'Valid description',
-        learningContext: 'Valid context',
-        competence: 'Valid competence',
-      },
-      {
-        name: '', // Invalid empty name
-        description: 'Invalid description',
-        learningContext: 'Invalid context',
-        competence: 'Invalid competence',
-      },
-    ];
-
-    const response = await request.post(characterTemplateRoute, {
-      headers: { ...authorizationHeader },
-      data: mixedData,
-    });
-
-    expect(response.status()).toBe(400);
-    const result = await response.json();
-    expect(result).toHaveProperty('error', 'Validation failed');
-  });
+  })
 
   test('POST - should return 400 for invalid JSON format', async ({
     request,

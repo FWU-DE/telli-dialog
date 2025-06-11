@@ -25,10 +25,6 @@ const customGptTemplateSchema = baseCustomGptInsertSchema
   .extend({
     description: z.string(),
     specification: z.string(),
-  })
-  .refine((data: CustomGptInsertModel) => data.name.trim().length > 0, {
-    message: 'Name cannot be empty',
-    path: ['name'],
   });
 
 const customGptTemplateArraySchema = z.array(customGptTemplateSchema);
@@ -102,7 +98,7 @@ export async function POST(request: NextRequest) {
           ...customGptData,
           accessLevel: 'global',
           userId: DUMMY_USER_ID,
-          systemPrompt: customGptData.systemPrompt || '',
+          systemPrompt: '',
           promptSuggestions: customGptData.promptSuggestions || [],
         };
 
