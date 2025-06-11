@@ -224,7 +224,8 @@ export default function CharacterForm({
     router.replace(backUrl);
   }
   const shareChatElement = !isCreating ? <ShareContainer {...character} /> : undefined;
-  const copyContainer = readOnly ? <CopyContainer 
+  const copyContainer = readOnly ? (
+    <CopyContainer
       templateId={character.id}
       templatePictureId={character.pictureId ?? undefined}
       startedAt={character.startedAt}
@@ -232,7 +233,7 @@ export default function CharacterForm({
       translation_path="characters"
       redirectPath="characters"
     />
-  : undefined;
+  ) : undefined;
 
   const generalSettings = (
     <fieldset className="mt-16 flex flex-col gap-8">

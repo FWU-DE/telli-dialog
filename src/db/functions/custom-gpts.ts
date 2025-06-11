@@ -229,7 +229,6 @@ export async function dbDeleteCustomGptByIdAndUserId({
   return deletedGpt;
 }
 
-
 export async function dbGetCopyTemplateCustomGpt({
   templateId,
   customGptId,

@@ -1,4 +1,4 @@
-import { insertTemplateCharacters } from './default-characters';
+import { insertTemplateCharacters, insertTemplateCustomGpt } from './default-characters';
 import { insertFederalStates } from './federal-state';
 import { insertHelpModeGpt } from './help-mode';
 import { insertDummyUser } from './user-entity';
@@ -31,4 +31,8 @@ insertDummyUser()
 
 insertTemplateCharacters()
   .then(() => console.log('template character seed successful'))
+  .catch((error) => console.error({ error }));
+
+insertTemplateCustomGpt()
+  .then(() => console.log('template custom gpt seed successful'))
   .catch((error) => console.error({ error }));
