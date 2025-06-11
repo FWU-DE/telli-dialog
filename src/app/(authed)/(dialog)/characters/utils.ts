@@ -1,5 +1,5 @@
 import { CharacterAccessLevel, CharacterModel } from '@/db/schema';
-import { getMaybeSignedUrlFromS3Get } from '@/s3';
+import { getMaybeSignedUrlIfExists } from '@/s3';
 
 export function buildGenericUrl(accessLevel: CharacterAccessLevel, route: 'characters' | 'custom') {
   const searchParams = new URLSearchParams();
@@ -17,7 +17,7 @@ export async function enrichCharactersWithImage({
   return await Promise.all(
     characters.map(async (character) => ({
       ...character,
-      maybeSignedPictureUrl: await getMaybeSignedUrlFromS3Get({ key: character.pictureId }),
+      maybeSignedPictureUrl: await getMaybeSignedUrlIfExists({ key: character.pictureId }),
     })),
   );
 }

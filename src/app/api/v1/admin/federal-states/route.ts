@@ -1,10 +1,11 @@
 import { decryptMaybeValue, encrypt } from '@/db/crypto';
 import { dbGetAllFederalStates, dbUpsertFederalState } from '@/db/functions/federal-state';
-import { DesignConfiguration } from '@/db/types';
+import { federalStateTable } from '@/db/schema';
 import { validateApiKeyByHeadersWithResult } from '@/db/utils';
 import { env } from '@/env';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { createInsertSchema } from 'drizzle-zod';
 
 export async function GET(req: NextRequest) {
   const [error] = validateApiKeyByHeadersWithResult(req.headers);
@@ -28,36 +29,15 @@ export async function GET(req: NextRequest) {
   );
 }
 
-const designConfigurationSchema: z.ZodType<DesignConfiguration> = z.object({
-  primaryColor: z.string(),
-  primaryTextColor: z.string(),
-  secondaryColor: z.string(),
-  secondaryTextColor: z.string(),
-  secondaryDarkColor: z.string(),
-  secondaryLightColor: z.string(),
-  primaryHoverColor: z.string(),
-  primaryHoverTextColor: z.string(),
-  chatMessageBackgroundColor: z.string(),
-  buttonPrimaryTextColor: z.string(),
-});
-
 /** Based on the database table this schema has a decryptedApiKey which is store encrypted in database. */
-const federalStateCreateSchema = z.object({
-  id: z.string(),
-  teacherPriceLimit: z.coerce.number(),
-  studentPriceLimit: z.coerce.number(),
-  decryptedApiKey: z.string().nullable(),
-  mandatoryCertificationTeacher: z.coerce.boolean().optional(),
-  chatStorageTime: z.coerce.number().optional(),
-  supportContact: z.coerce.string().nullable().optional(),
-  trainingLink: z.coerce.string().nullable().optional(),
-  studentAccess: z.coerce.boolean().optional(),
-  enableCharacter: z.coerce.boolean().optional(),
-  enableSharedChats: z.coerce.boolean().optional(),
-  enableCustomGpt: z.coerce.boolean().optional(),
-  designConfiguration: designConfigurationSchema.nullable().optional(),
-  telliName: z.coerce.string().nullable().optional(),
-});
+const federalStateCreateSchema = createInsertSchema(federalStateTable)
+  .omit({
+    encryptedApiKey: true,
+    createdAt: true,
+  })
+  .extend({
+    decryptedApiKey: z.string().nullable(),
+  });
 
 /**
  * Creates a new federal state record or updates an existing one if

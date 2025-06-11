@@ -226,7 +226,7 @@ export async function getMaybeSignedUrlIfExists({
   attachment = true,
   suppressError = false,
 }: {
-  key?: string;
+  key?: string | null;
   filename?: string;
   contentType?: string;
   attachment?: boolean;

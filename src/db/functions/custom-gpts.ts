@@ -49,6 +49,18 @@ export async function dbGetGlobalGpts(): Promise<CustomGptModel[]> {
   return characters;
 }
 
+export async function dbGetGlobalCustomGptByName({
+  name,
+}: {
+  name: string;
+}): Promise<CustomGptModel | undefined> {
+  const [customGpt] = await db
+    .select()
+    .from(customGptTable)
+    .where(and(eq(customGptTable.name, name), eq(customGptTable.accessLevel, 'global')));
+  return customGpt;
+}
+
 export async function dbGetGptsBySchoolId({
   schoolId,
 }: {
