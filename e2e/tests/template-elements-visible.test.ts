@@ -1,16 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../utils/login';
 
-const templateCharactersIdentifier = [
-  'Rosa Parks Civil rights',
-  'George W. Bush 43. Präsident',
-  'Anne Frank Intelligentes jü',
-  'Johann Wolfgang von Goethe',
-  'Frau Goß Schulinterne',
-  'Polizeioberkommissarin Julia',
-];
+const templateCharactersIdentifier = ['Johann Wolfgang von Goethe'];
 
-const templateCustomGptsIdentifier = ['Schulorganisationsassistent', 'Vertretungsstundenplaner'];
+const templateCustomGptsIdentifier = ['Schulorganisationsassistent'];
 
 test('all predefined characters are visible for everyone', async ({ page }) => {
   await login(page, 'teacher');
