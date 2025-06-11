@@ -106,10 +106,14 @@ export default function CharacterContainer({
           className={'w-8 h-8'}
           redirectPath="characters"
           createInstanceCallback={createNewCharacterAction}
-          {...{ title: t('copy-page.copy-template'), type: 'button' }}
+          {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
         >
           <button aria-label="copy-template" className={cn(iconClassName, 'w-8 h-8')}>
-            <TelliClipboardButton text={t('copy-page.copy-template')} className="w-6 h-6" />
+            <TelliClipboardButton
+              text={t('form.copy-page.copy-template')}
+              className="w-6 h-6"
+              outerDivClassName="p-1 rounded-enterprise-sm"
+            />
           </button>
         </CreateNewCharacterFromTemplate>
       )}
