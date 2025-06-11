@@ -103,7 +103,7 @@ export const defaultCharacters: Omit<CharacterInsertModel, 'modelId'>[] = [
     maxUsageTimeLimit: null,
     pictureId: 'characters/_templates/Goethe_Static',
     subject: '',
-  }
+  },
 ];
 
 export const defaultCustomGpt: CustomGptInsertModel[] = [
@@ -125,5 +125,5 @@ export const defaultCustomGpt: CustomGptInsertModel[] = [
       'Erstelle mir einen Elternbrief zur Einladung für den Elternsprechabend in leichter Sprache (Deutsch, Kroatisch, Arabisch, Albanisch und Englisch).',
       'Erstelle mir einen Ablauf für einen 90-minütigen Elternabend.',
     ],
-  }
+  },
 ];

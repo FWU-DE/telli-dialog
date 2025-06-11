@@ -1,5 +1,5 @@
 import { CharacterAccessLevel, CharacterModel } from '@/db/schema';
-import { getMaybeSignedUrlIfExists } from '@/s3';
+import { getMaybeSignedUrlFromS3Get } from '@/s3';
 
 export function buildGenericUrl(accessLevel: CharacterAccessLevel, route: 'characters' | 'custom') {
   const searchParams = new URLSearchParams();
@@ -17,7 +17,9 @@ export async function enrichCharactersWithImage({
   return await Promise.all(
     characters.map(async (character) => ({
       ...character,
-      maybeSignedPictureUrl: await getMaybeSignedUrlIfExists({ key: character.pictureId }),
+      // Do not use the function getMaybeSignedUrlIfExists here it will end up in a client side error
+      // TODO: find a workaround to test if image exists and show a placeholder if it does not
+      maybeSignedPictureUrl: await getMaybeSignedUrlFromS3Get({ key: character.pictureId }),
     })),
   );
 }
