@@ -29,6 +29,7 @@ test('should successfully upload a file and get response about its contents', as
   await page.waitForURL('/d/**');
 
   // Verify the response contains the expected content
+  await page.waitForTimeout(5000);
   const assistantMessage = page.getByLabel('assistant message').getByRole('paragraph');
   await expect(assistantMessage).toBeVisible();
   await expect(assistantMessage).toContainText('Napoleon Bonaparte');

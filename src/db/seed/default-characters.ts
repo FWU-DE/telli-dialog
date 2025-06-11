@@ -1,14 +1,22 @@
-import { CharacterInsertModel } from '../schema';
+import { CharacterInsertModel, CustomGptInsertModel } from '../schema';
 import * as fs from 'fs';
 import * as path from 'path';
 import { uploadFileToS3 } from '@/s3';
 import { dbCreateCharacter } from '../functions/character';
 import { DUMMY_USER_ID } from './user-entity';
+import { dbUpsertCustomGpt } from '../functions/custom-gpts';
 
 export async function insertTemplateCharacters() {
-  await processStaticJpegFiles('./assets/template-characters');
+  await processStaticJpegFiles('./assets/template-characters', 'characters/_templates');
   for (const templateCharacter of defaultCharacters) {
     await dbCreateCharacter(templateCharacter);
+  }
+}
+
+export async function insertTemplateCustomGpt() {
+  await processStaticJpegFiles('./assets/template-custom-gpt', 'custom-gpts/_templates');
+  for (const templateCustomGpt of defaultCustomGpt) {
+    await dbUpsertCustomGpt({ customGpt: templateCustomGpt });
   }
 }
 
@@ -39,7 +47,7 @@ async function findMatchingFiles(directoryPath: string, pattern: string): Promis
  * Main function to process files ending with 'Static.jpeg'
  * @param rootFolder - The root folder to start scanning from
  */
-async function processStaticJpegFiles(rootFolder: string): Promise<void> {
+async function processStaticJpegFiles(rootFolder: string, rootRemoteDir: string): Promise<void> {
   try {
     // Find all matching files
     const matchingFiles = await findMatchingFiles(rootFolder, 'Static.jpg');
@@ -59,7 +67,7 @@ async function processStaticJpegFiles(rootFolder: string): Promise<void> {
       const fileName = fileNameWithSuffix.split('.')[0];
       const fileBuffer = fs.readFileSync(file);
       await uploadFileToS3({
-        key: `characters/_templates/${fileName}`,
+        key: `${rootRemoteDir}/${fileName}`,
         body: fileBuffer,
         contentType: 'image/jpeg',
       });
@@ -239,5 +247,45 @@ export const defaultCharacters: Omit<CharacterInsertModel, 'modelId'>[] = [
     maxUsageTimeLimit: null,
     pictureId: 'characters/_templates/heart_image_Static',
     subject: '',
+  },
+];
+
+export const defaultCustomGpt: CustomGptInsertModel[] = [
+  {
+    id: 'edb34bca-9868-4948-af68-7e80810806ac',
+    userId: DUMMY_USER_ID,
+    name: 'Schulorganisationsassistent',
+    description: 'Planer für organisatorische Aufgaben innerhalb der Schule',
+
+    specification:
+      'Der Assistent soll mich in meiner täglichen organisatorischen Arbeit unterstützen. Er soll Vorlagen für Elternbriefe, Elternabende, Rundschreiben, Vorlagen für Protokolle für Elterngespräche, Bewertungsvorlagen für Schüler:innenarbeiten etc. generieren, die ich mir einfach anpassen kann. Das Format sollte so gewählt sein, dass ich es einfach exportieren kann, ohne große Formatänderungen vornehmen zu müssen.',
+    systemPrompt: '',
+    accessLevel: 'global',
+    pictureId: 'custom-gpts/_templates/Schulorganisationsassistent_Static',
+    promptSuggestions: [
+      'Erstelle mir einen Elternbrief zu einem Wandertag.',
+      'Erstelle mir eine Vorlage für ein Gesprächsprotokoll für ein Elterngespräch.',
+      'Erstelle mir einen Bewertungsbogen für ein Referat in tabellarischer Form.',
+      'Erstelle mir einen Elternbrief zur Einladung für den Elternsprechabend in leichter Sprache (Deutsch, Kroatisch, Arabisch, Albanisch und Englisch).',
+      'Erstelle mir einen Ablauf für einen 90-minütigen Elternabend.',
+    ],
+  },
+  {
+    id: 'd45246b9-af96-4c3b-9443-dec8c20dacdf',
+    userId: DUMMY_USER_ID,
+    name: 'Vertretungsstundenplaner',
+    description: 'kurzfristig abrufbarer Vertretungsstundenassistent für die Mittelschule Bayern',
+
+    specification:
+      'Der Dialogpartner bezieht sich nur auf den Lehrplan der Mittelschule Bayern. Hierzu soll ein detailliertes und umfangreiches Artikulationsschema mit pädagogischem Kommentar erstellt werden ,ein  angemessenes Tafelbild, drei Arbeitsblätter mit einer angemessenen und abwechslungsreichen Anzahl an Übungsaufgaben (Niveaustufen: leicht, mittel und schwer) und die Lösungen. Falls die Stunde eine Textarbeit einschließt, soll ein entsprechender Übungstext mit generiert werden.',
+    systemPrompt: '',
+    accessLevel: 'global',
+    pictureId: 'custom-gpts/_templates/Vertretungsstundenplaner_Static',
+    promptSuggestions: [
+      'Erstelle mir eine Mathestunde für die 7.Klasse.',
+      'Erstelle mir eine Englischstunde für die 10.Klasse.',
+      'Erstelle mir eine DaZ-Stunde für die 5.Klasse.',
+      'Erstelle mir eine Doppelstunde für Natur und Technik für die 8.Klasse.',
+    ],
   },
 ];

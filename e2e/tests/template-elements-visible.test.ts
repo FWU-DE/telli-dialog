@@ -10,13 +10,26 @@ const templateCharactersIdentifier = [
   'Polizeioberkommissarin Julia',
 ];
 
-test('alle predefined characters are visible for everyone', async ({ page }) => {
+const templateCustomGptsIdentifier = ['Schulorganisationsassistent', 'Vertretungsstundenplaner'];
+
+test('all predefined characters are visible for everyone', async ({ page }) => {
   await login(page, 'teacher');
   await page.goto('/characters?visibility=global');
 
   await page.waitForURL('/characters**');
 
   for (const elementIdentifier of templateCharactersIdentifier) {
+    await expect(page.getByRole('link', { name: elementIdentifier })).toBeVisible();
+  }
+});
+
+test('all predefined custom-gpt templates are visible for everyone', async ({ page }) => {
+  await login(page, 'teacher');
+  await page.goto('/custom?visibility=global');
+
+  await page.waitForURL('/custom**');
+
+  for (const elementIdentifier of templateCustomGptsIdentifier) {
     await expect(page.getByRole('link', { name: elementIdentifier })).toBeVisible();
   }
 });
