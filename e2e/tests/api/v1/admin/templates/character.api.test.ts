@@ -213,7 +213,7 @@ test.describe('Character Template API', () => {
     });
 
     expect(response.status()).toBe(403);
-  })
+  });
 
   test('POST - should return 400 for invalid JSON format', async ({
     request,

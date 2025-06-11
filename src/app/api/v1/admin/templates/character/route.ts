@@ -16,13 +16,12 @@ import { validateApiKeyByHeadersWithResult } from '@/db/utils';
 const baseCharacterInsertSchema = createInsertSchema(characterTable);
 
 // Customize the schema for API validation
-const characterTemplateSchema = baseCharacterInsertSchema
-  .omit({
-    id: true,
-    modelId: true,
-    createdAt: true,
-    userId: true,
-  })
+const characterTemplateSchema = baseCharacterInsertSchema.omit({
+  id: true,
+  modelId: true,
+  createdAt: true,
+  userId: true,
+});
 
 const characterTemplateArraySchema = z.array(characterTemplateSchema);
 
