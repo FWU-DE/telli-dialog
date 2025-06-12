@@ -55,7 +55,7 @@ export default function TermsConditionsModal({
     // If the overflow is less than 20% of the total height or the scrollTop is less than one line, set the scrollFinished state to true
     setScrollFinished(
       overflow <= div.scrollHeight * SCROLL_EXCEESING_TOLERANCE ||
-      div.scrollHeight - div.scrollTop - div.clientHeight <= STANDARD_REM_SIZE,
+        div.scrollHeight - div.scrollTop - div.clientHeight <= STANDARD_REM_SIZE,
     );
   };
 
