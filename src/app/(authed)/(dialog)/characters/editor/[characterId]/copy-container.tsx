@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { CreateNewCharacterFromTemplate } from '../../create-new-character-button';
 import { CharacterModel } from '@/db/schema';
 import { calculateTimeLeftBySharedChat } from '../../../shared-chats/[sharedSchoolChatId]/utils';
+import { createNewCharacterAction } from '../../actions';
 
 export function CopyContainer({ character }: { character: CharacterModel }) {
   const t = useTranslations('characters.copy-page');
@@ -14,6 +15,8 @@ export function CopyContainer({ character }: { character: CharacterModel }) {
     <CreateNewCharacterFromTemplate
       templateId={character.id}
       templatePictureId={character.pictureId ?? undefined}
+      redirectPath="characters"
+      createInstanceCallback={createNewCharacterAction}
     >
       <div
         className={cn(

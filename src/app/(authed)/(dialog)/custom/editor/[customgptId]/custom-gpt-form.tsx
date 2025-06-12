@@ -35,6 +35,7 @@ import { deleteFileMappingAndEntity, linkFileToCustomGpt } from '../../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
+import { CopyContainer } from '../../../_components/copy-container';
 import NavigateBack from '@/components/common/navigate-back';
 import { LocalFileState } from '@/components/chat/send-message-form';
 import { getZodFieldMetadataFn } from '@/components/forms/utils';
@@ -44,7 +45,7 @@ type CustomGptFormProps = CustomGptModel & {
   maybeSignedPictureUrl: string | undefined;
   userRole: UserSchoolRole;
   isCreating?: boolean;
-  readOnly?: boolean;
+  readOnly: boolean;
 };
 
 const customGptFormValuesSchema = z.object({
@@ -235,18 +236,29 @@ export default function CustomGptForm({
     if (dataEquals) return;
     onSubmit(data);
   }
-
   function handleCreateCustomGpt() {
     const data = getValues();
     onSubmit(data);
     toast.success(tToast('create-toast-success'));
     router.replace(backUrl);
   }
+
+  const copyContainer = readOnly ? (
+    <CopyContainer
+      templateId={customGpt.id}
+      templatePictureId={customGpt.pictureId ?? undefined}
+      startedAt={null}
+      maxUsageTimeLimit={null}
+      translation_path="custom-gpt.form"
+      redirectPath="custom"
+    />
+  ) : undefined;
+
   return (
     <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
       <NavigateBack label={t('all-gpts')} onClick={handleNavigateBack} />
-
       <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>
+      {copyContainer}
       {userRole === 'teacher' && (
         <fieldset className="mt-8 gap-8">
           <div className="flex gap-4">
@@ -254,6 +266,7 @@ export default function CustomGptForm({
               label={t('restriction-school')}
               checked={optimisticAccessLevel === 'school'}
               onCheckedChange={(value: boolean) => handleEnableSharing(value)}
+              disabled={readOnly}
             />
           </div>
         </fieldset>
@@ -320,6 +333,7 @@ export default function CustomGptForm({
               onUploadComplete={handlePictureUploadComplete}
               file_name="avatar"
               compressionOptions={{ maxHeight: 800 }}
+              disabled={readOnly}
             />
           </section>
         </div>
@@ -374,7 +388,7 @@ export default function CustomGptForm({
                         className={cn('flex items-center justify-center', iconClassName)}
                         aria-label={t('prompt-suggestions-add-button')}
                       >
-                        <PlusIcon className="w-8 h-8" />
+                        {!readOnly && <PlusIcon className="w-8 h-8" />}
                       </button>
                     ) : (
                       <button
@@ -386,7 +400,7 @@ export default function CustomGptForm({
                         className={cn('flex items-center justify-center', iconClassName)}
                         type="button"
                       >
-                        <TrashIcon className="w-8 h-8" />
+                        {!readOnly && <TrashIcon className="w-8 h-8" />}
                       </button>
                     )}
                   </div>
@@ -432,7 +446,7 @@ export default function CustomGptForm({
           </DestructiveActionButton>
         </section>
       )}
-      {isCreating && (
+      {isCreating && !readOnly && (
         <section className="mt-8 flex gap-4 items-center">
           <button
             className={cn(buttonSecondaryClassName, 'hover:border-primary hover:bg-primary-hover')}

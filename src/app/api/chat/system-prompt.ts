@@ -6,6 +6,7 @@ import { CustomGptModel, FederalStateModel } from '@/db/schema';
 import { constructWebsearchPrompt } from '../conversation/tools/websearch/prompt_templates';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { ChunkResult } from '../file-operations/process-chunks';
+import { HELP_MODE_GPT_ID } from '@/db/const';
 
 export function constructSchuleSystemPrompt() {
   return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. Heute ist der ${formatDateToGermanTimestamp(new Date())}. Befolge folgende Anweisungen: Du sprichst immer die Sprache mit der du angesprochen wirst. Deine Standardsprache ist Deutsch, du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die die Paardform (Beidnennung) z.B. Bürgerinnen und Bürger.`;
@@ -170,7 +171,7 @@ export async function constructChatSystemPrompt({
     }
     let additionalInstruction: string;
 
-    if (customGpt.name === 'Hilfe-Assistent')
+    if (customGpt.id === HELP_MODE_GPT_ID)
       additionalInstruction = constructHelpModeSystemPrompt({
         isTeacher,
         federalStateSupportEmail: federalState.supportContact,
