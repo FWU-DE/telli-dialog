@@ -38,7 +38,8 @@ export const EDUCATION_HINT_HB = `Liebe Kollegin, lieber Kollege,
 
   Deshalb ist in Bremen der Besuch eines itslearning Selbstlernkurses zum Thema KI vor der initialen Nutzung von telli verpflichtend.
 
-  Alle Informationen zum Selbstlernkurs sind unter [LINK](https://www.bildung.bremen.de/einfuhrung-des-chatbots-telli-im-land-bremen-458348) abrufbar.
+  Alle Informationen zum Selbstlernkurs sind abrufbar unter:
+  [https://www.bildung.bremen.de/einfuhrung-des-chatbots-telli-im-land-bremen-458348](https://www.bildung.bremen.de/einfuhrung-des-chatbots-telli-im-land-bremen-458348)
 
   Dort finden Sie hilfreiche Informationen, Hinweise und Tipps zum Thema KI und Schule im Allgemeinen sowie speziell zum Einsatz von telli.
 
