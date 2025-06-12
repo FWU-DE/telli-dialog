@@ -196,7 +196,7 @@ test('submit button is disabled when required fields are empty', async ({ page }
     .getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' })
     .fill('Test description');
 
-    await expect(submitButton).toBeDisabled();
+  await expect(submitButton).toBeDisabled();
   // Fill in the required specification field - now button should be enabled
   await page.getByRole('textbox', { name: 'Welche konkreten Funktionen' }).fill('Test functions');
   await expect(submitButton).toBeEnabled();
