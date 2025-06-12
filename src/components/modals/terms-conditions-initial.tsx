@@ -17,6 +17,9 @@ type TermsConditionsModalProps = {
   disclaimerConfig: DisclaimerConfig;
 } & React.ComponentProps<'button'>;
 
+/** This skips the scroll finishing check, to avoid the user from having to scroll to the bottom of the page to accept the terms and conditions. */
+const SCROLL_EXCEESING_TOLERANCE = 0.2;
+
 export default function TermsConditionsModal({
   disclaimerConfig,
   handleAccept,
@@ -44,7 +47,8 @@ export default function TermsConditionsModal({
   const handleScroll = () => {
     const div = scrollRef.current;
     if (div) {
-      setScrollFinished(div.scrollHeight - div.scrollTop <= div.clientHeight);
+      const remainingScroll = div.scrollHeight - div.scrollTop - div.clientHeight;
+      setScrollFinished(remainingScroll <= div.scrollHeight * SCROLL_EXCEESING_TOLERANCE);
     }
   };
 
@@ -84,11 +88,15 @@ export default function TermsConditionsModal({
     pageNumber >= 1 ? tUsage('terms-and-conditions-title') : tUsage('initial-title');
   const currentContent = <MarkdownDisplay>{contents[pageNumber] ?? ''}</MarkdownDisplay>;
 
-  // Check if the scrollable content is already fully visible
   useEffect(() => {
     const div = scrollRef.current;
-    if (div && div.scrollHeight <= div.clientHeight) {
-      setScrollFinished(true);
+    if (div) {
+      if (div.scrollHeight <= div.clientHeight) {
+        setScrollFinished(true);
+      } else {
+        const overflow = div.scrollHeight - div.clientHeight;
+        setScrollFinished(overflow <= div.scrollHeight * SCROLL_EXCEESING_TOLERANCE);
+      }
     }
   }, [pageNumber, contents]);
 

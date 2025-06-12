@@ -112,7 +112,6 @@ export const defaultCustomGpt: CustomGptInsertModel[] = [
     userId: DUMMY_USER_ID,
     name: 'Schulorganisationsassistent',
     description: 'Planer für organisatorische Aufgaben innerhalb der Schule',
-
     specification:
       'Der Assistent soll mich in meiner täglichen organisatorischen Arbeit unterstützen. Er soll Vorlagen für Elternbriefe, Elternabende, Rundschreiben, Vorlagen für Protokolle für Elterngespräche, Bewertungsvorlagen für Schüler:innenarbeiten etc. generieren, die ich mir einfach anpassen kann. Das Format sollte so gewählt sein, dass ich es einfach exportieren kann, ohne große Formatänderungen vornehmen zu müssen.',
     systemPrompt: '',
