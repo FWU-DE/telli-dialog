@@ -48,9 +48,15 @@ export default function TermsConditionsModal({
 
   const handleScroll = () => {
     const div = scrollRef.current;
-    if (div) {
-      setScrollFinished(div.scrollHeight - div.scrollTop - div.clientHeight <= STANDARD_REM_SIZE);
+    if (!div) {
+      return;
     }
+    const overflow = div.scrollHeight - div.clientHeight;
+    // If the overflow is less than 20% of the total height or the scrollTop is less than one line, set the scrollFinished state to true
+    setScrollFinished(
+      overflow <= div.scrollHeight * SCROLL_EXCEESING_TOLERANCE ||
+        div.scrollTop <= STANDARD_REM_SIZE,
+    );
   };
 
   const acceptAndClose = () => {
