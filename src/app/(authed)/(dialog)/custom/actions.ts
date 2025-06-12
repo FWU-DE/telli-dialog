@@ -4,15 +4,32 @@ import { getUser } from '@/auth/utils';
 import { db } from '@/db';
 import { dbGetRelatedCustomGptFiles } from '@/db/functions/files';
 import { CustomGptFileMapping, customGptTable, FileModel, fileTable } from '@/db/schema';
+import { copyFileInS3 } from '@/s3';
+import { generateUUID } from '@/utils/uuid';
 import { eq } from 'drizzle-orm';
 
-export async function createNewCustomGptAction() {
+export async function createNewCustomGptAction({
+  templatePictureId,
+}: {
+  templatePictureId?: string;
+}) {
   const user = await getUser();
 
+  const customGptId = generateUUID();
+
+  let copyOfTemplatePicture;
+  if (templatePictureId !== undefined) {
+    copyOfTemplatePicture = `custom-gpt/${customGptId}/avatar`;
+    await copyFileInS3({
+      newKey: copyOfTemplatePicture,
+      copySource: templatePictureId,
+    });
+  }
   const insertedCustomGpt = (
     await db
       .insert(customGptTable)
       .values({
+        id: customGptId,
         name: '',
         systemPrompt: '',
         userId: user.id,
@@ -20,6 +37,7 @@ export async function createNewCustomGptAction() {
         description: '',
         specification: '',
         promptSuggestions: [],
+        pictureId: copyOfTemplatePicture,
       })
       .returning()
   )[0];
