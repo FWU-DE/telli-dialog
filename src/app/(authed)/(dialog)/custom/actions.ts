@@ -12,7 +12,7 @@ export async function createNewCustomGptAction({
   templatePictureId,
 }: {
   templatePictureId?: string;
-}) {
+} = {}) {
   const user = await getUser();
 
   const customGptId = generateUUID();
