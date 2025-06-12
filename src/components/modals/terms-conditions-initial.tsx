@@ -19,6 +19,7 @@ type TermsConditionsModalProps = {
 
 /** This skips the scroll finishing check, to avoid the user from having to scroll to the bottom of the page to accept the terms and conditions. */
 const SCROLL_EXCEESING_TOLERANCE = 0.2;
+const STANDARD_REM_SIZE = 16;
 
 export default function TermsConditionsModal({
   disclaimerConfig,
@@ -44,11 +45,11 @@ export default function TermsConditionsModal({
   const contents: Array<string> = disclaimerConfig.pageContents;
 
   const scrollRef = useRef<HTMLDivElement>(null);
+
   const handleScroll = () => {
     const div = scrollRef.current;
     if (div) {
-      const remainingScroll = div.scrollHeight - div.scrollTop - div.clientHeight;
-      setScrollFinished(remainingScroll <= div.scrollHeight * SCROLL_EXCEESING_TOLERANCE);
+      setScrollFinished(div.scrollHeight - div.scrollTop - div.clientHeight <= STANDARD_REM_SIZE);
     }
   };
 
