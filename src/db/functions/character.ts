@@ -134,7 +134,10 @@ export async function dbGetGlobalCharacters({
     .from(characterTable)
     .leftJoin(
       sharedCharacterConversation,
-      eq(sharedCharacterConversation.characterId, characterTable.id),
+      and(
+        eq(sharedCharacterConversation.characterId, characterTable.id),
+        eq(sharedCharacterConversation.userId, userId),
+      ),
     )
     .where(
       and(
@@ -347,4 +350,30 @@ export async function dbUpdateTokenUsageByCharacterChatId(
   }
 
   return insertedUsage;
+}
+
+export async function dbGetCharacterByNameAndUserId({
+  name,
+  userId,
+}: {
+  name: string;
+  userId: string;
+}): Promise<CharacterModel | undefined> {
+  const [character] = await db
+    .select()
+    .from(characterTable)
+    .where(and(eq(characterTable.name, name), eq(characterTable.userId, userId)));
+  return character;
+}
+
+export async function dbGetGlobalCharacterByName({
+  name,
+}: {
+  name: string;
+}): Promise<CharacterModel | undefined> {
+  const [character] = await db
+    .select()
+    .from(characterTable)
+    .where(and(eq(characterTable.name, name), eq(characterTable.accessLevel, 'global')));
+  return character;
 }

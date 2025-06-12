@@ -49,6 +49,18 @@ export async function dbGetGlobalGpts(): Promise<CustomGptModel[]> {
   return characters;
 }
 
+export async function dbGetGlobalCustomGptByName({
+  name,
+}: {
+  name: string;
+}): Promise<CustomGptModel | undefined> {
+  const [customGpt] = await db
+    .select()
+    .from(customGptTable)
+    .where(and(eq(customGptTable.name, name), eq(customGptTable.accessLevel, 'global')));
+  return customGpt;
+}
+
 export async function dbGetGptsBySchoolId({
   schoolId,
 }: {
@@ -105,7 +117,7 @@ export async function dbGetCustomGptByIdOrSchoolId({
   return character;
 }
 
-export async function dbInsertCustomGpt({
+export async function dbUpsertCustomGpt({
   customGpt,
 }: {
   customGpt: CustomGptInsertModel;
@@ -227,4 +239,28 @@ export async function dbDeleteCustomGptByIdAndUserId({
   });
 
   return deletedGpt;
+}
+
+export async function dbGetCopyTemplateCustomGpt({
+  templateId,
+  customGptId,
+  userId,
+}: {
+  templateId: string;
+  customGptId: string;
+  userId: string;
+}): Promise<CustomGptInsertModel> {
+  console.log(templateId, customGptId, userId);
+  const customGpt = await dbGetCustomGptById({ customGptId: templateId });
+  if (customGpt?.name === undefined) {
+    throw new Error(
+      `Invalid State Template CustomGpt must have a name: provided values: ${JSON.stringify({ templateId, customGptId, userId })}`,
+    );
+  }
+  return {
+    ...customGpt,
+    id: customGptId,
+    accessLevel: 'private',
+    userId,
+  };
 }

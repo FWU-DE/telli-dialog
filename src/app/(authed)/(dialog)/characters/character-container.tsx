@@ -20,6 +20,7 @@ import { calculateTimeLeftBySharedChat } from '../shared-chats/[sharedSchoolChat
 import { CreateNewCharacterFromTemplate } from './create-new-character-button';
 import { iconClassName } from '@/utils/tailwind/icon';
 import TelliClipboardButton from '@/components/common/clipboard-button';
+import { createNewCharacterAction } from './actions';
 type CharacterContainerProps = CharacterModel & {
   currentUserId: string;
   maybeSignedPictureUrl: string | undefined;
@@ -103,11 +104,15 @@ export default function CharacterContainer({
           templateId={id}
           templatePictureId={character.pictureId ?? undefined}
           className={'w-8 h-8'}
-          {...{ title: t('copy-page.copy-template'), type: 'button' }}
+          redirectPath="characters"
+          createInstanceCallback={createNewCharacterAction}
+          {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
         >
-          <button aria-label="copy-template" className={cn(iconClassName, 'w-8 h-8')}>
-            <TelliClipboardButton text={t('copy-page.copy-template')} className="w-6 h-6" />
-          </button>
+          <TelliClipboardButton
+            text={t('form.copy-page.copy-template')}
+            className="w-6 h-6"
+            outerDivClassName="p-1 rounded-enterprise-sm"
+          />
         </CreateNewCharacterFromTemplate>
       )}
 
