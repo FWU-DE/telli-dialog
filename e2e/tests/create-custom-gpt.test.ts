@@ -168,3 +168,36 @@ test('data is autosaved on blur', async ({ page }) => {
   await page.getByPlaceholder('Erstelle einen').press('Tab');
   await expect(page.getByPlaceholder('Erstelle einen')).toHaveValue('New Prompt Suggestion');
 });
+
+test('submit button is disabled when required fields are empty', async ({ page }) => {
+  await login(page, 'teacher');
+
+  await page.goto('/custom');
+  await page.waitForURL('/custom');
+
+  const createButton = page.getByRole('button', { name: 'Assistent erstellen' });
+  await expect(createButton).toBeVisible();
+  await createButton.click();
+
+  await page.waitForURL('/custom/editor/**');
+
+  const submitButton = page.getByRole('button', { name: 'Assistent erstellen' });
+  await expect(submitButton).toBeVisible();
+
+  // Check that submit button is disabled when all fields are empty
+  await expect(submitButton).toBeDisabled();
+
+  // Fill in only the name - button should still be disabled due to missing description
+  await page.getByRole('textbox', { name: 'Wie soll diese' }).fill('Test GPT Name');
+  await expect(submitButton).toBeDisabled();
+
+  // Fill in the required description field - now button should be enabled
+  await page
+    .getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' })
+    .fill('Test description');
+
+    await expect(submitButton).toBeDisabled();
+  // Fill in the required specification field - now button should be enabled
+  await page.getByRole('textbox', { name: 'Welche konkreten Funktionen' }).fill('Test functions');
+  await expect(submitButton).toBeEnabled();
+});

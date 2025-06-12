@@ -75,9 +75,9 @@ export default function SharedSchoolChatForm({
     resolver: zodResolver(sharedSchoolChatFormValuesSchema),
     defaultValues: {
       ...sharedSchoolChat,
-      description: sharedSchoolChat.description ?? '',
-      studentExcercise: sharedSchoolChat.studentExcercise ?? '',
-      additionalInstructions: sharedSchoolChat.additionalInstructions ?? '',
+      description: sharedSchoolChat.description ?? undefined,
+      studentExcercise: sharedSchoolChat.studentExcercise ?? undefined,
+      additionalInstructions: sharedSchoolChat.additionalInstructions ?? undefined,
       attachedLinks: initalLinks,
       pictureId: sharedSchoolChat.pictureId ?? '',
     },

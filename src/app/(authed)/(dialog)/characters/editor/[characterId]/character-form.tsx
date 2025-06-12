@@ -47,11 +47,14 @@ type CharacterFormProps = CharacterModel & {
   readOnly: boolean;
 };
 
+/**
+ * If the field is required, set the min length to at least 1.
+ */
 const characterFormValuesSchema = z.object({
-  name: z.string(),
-  description: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  learningContext: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  competence: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  name: z.string().min(1),
+  description: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  learningContext: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  competence: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   modelId: z.string(),
   schoolType: z.string().nullable(),
   gradeLevel: z.string().nullable(),
@@ -86,12 +89,12 @@ export default function CharacterForm({
     resolver: zodResolver(characterFormValuesSchema),
     defaultValues: {
       ...character,
-      description: character.description ?? '',
-      learningContext: character.learningContext ?? '',
-      competence: character.competence ?? '',
-      schoolType: character.schoolType ?? '',
-      gradeLevel: character.gradeLevel ?? '',
-      subject: character.subject ?? '',
+      description: character.description ?? null,
+      learningContext: character.learningContext ?? null,
+      competence: character.competence ?? null,
+      schoolType: character.schoolType ?? null,
+      gradeLevel: character.gradeLevel ?? null,
+      subject: character.subject ?? null,
       modelId: maybeDefaultModelId,
     },
   });

@@ -49,9 +49,9 @@ type CustomGptFormProps = CustomGptModel & {
 };
 
 const customGptFormValuesSchema = z.object({
-  name: z.string(),
-  description: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  specification: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  name: z.string().min(1),
+  description: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  specification: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   promptSuggestions: z.array(z.object({ content: z.string() })),
 });
 type CustomGptFormValues = z.infer<typeof customGptFormValuesSchema>;
@@ -78,8 +78,8 @@ export default function CustomGptForm({
     resolver: zodResolver(customGptFormValuesSchema),
     defaultValues: {
       ...customGpt,
-      description: customGpt.description ?? '',
-      specification: customGpt.specification ?? '',
+      description: customGpt.description ?? undefined,
+      specification: customGpt.specification ?? undefined,
       promptSuggestions:
         promptSuggestions.length < 1
           ? [{ content: '' }]
