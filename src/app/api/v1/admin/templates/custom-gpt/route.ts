@@ -86,15 +86,8 @@ export async function POST(request: NextRequest) {
           name: customGptData.name.trim(),
         });
 
-        if (existingGlobalCustomGpt !== undefined) {
-          results.push({
-            error: `A global custom GPT with the name "${customGptData.name}" already exists`,
-            data: customGptData,
-          });
-          continue;
-        }
-
         const customGpt: CustomGptInsertModel = {
+          id: existingGlobalCustomGpt?.id ?? undefined,
           ...customGptData,
           accessLevel: 'global',
           userId: DUMMY_USER_ID,

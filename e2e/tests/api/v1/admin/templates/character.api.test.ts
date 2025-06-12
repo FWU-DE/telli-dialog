@@ -10,6 +10,27 @@ test.describe('Character Template API', () => {
   }: {
     request: APIRequestContext;
   }) => {
+    // First create a character template to ensure there's at least one in the list
+    const testCharacterName = 'GET Test Character ' + cnanoid(8);
+    const characterData = [
+      {
+        name: testCharacterName,
+        description: 'Test character for GET request verification',
+        learningContext: 'Test learning context',
+        competence: 'Test competence',
+      },
+    ];
+
+    const createResponse = await request.post(characterTemplateRoute, {
+      headers: { ...authorizationHeader },
+      data: characterData,
+    });
+
+    expect(createResponse.ok()).toBeTruthy();
+    const createResult = await createResponse.json();
+    const createdCharacterId = createResult.results[0].data.id;
+
+    // Now fetch all character templates
     const response = await request.get(characterTemplateRoute, {
       headers: { ...authorizationHeader },
     });
@@ -17,14 +38,25 @@ test.describe('Character Template API', () => {
     expect(response.ok()).toBeTruthy();
     const characters = await response.json();
     expect(Array.isArray(characters)).toBeTruthy();
+    expect(characters.length).toBeGreaterThan(0);
 
-    // If there are characters, verify the structure
-    if (characters.length > 0) {
-      expect(characters[0]).toHaveProperty('id');
-      expect(characters[0]).toHaveProperty('name');
-      expect(characters[0]).toHaveProperty('description');
-      expect(characters[0]).toHaveProperty('accessLevel', 'global');
-    }
+    // Verify our created character is in the list
+    const createdCharacter = characters.find((char: any) => char.id === createdCharacterId);
+    expect(createdCharacter).toBeDefined();
+    expect(createdCharacter).toMatchObject({
+      id: createdCharacterId,
+      name: testCharacterName,
+      description: 'Test character for GET request verification',
+      learningContext: 'Test learning context',
+      competence: 'Test competence',
+      accessLevel: 'global',
+    });
+
+    // Verify the general structure of characters in the list
+    expect(createdCharacter).toHaveProperty('id');
+    expect(createdCharacter).toHaveProperty('name');
+    expect(createdCharacter).toHaveProperty('description');
+    expect(createdCharacter).toHaveProperty('accessLevel', 'global');
   });
 
   test('GET - should return 403 when authorization header is missing', async ({
@@ -182,7 +214,6 @@ test.describe('Character Template API', () => {
         competence: 'Second competence',
       },
     ];
-
     const secondResponse = await request.post(characterTemplateRoute, {
       headers: { ...authorizationHeader },
       data: secondCharacterData,
@@ -190,8 +221,13 @@ test.describe('Character Template API', () => {
 
     expect(secondResponse.ok()).toBeTruthy();
     const result = await secondResponse.json();
-    expect(result.results[0]).toHaveProperty('error');
-    expect(result.results[0].error).toContain('already exists');
+
+    // Verify the character was updated (upserted) with new data
+    expect(result.results[0]).toHaveProperty('data');
+    expect(result.results[0].data.name).toBe(duplicateName);
+    expect(result.results[0].data.description).toBe('Second character');
+    expect(result.results[0].data.learningContext).toBe('Second context');
+    expect(result.results[0].data.competence).toBe('Second competence');
   });
 
   test('POST - should return 403 when authorization header is missing', async ({

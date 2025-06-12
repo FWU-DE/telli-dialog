@@ -94,15 +94,8 @@ export async function POST(request: NextRequest) {
           name: characterData.name.trim(),
         });
 
-        if (existingGlobalCharacter !== undefined) {
-          results.push({
-            error: `A global character with the name "${characterData.name}" already exists`,
-            data: characterData,
-          });
-          continue;
-        }
-
         const character: Omit<CharacterInsertModel, 'modelId'> = {
+          id: existingGlobalCharacter?.id ?? undefined,
           ...characterData,
           accessLevel: 'global',
           userId: DUMMY_USER_ID,
