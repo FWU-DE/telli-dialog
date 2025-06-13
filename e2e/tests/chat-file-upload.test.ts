@@ -70,6 +70,7 @@ test('should successfully upload an image and get response about its contents', 
   await page.waitForURL('/d/**');
 
   // Verify the response contains the expected content
+  await page.waitForTimeout(5000);
   const assistantMessage = page.getByLabel('assistant message').getByRole('paragraph');
   await expect(assistantMessage).toBeVisible();
   // Note: You may need to adjust this expectation based on what's actually in the lazy.webp image
