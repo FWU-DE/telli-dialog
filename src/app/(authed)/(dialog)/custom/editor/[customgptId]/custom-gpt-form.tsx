@@ -48,6 +48,13 @@ type CustomGptFormProps = CustomGptModel & {
   readOnly: boolean;
 };
 
+/**
+ * Zod form configuration Info:
+ * - If the field is required, set the min length to at least 1.
+ * - If the field is nullable, it must not have a min length.
+ * - bahavoir of the textInput component is based on the nullable property (required bavoir vs optional bavoir)
+ * - the max length property controls the behavior of the textInput component and blocks user input if the max length is reached
+ */
 const customGptFormValuesSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),

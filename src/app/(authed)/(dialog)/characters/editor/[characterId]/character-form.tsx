@@ -48,7 +48,11 @@ type CharacterFormProps = CharacterModel & {
 };
 
 /**
- * If the field is required, set the min length to at least 1.
+ * Zod form configuration Info:
+ * - If the field is required, set the min length to at least 1.
+ * - If the field is nullable, it must not have a min length.
+ * - bahavoir of the textInput component is based on the nullable property (required bavoir vs optional bavoir)
+ * - the max length property controls the behavior of the textInput component and blocks user input if the max length is reached
  */
 const characterFormValuesSchema = z.object({
   name: z.string().min(1),
@@ -89,12 +93,6 @@ export default function CharacterForm({
     resolver: zodResolver(characterFormValuesSchema),
     defaultValues: {
       ...character,
-      description: character.description ?? null,
-      learningContext: character.learningContext ?? null,
-      competence: character.competence ?? null,
-      schoolType: character.schoolType ?? null,
-      gradeLevel: character.gradeLevel ?? null,
-      subject: character.subject ?? null,
       modelId: maybeDefaultModelId,
     },
   });
