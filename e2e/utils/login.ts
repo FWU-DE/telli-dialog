@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test';
 
-export async function login(page: Page, user: 'teacher' | 'student') {
+export async function login(page: Page, user: string) {
   await page.goto('/logout');
   await page.waitForURL('**/login');
 
