@@ -1,5 +1,5 @@
 import { db } from '..';
-import { FederalStateInsertModel, federalStateTable } from '../schema';
+import { FederalStateInsertModel, FederalStateModel, federalStateTable } from '../schema';
 import { eq } from 'drizzle-orm';
 import { decrypt } from '../crypto';
 import { env } from '@/env';
@@ -50,24 +50,34 @@ export async function dbGetFederalStateById(id: string | undefined) {
     .from(federalStateTable)
     .where(eq(federalStateTable.id, id));
 
-  if (federalState === undefined) {
-    throw Error(`Could not find federal state with id ${id}`);
-  }
-
   return federalState;
 }
 
-export async function dbUpsertFederalState(federalState: FederalStateInsertModel) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { createdAt, ..._federalState } = federalState;
-  const [upserted] = await db
-    .insert(federalStateTable)
-    .values(_federalState)
-    .onConflictDoUpdate({
-      target: federalStateTable.id,
-      set: { ..._federalState },
-    })
+export async function dbInsertFederalState(federalState: FederalStateInsertModel) {
+  const [inserted] = await db.insert(federalStateTable).values(federalState).returning();
+
+  return inserted;
+}
+
+export async function dbUpdateFederalState(
+  federalState: Partial<FederalStateModel> & { id: string },
+) {
+  const [updated] = await db
+    .update(federalStateTable)
+    .set(federalState)
+    .where(eq(federalStateTable.id, federalState.id))
     .returning();
 
-  return upserted;
+  return updated;
+}
+
+export async function dbDeleteFederalState(id: string) {
+  if (!id) {
+    throw new Error('No federal state id given');
+  }
+  const [deleted] = await db
+    .delete(federalStateTable)
+    .where(eq(federalStateTable.id, id))
+    .returning();
+  return deleted;
 }

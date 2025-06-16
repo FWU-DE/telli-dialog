@@ -22,7 +22,8 @@ test('should create a new federal state with correct default values', async ({
     },
   });
   expect(response.ok()).toBeTruthy();
-  expect(await response.json()).toMatchObject({
+  const responseJson = await response.json();
+  expect(responseJson).toMatchObject({
     id,
     chatStorageTime: 120,
     designConfiguration: null,
@@ -100,4 +101,29 @@ test('should return 403 because authorization header is missing', async ({
     },
   });
   expect(response.status()).toBe(403);
+});
+
+test('should return 409 if federal state with same id already exists', async ({
+  request,
+}: {
+  request: APIRequestContext;
+}) => {
+  const id = 'Test-' + cnanoid(10);
+  const data = {
+    id,
+    teacherPriceLimit: 1000,
+    studentPriceLimit: 100,
+    decryptedApiKey: 'test-api-key',
+  };
+  // First creation
+  await request.post(federalStateRoute, {
+    headers: { ...authorizationHeader },
+    data,
+  });
+  // Duplicate creation
+  const response = await request.post(federalStateRoute, {
+    headers: { ...authorizationHeader },
+    data,
+  });
+  expect(response.status()).toBe(409);
 });
