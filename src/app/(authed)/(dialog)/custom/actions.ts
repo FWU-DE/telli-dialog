@@ -19,7 +19,7 @@ export async function createNewCustomGptAction({
 
   let copyOfTemplatePicture;
   if (templatePictureId !== undefined) {
-    copyOfTemplatePicture = `custom-gpt/${customGptId}/avatar`;
+    copyOfTemplatePicture = `custom-gpts/${customGptId}/avatar`;
     await copyFileInS3({
       newKey: copyOfTemplatePicture,
       copySource: templatePictureId,
