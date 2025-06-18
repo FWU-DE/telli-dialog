@@ -43,10 +43,6 @@ test('teacher can create shared chat with web sources, student can join chat and
     );
   await page.getByRole('button', { name: 'Link hinzufügen' }).click();
 
-  // Wait for the upload to complete
-  const uploadPromise = page.waitForResponse((response) =>
-    response.url().includes('api/v1/upload-file'),
-  );
 
   const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
 
@@ -71,7 +67,7 @@ test('teacher can create shared chat with web sources, student can join chat and
 
   // send first message
   await schoolChatPage.getByRole('button', { name: 'Dialog starten' }).click();
-
+  await page.waitForTimeout(1000);
   await schoolChatPage
     .getByPlaceholder('Wie kann ich Dir helfen?')
     .fill(
