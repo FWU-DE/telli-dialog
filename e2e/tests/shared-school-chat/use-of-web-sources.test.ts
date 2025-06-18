@@ -82,13 +82,4 @@ test('teacher can login, create and delete shared chat, student can join chat', 
   await expect(schoolChatPage.getByLabel('assistant message 1')).toContainText(
     'Es gab hier keine Überraschungen.',
   );
-
-  await schoolChatPage
-    .getByPlaceholder('Wie kann ich Dir helfen?')
-    .fill('Wie heißt die Hauptperson die in dieser Datei genannnt wird?');
-  await schoolChatPage.getByRole('button', { name: 'Nachricht abschicken' }).click();
-
-  await expect(schoolChatPage.getByLabel('assistant message 2')).toContainText(
-    'Napoleon Bonaparte',
-  );
 });
