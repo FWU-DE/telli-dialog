@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
 
-test('teacher can login, create and delete shared chat, student can join chat', async ({
+test('teacher can create shared chat with web sources, student can join chat and reference web sources', async ({
   page,
 }) => {
   await login(page, 'teacher');

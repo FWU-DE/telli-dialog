@@ -2,6 +2,7 @@ import { Page } from '@playwright/test';
 
 export async function login(page: Page, user: string) {
   await page.goto('/logout');
+  await page.context().clearCookies();
   await page.waitForURL('**/login');
 
   await page.getByRole('button', { name: 'Mit VIDIS einloggen' }).click();

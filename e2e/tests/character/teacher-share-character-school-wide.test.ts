@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 
-test('test', async ({ page }) => {
+test('teacher can share character school-wide', async ({ page }) => {
   await login(page, 'teacher1-BY');
   await page.goto('/characters');
   await page.waitForURL('/characters**');
@@ -54,5 +54,5 @@ test('test', async ({ page }) => {
   await page.waitForURL('/characters?visibility=school**');
 
   // Verify the shared character is visible
-  await expect(page.getByText('Ada Lovelace')).toBeVisible();
+  await expect(page.getByText('Ada Lovelace').first()).toBeVisible();
 });
