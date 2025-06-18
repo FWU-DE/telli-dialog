@@ -10,7 +10,7 @@ export async function login(page: Page, user: string) {
     // If logout fails, continue anyway as we'll clear cookies next
     console.warn('Logout navigation failed, continuing with login process:', error);
   }
-  
+
   await page.context().clearCookies();
   await page.waitForURL('**/login');
 

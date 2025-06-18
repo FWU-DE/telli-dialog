@@ -43,7 +43,6 @@ test('teacher can create shared chat with web sources, student can join chat and
     );
   await page.getByRole('button', { name: 'Link hinzufügen' }).click();
 
-
   const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
 
   await expect(submitButton).toBeVisible();
@@ -66,8 +65,8 @@ test('teacher can create shared chat with web sources, student can join chat and
   const schoolChatPage = await schoolChatPagePromise;
 
   // send first message
+  await page.waitForTimeout(100);
   await schoolChatPage.getByRole('button', { name: 'Dialog starten' }).click();
-  await page.waitForTimeout(1000);
   await schoolChatPage
     .getByPlaceholder('Wie kann ich Dir helfen?')
     .fill(
