@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../utils/login';
+import { login } from '../../utils/login';
 
 test('should successfully upload a file and get response about its contents', async ({ page }) => {
   await login(page, 'teacher');
