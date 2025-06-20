@@ -28,6 +28,7 @@ export default function SharedChat({
   const endpoint = `/api/shared-chat?${searchParams.toString()}`;
 
   const [dialogStarted, setDialogStarted] = React.useState(false);
+  const [rateLimitReached, setRateLimitReached] = React.useState(false);
 
   const {
     messages,
@@ -46,6 +47,16 @@ export default function SharedChat({
     experimental_throttle: 100,
     maxSteps: 2,
     body: { modelId: sharedSchoolChat.modelId },
+    onResponse: (response) => {
+      // Check for 429 status code
+      if (response.status === 429) {
+        console.log('rate limit reached');
+        setRateLimitReached(true);
+      } else {
+        // Clear rate limit error if response is successful
+        setRateLimitReached(false);
+      }
+    }
   });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
@@ -69,6 +80,12 @@ export default function SharedChat({
 
   function handleOpenNewChat() {
     setMessages([]);
+  }
+
+  function handleReload() {
+    // Clear rate limit error before reloading
+    setRateLimitReached(false);
+    reload();
   }
 
   const innerContent =
@@ -100,7 +117,6 @@ export default function SharedChat({
         </div>
       </>
     );
-
   return (
     <>
       {!chatActive && (
@@ -141,7 +157,11 @@ export default function SharedChat({
                 />
               )}
             {innerContent}
-            <ErrorChatPlaceholder error={error} handleReload={reload} />
+            <ErrorChatPlaceholder
+              error={error}
+              handleReload={handleReload}
+              isRateLimitError={rateLimitReached}
+            />
           </div>
           <div className="w-full max-w-5xl mx-auto px-4 pb-4">
             {dialogStarted && (
