@@ -19,7 +19,6 @@ export async function getAvailableLlmModels() {
   return await db
     .select()
     .from(llmModelTable)
-    .where(or(eq(llmModelTable.provider, 'ionos'), eq(llmModelTable.provider, 'openai')))
     .orderBy(llmModelTable.createdAt);
 }
 

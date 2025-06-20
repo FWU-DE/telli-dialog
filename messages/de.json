@@ -30,7 +30,7 @@
     "regenerate-message": "Antwort erneut generieren",
     "image-load-failed": "Bild konnte nicht geladen werden",
     "rate-limit-title": "telli-Points aufgebraucht",
-    "rate-limit-error": "Das verfügbare Budget an telli-Points wurde erreicht. Bitte versuchen Sie es später erneut oder wenden Sie sich an Ihren Administrator.",
+    "rate-limit-error": "Das verfügbare Budget an telli-Points wurde aufgebraucht.",
     "generic-error": "Ein Fehler ist aufgetreten",
     "retry-button": "Erneut versuchen"
   },
