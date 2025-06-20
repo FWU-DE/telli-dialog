@@ -35,9 +35,7 @@ export function ErrorChatPlaceholder({
     <div className="p-4 gap-2 text-sm rounded-2xl bg-red-100 text-red-500 border border-red-500 text-right mt-8 max-w-3xl mx-auto">
       <div className="flex justify-between items-center px-2">
         <div className="text-left flex-1">
-          {errorTitle && (
-            <div className="font-semibold mb-1">{errorTitle}</div>
-          )}
+          {errorTitle && <div className="font-semibold mb-1">{errorTitle}</div>}
           <div>{getErrorMessage()}</div>
         </div>
         <button

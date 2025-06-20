@@ -56,7 +56,7 @@ export default function SharedChat({
         // Clear rate limit error if response is successful
         setRateLimitReached(false);
       }
-    }
+    },
   });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
