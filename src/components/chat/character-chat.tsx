@@ -28,6 +28,8 @@ export default function CharacterSharedChat({
   const searchParams = new URLSearchParams({ id, inviteCode });
   const endpoint = `/api/character?${searchParams.toString()}`;
 
+  const [rateLimitReached, setRateLimitReached] = React.useState(false);
+
   const {
     messages,
     setMessages,
@@ -45,6 +47,15 @@ export default function CharacterSharedChat({
     experimental_throttle: 100,
     maxSteps: 2,
     body: { modelId: character.modelId },
+    onResponse: (response) => {
+      // Check for 429 status code
+      if (response.status === 429) {
+        setRateLimitReached(true);
+      } else {
+        // Clear rate limit error if response is successful
+        setRateLimitReached(false);
+      }
+    },
   });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
@@ -69,6 +80,13 @@ export default function CharacterSharedChat({
   function handleOpenNewChat() {
     setMessages([]);
   }
+
+  function handleReload() {
+    // Clear rate limit error before reloading
+    setRateLimitReached(false);
+    reload();
+  }
+
   const assistantIcon = getAssistantIcon({
     imageName: character.name,
     imageSource,
@@ -125,7 +143,11 @@ export default function CharacterSharedChat({
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
             {innerContent}
-            <ErrorChatPlaceholder error={error} handleReload={reload} />
+            <ErrorChatPlaceholder
+              error={error}
+              handleReload={handleReload}
+              isRateLimitError={rateLimitReached}
+            />
           </div>
 
           <div className="w-full max-w-5xl mx-auto px-4 pb-4">
