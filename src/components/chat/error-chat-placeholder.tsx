@@ -14,7 +14,7 @@ export function ErrorChatPlaceholder({
   const t = useTranslations('common');
 
   if (error === undefined) return undefined;
-  console.log('isRateLimitError', isRateLimitError);
+
   const getErrorMessage = () => {
     if (isRateLimitError) {
       return t('rate-limit-error');

@@ -9,9 +9,10 @@ import { InitialChatContentDisplay } from '@/components/chat/initial-content-dis
 import { ChatBox } from '@/components/chat/chat-box';
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
-import { ErrorChatPlaceholder } from '@/components/chat/error-message';
+import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { getAssistantIcon } from './chat';
 import useBreakpoints from '../hooks/use-breakpoints';
+import { useRateLimitAware } from '@/hooks/use-response-status';
 
 const reductionBreakpoint = 'sm';
 
@@ -28,7 +29,7 @@ export default function CharacterSharedChat({
   const searchParams = new URLSearchParams({ id, inviteCode });
   const endpoint = `/api/character?${searchParams.toString()}`;
 
-  const [rateLimitReached, setRateLimitReached] = React.useState(false);
+  const { rateLimitReached, handleResponse, clearRateLimit } = useRateLimitAware();
 
   const {
     messages,
@@ -47,15 +48,7 @@ export default function CharacterSharedChat({
     experimental_throttle: 100,
     maxSteps: 2,
     body: { modelId: character.modelId },
-    onResponse: (response) => {
-      // Check for 429 status code
-      if (response.status === 429) {
-        setRateLimitReached(true);
-      } else {
-        // Clear rate limit error if response is successful
-        setRateLimitReached(false);
-      }
-    },
+    onResponse: handleResponse,
   });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
@@ -83,7 +76,7 @@ export default function CharacterSharedChat({
 
   function handleReload() {
     // Clear rate limit error before reloading
-    setRateLimitReached(false);
+    clearRateLimit();
     reload();
   }
 

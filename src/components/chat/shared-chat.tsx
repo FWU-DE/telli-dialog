@@ -11,8 +11,9 @@ import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
 import { ChatBox } from '@/components/chat/chat-box';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
-import { ErrorChatPlaceholder } from '@/components/chat/error-message';
+import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { FloatingText } from './floating-text';
+import { useRateLimitAware } from '@/hooks/use-response-status';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
@@ -28,7 +29,8 @@ export default function SharedChat({
   const endpoint = `/api/shared-chat?${searchParams.toString()}`;
 
   const [dialogStarted, setDialogStarted] = React.useState(false);
-  const [rateLimitReached, setRateLimitReached] = React.useState(false);
+
+  const { error, handleResponse, clearRateLimit } = useRateLimitAware();
 
   const {
     messages,
@@ -47,16 +49,7 @@ export default function SharedChat({
     experimental_throttle: 100,
     maxSteps: 2,
     body: { modelId: sharedSchoolChat.modelId },
-    onResponse: (response) => {
-      // Check for 429 status code
-      if (response.status === 429) {
-        console.log('rate limit reached');
-        setRateLimitReached(true);
-      } else {
-        // Clear rate limit error if response is successful
-        setRateLimitReached(false);
-      }
-    },
+    onResponse: handleResponse,
   });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
@@ -84,7 +77,7 @@ export default function SharedChat({
 
   function handleReload() {
     // Clear rate limit error before reloading
-    setRateLimitReached(false);
+    clearRateLimit();
     reload();
   }
 

@@ -20,7 +20,7 @@ import { refetchFileMapping } from '@/app/(authed)/(dialog)/actions';
 import { InitialChatContentDisplay } from './initial-content-display';
 import { HELP_MODE_GPT_ID } from '@/db/const';
 import { ChatInputBox } from './chat-input-box';
-import { ErrorChatPlaceholder } from './error-message';
+import { ErrorChatPlaceholder } from './error-chat-placeholder';
 import Image from 'next/image';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { cn } from '@/utils/tailwind';

@@ -15,7 +15,7 @@ export async function dbGetModelByName(name: string) {
   return (await db.select().from(llmModelTable).where(eq(llmModelTable.name, name)))[0];
 }
 
-export async function getAvailableLlmModels() {
+export async function getAllLlmModels() {
   return await db.select().from(llmModelTable).orderBy(llmModelTable.createdAt);
 }
 
