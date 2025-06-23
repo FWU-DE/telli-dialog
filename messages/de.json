@@ -28,7 +28,11 @@
     "copy": "Kopieren",
     "copy-clipboard": "In die Zwischenablage kopieren",
     "regenerate-message": "Antwort erneut generieren",
-    "image-load-failed": "Bild konnte nicht geladen werden"
+    "image-load-failed": "Bild konnte nicht geladen werden",
+    "rate-limit-title": "telli-Points aufgebraucht",
+    "rate-limit-error": "Das bereitgestellte Budget an telli-Points wurde aufgebraucht.",
+    "generic-error": "Ein Fehler ist aufgetreten",
+    "retry-button": "Erneut versuchen"
   },
   "usage-disclaimer": {
     "initial-title": "Willkommen bei telli!",

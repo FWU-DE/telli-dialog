@@ -1,4 +1,4 @@
-import { and, eq, or } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db } from '..';
 import { federalStateLlmModelMappingTable, LlmModel, llmModelTable } from '../schema';
 import { KnotenpunktLlmModel } from '@/knotenpunkt/schema';
@@ -15,12 +15,8 @@ export async function dbGetModelByName(name: string) {
   return (await db.select().from(llmModelTable).where(eq(llmModelTable.name, name)))[0];
 }
 
-export async function getAvailableLlmModels() {
-  return await db
-    .select()
-    .from(llmModelTable)
-    .where(or(eq(llmModelTable.provider, 'ionos'), eq(llmModelTable.provider, 'openai')))
-    .orderBy(llmModelTable.createdAt);
+export async function getAllLlmModels() {
+  return await db.select().from(llmModelTable).orderBy(llmModelTable.createdAt);
 }
 
 export async function dbGetAndUpdateLlmModelsByFederalStateId({
