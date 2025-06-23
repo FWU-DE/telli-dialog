@@ -41,12 +41,8 @@
           "name": "character_file_mapping_file_id_file_table_id_fk",
           "tableFrom": "character_file_mapping",
           "tableTo": "file_table",
-          "columnsFrom": [
-            "file_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["file_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -54,12 +50,8 @@
           "name": "character_file_mapping_character_id_character_id_fk",
           "tableFrom": "character_file_mapping",
           "tableTo": "character",
-          "columnsFrom": [
-            "character_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["character_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -69,10 +61,7 @@
         "character_file_mapping_character_id_file_id_unique": {
           "name": "character_file_mapping_character_id_file_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "character_id",
-            "file_id"
-          ]
+          "columns": ["character_id", "file_id"]
         }
       },
       "policies": {},
@@ -122,12 +111,8 @@
           "name": "conversation_message_file_mapping_fileId_file_table_id_fk",
           "tableFrom": "conversation_message_file_mapping",
           "tableTo": "file_table",
-          "columnsFrom": [
-            "fileId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fileId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -135,12 +120,8 @@
           "name": "conversation_message_file_mapping_conversationMessageId_conversation_message_id_fk",
           "tableFrom": "conversation_message_file_mapping",
           "tableTo": "conversation_message",
-          "columnsFrom": [
-            "conversationMessageId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["conversationMessageId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -148,12 +129,8 @@
           "name": "conversation_message_file_mapping_conversationId_conversation_id_fk",
           "tableFrom": "conversation_message_file_mapping",
           "tableTo": "conversation",
-          "columnsFrom": [
-            "conversationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["conversationId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -163,10 +140,7 @@
         "conversation_message_file_mapping_conversationId_fileId_unique": {
           "name": "conversation_message_file_mapping_conversationId_fileId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "conversationId",
-            "fileId"
-          ]
+          "columns": ["conversationId", "fileId"]
         }
       },
       "policies": {},
@@ -210,12 +184,8 @@
           "name": "custom_gpt_file_mapping_file_id_file_table_id_fk",
           "tableFrom": "custom_gpt_file_mapping",
           "tableTo": "file_table",
-          "columnsFrom": [
-            "file_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["file_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -223,12 +193,8 @@
           "name": "custom_gpt_file_mapping_custom_gpt_id_custom_gpt_id_fk",
           "tableFrom": "custom_gpt_file_mapping",
           "tableTo": "custom_gpt",
-          "columnsFrom": [
-            "custom_gpt_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["custom_gpt_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -238,10 +204,7 @@
         "custom_gpt_file_mapping_custom_gpt_id_file_id_unique": {
           "name": "custom_gpt_file_mapping_custom_gpt_id_file_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "custom_gpt_id",
-            "file_id"
-          ]
+          "columns": ["custom_gpt_id", "file_id"]
         }
       },
       "policies": {},
@@ -285,12 +248,8 @@
           "name": "shared_conversation_file_mapping_fileId_file_table_id_fk",
           "tableFrom": "shared_conversation_file_mapping",
           "tableTo": "file_table",
-          "columnsFrom": [
-            "fileId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fileId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -298,12 +257,8 @@
           "name": "shared_conversation_file_mapping_shared_school_conversation_id_shared_school_conversation_id_fk",
           "tableFrom": "shared_conversation_file_mapping",
           "tableTo": "shared_school_conversation",
-          "columnsFrom": [
-            "shared_school_conversation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["shared_school_conversation_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -313,10 +268,7 @@
         "shared_conversation_file_mapping_shared_school_conversation_id_fileId_unique": {
           "name": "shared_conversation_file_mapping_shared_school_conversation_id_fileId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "shared_school_conversation_id",
-            "fileId"
-          ]
+          "columns": ["shared_school_conversation_id", "fileId"]
         }
       },
       "policies": {},
@@ -400,12 +352,8 @@
           "name": "text_chunk_file_id_file_table_id_fk",
           "tableFrom": "text_chunk",
           "tableTo": "file_table",
-          "columnsFrom": [
-            "file_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["file_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -560,12 +508,8 @@
           "name": "character_user_id_user_entity_id_fk",
           "tableFrom": "character",
           "tableTo": "user_entity",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -573,12 +517,8 @@
           "name": "character_model_id_llm_model_id_fk",
           "tableFrom": "character",
           "tableTo": "llm_model",
-          "columnsFrom": [
-            "model_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["model_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -586,12 +526,8 @@
           "name": "character_school_id_school_id_fk",
           "tableFrom": "character",
           "tableTo": "school",
-          "columnsFrom": [
-            "school_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["school_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -601,9 +537,7 @@
         "character_invite_code_unique": {
           "name": "character_invite_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "invite_code"
-          ]
+          "columns": ["invite_code"]
         }
       },
       "policies": {},
@@ -678,12 +612,8 @@
           "name": "conversation_message_conversation_id_conversation_id_fk",
           "tableFrom": "conversation_message",
           "tableTo": "conversation",
-          "columnsFrom": [
-            "conversation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["conversation_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -691,12 +621,8 @@
           "name": "conversation_message_user_id_user_entity_id_fk",
           "tableFrom": "conversation_message",
           "tableTo": "user_entity",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -762,12 +688,8 @@
           "name": "conversation_user_id_user_entity_id_fk",
           "tableFrom": "conversation",
           "tableTo": "user_entity",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -775,12 +697,8 @@
           "name": "conversation_character_id_character_id_fk",
           "tableFrom": "conversation",
           "tableTo": "character",
-          "columnsFrom": [
-            "character_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["character_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -788,12 +706,8 @@
           "name": "conversation_custom_gpt_id_custom_gpt_id_fk",
           "tableFrom": "conversation",
           "tableTo": "custom_gpt",
-          "columnsFrom": [
-            "custom_gpt_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["custom_gpt_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -859,12 +773,8 @@
           "name": "conversation_usage_tracking_model_id_llm_model_id_fk",
           "tableFrom": "conversation_usage_tracking",
           "tableTo": "llm_model",
-          "columnsFrom": [
-            "model_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["model_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -957,12 +867,8 @@
           "name": "custom_gpt_user_id_user_entity_id_fk",
           "tableFrom": "custom_gpt",
           "tableTo": "user_entity",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -970,12 +876,8 @@
           "name": "custom_gpt_school_id_school_id_fk",
           "tableFrom": "custom_gpt",
           "tableTo": "school",
-          "columnsFrom": [
-            "school_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["school_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1023,12 +925,8 @@
           "name": "federal_state_llm_model_mapping_federal_state_id_federal_state_id_fk",
           "tableFrom": "federal_state_llm_model_mapping",
           "tableTo": "federal_state",
-          "columnsFrom": [
-            "federal_state_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["federal_state_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1036,12 +934,8 @@
           "name": "federal_state_llm_model_mapping_llm_model_id_llm_model_id_fk",
           "tableFrom": "federal_state_llm_model_mapping",
           "tableTo": "llm_model",
-          "columnsFrom": [
-            "llm_model_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["llm_model_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1051,10 +945,7 @@
         "federal_state_llm_model_mapping_federal_state_id_llm_model_id_unique": {
           "name": "federal_state_llm_model_mapping_federal_state_id_llm_model_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "federal_state_id",
-            "llm_model_id"
-          ]
+          "columns": ["federal_state_id", "llm_model_id"]
         }
       },
       "policies": {},
@@ -1285,10 +1176,7 @@
         "llm_model_owner_name_unique": {
           "name": "llm_model_owner_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "owner",
-            "name"
-          ]
+          "columns": ["owner", "name"]
         }
       },
       "policies": {},
@@ -1325,12 +1213,8 @@
           "name": "school_federal_state_id_federal_state_id_fk",
           "tableFrom": "school",
           "tableTo": "federal_state",
-          "columnsFrom": [
-            "federal_state_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["federal_state_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1396,12 +1280,8 @@
           "name": "shared_character_chat_usage_tracking_model_id_llm_model_id_fk",
           "tableFrom": "shared_character_chat_usage_tracking",
           "tableTo": "llm_model",
-          "columnsFrom": [
-            "model_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["model_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1473,12 +1353,8 @@
           "name": "shared_character_conversation_user_id_user_entity_id_fk",
           "tableFrom": "shared_character_conversation",
           "tableTo": "user_entity",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1488,17 +1364,12 @@
         "shared_character_conversation_invite_code_unique": {
           "name": "shared_character_conversation_invite_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "invite_code"
-          ]
+          "columns": ["invite_code"]
         },
         "shared_character_conversation_character_id_user_id_unique": {
           "name": "shared_character_conversation_character_id_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "character_id",
-            "user_id"
-          ]
+          "columns": ["character_id", "user_id"]
         }
       },
       "policies": {},
@@ -1629,12 +1500,8 @@
           "name": "shared_school_conversation_model_id_llm_model_id_fk",
           "tableFrom": "shared_school_conversation",
           "tableTo": "llm_model",
-          "columnsFrom": [
-            "model_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["model_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1642,12 +1509,8 @@
           "name": "shared_school_conversation_user_id_user_entity_id_fk",
           "tableFrom": "shared_school_conversation",
           "tableTo": "user_entity",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1657,9 +1520,7 @@
         "shared_school_conversation_invite_code_unique": {
           "name": "shared_school_conversation_invite_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "invite_code"
-          ]
+          "columns": ["invite_code"]
         }
       },
       "policies": {},
@@ -1721,12 +1582,8 @@
           "name": "shared_school_conversation_usage_tracking_model_id_llm_model_id_fk",
           "tableFrom": "shared_school_conversation_usage_tracking",
           "tableTo": "llm_model",
-          "columnsFrom": [
-            "model_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["model_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1781,12 +1638,8 @@
           "name": "user_school_mapping_user_id_user_entity_id_fk",
           "tableFrom": "user_school_mapping",
           "tableTo": "user_entity",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1794,12 +1647,8 @@
           "name": "user_school_mapping_school_id_school_id_fk",
           "tableFrom": "user_school_mapping",
           "tableTo": "school",
-          "columnsFrom": [
-            "school_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["school_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1809,10 +1658,7 @@
         "user_school_mapping_user_id_school_id_unique": {
           "name": "user_school_mapping_user_id_school_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "school_id"
-          ]
+          "columns": ["user_id", "school_id"]
         }
       },
       "policies": {},
@@ -1875,9 +1721,7 @@
         "user_entity_email_unique": {
           "name": "user_entity_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -1889,38 +1733,22 @@
     "public.character_access_level": {
       "name": "character_access_level",
       "schema": "public",
-      "values": [
-        "private",
-        "school",
-        "global"
-      ]
+      "values": ["private", "school", "global"]
     },
     "public.conversation_role": {
       "name": "conversation_role",
       "schema": "public",
-      "values": [
-        "user",
-        "assistant",
-        "system",
-        "tool"
-      ]
+      "values": ["user", "assistant", "system", "tool"]
     },
     "public.llm_model_type": {
       "name": "llm_model_type",
       "schema": "public",
-      "values": [
-        "text",
-        "image",
-        "fc"
-      ]
+      "values": ["text", "image", "fc"]
     },
     "public.user_school_role": {
       "name": "user_school_role",
       "schema": "public",
-      "values": [
-        "student",
-        "teacher"
-      ]
+      "values": ["student", "teacher"]
     }
   },
   "schemas": {},

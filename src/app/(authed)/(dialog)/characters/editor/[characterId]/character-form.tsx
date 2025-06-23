@@ -397,7 +397,7 @@ export default function CharacterForm({
           placeholder={t('character-learning-context-placeholder')}
           onBlur={handleAutoSave}
         />
-        <TextInput 
+        <TextInput
           id="initialMessage"
           label={t('character-initial-message-label')}
           inputType="textarea"
