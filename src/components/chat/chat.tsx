@@ -98,7 +98,17 @@ export default function Chat({
     },
     generateId: generateUUID,
     sendExtraMessageFields: true,
-    onResponse: handleResponse,
+    onResponse: (response) => {
+      handleResponse(response);
+      // trigger refech of the fileMapping from the DB
+      setCountOfFilesInChat(countOfFilesInChat + 1);
+      if (messages.length > 1) {
+        return;
+      }
+
+      refetchConversations();
+      router.refresh();
+    },
     onFinish: () => {
       if (messages.length > 1) {
         return;
