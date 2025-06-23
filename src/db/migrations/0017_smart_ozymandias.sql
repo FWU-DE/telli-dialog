@@ -1,0 +1,1 @@
+ALTER TABLE "character" ADD COLUMN "initial_message" text;

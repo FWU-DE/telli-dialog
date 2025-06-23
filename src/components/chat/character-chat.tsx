@@ -1,5 +1,5 @@
 'use client';
-import { useChat } from '@ai-sdk/react';
+import { Message, useChat } from '@ai-sdk/react';
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { CharacterModel } from '@/db/schema';
@@ -27,7 +27,7 @@ export default function CharacterSharedChat({
 
   const searchParams = new URLSearchParams({ id, inviteCode });
   const endpoint = `/api/character?${searchParams.toString()}`;
-
+  const initialMessages: Message[] = character.initialMessage ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }] : [];
   const {
     messages,
     setMessages,
@@ -40,7 +40,7 @@ export default function CharacterSharedChat({
     error,
   } = useChat({
     id,
-    initialMessages: [],
+    initialMessages,
     api: endpoint,
     experimental_throttle: 100,
     maxSteps: 2,
