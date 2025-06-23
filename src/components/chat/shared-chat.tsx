@@ -13,7 +13,7 @@ import { ChatBox } from '@/components/chat/chat-box';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { FloatingText } from './floating-text';
-import { useRateLimitAware } from '@/hooks/use-response-status';
+import { useDisplayError } from '@/hooks/use-response-status';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
@@ -30,7 +30,7 @@ export default function SharedChat({
 
   const [dialogStarted, setDialogStarted] = React.useState(false);
 
-  const { error: handledError, handleResponse, clearRateLimit } = useRateLimitAware();
+  const { error: handledError, handleResponse, clearRateLimit } = useDisplayError();
 
   const {
     messages,

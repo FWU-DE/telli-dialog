@@ -24,6 +24,7 @@ import { ErrorChatPlaceholder } from './error-chat-placeholder';
 import Image from 'next/image';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { cn } from '@/utils/tailwind';
+import { useDisplayError } from '@/hooks/use-response-status';
 type ChatProps = {
   id: string;
   initialMessages: Message[];
@@ -66,6 +67,8 @@ export default function Chat({
   const [countOfFilesInChat, setCountOfFilesInChat] = React.useState(0);
   const queryClient = useQueryClient();
 
+  const { error: handledError, handleResponse, clearRateLimit } = useDisplayError();
+
   function refetchConversations() {
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
   }
@@ -95,16 +98,7 @@ export default function Chat({
     },
     generateId: generateUUID,
     sendExtraMessageFields: true,
-    onResponse: () => {
-      // trigger refech of the fileMapping from the DB
-      setCountOfFilesInChat(countOfFilesInChat + 1);
-      if (messages.length > 1) {
-        return;
-      }
-
-      refetchConversations();
-      router.refresh();
-    },
+    onResponse: handleResponse,
     onFinish: () => {
       if (messages.length > 1) {
         return;
@@ -151,7 +145,10 @@ export default function Chat({
       console.error(error);
     }
   }
-
+  function handleReload() {
+    clearRateLimit();
+    reload();
+  }
   const formatedSubHeading = tHelpMode('chat-subheading', { FAQ_LINK: tHelpMode('faq-link') });
 
   function handleDeattachFile(localFileId: string) {
@@ -240,7 +237,11 @@ export default function Chat({
       <div className="flex flex-col flex-grow justify-between w-full overflow-hidden">
         <div ref={scrollRef} className="flex-grow overflow-y-auto">
           {messages.length === 0 ? placeholderElement : messagesContent}
-          <ErrorChatPlaceholder error={error} handleReload={reload} />
+          <ErrorChatPlaceholder
+            unhandledError={error}
+            handledError={handledError}
+            handleReload={handleReload}
+          />
         </div>
         <div className="w-full max-w-3xl pb-4 px-4 mx-auto">
           <div className="relative flex flex-col">

@@ -12,7 +12,7 @@ import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { getAssistantIcon } from './chat';
 import useBreakpoints from '../hooks/use-breakpoints';
-import { useRateLimitAware } from '@/hooks/use-response-status';
+import { useDisplayError } from '@/hooks/use-response-status';
 
 const reductionBreakpoint = 'sm';
 
@@ -29,7 +29,7 @@ export default function CharacterSharedChat({
   const searchParams = new URLSearchParams({ id, inviteCode });
   const endpoint = `/api/character?${searchParams.toString()}`;
 
-  const { error: handledError, handleResponse, clearRateLimit } = useRateLimitAware();
+  const { error: handledError, handleResponse, clearRateLimit } = useDisplayError();
 
   const {
     messages,
