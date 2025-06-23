@@ -13,7 +13,7 @@ import { ChatBox } from '@/components/chat/chat-box';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { FloatingText } from './floating-text';
-import { useDisplayError } from '@/hooks/use-response-status';
+import { useCheckStatusCode } from '@/hooks/use-response-status';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
@@ -30,27 +30,19 @@ export default function SharedChat({
 
   const [dialogStarted, setDialogStarted] = React.useState(false);
 
-  const { error: handledError, handleResponse, clearRateLimit } = useDisplayError();
+  // substitute the error object from the useChat hook, to dislay a user friendly error message in German
+  const { error, handleResponse, resetError } = useCheckStatusCode();
 
-  const {
-    messages,
-    setMessages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
-    reload,
-    stop,
-    error,
-  } = useChat({
-    id,
-    initialMessages: [],
-    api: endpoint,
-    experimental_throttle: 100,
-    maxSteps: 2,
-    body: { modelId: sharedSchoolChat.modelId },
-    onResponse: handleResponse,
-  });
+  const { messages, setMessages, input, handleInputChange, handleSubmit, isLoading, reload, stop } =
+    useChat({
+      id,
+      initialMessages: [],
+      api: endpoint,
+      experimental_throttle: 100,
+      maxSteps: 2,
+      body: { modelId: sharedSchoolChat.modelId },
+      onResponse: handleResponse,
+    });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -77,7 +69,7 @@ export default function SharedChat({
 
   function handleReload() {
     // Clear rate limit error before reloading
-    clearRateLimit();
+    resetError();
     reload();
   }
 
@@ -150,11 +142,7 @@ export default function SharedChat({
                 />
               )}
             {innerContent}
-            <ErrorChatPlaceholder
-              unhandledError={error}
-              handledError={handledError}
-              handleReload={handleReload}
-            />
+            <ErrorChatPlaceholder error={error} handleReload={handleReload} />
           </div>
           <div className="w-full max-w-5xl mx-auto px-4 pb-4">
             {dialogStarted && (

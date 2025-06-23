@@ -3,23 +3,21 @@ import { useTranslations } from 'next-intl';
 import ReloadIcon from '../icons/reload';
 
 export function ErrorChatPlaceholder({
-  unhandledError,
-  handledError,
+  error,
   handleReload,
 }: {
-  unhandledError?: Error;
-  handledError?: Error;
+  error?: Error;
   handleReload: () => void;
 }) {
   const t = useTranslations('common');
 
-  if (unhandledError === undefined && handledError === undefined) return undefined;
+  if (error === undefined) return undefined;
 
   return (
     <div className="p-4 gap-2 text-sm rounded-2xl bg-red-100 text-red-500 border border-red-500 text-right mt-8 max-w-3xl mx-auto">
       <div className="flex justify-between items-center px-2">
         <div className="text-left flex-1">
-          <div>{handledError?.message || unhandledError?.message}</div>
+          <div>{error?.message}</div>
         </div>
         <button
           onClick={() => handleReload()}
