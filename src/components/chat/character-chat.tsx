@@ -31,11 +31,12 @@ export default function CharacterSharedChat({
 
   // substitute the error object from the useChat hook, to dislay a user friendly error message in German
   const { error, handleResponse, resetError } = useCheckStatusCode();
+  const initialMessages: Message[] = character.initialMessage ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }] : [];
 
   const { messages, setMessages, input, handleInputChange, handleSubmit, isLoading, reload, stop } =
     useChat({
       id,
-      initialMessages: [],
+      initialMessages,
       api: endpoint,
       experimental_throttle: 100,
       maxSteps: 2,
