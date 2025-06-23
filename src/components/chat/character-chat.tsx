@@ -29,7 +29,7 @@ export default function CharacterSharedChat({
   const searchParams = new URLSearchParams({ id, inviteCode });
   const endpoint = `/api/character?${searchParams.toString()}`;
 
-  const { rateLimitReached, handleResponse, clearRateLimit } = useRateLimitAware();
+  const { error: handledError, handleResponse, clearRateLimit } = useRateLimitAware();
 
   const {
     messages,
@@ -137,9 +137,9 @@ export default function CharacterSharedChat({
           >
             {innerContent}
             <ErrorChatPlaceholder
-              error={error}
+              unhandledError={error}
+              handledError={handledError}
               handleReload={handleReload}
-              isRateLimitError={rateLimitReached}
             />
           </div>
 

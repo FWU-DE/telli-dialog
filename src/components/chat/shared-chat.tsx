@@ -30,7 +30,7 @@ export default function SharedChat({
 
   const [dialogStarted, setDialogStarted] = React.useState(false);
 
-  const { error, handleResponse, clearRateLimit } = useRateLimitAware();
+  const { error: handledError, handleResponse, clearRateLimit } = useRateLimitAware();
 
   const {
     messages,
@@ -151,9 +151,9 @@ export default function SharedChat({
               )}
             {innerContent}
             <ErrorChatPlaceholder
-              error={error}
+              unhandledError={error}
+              handledError={handledError}
               handleReload={handleReload}
-              isRateLimitError={rateLimitReached}
             />
           </div>
           <div className="w-full max-w-5xl mx-auto px-4 pb-4">

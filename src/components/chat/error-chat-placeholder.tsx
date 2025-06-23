@@ -3,30 +3,26 @@ import { useTranslations } from 'next-intl';
 import ReloadIcon from '../icons/reload';
 
 export function ErrorChatPlaceholder({
-  error,
+  unhandledError,
+  handledError,
   handleReload,
-  isRateLimitError,
 }: {
-  error?: Error;
-  isRateLimitError?: boolean;
+  unhandledError?: Error;
+  handledError?: Error;
   handleReload: () => void;
 }) {
   const t = useTranslations('common');
 
-  if (error === undefined) return undefined;
-
-  const getErrorMessage = () => {
-    if (isRateLimitError) {
-      return t('rate-limit-error');
-    }
-    return error.message || t('generic-error');
-  };
+  if (unhandledError === undefined && handledError === undefined) return undefined;
 
   const getErrorTitle = () => {
-    if (isRateLimitError) {
-      return t('rate-limit-title');
+    if (unhandledError === undefined && handledError === undefined) {
+      return undefined;
     }
-    return null;
+    if (handledError !== undefined) {
+      return handledError.name;
+    }
+    return t('generic-error');
   };
 
   const errorTitle = getErrorTitle();
@@ -36,7 +32,7 @@ export function ErrorChatPlaceholder({
       <div className="flex justify-between items-center px-2">
         <div className="text-left flex-1">
           {errorTitle && <div className="font-semibold mb-1">{errorTitle}</div>}
-          <div>{getErrorMessage()}</div>
+          <div>{handledError?.message || unhandledError?.message}</div>
         </div>
         <button
           onClick={() => handleReload()}

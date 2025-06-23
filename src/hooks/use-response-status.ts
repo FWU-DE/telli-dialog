@@ -3,21 +3,24 @@ import { useState, useCallback } from 'react';
 
 export function useRateLimitAware() {
   const t = useTranslations('common');
-  const [rateLimitReached, setRateLimitReached] = useState(false);
 
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<{ message: string; name?: string } | undefined>(undefined);
+  
   const handleResponse = useCallback((response: Response) => {
     if (response.status === 429) {
-      setError(new Error(t('rate-limit-error')));
+      setError({ message: t('rate-limit-title') });
+    } else if (response.status === 400) {
+      console.log('chat expired');
+      setError({ message: t('chat-expired')});
     } else if (response.status !== 200) {
-      setError(new Error(t('generic-error')));
+      setError({ message: t('generic-error') });
     } else {
-      setError(null);
+      setError(undefined);
     }
   }, []);
 
   const clearRateLimit = useCallback(() => {
-    setRateLimitReached(false);
+    setError(undefined);
   }, []);
 
   return {
