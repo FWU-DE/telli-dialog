@@ -1,5 +1,5 @@
 'use client';
-import { useChat } from '@ai-sdk/react';
+import { Message, useChat } from '@ai-sdk/react';
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { CharacterModel } from '@/db/schema';
@@ -9,9 +9,10 @@ import { InitialChatContentDisplay } from '@/components/chat/initial-content-dis
 import { ChatBox } from '@/components/chat/chat-box';
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
-import { ErrorChatPlaceholder } from '@/components/chat/error-message';
+import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { getAssistantIcon } from './chat';
 import useBreakpoints from '../hooks/use-breakpoints';
+import { useCheckStatusCode } from '@/hooks/use-response-status';
 
 const reductionBreakpoint = 'sm';
 
@@ -28,24 +29,22 @@ export default function CharacterSharedChat({
   const searchParams = new URLSearchParams({ id, inviteCode });
   const endpoint = `/api/character?${searchParams.toString()}`;
 
-  const {
-    messages,
-    setMessages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
-    reload,
-    stop,
-    error,
-  } = useChat({
-    id,
-    initialMessages: [],
-    api: endpoint,
-    experimental_throttle: 100,
-    maxSteps: 2,
-    body: { modelId: character.modelId },
-  });
+  // substitute the error object from the useChat hook, to dislay a user friendly error message in German
+  const { error, handleResponse, resetError } = useCheckStatusCode();
+  const initialMessages: Message[] = character.initialMessage
+    ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
+    : [];
+
+  const { messages, setMessages, input, handleInputChange, handleSubmit, isLoading, reload, stop } =
+    useChat({
+      id,
+      initialMessages,
+      api: endpoint,
+      experimental_throttle: 100,
+      maxSteps: 2,
+      body: { modelId: character.modelId },
+      onResponse: handleResponse,
+    });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
   const { isBelow } = useBreakpoints();
@@ -69,6 +68,13 @@ export default function CharacterSharedChat({
   function handleOpenNewChat() {
     setMessages([]);
   }
+
+  function handleReload() {
+    // Clear rate limit error before reloading
+    resetError();
+    reload();
+  }
+
   const assistantIcon = getAssistantIcon({
     imageName: character.name,
     imageSource,
@@ -125,7 +131,7 @@ export default function CharacterSharedChat({
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
             {innerContent}
-            <ErrorChatPlaceholder error={error} handleReload={reload} />
+            <ErrorChatPlaceholder error={error} handleReload={handleReload} />
           </div>
 
           <div className="w-full max-w-5xl mx-auto px-4 pb-4">

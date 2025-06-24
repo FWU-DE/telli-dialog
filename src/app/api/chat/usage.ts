@@ -1,8 +1,5 @@
 import { dbInsertConversationUsage } from '@/db/functions/token-usage';
-import {
-  dbGetAndUpdateLlmModelsByFederalStateId,
-  getAvailableLlmModels,
-} from '@/db/functions/llm-model';
+import { dbGetAndUpdateLlmModelsByFederalStateId, getAllLlmModels } from '@/db/functions/llm-model';
 import { getPriceInCentBySharedCharacterChat, getPriceInCentBySharedChat } from '@/app/school';
 import { CharacterModel, type LlmModel, type SharedSchoolConversationModel } from '@/db/schema';
 import { type UserAndContext } from '@/auth/types';
@@ -48,7 +45,7 @@ export async function sharedChatHasReachedIntelliPointLimit({
     return true;
   }
 
-  const models = await getAvailableLlmModels();
+  const models = await getAllLlmModels();
 
   if (sharedChat.startedAt === null || sharedChat.maxUsageTimeLimit === null) {
     return true;
@@ -89,7 +86,7 @@ export async function sharedCharacterChatHasReachedIntelliPointLimit({
     return true;
   }
 
-  const models = await getAvailableLlmModels();
+  const models = await getAllLlmModels();
 
   if (character.startedAt === null || character.maxUsageTimeLimit === null) {
     return true;

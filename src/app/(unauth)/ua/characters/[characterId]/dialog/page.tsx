@@ -47,6 +47,7 @@ export default async function Page(context: PageContext) {
         <ThemeProvider designConfiguration={designConfiguration}>
           <CharacterSharedChat
             {...character}
+            initialMessage={character.initialMessage ?? ''}
             inviteCode={searchParams.inviteCode}
             imageSource={maybeSignedImageUrl}
           />

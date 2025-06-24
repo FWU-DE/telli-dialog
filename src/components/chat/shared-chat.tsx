@@ -11,8 +11,9 @@ import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
 import { ChatBox } from '@/components/chat/chat-box';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
-import { ErrorChatPlaceholder } from '@/components/chat/error-message';
+import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { FloatingText } from './floating-text';
+import { useCheckStatusCode } from '@/hooks/use-response-status';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
@@ -29,24 +30,19 @@ export default function SharedChat({
 
   const [dialogStarted, setDialogStarted] = React.useState(false);
 
-  const {
-    messages,
-    setMessages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
-    reload,
-    stop,
-    error,
-  } = useChat({
-    id,
-    initialMessages: [],
-    api: endpoint,
-    experimental_throttle: 100,
-    maxSteps: 2,
-    body: { modelId: sharedSchoolChat.modelId },
-  });
+  // substitute the error object from the useChat hook, to dislay a user friendly error message in German
+  const { error, handleResponse, resetError } = useCheckStatusCode();
+
+  const { messages, setMessages, input, handleInputChange, handleSubmit, isLoading, reload, stop } =
+    useChat({
+      id,
+      initialMessages: [],
+      api: endpoint,
+      experimental_throttle: 100,
+      maxSteps: 2,
+      body: { modelId: sharedSchoolChat.modelId },
+      onResponse: handleResponse,
+    });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -69,6 +65,12 @@ export default function SharedChat({
 
   function handleOpenNewChat() {
     setMessages([]);
+  }
+
+  function handleReload() {
+    // Clear rate limit error before reloading
+    resetError();
+    reload();
   }
 
   const innerContent =
@@ -100,7 +102,6 @@ export default function SharedChat({
         </div>
       </>
     );
-
   return (
     <>
       {!chatActive && (
@@ -141,7 +142,7 @@ export default function SharedChat({
                 />
               )}
             {innerContent}
-            <ErrorChatPlaceholder error={error} handleReload={reload} />
+            <ErrorChatPlaceholder error={error} handleReload={handleReload} />
           </div>
           <div className="w-full max-w-5xl mx-auto px-4 pb-4">
             {dialogStarted && (

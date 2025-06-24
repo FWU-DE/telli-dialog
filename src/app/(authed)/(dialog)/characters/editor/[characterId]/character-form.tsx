@@ -66,6 +66,7 @@ const characterFormValuesSchema = z.object({
 
   specifications: z.string().nullable(),
   restrictions: z.string().nullable(),
+  initialMessage: z.string().nullable(),
 });
 type CharacterFormValues = z.infer<typeof characterFormValuesSchema>;
 
@@ -394,6 +395,17 @@ export default function CharacterForm({
           {...register('learningContext')}
           readOnly={readOnly}
           placeholder={t('character-learning-context-placeholder')}
+          onBlur={handleAutoSave}
+        />
+        <TextInput
+          id="initialMessage"
+          label={t('character-initial-message-label')}
+          inputType="textarea"
+          getValue={() => getValues('initialMessage') ?? ''}
+          {...getZodFieldMetadata('initialMessage')}
+          {...register('initialMessage')}
+          readOnly={readOnly}
+          placeholder={t('character-initial-message-placeholder')}
           onBlur={handleAutoSave}
         />
         <TextInput

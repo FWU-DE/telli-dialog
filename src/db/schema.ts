@@ -160,6 +160,7 @@ export const characterTable = pgTable('character', {
   specifications: text('specifications'),
   restrictions: text('restrictions'),
   pictureId: text('picture_id'),
+  initialMessage: text('initial_message'),
   accessLevel: characterAccessLevelEnum('access_level').notNull().default('private'),
   schoolId: text('school_id').references(() => schoolTable.id),
   // for sharing the character. These Columns are unused, instead a MappingTable is being used

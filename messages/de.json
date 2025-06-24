@@ -28,7 +28,11 @@
     "copy": "Kopieren",
     "copy-clipboard": "In die Zwischenablage kopieren",
     "regenerate-message": "Antwort erneut generieren",
-    "image-load-failed": "Bild konnte nicht geladen werden"
+    "image-load-failed": "Bild konnte nicht geladen werden",
+    "rate-limit-title": "telli-Points aufgebraucht",
+    "rate-limit-error": "Das bereitgestellte Budget an telli-Points wurde aufgebraucht.",
+    "generic-error": "Ein Fehler ist aufgetreten",
+    "retry-button": "Erneut versuchen"
   },
   "usage-disclaimer": {
     "initial-title": "Willkommen bei telli!",
@@ -195,6 +199,8 @@
       "grade-placeholder": "7.Klasse",
       "subject": "Fach",
       "subject-placeholder": "Geschichte",
+      "character-initial-message-label": "Mit welcher Einstiegsfrage soll der Dialogavatar die Lernenden begrüßen?",
+      "character-initial-message-placeholder": "Der Dialogavatar begrüßt die Lernenden freundlich, stellt sich vor und stellt eine Frage, wie folgt: “Bonjour und herzlich willkommen! Ich bin Ludwig XIV. Viele sprechen über meine Worte: 'Der Staat bin ich'. Weißt du, was wirklich dahintersteckt?”",
       "copy-page": {
         "title": "Dialogpartner in eigenen Bereich kopieren",
         "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Dialogpartner in deinen privaten Bereich, um ihn anzupassen.",

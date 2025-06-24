@@ -20,10 +20,11 @@ import { refetchFileMapping } from '@/app/(authed)/(dialog)/actions';
 import { InitialChatContentDisplay } from './initial-content-display';
 import { HELP_MODE_GPT_ID } from '@/db/const';
 import { ChatInputBox } from './chat-input-box';
-import { ErrorChatPlaceholder } from './error-message';
+import { ErrorChatPlaceholder } from './error-chat-placeholder';
 import Image from 'next/image';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { cn } from '@/utils/tailwind';
+import { useCheckStatusCode } from '@/hooks/use-response-status';
 type ChatProps = {
   id: string;
   initialMessages: Message[];
@@ -66,52 +67,47 @@ export default function Chat({
   const [countOfFilesInChat, setCountOfFilesInChat] = React.useState(0);
   const queryClient = useQueryClient();
 
+  // substitute the error object from the useChat hook, to dislay a user friendly error message in German
+  const { error, handleResponse, resetError } = useCheckStatusCode();
+
   function refetchConversations() {
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
   }
 
-  const {
-    messages,
-    input,
-    setInput,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
-    reload,
-    stop,
-    error,
-  } = useChat({
-    id,
-    initialMessages,
-    api: '/api/chat',
-    experimental_throttle: 100,
-    maxSteps: 2,
-    body: {
+  const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, reload, stop } =
+    useChat({
       id,
-      modelId: selectedModel?.id,
-      characterId: character?.id,
-      customGptId: customGpt?.id,
-      fileIds: Array.from(files).map(([, file]) => file.fileId),
-    },
-    generateId: generateUUID,
-    sendExtraMessageFields: true,
-    onResponse: () => {
-      // trigger refech of the fileMapping from the DB
-      setCountOfFilesInChat(countOfFilesInChat + 1);
-      if (messages.length > 1) {
-        return;
-      }
+      initialMessages,
+      api: '/api/chat',
+      experimental_throttle: 100,
+      maxSteps: 2,
+      body: {
+        id,
+        modelId: selectedModel?.id,
+        characterId: character?.id,
+        customGptId: customGpt?.id,
+        fileIds: Array.from(files).map(([, file]) => file.fileId),
+      },
+      generateId: generateUUID,
+      sendExtraMessageFields: true,
+      onResponse: (response) => {
+        handleResponse(response);
+        // trigger refech of the fileMapping from the DB
+        setCountOfFilesInChat(countOfFilesInChat + 1);
+        if (messages.length > 1) {
+          return;
+        }
 
-      refetchConversations();
-      router.refresh();
-    },
-    onFinish: () => {
-      if (messages.length > 1) {
-        return;
-      }
-      refetchConversations();
-    },
-  });
+        refetchConversations();
+        router.refresh();
+      },
+      onFinish: () => {
+        if (messages.length > 1) {
+          return;
+        }
+        refetchConversations();
+      },
+    });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -151,7 +147,10 @@ export default function Chat({
       console.error(error);
     }
   }
-
+  function handleReload() {
+    resetError();
+    reload();
+  }
   const formatedSubHeading = tHelpMode('chat-subheading', { FAQ_LINK: tHelpMode('faq-link') });
 
   function handleDeattachFile(localFileId: string) {
@@ -240,7 +239,7 @@ export default function Chat({
       <div className="flex flex-col flex-grow justify-between w-full overflow-hidden">
         <div ref={scrollRef} className="flex-grow overflow-y-auto">
           {messages.length === 0 ? placeholderElement : messagesContent}
-          <ErrorChatPlaceholder error={error} handleReload={reload} />
+          <ErrorChatPlaceholder error={error} handleReload={handleReload} />
         </div>
         <div className="w-full max-w-3xl pb-4 px-4 mx-auto">
           <div className="relative flex flex-col">
