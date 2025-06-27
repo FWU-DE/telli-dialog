@@ -3,7 +3,7 @@ import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 import path from 'path';
 
-const baseNextConfig = {
+const baseNextConfig: NextConfig = {
   typescript: {
     // should be checked in the pipeline anyway and takes a lot of time during build
     ignoreBuildErrors: true,
@@ -38,6 +38,7 @@ const baseNextConfig = {
   },
   productionBrowserSourceMaps: process.env.NODE_ENV !== 'test',
   allowedDevOrigins: ['titanom.ngrok.app'],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   webpack: (config, { isServer }) => {
     // Ensure proper module resolution for path aliases
     config.resolve.alias = {
