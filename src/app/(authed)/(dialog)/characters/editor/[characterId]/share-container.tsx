@@ -2,18 +2,14 @@ import { cn } from '@/utils/tailwind';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { labelClassName } from '@/utils/tailwind/input';
 import {
-  intelliPointsPercentageValueSchema,
   SharedConversationShareFormValues,
-  usageTimeValueSchema,
+  intelliPointsPercentageValues,
   sharedConversationFormValuesSchema,
+  usageTimeValuesInMinutes,
 } from '../../../shared-chats/[sharedSchoolChatId]/schema';
 import { CharacterModel } from '@/db/schema';
 import { handleInitiateCharacterShareAction, handleStopCharacaterShareAction } from './actions';
-import {
-  calculateTimeLeftBySharedChat,
-  getIntelliPointsValueOrDefault,
-  getMaxUsageTimeValueOrDefault,
-} from '../../../shared-chats/[sharedSchoolChatId]/utils';
+import { calculateTimeLeftBySharedChat } from '../../../shared-chats/[sharedSchoolChatId]/utils';
 import { useToast } from '@/components/common/toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -42,11 +38,8 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
     useForm<SharedConversationShareFormValues>({
       resolver: zodResolver(sharedConversationFormValuesSchema),
       defaultValues: {
-        intelliPointsPercentageLimit: getIntelliPointsValueOrDefault(
-          character.intelligencePointsLimit,
-          '10',
-        ),
-        usageTimeLimit: getMaxUsageTimeValueOrDefault(character.maxUsageTimeLimit, '45'),
+        intelliPointsPercentageLimit: character.intelligencePointsLimit ?? 10,
+        usageTimeLimit: character.maxUsageTimeLimit ?? 45,
       },
       disabled: sharedChatActive,
     });
@@ -100,7 +93,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
               background: !sharedChatActive ? selectSVGBackground : undefined,
             }}
           >
-            {intelliPointsPercentageValueSchema.options.map((value) => (
+            {intelliPointsPercentageValues.map((value) => (
               <option key={value} value={value}>
                 {value} %
               </option>
@@ -124,11 +117,10 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
               background: !sharedChatActive ? selectSVGBackground : undefined,
             }}
           >
-            {usageTimeValueSchema.options.map((value) => {
-              const minutes = parseInt(value, 10);
+            {usageTimeValuesInMinutes.map((value) => {
               let displayLabel = `${value} Minuten`;
-              if (minutes >= 1440) {
-                const days = minutes / 1440;
+              if (value >= 1440) {
+                const days = value / 1440;
                 displayLabel = days === 1 ? '1 Tag' : `${days} Tage`;
               }
 

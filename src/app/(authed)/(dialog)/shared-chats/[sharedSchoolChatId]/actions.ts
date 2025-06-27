@@ -10,7 +10,6 @@ import {
 } from '@/db/schema';
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
-import { parseNumberOrThrow } from '@/utils/number';
 import { SharedConversationShareFormValues } from './schema';
 import { generateInviteCode } from './utils';
 import { dbGetRelatedSharedChatFiles } from '@/db/functions/files';
@@ -80,8 +79,8 @@ export async function updateSharedSchoolChatPictureAction({
 
 export async function handleInitiateSharedChatShareAction({
   id,
-  intelliPointsPercentageLimit: _intelliPointsPercentageLimit,
-  usageTimeLimit: _usageTimeLimit,
+  intelliPointsPercentageLimit,
+  usageTimeLimit,
 }: { id: string } & SharedConversationShareFormValues) {
   const user = await getUser();
 
@@ -93,9 +92,6 @@ export async function handleInitiateSharedChatShareAction({
     throw Error('Only a teacher can share a chat');
   }
 
-  const intelliPointsPercentageLimit = parseNumberOrThrow(_intelliPointsPercentageLimit);
-  const usageTimeLimitInSeconds = parseNumberOrThrow(_usageTimeLimit);
-
   const randomString = generateInviteCode();
 
   const updatedSharedChat = (
@@ -103,7 +99,7 @@ export async function handleInitiateSharedChatShareAction({
       .update(sharedSchoolConversationTable)
       .set({
         intelligencePointsLimit: intelliPointsPercentageLimit,
-        maxUsageTimeLimit: usageTimeLimitInSeconds,
+        maxUsageTimeLimit: usageTimeLimit,
         inviteCode: randomString.toUpperCase(),
         startedAt: new Date(),
       })
@@ -139,6 +135,8 @@ export async function handleStopSharedChatShareAction({ id }: { id: string }) {
       .update(sharedSchoolConversationTable)
       .set({
         startedAt: null,
+        intelligencePointsLimit: null,
+        maxUsageTimeLimit: null,
       })
       .where(
         and(
