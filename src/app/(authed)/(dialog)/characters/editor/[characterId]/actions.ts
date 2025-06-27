@@ -12,7 +12,6 @@ import { deleteFileFromS3 } from '@/s3';
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
 import { SharedConversationShareFormValues } from '../../../shared-chats/[sharedSchoolChatId]/schema';
-import { parseNumberOrThrow } from '@/utils/number';
 import { generateInviteCode } from '../../../shared-chats/[sharedSchoolChatId]/utils';
 import { removeNullValues } from '@/utils/generic/object-operations';
 
@@ -140,8 +139,8 @@ export async function handleInitiateCharacterShareAction({
         eq(sharedCharacterConversation.characterId, id),
       ),
     );
-  const intelligencePointsLimit = parseNumberOrThrow(_intelliPointsPercentageLimit);
-  const maxUsageTimeLimit = parseNumberOrThrow(_usageTimeLimit);
+  const intelligencePointsLimit = _intelliPointsPercentageLimit;
+  const maxUsageTimeLimit = _usageTimeLimit;
   const inviteCode = generateInviteCode();
   const startedAt = new Date();
   const updatedSharedChat = (
@@ -164,7 +163,7 @@ export async function handleInitiateCharacterShareAction({
   )[0];
 
   if (updatedSharedChat === undefined) {
-    throw Error('Could not character');
+    throw Error('Could not shared character chat');
   }
 
   return updatedSharedChat;
