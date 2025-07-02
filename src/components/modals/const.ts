@@ -20,12 +20,12 @@ export const TERM_AND_CONDITIONS = `telli ist ein Angebot des Instituts für Fil
 
 9. Diese Nutzungsbedingungen können jederzeit geändert werden. Nutzende werden durch eine Mitteilung auf dem Bildungsserver Berlin Brandenburg über Änderungen informiert. Die Nutzungsbedingung sind jederzeit auf den Seiten des Bildungsservers Berlin Brandenburg einsehbar.`;
 
-// TODO add link when available
-// "Der Kurs ist abrufbar unter [LINK] und kann online absolviert werden.
 export const EDUCATION_HINT_BB = `Liebe Kollegin, Lieber Kollege,
-  wir freuen uns, dass Sie telli nutzen möchten. Als KI-Chatbot unterliegt telli der EU-Verordnung über den Einsatz von Künstlicher Intelligenz (KI-VO). Die KI-VO verpflichtet in Art. 4 alle Anbieter und Betreiber von KI-Systemen dafür Sorge zu tragen, dass Personen, die ihre Systeme nutzen über die Notwendigen KI-Kompetenzen verfügen.'
+  wir freuen uns, dass Sie telli nutzen möchten. Als KI-Chatbot unterliegt telli der EU-Verordnung über den Einsatz von Künstlicher Intelligenz (KI-VO). Die KI-VO verpflichtet in Art. 4 alle Anbieter und Betreiber von KI-Systemen dafür Sorge zu tragen, dass Personen, die ihre Systeme nutzen über die Notwendigen KI-Kompetenzen verfügen.
   
   Für telli ist in Brandenburg vor der initialen Nutzung darum der Besuch eines Selbstlernkurses des LIBRA zum Thema KI verpflichtend.
+
+  Der Kurs ist abrufbar unter [https://ecampus.meinlibra.de/course/view.php?id=94](https://ecampus.meinlibra.de/course/view.php?id=94) und kann online absolviert werden.
 
   Darüber hinaus bietet das LIBRA auf der Plattform [JWD](https://bildungsserver.berlin-brandenburg.de/jwd/startseite) zahlreiche Informationen, Hinweise und Tipps zum Thema KI und Schule und für den Einsatz von telli für Lehrkräfte.
   

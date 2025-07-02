@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../utils/login';
+import { login } from '../../utils/login';
 
 test('teacher can provide link and it is displayed in the chat', async ({ page }) => {
   await login(page, 'teacher');
