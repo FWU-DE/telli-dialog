@@ -3,17 +3,15 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 import * as Sentry from '@sentry/nextjs';
 
-const environment = process.env.SENTRY_ENVIRONMENT;
-const dsn = process.env.SENTRY_DSN;
-
 Sentry.init({
-  dsn,
+  debug: false,
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.SENTRY_ENVIRONMENT,
   integrations: [
     Sentry.captureConsoleIntegration({ levels: ['warn', 'error'] }),
     Sentry.postgresIntegration(),
   ],
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
   profilesSampleRate: 1,
-  environment,
+  tracesSampleRate: 1,
 });
