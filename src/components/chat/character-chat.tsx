@@ -1,5 +1,5 @@
 'use client';
-import { Message, useChat } from '@ai-sdk/react';
+import { useChat } from '@ai-sdk/react';
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { CharacterModel } from '@/db/schema';
@@ -13,6 +13,7 @@ import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { getAssistantIcon } from './chat';
 import useBreakpoints from '../hooks/use-breakpoints';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
+import { Message } from 'ai';
 
 const reductionBreakpoint = 'sm';
 

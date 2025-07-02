@@ -1,6 +1,5 @@
 import { breakpoints } from '../hooks/use-breakpoints';
 
-import { Message } from '@ai-sdk/react';
 import useBreakpoints from '../hooks/use-breakpoints';
 import { useTranslations } from 'next-intl';
 import DestructiveActionButton from '../common/destructive-action-button';
@@ -11,6 +10,7 @@ import DownloadSharedConversationButton from '@/app/(unauth)/ua/dowload-shared-c
 import Image from 'next/image';
 import { ThreeDotsProfileMenu } from '../navigation/profile-menu';
 import { UnauthenticatedProfileMenu } from '../navigation/profile-menu';
+import { Message } from 'ai';
 
 export function SharedChatHeader({
   chatActive,

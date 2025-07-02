@@ -1,7 +1,6 @@
 import { FileModel } from '@/db/schema';
 import DisplayUploadedFile from './display-uploaded-file';
 import DisplayUploadedImage from './display-uploaded-image';
-import type { UIMessage } from '@ai-sdk/ui-utils';
 import TelliClipboardButton from '../common/clipboard-button';
 import ReloadIcon from '../icons/reload';
 import MarkdownDisplay from './markdown-display';
@@ -13,6 +12,7 @@ import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { iconClassName } from '@/utils/tailwind/icon';
 import useBreakpoints from '../hooks/use-breakpoints';
 import { isImageFile } from '@/utils/files/generic';
+import { UIMessage } from 'ai';
 
 export function ChatBox({
   children,
