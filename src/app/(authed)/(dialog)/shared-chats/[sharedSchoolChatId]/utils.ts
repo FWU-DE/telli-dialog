@@ -1,10 +1,4 @@
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
-import {
-  IntelliPointsPercentageValue,
-  intelliPointsPercentageValueSchema,
-  UsageTimeValue,
-  usageTimeValueSchema,
-} from './schema';
 import { customAlphabet } from 'nanoid';
 import { SharedSchoolConversationModel } from '@/db/schema';
 
@@ -32,30 +26,6 @@ export function calculateTimeLeftBySharedChat({
     maxUsageTimeLimit * 60 - Math.floor((nowUtcDate.getTime() - startedAtDate.getTime()) / 1000);
 
   return sharedChatTimeLeft;
-}
-
-export function getIntelliPointsValueOrDefault(
-  value: unknown,
-  defaultValue: IntelliPointsPercentageValue,
-): IntelliPointsPercentageValue {
-  try {
-    return intelliPointsPercentageValueSchema.parse(value);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
-    return defaultValue;
-  }
-}
-
-export function getMaxUsageTimeValueOrDefault(
-  value: unknown,
-  defaultValue: UsageTimeValue,
-): UsageTimeValue {
-  try {
-    return usageTimeValueSchema.parse(value);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
-    return defaultValue;
-  }
 }
 
 export function generateInviteCode(length = 8) {
