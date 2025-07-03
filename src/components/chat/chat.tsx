@@ -89,17 +89,6 @@ export default function Chat({
       api: '/api/chat',
       experimental_throttle: 100,
       maxSteps: 2,
-      experimental_prepareRequestBody(options) {
-        return {
-          ...options.requestBody, // in general this is empty
-          id,
-          messages: options.messages, // we have to take over the messages from options
-          modelId: selectedModel?.id,
-          characterId: character?.id,
-          customGptId: customGpt?.id,
-          fileIds: Array.from(files).map(([, file]) => file.fileId),
-        };
-      },
       generateId: generateUUID,
       sendExtraMessageFields: true, // content, role, name, data and annotations will be send to the server
       onResponse: (response) => {
@@ -161,7 +150,15 @@ export default function Chat({
 
     try {
       setDoesLastUserMessageContainLinkOrFile(doesUserInputContainLinkOrFile());
-      handleSubmit(e, {});
+      handleSubmit(e, {
+        allowEmptySubmit: false,
+        body: {
+          modelId: selectedModel?.id,
+          characterId: character?.id,
+          customGptId: customGpt?.id,
+          fileIds: Array.from(files).map(([, file]) => file.fileId),
+        },
+      });
       navigateWithoutRefresh(conversationPath);
       setInitialFiles(
         Array.from(files).map(([, file]) => {
