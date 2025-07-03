@@ -28,6 +28,7 @@ import { useCheckStatusCode } from '@/hooks/use-response-status';
 import LoadingAnimation from './loading-animation';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { Message } from 'ai';
+import { logDebug, logError, logWarning } from '@/utils/logging/logging';
 
 type ChatProps = {
   id: string;
@@ -88,30 +89,43 @@ export default function Chat({
       api: '/api/chat',
       experimental_throttle: 100,
       maxSteps: 2,
-      body: {
-        id,
-        modelId: selectedModel?.id,
-        characterId: character?.id,
-        customGptId: customGpt?.id,
-        fileIds: Array.from(files).map(([, file]) => file.fileId),
+      experimental_prepareRequestBody(options) {
+        return {
+          ...options.requestBody, // in general this is empty
+          id,
+          messages: options.messages, // we have to take over the messages from options
+          modelId: selectedModel?.id,
+          characterId: character?.id,
+          customGptId: customGpt?.id,
+          fileIds: Array.from(files).map(([, file]) => file.fileId),
+        };
       },
       generateId: generateUUID,
-      sendExtraMessageFields: true,
+      sendExtraMessageFields: true, // content, role, name, data and annotations will be send to the server
       onResponse: (response) => {
         handleResponse(response);
-        // trigger refech of the fileMapping from the DB
-        setCountOfFilesInChat(countOfFilesInChat + 1);
+        // trigger refetch of the fileMapping from the DB
+        setCountOfFilesInChat(countOfFilesInChat + 1); // clean code: workaround to trigger reloading of fileMapping from server
         if (messages.length > 1) {
           return;
         }
 
+        logWarning('Assert: onResponse was called with zero messages.');
         refetchConversations();
         router.refresh();
       },
-      onFinish: () => {
+      onFinish: (message: Message, options: unknown) => {
+        logDebug(
+          `onFinish called with message ${JSON.stringify(message)} and options ${JSON.stringify(options)}`,
+        );
         if (messages.length > 1) {
           return;
         }
+        logWarning('Assert: onFinish was called with zero messages.');
+        refetchConversations();
+      },
+      onError: (error: Error) => {
+        logError('Error in useChat:', error);
         refetchConversations();
       },
     });
@@ -127,7 +141,8 @@ export default function Chat({
 
   useEffect(() => {
     const fetchData = async () => {
-      setFileMapping(await refetchFileMapping(id));
+      const fileMapping = await refetchFileMapping(id);
+      setFileMapping(fileMapping);
     };
     fetchData();
   }, [countOfFilesInChat, id]);

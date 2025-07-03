@@ -15,3 +15,15 @@ export function logDebug(message: string) {
 export function logInfo(message: string) {
   logMessage(message, 'info');
 }
+
+export function logWarning(message: string) {
+  logMessage(message, 'warning');
+}
+
+export function logError(message: string, error: Error) {
+  Sentry.captureException({ exception: error });
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log(message);
+  }
+}

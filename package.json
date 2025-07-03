@@ -77,7 +77,7 @@
     "drizzle-orm": "0.39.3",
     "drizzle-zod": "0.7.1",
     "he": "1.2.0",
-    "import-in-the-middle": "1.13.0",
+    "import-in-the-middle": "1.14.2",
     "ioredis": "5.6.0",
     "jsdom": "24.1.0",
     "k6": "0.0.0",
