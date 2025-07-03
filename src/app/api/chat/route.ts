@@ -27,6 +27,7 @@ import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 import { extractImagesAndUrl } from '../file-operations/prepocess-image';
 import { formatMessagesWithImages } from './utils';
+import { logDebug } from '@/utils/logging/logging';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -56,6 +57,9 @@ export async function POST(request: NextRequest) {
     customGptId: string;
     fileIds?: string[];
   } = await request.json();
+  logDebug(
+    `POST chat message with modelId ${modelId}, ${messages.length} messages and ${currentFileIds?.length ?? 0} files`,
+  );
 
   const [error, modelAndProvider] = await getModelAndProviderWithResult({
     modelId,
