@@ -6,10 +6,9 @@ import { condenseChatHistory } from '../chat/utils';
 import { getKeywordsFromQuery } from '../chat/utils';
 import { embedBatchAndSave, embedText } from './embedding';
 import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
-import { Message } from '@ai-sdk/react';
 import { UserAndContext } from '@/auth/types';
 import { processFiles } from './process-file';
-import { LanguageModelV1 } from 'ai';
+import { LanguageModelV1, Message } from 'ai';
 
 type SearchOptions = {
   keywords: string[];

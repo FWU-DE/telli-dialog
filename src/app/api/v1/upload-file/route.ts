@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { extractFile } from '../../file-operations/extract-file';
 import { chunkText } from '../../file-operations/process-chunks';
 import { embedBatchAndSave } from '../../file-operations/embedding';
+import { logDebug } from '@/utils/logging/logging';
 
 export async function POST(req: NextRequest) {
   const user = await getUser();
@@ -65,6 +66,7 @@ export async function POST(req: NextRequest) {
     type: fileExtension,
     metadata: extractResult.metadata,
   });
+  logDebug(`File ${file.name} with type ${fileExtension} stored in db.`);
 
   await embedBatchAndSave({
     values: enrichedChunks,
@@ -80,6 +82,7 @@ export async function POST(req: NextRequest) {
     body: bufferToUpload,
     contentType: getFileExtension(file.name),
   });
+  logDebug(`File ${file.name} with id ${fileId} uploaded to s3 bucket.`);
 
   return NextResponse.json({
     body: JSON.stringify({ file_id: fileId }),

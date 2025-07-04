@@ -1,7 +1,7 @@
 'use client';
 
-import { useChat, type Message } from '@ai-sdk/react';
-import React, { useEffect } from 'react';
+import { useChat } from '@ai-sdk/react';
+import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
 import { type CustomGptModel, type CharacterModel, FileModel } from '@/db/schema';
@@ -25,6 +25,11 @@ import Image from 'next/image';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { cn } from '@/utils/tailwind';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
+import LoadingAnimation from './loading-animation';
+import { parseHyperlinks } from '@/utils/web-search/parsing';
+import { Message } from 'ai';
+import { logDebug, logError, logWarning } from '@/utils/logging/logging';
+
 type ChatProps = {
   id: string;
   initialMessages: Message[];
@@ -59,12 +64,15 @@ export default function Chat({
     characterId: character?.id,
     conversationId: id,
   });
-  const [initialFiles, setInitialFiles] = React.useState<FileModel[]>();
-  const [fileMapping, setFileMapping] = React.useState<Map<string, FileModel[]>>(
+  const [initialFiles, setInitialFiles] = useState<FileModel[]>();
+  const [fileMapping, setFileMapping] = useState<Map<string, FileModel[]>>(
     initialFileMapping ?? new Map(),
   );
-  const [files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
-  const [countOfFilesInChat, setCountOfFilesInChat] = React.useState(0);
+  const [files, setFiles] = useState<Map<string, LocalFileState>>(new Map());
+  const [countOfFilesInChat, setCountOfFilesInChat] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [doesLastUserMessageContainLinkOrFile, setDoesLastUserMessageContainLinkOrFile] =
+    useState(false);
   const queryClient = useQueryClient();
 
   // substitute the error object from the useChat hook, to dislay a user friendly error message in German
@@ -74,61 +82,83 @@ export default function Chat({
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
   }
 
-  const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, reload, stop } =
+  const { messages, input, setInput, handleInputChange, handleSubmit, reload, stop, status } =
     useChat({
       id,
       initialMessages,
       api: '/api/chat',
       experimental_throttle: 100,
       maxSteps: 2,
-      body: {
-        id,
-        modelId: selectedModel?.id,
-        characterId: character?.id,
-        customGptId: customGpt?.id,
-        fileIds: Array.from(files).map(([, file]) => file.fileId),
-      },
       generateId: generateUUID,
-      sendExtraMessageFields: true,
+      sendExtraMessageFields: true, // content, role, name, data and annotations will be send to the server
       onResponse: (response) => {
         handleResponse(response);
-        // trigger refech of the fileMapping from the DB
-        setCountOfFilesInChat(countOfFilesInChat + 1);
+        // trigger refetch of the fileMapping from the DB
+        setCountOfFilesInChat(countOfFilesInChat + 1); // clean code: workaround to trigger reloading of fileMapping from server
         if (messages.length > 1) {
           return;
         }
 
+        logWarning('Assert: onResponse was called with zero messages.');
         refetchConversations();
         router.refresh();
       },
-      onFinish: () => {
+      onFinish: (message: Message, options: unknown) => {
+        logDebug(
+          `onFinish called with message ${JSON.stringify(message)} and options ${JSON.stringify(options)}`,
+        );
         if (messages.length > 1) {
           return;
         }
+        logWarning('Assert: onFinish was called with zero messages.');
+        refetchConversations();
+      },
+      onError: (error: Error) => {
+        logError('Error in useChat:', error);
         refetchConversations();
       },
     });
 
-  const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  // set loading state based on status of useChat hook
+  useEffect(() => {
+    if (status === 'submitted') {
+      setIsLoading(true);
+    } else {
+      setIsLoading(false);
+    }
+  }, [status]);
 
   useEffect(() => {
     const fetchData = async () => {
-      setFileMapping(await refetchFileMapping(id));
+      const fileMapping = await refetchFileMapping(id);
+      setFileMapping(fileMapping);
     };
     fetchData();
   }, [countOfFilesInChat, id]);
 
-  React.useEffect(() => {
+  // scroll position handling
+  // scroll down to the end of the chat when new messages are added or when loading state changes
+  const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     }
-  }, [messages]);
+  }, [messages, isLoading]);
 
   async function customHandleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     try {
-      handleSubmit(e, {});
+      setDoesLastUserMessageContainLinkOrFile(doesUserInputContainLinkOrFile());
+      handleSubmit(e, {
+        allowEmptySubmit: false,
+        body: {
+          modelId: selectedModel?.id,
+          characterId: character?.id,
+          customGptId: customGpt?.id,
+          fileIds: Array.from(files).map(([, file]) => file.fileId),
+        },
+      });
       navigateWithoutRefresh(conversationPath);
       setInitialFiles(
         Array.from(files).map(([, file]) => {
@@ -147,10 +177,12 @@ export default function Chat({
       console.error(error);
     }
   }
+
   function handleReload() {
     resetError();
     reload();
   }
+
   const formatedSubHeading = tHelpMode('chat-subheading', { FAQ_LINK: tHelpMode('faq-link') });
 
   function handleDeattachFile(localFileId: string) {
@@ -162,6 +194,12 @@ export default function Chat({
       }
       return newMap;
     });
+  }
+
+  // returns true if user input contains files or web links
+  function doesUserInputContainLinkOrFile(): boolean {
+    const links = parseHyperlinks(input);
+    return files.size > 0 || (!!links && links.length > 0);
   }
 
   let placeholderElement: React.JSX.Element;
@@ -231,6 +269,10 @@ export default function Chat({
           </ChatBox>
         );
       })}
+
+      {isLoading && (
+        <LoadingAnimation isExternalResourceUsed={doesLastUserMessageContainLinkOrFile} />
+      )}
     </div>
   );
 
