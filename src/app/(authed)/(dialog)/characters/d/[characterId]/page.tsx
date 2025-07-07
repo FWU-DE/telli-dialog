@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
 import Logo from '@/components/common/logo';
+import { Message } from 'ai';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +35,10 @@ export default async function Page(context: PageContext) {
     redirect('/');
   }
 
+  const initialMessages: Message[] = character.initialMessage
+    ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
+    : [];
+
   const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: character.pictureId });
   const logoElement = <Logo federalStateId={user.federalState.id} />;
   return (
@@ -49,7 +54,7 @@ export default async function Page(context: PageContext) {
       <Chat
         key={id}
         id={id}
-        initialMessages={[]}
+        initialMessages={initialMessages}
         character={character}
         imageSource={maybeSignedImageUrl}
         enableFileUpload={false}
