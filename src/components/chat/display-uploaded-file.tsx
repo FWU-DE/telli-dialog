@@ -30,7 +30,6 @@ export default function DisplayUploadedFile({
 
   const { Icon: FileIcon, fillColor: backgroundColor } = getFileIconByFileExtension(file_extension);
 
-  if (isImage && file) {
     const {
       data: imageUrl,
       isLoading,
@@ -47,7 +46,7 @@ export default function DisplayUploadedFile({
       staleTime: 5 * 60 * 1000, // 5 minutes - signed URLs are typically valid for longer
       gcTime: 10 * 60 * 1000, // 10 minutes garbage collection time
     });
-
+  if (isImage && file) {
     return (
       <div className="flex items-center justify-center text-sm relative group">
         <div
