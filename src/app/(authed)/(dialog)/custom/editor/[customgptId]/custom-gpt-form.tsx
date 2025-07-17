@@ -21,7 +21,10 @@ import DestructiveActionButton from '@/components/common/destructive-action-butt
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
 import Checkbox from '@/components/common/checkbox';
-import { TEXT_INPUT_FIELDS_LENGTH_LIMIT, TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS } from '@/configuration-text-inputs/const';
+import {
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
+} from '@/configuration-text-inputs/const';
 import TrashIcon from '@/components/icons/trash';
 import PlusIcon from '@/components/icons/plus';
 import { TextInput } from '@/components/common/text-input';
