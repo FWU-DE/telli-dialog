@@ -130,6 +130,7 @@ export function ChatInputBox({
                 fileName={file.file.name}
                 key={localId}
                 status={file.status}
+                file={file}
                 onDeattachFile={() => handleDeattachFile(localId)}
               />
             ))}
