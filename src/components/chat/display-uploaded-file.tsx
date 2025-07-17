@@ -35,8 +35,13 @@ export default function DisplayUploadedFile({
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['signed-url', file.fileId, file.file.name, file.file.type],
+    queryKey: file
+      ? ['signed-url', file.fileId, file.file.name, file.file.type]
+      : ['signed-url', null, null, null],
     queryFn: async () => {
+      if (!file) {
+        throw new Error('File is undefined');
+      }
       const signedUrl = await getSignedUrlFromS3Get({
         key: `message_attachments/${file.fileId}`,
       });
