@@ -79,7 +79,7 @@ export function ChatBox({
         {nonImageFiles.length > 0 && (
           <div className="flex flex-row gap-2 overflow-auto">
             {nonImageFiles.map((file) => (
-              <DisplayUploadedFile fileName={file.name} status="processed" key={file.id} />
+              <DisplayUploadedFile fileName={file.name} status="processed" key={file.id} file={file} />
             ))}
           </div>
         )}
