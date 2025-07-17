@@ -30,22 +30,22 @@ export default function DisplayUploadedFile({
 
   const { Icon: FileIcon, fillColor: backgroundColor } = getFileIconByFileExtension(file_extension);
 
-    const {
-      data: imageUrl,
-      isLoading,
-      error,
-    } = useQuery({
-      queryKey: ['signed-url', file.fileId, file.file.name, file.file.type],
-      queryFn: async () => {
-        const signedUrl = await getSignedUrlFromS3Get({
-          key: `message_attachments/${file.fileId}`,
-        });
-        return signedUrl;
-      },
-      enabled: status === 'processed', // Only fetch when status is processed
-      staleTime: 5 * 60 * 1000, // 5 minutes - signed URLs are typically valid for longer
-      gcTime: 10 * 60 * 1000, // 10 minutes garbage collection time
-    });
+  const {
+    data: imageUrl,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['signed-url', file.fileId, file.file.name, file.file.type],
+    queryFn: async () => {
+      const signedUrl = await getSignedUrlFromS3Get({
+        key: `message_attachments/${file.fileId}`,
+      });
+      return signedUrl;
+    },
+    enabled: status === 'processed', // Only fetch when status is processed
+    staleTime: 5 * 60 * 1000, // 5 minutes - signed URLs are typically valid for longer
+    gcTime: 10 * 60 * 1000, // 10 minutes garbage collection time
+  });
   if (isImage && file) {
     return (
       <div className="flex items-center justify-center text-sm relative group">
