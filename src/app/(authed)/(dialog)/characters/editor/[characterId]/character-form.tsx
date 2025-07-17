@@ -7,7 +7,10 @@ import { useToast } from '@/components/common/toast';
 import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
-import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import {
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
+} from '@/configuration-text-inputs/const';
 import { CharacterAccessLevel, CharacterModel, FileModel } from '@/db/schema';
 import { deepCopy, deepEqual } from '@/utils/object';
 import { cn } from '@/utils/tailwind';
@@ -57,8 +60,8 @@ type CharacterFormProps = CharacterModel & {
 const characterFormValuesSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  learningContext: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  competence: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  learningContext: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS),
+  competence: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS),
   modelId: z.string(),
   schoolType: z.string().nullable(),
   gradeLevel: z.string().nullable(),
