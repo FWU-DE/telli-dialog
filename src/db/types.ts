@@ -41,8 +41,12 @@ export type LlmModelPriceMetadata =
       promptTokenPrice: number;
     }
   | {
+      type: 'embedding';
+      promptTokenPrice: number;
+    }
+  | {
       type: 'image';
-      pricePerImage: number;
+      pricePerImageInCent: number;
     };
 
 export type DbTransactionObject = PgTransaction<

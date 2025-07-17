@@ -1,10 +1,20 @@
 import { z } from 'zod';
 
-export const knotenpunktPriceMetadata = z.object({
-  type: z.literal('text').or(z.literal('embedding')),
-  completionTokenPrice: z.number(),
-  promptTokenPrice: z.number(),
-});
+export const knotenpunktPriceMetadata = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('text'),
+    completionTokenPrice: z.number(),
+    promptTokenPrice: z.number(),
+  }),
+  z.object({
+    type: z.literal('embedding'),
+    promptTokenPrice: z.number(),
+  }),
+  z.object({
+    type: z.literal('image'),
+    pricePerImageInCent: z.number(),
+  }),
+]);
 
 export const knotenpunktLlmModelSchema = z.object({
   id: z.string(),
