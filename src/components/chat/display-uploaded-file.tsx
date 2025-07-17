@@ -63,7 +63,7 @@ export default function DisplayUploadedFile({
           </button>
         )}
         <div className="relative flex items-center gap-2 h-[56px] w-[56px] overflow-hidden rounded-enterprise-sm">
-          {status === 'processed' && !isLoading && (
+          {status === 'processed' && !isLoading && !!imageUrl && (
             <Image
               src={imageUrl}
               alt={fileName}
@@ -75,7 +75,7 @@ export default function DisplayUploadedFile({
             />
           )}
           {(status === 'uploading' || isLoading) && <Spinner className="w-[56px] h-5" />}
-          {(status === 'failed' || error) && <CrossIcon className="w-5 h-5" />}
+          {(status === 'failed' || error || !imageUrl) && <CrossIcon className="w-5 h-5" />}
         </div>
       </div>
     );
