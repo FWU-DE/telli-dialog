@@ -15,7 +15,7 @@ import { LocalFileState } from './send-message-form';
 type DisplayUploadedFileProps = {
   fileName: string;
   status: FileStatus;
-  file: LocalFileState;
+  file?: LocalFileState;
   onDeattachFile?: () => void;
 };
 
@@ -30,7 +30,7 @@ export default function DisplayUploadedFile({
 
   const { Icon: FileIcon, fillColor: backgroundColor } = getFileIconByFileExtension(file_extension);
 
-  if (isImage) {
+  if (isImage && file) {
     const {
       data: imageUrl,
       isLoading,
