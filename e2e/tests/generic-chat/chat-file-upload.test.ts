@@ -10,7 +10,7 @@ test('should successfully upload a file and get response about its contents', as
   await fileInput.setInputFiles(filePath);
   // Wait for the upload to complete
   const uploadPromise = page.waitForResponse((response) =>
-    response.url().includes('api/v1/upload-file'),
+    response.url().includes('api/v1/files'),
   );
 
   const result = await uploadPromise;
@@ -51,7 +51,7 @@ test('should successfully upload an image and get response about its contents', 
   await fileInput.setInputFiles(filePath);
   // Wait for the upload to complete
   const uploadPromise = page.waitForResponse((response) =>
-    response.url().includes('api/v1/upload-file'),
+    response.url().includes('api/v1/files'),
   );
 
   const result = await uploadPromise;
