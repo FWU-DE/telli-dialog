@@ -25,17 +25,9 @@ export type FileStatus = 'uploading' | 'processed' | 'failed' | 'success';
 
 export type UploadFileButtonProps = {
   setFiles: React.Dispatch<React.SetStateAction<Map<string, LocalFileState>>>;
-  onFileUploaded?: (data: { id: string; name: string; file: File }) => void;
-  triggerButton?: React.ReactNode;
-  fileUploadFn?: (file: File) => Promise<FileUploadResponse>;
-  onFileUploadStart?: () => void;
   className?: string;
-  directoryId?: string;
-  showUploadConfirmation?: boolean;
-  countOfFiles?: number;
-  setFileUploading?: React.Dispatch<React.SetStateAction<boolean>>;
   files?: Map<string, LocalFileState>;
-  disabled?: boolean;
+  setFileUploading?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export async function handleSingleFile({
@@ -47,13 +39,8 @@ export async function handleSingleFile({
   showUploadConfirmation,
 }: {
   file: File;
-  prevFileIds?: string[];
   setFiles: React.Dispatch<React.SetStateAction<Map<string, LocalFileState>>>;
-  fileUploadFn?: (file: File) => Promise<FileUploadResponse>;
-  directoryId?: string;
   onFileUploaded?: (data: { id: string; name: string; file: File }) => void;
-  session: ReturnType<typeof useSession>;
-  conversation?: ReturnType<typeof useConversation>;
   toast: ToastContextType;
   translations: (key: string, values?: TranslationValues) => string;
   showUploadConfirmation?: boolean;
@@ -122,12 +109,7 @@ export async function handleSingleFile({
 
 export default function UploadFileButton({
   setFiles,
-  onFileUploaded,
-  triggerButton,
-  fileUploadFn,
   className,
-  onFileUploadStart,
-  directoryId,
   setFileUploading,
   files,
 }: UploadFileButtonProps) {
@@ -153,15 +135,11 @@ export default function UploadFileButton({
 
     const files = Array.from(selectedFiles);
     setFileUploading?.(true);
-    onFileUploadStart?.();
     await Promise.all(
       files.map((f) =>
         handleSingleFile({
           file: f,
           setFiles,
-          fileUploadFn,
-          directoryId,
-          onFileUploaded,
           session,
           conversation,
           toast,
