@@ -65,9 +65,9 @@ jobs:
           COMMIT_HASH="${{ github.event.inputs.commit_hash }}"
           echo "Updating Kubernetes deployment with image tag $COMMIT_HASH"
           kubectl set image deployment/telli-dialog-prod \
-            telli-dialog-prod=telli.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH \
+            telli-dialog-prod=telli.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH \ -n telli-prod
 
       - name: Wait for rollout to complete
         run: |
           echo "Waiting for rollout to complete"
-          kubectl rollout status deployment/telli-dialog-prod
+          kubectl rollout status deployment/telli-dialog-prod -n telli-prod
