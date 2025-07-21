@@ -30,10 +30,7 @@ export default function DisplayUploadedFile({
 
   const { Icon: FileIcon, fillColor: backgroundColor } = getFileIconByFileExtension(file_extension);
 
-  const {
-    data: imageUrl,
-    isLoading,
-  } = useQuery({
+  const { data: imageUrl, isLoading } = useQuery({
     queryKey: file
       ? ['signed-url', file.fileId, file.file.name, file.file.type]
       : ['signed-url', null, null, null],
