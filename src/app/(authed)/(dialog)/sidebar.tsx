@@ -125,6 +125,19 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
               {user.federalState.telliName ?? 'telli'}
             </span>
           </Link>
+          <Link href="/custom" className="w-full mt-1">
+            <div
+              className={cn(
+                'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
+                (pathname === '/custom' || pathname.includes('custom/editor')) &&
+                  !pathname.includes(HELP_MODE_GPT_ID) &&
+                  'underline',
+              )}
+            >
+              <FourBoxes className="w-6 h-5" />
+              <span className="text-base">{t('custom-gpt')}</span>
+            </div>
+          </Link>
           <hr className="w-full my-2" />
           <div className="w-full items-center flex flex-col gap-1 h-fit">
             {
@@ -157,19 +170,6 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                   </Link>
                 )}
 
-                <Link href="/custom" className="w-full">
-                  <div
-                    className={cn(
-                      'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
-                      (pathname === '/custom' || pathname.includes('custom/editor')) &&
-                        !pathname.includes(HELP_MODE_GPT_ID) &&
-                        'underline',
-                    )}
-                  >
-                    <FourBoxes className="w-6 h-5" />
-                    <span className="text-base">{t('custom-gpt')}</span>
-                  </div>
-                </Link>
                 {user.school.userRole === 'teacher' && user.federalState.enableCustomGpt && (
                   <Link href={`/custom/d/${HELP_MODE_GPT_ID}`} className="w-full">
                     <div
