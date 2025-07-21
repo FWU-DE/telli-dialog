@@ -33,7 +33,6 @@ export default function DisplayUploadedFile({
   const {
     data: imageUrl,
     isLoading,
-    error,
   } = useQuery({
     queryKey: file
       ? ['signed-url', file.fileId, file.file.name, file.file.type]
