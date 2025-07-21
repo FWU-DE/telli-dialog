@@ -17,8 +17,6 @@ type DisplayUploadedFileProps = {
   status: FileStatus;
   file?: LocalFileState;
   onDeattachFile?: () => void;
-  countOfFiles?: number;
-  onFileUploaded?: (data: { id: string; name: string; file: File }) => void;
 };
 
 export default function DisplayUploadedFile({

@@ -25,9 +25,17 @@ export type FileStatus = 'uploading' | 'processed' | 'failed' | 'success';
 
 export type UploadFileButtonProps = {
   setFiles: React.Dispatch<React.SetStateAction<Map<string, LocalFileState>>>;
+  onFileUploaded?: (data: { id: string; name: string; file: File }) => void;
+  triggerButton?: React.ReactNode;
+  fileUploadFn?: (file: File) => Promise<FileUploadResponse>;
+  onFileUploadStart?: () => void;
   className?: string;
-  files?: Map<string, LocalFileState>;
+  directoryId?: string;
+  showUploadConfirmation?: boolean;
+  countOfFiles?: number;
   setFileUploading?: React.Dispatch<React.SetStateAction<boolean>>;
+  files?: Map<string, LocalFileState>;
+  disabled?: boolean;
 };
 
 export async function handleSingleFile({
