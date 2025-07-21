@@ -49,6 +49,8 @@ export async function handleSingleFile({
   file: File;
   setFiles: React.Dispatch<React.SetStateAction<Map<string, LocalFileState>>>;
   onFileUploaded?: (data: { id: string; name: string; file: File }) => void;
+  session: ReturnType<typeof useSession>;
+  conversation?: ReturnType<typeof useConversation>;
   toast: ToastContextType;
   translations: (key: string, values?: TranslationValues) => string;
   showUploadConfirmation?: boolean;
