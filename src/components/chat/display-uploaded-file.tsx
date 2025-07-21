@@ -67,19 +67,21 @@ export default function DisplayUploadedFile({
           </button>
         )}
         <div className="relative flex items-center gap-2 h-[56px] w-[56px] overflow-hidden rounded-enterprise-sm">
-          {status === 'processed' && !isLoading && !!imageUrl && (
+          {status === 'processed' && !isLoading && !!imageUrl ? (
             <Image
               src={imageUrl}
               alt={fileName}
               width={200}
               height={200}
               loading="eager"
-              className="w-full h-auto max-h-48 object-cover"
+              className="w-full h-full object-cover"
               unoptimized={true} // Since we're using signed URLs from S3
             />
+          ) : status === 'uploading' || isLoading ? (
+            <Spinner className="w-[56px] h-5" />
+          ) : (
+            <CrossIcon className="w-5 h-5" />
           )}
-          {(status === 'uploading' || isLoading) && <Spinner className="w-[56px] h-5" />}
-          {(status === 'failed' || error || !imageUrl) && <CrossIcon className="w-5 h-5" />}
         </div>
       </div>
     );

@@ -182,9 +182,7 @@ export default function UploadFileButton({
             : t('upload.upload-file-button')
         }
       >
-        {triggerButton ?? (
-          <AttachFileIcon className={cn('sm:w-10 sm:h-10 w-8 h-8')} stroke="black" />
-        )}
+        <AttachFileIcon className={cn('sm:w-10 sm:h-10 w-8 h-8')} stroke="black" />
       </button>
     </>
   );
