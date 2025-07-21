@@ -47,10 +47,7 @@ export async function handleSingleFile({
   showUploadConfirmation,
 }: {
   file: File;
-  prevFileIds?: string[];
   setFiles: React.Dispatch<React.SetStateAction<Map<string, LocalFileState>>>;
-  fileUploadFn?: (file: File) => Promise<FileUploadResponse>;
-  directoryId?: string;
   onFileUploaded?: (data: { id: string; name: string; file: File }) => void;
   session: ReturnType<typeof useSession>;
   conversation?: ReturnType<typeof useConversation>;
@@ -122,12 +119,7 @@ export async function handleSingleFile({
 
 export default function UploadFileButton({
   setFiles,
-  onFileUploaded,
-  triggerButton,
-  fileUploadFn,
   className,
-  onFileUploadStart,
-  directoryId,
   setFileUploading,
   files,
 }: UploadFileButtonProps) {
@@ -153,15 +145,11 @@ export default function UploadFileButton({
 
     const files = Array.from(selectedFiles);
     setFileUploading?.(true);
-    onFileUploadStart?.();
     await Promise.all(
       files.map((f) =>
         handleSingleFile({
           file: f,
           setFiles,
-          fileUploadFn,
-          directoryId,
-          onFileUploaded,
           session,
           conversation,
           toast,
@@ -204,9 +192,7 @@ export default function UploadFileButton({
             : t('upload.upload-file-button')
         }
       >
-        {triggerButton ?? (
-          <AttachFileIcon className={cn('sm:w-10 sm:h-10 w-8 h-8')} stroke="black" />
-        )}
+        <AttachFileIcon className={cn('sm:w-10 sm:h-10 w-8 h-8')} stroke="black" />
       </button>
     </>
   );
@@ -219,7 +205,7 @@ export async function fetchUploadFile(data: {
 }): Promise<string> {
   const formData = new FormData();
   formData.append('file', data.body, data.fileName);
-  const response = await fetch('/api/v1/upload-file', {
+  const response = await fetch('/api/v1/files', {
     method: 'POST',
     body: formData,
   });
