@@ -57,7 +57,7 @@ export default function DisplayUploadedFile({
         {onDeattachFile !== undefined && (
           <button
             onClick={onDeattachFile}
-            className="absolute right-0 top-0 bg-neutral-200 z-10 rounded-enterprise-tr-sm"
+            className="absolute right-0 top-0 bg-neutral-50 z-10 rounded-enterprise-tr-sm"
           >
             <DeattachFileIcon />
           </button>
