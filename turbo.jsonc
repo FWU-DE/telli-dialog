@@ -1,0 +1,28 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+    },
+    "build:envless": {
+      "dependsOn": ["^build:envless"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"],
+    },
+    "dev": {
+      "persistent": true,
+      "cache": false,
+    },
+    "dev:local": {
+      "dependsOn": ["^dev"],
+      "persistent": true,
+      "cache": false,
+    },
+    "db:migrate": {
+      "dependsOn": ["^db:migrate"],
+    },
+  },
+}

@@ -22,7 +22,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: ".nvmrc"
 
       - name: Install PNPM
         run: npm install -g pnpm@9.6.0
@@ -54,7 +54,7 @@ jobs:
       - name: Build Docker image
         run: |
           COMMIT_HASH=${{ github.sha }}
-          SENTRY_AUTH_TOKEN=${{ env.SENTRY_AUTH_TOKEN }} SENTRY_ENVIRONMENT=staging SENTRY_DSN=${{ env.SENTRY_DSN }} docker build -f Dockerfile -t telli/chatbot:$COMMIT_HASH .
+          SENTRY_AUTH_TOKEN=${{ env.SENTRY_AUTH_TOKEN }} SENTRY_ENVIRONMENT=staging SENTRY_DSN=${{ env.SENTRY_DSN }} docker build -f ./apps/dialog/Dockerfile -t telli/chatbot:$COMMIT_HASH .
           docker tag telli/chatbot:$COMMIT_HASH telli.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH
 
       - name: Push Docker image to IONOS registry
@@ -78,7 +78,7 @@ jobs:
         with:
           method: kubeconfig
           kubeconfig: ${{ secrets.KUBECONFIG_FILE }}
-          context: ''
+          context: ""
 
       - name: Update Kubernetes deployment
         run: |
