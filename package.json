@@ -8,6 +8,6 @@
   "packageManager": "pnpm@9.6.0",
   "dependencies": {},
   "devDependencies": {
-    "turbo": "^2.5.5"
+    "turbo": "2.5.5"
   }
 }

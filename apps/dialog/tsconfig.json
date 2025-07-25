@@ -1,11 +1,19 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "_version": "2.0.0",
-  "extends": "./base.json",
-
+  "extends": "@telli/typescript-config/nextjs.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
-  }
+  },
+  "include": [
+    "../../packages/typescript-config/next-env.d.ts",
+    "../../packages/typescript-config/**/*.ts",
+    "../../packages/typescript-config/**/*.tsx",
+    "../../packages/typescript-config/.next/types/**/*.ts",
+    ".next/types/**/*.ts"
+  ]
 }

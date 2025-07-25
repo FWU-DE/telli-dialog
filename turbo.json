@@ -5,6 +5,10 @@
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
+    "build:envless": {
+      "dependsOn": ["^build:envless"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
     "check-types": {
       "dependsOn": ["^check-types"]
     },
