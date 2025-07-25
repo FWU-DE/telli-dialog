@@ -5,7 +5,8 @@
   "scripts": {
     "op": "op run --env-file=\"./.env\" --no-masking",
     "op:signin": "eval $(op signin)",
-    "dev": "ENVIRONMENT=development pnpm op -- next dev --turbo",
+    "dev": "next dev --turbo",
+    "dev:op": "ENVIRONMENT=development pnpm op -- next dev --turbo",
     "dev:local": "dotenvx run -f .env.local -- next dev --turbo",
     "dev:e2e": "ENVIRONMENT=e2e pnpm op -- next dev --turbo",
     "build": "next build",
