@@ -22,7 +22,8 @@
       "cache": false
     },
     "db:migrate": {
-      "dependsOn": ["^db:migrate"]
+      "dependsOn": ["^db:migrate"],
+      "env": ["DATABASE_URL"]
     },
     "format:check": {
       "dependsOn": ["^format:check"]
