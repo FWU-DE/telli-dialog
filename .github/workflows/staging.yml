@@ -32,13 +32,13 @@ jobs:
       - name: Audit dependencies
         run: pnpm audit --audit-level=critical
       - name: Check formatting
-        run: turbo run format:check
+        run: pnpm run format:check
       - name: Check types
-        run: turbo run types
+        run: pnpm run types
       - name: Check linter
-        run: turbo run lint
+        run: pnpm run lint
       - name: Check linter
-        run: turbo run test
+        run: pnpm run test
 
   build-staging:
     name: Build and push docker image
