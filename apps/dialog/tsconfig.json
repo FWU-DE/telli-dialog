@@ -7,11 +7,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": [
-    "../../packages/typescript-config/next-env.d.ts",
-    "../../packages/typescript-config/**/*.ts",
-    "../../packages/typescript-config/**/*.tsx",
-    "../../packages/typescript-config/.next/types/**/*.ts",
-    ".next/types/**/*.ts"
-  ]
+  "include": ["src"]
 }
