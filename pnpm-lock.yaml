@@ -104,6 +104,9 @@ importers:
       drizzle-zod:
         specifier: 0.7.1
         version: 0.7.1(drizzle-orm@0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.11.11)(pg@8.13.1))(zod@3.25.67)
+      eslint-config-turbo:
+        specifier: 2.5.5
+        version: 2.5.5(eslint@9.17.0(jiti@1.21.7))(turbo@2.5.5)
       he:
         specifier: 1.2.0
         version: 1.2.0
@@ -3762,6 +3765,10 @@ packages:
     resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
     engines: {node: '>=12'}
 
+  dotenv@16.0.3:
+    resolution: {integrity: sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==}
+    engines: {node: '>=12'}
+
   dotenv@16.6.1:
     resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
     engines: {node: '>=12'}
@@ -4001,6 +4008,12 @@ packages:
     peerDependencies:
       eslint: '>=7.0.0'
 
+  eslint-config-turbo@2.5.5:
+    resolution: {integrity: sha512-23lKrCr66HQR62aa94n2dBGUUFz0GzM6N1KwmcREZHxomZ5Ik2rDm00wAz95lOEkhzSt6IaxW00Uz0az/Fcq5Q==}
+    peerDependencies:
+      eslint: '>6.6.0'
+      turbo: '>2.0.0'
+
   eslint-import-resolver-node@0.3.9:
     resolution: {integrity: sha512-WFj2isz22JahUv+B788TlO3N6zL3nNJGU8CcZbPZvVEkBPaJdCV4vy5wyghty5ROFbCRnm132v8BScu5/1BQ8g==}
 
@@ -4079,6 +4092,12 @@ packages:
     engines: {node: '>=4'}
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9.7
+
+  eslint-plugin-turbo@2.5.5:
+    resolution: {integrity: sha512-IlN65X6W7rgK88u5xl1xC+7FIGKA7eyaca0yxZQ9CBNV6keAaqtjZQLw8ZfXdv7T+MzTLYkYOeOHAv8yCRUx4Q==}
+    peerDependencies:
+      eslint: '>6.6.0'
+      turbo: '>2.0.0'
 
   eslint-scope@5.1.1:
     resolution: {integrity: sha512-2NxwbF/hZ0KpepYN0cNbo+FN6XoK7GaHlQhgx/hIZl6Va0bF45RQOOwhLIy8lQDbuCiadSLCBnH2CFYquit5bw==}
@@ -10985,6 +11004,8 @@ snapshots:
 
   dotenv-expand@10.0.0: {}
 
+  dotenv@16.0.3: {}
+
   dotenv@16.6.1: {}
 
   drizzle-kit@0.31.1:
@@ -11256,6 +11277,12 @@ snapshots:
     dependencies:
       eslint: 9.17.0(jiti@1.21.7)
 
+  eslint-config-turbo@2.5.5(eslint@9.17.0(jiti@1.21.7))(turbo@2.5.5):
+    dependencies:
+      eslint: 9.17.0(jiti@1.21.7)
+      eslint-plugin-turbo: 2.5.5(eslint@9.17.0(jiti@1.21.7))(turbo@2.5.5)
+      turbo: 2.5.5
+
   eslint-import-resolver-node@0.3.9:
     dependencies:
       debug: 3.2.7
@@ -11373,6 +11400,12 @@ snapshots:
       semver: 6.3.1
       string.prototype.matchall: 4.0.12
       string.prototype.repeat: 1.0.0
+
+  eslint-plugin-turbo@2.5.5(eslint@9.17.0(jiti@1.21.7))(turbo@2.5.5):
+    dependencies:
+      dotenv: 16.0.3
+      eslint: 9.17.0(jiti@1.21.7)
+      turbo: 2.5.5
 
   eslint-scope@5.1.1:
     dependencies:

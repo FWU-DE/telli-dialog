@@ -4,6 +4,7 @@
     "build": "turbo run build",
     "build:docker:dialog": "docker build -t telli-dialog -f ./apps/dialog/Dockerfile .",
     "db:migrate": "turbo run db:migrate",
+    "db:seed": "turbo run db:seed",
     "dev": "turbo run dev:local",
     "format:check": "turbo run format:check",
     "lint": "turbo run lint",
