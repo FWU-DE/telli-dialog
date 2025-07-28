@@ -64,7 +64,3 @@ EXPOSE ${PORT}
 
 # https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
 CMD turbo db:migrate && HOSTNAME=0.0.0.0 node server.js
-
-# RUN npm run build:envless --verbose
-# RUN cp -r /app/.next/standalone/* /app/
-# CMD npm run db:migrate && HOSTNAME=0.0.0.0 node server.js

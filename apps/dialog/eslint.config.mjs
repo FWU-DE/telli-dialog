@@ -1,6 +1,7 @@
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { FlatCompat } from '@eslint/eslintrc';
+import { off } from 'process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -11,8 +12,10 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.config({
-    extends: ['next', 'next/core-web-vitals', 'next/typescript'],
+    extends: ['next', 'next/core-web-vitals', 'next/typescript', 'prettier'],
+    plugins: ['prettier'],
     rules: {
+      'prettier/prettier': 'error',
       'no-restricted-imports': [
         'error',
         {

@@ -3,26 +3,26 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "build:envless": {
       "dependsOn": ["^build:envless"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "check-types": {
-      "dependsOn": ["^check-types"],
+      "dependsOn": ["^check-types"]
     },
     "dev": {
       "persistent": true,
-      "cache": false,
+      "cache": false
     },
     "dev:local": {
       "dependsOn": ["^dev"],
       "persistent": true,
-      "cache": false,
+      "cache": false
     },
     "db:migrate": {
-      "dependsOn": ["^db:migrate"],
-    },
-  },
+      "dependsOn": ["^db:migrate"]
+    }
+  }
 }
