@@ -8,11 +8,17 @@
     "format:check": "turbo run format:check",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "types": "turbo run types"
+    "types": "turbo run types",
+    "e2e": "dotenv -e .env -- playwright test",
+    "e2e:api": "dotenvx run -f .env.local -- playwright test tests/api/",
+    "e2e:op": "ENVIRONMENT=e2e pnpm op -- playwright test",
+    "e2e:headed": "ENVIRONMENT=e2e pnpm op -- playwright test --headed",
+    "e2e:ui": "ENVIRONMENT=e2e pnpm op -- playwright test --ui"
   },
   "packageManager": "pnpm@9.6.0",
   "dependencies": {},
   "devDependencies": {
-    "turbo": "2.5.5"
+    "turbo": "2.5.5",
+    "@playwright/test": "1.50.1"
   }
 }
