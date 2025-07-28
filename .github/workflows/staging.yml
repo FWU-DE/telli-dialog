@@ -22,7 +22,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: ".nvmrc"
+          node-version-file: '.nvmrc'
 
       - name: Install PNPM
         run: npm install -g pnpm@9.6.0
@@ -32,13 +32,13 @@ jobs:
       - name: Audit dependencies
         run: pnpm audit --audit-level=critical
       - name: Check formatting
-        run: pnpm format:check
+        run: turbo run format:check
       - name: Check types
-        run: pnpm types
+        run: turbo run types
       - name: Check linter
-        run: pnpm lint
+        run: turbo run lint
       - name: Check linter
-        run: pnpm test
+        run: turbo run test
 
   build-staging:
     name: Build and push docker image
@@ -78,7 +78,7 @@ jobs:
         with:
           method: kubeconfig
           kubeconfig: ${{ secrets.KUBECONFIG_FILE }}
-          context: ""
+          context: ''
 
       - name: Update Kubernetes deployment
         run: |

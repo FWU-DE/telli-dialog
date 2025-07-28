@@ -23,6 +23,17 @@
     },
     "db:migrate": {
       "dependsOn": ["^db:migrate"]
+    },
+    "format:check": {
+      "dependsOn": ["^format:check"]
+    },
+    "types": {
+      "dependsOn": ["^types"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "test": {
+      "dependsOn": ["^test"]
     }
-  }
 }
