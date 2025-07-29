@@ -82,19 +82,17 @@ export default async function Page(context: PageContext) {
   });
 
   const initialLinks = PREFETCH_ENABLED
-    ? await Promise.all(
-      character.attachedLinks.filter((l) => l !== '').map(webScraperExecutable),
-    )
+    ? await Promise.all(character.attachedLinks.filter((l) => l !== '').map(webScraperExecutable))
     : character.attachedLinks
-      .filter((l) => l !== '')
-      .map(
-        (url) =>
-          ({
-            link: url,
-            type: 'websearch',
-            error: false,
-          }) as WebsearchSource,
-      );
+        .filter((l) => l !== '')
+        .map(
+          (url) =>
+            ({
+              link: url,
+              type: 'websearch',
+              error: false,
+            }) as WebsearchSource,
+        );
 
   const mergedCharacter = {
     ...removeNullValues(character),

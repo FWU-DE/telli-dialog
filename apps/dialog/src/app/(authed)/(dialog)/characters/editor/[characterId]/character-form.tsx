@@ -191,7 +191,7 @@ export default function CharacterForm({
     updateCharacterAction({
       characterId: character.id,
       ...data,
-      attachedLinks: data.attachedLinks.map((p) => p?.link ?? '')
+      attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
     })
       .then(() => {
         if (!isCreating) {

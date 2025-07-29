@@ -44,19 +44,18 @@ export default async function Page(context: PageContext) {
 
   const initialLinks = PREFETCH_ENABLED
     ? await Promise.all(
-      sharedSchoolChat.attachedLinks.filter((l) => l !== '').map(webScraperExecutable),
-    )
+        sharedSchoolChat.attachedLinks.filter((l) => l !== '').map(webScraperExecutable),
+      )
     : sharedSchoolChat.attachedLinks
-      .filter((l) => l && l !== '')
-      .map(
-        (url) =>
-          ({
-            link: url,
-            type: 'websearch',
-            error: false,
-          }) as WebsearchSource,
-      );
-
+        .filter((l) => l && l !== '')
+        .map(
+          (url) =>
+            ({
+              link: url,
+              type: 'websearch',
+              error: false,
+            }) as WebsearchSource,
+        );
 
   console.log('initialLinks', initialLinks);
 

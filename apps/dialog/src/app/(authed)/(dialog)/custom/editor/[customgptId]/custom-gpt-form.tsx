@@ -177,7 +177,7 @@ export default function CustomGptForm({
       ...data,
       promptSuggestions: data.promptSuggestions?.map((p) => p.content),
       gptId: customGpt.id,
-      attachedLinks: data.attachedLinks.map((p) => p?.link ?? '')
+      attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
     })
       .then(() => {
         if (!isCreating) toast.success(tToast('edit-toast-success'));
@@ -443,7 +443,6 @@ export default function CustomGptForm({
       </fieldset>
 
       <fieldset className="flex flex-col gap-4 mt-8">
-
         <h2 className="text-md font-medium">{t('additional-assets-label')}</h2>
         <span className="text-base">{t('additional-assets-content')}</span>
 
