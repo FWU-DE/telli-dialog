@@ -25,9 +25,17 @@ if (process.env.NODE_ENV === 'development') {
 }
 const db = drizzle({ client: pool });
 
-console.info('Running database migrations...');
-await migrate(db, {
-  migrationsFolder: path.join(process.cwd(), 'migrations'),
-});
+// cannot use `await` at the top level in a module, so we use an IIFE
+(async () => {
+  try {
+    console.info('Running database migrations...');
+    await migrate(db, {
+      migrationsFolder: path.join(process.cwd(), 'migrations'),
+    });
+    console.info('Database migrations completed successfully.');
+  } catch (error) {
+    console.error('Error running database migrations:', error);
+  }
+})();
 
 export { db };
