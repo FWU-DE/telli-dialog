@@ -42,20 +42,23 @@ export default async function Page(context: PageContext) {
   }
   const relatedFiles = await fetchFileMapping(params.sharedSchoolChatId);
 
-  const initalLinks = PREFETCH_ENABLED
+  const initialLinks = PREFETCH_ENABLED
     ? await Promise.all(
-        sharedSchoolChat.attachedLinks.filter((l) => l !== '').map(webScraperExecutable),
-      )
+      sharedSchoolChat.attachedLinks.filter((l) => l !== '').map(webScraperExecutable),
+    )
     : sharedSchoolChat.attachedLinks
-        .filter((l) => l !== '')
-        .map(
-          (url) =>
-            ({
-              link: url,
-              type: 'websearch',
-              error: false,
-            }) as WebsearchSource,
-        );
+      .filter((l) => l && l !== '')
+      .map(
+        (url) =>
+          ({
+            link: url,
+            type: 'websearch',
+            error: false,
+          }) as WebsearchSource,
+      );
+
+
+  console.log('initialLinks', initialLinks);
 
   const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
     key: sharedSchoolChat.pictureId ? `shared-chats/${sharedSchoolChat.id}/avatar` : undefined,
@@ -72,7 +75,7 @@ export default async function Page(context: PageContext) {
           {...sharedSchoolChat}
           existingFiles={relatedFiles}
           isCreating={isCreating}
-          initalLinks={initalLinks}
+          initialLinks={initialLinks}
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           readOnly={false}
         />

@@ -96,9 +96,8 @@ ${isTeacher ? 'Unterrichtsvorbereitung, Erstellen von Arbeitsblättern, Überset
 
 telli stellt zudem folgende Features mit einem pädagogischen Kontext bereit, welche sich speziell für die Anwendung im Unterricht eignen:
 
-${
-  isTeacher
-    ? `
+${isTeacher
+      ? `
   Deine Funktionen in der Seitenleiste links:
 
   Lernszenarien: Diese erlauben es der Lehrkraft, eine bestimmte pädagogische Situation oder Zielsetzung über einen Systemprompt vorab zu konfigurieren. Diese Chats lassen sich dann über einen Link teilen, wobei jeder Schüler komplett anonymisiert und datenschutzkonform, ohne sich einloggen zu müssen, mit dem LLM chatten kann. Jeder Chat besteht nur aus dem LLM und einem Gegenüber, d.h. einem Schüler.
@@ -106,8 +105,8 @@ ${
   Dialogpartner: Die User können hier Personen konfigurieren, welche dann von dem LLM in einem Chat simuliert werden. Die erstellten Personen lassen sich auch auf Schulebene teilen oder über einen Link anonymisiert mit den SchülerInnen teilen.
   
   Assistenten: Durch Systemprompts vorkonfigurierte KI-Chats. Sie eignen sich besonders für sich wiederholende Aufgaben, bspw. administrative Tätigkeiten`
-    : ''
-}
+      : ''
+    }
 
 Die Datenverarbeitung von telli erfolgt ausschließlich in der EU. Nutzerdaten werden nur pseudonymisiert verarbeitet.
 
@@ -149,9 +148,9 @@ export async function constructChatSystemPrompt({
   const fileContentPrompt =
     retrievedTextChunks !== undefined && Object.keys(retrievedTextChunks).length > 0
       ? BASE_FILE_PROMPT +
-        Object.keys(retrievedTextChunks).map((fileId) =>
-          constructSingleFilePrompt(retrievedTextChunks?.[fileId] ?? []),
-        )
+      Object.keys(retrievedTextChunks).map((fileId) =>
+        constructSingleFilePrompt(retrievedTextChunks?.[fileId] ?? []),
+      )
       : '';
 
   const websearchSourcesPrompt = constructWebsearchPrompt({ websearchSources });
@@ -161,7 +160,7 @@ export async function constructChatSystemPrompt({
       fileContentPrompt,
     });
 
-    return characterSystemPrompt + fileContentPrompt;
+    return characterSystemPrompt + fileContentPrompt + websearchSourcesPrompt;
   }
   if (customGptId !== undefined) {
     const customGpt = await dbGetCustomGptById({ customGptId });
@@ -181,9 +180,7 @@ export async function constructChatSystemPrompt({
       additionalInstruction = constructCustomGptSystemPrompt({ customGpt, fileContentPrompt });
     }
 
-    const concatenatedHelpModeSystemPrompt = schoolSystemPrompt + additionalInstruction;
-
-    return concatenatedHelpModeSystemPrompt;
+    return schoolSystemPrompt + additionalInstruction + websearchSourcesPrompt;
   }
 
   return schoolSystemPrompt + fileContentPrompt + websearchSourcesPrompt;

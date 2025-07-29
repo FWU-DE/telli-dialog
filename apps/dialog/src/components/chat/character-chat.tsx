@@ -121,7 +121,7 @@ export default function CharacterSharedChat({
           title={character.name}
           messages={messages}
           reductionBreakpoint={reductionBreakpoint}
-          // currently this is redundant, due to the inconsisitency with the shared school chat inital page
+          // currently this is redundant, due to the inconsisitency with the shared school chat initial page
           dialogStarted={messages.length > 0}
         />
         <hr className="w-full border-gray-200" />

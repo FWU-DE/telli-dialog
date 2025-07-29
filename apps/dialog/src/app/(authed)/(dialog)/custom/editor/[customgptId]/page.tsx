@@ -12,8 +12,11 @@ import CustomGptForm from './custom-gpt-form';
 import { fetchFileMapping } from '../../actions';
 import { removeNullValues } from '@/utils/generic/object-operations';
 import { CustomGptModel } from '@/db/schema';
+import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
+import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 
 export const dynamic = 'force-dynamic';
+const PREFETCH_ENABLED = false;
 
 async function getMaybeDefaultTemplateCustomGpt({
   templateId,
@@ -72,6 +75,20 @@ export default async function Page(context: PageContext) {
   });
 
   const readOnly = customGpt.userId !== user.id;
+  const initialLinks = PREFETCH_ENABLED
+    ? await Promise.all(
+      customGpt.attachedLinks.filter((l) => l !== '').map(webScraperExecutable),
+    )
+    : customGpt.attachedLinks
+      .filter((l) => l !== '')
+      .map(
+        (url) =>
+          ({
+            link: url,
+            type: 'websearch',
+            error: false,
+          }) as WebsearchSource,
+      );
 
   const mergedCustomGpt = {
     ...removeNullValues(customGpt),
@@ -92,6 +109,7 @@ export default async function Page(context: PageContext) {
           isCreating={isCreating}
           readOnly={readOnly}
           userRole={user.school.userRole}
+          initialLinks={initialLinks}
           existingFiles={relatedFiles}
         />
       </div>

@@ -41,14 +41,14 @@ import { getZodFieldMetadataFn } from '@/components/forms/utils';
 export default function SharedSchoolChatForm({
   existingFiles,
   isCreating,
-  initalLinks,
+  initialLinks,
   maybeSignedPictureUrl,
   readOnly,
   ...sharedSchoolChat
 }: SharedSchoolConversationModel & {
   existingFiles: FileModel[];
   isCreating: boolean;
-  initalLinks: WebsearchSource[];
+  initialLinks: WebsearchSource[];
   maybeSignedPictureUrl?: string;
   readOnly: boolean;
 }) {
@@ -76,7 +76,7 @@ export default function SharedSchoolChatForm({
     defaultValues: {
       ...sharedSchoolChat,
       additionalInstructions: sharedSchoolChat.additionalInstructions ?? undefined,
-      attachedLinks: initalLinks,
+      attachedLinks: initialLinks,
       pictureId: sharedSchoolChat.pictureId ?? '',
     },
   });
