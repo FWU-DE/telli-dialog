@@ -34,26 +34,10 @@ RUN pnpm install --frozen-lockfile
 # Copy source code of isolated subworkspace
 COPY --from=pruner /app/out/full/ .
 
-RUN turbo build:envless --filter=telli-dialog
+RUN turbo build:envless
 # RUN --mount=type=cache,id=pnpm,target=~/.pnpm-store pnpm prune --prod --no-optional
 RUN pnpm prune --prod --no-optional
-RUN rm -rf ./**/*/src
-
-# Final image
-FROM base AS runner
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nodejs
-USER nodejs
-
-WORKDIR /app
-# copy nextjs application 
-COPY --from=builder --chown=nodejs:nodejs /app/apps/dialog/.next/standalone ./
-COPY --from=builder --chown=nodejs:nodejs /app/apps/dialog/.next/static ./apps/dialog/.next/static
-# copy whole db folder in order to run database migrations
-COPY --from=pruner --chown=nodejs:nodejs /app/apps/dialog/src/db /app/apps/dialog/src/db
-
-WORKDIR /app/apps/dialog
+RUN cp -r /app/apps/dialog/.next/standalone/* /app/
 
 ARG PORT=3000
 ENV PORT=${PORT}
@@ -62,5 +46,31 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV TURBO_TELEMETRY_DISABLED=1
 EXPOSE ${PORT}
 
-# https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
 CMD pnpm db:migrate && node server.js
+
+
+## RUN rm -rf ./**/*/src
+
+# Final image
+# FROM base AS runner
+
+# RUN addgroup --system --gid 1001 nodejs
+# RUN adduser --system --uid 1001 nodejs
+# USER nodejs
+
+# WORKDIR /app
+# # copy nextjs application 
+# COPY --from=builder --chown=nodejs:nodejs /app/apps/dialog/.next/standalone ./
+# COPY --from=builder --chown=nodejs:nodejs /app/apps/dialog/.next/static ./apps/dialog/.next/static
+# # copy whole db folder in order to run database migrations
+# COPY --from=pruner --chown=nodejs:nodejs /app/apps/dialog/src/db /app/apps/dialog/src/db
+
+# ARG PORT=3000
+# ENV PORT=${PORT}
+# ENV NODE_ENV=production
+# ENV NEXT_TELEMETRY_DISABLED=1
+# ENV TURBO_TELEMETRY_DISABLED=1
+# EXPOSE ${PORT}
+
+# # https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
+# CMD pnpm db:migrate && node server.js
