@@ -1,0 +1,63 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "globalEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "BAVARIA_API_KEY",
+    "OTC_BUCKET_NAME",
+    "OTC_SECRET_ACCESS_KEY",
+    "OTC_ACCESS_KEY_ID",
+    "OTC_S3_HOSTNAME",
+    "VIDIS_CLIENT_ID",
+    "VIDIS_CLIENT_SECRET",
+    "VIDIS_ISSUER_URI",
+    "API_KEY",
+    "API_URL",
+    "ENCRYPTION_KEY",
+    "NEXTAUTH_URL",
+    "RABBITMQ_URI",
+    "NEXT_RUNTIME"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
+    "build:envless": {
+      "dependsOn": ["^build:envless"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
+    "dev": {
+      "persistent": true,
+      "cache": false
+    },
+    "dev:local": {
+      "dependsOn": ["^dev"],
+      "persistent": true,
+      "cache": false
+    },
+    "db:migrate": {
+      "dependsOn": ["^db:migrate"],
+      "env": ["DATABASE_URL"]
+    },
+    "db:seed": {
+      "dependsOn": ["^db:seed"],
+      "env": ["DATABASE_URL"]
+    },
+    "format:check": {
+      "dependsOn": ["^format:check"]
+    },
+    "types": {
+      "dependsOn": ["^types"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "test": {
+      "dependsOn": ["^test"]
+    }
+  }
+}
