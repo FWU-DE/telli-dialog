@@ -69,7 +69,7 @@ jobs:
         run: pnpm install
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install
+        run: pnpm -filter telli-dialog exec playwright install
 
       - name: Wait for PostgreSQL to be ready
         run: |
