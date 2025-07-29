@@ -51,7 +51,9 @@ WORKDIR /app
 COPY --from=builder --chown=nodejs:nodejs /app/apps/dialog/.next/standalone ./
 COPY --from=builder --chown=nodejs:nodejs /app/apps/dialog/.next/static ./apps/dialog/.next/static
 # copy whole db folder in order to run database migrations
-COPY --from=pruner --chown=nodejs:nodejs /app/apps/dialog/src/db /app/src/db
+COPY --from=pruner --chown=nodejs:nodejs /app/apps/dialog/src/db /app/apps/dialog/src/db
+
+WORKDIR /app/apps/dialog
 
 ARG PORT=3000
 ENV PORT=${PORT}
@@ -61,4 +63,4 @@ ENV TURBO_TELEMETRY_DISABLED=1
 EXPOSE ${PORT}
 
 # https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
-CMD turbo db:migrate && HOSTNAME=0.0.0.0 node ./apps/dialog/server.js
+CMD pnpm db:migrate && node server.js
