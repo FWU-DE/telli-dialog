@@ -1,8 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/.pnp
+**/node_modules
+**/.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -13,8 +13,11 @@
 # testing
 /coverage
 
+# turbo
+.turbo
+
 # next.js
-/.next/
+**/.next/
 /out/
 
 # production
@@ -48,6 +51,7 @@ certificates
 
 playwright-report/
 test-results/
+
 # Sentry Config File
 .env.sentry-build-plugin
 
