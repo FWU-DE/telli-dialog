@@ -25,6 +25,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 const db = drizzle({ client: pool });
 
+console.info('Running database migrations...');
 await migrate(db, {
   migrationsFolder: path.join(process.cwd(), 'migrations'),
 });
