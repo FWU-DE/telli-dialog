@@ -8,6 +8,6 @@
     "module": "commonjs",
     "skipLibCheck": true,
     "strict": true,
-    "target": "es2016"
+    "target": "es2017"
   }
 }

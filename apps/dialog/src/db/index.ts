@@ -1,5 +1,7 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
+import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { Pool } from 'pg';
+import path from 'node:path';
 
 const globalPool = global as unknown as {
   pool?: Pool;
@@ -21,5 +23,10 @@ const pool =
 if (process.env.NODE_ENV === 'development') {
   globalPool.pool = pool;
 }
+const db = drizzle({ client: pool });
 
-export const db = drizzle({ client: pool });
+await migrate(db, {
+  migrationsFolder: path.join(process.cwd(), 'migrations'),
+});
+
+export { db };
