@@ -119,7 +119,13 @@
         "title": "Assistent in eigenen Bereich kopieren",
         "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Assistenten in deinen privaten Bereich, um ihn anzupassen.",
         "copy-template": "Assistent bearbeiten"
-      }
+      },
+      "additional-assets-label": "Hintergrundwissen für telli",
+      "additional-assets-content": "Füge jeweils bis zu fünf Dateien und Links hinzu. telli nutzt diese Informationen, um das Lernszenario besser auf das Thema abzustimmen.",
+      "attached-files-label": "Welche Dateien dienen telli als Grundlage?",
+      "attached-links-label": "Welche Webquellen dienen telli als Grundlage?",
+      "attached-links-placeholder": "URL der Webseiten",
+      "add-link": "Link hinzufügen"
     },
     "toasts": {
       "create-toast-success": "Der Assistent wurde erfolgreich erstellt.",
@@ -168,7 +174,6 @@
       "content": "Dieser Dialogpartner ist schreibgeschützt. Möchtest du eine Kopie in deinem eigenen Bereich erstellen? Danach kannst du ihn frei bearbeiten und anpassen.",
       "copy-button": "Kopieren & bearbeiten"
     },
-
     "form": {
       "general-settings": "Allgemeine Einstellungen",
       "character-settings": "Dialogpartner-Einstellungen",
@@ -205,7 +210,13 @@
         "title": "Dialogpartner in eigenen Bereich kopieren",
         "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Dialogpartner in deinen privaten Bereich, um ihn anzupassen.",
         "copy-template": "Dialogpartner bearbeiten"
-      }
+      },
+      "additional-assets-label": "Hintergrundwissen für telli",
+      "additional-assets-content": "Füge jeweils bis zu fünf Dateien und Links hinzu. telli nutzt diese Informationen, um das Lernszenario besser auf das Thema abzustimmen.",
+      "attached-files-label": "Welche Dateien dienen telli als Grundlage?",
+      "attached-links-label": "Welche Webquellen dienen telli als Grundlage?",
+      "attached-links-placeholder": "URL der Webseiten",
+      "add-link": "Link hinzufügen"
     },
     "toasts": {
       "create-toast-success": "Der Dialogpartner wurde erfolgreich erstellt.",
@@ -247,7 +258,7 @@
       "additional-instructions-label": "Wie verhält sich telli im Lernszenario?",
       "additional-instructions-placeholder": "Erstelle ein historisch korrektes Lernszenario über Ludwig XIV., das für die 8. Klasse geeignet ist. Der Fokus soll auf den Begriff 'Absolutismus' und seine gesellschaftlichen Auswirkungen liegen. Verwende einfache, aber präzise Sprache.",
       "additional-assets-label": "Hintergrundwissen für telli",
-      "additional-assets-content": "Füge jeweils bis zu fünf Dateien und  Links hinzu. telli nutzt diese Informationen, um das Lernszenario besser auf das Thema abzustimmen.",
+      "additional-assets-content": "Füge jeweils bis zu fünf Dateien und Links hinzu. telli nutzt diese Informationen, um das Lernszenario besser auf das Thema abzustimmen.",
       "attached-files-label": "Welche Dateien dienen telli als Grundlage?",
       "attached-links-label": "Welche Webquellen dienen telli als Grundlage?",
       "attached-links-placeholder": "URL der Webseiten",

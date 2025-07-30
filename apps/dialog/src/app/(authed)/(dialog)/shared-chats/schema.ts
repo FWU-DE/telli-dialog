@@ -7,6 +7,7 @@ import {
   SMALL_TEXT_INPUT_FIELDS_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
+import { formLinks } from '@/utils/web-search/form-links';
 import { z } from 'zod';
 
 /**
@@ -27,16 +28,7 @@ export const sharedSchoolChatFormValuesSchema = z.object({
   studentExcercise: z.string().max(1000).nullable(),
   additionalInstructions: z.string().min(1).max(2000),
   restrictions: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT).nullable(),
-  attachedLinks: z.array(
-    z.object({
-      type: z.literal('websearch'),
-      name: z.string().optional(),
-      link: z.string(),
-      content: z.string().optional(),
-      hostname: z.string().optional(),
-      error: z.boolean().optional(),
-    }),
-  ),
+  attachedLinks: formLinks,
 });
 
 export type SharedSchoolChatFormValues = z.infer<typeof sharedSchoolChatFormValuesSchema>;

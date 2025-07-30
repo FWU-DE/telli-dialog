@@ -42,12 +42,12 @@ export default async function Page(context: PageContext) {
   }
   const relatedFiles = await fetchFileMapping(params.sharedSchoolChatId);
 
-  const initalLinks = PREFETCH_ENABLED
+  const initialLinks = PREFETCH_ENABLED
     ? await Promise.all(
         sharedSchoolChat.attachedLinks.filter((l) => l !== '').map(webScraperExecutable),
       )
     : sharedSchoolChat.attachedLinks
-        .filter((l) => l !== '')
+        .filter((l) => l && l !== '')
         .map(
           (url) =>
             ({
@@ -72,7 +72,7 @@ export default async function Page(context: PageContext) {
           {...sharedSchoolChat}
           existingFiles={relatedFiles}
           isCreating={isCreating}
-          initalLinks={initalLinks}
+          initialLinks={initialLinks}
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           readOnly={false}
         />

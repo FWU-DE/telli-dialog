@@ -15,8 +15,11 @@ import CharacterForm from './character-form';
 import { removeNullValues } from '@/utils/generic/object-operations';
 import { CharacterModel } from '@/db/schema';
 import { fetchFileMapping } from '../../actions';
+import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
+import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 
 export const dynamic = 'force-dynamic';
+const PREFETCH_ENABLED = false;
 
 async function getMaybeDefaultTemplateCharater({
   templateId,
@@ -78,6 +81,19 @@ export default async function Page(context: PageContext) {
     key: character.pictureId ?? copyOfTemplatePicture,
   });
 
+  const initialLinks = PREFETCH_ENABLED
+    ? await Promise.all(character.attachedLinks.filter((l) => l !== '').map(webScraperExecutable))
+    : character.attachedLinks
+        .filter((l) => l !== '')
+        .map(
+          (url) =>
+            ({
+              link: url,
+              type: 'websearch',
+              error: false,
+            }) as WebsearchSource,
+        );
+
   const mergedCharacter = {
     ...removeNullValues(character),
     ...removeNullValues(defaultTemplateCharacter),
@@ -98,6 +114,7 @@ export default async function Page(context: PageContext) {
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           isCreating={isCreating}
           existingFiles={relatedFiles}
+          initialLinks={initialLinks}
           readOnly={readOnly}
         />
       </div>
