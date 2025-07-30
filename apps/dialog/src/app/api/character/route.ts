@@ -22,6 +22,7 @@ import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbGetRelatedCharacterFiles } from '@/db/functions/files';
 import { getRelevantFileContent } from '../file-operations/retrieval';
+import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 
 export async function POST(request: NextRequest) {
   const { messages, modelId }: { messages: Array<Message>; modelId: string } = await request.json();
@@ -91,15 +92,18 @@ export async function POST(request: NextRequest) {
   }
 
   const relatedFileEntities = await dbGetRelatedCharacterFiles(character.id);
+  const urls = character.attachedLinks.filter((l) => l !== '').map(webScraperExecutable);
   const orderedChunks = await getRelevantFileContent({
     messages,
     user: teacherUserAndContext,
     relatedFileEntities,
     model: telliProvider,
   });
+  const websearchSources = await Promise.all(urls);
   const systemPrompt = constructSystemPromptByCharacterSharedChat({
     character,
     retrievedTextChunks: orderedChunks,
+    websearchSources,
   });
 
   const result = streamText({

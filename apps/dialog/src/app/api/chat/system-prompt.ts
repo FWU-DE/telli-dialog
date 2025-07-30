@@ -161,7 +161,7 @@ export async function constructChatSystemPrompt({
       fileContentPrompt,
     });
 
-    return characterSystemPrompt + fileContentPrompt;
+    return characterSystemPrompt + fileContentPrompt + websearchSourcesPrompt;
   }
   if (customGptId !== undefined) {
     const customGpt = await dbGetCustomGptById({ customGptId });
@@ -181,9 +181,7 @@ export async function constructChatSystemPrompt({
       additionalInstruction = constructCustomGptSystemPrompt({ customGpt, fileContentPrompt });
     }
 
-    const concatenatedHelpModeSystemPrompt = schoolSystemPrompt + additionalInstruction;
-
-    return concatenatedHelpModeSystemPrompt;
+    return schoolSystemPrompt + additionalInstruction + websearchSourcesPrompt;
   }
 
   return schoolSystemPrompt + fileContentPrompt + websearchSourcesPrompt;
