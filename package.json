@@ -6,7 +6,8 @@
     "db:migrate": "turbo run db:migrate",
     "db:seed": "turbo run db:seed",
     "dev": "turbo run dev:local",
-    "format:check": "turbo run format:check",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "types": "turbo run types"
@@ -14,6 +15,7 @@
   "packageManager": "pnpm@9.6.0",
   "dependencies": {},
   "devDependencies": {
+    "prettier": "3.4.2",
     "turbo": "2.5.5"
   }
 }
