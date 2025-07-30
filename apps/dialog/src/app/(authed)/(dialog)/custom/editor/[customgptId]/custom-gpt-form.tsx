@@ -21,7 +21,10 @@ import DestructiveActionButton from '@/components/common/destructive-action-butt
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
 import Checkbox from '@/components/common/checkbox';
-import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import {
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
+} from '@/configuration-text-inputs/const';
 import TrashIcon from '@/components/icons/trash';
 import PlusIcon from '@/components/icons/plus';
 import { TextInput } from '@/components/common/text-input';
@@ -61,7 +64,7 @@ type CustomGptFormProps = CustomGptModel & {
 const customGptFormValuesSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  specification: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
+  specification: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS),
   promptSuggestions: z.array(z.object({ content: z.string() })),
   attachedLinks: formLinks,
 });
@@ -368,7 +371,7 @@ export default function CustomGptForm({
           {...register('specification')}
           rows={7}
           readOnly={readOnly}
-          maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+          maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS}
           id="specification"
           onBlur={handleAutoSave}
         />
