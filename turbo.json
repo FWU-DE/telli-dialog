@@ -34,11 +34,6 @@
       "persistent": true,
       "cache": false
     },
-    "dev:local": {
-      "dependsOn": ["^dev"],
-      "persistent": true,
-      "cache": false
-    },
     "db:migrate": {
       "dependsOn": ["^db:migrate"],
       "env": ["DATABASE_URL"]
@@ -46,9 +41,6 @@
     "db:seed": {
       "dependsOn": ["^db:seed"],
       "env": ["DATABASE_URL"]
-    },
-    "types": {
-      "dependsOn": ["^types"]
     },
     "lint": {
       "dependsOn": ["^lint"]
