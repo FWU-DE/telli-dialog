@@ -25,7 +25,7 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { startTransition } from 'react';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import SelectLlmModelForm from '../../../_components/select-llm-model';
 import {
@@ -38,16 +38,20 @@ import ShareContainer from './share-container';
 import { CopyContainer } from '../../../_components/copy-container';
 import { LocalFileState } from '@/components/chat/send-message-form';
 import { deleteFileMappingAndEntity, linkFileToCharacter } from '../../actions';
-import FileDrop from '@/components/forms/file-drop-area';
-import FilesTable from '@/components/forms/file-upload-table';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
 import { getZodFieldMetadataFn } from '@/components/forms/utils';
+import { AttachedLinks } from '@/components/forms/attached-links';
+import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { formLinks } from '@/utils/web-search/form-links';
+import FileManagement from '@/components/forms/file-management';
 
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
   isCreating?: boolean;
   readOnly: boolean;
+  existingFiles: FileModel[];
+  initialLinks: WebsearchSource[];
 };
 
 /**
@@ -70,6 +74,7 @@ const characterFormValuesSchema = z.object({
   specifications: z.string().nullable(),
   restrictions: z.string().nullable(),
   initialMessage: z.string().nullable(),
+  attachedLinks: formLinks,
 });
 type CharacterFormValues = z.infer<typeof characterFormValuesSchema>;
 
@@ -78,8 +83,9 @@ export default function CharacterForm({
   isCreating = false,
   existingFiles,
   readOnly,
+  initialLinks,
   ...character
-}: CharacterFormProps & { existingFiles: FileModel[] }) {
+}: CharacterFormProps) {
   const router = useRouter();
   const toast = useToast();
 
@@ -92,11 +98,13 @@ export default function CharacterForm({
     handleSubmit,
     getValues,
     setValue,
+    control,
     formState: { isValid },
   } = useForm<CharacterFormValues>({
     resolver: zodResolver(characterFormValuesSchema),
     defaultValues: {
       ...character,
+      attachedLinks: initialLinks,
       modelId: maybeDefaultModelId,
     },
   });
@@ -157,6 +165,10 @@ export default function CharacterForm({
   }
 
   const backUrl = `/characters?visibility=${character.accessLevel}`;
+  const { fields } = useFieldArray({
+    control,
+    name: 'attachedLinks',
+  });
 
   function handlePictureUploadComplete(picturePath: string) {
     updateCharacterPictureAction({ picturePath, characterId: character.id })
@@ -170,7 +182,11 @@ export default function CharacterForm({
   }
 
   function onSubmit(data: CharacterFormValues) {
-    updateCharacterAction({ characterId: character.id, ...data })
+    updateCharacterAction({
+      characterId: character.id,
+      ...data,
+      attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
+    })
       .then(() => {
         if (!isCreating) {
           toast.success(tToast('edit-toast-success'));
@@ -212,13 +228,16 @@ export default function CharacterForm({
   function handleAutoSave() {
     if (isCreating || readOnly) return;
     const data = getValues();
-    const hasChanges = !deepEqual(data, {
-      ...character,
+    const defaultData = { ...character, promptSuggestions: [] };
+    const newData = {
+      ...defaultData,
+      ...data,
       description: character.description ?? '',
       learningContext: character.learningContext ?? '',
-    });
-
-    if (!hasChanges) return;
+      attachedLinks: data.attachedLinks.map((p) => p.link),
+    };
+    const dataEquals = deepEqual(defaultData, newData);
+    if (dataEquals) return;
     onSubmit(data);
   }
 
@@ -434,25 +453,32 @@ export default function CharacterForm({
           onBlur={handleAutoSave}
         />
       </fieldset>
-      {!readOnly && (
-        <>
-          <FileDrop
-            setFiles={setFiles}
-            countOfFiles={initialFiles.length + _files.size}
-            onFileUploaded={handleNewFile}
-            showUploadConfirmation={true}
-            className="mt-8"
-          />
-          <FilesTable
-            files={initialFiles ?? []}
-            additionalFiles={_files}
-            onDeleteFile={handleDeattachFile}
-            toast={toast}
-            showUploadConfirmation={true}
-            className="mt-4"
-          />
-        </>
-      )}
+      <fieldset className="flex flex-col gap-4 mt-8">
+        <h2 className="text-md font-medium">{t('additional-assets-label')}</h2>
+        <span className="text-base">{t('additional-assets-content')}</span>
+        {!readOnly && (
+          <>
+            <FileManagement
+              files={_files}
+              setFiles={setFiles}
+              initialFiles={initialFiles}
+              onFileUploaded={handleNewFile}
+              onDeleteFile={handleDeattachFile}
+              readOnly={readOnly}
+              translationNamespace="characters.form"
+            />
+          </>
+        )}
+        <AttachedLinks
+          fields={fields}
+          getValues={() => getValues('attachedLinks')}
+          setValue={(value) => setValue('attachedLinks', value)}
+          t={t}
+          tToast={tToast}
+          readOnly={readOnly}
+          handleAutosave={handleAutoSave}
+        />
+      </fieldset>
 
       {!isCreating && !readOnly && (
         <section className="mt-8">

@@ -45,7 +45,9 @@ jobs:
     needs: checks
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.ref == 'refs/heads/main'
+    if: |
+      startsWith(github.head_ref, 'ci/') ||
+      github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code

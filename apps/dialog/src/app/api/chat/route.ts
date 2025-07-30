@@ -28,6 +28,8 @@ import { getRelevantFileContent } from '../file-operations/retrieval';
 import { extractImagesAndUrl } from '../file-operations/prepocess-image';
 import { formatMessagesWithImages } from './utils';
 import { logDebug } from '@/utils/logging/logging';
+import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
+import { dbGetCharacterByIdWithShareData } from '@/db/functions/character';
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -159,17 +161,30 @@ export async function POST(request: NextRequest) {
   const modelSupportsImages =
     definedModel.supportedImageFormats !== null && definedModel.supportedImageFormats.length > 0;
 
-  const urls = [userMessage, ...messages]
-    .map((message) => parseHyperlinks(message.content) ?? [])
-    .flat();
+  let urls: string[] = [];
+
+  if (customGptId !== undefined) {
+    const customGpt = await dbGetCustomGptById({ customGptId });
+    if (customGpt) {
+      urls = customGpt.attachedLinks;
+    }
+  } else if (characterId !== undefined) {
+    const character = await dbGetCharacterByIdWithShareData({
+      characterId,
+      userId: user.id,
+    });
+    if (character) {
+      urls = character.attachedLinks;
+    }
+  } else {
+    urls = [userMessage, ...messages]
+      .map((message) => parseHyperlinks(message.content) ?? [])
+      .flat();
+  }
 
   let websearchSources: WebsearchSource[] = [];
   try {
-    websearchSources = await Promise.all(
-      urls.map(async (url) => {
-        return await webScraperExecutable(url);
-      }),
-    );
+    websearchSources = await Promise.all(urls.filter((l) => l !== '').map(webScraperExecutable));
   } catch (error) {
     console.error('Unhandled error while fetching website', error);
   }
