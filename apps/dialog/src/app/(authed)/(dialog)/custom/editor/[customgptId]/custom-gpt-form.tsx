@@ -33,8 +33,7 @@ import {
 } from './actions';
 import { deleteFileMappingAndEntity, linkFileToCustomGpt } from '../../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
-import FileDrop from '@/components/forms/file-drop-area';
-import FilesTable from '@/components/forms/file-upload-table';
+import FileManagement from '@/components/forms/file-management';
 import { CopyContainer } from '../../../_components/copy-container';
 import NavigateBack from '@/components/common/navigate-back';
 import { LocalFileState } from '@/components/chat/send-message-form';
@@ -42,6 +41,7 @@ import { getZodFieldMetadataFn } from '@/components/forms/utils';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { AttachedLinks } from '@/components/forms/attached-links';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { formLinks } from '@/utils/web-search/form-links';
 
 type CustomGptFormProps = CustomGptModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -51,7 +51,6 @@ type CustomGptFormProps = CustomGptModel & {
   existingFiles: FileModel[];
   initialLinks: WebsearchSource[];
 };
-
 /**
  * Zod form configuration Info:
  * - If the field is required, set the min length to at least 1.
@@ -64,16 +63,7 @@ const customGptFormValuesSchema = z.object({
   description: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   specification: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   promptSuggestions: z.array(z.object({ content: z.string() })),
-  attachedLinks: z.array(
-    z.object({
-      type: z.literal('websearch'),
-      name: z.string().optional(),
-      link: z.string(),
-      content: z.string().optional(),
-      hostname: z.string().optional(),
-      error: z.boolean().optional(),
-    }),
-  ),
+  attachedLinks: formLinks,
 });
 type CustomGptFormValues = z.infer<typeof customGptFormValuesSchema>;
 
@@ -448,19 +438,14 @@ export default function CustomGptForm({
 
         {!readOnly && (
           <>
-            <label className={cn(labelClassName)}>{t('attached-files-label')}</label>
-            <FileDrop
+            <FileManagement
+              files={_files}
               setFiles={setFiles}
+              initialFiles={initialFiles}
               onFileUploaded={handleNewFile}
-              showUploadConfirmation={true}
-              countOfFiles={initialFiles.length + _files.size}
-            />
-            <FilesTable
-              files={initialFiles ?? []}
-              additionalFiles={_files}
               onDeleteFile={handleDeattachFile}
-              toast={toast}
-              showUploadConfirmation={true}
+              readOnly={readOnly}
+              translationNamespace="custom-gpt.form"
             />
           </>
         )}

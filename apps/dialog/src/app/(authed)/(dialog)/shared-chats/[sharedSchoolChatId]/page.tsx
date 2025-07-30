@@ -57,8 +57,6 @@ export default async function Page(context: PageContext) {
             }) as WebsearchSource,
         );
 
-  console.log('initialLinks', initialLinks);
-
   const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
     key: sharedSchoolChat.pictureId ? `shared-chats/${sharedSchoolChat.id}/avatar` : undefined,
   });

@@ -35,13 +35,13 @@ import ShareContainer from './share-container';
 import { CopyContainer } from '../../../_components/copy-container';
 import { LocalFileState } from '@/components/chat/send-message-form';
 import { deleteFileMappingAndEntity, linkFileToCharacter } from '../../actions';
-import FileDrop from '@/components/forms/file-drop-area';
-import FilesTable from '@/components/forms/file-upload-table';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
 import { getZodFieldMetadataFn } from '@/components/forms/utils';
 import { AttachedLinks } from '@/components/forms/attached-links';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { formLinks } from '@/utils/web-search/form-links';
+import FileManagement from '@/components/forms/file-management';
 
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -71,16 +71,7 @@ const characterFormValuesSchema = z.object({
   specifications: z.string().nullable(),
   restrictions: z.string().nullable(),
   initialMessage: z.string().nullable(),
-  attachedLinks: z.array(
-    z.object({
-      type: z.literal('websearch'),
-      name: z.string().optional(),
-      link: z.string(),
-      content: z.string().optional(),
-      hostname: z.string().optional(),
-      error: z.boolean().optional(),
-    }),
-  ),
+  attachedLinks: formLinks,
 });
 type CharacterFormValues = z.infer<typeof characterFormValuesSchema>;
 
@@ -464,19 +455,14 @@ export default function CharacterForm({
         <span className="text-base">{t('additional-assets-content')}</span>
         {!readOnly && (
           <>
-            <label className={cn(labelClassName)}>{t('attached-files-label')}</label>
-            <FileDrop
+            <FileManagement
+              files={_files}
               setFiles={setFiles}
-              countOfFiles={initialFiles.length + _files.size}
+              initialFiles={initialFiles}
               onFileUploaded={handleNewFile}
-              showUploadConfirmation={true}
-            />
-            <FilesTable
-              files={initialFiles ?? []}
-              additionalFiles={_files}
               onDeleteFile={handleDeattachFile}
-              toast={toast}
-              showUploadConfirmation={true}
+              readOnly={readOnly}
+              translationNamespace="characters.form"
             />
           </>
         )}

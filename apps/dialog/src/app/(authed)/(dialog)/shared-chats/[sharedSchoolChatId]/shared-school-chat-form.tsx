@@ -26,8 +26,7 @@ import ShareContainer from './share-container';
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { LocalFileState } from '@/components/chat/send-message-form';
-import FileDrop from '@/components/forms/file-drop-area';
-import FilesTable from '@/components/forms/file-upload-table';
+import FileManagement from '@/components/forms/file-management';
 import SelectLlmModelForm from '../../_components/select-llm-model';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
@@ -329,20 +328,14 @@ export default function SharedSchoolChatForm({
           <h2 className="text-md font-medium">{t('additional-assets-label')}</h2>
           <span className="text-base">{t('additional-assets-content')}</span>
 
-          <label className={cn(labelClassName)}>{t('attached-files-label')}</label>
-          <FileDrop
+          <FileManagement
+            files={_files}
             setFiles={setFiles}
+            initialFiles={initialFiles}
             onFileUploaded={handleNewFile}
-            showUploadConfirmation={true}
-            countOfFiles={initialFiles.length + _files.size}
-          />
-          <FilesTable
-            files={initialFiles ?? []}
-            additionalFiles={_files}
             onDeleteFile={handleDeattachFile}
-            toast={toast}
-            showUploadConfirmation={true}
-            className="p-4"
+            readOnly={false}
+            translationNamespace="shared-chats.form"
           />
           <AttachedLinks
             fields={fields}
