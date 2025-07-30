@@ -10,7 +10,7 @@
     "format:check": "prettier --check .",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "types": "turbo run types"
+    "check-types": "turbo run check-types"
   },
   "packageManager": "pnpm@9.6.0",
   "dependencies": {},
