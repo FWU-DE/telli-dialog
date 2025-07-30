@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 export const formLinks = z.array(
@@ -9,5 +8,5 @@ export const formLinks = z.array(
     content: z.string().optional(),
     hostname: z.string().optional(),
     error: z.boolean().optional(),
-  })
+  }),
 );
