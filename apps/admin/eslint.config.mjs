@@ -7,7 +7,7 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.config({
-    extends: ['next', 'text/typescript', 'prettier'],
+    extends: ['next', 'next/typescript', 'prettier'],
     settings: {
       next: {
         rootDir: 'packages/my-app/',

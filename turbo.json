@@ -47,6 +47,9 @@
       "dependsOn": ["^db:seed"],
       "env": ["DATABASE_URL"]
     },
+    "format": {
+      "dependsOn": ["^format"]
+    },
     "format:check": {
       "dependsOn": ["^format:check"]
     },
