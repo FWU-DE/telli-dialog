@@ -78,7 +78,7 @@ jobs:
             sleep 2
           done
 
-      - name: Run migrations or seed database (if applicable)
+      - name: Run migrations and seed database (if applicable)
         run: pnpm --filter telli-dialog db:migrate && pnpm --filter telli-dialog db:seed
 
       - name: Start application
