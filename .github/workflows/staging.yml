@@ -52,7 +52,9 @@ jobs:
     needs: checks
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: ${{ startsWith(github.head_ref, 'ci/') }} || ${{ github.ref == 'refs/heads/main' }}
+    if: |
+      (github.event_name == 'push' && startsWith(github.ref_name, 'ci/')) ||
+      (github.event_name == 'pull_request' && github.base_ref == 'main')
 
     steps:
       - name: Checkout code
