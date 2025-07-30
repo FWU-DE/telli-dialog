@@ -36,21 +36,24 @@ import {
 } from './actions';
 import { deleteFileMappingAndEntity, linkFileToCustomGpt } from '../../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
-import FileDrop from '@/components/forms/file-drop-area';
-import FilesTable from '@/components/forms/file-upload-table';
+import FileManagement from '@/components/forms/file-management';
 import { CopyContainer } from '../../../_components/copy-container';
 import NavigateBack from '@/components/common/navigate-back';
 import { LocalFileState } from '@/components/chat/send-message-form';
 import { getZodFieldMetadataFn } from '@/components/forms/utils';
 import { iconClassName } from '@/utils/tailwind/icon';
+import { AttachedLinks } from '@/components/forms/attached-links';
+import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { formLinks } from '@/utils/web-search/form-links';
 
 type CustomGptFormProps = CustomGptModel & {
   maybeSignedPictureUrl: string | undefined;
   userRole: UserSchoolRole;
   isCreating?: boolean;
   readOnly: boolean;
+  existingFiles: FileModel[];
+  initialLinks: WebsearchSource[];
 };
-
 /**
  * Zod form configuration Info:
  * - If the field is required, set the min length to at least 1.
@@ -63,6 +66,7 @@ const customGptFormValuesSchema = z.object({
   description: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   specification: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS),
   promptSuggestions: z.array(z.object({ content: z.string() })),
+  attachedLinks: formLinks,
 });
 type CustomGptFormValues = z.infer<typeof customGptFormValuesSchema>;
 
@@ -73,8 +77,9 @@ export default function CustomGptForm({
   userRole,
   existingFiles,
   readOnly,
+  initialLinks,
   ...customGpt
-}: CustomGptFormProps & { existingFiles: FileModel[] }) {
+}: CustomGptFormProps) {
   const router = useRouter();
   const toast = useToast();
 
@@ -83,6 +88,7 @@ export default function CustomGptForm({
     handleSubmit,
     control,
     getValues,
+    setValue,
     formState: { isValid },
   } = useForm<CustomGptFormValues>({
     resolver: zodResolver(customGptFormValuesSchema),
@@ -94,6 +100,7 @@ export default function CustomGptForm({
         promptSuggestions.length < 1
           ? [{ content: '' }]
           : promptSuggestions.map((p) => ({ content: p })),
+      attachedLinks: initialLinks,
     },
   });
   const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
@@ -129,6 +136,10 @@ export default function CustomGptForm({
     control,
     name: 'promptSuggestions',
   });
+  const { fields: attachedLinkFields } = useFieldArray({
+    control,
+    name: 'attachedLinks',
+  });
 
   async function handleDeattachFile(localFileId: string) {
     const fileId: string | undefined =
@@ -159,6 +170,7 @@ export default function CustomGptForm({
       ...data,
       promptSuggestions: data.promptSuggestions?.map((p) => p.content),
       gptId: customGpt.id,
+      attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
     })
       .then(() => {
         if (!isCreating) toast.success(tToast('edit-toast-success'));
@@ -241,6 +253,7 @@ export default function CustomGptForm({
       ...defaultData,
       ...data,
       promptSuggestions: [],
+      attachedLinks: data.attachedLinks.map((p) => p.link),
     };
     const dataEquals = deepEqual(defaultData, newData);
     if (dataEquals) return;
@@ -422,25 +435,33 @@ export default function CustomGptForm({
         <section className="mt-8"></section>
       </fieldset>
 
-      {!readOnly && (
-        <>
-          <FileDrop
-            setFiles={setFiles}
-            onFileUploaded={handleNewFile}
-            showUploadConfirmation={true}
-            countOfFiles={initialFiles.length + _files.size}
-            className="mt-8"
-          />
-          <FilesTable
-            files={initialFiles ?? []}
-            additionalFiles={_files}
-            onDeleteFile={handleDeattachFile}
-            toast={toast}
-            showUploadConfirmation={true}
-            className="mt-4"
-          />
-        </>
-      )}
+      <fieldset className="flex flex-col gap-4 mt-8">
+        <h2 className="text-md font-medium">{t('additional-assets-label')}</h2>
+        <span className="text-base">{t('additional-assets-content')}</span>
+
+        {!readOnly && (
+          <>
+            <FileManagement
+              files={_files}
+              setFiles={setFiles}
+              initialFiles={initialFiles}
+              onFileUploaded={handleNewFile}
+              onDeleteFile={handleDeattachFile}
+              readOnly={readOnly}
+              translationNamespace="custom-gpt.form"
+            />
+          </>
+        )}
+        <AttachedLinks
+          fields={attachedLinkFields}
+          getValues={() => getValues('attachedLinks')}
+          setValue={(value) => setValue('attachedLinks', value)}
+          t={t}
+          tToast={tToast}
+          readOnly={readOnly}
+          handleAutosave={handleAutoSave}
+        />
+      </fieldset>
       {!isCreating && !readOnly && (
         <section className="mt-8">
           <h3 className="font-medium">{t('delete-gpt')}</h3>

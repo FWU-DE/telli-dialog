@@ -168,8 +168,11 @@ export const characterTable = pgTable('character', {
   maxUsageTimeLimit: integer('max_usage_time_limit'),
   inviteCode: text('invite_code').unique(),
   startedAt: timestamp('started_at', { withTimezone: true }),
-
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  attachedLinks: text('attached_links')
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
 });
 
 export type CharacterInsertModel = typeof characterTable.$inferInsert;
@@ -334,6 +337,10 @@ export const customGptTable = pgTable('custom_gpt', {
   description: text('description'),
   specification: text('specification'),
   promptSuggestions: text('prompt_suggestions')
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
+  attachedLinks: text('attached_links')
     .array()
     .notNull()
     .default(sql`'{}'::text[]`),

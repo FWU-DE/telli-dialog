@@ -8,7 +8,7 @@ export function constructWebsearchPrompt({
 }: {
   websearchSources?: WebsearchSource[];
 }) {
-  if (websearchSources === undefined) {
+  if (websearchSources === undefined || websearchSources.length === 0) {
     return '';
   }
   return `${WEBSEARCH_PROMPT} ${websearchSources.map((source) => constructSingleWebsearchPrompt(source)).join('\n')}`;
