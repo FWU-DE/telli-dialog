@@ -17,13 +17,25 @@
     "rolle": "LEHR",
     "bundesland": "DE-TEST"
   },
-  "teacher-bb": {
+  "teacher1-BY": {
+    "sub": "cf1cb1a1-221d-4bb4-8ab6-932eef73ee09",
+    "schulkennung": "school1-BY",
+    "rolle": "LEHR",
+    "bundesland": "DE-BY"
+  },
+  "teacher2-BY": {
+    "sub": "1f43838a-6eb2-4e5a-bbf4-11b43235b67a",
+    "schulkennung": "school1-BY",
+    "rolle": "LEHR",
+    "bundesland": "DE-BY"
+  },
+  "teacher-BB": {
     "sub": "f7e4d2c1-8b5a-4f9e-a3d6-1c7e9b2f4a8d",
     "schulkennung": "school-bb",
     "rolle": "LEHR",
     "bundesland": "DE-BB"
   },
-  "teacher-bw": {
+  "teacher-BW": {
     "sub": "9a3f7b2e-c8d1-4e6f-b9a2-5d8c3f1e7b4a",
     "schulkennung": "school-bw",
     "rolle": "LEHR",
