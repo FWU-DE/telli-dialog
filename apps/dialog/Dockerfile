@@ -46,7 +46,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV TURBO_TELEMETRY_DISABLED=1
 EXPOSE ${PORT}
 
-CMD pnpm db:migrate && node ./apps/dialog/server.js
+CMD node ./apps/dialog/server.js
 
 
 ## RUN rm -rf ./**/*/src
