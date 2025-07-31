@@ -5,9 +5,6 @@ import { mockVidisConfig } from './providers/vidis-mock';
 
 const SESSION_LIFETIME = 60 * 60 * 8;
 
-console.log('Authentication: ', process.env.VIDIS_ISSUER_URI);
-console.log('Client ID: ', process.env.VIDIS_CLIENT_ID);
-
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [vidisConfig, mockVidisConfig],
   jwt: {
