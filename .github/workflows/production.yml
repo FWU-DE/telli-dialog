@@ -20,28 +20,114 @@ jobs:
         run: sudo timedatectl set-timezone Europe/Warsaw
 
       - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
 
-      - name: Install PNPM
-        run: npm i -g pnpm@9.6.0
+      - name: Cache turbo build cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ hashFiles('**/turbo.json') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
 
+  audit:
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
       - name: Audit dependencies
         run: pnpm audit --audit-level=critical
+
+  check_formatting:
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
       - name: Check formatting
-        run: pnpm format:check
+        run: pnpm run format:check
+
+  check_types:
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
       - name: Check types
-        run: pnpm types
+        run: pnpm run check-types
+
+  check_linter:
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
       - name: Check linter
-        run: pnpm lint
-      - name: Run tests
-        run: pnpm test
+        run: pnpm run lint
+
+  check_unit_tests:
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Check unit tests
+        run: pnpm run test
 
   deploy-production:
     name: Rollout production
@@ -51,7 +137,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set Kubernetes context
         uses: azure/k8s-set-context@v4
@@ -66,6 +152,8 @@ jobs:
           echo "Updating Kubernetes deployment with image tag $COMMIT_HASH"
           kubectl set image deployment/telli-dialog-prod \
             telli-dialog-prod=telli.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH \ -n telli-prod
+          kubectl set image deployment/telli-admin-prod \
+            telli-admin-prod=telli.cr.de-fra.ionos.com/telli/admin:$COMMIT_HASH \ -n telli-prod
 
       - name: Wait for rollout to complete
         run: |

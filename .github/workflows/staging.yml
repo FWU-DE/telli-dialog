@@ -131,7 +131,6 @@ jobs:
     needs: [audit, check_formatting, check_types, check_linter, check_unit_tests]
     timeout-minutes: 10
     if: |
-      startsWith(github.head_ref, 'TD-365') ||
       startsWith(github.head_ref, 'ci/') ||
       github.ref == 'refs/heads/main'
 
@@ -157,7 +156,6 @@ jobs:
     needs: [audit, check_formatting, check_types, check_linter, check_unit_tests]
     timeout-minutes: 10
     if: |
-      startsWith(github.head_ref, 'TD-365') ||
       startsWith(github.head_ref, 'ci/') ||
       github.ref == 'refs/heads/main'
 
