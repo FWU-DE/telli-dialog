@@ -3,6 +3,7 @@
   "scripts": {
     "build": "turbo run build",
     "build:docker:dialog": "docker build -t telli-dialog -f ./apps/dialog/Dockerfile .",
+    "build:docker:admin": "docker build -t telli-admin -f ./apps/admin/Dockerfile .",
     "db:migrate": "turbo run db:migrate",
     "db:seed": "turbo run db:seed",
     "dev": "turbo run dev",

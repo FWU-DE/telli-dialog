@@ -12,9 +12,6 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const vidis_idp_hint = searchParams.get('vidis_idp_hint');
 
-  console.log('Login Authentication: ', process.env.VIDIS_ISSUER_URI);
-  console.log('Login Client ID: ', process.env.VIDIS_CLIENT_ID);
-
   if (vidis_idp_hint !== null) {
     signIn('vidis', undefined, { vidis_idp_hint: vidis_idp_hint });
   }

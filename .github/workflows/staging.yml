@@ -12,38 +12,123 @@ env:
   SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
 jobs:
-  checks:
-    timeout-minutes: 10
+  install:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Use Node.js
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
 
-      - name: Install PNPM
-        run: npm install -g pnpm@9.6.0
+      - name: Cache turbo build cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ hashFiles('**/turbo.json') }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
 
+  checks:
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
       - name: Audit dependencies
         run: pnpm audit --audit-level=critical
+
+  check_formatting:
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
       - name: Check formatting
         run: pnpm run format:check
+
+  check_types:
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
       - name: Check types
         run: pnpm run check-types
+
+  check_linter:
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
       - name: Check linter
         run: pnpm run lint
+
+  check_unit_tests:
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
       - name: Check unit tests
         run: pnpm run test
 
-  build-staging:
-    name: Build and push docker image
-    needs: checks
+  build_push_docker_image_dialog:
+    name: Build and push docker image telli-dialog
     runs-on: ubuntu-latest
+    needs: [checks, check_formatting, check_types, check_linter, check_unit_tests]
     timeout-minutes: 10
     if: |
       startsWith(github.head_ref, 'ci/') ||
@@ -51,7 +136,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build Docker image
         run: |
@@ -65,11 +150,35 @@ jobs:
           COMMIT_HASH=${{ github.sha }}
           docker push telli.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH
 
-  deploy-staging:
-    name: Rollout staging
-    timeout-minutes: 20
-    needs: build-staging
+  build_push_docker_image_admin:
+    name: Build and push docker image telli-admin
     runs-on: ubuntu-latest
+    needs: [checks, check_formatting, check_types, check_linter, check_unit_tests]
+    timeout-minutes: 10
+    if: |
+      startsWith(github.head_ref, 'ci/') ||
+      github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: |
+          COMMIT_HASH=${{ github.sha }}
+          docker build -f ./apps/admin/Dockerfile -t telli/admin:$COMMIT_HASH .
+          docker tag telli/admin:$COMMIT_HASH telli.cr.de-fra.ionos.com/telli/admin:$COMMIT_HASH
+
+      - name: Push Docker image to IONOS registry
+        run: |
+          echo "${{ secrets.IONOS_REGISTRY_TOKEN_GITHUB_PUSH }}" | docker login --username github-push --password-stdin telli.cr.de-fra.ionos.com
+          COMMIT_HASH=${{ github.sha }}
+          docker push telli.cr.de-fra.ionos.com/telli/admin:$COMMIT_HASH
+
+  deploy_apps:
+    name: Deploy to staging
+    runs-on: ubuntu-latest
+    needs: [build_push_docker_image_dialog, build_push_docker_image_admin]
 
     steps:
       - name: Checkout code
@@ -88,6 +197,8 @@ jobs:
           echo "Updating Kubernetes deployment with image tag $COMMIT_HASH"
           kubectl set image deployment/telli-dialog-stage \
             telli-dialog-stage=telli.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH -n telli-stage
+          kubectl set image deployment/telli-admin-stage \
+            telli-admin-stage=telli.cr.de-fra.ionos.com/telli/admin:$COMMIT_HASH -n telli-stage
 
       - name: Wait for rollout to complete
         run: |
