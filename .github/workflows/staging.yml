@@ -175,7 +175,7 @@ jobs:
         run: |
           echo "${{ secrets.IONOS_REGISTRY_TOKEN_GITHUB_PUSH }}" | docker login --username github-push --password-stdin telli.cr.de-fra.ionos.com
           COMMIT_HASH=${{ github.sha }}
-          docker push telli.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH
+          docker push telli.cr.de-fra.ionos.com/telli/admin:$COMMIT_HASH
 
   deploy_apps:
     name: Deploy to staging
