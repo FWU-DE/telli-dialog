@@ -7,6 +7,7 @@ import { DisclaimerConfig } from './const';
 import { useTranslations } from 'next-intl';
 import Checkbox from '../common/checkbox';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 import MarkdownDisplay from '../chat/markdown-display';
 import { useTheme } from '@/hooks/use-theme';
@@ -126,11 +127,24 @@ export default function TermsConditionsModal({
             >
               {currentContent}
             </div>
+            {disclaimerConfig.image && (
+              <div className="flex justify-center w-full mt-4">
+                <Image
+                  src={disclaimerConfig.image}
+                  alt="Disclaimer"
+                  width={300}
+                  height={0}
+                  style={{ height: 'auto' }}
+                />
+              </div>
+            )}
             {pageNumber === contents.length - 1 && disclaimerConfig.showCheckBox && (
-              <Checkbox
-                onCheckedChange={setChecked}
-                label={disclaimerConfig.acceptLabel}
-              ></Checkbox>
+              <div className="flex items-center gap-3 justify-center">
+                <Checkbox onCheckedChange={setChecked} checked={checked} />
+                <div className="flex-1">
+                  <MarkdownDisplay>{disclaimerConfig.acceptLabel ?? ''}</MarkdownDisplay>
+                </div>
+              </div>
             )}
             <div className="flex flex-wrap justify-end items-center gap-6 mt-auto self-end">
               <AlertDialog.Action asChild>{navigationBar}</AlertDialog.Action>
