@@ -1,3 +1,7 @@
+.next
 .turbo
+build
+dist
 node_modules
-pnpm-lock-yaml
+pnpm-lock.yaml
+migrations
