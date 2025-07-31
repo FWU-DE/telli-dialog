@@ -1,6 +1,6 @@
 import { FederalStateId } from '@/utils/vidis/const';
 
-export const TERM_AND_CONDITIONS = `telli ist ein Angebot des Instituts für Film und Bild in Wissenschaft und Unterricht (FWU) gGmbH, das in Brandenburg im Auftrag des Ministeriums für Bildung, Jugend und Sport des Landes Brandenburg zur Verfügung gestellt wird.
+export const TERM_AND_CONDITIONS_BB = `telli ist ein Angebot des Instituts für Film und Bild in Wissenschaft und Unterricht (FWU) gGmbH, das in Brandenburg im Auftrag des Ministeriums für Bildung, Jugend und Sport des Landes Brandenburg zur Verfügung gestellt wird.
 
 1. Nur registrierte und für telli freigeschaltete Lehrkräfte („Nutzende“) können telli für dienstliche Zwecke nutzen. Eine private Nutzung ist nicht zulässig.
 
@@ -46,12 +46,15 @@ export const EDUCATION_HINT_HB = `Liebe Kollegin, lieber Kollege,
   Vielen Dank und viel Freude bei der Nutzung von telli.
   Ihr Referat 10 Medien und Bildung in der digitalen Welt`;
 
+export const EDUCATION_HINT_BW = `telli ist eine KI-Chatbotoberfläche, über die verschiedene Sprachmodelle für Lehrkräfte, Schülerinnen und Schüler zu schulischen Zwecken nutzbar sind. Die Anwendung von KI erfordert Kompetenzen über die Nutzung, Funktion und die Wirkungsweise künstlicher Intelligenz.`;
+
 // increment this number to prompt renewed acceptance from all users
 export const VERSION: number = 1;
 export type DisclaimerConfig = {
   pageContents: string[];
   showCheckBox?: boolean;
   acceptLabel?: string;
+  image?: string;
 };
 // Ids of all States which explicitly have to accept to the terms & conditions
 
@@ -59,7 +62,7 @@ export const federalStateDisclaimers: Partial<Record<FederalStateId, DisclaimerC
   'DE-BB': {
     pageContents: [
       'Bitte lese und akzeptiere die Nutzungsbedingungen um fortzufahren.',
-      TERM_AND_CONDITIONS,
+      TERM_AND_CONDITIONS_BB,
       EDUCATION_HINT_BB,
     ],
     showCheckBox: true,
@@ -78,6 +81,13 @@ export const federalStateDisclaimers: Partial<Record<FederalStateId, DisclaimerC
     pageContents: [
       'KI-Tools neigen zu Halluzinationen und Vorurteilen. Bitte überprüfen Sie die Ausgaben des KI-Chatbots kritisch.',
     ],
+  },
+  'DE-BW': {
+    pageContents: [EDUCATION_HINT_BW],
+    showCheckBox: true,
+    acceptLabel:
+      'Es dürfen keine privaten oder rechtswidrigen Inhalte über telli eingegeben werden. Der Output von KI-Systemen muss geprüft werden, bevor er weiterverwendet wird. Weiterführende Informationen, Hilfen und Materialien zum Einsatz von telli an Schulen sind [hier](https://edubw.link/telli-taskcards) zu finden. Ich bestätige, dies zur Kenntnis genommen zu haben.',
+    image: '/disclaimer/disclaimer-de-bw.png',
   },
 };
 
