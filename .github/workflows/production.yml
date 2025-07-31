@@ -132,7 +132,7 @@ jobs:
   deploy-production:
     name: Rollout production
     timeout-minutes: 5
-    needs: checks
+    needs: [checks, check_formatting, check_types, check_linter, check_unit_tests]
     runs-on: ubuntu-latest
 
     steps:
