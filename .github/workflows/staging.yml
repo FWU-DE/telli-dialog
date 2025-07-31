@@ -18,13 +18,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - name: Install pnpm
-        run: npm install -g pnpm@9.6.0
       - name: Install dependencies
         run: pnpm install
 
@@ -42,13 +42,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - name: Install pnpm
-        run: npm install -g pnpm@9.6.0
       - name: Install dependencies
         run: pnpm install
       - name: Audit dependencies
@@ -60,13 +60,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - name: Install pnpm
-        run: npm install -g pnpm@9.6.0
       - name: Install dependencies
         run: pnpm install
       - name: Check formatting
@@ -78,13 +78,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - name: Install pnpm
-        run: npm install -g pnpm@9.6.0
       - name: Install dependencies
         run: pnpm install
       - name: Check types
@@ -96,13 +96,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - name: Install pnpm
-        run: npm install -g pnpm@9.6.0
       - name: Install dependencies
         run: pnpm install
       - name: Check linter
@@ -114,13 +114,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - name: Install pnpm
-        run: npm install -g pnpm@9.6.0
       - name: Install dependencies
         run: pnpm install
       - name: Check unit tests
