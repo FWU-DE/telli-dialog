@@ -3,11 +3,19 @@
   "_version": "2.0.0",
 
   "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "module": "commonjs",
+    "incremental": false,
+    "isolatedModules": true,
+    "lib": ["es2022", "DOM", "DOM.Iterable"],
+    "module": "NodeNext",
+    "moduleDetection": "force",
+    "moduleResolution": "NodeNext",
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "es2017"
+    "target": "ES2022"
   }
 }

@@ -1,0 +1,6 @@
+export const env = {
+  API_KEY_TELLI_DIALOG: process.env.API_KEY_TELLI_DIALOG,
+  BASE_URL_TELLI_DIALOG: process.env.BASE_URL_TELLI_DIALOG,
+  API_KEY_TELLI_API: process.env.API_KEY_TELLI_API,
+  BASE_URL_TELLI_API: process.env.BASE_URL_TELLI_API,
+};

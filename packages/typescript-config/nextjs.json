@@ -4,22 +4,17 @@
   "extends": "./base.json",
 
   "compilerOptions": {
+    "plugins": [{ "name": "next" }],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "allowJs": true,
-    "incremental": true,
-    "isolatedModules": true,
     "jsx": "preserve",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "module": "esnext",
-    "moduleResolution": "bundler",
     "noEmit": true,
-    "noUncheckedIndexedAccess": true,
-    "resolveJsonModule": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+    "paths": {
+      "@/*": ["./*"],
+      "@ui/*": ["../../packages/ui/src/*"],
+      "@ui/components/*": ["../../packages/ui/src/components/*"],
+      "@ui/components/ui/*": ["../../packages/ui/src/components/*"]
+    }
+  }
 }

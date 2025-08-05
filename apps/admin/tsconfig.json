@@ -2,9 +2,8 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "_version": "2.0.0",
   "extends": "@telli/typescript-config/nextjs.json",
-  "compilerOptions": {
-    "baseUrl": "./src"
-  },
+  "compilerOptions": {},
+  "types": ["node"],
   "include": ["**/*.ts", "**/*.tsx", "next-env.d.ts", "src", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }

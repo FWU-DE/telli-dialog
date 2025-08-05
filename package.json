@@ -1,4 +1,6 @@
 {
+  "name": "telli-chatbot",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -13,9 +15,10 @@
     "test": "turbo run test",
     "check-types": "turbo run check-types"
   },
-  "packageManager": "pnpm@9.6.0",
+  "packageManager": "pnpm@9.15.1",
   "dependencies": {},
   "devDependencies": {
+    "@telli/typescript-config": "workspace:*",
     "prettier": "3.4.2",
     "turbo": "2.5.5"
   }
