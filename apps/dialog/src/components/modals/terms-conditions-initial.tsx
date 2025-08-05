@@ -47,6 +47,19 @@ export default function TermsConditionsModal({
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const checkScrollState = () => {
+    const div = scrollRef.current;
+    if (div) {
+      if (div.scrollHeight <= div.clientHeight) {
+        setScrollFinished(true);
+      } else {
+        const overflow = div.scrollHeight - div.clientHeight;
+        const shouldBeFinished = overflow <= div.scrollHeight * SCROLL_EXCEESING_TOLERANCE;
+        setScrollFinished(shouldBeFinished);
+      }
+    }
+  };
+
   const handleScroll = () => {
     const div = scrollRef.current;
     if (!div) {
@@ -97,15 +110,7 @@ export default function TermsConditionsModal({
   const currentContent = <MarkdownDisplay>{contents[pageNumber] ?? ''}</MarkdownDisplay>;
 
   useEffect(() => {
-    const div = scrollRef.current;
-    if (div) {
-      if (div.scrollHeight <= div.clientHeight) {
-        setScrollFinished(true);
-      } else {
-        const overflow = div.scrollHeight - div.clientHeight;
-        setScrollFinished(overflow <= div.scrollHeight * SCROLL_EXCEESING_TOLERANCE);
-      }
-    }
+    checkScrollState();
   }, [pageNumber, contents]);
 
   return (
@@ -119,6 +124,9 @@ export default function TermsConditionsModal({
           <AlertDialog.Title asChild>
             <h1 className="text-3xl font-medium p-1 mb-auto mt-auto">{currentTitle}</h1>
           </AlertDialog.Title>
+          <AlertDialog.Description asChild>
+            <div className="sr-only">{'Terms and conditions content'}</div>
+          </AlertDialog.Description>
           <div className="flex flex-col gap-5 items-start p-2">
             <div
               className="overflow-y-auto max-h-[60vh] mt-4"
@@ -135,6 +143,7 @@ export default function TermsConditionsModal({
                   width={300}
                   height={0}
                   style={{ height: 'auto' }}
+                  onLoad={checkScrollState}
                 />
               </div>
             )}
