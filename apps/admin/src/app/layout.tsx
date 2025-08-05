@@ -1,7 +1,5 @@
 import type { ReactNode } from 'react';
 import './globals.css';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from './api/auth/[...nextauth]/auth';
 import { Header } from 'components/header/header';
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
