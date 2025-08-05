@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import './globals.css';
-import { SignOutButton } from 'components/authentication/sign-out-button';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './api/auth/[...nextauth]/auth';
 import { Header } from 'components/header/header';
