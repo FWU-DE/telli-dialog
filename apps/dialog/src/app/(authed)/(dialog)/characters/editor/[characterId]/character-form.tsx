@@ -232,8 +232,6 @@ export default function CharacterForm({
     const newData = {
       ...defaultData,
       ...data,
-      description: character.description ?? '',
-      learningContext: character.learningContext ?? '',
       attachedLinks: data.attachedLinks.map((p) => p.link),
     };
     const dataEquals = deepEqual(defaultData, newData);
