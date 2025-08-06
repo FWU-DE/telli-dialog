@@ -51,16 +51,6 @@ let successFlows = 0;
 
 export const options = __ENV.K6_BROWSER_HEADLESS === 'false' ? TEST_OPTIONS : LOAD_TEST_OPTIONS;
 
-function getUserNameByNumber(n: number) {
-  if (n % 2 === 0) {
-    return `teacher_test_${n}`;
-  }
-  if (n % 2 !== 0) {
-    return `student_test_${n}`;
-  }
-  throw Error('Math not mathing');
-}
-
 // const users = readUserMappings();
 // const users = JSON.parse(open('user-mappings.json'));
 
@@ -72,7 +62,7 @@ export default async function main() {
   const page = await context.newPage();
 
   const userIndex = __VU + __ITER;
-  const userName = getUserNameByNumber(userIndex);
+  const userName = 'teacher';
 
   try {
     await page.goto(`${BASE_URL}/login?mocklogin=true`);
