@@ -4,6 +4,13 @@
   "extends": "@telli/typescript-config/nextjs.json",
   "compilerOptions": {},
   "types": ["node"],
-  "include": ["**/*.ts", "**/*.tsx", "next-env.d.ts", "src", ".next/types/**/*.ts"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "next.config.mjs",
+    "next-env.d.ts",
+    "src",
+    ".next/types/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }

@@ -1,5 +1,5 @@
-@import 'tailwindcss/preflight';
-@tailwind utilities;
+@import 'tailwindcss';
+@config "../../tailwind.config.ts";
 
 @layer base {
   :root {
@@ -71,7 +71,6 @@
 
 @layer base {
   * {
-    @apply border-border;
     padding: 0;
     margin: 0;
   }
@@ -83,9 +82,6 @@
   }
 
   body {
-    @apply text-foreground;
-    background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb)))
-      rgb(var(--background-start-rgb));
   }
 }
 
