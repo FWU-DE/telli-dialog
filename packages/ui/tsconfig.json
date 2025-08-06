@@ -1,8 +1,6 @@
 {
   "extends": "@telli/typescript-config/react-library.json",
-  "compilerOptions": {
-    //"outDir": "dist"
-  },
+  "compilerOptions": {},
   "baseUrl": ".",
   "paths": {
     "@ui/*": ["./src/*"],
