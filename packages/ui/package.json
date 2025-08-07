@@ -2,9 +2,7 @@
   "name": "ui",
   "version": "0.0.0",
   "private": true,
-  "scripts": {
-    "lint": "eslint . --max-warnings 0"
-  },
+  "scripts": {},
   "dependencies": {
     "@radix-ui/react-slot": "1.2.3",
     "class-variance-authority": "0.7.1",
