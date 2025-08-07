@@ -18,10 +18,8 @@ function preprocessMathDelimiters(markdown: string) {
   return (
     markdown
       // Replace \( ... \) with $ ... $ for inline math
-      // @ts-expect-error - this is a regex
       .replace(/\\\((.*?)\\\)/gs, (_, content) => `$${content}$`)
       // Replace \[ ... \] with $$ ... $$ for block math
-      // @ts-expect-error - this is a regex
       .replace(/\\\[(.*?)\\\]/gs, (_, content) => `$$${content}$$`)
   );
 }

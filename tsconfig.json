@@ -1,0 +1,3 @@
+{
+  "extends": "@telli/typescript-config/base.json"
+}
