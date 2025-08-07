@@ -8,9 +8,10 @@ const compat = new FlatCompat({
 const eslintConfig = [
   ...compat.config({
     extends: ['next', 'next/typescript', 'prettier'],
+    plugins: ['prettier'],
     settings: {
       next: {
-        rootDir: 'packages/my-app/',
+        rootDir: 'apps/admin/',
       },
     },
   }),

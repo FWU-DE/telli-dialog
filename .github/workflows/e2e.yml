@@ -63,7 +63,7 @@ jobs:
           node-version-file: '.nvmrc'
 
       - name: Install PNPM
-        run: npm i -g pnpm@9.6.0
+        run: npm i -g pnpm@9.15.1
 
       - name: Install dependencies
         run: pnpm install

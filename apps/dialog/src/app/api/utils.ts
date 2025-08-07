@@ -28,7 +28,8 @@ export async function getModelAndProvider({
 }: {
   federalStateId: string;
   modelId: string;
-}) {
+  /* eslint-disable  @typescript-eslint/no-explicit-any */
+}): Promise<{ telliProvider: any; definedModel: LlmModel }> {
   const [error, federalStateObject] = await dbGetApiKeyByFederalStateIdWithResult({
     federalStateId,
   });

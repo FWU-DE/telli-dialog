@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import KeycloakProvider from 'next-auth/providers/keycloak';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { Provider } from 'next-auth/providers/index';
-import { isDevelopment } from 'utils';
+import { isDevelopment } from '../../../../utils';
 
 // Default provider for stage and prod
 const keycloakProvider: Provider = KeycloakProvider({

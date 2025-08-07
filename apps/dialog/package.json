@@ -45,7 +45,7 @@
     "status:cluster": "pm2 status",
     "logs:cluster": "pm2 logs"
   },
-  "packageManager": "pnpm@9.6.0",
+  "packageManager": "pnpm@9.15.1",
   "dependencies": {
     "@ai-sdk/openai": "1.1.9",
     "@ai-sdk/react": "1.2.12",
