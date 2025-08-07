@@ -78,6 +78,20 @@ async function performLogin(page: Page, userName: string) {
 async function selectModel(page: Page, userIndex: number) {
   const dropdownLocator = page.locator(SELECTORS.LLM_DROPDOWN);
   await dropdownLocator.waitFor();
+
+  // Check current selected model by reading the dropdown trigger text
+  const currentSelectedText = await dropdownLocator.textContent();
+  const targetModelName = userIndex % 2 === 0 ? 'Llama-3.1-8B' : 'GPT-4o-mini';
+
+  // If the target model is already selected, skip selection
+  if (currentSelectedText && currentSelectedText.includes(targetModelName)) {
+    console.log(
+      `Model ${targetModelName} already selected for user ${userIndex}, skipping selection`,
+    );
+    return;
+  }
+
+  // Open dropdown and select the target model
   await dropdownLocator.click();
   await page.waitForTimeout(WAIT_TIMES_IN_MS.ELEMENT_LOAD);
 
@@ -90,6 +104,7 @@ async function selectModel(page: Page, userIndex: number) {
   });
   await modelLocator.click();
   await page.waitForTimeout(WAIT_TIMES_IN_MS.ELEMENT_LOAD);
+  console.log(`Selected model ${targetModelName} for user ${userIndex}`);
 }
 
 async function sendMessageAndWait(page: Page) {
