@@ -28,7 +28,7 @@ export async function getModelAndProvider({
 }: {
   federalStateId: string;
   modelId: string;
-}) {
+}): Promise<{ telliProvider: any; definedModel: LlmModel }> {
   const [error, federalStateObject] = await dbGetApiKeyByFederalStateIdWithResult({
     federalStateId,
   });

@@ -1,11 +1,11 @@
-import NextAuth from 'next-auth';
+import NextAuth, { NextAuthResult } from 'next-auth';
 import { vidisConfig, handleVidisJWTCallback, handleVidisLogout } from './providers/vidis';
 import { dbGetUserById } from '@/db/functions/user';
 import { mockVidisConfig } from './providers/vidis-mock';
 
 const SESSION_LIFETIME = 60 * 60 * 8;
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+const result = NextAuth({
   providers: [vidisConfig, mockVidisConfig],
   jwt: {
     maxAge: SESSION_LIFETIME,
@@ -62,3 +62,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
   },
 });
+
+export const handlers: NextAuthResult['handlers'] = result.handlers;
+export const auth: NextAuthResult['auth'] = result.auth;
+export const signIn: NextAuthResult['signIn'] = result.signIn;
+export const signOut: NextAuthResult['signOut'] = result.signOut;
