@@ -2,7 +2,7 @@ import fs from 'fs';
 
 import { getErrorMessage } from '@/utils/error';
 
-const FILE_PATH = 'e2e/fixtures/user-mappings.json';
+const USER_MAPPINGS_FILE_PATH = 'e2e/fixtures/user-mappings.json';
 
 export type Account = {
   sub: string;
@@ -19,7 +19,7 @@ export function getMockUserByAccountId({ accountId }: { accountId: string }) {
 /**
  * Read user mappings from a file
  */
-export function readUserMappings(filePath = FILE_PATH) {
+export function readUserMappings(filePath = USER_MAPPINGS_FILE_PATH) {
   try {
     const fileContent = fs.readFileSync(filePath, 'utf8');
     const userMappings = JSON.parse(fileContent);
