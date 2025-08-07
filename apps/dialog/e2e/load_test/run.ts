@@ -1,72 +1,13 @@
 import { browser, Page } from 'k6/browser';
 import { check } from 'k6';
-import { BASE_URL } from './const';
-
-const WAIT_TIMES_IN_MS = {
-  PAGE_LOAD: 5000,
-  PAGE_ELEMENT_TIMEOUT: 10000, // Maximum time to wait for an element to appear
-  ELEMENT_LOAD: 1000,
-  MESSAGE_RESPONSE: 5000,
-};
-
-const SELECTORS = {
-  LOGIN_BUTTON: 'button[aria-label="Mit VIDIS einloggen"]',
-  USERNAME_INPUT: 'input[placeholder="Enter any login"]',
-  PASSWORD_INPUT: 'input[placeholder="and password"]',
-  SIGN_IN_BUTTON: 'button[type="submit"]',
-  LLM_DROPDOWN: 'button[aria-label="Select Llm Dropdown"]',
-  LLAMA_MODEL: 'button[aria-label="Select meta-llama/Meta-Llama-3.1-8B-Instruct Model"]',
-  GPT4_MODEL: 'button[aria-label="Select gpt-4o-mini Model"]',
-  MESSAGE_INPUT: 'textarea[placeholder="Wie kann ich Dir helfen?"]',
-  SEND_BUTTON: 'button[aria-label="Nachricht abschicken"]',
-} as const;
-
-const DEFAULT_PROMPT = `Ich bin Lehrer für Chemie in der 7. Klasse an einem Gymnasium in Bayern. Ich möchte eine Unterrichtsstunde zum Thema Wasserstoffreaktionen vorbereiten, die 90 Minuten dauert. Mein Ziel ist es, dass die Schüler am Ende der Stunde verstehen, warum Wasserstoff stark reaktiv ist und warum das Gemisch aus Wasserstoff und Sauerstoff bei Entzündung eine deutlich stärkere Reaktion auslöst. Die Klasse besteht aus 20 Schülern mit besonderem Interesse an interessanten Experimenten.
-Bitte erstelle für mich eine detaillierte Unterrichtsplanung. Gehe auf Konzepte ein, mit denen ich den Unterricht ansprechender machen kann, z.B. Gruppenarbeiten, Präsentationen usw…
-Gib mir zusätzlich kreative Ideen für den Unterrichtseinstieg oder anschauliche Beispiele, die das Thema greifbarer machen. Achte darauf, dass die Planung leicht umsetzbar ist.
-`;
-
-export const LOAD_TEST_OPTIONS = {
-  scenarios: {
-    ui_with_browser: {
-      executor: 'ramping-vus',
-      startVUs: 1,
-      stages: [
-        { duration: '1m', target: 10 }, // Ramp up gradually
-        { duration: '2m', target: 50 }, // Moderate load
-        { duration: '2m', target: 100 }, // Peak load
-        { duration: '5m', target: 100 }, // Sustain peak
-        { duration: '1m', target: 0 }, // Ramp down
-      ],
-      options: {
-        browser: {
-          type: 'chromium',
-        },
-      },
-    },
-  },
-  thresholds: {
-    checks: ['rate>0.95'], // 95% of checks must pass
-    http_req_duration: ['p(95)<10000'], // 95% of requests must complete within 10s
-    browser_web_vital_fcp: ['p(95)<3000'], // First Contentful Paint
-    browser_web_vital_lcp: ['p(95)<5000'], // Largest Contentful Paint
-  },
-};
-
-const TEST_OPTIONS = {
-  scenarios: {
-    ui_test: {
-      executor: 'constant-vus',
-      vus: 1, // Only run 1 user to see the UI
-      duration: '2m', // Run long enough for debugging
-      options: {
-        browser: {
-          type: 'chromium', // Required to enable browser execution
-        },
-      },
-    },
-  },
-};
+import {
+  BASE_URL,
+  WAIT_TIMES_IN_MS,
+  SELECTORS,
+  DEFAULT_PROMPT,
+  LOAD_TEST_OPTIONS,
+  TEST_OPTIONS,
+} from './config';
 
 let errorFlows = 0;
 let successFlows = 0;
@@ -78,7 +19,6 @@ export default async function main() {
   await context.clearCookies();
   const page = await context.newPage();
 
-  // Set page timeout
   page.setDefaultTimeout(WAIT_TIMES_IN_MS.PAGE_ELEMENT_TIMEOUT);
 
   const userIndex = __VU + __ITER;
@@ -90,9 +30,9 @@ export default async function main() {
     await sendMessageAndWait(page);
 
     await page.screenshot({ path: `e2e/load_test/success-results/screenshot-${userIndex}.png` });
-    successFlows += 1;
+    successFlows++;
   } catch (error) {
-    errorFlows += 1;
+    errorFlows++;
     console.error(`Error during test execution for user ${userIndex}:`, error);
     await page.screenshot({ path: `e2e/load_test/error-results/screenshot-${userIndex}.png` });
   } finally {
@@ -142,7 +82,7 @@ async function selectModel(page: Page, userIndex: number) {
   await page.waitForTimeout(WAIT_TIMES_IN_MS.ELEMENT_LOAD);
 
   const modelLocator =
-    userIndex % 2 === 0 ? page.locator(SELECTORS.LLAMA_MODEL) : page.locator(SELECTORS.GPT4_MODEL);
+    userIndex % 2 === 0 ? page.locator(SELECTORS.LLAMA_MODEL) : page.locator(SELECTORS.GPT_MODEL);
 
   await modelLocator.waitFor();
   check(modelLocator, {
@@ -164,6 +104,44 @@ async function sendMessageAndWait(page: Page) {
   await sendButton.waitFor();
   await sendButton.click();
 
-  // Wait for AI response (longer timeout)
-  await page.waitForTimeout(WAIT_TIMES_IN_MS.MESSAGE_RESPONSE);
+  // Poll for AI response
+  const maxAttempts = 30; // 30 seconds with 1-second intervals
+  let attempts = 0;
+  let responseReceived = false;
+
+  while (attempts < maxAttempts && !responseReceived) {
+    attempts++;
+
+    const aiMessage = page.locator(SELECTORS.AI_MESSAGE);
+
+    try {
+      await aiMessage.waitFor({ timeout: 1000 });
+      const content = await aiMessage.textContent();
+
+      if (content && content.trim().length > 10) {
+        responseReceived = true;
+        console.log(
+          `AI response received after ${attempts} seconds. Content length: ${content.trim().length}`,
+        );
+
+        check(aiMessage, {
+          'AI response received via polling': () => true,
+          'AI response has content': () => content.trim().length > 10,
+        });
+
+        return;
+      }
+    } catch {
+      // Message not yet available, continue polling
+    }
+
+    await page.waitForTimeout(1000); // Wait 1 second before next check
+  }
+
+  if (!responseReceived) {
+    check(page, {
+      'AI response received within timeout': () => false,
+    });
+    throw new Error(`No AI response received after ${attempts} seconds`);
+  }
 }
