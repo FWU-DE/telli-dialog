@@ -1,10 +1,13 @@
 // export const BASE_URL = 'https://chat-staging.telli.schule';
 export const BASE_URL = 'http://localhost:3000';
 
+export const SAVE_SCREENSHOTS = true;
+
 export const WAIT_TIMES_IN_MS = {
   PAGE_LOAD: 5000, // Time to wait for a new page to load
   PAGE_ELEMENT_TIMEOUT: 10000, // Maximum time to wait for an element to appear
   ELEMENT_LOAD: 1000, // Time to wait for elements to load after actions
+  POLL_TIME: 1000, // Time to wait between polling attempts
 };
 
 export const SELECTORS = {
@@ -20,19 +23,17 @@ export const SELECTORS = {
   MESSAGE_INPUT: 'textarea[placeholder="Wie kann ich Dir helfen?"]',
   SEND_BUTTON: 'button[aria-label="Nachricht abschicken"]',
   AI_MESSAGE: '[aria-label="assistant message 1"]',
-} as const;
+};
 
-export const DEFAULT_PROMPT = `Ich bin Lehrer für Chemie in der 7. Klasse an einem Gymnasium. Ich möchte eine Unterrichtsstunde zum Thema Wasserstoffreaktionen vorbereiten, die 90 Minuten dauert. Mein Ziel ist es, dass die Schüler am Ende der Stunde verstehen, warum Wasserstoff stark reaktiv ist und warum das Gemisch aus Wasserstoff und Sauerstoff bei Entzündung eine deutlich stärkere Reaktion auslöst. Die Klasse besteht aus 20 Schülern mit besonderem Interesse an interessanten Experimenten.
-Bitte erstelle für mich eine detaillierte Unterrichtsplanung. Gehe auf Konzepte ein, mit denen ich den Unterricht ansprechender machen kann, z.B. Gruppenarbeiten, Präsentationen usw…
-Gib mir zusätzlich kreative Ideen für den Unterrichtseinstieg oder anschauliche Beispiele, die das Thema greifbarer machen. Achte darauf, dass die Planung leicht umsetzbar ist.
-`;
+export const DEFAULT_PROMPT = `Ich bin eine Lehrerin an einer Schule und unterrichte ein technisches Fach. 
+Wie kann ich dennoch dazu beitragen, den Schülerinnen und Schülern soziale Werte zu vermitteln?`;
 
 export const SCREENSHOT_FOLDERS = {
   SUCCESS_RESULTS: 'e2e/load_test/success-results',
   ERROR_RESULTS: 'e2e/load_test/error-results',
 };
 
-export const LOAD_TEST_OPTIONS = {
+export const HEADLESS_BROWSER_OPTIONS = {
   scenarios: {
     ui_with_browser: {
       executor: 'ramping-vus',
@@ -59,7 +60,7 @@ export const LOAD_TEST_OPTIONS = {
   },
 };
 
-export const TEST_OPTIONS = {
+export const VISIBLE_BROWSER_OPTIONS = {
   scenarios: {
     ui_test: {
       executor: 'constant-vus',
@@ -67,7 +68,7 @@ export const TEST_OPTIONS = {
       duration: '2m', // Run long enough for debugging
       options: {
         browser: {
-          type: 'chromium', // Required to enable browser execution
+          type: 'chromium',
         },
       },
     },

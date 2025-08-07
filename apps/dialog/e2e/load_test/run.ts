@@ -5,15 +5,17 @@ import {
   WAIT_TIMES_IN_MS,
   SELECTORS,
   DEFAULT_PROMPT,
-  LOAD_TEST_OPTIONS,
-  TEST_OPTIONS,
+  HEADLESS_BROWSER_OPTIONS,
+  VISIBLE_BROWSER_OPTIONS,
   SCREENSHOT_FOLDERS,
+  SAVE_SCREENSHOTS,
 } from './config';
 
 let errorFlows = 0;
 let successFlows = 0;
 
-export const options = __ENV.K6_BROWSER_HEADLESS === 'false' ? TEST_OPTIONS : LOAD_TEST_OPTIONS;
+export const options =
+  __ENV.K6_BROWSER_HEADLESS === 'true' ? HEADLESS_BROWSER_OPTIONS : VISIBLE_BROWSER_OPTIONS;
 
 export default async function main() {
   const context = await browser.newContext();
@@ -28,18 +30,22 @@ export default async function main() {
   try {
     await performLogin(page, userName);
     await selectModel(page, userIndex);
-    await sendMessageAndWait(page);
+    await sendMessage(page);
 
-    await page.screenshot({
-      path: `${SCREENSHOT_FOLDERS.SUCCESS_RESULTS}/screenshot-${userIndex}.png`,
-    });
     successFlows++;
+    if (SAVE_SCREENSHOTS) {
+      await page.screenshot({
+        path: `${SCREENSHOT_FOLDERS.SUCCESS_RESULTS}/screenshot-${userIndex}.png`,
+      });
+    }
   } catch (error) {
     errorFlows++;
     console.error(`Error during test execution for user ${userIndex}:`, error);
-    await page.screenshot({
-      path: `${SCREENSHOT_FOLDERS.ERROR_RESULTS}/screenshot-${userIndex}.png`,
-    });
+    if (SAVE_SCREENSHOTS) {
+      await page.screenshot({
+        path: `${SCREENSHOT_FOLDERS.ERROR_RESULTS}/screenshot-${userIndex}.png`,
+      });
+    }
   } finally {
     console.info({ successFlows, errorFlows, userIndex });
     await page.close();
@@ -71,12 +77,10 @@ async function performLogin(page: Page, userName: string) {
   await signInButton.click();
   await page.waitForTimeout(WAIT_TIMES_IN_MS.ELEMENT_LOAD);
 
-  // Handle authorization page
   const authorizeButton = page.locator(SELECTORS.SIGN_IN_BUTTON);
   await authorizeButton.waitFor();
   await authorizeButton.click();
 
-  // Wait for redirect
   await page.waitForTimeout(WAIT_TIMES_IN_MS.PAGE_LOAD);
 }
 
@@ -84,11 +88,10 @@ async function selectModel(page: Page, userIndex: number) {
   const dropdownLocator = page.locator(SELECTORS.LLM_DROPDOWN);
   await dropdownLocator.waitFor();
 
-  // Check current selected model by reading the dropdown trigger text
   const currentSelectedText = await dropdownLocator.textContent();
-  const targetModelName = userIndex % 2 === 0 ? 'Llama-3.1-8B' : 'GPT-4o-mini';
+  const targetModelName =
+    userIndex % 2 === 0 ? SELECTORS.LLAMA_MODEL_NAME : SELECTORS.GPT_MODEL_NAME;
 
-  // If the target model is already selected, skip selection
   if (currentSelectedText && currentSelectedText.includes(targetModelName)) {
     console.log(
       `Model ${targetModelName} already selected for user ${userIndex}, skipping selection`,
@@ -96,7 +99,6 @@ async function selectModel(page: Page, userIndex: number) {
     return;
   }
 
-  // Open dropdown and select the target model
   await dropdownLocator.click();
   await page.waitForTimeout(WAIT_TIMES_IN_MS.ELEMENT_LOAD);
 
@@ -112,7 +114,7 @@ async function selectModel(page: Page, userIndex: number) {
   console.log(`Selected model ${targetModelName} for user ${userIndex}`);
 }
 
-async function sendMessageAndWait(page: Page) {
+async function sendMessage(page: Page) {
   const inputField = page.locator(SELECTORS.MESSAGE_INPUT);
   await inputField.waitFor();
   check(inputField, {
@@ -135,7 +137,7 @@ async function sendMessageAndWait(page: Page) {
     const aiMessage = page.locator(SELECTORS.AI_MESSAGE);
 
     try {
-      await aiMessage.waitFor({ timeout: 1000 });
+      await aiMessage.waitFor();
       const content = await aiMessage.textContent();
 
       if (content && content.trim().length > 10) {
@@ -155,7 +157,7 @@ async function sendMessageAndWait(page: Page) {
       // Message not yet available, continue polling
     }
 
-    await page.waitForTimeout(1000); // Wait 1 second before next check
+    await page.waitForTimeout(WAIT_TIMES_IN_MS.POLL_TIME);
   }
 
   if (!responseReceived) {
