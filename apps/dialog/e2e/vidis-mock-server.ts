@@ -2,7 +2,7 @@ import Provider, { Configuration } from 'oidc-provider';
 import express from 'express';
 import crypto from 'crypto';
 import * as jose from 'jose';
-import { readUserMappings } from './load_test/utils';
+import { readUserMappings } from './utils';
 
 const isProduction = process.env.NODE_ENV === 'production';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
