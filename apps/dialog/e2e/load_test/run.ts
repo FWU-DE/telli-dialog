@@ -7,6 +7,7 @@ import {
   DEFAULT_PROMPT,
   LOAD_TEST_OPTIONS,
   TEST_OPTIONS,
+  SCREENSHOT_FOLDERS,
 } from './config';
 
 let errorFlows = 0;
@@ -29,12 +30,16 @@ export default async function main() {
     await selectModel(page, userIndex);
     await sendMessageAndWait(page);
 
-    await page.screenshot({ path: `e2e/load_test/success-results/screenshot-${userIndex}.png` });
+    await page.screenshot({
+      path: `${SCREENSHOT_FOLDERS.SUCCESS_RESULTS}/screenshot-${userIndex}.png`,
+    });
     successFlows++;
   } catch (error) {
     errorFlows++;
     console.error(`Error during test execution for user ${userIndex}:`, error);
-    await page.screenshot({ path: `e2e/load_test/error-results/screenshot-${userIndex}.png` });
+    await page.screenshot({
+      path: `${SCREENSHOT_FOLDERS.ERROR_RESULTS}/screenshot-${userIndex}.png`,
+    });
   } finally {
     console.info({ successFlows, errorFlows, userIndex });
     await page.close();

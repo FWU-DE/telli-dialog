@@ -27,6 +27,11 @@ Bitte erstelle für mich eine detaillierte Unterrichtsplanung. Gehe auf Konzepte
 Gib mir zusätzlich kreative Ideen für den Unterrichtseinstieg oder anschauliche Beispiele, die das Thema greifbarer machen. Achte darauf, dass die Planung leicht umsetzbar ist.
 `;
 
+export const SCREENSHOT_FOLDERS = {
+  SUCCESS_RESULTS: 'e2e/load_test/success-results',
+  ERROR_RESULTS: 'e2e/load_test/error-results',
+};
+
 export const LOAD_TEST_OPTIONS = {
   scenarios: {
     ui_with_browser: {
