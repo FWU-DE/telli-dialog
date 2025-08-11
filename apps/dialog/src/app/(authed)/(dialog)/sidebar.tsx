@@ -169,7 +169,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                     </div>
                   </Link>
                 )}
-
+                <hr className="w-full px-1 my-2" />
                 {user.school.userRole === 'teacher' && user.federalState.enableCustomGpt && (
                   <Link href={`/custom/d/${HELP_MODE_GPT_ID}`} className="w-full">
                     <div
