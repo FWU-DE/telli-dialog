@@ -3,9 +3,9 @@ import { resourceFromAttributes } from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
-import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
 
-// For debugging purposes, you can uncomment the following line to enable console logging
+// For debugging purposes, you can uncomment the following two lines to enable console logging
+// import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
 // diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 
 const exporter = new OTLPMetricExporter();
