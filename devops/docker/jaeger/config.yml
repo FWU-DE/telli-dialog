@@ -3,7 +3,7 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch, tail_sampling]
+      processors: [tail_sampling]
       exporters: [jaeger_storage_exporter]
 
 extensions:
@@ -42,7 +42,23 @@ processors:
         {
           name: filter-by-attribute,
           type: string_attribute,
-          string_attribute: { key: service.name, values: [tracegen-02, tracegen-04] },
+          string_attribute: { key: service.name, values: [telli-dialog, telli-admin] },
+        },
+        {
+          name: drop-next-static,
+          type: drop,
+          drop:
+            {
+              drop_sub_policy:
+                [
+                  {
+                    name: drop-next-static-sub-1,
+                    type: string_attribute,
+                    string_attribute:
+                      { key: http.target, values: [\/_next\/static], enabled_regex_matching: true },
+                  },
+                ],
+            },
         },
       ]
 
