@@ -1,4 +1,3 @@
-# run 'docker compose -f ./devops/docker/monitoring.yml up' from project root folder
 # https://prometheus.io/docs/prometheus/latest/configuration/configuration/
 global:
   scrape_interval: '15s'
