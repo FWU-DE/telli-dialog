@@ -14,11 +14,19 @@
   },
   "packageManager": "pnpm@9.15.1",
   "dependencies": {
-    "ui": "workspace:*",
+    "@opentelemetry/api": "1.9.0",
+    "@opentelemetry/exporter-metrics-otlp-http": "0.203.0",
+    "@opentelemetry/exporter-trace-otlp-http": "0.203.0",
+    "@opentelemetry/resources": "2.0.1",
+    "@opentelemetry/sdk-metrics": "2.0.1",
+    "@opentelemetry/sdk-node": "0.203.0",
+    "@opentelemetry/sdk-trace-node": "2.0.1",
+    "@opentelemetry/semantic-conventions": "1.36.0",
     "next": "15.3.4",
     "next-auth": "4.24.11",
     "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react-dom": "19.0.0",
+    "ui": "workspace:*"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.2.0",
