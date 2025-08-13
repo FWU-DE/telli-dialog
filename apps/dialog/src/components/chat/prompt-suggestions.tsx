@@ -15,10 +15,16 @@ export default function PromptSuggestions({
 }: PromptSuggestionsProps) {
   return (
     <div
+      // HINZUGEFÜGT: bg-white und z-50 zu den bestehenden Klassen
+      className={cn(
+        'bg-white relative z-50 grid gap-2 xs:mb-2 xs:grid-cols-1 lg:mb-4 lg:grid-cols-2 lg:gap-4',
+        suggestions.length === 1 && 'grid-cols-1',
+      )}
+      /* <div
       className={cn(
         'relative grid gap-2 xs:mb-2 xs:grid-cols-1 lg:mb-4 lg:grid-cols-2 lg:gap-4',
         suggestions.length === 1 && 'grid-cols-1',
-      )}
+      )}*/
     >
       {suggestions
         .filter((s) => s.trim() !== '')
