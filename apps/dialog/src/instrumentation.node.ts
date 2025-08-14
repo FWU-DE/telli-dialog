@@ -10,7 +10,7 @@ import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node';
 // import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
 // diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 
-const SERVICE_NAME = 'telli-admin';
+const SERVICE_NAME = 'telli-dialog';
 
 const exporter = new OTLPMetricExporter();
 const periodicExportingMetricReader = new PeriodicExportingMetricReader({
