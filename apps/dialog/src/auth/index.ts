@@ -60,18 +60,12 @@ const result = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      console.log('[NextAuth][session callback] token:', token);
       const userId = token.userId;
-      if (userId === undefined || userId === null) {
-        console.log('[NextAuth][session callback] No userId in token');
-        return session;
-      }
+      if (userId === undefined || userId === null) return session;
 
       const user = await dbGetUserById({ userId: userId as string });
-      console.log('[NextAuth][session callback] dbGetUserById result:', user);
 
       if (user === undefined) {
-        console.log(`[NextAuth][session callback] Could not find user with id ${userId}`);
         throw Error(`Could not find user with id ${userId}`);
       }
       // @ts-expect-error some weird next-auth typing error
