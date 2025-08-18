@@ -5,8 +5,13 @@ import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Page() {
+export default async function Page({ searchParams }: { searchParams?: { testlogin?: string } }) {
+  const params = searchParams ? await searchParams : {};
   const maybeUser = await getMaybeUser();
+
+  if (params.testlogin === 'true') {
+    redirect('/test-login');
+  }
 
   if (maybeUser !== null) {
     redirect('/');

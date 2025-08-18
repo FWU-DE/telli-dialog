@@ -11,6 +11,7 @@ const result = NextAuth({
     vidisConfig,
     mockVidisConfig,
     CredentialsProvider({
+      id: 'credentials',
       name: 'Test Credentials',
       credentials: {
         username: { label: 'Username', type: 'text' },
@@ -19,7 +20,7 @@ const result = NextAuth({
       async authorize(credentials) {
         if (credentials?.username === 'test' && credentials?.password === 'test') {
           return {
-            id: 'testuser',
+            id: 'f4830567-2ca9-4b9c-9c27-1900d443c07c',
             email: 'testuser@example.com',
             name: 'Test User',
             rolle: 'LEHR',
@@ -44,7 +45,7 @@ const result = NextAuth({
   },
   trustHost: true,
   callbacks: {
-    async jwt({ token, account, profile, trigger }) {
+    async jwt({ token, account, profile, trigger, user }) {
       if (
         trigger === 'signIn' &&
         (account?.provider === 'vidis' || account?.provider === 'vidis-mock') &&
@@ -52,15 +53,25 @@ const result = NextAuth({
       ) {
         return await handleVidisJWTCallback({ account, profile, token });
       }
+      // Ensure userId is set for credentials provider
+      if (account?.provider === 'credentials' && user?.id) {
+        token.userId = user.id;
+      }
       return token;
     },
     async session({ session, token }) {
+      console.log('[NextAuth][session callback] token:', token);
       const userId = token.userId;
-      if (userId === undefined || userId === null) return session;
+      if (userId === undefined || userId === null) {
+        console.log('[NextAuth][session callback] No userId in token');
+        return session;
+      }
 
       const user = await dbGetUserById({ userId: userId as string });
+      console.log('[NextAuth][session callback] dbGetUserById result:', user);
 
       if (user === undefined) {
+        console.log(`[NextAuth][session callback] Could not find user with id ${userId}`);
         throw Error(`Could not find user with id ${userId}`);
       }
       // @ts-expect-error some weird next-auth typing error
