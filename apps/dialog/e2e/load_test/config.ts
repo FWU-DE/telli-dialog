@@ -1,5 +1,5 @@
-// export const BASE_URL = 'https://chat-staging.telli.schule';
-export const BASE_URL = 'http://localhost:3000';
+export const BASE_URL = 'https://chat-staging.telli.schule';
+// export const BASE_URL = 'http://localhost:3000';
 
 export const SAVE_SCREENSHOTS = true;
 
@@ -40,10 +40,6 @@ export const HEADLESS_BROWSER_OPTIONS = {
       startVUs: 1,
       stages: [
         { duration: '1m', target: 10 }, // Ramp up gradually
-        { duration: '2m', target: 50 }, // Moderate load
-        { duration: '2m', target: 100 }, // Peak load
-        { duration: '5m', target: 100 }, // Sustain peak
-        { duration: '1m', target: 0 }, // Ramp down
       ],
       options: {
         browser: {

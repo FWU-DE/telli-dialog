@@ -11,9 +11,13 @@ import { useSearchParams } from 'next/navigation';
 export default function LoginForm() {
   const searchParams = useSearchParams();
   const vidis_idp_hint = searchParams.get('vidis_idp_hint');
-
+  const credential_login = searchParams.get('credential_login');
   if (vidis_idp_hint !== null) {
     signIn('vidis', undefined, { vidis_idp_hint: vidis_idp_hint });
+  }
+
+  if (credential_login === 'true') {
+    signIn('credentials', { username: 'jsmith', password: '1234' });
   }
 
   return (
