@@ -9,7 +9,7 @@ import {
   VISIBLE_BROWSER_OPTIONS,
   SCREENSHOT_FOLDERS,
   SAVE_SCREENSHOTS,
-} from './config';
+} from './config.ts';
 
 let errorFlows = 0;
 let successFlows = 0;
@@ -26,7 +26,7 @@ export default async function main() {
 
   const userIndex = __VU + __ITER;
   const userName = 'test';
-  const password = process.env.LOADTEST_PASSWORD ?? 'test';
+  const password = 'dDAQttYMe8&@b@96Vix&V2Y%s!Pq';
 
   try {
     await performLogin(page, userName, password);
