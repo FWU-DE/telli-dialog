@@ -33,6 +33,53 @@ export async function dbCreateVidisUser(user: InsertUserModel) {
   return insertedUser;
 }
 
+export async function dbGetOrCreateTestUser(userInfo: InsertUserModel & VidisUserInfo) {
+  const federalState = await dbGetOrCreateFederalState({ federalStateId: userInfo.bundesland });
+
+  if (federalState === undefined) {
+    throw Error('Could not insert federal state');
+  }
+
+  const schoolIds =
+    typeof userInfo.schulkennung === 'string' ? [userInfo.schulkennung] : userInfo.schulkennung;
+
+  const schools = await dbGetOrCreateSchools({
+    schools: schoolIds.map((school) => ({ id: school, federalStateId: federalState.id })),
+  });
+
+  if (schools.length < 1) {
+    throw Error('Could not insert school');
+  }
+
+  return await db.transaction(async (tx) => {
+    const insertedUser = (
+      await tx
+        .insert(userTable)
+        .values({
+          id: userInfo.id,
+          firstName: '',
+          lastName: '',
+          email: userInfo.email,
+        })
+        .onConflictDoUpdate({ target: [userTable.id], set: { id: userInfo.id } })
+        .returning()
+    )[0];
+
+    const insertedSchoolMappings = await dbUpsertUserSchoolMappings(
+      {
+        schoolIds,
+        role: vidisRoleToUserSchoolRole(userInfo.rolle),
+        userId: userInfo.id ?? userInfo.sub,
+      },
+      { dbObject: tx },
+    );
+
+    if (insertedSchoolMappings.length < 1) throw Error('Could not insert user');
+
+    return { ...insertedUser, role: vidisRoleToUserSchoolRole(userInfo.rolle) };
+  });
+}
+
 export async function dbGetOrCreateVidisUser(userInfo: VidisUserInfo) {
   const federalState = await dbGetOrCreateFederalState({ federalStateId: userInfo.bundesland });
 
