@@ -2,39 +2,12 @@ import NextAuth, { NextAuthResult } from 'next-auth';
 import { vidisConfig, handleVidisJWTCallback, handleVidisLogout } from './providers/vidis';
 import { dbGetUserById } from '@/db/functions/user';
 import { mockVidisConfig } from './providers/vidis-mock';
-import CredentialsProvider from 'next-auth/providers/credentials';
+import { credentialsProvider } from './providers/credentials';
 
 const SESSION_LIFETIME = 60 * 60 * 8;
 
 const result = NextAuth({
-  providers: [
-    vidisConfig,
-    mockVidisConfig,
-    CredentialsProvider({
-      id: 'credentials',
-      name: 'Test Credentials',
-      credentials: {
-        username: { label: 'Username', type: 'text' },
-        password: { label: 'Password', type: 'password' },
-      },
-      async authorize(credentials) {
-        if (
-          credentials?.username === 'test' &&
-          credentials?.password === process.env.LOADTEST_PASSWORD
-        ) {
-          return {
-            id: 'f4830567-2ca9-4b9c-9c27-1900d443c07c',
-            email: 'testuser@example.com',
-            name: 'Test User',
-            rolle: 'LEHR',
-            schulkennung: 'Test-Schule',
-            bundesland: 'DE-TEST',
-          };
-        }
-        return null;
-      },
-    }),
-  ],
+  providers: [vidisConfig, mockVidisConfig, credentialsProvider],
   jwt: {
     maxAge: SESSION_LIFETIME,
   },
