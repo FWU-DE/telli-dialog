@@ -1,3 +1,4 @@
+import { dbGetOrCreateTestUser } from '@/db/functions/vidis';
 import CredentialsProvider from 'next-auth/providers/credentials';
 export const credentialsProvider = CredentialsProvider({
   id: 'credentials',
@@ -11,14 +12,16 @@ export const credentialsProvider = CredentialsProvider({
       credentials?.username === 'test' &&
       credentials?.password === process.env.LOADTEST_PASSWORD
     ) {
-      return {
+      return await dbGetOrCreateTestUser({
         id: 'f4830567-2ca9-4b9c-9c27-1900d443c07c',
+        sub: 'f4830567-2ca9-4b9c-9c27-1900d443c07c',
         email: 'testuser@example.com',
-        name: 'Test User',
+        firstName: 'Test',
+        lastName: 'User',
         rolle: 'LEHR',
         schulkennung: 'Test-Schule',
         bundesland: 'DE-TEST',
-      };
+      });
     }
     return null;
   },
