@@ -25,10 +25,11 @@ export default async function main() {
   page.setDefaultTimeout(WAIT_TIMES_IN_MS.PAGE_ELEMENT_TIMEOUT);
 
   const userIndex = __VU + __ITER;
-  const userName = `teacher`;
+  const userName = 'test';
+  const password = 'test';
 
   try {
-    await performLogin(page, userName);
+    await performLogin(page, userName, password);
     await selectModel(page, userIndex);
     await sendMessage(page);
 
@@ -53,16 +54,9 @@ export default async function main() {
   }
 }
 
-async function performLogin(page: Page, userName: string) {
-  await page.goto(`${BASE_URL}/login?mocklogin=true`);
+async function performLogin(page: Page, userName: string, password: string) {
+  await page.goto(`${BASE_URL}/login?testlogin=true`);
   await page.waitForTimeout(WAIT_TIMES_IN_MS.PAGE_LOAD);
-
-  const loginButton = page.locator(SELECTORS.LOGIN_BUTTON);
-  await loginButton.waitFor();
-  check(loginButton, {
-    'Login button is visible': (btn) => btn !== null,
-  });
-  await loginButton.click();
 
   const usernameInput = page.locator(SELECTORS.USERNAME_INPUT);
   await usernameInput.waitFor();
@@ -70,17 +64,11 @@ async function performLogin(page: Page, userName: string) {
 
   const passwordInput = page.locator(SELECTORS.PASSWORD_INPUT);
   await passwordInput.waitFor();
-  await passwordInput.fill(process.env.LOADTEST_PASSWORD ?? 'test');
+  await passwordInput.fill(password);
 
-  const signInButton = page.locator(SELECTORS.SIGN_IN_BUTTON);
-  await signInButton.waitFor();
-  await signInButton.click();
-  await page.waitForTimeout(WAIT_TIMES_IN_MS.ELEMENT_LOAD);
-
-  const authorizeButton = page.locator(SELECTORS.SIGN_IN_BUTTON);
-  await authorizeButton.waitFor();
-  await authorizeButton.click();
-
+  const loginButton = page.locator(SELECTORS.LOGIN_BUTTON);
+  await loginButton.waitFor();
+  await loginButton.click();
   await page.waitForTimeout(WAIT_TIMES_IN_MS.PAGE_LOAD);
 }
 

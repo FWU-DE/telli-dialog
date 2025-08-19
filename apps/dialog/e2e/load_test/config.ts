@@ -1,5 +1,5 @@
-// export const BASE_URL = 'https://chat-staging.telli.schule';
-export const BASE_URL = 'http://localhost:3000';
+export const BASE_URL = 'https://chat-staging.telli.schule';
+//export const BASE_URL = 'http://localhost:3000';
 
 export const SAVE_SCREENSHOTS = true;
 
@@ -11,10 +11,9 @@ export const WAIT_TIMES_IN_MS = {
 };
 
 export const SELECTORS = {
-  LOGIN_BUTTON: 'button[aria-label="Mit VIDIS einloggen"]',
-  USERNAME_INPUT: 'input[placeholder="Enter any login"]',
-  PASSWORD_INPUT: 'input[placeholder="and password"]',
-  SIGN_IN_BUTTON: 'button[type="submit"]',
+  USERNAME_INPUT: 'input[placeholder="Username"]',
+  PASSWORD_INPUT: 'input[placeholder="Password"]',
+  LOGIN_BUTTON: 'button[type="submit"]',
   LLM_DROPDOWN: 'button[aria-label="Select Llm Dropdown"]',
   LLAMA_MODEL: 'button[aria-label="Select meta-llama/Meta-Llama-3.1-8B-Instruct Model"]',
   LLAMA_MODEL_NAME: 'Llama-3.1-8B',
