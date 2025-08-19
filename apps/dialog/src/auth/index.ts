@@ -18,7 +18,10 @@ const result = NextAuth({
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (credentials?.username === 'test' && credentials?.password === 'test') {
+        if (
+          credentials?.username === 'test' &&
+          credentials?.password === process.env.LOADTEST_PASSWORD
+        ) {
           return {
             id: 'f4830567-2ca9-4b9c-9c27-1900d443c07c',
             email: 'testuser@example.com',
