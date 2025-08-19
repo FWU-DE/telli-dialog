@@ -20,7 +20,7 @@ const result = NextAuth({
       async authorize(credentials) {
         if (credentials?.username === 'test' && credentials?.password === 'test') {
           return {
-            id: 'f4830567-2ca9-4b9c-9c27-1900d443c07c',
+            id: 'da38b3fe-19de-342a-a743-aa11f718f4ac',
             email: 'testuser@example.com',
             name: 'Test User',
             rolle: 'LEHR',
