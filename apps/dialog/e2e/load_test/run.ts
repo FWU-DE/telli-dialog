@@ -26,7 +26,7 @@ export default async function main() {
 
   const userIndex = __VU + __ITER;
   const userName = 'test';
-  const password = 'test';
+  const password = process.env.LOADTEST_PASSWORD ?? 'test';
 
   try {
     await performLogin(page, userName, password);
