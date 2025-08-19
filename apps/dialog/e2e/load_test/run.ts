@@ -70,7 +70,7 @@ async function performLogin(page: Page, userName: string) {
 
   const passwordInput = page.locator(SELECTORS.PASSWORD_INPUT);
   await passwordInput.waitFor();
-  await passwordInput.fill('test');
+  await passwordInput.fill(process.env.LOADTEST_PASSWORD ?? 'test');
 
   const signInButton = page.locator(SELECTORS.SIGN_IN_BUTTON);
   await signInButton.waitFor();
