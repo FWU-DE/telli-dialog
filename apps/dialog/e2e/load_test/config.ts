@@ -1,13 +1,15 @@
-export const BASE_URL = 'https://chat-staging.telli.schule';
-//export const BASE_URL = 'http://localhost:3000';
+//export const BASE_URL = 'https://chat-staging.telli.schule';
+export const BASE_URL = 'http://localhost:3000';
 
 export const SAVE_SCREENSHOTS = true;
+export const UPLOAD_FILE = true;
 
 export const WAIT_TIMES_IN_MS = {
   PAGE_LOAD: 5000, // Time to wait for a new page to load
   PAGE_ELEMENT_TIMEOUT: 10000, // Maximum time to wait for an element to appear
   ELEMENT_LOAD: 1000, // Time to wait for elements to load after actions
   POLL_TIME: 1000, // Time to wait between polling attempts
+  FILE_LOAD: 10000, // Time to wait for file uploads
 };
 
 export const SELECTORS = {
@@ -22,14 +24,20 @@ export const SELECTORS = {
   MESSAGE_INPUT: 'textarea[placeholder="Wie kann ich Dir helfen?"]',
   SEND_BUTTON: 'button[aria-label="Nachricht abschicken"]',
   AI_MESSAGE: '[aria-label="assistant message 1"]',
+  FILE_UPLOAD: 'input[type="file"]',
 };
 
 export const DEFAULT_PROMPT = `Ich bin eine Lehrerin an einer Schule und unterrichte ein technisches Fach. 
 Wie kann ich dennoch dazu beitragen, den Schülerinnen und Schülern soziale Werte zu vermitteln?`;
 
-export const SCREENSHOT_FOLDERS = {
-  SUCCESS_RESULTS: 'e2e/load_test/success-results',
-  ERROR_RESULTS: 'e2e/load_test/error-results',
+// TODO text und bessere Datei
+export const FILE_PROMPT = `Ich bin eine Lehrerin an einer Schule und unterrichte ein technisches Fach. 
+Wie kann ich dennoch dazu beitragen, den Schülerinnen und Schülern soziale Werte zu vermitteln?`;
+
+export const PATHS = {
+  SUCCESS_SCREENSHOT_DIR: 'e2e/load_test/success-results',
+  ERROR_SCREENSHOT_DIR: 'e2e/load_test/error-results',
+  UPLOAD_FILE: 'e2e/load_test/assets/Geschichte_der_Kartoffel.pdf', // TODO: hier hatte ich erst assets/Geschichte_der_Kartoffel.pdf
 };
 
 export const HEADLESS_BROWSER_OPTIONS = {

@@ -1,5 +1,7 @@
 import { browser, Page } from 'k6/browser';
 import { check } from 'k6';
+import { File, open } from 'k6/experimental/fs';
+import encoding from 'k6/encoding';
 import {
   BASE_URL,
   WAIT_TIMES_IN_MS,
@@ -7,12 +9,21 @@ import {
   DEFAULT_PROMPT,
   HEADLESS_BROWSER_OPTIONS,
   VISIBLE_BROWSER_OPTIONS,
-  SCREENSHOT_FOLDERS,
+  PATHS,
   SAVE_SCREENSHOTS,
+  UPLOAD_FILE,
+  FILE_PROMPT,
 } from './config';
 
 let errorFlows = 0;
 let successFlows = 0;
+
+let fileData: File;
+(async function () {
+  if (UPLOAD_FILE) {
+    fileData = await open(PATHS.UPLOAD_FILE);
+  }
+})();
 
 export const options =
   __ENV.K6_BROWSER_HEADLESS === 'true' ? HEADLESS_BROWSER_OPTIONS : VISIBLE_BROWSER_OPTIONS;
@@ -26,17 +37,22 @@ export default async function main() {
 
   const userIndex = __VU + __ITER;
   const userName = 'test';
-  const password = process.env.LOADTEST_PASSWORD ?? 'test';
+  const password = 'test';
 
   try {
     await performLogin(page, userName, password);
+
+    if (UPLOAD_FILE) {
+      await uploadPdfFile(page);
+    }
+
     await selectModel(page, userIndex);
     await sendMessage(page);
 
     successFlows++;
     if (SAVE_SCREENSHOTS) {
       await page.screenshot({
-        path: `${SCREENSHOT_FOLDERS.SUCCESS_RESULTS}/screenshot-${userIndex}.png`,
+        path: `${PATHS.SUCCESS_SCREENSHOT_DIR}/screenshot-${userIndex}.png`,
       });
     }
   } catch (error) {
@@ -44,7 +60,7 @@ export default async function main() {
     console.error(`Error during test execution for user ${userIndex}:`, error);
     if (SAVE_SCREENSHOTS) {
       await page.screenshot({
-        path: `${SCREENSHOT_FOLDERS.ERROR_RESULTS}/screenshot-${userIndex}.png`,
+        path: `${PATHS.ERROR_SCREENSHOT_DIR}/screenshot-${userIndex}.png`,
       });
     }
   } finally {
@@ -70,6 +86,36 @@ async function performLogin(page: Page, userName: string, password: string) {
   await loginButton.waitFor();
   await loginButton.click();
   await page.waitForTimeout(WAIT_TIMES_IN_MS.PAGE_LOAD);
+}
+
+async function readAll(file: File) {
+  const fileInfo = await file.stat();
+  const buffer = new Uint8Array(fileInfo.size);
+
+  const bytesRead = await file.read(buffer);
+  if (bytesRead !== fileInfo.size) {
+    throw new Error('unexpected number of bytes read');
+  }
+
+  return buffer;
+}
+
+async function uploadPdfFile(page: Page) {
+  const buffer = await readAll(fileData);
+
+  const file = {
+    name: 'Geschichte_der_Kartoffel.pdf',
+    mimeType: 'application/pdf',
+    buffer: encoding.b64encode(buffer.buffer),
+  };
+
+  const fileInputSelector = 'input[type="file"]';
+
+  console.log('Setting input file');
+  await page.setInputFiles(fileInputSelector, [file]);
+  console.log('Waiting for file upload to complete');
+  await page.waitForTimeout(WAIT_TIMES_IN_MS.FILE_LOAD);
+  console.log('File upload complete');
 }
 
 async function selectModel(page: Page, userIndex: number) {
@@ -108,7 +154,7 @@ async function sendMessage(page: Page) {
   check(inputField, {
     'Message input is visible': (input) => input !== null,
   });
-  await inputField.fill(DEFAULT_PROMPT);
+  await inputField.fill(UPLOAD_FILE ? FILE_PROMPT : DEFAULT_PROMPT);
 
   const sendButton = page.locator(SELECTORS.SEND_BUTTON);
   await sendButton.waitFor();
