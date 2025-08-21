@@ -31,13 +31,12 @@ export const DEFAULT_PROMPT = `Ich bin eine Lehrerin an einer Schule und unterri
 Wie kann ich dennoch dazu beitragen, den Schülerinnen und Schülern soziale Werte zu vermitteln?`;
 
 // TODO text und bessere Datei
-export const FILE_PROMPT = `Ich bin eine Lehrerin an einer Schule und unterrichte ein technisches Fach. 
-Wie kann ich dennoch dazu beitragen, den Schülerinnen und Schülern soziale Werte zu vermitteln?`;
+export const FILE_PROMPT = `Wie viele Kartoffelsorten gibt es?`;
 
 export const PATHS = {
   SUCCESS_SCREENSHOT_DIR: 'e2e/load_test/success-results',
   ERROR_SCREENSHOT_DIR: 'e2e/load_test/error-results',
-  UPLOAD_FILE: 'e2e/load_test/assets/Geschichte_der_Kartoffel.pdf', // TODO: hier hatte ich erst assets/Geschichte_der_Kartoffel.pdf
+  UPLOAD_FILE: 'assets/Geschichte_der_Kartoffel.pdf',
 };
 
 export const HEADLESS_BROWSER_OPTIONS = {
