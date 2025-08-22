@@ -117,7 +117,7 @@ export const federalStateTable = pgTable('federal_state', {
   // vidis things
   mandatoryCertificationTeacher: boolean('mandatory_certification_teacher').default(false),
   chatStorageTime: integer('chat_storage_time').notNull().default(120),
-  supportContact: text('support_contact'),
+  supportContacts: json('support_contacts').$type<string[]>(),
   trainingLink: text('training_link'),
   // whitelabel configuration
   designConfiguration: json('design_configuration').$type<DesignConfiguration>(),

@@ -25,12 +25,12 @@ test('should update an existing federal state', async ({
     headers: { ...authorizationHeader },
     data: {
       id,
-      supportContact: 'updated-support-contact',
+      supportContact: ['updated-support-contact'],
     },
   });
   expect(response.ok()).toBeTruthy();
   const json = await response.json();
-  expect(json.supportContact).toBe('updated-support-contact');
+  expect(json.supportContact).toBe(['updated-support-contact']);
 });
 
 test('should return 404 if federal state does not exist', async ({

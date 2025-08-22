@@ -29,6 +29,8 @@ import LoadingAnimation from './loading-animation';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { Message } from 'ai';
 import { logDebug, logError, logWarning } from '@/utils/logging/logging';
+import { getUser } from '@/auth/utils';
+import { dbGetFederalStateByIdWithResult } from '@/db/functions/federal-state';
 
 type ChatProps = {
   id: string;
@@ -43,7 +45,7 @@ type ChatProps = {
   logoElement: React.ReactNode;
 };
 
-export default function Chat({
+export default async function Chat({
   id,
   initialMessages,
   customGpt,
@@ -183,7 +185,22 @@ export default function Chat({
     reload();
   }
 
-  const formatedSubHeading = tHelpMode('chat-subheading', { FAQ_LINK: tHelpMode('faq-link') });
+  function formatSupportAdressesToString(arr: string[]): string {
+    if (arr.length === 0) return '';
+    if (arr.length === 1) return arr[0]!;
+
+    const allButLast = arr.slice(0, -1).join(', ');
+    const last = arr[arr.length - 1];
+    return `${allButLast} ${tHelpMode('support-addresses-concat')} ${last}`;
+  }
+
+  const user = await getUser();
+  const [, federalState] = await dbGetFederalStateByIdWithResult(user.school.federalStateId);
+
+  const formatedSubHeading = tHelpMode('chat-subheading', {
+    FAQ_LINK: tHelpMode('faq-link'),
+    SUPPORT_ADRESSES: formatSupportAdressesToString(federalState?.supportContacts ?? []),
+  });
 
   function handleDeattachFile(localFileId: string) {
     setFiles((prev) => {
