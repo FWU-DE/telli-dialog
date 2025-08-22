@@ -4,19 +4,15 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
+env:
+  API_KEY: ${{ secrets.API_KEY }}
+
 jobs:
   delete-conversations:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Load 1Password Secrets
-        uses: 1password/load-secrets-action@v1
-        with:
-          export-env: true
-        env:
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          API_KEY: op://telli Engineering/.env.production chatbot/API_KEY
       - name: Call Delete Conversations Endpoint
         run: |
           # Make the API call and store the full response
