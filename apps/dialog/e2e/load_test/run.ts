@@ -25,7 +25,13 @@ export default async function main() {
 
   const userIndex = __VU + __ITER;
   const userName = 'test';
-  const password = __ENV.LOADTEST_PASSWORD ?? 'test';
+  const password = __ENV.LOADTEST_PASSWORD;
+
+  if (!password) {
+    throw new Error(
+      'Please provide the password for the test user via the env variable LOADTEST_PASSWORD',
+    );
+  }
 
   try {
     await performLogin(page, userName, password);
@@ -121,7 +127,9 @@ async function sendMessage(page: Page) {
   try {
     const inputField = page.locator(SELECTORS.MESSAGE_INPUT);
     await inputField.waitFor();
-    await inputField.fill(DEFAULT_PROMPT);
+    do {
+      await inputField.fill(DEFAULT_PROMPT);
+    } while (((await inputField.textContent()) ?? '').length < 10);
 
     const sendButton = page.locator(SELECTORS.SEND_BUTTON);
     await sendButton.waitFor();
