@@ -127,13 +127,11 @@ async function sendMessage(page: Page) {
   try {
     const inputField = page.locator(SELECTORS.MESSAGE_INPUT);
     await inputField.waitFor();
-    do {
-      await inputField.fill(DEFAULT_PROMPT);
-    } while (((await inputField.textContent()) ?? '').length < 10);
+    await page.waitForTimeout(200);
+    await inputField.fill(DEFAULT_PROMPT);
 
-    const sendButton = page.locator(SELECTORS.SEND_BUTTON);
-    await sendButton.waitFor();
-    await sendButton.click();
+    // This fixes the "element is not attached to the DOM" errors, by waiting for a new button
+    await page.click(SELECTORS.SEND_BUTTON);
 
     const aiMessage = page.locator(SELECTORS.AI_MESSAGE);
 
