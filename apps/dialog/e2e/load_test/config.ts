@@ -42,7 +42,7 @@ export const HEADLESS_BROWSER_OPTIONS = {
   scenarios: {
     ui_with_browser: {
       executor: 'constant-vus',
-      vus: 1,
+      vus: 100,
       duration: '5m', // Run long enough for debugging
       options: {
         browser: {
