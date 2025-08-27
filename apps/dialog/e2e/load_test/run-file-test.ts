@@ -3,6 +3,7 @@ import { File, open } from 'k6/experimental/fs';
 import encoding from 'k6/encoding';
 import { WAIT_TIMES_IN_MS, HEADLESS_BROWSER_OPTIONS } from './config';
 import { performLogin, saveScreenshot, selectModel, sendMessage } from './common';
+import { check } from 'k6';
 
 export const options = HEADLESS_BROWSER_OPTIONS;
 
@@ -79,19 +80,24 @@ async function readAll(file: File) {
 }
 
 async function uploadPdfFile(page: Page, userIndex: string) {
-  const buffer = await readAll(fileData);
+  let successfulUpload = false;
+  try {
+    const buffer = await readAll(fileData);
 
-  const file = {
-    name: userIndex + '.pdf',
-    mimeType: 'application/pdf',
-    buffer: encoding.b64encode(buffer.buffer),
-  };
+    const file = {
+      name: userIndex + '.pdf',
+      mimeType: 'application/pdf',
+      buffer: encoding.b64encode(buffer.buffer),
+    };
 
-  const fileInputSelector = 'input[type="file"]';
+    const fileInputSelector = 'input[type="file"]';
 
-  console.log('Setting input file');
-  await page.setInputFiles(fileInputSelector, [file]);
-  console.log('Waiting for file upload to complete');
-  await page.waitForTimeout(WAIT_TIMES_IN_MS.FILE_LOAD);
-  console.log('File upload complete');
+    await page.setInputFiles(fileInputSelector, [file]);
+    await page.waitForTimeout(WAIT_TIMES_IN_MS.FILE_LOAD);
+    successfulUpload = true;
+  } finally {
+    check(page, {
+      'File uploaded successfully': () => successfulUpload,
+    });
+  }
 }
