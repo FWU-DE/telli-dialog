@@ -97,6 +97,7 @@ async function selectModel(page: Page, userIndex: number) {
       userIndex % 2 === 0 ? SELECTORS.LLAMA_MODEL_NAME : SELECTORS.GPT_MODEL_NAME;
 
     if (currentSelectedText && currentSelectedText.includes(targetModelName)) {
+      sucessfullyselected = true;
       console.log(
         `Model ${targetModelName} already selected for user ${userIndex}, skipping selection`,
       );
