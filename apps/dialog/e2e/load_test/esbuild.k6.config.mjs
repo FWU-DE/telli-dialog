@@ -1,10 +1,10 @@
 import { build } from 'esbuild';
 
 build({
-  entryPoints: ['e2e/load_test/run.ts'],
+  entryPoints: ['e2e/load_test/run-chat-test.ts', 'e2e/load_test/run-file-test.ts'],
   bundle: true,
   platform: 'node',
-  outfile: 'e2e/load_test/run.js',
+  outdir: 'e2e/load_test',
   external: ['k6', 'k6/browser', 'fs', 'path', 'os', 'crypto'], // Prevents K6 & Node.js modules from being bundled
   logLevel: 'info',
 }).catch(() => process.exit(1));
