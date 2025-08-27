@@ -9,7 +9,7 @@ import {
   VISIBLE_BROWSER_OPTIONS,
   SCREENSHOT_FOLDERS,
   SAVE_SCREENSHOTS,
-} from './config.ts';
+} from './config';
 
 let errorFlows = 0;
 let successFlows = 0;
