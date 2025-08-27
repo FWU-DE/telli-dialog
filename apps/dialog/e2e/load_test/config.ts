@@ -36,7 +36,7 @@ export const FILE_PROMPT = `Wie viele Kartoffelsorten gibt es?`;
 export const PATHS = {
   SUCCESS_SCREENSHOT_DIR: 'e2e/load_test/success-results',
   ERROR_SCREENSHOT_DIR: 'e2e/load_test/error-results',
-  UPLOAD_FILE: 'assets/Geschichte_der_Kartoffel.pdf',
+  UPLOAD_FILE: 'assets/Claude_Monet_Wikipedia.pdf',
 };
 
 export const HEADLESS_BROWSER_OPTIONS = {
