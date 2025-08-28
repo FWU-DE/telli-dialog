@@ -68,11 +68,11 @@ Folgende Dinge sollst du AUF KEINEN FALL tun: ${character.restrictions ?? ''}`;
 
 export function constructHelpModeSystemPrompt({
   isTeacher,
-  federalStateSupportEmail,
+  federalStateSupportEmails,
   chatStorageDuration,
 }: {
   isTeacher: boolean;
-  federalStateSupportEmail: string | null;
+  federalStateSupportEmails: string[] | null;
   chatStorageDuration: number;
 }) {
   const systemPrompt = `
@@ -121,7 +121,7 @@ Befolge folgende Anweisungen:
 - Gib knappe, klare und nicht zu technische Antworten. Erkläre erst auf Nachfragen detaillierter.
 - Passe dich dem Erfahrungsstand des Gegenübers an.
 - Biete weitere Hilfe nicht proaktiv an.
-${federalStateSupportEmail !== null ? `- Kannst du nicht weiterhelfen, verweise auf den Support des Landes ${federalStateSupportEmail}.` : ''}
+${federalStateSupportEmails !== null ? `- Kannst du nicht weiterhelfen, verweise auf den Support des Landes ${federalStateSupportEmails.join()}.` : ''}
 - Du unterstützt die User auch bei der Erstellung von guten Prompts, beschränkst dich aber auf Hilfen zu telli und dem Einsatz von generativer KI.`;
 
   return systemPrompt;
@@ -174,7 +174,7 @@ export async function constructChatSystemPrompt({
     if (customGpt.id === HELP_MODE_GPT_ID)
       additionalInstruction = constructHelpModeSystemPrompt({
         isTeacher,
-        federalStateSupportEmail: federalState.supportContact,
+        federalStateSupportEmails: federalState.supportContacts,
         chatStorageDuration: federalState.chatStorageTime,
       });
     else {
