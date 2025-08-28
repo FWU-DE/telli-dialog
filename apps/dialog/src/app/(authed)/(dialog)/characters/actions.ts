@@ -3,7 +3,7 @@
 import { db } from '@/db';
 import { CharacterFileMapping, characterTable, FileModel, fileTable } from '@/db/schema';
 import { getUser } from '@/auth/utils';
-import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
+import { dbGetLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 import { copyFileInS3 } from '@/s3';
 import { generateUUID } from '@/utils/uuid';
 import { eq } from 'drizzle-orm';
@@ -28,7 +28,7 @@ export async function createNewCharacterAction({
       copySource: templatePictureId,
     });
   }
-  const llmModels = await dbGetAndUpdateLlmModelsByFederalStateId({
+  const llmModels = await dbGetLlmModelsByFederalStateId({
     federalStateId: user.federalState.id,
   });
 
