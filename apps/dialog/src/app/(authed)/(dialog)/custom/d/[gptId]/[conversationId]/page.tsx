@@ -7,7 +7,7 @@ import Logo from '@/components/common/logo';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetConversationById, dbGetCoversationMessages } from '@/db/functions/chat';
 import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
-import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
+import { dbGetLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
@@ -58,7 +58,7 @@ export default async function Page(context: PageContext) {
     redirect('/');
   }
 
-  const models = await dbGetAndUpdateLlmModelsByFederalStateId({
+  const models = await dbGetLlmModelsByFederalStateId({
     federalStateId: user.federalState.id,
   });
 

@@ -1,5 +1,5 @@
 import { dbInsertConversationUsage } from '@/db/functions/token-usage';
-import { dbGetAndUpdateLlmModelsByFederalStateId, getAllLlmModels } from '@/db/functions/llm-model';
+import { dbGetLlmModelsByFederalStateId, getAllLlmModels } from '@/db/functions/llm-model';
 import { getPriceInCentBySharedCharacterChat, getPriceInCentBySharedChat } from '@/app/school';
 import { CharacterModel, type LlmModel, type SharedSchoolConversationModel } from '@/db/schema';
 import { type UserAndContext } from '@/auth/types';
@@ -136,7 +136,7 @@ export async function userHasReachedIntelliPointLimit({
   if (user === undefined || user.school === undefined || user.federalState === undefined) {
     return false;
   }
-  const models = await dbGetAndUpdateLlmModelsByFederalStateId({
+  const models = await dbGetLlmModelsByFederalStateId({
     federalStateId: user.federalState.id,
   });
 

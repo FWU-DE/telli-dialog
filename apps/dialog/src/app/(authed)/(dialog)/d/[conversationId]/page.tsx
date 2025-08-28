@@ -14,7 +14,7 @@ import { z } from 'zod';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
-import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
+import { dbGetLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { dbGetRelatedFiles } from '@/db/functions/files';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
@@ -47,7 +47,7 @@ export default async function Page(context: PageContext) {
   const fileMapping = await dbGetRelatedFiles(conversationId);
   const { conversation, messages } = conversationObject;
 
-  const models = await dbGetAndUpdateLlmModelsByFederalStateId({
+  const models = await dbGetLlmModelsByFederalStateId({
     federalStateId: user.federalState.id,
   });
 
