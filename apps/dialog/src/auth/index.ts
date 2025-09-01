@@ -40,10 +40,6 @@ const result = NextAuth({
       // Ensure userId is set for credentials provider
       if (account?.provider === 'credentials' && user?.id) {
         token.userId = user.id;
-        token.user = user;
-      }
-      if (token.user === undefined) {
-        token.user = await getUserAndContextByUserId({ userId: token.userId as string });
       }
       if (token.user === undefined || (token.user as UserAndContext).school === undefined) {
         token.user = await getUserAndContextByUserId({ userId: token.userId as string });
