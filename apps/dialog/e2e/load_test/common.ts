@@ -1,66 +1,27 @@
-import { browser, Page } from 'k6/browser';
+import { Page } from 'k6/browser';
+import { SCREENSHOT_FOLDERS } from './config';
 import { check } from 'k6';
-import {
-  BASE_URL,
-  WAIT_TIMES_IN_MS,
-  SELECTORS,
-  DEFAULT_PROMPT,
-  HEADLESS_BROWSER_OPTIONS,
-  VISIBLE_BROWSER_OPTIONS,
-  SCREENSHOT_FOLDERS,
-  SAVE_SCREENSHOTS,
-} from './config';
+import { BASE_URL, WAIT_TIMES_IN_MS, SELECTORS } from './config';
 
-let errorFlows = 0;
-let successFlows = 0;
-
-export const options = HEADLESS_BROWSER_OPTIONS;
-
-export default async function main() {
-  const context = await browser.newContext();
-  await context.clearCookies();
-  const page = await context.newPage();
-
-  page.setDefaultTimeout(WAIT_TIMES_IN_MS.PAGE_ELEMENT_TIMEOUT);
-
-  const userIndex = __VU + __ITER;
-  const userName = 'test';
-  const password = __ENV.LOADTEST_PASSWORD;
-
-  if (!password) {
-    throw new Error(
-      'Please provide the password for the test user via the env variable LOADTEST_PASSWORD',
-    );
-  }
-
+export async function saveScreenshot(page: Page, userIndex: string, isSuccess: boolean) {
   try {
-    await performLogin(page, userName, password);
-    await selectModel(page, userIndex);
-    await sendMessage(page);
+    const folder = isSuccess
+      ? SCREENSHOT_FOLDERS.SUCCESS_RESULTS
+      : SCREENSHOT_FOLDERS.ERROR_RESULTS;
+    const prefix = isSuccess ? 'success' : 'error';
+    const screenshotPath = `${folder}/${prefix}-${userIndex}.png`;
 
-    successFlows++;
-    if (SAVE_SCREENSHOTS) {
-      await page.screenshot({
-        path: `${SCREENSHOT_FOLDERS.SUCCESS_RESULTS}/screenshot-${userIndex}.png`,
-      });
-    }
-  } catch (error) {
-    errorFlows++;
-    console.error(`Error during test execution for user ${userIndex}:`, error);
-    if (SAVE_SCREENSHOTS) {
-      await page.screenshot({
-        path: `${SCREENSHOT_FOLDERS.ERROR_RESULTS}/screenshot-${userIndex}.png`,
-      });
-    }
-    throw error;
-  } finally {
-    console.info({ successFlows, errorFlows, userIndex });
-    await page.close();
-    await context.close();
+    await page.screenshot({
+      path: screenshotPath,
+      fullPage: true,
+    });
+  } catch (screenshotError) {
+    console.error(`Failed to save screenshot for user ${userIndex}:`, screenshotError);
+    // Don't throw here - we don't want screenshot failures to break the test
   }
 }
 
-async function performLogin(page: Page, userName: string, password: string) {
+export async function performLogin(page: Page, userName: string, password: string) {
   let successfullLogin = false;
   try {
     await page.goto(`${BASE_URL}/login?testlogin=true`);
@@ -86,7 +47,7 @@ async function performLogin(page: Page, userName: string, password: string) {
   }
 }
 
-async function selectModel(page: Page, userIndex: number) {
+export async function selectModel(page: Page, userIndex: number) {
   let sucessfullyselected = false;
   try {
     const dropdownLocator = page.locator(SELECTORS.LLM_DROPDOWN);
@@ -122,21 +83,21 @@ async function selectModel(page: Page, userIndex: number) {
   }
 }
 
-async function sendMessage(page: Page) {
+export async function sendMessage(page: Page, prompt: string) {
   let responseReceived = false;
   let content: string = '';
   try {
     const inputField = page.locator(SELECTORS.MESSAGE_INPUT);
     await inputField.waitFor();
-    await page.waitForTimeout(200);
-    await inputField.fill(DEFAULT_PROMPT);
+    await page.waitForTimeout(WAIT_TIMES_IN_MS.ELEMENT_LOAD);
+    await inputField.fill(prompt);
 
     // This fixes the "element is not attached to the DOM" errors, by waiting for a new button
     await page.click(SELECTORS.SEND_BUTTON);
 
     const aiMessage = page.locator(SELECTORS.AI_MESSAGE);
+    await aiMessage.waitFor({ state: 'visible', timeout: WAIT_TIMES_IN_MS.AI_MESSAGE_TIMEOUT });
 
-    await aiMessage.waitFor({ state: 'visible', timeout: 30_000 });
     let attempts = 0;
     while (true) {
       content = (await aiMessage.textContent()) ?? '';
