@@ -33,6 +33,9 @@ const result = NextAuth({
       if (account?.provider === 'credentials' && user?.id) {
         token.userId = user.id;
       }
+      if (token.user === undefined || (token.user as UserAndContext).school === undefined) {
+        token.user = await getUserAndContextByUserId({ userId: token.userId as string });
+      }
       return token;
     },
     async session({ session, token }) {
