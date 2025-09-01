@@ -3,6 +3,15 @@ import { vidisConfig, handleVidisJWTCallback, handleVidisLogout } from './provid
 import { dbGetUserById } from '@/db/functions/user';
 import { mockVidisConfig } from './providers/vidis-mock';
 import { credentialsProvider } from './providers/credentials';
+import { getUserAndContextByUserId } from './utils';
+import { UserAndContext } from './types';
+
+// TODO: Move this to it's own file (see also: https://github.com/nextauthjs/next-auth/discussions/9120#discussioncomment-7544307)
+declare module 'next-auth' {
+  interface Session {
+    user?: UserAndContext;
+  }
+}
 
 const SESSION_LIFETIME = 60 * 60 * 8;
 
@@ -27,11 +36,15 @@ const result = NextAuth({
         (account?.provider === 'vidis' || account?.provider === 'vidis-mock') &&
         profile !== undefined
       ) {
-        return await handleVidisJWTCallback({ account, profile, token });
+        token = await handleVidisJWTCallback({ account, profile, token });
       }
       // Ensure userId is set for credentials provider
       if (account?.provider === 'credentials' && user?.id) {
         token.userId = user.id;
+        token.user = user;
+      }
+      if (token.user === undefined) {
+        token.user = await getUserAndContextByUserId({ userId: token.userId as string });
       }
       return token;
     },
@@ -39,13 +52,13 @@ const result = NextAuth({
       const userId = token.userId;
       if (userId === undefined || userId === null) return session;
 
-      const user = await dbGetUserById({ userId: userId as string });
-
-      if (user === undefined) {
-        throw Error(`Could not find user with id ${userId}`);
+      if (session?.user?.id === undefined) {
+        session.user = {
+          ...session.user,
+          ...(token.user as UserAndContext),
+        };
       }
-      // @ts-expect-error some weird next-auth typing error
-      session.user = user;
+
       return session;
     },
   },
