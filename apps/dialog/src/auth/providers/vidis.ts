@@ -68,7 +68,7 @@ export async function handleVidisJWTCallback({
   const createdUser = await dbGetOrCreateVidisUser({ ...parsedProfile });
 
   if (createdUser === undefined) {
-    return null;
+    throw Error('Could not create user');
   }
 
   token.userId = createdUser.id;
