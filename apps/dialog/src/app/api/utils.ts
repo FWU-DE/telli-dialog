@@ -1,7 +1,7 @@
 import { dbGetApiKeyByFederalStateIdWithResult } from '@/db/functions/federal-state';
 import {
   dbGetModelByIdAndFederalStateId,
-  dbGetAndUpdateLlmModelsByFederalStateId,
+  dbGetLlmModelsByFederalStateId,
 } from '@/db/functions/llm-model';
 import { createTelliConfiguration } from './chat/custom-model-config';
 import { env } from '@/env';
@@ -71,7 +71,7 @@ export function calculateCostsInCents(
  * @returns The auxiliary model for the user's federal state
  */
 export async function getAuxiliaryModel(user: UserAndContext): Promise<LlmModel> {
-  const llmModels = await dbGetAndUpdateLlmModelsByFederalStateId({
+  const llmModels = await dbGetLlmModelsByFederalStateId({
     federalStateId: user.federalState.id,
   });
   const auxiliaryModel = llmModels.find((m) => m.name === DEFAULT_AUXILIARY_MODEL) ?? llmModels[0];

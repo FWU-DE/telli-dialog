@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import Chat from '@/components/chat/chat';
 import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
-import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
+import { dbGetLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { getMaybeSignedUrlFromS3Get } from '@/s3';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
@@ -25,7 +25,7 @@ export default async function Page({ params }: { params: Promise<{ gptId: string
     redirect('/');
   }
   const logoElement = <Logo federalStateId={user.federalState.id} />;
-  const models = await dbGetAndUpdateLlmModelsByFederalStateId({
+  const models = await dbGetLlmModelsByFederalStateId({
     federalStateId: user.federalState.id,
   });
 

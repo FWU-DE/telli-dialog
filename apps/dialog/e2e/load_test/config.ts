@@ -56,6 +56,11 @@ export const HEADLESS_BROWSER_OPTIONS = {
 };
 
 export const VISIBLE_BROWSER_OPTIONS = {
+  cloud: {
+    distribution: {
+      distributionLabel1: { loadZone: 'amazon:de:frankfurt', percent: 100 },
+    },
+  },
   scenarios: {
     ui_test: {
       executor: 'constant-vus',

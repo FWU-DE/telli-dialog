@@ -5,7 +5,7 @@ import DialogSidebar from './sidebar';
 import { HEADER_PORTAL_ID } from './header-portal';
 import { contentHeight } from '@/utils/tailwind/height';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
-import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
+import { dbGetLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 import { getPriceInCentByUser } from '@/app/school';
 import AutoLogout from '@/components/auth/auto-logout';
 import { checkProductAccess } from '@/utils/vidis/access';
@@ -20,7 +20,7 @@ import { FederalStateId } from '@/utils/vidis/const';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
-  const models = await dbGetAndUpdateLlmModelsByFederalStateId({
+  const models = await dbGetLlmModelsByFederalStateId({
     federalStateId: user.federalState.id,
   });
 
