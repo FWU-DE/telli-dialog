@@ -1,6 +1,5 @@
 import NextAuth, { NextAuthResult } from 'next-auth';
 import { vidisConfig, handleVidisJWTCallback, handleVidisLogout } from './providers/vidis';
-import { dbGetUserById } from '@/db/functions/user';
 import { mockVidisConfig } from './providers/vidis-mock';
 import { credentialsProvider } from './providers/credentials';
 import { getUserAndContextByUserId } from './utils';

@@ -1,7 +1,6 @@
 import { type Session } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { auth } from '.';
-import { dbGetUserById } from '@/db/functions/user';
 import { type UserAndContext } from './types';
 import { dbGetSchoolAndMappingAndFederalStateByUserId } from '@/db/functions/school';
 import { FederalStateModel } from '@/db/schema';
