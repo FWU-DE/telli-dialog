@@ -92,6 +92,7 @@ async function uploadPdfFile(page: Page, userIndex: string) {
 
     const fileInputSelector = 'input[type="file"]';
 
+    // @ts-ignore
     await page.setInputFiles(fileInputSelector, [file]);
     await page.waitForTimeout(WAIT_TIMES_IN_MS.FILE_LOAD);
     successfulUpload = true;
