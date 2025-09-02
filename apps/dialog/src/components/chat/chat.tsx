@@ -29,7 +29,6 @@ import LoadingAnimation from './loading-animation';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { Message } from 'ai';
 import { logDebug, logError, logWarning } from '@/utils/logging/logging';
-import { getUser } from '@/auth/utils';
 import { useSession } from 'next-auth/react';
 
 type ChatProps = {
