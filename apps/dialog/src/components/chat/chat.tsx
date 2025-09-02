@@ -195,11 +195,10 @@ export default async function Chat({
   }
 
   const user = await getUser();
-  const [, federalState] = await dbGetFederalStateByIdWithResult(user.school.federalStateId);
 
   const formatedSubHeading = tHelpMode('chat-subheading', {
     FAQ_LINK: tHelpMode('faq-link'),
-    SUPPORT_ADRESSES: formatSupportAdressesToString(federalState?.supportContacts ?? []),
+    SUPPORT_ADRESSES: formatSupportAdressesToString(user.federalState?.supportContacts ?? []),
   });
 
   function handleDeattachFile(localFileId: string) {
