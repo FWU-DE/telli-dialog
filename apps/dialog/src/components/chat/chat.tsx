@@ -30,7 +30,7 @@ import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { Message } from 'ai';
 import { logDebug, logError, logWarning } from '@/utils/logging/logging';
 import { getUser } from '@/auth/utils';
-import { dbGetFederalStateByIdWithResult } from '@/db/functions/federal-state';
+import { useSession } from 'next-auth/react';
 
 type ChatProps = {
   id: string;
@@ -45,7 +45,7 @@ type ChatProps = {
   logoElement: React.ReactNode;
 };
 
-export default async function Chat({
+export default function Chat({
   id,
   initialMessages,
   customGpt,
@@ -76,6 +76,7 @@ export default async function Chat({
   const [doesLastUserMessageContainLinkOrFile, setDoesLastUserMessageContainLinkOrFile] =
     useState(false);
   const queryClient = useQueryClient();
+  const session = useSession();
 
   // substitute the error object from the useChat hook, to dislay a user friendly error message in German
   const { error, handleResponse, resetError } = useCheckStatusCode();
@@ -193,12 +194,11 @@ export default async function Chat({
     const last = arr[arr.length - 1];
     return `${allButLast} ${tHelpMode('support-addresses-concat')} ${last}`;
   }
-
-  const user = await getUser();
-
   const formatedSubHeading = tHelpMode('chat-subheading', {
     FAQ_LINK: tHelpMode('faq-link'),
-    SUPPORT_ADRESSES: formatSupportAdressesToString(user.federalState?.supportContacts ?? []),
+    SUPPORT_ADRESSES: formatSupportAdressesToString(
+      session.data?.user?.federalState?.supportContacts ?? [],
+    ),
   });
 
   function handleDeattachFile(localFileId: string) {
