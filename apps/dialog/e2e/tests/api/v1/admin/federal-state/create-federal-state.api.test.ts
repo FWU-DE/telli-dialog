@@ -33,7 +33,7 @@ test('should create a new federal state with correct default values', async ({
     mandatoryCertificationTeacher: false,
     studentAccess: true,
     studentPriceLimit: 100,
-    supportContact: null,
+    supportContacts: null,
     teacherPriceLimit: 1000,
     telliName: null,
     trainingLink: null,
