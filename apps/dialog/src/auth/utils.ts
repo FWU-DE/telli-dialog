@@ -1,7 +1,6 @@
 import { type Session } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { auth } from '.';
-import { dbGetUserById } from '@/db/functions/user';
 import { type UserAndContext } from './types';
 import { dbGetSchoolAndMappingAndFederalStateByUserId } from '@/db/functions/school';
 import { FederalStateModel } from '@/db/schema';
@@ -28,24 +27,17 @@ export async function getMaybeUser() {
 
   if (user === undefined) return null;
 
-  const dbUser = await dbGetUserById({ userId: user.id });
-
-  if (dbUser === undefined || dbUser.id === undefined) return null;
-  const userAndContext = await getUserAndContextByUserId({ userId: dbUser.id });
-  return userAndContext;
+  return user;
 }
 
 export async function getUser(): Promise<UserAndContext> {
   const session = await getValidSession();
-  const user = session.user;
 
-  if (user?.id === undefined) {
+  if (session.user === undefined) {
     redirect('/logout');
   }
 
-  const userAndContext = await getUserAndContextByUserId({ userId: user.id });
-
-  return userAndContext;
+  return session.user;
 }
 
 export async function getUserAndContextByUserId({

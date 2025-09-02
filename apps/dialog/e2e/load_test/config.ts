@@ -1,13 +1,13 @@
 export const BASE_URL = 'https://chat-staging.telli.schule';
 //export const BASE_URL = 'http://localhost:3000';
 
-export const SAVE_SCREENSHOTS = true;
-
 export const WAIT_TIMES_IN_MS = {
   PAGE_LOAD: 5000, // Time to wait for a new page to load
   PAGE_ELEMENT_TIMEOUT: 10000, // Maximum time to wait for an element to appear
+  AI_MESSAGE_TIMEOUT: 30000, // Maximum time to wait for an element to appear
   ELEMENT_LOAD: 1000, // Time to wait for elements to load after actions
   POLL_TIME: 1000, // Time to wait between polling attempts
+  FILE_LOAD: 10000, // Time to wait for file uploads
 };
 
 export const SELECTORS = {
@@ -24,26 +24,22 @@ export const SELECTORS = {
   AI_MESSAGE: '[aria-label="assistant message 1"]',
 };
 
-export const DEFAULT_PROMPT = `Ich bin eine Lehrerin an einer Schule und unterrichte ein technisches Fach. 
-Wie kann ich dennoch dazu beitragen, den Schülerinnen und Schülern soziale Werte zu vermitteln?`;
-
 export const SCREENSHOT_FOLDERS = {
-  SUCCESS_RESULTS: 'e2e/load_test/success-results',
-  ERROR_RESULTS: 'e2e/load_test/error-results',
+  SUCCESS_RESULTS: './e2e/load_test/success-results',
+  ERROR_RESULTS: './e2e/load_test/error-results',
 };
 
 export const HEADLESS_BROWSER_OPTIONS = {
+  cloud: {
+    distribution: {
+      distributionLabel1: { loadZone: 'amazon:de:frankfurt', percent: 100 },
+    },
+  },
   scenarios: {
     ui_with_browser: {
-      executor: 'ramping-vus',
-      startVUs: 1,
-      stages: [
-        { duration: '1m', target: 10 }, // Ramp up gradually
-        { duration: '2m', target: 50 }, // Moderate load
-        { duration: '2m', target: 100 }, // Peak load
-        { duration: '5m', target: 100 }, // Sustain peak
-        { duration: '1m', target: 0 }, // Ramp down
-      ],
+      executor: 'constant-vus',
+      vus: 100,
+      duration: '5m', // Run long enough for debugging
       options: {
         browser: {
           type: 'chromium',
@@ -60,11 +56,16 @@ export const HEADLESS_BROWSER_OPTIONS = {
 };
 
 export const VISIBLE_BROWSER_OPTIONS = {
+  cloud: {
+    distribution: {
+      distributionLabel1: { loadZone: 'amazon:de:frankfurt', percent: 100 },
+    },
+  },
   scenarios: {
     ui_test: {
       executor: 'constant-vus',
       vus: 1, // Only run 1 user to see the UI
-      duration: '2m', // Run long enough for debugging
+      duration: '20m', // Run long enough for debugging
       options: {
         browser: {
           type: 'chromium',
