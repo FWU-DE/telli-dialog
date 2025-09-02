@@ -30,7 +30,7 @@ test('should update an existing federal state', async ({
   });
   expect(response.ok()).toBeTruthy();
   const json = await response.json();
-  expect(json.supportContacts).toBe(['updated-support-contact']);
+  expect(json['supportContacts']).toBe(['updated-support-contact']);
 });
 
 test('should return 404 if federal state does not exist', async ({
