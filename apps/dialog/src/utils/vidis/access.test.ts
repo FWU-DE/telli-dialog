@@ -13,7 +13,7 @@ describe('checkProductAccess', () => {
     studentPriceLimit: 200,
     mandatoryCertificationTeacher: null,
     chatStorageTime: 120,
-    supportContact: null,
+    supportContacts: null,
     trainingLink: null,
     studentAccess: true,
     enableCharacter: true,

@@ -29,6 +29,7 @@ import LoadingAnimation from './loading-animation';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { Message } from 'ai';
 import { logDebug, logError, logWarning } from '@/utils/logging/logging';
+import { useSession } from 'next-auth/react';
 
 type ChatProps = {
   id: string;
@@ -74,6 +75,7 @@ export default function Chat({
   const [doesLastUserMessageContainLinkOrFile, setDoesLastUserMessageContainLinkOrFile] =
     useState(false);
   const queryClient = useQueryClient();
+  const session = useSession();
 
   // substitute the error object from the useChat hook, to dislay a user friendly error message in German
   const { error, handleResponse, resetError } = useCheckStatusCode();
@@ -183,7 +185,20 @@ export default function Chat({
     reload();
   }
 
-  const formatedSubHeading = tHelpMode('chat-subheading', { FAQ_LINK: tHelpMode('faq-link') });
+  function formatSupportAdressesToString(arr: string[]): string {
+    if (arr.length === 0) return '';
+    if (arr.length === 1) return arr[0]!;
+
+    const allButLast = arr.slice(0, -1).join(', ');
+    const last = arr[arr.length - 1];
+    return `${allButLast} ${tHelpMode('support-addresses-concat')} ${last}`;
+  }
+  const formatedSubHeading = tHelpMode('chat-subheading', {
+    FAQ_LINK: tHelpMode('faq-link'),
+    SUPPORT_ADRESSES: formatSupportAdressesToString(
+      session.data?.user?.federalState?.supportContacts ?? [],
+    ),
+  });
 
   function handleDeattachFile(localFileId: string) {
     setFiles((prev) => {
