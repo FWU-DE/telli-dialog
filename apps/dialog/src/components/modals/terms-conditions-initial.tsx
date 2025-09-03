@@ -12,9 +12,10 @@ import Image from 'next/image';
 import MarkdownDisplay from '../chat/markdown-display';
 import { useTheme } from '@/hooks/use-theme';
 import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
+import { useSession } from 'next-auth/react';
 
 type TermsConditionsModalProps = {
-  handleAccept(): void;
+  handleAccept(): Promise<boolean>;
   disclaimerConfig: DisclaimerConfig;
 } & React.ComponentProps<'button'>;
 
@@ -33,6 +34,7 @@ export default function TermsConditionsModal({
   const tUsage = useTranslations('usage-disclaimer');
   const tCommon = useTranslations('common');
   const { designConfiguration } = useTheme();
+  const session = useSession();
 
   const nextPage = () => {
     setPageNumber(pageNumber + 1);
@@ -73,8 +75,8 @@ export default function TermsConditionsModal({
     );
   };
 
-  const acceptAndClose = () => {
-    handleAccept();
+  const acceptAndClose = async () => {
+    await session.update(await handleAccept());
     router.refresh();
   };
 

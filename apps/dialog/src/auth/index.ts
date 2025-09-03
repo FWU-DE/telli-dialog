@@ -41,6 +41,9 @@ const result = NextAuth({
       if (account?.provider === 'credentials' && user?.id) {
         token.userId = user.id;
       }
+      if (trigger === 'update') {
+        token.user = await getUserAndContextByUserId({ userId: token.userId as string });
+      }
       if (token.user === undefined || (token.user as UserAndContext).school === undefined) {
         token.user = await getUserAndContextByUserId({ userId: token.userId as string });
       }
@@ -83,3 +86,6 @@ export const handlers: NextAuthResult['handlers'] = result.handlers;
 export const auth: NextAuthResult['auth'] = result.auth;
 export const signIn: NextAuthResult['signIn'] = result.signIn;
 export const signOut: NextAuthResult['signOut'] = result.signOut;
+// This seems to currently be the only option for server-side updates to the session/jwt.
+// Client side use useSession().update()
+export const unstable_update: NextAuthResult['unstable_update'] = result.unstable_update;

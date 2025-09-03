@@ -1,6 +1,6 @@
 import { type Session } from 'next-auth';
 import { redirect } from 'next/navigation';
-import { auth } from '.';
+import { auth, unstable_update } from '.';
 import { type UserAndContext } from './types';
 import { dbGetSchoolAndMappingAndFederalStateByUserId } from '@/db/functions/school';
 import { FederalStateModel } from '@/db/schema';
@@ -38,6 +38,17 @@ export async function getUser(): Promise<UserAndContext> {
   }
 
   return session.user;
+}
+
+export async function updateSession(
+  data?: Partial<
+    | Session
+    | {
+        user: Partial<Session['user']>;
+      }
+  >,
+): Promise<void> {
+  await unstable_update(data ?? {});
 }
 
 export async function getUserAndContextByUserId({
