@@ -9,7 +9,7 @@ import {
 import { getUser } from '@/auth/utils';
 import { dbDeleteSharedSchoolChatByIdAndUserId } from '@/db/functions/shared-school-chat';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
-import { dbGetAndUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
+import { dbGetLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 
 export async function dbDeleteSharedChatAction({ id }: { id: string }) {
   const user = await getUser();
@@ -51,7 +51,7 @@ export async function createNewSharedSchoolChatAction(
 
 export async function dbCreateSharedSchoolChat({ userId }: { userId: string }) {
   const user = await getUser();
-  const llmModels = await dbGetAndUpdateLlmModelsByFederalStateId({
+  const llmModels = await dbGetLlmModelsByFederalStateId({
     federalStateId: user.federalState.id,
   });
 

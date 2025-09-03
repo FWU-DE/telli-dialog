@@ -19,7 +19,7 @@ export async function getAllLlmModels() {
   return await db.select().from(llmModelTable).orderBy(llmModelTable.createdAt);
 }
 
-export async function dbGetAndUpdateLlmModelsByFederalStateId({
+export async function dbGetLlmModelsByFederalStateId({
   federalStateId,
 }: {
   federalStateId: string;
@@ -33,12 +33,20 @@ export async function dbGetAndUpdateLlmModelsByFederalStateId({
     )
     .where(eq(federalStateLlmModelMappingTable.federalStateId, federalStateId));
 
+  return rows.map((r) => r.llm_model);
+}
+
+// TODO: Add chronjob that uses this regularly
+export async function dbUpdateLlmModelsByFederalStateId({
+  federalStateId,
+}: {
+  federalStateId: string;
+}): Promise<LlmModel[]> {
   const [error, result] = await dbGetApiKeyByFederalStateIdWithResult({ federalStateId });
   if (error !== null) {
     console.error({ error });
     return [];
   }
-
   const models = await fetchLlmModels({ apiKey: result.decryptedApiKey });
 
   const upsertedModels = await dbUpsertLlmModelsByModelsAndFederalStateId({
@@ -48,8 +56,7 @@ export async function dbGetAndUpdateLlmModelsByFederalStateId({
   if (models.length !== upsertedModels.length) {
     return upsertedModels;
   }
-
-  return rows.map((r) => r.llm_model);
+  return models;
 }
 
 export async function dbGetModelByIdAndFederalStateId({
