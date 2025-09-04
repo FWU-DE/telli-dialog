@@ -54,18 +54,17 @@ export default function CustomGptContainer({
       });
   }
 
-  function handleNavigateToNewChat(e: React.MouseEvent<HTMLButtonElement>) {
+  function handleNavigateToNewChat(e: React.MouseEvent) {
     e.preventDefault();
-    e.stopPropagation();
     router.push(`/custom/d/${id}`);
   }
   const queryParams = new URLSearchParams({
     create: 'false',
   });
   return (
-    <Link
-      href={`/custom/editor/${id}?${queryParams.toString()}`}
-      className="rounded-enterprise-md border p-6 flex items-center gap-4 w-full hover:border-primary"
+    <div
+      onClick={handleNavigateToNewChat}
+      className="rounded-enterprise-md border p-6 flex items-center gap-4 w-full hover:border-primary cursor-pointer"
     >
       <figure
         className="w-11 h-11 bg-light-gray rounded-enterprise-sm flex justify-center items-center"
@@ -87,46 +86,34 @@ export default function CustomGptContainer({
         <span className={cn(truncateClassName, 'text-gray-400')}>{description}</span>
       </div>
       <div className="flex-grow" />
-      {accessLevel === 'global' && (
-        <CreateNewCharacterFromTemplate
-          redirectPath="custom"
-          createInstanceCallback={createNewCustomGptAction}
-          templateId={id}
-          templatePictureId={pictureId ?? undefined}
-          className="w-8 h-8 flex items-center justify-center"
-          {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
-        >
-          <TelliClipboardButton
-            text={t('form.copy-page.copy-template')}
-            className="w-6 h-6"
-            outerDivClassName="p-1 rounded-enterprise-sm"
-          />
-        </CreateNewCharacterFromTemplate>
-      )}
       {
-        <button
-          type="button"
-          aria-label={tCommon('new-chat')}
-          onClick={handleNavigateToNewChat}
-          className={cn(iconClassName, 'border-transparent p-0')}
-        >
-          <SharedChatIcon aria-hidden="true" className="w-8 h-8" />
-          <span className="sr-only">{tCommon('new-chat')}</span>
-        </button>
+        <div onClick={(event) => event.stopPropagation()}>
+          <Link
+            type="button"
+            aria-label={tCommon('new-chat')}
+            href={`/custom/editor/${id}?${queryParams.toString()}`}
+            className={cn(iconClassName, 'border-transparent p-1')}
+          >
+            <SharedChatIcon aria-hidden="true" className="w-6 h-6" />
+            <span className="sr-only">{tCommon('new-chat')}</span>
+          </Link>
+        </div>
       }
       {currentUserId === userId && (
-        <DestructiveActionButton
-          modalTitle={t('form.delete-gpt')}
-          modalDescription={t('form.gpt-delete-modal-description')}
-          confirmText={tCommon('delete')}
-          actionFn={handleDeleteCustomGpt}
-          aria-label={t('form.delete-gpt')}
-          triggerButtonClassName={cn('border-transparent p-0', iconClassName)}
-        >
-          <TrashIcon aria-hidden="true" className="w-8 h-8" />
-          <span className="sr-only">{t('form.delete-gpt')}</span>
-        </DestructiveActionButton>
+        <div onClick={(event) => event.stopPropagation()}>
+          <DestructiveActionButton
+            modalTitle={t('form.delete-gpt')}
+            modalDescription={t('form.gpt-delete-modal-description')}
+            confirmText={tCommon('delete')}
+            actionFn={handleDeleteCustomGpt}
+            aria-label={t('form.delete-gpt')}
+            triggerButtonClassName={cn('border-transparent p-0', iconClassName)}
+          >
+            <TrashIcon aria-hidden="true" className="w-8 h-8" />
+            <span className="sr-only">{t('form.delete-gpt')}</span>
+          </DestructiveActionButton>
+        </div>
       )}
-    </Link>
+    </div>
   );
 }
