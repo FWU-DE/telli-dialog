@@ -44,12 +44,23 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
 
   const effectiveMaxLength: number | undefined = props.maxLength ?? defaultMaxLength;
   const [invalid, setInvalid] = React.useState(false);
+  const [counterVisible, setCounterVisible] = React.useState(false);
+  const [liveValue, setLiveValue] = React.useState(getValue());
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>,
-  ) => {
+  const updateCounterVisible = () => {
+    setCounterVisible(
+      effectiveMaxLength !== undefined &&
+        (inputType === 'textarea' || effectiveMaxLength - liveValue.length < 10),
+    );
+  };
+
+  const handleFocus = () => {
+    updateCounterVisible();
+  };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const newValue = e.target.value;
-    console.log('newValue', newValue);
+    setLiveValue(newValue);
+    updateCounterVisible();
     if (newValue.trim().length === 0 && props.required) {
       setInvalid(true);
       return;
@@ -63,9 +74,9 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const currentValue = getValue();
+    setCounterVisible(false);
     // if (currentValue === e.target.value) return;
     if (currentValue.trim().length === 0 && props.required) {
-      console.log('currentValue is empty');
       e.preventDefault();
       e.stopPropagation();
       setInvalid(true);
@@ -78,45 +89,79 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
 
   const borderErrorClass = invalid ? 'border-coral focus:border-coral' : '';
 
+  const borderLongTextClass =
+    effectiveMaxLength !== undefined && effectiveMaxLength === liveValue.length
+      ? 'border-coral focus:border-coral'
+      : '';
+
   return (
     <div className={cn('flex flex-col gap-4', containerClassName, className)}>
       <label htmlFor={id} className={cn(labelClassName, 'text-sm', customLabelClassName)}>
         {label} {props.required && <span className="text-coral">*</span>}
       </label>
-      <div>
+      <div className="relative">
         {inputType === 'textarea' ? (
-          <textarea
-            className={cn(
-              'w-full',
-              inputFieldClassName,
-              'focus:border-primary placeholder:text-gray-300',
-              customInputClassName,
-              'resize-none',
-              borderErrorClass,
+          <React.Fragment>
+            <textarea
+              className={cn(
+                'w-full',
+                inputFieldClassName,
+                'focus:border-primary placeholder:text-gray-300',
+                customInputClassName,
+                'resize-none',
+                borderErrorClass,
+                borderLongTextClass,
+              )}
+              rows={rows}
+              readOnly={readOnly}
+              maxLength={effectiveMaxLength}
+              {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
+              onChange={handleChange}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+            />
+            {counterVisible && (
+              <span
+                className={cn(
+                  'text-sm absolute bottom-3 right-3',
+                  liveValue.length === effectiveMaxLength ? 'text-coral' : 'text-primary',
+                )}
+              >
+                {liveValue.length}/{effectiveMaxLength}
+              </span>
             )}
-            rows={rows}
-            readOnly={readOnly}
-            maxLength={effectiveMaxLength}
-            {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
+          </React.Fragment>
         ) : (
-          <input
-            type="text"
-            className={cn(
-              'w-full',
-              inputFieldClassName,
-              'focus:border-primary placeholder:text-gray-300',
-              customInputClassName,
-              borderErrorClass,
+          <React.Fragment>
+            <input
+              type="text"
+              className={cn(
+                'w-full',
+                inputFieldClassName,
+                'focus:border-primary placeholder:text-gray-300',
+                customInputClassName,
+                borderErrorClass,
+                borderLongTextClass,
+                counterVisible ? 'pr-14' : '',
+              )}
+              readOnly={readOnly}
+              {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
+              maxLength={effectiveMaxLength}
+              onChange={handleChange}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+            />
+            {counterVisible && (
+              <span
+                className={cn(
+                  'text-sm absolute bottom-1/2 translate-y-1/2 right-3',
+                  liveValue.length === effectiveMaxLength ? 'text-coral' : 'text-primary',
+                )}
+              >
+                {liveValue.length}/{effectiveMaxLength}
+              </span>
             )}
-            readOnly={readOnly}
-            {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
-            maxLength={effectiveMaxLength}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
+          </React.Fragment>
         )}
       </div>
     </div>
