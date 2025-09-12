@@ -14,10 +14,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import { deleteCustomGptAction } from './editor/[customgptId]/actions';
-import { createNewCustomGptAction } from './actions';
-import { CreateNewCharacterFromTemplate } from '../characters/create-new-character-button';
 import { iconClassName } from '@/utils/tailwind/icon';
-import TelliClipboardButton from '@/components/common/clipboard-button';
 
 type CustomGptContainerProps = CustomGptModel & {
   currentUserId: string;
@@ -33,8 +30,6 @@ export default function CustomGptContainer({
   userId,
   currentUserId,
   maybeSignedPictureUrl,
-  accessLevel,
-  pictureId,
 }: CustomGptContainerProps) {
   const router = useRouter();
   const toast = useToast();
