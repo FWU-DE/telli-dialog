@@ -3,7 +3,7 @@
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { useToast } from '@/components/common/toast';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
-import SharedChatIcon from '@/components/icons/shared-chat';
+import SettingsIcon from '@/components/icons/settings';
 import TrashIcon from '@/components/icons/trash';
 import { CustomGptModel } from '@/db/schema';
 import { cn } from '@/utils/tailwind';
@@ -89,7 +89,7 @@ export default function CustomGptContainer({
             href={`/custom/editor/${id}?${queryParams.toString()}`}
             className={cn(iconClassName, 'border-transparent p-1')}
           >
-            <SharedChatIcon aria-hidden="true" className="w-6 h-6" />
+            <SettingsIcon aria-hidden="true" className="w-6 h-6" />
             <span className="sr-only">{tCommon('new-chat')}</span>
           </Link>
         </div>
