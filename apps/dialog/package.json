@@ -21,7 +21,7 @@
     "test:watch": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "db:generate": "drizzle-kit generate --config=./drizzle.config.ts",
+    "db:generate": "dotenvx run -f .env.local -- drizzle-kit generate --config=./drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config=./drizzle.config.ts",
     "db:migrate:local": "dotenvx run -f .env.local -- drizzle-kit migrate --config=./drizzle.config.ts",
     "db:migrate:op": "ENVIRONMENT=development op run --env-file=\"./.env\" -- drizzle-kit migrate --config=./drizzle.config.ts",
