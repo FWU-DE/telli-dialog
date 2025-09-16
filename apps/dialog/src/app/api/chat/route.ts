@@ -6,7 +6,7 @@ import {
 } from '@/db/functions/chat';
 import { NextRequest, NextResponse } from 'next/server';
 import { dbInsertChatContent } from '@/db/functions/chat';
-import { getUser } from '@/auth/utils';
+import { getUser, updateSession } from '@/auth/utils';
 import { userHasReachedIntelliPointLimit, trackChatUsage } from './usage';
 import { getModelAndProviderWithResult, calculateCostsInCents, getAuxiliaryModel } from '../utils';
 import { generateUUID } from '@/utils/uuid';
@@ -190,7 +190,9 @@ export async function POST(request: NextRequest) {
   }
   // Condense chat history to search query to use for vector search and text retrieval
 
-  await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
+  await updateSession({
+    user: await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id }),
+  });
   const maxCharacterLimit = SMALL_MODEL_LIST.includes(definedModel.displayName)
     ? SMALL_MODEL_MAX_CHARACTERS
     : TOTAL_CHAT_LENGTH_LIMIT;
