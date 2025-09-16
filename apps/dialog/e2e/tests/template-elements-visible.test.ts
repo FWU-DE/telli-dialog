@@ -23,6 +23,6 @@ test('all predefined custom-gpt templates are visible for everyone', async ({ pa
   await page.waitForURL('/custom**');
 
   for (const elementIdentifier of templateCustomGptsIdentifier) {
-    await expect(page.getByRole('link', { name: elementIdentifier })).toBeVisible();
+    await expect(page.getByRole('heading', { name: elementIdentifier })).toBeVisible();
   }
 });

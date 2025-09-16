@@ -5,6 +5,7 @@ import {
   dbGetGlobalCharacters,
   dbCreateCharacter,
   dbGetGlobalCharacterByName,
+  dbDeleteCharacterByIdAndUserId,
 } from '@/db/functions/character';
 import { CharacterInsertModel, characterTable } from '@/db/schema';
 import { dbGetModelByName } from '@/db/functions/llm-model';
@@ -40,6 +41,36 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         error: 'Failed to fetch template characters',
+      },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const [error] = validateApiKeyByHeadersWithResult(request.headers);
+    if (error !== null) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const characterId = body['characterId'];
+
+    if (!characterId) {
+      return NextResponse.json({ error: 'characterId is required' }, { status: 400 });
+    }
+
+    const characters = await dbDeleteCharacterByIdAndUserId({
+      characterId: characterId,
+      userId: DUMMY_USER_ID,
+    });
+
+    return NextResponse.json(characters);
+  } catch {
+    return NextResponse.json(
+      {
+        error: 'Failed to delete template characters',
       },
       { status: 500 },
     );

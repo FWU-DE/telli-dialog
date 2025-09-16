@@ -9,7 +9,7 @@ import { ChunkResult } from '../file-operations/process-chunks';
 import { HELP_MODE_GPT_ID } from '@/db/const';
 
 export function constructSchuleSystemPrompt() {
-  return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. Heute ist der ${formatDateToGermanTimestamp(new Date())}. Befolge folgende Anweisungen: Du sprichst immer die Sprache mit der du angesprochen wirst. Du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die Paarform (Beidnennung) z.B. Bürgerinnen und Bürger.`;
+  return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. Heute ist der ${formatDateToGermanTimestamp(new Date())}. Befolge folgende Anweisungen: Du sprichst immer die Sprache mit der du angesprochen wirst. Du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die Paarform (Beidnennung) z.B. Bürgerinnen und Bürger. Bei Fragen über telli verweise auf die Hilfe in der Sidebar.`;
 }
 
 function formatTextChunk(textChunk: ChunkResult) {
@@ -68,11 +68,11 @@ Folgende Dinge sollst du AUF KEINEN FALL tun: ${character.restrictions ?? ''}`;
 
 export function constructHelpModeSystemPrompt({
   isTeacher,
-  federalStateSupportEmail,
+  federalStateSupportEmails,
   chatStorageDuration,
 }: {
   isTeacher: boolean;
-  federalStateSupportEmail: string | null;
+  federalStateSupportEmails: string[] | null;
   chatStorageDuration: number;
 }) {
   const systemPrompt = `
@@ -121,7 +121,7 @@ Befolge folgende Anweisungen:
 - Gib knappe, klare und nicht zu technische Antworten. Erkläre erst auf Nachfragen detaillierter.
 - Passe dich dem Erfahrungsstand des Gegenübers an.
 - Biete weitere Hilfe nicht proaktiv an.
-${federalStateSupportEmail !== null ? `- Kannst du nicht weiterhelfen, verweise auf den Support des Landes ${federalStateSupportEmail}.` : ''}
+${federalStateSupportEmails !== null ? `- Kannst du nicht weiterhelfen, verweise auf den Support des Landes ${federalStateSupportEmails.join(', ')}.` : ''}
 - Du unterstützt die User auch bei der Erstellung von guten Prompts, beschränkst dich aber auf Hilfen zu telli und dem Einsatz von generativer KI.`;
 
   return systemPrompt;
@@ -174,7 +174,7 @@ export async function constructChatSystemPrompt({
     if (customGpt.id === HELP_MODE_GPT_ID)
       additionalInstruction = constructHelpModeSystemPrompt({
         isTeacher,
-        federalStateSupportEmail: federalState.supportContact,
+        federalStateSupportEmails: federalState.supportContacts,
         chatStorageDuration: federalState.chatStorageTime,
       });
     else {
