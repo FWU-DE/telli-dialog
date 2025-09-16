@@ -83,9 +83,10 @@
   },
   "help-mode": {
     "chat-heading": "Hallo, ich bin tellis Hilfe",
-    "chat-subheading": "Ich kenne mich hier aus und kann Dir hoffentlich Fragen beantworten oder Dir bei Problemen weiterhelfen. Ansonsten kannst Du auch gerne meine {FAQ_LINK} besuchen.",
+    "chat-subheading": "Ich kenne mich hier aus und kann Dir hoffentlich Fragen beantworten oder Dir bei Problemen weiterhelfen. Ansonsten kannst Du auch gerne meine {FAQ_LINK} besuchen oder dich an den Support unter {SUPPORT_ADRESSES} wenden.",
     "chat-placeholder": "Wie kann ich helfen?",
-    "faq-link": "[FAQ Seite](https://telli.schule/#faq)"
+    "faq-link": "[FAQ Seite](https://telli.schule/#faq)",
+    "support-addresses-concat": "oder"
   },
   "custom-gpt": {
     "title": "Assistenten",

@@ -134,6 +134,20 @@
       "when": 1753434016906,
       "tag": "0018_high_alex_wilder",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1755854423429,
+      "tag": "0019_dusty_exodus",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1755854829522,
+      "tag": "0020_wakeful_pride",
+      "breakpoints": true
     }
   ]
 }

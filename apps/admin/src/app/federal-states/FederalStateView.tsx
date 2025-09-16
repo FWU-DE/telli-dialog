@@ -6,7 +6,7 @@ export type FederalState = {
   updatedAt: string;
   mandatoryCertificationTeacher: boolean;
   chatStorageTime: number;
-  supportContact: string;
+  supportContacts: string[];
   trainingLink: string;
   telliName: string;
   studentAccess: boolean;
