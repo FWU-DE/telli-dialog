@@ -53,7 +53,9 @@ export async function DELETE(request: NextRequest) {
     if (error !== null) {
       return NextResponse.json({ error: error.message }, { status: 403 });
     }
-    const characterId = request.nextUrl.searchParams.get('characterId');
+    
+    const body = await request.json();    
+    const characterId = body['characterId'];
 
     if (!characterId) {
       return NextResponse.json({ error: 'characterId is required' }, { status: 400 });
@@ -66,7 +68,6 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json(characters);
   } catch (error) {
-    console.error('Error deleting template characters:', error);
     return NextResponse.json(
       {
         error: 'Failed to delete template characters',
