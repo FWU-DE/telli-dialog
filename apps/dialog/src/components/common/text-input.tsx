@@ -45,12 +45,12 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
   const effectiveMaxLength: number | undefined = props.maxLength ?? defaultMaxLength;
   const [invalid, setInvalid] = React.useState(false);
   const [counterVisible, setCounterVisible] = React.useState(false);
-  const [liveValue, setLiveValue] = React.useState(getValue());
+  const [currentLength, setCurrentLength] = React.useState(getValue().length);
 
   const updateCounterVisible = () => {
     setCounterVisible(
       effectiveMaxLength !== undefined &&
-        (inputType === 'textarea' || effectiveMaxLength - liveValue.length < 10),
+        (inputType === 'textarea' || effectiveMaxLength - currentLength < 10),
     );
   };
 
@@ -59,7 +59,7 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
   };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const newValue = e.target.value;
-    setLiveValue(newValue);
+    setCurrentLength(newValue.length);
     updateCounterVisible();
     if (newValue.trim().length === 0 && props.required) {
       setInvalid(true);
@@ -90,7 +90,7 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
   const borderErrorClass = invalid ? 'border-coral focus:border-coral' : '';
 
   const borderLongTextClass =
-    effectiveMaxLength !== undefined && effectiveMaxLength === liveValue.length
+    effectiveMaxLength !== undefined && effectiveMaxLength === currentLength
       ? 'border-coral focus:border-coral'
       : '';
 
@@ -101,7 +101,7 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
       </label>
       <div className="relative">
         {inputType === 'textarea' ? (
-          <React.Fragment>
+          <>
             <textarea
               className={cn(
                 'w-full',
@@ -124,15 +124,15 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
               <span
                 className={cn(
                   'text-sm absolute bottom-3 right-3',
-                  liveValue.length === effectiveMaxLength ? 'text-coral' : 'text-primary',
+                  currentLength === effectiveMaxLength ? 'text-coral' : 'text-primary',
                 )}
               >
-                {liveValue.length}/{effectiveMaxLength}
+                {currentLength}/{effectiveMaxLength}
               </span>
             )}
-          </React.Fragment>
+          </>
         ) : (
-          <React.Fragment>
+          <>
             <input
               type="text"
               className={cn(
@@ -155,13 +155,13 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
               <span
                 className={cn(
                   'text-sm absolute bottom-1/2 translate-y-1/2 right-3',
-                  liveValue.length === effectiveMaxLength ? 'text-coral' : 'text-primary',
+                  currentLength === effectiveMaxLength ? 'text-coral' : 'text-primary',
                 )}
               >
-                {liveValue.length}/{effectiveMaxLength}
+                {currentLength}/{effectiveMaxLength}
               </span>
             )}
-          </React.Fragment>
+          </>
         )}
       </div>
     </div>
