@@ -4,7 +4,7 @@ import { login } from '../../utils/login';
 test('test', async ({ page }) => {
   await login(page, 'teacher');
   await page.goto('/custom?visibility=global');
-  const editButton = page.getByRole('button', { name: 'Neuer Chat' }).first();
+  const editButton = page.getByRole('button', { name: 'Bearbeiten' }).first();
 
   expect(editButton).toBeVisible();
   expect(editButton).toBeEnabled();

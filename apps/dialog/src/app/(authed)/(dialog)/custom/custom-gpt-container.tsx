@@ -85,12 +85,12 @@ export default function CustomGptContainer({
         <div onClick={(event) => event.stopPropagation()}>
           <Link
             type="button"
-            aria-label={tCommon('new-chat')}
+            aria-label={tCommon('edit')}
             href={`/custom/editor/${id}?${queryParams.toString()}`}
             className={cn(iconClassName, 'border-transparent p-1')}
           >
             <SettingsIcon aria-hidden="true" className="w-6 h-6" />
-            <span className="sr-only">{tCommon('new-chat')}</span>
+            <span className="sr-only">{tCommon('edit')}</span>
           </Link>
         </div>
       }
