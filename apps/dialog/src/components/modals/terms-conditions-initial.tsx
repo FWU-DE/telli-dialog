@@ -120,21 +120,17 @@ export default function TermsConditionsModal({
       <AlertDialog.Portal>
         <AlertDialog.Overlay className="fixed inset-0 bg-[#333333] z-30 opacity-30 shadow-[0px_0px_80px_0px_rgba(0,41,102,0.1)]" />
         <AlertDialog.Content
-          className="z-50 fixed left-1/2 top-1/2 max-h-[100vh] -translate-x-1/2 -translate-y-1/2 rounded-enterprise-md bg-white p-10 w-[450px] lg:w-[720px]"
+          className="z-50 fixed left-1/2 top-1/2 max-h-[100vh] -translate-x-1/2 -translate-y-1/2 rounded-enterprise-md bg-white xs:p-5 lg:p-10 w-[450px] lg:w-[720px]"
           style={constructRootLayoutStyle({ designConfiguration })}
         >
           <AlertDialog.Title asChild>
-            <h1 className="text-3xl font-medium p-1 mb-auto mt-auto">{currentTitle}</h1>
+            <h1 className="text-3xl font-medium pb-5 mb-auto mt-auto">{currentTitle}</h1>
           </AlertDialog.Title>
           <AlertDialog.Description asChild>
             <div className="sr-only">{'Terms and conditions content'}</div>
           </AlertDialog.Description>
-          <div className="flex flex-col gap-5 items-start p-2">
-            <div
-              className="overflow-y-auto max-h-[60vh] mt-4"
-              ref={scrollRef}
-              onScroll={handleScroll}
-            >
+          <div className="flex flex-col gap-5 items-start overflow-y-auto max-h-[60vh]">
+            <div className="" ref={scrollRef} onScroll={handleScroll}>
               {currentContent}
             </div>
             {disclaimerConfig.image && (
