@@ -9,10 +9,10 @@ test('test', async ({ page }) => {
   expect(editButton).toBeVisible();
   expect(editButton).toBeEnabled();
   await editButton.click();
-  
+
   await page.waitForURL('/custom/editor/**');
 
-   const copyButton = page.getByRole('button', { name: 'Assistent bearbeiten' }).first();
+  const copyButton = page.getByRole('button', { name: 'Assistent bearbeiten' }).first();
 
   expect(copyButton).toBeVisible();
   expect(copyButton).toBeEnabled();
