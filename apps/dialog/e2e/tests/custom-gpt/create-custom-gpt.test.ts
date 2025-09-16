@@ -61,8 +61,7 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
 
   await page.waitForURL('/custom/**');
   await page
-    .getByRole('heading', { name: 'Hausbauplaner Hilft bei der' })
-    .getByLabel('Neuer Chat')
+    .getByRole('heading', { name: 'Hausbauplaner' })
     .first()
     .click();
   await page.waitForURL('/custom/d/**');
@@ -129,7 +128,9 @@ test('data is autosaved on blur', async ({ page }) => {
   await submitButton.click();
 
   await page.waitForURL('/custom/**');
-  await page.getByRole('heading', { name: 'Autosave Test GPT' }).first().click();
+  const child = page.getByRole('heading', { name: 'Autosave Test GPT' });
+  const item = page.locator(".cursor-pointer").filter({ has: child });
+  await item.locator('[aria-label="Bearbeiten"]').first().click();
   await page.waitForURL('/custom/editor/**');
 
   // change title to new value
