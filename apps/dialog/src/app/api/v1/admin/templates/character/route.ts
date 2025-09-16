@@ -53,8 +53,8 @@ export async function DELETE(request: NextRequest) {
     if (error !== null) {
       return NextResponse.json({ error: error.message }, { status: 403 });
     }
-    
-    const body = await request.json();    
+
+    const body = await request.json();
     const characterId = body['characterId'];
 
     if (!characterId) {
@@ -67,7 +67,7 @@ export async function DELETE(request: NextRequest) {
     });
 
     return NextResponse.json(characters);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         error: 'Failed to delete template characters',
