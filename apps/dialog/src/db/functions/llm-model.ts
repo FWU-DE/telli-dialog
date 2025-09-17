@@ -36,7 +36,6 @@ export async function dbGetLlmModelsByFederalStateId({
   return rows.map((r) => r.llm_model);
 }
 
-// TODO: Add chronjob that uses this regularly
 export async function dbUpdateLlmModelsByFederalStateId({
   federalStateId,
 }: {
