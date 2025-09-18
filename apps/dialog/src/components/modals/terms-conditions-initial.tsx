@@ -120,7 +120,7 @@ export default function TermsConditionsModal({
       <AlertDialog.Portal>
         <AlertDialog.Overlay className="fixed inset-0 bg-[#333333] z-30 opacity-30 shadow-[0px_0px_80px_0px_rgba(0,41,102,0.1)]" />
         <AlertDialog.Content
-          className="z-50 fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-enterprise-md bg-white xs:p-5 lg:p-10 xs:w-[450px] lg:w-[720px]"
+          className="z-50 fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-enterprise-md bg-white p-5 lg:p-10 w-full sm:w-[450px] lg:w-[720px]"
           style={constructRootLayoutStyle({ designConfiguration })}
         >
           <AlertDialog.Title asChild>
