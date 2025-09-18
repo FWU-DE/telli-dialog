@@ -1,5 +1,5 @@
 import { dbInsertConversationUsage } from '@/db/functions/token-usage';
-import { dbGetLlmModelsByFederalStateId, dbGetAllLlmModels } from '@/db/functions/llm-model';
+import { dbGetAllLlmModels } from '@/db/functions/llm-model';
 import { getPriceInCentBySharedCharacterChat, getPriceInCentBySharedChat } from '@/app/school';
 import { CharacterModel, type LlmModel, type SharedSchoolConversationModel } from '@/db/schema';
 import { type UserAndContext } from '@/auth/types';

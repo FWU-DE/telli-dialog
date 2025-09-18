@@ -31,7 +31,12 @@ export async function dbGetLlmModelsByFederalStateId({
       federalStateLlmModelMappingTable,
       eq(federalStateLlmModelMappingTable.llmModelId, llmModelTable.id),
     )
-    .where(and(eq(federalStateLlmModelMappingTable.federalStateId, federalStateId),eq(llmModelTable.isDeleted, false)));
+    .where(
+      and(
+        eq(federalStateLlmModelMappingTable.federalStateId, federalStateId),
+        eq(llmModelTable.isDeleted, false),
+      ),
+    );
 
   return rows.map((r) => r.llm_model);
 }
