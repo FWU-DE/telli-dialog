@@ -8,15 +8,13 @@ import {
 import { LlmModel } from '@/db/schema';
 import { type UserAndContext } from '@/auth/types';
 import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
+import { dbGetAllLlmModels } from '@/db/functions/llm-model';
 
-export async function getPriceInCentByUser({
-  user,
-  models,
-}: {
-  user: Omit<UserAndContext, 'subscription'>;
-  models: LlmModel[];
-}) {
+export async function getPriceInCentByUser(user: Omit<UserAndContext, 'subscription'>) {
+    
   if (user.school === undefined) return null;
+  // This has to include deleted models, because there might have been usage this month
+  const models = await dbGetAllLlmModels();
 
   // students cannot have shared chats
   const sharedChatsUsagePerModel =
