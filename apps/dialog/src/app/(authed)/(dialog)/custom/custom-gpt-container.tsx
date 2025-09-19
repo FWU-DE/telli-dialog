@@ -87,23 +87,25 @@ export default function CustomGptContainer({
       </div>
       <div className="flex-grow" />
       {accessLevel === 'global' && (
-        <CreateNewCharacterFromTemplate
-          redirectPath="custom"
-          createInstanceCallback={createNewCustomGptAction}
-          templateId={id}
-          templatePictureId={pictureId ?? undefined}
-          className="w-8 h-8 flex items-center justify-center"
-          {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
-        >
-          <TelliClipboardButton
-            text={t('form.copy-page.copy-template')}
-            className="w-6 h-6"
-            outerDivClassName="p-1 rounded-enterprise-sm"
-          />
-        </CreateNewCharacterFromTemplate>
+        <div onClick={(event) => event.stopPropagation()} className="flex items-center">
+          <CreateNewCharacterFromTemplate
+            redirectPath="custom"
+            createInstanceCallback={createNewCustomGptAction}
+            templateId={id}
+            templatePictureId={pictureId ?? undefined}
+            className="w-8 h-8 flex items-center justify-center"
+            {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
+          >
+            <TelliClipboardButton
+              text={t('form.copy-page.copy-template')}
+              className="w-6 h-6"
+              outerDivClassName="p-1 rounded-enterprise-sm"
+            />
+          </CreateNewCharacterFromTemplate>
+        </div>
       )}
       {
-        <div onClick={(event) => event.stopPropagation()}>
+        <div onClick={(event) => event.stopPropagation()} className="flex items-center">
           <Link
             type="button"
             aria-label={tCommon('edit')}
@@ -116,7 +118,7 @@ export default function CustomGptContainer({
         </div>
       }
       {currentUserId === userId && (
-        <div onClick={(event) => event.stopPropagation()}>
+        <div onClick={(event) => event.stopPropagation()} className="flex items-center">
           <DestructiveActionButton
             modalTitle={t('form.delete-gpt')}
             modalDescription={t('form.gpt-delete-modal-description')}
