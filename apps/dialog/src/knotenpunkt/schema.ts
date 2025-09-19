@@ -25,5 +25,7 @@ export const knotenpunktLlmModelSchema = z.object({
   priceMetadata: knotenpunktPriceMetadata,
   supportedImageFormats: z.array(z.string()).optional().default([]),
   createdAt: z.coerce.date(),
+  isNew: z.boolean().optional().default(false),
+  isDeleted: z.boolean().optional().default(false),
 });
 export type KnotenpunktLlmModel = z.infer<typeof knotenpunktLlmModelSchema>;

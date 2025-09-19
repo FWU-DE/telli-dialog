@@ -1,0 +1,1 @@
+ALTER TABLE "llm_model" DROP COLUMN "additional_parameters";
