@@ -44,6 +44,7 @@ export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProp
   const selectedModel = models.find((model) => model.name === optimisticModelId);
 
   if (selectedModel === undefined) {
+    setOptimisticModelId(DEFAULT_CHAT_MODEL);
     return undefined;
   }
 
