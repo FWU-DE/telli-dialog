@@ -4,10 +4,8 @@ import { login } from '../../utils/login';
 test('create character from template', async ({ page }) => {
   await login(page, 'teacher');
   await page.goto('/characters?visibility=global');
-  const link = page
-    .getByRole('link', { name: 'Johann Wolfgang von Goethe' })
-  const copyButton = link
-    .getByRole('button', { name: 'Kopieren' });
+  const link = page.getByRole('link', { name: 'Johann Wolfgang von Goethe' });
+  const copyButton = link.getByRole('button', { name: 'Kopieren' });
 
   expect(link).toBeVisible();
   expect(copyButton).toBeVisible();
