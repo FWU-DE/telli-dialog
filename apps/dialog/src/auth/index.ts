@@ -4,7 +4,6 @@ import { mockVidisConfig } from './providers/vidis-mock';
 import { credentialsProvider } from './providers/credentials';
 import { getUserAndContextByUserId } from './utils';
 import { UserAndContext } from './types';
-import { dbUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 
 // TODO: Move this to it's own file (see also: https://github.com/nextauthjs/next-auth/discussions/9120#discussioncomment-7544307)
 declare module 'next-auth' {
@@ -46,9 +45,7 @@ const result = NextAuth({
         token.user = await getUserAndContextByUserId({ userId: token.userId as string });
       }
       if (token.user === undefined || (token.user as UserAndContext).school === undefined) {
-        const userAndContext = await getUserAndContextByUserId({ userId: token.userId as string });
-        token.user = userAndContext;
-        dbUpdateLlmModelsByFederalStateId({ federalStateId: userAndContext.federalState?.id });
+        token.user = await getUserAndContextByUserId({ userId: token.userId as string });
       }
       return token;
     },
