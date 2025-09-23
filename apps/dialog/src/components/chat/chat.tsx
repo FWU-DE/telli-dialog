@@ -28,7 +28,7 @@ import { useCheckStatusCode } from '@/hooks/use-response-status';
 import LoadingAnimation from './loading-animation';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { Message } from 'ai';
-import { logDebug, logError, logWarning } from '@/utils/logging/logging';
+import { logDebug, logWarning } from '@/utils/logging/logging';
 import { useSession } from 'next-auth/react';
 
 type ChatProps = {
@@ -78,7 +78,7 @@ export default function Chat({
   const session = useSession();
 
   // substitute the error object from the useChat hook, to dislay a user friendly error message in German
-  const { error, handleResponse, resetError } = useCheckStatusCode();
+  const { error, handleResponse, handleError, resetError } = useCheckStatusCode();
 
   function refetchConversations() {
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
@@ -116,7 +116,7 @@ export default function Chat({
         refetchConversations();
       },
       onError: (error: Error) => {
-        logError('Error in useChat:', error);
+        handleError(error);
         refetchConversations();
       },
     });
