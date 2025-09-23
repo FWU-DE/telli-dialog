@@ -46,9 +46,7 @@ const result = NextAuth({
         token.user = await getUserAndContextByUserId({ userId: token.userId as string });
       }
       if (token.user === undefined || (token.user as UserAndContext).school === undefined) {
-        const userAndContext = await getUserAndContextByUserId({ userId: token.userId as string });
-        token.user = userAndContext;
-        dbUpdateLlmModelsByFederalStateId({ federalStateId: userAndContext.federalState?.id });
+        token.user = await getUserAndContextByUserId({ userId: token.userId as string });
       }
       return token;
     },
