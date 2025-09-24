@@ -19,7 +19,6 @@ export async function fetchFederalStates() {
   }
 
   const data = await response.json();
-  // validate response with zod
   return data.federalStates as FederalState[];
 }
 

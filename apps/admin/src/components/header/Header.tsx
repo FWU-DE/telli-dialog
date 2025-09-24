@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import { Menubar } from '../menu/Menubar';
-import { SignOutButton } from '../authentication/sign-out-button';
+import { SignOutButton } from '../authentication/SignOutButton';
 
 export function Header() {
   return (
@@ -8,9 +7,7 @@ export function Header() {
       <Link href="/" className="flex-none">
         <span className="text-xl font-bold">telli-admin</span>
       </Link>
-      <div className="flex-1">
-        <Menubar />
-      </div>
+      <div className="flex-1"></div>
       <div className="flex-none">
         <SignOutButton />
       </div>

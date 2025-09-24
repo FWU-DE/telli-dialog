@@ -3,7 +3,6 @@ export type FederalState = {
   teacherPriceLimit: number;
   studentPriceLimit: number;
   createdAt: string;
-  updatedAt: string;
   mandatoryCertificationTeacher: boolean;
   chatStorageTime: number;
   supportContacts: string[];
@@ -13,4 +12,5 @@ export type FederalState = {
   enableCharacter: boolean;
   enableSharedChats: boolean;
   enableCustomGpt: boolean;
+  designConfiguration: string;
 };

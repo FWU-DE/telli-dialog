@@ -1,5 +1,5 @@
 import { fetchFederalStateById } from '../../../services/federal-states-service';
-import { FederalStateView } from './FederalStateView';
+import { FederalStateView } from './FederalStateDetailView';
 
 export const FEDERAL_STATE_BY_ID_ROUTE = '/federal-states/{id}';
 
@@ -10,7 +10,6 @@ export default async function FederalStatePage({
 }) {
   const federalStateId = (await params)['federal-state-id'];
   const federalState = await fetchFederalStateById(federalStateId);
-  console.log('FederalState', federalState);
 
   return (
     <div>
