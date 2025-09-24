@@ -6,7 +6,7 @@ import { HEADER_PORTAL_ID } from './header-portal';
 import { contentHeight } from '@/utils/tailwind/height';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@/db/functions/llm-model';
-import { getPriceInCentByUser } from '@/app/school';
+import { getPriceInCentByUser, getPriceLimitByUser } from '@/app/school';
 import AutoLogout from '@/components/auth/auto-logout';
 import { checkProductAccess } from '@/utils/vidis/access';
 import ProductAccessModal from '@/components/modals/product-access';
@@ -24,6 +24,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
   const models = await dbGetLlmModelsByFederalStateId({ federalStateId: user.federalState.id });
 
   const priceInCent = await getPriceInCentByUser(user);
+  const userPriceLimit = (await getPriceLimitByUser(user)) ?? 500;
   const productAccess = checkProductAccess(user);
   const federalStateDisclaimer =
     federalStateDisclaimers[user.school.federalStateId as FederalStateId];
@@ -39,7 +40,11 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
           models={models}
           defaultLlmModelByCookie={user.lastUsedModel ?? DEFAULT_CHAT_MODEL}
         >
-          <DialogSidebar user={user} currentModelCosts={priceInCent ?? 0} />
+          <DialogSidebar
+            user={user}
+            currentModelCosts={priceInCent ?? 0}
+            userPriceLimit={userPriceLimit}
+          />
           <div className="flex flex-col max-h-[100dvh] min-h-[100dvh] w-full overflow-auto">
             <div
               id={HEADER_PORTAL_ID}

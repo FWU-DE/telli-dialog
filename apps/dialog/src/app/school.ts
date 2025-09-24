@@ -9,6 +9,23 @@ import { LlmModel } from '@/db/schema';
 import { type UserAndContext } from '@/auth/types';
 import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
 import { dbGetAllLlmModels } from '@/db/functions/llm-model';
+import { dbGetCodePriceLimit } from '@/db/functions/codes';
+
+export async function getPriceLimitByUser(user: UserAndContext) {
+  if (user.school === undefined || user.federalState === undefined) return null;
+
+  const codeBonus = await dbGetCodePriceLimit(user.id);
+
+  if (user.school.userRole === 'student') {
+    return user.federalState.studentPriceLimit + codeBonus;
+  }
+
+  if (user.school.userRole === 'teacher') {
+    return user.federalState.teacherPriceLimit + codeBonus;
+  }
+
+  return 500;
+}
 
 export async function getPriceInCentByUser(user: Omit<UserAndContext, 'subscription'>) {
   if (user.school === undefined) return null;
