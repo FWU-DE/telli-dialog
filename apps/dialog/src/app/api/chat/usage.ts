@@ -1,5 +1,5 @@
 import { dbInsertConversationUsage } from '@/db/functions/token-usage';
-import { dbGetLlmModelsByFederalStateId, getAllLlmModels } from '@/db/functions/llm-model';
+import { dbGetAllLlmModels } from '@/db/functions/llm-model';
 import { getPriceInCentBySharedCharacterChat, getPriceInCentBySharedChat } from '@/app/school';
 import { CharacterModel, type LlmModel, type SharedSchoolConversationModel } from '@/db/schema';
 import { type UserAndContext } from '@/auth/types';
@@ -45,7 +45,7 @@ export async function sharedChatHasReachedIntelliPointLimit({
     return true;
   }
 
-  const models = await getAllLlmModels();
+  const models = await dbGetAllLlmModels();
 
   if (sharedChat.startedAt === null || sharedChat.maxUsageTimeLimit === null) {
     return true;
@@ -86,7 +86,7 @@ export async function sharedCharacterChatHasReachedIntelliPointLimit({
     return true;
   }
 
-  const models = await getAllLlmModels();
+  const models = await dbGetAllLlmModels();
 
   if (character.startedAt === null || character.maxUsageTimeLimit === null) {
     return true;
@@ -136,11 +136,8 @@ export async function userHasReachedIntelliPointLimit({
   if (user === undefined || user.school === undefined || user.federalState === undefined) {
     return false;
   }
-  const models = await dbGetLlmModelsByFederalStateId({
-    federalStateId: user.federalState.id,
-  });
 
-  const price = await getPriceInCentByUser({ user: user, models });
+  const price = await getPriceInCentByUser(user);
   const federalStateLimits = user.federalState;
 
   if (
