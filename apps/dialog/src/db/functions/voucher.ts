@@ -18,7 +18,7 @@ export async function dbGetVoucherPriceLimit(userId: string) {
       ),
     );
 
-  return result?.totalPriceLimit ?? 0;
+  return Number(result?.totalPriceLimit ?? 0);
 }
 
 export async function dbInsertVouchers(vouchers: VoucherInsertModel[]) {
@@ -43,6 +43,15 @@ export async function dbUpdateVoucher(voucher: Partial<VoucherInsertModel>) {
     .update(VoucherTable)
     .set(voucher)
     .where(eq(VoucherTable.id, voucher.id))
+    .returning();
+  return result;
+}
+
+export async function dbRedeemVoucher(voucher: string, userId: string) {
+  const [result] = await db
+    .update(VoucherTable)
+    .set({ status: 'used', redeemedBy: userId, redeemedAt: new Date() })
+    .where(eq(VoucherTable.code, voucher))
     .returning();
   return result;
 }

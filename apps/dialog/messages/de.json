@@ -312,5 +312,16 @@
       "max-links-reached": "Es können maximal {max_links} Links hinzugefügt werden",
       "empty-url": "Es wurde keine URL eingegeben"
     }
+  },
+  "top-up": {
+    "title": "telli-Points aufladen",
+    "description": "Um telli weiterhin nutzen zu können, lade deine telli-Points einfach hier auf. Du kannst die Points in deinem Profil einsehen.",
+    "voucher": "Gutscheincode",
+    "voucher-placeholder": "Gib deinen 16-stelligen Gutscheincode ein",
+    "redeem-button": "Gutschein einlösen",
+    "toasts": {
+      "redeem-success": "Deine telli-Points wurden erfolgreich aufgeladen.",
+      "redeem-invalid": "Der eingegebene Gutscheincode ist ungültig."
+    }
   }
 }
