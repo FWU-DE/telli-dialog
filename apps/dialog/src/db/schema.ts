@@ -464,15 +464,15 @@ export const TextChunkTable = pgTable(
 export type TextChunkModel = typeof TextChunkTable.$inferSelect;
 export type TextChunkInsertModel = typeof TextChunkTable.$inferInsert;
 
-export const codeStatus = z.enum(['active', 'used', 'revoked']);
-export const codeStatusEnum = pgEnum('code_status', codeStatus.options);
+export const voucherStatus = z.enum(['active', 'used', 'revoked']);
+export const voucherStatusEnum = pgEnum('voucher_status', voucherStatus.options);
 
-export const CodeTable = pgTable('code', {
+export const VoucherTable = pgTable('voucher', {
   id: uuid('id').defaultRandom().primaryKey(),
   code: text('code').notNull().unique(),
   increase_amount: integer('increase_amount').notNull(),
   duration_months: integer('duration_months').notNull(),
-  status: codeStatusEnum('status').notNull().default('active'),
+  status: voucherStatusEnum('status').notNull().default('active'),
   valid_until: timestamp('valid_until', { mode: 'date', withTimezone: true }).notNull(),
   federalStateId: text('federal_state_id')
     .references(() => federalStateTable.id)
@@ -487,5 +487,5 @@ export const CodeTable = pgTable('code', {
   update_reason: text('update_reason').notNull().default(''),
 });
 
-export type CodeModel = typeof CodeTable.$inferSelect;
-export type CodeInsertModel = typeof CodeTable.$inferInsert;
+export type VoucherModel = typeof VoucherTable.$inferSelect;
+export type VoucherInsertModel = typeof VoucherTable.$inferInsert;

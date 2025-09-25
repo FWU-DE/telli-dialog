@@ -24,7 +24,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
   const models = await dbGetLlmModelsByFederalStateId({ federalStateId: user.federalState.id });
 
   const priceInCent = await getPriceInCentByUser(user);
-  const userPriceLimit = (await getPriceLimitByUser(user)) ?? 500;
+  const userPriceLimit = await getPriceLimitByUser(user);
   const productAccess = checkProductAccess(user);
   const federalStateDisclaimer =
     federalStateDisclaimers[user.school.federalStateId as FederalStateId];
@@ -43,7 +43,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
           <DialogSidebar
             user={user}
             currentModelCosts={priceInCent ?? 0}
-            userPriceLimit={userPriceLimit}
+            userPriceLimit={userPriceLimit ?? 500}
           />
           <div className="flex flex-col max-h-[100dvh] min-h-[100dvh] w-full overflow-auto">
             <div

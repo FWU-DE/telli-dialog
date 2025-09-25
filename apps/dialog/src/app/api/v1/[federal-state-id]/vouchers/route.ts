@@ -1,5 +1,5 @@
-import { dbGetCodesByFederalStateId, dbInsertCodes } from '@/db/functions/codes';
-import { CodeInsertModel, CodeTable } from '@/db/schema';
+import { dbGetVouchersByFederalStateId, dbInsertVouchers } from '@/db/functions/voucher';
+import { VoucherInsertModel, VoucherTable } from '@/db/schema';
 import { validateApiKeyByHeadersWithResult } from '@/db/utils';
 import { createInsertSchema } from 'drizzle-zod';
 import { NextRequest, NextResponse } from 'next/server';
@@ -19,11 +19,11 @@ export async function GET(
     return NextResponse.json({ error: error.message }, { status: 403 });
   }
 
-  const codes = await dbGetCodesByFederalStateId(params.federal_state_id);
+  const codes = await dbGetVouchersByFederalStateId(params.federal_state_id);
   return NextResponse.json({ codes }, { status: 200 });
 }
 
-const codePostSchema = createInsertSchema(CodeTable)
+const codePostSchema = createInsertSchema(VoucherTable)
   .pick({
     increase_amount: true,
     duration_months: true,
@@ -58,7 +58,7 @@ export async function POST(
   var valid_until = new Date();
   valid_until.setFullYear(valid_until.getFullYear() + 2);
   
-  const codesToCreate: CodeInsertModel[] = [];
+  const codesToCreate: VoucherInsertModel[] = [];
   for (let i = 0; i < parseData.number_of_codes; i++) {
     codesToCreate.push({
       code: crypto.randomUUID().replace(/-/g, '').substring(0, 16).toUpperCase(),
@@ -71,7 +71,7 @@ export async function POST(
     });
   }
 
-  const createdCodes = await dbInsertCodes(codesToCreate);
+  const createdCodes = await dbInsertVouchers(codesToCreate);
   return NextResponse.json({ createdCodes }, { status: 201 });
 }
 
