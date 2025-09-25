@@ -31,3 +31,18 @@ export async function dbGetVouchersByFederalStateId(federalStateId: string) {
     .from(VoucherTable)
     .where(and(eq(VoucherTable.federalStateId, federalStateId)));
 }
+
+export async function dbGetVoucherByCode(code: string) {
+  const [result] = await db.select().from(VoucherTable).where(eq(VoucherTable.code, code)).limit(1);
+  return result;
+}
+
+export async function dbUpdateVoucher(voucher: Partial<VoucherInsertModel>) {
+  if (!voucher.id) throw new Error('Voucher ID is required for update');
+  const [result] = await db
+    .update(VoucherTable)
+    .set(voucher)
+    .where(eq(VoucherTable.id, voucher.id))
+    .returning();
+  return result;
+}
