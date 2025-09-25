@@ -7,7 +7,7 @@ import { VoucherInsertModel, VoucherTable } from '../schema';
 export async function dbGetVoucherPriceLimit(userId: string) {
   const [result] = await db
     .select({
-      totalPriceLimit: sum(VoucherTable.increase_amount),
+      totalPriceLimit: sum(VoucherTable.increaseAmount),
     })
     .from(VoucherTable)
     .where(

@@ -470,10 +470,10 @@ export const voucherStatusEnum = pgEnum('voucher_status', voucherStatus.options)
 export const VoucherTable = pgTable('voucher', {
   id: uuid('id').defaultRandom().primaryKey(),
   code: text('code').notNull().unique(),
-  increase_amount: integer('increase_amount').notNull(),
-  duration_months: integer('duration_months').notNull(),
+  increaseAmount: integer('increase_amount').notNull(),
+  durationMonths: integer('duration_months').notNull(),
   status: voucherStatusEnum('status').notNull().default('active'),
-  valid_until: timestamp('valid_until', { mode: 'date', withTimezone: true }).notNull(),
+  validUntil: timestamp('valid_until', { mode: 'date', withTimezone: true }).notNull(),
   federalStateId: text('federal_state_id')
     .references(() => federalStateTable.id)
     .notNull(),
@@ -481,10 +481,10 @@ export const VoucherTable = pgTable('voucher', {
   redeemedAt: timestamp('redeemed_at', { mode: 'date', withTimezone: true }),
   createdBy: uuid('created_by').notNull(),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-  create_reason: text('create_reason').notNull().default(''),
+  createReason: text('create_reason').notNull().default(''),
   updatedBy: uuid('updated_by').references(() => userTable.id),
   updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true }),
-  update_reason: text('update_reason').notNull().default(''),
+  updateReason: text('update_reason').notNull().default(''),
 });
 
 export type VoucherModel = typeof VoucherTable.$inferSelect;
