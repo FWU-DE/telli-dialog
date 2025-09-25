@@ -76,7 +76,9 @@ export default async function Page(context: PageContext) {
 
   const readOnly = customGpt.userId !== user.id;
   const initialLinks = PREFETCH_ENABLED
-    ? await Promise.all(customGpt.attachedLinks.filter((l) => l !== '').map(webScraperExecutable))
+    ? await Promise.all(
+        customGpt.attachedLinks.filter((l) => l !== '').map((url) => webScraperExecutable(url)),
+      )
     : customGpt.attachedLinks
         .filter((l) => l !== '')
         .map(
