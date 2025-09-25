@@ -162,6 +162,13 @@
       "when": 1758114406161,
       "tag": "0022_special_maddog",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1758800851291,
+      "tag": "0023_curved_weapon_omega",
+      "breakpoints": true
     }
   ]
 }

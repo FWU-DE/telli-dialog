@@ -479,10 +479,10 @@ export const VoucherTable = pgTable('voucher', {
     .notNull(),
   redeemedBy: uuid('redeemed_by').references(() => userTable.id),
   redeemedAt: timestamp('redeemed_at', { mode: 'date', withTimezone: true }),
-  createdBy: uuid('created_by').notNull(),
+  createdBy: text('created_by').notNull(),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   createReason: text('create_reason').notNull().default(''),
-  updatedBy: uuid('updated_by').references(() => userTable.id),
+  updatedBy: text('updated_by'),
   updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true }),
   updateReason: text('update_reason').notNull().default(''),
 });
