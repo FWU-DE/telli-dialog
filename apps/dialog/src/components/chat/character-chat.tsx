@@ -31,7 +31,7 @@ export default function CharacterSharedChat({
   const endpoint = `/api/character?${searchParams.toString()}`;
 
   // substitute the error object from the useChat hook, to dislay a user friendly error message in German
-  const { error, handleResponse, resetError } = useCheckStatusCode();
+  const { error, handleResponse, handleError, resetError } = useCheckStatusCode();
   const initialMessages: Message[] = character.initialMessage
     ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
     : [];
@@ -45,6 +45,7 @@ export default function CharacterSharedChat({
       maxSteps: 2,
       body: { modelId: character.modelId },
       onResponse: handleResponse,
+      onError: handleError,
     });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
