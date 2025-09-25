@@ -1,3 +1,4 @@
+import { logError } from '@/utils/logging/logging';
 import { useTranslations } from 'next-intl';
 import { useState, useCallback } from 'react';
 
@@ -21,6 +22,12 @@ export function useCheckStatusCode() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleError = useCallback((error: Error) => {
+    setError(new Error(t('generic-error')));
+    logError('Error in chat:', error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const resetError = () => {
     setError(undefined);
   };
@@ -28,6 +35,7 @@ export function useCheckStatusCode() {
   return {
     error,
     handleResponse,
+    handleError,
     resetError,
   };
 }

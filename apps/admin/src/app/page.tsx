@@ -1,3 +1,10 @@
-export default function Home() {
-  return <div>Welcome to the Admin App!</div>;
+export default async function Home() {
+  return (
+    <div>
+      <div>Willkommen bei telli-admin.</div>
+      <span>
+        Benutzen Sie die Navigation links um telli-api bzw. telli-dialog zu konfigurieren.
+      </span>
+    </div>
+  );
 }

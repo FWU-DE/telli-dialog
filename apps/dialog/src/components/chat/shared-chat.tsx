@@ -31,7 +31,7 @@ export default function SharedChat({
   const [dialogStarted, setDialogStarted] = React.useState(false);
 
   // substitute the error object from the useChat hook, to dislay a user friendly error message in German
-  const { error, handleResponse, resetError } = useCheckStatusCode();
+  const { error, handleResponse, handleError, resetError } = useCheckStatusCode();
 
   const { messages, setMessages, input, handleInputChange, handleSubmit, isLoading, reload, stop } =
     useChat({
@@ -42,6 +42,7 @@ export default function SharedChat({
       maxSteps: 2,
       body: { modelId: sharedSchoolChat.modelId },
       onResponse: handleResponse,
+      onError: handleError,
     });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
