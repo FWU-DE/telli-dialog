@@ -11,9 +11,8 @@ vi.mock('next-intl/server', () => ({
 }));
 
 // We do not want to execute those tests on every run because they depend on external resources.
-// That is why we use describe.only to run them only when explicitly requested.
-describe.only('webScraperExecutable', () => {
-  test('scrape existing wiki page', { timeout: 1000 }, async () => {
+describe.skip('webScraperExecutable', () => {
+  test('scrape existing wiki page', async () => {
     const output = await webScraperExecutable(WIKI_PAGE_URL);
     expect(output).toBeDefined();
     expect(output.content?.length).toBeGreaterThan(100);
