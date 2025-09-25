@@ -12,11 +12,7 @@ import z from 'zod';
 
 export async function GET(
   request: NextRequest,
-  {
-    params,
-  }: {
-    params: { federal_state_id: string };
-  },
+  { params }: { params: Promise<{ federalStateId: string }> },
 ) {
   const [error] = validateApiKeyByHeadersWithResult(request.headers);
 
@@ -24,7 +20,7 @@ export async function GET(
     return NextResponse.json({ error: error.message }, { status: 403 });
   }
 
-  const codes = await dbGetVouchersByFederalStateId(params.federal_state_id);
+  const codes = await dbGetVouchersByFederalStateId((await params).federalStateId);
   return NextResponse.json({ codes }, { status: 200 });
 }
 
@@ -38,17 +34,14 @@ const codePostSchema = createInsertSchema(VoucherTable)
   .extend({
     increaseAmount: z.number().min(1).max(20_000),
     durationMonths: z.number().min(1).max(12).default(3),
+    createReason: z.string().min(1).max(500),
     numberOfCodes: z.number().min(1).default(1),
   });
 
 // Creates Multiple codes at once
 export async function POST(
   request: NextRequest,
-  {
-    params,
-  }: {
-    params: { federal_state_id: string };
-  },
+  { params }: { params: Promise<{ federalStateId: string }> },
 ) {
   const [error] = validateApiKeyByHeadersWithResult(request.headers);
   if (error !== null) {
@@ -64,6 +57,9 @@ export async function POST(
   var valid_until = new Date();
   valid_until.setFullYear(valid_until.getFullYear() + 2);
 
+
+  const federalStateId = (await params).federalStateId;
+
   const codesToCreate: VoucherInsertModel[] = [];
   for (let i = 0; i < parseData.numberOfCodes; i++) {
     codesToCreate.push({
@@ -71,7 +67,7 @@ export async function POST(
       increaseAmount: parseData.increaseAmount,
       durationMonths: parseData.durationMonths,
       validUntil: valid_until,
-      federalStateId: params.federal_state_id,
+      federalStateId: federalStateId,
       createdBy: parseData.createdBy,
       createReason: parseData.createReason,
     });
@@ -83,11 +79,7 @@ export async function POST(
 
 export async function PATCH(
   request: NextRequest,
-  {
-    params,
-  }: {
-    params: { federal_state_id: string };
-  },
+  { params }: { params: Promise<{ federalStateId: string }> },
 ) {
   const [error] = validateApiKeyByHeadersWithResult(request.headers);
   if (error !== null) {
@@ -97,8 +89,8 @@ export async function PATCH(
   const patchSchema = z.object({
     code: z.string().length(16),
     revoked: z.boolean().optional(),
-    modifiedBy: z.string().min(1).max(100),
-    modifyReason: z.string().min(1).max(500),
+    updatedBy: z.string().min(1).max(100),
+    updateReason: z.string().min(1).max(500),
   });
 
   const body = await request.json();
@@ -109,7 +101,7 @@ export async function PATCH(
   const parseData = parseResult.data;
 
   const voucher = await dbGetVoucherByCode(parseData.code);
-  if (!voucher || voucher.federalStateId !== params.federal_state_id) {
+  if (!voucher || voucher.federalStateId !== (await params).federalStateId) {
     return NextResponse.json({ error: 'Voucher not found' }, { status: 404 });
   }
   if (voucher.status === 'used') {
@@ -121,8 +113,8 @@ export async function PATCH(
 
   const updatedFields: Partial<VoucherInsertModel> = {
     id: voucher.id,
-    updatedBy: parseData.modifiedBy,
-    updateReason: parseData.modifyReason,
+    updatedBy: parseData.updatedBy,
+    updateReason: parseData.updateReason,
     updatedAt: new Date(),
     status: parseData.revoked ? 'revoked' : 'active',
   };
