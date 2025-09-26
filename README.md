@@ -37,6 +37,30 @@ Check that you can access it:
 psql "postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db"
 ```
 
+---
+
+## Troubleshooting
+
+**Problem: Die Datenbank existiert nicht**
+
+Wenn du beim Versuch, die Datenbank zu starten oder darauf zuzugreifen, die Fehlermeldung **`FATAL: database "telli_dialog_db" does not exist`** bekommst, liegt das daran, dass die Datenbank noch nicht erstellt wurde.
+
+Du kannst das einfach manuell beheben:
+
+1.  Zuerst mit der Standard-Postgres-Datenbank verbinden:
+
+    ```sh
+    psql "postgresql://telli_dialog_db:test1234@127.0.0.1:5432/postgres"
+    ```
+
+2.  Dann die benötigte Datenbank erstellen:
+
+    ```sql
+    CREATE DATABASE telli_dialog_db;
+    ```
+
+3.  Danach sollte alles wie gewohnt funktionieren.
+
 If you start with a fresh database, do not forget to apply migrations and seed the database, otherwise the application will not work.
 
 ```sh
