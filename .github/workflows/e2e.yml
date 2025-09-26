@@ -36,6 +36,7 @@ jobs:
         uses: 1password/load-secrets-action@v1
         with:
           export-env: true
+          unset-previous: true
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           NEXTAUTH_URL: op://telli Engineering/.env.e2e chatbot/NEXTAUTH_URL
