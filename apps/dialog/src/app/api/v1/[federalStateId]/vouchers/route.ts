@@ -21,7 +21,7 @@ export async function GET(
   }
 
   const codes = await dbGetVouchersByFederalStateId((await params).federalStateId);
-  return NextResponse.json({ codes }, { status: 200 });
+  return NextResponse.json( codes , { status: 200 });
 }
 
 const codePostSchema = createInsertSchema(VoucherTable)
@@ -74,7 +74,7 @@ export async function POST(
   }
 
   const createdCodes = await dbInsertVouchers(codesToCreate);
-  return NextResponse.json({ createdCodes }, { status: 201 });
+  return NextResponse.json( createdCodes , { status: 201 });
 }
 
 export async function PATCH(
@@ -119,5 +119,5 @@ export async function PATCH(
     status: parseData.revoked ? 'revoked' : 'active',
   };
   const updatedVoucher = await dbUpdateVoucher(updatedFields);
-  return NextResponse.json({ updatedVoucher }, { status: 200 });
+  return NextResponse.json( updatedVoucher , { status: 200 });
 }
