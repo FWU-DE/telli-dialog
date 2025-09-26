@@ -463,3 +463,29 @@ export const TextChunkTable = pgTable(
 
 export type TextChunkModel = typeof TextChunkTable.$inferSelect;
 export type TextChunkInsertModel = typeof TextChunkTable.$inferInsert;
+
+export const voucherStatus = z.enum(['active', 'used', 'revoked']);
+export const voucherStatusEnum = pgEnum('voucher_status', voucherStatus.options);
+
+export const VoucherTable = pgTable('voucher', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  code: text('code').notNull().unique(),
+  increaseAmount: integer('increase_amount').notNull(),
+  durationMonths: integer('duration_months').notNull(),
+  status: voucherStatusEnum('status').notNull().default('active'),
+  validUntil: timestamp('valid_until', { mode: 'date', withTimezone: true }).notNull(),
+  federalStateId: text('federal_state_id')
+    .references(() => federalStateTable.id)
+    .notNull(),
+  redeemedBy: uuid('redeemed_by').references(() => userTable.id),
+  redeemedAt: timestamp('redeemed_at', { mode: 'date', withTimezone: true }),
+  createdBy: text('created_by').notNull(),
+  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  createReason: text('create_reason').notNull().default(''),
+  updatedBy: text('updated_by'),
+  updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true }),
+  updateReason: text('update_reason').notNull().default(''),
+});
+
+export type VoucherModel = typeof VoucherTable.$inferSelect;
+export type VoucherInsertModel = typeof VoucherTable.$inferInsert;

@@ -16,6 +16,9 @@ export function Sidebar() {
       <Link href="/federal-states" className="block mt-2">
         Bundesländer
       </Link>
+      <Link href="/vouchers" className="block mt-2">
+        Guthaben Codes
+      </Link>
     </div>
   );
 }
