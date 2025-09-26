@@ -18,10 +18,10 @@ test('teacher can login, create and join shared dialogpartner chat', async ({ pa
   await page.getByLabel('Klassenstufe').fill('10. Klasse');
   await page.getByLabel('Fach').fill('Geschichte');
 
-  await page.getByLabel('Wie heißt die Rolle/Simulierte Person? *').fill('John Cena');
+  await page.getByLabel('Wie heißt die simulierte Person? *').fill('John Cena');
 
   await page
-    .getByLabel('Wie kann die Rolle/Simulierte Person in einem kurzen Satz beschrieben werden? *')
+    .getByLabel('Wie kann die simulierte Person in einem kurzen Satz beschrieben werden? *')
     .fill('Er ist bekannt für seinen Spruch „You can`t see me“ und seine Wrestling-Karriere.');
 
   await page

@@ -20,10 +20,10 @@ test('teacher can create character with initial message and verify it appears in
   await page.getByLabel('Klassenstufe').fill('8. Klasse');
   await page.getByLabel('Fach').fill('Deutsch');
 
-  await page.getByLabel('Wie heißt die Rolle/Simulierte Person? *').fill('Albert Einstein');
+  await page.getByLabel('Wie heißt die simulierte Person? *').fill('Albert Einstein');
 
   await page
-    .getByLabel('Wie kann die Rolle/Simulierte Person in einem kurzen Satz beschrieben werden? *')
+    .getByLabel('Wie kann die simulierte Person in einem kurzen Satz beschrieben werden? *')
     .fill('Ein brillanter Physiker, der die Relativitätstheorie entwickelt hat.');
 
   await page
