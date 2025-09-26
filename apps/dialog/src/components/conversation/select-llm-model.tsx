@@ -10,6 +10,7 @@ import { cn } from '@/utils/tailwind';
 import { saveChatModelForUserAction } from '@/app/(authed)/(dialog)/actions';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { iconClassName } from '@/utils/tailwind/icon';
+import { Badge } from '../common/badge';
 
 type SelectLlmModelProps = {
   isStudent?: boolean;
@@ -43,6 +44,7 @@ export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProp
   const selectedModel = models.find((model) => model.name === optimisticModelId);
 
   if (selectedModel === undefined) {
+    setOptimisticModelId(DEFAULT_CHAT_MODEL);
     return undefined;
   }
 
@@ -87,6 +89,7 @@ export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProp
               {selectedModel?.displayName ?? 'Kein Modell'}
             </span>
             {isGreenModel({ model: selectedModel }) && <GreenLeafIcon />}
+            {selectedModel.isNew && <Badge text="NEU" />}
             {models.length > 1 && <ChevronDown className="text-primary" />}
           </button>
         </DropdownMenu.Trigger>
@@ -136,6 +139,7 @@ function ModelSpan({ model }: { model: LlmModel }) {
       <div className="flex gap-2 items-center">
         <span>{model.displayName}</span>
         {isGreenModel({ model }) && <GreenLeafIcon />}
+        {model.isNew && <Badge text="NEU" />}
       </div>
       {model.description && (
         <span className="text-sm hover:text-text-secondary">{model.description}</span>

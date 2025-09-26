@@ -193,6 +193,8 @@ export const llmModelTable = pgTable(
     priceMetadata: json('price_metada').$type<LlmModelPriceMetadata>().notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     supportedImageFormats: json('supported_image_formats').$type<string[]>(),
+    isNew: boolean('is_new').notNull().default(false),
+    isDeleted: boolean('is_deleted').notNull().default(false),
   },
   (table) => ({
     unq: unique().on(table.provider, table.name),

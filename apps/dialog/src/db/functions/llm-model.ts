@@ -15,7 +15,7 @@ export async function dbGetModelByName(name: string) {
   return (await db.select().from(llmModelTable).where(eq(llmModelTable.name, name)))[0];
 }
 
-export async function getAllLlmModels() {
+export async function dbGetAllLlmModels() {
   return await db.select().from(llmModelTable).orderBy(llmModelTable.createdAt);
 }
 
@@ -31,12 +31,16 @@ export async function dbGetLlmModelsByFederalStateId({
       federalStateLlmModelMappingTable,
       eq(federalStateLlmModelMappingTable.llmModelId, llmModelTable.id),
     )
-    .where(eq(federalStateLlmModelMappingTable.federalStateId, federalStateId));
+    .where(
+      and(
+        eq(federalStateLlmModelMappingTable.federalStateId, federalStateId),
+        eq(llmModelTable.isDeleted, false),
+      ),
+    );
 
   return rows.map((r) => r.llm_model);
 }
 
-// TODO: Add chronjob that uses this regularly
 export async function dbUpdateLlmModelsByFederalStateId({
   federalStateId,
 }: {
@@ -104,6 +108,8 @@ export async function dbUpsertLlmModelsByModelsAndFederalStateId({
           description: model.description,
           priceMetadata: model.priceMetadata,
           supportedImageFormats: model.supportedImageFormats,
+          isNew: model.isNew,
+          isDeleted: model.isDeleted,
         },
       });
     insertedModels.push(model);

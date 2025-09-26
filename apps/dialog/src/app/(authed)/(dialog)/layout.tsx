@@ -20,11 +20,10 @@ import { FederalStateId } from '@/utils/vidis/const';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
-  const models = await dbGetLlmModelsByFederalStateId({
-    federalStateId: user.federalState.id,
-  });
 
-  const priceInCent = await getPriceInCentByUser({ user, models });
+  const models = await dbGetLlmModelsByFederalStateId({ federalStateId: user.federalState.id });
+
+  const priceInCent = await getPriceInCentByUser(user);
   const productAccess = checkProductAccess(user);
   const federalStateDisclaimer =
     federalStateDisclaimers[user.school.federalStateId as FederalStateId];
