@@ -87,7 +87,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'User has reached intelli points limit' }, { status: 429 });
   }
   const relatedFileEntities = await dbGetRelatedSharedChatFiles(sharedChat.id);
-  const urls = sharedChat.attachedLinks.filter((l) => l !== '').map(webScraperExecutable);
+  const urls = sharedChat.attachedLinks
+    .filter((l) => l !== '')
+    .map((url) => webScraperExecutable(url));
 
   const retrievedTextChunks = await getRelevantFileContent({
     model: telliProvider,
