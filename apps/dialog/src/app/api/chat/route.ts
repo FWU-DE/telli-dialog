@@ -184,7 +184,9 @@ export async function POST(request: NextRequest) {
 
   let websearchSources: WebsearchSource[] = [];
   try {
-    websearchSources = await Promise.all(urls.filter((l) => l !== '').map(webScraperExecutable));
+    websearchSources = await Promise.all(
+      urls.filter((l) => l !== '').map((url) => webScraperExecutable(url)),
+    );
   } catch (error) {
     console.error('Unhandled error while fetching website', error);
   }
