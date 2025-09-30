@@ -14,7 +14,10 @@ export async function dbGetVoucherPriceLimit(userId: string) {
       and(
         eq(VoucherTable.status, 'used'),
         eq(VoucherTable.redeemedBy, userId),
-        gt(sql`date_trunc('month', redeemed_at) + make_interval(months:=duration_months)`, sql`now()`),
+        gt(
+          sql`date_trunc('month', redeemed_at) + make_interval(months:=duration_months)`,
+          sql`now()`,
+        ),
       ),
     );
 

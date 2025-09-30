@@ -464,7 +464,7 @@ export const TextChunkTable = pgTable(
 export type TextChunkModel = typeof TextChunkTable.$inferSelect;
 export type TextChunkInsertModel = typeof TextChunkTable.$inferInsert;
 
-export const voucherStatus = z.enum(['active', 'used', 'revoked']);
+export const voucherStatus = z.enum(['created', 'redeemed', 'revoked']);
 export const voucherStatusEnum = pgEnum('voucher_status', voucherStatus.options);
 
 export const VoucherTable = pgTable('voucher', {
@@ -472,7 +472,7 @@ export const VoucherTable = pgTable('voucher', {
   code: text('code').notNull().unique(),
   increaseAmount: integer('increase_amount').notNull(),
   durationMonths: integer('duration_months').notNull(),
-  status: voucherStatusEnum('status').notNull().default('active'),
+  status: voucherStatusEnum('status').notNull().default('created'),
   validUntil: timestamp('valid_until', { mode: 'date', withTimezone: true }).notNull(),
   federalStateId: text('federal_state_id')
     .references(() => federalStateTable.id)

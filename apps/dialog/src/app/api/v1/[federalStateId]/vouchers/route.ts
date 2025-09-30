@@ -21,7 +21,7 @@ export async function GET(
   }
 
   const codes = await dbGetVouchersByFederalStateId((await params).federalStateId);
-  return NextResponse.json( codes , { status: 200 });
+  return NextResponse.json(codes, { status: 200 });
 }
 
 const codePostSchema = createInsertSchema(VoucherTable)
@@ -54,9 +54,8 @@ export async function POST(
   }
   const parseData = parseResult.data;
 
-  var valid_until = new Date();
+  const valid_until = new Date();
   valid_until.setFullYear(valid_until.getFullYear() + 2);
-
 
   const federalStateId = (await params).federalStateId;
 
@@ -74,7 +73,7 @@ export async function POST(
   }
 
   const createdCodes = await dbInsertVouchers(codesToCreate);
-  return NextResponse.json( createdCodes , { status: 201 });
+  return NextResponse.json(createdCodes, { status: 201 });
 }
 
 export async function PATCH(
@@ -104,9 +103,9 @@ export async function PATCH(
   if (!voucher || voucher.federalStateId !== (await params).federalStateId) {
     return NextResponse.json({ error: 'Voucher not found' }, { status: 404 });
   }
-  if (voucher.status === 'used') {
+  if (voucher.status === 'redeemed') {
     return NextResponse.json(
-      { error: 'Voucher already used and cannot be modified' },
+      { error: 'Voucher already redeemed and cannot be modified' },
       { status: 400 },
     );
   }
@@ -116,8 +115,8 @@ export async function PATCH(
     updatedBy: parseData.updatedBy,
     updateReason: parseData.updateReason,
     updatedAt: new Date(),
-    status: parseData.revoked ? 'revoked' : 'active',
+    status: parseData.revoked ? 'revoked' : 'created',
   };
   const updatedVoucher = await dbUpdateVoucher(updatedFields);
-  return NextResponse.json( updatedVoucher , { status: 200 });
+  return NextResponse.json(updatedVoucher, { status: 200 });
 }

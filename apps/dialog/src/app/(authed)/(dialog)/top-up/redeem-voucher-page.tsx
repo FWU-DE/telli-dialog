@@ -23,7 +23,7 @@ export default function RedeemVoucherPage({
       const voucher = await dbGetVoucherByCode(voucherCode);
       if (
         !voucher ||
-        voucher.status !== 'active' ||
+        voucher.status !== 'created' ||
         new Date() > voucher.validUntil ||
         voucher.federalStateId !== user.federalState.id
       ) {
