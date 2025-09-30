@@ -6,9 +6,9 @@ export const FEDERAL_STATE_BY_ID_ROUTE = '/federal-states/{id}';
 export default async function FederalStatePage({
   params,
 }: {
-  params: Promise<{ federalStateId: string }>;
+  params: Promise<{ 'federal-state-id': string }>;
 }) {
-  const federalStateId = (await params).federalStateId;
+  const federalStateId = (await params)['federal-state-id'];
   const federalState = await fetchFederalStateById(federalStateId);
 
   return (
