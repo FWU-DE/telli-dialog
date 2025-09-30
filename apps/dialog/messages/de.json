@@ -315,7 +315,7 @@
   },
   "top-up": {
     "title": "telli-Points aufladen",
-    "description": "Um telli weiterhin nutzen zu können, lade deine telli-Points einfach hier auf. Du kannst die Points in deinem Profil einsehen.",
+    "description": "Um telli mehr nutzen zu können, lade deine telli-Points einfach hier auf.",
     "voucher": "Gutscheincode",
     "voucher-placeholder": "Gib deinen 16-stelligen Gutscheincode ein",
     "redeem-button": "Gutschein einlösen",

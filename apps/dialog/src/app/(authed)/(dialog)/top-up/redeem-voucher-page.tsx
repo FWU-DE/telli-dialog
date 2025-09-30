@@ -38,8 +38,8 @@ export default function RedeemVoucherPage({
 
   return (
     <>
-      <h2 className="font-medium mb-2">{t('title')}</h2>
-      <p className="text-sm text-gray-300">{t('description')}</p>
+      <h1 className="text-3xl">{t('title')}</h1>
+      <p className="text-sm text-gray-300 mb-6">{t('description')}</p>
       <div className="flex flex-row gap-4">
         <SimpleTextInput
           id="voucher"
@@ -51,7 +51,7 @@ export default function RedeemVoucherPage({
           onChange={(e) => setVoucherCode(e.target.value)}
         />
         <button
-          className="bg-black text-white px-4 rounded-enterprise-md"
+          className="bg-primary text-white px-4 rounded-enterprise-md"
           type="button"
           onClick={handleRedeem}
           disabled={!voucherSchema.safeParse(voucherCode).success}
