@@ -18,14 +18,28 @@ const headers = {
  * @param url The URL to fetch and parse.
  * @returns A summary of the most important information from the page.
  */
-export async function webScraperExecutable(url: string): Promise<WebsearchSource> {
+export async function webScraperExecutable(
+  url: string,
+  options: { timeout?: number } = { timeout: 5000 },
+): Promise<WebsearchSource> {
   console.info(`Requesting webcontent for url: ${url}`);
   const t = await getTranslations({ namespace: 'websearch' });
   let response: Response;
   try {
+    const isPage = await isWebPage(url);
+    if (!isPage) {
+      console.warn(`URL is not a webpage: ${url}`);
+      return {
+        error: true,
+        content: 'Es werden nur Links auf Webseiten unterstützt, keine Dateien.',
+        name: 'Nicht unterstützter Link',
+        link: url,
+        type: 'websearch',
+      };
+    }
     // Set up a timeout for the fetch request
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 seconds timeout
+    const timeoutId = setTimeout(() => controller.abort(), options.timeout);
     response = await fetch(url, {
       headers: headers,
       signal: controller.signal,
@@ -128,4 +142,20 @@ function extractArticleContent(html: string, url: string): string {
       return `Failed to extract content from ${url}`;
     }
   }
+}
+
+/**
+ * The function sends a HEAD request to the URL and checks the Content-Type header.
+ * @param url the URL to check
+ * @returns true if the content-type is text/html, false otherwise
+ */
+export async function isWebPage(url: string) {
+  const response = await fetch(url, { method: 'HEAD' });
+  const contentType = response.headers.get('content-type');
+
+  // Basic heuristic
+  if (contentType?.includes('text/html')) {
+    return true; // it's a web page
+  }
+  return false; // likely a file
 }

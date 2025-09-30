@@ -92,7 +92,9 @@ export async function POST(request: NextRequest) {
   }
 
   const relatedFileEntities = await dbGetRelatedCharacterFiles(character.id);
-  const urls = character.attachedLinks.filter((l) => l !== '').map(webScraperExecutable);
+  const urls = character.attachedLinks
+    .filter((l) => l !== '')
+    .map((url) => webScraperExecutable(url));
   const orderedChunks = await getRelevantFileContent({
     messages,
     user: teacherUserAndContext,
