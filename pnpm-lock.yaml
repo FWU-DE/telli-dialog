@@ -276,9 +276,6 @@ importers:
       next-intl:
         specifier: 3.26.3
         version: 3.26.3(next@15.5.4(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.55.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
-      next-runtime-env:
-        specifier: 3.3.0
-        version: 3.3.0(next@15.5.4(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.55.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
       openai:
         specifier: 4.83.0
         version: 4.83.0(ws@8.18.3)(zod@3.25.67)
@@ -6292,12 +6289,6 @@ packages:
     peerDependencies:
       next: ^10.0.0 || ^11.0.0 || ^12.0.0 || ^13.0.0 || ^14.0.0 || ^15.0.0
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || >=19.0.0-rc <19.0.0 || ^19.0.0
-
-  next-runtime-env@3.3.0:
-    resolution: {integrity: sha512-JgKVnog9mNbjbjH9csVpMnz2tB2cT5sLF+7O47i6Ze/s/GoiKdV7dHhJHk1gwXpo6h5qPj5PTzryldtSjvrHuQ==}
-    peerDependencies:
-      next: ^14
-      react: ^18
 
   next@15.5.4:
     resolution: {integrity: sha512-xH4Yjhb82sFYQfY3vbkJfgSDgXvBB6a8xPs9i35k6oZJRoQRihZH+4s9Yo2qsWpzBmZ3lPXaJ2KPXLfkvW4LnA==}
@@ -15057,11 +15048,6 @@ snapshots:
       next: 15.5.4(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.55.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
       use-intl: 3.26.5(react@19.0.0)
-
-  next-runtime-env@3.3.0(next@15.5.4(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.55.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0):
-    dependencies:
-      next: 15.5.4(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.55.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      react: 19.0.0
 
   next@15.5.4(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.55.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
