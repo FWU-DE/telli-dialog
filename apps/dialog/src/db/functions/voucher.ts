@@ -12,7 +12,7 @@ export async function dbGetVoucherPriceLimit(userId: string) {
     .from(VoucherTable)
     .where(
       and(
-        eq(VoucherTable.status, 'used'),
+        eq(VoucherTable.status, 'created'),
         eq(VoucherTable.redeemedBy, userId),
         gt(
           sql`date_trunc('month', redeemed_at) + make_interval(months:=duration_months)`,
@@ -53,7 +53,7 @@ export async function dbUpdateVoucher(voucher: Partial<VoucherInsertModel>) {
 export async function dbRedeemVoucher(voucher: string, userId: string) {
   const [result] = await db
     .update(VoucherTable)
-    .set({ status: 'used', redeemedBy: userId, redeemedAt: new Date() })
+    .set({ status: 'redeemed', redeemedBy: userId, redeemedAt: new Date() })
     .where(eq(VoucherTable.code, voucher))
     .returning();
   return result;
