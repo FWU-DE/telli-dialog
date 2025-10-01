@@ -130,7 +130,7 @@ export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProp
 }
 
 function isGreenModel({ model }: { model: LlmModel }) {
-  return model.priceMetadata.type === 'text' && model.priceMetadata.promptTokenPrice < 2000;
+  return model.priceMetadata.type === 'text' && model.priceMetadata.promptTokenPrice < 150; // in tenth of a cent
 }
 
 function ModelSpan({ model }: { model: LlmModel }) {

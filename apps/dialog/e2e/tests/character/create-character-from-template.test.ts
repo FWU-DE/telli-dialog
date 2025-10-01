@@ -13,7 +13,7 @@ test('create character from template', async ({ page }) => {
   await copyButton.click();
   await page.waitForURL('/characters/editor/**');
   await page
-    .getByLabel('Wie heißt die Rolle/Simulierte Person? *')
+    .getByLabel('Wie heißt die simulierte Person? *')
     .fill('Johann Wolfgang von Goethe Individuell');
   await page.getByRole('textbox', { name: 'Schultyp' }).click();
   await page.getByRole('textbox', { name: 'Schultyp' }).fill('Gymnasium');

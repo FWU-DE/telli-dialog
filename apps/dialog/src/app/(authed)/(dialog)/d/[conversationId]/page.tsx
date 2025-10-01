@@ -64,7 +64,7 @@ export default async function Page(context: PageContext) {
     if (urls === undefined) {
       continue;
     }
-    const webSearchPromises = urls?.map(webScraperExecutable);
+    const webSearchPromises = urls?.map((url) => webScraperExecutable(url));
 
     try {
       const websearchSources = await Promise.all(webSearchPromises ?? []);

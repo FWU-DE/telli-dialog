@@ -44,7 +44,9 @@ export default async function Page(context: PageContext) {
 
   const initialLinks = PREFETCH_ENABLED
     ? await Promise.all(
-        sharedSchoolChat.attachedLinks.filter((l) => l !== '').map(webScraperExecutable),
+        sharedSchoolChat.attachedLinks
+          .filter((l) => l !== '')
+          .map((url) => webScraperExecutable(url)),
       )
     : sharedSchoolChat.attachedLinks
         .filter((l) => l && l !== '')
