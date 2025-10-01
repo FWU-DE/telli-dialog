@@ -15,24 +15,27 @@ export default function CreateVouchersPage({
   federalStateId: string;
   username: string;
 }) {
-  const [amount, setAmount] = useState<number | undefined>();
-  const [count, setCount] = useState(1); // default 1 code
+  const [amount, setAmount] = useState('');
+  const [count, setCount] = useState('1'); // default 1 code
   const [comment, setComment] = useState('');
-  const [months, setMonths] = useState(3); // default 3 months
+  const [months, setMonths] = useState('3'); // default 3 months
 
   const [createdVouchers, setCreatedVouchers] = useState<Voucher[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amount || amount < 1 || amount > 20000) {
+    const parsedAmount = parseInt(amount);
+    if (!parsedAmount || parsedAmount < 1 || parsedAmount > 20000) {
       alert('Bitte einen gültigen Guthabenbetrag zwischen 1 und 20000 Cent angeben.');
       return;
     }
-    if (count < 1) {
+    const parsedCount = parseInt(count);
+    if (parsedCount < 1) {
       alert('Bitte eine gültige Anzahl von Codes angeben.');
       return;
     }
-    if (months < 1 || months > 12) {
+    const parsedMonths = parseInt(months);
+    if (parsedMonths < 1 || parsedMonths > 12) {
       alert('Bitte eine gültige Anzahl von Monaten zwischen 1 und 12 angeben.');
       return;
     }
@@ -41,7 +44,14 @@ export default function CreateVouchersPage({
       return;
     }
     try {
-      const result = await createVouchers(federalStateId, amount, months, username, comment, count);
+      const result = await createVouchers(
+        federalStateId,
+        parsedAmount,
+        parsedMonths,
+        username,
+        comment,
+        parsedCount,
+      );
       setCreatedVouchers((prev) => [...prev, ...result]);
     } catch (err) {
       alert('Fehler beim Erstellen der Guthaben Codes: ' + (err as Error).message);
@@ -56,8 +66,8 @@ export default function CreateVouchersPage({
         <label>Guthabenbetrag (in Cent): </label>
         <Input
           type="number"
-          value={amount ?? ''}
-          onChange={(e) => setAmount(parseInt(e.target.value))}
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
           min={100}
           max={20000}
           required
@@ -65,8 +75,8 @@ export default function CreateVouchersPage({
         <label>Dauer (in Monaten): </label>
         <Input
           type="number"
-          value={months ?? ''}
-          onChange={(e) => setMonths(parseInt(e.target.value))}
+          value={months}
+          onChange={(e) => setMonths(e.target.value)}
           min={1}
           max={12}
           required
@@ -74,8 +84,8 @@ export default function CreateVouchersPage({
         <label>Anzahl der Codes: </label>
         <Input
           type="number"
-          value={count ?? ''}
-          onChange={(e) => setCount(parseInt(e.target.value))}
+          value={count}
+          onChange={(e) => setCount(e.target.value)}
           min={1}
           max={100}
           required
@@ -96,10 +106,10 @@ export default function CreateVouchersPage({
               data={createdVouchers.map((voucher) => ({
                 Code: voucher.code,
                 Betrag: voucher.increaseAmount,
+                DauerInMonaten: voucher.durationMonths,
                 GültigBis: new Date(voucher.validUntil).toLocaleDateString('de-DE'),
                 ErstelltDatum: new Date(voucher.createdAt).toLocaleDateString('de-DE'),
                 ErstelltVon: voucher.createdBy,
-                DauerInMonaten: voucher.durationMonths,
                 Status: voucher.status,
               }))}
               separator=";"
