@@ -62,6 +62,7 @@ docker compose -f devops/docker/docker-compose.db.local.yml down -v
 ## E2E Tests
 
 We use playwright with a vidis mock server for e2e testing, refer to the [details](apps/dialog/e2e/readme.md) for setup guide.
+The e2e tests are integrated into the pipeline and run on every pull request.
 
 ## Load Tests
 
@@ -82,12 +83,13 @@ Please see [SECURITY.md](SECURITY.md) for guidance on reporting security-related
 
 ## Configurations by Federal State
 
-There are several functionalities to customize look and functionality for each federal state see federalStateTable in [db-schema](src/db/schema.ts):
+There are several functionalities to customize look and functionality for each federal state:
 
 ### Access Flags
 
 - **student_access**:  
   Whether students are allowed to login.
+  This value is configured in the SQL column federal_state/student_access.
 
 ### Feature Flags
 
@@ -95,12 +97,15 @@ These are hidden in the sidebar, but the routes are still accessible.
 
 - **enableCharacters**:  
   Whether custom characters (Dialogpartner) are enabled for teachers.
+  This value is configured in the SQL column federal_state/enable_characters.
 
 - **enableSharedChats**:  
   Whether shared school chats (Lernszenario) are enabled for teachers.
+  This value is configured in the SQL column federal_state/enable_shared_chats.
 
 - **enableCustomGpt**:  
   Whether customGpts (Assistenten) are enabled for teachers.
+  This value is configured in the SQL column federal_state/enable_custom_gpts.
 
 ### Whitelabel
 
@@ -108,6 +113,7 @@ Custom designs and titles for federal states:
 
 - **telliName**:  
   Custom name appearing in the sidebar and as website title.
+  This value is configured in the SQL column federal_state/telli_name.
 
 - **logos**:  
   The logo is stored in the OTC S3 Bucket at a fixed path:  
@@ -115,4 +121,4 @@ Custom designs and titles for federal states:
 
 - **design configuration**:  
   Custom color palette for buttons, icons, etc. (see Figma designs).  
-  Type is defined in [DesignConfiguration](src/db/types.ts)
+  This value is configured in the SQL column federal_state/design_configuration.

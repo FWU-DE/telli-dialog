@@ -26,9 +26,7 @@
     "e2e:api": "dotenvx run -f .env.local -- playwright test tests/api/",
     "e2e:headed": "playwright test --headed",
     "e2e:ui": "playwright test --ui",
-    "k6:build": "node e2e/load_test/esbuild.k6.config.mjs",
-    "k6:run:ui": "K6_BROWSER_HEADLESS=false pnpm k6:build && K6_BROWSER_HEADLESS=false k6 run e2e/load_test/run.js -e K6_BROWSER_HEADLESS=false",
-    "k6:run": "pnpm k6:build && K6_BROWSER_HEADLESS=true K6_BROWSER_ARGS='no-sandbox' k6 run e2e/load_test/run.js -e K6_BROWSER_HEADLESS=true -e K6_BROWSER_ARGS='no-sandbox'"
+    "k6:build": "node e2e/load_test/esbuild.k6.config.mjs"
   },
   "packageManager": "pnpm@9.15.1",
   "dependencies": {
