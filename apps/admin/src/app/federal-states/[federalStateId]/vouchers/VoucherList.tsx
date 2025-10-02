@@ -22,7 +22,7 @@ export default function VoucherList({
 }) {
   const handleRevoke = async (voucher: Voucher) => {
     if (!username) {
-      alert('Cannot revoke voucher: username is missing.');
+      alert('Widerrufen abgebrochen: Benutzername nicht gefunden.');
       return;
     }
     const reason = prompt('Bitte Grund für das Widerrufen des Codes angeben:');
@@ -36,7 +36,7 @@ export default function VoucherList({
       voucher.status = 'revoked';
       vouchers.find((v) => v.code === voucher.code)!.status = 'revoked';
     } catch (err) {
-      alert('Error revoking voucher: ' + (err as Error).message);
+      alert('Fehler beim Widerrufen des Gutscheins: ' + (err as Error).message);
     }
   };
   return (

@@ -12,5 +12,11 @@ export default async function VouchersByStatePage({
   const vouchers = await fetchVouchers(federalStateId);
   const session = await auth();
 
-  return <VoucherListView vouchers={vouchers} username={session?.user?.name ?? undefined} />;
+  return (
+    <VoucherListView
+      vouchers={vouchers}
+      federalStateId={federalStateId}
+      username={session?.user?.name ?? undefined}
+    />
+  );
 }

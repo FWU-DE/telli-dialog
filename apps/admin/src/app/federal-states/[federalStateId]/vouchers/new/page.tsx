@@ -13,7 +13,7 @@ export default async function Page({ params }: { params: Promise<{ federalStateI
     session.user.name === undefined ||
     session.user.name === null
   ) {
-    throw new Error('Not authenticated');
+    throw new Error('User not found');
   }
   return (
     <div>

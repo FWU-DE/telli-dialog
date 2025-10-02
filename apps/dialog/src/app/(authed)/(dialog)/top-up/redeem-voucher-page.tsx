@@ -1,4 +1,5 @@
 'use client';
+import { UserAndContext } from '@/auth/types';
 import SimpleTextInput from '@/components/common/simple-text-input';
 import { useToast } from '@/components/common/toast';
 import { dbGetVoucherByCode, dbRedeemVoucher } from '@/db/functions/voucher';
@@ -6,11 +7,7 @@ import { useTranslations } from 'next-intl';
 import React from 'react';
 import z from 'zod';
 
-export default function RedeemVoucherPage({
-  user,
-}: {
-  user: Awaited<ReturnType<typeof import('@/auth/utils').getUser>>;
-}) {
+export default function RedeemVoucherPage({ user }: { user: UserAndContext }) {
   const t = useTranslations('top-up');
   const tToast = useTranslations('top-up.toasts');
   const toast = useToast();
