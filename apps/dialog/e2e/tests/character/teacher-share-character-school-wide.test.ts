@@ -22,7 +22,7 @@ test('teacher can share character school-wide', async ({ page }) => {
   await page.getByLabel('Wie heißt die simulierte Person? *').fill('Ada Lovelace');
 
   await page
-    .getByLabel('Wie kann die simulierte Person in einem kurzen Satz beschrieben werden? *')
+    .getByLabel('Wie kann die simulierte Person kurz beschrieben werden? *')
     .fill('Sie gilt als erste Programmiererin der Welt.');
 
   await page

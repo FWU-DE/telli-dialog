@@ -21,7 +21,7 @@ test('teacher can login, create and join shared dialogpartner chat', async ({ pa
   await page.getByLabel('Wie heißt die simulierte Person? *').fill('John Cena');
 
   await page
-    .getByLabel('Wie kann die simulierte Person in einem kurzen Satz beschrieben werden? *')
+    .getByLabel('Wie kann die simulierte Person kurz beschrieben werden? *')
     .fill('Er ist bekannt für seinen Spruch „You can`t see me“ und seine Wrestling-Karriere.');
 
   await page

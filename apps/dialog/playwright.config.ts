@@ -65,7 +65,7 @@ export default defineConfig({
     // },
   ],
   webServer: {
-    command: 'pnpm dev:local',
+    command: 'pnpm dev',
     timeout: 60000, // wait 60 seconds for web server at url to be available
     url: 'http://localhost:3000', // the server to be used for tests
     reuseExistingServer: true,
