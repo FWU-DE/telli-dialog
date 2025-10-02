@@ -8,7 +8,7 @@ import { Voucher } from '../../../../../types/voucher';
 import { Button } from '@ui/components/Button';
 import VoucherList from '../VoucherList';
 
-export default function CreateVouchersPage({
+export default function VoucherCreateView({
   federalStateId,
   username,
 }: {
