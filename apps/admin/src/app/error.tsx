@@ -14,7 +14,7 @@ export default function Error({
 
   return (
     <div>
-      <h2>Ein Fehler ist aufgetreten!</h2>
+      <h1>Ein Fehler ist aufgetreten!</h1>
       <span>{error.message}</span>
     </div>
   );

@@ -16,7 +16,7 @@ export default function VoucherListView({
   return (
     <div>
       <div className="flex items-center justify-between w-full gap-4 mb-4">
-        <h2>Guthaben Codes Übersicht</h2>
+        <h1>Guthaben Codes Übersicht</h1>
         <Link href="vouchers/new">
           <Button>Neue erstellen</Button>
         </Link>
