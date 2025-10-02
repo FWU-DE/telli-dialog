@@ -26,7 +26,7 @@ test.describe('Character Template API', () => {
       data: characterData,
     });
 
-    expect(createResponse.ok()).toBeTruthy();
+    expect(createResponse.ok(), `Response code is ${createResponse.status()}`).toBeTruthy();
     const createResult = await createResponse.json();
     const createdCharacterId = createResult.results[0].data.id;
 

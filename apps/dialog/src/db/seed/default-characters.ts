@@ -9,7 +9,11 @@ import { dbUpsertCustomGpt } from '../functions/custom-gpts';
 export async function insertTemplateCharacters() {
   await processStaticJpegFiles('./assets/template-characters', 'characters/_templates');
   for (const templateCharacter of defaultCharacters) {
-    await dbCreateCharacter(templateCharacter);
+    const result = await dbCreateCharacter(templateCharacter);
+    const id = result && result[0] ? result[0].id : undefined;
+    if (!id) {
+      console.error('Failed to insert template character:', templateCharacter.name);
+    }
   }
 }
 
