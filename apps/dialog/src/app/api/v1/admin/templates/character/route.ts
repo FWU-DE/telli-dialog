@@ -107,14 +107,14 @@ export async function POST(request: NextRequest) {
 
     // Get default model ID
     const defaultModel = await dbGetModelByName(DEFAULT_CHAT_MODEL);
-    /* if (!defaultModel) {
+    if (!defaultModel) {
       return NextResponse.json(
         {
           error: 'Default model not found',
         },
         { status: 500 },
       );
-    } */
+    }
 
     const results = [];
 
