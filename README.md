@@ -19,13 +19,13 @@ pnpm i # installs the dependencies
 ## Environment variables
 
 You will need environment variables to work with.
-Place those in the `.env` file **or** use the [1password cli](https://developer.1password.com/docs/cli/).
+Place those in the `.env.local` file.
 
 You can find the env variables [here](https://start.1password.com/open/i?a=ADERP2QHK5HBPLKMBFF2QU5CXI&v=jtidfrchgfg2sunjzwpzgendlq&i=a2khk5vx6hrqmtkta2gg7vonga&h=deutschlandgpt.1password.eu).
 
 ## Database
 
-For local development it makes sense to spin up a local postgresql database
+For local development spin up a local postgresql database
 
 ```sh
 docker compose -f devops/docker/docker-compose.db.local.yml up -d
@@ -37,28 +37,26 @@ Check that you can access it:
 psql "postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db"
 ```
 
-If you start with a fresh database, do not forget to apply migrations and seed the database, otherwise the application will not work.
+If you start with a fresh database, apply migrations and seed the database, otherwise the application will not work.
 
 ```sh
-# with proper values in .env file
-pnpm db:migrate
-pnpm db:seed
-
-# with use of 1password-cli
-eval $(op signin)
-pnpm db:migrate:op
-```
-
-Lastly, before starting the application you have to stat the local mock of authentication.
+# with proper values in .env.local file
+cd apps/dialog
+pnpm db:migrate:local
+pnpm db:seed:local
 
 ```
-pnpm start:oidc
-```
 
-You can now start the application:
+You can now start the application from the root directory:
 
 ```sh
 pnpm dev
+```
+
+To remove the database and delete all its data you can stop and remove the container and its volume:
+
+```sh
+docker compose -f devops/docker/docker-compose.db.local.yml down -v
 ```
 
 ## E2E Tests
@@ -67,7 +65,7 @@ We use playwright with a vidis mock server for e2e testing, refer to the [detail
 
 ## Load Tests
 
-If you need to load test, you need to install `k6`.
+If you need to run load tests, you need to install `k6`.
 
 ```sh
 brew install k6
