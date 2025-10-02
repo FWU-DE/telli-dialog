@@ -1,6 +1,7 @@
 # E2E Testing
 
 This folder contains test files and utils for running e2e and api tests.
+For e2e tests we use [playwright](https://playwright.dev/).
 
 One of the most notable things is an oidc mock provider to mock [VIDIS](https://www.vidis.schule/)
 
@@ -40,46 +41,85 @@ When being directed for the oidc provider page and the username and password, yo
 
 ## Run e2e tests
 
-Ensure that all the requried browsers are installed
+Make sure that there is a `.env.local` file that contains the configuration necessary for the tests to run.
+
+Ensure that all the requried browsers are installed.
 
 ```sh
 pnpm playwright install
 ```
 
-Before running the e2e test locally is is recommended to manually build and start the app beforehand:
+Then you can run the e2e tests.
 
-```sh
-pnpm build:e2e && pnpm start:e2e
-```
+1. `pnpm e2e` - This runs all tests in headless mode without a visible browser.
+2. `pnpm e2e:headed` - This runs the tests in a visible browser.
+3. `pnpm e2e:ui` - This starts a graphical interface where the test are run. You can rerun tests directly within the interface.
+4. `pnpm e2e:api` - This runs the api tests.
 
-Those command are the same as `pnpm build:envless` but use the `.env.e2e` file as the environment file.
+### Run tests in vscode
 
-Then you can run the e2e tests. There are two main ways of doing it:
-
-1. `pnpm e2e:op` - This runs in headless mode and is also the command that is executed in the CI, you will most likely not be able to debug there.
-2. `pnpm e2e:ui` - This starts a browser where the test are run it, so you can see live what is happening and debug.
-
-## Run api tests
-
-### Prerequisites
-
-Make sure that there is a `.env.local` file that contains the configuration necessary for the api tests to run.
-At least the following keys are needed:
-
-- API_KEY
-- DATABASE_URL
-
-### Run api tests via command line
-
-The following command will run all api tests that are located in the api test folder.
-If no running web server is located, playwright will start one (see playwright.config.ts for details).
-
-```sh
-pnpm e2e:api
-```
-
-### Run api tests in vscode
-
-In order to run api tests directly in vscode, the extension `Playwright Test for VSCode` is recommended.
+In order to run tests directly in vscode, the extension `Playwright Test for VSCode` is recommended.
 The extension provides a `Test Explorer` available through the `Testing` icon on the left menu bar.
 Run or debug a test directly from here.
+
+# Load Testing
+
+## Run load tests locally
+
+If you want to run load tests, you need to install `k6`.
+
+```sh
+pnpm install k6
+```
+
+Ensure that all the requried browsers are installed.
+
+```sh
+pnpm playwright install
+```
+
+Set the passwort for the load test user in the .env.local file
+LOADTEST_PASSWORD="test"
+
+Then you can run the load tests from the directory apps/dialog.
+
+This runs the tests in a visible browser:
+
+```sh
+K6_BROWSER_HEADLESS=false pnpm k6:build && K6_BROWSER_HEADLESS=false k6 run e2e/load_test/run-chat-test.js -e K6_BROWSER_HEADLESS=false -e LOADTEST_PASSWORD=test
+```
+
+or
+
+```sh
+K6_BROWSER_HEADLESS=false pnpm k6:build && K6_BROWSER_HEADLESS=false k6 run e2e/load_test/run-file-test.js -e K6_BROWSER_HEADLESS=false -e LOADTEST_PASSWORD=test
+```
+
+This runs the tests in headless mode without a visible browser:
+
+```sh
+pnpm k6:build && K6_BROWSER_HEADLESS=true K6_BROWSER_ARGS='no-sandbox' k6 run e2e/load_test/run-chat-test.js -e K6_BROWSER_HEADLESS=true -e K6_BROWSER_ARGS='no-sandbox'
+```
+
+or
+
+```sh
+pnpm k6:build && K6_BROWSER_HEADLESS=true K6_BROWSER_ARGS='no-sandbox' k6 run e2e/load_test/run-file-test.js -e K6_BROWSER_HEADLESS=true -e K6_BROWSER_ARGS='no-sandbox'
+```
+
+## Run load tests in Grafana Cloud K6
+
+```sh
+cd apps/dialog
+k6 cloud login
+```
+
+```sh
+k6 cloud run e2e/load_test/run-chat-test.ts
+```
+
+or
+
+```sh
+k6 cloud run e2e/load_test/run-file-test.ts
+```
