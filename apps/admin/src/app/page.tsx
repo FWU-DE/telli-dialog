@@ -1,3 +1,4 @@
+export const HOME_ROUTE = '/';
 export default async function Home() {
   return (
     <div>

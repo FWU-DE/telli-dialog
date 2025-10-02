@@ -23,15 +23,16 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 import deleteConversationAction, { updateConversationNameAction } from './actions';
-import { fetchClientSideConversations, getPriceLimitByUser } from './utils';
+import { fetchClientSideConversations } from './utils';
 import { HELP_MODE_GPT_ID } from '@/db/const';
 
 type Props = {
   user: UserAndContext;
   currentModelCosts: number;
+  userPriceLimit: number;
 };
 
-export default function DialogSidebar({ user, currentModelCosts }: Props) {
+export default function DialogSidebar({ user, currentModelCosts, userPriceLimit }: Props) {
   const { isBelow } = useBreakpoints();
   const { toggle, isOpen } = useSidebarVisibility();
   const pathname = usePathname();
@@ -192,7 +193,7 @@ export default function DialogSidebar({ user, currentModelCosts }: Props) {
                 <span className="text-base">{t('telli-points')}</span>
               </div>
               <TelliPointsProgressBar
-                percentage={100 - (currentModelCosts / (getPriceLimitByUser(user) ?? 500)) * 100}
+                percentage={100 - (currentModelCosts / userPriceLimit) * 100}
               />
               <hr className="my-2" />
             </div>
