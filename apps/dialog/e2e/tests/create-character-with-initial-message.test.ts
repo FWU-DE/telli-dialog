@@ -23,7 +23,7 @@ test('teacher can create character with initial message and verify it appears in
   await page.getByLabel('Wie heißt die simulierte Person? *').fill('Albert Einstein');
 
   await page
-    .getByLabel('Wie kann die simulierte Person in einem kurzen Satz beschrieben werden? *')
+    .getByLabel('Wie kann die simulierte Person kurz beschrieben werden? *')
     .fill('Ein brillanter Physiker, der die Relativitätstheorie entwickelt hat.');
 
   await page
