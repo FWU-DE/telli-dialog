@@ -75,6 +75,6 @@ test('teacher can create shared chat with web sources, student can join chat and
   await schoolChatPage.keyboard.press('Enter');
 
   await expect(schoolChatPage.getByLabel('assistant message 1')).toContainText(
-    'Es gab hier keine Überraschungen.',
+    'Es gab hier keine Überraschungen',
   );
 });
