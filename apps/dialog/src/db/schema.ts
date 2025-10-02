@@ -489,3 +489,4 @@ export const VoucherTable = pgTable('voucher', {
 
 export type VoucherModel = typeof VoucherTable.$inferSelect;
 export type VoucherInsertModel = typeof VoucherTable.$inferInsert;
+export type VoucherUpdateModel = Partial<VoucherInsertModel> & Pick<VoucherModel, 'id'>;

@@ -2,7 +2,7 @@
 
 import { and, eq, gt, sql, sum } from 'drizzle-orm';
 import { db } from '..';
-import { VoucherInsertModel, VoucherTable } from '../schema';
+import { VoucherInsertModel, VoucherTable, VoucherUpdateModel } from '../schema';
 
 export async function dbGetVoucherPriceLimit(userId: string) {
   const [result] = await db
@@ -40,8 +40,7 @@ export async function dbGetVoucherByCode(code: string) {
   return result;
 }
 
-export async function dbUpdateVoucher(voucher: Partial<VoucherInsertModel>) {
-  if (!voucher.id) throw new Error('Voucher ID is required for update');
+export async function dbUpdateVoucher(voucher: VoucherUpdateModel) {
   const [result] = await db
     .update(VoucherTable)
     .set(voucher)
