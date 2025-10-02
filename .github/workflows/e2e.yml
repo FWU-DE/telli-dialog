@@ -30,10 +30,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Load 1Password Secrets
-        uses: 1password/load-secrets-action@v1
+        uses: 1password/load-secrets-action@v3
         with:
           export-env: true
         env:
@@ -57,13 +57,12 @@ jobs:
           BAVARIA_API_KEY: op://telli Engineering/.env.e2e chatbot/BAVARIA_API_KEY
           RABBITMQ_URI: op://telli Engineering/.env.e2e chatbot/RABBITMQ_URI
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
         with:
           node-version-file: '.nvmrc'
-
-      - name: Install PNPM
-        run: npm i -g pnpm@9.15.1
 
       - name: Install dependencies
         run: pnpm install
