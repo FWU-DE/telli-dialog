@@ -5,9 +5,9 @@ import VoucherListView from './VoucherListView';
 export default async function VouchersByStatePage({
   params,
 }: {
-  params: Promise<{ 'federal-state-id': string }>;
+  params: Promise<{ federalStateId: string }>;
 }) {
-  const federalStateId = (await params)['federal-state-id'];
+  const federalStateId = (await params).federalStateId;
   const vouchers = await fetchVouchers(federalStateId);
   const session = await auth();
 
