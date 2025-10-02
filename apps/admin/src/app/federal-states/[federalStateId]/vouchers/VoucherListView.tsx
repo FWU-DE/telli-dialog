@@ -2,9 +2,9 @@
 import React from 'react';
 import { Voucher } from '../../../../types/voucher';
 
-import { Button } from '../../../../components/common/Button';
+import { Button } from '@ui/components/Button';
 import Link from 'next/link';
-import VoucherList from '../../../../components/vouchers/VoucherList';
+import VoucherList from './VoucherList';
 
 export default function VoucherListView({
   vouchers,

@@ -5,8 +5,8 @@ import { CSVLink } from 'react-csv';
 import { Input } from '@ui/components/Input';
 import { Textarea } from '@ui/components/Textarea';
 import { Voucher } from '../../../../../types/voucher';
-import { Button } from '../../../../../components/common/Button';
-import VoucherList from '../../../../../components/vouchers/VoucherList';
+import { Button } from '@ui/components/Button';
+import VoucherList from '../VoucherList';
 
 export default function CreateVouchersPage({
   federalStateId,

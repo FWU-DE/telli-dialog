@@ -9,9 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from '@ui/components/Table';
-import { Voucher } from '../../types/voucher';
-import { revokeVoucher } from '../../services/voucher-service';
-import { Button } from '../common/Button';
+import { Voucher } from '../../../../types/voucher';
+import { revokeVoucher } from '../../../../services/voucher-service';
+import { Button } from '@ui/components/Button';
 
 export default function VoucherList({
   vouchers,

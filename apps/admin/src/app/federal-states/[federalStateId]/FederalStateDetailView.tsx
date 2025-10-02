@@ -1,5 +1,5 @@
 import Link from 'next/dist/client/link';
-import { Button } from '../../../components/common/Button';
+import { Button } from '@ui/components/Button';
 import { FederalState } from '../../../types/federal-state';
 
 export type FederalStateViewProps = {
