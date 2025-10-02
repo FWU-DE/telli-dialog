@@ -9,12 +9,12 @@ import { LlmModel } from '@/db/schema';
 import { type UserAndContext } from '@/auth/types';
 import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
 import { dbGetAllLlmModels } from '@/db/functions/llm-model';
-import { dbGetVoucherPriceLimit } from '@/db/functions/voucher';
+import { dbGetCreditIncreaseForCurrentMonth } from '@/db/functions/voucher';
 
 export async function getPriceLimitByUser(user: UserAndContext) {
   if (user.school === undefined || user.federalState === undefined) return null;
 
-  const codeBonus = await dbGetVoucherPriceLimit(user.id);
+  const codeBonus = await dbGetCreditIncreaseForCurrentMonth(user.id);
 
   if (user.school.userRole === 'student') {
     return user.federalState.studentPriceLimit + codeBonus;

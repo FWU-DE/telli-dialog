@@ -4,7 +4,7 @@ import { and, eq, gt, sql, sum } from 'drizzle-orm';
 import { db } from '..';
 import { VoucherInsertModel, VoucherTable, VoucherUpdateModel } from '../schema';
 
-export async function dbGetVoucherPriceLimit(userId: string) {
+export async function dbGetCreditIncreaseForCurrentMonth(userId: string) {
   const [result] = await db
     .select({
       totalPriceLimit: sum(VoucherTable.increaseAmount),

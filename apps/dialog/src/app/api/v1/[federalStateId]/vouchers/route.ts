@@ -4,7 +4,7 @@ import {
   dbInsertVouchers,
   dbUpdateVoucher,
 } from '@/db/functions/voucher';
-import { VoucherInsertModel, VoucherTable } from '@/db/schema';
+import { VoucherInsertModel, VoucherTable, VoucherUpdateModel } from '@/db/schema';
 import { validateApiKeyByHeadersWithResult } from '@/db/utils';
 import { createInsertSchema } from 'drizzle-zod';
 import { NextRequest, NextResponse } from 'next/server';
@@ -110,7 +110,7 @@ export async function PATCH(
     );
   }
 
-  const updatedFields: Partial<VoucherInsertModel> = {
+  const updatedFields: VoucherUpdateModel = {
     id: voucher.id,
     updatedBy: parseData.updatedBy,
     updateReason: parseData.updateReason,
