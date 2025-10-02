@@ -140,7 +140,7 @@ jobs:
       - name: Build Docker image
         run: |
           COMMIT_HASH=${{ github.sha }}
-          docker build --build-arg CI=${{ env.CI }} --secret id=SENTRY_AUTH_TOKEN -f ./apps/dialog/Dockerfile -t telli/chatbot:$COMMIT_HASH .
+          docker build --build-arg CI=${CI} --secret id=SENTRY_AUTH_TOKEN -f ./apps/dialog/Dockerfile -t telli/chatbot:$COMMIT_HASH .
           docker tag telli/chatbot:$COMMIT_HASH telli.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH
 
       - name: Push Docker image to IONOS registry
