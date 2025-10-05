@@ -39,6 +39,8 @@ psql "postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db"
 
 If you start with a fresh database, do not forget to apply migrations and seed the database, otherwise the application will not work.
 
+Add api keys in your .env.local file for all federal states that you want to login with, e.g. DE_BY_API_KEY for bavaria.
+
 ```sh
 # with proper values in .env file
 pnpm db:migrate
