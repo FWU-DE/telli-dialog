@@ -54,7 +54,7 @@ jobs:
           ENCRYPTION_KEY: op://telli Engineering/.env.e2e chatbot/ENCRYPTION_KEY
           SENTRY_DSN: op://telli Engineering/.env.e2e chatbot/SENTRY_DSN
           API_KEY: op://telli Engineering/.env.e2e chatbot/API_KEY
-          BAVARIA_API_KEY: op://telli Engineering/.env.e2e chatbot/BAVARIA_API_KEY
+          DE_BY_API_KEY: op://telli Engineering/.env.e2e chatbot/BAVARIA_API_KEY
           RABBITMQ_URI: op://telli Engineering/.env.e2e chatbot/RABBITMQ_URI
 
       - name: Setup pnpm
