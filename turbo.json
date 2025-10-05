@@ -21,11 +21,13 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "passThroughEnv": ["CI", "SENTRY_AUTH_TOKEN"]
     },
     "build:envless": {
       "dependsOn": ["^build:envless"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "passThroughEnv": ["CI", "SENTRY_AUTH_TOKEN"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]

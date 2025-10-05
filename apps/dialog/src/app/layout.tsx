@@ -1,5 +1,4 @@
 import { type Metadata } from 'next';
-import { PublicEnvScript } from 'next-runtime-env';
 import React from 'react';
 import { Barlow } from 'next/font/google';
 import ClientProvider from './client-provider';
@@ -45,9 +44,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale} className={barlow.className}>
-      <head>
-        <PublicEnvScript />
-      </head>
       <body>
         <NextIntlClientProvider messages={messages}>
           <ClientProvider session={fullSession} designConfiguration={designConfiguration}>
