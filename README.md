@@ -39,27 +39,27 @@ psql "postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db"
 
 ---
 
-## Troubleshooting
+### Database Troubleshooting
 
-**Problem: Die Datenbank existiert nicht**
+If you encounter the error: `FATAL: database "telli_dialog_db" does not exist` after running the application, try the following:
 
-Wenn du beim Versuch, die Datenbank zu starten oder darauf zuzugreifen, die Fehlermeldung **`FATAL: database "telli_dialog_db" does not exist`** bekommst, liegt das daran, dass die Datenbank noch nicht erstellt wurde.
-
-Du kannst das einfach manuell beheben:
-
-1.  Zuerst mit der Standard-Postgres-Datenbank verbinden:
+1.  **Ensure Docker Compose has run correctly.** The database should be created automatically when running the initial Docker command:
 
     ```sh
-    psql "postgresql://telli_dialog_db:test1234@127.0.0.1:5432/postgres"
+    docker compose -f devops/docker/docker-compose.db.local.yml up -d
     ```
 
-2.  Dann die benötigte Datenbank erstellen:
+    If you recently ran this command, give the containers a few more seconds to fully initialize.
 
-    ```sql
-    CREATE DATABASE telli_dialog_db;
+2.  **Verify the database container is running:**
+
+    ```sh
+    docker ps
     ```
 
-3.  Danach sollte alles wie gewohnt funktionieren.
+    (Look for the PostgreSQL container.)
+
+3.  If the container is running and the database still doesn't exist, try stopping and restarting the Docker container.
 
 If you start with a fresh database, do not forget to apply migrations and seed the database, otherwise the application will not work.
 
