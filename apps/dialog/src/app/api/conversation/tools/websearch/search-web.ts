@@ -5,6 +5,7 @@ import { CHAT_MESSAGE_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
 import he from 'he';
+import { unstable_cacheLife as cacheLife } from 'next/cache';
 
 const headers = {
   'User-Agent':
@@ -16,12 +17,16 @@ const headers = {
  * Uses Mozilla's Readability to extract the main content.
  * Filters the most important information and stops if content is longer than TOKEN_LIMIT tokens.
  * @param url The URL to fetch and parse.
+ * @param options The options for the fetch request.
  * @returns A summary of the most important information from the page.
  */
 export async function webScraperExecutable(
   url: string,
   options: { timeout?: number } = { timeout: 5000 },
 ): Promise<WebsearchSource> {
+  'use cache';
+  cacheLife('weeks');
+
   console.info(`Requesting webcontent for url: ${url}`);
   const t = await getTranslations({ namespace: 'websearch' });
   let response: Response;
@@ -41,7 +46,7 @@ export async function webScraperExecutable(
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), options.timeout);
     response = await fetch(url, {
-      headers: headers,
+      headers,
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
