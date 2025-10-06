@@ -62,13 +62,11 @@ export async function sharedChatHasReachedIntelliPointLimit({
     sharedChatId: sharedChat.id,
   });
 
-  const federalStateLimits = user.federalState;
-
-  // TODO: TD-308 Klären ob codes auch hier budget erhöhen
   if (
     user.school.userRole === 'teacher' &&
     sharedChat.intelligencePointsLimit !== null &&
-    priceInCent < (federalStateLimits.teacherPriceLimit * sharedChat.intelligencePointsLimit) / 100
+    priceInCent <
+      ((await getPriceLimitByUser(user)) ?? 0 * sharedChat.intelligencePointsLimit) / 100
   ) {
     return false;
   }
@@ -103,14 +101,10 @@ export async function sharedCharacterChatHasReachedIntelliPointLimit({
     maxUsageTimeLimit: character.maxUsageTimeLimit,
     characterId: character.id,
   });
-
-  const federalStateLimits = user.federalState;
-
-  // TODO: TD-308 Klären ob codes auch hier budget erhöhen
   if (
     user.school.userRole === 'teacher' &&
     character.intelligencePointsLimit !== null &&
-    priceInCent < (federalStateLimits.teacherPriceLimit * character.intelligencePointsLimit) / 100
+    priceInCent < ((await getPriceLimitByUser(user)) ?? 0 * character.intelligencePointsLimit) / 100
   ) {
     return false;
   }
