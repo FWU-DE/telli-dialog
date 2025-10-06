@@ -34,7 +34,11 @@ RUN pnpm install --frozen-lockfile
 # Copy source code of isolated subworkspace
 COPY --from=pruner /app/out/full/ .
 
-RUN turbo build:envless
+ARG CI
+
+RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
+    CI=${CI} \
+    turbo build:envless
 # RUN --mount=type=cache,id=pnpm,target=~/.pnpm-store pnpm prune --prod --no-optional
 RUN pnpm prune --prod --no-optional
 RUN cp -r /app/apps/dialog/.next/standalone/* /app/
