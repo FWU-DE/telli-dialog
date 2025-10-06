@@ -11,6 +11,9 @@ FROM alpine AS base
 RUN npm install pnpm turbo --global
 RUN pnpm config set store-dir ~/.pnpm-store
 
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV TURBO_TELEMETRY_DISABLED=1
+
 # Prune projects
 FROM base AS pruner
 WORKDIR /app
@@ -60,8 +63,6 @@ COPY --from=builder --exclude=.git /app/ .
 ARG PORT=3000
 ENV PORT=${PORT}
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV TURBO_TELEMETRY_DISABLED=1
 EXPOSE ${PORT}
 
 CMD node ./apps/dialog/server.js
