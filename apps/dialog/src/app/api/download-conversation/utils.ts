@@ -13,6 +13,13 @@ import { dbGetConversationAndMessages } from '@/db/functions/chat';
 import { UserModel } from '@/db/schema';
 import { markdownToDocx } from './markdown';
 
+const LLM_DISPLAY_NAMES: Record<string, string> = {
+  //  hier alle  LLM-Nameu einfügen
+  'gpt-4o-mini': 'GPT-4o-mini',
+  'meta-llama/Meta-Llama-3.1-8B-Instruct': 'Llama-3.1-8B', // Beispiel
+  telli: 'telli (Standardmodell)',
+};
+
 export async function generateConversationDocxFiles({
   conversationId,
   user,
@@ -50,14 +57,16 @@ export async function generateConversationDocxFiles({
     const conversationMetadata = getConversationMetadata({
       conversation,
     });
+
     const gptName = await getGptName({ enterpriseGptName });
+
     const messageParagraphs = getConversationMessages({
       messages,
       gptName,
       userFullName,
     });
 
-    const doc = buildDocxDocument({ conversationMetadata, messageParagraphs });
+    const doc = buildDocxDocument({ conversationMetadata, messageParagraphs, gptName });
     const buffer = await Packer.toBuffer(doc);
 
     return { buffer, conversation, gptName, messages };
@@ -115,18 +124,37 @@ async function getGptName({
   enterpriseGptName: string | null;
 }): Promise<string> {
   if (enterpriseGptName) {
-    return enterpriseGptName;
+    // Versucht, den Display-Namen über das Mapping zu finden
+    return LLM_DISPLAY_NAMES[enterpriseGptName] ?? enterpriseGptName;
   }
-  return 'telli';
+
+  // Standardfall
+  return LLM_DISPLAY_NAMES['telli'] ?? 'telli';
 }
 
+// NEU: gptName zu den Parametern hinzugefügt
 function buildDocxDocument({
   conversationMetadata,
   messageParagraphs,
+  gptName, // HINZUGEFÜGT
 }: {
   conversationMetadata: Paragraph[];
   messageParagraphs: SectionType[];
+  gptName: string; // HINZUGEFÜGT
 }) {
+  //für die LLM-Signatur
+  const exportSignature = new Paragraph({
+    alignment: AlignmentType.START, // WICHTIG: Links ausrichten
+    spacing: { before: 300 }, // Etwas Abstand nach oben
+    children: [
+      new TextRun({
+        text: `Generiert von telli unter Nutzung von ${gptName}`,
+        size: 22,
+        italics: true,
+      }),
+    ],
+  });
+
   const doc = new Document({
     numbering: {
       config: [
@@ -244,7 +272,8 @@ function buildDocxDocument({
     sections: [
       {
         properties: {},
-        children: [...conversationMetadata, ...messageParagraphs],
+        //  exportSignature am Ende der Liste hinzugefügt
+        children: [...conversationMetadata, ...messageParagraphs, exportSignature],
       },
     ],
   });

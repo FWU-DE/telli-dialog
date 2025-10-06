@@ -11,14 +11,18 @@ import { iconClassName } from '@/utils/tailwind/icon';
 type DownloadConversationButtonProps = {
   conversationId: string;
   characterName?: string;
+  //  für den Namen des Sprachmodells
+  llmName: string;
   className?: React.ComponentProps<'button'>['className'];
   iconClassName?: string;
   disabled: boolean;
 };
 
+//llmName  hinzugefügt
 export default function DownloadConversationButton({
   conversationId,
   characterName,
+  llmName,
   disabled = true,
 }: DownloadConversationButtonProps) {
   const [isLoading, setIsLoading] = React.useState(false);
