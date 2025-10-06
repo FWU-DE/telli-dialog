@@ -60,4 +60,4 @@ ENV NODE_ENV=production
 EXPOSE ${PORT}
 
 # https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
-CMD node ./apps/admin/server.js
+CMD ["node", "./apps/admin/server.js"]

@@ -65,7 +65,7 @@ ENV PORT=${PORT}
 ENV NODE_ENV=production
 EXPOSE ${PORT}
 
-CMD node ./apps/dialog/server.js
+CMD ["node", "./apps/dialog/server.js"]
 
 
 ## RUN rm -rf ./**/*/src
