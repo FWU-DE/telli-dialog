@@ -38,9 +38,6 @@ RUN pnpm install --frozen-lockfile
 COPY --from=pruner /app/out/full/ .
 
 RUN turbo build:envless
-# RUN --mount=type=cache,id=pnpm,target=~/.pnpm-store pnpm prune --prod --no-optional
-RUN pnpm prune --prod --no-optional
-
 
 # Final image
 FROM base AS runner
@@ -53,6 +50,7 @@ WORKDIR /app
 # copy nextjs application 
 COPY --from=builder --chown=nodejs:nodejs /app/apps/admin/.next/standalone ./
 COPY --from=builder --chown=nodejs:nodejs /app/apps/admin/.next/static ./apps/admin/.next/static
+COPY --from=builder --chown=nodejs:nodejs /app/apps/admin/public ./apps/admin/public
 
 ARG PORT=3000
 ENV PORT=${PORT}
