@@ -31,7 +31,7 @@ export async function webScraperExecutable(
   const t = await getTranslations({ namespace: 'websearch' });
   let response: Response;
   try {
-    const isPage = await isWebPage(url);
+    const isPage = await isWebPage(url, options.timeout);
     if (!isPage) {
       console.warn(`URL is not a webpage: ${url}`);
       return {
@@ -152,10 +152,20 @@ function extractArticleContent(html: string, url: string): string {
 /**
  * The function sends a HEAD request to the URL and checks the Content-Type header.
  * @param url the URL to check
+ * @param timeout the timeout for fetch request
  * @returns true if the content-type is text/html, false otherwise
  */
-export async function isWebPage(url: string) {
-  const response = await fetch(url, { method: 'HEAD' });
+export async function isWebPage(url: string, timeout?: number) {
+  // Set up a timeout for the fetch request
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  const response = await fetch(url, {
+    headers,
+    method: 'HEAD',
+    signal: controller.signal,
+  });
+  clearTimeout(timeoutId);
+
   const contentType = response.headers.get('content-type');
 
   // Basic heuristic
