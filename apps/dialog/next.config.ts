@@ -57,11 +57,19 @@ export default withSentryConfig(baseNextConfigWithNextIntl, {
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options
 
-  org: 'sentry',
-  project: 'telli-chatbot',
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
   sentryUrl: 'https://sentry.logging.eu-de.prod.telli.schule',
   authToken: process.env.SENTRY_AUTH_TOKEN,
   debug: true,
+
+  release: {
+    setCommits: {
+      auto: true,
+      ignoreEmpty: true,
+      ignoreMissing: true,
+    },
+  },
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
