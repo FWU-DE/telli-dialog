@@ -3,7 +3,7 @@ import Image from 'next/image';
 import TelliLogo from '@/components/icons/logo';
 
 export default async function Logo({ federalStateId }: { federalStateId: string | undefined }) {
-  const logoPath = await getMaybeLogoFromS3(federalStateId, 'logo.jpg');
+  const logoPath = await getMaybeLogoFromS3(federalStateId, 'logo.svg');
   const logoElement = logoPath ? (
     <Image src={logoPath} alt="logo" width={150} height={150} />
   ) : (
