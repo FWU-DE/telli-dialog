@@ -4,7 +4,6 @@
   "globalEnv": [
     "NODE_ENV",
     "DATABASE_URL",
-    "BAVARIA_API_KEY",
     "OTC_BUCKET_NAME",
     "OTC_SECRET_ACCESS_KEY",
     "OTC_ACCESS_KEY_ID",
