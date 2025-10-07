@@ -11,6 +11,9 @@ FROM alpine AS base
 RUN npm install pnpm turbo --global
 RUN pnpm config set store-dir ~/.pnpm-store
 
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV TURBO_TELEMETRY_DISABLED=1
+
 # Prune projects
 FROM base AS pruner
 WORKDIR /app
@@ -35,9 +38,6 @@ RUN pnpm install --frozen-lockfile
 COPY --from=pruner /app/out/full/ .
 
 RUN turbo build:envless
-# RUN --mount=type=cache,id=pnpm,target=~/.pnpm-store pnpm prune --prod --no-optional
-RUN pnpm prune --prod --no-optional
-
 
 # Final image
 FROM base AS runner
@@ -50,13 +50,12 @@ WORKDIR /app
 # copy nextjs application 
 COPY --from=builder --chown=nodejs:nodejs /app/apps/admin/.next/standalone ./
 COPY --from=builder --chown=nodejs:nodejs /app/apps/admin/.next/static ./apps/admin/.next/static
+COPY --from=builder --chown=nodejs:nodejs /app/apps/admin/public ./apps/admin/public
 
 ARG PORT=3000
 ENV PORT=${PORT}
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV TURBO_TELEMETRY_DISABLED=1
 EXPOSE ${PORT}
 
 # https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
-CMD node ./apps/admin/server.js
+CMD ["node", "./apps/admin/server.js"]
