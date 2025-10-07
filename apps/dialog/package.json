@@ -18,6 +18,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:generate": "dotenvx run -f .env.local -- drizzle-kit generate --config=./drizzle.config.ts",
+    "db:drop": "dotenvx run -f .env.local -- drizzle-kit drop --config=./drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config=./drizzle.config.ts",
     "db:migrate:local": "dotenvx run -f .env.local -- drizzle-kit migrate --config=./drizzle.config.ts",
     "db:seed": "tsx src/db/seed/index.ts",
