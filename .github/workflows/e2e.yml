@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Load 1Password Secrets
         uses: 1password/load-secrets-action@v3
@@ -74,7 +74,7 @@ jobs:
         run: |
           until pg_isready -h localhost -p 5432 -U postgres; do
             echo "$(date) - waiting for database to start"
-            sleep 2
+            sleep 1
           done
 
       - name: Run migrations and seed database (if applicable)
@@ -95,5 +95,5 @@ jobs:
         if: always()
         with:
           name: playwright-report
-          path: apps/dialog/test-results
+          path: apps/dialog/playwright-report
           retention-days: 30
