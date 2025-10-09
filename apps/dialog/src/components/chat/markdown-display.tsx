@@ -48,13 +48,28 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
         },
         // @ts-expect-error plugin errors
         inlineMath({ value }) {
-          return (
-            <span
-              dangerouslySetInnerHTML={{
-                __html: katex.renderToString(value, { displayMode: false }),
-              }}
-            />
-          );
+          const spanRef = React.useRef<HTMLSpanElement>(null);
+          
+          React.useEffect(() => {
+            if (spanRef.current) {
+              // Clear the span first
+              spanRef.current.innerHTML = '';
+              // Use KaTeX's render method for safe DOM rendering
+              try {
+                katex.render(value, spanRef.current, { 
+                  displayMode: false,
+                  throwOnError: false, // Prevent XSS through error messages
+                  strict: false,
+                  trust: false // Disable potentially dangerous LaTeX commands
+                });
+              } catch (error) {
+                // Safely display error message
+                spanRef.current.textContent = `Error rendering math: ${value}`;
+              }
+            }
+          }, [value]);
+          
+          return <span ref={spanRef} />;
         },
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         hr({ ...props }) {

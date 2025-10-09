@@ -49,9 +49,13 @@ export function ChatBox({
   const urls = parseHyperlinks(children.content) ?? [];
   const websearchSources = [...(initialWebsources ?? [])];
 
+  // Create a Set for O(1) lookup of existing URLs
+  const existingUrls = new Set(websearchSources.map(source => source.link));
+  
   for (const url of urls) {
-    if (websearchSources.find((source) => source.link === url) === undefined) {
+    if (!existingUrls.has(url)) {
       websearchSources.push({ link: url, type: 'websearch' });
+      existingUrls.add(url); // Keep the Set updated
     }
   }
 

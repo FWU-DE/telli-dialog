@@ -16,8 +16,41 @@ const baseNextConfig: NextConfig = {
   // if you want to host it on vercel, remove this option
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/output#automatically-copying-traced-files
   output: 'standalone',
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://sentry.logging.eu-de.prod.telli.schule; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://sentry.logging.eu-de.prod.telli.schule https://telli-development.obs.eu-nl.otc.t-systems.com https://telli-staging.obs.eu-nl.otc.t-systems.com https://telli-production.obs.eu-nl.otc.t-systems.com; frame-ancestors 'none';",
+          },
+        ],
+      },
+    ];
+  },
   images: {
-    dangerouslyAllowSVG: true,
+    dangerouslyAllowSVG: false, // Changed from true to false for security
     remotePatterns: [
       {
         protocol: 'https',

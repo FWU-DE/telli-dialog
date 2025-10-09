@@ -40,14 +40,18 @@ export async function dbDeleteConversationByIdAndUserId({
         .where(eq(ConversationMessageFileMappingTable.conversationId, conversationId))
     ).map((f) => f.fileId);
 
-    for (const fileId of filesToDelete) {
-      await deleteFileFromS3({ key: fileId });
+    // Parallelize S3 deletion operations for better performance
+    if (filesToDelete.length > 0) {
+      await Promise.all(
+        filesToDelete.map(fileId => deleteFileFromS3({ key: fileId }))
+      );
+      
+      await tx
+        .delete(ConversationMessageFileMappingTable)
+        .where(inArray(ConversationMessageFileMappingTable.fileId, filesToDelete));
+      await tx.delete(TextChunkTable).where(inArray(TextChunkTable.fileId, filesToDelete));
+      await tx.delete(fileTable).where(inArray(fileTable.id, filesToDelete));
     }
-    await tx
-      .delete(ConversationMessageFileMappingTable)
-      .where(inArray(ConversationMessageFileMappingTable.fileId, filesToDelete));
-    await tx.delete(TextChunkTable).where(inArray(TextChunkTable.fileId, filesToDelete));
-    await tx.delete(fileTable).where(inArray(fileTable.id, filesToDelete));
 
     return deletedConversation;
   });

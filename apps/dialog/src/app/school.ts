@@ -52,8 +52,11 @@ export async function getPriceInCentByUser(user: Omit<UserAndContext, 'subscript
 
   let currentPrice = 0;
 
+  // Create a Map for O(1) model lookup instead of O(n) with .find()
+  const modelMap = new Map(models.map(model => [model.id, model]));
+
   for (const modelUsage of usagePerModel) {
-    const model = models.find((model) => model.id === modelUsage.modelId);
+    const model = modelMap.get(modelUsage.modelId);
     if (model === undefined) {
       console.error(`Could not find model with id ${modelUsage.modelId}`);
       continue;
@@ -88,8 +91,11 @@ export async function getPriceInCentBySharedChat({
 
   let currentPrice = 0;
 
+  // Create a Map for O(1) model lookup instead of O(n) with .find()
+  const modelMap = new Map(models.map(model => [model.id, model]));
+
   for (const modelUsage of sharedChatUsagePerModel) {
-    const model = models.find((model) => model.id === modelUsage.modelId);
+    const model = modelMap.get(modelUsage.modelId);
     if (model === undefined) {
       console.error(`Could not find model with id ${modelUsage.modelId}`);
       continue;
@@ -124,8 +130,11 @@ export async function getPriceInCentBySharedCharacterChat({
 
   let currentPrice = 0;
 
+  // Create a Map for O(1) model lookup instead of O(n) with .find()
+  const modelMap = new Map(models.map(model => [model.id, model]));
+
   for (const modelUsage of characterUsagePerModel) {
-    const model = models.find((model) => model.id === modelUsage.modelId);
+    const model = modelMap.get(modelUsage.modelId);
     if (model === undefined) {
       console.error(`Could not find model with id ${modelUsage.modelId}`);
       continue;

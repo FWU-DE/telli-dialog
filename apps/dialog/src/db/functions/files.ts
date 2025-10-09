@@ -22,11 +22,18 @@ export async function link_file_to_conversation({
   conversationId: string;
   fileIds: string[];
 }) {
-  for (const fileId of fileIds) {
-    await db
-      .insert(ConversationMessageFileMappingTable)
-      .values({ conversationMessageId, fileId, conversationId });
-  }
+  // Use bulk insert for better performance
+  if (fileIds.length === 0) return;
+  
+  const mappings = fileIds.map(fileId => ({
+    conversationMessageId,
+    fileId,
+    conversationId
+  }));
+  
+  await db
+    .insert(ConversationMessageFileMappingTable)
+    .values(mappings);
 }
 
 export async function dbGetRelatedFiles(conversationId: string): Promise<Map<string, FileModel[]>> {

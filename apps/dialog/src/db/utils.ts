@@ -1,5 +1,6 @@
 import { env } from '@/env';
 import { errorifyFn } from '@/utils/error';
+import { createHash, timingSafeEqual } from 'crypto';
 
 export const validateApiKeyByHeadersWithResult = errorifyFn(validateApiKeyByHeaders);
 export function validateApiKeyByHeaders(headers: Headers) {
@@ -11,7 +12,13 @@ export function validateApiKeyByHeaders(headers: Headers) {
 
   const bareApiKey = authorization.substring('Bearer '.length);
 
-  if (bareApiKey !== env.apiKey) {
+  // Use timing-safe comparison to prevent timing attacks
+  const providedKeyHash = createHash('sha256').update(bareApiKey).digest();
+  const expectedKeyHash = createHash('sha256').update(env.apiKey).digest();
+  
+  const isValid = timingSafeEqual(providedKeyHash, expectedKeyHash);
+
+  if (!isValid) {
     throw Error('Wrong api key');
   }
 
