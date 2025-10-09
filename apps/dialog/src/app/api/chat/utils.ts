@@ -88,59 +88,32 @@ export function limitChatHistory({
   limitRecent = limitRecent * 2 + 1;
   limitFirst = limitFirst * 2 - 1;
 
-  // If we have fewer messages than the limits, just return all messages
-  if (consolidatedMessages.length <= limitFirst + limitRecent) {
+  // If we have fewer messages or less characters than the limits, just return all messages
+  if (consolidatedMessages.length <= limitFirst + limitRecent || consolidatedMessages.reduce((totalContentlength, { content }) => totalContentlength + content.length, 0) <= characterLimit) {
     return consolidatedMessages;
   }
 
   // Initialize arrays for front and back messages
-  const frontMessages: Message[] = [];
+  const frontMessages: Message[] = consolidatedMessages.slice(0,limitFirst);
   const backMessages: Message[] = [];
+
   let runningTotal = 0;
-
-  // Track which messages are included and which are omitted
-  const includedIndices = new Set<number>();
-  const omittedIndices = new Set<number>();
-
-  let backIndex = consolidatedMessages.length - 1;
-  let frontIndex = 0;
   let manadatoryMessagesIncluded = false;
-  // Add messages from the front
 
-  while (backMessages.length + frontMessages.length < consolidatedMessages.length) {
-    const frontMessage = consolidatedMessages[frontIndex];
+  for (let backIndex = consolidatedMessages.length - 1; backMessages.length + frontMessages.length < consolidatedMessages.length; backIndex--) {
     const backMessage = consolidatedMessages[backIndex];
-
-    if (frontMessage === undefined) continue;
-
-    runningTotal += frontMessage.content.length;
-
-    if (frontIndex <= limitFirst) {
-      frontMessages.push(frontMessage);
-      includedIndices.add(frontIndex);
-    }
 
     if (backMessage === undefined) continue;
 
     runningTotal += backMessage.content.length;
     backMessages.unshift(backMessage);
-    includedIndices.add(backIndex);
 
-    manadatoryMessagesIncluded =
-      frontIndex >= limitFirst && backIndex <= consolidatedMessages.length - limitRecent;
+    manadatoryMessagesIncluded = backIndex <= consolidatedMessages.length - limitRecent;
     if (manadatoryMessagesIncluded && runningTotal > characterLimit) {
       break;
     }
-    backIndex--;
-    frontIndex++;
   }
 
-  // Mark all messages not in includedIndices as omitted this is left in for debugging purposes
-  for (let i = 0; i < consolidatedMessages.length; i++) {
-    if (!includedIndices.has(i)) {
-      omittedIndices.add(i);
-    }
-  }
   // Combine front and back messages
   return [...frontMessages, ...backMessages];
 }

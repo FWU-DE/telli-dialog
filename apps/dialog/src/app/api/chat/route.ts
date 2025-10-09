@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
     : TOTAL_CHAT_LENGTH_LIMIT;
   const prunedMessages = limitChatHistory({
     messages,
-    limitRecent: 10,
+    limitRecent: 30,
     limitFirst: 2,
     characterLimit: maxCharacterLimit,
   });
