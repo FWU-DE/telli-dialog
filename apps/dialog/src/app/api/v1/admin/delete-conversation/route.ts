@@ -28,5 +28,8 @@ export async function DELETE(req: NextRequest) {
     danglingConversationFiles,
     danglingFiles,
   };
+
+  console.info('Deleted old conversations:', response);
+
   return NextResponse.json(response, { status: 200 });
 }
