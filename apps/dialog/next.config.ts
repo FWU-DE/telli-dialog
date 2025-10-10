@@ -38,6 +38,9 @@ const baseNextConfig: NextConfig = {
   },
   productionBrowserSourceMaps: process.env.NODE_ENV !== 'test',
   allowedDevOrigins: ['titanom.ngrok.app'],
+  experimental: {
+    useCache: true,
+  },
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   webpack: (config, { isServer }) => {
     // Ensure proper module resolution for path aliases
