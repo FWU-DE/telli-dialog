@@ -5,7 +5,7 @@
 
 import { db } from '../index';
 
-import { eq, isNull, or } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { calculateCostsInCents } from '@/app/api/utils';
 import {
   conversationUsageTracking,
@@ -23,10 +23,7 @@ async function updateConversationUsageCosts(
   console.log('Starting usage cost updates');
 
   // Get all records without costs calculated
-  const usages = await db
-    .select()
-    .from(table)
-    .where(or(eq(table.costsInCent, 0), isNull(table.costsInCent)));
+  const usages = await db.select().from(table).where(eq(table.costsInCent, 0));
 
   console.log(`Found ${usages.length} usage records to update`);
 
