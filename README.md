@@ -118,8 +118,9 @@ Custom designs and titles for federal states:
   This value is configured in the SQL column federal_state/telli_name.
 
 - **logos**:  
-  The logo is stored in the OTC S3 Bucket at a fixed path:  
-  `/whitelabels/<Federal-State-ID>/logo.jpg`
+  The logo and favicon are stored in the OTC S3 Bucket at a fixed path:  
+  `/whitelabels/<Federal-State-ID>/logo.svg`
+  `/whitelabels/<Federal-State-ID>/favicon.svg`
 
 - **design configuration**:  
   Custom color palette for buttons, icons, etc. (see Figma designs).  

@@ -10,6 +10,7 @@ import {
   boolean,
   vector,
   customType,
+  doublePrecision,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
 import { DesignConfiguration, type LlmModelPriceMetadata } from './types';
@@ -262,6 +263,7 @@ export const sharedSchoolConversationUsageTracking = pgTable(
     userId: uuid('user_id').notNull(),
     completionTokens: integer('completion_tokens').notNull(),
     promptTokens: integer('prompt_tokens').notNull(),
+    costsInCent: doublePrecision('costs_in_cent').notNull().default(0),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
 );
@@ -282,6 +284,7 @@ export const conversationUsageTracking = pgTable('conversation_usage_tracking', 
   userId: uuid('user_id').notNull(),
   completionTokens: integer('completion_tokens').notNull(),
   promptTokens: integer('prompt_tokens').notNull(),
+  costsInCent: doublePrecision('costs_in_cent').notNull().default(0),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
 });
 export type ConversationUsageTrackingInsertModel = typeof conversationUsageTracking.$inferInsert;
@@ -319,6 +322,7 @@ export const sharedCharacterChatUsageTrackingTable = pgTable(
     userId: uuid('user_id').notNull(),
     completionTokens: integer('completion_tokens').notNull(),
     promptTokens: integer('prompt_tokens').notNull(),
+    costsInCent: doublePrecision('costs_in_cent').notNull().default(0),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
 );
