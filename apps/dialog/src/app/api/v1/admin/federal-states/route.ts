@@ -45,16 +45,6 @@ const federalStateCreateSchema = createInsertSchema(federalStateTable)
     decryptedApiKey: z.string().nullable(),
   });
 
-const federalStateUpdateSchema = createUpdateSchema(federalStateTable)
-  .omit({
-    encryptedApiKey: true,
-    createdAt: true,
-  })
-  .extend({
-    decryptedApiKey: z.string().nullable().optional(),
-    id: z.string(),
-  });
-
 /**
  * Creates a new federal state record.
  * @param request
@@ -91,42 +81,6 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json(inserted, { status: 201 });
-}
-/**
- * Updates an existing federal state record.
- * @param request
- * @returns 200 on success, 403 on forbidden, 404 if not found, 500 on error
- */
-export async function PUT(request: NextRequest) {
-  const [error] = validateApiKeyByHeadersWithResult(request.headers);
-  if (error !== null) {
-    return NextResponse.json({ error: error.message }, { status: 403 });
-  }
-
-  const body = await request.json();
-  const federalStateToUpdate = federalStateUpdateSchema.parse(body);
-
-  const encryptedApiKey =
-    federalStateToUpdate.decryptedApiKey != null
-      ? encrypt({
-          text: federalStateToUpdate.decryptedApiKey,
-          plainEncryptionKey: env.encryptionKey,
-        })
-      : null;
-  const existingFederalState = await dbGetFederalStateById(federalStateToUpdate.id);
-  if (existingFederalState === undefined) {
-    return NextResponse.json(
-      { error: `Federal state with id ${federalStateToUpdate.id} does not exist` },
-      { status: 404 },
-    );
-  }
-  const updated = await dbUpdateFederalState({ ...federalStateToUpdate, encryptedApiKey });
-
-  if (updated === undefined) {
-    return NextResponse.json({ error: 'Could not update federal state' }, { status: 500 });
-  }
-
-  return NextResponse.json(updated, { status: 200 });
 }
 
 export async function DELETE(request: NextRequest) {
