@@ -68,7 +68,7 @@ export default async function Page(context: PageContext) {
 
     try {
       const websearchSources = await Promise.all(webSearchPromises ?? []);
-      if (websearchSources == undefined || websearchSources.length === 0) {
+      if (websearchSources === undefined || websearchSources.length === 0) {
         continue;
       }
       webSourceMapping.set(

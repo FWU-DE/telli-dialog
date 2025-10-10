@@ -60,7 +60,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     );
   }
   const encryptedApiKey =
-    (federalStateToUpdate.decryptedApiKey !== undefined && federalStateToUpdate.decryptedApiKey !== null)
+    federalStateToUpdate.decryptedApiKey !== undefined &&
+    federalStateToUpdate.decryptedApiKey !== null
       ? encrypt({
           text: federalStateToUpdate.decryptedApiKey,
           plainEncryptionKey: env.encryptionKey,
