@@ -1,6 +1,6 @@
 'use client';
 import { useChat } from '@ai-sdk/react';
-import React from 'react';
+import { FormEvent, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { CharacterModel } from '@/db/schema';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
@@ -48,16 +48,16 @@ export default function CharacterSharedChat({
       onError: handleError,
     });
 
-  const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   const { isBelow } = useBreakpoints();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     }
   }, [messages, id, inviteCode]);
 
-  async function customHandleSubmit(e: React.FormEvent) {
+  async function customHandleSubmit(e: FormEvent) {
     e.preventDefault();
 
     try {
@@ -74,7 +74,7 @@ export default function CharacterSharedChat({
   function handleReload() {
     // Clear rate limit error before reloading
     resetError();
-    reload();
+    void reload();
   }
 
   const assistantIcon = getAssistantIcon({
