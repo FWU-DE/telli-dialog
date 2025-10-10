@@ -9,6 +9,7 @@ import { UserAndContext } from './types';
 declare module 'next-auth' {
   interface Session {
     user?: UserAndContext;
+    hasCompletedTraining?: boolean;
   }
 }
 
@@ -58,6 +59,7 @@ const result = NextAuth({
           ...session.user,
           ...(token.user as UserAndContext),
         };
+        session.hasCompletedTraining = (token.hasCompletedTraining as boolean) ?? false;
       }
 
       return session;

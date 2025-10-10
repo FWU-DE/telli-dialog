@@ -1,6 +1,9 @@
 import { UserAndContext } from '@/auth/types';
 import React from 'react';
-import { getFederalStateNameById } from './const';
+import { FederalStateId, getFederalStateNameById } from './const';
+import { missingTrainingDisclaimers } from '@/components/modals/const';
+import MarkdownDisplay from '@/components/chat/markdown-display';
+import { userHasCompletedTraining } from '@/auth/utils';
 
 type AccessResult =
   | {
@@ -35,7 +38,15 @@ export function checkProductAccess({ federalState, school }: UserAndContext): Ac
 
   const trainingRequired = federalState.mandatoryCertificationTeacher === true;
 
-  if (trainingRequired) {
+  if (trainingRequired && !userHasCompletedTraining()) {
+    const disclaimer = missingTrainingDisclaimers[federalState.id as FederalStateId];
+    if (disclaimer) {
+      return {
+        hasAccess: false,
+        errorMessage: <MarkdownDisplay>{String(disclaimer)}</MarkdownDisplay>,
+        errorType: 'TRAINING_NEEDED',
+      };
+    }
     return {
       hasAccess: false,
       errorMessage: (
