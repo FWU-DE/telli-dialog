@@ -47,7 +47,7 @@ export function AttachedLinks({
     }
 
     const linkExists = currentValues.find((item: WebsearchSource) => item.link === content);
-    if (linkExists != undefined) {
+    if (linkExists !== undefined) {
       toast.error(tToast('duplicate-url'));
       setCurrentAttachedLink('');
       return;

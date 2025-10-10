@@ -35,7 +35,7 @@ export async function extractImagesAndUrl(
   });
 
   const images = await Promise.all(imagePromises);
-  return images.filter((img) => img != null) as ImageAttachment[];
+  return images.filter((img) => img !== null) as ImageAttachment[];
 }
 
 export async function preprocessImage(
