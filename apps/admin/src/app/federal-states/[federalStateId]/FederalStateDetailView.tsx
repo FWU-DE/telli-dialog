@@ -48,9 +48,13 @@ export function FederalStateView(props: FederalStateViewProps) {
       return;
     }
     try {
+      // trainingLink, designConfiguration, telliName can be null, but the form returns '' when empty
       await updateFederalState({
         ...data,
         supportContacts: data.supportContacts.map((s) => s.value),
+        trainingLink: data.trainingLink === '' ? null : data.trainingLink,
+        designConfiguration: data.designConfiguration === '' ? null : data.designConfiguration,
+        telliName: data.telliName === '' ? null : data.telliName,
       });
       alert('Bundesland erfolgreich aktualisiert');
     } catch (error) {
