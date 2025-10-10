@@ -111,7 +111,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.2.0",
-    "@playwright/test": "1.55.1",
+    "@playwright/test": "1.56.0",
     "@telli/typescript-config": "workspace:*",
     "@types/bcrypt": "5.0.2",
     "@types/he": "1.2.0",
@@ -133,6 +133,7 @@
     "express": "4.21.2",
     "jose": "6.0.6",
     "oidc-provider": "8.8.0",
+    "playwright-core": "1.56.0",
     "prettier": "3.4.2",
     "prettier-eslint": "16.4.2",
     "typescript": "5.7.2",
