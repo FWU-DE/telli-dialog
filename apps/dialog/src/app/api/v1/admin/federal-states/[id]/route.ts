@@ -43,7 +43,7 @@ const federalStateUpdateSchema = createInsertSchema(federalStateTable)
  */
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const [error] = validateApiKeyByHeadersWithResult(request.headers);
-  if (error !== null) {
+  if (error) {
     return NextResponse.json({ error: error.message }, { status: 403 });
   }
 
@@ -60,7 +60,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     );
   }
   const encryptedApiKey =
-    federalStateToUpdate.decryptedApiKey != null
+    (federalStateToUpdate.decryptedApiKey !== undefined && federalStateToUpdate.decryptedApiKey !== null)
       ? encrypt({
           text: federalStateToUpdate.decryptedApiKey,
           plainEncryptionKey: env.encryptionKey,
