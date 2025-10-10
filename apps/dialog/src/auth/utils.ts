@@ -40,6 +40,11 @@ export async function getUser(): Promise<UserAndContext> {
   return session.user;
 }
 
+export async function userHasCompletedTraining(): Promise<boolean> {
+  const session = await getMaybeSession();
+  return session?.hasCompletedTraining ?? false;
+}
+
 export async function updateSession(
   data?: Partial<
     | Session

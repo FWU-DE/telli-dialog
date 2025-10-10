@@ -164,6 +164,15 @@ export const federalStateDisclaimers: Partial<Record<FederalStateId, DisclaimerC
   },
 };
 
+export const missingTrainingDisclaimers: Partial<Record<FederalStateId, String>> = {
+  'DE-SL': 
+    `Sie haben die Grundlagenschulung zum Einsatz von KI im Unterricht noch nicht abgeschlossen.
+
+Bearbeiten Sie bitte den Online-Selbstlernkurs des Bildungscampus Saarland unter <https://lms-bildungscampus-fw.online-schule.saarland/course/view.php?id=1983> (Einschreibeschlüssel: BCS_KI).
+
+Die Freischaltung des KI-Tools erfolgt automatisiert.`,
+};
+
 if (!Number.isInteger(VERSION)) {
   throw Error(`Version must be set to an Integer, Value: ${VERSION}`);
 }
