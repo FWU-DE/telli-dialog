@@ -1,8 +1,5 @@
 import { encrypt } from '@/db/crypto';
-import {
-  dbUpdateFederalState,
-  dbGetFederalStateById,
-} from '@/db/functions/federal-state';
+import { dbUpdateFederalState, dbGetFederalStateById } from '@/db/functions/federal-state';
 import { federalStateTable } from '@/db/schema';
 import { validateApiKeyByHeadersWithResult } from '@/db/utils';
 import { env } from '@/env';
@@ -53,7 +50,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   const body = await request.json();
   const federalStateToUpdate = federalStateUpdateSchema.parse(body);
 
-  
   const { id } = await params;
 
   const existingFederalState = await dbGetFederalStateById(id);
@@ -69,8 +65,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           text: federalStateToUpdate.decryptedApiKey,
           plainEncryptionKey: env.encryptionKey,
         })
-      : existingFederalState.encryptedApiKey // keep existing if not provided;
-  const updated = await dbUpdateFederalState({ ...federalStateToUpdate, id, encryptedApiKey});
+      : existingFederalState.encryptedApiKey; // keep existing if not provided;
+  const updated = await dbUpdateFederalState({ ...federalStateToUpdate, id, encryptedApiKey });
 
   if (updated === undefined) {
     return NextResponse.json({ error: 'Could not update federal state' }, { status: 500 });

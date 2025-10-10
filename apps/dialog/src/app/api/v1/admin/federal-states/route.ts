@@ -1,7 +1,6 @@
 import { decryptMaybeValue, encrypt } from '@/db/crypto';
 import {
   dbGetAllFederalStates,
-  dbUpdateFederalState,
   dbInsertFederalState,
   dbGetFederalStateById,
   dbDeleteFederalState,
@@ -11,7 +10,7 @@ import { validateApiKeyByHeadersWithResult } from '@/db/utils';
 import { env } from '@/env';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
+import { createInsertSchema } from 'drizzle-zod';
 
 export async function GET(req: NextRequest) {
   const [error] = validateApiKeyByHeadersWithResult(req.headers);

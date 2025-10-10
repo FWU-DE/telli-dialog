@@ -45,7 +45,8 @@ export async function fetchFederalStateById(federalStateId: string) {
 
 export async function updateFederalState(federalState: FederalState) {
   const response = await fetch(
-    env.BASE_URL_TELLI_DIALOG + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE.replace('{id}', federalState.id),
+    env.BASE_URL_TELLI_DIALOG +
+      apiRoutes.FEDERAL_STATE_BY_ID_ROUTE.replace('{id}', federalState.id),
     {
       method: 'PUT',
       headers: {
