@@ -59,7 +59,8 @@ export async function POST(request: NextRequest) {
   const federalStateToCreate = federalStateCreateSchema.parse(body);
 
   const encryptedApiKey =
-    federalStateToCreate.decryptedApiKey != null
+    federalStateToCreate.decryptedApiKey !== null &&
+    federalStateToCreate.decryptedApiKey !== undefined
       ? encrypt({
           text: federalStateToCreate.decryptedApiKey,
           plainEncryptionKey: env.encryptionKey,

@@ -36,7 +36,7 @@ const eslintConfig = [
           message: "Please import UIMessage directly from '@ai' instead.",
         },
       ],
-      eqeqeq: ['error', 'always', { null: 'ignore' }],
+      eqeqeq: ['error', 'always'],
     },
   }),
 ];
