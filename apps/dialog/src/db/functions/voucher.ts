@@ -12,7 +12,7 @@ export async function dbGetCreditIncreaseForCurrentMonth(userId: string) {
     .from(VoucherTable)
     .where(
       and(
-        eq(VoucherTable.status, 'created'),
+        eq(VoucherTable.status, 'redeemed'),
         eq(VoucherTable.redeemedBy, userId),
         gt(
           sql`date_trunc('month', redeemed_at) + make_interval(months:=duration_months)`,
