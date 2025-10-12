@@ -6,7 +6,7 @@ import { HEADER_PORTAL_ID } from './header-portal';
 import { contentHeight } from '@/utils/tailwind/height';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@/db/functions/llm-model';
-import { getPriceInCentByUser, getPriceLimitByUser } from '@/app/school';
+import { getPriceInCentByUser, getPriceLimitInCentByUser } from '@/app/school';
 import AutoLogout from '@/components/auth/auto-logout';
 import { checkProductAccess } from '@/utils/vidis/access';
 import ProductAccessModal from '@/components/modals/product-access';
@@ -24,7 +24,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
   const models = await dbGetLlmModelsByFederalStateId({ federalStateId: user.federalState.id });
 
   const priceInCent = await getPriceInCentByUser(user);
-  const userPriceLimit = await getPriceLimitByUser(user);
+  const userPriceLimit = await getPriceLimitInCentByUser(user);
   const productAccess = checkProductAccess(user);
   const federalStateDisclaimer =
     federalStateDisclaimers[user.school.federalStateId as FederalStateId];

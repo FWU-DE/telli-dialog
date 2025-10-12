@@ -1,17 +1,14 @@
 import {
-  dbGetModelUsageBySharedCharacterChatId,
-  dbGetModelUsageBySharedChatId,
-  dbGetModelUsageOfCharacterSharedChatsByUserId,
-  dbGetModelUsageOfChatsByUserId,
-  dbGetModelUsageOfSharedChatsByUserId,
+  dbGetCharacterSharedChatsUsageInCentByUserId,
+  dbGetChatsUsageInCentByUserId,
+  dbGetSharedCharacterChatUsageInCentByCharacterId,
+  dbGetSharedChatsUsageInCentByUserId,
+  dbGetSharedChatUsageInCentBySharedChatId,
 } from '@/db/functions/intelli-points';
-import { LlmModel } from '@/db/schema';
 import { type UserAndContext } from '@/auth/types';
-import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
-import { dbGetAllLlmModels } from '@/db/functions/llm-model';
 import { dbGetCreditIncreaseForCurrentMonth } from '@/db/functions/voucher';
 
-export async function getPriceLimitByUser(user: UserAndContext) {
+export async function getPriceLimitInCentByUser(user: UserAndContext) {
   if (user.school === undefined || user.federalState === undefined) return null;
 
   const codeBonus = await dbGetCreditIncreaseForCurrentMonth(user.id);
@@ -29,48 +26,23 @@ export async function getPriceLimitByUser(user: UserAndContext) {
 
 export async function getPriceInCentByUser(user: Omit<UserAndContext, 'subscription'>) {
   if (user.school === undefined) return null;
-  // This has to include deleted models, because there might have been usage this month
-  const models = await dbGetAllLlmModels();
 
   // students cannot have shared chats
-  const sharedChatsUsagePerModel =
+  const sharedChatsUsageInCent =
     user.school.userRole !== 'student'
-      ? await dbGetModelUsageOfSharedChatsByUserId({ userId: user.id })
-      : [];
+      ? await dbGetSharedChatsUsageInCentByUserId({ userId: user.id })
+      : 0;
 
-  const characterSharedChatsUsagePerModel = await dbGetModelUsageOfCharacterSharedChatsByUserId({
+  const characterSharedChatsUsageInCent = await dbGetCharacterSharedChatsUsageInCentByUserId({
     userId: user.id,
   });
 
-  const chatUsagePerModel = await dbGetModelUsageOfChatsByUserId({ userId: user.id });
+  const chatUsageInCent = await dbGetChatsUsageInCentByUserId({ userId: user.id });
 
-  const usagePerModel = [
-    ...sharedChatsUsagePerModel,
-    ...chatUsagePerModel,
-    ...characterSharedChatsUsagePerModel,
-  ];
-
-  let currentPrice = 0;
-
-  for (const modelUsage of usagePerModel) {
-    const model = models.find((model) => model.id === modelUsage.modelId);
-    if (model === undefined) {
-      console.error(`Could not find model with id ${modelUsage.modelId}`);
-      continue;
-    }
-
-    // TODO: add image model here later
-    if (model.priceMetadata.type === 'text') {
-      currentPrice += calculatePriceByTextModelAndUsage({ ...modelUsage, model });
-    }
-  }
-
-  const priceInCent = currentPrice / PRICE_AND_CENT_MULTIPLIER;
-  return priceInCent;
+  return sharedChatsUsageInCent + characterSharedChatsUsageInCent + chatUsageInCent;
 }
 
 export async function getPriceInCentBySharedChat({
-  models,
   startedAt,
   maxUsageTimeLimit,
   sharedChatId,
@@ -78,35 +50,17 @@ export async function getPriceInCentBySharedChat({
   sharedChatId: string;
   startedAt: Date;
   maxUsageTimeLimit: number;
-  models: LlmModel[];
 }) {
-  const sharedChatUsagePerModel = await dbGetModelUsageBySharedChatId({
+  const sharedChatUsageInCent = await dbGetSharedChatUsageInCentBySharedChatId({
     sharedChatId,
     maxUsageTimeLimit,
     startedAt,
   });
 
-  let currentPrice = 0;
-
-  for (const modelUsage of sharedChatUsagePerModel) {
-    const model = models.find((model) => model.id === modelUsage.modelId);
-    if (model === undefined) {
-      console.error(`Could not find model with id ${modelUsage.modelId}`);
-      continue;
-    }
-
-    // TODO: add image model here later
-    if (model.priceMetadata.type === 'text') {
-      currentPrice += calculatePriceByTextModelAndUsage({ ...modelUsage, model });
-    }
-  }
-
-  const priceInCent = currentPrice / PRICE_AND_CENT_MULTIPLIER;
-  return priceInCent;
+  return sharedChatUsageInCent;
 }
 
 export async function getPriceInCentBySharedCharacterChat({
-  models,
   startedAt,
   maxUsageTimeLimit,
   characterId,
@@ -114,47 +68,12 @@ export async function getPriceInCentBySharedCharacterChat({
   characterId: string;
   startedAt: Date;
   maxUsageTimeLimit: number;
-  models: LlmModel[];
 }) {
-  const characterUsagePerModel = await dbGetModelUsageBySharedCharacterChatId({
+  const characterUsageInCent = await dbGetSharedCharacterChatUsageInCentByCharacterId({
     characterId,
     maxUsageTimeLimit,
     startedAt,
   });
 
-  let currentPrice = 0;
-
-  for (const modelUsage of characterUsagePerModel) {
-    const model = models.find((model) => model.id === modelUsage.modelId);
-    if (model === undefined) {
-      console.error(`Could not find model with id ${modelUsage.modelId}`);
-      continue;
-    }
-
-    // TODO: add image model here later
-    if (model.priceMetadata.type === 'text') {
-      currentPrice += calculatePriceByTextModelAndUsage({ ...modelUsage, model });
-    }
-  }
-
-  const priceInCent = currentPrice / PRICE_AND_CENT_MULTIPLIER;
-  return priceInCent;
-}
-
-function calculatePriceByTextModelAndUsage({
-  model,
-  completionTokens,
-  promptTokens,
-}: {
-  model: LlmModel;
-  completionTokens: number;
-  promptTokens: number;
-}) {
-  const priceMetadata = model.priceMetadata;
-  if (priceMetadata.type !== 'text') return 0;
-
-  const completionTokenPrice = completionTokens * priceMetadata.completionTokenPrice;
-  const promptTokenPrice = promptTokens * priceMetadata.promptTokenPrice;
-
-  return completionTokenPrice + promptTokenPrice;
+  return characterUsageInCent;
 }
