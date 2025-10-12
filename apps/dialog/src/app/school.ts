@@ -1,9 +1,7 @@
 import {
   dbGetCharacterSharedChatsUsageInCentByUserId,
   dbGetChatsUsageInCentByUserId,
-  dbGetSharedCharacterChatUsageInCentByCharacterId,
   dbGetSharedChatsUsageInCentByUserId,
-  dbGetSharedChatUsageInCentBySharedChatId,
 } from '@/db/functions/intelli-points';
 import { type UserAndContext } from '@/auth/types';
 import { dbGetCreditIncreaseForCurrentMonth } from '@/db/functions/voucher';
@@ -40,40 +38,4 @@ export async function getPriceInCentByUser(user: Omit<UserAndContext, 'subscript
   const chatUsageInCent = await dbGetChatsUsageInCentByUserId({ userId: user.id });
 
   return sharedChatsUsageInCent + characterSharedChatsUsageInCent + chatUsageInCent;
-}
-
-export async function getPriceInCentBySharedChat({
-  startedAt,
-  maxUsageTimeLimit,
-  sharedChatId,
-}: {
-  sharedChatId: string;
-  startedAt: Date;
-  maxUsageTimeLimit: number;
-}) {
-  const sharedChatUsageInCent = await dbGetSharedChatUsageInCentBySharedChatId({
-    sharedChatId,
-    maxUsageTimeLimit,
-    startedAt,
-  });
-
-  return sharedChatUsageInCent;
-}
-
-export async function getPriceInCentBySharedCharacterChat({
-  startedAt,
-  maxUsageTimeLimit,
-  characterId,
-}: {
-  characterId: string;
-  startedAt: Date;
-  maxUsageTimeLimit: number;
-}) {
-  const characterUsageInCent = await dbGetSharedCharacterChatUsageInCentByCharacterId({
-    characterId,
-    maxUsageTimeLimit,
-    startedAt,
-  });
-
-  return characterUsageInCent;
 }

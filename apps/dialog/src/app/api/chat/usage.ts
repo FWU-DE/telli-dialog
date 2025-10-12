@@ -1,15 +1,15 @@
 import { dbInsertConversationUsage } from '@/db/functions/token-usage';
-import {
-  getPriceInCentBySharedCharacterChat,
-  getPriceInCentBySharedChat,
-  getPriceLimitInCentByUser,
-} from '@/app/school';
+import { getPriceLimitInCentByUser } from '@/app/school';
 import { CharacterModel, type LlmModel, type SharedSchoolConversationModel } from '@/db/schema';
 import { type UserAndContext } from '@/auth/types';
 import { getPriceInCentByUser } from '@/app/school';
 import { type LanguageModelUsage } from 'ai';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import { parseNumberOrDefault } from '@/utils/number';
+import {
+  dbGetSharedCharacterChatUsageInCentByCharacterId,
+  dbGetSharedChatUsageInCentBySharedChatId,
+} from '@/db/functions/intelli-points';
 
 export async function trackChatUsage({
   usage,
@@ -55,16 +55,16 @@ export async function sharedChatHasReachedIntelliPointLimit({
     return true;
   }
 
-  const priceInCent = await getPriceInCentBySharedChat({
-    startedAt: sharedChat.startedAt,
-    maxUsageTimeLimit: sharedChat.maxUsageTimeLimit,
+  const sharedChatUsageInCent = await dbGetSharedChatUsageInCentBySharedChatId({
     sharedChatId: sharedChat.id,
+    maxUsageTimeLimit: sharedChat.maxUsageTimeLimit,
+    startedAt: sharedChat.startedAt,
   });
 
   if (
     user.school.userRole === 'teacher' &&
     sharedChat.intelligencePointsLimit !== null &&
-    priceInCent <
+    sharedChatUsageInCent <
       ((await getPriceLimitInCentByUser(user)) ?? 0 * sharedChat.intelligencePointsLimit) / 100
   ) {
     return false;
@@ -92,15 +92,16 @@ export async function sharedCharacterChatHasReachedIntelliPointLimit({
     return true;
   }
 
-  const priceInCent = await getPriceInCentBySharedCharacterChat({
-    startedAt: character.startedAt,
-    maxUsageTimeLimit: character.maxUsageTimeLimit,
+  const characterUsageInCent = await dbGetSharedCharacterChatUsageInCentByCharacterId({
     characterId: character.id,
+    maxUsageTimeLimit: character.maxUsageTimeLimit,
+    startedAt: character.startedAt,
   });
+
   if (
     user.school.userRole === 'teacher' &&
     character.intelligencePointsLimit !== null &&
-    priceInCent <
+    characterUsageInCent <
       ((await getPriceLimitInCentByUser(user)) ?? 0 * character.intelligencePointsLimit) / 100
   ) {
     return false;
