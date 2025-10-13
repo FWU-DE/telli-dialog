@@ -45,7 +45,7 @@ export function checkProductAccess({
     if (disclaimer) {
       return {
         hasAccess: false,
-        errorMessage: <MarkdownDisplay>{String(disclaimer)}</MarkdownDisplay>,
+        errorMessage: <MarkdownDisplay>{disclaimer}</MarkdownDisplay>,
         errorType: 'TRAINING_NEEDED',
       };
     }
