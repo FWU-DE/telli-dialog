@@ -37,6 +37,7 @@ const result = NextAuth({
         profile !== undefined
       ) {
         token = await handleVidisJWTCallback({ account, profile, token });
+        token.hasCompletedTraining = (profile.hasCompletedTraining as boolean) ?? false;
       }
       // Ensure userId is set for credentials provider
       if (account?.provider === 'credentials' && user?.id) {
