@@ -9,6 +9,7 @@ import { UserAndContext } from './types';
 declare module 'next-auth' {
   interface Session {
     user?: UserAndContext;
+    hasCompletedTraining?: boolean;
   }
 }
 
@@ -36,6 +37,7 @@ const result = NextAuth({
         profile !== undefined
       ) {
         token = await handleVidisJWTCallback({ account, profile, token });
+        token.hasCompletedTraining = (profile.hasCompletedTraining as boolean) ?? false;
       }
       // Ensure userId is set for credentials provider
       if (account?.provider === 'credentials' && user?.id) {
@@ -58,6 +60,7 @@ const result = NextAuth({
           ...session.user,
           ...(token.user as UserAndContext),
         };
+        session.hasCompletedTraining = (token.hasCompletedTraining as boolean) ?? false;
       }
 
       return session;

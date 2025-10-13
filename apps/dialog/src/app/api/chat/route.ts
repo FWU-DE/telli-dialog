@@ -6,7 +6,7 @@ import {
 } from '@/db/functions/chat';
 import { NextRequest, NextResponse } from 'next/server';
 import { dbInsertChatContent } from '@/db/functions/chat';
-import { getUser, updateSession } from '@/auth/utils';
+import { getUser, updateSession, userHasCompletedTraining } from '@/auth/utils';
 import { userHasReachedIntelliPointLimit, trackChatUsage } from './usage';
 import { getModelAndProviderWithResult, calculateCostsInCents, getAuxiliaryModel } from '../utils';
 import { generateUUID } from '@/utils/uuid';
@@ -32,9 +32,8 @@ import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
 import { dbGetCharacterByIdWithShareData } from '@/db/functions/character';
 
 export async function POST(request: NextRequest) {
-  const user = await getUser();
-
-  const productAccess = checkProductAccess(user);
+  const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);
+  const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
 
   if (!productAccess.hasAccess) {
     return NextResponse.json({ error: productAccess.errorType }, { status: 403 });
