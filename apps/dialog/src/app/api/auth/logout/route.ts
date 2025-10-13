@@ -5,8 +5,8 @@ import { redirect } from 'next/navigation';
 import { NextRequest, NextResponse } from 'next/server';
 
 const LOGIN_PAGE = new URL('/login', env.nextauthUrl);
-const LOGOUT_FINISHED_URL = new URL('/logout-finished', env.nextauthUrl);
-const VIDIS_LOGOUT_URL = new URL('/protocol/openid-connect/logout', env.vidisIssuerUri);
+const LOGOUT_FINISHED_URL = new URL('/api/auth/logout-finished', env.nextauthUrl);
+const VIDIS_LOGOUT_URL = new URL(env.vidisIssuerUri + '/protocol/openid-connect/logout');
 
 function handleEmptyToken() {
   logWarning('No valid token found, redirecting to login page');
