@@ -20,8 +20,12 @@ export function logWarning(message: string) {
   logMessage(message, 'warning');
 }
 
-export function logError(message: string, error: Error) {
-  Sentry.captureException({ exception: error });
+export function logError(message: string, error: unknown) {
+  if (error instanceof Error) {
+    Sentry.captureException({ exception: error, message });
+  } else {
+    Sentry.captureMessage(`${message}: ${JSON.stringify(error)}`, 'error');
+  }
 
   if (process.env.NODE_ENV === 'development') {
     console.log(message);
