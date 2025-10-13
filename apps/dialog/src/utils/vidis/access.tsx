@@ -20,8 +20,8 @@ type AccessResult =
 export function checkProductAccess({
   federalState,
   school,
-  hasCompletedTraining,
-}: UserAndContext & { hasCompletedTraining: boolean }): AccessResult {
+  hasCompletedTraining = true,
+}: UserAndContext & { hasCompletedTraining?: boolean }): AccessResult {
   const successResult: AccessResult = { hasAccess: true };
 
   if (school.userRole === 'student' && !federalState.studentAccess) {
