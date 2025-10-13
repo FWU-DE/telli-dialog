@@ -16,12 +16,13 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: 1,
-  reporter: [['html'], ['json'], ['github'], ['list']],
+  reporter: [['html', { outputFolder: './playwright-report' }], ['json'], ['github'], ['list']],
   timeout: 0.5 * 60 * 1000,
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'on',
+    video: 'retain-on-failure',
   },
   globalSetup: './e2e/global-setup.ts',
   /* Configure projects for major browsers */
@@ -31,6 +32,7 @@ export default defineConfig({
       testIgnore: /.*api.test.ts/,
       use: {
         ...devices['Desktop Chrome'],
+        permissions: ['clipboard-read', 'clipboard-write'],
       },
     },
     {
@@ -65,7 +67,7 @@ export default defineConfig({
     // },
   ],
   webServer: {
-    command: 'pnpm dev:local',
+    command: 'pnpm dev',
     timeout: 60000, // wait 60 seconds for web server at url to be available
     url: 'http://localhost:3000', // the server to be used for tests
     reuseExistingServer: true,

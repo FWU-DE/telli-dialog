@@ -1,12 +1,17 @@
 import { dbInsertConversationUsage } from '@/db/functions/token-usage';
 import { dbGetAllLlmModels } from '@/db/functions/llm-model';
-import { getPriceInCentBySharedCharacterChat, getPriceInCentBySharedChat } from '@/app/school';
+import {
+  getPriceInCentBySharedCharacterChat,
+  getPriceInCentBySharedChat,
+  getPriceLimitByUser,
+} from '@/app/school';
 import { CharacterModel, type LlmModel, type SharedSchoolConversationModel } from '@/db/schema';
 import { type UserAndContext } from '@/auth/types';
 import { getPriceInCentByUser } from '@/app/school';
 import { type LanguageModelUsage } from 'ai';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import { parseNumberOrDefault } from '@/utils/number';
+import { calculateCostsInCents } from '../utils';
 
 export async function trackChatUsage({
   usage,
@@ -27,6 +32,7 @@ export async function trackChatUsage({
     modelId: model.id,
     completionTokens: parseNumberOrDefault(usage.completionTokens, 0),
     promptTokens: parseNumberOrDefault(usage.promptTokens, 0),
+    costsInCent: calculateCostsInCents(model, usage),
   });
 }
 
@@ -58,12 +64,11 @@ export async function sharedChatHasReachedIntelliPointLimit({
     sharedChatId: sharedChat.id,
   });
 
-  const federalStateLimits = user.federalState;
-
   if (
     user.school.userRole === 'teacher' &&
     sharedChat.intelligencePointsLimit !== null &&
-    priceInCent < (federalStateLimits.teacherPriceLimit * sharedChat.intelligencePointsLimit) / 100
+    priceInCent <
+      ((await getPriceLimitByUser(user)) ?? 0 * sharedChat.intelligencePointsLimit) / 100
   ) {
     return false;
   }
@@ -98,13 +103,10 @@ export async function sharedCharacterChatHasReachedIntelliPointLimit({
     maxUsageTimeLimit: character.maxUsageTimeLimit,
     characterId: character.id,
   });
-
-  const federalStateLimits = user.federalState;
-
   if (
     user.school.userRole === 'teacher' &&
     character.intelligencePointsLimit !== null &&
-    priceInCent < (federalStateLimits.teacherPriceLimit * character.intelligencePointsLimit) / 100
+    priceInCent < ((await getPriceLimitByUser(user)) ?? 0 * character.intelligencePointsLimit) / 100
   ) {
     return false;
   }
@@ -138,21 +140,9 @@ export async function userHasReachedIntelliPointLimit({
   }
 
   const price = await getPriceInCentByUser(user);
-  const federalStateLimits = user.federalState;
+  const priceLimit = await getPriceLimitByUser(user);
 
-  if (
-    price !== null &&
-    user.school.userRole === 'teacher' &&
-    price > federalStateLimits.teacherPriceLimit
-  ) {
-    return true;
-  }
-
-  if (
-    price !== null &&
-    user.school.userRole === 'student' &&
-    price > federalStateLimits.studentPriceLimit
-  ) {
+  if (price !== null && priceLimit !== null && price > priceLimit) {
     return true;
   }
   return false;

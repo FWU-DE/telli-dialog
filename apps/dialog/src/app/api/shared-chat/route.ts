@@ -117,6 +117,7 @@ export async function POST(request: NextRequest) {
         promptTokens: assistantMessage.usage.promptTokens,
         sharedSchoolConversationId: sharedChat.id,
         userId: teacherUserAndContext.id,
+        costsInCent: calculateCostsInCents(definedModel, assistantMessage.usage),
       });
 
       await sendRabbitmqEvent(

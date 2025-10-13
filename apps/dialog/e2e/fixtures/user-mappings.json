@@ -11,12 +11,6 @@
     "rolle": "LERN",
     "bundesland": "DE-BY"
   },
-  "teacher-local": {
-    "sub": "02bc9c83-defa-4aef-9cf5-0cf2b0b3b20a",
-    "schulkennung": "school-local",
-    "rolle": "LEHR",
-    "bundesland": "DE-TEST"
-  },
   "teacher1-BY": {
     "sub": "cf1cb1a1-221d-4bb4-8ab6-932eef73ee09",
     "schulkennung": "school1-BY",
@@ -40,5 +34,17 @@
     "schulkennung": "school-bw",
     "rolle": "LEHR",
     "bundesland": "DE-BW"
+  },
+  "teacher-SH": {
+    "sub": "d1e8f3c4-5b6a-4c7d-8e9f-0a1b2c3d4e5f",
+    "schulkennung": "school-sh",
+    "rolle": "LEHR",
+    "bundesland": "DE-SH"
+  },
+  "teacher-SL": {
+    "sub": "a2b3c4d5-e6f7-8901-2345-6789abcdef01",
+    "schulkennung": "school-sl",
+    "rolle": "LEHR",
+    "bundesland": "DE-SL"
   }
 }

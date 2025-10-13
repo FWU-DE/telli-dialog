@@ -85,6 +85,11 @@ test('teacher can login, create and join shared dialogpartner chat', async ({ pa
   await page.getByTitle('Kopieren').click();
 
   await expect(page.getByLabel('assistant message 1')).toContainText('John Cena');
+
+  // regenerate last message
+  await page.getByLabel('Reload').click();
+  await page.getByLabel('Reload').waitFor();
+  await expect(page.getByLabel('assistant message 1')).toContainText('John Cena');
 });
 
 test('teacher can delete character chat', async ({ page }) => {

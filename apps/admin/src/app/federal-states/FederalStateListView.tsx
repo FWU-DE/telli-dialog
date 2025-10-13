@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { fetchFederalStates } from '../../services/federal-states-service';
-import { FEDERAL_STATE_BY_ID_ROUTE } from './[federal-state-id]/page';
+import { FEDERAL_STATE_BY_ID_ROUTE } from './[federalStateId]/page';
 import {
   Table,
   TableBody,

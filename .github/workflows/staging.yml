@@ -7,23 +7,18 @@ on:
     branches:
       - main
 
-env:
-  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-
 jobs:
   install:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version-file: '.nvmrc'
-          cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
 
@@ -40,7 +35,7 @@ jobs:
     needs: install
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node.js
@@ -58,7 +53,7 @@ jobs:
     needs: install
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node.js
@@ -76,7 +71,7 @@ jobs:
     needs: install
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node.js
@@ -94,7 +89,7 @@ jobs:
     needs: install
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node.js
@@ -112,7 +107,7 @@ jobs:
     needs: install
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node.js
@@ -136,19 +131,34 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Build Docker image
-        run: |
-          COMMIT_HASH=${{ github.sha }}
-          SENTRY_AUTH_TOKEN=${{ env.SENTRY_AUTH_TOKEN }} SENTRY_ENVIRONMENT=staging SENTRY_DSN=${{ env.SENTRY_DSN }} docker build -f ./apps/dialog/Dockerfile -t telli/chatbot:$COMMIT_HASH .
-          docker tag telli/chatbot:$COMMIT_HASH telli.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Push Docker image to IONOS registry
-        run: |
-          echo "${{ secrets.IONOS_REGISTRY_TOKEN_GITHUB_PUSH }}" | docker login --username github-push --password-stdin telli.cr.de-fra.ionos.com
-          COMMIT_HASH=${{ github.sha }}
-          docker push telli.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH
+      - name: Log in to IONOS Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: telli.cr.de-fra.ionos.com
+          username: github-push
+          password: ${{ secrets.IONOS_REGISTRY_TOKEN_GITHUB_PUSH }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        with:
+          context: .
+          file: apps/dialog/Dockerfile
+          secret-envs: |
+            SENTRY_AUTH_TOKEN=SENTRY_AUTH_TOKEN
+            SENTRY_ORG=SENTRY_ORG
+            SENTRY_PROJECT=SENTRY_PROJECT
+          build-args: CI=${CI}
+          tags: telli.cr.de-fra.ionos.com/telli/chatbot:${{ github.sha }}
+          push: true
 
   build_push_docker_image_admin:
     name: Build and push docker image telli-admin
@@ -161,19 +171,25 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
-      - name: Build Docker image
-        run: |
-          COMMIT_HASH=${{ github.sha }}
-          docker build -f ./apps/admin/Dockerfile -t telli/admin:$COMMIT_HASH .
-          docker tag telli/admin:$COMMIT_HASH telli.cr.de-fra.ionos.com/telli/admin:$COMMIT_HASH
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Push Docker image to IONOS registry
-        run: |
-          echo "${{ secrets.IONOS_REGISTRY_TOKEN_GITHUB_PUSH }}" | docker login --username github-push --password-stdin telli.cr.de-fra.ionos.com
-          COMMIT_HASH=${{ github.sha }}
-          docker push telli.cr.de-fra.ionos.com/telli/admin:$COMMIT_HASH
+      - name: Log in to IONOS Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: telli.cr.de-fra.ionos.com
+          username: github-push
+          password: ${{ secrets.IONOS_REGISTRY_TOKEN_GITHUB_PUSH }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/admin/Dockerfile
+          tags: telli.cr.de-fra.ionos.com/telli/admin:${{ github.sha }}
+          push: true
 
   deploy_apps:
     name: Deploy to staging
@@ -182,7 +198,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
       - name: Set Kubernetes context
         uses: azure/k8s-set-context@v4

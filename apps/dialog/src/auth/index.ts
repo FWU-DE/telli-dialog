@@ -10,6 +10,7 @@ import { logDebug, logError } from '@/utils/logging/logging';
 declare module 'next-auth' {
   interface Session {
     user?: UserAndContext;
+    hasCompletedTraining?: boolean;
   }
 }
 
@@ -53,6 +54,7 @@ const result = NextAuth({
         ) {
           // This function can throw an error if the return type does not match our schema
           token = await handleVidisJWTCallback({ account, profile, token });
+          token.hasCompletedTraining = (profile.hasCompletedTraining as boolean) ?? false;
         }
         // Ensure userId is set for credentials provider
         if (account?.provider === 'credentials' && user?.id) {
@@ -83,6 +85,7 @@ const result = NextAuth({
           ...session.user,
           ...(token.user as UserAndContext),
         };
+        session.hasCompletedTraining = (token.hasCompletedTraining as boolean) ?? false;
       }
 
       return session;

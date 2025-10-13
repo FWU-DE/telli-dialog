@@ -5,6 +5,7 @@ import { CHAT_MESSAGE_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
 import he from 'he';
+import { unstable_cacheLife as cacheLife } from 'next/cache';
 
 const headers = {
   'User-Agent':
@@ -16,17 +17,21 @@ const headers = {
  * Uses Mozilla's Readability to extract the main content.
  * Filters the most important information and stops if content is longer than TOKEN_LIMIT tokens.
  * @param url The URL to fetch and parse.
+ * @param options The options for the fetch request.
  * @returns A summary of the most important information from the page.
  */
 export async function webScraperExecutable(
   url: string,
   options: { timeout?: number } = { timeout: 5000 },
 ): Promise<WebsearchSource> {
+  'use cache';
+  cacheLife('weeks');
+
   console.info(`Requesting webcontent for url: ${url}`);
   const t = await getTranslations({ namespace: 'websearch' });
   let response: Response;
   try {
-    const isPage = await isWebPage(url);
+    const isPage = await isWebPage(url, options.timeout);
     if (!isPage) {
       console.warn(`URL is not a webpage: ${url}`);
       return {
@@ -41,7 +46,7 @@ export async function webScraperExecutable(
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), options.timeout);
     response = await fetch(url, {
-      headers: headers,
+      headers,
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
@@ -147,10 +152,20 @@ function extractArticleContent(html: string, url: string): string {
 /**
  * The function sends a HEAD request to the URL and checks the Content-Type header.
  * @param url the URL to check
+ * @param timeout the timeout for fetch request
  * @returns true if the content-type is text/html, false otherwise
  */
-export async function isWebPage(url: string) {
-  const response = await fetch(url, { method: 'HEAD' });
+export async function isWebPage(url: string, timeout?: number) {
+  // Set up a timeout for the fetch request
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  const response = await fetch(url, {
+    headers,
+    method: 'HEAD',
+    signal: controller.signal,
+  });
+  clearTimeout(timeoutId);
+
   const contentType = response.headers.get('content-type');
 
   // Basic heuristic

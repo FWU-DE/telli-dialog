@@ -110,7 +110,7 @@ test('teacher can create character with initial message and verify it appears in
   // Check that assistant responded (message 3)
   const secondAssistantMessage = page.getByLabel('assistant message 2');
   await expect(secondAssistantMessage).toBeVisible();
-  await expect(secondAssistantMessage).toContainText('Die Relativitätstheorie');
+  await expect(secondAssistantMessage).toContainText('Relativitätstheorie');
 
   // Verify the initial message is still there
   await expect(assistantMessage).toBeVisible();

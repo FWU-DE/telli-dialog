@@ -6,7 +6,7 @@ import {
 } from '@/db/functions/chat';
 import { NextRequest, NextResponse } from 'next/server';
 import { dbInsertChatContent } from '@/db/functions/chat';
-import { getUser, updateSession } from '@/auth/utils';
+import { getUser, updateSession, userHasCompletedTraining } from '@/auth/utils';
 import { userHasReachedIntelliPointLimit, trackChatUsage } from './usage';
 import { getModelAndProviderWithResult, calculateCostsInCents, getAuxiliaryModel } from '../utils';
 import { generateUUID } from '@/utils/uuid';
@@ -32,9 +32,8 @@ import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
 import { dbGetCharacterByIdWithShareData } from '@/db/functions/character';
 
 export async function POST(request: NextRequest) {
-  const user = await getUser();
-
-  const productAccess = checkProductAccess(user);
+  const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);
+  const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
 
   if (!productAccess.hasAccess) {
     return NextResponse.json({ error: productAccess.errorType }, { status: 403 });
@@ -177,19 +176,24 @@ export async function POST(request: NextRequest) {
       urls = character.attachedLinks;
     }
   } else {
-    urls = [userMessage, ...messages]
-      .map((message) => parseHyperlinks(message.content) ?? [])
-      .flat();
+    urls = [userMessage, ...messages].flatMap((message) => parseHyperlinks(message.content) ?? []);
   }
 
-  let websearchSources: WebsearchSource[] = [];
-  try {
-    websearchSources = await Promise.all(
-      urls.filter((l) => l !== '').map((url) => webScraperExecutable(url)),
-    );
-  } catch (error) {
-    console.error('Unhandled error while fetching website', error);
-  }
+  const uniqueUrls = [...new Set(urls)];
+  const websearchSources = (
+    await Promise.all(
+      uniqueUrls
+        .filter((l) => l !== '')
+        .map(async (url) => {
+          try {
+            return await webScraperExecutable(url);
+          } catch (error) {
+            console.error(`Error fetching webpage content for URL: ${url}`, error);
+          }
+        }),
+    )
+  ).filter((x): x is WebsearchSource => !!x);
+
   // Condense chat history to search query to use for vector search and text retrieval
 
   await updateSession({

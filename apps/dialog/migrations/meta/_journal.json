@@ -162,6 +162,27 @@
       "when": 1758114406161,
       "tag": "0022_special_maddog",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1758800851291,
+      "tag": "0023_curved_weapon_omega",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1759218795486,
+      "tag": "0024_ambiguous_invisible_woman",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1760012162984,
+      "tag": "0025_remarkable_queen_noir",
+      "breakpoints": true
     }
   ]
 }

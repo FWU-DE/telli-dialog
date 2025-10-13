@@ -30,10 +30,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
       - name: Load 1Password Secrets
-        uses: 1password/load-secrets-action@v1
+        uses: 1password/load-secrets-action@v3
         with:
           export-env: true
         env:
@@ -54,16 +54,15 @@ jobs:
           ENCRYPTION_KEY: op://telli Engineering/.env.e2e chatbot/ENCRYPTION_KEY
           SENTRY_DSN: op://telli Engineering/.env.e2e chatbot/SENTRY_DSN
           API_KEY: op://telli Engineering/.env.e2e chatbot/API_KEY
-          BAVARIA_API_KEY: op://telli Engineering/.env.e2e chatbot/BAVARIA_API_KEY
+          DE_BY_API_KEY: op://telli Engineering/.env.e2e chatbot/BAVARIA_API_KEY
           RABBITMQ_URI: op://telli Engineering/.env.e2e chatbot/RABBITMQ_URI
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
         with:
           node-version-file: '.nvmrc'
-
-      - name: Install PNPM
-        run: npm i -g pnpm@9.15.1
 
       - name: Install dependencies
         run: pnpm install
@@ -75,7 +74,7 @@ jobs:
         run: |
           until pg_isready -h localhost -p 5432 -U postgres; do
             echo "$(date) - waiting for database to start"
-            sleep 2
+            sleep 1
           done
 
       - name: Run migrations and seed database (if applicable)
@@ -96,5 +95,5 @@ jobs:
         if: always()
         with:
           name: playwright-report
-          path: playwright-report/
+          path: apps/dialog/playwright-report
           retention-days: 30

@@ -1,5 +1,4 @@
 import { type Metadata } from 'next';
-import { PublicEnvScript } from 'next-runtime-env';
 import React from 'react';
 import { Barlow } from 'next/font/google';
 import ClientProvider from './client-provider';
@@ -20,8 +19,10 @@ const barlow = Barlow({
 
 export async function generateMetadata(): Promise<Metadata> {
   const maybeUser = await getMaybeUser();
-  const faviconPath = await getMaybeLogoFromS3(maybeUser?.school.federalStateId, 'favicon.svg');
-  const [, federalState] = await dbGetFederalStateByIdWithResult(maybeUser?.school.federalStateId);
+  const [faviconPath, [, federalState]] = await Promise.all([
+    getMaybeLogoFromS3(maybeUser?.school.federalStateId, 'favicon.svg'),
+    dbGetFederalStateByIdWithResult(maybeUser?.school.federalStateId),
+  ]);
 
   return {
     title: federalState?.telliName ?? 'telli',
@@ -45,9 +46,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale} className={barlow.className}>
-      <head>
-        <PublicEnvScript />
-      </head>
       <body>
         <NextIntlClientProvider messages={messages}>
           <ClientProvider session={fullSession} designConfiguration={designConfiguration}>

@@ -1,12 +1,12 @@
 import { SidebarVisibilityProvider } from '@/components/navigation/sidebar/sidebar-provider';
-import { getUser } from '@/auth/utils';
+import { getUser, userHasCompletedTraining } from '@/auth/utils';
 import React from 'react';
 import DialogSidebar from './sidebar';
 import { HEADER_PORTAL_ID } from './header-portal';
 import { contentHeight } from '@/utils/tailwind/height';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@/db/functions/llm-model';
-import { getPriceInCentByUser } from '@/app/school';
+import { getPriceInCentByUser, getPriceLimitByUser } from '@/app/school';
 import AutoLogout from '@/components/auth/auto-logout';
 import { checkProductAccess } from '@/utils/vidis/access';
 import ProductAccessModal from '@/components/modals/product-access';
@@ -21,10 +21,13 @@ import { FederalStateId } from '@/utils/vidis/const';
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
 
-  const models = await dbGetLlmModelsByFederalStateId({ federalStateId: user.federalState.id });
-
-  const priceInCent = await getPriceInCentByUser(user);
-  const productAccess = checkProductAccess(user);
+  const [models, priceInCent, userPriceLimit, hasCompletedTraining] = await Promise.all([
+    dbGetLlmModelsByFederalStateId({ federalStateId: user.federalState.id }),
+    getPriceInCentByUser(user),
+    getPriceLimitByUser(user),
+    userHasCompletedTraining(),
+  ]);
+  const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
   const federalStateDisclaimer =
     federalStateDisclaimers[user.school.federalStateId as FederalStateId];
   const userMustAccept =
@@ -39,7 +42,11 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
           models={models}
           defaultLlmModelByCookie={user.lastUsedModel ?? DEFAULT_CHAT_MODEL}
         >
-          <DialogSidebar user={user} currentModelCosts={priceInCent ?? 0} />
+          <DialogSidebar
+            user={user}
+            currentModelCosts={priceInCent ?? 0}
+            userPriceLimit={userPriceLimit ?? 500}
+          />
           <div className="flex flex-col max-h-[100dvh] min-h-[100dvh] w-full overflow-auto">
             <div
               id={HEADER_PORTAL_ID}
