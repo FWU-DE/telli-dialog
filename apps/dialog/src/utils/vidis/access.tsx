@@ -1,4 +1,3 @@
-'use server';
 import { UserAndContext } from '@/auth/types';
 import React from 'react';
 import { FederalStateId, getFederalStateNameById } from './const';
