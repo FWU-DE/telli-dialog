@@ -1,5 +1,5 @@
 import { SidebarVisibilityProvider } from '@/components/navigation/sidebar/sidebar-provider';
-import { getUser } from '@/auth/utils';
+import { getUser, userHasCompletedTraining } from '@/auth/utils';
 import React from 'react';
 import DialogSidebar from './sidebar';
 import { HEADER_PORTAL_ID } from './header-portal';
@@ -25,7 +25,8 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
 
   const priceInCent = await getPriceInCentByUser(user);
   const userPriceLimit = await getPriceLimitByUser(user);
-  const productAccess = checkProductAccess(user);
+  const hasCompletedTraining = await userHasCompletedTraining();
+  const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
   const federalStateDisclaimer =
     federalStateDisclaimers[user.school.federalStateId as FederalStateId];
   const userMustAccept =

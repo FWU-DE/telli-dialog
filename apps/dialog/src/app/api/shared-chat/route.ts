@@ -1,6 +1,6 @@
 import { type Message, smoothStream, streamText } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserAndContextByUserId } from '@/auth/utils';
+import { getUserAndContextByUserId, userHasCompletedTraining } from '@/auth/utils';
 import {
   sharedChatHasExpired,
   sharedChatHasReachedIntelliPointLimit,
@@ -34,7 +34,8 @@ export async function POST(request: NextRequest) {
 
   const teacherUserAndContext = await getUserAndContextByUserId({ userId: sharedChat.userId });
   // check for product access
-  const productAccess = checkProductAccess(teacherUserAndContext);
+  const hasCompletedTraining = await userHasCompletedTraining();
+  const productAccess = checkProductAccess({ ...teacherUserAndContext, hasCompletedTraining });
 
   if (!productAccess.hasAccess) {
     return NextResponse.json({ error: productAccess.errorType }, { status: 403 });

@@ -1,9 +1,10 @@
+'use server';
 import { UserAndContext } from '@/auth/types';
 import React from 'react';
 import { FederalStateId, getFederalStateNameById } from './const';
 import { missingTrainingDisclaimers } from '@/components/modals/const';
 import MarkdownDisplay from '@/components/chat/markdown-display';
-import { userHasCompletedTraining } from '@/auth/utils';
+import { auth } from '@/auth';
 
 type AccessResult =
   | {
@@ -14,12 +15,15 @@ type AccessResult =
   | {
       hasAccess: true;
     };
-
 /**
  * Checks if a user has access to the telli product based on their role, training requirements,
  * and federal state configuration.
  */
-export function checkProductAccess({ federalState, school }: UserAndContext): AccessResult {
+export function checkProductAccess({
+  federalState,
+  school,
+  hasCompletedTraining,
+}: UserAndContext & { hasCompletedTraining: boolean }): AccessResult {
   const successResult: AccessResult = { hasAccess: true };
 
   if (school.userRole === 'student' && !federalState.studentAccess) {
@@ -38,7 +42,7 @@ export function checkProductAccess({ federalState, school }: UserAndContext): Ac
 
   const trainingRequired = federalState.mandatoryCertificationTeacher === true;
 
-  if (trainingRequired && !userHasCompletedTraining()) {
+  if (trainingRequired && !hasCompletedTraining) {
     const disclaimer = missingTrainingDisclaimers[federalState.id as FederalStateId];
     if (disclaimer) {
       return {
