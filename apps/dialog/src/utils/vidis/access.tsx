@@ -4,7 +4,6 @@ import React from 'react';
 import { FederalStateId, getFederalStateNameById } from './const';
 import { missingTrainingDisclaimers } from '@/components/modals/const';
 import MarkdownDisplay from '@/components/chat/markdown-display';
-import { auth } from '@/auth';
 
 type AccessResult =
   | {

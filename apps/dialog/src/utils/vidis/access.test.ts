@@ -47,7 +47,7 @@ describe('checkProductAccess', () => {
       school: baseSchool,
     };
 
-    const result = checkProductAccess(context);
+    const result = checkProductAccess({...context, hasCompletedTraining: true});
     expect(result.hasAccess).toBe(true);
   });
 
@@ -64,7 +64,7 @@ describe('checkProductAccess', () => {
       },
     };
 
-    const result = checkProductAccess(context);
+    const result = checkProductAccess({...context, hasCompletedTraining: true});
     expect(result.hasAccess).toBe(false);
     if (!result.hasAccess) {
       expect(result.errorType).toBe('RESTRICTED_ROLE');
@@ -85,7 +85,7 @@ describe('checkProductAccess', () => {
       },
     };
 
-    const result = checkProductAccess(context);
+    const result = checkProductAccess({...context, hasCompletedTraining: true});
     expect(result.hasAccess).toBe(true);
   });
 
@@ -99,7 +99,7 @@ describe('checkProductAccess', () => {
       school: baseSchool,
     };
 
-    const result = checkProductAccess(context);
+    const result = checkProductAccess({...context, hasCompletedTraining: false});
     expect(result.hasAccess).toBe(false);
     if (!result.hasAccess) {
       expect(result.errorType).toBe('TRAINING_NEEDED');
@@ -120,7 +120,7 @@ describe('checkProductAccess', () => {
       school: baseSchool,
     };
 
-    const result = checkProductAccess(context);
+    const result = checkProductAccess({...context, hasCompletedTraining: true});
     if (!result.hasAccess) {
       expect(result.hasAccess).toBe(false);
       expect(result.errorType).toBe('TRAINING_NEEDED');
@@ -142,7 +142,7 @@ describe('checkProductAccess', () => {
       },
     };
 
-    const result = checkProductAccess(context);
+    const result = checkProductAccess({...context, hasCompletedTraining: true});
     expect(result.hasAccess).toBe(false);
     if (!result.hasAccess) {
       expect(result.errorType).toBe('RESTRICTED_ROLE'); // Should be role error, not training
@@ -165,7 +165,7 @@ describe('checkProductAccess', () => {
 
     // We're testing the implementation detail that training is not checked for students
     // when studentAccess is false, as they're already restricted by role
-    const result = checkProductAccess(context);
+    const result = checkProductAccess({...context, hasCompletedTraining: true});
     expect(result.hasAccess).toBe(false);
     if (!result.hasAccess) {
       expect(result.errorType).toBe('RESTRICTED_ROLE');
@@ -186,7 +186,7 @@ describe('checkProductAccess', () => {
         },
       };
 
-      const result = checkProductAccess(context);
+      const result = checkProductAccess({...context, hasCompletedTraining: true});
       expect(result.hasAccess).toBe(true);
     });
   });
@@ -212,7 +212,7 @@ describe('checkProductAccess', () => {
         },
       };
 
-      const result = checkProductAccess(context);
+      const result = checkProductAccess({...context, hasCompletedTraining: true});
 
       if (state.studentAccess) {
         expect(result.hasAccess).toBe(true);
