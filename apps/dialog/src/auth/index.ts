@@ -31,10 +31,7 @@ const result = NextAuth({
   trustHost: true,
   // https://next-auth.js.org/configuration/callbacks
   callbacks: {
-    async signIn({ user, account, profile, email, credentials }) {
-      logDebug(
-        `signIn callback triggered: ${user}, ${account}, ${profile}, ${email}, ${credentials}`,
-      );
+    async signIn() {
       // account contains access_token, refresh_token, id_token, expires_in, session_state, etc.
       // profile contains user profile (if available) like name, preferred_username, given_name, family_name, email, bundesland, rolle, schulkennung, etc.
       // user contains id, name, email
@@ -48,7 +45,6 @@ const result = NextAuth({
       // account contains access_token, refresh_token, id_token, expires_in, session_state, etc.
       // profile contains user profile (if available) like name, preferred_username, given_name, family_name, email, etc.
       // user contains id, name, email
-      logDebug(`jwt callback triggered: ${token}, ${account}, ${profile}, ${trigger}, ${user}`);
       try {
         if (
           trigger === 'signIn' &&
@@ -78,7 +74,6 @@ const result = NextAuth({
     async session({ session, token }) {
       // This callback is called whenever a session is checked (i.e. on the client)
       // in order to pass properties to the client, copy them from token to the session
-      logDebug(`session callback triggered: ${session}, ${token}`);
 
       const userId = token.userId;
       if (userId === undefined || userId === null) return session;
@@ -97,10 +92,10 @@ const result = NextAuth({
   // Events should only be used for instrumentation
   events: {
     async signIn(message) {
-      logDebug(`signIn event triggered: ${message}`);
+      logDebug(`signIn event triggered: ${JSON.stringify(message)}`);
     },
     async signOut(message) {
-      logDebug(`signOut event triggered: ${message}`);
+      logDebug(`signOut event triggered: ${JSON.stringify(message)}`);
     },
   },
 });
