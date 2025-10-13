@@ -56,14 +56,35 @@ export function calculateCostsInCents(
   model: LlmModel,
   usage: { promptTokens: number; completionTokens: number },
 ) {
+  if (model.priceMetadata.type === 'text') {
+    return calculateCostsInCentsForTextModel(model, usage);
+  } else if (model.priceMetadata.type === 'embedding') {
+    return calculateCostsInCentsForEmbeddingModel(model, usage);
+  }
+  return 0;
+}
+
+function calculateCostsInCentsForTextModel(
+  model: LlmModel,
+  usage: { promptTokens: number; completionTokens: number },
+) {
   if (model.priceMetadata.type !== 'text') return 0;
 
-  const completionTokenPrice =
-    (usage.completionTokens * model.priceMetadata.completionTokenPrice) / PRICE_AND_CENT_MULTIPLIER;
-  const promptTokenPrice =
-    (usage.promptTokens * model.priceMetadata.promptTokenPrice) / PRICE_AND_CENT_MULTIPLIER;
+  const completionTokenPrice = usage.completionTokens * model.priceMetadata.completionTokenPrice;
+  const promptTokenPrice = usage.promptTokens * model.priceMetadata.promptTokenPrice;
 
-  return completionTokenPrice + promptTokenPrice;
+  return (completionTokenPrice + promptTokenPrice) / PRICE_AND_CENT_MULTIPLIER;
+}
+
+function calculateCostsInCentsForEmbeddingModel(
+  model: LlmModel,
+  usage: { promptTokens: number; completionTokens: number },
+) {
+  if (model.priceMetadata.type !== 'embedding') return 0;
+
+  const promptTokenPrice = usage.promptTokens * model.priceMetadata.promptTokenPrice;
+
+  return promptTokenPrice / PRICE_AND_CENT_MULTIPLIER;
 }
 
 /**

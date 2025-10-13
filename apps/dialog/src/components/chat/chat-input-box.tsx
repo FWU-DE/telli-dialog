@@ -11,7 +11,15 @@ import StopIcon from '../icons/stop';
 import ArrowRightIcon from '../icons/arrow-right';
 import UploadFileButton from './upload-file-button';
 import { useToast } from '../common/toast';
-import { useEffect, useState } from 'react';
+import {
+  ChangeEvent,
+  Dispatch,
+  FormEvent,
+  KeyboardEvent,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { cn } from '@/utils/tailwind';
 import { isImageFile } from '@/utils/files/generic';
@@ -28,12 +36,12 @@ export function ChatInputBox({
   enableFileUpload = false,
 }: {
   files?: Map<string, LocalFileState>;
-  setFiles?: React.Dispatch<React.SetStateAction<Map<string, LocalFileState>>>;
+  setFiles?: Dispatch<SetStateAction<Map<string, LocalFileState>>>;
   isLoading: boolean;
   handleDeattachFile?: (localId: string) => void;
-  handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  handleInputChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   handleStopGeneration: () => void;
-  customHandleSubmit: (e: React.FormEvent) => Promise<void>;
+  customHandleSubmit: (e: FormEvent) => Promise<void>;
   input: string;
   enableFileUpload?: boolean;
 }) {
@@ -53,8 +61,7 @@ export function ChatInputBox({
       setFiles(trimmedFiles);
       setFileUploading(false);
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const imageEntries = Array.from(files?.entries() ?? []).filter(([_, file]) =>
+    const imageEntries = Array.from(files?.entries() ?? []).filter(([, file]) =>
       isImageFile(file.file.name),
     );
     const numberOfImages = imageEntries.length;
@@ -79,7 +86,7 @@ export function ChatInputBox({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [files]);
 
-  async function handleSubmitOnEnter(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+  async function handleSubmitOnEnter(e: KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !isLoading && !e.shiftKey) {
       e.preventDefault();
       if (e.currentTarget.value.trim().length > 0) {

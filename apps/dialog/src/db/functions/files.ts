@@ -192,9 +192,7 @@ export async function dbDeleteFileAndDetachFromConversation(filesToDelete: strin
     await tx
       .delete(ConversationMessageFileMappingTable)
       .where(inArray(ConversationMessageFileMappingTable.fileId, filesToDelete));
-    await tx
-      .delete(ConversationMessageFileMappingTable)
-      .where(inArray(ConversationMessageFileMappingTable.fileId, filesToDelete));
+    await tx.delete(TextChunkTable).where(inArray(TextChunkTable.fileId, filesToDelete));
     await tx.delete(fileTable).where(inArray(fileTable.id, filesToDelete));
   });
 }

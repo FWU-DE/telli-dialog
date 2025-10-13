@@ -176,6 +176,13 @@
       "when": 1759218795486,
       "tag": "0024_ambiguous_invisible_woman",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1760012162984,
+      "tag": "0025_remarkable_queen_noir",
+      "breakpoints": true
     }
   ]
 }

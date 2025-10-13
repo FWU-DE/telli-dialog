@@ -11,6 +11,7 @@ import { getPriceInCentByUser } from '@/app/school';
 import { type LanguageModelUsage } from 'ai';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import { parseNumberOrDefault } from '@/utils/number';
+import { calculateCostsInCents } from '../utils';
 
 export async function trackChatUsage({
   usage,
@@ -31,6 +32,7 @@ export async function trackChatUsage({
     modelId: model.id,
     completionTokens: parseNumberOrDefault(usage.completionTokens, 0),
     promptTokens: parseNumberOrDefault(usage.promptTokens, 0),
+    costsInCent: calculateCostsInCents(model, usage),
   });
 }
 

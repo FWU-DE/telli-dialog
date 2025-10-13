@@ -32,6 +32,7 @@ export default defineConfig({
       testIgnore: /.*api.test.ts/,
       use: {
         ...devices['Desktop Chrome'],
+        permissions: ['clipboard-read', 'clipboard-write'],
       },
     },
     {
