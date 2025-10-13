@@ -32,10 +32,7 @@ import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
 import { dbGetCharacterByIdWithShareData } from '@/db/functions/character';
 
 export async function POST(request: NextRequest) {
-  const [user, hasCompletedTraining] = await Promise.all([
-    getUser(),
-    userHasCompletedTraining(),
-  ]);
+  const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);
   const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
 
   if (!productAccess.hasAccess) {
