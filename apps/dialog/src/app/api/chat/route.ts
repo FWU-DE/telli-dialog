@@ -6,7 +6,7 @@ import {
 } from '@/db/functions/chat';
 import { NextRequest, NextResponse } from 'next/server';
 import { dbInsertChatContent } from '@/db/functions/chat';
-import { getUser, updateSession } from '@/auth/utils';
+import { getUser, updateSession, userHasCompletedTraining } from '@/auth/utils';
 import { userHasReachedIntelliPointLimit } from './usage';
 import { getModelAndProviderWithResult, calculateCostsInCent, getAuxiliaryModel } from '../utils';
 import { generateUUID } from '@/utils/uuid';
@@ -33,9 +33,8 @@ import { dbGetCharacterByIdWithShareData } from '@/db/functions/character';
 import { dbInsertConversationUsage } from '@/db/functions/token-usage';
 
 export async function POST(request: NextRequest) {
-  const user = await getUser();
-
-  const productAccess = checkProductAccess(user);
+  const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);
+  const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
 
   if (!productAccess.hasAccess) {
     return NextResponse.json({ error: productAccess.errorType }, { status: 403 });

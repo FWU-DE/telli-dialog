@@ -1,3 +1,4 @@
+'use server';
 import { env } from '../consts/env';
 import { FederalState } from '../types/federal-state';
 
@@ -39,5 +40,26 @@ export async function fetchFederalStateById(federalStateId: string) {
 
   const data = await response.json();
   // validate response with zod
+  return data as FederalState;
+}
+
+export async function updateFederalState(federalState: FederalState) {
+  const response = await fetch(
+    env.BASE_URL_TELLI_DIALOG +
+      apiRoutes.FEDERAL_STATE_BY_ID_ROUTE.replace('{id}', federalState.id),
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${env.API_KEY_TELLI_DIALOG}`,
+      },
+      body: JSON.stringify(federalState),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Failed to update federal state: ${response.statusText}`);
+  }
+
+  const data = await response.json();
   return data as FederalState;
 }
