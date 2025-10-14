@@ -11,8 +11,6 @@ services:
       - postgres_data_telli_dialog:/var/lib/postgresql/data
     ports:
       - '5432:5432'
-    networks:
-      - postgres_network
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U telli_dialog_db -d telli_dialog_db']
       interval: 10s
@@ -20,10 +18,16 @@ services:
       retries: 5
       start_period: 30s
 
-networks:
-  postgres_network:
-    driver: bridge
+  telli_dialog_valkey:
+    image: ghcr.io/valkey-io/valkey:8
+    container_name: telli_dialog_valkey
+    restart: always
+    volumes:
+      - valkey_data:/data
+    ports:
+      - '6379:6379'
 
 volumes:
   postgres_data_telli_dialog:
     driver: local
+  valkey_data:

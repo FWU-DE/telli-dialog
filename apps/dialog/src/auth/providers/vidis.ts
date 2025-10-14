@@ -1,4 +1,3 @@
-import { getBaseUrlByHeaders } from '@/utils/host';
 import { dbGetOrCreateVidisUser } from '@/db/functions/vidis';
 import { env } from '@/env';
 import { Account, NextAuthConfig, Profile } from 'next-auth';
@@ -75,21 +74,6 @@ export async function handleVidisJWTCallback({
   token.email = createdUser.email;
   token.id_token = parsedAccount.id_token;
   return token;
-}
-
-export async function handleVidisLogout({ idToken }: { idToken: string }) {
-  console.info('Performing logout handshare with vidis');
-  const searchParams = new URLSearchParams({
-    post_logout_redirect_uri: (await getBaseUrlByHeaders()) ?? 'chat.telli.schule',
-    id_token_hint: idToken,
-  });
-  const response = await fetch(
-    `${env.vidisIssuerUri}/protocol/openid-connect/logout?${searchParams.toString()}`,
-  );
-  console.info({ response });
-  if (!response.ok) {
-    console.error({ error: await response.text() });
-  }
 }
 
 export const vidisConfig = {

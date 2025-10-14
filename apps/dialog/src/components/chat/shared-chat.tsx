@@ -91,7 +91,7 @@ export default function SharedChat({
               <ChatBox
                 key={index}
                 index={index}
-                isLastUser={index === messages.length - 1 && message.role == 'user'}
+                isLastUser={index === messages.length - 1 && message.role === 'user'}
                 isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
                 isLoading={isLoading}
                 regenerateMessage={reload}

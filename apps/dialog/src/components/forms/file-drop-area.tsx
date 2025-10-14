@@ -30,14 +30,14 @@ export function FileDrop({
   }
 
   function validateFileExtensions(selectedFiles: FileList | undefined | null) {
-    if (selectedFiles == null) return;
+    if (selectedFiles === null || selectedFiles === undefined) return;
     const files = Array.from(selectedFiles);
     return files.some((f) => validateFileExtension(f.name));
   }
 
   const handleFiles = useCallback(
     async (selectedFiles: FileList | undefined | null) => {
-      if (selectedFiles == null) return;
+      if (selectedFiles === null || selectedFiles === undefined) return;
       const files = Array.from(selectedFiles);
 
       const totalFileCount = countOfFiles ? countOfFiles + files.length : files.length;

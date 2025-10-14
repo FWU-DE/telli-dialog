@@ -1,23 +1,19 @@
 'use client';
 
 import { LogoutIcon } from '@/components/icons/logout';
-import { signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
 
-export default function LogoutButton({ className, ...props }: React.ComponentProps<'button'>) {
-  const router = useRouter();
-  const t = useTranslations('common');
+async function logout() {
+  window.location.assign('/api/auth/logout');
+}
 
-  async function handleLogout() {
-    await signOut({ redirect: false });
-    router.refresh();
-  }
+export default function LogoutButton({ className, ...props }: React.ComponentProps<'button'>) {
+  const t = useTranslations('common');
 
   return (
     <button
-      onClick={handleLogout}
+      onClick={logout}
       className={cn('flex flex-row gap-2 items-center', className)}
       {...props}
     >
