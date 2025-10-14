@@ -270,7 +270,7 @@ export default function Chat({
             key={index}
             index={index}
             fileMapping={fileMapping}
-            isLastUser={index === messages.length - 1 && message.role == 'user'}
+            isLastUser={index === messages.length - 1 && message.role === 'user'}
             isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
             isLoading={isLoading}
             regenerateMessage={reload}

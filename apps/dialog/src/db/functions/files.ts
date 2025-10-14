@@ -124,7 +124,7 @@ function convertToMap(
       metadata: row.metadata,
     };
     const maybeFiles = resultMap.get(row.foreignId);
-    if (maybeFiles == null) {
+    if (maybeFiles === null || maybeFiles === undefined) {
       resultMap.set(row.foreignId, [file]);
     }
     if (maybeFiles !== undefined) {

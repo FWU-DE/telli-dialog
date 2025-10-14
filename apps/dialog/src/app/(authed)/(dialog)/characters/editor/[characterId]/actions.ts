@@ -104,7 +104,7 @@ export async function deleteCharacterAction({
 
   const maybePictureId = deletedCharacter.pictureId ?? pictureId;
 
-  if (maybePictureId != null) {
+  if (maybePictureId !== null && maybePictureId !== undefined) {
     try {
       await deleteFileFromS3({ key: maybePictureId });
     } catch (error) {
