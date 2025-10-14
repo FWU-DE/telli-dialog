@@ -1,6 +1,6 @@
 import { type Message, smoothStream, streamText } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserAndContextByUserId, userHasCompletedTraining } from '@/auth/utils';
+import { getUserAndContextByUserId } from '@/auth/utils';
 import {
   sharedCharacterChatHasReachedIntelliPointLimit,
   sharedChatHasExpired,
