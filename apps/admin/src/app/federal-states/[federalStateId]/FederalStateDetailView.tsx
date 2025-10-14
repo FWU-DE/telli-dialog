@@ -37,6 +37,9 @@ export function FederalStateView(props: FederalStateViewProps) {
     defaultValues: {
       ...federalState,
       supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
+      designConfiguration: federalState.designConfiguration
+        ? JSON.stringify(federalState.designConfiguration, null, 2)
+        : '',
     },
   });
   const { fields, append, remove } = useFieldArray({
@@ -48,12 +51,23 @@ export function FederalStateView(props: FederalStateViewProps) {
       return;
     }
     try {
+      // Parse designConfiguration as JSON if not empty, otherwise set to null
+      let parsedDesignConfiguration = null;
+      if (data.designConfiguration && data.designConfiguration.trim() !== '') {
+        try {
+          parsedDesignConfiguration = JSON.parse(data.designConfiguration);
+        } catch (jsonError) {
+          alert('Fehler: designConfiguration ist kein gültiges JSON');
+          return;
+        }
+      }
+
       // trainingLink, designConfiguration, telliName can be null, but the form returns '' when empty
       await updateFederalState({
         ...data,
         supportContacts: data.supportContacts.map((s) => s.value),
         trainingLink: data.trainingLink === '' ? null : data.trainingLink,
-        designConfiguration: data.designConfiguration === '' ? null : data.designConfiguration,
+        designConfiguration: data.designConfiguration === '' ? null : parsedDesignConfiguration,
         telliName: data.telliName === '' ? null : data.telliName,
       });
       alert('Bundesland erfolgreich aktualisiert');
