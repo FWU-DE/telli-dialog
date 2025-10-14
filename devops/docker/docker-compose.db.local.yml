@@ -10,9 +10,7 @@ services:
     volumes:
       - postgres_data_telli_dialog:/var/lib/postgresql/data
     ports:
-      - '127.0.0.1:5432:5432'
-    networks:
-      - postgres_network
+      - '5432:5432'
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U telli_dialog_db -d telli_dialog_db']
       interval: 10s
@@ -27,13 +25,7 @@ services:
     volumes:
       - valkey_data:/data
     ports:
-      - '127.0.0.1:6379:6379'
-    networks:
-      - postgres_network
-
-networks:
-  postgres_network:
-    driver: bridge
+      - '6379:6379'
 
 volumes:
   postgres_data_telli_dialog:
