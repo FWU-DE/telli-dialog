@@ -8,6 +8,20 @@ import {
   dbGetSharedChatUsageInCentBySharedChatId,
 } from '@/db/functions/intelli-points';
 
+/**
+ * Calculates the shared chat limit in cents
+ * @param user - The user and context
+ * @param intelligencePointsPercentageLimit - The percentage limit (e.g., 10 for 10%)
+ * @returns The calculated limit in cents
+ */
+async function calculateSharedChatLimitInCent(
+  user: UserAndContext,
+  intelligencePointsPercentageLimit: number,
+): Promise<number> {
+  const priceLimitInCent = await getPriceLimitInCentByUser(user);
+  return ((priceLimitInCent ?? 0) * intelligencePointsPercentageLimit) / 100;
+}
+
 export async function sharedChatHasReachedIntelliPointLimit({
   user,
   sharedChat,
@@ -37,7 +51,7 @@ export async function sharedChatHasReachedIntelliPointLimit({
     user.school.userRole === 'teacher' &&
     sharedChat.intelligencePointsLimit !== null &&
     sharedChatUsageInCent <
-      (((await getPriceLimitInCentByUser(user)) ?? 0) * sharedChat.intelligencePointsLimit) / 100
+      (await calculateSharedChatLimitInCent(user, sharedChat.intelligencePointsLimit))
   ) {
     return false;
   }
@@ -74,7 +88,7 @@ export async function sharedCharacterChatHasReachedIntelliPointLimit({
     user.school.userRole === 'teacher' &&
     character.intelligencePointsLimit !== null &&
     characterUsageInCent <
-      (((await getPriceLimitInCentByUser(user)) ?? 0) * character.intelligencePointsLimit) / 100
+      (await calculateSharedChatLimitInCent(user, character.intelligencePointsLimit))
   ) {
     return false;
   }
