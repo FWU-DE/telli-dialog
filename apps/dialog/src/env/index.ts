@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 export const env = createEnv({
   server: {
+    authSecret: z.string().min(1),
     databaseUrl: z.string(),
     otcBucketName: z.string().min(1),
     otcSecretAccessKey: z.string().min(1),
@@ -19,6 +20,7 @@ export const env = createEnv({
   },
   client: {},
   runtimeEnv: {
+    authSecret: process.env.AUTH_SECRET,
     databaseUrl: process.env.DATABASE_URL,
     otcBucketName: process.env.OTC_BUCKET_NAME,
     otcSecretAccessKey: process.env.OTC_SECRET_ACCESS_KEY,
