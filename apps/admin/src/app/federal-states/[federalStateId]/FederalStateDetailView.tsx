@@ -71,7 +71,7 @@ export function FederalStateView(props: FederalStateViewProps) {
         telliName: data.telliName === '' ? null : data.telliName,
       });
       alert('Bundesland erfolgreich aktualisiert');
-    } catch (error) {
+    } catch {
       alert('Fehler beim Aktualisieren des Bundeslands');
     }
   }
