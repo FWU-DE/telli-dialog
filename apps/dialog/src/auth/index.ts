@@ -4,8 +4,8 @@ import { mockVidisConfig } from './providers/vidis-mock';
 import { credentialsProvider } from './providers/credentials';
 import { getUserAndContextByUserId } from './utils';
 import { UserAndContext } from './types';
-import { logDebug, logError } from '@/utils/logging/logging';
-import { storeSession } from './session';
+import { logError } from '@/utils/logging/logging';
+import { createSession } from './session';
 
 // TODO: Move this to it's own file (see also: https://github.com/nextauthjs/next-auth/discussions/9120#discussioncomment-7544307)
 declare module 'next-auth' {
@@ -34,20 +34,13 @@ const result = NextAuth({
   // https://next-auth.js.org/configuration/callbacks
   callbacks: {
     async signIn() {
-      // account contains access_token, refresh_token, id_token, expires_in, session_state, etc.
-      // profile contains user profile (if available) like name, preferred_username, given_name, family_name, email, bundesland, rolle, schulkennung, etc.
-      // user contains id, name, email
       // all props are only passed the first time a user signs in, subsequent calls only provide a token
-
       // Todo: we should check if custom attributes like bundesland are provided and return false if not
       return true;
     },
     async jwt({ token, account, profile, trigger, user }) {
       // this callback is called when a JSON Web Token is created (i.e. at sign in and when the session is accessed in the client)
-      // account contains access_token, refresh_token, id_token, expires_in, session_state, etc.
-      // profile contains user profile (if available) like name, preferred_username, given_name, family_name, email, etc.
-      // user contains id, name, email
-      // console.log('JWT callback triggered', { token, account, profile, trigger, user });
+      // Todo: this function is called very often when a user signs in
       try {
         if (
           trigger === 'signIn' &&
@@ -57,7 +50,7 @@ const result = NextAuth({
           // This function can throw an error if the return type does not match our schema
           token = await handleVidisJWTCallback({ account, profile, token });
           token.hasCompletedTraining = (profile.hasCompletedTraining as boolean) ?? false;
-          if (user.id) await storeSession(user.id);
+          await createSession(profile.sid as string);
         }
         // Ensure userId is set for credentials provider
         if (account?.provider === 'credentials' && user?.id) {
@@ -66,7 +59,6 @@ const result = NextAuth({
         if (trigger === 'update') {
           token.user = await getUserAndContextByUserId({ userId: token.userId as string });
         }
-        // Todo: that function is called very often so we should not make database calls here --> check token.user and token.school
         if (token.user === undefined || (token.user as UserAndContext).school === undefined) {
           token.user = await getUserAndContextByUserId({ userId: token.userId as string });
         }
@@ -76,10 +68,9 @@ const result = NextAuth({
         return null;
       }
     },
-    async session({ session, token, user, trigger }) {
+    async session({ session, token }) {
       // This callback is called whenever a session is checked (i.e. on the client)
       // in order to pass properties to the client, copy them from token to the session
-      // console.log('Session callback triggered', { session, token, user, trigger });
 
       const userId = token.userId;
       if (userId === undefined || userId === null) return session;
@@ -98,12 +89,11 @@ const result = NextAuth({
   // https://next-auth.js.org/configuration/events
   // Events should only be used for instrumentation
   events: {
-    async signIn(message) {
-      // logDebug(`signIn event triggered`);
-      // logDebug(`signIn event triggered: ${JSON.stringify(message)}`);
+    async signIn() {
+      /* raise custom metric here as soon as we have one */
     },
-    async signOut(message) {
-      // logDebug(`signOut event triggered: ${JSON.stringify(message)}`);
+    async signOut() {
+      /* raise custom metric here as soon as we have one */
     },
   },
 });

@@ -28,6 +28,6 @@ export function logError(message: string, error: unknown) {
   }
 
   if (process.env.NODE_ENV === 'development') {
-    console.log(message);
+    console.log(`${message}: ${JSON.stringify(error)}`, 'error');
   }
 }

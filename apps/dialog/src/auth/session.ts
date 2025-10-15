@@ -1,4 +1,3 @@
-import { logDebug } from '@/utils/logging/logging';
 import { createStorage } from 'unstorage';
 import redisDriver from 'unstorage/drivers/redis';
 
@@ -12,17 +11,17 @@ const storage = createStorage({
 
 const SESSION_PREFIX = 'telli:dialog:session:';
 
-export async function storeSession(sessionId: string) {
-  logDebug('storeSession: ' + sessionId);
+/** create a new session with fixed expiration time to prevent stale data */
+export async function createSession(sessionId: string) {
   storage.setItem(SESSION_PREFIX + sessionId, true, { ttl: 60 * 60 * 8 }); // 8 hours
 }
 
+/** check if a session exists */
 export async function doesSessionExist(sessionId: string) {
-  logDebug('doesSessionExist: ' + sessionId);
   return storage.hasItem(SESSION_PREFIX + sessionId);
 }
 
+/** delete a session */
 export async function deleteSession(sessionId: string) {
-  logDebug('deleteSession: ' + sessionId);
   return storage.removeItem(SESSION_PREFIX + sessionId);
 }
