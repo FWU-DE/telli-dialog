@@ -17,6 +17,7 @@ export const env = createEnv({
     apiKey: z.string().min(1),
     nextauthUrl: z.string().min(1),
     rabbitmqUri: z.string().min(1),
+    valkeyUrl: z.string().min(1),
   },
   client: {},
   runtimeEnv: {
@@ -34,6 +35,7 @@ export const env = createEnv({
     apiKey: process.env.API_KEY,
     nextauthUrl: process.env.NEXTAUTH_URL,
     rabbitmqUri: process.env.RABBITMQ_URI,
+    valkeyUrl: process.env.VALKEY_URL,
   },
   skipValidation: true,
 });

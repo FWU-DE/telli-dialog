@@ -1,11 +1,11 @@
+import { env } from '@/env';
 import { createStorage } from 'unstorage';
 import redisDriver from 'unstorage/drivers/redis';
 
 const storage = createStorage({
   driver: redisDriver({
+    url: env.valkeyUrl,
     base: 'telli:dialog',
-    host: 'localhost',
-    port: 6379,
   }),
 });
 
