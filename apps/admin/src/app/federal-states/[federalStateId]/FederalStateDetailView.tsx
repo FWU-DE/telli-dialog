@@ -10,6 +10,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { updateFederalState } from '../../../services/federal-states-service';
+import { DesignConfigurationSchema } from '@ui/types/design-configuration';
 
 export type FederalStateViewProps = {
   federalState: FederalState;
@@ -25,6 +26,7 @@ export function FederalStateView(props: FederalStateViewProps) {
         value: z.string(),
       }),
     ),
+    designConfiguration: z.string(), // Will be parsed as JSON before submitting
   });
   type FederalStateEdit = z.infer<typeof FederalStateEditSchema>;
   const {
@@ -55,9 +57,11 @@ export function FederalStateView(props: FederalStateViewProps) {
       let parsedDesignConfiguration = null;
       if (data.designConfiguration && data.designConfiguration.trim() !== '') {
         try {
-          parsedDesignConfiguration = JSON.parse(data.designConfiguration);
+          parsedDesignConfiguration = DesignConfigurationSchema.parse(
+            JSON.parse(data.designConfiguration),
+          );
         } catch {
-          alert('Fehler: designConfiguration ist kein gültiges JSON');
+          alert('Fehler: designConfiguration ist nicht im korrekten Format');
           return;
         }
       }

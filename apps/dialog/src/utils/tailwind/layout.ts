@@ -1,4 +1,4 @@
-import { DesignConfiguration } from '@/db/types';
+import { DesignConfiguration } from '@ui/types/design-configuration';
 
 export function constructRootLayoutStyle({
   designConfiguration,
