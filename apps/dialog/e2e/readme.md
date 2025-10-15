@@ -53,8 +53,9 @@ Then you can run the e2e tests.
 
 1. `pnpm e2e` - This runs all tests in headless mode without a visible browser.
 2. `pnpm e2e:headed` - This runs the tests in a visible browser.
-3. `pnpm e2e:ui` - This starts a graphical interface where the test are run. You can rerun tests directly within the interface.
+3. `pnpm e2e:ui` - This starts the playwright ui for the e2e tests.
 4. `pnpm e2e:api` - This runs the api tests.
+5. `pnpm e2e:api:ui` - This starts the playwright ui for the api tests.
 
 ### Run tests in vscode
 

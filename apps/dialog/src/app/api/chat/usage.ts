@@ -1,39 +1,25 @@
-import { dbInsertConversationUsage } from '@/db/functions/token-usage';
 import { getPriceLimitInCentByUser } from '@/app/school';
-import { CharacterModel, type LlmModel, type SharedSchoolConversationModel } from '@/db/schema';
+import { CharacterModel, type SharedSchoolConversationModel } from '@/db/schema';
 import { type UserAndContext } from '@/auth/types';
 import { getPriceInCentByUser } from '@/app/school';
-import { type LanguageModelUsage } from 'ai';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
-import { parseNumberOrDefault } from '@/utils/number';
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
   dbGetSharedChatUsageInCentBySharedChatId,
 } from '@/db/functions/intelli-points';
 
-export async function trackChatUsage({
-  usage,
-  model,
-  conversationId,
-  userId,
-  costsInCent,
-}: {
-  usage: LanguageModelUsage;
-  model: LlmModel | undefined;
-  userId: string | undefined;
-  conversationId: string | undefined;
-  costsInCent: number;
-}) {
-  if (model === undefined || conversationId === undefined || userId === undefined) return;
-
-  await dbInsertConversationUsage({
-    conversationId,
-    userId,
-    modelId: model.id,
-    completionTokens: parseNumberOrDefault(usage.completionTokens, 0),
-    promptTokens: parseNumberOrDefault(usage.promptTokens, 0),
-    costsInCent: costsInCent,
-  });
+/**
+ * Calculates the shared chat limit in cents
+ * @param user - The user and context
+ * @param intelligencePointsPercentageLimit - The percentage limit (e.g., 10 for 10%)
+ * @returns The calculated limit in cents
+ */
+async function calculateSharedChatLimitInCent(
+  user: UserAndContext,
+  intelligencePointsPercentageLimit: number,
+): Promise<number> {
+  const priceLimitInCent = await getPriceLimitInCentByUser(user);
+  return ((priceLimitInCent ?? 0) * intelligencePointsPercentageLimit) / 100;
 }
 
 export async function sharedChatHasReachedIntelliPointLimit({
@@ -65,7 +51,7 @@ export async function sharedChatHasReachedIntelliPointLimit({
     user.school.userRole === 'teacher' &&
     sharedChat.intelligencePointsLimit !== null &&
     sharedChatUsageInCent <
-      ((await getPriceLimitInCentByUser(user)) ?? 0 * sharedChat.intelligencePointsLimit) / 100
+      (await calculateSharedChatLimitInCent(user, sharedChat.intelligencePointsLimit))
   ) {
     return false;
   }
@@ -102,7 +88,7 @@ export async function sharedCharacterChatHasReachedIntelliPointLimit({
     user.school.userRole === 'teacher' &&
     character.intelligencePointsLimit !== null &&
     characterUsageInCent <
-      ((await getPriceLimitInCentByUser(user)) ?? 0 * character.intelligencePointsLimit) / 100
+      (await calculateSharedChatLimitInCent(user, character.intelligencePointsLimit))
   ) {
     return false;
   }

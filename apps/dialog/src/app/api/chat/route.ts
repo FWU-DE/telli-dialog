@@ -7,7 +7,7 @@ import {
 import { NextRequest, NextResponse } from 'next/server';
 import { dbInsertChatContent } from '@/db/functions/chat';
 import { getUser, updateSession, userHasCompletedTraining } from '@/auth/utils';
-import { userHasReachedIntelliPointLimit, trackChatUsage } from './usage';
+import { userHasReachedIntelliPointLimit } from './usage';
 import { getModelAndProviderWithResult, calculateCostsInCent, getAuxiliaryModel } from '../utils';
 import { generateUUID } from '@/utils/uuid';
 import { getChatTitle, getMostRecentUserMessage, limitChatHistory } from './utils';
@@ -30,6 +30,7 @@ import { formatMessagesWithImages } from './utils';
 import { logDebug } from '@/utils/logging/logging';
 import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
 import { dbGetCharacterByIdWithShareData } from '@/db/functions/character';
+import { dbInsertConversationUsage } from '@/db/functions/token-usage';
 
 export async function POST(request: NextRequest) {
   const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);
@@ -258,11 +259,12 @@ export async function POST(request: NextRequest) {
 
       const costsInCent = calculateCostsInCent(definedModel, assistantMessage.usage);
 
-      await trackChatUsage({
-        userId: user.id,
+      await dbInsertConversationUsage({
         conversationId: conversation.id,
-        model: definedModel,
-        usage: assistantMessage.usage,
+        userId: user.id,
+        modelId: definedModel.id,
+        completionTokens: assistantMessage.usage.completionTokens,
+        promptTokens: assistantMessage.usage.promptTokens,
         costsInCent: costsInCent,
       });
 
