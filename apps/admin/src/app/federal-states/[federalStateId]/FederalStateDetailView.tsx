@@ -56,7 +56,7 @@ export function FederalStateView(props: FederalStateViewProps) {
       if (data.designConfiguration && data.designConfiguration.trim() !== '') {
         try {
           parsedDesignConfiguration = JSON.parse(data.designConfiguration);
-        } catch (jsonError) {
+        } catch {
           alert('Fehler: designConfiguration ist kein gültiges JSON');
           return;
         }
