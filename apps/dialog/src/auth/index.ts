@@ -5,6 +5,7 @@ import { credentialsProvider } from './providers/credentials';
 import { getUserAndContextByUserId } from './utils';
 import { UserAndContext } from './types';
 import { logDebug, logError } from '@/utils/logging/logging';
+import { storeSession } from './session';
 
 // TODO: Move this to it's own file (see also: https://github.com/nextauthjs/next-auth/discussions/9120#discussioncomment-7544307)
 declare module 'next-auth' {
@@ -14,12 +15,12 @@ declare module 'next-auth' {
   }
 }
 
-const SESSION_LIFETIME = 60 * 60 * 8;
+const SESSION_LIFETIME_SECONDS = 60 * 60 * 8;
 
 const result = NextAuth({
   providers: [vidisConfig, mockVidisConfig, credentialsProvider],
   jwt: {
-    maxAge: SESSION_LIFETIME,
+    maxAge: SESSION_LIFETIME_SECONDS,
   },
   pages: {
     signIn: '/login',
@@ -27,7 +28,7 @@ const result = NextAuth({
   },
   session: {
     strategy: 'jwt',
-    maxAge: SESSION_LIFETIME,
+    maxAge: SESSION_LIFETIME_SECONDS,
   },
   trustHost: true,
   // https://next-auth.js.org/configuration/callbacks
@@ -46,6 +47,7 @@ const result = NextAuth({
       // account contains access_token, refresh_token, id_token, expires_in, session_state, etc.
       // profile contains user profile (if available) like name, preferred_username, given_name, family_name, email, etc.
       // user contains id, name, email
+      // console.log('JWT callback triggered', { token, account, profile, trigger, user });
       try {
         if (
           trigger === 'signIn' &&
@@ -55,6 +57,7 @@ const result = NextAuth({
           // This function can throw an error if the return type does not match our schema
           token = await handleVidisJWTCallback({ account, profile, token });
           token.hasCompletedTraining = (profile.hasCompletedTraining as boolean) ?? false;
+          if (user.id) await storeSession(user.id);
         }
         // Ensure userId is set for credentials provider
         if (account?.provider === 'credentials' && user?.id) {
@@ -73,9 +76,10 @@ const result = NextAuth({
         return null;
       }
     },
-    async session({ session, token }) {
+    async session({ session, token, user, trigger }) {
       // This callback is called whenever a session is checked (i.e. on the client)
       // in order to pass properties to the client, copy them from token to the session
+      // console.log('Session callback triggered', { session, token, user, trigger });
 
       const userId = token.userId;
       if (userId === undefined || userId === null) return session;
@@ -95,10 +99,11 @@ const result = NextAuth({
   // Events should only be used for instrumentation
   events: {
     async signIn(message) {
-      logDebug(`signIn event triggered: ${JSON.stringify(message)}`);
+      // logDebug(`signIn event triggered`);
+      // logDebug(`signIn event triggered: ${JSON.stringify(message)}`);
     },
     async signOut(message) {
-      logDebug(`signOut event triggered: ${JSON.stringify(message)}`);
+      // logDebug(`signOut event triggered: ${JSON.stringify(message)}`);
     },
   },
 });

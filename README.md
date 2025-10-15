@@ -61,6 +61,22 @@ To remove the database and delete all its data you can stop and remove the conta
 docker compose -f devops/docker/docker-compose.db.local.yml down -v
 ```
 
+## Valkey
+
+We use Valkey for storing session data.
+It is part of the docker-compose.db.local.yml file.
+If you want to access the values for testing or experimenting, you can use [valkey-cli](https://valkey.io/topics/installation/).
+Then you can access the local instance as follows:
+
+```sh
+# check if valkey-cli is installed correctly
+valkey-cli --version
+# check if connection to local instance is working, otherwise check hostname, port, etc.
+valkey-cli PING
+# show current stats
+valkey-cli --stats
+```
+
 ## E2E Tests
 
 We use playwright with a vidis mock server for e2e testing, refer to the [details](apps/dialog/e2e/readme.md) for setup guide.

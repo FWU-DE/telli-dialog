@@ -34,7 +34,6 @@
   "dependencies": {
     "@ai-sdk/openai": "1.1.9",
     "@ai-sdk/react": "1.2.12",
-    "@auth/unstorage-adapter": "2.11.0",
     "@aws-sdk/client-s3": "3.744.0",
     "@aws-sdk/s3-request-presigner": "3.744.0",
     "@deutschlandgpt/core": "0.1.5",
