@@ -15,7 +15,6 @@
   "packageManager": "pnpm@9.15.1",
   "dependencies": {
     "@opentelemetry/api": "1.9.0",
-    "@opentelemetry/exporter-jaeger": "2.1.0",
     "@opentelemetry/exporter-metrics-otlp-http": "0.206.0",
     "@opentelemetry/exporter-trace-otlp-http": "0.206.0",
     "@opentelemetry/resources": "2.1.0",
