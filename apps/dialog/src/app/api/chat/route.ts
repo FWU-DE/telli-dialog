@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { dbInsertChatContent } from '@/db/functions/chat';
 import { getUser, updateSession, userHasCompletedTraining } from '@/auth/utils';
 import { userHasReachedIntelliPointLimit, trackChatUsage } from './usage';
-import { getModelAndProviderWithResult, calculateCostsInCents, getAuxiliaryModel } from '../utils';
+import { getModelAndProviderWithResult, calculateCostsInCent, getAuxiliaryModel } from '../utils';
 import { generateUUID } from '@/utils/uuid';
 import { getChatTitle, getMostRecentUserMessage, limitChatHistory } from './utils';
 import { constructChatSystemPrompt } from './system-prompt';
@@ -256,11 +256,14 @@ export async function POST(request: NextRequest) {
         });
       }
 
+      const costsInCent = calculateCostsInCent(definedModel, assistantMessage.usage);
+
       await trackChatUsage({
         userId: user.id,
         conversationId: conversation.id,
         model: definedModel,
         usage: assistantMessage.usage,
+        costsInCent: costsInCent,
       });
 
       await sendRabbitmqEvent(
@@ -268,7 +271,7 @@ export async function POST(request: NextRequest) {
           user,
           promptTokens: assistantMessage.usage.promptTokens,
           completionTokens: assistantMessage.usage.completionTokens,
-          costsInCents: calculateCostsInCents(definedModel, assistantMessage.usage),
+          costsInCent: costsInCent,
           provider: definedModel.provider,
           anonymous: false,
           conversation,

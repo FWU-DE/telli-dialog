@@ -10,7 +10,7 @@ import { constructSystemPromptByCharacterSharedChat } from './system-prompt';
 import {
   getModelAndProviderWithResult,
   getSearchParamsFromUrl,
-  calculateCostsInCents,
+  calculateCostsInCent,
 } from '../utils';
 import {
   dbGetCharacterByIdAndInviteCode,
@@ -114,20 +114,22 @@ export async function POST(request: NextRequest) {
     messages,
     experimental_transform: smoothStream({ chunking: 'word' }),
     async onFinish(assistantMessage) {
+      const costsInCent = calculateCostsInCent(definedModel, assistantMessage.usage);
+
       await dbUpdateTokenUsageByCharacterChatId({
         modelId: definedModel.id,
         completionTokens: assistantMessage.usage.completionTokens,
         promptTokens: assistantMessage.usage.promptTokens,
         characterId: character.id,
         userId: teacherUserAndContext.id,
-        costsInCent: calculateCostsInCents(definedModel, assistantMessage.usage),
+        costsInCent: costsInCent,
       });
       await sendRabbitmqEvent(
         constructTelliNewMessageEvent({
           user: teacherUserAndContext,
           promptTokens: assistantMessage.usage.promptTokens,
           completionTokens: assistantMessage.usage.completionTokens,
-          costsInCents: calculateCostsInCents(definedModel, assistantMessage.usage),
+          costsInCent: costsInCent,
           provider: definedModel.provider,
           anonymous: true,
           character,
