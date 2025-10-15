@@ -72,7 +72,6 @@ export function FederalStateView(props: FederalStateViewProps) {
       });
       alert('Bundesland erfolgreich aktualisiert');
     } catch (error) {
-      console.error('Failed to update federal state:', error);
       alert('Fehler beim Aktualisieren des Bundeslands');
     }
   }
