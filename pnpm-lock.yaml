@@ -6223,6 +6223,9 @@ packages:
       encoding:
         optional: true
 
+  node-mock-http@1.0.3:
+    resolution: {integrity: sha512-jN8dK25fsfnMrVsEhluUTPkBFY+6ybu7jSB1n+ri/vOGjJxU8J9CZhpSGkHXSkFjtUhbmoncG/YG9ta5Ludqog==}
+
   node-plop@0.26.3:
     resolution: {integrity: sha512-Cov028YhBZ5aB7MdMWJEmwyBig43aGL5WT4vdoB28Oitau1zZAcHUn8Sgfk9HM33TqhtLJ9PlM/O0Mv+QpV/4Q==}
     engines: {node: '>=8.9.4'}
@@ -14813,6 +14816,8 @@ snapshots:
     dependencies:
       whatwg-url: 5.0.0
 
+  node-mock-http@1.0.3: {}
+
   node-plop@0.26.3:
     dependencies:
       '@babel/runtime-corejs3': 7.28.2
@@ -15373,6 +15378,8 @@ snapshots:
   quick-lru@7.0.1: {}
 
   rabbitmq-client@5.0.5: {}
+
+  radix3@1.1.2: {}
 
   randombytes@2.1.0:
     dependencies:
