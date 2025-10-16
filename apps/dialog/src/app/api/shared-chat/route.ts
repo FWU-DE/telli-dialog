@@ -12,7 +12,7 @@ import { dbUpdateTokenUsageBySharedChatId } from '@/db/functions/shared-school-c
 import {
   getModelAndProviderWithResult,
   getSearchParamsFromUrl,
-  calculateCostsInCents,
+  calculateCostsInCent,
 } from '../utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
@@ -111,13 +111,15 @@ export async function POST(request: NextRequest) {
     messages,
     experimental_transform: smoothStream({ chunking: 'word' }),
     async onFinish(assistantMessage) {
+      const costsInCent = calculateCostsInCent(definedModel, assistantMessage.usage);
+
       await dbUpdateTokenUsageBySharedChatId({
         modelId: definedModel.id,
         completionTokens: assistantMessage.usage.completionTokens,
         promptTokens: assistantMessage.usage.promptTokens,
         sharedSchoolConversationId: sharedChat.id,
         userId: teacherUserAndContext.id,
-        costsInCent: calculateCostsInCents(definedModel, assistantMessage.usage),
+        costsInCent: costsInCent,
       });
 
       await sendRabbitmqEvent(
@@ -126,7 +128,7 @@ export async function POST(request: NextRequest) {
           provider: modelAndProvider.definedModel.provider,
           promptTokens: assistantMessage.usage.promptTokens,
           completionTokens: assistantMessage.usage.completionTokens,
-          costsInCents: calculateCostsInCents(definedModel, assistantMessage.usage),
+          costsInCent: costsInCent,
           anonymous: true,
           sharedChat,
         }),

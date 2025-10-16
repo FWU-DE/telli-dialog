@@ -7,8 +7,8 @@ import {
 import { NextRequest, NextResponse } from 'next/server';
 import { dbInsertChatContent } from '@/db/functions/chat';
 import { getUser, updateSession, userHasCompletedTraining } from '@/auth/utils';
-import { userHasReachedIntelliPointLimit, trackChatUsage } from './usage';
-import { getModelAndProviderWithResult, calculateCostsInCents, getAuxiliaryModel } from '../utils';
+import { userHasReachedIntelliPointLimit } from './usage';
+import { getModelAndProviderWithResult, calculateCostsInCent, getAuxiliaryModel } from '../utils';
 import { generateUUID } from '@/utils/uuid';
 import { getChatTitle, getMostRecentUserMessage, limitChatHistory } from './utils';
 import { constructChatSystemPrompt } from './system-prompt';
@@ -30,6 +30,7 @@ import { formatMessagesWithImages } from './utils';
 import { logDebug } from '@/utils/logging/logging';
 import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
 import { dbGetCharacterByIdWithShareData } from '@/db/functions/character';
+import { dbInsertConversationUsage } from '@/db/functions/token-usage';
 
 export async function POST(request: NextRequest) {
   const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);
@@ -256,11 +257,15 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      await trackChatUsage({
-        userId: user.id,
+      const costsInCent = calculateCostsInCent(definedModel, assistantMessage.usage);
+
+      await dbInsertConversationUsage({
         conversationId: conversation.id,
-        model: definedModel,
-        usage: assistantMessage.usage,
+        userId: user.id,
+        modelId: definedModel.id,
+        completionTokens: assistantMessage.usage.completionTokens,
+        promptTokens: assistantMessage.usage.promptTokens,
+        costsInCent: costsInCent,
       });
 
       await sendRabbitmqEvent(
@@ -268,7 +273,7 @@ export async function POST(request: NextRequest) {
           user,
           promptTokens: assistantMessage.usage.promptTokens,
           completionTokens: assistantMessage.usage.completionTokens,
-          costsInCents: calculateCostsInCents(definedModel, assistantMessage.usage),
+          costsInCent: costsInCent,
           provider: definedModel.provider,
           anonymous: false,
           conversation,
