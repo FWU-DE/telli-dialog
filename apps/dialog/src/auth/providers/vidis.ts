@@ -62,7 +62,7 @@ export async function handleVidisJWTCallback({
   token: JWT;
   account: Account;
 }) {
-  console.log("max (temp):" + JSON.stringify(profile));
+  console.log('max (temp):' + JSON.stringify(profile));
 
   const parsedProfile = vidisProfileSchema.parse(profile);
   const parsedAccount = vidisAccountSchema.parse(account);
