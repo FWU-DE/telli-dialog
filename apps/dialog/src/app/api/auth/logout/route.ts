@@ -1,4 +1,3 @@
-import { deleteSession } from '@/auth/session';
 import { env } from '@/env';
 import { logError, logWarning } from '@/utils/logging/logging';
 import { getToken, JWT } from 'next-auth/jwt';
@@ -21,14 +20,6 @@ function redirectToIDP(token: JWT) {
   return NextResponse.redirect(logoutUrl);
 }
 
-async function clearSession(token: JWT) {
-  const sessionId = token.sid as string;
-  if (!sessionId) {
-    logWarning('No sid found in token');
-  }
-  await deleteSession(sessionId);
-}
-
 /**
  * Route to handle logout.
  * If a valid JWT token is available, we redirect to the IDP to logout current session.
@@ -38,7 +29,6 @@ export async function GET(req: NextRequest) {
   try {
     const token = await getToken({ req, secret: env.authSecret });
     if (token) {
-      await clearSession(token);
       return redirectToIDP(token);
     }
     return handleEmptyToken();

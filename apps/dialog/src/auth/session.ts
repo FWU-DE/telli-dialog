@@ -10,18 +10,14 @@ const storage = createStorage({
 });
 
 const SESSION_PREFIX = 'telli:dialog:session:';
+const TIME_TO_LIVE_SECONDS = 60 * 60 * 24; // remove blocklist items automatically after 24 hours
 
-/** create a new session with fixed expiration time to prevent stale data */
-export async function createSession(sessionId: string) {
-  storage.setItem(SESSION_PREFIX + sessionId, true, { ttl: 60 * 60 * 8 }); // 8 hours
-}
-
-/** check if a session exists */
-export async function doesSessionExist(sessionId: string) {
-  return storage.hasItem(SESSION_PREFIX + sessionId);
-}
-
-/** delete a session */
-export async function deleteSession(sessionId: string) {
-  return storage.removeItem(SESSION_PREFIX + sessionId);
-}
+/** List of outdated sessions because user logged out elsewhere. */
+export const sessionBlockList = {
+  add: async (sessionId: string) => {
+    await storage.setItem(SESSION_PREFIX + sessionId, true, { ttl: TIME_TO_LIVE_SECONDS });
+  },
+  has: async (sessionId: string) => {
+    return storage.hasItem(SESSION_PREFIX + sessionId);
+  },
+};

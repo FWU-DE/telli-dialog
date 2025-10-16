@@ -1,4 +1,4 @@
-import { deleteSession } from '@/auth/session';
+import { sessionBlockList } from '@/auth/session';
 import { logError, logWarning } from '@/utils/logging/logging';
 import * as jose from 'jose';
 import { NextRequest, NextResponse } from 'next/server';
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No sid found in logout_token' }, { status: 400 });
     }
 
-    await deleteSession(sessionId);
+    await sessionBlockList.add(sessionId);
     return new Response('OK', { status: 200 });
   } catch (error) {
     logError('Error processing backchannel logout', error);

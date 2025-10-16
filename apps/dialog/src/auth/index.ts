@@ -5,7 +5,6 @@ import { credentialsProvider } from './providers/credentials';
 import { getUserAndContextByUserId } from './utils';
 import { UserAndContext } from './types';
 import { logError } from '@/utils/logging/logging';
-import { createSession } from './session';
 
 // TODO: Move this to it's own file (see also: https://github.com/nextauthjs/next-auth/discussions/9120#discussioncomment-7544307)
 declare module 'next-auth' {
@@ -50,7 +49,6 @@ const result = NextAuth({
           // This function can throw an error if the return type does not match our schema
           token = await handleVidisJWTCallback({ account, profile, token });
           token.hasCompletedTraining = (profile.hasCompletedTraining as boolean) ?? false;
-          await createSession(profile.sid as string);
         }
         // Ensure userId is set for credentials provider
         if (account?.provider === 'credentials' && user?.id) {
