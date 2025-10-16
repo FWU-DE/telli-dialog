@@ -9,7 +9,7 @@ type CommonProps = {
   anonymous: boolean;
   promptTokens: number;
   completionTokens: number;
-  costsInCents: number;
+  costsInCent: number;
   provider: string;
 };
 
@@ -30,7 +30,7 @@ export function constructTelliNewMessageEvent(props: FunctionProps): TelliNewCha
     school_id: props.user.school.id,
     federal_state: props.user.federalState.id,
     provider: props.provider,
-    cost_in_cent: props.costsInCents,
+    cost_in_cent: props.costsInCent,
     timestamp: new Date(),
     user_role: props.anonymous ? 'anonymous' : props.user.school.userRole,
     input_tokens: props.promptTokens,

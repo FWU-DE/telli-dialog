@@ -149,7 +149,7 @@ test('teacher can login, create and delete shared chat, student can join chat', 
   await expect(startButton).toBeVisible();
   await startButton.click();
 
-  await page.getByPlaceholder('Wie kann ich Dir helfen?').fill('Was lernen wir hier?');
+  await page.getByPlaceholder('Wie kann ich Dir helfen?').fill('Über wen lernen wir hier?');
   await page.keyboard.press('Enter');
   await page.getByTitle('Kopieren').click();
 

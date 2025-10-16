@@ -52,19 +52,19 @@ export async function getModelAndProvider({
   return { telliProvider: telliConfiguration(definedModel.name), definedModel };
 }
 
-export function calculateCostsInCents(
+export function calculateCostsInCent(
   model: LlmModel,
   usage: { promptTokens: number; completionTokens: number },
 ) {
   if (model.priceMetadata.type === 'text') {
-    return calculateCostsInCentsForTextModel(model, usage);
+    return calculateCostsInCentForTextModel(model, usage);
   } else if (model.priceMetadata.type === 'embedding') {
-    return calculateCostsInCentsForEmbeddingModel(model, usage);
+    return calculateCostsInCentForEmbeddingModel(model, usage);
   }
   return 0;
 }
 
-function calculateCostsInCentsForTextModel(
+function calculateCostsInCentForTextModel(
   model: LlmModel,
   usage: { promptTokens: number; completionTokens: number },
 ) {
@@ -76,7 +76,7 @@ function calculateCostsInCentsForTextModel(
   return (completionTokenPrice + promptTokenPrice) / PRICE_AND_CENT_MULTIPLIER;
 }
 
-function calculateCostsInCentsForEmbeddingModel(
+function calculateCostsInCentForEmbeddingModel(
   model: LlmModel,
   usage: { promptTokens: number; completionTokens: number },
 ) {

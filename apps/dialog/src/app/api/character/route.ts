@@ -1,6 +1,6 @@
 import { type Message, smoothStream, streamText } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserAndContextByUserId, userHasCompletedTraining } from '@/auth/utils';
+import { getUserAndContextByUserId } from '@/auth/utils';
 import {
   sharedCharacterChatHasReachedIntelliPointLimit,
   sharedChatHasExpired,
@@ -10,7 +10,7 @@ import { constructSystemPromptByCharacterSharedChat } from './system-prompt';
 import {
   getModelAndProviderWithResult,
   getSearchParamsFromUrl,
-  calculateCostsInCents,
+  calculateCostsInCent,
 } from '../utils';
 import {
   dbGetCharacterByIdAndInviteCode,
@@ -34,8 +34,7 @@ export async function POST(request: NextRequest) {
   }
 
   const teacherUserAndContext = await getUserAndContextByUserId({ userId: character.userId });
-  const hasCompletedTraining = await userHasCompletedTraining();
-  const productAccess = checkProductAccess({ ...teacherUserAndContext, hasCompletedTraining });
+  const productAccess = checkProductAccess(teacherUserAndContext);
 
   if (!productAccess.hasAccess) {
     return NextResponse.json({ error: productAccess.errorType }, { status: 403 });
@@ -115,20 +114,22 @@ export async function POST(request: NextRequest) {
     messages,
     experimental_transform: smoothStream({ chunking: 'word' }),
     async onFinish(assistantMessage) {
+      const costsInCent = calculateCostsInCent(definedModel, assistantMessage.usage);
+
       await dbUpdateTokenUsageByCharacterChatId({
         modelId: definedModel.id,
         completionTokens: assistantMessage.usage.completionTokens,
         promptTokens: assistantMessage.usage.promptTokens,
         characterId: character.id,
         userId: teacherUserAndContext.id,
-        costsInCent: calculateCostsInCents(definedModel, assistantMessage.usage),
+        costsInCent: costsInCent,
       });
       await sendRabbitmqEvent(
         constructTelliNewMessageEvent({
           user: teacherUserAndContext,
           promptTokens: assistantMessage.usage.promptTokens,
           completionTokens: assistantMessage.usage.completionTokens,
-          costsInCents: calculateCostsInCents(definedModel, assistantMessage.usage),
+          costsInCent: costsInCent,
           provider: definedModel.provider,
           anonymous: true,
           character,

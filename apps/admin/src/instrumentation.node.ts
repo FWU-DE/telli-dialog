@@ -4,7 +4,7 @@ import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
-import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node';
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node';
 
 // For debugging purposes, you can uncomment the following two lines to enable console logging
 // import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
@@ -26,7 +26,7 @@ const sdk = new NodeSDK({
   resource: resourceFromAttributes({ [ATTR_SERVICE_NAME]: SERVICE_NAME }),
   metricReader: periodicExportingMetricReader,
   serviceName: SERVICE_NAME,
-  spanProcessors: [new SimpleSpanProcessor(new OTLPTraceExporter())],
+  spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter())],
 });
 
 sdk.start();

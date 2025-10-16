@@ -77,6 +77,16 @@ valkey-cli PING
 valkey-cli --stats
 ```
 
+## Monitoring
+
+To setup the monitoring and tracing stack in local development use following docker compose file:
+
+```sh
+docker compose -f devops/docker/monitoring.yml up -d
+```
+
+Also make sure to include the required env variables in your `.env.local`.
+
 ## E2E Tests
 
 We use playwright with a vidis mock server for e2e testing, refer to the [details](apps/dialog/e2e/readme.md) for setup guide.
