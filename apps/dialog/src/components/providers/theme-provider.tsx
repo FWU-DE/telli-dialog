@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { DesignConfiguration } from '@/db/types';
+import { DesignConfiguration } from '@ui/types/design-configuration';
 import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
 
 type ThemeContextType = {

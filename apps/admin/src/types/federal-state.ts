@@ -1,3 +1,4 @@
+import { DesignConfigurationSchema } from '@ui/types/design-configuration';
 import { z } from 'zod';
 
 export const FederalStateSchema = z.object({
@@ -9,7 +10,7 @@ export const FederalStateSchema = z.object({
   chatStorageTime: z.number(),
   supportContacts: z.array(z.string()),
   trainingLink: z.string().nullable(),
-  designConfiguration: z.string().nullable(),
+  designConfiguration: DesignConfigurationSchema.nullable(),
   telliName: z.string().nullable(),
   studentAccess: z.boolean(),
   enableCharacter: z.boolean(),
