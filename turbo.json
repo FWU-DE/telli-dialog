@@ -17,7 +17,8 @@
     "ENCRYPTION_KEY",
     "NEXTAUTH_URL",
     "RABBITMQ_URI",
-    "NEXT_RUNTIME"
+    "NEXT_RUNTIME",
+    "VALKEY_URL"
   ],
   "tasks": {
     "build": {

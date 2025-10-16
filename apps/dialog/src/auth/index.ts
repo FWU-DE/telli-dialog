@@ -4,7 +4,7 @@ import { mockVidisConfig } from './providers/vidis-mock';
 import { credentialsProvider } from './providers/credentials';
 import { getUserAndContextByUserId } from './utils';
 import { UserAndContext } from './types';
-import { logDebug, logError } from '@/utils/logging/logging';
+import { logError } from '@/utils/logging/logging';
 
 // TODO: Move this to it's own file (see also: https://github.com/nextauthjs/next-auth/discussions/9120#discussioncomment-7544307)
 declare module 'next-auth' {
@@ -14,12 +14,12 @@ declare module 'next-auth' {
   }
 }
 
-const SESSION_LIFETIME = 60 * 60 * 8;
+const SESSION_LIFETIME_SECONDS = 60 * 60 * 8;
 
 const result = NextAuth({
   providers: [vidisConfig, mockVidisConfig, credentialsProvider],
   jwt: {
-    maxAge: SESSION_LIFETIME,
+    maxAge: SESSION_LIFETIME_SECONDS,
   },
   pages: {
     signIn: '/login',
@@ -27,25 +27,19 @@ const result = NextAuth({
   },
   session: {
     strategy: 'jwt',
-    maxAge: SESSION_LIFETIME,
+    maxAge: SESSION_LIFETIME_SECONDS,
   },
   trustHost: true,
   // https://next-auth.js.org/configuration/callbacks
   callbacks: {
     async signIn() {
-      // account contains access_token, refresh_token, id_token, expires_in, session_state, etc.
-      // profile contains user profile (if available) like name, preferred_username, given_name, family_name, email, bundesland, rolle, schulkennung, etc.
-      // user contains id, name, email
       // all props are only passed the first time a user signs in, subsequent calls only provide a token
-
       // Todo: we should check if custom attributes like bundesland are provided and return false if not
       return true;
     },
     async jwt({ token, account, profile, trigger, user }) {
       // this callback is called when a JSON Web Token is created (i.e. at sign in and when the session is accessed in the client)
-      // account contains access_token, refresh_token, id_token, expires_in, session_state, etc.
-      // profile contains user profile (if available) like name, preferred_username, given_name, family_name, email, etc.
-      // user contains id, name, email
+      // Todo: this function is called very often when a user signs in
       try {
         if (
           trigger === 'signIn' &&
@@ -62,7 +56,6 @@ const result = NextAuth({
         if (trigger === 'update') {
           token.user = await getUserAndContextByUserId({ userId: token.userId as string });
         }
-        // Todo: that function is called very often so we should not make database calls here --> check token.user and token.school
         if (token.user === undefined || (token.user as UserAndContext).school === undefined) {
           token.user = await getUserAndContextByUserId({ userId: token.userId as string });
         }
@@ -93,11 +86,11 @@ const result = NextAuth({
   // https://next-auth.js.org/configuration/events
   // Events should only be used for instrumentation
   events: {
-    async signIn(message) {
-      logDebug(`signIn event triggered: ${JSON.stringify(message)}`);
+    async signIn() {
+      /* raise custom metric here as soon as we have one */
     },
-    async signOut(message) {
-      logDebug(`signOut event triggered: ${JSON.stringify(message)}`);
+    async signOut() {
+      /* raise custom metric here as soon as we have one */
     },
   },
 });
