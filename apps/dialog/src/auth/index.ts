@@ -54,7 +54,6 @@ const result = NextAuth({
         ) {
           // This function can throw an error if the return type does not match our schema
           token = await handleVidisJWTCallback({ account, profile, token });
-          token.hasCompletedTraining = (profile.hasCompletedTraining as boolean) ?? false;
         }
         // Ensure userId is set for credentials provider
         if (account?.provider === 'credentials' && user?.id) {

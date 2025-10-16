@@ -47,6 +47,7 @@ const vidisProfileSchema = z.object({
   at_hash: z.string(),
   // email: z.string(),
   // sid: z.string(),
+  is_ai_chat_eligible: z.boolean().optional(),
   rolle: z.string(),
   schulkennung: z.string().or(z.array(z.string())),
   bundesland: z.string(),
@@ -61,6 +62,8 @@ export async function handleVidisJWTCallback({
   token: JWT;
   account: Account;
 }) {
+  console.log('max (temp):' + JSON.stringify(profile));
+
   const parsedProfile = vidisProfileSchema.parse(profile);
   const parsedAccount = vidisAccountSchema.parse(account);
 
@@ -73,6 +76,7 @@ export async function handleVidisJWTCallback({
   token.userId = createdUser.id;
   token.email = createdUser.email;
   token.id_token = parsedAccount.id_token;
+  token.hasCompletedTraining = parsedProfile.is_ai_chat_eligible ?? false;
   return token;
 }
 
