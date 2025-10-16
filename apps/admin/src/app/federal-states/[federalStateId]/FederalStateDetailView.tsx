@@ -10,6 +10,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { updateFederalState } from '../../../services/federal-states-service';
+import { DesignConfigurationSchema } from '@ui/types/design-configuration';
 
 export type FederalStateViewProps = {
   federalState: FederalState;
@@ -25,6 +26,7 @@ export function FederalStateView(props: FederalStateViewProps) {
         value: z.string(),
       }),
     ),
+    designConfiguration: z.string(), // Will be parsed as JSON before submitting
   });
   type FederalStateEdit = z.infer<typeof FederalStateEditSchema>;
   const {
@@ -37,6 +39,9 @@ export function FederalStateView(props: FederalStateViewProps) {
     defaultValues: {
       ...federalState,
       supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
+      designConfiguration: federalState.designConfiguration
+        ? JSON.stringify(federalState.designConfiguration, null, 2)
+        : '',
     },
   });
   const { fields, append, remove } = useFieldArray({
@@ -48,17 +53,29 @@ export function FederalStateView(props: FederalStateViewProps) {
       return;
     }
     try {
+      // Parse designConfiguration as JSON if not empty, otherwise set to null
+      let parsedDesignConfiguration = null;
+      if (data.designConfiguration && data.designConfiguration.trim() !== '') {
+        try {
+          parsedDesignConfiguration = DesignConfigurationSchema.parse(
+            JSON.parse(data.designConfiguration),
+          );
+        } catch {
+          alert('Fehler: designConfiguration ist nicht im korrekten Format');
+          return;
+        }
+      }
+
       // trainingLink, designConfiguration, telliName can be null, but the form returns '' when empty
       await updateFederalState({
         ...data,
         supportContacts: data.supportContacts.map((s) => s.value),
         trainingLink: data.trainingLink === '' ? null : data.trainingLink,
-        designConfiguration: data.designConfiguration === '' ? null : data.designConfiguration,
+        designConfiguration: data.designConfiguration === '' ? null : parsedDesignConfiguration,
         telliName: data.telliName === '' ? null : data.telliName,
       });
       alert('Bundesland erfolgreich aktualisiert');
-    } catch (error) {
-      console.error('Failed to update federal state:', error);
+    } catch {
       alert('Fehler beim Aktualisieren des Bundeslands');
     }
   }
