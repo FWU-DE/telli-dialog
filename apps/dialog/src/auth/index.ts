@@ -13,6 +13,7 @@ declare module 'next-auth' {
     user?: UserAndContext;
     hasCompletedTraining?: boolean;
     sessionId?: string;
+    idToken?: string;
   }
 }
 
@@ -81,6 +82,7 @@ const result = NextAuth({
       // in order to pass properties to the client, copy them from token to the session
 
       if (token?.sessionId) session.sessionId = token.sessionId as string;
+      if (token?.id_token) session.idToken = token.id_token as string;
       const userId = token.userId;
       if (userId === undefined || userId === null) return session;
 
