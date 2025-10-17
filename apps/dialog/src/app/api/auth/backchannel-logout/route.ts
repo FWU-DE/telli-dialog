@@ -1,5 +1,5 @@
 import { sessionBlockList } from '@/auth/session';
-import { logError, logWarning } from '@/utils/logging/logging';
+import { logError, logInfo, logWarning } from '@/utils/logging/logging';
 import * as jose from 'jose';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -23,6 +23,7 @@ async function getLogoutTokenFromRequest(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
+    logInfo('Received backchannel logout request');
     const logoutToken = await getLogoutTokenFromRequest(req);
     if (!logoutToken) {
       logWarning('No logout_token found in request body');

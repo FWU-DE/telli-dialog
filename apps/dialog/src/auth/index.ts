@@ -4,13 +4,15 @@ import { mockVidisConfig } from './providers/vidis-mock';
 import { credentialsProvider } from './providers/credentials';
 import { getUserAndContextByUserId } from './utils';
 import { UserAndContext } from './types';
-import { logError } from '@/utils/logging/logging';
+import { logError, logInfo } from '@/utils/logging/logging';
+import { sessionBlockList } from './session';
 
 // TODO: Move this to it's own file (see also: https://github.com/nextauthjs/next-auth/discussions/9120#discussioncomment-7544307)
 declare module 'next-auth' {
   interface Session {
     user?: UserAndContext;
     hasCompletedTraining?: boolean;
+    sessionId?: string;
   }
 }
 
@@ -59,6 +61,15 @@ const result = NextAuth({
         if (token.user === undefined || (token.user as UserAndContext).school === undefined) {
           token.user = await getUserAndContextByUserId({ userId: token.userId as string });
         }
+        if (profile?.sid) {
+          token.sessionId = profile.sid;
+        }
+        if (token.sessionId) {
+          if (await sessionBlockList.has(token.sessionId as string)) {
+            logInfo('Session is blocked, returning null token');
+            return null;
+          }
+        }
         return token;
       } catch (error) {
         logError('Error in JWT callback', error);
@@ -69,6 +80,7 @@ const result = NextAuth({
       // This callback is called whenever a session is checked (i.e. on the client)
       // in order to pass properties to the client, copy them from token to the session
 
+      if (token?.sessionId) session.sessionId = token.sessionId as string;
       const userId = token.userId;
       if (userId === undefined || userId === null) return session;
 

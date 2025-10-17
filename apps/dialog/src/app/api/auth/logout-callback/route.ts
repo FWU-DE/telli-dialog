@@ -1,11 +1,11 @@
 import { env } from '@/env';
-import { logError } from '@/utils/logging/logging';
-import { redirect } from 'next/navigation';
+import { logError, logInfo } from '@/utils/logging/logging';
 import { NextResponse } from 'next/server';
 
 const LOGIN_PAGE = new URL('login', env.nextauthUrl);
 const SESSION_COOKIE_NAME = 'authjs.session-token';
 const SECURE_SESSION_COOKIE_NAME = `__Secure-${SESSION_COOKIE_NAME}`; // Used when site is served over HTTPS
+const SESSION_ID_COOKIE_NAME = 'telli-session-id';
 
 /**
  * This route is called by the IDP after logout.
@@ -16,9 +16,11 @@ export async function GET() {
     const response = NextResponse.redirect(LOGIN_PAGE);
     response.cookies.set(SESSION_COOKIE_NAME, '', { path: '/', maxAge: 0 });
     response.cookies.set(SECURE_SESSION_COOKIE_NAME, '', { path: '/', maxAge: 0 });
+    response.cookies.set(SESSION_ID_COOKIE_NAME, '', { path: '/', maxAge: 0 });
+    logInfo('logout-callback: returning redirect to login page and deleted session cookies');
     return response;
   } catch (error) {
-    logError('Error during logout-finished', error);
+    logError('Error during logout-callback', error);
+    return NextResponse.error();
   }
-  return redirect(env.nextauthUrl);
 }
