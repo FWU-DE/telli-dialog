@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
     }
 
     await sessionBlockList.add(sessionId);
+
     return new Response('OK', { status: 200 });
   } catch (error) {
     logError('Error processing backchannel logout', error);

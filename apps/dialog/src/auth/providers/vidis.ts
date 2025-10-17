@@ -4,6 +4,8 @@ import { Account, NextAuthConfig, Profile } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 import { z } from 'zod';
 
+export const VIDIS_LOGOUT_URL = new URL(env.vidisIssuerUri + '/protocol/openid-connect/logout');
+
 export const oAuthTokenResponseSchema = z.object({
   access_token: z.string(),
   expires_in: z.coerce.number(),

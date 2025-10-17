@@ -7,13 +7,12 @@ import { UserAndContext } from './types';
 import { logError, logInfo } from '@/utils/logging/logging';
 import { sessionBlockList } from './session';
 
-// TODO: Move this to it's own file (see also: https://github.com/nextauthjs/next-auth/discussions/9120#discussioncomment-7544307)
 declare module 'next-auth' {
   interface Session {
     user?: UserAndContext;
     hasCompletedTraining?: boolean;
-    sessionId?: string;
-    idToken?: string;
+    sessionId?: string; // identifies the session for blocking list after backchannel logout
+    idToken?: string; // needed for logout at identity provider (vidis)
   }
 }
 
@@ -41,8 +40,8 @@ const result = NextAuth({
       return true;
     },
     async jwt({ token, account, profile, trigger, user }) {
-      // this callback is called when a JSON Web Token is created (i.e. at sign in and when the session is accessed in the client)
-      // Todo: this function is called very often when a user signs in
+      // this callback is called when a JSON Web Token is created, updated or accessed in backend
+      // returning null will invalidate the token and end the session
       try {
         if (
           trigger === 'signIn' &&
@@ -83,15 +82,17 @@ const result = NextAuth({
 
       if (token?.sessionId) session.sessionId = token.sessionId as string;
       if (token?.id_token) session.idToken = token.id_token as string;
+
       const userId = token.userId;
       if (userId === undefined || userId === null) return session;
+
+      session.hasCompletedTraining = (token.hasCompletedTraining as boolean) ?? false;
 
       if (session?.user?.id === undefined) {
         session.user = {
           ...session.user,
           ...(token.user as UserAndContext),
         };
-        session.hasCompletedTraining = (token.hasCompletedTraining as boolean) ?? false;
       }
 
       return session;

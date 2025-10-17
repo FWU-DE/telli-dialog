@@ -1,9 +1,12 @@
 import LoginForm from './login-form';
 import { getMaybeUser } from '@/auth/utils';
 import Footer from '@/components/navigation/footer';
+import { env } from '@/env';
 import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
+
+export const LOGIN_PAGE_URL = new URL('/login', env.nextauthUrl);
 
 export default async function Page({ searchParams }: { searchParams?: { testlogin?: string } }) {
   const params = searchParams ? await searchParams : {};
