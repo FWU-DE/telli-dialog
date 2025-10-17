@@ -4,7 +4,6 @@ import { getToken, JWT } from 'next-auth/jwt';
 import { redirect } from 'next/navigation';
 import { NextRequest, NextResponse } from 'next/server';
 
-//const LOGIN_PAGE = new URL('/login', env.nextauthUrl);
 const LOGOUT_CALLBACK_URL = new URL('/api/auth/logout-callback', env.nextauthUrl);
 const VIDIS_LOGOUT_URL = new URL(env.vidisIssuerUri + '/protocol/openid-connect/logout');
 

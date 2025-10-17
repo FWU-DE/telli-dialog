@@ -28,7 +28,7 @@ export default function LoginForm() {
         </div>
         <button
           className={cn(buttonSecondaryClassName, 'w-full')}
-          onClick={() => signIn('vidis', { redirectTo: '/api/auth/login-callback' })}
+          onClick={() => signIn('vidis')}
           aria-label="Mit VIDIS einloggen"
         >
           Mit VIDIS einloggen
