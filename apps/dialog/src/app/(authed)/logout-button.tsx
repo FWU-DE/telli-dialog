@@ -2,13 +2,10 @@
 
 import { LogoutIcon } from '@/components/icons/logout';
 import { cn } from '@/utils/tailwind';
-import { signOut } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 
 async function logout() {
-  // Todo: TD-349 logout via IDP
-  // window.location.assign('/api/auth/logout');
-  signOut({ callbackUrl: '/login' });
+  window.location.assign('/api/auth/logout');
 }
 
 export default function LogoutButton({ className, ...props }: React.ComponentProps<'button'>) {

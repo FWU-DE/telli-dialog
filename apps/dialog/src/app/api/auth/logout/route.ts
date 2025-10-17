@@ -1,22 +1,22 @@
 import { env } from '@/env';
-import { logError, logWarning } from '@/utils/logging/logging';
+import { logError, logInfo, logWarning } from '@/utils/logging/logging';
 import { getToken, JWT } from 'next-auth/jwt';
 import { redirect } from 'next/navigation';
 import { NextRequest, NextResponse } from 'next/server';
 
-const LOGIN_PAGE = new URL('/login', env.nextauthUrl);
-const LOGOUT_FINISHED_URL = new URL('/api/auth/logout-finished', env.nextauthUrl);
+const LOGOUT_CALLBACK_URL = new URL('/api/auth/logout-callback', env.nextauthUrl);
 const VIDIS_LOGOUT_URL = new URL(env.vidisIssuerUri + '/protocol/openid-connect/logout');
 
 function handleEmptyToken() {
-  logWarning('No valid token found, redirecting to login page');
-  return NextResponse.redirect(LOGIN_PAGE);
+  logWarning('No valid token found, redirecting to logout-callback url');
+  return NextResponse.redirect(LOGOUT_CALLBACK_URL);
 }
 
 function redirectToIDP(token: JWT) {
+  logInfo('Redirecting to IDP with token for logout');
   const logoutUrl = new URL(VIDIS_LOGOUT_URL);
   logoutUrl.searchParams.append('id_token_hint', token.id_token as string);
-  logoutUrl.searchParams.append('post_logout_redirect_uri', LOGOUT_FINISHED_URL.toString());
+  logoutUrl.searchParams.append('post_logout_redirect_uri', LOGOUT_CALLBACK_URL.toString());
   return NextResponse.redirect(logoutUrl);
 }
 
