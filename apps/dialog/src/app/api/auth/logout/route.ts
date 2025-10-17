@@ -1,7 +1,6 @@
 import { env } from '@/env';
 import { logError, logInfo, logWarning } from '@/utils/logging/logging';
 import { getToken, JWT } from 'next-auth/jwt';
-import { redirect } from 'next/navigation';
 import { NextRequest, NextResponse } from 'next/server';
 
 const LOGOUT_CALLBACK_URL = new URL('/api/auth/logout-callback', env.nextauthUrl);
@@ -21,13 +20,21 @@ function redirectToIDP(token: JWT) {
 }
 
 /**
+/**
  * Route to handle logout.
  * If a valid JWT token is available, we redirect to the IDP to logout current session.
  * If no token is available, we simply redirect to the login page.
  */
 export async function GET(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: env.authSecret });
+    const cookies = req.cookies.getAll();
+    const tokenRaw = await getToken({ req, secret: env.authSecret, raw: true });
+    const cookieNames = cookies.map((c) => c.name).join(', ');
+    logInfo(
+      `Processing logout request: found ${cookies.length} cookies with names: ${cookieNames} and tokenRaw: ${tokenRaw}`,
+    );
+    const useSecureCookie = env.nextauthUrl.startsWith('https://');
+    const token = await getToken({ req, secret: env.authSecret, secureCookie: useSecureCookie });
     if (token) {
       return redirectToIDP(token);
     }
@@ -35,5 +42,5 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     logError('Error during logout', error);
   }
-  return redirect(env.nextauthUrl);
+  return NextResponse.redirect(env.nextauthUrl);
 }
