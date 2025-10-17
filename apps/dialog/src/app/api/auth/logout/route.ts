@@ -1,7 +1,7 @@
+import { auth } from '@/auth';
 import { env } from '@/env';
 import { logError, logInfo, logWarning } from '@/utils/logging/logging';
 import { getToken, JWT } from 'next-auth/jwt';
-import { redirect } from 'next/navigation';
 import { NextRequest, NextResponse } from 'next/server';
 
 const LOGOUT_CALLBACK_URL = new URL('/api/auth/logout-callback', env.nextauthUrl);
@@ -12,14 +12,15 @@ function handleEmptyToken() {
   return NextResponse.redirect(LOGOUT_CALLBACK_URL);
 }
 
-function redirectToIDP(token: JWT) {
+function redirectToIDP(idToken: string) {
   logInfo('Redirecting to IDP with token for logout');
   const logoutUrl = new URL(VIDIS_LOGOUT_URL);
-  logoutUrl.searchParams.append('id_token_hint', token.id_token as string);
+  logoutUrl.searchParams.append('id_token_hint', idToken);
   logoutUrl.searchParams.append('post_logout_redirect_uri', LOGOUT_CALLBACK_URL.toString());
   return NextResponse.redirect(logoutUrl);
 }
 
+/**
 /**
  * Route to handle logout.
  * If a valid JWT token is available, we redirect to the IDP to logout current session.
@@ -27,13 +28,23 @@ function redirectToIDP(token: JWT) {
  */
 export async function GET(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: env.authSecret });
-    if (token) {
-      return redirectToIDP(token);
+    const cookies = req.cookies.getAll();
+    const tokenRaw = await getToken({ req, secret: env.authSecret, raw: true });
+    const cookieNames = cookies.map((c) => c.name).join(', ');
+    logInfo(
+      `Processing logout request: found ${cookies.length} cookies with names: ${cookieNames} and tokenRaw: ${tokenRaw}`,
+    );
+    const useSecureCookie = env.nextauthUrl.startsWith('https://');
+    const token = await getToken({ req, secret: env.authSecret, secureCookie: useSecureCookie });
+    console.log('Token at logout:', JSON.stringify(token as JWT));
+    const session = await auth();
+    console.log('Session at logout:', JSON.stringify(session));
+    if (session?.idToken) {
+      return redirectToIDP(session?.idToken);
     }
     return handleEmptyToken();
   } catch (error) {
     logError('Error during logout', error);
   }
-  return redirect(env.nextauthUrl);
+  return NextResponse.redirect(env.nextauthUrl);
 }
