@@ -82,10 +82,11 @@ const result = NextAuth({
 
       if (token?.sessionId) session.sessionId = token.sessionId as string;
       if (token?.id_token) session.idToken = token.id_token as string;
-      session.hasCompletedTraining = (token.hasCompletedTraining as boolean) ?? false;
 
       const userId = token.userId;
       if (userId === undefined || userId === null) return session;
+
+      session.hasCompletedTraining = (token.hasCompletedTraining as boolean) ?? false;
 
       if (session?.user?.id === undefined) {
         session.user = {
