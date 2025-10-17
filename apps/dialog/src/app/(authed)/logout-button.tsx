@@ -3,9 +3,10 @@
 import { LogoutIcon } from '@/components/icons/logout';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
+import { LOGOUT_URL } from '../api/auth/logout/route';
 
 async function logout() {
-  window.location.assign('/api/auth/logout');
+  window.location.assign(LOGOUT_URL);
 }
 
 export default function LogoutButton({ className, ...props }: React.ComponentProps<'button'>) {
