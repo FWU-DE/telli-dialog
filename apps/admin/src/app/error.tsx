@@ -15,7 +15,9 @@ export default function Error({
   return (
     <div>
       <h1>Ein Fehler ist aufgetreten!</h1>
-      <span>{error.message}</span>
+      {error.name && <pre>Name: {error.name}</pre>}
+      {error.message && <pre>Message: {error.message}</pre>}
+      {error.stack && <pre>Stack: {error.stack}</pre>}
     </div>
   );
 }
