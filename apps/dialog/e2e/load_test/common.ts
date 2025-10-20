@@ -1,7 +1,6 @@
 import { Page } from 'k6/browser';
-import { SCREENSHOT_FOLDERS } from './config';
+import { BASE_URL, SCREENSHOT_FOLDERS, SELECTORS, WAIT_TIMES_IN_MS } from './config';
 import { check } from 'k6';
-import { BASE_URL, WAIT_TIMES_IN_MS, SELECTORS } from './config';
 
 export async function saveScreenshot(page: Page, userIndex: string, isSuccess: boolean) {
   try {
@@ -22,10 +21,9 @@ export async function saveScreenshot(page: Page, userIndex: string, isSuccess: b
 }
 
 export async function performLogin(page: Page, userName: string, password: string) {
-  let successfullLogin = false;
+  let successfulLogin = false;
   try {
     await page.goto(`${BASE_URL}/login?testlogin=true`);
-    await page.waitForTimeout(WAIT_TIMES_IN_MS.PAGE_LOAD);
 
     const usernameInput = page.locator(SELECTORS.USERNAME_INPUT);
     await usernameInput.waitFor();
@@ -38,17 +36,18 @@ export async function performLogin(page: Page, userName: string, password: strin
     const loginButton = page.locator(SELECTORS.LOGIN_BUTTON);
     await loginButton.waitFor();
     await loginButton.click();
-    await page.waitForTimeout(WAIT_TIMES_IN_MS.PAGE_LOAD);
-    successfullLogin = true;
+
+    await page.locator(SELECTORS.PROFILE_BUTTON).waitFor();
+    successfulLogin = true;
   } finally {
     check(page, {
-      'Login was successful': () => successfullLogin,
+      'Login was successful': () => successfulLogin,
     });
   }
 }
 
 export async function selectModel(page: Page, userIndex: number) {
-  let sucessfullyselected = false;
+  let successfullySelected = false;
   try {
     const dropdownLocator = page.locator(SELECTORS.LLM_DROPDOWN);
     await dropdownLocator.waitFor();
@@ -58,7 +57,7 @@ export async function selectModel(page: Page, userIndex: number) {
       userIndex % 2 === 0 ? SELECTORS.LLAMA_MODEL_NAME : SELECTORS.GPT_MODEL_NAME;
 
     if (currentSelectedText && currentSelectedText.includes(targetModelName)) {
-      sucessfullyselected = true;
+      successfullySelected = true;
       console.log(
         `Model ${targetModelName} already selected for user ${userIndex}, skipping selection`,
       );
@@ -66,54 +65,45 @@ export async function selectModel(page: Page, userIndex: number) {
     }
 
     await dropdownLocator.click();
-    await page.waitForTimeout(WAIT_TIMES_IN_MS.ELEMENT_LOAD);
+    await page.locator(SELECTORS.DROPDOWN_WRAPPER).waitFor();
 
-    const modelLocator =
-      userIndex % 2 === 0 ? page.locator(SELECTORS.LLAMA_MODEL) : page.locator(SELECTORS.GPT_MODEL);
+    const modelSelector = userIndex % 2 === 0 ? 'LLAMA_MODEL' : 'GPT_MODEL';
+    const modelName = SELECTORS[`${modelSelector}_NAME` as const];
+    const modelLocator = page.locator(SELECTORS[modelSelector]);
 
     await modelLocator.waitFor();
+
+    const changeLlmResponse = page.waitForResponse(new RegExp(modelName, 'i'));
     await modelLocator.click();
-    await page.waitForTimeout(WAIT_TIMES_IN_MS.ELEMENT_LOAD);
+    await changeLlmResponse;
     console.log(`Selected model ${targetModelName} for user ${userIndex}`);
-    sucessfullyselected = true;
+    successfullySelected = true;
   } finally {
     check(page, {
-      'Model selected': () => sucessfullyselected,
+      'Model selected': () => successfullySelected,
     });
   }
 }
 
 export async function sendMessage(page: Page, prompt: string) {
-  let responseReceived = false;
-  let content: string = '';
+  let content = '';
   try {
     const inputField = page.locator(SELECTORS.MESSAGE_INPUT);
     await inputField.waitFor();
-    await page.waitForTimeout(WAIT_TIMES_IN_MS.ELEMENT_LOAD);
     await inputField.fill(prompt);
 
-    // This fixes the "element is not attached to the DOM" errors, by waiting for a new button
+    // This fixes the "element is not attached to the DOM" errors by waiting for a new button
     await page.click(SELECTORS.SEND_BUTTON);
 
     const aiMessage = page.locator(SELECTORS.AI_MESSAGE);
-    await aiMessage.waitFor({ state: 'visible', timeout: WAIT_TIMES_IN_MS.AI_MESSAGE_TIMEOUT });
+    await aiMessage.waitFor({ timeout: WAIT_TIMES_IN_MS.AI_MESSAGE_TIMEOUT });
 
-    let attempts = 0;
-    while (true) {
-      content = (await aiMessage.textContent()) ?? '';
-
-      if (content.includes('ENDE') || attempts > 20) {
-        responseReceived = true;
-        console.log(`AI response received. Content length: ${content.trim().length}`);
-        return;
-      }
-      await page.waitForTimeout(WAIT_TIMES_IN_MS.POLL_TIME);
-      attempts++;
-    }
+    await page.locator(SELECTORS.RELOAD_BUTTON).waitFor();
+    content = (await aiMessage.textContent())?.trim() ?? '';
+    console.log(`AI response received. Content length: ${content.length}`);
   } finally {
     check(page, {
-      'AI response received via polling': () => responseReceived,
-      'AI response has content': () => content.trim().length > 10,
+      'AI response has expected content': () => content.includes('ENDE'),
     });
   }
 }

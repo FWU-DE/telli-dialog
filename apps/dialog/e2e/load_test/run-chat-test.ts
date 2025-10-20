@@ -6,7 +6,7 @@ export const options = HEADLESS_BROWSER_OPTIONS;
 
 const PROMPT = `Ich bin eine Lehrerin an einer Schule und unterrichte ein technisches Fach. 
 Wie kann ich dennoch dazu beitragen, den Schülerinnen und Schülern soziale Werte zu vermitteln? Bitte schreib mir dazu 2-5 Sätze. 
-Bitte beende außerdem deine Nachricht mit ENDE, nur so weiß ich, dass du fertig bist.`;
+Bitte beende außerdem deine Nachricht mit dem Wort "ENDE", nur so weiß ich, dass du fertig bist.`;
 
 export default async function main() {
   const context = await browser.newContext();
