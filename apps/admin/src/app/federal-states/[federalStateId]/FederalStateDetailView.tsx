@@ -21,6 +21,7 @@ import {
 import { FormField } from '@ui/components/form/FormField';
 import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
 import { FormFieldArray } from '../../../components/form/FormFieldArray';
+import { toast } from 'sonner';
 
 export type FederalStateViewProps = {
   federalState: FederalState;
@@ -54,7 +55,7 @@ export function FederalStateView(props: FederalStateViewProps) {
             JSON.parse(data.designConfiguration),
           );
         } catch {
-          alert('Fehler: designConfiguration ist nicht im korrekten Format');
+          toast.error('Fehler: designConfiguration ist nicht im korrekten Format');
           return;
         }
       }
@@ -65,9 +66,9 @@ export function FederalStateView(props: FederalStateViewProps) {
         trainingLink: data.trainingLink,
         designConfiguration: data.designConfiguration === '' ? null : parsedDesignConfiguration,
       });
-      alert('Bundesland erfolgreich aktualisiert');
+      toast.success('Bundesland erfolgreich aktualisiert');
     } catch {
-      alert('Fehler beim Aktualisieren des Bundeslands');
+      toast.error('Fehler beim Aktualisieren des Bundeslands');
     }
   }
 
