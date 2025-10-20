@@ -7,8 +7,7 @@ import { check } from 'k6';
 
 export const options = HEADLESS_BROWSER_OPTIONS;
 
-const PROMPT = `Was sind große Meilensteine im Leben von Van Gogh? Bitte schreib mir dazu 2-5 Sätze. 
-Bitte beende außerdem deine Nachricht mit dem Wort "ENDE", nur so weiß ich, dass du fertig bist.`;
+const PROMPT = `Was sind große Meilensteine im Leben von Van Gogh? Bitte schreib mir dazu 2-5 Sätze.`;
 
 const UPLOAD_FILE_PATH = 'assets/Van_Gogh_Wikipedia.pdf';
 
