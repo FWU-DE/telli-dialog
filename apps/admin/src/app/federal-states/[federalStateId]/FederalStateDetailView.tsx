@@ -4,11 +4,22 @@ import { Button } from '@ui/components/Button';
 import { Checkbox } from '@ui/components/Checkbox';
 import { Input } from '@ui/components/Input';
 import { Label } from '@ui/components/Label';
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from '@ui/components/Field';
 import { Textarea } from '@ui/components/Textarea';
-import { FederalStateSchema, FederalState } from '../../../types/federal-state';
-import { useFieldArray, useForm } from 'react-hook-form';
+import {
+  FederalState,
+  FederalStateEdit,
+  FederalStateEditSchema,
+} from '../../../types/federal-state';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { updateFederalState } from '../../../services/federal-states-service';
 import { DesignConfigurationSchema } from '@ui/types/design-configuration';
 
@@ -18,23 +29,8 @@ export type FederalStateViewProps = {
 
 export function FederalStateView(props: FederalStateViewProps) {
   const federalState = props.federalState;
-  // Id should not be editable
-  const FederalStateEditSchema = FederalStateSchema.extend({
-    id: z.literal(federalState.id),
-    supportContacts: z.array(
-      z.object({
-        value: z.string(),
-      }),
-    ),
-    designConfiguration: z.string(), // Will be parsed as JSON before submitting
-  });
-  type FederalStateEdit = z.infer<typeof FederalStateEditSchema>;
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { isValid },
-  } = useForm<FederalStateEdit>({
+
+  const form = useForm<FederalStateEdit>({
     resolver: zodResolver(FederalStateEditSchema),
     defaultValues: {
       ...federalState,
@@ -44,10 +40,19 @@ export function FederalStateView(props: FederalStateViewProps) {
         : '',
     },
   });
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { isValid },
+  } = form;
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'supportContacts',
   });
+
   async function onSubmit(data: FederalStateEdit) {
     if (!isValid) {
       return;
@@ -70,9 +75,9 @@ export function FederalStateView(props: FederalStateViewProps) {
       await updateFederalState({
         ...data,
         supportContacts: data.supportContacts.map((s) => s.value),
-        trainingLink: data.trainingLink === '' ? null : data.trainingLink,
+        trainingLink: data.trainingLink,
         designConfiguration: data.designConfiguration === '' ? null : parsedDesignConfiguration,
-        telliName: data.telliName === '' ? null : data.telliName,
+        telliName: data.telliName,
       });
       alert('Bundesland erfolgreich aktualisiert');
     } catch {
@@ -89,42 +94,131 @@ export function FederalStateView(props: FederalStateViewProps) {
           <Button type="button">Guthaben Codes</Button>
         </Link>
       </div>
-      <div>
-        <Label>id</Label>
-        <Input value={federalState.id} disabled />
-      </div>
-      <div>
-        <Label>telliName</Label>
-        <Input {...register('telliName')} />
-      </div>
-      <div>
-        <Label>CreatedAt</Label>
-        <Input value={federalState.createdAt} disabled />
-      </div>
-      <div>
-        <Label>teacherPriceLimit</Label>
-        <Input type="number" {...register('teacherPriceLimit', { valueAsNumber: true })} />
-      </div>
-      <div>
-        <Label>studentAccess</Label>
-        <Checkbox {...register('studentAccess')} />
-      </div>
-      <div>
-        <Label>studentPriceLimit</Label>
-        <Input type="number" {...register('studentPriceLimit', { valueAsNumber: true })} />
-      </div>
-      <div>
-        <Label>chatStorageTime</Label>
-        <Input type="number" {...register('chatStorageTime', { valueAsNumber: true })} />
-      </div>
-      <div>
-        <Label>mandatoryCertificationTeacher</Label>
-        <Checkbox {...register('mandatoryCertificationTeacher')} />
-      </div>
-      <div>
-        <Label>trainingLink</Label>
-        <Input {...register('trainingLink')} />
-      </div>
+      <Controller
+        name="id"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>ID</FieldLabel>
+            <Input {...field} id={field.name} disabled />
+            <FieldDescription>Eindeutige ID des Bundeslandes.</FieldDescription>
+          </Field>
+        )}
+      />
+      <Controller
+        name="createdAt"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Erstellt am</FieldLabel>
+            <Input {...field} id={field.name} disabled />
+            <FieldDescription>Datum, an dem das Bundesland erstellt wurde.</FieldDescription>
+          </Field>
+        )}
+      />
+      <Controller
+        name="telliName"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+            <Input {...field} id={field.name} />
+            <FieldDescription>Erlaubt den Zugriff auch für Schüler.</FieldDescription>
+          </Field>
+        )}
+      />
+      <Controller
+        name="teacherPriceLimit"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Preislimit für Lehrer</FieldLabel>
+            <Input {...field} id={field.name} type="number" />
+            <FieldDescription>
+              Legt das Preislimit (in Cent) für Lehrer pro Monat fest.
+            </FieldDescription>
+          </Field>
+        )}
+      />
+      <Controller
+        name="studentAccess"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <FieldSet data-invalid={fieldState.invalid}>
+            <FieldLegend variant="label">Student Access</FieldLegend>
+            <FieldDescription>Erlaubt den Zugriff auch für Schüler.</FieldDescription>
+            <FieldGroup data-slot="checkbox-group">
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="student-access-checkbox"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+                <FieldLabel htmlFor="student-access-checkbox">Student Access</FieldLabel>
+              </Field>
+            </FieldGroup>
+          </FieldSet>
+        )}
+      />
+      <Controller
+        name="studentPriceLimit"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Preislimit für Schüler</FieldLabel>
+            <Input {...field} id={field.name} type="number" />
+            <FieldDescription>
+              Legt das Preislimit (in Cent) für Schüler pro Monat fest.
+            </FieldDescription>
+          </Field>
+        )}
+      />
+      <Controller
+        name="chatStorageTime"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Speicherzeit für Chats</FieldLabel>
+            <Input {...field} id={field.name} type="number" />
+            <FieldDescription>Legt die Speicherzeit (in Tagen) für Chats fest.</FieldDescription>
+          </Field>
+        )}
+      />
+      <Controller
+        name="mandatoryCertificationTeacher"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <FieldSet data-invalid={fieldState.invalid}>
+            <FieldLegend variant="label">Mandatory Certification Teacher</FieldLegend>
+            <FieldDescription>
+              Lehrer müssen zuerst eine Schulung abschließen bevor die Verwendung erlaubt wird.
+            </FieldDescription>
+            <FieldGroup data-slot="checkbox-group">
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="mandatory-certification-teacher-checkbox"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+                <FieldLabel htmlFor="mandatory-certification-teacher-checkbox">
+                  Mandatory Certification Teacher
+                </FieldLabel>
+              </Field>
+            </FieldGroup>
+          </FieldSet>
+        )}
+      />
+      <Controller
+        name="trainingLink"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel htmlFor={field.name}>Link für die Schulung</FieldLabel>
+            <Input {...field} id={field.name} />
+            <FieldDescription>Legt den Link für die Schulung fest.</FieldDescription>
+          </Field>
+        )}
+      />
       <div>
         <Label>supportContacts</Label>
         <div className="space-y-2">
@@ -141,18 +235,66 @@ export function FederalStateView(props: FederalStateViewProps) {
           </Button>
         </div>
       </div>
-      <div>
-        <Label>enableCharacter</Label>
-        <Checkbox {...register('enableCharacter')} />
-      </div>
-      <div>
-        <Label>enableCustomGpt</Label>
-        <Checkbox {...register('enableCustomGpt')} />
-      </div>
-      <div>
-        <Label>enableSharedChats</Label>
-        <Checkbox {...register('enableSharedChats')} />
-      </div>
+      <Controller
+        name="enableCharacter"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <FieldSet data-invalid={fieldState.invalid}>
+            <FieldLegend variant="label">Enable Character</FieldLegend>
+            <FieldDescription>Schaltet die Verwendung von Dialogpartnern frei.</FieldDescription>
+            <FieldGroup data-slot="checkbox-group">
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="enable-character-checkbox"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+                <FieldLabel htmlFor="enable-character-checkbox">Enable Character</FieldLabel>
+              </Field>
+            </FieldGroup>
+          </FieldSet>
+        )}
+      />
+      <Controller
+        name="enableCustomGpt"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <FieldSet data-invalid={fieldState.invalid}>
+            <FieldLegend variant="label">Enable Custom GPT</FieldLegend>
+            <FieldDescription>Schaltet die Verwendung von Assistenten frei.</FieldDescription>
+            <FieldGroup data-slot="checkbox-group">
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="enable-custom-gpt-checkbox"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+                <FieldLabel htmlFor="enable-custom-gpt-checkbox">Enable Custom GPT</FieldLabel>
+              </Field>
+            </FieldGroup>
+          </FieldSet>
+        )}
+      />
+      <Controller
+        name="enableSharedChats"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <FieldSet data-invalid={fieldState.invalid}>
+            <FieldLegend variant="label">Enable Shared Chats</FieldLegend>
+            <FieldDescription>Schaltet die Verwendung von geteilten Chats frei.</FieldDescription>
+            <FieldGroup data-slot="checkbox-group">
+              <Field orientation="horizontal">
+                <Checkbox
+                  id="enable-shared-chats-checkbox"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+                <FieldLabel htmlFor="enable-shared-chats-checkbox">Enable Shared Chats</FieldLabel>
+              </Field>
+            </FieldGroup>
+          </FieldSet>
+        )}
+      />
       <div>
         <Label>designConfiguration</Label>
         <Textarea {...register('designConfiguration')} />
