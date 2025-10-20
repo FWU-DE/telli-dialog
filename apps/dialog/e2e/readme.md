@@ -7,7 +7,7 @@ One of the most notable things is an oidc mock provider to mock [VIDIS](https://
 
 ## Mock OIDC Vidis
 
-Due do the complexity of having the actual vidis authentication provider in the pipeline,
+Due to the complexity of having the actual vidis authentication provider in the pipeline,
 there is a mock oidc server vidis server configured in the [`vidis-mock-server.ts`](./vidis-mock-server.ts) file.
 
 It exposes an OIDC compliant mock server (with VIDIS claims) on [http://localhost:9000](http://localhost:9000).
@@ -37,13 +37,13 @@ teacher: {
 },
 ```
 
-When being directed for the oidc provider page and the username and password, you just have to specify the username. The password currently does not matter.
+When being directed to the oidc provider page and the username and password, you just have to specify the username. The password currently does not matter.
 
 ## Run e2e tests
 
 Make sure that there is a `.env.local` file that contains the configuration necessary for the tests to run.
 
-Ensure that all the requried browsers are installed.
+Ensure that all the required browsers are installed.
 
 ```sh
 pnpm playwright install
@@ -68,19 +68,19 @@ Run or debug a test directly from here.
 ## Run load tests locally
 
 If you want to run load tests, you need to install `k6`.
+Follow the instructions at https://grafana.com/docs/k6/latest/set-up/install-k6
 
-```sh
-pnpm install k6
-```
-
-Ensure that all the requried browsers are installed.
+Ensure that all the required browsers are installed.
 
 ```sh
 pnpm playwright install
 ```
 
-Set the passwort for the load test user in the .env.local file
+Set the password for the load test user in the .env.local file
+
+```dotenv
 LOADTEST_PASSWORD="test"
+```
 
 Then you can run the load tests from the directory apps/dialog.
 
