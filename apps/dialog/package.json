@@ -90,7 +90,6 @@
     "rabbitmq-client": "5.0.5",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "react-hook-form": "7.54.2",
     "react-image-crop": "11.0.7",
     "react-markdown": "9.0.3",
     "react-syntax-highlighter": "15.6.1",

@@ -309,9 +309,6 @@ importers:
       react-dom:
         specifier: 19.0.0
         version: 19.0.0(react@19.0.0)
-      react-hook-form:
-        specifier: 7.54.2
-        version: 7.54.2(react@19.0.0)
       react-image-crop:
         specifier: 11.0.7
         version: 11.0.7(react@19.0.0)
@@ -535,6 +532,9 @@ importers:
       react:
         specifier: 19.0.0
         version: 19.0.0
+      react-hook-form:
+        specifier: 7.54.2
+        version: 7.54.2(react@19.0.0)
       tailwindcss:
         specifier: 4.1.11
         version: 4.1.11
