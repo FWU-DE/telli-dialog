@@ -33,6 +33,7 @@ export function FederalStateView(props: FederalStateViewProps) {
     resolver: zodResolver(FederalStateEditSchema),
     defaultValues: {
       ...federalState,
+      // react-hook-form does not support array of primitives, so we map to array of objects
       supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
       designConfiguration: federalState.designConfiguration
         ? JSON.stringify(federalState.designConfiguration, null, 2)
@@ -58,7 +59,6 @@ export function FederalStateView(props: FederalStateViewProps) {
         }
       }
 
-      // trainingLink, designConfiguration, telliName can be null, but the form returns '' when empty
       await updateFederalState({
         ...data,
         supportContacts: data.supportContacts.map((s) => s.value),
