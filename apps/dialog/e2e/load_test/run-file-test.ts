@@ -1,23 +1,31 @@
 import { browser, Page } from 'k6/browser';
-import { File, open } from 'k6/experimental/fs';
+import { open } from 'k6/experimental/fs';
 import encoding from 'k6/encoding';
-import { WAIT_TIMES_IN_MS, HEADLESS_BROWSER_OPTIONS } from './config';
+import { HEADLESS_BROWSER_OPTIONS, SELECTORS, WAIT_TIMES_IN_MS } from './config';
 import { performLogin, saveScreenshot, selectModel, sendMessage } from './common';
 import { check } from 'k6';
 
 export const options = HEADLESS_BROWSER_OPTIONS;
 
 const PROMPT = `Was sind große Meilensteine im Leben von Van Gogh? Bitte schreib mir dazu 2-5 Sätze. 
-Bitte beende außerdem deine Nachricht mit ENDE, nur so weiß ich, dass du fertig bist.`;
+Bitte beende außerdem deine Nachricht mit dem Wort "ENDE", nur so weiß ich, dass du fertig bist.`;
 
 const UPLOAD_FILE_PATH = 'assets/Van_Gogh_Wikipedia.pdf';
 
-let fileData: File;
-(async function () {
-  fileData = await open(UPLOAD_FILE_PATH);
-})();
+const filePromise = open(UPLOAD_FILE_PATH);
 
-export default async function main() {
+export async function setup() {
+  const file = await filePromise;
+  const stat = await file.stat();
+  const buffer = new Uint8Array(stat.size);
+  const bytesRead = await file.read(buffer);
+  if (bytesRead !== stat.size) {
+    throw new Error('unexpected number of bytes read');
+  }
+  return { pdfBase64: encoding.b64encode(buffer, 'std') };
+}
+
+export default async function main(data: { pdfBase64: string }) {
   const context = await browser.newContext();
   await context.clearCookies();
   const page = await context.newPage();
@@ -39,8 +47,8 @@ export default async function main() {
 
   try {
     await performLogin(page, userName, password);
-    await uploadPdfFile(page, userIndex);
     await selectModel(page, Number(__VU) + Number(__ITER));
+    await uploadPdfFile(page, userIndex, data.pdfBase64);
     await sendMessage(page, PROMPT);
 
     testSuccessful = true;
@@ -67,34 +75,20 @@ export default async function main() {
   }
 }
 
-async function readAll(file: File) {
-  const fileInfo = await file.stat();
-  const buffer = new Uint8Array(fileInfo.size);
-
-  const bytesRead = await file.read(buffer);
-  if (bytesRead !== fileInfo.size) {
-    throw new Error('unexpected number of bytes read');
-  }
-
-  return buffer;
-}
-
-async function uploadPdfFile(page: Page, userIndex: string) {
+async function uploadPdfFile(page: Page, userIndex: string, pdfBase64: string) {
   let successfulUpload = false;
   try {
-    const buffer = await readAll(fileData);
-
-    const file = {
-      name: userIndex + '.pdf',
+    const uploadPromise = page.waitForResponse(/api\/v1\/files$/, {
+      timeout: WAIT_TIMES_IN_MS.FILE_UPLOAD_TIMEOUT,
+    });
+    await page.setInputFiles('input[type="file"]', {
+      // @ts-expect-error Typings from @types/k6 are incorrect, string is allowed
+      buffer: pdfBase64,
       mimeType: 'application/pdf',
-      buffer: encoding.b64encode(buffer.buffer),
-    };
+      name: `${userIndex}.pdf`,
+    });
 
-    const fileInputSelector = 'input[type="file"]';
-
-    // @ts-ignore
-    await page.setInputFiles(fileInputSelector, [file]);
-    await page.waitForTimeout(WAIT_TIMES_IN_MS.FILE_LOAD);
+    await uploadPromise;
     successfulUpload = true;
   } finally {
     check(page, {

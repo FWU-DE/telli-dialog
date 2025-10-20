@@ -2,12 +2,9 @@ export const BASE_URL = 'https://chat-staging.telli.schule';
 //export const BASE_URL = 'http://localhost:3000';
 
 export const WAIT_TIMES_IN_MS = {
-  PAGE_LOAD: 5000, // Time to wait for a new page to load
   PAGE_ELEMENT_TIMEOUT: 10000, // Maximum time to wait for an element to appear
   AI_MESSAGE_TIMEOUT: 30000, // Maximum time to wait for a chat message to appear
-  ELEMENT_LOAD: 1000, // Time to wait for elements to load after actions
-  POLL_TIME: 1000, // Time to wait between polling attempts
-  FILE_LOAD: 10000, // Time to wait for file uploads
+  FILE_UPLOAD_TIMEOUT: 30000, // Time to wait for file uploads
 };
 
 export const SELECTORS = {
@@ -25,7 +22,6 @@ export const SELECTORS = {
   RELOAD_BUTTON: '[aria-label="Reload"]',
   PROFILE_BUTTON: '[aria-label="profileDropdown"]',
   DROPDOWN_WRAPPER: 'div[data-radix-popper-content-wrapper]',
-  ICON_DEATTACH_FILE: 'svg[data-icon="deattach-file"]',
 };
 
 export const SCREENSHOT_FOLDERS = {
