@@ -1,13 +1,12 @@
 'use client';
 import Link from 'next/dist/client/link';
 import { Button } from '@ui/components/Button';
-import { Input } from '@ui/components/Input';
 import {
   FederalState,
   FederalStateEdit,
   FederalStateEditSchema,
 } from '../../../types/federal-state';
-import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { updateFederalState } from '../../../services/federal-states-service';
 import { DesignConfigurationSchema } from '@ui/types/design-configuration';
@@ -21,7 +20,7 @@ import {
 } from '@ui/components/Card';
 import { FormField } from '@ui/components/form/FormField';
 import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
-import { Field, FieldDescription, FieldError, FieldLegend, FieldSet } from '@ui/components/Field';
+import { FormFieldArray } from '../../../components/form/FormFieldArray';
 
 export type FederalStateViewProps = {
   federalState: FederalState;
@@ -41,19 +40,8 @@ export function FederalStateView(props: FederalStateViewProps) {
     },
   });
 
-  const {
-    handleSubmit,
-    control,
-    formState: { isValid },
-  } = form;
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'supportContacts',
-  });
-
   async function onSubmit(data: FederalStateEdit) {
-    if (!isValid) {
+    if (!form.formState.isValid) {
       return;
     }
     try {
@@ -95,7 +83,7 @@ export function FederalStateView(props: FederalStateViewProps) {
         </CardAction>
       </CardHeader>
       <CardContent>
-        <form className="flex flex-col gap-8" onSubmit={handleSubmit(onSubmit)}>
+        <form className="flex flex-col gap-8" onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
             name="id"
             label="ID"
@@ -164,37 +152,13 @@ export function FederalStateView(props: FederalStateViewProps) {
             control={form.control}
           />
 
-          <FieldSet>
-            <FieldLegend variant="label">Support Emailadressen</FieldLegend>
-            <FieldDescription>
-              Emailadressen die im Supportfall benutzt werden können. Diese werden im Disclaimer
-              angezeigt.
-            </FieldDescription>
-            <div className="flex flex-col gap-2">
-              {fields.map((item, index) => (
-                <div key={item.id} className="flex gap-2">
-                  <Controller
-                    name={`supportContacts.${index}.value`}
-                    control={form.control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <div className="flex flex-row gap-2">
-                          <Input {...field} id={`supportContacts.${index}.name`} type="email" />
-                          <Button type="button" variant="destructive" onClick={() => remove(index)}>
-                            Entfernen
-                          </Button>
-                        </div>
-                        <FieldError>{fieldState.error?.message}</FieldError>
-                      </Field>
-                    )}
-                  />
-                </div>
-              ))}
-              <Button type="button" onClick={() => append({ value: '' })}>
-                Kontakt hinzufügen
-              </Button>
-            </div>
-          </FieldSet>
+          <FormFieldArray
+            name="supportContacts"
+            label="Support Emailadressen"
+            description="Emailadressen die im Supportfall benutzt werden können. Diese werden im Disclaimer angezeigt."
+            control={form.control}
+            inputType="email"
+          />
 
           <FormFieldCheckbox
             name="enableCharacter"
