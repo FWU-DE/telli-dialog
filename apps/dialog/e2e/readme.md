@@ -87,25 +87,25 @@ Then you can run the load tests from the directory apps/dialog.
 This runs the tests in a visible browser:
 
 ```sh
-K6_BROWSER_HEADLESS=false pnpm k6:build && K6_BROWSER_HEADLESS=false k6 run e2e/load_test/run-chat-test.js -e K6_BROWSER_HEADLESS=false -e LOADTEST_PASSWORD=test
+pnpm k6:build && K6_BROWSER_HEADLESS=false k6 run e2e/load_test/run-chat-test.js -e LOADTEST_PASSWORD=test
 ```
 
 or
 
 ```sh
-K6_BROWSER_HEADLESS=false pnpm k6:build && K6_BROWSER_HEADLESS=false k6 run e2e/load_test/run-file-test.js -e K6_BROWSER_HEADLESS=false -e LOADTEST_PASSWORD=test
+pnpm k6:build && K6_BROWSER_HEADLESS=false k6 run e2e/load_test/run-file-test.js -e LOADTEST_PASSWORD=test
 ```
 
 This runs the tests in headless mode without a visible browser:
 
 ```sh
-pnpm k6:build && K6_BROWSER_HEADLESS=true K6_BROWSER_ARGS='no-sandbox' k6 run e2e/load_test/run-chat-test.js -e K6_BROWSER_HEADLESS=true -e K6_BROWSER_ARGS='no-sandbox'
+pnpm k6:build && K6_BROWSER_HEADLESS=true K6_BROWSER_ARGS='no-sandbox' k6 run e2e/load_test/run-chat-test.js
 ```
 
 or
 
 ```sh
-pnpm k6:build && K6_BROWSER_HEADLESS=true K6_BROWSER_ARGS='no-sandbox' k6 run e2e/load_test/run-file-test.js -e K6_BROWSER_HEADLESS=true -e K6_BROWSER_ARGS='no-sandbox'
+pnpm k6:build && K6_BROWSER_HEADLESS=true K6_BROWSER_ARGS='no-sandbox' k6 run e2e/load_test/run-file-test.js
 ```
 
 ## Run load tests in Grafana Cloud K6
