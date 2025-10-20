@@ -33,6 +33,7 @@ export function FormField<
       render={({ field, fieldState }) => (
         <Field data-invalid={fieldState.invalid}>
           <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+          {description && <FieldDescription>{description}</FieldDescription>}
           {type === 'textArea' ? (
             <Textarea {...field} id={field.name} disabled={disabled} />
           ) : (
@@ -52,7 +53,6 @@ export function FormField<
             />
           )}
           <FieldError>{fieldState.error?.message}</FieldError>
-          {description && <FieldDescription>{description}</FieldDescription>}
         </Field>
       )}
     />

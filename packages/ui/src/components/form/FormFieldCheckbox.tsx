@@ -1,14 +1,5 @@
 import { Controller, Control, FieldPath, FieldValues } from 'react-hook-form';
-import { Input } from '../Input';
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-  FieldLegend,
-  FieldSet,
-} from '../Field';
+import { Field, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSet } from '../Field';
 import { Checkbox } from '../Checkbox';
 
 type FormFieldCheckboxProps<
@@ -39,6 +30,7 @@ export function FormFieldCheckbox<
       render={({ field, fieldState }) => (
         <FieldSet data-invalid={fieldState.invalid}>
           <FieldLegend variant="label">{label}</FieldLegend>
+          {description && <FieldDescription>{description}</FieldDescription>}
           <FieldGroup data-slot="checkbox-group">
             <Field orientation="horizontal">
               <Checkbox
@@ -50,7 +42,6 @@ export function FormFieldCheckbox<
               <FieldLabel htmlFor={field.name + '-checkbox'}>{label}</FieldLabel>
             </Field>
           </FieldGroup>
-          {description && <FieldDescription>{description}</FieldDescription>}
         </FieldSet>
       )}
     />
