@@ -1,4 +1,4 @@
-import { Page } from 'k6/browser';
+import { browser, BrowserContext, Page } from 'k6/browser';
 import { BASE_URL, SCREENSHOT_FOLDERS, SELECTORS, WAIT_TIMES_IN_MS } from './config';
 import { check } from 'k6';
 
@@ -17,6 +17,56 @@ export async function saveScreenshot(page: Page, userIndex: string, isSuccess: b
   } catch (screenshotError) {
     console.error(`Failed to save screenshot for user ${userIndex}:`, screenshotError);
     // Don't throw here - we don't want screenshot failures to break the test
+  }
+}
+
+export async function runTest(
+  testFunction: (data: {
+    context: BrowserContext;
+    page: Page;
+    userIndex: string;
+    userName: string;
+    password: string;
+  }) => Promise<void>,
+) {
+  const context = await browser.newContext();
+  await context.clearCookies();
+  const page = await context.newPage();
+
+  page.setDefaultTimeout(WAIT_TIMES_IN_MS.PAGE_ELEMENT_TIMEOUT);
+
+  const userIndex = `${__VU}-${__ITER}-${Date.now()}`;
+  const userName = 'test';
+  const password = __ENV.LOADTEST_PASSWORD;
+
+  if (!password) {
+    throw new Error(
+      'Please provide the password for the test user via the env variable LOADTEST_PASSWORD',
+    );
+  }
+
+  let testSuccessful = false;
+
+  try {
+    await testFunction({ context, page, userIndex, userName, password });
+
+    testSuccessful = true;
+    console.log(`Test successful for user ${userIndex}`);
+  } catch (error) {
+    console.error(`Error during test execution for user ${userIndex}:`, error);
+    throw error;
+  } finally {
+    await saveScreenshot(page, userIndex, testSuccessful);
+
+    console.info({
+      userIndex,
+      testSuccessful,
+      vu: __VU,
+      iter: __ITER,
+    });
+
+    await page.close();
+    await context.close();
   }
 }
 
