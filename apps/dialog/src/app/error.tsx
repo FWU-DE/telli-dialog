@@ -23,7 +23,7 @@ export default function Error({
         <span>Fehler</span>
       </h1>
       <h2 className="text-xl font-bold">Es ist leider ein Fehler aufgetreten.</h2>
-      <span className="pt-4">{error.message}</span>
+      {error.message && <span className="pt-4">{error.message}</span>}
       <button
         className="btn-primary mt-12"
         onClick={
