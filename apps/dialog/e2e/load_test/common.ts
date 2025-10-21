@@ -123,9 +123,10 @@ export async function selectModel(page: Page, userIndex: number) {
 
     await modelLocator.waitFor();
 
-    const changeLlmResponse = page.waitForResponse(new RegExp(modelName, 'i'));
+    const changeLlmNavigation = page.waitForURL(new RegExp(modelName, 'i'));
     await modelLocator.click();
-    await changeLlmResponse;
+    await page.waitForTimeout(5000); // TODO: remove timeout after staging is deployed
+    await changeLlmNavigation;
     console.log(`Selected model ${targetModelName} for user ${userIndex}`);
     successfullySelected = true;
   } finally {
