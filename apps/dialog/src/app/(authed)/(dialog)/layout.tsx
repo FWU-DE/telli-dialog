@@ -7,7 +7,6 @@ import { contentHeight } from '@/utils/tailwind/height';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@/db/functions/llm-model';
 import { getPriceInCentByUser, getPriceLimitInCentByUser } from '@/app/school';
-import AutoLogout from '@/components/auth/auto-logout';
 import { checkProductAccess } from '@/utils/vidis/access';
 import ProductAccessModal from '@/components/modals/product-access';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
@@ -36,7 +35,6 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
 
   return (
     <div className="flex h-[100dvh] w-[100dvw]">
-      <AutoLogout />
       <SidebarVisibilityProvider>
         <LlmModelsProvider
           models={models}
