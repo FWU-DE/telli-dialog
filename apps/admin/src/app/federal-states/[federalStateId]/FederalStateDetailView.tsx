@@ -44,6 +44,7 @@ export function FederalStateView(props: FederalStateViewProps) {
 
   async function onSubmit(data: FederalStateEdit) {
     if (!form.formState.isValid) {
+      toast.error('Das Formular enthält ungültige Werte.');
       return;
     }
     try {
@@ -63,7 +64,6 @@ export function FederalStateView(props: FederalStateViewProps) {
       await updateFederalState({
         ...data,
         supportContacts: data.supportContacts.map((s) => s.value),
-        trainingLink: data.trainingLink,
         designConfiguration: data.designConfiguration === '' ? null : parsedDesignConfiguration,
       });
       toast.success('Bundesland erfolgreich aktualisiert');
