@@ -14,8 +14,6 @@ import { Badge } from '../common/badge';
 
 type SelectLlmModelProps = {
   isStudent?: boolean;
-  predefinedModel?: string;
-  model?: string;
 };
 
 export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProps) {
@@ -44,7 +42,6 @@ export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProp
   const selectedModel = models.find((model) => model.name === optimisticModelId);
 
   if (selectedModel === undefined) {
-    setOptimisticModelId(DEFAULT_CHAT_MODEL);
     return undefined;
   }
 
