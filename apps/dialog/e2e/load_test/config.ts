@@ -1,10 +1,10 @@
-export const BASE_URL = 'https://chat-staging.telli.schule';
+export const BASE_URL = __ENV.LOADTEST_BASE_URL || 'https://chat-staging.telli.schule';
 //export const BASE_URL = 'http://localhost:3000';
 
 export const WAIT_TIMES_IN_MS = {
-  PAGE_ELEMENT_TIMEOUT: 10000, // Maximum time to wait for an element to appear
-  AI_MESSAGE_TIMEOUT: 30000, // Maximum time to wait for a chat message to appear
-  FILE_UPLOAD_TIMEOUT: 30000, // Time to wait for file uploads
+  PAGE_ELEMENT_TIMEOUT: 10_000, // Maximum time to wait for an element to appear
+  AI_MESSAGE_TIMEOUT: 30_000, // Maximum time to wait for a chat message to appear
+  FILE_UPLOAD_TIMEOUT: 30_000, // Time to wait for file uploads
 };
 
 export const SELECTORS = {

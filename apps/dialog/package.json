@@ -28,7 +28,11 @@
     "e2e:api:ui": "dotenvx run -f .env.local -- playwright test tests/api/ --ui",
     "e2e:headed": "playwright test --headed",
     "e2e:ui": "playwright test --ui",
-    "k6:build": "node e2e/load_test/esbuild.k6.config.mjs"
+    "k6:build": "node e2e/load_test/esbuild.k6.config.mjs",
+    "prek6:run": "pnpm k6:build",
+    "k6:run": "dotenvx run -f .env.k6 -- k6 run",
+    "prek6:run:cloud": "pnpm k6:build",
+    "k6:run:cloud": "dotenvx run -f .env.k6 -- k6 cloud run"
   },
   "packageManager": "pnpm@9.15.1",
   "dependencies": {
