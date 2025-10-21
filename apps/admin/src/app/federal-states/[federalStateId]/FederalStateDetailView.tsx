@@ -1,16 +1,27 @@
 'use client';
 import Link from 'next/dist/client/link';
 import { Button } from '@ui/components/Button';
-import { Checkbox } from '@ui/components/Checkbox';
-import { Input } from '@ui/components/Input';
-import { Label } from '@ui/components/Label';
-import { Textarea } from '@ui/components/Textarea';
-import { FederalStateSchema, FederalState } from '../../../types/federal-state';
-import { useFieldArray, useForm } from 'react-hook-form';
+import {
+  FederalState,
+  FederalStateEdit,
+  FederalStateEditSchema,
+} from '../../../types/federal-state';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { updateFederalState } from '../../../services/federal-states-service';
 import { DesignConfigurationSchema } from '@ui/types/design-configuration';
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@ui/components/Card';
+import { FormField } from '@ui/components/form/FormField';
+import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
+import { FormFieldArray } from '../../../components/form/FormFieldArray';
+import { toast } from 'sonner';
 
 export type FederalStateViewProps = {
   federalState: FederalState;
@@ -18,38 +29,22 @@ export type FederalStateViewProps = {
 
 export function FederalStateView(props: FederalStateViewProps) {
   const federalState = props.federalState;
-  // Id should not be editable
-  const FederalStateEditSchema = FederalStateSchema.extend({
-    id: z.literal(federalState.id),
-    supportContacts: z.array(
-      z.object({
-        value: z.string(),
-      }),
-    ),
-    designConfiguration: z.string(), // Will be parsed as JSON before submitting
-  });
-  type FederalStateEdit = z.infer<typeof FederalStateEditSchema>;
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { isValid },
-  } = useForm<FederalStateEdit>({
+
+  const form = useForm<FederalStateEdit>({
     resolver: zodResolver(FederalStateEditSchema),
     defaultValues: {
       ...federalState,
+      // react-hook-form does not support array of primitives, so we map to array of objects
       supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
       designConfiguration: federalState.designConfiguration
         ? JSON.stringify(federalState.designConfiguration, null, 2)
         : '',
     },
   });
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'supportContacts',
-  });
+
   async function onSubmit(data: FederalStateEdit) {
-    if (!isValid) {
+    if (!form.formState.isValid) {
+      toast.error('Das Formular enthält ungültige Werte.');
       return;
     }
     try {
@@ -61,105 +56,144 @@ export function FederalStateView(props: FederalStateViewProps) {
             JSON.parse(data.designConfiguration),
           );
         } catch {
-          alert('Fehler: designConfiguration ist nicht im korrekten Format');
+          toast.error('Fehler: designConfiguration ist nicht im korrekten Format');
           return;
         }
       }
 
-      // trainingLink, designConfiguration, telliName can be null, but the form returns '' when empty
       await updateFederalState({
         ...data,
         supportContacts: data.supportContacts.map((s) => s.value),
-        trainingLink: data.trainingLink === '' ? null : data.trainingLink,
         designConfiguration: data.designConfiguration === '' ? null : parsedDesignConfiguration,
-        telliName: data.telliName === '' ? null : data.telliName,
       });
-      alert('Bundesland erfolgreich aktualisiert');
+      toast.success('Bundesland erfolgreich aktualisiert');
     } catch {
-      alert('Fehler beim Aktualisieren des Bundeslands');
+      toast.error('Fehler beim Aktualisieren des Bundeslands');
     }
   }
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-      <div className="flex items-center gap-4 mb-4">
-        <h1 className="text-2xl font-bold">Bundesland Detailansicht</h1>
-        <span className="text-gray-500">({federalState.id})</span>
-        <Link href={`/federal-states/${federalState.id}/vouchers`}>
-          <Button type="button">Guthaben Codes</Button>
-        </Link>
-      </div>
-      <div>
-        <Label>id</Label>
-        <Input value={federalState.id} disabled />
-      </div>
-      <div>
-        <Label>telliName</Label>
-        <Input {...register('telliName')} />
-      </div>
-      <div>
-        <Label>CreatedAt</Label>
-        <Input value={federalState.createdAt} disabled />
-      </div>
-      <div>
-        <Label>teacherPriceLimit</Label>
-        <Input type="number" {...register('teacherPriceLimit', { valueAsNumber: true })} />
-      </div>
-      <div>
-        <Label>studentAccess</Label>
-        <Checkbox {...register('studentAccess')} />
-      </div>
-      <div>
-        <Label>studentPriceLimit</Label>
-        <Input type="number" {...register('studentPriceLimit', { valueAsNumber: true })} />
-      </div>
-      <div>
-        <Label>chatStorageTime</Label>
-        <Input type="number" {...register('chatStorageTime', { valueAsNumber: true })} />
-      </div>
-      <div>
-        <Label>mandatoryCertificationTeacher</Label>
-        <Checkbox {...register('mandatoryCertificationTeacher')} />
-      </div>
-      <div>
-        <Label>trainingLink</Label>
-        <Input {...register('trainingLink')} />
-      </div>
-      <div>
-        <Label>supportContacts</Label>
-        <div className="space-y-2">
-          {fields.map((field, index) => (
-            <div key={field.id} className="flex gap-2">
-              <Input {...register(`supportContacts.${index}.value` as const)} />
-              <Button type="button" variant="destructive" onClick={() => remove(index)}>
-                Entfernen
-              </Button>
-            </div>
-          ))}
-          <Button type="button" onClick={() => append({ value: '' })}>
-            Kontakt hinzufügen
-          </Button>
-        </div>
-      </div>
-      <div>
-        <Label>enableCharacter</Label>
-        <Checkbox {...register('enableCharacter')} />
-      </div>
-      <div>
-        <Label>enableCustomGpt</Label>
-        <Checkbox {...register('enableCustomGpt')} />
-      </div>
-      <div>
-        <Label>enableSharedChats</Label>
-        <Checkbox {...register('enableSharedChats')} />
-      </div>
-      <div>
-        <Label>designConfiguration</Label>
-        <Textarea {...register('designConfiguration')} />
-      </div>
-      <div className="flex gap-8">
-        <Button type="submit">Speichern</Button>
-      </div>
-    </form>
+    <Card>
+      <CardHeader>
+        <CardTitle>Bundesland Detailansicht</CardTitle>
+        <CardDescription>Details zum Bundesland {federalState.id}</CardDescription>
+        <CardAction>
+          <Link href={`/federal-states/${federalState.id}/vouchers`}>
+            <Button type="button">Guthaben Codes</Button>
+          </Link>
+        </CardAction>
+      </CardHeader>
+      <CardContent>
+        <form className="flex flex-col gap-8" onSubmit={form.handleSubmit(onSubmit)}>
+          <FormField
+            name="id"
+            label="ID"
+            description="Eindeutige ID des Bundeslandes."
+            control={form.control}
+            disabled
+          />
+
+          <FormField
+            name="createdAt"
+            label="Erstellt am"
+            description="Datum, an dem das Bundesland erstellt wurde."
+            control={form.control}
+            disabled
+          />
+
+          <FormField
+            name="telliName"
+            label="Name"
+            description="Beschreibender Name für das Bundesland."
+            control={form.control}
+          />
+
+          <FormField
+            name="teacherPriceLimit"
+            label="Preislimit für Unterrichtende"
+            description="Legt das Preislimit (in Cent) für Unterrichtende pro Monat fest."
+            control={form.control}
+            type="number"
+          />
+
+          <FormFieldCheckbox
+            name="studentAccess"
+            label="Zugriff für Lernende erlaubt?"
+            description="Erlaubt den Zugriff auch für Lernende."
+            control={form.control}
+          />
+
+          <FormField
+            name="studentPriceLimit"
+            label="Preislimit für Lernende"
+            description="Legt das Preislimit (in Cent) für Lernende pro Monat fest."
+            control={form.control}
+            type="number"
+          />
+
+          <FormField
+            name="chatStorageTime"
+            label="Speicherzeit für Chats"
+            description="Legt die Speicherzeit (in Tagen) für Chats fest."
+            control={form.control}
+            type="number"
+          />
+
+          <FormFieldCheckbox
+            name="mandatoryCertificationTeacher"
+            label="Pflichtschulung für Unterrichtende aktivieren"
+            description="Lehrer müssen zuerst eine Schulung abschließen bevor die Verwendung erlaubt wird."
+            control={form.control}
+          />
+
+          <FormField
+            name="trainingLink"
+            label="Link für die Schulung"
+            description="Legt den Link für die Schulung fest."
+            control={form.control}
+          />
+
+          <FormFieldArray
+            name="supportContacts"
+            label="Support Emailadressen"
+            description="Emailadressen die im Supportfall benutzt werden können. Diese werden im Disclaimer angezeigt."
+            control={form.control}
+            inputType="email"
+          />
+
+          <FormFieldCheckbox
+            name="enableCharacter"
+            label="Aktiviere Dialogpartner"
+            description="Schaltet die Verwendung von Dialogpartnern frei."
+            control={form.control}
+          />
+
+          <FormFieldCheckbox
+            name="enableCustomGpt"
+            label="Aktiviere Assistenten"
+            description="Schaltet die Verwendung von Assistenten frei."
+            control={form.control}
+          />
+          <FormFieldCheckbox
+            name="enableSharedChats"
+            label="Lernszenarien aktivieren"
+            description="Schaltet die Verwendung von Lernszenarien frei."
+            control={form.control}
+          />
+
+          <FormField
+            name="designConfiguration"
+            label="Design Konfiguration"
+            description="Legt die Hauptfarben für die Anwendung fest."
+            control={form.control}
+            type="textArea"
+          />
+
+          <CardAction>
+            <Button type="submit">Speichern</Button>
+          </CardAction>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

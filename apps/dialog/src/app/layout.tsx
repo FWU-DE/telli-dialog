@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
   ]);
 
   return {
-    title: federalState?.telliName ?? 'telli',
+    title: !!federalState?.telliName ? federalState?.telliName : 'telli',
     description: 'Der datenschutzkonforme KI-Chatbot für die Schule',
     icons: { icon: faviconPath ?? '/telli.svg' },
   };
