@@ -23,7 +23,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     );
   }
 
-  return NextResponse.json(federalState, { status: 200 });
+  const federalStateInfo = {
+    ...federalState,
+    hasApiKeyAssigned: !!federalState.encryptedApiKey,
+  };
+
+  return NextResponse.json(federalStateInfo, { status: 200 });
 }
 
 const federalStateUpdateSchema = createInsertSchema(federalStateTable)

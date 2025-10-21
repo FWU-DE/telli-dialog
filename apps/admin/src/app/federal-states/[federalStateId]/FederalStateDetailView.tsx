@@ -81,6 +81,8 @@ export function FederalStateView(props: FederalStateViewProps) {
       <CardHeader>
         <CardTitle>Bundesland Detailansicht</CardTitle>
         <CardDescription>Details zum Bundesland {federalState.id}</CardDescription>
+        {/* I have to render the form state validity otherwise it is invalid and I cannot save. */}
+        <span>{form.formState.isValid ? 'Formular ist gültig' : 'Formular ist ungültig'}</span>
         {Object.keys(form.formState.errors).length > 0 && (
           <div className="text-red-500">{JSON.stringify(form.formState.errors)}</div>
         )}
@@ -205,7 +207,9 @@ export function FederalStateView(props: FederalStateViewProps) {
           />
 
           <CardAction>
-            {form.formState.isDirty && <Button type="submit">Speichern</Button>}
+            <Button type="submit" disabled={!form.formState.isDirty}>
+              Speichern
+            </Button>
           </CardAction>
         </form>
       </CardContent>
