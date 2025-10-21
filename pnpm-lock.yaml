@@ -22,7 +22,7 @@ importers:
     dependencies:
       '@hookform/resolvers':
         specifier: 3.10.0
-        version: 3.10.0(react-hook-form@7.54.2(react@19.0.0))
+        version: 3.10.0(react-hook-form@7.65.0(react@19.0.0))
       '@opentelemetry/api':
         specifier: 1.9.0
         version: 1.9.0
@@ -72,8 +72,8 @@ importers:
         specifier: 19.0.0
         version: 19.0.0(react@19.0.0)
       react-hook-form:
-        specifier: 7.54.2
-        version: 7.54.2(react@19.0.0)
+        specifier: 7.65.0
+        version: 7.65.0(react@19.0.0)
       sonner:
         specifier: 2.0.7
         version: 2.0.7(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -155,7 +155,7 @@ importers:
         version: 1.44.1
       '@hookform/resolvers':
         specifier: 3.10.0
-        version: 3.10.0(react-hook-form@7.54.2(react@19.0.0))
+        version: 3.10.0(react-hook-form@7.65.0(react@19.0.0))
       '@mozilla/readability':
         specifier: 0.6.0
         version: 0.6.0
@@ -312,6 +312,9 @@ importers:
       react-dom:
         specifier: 19.0.0
         version: 19.0.0(react@19.0.0)
+      react-hook-form:
+        specifier: 7.65.0
+        version: 7.65.0(react@19.0.0)
       react-image-crop:
         specifier: 11.0.7
         version: 11.0.7(react@19.0.0)
@@ -542,8 +545,8 @@ importers:
         specifier: 19.0.0
         version: 19.0.0
       react-hook-form:
-        specifier: 7.54.2
-        version: 7.54.2(react@19.0.0)
+        specifier: 7.65.0
+        version: 7.65.0(react@19.0.0)
       tailwindcss:
         specifier: 4.1.11
         version: 4.1.11
@@ -6889,8 +6892,8 @@ packages:
     peerDependencies:
       react: ^19.0.0
 
-  react-hook-form@7.54.2:
-    resolution: {integrity: sha512-eHpAUgUjWbZocoQYUHposymRb4ZP6d0uwUnooL2uOybA9/3tPUvoAKqEWK1WaSiTxxOfTpffNZP7QwlnM3/gEg==}
+  react-hook-form@7.65.0:
+    resolution: {integrity: sha512-xtOzDz063WcXvGWaHgLNrNzlsdFgtUWcb32E6WFaGTd7kPZG3EeDusjdZfUsPwKCKVXy1ZlntifaHZ4l8pAsmw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
@@ -9248,9 +9251,9 @@ snapshots:
       protobufjs: 7.5.3
       yargs: 17.7.2
 
-  '@hookform/resolvers@3.10.0(react-hook-form@7.54.2(react@19.0.0))':
+  '@hookform/resolvers@3.10.0(react-hook-form@7.65.0(react@19.0.0))':
     dependencies:
-      react-hook-form: 7.54.2(react@19.0.0)
+      react-hook-form: 7.65.0(react@19.0.0)
 
   '@humanfs/core@0.19.1': {}
 
@@ -15694,7 +15697,7 @@ snapshots:
       react: 19.0.0
       scheduler: 0.25.0
 
-  react-hook-form@7.54.2(react@19.0.0):
+  react-hook-form@7.65.0(react@19.0.0):
     dependencies:
       react: 19.0.0
 
