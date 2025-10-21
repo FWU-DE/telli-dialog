@@ -35,6 +35,11 @@ const eslintConfig = [
           importNames: ['UIMessage'],
           message: "Please import UIMessage directly from '@ai' instead.",
         },
+        {
+          name: 'next-auth/jwt',
+          importNames: ['getToken'],
+          message: "Do not import 'getToken' from 'next-auth/jwt'. Use the auth() wrapper instead.",
+        },
       ],
       eqeqeq: ['error', 'always'],
     },
