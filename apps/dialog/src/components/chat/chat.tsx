@@ -279,6 +279,7 @@ export default function Chat({
             initialWebsources={
               message.role === 'user' ? webSourceMapping?.get(message.id) : undefined
             }
+            status={status}
           >
             {message}
           </ChatBox>
