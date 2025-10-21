@@ -1,100 +1,52 @@
-import { browser, Page } from 'k6/browser';
-import { File, open } from 'k6/experimental/fs';
+import { Page } from 'k6/browser';
+import { open } from 'k6/experimental/fs';
 import encoding from 'k6/encoding';
-import { WAIT_TIMES_IN_MS, HEADLESS_BROWSER_OPTIONS } from './config';
-import { performLogin, saveScreenshot, selectModel, sendMessage } from './common';
+import { HEADLESS_BROWSER_OPTIONS, WAIT_TIMES_IN_MS } from './config';
+import { performLogin, runTest, selectModel, sendMessage } from './common';
 import { check } from 'k6';
 
 export const options = HEADLESS_BROWSER_OPTIONS;
 
-const PROMPT = `Was sind große Meilensteine im Leben von Van Gogh? Bitte schreib mir dazu 2-5 Sätze. 
-Bitte beende außerdem deine Nachricht mit ENDE, nur so weiß ich, dass du fertig bist.`;
+const PROMPT = `Was sind große Meilensteine im Leben von Van Gogh? Bitte schreib mir dazu 2-5 Sätze.`;
 
 const UPLOAD_FILE_PATH = 'assets/Van_Gogh_Wikipedia.pdf';
 
-let fileData: File;
-(async function () {
-  fileData = await open(UPLOAD_FILE_PATH);
-})();
+const filePromise = open(UPLOAD_FILE_PATH);
 
-export default async function main() {
-  const context = await browser.newContext();
-  await context.clearCookies();
-  const page = await context.newPage();
-
-  page.setDefaultTimeout(WAIT_TIMES_IN_MS.PAGE_ELEMENT_TIMEOUT);
-
-  const userIndex = `${__VU}-${__ITER}-${Date.now()}`;
-  const userName = 'test';
-  const password = __ENV.LOADTEST_PASSWORD;
-
-  if (!password) {
-    throw new Error(
-      'Please provide the password for the test user via the env variable LOADTEST_PASSWORD',
-    );
-  }
-
-  let testSuccessful = false;
-  let testError: Error | null = null;
-
-  try {
-    await performLogin(page, userName, password);
-    await uploadPdfFile(page, userIndex);
-    await selectModel(page, Number(__VU) + Number(__ITER));
-    await sendMessage(page, PROMPT);
-
-    testSuccessful = true;
-    console.log(`Test successful for user ${userIndex}`);
-  } catch (error) {
-    testError = error as Error;
-    console.error(`Error during test execution for user ${userIndex}:`, error);
-  } finally {
-    await saveScreenshot(page, userIndex, testSuccessful);
-
-    console.info({
-      userIndex,
-      testSuccessful,
-      vu: __VU,
-      iter: __ITER,
-    });
-
-    await page.close();
-    await context.close();
-
-    if (testError) {
-      throw testError;
-    }
-  }
-}
-
-async function readAll(file: File) {
-  const fileInfo = await file.stat();
-  const buffer = new Uint8Array(fileInfo.size);
-
+export async function setup() {
+  const file = await filePromise;
+  const stat = await file.stat();
+  const buffer = new Uint8Array(stat.size);
   const bytesRead = await file.read(buffer);
-  if (bytesRead !== fileInfo.size) {
+  if (bytesRead !== stat.size) {
     throw new Error('unexpected number of bytes read');
   }
-
-  return buffer;
+  return { pdfBase64: encoding.b64encode(buffer, 'std') };
 }
 
-async function uploadPdfFile(page: Page, userIndex: string) {
+export default async function main(data: { pdfBase64: string }) {
+  await runTest(async ({ page, userIndex, userName, password }) => {
+    await performLogin(page, userName, password);
+    await selectModel(page, Number(__VU) + Number(__ITER));
+    await uploadPdfFile(page, userIndex, data.pdfBase64);
+    await sendMessage(page, PROMPT);
+  });
+}
+
+async function uploadPdfFile(page: Page, userIndex: string, pdfBase64: string) {
   let successfulUpload = false;
   try {
-    const buffer = await readAll(fileData);
-
-    const file = {
-      name: userIndex + '.pdf',
+    const uploadPromise = page.waitForResponse(/api\/v1\/files$/, {
+      timeout: WAIT_TIMES_IN_MS.FILE_UPLOAD_TIMEOUT,
+    });
+    await page.setInputFiles('input[type="file"]', {
+      // @ts-expect-error Typings from @types/k6 are incorrect, string is allowed
+      buffer: pdfBase64,
       mimeType: 'application/pdf',
-      buffer: encoding.b64encode(buffer.buffer),
-    };
+      name: `${userIndex}.pdf`,
+    });
 
-    const fileInputSelector = 'input[type="file"]';
-
-    // @ts-ignore
-    await page.setInputFiles(fileInputSelector, [file]);
-    await page.waitForTimeout(WAIT_TIMES_IN_MS.FILE_LOAD);
+    await uploadPromise;
     successfulUpload = true;
   } finally {
     check(page, {

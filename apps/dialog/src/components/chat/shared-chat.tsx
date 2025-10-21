@@ -33,17 +33,26 @@ export default function SharedChat({
   // substitute the error object from the useChat hook, to dislay a user friendly error message in German
   const { error, handleResponse, handleError, resetError } = useCheckStatusCode();
 
-  const { messages, setMessages, input, handleInputChange, handleSubmit, isLoading, reload, stop } =
-    useChat({
-      id,
-      initialMessages: [],
-      api: endpoint,
-      experimental_throttle: 100,
-      maxSteps: 2,
-      body: { modelId: sharedSchoolChat.modelId },
-      onResponse: handleResponse,
-      onError: handleError,
-    });
+  const {
+    messages,
+    setMessages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    reload,
+    stop,
+    status,
+  } = useChat({
+    id,
+    initialMessages: [],
+    api: endpoint,
+    experimental_throttle: 100,
+    maxSteps: 2,
+    body: { modelId: sharedSchoolChat.modelId },
+    onResponse: handleResponse,
+    onError: handleError,
+  });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -95,6 +104,7 @@ export default function SharedChat({
                 isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
                 isLoading={isLoading}
                 regenerateMessage={reload}
+                status={status}
               >
                 {message}
               </ChatBox>

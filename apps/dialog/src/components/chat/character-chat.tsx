@@ -36,17 +36,26 @@ export default function CharacterSharedChat({
     ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
     : [];
 
-  const { messages, setMessages, input, handleInputChange, handleSubmit, isLoading, reload, stop } =
-    useChat({
-      id,
-      initialMessages,
-      api: endpoint,
-      experimental_throttle: 100,
-      maxSteps: 2,
-      body: { modelId: character.modelId },
-      onResponse: handleResponse,
-      onError: handleError,
-    });
+  const {
+    messages,
+    setMessages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    reload,
+    status,
+    stop,
+  } = useChat({
+    id,
+    initialMessages,
+    api: endpoint,
+    experimental_throttle: 100,
+    maxSteps: 2,
+    body: { modelId: character.modelId },
+    onResponse: handleResponse,
+    onError: handleError,
+  });
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const { isBelow } = useBreakpoints();
@@ -102,6 +111,7 @@ export default function CharacterSharedChat({
               isLoading={isLoading}
               regenerateMessage={reload}
               assistantIcon={assistantIcon}
+              status={status}
             >
               {message}
             </ChatBox>
