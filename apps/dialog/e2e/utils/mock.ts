@@ -18,6 +18,7 @@ export const mockUserAndContext = (): UserAndContext => {
     email: `mock.user@${generateRandomString(5)}.com`,
     lastUsedModel: null,
     versionAcceptedConditions: null,
+    hasApiKeyAssigned: true,
     school: {
       id: generateUUID(),
       userRole: 'teacher',
