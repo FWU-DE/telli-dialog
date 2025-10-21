@@ -1,4 +1,4 @@
-import { decryptMaybeValue, encrypt } from '@/db/crypto';
+import { encrypt } from '@/db/crypto';
 import {
   dbGetAllFederalStates,
   dbInsertFederalState,
@@ -22,12 +22,9 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json(
     {
-      federalStates: federalStates.map((f) => ({
-        ...f,
-        decryptedApiKey: decryptMaybeValue({
-          data: f.encryptedApiKey,
-          plainEncryptionKey: env.encryptionKey,
-        }),
+      federalStates: federalStates.map((federalState) => ({
+        ...federalState,
+        hasApiKeyAssigned: !!federalState.encryptedApiKey,
       })),
     },
     { status: 200 },

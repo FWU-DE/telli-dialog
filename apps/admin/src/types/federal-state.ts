@@ -16,6 +16,7 @@ export const FederalStateSchema = z.object({
   enableCharacter: z.boolean(),
   enableSharedChats: z.boolean(),
   enableCustomGpt: z.boolean(),
+  hasApiKeyAssigned: z.boolean().readonly(),
 });
 
 export type FederalState = z.infer<typeof FederalStateSchema>;

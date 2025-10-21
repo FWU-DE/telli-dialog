@@ -36,6 +36,10 @@ export function FederalStateView(props: FederalStateViewProps) {
       ...federalState,
       // react-hook-form does not support array of primitives, so we map to array of objects
       supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
+      // all null values must be converted to empty string
+      telliName: federalState.telliName ?? '',
+      trainingLink: federalState.trainingLink ?? '',
+      // designConfiguration is stringified for the textarea
       designConfiguration: federalState.designConfiguration
         ? JSON.stringify(federalState.designConfiguration, null, 2)
         : '',
@@ -77,6 +81,9 @@ export function FederalStateView(props: FederalStateViewProps) {
       <CardHeader>
         <CardTitle>Bundesland Detailansicht</CardTitle>
         <CardDescription>Details zum Bundesland {federalState.id}</CardDescription>
+        {Object.keys(form.formState.errors).length > 0 && (
+          <div className="text-red-500">{JSON.stringify(form.formState.errors)}</div>
+        )}
         <CardAction>
           <Link href={`/federal-states/${federalState.id}/vouchers`}>
             <Button type="button">Guthaben Codes</Button>
@@ -97,6 +104,14 @@ export function FederalStateView(props: FederalStateViewProps) {
             name="createdAt"
             label="Erstellt am"
             description="Datum, an dem das Bundesland erstellt wurde."
+            control={form.control}
+            disabled
+          />
+
+          <FormFieldCheckbox
+            name="hasApiKeyAssigned"
+            label="API Key vorhanden?"
+            description="Zeigt an ob bereits ein API Key erstellt wurde. Dieser ist zwingend für die Kommunikation mit telli-api erforderlich."
             control={form.control}
             disabled
           />
@@ -190,7 +205,7 @@ export function FederalStateView(props: FederalStateViewProps) {
           />
 
           <CardAction>
-            <Button type="submit">Speichern</Button>
+            {form.formState.isDirty && <Button type="submit">Speichern</Button>}
           </CardAction>
         </form>
       </CardContent>
