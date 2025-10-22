@@ -80,3 +80,49 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
   return NextResponse.json(updated, { status: 200 });
 }
+
+const federalStatePatchSchema = z.object({
+  decryptedApiKey: z.string(),
+});
+
+/**
+ * Updates only the API key for an existing federal state record.
+ * @param request
+ * @returns 200 on success, 403 on forbidden, 404 if not found, 500 on error
+ */
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const [error] = validateApiKeyByHeadersWithResult(request.headers);
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 403 });
+  }
+
+  const body = await request.json();
+  // we only support updating the API key via PATCH atm
+  const { decryptedApiKey } = federalStatePatchSchema.parse(body);
+
+  const { id } = await params;
+
+  const existingFederalState = await dbGetFederalStateById(id);
+  if (existingFederalState === undefined) {
+    return NextResponse.json(
+      { error: `Federal state with id ${id} does not exist` },
+      { status: 404 },
+    );
+  }
+
+  const encryptedApiKey = encrypt({
+    text: decryptedApiKey,
+    plainEncryptionKey: env.encryptionKey,
+  });
+
+  const updated = await dbUpdateFederalState({
+    id,
+    encryptedApiKey,
+  });
+
+  if (updated === undefined) {
+    return NextResponse.json({ error: 'Could not update federal state API key' }, { status: 500 });
+  }
+
+  return NextResponse.json(updated, { status: 200 });
+}
