@@ -1,6 +1,6 @@
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { resourceFromAttributes } from '@opentelemetry/resources';
-import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
+import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
@@ -24,7 +24,10 @@ const periodicExportingMetricReader = new PeriodicExportingMetricReader({
 // https://www.npmjs.com/package/@opentelemetry/sdk-node
 const sdk = new NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
-  resource: resourceFromAttributes({ [ATTR_SERVICE_NAME]: SERVICE_NAME }),
+  resource: resourceFromAttributes({
+    [ATTR_SERVICE_NAME]: SERVICE_NAME,
+    [ATTR_SERVICE_VERSION]: process.env.APP_VERSION,
+  }),
   metricReader: periodicExportingMetricReader,
   serviceName: SERVICE_NAME,
   spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter())],

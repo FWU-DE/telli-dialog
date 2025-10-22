@@ -64,9 +64,13 @@ COPY --from=builder --chown=nodejs:nodejs /app/apps/dialog/.next/standalone ./
 COPY --from=builder --chown=nodejs:nodejs /app/apps/dialog/.next/static ./apps/dialog/.next/static
 COPY --from=builder --chown=nodejs:nodejs /app/apps/dialog/public ./apps/dialog/public
 
+ARG APP_VERSION
 ARG PORT=3000
+
+ENV APP_VERSION=${APP_VERSION}
 ENV PORT=${PORT}
 ENV NODE_ENV=production
+
 EXPOSE ${PORT}
 
 # https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
