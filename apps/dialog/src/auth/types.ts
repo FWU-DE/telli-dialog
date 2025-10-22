@@ -9,4 +9,5 @@ type UserSchoolProps = SchoolModel & {
 export type UserAndContext = User & {
   school: UserSchoolProps;
   federalState: ObscuredFederalState;
+  hasApiKeyAssigned: boolean;
 };

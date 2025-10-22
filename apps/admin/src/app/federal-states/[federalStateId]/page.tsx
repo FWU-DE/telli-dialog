@@ -1,6 +1,7 @@
 import { fetchFederalStateById } from '../../../services/federal-states-service';
 import { FederalStateView } from './FederalStateDetailView';
 
+export const dynamic = 'force-dynamic';
 export const FEDERAL_STATE_BY_ID_ROUTE = '/federal-states/{id}';
 
 export default async function Page({ params }: { params: Promise<{ federalStateId: string }> }) {

@@ -35,6 +35,9 @@
     "generic-error": "Ein Fehler ist aufgetreten",
     "retry-button": "Erneut versuchen"
   },
+  "errors": {
+    "no-api-key": "Dem Bundesland wurde noch kein API-Schlüssel zugewiesen."
+  },
   "usage-disclaimer": {
     "initial-title": "Willkommen bei telli!",
     "terms-and-conditions-title": "Nutzungsbedingungen"

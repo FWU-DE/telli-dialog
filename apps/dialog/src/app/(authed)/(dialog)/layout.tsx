@@ -16,9 +16,12 @@ import TermsConditionsModal from '@/components/modals/terms-conditions-initial';
 import { federalStateDisclaimers, VERSION } from '@/components/modals/const';
 import { setUserAcceptConditions } from './actions';
 import { FederalStateId } from '@/utils/vidis/const';
+import { getTranslations } from 'next-intl/server';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
+  const t = await getTranslations('errors');
   const user = await getUser();
+  if (!user.hasApiKeyAssigned) throw new Error(t('no-api-key'));
 
   const [models, priceInCent, userPriceLimit, hasCompletedTraining] = await Promise.all([
     dbGetLlmModelsByFederalStateId({ federalStateId: user.federalState.id }),
@@ -26,6 +29,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
     getPriceLimitInCentByUser(user),
     userHasCompletedTraining(),
   ]);
+
   const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
   const federalStateDisclaimer =
     federalStateDisclaimers[user.school.federalStateId as FederalStateId];

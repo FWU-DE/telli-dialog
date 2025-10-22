@@ -36,14 +36,25 @@ export function FederalStateView(props: FederalStateViewProps) {
       ...federalState,
       // react-hook-form does not support array of primitives, so we map to array of objects
       supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
+      // all null values must be converted to empty string
+      telliName: federalState.telliName ?? '',
+      trainingLink: federalState.trainingLink ?? '',
+      // designConfiguration is stringified for the textarea
       designConfiguration: federalState.designConfiguration
         ? JSON.stringify(federalState.designConfiguration, null, 2)
         : '',
     },
   });
 
+  // Destructuring is necessary, otherwise formState is not updated correctly
+  // https://www.react-hook-form.com/api/useform/formstate/
+  const {
+    control,
+    formState: { isValid, errors, isDirty },
+  } = form;
+
   async function onSubmit(data: FederalStateEdit) {
-    if (!form.formState.isValid) {
+    if (!isValid) {
       toast.error('Das Formular enthält ungültige Werte.');
       return;
     }
@@ -77,6 +88,9 @@ export function FederalStateView(props: FederalStateViewProps) {
       <CardHeader>
         <CardTitle>Bundesland Detailansicht</CardTitle>
         <CardDescription>Details zum Bundesland {federalState.id}</CardDescription>
+        {Object.keys(errors).length > 0 && (
+          <div className="text-red-500">{JSON.stringify(errors)}</div>
+        )}
         <CardAction>
           <Link href={`/federal-states/${federalState.id}/vouchers`}>
             <Button type="button">Guthaben Codes</Button>
@@ -89,7 +103,7 @@ export function FederalStateView(props: FederalStateViewProps) {
             name="id"
             label="ID"
             description="Eindeutige ID des Bundeslandes."
-            control={form.control}
+            control={control}
             disabled
           />
 
@@ -97,7 +111,15 @@ export function FederalStateView(props: FederalStateViewProps) {
             name="createdAt"
             label="Erstellt am"
             description="Datum, an dem das Bundesland erstellt wurde."
-            control={form.control}
+            control={control}
+            disabled
+          />
+
+          <FormFieldCheckbox
+            name="hasApiKeyAssigned"
+            label="API Key vorhanden?"
+            description="Zeigt an ob bereits ein API Key erstellt wurde. Dieser ist zwingend für die Kommunikation mit telli-api erforderlich."
+            control={control}
             disabled
           />
 
@@ -105,14 +127,14 @@ export function FederalStateView(props: FederalStateViewProps) {
             name="telliName"
             label="Name"
             description="Beschreibender Name für das Bundesland."
-            control={form.control}
+            control={control}
           />
 
           <FormField
             name="teacherPriceLimit"
             label="Preislimit für Unterrichtende"
             description="Legt das Preislimit (in Cent) für Unterrichtende pro Monat fest."
-            control={form.control}
+            control={control}
             type="number"
           />
 
@@ -120,14 +142,14 @@ export function FederalStateView(props: FederalStateViewProps) {
             name="studentAccess"
             label="Zugriff für Lernende erlaubt?"
             description="Erlaubt den Zugriff auch für Lernende."
-            control={form.control}
+            control={control}
           />
 
           <FormField
             name="studentPriceLimit"
             label="Preislimit für Lernende"
             description="Legt das Preislimit (in Cent) für Lernende pro Monat fest."
-            control={form.control}
+            control={control}
             type="number"
           />
 
@@ -135,7 +157,7 @@ export function FederalStateView(props: FederalStateViewProps) {
             name="chatStorageTime"
             label="Speicherzeit für Chats"
             description="Legt die Speicherzeit (in Tagen) für Chats fest."
-            control={form.control}
+            control={control}
             type="number"
           />
 
@@ -143,21 +165,21 @@ export function FederalStateView(props: FederalStateViewProps) {
             name="mandatoryCertificationTeacher"
             label="Pflichtschulung für Unterrichtende aktivieren"
             description="Lehrer müssen zuerst eine Schulung abschließen bevor die Verwendung erlaubt wird."
-            control={form.control}
+            control={control}
           />
 
           <FormField
             name="trainingLink"
             label="Link für die Schulung"
             description="Legt den Link für die Schulung fest."
-            control={form.control}
+            control={control}
           />
 
           <FormFieldArray
             name="supportContacts"
             label="Support Emailadressen"
             description="Emailadressen die im Supportfall benutzt werden können. Diese werden im Disclaimer angezeigt."
-            control={form.control}
+            control={control}
             inputType="email"
           />
 
@@ -165,32 +187,34 @@ export function FederalStateView(props: FederalStateViewProps) {
             name="enableCharacter"
             label="Aktiviere Dialogpartner"
             description="Schaltet die Verwendung von Dialogpartnern frei."
-            control={form.control}
+            control={control}
           />
 
           <FormFieldCheckbox
             name="enableCustomGpt"
             label="Aktiviere Assistenten"
             description="Schaltet die Verwendung von Assistenten frei."
-            control={form.control}
+            control={control}
           />
           <FormFieldCheckbox
             name="enableSharedChats"
             label="Lernszenarien aktivieren"
             description="Schaltet die Verwendung von Lernszenarien frei."
-            control={form.control}
+            control={control}
           />
 
           <FormField
             name="designConfiguration"
             label="Design Konfiguration"
             description="Legt die Hauptfarben für die Anwendung fest."
-            control={form.control}
+            control={control}
             type="textArea"
           />
 
           <CardAction>
-            <Button type="submit">Speichern</Button>
+            <Button type="submit" disabled={!isDirty}>
+              Speichern
+            </Button>
           </CardAction>
         </form>
       </CardContent>

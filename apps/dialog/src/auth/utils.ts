@@ -73,6 +73,7 @@ export async function getUserAndContextByUserId({
     ...userAndContext.user,
     ...userAndContext,
     federalState: obscureFederalState(userAndContext.federalState),
+    hasApiKeyAssigned: !!userAndContext.federalState.encryptedApiKey,
   };
 }
 
