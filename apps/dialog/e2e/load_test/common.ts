@@ -20,6 +20,33 @@ export async function saveScreenshot(page: Page, userIndex: string, isSuccess: b
   }
 }
 
+function tagHttpRequests(page: Page) {
+  page.on('metric', (metric) => {
+    metric.tag({
+      name: `${BASE_URL}/d/[conversationId]`,
+      matches: [{ url: new RegExp(`^${BASE_URL}/d/[a-zA-Z0-9-]+($|\\?)`) }],
+    });
+    metric.tag({
+      name: `${BASE_URL}/characters/d/[characterId]/[conversationId]`,
+      matches: [
+        { url: new RegExp(`^${BASE_URL}/characters/d/[a-zA-Z0-9-]+/[a-zA-Z0-9-]+($|\\?)`) },
+      ],
+    });
+    metric.tag({
+      name: `${BASE_URL}/custom/d/[gptId]`,
+      matches: [{ url: new RegExp(`^${BASE_URL}/custom/d/[a-zA-Z0-9-]+($|\\?)`) }],
+    });
+    metric.tag({
+      name: `${BASE_URL}/custom/d/[gptId]/[conversationId]`,
+      matches: [{ url: new RegExp(`^${BASE_URL}/custom/d/[a-zA-Z0-9-]+/[a-zA-Z0-9-]+($|\\?)`) }],
+    });
+    metric.tag({
+      name: `${BASE_URL}/_next/static/*`,
+      matches: [{ url: new RegExp(`^${BASE_URL}/_next/static/.+`) }],
+    });
+  });
+}
+
 export async function runTest(
   testFunction: (data: {
     context: BrowserContext;
@@ -32,6 +59,7 @@ export async function runTest(
   const context = await browser.newContext();
   await context.clearCookies();
   const page = await context.newPage();
+  tagHttpRequests(page);
 
   page.setDefaultTimeout(WAIT_TIMES_IN_MS.PAGE_ELEMENT_TIMEOUT);
 
