@@ -23,7 +23,14 @@ const periodicExportingMetricReader = new PeriodicExportingMetricReader({
 // Documentation for the OpenTelemetry SDK for Node.js can be found here:
 // https://www.npmjs.com/package/@opentelemetry/sdk-node
 const sdk = new NodeSDK({
-  instrumentations: [getNodeAutoInstrumentations()],
+  instrumentations: [
+    getNodeAutoInstrumentations({
+      '@opentelemetry/instrumentation-http': {
+        // instrumentation from next.js is enough
+        enabled: false,
+      },
+    }),
+  ],
   resource: resourceFromAttributes({
     [ATTR_SERVICE_NAME]: SERVICE_NAME,
     [ATTR_SERVICE_VERSION]: process.env.APP_VERSION,
