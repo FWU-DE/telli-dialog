@@ -116,11 +116,13 @@ k6 cloud login
 ```
 
 ```sh
-k6 cloud run e2e/load_test/run-chat-test.ts
+pnpm k6:run e2e/load_test/run-chat-test.js
+pnpm k6:run e2e/load_test/run-file-test.js
 ```
 
 or
 
 ```sh
-k6 cloud run e2e/load_test/run-file-test.ts
+pnpm k6:run:cloud e2e/load_test/run-chat-test.js
+pnpm k6:run:cloud e2e/load_test/run-file-test.js
 ```

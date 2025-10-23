@@ -7,7 +7,6 @@ import { type LlmModel } from '@/db/schema';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { useSidebarVisibility } from '../navigation/sidebar/sidebar-provider';
 import { cn } from '@/utils/tailwind';
-import { saveChatModelForUserAction } from '@/app/(authed)/(dialog)/actions';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { Badge } from '../common/badge';
@@ -23,12 +22,11 @@ export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProp
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  function handleSelectModel(model: LlmModel) {
-    startTransition(() => {
+  async function handleSelectModel(model: LlmModel) {
+    startTransition(async () => {
       setOptimisticModelId(model.name);
-      saveChatModelForUserAction(model.name);
     });
-    setSelectedModel(model);
+    await setSelectedModel(model);
 
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('model', model.name);
