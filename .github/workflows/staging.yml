@@ -156,7 +156,9 @@ jobs:
             SENTRY_AUTH_TOKEN=SENTRY_AUTH_TOKEN
             SENTRY_ORG=SENTRY_ORG
             SENTRY_PROJECT=SENTRY_PROJECT
-          build-args: CI=${CI}
+          build-args: |
+            CI=${CI}
+            APP_VERSION=${{ github.sha }}
           tags: telli.cr.de-fra.ionos.com/telli/chatbot:${{ github.sha }}
           push: true
 
@@ -188,6 +190,7 @@ jobs:
         with:
           context: .
           file: apps/admin/Dockerfile
+          build-args: APP_VERSION=${{ github.sha }}
           tags: telli.cr.de-fra.ionos.com/telli/admin:${{ github.sha }}
           push: true
 
