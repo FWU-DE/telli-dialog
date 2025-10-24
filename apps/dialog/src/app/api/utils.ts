@@ -8,7 +8,7 @@ import { env } from '@/env';
 import { errorifyAsyncFn } from '@/utils/error';
 import { LlmModel } from '@/db/schema';
 import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
-import { DEFAULT_AUXILIARY_MODEL } from '@/app/api/chat/models';
+import { DEFAULT_AUXILIARY_MODEL, FALLBACK_AUXILIARY_MODEL } from '@/app/api/chat/models';
 
 export function getSearchParamsFromUrl(url: string) {
   const [, ...rest] = url.split('?');
@@ -95,11 +95,26 @@ export async function getAuxiliaryModel(federalStateId: string): Promise<LlmMode
     federalStateId,
   });
   const auxiliaryModel =
-    llmModels.find((m) => m.name === DEFAULT_AUXILIARY_MODEL) ?? getFirstTextModel(llmModels);
+    getDefaultAuxModel(llmModels) ??
+    getFallbackAuxModel(llmModels) ??
+    getFirstEmbeddingModel(llmModels) ??
+    getFirstTextModel(llmModels);
   if (auxiliaryModel === undefined) {
     throw new Error('No auxiliary model found');
   }
   return auxiliaryModel;
+}
+
+function getDefaultAuxModel(models: LlmModel[]): LlmModel | undefined {
+  return models.find((model) => model.name === DEFAULT_AUXILIARY_MODEL);
+}
+
+function getFallbackAuxModel(models: LlmModel[]): LlmModel | undefined {
+  return models.find((model) => model.name === FALLBACK_AUXILIARY_MODEL);
+}
+
+function getFirstEmbeddingModel(models: LlmModel[]): LlmModel | undefined {
+  return models.find((model) => model.priceMetadata.type === 'embedding');
 }
 
 function getFirstTextModel(models: LlmModel[]): LlmModel | undefined {
