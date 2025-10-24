@@ -63,3 +63,20 @@ export async function updateFederalState(federalState: FederalState) {
   const data = await response.json();
   return data as FederalState;
 }
+
+export async function patchApiKey(federalStateId: string, decryptedApiKey: string) {
+  const response = await fetch(
+    env.BASE_URL_TELLI_DIALOG + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE.replace('{id}', federalStateId),
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${env.API_KEY_TELLI_DIALOG}`,
+      },
+      body: JSON.stringify({ decryptedApiKey }),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Failed to update federal state: ${response.statusText}`);
+  }
+}

@@ -8,6 +8,6 @@
       "@ui/*": ["../../packages/ui/src/*"]
     }
   },
-  "include": ["next-env.d.ts", "next.config.mjs", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "next.config.mjs", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
 }
