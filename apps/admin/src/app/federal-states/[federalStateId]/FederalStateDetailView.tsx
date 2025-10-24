@@ -1,5 +1,4 @@
 'use client';
-import Link from 'next/dist/client/link';
 import { Button } from '@ui/components/Button';
 import {
   FederalState,
@@ -91,11 +90,6 @@ export function FederalStateView(props: FederalStateViewProps) {
         {Object.keys(errors).length > 0 && (
           <div className="text-red-500">{JSON.stringify(errors)}</div>
         )}
-        <CardAction>
-          <Link href={`/federal-states/${federalState.id}/vouchers`}>
-            <Button type="button">Guthaben Codes</Button>
-          </Link>
-        </CardAction>
       </CardHeader>
       <CardContent>
         <form className="flex flex-col gap-8" onSubmit={form.handleSubmit(onSubmit)}>
