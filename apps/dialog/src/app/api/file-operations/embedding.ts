@@ -1,7 +1,7 @@
 import { dbCreateManyTextChunks } from '@/db/functions/text-chunk';
 import { OpenAI } from 'openai';
 import { env } from '@/env';
-import { dbGetApiKeyByFederalStateIdWithResult } from '@/db/functions/federal-state';
+import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@/db/functions/federal-state';
 import { EMBEDDING_BATCH_SIZE } from '@/const';
 import { TextChunkInsertModel } from '@/db/schema';
 export async function embedText({
@@ -11,7 +11,7 @@ export async function embedText({
   text: string[];
   federalStateId: string;
 }) {
-  const [error, federalStateObject] = await dbGetApiKeyByFederalStateIdWithResult({
+  const [error, federalStateObject] = await dbGetFederalStateWithDecryptedApiKeyWithResult({
     federalStateId,
   });
 

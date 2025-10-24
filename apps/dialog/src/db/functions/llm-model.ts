@@ -2,7 +2,7 @@ import { and, eq } from 'drizzle-orm';
 import { db } from '..';
 import { federalStateLlmModelMappingTable, LlmModel, llmModelTable } from '../schema';
 import { KnotenpunktLlmModel } from '@/knotenpunkt/schema';
-import { dbGetApiKeyByFederalStateIdWithResult } from './federal-state';
+import { dbGetFederalStateWithDecryptedApiKeyWithResult } from './federal-state';
 import { fetchLlmModels } from '@/knotenpunkt';
 
 export async function dbGetLlmModelById({ modelId }: { modelId: string | undefined }) {
@@ -46,7 +46,7 @@ export async function dbUpdateLlmModelsByFederalStateId({
 }: {
   federalStateId: string;
 }): Promise<LlmModel[]> {
-  const [error, result] = await dbGetApiKeyByFederalStateIdWithResult({ federalStateId });
+  const [error, result] = await dbGetFederalStateWithDecryptedApiKeyWithResult({ federalStateId });
   if (error !== null) {
     console.error({ error });
     return [];

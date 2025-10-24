@@ -3,7 +3,7 @@ import { db } from '..';
 import { encrypt } from '../crypto';
 import { FederalStateInsertModel, federalStateTable } from '../schema';
 import { fetchLlmModels } from '@/knotenpunkt';
-import { dbGetApiKeyByFederalStateId } from '../functions/federal-state';
+import { dbGetFederalStateWithDecryptedApiKey } from '../functions/federal-state';
 import { dbUpsertLlmModelsByModelsAndFederalStateId } from '../functions/llm-model';
 
 export async function insertFederalStates({ skip = true }: { skip: boolean }) {
@@ -15,7 +15,7 @@ export async function insertFederalStates({ skip = true }: { skip: boolean }) {
       .onConflictDoNothing();
 
     // upsert models per federal state
-    const federalStateAndApiKey = await dbGetApiKeyByFederalStateId({
+    const federalStateAndApiKey = await dbGetFederalStateWithDecryptedApiKey({
       federalStateId: federalState.id,
     });
     if (federalStateAndApiKey === undefined) {

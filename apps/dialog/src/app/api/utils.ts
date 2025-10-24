@@ -1,4 +1,4 @@
-import { dbGetApiKeyByFederalStateIdWithResult } from '@/db/functions/federal-state';
+import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@/db/functions/federal-state';
 import {
   dbGetModelByIdAndFederalStateId,
   dbGetLlmModelsByFederalStateId,
@@ -8,7 +8,6 @@ import { env } from '@/env';
 import { errorifyAsyncFn } from '@/utils/error';
 import { LlmModel } from '@/db/schema';
 import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
-import { UserAndContext } from '@/auth/types';
 import { DEFAULT_AUXILIARY_MODEL } from '@/app/api/chat/models';
 
 export function getSearchParamsFromUrl(url: string) {
@@ -30,7 +29,7 @@ export async function getModelAndProvider({
   modelId: string;
   /* eslint-disable  @typescript-eslint/no-explicit-any */
 }): Promise<{ telliProvider: any; definedModel: LlmModel }> {
-  const [error, federalStateObject] = await dbGetApiKeyByFederalStateIdWithResult({
+  const [error, federalStateObject] = await dbGetFederalStateWithDecryptedApiKeyWithResult({
     federalStateId,
   });
 
@@ -88,16 +87,21 @@ function calculateCostsInCentForEmbeddingModel(
 }
 
 /**
- * Get the auxiliary model for the user's federal state
- * @returns The auxiliary model for the user's federal state
+ * Get the auxiliary model for the federal state
+ * @returns The auxiliary model for the federal state
  */
-export async function getAuxiliaryModel(user: UserAndContext): Promise<LlmModel> {
+export async function getAuxiliaryModel(federalStateId: string): Promise<LlmModel> {
   const llmModels = await dbGetLlmModelsByFederalStateId({
-    federalStateId: user.federalState.id,
+    federalStateId,
   });
-  const auxiliaryModel = llmModels.find((m) => m.name === DEFAULT_AUXILIARY_MODEL) ?? llmModels[0];
+  const auxiliaryModel =
+    llmModels.find((m) => m.name === DEFAULT_AUXILIARY_MODEL) ?? getFirstTextModel(llmModels);
   if (auxiliaryModel === undefined) {
     throw new Error('No auxiliary model found');
   }
   return auxiliaryModel;
+}
+
+function getFirstTextModel(models: LlmModel[]): LlmModel | undefined {
+  return models.find((model) => model.priceMetadata.type === 'text');
 }
