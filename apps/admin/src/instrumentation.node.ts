@@ -35,7 +35,7 @@ const sdk = new NodeSDK({
     [ATTR_SERVICE_NAME]: SERVICE_NAME,
     [ATTR_SERVICE_VERSION]: process.env.APP_VERSION,
   }),
-  metricReader: periodicExportingMetricReader,
+  metricReaders: [periodicExportingMetricReader],
   serviceName: SERVICE_NAME,
   spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter())],
 });
