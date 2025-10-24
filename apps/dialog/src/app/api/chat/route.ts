@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     federalStateId: user.federalState.id,
   });
 
-  const auxiliaryModel = await getAuxiliaryModel(user);
+  const auxiliaryModel = await getAuxiliaryModel(user.federalState.id);
 
   const [errorAuxiliaryModel, auxiliaryModelAndProvider] = await getModelAndProviderWithResult({
     modelId: auxiliaryModel.id,

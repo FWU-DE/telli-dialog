@@ -25,6 +25,7 @@ export default async function deleteConversationAction({
   return deletedConversation;
 }
 
+/** Triggered by the user if they want to update the name of a conversation */
 export async function updateConversationNameAction({
   conversationId,
   name,
