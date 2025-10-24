@@ -47,9 +47,6 @@ importers:
       '@opentelemetry/sdk-node':
         specifier: 0.207.0
         version: 0.207.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-trace-base':
-        specifier: 2.2.0
-        version: 2.2.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-node':
         specifier: 2.2.0
         version: 2.2.0(@opentelemetry/api@1.9.0)
@@ -186,9 +183,6 @@ importers:
       '@opentelemetry/sdk-node':
         specifier: 0.207.0
         version: 0.207.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-trace-base':
-        specifier: 2.2.0
-        version: 2.2.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-node':
         specifier: 2.2.0
         version: 2.2.0(@opentelemetry/api@1.9.0)
@@ -225,12 +219,6 @@ importers:
       '@telli/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@types/express':
-        specifier: 5.0.0
-        version: 5.0.0
-      '@types/pg':
-        specifier: 8.11.11
-        version: 8.11.11
       ai:
         specifier: 4.3.16
         version: 4.3.16(react@19.0.0)(zod@3.25.67)
@@ -246,9 +234,6 @@ importers:
       docx:
         specifier: 9.1.1
         version: 9.1.1
-      dotenv-cli:
-        specifier: 7.4.1
-        version: 7.4.1
       drizzle-kit:
         specifier: 0.31.1
         version: 0.31.1
@@ -258,9 +243,6 @@ importers:
       drizzle-zod:
         specifier: 0.7.1
         version: 0.7.1(drizzle-orm@0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.11.11)(pg@8.13.1))(zod@3.25.67)
-      eslint-config-turbo:
-        specifier: 2.5.5
-        version: 2.5.5(eslint@9.17.0(jiti@2.5.1))(turbo@2.5.5)
       he:
         specifier: 1.2.0
         version: 1.2.0
@@ -273,9 +255,6 @@ importers:
       jsdom:
         specifier: 24.1.0
         version: 24.1.0
-      k6:
-        specifier: 0.0.0
-        version: 0.0.0
       katex:
         specifier: 0.16.21
         version: 0.16.21
@@ -388,6 +367,9 @@ importers:
       '@types/bcrypt':
         specifier: 5.0.2
         version: 5.0.2
+      '@types/express':
+        specifier: 5.0.0
+        version: 5.0.0
       '@types/he':
         specifier: 1.2.0
         version: 1.2.0
@@ -409,6 +391,9 @@ importers:
       '@types/oidc-provider':
         specifier: 8.8.0
         version: 8.8.0
+      '@types/pg':
+        specifier: 8.11.11
+        version: 8.11.11
       '@types/react':
         specifier: 19.0.3
         version: 19.0.3
@@ -433,6 +418,9 @@ importers:
       eslint-config-prettier:
         specifier: 10.1.8
         version: 10.1.8(eslint@9.17.0(jiti@2.5.1))
+      eslint-config-turbo:
+        specifier: 2.5.5
+        version: 2.5.5(eslint@9.17.0(jiti@2.5.1))(turbo@2.5.5)
       eslint-plugin-prettier:
         specifier: 5.5.3
         version: 5.5.3(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@9.17.0(jiti@2.5.1)))(eslint@9.17.0(jiti@2.5.1))(prettier@3.4.2)
@@ -442,6 +430,9 @@ importers:
       jose:
         specifier: 6.0.6
         version: 6.0.6
+      k6:
+        specifier: 0.0.0
+        version: 0.0.0
       oidc-provider:
         specifier: 8.8.0
         version: 8.8.0
@@ -4726,14 +4717,6 @@ packages:
 
   dot-case@2.1.1:
     resolution: {integrity: sha512-HnM6ZlFqcajLsyudHq7LeeLDr2rFAVYtDv/hV5qchQEidSck8j9OPUsXY9KwJv/lHMtYlX4DjRQqwFYa+0r8Ug==}
-
-  dotenv-cli@7.4.1:
-    resolution: {integrity: sha512-fE1aywjRrWGxV3miaiUr3d2zC/VAiuzEGghi+QzgIA9fEf/M5hLMaRSXb4IxbUAwGmaLi0IozdZddnVU96acag==}
-    hasBin: true
-
-  dotenv-expand@10.0.0:
-    resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
-    engines: {node: '>=12'}
 
   dotenv@16.0.3:
     resolution: {integrity: sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==}
@@ -13316,15 +13299,6 @@ snapshots:
   dot-case@2.1.1:
     dependencies:
       no-case: 2.3.2
-
-  dotenv-cli@7.4.1:
-    dependencies:
-      cross-spawn: 7.0.6
-      dotenv: 16.6.1
-      dotenv-expand: 10.0.0
-      minimist: 1.2.8
-
-  dotenv-expand@10.0.0: {}
 
   dotenv@16.0.3: {}
 
