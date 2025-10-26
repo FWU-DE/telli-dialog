@@ -95,9 +95,7 @@ export async function getAuxiliaryModel(federalStateId: string): Promise<LlmMode
     federalStateId,
   });
   const auxiliaryModel =
-    getDefaultAuxModel(llmModels) ??
-    getFallbackAuxModel(llmModels) ??
-    getFirstTextModel(llmModels);
+    getDefaultAuxModel(llmModels) ?? getFallbackAuxModel(llmModels) ?? getFirstTextModel(llmModels);
   if (auxiliaryModel === undefined) {
     throw new Error('No auxiliary model found');
   }
