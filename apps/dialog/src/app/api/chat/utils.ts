@@ -85,22 +85,32 @@ export function limitChatHistory({
   const consolidatedMessages = consolidateMessages(messages);
 
   // Always include the last user message even if limitRecent == 0
-  limitRecent = limitRecent * 2 + 1;
-  limitFirst = limitFirst * 2 - 1;
+  limitRecent = limitRecent * 2;
+  limitFirst = limitFirst * 2;
 
   // If we have fewer messages or less characters than the limits, just return all messages
-  if (consolidatedMessages.length <= limitFirst + limitRecent || consolidatedMessages.reduce((totalContentlength, { content }) => totalContentlength + content.length, 0) <= characterLimit) {
+  if (
+    consolidatedMessages.length <= limitFirst + limitRecent ||
+    consolidatedMessages.reduce(
+      (totalContentlength, { content }) => totalContentlength + content.length,
+      0,
+    ) <= characterLimit
+  ) {
     return consolidatedMessages;
   }
 
   // Initialize arrays for front and back messages
-  const frontMessages: Message[] = consolidatedMessages.slice(0,limitFirst);
+  const frontMessages: Message[] = consolidatedMessages.slice(0, limitFirst);
   const backMessages: Message[] = [];
 
-  let runningTotal = 0;
+  let runningTotal = frontMessages.reduce((acc, message) => acc + message.content.length, 0);
   let manadatoryMessagesIncluded = false;
 
-  for (let backIndex = consolidatedMessages.length - 1; backMessages.length + frontMessages.length < consolidatedMessages.length; backIndex--) {
+  for (
+    let backIndex = consolidatedMessages.length - 1;
+    backMessages.length + frontMessages.length < consolidatedMessages.length;
+    backIndex--
+  ) {
     const backMessage = consolidatedMessages[backIndex];
 
     if (backMessage === undefined) continue;
