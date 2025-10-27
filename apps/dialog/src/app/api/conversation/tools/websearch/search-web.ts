@@ -6,6 +6,7 @@ import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
 import he from 'he';
 import { unstable_cacheLife as cacheLife } from 'next/cache';
+import { logDebug, logError, logInfo } from '@/utils/logging/logging';
 
 const headers = {
   'User-Agent':
@@ -27,13 +28,13 @@ export async function webScraperExecutable(
   'use cache';
   cacheLife('weeks');
 
-  console.info(`Requesting webcontent for url: ${url}`);
+  logInfo(`Requesting webcontent for url: ${url}`);
   const t = await getTranslations({ namespace: 'websearch' });
   let response: Response;
   try {
-    const isPage = await isWebPage(url, options.timeout);
+    const { isPage, redirectedUrl } = await isWebPage(url, options.timeout);
     if (!isPage) {
-      console.warn(`URL is not a webpage: ${url}`);
+      logInfo(`URL is not a webpage: ${url}`);
       return {
         error: true,
         content: 'Es werden nur Links auf Webseiten unterstützt, keine Dateien.',
@@ -42,16 +43,19 @@ export async function webScraperExecutable(
         type: 'websearch',
       };
     }
+    if (url !== redirectedUrl) {
+      logDebug(`Requested URL '${url}' was redirected to '${redirectedUrl}'`);
+    }
     // Set up a timeout for the fetch request
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), options.timeout);
-    response = await fetch(url, {
+    response = await fetch(redirectedUrl, {
       headers,
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
-  } catch {
-    console.error(`Request timed out for URL: ${url}`);
+  } catch (error) {
+    logError(`Request timed out for URL: ${url}`, error);
     return {
       ...defaultErrorSource({ status_code: 408, t }),
       link: url,
@@ -170,7 +174,13 @@ export async function isWebPage(url: string, timeout?: number) {
 
   // Basic heuristic
   if (contentType?.includes('text/html')) {
-    return true; // it's a web page
+    return {
+      isPage: true, // it's a web page
+      redirectedUrl: response.url,
+    };
   }
-  return false; // likely a file
+  return {
+    isPage: false, // likely a file
+    redirectedUrl: response.url,
+  };
 }
