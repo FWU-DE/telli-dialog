@@ -6,6 +6,7 @@ import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
 import he from 'he';
 import { unstable_cacheLife as cacheLife } from 'next/cache';
+import { logDebug, logError, logInfo } from '@/utils/logging/logging';
 
 const headers = {
   'User-Agent':
@@ -27,13 +28,13 @@ export async function webScraperExecutable(
   'use cache';
   cacheLife('weeks');
 
-  console.info(`Requesting webcontent for url: ${url}`);
+  logInfo(`Requesting webcontent for url: ${url}`);
   const t = await getTranslations({ namespace: 'websearch' });
   let response: Response;
   try {
     const { isPage, redirectedUrl } = await isWebPage(url, options.timeout);
     if (!isPage) {
-      console.warn(`URL is not a webpage: ${url}`);
+      logInfo(`URL is not a webpage: ${url}`);
       return {
         error: true,
         content: 'Es werden nur Links auf Webseiten unterstützt, keine Dateien.',
@@ -43,7 +44,7 @@ export async function webScraperExecutable(
       };
     }
     if (url !== redirectedUrl) {
-      console.log(`Requested URL '${url}' was redirected to '${redirectedUrl}'`);
+      logDebug(`Requested URL '${url}' was redirected to '${redirectedUrl}'`);
     }
     // Set up a timeout for the fetch request
     const controller = new AbortController();
@@ -53,8 +54,8 @@ export async function webScraperExecutable(
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
-  } catch {
-    console.error(`Request timed out for URL: ${url}`);
+  } catch (error) {
+    logError(`Request timed out for URL: ${url}`, error);
     return {
       ...defaultErrorSource({ status_code: 408, t }),
       link: url,
