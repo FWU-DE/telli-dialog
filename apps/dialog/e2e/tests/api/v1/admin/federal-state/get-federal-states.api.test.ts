@@ -14,9 +14,11 @@ test('should fetch all federal states with decryptedApiKey', async ({
   expect(response.ok()).toBeTruthy();
   const json = await response.json();
   expect(Array.isArray(json.federalStates)).toBe(true);
-  if (json.federalStates.length > 0) {
-    expect(json.federalStates[0]).toHaveProperty('decryptedApiKey');
-  }
+  json.federalStates.forEach((federalState: any) => {
+    if (federalState.hasApiKeyAssigned) {
+      expect(federalState).toHaveProperty('decryptedApiKey');
+    }
+  });
 });
 
 test('should return 403 if authorization header is missing', async ({
