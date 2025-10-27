@@ -95,10 +95,7 @@ export async function getAuxiliaryModel(federalStateId: string): Promise<LlmMode
     federalStateId,
   });
   const auxiliaryModel =
-    getDefaultAuxModel(llmModels) ??
-    getFallbackAuxModel(llmModels) ??
-    getFirstEmbeddingModel(llmModels) ??
-    getFirstTextModel(llmModels);
+    getDefaultAuxModel(llmModels) ?? getFallbackAuxModel(llmModels) ?? getFirstTextModel(llmModels);
   if (auxiliaryModel === undefined) {
     throw new Error('No auxiliary model found');
   }
@@ -113,10 +110,6 @@ function getFallbackAuxModel(models: LlmModel[]): LlmModel | undefined {
   return models.find((model) => model.name === FALLBACK_AUXILIARY_MODEL);
 }
 
-function getFirstEmbeddingModel(models: LlmModel[]): LlmModel | undefined {
-  return models.find((model) => model.priceMetadata.type === 'embedding');
-}
-
-function getFirstTextModel(models: LlmModel[]): LlmModel | undefined {
+export function getFirstTextModel(models: LlmModel[]): LlmModel | undefined {
   return models.find((model) => model.priceMetadata.type === 'text');
 }
