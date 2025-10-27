@@ -29,7 +29,7 @@ export async function webScraperExecutable(
   cacheLife('weeks');
 
   logInfo(`Requesting webcontent for url: ${url}`);
-  const t = await getTranslations({ namespace: 'websearch' });
+  const t = await getTranslations('websearch');
   let response: Response;
   try {
     const { isPage, redirectedUrl } = await isWebPage(url, options.timeout);
