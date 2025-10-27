@@ -83,7 +83,7 @@
     "next": "15.5.4",
     "next-auth": "5.0.0-beta.25",
     "next-axiom": "1.9.1",
-    "next-intl": "3.26.3",
+    "next-intl": "4.4.0",
     "openai": "4.83.0",
     "pg": "8.13.1",
     "postcss": "8.4.49",
