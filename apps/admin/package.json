@@ -22,7 +22,6 @@
     "@opentelemetry/resources": "2.2.0",
     "@opentelemetry/sdk-metrics": "2.2.0",
     "@opentelemetry/sdk-node": "0.207.0",
-    "@opentelemetry/sdk-trace-base": "2.2.0",
     "@opentelemetry/sdk-trace-node": "2.2.0",
     "@opentelemetry/semantic-conventions": "1.37.0",
     "@telli/ui": "workspace:*",
