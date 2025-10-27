@@ -26,8 +26,10 @@ const sdk = new NodeSDK({
   instrumentations: [
     getNodeAutoInstrumentations({
       '@opentelemetry/instrumentation-http': {
-        // instrumentation from next.js is enough
-        enabled: false,
+        requestHook: (span, msg) => {
+          const path = 'path' in msg ? msg.path : msg.url;
+          span.updateName(`${msg.method} ${path}`);
+        },
       },
     }),
   ],
@@ -35,7 +37,7 @@ const sdk = new NodeSDK({
     [ATTR_SERVICE_NAME]: SERVICE_NAME,
     [ATTR_SERVICE_VERSION]: process.env.APP_VERSION,
   }),
-  metricReader: periodicExportingMetricReader,
+  metricReaders: [periodicExportingMetricReader],
   serviceName: SERVICE_NAME,
   spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter())],
 });
