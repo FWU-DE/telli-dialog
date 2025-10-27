@@ -4,7 +4,7 @@ import { HOME_ROUTE } from '../../app/page';
 
 export function Header() {
   return (
-    <header className="flex p-0 gap-6 items-center">
+    <header className="flex px-4 gap-6 items-center">
       <Link href={HOME_ROUTE} className="flex-none">
         <span className="text-xl font-bold">telli-admin</span>
       </Link>
