@@ -1,8 +1,6 @@
 import React from 'react';
 import VoucherCreateView from './VoucherCreateView';
-import { auth } from '../../../../api/auth/[...nextauth]/auth';
-
-export const NEW_VOUCHER_ROUTE = '/federal-states/{federalStateId}/vouchers/new';
+import { auth } from '../../../../../api/auth/[...nextauth]/auth';
 
 export default async function Page({ params }: { params: Promise<{ federalStateId: string }> }) {
   const federalStateId = (await params).federalStateId;

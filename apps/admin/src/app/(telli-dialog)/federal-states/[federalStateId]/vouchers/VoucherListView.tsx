@@ -1,11 +1,10 @@
 'use client';
 import React from 'react';
-import { Voucher } from '../../../../types/voucher';
-
+import { Voucher } from '../../../../../types/voucher';
 import { Button } from '@ui/components/Button';
 import Link from 'next/link';
 import VoucherList from './VoucherList';
-import { NEW_VOUCHER_ROUTE } from './new/page';
+import { ROUTES } from '../../../../../consts/routes';
 
 export default function VoucherListView({
   vouchers,
@@ -20,7 +19,7 @@ export default function VoucherListView({
     <div>
       <div className="flex items-center justify-between w-full gap-4 mb-4">
         <h1>Guthaben Codes Übersicht</h1>
-        <Link href={NEW_VOUCHER_ROUTE.replace('{federalStateId}', federalStateId)}>
+        <Link href={ROUTES.dialog.voucherNew(federalStateId)}>
           <Button>Neue erstellen</Button>
         </Link>
       </div>

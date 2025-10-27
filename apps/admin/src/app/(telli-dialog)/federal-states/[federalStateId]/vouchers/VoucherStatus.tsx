@@ -1,5 +1,5 @@
 import React from 'react';
-import { Voucher } from '../../../../types/voucher';
+import { Voucher } from '../../../../../types/voucher';
 
 type VoucherStatus = Voucher['status'];
 

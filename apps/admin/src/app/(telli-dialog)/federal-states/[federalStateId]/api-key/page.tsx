@@ -1,8 +1,7 @@
-import { fetchFederalStateById } from '../../../services/federal-states-service';
-import { FederalStateView } from './FederalStateDetailView';
+import { fetchFederalStateById } from '../../../../../services/federal-states-service';
+import { FederalStateUpdateApiKey } from './FederalStateUpdateApiKey';
 
 export const dynamic = 'force-dynamic';
-export const FEDERAL_STATE_BY_ID_ROUTE = '/federal-states/{id}';
 
 export default async function Page({ params }: { params: Promise<{ federalStateId: string }> }) {
   const federalStateId = (await params).federalStateId;
@@ -10,7 +9,7 @@ export default async function Page({ params }: { params: Promise<{ federalStateI
 
   return (
     <div>
-      <FederalStateView federalState={federalState} />
+      <FederalStateUpdateApiKey federalState={federalState} />
     </div>
   );
 }

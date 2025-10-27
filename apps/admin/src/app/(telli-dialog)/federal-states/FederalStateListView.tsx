@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import { fetchFederalStates } from '../../services/federal-states-service';
-import { FEDERAL_STATE_BY_ID_ROUTE } from './[federalStateId]/page';
+import { fetchFederalStates } from '../../../services/federal-states-service';
 import {
   Table,
   TableBody,
@@ -9,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from '@ui/components/Table';
+import { ROUTES } from '../../../consts/routes';
 
 export default async function FederalStateListView() {
   const federalStates = await fetchFederalStates();
@@ -33,7 +33,7 @@ export default async function FederalStateListView() {
               <TableCell>
                 <Link
                   key={federalState.id}
-                  href={FEDERAL_STATE_BY_ID_ROUTE.replace('{id}', federalState.id)}
+                  href={ROUTES.dialog.federalStateDetails(federalState.id)}
                 >
                   Details
                 </Link>

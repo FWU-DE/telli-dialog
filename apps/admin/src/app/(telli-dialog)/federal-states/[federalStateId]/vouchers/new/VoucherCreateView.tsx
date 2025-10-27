@@ -1,10 +1,10 @@
 'use client';
 import React, { useState } from 'react';
-import { createVouchers } from '../../../../../services/voucher-service';
+import { createVouchers } from '../../../../../../services/voucher-service';
 import { CSVLink } from 'react-csv';
 import { Input } from '@ui/components/Input';
 import { Textarea } from '@ui/components/Textarea';
-import { Voucher } from '../../../../../types/voucher';
+import { Voucher } from '../../../../../../types/voucher';
 import { Button } from '@ui/components/Button';
 import VoucherList from '../VoucherList';
 

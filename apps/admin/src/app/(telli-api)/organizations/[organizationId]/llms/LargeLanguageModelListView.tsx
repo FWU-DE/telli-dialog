@@ -6,8 +6,8 @@ import {
   TableHeader,
   TableRow,
 } from '@ui/components/Table';
-import { fetchLargeLanguageModels } from '../../services/llm-service';
-import { fetchSingleOrganization } from '../../services/organization-service';
+import { fetchLargeLanguageModels } from '../../../../../services/llm-service';
+import { fetchSingleOrganization } from '../../../../../services/organization-service';
 import { Checkbox } from '@ui/components/Checkbox';
 
 export async function LargeLanguageModelListView() {

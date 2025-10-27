@@ -4,10 +4,10 @@ import {
   FederalState,
   FederalStateEdit,
   FederalStateEditSchema,
-} from '../../../types/federal-state';
+} from '../../../../types/federal-state';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { updateFederalState } from '../../../services/federal-states-service';
+import { updateFederalState } from '../../../../services/federal-states-service';
 import { DesignConfigurationSchema } from '@ui/types/design-configuration';
 import {
   Card,
@@ -19,7 +19,7 @@ import {
 } from '@ui/components/Card';
 import { FormField } from '@ui/components/form/FormField';
 import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
-import { FormFieldArray } from '../../../components/form/FormFieldArray';
+import { FormFieldArray } from '../../../../components/form/FormFieldArray';
 import { toast } from 'sonner';
 
 export type FederalStateViewProps = {

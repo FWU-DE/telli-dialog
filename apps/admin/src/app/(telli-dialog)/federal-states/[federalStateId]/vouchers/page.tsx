@@ -1,8 +1,7 @@
-import { fetchVouchers } from '../../../../services/voucher-service';
-import { auth } from '../../../api/auth/[...nextauth]/auth';
+import { fetchVouchers } from '../../../../../services/voucher-service';
+import { auth } from '../../../../api/auth/[...nextauth]/auth';
 import VoucherListView from './VoucherListView';
 
-export const VOUCHERS_BY_STATE_ROUTE = '/federal-states/{federalStateId}/vouchers';
 export default async function VouchersByStatePage({
   params,
 }: {

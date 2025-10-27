@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from '@ui/components/Table';
-import { fetchProjects } from '../../../../services/project-service';
+import { fetchProjects } from '../../../../../services/project-service';
 
 export type ProjectListViewProps = {
   organizationId: string;
