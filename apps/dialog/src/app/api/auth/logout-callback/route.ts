@@ -16,7 +16,11 @@ export async function GET() {
   try {
     const response = NextResponse.redirect(LOGIN_PAGE_URL);
     response.cookies.set(SESSION_COOKIE_NAME, '', { path: '/', maxAge: 0 });
-    response.cookies.set(SECURE_SESSION_COOKIE_NAME, '', { path: '/', maxAge: 0 });
+    response.cookies.set(SECURE_SESSION_COOKIE_NAME, '', {
+      path: '/',
+      maxAge: 0,
+      secure: true, // Required for __Secure- prefixed cookies
+    });
     return response;
   } catch (error) {
     logError('Error during logout-callback', error);
