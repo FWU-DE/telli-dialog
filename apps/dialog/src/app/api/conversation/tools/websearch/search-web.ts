@@ -31,7 +31,7 @@ export async function webScraperExecutable(
   const t = await getTranslations({ namespace: 'websearch' });
   let response: Response;
   try {
-    const isPage = await isWebPage(url, options.timeout);
+    const { isPage, redirectedUrl } = await isWebPage(url, options.timeout);
     if (!isPage) {
       console.warn(`URL is not a webpage: ${url}`);
       return {
@@ -42,10 +42,13 @@ export async function webScraperExecutable(
         type: 'websearch',
       };
     }
+    if (url !== redirectedUrl) {
+      console.log(`Requested URL '${url}' was redirected to '${redirectedUrl}'`);
+    }
     // Set up a timeout for the fetch request
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), options.timeout);
-    response = await fetch(url, {
+    response = await fetch(redirectedUrl, {
       headers,
       signal: controller.signal,
     });
@@ -170,7 +173,13 @@ export async function isWebPage(url: string, timeout?: number) {
 
   // Basic heuristic
   if (contentType?.includes('text/html')) {
-    return true; // it's a web page
+    return {
+      isPage: true, // it's a web page
+      redirectedUrl: response.url,
+    };
   }
-  return false; // likely a file
+  return {
+    isPage: false, // likely a file
+    redirectedUrl: response.url,
+  };
 }
