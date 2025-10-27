@@ -47,7 +47,7 @@ export async function fetchSingleApiKey(
     },
   );
   if (!response.ok) {
-    throw new Error(`Failed to fetch project: ${response.statusText}`);
+    throw new Error(`Failed to fetch API keys: ${response.statusText}`);
   }
 
   const data = await response.json();

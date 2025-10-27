@@ -7,6 +7,8 @@ import {
   TableRow,
 } from '@ui/components/Table';
 import { fetchApiKeys } from '../../../../../../../services/api-key-service';
+import Link from 'next/link';
+import { ROUTES } from '../../../../../../../consts/routes';
 
 export type ApiKeyListViewProps = {
   organizationId: string;
@@ -26,6 +28,7 @@ export async function ApiKeyListView({ organizationId, projectId }: ApiKeyListVi
           <TableHead>Status</TableHead>
           <TableHead>Erstellt am</TableHead>
           <TableHead>Läuft ab am</TableHead>
+          <TableHead></TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -37,6 +40,11 @@ export async function ApiKeyListView({ organizationId, projectId }: ApiKeyListVi
             <TableCell>{apiKey.state}</TableCell>
             <TableCell>{JSON.stringify(apiKey.createdAt)}</TableCell>
             <TableCell>{JSON.stringify(apiKey.expiresAt)}</TableCell>
+            <TableCell>
+              <Link href={ROUTES.api.apiKeyModelMappings(organizationId, projectId, apiKey.id)}>
+                Sprachmodelle
+              </Link>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
