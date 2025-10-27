@@ -4,6 +4,7 @@ import { LlmModel } from '@/db/schema';
 import React from 'react';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { saveChatModelForUserAction } from '@/app/(authed)/(dialog)/actions';
+import { getFirstTextModel } from '@/app/api/utils';
 
 type LlmModelsProviderProps = {
   models: LlmModel[];
@@ -56,6 +57,6 @@ function getSelectedModel({
   return (
     models.find((model) => model.name === defaultLlmModelByCookie) ??
     models.find((model) => model.name === DEFAULT_CHAT_MODEL) ??
-    models[0]
+    getFirstTextModel(models)
   );
 }

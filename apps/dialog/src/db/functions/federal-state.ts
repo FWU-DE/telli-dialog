@@ -5,9 +5,10 @@ import { decrypt } from '../crypto';
 import { env } from '@/env';
 import { errorifyAsyncFn } from '@/utils/error';
 
-export const dbGetApiKeyByFederalStateIdWithResult = errorifyAsyncFn(dbGetApiKeyByFederalStateId);
-export const dbGetFederalStateByIdWithResult = errorifyAsyncFn(dbGetFederalStateById);
-export async function dbGetApiKeyByFederalStateId({
+export const dbGetFederalStateWithDecryptedApiKeyWithResult = errorifyAsyncFn(
+  dbGetFederalStateWithDecryptedApiKey,
+);
+export async function dbGetFederalStateWithDecryptedApiKey({
   federalStateId,
 }: {
   federalStateId: string | undefined;
@@ -41,6 +42,7 @@ export async function dbGetAllFederalStates() {
   return await db.select().from(federalStateTable);
 }
 
+export const dbGetFederalStateByIdWithResult = errorifyAsyncFn(dbGetFederalStateById);
 export async function dbGetFederalStateById(id: string | undefined) {
   if (id === undefined) {
     return undefined;
