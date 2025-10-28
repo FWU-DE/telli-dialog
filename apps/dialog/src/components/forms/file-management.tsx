@@ -17,7 +17,7 @@ interface FileManagementProps {
   onFileUploaded: (data: { id: string; name: string; file: File }) => void;
   onDeleteFile: (localFileId: string) => Promise<void>;
   readOnly: boolean;
-  translationNamespace?: string;
+  translationNamespace?: Parameters<typeof useTranslations>[0];
 }
 
 export default function FileManagement({

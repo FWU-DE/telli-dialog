@@ -1,12 +1,9 @@
 import { auth } from '@/auth';
 import { logError, logInfo, logWarning } from '@/utils/logging/logging';
 import { NextResponse } from 'next/server';
-import { LOGOUT_CALLBACK_URL } from '../logout-callback/route';
+import { LOGOUT_CALLBACK_URL } from '../const';
 import { VIDIS_LOGOUT_URL } from '@/auth/providers/vidis';
 import { LOGIN_PAGE_URL } from '@/app/(unauth)/login/page';
-import { env } from '@/env';
-
-export const LOGOUT_URL = new URL('/api/auth/logout', env.nextauthUrl);
 
 function handleEmptyToken() {
   logWarning('No valid token found, redirecting to logout-callback url');

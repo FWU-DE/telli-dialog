@@ -18,7 +18,7 @@ services:
 
   jaeger:
     # https://github.com/jaegertracing/jaeger/blob/v2.9.0/cmd/jaeger/internal/all-in-one.yaml
-    image: jaegertracing/jaeger:2.9.0
+    image: jaegertracing/jaeger:2.11.0
     container_name: jaeger
     command: ['--config=/jaeger/config.yml']
     ports:

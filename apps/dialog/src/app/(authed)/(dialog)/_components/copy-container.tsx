@@ -18,7 +18,7 @@ export function CopyContainer({
   templatePictureId?: string;
   startedAt: Date | null;
   maxUsageTimeLimit: number | null;
-  translation_path: string;
+  translation_path: Parameters<typeof useTranslations>[0];
   redirectPath: 'characters' | 'custom';
 }) {
   const sharedChatTimeLeft = calculateTimeLeftBySharedChat({ startedAt, maxUsageTimeLimit });
