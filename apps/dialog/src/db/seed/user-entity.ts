@@ -7,7 +7,7 @@ export async function insertDummyUser() {
     firstName: DUMMY_USER_FIRST_NAME,
     lastName: DUMMY_USER_LAST_NAME,
   });
-  
+
   console.log('Dummy user seed successful');
 }
 

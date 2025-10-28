@@ -15,7 +15,7 @@ export async function insertTemplateCharacters() {
       console.error('Failed to insert template character:', templateCharacter.name);
     }
   }
-  console.log('template character seed successful')
+  console.log('template character seed successful');
 }
 
 export async function insertTemplateCustomGpt() {
@@ -23,7 +23,7 @@ export async function insertTemplateCustomGpt() {
   for (const templateCustomGpt of defaultCustomGpt) {
     await dbUpsertCustomGpt({ customGpt: templateCustomGpt });
   }
-  console.log('template custom gpt seed successful')
+  console.log('template custom gpt seed successful');
 }
 
 async function findMatchingFiles(directoryPath: string, pattern: string): Promise<string[]> {

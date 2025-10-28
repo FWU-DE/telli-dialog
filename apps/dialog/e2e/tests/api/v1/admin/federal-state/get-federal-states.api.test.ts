@@ -3,11 +3,7 @@ import { authorizationHeader } from '../../../../../utils/authorizationHeader';
 
 const federalStateRoute = '/api/v1/admin/federal-states';
 
-test('should fetch all federal states', async ({
-  request,
-}: {
-  request: APIRequestContext;
-}) => {
+test('should fetch all federal states', async ({ request }: { request: APIRequestContext }) => {
   const response = await request.get(federalStateRoute, {
     headers: { ...authorizationHeader },
   });

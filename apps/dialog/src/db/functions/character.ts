@@ -107,7 +107,9 @@ export async function dbGetCopyTemplateCharacter({
   };
 }
 
-export async function dbCreateCharacter(character: Omit<CharacterInsertModel, 'modelId'> & Partial<Pick<CharacterInsertModel, 'modelId'>>) {
+export async function dbCreateCharacter(
+  character: Omit<CharacterInsertModel, 'modelId'> & Partial<Pick<CharacterInsertModel, 'modelId'>>,
+) {
   const defaultModelId = (await dbGetModelByName(DEFAULT_CHAT_MODEL))?.id;
   const modelId = character.modelId ?? defaultModelId;
   if (!modelId) {
