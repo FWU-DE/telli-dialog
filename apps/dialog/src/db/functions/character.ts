@@ -153,6 +153,16 @@ export async function dbGetGlobalCharacters({
   return characters;
 }
 
+/**
+ * Retrieves all characters associated with a specific school that are accessible to a user.
+ *
+ * This includes usage Data from the SharedCharacterConversation table.
+ *
+ * @param params.schoolId - The unique identifier of the school
+ * @param params.userId - The unique identifier of the user requesting the characters
+ * @returns A promise that resolves to an array of character models with associated conversation metadata
+ *
+ */
 export async function dbGetCharactersBySchoolId({
   schoolId,
   userId,
@@ -173,7 +183,7 @@ export async function dbGetCharactersBySchoolId({
       sharedCharacterConversation,
       and(
         eq(sharedCharacterConversation.characterId, characterTable.id),
-        eq(sharedCharacterConversation.userId, userId),
+        eq(sharedCharacterConversation.userId, userId), // this ensures we get the user-specific shared data, or null if not shared by this user
       ),
     )
     .where(
