@@ -1,26 +1,17 @@
 'use server';
 import { env } from '../consts/env';
 import { type Voucher } from '../types/voucher';
+import { fetchFromDialog } from './fetch';
 
 const apiRoutes = {
   VOUCHERS_API_URL: (federalStateId: string) => `/api/v1/${federalStateId}/vouchers`,
 };
 
 export async function fetchVouchers(federalStateId: string): Promise<Voucher[]> {
-  const response = await fetch(
+  const response = await fetchFromDialog(
     env.BASE_URL_TELLI_DIALOG + apiRoutes.VOUCHERS_API_URL(federalStateId),
-    {
-      method: 'GET',
-      mode: 'no-cors',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${env.API_KEY_TELLI_DIALOG}`,
-      },
-    },
   );
-  if (!response.ok) {
-    throw new Error(`Gutscheine konnten nicht abgerufen werden: ${response.statusText}`);
-  }
+
   const data = await response.json();
   return data as Voucher[];
 }
@@ -33,14 +24,10 @@ export async function createVouchers(
   createReason: string,
   numberOfCodes: number,
 ): Promise<Voucher[]> {
-  const response = await fetch(
+  const response = await fetchFromDialog(
     env.BASE_URL_TELLI_DIALOG + apiRoutes.VOUCHERS_API_URL(federalStateId),
     {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${env.API_KEY_TELLI_DIALOG}`,
-      },
       body: JSON.stringify({
         increaseAmount,
         durationMonths,
@@ -50,9 +37,7 @@ export async function createVouchers(
       }),
     },
   );
-  if (!response.ok) {
-    throw new Error(`Gutscheine konnten nicht erstellt werden: ${response.statusText}`);
-  }
+
   const data = await response.json();
   return data as Voucher[];
 }
@@ -63,19 +48,10 @@ export async function revokeVoucher(
   updatedBy: string,
   updateReason: string,
 ): Promise<void> {
-  const response = await fetch(
-    env.BASE_URL_TELLI_DIALOG + apiRoutes.VOUCHERS_API_URL(federalStateId),
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${env.API_KEY_TELLI_DIALOG}`,
-      },
-      body: JSON.stringify({ code, revoked: true, updatedBy, updateReason }),
-    },
-  );
-  if (!response.ok) {
-    throw new Error(`Gutschein konnte nicht widerrufen werden: ${response.statusText}`);
-  }
+  await fetchFromDialog(env.BASE_URL_TELLI_DIALOG + apiRoutes.VOUCHERS_API_URL(federalStateId), {
+    method: 'PATCH',
+    body: JSON.stringify({ code, revoked: true, updatedBy, updateReason }),
+  });
+
   return;
 }

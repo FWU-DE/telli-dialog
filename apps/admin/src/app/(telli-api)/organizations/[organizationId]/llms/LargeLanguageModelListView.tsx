@@ -7,12 +7,17 @@ import {
   TableRow,
 } from '@ui/components/Table';
 import { fetchLargeLanguageModels } from '../../../../../services/llm-service';
-import { fetchSingleOrganization } from '../../../../../services/organization-service';
+
 import { Checkbox } from '@ui/components/Checkbox';
 
-export async function LargeLanguageModelListView() {
-  const organization = await fetchSingleOrganization();
-  const languageModels = await fetchLargeLanguageModels(organization.id);
+export type LargeLanguageModelListViewProps = {
+  organizationId: string;
+};
+
+export async function LargeLanguageModelListView({
+  organizationId,
+}: LargeLanguageModelListViewProps) {
+  const languageModels = await fetchLargeLanguageModels(organizationId);
 
   return (
     <Table>

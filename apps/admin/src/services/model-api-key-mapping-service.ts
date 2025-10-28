@@ -1,5 +1,6 @@
 import { env } from '../consts/env';
 import { ModelApiKeyMapping } from '../types/model-mappings';
+import { fetchFromApi } from './fetch';
 
 const apiRoutes = {
   GET_ALL: (organizationId: string, projectId: string, apiKeyId: string) =>
@@ -11,18 +12,9 @@ export async function fetchModelApiKeyMappings(
   projectId: string,
   apiKeyId: string,
 ): Promise<ModelApiKeyMapping[]> {
-  const response = await fetch(
+  const response = await fetchFromApi(
     env.BASE_URL_TELLI_API + apiRoutes.GET_ALL(organizationId, projectId, apiKeyId),
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${env.API_KEY_TELLI_API}`,
-      },
-    },
   );
-  if (!response.ok) {
-    throw new Error(`Failed to fetch model API key mappings: ${response.statusText}`);
-  }
 
   const data = await response.json();
 

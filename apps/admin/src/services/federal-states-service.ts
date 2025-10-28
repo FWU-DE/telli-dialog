@@ -1,6 +1,7 @@
 'use server';
 import { env } from '../consts/env';
 import { FederalState } from '../types/federal-state';
+import { fetchFromDialog } from './fetch';
 
 const apiRoutes = {
   FEDERAL_STATES_ROUTE: '/api/v1/admin/federal-states',
@@ -8,35 +9,18 @@ const apiRoutes = {
 };
 
 export async function fetchFederalStates() {
-  const response = await fetch(env.BASE_URL_TELLI_DIALOG + apiRoutes.FEDERAL_STATES_ROUTE, {
-    mode: 'no-cors',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${env.API_KEY_TELLI_DIALOG}`,
-    },
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to fetch federal states: ${response.statusText}`);
-  }
+  const response = await fetchFromDialog(
+    env.BASE_URL_TELLI_DIALOG + apiRoutes.FEDERAL_STATES_ROUTE,
+  );
 
   const data = await response.json();
   return data.federalStates as FederalState[];
 }
 
 export async function fetchFederalStateById(federalStateId: string) {
-  const response = await fetch(
+  const response = await fetchFromDialog(
     env.BASE_URL_TELLI_DIALOG + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE(federalStateId),
-    {
-      mode: 'no-cors',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${env.API_KEY_TELLI_DIALOG}`,
-      },
-    },
   );
-  if (!response.ok) {
-    throw new Error(`Failed to fetch federal state by id: ${response.statusText}`);
-  }
 
   const data = await response.json();
   // validate response with zod
@@ -44,38 +28,28 @@ export async function fetchFederalStateById(federalStateId: string) {
 }
 
 export async function updateFederalState(federalState: FederalState) {
-  const response = await fetch(
+  const response = await fetchFromDialog(
     env.BASE_URL_TELLI_DIALOG + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE(federalState.id),
     {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${env.API_KEY_TELLI_DIALOG}`,
-      },
       body: JSON.stringify(federalState),
     },
   );
-  if (!response.ok) {
-    throw new Error(`Failed to update federal state: ${response.statusText}`);
-  }
 
   const data = await response.json();
   return data as FederalState;
 }
 
 export async function patchApiKey(federalStateId: string, decryptedApiKey: string) {
-  const response = await fetch(
+  const response = await fetchFromDialog(
     env.BASE_URL_TELLI_DIALOG + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE(federalStateId),
     {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${env.API_KEY_TELLI_DIALOG}`,
-      },
       body: JSON.stringify({ decryptedApiKey }),
     },
   );
-  if (!response.ok) {
-    throw new Error(`Failed to update federal state: ${response.statusText}`);
-  }
+
+  const data = await response.json();
+  // unsure what the return value is atm.
+  return data;
 }

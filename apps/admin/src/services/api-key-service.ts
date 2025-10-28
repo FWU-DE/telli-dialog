@@ -1,5 +1,6 @@
 import { env } from '../consts/env';
 import { ApiKey } from '../types/api-key';
+import { fetchFromApi } from './fetch';
 
 const apiRoutes = {
   GET_ALL: (organizationId: string, projectId: string) =>
@@ -9,21 +10,11 @@ const apiRoutes = {
 };
 
 export async function fetchApiKeys(organizationId: string, projectId: string): Promise<ApiKey[]> {
-  const response = await fetch(
+  const response = await fetchFromApi(
     env.BASE_URL_TELLI_API + apiRoutes.GET_ALL(organizationId, projectId),
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${env.API_KEY_TELLI_API}`,
-      },
-    },
   );
-  if (!response.ok) {
-    throw new Error(`Failed to fetch projects: ${response.statusText}`);
-  }
 
   const data = await response.json();
-
   return data as ApiKey[];
 }
 
@@ -32,18 +23,9 @@ export async function fetchSingleApiKey(
   projectId: string,
   apiKeyId: string,
 ): Promise<ApiKey> {
-  const response = await fetch(
+  const response = await fetchFromApi(
     env.BASE_URL_TELLI_API + apiRoutes.GET_SINGLE(organizationId, projectId, apiKeyId),
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${env.API_KEY_TELLI_API}`,
-      },
-    },
   );
-  if (!response.ok) {
-    throw new Error(`Failed to fetch API keys: ${response.statusText}`);
-  }
 
   const data = await response.json();
   return data as ApiKey;
