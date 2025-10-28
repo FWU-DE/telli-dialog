@@ -29,7 +29,7 @@ export async function insertFederalStates({ skip = true }: { skip: boolean }) {
     });
   }
 
-  console.info('federalState seed successful');
+  console.log('federalState seed successful');
 }
 
 const FEDERAL_STATE_DEFINITIONS = [
