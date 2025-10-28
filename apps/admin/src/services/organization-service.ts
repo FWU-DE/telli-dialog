@@ -1,9 +1,9 @@
+import { env } from '../consts/env';
+import { Organization } from '../types/organization';
+
 const apiRoutes = {
   GET_ALL: '/v1/admin/organizations',
 };
-
-import { env } from '../consts/env';
-import { Organization } from '../types/organization';
 
 export async function fetchOrganizations(): Promise<Organization[]> {
   const response = await fetch(env.BASE_URL_TELLI_API + apiRoutes.GET_ALL, {

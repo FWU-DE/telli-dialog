@@ -2,10 +2,13 @@
 import { env } from '../consts/env';
 import { type Voucher } from '../types/voucher';
 
-const VOUCHERS_API_URL = '/api/v1/{federalStateId}/vouchers';
+const apiRoutes = {
+  VOUCHERS_API_URL: (federalStateId: string) => `/api/v1/${federalStateId}/vouchers`,
+};
+
 export async function fetchVouchers(federalStateId: string): Promise<Voucher[]> {
   const response = await fetch(
-    env.BASE_URL_TELLI_DIALOG + VOUCHERS_API_URL.replace('{federalStateId}', federalStateId),
+    env.BASE_URL_TELLI_DIALOG + apiRoutes.VOUCHERS_API_URL(federalStateId),
     {
       method: 'GET',
       mode: 'no-cors',
@@ -31,7 +34,7 @@ export async function createVouchers(
   numberOfCodes: number,
 ): Promise<Voucher[]> {
   const response = await fetch(
-    env.BASE_URL_TELLI_DIALOG + VOUCHERS_API_URL.replace('{federalStateId}', federalStateId),
+    env.BASE_URL_TELLI_DIALOG + apiRoutes.VOUCHERS_API_URL(federalStateId),
     {
       method: 'POST',
       headers: {
@@ -61,7 +64,7 @@ export async function revokeVoucher(
   updateReason: string,
 ): Promise<void> {
   const response = await fetch(
-    env.BASE_URL_TELLI_DIALOG + VOUCHERS_API_URL.replace('{federalStateId}', federalStateId),
+    env.BASE_URL_TELLI_DIALOG + apiRoutes.VOUCHERS_API_URL(federalStateId),
     {
       method: 'PATCH',
       headers: {

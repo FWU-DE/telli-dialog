@@ -4,7 +4,7 @@ import { FederalState } from '../types/federal-state';
 
 const apiRoutes = {
   FEDERAL_STATES_ROUTE: '/api/v1/admin/federal-states',
-  FEDERAL_STATE_BY_ID_ROUTE: '/api/v1/admin/federal-states/{id}',
+  FEDERAL_STATE_BY_ID_ROUTE: (id: string) => `/api/v1/admin/federal-states/${id}`,
 };
 
 export async function fetchFederalStates() {
@@ -25,7 +25,7 @@ export async function fetchFederalStates() {
 
 export async function fetchFederalStateById(federalStateId: string) {
   const response = await fetch(
-    env.BASE_URL_TELLI_DIALOG + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE.replace('{id}', federalStateId),
+    env.BASE_URL_TELLI_DIALOG + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE(federalStateId),
     {
       mode: 'no-cors',
       headers: {
@@ -45,8 +45,7 @@ export async function fetchFederalStateById(federalStateId: string) {
 
 export async function updateFederalState(federalState: FederalState) {
   const response = await fetch(
-    env.BASE_URL_TELLI_DIALOG +
-      apiRoutes.FEDERAL_STATE_BY_ID_ROUTE.replace('{id}', federalState.id),
+    env.BASE_URL_TELLI_DIALOG + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE(federalState.id),
     {
       method: 'PUT',
       headers: {
@@ -66,7 +65,7 @@ export async function updateFederalState(federalState: FederalState) {
 
 export async function patchApiKey(federalStateId: string, decryptedApiKey: string) {
   const response = await fetch(
-    env.BASE_URL_TELLI_DIALOG + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE.replace('{id}', federalStateId),
+    env.BASE_URL_TELLI_DIALOG + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE(federalStateId),
     {
       method: 'PATCH',
       headers: {

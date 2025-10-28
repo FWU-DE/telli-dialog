@@ -1,18 +1,16 @@
-const apiRoutes = {
-  GET_ALL: '/v1/admin/organizations/{organizationId}/projects/{projectId}/api-keys',
-  GET_SINGLE: '/v1/admin/organizations/{organizationId}/projects/{projectId}/api-keys/{apiKeyId}',
-};
-
 import { env } from '../consts/env';
 import { ApiKey } from '../types/api-key';
 
+const apiRoutes = {
+  GET_ALL: (organizationId: string, projectId: string) =>
+    `/v1/admin/organizations/${organizationId}/projects/${projectId}/api-keys`,
+  GET_SINGLE: (organizationId: string, projectId: string, apiKeyId: string) =>
+    `/v1/admin/organizations/${organizationId}/projects/${projectId}/api-keys/${apiKeyId}`,
+};
+
 export async function fetchApiKeys(organizationId: string, projectId: string): Promise<ApiKey[]> {
   const response = await fetch(
-    env.BASE_URL_TELLI_API +
-      apiRoutes.GET_ALL.replace('{organizationId}', organizationId).replace(
-        '{projectId}',
-        projectId,
-      ),
+    env.BASE_URL_TELLI_API + apiRoutes.GET_ALL(organizationId, projectId),
     {
       headers: {
         'Content-Type': 'application/json',
@@ -35,10 +33,7 @@ export async function fetchSingleApiKey(
   apiKeyId: string,
 ): Promise<ApiKey> {
   const response = await fetch(
-    env.BASE_URL_TELLI_API +
-      apiRoutes.GET_SINGLE.replace('{organizationId}', organizationId)
-        .replace('{projectId}', projectId)
-        .replace('{apiKeyId}', apiKeyId),
+    env.BASE_URL_TELLI_API + apiRoutes.GET_SINGLE(organizationId, projectId, apiKeyId),
     {
       headers: {
         'Content-Type': 'application/json',
