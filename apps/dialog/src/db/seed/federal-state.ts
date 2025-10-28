@@ -28,6 +28,8 @@ export async function insertFederalStates({ skip = true }: { skip: boolean }) {
       federalStateId: federalStateAndApiKey.id,
     });
   }
+  
+    console.info('federalState seed successful');
 }
 
 const FEDERAL_STATE_DEFINITIONS = [

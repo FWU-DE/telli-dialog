@@ -7,6 +7,8 @@ export async function insertDummyUser() {
     firstName: DUMMY_USER_FIRST_NAME,
     lastName: DUMMY_USER_LAST_NAME,
   });
+  
+  console.log('Dummy user seed successful');
 }
 
 export const DUMMY_USER_ID = 'e7cdbdd7-f950-47c5-9955-61e5172b39b0';
