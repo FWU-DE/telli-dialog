@@ -53,6 +53,9 @@ importers:
       '@opentelemetry/semantic-conventions':
         specifier: 1.37.0
         version: 1.37.0
+      '@t3-oss/env-nextjs':
+        specifier: 0.10.1
+        version: 0.10.1(typescript@5.7.2)(zod@3.25.67)
       '@telli/ui':
         specifier: workspace:*
         version: link:../../packages/ui
