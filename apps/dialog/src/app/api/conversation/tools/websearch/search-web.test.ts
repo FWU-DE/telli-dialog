@@ -4,6 +4,7 @@ import { isWebPage, webScraperExecutable } from './search-web';
 const WIKI_PAGE_URL = 'https://de.wikipedia.org/wiki/Wiki';
 const PDF_DOC_URL =
   'https://www.bpb.de/system/files/dokument_pdf/Zeitleiste_deutsch_zum-Selbstdruck_16_Einzelseiten.pdf';
+const REDIRECT_PAGE_URL = 'https://de.wikipedia.org/';
 
 // mock is needed because test is not running in a next.js environment
 vi.mock('next-intl/server', () => ({
@@ -38,12 +39,17 @@ describe.skip('webScraperExecutable', () => {
   });
 
   test('isWebPage returns true for wiki page', async () => {
-    const output = await isWebPage(WIKI_PAGE_URL);
-    expect(output).toBe(true);
+    const { isPage } = await isWebPage(WIKI_PAGE_URL);
+    expect(isPage).toBe(true);
   });
 
   test('isWebPage returns false for pdf document', async () => {
-    const output = await isWebPage(PDF_DOC_URL);
-    expect(output).toBe(false);
+    const { isPage } = await isWebPage(PDF_DOC_URL);
+    expect(isPage).toBe(false);
+  });
+
+  test('isWebPage returns redirected url', async () => {
+    const { redirectedUrl } = await isWebPage(REDIRECT_PAGE_URL);
+    expect(redirectedUrl).not.toBe(REDIRECT_PAGE_URL);
   });
 });
