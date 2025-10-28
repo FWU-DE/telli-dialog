@@ -52,7 +52,7 @@ export async function handleSingleFile({
   session: ReturnType<typeof useSession>;
   conversation?: ReturnType<typeof useConversation>;
   toast: ToastContextType;
-  translations: (key: string, values?: TranslationValues) => string;
+  translations: ReturnType<typeof useTranslations>;
   showUploadConfirmation?: boolean;
 }) {
   if (!file) {

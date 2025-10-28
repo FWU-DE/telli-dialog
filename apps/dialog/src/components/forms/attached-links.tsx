@@ -9,7 +9,7 @@ import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { useToast } from '../common/toast';
-import { TranslationValues } from 'next-intl';
+import { useTranslations } from 'next-intl';
 
 const MAX_LINKS = 5;
 
@@ -17,8 +17,8 @@ type AttachedLinksProps = {
   fields: FieldArrayWithId<WebsearchSource, never, 'id'>[];
   getValues: () => WebsearchSource[];
   setValue: (value: WebsearchSource[]) => void;
-  t: (key: string) => string;
-  tToast: (key: string, values?: TranslationValues) => string;
+  t: ReturnType<typeof useTranslations>;
+  tToast: ReturnType<typeof useTranslations>;
   readOnly?: boolean;
   handleAutosave: () => void;
 };
