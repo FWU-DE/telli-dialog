@@ -25,7 +25,7 @@ export function SharedChatHeader({
 }: {
   chatActive: boolean;
   hasMessages: boolean;
-  t: (key: string) => string;
+  t: ReturnType<typeof useTranslations>;
   handleOpenNewChat: () => void;
   title: string;
   messages: Message[];

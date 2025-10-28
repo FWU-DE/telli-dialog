@@ -19,5 +19,7 @@ const hilfeModusGpt: CustomGptInsertModel = {
 export async function insertHelpModeGpt({ skip = true }: { skip: boolean }) {
   if (skip) return;
 
-  return await dbUpsertCustomGpt({ customGpt: hilfeModusGpt });
+  const result = await dbUpsertCustomGpt({ customGpt: hilfeModusGpt });
+  console.log('helpMode seed successful');
+  return result;
 }

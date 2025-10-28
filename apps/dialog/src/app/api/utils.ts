@@ -110,6 +110,6 @@ function getFallbackAuxModel(models: LlmModel[]): LlmModel | undefined {
   return models.find((model) => model.name === FALLBACK_AUXILIARY_MODEL);
 }
 
-export function getFirstTextModel(models: LlmModel[]): LlmModel | undefined {
+function getFirstTextModel(models: LlmModel[]): LlmModel | undefined {
   return models.find((model) => model.priceMetadata.type === 'text');
 }

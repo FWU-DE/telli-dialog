@@ -1,24 +1,32 @@
-import { Separator } from '@ui/components/Separator';
 import Link from 'next/link';
-import { ORGANIZATIONS_ROUTE } from '../../app/organizations/page';
-import { LLMS_ROUTE } from '../../app/llms/page';
-import { FEDERAL_STATES_ROUTE } from '../../app/federal-states/page';
 
-export function Sidebar() {
+export type NavigationItem = {
+  label: string;
+  href: string;
+};
+
+export type NavigationSection = {
+  title: string;
+  items: NavigationItem[];
+};
+
+export type SidebarProps = {
+  sections: NavigationSection[];
+};
+
+export function Sidebar({ sections }: SidebarProps) {
   return (
-    <div className="w-[240px] h-full p-4">
-      <div className="text-sm">telli-api</div>
-      <Link href={ORGANIZATIONS_ROUTE} className="block mt-2">
-        Organisationen
-      </Link>
-      <Link href={LLMS_ROUTE} className="block mt-2">
-        Modelle
-      </Link>
-      <Separator className="my-8" />
-      <div className="text-sm">telli-dialog</div>
-      <Link href={FEDERAL_STATES_ROUTE} className="block mt-2">
-        Bundesländer
-      </Link>
+    <div className="flex flex-col gap-8 w-[240px] p-4">
+      {sections.map((section) => (
+        <div key={section.title}>
+          <div className="text-sm">{section.title}</div>
+          {section.items.map((item) => (
+            <Link key={item.label} href={item.href} className="block mt-2">
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }

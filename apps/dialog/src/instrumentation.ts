@@ -6,7 +6,6 @@ export async function register() {
       `NEXT_RUNTIME is ${process.env.NEXT_RUNTIME} - registering nodejs instrumentation.`,
     );
     await import('./instrumentation.node');
-    await import('../sentry.server.config');
   }
 
   if (process.env.NEXT_RUNTIME === 'edge') {

@@ -7,7 +7,7 @@ import { calculateTimeLeftBySharedChat } from '../../../shared-chats/[sharedScho
 import { createNewCharacterAction } from '../../actions';
 
 export function CopyContainer({ character }: { character: CharacterModel }) {
-  const t = useTranslations('characters.copy-page');
+  const t = useTranslations('characters.form.copy-page');
   const sharedChatTimeLeft = calculateTimeLeftBySharedChat(character);
   const sharedChatActive = sharedChatTimeLeft > 0;
   const containerBg = !sharedChatActive ? 'bg-secondary/10' : 'bg-gray-100/10';

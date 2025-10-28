@@ -62,31 +62,33 @@ export async function getRelevantFileContent({
     console.warn('No text chunks found, attempting ad-hoc file processing...');
     const processedFiles = await processFiles(relatedFileEntities);
     // Process each file that hasn't been processed yet
-    for (const file of processedFiles) {
-      const textChunks = chunkText({
-        text: file.content ?? '',
-        sentenceChunkOverlap: 1,
-        lowerBoundWordCount: 200,
-      });
+    await Promise.all(
+      processedFiles.map(async (file) => {
+        const textChunks = chunkText({
+          text: file.content ?? '',
+          sentenceChunkOverlap: 1,
+          lowerBoundWordCount: 200,
+        });
 
-      // Enrich chunks with required properties
-      const enrichedChunks = textChunks.map((chunk, index) => ({
-        ...chunk,
-        fileId: file.id,
-        orderIndex: index,
-        pageNumber: 0, // Default page number for non-PDF files
-      }));
+        // Enrich chunks with required properties
+        const enrichedChunks = textChunks.map((chunk, index) => ({
+          ...chunk,
+          fileId: file.id,
+          orderIndex: index,
+          pageNumber: 0, // Default page number for non-PDF files
+        }));
 
-      await db
-        .insert(fileTable)
-        .values({ id: file.id, name: file.name, size: file.size, type: file.type })
-        .onConflictDoNothing();
-      await embedBatchAndSave({
-        values: enrichedChunks,
-        fileId: file.id,
-        federalStateId: user.federalState.id,
-      });
-    }
+        await db
+          .insert(fileTable)
+          .values({ id: file.id, name: file.name, size: file.size, type: file.type })
+          .onConflictDoNothing();
+        await embedBatchAndSave({
+          values: enrichedChunks,
+          fileId: file.id,
+          federalStateId: user.federalState.id,
+        });
+      }),
+    );
 
     // Try search again after processing
     retrievedTextChunks = await searchTextChunks({

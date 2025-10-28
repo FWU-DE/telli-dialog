@@ -107,12 +107,17 @@ export async function dbGetCopyTemplateCharacter({
   };
 }
 
-export async function dbCreateCharacter(character: Omit<CharacterInsertModel, 'modelId'>) {
-  const defaultModelId = await dbGetModelByName(DEFAULT_CHAT_MODEL);
-  if (defaultModelId === undefined) return;
+export async function dbCreateCharacter(
+  character: Omit<CharacterInsertModel, 'modelId'> & Partial<Pick<CharacterInsertModel, 'modelId'>>,
+) {
+  const defaultModelId = (await dbGetModelByName(DEFAULT_CHAT_MODEL))?.id;
+  const modelId = character.modelId ?? defaultModelId;
+  if (!modelId) {
+    throw new Error('No default model found');
+  }
   const created = await db
     .insert(characterTable)
-    .values({ ...character, modelId: defaultModelId.id })
+    .values({ ...character, modelId })
     .onConflictDoUpdate({ target: characterTable.id, set: { ...character } })
     .returning();
   return created;

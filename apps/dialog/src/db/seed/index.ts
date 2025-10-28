@@ -3,36 +3,22 @@ import { insertFederalStates } from './federal-state';
 import { insertHelpModeGpt } from './help-mode';
 import { insertDummyUser } from './user-entity';
 
-insertFederalStates({ skip: false })
+async function add() {
+  const step1 = [insertFederalStates({ skip: false }), insertDummyUser()];
+  await Promise.all(step1);
+  const step2 = [
+    insertHelpModeGpt({ skip: false }),
+    insertTemplateCharacters(),
+    insertTemplateCustomGpt(),
+  ];
+  await Promise.all(step2);
+}
+
+add()
   .then(() => {
-    console.info('federalState seed successful');
+    console.log('Seeding completed');
   })
   .catch((error) => {
     console.error({ error });
     process.exit(1);
   });
-
-insertHelpModeGpt({ skip: false })
-  .then(() => {
-    console.log('helpMode seed successful');
-  })
-  .catch((error) => {
-    console.error({ error });
-    process.exit(1);
-  });
-insertDummyUser()
-  .then(() => {
-    console.log('helpMode seed successful');
-  })
-  .catch((error) => {
-    console.error({ error });
-    process.exit(1);
-  });
-
-insertTemplateCharacters()
-  .then(() => console.log('template character seed successful'))
-  .catch((error) => console.error({ error }));
-
-insertTemplateCustomGpt()
-  .then(() => console.log('template custom gpt seed successful'))
-  .catch((error) => console.error({ error }));
