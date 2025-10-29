@@ -18,7 +18,5 @@ export async function fetchModelApiKeyMappings(
 
   const data = await response.json();
 
-  // Todo: fix return type here
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return data.map((d: any) => d.llm_model_api_key_mapping) as ModelApiKeyMapping[];
+  return data as ModelApiKeyMapping[];
 }
