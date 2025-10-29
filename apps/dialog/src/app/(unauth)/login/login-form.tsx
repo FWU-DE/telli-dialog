@@ -3,7 +3,7 @@
 import SharedChatLoginForm from '../../(authed)/(dialog)/shared-chats/_components/shared-chat-login-form';
 import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { signIn } from 'next-auth/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import TelliLogo from '@/components/icons/logo';
 import { cn } from '@/utils/tailwind';
 import { useSearchParams } from 'next/navigation';
@@ -12,9 +12,11 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const vidis_idp_hint = searchParams.get('vidis_idp_hint');
 
-  if (vidis_idp_hint !== null) {
-    signIn('vidis', undefined, { vidis_idp_hint: vidis_idp_hint });
-  }
+  useEffect(() => {
+    if (!!vidis_idp_hint) {
+      signIn('vidis', undefined, { vidis_idp_hint: vidis_idp_hint });
+    }
+  }, [vidis_idp_hint]);
 
   return (
     <main className="w-full flex flex-col justify-center items-center max-w-72 mx-auto py-4 h-full">
