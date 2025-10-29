@@ -13,6 +13,7 @@ export default function LoginForm() {
   const vidis_idp_hint = searchParams.get('vidis_idp_hint');
 
   useEffect(() => {
+    // automatic sign-in if vidis_idp_hint is present
     if (!!vidis_idp_hint) {
       signIn('vidis', undefined, { vidis_idp_hint: vidis_idp_hint });
     }
