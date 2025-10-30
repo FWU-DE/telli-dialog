@@ -1,7 +1,8 @@
 import * as Sentry from '@sentry/nextjs';
+import { env } from '@/env';
 
 const logLevelOrder = ['fatal', 'error', 'warning', 'log', 'info', 'debug'];
-const sentryLogLevel = process.env.SENTRY_LOG_LEVEL?.toLowerCase();
+const sentryLogLevel = env.sentryLogLevel?.toLowerCase();
 const logLevel = sentryLogLevel && logLevelOrder.includes(sentryLogLevel) ? sentryLogLevel : 'info';
 const logLevels = logLevelOrder.slice(0, 1 + logLevelOrder.indexOf(logLevel));
 
