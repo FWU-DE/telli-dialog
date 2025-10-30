@@ -13,7 +13,7 @@ import {
   TextChunkTable,
 } from '../schema';
 
-export async function link_file_to_conversation({
+export async function linkFilesToConversation({
   conversationMessageId,
   conversationId,
   fileIds,
@@ -22,11 +22,10 @@ export async function link_file_to_conversation({
   conversationId: string;
   fileIds: string[];
 }) {
-  for (const fileId of fileIds) {
-    await db
-      .insert(ConversationMessageFileMappingTable)
-      .values({ conversationMessageId, fileId, conversationId });
-  }
+  if (fileIds.length === 0) return;
+  await db
+    .insert(ConversationMessageFileMappingTable)
+    .values(fileIds.map((fileId) => ({ conversationMessageId, fileId, conversationId })));
 }
 
 export async function dbGetRelatedFiles(conversationId: string): Promise<Map<string, FileModel[]>> {
