@@ -183,7 +183,7 @@ export const characterTemplateMappingTable = pgTable('character_template_mapping
   id: uuid('id').defaultRandom().primaryKey(),
   characterId: uuid('character_id')
     .notNull()
-    .references(() => characterTable.id),
+    .references(() => characterTable.id, { onDelete: 'cascade' }),
   federalStateId: text('federal_state_id')
     .notNull()
     .references(() => federalStateTable.id),
@@ -371,7 +371,7 @@ export const customGptTemplateMappingTable = pgTable('custom_gpt_template_mappin
   id: uuid('id').defaultRandom().primaryKey(),
   customGptId: uuid('custom_gpt_id')
     .notNull()
-    .references(() => customGptTable.id),
+    .references(() => customGptTable.id, { onDelete: 'cascade' }),
   federalStateId: text('federal_state_id')
     .notNull()
     .references(() => federalStateTable.id),
