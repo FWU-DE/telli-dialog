@@ -184,9 +184,9 @@ export const characterTemplateMappingTable = pgTable('character_template_mapping
   characterId: uuid('character_id')
     .notNull()
     .references(() => characterTable.id),
-  // foreign key relationship is optional because we allow global templates as well
-  federalStateId: text('federal_state_id').references(() => federalStateTable.id),
-  isGlobal: boolean('is_global').notNull().default(false),
+  federalStateId: text('federal_state_id')
+    .notNull()
+    .references(() => federalStateTable.id),
 });
 export type CharacterTemplateMappingModel = typeof characterTemplateMappingTable.$inferSelect;
 export type CharacterTemplateMappingInsertModel = typeof characterTemplateMappingTable.$inferInsert;
@@ -372,9 +372,9 @@ export const customGptTemplateMappingTable = pgTable('custom_gpt_template_mappin
   customGptId: uuid('custom_gpt_id')
     .notNull()
     .references(() => customGptTable.id),
-  // foreign key relationship is optional because we allow global templates as well
-  federalStateId: text('federal_state_id').references(() => federalStateTable.id),
-  isGlobal: boolean('is_global').notNull().default(false),
+  federalStateId: text('federal_state_id')
+    .notNull()
+    .references(() => federalStateTable.id),
 });
 export type CustomGptTemplateMappingModel = typeof customGptTemplateMappingTable.$inferSelect;
 export type CustomGptTemplateMappingInsertModel = typeof customGptTemplateMappingTable.$inferInsert;
