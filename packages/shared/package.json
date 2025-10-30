@@ -1,0 +1,41 @@
+{
+  "name": "@telli/shared",
+  "version": "0.0.1",
+  "main": "src/index.ts",
+  "exports": {},
+  "scripts": {
+    "db:generate": "dotenvx run -f .env.local -- drizzle-kit generate --config=./drizzle.config.ts",
+    "db:drop": "dotenvx run -f .env.local -- drizzle-kit drop --config=./drizzle.config.ts",
+    "db:migrate": "drizzle-kit migrate --config=./drizzle.config.ts",
+    "db:migrate:local": "dotenvx run -f .env.local -- drizzle-kit migrate --config=./drizzle.config.ts",
+    "db:seed": "tsx src/db/seed/index.ts",
+    "db:seed:local": "ENVIRONMENT=development dotenvx run -f .env.local -- pnpm tsx src/db/seed/index.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "types": "tsc --noEmit",
+    "lint": "eslint \"**/*.ts*\" --max-warnings 0"
+  },
+  "dependencies": {
+    "@dotenvx/dotenvx": "1.44.1",
+    "drizzle-kit": "0.31.1",
+    "drizzle-orm": "0.39.3",
+    "drizzle-zod": "0.7.1",
+    "nanoid": "5.0.9",
+    "pg": "8.13.3",
+    "zod": "3.25.67"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "3.2.0",
+    "@telli/typescript-config": "workspace:*",
+    "@types/node": "22.13.14",
+    "@types/pg": "8.11.11",
+    "dotenv-cli": "10.0.0",
+    "eslint": "9.17.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-config-turbo": "2.5.8",
+    "eslint-plugin-prettier": "5.5.4",
+    "prettier": "3.4.2",
+    "prettier-eslint": "16.4.2",
+    "typescript": "5.7.2"
+  }
+}

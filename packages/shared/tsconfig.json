@@ -1,0 +1,8 @@
+{
+  "extends": "@telli/typescript-config/base.json",
+  "include": ["."],
+  "compilerOptions": {
+    "esModuleInterop": true
+  },
+  "exclude": ["dist", "build", "node_modules"]
+}
