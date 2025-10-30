@@ -11,6 +11,5 @@ export async function fetchOrganizations(): Promise<Organization[]> {
 
   const data = await response.json();
 
-  // TODO: fix endpoint to return array directly
-  return data.organizations as Organization[];
+  return data as Organization[];
 }
