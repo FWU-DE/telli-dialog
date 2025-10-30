@@ -179,6 +179,18 @@ export const characterTable = pgTable('character', {
 export type CharacterInsertModel = typeof characterTable.$inferInsert;
 export type CharacterModel = typeof characterTable.$inferSelect;
 
+export const characterTemplateMappingTable = pgTable('character_template_mappings', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  characterId: uuid('character_id')
+    .notNull()
+    .references(() => characterTable.id),
+  // foreign key relationship is optional because we allow global templates as well
+  federalStateId: uuid('federal_state_id').references(() => federalStateTable.id),
+  isGlobal: boolean('is_global').notNull().default(false),
+});
+export type CharacterTemplateMappingModel = typeof characterTemplateMappingTable.$inferSelect;
+export type CharacterTemplateMappingInsertModel = typeof characterTemplateMappingTable.$inferInsert;
+
 export const llmModelTypeSchema = z.enum(['text', 'image', 'fc']);
 export const llmModelTypeEnum = pgEnum('llm_model_type', llmModelTypeSchema.options);
 export type LlmModeType = z.infer<typeof llmModelTypeSchema>;
@@ -354,6 +366,18 @@ export const customGptTable = pgTable('custom_gpt', {
 
 export type CustomGptModel = typeof customGptTable.$inferSelect;
 export type CustomGptInsertModel = typeof customGptTable.$inferInsert;
+
+export const customGptTemplateMappingTable = pgTable('custom_gpt_template_mappings', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  customGptId: uuid('custom_gpt_id')
+    .notNull()
+    .references(() => customGptTable.id),
+  // foreign key relationship is optional because we allow global templates as well
+  federalStateId: uuid('federal_state_id').references(() => federalStateTable.id),
+  isGlobal: boolean('is_global').notNull().default(false),
+});
+export type CustomGptTemplateMappingModel = typeof customGptTemplateMappingTable.$inferSelect;
+export type CustomGptTemplateMappingInsertModel = typeof customGptTemplateMappingTable.$inferInsert;
 
 export const fileTable = pgTable('file_table', {
   id: text('id').primaryKey(),
