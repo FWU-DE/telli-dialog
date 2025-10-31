@@ -17,7 +17,7 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
-import { dbGetAttachedFileByEntityId, link_file_to_conversation } from '@/db/functions/files';
+import { dbGetAttachedFileByEntityId, linkFilesToConversation } from '@/db/functions/files';
 import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { SMALL_MODEL_MAX_CHARACTERS } from '@/configuration-text-inputs/const';
 import { SMALL_MODEL_LIST } from '@/configuration-text-inputs/const';
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (currentFileIds !== undefined) {
-    await link_file_to_conversation({
+    await linkFilesToConversation({
       fileIds: currentFileIds,
       conversationMessageId: userMessage.id,
       conversationId: conversation.id,
