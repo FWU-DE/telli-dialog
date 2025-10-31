@@ -1,8 +1,8 @@
 import React from 'react';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
-import { FileModel } from '@/db/schema';
-import { getSignedUrlFromS3Get } from '@/s3';
+import { FileModel } from '@shared/db/schema';
+import { getSignedUrlFromS3Get } from '@shared/s3';
 import { FileStatus } from './upload-file-button';
 import DeattachFileIcon from '../icons/file-upload-icons/deattach-file-icon';
 import Spinner from '../icons/spinner';

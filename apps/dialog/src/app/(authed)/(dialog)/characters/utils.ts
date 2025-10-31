@@ -1,5 +1,5 @@
-import { CharacterAccessLevel, CharacterModel } from '@/db/schema';
-import { getMaybeSignedUrlFromS3Get } from '@/s3';
+import { CharacterAccessLevel, CharacterModel } from '@shared/db/schema';
+import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 
 export function buildGenericUrl(accessLevel: CharacterAccessLevel, route: 'characters' | 'custom') {
   const searchParams = new URLSearchParams();

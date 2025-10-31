@@ -24,7 +24,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 import deleteConversationAction, { updateConversationNameAction } from './actions';
 import { fetchClientSideConversations } from './utils';
-import { HELP_MODE_GPT_ID } from '@/db/const';
+import { HELP_MODE_GPT_ID } from '@shared/db/const';
 
 type Props = {
   user: UserAndContext;

@@ -1,5 +1,5 @@
 import { split as splitSentences, SentenceSplitterSyntax } from 'sentence-splitter';
-import { TextChunkModel } from '@/db/schema';
+import { TextChunkModel } from '@shared/db/schema';
 
 export type ChunkResult = Omit<TextChunkModel, 'embedding' | 'contentTsv' | 'createdAt'> & {
   fileName: string;

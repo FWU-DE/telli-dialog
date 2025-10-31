@@ -2,11 +2,11 @@ import NotFound from '@/app/not-found';
 import SharedChat from '@/components/chat/shared-chat';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
-import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
-import { dbGetLlmModelById } from '@/db/functions/llm-model';
-import { dbGetFederalStateByUserId } from '@/db/functions/school';
-import { dbGetSharedChatByIdAndInviteCode } from '@/db/functions/shared-school-chat';
-import { getMaybeSignedUrlFromS3Get } from '@/s3';
+import { DEFAULT_DESIGN_CONFIGURATION } from '@shared/db/const';
+import { dbGetLlmModelById } from '@shared/db/functions/llm-model';
+import { dbGetFederalStateByUserId } from '@shared/db/functions/school';
+import { dbGetSharedChatByIdAndInviteCode } from '@shared/db/functions/shared-school-chat';
+import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { awaitPageContext } from '@/utils/next/utils';
 import { z } from 'zod';
 

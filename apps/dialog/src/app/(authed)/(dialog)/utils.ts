@@ -1,4 +1,4 @@
-import { ConversationModel } from '@/db/types';
+import { ConversationModel } from '@shared/db/types';
 
 export async function fetchClientSideConversations(): Promise<ConversationModel[]> {
   const response = await fetch('/api/conversations', { cache: 'no-store' });

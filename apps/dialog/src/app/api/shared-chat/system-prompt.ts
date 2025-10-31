@@ -1,4 +1,4 @@
-import { type SharedSchoolConversationModel } from '@/db/schema';
+import { type SharedSchoolConversationModel } from '@shared/db/schema';
 import { BASE_FILE_PROMPT, constructSingleFilePrompt } from '../chat/system-prompt';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { constructWebsearchPrompt } from '../conversation/tools/websearch/prompt_templates';

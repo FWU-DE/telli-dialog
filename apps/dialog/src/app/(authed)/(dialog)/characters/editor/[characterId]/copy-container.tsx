@@ -2,7 +2,7 @@ import { cn } from '@/utils/tailwind';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { useTranslations } from 'next-intl';
 import { CreateNewCharacterFromTemplate } from '../../create-new-character-button';
-import { CharacterModel } from '@/db/schema';
+import { CharacterModel } from '@shared/db/schema';
 import { calculateTimeLeftBySharedChat } from '../../../shared-chats/[sharedSchoolChatId]/utils';
 import { createNewCharacterAction } from '../../actions';
 

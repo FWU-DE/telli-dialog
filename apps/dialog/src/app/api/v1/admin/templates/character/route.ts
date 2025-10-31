@@ -6,12 +6,12 @@ import {
   dbCreateCharacter,
   dbGetGlobalCharacterByName,
   dbDeleteCharacterByIdAndUserId,
-} from '@/db/functions/character';
-import { CharacterInsertModel, characterTable } from '@/db/schema';
-import { dbGetModelByName } from '@/db/functions/llm-model';
+} from '@shared/db/functions/character';
+import { CharacterInsertModel, characterTable } from '@shared/db/schema';
+import { dbGetModelByName } from '@shared/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
-import { DUMMY_USER_ID } from '@/db/seed/user-entity';
-import { validateApiKeyByHeadersWithResult } from '@/db/utils';
+import { DUMMY_USER_ID } from '@shared/db/seed/user-entity';
+import { validateApiKeyByHeadersWithResult } from '@/utils/validation';
 
 // Generate Zod schema from Drizzle table definition
 const baseCharacterInsertSchema = createInsertSchema(characterTable);

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { knotenpunktLlmModelSchema } from './schema';
-import { env } from '@/env';
+import { env } from '../env';
 
 export async function fetchLlmModels({ apiKey }: { apiKey: string }) {
   const response = await fetch(`${env.apiUrl}/v1/models`, {

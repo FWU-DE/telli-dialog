@@ -1,4 +1,4 @@
-import { CharacterModel } from '@/db/schema';
+import { CharacterModel } from '@shared/db/schema';
 import { BASE_FILE_PROMPT, constructSingleFilePrompt } from '../chat/system-prompt';
 import { ChunkResult } from '../file-operations/process-chunks';
 import { WebsearchSource } from '../conversation/tools/websearch/types';

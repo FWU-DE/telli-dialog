@@ -1,13 +1,13 @@
-import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@/db/functions/federal-state';
+import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
 import {
   dbGetModelByIdAndFederalStateId,
   dbGetLlmModelsByFederalStateId,
-} from '@/db/functions/llm-model';
+} from '@shared/db/functions/llm-model';
 import { createTelliConfiguration } from './chat/custom-model-config';
 import { env } from '@/env';
-import { errorifyAsyncFn } from '@/utils/error';
-import { LlmModel } from '@/db/schema';
-import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
+import { errorifyAsyncFn } from '@shared/utils/error';
+import { LlmModel } from '@shared/db/schema';
+import { PRICE_AND_CENT_MULTIPLIER } from '@shared/db/const';
 import { DEFAULT_AUXILIARY_MODEL, FALLBACK_AUXILIARY_MODEL } from '@/app/api/chat/models';
 
 export function getSearchParamsFromUrl(url: string) {

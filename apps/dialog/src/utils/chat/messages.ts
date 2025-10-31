@@ -1,10 +1,9 @@
-import { ConversationMessageModel } from '@/db/types';
+import { ConversationMessageModel } from '@shared/db/types';
 import { Message } from 'ai';
 
 export function convertMessageModelToMessage(
   messages: Array<ConversationMessageModel>,
 ): Array<Message> {
-  // @ts-expect-error tool is filtered out
   return messages
     .filter((message) => message.role !== 'tool')
     .map((message) => ({

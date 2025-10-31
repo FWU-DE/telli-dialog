@@ -11,13 +11,13 @@ import {
 } from '@/components/navigation/sidebar/collapsible-sidebar';
 import SearchBarInput from '@/components/search-bar';
 import { type UserAndContext } from '@/auth/types';
-import { CharacterAccessLevel } from '@/db/schema';
+import { CharacterAccessLevel } from '@shared/db/schema';
 import { useTranslations } from 'next-intl';
 import CustomGptContainer from './custom-gpt-container';
 import { buildGenericUrl } from '../characters/utils';
 import CreateNewCustomGptButton from './create-new-customgpt-button';
 import { CustomGptWithImage } from './utils';
-import { HELP_MODE_GPT_ID } from '@/db/const';
+import { HELP_MODE_GPT_ID } from '@shared/db/const';
 
 export default function Page2({
   user,

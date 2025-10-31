@@ -3,9 +3,9 @@ import {
   dbGetVouchersByFederalStateId,
   dbInsertVouchers,
   dbUpdateVoucher,
-} from '@/db/functions/voucher';
-import { VoucherInsertModel, VoucherTable, VoucherUpdateModel } from '@/db/schema';
-import { validateApiKeyByHeadersWithResult } from '@/db/utils';
+} from '@shared/db/functions/voucher';
+import { VoucherInsertModel, VoucherTable, VoucherUpdateModel } from '@shared/db/schema';
+import { validateApiKeyByHeadersWithResult } from '@/utils/validation';
 import { createInsertSchema } from 'drizzle-zod';
 import { NextRequest, NextResponse } from 'next/server';
 import z from 'zod';

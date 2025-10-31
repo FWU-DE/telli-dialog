@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { generateSharedConversationDocxFiles } from './utils';
-import { formatDateToDayMonthYear } from '@/utils/date';
+import { formatDateToDayMonthYear } from '@shared/utils/date';
 
 const requestSchema = z.object({
   messages: z.array(

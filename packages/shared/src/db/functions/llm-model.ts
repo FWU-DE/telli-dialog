@@ -1,9 +1,9 @@
 import { and, eq } from 'drizzle-orm';
 import { db } from '..';
 import { federalStateLlmModelMappingTable, LlmModel, llmModelTable } from '../schema';
-import { KnotenpunktLlmModel } from '@/knotenpunkt/schema';
+import { KnotenpunktLlmModel } from '../../knotenpunkt/schema';
 import { dbGetFederalStateWithDecryptedApiKeyWithResult } from './federal-state';
-import { fetchLlmModels } from '@/knotenpunkt';
+import { fetchLlmModels } from '../../knotenpunkt';
 
 export async function dbGetLlmModelById({ modelId }: { modelId: string | undefined }) {
   if (modelId === undefined) return undefined;

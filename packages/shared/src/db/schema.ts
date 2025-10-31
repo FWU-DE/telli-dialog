@@ -14,7 +14,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
 import { DesignConfiguration, type LlmModelPriceMetadata } from './types';
-import { conversationRoleSchema } from '@/utils/chat';
+import { conversationRoleSchema } from '../utils/chat';
 import { sql } from 'drizzle-orm';
 
 export const tsvector = customType<{

@@ -1,4 +1,4 @@
-import { dbGetOrCreateTestUser } from '@/db/functions/vidis';
+import { dbGetOrCreateTestUser } from '@shared/db/functions/vidis';
 import CredentialsProvider from 'next-auth/providers/credentials';
 export const credentialsProvider = CredentialsProvider({
   id: 'credentials',

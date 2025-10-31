@@ -3,8 +3,12 @@ import {
   dbGetGlobalGpts,
   dbGetGptsBySchoolId,
   dbGetGptsByUserId,
-} from '@/db/functions/custom-gpts';
-import { type CharacterAccessLevel, CustomGptModel, characterAccessLevelSchema } from '@/db/schema';
+} from '@shared/db/functions/custom-gpts';
+import {
+  type CharacterAccessLevel,
+  CustomGptModel,
+  characterAccessLevelSchema,
+} from '@shared/db/schema';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
 import { z } from 'zod';

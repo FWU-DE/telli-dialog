@@ -1,4 +1,4 @@
-import { FileModel } from '@/db/schema';
+import { FileModel } from '@shared/db/schema';
 import DisplayUploadedFile from './display-uploaded-file';
 import DisplayUploadedImage from './display-uploaded-image';
 import TelliClipboardButton from '../common/clipboard-button';

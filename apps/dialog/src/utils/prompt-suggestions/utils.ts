@@ -1,4 +1,4 @@
-import { UserSchoolRole } from '@/db/schema';
+import { UserSchoolRole } from '@shared/db/schema';
 import { getRandomElements } from '../array/array';
 import { STUDENT_SUGGESTIONS, TEACHER_SUGGESTIONS } from './const';
 

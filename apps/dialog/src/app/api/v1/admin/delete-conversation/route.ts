@@ -1,11 +1,11 @@
-import { dbDeleteOutdatedConversations } from '@/db/functions/conversation';
+import { dbDeleteOutdatedConversations } from '@shared/db/functions/conversation';
 import {
   dbDeleteDanglingFiles,
   dbDeleteFileAndDetachFromConversation,
   dbGetDanglingConversationFileIds,
-} from '@/db/functions/files';
-import { validateApiKeyByHeadersWithResult } from '@/db/utils';
-import { deleteFileFromS3 } from '@/s3';
+} from '@shared/db/functions/files';
+import { validateApiKeyByHeadersWithResult } from '@/utils/validation';
+import { deleteFileFromS3 } from '@shared/s3';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function DELETE(req: NextRequest) {

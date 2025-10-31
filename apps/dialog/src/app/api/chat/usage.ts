@@ -1,12 +1,12 @@
 import { getPriceLimitInCentByUser } from '@/app/school';
-import { CharacterModel, type SharedSchoolConversationModel } from '@/db/schema';
+import { CharacterModel, type SharedSchoolConversationModel } from '@shared/db/schema';
 import { type UserAndContext } from '@/auth/types';
 import { getPriceInCentByUser } from '@/app/school';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
   dbGetSharedChatUsageInCentBySharedChatId,
-} from '@/db/functions/intelli-points';
+} from '@shared/db/functions/intelli-points';
 
 /**
  * Calculates the shared chat limit in cents

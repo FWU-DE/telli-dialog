@@ -15,12 +15,12 @@ import {
 import {
   dbGetCharacterByIdAndInviteCode,
   dbUpdateTokenUsageByCharacterChatId,
-} from '@/db/functions/character';
+} from '@shared/db/functions/character';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
-import { dbGetRelatedCharacterFiles } from '@/db/functions/files';
+import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 

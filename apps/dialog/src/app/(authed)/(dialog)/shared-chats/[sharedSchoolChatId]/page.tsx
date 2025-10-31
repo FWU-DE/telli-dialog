@@ -1,6 +1,6 @@
 import { getUser } from '@/auth/utils';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { dbGetSharedSchoolChatById } from '@/db/functions/shared-school-chat';
+import { dbGetSharedSchoolChatById } from '@shared/db/functions/shared-school-chat';
 import { awaitPageContext } from '@/utils/next/utils';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
@@ -10,7 +10,7 @@ import { fetchFileMapping } from './actions';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { PageContext } from '@/utils/next/types';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
-import { getMaybeSignedUrlFromS3Get } from '@/s3';
+import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 const pageContextSchema = z.object({
   params: z.object({

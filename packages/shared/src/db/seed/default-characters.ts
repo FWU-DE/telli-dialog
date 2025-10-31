@@ -1,7 +1,7 @@
 import { CharacterInsertModel, CustomGptInsertModel } from '../schema';
 import * as fs from 'fs';
 import * as path from 'path';
-import { uploadFileToS3 } from '@/s3';
+import { uploadFileToS3 } from '../../s3';
 import { dbCreateCharacter } from '../functions/character';
 import { DUMMY_USER_ID } from './user-entity';
 import { dbUpsertCustomGpt } from '../functions/custom-gpts';

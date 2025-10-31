@@ -4,6 +4,7 @@
   "extends": "@telli/typescript-config/nextjs.json",
   "compilerOptions": {
     "paths": {
+      "baseUrl": ["."],
       "@/*": ["./src/*"],
       "@ui/*": ["../../packages/ui/src/*"],
       "@shared/*": ["../../packages/shared/src/*"]

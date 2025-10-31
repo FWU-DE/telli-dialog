@@ -1,6 +1,6 @@
 'use client';
 
-import { LlmModel } from '@/db/schema';
+import { LlmModel } from '@shared/db/schema';
 import React from 'react';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { saveChatModelForUserAction } from '@/app/(authed)/(dialog)/actions';

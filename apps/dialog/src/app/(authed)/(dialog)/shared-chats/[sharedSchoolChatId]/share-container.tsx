@@ -8,7 +8,7 @@ import {
   sharedConversationFormValuesSchema,
   usageTimeValuesInMinutes,
 } from './schema';
-import { SharedSchoolConversationModel } from '@/db/schema';
+import { SharedSchoolConversationModel } from '@shared/db/schema';
 import { handleInitiateSharedChatShareAction, handleStopSharedChatShareAction } from './actions';
 import { calculateTimeLeftBySharedChat } from './utils';
 import { useToast } from '@/components/common/toast';

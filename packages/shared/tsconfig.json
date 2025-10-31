@@ -6,10 +6,7 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "bundler",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "moduleResolution": "bundler"
   },
   "exclude": ["dist", "build", "node_modules"]
 }

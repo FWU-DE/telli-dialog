@@ -1,8 +1,8 @@
 'use client';
 
 import { FileStatus } from './upload-file-button';
-import { ConversationMessageMetadata } from '@/utils/chat';
-import { CustomGptModel } from '@/db/schema';
+import { ConversationMessageMetadata } from '@shared/utils/chat';
+import { CustomGptModel } from '@shared/db/schema';
 
 export type SendMessageProps = {
   className?: string;

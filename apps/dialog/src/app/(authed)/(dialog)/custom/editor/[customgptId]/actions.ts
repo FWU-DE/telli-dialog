@@ -1,10 +1,10 @@
 'use server';
 
-import { db } from '@/db';
-import { CharacterAccessLevel, CustomGptInsertModel, customGptTable } from '@/db/schema';
+import { db } from '@shared/db';
+import { CharacterAccessLevel, CustomGptInsertModel, customGptTable } from '@shared/db/schema';
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
-import { dbDeleteCustomGptByIdAndUserId } from '@/db/functions/custom-gpts';
+import { dbDeleteCustomGptByIdAndUserId } from '@shared/db/functions/custom-gpts';
 import { removeNullValues } from '@/utils/generic/object-operations';
 
 export async function updateCustomGptAccessLevelAction({

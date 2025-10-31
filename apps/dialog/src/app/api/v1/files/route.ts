@@ -1,7 +1,7 @@
 import { getUser } from '@/auth/utils';
-import { db } from '@/db';
-import { fileTable, TextChunkInsertModel } from '@/db/schema';
-import { uploadFileToS3 } from '@/s3';
+import { db } from '@shared/db';
+import { fileTable, TextChunkInsertModel } from '@shared/db/schema';
+import { uploadFileToS3 } from '@shared/s3';
 import { getFileExtension } from '@/utils/files/generic';
 import { cnanoid } from '@/utils/random';
 import { NextRequest, NextResponse } from 'next/server';

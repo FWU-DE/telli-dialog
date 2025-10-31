@@ -2,7 +2,7 @@
 import { UserAndContext } from '@/auth/types';
 import SimpleTextInput from '@/components/common/simple-text-input';
 import { useToast } from '@/components/common/toast';
-import { dbGetVoucherByCode, dbRedeemVoucher } from '@/db/functions/voucher';
+import { dbGetVoucherByCode, dbRedeemVoucher } from '@shared/db/functions/voucher';
 import { useTranslations } from 'next-intl';
 import React from 'react';
 import z from 'zod';

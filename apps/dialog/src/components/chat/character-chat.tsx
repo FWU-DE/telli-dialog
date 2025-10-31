@@ -2,7 +2,7 @@
 import { useChat } from '@ai-sdk/react';
 import { FormEvent, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { CharacterModel } from '@/db/schema';
+import { CharacterModel } from '@shared/db/schema';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';

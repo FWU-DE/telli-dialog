@@ -1,16 +1,16 @@
 import { z } from 'zod';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
-import { dbGetLlmModelById } from '@/db/functions/llm-model';
+import { dbGetLlmModelById } from '@shared/db/functions/llm-model';
 import NotFound from '@/app/not-found';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
-import { dbGetCharacterByIdAndInviteCode } from '@/db/functions/character';
+import { dbGetCharacterByIdAndInviteCode } from '@shared/db/functions/character';
 
-import { getMaybeSignedUrlFromS3Get } from '@/s3';
+import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import CharacterSharedChat from '@/components/chat/character-chat';
 import { ThemeProvider } from '@/components/providers/theme-provider';
-import { dbGetFederalStateBySchoolId } from '@/db/functions/school';
-import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
+import { dbGetFederalStateBySchoolId } from '@shared/db/functions/school';
+import { DEFAULT_DESIGN_CONFIGURATION } from '@shared/db/const';
 
 const pageContextSchema = z.object({
   params: z.object({
