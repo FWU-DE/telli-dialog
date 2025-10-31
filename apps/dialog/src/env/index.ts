@@ -18,6 +18,7 @@ export const env = createEnv({
     nextauthUrl: z.string().min(1),
     rabbitmqUri: z.string().min(1),
     valkeyUrl: z.string().min(1),
+    sentryLogLevel: z.string().optional(),
   },
   client: {},
   runtimeEnv: {
@@ -36,6 +37,7 @@ export const env = createEnv({
     nextauthUrl: process.env.NEXTAUTH_URL,
     rabbitmqUri: process.env.RABBITMQ_URI,
     valkeyUrl: process.env.VALKEY_URL,
+    sentryLogLevel: process.env.SENTRY_LOG_LEVEL,
   },
   skipValidation: true,
 });

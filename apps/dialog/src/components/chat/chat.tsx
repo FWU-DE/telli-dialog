@@ -182,7 +182,7 @@ export default function Chat({
 
   function handleReload() {
     resetError();
-    reload();
+    void reload();
   }
 
   function formatSupportAdressesToString(arr: string[]): string {
