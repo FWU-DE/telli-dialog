@@ -29,7 +29,7 @@
     "@aws-sdk/client-s3": "3.744.0",
     "@aws-sdk/s3-request-presigner": "3.744.0",
     "@dotenvx/dotenvx": "1.44.1",
-    "@t3-oss/env-nextjs": "0.10.1",
+    "@t3-oss/env-core": "0.13.8",
     "bcrypt": "5.1.1",
     "drizzle-kit": "0.31.1",
     "drizzle-orm": "0.39.3",

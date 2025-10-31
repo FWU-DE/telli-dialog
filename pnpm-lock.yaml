@@ -472,9 +472,9 @@ importers:
       '@dotenvx/dotenvx':
         specifier: 1.44.1
         version: 1.44.1
-      '@t3-oss/env-nextjs':
-        specifier: 0.10.1
-        version: 0.10.1(typescript@5.7.2)(zod@3.25.67)
+      '@t3-oss/env-core':
+        specifier: 0.13.8
+        version: 0.13.8(typescript@5.7.2)(zod@3.25.67)
       bcrypt:
         specifier: 5.1.1
         version: 5.1.1
@@ -3455,6 +3455,23 @@ packages:
       zod: ^3.0.0
     peerDependenciesMeta:
       typescript:
+        optional: true
+
+  '@t3-oss/env-core@0.13.8':
+    resolution: {integrity: sha512-L1inmpzLQyYu4+Q1DyrXsGJYCXbtXjC4cICw1uAKv0ppYPQv656lhZPU91Qd1VS6SO/bou1/q5ufVzBGbNsUpw==}
+    peerDependencies:
+      arktype: ^2.1.0
+      typescript: '>=5.0.0'
+      valibot: ^1.0.0-beta.7 || ^1.0.0
+      zod: ^3.24.0 || ^4.0.0-beta.0
+    peerDependenciesMeta:
+      arktype:
+        optional: true
+      typescript:
+        optional: true
+      valibot:
+        optional: true
+      zod:
         optional: true
 
   '@t3-oss/env-nextjs@0.10.1':
@@ -11988,6 +12005,11 @@ snapshots:
       zod: 3.25.67
     optionalDependencies:
       typescript: 5.7.2
+
+  '@t3-oss/env-core@0.13.8(typescript@5.7.2)(zod@3.25.67)':
+    optionalDependencies:
+      typescript: 5.7.2
+      zod: 3.25.67
 
   '@t3-oss/env-nextjs@0.10.1(typescript@5.7.2)(zod@3.25.67)':
     dependencies:

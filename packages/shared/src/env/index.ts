@@ -1,7 +1,11 @@
-import { createEnv } from '@t3-oss/env-nextjs';
+import { createEnv } from '@t3-oss/env-core';
 import { z } from 'zod';
 
 export const env = createEnv({
+  // Empty client prefix means do not expose any variables to the client
+  clientPrefix: '',
+  client: {},
+  emptyStringAsUndefined: true,
   server: {
     authSecret: z.string().min(1),
     databaseUrl: z.string(),
@@ -19,7 +23,6 @@ export const env = createEnv({
     rabbitmqUri: z.string().min(1),
     valkeyUrl: z.string().min(1),
   },
-  client: {},
   runtimeEnv: {
     authSecret: process.env.AUTH_SECRET,
     databaseUrl: process.env.DATABASE_URL,
@@ -37,5 +40,4 @@ export const env = createEnv({
     rabbitmqUri: process.env.RABBITMQ_URI,
     valkeyUrl: process.env.VALKEY_URL,
   },
-  skipValidation: true,
 });
