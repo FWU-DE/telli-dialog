@@ -10,15 +10,16 @@
     "./types/*": "./src/types/*.ts"
   },
   "scripts": {
-    "db:generate": "dotenvx run -f .env.local -- drizzle-kit generate --config=./drizzle.config.ts",
-    "db:drop": "dotenvx run -f .env.local -- drizzle-kit drop --config=./drizzle.config.ts",
+    "db:generate": "dotenvx run -f ../../apps/dialog/.env.local -- drizzle-kit generate --config=./drizzle.config.ts",
+    "db:drop": "dotenvx run -f ../../apps/dialog/.env.local -- drizzle-kit drop --config=./drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config=./drizzle.config.ts",
-    "db:migrate:local": "dotenvx run -f .env.local -- drizzle-kit migrate --config=./drizzle.config.ts",
+    "db:migrate:local": "dotenvx run -f ../../apps/dialog/.env.local -- drizzle-kit migrate --config=./drizzle.config.ts",
     "db:seed": "tsx src/db/seed/index.ts",
-    "db:seed:local": "ENVIRONMENT=development dotenvx run -f .env.local -- pnpm tsx src/db/seed/index.ts",
+    "db:seed:local": "ENVIRONMENT=development dotenvx run -f ../../apps/dialog/.env.local -- pnpm tsx src/db/seed/index.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "types": "tsc --noEmit",
+    "check-types": "tsc --noEmit",
     "lint": "eslint \"**/*.ts*\" --max-warnings 0",
     "test": "vitest run",
     "test:watch": "vitest"
