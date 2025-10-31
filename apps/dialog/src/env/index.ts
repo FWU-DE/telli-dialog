@@ -48,4 +48,5 @@ export const env = createEnv({
     valkeyUrl: process.env.VALKEY_URL,
     sentryLogLevel: process.env.SENTRY_LOG_LEVEL,
   },
+  emptyStringAsUndefined: true,
 });
