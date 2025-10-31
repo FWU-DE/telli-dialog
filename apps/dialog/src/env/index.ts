@@ -18,7 +18,9 @@ export const env = createEnv({
     nextauthUrl: z.string().min(1),
     rabbitmqUri: z.string().min(1),
     valkeyUrl: z.string().min(1),
-    sentryLogLevel: z
+  },
+  client: {
+    NEXT_PUBLIC_SENTRY_LOG_LEVEL: z
       .union([
         z.literal('fatal'),
         z.literal('error'),
@@ -29,7 +31,6 @@ export const env = createEnv({
       ])
       .default('info'),
   },
-  client: {},
   runtimeEnv: {
     authSecret: process.env.AUTH_SECRET,
     databaseUrl: process.env.DATABASE_URL,
@@ -46,7 +47,7 @@ export const env = createEnv({
     nextauthUrl: process.env.NEXTAUTH_URL,
     rabbitmqUri: process.env.RABBITMQ_URI,
     valkeyUrl: process.env.VALKEY_URL,
-    sentryLogLevel: process.env.SENTRY_LOG_LEVEL,
+    NEXT_PUBLIC_SENTRY_LOG_LEVEL: process.env.NEXT_PUBLIC_SENTRY_LOG_LEVEL,
   },
   emptyStringAsUndefined: true,
 });

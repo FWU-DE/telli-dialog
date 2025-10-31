@@ -2,7 +2,10 @@ import * as Sentry from '@sentry/nextjs';
 import { env } from '@/env';
 
 const logLevelOrder = ['fatal', 'error', 'warning', 'log', 'info', 'debug'] as const;
-const logLevels = logLevelOrder.slice(0, 1 + logLevelOrder.indexOf(env.sentryLogLevel));
+const logLevels = logLevelOrder.slice(
+  0,
+  1 + logLevelOrder.indexOf(env.NEXT_PUBLIC_SENTRY_LOG_LEVEL),
+);
 
 export function logMessage(message: string, level: Sentry.SeverityLevel) {
   if (logLevels.includes(level)) {
