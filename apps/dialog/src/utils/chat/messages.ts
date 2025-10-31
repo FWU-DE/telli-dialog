@@ -4,7 +4,7 @@ import { Message } from 'ai';
 export function convertMessageModelToMessage(
   messages: Array<ConversationMessageModel>,
 ): Array<Message> {
-  return messages
+  const test = messages
     .filter((message) => message.role !== 'tool')
     .map((message) => ({
       id: message.id,
@@ -12,4 +12,5 @@ export function convertMessageModelToMessage(
       content: message.content,
       createdAt: message.createdAt,
     }));
+  return test;
 }

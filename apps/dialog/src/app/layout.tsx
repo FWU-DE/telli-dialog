@@ -8,7 +8,7 @@ import { getMessages, getLocale } from 'next-intl/server';
 
 import './globals.css';
 import './scrollbar.css';
-import { DEFAULT_DESIGN_CONFIGURATION } from '@shared/db/const';
+import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 import { dbGetFederalStateByIdWithResult } from '@shared/db/functions/federal-state';
 import { getMaybeLogoFromS3 } from '@shared/s3';
 

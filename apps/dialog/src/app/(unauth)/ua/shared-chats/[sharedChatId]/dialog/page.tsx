@@ -2,7 +2,7 @@ import NotFound from '@/app/not-found';
 import SharedChat from '@/components/chat/shared-chat';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
-import { DEFAULT_DESIGN_CONFIGURATION } from '@shared/db/const';
+import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 import { dbGetLlmModelById } from '@shared/db/functions/llm-model';
 import { dbGetFederalStateByUserId } from '@shared/db/functions/school';
 import { dbGetSharedChatByIdAndInviteCode } from '@shared/db/functions/shared-school-chat';

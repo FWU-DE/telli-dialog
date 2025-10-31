@@ -10,7 +10,7 @@ import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import CharacterSharedChat from '@/components/chat/character-chat';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { dbGetFederalStateBySchoolId } from '@shared/db/functions/school';
-import { DEFAULT_DESIGN_CONFIGURATION } from '@shared/db/const';
+import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 
 const pageContextSchema = z.object({
   params: z.object({
