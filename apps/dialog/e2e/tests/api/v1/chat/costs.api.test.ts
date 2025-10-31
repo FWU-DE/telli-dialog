@@ -1,5 +1,5 @@
 import test, { expect } from '@playwright/test';
-import { db } from '@/db';
+import { db } from '@shared/db';
 import {
   conversationUsageTracking,
   sharedSchoolConversationUsageTracking,
@@ -7,7 +7,7 @@ import {
   llmModelTable,
   sharedSchoolConversationTable,
   userTable,
-} from '@/db/schema';
+} from '@shared/db/schema';
 import { getPriceInCentByUser } from '@/app/school';
 import { UserAndContext } from '@/auth/types';
 import {
@@ -17,7 +17,7 @@ import {
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
   dbGetSharedChatUsageInCentBySharedChatId,
-} from '@/db/functions/intelli-points';
+} from '@shared/db/functions/intelli-points';
 import {
   mockCharacter,
   mockConversationUsage,

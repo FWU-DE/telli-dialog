@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../utils/login';
-import { db } from '@/db';
-import { federalStateTable } from '@/db/schema';
+import { db } from '@shared/db';
+import { federalStateTable } from '@shared/db/schema';
 import { eq } from 'drizzle-orm';
 
 test('login as student with students disabled', async ({ page }) => {
