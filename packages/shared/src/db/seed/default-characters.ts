@@ -6,10 +6,12 @@ import { dbCreateCharacter } from '../functions/character';
 import { DUMMY_USER_ID } from './user-entity';
 import { dbUpsertCustomGpt } from '../functions/custom-gpts';
 
+const DEFAULT_CHAT_MODEL = 'gpt-5-mini';
+
 export async function insertTemplateCharacters() {
   await processStaticJpegFiles('./assets/template-characters', 'characters/_templates');
   for (const templateCharacter of defaultCharacters) {
-    const result = await dbCreateCharacter(templateCharacter);
+    const result = await dbCreateCharacter(templateCharacter, DEFAULT_CHAT_MODEL);
     const id = result && result[0] ? result[0].id : undefined;
     if (!id) {
       console.error('Failed to insert template character:', templateCharacter.name);

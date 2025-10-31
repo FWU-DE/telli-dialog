@@ -63,6 +63,7 @@
     "@sentry/opentelemetry": "10.22.0",
     "@t3-oss/env-nextjs": "0.10.1",
     "@tanstack/react-query": "5.66.0",
+    "@telli/shared": "workspace:*",
     "@telli/ui": "workspace:*",
     "ai": "4.3.16",
     "bcrypt": "5.1.1",

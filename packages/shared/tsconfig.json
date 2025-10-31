@@ -1,8 +1,15 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "_version": "2.0.0",
   "extends": "@telli/typescript-config/base.json",
   "include": ["."],
   "compilerOptions": {
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "exclude": ["dist", "build", "node_modules"]
 }

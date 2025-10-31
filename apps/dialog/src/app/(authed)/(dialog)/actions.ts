@@ -48,7 +48,10 @@ export async function saveChatModelForUserAction(modelName: string) {
 
 export async function setUserAcceptConditions(): Promise<boolean> {
   const user = await getUser();
-  const updated = await dbUpdateUserTermsVersion({ userId: user.id });
+  const updated = await dbUpdateUserTermsVersion({
+    userId: user.id,
+    versionAcceptedConditions: VERSION,
+  });
   return updated?.versionAcceptedConditions === VERSION;
 }
 

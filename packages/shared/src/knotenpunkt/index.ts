@@ -1,11 +1,11 @@
-import { env } from '@/env';
 import { z } from 'zod';
 import { knotenpunktLlmModelSchema } from './schema';
 
 export async function fetchLlmModels({ apiKey }: { apiKey: string }) {
-  const response = await fetch(`${env.apiUrl}/v1/models`, {
+  const response = await fetch(`${process.env.apiUrl}/v1/models`, {
     headers: { Authorization: `Bearer ${apiKey}` },
-    next: { revalidate: 60 },
+    // Todo RL: Does not exist
+    //    next: { revalidate: 60 },
   });
 
   if (!response.ok) {

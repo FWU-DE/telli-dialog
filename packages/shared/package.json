@@ -2,7 +2,13 @@
   "name": "@telli/shared",
   "version": "0.0.1",
   "main": "src/index.ts",
-  "exports": {},
+  "type": "module",
+  "exports": {
+    "./knotenpunkt/*": "./src/knotenpunkt/*.ts",
+    "./s3/*": "./src/s3/*.ts",
+    "./db/*": "./src/db/*.ts",
+    "./types/*": "./src/types/*.ts"
+  },
   "scripts": {
     "db:generate": "dotenvx run -f .env.local -- drizzle-kit generate --config=./drizzle.config.ts",
     "db:drop": "dotenvx run -f .env.local -- drizzle-kit drop --config=./drizzle.config.ts",
@@ -13,10 +19,16 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "types": "tsc --noEmit",
-    "lint": "eslint \"**/*.ts*\" --max-warnings 0"
+    "lint": "eslint \"**/*.ts*\" --max-warnings 0",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.744.0",
+    "@aws-sdk/s3-request-presigner": "3.744.0",
     "@dotenvx/dotenvx": "1.44.1",
+    "@t3-oss/env-nextjs": "0.10.1",
+    "bcrypt": "5.1.1",
     "drizzle-kit": "0.31.1",
     "drizzle-orm": "0.39.3",
     "drizzle-zod": "0.7.1",
@@ -27,6 +39,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "3.2.0",
     "@telli/typescript-config": "workspace:*",
+    "@types/bcrypt": "5.0.2",
     "@types/node": "22.13.14",
     "@types/pg": "8.11.11",
     "dotenv-cli": "10.0.0",
@@ -36,6 +49,7 @@
     "eslint-plugin-prettier": "5.5.4",
     "prettier": "3.4.2",
     "prettier-eslint": "16.4.2",
-    "typescript": "5.7.2"
+    "typescript": "5.7.2",
+    "vitest": "3.0.5"
   }
 }

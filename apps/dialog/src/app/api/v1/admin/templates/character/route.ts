@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
           userId: DUMMY_USER_ID,
         };
 
-        const createdCharacter = await dbCreateCharacter(character);
+        const createdCharacter = await dbCreateCharacter(character, DEFAULT_CHAT_MODEL);
 
         results.push({
           data: createdCharacter?.[0],

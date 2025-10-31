@@ -1,4 +1,3 @@
-import { env } from '@/env';
 import { db } from '..';
 import { encrypt } from '../crypto';
 import { FederalStateInsertModel, federalStateTable } from '../schema';
@@ -134,7 +133,7 @@ export const FEDERAL_STATES = FEDERAL_STATE_DEFINITIONS.filter((state) => {
   studentPriceLimit: 200,
   teacherPriceLimit: 500,
   encryptedApiKey: encrypt({
-    plainEncryptionKey: env.encryptionKey,
+    plainEncryptionKey: process.env.encryptionKey as string,
     text: process.env[state.envKeyName]!,
   }),
 })) satisfies Array<Omit<FederalStateInsertModel, 'organizationId'>>;

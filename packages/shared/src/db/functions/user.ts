@@ -1,7 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { db } from '..';
 import { userTable } from '../schema';
-import { VERSION } from '@/components/modals/const';
 
 export async function dbGetUserById({ userId }: { userId: string | undefined }) {
   if (userId === undefined) return undefined;
@@ -29,10 +28,16 @@ export async function dbUpdateLastUsedModelByUserId({
   return updatedUser;
 }
 
-export async function dbUpdateUserTermsVersion({ userId }: { userId: string }) {
+export async function dbUpdateUserTermsVersion({
+  userId,
+  versionAcceptedConditions,
+}: {
+  userId: string;
+  versionAcceptedConditions: number;
+}) {
   const [updatedRow] = await db
     .update(userTable)
-    .set({ versionAcceptedConditions: VERSION })
+    .set({ versionAcceptedConditions: versionAcceptedConditions })
     .where(eq(userTable.id, userId))
     .returning();
   return updatedRow;
