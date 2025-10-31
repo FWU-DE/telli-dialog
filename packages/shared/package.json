@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "main": "src/index.ts",
   "type": "module",
+  "private": true,
   "exports": {
     "./knotenpunkt/*": "./src/knotenpunkt/*.ts",
     "./s3/*": "./src/s3/*.ts",

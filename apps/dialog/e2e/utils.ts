@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import { getErrorMessage } from '@/utils/error';
+import { getErrorMessage } from '@shared/utils/error';
 
 const USER_MAPPINGS_FILE_PATH = 'e2e/fixtures/user-mappings.json';
 
