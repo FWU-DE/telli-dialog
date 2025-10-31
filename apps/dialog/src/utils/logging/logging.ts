@@ -1,10 +1,18 @@
 import * as Sentry from '@sentry/nextjs';
+import { env } from '@/env';
+
+const logLevelOrder = ['fatal', 'error', 'warning', 'log', 'info', 'debug'];
+const sentryLogLevel = env.sentryLogLevel?.toLowerCase();
+const logLevel = sentryLogLevel && logLevelOrder.includes(sentryLogLevel) ? sentryLogLevel : 'info';
+const logLevels = logLevelOrder.slice(0, 1 + logLevelOrder.indexOf(logLevel));
 
 export function logMessage(message: string, level: Sentry.SeverityLevel) {
-  Sentry.captureMessage(message, level);
+  if (logLevels.includes(level)) {
+    Sentry.captureMessage(message, level);
+  }
 
   if (process.env.NODE_ENV === 'development') {
-    console.log(message);
+    console.log(`[${level.toUpperCase()}] ${message}`);
   }
 }
 
