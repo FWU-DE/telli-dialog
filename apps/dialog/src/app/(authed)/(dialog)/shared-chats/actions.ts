@@ -1,15 +1,15 @@
 'use server';
 
-import { db } from '@/db';
+import { db } from '@shared/db';
 import {
   SharedSchoolConversationFileMapping,
   SharedSchoolConversationInsertModel,
   sharedSchoolConversationTable,
-} from '@/db/schema';
+} from '@shared/db/schema';
 import { getUser } from '@/auth/utils';
-import { dbDeleteSharedSchoolChatByIdAndUserId } from '@/db/functions/shared-school-chat';
+import { dbDeleteSharedSchoolChatByIdAndUserId } from '@shared/db/functions/shared-school-chat';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
-import { dbGetLlmModelsByFederalStateId } from '@/db/functions/llm-model';
+import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 
 export async function dbDeleteSharedChatAction({ id }: { id: string }) {
   const user = await getUser();

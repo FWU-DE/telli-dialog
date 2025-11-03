@@ -7,7 +7,7 @@ import {
   AlignmentType,
   convertInchesToTwip,
 } from 'docx';
-import { formatDateToGermanTimestamp } from '@/utils/date';
+import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { markdownToDocx } from '../markdown';
 import { type Message } from 'ai';
 

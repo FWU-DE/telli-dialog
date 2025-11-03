@@ -6,9 +6,9 @@ import {
   sharedChatHasReachedIntelliPointLimit,
   userHasReachedIntelliPointLimit,
 } from '../chat/usage';
-import { dbGetSharedChatByIdAndInviteCode } from '@/db/functions/shared-school-chat';
+import { dbGetSharedChatByIdAndInviteCode } from '@shared/db/functions/shared-school-chat';
 import { constructSystemPromptBySharedChat } from './system-prompt';
-import { dbUpdateTokenUsageBySharedChatId } from '@/db/functions/shared-school-chat';
+import { dbUpdateTokenUsageBySharedChatId } from '@shared/db/functions/shared-school-chat';
 import {
   getModelAndProviderWithResult,
   getSearchParamsFromUrl,
@@ -18,7 +18,7 @@ import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
-import { dbGetRelatedSharedChatFiles } from '@/db/functions/files';
+import { dbGetRelatedSharedChatFiles } from '@shared/db/functions/files';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 

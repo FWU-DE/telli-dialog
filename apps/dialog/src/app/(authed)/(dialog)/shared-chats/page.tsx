@@ -1,5 +1,5 @@
 import Refresh from '@/components/refresh';
-import { dbGetSharedChatsByUserId } from '@/db/functions/shared-school-chat';
+import { dbGetSharedChatsByUserId } from '@shared/db/functions/shared-school-chat';
 import { getUser } from '@/auth/utils';
 import { SharedChatContainer } from './shared-chat-container';
 import { enrichSharedChatWithPictureUrl } from './[sharedSchoolChatId]/utils';

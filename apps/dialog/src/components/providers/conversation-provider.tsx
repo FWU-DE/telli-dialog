@@ -1,6 +1,6 @@
 'use client';
 
-import { ConversationModel } from '@/db/types';
+import { ConversationModel } from '@shared/db/types';
 import React from 'react';
 
 type ConversationProviderProps = {

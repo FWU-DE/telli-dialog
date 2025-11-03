@@ -1,9 +1,9 @@
-import { dbCreateManyTextChunks } from '@/db/functions/text-chunk';
+import { dbCreateManyTextChunks } from '@shared/db/functions/text-chunk';
 import { OpenAI } from 'openai';
 import { env } from '@/env';
-import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@/db/functions/federal-state';
+import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
 import { EMBEDDING_BATCH_SIZE } from '@/const';
-import { TextChunkInsertModel } from '@/db/schema';
+import { TextChunkInsertModel } from '@shared/db/schema';
 
 export async function embedText({
   text,

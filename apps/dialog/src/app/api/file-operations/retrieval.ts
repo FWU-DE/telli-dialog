@@ -1,5 +1,5 @@
-import { db } from '@/db';
-import { FileModelAndContent, fileTable, TextChunkTable } from '@/db/schema';
+import { db } from '@shared/db';
+import { FileModelAndContent, fileTable, TextChunkTable } from '@shared/db/schema';
 import { eq, sql, inArray, desc, SQL, and } from 'drizzle-orm';
 import { chunkText, groupAndSortChunks } from './process-chunks';
 import { condenseChatHistory } from '../chat/utils';

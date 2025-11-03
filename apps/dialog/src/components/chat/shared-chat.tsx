@@ -3,7 +3,7 @@
 import { useChat } from '@ai-sdk/react';
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import { type SharedSchoolConversationModel } from '@/db/schema';
+import { type SharedSchoolConversationModel } from '@shared/db/schema';
 
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import ExpiredChatModal from '@/components/common/expired-chat-modal';

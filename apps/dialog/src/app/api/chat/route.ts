@@ -3,9 +3,9 @@ import {
   dbGetConversationAndMessages,
   dbGetOrCreateConversation,
   dbUpdateConversationTitle,
-} from '@/db/functions/chat';
+} from '@shared/db/functions/chat';
 import { NextRequest, NextResponse } from 'next/server';
-import { dbInsertChatContent } from '@/db/functions/chat';
+import { dbInsertChatContent } from '@shared/db/functions/chat';
 import { getUser, updateSession, userHasCompletedTraining } from '@/auth/utils';
 import { userHasReachedIntelliPointLimit } from './usage';
 import { getModelAndProviderWithResult, calculateCostsInCent, getAuxiliaryModel } from '../utils';
@@ -16,8 +16,8 @@ import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
-import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
-import { dbGetAttachedFileByEntityId, linkFilesToConversation } from '@/db/functions/files';
+import { dbUpdateLastUsedModelByUserId } from '@shared/db/functions/user';
+import { dbGetAttachedFileByEntityId, linkFilesToConversation } from '@shared/db/functions/files';
 import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { SMALL_MODEL_MAX_CHARACTERS } from '@/configuration-text-inputs/const';
 import { SMALL_MODEL_LIST } from '@/configuration-text-inputs/const';
@@ -28,9 +28,9 @@ import { getRelevantFileContent } from '../file-operations/retrieval';
 import { extractImagesAndUrl } from '../file-operations/prepocess-image';
 import { formatMessagesWithImages } from './utils';
 import { logDebug } from '@/utils/logging/logging';
-import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
-import { dbGetCharacterByIdWithShareData } from '@/db/functions/character';
-import { dbInsertConversationUsage } from '@/db/functions/token-usage';
+import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
+import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
+import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
 
 export async function POST(request: NextRequest) {
   const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);

@@ -1,14 +1,14 @@
 'use server';
 
-import { dbDeleteConversationByIdAndUserId } from '@/db/functions/conversation';
+import { dbDeleteConversationByIdAndUserId } from '@shared/db/functions/conversation';
 import { getUser, updateSession } from '@/auth/utils';
-import { dbUpdateConversationTitle } from '@/db/functions/chat';
-import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
+import { dbUpdateConversationTitle } from '@shared/db/functions/chat';
+import { dbUpdateLastUsedModelByUserId } from '@shared/db/functions/user';
 import { revalidatePath } from 'next/cache';
-import { dbUpdateUserTermsVersion } from '@/db/functions/user';
-import { FileModel } from '@/db/schema';
+import { dbUpdateUserTermsVersion } from '@shared/db/functions/user';
+import { FileModel } from '@shared/db/schema';
 import { VERSION } from '@/components/modals/const';
-import { dbGetRelatedFiles } from '@/db/functions/files';
+import { dbGetRelatedFiles } from '@shared/db/functions/files';
 
 export default async function deleteConversationAction({
   conversationId,
@@ -48,7 +48,10 @@ export async function saveChatModelForUserAction(modelName: string) {
 
 export async function setUserAcceptConditions(): Promise<boolean> {
   const user = await getUser();
-  const updated = await dbUpdateUserTermsVersion({ userId: user.id });
+  const updated = await dbUpdateUserTermsVersion({
+    userId: user.id,
+    versionAcceptedConditions: VERSION,
+  });
   return updated?.versionAcceptedConditions === VERSION;
 }
 

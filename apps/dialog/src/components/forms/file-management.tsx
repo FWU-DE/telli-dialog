@@ -4,7 +4,7 @@ import { LocalFileState } from '@/components/chat/send-message-form';
 import { useToast } from '@/components/common/toast';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
-import { FileModel } from '@/db/schema';
+import { FileModel } from '@shared/db/schema';
 import { cn } from '@/utils/tailwind';
 import { labelClassName } from '@/utils/tailwind/input';
 import { useTranslations } from 'next-intl';

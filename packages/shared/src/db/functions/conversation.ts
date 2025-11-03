@@ -7,7 +7,7 @@ import {
   fileTable,
   TextChunkTable,
 } from '../schema';
-import { deleteFileFromS3 } from '@/s3';
+import { deleteFileFromS3 } from '../../s3';
 
 export async function dbDeleteConversationByIdAndUserId({
   conversationId,

@@ -1,6 +1,6 @@
-import { dbGetAllFederalStates } from '@/db/functions/federal-state';
-import { dbUpdateLlmModelsByFederalStateId } from '@/db/functions/llm-model';
-import { validateApiKeyByHeadersWithResult } from '@/db/utils';
+import { dbGetAllFederalStates } from '@shared/db/functions/federal-state';
+import { dbUpdateLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
+import { validateApiKeyByHeadersWithResult } from '@/utils/validation';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function PUT(req: NextRequest) {

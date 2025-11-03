@@ -1,6 +1,6 @@
 import { UserAndContext } from '@/auth/types';
-import { ConversationModel } from '@/db/types';
-import { CharacterModel, SharedSchoolConversationModel } from '@/db/schema';
+import { ConversationModel } from '@shared/db/types';
+import { CharacterModel, SharedSchoolConversationModel } from '@shared/db/schema';
 import { TelliMonthlyTokenBudgetExceededEventType } from '../schema';
 import { hashWithoutSalt } from '@/utils/crypto';
 

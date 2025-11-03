@@ -1,10 +1,10 @@
-import { env } from '@/env';
 import { db } from '..';
 import { encrypt } from '../crypto';
 import { FederalStateInsertModel, federalStateTable } from '../schema';
-import { fetchLlmModels } from '@/knotenpunkt';
+import { fetchLlmModels } from '../../knotenpunkt';
 import { dbGetFederalStateWithDecryptedApiKey } from '../functions/federal-state';
 import { dbUpsertLlmModelsByModelsAndFederalStateId } from '../functions/llm-model';
+import { env } from '../../env';
 
 export async function insertFederalStates({ skip = true }: { skip: boolean }) {
   if (skip) return;

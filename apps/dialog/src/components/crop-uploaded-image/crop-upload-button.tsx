@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '@/utils/tailwind';
 import GenericFileUploadButton from '@/components/common/upload-file-button';
-import { getSignedUrlFromS3Put } from '@/s3';
+import { getSignedUrlFromS3Put } from '@shared/s3';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import UploadImageIcon from '../icons/upload-image';
 import ImageCropModal from './crop-image-modal';

@@ -1,6 +1,6 @@
-import { getMaybeSignedUrlFromS3Get } from '@/s3';
+import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { customAlphabet } from 'nanoid';
-import { SharedSchoolConversationModel } from '@/db/schema';
+import { SharedSchoolConversationModel } from '@shared/db/schema';
 
 export type SharedChatWithImage = SharedSchoolConversationModel & {
   maybeSignedPictureUrl: string | undefined;

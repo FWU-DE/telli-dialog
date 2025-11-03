@@ -9,8 +9,8 @@ import { getMessages, getLocale } from 'next-intl/server';
 import './globals.css';
 import './scrollbar.css';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
-import { dbGetFederalStateByIdWithResult } from '@/db/functions/federal-state';
-import { getMaybeLogoFromS3 } from '@/s3';
+import { dbGetFederalStateByIdWithResult } from '@shared/db/functions/federal-state';
+import { getMaybeLogoFromS3 } from '@shared/s3';
 
 const barlow = Barlow({
   weight: ['400', '500', '600', '700'],

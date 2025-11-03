@@ -1,4 +1,4 @@
-import { getErrorMessage } from '@/utils/error';
+import { getErrorMessage } from '../utils/error';
 
 export class DatabaseError extends Error {
   public static from(error: unknown) {

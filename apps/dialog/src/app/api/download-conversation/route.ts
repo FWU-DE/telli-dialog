@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateConversationDocxFiles } from './utils';
 import { getUser } from '@/auth/utils';
-import { type ConversationModel } from '@/db/types';
+import { type ConversationModel } from '@shared/db/types';
 
 export const dynamic = 'force-dynamic';
 

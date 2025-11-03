@@ -5,7 +5,7 @@ import DialogSidebar from './sidebar';
 import { HEADER_PORTAL_ID } from './header-portal';
 import { contentHeight } from '@/utils/tailwind/height';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
-import { dbGetLlmModelsByFederalStateId } from '@/db/functions/llm-model';
+import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { getPriceInCentByUser, getPriceLimitInCentByUser } from '@/app/school';
 import { checkProductAccess } from '@/utils/vidis/access';
 import ProductAccessModal from '@/components/modals/product-access';

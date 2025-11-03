@@ -2,8 +2,8 @@ import { type Session } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { auth, unstable_update } from '.';
 import { type UserAndContext } from './types';
-import { dbGetSchoolAndMappingAndFederalStateByUserId } from '@/db/functions/school';
-import { FederalStateModel } from '@/db/schema';
+import { dbGetSchoolAndMappingAndFederalStateByUserId } from '@shared/db/functions/school';
+import { FederalStateModel } from '@shared/db/schema';
 
 export async function getValidSession(): Promise<Session> {
   const session = await auth();

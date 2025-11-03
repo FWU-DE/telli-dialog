@@ -1,10 +1,10 @@
 'use server';
 
 import { getUser } from '@/auth/utils';
-import { db } from '@/db';
-import { dbGetRelatedCustomGptFiles } from '@/db/functions/files';
-import { CustomGptFileMapping, customGptTable, FileModel, fileTable } from '@/db/schema';
-import { copyFileInS3 } from '@/s3';
+import { db } from '@shared/db';
+import { dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
+import { CustomGptFileMapping, customGptTable, FileModel, fileTable } from '@shared/db/schema';
+import { copyFileInS3 } from '@shared/s3';
 import { generateUUID } from '@/utils/uuid';
 import { eq } from 'drizzle-orm';
 

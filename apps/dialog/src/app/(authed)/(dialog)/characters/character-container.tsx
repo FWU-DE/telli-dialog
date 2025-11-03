@@ -1,7 +1,7 @@
 'use client';
 
 import DestructiveActionButton from '@/components/common/destructive-action-button';
-import { CharacterModel } from '@/db/schema';
+import { CharacterModel } from '@shared/db/schema';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import Link from 'next/link';
 import React from 'react';

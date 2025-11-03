@@ -2,9 +2,9 @@ import {
   dbGetCharacterSharedChatsUsageInCentByUserId,
   dbGetChatsUsageInCentByUserId,
   dbGetSharedChatsUsageInCentByUserId,
-} from '@/db/functions/intelli-points';
+} from '@shared/db/functions/intelli-points';
 import { type UserAndContext } from '@/auth/types';
-import { dbGetCreditIncreaseForCurrentMonth } from '@/db/functions/voucher';
+import { dbGetCreditIncreaseForCurrentMonth } from '@shared/db/functions/voucher';
 
 export async function getPriceLimitInCentByUser(user: UserAndContext) {
   if (user.school === undefined || user.federalState === undefined) return null;

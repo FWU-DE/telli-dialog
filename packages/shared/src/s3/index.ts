@@ -15,9 +15,8 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { env } from '@/env';
+import { env } from '../env';
 import { nanoid } from 'nanoid';
-import { unstable_cache } from 'next/cache';
 
 const s3Client = new S3Client({
   // region: 'eu-de',
@@ -235,29 +234,23 @@ export async function getMaybeSignedUrlIfExists({
   suppressError?: boolean;
 }) {
   if (key === undefined || key === null || key === '') return undefined;
-  return unstable_cache(
-    async () => {
-      try {
-        // Check if the object exists by attempting to get its metadata
-        await s3Client.send(
-          new HeadObjectCommand({
-            Bucket: env.otcBucketName,
-            Key: key,
-          }),
-        );
+  // Todo: unstable_cache from next was used here with revalidate of 3000 seconds
+  try {
+    // Check if the object exists by attempting to get its metadata
+    await s3Client.send(
+      new HeadObjectCommand({
+        Bucket: env.otcBucketName,
+        Key: key,
+      }),
+    );
 
-        // If no error is thrown, the object exists, so generate the signed URL
-        return await getSignedUrlFromS3Get({ key, filename, contentType, attachment });
-      } catch (error) {
-        if (!suppressError) {
-          console.error('Error getting signed URL from S3:', error);
-        }
-        // If an error is thrown, the object doesn't exist
-        return undefined;
-      }
-    },
-    [key],
-    // re-validate after 50 min, as the signed url is valid for 60 min
-    { revalidate: 3000 },
-  )();
+    // If no error is thrown, the object exists, so generate the signed URL
+    return await getSignedUrlFromS3Get({ key, filename, contentType, attachment });
+  } catch (error) {
+    if (!suppressError) {
+      console.error('Error getting signed URL from S3:', error);
+    }
+    // If an error is thrown, the object doesn't exist
+    return undefined;
+  }
 }

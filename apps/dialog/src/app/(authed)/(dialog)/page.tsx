@@ -9,7 +9,7 @@ import HeaderPortal from './header-portal';
 import { getUser } from '@/auth/utils';
 import { getRandomPromptSuggestions } from '@/utils/prompt-suggestions/utils';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
-import { dbGetLlmModelsByFederalStateId } from '@/db/functions/llm-model';
+import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import Logo from '@/components/common/logo';
 export const dynamic = 'force-dynamic';

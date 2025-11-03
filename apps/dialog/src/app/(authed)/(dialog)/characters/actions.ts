@@ -1,13 +1,13 @@
 'use server';
 
-import { db } from '@/db';
-import { CharacterFileMapping, characterTable, FileModel, fileTable } from '@/db/schema';
+import { db } from '@shared/db';
+import { CharacterFileMapping, characterTable, FileModel, fileTable } from '@shared/db/schema';
 import { getUser } from '@/auth/utils';
-import { dbGetLlmModelsByFederalStateId } from '@/db/functions/llm-model';
-import { copyFileInS3 } from '@/s3';
+import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
+import { copyFileInS3 } from '@shared/s3';
 import { generateUUID } from '@/utils/uuid';
 import { eq } from 'drizzle-orm';
-import { dbGetRelatedCharacterFiles } from '@/db/functions/files';
+import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 
 export async function createNewCharacterAction({
   modelId: _modelId,

@@ -1,5 +1,5 @@
-import { CustomGptModel } from '@/db/schema';
-import { getMaybeSignedUrlFromS3Get } from '@/s3';
+import { CustomGptModel } from '@shared/db/schema';
+import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 
 export type CustomGptWithImage = CustomGptModel & { maybeSignedPictureUrl: string | undefined };
 

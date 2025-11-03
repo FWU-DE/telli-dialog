@@ -8,7 +8,7 @@ import {
   SharedCharacterChatUsageTrackingModel,
   SharedSchoolConversationModel,
   SharedSchoolConversationUsageTrackingModel,
-} from '@/db/schema';
+} from '@shared/db/schema';
 
 export const mockUserAndContext = (): UserAndContext => {
   return {

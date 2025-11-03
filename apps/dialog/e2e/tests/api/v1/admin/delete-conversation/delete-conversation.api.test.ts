@@ -2,8 +2,8 @@ import test, { expect } from '@playwright/test';
 import { authorizationHeader } from '../../../../../utils/authorizationHeader';
 import { login } from '../../../../../utils/login';
 import type { Page } from 'playwright-core';
-import { db } from '@/db';
-import { federalStateTable } from '@/db/schema';
+import { db } from '@shared/db';
+import { federalStateTable } from '@shared/db/schema';
 import { eq } from 'drizzle-orm';
 
 const deleteConversationRoute = '/api/v1/admin/delete-conversation';

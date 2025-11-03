@@ -1,5 +1,5 @@
-import { FileModelAndContent } from '@/db/schema';
-import { readFileFromS3 } from '@/s3';
+import { FileModelAndContent } from '@shared/db/schema';
+import { readFileFromS3 } from '@shared/s3';
 import { extractFile } from './extract-file';
 import { getFileExtension } from '@/utils/files/generic';
 

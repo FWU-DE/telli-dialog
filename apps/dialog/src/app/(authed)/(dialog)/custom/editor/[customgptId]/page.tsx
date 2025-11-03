@@ -1,8 +1,8 @@
 import { getUser } from '@/auth/utils';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { dbGetCustomGptById, dbGetCopyTemplateCustomGpt } from '@/db/functions/custom-gpts';
-import { getMaybeSignedUrlFromS3Get } from '@/s3';
+import { dbGetCustomGptById, dbGetCopyTemplateCustomGpt } from '@shared/db/functions/custom-gpts';
+import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
 import { notFound } from 'next/navigation';
@@ -11,7 +11,7 @@ import HeaderPortal from '../../../header-portal';
 import CustomGptForm from './custom-gpt-form';
 import { fetchFileMapping } from '../../actions';
 import { removeNullValues } from '@/utils/generic/object-operations';
-import { CustomGptModel } from '@/db/schema';
+import { CustomGptModel } from '@shared/db/schema';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 

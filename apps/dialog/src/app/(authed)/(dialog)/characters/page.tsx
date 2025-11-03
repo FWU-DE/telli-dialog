@@ -3,12 +3,12 @@ import {
   dbGetCharactersBySchoolId,
   dbGetCharactersByUserId,
   dbGetGlobalCharacters,
-} from '@/db/functions/character';
+} from '@shared/db/functions/character';
 import {
   type CharacterAccessLevel,
   type CharacterModel,
   characterAccessLevelSchema,
-} from '@/db/schema';
+} from '@shared/db/schema';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
 import { z } from 'zod';

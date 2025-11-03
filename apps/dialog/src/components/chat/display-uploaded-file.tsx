@@ -8,7 +8,7 @@ import DeattachFileIcon from '../icons/file-upload-icons/deattach-file-icon';
 import Spinner from '../icons/spinner';
 import CrossIcon from '../icons/cross';
 import { getFileExtension, isImageFile } from '@/utils/files/generic';
-import { getSignedUrlFromS3Get } from '@/s3';
+import { getSignedUrlFromS3Get } from '@shared/s3';
 import { useQuery } from '@tanstack/react-query';
 import { LocalFileState } from './send-message-form';
 

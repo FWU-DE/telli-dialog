@@ -1,7 +1,7 @@
-import { encrypt } from '@/db/crypto';
-import { dbUpdateFederalState, dbGetFederalStateById } from '@/db/functions/federal-state';
-import { federalStateTable } from '@/db/schema';
-import { validateApiKeyByHeadersWithResult } from '@/db/utils';
+import { encrypt } from '@shared/db/crypto';
+import { dbUpdateFederalState, dbGetFederalStateById } from '@shared/db/functions/federal-state';
+import { federalStateTable } from '@shared/db/schema';
+import { validateApiKeyByHeadersWithResult } from '@/utils/validation';
 import { env } from '@/env';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
