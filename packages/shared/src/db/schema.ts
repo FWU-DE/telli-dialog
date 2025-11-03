@@ -174,10 +174,24 @@ export const characterTable = pgTable('character', {
     .array()
     .notNull()
     .default(sql`'{}'::text[]`),
+  isDeleted: boolean('is_deleted').notNull().default(false),
+  originalCharacterId: uuid('original_character_id'),
 });
 
 export type CharacterInsertModel = typeof characterTable.$inferInsert;
 export type CharacterModel = typeof characterTable.$inferSelect;
+
+export const characterTemplateMappingTable = pgTable('character_template_mappings', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  characterId: uuid('character_id')
+    .notNull()
+    .references(() => characterTable.id, { onDelete: 'cascade' }),
+  federalStateId: text('federal_state_id')
+    .notNull()
+    .references(() => federalStateTable.id, { onDelete: 'cascade' }),
+});
+export type CharacterTemplateMappingModel = typeof characterTemplateMappingTable.$inferSelect;
+export type CharacterTemplateMappingInsertModel = typeof characterTemplateMappingTable.$inferInsert;
 
 export const llmModelTypeSchema = z.enum(['text', 'image', 'fc']);
 export const llmModelTypeEnum = pgEnum('llm_model_type', llmModelTypeSchema.options);
@@ -350,10 +364,24 @@ export const customGptTable = pgTable('custom_gpt', {
     .array()
     .notNull()
     .default(sql`'{}'::text[]`),
+  isDeleted: boolean('is_deleted').notNull().default(false),
+  originalCustomGptId: uuid('original_custom_gpt_id'),
 });
 
 export type CustomGptModel = typeof customGptTable.$inferSelect;
 export type CustomGptInsertModel = typeof customGptTable.$inferInsert;
+
+export const customGptTemplateMappingTable = pgTable('custom_gpt_template_mappings', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  customGptId: uuid('custom_gpt_id')
+    .notNull()
+    .references(() => customGptTable.id, { onDelete: 'cascade' }),
+  federalStateId: text('federal_state_id')
+    .notNull()
+    .references(() => federalStateTable.id, { onDelete: 'cascade' }),
+});
+export type CustomGptTemplateMappingModel = typeof customGptTemplateMappingTable.$inferSelect;
+export type CustomGptTemplateMappingInsertModel = typeof customGptTemplateMappingTable.$inferInsert;
 
 export const fileTable = pgTable('file_table', {
   id: text('id').primaryKey(),
