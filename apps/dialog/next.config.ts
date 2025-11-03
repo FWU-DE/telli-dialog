@@ -4,7 +4,7 @@ import createNextIntlPlugin from 'next-intl/plugin';
 import path from 'path';
 
 const baseNextConfig: NextConfig = {
-  transpilePackages: ['ui', 'import-in-the-middle'],
+  transpilePackages: ['ui', 'import-in-the-middle', '@t3-oss/env-nextjs', '@t3-oss/env-core'],
   typescript: {
     // should be checked in the pipeline anyway and takes a lot of time during build
     ignoreBuildErrors: true,

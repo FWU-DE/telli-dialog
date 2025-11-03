@@ -1,16 +1,11 @@
 import { trace } from '@opentelemetry/api';
 import { Connection } from 'rabbitmq-client';
 import { logError } from '@/utils/logging/logging';
-
-const rabbitmqUri = process.env['RABBITMQ_URI'];
-
-if (rabbitmqUri === undefined) {
-  throw Error('Expected process.env.RABBITMQ_URI to be defined');
-}
+import { env } from '@/env';
 
 const tracer = trace.getTracer('rabbitmq-client');
 
-const rabbit = new Connection(rabbitmqUri);
+const rabbit = new Connection(env.rabbitmqUri);
 
 const publisher = rabbit.createPublisher({ confirm: true });
 

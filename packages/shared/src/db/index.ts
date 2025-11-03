@@ -2,20 +2,16 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { Pool } from 'pg';
 import path from 'node:path';
+import { env } from '../env';
 
 const globalPool = global as unknown as {
   pool?: Pool;
 };
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  throw new Error('Database URL undefined');
-}
-
 const pool =
   globalPool.pool ??
   new Pool({
-    connectionString,
+    connectionString: env.databaseUrl,
     max: 12,
   });
 
