@@ -30,7 +30,7 @@ const db = drizzle({ client: pool });
   try {
     console.info('Running database migrations...');
     await migrate(db, {
-      migrationsFolder: path.join(process.cwd(), 'migrations'),
+      migrationsFolder: path.join(process.cwd(), '..', '..', 'packages', 'shared', 'migrations'),
     });
     console.info('Database migrations completed successfully.');
   } catch (error) {
