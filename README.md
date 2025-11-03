@@ -43,7 +43,7 @@ Add api keys in your .env.local file for all federal states that you want to log
 
 ```sh
 # with proper values in .env.local file
-cd apps/dialog
+cd packages/shared
 pnpm db:migrate:local
 pnpm db:seed:local
 

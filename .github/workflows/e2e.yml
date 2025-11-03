@@ -85,7 +85,7 @@ jobs:
           done
 
       - name: Run migrations and seed database (if applicable)
-        run: pnpm --filter telli-dialog db:migrate && pnpm --filter telli-dialog db:seed
+        run: pnpm --filter @telli/shared db:migrate && pnpm --filter @telli/shared db:seed
 
       - name: Start application
         run: |
