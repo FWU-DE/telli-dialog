@@ -522,8 +522,8 @@ export const TextChunkTable = pgTable(
   },
   (table) => [
     index().on(table.fileId),
-    sql`CREATE INDEX IF NOT EXISTS text_chunk_embedding_idx ON text_chunk USING hnsw (embedding vector_cosine_ops)`,
-    sql`CREATE INDEX IF NOT EXISTS text_chunk_content_tsv_idx ON text_chunk USING GIN (contentTsv)`,
+    index('text_chunk_embedding_idx').using('hnsw', table.embedding.op('vector_cosine_ops')),
+    index('text_chunk_content_tsv_idx').using('gin', table.contentTsv),
   ],
 );
 
