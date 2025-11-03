@@ -151,5 +151,7 @@ export const mockCharacter = (): CharacterModel => {
     startedAt: new Date(),
     createdAt: new Date(),
     attachedLinks: [],
+    originalCharacterId: null,
+    isDeleted: false,
   };
 };
