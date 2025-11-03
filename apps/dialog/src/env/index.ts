@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 export const env = createEnv({
   server: {
+    authSecret: z.string().min(1),
     databaseUrl: z.string(),
     otcBucketName: z.string().min(1),
     otcSecretAccessKey: z.string().min(1),
@@ -16,9 +17,22 @@ export const env = createEnv({
     apiKey: z.string().min(1),
     nextauthUrl: z.string().min(1),
     rabbitmqUri: z.string().min(1),
+    valkeyUrl: z.string().min(1),
   },
-  client: {},
+  client: {
+    NEXT_PUBLIC_SENTRY_LOG_LEVEL: z
+      .union([
+        z.literal('fatal'),
+        z.literal('error'),
+        z.literal('warning'),
+        z.literal('log'),
+        z.literal('info'),
+        z.literal('debug'),
+      ])
+      .default('info'),
+  },
   runtimeEnv: {
+    authSecret: process.env.AUTH_SECRET,
     databaseUrl: process.env.DATABASE_URL,
     otcBucketName: process.env.OTC_BUCKET_NAME,
     otcSecretAccessKey: process.env.OTC_SECRET_ACCESS_KEY,
@@ -32,6 +46,8 @@ export const env = createEnv({
     apiKey: process.env.API_KEY,
     nextauthUrl: process.env.NEXTAUTH_URL,
     rabbitmqUri: process.env.RABBITMQ_URI,
+    valkeyUrl: process.env.VALKEY_URL,
+    NEXT_PUBLIC_SENTRY_LOG_LEVEL: process.env.NEXT_PUBLIC_SENTRY_LOG_LEVEL,
   },
-  skipValidation: true,
+  emptyStringAsUndefined: true,
 });

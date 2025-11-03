@@ -5,21 +5,24 @@
   "scripts": {},
   "dependencies": {
     "@radix-ui/react-checkbox": "1.1.4",
-    "@radix-ui/react-collapsible": "^1.1.12",
-    "@radix-ui/react-label": "^2.1.7",
-    "@radix-ui/react-separator": "^1.1.7",
+    "@radix-ui/react-collapsible": "1.1.12",
+    "@radix-ui/react-label": "2.1.7",
+    "@radix-ui/react-separator": "1.1.7",
     "@radix-ui/react-slot": "1.2.3",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "lucide-react": "0.536.0",
+    "next-themes": "0.4.6",
+    "sonner": "2.0.7",
     "tailwind-merge": "3.0.1",
-    "tailwindcss-animate": "1.0.7"
+    "tailwindcss-animate": "1.0.7",
+    "zod": "3.25.67"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.2.0",
     "@tailwindcss/postcss": "4.1.11",
     "@telli/typescript-config": "workspace:*",
-    "@turbo/gen": "2.5.5",
+    "@turbo/gen": "2.5.8",
     "@types/eslint": "9.6.1",
     "@types/react": "19.0.3",
     "@types/react-dom": "19.0.2",
@@ -32,6 +35,7 @@
     "prettier": "3.4.2",
     "prettier-eslint": "16.4.2",
     "react": "19.0.0",
+    "react-hook-form": "7.65.0",
     "tailwindcss": "4.1.11",
     "typescript": "5.7.2"
   },
@@ -40,6 +44,7 @@
     "./postcss.config": "./postcss.config.mjs",
     "./tailwind.config": "./tailwind.config.ts",
     "./lib/*": "./src/lib/*.ts",
-    "./components/*": "./src/components/*.tsx"
+    "./components/*": "./src/components/*.tsx",
+    "./types/*": "./src/types/*.ts"
   }
 }

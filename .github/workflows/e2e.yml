@@ -27,10 +27,19 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      valkey:
+        image: ghcr.io/valkey-io/valkey:8
+        ports:
+          - 6379:6379
+
+    env:
+      NEXTAUTH_URL: http://localhost:3000
+      DATABASE_URL: postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db
+      VALKEY_URL: redis://127.0.0.1:6379/0
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Load 1Password Secrets
         uses: 1password/load-secrets-action@v3
@@ -38,8 +47,6 @@ jobs:
           export-env: true
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          NEXTAUTH_URL: op://telli Engineering/.env.e2e chatbot/NEXTAUTH_URL
-          DATABASE_URL: op://telli Engineering/.env.e2e chatbot/DATABASE_URL
           AUTH_SECRET: op://telli Engineering/.env.e2e chatbot/AUTH_SECRET
           OTC_SECRET_ACCESS_KEY: op://telli Engineering/.env.e2e chatbot/OTC_SECRET_ACCESS_KEY
           OTC_ACCESS_KEY_ID: op://telli Engineering/.env.e2e chatbot/OTC_ACCESS_KEY_ID
@@ -74,11 +81,11 @@ jobs:
         run: |
           until pg_isready -h localhost -p 5432 -U postgres; do
             echo "$(date) - waiting for database to start"
-            sleep 2
+            sleep 1
           done
 
       - name: Run migrations and seed database (if applicable)
-        run: pnpm --filter telli-dialog db:migrate && pnpm --filter telli-dialog db:seed
+        run: pnpm --filter @telli/shared db:migrate && pnpm --filter @telli/shared db:seed
 
       - name: Start application
         run: |
@@ -95,5 +102,5 @@ jobs:
         if: always()
         with:
           name: playwright-report
-          path: apps/dialog/test-results
+          path: apps/dialog/playwright-report
           retention-days: 30

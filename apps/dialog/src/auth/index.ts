@@ -1,23 +1,27 @@
 import NextAuth, { NextAuthResult } from 'next-auth';
-import { vidisConfig, handleVidisJWTCallback, handleVidisLogout } from './providers/vidis';
+import { vidisConfig, handleVidisJWTCallback } from './providers/vidis';
 import { mockVidisConfig } from './providers/vidis-mock';
 import { credentialsProvider } from './providers/credentials';
 import { getUserAndContextByUserId } from './utils';
 import { UserAndContext } from './types';
+import { logError, logInfo } from '@/utils/logging/logging';
+import { sessionBlockList } from './session';
 
-// TODO: Move this to it's own file (see also: https://github.com/nextauthjs/next-auth/discussions/9120#discussioncomment-7544307)
 declare module 'next-auth' {
   interface Session {
     user?: UserAndContext;
+    hasCompletedTraining?: boolean;
+    sessionId?: string; // identifies the session for blocking list after backchannel logout
+    idToken?: string; // needed for logout at identity provider (vidis)
   }
 }
 
-const SESSION_LIFETIME = 60 * 60 * 8;
+const SESSION_LIFETIME_SECONDS = 60 * 60 * 8;
 
 const result = NextAuth({
   providers: [vidisConfig, mockVidisConfig, credentialsProvider],
   jwt: {
-    maxAge: SESSION_LIFETIME,
+    maxAge: SESSION_LIFETIME_SECONDS,
   },
   pages: {
     signIn: '/login',
@@ -25,33 +29,64 @@ const result = NextAuth({
   },
   session: {
     strategy: 'jwt',
-    maxAge: SESSION_LIFETIME,
+    maxAge: SESSION_LIFETIME_SECONDS,
   },
   trustHost: true,
+  // https://next-auth.js.org/configuration/callbacks
   callbacks: {
+    async signIn() {
+      // all props are only passed the first time a user signs in, subsequent calls only provide a token
+      // Todo: we should check if custom attributes like bundesland are provided and return false if not
+      return true;
+    },
     async jwt({ token, account, profile, trigger, user }) {
-      if (
-        trigger === 'signIn' &&
-        (account?.provider === 'vidis' || account?.provider === 'vidis-mock') &&
-        profile !== undefined
-      ) {
-        token = await handleVidisJWTCallback({ account, profile, token });
+      // this callback is called when a JSON Web Token is created, updated or accessed in backend
+      // returning null will invalidate the token and end the session
+      try {
+        if (
+          trigger === 'signIn' &&
+          (account?.provider === 'vidis' || account?.provider === 'vidis-mock') &&
+          profile !== undefined
+        ) {
+          // This function can throw an error if the return type does not match our schema
+          token = await handleVidisJWTCallback({ account, profile, token });
+        }
+        // Ensure userId is set for credentials provider
+        if (account?.provider === 'credentials' && user?.id) {
+          token.userId = user.id;
+        }
+        if (trigger === 'update') {
+          token.user = await getUserAndContextByUserId({ userId: token.userId as string });
+        }
+        if (token.user === undefined || (token.user as UserAndContext).school === undefined) {
+          token.user = await getUserAndContextByUserId({ userId: token.userId as string });
+        }
+        if (profile?.sid) {
+          token.sessionId = profile.sid;
+        }
+        if (token.sessionId) {
+          if (await sessionBlockList.has(token.sessionId as string)) {
+            logInfo('Session is blocked, returning null token');
+            return null;
+          }
+        }
+        return token;
+      } catch (error) {
+        logError('Error in JWT callback', error);
+        return null;
       }
-      // Ensure userId is set for credentials provider
-      if (account?.provider === 'credentials' && user?.id) {
-        token.userId = user.id;
-      }
-      if (trigger === 'update') {
-        token.user = await getUserAndContextByUserId({ userId: token.userId as string });
-      }
-      if (token.user === undefined || (token.user as UserAndContext).school === undefined) {
-        token.user = await getUserAndContextByUserId({ userId: token.userId as string });
-      }
-      return token;
     },
     async session({ session, token }) {
+      // This callback is called whenever a session is checked (i.e. on the client)
+      // in order to pass properties to the client, copy them from token to the session
+
+      if (token?.sessionId) session.sessionId = token.sessionId as string;
+      if (token?.id_token) session.idToken = token.id_token as string;
+
       const userId = token.userId;
       if (userId === undefined || userId === null) return session;
+
+      session.hasCompletedTraining = (token.hasCompletedTraining as boolean) ?? false;
 
       if (session?.user?.id === undefined) {
         session.user = {
@@ -63,21 +98,14 @@ const result = NextAuth({
       return session;
     },
   },
+  // https://next-auth.js.org/configuration/events
+  // Events should only be used for instrumentation
   events: {
-    async signOut(message) {
-      if ('session' in message) return;
-
-      const token = message.token;
-
-      if (token === null) return;
-
-      const maybeIdToken = token.id_token as string | undefined;
-
-      if (maybeIdToken !== undefined) {
-        await handleVidisLogout({ idToken: maybeIdToken });
-      }
-
-      return undefined;
+    async signIn() {
+      /* raise custom metric here as soon as we have one */
+    },
+    async signOut() {
+      /* raise custom metric here as soon as we have one */
     },
   },
 });

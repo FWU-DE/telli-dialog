@@ -7,10 +7,10 @@ import {
   AlignmentType,
   convertInchesToTwip,
 } from 'docx';
-import { type ConversationModel, type ConversationMessageModel } from '@/db/types';
-import { formatDateToGermanTimestamp } from '@/utils/date';
-import { dbGetConversationAndMessages } from '@/db/functions/chat';
-import { UserModel } from '@/db/schema';
+import { type ConversationModel, type ConversationMessageModel } from '@shared/db/types';
+import { formatDateToGermanTimestamp } from '@shared/utils/date';
+import { dbGetConversationAndMessages } from '@shared/db/functions/chat';
+import { UserModel } from '@shared/db/schema';
 import { markdownToDocx } from './markdown';
 
 export async function generateConversationDocxFiles({

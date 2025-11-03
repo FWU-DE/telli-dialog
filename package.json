@@ -14,10 +14,14 @@
     "check-types": "turbo run check-types"
   },
   "packageManager": "pnpm@9.15.1",
-  "dependencies": {},
   "devDependencies": {
     "@telli/typescript-config": "workspace:*",
     "prettier": "3.4.2",
-    "turbo": "2.5.5"
+    "turbo": "2.5.8"
+  },
+  "pnpm": {
+    "overrides": {
+      "require-in-the-middle": "8.0.1"
+    }
   }
 }

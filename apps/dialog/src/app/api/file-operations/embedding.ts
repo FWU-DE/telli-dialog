@@ -1,9 +1,10 @@
-import { dbCreateManyTextChunks } from '@/db/functions/text-chunk';
+import { dbCreateManyTextChunks } from '@shared/db/functions/text-chunk';
 import { OpenAI } from 'openai';
 import { env } from '@/env';
-import { dbGetApiKeyByFederalStateIdWithResult } from '@/db/functions/federal-state';
+import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
 import { EMBEDDING_BATCH_SIZE } from '@/const';
-import { TextChunkInsertModel } from '@/db/schema';
+import { TextChunkInsertModel } from '@shared/db/schema';
+
 export async function embedText({
   text,
   federalStateId,
@@ -11,7 +12,11 @@ export async function embedText({
   text: string[];
   federalStateId: string;
 }) {
-  const [error, federalStateObject] = await dbGetApiKeyByFederalStateIdWithResult({
+  return await embedTextWithApiKey(text, await getFederalStateApiKey(federalStateId));
+}
+
+async function getFederalStateApiKey(federalStateId: string) {
+  const [error, federalStateObject] = await dbGetFederalStateWithDecryptedApiKeyWithResult({
     federalStateId,
   });
 
@@ -19,8 +24,12 @@ export async function embedText({
     throw new Error(error?.message ?? 'Error fetching federal state');
   }
 
+  return federalStateObject.decryptedApiKey;
+}
+
+async function embedTextWithApiKey(text: string[], federalStateApiKey: string) {
   const client = new OpenAI({
-    apiKey: federalStateObject.decryptedApiKey,
+    apiKey: federalStateApiKey,
     baseURL: `${env.apiUrl}/v1`,
   });
   const result = await client.embeddings.create({
@@ -40,37 +49,40 @@ export async function embedBatchAndSave({
   fileId: string;
   federalStateId: string;
 }) {
-  let tempChunks: TextChunkInsertModel[] = [];
+  const federalStateApiKey = await getFederalStateApiKey(federalStateId);
 
   console.log(`Embedding ${values.length} chunks`);
+  const promises: Promise<void>[] = [];
   // Process chunks in batches of 200
   for (let i = 0; i < values.length; i += EMBEDDING_BATCH_SIZE) {
-    tempChunks = [];
-    const batch = values.slice(i, i + EMBEDDING_BATCH_SIZE);
-    const batchTexts = batch.map(
-      (value) => `${value.leadingOverlap ?? ''}${value.content}${value.trailingOverlap ?? ''}`,
+    promises.push(
+      (async () => {
+        const batch = values.slice(i, i + EMBEDDING_BATCH_SIZE);
+        const batchTexts = batch.map(
+          (value) => `${value.leadingOverlap ?? ''}${value.content}${value.trailingOverlap ?? ''}`,
+        );
+
+        const batchEmbeddings = await embedTextWithApiKey(batchTexts, federalStateApiKey);
+
+        // Add the processed batch to our chunks array
+        const tempChunks = batchEmbeddings.map((embedding, batchIndex) => {
+          const originalIndex = i + batchIndex;
+          return {
+            content: values[originalIndex]?.content ?? '',
+            embedding,
+            fileId,
+            orderIndex: originalIndex,
+            pageNumber: values[originalIndex]?.pageNumber ?? 0,
+            leadingOverlap: values[originalIndex]?.leadingOverlap ?? undefined,
+            trailingOverlap: values[originalIndex]?.trailingOverlap ?? undefined,
+          };
+        });
+        await dbCreateManyTextChunks({
+          chunks: tempChunks,
+        });
+      })(),
     );
-
-    const batchEmbeddings = await embedText({
-      text: batchTexts,
-      federalStateId,
-    });
-
-    // Add the processed batch to our chunks array
-    batchEmbeddings.forEach((embedding, batchIndex) => {
-      const originalIndex = i + batchIndex;
-      tempChunks.push({
-        content: values[originalIndex]?.content ?? '',
-        embedding,
-        fileId,
-        orderIndex: originalIndex,
-        pageNumber: values[originalIndex]?.pageNumber ?? 0,
-        leadingOverlap: values[originalIndex]?.leadingOverlap ?? undefined,
-        trailingOverlap: values[originalIndex]?.trailingOverlap ?? undefined,
-      });
-    });
-    await dbCreateManyTextChunks({
-      chunks: tempChunks,
-    });
   }
+
+  await Promise.all(promises);
 }

@@ -1,8 +1,8 @@
 import DestructiveActionButton from '@/components/common/destructive-action-button';
-import { FileModel } from '@/db/schema';
+import { FileModel } from '@shared/db/schema';
 import React from 'react';
 
-import { isNotNull } from '@/utils/guard';
+import { isNotNull } from '@shared/utils/guard';
 import Spinner from '../icons/spinner';
 import CrossIcon from '../icons/cross';
 import { LocalFileState } from '../chat/send-message-form';

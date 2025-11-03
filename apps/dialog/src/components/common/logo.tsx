@@ -1,4 +1,4 @@
-import { getMaybeLogoFromS3 } from '@/s3';
+import { getMaybeLogoFromS3 } from '@shared/s3';
 import Image from 'next/image';
 import TelliLogo from '@/components/icons/logo';
 

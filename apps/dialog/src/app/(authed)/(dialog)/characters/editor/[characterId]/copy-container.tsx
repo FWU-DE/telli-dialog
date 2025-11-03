@@ -2,12 +2,12 @@ import { cn } from '@/utils/tailwind';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { useTranslations } from 'next-intl';
 import { CreateNewCharacterFromTemplate } from '../../create-new-character-button';
-import { CharacterModel } from '@/db/schema';
+import { CharacterModel } from '@shared/db/schema';
 import { calculateTimeLeftBySharedChat } from '../../../shared-chats/[sharedSchoolChatId]/utils';
 import { createNewCharacterAction } from '../../actions';
 
 export function CopyContainer({ character }: { character: CharacterModel }) {
-  const t = useTranslations('characters.copy-page');
+  const t = useTranslations('characters.form.copy-page');
   const sharedChatTimeLeft = calculateTimeLeftBySharedChat(character);
   const sharedChatActive = sharedChatTimeLeft > 0;
   const containerBg = !sharedChatActive ? 'bg-secondary/10' : 'bg-gray-100/10';

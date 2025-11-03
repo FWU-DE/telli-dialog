@@ -3,19 +3,16 @@
 import React, { startTransition } from 'react';
 import { useLlmModels } from '../providers/llm-model-provider';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { type LlmModel } from '@/db/schema';
+import { type LlmModel } from '@shared/db/schema';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { useSidebarVisibility } from '../navigation/sidebar/sidebar-provider';
 import { cn } from '@/utils/tailwind';
-import { saveChatModelForUserAction } from '@/app/(authed)/(dialog)/actions';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { Badge } from '../common/badge';
 
 type SelectLlmModelProps = {
   isStudent?: boolean;
-  predefinedModel?: string;
-  model?: string;
 };
 
 export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProps) {
@@ -25,12 +22,11 @@ export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProp
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  function handleSelectModel(model: LlmModel) {
-    startTransition(() => {
+  async function handleSelectModel(model: LlmModel) {
+    startTransition(async () => {
       setOptimisticModelId(model.name);
-      saveChatModelForUserAction(model.name);
     });
-    setSelectedModel(model);
+    await setSelectedModel(model);
 
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('model', model.name);
@@ -44,7 +40,6 @@ export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProp
   const selectedModel = models.find((model) => model.name === optimisticModelId);
 
   if (selectedModel === undefined) {
-    setOptimisticModelId(DEFAULT_CHAT_MODEL);
     return undefined;
   }
 

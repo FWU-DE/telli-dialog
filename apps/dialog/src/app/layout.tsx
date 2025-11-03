@@ -9,8 +9,8 @@ import { getMessages, getLocale } from 'next-intl/server';
 import './globals.css';
 import './scrollbar.css';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
-import { dbGetFederalStateByIdWithResult } from '@/db/functions/federal-state';
-import { getMaybeLogoFromS3 } from '@/s3';
+import { dbGetFederalStateByIdWithResult } from '@shared/db/functions/federal-state';
+import { getMaybeLogoFromS3 } from '@shared/s3';
 
 const barlow = Barlow({
   weight: ['400', '500', '600', '700'],
@@ -19,11 +19,13 @@ const barlow = Barlow({
 
 export async function generateMetadata(): Promise<Metadata> {
   const maybeUser = await getMaybeUser();
-  const faviconPath = await getMaybeLogoFromS3(maybeUser?.school.federalStateId, 'favicon.svg');
-  const [, federalState] = await dbGetFederalStateByIdWithResult(maybeUser?.school.federalStateId);
+  const [faviconPath, [, federalState]] = await Promise.all([
+    getMaybeLogoFromS3(maybeUser?.school.federalStateId, 'favicon.svg'),
+    dbGetFederalStateByIdWithResult(maybeUser?.school.federalStateId),
+  ]);
 
   return {
-    title: federalState?.telliName ?? 'telli',
+    title: !!federalState?.telliName ? federalState?.telliName : 'telli',
     description: 'Der datenschutzkonforme KI-Chatbot für die Schule',
     icons: { icon: faviconPath ?? '/telli.svg' },
   };

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { checkProductAccess } from './access';
 import { UserAndContext } from '@/auth/types';
-import { UserModel, UserSchoolRole } from '@/db/schema';
+import { UserModel, UserSchoolRole } from '@shared/db/schema';
 
 describe('checkProductAccess', () => {
   // Base test data
@@ -45,9 +45,10 @@ describe('checkProductAccess', () => {
       ...baseUser,
       federalState: baseFederalState,
       school: baseSchool,
+      hasApiKeyAssigned: true,
     };
 
-    const result = checkProductAccess(context);
+    const result = checkProductAccess({ ...context, hasCompletedTraining: true });
     expect(result.hasAccess).toBe(true);
   });
 
@@ -62,9 +63,10 @@ describe('checkProductAccess', () => {
         ...baseSchool,
         userRole: 'student',
       },
+      hasApiKeyAssigned: true,
     };
 
-    const result = checkProductAccess(context);
+    const result = checkProductAccess({ ...context, hasCompletedTraining: true });
     expect(result.hasAccess).toBe(false);
     if (!result.hasAccess) {
       expect(result.errorType).toBe('RESTRICTED_ROLE');
@@ -83,9 +85,10 @@ describe('checkProductAccess', () => {
         ...baseSchool,
         userRole: 'student',
       },
+      hasApiKeyAssigned: true,
     };
 
-    const result = checkProductAccess(context);
+    const result = checkProductAccess({ ...context, hasCompletedTraining: true });
     expect(result.hasAccess).toBe(true);
   });
 
@@ -97,9 +100,10 @@ describe('checkProductAccess', () => {
         mandatoryCertificationTeacher: true,
       },
       school: baseSchool,
+      hasApiKeyAssigned: true,
     };
 
-    const result = checkProductAccess(context);
+    const result = checkProductAccess({ ...context, hasCompletedTraining: false });
     expect(result.hasAccess).toBe(false);
     if (!result.hasAccess) {
       expect(result.errorType).toBe('TRAINING_NEEDED');
@@ -118,9 +122,10 @@ describe('checkProductAccess', () => {
         trainingLink,
       },
       school: baseSchool,
+      hasApiKeyAssigned: true,
     };
 
-    const result = checkProductAccess(context);
+    const result = checkProductAccess({ ...context, hasCompletedTraining: true });
     if (!result.hasAccess) {
       expect(result.hasAccess).toBe(false);
       expect(result.errorType).toBe('TRAINING_NEEDED');
@@ -140,9 +145,10 @@ describe('checkProductAccess', () => {
         ...baseSchool,
         userRole: 'student',
       },
+      hasApiKeyAssigned: true,
     };
 
-    const result = checkProductAccess(context);
+    const result = checkProductAccess({ ...context, hasCompletedTraining: true });
     expect(result.hasAccess).toBe(false);
     if (!result.hasAccess) {
       expect(result.errorType).toBe('RESTRICTED_ROLE'); // Should be role error, not training
@@ -161,11 +167,12 @@ describe('checkProductAccess', () => {
         ...baseSchool,
         userRole: 'student',
       },
+      hasApiKeyAssigned: true,
     };
 
     // We're testing the implementation detail that training is not checked for students
     // when studentAccess is false, as they're already restricted by role
-    const result = checkProductAccess(context);
+    const result = checkProductAccess({ ...context, hasCompletedTraining: true });
     expect(result.hasAccess).toBe(false);
     if (!result.hasAccess) {
       expect(result.errorType).toBe('RESTRICTED_ROLE');
@@ -184,9 +191,10 @@ describe('checkProductAccess', () => {
           ...baseSchool,
           userRole: role,
         },
+        hasApiKeyAssigned: true,
       };
 
-      const result = checkProductAccess(context);
+      const result = checkProductAccess({ ...context, hasCompletedTraining: true });
       expect(result.hasAccess).toBe(true);
     });
   });
@@ -210,9 +218,10 @@ describe('checkProductAccess', () => {
           ...baseSchool,
           userRole: 'student',
         },
+        hasApiKeyAssigned: true,
       };
 
-      const result = checkProductAccess(context);
+      const result = checkProductAccess({ ...context, hasCompletedTraining: true });
 
       if (state.studentAccess) {
         expect(result.hasAccess).toBe(true);

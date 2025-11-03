@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { dbGetConversations } from '@/db/functions/chat';
+import { dbGetConversations } from '@shared/db/functions/chat';
 import { getUser } from '@/auth/utils';
 
 export async function GET() {

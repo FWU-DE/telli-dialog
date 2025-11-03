@@ -1,8 +1,8 @@
 'use client';
 import { useChat } from '@ai-sdk/react';
-import React from 'react';
+import { FormEvent, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { CharacterModel } from '@/db/schema';
+import { CharacterModel } from '@shared/db/schema';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
@@ -36,28 +36,37 @@ export default function CharacterSharedChat({
     ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
     : [];
 
-  const { messages, setMessages, input, handleInputChange, handleSubmit, isLoading, reload, stop } =
-    useChat({
-      id,
-      initialMessages,
-      api: endpoint,
-      experimental_throttle: 100,
-      maxSteps: 2,
-      body: { modelId: character.modelId },
-      onResponse: handleResponse,
-      onError: handleError,
-    });
+  const {
+    messages,
+    setMessages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    reload,
+    status,
+    stop,
+  } = useChat({
+    id,
+    initialMessages,
+    api: endpoint,
+    experimental_throttle: 100,
+    maxSteps: 2,
+    body: { modelId: character.modelId },
+    onResponse: handleResponse,
+    onError: handleError,
+  });
 
-  const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   const { isBelow } = useBreakpoints();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     }
   }, [messages, id, inviteCode]);
 
-  async function customHandleSubmit(e: React.FormEvent) {
+  async function customHandleSubmit(e: FormEvent) {
     e.preventDefault();
 
     try {
@@ -74,7 +83,7 @@ export default function CharacterSharedChat({
   function handleReload() {
     // Clear rate limit error before reloading
     resetError();
-    reload();
+    void reload();
   }
 
   const assistantIcon = getAssistantIcon({
@@ -97,11 +106,12 @@ export default function CharacterSharedChat({
             <ChatBox
               key={index}
               index={index}
-              isLastUser={index === messages.length - 1 && message.role == 'user'}
+              isLastUser={index === messages.length - 1 && message.role === 'user'}
               isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
               isLoading={isLoading}
               regenerateMessage={reload}
               assistantIcon={assistantIcon}
+              status={status}
             >
               {message}
             </ChatBox>

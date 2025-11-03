@@ -1,6 +1,5 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "_version": "2.0.0",
   "extends": "./base.json",
 
   "compilerOptions": {
@@ -14,7 +13,8 @@
       "@/*": ["./*"],
       "@ui/*": ["../../packages/ui/src/*"],
       "@ui/components/*": ["../../packages/ui/src/components/*"],
-      "@ui/components/ui/*": ["../../packages/ui/src/components/*"]
+      "@ui/components/ui/*": ["../../packages/ui/src/components/*"],
+      "@ui/types/*": ["../../packages/ui/src/types/*"]
     }
   }
 }

@@ -10,17 +10,17 @@ import { constructSystemPromptByCharacterSharedChat } from './system-prompt';
 import {
   getModelAndProviderWithResult,
   getSearchParamsFromUrl,
-  calculateCostsInCents,
+  calculateCostsInCent,
 } from '../utils';
 import {
   dbGetCharacterByIdAndInviteCode,
   dbUpdateTokenUsageByCharacterChatId,
-} from '@/db/functions/character';
+} from '@shared/db/functions/character';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
-import { dbGetRelatedCharacterFiles } from '@/db/functions/files';
+import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 
@@ -114,19 +114,22 @@ export async function POST(request: NextRequest) {
     messages,
     experimental_transform: smoothStream({ chunking: 'word' }),
     async onFinish(assistantMessage) {
+      const costsInCent = calculateCostsInCent(definedModel, assistantMessage.usage);
+
       await dbUpdateTokenUsageByCharacterChatId({
         modelId: definedModel.id,
         completionTokens: assistantMessage.usage.completionTokens,
         promptTokens: assistantMessage.usage.promptTokens,
         characterId: character.id,
         userId: teacherUserAndContext.id,
+        costsInCent: costsInCent,
       });
       await sendRabbitmqEvent(
         constructTelliNewMessageEvent({
           user: teacherUserAndContext,
           promptTokens: assistantMessage.usage.promptTokens,
           completionTokens: assistantMessage.usage.completionTokens,
-          costsInCents: calculateCostsInCents(definedModel, assistantMessage.usage),
+          costsInCent: costsInCent,
           provider: definedModel.provider,
           anonymous: true,
           character,

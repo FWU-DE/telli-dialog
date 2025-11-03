@@ -2,8 +2,8 @@ import { type Session } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { auth, unstable_update } from '.';
 import { type UserAndContext } from './types';
-import { dbGetSchoolAndMappingAndFederalStateByUserId } from '@/db/functions/school';
-import { FederalStateModel } from '@/db/schema';
+import { dbGetSchoolAndMappingAndFederalStateByUserId } from '@shared/db/functions/school';
+import { FederalStateModel } from '@shared/db/schema';
 
 export async function getValidSession(): Promise<Session> {
   const session = await auth();
@@ -40,6 +40,11 @@ export async function getUser(): Promise<UserAndContext> {
   return session.user;
 }
 
+export async function userHasCompletedTraining(): Promise<boolean> {
+  const session = await getMaybeSession();
+  return session?.hasCompletedTraining ?? false;
+}
+
 export async function updateSession(
   data?: Partial<
     | Session
@@ -68,6 +73,7 @@ export async function getUserAndContextByUserId({
     ...userAndContext.user,
     ...userAndContext,
     federalState: obscureFederalState(userAndContext.federalState),
+    hasApiKeyAssigned: !!userAndContext.federalState.encryptedApiKey,
   };
 }
 

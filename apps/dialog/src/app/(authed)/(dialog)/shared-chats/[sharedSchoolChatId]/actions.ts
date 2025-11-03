@@ -1,18 +1,18 @@
 'use server';
 
-import { db } from '@/db';
+import { db } from '@shared/db';
 import {
   FileModel,
   fileTable,
   SharedSchoolConversationFileMapping,
   SharedSchoolConversationModel,
   sharedSchoolConversationTable,
-} from '@/db/schema';
+} from '@shared/db/schema';
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
 import { SharedConversationShareFormValues } from './schema';
 import { generateInviteCode } from './utils';
-import { dbGetRelatedSharedChatFiles } from '@/db/functions/files';
+import { dbGetRelatedSharedChatFiles } from '@shared/db/functions/files';
 
 export async function updateSharedSchoolChat({
   id: sharedChatId,

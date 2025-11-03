@@ -1,4 +1,5 @@
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { useTranslations } from 'next-intl';
 
 /**
  * get a default error source for a websearch source
@@ -11,7 +12,7 @@ export function defaultErrorSource({
   t,
 }: {
   status_code?: number;
-  t: (key: string, params?: Record<string, string>) => string;
+  t: ReturnType<typeof useTranslations>;
 }): WebsearchSource {
   const statusCodeInfo = status_code ? `(Statuscode: ${status_code})` : '';
   return {

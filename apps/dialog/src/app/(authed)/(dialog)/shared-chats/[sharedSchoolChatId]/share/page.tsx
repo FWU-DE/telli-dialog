@@ -2,7 +2,7 @@ import NotFound from '@/app/not-found';
 import { getUser } from '@/auth/utils';
 import SidebarCloseIcon from '@/components/icons/sidebar-close';
 import Footer from '@/components/navigation/footer';
-import { dbGetSharedSchoolChatById } from '@/db/functions/shared-school-chat';
+import { dbGetSharedSchoolChatById } from '@shared/db/functions/shared-school-chat';
 import { getBaseUrlByHeaders, getHostByHeaders } from '@/utils/host';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';

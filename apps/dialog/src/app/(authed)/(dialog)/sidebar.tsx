@@ -24,7 +24,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 import deleteConversationAction, { updateConversationNameAction } from './actions';
 import { fetchClientSideConversations } from './utils';
-import { HELP_MODE_GPT_ID } from '@/db/const';
+import { HELP_MODE_GPT_ID } from '@shared/db/const';
 
 type Props = {
   user: UserAndContext;
@@ -123,7 +123,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
           <Link href="/" className="w-full flex gap-2 items-center hover:underline px-2 py-1.5">
             <TelliIcon className="w-4 h-4 fill-primary" />
             <span className="text-base font-medium text-primary">
-              {user.federalState.telliName ?? 'telli'}
+              {!!user.federalState.telliName ? user.federalState.telliName : 'telli'}
             </span>
           </Link>
           <Link href="/custom" className="w-full mt-1">

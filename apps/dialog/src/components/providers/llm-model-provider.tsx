@@ -1,6 +1,6 @@
 'use client';
 
-import { LlmModel } from '@/db/schema';
+import { LlmModel } from '@shared/db/schema';
 import React from 'react';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { saveChatModelForUserAction } from '@/app/(authed)/(dialog)/actions';
@@ -18,6 +18,10 @@ type LlmModelsContextProps = {
 };
 
 const LlmModelsContext = React.createContext<LlmModelsContextProps | undefined>(undefined);
+
+function getFirstTextModel(models: LlmModel[]): LlmModel | undefined {
+  return models.find((model) => model.priceMetadata.type === 'text');
+}
 
 export function LlmModelsProvider({
   models,
@@ -56,6 +60,6 @@ function getSelectedModel({
   return (
     models.find((model) => model.name === defaultLlmModelByCookie) ??
     models.find((model) => model.name === DEFAULT_CHAT_MODEL) ??
-    models[0]
+    getFirstTextModel(models)
   );
 }

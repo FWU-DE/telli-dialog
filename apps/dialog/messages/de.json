@@ -35,6 +35,9 @@
     "generic-error": "Ein Fehler ist aufgetreten",
     "retry-button": "Erneut versuchen"
   },
+  "errors": {
+    "no-api-key": "Dem Bundesland wurde noch kein API-Schlüssel zugewiesen."
+  },
   "usage-disclaimer": {
     "initial-title": "Willkommen bei telli!",
     "terms-and-conditions-title": "Nutzungsbedingungen"
@@ -153,7 +156,7 @@
     "visibility-private": "Für mich",
     "shared": {
       "title": "Dialogpartner im Unterricht einsetzen",
-      "description": "Wie viel des Restbudgets soll durch diesen Chat verbraucht und wie lange darf er aktiv benutzt werden?",
+      "description": "Wie viel des Tokenvolumens soll durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
       "share": "Teilen",
@@ -273,7 +276,7 @@
     "shared": {
       "excersise-title": "Dein Arbeitsauftrag",
       "title": "Lernszenario einsetzen",
-      "description": "Wie viel des Restbudgets soll durch diesen Chat verbraucht und wie lange darf er aktiv benutzt werden?",
+      "description": "Wie viel des Tokenvolumens soll durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
       "share": "Teilen",

@@ -4,7 +4,8 @@
   "baseUrl": ".",
   "paths": {
     "@ui/*": ["./src/*"],
-    "@ui/components*": ["./src/components/*"]
+    "@ui/components*": ["./src/components/*"],
+    "@ui/types*": ["./src/types/*"]
   },
   "include": ["."],
   "exclude": ["node_modules", "dist"]

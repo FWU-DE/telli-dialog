@@ -5,7 +5,7 @@ import { useToast } from '@/components/common/toast';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import SettingsIcon from '@/components/icons/settings';
 import TrashIcon from '@/components/icons/trash';
-import { CustomGptModel } from '@/db/schema';
+import { CustomGptModel } from '@shared/db/schema';
 import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
 import { useTranslations } from 'next-intl';

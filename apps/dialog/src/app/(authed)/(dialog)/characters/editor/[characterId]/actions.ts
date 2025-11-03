@@ -1,14 +1,14 @@
 'use server';
 
-import { db } from '@/db';
-import { dbDeleteCharacterByIdAndUserId } from '@/db/functions/character';
+import { db } from '@shared/db';
+import { dbDeleteCharacterByIdAndUserId } from '@shared/db/functions/character';
 import {
   CharacterAccessLevel,
   CharacterInsertModel,
   characterTable,
   sharedCharacterConversation,
-} from '@/db/schema';
-import { deleteFileFromS3 } from '@/s3';
+} from '@shared/db/schema';
+import { deleteFileFromS3 } from '@shared/s3';
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
 import { SharedConversationShareFormValues } from '../../../shared-chats/[sharedSchoolChatId]/schema';
@@ -104,7 +104,7 @@ export async function deleteCharacterAction({
 
   const maybePictureId = deletedCharacter.pictureId ?? pictureId;
 
-  if (maybePictureId != null) {
+  if (maybePictureId !== null && maybePictureId !== undefined) {
     try {
       await deleteFileFromS3({ key: maybePictureId });
     } catch (error) {

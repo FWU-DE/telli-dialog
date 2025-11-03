@@ -4,8 +4,8 @@ import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible
 import {
   dbGetCharacterByIdWithShareData,
   dbGetCopyTemplateCharacter,
-} from '@/db/functions/character';
-import { getMaybeSignedUrlFromS3Get } from '@/s3';
+} from '@shared/db/functions/character';
+import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
 import { notFound } from 'next/navigation';
@@ -13,7 +13,7 @@ import { z } from 'zod';
 import HeaderPortal from '../../../header-portal';
 import CharacterForm from './character-form';
 import { removeNullValues } from '@/utils/generic/object-operations';
-import { CharacterModel } from '@/db/schema';
+import { CharacterModel } from '@shared/db/schema';
 import { fetchFileMapping } from '../../actions';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';

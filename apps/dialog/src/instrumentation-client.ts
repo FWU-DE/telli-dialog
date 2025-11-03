@@ -4,7 +4,10 @@ Sentry.init({
   debug: false,
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   environment: process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT,
-  integrations: [Sentry.captureConsoleIntegration({ levels: ['warn', 'error'] })],
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.captureConsoleIntegration({ levels: ['warn', 'error'] }),
+  ],
 
   // Capture Replay for 10% of all sessions,
   // plus for 100% of sessions with an error
@@ -12,10 +15,7 @@ Sentry.init({
   // https://docs.sentry.io/platforms/javascript/session-replay/configuration/#general-integration-configuration
   replaysOnErrorSampleRate: 1.0,
   replaysSessionSampleRate: 0.1,
-
-  // Adds request headers and IP for users, for more info visit:
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
-  sendDefaultPii: true,
+  tracesSampleRate: 0.1,
 
   beforeSend(event: Sentry.ErrorEvent) {
     // do not send any logs to sentry for development environment

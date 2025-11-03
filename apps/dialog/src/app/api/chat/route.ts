@@ -3,12 +3,12 @@ import {
   dbGetConversationAndMessages,
   dbGetOrCreateConversation,
   dbUpdateConversationTitle,
-} from '@/db/functions/chat';
+} from '@shared/db/functions/chat';
 import { NextRequest, NextResponse } from 'next/server';
-import { dbInsertChatContent } from '@/db/functions/chat';
-import { getUser, updateSession } from '@/auth/utils';
-import { userHasReachedIntelliPointLimit, trackChatUsage } from './usage';
-import { getModelAndProviderWithResult, calculateCostsInCents, getAuxiliaryModel } from '../utils';
+import { dbInsertChatContent } from '@shared/db/functions/chat';
+import { getUser, updateSession, userHasCompletedTraining } from '@/auth/utils';
+import { userHasReachedIntelliPointLimit } from './usage';
+import { getModelAndProviderWithResult, calculateCostsInCent, getAuxiliaryModel } from '../utils';
 import { generateUUID } from '@/utils/uuid';
 import { getChatTitle, getMostRecentUserMessage, limitChatHistory } from './utils';
 import { constructChatSystemPrompt } from './system-prompt';
@@ -16,8 +16,8 @@ import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
-import { dbUpdateLastUsedModelByUserId } from '@/db/functions/user';
-import { dbGetAttachedFileByEntityId, link_file_to_conversation } from '@/db/functions/files';
+import { dbUpdateLastUsedModelByUserId } from '@shared/db/functions/user';
+import { dbGetAttachedFileByEntityId, linkFilesToConversation } from '@shared/db/functions/files';
 import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { SMALL_MODEL_MAX_CHARACTERS } from '@/configuration-text-inputs/const';
 import { SMALL_MODEL_LIST } from '@/configuration-text-inputs/const';
@@ -28,13 +28,13 @@ import { getRelevantFileContent } from '../file-operations/retrieval';
 import { extractImagesAndUrl } from '../file-operations/prepocess-image';
 import { formatMessagesWithImages } from './utils';
 import { logDebug } from '@/utils/logging/logging';
-import { dbGetCustomGptById } from '@/db/functions/custom-gpts';
-import { dbGetCharacterByIdWithShareData } from '@/db/functions/character';
+import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
+import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
+import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
 
 export async function POST(request: NextRequest) {
-  const user = await getUser();
-
-  const productAccess = checkProductAccess(user);
+  const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);
+  const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
 
   if (!productAccess.hasAccess) {
     return NextResponse.json({ error: productAccess.errorType }, { status: 403 });
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     federalStateId: user.federalState.id,
   });
 
-  const auxiliaryModel = await getAuxiliaryModel(user);
+  const auxiliaryModel = await getAuxiliaryModel(user.federalState.id);
 
   const [errorAuxiliaryModel, auxiliaryModelAndProvider] = await getModelAndProviderWithResult({
     modelId: auxiliaryModel.id,
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (currentFileIds !== undefined) {
-    await link_file_to_conversation({
+    await linkFilesToConversation({
       fileIds: currentFileIds,
       conversationMessageId: userMessage.id,
       conversationId: conversation.id,
@@ -177,19 +177,24 @@ export async function POST(request: NextRequest) {
       urls = character.attachedLinks;
     }
   } else {
-    urls = [userMessage, ...messages]
-      .map((message) => parseHyperlinks(message.content) ?? [])
-      .flat();
+    urls = [userMessage, ...messages].flatMap((message) => parseHyperlinks(message.content) ?? []);
   }
 
-  let websearchSources: WebsearchSource[] = [];
-  try {
-    websearchSources = await Promise.all(
-      urls.filter((l) => l !== '').map((url) => webScraperExecutable(url)),
-    );
-  } catch (error) {
-    console.error('Unhandled error while fetching website', error);
-  }
+  const uniqueUrls = [...new Set(urls)];
+  const websearchSources = (
+    await Promise.all(
+      uniqueUrls
+        .filter((l) => l !== '')
+        .map(async (url) => {
+          try {
+            return await webScraperExecutable(url);
+          } catch (error) {
+            console.error(`Error fetching webpage content for URL: ${url}`, error);
+          }
+        }),
+    )
+  ).filter((x): x is WebsearchSource => !!x);
+
   // Condense chat history to search query to use for vector search and text retrieval
 
   await updateSession({
@@ -252,11 +257,15 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      await trackChatUsage({
-        userId: user.id,
+      const costsInCent = calculateCostsInCent(definedModel, assistantMessage.usage);
+
+      await dbInsertConversationUsage({
         conversationId: conversation.id,
-        model: definedModel,
-        usage: assistantMessage.usage,
+        userId: user.id,
+        modelId: definedModel.id,
+        completionTokens: assistantMessage.usage.completionTokens,
+        promptTokens: assistantMessage.usage.promptTokens,
+        costsInCent: costsInCent,
       });
 
       await sendRabbitmqEvent(
@@ -264,7 +273,7 @@ export async function POST(request: NextRequest) {
           user,
           promptTokens: assistantMessage.usage.promptTokens,
           completionTokens: assistantMessage.usage.completionTokens,
-          costsInCents: calculateCostsInCents(definedModel, assistantMessage.usage),
+          costsInCent: costsInCent,
           provider: definedModel.provider,
           anonymous: false,
           conversation,

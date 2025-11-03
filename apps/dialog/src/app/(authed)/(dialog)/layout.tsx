@@ -1,13 +1,12 @@
 import { SidebarVisibilityProvider } from '@/components/navigation/sidebar/sidebar-provider';
-import { getUser } from '@/auth/utils';
+import { getUser, userHasCompletedTraining } from '@/auth/utils';
 import React from 'react';
 import DialogSidebar from './sidebar';
 import { HEADER_PORTAL_ID } from './header-portal';
 import { contentHeight } from '@/utils/tailwind/height';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
-import { dbGetLlmModelsByFederalStateId } from '@/db/functions/llm-model';
-import { getPriceInCentByUser, getPriceLimitByUser } from '@/app/school';
-import AutoLogout from '@/components/auth/auto-logout';
+import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
+import { getPriceInCentByUser, getPriceLimitInCentByUser } from '@/app/school';
 import { checkProductAccess } from '@/utils/vidis/access';
 import ProductAccessModal from '@/components/modals/product-access';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
@@ -17,15 +16,21 @@ import TermsConditionsModal from '@/components/modals/terms-conditions-initial';
 import { federalStateDisclaimers, VERSION } from '@/components/modals/const';
 import { setUserAcceptConditions } from './actions';
 import { FederalStateId } from '@/utils/vidis/const';
+import { getTranslations } from 'next-intl/server';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
+  const t = await getTranslations('errors');
   const user = await getUser();
+  if (!user.hasApiKeyAssigned) throw new Error(t('no-api-key'));
 
-  const models = await dbGetLlmModelsByFederalStateId({ federalStateId: user.federalState.id });
+  const [models, priceInCent, userPriceLimit, hasCompletedTraining] = await Promise.all([
+    dbGetLlmModelsByFederalStateId({ federalStateId: user.federalState.id }),
+    getPriceInCentByUser(user),
+    getPriceLimitInCentByUser(user),
+    userHasCompletedTraining(),
+  ]);
 
-  const priceInCent = await getPriceInCentByUser(user);
-  const userPriceLimit = await getPriceLimitByUser(user);
-  const productAccess = checkProductAccess(user);
+  const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
   const federalStateDisclaimer =
     federalStateDisclaimers[user.school.federalStateId as FederalStateId];
   const userMustAccept =
@@ -34,7 +39,6 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
 
   return (
     <div className="flex h-[100dvh] w-[100dvw]">
-      <AutoLogout />
       <SidebarVisibilityProvider>
         <LlmModelsProvider
           models={models}

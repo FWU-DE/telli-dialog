@@ -1,57 +1,10 @@
-import { getBaseUrlByHeaders } from '@/utils/host';
-import { dbGetOrCreateVidisUser } from '@/db/functions/vidis';
+import { dbGetOrCreateVidisUser } from '@telli/shared/db/functions/vidis';
 import { env } from '@/env';
 import { Account, NextAuthConfig, Profile } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
-import { z } from 'zod';
+import { vidisAccountSchema, vidisProfileSchema } from '@telli/shared/types/vidis';
 
-export const oAuthTokenResponseSchema = z.object({
-  access_token: z.string(),
-  expires_in: z.coerce.number(),
-  id_token: z.string(),
-  scope: z.string(),
-  token_type: z.string(),
-});
-
-export const vidisUserInfoSchema = z.object({
-  sub: z.string(),
-  rolle: z.string(),
-  schulkennung: z.string().or(z.array(z.string())),
-  bundesland: z.string(),
-});
-export type VidisUserInfo = z.infer<typeof vidisUserInfoSchema>;
-
-export const signInVidisSchema = vidisUserInfoSchema.and(oAuthTokenResponseSchema);
-
-const vidisAccountSchema = z.object({
-  access_token: z.string(),
-  expires_in: z.number(),
-  // refresh_expires_in: z.number(),
-  // refresh_token: z.string(),
-  // session_state: z.string(),
-  token_type: z.literal('bearer'),
-  id_token: z.string(),
-  provider: z.literal('vidis').or(z.literal('vidis-mock')),
-});
-
-const vidisProfileSchema = z.object({
-  exp: z.number(),
-  iat: z.number(),
-  // auth_time: z.number(),
-  // jti: z.string(),
-  iss: z.string(),
-  aud: z.string(),
-  sub: z.string(),
-  // typ: z.literal('ID'),
-  // azp: z.string(),
-  // session_state: z.string(),
-  at_hash: z.string(),
-  // email: z.string(),
-  // sid: z.string(),
-  rolle: z.string(),
-  schulkennung: z.string().or(z.array(z.string())),
-  bundesland: z.string(),
-});
+export const VIDIS_LOGOUT_URL = new URL(env.vidisIssuerUri + '/protocol/openid-connect/logout');
 
 export async function handleVidisJWTCallback({
   profile,
@@ -74,22 +27,8 @@ export async function handleVidisJWTCallback({
   token.userId = createdUser.id;
   token.email = createdUser.email;
   token.id_token = parsedAccount.id_token;
+  token.hasCompletedTraining = parsedProfile.is_ai_chat_eligible ?? false;
   return token;
-}
-
-export async function handleVidisLogout({ idToken }: { idToken: string }) {
-  console.info('Performing logout handshare with vidis');
-  const searchParams = new URLSearchParams({
-    post_logout_redirect_uri: (await getBaseUrlByHeaders()) ?? 'chat.telli.schule',
-    id_token_hint: idToken,
-  });
-  const response = await fetch(
-    `${env.vidisIssuerUri}/protocol/openid-connect/logout?${searchParams.toString()}`,
-  );
-  console.info({ response });
-  if (!response.ok) {
-    console.error({ error: await response.text() });
-  }
 }
 
 export const vidisConfig = {

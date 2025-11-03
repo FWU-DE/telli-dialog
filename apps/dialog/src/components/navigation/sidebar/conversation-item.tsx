@@ -12,7 +12,7 @@ import { useSidebarVisibility } from './sidebar-provider';
 import useBreakpoints from '@/components/hooks/use-breakpoints';
 import { cn } from '@/utils/tailwind';
 import { usePathname } from 'next/navigation';
-import { type ConversationModel } from '@/db/types';
+import { type ConversationModel } from '@shared/db/types';
 import Link from 'next/link';
 import { useTheme } from '@/hooks/use-theme';
 import { constructRootLayoutStyle } from '@/utils/tailwind/layout';

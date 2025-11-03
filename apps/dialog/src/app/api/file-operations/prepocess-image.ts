@@ -1,6 +1,6 @@
 import { SUPPORTED_DOCUMENTS_TYPE, TRUNCATE_IMAGE_HEIGHT } from '@/const';
-import { FileMetadata, FileModel } from '@/db/schema';
-import { getMaybeSignedUrlFromS3Get } from '@/s3';
+import { FileMetadata, FileModel } from '@shared/db/schema';
+import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { isImageFile } from '@/utils/files/generic';
 import { ImageAttachment } from '@/utils/files/types';
 import sharp from 'sharp';
@@ -35,7 +35,7 @@ export async function extractImagesAndUrl(
   });
 
   const images = await Promise.all(imagePromises);
-  return images.filter((img) => img != null) as ImageAttachment[];
+  return images.filter((img) => img !== null) as ImageAttachment[];
 }
 
 export async function preprocessImage(

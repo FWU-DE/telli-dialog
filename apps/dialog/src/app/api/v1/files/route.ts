@@ -1,7 +1,7 @@
 import { getUser } from '@/auth/utils';
-import { db } from '@/db';
-import { fileTable, TextChunkInsertModel } from '@/db/schema';
-import { uploadFileToS3 } from '@/s3';
+import { db } from '@shared/db';
+import { fileTable, TextChunkInsertModel } from '@shared/db/schema';
+import { uploadFileToS3 } from '@shared/s3';
 import { getFileExtension } from '@/utils/files/generic';
 import { cnanoid } from '@/utils/random';
 import { NextRequest, NextResponse } from 'next/server';
@@ -68,24 +68,29 @@ export async function POST(req: NextRequest) {
   });
   logDebug(`File ${file.name} with type ${fileExtension} stored in db.`);
 
-  await embedBatchAndSave({
-    values: enrichedChunks,
-    fileId,
-    federalStateId: user.federalState.id,
-  });
-
-  // Use processed buffer for images, original buffer for other files
-  const bufferToUpload = extractResult.processedBuffer || buffer;
-
-  await uploadFileToS3({
-    key: `message_attachments/${fileId}`,
-    body: bufferToUpload,
-    contentType: getFileExtension(file.name),
-  });
-  logDebug(`File ${file.name} with id ${fileId} uploaded to s3 bucket.`);
+  await Promise.all([
+    embedBatchAndSave({
+      values: enrichedChunks,
+      fileId,
+      federalStateId: user.federalState.id,
+    }),
+    uploadToS3(file),
+  ]);
 
   return NextResponse.json({
     body: JSON.stringify({ file_id: fileId }),
     status: 200,
   });
+
+  async function uploadToS3(file: File) {
+    // Use processed buffer for images, original buffer for other files
+    const bufferToUpload = extractResult.processedBuffer || buffer;
+
+    await uploadFileToS3({
+      key: `message_attachments/${fileId}`,
+      body: bufferToUpload,
+      contentType: getFileExtension(file.name),
+    });
+    logDebug(`File ${file.name} with id ${fileId} uploaded to s3 bucket.`);
+  }
 }

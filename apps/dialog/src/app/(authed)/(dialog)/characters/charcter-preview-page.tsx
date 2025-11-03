@@ -13,7 +13,7 @@ import {
 } from '@/components/navigation/sidebar/collapsible-sidebar';
 import SearchBarInput from '@/components/search-bar';
 import { type UserAndContext } from '@/auth/types';
-import { CharacterAccessLevel } from '@/db/schema';
+import { CharacterAccessLevel } from '@shared/db/schema';
 import { buildGenericUrl, CharacterWithImage } from './utils';
 import { useTranslations } from 'next-intl';
 

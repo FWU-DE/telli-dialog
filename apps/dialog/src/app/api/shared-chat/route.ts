@@ -6,19 +6,19 @@ import {
   sharedChatHasReachedIntelliPointLimit,
   userHasReachedIntelliPointLimit,
 } from '../chat/usage';
-import { dbGetSharedChatByIdAndInviteCode } from '@/db/functions/shared-school-chat';
+import { dbGetSharedChatByIdAndInviteCode } from '@shared/db/functions/shared-school-chat';
 import { constructSystemPromptBySharedChat } from './system-prompt';
-import { dbUpdateTokenUsageBySharedChatId } from '@/db/functions/shared-school-chat';
+import { dbUpdateTokenUsageBySharedChatId } from '@shared/db/functions/shared-school-chat';
 import {
   getModelAndProviderWithResult,
   getSearchParamsFromUrl,
-  calculateCostsInCents,
+  calculateCostsInCent,
 } from '../utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
-import { dbGetRelatedSharedChatFiles } from '@/db/functions/files';
+import { dbGetRelatedSharedChatFiles } from '@shared/db/functions/files';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 
@@ -111,12 +111,15 @@ export async function POST(request: NextRequest) {
     messages,
     experimental_transform: smoothStream({ chunking: 'word' }),
     async onFinish(assistantMessage) {
+      const costsInCent = calculateCostsInCent(definedModel, assistantMessage.usage);
+
       await dbUpdateTokenUsageBySharedChatId({
         modelId: definedModel.id,
         completionTokens: assistantMessage.usage.completionTokens,
         promptTokens: assistantMessage.usage.promptTokens,
         sharedSchoolConversationId: sharedChat.id,
         userId: teacherUserAndContext.id,
+        costsInCent: costsInCent,
       });
 
       await sendRabbitmqEvent(
@@ -125,7 +128,7 @@ export async function POST(request: NextRequest) {
           provider: modelAndProvider.definedModel.provider,
           promptTokens: assistantMessage.usage.promptTokens,
           completionTokens: assistantMessage.usage.completionTokens,
-          costsInCents: calculateCostsInCents(definedModel, assistantMessage.usage),
+          costsInCent: costsInCent,
           anonymous: true,
           sharedChat,
         }),

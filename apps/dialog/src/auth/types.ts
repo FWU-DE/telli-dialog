@@ -1,5 +1,5 @@
-import { type User } from '@/db/types';
-import { type SchoolModel, type UserSchoolRole } from '@/db/schema';
+import { type User } from '@shared/db/types';
+import { type SchoolModel, type UserSchoolRole } from '@shared/db/schema';
 import { ObscuredFederalState } from './utils';
 
 type UserSchoolProps = SchoolModel & {
@@ -9,4 +9,5 @@ type UserSchoolProps = SchoolModel & {
 export type UserAndContext = User & {
   school: UserSchoolProps;
   federalState: ObscuredFederalState;
+  hasApiKeyAssigned: boolean;
 };

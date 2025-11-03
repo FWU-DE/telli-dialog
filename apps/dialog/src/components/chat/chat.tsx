@@ -1,10 +1,10 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import React, { useEffect, useState } from 'react';
+import { FormEvent, ReactNode, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
-import { type CustomGptModel, type CharacterModel, FileModel } from '@/db/schema';
+import { type CharacterModel, type CustomGptModel, FileModel } from '@shared/db/schema';
 import PromptSuggestions from './prompt-suggestions';
 import MarkdownDisplay from './markdown-display';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
@@ -18,7 +18,7 @@ import { ChatBox } from './chat-box';
 import { getFileExtension } from '@/utils/files/generic';
 import { refetchFileMapping } from '@/app/(authed)/(dialog)/actions';
 import { InitialChatContentDisplay } from './initial-content-display';
-import { HELP_MODE_GPT_ID } from '@/db/const';
+import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { ChatInputBox } from './chat-input-box';
 import { ErrorChatPlaceholder } from './error-chat-placeholder';
 import Image from 'next/image';
@@ -41,7 +41,7 @@ type ChatProps = {
   initialFileMapping?: Map<string, FileModel[]>;
   enableFileUpload: boolean;
   webSourceMapping?: Map<string, WebsearchSource[]>;
-  logoElement: React.ReactNode;
+  logoElement: ReactNode;
 };
 
 export default function Chat({
@@ -81,7 +81,7 @@ export default function Chat({
   const { error, handleResponse, handleError, resetError } = useCheckStatusCode();
 
   function refetchConversations() {
-    queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    void queryClient.invalidateQueries({ queryKey: ['conversations'] });
   }
 
   const { messages, input, setInput, handleInputChange, handleSubmit, reload, stop, status } =
@@ -93,6 +93,11 @@ export default function Chat({
       maxSteps: 2,
       generateId: generateUUID,
       sendExtraMessageFields: true, // content, role, name, data and annotations will be send to the server
+      body: {
+        characterId: character?.id,
+        customGptId: customGpt?.id,
+        modelId: selectedModel?.id,
+      },
       onResponse: (response) => {
         handleResponse(response);
         // trigger refetch of the fileMapping from the DB
@@ -135,19 +140,19 @@ export default function Chat({
       const fileMapping = await refetchFileMapping(id);
       setFileMapping(fileMapping);
     };
-    fetchData();
+    void fetchData();
   }, [countOfFilesInChat, id]);
 
   // scroll position handling
   // scroll down to the end of the chat when new messages are added or when loading state changes
-  const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     }
   }, [messages, isLoading]);
 
-  async function customHandleSubmit(e: React.FormEvent) {
+  async function customHandleSubmit(e: FormEvent) {
     e.preventDefault();
 
     try {
@@ -155,24 +160,19 @@ export default function Chat({
       handleSubmit(e, {
         allowEmptySubmit: false,
         body: {
-          modelId: selectedModel?.id,
-          characterId: character?.id,
-          customGptId: customGpt?.id,
           fileIds: Array.from(files).map(([, file]) => file.fileId),
         },
       });
       navigateWithoutRefresh(conversationPath);
       setInitialFiles(
-        Array.from(files).map(([, file]) => {
-          return {
-            id: file.fileId ?? '',
-            name: file.file.name,
-            type: getFileExtension(file.file.name),
-            createdAt: new Date(),
-            size: file.file.size,
-            metadata: null,
-          };
-        }),
+        Array.from(files).map(([, file]) => ({
+          id: file.fileId ?? '',
+          name: file.file.name,
+          type: getFileExtension(file.file.name),
+          createdAt: new Date(),
+          size: file.file.size,
+          metadata: null,
+        })),
       );
       setFiles(new Map());
     } catch (error) {
@@ -182,7 +182,7 @@ export default function Chat({
 
   function handleReload() {
     resetError();
-    reload();
+    void reload();
   }
 
   function formatSupportAdressesToString(arr: string[]): string {
@@ -217,7 +217,7 @@ export default function Chat({
     return files.size > 0 || (!!links && links.length > 0);
   }
 
-  let placeholderElement: React.JSX.Element;
+  let placeholderElement: ReactNode;
 
   if (character !== undefined) {
     placeholderElement = (
@@ -270,7 +270,7 @@ export default function Chat({
             key={index}
             index={index}
             fileMapping={fileMapping}
-            isLastUser={index === messages.length - 1 && message.role == 'user'}
+            isLastUser={index === messages.length - 1 && message.role === 'user'}
             isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
             isLoading={isLoading}
             regenerateMessage={reload}
@@ -279,6 +279,7 @@ export default function Chat({
             initialWebsources={
               message.role === 'user' ? webSourceMapping?.get(message.id) : undefined
             }
+            status={status}
           >
             {message}
           </ChatBox>
@@ -370,7 +371,7 @@ export function getAssistantIcon({
           height={30}
           alt={imageName}
           className="rounded-enterprise-sm"
-          // this is neccessarly for it rendering correctly in safari
+          // this is necessary for it rendering correctly in safari
           style={{
             minWidth: '2.5rem',
           }}

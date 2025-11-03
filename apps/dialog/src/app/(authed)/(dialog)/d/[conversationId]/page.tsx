@@ -1,5 +1,5 @@
 import Chat from '@/components/chat/chat';
-import { dbGetConversationAndMessages } from '@/db/functions/chat';
+import { dbGetConversationAndMessages } from '@shared/db/functions/chat';
 import { getUser } from '@/auth/utils';
 import SelectLlmModel from '@/components/conversation/select-llm-model';
 import { NewChatButton } from '@/components/navigation/sidebar/collapsible-sidebar';
@@ -14,9 +14,9 @@ import { z } from 'zod';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
-import { dbGetLlmModelsByFederalStateId } from '@/db/functions/llm-model';
+import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
-import { dbGetRelatedFiles } from '@/db/functions/files';
+import { dbGetRelatedFiles } from '@shared/db/functions/files';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import Logo from '@/components/common/logo';
@@ -68,7 +68,7 @@ export default async function Page(context: PageContext) {
 
     try {
       const websearchSources = await Promise.all(webSearchPromises ?? []);
-      if (websearchSources == undefined || websearchSources.length === 0) {
+      if (websearchSources === undefined || websearchSources.length === 0) {
         continue;
       }
       webSourceMapping.set(
@@ -88,10 +88,7 @@ export default async function Page(context: PageContext) {
         <div className="flex w-full gap-4 justify-center items-center z-30">
           <ToggleSidebarButton />
           <NewChatButton />
-          <SelectLlmModel
-            isStudent={user.school.userRole === 'student'}
-            predefinedModel={currentModel}
-          />
+          <SelectLlmModel isStudent={user.school.userRole === 'student'} />
           <div className="flex-grow"></div>
           <DownloadConversationButton conversationId={conversation.id} disabled={false} />
           <ProfileMenu {...user} />

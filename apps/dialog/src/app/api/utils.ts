@@ -1,15 +1,14 @@
-import { dbGetApiKeyByFederalStateIdWithResult } from '@/db/functions/federal-state';
+import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
 import {
   dbGetModelByIdAndFederalStateId,
   dbGetLlmModelsByFederalStateId,
-} from '@/db/functions/llm-model';
+} from '@shared/db/functions/llm-model';
 import { createTelliConfiguration } from './chat/custom-model-config';
 import { env } from '@/env';
-import { errorifyAsyncFn } from '@/utils/error';
-import { LlmModel } from '@/db/schema';
+import { errorifyAsyncFn } from '@shared/utils/error';
+import { LlmModel } from '@shared/db/schema';
 import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
-import { UserAndContext } from '@/auth/types';
-import { DEFAULT_AUXILIARY_MODEL } from '@/app/api/chat/models';
+import { DEFAULT_AUXILIARY_MODEL, FALLBACK_AUXILIARY_MODEL } from '@/app/api/chat/models';
 
 export function getSearchParamsFromUrl(url: string) {
   const [, ...rest] = url.split('?');
@@ -30,7 +29,7 @@ export async function getModelAndProvider({
   modelId: string;
   /* eslint-disable  @typescript-eslint/no-explicit-any */
 }): Promise<{ telliProvider: any; definedModel: LlmModel }> {
-  const [error, federalStateObject] = await dbGetApiKeyByFederalStateIdWithResult({
+  const [error, federalStateObject] = await dbGetFederalStateWithDecryptedApiKeyWithResult({
     federalStateId,
   });
 
@@ -52,31 +51,65 @@ export async function getModelAndProvider({
   return { telliProvider: telliConfiguration(definedModel.name), definedModel };
 }
 
-export function calculateCostsInCents(
+export function calculateCostsInCent(
+  model: LlmModel,
+  usage: { promptTokens: number; completionTokens: number },
+) {
+  if (model.priceMetadata.type === 'text') {
+    return calculateCostsInCentForTextModel(model, usage);
+  } else if (model.priceMetadata.type === 'embedding') {
+    return calculateCostsInCentForEmbeddingModel(model, usage);
+  }
+  return 0;
+}
+
+function calculateCostsInCentForTextModel(
   model: LlmModel,
   usage: { promptTokens: number; completionTokens: number },
 ) {
   if (model.priceMetadata.type !== 'text') return 0;
 
-  const completionTokenPrice =
-    (usage.completionTokens * model.priceMetadata.completionTokenPrice) / PRICE_AND_CENT_MULTIPLIER;
-  const promptTokenPrice =
-    (usage.promptTokens * model.priceMetadata.promptTokenPrice) / PRICE_AND_CENT_MULTIPLIER;
+  const completionTokenPrice = usage.completionTokens * model.priceMetadata.completionTokenPrice;
+  const promptTokenPrice = usage.promptTokens * model.priceMetadata.promptTokenPrice;
 
-  return completionTokenPrice + promptTokenPrice;
+  return (completionTokenPrice + promptTokenPrice) / PRICE_AND_CENT_MULTIPLIER;
+}
+
+function calculateCostsInCentForEmbeddingModel(
+  model: LlmModel,
+  usage: { promptTokens: number; completionTokens: number },
+) {
+  if (model.priceMetadata.type !== 'embedding') return 0;
+
+  const promptTokenPrice = usage.promptTokens * model.priceMetadata.promptTokenPrice;
+
+  return promptTokenPrice / PRICE_AND_CENT_MULTIPLIER;
 }
 
 /**
- * Get the auxiliary model for the user's federal state
- * @returns The auxiliary model for the user's federal state
+ * Get the auxiliary model for the federal state
+ * @returns The auxiliary model for the federal state
  */
-export async function getAuxiliaryModel(user: UserAndContext): Promise<LlmModel> {
+export async function getAuxiliaryModel(federalStateId: string): Promise<LlmModel> {
   const llmModels = await dbGetLlmModelsByFederalStateId({
-    federalStateId: user.federalState.id,
+    federalStateId,
   });
-  const auxiliaryModel = llmModels.find((m) => m.name === DEFAULT_AUXILIARY_MODEL) ?? llmModels[0];
+  const auxiliaryModel =
+    getDefaultAuxModel(llmModels) ?? getFallbackAuxModel(llmModels) ?? getFirstTextModel(llmModels);
   if (auxiliaryModel === undefined) {
     throw new Error('No auxiliary model found');
   }
   return auxiliaryModel;
+}
+
+function getDefaultAuxModel(models: LlmModel[]): LlmModel | undefined {
+  return models.find((model) => model.name === DEFAULT_AUXILIARY_MODEL);
+}
+
+function getFallbackAuxModel(models: LlmModel[]): LlmModel | undefined {
+  return models.find((model) => model.name === FALLBACK_AUXILIARY_MODEL);
+}
+
+function getFirstTextModel(models: LlmModel[]): LlmModel | undefined {
+  return models.find((model) => model.priceMetadata.type === 'text');
 }

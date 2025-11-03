@@ -1,4 +1,4 @@
-import { dbGetOrCreateTestUser } from '@/db/functions/vidis';
+import { dbGetOrCreateTestUser } from '@shared/db/functions/vidis';
 import CredentialsProvider from 'next-auth/providers/credentials';
 export const credentialsProvider = CredentialsProvider({
   id: 'credentials',
@@ -9,6 +9,7 @@ export const credentialsProvider = CredentialsProvider({
   },
   async authorize(credentials) {
     if (
+      process.env.LOADTEST_PASSWORD &&
       credentials?.username === 'test' &&
       credentials?.password === process.env.LOADTEST_PASSWORD
     ) {

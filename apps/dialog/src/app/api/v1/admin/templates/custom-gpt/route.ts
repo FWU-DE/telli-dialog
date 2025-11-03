@@ -5,10 +5,10 @@ import {
   dbGetGlobalGpts,
   dbUpsertCustomGpt,
   dbGetGlobalCustomGptByName,
-} from '@/db/functions/custom-gpts';
-import { CustomGptInsertModel, customGptTable } from '@/db/schema';
-import { DUMMY_USER_ID } from '@/db/seed/user-entity';
-import { validateApiKeyByHeadersWithResult } from '@/db/utils';
+} from '@shared/db/functions/custom-gpts';
+import { CustomGptInsertModel, customGptTable } from '@shared/db/schema';
+import { DUMMY_USER_ID } from '@shared/db/seed/user-entity';
+import { validateApiKeyByHeadersWithResult } from '@/utils/validation';
 
 // Generate Zod schema from Drizzle table definition
 const baseCustomGptInsertSchema = createInsertSchema(customGptTable);

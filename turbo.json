@@ -2,6 +2,8 @@
   "$schema": "https://turborepo.com/schema.json",
   "globalDependencies": ["**/.env.*local"],
   "globalEnv": [
+    "APP_VERSION",
+    "AUTH_SECRET",
     "NODE_ENV",
     "DATABASE_URL",
     "OTC_BUCKET_NAME",
@@ -16,7 +18,13 @@
     "ENCRYPTION_KEY",
     "NEXTAUTH_URL",
     "RABBITMQ_URI",
-    "NEXT_RUNTIME"
+    "NEXT_RUNTIME",
+    "VALKEY_URL",
+    "OTEL_METRIC_EXPORT_INTERVAL",
+    "OTEL_METRIC_EXPORT_TIMEOUT",
+    "SENTRY_DSN",
+    "SENTRY_ENVIRONMENT",
+    "LOADTEST_PASSWORD"
   ],
   "tasks": {
     "build": {

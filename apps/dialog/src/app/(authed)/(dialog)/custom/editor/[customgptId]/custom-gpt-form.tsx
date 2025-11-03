@@ -1,6 +1,6 @@
 'use client';
 
-import { CharacterAccessLevel, CustomGptModel, FileModel, UserSchoolRole } from '@/db/schema';
+import { CharacterAccessLevel, CustomGptModel, FileModel, UserSchoolRole } from '@shared/db/schema';
 import {
   buttonDeleteClassName,
   buttonPrimaryClassName,

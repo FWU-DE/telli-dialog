@@ -1,100 +1,48 @@
-import { browser, Page } from 'k6/browser';
-import { File, open } from 'k6/experimental/fs';
+import { Page } from 'k6/browser';
 import encoding from 'k6/encoding';
-import { WAIT_TIMES_IN_MS, HEADLESS_BROWSER_OPTIONS } from './config';
-import { performLogin, saveScreenshot, selectModel, sendMessage } from './common';
+import { HEADLESS_BROWSER_OPTIONS, WAIT_TIMES_IN_MS } from './config';
+import { performLogin, runTest, selectModel, sendMessage } from './common';
 import { check } from 'k6';
 
 export const options = HEADLESS_BROWSER_OPTIONS;
 
-const PROMPT = `Was sind große Meilensteine im Leben von Van Gogh? Bitte schreib mir dazu 2-5 Sätze. 
-Bitte beende außerdem deine Nachricht mit ENDE, nur so weiß ich, dass du fertig bist.`;
+const PROMPT = `Was sind große Meilensteine im Leben von Van Gogh? Bitte schreib mir dazu 2-5 Sätze.`;
 
-const UPLOAD_FILE_PATH = 'assets/Van_Gogh_Wikipedia.pdf';
-
-let fileData: File;
-(async function () {
-  fileData = await open(UPLOAD_FILE_PATH);
-})();
+const FILE_CONTENT = `Vincent van Gogh wurde 1853 in Zundert geboren und nahm 1881 bei seinen Eltern die Malerei auf, finanziell und emotional unterstützt von seinem Bruder Theo.
+1886 zog er nach Paris und traf Avantgarde-Künstlerinnen und -Künstler wie Émile Bernard und Paul Gauguin.
+1888 folgte die prägende Arles-Zeit mit helleren Farben und Naturmotiven; nach dem Konflikt mit Gauguin verletzte er sich am linken Ohr und verbrachte Zeit in psychiatrischen Kliniken, darunter Saint-Rémy.
+1890 lebte er in Auvers-sur-Oise unter Dr. Paul Gachet und starb am 29. Juli 1890; seine große Anerkennung setzte vor allem posthum ein.`;
 
 export default async function main() {
-  const context = await browser.newContext();
-  await context.clearCookies();
-  const page = await context.newPage();
-
-  page.setDefaultTimeout(WAIT_TIMES_IN_MS.PAGE_ELEMENT_TIMEOUT);
-
-  const userIndex = `${__VU}-${__ITER}-${Date.now()}`;
-  const userName = 'test';
-  const password = __ENV.LOADTEST_PASSWORD;
-
-  if (!password) {
-    throw new Error(
-      'Please provide the password for the test user via the env variable LOADTEST_PASSWORD',
-    );
-  }
-
-  let testSuccessful = false;
-  let testError: Error | null = null;
-
-  try {
+  await runTest(async ({ page, userIndex, userName, password }) => {
     await performLogin(page, userName, password);
-    await uploadPdfFile(page, userIndex);
     await selectModel(page, Number(__VU) + Number(__ITER));
+    await uploadPdfFile(page, userIndex);
     await sendMessage(page, PROMPT);
-
-    testSuccessful = true;
-    console.log(`Test successful for user ${userIndex}`);
-  } catch (error) {
-    testError = error as Error;
-    console.error(`Error during test execution for user ${userIndex}:`, error);
-  } finally {
-    await saveScreenshot(page, userIndex, testSuccessful);
-
-    console.info({
-      userIndex,
-      testSuccessful,
-      vu: __VU,
-      iter: __ITER,
-    });
-
-    await page.close();
-    await context.close();
-
-    if (testError) {
-      throw testError;
-    }
-  }
+  });
 }
 
-async function readAll(file: File) {
-  const fileInfo = await file.stat();
-  const buffer = new Uint8Array(fileInfo.size);
-
-  const bytesRead = await file.read(buffer);
-  if (bytesRead !== fileInfo.size) {
-    throw new Error('unexpected number of bytes read');
-  }
-
-  return buffer;
-}
-
+// File upload does not work on k6 cloud, the client unexpectedly closes the connection before the file is fully uploaded
 async function uploadPdfFile(page: Page, userIndex: string) {
   let successfulUpload = false;
   try {
-    const buffer = await readAll(fileData);
+    const uploadPromise = page.waitForResponse(/.*\/api\/v1\/files$/, {
+      timeout: WAIT_TIMES_IN_MS.FILE_UPLOAD_TIMEOUT,
+    });
+    await page.setInputFiles(
+      'input[type="file"]',
+      {
+        // @ts-expect-error Typings from @types/k6 are incorrect, string is allowed
+        buffer: encoding.b64encode(FILE_CONTENT),
+        mimeType: 'text/plain',
+        name: `${userIndex}.txt`,
+      },
+      {
+        timeout: WAIT_TIMES_IN_MS.FILE_UPLOAD_TIMEOUT,
+      },
+    );
 
-    const file = {
-      name: userIndex + '.pdf',
-      mimeType: 'application/pdf',
-      buffer: encoding.b64encode(buffer.buffer),
-    };
-
-    const fileInputSelector = 'input[type="file"]';
-
-    // @ts-ignore
-    await page.setInputFiles(fileInputSelector, [file]);
-    await page.waitForTimeout(WAIT_TIMES_IN_MS.FILE_LOAD);
+    await uploadPromise;
     successfulUpload = true;
   } finally {
     check(page, {

@@ -43,7 +43,7 @@ Add api keys in your .env.local file for all federal states that you want to log
 
 ```sh
 # with proper values in .env.local file
-cd apps/dialog
+cd packages/shared
 pnpm db:migrate:local
 pnpm db:seed:local
 
@@ -60,6 +60,32 @@ To remove the database and delete all its data you can stop and remove the conta
 ```sh
 docker compose -f devops/docker/docker-compose.db.local.yml down -v
 ```
+
+## Valkey
+
+We use Valkey for storing session data.
+It is part of the docker-compose.db.local.yml file.
+If you want to access the values for testing or experimenting, you can use [valkey-cli](https://valkey.io/topics/installation/).
+Then you can access the local instance as follows:
+
+```sh
+# check if valkey-cli is installed correctly
+valkey-cli --version
+# check if connection to local instance is working, otherwise check hostname, port, etc.
+valkey-cli PING
+# show current stats
+valkey-cli --stats
+```
+
+## Monitoring
+
+To setup the monitoring and tracing stack in local development use following docker compose file:
+
+```sh
+docker compose -f devops/docker/monitoring.yml up -d
+```
+
+Also make sure to include the required env variables in your `.env.local`.
 
 ## E2E Tests
 
@@ -118,8 +144,9 @@ Custom designs and titles for federal states:
   This value is configured in the SQL column federal_state/telli_name.
 
 - **logos**:  
-  The logo is stored in the OTC S3 Bucket at a fixed path:  
-  `/whitelabels/<Federal-State-ID>/logo.jpg`
+  The logo and favicon are stored in the OTC S3 Bucket at a fixed path:  
+  `/whitelabels/<Federal-State-ID>/logo.svg`
+  `/whitelabels/<Federal-State-ID>/favicon.svg`
 
 - **design configuration**:  
   Custom color palette for buttons, icons, etc. (see Figma designs).  

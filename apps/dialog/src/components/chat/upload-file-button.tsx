@@ -8,7 +8,7 @@ import { useConversation } from '../providers/conversation-provider';
 import AttachFileIcon from '../icons/attach-file';
 import { cn } from '@/utils/tailwind';
 import { SUPPORTED_DOCUMENTS_EXTENSIONS, MAX_FILE_SIZE, SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
-import { TranslationValues, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { NUMBER_OF_FILES_LIMIT, NUMBER_OF_IMAGES_LIMIT } from '@/configuration-text-inputs/const';
 import { useLlmModels } from '../providers/llm-model-provider';
 import { isImageFile } from '@/utils/files/generic';
@@ -52,7 +52,7 @@ export async function handleSingleFile({
   session: ReturnType<typeof useSession>;
   conversation?: ReturnType<typeof useConversation>;
   toast: ToastContextType;
-  translations: (key: string, values?: TranslationValues) => string;
+  translations: ReturnType<typeof useTranslations>;
   showUploadConfirmation?: boolean;
 }) {
   if (!file) {

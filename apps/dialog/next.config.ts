@@ -4,6 +4,7 @@ import createNextIntlPlugin from 'next-intl/plugin';
 import path from 'path';
 
 const baseNextConfig: NextConfig = {
+  transpilePackages: ['ui', 'import-in-the-middle', '@t3-oss/env-nextjs', '@t3-oss/env-core'],
   typescript: {
     // should be checked in the pipeline anyway and takes a lot of time during build
     ignoreBuildErrors: true,
@@ -38,8 +39,10 @@ const baseNextConfig: NextConfig = {
   },
   productionBrowserSourceMaps: process.env.NODE_ENV !== 'test',
   allowedDevOrigins: ['titanom.ngrok.app'],
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  webpack: (config, { isServer }) => {
+  experimental: {
+    useCache: true,
+  },
+  webpack: (config) => {
     // Ensure proper module resolution for path aliases
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -85,11 +88,6 @@ export default withSentryConfig(baseNextConfigWithNextIntl, {
     enabled: true,
   },
 
-  // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
-  // This can increase your server load as well as your hosting bill.
-  // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
-  // side errors will fail.
-  tunnelRoute: '/monitoring',
   // Automatically tree-shake Sentry logger statements to reduce bundle size
   disableLogger: true,
 });

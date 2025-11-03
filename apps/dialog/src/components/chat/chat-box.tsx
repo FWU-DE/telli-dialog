@@ -1,4 +1,4 @@
-import { FileModel } from '@/db/schema';
+import { FileModel } from '@shared/db/schema';
 import DisplayUploadedFile from './display-uploaded-file';
 import DisplayUploadedImage from './display-uploaded-image';
 import TelliClipboardButton from '../common/clipboard-button';
@@ -13,32 +13,38 @@ import { iconClassName } from '@/utils/tailwind/icon';
 import useBreakpoints from '../hooks/use-breakpoints';
 import { isImageFile } from '@/utils/files/generic';
 import { UIMessage } from 'ai';
+import { ReactNode, useMemo } from 'react';
+import { UseChatHelpers } from '@ai-sdk/react';
 
 export function ChatBox({
+  assistantIcon,
   children,
-  index,
   fileMapping,
-  isLastUser,
+  index,
+  initialFiles,
+  initialWebsources,
   isLastNonUser,
+  isLastUser,
   isLoading,
   regenerateMessage,
-  initialFiles,
-  assistantIcon,
-  initialWebsources,
+  status,
 }: {
+  assistantIcon?: ReactNode;
   children: UIMessage;
-  index: number;
   fileMapping?: Map<string, FileModel[]>;
-  isLastUser?: boolean;
+  index: number;
+  initialFiles?: FileModel[];
+  initialWebsources?: WebsearchSource[];
   isLastNonUser: boolean;
+  isLastUser?: boolean;
   isLoading: boolean;
   regenerateMessage: () => void;
-  initialFiles?: FileModel[];
-  assistantIcon?: React.JSX.Element;
-  initialWebsources?: WebsearchSource[];
+  status: UseChatHelpers['status'];
 }) {
   const tCommon = useTranslations('common');
   const { isAtLeast } = useBreakpoints();
+
+  const isFinished = useMemo(() => status !== 'streaming', [status]);
 
   const userClassName =
     children.role === 'user'
@@ -110,7 +116,7 @@ export function ChatBox({
   const margin = allFiles !== undefined || webSourceAvailable ? 'm-0 mt-4' : 'm-4';
 
   const maybeShowMessageIcons =
-    isLastNonUser && !isLoading ? (
+    isLastNonUser && isFinished ? (
       <div className="flex items-center gap-1 mt-1">
         <TelliClipboardButton text={children.content} className="w-5 h-5" />
         <button

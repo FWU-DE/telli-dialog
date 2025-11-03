@@ -52,9 +52,13 @@ COPY --from=builder --chown=nodejs:nodejs /app/apps/admin/.next/standalone ./
 COPY --from=builder --chown=nodejs:nodejs /app/apps/admin/.next/static ./apps/admin/.next/static
 COPY --from=builder --chown=nodejs:nodejs /app/apps/admin/public ./apps/admin/public
 
+ARG APP_VERSION
 ARG PORT=3000
+
+ENV APP_VERSION=${APP_VERSION}
 ENV PORT=${PORT}
 ENV NODE_ENV=production
+
 EXPOSE ${PORT}
 
 # https://nextjs.org/docs/pages/api-reference/config/next-config-js/output

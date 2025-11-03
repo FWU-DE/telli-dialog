@@ -5,6 +5,8 @@ import { CHAT_MESSAGE_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
 import he from 'he';
+import { unstable_cacheLife as cacheLife } from 'next/cache';
+import { logDebug, logError, logInfo } from '@/utils/logging/logging';
 
 const headers = {
   'User-Agent':
@@ -16,19 +18,23 @@ const headers = {
  * Uses Mozilla's Readability to extract the main content.
  * Filters the most important information and stops if content is longer than TOKEN_LIMIT tokens.
  * @param url The URL to fetch and parse.
+ * @param options The options for the fetch request.
  * @returns A summary of the most important information from the page.
  */
 export async function webScraperExecutable(
   url: string,
   options: { timeout?: number } = { timeout: 5000 },
 ): Promise<WebsearchSource> {
-  console.info(`Requesting webcontent for url: ${url}`);
-  const t = await getTranslations({ namespace: 'websearch' });
+  'use cache';
+  cacheLife('weeks');
+
+  logInfo(`Requesting webcontent for url: ${url}`);
+  const t = await getTranslations('websearch');
   let response: Response;
   try {
-    const isPage = await isWebPage(url);
+    const { isPage, redirectedUrl } = await isWebPage(url, options.timeout);
     if (!isPage) {
-      console.warn(`URL is not a webpage: ${url}`);
+      logInfo(`URL is not a webpage: ${url}`);
       return {
         error: true,
         content: 'Es werden nur Links auf Webseiten unterstützt, keine Dateien.',
@@ -37,16 +43,19 @@ export async function webScraperExecutable(
         type: 'websearch',
       };
     }
+    if (url !== redirectedUrl) {
+      logDebug(`Requested URL '${url}' was redirected to '${redirectedUrl}'`);
+    }
     // Set up a timeout for the fetch request
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), options.timeout);
-    response = await fetch(url, {
-      headers: headers,
+    response = await fetch(redirectedUrl, {
+      headers,
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
-  } catch {
-    console.error(`Request timed out for URL: ${url}`);
+  } catch (error) {
+    logError(`Request timed out for URL: ${url}`, error);
     return {
       ...defaultErrorSource({ status_code: 408, t }),
       link: url,
@@ -147,15 +156,31 @@ function extractArticleContent(html: string, url: string): string {
 /**
  * The function sends a HEAD request to the URL and checks the Content-Type header.
  * @param url the URL to check
+ * @param timeout the timeout for fetch request
  * @returns true if the content-type is text/html, false otherwise
  */
-export async function isWebPage(url: string) {
-  const response = await fetch(url, { method: 'HEAD' });
+export async function isWebPage(url: string, timeout?: number) {
+  // Set up a timeout for the fetch request
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  const response = await fetch(url, {
+    headers,
+    method: 'HEAD',
+    signal: controller.signal,
+  });
+  clearTimeout(timeoutId);
+
   const contentType = response.headers.get('content-type');
 
   // Basic heuristic
   if (contentType?.includes('text/html')) {
-    return true; // it's a web page
+    return {
+      isPage: true, // it's a web page
+      redirectedUrl: response.url,
+    };
   }
-  return false; // likely a file
+  return {
+    isPage: false, // likely a file
+    redirectedUrl: response.url,
+  };
 }
