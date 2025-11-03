@@ -11,6 +11,7 @@ import {
   vector,
   customType,
   doublePrecision,
+  index,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
 import { DesignConfiguration, type LlmModelPriceMetadata } from './types';
@@ -44,33 +45,45 @@ export const userTable = pgTable('user_entity', {
 export type InsertUserModel = typeof userTable.$inferInsert;
 export type UserModel = typeof userTable.$inferSelect;
 
-export const conversationTable = pgTable('conversation', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  name: text('name'),
-  userId: uuid('user_id')
-    .references(() => userTable.id)
-    .notNull(),
-  characterId: uuid('character_id').references(() => characterTable.id),
-  customGptId: uuid('custom_gpt_id').references(() => customGptTable.id),
-  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-  deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
-});
+export const conversationTable = pgTable(
+  'conversation',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    name: text('name'),
+    userId: uuid('user_id')
+      .references(() => userTable.id)
+      .notNull(),
+    characterId: uuid('character_id').references(() => characterTable.id),
+    customGptId: uuid('custom_gpt_id').references(() => customGptTable.id),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
+  },
+  (table) => [
+    index().on(table.userId),
+    index().on(table.characterId),
+    index().on(table.customGptId),
+  ],
+);
 
 export const conversationRoleEnum = pgEnum('conversation_role', conversationRoleSchema.options);
 
-export const conversationMessageTable = pgTable('conversation_message', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  content: text('content').notNull(),
-  conversationId: uuid('conversation_id')
-    .references(() => conversationTable.id)
-    .notNull(),
-  modelName: text('model_name'),
-  userId: uuid('user_id').references(() => userTable.id),
-  role: conversationRoleEnum('role').notNull(),
-  orderNumber: integer('order_number').notNull(),
-  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-  deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
-});
+export const conversationMessageTable = pgTable(
+  'conversation_message',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    content: text('content').notNull(),
+    conversationId: uuid('conversation_id')
+      .references(() => conversationTable.id)
+      .notNull(),
+    modelName: text('model_name'),
+    userId: uuid('user_id').references(() => userTable.id),
+    role: conversationRoleEnum('role').notNull(),
+    orderNumber: integer('order_number').notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
+  },
+  (table) => [index().on(table.conversationId), index().on(table.userId)],
+);
 
 export type ConversationModelWithFiles = typeof conversationTable.$inferSelect & {
   files: FileModel[];
@@ -93,18 +106,20 @@ export const userSchoolMappingTable = pgTable(
     role: userSchoolRoleEnum('role').notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => ({
-    unq: unique().on(table.userId, table.schoolId),
-  }),
+  (table) => [unique().on(table.userId, table.schoolId)],
 );
 
-export const schoolTable = pgTable('school', {
-  id: text('id').primaryKey(),
-  federalStateId: text('federal_state_id')
-    .references(() => federalStateTable.id)
-    .notNull(),
-  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-});
+export const schoolTable = pgTable(
+  'school',
+  {
+    id: text('id').primaryKey(),
+    federalStateId: text('federal_state_id')
+      .references(() => federalStateTable.id)
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index().on(table.federalStateId)],
+);
 
 export type SchoolInsertModel = typeof schoolTable.$inferInsert;
 export type SchoolModel = typeof schoolTable.$inferSelect;
@@ -140,56 +155,64 @@ export const characterAccessLevelEnum = pgEnum(
 );
 export type CharacterAccessLevel = z.infer<typeof characterAccessLevelSchema>;
 
-export const characterTable = pgTable('character', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id')
-    .references(() => userTable.id)
-    .notNull(),
-  modelId: uuid('model_id')
-    .notNull()
-    .references(() => llmModelTable.id),
-  // required
-  name: text('name').notNull(),
-  description: text('description').notNull().default(''),
-  learningContext: text('learning_context').notNull().default(''),
-  competence: text('competence').notNull().default(''),
-  // new
-  schoolType: text('school_type'),
-  gradeLevel: text('grade_level'),
-  subject: text('subject'),
-  // not required
-  specifications: text('specifications'),
-  restrictions: text('restrictions'),
-  pictureId: text('picture_id'),
-  initialMessage: text('initial_message'),
-  accessLevel: characterAccessLevelEnum('access_level').notNull().default('private'),
-  schoolId: text('school_id').references(() => schoolTable.id),
-  // for sharing the character. These Columns are unused, instead a MappingTable is being used
-  intelligencePointsLimit: integer('intelligence_points_limit'),
-  maxUsageTimeLimit: integer('max_usage_time_limit'),
-  inviteCode: text('invite_code').unique(),
-  startedAt: timestamp('started_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-  attachedLinks: text('attached_links')
-    .array()
-    .notNull()
-    .default(sql`'{}'::text[]`),
-  isDeleted: boolean('is_deleted').notNull().default(false),
-  originalCharacterId: uuid('original_character_id'),
-});
+export const characterTable = pgTable(
+  'character',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id')
+      .references(() => userTable.id)
+      .notNull(),
+    modelId: uuid('model_id')
+      .notNull()
+      .references(() => llmModelTable.id),
+    // required
+    name: text('name').notNull(),
+    description: text('description').notNull().default(''),
+    learningContext: text('learning_context').notNull().default(''),
+    competence: text('competence').notNull().default(''),
+    // new
+    schoolType: text('school_type'),
+    gradeLevel: text('grade_level'),
+    subject: text('subject'),
+    // not required
+    specifications: text('specifications'),
+    restrictions: text('restrictions'),
+    pictureId: text('picture_id'),
+    initialMessage: text('initial_message'),
+    accessLevel: characterAccessLevelEnum('access_level').notNull().default('private'),
+    schoolId: text('school_id').references(() => schoolTable.id),
+    // for sharing the character. These Columns are unused, instead a MappingTable is being used
+    intelligencePointsLimit: integer('intelligence_points_limit'),
+    maxUsageTimeLimit: integer('max_usage_time_limit'),
+    inviteCode: text('invite_code').unique(),
+    startedAt: timestamp('started_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    attachedLinks: text('attached_links')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    isDeleted: boolean('is_deleted').notNull().default(false),
+    originalCharacterId: uuid('original_character_id'),
+  },
+  (table) => [index().on(table.userId), index().on(table.modelId), index().on(table.schoolId)],
+);
 
 export type CharacterInsertModel = typeof characterTable.$inferInsert;
 export type CharacterModel = typeof characterTable.$inferSelect;
 
-export const characterTemplateMappingTable = pgTable('character_template_mappings', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  characterId: uuid('character_id')
-    .notNull()
-    .references(() => characterTable.id, { onDelete: 'cascade' }),
-  federalStateId: text('federal_state_id')
-    .notNull()
-    .references(() => federalStateTable.id, { onDelete: 'cascade' }),
-});
+export const characterTemplateMappingTable = pgTable(
+  'character_template_mappings',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    characterId: uuid('character_id')
+      .notNull()
+      .references(() => characterTable.id, { onDelete: 'cascade' }),
+    federalStateId: text('federal_state_id')
+      .notNull()
+      .references(() => federalStateTable.id, { onDelete: 'cascade' }),
+  },
+  (table) => [index().on(table.characterId), index().on(table.federalStateId)],
+);
 export type CharacterTemplateMappingModel = typeof characterTemplateMappingTable.$inferSelect;
 export type CharacterTemplateMappingInsertModel = typeof characterTemplateMappingTable.$inferInsert;
 
@@ -231,38 +254,43 @@ export const federalStateLlmModelMappingTable = pgTable(
   (table) => ({
     unq: unique().on(table.federalStateId, table.llmModelId),
   }),
+  (table) => [index().on(table.federalStateId), index().on(table.llmModelId)],
 );
 
 export type LlmInsertModel = typeof llmModelTable.$inferInsert;
 export type LlmModel = typeof llmModelTable.$inferSelect;
 
-export const sharedSchoolConversationTable = pgTable('shared_school_conversation', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  name: text('name').notNull(),
-  description: text('description').notNull().default(''),
-  modelId: uuid('model_id')
-    .notNull()
-    .references(() => llmModelTable.id),
-  userId: uuid('user_id')
-    .references(() => userTable.id)
-    .notNull(),
-  schoolType: text('school_type'),
-  gradeLevel: text('grade_level'),
-  subject: text('subject'),
-  studentExcercise: text('student_excercise').default('').notNull(),
-  additionalInstructions: text('additional_instructions'),
-  restrictions: text('restrictions'), // Not used anymore
-  intelligencePointsLimit: integer('intelligence_points_limit'),
-  maxUsageTimeLimit: integer('max_usage_time_limit'),
-  attachedLinks: text('attached_links')
-    .array()
-    .notNull()
-    .default(sql`'{}'::text[]`),
-  pictureId: text('picture_id'),
-  inviteCode: text('invite_code').unique(),
-  startedAt: timestamp('started_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-});
+export const sharedSchoolConversationTable = pgTable(
+  'shared_school_conversation',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    name: text('name').notNull(),
+    description: text('description').notNull().default(''),
+    modelId: uuid('model_id')
+      .notNull()
+      .references(() => llmModelTable.id),
+    userId: uuid('user_id')
+      .references(() => userTable.id)
+      .notNull(),
+    schoolType: text('school_type'),
+    gradeLevel: text('grade_level'),
+    subject: text('subject'),
+    studentExcercise: text('student_excercise').default('').notNull(),
+    additionalInstructions: text('additional_instructions'),
+    restrictions: text('restrictions'), // Not used anymore
+    intelligencePointsLimit: integer('intelligence_points_limit'),
+    maxUsageTimeLimit: integer('max_usage_time_limit'),
+    attachedLinks: text('attached_links')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    pictureId: text('picture_id'),
+    inviteCode: text('invite_code').unique(),
+    startedAt: timestamp('started_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index().on(table.userId), index().on(table.modelId)],
+);
 export type SharedSchoolConversationInsertModel = typeof sharedSchoolConversationTable.$inferInsert;
 export type SharedSchoolConversationModel = typeof sharedSchoolConversationTable.$inferSelect;
 
@@ -280,27 +308,32 @@ export const sharedSchoolConversationUsageTracking = pgTable(
     costsInCent: doublePrecision('costs_in_cent').notNull().default(0),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
+  (table) => [index().on(table.modelId)],
 );
 export type SharedSchoolConversationUsageTrackingInsertModel =
   typeof sharedSchoolConversationUsageTracking.$inferInsert;
 export type SharedSchoolConversationUsageTrackingModel =
   typeof sharedSchoolConversationUsageTracking.$inferSelect;
 
-export const conversationUsageTracking = pgTable('conversation_usage_tracking', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  modelId: uuid('model_id')
-    .notNull()
-    .references(() => llmModelTable.id),
-  // this rows will be kept forever even if conversations are deleted, therefore we cannot enforce a foreign key constaint here
-  conversationId: uuid('conversation_id').notNull(),
-  // for easier tracking we add a user_id here to make less joins as this table will contain a lot of entries
-  // this is not database normalization conform tho, we need to keep these rows forever too
-  userId: uuid('user_id').notNull(),
-  completionTokens: integer('completion_tokens').notNull(),
-  promptTokens: integer('prompt_tokens').notNull(),
-  costsInCent: doublePrecision('costs_in_cent').notNull().default(0),
-  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-});
+export const conversationUsageTracking = pgTable(
+  'conversation_usage_tracking',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    modelId: uuid('model_id')
+      .notNull()
+      .references(() => llmModelTable.id),
+    // this rows will be kept forever even if conversations are deleted, therefore we cannot enforce a foreign key constaint here
+    conversationId: uuid('conversation_id').notNull(),
+    // for easier tracking we add a user_id here to make less joins as this table will contain a lot of entries
+    // this is not database normalization conform tho, we need to keep these rows forever too
+    userId: uuid('user_id').notNull(),
+    completionTokens: integer('completion_tokens').notNull(),
+    promptTokens: integer('prompt_tokens').notNull(),
+    costsInCent: doublePrecision('costs_in_cent').notNull().default(0),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index().on(table.modelId)],
+);
 export type ConversationUsageTrackingInsertModel = typeof conversationUsageTracking.$inferInsert;
 export type ConversationUsageTrackingModel = typeof conversationUsageTracking.$inferSelect;
 
@@ -318,9 +351,7 @@ export const sharedCharacterConversation = pgTable(
     startedAt: timestamp('started_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => ({
-    unq: unique().on(table.characterId, table.userId),
-  }),
+  (table) => [unique().on(table.characterId, table.userId)],
 );
 
 // export type sharedCharacterConversation = typeof sharedCharacterConversation.$inferSelect;
@@ -339,47 +370,56 @@ export const sharedCharacterChatUsageTrackingTable = pgTable(
     costsInCent: doublePrecision('costs_in_cent').notNull().default(0),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
+  (table) => [index().on(table.modelId)],
 );
 export type SharedCharacterChatUsageTrackingInsertModel =
   typeof sharedCharacterChatUsageTrackingTable.$inferInsert;
 export type SharedCharacterChatUsageTrackingModel =
   typeof sharedCharacterChatUsageTrackingTable.$inferSelect;
 
-export const customGptTable = pgTable('custom_gpt', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  name: text('name').notNull(),
-  systemPrompt: text('system_prompt').notNull(),
-  userId: uuid('user_id').references(() => userTable.id),
-  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-  schoolId: text('school_id').references(() => schoolTable.id),
-  accessLevel: characterAccessLevelEnum('access_level').notNull().default('private'),
-  pictureId: text('picture_id'),
-  description: text('description'),
-  specification: text('specification'),
-  promptSuggestions: text('prompt_suggestions')
-    .array()
-    .notNull()
-    .default(sql`'{}'::text[]`),
-  attachedLinks: text('attached_links')
-    .array()
-    .notNull()
-    .default(sql`'{}'::text[]`),
-  isDeleted: boolean('is_deleted').notNull().default(false),
-  originalCustomGptId: uuid('original_custom_gpt_id'),
-});
+export const customGptTable = pgTable(
+  'custom_gpt',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    name: text('name').notNull(),
+    systemPrompt: text('system_prompt').notNull(),
+    userId: uuid('user_id').references(() => userTable.id),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    schoolId: text('school_id').references(() => schoolTable.id),
+    accessLevel: characterAccessLevelEnum('access_level').notNull().default('private'),
+    pictureId: text('picture_id'),
+    description: text('description'),
+    specification: text('specification'),
+    promptSuggestions: text('prompt_suggestions')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    attachedLinks: text('attached_links')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    isDeleted: boolean('is_deleted').notNull().default(false),
+    originalCustomGptId: uuid('original_custom_gpt_id'),
+  },
+  (table) => [index().on(table.userId), index().on(table.schoolId)],
+);
 
 export type CustomGptModel = typeof customGptTable.$inferSelect;
 export type CustomGptInsertModel = typeof customGptTable.$inferInsert;
 
-export const customGptTemplateMappingTable = pgTable('custom_gpt_template_mappings', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  customGptId: uuid('custom_gpt_id')
-    .notNull()
-    .references(() => customGptTable.id, { onDelete: 'cascade' }),
-  federalStateId: text('federal_state_id')
-    .notNull()
-    .references(() => federalStateTable.id, { onDelete: 'cascade' }),
-});
+export const customGptTemplateMappingTable = pgTable(
+  'custom_gpt_template_mappings',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    customGptId: uuid('custom_gpt_id')
+      .notNull()
+      .references(() => customGptTable.id, { onDelete: 'cascade' }),
+    federalStateId: text('federal_state_id')
+      .notNull()
+      .references(() => federalStateTable.id, { onDelete: 'cascade' }),
+  },
+  (table) => [index().on(table.customGptId), index().on(table.federalStateId)],
+);
 export type CustomGptTemplateMappingModel = typeof customGptTemplateMappingTable.$inferSelect;
 export type CustomGptTemplateMappingInsertModel = typeof customGptTemplateMappingTable.$inferInsert;
 
@@ -412,9 +452,10 @@ export const ConversationMessageFileMappingTable = pgTable(
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => ({
-    unq: unique().on(table.conversationId, table.fileId),
-  }),
+  (table) => [
+    index().on(table.conversationMessageId),
+    unique().on(table.conversationId, table.fileId),
+  ],
 );
 
 export const SharedSchoolConversationFileMapping = pgTable(
@@ -429,9 +470,7 @@ export const SharedSchoolConversationFileMapping = pgTable(
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => ({
-    unq: unique().on(table.sharedSchoolConversationId, table.fileId),
-  }),
+  (table) => [unique().on(table.sharedSchoolConversationId, table.fileId)],
 );
 
 export const CharacterFileMapping = pgTable(
@@ -446,9 +485,7 @@ export const CharacterFileMapping = pgTable(
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => ({
-    unq: unique().on(table.characterId, table.fileId),
-  }),
+  (table) => [unique().on(table.characterId, table.fileId)],
 );
 export const CustomGptFileMapping = pgTable(
   'custom_gpt_file_mapping',
@@ -462,9 +499,7 @@ export const CustomGptFileMapping = pgTable(
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => ({
-    unq: unique().on(table.customGptId, table.fileId),
-  }),
+  (table) => [unique().on(table.customGptId, table.fileId)],
 );
 
 export const TextChunkTable = pgTable(
@@ -485,12 +520,11 @@ export const TextChunkTable = pgTable(
       .notNull()
       .generatedAlwaysAs(sql`to_tsvector('german', content)`),
   },
-  () => {
-    return {
-      embeddingIdx: sql`CREATE INDEX IF NOT EXISTS text_chunk_embedding_idx ON text_chunk USING hnsw (embedding vector_cosine_ops)`,
-      contentTsvIdx: sql`CREATE INDEX IF NOT EXISTS text_chunk_content_tsv_idx ON text_chunk USING GIN (contentTsv)`,
-    };
-  },
+  (table) => [
+    index().on(table.fileId),
+    sql`CREATE INDEX IF NOT EXISTS text_chunk_embedding_idx ON text_chunk USING hnsw (embedding vector_cosine_ops)`,
+    sql`CREATE INDEX IF NOT EXISTS text_chunk_content_tsv_idx ON text_chunk USING GIN (contentTsv)`,
+  ],
 );
 
 export type TextChunkModel = typeof TextChunkTable.$inferSelect;
@@ -499,25 +533,29 @@ export type TextChunkInsertModel = typeof TextChunkTable.$inferInsert;
 export const voucherStatus = z.enum(['created', 'redeemed', 'revoked']);
 export const voucherStatusEnum = pgEnum('voucher_status', voucherStatus.options);
 
-export const VoucherTable = pgTable('voucher', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  code: text('code').notNull().unique(),
-  increaseAmount: integer('increase_amount').notNull(),
-  durationMonths: integer('duration_months').notNull(),
-  status: voucherStatusEnum('status').notNull().default('created'),
-  validUntil: timestamp('valid_until', { mode: 'date', withTimezone: true }).notNull(),
-  federalStateId: text('federal_state_id')
-    .references(() => federalStateTable.id)
-    .notNull(),
-  redeemedBy: uuid('redeemed_by').references(() => userTable.id),
-  redeemedAt: timestamp('redeemed_at', { mode: 'date', withTimezone: true }),
-  createdBy: text('created_by').notNull(),
-  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-  createReason: text('create_reason').notNull().default(''),
-  updatedBy: text('updated_by'),
-  updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true }),
-  updateReason: text('update_reason').notNull().default(''),
-});
+export const VoucherTable = pgTable(
+  'voucher',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    code: text('code').notNull().unique(),
+    increaseAmount: integer('increase_amount').notNull(),
+    durationMonths: integer('duration_months').notNull(),
+    status: voucherStatusEnum('status').notNull().default('created'),
+    validUntil: timestamp('valid_until', { mode: 'date', withTimezone: true }).notNull(),
+    federalStateId: text('federal_state_id')
+      .references(() => federalStateTable.id)
+      .notNull(),
+    redeemedBy: uuid('redeemed_by').references(() => userTable.id),
+    redeemedAt: timestamp('redeemed_at', { mode: 'date', withTimezone: true }),
+    createdBy: text('created_by').notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    createReason: text('create_reason').notNull().default(''),
+    updatedBy: text('updated_by'),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true }),
+    updateReason: text('update_reason').notNull().default(''),
+  },
+  (table) => [index().on(table.federalStateId), index().on(table.redeemedBy)],
+);
 
 export type VoucherModel = typeof VoucherTable.$inferSelect;
 export type VoucherInsertModel = typeof VoucherTable.$inferInsert;
