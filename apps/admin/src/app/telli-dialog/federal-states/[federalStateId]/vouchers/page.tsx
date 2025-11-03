@@ -2,6 +2,8 @@ import { fetchVouchers } from '../../../../../services/voucher-service';
 import { auth } from '../../../../api/auth/[...nextauth]/auth';
 import VoucherListView from './VoucherListView';
 
+export const dynamic = 'force-dynamic';
+
 export default async function VouchersByStatePage({
   params,
 }: {
