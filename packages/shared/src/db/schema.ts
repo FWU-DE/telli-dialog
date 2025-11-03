@@ -251,10 +251,7 @@ export const federalStateLlmModelMappingTable = pgTable(
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => ({
-    unq: unique().on(table.federalStateId, table.llmModelId),
-  }),
-  (table) => [index().on(table.federalStateId), index().on(table.llmModelId)],
+  (table) => [unique().on(table.federalStateId, table.llmModelId)],
 );
 
 export type LlmInsertModel = typeof llmModelTable.$inferInsert;
@@ -308,7 +305,7 @@ export const sharedSchoolConversationUsageTracking = pgTable(
     costsInCent: doublePrecision('costs_in_cent').notNull().default(0),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index().on(table.modelId)],
+  (table) => [index().on(table.modelId), index().on(table.createdAt)],
 );
 export type SharedSchoolConversationUsageTrackingInsertModel =
   typeof sharedSchoolConversationUsageTracking.$inferInsert;
@@ -332,7 +329,7 @@ export const conversationUsageTracking = pgTable(
     costsInCent: doublePrecision('costs_in_cent').notNull().default(0),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index().on(table.modelId)],
+  (table) => [index().on(table.modelId), index().on(table.createdAt)],
 );
 export type ConversationUsageTrackingInsertModel = typeof conversationUsageTracking.$inferInsert;
 export type ConversationUsageTrackingModel = typeof conversationUsageTracking.$inferSelect;
@@ -370,7 +367,7 @@ export const sharedCharacterChatUsageTrackingTable = pgTable(
     costsInCent: doublePrecision('costs_in_cent').notNull().default(0),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index().on(table.modelId)],
+  (table) => [index().on(table.modelId), index().on(table.createdAt)],
 );
 export type SharedCharacterChatUsageTrackingInsertModel =
   typeof sharedCharacterChatUsageTrackingTable.$inferInsert;
