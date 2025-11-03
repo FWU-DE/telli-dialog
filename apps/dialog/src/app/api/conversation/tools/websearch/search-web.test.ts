@@ -10,6 +10,11 @@ const REDIRECT_PAGE_URL = 'https://de.wikipedia.org/';
 vi.mock('next-intl/server', () => ({
   getTranslations: vi.fn(() => (key: string) => key),
 }));
+vi.mock('@/utils/logging/logging', () => ({
+  env: {
+    NEXT_PUBLIC_SENTRY_LOG_LEVEL: 'info',
+  },
+}));
 
 // We do not want to execute those tests on every run because they depend on external resources.
 describe.skip('webScraperExecutable', () => {
