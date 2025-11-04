@@ -1,16 +1,7 @@
 import { eq } from 'drizzle-orm';
-import { db } from '../db';
-import { characterTable, customGptTable } from '../db/schema';
-
-/* Unified template model for characters and custom GPTs */
-export type TemplateModel = {
-  id: string;
-  originalId: string | null;
-  type: 'character' | 'custom-gpt';
-  name: string;
-  createdAt: Date;
-  isDeleted: boolean;
-};
+import { db } from '@shared/db';
+import { characterTable, customGptTable } from '@shared/db/schema';
+import { TemplateModel } from '@shared/models/templates';
 
 /**
  * Fetch all global templates from the database, including deleted templates.

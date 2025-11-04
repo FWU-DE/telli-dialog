@@ -1,0 +1,11 @@
+export type TemplateTypes = 'character' | 'custom-gpt';
+
+/* Unified template model for characters and custom GPTs */
+export type TemplateModel = {
+  id: string;
+  originalId: string | null;
+  type: TemplateTypes;
+  name: string;
+  createdAt: Date;
+  isDeleted: boolean;
+};

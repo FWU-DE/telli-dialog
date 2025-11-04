@@ -3,7 +3,6 @@
 import { useEffect, useState, useTransition } from 'react';
 import { Button } from '@ui/components/Button';
 import { getTemplatesAction } from './actions';
-import { TemplateModel } from '@telli/shared/services/templateService';
 import {
   Table,
   TableBody,
@@ -20,8 +19,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@ui/components/Card';
+import { ROUTES } from '@/consts/routes';
+import Link from 'next/link';
+import { TemplateModel } from '@shared/models/templates';
 
-function getTypeName(type: string) {
+function getTypeName(type: TemplateModel['type']): string {
   switch (type) {
     case 'character':
       return 'Dialogpartner';
@@ -70,6 +72,7 @@ export default function TemplateListView() {
               <TableHead>Name</TableHead>
               <TableHead>Erstellt am</TableHead>
               <TableHead>Gelöscht</TableHead>
+              <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -81,6 +84,9 @@ export default function TemplateListView() {
                 <TableCell>{template.name}</TableCell>
                 <TableCell>{template.createdAt.toLocaleString()}</TableCell>
                 <TableCell>{template.isDeleted ? 'ja' : 'nein'}</TableCell>
+                <TableCell>
+                  <Link href={ROUTES.dialog.template(template.type, template.id)}>Details</Link>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
