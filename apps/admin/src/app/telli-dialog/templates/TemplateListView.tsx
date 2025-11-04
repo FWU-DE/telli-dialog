@@ -40,7 +40,7 @@ export default function TemplateListView() {
 
   useEffect(() => {
     loadTemplates();
-  });
+  }, []);
 
   const loadTemplates = async () => {
     startTransition(async () => {

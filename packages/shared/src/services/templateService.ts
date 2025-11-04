@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { db } from '@shared/db';
-import { characterTable, customGptTable } from '@shared/db/schema';
-import { TemplateModel } from '@shared/models/templates';
+import { characterTable, customGptTable, federalStateTable } from '@shared/db/schema';
+import { TemplateModel, TemplateTypes } from '@shared/models/templates';
 
 /**
  * Fetch all global templates from the database, including deleted templates.
@@ -57,7 +57,7 @@ async function getCustomGpt(): Promise<TemplateModel[]> {
 
 /* Fetch a template by its type and id. */
 export async function getTemplateById(
-  templateType: string,
+  templateType: TemplateTypes,
   templateId: string,
 ): Promise<TemplateModel> {
   if (templateType === 'character') {
@@ -103,4 +103,13 @@ export async function getTemplateById(
   } else {
     throw new Error('Invalid template type');
   }
+}
+
+/* Fetch all federal states from the database for template mapping purpose. */
+export async function getFederalStateIds() {
+  return await db
+    .select({
+      id: federalStateTable.id,
+    })
+    .from(federalStateTable);
 }

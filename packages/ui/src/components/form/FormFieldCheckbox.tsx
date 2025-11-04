@@ -11,6 +11,7 @@ type FormFieldCheckboxProps<
   label: string;
   description?: string;
   disabled?: boolean;
+  variant?: 'default' | 'compact';
 };
 
 export function FormFieldCheckbox<
@@ -22,6 +23,7 @@ export function FormFieldCheckbox<
   label,
   description,
   disabled = false,
+  variant = 'default',
 }: FormFieldCheckboxProps<TFieldValues, TName>) {
   return (
     <Controller
@@ -29,7 +31,7 @@ export function FormFieldCheckbox<
       control={control}
       render={({ field, fieldState }) => (
         <FieldSet data-invalid={fieldState.invalid}>
-          <FieldLegend variant="label">{label}</FieldLegend>
+          {variant !== 'compact' && <FieldLegend variant="label">{label}</FieldLegend>}
           {description && <FieldDescription>{description}</FieldDescription>}
           <FieldGroup data-slot="checkbox-group">
             <Field orientation="horizontal">
