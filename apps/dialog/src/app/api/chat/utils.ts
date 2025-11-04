@@ -62,11 +62,14 @@ export function consolidateMessages(messages: Array<Message>): Array<Message> {
 }
 
 /**
- * Limits the chat history to the most recent messages, keeping the first N messages and the last N messages.
- * @param messages - The messages to limit.
- * @param limitRecent - The number of recent message-pairs to keep e.g. 2 means 2 user messages and 2 assistant messages.
- * @param limitFirst - The number of first message-pairs to keep.
- * @param characterLimit - The maximum number of characters to keep.
+ * Limits chat history by keeping the first message pairs, last message pairs, and filling remaining space
+ * with middle messages (prioritizing more recent ones), while respecting character limits.
+ *
+ * @param messages - The messages to limit
+ * @param limitRecent - Number of recent message pairs to keep (e.g. 2 means 2 user + 2 assistant messages)
+ * @param limitFirst - Number of first message pairs to keep (default: 2)
+ * @param characterLimit - Maximum total characters allowed
+ * @returns Limited message array with prioritized recent context
  */
 export function limitChatHistory({
   messages,
@@ -79,53 +82,50 @@ export function limitChatHistory({
   limitFirst?: number;
   characterLimit: number;
 }): Array<Message> {
-  // Validate inputs
-
-  // First consolidate consecutive messages from the same role
   const consolidatedMessages = consolidateMessages(messages);
 
-  // Always include the last user message even if limitRecent == 0
-  limitRecent = limitRecent * 2;
-  limitFirst = limitFirst * 2;
+  // Convert pairs to individual message counts
+  const maxFirst = limitFirst * 2;
+  const maxRecent = limitRecent * 2;
 
   // If we have fewer messages or less characters than the limits, just return all messages
-  if (
-    consolidatedMessages.length <= limitFirst + limitRecent ||
-    consolidatedMessages.reduce(
-      (totalContentlength, { content }) => totalContentlength + content.length,
-      0,
-    ) <= characterLimit
-  ) {
+  const totalChars = consolidatedMessages.reduce((sum, msg) => sum + msg.content.length, 0);
+  if (consolidatedMessages.length <= maxFirst + maxRecent || totalChars <= characterLimit) {
     return consolidatedMessages;
   }
 
-  // Initialize arrays for front and back messages
-  const frontMessages: Message[] = consolidatedMessages.slice(0, limitFirst);
-  const backMessages: Message[] = [];
+  // Get mandatory messages
+  const firstMessages = consolidatedMessages.slice(0, maxFirst);
+  const recentMessages = consolidatedMessages.slice(-maxRecent);
 
-  let runningTotal = frontMessages.reduce((acc, message) => acc + message.content.length, 0);
-  let manadatoryMessagesIncluded = false;
+  // Get middle messages in reverse order (most recent first)
+  const startIndex = maxFirst;
+  const endIndex = consolidatedMessages.length - maxRecent;
+  const middleMessages = consolidatedMessages.slice(startIndex, endIndex).reverse();
 
-  for (
-    let backIndex = consolidatedMessages.length - 1;
-    backMessages.length + frontMessages.length < consolidatedMessages.length;
-    backIndex--
-  ) {
-    const backMessage = consolidatedMessages[backIndex];
+  // Build result: first + selected middle + recent
+  const result = [...firstMessages];
+  let charCount = result.reduce((sum, msg) => sum + msg.content.length, 0);
 
-    if (backMessage === undefined) continue;
+  // Add recent messages since they are mandatory
+  for (const msg of recentMessages) {
+    result.push(msg);
+    charCount += msg.content.length;
+  }
 
-    runningTotal += backMessage.content.length;
-    backMessages.unshift(backMessage);
-
-    manadatoryMessagesIncluded = backIndex <= consolidatedMessages.length - limitRecent;
-    if (manadatoryMessagesIncluded && runningTotal > characterLimit) {
-      break;
+  // Add middle messages that fit within the character limit
+  const middleToAdd: Message[] = [];
+  for (const msg of middleMessages) {
+    if (charCount + msg.content.length <= characterLimit) {
+      middleToAdd.unshift(msg); // Add to front to maintain chronological order
+      charCount += msg.content.length;
     }
   }
 
-  // Combine front and back messages
-  return [...frontMessages, ...backMessages];
+  // Insert middle messages between first and recent
+  result.splice(firstMessages.length, 0, ...middleToAdd);
+
+  return result;
 }
 
 /**
