@@ -5,7 +5,8 @@ export const WAIT_TIMES_IN_MS = {
   PAGE_ELEMENT_TIMEOUT: 10_000, // Maximum time to wait for an element to appear
   AI_MESSAGE_TIMEOUT: 30_000, // Maximum time to wait for a chat message to appear
   FILE_UPLOAD_TIMEOUT: 30_000, // Time to wait for file uploads
-};
+  NAVIGATION_TIMEOUT: 30_000, // Time to wait for navigation
+} as const;
 
 export const SELECTORS = {
   USERNAME_INPUT: 'input[placeholder="Username"]',
@@ -22,7 +23,7 @@ export const SELECTORS = {
   RELOAD_BUTTON: '[aria-label="Reload"]',
   PROFILE_BUTTON: '[aria-label="profileDropdown"]',
   DROPDOWN_WRAPPER: 'div[data-radix-popper-content-wrapper]',
-};
+} as const;
 
 export const SCREENSHOT_FOLDERS = {
   SUCCESS_RESULTS: './e2e/load_test/success-results',

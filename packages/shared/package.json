@@ -5,10 +5,7 @@
   "type": "module",
   "private": true,
   "exports": {
-    "./knotenpunkt/*": "./src/knotenpunkt/*.ts",
-    "./s3/*": "./src/s3/*.ts",
-    "./db/*": "./src/db/*.ts",
-    "./types/*": "./src/types/*.ts"
+    "./*": "./src/*.ts"
   },
   "scripts": {
     "db:generate": "dotenvx run -f ../../apps/dialog/.env.local -- drizzle-kit generate --config=./drizzle.config.ts",
@@ -35,7 +32,7 @@
     "drizzle-orm": "0.39.3",
     "drizzle-zod": "0.7.1",
     "nanoid": "5.0.9",
-    "pg": "8.13.3",
+    "pg": "8.16.3",
     "zod": "3.25.67"
   },
   "devDependencies": {

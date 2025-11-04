@@ -8,8 +8,8 @@ import { FederalStateId } from '@/utils/vidis/const';
  * - headings: ## Heading 2, ### Heading 3
  *
  * IMPORTANT!
- * - DO NOT use heading level 1 (# Heading 1) as this is reserved for the modal title
- * - Headings are not styled yet. You can use them and they will be rendered, but they will look like normal text.
+ * - DO NOT use heading level 1 (# Heading 1) as this is reserved for the dialog title
+ * - Headings are styled specifically for the disclaimer content.
  */
 
 const TERM_AND_CONDITIONS_BB = `Die Digitalisierung und der Einsatz von Künstlicher Intelligenz (KI) bieten großes Potential, den Unterricht effizienter und stärker an die Bedürfnisse der Schülerinnen und Schüler angepasst zu gestalten. Gleichzeitig stellt der Einsatz von KI in Schulen auch eine Herausforderung dar, insbesondere in Bezug auf Datenschutz und die notwendige Medienkompetenz bei ihrer Nutzung.
@@ -105,25 +105,28 @@ Vorbehaltlich der nachfolgenden Regelungen lehnt das FWU jegliche Haftung im Zus
 
 Das FWU haftet nur für Vorsatz und grobe Fahrlässigkeit. Das gilt nicht bei der Verletzung von Leben, Körper, Gesundheit sowie bei der Verletzung von vertragswesentlichen Pflichten, also solchen Pflichten, deren Erfüllung die ordnungsgemäße Durchführung des Vertrags überhaupt erst ermöglicht und auf deren Einhaltung der Vertragspartner regelmäßig vertrauen darf bzw. deren Verletzung den Vertragszweck gefährden (sog. Kardinalpflichten). Bei Verletzung einer Kardinalspflicht ist die Haftung des FWU und ihrer Erfüllungsgehilfen jedoch der Höhe nach auf die vorhersehbaren und vertragstypischen Schäden beschränkt. Die Haftung im Falle der Übernahme einer Garantie oder nach zwingenden gesetzlichen Haftungstatbeständen bleibt unberührt.`;
 
-const TERMS_AND_CONDITIONS_NW = `# telli - Der KI-Chatbot für die Schule
+const TERMS_AND_CONDITIONS_NW = `## telli - Der KI-Chatbot für die Schule
 
-## Was ist telli?
+### Was ist telli?
 
 telli ist ein datenschutzkonformer KI-Chatbot, der speziell für den Schulunterricht im Rahmen eines länderübergreifenden Vorhabens des Digitalpakts Schule entwickelt wurde. Er unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. Mit telli können verschiedene Large Language Models genutzt werden, um beispielsweise Arbeitsblätter zu erstellen, bei Hausaufgaben zu helfen oder Aufgaben zu übersetzen. Die Datenverarbeitung erfolgt ausschließlich in der EU und die Nutzung ist anonym und datenschutzkonform.
-Zugang zum Chatbot erhalten Lehrkräfte sowie sonstige im Landesdienst stehende pädagogische und sozialpädagogische Mitarbeiterinnen und Mitarbeiter im Land Nordrhein-Westfalen, die bei der Bildungs- und Erziehungsarbeit mitwirken. Diese können dann entscheiden, wie lange und in welchem Umfang sie den Lerngruppen einen KI-Zugang freischalten können. 
+
+Zugang zum Chatbot erhalten Lehrkräfte sowie sonstige im Landesdienst stehende pädagogische und sozialpädagogische Mitarbeiterinnen und Mitarbeiter im Land Nordrhein-Westfalen, die bei der Bildungs- und Erziehungsarbeit mitwirken. Diese können dann entscheiden, wie lange und in welchem Umfang sie den Lerngruppen einen KI-Zugang freischalten können.
+
 Als KI-Chatbot unterliegt telli der EU-Verordnung über den Einsatz von Künstlicher Intelligenz (KI-VO). Die KI-VO verpflichtet in Art. 4 alle Anbieter und Betreiber von KI-Systemen dafür Sorge zu tragen, dass Personen, die ihre Systeme nutzen, über die notwendigen KI-Kompetenzen verfügen.
+
 Deshalb ist in Nordrhein-Westfalen der Besuch des Selbstlernkurses „Künstliche Intelligenz im Schulalltag: Der EU AI Act und praxisnahe Handlungsempfehlungen“ vor der initialen Nutzung von telli verpflichtend. Der Kurs ist frei zugänglich. Der Kurs kann zusätzlich auch als mbz-Datei heruntergeladen und in die eigene Moodle-basierte Lernplattform, z.B. LOGINEO NRW LMS, integriert werden.
 
-## Wie logge ich mich bei telli ein?
+### Wie logge ich mich bei telli ein?
 
 Sie finden den Zugang zu telli auf unserer Homepage www.lernen-digital.nrw 
 [Zugang zu „telli“ | Lehren und Lernen](https://www.lernen-digital.nrw/zugang-zu-telli)
 
-## Was sind telli-Points?
+### Was sind telli-Points?
 
 telli-Points sind eine Art von virtuellem Guthaben, das Sie beim Chatten mit telli verwenden. Jeder Chat verbraucht eine bestimmte Anzahl von telli-Points, abhängig vom verwendeten Sprachmodell und dem Tokenverbrauch. Sie haben ein limitiertes Budget pro Monat, und der Verbrauch wird in einer Balkenanzeige in der linken Sidebar angezeigt. 100% entsprechend einem initialen monatlichen Budget.
 
-## Was kann ich tun, wenn meine telli-Points zur Neige gehen?
+### Was kann ich tun, wenn meine telli-Points zur Neige gehen?
 
 **Ressourcensparende Modelle nutzen:** Wählen Sie ein Modell mit geringerem Ressourcenbedarf, wie zum Beispiel GPT4o-mini oder Llama 3.1 70B. Diese verbrauchen weniger telli-Points. 
 **Wichtige Anfragen priorisieren:** Überlegen Sie, welche Fragen oder Aufgaben am dringendsten sind, und konzentrieren Sie sich darauf.
@@ -132,17 +135,16 @@ telli-Points sind eine Art von virtuellem Guthaben, das Sie beim Chatten mit tel
 
 Nähere Informationen zu einzelnen Sprachmodellen finden Sie ebenfalls auf unserer Homepage [www.lernen-digital.nrw](https://www.lernen-digital.nrw/) unter [Zugang zu „telli“ | Lehren und Lernen](https://www.lernen-digital.nrw/zugang-zu-telli)
 
-## Werden meine Chats gespeichert?
+### Werden meine Chats gespeichert?
 
 Die Chats mit telli werden über das laufende Schuljahr gespeichert. 
 Nach den Sommerferien werden die Chats gelöscht. 
 Möchten Sie Ergebnisse längerfristig sichern, dann laden Sie sich die Ergebnisse als Word-Dokument herunter. 
 Sollten Sie durch einen umfangreichen Prompt eine ganz spezielle Funktionsweise des Chatbots wünschen, der über die Schuljahresgrenzen hinaus funktioniert, dann empfehlen wir die telli-Funktion “Assistenten”. 
 
-## Was sind Lernszenarien, Dialogpartner und Assistenten?
+### Was sind Lernszenarien, Dialogpartner und Assistenten?
 
-Lernszenarien ermöglichen Lehrkräften, spezifische pädagogische Situationen zu gestalten und anonymisierte Chats für Schülerinnen zu erstellen. So können diese gezielt lernen, ohne sich einloggen zu müssen. Dialogpartner sind simulierte Personen, die in Chats agieren und den Schülerinnen helfen, verschiedene Perspektiven zu verstehen oder Diskussionen zuführen. Assistenten unterstützen bei der Unterrichtsvorbereitung, indem sie Materialienerstellen, Aufgaben übersetzen oder bei Hausaufgaben helfen. Gemeinsam fördern diese Funktionen individuelles Lernen, stärken die Selbstständigkeit der Schülerinnen und Schüler und bieten Lehrkräften wertvolle Werkzeuge zur Gestaltung eines effektiven Unterrichts. 
-Wenn man über diese Funktionen Chatbots für die Klasse freigibt, wird das **eigene Budget an telli-Points** verbraucht. 
+Lernszenarien ermöglichen Lehrkräften, spezifische pädagogische Situationen zu gestalten und anonymisierte Chats für Schülerinnen zu erstellen. So können diese gezielt lernen, ohne sich einloggen zu müssen. Dialogpartner sind simulierte Personen, die in Chats agieren und den Schülerinnen helfen, verschiedene Perspektiven zu verstehen oder Diskussionen zuführen. Assistenten unterstützen bei der Unterrichtsvorbereitung, indem sie Materialienerstellen, Aufgaben übersetzen oder bei Hausaufgaben helfen. Gemeinsam fördern diese Funktionen individuelles Lernen, stärken die Selbstständigkeit der Schülerinnen und Schüler und bieten Lehrkräften wertvolle Werkzeuge zur Gestaltung eines effektiven Unterrichts. Wenn man über diese Funktionen Chatbots für die Klasse freigibt, wird das **eigene Budget an telli-Points** verbraucht. 
 
 **Lernszenarien:** Mit dieser Funktion kann man den Schülerinnen und Schülern einen DSGVO-konformen KI-Zugang freigeben. Hierbei kann man die Funktionsweise des Chatbots über eine Eingabemaske anpassen. Die Eingabemaske beinhaltet Vorschläge, wie man sie ausfüllen kann. Diesen KI-Zugang kann man zeitlich begrenzt in verschiedenen Schritten bis zu maximal 30 Tagen freigeben. Die Schülerinnen und Schüler können den Chatverlauf als Word-Dokument herunterladen. 
 
@@ -150,7 +152,7 @@ Wenn man über diese Funktionen Chatbots für die Klasse freigibt, wird das **ei
 
 **Assistenten:** Diese Funktion bietet die Möglichkeit einen KI-Chatbot mit ganz bestimmten Funktionen zu erstellen und schulintern zu teilen. Die Vorlage zielt sehr auf typische Aufgaben von Lehrkrafttätigkeiten ab. Auch in diesem Bereich gibt es Vorlagen. 
 
-## Weitere Fragen zu telli?
+### Weitere Fragen zu telli?
 
 [https://telli.schule/](https://telli.schule/)
 

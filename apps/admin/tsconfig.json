@@ -1,7 +1,14 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "@telli/typescript-config/nextjs.json",
-  "compilerOptions": {},
+  "compilerOptions": {
+    "paths": {
+      "baseUrl": ["."],
+      "@/*": ["./src/*"],
+      "@ui/*": ["../../packages/ui/src/*"],
+      "@shared/*": ["../../packages/shared/src/*"]
+    }
+  },
   "types": ["node"],
   "include": [
     "**/*.ts",

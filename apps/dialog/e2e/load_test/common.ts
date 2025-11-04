@@ -101,7 +101,9 @@ export async function runTest(
 export async function performLogin(page: Page, userName: string, password: string) {
   let successfulLogin = false;
   try {
-    await page.goto(`${BASE_URL}/login?testlogin=true`);
+    await page.goto(`${BASE_URL}/login?testlogin=true`, {
+      timeout: WAIT_TIMES_IN_MS.NAVIGATION_TIMEOUT,
+    });
 
     const usernameInput = page.locator(SELECTORS.USERNAME_INPUT);
     await usernameInput.waitFor();
@@ -115,6 +117,7 @@ export async function performLogin(page: Page, userName: string, password: strin
     await loginButton.waitFor();
     await loginButton.click();
 
+    await page.waitForNavigation({ url: /\/?$/, timeout: WAIT_TIMES_IN_MS.NAVIGATION_TIMEOUT });
     await page.locator(SELECTORS.PROFILE_BUTTON).waitFor();
     successfulLogin = true;
   } finally {
@@ -151,9 +154,10 @@ export async function selectModel(page: Page, userIndex: number) {
 
     await modelLocator.waitFor();
 
-    const changeLlmNavigation = page.waitForURL(new RegExp(modelName, 'i'));
+    const changeLlmNavigation = page.waitForURL(new RegExp(modelName, 'i'), {
+      timeout: WAIT_TIMES_IN_MS.NAVIGATION_TIMEOUT,
+    });
     await modelLocator.click();
-    await page.waitForTimeout(5000); // TODO: remove timeout after staging is deployed
     await changeLlmNavigation;
     console.log(`Selected model ${targetModelName} for user ${userIndex}`);
     successfullySelected = true;
@@ -178,7 +182,9 @@ export async function sendMessage(page: Page, prompt: string) {
     const aiMessage = page.locator(SELECTORS.AI_MESSAGE);
     await aiMessage.waitFor({ timeout: WAIT_TIMES_IN_MS.AI_MESSAGE_TIMEOUT });
 
-    await page.locator(SELECTORS.RELOAD_BUTTON).waitFor();
+    await page
+      .locator(SELECTORS.RELOAD_BUTTON)
+      .waitFor({ timeout: WAIT_TIMES_IN_MS.AI_MESSAGE_TIMEOUT });
     content = (await aiMessage.textContent())?.trim() ?? '';
     console.log(`AI response received. Content length: ${content.length}`);
   } finally {
