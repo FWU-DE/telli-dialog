@@ -194,7 +194,7 @@ export const characterTable = pgTable(
     isDeleted: boolean('is_deleted').notNull().default(false),
     originalCharacterId: uuid('original_character_id'),
   },
-  (table) => [index().on(table.userId), index().on(table.modelId), index().on(table.schoolId)],
+  (table) => [index().on(table.userId), index().on(table.schoolId)],
 );
 
 export type CharacterInsertModel = typeof characterTable.$inferInsert;
@@ -234,9 +234,7 @@ export const llmModelTable = pgTable(
     isNew: boolean('is_new').notNull().default(false),
     isDeleted: boolean('is_deleted').notNull().default(false),
   },
-  (table) => ({
-    unq: unique().on(table.provider, table.name),
-  }),
+  (table) => [unique().on(table.provider, table.name)],
 );
 
 export const federalStateLlmModelMappingTable = pgTable(
@@ -286,7 +284,7 @@ export const sharedSchoolConversationTable = pgTable(
     startedAt: timestamp('started_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index().on(table.userId), index().on(table.modelId)],
+  (table) => [index().on(table.userId)],
 );
 export type SharedSchoolConversationInsertModel = typeof sharedSchoolConversationTable.$inferInsert;
 export type SharedSchoolConversationModel = typeof sharedSchoolConversationTable.$inferSelect;
@@ -305,7 +303,11 @@ export const sharedSchoolConversationUsageTracking = pgTable(
     costsInCent: doublePrecision('costs_in_cent').notNull().default(0),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index().on(table.modelId), index().on(table.createdAt)],
+  (table) => [
+    index().on(table.sharedSchoolConversationId),
+    index().on(table.userId),
+    index().on(table.createdAt),
+  ],
 );
 export type SharedSchoolConversationUsageTrackingInsertModel =
   typeof sharedSchoolConversationUsageTracking.$inferInsert;
@@ -329,7 +331,11 @@ export const conversationUsageTracking = pgTable(
     costsInCent: doublePrecision('costs_in_cent').notNull().default(0),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index().on(table.modelId), index().on(table.createdAt)],
+  (table) => [
+    index().on(table.conversationId),
+    index().on(table.userId),
+    index().on(table.createdAt),
+  ],
 );
 export type ConversationUsageTrackingInsertModel = typeof conversationUsageTracking.$inferInsert;
 export type ConversationUsageTrackingModel = typeof conversationUsageTracking.$inferSelect;
@@ -367,7 +373,7 @@ export const sharedCharacterChatUsageTrackingTable = pgTable(
     costsInCent: doublePrecision('costs_in_cent').notNull().default(0),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index().on(table.modelId), index().on(table.createdAt)],
+  (table) => [index().on(table.characterId), index().on(table.userId), index().on(table.createdAt)],
 );
 export type SharedCharacterChatUsageTrackingInsertModel =
   typeof sharedCharacterChatUsageTrackingTable.$inferInsert;
