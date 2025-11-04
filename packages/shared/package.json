@@ -5,11 +5,7 @@
   "type": "module",
   "private": true,
   "exports": {
-    "./db/*": "./src/db/*.ts",
-    "./knotenpunkt/*": "./src/knotenpunkt/*.ts",
-    "./s3/*": "./src/s3/*.ts",
-    "./services/*": "./src/services/*.ts",
-    "./types/*": "./src/types/*.ts"
+    "./*": "./src/*.ts"
   },
   "scripts": {
     "db:generate": "dotenvx run -f ../../apps/dialog/.env.local -- drizzle-kit generate --config=./drizzle.config.ts",

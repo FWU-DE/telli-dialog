@@ -1,22 +1,24 @@
-import { MainWithNavigation, NavItem } from '../../../../components/layout/MainWithNavigation';
+import TwoColumnLayout from '@/components/layout/TwoColumnLayout';
 import { fetchFederalStateById } from '../../../../services/federal-states-service';
 import { FederalStateView } from './FederalStateDetailView';
+import { Sidebar, SidebarItem } from '@/components/navigation/Sidebar';
+import { ROUTES } from '@/consts/routes';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Page({ params }: { params: Promise<{ federalStateId: string }> }) {
-  const federalStateId = (await params).federalStateId;
+  const { federalStateId } = await params;
   const federalState = await fetchFederalStateById(federalStateId);
 
-  const navItems: NavItem[] = [
-    { label: 'Einstellungen', href: `/federal-states/${federalStateId}` },
-    { label: 'API Key aktualisieren', href: `/federal-states/${federalStateId}/api-key` },
-    { label: 'Guthaben Codes', href: `/federal-states/${federalStateId}/vouchers` },
-  ];
-
   return (
-    <MainWithNavigation navItems={navItems}>
-      <FederalStateView federalState={federalState} />
-    </MainWithNavigation>
+    <TwoColumnLayout
+      sidebar={
+        <Sidebar>
+          <SidebarItem label="API Key aktualisieren" href={ROUTES.dialog.apiKey(federalStateId)} />
+          <SidebarItem label="Guthaben Codes" href={ROUTES.dialog.vouchers(federalStateId)} />
+        </Sidebar>
+      }
+      page={<FederalStateView federalState={federalState} />}
+    />
   );
 }
