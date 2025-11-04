@@ -103,15 +103,9 @@ export function limitChatHistory({
   const endIndex = consolidatedMessages.length - maxRecent;
   const middleMessages = consolidatedMessages.slice(startIndex, endIndex).reverse();
 
-  // Build result: first + selected middle + recent
-  const result = [...firstMessages];
+  // Build result: first + recent, as they are mandatory
+  const result = [...firstMessages, ...recentMessages];
   let charCount = result.reduce((sum, msg) => sum + msg.content.length, 0);
-
-  // Add recent messages since they are mandatory
-  for (const msg of recentMessages) {
-    result.push(msg);
-    charCount += msg.content.length;
-  }
 
   // Add middle messages that fit within the character limit
   const middleToAdd: Message[] = [];
@@ -119,6 +113,8 @@ export function limitChatHistory({
     if (charCount + msg.content.length <= characterLimit) {
       middleToAdd.unshift(msg); // Add to front to maintain chronological order
       charCount += msg.content.length;
+    } else {
+      break;
     }
   }
 
