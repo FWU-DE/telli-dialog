@@ -11,6 +11,7 @@ export const ROUTES = {
     projects: (organizationId: string) => `/organizations/${organizationId}/projects`,
   },
   dialog: {
+    apiKey: (federalStateId: string) => `/telli-dialog/federal-states/${federalStateId}/api-key`,
     page: '/telli-dialog',
     federalStates: `/telli-dialog/federal-states`,
     federalStateDetails: (federalStateId: string) =>
