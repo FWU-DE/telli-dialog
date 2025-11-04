@@ -11,9 +11,13 @@ export const ROUTES = {
     projects: (organizationId: string) => `/organizations/${organizationId}/projects`,
   },
   dialog: {
-    federalStates: '/federal-states',
-    federalStateDetails: (federalStateId: string) => `/federal-states/${federalStateId}`,
-    vouchers: (federalStateId: string) => `/federal-states/${federalStateId}/vouchers`,
-    voucherNew: (federalStateId: string) => `/federal-states/${federalStateId}/vouchers/new`,
+    page: '/telli-dialog',
+    federalStates: `/telli-dialog/federal-states`,
+    federalStateDetails: (federalStateId: string) =>
+      `/telli-dialog/federal-states/${federalStateId}`,
+    templates: '/telli-dialog/templates',
+    vouchers: (federalStateId: string) => `/telli-dialog/federal-states/${federalStateId}/vouchers`,
+    voucherNew: (federalStateId: string) =>
+      `/telli-dialog/federal-states/${federalStateId}/vouchers/new`,
   },
 };

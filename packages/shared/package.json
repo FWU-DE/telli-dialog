@@ -5,9 +5,10 @@
   "type": "module",
   "private": true,
   "exports": {
+    "./db/*": "./src/db/*.ts",
     "./knotenpunkt/*": "./src/knotenpunkt/*.ts",
     "./s3/*": "./src/s3/*.ts",
-    "./db/*": "./src/db/*.ts",
+    "./services/*": "./src/services/*.ts",
     "./types/*": "./src/types/*.ts"
   },
   "scripts": {
