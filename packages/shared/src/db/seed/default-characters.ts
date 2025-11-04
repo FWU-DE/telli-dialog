@@ -9,7 +9,10 @@ import { dbUpsertCustomGpt } from '../functions/custom-gpts';
 const DEFAULT_CHAT_MODEL = 'gpt-5-mini';
 
 export async function insertTemplateCharacters() {
-  await processStaticJpegFiles('./assets/template-characters', 'characters/_templates');
+  await processStaticJpegFiles(
+    `${import.meta.dirname}/assets/template-characters`,
+    'characters/_templates',
+  );
   for (const templateCharacter of defaultCharacters) {
     const result = await dbCreateCharacter(templateCharacter, DEFAULT_CHAT_MODEL);
     const id = result && result[0] ? result[0].id : undefined;
@@ -21,7 +24,10 @@ export async function insertTemplateCharacters() {
 }
 
 export async function insertTemplateCustomGpt() {
-  await processStaticJpegFiles('./assets/template-custom-gpt', 'custom-gpts/_templates');
+  await processStaticJpegFiles(
+    `${import.meta.dirname}/assets/template-custom-gpt`,
+    'custom-gpts/_templates',
+  );
   for (const templateCustomGpt of defaultCustomGpt) {
     await dbUpsertCustomGpt({ customGpt: templateCustomGpt });
   }
