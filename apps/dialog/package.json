@@ -80,7 +80,7 @@
     "next-axiom": "1.9.1",
     "next-intl": "4.4.0",
     "openai": "4.83.0",
-    "pg": "8.13.3",
+    "pg": "8.16.3",
     "postcss": "8.4.49",
     "qrcode.react": "4.2.0",
     "rabbitmq-client": "5.0.5",
