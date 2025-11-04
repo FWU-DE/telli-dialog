@@ -171,10 +171,9 @@ export function FederalStateView(props: FederalStateViewProps) {
 
           <FormFieldArray
             name="supportContacts"
-            label="Support Emailadressen"
-            description="Emailadressen die im Supportfall benutzt werden können. Diese werden im Disclaimer angezeigt."
+            label="Support Kontaktadressen"
+            description="Emailadressen, Telefonnummern oder auch Webadressen die im Supportfall benutzt werden können. Diese werden im Disclaimer angezeigt."
             control={control}
-            inputType="email"
           />
 
           <FormFieldCheckbox
