@@ -129,7 +129,7 @@ export default function TermsConditionsModal({
           <AlertDialog.Description asChild>
             <div className="sr-only">{'Terms and conditions content'}</div>
           </AlertDialog.Description>
-          <div className="flex flex-col gap-5 items-start overflow-y-auto max-h-[60vh]">
+          <div className="flex flex-col gap-5 items-start overflow-y-auto max-h-[60vh] disclaimer-content">
             <div className="" ref={scrollRef} onScroll={handleScroll}>
               {currentContent}
             </div>
@@ -148,7 +148,7 @@ export default function TermsConditionsModal({
             {pageNumber === contents.length - 1 && disclaimerConfig.showCheckBox && (
               <div className="flex items-center gap-3 justify-center">
                 <Checkbox onCheckedChange={setChecked} checked={checked} />
-                <div className="flex-1">
+                <div className="flex-1 disclaimer">
                   <MarkdownDisplay>{disclaimerConfig.acceptLabel ?? ''}</MarkdownDisplay>
                 </div>
               </div>
