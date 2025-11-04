@@ -154,7 +154,7 @@ function extractArticleContent(html: string, url: string): string {
  * @param timeout the timeout for fetch request
  * @returns true if the content-type is text/html, false otherwise
  */
-export async function isWebPage(url: string, timeout?: number) {
+export async function isWebPage(url: string, timeout = 1000) {
   // Set up a timeout for the fetch request
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
