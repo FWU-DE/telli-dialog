@@ -144,7 +144,10 @@
       "edit-toast-success": "Der Assistent wurde erfolgreich aktualisiert.",
       "edit-toast-error": "Etwas ist beim Aktualisieren des Assistenten schief gelaufen.",
       "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
-      "too-many-suggestions": "Das Limit von 10 Vorschlägen wurde erreicht"
+      "too-many-suggestions": "Das Limit von 10 Vorschlägen wurde erreicht",
+      "empty-url": "Es wurde keine URL eingegeben.",
+      "duplicate-url": "Dieser Link wurde bereits hinzugefügt.",
+      "invalid-url": "Die eingegebene URL ist ungültig."
     }
   },
   "characters": {
@@ -234,7 +237,10 @@
       "delete-toast-error": "Der Dialogpartner konnte nicht gelöscht werden.",
       "edit-toast-success": "Der Dialogpartner wurde erfolgreich aktualisiert.",
       "edit-toast-error": "Etwas ist beim Aktualisieren des Dialogpartners schief gelaufen.",
-      "image-toast-success": "Das Bild wurde erfolgreich hochgeladen."
+      "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
+      "empty-url": "Es wurde keine URL eingegeben.",
+      "invalid-url": "Die eingegebene URL ist ungültig.",
+      "duplicate-url": "Dieser Link wurde bereits hinzugefügt."
     }
   },
   "shared-chats": {
@@ -311,9 +317,8 @@
       "edit-toast-success": "Das Lernszenario wurde erfolgreich aktualisiert.",
       "edit-toast-error": "Das Lernszenario konnte nicht aktualisiert werden.",
       "invalid-url": "Die eingegebene URL ist ungültig.",
-      "duplicate-url": "Diese URL wurde bereits hinzugefügt",
-      "max-links-reached": "Es können maximal {max_links} Links hinzugefügt werden",
-      "empty-url": "Es wurde keine URL eingegeben"
+      "duplicate-url": "Diese URL wurde bereits hinzugefügt.",
+      "empty-url": "Es wurde keine URL eingegeben."
     }
   },
   "top-up": {
