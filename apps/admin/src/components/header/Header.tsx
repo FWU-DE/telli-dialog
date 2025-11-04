@@ -10,7 +10,7 @@ export function Header() {
       </Link>
       <div className="flex-1 flex flex-row gap-4">
         <Link href={ROUTES.api.organizations}>telli-api</Link>
-        <Link href={ROUTES.dialog.federalStates}>telli-dialog</Link>
+        <Link href={ROUTES.dialog.page}>telli-dialog</Link>
       </div>
       <div className="flex-none">
         <SignOutButton />
