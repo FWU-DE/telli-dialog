@@ -62,11 +62,14 @@ export function consolidateMessages(messages: Array<Message>): Array<Message> {
 }
 
 /**
- * Limits the chat history to the most recent messages, keeping the first N messages and the last N messages.
- * @param messages - The messages to limit.
- * @param limitRecent - The number of recent message-pairs to keep e.g. 2 means 2 user messages and 2 assistant messages.
- * @param limitFirst - The number of first message-pairs to keep.
- * @param characterLimit - The maximum number of characters to keep.
+ * Limits chat history by keeping the first message pairs, last message pairs, and filling remaining space
+ * with middle messages (prioritizing more recent ones), while respecting character limits.
+ *
+ * @param messages - The messages to limit
+ * @param limitRecent - Number of recent message pairs to keep (e.g. 2 means 2 user + 2 assistant messages)
+ * @param limitFirst - Number of first message pairs to keep (default: 2)
+ * @param characterLimit - Maximum total characters allowed
+ * @returns Limited message array with prioritized recent context
  */
 export function limitChatHistory({
   messages,
@@ -79,70 +82,46 @@ export function limitChatHistory({
   limitFirst?: number;
   characterLimit: number;
 }): Array<Message> {
-  // Validate inputs
-
-  // First consolidate consecutive messages from the same role
   const consolidatedMessages = consolidateMessages(messages);
 
-  // Always include the last user message even if limitRecent == 0
-  limitRecent = limitRecent * 2 + 1;
-  limitFirst = limitFirst * 2 - 1;
+  // Convert pairs to individual message counts
+  const maxFirst = limitFirst * 2;
+  const maxRecent = limitRecent * 2;
 
-  // If we have fewer messages than the limits, just return all messages
-  if (consolidatedMessages.length <= limitFirst + limitRecent) {
+  // If we have fewer messages or less characters than the limits, just return all messages
+  const totalChars = consolidatedMessages.reduce((sum, msg) => sum + msg.content.length, 0);
+  if (consolidatedMessages.length <= maxFirst + maxRecent || totalChars <= characterLimit) {
     return consolidatedMessages;
   }
 
-  // Initialize arrays for front and back messages
-  const frontMessages: Message[] = [];
-  const backMessages: Message[] = [];
-  let runningTotal = 0;
+  // Get mandatory messages
+  const firstMessages = consolidatedMessages.slice(0, maxFirst);
+  const recentMessages = consolidatedMessages.slice(-maxRecent);
 
-  // Track which messages are included and which are omitted
-  const includedIndices = new Set<number>();
-  const omittedIndices = new Set<number>();
+  // Get middle messages in reverse order (most recent first)
+  const startIndex = maxFirst;
+  const endIndex = consolidatedMessages.length - maxRecent;
+  const middleMessages = consolidatedMessages.slice(startIndex, endIndex).reverse();
 
-  let backIndex = consolidatedMessages.length - 1;
-  let frontIndex = 0;
-  let manadatoryMessagesIncluded = false;
-  // Add messages from the front
+  // Build result: first + recent, as they are mandatory
+  const result = [...firstMessages, ...recentMessages];
+  let charCount = result.reduce((sum, msg) => sum + msg.content.length, 0);
 
-  while (backMessages.length + frontMessages.length < consolidatedMessages.length) {
-    const frontMessage = consolidatedMessages[frontIndex];
-    const backMessage = consolidatedMessages[backIndex];
-
-    if (frontMessage === undefined) continue;
-
-    runningTotal += frontMessage.content.length;
-
-    if (frontIndex <= limitFirst) {
-      frontMessages.push(frontMessage);
-      includedIndices.add(frontIndex);
-    }
-
-    if (backMessage === undefined) continue;
-
-    runningTotal += backMessage.content.length;
-    backMessages.unshift(backMessage);
-    includedIndices.add(backIndex);
-
-    manadatoryMessagesIncluded =
-      frontIndex >= limitFirst && backIndex <= consolidatedMessages.length - limitRecent;
-    if (manadatoryMessagesIncluded && runningTotal > characterLimit) {
+  // Add middle messages that fit within the character limit
+  const middleToAdd: Message[] = [];
+  for (const msg of middleMessages) {
+    if (charCount + msg.content.length <= characterLimit) {
+      middleToAdd.unshift(msg); // Add to front to maintain chronological order
+      charCount += msg.content.length;
+    } else {
       break;
     }
-    backIndex--;
-    frontIndex++;
   }
 
-  // Mark all messages not in includedIndices as omitted this is left in for debugging purposes
-  for (let i = 0; i < consolidatedMessages.length; i++) {
-    if (!includedIndices.has(i)) {
-      omittedIndices.add(i);
-    }
-  }
-  // Combine front and back messages
-  return [...frontMessages, ...backMessages];
+  // Insert middle messages between first and recent
+  result.splice(firstMessages.length, 0, ...middleToAdd);
+
+  return result;
 }
 
 /**
