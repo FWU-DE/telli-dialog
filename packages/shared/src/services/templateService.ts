@@ -54,3 +54,53 @@ async function getCustomGpt(): Promise<TemplateModel[]> {
     type: 'custom-gpt',
   }));
 }
+
+/* Fetch a template by its type and id. */
+export async function getTemplateById(
+  templateType: string,
+  templateId: string,
+): Promise<TemplateModel> {
+  if (templateType === 'character') {
+    const character = await db
+      .select({
+        id: characterTable.id,
+        originalId: characterTable.originalCharacterId,
+        name: characterTable.name,
+        createdAt: characterTable.createdAt,
+        isDeleted: characterTable.isDeleted,
+      })
+      .from(characterTable)
+      .where(eq(characterTable.id, templateId));
+
+    if (!character[0]) {
+      throw new Error('Character template not found');
+    }
+
+    return {
+      ...character[0],
+      type: 'character',
+    };
+  } else if (templateType === 'custom-gpt') {
+    const customGpt = await db
+      .select({
+        id: customGptTable.id,
+        originalId: customGptTable.originalCustomGptId,
+        name: customGptTable.name,
+        createdAt: customGptTable.createdAt,
+        isDeleted: customGptTable.isDeleted,
+      })
+      .from(customGptTable)
+      .where(eq(customGptTable.id, templateId));
+
+    if (!customGpt[0]) {
+      throw new Error('Custom GPT template not found');
+    }
+
+    return {
+      ...customGpt[0],
+      type: 'custom-gpt',
+    };
+  } else {
+    throw new Error('Invalid template type');
+  }
+}
