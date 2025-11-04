@@ -72,8 +72,8 @@ importers:
         specifier: 4.24.11
         version: 4.24.11(next@15.5.4(@opentelemetry/api@1.9.0)(@playwright/test@1.56.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       pg:
-        specifier: 8.13.3
-        version: 8.13.3
+        specifier: 8.16.3
+        version: 8.16.3
       react:
         specifier: 19.0.0
         version: 19.0.0
@@ -257,10 +257,10 @@ importers:
         version: 0.31.1
       drizzle-orm:
         specifier: 0.39.3
-        version: 0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.11.11)(pg@8.13.3)
+        version: 0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.11.11)(pg@8.16.3)
       drizzle-zod:
         specifier: 0.7.1
-        version: 0.7.1(drizzle-orm@0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.11.11)(pg@8.13.3))(zod@3.25.67)
+        version: 0.7.1(drizzle-orm@0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.11.11)(pg@8.16.3))(zod@3.25.67)
       he:
         specifier: 1.2.0
         version: 1.2.0
@@ -301,8 +301,8 @@ importers:
         specifier: 4.83.0
         version: 4.83.0(ws@8.18.3)(zod@3.25.67)
       pg:
-        specifier: 8.13.3
-        version: 8.13.3
+        specifier: 8.16.3
+        version: 8.16.3
       postcss:
         specifier: 8.4.49
         version: 8.4.49
@@ -492,16 +492,16 @@ importers:
         version: 0.31.1
       drizzle-orm:
         specifier: 0.39.3
-        version: 0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.11.11)(pg@8.13.3)
+        version: 0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.11.11)(pg@8.16.3)
       drizzle-zod:
         specifier: 0.7.1
-        version: 0.7.1(drizzle-orm@0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.11.11)(pg@8.13.3))(zod@3.25.67)
+        version: 0.7.1(drizzle-orm@0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.11.11)(pg@8.16.3))(zod@3.25.67)
       nanoid:
         specifier: 5.0.9
         version: 5.0.9
       pg:
-        specifier: 8.13.3
-        version: 8.13.3
+        specifier: 8.16.3
+        version: 8.16.3
       zod:
         specifier: 3.25.67
         version: 3.25.67
@@ -6997,9 +6997,9 @@ packages:
     resolution: {integrity: sha512-cRL3JpS3lKMGsKaWndugWQoLOCoP+Cic8oseVcbr0qhPzYD5DWXK+RZ9LY9wxRf7RQia4SCwQlXk0q6FCPrVng==}
     engines: {node: '>=10'}
 
-  pg@8.13.3:
-    resolution: {integrity: sha512-P6tPt9jXbL9HVu/SSRERNYaYG++MjnscnegFh9pPHihfoBSujsrka0hyuymMzeJKFWrcG8wvCKy8rCe8e5nDUQ==}
-    engines: {node: '>= 8.0.0'}
+  pg@8.16.3:
+    resolution: {integrity: sha512-enxc1h0jA/aq5oSDMvqyW3q89ra6XIIDZgCX9vkMrnz5DFTw/Ny3Li2lFQ+pt3L6MCgm/5o2o8HW9hiJji+xvw==}
+    engines: {node: '>= 16.0.0'}
     peerDependencies:
       pg-native: '>=3.0.1'
     peerDependenciesMeta:
@@ -13494,15 +13494,15 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.11.11)(pg@8.13.3):
+  drizzle-orm@0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.11.11)(pg@8.16.3):
     optionalDependencies:
       '@opentelemetry/api': 1.9.0
       '@types/pg': 8.11.11
-      pg: 8.13.3
+      pg: 8.16.3
 
-  drizzle-zod@0.7.1(drizzle-orm@0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.11.11)(pg@8.13.3))(zod@3.25.67):
+  drizzle-zod@0.7.1(drizzle-orm@0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.11.11)(pg@8.16.3))(zod@3.25.67):
     dependencies:
-      drizzle-orm: 0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.11.11)(pg@8.13.3)
+      drizzle-orm: 0.39.3(@opentelemetry/api@1.9.0)(@types/pg@8.11.11)(pg@8.16.3)
       zod: 3.25.67
 
   duck@0.1.12:
@@ -16176,9 +16176,9 @@ snapshots:
 
   pg-numeric@1.0.2: {}
 
-  pg-pool@3.10.1(pg@8.13.3):
+  pg-pool@3.10.1(pg@8.16.3):
     dependencies:
-      pg: 8.13.3
+      pg: 8.16.3
 
   pg-protocol@1.10.3: {}
 
@@ -16200,10 +16200,10 @@ snapshots:
       postgres-interval: 3.0.0
       postgres-range: 1.1.4
 
-  pg@8.13.3:
+  pg@8.16.3:
     dependencies:
       pg-connection-string: 2.9.1
-      pg-pool: 3.10.1(pg@8.13.3)
+      pg-pool: 3.10.1(pg@8.16.3)
       pg-protocol: 1.10.3
       pg-types: 2.2.0
       pgpass: 1.0.5
