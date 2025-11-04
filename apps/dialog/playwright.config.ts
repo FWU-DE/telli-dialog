@@ -24,7 +24,6 @@ export default defineConfig({
     screenshot: 'on',
     video: 'retain-on-failure',
   },
-  globalSetup: './e2e/global-setup.ts',
   /* Configure projects for major browsers */
   projects: [
     {
