@@ -37,6 +37,6 @@ export function logError(message: string, error: unknown) {
   }
 
   if (process.env.NODE_ENV === 'development') {
-    console.log(`${message}: ${JSON.stringify(error)}`, 'error');
+    console.log(message, error, 'error');
   }
 }
