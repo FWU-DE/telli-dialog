@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
+import { regenerateMessage } from '../../utils/utils';
 
 test('should successfully regenerate a response', async ({ page }) => {
   await login(page, 'teacher');
@@ -10,23 +11,20 @@ test('should successfully regenerate a response', async ({ page }) => {
   await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
 
   // Wait for navigation and response
-  await page.waitForURL('/d/**');
+  await page.getByLabel('Reload').waitFor();
 
   // Verify the response contains the expected content
-  const assistantMessage = page.getByLabel('assistant message 1').getByRole('paragraph');
+  const assistantMessage = page.getByLabel('assistant message 1');
   await expect(assistantMessage).toBeVisible();
   await expect(assistantMessage).toContainText('OK');
-  const text = await page.getByLabel('assistant message 1').innerText();
 
   // regenerate last message
-  await page.getByLabel('Reload').click();
-
-  await page.waitForURL('/d/**');
-
-  await page.getByLabel('Reload').waitFor();
+  await regenerateMessage(page);
   await expect(page.getByLabel('assistant message 1')).toContainText('OK');
-  const regeneratedText = await page.getByLabel('assistant message 1').innerText();
-  expect(regeneratedText).not.toBe(text);
+  const chatRequests = (await page.requests()).filter(
+    (x) => x.method() === 'POST' && x.url().endsWith('/api/chat'),
+  );
+  expect(chatRequests).toHaveLength(2);
 });
 
 test('should copy response to clipboard', async ({ page }) => {
@@ -36,10 +34,9 @@ test('should copy response to clipboard', async ({ page }) => {
   await messageInput.click();
   await messageInput.fill('Schreibe "OK"');
   await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
+  await page.getByLabel('Reload').waitFor();
 
-  await page.waitForURL('/d/**');
-
-  const assistantMessage = page.getByLabel('assistant message 1').getByRole('paragraph');
+  const assistantMessage = page.getByLabel('assistant message 1');
   await expect(assistantMessage).toBeVisible();
 
   await page.getByTitle('Kopieren').click();

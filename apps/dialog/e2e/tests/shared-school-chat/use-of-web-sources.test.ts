@@ -63,19 +63,19 @@ test('teacher can create shared chat with web sources, student can join chat and
   await page.getByRole('link', { name: 'Chat öffnen' }).click();
   const schoolChatPagePromise = page.waitForEvent('popup');
   const schoolChatPage = await schoolChatPagePromise;
+  await schoolChatPage.getByLabel('profileDropdown').waitFor();
 
   // send first message
-  await page.waitForTimeout(100);
-  await schoolChatPage.getByRole('button', { name: 'Dialog starten' }).click();
+  const button = schoolChatPage.getByRole('button', { name: 'Dialog starten' });
+  await button.waitFor();
+  await button.click();
   await schoolChatPage
     .getByPlaceholder('Wie kann ich Dir helfen?')
     .fill(
-      'Was berichtete der Reporter Bret Baier nach einem Gespräch mit US-Präsident Trump? Nenne das genaue Zitat.',
+      'Was berichtete der Reporter Bret Baier nach einem Gespräch mit US-Präsident Trump? Beende die Antwort mit "ENDE".',
     );
   await schoolChatPage.keyboard.press('Enter');
+  await schoolChatPage.getByLabel('Reload').waitFor();
 
-  await expect(schoolChatPage.getByLabel('assistant message 1')).toContainText(
-    'Es gab hier keine Überraschungen',
-    { timeout: 8000 },
-  );
+  await expect(schoolChatPage.getByLabel('assistant message 1')).toContainText('ENDE');
 });

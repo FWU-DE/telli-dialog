@@ -10,6 +10,8 @@ test('teacher can provide link and it is displayed in the chat', async ({ page }
       'In welchem Jahr wurde der Artikel verfasst?\nhttps://www.planet-wissen.de/geschichte/neuzeit/barock/index.html',
     );
   await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
+  await page.getByLabel('Reload').waitFor();
+
   await expect(page.getByLabel('assistant message 1')).toBeVisible();
   await expect(page.getByLabel('assistant message 1')).toContainText('2015');
   const sourceTitle = page.getByLabel('Source Title 0 0');
