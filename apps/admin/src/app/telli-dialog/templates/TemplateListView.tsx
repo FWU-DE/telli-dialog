@@ -87,7 +87,7 @@ export default function TemplateListView() {
                 <TableCell>{template.isDeleted ? 'ja' : 'nein'}</TableCell>
                 <TableCell>
                   <Link href={ROUTES.dialog.template(template.type, template.id)}>
-                    <Search />
+                    <Search className="text-primary" />
                   </Link>
                 </TableCell>
               </TableRow>
