@@ -14,6 +14,7 @@ import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { FloatingText } from './floating-text';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
+import LoadingAnimation from './loading-animation';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
@@ -110,6 +111,8 @@ export default function SharedChat({
               </ChatBox>
             );
           })}
+
+          {isLoading && <LoadingAnimation />}
         </div>
       </>
     );

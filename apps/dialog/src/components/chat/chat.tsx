@@ -21,15 +21,14 @@ import { InitialChatContentDisplay } from './initial-content-display';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { ChatInputBox } from './chat-input-box';
 import { ErrorChatPlaceholder } from './error-chat-placeholder';
-import Image from 'next/image';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
-import { cn } from '@/utils/tailwind';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
 import LoadingAnimation from './loading-animation';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { Message } from 'ai';
 import { logDebug, logWarning } from '@/utils/logging/logging';
 import { useSession } from 'next-auth/react';
+import { AssistantIcon } from './assistant-icon';
 
 type ChatProps = {
   id: string;
@@ -256,7 +255,7 @@ export default function Chat({
     );
   }
 
-  const assistantIcon = getAssistantIcon({
+  const assistantIcon = AssistantIcon({
     customGptId: customGpt?.id,
     imageName: character?.name ?? customGpt?.name,
     imageSource,
@@ -342,41 +341,4 @@ function getConversationPath({
   }
 
   return `/d/${conversationId}`;
-}
-
-export function getAssistantIcon({
-  customGptId: customGptId,
-  imageName,
-  imageSource,
-  className,
-}: {
-  customGptId?: string;
-  imageName?: string;
-  imageSource?: string;
-  className?: string;
-}) {
-  if (customGptId === HELP_MODE_GPT_ID) {
-    return (
-      <div className="rounded-enterprise-sm bg-secondary/5 w-8 h-8 place-self-start m-4 mt-1">
-        <RobotIcon className="w-8 h-8 text-primary p-1" />
-      </div>
-    );
-  }
-  if (imageSource !== undefined && imageName !== undefined) {
-    return (
-      <div className={cn('p-1.5 place-self-start mx-4 mt-1 ', className)}>
-        <Image
-          src={imageSource}
-          width={30}
-          height={30}
-          alt={imageName}
-          className="rounded-enterprise-sm"
-          // this is necessary for it rendering correctly in safari
-          style={{
-            minWidth: '2.5rem',
-          }}
-        />
-      </div>
-    );
-  }
 }

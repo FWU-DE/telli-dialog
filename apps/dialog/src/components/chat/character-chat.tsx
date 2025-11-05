@@ -10,10 +10,11 @@ import { ChatBox } from '@/components/chat/chat-box';
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
-import { getAssistantIcon } from './chat';
 import useBreakpoints from '../hooks/use-breakpoints';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
+import LoadingAnimation from './loading-animation';
 import { Message } from 'ai';
+import { AssistantIcon } from './assistant-icon';
 
 const reductionBreakpoint = 'sm';
 
@@ -86,7 +87,7 @@ export default function CharacterSharedChat({
     void reload();
   }
 
-  const assistantIcon = getAssistantIcon({
+  const assistantIcon = AssistantIcon({
     imageName: character.name,
     imageSource,
     className: isBelow[reductionBreakpoint] ? 'mt-0 mx-0' : undefined,
@@ -117,6 +118,8 @@ export default function CharacterSharedChat({
             </ChatBox>
           );
         })}
+
+        {isLoading && <LoadingAnimation />}
       </div>
     );
 
