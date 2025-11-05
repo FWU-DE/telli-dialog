@@ -69,7 +69,7 @@ export function AttachedLinks({
     handleAutosave();
   }
 
-  const maxLinksReached = (getValues() || []).length >= NUMBER_OF_LINKS_LIMIT_FOR_SHARED_CHAT;
+  const maxLinksReached = getValues().length >= NUMBER_OF_LINKS_LIMIT_FOR_SHARED_CHAT;
 
   return (
     <div className="flex flex-col gap-4">
