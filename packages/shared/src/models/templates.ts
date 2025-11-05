@@ -10,11 +10,11 @@ export type TemplateModel = {
   isDeleted: boolean;
 };
 
-export type TemplateToFederalStateMapping = Array<{
+export type TemplateToFederalStateMapping = {
   federalStateId: string;
   mappingId: string | null;
   isMapped: boolean;
-}>;
+};
 
 /**** Guards ****/
 

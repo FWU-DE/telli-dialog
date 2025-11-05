@@ -21,70 +21,32 @@ export type TemplateDetailViewProps = {
   templateId: string;
 };
 
-// Component that handles the form with proper initialization
-function TemplateForm({
-  formData,
-  onSubmit,
-}: {
-  formData: TemplateToFederalStateMapping;
-  onSubmit: (data: TemplateToFederalStateMapping) => void;
-}) {
-  const form = useForm<{ mappings: TemplateToFederalStateMapping }>({
-    defaultValues: { mappings: formData },
-  });
-  const { control } = form;
+export default function TemplateDetailView(props: TemplateDetailViewProps) {
+  const { templateType, templateId } = props;
+  const [template, setTemplate] = useState<TemplateModel | null>(null);
+  const [formData, setFormData] = useState<TemplateToFederalStateMapping[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const form = useForm<{ mappings: TemplateToFederalStateMapping[] }>();
+  const { control, reset } = form;
 
   const { fields } = useFieldArray({
     control,
     name: 'mappings',
   });
 
-  console.log('TemplateForm initialized with formData:', formData);
-  console.log('Form default values:', form.getValues());
-  console.log('Fields from useFieldArray:', fields);
-
-  const handleSubmit = (data: { mappings: TemplateToFederalStateMapping }) => {
-    onSubmit(data.mappings);
-  };
-
-  return (
-    <form onSubmit={form.handleSubmit(handleSubmit)}>
-      {fields.map((field, index) => {
-        const fieldName = `mappings.${index}.isMapped` as const;
-        console.log(`Checkbox ${index} for ${formData[index]?.federalStateId}:`, {
-          isMapped: formData[index]?.isMapped,
-          path: fieldName,
-          fieldId: field.id,
-        });
-        return (
-          <FormFieldCheckbox
-            control={control}
-            key={field.id}
-            label={`${formData[index]?.federalStateId} (${formData[index]?.isMapped ? 'checked' : 'unchecked'})`}
-            name={fieldName}
-            variant="compact"
-          />
-        );
-      })}
-      <Button type="submit">Speichern</Button>
-    </form>
-  );
-}
-
-export default function TemplateDetailView(props: TemplateDetailViewProps) {
-  const { templateType, templateId } = props;
-  const [template, setTemplate] = useState<TemplateModel | null>(null);
-  const [formData, setFormData] = useState<TemplateToFederalStateMapping>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const onSubmit = (data: TemplateToFederalStateMapping) => {
+  const handleSubmit = ({ mappings }: { mappings: TemplateToFederalStateMapping[] }) => {
     try {
-      updateTemplateMappingsAction(templateType, templateId, data);
+      updateTemplateMappingsAction(templateType, templateId, mappings);
+      toast.success('Template-Zuordnungen erfolgreich aktualisiert.');
     } catch {
       toast.error('Fehler beim Aktualisieren der Template-Zuordnungen.');
     }
   };
+
+  useEffect(() => {
+    reset({ mappings: formData });
+  }, [formData, reset]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -98,16 +60,9 @@ export default function TemplateDetailView(props: TemplateDetailViewProps) {
         ]);
 
         setTemplate(template);
-        // Ensure boolean values are properly typed
-        const processedMappings = federalStateMappings.map((mapping) => ({
-          ...mapping,
-          isMapped: Boolean(mapping.isMapped),
-        }));
-        console.log('Raw federalStateMappings:', federalStateMappings);
-        console.log('Processed mappings:', processedMappings);
-        setFormData(processedMappings);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        setFormData(federalStateMappings);
+      } catch (error) {
+        setError(error instanceof Error ? error.message : 'Ein Fehler ist aufgetreten');
       } finally {
         setLoading(false);
       }
@@ -141,12 +96,20 @@ export default function TemplateDetailView(props: TemplateDetailViewProps) {
           </>
         )}
       </div>
-      <div>
-        Mappings
-        {formData.length > 0 && (
-          <TemplateForm key={`form-${templateId}`} formData={formData} onSubmit={onSubmit} />
-        )}
-      </div>
+      <form onSubmit={form.handleSubmit(handleSubmit)}>
+        {fields.map((field, index) => {
+          return (
+            <FormFieldCheckbox
+              control={control}
+              key={field.id}
+              label={field.federalStateId}
+              name={`mappings.${index}.isMapped`}
+              variant="compact"
+            />
+          );
+        })}
+        <Button type="submit">Speichern</Button>
+      </form>
     </div>
   );
 }

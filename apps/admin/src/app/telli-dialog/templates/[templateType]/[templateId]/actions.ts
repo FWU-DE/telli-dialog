@@ -23,7 +23,7 @@ export async function getFederalStatesWithMappingsAction(
 export async function updateTemplateMappingsAction(
   templateType: TemplateTypes,
   templateId: string,
-  mappings: TemplateToFederalStateMapping,
+  mappings: TemplateToFederalStateMapping[],
 ) {
   return updateTemplateMappings(templateType, templateId, mappings);
 }

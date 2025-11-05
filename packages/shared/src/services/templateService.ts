@@ -118,7 +118,7 @@ export async function getTemplateById(
 export async function getFederalStatesWithMappings(
   templateType: TemplateTypes,
   templateId: string,
-): Promise<TemplateToFederalStateMapping> {
+): Promise<TemplateToFederalStateMapping[]> {
   if (templateType === 'character') {
     const subquery = db
       .select()
@@ -147,7 +147,7 @@ export async function getFederalStatesWithMappings(
 export async function updateTemplateMappings(
   templateType: TemplateTypes,
   templateId: string,
-  mappings: TemplateToFederalStateMapping,
+  mappings: TemplateToFederalStateMapping[],
 ): Promise<void> {
   if (templateType === 'character') {
     const mappingsToDelete = mappings
