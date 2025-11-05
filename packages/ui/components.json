@@ -15,5 +15,6 @@
     "utils": "@telli/ui/lib/utils",
     "lib": "@telli/ui/lib",
     "types": "@telli/ui/types"
-  }
+  },
+  "iconLibrary": "lucide-react"
 }

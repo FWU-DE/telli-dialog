@@ -22,6 +22,7 @@ import {
 import { ROUTES } from '@/consts/routes';
 import Link from 'next/link';
 import { TemplateModel } from '@shared/models/templates';
+import { Search } from 'lucide-react';
 
 function getTypeName(type: TemplateModel['type']): string {
   switch (type) {
@@ -85,7 +86,9 @@ export default function TemplateListView() {
                 <TableCell>{template.createdAt.toLocaleString()}</TableCell>
                 <TableCell>{template.isDeleted ? 'ja' : 'nein'}</TableCell>
                 <TableCell>
-                  <Link href={ROUTES.dialog.template(template.type, template.id)}>Details</Link>
+                  <Link href={ROUTES.dialog.template(template.type, template.id)}>
+                    <Search />
+                  </Link>
                 </TableCell>
               </TableRow>
             ))}
