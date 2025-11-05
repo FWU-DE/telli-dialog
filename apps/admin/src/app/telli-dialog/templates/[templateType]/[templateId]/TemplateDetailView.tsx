@@ -1,32 +1,89 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getFederalStateIdsAction, getTemplateByIdAction } from './actions';
-import { TemplateModel, TemplateTypes } from '@shared/models/templates';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import {
+  getFederalStatesWithMappingsAction,
+  getTemplateByIdAction,
+  updateTemplateMappingsAction,
+} from './actions';
+import {
+  TemplateModel,
+  TemplateToFederalStateMapping,
+  TemplateTypes,
+} from '@shared/models/templates';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { Button } from '@ui/components/Button';
 import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
+import { toast } from 'sonner';
 
 export type TemplateDetailViewProps = {
   templateType: TemplateTypes;
   templateId: string;
 };
 
-const formSchema = z.array(z.object({ federalStateId: z.string(), isSelected: z.boolean() }));
-type FormData = z.infer<typeof formSchema>;
+// Component that handles the form with proper initialization
+function TemplateForm({
+  formData,
+  onSubmit,
+}: {
+  formData: TemplateToFederalStateMapping;
+  onSubmit: (data: TemplateToFederalStateMapping) => void;
+}) {
+  const form = useForm<{ mappings: TemplateToFederalStateMapping }>({
+    defaultValues: { mappings: formData },
+  });
+  const { control } = form;
+
+  const { fields } = useFieldArray({
+    control,
+    name: 'mappings',
+  });
+
+  console.log('TemplateForm initialized with formData:', formData);
+  console.log('Form default values:', form.getValues());
+  console.log('Fields from useFieldArray:', fields);
+
+  const handleSubmit = (data: { mappings: TemplateToFederalStateMapping }) => {
+    onSubmit(data.mappings);
+  };
+
+  return (
+    <form onSubmit={form.handleSubmit(handleSubmit)}>
+      {fields.map((field, index) => {
+        const fieldName = `mappings.${index}.isMapped` as const;
+        console.log(`Checkbox ${index} for ${formData[index]?.federalStateId}:`, {
+          isMapped: formData[index]?.isMapped,
+          path: fieldName,
+          fieldId: field.id,
+        });
+        return (
+          <FormFieldCheckbox
+            control={control}
+            key={field.id}
+            label={`${formData[index]?.federalStateId} (${formData[index]?.isMapped ? 'checked' : 'unchecked'})`}
+            name={fieldName}
+            variant="compact"
+          />
+        );
+      })}
+      <Button type="submit">Speichern</Button>
+    </form>
+  );
+}
 
 export default function TemplateDetailView(props: TemplateDetailViewProps) {
   const { templateType, templateId } = props;
   const [template, setTemplate] = useState<TemplateModel | null>(null);
-  const [formData, setFormData] = useState<FormData>([]);
+  const [formData, setFormData] = useState<TemplateToFederalStateMapping>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const form = useForm<FormData>();
-  const { control } = form;
 
-  const onSubmit = (data: FormData) => {
-    console.log(data);
+  const onSubmit = (data: TemplateToFederalStateMapping) => {
+    try {
+      updateTemplateMappingsAction(templateType, templateId, data);
+    } catch {
+      toast.error('Fehler beim Aktualisieren der Template-Zuordnungen.');
+    }
   };
 
   useEffect(() => {
@@ -35,13 +92,20 @@ export default function TemplateDetailView(props: TemplateDetailViewProps) {
         setLoading(true);
         setError(null);
 
-        const [template, federalStateIds] = await Promise.all([
+        const [template, federalStateMappings] = await Promise.all([
           getTemplateByIdAction(templateType, templateId),
-          getFederalStateIdsAction(),
+          getFederalStatesWithMappingsAction(templateType, templateId),
         ]);
 
         setTemplate(template);
-        setFormData(federalStateIds.map((id) => ({ federalStateId: id.id, isSelected: false })));
+        // Ensure boolean values are properly typed
+        const processedMappings = federalStateMappings.map((mapping) => ({
+          ...mapping,
+          isMapped: Boolean(mapping.isMapped),
+        }));
+        console.log('Raw federalStateMappings:', federalStateMappings);
+        console.log('Processed mappings:', processedMappings);
+        setFormData(processedMappings);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -79,19 +143,9 @@ export default function TemplateDetailView(props: TemplateDetailViewProps) {
       </div>
       <div>
         Mappings
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          {formData.map((data, index) => (
-            <FormFieldCheckbox
-              control={control}
-              key={data.federalStateId}
-              label={data.federalStateId}
-              name={`${index}.isSelected`}
-              variant="compact"
-            />
-          ))}
-
-          <Button type="submit">Speichern</Button>
-        </form>
+        {formData.length > 0 && (
+          <TemplateForm key={`form-${templateId}`} formData={formData} onSubmit={onSubmit} />
+        )}
       </div>
     </div>
   );

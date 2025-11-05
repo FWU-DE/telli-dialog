@@ -1,7 +1,16 @@
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { db } from '@shared/db';
-import { characterTable, customGptTable, federalStateTable } from '@shared/db/schema';
-import { TemplateModel, TemplateTypes } from '@shared/models/templates';
+import {
+  characterTable,
+  characterTemplateMappingTable,
+  customGptTable,
+  federalStateTable,
+} from '@shared/db/schema';
+import {
+  TemplateModel,
+  TemplateToFederalStateMapping,
+  TemplateTypes,
+} from '@shared/models/templates';
 
 /**
  * Fetch all global templates from the database, including deleted templates.
@@ -105,11 +114,63 @@ export async function getTemplateById(
   }
 }
 
-/* Fetch all federal states from the database for template mapping purpose. */
-export async function getFederalStateIds() {
-  return await db
-    .select({
-      id: federalStateTable.id,
-    })
-    .from(federalStateTable);
+/* Select all federal states with the mapping information for the given template. */
+export async function getFederalStatesWithMappings(
+  templateType: TemplateTypes,
+  templateId: string,
+): Promise<TemplateToFederalStateMapping> {
+  if (templateType === 'character') {
+    const subquery = db
+      .select()
+      .from(characterTemplateMappingTable)
+      .where(eq(characterTemplateMappingTable.characterId, templateId))
+      .as('mapping');
+
+    const federalStateMappings = await db
+      .select({ mappingId: subquery.id, federalStateId: federalStateTable.id })
+      .from(federalStateTable)
+      .leftJoin(subquery, eq(subquery.federalStateId, federalStateTable.id));
+
+    return federalStateMappings.map((mapping) => ({
+      ...mapping,
+      isMapped: mapping.mappingId !== null,
+    }));
+  } else {
+    throw new Error('not implemented');
+  }
+}
+
+/* Updates template to federal state mapping by:
+- adding new mappings
+- deleting old mappings
+ */
+export async function updateTemplateMappings(
+  templateType: TemplateTypes,
+  templateId: string,
+  mappings: TemplateToFederalStateMapping,
+): Promise<void> {
+  if (templateType === 'character') {
+    const mappingsToDelete = mappings
+      .filter((mapping) => !!mapping.mappingId && !mapping.isMapped)
+      .map((mapping) => mapping.mappingId!);
+
+    // delete existing mappings that are unchecked now
+    await db
+      .delete(characterTemplateMappingTable)
+      .where(inArray(characterTemplateMappingTable.id, mappingsToDelete));
+
+    // insert new mappings
+    const newMappings = mappings
+      .filter((mapping) => !mapping.mappingId && mapping.isMapped)
+      .map((mapping) => ({
+        characterId: templateId,
+        federalStateId: mapping.federalStateId,
+      }));
+
+    if (newMappings.length > 0) {
+      await db.insert(characterTemplateMappingTable).values(newMappings);
+    }
+  } else {
+    throw new Error('not implemented');
+  }
 }

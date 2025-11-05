@@ -10,6 +10,12 @@ export type TemplateModel = {
   isDeleted: boolean;
 };
 
+export type TemplateToFederalStateMapping = Array<{
+  federalStateId: string;
+  mappingId: string | null;
+  isMapped: boolean;
+}>;
+
 /**** Guards ****/
 
 export function isTemplateType(templateType: string): templateType is TemplateTypes {
