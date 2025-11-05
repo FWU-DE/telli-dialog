@@ -154,12 +154,6 @@ export async function updateTemplateMappings(
       .filter((mapping) => !!mapping.mappingId && !mapping.isMapped)
       .map((mapping) => mapping.mappingId!);
 
-    // delete existing mappings that are unchecked now
-    await db
-      .delete(characterTemplateMappingTable)
-      .where(inArray(characterTemplateMappingTable.id, mappingsToDelete));
-
-    // insert new mappings
     const newMappings = mappings
       .filter((mapping) => !mapping.mappingId && mapping.isMapped)
       .map((mapping) => ({
@@ -167,9 +161,17 @@ export async function updateTemplateMappings(
         federalStateId: mapping.federalStateId,
       }));
 
-    if (newMappings.length > 0) {
-      await db.insert(characterTemplateMappingTable).values(newMappings);
-    }
+    await db.transaction(async (tx) => {
+      if (mappingsToDelete.length > 0) {
+        await tx
+          .delete(characterTemplateMappingTable)
+          .where(inArray(characterTemplateMappingTable.id, mappingsToDelete));
+      }
+
+      if (newMappings.length > 0) {
+        await tx.insert(characterTemplateMappingTable).values(newMappings);
+      }
+    });
   } else {
     throw new Error('not implemented');
   }
