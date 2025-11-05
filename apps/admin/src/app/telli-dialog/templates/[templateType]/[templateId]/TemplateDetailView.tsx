@@ -15,6 +15,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { Button } from '@ui/components/Button';
 import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
 import { toast } from 'sonner';
+import { TemplateInfoCard } from './TemplateInfoCard';
 
 export type TemplateDetailViewProps = {
   templateType: TemplateTypes;
@@ -81,21 +82,7 @@ export default function TemplateDetailView(props: TemplateDetailViewProps) {
 
   return (
     <div>
-      <div>
-        <div>
-          Template Detail View for {props.templateType} - {props.templateId}
-        </div>
-        {template && (
-          <>
-            <div>{template.id}</div>
-            <div>{template.originalId}</div>
-            <div>{template.type}</div>
-            <div>{template.name}</div>
-            <div>{template.createdAt.toLocaleString()}</div>
-            <div>{template.isDeleted.toString()}</div>
-          </>
-        )}
-      </div>
+      <div>{template && <TemplateInfoCard template={template} />}</div>
       <form onSubmit={form.handleSubmit(handleSubmit)}>
         {fields.map((field, index) => {
           return (
