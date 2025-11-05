@@ -8,7 +8,7 @@ import { useSession } from 'next-auth/react';
 import { useToast } from '../common/toast';
 import { SUPPORTED_DOCUMENTS_EXTENSIONS } from '@/const';
 import { validateFileExtentsion as validateFileExtension } from '@/utils/files/generic';
-import { FORM_NUMBER_FILES_LIMIT } from '@/configuration-text-inputs/const';
+import { NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT } from '@/configuration-text-inputs/const';
 
 export function FileDrop({
   onFileUploaded,
@@ -42,10 +42,10 @@ export function FileDrop({
 
       const totalFileCount = countOfFiles ? countOfFiles + files.length : files.length;
 
-      if (totalFileCount > FORM_NUMBER_FILES_LIMIT) {
+      if (totalFileCount > NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT) {
         toast.error(
           t('toasts.file-limit-exceeded', {
-            max_files: FORM_NUMBER_FILES_LIMIT,
+            max_files: NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT,
           }),
         );
         return;

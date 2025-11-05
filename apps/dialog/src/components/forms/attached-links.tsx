@@ -6,12 +6,13 @@ import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import Citation from '@/components/chat/sources/citation';
 import PlusIcon from '@/components/icons/plus';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
-import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import {
+  NUMBER_OF_LINKS_LIMIT_FOR_SHARED_CHAT,
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+} from '@/configuration-text-inputs/const';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { useToast } from '../common/toast';
 import { useTranslations } from 'next-intl';
-
-const MAX_LINKS = 5;
 
 type AttachedLinksProps = {
   fields: FieldArrayWithId<WebsearchSource, never, 'id'>[];
@@ -37,10 +38,6 @@ export function AttachedLinks({
   function appendLink(content: string) {
     const currentValues = getValues() || [];
 
-    if (currentValues.length >= MAX_LINKS) {
-      toast.error(tToast('max-links-reached', { max_links: MAX_LINKS }));
-      return;
-    }
     if (content === '') {
       toast.error(tToast('empty-url'));
       return;
@@ -71,7 +68,9 @@ export function AttachedLinks({
     setValue(newValues);
     handleAutosave();
   }
-  const maxLinksReached = (getValues() || []).length >= MAX_LINKS;
+
+  const maxLinksReached = getValues().length >= NUMBER_OF_LINKS_LIMIT_FOR_SHARED_CHAT;
+
   return (
     <div className="flex flex-col gap-4">
       <label className={cn(labelClassName, 'text-sm')}>{t('attached-links-label')}</label>
@@ -97,7 +96,7 @@ export function AttachedLinks({
           <button
             type="button"
             className={cn(buttonPrimaryClassName, 'flex items-center gap-2 py-1 my-0')}
-            disabled={readOnly || maxLinksReached}
+            disabled={maxLinksReached}
             onClick={(e) => {
               e.stopPropagation();
               appendLink(currentAttachedLink);

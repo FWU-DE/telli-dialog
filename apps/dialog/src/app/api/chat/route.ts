@@ -19,8 +19,6 @@ import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exce
 import { dbUpdateLastUsedModelByUserId } from '@shared/db/functions/user';
 import { dbGetAttachedFileByEntityId, linkFilesToConversation } from '@shared/db/functions/files';
 import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
-import { SMALL_MODEL_MAX_CHARACTERS } from '@/configuration-text-inputs/const';
-import { SMALL_MODEL_LIST } from '@/configuration-text-inputs/const';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
@@ -200,14 +198,11 @@ export async function POST(request: NextRequest) {
   await updateSession({
     user: await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id }),
   });
-  const maxCharacterLimit = SMALL_MODEL_LIST.includes(definedModel.displayName)
-    ? SMALL_MODEL_MAX_CHARACTERS
-    : TOTAL_CHAT_LENGTH_LIMIT;
   const prunedMessages = limitChatHistory({
     messages,
     limitRecent: 30,
     limitFirst: 2,
-    characterLimit: maxCharacterLimit,
+    characterLimit: TOTAL_CHAT_LENGTH_LIMIT,
   });
   const systemPrompt = await constructChatSystemPrompt({
     characterId,
