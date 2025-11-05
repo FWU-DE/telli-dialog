@@ -1,5 +1,6 @@
 import { TemplateModel } from '@shared/models/templates';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ui/components/Card';
+import { getTemplateTypeName } from '../../templateTypeName';
 
 export type TemplateInfoCardProps = {
   template: TemplateModel;
@@ -11,7 +12,7 @@ export function TemplateInfoCard({ template }: TemplateInfoCardProps) {
       <CardHeader>
         <CardTitle className="flex flex-row justify-between">
           <span>{template.name}</span>
-          <span>{template.type}</span>
+          <span>{getTemplateTypeName(template.type)}</span>
         </CardTitle>
         <CardDescription>{template.id}</CardDescription>
       </CardHeader>

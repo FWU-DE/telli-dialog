@@ -16,6 +16,14 @@ import { Button } from '@ui/components/Button';
 import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
 import { toast } from 'sonner';
 import { TemplateInfoCard } from './TemplateInfoCard';
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@ui/components/Card';
 
 export type TemplateDetailViewProps = {
   templateType: TemplateTypes;
@@ -81,22 +89,32 @@ export default function TemplateDetailView(props: TemplateDetailViewProps) {
   }
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       <div>{template && <TemplateInfoCard template={template} />}</div>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
-        {fields.map((field, index) => {
-          return (
-            <FormFieldCheckbox
-              control={control}
-              key={field.id}
-              label={field.federalStateId}
-              name={`mappings.${index}.isMapped`}
-              variant="compact"
-            />
-          );
-        })}
-        <Button type="submit">Speichern</Button>
-      </form>
+      <Card>
+        <CardHeader>
+          <CardTitle>Template Zuordnungen</CardTitle>
+          <CardDescription>Legt die Zuweisung zu den Bundesländern fest.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={form.handleSubmit(handleSubmit)}>
+            {fields.map((field, index) => {
+              return (
+                <FormFieldCheckbox
+                  control={control}
+                  key={field.id}
+                  label={field.federalStateId}
+                  name={`mappings.${index}.isMapped`}
+                  variant="compact"
+                />
+              );
+            })}
+            <CardAction>
+              <Button type="submit">Speichern</Button>
+            </CardAction>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

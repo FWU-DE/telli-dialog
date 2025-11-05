@@ -23,17 +23,7 @@ import { ROUTES } from '@/consts/routes';
 import Link from 'next/link';
 import { TemplateModel } from '@shared/models/templates';
 import { Search } from 'lucide-react';
-
-function getTypeName(type: TemplateModel['type']): string {
-  switch (type) {
-    case 'character':
-      return 'Dialogpartner';
-    case 'custom-gpt':
-      return 'Assistent';
-    default:
-      return 'Unbekannt';
-  }
-}
+import { getTemplateTypeName } from './templateTypeName';
 
 export default function TemplateListView() {
   const [templates, setTemplates] = useState<TemplateModel[]>([]);
@@ -81,7 +71,7 @@ export default function TemplateListView() {
               <TableRow key={template.id}>
                 <TableCell>{template.id}</TableCell>
                 <TableCell>{template.originalId}</TableCell>
-                <TableCell>{getTypeName(template.type)}</TableCell>
+                <TableCell>{getTemplateTypeName(template.type)}</TableCell>
                 <TableCell>{template.name}</TableCell>
                 <TableCell>{template.createdAt.toLocaleString()}</TableCell>
                 <TableCell>{template.isDeleted ? 'ja' : 'nein'}</TableCell>
