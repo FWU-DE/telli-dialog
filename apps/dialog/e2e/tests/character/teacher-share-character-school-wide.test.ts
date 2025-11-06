@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
+import { waitForToast } from '../../utils/utils';
 
 test('teacher can share character school-wide', async ({ page }) => {
   await login(page, 'teacher1-BY');
@@ -42,11 +43,12 @@ test('teacher can share character school-wide', async ({ page }) => {
     .fill('Ada Lovelace soll keine komplizierten Fachbegriffe verwenden.');
 
   const submitButton = page.getByRole('button', { name: 'Dialogpartner erstellen' });
+  await submitButton.scrollIntoViewIfNeeded();
   await expect(submitButton).toBeVisible();
+  await expect(submitButton).toBeEnabled();
   await submitButton.click();
-
-  // Delete cookies to simulate a new session
-  await page.context().clearCookies();
+  await waitForToast(page);
+  await page.waitForURL('/characters?visibility=school**');
 
   // Login as a different teacher to verify sharing
   await login(page, 'teacher2-BY');
