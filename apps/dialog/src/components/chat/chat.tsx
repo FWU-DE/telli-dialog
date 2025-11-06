@@ -1,7 +1,7 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import { FormEvent, ReactNode, useEffect, useRef, useState } from 'react';
+import { FormEvent, ReactNode, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
 import { type CharacterModel, type CustomGptModel, FileModel } from '@shared/db/schema';
@@ -29,6 +29,8 @@ import { logDebug, logWarning } from '@/utils/logging/logging';
 import { useSession } from 'next-auth/react';
 import { AssistantIcon } from './assistant-icon';
 import { doesUserInputContainLinkOrFile } from '@/utils/chat/messages';
+import { useAutoScroll } from '@/hooks/use-auto-scroll';
+import { getConversationPath } from '@/utils/chat/path';
 
 type ChatProps = {
   id: string;
@@ -124,6 +126,8 @@ export default function Chat({
       },
     });
 
+  const scrollRef = useAutoScroll([messages, status]);
+
   useEffect(() => {
     const fetchData = async () => {
       const fileMapping = await refetchFileMapping(id);
@@ -131,15 +135,6 @@ export default function Chat({
     };
     void fetchData();
   }, [countOfFilesInChat, id]);
-
-  // scroll position handling
-  // scroll down to the end of the chat when new messages are added or when loading state changes
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-    }
-  }, [messages, status]);
 
   async function customHandleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -307,24 +302,4 @@ export default function Chat({
       </div>
     </div>
   );
-}
-
-function getConversationPath({
-  customGptId,
-  characterId,
-  conversationId,
-}: {
-  customGptId?: string;
-  characterId?: string;
-  conversationId: string;
-}) {
-  if (characterId !== undefined) {
-    return `/characters/d/${characterId}/${conversationId}`;
-  }
-
-  if (customGptId !== undefined) {
-    return `/custom/d/${customGptId}/${conversationId}`;
-  }
-
-  return `/d/${conversationId}`;
 }

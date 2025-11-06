@@ -73,7 +73,6 @@ export default function CharacterSharedChat({
   }
 
   function handleReload() {
-    // Clear rate limit error before reloading
     resetError();
     void reload();
   }

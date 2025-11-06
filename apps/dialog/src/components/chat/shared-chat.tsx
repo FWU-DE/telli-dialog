@@ -16,6 +16,7 @@ import { FloatingText } from './floating-text';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
 import LoadingAnimation from './loading-animation';
 import { doesUserInputContainLinkOrFile } from '@/utils/chat/messages';
+import { useAutoScroll } from '@/hooks/use-auto-scroll';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
@@ -49,14 +50,8 @@ export default function SharedChat({
       onError: handleError,
     });
 
-  const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  const scrollRef = useAutoScroll([messages, id, inviteCode]);
   const containerRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-    }
-  }, [messages, id, inviteCode]);
 
   async function customHandleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -74,7 +69,6 @@ export default function SharedChat({
   }
 
   function handleReload() {
-    // Clear rate limit error before reloading
     resetError();
     reload();
   }
