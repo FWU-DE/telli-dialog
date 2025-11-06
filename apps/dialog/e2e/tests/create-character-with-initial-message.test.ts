@@ -51,7 +51,7 @@ test('teacher can create character with initial message and verify it appears in
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
-  await page.waitForTimeout(3000);
+  await page.waitForURL('/characters?visibility=private');
 
   // check if created with right name
   const dialogChatName = page.getByText('Albert Einstein').first();
@@ -85,9 +85,7 @@ test('teacher can create character with initial message and verify it appears in
   await loginButton.click();
 
   await page.waitForURL('/ua/characters/**/dialog?inviteCode=*');
-
-  // Wait for the page to load completely
-  await page.waitForTimeout(2000);
+  await page.getByLabel('assistant message 1').waitFor();
 
   // Verify the initial message appears in the chat interface
   // The initial message should be displayed as an assistant message
@@ -100,7 +98,7 @@ test('teacher can create character with initial message and verify it appears in
   await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
 
   // Wait for the response and verify that we now have both the initial message and the new conversation
-  await page.waitForTimeout(5000);
+  await page.getByLabel('Reload').waitFor();
 
   // Should have user message (message 2) and assistant response (message 3)
   const userMessage = page.getByLabel('user message 1');

@@ -9,6 +9,7 @@ export async function login(page: Page, user: string) {
   }
 
   await page.context().clearCookies();
+  await page.goto('/login');
   await page.waitForURL('**/login');
 
   await page.getByRole('button', { name: 'Mit VIDIS einloggen' }).click();
