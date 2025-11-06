@@ -1,6 +1,6 @@
 'use client';
 import { useChat } from '@ai-sdk/react';
-import { FormEvent, useEffect, useRef } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { CharacterModel } from '@shared/db/schema';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
@@ -15,6 +15,7 @@ import { useCheckStatusCode } from '@/hooks/use-response-status';
 import LoadingAnimation from './loading-animation';
 import { Message } from 'ai';
 import { AssistantIcon } from './assistant-icon';
+import { parseHyperlinks } from '@/utils/web-search/parsing';
 
 const reductionBreakpoint = 'sm';
 
@@ -22,14 +23,17 @@ export default function CharacterSharedChat({
   imageSource,
   ...character
 }: CharacterModel & { inviteCode: string; imageSource?: string }) {
-  const { id, inviteCode } = character;
   const t = useTranslations('characters.shared');
 
+  const { id, inviteCode } = character;
   const timeLeft = calculateTimeLeftBySharedChat(character);
   const chatActive = timeLeft > 0;
 
   const searchParams = new URLSearchParams({ id, inviteCode });
   const endpoint = `/api/character?${searchParams.toString()}`;
+
+  const [doesLastUserMessageContainLinkOrFile, setDoesLastUserMessageContainLinkOrFile] =
+    useState(false);
 
   // substitute the error object from the useChat hook, to dislay a user friendly error message in German
   const { error, handleResponse, handleError, resetError } = useCheckStatusCode();
@@ -37,26 +41,17 @@ export default function CharacterSharedChat({
     ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
     : [];
 
-  const {
-    messages,
-    setMessages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
-    reload,
-    status,
-    stop,
-  } = useChat({
-    id,
-    initialMessages,
-    api: endpoint,
-    experimental_throttle: 100,
-    maxSteps: 2,
-    body: { modelId: character.modelId },
-    onResponse: handleResponse,
-    onError: handleError,
-  });
+  const { messages, setMessages, input, handleInputChange, handleSubmit, reload, status, stop } =
+    useChat({
+      id,
+      initialMessages,
+      api: endpoint,
+      experimental_throttle: 100,
+      maxSteps: 2,
+      body: { modelId: character.modelId },
+      onResponse: handleResponse,
+      onError: handleError,
+    });
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const { isBelow } = useBreakpoints();
@@ -71,6 +66,7 @@ export default function CharacterSharedChat({
     e.preventDefault();
 
     try {
+      setDoesLastUserMessageContainLinkOrFile(doesUserInputContainLinkOrFile());
       handleSubmit(e, {});
     } catch (error) {
       console.error(error);
@@ -87,11 +83,19 @@ export default function CharacterSharedChat({
     void reload();
   }
 
+  // returns true if user input contains web links
+  function doesUserInputContainLinkOrFile(): boolean {
+    const links = parseHyperlinks(input);
+    return !!links && links.length > 0;
+  }
+
   const assistantIcon = AssistantIcon({
     imageName: character.name,
     imageSource,
     className: isBelow[reductionBreakpoint] ? 'mt-0 mx-0' : undefined,
   });
+
+  const isLoading = status === 'submitted';
 
   const innerContent =
     messages.length === 0 ? (
@@ -119,7 +123,9 @@ export default function CharacterSharedChat({
           );
         })}
 
-        {isLoading && <LoadingAnimation />}
+        {isLoading && (
+          <LoadingAnimation isExternalResourceUsed={doesLastUserMessageContainLinkOrFile} />
+        )}
       </div>
     );
 

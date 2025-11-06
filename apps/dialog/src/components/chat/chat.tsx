@@ -70,7 +70,6 @@ export default function Chat({
   );
   const [files, setFiles] = useState<Map<string, LocalFileState>>(new Map());
   const [countOfFilesInChat, setCountOfFilesInChat] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
   const [doesLastUserMessageContainLinkOrFile, setDoesLastUserMessageContainLinkOrFile] =
     useState(false);
   const queryClient = useQueryClient();
@@ -125,15 +124,6 @@ export default function Chat({
       },
     });
 
-  // set loading state based on status of useChat hook
-  useEffect(() => {
-    if (status === 'submitted') {
-      setIsLoading(true);
-    } else {
-      setIsLoading(false);
-    }
-  }, [status]);
-
   useEffect(() => {
     const fetchData = async () => {
       const fileMapping = await refetchFileMapping(id);
@@ -149,7 +139,7 @@ export default function Chat({
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     }
-  }, [messages, isLoading]);
+  }, [messages, status]);
 
   async function customHandleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -260,6 +250,8 @@ export default function Chat({
     imageName: character?.name ?? customGpt?.name,
     imageSource,
   });
+
+  const isLoading = status === 'submitted';
 
   const messagesContent = (
     <div className="flex flex-col gap-2 max-w-3xl mx-auto p-4">

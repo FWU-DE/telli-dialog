@@ -15,6 +15,7 @@ import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { FloatingText } from './floating-text';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
 import LoadingAnimation from './loading-animation';
+import { parseHyperlinks } from '@/utils/web-search/parsing';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
@@ -30,30 +31,23 @@ export default function SharedChat({
   const endpoint = `/api/shared-chat?${searchParams.toString()}`;
 
   const [dialogStarted, setDialogStarted] = React.useState(false);
+  const [doesLastUserMessageContainLinkOrFile, setDoesLastUserMessageContainLinkOrFile] =
+    React.useState(false);
 
   // substitute the error object from the useChat hook, to dislay a user friendly error message in German
   const { error, handleResponse, handleError, resetError } = useCheckStatusCode();
 
-  const {
-    messages,
-    setMessages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
-    reload,
-    stop,
-    status,
-  } = useChat({
-    id,
-    initialMessages: [],
-    api: endpoint,
-    experimental_throttle: 100,
-    maxSteps: 2,
-    body: { modelId: sharedSchoolChat.modelId },
-    onResponse: handleResponse,
-    onError: handleError,
-  });
+  const { messages, setMessages, input, handleInputChange, handleSubmit, reload, stop, status } =
+    useChat({
+      id,
+      initialMessages: [],
+      api: endpoint,
+      experimental_throttle: 100,
+      maxSteps: 2,
+      body: { modelId: sharedSchoolChat.modelId },
+      onResponse: handleResponse,
+      onError: handleError,
+    });
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -68,6 +62,7 @@ export default function SharedChat({
     e.preventDefault();
 
     try {
+      setDoesLastUserMessageContainLinkOrFile(doesUserInputContainLinkOrFile());
       handleSubmit(e, {});
     } catch (error) {
       console.error(error);
@@ -83,6 +78,14 @@ export default function SharedChat({
     resetError();
     reload();
   }
+
+  // returns true if user input contains web links
+  function doesUserInputContainLinkOrFile(): boolean {
+    const links = parseHyperlinks(input);
+    return !!links && links.length > 0;
+  }
+
+  const isLoading = status === 'submitted';
 
   const innerContent =
     messages.length === 0 && !dialogStarted ? (
@@ -112,7 +115,9 @@ export default function SharedChat({
             );
           })}
 
-          {isLoading && <LoadingAnimation />}
+          {isLoading && (
+            <LoadingAnimation isExternalResourceUsed={doesLastUserMessageContainLinkOrFile} />
+          )}
         </div>
       </>
     );
