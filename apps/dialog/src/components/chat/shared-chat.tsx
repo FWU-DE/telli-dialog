@@ -15,7 +15,7 @@ import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { FloatingText } from './floating-text';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
 import LoadingAnimation from './loading-animation';
-import { parseHyperlinks } from '@/utils/web-search/parsing';
+import { doesUserInputContainLinkOrFile } from '@/utils/chat/messages';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
@@ -62,7 +62,7 @@ export default function SharedChat({
     e.preventDefault();
 
     try {
-      setDoesLastUserMessageContainLinkOrFile(doesUserInputContainLinkOrFile());
+      setDoesLastUserMessageContainLinkOrFile(doesUserInputContainLinkOrFile(input));
       handleSubmit(e, {});
     } catch (error) {
       console.error(error);
@@ -77,12 +77,6 @@ export default function SharedChat({
     // Clear rate limit error before reloading
     resetError();
     reload();
-  }
-
-  // returns true if user input contains web links
-  function doesUserInputContainLinkOrFile(): boolean {
-    const links = parseHyperlinks(input);
-    return !!links && links.length > 0;
   }
 
   const isLoading = status === 'submitted';

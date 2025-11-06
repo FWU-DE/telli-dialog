@@ -1,5 +1,7 @@
 import { ConversationMessageModel } from '@shared/db/types';
 import { Message } from 'ai';
+import { parseHyperlinks } from '../web-search/parsing';
+import { LocalFileState } from '@/components/chat/send-message-form';
 
 export function convertMessageModelToMessage(
   messages: Array<ConversationMessageModel>,
@@ -16,4 +18,13 @@ export function convertMessageModelToMessage(
       content: message.content,
       createdAt: message.createdAt,
     }));
+}
+
+// returns true if user input contains files or web links
+export function doesUserInputContainLinkOrFile(
+  input: string,
+  files?: Map<string, LocalFileState>,
+): boolean {
+  const links = parseHyperlinks(input);
+  return (files && files.size > 0) || (!!links && links.length > 0);
 }

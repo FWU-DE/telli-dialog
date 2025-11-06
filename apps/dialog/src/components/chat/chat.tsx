@@ -24,11 +24,11 @@ import { ErrorChatPlaceholder } from './error-chat-placeholder';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
 import LoadingAnimation from './loading-animation';
-import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { Message } from 'ai';
 import { logDebug, logWarning } from '@/utils/logging/logging';
 import { useSession } from 'next-auth/react';
 import { AssistantIcon } from './assistant-icon';
+import { doesUserInputContainLinkOrFile } from '@/utils/chat/messages';
 
 type ChatProps = {
   id: string;
@@ -145,7 +145,7 @@ export default function Chat({
     e.preventDefault();
 
     try {
-      setDoesLastUserMessageContainLinkOrFile(doesUserInputContainLinkOrFile());
+      setDoesLastUserMessageContainLinkOrFile(doesUserInputContainLinkOrFile(input, files));
       handleSubmit(e, {
         allowEmptySubmit: false,
         body: {
@@ -198,12 +198,6 @@ export default function Chat({
       }
       return newMap;
     });
-  }
-
-  // returns true if user input contains files or web links
-  function doesUserInputContainLinkOrFile(): boolean {
-    const links = parseHyperlinks(input);
-    return files.size > 0 || (!!links && links.length > 0);
   }
 
   let placeholderElement: ReactNode;

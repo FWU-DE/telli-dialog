@@ -1,6 +1,6 @@
 'use client';
 import { useChat } from '@ai-sdk/react';
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { CharacterModel } from '@shared/db/schema';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
@@ -12,10 +12,11 @@ import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import useBreakpoints from '../hooks/use-breakpoints';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
+import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import LoadingAnimation from './loading-animation';
 import { Message } from 'ai';
 import { AssistantIcon } from './assistant-icon';
-import { parseHyperlinks } from '@/utils/web-search/parsing';
+import { doesUserInputContainLinkOrFile } from '@/utils/chat/messages';
 
 const reductionBreakpoint = 'sm';
 
@@ -53,20 +54,14 @@ export default function CharacterSharedChat({
       onError: handleError,
     });
 
-  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useAutoScroll([messages, id, inviteCode]);
   const { isBelow } = useBreakpoints();
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-    }
-  }, [messages, id, inviteCode]);
 
   async function customHandleSubmit(e: FormEvent) {
     e.preventDefault();
 
     try {
-      setDoesLastUserMessageContainLinkOrFile(doesUserInputContainLinkOrFile());
+      setDoesLastUserMessageContainLinkOrFile(doesUserInputContainLinkOrFile(input));
       handleSubmit(e, {});
     } catch (error) {
       console.error(error);
@@ -81,12 +76,6 @@ export default function CharacterSharedChat({
     // Clear rate limit error before reloading
     resetError();
     void reload();
-  }
-
-  // returns true if user input contains web links
-  function doesUserInputContainLinkOrFile(): boolean {
-    const links = parseHyperlinks(input);
-    return !!links && links.length > 0;
   }
 
   const assistantIcon = AssistantIcon({
