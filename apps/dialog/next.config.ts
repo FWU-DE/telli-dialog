@@ -3,6 +3,8 @@ import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 import path from 'path';
 
+const isDevBuild = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development';
+
 const baseNextConfig: NextConfig = {
   transpilePackages: ['ui', 'import-in-the-middle', '@t3-oss/env-nextjs', '@t3-oss/env-core'],
   typescript: {
@@ -37,7 +39,7 @@ const baseNextConfig: NextConfig = {
       },
     ],
   },
-  productionBrowserSourceMaps: process.env.NODE_ENV !== 'test',
+  productionBrowserSourceMaps: !isDevBuild,
   allowedDevOrigins: ['titanom.ngrok.app'],
   experimental: {
     useCache: true,
@@ -67,6 +69,7 @@ export default withSentryConfig(baseNextConfigWithNextIntl, {
   debug: true,
 
   release: {
+    create: !isDevBuild,
     setCommits: {
       auto: true,
       ignoreEmpty: true,
@@ -77,9 +80,8 @@ export default withSentryConfig(baseNextConfigWithNextIntl, {
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
 
-  // Disable source maps for e2e tests
   sourcemaps: {
-    disable: process.env.NODE_ENV === 'test',
+    disable: isDevBuild,
   },
 
   // For all available options, see:
