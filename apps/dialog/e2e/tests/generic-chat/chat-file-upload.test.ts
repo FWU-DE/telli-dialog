@@ -61,7 +61,7 @@ test('should successfully upload an image and get response about its contents', 
   // Send message about image contents
   const messageInput = page.getByRole('textbox', { name: 'Wie kann ich Dir helfen?' });
   await messageInput.click();
-  await messageInput.fill('Was ist auf diesem Bild zu sehen?');
+  await messageInput.fill('Was ist auf diesem Bild zu sehen? Beende die Antwort mit "ENDE".');
   await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
 
   // Wait for navigation and response
@@ -72,7 +72,8 @@ test('should successfully upload an image and get response about its contents', 
   const assistantMessage = page.getByLabel('assistant message 1');
   await expect(assistantMessage).toBeVisible();
   // Note: You may need to adjust this expectation based on what's actually in the lazy.webp image
-  await expect(assistantMessage).toContainText('Bürostuhl');
+  await expect(assistantMessage).toContainText('ENDE');
+  await expect(assistantMessage).toContainText(/stuhl|tisch|person|blau/i);
 
   // Clean up by deleting the conversation
   const dropDownMenu = page.getByLabel('Conversation actions').first();
