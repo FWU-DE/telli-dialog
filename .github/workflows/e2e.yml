@@ -92,6 +92,9 @@ jobs:
           NODE_ENV=test pnpm --filter telli-dialog build:envless
           pnpm --filter telli-dialog start:oidc &
           pnpm --filter telli-dialog start &
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          TURBO_TELEMETRY_DISABLED: 1
 
       - name: Run E2E tests
         run: pnpm --filter telli-dialog e2e

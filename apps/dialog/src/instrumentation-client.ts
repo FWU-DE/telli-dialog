@@ -18,8 +18,8 @@ Sentry.init({
   tracesSampleRate: 0.1,
 
   beforeSend(event: Sentry.ErrorEvent) {
-    // do not send any logs to sentry for development environment
-    if (event.environment === 'development') {
+    // do not send any logs to sentry for development or e2e environment
+    if (event.environment === 'development' || event.environment === 'e2e') {
       return null;
     }
     return event;

@@ -7,13 +7,14 @@ test('can login as teacher and send a message', async ({ page }) => {
   // send first message
   await page.getByPlaceholder('Wie kann ich Dir helfen?').fill('Wieviel ist 2+2?');
   await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
-  await page.getByTitle('Kopieren').click();
+  await page.getByLabel('Reload').waitFor();
 
   await expect(page.getByLabel('assistant message 1')).toContainText('4');
 
   // send second message
   await page.getByPlaceholder('Wie kann ich Dir helfen?').fill('Wieviel ist 3+3?');
   await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
+  await page.getByLabel('Reload').waitFor();
 
   await expect(page.getByLabel('assistant message 2')).toBeVisible();
 });
