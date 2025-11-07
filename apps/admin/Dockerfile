@@ -2,7 +2,7 @@
 # https://docs.docker.com/build/building/multi-stage/
 
 # Alpine image
-FROM node:22-alpine AS alpine
+FROM node:25-alpine AS alpine
 RUN apk update
 RUN apk add --no-cache libc6-compat
 
