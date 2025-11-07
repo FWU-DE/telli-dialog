@@ -2,7 +2,7 @@ version: '3'
 
 services:
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     container_name: vidis-redis
     restart: always
     ports:
