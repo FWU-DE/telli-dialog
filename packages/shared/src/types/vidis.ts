@@ -40,7 +40,7 @@ export const vidisProfileSchema = z.object({
   // typ: z.literal('ID'),
   // azp: z.string(),
   // session_state: z.string(),
-  at_hash: z.string(),
+  // at_hash: z.string(),
   // email: z.string(),
   // sid: z.string(),
   is_ai_chat_eligible: z.boolean().optional(),
