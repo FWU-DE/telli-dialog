@@ -1,36 +1,28 @@
-import Provider, { Configuration } from 'oidc-provider';
+import Provider, { ClientMetadata, Configuration } from 'oidc-provider';
 import express from 'express';
 import crypto from 'crypto';
 import * as jose from 'jose';
 import { readUserMappings } from './utils';
 
-const isProduction = process.env.NODE_ENV === 'production';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const RedisAdapter = isProduction ? require('./redis-adapter') : undefined;
-
 const PORT = process.env.PORT || 9000;
-const ISSUER_URL = isProduction ? 'https://vidis-mock.dgpt.app' : `http://localhost:${PORT}`;
+const ISSUER_URL = `http://localhost:${PORT}`;
 console.info({ PORT, ISSUER_URL });
 
 const VALID_REDIRECT_URLS = [
   'http://localhost:3000',
-  'https://titanom.ngrok.app',
   'https://chat.telli.schule',
   'https://chat-staging.telli.schule',
 ];
 
 // Create express app
 let app = express();
-if (isProduction) {
-  app = app.set('trust-proxy', true);
-}
 
 const userAccountMapping = readUserMappings();
 
 let userCount = 0;
 
 // Create a simple PKCE-enabled client configuration
-const clientConfig = {
+const clientConfig: ClientMetadata = {
   client_id: 'vidis-client', // Should match env.vidisClientId in your next-auth config
   client_secret: 'vidis-secret', // Should match env.vidisClientSecret in your next-auth config
   // redirect_uris: ['http://localhost:3000/api/auth/callback/vidis'], // Update to match your next-auth callback
@@ -41,7 +33,7 @@ const clientConfig = {
   response_types: ['code'],
   grant_types: ['authorization_code', 'refresh_token'],
   token_endpoint_auth_method: 'client_secret_basic',
-} satisfies NonNullable<Configuration['clients']>[number];
+};
 
 // OIDC provider configuration
 const providerConfig: Configuration = {
@@ -59,18 +51,17 @@ const providerConfig: Configuration = {
     long: {
       httpOnly: true,
       sameSite: 'lax',
-      secure: isProduction, // Explicitly set to false for local development
+      secure: false, // Explicitly set to false for local development
     },
     short: {
       httpOnly: true,
       sameSite: 'lax',
-      secure: isProduction, // Explicitly set to false for local development
+      secure: false, // Explicitly set to false for local development
     },
   },
   claims: {
     openid: ['sub', 'rolle', 'schulkennung', 'bundesland'],
   },
-  adapter: isProduction ? RedisAdapter : undefined,
   async findAccount(ctx, id: string) {
     const maybeAccount = userAccountMapping[id];
 
@@ -79,7 +70,7 @@ const providerConfig: Configuration = {
     }
     return {
       accountId: id,
-      async claims(use: string, scope: string) {
+      async claims() {
         return {
           sub: maybeAccount.sub,
           rolle: maybeAccount.rolle,
@@ -134,15 +125,9 @@ async function generateKeys() {
 
 async function startServer() {
   const { privateJwk } = await generateKeys();
-  // @ts-expect-error propery exists
   providerConfig.jwks.keys = [privateJwk];
 
-  const issuerUrl = ISSUER_URL;
-  const provider = new Provider(issuerUrl, providerConfig);
-
-  if (isProduction) {
-    provider.proxy = true;
-  }
+  const provider = new Provider(ISSUER_URL, providerConfig);
 
   // Add detailed error event handlers
   provider.on('server_error', (ctx, err) => {
