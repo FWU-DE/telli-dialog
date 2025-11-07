@@ -28,7 +28,6 @@
     "prek6:run:cloud": "pnpm k6:build",
     "k6:run:cloud": "dotenvx run -f .env.k6 -- k6 cloud run"
   },
-  "packageManager": "pnpm@9.15.1",
   "dependencies": {
     "@ai-sdk/openai": "1.1.9",
     "@ai-sdk/react": "1.2.12",
