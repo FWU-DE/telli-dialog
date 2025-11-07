@@ -9,14 +9,13 @@ import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-ch
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
-import { ChatBox } from '@/components/chat/chat-box';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { FloatingText } from './floating-text';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
-import LoadingAnimation from './loading-animation';
-import { doesUserInputContainLinkOrFile } from '@/utils/chat/messages';
+import { messageContainsAttachments } from '@/utils/chat/messages';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
+import { Messages } from './messages';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
@@ -32,8 +31,7 @@ export default function SharedChat({
   const endpoint = `/api/shared-chat?${searchParams.toString()}`;
 
   const [dialogStarted, setDialogStarted] = React.useState(false);
-  const [doesLastUserMessageContainLinkOrFile, setDoesLastUserMessageContainLinkOrFile] =
-    React.useState(false);
+  const [lastMessageHasAttachments, setLastMessageHasAttachments] = React.useState(false);
 
   // substitute the error object from the useChat hook, to dislay a user friendly error message in German
   const { error, handleResponse, handleError, resetError } = useCheckStatusCode();
@@ -57,7 +55,7 @@ export default function SharedChat({
     e.preventDefault();
 
     try {
-      setDoesLastUserMessageContainLinkOrFile(doesUserInputContainLinkOrFile(input));
+      setLastMessageHasAttachments(messageContainsAttachments(input));
       handleSubmit(e, {});
     } catch (error) {
       console.error(error);
@@ -75,40 +73,6 @@ export default function SharedChat({
 
   const isLoading = status === 'submitted';
 
-  const innerContent =
-    messages.length === 0 && !dialogStarted ? (
-      <InitialChatContentDisplay
-        title={sharedSchoolChat.name}
-        description={sharedSchoolChat.description}
-        excerciseDescription={sharedSchoolChat.studentExcercise}
-        imageSource={maybeSignedPictureUrl}
-        setDialogStarted={setDialogStarted}
-      />
-    ) : (
-      <>
-        <div className="flex flex-col gap-4">
-          {messages.map((message, index) => {
-            return (
-              <ChatBox
-                key={index}
-                index={index}
-                isLastUser={index === messages.length - 1 && message.role === 'user'}
-                isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
-                isLoading={isLoading}
-                regenerateMessage={reload}
-                status={status}
-              >
-                {message}
-              </ChatBox>
-            );
-          })}
-
-          {isLoading && (
-            <LoadingAnimation isExternalResourceUsed={doesLastUserMessageContainLinkOrFile} />
-          )}
-        </div>
-      </>
-    );
   return (
     <>
       {!chatActive && (
@@ -148,7 +112,24 @@ export default function SharedChat({
                   minMargin={16}
                 />
               )}
-            {innerContent}
+            {messages.length === 0 && !dialogStarted ? (
+              <InitialChatContentDisplay
+                title={sharedSchoolChat.name}
+                description={sharedSchoolChat.description}
+                excerciseDescription={sharedSchoolChat.studentExcercise}
+                imageSource={maybeSignedPictureUrl}
+                setDialogStarted={setDialogStarted}
+              />
+            ) : (
+              <Messages
+                messages={messages}
+                isLoading={isLoading}
+                status={status}
+                reload={reload}
+                doesLastUserMessageContainLinkOrFile={lastMessageHasAttachments}
+                containerClassName="flex flex-col gap-4"
+              />
+            )}
             <ErrorChatPlaceholder error={error} handleReload={handleReload} />
           </div>
           <div className="w-full max-w-5xl mx-auto px-4 pb-4">

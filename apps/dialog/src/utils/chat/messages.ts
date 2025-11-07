@@ -3,6 +3,12 @@ import { Message } from 'ai';
 import { parseHyperlinks } from '../web-search/parsing';
 import { LocalFileState } from '@/components/chat/send-message-form';
 
+/**
+ * Converts database conversation message models to AI library message format.
+ *
+ * @param messages - Array of conversation messages from the database
+ * @returns Array of messages compatible with the AI library format
+ */
 export function convertMessageModelToMessage(
   messages: Array<ConversationMessageModel>,
 ): Array<Message> {
@@ -20,8 +26,14 @@ export function convertMessageModelToMessage(
     }));
 }
 
-// returns true if user input contains files or web links
-export function doesUserInputContainLinkOrFile(
+/**
+ * Determines whether a user message contains any attachments.
+ *
+ * @param input - The user's message text to analyze for web links
+ * @param files - Optional map of local file states representing uploaded files
+ * @returns `true` if the message contains files or web links, `false` otherwise
+ */
+export function messageContainsAttachments(
   input: string,
   files?: Map<string, LocalFileState>,
 ): boolean {

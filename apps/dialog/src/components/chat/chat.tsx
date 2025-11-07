@@ -14,7 +14,6 @@ import RobotIcon from '../icons/robot';
 import { useRouter } from 'next/navigation';
 import { LocalFileState } from './send-message-form';
 import { deepCopy } from '@/utils/object';
-import { ChatBox } from './chat-box';
 import { getFileExtension } from '@/utils/files/generic';
 import { refetchFileMapping } from '@/app/(authed)/(dialog)/actions';
 import { InitialChatContentDisplay } from './initial-content-display';
@@ -23,14 +22,14 @@ import { ChatInputBox } from './chat-input-box';
 import { ErrorChatPlaceholder } from './error-chat-placeholder';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
-import LoadingAnimation from './loading-animation';
 import { Message } from 'ai';
 import { logDebug, logWarning } from '@/utils/logging/logging';
 import { useSession } from 'next-auth/react';
 import { AssistantIcon } from './assistant-icon';
-import { doesUserInputContainLinkOrFile } from '@/utils/chat/messages';
+import { messageContainsAttachments } from '@/utils/chat/messages';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { getConversationPath } from '@/utils/chat/path';
+import { Messages } from './messages';
 
 type ChatProps = {
   id: string;
@@ -72,8 +71,7 @@ export default function Chat({
   );
   const [files, setFiles] = useState<Map<string, LocalFileState>>(new Map());
   const [countOfFilesInChat, setCountOfFilesInChat] = useState(0);
-  const [doesLastUserMessageContainLinkOrFile, setDoesLastUserMessageContainLinkOrFile] =
-    useState(false);
+  const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
   const queryClient = useQueryClient();
   const session = useSession();
 
@@ -140,7 +138,7 @@ export default function Chat({
     e.preventDefault();
 
     try {
-      setDoesLastUserMessageContainLinkOrFile(doesUserInputContainLinkOrFile(input, files));
+      setLastMessageHasAttachments(messageContainsAttachments(input, files));
       handleSubmit(e, {
         allowEmptySubmit: false,
         body: {
@@ -242,41 +240,26 @@ export default function Chat({
 
   const isLoading = status === 'submitted';
 
-  const messagesContent = (
-    <div className="flex flex-col gap-2 max-w-3xl mx-auto p-4">
-      {messages.map((message, index) => {
-        return (
-          <ChatBox
-            key={index}
-            index={index}
-            fileMapping={fileMapping}
-            isLastUser={index === messages.length - 1 && message.role === 'user'}
-            isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
-            isLoading={isLoading}
-            regenerateMessage={reload}
-            initialFiles={initialFiles}
-            assistantIcon={assistantIcon}
-            initialWebsources={
-              message.role === 'user' ? webSourceMapping?.get(message.id) : undefined
-            }
-            status={status}
-          >
-            {message}
-          </ChatBox>
-        );
-      })}
-
-      {isLoading && (
-        <LoadingAnimation isExternalResourceUsed={doesLastUserMessageContainLinkOrFile} />
-      )}
-    </div>
-  );
-
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
       <div className="flex flex-col flex-grow justify-between w-full overflow-hidden">
         <div ref={scrollRef} className="flex-grow overflow-y-auto">
-          {messages.length === 0 ? placeholderElement : messagesContent}
+          {messages.length === 0 ? (
+            placeholderElement
+          ) : (
+            <Messages
+              messages={messages}
+              isLoading={isLoading}
+              status={status}
+              reload={reload}
+              assistantIcon={assistantIcon}
+              doesLastUserMessageContainLinkOrFile={lastMessageHasAttachments}
+              containerClassName="flex flex-col gap-2 max-w-3xl mx-auto p-4"
+              fileMapping={fileMapping}
+              initialFiles={initialFiles}
+              webSourceMapping={webSourceMapping}
+            />
+          )}
           <ErrorChatPlaceholder error={error} handleReload={handleReload} />
         </div>
         <div className="w-full max-w-3xl pb-4 px-4 mx-auto">

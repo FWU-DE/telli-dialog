@@ -1,4 +1,5 @@
 'use client';
+
 import { useChat } from '@ai-sdk/react';
 import { FormEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -6,17 +7,16 @@ import { CharacterModel } from '@shared/db/schema';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
-import { ChatBox } from '@/components/chat/chat-box';
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import useBreakpoints from '../hooks/use-breakpoints';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
-import LoadingAnimation from './loading-animation';
 import { Message } from 'ai';
 import { AssistantIcon } from './assistant-icon';
-import { doesUserInputContainLinkOrFile } from '@/utils/chat/messages';
+import { messageContainsAttachments } from '@/utils/chat/messages';
+import { Messages } from './messages';
 
 const reductionBreakpoint = 'sm';
 
@@ -33,8 +33,7 @@ export default function CharacterSharedChat({
   const searchParams = new URLSearchParams({ id, inviteCode });
   const endpoint = `/api/character?${searchParams.toString()}`;
 
-  const [doesLastUserMessageContainLinkOrFile, setDoesLastUserMessageContainLinkOrFile] =
-    useState(false);
+  const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
 
   // substitute the error object from the useChat hook, to dislay a user friendly error message in German
   const { error, handleResponse, handleError, resetError } = useCheckStatusCode();
@@ -61,7 +60,7 @@ export default function CharacterSharedChat({
     e.preventDefault();
 
     try {
-      setDoesLastUserMessageContainLinkOrFile(doesUserInputContainLinkOrFile(input));
+      setLastMessageHasAttachments(messageContainsAttachments(input));
       handleSubmit(e, {});
     } catch (error) {
       console.error(error);
@@ -85,38 +84,6 @@ export default function CharacterSharedChat({
 
   const isLoading = status === 'submitted';
 
-  const innerContent =
-    messages.length === 0 ? (
-      <InitialChatContentDisplay
-        title={character.name}
-        description={character.description}
-        imageSource={imageSource}
-      />
-    ) : (
-      <div className="flex flex-col gap-4">
-        {messages.map((message, index) => {
-          return (
-            <ChatBox
-              key={index}
-              index={index}
-              isLastUser={index === messages.length - 1 && message.role === 'user'}
-              isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
-              isLoading={isLoading}
-              regenerateMessage={reload}
-              assistantIcon={assistantIcon}
-              status={status}
-            >
-              {message}
-            </ChatBox>
-          );
-        })}
-
-        {isLoading && (
-          <LoadingAnimation isExternalResourceUsed={doesLastUserMessageContainLinkOrFile} />
-        )}
-      </div>
-    );
-
   return (
     <>
       {!chatActive && <ExpiredChatModal conversationMessages={messages} title={character.name} />}
@@ -139,10 +106,25 @@ export default function CharacterSharedChat({
             className="flex-grow w-full max-w-5xl overflow-y-auto p-4 pb-[5rem]"
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
-            {innerContent}
+            {messages.length === 0 ? (
+              <InitialChatContentDisplay
+                title={character.name}
+                description={character.description}
+                imageSource={imageSource}
+              />
+            ) : (
+              <Messages
+                messages={messages}
+                isLoading={isLoading}
+                status={status}
+                reload={reload}
+                assistantIcon={assistantIcon}
+                doesLastUserMessageContainLinkOrFile={lastMessageHasAttachments}
+                containerClassName="flex flex-col gap-4"
+              />
+            )}
             <ErrorChatPlaceholder error={error} handleReload={handleReload} />
           </div>
-
           <div className="w-full max-w-5xl mx-auto px-4 pb-4">
             <div className="flex flex-col">
               <ChatInputBox
