@@ -16,7 +16,10 @@ updates:
       interval: 'weekly'
 
   - package-ecosystem: 'docker-compose'
-    directory: '/'
+    directories:
+      - '/apps/dialog/e2e'
+      - '/apps/dialog/e2e/mock'
+      - '/devops/docker'
     labels: ['dependencies']
     schedule:
       interval: 'weekly'
