@@ -2,6 +2,7 @@
   "name": "telli-dialog",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "concurrently \"pnpm start:oidc\" \"next dev -p 3000 --turbo\"",
     "build": "next build",
