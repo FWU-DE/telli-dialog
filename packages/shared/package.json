@@ -44,7 +44,6 @@
     "@types/pg": "8.15.6",
     "@typescript-eslint/eslint-plugin": "8.46.3",
     "@typescript-eslint/parser": "8.46.3",
-    "dotenv-cli": "10.0.0",
     "eslint": "9.39.1",
     "eslint-config-prettier": "10.1.8",
     "eslint-config-turbo": "2.6.0",
