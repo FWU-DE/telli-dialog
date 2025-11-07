@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
+import { sendMessage } from '../../utils/utils';
 
 test('should successfully upload a file and get response about its contents', async ({ page }) => {
   await login(page, 'teacher');
@@ -18,14 +19,7 @@ test('should successfully upload a file and get response about its contents', as
   await expect(page.locator('form').getByRole('img').nth(1)).toBeVisible();
 
   // Send message about file contents
-  const messageInput = page.getByRole('textbox', { name: 'Wie kann ich Dir helfen?' });
-  await messageInput.click();
-  await messageInput.fill('Wie heißt die Hauptperson die in dieser Datei genannnt wird?');
-  await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
-
-  // Wait for navigation and response
-  await page.waitForURL('/d/**');
-  await page.getByLabel('Reload').waitFor();
+  await sendMessage(page, 'Wie heißt die Hauptperson die in dieser Datei genannnt wird?');
 
   // Verify the response contains the expected content
   const assistantMessage = page.getByLabel('assistant message 1');
@@ -59,14 +53,7 @@ test('should successfully upload an image and get response about its contents', 
   await expect(page.locator('form').getByRole('img').nth(1)).toBeVisible();
 
   // Send message about image contents
-  const messageInput = page.getByRole('textbox', { name: 'Wie kann ich Dir helfen?' });
-  await messageInput.click();
-  await messageInput.fill('Was ist auf diesem Bild zu sehen? Beende die Antwort mit "ENDE".');
-  await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
-
-  // Wait for navigation and response
-  await page.waitForURL('/d/**');
-  await page.getByLabel('Reload').waitFor();
+  await sendMessage(page, 'Was ist auf diesem Bild zu sehen? Beende die Antwort mit "ENDE".');
 
   // Verify the response contains the expected content
   const assistantMessage = page.getByLabel('assistant message 1');

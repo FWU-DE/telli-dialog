@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
+import { sendMessage } from '../../utils/utils';
 
 test('teacher can create shared chat with web sources, student can join chat and reference web sources', async ({
   page,
@@ -69,13 +70,10 @@ test('teacher can create shared chat with web sources, student can join chat and
   const button = schoolChatPage.getByRole('button', { name: 'Dialog starten' });
   await button.waitFor();
   await button.click();
-  await schoolChatPage
-    .getByPlaceholder('Wie kann ich Dir helfen?')
-    .fill(
-      'Was berichtete der Reporter Bret Baier nach einem Gespräch mit US-Präsident Trump? Beende die Antwort mit "ENDE".',
-    );
-  await schoolChatPage.keyboard.press('Enter');
-  await schoolChatPage.getByLabel('Reload').waitFor();
+  await sendMessage(
+    schoolChatPage,
+    'Was berichtete der Reporter Bret Baier nach einem Gespräch mit US-Präsident Trump? Beende die Antwort mit "ENDE".',
+  );
 
   await expect(schoolChatPage.getByLabel('assistant message 1')).toContainText('ENDE');
 });

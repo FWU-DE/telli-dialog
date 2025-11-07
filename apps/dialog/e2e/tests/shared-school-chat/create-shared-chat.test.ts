@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { waitForToast } from '../../utils/utils';
+import { sendMessage, waitForToast } from '../../utils/utils';
 
 test('teacher can login, create and join shared chat', async ({ page }) => {
   await login(page, 'teacher');
@@ -150,9 +150,7 @@ test('teacher can login, create and delete shared chat, student can join chat', 
   await expect(startButton).toBeVisible();
   await startButton.click();
 
-  await page.getByPlaceholder('Wie kann ich Dir helfen?').fill('Über wen lernen wir hier?');
-  await page.keyboard.press('Enter');
-  await page.getByLabel('Reload').waitFor();
+  await sendMessage(page, 'Über wen lernen wir hier?');
 
   await expect(page.getByLabel('assistant message 1')).toContainText('Ludwig XIV');
 
