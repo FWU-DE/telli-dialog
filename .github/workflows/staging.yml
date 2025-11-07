@@ -7,6 +7,10 @@ on:
     branches:
       - main
 
+env:
+  NEXT_TELEMETRY_DISABLED: 1
+  TURBO_TELEMETRY_DISABLED: 1
+
 jobs:
   install:
     runs-on: ubuntu-latest
