@@ -29,8 +29,8 @@
     "@t3-oss/env-core": "0.13.8",
     "bcrypt": "6.0.0",
     "drizzle-kit": "0.31.6",
-    "drizzle-orm": "0.39.3",
-    "drizzle-zod": "0.7.1",
+    "drizzle-orm": "0.44.7",
+    "drizzle-zod": "0.8.3",
     "nanoid": "5.0.9",
     "pg": "8.16.3",
     "zod": "3.25.76"
@@ -50,7 +50,7 @@
     "eslint-plugin-prettier": "5.5.4",
     "prettier": "3.6.2",
     "prettier-eslint": "16.4.2",
-    "typescript": "5.7.3",
+    "typescript": "5.9.3",
     "tsx": "4.20.6",
     "vitest": "3.0.5"
   }
