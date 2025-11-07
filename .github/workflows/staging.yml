@@ -144,7 +144,7 @@ jobs:
           password: ${{ secrets.IONOS_REGISTRY_TOKEN_GITHUB_PUSH }}
 
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
@@ -186,7 +186,7 @@ jobs:
           password: ${{ secrets.IONOS_REGISTRY_TOKEN_GITHUB_PUSH }}
 
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: apps/admin/Dockerfile
