@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { regenerateMessage } from '../../utils/utils';
+import { regenerateMessage, sendMessage } from '../../utils/utils';
 
 test('teacher can login, create and join shared dialogpartner chat', async ({ page }) => {
   await login(page, 'teacher');
@@ -81,8 +81,7 @@ test('teacher can login, create and join shared dialogpartner chat', async ({ pa
   await page.waitForURL('/ua/characters/**/dialog?inviteCode=*');
 
   // send first message
-  await page.getByPlaceholder('Wie kann ich Dir helfen?').fill('Wer bist du?');
-  await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
+  await sendMessage(page, 'Wer bist du?');
   await page.getByTitle('Kopieren').click();
 
   await expect(page.getByLabel('assistant message 1')).toContainText('John Cena');

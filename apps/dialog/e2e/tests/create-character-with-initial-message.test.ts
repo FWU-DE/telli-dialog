@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { login } from '../utils/login';
+import { sendMessage } from '../utils/utils';
 
 test('teacher can create character with initial message and verify it appears in shared chat', async ({
   page,
@@ -94,11 +95,7 @@ test('teacher can create character with initial message and verify it appears in
   await expect(assistantMessage).toContainText(initialMessage);
 
   // Test that we can still send a message after the initial message is displayed
-  await page.getByPlaceholder('Wie kann ich Dir helfen?').fill('Was ist die Relativitätstheorie?');
-  await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
-
-  // Wait for the response and verify that we now have both the initial message and the new conversation
-  await page.getByLabel('Reload').waitFor();
+  await sendMessage(page, 'Was ist die Relativitätstheorie? Beende die Antwort mit "ENDE".');
 
   // Should have user message (message 2) and assistant response (message 3)
   const userMessage = page.getByLabel('user message 1');
@@ -108,7 +105,7 @@ test('teacher can create character with initial message and verify it appears in
   // Check that assistant responded (message 3)
   const secondAssistantMessage = page.getByLabel('assistant message 2');
   await expect(secondAssistantMessage).toBeVisible();
-  await expect(secondAssistantMessage).toContainText('Relativitätstheorie');
+  await expect(secondAssistantMessage).toContainText('ENDE');
 
   // Verify the initial message is still there
   await expect(assistantMessage).toBeVisible();

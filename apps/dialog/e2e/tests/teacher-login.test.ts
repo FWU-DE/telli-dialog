@@ -1,20 +1,15 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { login } from '../utils/login';
+import { sendMessage } from '../utils/utils';
 
 test('can login as teacher and send a message', async ({ page }) => {
   await login(page, 'teacher');
 
   // send first message
-  await page.getByPlaceholder('Wie kann ich Dir helfen?').fill('Wieviel ist 2+2?');
-  await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
-  await page.getByLabel('Reload').waitFor();
-
+  await sendMessage(page, 'Wieviel ist 2+2?');
   await expect(page.getByLabel('assistant message 1')).toContainText('4');
 
   // send second message
-  await page.getByPlaceholder('Wie kann ich Dir helfen?').fill('Wieviel ist 3+3?');
-  await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
-  await page.getByLabel('Reload').waitFor();
-
+  await sendMessage(page, 'Wieviel ist 3+3?');
   await expect(page.getByLabel('assistant message 2')).toBeVisible();
 });
