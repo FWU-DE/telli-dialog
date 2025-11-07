@@ -96,7 +96,7 @@ export default function SharedChat({
         >
           <div
             ref={scrollRef}
-            className="flex-grow w-full max-w-5xl overflow-y-auto"
+            className="flex-grow w-full max-w-5xl overflow-y-auto p-4 pb-[5rem]"
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
             {sharedSchoolChat.studentExcercise !== undefined &&
