@@ -1,7 +1,7 @@
 import { Page } from '@playwright/test';
 
 export async function waitForToast(page: Page) {
-  await page.locator('li[role="status"]').waitFor();
+  await page.getByLabel('Notifications (F8)').locator('li').waitFor();
 }
 
 export async function regenerateMessage(page: Page) {
