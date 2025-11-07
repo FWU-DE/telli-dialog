@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { waitForToast } from '../../utils/utils';
+import { sendMessage, waitForToast } from '../../utils/utils';
 
 test('teacher can login, create a custom gpt and start a chat', async ({ page }) => {
   await login(page, 'teacher');
@@ -70,10 +70,7 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await expect(page.locator('body')).toContainText('Was kostet ein Grundstück in München?');
   await expect(page.locator('body')).toContainText('Was ist das aktuelle Zinsniveau');
   await expect(page.locator('body')).toContainText('Wo kann man günstig Baugrund erwerben');
-  await page.getByRole('textbox', { name: 'Wie kann ich Dir helfen?' }).click();
-  await page.getByRole('textbox', { name: 'Wie kann ich Dir helfen?' }).fill('Wer bist du?');
-  await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
-  await page.getByLabel('Reload').waitFor();
+  await sendMessage(page, 'Wer bist du?');
 
   await expect(page.getByLabel('assistant message 1')).toContainText('Hausbauplaner');
 });

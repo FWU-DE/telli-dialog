@@ -5,6 +5,7 @@ import type { Page } from 'playwright-core';
 import { db } from '@shared/db';
 import { federalStateTable } from '@shared/db/schema';
 import { eq } from 'drizzle-orm';
+import { sendMessage } from '../../../../../utils/utils';
 
 const deleteConversationRoute = '/api/v1/admin/delete-conversation';
 
@@ -60,10 +61,5 @@ async function createGenericChatWithFileAttachment(page: Page) {
   const result = await page.waitForResponse('/api/v1/files');
   expect(result.status()).toBe(200);
 
-  const messageInput = page.getByRole('textbox', { name: 'Wie kann ich Dir helfen?' });
-  await messageInput.click();
-  await messageInput.fill('Gib "OK" aus.');
-  await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
-
-  await page.waitForResponse('/d/**');
+  await sendMessage(page, 'Gib "OK" aus.');
 }

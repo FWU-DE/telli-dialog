@@ -25,7 +25,7 @@ export async function generateConversationDocxFiles({
   userFullName: string;
 }): Promise<
   | {
-      buffer: Buffer;
+      buffer: ArrayBuffer;
       conversation: ConversationModel;
       gptName: string;
       messages: ConversationMessageModel[];
@@ -58,7 +58,7 @@ export async function generateConversationDocxFiles({
     });
 
     const doc = buildDocxDocument({ conversationMetadata, messageParagraphs });
-    const buffer = await Packer.toBuffer(doc);
+    const buffer = await Packer.toArrayBuffer(doc);
 
     return { buffer, conversation, gptName, messages };
   } catch (error) {

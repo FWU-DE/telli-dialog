@@ -1,17 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { regenerateMessage } from '../../utils/utils';
+import { regenerateMessage, sendMessage } from '../../utils/utils';
 
 test('should successfully regenerate a response', async ({ page }) => {
   await login(page, 'teacher');
-
-  const messageInput = page.getByRole('textbox', { name: 'Wie kann ich Dir helfen?' });
-  await messageInput.click();
-  await messageInput.fill('Schreibe "OK" und eine Zufallszahl von 0 bis 1.000.000');
-  await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
-
-  // Wait for navigation and response
-  await page.getByLabel('Reload').waitFor();
+  await sendMessage(page, 'Schreibe "OK" und eine Zufallszahl von 0 bis 1.000.000');
 
   // Verify the response contains the expected content
   const assistantMessage = page.getByLabel('assistant message 1');
@@ -29,12 +22,7 @@ test('should successfully regenerate a response', async ({ page }) => {
 
 test('should copy response to clipboard', async ({ page }) => {
   await login(page, 'teacher');
-
-  const messageInput = page.getByRole('textbox', { name: 'Wie kann ich Dir helfen?' });
-  await messageInput.click();
-  await messageInput.fill('Schreibe "OK"');
-  await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
-  await page.getByLabel('Reload').waitFor();
+  await sendMessage(page, 'Schreibe "OK"');
 
   const assistantMessage = page.getByLabel('assistant message 1');
   await expect(assistantMessage).toBeVisible();
