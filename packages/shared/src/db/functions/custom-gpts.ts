@@ -45,24 +45,30 @@ export async function dbGetGlobalGpts({
 }: {
   federalStateId?: string;
 }): Promise<CustomGptModel[]> {
-  const characters = await db
-    .select()
-    .from(customGptTable)
-    .innerJoin(
-      customGptTemplateMappingTable,
-      eq(customGptTemplateMappingTable.customGptId, customGptTable.id),
-    )
-    .where(
-      federalStateId
-        ? and(
-            eq(customGptTable.accessLevel, 'global'),
-            eq(customGptTemplateMappingTable.federalStateId, federalStateId),
-          )
-        : eq(customGptTable.accessLevel, 'global'),
-    )
-    .orderBy(desc(customGptTable.createdAt));
-
-  return characters.map((row) => row.custom_gpt);
+  if (federalStateId) {
+    const characters = await db
+      .select()
+      .from(customGptTable)
+      .innerJoin(
+        customGptTemplateMappingTable,
+        eq(customGptTemplateMappingTable.customGptId, customGptTable.id),
+      )
+      .where(
+        and(
+          eq(customGptTable.accessLevel, 'global'),
+          eq(customGptTemplateMappingTable.federalStateId, federalStateId),
+        ),
+      )
+      .orderBy(desc(customGptTable.createdAt));
+    return characters.map((row) => row.custom_gpt);
+  } else {
+    const characters = await db
+      .select()
+      .from(customGptTable)
+      .where(eq(customGptTable.accessLevel, 'global'))
+      .orderBy(desc(customGptTable.createdAt));
+    return characters;
+  }
 }
 
 export async function dbGetGlobalCustomGptByName({
