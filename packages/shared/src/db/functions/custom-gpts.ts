@@ -43,7 +43,7 @@ export async function dbGetCustomGptById({
 export async function dbGetGlobalGpts({
   federalStateId,
 }: {
-  federalStateId: string;
+  federalStateId?: string;
 }): Promise<CustomGptModel[]> {
   const characters = await db
     .select()
