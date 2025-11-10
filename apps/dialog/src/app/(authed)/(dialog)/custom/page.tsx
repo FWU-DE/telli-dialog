@@ -33,6 +33,7 @@ export default async function Page(context: PageContext) {
     accessLevel,
     schoolId: user.school?.id,
     userId: user.id,
+    federalStateId: user.federalState?.id,
   });
   const customGpts = _customGpts.filter((c) => c.name !== '');
 
@@ -45,13 +46,15 @@ async function getCustomGptByAccessLevel({
   accessLevel,
   schoolId,
   userId,
+  federalStateId,
 }: {
   accessLevel: CharacterAccessLevel;
   schoolId: string | undefined;
   userId: string;
+  federalStateId: string;
 }): Promise<CustomGptModel[]> {
   if (accessLevel === 'global') {
-    return await dbGetGlobalGpts();
+    return await dbGetGlobalGpts({ federalStateId });
   }
 
   if (accessLevel === 'school' && schoolId !== undefined) {

@@ -9,6 +9,7 @@ import {
   CustomGptFileMapping,
   fileTable,
   TextChunkTable,
+  customGptTemplateMappingTable,
 } from '../schema';
 
 export async function dbGetCustomGptsByUserId({
@@ -39,14 +40,25 @@ export async function dbGetCustomGptById({
   return customGpt;
 }
 
-export async function dbGetGlobalGpts(): Promise<CustomGptModel[]> {
+export async function dbGetGlobalGpts({federalStateId}: {federalStateId: string}): Promise<CustomGptModel[]> {
   const characters = await db
     .select()
     .from(customGptTable)
-    .where(eq(customGptTable.accessLevel, 'global'))
+    .innerJoin(
+      customGptTemplateMappingTable,
+      eq(customGptTemplateMappingTable.customGptId, customGptTable.id),
+    )
+    .where(
+      federalStateId
+        ? and(
+            eq(customGptTable.accessLevel, 'global'),
+            eq(customGptTemplateMappingTable.federalStateId, federalStateId),
+          )
+        : eq(customGptTable.accessLevel, 'global'),
+    )
     .orderBy(desc(customGptTable.createdAt));
 
-  return characters;
+  return characters.map(row => row.custom_gpt);
 }
 
 export async function dbGetGlobalCustomGptByName({

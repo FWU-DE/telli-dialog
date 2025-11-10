@@ -5,9 +5,11 @@ import {
   CharacterInsertModel,
   CharacterModel,
   characterTable,
+  characterTemplateMappingTable,
   conversationMessageTable,
   conversationTable,
   fileTable,
+  llmModelTable,
   SharedCharacterChatUsageTrackingInsertModel,
   sharedCharacterChatUsageTrackingTable,
   sharedCharacterConversation,
@@ -110,7 +112,7 @@ export async function dbCreateCharacter(
   character: Omit<CharacterInsertModel, 'modelId'> & Partial<Pick<CharacterInsertModel, 'modelId'>>,
   defaultModelName: string,
 ) {
-  const defaultModelId = (await dbGetModelByName(defaultModelName))?.id;
+  const defaultModelId = (await db.select().from(llmModelTable).where(eq(llmModelTable.name, defaultModelName)))[0]?.id;
   const modelId = character.modelId ?? defaultModelId;
   if (!modelId) {
     throw new Error('No default model found');
@@ -125,8 +127,10 @@ export async function dbCreateCharacter(
 
 export async function dbGetGlobalCharacters({
   userId,
+  federalStateId,
 }: {
   userId: string;
+  federalStateId: string;
 }): Promise<CharacterModel[]> {
   const characters = await db
     .select({
@@ -144,9 +148,14 @@ export async function dbGetGlobalCharacters({
         eq(sharedCharacterConversation.userId, userId),
       ),
     )
+    .innerJoin(
+      characterTemplateMappingTable,
+      eq(characterTemplateMappingTable.characterId, characterTable.id)
+    )
     .where(
       and(
         eq(characterTable.accessLevel, 'global'),
+        eq(characterTemplateMappingTable.federalStateId, federalStateId),
         or(
           eq(sharedCharacterConversation.userId, userId),
           isNull(sharedCharacterConversation.userId),
