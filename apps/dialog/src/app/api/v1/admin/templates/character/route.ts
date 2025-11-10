@@ -33,16 +33,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 403 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const federalStateID = searchParams.get('federalStateID');
-
-    if (!federalStateID) {
-      return NextResponse.json({ error: 'federalStateID parameter is required' }, { status: 400 });
-    }
-
     const characters = await dbGetGlobalCharacters({
       userId: DUMMY_USER_ID,
-      federalStateId: federalStateID,
     });
 
     return NextResponse.json(characters);
