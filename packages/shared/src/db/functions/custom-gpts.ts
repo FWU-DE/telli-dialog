@@ -1,5 +1,5 @@
 import { db } from '..';
-import { eq, and, or, desc, inArray } from 'drizzle-orm';
+import { eq, and, or, desc, inArray, getTableColumns } from 'drizzle-orm';
 import {
   customGptTable,
   conversationMessageTable,
@@ -47,7 +47,7 @@ export async function dbGetGlobalGpts({
 }): Promise<CustomGptModel[]> {
   if (federalStateId) {
     const characters = await db
-      .select()
+      .select({ ...getTableColumns(customGptTable) })
       .from(customGptTable)
       .innerJoin(
         customGptTemplateMappingTable,
@@ -60,7 +60,7 @@ export async function dbGetGlobalGpts({
         ),
       )
       .orderBy(desc(customGptTable.createdAt));
-    return characters.map((row) => row.custom_gpt);
+    return characters;
   } else {
     const characters = await db
       .select()
