@@ -1,11 +1,11 @@
 import { encrypt } from '@shared/db/crypto';
-import { dbUpdateFederalState, dbGetFederalStateById } from '@shared/db/functions/federal-state';
+import { dbGetFederalStateById, dbUpdateFederalState } from '@shared/db/functions/federal-state';
 import { federalStateTable } from '@shared/db/schema';
 import { validateApiKeyByHeadersWithResult } from '@/utils/validation';
 import { env } from '@/env';
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { createInsertSchema } from 'drizzle-zod';
+import { z } from 'zod/v4';
+import { createUpdateSchema } from 'drizzle-zod';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const [error] = validateApiKeyByHeadersWithResult(request.headers);
@@ -31,7 +31,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   return NextResponse.json(federalStateInfo, { status: 200 });
 }
 
-const federalStateUpdateSchema = createInsertSchema(federalStateTable)
+const federalStateUpdateSchema = createUpdateSchema(federalStateTable)
   .omit({
     encryptedApiKey: true,
     createdAt: true,

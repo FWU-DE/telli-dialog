@@ -8,7 +8,7 @@ import { VoucherInsertModel, VoucherTable, VoucherUpdateModel } from '@shared/db
 import { validateApiKeyByHeadersWithResult } from '@/utils/validation';
 import { createInsertSchema } from 'drizzle-zod';
 import { NextRequest, NextResponse } from 'next/server';
-import z from 'zod';
+import z from 'zod/v4';
 
 export async function GET(
   request: NextRequest,
@@ -49,8 +49,8 @@ export async function POST(
   }
   const body = await request.json();
   const parseResult = codePostSchema.safeParse(body);
-  if (!parseResult.success) {
-    return NextResponse.json({ error: parseResult.error.errors }, { status: 400 });
+  if (parseResult.error) {
+    return NextResponse.json({ error: parseResult.error.message }, { status: 400 });
   }
   const parseData = parseResult.data;
 
@@ -95,7 +95,7 @@ export async function PATCH(
   const body = await request.json();
   const parseResult = patchSchema.safeParse(body);
   if (!parseResult.success) {
-    return NextResponse.json({ error: parseResult.error.errors }, { status: 400 });
+    return NextResponse.json({ error: parseResult.error.message }, { status: 400 });
   }
   const parseData = parseResult.data;
 

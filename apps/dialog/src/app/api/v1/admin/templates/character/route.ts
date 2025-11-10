@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { createInsertSchema } from 'drizzle-zod';
 import {
-  dbGetGlobalCharacters,
   dbCreateCharacter,
-  dbGetGlobalCharacterByName,
   dbDeleteCharacterByIdAndUserId,
+  dbGetGlobalCharacterByName,
+  dbGetGlobalCharacters,
 } from '@shared/db/functions/character';
 import { CharacterInsertModel, characterTable } from '@shared/db/schema';
 import { dbGetModelByName } from '@shared/db/functions/llm-model';

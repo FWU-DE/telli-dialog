@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { createInsertSchema } from 'drizzle-zod';
 import {
+  dbGetGlobalCustomGptByName,
   dbGetGlobalGpts,
   dbUpsertCustomGpt,
-  dbGetGlobalCustomGptByName,
 } from '@shared/db/functions/custom-gpts';
 import { CustomGptInsertModel, customGptTable } from '@shared/db/schema';
 import { DUMMY_USER_ID } from '@shared/db/seed/user-entity';
