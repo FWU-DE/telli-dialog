@@ -11,9 +11,9 @@ import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
-import { type Message } from 'ai';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { convertMessageModelToMessage } from '@/utils/chat/messages';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,10 +46,7 @@ export default async function Page(context: PageContext) {
     throw new Error('no Chat messages found');
   }
 
-  const chatMessages: Message[] = rawChatMessages.map((message) => ({
-    ...message,
-    role: message.role === 'tool' ? 'data' : message.role,
-  }));
+  const chatMessages = convertMessageModelToMessage(rawChatMessages);
 
   const customGpt = await dbGetCustomGptById({ customGptId: params.gptId });
 
