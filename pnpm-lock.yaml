@@ -241,9 +241,6 @@ importers:
       ai:
         specifier: 4.3.16
         version: 4.3.16(react@19.2.0)(zod@3.25.76)
-      bcrypt:
-        specifier: 6.0.0
-        version: 6.0.0
       clsx:
         specifier: 2.1.1
         version: 2.1.1
@@ -383,9 +380,6 @@ importers:
       '@telli/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
-      '@types/bcrypt':
-        specifier: 6.0.0
-        version: 6.0.0
       '@types/express':
         specifier: 5.0.0
         version: 5.0.0
@@ -485,9 +479,6 @@ importers:
       '@t3-oss/env-core':
         specifier: 0.13.8
         version: 0.13.8(typescript@5.9.3)(zod@3.25.76)
-      bcrypt:
-        specifier: 6.0.0
-        version: 6.0.0
       drizzle-kit:
         specifier: 0.31.6
         version: 0.31.6
@@ -516,9 +507,6 @@ importers:
       '@telli/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
-      '@types/bcrypt':
-        specifier: 6.0.0
-        version: 6.0.0
       '@types/node':
         specifier: 24.10.0
         version: 24.10.0
@@ -3858,9 +3846,6 @@ packages:
   '@types/aws-lambda@8.10.157':
     resolution: {integrity: sha512-ofjcRCO1N7tMZDSO11u5bFHPDfUFD3Q9YK9g4S4w8UDKuG3CNlw2lNK1sd3Itdo7JORygZmG4h9ZykS8dlXvMA==}
 
-  '@types/bcrypt@6.0.0':
-    resolution: {integrity: sha512-/oJGukuH3D2+D+3H4JWLaAsJ/ji86dhRidzZ/Od7H/i8g+aCmvkeCc6Ni/f9uxGLSQVCRZkX2/lqEFG2BvWtlQ==}
-
   '@types/body-parser@1.19.6':
     resolution: {integrity: sha512-HLFeCYgz89uk22N5Qg3dvGvsv46B8GLvKKo1zKG4NybA8U2DiEO3w9lqGg29t/tfLRJpJ6iQxnVw4OnB7MoM9g==}
 
@@ -4561,10 +4546,6 @@ packages:
   basic-ftp@5.0.5:
     resolution: {integrity: sha512-4Bcg1P8xhUuqcii/S0Z9wiHIrQVPMermM1any+MX5GeGD7faD3/msQUDGLol9wOcz4/jbg/WJnGqoJF6LiBdtg==}
     engines: {node: '>=10.0.0'}
-
-  bcrypt@6.0.0:
-    resolution: {integrity: sha512-cU8v/EGSrnH+HnxV2z0J7/blxH8gq7Xh2JFT6Aroax7UohdmiJJlxApMxtKfuI7z68NvvVcmR78k2LbT6efhRg==}
-    engines: {node: '>= 18'}
 
   bidi-js@1.0.3:
     resolution: {integrity: sha512-RKshQI1R3YQ+n9YJz2QQ147P66ELpa1FQEg20Dk8oW9t2KgLbpDLLp9aGZ7y8WHSshDknG0bknqGw5/tyCs5tw==}
@@ -6892,10 +6873,6 @@ packages:
   no-case@2.3.2:
     resolution: {integrity: sha512-rmTZ9kz+f3rCvK2TD1Ue/oZlns7OGoIWP4fc3llxxRXlOkHKoWPPWJOfFYpITabSow43QJbRIoHQXtt10VldyQ==}
 
-  node-addon-api@8.5.0:
-    resolution: {integrity: sha512-/bRZty2mXUIFY/xU5HLvveNHlswNJej+RnxBjOMkidWfwZzgTbPG1E3K5TOxRLOR+5hX7bSofy8yf1hZevMS8A==}
-    engines: {node: ^18 || ^20 || >= 21}
-
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
@@ -6912,10 +6889,6 @@ packages:
     peerDependenciesMeta:
       encoding:
         optional: true
-
-  node-gyp-build@4.8.4:
-    resolution: {integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==}
-    hasBin: true
 
   node-mock-http@1.0.3:
     resolution: {integrity: sha512-jN8dK25fsfnMrVsEhluUTPkBFY+6ybu7jSB1n+ri/vOGjJxU8J9CZhpSGkHXSkFjtUhbmoncG/YG9ta5Ludqog==}
@@ -12410,10 +12383,6 @@ snapshots:
 
   '@types/aws-lambda@8.10.157': {}
 
-  '@types/bcrypt@6.0.0':
-    dependencies:
-      '@types/node': 24.10.0
-
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
@@ -13203,11 +13172,6 @@ snapshots:
   baseline-browser-mapping@2.8.25: {}
 
   basic-ftp@5.0.5: {}
-
-  bcrypt@6.0.0:
-    dependencies:
-      node-addon-api: 8.5.0
-      node-gyp-build: 4.8.4
 
   bidi-js@1.0.3:
     dependencies:
@@ -16054,8 +16018,6 @@ snapshots:
     dependencies:
       lower-case: 1.1.4
 
-  node-addon-api@8.5.0: {}
-
   node-domexception@1.0.0: {}
 
   node-fetch-native@1.6.7: {}
@@ -16063,8 +16025,6 @@ snapshots:
   node-fetch@2.7.0:
     dependencies:
       whatwg-url: 5.0.0
-
-  node-gyp-build@4.8.4: {}
 
   node-mock-http@1.0.3: {}
 
