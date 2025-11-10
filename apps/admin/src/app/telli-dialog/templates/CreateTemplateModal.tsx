@@ -53,12 +53,10 @@ export function CreateTemplateModal({ isOpen, onClose, onSuccess }: CreateTempla
     setError(null);
 
     try {
-      // Extract path from URL (in case full URL was provided)
       const pathOnly = extractPath(url.trim());
       const result = await createTemplateFromUrlAction(pathOnly);
 
       if (result.success && result.templateId && result.templateType) {
-        // Call success callback and close modal
         onSuccess?.();
         onClose();
       }
@@ -69,11 +67,11 @@ export function CreateTemplateModal({ isOpen, onClose, onSuccess }: CreateTempla
     }
   };
 
-  const handleClose = () => {
+  const handleClose = React.useCallback(() => {
     setUrl('');
     setError(null);
     onClose();
-  };
+  }, [onClose]);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -81,7 +79,6 @@ export function CreateTemplateModal({ isOpen, onClose, onSuccess }: CreateTempla
     }
   };
 
-  // Close modal on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -91,7 +88,7 @@ export function CreateTemplateModal({ isOpen, onClose, onSuccess }: CreateTempla
 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   if (!isOpen) return null;
 

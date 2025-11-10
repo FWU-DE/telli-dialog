@@ -27,20 +27,17 @@ export async function createTemplateFromUrlAction(url: string) {
   const [, templateTypeRaw, templateId] = match;
   const templateType: TemplateTypes = templateTypeRaw === 'custom' ? 'custom-gpt' : 'character';
 
-  // Ensure templateId is defined
   if (!templateId) {
     throw new Error('Template ID ist erforderlich');
   }
 
   try {
     if (templateType === 'character') {
-      // Get the source character
       const sourceCharacter = await dbGetCharacterById({ characterId: templateId });
       if (!sourceCharacter) {
         throw new Error('Charakter nicht gefunden');
       }
 
-      // Create a new character template
       const newCharacter = {
         ...sourceCharacter,
         id: undefined,
@@ -53,20 +50,22 @@ export async function createTemplateFromUrlAction(url: string) {
       };
 
       const result = await dbCreateCharacter(newCharacter, DEFAULT_CHAT_MODEL);
+      const resultId = result?.[0]?.id;
+      if (!resultId) {
+        throw new Error('Fehler beim Erstellen der Charakter-Vorlage');
+      }
       return { 
         success: true, 
-        templateId: result?.[0]?.id,
+        templateId: resultId,
         templateType: 'character',
         message: 'Charakter-Vorlage erfolgreich erstellt'
       };
     } else {
-      // Get the source custom GPT
       const sourceCustomGpt = await dbGetCustomGptById({ customGptId: templateId });
       if (!sourceCustomGpt) {
         throw new Error('Custom GPT nicht gefunden');
       }
 
-      // Create a new custom GPT template
       const newCustomGpt = {
         ...sourceCustomGpt,
         id: undefined,
@@ -78,10 +77,14 @@ export async function createTemplateFromUrlAction(url: string) {
         isDeleted: false,
       };
 
-      await dbUpsertCustomGpt({ customGpt: newCustomGpt });
+      const result = await dbUpsertCustomGpt({ customGpt: newCustomGpt });
+      const resultId = result?.id;
+      if (!resultId) {
+        throw new Error('Fehler beim Erstellen der Custom GPT-Vorlage');
+      }
       return { 
         success: true, 
-        templateId: newCustomGpt.id,
+        templateId: resultId,
         templateType: 'custom-gpt',
         message: 'Custom GPT-Vorlage erfolgreich erstellt'
       };
