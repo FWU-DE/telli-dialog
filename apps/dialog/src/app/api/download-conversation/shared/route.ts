@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       headers: {
         'Content-Disposition': 'attachment',
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'Content-Length': buffer.length.toString(),
+        'Content-Length': buffer.byteLength.toString(),
         'X-Filename': encodeURIComponent(fileName),
       },
     });
