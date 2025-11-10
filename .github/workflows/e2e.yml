@@ -67,7 +67,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
 
@@ -92,13 +92,16 @@ jobs:
           NODE_ENV=test pnpm --filter telli-dialog build:envless
           pnpm --filter telli-dialog start:oidc &
           pnpm --filter telli-dialog start &
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          TURBO_TELEMETRY_DISABLED: 1
 
       - name: Run E2E tests
         run: pnpm --filter telli-dialog e2e
         env:
           CI: true
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: playwright-report

@@ -1,12 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// require('dotenv').config();
-
-/**
  * See https://playwright.dev/docs/test-configuration.
  */
 
@@ -17,7 +11,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: 1,
   reporter: [['html', { outputFolder: './playwright-report' }], ['json'], ['github'], ['list']],
-  timeout: 0.5 * 60 * 1000,
+  timeout: 30_000,
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',

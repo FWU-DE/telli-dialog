@@ -13,7 +13,7 @@ import { iconClassName } from '@/utils/tailwind/icon';
 import useBreakpoints from '../hooks/use-breakpoints';
 import { isImageFile } from '@/utils/files/generic';
 import { UIMessage } from 'ai';
-import { ReactNode, useMemo } from 'react';
+import { ReactNode } from 'react';
 import { UseChatHelpers } from '@ai-sdk/react';
 
 export function ChatBox({
@@ -43,8 +43,6 @@ export function ChatBox({
 }) {
   const tCommon = useTranslations('common');
   const { isAtLeast } = useBreakpoints();
-
-  const isFinished = useMemo(() => status !== 'streaming', [status]);
 
   const userClassName =
     children.role === 'user'
@@ -116,7 +114,7 @@ export function ChatBox({
   const margin = allFiles !== undefined || webSourceAvailable ? 'm-0 mt-4' : 'm-4';
 
   const maybeShowMessageIcons =
-    isLastNonUser && isFinished ? (
+    isLastNonUser && status !== 'streaming' ? (
       <div className="flex items-center gap-1 mt-1">
         <TelliClipboardButton text={children.content} className="w-5 h-5" />
         <button

@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
+import { sendMessage, waitForToast } from '../../utils/utils';
 
 test('teacher can login, create and join shared chat', async ({ page }) => {
   await login(page, 'teacher');
@@ -149,9 +150,7 @@ test('teacher can login, create and delete shared chat, student can join chat', 
   await expect(startButton).toBeVisible();
   await startButton.click();
 
-  await page.getByPlaceholder('Wie kann ich Dir helfen?').fill('Über wen lernen wir hier?');
-  await page.keyboard.press('Enter');
-  await page.getByTitle('Kopieren').click();
+  await sendMessage(page, 'Über wen lernen wir hier?');
 
   await expect(page.getByLabel('assistant message 1')).toContainText('Ludwig XIV');
 
@@ -223,14 +222,14 @@ test('data is autosaved on blur', async ({ page }) => {
   // Title
   await page.getByLabel('Wie heißt das Szenario? *').fill('New Title');
   await page.getByLabel('Wie heißt das Szenario? *').press('Tab');
-  await page.waitForTimeout(1000);
+  await waitForToast(page);
   await page.reload();
   await expect(page.getByLabel('Wie heißt das Szenario? *')).toHaveValue('New Title');
 
   // Description
   await page.getByLabel('Wie kann das Szenario kurz beschrieben werden?').fill('New Description');
   await page.getByLabel('Wie kann das Szenario kurz beschrieben werden?').press('Tab');
-  await page.waitForTimeout(1000);
+  await waitForToast(page);
   await page.reload();
   await expect(page.getByLabel('Wie kann das Szenario kurz beschrieben werden?')).toHaveValue(
     'New Description',
@@ -239,35 +238,35 @@ test('data is autosaved on blur', async ({ page }) => {
   // School Type
   await page.getByLabel('Schultyp').fill('Realschule');
   await page.getByLabel('Schultyp').press('Tab');
-  await page.waitForTimeout(1000);
+  await waitForToast(page);
   await page.reload();
   await expect(page.getByLabel('Schultyp')).toHaveValue('Realschule');
 
   // Grade Level
   await page.getByLabel('Klassenstufe').fill('9. Klasse');
   await page.getByLabel('Klassenstufe').press('Tab');
-  await page.waitForTimeout(1000);
+  await waitForToast(page);
   await page.reload();
   await expect(page.getByLabel('Klassenstufe')).toHaveValue('9. Klasse');
 
   // Subject
   await page.getByLabel('Fach').fill('Mathematik');
   await page.getByLabel('Fach').press('Tab');
-  await page.waitForTimeout(1000);
+  await waitForToast(page);
   await page.reload();
   await expect(page.getByLabel('Fach')).toHaveValue('Mathematik');
 
   // Task
   await page.getByLabel('Wie lautet der Auftrag an die Lernenden?').fill('New Task');
   await page.getByLabel('Wie lautet der Auftrag an die Lernenden?').press('Tab');
-  await page.waitForTimeout(1000);
+  await waitForToast(page);
   await page.reload();
   await expect(page.getByLabel('Wie lautet der Auftrag an die Lernenden?')).toHaveValue('New Task');
 
   // Behavior
   await page.getByLabel('Wie verhält sich telli im Lernszenario? *').fill('New Behavior');
   await page.getByLabel('Wie verhält sich telli im Lernszenario? *').press('Tab');
-  await page.waitForTimeout(1000);
+  await waitForToast(page);
   await page.reload();
   await expect(page.getByLabel('Wie verhält sich telli im Lernszenario? *')).toHaveValue(
     'New Behavior',

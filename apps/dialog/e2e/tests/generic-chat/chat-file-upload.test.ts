@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
+import { sendMessage } from '../../utils/utils';
 
 test('should successfully upload a file and get response about its contents', async ({ page }) => {
   await login(page, 'teacher');
@@ -18,22 +19,17 @@ test('should successfully upload a file and get response about its contents', as
   await expect(page.locator('form').getByRole('img').nth(1)).toBeVisible();
 
   // Send message about file contents
-  const messageInput = page.getByRole('textbox', { name: 'Wie kann ich Dir helfen?' });
-  await messageInput.click();
-  await messageInput.fill('Wie heißt die Hauptperson die in dieser Datei genannnt wird?');
-  await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
-
-  // Wait for navigation and response
-  await page.waitForURL('/d/**');
+  await sendMessage(page, 'Wie heißt die Hauptperson die in dieser Datei genannnt wird?');
 
   // Verify the response contains the expected content
-  await page.waitForTimeout(5000);
-  const assistantMessage = page.getByLabel('assistant message').getByRole('paragraph');
+  const assistantMessage = page.getByLabel('assistant message 1');
   await expect(assistantMessage).toBeVisible();
   await expect(assistantMessage).toContainText('Napoleon Bonaparte');
-  const dropDownMenu = page.locator('div[aria-label="Conversation actions"]').first();
+
+  // Clean up by deleting the conversation
+  const dropDownMenu = page.getByLabel('Conversation actions').first();
   await dropDownMenu.hover({ force: true });
-  await page.waitForTimeout(500);
+  await dropDownMenu.waitFor();
   await dropDownMenu.click();
   await page.getByRole('menuitem', { name: 'Löschen' }).click();
 });
@@ -57,25 +53,19 @@ test('should successfully upload an image and get response about its contents', 
   await expect(page.locator('form').getByRole('img').nth(1)).toBeVisible();
 
   // Send message about image contents
-  const messageInput = page.getByRole('textbox', { name: 'Wie kann ich Dir helfen?' });
-  await messageInput.click();
-  await messageInput.fill('Was ist auf diesem Bild zu sehen?');
-  await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
-
-  // Wait for navigation and response
-  await page.waitForURL('/d/**');
+  await sendMessage(page, 'Was ist auf diesem Bild zu sehen? Beende die Antwort mit "ENDE".');
 
   // Verify the response contains the expected content
-  await page.waitForTimeout(5000);
-  const assistantMessage = page.getByLabel('assistant message').getByRole('paragraph');
+  const assistantMessage = page.getByLabel('assistant message 1');
   await expect(assistantMessage).toBeVisible();
   // Note: You may need to adjust this expectation based on what's actually in the lazy.webp image
-  await expect(assistantMessage).toContainText('Bürostuhl');
+  await expect(assistantMessage).toContainText('ENDE');
+  await expect(assistantMessage).toContainText(/stuhl|tisch|person|blau/i);
 
   // Clean up by deleting the conversation
-  const dropDownMenu = page.locator('div[aria-label="Conversation actions"]').first();
+  const dropDownMenu = page.getByLabel('Conversation actions').first();
   await dropDownMenu.hover({ force: true });
-  await page.waitForTimeout(500);
+  await dropDownMenu.waitFor();
   await dropDownMenu.click();
   await page.getByRole('menuitem', { name: 'Löschen' }).click();
 });

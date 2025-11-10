@@ -1,7 +1,7 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import { FormEvent, ReactNode, useEffect, useRef, useState } from 'react';
+import { FormEvent, ReactNode, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
 import { type CharacterModel, type CustomGptModel, FileModel } from '@shared/db/schema';
@@ -14,22 +14,22 @@ import RobotIcon from '../icons/robot';
 import { useRouter } from 'next/navigation';
 import { LocalFileState } from './send-message-form';
 import { deepCopy } from '@/utils/object';
-import { ChatBox } from './chat-box';
 import { getFileExtension } from '@/utils/files/generic';
 import { refetchFileMapping } from '@/app/(authed)/(dialog)/actions';
 import { InitialChatContentDisplay } from './initial-content-display';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { ChatInputBox } from './chat-input-box';
 import { ErrorChatPlaceholder } from './error-chat-placeholder';
-import Image from 'next/image';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
-import { cn } from '@/utils/tailwind';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
-import LoadingAnimation from './loading-animation';
-import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { Message } from 'ai';
 import { logDebug, logWarning } from '@/utils/logging/logging';
 import { useSession } from 'next-auth/react';
+import { AssistantIcon } from './assistant-icon';
+import { messageContainsAttachments } from '@/utils/chat/messages';
+import { useAutoScroll } from '@/hooks/use-auto-scroll';
+import { getConversationPath } from '@/utils/chat/path';
+import { Messages } from './messages';
 
 type ChatProps = {
   id: string;
@@ -71,9 +71,7 @@ export default function Chat({
   );
   const [files, setFiles] = useState<Map<string, LocalFileState>>(new Map());
   const [countOfFilesInChat, setCountOfFilesInChat] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const [doesLastUserMessageContainLinkOrFile, setDoesLastUserMessageContainLinkOrFile] =
-    useState(false);
+  const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
   const queryClient = useQueryClient();
   const session = useSession();
 
@@ -126,14 +124,7 @@ export default function Chat({
       },
     });
 
-  // set loading state based on status of useChat hook
-  useEffect(() => {
-    if (status === 'submitted') {
-      setIsLoading(true);
-    } else {
-      setIsLoading(false);
-    }
-  }, [status]);
+  const scrollRef = useAutoScroll([messages, status]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -143,20 +134,11 @@ export default function Chat({
     void fetchData();
   }, [countOfFilesInChat, id]);
 
-  // scroll position handling
-  // scroll down to the end of the chat when new messages are added or when loading state changes
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-    }
-  }, [messages, isLoading]);
-
   async function customHandleSubmit(e: FormEvent) {
     e.preventDefault();
 
     try {
-      setDoesLastUserMessageContainLinkOrFile(doesUserInputContainLinkOrFile());
+      setLastMessageHasAttachments(messageContainsAttachments(input, files));
       handleSubmit(e, {
         allowEmptySubmit: false,
         body: {
@@ -211,12 +193,6 @@ export default function Chat({
     });
   }
 
-  // returns true if user input contains files or web links
-  function doesUserInputContainLinkOrFile(): boolean {
-    const links = parseHyperlinks(input);
-    return files.size > 0 || (!!links && links.length > 0);
-  }
-
   let placeholderElement: ReactNode;
 
   if (character !== undefined) {
@@ -256,47 +232,34 @@ export default function Chat({
     );
   }
 
-  const assistantIcon = getAssistantIcon({
+  const assistantIcon = AssistantIcon({
     customGptId: customGpt?.id,
     imageName: character?.name ?? customGpt?.name,
     imageSource,
   });
 
-  const messagesContent = (
-    <div className="flex flex-col gap-2 max-w-3xl mx-auto p-4">
-      {messages.map((message, index) => {
-        return (
-          <ChatBox
-            key={index}
-            index={index}
-            fileMapping={fileMapping}
-            isLastUser={index === messages.length - 1 && message.role === 'user'}
-            isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
-            isLoading={isLoading}
-            regenerateMessage={reload}
-            initialFiles={initialFiles}
-            assistantIcon={assistantIcon}
-            initialWebsources={
-              message.role === 'user' ? webSourceMapping?.get(message.id) : undefined
-            }
-            status={status}
-          >
-            {message}
-          </ChatBox>
-        );
-      })}
-
-      {isLoading && (
-        <LoadingAnimation isExternalResourceUsed={doesLastUserMessageContainLinkOrFile} />
-      )}
-    </div>
-  );
+  const isLoading = status === 'submitted';
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
       <div className="flex flex-col flex-grow justify-between w-full overflow-hidden">
         <div ref={scrollRef} className="flex-grow overflow-y-auto">
-          {messages.length === 0 ? placeholderElement : messagesContent}
+          {messages.length === 0 ? (
+            placeholderElement
+          ) : (
+            <Messages
+              messages={messages}
+              isLoading={isLoading}
+              status={status}
+              reload={reload}
+              assistantIcon={assistantIcon}
+              doesLastUserMessageContainLinkOrFile={lastMessageHasAttachments}
+              containerClassName="flex flex-col gap-2 max-w-3xl mx-auto p-4"
+              fileMapping={fileMapping}
+              initialFiles={initialFiles}
+              webSourceMapping={webSourceMapping}
+            />
+          )}
           <ErrorChatPlaceholder error={error} handleReload={handleReload} />
         </div>
         <div className="w-full max-w-3xl pb-4 px-4 mx-auto">
@@ -322,61 +285,4 @@ export default function Chat({
       </div>
     </div>
   );
-}
-
-function getConversationPath({
-  customGptId,
-  characterId,
-  conversationId,
-}: {
-  customGptId?: string;
-  characterId?: string;
-  conversationId: string;
-}) {
-  if (characterId !== undefined) {
-    return `/characters/d/${characterId}/${conversationId}`;
-  }
-
-  if (customGptId !== undefined) {
-    return `/custom/d/${customGptId}/${conversationId}`;
-  }
-
-  return `/d/${conversationId}`;
-}
-
-export function getAssistantIcon({
-  customGptId: customGptId,
-  imageName,
-  imageSource,
-  className,
-}: {
-  customGptId?: string;
-  imageName?: string;
-  imageSource?: string;
-  className?: string;
-}) {
-  if (customGptId === HELP_MODE_GPT_ID) {
-    return (
-      <div className="rounded-enterprise-sm bg-secondary/5 w-8 h-8 place-self-start m-4 mt-1">
-        <RobotIcon className="w-8 h-8 text-primary p-1" />
-      </div>
-    );
-  }
-  if (imageSource !== undefined && imageName !== undefined) {
-    return (
-      <div className={cn('p-1.5 place-self-start mx-4 mt-1 ', className)}>
-        <Image
-          src={imageSource}
-          width={30}
-          height={30}
-          alt={imageName}
-          className="rounded-enterprise-sm"
-          // this is necessary for it rendering correctly in safari
-          style={{
-            minWidth: '2.5rem',
-          }}
-        />
-      </div>
-    );
-  }
 }

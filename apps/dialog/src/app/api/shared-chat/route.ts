@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
     model: telliProvider,
     system: systemPrompt,
     messages,
-    experimental_transform: smoothStream({ chunking: 'word' }),
+    experimental_transform: smoothStream({ chunking: 'word', delayInMs: 20 }),
     async onFinish(assistantMessage) {
       const costsInCent = calculateCostsInCent(definedModel, assistantMessage.usage);
 

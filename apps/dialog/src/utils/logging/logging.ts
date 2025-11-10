@@ -31,12 +31,13 @@ export function logWarning(message: string) {
 
 export function logError(message: string, error: unknown) {
   if (error instanceof Error) {
-    Sentry.captureException({ exception: error, message });
+    // The error class name will be used as issue title in sentry, therefore passing the message as additional data
+    Sentry.captureException(error, { level: 'error', extra: { message } });
   } else {
-    Sentry.captureMessage(`${message}: ${JSON.stringify(error)}`, 'error');
+    Sentry.captureMessage(message, { level: 'error', extra: { error } });
   }
 
   if (process.env.NODE_ENV === 'development') {
-    console.log(`${message}: ${JSON.stringify(error)}`, 'error');
+    console.log(`[ERROR] ${message}`, error);
   }
 }

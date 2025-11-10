@@ -9,6 +9,7 @@ import { cn } from '@/utils/tailwind';
 import { labelClassName } from '@/utils/tailwind/input';
 import { useTranslations } from 'next-intl';
 import React from 'react';
+import { NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT } from '@/configuration-text-inputs/const';
 
 interface FileManagementProps {
   files: Map<string, LocalFileState>;
@@ -41,6 +42,7 @@ export default function FileManagement({
       <label className={cn(labelClassName)}>{t('attached-files-label')}</label>
       <FileDrop
         setFiles={setFiles}
+        disabled={initialFiles.length + files.size >= NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT}
         countOfFiles={initialFiles.length + files.size}
         onFileUploaded={onFileUploaded}
         showUploadConfirmation={true}

@@ -6,7 +6,7 @@ import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
 import he from 'he';
 import { unstable_cacheLife as cacheLife } from 'next/cache';
-import { logDebug, logError, logInfo } from '@/utils/logging/logging';
+import { logDebug, logError, logInfo, logWarning } from '@/utils/logging/logging';
 
 const headers = {
   'User-Agent':
@@ -28,7 +28,7 @@ export async function webScraperExecutable(
   'use cache';
   cacheLife('weeks');
 
-  logInfo(`Requesting webcontent for url: ${url}`);
+  logInfo(`Requesting webcontent for URL: ${url}`);
   const t = await getTranslations('websearch');
   let response: Response;
   try {
@@ -80,16 +80,15 @@ export async function webScraperExecutable(
   const metaTitleMatch = html.match(/<meta[^>]*name="title"[^>]*content="([^"]*)"/i);
 
   // Use the first available title source and decode HTML entities
-  let title = 'Untitled Page';
   const rawTitle = ogTitleMatch?.[1]?.trim() || metaTitleMatch?.[1]?.trim() || 'Untitled Page';
   // decode html special characters like &amp; etc.
-  title = he.decode(rawTitle);
+  const title = he.decode(rawTitle);
 
   let info = '';
   try {
     info = extractArticleContent(html, url);
-  } catch {
-    console.error('Error in web parsing tool');
+  } catch (error) {
+    logError(`Error in web parsing tool for URL: ${url}`, error);
     return {
       ...defaultErrorSource({ status_code: 408, t }),
       link: url,
@@ -116,40 +115,36 @@ export async function webScraperExecutable(
  * @returns {string} - The extracted article content as text
  */
 function extractArticleContent(html: string, url: string): string {
+  let doc: JSDOM | undefined;
   try {
     // Create a DOM document
-    const doc = new JSDOM(html, { url: url });
-
-    // Check if Readability is available
-    if (!Readability) {
-      throw new Error('Readability is not available');
-    }
+    doc = new JSDOM(html, { url: url });
 
     // Create a new Readability object and parse the document
-    const reader = new Readability(doc.window.document);
+    // Limit the max elements for performance reasons (Readability can take several minutes to parse large websites)
+    const reader = new Readability(doc.window.document, { maxElemsToParse: 10_000 });
     const article = reader.parse();
 
-    if (!article) {
-      throw new Error('Failed to parse article content');
-    }
-    if (!article.textContent) {
-      throw new Error('Failed to extract content');
-    }
-
     // Return the text content
-    return article.textContent;
-  } catch (error) {
-    console.error('Error extracting content with Readability:', error);
-
-    // Fallback to basic title extraction if Readability fails
-    try {
-      const dom = new JSDOM(html);
-      const title = dom.window.document.querySelector('title')?.textContent || '';
-
-      return `[Readability extraction failed] ${title}`;
-    } catch {
-      return `Failed to extract content from ${url}`;
+    if (article?.textContent) {
+      return article.textContent;
+    } else if (!article) {
+      logWarning(`Failed to parse article content using Readability for URL: ${url}`);
+    } else {
+      logWarning(`Failed to extract text content using Readability for URL: ${url}`);
     }
+  } catch (error) {
+    logError(`Error extracting content with Readability for URL: ${url}`, error);
+  }
+
+  // Fallback to basic title extraction if Readability fails
+  try {
+    doc ??= new JSDOM(html);
+    const title = doc.window.document.querySelector('title')?.textContent || '';
+
+    return `[Readability extraction failed] ${title}`;
+  } catch {
+    return `Failed to extract content from ${url}`;
   }
 }
 
@@ -159,7 +154,7 @@ function extractArticleContent(html: string, url: string): string {
  * @param timeout the timeout for fetch request
  * @returns true if the content-type is text/html, false otherwise
  */
-export async function isWebPage(url: string, timeout?: number) {
+export async function isWebPage(url: string, timeout = 1000) {
   // Set up a timeout for the fetch request
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);

@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
+import { sendMessage, waitForToast } from '../../utils/utils';
 
 test('teacher can login, create a custom gpt and start a chat', async ({ page }) => {
   await login(page, 'teacher');
@@ -69,10 +70,7 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await expect(page.locator('body')).toContainText('Was kostet ein Grundstück in München?');
   await expect(page.locator('body')).toContainText('Was ist das aktuelle Zinsniveau');
   await expect(page.locator('body')).toContainText('Wo kann man günstig Baugrund erwerben');
-  await page.getByRole('textbox', { name: 'Wie kann ich Dir helfen?' }).click();
-  await page.getByRole('textbox', { name: 'Wie kann ich Dir helfen?' }).fill('Wer bist du?');
-  await page.getByRole('button', { name: 'Nachricht abschicken' }).click();
-  await page.getByTitle('Kopieren').click();
+  await sendMessage(page, 'Wer bist du?');
 
   await expect(page.getByLabel('assistant message 1')).toContainText('Hausbauplaner');
 });
@@ -134,7 +132,7 @@ test('data is autosaved on blur', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Wie soll diese' }).fill('New Title');
   // unfocus the textbox
   await page.getByRole('textbox', { name: 'Wie soll diese' }).press('Tab');
-  await page.waitForTimeout(1000);
+  await waitForToast(page);
   await page.reload();
   await expect(page.getByRole('textbox', { name: 'Wie soll diese' })).toHaveValue('New Title');
 
@@ -145,7 +143,7 @@ test('data is autosaved on blur', async ({ page }) => {
   await page
     .getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' })
     .press('Tab');
-  await page.waitForTimeout(1000);
+  await waitForToast(page);
   await page.reload();
   await expect(
     page.getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' }),
@@ -154,7 +152,7 @@ test('data is autosaved on blur', async ({ page }) => {
   // change functions to new value
   await page.getByRole('textbox', { name: 'Welche konkreten Funktionen' }).fill('New Functions');
   await page.getByRole('textbox', { name: 'Welche konkreten Funktionen' }).press('Tab');
-  await page.waitForTimeout(1000);
+  await waitForToast(page);
   await page.reload();
   await expect(page.getByRole('textbox', { name: 'Welche konkreten Funktionen' })).toHaveValue(
     'New Functions',
@@ -162,8 +160,9 @@ test('data is autosaved on blur', async ({ page }) => {
 
   // change prompt suggestion to new value
   await page.getByPlaceholder('Erstelle einen').fill('New Prompt Suggestion');
-  await page.waitForTimeout(1000);
   await page.getByPlaceholder('Erstelle einen').press('Tab');
+  await waitForToast(page);
+  await page.reload();
   await expect(page.getByPlaceholder('Erstelle einen')).toHaveValue('New Prompt Suggestion');
 });
 

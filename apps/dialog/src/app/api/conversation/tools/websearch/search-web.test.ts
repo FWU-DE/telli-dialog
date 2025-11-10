@@ -5,6 +5,7 @@ const WIKI_PAGE_URL = 'https://de.wikipedia.org/wiki/Wiki';
 const PDF_DOC_URL =
   'https://www.bpb.de/system/files/dokument_pdf/Zeitleiste_deutsch_zum-Selbstdruck_16_Einzelseiten.pdf';
 const REDIRECT_PAGE_URL = 'https://de.wikipedia.org/';
+const TOO_LARGE_PAGE_URL = 'https://openmoji.org/library/';
 
 // mock is needed because test is not running in a next.js environment
 vi.mock('next-intl/server', () => ({
@@ -14,33 +15,48 @@ vi.mock('@/utils/logging/logging', () => ({
   env: {
     NEXT_PUBLIC_SENTRY_LOG_LEVEL: 'info',
   },
+  logInfo: vi.fn(),
+  logError: vi.fn(),
 }));
 
 // We do not want to execute those tests on every run because they depend on external resources.
 describe.skip('webScraperExecutable', () => {
   test('scrape existing wiki page', async () => {
     const output = await webScraperExecutable(WIKI_PAGE_URL);
-    expect(output).toBeDefined();
-    expect(output.content?.length).toBeGreaterThan(100);
-    expect(output.name).toBe('Wiki – Wikipedia');
-    expect(output.link).toBe(WIKI_PAGE_URL);
-    expect(output.type).toBe('websearch');
+    expect(output).toMatchObject({
+      link: WIKI_PAGE_URL,
+      name: 'Wiki – Wikipedia',
+      type: 'websearch',
+    });
+    expect(output?.content?.length).toBeGreaterThan(100);
   });
 
   test('scrape page should time out', async () => {
     const output = await webScraperExecutable(WIKI_PAGE_URL, {
       timeout: 10,
     });
-    expect(output).toBeDefined();
-    expect(output.error).toBe(true);
-    expect(output.link).toBe(WIKI_PAGE_URL);
+    expect(output).toMatchObject({
+      error: true,
+      link: WIKI_PAGE_URL,
+    });
   });
 
   test('scrape pdf document', async () => {
     const output = await webScraperExecutable(PDF_DOC_URL);
-    expect(output).toBeDefined();
-    expect(output.error).toBe(true);
-    expect(output.link).toBe(PDF_DOC_URL);
+    expect(output).toMatchObject({
+      error: true,
+      link: PDF_DOC_URL,
+    });
+  });
+
+  test('scrape large website should use fallback to title content', async () => {
+    const output = await webScraperExecutable(TOO_LARGE_PAGE_URL);
+    expect(output).toStrictEqual({
+      content: '[Readability extraction failed] Library  OpenMoji',
+      link: TOO_LARGE_PAGE_URL,
+      name: 'Library',
+      type: 'websearch',
+    });
   });
 
   test('isWebPage returns true for wiki page', async () => {
