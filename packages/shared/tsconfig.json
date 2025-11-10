@@ -5,7 +5,11 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "paths": {
+      "baseUrl": ["."],
+      "@shared/*": ["./src/*"]
+    }
   },
   "exclude": ["dist", "build", "node_modules"]
 }
