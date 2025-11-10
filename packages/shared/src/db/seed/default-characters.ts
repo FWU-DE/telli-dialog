@@ -6,7 +6,7 @@ import { dbCreateCharacter } from '../functions/character';
 import { DUMMY_USER_ID } from './user-entity';
 import { dbUpsertCustomGpt } from '../functions/custom-gpts';
 
-const DEFAULT_CHAT_MODEL = 'gpt-5-mini';
+export const DEFAULT_CHAT_MODEL = 'gpt-5-mini';
 
 export async function insertTemplateCharacters() {
   await processStaticJpegFiles(

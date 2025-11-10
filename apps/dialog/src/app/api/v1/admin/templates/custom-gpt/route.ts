@@ -36,7 +36,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 403 });
     }
 
-    const customGpts = await dbGetGlobalGpts();
+    const { searchParams } = new URL(request.url);
+    const federalStateID = searchParams.get('federalStateID');
+
+    if (!federalStateID) {
+      return NextResponse.json(
+        { error: 'federalStateID parameter is required' },
+        { status: 400 },
+      );
+    }
+
+    const customGpts = await dbGetGlobalGpts({ federalStateId: federalStateID });
 
     return NextResponse.json(customGpts);
   } catch (error) {
