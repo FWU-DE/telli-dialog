@@ -1,15 +1,15 @@
 import { encrypt } from '@shared/db/crypto';
 import {
-  dbGetAllFederalStates,
-  dbInsertFederalState,
-  dbGetFederalStateById,
   dbDeleteFederalState,
+  dbGetAllFederalStates,
+  dbGetFederalStateById,
+  dbInsertFederalState,
 } from '@shared/db/functions/federal-state';
 import { federalStateTable } from '@shared/db/schema';
 import { validateApiKeyByHeadersWithResult } from '@/utils/validation';
 import { env } from '@/env';
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { createInsertSchema } from 'drizzle-zod';
 
 export async function GET(req: NextRequest) {
