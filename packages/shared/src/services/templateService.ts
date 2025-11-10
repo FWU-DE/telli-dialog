@@ -141,8 +141,8 @@ export async function getFederalStatesWithMappings(
 }
 
 /** Updates template to federal state mapping by:
-* - adding new mappings
-* - deleting old mappings
+ * - adding new mappings
+ * - deleting old mappings
  */
 export async function updateTemplateMappings(
   templateType: TemplateTypes,
