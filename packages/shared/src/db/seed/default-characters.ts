@@ -22,7 +22,11 @@ export async function insertTemplateCharacters() {
       console.error('Failed to insert template character:', templateCharacter.name);
       continue;
     }
-    await updateTemplateMappings('character', id, FEDERAL_STATES.map((fs) => ({ federalStateId: fs.id, mappingId: null, isMapped: true })));
+    await updateTemplateMappings(
+      'character',
+      id,
+      FEDERAL_STATES.map((fs) => ({ federalStateId: fs.id, mappingId: null, isMapped: true })),
+    );
   }
   console.log('template character seed successful');
 }
@@ -39,7 +43,11 @@ export async function insertTemplateCustomGpt() {
       console.error('Failed to insert template custom gpt:', templateCustomGpt.name);
       continue;
     }
-    await updateTemplateMappings('custom-gpt', id, FEDERAL_STATES.map((fs) => ({ federalStateId: fs.id, mappingId: null, isMapped: true })));
+    await updateTemplateMappings(
+      'custom-gpt',
+      id,
+      FEDERAL_STATES.map((fs) => ({ federalStateId: fs.id, mappingId: null, isMapped: true })),
+    );
   }
   console.log('template custom gpt seed successful');
 }
