@@ -197,6 +197,13 @@
       "when": 1762257470865,
       "tag": "0027_cultured_nehzno",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1762783494022,
+      "tag": "0028_abandoned_pestilence",
+      "breakpoints": true
     }
   ]
 }

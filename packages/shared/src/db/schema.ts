@@ -510,7 +510,7 @@ export const TextChunkTable = pgTable(
   {
     id: uuid('id').defaultRandom().primaryKey(),
     fileId: text('file_id')
-      .references(() => fileTable.id)
+      .references(() => fileTable.id, { onDelete: 'cascade' })
       .notNull(),
     embedding: vector('embedding', { dimensions: 1024 }).notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
