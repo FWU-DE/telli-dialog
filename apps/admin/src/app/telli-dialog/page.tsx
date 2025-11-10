@@ -8,7 +8,7 @@ export default function Page() {
       sidebar={
         <Sidebar>
           <SidebarItem label="Bundesländer" href={ROUTES.dialog.federalStates} />
-          <SidebarItem label="Dialogpartner" href={ROUTES.dialog.templates} />
+          <SidebarItem label="Vorlagen" href={ROUTES.dialog.templates} />
         </Sidebar>
       }
       page={<div></div>}

@@ -1,3 +1,5 @@
+import { TemplateTypes } from '@shared/models/templates';
+
 export const ROUTES = {
   home: '/',
   api: {
@@ -17,6 +19,8 @@ export const ROUTES = {
     federalStateDetails: (federalStateId: string) =>
       `/telli-dialog/federal-states/${federalStateId}`,
     templates: '/telli-dialog/templates',
+    template: (templateType: TemplateTypes, templateId: string) =>
+      `/telli-dialog/templates/${templateType}/${templateId}`,
     vouchers: (federalStateId: string) => `/telli-dialog/federal-states/${federalStateId}/vouchers`,
     voucherNew: (federalStateId: string) =>
       `/telli-dialog/federal-states/${federalStateId}/vouchers/new`,

@@ -3,7 +3,6 @@
 import { useEffect, useState, useTransition } from 'react';
 import { Button } from '@ui/components/Button';
 import { getTemplatesAction } from './actions';
-import { TemplateModel } from '@telli/shared/services/templateService';
 import {
   Table,
   TableBody,
@@ -20,17 +19,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@ui/components/Card';
-
-function getTypeName(type: string) {
-  switch (type) {
-    case 'character':
-      return 'Dialogpartner';
-    case 'custom-gpt':
-      return 'Assistent';
-    default:
-      return 'Unbekannt';
-  }
-}
+import { ROUTES } from '@/consts/routes';
+import Link from 'next/link';
+import { TemplateModel } from '@shared/models/templates';
+import { Search } from 'lucide-react';
+import { getTemplateTypeName } from './templateTypeName';
 
 export default function TemplateListView() {
   const [templates, setTemplates] = useState<TemplateModel[]>([]);
@@ -70,6 +63,7 @@ export default function TemplateListView() {
               <TableHead>Name</TableHead>
               <TableHead>Erstellt am</TableHead>
               <TableHead>Gelöscht</TableHead>
+              <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -77,10 +71,15 @@ export default function TemplateListView() {
               <TableRow key={template.id}>
                 <TableCell>{template.id}</TableCell>
                 <TableCell>{template.originalId}</TableCell>
-                <TableCell>{getTypeName(template.type)}</TableCell>
+                <TableCell>{getTemplateTypeName(template.type)}</TableCell>
                 <TableCell>{template.name}</TableCell>
                 <TableCell>{template.createdAt.toLocaleString()}</TableCell>
                 <TableCell>{template.isDeleted ? 'ja' : 'nein'}</TableCell>
+                <TableCell>
+                  <Link href={ROUTES.dialog.template(template.type, template.id)}>
+                    <Search className="text-primary" />
+                  </Link>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
