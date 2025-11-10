@@ -4,7 +4,7 @@ import RobotIcon from '../icons/robot';
 import Image from 'next/image';
 
 export function AssistantIcon({
-  customGptId: customGptId,
+  customGptId,
   imageName,
   imageSource,
   className,

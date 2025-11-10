@@ -1,4 +1,5 @@
 import { UIMessage } from 'ai';
+import { UseChatHelpers } from '@ai-sdk/react';
 import { ChatBox } from './chat-box';
 import LoadingAnimation from './loading-animation';
 import { FileModel } from '@shared/db/schema';
@@ -7,7 +8,7 @@ import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 interface MessagesProps {
   messages: UIMessage[];
   isLoading: boolean;
-  status: 'submitted' | 'streaming' | 'ready' | 'error';
+  status: UseChatHelpers['status'];
   reload: () => void;
   assistantIcon?: React.ReactNode;
   doesLastUserMessageContainLinkOrFile: boolean;

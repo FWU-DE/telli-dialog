@@ -1,7 +1,7 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import React from 'react';
+import { FormEvent, RefObject, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { type SharedSchoolConversationModel } from '@shared/db/schema';
 
@@ -30,8 +30,8 @@ export default function SharedChat({
   const searchParams = new URLSearchParams({ id, inviteCode });
   const endpoint = `/api/shared-chat?${searchParams.toString()}`;
 
-  const [dialogStarted, setDialogStarted] = React.useState(false);
-  const [lastMessageHasAttachments, setLastMessageHasAttachments] = React.useState(false);
+  const [dialogStarted, setDialogStarted] = useState(false);
+  const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
 
   // substitute the error object from the useChat hook, to dislay a user friendly error message in German
   const { error, handleResponse, handleError, resetError } = useCheckStatusCode();
@@ -49,9 +49,9 @@ export default function SharedChat({
     });
 
   const scrollRef = useAutoScroll([messages, id, inviteCode]);
-  const containerRef = React.useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  async function customHandleSubmit(e: React.FormEvent) {
+  async function customHandleSubmit(e: FormEvent) {
     e.preventDefault();
 
     try {
@@ -105,7 +105,7 @@ export default function SharedChat({
                   learningContext={sharedSchoolChat.studentExcercise ?? ''}
                   dialogStarted={dialogStarted}
                   title={t('excersise-title')}
-                  parentRef={containerRef as React.RefObject<HTMLDivElement>}
+                  parentRef={containerRef as RefObject<HTMLDivElement>}
                   maxWidth={600}
                   maxHeight={600}
                   initialMargin={32}
