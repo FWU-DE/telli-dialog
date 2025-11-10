@@ -131,7 +131,7 @@ export async function dbGetGlobalCharacters({
   federalStateId,
 }: {
   userId: string;
-  federalStateId: string;
+  federalStateId?: string;
 }): Promise<CharacterModel[]> {
   const characters = await db
     .select({
@@ -149,14 +149,16 @@ export async function dbGetGlobalCharacters({
         eq(sharedCharacterConversation.userId, userId),
       ),
     )
-    .innerJoin(
+    .leftJoin(
       characterTemplateMappingTable,
       eq(characterTemplateMappingTable.characterId, characterTable.id),
     )
     .where(
       and(
         eq(characterTable.accessLevel, 'global'),
-        eq(characterTemplateMappingTable.federalStateId, federalStateId),
+        federalStateId
+          ? eq(characterTemplateMappingTable.federalStateId, federalStateId)
+          : undefined,
         or(
           eq(sharedCharacterConversation.userId, userId),
           isNull(sharedCharacterConversation.userId),
