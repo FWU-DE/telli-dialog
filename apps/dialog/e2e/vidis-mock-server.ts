@@ -1,55 +1,32 @@
-import Provider, { Configuration } from 'oidc-provider';
+import Provider, { ClientMetadata, Configuration } from 'oidc-provider';
 import express from 'express';
 import crypto from 'crypto';
 import * as jose from 'jose';
 import { readUserMappings } from './utils';
 
-const isProduction = process.env.NODE_ENV === 'production';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const RedisAdapter = isProduction ? require('./redis-adapter') : undefined;
-
 const PORT = process.env.PORT || 9000;
-const ISSUER_URL = isProduction ? 'https://vidis-mock.dgpt.app' : `http://localhost:${PORT}`;
+const ISSUER_URL = `http://localhost:${PORT}`;
 console.info({ PORT, ISSUER_URL });
 
-const VALID_REDIRECT_URLS = [
-  'http://localhost:3000',
-  'https://titanom.ngrok.app',
-  'https://chat.telli.schule',
-  'https://chat-staging.telli.schule',
-];
-
 // Create express app
-let app = express();
-if (isProduction) {
-  app = app.set('trust-proxy', true);
-}
+const app = express();
 
 const userAccountMapping = readUserMappings();
 
 let userCount = 0;
 
-// Create a simple PKCE-enabled client configuration
-const clientConfig = {
+const clientConfig: ClientMetadata = {
   client_id: 'vidis-client', // Should match env.vidisClientId in your next-auth config
   client_secret: 'vidis-secret', // Should match env.vidisClientSecret in your next-auth config
-  // redirect_uris: ['http://localhost:3000/api/auth/callback/vidis'], // Update to match your next-auth callback
-  redirect_uris: [
-    ...VALID_REDIRECT_URLS.map((u) => `${u}/api/auth/callback/vidis`),
-    ...VALID_REDIRECT_URLS.map((u) => `${u}/api/auth/callback/vidis-mock`),
-  ],
+  redirect_uris: ['http://localhost:3000/api/auth/callback/vidis'], // Update to match your next-auth callback
   response_types: ['code'],
   grant_types: ['authorization_code', 'refresh_token'],
   token_endpoint_auth_method: 'client_secret_basic',
-} satisfies NonNullable<Configuration['clients']>[number];
+};
 
 // OIDC provider configuration
 const providerConfig: Configuration = {
   clients: [clientConfig],
-  pkce: {
-    methods: ['S256'],
-    required: () => true, // Require PKCE for all clients
-  },
   features: {
     devInteractions: { enabled: true },
   },
@@ -59,27 +36,26 @@ const providerConfig: Configuration = {
     long: {
       httpOnly: true,
       sameSite: 'lax',
-      secure: isProduction, // Explicitly set to false for local development
+      secure: false, // Explicitly set to false for local development
     },
     short: {
       httpOnly: true,
       sameSite: 'lax',
-      secure: isProduction, // Explicitly set to false for local development
+      secure: false, // Explicitly set to false for local development
     },
   },
   claims: {
     openid: ['sub', 'rolle', 'schulkennung', 'bundesland'],
   },
-  adapter: isProduction ? RedisAdapter : undefined,
   async findAccount(ctx, id: string) {
-    const maybeAccount = userAccountMapping[id];
+    const maybeAccount = Object.values(userAccountMapping).find((u) => u.sub === id);
 
     if (maybeAccount === undefined) {
-      throw Error(`Expected teacher or student but got '${id}'`);
+      throw Error(`User not found '${id}'`);
     }
     return {
       accountId: id,
-      async claims(use: string, scope: string) {
+      async claims() {
         return {
           sub: maybeAccount.sub,
           rolle: maybeAccount.rolle,
@@ -88,26 +64,6 @@ const providerConfig: Configuration = {
         };
       },
     };
-  },
-  async extraTokenClaims(ctx, token) {
-    // @ts-expect-error property exists
-    const maybeAccount = userAccountMapping[token.accountId];
-    if (maybeAccount === undefined) {
-      // @ts-expect-error property exists
-      throw Error(`Expected teacher or student but got '${token.accountId}'`);
-    }
-    userCount = userCount + 1;
-    console.info({ userCount });
-
-    return {
-      typ: 'ID',
-      rolle: maybeAccount.rolle,
-      schulkennung: maybeAccount.schulkennung,
-      bundesland: maybeAccount.bundesland,
-    };
-  },
-  jwks: {
-    keys: [],
   },
   ttl: {
     AccessToken: 60 * 60,
@@ -134,15 +90,25 @@ async function generateKeys() {
 
 async function startServer() {
   const { privateJwk } = await generateKeys();
-  // @ts-expect-error propery exists
-  providerConfig.jwks.keys = [privateJwk];
+  providerConfig.jwks = { keys: [privateJwk] };
 
-  const issuerUrl = ISSUER_URL;
-  const provider = new Provider(issuerUrl, providerConfig);
+  const provider = new Provider(ISSUER_URL, providerConfig);
 
-  if (isProduction) {
-    provider.proxy = true;
-  }
+  // `accountId` and `sub` must be the same value
+  // in devInteractions, the `accountId` is the entered username and cannot be changed
+  // -> overriding `interactionFinished` to change the accountId to the user's unique id (sub)
+  const { interactionFinished } = provider;
+  provider.interactionFinished = (...args) => {
+    const { login } = args[2];
+    if (login) {
+      const maybeAccount = userAccountMapping[login.accountId];
+      if (maybeAccount) {
+        login.accountId = maybeAccount.sub;
+      }
+    }
+
+    return interactionFinished.call(provider, ...args);
+  };
 
   // Add detailed error event handlers
   provider.on('server_error', (ctx, err) => {
