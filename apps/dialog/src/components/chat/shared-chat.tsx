@@ -1,7 +1,7 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import React from 'react';
+import { FormEvent, RefObject, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { type SharedSchoolConversationModel } from '@shared/db/schema';
 
@@ -9,11 +9,13 @@ import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-ch
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
-import { ChatBox } from '@/components/chat/chat-box';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { FloatingText } from './floating-text';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
+import { messageContainsAttachments } from '@/utils/chat/messages';
+import { useAutoScroll } from '@/hooks/use-auto-scroll';
+import { Messages } from './messages';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
@@ -28,45 +30,32 @@ export default function SharedChat({
   const searchParams = new URLSearchParams({ id, inviteCode });
   const endpoint = `/api/shared-chat?${searchParams.toString()}`;
 
-  const [dialogStarted, setDialogStarted] = React.useState(false);
+  const [dialogStarted, setDialogStarted] = useState(false);
+  const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
 
   // substitute the error object from the useChat hook, to dislay a user friendly error message in German
   const { error, handleResponse, handleError, resetError } = useCheckStatusCode();
 
-  const {
-    messages,
-    setMessages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
-    reload,
-    stop,
-    status,
-  } = useChat({
-    id,
-    initialMessages: [],
-    api: endpoint,
-    experimental_throttle: 100,
-    maxSteps: 2,
-    body: { modelId: sharedSchoolChat.modelId },
-    onResponse: handleResponse,
-    onError: handleError,
-  });
+  const { messages, setMessages, input, handleInputChange, handleSubmit, reload, stop, status } =
+    useChat({
+      id,
+      initialMessages: [],
+      api: endpoint,
+      experimental_throttle: 100,
+      maxSteps: 2,
+      body: { modelId: sharedSchoolChat.modelId },
+      onResponse: handleResponse,
+      onError: handleError,
+    });
 
-  const scrollRef = React.useRef<HTMLDivElement | null>(null);
-  const containerRef = React.useRef<HTMLDivElement>(null);
+  const scrollRef = useAutoScroll([messages, id, inviteCode]);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-    }
-  }, [messages, id, inviteCode]);
-
-  async function customHandleSubmit(e: React.FormEvent) {
+  async function customHandleSubmit(e: FormEvent) {
     e.preventDefault();
 
     try {
+      setLastMessageHasAttachments(messageContainsAttachments(input));
       handleSubmit(e, {});
     } catch (error) {
       console.error(error);
@@ -78,41 +67,12 @@ export default function SharedChat({
   }
 
   function handleReload() {
-    // Clear rate limit error before reloading
     resetError();
     reload();
   }
 
-  const innerContent =
-    messages.length === 0 && !dialogStarted ? (
-      <InitialChatContentDisplay
-        title={sharedSchoolChat.name}
-        description={sharedSchoolChat.description}
-        excerciseDescription={sharedSchoolChat.studentExcercise}
-        imageSource={maybeSignedPictureUrl}
-        setDialogStarted={setDialogStarted}
-      />
-    ) : (
-      <>
-        <div className="flex flex-col gap-4">
-          {messages.map((message, index) => {
-            return (
-              <ChatBox
-                key={index}
-                index={index}
-                isLastUser={index === messages.length - 1 && message.role === 'user'}
-                isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
-                isLoading={isLoading}
-                regenerateMessage={reload}
-                status={status}
-              >
-                {message}
-              </ChatBox>
-            );
-          })}
-        </div>
-      </>
-    );
+  const isLoading = status === 'submitted';
+
   return (
     <>
       {!chatActive && (
@@ -136,7 +96,7 @@ export default function SharedChat({
         >
           <div
             ref={scrollRef}
-            className="flex-grow w-full max-w-5xl overflow-y-auto"
+            className="flex-grow w-full max-w-5xl overflow-y-auto p-4 pb-[5rem]"
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
             {sharedSchoolChat.studentExcercise !== undefined &&
@@ -145,14 +105,31 @@ export default function SharedChat({
                   learningContext={sharedSchoolChat.studentExcercise ?? ''}
                   dialogStarted={dialogStarted}
                   title={t('excersise-title')}
-                  parentRef={containerRef as React.RefObject<HTMLDivElement>}
+                  parentRef={containerRef as RefObject<HTMLDivElement>}
                   maxWidth={600}
                   maxHeight={600}
                   initialMargin={32}
                   minMargin={16}
                 />
               )}
-            {innerContent}
+            {messages.length === 0 && !dialogStarted ? (
+              <InitialChatContentDisplay
+                title={sharedSchoolChat.name}
+                description={sharedSchoolChat.description}
+                excerciseDescription={sharedSchoolChat.studentExcercise}
+                imageSource={maybeSignedPictureUrl}
+                setDialogStarted={setDialogStarted}
+              />
+            ) : (
+              <Messages
+                messages={messages}
+                isLoading={isLoading}
+                status={status}
+                reload={reload}
+                doesLastUserMessageContainLinkOrFile={lastMessageHasAttachments}
+                containerClassName="flex flex-col gap-4"
+              />
+            )}
             <ErrorChatPlaceholder error={error} handleReload={handleReload} />
           </div>
           <div className="w-full max-w-5xl mx-auto px-4 pb-4">
