@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import * as Toast from '@radix-ui/react-toast';
 import { cn } from '@/utils/tailwind';

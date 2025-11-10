@@ -30,6 +30,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  return NextResponse.json({
+    body: JSON.stringify({ file_id: await handleFileUpload(file) }),
+    status: 200,
+  });
+}
+
+export async function handleFileUpload(file: File) {
+  const user = await getUser();
   const fileId = `file_${cnanoid()}`;
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
@@ -77,10 +85,7 @@ export async function POST(req: NextRequest) {
     uploadToS3(file),
   ]);
 
-  return NextResponse.json({
-    body: JSON.stringify({ file_id: fileId }),
-    status: 200,
-  });
+  return fileId;
 
   async function uploadToS3(file: File) {
     // Use processed buffer for images, original buffer for other files
