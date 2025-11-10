@@ -1,3 +1,4 @@
+import { Button } from '@ui/components/Button';
 import Link from 'next/link';
 
 /**
@@ -9,8 +10,10 @@ export type SidebarProps = {
 
 export function Sidebar({ children }: SidebarProps) {
   return (
-    <div className="flex flex-col gap-4 w-[240px] p-6">
-      <div className="text-sm text-gray-500 font-bold tracking-widest uppercase">Navigation</div>
+    <div className="flex flex-col gap-0 w-[240px] p-6">
+      <div className="py-4 text-sm text-primary font-bold tracking-widest uppercase">
+        Navigation
+      </div>
       {children}
     </div>
   );
@@ -26,8 +29,10 @@ export type SidebarItemProps = {
 
 export function SidebarItem({ label, href }: SidebarItemProps) {
   return (
-    <Link href={href} className="block">
-      {label}
+    <Link href={href}>
+      <Button variant="link" className="pl-0">
+        {label}
+      </Button>
     </Link>
   );
 }
