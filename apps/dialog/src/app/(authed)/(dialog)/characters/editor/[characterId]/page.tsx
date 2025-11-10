@@ -5,7 +5,7 @@ import {
   dbGetCharacterByIdWithShareData,
   dbGetCopyTemplateCharacter,
 } from '@shared/db/functions/character';
-import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { getMaybeSignedUrlFromS3Get, readFileFromS3 } from '@shared/s3';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
 import { notFound } from 'next/navigation';
@@ -14,9 +14,11 @@ import HeaderPortal from '../../../header-portal';
 import CharacterForm from './character-form';
 import { removeNullValues } from '@/utils/generic/object-operations';
 import { CharacterModel } from '@shared/db/schema';
-import { fetchFileMapping } from '../../actions';
+import { fetchFileMapping, linkFileToCharacter } from '../../actions';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
+import { handleFileUpload } from '@/app/api/v1/files/route';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
@@ -58,6 +60,14 @@ export default async function Page(context: PageContext) {
   const templateId = searchParams?.templateId;
   const user = await getUser();
 
+  const templateCharacter =
+    templateId != undefined
+      ? await dbGetCharacterByIdWithShareData({
+          characterId: templateId,
+          userId: user.id,
+        })
+      : undefined;
+
   const character = await dbGetCharacterByIdWithShareData({
     characterId: params.characterId,
     userId: user.id,
@@ -73,6 +83,16 @@ export default async function Page(context: PageContext) {
     templateId !== undefined ? `characters/${character.id}/avatar` : undefined;
 
   const relatedFiles = await fetchFileMapping(params.characterId);
+  if (templateId !== undefined) {
+    const templateFiles = await dbGetRelatedCharacterFiles(templateId);
+    for (const file of templateFiles) {
+      const fileContent = await readFileFromS3({ key: `message_attachments/${file.id}` });
+      const blobFile = new File([fileContent], file.name, { type: file.type });
+      const fileId = await handleFileUpload(blobFile);
+      await linkFileToCharacter({ fileId: fileId, characterId: character.id });
+      relatedFiles.push({ ...file, id: fileId });
+    }
+  }
   if (!character) {
     return notFound();
   }
@@ -81,11 +101,11 @@ export default async function Page(context: PageContext) {
     key: character.pictureId ?? copyOfTemplatePicture,
   });
 
+  const links = character.attachedLinks.concat(templateCharacter?.attachedLinks || []);
+
   const initialLinks = PREFETCH_ENABLED
-    ? await Promise.all(
-        character.attachedLinks.filter((l) => l !== '').map((url) => webScraperExecutable(url)),
-      )
-    : character.attachedLinks
+    ? await Promise.all(links.filter((l) => l !== '').map((url) => webScraperExecutable(url)))
+    : links
         .filter((l) => l !== '')
         .map(
           (url) =>

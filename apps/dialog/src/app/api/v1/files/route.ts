@@ -9,6 +9,7 @@ import { extractFile } from '../../file-operations/extract-file';
 import { chunkText } from '../../file-operations/process-chunks';
 import { embedBatchAndSave } from '../../file-operations/embedding';
 import { logDebug } from '@/utils/logging/logging';
+import { UserAndContext } from '@/auth/types';
 
 export async function POST(req: NextRequest) {
   const user = await getUser();
@@ -28,8 +29,16 @@ export async function POST(req: NextRequest) {
       { error: 'file FormData entry value was of type "string", but expected type "File"' },
       { status: 400 },
     );
-  }
+  }  
 
+  return NextResponse.json({
+    body: JSON.stringify({ file_id: await handleFileUpload(file) }),
+    status: 200,
+  }); 
+}
+
+export async function handleFileUpload(file: File) {  
+  const user = await getUser();
   const fileId = `file_${cnanoid()}`;
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
@@ -77,10 +86,7 @@ export async function POST(req: NextRequest) {
     uploadToS3(file),
   ]);
 
-  return NextResponse.json({
-    body: JSON.stringify({ file_id: fileId }),
-    status: 200,
-  });
+  return fileId
 
   async function uploadToS3(file: File) {
     // Use processed buffer for images, original buffer for other files
