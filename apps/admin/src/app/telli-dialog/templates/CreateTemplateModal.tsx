@@ -5,7 +5,6 @@ import { Button } from '@ui/components/Button';
 import { Input } from '@ui/components/Input';
 import { Label } from '@ui/components/Label';
 import { createTemplateFromUrlAction } from './actions';
-import { useRouter } from 'next/navigation';
 
 type CreateTemplateModalProps = {
   isOpen: boolean;
