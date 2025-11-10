@@ -85,13 +85,15 @@ export default async function Page(context: PageContext) {
   const relatedFiles = await fetchFileMapping(params.characterId);
   if (templateId !== undefined) {
     const templateFiles = await dbGetRelatedCharacterFiles(templateId);
-    for (const file of templateFiles) {
-      const fileContent = await readFileFromS3({ key: `message_attachments/${file.id}` });
-      const blobFile = new File([fileContent], file.name, { type: file.type });
-      const fileId = await handleFileUpload(blobFile);
-      await linkFileToCharacter({ fileId: fileId, characterId: character.id });
-      relatedFiles.push({ ...file, id: fileId });
-    }
+    await Promise.all(
+      templateFiles.map(async (file) => {
+        const fileContent = await readFileFromS3({ key: `message_attachments/${file.id}` });
+        const blobFile = new File([fileContent], file.name, { type: file.type });
+        const fileId = await handleFileUpload(blobFile);
+        await linkFileToCharacter({ fileId: fileId, characterId: character.id });
+        relatedFiles.push({ ...file, id: fileId });
+      }),
+    );
   }
   if (!character) {
     return notFound();
