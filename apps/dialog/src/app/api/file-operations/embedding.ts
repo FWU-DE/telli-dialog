@@ -2,8 +2,9 @@ import { dbCreateManyTextChunks } from '@shared/db/functions/text-chunk';
 import { OpenAI } from 'openai';
 import { env } from '@/env';
 import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
-import { EMBEDDING_BATCH_SIZE } from '@/const';
+import { EMBEDDING_BATCH_SIZE, EMBEDDING_MAX_CONCURRENT_REQUESTS } from '@/const';
 import { TextChunkInsertModel } from '@shared/db/schema';
+import { logDebug } from '@/utils/logging/logging';
 
 export async function embedText({
   text,
@@ -51,7 +52,7 @@ export async function embedBatchAndSave({
 }) {
   const federalStateApiKey = await getFederalStateApiKey(federalStateId);
 
-  console.log(`Embedding ${values.length} chunks`);
+  logDebug(`Embedding ${values.length} chunks`);
   const promises: Promise<void>[] = [];
   // Process chunks in batches of 200
   for (let i = 0; i < values.length; i += EMBEDDING_BATCH_SIZE) {
@@ -82,6 +83,11 @@ export async function embedBatchAndSave({
         });
       })(),
     );
+
+    if (promises.length % EMBEDDING_MAX_CONCURRENT_REQUESTS === 0) {
+      logDebug('Awaiting embedding API calls due to rate limiting');
+      await Promise.all(promises);
+    }
   }
 
   await Promise.all(promises);
