@@ -4,6 +4,7 @@ import {
   characterTable,
   characterTemplateMappingTable,
   customGptTable,
+  customGptTemplateMappingTable,
   federalStateTable,
 } from '@shared/db/schema';
 import {
@@ -119,25 +120,29 @@ export async function getFederalStatesWithMappings(
   templateType: TemplateTypes,
   templateId: string,
 ): Promise<TemplateToFederalStateMapping[]> {
+  let subquery;
   if (templateType === 'character') {
-    const subquery = db
+    subquery = db
       .select()
       .from(characterTemplateMappingTable)
       .where(eq(characterTemplateMappingTable.characterId, templateId))
       .as('mapping');
-
-    const federalStateMappings = await db
-      .select({ mappingId: subquery.id, federalStateId: federalStateTable.id })
-      .from(federalStateTable)
-      .leftJoin(subquery, eq(subquery.federalStateId, federalStateTable.id));
-
-    return federalStateMappings.map((mapping) => ({
-      ...mapping,
-      isMapped: mapping.mappingId !== null,
-    }));
   } else {
-    throw new Error('not implemented');
+    subquery = db
+      .select()
+      .from(customGptTemplateMappingTable)
+      .where(eq(customGptTemplateMappingTable.customGptId, templateId))
+      .as('mapping');
   }
+  const federalStateMappings = await db
+    .select({ mappingId: subquery.id, federalStateId: federalStateTable.id })
+    .from(federalStateTable)
+    .leftJoin(subquery, eq(subquery.federalStateId, federalStateTable.id));
+
+  return federalStateMappings.map((mapping) => ({
+    ...mapping,
+    isMapped: mapping.mappingId !== null,
+  }));
 }
 
 /** Updates template to federal state mapping by:
@@ -173,6 +178,27 @@ export async function updateTemplateMappings(
       }
     });
   } else {
-    throw new Error('not implemented');
+    const mappingsToDelete = mappings
+      .filter((mapping) => !!mapping.mappingId && !mapping.isMapped)
+      .map((mapping) => mapping.mappingId!);
+
+    const newMappings = mappings
+      .filter((mapping) => !mapping.mappingId && mapping.isMapped)
+      .map((mapping) => ({
+        customGptId: templateId,
+        federalStateId: mapping.federalStateId,
+      }));
+
+    await db.transaction(async (tx) => {
+      if (mappingsToDelete.length > 0) {
+        await tx
+          .delete(customGptTemplateMappingTable)
+          .where(inArray(customGptTemplateMappingTable.id, mappingsToDelete));
+      }
+
+      if (newMappings.length > 0) {
+        await tx.insert(customGptTemplateMappingTable).values(newMappings);
+      }
+    });
   }
 }

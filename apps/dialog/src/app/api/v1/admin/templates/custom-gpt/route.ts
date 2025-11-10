@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 403 });
     }
 
-    const customGpts = await dbGetGlobalGpts();
+    const customGpts = await dbGetGlobalGpts({});
 
     return NextResponse.json(customGpts);
   } catch (error) {

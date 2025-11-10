@@ -1,5 +1,5 @@
 import { db } from '..';
-import { eq, and, or, desc, inArray } from 'drizzle-orm';
+import { eq, and, or, desc, inArray, getTableColumns } from 'drizzle-orm';
 import {
   customGptTable,
   conversationMessageTable,
@@ -9,6 +9,7 @@ import {
   CustomGptFileMapping,
   fileTable,
   TextChunkTable,
+  customGptTemplateMappingTable,
 } from '../schema';
 
 export async function dbGetCustomGptsByUserId({
@@ -39,14 +40,35 @@ export async function dbGetCustomGptById({
   return customGpt;
 }
 
-export async function dbGetGlobalGpts(): Promise<CustomGptModel[]> {
-  const characters = await db
-    .select()
-    .from(customGptTable)
-    .where(eq(customGptTable.accessLevel, 'global'))
-    .orderBy(desc(customGptTable.createdAt));
-
-  return characters;
+export async function dbGetGlobalGpts({
+  federalStateId,
+}: {
+  federalStateId?: string;
+}): Promise<CustomGptModel[]> {
+  if (federalStateId) {
+    const characters = await db
+      .select({ ...getTableColumns(customGptTable) })
+      .from(customGptTable)
+      .innerJoin(
+        customGptTemplateMappingTable,
+        eq(customGptTemplateMappingTable.customGptId, customGptTable.id),
+      )
+      .where(
+        and(
+          eq(customGptTable.accessLevel, 'global'),
+          eq(customGptTemplateMappingTable.federalStateId, federalStateId),
+        ),
+      )
+      .orderBy(desc(customGptTable.createdAt));
+    return characters;
+  } else {
+    const characters = await db
+      .select()
+      .from(customGptTable)
+      .where(eq(customGptTable.accessLevel, 'global'))
+      .orderBy(desc(customGptTable.createdAt));
+    return characters;
+  }
 }
 
 export async function dbGetGlobalCustomGptByName({

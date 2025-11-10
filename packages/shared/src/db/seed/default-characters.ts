@@ -5,8 +5,10 @@ import { uploadFileToS3 } from '../../s3';
 import { dbCreateCharacter } from '../functions/character';
 import { DUMMY_USER_ID } from './user-entity';
 import { dbUpsertCustomGpt } from '../functions/custom-gpts';
+import { updateTemplateMappings } from '@shared/services/templateService';
+import { FEDERAL_STATES } from './federal-state';
 
-const DEFAULT_CHAT_MODEL = 'gpt-5-mini';
+export const DEFAULT_CHAT_MODEL = 'gpt-5-mini';
 
 export async function insertTemplateCharacters() {
   await processStaticJpegFiles(
@@ -18,7 +20,13 @@ export async function insertTemplateCharacters() {
     const id = result && result[0] ? result[0].id : undefined;
     if (!id) {
       console.error('Failed to insert template character:', templateCharacter.name);
+      continue;
     }
+    await updateTemplateMappings(
+      'character',
+      id,
+      FEDERAL_STATES.map((fs) => ({ federalStateId: fs.id, mappingId: null, isMapped: true })),
+    );
   }
   console.log('template character seed successful');
 }
@@ -29,7 +37,17 @@ export async function insertTemplateCustomGpt() {
     'custom-gpts/_templates',
   );
   for (const templateCustomGpt of defaultCustomGpt) {
-    await dbUpsertCustomGpt({ customGpt: templateCustomGpt });
+    const result = await dbUpsertCustomGpt({ customGpt: templateCustomGpt });
+    const id = result?.id ?? undefined;
+    if (!id) {
+      console.error('Failed to insert template custom gpt:', templateCustomGpt.name);
+      continue;
+    }
+    await updateTemplateMappings(
+      'custom-gpt',
+      id,
+      FEDERAL_STATES.map((fs) => ({ federalStateId: fs.id, mappingId: null, isMapped: true })),
+    );
   }
   console.log('template custom gpt seed successful');
 }

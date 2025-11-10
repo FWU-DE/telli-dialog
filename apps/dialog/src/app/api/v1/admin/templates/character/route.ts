@@ -33,7 +33,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 403 });
     }
 
-    const characters = await dbGetGlobalCharacters({ userId: DUMMY_USER_ID });
+    const characters = await dbGetGlobalCharacters({
+      userId: DUMMY_USER_ID,
+    });
 
     return NextResponse.json(characters);
   } catch (error) {

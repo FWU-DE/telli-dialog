@@ -34,6 +34,7 @@ export default async function Page(context: PageContext) {
     accessLevel,
     schoolId: user.school?.id,
     userId: user.id,
+    federalStateId: user.federalState?.id,
   });
   const characters = _characters.filter((c) => c.name !== '');
 
@@ -48,13 +49,15 @@ async function getCharacterByAccessLevel({
   accessLevel,
   schoolId,
   userId,
+  federalStateId,
 }: {
   accessLevel: CharacterAccessLevel;
   schoolId: string | undefined;
   userId: string;
+  federalStateId: string;
 }): Promise<CharacterModel[]> {
   if (accessLevel === 'global') {
-    return await dbGetGlobalCharacters({ userId });
+    return await dbGetGlobalCharacters({ userId, federalStateId });
   }
 
   if (accessLevel === 'school' && schoolId !== undefined) {
