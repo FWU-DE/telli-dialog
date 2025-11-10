@@ -61,7 +61,7 @@ export default async function Page(context: PageContext) {
   const user = await getUser();
 
   const templateCharacter =
-    templateId != undefined
+    templateId !== undefined
       ? await dbGetCharacterByIdWithShareData({
           characterId: templateId,
           userId: user.id,

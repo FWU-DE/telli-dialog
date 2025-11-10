@@ -57,7 +57,7 @@ export default async function Page(context: PageContext) {
 
   const user = await getUser();
   const templateCustomGpt =
-    templateId != undefined
+    templateId !== undefined
       ? await dbGetCustomGptById({
           customGptId: templateId,
         })
