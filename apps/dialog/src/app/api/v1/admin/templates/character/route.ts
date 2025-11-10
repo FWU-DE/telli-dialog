@@ -37,13 +37,10 @@ export async function GET(request: NextRequest) {
     const federalStateID = searchParams.get('federalStateID');
 
     if (!federalStateID) {
-      return NextResponse.json(
-        { error: 'federalStateID parameter is required' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'federalStateID parameter is required' }, { status: 400 });
     }
 
-    const characters = await dbGetGlobalCharacters({ 
+    const characters = await dbGetGlobalCharacters({
       userId: DUMMY_USER_ID,
       federalStateId: federalStateID,
     });

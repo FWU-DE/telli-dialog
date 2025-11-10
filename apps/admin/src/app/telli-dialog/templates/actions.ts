@@ -19,9 +19,11 @@ export async function createTemplateFromUrlAction(url: string) {
   // Parse the URL to extract template type and ID
   const urlPattern = /\/(custom|characters)\/editor\/([a-fA-F0-9-]+)/;
   const match = url.match(urlPattern);
-  
+
   if (!match) {
-    throw new Error('URL Format ungültig. URL muss in einem der folgenden Formate sein: /custom/editor/{id} oder /characters/editor/{id}');
+    throw new Error(
+      'URL Format ungültig. URL muss in einem der folgenden Formate sein: /custom/editor/{id} oder /characters/editor/{id}',
+    );
   }
 
   const [, templateTypeRaw, templateId] = match;
@@ -54,11 +56,11 @@ export async function createTemplateFromUrlAction(url: string) {
       if (!resultId) {
         throw new Error('Fehler beim Erstellen der Charakter-Vorlage');
       }
-      return { 
-        success: true, 
+      return {
+        success: true,
         templateId: resultId,
         templateType: 'character',
-        message: 'Charakter-Vorlage erfolgreich erstellt'
+        message: 'Charakter-Vorlage erfolgreich erstellt',
       };
     } else {
       const sourceCustomGpt = await dbGetCustomGptById({ customGptId: templateId });
@@ -82,11 +84,11 @@ export async function createTemplateFromUrlAction(url: string) {
       if (!resultId) {
         throw new Error('Fehler beim Erstellen der Custom GPT-Vorlage');
       }
-      return { 
-        success: true, 
+      return {
+        success: true,
         templateId: resultId,
         templateType: 'custom-gpt',
-        message: 'Custom GPT-Vorlage erfolgreich erstellt'
+        message: 'Custom GPT-Vorlage erfolgreich erstellt',
       };
     }
   } catch (error) {

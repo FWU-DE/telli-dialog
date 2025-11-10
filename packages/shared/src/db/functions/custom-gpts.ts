@@ -40,7 +40,11 @@ export async function dbGetCustomGptById({
   return customGpt;
 }
 
-export async function dbGetGlobalGpts({federalStateId}: {federalStateId: string}): Promise<CustomGptModel[]> {
+export async function dbGetGlobalGpts({
+  federalStateId,
+}: {
+  federalStateId: string;
+}): Promise<CustomGptModel[]> {
   const characters = await db
     .select()
     .from(customGptTable)
@@ -58,7 +62,7 @@ export async function dbGetGlobalGpts({federalStateId}: {federalStateId: string}
     )
     .orderBy(desc(customGptTable.createdAt));
 
-  return characters.map(row => row.custom_gpt);
+  return characters.map((row) => row.custom_gpt);
 }
 
 export async function dbGetGlobalCustomGptByName({

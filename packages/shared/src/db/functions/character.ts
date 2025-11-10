@@ -15,7 +15,6 @@ import {
   sharedCharacterConversation,
   TextChunkTable,
 } from '../schema';
-import { dbGetModelByName } from './llm-model';
 
 export async function dbGetCharacterByIdOrSchoolId({
   characterId,
@@ -112,7 +111,9 @@ export async function dbCreateCharacter(
   character: Omit<CharacterInsertModel, 'modelId'> & Partial<Pick<CharacterInsertModel, 'modelId'>>,
   defaultModelName: string,
 ) {
-  const defaultModelId = (await db.select().from(llmModelTable).where(eq(llmModelTable.name, defaultModelName)))[0]?.id;
+  const defaultModelId = (
+    await db.select().from(llmModelTable).where(eq(llmModelTable.name, defaultModelName))
+  )[0]?.id;
   const modelId = character.modelId ?? defaultModelId;
   if (!modelId) {
     throw new Error('No default model found');
@@ -150,7 +151,7 @@ export async function dbGetGlobalCharacters({
     )
     .innerJoin(
       characterTemplateMappingTable,
-      eq(characterTemplateMappingTable.characterId, characterTable.id)
+      eq(characterTemplateMappingTable.characterId, characterTable.id),
     )
     .where(
       and(
