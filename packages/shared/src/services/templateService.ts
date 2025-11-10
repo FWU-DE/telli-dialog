@@ -26,7 +26,7 @@ export async function getTemplates(): Promise<TemplateModel[]> {
   return [...characterTemplates, ...customGptTemplates];
 }
 
-/* Fetch all character templates from the database. */
+/** Fetch all character templates from the database. */
 async function getCharacters(): Promise<TemplateModel[]> {
   const templates = await db
     .select({
@@ -45,7 +45,7 @@ async function getCharacters(): Promise<TemplateModel[]> {
   }));
 }
 
-/* Fetch all custom GPT templates from the database. */
+/** Fetch all custom GPT templates from the database. */
 async function getCustomGpt(): Promise<TemplateModel[]> {
   const templates = await db
     .select({
@@ -64,7 +64,7 @@ async function getCustomGpt(): Promise<TemplateModel[]> {
   }));
 }
 
-/* Fetch a template by its type and id. */
+/** Fetch a template by its type and id. */
 export async function getTemplateById(
   templateType: TemplateTypes,
   templateId: string,
@@ -114,7 +114,7 @@ export async function getTemplateById(
   }
 }
 
-/* Select all federal states with the mapping information for the given template. */
+/** Select all federal states with the mapping information for the given template. */
 export async function getFederalStatesWithMappings(
   templateType: TemplateTypes,
   templateId: string,
@@ -140,9 +140,9 @@ export async function getFederalStatesWithMappings(
   }
 }
 
-/* Updates template to federal state mapping by:
-- adding new mappings
-- deleting old mappings
+/** Updates template to federal state mapping by:
+* - adding new mappings
+* - deleting old mappings
  */
 export async function updateTemplateMappings(
   templateType: TemplateTypes,

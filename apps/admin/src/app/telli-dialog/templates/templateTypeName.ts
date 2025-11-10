@@ -6,7 +6,5 @@ export function getTemplateTypeName(type: TemplateModel['type']): string {
       return 'Dialogpartner';
     case 'custom-gpt':
       return 'Assistent';
-    default:
-      return 'Unbekannt';
   }
 }
