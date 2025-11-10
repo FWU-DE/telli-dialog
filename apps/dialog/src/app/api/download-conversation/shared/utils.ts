@@ -19,7 +19,7 @@ export async function generateSharedConversationDocxFiles({
   userFullName: string;
 }): Promise<
   | {
-      buffer: Buffer;
+      buffer: ArrayBuffer;
       messages: Message[];
     }
   | undefined
@@ -32,7 +32,7 @@ export async function generateSharedConversationDocxFiles({
     });
 
     const doc = buildDocxDocument({ conversationMetadata, messageParagraphs });
-    const buffer = await Packer.toBuffer(doc);
+    const buffer = await Packer.toArrayBuffer(doc);
 
     return { buffer, messages: conversationMessages };
   } catch (error) {
