@@ -6,8 +6,6 @@ import { Input } from '@ui/components/Input';
 import { Label } from '@ui/components/Label';
 import { createTemplateFromUrlAction } from './actions';
 import { useRouter } from 'next/navigation';
-import { ROUTES } from '@/consts/routes';
-import { TemplateTypes } from '@shared/models/templates';
 
 type CreateTemplateModalProps = {
   isOpen: boolean;
@@ -19,7 +17,6 @@ export function CreateTemplateModal({ isOpen, onClose, onSuccess }: CreateTempla
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const validateUrl = (inputUrl: string): boolean => {
     // Support both full URLs and path-only URLs
