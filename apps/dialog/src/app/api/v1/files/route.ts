@@ -48,24 +48,21 @@ export async function handleFileUpload(file: File) {
     type: fileExtension,
   });
 
-  const enrichedChunks: Omit<TextChunkInsertModel, 'embedding'>[] = [];
-  for (const element of extractResult.content) {
-    const textChunks = chunkText({
-      text: element.text,
-      sentenceChunkOverlap: 1,
-      lowerBoundWordCount: 200,
-    });
-    textChunks.forEach((chunk, index) => {
-      enrichedChunks.push({
+  const enrichedChunks: Omit<TextChunkInsertModel, 'embedding'>[] = extractResult.content.flatMap(
+    (element) =>
+      chunkText({
+        text: element.text,
+        sentenceChunkOverlap: 1,
+        lowerBoundWordCount: 200,
+      }).map((chunk, index) => ({
         pageNumber: element.page,
         fileId,
         orderIndex: index,
         content: chunk.content,
         leadingOverlap: chunk.leadingOverlap,
         trailingOverlap: chunk.trailingOverlap,
-      });
-    });
-  }
+      })),
+  );
 
   await db.insert(fileTable).values({
     id: fileId,
