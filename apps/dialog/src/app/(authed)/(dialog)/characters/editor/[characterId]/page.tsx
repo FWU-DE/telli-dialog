@@ -87,11 +87,15 @@ export default async function Page(context: PageContext) {
     const templateFiles = await dbGetRelatedCharacterFiles(templateId);
     await Promise.all(
       templateFiles.map(async (file) => {
-        const fileContent = await readFileFromS3({ key: `message_attachments/${file.id}` });
-        const blobFile = new File([fileContent], file.name, { type: file.type });
-        const fileId = await handleFileUpload(blobFile);
-        await linkFileToCharacter({ fileId: fileId, characterId: character.id });
-        relatedFiles.push({ ...file, id: fileId });
+        try {
+          const fileContent = await readFileFromS3({ key: `message_attachments/${file.id}` });
+          const blobFile = new File([fileContent], file.name, { type: file.type });
+          const fileId = await handleFileUpload(blobFile);
+          await linkFileToCharacter({ fileId: fileId, characterId: character.id });
+          relatedFiles.push({ ...file, id: fileId });
+        } catch (e) {
+          console.error('Error copying file from template to character:', e);
+        }
       }),
     );
   }
@@ -99,9 +103,14 @@ export default async function Page(context: PageContext) {
     return notFound();
   }
   const readOnly = user.id !== character.userId;
-  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
-    key: character.pictureId ?? copyOfTemplatePicture,
-  });
+  let maybeSignedPictureUrl: string | undefined;
+  try {
+    maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
+      key: character.pictureId ?? copyOfTemplatePicture,
+    });
+  } catch (e) {
+    console.error('Error getting signed picture URL:', e);
+  }
 
   const links = character.attachedLinks.concat(templateCharacter?.attachedLinks || []);
 
@@ -140,6 +149,7 @@ export default async function Page(context: PageContext) {
           existingFiles={relatedFiles}
           initialLinks={initialLinks}
           readOnly={readOnly}
+          templateCharacterId={templateId}
         />
       </div>
     </div>

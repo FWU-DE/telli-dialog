@@ -68,11 +68,15 @@ export default async function Page(context: PageContext) {
     const templateFiles = await dbGetRelatedCustomGptFiles(templateId);
     await Promise.all(
       templateFiles.map(async (file) => {
-        const fileContent = await readFileFromS3({ key: `message_attachments/${file.id}` });
-        const blobFile = new File([fileContent], file.name, { type: file.type });
-        const fileId = await handleFileUpload(blobFile);
-        await linkFileToCustomGpt({ fileId: fileId, customGpt: params.customgptId });
-        relatedFiles.push({ ...file, id: fileId });
+        try {
+          const fileContent = await readFileFromS3({ key: `message_attachments/${file.id}` });
+          const blobFile = new File([fileContent], file.name, { type: file.type });
+          const fileId = await handleFileUpload(blobFile);
+          await linkFileToCustomGpt({ fileId: fileId, customGpt: params.customgptId });
+          relatedFiles.push({ ...file, id: fileId });
+        } catch (error) {
+          console.error('Error processing file:', file.id, error);
+        }
       }),
     );
   }
@@ -90,9 +94,14 @@ export default async function Page(context: PageContext) {
   const copyOfTemplatePicture =
     templateId !== undefined ? `custom-gpts/${customGpt.id}/avatar` : undefined;
 
-  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
-    key: customGpt.pictureId ?? copyOfTemplatePicture,
-  });
+  let maybeSignedPictureUrl: string | undefined;
+  try {
+    maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
+      key: customGpt.pictureId ?? copyOfTemplatePicture,
+    });
+  } catch (e) {
+    console.error('Error getting signed picture URL:', e);
+  }
 
   const readOnly = customGpt.userId !== user.id;
   const links = customGpt.attachedLinks.concat(templateCustomGpt?.attachedLinks || []);
@@ -130,6 +139,7 @@ export default async function Page(context: PageContext) {
           userRole={user.school.userRole}
           initialLinks={initialLinks}
           existingFiles={relatedFiles}
+          templateCustomGptId={templateId}
         />
       </div>
     </div>
