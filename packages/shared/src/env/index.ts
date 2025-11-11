@@ -8,7 +8,6 @@ export const env = createEnv({
   emptyStringAsUndefined: true,
   server: {
     authSecret: z.string().optional(),
-    databaseUrl: z.string(),
     vidisClientId: z.string().optional(),
     vidisClientSecret: z.string().optional(),
     vidisIssuerUri: z.string().optional(),
@@ -21,7 +20,6 @@ export const env = createEnv({
   },
   runtimeEnv: {
     authSecret: process.env.AUTH_SECRET,
-    databaseUrl: process.env.DATABASE_URL ?? 'todo',
     vidisClientId: process.env.VIDIS_CLIENT_ID,
     vidisClientSecret: process.env.VIDIS_CLIENT_SECRET,
     vidisIssuerUri: process.env.VIDIS_ISSUER_URI,

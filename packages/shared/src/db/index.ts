@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import path from 'node:path';
-import { env } from '../env';
+import { env } from './env';
 import { migrateWithLock } from './migrate';
 
 const globalState = global as unknown as {
