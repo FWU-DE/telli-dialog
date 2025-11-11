@@ -9,10 +9,6 @@ export const env = createEnv({
   server: {
     authSecret: z.string().optional(),
     databaseUrl: z.string(),
-    otcBucketName: z.string(),
-    otcSecretAccessKey: z.string(),
-    otcAccessKeyId: z.string(),
-    otcS3Hostname: z.string(),
     vidisClientId: z.string().optional(),
     vidisClientSecret: z.string().optional(),
     vidisIssuerUri: z.string().optional(),
@@ -26,10 +22,6 @@ export const env = createEnv({
   runtimeEnv: {
     authSecret: process.env.AUTH_SECRET,
     databaseUrl: process.env.DATABASE_URL ?? 'todo',
-    otcBucketName: process.env.OTC_BUCKET_NAME ?? 'todo',
-    otcSecretAccessKey: process.env.OTC_SECRET_ACCESS_KEY ?? 'todo',
-    otcAccessKeyId: process.env.OTC_ACCESS_KEY_ID ?? 'todo',
-    otcS3Hostname: process.env.OTC_S3_HOSTNAME ?? 'todo',
     vidisClientId: process.env.VIDIS_CLIENT_ID,
     vidisClientSecret: process.env.VIDIS_CLIENT_SECRET,
     vidisIssuerUri: process.env.VIDIS_ISSUER_URI,
