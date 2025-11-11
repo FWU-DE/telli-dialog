@@ -204,6 +204,13 @@
       "when": 1762783494022,
       "tag": "0028_abandoned_pestilence",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1762808266886,
+      "tag": "0029_omniscient_fat_cobra",
+      "breakpoints": true
     }
   ]
 }
