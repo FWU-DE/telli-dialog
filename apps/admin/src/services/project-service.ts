@@ -9,7 +9,7 @@ const apiRoutes = {
 };
 
 export async function fetchProjects(organizationId: string): Promise<Project[]> {
-  const response = await fetchFromApi(env.BASE_URL_TELLI_API + apiRoutes.GET_ALL(organizationId));
+  const response = await fetchFromApi(env.telliApiBaseUrl + apiRoutes.GET_ALL(organizationId));
 
   const data = await response.json();
   return data as Project[];
@@ -20,7 +20,7 @@ export async function fetchSingleProject(
   projectId: string,
 ): Promise<Project> {
   const response = await fetchFromApi(
-    env.BASE_URL_TELLI_API + apiRoutes.GET_SINGLE(organizationId, projectId),
+    env.telliApiBaseUrl + apiRoutes.GET_SINGLE(organizationId, projectId),
   );
 
   const data = await response.json();
