@@ -7,11 +7,11 @@ export type FetchOptions = {
 };
 
 export async function fetchFromApi(url: string, options?: FetchOptions): Promise<Response> {
-  return fetchGeneric(url, env.API_KEY_TELLI_API, options);
+  return fetchGeneric(url, env.telliApiApiKey, options);
 }
 
 export async function fetchFromDialog(url: string, options?: FetchOptions): Promise<Response> {
-  return fetchGeneric(url, env.API_KEY_TELLI_DIALOG, options);
+  return fetchGeneric(url, env.telliDialogApiKey, options);
 }
 
 export async function fetchGeneric(
