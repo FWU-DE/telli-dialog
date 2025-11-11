@@ -65,7 +65,7 @@ export const conversationTable = pgTable(
   ],
 );
 
-export const conversationRoleEnum = pgEnum('conversation_role', conversationRoleSchema.options);
+export const conversationRoleEnum = pgEnum('conversation_role', conversationRoleSchema.enum);
 
 export const conversationMessageTable = pgTable(
   'conversation_message',
@@ -90,7 +90,7 @@ export type ConversationModelWithFiles = typeof conversationTable.$inferSelect &
 };
 
 export const userSchoolRoleSchema = z.enum(['student', 'teacher']);
-export const userSchoolRoleEnum = pgEnum('user_school_role', userSchoolRoleSchema.options);
+export const userSchoolRoleEnum = pgEnum('user_school_role', userSchoolRoleSchema.enum);
 export type UserSchoolRole = z.infer<typeof userSchoolRoleSchema>;
 
 export const userSchoolMappingTable = pgTable(
@@ -151,7 +151,7 @@ export type FederalStateModel = typeof federalStateTable.$inferSelect;
 export const characterAccessLevelSchema = z.enum(['private', 'school', 'global']);
 export const characterAccessLevelEnum = pgEnum(
   'character_access_level',
-  characterAccessLevelSchema.options,
+  characterAccessLevelSchema.enum,
 );
 export type CharacterAccessLevel = z.infer<typeof characterAccessLevelSchema>;
 
@@ -217,7 +217,7 @@ export type CharacterTemplateMappingModel = typeof characterTemplateMappingTable
 export type CharacterTemplateMappingInsertModel = typeof characterTemplateMappingTable.$inferInsert;
 
 export const llmModelTypeSchema = z.enum(['text', 'image', 'fc']);
-export const llmModelTypeEnum = pgEnum('llm_model_type', llmModelTypeSchema.options);
+export const llmModelTypeEnum = pgEnum('llm_model_type', llmModelTypeSchema.enum);
 export type LlmModeType = z.infer<typeof llmModelTypeSchema>;
 
 export const llmModelTable = pgTable(
@@ -534,7 +534,7 @@ export type TextChunkModel = typeof TextChunkTable.$inferSelect;
 export type TextChunkInsertModel = typeof TextChunkTable.$inferInsert;
 
 export const voucherStatus = z.enum(['created', 'redeemed', 'revoked']);
-export const voucherStatusEnum = pgEnum('voucher_status', voucherStatus.options);
+export const voucherStatusEnum = pgEnum('voucher_status', voucherStatus.enum);
 
 export const VoucherTable = pgTable(
   'voucher',
