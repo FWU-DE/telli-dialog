@@ -19,6 +19,7 @@ import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/sea
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { handleFileUpload } from '@/app/api/v1/files/route';
+import { logError } from '@/utils/logging/logging';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
@@ -87,11 +88,18 @@ export default async function Page(context: PageContext) {
     const templateFiles = await dbGetRelatedCharacterFiles(templateId);
     await Promise.all(
       templateFiles.map(async (file) => {
-        const fileContent = await readFileFromS3({ key: `message_attachments/${file.id}` });
-        const blobFile = new File([fileContent], file.name, { type: file.type });
-        const fileId = await handleFileUpload(blobFile);
-        await linkFileToCharacter({ fileId: fileId, characterId: character.id });
-        relatedFiles.push({ ...file, id: fileId });
+        try {
+          const fileContent = await readFileFromS3({ key: `message_attachments/${file.id}` });
+          const blobFile = new File([fileContent], file.name, { type: file.type });
+          const fileId = await handleFileUpload(blobFile);
+          await linkFileToCharacter({ fileId: fileId, characterId: character.id });
+          relatedFiles.push({ ...file, id: fileId });
+        } catch (e) {
+          logError(
+            `Error copying file from template to character (original file id: ${file.id}, character id: ${character.id}, template id: ${templateId})`,
+            e,
+          );
+        }
       }),
     );
   }
@@ -99,9 +107,17 @@ export default async function Page(context: PageContext) {
     return notFound();
   }
   const readOnly = user.id !== character.userId;
-  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
-    key: character.pictureId ?? copyOfTemplatePicture,
-  });
+  let maybeSignedPictureUrl: string | undefined;
+  try {
+    maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
+      key: character.pictureId ?? copyOfTemplatePicture,
+    });
+  } catch (e) {
+    logError(
+      `Error getting signed picture URL (key: ${character.pictureId ?? copyOfTemplatePicture}, character id: ${character.id}, template id: ${templateId})`,
+      e,
+    );
+  }
 
   const links = character.attachedLinks.concat(templateCharacter?.attachedLinks || []);
 
@@ -140,6 +156,7 @@ export default async function Page(context: PageContext) {
           existingFiles={relatedFiles}
           initialLinks={initialLinks}
           readOnly={readOnly}
+          templateCharacterId={templateId}
         />
       </div>
     </div>
