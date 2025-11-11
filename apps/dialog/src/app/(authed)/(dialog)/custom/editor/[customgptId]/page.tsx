@@ -16,6 +16,7 @@ import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/sea
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
 import { handleFileUpload } from '@/app/api/v1/files/route';
+import { logError } from '@/utils/logging/logging';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
@@ -75,7 +76,10 @@ export default async function Page(context: PageContext) {
           await linkFileToCustomGpt({ fileId: fileId, customGpt: params.customgptId });
           relatedFiles.push({ ...file, id: fileId });
         } catch (error) {
-          console.error('Error processing file:', file.id, error);
+          logError(
+            `Error copying file from template to customGpt (original file id: ${file.id}, customGpt id: ${params.customgptId}, template id: ${templateId})`,
+            error,
+          );
         }
       }),
     );
@@ -100,7 +104,10 @@ export default async function Page(context: PageContext) {
       key: customGpt.pictureId ?? copyOfTemplatePicture,
     });
   } catch (e) {
-    console.error('Error getting signed picture URL:', e);
+    logError(
+      `Error getting signed picture URL (key: ${customGpt.pictureId ?? copyOfTemplatePicture}, customGpt id: ${customGpt.id}, template id: ${templateId})`,
+      e,
+    );
   }
 
   const readOnly = customGpt.userId !== user.id;

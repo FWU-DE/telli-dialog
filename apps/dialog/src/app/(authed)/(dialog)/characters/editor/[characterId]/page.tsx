@@ -19,6 +19,7 @@ import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/sea
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { handleFileUpload } from '@/app/api/v1/files/route';
+import { logError } from '@/utils/logging/logging';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
@@ -94,7 +95,10 @@ export default async function Page(context: PageContext) {
           await linkFileToCharacter({ fileId: fileId, characterId: character.id });
           relatedFiles.push({ ...file, id: fileId });
         } catch (e) {
-          console.error('Error copying file from template to character:', e);
+          logError(
+            `Error copying file from template to character (original file id: ${file.id}, character id: ${character.id}, template id: ${templateId})`,
+            e,
+          );
         }
       }),
     );
@@ -109,7 +113,10 @@ export default async function Page(context: PageContext) {
       key: character.pictureId ?? copyOfTemplatePicture,
     });
   } catch (e) {
-    console.error('Error getting signed picture URL:', e);
+    logError(
+      `Error getting signed picture URL (key: ${character.pictureId ?? copyOfTemplatePicture}, character id: ${character.id}, template id: ${templateId})`,
+      e,
+    );
   }
 
   const links = character.attachedLinks.concat(templateCharacter?.attachedLinks || []);
