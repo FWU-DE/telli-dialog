@@ -16,6 +16,7 @@ import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/sea
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
 import { handleFileUpload } from '@/app/api/v1/files/route';
+import { logError } from '@/utils/logging/logging';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
@@ -68,11 +69,18 @@ export default async function Page(context: PageContext) {
     const templateFiles = await dbGetRelatedCustomGptFiles(templateId);
     await Promise.all(
       templateFiles.map(async (file) => {
-        const fileContent = await readFileFromS3({ key: `message_attachments/${file.id}` });
-        const blobFile = new File([fileContent], file.name, { type: file.type });
-        const fileId = await handleFileUpload(blobFile);
-        await linkFileToCustomGpt({ fileId: fileId, customGpt: params.customgptId });
-        relatedFiles.push({ ...file, id: fileId });
+        try {
+          const fileContent = await readFileFromS3({ key: `message_attachments/${file.id}` });
+          const blobFile = new File([fileContent], file.name, { type: file.type });
+          const fileId = await handleFileUpload(blobFile);
+          await linkFileToCustomGpt({ fileId: fileId, customGpt: params.customgptId });
+          relatedFiles.push({ ...file, id: fileId });
+        } catch (error) {
+          logError(
+            `Error copying file from template to customGpt (original file id: ${file.id}, customGpt id: ${params.customgptId}, template id: ${templateId})`,
+            error,
+          );
+        }
       }),
     );
   }
@@ -90,9 +98,17 @@ export default async function Page(context: PageContext) {
   const copyOfTemplatePicture =
     templateId !== undefined ? `custom-gpts/${customGpt.id}/avatar` : undefined;
 
-  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
-    key: customGpt.pictureId ?? copyOfTemplatePicture,
-  });
+  let maybeSignedPictureUrl: string | undefined;
+  try {
+    maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
+      key: customGpt.pictureId ?? copyOfTemplatePicture,
+    });
+  } catch (e) {
+    logError(
+      `Error getting signed picture URL (key: ${customGpt.pictureId ?? copyOfTemplatePicture}, customGpt id: ${customGpt.id}, template id: ${templateId})`,
+      e,
+    );
+  }
 
   const readOnly = customGpt.userId !== user.id;
   const links = customGpt.attachedLinks.concat(templateCustomGpt?.attachedLinks || []);
@@ -130,6 +146,7 @@ export default async function Page(context: PageContext) {
           userRole={user.school.userRole}
           initialLinks={initialLinks}
           existingFiles={relatedFiles}
+          templateCustomGptId={templateId}
         />
       </div>
     </div>
