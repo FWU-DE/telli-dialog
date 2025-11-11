@@ -11,7 +11,7 @@ const apiRoutes = {
 
 export async function fetchApiKeys(organizationId: string, projectId: string): Promise<ApiKey[]> {
   const response = await fetchFromApi(
-    env.BASE_URL_TELLI_API + apiRoutes.GET_ALL(organizationId, projectId),
+    env.telliApiBaseUrl + apiRoutes.GET_ALL(organizationId, projectId),
   );
 
   const data = await response.json();
@@ -24,7 +24,7 @@ export async function fetchSingleApiKey(
   apiKeyId: string,
 ): Promise<ApiKey> {
   const response = await fetchFromApi(
-    env.BASE_URL_TELLI_API + apiRoutes.GET_SINGLE(organizationId, projectId, apiKeyId),
+    env.telliApiBaseUrl + apiRoutes.GET_SINGLE(organizationId, projectId, apiKeyId),
   );
 
   const data = await response.json();

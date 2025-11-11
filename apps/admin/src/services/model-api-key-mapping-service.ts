@@ -13,7 +13,7 @@ export async function fetchModelApiKeyMappings(
   apiKeyId: string,
 ): Promise<ModelApiKeyMapping[]> {
   const response = await fetchFromApi(
-    env.BASE_URL_TELLI_API + apiRoutes.GET_ALL(organizationId, projectId, apiKeyId),
+    env.telliApiBaseUrl + apiRoutes.GET_ALL(organizationId, projectId, apiKeyId),
   );
 
   const data = await response.json();

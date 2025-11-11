@@ -9,9 +9,7 @@ const apiRoutes = {
 };
 
 export async function fetchFederalStates() {
-  const response = await fetchFromDialog(
-    env.BASE_URL_TELLI_DIALOG + apiRoutes.FEDERAL_STATES_ROUTE,
-  );
+  const response = await fetchFromDialog(env.telliDialogBaseUrl + apiRoutes.FEDERAL_STATES_ROUTE);
 
   const data = await response.json();
   return data.federalStates as FederalState[];
@@ -19,7 +17,7 @@ export async function fetchFederalStates() {
 
 export async function fetchFederalStateById(federalStateId: string) {
   const response = await fetchFromDialog(
-    env.BASE_URL_TELLI_DIALOG + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE(federalStateId),
+    env.telliDialogBaseUrl + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE(federalStateId),
   );
 
   const data = await response.json();
@@ -29,7 +27,7 @@ export async function fetchFederalStateById(federalStateId: string) {
 
 export async function updateFederalState(federalState: FederalState) {
   const response = await fetchFromDialog(
-    env.BASE_URL_TELLI_DIALOG + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE(federalState.id),
+    env.telliDialogBaseUrl + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE(federalState.id),
     {
       method: 'PUT',
       body: JSON.stringify(federalState),
@@ -42,7 +40,7 @@ export async function updateFederalState(federalState: FederalState) {
 
 export async function patchApiKey(federalStateId: string, decryptedApiKey: string) {
   const response = await fetchFromDialog(
-    env.BASE_URL_TELLI_DIALOG + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE(federalStateId),
+    env.telliDialogBaseUrl + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE(federalStateId),
     {
       method: 'PATCH',
       body: JSON.stringify({ decryptedApiKey }),
