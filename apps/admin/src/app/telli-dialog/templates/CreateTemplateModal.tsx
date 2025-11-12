@@ -50,9 +50,9 @@ export function CreateTemplateModal({ isOpen, onClose, onSuccess }: CreateTempla
 
     try {
       const pathOnly = extractPath(url.trim());
-      const result = await createTemplateFromUrlAction(pathOnly);
+      const resultId = await createTemplateFromUrlAction(pathOnly);
 
-      if (result.success && result.templateId && result.templateType) {
+      if (resultId) {
         onSuccess?.();
         onClose();
       }

@@ -11,7 +11,6 @@ import {
   TemplateModel,
   TemplateToFederalStateMapping,
   TemplateTypes,
-  CreateTemplateFromUrlResult,
 } from '@shared/models/templates';
 import { dbGetCharacterById, dbCreateCharacter } from '@shared/db/functions/character';
 import { dbGetCustomGptById, dbUpsertCustomGpt } from '@shared/db/functions/custom-gpts';
@@ -224,7 +223,7 @@ export async function updateTemplateMappings(
  * @returns Promise with success result containing templateId, templateType, and message
  * @throws Error if URL format is invalid, template ID is missing, or template creation fails
  */
-export async function createTemplateFromUrl(url: string): Promise<CreateTemplateFromUrlResult> {
+export async function createTemplateFromUrl(url: string): Promise<string> {
   // Parse the URL to extract template type and ID
   const urlPattern = /\/(custom|characters)\/editor\/([a-fA-F0-9-]+)/;
   const match = url.match(urlPattern);
@@ -252,7 +251,6 @@ export async function createTemplateFromUrl(url: string): Promise<CreateTemplate
       const newCharacter = {
         ...sourceCharacter,
         id: undefined,
-        name: sourceCharacter.name,
         originalCharacterId: templateId,
         accessLevel: 'global' as const,
         userId: DUMMY_USER_ID,
@@ -288,12 +286,7 @@ export async function createTemplateFromUrl(url: string): Promise<CreateTemplate
         // Don't fail the entire template creation if file copying fails
       }
 
-      return {
-        success: true,
-        templateId: resultId,
-        templateType: 'character',
-        message: 'Charakter-Vorlage erfolgreich erstellt',
-      };
+      return resultId;
     } else {
       const sourceCustomGpt = await dbGetCustomGptById({ customGptId: templateId });
       if (!sourceCustomGpt) {
@@ -303,7 +296,6 @@ export async function createTemplateFromUrl(url: string): Promise<CreateTemplate
       const newCustomGpt = {
         ...sourceCustomGpt,
         id: undefined,
-        name: sourceCustomGpt.name,
         originalCustomGptId: templateId,
         accessLevel: 'global' as const,
         userId: DUMMY_USER_ID,
@@ -339,12 +331,7 @@ export async function createTemplateFromUrl(url: string): Promise<CreateTemplate
         // Don't fail the entire template creation if file copying fails
       }
 
-      return {
-        success: true,
-        templateId: resultId,
-        templateType: 'custom-gpt',
-        message: 'Custom GPT-Vorlage erfolgreich erstellt',
-      };
+      return resultId;
     }
   } catch (error) {
     console.error('Error creating template from URL:', error);

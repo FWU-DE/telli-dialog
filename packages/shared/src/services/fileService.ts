@@ -36,9 +36,16 @@ export async function duplicateFileWithEmbeddings(originalFileId: string): Promi
       .from(TextChunkTable)
       .where(eq(TextChunkTable.fileId, originalFileId));
 
-    // Read the original file from S3
+    // Copy the original file from S3
     const fileContent = await readFileFromS3({ key: `message_attachments/${originalFileId}` });
 
+    await uploadFileToS3({
+      key: `message_attachments/${newFileId}`,
+      body: fileContent,
+      contentType: originalFile.type,
+    });
+
+    // Create database records in a transaction
     await db.transaction(async (tx) => {
       // Create new file record with new ID
       await tx.insert(fileTable).values({
@@ -58,13 +65,6 @@ export async function duplicateFileWithEmbeddings(originalFileId: string): Promi
         });
         await tx.insert(TextChunkTable).values(newChunks);
       }
-    });
-
-    // Upload file to new location in S3
-    await uploadFileToS3({
-      key: `message_attachments/${newFileId}`,
-      body: fileContent,
-      contentType: originalFile.type,
     });
 
     return newFileId;
