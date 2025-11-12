@@ -1,4 +1,4 @@
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '@shared/db';
 import {
   characterTable,
@@ -123,25 +123,31 @@ export async function getFederalStatesWithMappings(
   let subquery;
   if (templateType === 'character') {
     subquery = db
-      .select()
+      .select({
+        federalStateId: characterTemplateMappingTable.federalStateId,
+        template: characterTemplateMappingTable.characterId,
+      })
       .from(characterTemplateMappingTable)
       .where(eq(characterTemplateMappingTable.characterId, templateId))
       .as('mapping');
   } else {
     subquery = db
-      .select()
+      .select({
+        federalStateId: customGptTemplateMappingTable.federalStateId,
+        template: customGptTemplateMappingTable.customGptId,
+      })
       .from(customGptTemplateMappingTable)
       .where(eq(customGptTemplateMappingTable.customGptId, templateId))
       .as('mapping');
   }
   const federalStateMappings = await db
-    .select({ mappingId: subquery.id, federalStateId: federalStateTable.id })
+    .select({ federalStateId: federalStateTable.id, template: subquery.template })
     .from(federalStateTable)
     .leftJoin(subquery, eq(subquery.federalStateId, federalStateTable.id));
 
   return federalStateMappings.map((mapping) => ({
     ...mapping,
-    isMapped: mapping.mappingId !== null,
+    isMapped: mapping.template !== null,
   }));
 }
 
@@ -155,49 +161,57 @@ export async function updateTemplateMappings(
   mappings: TemplateToFederalStateMapping[],
 ): Promise<void> {
   if (templateType === 'character') {
-    const mappingsToDelete = mappings
-      .filter((mapping) => !!mapping.mappingId && !mapping.isMapped)
-      .map((mapping) => mapping.mappingId!);
-
-    const newMappings = mappings
-      .filter((mapping) => !mapping.mappingId && mapping.isMapped)
-      .map((mapping) => ({
-        characterId: templateId,
-        federalStateId: mapping.federalStateId,
-      }));
-
     await db.transaction(async (tx) => {
-      if (mappingsToDelete.length > 0) {
-        await tx
-          .delete(characterTemplateMappingTable)
-          .where(inArray(characterTemplateMappingTable.id, mappingsToDelete));
+      if (mappings.some((m) => !m.isMapped)) {
+        await tx.delete(characterTemplateMappingTable).where(
+          and(
+            eq(characterTemplateMappingTable.characterId, templateId),
+            inArray(
+              characterTemplateMappingTable.federalStateId,
+              mappings.filter((m) => !m.isMapped).map((m) => m.federalStateId
+            ),
+          ),
+        ));
       }
 
-      if (newMappings.length > 0) {
-        await tx.insert(characterTemplateMappingTable).values(newMappings);
+      if (mappings.some((m) => m.isMapped)) {
+        await tx.insert(characterTemplateMappingTable)
+          .values(
+            mappings
+              .filter((mapping) => mapping.isMapped)
+              .map((mapping) => ({
+                characterId: templateId,
+                federalStateId: mapping.federalStateId,
+              })),
+          )
+          .onConflictDoNothing(); // Prevent duplicate entries
       }
     });
   } else {
-    const mappingsToDelete = mappings
-      .filter((mapping) => !!mapping.mappingId && !mapping.isMapped)
-      .map((mapping) => mapping.mappingId!);
-
-    const newMappings = mappings
-      .filter((mapping) => !mapping.mappingId && mapping.isMapped)
-      .map((mapping) => ({
-        customGptId: templateId,
-        federalStateId: mapping.federalStateId,
-      }));
-
     await db.transaction(async (tx) => {
-      if (mappingsToDelete.length > 0) {
-        await tx
-          .delete(customGptTemplateMappingTable)
-          .where(inArray(customGptTemplateMappingTable.id, mappingsToDelete));
+      if (mappings.some((m) => !m.isMapped)) {
+        await tx.delete(customGptTemplateMappingTable).where(
+          and(
+            eq(customGptTemplateMappingTable.customGptId, templateId),
+            inArray(
+              customGptTemplateMappingTable.federalStateId,
+              mappings.filter((m) => !m.isMapped).map((m) => m.federalStateId)
+            ),
+          ),
+        );
       }
 
-      if (newMappings.length > 0) {
-        await tx.insert(customGptTemplateMappingTable).values(newMappings);
+      if (mappings.some((m) => m.isMapped)) {
+        await tx.insert(customGptTemplateMappingTable)
+          .values(
+            mappings
+              .filter((mapping) => mapping.isMapped)
+              .map((mapping) => ({
+              customGptId: templateId,
+              federalStateId: mapping.federalStateId,
+            })),
+        )
+        .onConflictDoNothing(); // Prevent duplicate entries
       }
     });
   }

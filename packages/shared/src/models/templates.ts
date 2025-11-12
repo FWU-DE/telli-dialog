@@ -12,7 +12,6 @@ export type TemplateModel = {
 
 export type TemplateToFederalStateMapping = {
   federalStateId: string;
-  mappingId: string | null;
   isMapped: boolean;
 };
 
