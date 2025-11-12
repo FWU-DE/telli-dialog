@@ -10,7 +10,7 @@ export const env = createEnv({
     apiKey: z.string(),
     apiUrl: z.string(),
     encryptionKey: z.string(),
-    nodeEnv: z.enum(['development', 'production', 'test']).default('development'),
+    nodeEnv: z.literal(['development', 'production', 'test']).default('development'),
   },
   runtimeEnv: {
     apiKey: process.env.API_KEY,

@@ -5,17 +5,17 @@ export const env = createEnv({
   emptyStringAsUndefined: true,
   server: {
     appVersion: z.string().default('0.0.0'),
-    databaseUrl: z.string().min(1, 'DATABASE_URL is required'),
-    keycloakClientId: z.string().min(1, 'KEYCLOAK_CLIENT_ID is required'),
-    keycloakClientSecret: z.string().min(1, 'KEYCLOAK_CLIENT_SECRET is required'),
-    keycloakIssuer: z.string().min(1, 'KEYCLOAK_ISSUER is required'),
-    nodeEnv: z.enum(['development', 'production', 'test']).default('development'),
-    otelMetricExportInterval: z.number().default(60000),
-    otelMetricExportTimeout: z.number().default(30000),
-    telliDialogApiKey: z.string().min(1, 'API_KEY_TELLI_DIALOG is required'),
-    telliDialogBaseUrl: z.string().url('BASE_URL_TELLI_DIALOG must be a valid URL'),
-    telliApiApiKey: z.string().min(1, 'API_KEY_TELLI_API is required'),
-    telliApiBaseUrl: z.string().url('BASE_URL_TELLI_API must be a valid URL'),
+    databaseUrl: z.string(),
+    keycloakClientId: z.string(),
+    keycloakClientSecret: z.string(),
+    keycloakIssuer: z.string(),
+    nodeEnv: z.literal(['development', 'production', 'test']).default('development'),
+    otelMetricExportInterval: z.coerce.number().default(60000),
+    otelMetricExportTimeout: z.coerce.number().default(30000),
+    telliDialogApiKey: z.string(),
+    telliDialogBaseUrl: z.url('BASE_URL_TELLI_DIALOG must be a valid URL'),
+    telliApiApiKey: z.string(),
+    telliApiBaseUrl: z.url('BASE_URL_TELLI_API must be a valid URL'),
   },
   client: {},
   runtimeEnv: {
@@ -33,3 +33,5 @@ export const env = createEnv({
     telliApiBaseUrl: process.env.BASE_URL_TELLI_API,
   },
 });
+
+console.log('Robin', JSON.stringify(env));
