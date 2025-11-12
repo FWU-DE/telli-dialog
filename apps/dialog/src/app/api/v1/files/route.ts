@@ -1,14 +1,14 @@
 import { getUser } from '@/auth/utils';
-import { db } from '@shared/db';
-import { fileTable, TextChunkInsertModel } from '@shared/db/schema';
+import { TextChunkInsertModel } from '@shared/db/schema';
 import { uploadFileToS3 } from '@shared/s3';
 import { getFileExtension } from '@/utils/files/generic';
 import { cnanoid } from '@/utils/random';
 import { NextRequest, NextResponse } from 'next/server';
 import { extractFile } from '../../file-operations/extract-file';
 import { chunkText } from '../../file-operations/process-chunks';
-import { embedBatchAndSave } from '../../file-operations/embedding';
+import { embedTextChunks } from '../../file-operations/embedding';
 import { logDebug } from '@/utils/logging/logging';
+import { dbInsertFileWithTextChunks } from '@shared/db/functions/files';
 
 export async function POST(req: NextRequest) {
   const user = await getUser();
@@ -64,23 +64,23 @@ export async function handleFileUpload(file: File) {
       })),
   );
 
-  await db.insert(fileTable).values({
-    id: fileId,
-    name: file.name,
-    size: extractResult.processedBuffer ? extractResult.processedBuffer.length : file.size,
-    type: fileExtension,
-    metadata: extractResult.metadata,
-  });
-  logDebug(`File ${file.name} with type ${fileExtension} stored in db.`);
-
-  await Promise.all([
-    embedBatchAndSave({
+  const [textChunks] = await Promise.all([
+    embedTextChunks({
       values: enrichedChunks,
       fileId,
       federalStateId: user.federalState.id,
     }),
     uploadToS3(file),
   ]);
+  const fileModel = {
+    id: fileId,
+    name: file.name,
+    size: extractResult.processedBuffer ? extractResult.processedBuffer.length : file.size,
+    type: fileExtension,
+    metadata: extractResult.metadata,
+  };
+  await dbInsertFileWithTextChunks(fileModel, textChunks);
+  logDebug(`File ${file.name} with type ${fileExtension} stored in db.`);
 
   return fileId;
 
