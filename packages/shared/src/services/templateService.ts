@@ -19,8 +19,8 @@ import { dbGetRelatedCharacterFiles, dbGetRelatedCustomGptFiles } from '@shared/
 import { DUMMY_USER_ID } from '@shared/db/seed/user-entity';
 import { DEFAULT_CHAT_MODEL } from '@shared/db/seed/default-characters';
 import { readFileFromS3, uploadFileToS3 } from '@shared/s3';
-import { customAlphabet } from 'nanoid';
 import { fileTable, TextChunkTable, CharacterFileMapping, CustomGptFileMapping } from '@shared/db/schema';
+import { cnanoid } from './randomService';
 
 /**
  * Fetch all global templates from the database, including deleted templates.
@@ -221,7 +221,6 @@ export async function updateTemplateMappings(
  * @returns Promise with the new file ID
  */
 async function copyFileForTemplate(originalFileId: string): Promise<string> {
-  const cnanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 24);
   const newFileId = `file_${cnanoid()}`;
 
   try {

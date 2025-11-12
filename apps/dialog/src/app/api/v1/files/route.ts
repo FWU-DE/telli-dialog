@@ -3,7 +3,7 @@ import { db } from '@shared/db';
 import { fileTable, TextChunkInsertModel } from '@shared/db/schema';
 import { uploadFileToS3 } from '@shared/s3';
 import { getFileExtension } from '@/utils/files/generic';
-import { cnanoid } from '@/utils/random';
+import { cnanoid } from '@telli/shared/services/randomService';
 import { NextRequest, NextResponse } from 'next/server';
 import { extractFile } from '../../file-operations/extract-file';
 import { chunkText } from '../../file-operations/process-chunks';

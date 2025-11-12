@@ -1,6 +1,6 @@
 import test, { APIRequestContext, expect } from '@playwright/test';
 import { authorizationHeader } from '../../../../../utils/authorizationHeader';
-import { cnanoid } from '@/utils/random';
+import { cnanoid } from '@telli/shared/services/randomService';
 
 const characterTemplateRoute = '/api/v1/admin/templates/character';
 
