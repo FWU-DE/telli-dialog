@@ -10,6 +10,7 @@ import {
   userTable,
 } from '../schema';
 import { PgTransactionObject } from '../types';
+import { dbGetFederalStateById } from './federal-state';
 
 function vidisRoleToUserSchoolRole(role: string): UserSchoolRole {
   switch (role) {
@@ -81,10 +82,10 @@ export async function dbGetOrCreateTestUser(userInfo: InsertUserModel & VidisUse
 }
 
 export async function dbGetOrCreateVidisUser(userInfo: VidisUserInfo) {
-  const federalState = await dbGetOrCreateFederalState({ federalStateId: userInfo.bundesland });
+  const federalState = await dbGetFederalStateById(userInfo.bundesland);
 
-  if (federalState === undefined) {
-    throw Error('Could not insert federal state');
+  if (!federalState) {
+    throw Error('Could not get federal state');
   }
 
   const schoolIds =
