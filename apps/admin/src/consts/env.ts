@@ -33,5 +33,3 @@ export const env = createEnv({
     telliApiBaseUrl: process.env.BASE_URL_TELLI_API,
   },
 });
-
-console.log('Robin', JSON.stringify(env));
