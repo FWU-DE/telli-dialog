@@ -16,6 +16,13 @@ export type TemplateToFederalStateMapping = {
   isMapped: boolean;
 };
 
+export type CreateTemplateFromUrlResult = {
+  success: true;
+  templateId: string;
+  templateType: TemplateTypes;
+  message: string;
+};
+
 /**** Guards ****/
 
 export function isTemplateType(templateType: string): templateType is TemplateTypes {
