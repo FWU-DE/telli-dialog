@@ -5,11 +5,13 @@ import {
   ConversationMessageFileMappingTable,
   conversationTable,
   CustomGptFileMapping,
+  FileInsertModel,
   FileMetadata,
   FileModel,
   FileModelAndContent,
   fileTable,
   SharedSchoolConversationFileMapping,
+  TextChunkInsertModel,
   TextChunkTable,
 } from '../schema';
 
@@ -184,6 +186,18 @@ export async function dbGetDanglingConversationFileIds(): Promise<string[]> {
     )
     .where(isNotNull(conversationTable.deletedAt));
   return fileMappings.map((row) => row.fileId);
+}
+
+export async function dbInsertFileWithTextChunks(
+  file: FileInsertModel,
+  textChunks: TextChunkInsertModel[],
+) {
+  await db.transaction(async (tx) => {
+    await tx.insert(fileTable).values(file).onConflictDoNothing();
+    if (textChunks.length > 0) {
+      await tx.insert(TextChunkTable).values(textChunks);
+    }
+  });
 }
 
 export async function dbDeleteFileAndDetachFromConversation(filesToDelete: string[]) {

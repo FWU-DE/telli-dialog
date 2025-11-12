@@ -5,8 +5,15 @@ export type ChunkResult = Omit<TextChunkModel, 'embedding' | 'contentTsv' | 'cre
   fileName: string;
 };
 
+const splitWhitespaceRegex = /\s+/;
+
+/** Helper to count words */
+function countWords(str: string) {
+  return str.trim().split(splitWhitespaceRegex).length;
+}
+
 function splitLongSentence(sentence: string, maxSentenceWords: number): string[] {
-  const words = sentence.trim().split(/\s+/);
+  const words = sentence.trim().split(splitWhitespaceRegex);
   if (words.length <= maxSentenceWords) return [sentence];
   const parts: string[] = [];
   let i = 0;
@@ -26,13 +33,8 @@ export function chunkText({
   sentenceChunkOverlap: number;
   lowerBoundWordCount?: number;
 }) {
-  // Helper to count words
-  function countWords(str: string) {
-    return str.trim().split(/\s+/).length;
-  }
-
   // Try sentence splitting
-  let sentences: string[] = [];
+  let sentences: string[];
   try {
     const nodes = splitSentences(text);
     sentences = nodes
@@ -51,10 +53,9 @@ export function chunkText({
   // Ensure each sentence is below 100 words
   const maxSentenceWords = 100;
 
-  const pseudoSentences: string[] = [];
-  for (const sentence of sentences) {
-    pseudoSentences.push(...splitLongSentence(sentence, maxSentenceWords));
-  }
+  const pseudoSentences = sentences.flatMap((sentence) =>
+    splitLongSentence(sentence, maxSentenceWords),
+  );
 
   // Sentence-based chunking
   const chunks: {
@@ -62,17 +63,14 @@ export function chunkText({
     leadingOverlap?: string;
     trailingOverlap?: string;
   }[] = [];
-  let currentChunk: string[] = [];
   let currentWordCount = 0;
   let startIdx = 0;
 
   while (startIdx < pseudoSentences.length) {
-    currentChunk = [];
     currentWordCount = 0;
     let endIdx = startIdx;
     // Add sentences until we reach the chunk size
     while (endIdx < pseudoSentences.length && currentWordCount < lowerBoundWordCount) {
-      currentChunk.push(pseudoSentences[endIdx] ?? '');
       currentWordCount += countWords(pseudoSentences[endIdx] ?? '');
       endIdx++;
     }
