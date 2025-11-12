@@ -5,7 +5,7 @@ import {
   dbGetDanglingConversationFileIds,
 } from '@shared/db/functions/files';
 import { validateApiKeyByHeadersWithResult } from '@/utils/validation';
-import { deleteFileFromS3 } from '@shared/s3';
+import { deleteFilesFromS3 } from '@shared/s3';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function DELETE(req: NextRequest) {
@@ -19,9 +19,7 @@ export async function DELETE(req: NextRequest) {
   await dbDeleteFileAndDetachFromConversation(danglingConversationFiles);
   // from other entities character, custom gpt, shared school chat
   const danglingFiles = await dbDeleteDanglingFiles();
-  for (const fileId of [...danglingConversationFiles, ...danglingFiles]) {
-    await deleteFileFromS3({ key: fileId });
-  }
+  await deleteFilesFromS3([...danglingConversationFiles, ...danglingFiles]);
   const response = {
     message: 'Ok',
     countDeletedConversations,

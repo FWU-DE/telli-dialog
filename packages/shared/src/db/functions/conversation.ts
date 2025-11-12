@@ -1,13 +1,13 @@
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { db } from '..';
 import {
-  conversationMessageTable,
   ConversationMessageFileMappingTable,
+  conversationMessageTable,
   conversationTable,
   fileTable,
   TextChunkTable,
 } from '../schema';
-import { deleteFileFromS3 } from '../../s3';
+import { deleteFilesFromS3 } from '../../s3';
 
 export async function dbDeleteConversationByIdAndUserId({
   conversationId,
@@ -39,10 +39,7 @@ export async function dbDeleteConversationByIdAndUserId({
         .from(ConversationMessageFileMappingTable)
         .where(eq(ConversationMessageFileMappingTable.conversationId, conversationId))
     ).map((f) => f.fileId);
-
-    for (const fileId of filesToDelete) {
-      await deleteFileFromS3({ key: fileId });
-    }
+    await deleteFilesFromS3(filesToDelete);
     await tx
       .delete(ConversationMessageFileMappingTable)
       .where(inArray(ConversationMessageFileMappingTable.fileId, filesToDelete));
