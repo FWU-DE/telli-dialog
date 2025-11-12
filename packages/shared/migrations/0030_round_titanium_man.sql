@@ -5,7 +5,7 @@ DROP INDEX "character_template_mappings_federal_state_id_index";--> statement-br
 DROP INDEX "custom_gpt_template_mappings_custom_gpt_id_index";--> statement-breakpoint
 DROP INDEX "custom_gpt_template_mappings_federal_state_id_index";--> statement-breakpoint
 ALTER TABLE "character_template_mappings" DROP COLUMN "id";--> statement-breakpoint
-ALTER TABLE "custom_gpt_template_mappings" DROP COLUMN "id";
+ALTER TABLE "custom_gpt_template_mappings" DROP COLUMN "id";--> statement-breakpoint
 ALTER TABLE "character_template_mappings" ADD CONSTRAINT "character_template_mappings_character_id_federal_state_id_pk" PRIMARY KEY("character_id","federal_state_id");--> statement-breakpoint
 ALTER TABLE "custom_gpt_template_mappings" ADD CONSTRAINT "custom_gpt_template_mappings_custom_gpt_id_federal_state_id_pk" PRIMARY KEY("custom_gpt_id","federal_state_id");--> statement-breakpoint
 
