@@ -3,6 +3,7 @@ import { Pool } from 'pg';
 import path from 'node:path';
 import { env } from './env';
 import { migrateWithLock } from './migrate';
+import { isDevelopment } from '@shared/utils/isDevelopment';
 
 const globalState = global as unknown as {
   pool?: Pool;
@@ -17,7 +18,7 @@ const pool =
   });
 
 // In development mode, store the pool globally to reuse it across hot reloads.
-if (process.env.NODE_ENV === 'development') {
+if (isDevelopment()) {
   globalState.pool = pool;
 }
 const db = drizzle({ client: pool });

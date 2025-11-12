@@ -4,15 +4,16 @@ import { getServerSession } from 'next-auth';
 import KeycloakProvider from 'next-auth/providers/keycloak';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { Provider } from 'next-auth/providers/index';
-import { isDevelopment } from '../../../../utils';
+import { env } from '@/consts/env';
+import { isDevelopment } from '@shared/utils/isDevelopment';
 
 // Default provider for stage and prod
 const keycloakProvider: Provider = KeycloakProvider({
   // https://next-auth.js.org/configuration/providers/oauth#userinfo-option
   idToken: true, // preferred way to get some user information, otherwise an additional request is send
-  clientId: process.env.KEYCLOAK_CLIENT_ID || '',
-  clientSecret: process.env.KEYCLOAK_CLIENT_SECRET || '',
-  issuer: process.env.KEYCLOAK_ISSUER || '',
+  clientId: env.keycloakClientId,
+  clientSecret: env.keycloakClientSecret,
+  issuer: env.keycloakIssuer,
 });
 
 // Development only provider

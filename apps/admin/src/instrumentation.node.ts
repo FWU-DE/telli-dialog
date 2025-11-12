@@ -6,6 +6,7 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { env } from './consts/env';
 
 // For debugging purposes, you can uncomment the following two lines to enable console logging
 // import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
@@ -16,8 +17,8 @@ const SERVICE_NAME = 'telli-admin';
 const exporter = new OTLPMetricExporter();
 const periodicExportingMetricReader = new PeriodicExportingMetricReader({
   exporter,
-  exportIntervalMillis: Number.parseInt(process.env.OTEL_METRIC_EXPORT_INTERVAL ?? '60000'),
-  exportTimeoutMillis: Number.parseInt(process.env.OTEL_METRIC_EXPORT_TIMEOUT ?? '30000'),
+  exportIntervalMillis: env.otelMetricExportInterval,
+  exportTimeoutMillis: env.otelMetricExportTimeout,
 });
 
 // Documentation for the OpenTelemetry SDK for Node.js can be found here:
@@ -33,7 +34,7 @@ const sdk = new NodeSDK({
   ],
   resource: resourceFromAttributes({
     [ATTR_SERVICE_NAME]: SERVICE_NAME,
-    [ATTR_SERVICE_VERSION]: process.env.APP_VERSION,
+    [ATTR_SERVICE_VERSION]: env.appVersion,
   }),
   metricReaders: [periodicExportingMetricReader],
   serviceName: SERVICE_NAME,
