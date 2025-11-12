@@ -9,7 +9,7 @@ const apiRoutes = {
 
 export async function fetchVouchers(federalStateId: string): Promise<Voucher[]> {
   const response = await fetchFromDialog(
-    env.BASE_URL_TELLI_DIALOG + apiRoutes.VOUCHERS_API_URL(federalStateId),
+    env.telliDialogBaseUrl + apiRoutes.VOUCHERS_API_URL(federalStateId),
   );
 
   const data = await response.json();
@@ -25,7 +25,7 @@ export async function createVouchers(
   numberOfCodes: number,
 ): Promise<Voucher[]> {
   const response = await fetchFromDialog(
-    env.BASE_URL_TELLI_DIALOG + apiRoutes.VOUCHERS_API_URL(federalStateId),
+    env.telliDialogBaseUrl + apiRoutes.VOUCHERS_API_URL(federalStateId),
     {
       method: 'POST',
       body: JSON.stringify({
@@ -48,7 +48,7 @@ export async function revokeVoucher(
   updatedBy: string,
   updateReason: string,
 ): Promise<void> {
-  await fetchFromDialog(env.BASE_URL_TELLI_DIALOG + apiRoutes.VOUCHERS_API_URL(federalStateId), {
+  await fetchFromDialog(env.telliDialogBaseUrl + apiRoutes.VOUCHERS_API_URL(federalStateId), {
     method: 'PATCH',
     body: JSON.stringify({ code, revoked: true, updatedBy, updateReason }),
   });

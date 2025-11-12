@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const conversationRoleSchema = z.enum(['user', 'assistant', 'system', 'tool']);
+export const conversationRoleSchema = z.enum(['user', 'assistant', 'system', 'data']);
 export type ConversationRole = z.infer<typeof conversationRoleSchema>;
 
 const fileMetadataSchema = z.object({

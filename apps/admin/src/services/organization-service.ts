@@ -7,7 +7,7 @@ const apiRoutes = {
 };
 
 export async function fetchOrganizations(): Promise<Organization[]> {
-  const response = await fetchFromApi(env.BASE_URL_TELLI_API + apiRoutes.GET_ALL);
+  const response = await fetchFromApi(env.telliApiBaseUrl + apiRoutes.GET_ALL);
 
   const data = await response.json();
 
