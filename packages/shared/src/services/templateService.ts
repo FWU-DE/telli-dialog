@@ -267,7 +267,7 @@ async function copyFileForTemplate(originalFileId: string): Promise<string> {
 
     return newFileId;
   } catch (error) {
-    console.error(`Error copying file from ${originalFileId} to ${newFileId}:`, error);
+    console.error(`Error copying file from ${originalFileId}:`, error);
     throw new Error(`Failed to copy file: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
