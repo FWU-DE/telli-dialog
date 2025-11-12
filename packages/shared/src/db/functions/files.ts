@@ -194,7 +194,9 @@ export async function dbInsertFileWithTextChunks(
 ) {
   await db.transaction(async (tx) => {
     await tx.insert(fileTable).values(file).onConflictDoNothing();
-    await tx.insert(TextChunkTable).values(textChunks);
+    if (textChunks.length > 0) {
+      await tx.insert(TextChunkTable).values(textChunks);
+    }
   });
 }
 
