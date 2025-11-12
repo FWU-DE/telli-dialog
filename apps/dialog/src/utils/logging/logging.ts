@@ -8,26 +8,30 @@ const logLevels = logLevelOrder.slice(
   1 + logLevelOrder.indexOf(env.NEXT_PUBLIC_SENTRY_LOG_LEVEL),
 );
 
-export function logMessage(message: string, level: Sentry.SeverityLevel) {
+export function logMessage(
+  message: string,
+  level: Sentry.SeverityLevel,
+  extra?: Record<string, unknown>,
+) {
   if (logLevels.includes(level)) {
-    Sentry.captureMessage(message, level);
+    Sentry.captureMessage(message, { level, extra });
   }
 
   if (isDevelopment()) {
-    console.log(`[${level.toUpperCase()}] ${message}`);
+    console.log(`[${level.toUpperCase()}] ${message}`, extra);
   }
 }
 
-export function logDebug(message: string) {
-  logMessage(message, 'debug');
+export function logDebug(message: string, extra?: Record<string, unknown>) {
+  logMessage(message, 'debug', extra);
 }
 
-export function logInfo(message: string) {
-  logMessage(message, 'info');
+export function logInfo(message: string, extra?: Record<string, unknown>) {
+  logMessage(message, 'info', extra);
 }
 
-export function logWarning(message: string) {
-  logMessage(message, 'warning');
+export function logWarning(message: string, extra?: Record<string, unknown>) {
+  logMessage(message, 'warning', extra);
 }
 
 export function logError(message: string, error: unknown) {
