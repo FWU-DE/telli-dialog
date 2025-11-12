@@ -1,14 +1,15 @@
 import { db } from '@shared/db';
 import { FileModelAndContent, fileTable, TextChunkTable } from '@shared/db/schema';
-import { eq, sql, inArray, desc, SQL, and } from 'drizzle-orm';
+import { and, desc, eq, inArray, SQL, sql } from 'drizzle-orm';
 import { chunkText, groupAndSortChunks } from './process-chunks';
-import { condenseChatHistory } from '../chat/utils';
-import { getKeywordsFromQuery } from '../chat/utils';
-import { embedBatchAndSave, embedText } from './embedding';
+import { condenseChatHistory, getKeywordsFromQuery } from '../chat/utils';
+import { embedText, embedTextChunks } from './embedding';
 import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
 import { processFiles } from './process-file';
 import { LanguageModelV1, Message } from 'ai';
+import { dbInsertFileWithTextChunks } from '@shared/db/functions/files';
+import { logWarning } from '@/utils/logging/logging';
 
 type SearchOptions = {
   keywords: string[];
@@ -43,23 +44,24 @@ export async function getRelevantFileContent({
     }),
   ]);
 
-  console.log(`Search query: ${searchQuery}`);
-  console.log(`Keywords: ${keywords}`);
   const [queryEmbedding] = await embedText({
     text: [searchQuery],
     federalStateId: user.federalState.id,
   });
 
+  const relatedFileEntityIds = relatedFileEntities.map((file) => file.id);
   let retrievedTextChunks = await searchTextChunks({
     keywords,
     embedding: queryEmbedding ?? [],
-    fileIds: relatedFileEntities.map((file) => file.id),
+    fileIds: relatedFileEntityIds,
     limit: FILE_SEARCH_LIMIT,
   });
 
   // Fallback: If no chunks found, process files ad-hoc and try search again
   if (retrievedTextChunks.length === 0) {
-    console.warn('No text chunks found, attempting ad-hoc file processing...');
+    logWarning('No text chunks found, attempting ad-hoc file processing...', {
+      relatedFileEntityIds,
+    });
     const processedFiles = await processFiles(relatedFileEntities);
     // Process each file that hasn't been processed yet
     await Promise.all(
@@ -78,15 +80,15 @@ export async function getRelevantFileContent({
           pageNumber: 0, // Default page number for non-PDF files
         }));
 
-        await db
-          .insert(fileTable)
-          .values({ id: file.id, name: file.name, size: file.size, type: file.type })
-          .onConflictDoNothing();
-        await embedBatchAndSave({
+        const chunks = await embedTextChunks({
           values: enrichedChunks,
           fileId: file.id,
           federalStateId: user.federalState.id,
         });
+        await dbInsertFileWithTextChunks(
+          { id: file.id, name: file.name, size: file.size, type: file.type },
+          chunks,
+        );
       }),
     );
 
@@ -94,7 +96,7 @@ export async function getRelevantFileContent({
     retrievedTextChunks = await searchTextChunks({
       keywords,
       embedding: queryEmbedding ?? [],
-      fileIds: relatedFileEntities.map((file) => file.id),
+      fileIds: relatedFileEntityIds,
       limit: FILE_SEARCH_LIMIT,
     });
   }

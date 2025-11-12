@@ -1,9 +1,9 @@
-import { dbCreateManyTextChunks } from '@shared/db/functions/text-chunk';
 import { OpenAI } from 'openai';
 import { env } from '@/env';
 import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
-import { EMBEDDING_BATCH_SIZE } from '@/const';
+import { EMBEDDING_BATCH_SIZE, EMBEDDING_MAX_CONCURRENT_REQUESTS } from '@/const';
 import { TextChunkInsertModel } from '@shared/db/schema';
+import { logDebug } from '@/utils/logging/logging';
 
 export async function embedText({
   text,
@@ -40,7 +40,7 @@ async function embedTextWithApiKey(text: string[], federalStateApiKey: string) {
   return result.data.map((element) => element.embedding);
 }
 
-export async function embedBatchAndSave({
+export async function embedTextChunks({
   values,
   fileId,
   federalStateId,
@@ -48,11 +48,11 @@ export async function embedBatchAndSave({
   values: Omit<TextChunkInsertModel, 'embedding'>[];
   fileId: string;
   federalStateId: string;
-}) {
+}): Promise<TextChunkInsertModel[]> {
   const federalStateApiKey = await getFederalStateApiKey(federalStateId);
 
-  console.log(`Embedding ${values.length} chunks`);
-  const promises: Promise<void>[] = [];
+  logDebug(`Embedding ${values.length} chunks`);
+  const promises: Promise<TextChunkInsertModel[]>[] = [];
   // Process chunks in batches of 200
   for (let i = 0; i < values.length; i += EMBEDDING_BATCH_SIZE) {
     promises.push(
@@ -64,8 +64,7 @@ export async function embedBatchAndSave({
 
         const batchEmbeddings = await embedTextWithApiKey(batchTexts, federalStateApiKey);
 
-        // Add the processed batch to our chunks array
-        const tempChunks = batchEmbeddings.map((embedding, batchIndex) => {
+        return batchEmbeddings.map((embedding, batchIndex) => {
           const originalIndex = i + batchIndex;
           return {
             content: values[originalIndex]?.content ?? '',
@@ -77,12 +76,14 @@ export async function embedBatchAndSave({
             trailingOverlap: values[originalIndex]?.trailingOverlap ?? undefined,
           };
         });
-        await dbCreateManyTextChunks({
-          chunks: tempChunks,
-        });
       })(),
     );
+
+    if (promises.length % EMBEDDING_MAX_CONCURRENT_REQUESTS === 0) {
+      logDebug('Awaiting embedding API calls due to rate limiting');
+      await Promise.all(promises);
+    }
   }
 
-  await Promise.all(promises);
+  return (await Promise.all(promises)).flat();
 }
