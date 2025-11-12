@@ -65,7 +65,7 @@ export default async function Page(context: PageContext) {
       : undefined;
   const customGpt = await dbGetCustomGptById({ customGptId: params.customgptId });
   const relatedFiles = await fetchFileMapping(params.customgptId);
-  if (templateId !== undefined) {
+  if (templateId !== undefined && relatedFiles.length === 0) {
     const templateFiles = await dbGetRelatedCustomGptFiles(templateId);
     await Promise.all(
       templateFiles.map(async (file) => {

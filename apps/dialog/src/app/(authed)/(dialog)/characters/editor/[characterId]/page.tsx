@@ -84,7 +84,7 @@ export default async function Page(context: PageContext) {
     templateId !== undefined ? `characters/${character.id}/avatar` : undefined;
 
   const relatedFiles = await fetchFileMapping(params.characterId);
-  if (templateId !== undefined) {
+  if (templateId !== undefined && relatedFiles.length === 0) {
     const templateFiles = await dbGetRelatedCharacterFiles(templateId);
     await Promise.all(
       templateFiles.map(async (file) => {
