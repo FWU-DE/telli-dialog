@@ -5,7 +5,7 @@ import type { Page } from 'playwright-core';
 import { db } from '@shared/db';
 import { federalStateTable } from '@shared/db/schema';
 import { eq } from 'drizzle-orm';
-import { sendMessage } from '../../../../../utils/utils';
+import { sendMessage, uploadFile } from '../../../../../utils/utils';
 
 const deleteConversationRoute = '/api/v1/admin/delete-conversation';
 
@@ -53,13 +53,6 @@ test('should return 403 if authorization header is missing', async ({ request })
 
 async function createGenericChatWithFileAttachment(page: Page) {
   await login(page, 'teacher1-BY');
-
-  const fileInput = page.locator('input[type="file"]');
-  const filePath = './e2e/fixtures/file-upload/Große Text Datei.txt';
-
-  await fileInput.setInputFiles(filePath);
-  const result = await page.waitForResponse('/api/v1/files');
-  expect(result.status()).toBe(200);
-
+  await uploadFile(page, './e2e/fixtures/file-upload/Große Text Datei.txt');
   await sendMessage(page, 'Gib "OK" aus.');
 }

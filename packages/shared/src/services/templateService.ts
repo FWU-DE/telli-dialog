@@ -159,12 +159,13 @@ export async function getFederalStatesWithMappings(
 /** Updates template to federal state mapping by:
  * - adding new mappings
  * - deleting old mappings
+ *
  */
 export async function updateTemplateMappings(
   templateType: TemplateTypes,
   templateId: string,
   mappings: TemplateToFederalStateMapping[],
-): Promise<void> {
+): Promise<TemplateToFederalStateMapping[]> {
   if (templateType === 'character') {
     const mappingsToDelete = mappings
       .filter((mapping) => !!mapping.mappingId && !mapping.isMapped)
@@ -212,6 +213,7 @@ export async function updateTemplateMappings(
       }
     });
   }
+  return getFederalStatesWithMappings(templateType, templateId);
 }
 
 /**

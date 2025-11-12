@@ -44,9 +44,14 @@ export default function TemplateDetailView(props: TemplateDetailViewProps) {
     name: 'mappings',
   });
 
-  const handleSubmit = ({ mappings }: { mappings: TemplateToFederalStateMapping[] }) => {
+  const handleSubmit = async ({ mappings }: { mappings: TemplateToFederalStateMapping[] }) => {
     try {
-      updateTemplateMappingsAction(templateType, templateId, mappings);
+      const updatedMappings = await updateTemplateMappingsAction(
+        templateType,
+        templateId,
+        mappings,
+      );
+      setFormData(updatedMappings);
       toast.success('Template-Zuordnungen erfolgreich aktualisiert.');
     } catch {
       toast.error('Fehler beim Aktualisieren der Template-Zuordnungen.');

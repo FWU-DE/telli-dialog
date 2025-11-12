@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/nextjs';
 import { env } from '@/env';
+import { isDevelopment } from '@shared/utils/isDevelopment';
 
 const logLevelOrder = ['fatal', 'error', 'warning', 'log', 'info', 'debug'] as const;
 const logLevels = logLevelOrder.slice(
@@ -16,7 +17,7 @@ export function logMessage(
     Sentry.captureMessage(message, { level, extra });
   }
 
-  if (process.env.NODE_ENV === 'development') {
+  if (isDevelopment()) {
     console.log(`[${level.toUpperCase()}] ${message}`, extra);
   }
 }
@@ -41,7 +42,7 @@ export function logError(message: string, error: unknown) {
     Sentry.captureMessage(message, { level: 'error', extra: { error } });
   }
 
-  if (process.env.NODE_ENV === 'development') {
+  if (isDevelopment()) {
     console.log(`[ERROR] ${message}`, error);
   }
 }

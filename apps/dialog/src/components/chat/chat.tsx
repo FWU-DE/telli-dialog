@@ -142,7 +142,9 @@ export default function Chat({
       handleSubmit(e, {
         allowEmptySubmit: false,
         body: {
-          fileIds: Array.from(files).map(([, file]) => file.fileId),
+          fileIds: Array.from(files)
+            .map(([, file]) => file.fileId)
+            .filter(Boolean),
         },
       });
       navigateWithoutRefresh(conversationPath);

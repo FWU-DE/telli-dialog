@@ -1,19 +1,11 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { sendMessage } from '../../utils/utils';
+import { sendMessage, uploadFile } from '../../utils/utils';
 
 test('should successfully upload a file and get response about its contents', async ({ page }) => {
   await login(page, 'teacher');
 
-  const fileInput = page.locator('input[type="file"]');
-  const filePath = './e2e/fixtures/file-upload/Große Text Datei.txt';
-
-  await fileInput.setInputFiles(filePath);
-  // Wait for the upload to complete
-  const uploadPromise = page.waitForResponse((response) => response.url().includes('api/v1/files'));
-
-  const result = await uploadPromise;
-  expect(result.status()).toBe(200);
+  await uploadFile(page, './e2e/fixtures/file-upload/Große Text Datei.txt');
 
   // Verify file upload was successful
   await expect(page.locator('form').getByRole('img').nth(1)).toBeVisible();
@@ -39,15 +31,7 @@ test('should successfully upload an image and get response about its contents', 
 }) => {
   await login(page, 'teacher');
 
-  const fileInput = page.locator('input[type="file"]');
-  const filePath = './e2e/fixtures/lazy.webp';
-
-  await fileInput.setInputFiles(filePath);
-  // Wait for the upload to complete
-  const uploadPromise = page.waitForResponse((response) => response.url().includes('api/v1/files'));
-
-  const result = await uploadPromise;
-  expect(result.status()).toBe(200);
+  await uploadFile(page, './e2e/fixtures/lazy.webp');
 
   // Verify file upload was successful
   await expect(page.locator('form').getByRole('img').nth(1)).toBeVisible();
