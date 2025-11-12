@@ -249,9 +249,8 @@ async function copyFileForTemplate(originalFileId: string): Promise<string> {
 
       // Copy all chunks with new file ID (remove id to let DB generate new ones)
       if (originalChunks.length > 0) {
-        const newChunks = originalChunks.map(chunk => ({
-          ...chunk,
-          id: undefined as any, // Let DB generate new ID
+        const newChunks = originalChunks.map(({ id, ...rest }) => ({
+          ...rest,
           fileId: newFileId,
         }));
         await tx.insert(TextChunkTable).values(newChunks);
