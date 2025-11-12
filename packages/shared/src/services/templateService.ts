@@ -168,14 +168,15 @@ export async function updateTemplateMappings(
             eq(characterTemplateMappingTable.characterId, templateId),
             inArray(
               characterTemplateMappingTable.federalStateId,
-              mappings.filter((m) => !m.isMapped).map((m) => m.federalStateId
+              mappings.filter((m) => !m.isMapped).map((m) => m.federalStateId),
             ),
           ),
-        ));
+        );
       }
 
       if (mappings.some((m) => m.isMapped)) {
-        await tx.insert(characterTemplateMappingTable)
+        await tx
+          .insert(characterTemplateMappingTable)
           .values(
             mappings
               .filter((mapping) => mapping.isMapped)
@@ -195,23 +196,24 @@ export async function updateTemplateMappings(
             eq(customGptTemplateMappingTable.customGptId, templateId),
             inArray(
               customGptTemplateMappingTable.federalStateId,
-              mappings.filter((m) => !m.isMapped).map((m) => m.federalStateId)
+              mappings.filter((m) => !m.isMapped).map((m) => m.federalStateId),
             ),
           ),
         );
       }
 
       if (mappings.some((m) => m.isMapped)) {
-        await tx.insert(customGptTemplateMappingTable)
+        await tx
+          .insert(customGptTemplateMappingTable)
           .values(
             mappings
               .filter((mapping) => mapping.isMapped)
               .map((mapping) => ({
-              customGptId: templateId,
-              federalStateId: mapping.federalStateId,
-            })),
-        )
-        .onConflictDoNothing(); // Prevent duplicate entries
+                customGptId: templateId,
+                federalStateId: mapping.federalStateId,
+              })),
+          )
+          .onConflictDoNothing(); // Prevent duplicate entries
       }
     });
   }
