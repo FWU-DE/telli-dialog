@@ -18,7 +18,11 @@ import { dbGetCustomGptById, dbUpsertCustomGpt } from '@shared/db/functions/cust
 import { dbGetRelatedCharacterFiles, dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
 import { DUMMY_USER_ID } from '@shared/db/seed/user-entity';
 import { DEFAULT_CHAT_MODEL } from '@shared/db/seed/default-characters';
-import { duplicateFileWithEmbeddings, linkFileToCharacter, linkFileToCustomGpt } from './fileService';
+import {
+  duplicateFileWithEmbeddings,
+  linkFileToCharacter,
+  linkFileToCustomGpt,
+} from './fileService';
 
 /**
  * Fetch all global templates from the database, including deleted templates.
@@ -210,12 +214,10 @@ export async function updateTemplateMappings(
   }
 }
 
-
-
 /**
  * Creates a template from URL by parsing the URL, extracting template type and ID,
  * and creating a new global template based on the existing template.
- * 
+ *
  * @param url - The URL containing template information in format: /custom/editor/{id} or /characters/editor/{id}
  * @returns Promise with success result containing templateId, templateType, and message
  * @throws Error if URL format is invalid, template ID is missing, or template creation fails
@@ -271,7 +273,10 @@ export async function createTemplateFromUrl(url: string): Promise<CreateTemplate
               const newFileId = await duplicateFileWithEmbeddings(file.id);
               await linkFileToCharacter(newFileId, resultId);
             } catch (error) {
-              console.error(`Error copying file ${file.id} for character template ${resultId}:`, error);
+              console.error(
+                `Error copying file ${file.id} for character template ${resultId}:`,
+                error,
+              );
               // Continue with other files even if one fails
             }
           }),
@@ -319,7 +324,10 @@ export async function createTemplateFromUrl(url: string): Promise<CreateTemplate
               const newFileId = await duplicateFileWithEmbeddings(file.id);
               await linkFileToCustomGpt(newFileId, resultId);
             } catch (error) {
-              console.error(`Error copying file ${file.id} for custom GPT template ${resultId}:`, error);
+              console.error(
+                `Error copying file ${file.id} for custom GPT template ${resultId}:`,
+                error,
+              );
               // Continue with other files even if one fails
             }
           }),
