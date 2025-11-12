@@ -7,15 +7,15 @@ export const env = createEnv({
   client: {},
   emptyStringAsUndefined: true,
   server: {
-    apiUrl: z.string(),
     apiKey: z.string(),
+    apiUrl: z.string(),
     encryptionKey: z.string(),
     nodeEnv: z.enum(['development', 'production', 'test']).default('development'),
   },
   runtimeEnv: {
+    apiKey: process.env.API_KEY,
     apiUrl: process.env.API_URL,
     encryptionKey: process.env.ENCRYPTION_KEY,
-    apiKey: process.env.API_KEY,
     nodeEnv: process.env.NODE_ENV,
   },
 });
