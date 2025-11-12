@@ -3,20 +3,20 @@
 import { Readable } from 'stream';
 
 import {
+  CopyObjectCommand,
+  CopyObjectCommandInput,
   DeleteObjectCommand,
   DeleteObjectCommandInput,
+  DeleteObjectsCommand,
+  DeleteObjectsCommandInput,
   GetObjectCommand,
   GetObjectCommandInput,
   HeadObjectCommand,
+  ListObjectsV2Command,
+  ListObjectsV2CommandInput,
   PutObjectCommand,
   PutObjectCommandInput,
-  CopyObjectCommand,
-  CopyObjectCommandInput,
   S3Client,
-  ListObjectsV2CommandInput,
-  ListObjectsV2Command,
-  DeleteObjectsCommandInput,
-  DeleteObjectsCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from './env';
@@ -231,10 +231,11 @@ export async function deleteFileFromS3({ key }: { key: string }) {
  * @param keys The keys (file name) of the files to delete.
  */
 export async function deleteFilesFromS3(keys: string[]) {
+  const uniqueKeys = [...new Set(keys)];
   const deleteParams: DeleteObjectsCommandInput = {
     Bucket: env.otcBucketName,
     Delete: {
-      Objects: keys.map((key) => ({ Key: key })),
+      Objects: uniqueKeys.map((key) => ({ Key: key })),
       Quiet: true,
     },
   };
@@ -282,4 +283,43 @@ export async function getMaybeSignedUrlIfExists({
     // If an error is thrown, the object doesn't exist
     return undefined;
   }
+}
+
+/**
+ * Lists all files in an S3 bucket with optional prefix filtering.
+ *
+ * @param prefix Optional prefix to filter objects (e.g., 'folder/subfolder/')
+ * @param maxKeys Maximum number of keys to return per page (default: 1000)
+ * @returns Array of objects keys
+ */
+export async function listFilesFromS3({
+  prefix,
+}: {
+  prefix?: string;
+} = {}) {
+  const allObjects: string[] = [];
+  let continuationToken: string | undefined = undefined;
+
+  do {
+    const listParams: ListObjectsV2CommandInput = {
+      Bucket: env.otcBucketName,
+      Prefix: prefix,
+      MaxKeys: 1_000,
+      ContinuationToken: continuationToken,
+    };
+    const command = new ListObjectsV2Command(listParams);
+    const response = await s3Client.send(command);
+
+    if (response.Contents) {
+      const keys = response.Contents.map((x) => x.Key).filter(
+        // Exclude folders, their keys end with '/'
+        (x): x is string => !!x && !x.endsWith('/'),
+      );
+      allObjects.push(...keys);
+    }
+
+    continuationToken = response.NextContinuationToken;
+  } while (continuationToken);
+
+  return allObjects;
 }
