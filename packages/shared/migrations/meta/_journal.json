@@ -211,6 +211,13 @@
       "when": 1762808266886,
       "tag": "0029_omniscient_fat_cobra",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1762876664370,
+      "tag": "0030_round_titanium_man",
+      "breakpoints": true
     }
   ]
 }

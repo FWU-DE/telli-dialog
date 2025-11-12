@@ -12,6 +12,7 @@ import {
   customType,
   doublePrecision,
   index,
+  primaryKey,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
 import { DesignConfiguration, type LlmModelPriceMetadata } from './types';
@@ -203,7 +204,6 @@ export type CharacterModel = typeof characterTable.$inferSelect;
 export const characterTemplateMappingTable = pgTable(
   'character_template_mappings',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
     characterId: uuid('character_id')
       .notNull()
       .references(() => characterTable.id, { onDelete: 'cascade' }),
@@ -211,7 +211,7 @@ export const characterTemplateMappingTable = pgTable(
       .notNull()
       .references(() => federalStateTable.id, { onDelete: 'cascade' }),
   },
-  (table) => [index().on(table.characterId), index().on(table.federalStateId)],
+  (table) => [primaryKey({ columns: [table.characterId, table.federalStateId] })],
 );
 export type CharacterTemplateMappingModel = typeof characterTemplateMappingTable.$inferSelect;
 export type CharacterTemplateMappingInsertModel = typeof characterTemplateMappingTable.$inferInsert;
@@ -413,7 +413,6 @@ export type CustomGptInsertModel = typeof customGptTable.$inferInsert;
 export const customGptTemplateMappingTable = pgTable(
   'custom_gpt_template_mappings',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
     customGptId: uuid('custom_gpt_id')
       .notNull()
       .references(() => customGptTable.id, { onDelete: 'cascade' }),
@@ -421,7 +420,7 @@ export const customGptTemplateMappingTable = pgTable(
       .notNull()
       .references(() => federalStateTable.id, { onDelete: 'cascade' }),
   },
-  (table) => [index().on(table.customGptId), index().on(table.federalStateId)],
+  (table) => [primaryKey({ columns: [table.customGptId, table.federalStateId] })],
 );
 export type CustomGptTemplateMappingModel = typeof customGptTemplateMappingTable.$inferSelect;
 export type CustomGptTemplateMappingInsertModel = typeof customGptTemplateMappingTable.$inferInsert;
