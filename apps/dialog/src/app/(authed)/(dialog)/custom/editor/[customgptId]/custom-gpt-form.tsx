@@ -40,7 +40,7 @@ import FileManagement from '@/components/forms/file-management';
 import { CopyContainer } from '../../../_components/copy-container';
 import NavigateBack from '@/components/common/navigate-back';
 import { LocalFileState } from '@/components/chat/send-message-form';
-import { getZodFieldMetadataFn } from '@/components/forms/utils';
+import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { AttachedLinks } from '@/components/forms/attached-links';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
@@ -110,7 +110,7 @@ export default function CustomGptForm({
   const t = useTranslations('custom-gpt.form');
   const tToast = useTranslations('custom-gpt.toasts');
   const tCommon = useTranslations('common');
-  const getZodFieldMetadata = getZodFieldMetadataFn(customGptFormValuesSchema);
+  const getZodStringFieldMetadata = getZodStringFieldMetadataFn(customGptFormValuesSchema);
   const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
     customGpt.accessLevel,
     (p, n: CharacterAccessLevel) => n,
@@ -306,7 +306,7 @@ export default function CustomGptForm({
               placeholder={t('gpt-name-placeholder')}
               inputType="text"
               getValue={() => getValues('name') ?? ''}
-              {...getZodFieldMetadata('name')}
+              {...getZodStringFieldMetadata('name')}
               {...register('name')}
               rows={undefined}
               readOnly={readOnly}
@@ -319,7 +319,7 @@ export default function CustomGptForm({
               placeholder={t('gpt-description-placeholder')}
               inputType="textarea"
               getValue={() => getValues('description') ?? ''}
-              {...getZodFieldMetadata('description')}
+              {...getZodStringFieldMetadata('description')}
               {...register('description')}
               rows={5}
               readOnly={readOnly}
@@ -371,7 +371,7 @@ export default function CustomGptForm({
           placeholder={t('gpt-specification-placeholder')}
           inputType="textarea"
           getValue={() => getValues('specification') ?? ''}
-          {...getZodFieldMetadata('specification')}
+          {...getZodStringFieldMetadata('specification')}
           {...register('specification')}
           rows={7}
           readOnly={readOnly}
@@ -393,7 +393,7 @@ export default function CustomGptForm({
                     placeholder={index === 0 ? t('prompt-suggestion-placeholder') : undefined}
                     inputType="textarea"
                     getValue={() => getValues(`promptSuggestions.${index}.content`) ?? ''}
-                    {...getZodFieldMetadata(`promptSuggestions.${index}.content`)}
+                    {...getZodStringFieldMetadata(`promptSuggestions.${index}.content`)}
                     {...register(`promptSuggestions.${index}.content`)}
                     rows={2}
                     onBlur={updatePromptSuggestions}

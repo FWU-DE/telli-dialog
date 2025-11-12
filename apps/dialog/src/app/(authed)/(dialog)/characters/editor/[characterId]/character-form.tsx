@@ -40,7 +40,7 @@ import { LocalFileState } from '@/components/chat/send-message-form';
 import { deleteFileMappingAndEntity, linkFileToCharacter } from '../../actions';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
-import { getZodFieldMetadataFn } from '@/components/forms/utils';
+import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
 import { AttachedLinks } from '@/components/forms/attached-links';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { formLinks } from '@/utils/web-search/form-links';
@@ -116,7 +116,7 @@ export default function CharacterForm({
   const t = useTranslations('characters.form');
   const tToast = useTranslations('characters.toasts');
   const tCommon = useTranslations('common');
-  const getZodFieldMetadata = getZodFieldMetadataFn(characterFormValuesSchema);
+  const getZodStringFieldMetadata = getZodStringFieldMetadataFn(characterFormValuesSchema);
 
   const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
     character.accessLevel,
@@ -288,7 +288,7 @@ export default function CharacterForm({
           label={t('school-type')}
           inputType="text"
           getValue={() => getValues('schoolType') ?? ''}
-          {...getZodFieldMetadata('schoolType')}
+          {...getZodStringFieldMetadata('schoolType')}
           readOnly={readOnly}
           {...register('schoolType')}
           placeholder={t('school-type-placeholder')}
@@ -300,7 +300,7 @@ export default function CharacterForm({
           inputType="text"
           readOnly={readOnly}
           getValue={() => getValues('gradeLevel') ?? ''}
-          {...getZodFieldMetadata('gradeLevel')}
+          {...getZodStringFieldMetadata('gradeLevel')}
           {...register('gradeLevel')}
           placeholder={t('grade-placeholder')}
           onBlur={handleAutoSave}
@@ -311,7 +311,7 @@ export default function CharacterForm({
           inputType="text"
           readOnly={readOnly}
           getValue={() => getValues('subject') ?? ''}
-          {...getZodFieldMetadata('subject')}
+          {...getZodStringFieldMetadata('subject')}
           {...register('subject')}
           placeholder={t('subject-placeholder')}
           onBlur={handleAutoSave}
@@ -340,7 +340,7 @@ export default function CharacterForm({
               label={t('character-name-label')}
               readOnly={readOnly}
               getValue={() => getValues('name') ?? ''}
-              {...getZodFieldMetadata('name')}
+              {...getZodStringFieldMetadata('name')}
               {...register('name')}
               placeholder={t('character-name-placeholder')}
               onBlur={handleAutoSave}
@@ -351,7 +351,7 @@ export default function CharacterForm({
               inputType="textarea"
               readOnly={readOnly}
               getValue={() => getValues('description') ?? ''}
-              {...getZodFieldMetadata('description')}
+              {...getZodStringFieldMetadata('description')}
               {...register('description')}
               placeholder={t('character-description-placeholder')}
               onBlur={handleAutoSave}
@@ -402,7 +402,7 @@ export default function CharacterForm({
           required={true}
           inputType="textarea"
           getValue={() => getValues('competence') ?? ''}
-          {...getZodFieldMetadata('competence')}
+          {...getZodStringFieldMetadata('competence')}
           {...register('competence')}
           readOnly={readOnly}
           placeholder={t('character-competence-placeholder')}
@@ -414,7 +414,7 @@ export default function CharacterForm({
           required={true}
           inputType="textarea"
           getValue={() => getValues('learningContext') ?? ''}
-          {...getZodFieldMetadata('learningContext')}
+          {...getZodStringFieldMetadata('learningContext')}
           {...register('learningContext')}
           readOnly={readOnly}
           placeholder={t('character-learning-context-placeholder')}
@@ -425,7 +425,7 @@ export default function CharacterForm({
           label={t('character-initial-message-label')}
           inputType="textarea"
           getValue={() => getValues('initialMessage') ?? ''}
-          {...getZodFieldMetadata('initialMessage')}
+          {...getZodStringFieldMetadata('initialMessage')}
           {...register('initialMessage')}
           readOnly={readOnly}
           placeholder={t('character-initial-message-placeholder')}
@@ -436,7 +436,7 @@ export default function CharacterForm({
           label={t('character-specification-label')}
           inputType="textarea"
           getValue={() => getValues('specifications') ?? ''}
-          {...getZodFieldMetadata('specifications')}
+          {...getZodStringFieldMetadata('specifications')}
           {...register('specifications')}
           readOnly={readOnly}
           placeholder={t('character-specification-placeholder')}
@@ -447,7 +447,7 @@ export default function CharacterForm({
           label={t('character-restriction-label')}
           inputType="textarea"
           getValue={() => getValues('restrictions') ?? ''}
-          {...getZodFieldMetadata('restrictions')}
+          {...getZodStringFieldMetadata('restrictions')}
           {...register('restrictions')}
           readOnly={readOnly}
           placeholder={t('character-restriction-placeholder')}

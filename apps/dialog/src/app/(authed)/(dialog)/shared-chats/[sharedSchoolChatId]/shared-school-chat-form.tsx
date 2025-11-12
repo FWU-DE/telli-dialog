@@ -36,7 +36,7 @@ import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { AttachedLinks } from '@/components/forms/attached-links';
 
-import { getZodFieldMetadataFn } from '@/components/forms/utils';
+import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
 export default function SharedSchoolChatForm({
   existingFiles,
   isCreating,
@@ -181,7 +181,7 @@ export default function SharedSchoolChatForm({
     router.push(backUrl);
   }
 
-  const getZodFieldMetadata = getZodFieldMetadataFn(sharedSchoolChatFormValuesSchema);
+  const getZodStringFieldMetadata = getZodStringFieldMetadataFn(sharedSchoolChatFormValuesSchema);
 
   return (
     <>
@@ -214,7 +214,7 @@ export default function SharedSchoolChatForm({
                 readOnly={readOnly}
                 getValue={() => getValues('name')}
                 {...register('name')}
-                {...getZodFieldMetadata('name')}
+                {...getZodStringFieldMetadata('name')}
                 placeholder={t('name-placeholder')}
                 onBlur={handleAutoSave}
               />
@@ -226,7 +226,7 @@ export default function SharedSchoolChatForm({
                 readOnly={readOnly}
                 getValue={() => getValues('description') ?? ''}
                 {...register('description')}
-                {...getZodFieldMetadata('description')}
+                {...getZodStringFieldMetadata('description')}
                 placeholder={t('purpose-placeholder')}
                 onBlur={handleAutoSave}
               />
@@ -278,7 +278,7 @@ export default function SharedSchoolChatForm({
           inputType="textarea"
           rows={5}
           {...register('studentExcercise')}
-          {...getZodFieldMetadata('studentExcercise')}
+          {...getZodStringFieldMetadata('studentExcercise')}
           onBlur={handleAutoSave}
         />
 
@@ -290,7 +290,7 @@ export default function SharedSchoolChatForm({
           rows={5}
           getValue={() => getValues('additionalInstructions') ?? ''}
           {...register('additionalInstructions')}
-          {...getZodFieldMetadata('additionalInstructions')}
+          {...getZodStringFieldMetadata('additionalInstructions')}
           onBlur={handleAutoSave}
         />
         <div className="grid grid-cols-3 gap-6">
@@ -300,7 +300,7 @@ export default function SharedSchoolChatForm({
             placeholder={t('school-type-placeholder')}
             getValue={() => getValues('schoolType') ?? ''}
             {...register('schoolType')}
-            {...getZodFieldMetadata('schoolType')}
+            {...getZodStringFieldMetadata('schoolType')}
             onBlur={handleAutoSave}
           />
 
@@ -310,7 +310,7 @@ export default function SharedSchoolChatForm({
             placeholder={t('grade-placeholder')}
             getValue={() => getValues('gradeLevel') ?? ''}
             {...register('gradeLevel')}
-            {...getZodFieldMetadata('gradeLevel')}
+            {...getZodStringFieldMetadata('gradeLevel')}
             onBlur={handleAutoSave}
           />
 
@@ -319,7 +319,7 @@ export default function SharedSchoolChatForm({
             label={t('subject-label')}
             placeholder={t('subject-placeholder')}
             getValue={() => getValues('subject') ?? ''}
-            {...getZodFieldMetadata('subject')}
+            {...getZodStringFieldMetadata('subject')}
             {...register('subject')}
             onBlur={handleAutoSave}
           />
