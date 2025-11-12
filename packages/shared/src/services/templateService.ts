@@ -18,9 +18,7 @@ import { dbGetCustomGptById, dbUpsertCustomGpt } from '@shared/db/functions/cust
 import { dbGetRelatedCharacterFiles, dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
 import { DUMMY_USER_ID } from '@shared/db/seed/user-entity';
 import { DEFAULT_CHAT_MODEL } from '@shared/db/seed/default-characters';
-import { readFileFromS3, uploadFileToS3 } from '@shared/s3';
-import { fileTable, TextChunkTable, CharacterFileMapping, CustomGptFileMapping } from '@shared/db/schema';
-import { cnanoid } from './randomService';
+import { duplicateFileWithEmbeddings, linkFileToCharacter, linkFileToCustomGpt } from './fileService';
 
 /**
  * Fetch all global templates from the database, including deleted templates.
@@ -212,89 +210,7 @@ export async function updateTemplateMappings(
   }
 }
 
-/**
- * Copies a file and all its related text chunks and embeddings for template creation.
- * This preserves all existing processing (embeddings, chunks, metadata) while creating
- * a clean copy with a new file ID.
- * 
- * @param originalFileId - The ID of the original file to copy
- * @returns Promise with the new file ID
- */
-async function copyFileForTemplate(originalFileId: string): Promise<string> {
-  const newFileId = `file_${cnanoid()}`;
 
-  try {
-    // Get original file record
-    const [originalFile] = await db.select().from(fileTable).where(eq(fileTable.id, originalFileId));
-    if (!originalFile) {
-      throw new Error(`Original file not found: ${originalFileId}`);
-    }
-
-    // Get all text chunks for the original file
-    const originalChunks = await db
-      .select()
-      .from(TextChunkTable)
-      .where(eq(TextChunkTable.fileId, originalFileId));
-
-    // Read the original file from S3
-    const fileContent = await readFileFromS3({ key: `message_attachments/${originalFileId}` });
-
-    await db.transaction(async (tx) => {
-      // Create new file record with new ID
-      await tx.insert(fileTable).values({
-        ...originalFile,
-        id: newFileId,
-      });
-
-      // Copy all chunks with new file ID (remove id to let DB generate new ones)
-      if (originalChunks.length > 0) {
-        const newChunks = originalChunks.map(({ id, ...rest }) => ({
-          ...rest,
-          fileId: newFileId,
-        }));
-        await tx.insert(TextChunkTable).values(newChunks);
-      }
-    });
-
-    // Upload file to new location in S3
-    await uploadFileToS3({
-      key: `message_attachments/${newFileId}`,
-      body: fileContent,
-      contentType: originalFile.type,
-    });
-
-    return newFileId;
-  } catch (error) {
-    console.error(`Error copying file from ${originalFileId}:`, error);
-    throw new Error(`Failed to copy file: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
-}
-
-/**
- * Links a file to a character by creating a mapping record.
- * 
- * @param fileId - The ID of the file to link
- * @param characterId - The ID of the character to link to
- */
-async function linkFileToCharacterInTemplate(fileId: string, characterId: string): Promise<void> {
-  await db.insert(CharacterFileMapping).values({
-    fileId,
-    characterId,
-  });
-}
-
-/**
- * Links a file to a custom GPT by creating a mapping record.
- * 
- * @param fileId - The ID of the file to link
- * @param customGptId - The ID of the custom GPT to link to
- */
-async function linkFileToCustomGptInTemplate(fileId: string, customGptId: string): Promise<void> {
-  await db.insert(CustomGptFileMapping).values({
-    fileId,
-    customGptId,
-  });
-}
 
 /**
  * Creates a template from URL by parsing the URL, extracting template type and ID,
@@ -352,8 +268,8 @@ export async function createTemplateFromUrl(url: string): Promise<CreateTemplate
         await Promise.all(
           relatedFiles.map(async (file) => {
             try {
-              const newFileId = await copyFileForTemplate(file.id);
-              await linkFileToCharacterInTemplate(newFileId, resultId);
+              const newFileId = await duplicateFileWithEmbeddings(file.id);
+              await linkFileToCharacter(newFileId, resultId);
             } catch (error) {
               console.error(`Error copying file ${file.id} for character template ${resultId}:`, error);
               // Continue with other files even if one fails
@@ -400,8 +316,8 @@ export async function createTemplateFromUrl(url: string): Promise<CreateTemplate
         await Promise.all(
           relatedFiles.map(async (file) => {
             try {
-              const newFileId = await copyFileForTemplate(file.id);
-              await linkFileToCustomGptInTemplate(newFileId, resultId);
+              const newFileId = await duplicateFileWithEmbeddings(file.id);
+              await linkFileToCustomGpt(newFileId, resultId);
             } catch (error) {
               console.error(`Error copying file ${file.id} for custom GPT template ${resultId}:`, error);
               // Continue with other files even if one fails
