@@ -2,10 +2,7 @@ import { z, ZodNullable } from 'zod';
 
 type ZodFieldMetadata = Partial<Pick<HTMLInputElement, 'maxLength' | 'minLength' | 'required'>>;
 
-function getZodFieldInfoForTextInputField(
-  schema: z.ZodObject<any>,
-  field: string,
-): ZodFieldMetadata {
+function getZodFieldInfoForTextInputField(schema: z.ZodObject, field: string): ZodFieldMetadata {
   if (!schema) return { required: false };
   let fieldSchema = schema.shape[field];
   if (!fieldSchema) return { required: false };
@@ -34,6 +31,6 @@ function getZodFieldInfoForTextInputField(
  * @param schema - The zod schema to get the metadata for.
  * @returns A function that can be used to get the metadata for a field in the schema.
  */
-export function getZodStringFieldMetadataFn(schema: z.ZodObject<any>) {
+export function getZodStringFieldMetadataFn(schema: z.ZodObject) {
   return (field: string) => getZodFieldInfoForTextInputField(schema, field);
 }
