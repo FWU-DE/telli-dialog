@@ -43,7 +43,7 @@
     "@eslint/eslintrc": "3.3.1",
     "@telli/typescript-config": "workspace:*",
     "@types/node": "24.10.1",
-    "@types/react": "19.2.3",
+    "@types/react": "19.2.4",
     "@types/react-csv": "1.1.10",
     "@types/react-dom": "19.2.3",
     "@types/react-syntax-highlighter": "15.5.13",
