@@ -126,6 +126,16 @@ export const schoolTable = pgTable(
 export type SchoolInsertModel = typeof schoolTable.$inferInsert;
 export type SchoolModel = typeof schoolTable.$inferSelect;
 
+export const federalStateFeatureTogglesSchema = z.object({
+  isStudentAccessEnabled: z.boolean().default(true),
+  isCharacterEnabled: z.boolean().default(true),
+  isSharedChatEnabled: z.boolean().default(true),
+  isCustomGptEnabled: z.boolean().default(true),
+  isShareTemplateWithSchoolEnabled: z.boolean().default(true),
+});
+
+export type FederalStateFeatureToggles = z.infer<typeof federalStateFeatureTogglesSchema>;
+
 export const federalStateTable = pgTable('federal_state', {
   id: text('id').primaryKey(),
   teacherPriceLimit: integer('teacher_price_limit').notNull().default(500),
@@ -140,11 +150,8 @@ export const federalStateTable = pgTable('federal_state', {
   // whitelabel configuration
   designConfiguration: json('design_configuration').$type<DesignConfiguration>(),
   telliName: text('telli_name'),
-  // feature flags
-  studentAccess: boolean('student_access').default(true).notNull(),
-  enableCharacter: boolean('enable_characters').default(true).notNull(),
-  enableSharedChats: boolean('enable_shared_chats').default(true).notNull(),
-  enableCustomGpt: boolean('enable_custom_gpts').default(true).notNull(),
+  // feature toggles
+  featureToggles: json('feature_toggles').$type<FederalStateFeatureToggles>().notNull(),
 });
 
 export type FederalStateInsertModel = typeof federalStateTable.$inferInsert;
