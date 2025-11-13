@@ -267,7 +267,7 @@ export async function dbGetAllS3FileKeys(): Promise<string[]> {
       db.select({ id: federalStateTable.id }).from(federalStateTable),
     ]);
 
-  const fileIds = files.map((x) => x.fileId);
+  const fileIds = files.map((x) => `message_attachments/${x.fileId}`);
   const pictureIds = [...characters, ...customGpts, ...sharedSchoolConversations]
     .map((x) => x.pictureId)
     .filter((x): x is string => !!x);
