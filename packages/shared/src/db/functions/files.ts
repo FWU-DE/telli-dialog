@@ -249,48 +249,32 @@ export async function dbDeleteDanglingFiles() {
  * Returns all S3 keys for files which are referenced in the database in any table.
  */
 export async function dbGetAllS3FileKeys(): Promise<string[]> {
-  const [
-    files,
-    characterPictures,
-    customGptPictures,
-    sharedSchoolConversationPictures,
-    federalStates,
-  ] = await Promise.all([
-    db.select({ fileId: fileTable.id }).from(fileTable),
-    db
-      .select({ id: characterTable.id, pictureId: characterTable.pictureId })
-      .from(characterTable)
-      .where(isNotNull(characterTable.pictureId)),
-    db
-      .select({ id: customGptTable.id, pictureId: customGptTable.pictureId })
-      .from(customGptTable)
-      .where(isNotNull(customGptTable.pictureId)),
-    db
-      .select({
-        id: sharedSchoolConversationTable.id,
-        pictureId: sharedSchoolConversationTable.pictureId,
-      })
-      .from(sharedSchoolConversationTable)
-      .where(isNotNull(sharedSchoolConversationTable.pictureId)),
-    db
-      .select({
-        id: federalStateTable.id,
-      })
-      .from(federalStateTable),
-  ]);
+  const [files, characters, customGpts, sharedSchoolConversations, federalStates] =
+    await Promise.all([
+      db.select({ fileId: fileTable.id }).from(fileTable),
+      db
+        .select({ id: characterTable.id, pictureId: characterTable.pictureId })
+        .from(characterTable),
+      db
+        .select({ id: customGptTable.id, pictureId: customGptTable.pictureId })
+        .from(customGptTable),
+      db
+        .select({
+          id: sharedSchoolConversationTable.id,
+          pictureId: sharedSchoolConversationTable.pictureId,
+        })
+        .from(sharedSchoolConversationTable),
+      db.select({ id: federalStateTable.id }).from(federalStateTable),
+    ]);
 
-  const fileIds = files.map((x) => x.fileId);
-  const pictureIds = [
-    ...characterPictures,
-    ...customGptPictures,
-    ...sharedSchoolConversationPictures,
-  ]
+  const fileIds = files.map((x) => `message_attachments/${x.fileId}`);
+  const pictureIds = [...characters, ...customGpts, ...sharedSchoolConversations]
     .map((x) => x.pictureId)
     .filter((x): x is string => !!x);
   const avatarIds = [
-    ...characterPictures.map((x) => `characters/${x.id}/avatar`),
-    ...customGptPictures.map((x) => `custom-gpts/${x.id}/avatar`),
-    ...sharedSchoolConversationPictures.map((x) => `shared-chats/${x.id}/avatar`),
+    ...characters.map((x) => `characters/${x.id}/avatar`),
+    ...customGpts.map((x) => `custom-gpts/${x.id}/avatar`),
+    ...sharedSchoolConversations.map((x) => `shared-chats/${x.id}/avatar`),
   ];
   const whitelabels = federalStates.flatMap((x) => [
     `whitelabels/${x.id}/logo.svg`,
