@@ -276,7 +276,7 @@ export async function createTemplateFromUrl(url: string): Promise<string> {
 /**
  * Copies all files associated with a template to a new template, including embeddings and text chunks.
  * Files are duplicated in S3 and database records are created for the new template.
- * 
+ *
  * @param templateType - The type of template ('character' or 'custom-gpt')
  * @param templateId - The ID of the source template to copy files from
  * @param resultId - The ID of the new template to link copied files to
@@ -321,7 +321,7 @@ async function copyRelatedTemplateFiles(
  * Creates a new global custom GPT template based on an existing custom GPT.
  * The new template inherits all properties from the source but becomes a global template
  * accessible across all schools.
- * 
+ *
  * @param originalId - The ID of the source custom GPT to create a template from
  * @returns Promise resolving to the ID of the newly created custom GPT template
  * @throws Error if source custom GPT is not found or template creation fails
@@ -354,7 +354,7 @@ async function createCustomGptTemplate(originalId: string) {
  * Creates a new global character template based on an existing character.
  * The new template inherits all properties from the source but becomes a global template
  * accessible across all schools.
- * 
+ *
  * @param originalId - The ID of the source character to create a template from
  * @returns Promise resolving to the ID of the newly created character template
  * @throws Error if source character is not found or template creation fails
