@@ -37,15 +37,15 @@
     "react-hook-form": "7.66.0",
     "require-in-the-middle": "8.0.1",
     "sonner": "2.0.7",
-    "zod": "3.25.76"
+    "zod": "4.1.12"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.1",
     "@telli/typescript-config": "workspace:*",
-    "@types/node": "24.10.0",
-    "@types/react": "19.2.2",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.3",
     "@types/react-csv": "1.1.10",
-    "@types/react-dom": "19.2.2",
+    "@types/react-dom": "19.2.3",
     "@types/react-syntax-highlighter": "15.5.13",
     "esbuild": "0.27.0",
     "eslint": "9.39.1",

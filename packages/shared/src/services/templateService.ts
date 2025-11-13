@@ -154,12 +154,13 @@ export async function getFederalStatesWithMappings(
 /** Updates template to federal state mapping by:
  * - adding new mappings
  * - deleting old mappings
+ *
  */
 export async function updateTemplateMappings(
   templateType: TemplateTypes,
   templateId: string,
   mappings: TemplateToFederalStateMapping[],
-): Promise<void> {
+): Promise<TemplateToFederalStateMapping[]> {
   if (templateType === 'character') {
     await db.transaction(async (tx) => {
       if (mappings.some((m) => !m.isMapped)) {
@@ -217,4 +218,5 @@ export async function updateTemplateMappings(
       }
     });
   }
+  return getFederalStatesWithMappings(templateType, templateId);
 }
