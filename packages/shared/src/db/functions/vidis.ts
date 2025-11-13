@@ -132,7 +132,16 @@ export async function dbGetOrCreateFederalState({ federalStateId }: { federalSta
   return (
     await db
       .insert(federalStateTable)
-      .values({ id: federalStateId })
+      .values({
+        id: federalStateId,
+        featureToggles: {
+          isStudentAccessEnabled: true,
+          isCharacterEnabled: true,
+          isCustomGptEnabled: true,
+          isSharedChatEnabled: true,
+          isShareTemplateWithSchoolEnabled: true,
+        },
+      })
       .onConflictDoUpdate({ target: federalStateTable.id, set: { id: federalStateId } })
       .returning()
   )[0];

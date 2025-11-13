@@ -36,10 +36,13 @@ export const mockUserAndContext = (): UserAndContext => {
       trainingLink: null,
       designConfiguration: null,
       telliName: null,
-      studentAccess: false,
-      enableCharacter: false,
-      enableSharedChats: false,
-      enableCustomGpt: false,
+      featureToggles: {
+        isStudentAccessEnabled: false,
+        isCharacterEnabled: false,
+        isCustomGptEnabled: false,
+        isSharedChatEnabled: false,
+        isShareTemplateWithSchoolEnabled: false,
+      },
     },
     createdAt: new Date(),
   };

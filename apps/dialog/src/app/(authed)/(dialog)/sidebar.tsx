@@ -143,47 +143,50 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
           <div className="w-full items-center flex flex-col gap-1 h-fit">
             {
               <>
-                {user.school.userRole === 'teacher' && user.federalState.enableSharedChats && (
-                  <Link prefetch href="/shared-chats" className="w-full">
-                    <div
-                      className={cn(
-                        'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
-                        pathname.startsWith('/shared-chats') && 'underline',
-                      )}
-                    >
-                      <SharedChatIcon className="w-6 h-6" />
-                      <span className="text-base">{t('class-chats')}</span>
-                    </div>
-                  </Link>
-                )}
-                {user.school.userRole === 'teacher' && user.federalState.enableCharacter && (
-                  <Link prefetch href="/characters" className="w-full">
-                    <div
-                      className={cn(
-                        'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
-                        (pathname === '/characters' || pathname.includes('/characters/editor')) &&
-                          'underline',
-                      )}
-                    >
-                      <CharacterAvatarIcon className="w-6 h-5" />
-                      <span className="text-base">{t('characters')}</span>
-                    </div>
-                  </Link>
-                )}
+                {user.school.userRole === 'teacher' &&
+                  user.federalState.featureToggles.isSharedChatEnabled && (
+                    <Link prefetch href="/shared-chats" className="w-full">
+                      <div
+                        className={cn(
+                          'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
+                          pathname.startsWith('/shared-chats') && 'underline',
+                        )}
+                      >
+                        <SharedChatIcon className="w-6 h-6" />
+                        <span className="text-base">{t('class-chats')}</span>
+                      </div>
+                    </Link>
+                  )}
+                {user.school.userRole === 'teacher' &&
+                  user.federalState.featureToggles.isCharacterEnabled && (
+                    <Link prefetch href="/characters" className="w-full">
+                      <div
+                        className={cn(
+                          'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
+                          (pathname === '/characters' || pathname.includes('/characters/editor')) &&
+                            'underline',
+                        )}
+                      >
+                        <CharacterAvatarIcon className="w-6 h-5" />
+                        <span className="text-base">{t('characters')}</span>
+                      </div>
+                    </Link>
+                  )}
                 <hr className="w-full px-1 my-2" />
-                {user.school.userRole === 'teacher' && user.federalState.enableCustomGpt && (
-                  <Link href={`/custom/d/${HELP_MODE_GPT_ID}`} className="w-full">
-                    <div
-                      className={cn(
-                        'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
-                        pathname.includes(HELP_MODE_GPT_ID) && 'underline',
-                      )}
-                    >
-                      <RobotIcon className="w-6 h-5" />
-                      <span className="text-base">{t('help-mode')}</span>
-                    </div>
-                  </Link>
-                )}
+                {user.school.userRole === 'teacher' &&
+                  user.federalState.featureToggles.isCustomGptEnabled && (
+                    <Link href={`/custom/d/${HELP_MODE_GPT_ID}`} className="w-full">
+                      <div
+                        className={cn(
+                          'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
+                          pathname.includes(HELP_MODE_GPT_ID) && 'underline',
+                        )}
+                      >
+                        <RobotIcon className="w-6 h-5" />
+                        <span className="text-base">{t('help-mode')}</span>
+                      </div>
+                    </Link>
+                  )}
                 <hr className="w-full px-1 my-2" />
               </>
             }

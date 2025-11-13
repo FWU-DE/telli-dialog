@@ -2,11 +2,12 @@ import { describe, it, expect } from 'vitest';
 import { checkProductAccess } from './access';
 import { UserAndContext } from '@/auth/types';
 import { UserModel, UserSchoolRole } from '@shared/db/schema';
+import { ObscuredFederalState } from '@/auth/utils';
 
 describe('checkProductAccess', () => {
   // Base test data
   const baseDate = new Date();
-  const baseFederalState = {
+  const baseFederalState: ObscuredFederalState = {
     id: 'DE-BY',
     createdAt: baseDate,
     teacherPriceLimit: 500,
@@ -15,12 +16,15 @@ describe('checkProductAccess', () => {
     chatStorageTime: 120,
     supportContacts: null,
     trainingLink: null,
-    studentAccess: true,
-    enableCharacter: true,
-    enableSharedChats: true,
-    enableCustomGpt: true,
     designConfiguration: null,
     telliName: 'telli',
+    featureToggles: {
+      isStudentAccessEnabled: true,
+      isCharacterEnabled: true,
+      isCustomGptEnabled: true,
+      isSharedChatEnabled: true,
+      isShareTemplateWithSchoolEnabled: true,
+    },
   };
 
   const baseSchool = {
@@ -57,7 +61,10 @@ describe('checkProductAccess', () => {
       ...baseUser,
       federalState: {
         ...baseFederalState,
-        studentAccess: false,
+        featureToggles: {
+          ...baseFederalState.featureToggles,
+          isStudentAccessEnabled: false,
+        },
       },
       school: {
         ...baseSchool,
@@ -79,7 +86,10 @@ describe('checkProductAccess', () => {
       ...baseUser,
       federalState: {
         ...baseFederalState,
-        studentAccess: true,
+        featureToggles: {
+          ...baseFederalState.featureToggles,
+          isStudentAccessEnabled: true,
+        },
       },
       school: {
         ...baseSchool,
@@ -138,7 +148,10 @@ describe('checkProductAccess', () => {
       ...baseUser,
       federalState: {
         ...baseFederalState,
-        studentAccess: false,
+        featureToggles: {
+          ...baseFederalState.featureToggles,
+          isStudentAccessEnabled: false,
+        },
         mandatoryCertificationTeacher: true,
       },
       school: {
@@ -160,7 +173,10 @@ describe('checkProductAccess', () => {
       ...baseUser,
       federalState: {
         ...baseFederalState,
-        studentAccess: false,
+        featureToggles: {
+          ...baseFederalState.featureToggles,
+          isStudentAccessEnabled: false,
+        },
         mandatoryCertificationTeacher: true,
       },
       school: {
@@ -212,7 +228,10 @@ describe('checkProductAccess', () => {
         federalState: {
           ...baseFederalState,
           id: state.id,
-          studentAccess: state.studentAccess,
+          featureToggles: {
+            ...baseFederalState.featureToggles,
+            isStudentAccessEnabled: state.studentAccess,
+          },
         },
         school: {
           ...baseSchool,
