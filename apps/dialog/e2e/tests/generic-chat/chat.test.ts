@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { regenerateMessage, sendMessage } from '../../utils/utils';
+import { deleteChat, regenerateMessage, sendMessage } from '../../utils/utils';
+import path from 'path';
 
 test('should successfully regenerate a response', async ({ page }) => {
   await login(page, 'teacher');
@@ -31,4 +32,14 @@ test('should copy response to clipboard', async ({ page }) => {
   const text = await assistantMessage.innerText();
   const clipboardContent = await page.evaluate(() => navigator.clipboard.readText());
   expect(clipboardContent).toBe(text);
+});
+
+test('should successfully delete the current chat', async ({ page }) => {
+  await login(page, 'teacher');
+  await sendMessage(page, 'Schreibe "OK"');
+  await deleteChat(page, path.basename(page.url()));
+
+  await page.waitForURL('/');
+
+  expect(page.url()).not.toContain('/d/');
 });

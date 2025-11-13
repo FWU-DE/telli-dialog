@@ -21,6 +21,8 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from './env';
 import { nanoid } from 'nanoid';
+import { chunkArray } from '@shared/utils/arrays';
+import { S3_DELETE_OBJECTS_MAX } from '@shared/s3/const';
 
 const s3Client = new S3Client({
   // region: 'eu-de',
@@ -231,23 +233,32 @@ export async function deleteFileFromS3({ key }: { key: string }) {
  * @param keys The keys (file name) of the files to delete.
  */
 export async function deleteFilesFromS3(keys: string[]) {
-  const uniqueKeys = [...new Set(keys)];
-  const deleteParams: DeleteObjectsCommandInput = {
-    Bucket: env.otcBucketName,
-    Delete: {
-      Objects: uniqueKeys.map((key) => ({ Key: key })),
-      Quiet: true,
-    },
-  };
-
-  try {
-    const command = new DeleteObjectsCommand(deleteParams);
-    const result = await s3Client.send(command);
-    console.log('Files deleted successfully from S3:', result);
-  } catch (error) {
-    console.error('Error deleting files from S3:', error);
-    throw error;
+  if (keys.length === 0) {
+    return;
   }
+
+  const uniqueKeys = [...new Set(keys)];
+  const chunks = chunkArray(uniqueKeys, S3_DELETE_OBJECTS_MAX);
+  await Promise.all(
+    chunks.map(async (chunkedKeys) => {
+      const deleteParams: DeleteObjectsCommandInput = {
+        Bucket: env.otcBucketName,
+        Delete: {
+          Objects: chunkedKeys.map((key) => ({ Key: key })),
+          Quiet: true,
+        },
+      };
+
+      try {
+        const command = new DeleteObjectsCommand(deleteParams);
+        const result = await s3Client.send(command);
+        console.log('Files deleted successfully from S3:', result);
+      } catch (error) {
+        console.error('Error deleting files from S3:', error);
+        throw error;
+      }
+    }),
+  );
 }
 
 export async function getMaybeSignedUrlIfExists({

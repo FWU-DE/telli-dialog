@@ -29,3 +29,13 @@ export async function uploadFile(page: Page, filePath: string) {
   // Wait for the loading spinner to disappear
   await page.locator('form svg.animate-spin').waitFor({ state: 'detached' });
 }
+
+export async function deleteChat(page: Page, conversationId: string) {
+  const label = page.locator('div', { has: page.locator(`a[href="/d/${conversationId}"]`) }).last();
+  await label.hover();
+  const dropDownMenu = label.getByLabel('Conversation actions');
+  await dropDownMenu.waitFor();
+  await dropDownMenu.click();
+  await page.getByRole('menuitem', { name: 'Löschen' }).click();
+  await waitForToast(page);
+}
