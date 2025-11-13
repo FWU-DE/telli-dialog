@@ -137,4 +137,11 @@ export const FEDERAL_STATES = FEDERAL_STATE_DEFINITIONS.filter((state) => {
     plainEncryptionKey: env.encryptionKey,
     text: process.env[state.envKeyName]!,
   }),
+  featureToggles: {
+    isStudentAccessEnabled: true,
+    isCharacterEnabled: true,
+    isCustomGptEnabled: true,
+    isSharedChatEnabled: true,
+    isShareTemplateWithSchoolEnabled: true,
+  },
 })) satisfies Array<Omit<FederalStateInsertModel, 'organizationId'>>;

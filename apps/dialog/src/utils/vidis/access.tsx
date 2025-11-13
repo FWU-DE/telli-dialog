@@ -24,7 +24,7 @@ export function checkProductAccess({
 }: UserAndContext & { hasCompletedTraining?: boolean }): AccessResult {
   const successResult: AccessResult = { hasAccess: true };
 
-  if (school.userRole === 'student' && !federalState.studentAccess) {
+  if (school.userRole === 'student' && !federalState.featureToggles.isStudentAccessEnabled) {
     return {
       hasAccess: false,
       errorMessage: (
