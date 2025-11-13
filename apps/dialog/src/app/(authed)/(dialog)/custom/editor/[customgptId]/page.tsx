@@ -2,21 +2,21 @@ import { getUser } from '@/auth/utils';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import { dbGetCustomGptById, dbGetCopyTemplateCustomGpt } from '@shared/db/functions/custom-gpts';
-import { getMaybeSignedUrlFromS3Get, readFileFromS3 } from '@shared/s3';
+import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import HeaderPortal from '../../../header-portal';
 import CustomGptForm from './custom-gpt-form';
-import { fetchFileMapping, linkFileToCustomGpt } from '../../actions';
+import { fetchFileMapping } from '../../actions';
 import { removeNullValues } from '@/utils/generic/object-operations';
 import { CustomGptModel } from '@shared/db/schema';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
-import { handleFileUpload } from '@/app/api/v1/files/route';
 import { logError } from '@/utils/logging/logging';
+import { duplicateFileWithEmbeddings, linkFileToCustomGpt } from '@shared/services/fileService';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
@@ -65,16 +65,14 @@ export default async function Page(context: PageContext) {
       : undefined;
   const customGpt = await dbGetCustomGptById({ customGptId: params.customgptId });
   const relatedFiles = await fetchFileMapping(params.customgptId);
-  if (templateId !== undefined) {
+  if (templateId !== undefined && relatedFiles.length === 0) {
     const templateFiles = await dbGetRelatedCustomGptFiles(templateId);
     await Promise.all(
       templateFiles.map(async (file) => {
         try {
-          const fileContent = await readFileFromS3({ key: `message_attachments/${file.id}` });
-          const blobFile = new File([fileContent], file.name, { type: file.type });
-          const fileId = await handleFileUpload(blobFile);
-          await linkFileToCustomGpt({ fileId: fileId, customGpt: params.customgptId });
-          relatedFiles.push({ ...file, id: fileId });
+          const newFileId = await duplicateFileWithEmbeddings(file.id);
+          await linkFileToCustomGpt(newFileId, params.customgptId);
+          relatedFiles.push({ ...file, id: newFileId });
         } catch (error) {
           logError(
             `Error copying file from template to customGpt (original file id: ${file.id}, customGpt id: ${params.customgptId}, template id: ${templateId})`,

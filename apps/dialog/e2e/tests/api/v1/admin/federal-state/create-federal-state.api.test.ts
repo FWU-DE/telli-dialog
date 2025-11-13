@@ -1,7 +1,7 @@
 import test, { APIRequestContext, expect } from '@playwright/test';
 import { authorizationHeader } from '../../../../../utils/authorizationHeader';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
-import { cnanoid } from '@/utils/random';
+import { cnanoid } from '@telli/shared/services/randomService';
 
 const federalStateRoute = '/api/v1/admin/federal-states';
 
