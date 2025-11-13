@@ -216,15 +216,13 @@ export async function updateTemplateMappings(
 }
 
 /**
- * Creates a template from URL by parsing the URL, extracting template type and ID,
- * and creating a new global template based on the existing template.
+ * Parses a template URL to extract the template type and ID.
  *
  * @param url - The URL containing template information in format: /custom/editor/{id} or /characters/editor/{id}
- * @returns Promise with success result containing templateId, templateType, and message
- * @throws Error if URL format is invalid, template ID is missing, or template creation fails
+ * @returns Object containing templateType and templateId
+ * @throws Error if URL format is invalid or template ID is missing
  */
-export async function createTemplateFromUrl(url: string): Promise<string> {
-  // Parse the URL to extract template type and ID
+function parseTemplateUrl(url: string): { templateType: TemplateTypes; originalId: string } {
   const urlPattern = /\/(custom|characters)\/editor\/([a-fA-F0-9-]+)/;
   const match = url.match(urlPattern);
 
@@ -234,107 +232,153 @@ export async function createTemplateFromUrl(url: string): Promise<string> {
     );
   }
 
-  const [, templateTypeRaw, templateId] = match;
+  const [, templateTypeRaw, originalId] = match;
   const templateType: TemplateTypes = templateTypeRaw === 'custom' ? 'custom-gpt' : 'character';
 
-  if (!templateId) {
+  if (!originalId) {
     throw new Error('Template ID ist erforderlich');
   }
 
+  return { templateType, originalId };
+}
+
+/**
+ * Creates a template from URL by parsing the URL, extracting template type and ID,
+ * and creating a new global template based on the existing template.
+ *
+ * @param url - The URL containing template information in format: /custom/editor/{id} or /characters/editor/{id}
+ * @returns Promise with success result containing templateId, templateType, and message
+ * @throws Error if URL format is invalid, template ID is missing, or template creation fails
+ */
+export async function createTemplateFromUrl(url: string): Promise<string> {
+  const { templateType, originalId } = parseTemplateUrl(url);
+
   try {
+    let newTemplateId: string;
+
     if (templateType === 'character') {
-      const sourceCharacter = await dbGetCharacterById({ characterId: templateId });
-      if (!sourceCharacter) {
-        throw new Error('Charakter nicht gefunden');
-      }
-
-      const newCharacter = {
-        ...sourceCharacter,
-        id: undefined,
-        originalCharacterId: templateId,
-        accessLevel: 'global' as const,
-        userId: DUMMY_USER_ID,
-        schoolId: null,
-        isDeleted: false,
-      };
-
-      const result = await dbCreateCharacter(newCharacter, DEFAULT_CHAT_MODEL);
-      const resultId = result?.[0]?.id;
-      if (!resultId) {
-        throw new Error('Fehler beim Erstellen der Charakter-Vorlage');
-      }
-
-      // Copy associated files
-      try {
-        const relatedFiles = await dbGetRelatedCharacterFiles(templateId);
-        await Promise.all(
-          relatedFiles.map(async (file) => {
-            try {
-              const newFileId = await duplicateFileWithEmbeddings(file.id);
-              await linkFileToCharacter(newFileId, resultId);
-            } catch (error) {
-              console.error(
-                `Error copying file ${file.id} for character template ${resultId}:`,
-                error,
-              );
-              // Continue with other files even if one fails
-            }
-          }),
-        );
-      } catch (error) {
-        console.error(`Error processing files for character template ${resultId}:`, error);
-        // Don't fail the entire template creation if file copying fails
-      }
-
-      return resultId;
+      newTemplateId = await createCharacterTemplate(originalId);
     } else {
-      const sourceCustomGpt = await dbGetCustomGptById({ customGptId: templateId });
-      if (!sourceCustomGpt) {
-        throw new Error('Custom GPT nicht gefunden');
-      }
-
-      const newCustomGpt = {
-        ...sourceCustomGpt,
-        id: undefined,
-        originalCustomGptId: templateId,
-        accessLevel: 'global' as const,
-        userId: DUMMY_USER_ID,
-        schoolId: null,
-        isDeleted: false,
-      };
-
-      const result = await dbUpsertCustomGpt({ customGpt: newCustomGpt });
-      const resultId = result?.id;
-      if (!resultId) {
-        throw new Error('Fehler beim Erstellen der Custom GPT-Vorlage');
-      }
-
-      // Copy associated files
-      try {
-        const relatedFiles = await dbGetRelatedCustomGptFiles(templateId);
-        await Promise.all(
-          relatedFiles.map(async (file) => {
-            try {
-              const newFileId = await duplicateFileWithEmbeddings(file.id);
-              await linkFileToCustomGpt(newFileId, resultId);
-            } catch (error) {
-              console.error(
-                `Error copying file ${file.id} for custom GPT template ${resultId}:`,
-                error,
-              );
-              // Continue with other files even if one fails
-            }
-          }),
-        );
-      } catch (error) {
-        console.error(`Error processing files for custom GPT template ${resultId}:`, error);
-        // Don't fail the entire template creation if file copying fails
-      }
-
-      return resultId;
+      // Handle custom GPT template creation
+      newTemplateId = await createCustomGptTemplate(originalId);
     }
+
+    // Copy associated files
+    await copyRelatedTemplateFiles(templateType, originalId, newTemplateId);
+
+    return newTemplateId;
   } catch (error) {
     console.error('Error creating template from URL:', error);
     throw new Error(error instanceof Error ? error.message : 'Fehler beim Erstellen der Vorlage');
   }
+}
+
+/**
+ * Copies all files associated with a template to a new template, including embeddings and text chunks.
+ * Files are duplicated in S3 and database records are created for the new template.
+ * 
+ * @param templateType - The type of template ('character' or 'custom-gpt')
+ * @param templateId - The ID of the source template to copy files from
+ * @param resultId - The ID of the new template to link copied files to
+ * @throws Error if file copying fails, but continues with remaining files
+ */
+async function copyRelatedTemplateFiles(
+  templateType: TemplateTypes,
+  templateId: string,
+  resultId: string,
+) {
+  try {
+    const relatedFiles =
+      templateType === 'character'
+        ? await dbGetRelatedCharacterFiles(templateId)
+        : await dbGetRelatedCustomGptFiles(templateId);
+
+    await Promise.all(
+      relatedFiles.map(async (file) => {
+        try {
+          const newFileId = await duplicateFileWithEmbeddings(file.id);
+          if (templateType === 'character') {
+            await linkFileToCharacter(newFileId, resultId);
+          } else {
+            await linkFileToCustomGpt(newFileId, resultId);
+          }
+        } catch (error) {
+          console.error(
+            `Error copying file ${file.id} for ${templateType} template ${resultId}:`,
+            error,
+          );
+          // Continue with other files even if one fails
+        }
+      }),
+    );
+  } catch (error) {
+    console.error(`Error processing files for ${templateType} template ${resultId}:`, error);
+    // Don't fail the entire template creation if file copying fails
+  }
+}
+
+/**
+ * Creates a new global custom GPT template based on an existing custom GPT.
+ * The new template inherits all properties from the source but becomes a global template
+ * accessible across all schools.
+ * 
+ * @param originalId - The ID of the source custom GPT to create a template from
+ * @returns Promise resolving to the ID of the newly created custom GPT template
+ * @throws Error if source custom GPT is not found or template creation fails
+ */
+async function createCustomGptTemplate(originalId: string) {
+  const sourceCustomGpt = await dbGetCustomGptById({ customGptId: originalId });
+  if (!sourceCustomGpt) {
+    throw new Error('Assistent nicht gefunden');
+  }
+
+  const newCustomGpt = {
+    ...sourceCustomGpt,
+    id: undefined,
+    originalCustomGptId: originalId,
+    accessLevel: 'global' as const,
+    userId: DUMMY_USER_ID,
+    schoolId: null,
+    isDeleted: false,
+  };
+
+  const result = await dbUpsertCustomGpt({ customGpt: newCustomGpt });
+  const customGptId = result?.id;
+  if (!customGptId) {
+    throw new Error('Fehler beim Erstellen der Assistenten-Vorlage');
+  }
+  return customGptId;
+}
+
+/**
+ * Creates a new global character template based on an existing character.
+ * The new template inherits all properties from the source but becomes a global template
+ * accessible across all schools.
+ * 
+ * @param originalId - The ID of the source character to create a template from
+ * @returns Promise resolving to the ID of the newly created character template
+ * @throws Error if source character is not found or template creation fails
+ */
+async function createCharacterTemplate(originalId: string) {
+  const sourceCharacter = await dbGetCharacterById({ characterId: originalId });
+  if (!sourceCharacter) {
+    throw new Error('Dialogpartner nicht gefunden');
+  }
+
+  const newCharacter = {
+    ...sourceCharacter,
+    id: undefined,
+    originalCharacterId: originalId,
+    accessLevel: 'global' as const,
+    userId: DUMMY_USER_ID,
+    schoolId: null,
+    isDeleted: false,
+  };
+
+  const result = await dbCreateCharacter(newCharacter, DEFAULT_CHAT_MODEL);
+  const characterId = result?.[0]?.id;
+  if (!characterId) {
+    throw new Error('Fehler beim Erstellen der Dialogpartner-Vorlage');
+  }
+  return characterId;
 }
