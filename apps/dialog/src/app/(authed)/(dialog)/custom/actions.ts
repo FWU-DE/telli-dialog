@@ -7,6 +7,7 @@ import { CustomGptFileMapping, customGptTable, FileModel, fileTable } from '@sha
 import { copyFileInS3 } from '@shared/s3';
 import { generateUUID } from '@/utils/uuid';
 import { eq } from 'drizzle-orm';
+import { logInfo } from '@/utils/logging/logging';
 
 export async function createNewCustomGptAction({
   templatePictureId,
@@ -68,6 +69,7 @@ export async function linkFileToCustomGpt({
   fileId: string;
   customGpt: string;
 }) {
+  logInfo('Linking file to custom GPT', { fileId, customGpt });
   await getUser();
   const [insertedFileMapping] = await db
     .insert(CustomGptFileMapping)

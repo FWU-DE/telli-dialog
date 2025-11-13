@@ -15,7 +15,7 @@ import { CustomGptModel } from '@shared/db/schema';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
-import { logError } from '@/utils/logging/logging';
+import { logError, logInfo } from '@/utils/logging/logging';
 import { duplicateFileWithEmbeddings, linkFileToCustomGpt } from '@shared/services/fileService';
 
 export const dynamic = 'force-dynamic';
@@ -70,6 +70,10 @@ export default async function Page(context: PageContext) {
     await Promise.all(
       templateFiles.map(async (file) => {
         try {
+          logInfo('Copying file to custom GPT', {
+            fileId: file.id,
+            customGpt: params.customgptId,
+          });
           const newFileId = await duplicateFileWithEmbeddings(file.id);
           await linkFileToCustomGpt(newFileId, params.customgptId);
           relatedFiles.push({ ...file, id: newFileId });
