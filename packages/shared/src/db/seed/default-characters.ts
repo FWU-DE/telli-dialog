@@ -25,7 +25,7 @@ export async function insertTemplateCharacters() {
     await updateTemplateMappings(
       'character',
       id,
-      FEDERAL_STATES.map((fs) => ({ federalStateId: fs.id, mappingId: null, isMapped: true })),
+      FEDERAL_STATES.map((fs) => ({ federalStateId: fs.id, isMapped: true })),
     );
   }
   console.log('template character seed successful');
@@ -46,7 +46,7 @@ export async function insertTemplateCustomGpt() {
     await updateTemplateMappings(
       'custom-gpt',
       id,
-      FEDERAL_STATES.map((fs) => ({ federalStateId: fs.id, mappingId: null, isMapped: true })),
+      FEDERAL_STATES.map((fs) => ({ federalStateId: fs.id, isMapped: true })),
     );
   }
   console.log('template custom gpt seed successful');
