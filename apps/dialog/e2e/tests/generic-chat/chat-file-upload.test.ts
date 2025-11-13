@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { sendMessage, uploadFile } from '../../utils/utils';
+import { deleteChat, sendMessage, uploadFile } from '../../utils/utils';
+import path from 'path';
 
 test('should successfully upload a file and get response about its contents', async ({ page }) => {
   await login(page, 'teacher');
@@ -19,11 +20,7 @@ test('should successfully upload a file and get response about its contents', as
   await expect(assistantMessage).toContainText('Napoleon Bonaparte');
 
   // Clean up by deleting the conversation
-  const dropDownMenu = page.getByLabel('Conversation actions').first();
-  await dropDownMenu.hover({ force: true });
-  await dropDownMenu.waitFor();
-  await dropDownMenu.click();
-  await page.getByRole('menuitem', { name: 'Löschen' }).click();
+  await deleteChat(page, path.basename(page.url()));
 });
 
 test('should successfully upload an image and get response about its contents', async ({
@@ -47,9 +44,5 @@ test('should successfully upload an image and get response about its contents', 
   await expect(assistantMessage).toContainText(/stuhl|tisch|person|blau/i);
 
   // Clean up by deleting the conversation
-  const dropDownMenu = page.getByLabel('Conversation actions').first();
-  await dropDownMenu.hover({ force: true });
-  await dropDownMenu.waitFor();
-  await dropDownMenu.click();
-  await page.getByRole('menuitem', { name: 'Löschen' }).click();
+  await deleteChat(page, path.basename(page.url()));
 });
