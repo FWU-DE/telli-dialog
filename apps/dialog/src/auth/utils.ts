@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { auth, unstable_update } from '.';
 import { type UserAndContext } from './types';
 import { dbGetSchoolAndMappingAndFederalStateByUserId } from '@shared/db/functions/school';
-import { FederalStateModel } from '@shared/db/schema';
+import { FederalStateSelectModel } from '@shared/db/schema';
 
 export async function getValidSession(): Promise<Session> {
   const session = await auth();
@@ -77,7 +77,7 @@ export async function getUserAndContextByUserId({
   };
 }
 
-function obscureFederalState(federalState: FederalStateModel) {
+function obscureFederalState(federalState: FederalStateSelectModel) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { encryptedApiKey, ...rest } = federalState;
 

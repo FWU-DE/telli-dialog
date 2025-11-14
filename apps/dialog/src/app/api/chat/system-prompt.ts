@@ -2,7 +2,7 @@ import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { dbGetCharacterById } from '@shared/db/functions/character';
 import { getUser } from '@/auth/utils';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
-import { CustomGptModel, FederalStateModel } from '@shared/db/schema';
+import { CustomGptModel, FederalStateSelectModel } from '@shared/db/schema';
 import { constructWebsearchPrompt } from '../conversation/tools/websearch/prompt_templates';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { ChunkResult } from '../file-operations/process-chunks';
@@ -141,7 +141,7 @@ export async function constructChatSystemPrompt({
   characterId?: string;
   customGptId?: string;
   isTeacher: boolean;
-  federalState: Omit<FederalStateModel, 'encryptedApiKey'>;
+  federalState: Omit<FederalStateSelectModel, 'encryptedApiKey'>;
   websearchSources: WebsearchSource[];
   retrievedTextChunks?: Record<string, ChunkResult[]>;
 }) {
