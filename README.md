@@ -23,15 +23,17 @@ Place those in the `.env.local` file.
 
 You can find the env variables [here](https://start.1password.com/open/i?a=ADERP2QHK5HBPLKMBFF2QU5CXI&v=jtidfrchgfg2sunjzwpzgendlq&i=a2khk5vx6hrqmtkta2gg7vonga&h=deutschlandgpt.1password.eu).
 
-## Database
+## Local development
 
-For local development spin up a local postgresql database
+For local development spin up all required services using docker compose:
 
 ```sh
-docker compose -f devops/docker/docker-compose.db.local.yml up -d
+docker compose -f devops/docker/docker-compose.local.yml up -d
 ```
 
-Check that you can access it:
+## Database
+
+Check that you can access the local postgresql database:
 
 ```sh
 psql "postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db"
@@ -55,16 +57,16 @@ You can now start the application from the root directory:
 pnpm dev
 ```
 
-To remove the database and delete all its data you can stop and remove the container and its volume:
+To remove the database and delete all its data, you can stop and remove the container and its volume:
 
 ```sh
-docker compose -f devops/docker/docker-compose.db.local.yml down -v
+docker compose -f devops/docker/docker-compose.local.yml down -v
 ```
 
 ## Valkey
 
 We use Valkey for storing session data.
-It is part of the docker-compose.db.local.yml file.
+It is part of the `docker-compose.local.yml` file.
 If you want to access the values for testing or experimenting, you can use [valkey-cli](https://valkey.io/topics/installation/).
 Then you can access the local instance as follows:
 
