@@ -14,9 +14,7 @@ import { removeNullValues } from '@/utils/generic/object-operations';
 import { CustomGptModel } from '@shared/db/schema';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
-import { dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
-import { logError, logInfo } from '@/utils/logging/logging';
-import { duplicateFileWithEmbeddings, linkFileToCustomGpt } from '@shared/services/fileService';
+import { logError } from '@/utils/logging/logging';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
@@ -65,27 +63,6 @@ export default async function Page(context: PageContext) {
       : undefined;
   const customGpt = await dbGetCustomGptById({ customGptId: params.customgptId });
   const relatedFiles = await fetchFileMapping(params.customgptId);
-  if (templateId !== undefined && relatedFiles.length === 0) {
-    const templateFiles = await dbGetRelatedCustomGptFiles(templateId);
-    await Promise.all(
-      templateFiles.map(async (file) => {
-        try {
-          logInfo('Copying file to custom GPT', {
-            fileId: file.id,
-            customGpt: params.customgptId,
-          });
-          const newFileId = await duplicateFileWithEmbeddings(file.id);
-          await linkFileToCustomGpt(newFileId, params.customgptId);
-          relatedFiles.push({ ...file, id: newFileId });
-        } catch (error) {
-          logError(
-            `Error copying file from template to customGpt (original file id: ${file.id}, customGpt id: ${params.customgptId}, template id: ${templateId})`,
-            error,
-          );
-        }
-      }),
-    );
-  }
 
   if (!customGpt) {
     return notFound();

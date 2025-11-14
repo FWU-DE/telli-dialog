@@ -298,7 +298,7 @@ export async function createTemplateFromUrl(url: string): Promise<string> {
  * @param resultId - The ID of the new template to link copied files to
  * @throws Error if file copying fails, but continues with remaining files
  */
-async function copyRelatedTemplateFiles(
+export async function copyRelatedTemplateFiles(
   templateType: TemplateTypes,
   templateId: string,
   resultId: string,

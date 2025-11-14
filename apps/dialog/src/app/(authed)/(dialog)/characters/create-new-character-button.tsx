@@ -27,9 +27,11 @@ export function CreateNewCharacterFromTemplate({
   createInstanceCallback: ({
     modelId,
     templatePictureId,
+    templateId,
   }: {
     modelId?: string;
     templatePictureId?: string;
+    templateId?: string;
   }) => Promise<{ id: string }>;
 }) {
   const router = useRouter();
@@ -47,7 +49,7 @@ export function CreateNewCharacterFromTemplate({
       templateId,
     });
 
-    createInstanceCallback({ modelId: maybeDefaultModelId, templatePictureId })
+    createInstanceCallback({ modelId: maybeDefaultModelId, templatePictureId, templateId })
       .then((newInstance) => {
         router.push(`/${redirectPath}/editor/${newInstance.id}?${urlSearchParams.toString()}`);
       })

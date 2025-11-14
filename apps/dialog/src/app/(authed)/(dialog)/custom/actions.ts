@@ -7,12 +7,14 @@ import { CustomGptFileMapping, customGptTable, FileModel, fileTable } from '@sha
 import { copyFileInS3 } from '@shared/s3';
 import { generateUUID } from '@/utils/uuid';
 import { eq } from 'drizzle-orm';
-import { logInfo } from '@/utils/logging/logging';
+import { copyRelatedTemplateFiles } from '@shared/services/templateService';
 
 export async function createNewCustomGptAction({
   templatePictureId,
+  templateId,
 }: {
   templatePictureId?: string;
+  templateId?: string;
 } = {}) {
   const user = await getUser();
 
@@ -47,6 +49,10 @@ export async function createNewCustomGptAction({
     throw Error('Could not create a new CustomGpt');
   }
 
+  if (templateId !== undefined) {
+    await copyRelatedTemplateFiles('custom-gpt', templateId, insertedCustomGpt.id);
+  }
+
   return insertedCustomGpt;
 }
 
@@ -69,7 +75,6 @@ export async function linkFileToCustomGpt({
   fileId: string;
   customGpt: string;
 }) {
-  logInfo('Linking file to custom GPT', { fileId, customGpt });
   await getUser();
   const [insertedFileMapping] = await db
     .insert(CustomGptFileMapping)

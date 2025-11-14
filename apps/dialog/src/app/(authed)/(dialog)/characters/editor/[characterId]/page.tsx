@@ -84,23 +84,6 @@ export default async function Page(context: PageContext) {
     templateId !== undefined ? `characters/${character.id}/avatar` : undefined;
 
   const relatedFiles = await fetchFileMapping(params.characterId);
-  if (templateId !== undefined && relatedFiles.length === 0) {
-    const templateFiles = await dbGetRelatedCharacterFiles(templateId);
-    await Promise.all(
-      templateFiles.map(async (file) => {
-        try {
-          const newFileId = await duplicateFileWithEmbeddings(file.id);
-          await linkFileToCharacter(newFileId, character.id);
-          relatedFiles.push({ ...file, id: newFileId });
-        } catch (e) {
-          logError(
-            `Error copying file from template to character (original file id: ${file.id}, character id: ${character.id}, template id: ${templateId})`,
-            e,
-          );
-        }
-      }),
-    );
-  }
   if (!character) {
     return notFound();
   }
