@@ -50,11 +50,7 @@ export async function createNewCustomGptAction({
   }
 
   if (templateId !== undefined) {
-    await copyRelatedTemplateFiles(
-      'custom-gpt',
-      templateId,
-      insertedCustomGpt.id,
-    );
+    await copyRelatedTemplateFiles('custom-gpt', templateId, insertedCustomGpt.id);
   }
 
   return insertedCustomGpt;
