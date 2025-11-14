@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getFederalStates } from '../../../services/federal-states-service';
+import { getFederalStates } from '@shared/services/federal-state-service';
 import {
   Table,
   TableBody,

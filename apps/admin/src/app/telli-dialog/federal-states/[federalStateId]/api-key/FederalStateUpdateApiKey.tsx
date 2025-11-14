@@ -8,14 +8,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@ui/components/Card';
-import { FederalStateModel } from '../../../../../types/federal-state';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
-import { patchApiKey } from '../../../../../services/federal-states-service';
 import { FormField } from '@ui/components/form/FormField';
 import { Button } from '@ui/components/Button';
 import { toast } from 'sonner';
+import { FederalStateModel } from '@shared/types/federal-state';
+import { patchApiKey } from '@shared/services/federal-state-service';
 
 export type FederalStateUpdateApiKeyProps = {
   federalState: FederalStateModel;
