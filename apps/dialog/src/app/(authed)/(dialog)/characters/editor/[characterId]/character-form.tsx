@@ -262,7 +262,7 @@ export default function CharacterForm({
   const generalSettings = (
     <fieldset className="mt-16 flex flex-col gap-8">
       <h2 className="font-medium mb-2">{t('general-settings')}</h2>
-      {federalState?.featureToggles.isShareTemplateWithSchoolEnabled && (
+      {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
         <div className="flex gap-4">
           <Checkbox
             label={t('restriction-school')}
