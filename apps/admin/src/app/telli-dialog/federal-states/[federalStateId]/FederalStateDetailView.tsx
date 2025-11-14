@@ -15,43 +15,55 @@ import { FormField } from '@ui/components/form/FormField';
 import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
 import { FormFieldArray } from '../../../../components/form/FormFieldArray';
 import { toast } from 'sonner';
-import { federalStateUpdateSchema } from '@shared/db/schema';
 import z from 'zod';
-import { FederalStateModel } from '@/types/federal-state';
+import { FederalStateModel, federalStateSchema } from '@/types/federal-state';
+import { DesignConfigurationSchema } from '@ui/types/design-configuration';
+import { useEffect, useState } from 'react';
 
 export type FederalStateViewProps = {
   federalState: FederalStateModel;
 };
 
-export const federalStateFormSchema = federalStateUpdateSchema.extend({
+export const federalStateEditFormSchema = federalStateSchema.extend({
   supportContacts: z.array(
     z.object({
       value: z.string(),
     }),
   ),
   designConfiguration: z.string(), // Will be parsed as JSON before submitting
-  featureToggles: z.string(), // Will be parsed as JSON before submitting
 });
 
-// export type FederalStateEdit = z.infer<typeof FederalStateEditSchema>;
+export type FederalStateEditForm = z.infer<typeof federalStateEditFormSchema>;
+
+// Parse string as designConfiguration if not empty, otherwise set to null
+function parseAsDesignConfiguration(value: string) {
+  if (!value || value.trim() == '') {
+    return null;
+  }
+  return DesignConfigurationSchema.parse(JSON.parse(value));
+}
+
+function transformToFederalStateEditForm(federalState: FederalStateModel): FederalStateEditForm {
+  return {
+    ...federalState,
+    supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
+    telliName: federalState.telliName ?? '',
+    trainingLink: federalState.trainingLink ?? '',
+    designConfiguration: federalState.designConfiguration
+      ? JSON.stringify(federalState.designConfiguration, null, 2)
+      : '',
+  };
+}
 
 export function FederalStateView(props: FederalStateViewProps) {
+  const [formData, setFormData] = useState<FederalStateEditForm>(
+    transformToFederalStateEditForm(props.federalState),
+  );
   const federalState = props.federalState;
 
-  const form = useForm<FederalStateModel>({
-    resolver: zodResolver(federalStateFormSchema),
-    defaultValues: {
-      ...federalState,
-      // react-hook-form does not support array of primitives, so we map to array of objects
-      // supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
-      // all null values must be converted to empty string
-      telliName: federalState.telliName ?? '',
-      trainingLink: federalState.trainingLink ?? '',
-      // designConfiguration is stringified for the textarea
-      // designConfiguration: federalState.designConfiguration
-      //   ? JSON.stringify(federalState.designConfiguration, null, 2)
-      //   : '',
-    },
+  const form = useForm<FederalStateEditForm>({
+    resolver: zodResolver(federalStateEditFormSchema),
+    defaultValues: transformToFederalStateEditForm(federalState),
   });
 
   // Destructuring is necessary, otherwise formState is not updated correctly
@@ -59,37 +71,39 @@ export function FederalStateView(props: FederalStateViewProps) {
   const {
     control,
     formState: { isValid, errors, isDirty },
+    reset,
   } = form;
 
-  async function onSubmit(data: FederalStateModel) {
+  async function onSubmit(data: FederalStateEditForm) {
     if (!isValid) {
       toast.error('Das Formular enthält ungültige Werte.');
       return;
     }
-    try {
-      // Parse designConfiguration as JSON if not empty, otherwise set to null
-      // let parsedDesignConfiguration = null;
-      // if (data.designConfiguration && data.designConfiguration.trim() !== '') {
-      //   try {
-      //     parsedDesignConfiguration = DesignConfigurationSchema.parse(
-      //       JSON.parse(data.designConfiguration),
-      //     );
-      //   } catch {
-      //     toast.error('Fehler: designConfiguration ist nicht im korrekten Format');
-      //     return;
-      //   }
-      // }
 
-      await updateFederalState({
+    let parsedDesignConfiguration = null;
+    try {
+      parsedDesignConfiguration = parseAsDesignConfiguration(data.designConfiguration);
+    } catch {
+      toast.error('Fehler: designConfiguration ist nicht im korrekten Format');
+      return;
+    }
+
+    try {
+      const updatedValues = await updateFederalState({
         ...data,
-        // supportContacts: data.supportContacts.map((s) => s.value),
-        // designConfiguration: data.designConfiguration === '' ? null : parsedDesignConfiguration,
+        supportContacts: data.supportContacts.map((s) => s.value),
+        designConfiguration: parsedDesignConfiguration,
       });
+      setFormData(transformToFederalStateEditForm(updatedValues));
       toast.success('Bundesland erfolgreich aktualisiert');
     } catch {
       toast.error('Fehler beim Aktualisieren des Bundeslands');
     }
   }
+
+  useEffect(() => {
+    reset({ ...formData });
+  }, [formData, reset]);
 
   return (
     <Card>
@@ -207,7 +221,7 @@ export function FederalStateView(props: FederalStateViewProps) {
           />
 
           <FormFieldCheckbox
-            name="featureToggles.isSharedChatEnabled"
+            name="featureToggles.isShareTemplateWithSchoolEnabled"
             label="Vorlage mit Schule teilen aktivieren"
             description="Schaltet die Möglichkeit frei, Vorlagen mit allen Benutzern einer Schule zu teilen."
             control={control}
