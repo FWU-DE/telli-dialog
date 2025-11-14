@@ -349,7 +349,7 @@ export async function copyCustomGpt(
   originalId: string,
   accessLevel: 'global' | 'school' | 'private',
   userId: string,
-  schoolId: string | null
+  schoolId: string | null,
 ) {
   const sourceCustomGpt = await dbGetCustomGptById({ customGptId: originalId });
   if (!sourceCustomGpt) {
@@ -403,7 +403,7 @@ export async function copyCharacter(
   originalId: string,
   accessLevel: 'global' | 'school' | 'private',
   userId: string,
-  schoolId: string | null
+  schoolId: string | null,
 ) {
   const sourceCharacter = await dbGetCharacterById({ characterId: originalId });
   if (!sourceCharacter) {

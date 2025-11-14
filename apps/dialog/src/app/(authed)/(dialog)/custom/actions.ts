@@ -18,12 +18,7 @@ export async function createNewCustomGptAction({
 } = {}) {
   const user = await getUser();
   if (templateId !== undefined) {
-    let insertedCustomGpt = await copyCustomGpt(
-      templateId,
-      'private',
-      user.id,
-      user.school.id
-    );
+    let insertedCustomGpt = await copyCustomGpt(templateId, 'private', user.id, user.school.id);
 
     if (templatePictureId !== undefined) {
       const copyOfTemplatePicture = `custom-gpts/${insertedCustomGpt.id}/avatar`;
@@ -31,7 +26,7 @@ export async function createNewCustomGptAction({
         newKey: copyOfTemplatePicture,
         copySource: templatePictureId,
       });
-      
+
       // Update the custom GPT with the new picture
       const updatedCustomGpt = (
         await db
@@ -40,15 +35,15 @@ export async function createNewCustomGptAction({
           .where(eq(customGptTable.id, insertedCustomGpt.id))
           .returning()
       )[0];
-      
+
       if (updatedCustomGpt) {
         insertedCustomGpt = updatedCustomGpt;
       }
     }
-    
+
     await copyRelatedTemplateFiles('custom-gpt', templateId, insertedCustomGpt.id);
     return insertedCustomGpt;
-  }  
+  }
 
   const customGptId = generateUUID();
 

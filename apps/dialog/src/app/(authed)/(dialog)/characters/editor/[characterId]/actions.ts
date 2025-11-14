@@ -72,15 +72,15 @@ export async function updateCharacterAction({
   ...character
 }: Omit<CharacterInsertModel, 'userId'> & { characterId: string }) {
   const user = await getUser();
-  
+
   const characterWithDefaults = {
     ...character,
     originalCharacterId: character.originalCharacterId ?? null, // Set originalCharacterId to null if not explicitly provided, so removeNullValues will filter it out
   };
-  
+
   const cleanedCharacter = removeNullValues(characterWithDefaults);
   if (cleanedCharacter === undefined) return;
-  
+
   const { id, accessLevel, schoolId, createdAt, ...updatableProps } = cleanedCharacter;
   const updatedCharacter = (
     await db

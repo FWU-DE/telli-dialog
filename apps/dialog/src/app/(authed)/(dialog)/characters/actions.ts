@@ -25,7 +25,7 @@ export async function createNewCharacterAction({
       templateId,
       'private',
       user.id,
-      user.school?.id ?? null
+      user.school?.id ?? null,
     );
 
     if (templatePictureId !== undefined) {
@@ -34,7 +34,7 @@ export async function createNewCharacterAction({
         newKey: copyOfTemplatePicture,
         copySource: templatePictureId,
       });
-      
+
       // Update the character with the new picture
       const updatedCharacter = (
         await db
@@ -43,12 +43,12 @@ export async function createNewCharacterAction({
           .where(eq(characterTable.id, insertedCharacter.id))
           .returning()
       )[0];
-      
+
       if (updatedCharacter) {
         insertedCharacter = updatedCharacter;
       }
     }
-    
+
     await copyRelatedTemplateFiles('character', templateId, insertedCharacter.id);
     return insertedCharacter;
   }
