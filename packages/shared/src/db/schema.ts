@@ -18,6 +18,7 @@ import { z } from 'zod';
 import { DesignConfiguration, type LlmModelPriceMetadata } from './types';
 import { conversationRoleSchema } from '../utils/chat';
 import { isNull, sql } from 'drizzle-orm';
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod';
 
 export const tsvector = customType<{
   data: string;
@@ -154,8 +155,15 @@ export const federalStateTable = pgTable('federal_state', {
   featureToggles: json('feature_toggles').$type<FederalStateFeatureToggles>().notNull(),
 });
 
-export type FederalStateInsertModel = typeof federalStateTable.$inferInsert;
-export type FederalStateModel = typeof federalStateTable.$inferSelect;
+export const federalStateSelectSchema = createSelectSchema(federalStateTable);
+export const federalStateInsertSchema = createInsertSchema(federalStateTable);
+export const federalStateUpdateSchema = createUpdateSchema(federalStateTable).extend({
+  id: z.string(),
+});
+
+export type FederalStateSelectModel = z.infer<typeof federalStateSelectSchema>;
+export type FederalStateInsertModel = z.infer<typeof federalStateInsertSchema>;
+export type FederalStateUpdateModel = z.infer<typeof federalStateUpdateSchema>;
 
 export const characterAccessLevelSchema = z.enum(['private', 'school', 'global']);
 export const characterAccessLevelEnum = pgEnum(

@@ -1,53 +1,73 @@
 'use server';
-import { env } from '../consts/env';
-import { FederalState } from '../types/federal-state';
-import { fetchFromDialog } from './fetch';
+import {
+  FederalStateSelectModel,
+  FederalStateUpdateModel,
+  federalStateUpdateSchema,
+} from '@shared/db/schema';
+import {
+  dbGetFederalState,
+  dbGetFederalStates,
+  dbUpdateFederalState,
+} from '@shared/db/functions/federal-state';
+import { FederalStateModel, federalStateSchema } from '@/types/federal-state';
+import { encrypt } from '@shared/db/crypto';
+import { env } from '@shared/env';
 
-const apiRoutes = {
-  FEDERAL_STATES_ROUTE: '/api/v1/admin/federal-states',
-  FEDERAL_STATE_BY_ID_ROUTE: (id: string) => `/api/v1/admin/federal-states/${id}`,
-};
-
-export async function fetchFederalStates() {
-  const response = await fetchFromDialog(env.telliDialogBaseUrl + apiRoutes.FEDERAL_STATES_ROUTE);
-
-  const data = await response.json();
-  return data.federalStates as FederalState[];
+export async function getFederalStates(): Promise<FederalStateModel[]> {
+  const federalStates = await dbGetFederalStates();
+  return federalStates.map((federalState) => {
+    return transformToModel(federalState);
+  });
 }
 
-export async function fetchFederalStateById(federalStateId: string) {
-  const response = await fetchFromDialog(
-    env.telliDialogBaseUrl + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE(federalStateId),
-  );
-
-  const data = await response.json();
-  // validate response with zod
-  return data as FederalState;
+export async function getFederalStateById(federalStateId: string): Promise<FederalStateModel> {
+  const federalState = await dbGetFederalState(federalStateId);
+  return transformToModel(federalState);
 }
 
-export async function updateFederalState(federalState: FederalState) {
-  const response = await fetchFromDialog(
-    env.telliDialogBaseUrl + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE(federalState.id),
-    {
-      method: 'PUT',
-      body: JSON.stringify(federalState),
-    },
-  );
+// Todo RL: naming
+const updateSchema = federalStateUpdateSchema.omit({
+  createdAt: true,
+  encryptedApiKey: true,
+});
 
-  const data = await response.json();
-  return data as FederalState;
+export async function updateFederalState(
+  federalState: Omit<FederalStateUpdateModel, 'encryptedApiKey' | 'createdAt'>,
+): Promise<FederalStateModel> {
+  const values = updateSchema.parse(federalState);
+  const updated = await dbUpdateFederalState(values);
+  if (!updated) {
+    throw new Error(`Failed to update federal state with id ${federalState.id}`);
+  }
+  return transformToModel(updated);
 }
 
-export async function patchApiKey(federalStateId: string, decryptedApiKey: string) {
-  const response = await fetchFromDialog(
-    env.telliDialogBaseUrl + apiRoutes.FEDERAL_STATE_BY_ID_ROUTE(federalStateId),
-    {
-      method: 'PATCH',
-      body: JSON.stringify({ decryptedApiKey }),
-    },
-  );
+export async function patchApiKey(
+  federalStateId: string,
+  decryptedApiKey: string,
+): Promise<FederalStateModel> {
+  const existingFederalState = await dbGetFederalState(federalStateId);
 
-  const data = await response.json();
-  // unsure what the return value is atm.
-  return data;
+  const apiKey = encrypt({
+    text: decryptedApiKey,
+    plainEncryptionKey: env.encryptionKey,
+  });
+
+  const updated = await dbUpdateFederalState({
+    id: federalStateId,
+    encryptedApiKey: apiKey,
+  });
+  if (!updated) {
+    throw new Error(`Failed to update federal state with id ${federalStateId}`);
+  }
+  return transformToModel(updated);
+}
+
+function transformToModel(federalState: FederalStateSelectModel): FederalStateModel {
+  const { encryptedApiKey, ...federalStateWithoutApiKey } = federalState;
+
+  return {
+    ...federalStateWithoutApiKey,
+    hasApiKeyAssigned: !!federalState.encryptedApiKey,
+  };
 }

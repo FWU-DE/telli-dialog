@@ -1,5 +1,10 @@
 import { db } from '..';
-import { FederalStateInsertModel, FederalStateModel, federalStateTable } from '../schema';
+import {
+  FederalStateInsertModel,
+  FederalStateSelectModel,
+  federalStateTable,
+  FederalStateUpdateModel,
+} from '../schema';
 import { eq } from 'drizzle-orm';
 import { decrypt } from '../crypto';
 import { env } from '../../env';
@@ -38,8 +43,24 @@ export async function dbGetFederalStateWithDecryptedApiKey({
   return { ...federalState, decryptedApiKey };
 }
 
+export async function dbGetFederalStates(): Promise<FederalStateSelectModel[]> {
+  return db.select().from(federalStateTable);
+}
+
 export async function dbGetAllFederalStates() {
-  return await db.select().from(federalStateTable);
+  return db.select().from(federalStateTable);
+}
+
+export async function dbGetFederalState(id: string): Promise<FederalStateSelectModel> {
+  const [federalState] = await db
+    .select()
+    .from(federalStateTable)
+    .where(eq(federalStateTable.id, id));
+
+  if (!federalState) {
+    throw new Error(`Federal state with id ${id} not found`);
+  }
+  return federalState;
 }
 
 export const dbGetFederalStateByIdWithResult = errorifyAsyncFn(dbGetFederalStateById);
@@ -61,14 +82,16 @@ export async function dbInsertFederalState(federalState: FederalStateInsertModel
   return inserted;
 }
 
-export async function dbUpdateFederalState(
-  federalState: Partial<FederalStateModel> & { id: string },
-) {
+export async function dbUpdateFederalState(federalState: FederalStateUpdateModel) {
   const [updated] = await db
     .update(federalStateTable)
     .set(federalState)
     .where(eq(federalStateTable.id, federalState.id))
     .returning();
+
+  if (!updated) {
+    throw new Error(`Failed to update federal state with id ${federalState.id}`);
+  }
 
   return updated;
 }
