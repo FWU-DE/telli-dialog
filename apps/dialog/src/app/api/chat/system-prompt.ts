@@ -2,11 +2,12 @@ import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { dbGetCharacterById } from '@shared/db/functions/character';
 import { getUser } from '@/auth/utils';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
-import { CustomGptModel, FederalStateSelectModel } from '@shared/db/schema';
+import { CustomGptModel } from '@shared/db/schema';
 import { constructWebsearchPrompt } from '../conversation/tools/websearch/prompt_templates';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { ChunkResult } from '../file-operations/process-chunks';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
+import { FederalStateModel } from '@shared/types/federal-state';
 
 export function constructSchuleSystemPrompt() {
   return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. Heute ist der ${formatDateToGermanTimestamp(new Date())}. Befolge folgende Anweisungen: Du sprichst immer die Sprache mit der du angesprochen wirst. Du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die Paarform (Beidnennung) z.B. Bürgerinnen und Bürger. Bei Fragen über telli verweise auf die Hilfe in der Sidebar.`;
@@ -141,7 +142,7 @@ export async function constructChatSystemPrompt({
   characterId?: string;
   customGptId?: string;
   isTeacher: boolean;
-  federalState: Omit<FederalStateSelectModel, 'encryptedApiKey'>;
+  federalState: FederalStateModel;
   websearchSources: WebsearchSource[];
   retrievedTextChunks?: Record<string, ChunkResult[]>;
 }) {

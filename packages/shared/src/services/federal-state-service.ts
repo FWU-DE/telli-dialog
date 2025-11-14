@@ -25,7 +25,6 @@ export async function getFederalStateById(federalStateId: string): Promise<Feder
   return transformToModel(federalState);
 }
 
-// Todo RL: naming
 const updateSchema = federalStateUpdateSchema.omit({
   createdAt: true,
   encryptedApiKey: true,
