@@ -286,7 +286,7 @@ export default function CustomGptForm({
       {copyContainer}
       {userRole === 'teacher' && (
         <fieldset className="mt-8 gap-8">
-          {federalState?.featureToggles.isShareTemplateWithSchoolEnabled && (
+          {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
             <div className="flex gap-4">
               <Checkbox
                 label={t('restriction-school')}
