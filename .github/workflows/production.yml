@@ -8,9 +8,6 @@ on:
         required: true
         default: ''
 
-env:
-  IONOS_DOCKER_REGISTRY_TOKEN: ${{ secrets.IONOS_DOCKER_REGISTRY_TOKEN }}
-
 jobs:
   deploy-production:
     name: Rollout production
@@ -33,9 +30,9 @@ jobs:
           COMMIT_HASH="${{ github.event.inputs.commit_hash }}"
           echo "Updating Kubernetes deployment with image tag $COMMIT_HASH"
           kubectl set image deployment/telli-dialog-prod \
-            telli-dialog-prod=telli.cr.de-fra.ionos.com/telli/chatbot:$COMMIT_HASH -n telli-prod
+            telli-dialog-prod=ghcr.io/fwu-de/telli-dialog:$COMMIT_HASH -n telli-prod
           kubectl set image deployment/telli-admin-prod \
-            telli-admin-prod=telli.cr.de-fra.ionos.com/telli/admin:$COMMIT_HASH -n telli-prod
+            telli-admin-prod=ghcr.io/fwu-de/telli-admin:$COMMIT_HASH -n telli-prod
 
       - name: Wait for rollout to complete
         run: |
