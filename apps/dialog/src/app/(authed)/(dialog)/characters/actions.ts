@@ -53,7 +53,7 @@ export async function createNewCharacterAction({
     return insertedCharacter;
   }
 
-  // Generate uuid before hand to avoid two db transactions for create and imediate update
+  // Generate uuid before hand to avoid two db transactions for create and immediate update
   const characterId = generateUUID();
   let copyOfTemplatePicture;
   if (templatePictureId !== undefined) {
