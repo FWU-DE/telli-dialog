@@ -37,7 +37,7 @@ export type FederalStateEditForm = z.infer<typeof federalStateEditFormSchema>;
 
 // Parse string as designConfiguration if not empty, otherwise set to null
 function parseAsDesignConfiguration(value: string) {
-  if (!value || value.trim() == '') {
+  if (!value || value.trim() === '') {
     return null;
   }
   return DesignConfigurationSchema.parse(JSON.parse(value));
