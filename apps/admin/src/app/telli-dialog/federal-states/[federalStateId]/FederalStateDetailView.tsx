@@ -2,7 +2,7 @@
 import { Button } from '@ui/components/Button';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { updateFederalState } from '../../../../services/federal-states-service';
+import { updateFederalState } from '@shared/services/federal-state-service';
 import {
   Card,
   CardAction,
@@ -16,7 +16,7 @@ import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
 import { FormFieldArray } from '../../../../components/form/FormFieldArray';
 import { toast } from 'sonner';
 import z from 'zod';
-import { FederalStateModel, federalStateSchema } from '@/types/federal-state';
+import { FederalStateModel, federalStateSchema } from '@shared/types/federal-state';
 import { DesignConfigurationSchema } from '@ui/types/design-configuration';
 import { useEffect, useState } from 'react';
 

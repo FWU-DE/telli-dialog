@@ -9,7 +9,7 @@ import {
   dbGetFederalStates,
   dbUpdateFederalState,
 } from '@shared/db/functions/federal-state';
-import { FederalStateModel, federalStateSchema } from '@/types/federal-state';
+import { FederalStateModel } from '@shared/types/federal-state';
 import { encrypt } from '@shared/db/crypto';
 import { env } from '@shared/env';
 
@@ -46,8 +46,6 @@ export async function patchApiKey(
   federalStateId: string,
   decryptedApiKey: string,
 ): Promise<FederalStateModel> {
-  const existingFederalState = await dbGetFederalState(federalStateId);
-
   const apiKey = encrypt({
     text: decryptedApiKey,
     plainEncryptionKey: env.encryptionKey,
@@ -57,6 +55,7 @@ export async function patchApiKey(
     id: federalStateId,
     encryptedApiKey: apiKey,
   });
+
   if (!updated) {
     throw new Error(`Failed to update federal state with id ${federalStateId}`);
   }
@@ -64,6 +63,7 @@ export async function patchApiKey(
 }
 
 function transformToModel(federalState: FederalStateSelectModel): FederalStateModel {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { encryptedApiKey, ...federalStateWithoutApiKey } = federalState;
 
   return {

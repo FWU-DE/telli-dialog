@@ -1,5 +1,5 @@
 import TwoColumnLayout from '@/components/layout/TwoColumnLayout';
-import { getFederalStateById } from '../../../../services/federal-states-service';
+import { getFederalStateById } from '@shared/services/federal-state-service';
 import { FederalStateView } from './FederalStateDetailView';
 import { Sidebar, SidebarItem } from '@/components/navigation/Sidebar';
 import { ROUTES } from '@/consts/routes';

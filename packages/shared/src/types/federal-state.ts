@@ -1,5 +1,4 @@
 import { federalStateSelectSchema } from '@shared/db/schema';
-import { DesignConfigurationSchema } from '@ui/types/design-configuration';
 import { z } from 'zod';
 
 export const federalStateSchema = federalStateSelectSchema
