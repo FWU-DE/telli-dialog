@@ -8,13 +8,16 @@ import { copyFileInS3 } from '@shared/s3';
 import { generateUUID } from '@/utils/uuid';
 import { eq } from 'drizzle-orm';
 import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
+import { copyRelatedTemplateFiles } from '@shared/services/templateService';
 
 export async function createNewCharacterAction({
   modelId: _modelId,
   templatePictureId,
+  templateId,
 }: {
   modelId?: string;
   templatePictureId?: string;
+  templateId?: string;
 }) {
   const user = await getUser();
 
@@ -54,6 +57,14 @@ export async function createNewCharacterAction({
 
   if (insertedCharacter === undefined) {
     throw Error('Could not create a new character');
+  }
+
+  if (templateId !== undefined) {
+    copyRelatedTemplateFiles(
+      'character',
+      templateId,
+      insertedCharacter.id,
+    );
   }
 
   return insertedCharacter;
