@@ -64,7 +64,12 @@ export async function updateCustomGptAction({
 }: Partial<CustomGptInsertModel> & { gptId: string }) {
   const user = await getUser();
 
-  const cleanedCustomGpt = removeNullValues(customGpt);
+  const customGptWithDefaults = {
+    ...customGpt,
+    originalCustomGptId: customGpt.originalCustomGptId ?? null, // Set originalCustomGptId to null if not explicitly provided, so removeNullValues will filter it out
+  };
+
+  const cleanedCustomGpt = removeNullValues(customGptWithDefaults);
   if (cleanedCustomGpt === undefined) return;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { id, createdAt, ...updatableProps } = cleanedCustomGpt;

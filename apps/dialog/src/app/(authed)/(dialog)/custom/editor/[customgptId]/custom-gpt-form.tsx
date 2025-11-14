@@ -53,7 +53,6 @@ type CustomGptFormProps = CustomGptModel & {
   readOnly: boolean;
   existingFiles: FileModel[];
   initialLinks: WebsearchSource[];
-  templateCustomGptId?: string;
 };
 /**
  * Zod form configuration Info:
@@ -79,7 +78,6 @@ export default function CustomGptForm({
   existingFiles,
   readOnly,
   initialLinks,
-  templateCustomGptId,
   ...customGpt
 }: CustomGptFormProps) {
   const router = useRouter();
@@ -173,7 +171,6 @@ export default function CustomGptForm({
       promptSuggestions: data.promptSuggestions?.map((p) => p.content),
       gptId: customGpt.id,
       attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
-      originalCustomGptId: templateCustomGptId ?? null,
     })
       .then(() => {
         if (!isCreating) toast.success(tToast('edit-toast-success'));
@@ -200,7 +197,6 @@ export default function CustomGptForm({
     updateCustomGptAction({
       gptId: customGpt.id,
       promptSuggestions: newPromptSuggestions,
-      originalCustomGptId: templateCustomGptId ?? null,
     })
       .then(() => {
         if (!isCreating) toast.success(tToast('edit-toast-success'));

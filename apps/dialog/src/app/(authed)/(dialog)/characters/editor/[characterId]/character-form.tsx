@@ -52,7 +52,6 @@ type CharacterFormProps = CharacterModel & {
   readOnly: boolean;
   existingFiles: FileModel[];
   initialLinks: WebsearchSource[];
-  templateCharacterId?: string;
 };
 
 /**
@@ -85,7 +84,6 @@ export default function CharacterForm({
   existingFiles,
   readOnly,
   initialLinks,
-  templateCharacterId,
   ...character
 }: CharacterFormProps) {
   const router = useRouter();
@@ -188,7 +186,6 @@ export default function CharacterForm({
       characterId: character.id,
       ...data,
       attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
-      originalCharacterId: templateCharacterId ?? null,
     })
       .then(() => {
         if (!isCreating) {
