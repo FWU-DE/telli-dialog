@@ -35,13 +35,10 @@ export async function updateFederalState(
 ): Promise<FederalStateModel> {
   const values = updateSchema.parse(federalState);
   const updated = await dbUpdateFederalState(values);
-  if (!updated) {
-    throw new Error(`Failed to update federal state with id ${federalState.id}`);
-  }
   return transformToModel(updated);
 }
 
-export async function patchApiKey(
+export async function updateApiKey(
   federalStateId: string,
   decryptedApiKey: string,
 ): Promise<FederalStateModel> {

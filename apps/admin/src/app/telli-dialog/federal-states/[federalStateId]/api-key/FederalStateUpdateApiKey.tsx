@@ -16,7 +16,7 @@ import { FormField } from '@ui/components/form/FormField';
 import { Button } from '@ui/components/Button';
 import { toast } from 'sonner';
 import { FederalStateModel } from '@shared/types/federal-state';
-import { patchApiKey } from '@shared/services/federal-state-service';
+import { updateApiKey } from '@shared/services/federal-state-service';
 
 export type FederalStateUpdateApiKeyProps = {
   federalState: FederalStateModel;
@@ -46,7 +46,7 @@ export function FederalStateUpdateApiKey(props: FederalStateUpdateApiKeyProps) {
 
   async function onSubmit(data: PatchApiKey) {
     try {
-      await patchApiKey(federalState.id, data.decryptedApiKey);
+      await updateApiKey(federalState.id, data.decryptedApiKey);
       reset();
       toast.success('API Key erfolgreich aktualisiert.');
     } catch {
