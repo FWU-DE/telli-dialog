@@ -16,6 +16,7 @@ import { type UserAndContext } from '@/auth/types';
 import { CharacterAccessLevel } from '@shared/db/schema';
 import { buildGenericUrl, CharacterWithImage } from './utils';
 import { useTranslations } from 'next-intl';
+import { useFederalState } from '@/components/providers/federal-state-provider';
 
 export default function CharacterPreviewPage({
   user,
@@ -27,6 +28,7 @@ export default function CharacterPreviewPage({
   accessLevel: CharacterAccessLevel;
 }) {
   const [input, setInput] = React.useState('');
+  const federalState = useFederalState();
 
   const filterDisabled = characters.length < 1;
 
@@ -69,15 +71,17 @@ export default function CharacterPreviewPage({
         >
           {t('visibility-global')}
         </Link>
-        <Link
-          href={buildGenericUrl('school', 'characters')}
-          className={cn(
-            'hover:underline px-2 p-1 text-primary',
-            accessLevel === 'school' && 'underline',
-          )}
-        >
-          {t('visibility-school')}
-        </Link>
+        {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
+          <Link
+            href={buildGenericUrl('school', 'characters')}
+            className={cn(
+              'hover:underline px-2 p-1 text-primary',
+              accessLevel === 'school' && 'underline',
+            )}
+          >
+            {t('visibility-school')}
+          </Link>
+        )}
         <Link
           href={buildGenericUrl('private', 'characters')}
           className={cn(
