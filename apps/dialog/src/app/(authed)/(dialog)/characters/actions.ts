@@ -60,7 +60,7 @@ export async function createNewCharacterAction({
   }
 
   if (templateId !== undefined) {
-    copyRelatedTemplateFiles('character', templateId, insertedCharacter.id);
+    await copyRelatedTemplateFiles('character', templateId, insertedCharacter.id);
   }
 
   return insertedCharacter;
