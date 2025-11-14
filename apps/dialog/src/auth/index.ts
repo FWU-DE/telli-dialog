@@ -6,6 +6,7 @@ import { getUserAndContextByUserId } from './utils';
 import { UserAndContext } from './types';
 import { logError, logInfo } from '@/utils/logging/logging';
 import { sessionBlockList } from './session';
+import { consoleLoggingIntegration } from '@sentry/nextjs';
 
 declare module 'next-auth' {
   interface Session {
@@ -13,10 +14,12 @@ declare module 'next-auth' {
     hasCompletedTraining?: boolean;
     sessionId?: string; // identifies the session for blocking list after backchannel logout
     idToken?: string; // needed for logout at identity provider (vidis)
+    version: number; // token version to invalidate old tokens if structure changed
   }
 }
 
 const SESSION_LIFETIME_SECONDS = 60 * 60 * 8;
+const TOKEN_VERSION = 1;
 
 const result = NextAuth({
   providers: [vidisConfig, mockVidisConfig, credentialsProvider],
@@ -50,7 +53,14 @@ const result = NextAuth({
         ) {
           // This function can throw an error if the return type does not match our schema
           token = await handleVidisJWTCallback({ account, profile, token });
+          token.version = TOKEN_VERSION;
         }
+        // invalidate old tokens
+        if ((token.version as number) < TOKEN_VERSION) {
+          logInfo('Token version changed, returning null token');
+          return null;
+        }
+
         // Ensure userId is set for credentials provider
         if (account?.provider === 'credentials' && user?.id) {
           token.userId = user.id;
@@ -58,7 +68,11 @@ const result = NextAuth({
         if (trigger === 'update') {
           token.user = await getUserAndContextByUserId({ userId: token.userId as string });
         }
-        if (token.user === undefined || (token.user as UserAndContext).school === undefined) {
+        if (
+          token.user === undefined ||
+          (token.user as UserAndContext).school === undefined ||
+          (token.user as UserAndContext).federalState.featureToggles === undefined // temporary fix because of structural change in federalState.featureToggles
+        ) {
           token.user = await getUserAndContextByUserId({ userId: token.userId as string });
         }
         if (profile?.sid) {
@@ -80,6 +94,7 @@ const result = NextAuth({
       // This callback is called whenever a session is checked (i.e. on the client)
       // in order to pass properties to the client, copy them from token to the session
 
+      session.version = token.version as number;
       if (token?.sessionId) session.sessionId = token.sessionId as string;
       if (token?.id_token) session.idToken = token.id_token as string;
 
