@@ -18,6 +18,7 @@ import { buildGenericUrl } from '../characters/utils';
 import CreateNewCustomGptButton from './create-new-customgpt-button';
 import { CustomGptWithImage } from './utils';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
+import { useFederalState } from '@/components/providers/federal-state-provider';
 
 export default function Page2({
   user,
@@ -29,6 +30,7 @@ export default function Page2({
   accessLevel: CharacterAccessLevel;
 }) {
   const [input, setInput] = React.useState('');
+  const federalState = useFederalState();
 
   const filterDisabled = customGpts.length < 1;
 
@@ -71,17 +73,18 @@ export default function Page2({
         >
           {t('visibility-global')}
         </Link>
-        {user.school.userRole === 'teacher' && (
-          <Link
-            href={buildGenericUrl('school', 'custom')}
-            className={cn(
-              'hover:underline px-2 p-1 text-primary',
-              accessLevel === 'school' && 'underline',
-            )}
-          >
-            {t('visibility-school')}
-          </Link>
-        )}
+        {user.school.userRole === 'teacher' &&
+          federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
+            <Link
+              href={buildGenericUrl('school', 'custom')}
+              className={cn(
+                'hover:underline px-2 p-1 text-primary',
+                accessLevel === 'school' && 'underline',
+              )}
+            >
+              {t('visibility-school')}
+            </Link>
+          )}
         <Link
           href={buildGenericUrl('private', 'custom')}
           className={cn(

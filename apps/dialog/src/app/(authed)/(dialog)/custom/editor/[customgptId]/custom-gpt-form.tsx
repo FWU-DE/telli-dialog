@@ -45,6 +45,7 @@ import { iconClassName } from '@/utils/tailwind/icon';
 import { AttachedLinks } from '@/components/forms/attached-links';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { formLinks } from '@/utils/web-search/form-links';
+import { useFederalState } from '@/components/providers/federal-state-provider';
 
 type CustomGptFormProps = CustomGptModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -82,6 +83,7 @@ export default function CustomGptForm({
 }: CustomGptFormProps) {
   const router = useRouter();
   const toast = useToast();
+  const federalState = useFederalState();
 
   const {
     register,
@@ -284,14 +286,16 @@ export default function CustomGptForm({
       {copyContainer}
       {userRole === 'teacher' && (
         <fieldset className="mt-8 gap-8">
-          <div className="flex gap-4">
-            <Checkbox
-              label={t('restriction-school')}
-              checked={optimisticAccessLevel === 'school'}
-              onCheckedChange={(value: boolean) => handleEnableSharing(value)}
-              disabled={readOnly}
-            />
-          </div>
+          {federalState?.featureToggles.isShareTemplateWithSchoolEnabled && (
+            <div className="flex gap-4">
+              <Checkbox
+                label={t('restriction-school')}
+                checked={optimisticAccessLevel === 'school'}
+                onCheckedChange={(value: boolean) => handleEnableSharing(value)}
+                disabled={readOnly}
+              />
+            </div>
+          )}
         </fieldset>
       )}
       <fieldset className="flex flex-col gap-4 mt-8">
