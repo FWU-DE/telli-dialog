@@ -23,11 +23,11 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.930.0",
-    "@aws-sdk/s3-request-presigner": "3.930.0",
+    "@aws-sdk/client-s3": "3.931.0",
+    "@aws-sdk/s3-request-presigner": "3.931.0",
     "@dotenvx/dotenvx": "1.51.1",
     "@t3-oss/env-core": "0.13.8",
-    "drizzle-kit": "0.31.6",
+    "drizzle-kit": "0.31.7",
     "drizzle-orm": "0.44.7",
     "drizzle-zod": "0.8.3",
     "nanoid": "5.1.6",
