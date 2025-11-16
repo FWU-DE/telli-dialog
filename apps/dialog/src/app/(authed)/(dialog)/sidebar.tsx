@@ -54,7 +54,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
   });
 
   function refetchConversations() {
-    queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    void queryClient.invalidateQueries({ queryKey: ['conversations'] });
   }
 
   React.useEffect(() => {
