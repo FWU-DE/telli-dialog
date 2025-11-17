@@ -58,9 +58,8 @@ If you start with a fresh database, apply migrations and seed the database; othe
 Add api keys in your .env.local file for all federal states that you want to login with, e.g. DE_BY_API_KEY for bavaria.
 
 ```sh
-# with proper values in .env.local file
+# with proper values in /apps/dialog/.env.local file
 cd packages/shared
-pnpm db:migrate:local
 pnpm db:seed:local
 
 ```

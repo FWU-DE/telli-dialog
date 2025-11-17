@@ -4,14 +4,12 @@ import { insertHelpModeGpt } from './help-mode';
 import { insertDummyUser } from './user-entity';
 
 async function add() {
-  const step1 = [insertFederalStates({ skip: false }), insertDummyUser()];
-  await Promise.all(step1);
-  const step2 = [
+  await Promise.all([insertFederalStates({ skip: false }), insertDummyUser()]);
+  await Promise.all([
     insertHelpModeGpt({ skip: false }),
     insertTemplateCharacters(),
     insertTemplateCustomGpt(),
-  ];
-  await Promise.all(step2);
+  ]);
 }
 
 add()
