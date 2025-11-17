@@ -10,7 +10,7 @@ import { z } from 'zod';
 import HeaderPortal from '../../../header-portal';
 import CustomGptForm from './custom-gpt-form';
 import { fetchFileMapping } from '../../actions';
-import { removeNullValues } from '@/utils/generic/object-operations';
+import { removeNullishValues } from '@/utils/generic/object-operations';
 import { CustomGptModel } from '@shared/db/schema';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
@@ -80,7 +80,7 @@ export default async function Page(context: PageContext) {
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
         <CustomGptForm
-          {...(removeNullValues(customGpt) as CustomGptModel)}
+          {...(removeNullishValues(customGpt) as CustomGptModel)}
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           isCreating={isCreating}
           readOnly={readOnly}

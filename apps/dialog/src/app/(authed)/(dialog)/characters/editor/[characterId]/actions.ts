@@ -13,7 +13,7 @@ import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
 import { SharedConversationShareFormValues } from '../../../shared-chats/[sharedSchoolChatId]/schema';
 import { generateInviteCode } from '../../../shared-chats/[sharedSchoolChatId]/utils';
-import { removeNullValues } from '@/utils/generic/object-operations';
+import { removeNullishValues } from '@/utils/generic/object-operations';
 
 export async function updateCharacterAccessLevelAction({
   characterId,
@@ -73,12 +73,7 @@ export async function updateCharacterAction({
 }: Omit<CharacterInsertModel, 'userId'> & { characterId: string }) {
   const user = await getUser();
 
-  const characterWithDefaults = {
-    ...character,
-    originalCharacterId: character.originalCharacterId ?? null, // Set originalCharacterId to null if not explicitly provided, so removeNullValues will filter it out
-  };
-
-  const cleanedCharacter = removeNullValues(characterWithDefaults);
+  const cleanedCharacter = removeNullishValues(character);
   if (cleanedCharacter === undefined) return;
 
   const { id, accessLevel, schoolId, createdAt, ...updatableProps } = cleanedCharacter;

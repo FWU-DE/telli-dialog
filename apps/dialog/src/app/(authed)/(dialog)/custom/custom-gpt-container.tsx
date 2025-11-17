@@ -5,7 +5,7 @@ import { useToast } from '@/components/common/toast';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import SettingsIcon from '@/components/icons/settings';
 import TrashIcon from '@/components/icons/trash';
-import { CustomGptModel } from '@shared/db/schema';
+import { CharacterAccessLevel, CustomGptModel } from '@shared/db/schema';
 import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
 import { useTranslations } from 'next-intl';
@@ -22,7 +22,7 @@ import { createNewCustomGptAction } from './actions';
 type CustomGptContainerProps = CustomGptModel & {
   currentUserId: string;
   maybeSignedPictureUrl: string | undefined;
-  accessLevel: 'global' | 'school' | 'private';
+  accessLevel: CharacterAccessLevel;
   pictureId: string | null;
 };
 
