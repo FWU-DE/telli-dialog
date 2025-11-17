@@ -31,11 +31,26 @@ jobs:
         image: ghcr.io/valkey-io/valkey:8
         ports:
           - 6379:6379
+      keycloak:
+        image: quay.io/keycloak/keycloak:26.4.5
+        env:
+          KC_BOOTSTRAP_ADMIN_USERNAME: admin
+          KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+          CLIENT_NAME: telli-e2e-client
+          CLIENT_SECRET: ClientSecret-e2e
+        options: --entrypoint /opt/keycloak/data/import/entrypoint.sh
+        volumes:
+          - ./devops/docker/keycloak:/opt/keycloak/data/import
+        ports:
+          - 8080:8080
 
     env:
       NEXTAUTH_URL: http://localhost:3000
       DATABASE_URL: postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db
       VALKEY_URL: redis://127.0.0.1:6379/0
+      VIDIS_CLIENT_ID: telli-e2e-client
+      VIDIS_CLIENT_SECRET: ClientSecret-e2e
+      VIDIS_ISSUER_URI: http://localhost:8080/realms/telli-local
 
     steps:
       - name: Checkout code
@@ -54,9 +69,6 @@ jobs:
           OTC_BUCKET_NAME: op://telli Engineering/.env.e2e chatbot/OTC_BUCKET_NAME
           # SENTRY_AUTH_TOKEN: op://telli Engineering/.env.e2e chatbot/SENTRY_AUTH_TOKEN
           SENTRY_ENVIRONMENT: op://telli Engineering/.env.e2e chatbot/SENTRY_ENVIRONMENT
-          VIDIS_CLIENT_ID: op://telli Engineering/.env.e2e chatbot/VIDIS_CLIENT_ID
-          VIDIS_CLIENT_SECRET: op://telli Engineering/.env.e2e chatbot/VIDIS_CLIENT_SECRET
-          VIDIS_ISSUER_URI: op://telli Engineering/.env.e2e chatbot/VIDIS_ISSUER_URI
           API_URL: op://telli Engineering/.env.e2e chatbot/API_URL
           ENCRYPTION_KEY: op://telli Engineering/.env.e2e chatbot/ENCRYPTION_KEY
           SENTRY_DSN: op://telli Engineering/.env.e2e chatbot/SENTRY_DSN
