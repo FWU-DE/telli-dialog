@@ -218,6 +218,13 @@
       "when": 1762876664370,
       "tag": "0030_round_titanium_man",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1763309433520,
+      "tag": "0031_smart_timeslip",
+      "breakpoints": true
     }
   ]
 }

@@ -31,7 +31,7 @@ export default function DestructiveActionButton({
   const queryClient = useQueryClient();
 
   function refetchConversations() {
-    queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    void queryClient.invalidateQueries({ queryKey: ['conversations'] });
   }
   const { designConfiguration } = useTheme();
   return (

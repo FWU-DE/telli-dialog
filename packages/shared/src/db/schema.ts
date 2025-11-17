@@ -1,23 +1,23 @@
 import {
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-  pgEnum,
-  integer,
-  unique,
-  json,
   boolean,
-  vector,
   customType,
   doublePrecision,
   index,
+  integer,
+  json,
+  pgEnum,
+  pgTable,
   primaryKey,
+  text,
+  timestamp,
+  unique,
+  uuid,
+  vector,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
 import { DesignConfiguration, type LlmModelPriceMetadata } from './types';
 import { conversationRoleSchema } from '../utils/chat';
-import { sql } from 'drizzle-orm';
+import { isNull, sql } from 'drizzle-orm';
 
 export const tsvector = customType<{
   data: string;
@@ -63,6 +63,7 @@ export const conversationTable = pgTable(
     index().on(table.userId),
     index().on(table.characterId),
     index().on(table.customGptId),
+    index().on(table.userId, table.createdAt.desc()).where(isNull(table.deletedAt)),
   ],
 );
 

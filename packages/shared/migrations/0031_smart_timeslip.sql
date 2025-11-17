@@ -1,0 +1,1 @@
+CREATE INDEX "conversation_user_id_created_at_index" ON "conversation" USING btree ("user_id","created_at" DESC NULLS LAST) WHERE "conversation"."deleted_at" is null;
