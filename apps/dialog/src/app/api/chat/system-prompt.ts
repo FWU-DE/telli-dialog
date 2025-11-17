@@ -1,6 +1,6 @@
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { dbGetCharacterById } from '@shared/db/functions/character';
-import { getUser } from '@/auth/utils';
+import { getUser, ObscuredFederalState } from '@/auth/utils';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { CustomGptModel } from '@shared/db/schema';
 import { constructWebsearchPrompt } from '../conversation/tools/websearch/prompt_templates';
@@ -142,7 +142,7 @@ export async function constructChatSystemPrompt({
   characterId?: string;
   customGptId?: string;
   isTeacher: boolean;
-  federalState: FederalStateModel;
+  federalState: ObscuredFederalState;
   websearchSources: WebsearchSource[];
   retrievedTextChunks?: Record<string, ChunkResult[]>;
 }) {
