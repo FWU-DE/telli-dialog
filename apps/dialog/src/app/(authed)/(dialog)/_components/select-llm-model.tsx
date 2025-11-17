@@ -8,12 +8,14 @@ type SelectLlmFormProps = {
   selectedModel: string | undefined;
   onValueChange(value: string): void;
   models: LlmModel[];
+  disabled?: boolean;
 };
 
 export default function SelectLlmModelForm({
   selectedModel,
   onValueChange,
   models,
+  disabled,
 }: SelectLlmFormProps) {
   const tCommon = useTranslations('common');
 
@@ -22,10 +24,13 @@ export default function SelectLlmModelForm({
   }
 
   return (
-    <Select.Root onValueChange={onValueChange} defaultValue={selectedModel}>
+    <Select.Root onValueChange={onValueChange} defaultValue={selectedModel} disabled={disabled}>
       <Select.Trigger
         aria-label={tCommon('llm-model')}
-        className="flex items-center justify-between w-full py-2 pl-4 pr-4 bg-white border border-gray-200 focus:border-primary rounded-enterprise-md focus:outline-none max-w-min min-w-max"
+        className={cn(
+          'flex items-center justify-between w-full py-2 pl-4 pr-4 bg-white border border-gray-200 focus:border-primary rounded-enterprise-md focus:outline-none max-w-min min-w-max',
+          disabled && 'bg-light-gray border-gray-100 text-gray-100',
+        )}
       >
         <Select.Value />
         <ChevronDownIcon aria-hidden="true" className="text-primary ms-2 w-4 h-2" />
