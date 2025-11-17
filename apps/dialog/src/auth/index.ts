@@ -14,7 +14,6 @@ declare module 'next-auth' {
     hasCompletedTraining?: boolean;
     sessionId?: string; // identifies the session for blocking list after backchannel logout
     idToken?: string; // needed for logout at identity provider (vidis)
-    version: number; // token version to invalidate old tokens if structure changed
   }
 }
 
@@ -87,7 +86,6 @@ const result = NextAuth({
       // This callback is called whenever a session is checked (i.e. on the client)
       // in order to pass properties to the client, copy them from token to the session
 
-      session.version = token.version as number;
       if (token?.sessionId) session.sessionId = token.sessionId as string;
       if (token?.id_token) session.idToken = token.id_token as string;
 
