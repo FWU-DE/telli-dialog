@@ -268,6 +268,7 @@ export default function CharacterForm({
             label={t('restriction-school')}
             checked={optimisticAccessLevel === 'school'}
             onCheckedChange={(value: boolean) => handleAccessLevelChange(value)}
+            disabled={readOnly}
           />
         </div>
       )}
@@ -280,6 +281,7 @@ export default function CharacterForm({
             handleAutoSave();
           }}
           models={models}
+          disabled={readOnly}
         />
       </div>
 

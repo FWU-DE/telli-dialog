@@ -111,6 +111,7 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
                 'resize-none',
                 borderErrorClass,
                 borderLongTextClass,
+                readOnly && 'text-gray-100',
               )}
               rows={rows}
               readOnly={readOnly}
@@ -143,6 +144,7 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
                 borderErrorClass,
                 borderLongTextClass,
                 counterVisible ? 'pr-14' : '',
+                readOnly && 'text-gray-100',
               )}
               readOnly={readOnly}
               {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
