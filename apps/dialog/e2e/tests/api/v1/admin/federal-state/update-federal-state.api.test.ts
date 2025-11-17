@@ -19,6 +19,13 @@ test('should update an existing federal state', async ({
       teacherPriceLimit: 1000,
       studentPriceLimit: 100,
       decryptedApiKey: 'test-api-key',
+      featureToggles: {
+        isStudentAccessEnabled: false,
+        isCharacterEnabled: false,
+        isSharedChatEnabled: false,
+        isCustomGptEnabled: false,
+        isShareTemplateWithSchoolEnabled: false,
+      },
     },
   });
   // Update

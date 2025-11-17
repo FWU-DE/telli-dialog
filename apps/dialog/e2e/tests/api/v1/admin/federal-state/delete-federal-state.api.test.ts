@@ -18,6 +18,13 @@ test('should delete an existing federal state', async ({
       teacherPriceLimit: 1000,
       studentPriceLimit: 100,
       decryptedApiKey: 'delete-api-key',
+      featureToggles: {
+        isStudentAccessEnabled: false,
+        isCharacterEnabled: false,
+        isSharedChatEnabled: false,
+        isCustomGptEnabled: false,
+        isShareTemplateWithSchoolEnabled: false,
+      },
     },
   });
   // Delete
