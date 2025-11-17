@@ -1,7 +1,7 @@
 import { encrypt } from '@shared/db/crypto';
 import {
   dbDeleteFederalState,
-  dbGetAllFederalStates,
+  dbGetFederalStates,
   dbGetFederalStateById,
   dbInsertFederalState,
 } from '@shared/db/functions/federal-state';
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 403 });
   }
 
-  const federalStates = await dbGetAllFederalStates();
+  const federalStates = await dbGetFederalStates();
 
   return NextResponse.json(
     {

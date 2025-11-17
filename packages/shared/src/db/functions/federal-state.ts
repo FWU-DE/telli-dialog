@@ -47,10 +47,6 @@ export async function dbGetFederalStates(): Promise<FederalStateSelectModel[]> {
   return db.select().from(federalStateTable);
 }
 
-export async function dbGetAllFederalStates() {
-  return db.select().from(federalStateTable);
-}
-
 export async function dbGetFederalState(id: string): Promise<FederalStateSelectModel> {
   const [federalState] = await db
     .select()
