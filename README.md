@@ -31,6 +31,20 @@ For local development spin up all required services using docker compose:
 docker compose -f devops/docker/docker-compose.local.yml up -d
 ```
 
+To remove all data and start from scratch, you can stop and remove the container and its volume.
+This will delete your database and keycloak configuration.
+
+```sh
+docker compose -f devops/docker/docker-compose.local.yml down -v
+```
+
+To delete only the keycloak data, shutdown all containers and delete the volume:
+
+```sh
+docker compose -f devops/docker/docker-compose.local.yml down
+docker volume rm telli_keycloak_data
+```
+
 ## Database
 
 Check that you can access the local postgresql database:
@@ -39,7 +53,7 @@ Check that you can access the local postgresql database:
 psql "postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db"
 ```
 
-If you start with a fresh database, apply migrations and seed the database, otherwise the application will not work.
+If you start with a fresh database, apply migrations and seed the database; otherwise the application will not work.
 
 Add api keys in your .env.local file for all federal states that you want to login with, e.g. DE_BY_API_KEY for bavaria.
 
@@ -55,12 +69,6 @@ You can now start the application from the root directory:
 
 ```sh
 pnpm dev
-```
-
-To remove the database and delete all its data, you can stop and remove the container and its volume:
-
-```sh
-docker compose -f devops/docker/docker-compose.local.yml down -v
 ```
 
 ## Valkey

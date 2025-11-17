@@ -33,6 +33,8 @@ services:
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      CLIENT_NAME: telli-dev-client
+      CLIENT_SECRET: ClientSecret
     entrypoint: /opt/keycloak/data/import/entrypoint.sh
     volumes:
       - keycloak_data:/opt/keycloak/data/h2

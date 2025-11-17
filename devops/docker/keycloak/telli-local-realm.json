@@ -386,8 +386,7 @@
           "containerId": "422b2097-b474-47d6-a4d1-0a173258a99a",
           "attributes": {}
         }
-      ],
-      "telli-dev-client": []
+      ]
     }
   },
   "groups": [],
@@ -706,8 +705,8 @@
     },
     {
       "id": "457e8171-4c0f-4fa6-b03e-a71003dedcf9",
-      "clientId": "telli-dev-client",
-      "name": "telli-dev-client",
+      "clientId": "${CLIENT_NAME}",
+      "name": "${CLIENT_NAME}",
       "description": "",
       "rootUrl": "",
       "adminUrl": "",
@@ -716,7 +715,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": true,
       "clientAuthenticatorType": "client-secret",
-      "secret": "3gbXPx7dELNCXfLgHgAfp5cqcNkTHfbH",
+      "secret": "${CLIENT_SECRET}",
       "redirectUris": ["http://localhost/*"],
       "webOrigins": ["http://localhost"],
       "notBefore": 0,
@@ -2655,5 +2654,151 @@
   },
   "clientPolicies": {
     "policies": []
-  }
+  },
+  "users": [
+    {
+      "username": "student",
+      "firstName": "Student",
+      "lastName": "Student",
+      "email": "student@example.com",
+      "attributes": {
+        "schulnummer": ["school1"],
+        "federal_state": ["DE-BY"],
+        "role": ["LERN"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher",
+      "firstName": "Teacher",
+      "lastName": "Teacher",
+      "email": "teacher@example.com",
+      "attributes": {
+        "schulnummer": ["school1"],
+        "federal_state": ["DE-BY"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher-bb",
+      "firstName": "Teacher",
+      "lastName": "Teacher",
+      "email": "teacher-bb@example.com",
+      "attributes": {
+        "schulnummer": ["school-bb"],
+        "federal_state": ["DE-BB"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher-bw",
+      "firstName": "Teacher",
+      "lastName": "Teacher",
+      "email": "teacher-bw@example.com",
+      "attributes": {
+        "schulnummer": ["school-bw"],
+        "federal_state": ["DE-BW"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher-sh",
+      "firstName": "Teacher",
+      "lastName": "Teacher",
+      "email": "teacher-sh@example.com",
+      "attributes": {
+        "schulnummer": ["school-sh"],
+        "federal_state": ["DE-SH"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher-sl",
+      "firstName": "Teacher",
+      "lastName": "Teacher",
+      "email": "teacher-sl@example.com",
+      "attributes": {
+        "schulnummer": ["school-sl"],
+        "federal_state": ["DE-SL"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher1-by",
+      "firstName": "Teacher",
+      "lastName": "Teacher",
+      "email": "teacher1-by@example.com",
+      "attributes": {
+        "schulnummer": ["school1-BY"],
+        "federal_state": ["DE-BY"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher2-by",
+      "firstName": "Teacher",
+      "lastName": "Teacher",
+      "email": "teacher2-by@example.com",
+      "attributes": {
+        "schulnummer": ["school1-BY"],
+        "federal_state": ["DE-BY"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    }
+  ]
 }
