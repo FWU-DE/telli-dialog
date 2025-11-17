@@ -435,7 +435,7 @@ export async function copyCharacter(
  * accessible across all schools.
  *
  * @param originalId - The ID of the source character to create a template from
- * @returns Promise resolving to the ID of the newly created character template
+ * @returns Promise resolving to the newly created character template object
  * @throws Error if source character is not found or template creation fails
  */
 async function createCharacterTemplate(originalId: string) {
