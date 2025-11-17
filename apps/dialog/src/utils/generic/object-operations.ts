@@ -1,4 +1,4 @@
-export function removeNullValues<T extends Record<string, unknown>>(
+export function removeNullishValues<T extends Record<string, unknown>>(
   obj: T | undefined,
 ): Partial<T> | undefined {
   if (obj === undefined) return undefined;

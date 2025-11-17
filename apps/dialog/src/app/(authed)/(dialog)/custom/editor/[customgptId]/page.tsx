@@ -10,7 +10,7 @@ import { z } from 'zod';
 import HeaderPortal from '../../../header-portal';
 import CustomGptForm from './custom-gpt-form';
 import { fetchFileMapping } from '../../actions';
-import { removeNullValues } from '@/utils/generic/object-operations';
+import { removeNullishValues } from '@/utils/generic/object-operations';
 import { CustomGptModel } from '@shared/db/schema';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
@@ -18,23 +18,6 @@ import { logError } from '@/utils/logging/logging';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
-
-async function getMaybeDefaultTemplateCustomGpt({
-  templateId,
-  customGptId,
-  userId,
-}: {
-  templateId?: string;
-  customGptId: string;
-  userId: string;
-}) {
-  if (templateId === undefined) return undefined;
-  return await dbGetCopyTemplateCustomGpt({
-    templateId,
-    customGptId: customGptId,
-    userId: userId,
-  });
-}
 
 const pageContextSchema = z.object({
   params: z.object({
@@ -52,45 +35,28 @@ export default async function Page(context: PageContext) {
   const { params, searchParams } = pageContextSchema.parse(await awaitPageContext(context));
 
   const isCreating = searchParams?.create === 'true';
-  const templateId = searchParams?.templateId;
 
   const user = await getUser();
-  const templateCustomGpt =
-    templateId !== undefined
-      ? await dbGetCustomGptById({
-          customGptId: templateId,
-        })
-      : undefined;
   const customGpt = await dbGetCustomGptById({ customGptId: params.customgptId });
   const relatedFiles = await fetchFileMapping(params.customgptId);
 
   if (!customGpt) {
     return notFound();
   }
-
-  const defaultTemplateCustomGpt = await getMaybeDefaultTemplateCustomGpt({
-    templateId: templateId,
-    customGptId: customGpt.id,
-    userId: user.id,
-  });
-
-  const copyOfTemplatePicture =
-    templateId !== undefined ? `custom-gpts/${customGpt.id}/avatar` : undefined;
-
   let maybeSignedPictureUrl: string | undefined;
   try {
     maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
-      key: customGpt.pictureId ?? copyOfTemplatePicture,
+      key: customGpt.pictureId,
     });
   } catch (e) {
     logError(
-      `Error getting signed picture URL (key: ${customGpt.pictureId ?? copyOfTemplatePicture}, customGpt id: ${customGpt.id}, template id: ${templateId})`,
+      `Error getting signed picture URL (key: ${customGpt.pictureId}, customGpt id: ${customGpt.id}, template id: ${searchParams?.templateId})`,
       e,
     );
   }
 
   const readOnly = customGpt.userId !== user.id;
-  const links = customGpt.attachedLinks.concat(templateCustomGpt?.attachedLinks || []);
+  const links = customGpt.attachedLinks;
   const initialLinks = PREFETCH_ENABLED
     ? await Promise.all(links.filter((l) => l !== '').map((url) => webScraperExecutable(url)))
     : links
@@ -104,11 +70,6 @@ export default async function Page(context: PageContext) {
             }) as WebsearchSource,
         );
 
-  const mergedCustomGpt = {
-    ...removeNullValues(customGpt),
-    ...removeNullValues(defaultTemplateCustomGpt),
-  } as CustomGptModel;
-
   return (
     <div className="min-w-full p-6 overflow-auto">
       <HeaderPortal>
@@ -118,14 +79,13 @@ export default async function Page(context: PageContext) {
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
         <CustomGptForm
-          {...mergedCustomGpt}
+          {...(removeNullishValues(customGpt) as CustomGptModel)}
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           isCreating={isCreating}
           readOnly={readOnly}
           userRole={user.school.userRole}
           initialLinks={initialLinks}
           existingFiles={relatedFiles}
-          templateCustomGptId={templateId}
         />
       </div>
     </div>

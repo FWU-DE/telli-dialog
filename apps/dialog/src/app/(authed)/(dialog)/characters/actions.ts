@@ -8,7 +8,7 @@ import { copyFileInS3 } from '@shared/s3';
 import { generateUUID } from '@/utils/uuid';
 import { eq } from 'drizzle-orm';
 import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
-import { copyRelatedTemplateFiles } from '@shared/services/templateService';
+import { copyRelatedTemplateFiles, copyCharacter } from '@shared/services/templateService';
 
 export async function createNewCharacterAction({
   modelId: _modelId,
@@ -20,8 +20,40 @@ export async function createNewCharacterAction({
   templateId?: string;
 }) {
   const user = await getUser();
+  if (templateId !== undefined) {
+    let insertedCharacter = await copyCharacter(
+      templateId,
+      'private',
+      user.id,
+      user.school?.id ?? null,
+    );
 
-  // Generate uuid before hand to avoid two db transactions for create and imediate update
+    if (templatePictureId !== undefined) {
+      const copyOfTemplatePicture = `characters/${insertedCharacter.id}/avatar`;
+      await copyFileInS3({
+        newKey: copyOfTemplatePicture,
+        copySource: templatePictureId,
+      });
+
+      // Update the character with the new picture
+      const updatedCharacter = (
+        await db
+          .update(characterTable)
+          .set({ pictureId: copyOfTemplatePicture })
+          .where(eq(characterTable.id, insertedCharacter.id))
+          .returning()
+      )[0];
+
+      if (updatedCharacter) {
+        insertedCharacter = updatedCharacter;
+      }
+    }
+
+    await copyRelatedTemplateFiles('character', templateId, insertedCharacter.id);
+    return insertedCharacter;
+  }
+
+  // Generate uuid before hand to avoid two db transactions for create and immediate update
   const characterId = generateUUID();
   let copyOfTemplatePicture;
   if (templatePictureId !== undefined) {
@@ -57,10 +89,6 @@ export async function createNewCharacterAction({
 
   if (insertedCharacter === undefined) {
     throw Error('Could not create a new character');
-  }
-
-  if (templateId !== undefined) {
-    await copyRelatedTemplateFiles('character', templateId, insertedCharacter.id);
   }
 
   return insertedCharacter;

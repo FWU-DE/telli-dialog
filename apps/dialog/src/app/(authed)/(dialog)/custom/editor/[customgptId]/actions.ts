@@ -5,7 +5,7 @@ import { CharacterAccessLevel, CustomGptInsertModel, customGptTable } from '@sha
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
 import { dbDeleteCustomGptByIdAndUserId } from '@shared/db/functions/custom-gpts';
-import { removeNullValues } from '@/utils/generic/object-operations';
+import { removeNullishValues } from '@/utils/generic/object-operations';
 
 export async function updateCustomGptAccessLevelAction({
   gptId: gptId,
@@ -64,7 +64,7 @@ export async function updateCustomGptAction({
 }: Partial<CustomGptInsertModel> & { gptId: string }) {
   const user = await getUser();
 
-  const cleanedCustomGpt = removeNullValues(customGpt);
+  const cleanedCustomGpt = removeNullishValues(customGpt);
   if (cleanedCustomGpt === undefined) return;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { id, createdAt, ...updatableProps } = cleanedCustomGpt;

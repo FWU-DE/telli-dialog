@@ -1,10 +1,7 @@
 import { getUser } from '@/auth/utils';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import {
-  dbGetCharacterByIdWithShareData,
-  dbGetCopyTemplateCharacter,
-} from '@shared/db/functions/character';
+import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
@@ -12,34 +9,15 @@ import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import HeaderPortal from '../../../header-portal';
 import CharacterForm from './character-form';
-import { removeNullValues } from '@/utils/generic/object-operations';
+import { removeNullishValues } from '@/utils/generic/object-operations';
 import { CharacterModel } from '@shared/db/schema';
 import { fetchFileMapping } from '../../actions';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
-import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { logError } from '@/utils/logging/logging';
-import { duplicateFileWithEmbeddings, linkFileToCharacter } from '@shared/services/fileService';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
-
-async function getMaybeDefaultTemplateCharater({
-  templateId,
-  characterId,
-  userId,
-}: {
-  templateId?: string;
-  characterId: string;
-  userId: string;
-}) {
-  if (templateId === undefined) return undefined;
-  return await dbGetCopyTemplateCharacter({
-    templateId,
-    characterId: characterId,
-    userId: userId,
-  });
-}
 
 const pageContextSchema = z.object({
   params: z.object({
@@ -58,31 +36,13 @@ export default async function Page(context: PageContext) {
   if (!result.success) notFound();
   const { params, searchParams } = result.data;
   const isCreating = searchParams?.create === 'true';
-  const templateId = searchParams?.templateId;
   const user = await getUser();
-
-  const templateCharacter =
-    templateId !== undefined
-      ? await dbGetCharacterByIdWithShareData({
-          characterId: templateId,
-          userId: user.id,
-        })
-      : undefined;
 
   const character = await dbGetCharacterByIdWithShareData({
     characterId: params.characterId,
     userId: user.id,
   });
   if (character === undefined) return notFound();
-
-  const defaultTemplateCharacter = await getMaybeDefaultTemplateCharater({
-    templateId: templateId,
-    characterId: character.id,
-    userId: user.id,
-  });
-  const copyOfTemplatePicture =
-    templateId !== undefined ? `characters/${character.id}/avatar` : undefined;
-
   const relatedFiles = await fetchFileMapping(params.characterId);
   if (!character) {
     return notFound();
@@ -91,16 +51,16 @@ export default async function Page(context: PageContext) {
   let maybeSignedPictureUrl: string | undefined;
   try {
     maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
-      key: character.pictureId ?? copyOfTemplatePicture,
+      key: character.pictureId,
     });
   } catch (e) {
     logError(
-      `Error getting signed picture URL (key: ${character.pictureId ?? copyOfTemplatePicture}, character id: ${character.id}, template id: ${templateId})`,
+      `Error getting signed picture URL (key: ${character.pictureId}, character id: ${character.id}, template id: ${searchParams?.templateId})`,
       e,
     );
   }
 
-  const links = character.attachedLinks.concat(templateCharacter?.attachedLinks || []);
+  const links = character.attachedLinks;
 
   const initialLinks = PREFETCH_ENABLED
     ? await Promise.all(links.filter((l) => l !== '').map((url) => webScraperExecutable(url)))
@@ -115,12 +75,6 @@ export default async function Page(context: PageContext) {
             }) as WebsearchSource,
         );
 
-  const mergedCharacter = {
-    ...removeNullValues(character),
-    ...removeNullValues(defaultTemplateCharacter),
-    modelId: character.modelId,
-  } as CharacterModel;
-
   return (
     <div className="min-w-full p-6 overflow-auto">
       <HeaderPortal>
@@ -130,14 +84,13 @@ export default async function Page(context: PageContext) {
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
         <CharacterForm
-          {...mergedCharacter}
+          {...(removeNullishValues(character) as CharacterModel)}
           pictureId={character.pictureId}
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           isCreating={isCreating}
           existingFiles={relatedFiles}
           initialLinks={initialLinks}
           readOnly={readOnly}
-          templateCharacterId={templateId}
         />
       </div>
     </div>

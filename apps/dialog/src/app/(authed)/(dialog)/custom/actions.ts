@@ -7,7 +7,7 @@ import { CustomGptFileMapping, customGptTable, FileModel, fileTable } from '@sha
 import { copyFileInS3 } from '@shared/s3';
 import { generateUUID } from '@/utils/uuid';
 import { eq } from 'drizzle-orm';
-import { copyRelatedTemplateFiles } from '@shared/services/templateService';
+import { copyRelatedTemplateFiles, copyCustomGpt } from '@shared/services/templateService';
 
 export async function createNewCustomGptAction({
   templatePictureId,
@@ -17,17 +17,36 @@ export async function createNewCustomGptAction({
   templateId?: string;
 } = {}) {
   const user = await getUser();
+  if (templateId !== undefined) {
+    let insertedCustomGpt = await copyCustomGpt(templateId, 'private', user.id, user.school.id);
+
+    if (templatePictureId !== undefined) {
+      const copyOfTemplatePicture = `custom-gpts/${insertedCustomGpt.id}/avatar`;
+      await copyFileInS3({
+        newKey: copyOfTemplatePicture,
+        copySource: templatePictureId,
+      });
+
+      // Update the custom GPT with the new picture
+      const updatedCustomGpt = (
+        await db
+          .update(customGptTable)
+          .set({ pictureId: copyOfTemplatePicture })
+          .where(eq(customGptTable.id, insertedCustomGpt.id))
+          .returning()
+      )[0];
+
+      if (updatedCustomGpt) {
+        insertedCustomGpt = updatedCustomGpt;
+      }
+    }
+
+    await copyRelatedTemplateFiles('custom-gpt', templateId, insertedCustomGpt.id);
+    return insertedCustomGpt;
+  }
 
   const customGptId = generateUUID();
 
-  let copyOfTemplatePicture;
-  if (templatePictureId !== undefined) {
-    copyOfTemplatePicture = `custom-gpts/${customGptId}/avatar`;
-    await copyFileInS3({
-      newKey: copyOfTemplatePicture,
-      copySource: templatePictureId,
-    });
-  }
   const insertedCustomGpt = (
     await db
       .insert(customGptTable)
@@ -40,17 +59,12 @@ export async function createNewCustomGptAction({
         description: '',
         specification: '',
         promptSuggestions: [],
-        pictureId: copyOfTemplatePicture,
       })
       .returning()
   )[0];
 
   if (insertedCustomGpt === undefined) {
     throw Error('Could not create a new CustomGpt');
-  }
-
-  if (templateId !== undefined) {
-    await copyRelatedTemplateFiles('custom-gpt', templateId, insertedCustomGpt.id);
   }
 
   return insertedCustomGpt;

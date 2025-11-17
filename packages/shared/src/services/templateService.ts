@@ -1,6 +1,7 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '@shared/db';
 import {
+  CharacterAccessLevel,
   characterTable,
   characterTemplateMappingTable,
   customGptTable,
@@ -270,19 +271,19 @@ export async function createTemplateFromUrl(url: string): Promise<string> {
   const { templateType, originalId } = parseTemplateUrl(url);
 
   try {
-    let newTemplateId: string;
+    let newTemplate;
 
     if (templateType === 'character') {
-      newTemplateId = await createCharacterTemplate(originalId);
+      newTemplate = await createCharacterTemplate(originalId);
     } else {
       // Handle custom GPT template creation
-      newTemplateId = await createCustomGptTemplate(originalId);
+      newTemplate = await createCustomGptTemplate(originalId);
     }
 
     // Copy associated files
-    await copyRelatedTemplateFiles(templateType, originalId, newTemplateId);
+    await copyRelatedTemplateFiles(templateType, originalId, newTemplate.id);
 
-    return newTemplateId;
+    return newTemplate.id;
   } catch (error) {
     console.error('Error creating template from URL:', error);
     throw new Error(error instanceof Error ? error.message : 'Fehler beim Erstellen der Vorlage');
@@ -334,15 +335,23 @@ export async function copyRelatedTemplateFiles(
 }
 
 /**
- * Creates a new global custom GPT template based on an existing custom GPT.
- * The new template inherits all properties from the source but becomes a global template
- * accessible across all schools.
+ * Copies a custom GPT and creates a new one based on an existing custom GPT.
+ * The new custom GPT inherits all properties from the source but can have customized
+ * access level, user, and school assignments.
  *
- * @param originalId - The ID of the source custom GPT to create a template from
- * @returns Promise resolving to the ID of the newly created custom GPT template
- * @throws Error if source custom GPT is not found or template creation fails
+ * @param originalId - The ID of the source custom GPT to copy
+ * @param accessLevel - The access level for the new custom GPT
+ * @param userId - The user ID to assign to the new custom GPT
+ * @param schoolId - The school ID to assign to the new custom GPT
+ * @returns Promise resolving to the newly created custom GPT object
+ * @throws Error if source custom GPT is not found or custom GPT creation fails
  */
-async function createCustomGptTemplate(originalId: string) {
+export async function copyCustomGpt(
+  originalId: string,
+  accessLevel: CharacterAccessLevel,
+  userId: string,
+  schoolId: string | null,
+) {
   const sourceCustomGpt = await dbGetCustomGptById({ customGptId: originalId });
   if (!sourceCustomGpt) {
     throw new Error('Assistent nicht gefunden');
@@ -352,30 +361,51 @@ async function createCustomGptTemplate(originalId: string) {
     ...sourceCustomGpt,
     id: undefined,
     originalCustomGptId: originalId,
-    accessLevel: 'global' as const,
-    userId: DUMMY_USER_ID,
-    schoolId: null,
+    accessLevel,
+    userId,
+    schoolId,
     isDeleted: false,
   };
 
   const result = await dbUpsertCustomGpt({ customGpt: newCustomGpt });
   const customGptId = result?.id;
   if (!customGptId) {
-    throw new Error('Fehler beim Erstellen der Assistenten-Vorlage');
+    throw new Error('Fehler beim Erstellen des Assistenten');
   }
-  return customGptId;
+  return result;
 }
 
 /**
- * Creates a new global character template based on an existing character.
+ * Creates a new global custom GPT template based on an existing custom GPT.
  * The new template inherits all properties from the source but becomes a global template
  * accessible across all schools.
  *
- * @param originalId - The ID of the source character to create a template from
- * @returns Promise resolving to the ID of the newly created character template
- * @throws Error if source character is not found or template creation fails
+ * @param originalId - The ID of the source custom GPT to create a template from
+ * @returns Promise resolving to the newly created custom GPT template object
+ * @throws Error if source custom GPT is not found or template creation fails
  */
-async function createCharacterTemplate(originalId: string) {
+async function createCustomGptTemplate(originalId: string) {
+  return copyCustomGpt(originalId, 'global', DUMMY_USER_ID, null);
+}
+
+/**
+ * Copies a character and creates a new one based on an existing character.
+ * The new character inherits all properties from the source but can have customized
+ * access level, user, and school assignments.
+ *
+ * @param originalId - The ID of the source character to copy
+ * @param accessLevel - The access level for the new character
+ * @param userId - The user ID to assign to the new character
+ * @param schoolId - The school ID to assign to the new character
+ * @returns Promise resolving to the newly created character object
+ * @throws Error if source character is not found or character creation fails
+ */
+export async function copyCharacter(
+  originalId: string,
+  accessLevel: CharacterAccessLevel,
+  userId: string,
+  schoolId: string | null,
+) {
   const sourceCharacter = await dbGetCharacterById({ characterId: originalId });
   if (!sourceCharacter) {
     throw new Error('Dialogpartner nicht gefunden');
@@ -385,16 +415,29 @@ async function createCharacterTemplate(originalId: string) {
     ...sourceCharacter,
     id: undefined,
     originalCharacterId: originalId,
-    accessLevel: 'global' as const,
-    userId: DUMMY_USER_ID,
-    schoolId: null,
+    accessLevel,
+    userId,
+    schoolId,
     isDeleted: false,
   };
 
   const result = await dbCreateCharacter(newCharacter, DEFAULT_CHAT_MODEL);
-  const characterId = result?.[0]?.id;
-  if (!characterId) {
-    throw new Error('Fehler beim Erstellen der Dialogpartner-Vorlage');
+  const character = result?.[0];
+  if (!character) {
+    throw new Error('Fehler beim Erstellen des Dialogpartners');
   }
-  return characterId;
+  return character;
+}
+
+/**
+ * Creates a new global character template based on an existing character.
+ * The new template inherits all properties from the source but becomes a global template
+ * accessible across all schools.
+ *
+ * @param originalId - The ID of the source character to create a template from
+ * @returns Promise resolving to the newly created character template object
+ * @throws Error if source character is not found or template creation fails
+ */
+async function createCharacterTemplate(originalId: string) {
+  return copyCharacter(originalId, 'global', DUMMY_USER_ID, null);
 }
