@@ -36,7 +36,6 @@ export default async function Page(context: PageContext) {
   if (!result.success) notFound();
   const { params, searchParams } = result.data;
   const isCreating = searchParams?.create === 'true';
-  const templateId = searchParams?.templateId;
   const user = await getUser();
 
   const character = await dbGetCharacterByIdWithShareData({
@@ -56,7 +55,7 @@ export default async function Page(context: PageContext) {
     });
   } catch (e) {
     logError(
-      `Error getting signed picture URL (key: ${character.pictureId}, character id: ${character.id}, template id: ${templateId})`,
+      `Error getting signed picture URL (key: ${character.pictureId}, character id: ${character.id}, template id: ${searchParams?.templateId})`,
       e,
     );
   }

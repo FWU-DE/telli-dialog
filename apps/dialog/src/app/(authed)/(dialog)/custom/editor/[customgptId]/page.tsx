@@ -35,7 +35,6 @@ export default async function Page(context: PageContext) {
   const { params, searchParams } = pageContextSchema.parse(await awaitPageContext(context));
 
   const isCreating = searchParams?.create === 'true';
-  const templateId = searchParams?.templateId; // Only for logging purposes
 
   const user = await getUser();
   const customGpt = await dbGetCustomGptById({ customGptId: params.customgptId });
@@ -51,7 +50,7 @@ export default async function Page(context: PageContext) {
     });
   } catch (e) {
     logError(
-      `Error getting signed picture URL (key: ${customGpt.pictureId}, customGpt id: ${customGpt.id}, template id: ${templateId})`,
+      `Error getting signed picture URL (key: ${customGpt.pictureId}, customGpt id: ${customGpt.id}, template id: ${searchParams?.templateId})`,
       e,
     );
   }
