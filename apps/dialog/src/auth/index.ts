@@ -19,7 +19,6 @@ declare module 'next-auth' {
 }
 
 const SESSION_LIFETIME_SECONDS = 60 * 60 * 8;
-const TOKEN_VERSION = 1;
 
 const result = NextAuth({
   providers: [vidisConfig, mockVidisConfig, credentialsProvider],
@@ -53,12 +52,6 @@ const result = NextAuth({
         ) {
           // This function can throw an error if the return type does not match our schema
           token = await handleVidisJWTCallback({ account, profile, token });
-          token.version = TOKEN_VERSION;
-        }
-        // invalidate old tokens
-        if ((token.version as number) < TOKEN_VERSION) {
-          logInfo('Token version changed, returning null token');
-          return null;
         }
 
         // Ensure userId is set for credentials provider
