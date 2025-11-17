@@ -4,10 +4,18 @@ import { db } from '@shared/db';
 import { federalStateTable } from '@shared/db/schema';
 import { eq } from 'drizzle-orm';
 
+const featureToggleDefaults = {
+  isStudentAccessEnabled: true,
+  isCharacterEnabled: true,
+  isCustomGptEnabled: true,
+  isSharedChatEnabled: true,
+  isShareTemplateWithSchoolEnabled: true,
+};
+
 test('login as student with students disabled', async ({ page }) => {
   await db
     .update(federalStateTable)
-    .set({ studentAccess: false })
+    .set({ featureToggles: { ...featureToggleDefaults, isStudentAccessEnabled: false } })
     .where(eq(federalStateTable.id, 'DE-BY'));
 
   await login(page, 'student');
@@ -16,14 +24,14 @@ test('login as student with students disabled', async ({ page }) => {
 
   await db
     .update(federalStateTable)
-    .set({ studentAccess: true })
+    .set({ featureToggles: { ...featureToggleDefaults, isStudentAccessEnabled: true } })
     .where(eq(federalStateTable.id, 'DE-BY'));
 });
 
 test('login as student with students enabled', async ({ page }) => {
   await db
     .update(federalStateTable)
-    .set({ studentAccess: true })
+    .set({ featureToggles: { ...featureToggleDefaults, isStudentAccessEnabled: true } })
     .where(eq(federalStateTable.id, 'DE-BY'));
 
   await login(page, 'student');

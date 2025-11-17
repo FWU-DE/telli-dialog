@@ -2,6 +2,7 @@ import test, { APIRequestContext, expect } from '@playwright/test';
 import { authorizationHeader } from '../../../../../utils/authorizationHeader';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 import { cnanoid } from '@telli/shared/services/randomService';
+import { FederalStateInsertModel } from '@shared/db/schema';
 
 const federalStateRoute = '/api/v1/admin/federal-states';
 
@@ -19,6 +20,13 @@ test('should create a new federal state with correct default values', async ({
       teacherPriceLimit: 1000,
       studentPriceLimit: 100,
       decryptedApiKey: 'test-api-key',
+      featureToggles: {
+        isStudentAccessEnabled: false,
+        isCharacterEnabled: false,
+        isSharedChatEnabled: false,
+        isCustomGptEnabled: false,
+        isShareTemplateWithSchoolEnabled: false,
+      },
     },
   });
   expect(response.ok()).toBeTruthy();
@@ -27,11 +35,7 @@ test('should create a new federal state with correct default values', async ({
     id,
     chatStorageTime: 120,
     designConfiguration: null,
-    enableCharacter: true,
-    enableCustomGpt: true,
-    enableSharedChats: true,
     mandatoryCertificationTeacher: false,
-    studentAccess: true,
     studentPriceLimit: 100,
     supportContacts: null,
     teacherPriceLimit: 1000,
@@ -55,12 +59,15 @@ test('should create a new federal state with all values set', async ({
     chatStorageTime: 90,
     supportContacts: ['help@support.com'],
     trainingLink: 'https://help.me',
-    studentAccess: false,
-    enableCharacter: false,
-    enableSharedChats: false,
-    enableCustomGpt: false,
     designConfiguration: DEFAULT_DESIGN_CONFIGURATION,
     telliName: 'myTelliName',
+    featureToggles: {
+      isStudentAccessEnabled: false,
+      isCharacterEnabled: false,
+      isSharedChatEnabled: false,
+      isCustomGptEnabled: false,
+      isShareTemplateWithSchoolEnabled: false,
+    },
   };
 
   const response = await request.post(federalStateRoute, {
@@ -77,12 +84,15 @@ test('should create a new federal state with all values set', async ({
     chatStorageTime: 90,
     supportContacts: ['help@support.com'],
     trainingLink: 'https://help.me',
-    studentAccess: false,
-    enableCharacter: false,
-    enableSharedChats: false,
-    enableCustomGpt: false,
     designConfiguration: DEFAULT_DESIGN_CONFIGURATION,
     telliName: 'myTelliName',
+    featureToggles: {
+      isStudentAccessEnabled: false,
+      isCharacterEnabled: false,
+      isSharedChatEnabled: false,
+      isCustomGptEnabled: false,
+      isShareTemplateWithSchoolEnabled: false,
+    },
   });
 });
 
@@ -114,6 +124,13 @@ test('should return 409 if federal state with same id already exists', async ({
     teacherPriceLimit: 1000,
     studentPriceLimit: 100,
     decryptedApiKey: 'test-api-key',
+    featureToggles: {
+      isStudentAccessEnabled: false,
+      isCharacterEnabled: false,
+      isSharedChatEnabled: false,
+      isCustomGptEnabled: false,
+      isShareTemplateWithSchoolEnabled: false,
+    },
   };
   // First creation
   await request.post(federalStateRoute, {

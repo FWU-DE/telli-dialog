@@ -1,14 +1,8 @@
 'use client';
 import { Button } from '@ui/components/Button';
-import {
-  FederalState,
-  FederalStateEdit,
-  FederalStateEditSchema,
-} from '../../../../types/federal-state';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { updateFederalState } from '../../../../services/federal-states-service';
-import { DesignConfigurationSchema } from '@ui/types/design-configuration';
+import { updateFederalState } from '@shared/services/federal-state-service';
 import {
   Card,
   CardAction,
@@ -21,28 +15,55 @@ import { FormField } from '@ui/components/form/FormField';
 import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
 import { FormFieldArray } from '../../../../components/form/FormFieldArray';
 import { toast } from 'sonner';
+import z from 'zod';
+import { FederalStateModel, federalStateSchema } from '@shared/types/federal-state';
+import { DesignConfigurationSchema } from '@ui/types/design-configuration';
+import { useEffect, useState } from 'react';
 
 export type FederalStateViewProps = {
-  federalState: FederalState;
+  federalState: FederalStateModel;
 };
 
+export const federalStateEditFormSchema = federalStateSchema.extend({
+  supportContacts: z.array(
+    z.object({
+      value: z.string(),
+    }),
+  ),
+  designConfiguration: z.string(), // Will be parsed as JSON before submitting
+});
+
+export type FederalStateEditForm = z.infer<typeof federalStateEditFormSchema>;
+
+// Parse string as designConfiguration if not empty, otherwise set to null
+function parseAsDesignConfiguration(value: string) {
+  if (!value || value.trim() === '') {
+    return null;
+  }
+  return DesignConfigurationSchema.parse(JSON.parse(value));
+}
+
+function transformToFederalStateEditForm(federalState: FederalStateModel): FederalStateEditForm {
+  return {
+    ...federalState,
+    supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
+    telliName: federalState.telliName ?? '',
+    trainingLink: federalState.trainingLink ?? '',
+    designConfiguration: federalState.designConfiguration
+      ? JSON.stringify(federalState.designConfiguration, null, 2)
+      : '',
+  };
+}
+
 export function FederalStateView(props: FederalStateViewProps) {
+  const [formData, setFormData] = useState<FederalStateEditForm>(
+    transformToFederalStateEditForm(props.federalState),
+  );
   const federalState = props.federalState;
 
-  const form = useForm<FederalStateEdit>({
-    resolver: zodResolver(FederalStateEditSchema),
-    defaultValues: {
-      ...federalState,
-      // react-hook-form does not support array of primitives, so we map to array of objects
-      supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
-      // all null values must be converted to empty string
-      telliName: federalState.telliName ?? '',
-      trainingLink: federalState.trainingLink ?? '',
-      // designConfiguration is stringified for the textarea
-      designConfiguration: federalState.designConfiguration
-        ? JSON.stringify(federalState.designConfiguration, null, 2)
-        : '',
-    },
+  const form = useForm<FederalStateEditForm>({
+    resolver: zodResolver(federalStateEditFormSchema),
+    defaultValues: transformToFederalStateEditForm(federalState),
   });
 
   // Destructuring is necessary, otherwise formState is not updated correctly
@@ -50,37 +71,39 @@ export function FederalStateView(props: FederalStateViewProps) {
   const {
     control,
     formState: { isValid, errors, isDirty },
+    reset,
   } = form;
 
-  async function onSubmit(data: FederalStateEdit) {
+  async function onSubmit(data: FederalStateEditForm) {
     if (!isValid) {
       toast.error('Das Formular enthält ungültige Werte.');
       return;
     }
-    try {
-      // Parse designConfiguration as JSON if not empty, otherwise set to null
-      let parsedDesignConfiguration = null;
-      if (data.designConfiguration && data.designConfiguration.trim() !== '') {
-        try {
-          parsedDesignConfiguration = DesignConfigurationSchema.parse(
-            JSON.parse(data.designConfiguration),
-          );
-        } catch {
-          toast.error('Fehler: designConfiguration ist nicht im korrekten Format');
-          return;
-        }
-      }
 
-      await updateFederalState({
+    let parsedDesignConfiguration = null;
+    try {
+      parsedDesignConfiguration = parseAsDesignConfiguration(data.designConfiguration);
+    } catch {
+      toast.error('Fehler: designConfiguration ist nicht im korrekten Format');
+      return;
+    }
+
+    try {
+      const updatedValues = await updateFederalState({
         ...data,
         supportContacts: data.supportContacts.map((s) => s.value),
-        designConfiguration: data.designConfiguration === '' ? null : parsedDesignConfiguration,
+        designConfiguration: parsedDesignConfiguration,
       });
+      setFormData(transformToFederalStateEditForm(updatedValues));
       toast.success('Bundesland erfolgreich aktualisiert');
     } catch {
       toast.error('Fehler beim Aktualisieren des Bundeslands');
     }
   }
+
+  useEffect(() => {
+    reset({ ...formData });
+  }, [formData, reset]);
 
   return (
     <Card>
@@ -132,13 +155,6 @@ export function FederalStateView(props: FederalStateViewProps) {
             type="number"
           />
 
-          <FormFieldCheckbox
-            name="studentAccess"
-            label="Zugriff für Lernende erlaubt?"
-            description="Erlaubt den Zugriff auch für Lernende."
-            control={control}
-          />
-
           <FormField
             name="studentPriceLimit"
             label="Preislimit für Lernende"
@@ -177,22 +193,37 @@ export function FederalStateView(props: FederalStateViewProps) {
           />
 
           <FormFieldCheckbox
-            name="enableCharacter"
+            name="featureToggles.isStudentAccessEnabled"
+            label="Zugriff für Lernende erlaubt?"
+            description="Erlaubt den Zugriff auch für Lernende."
+            control={control}
+          />
+
+          <FormFieldCheckbox
+            name="featureToggles.isCharacterEnabled"
             label="Aktiviere Dialogpartner"
             description="Schaltet die Verwendung von Dialogpartnern frei."
             control={control}
           />
 
           <FormFieldCheckbox
-            name="enableCustomGpt"
+            name="featureToggles.isCustomGptEnabled"
             label="Aktiviere Assistenten"
             description="Schaltet die Verwendung von Assistenten frei."
             control={control}
           />
+
           <FormFieldCheckbox
-            name="enableSharedChats"
+            name="featureToggles.isSharedChatEnabled"
             label="Lernszenarien aktivieren"
             description="Schaltet die Verwendung von Lernszenarien frei."
+            control={control}
+          />
+
+          <FormFieldCheckbox
+            name="featureToggles.isShareTemplateWithSchoolEnabled"
+            label="Vorlage mit Schule teilen aktivieren"
+            description="Schaltet die Möglichkeit frei, Vorlagen mit allen Benutzern einer Schule zu teilen."
             control={control}
           />
 

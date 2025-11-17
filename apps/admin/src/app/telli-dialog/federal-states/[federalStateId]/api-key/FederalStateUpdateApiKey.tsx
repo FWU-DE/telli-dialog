@@ -8,17 +8,18 @@ import {
   CardHeader,
   CardTitle,
 } from '@ui/components/Card';
-import { FederalState } from '../../../../../types/federal-state';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
-import { patchApiKey } from '../../../../../services/federal-states-service';
 import { FormField } from '@ui/components/form/FormField';
 import { Button } from '@ui/components/Button';
 import { toast } from 'sonner';
+import { FederalStateModel } from '@shared/types/federal-state';
+import { updateApiKey } from '@shared/services/federal-state-service';
 
 export type FederalStateUpdateApiKeyProps = {
-  federalState: FederalState;
+  federalState: FederalStateModel;
 };
 
 const patchApiKeySchema = z.object({
@@ -45,7 +46,7 @@ export function FederalStateUpdateApiKey(props: FederalStateUpdateApiKeyProps) {
 
   async function onSubmit(data: PatchApiKey) {
     try {
-      await patchApiKey(federalState.id, data.decryptedApiKey);
+      await updateApiKey(federalState.id, data.decryptedApiKey);
       reset();
       toast.success('API Key erfolgreich aktualisiert.');
     } catch {

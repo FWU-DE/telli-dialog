@@ -6,6 +6,7 @@ import { getUserAndContextByUserId } from './utils';
 import { UserAndContext } from './types';
 import { logError, logInfo } from '@/utils/logging/logging';
 import { sessionBlockList } from './session';
+import { consoleLoggingIntegration } from '@sentry/nextjs';
 
 declare module 'next-auth' {
   interface Session {
@@ -51,6 +52,7 @@ const result = NextAuth({
           // This function can throw an error if the return type does not match our schema
           token = await handleVidisJWTCallback({ account, profile, token });
         }
+
         // Ensure userId is set for credentials provider
         if (account?.provider === 'credentials' && user?.id) {
           token.userId = user.id;
@@ -58,7 +60,11 @@ const result = NextAuth({
         if (trigger === 'update') {
           token.user = await getUserAndContextByUserId({ userId: token.userId as string });
         }
-        if (token.user === undefined || (token.user as UserAndContext).school === undefined) {
+        if (
+          token.user === undefined ||
+          (token.user as UserAndContext).school === undefined ||
+          (token.user as UserAndContext).federalState.featureToggles === undefined // temporary fix because of structural change in federalState.featureToggles
+        ) {
           token.user = await getUserAndContextByUserId({ userId: token.userId as string });
         }
         if (profile?.sid) {

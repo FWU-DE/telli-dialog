@@ -45,6 +45,7 @@ import { AttachedLinks } from '@/components/forms/attached-links';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { formLinks } from '@/utils/web-search/form-links';
 import FileManagement from '@/components/forms/file-management';
+import { useFederalState } from '@/components/providers/federal-state-provider';
 
 type CharacterFormProps = CharacterModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -88,6 +89,7 @@ export default function CharacterForm({
 }: CharacterFormProps) {
   const router = useRouter();
   const toast = useToast();
+  const federalState = useFederalState();
 
   const { models } = useLlmModels();
   const maybeDefaultModelId =
@@ -260,13 +262,15 @@ export default function CharacterForm({
   const generalSettings = (
     <fieldset className="mt-16 flex flex-col gap-8">
       <h2 className="font-medium mb-2">{t('general-settings')}</h2>
-      <div className="flex gap-4">
-        <Checkbox
-          label={t('restriction-school')}
-          checked={optimisticAccessLevel === 'school'}
-          onCheckedChange={(value: boolean) => handleAccessLevelChange(value)}
-        />
-      </div>
+      {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
+        <div className="flex gap-4">
+          <Checkbox
+            label={t('restriction-school')}
+            checked={optimisticAccessLevel === 'school'}
+            onCheckedChange={(value: boolean) => handleAccessLevelChange(value)}
+          />
+        </div>
+      )}
       <div className="flex flex-col gap-4">
         <label className={labelClassName}>{tCommon('llm-model')}</label>
         <SelectLlmModelForm

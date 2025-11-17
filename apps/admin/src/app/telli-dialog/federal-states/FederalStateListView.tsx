@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { fetchFederalStates } from '../../../services/federal-states-service';
+import { getFederalStates } from '@shared/services/federal-state-service';
 import {
   Table,
   TableBody,
@@ -11,7 +11,7 @@ import {
 import { ROUTES } from '../../../consts/routes';
 
 export default async function FederalStateListView() {
-  const federalStates = await fetchFederalStates();
+  const federalStates = await getFederalStates();
 
   return (
     <div>
@@ -29,7 +29,7 @@ export default async function FederalStateListView() {
             <TableRow key={federalState.id}>
               <TableCell>{federalState.id}</TableCell>
               <TableCell>{federalState.telliName}</TableCell>
-              <TableCell>{federalState.createdAt}</TableCell>
+              <TableCell>{federalState.createdAt.toLocaleString()}</TableCell>
               <TableCell>
                 <Link
                   key={federalState.id}

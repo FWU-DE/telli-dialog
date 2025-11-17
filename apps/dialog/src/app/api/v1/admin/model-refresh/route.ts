@@ -1,4 +1,4 @@
-import { dbGetAllFederalStates } from '@shared/db/functions/federal-state';
+import { dbGetFederalStates } from '@shared/db/functions/federal-state';
 import { dbUpdateLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { validateApiKeyByHeadersWithResult } from '@/utils/validation';
 import { NextRequest, NextResponse } from 'next/server';
@@ -10,7 +10,7 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 403 });
   }
 
-  const states = await dbGetAllFederalStates();
+  const states = await dbGetFederalStates();
 
   const models: Record<string, Awaited<ReturnType<typeof dbUpdateLlmModelsByFederalStateId>>> = {};
   for (const state of states) {
