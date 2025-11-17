@@ -33,7 +33,10 @@ export default function SelectLlmModelForm({
         )}
       >
         <Select.Value />
-        <ChevronDownIcon aria-hidden="true" className="text-primary ms-2 w-4 h-2" />
+        <ChevronDownIcon
+          aria-hidden="true"
+          className={cn('ms-2 w-4 h-2', disabled ? 'text-gray-100' : 'text-primary')}
+        />
         <span className="sr-only">{tCommon('llm-model')}</span>
       </Select.Trigger>
 
