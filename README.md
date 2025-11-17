@@ -70,6 +70,15 @@ You can now start the application from the root directory:
 pnpm dev
 ```
 
+## Keycloak
+
+Keycloak is used for logins both locally and in e2e tests.
+The realm, client and several predefined users are configured in [telli-local-realm.json](devops/docker/keycloak/telli-local-realm.json).
+Users are defined at the bottom of the json.
+
+The json is imported once when starting keycloak, but only if the realm does not yet exist.
+When updating the json, remember to drop your local keycloak docker volume to re-import the realm.
+
 ## Valkey
 
 We use Valkey for storing session data.
@@ -98,7 +107,7 @@ Also make sure to include the required env variables in your `.env.local`.
 
 ## E2E Tests
 
-We use playwright with a vidis mock server for e2e testing, refer to the [details](apps/dialog/e2e/readme.md) for setup guide.
+We use playwright with a vidis mock server for e2e testing, refer to the [details](apps/dialog/e2e/README.md) for setup guide.
 The e2e tests are integrated into the pipeline and run on every pull request.
 
 ## Load Tests
