@@ -31,18 +31,6 @@ jobs:
         image: ghcr.io/valkey-io/valkey:8
         ports:
           - 6379:6379
-      keycloak:
-        image: quay.io/keycloak/keycloak:26.4.5
-        env:
-          KC_BOOTSTRAP_ADMIN_USERNAME: admin
-          KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-          CLIENT_NAME: telli-e2e-client
-          CLIENT_SECRET: ClientSecret-e2e
-        options: --entrypoint /opt/keycloak/data/import/entrypoint.sh
-        volumes:
-          - ./devops/docker/keycloak:/opt/keycloak/data/import
-        ports:
-          - 8080:8080
 
     env:
       NEXTAUTH_URL: http://localhost:3000
@@ -55,6 +43,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+
+      # Keycloak container cannot be started under services, because it needs to mount files from the repo
+      - name: Start keycloak container
+        run: |
+          docker run --rm --detach \
+            -v "$PWD/devops/docker/keycloak:/opt/keycloak/data/import" \
+            -p 8080:8080 \
+            -e CLIENT_NAME=$VIDIS_CLIENT_ID -e CLIENT_SECRET=$VIDIS_CLIENT_SECRET \
+            --entrypoint /opt/keycloak/data/import/entrypoint.sh \
+            quay.io/keycloak/keycloak:26.4
 
       - name: Load 1Password Secrets
         uses: 1password/load-secrets-action@v3
