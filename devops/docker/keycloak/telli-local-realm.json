@@ -716,7 +716,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": true,
       "clientAuthenticatorType": "client-secret",
-      "secret": "**********",
+      "secret": "3gbXPx7dELNCXfLgHgAfp5cqcNkTHfbH",
       "redirectUris": ["http://localhost/*"],
       "webOrigins": ["http://localhost"],
       "notBefore": 0,

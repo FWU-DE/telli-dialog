@@ -1,0 +1,133 @@
+{
+  "realm": "telli-local",
+  "users": [
+    {
+      "username": "student",
+      "email": "student@example.com",
+      "attributes": {
+        "schulnummer": ["school1"],
+        "federal_state": ["DE-BY"],
+        "role": ["LERN"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher",
+      "email": "teacher@example.com",
+      "attributes": {
+        "schulnummer": ["school1"],
+        "federal_state": ["DE-BY"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher-bb",
+      "email": "teacher-bb@example.com",
+      "attributes": {
+        "schulnummer": ["school-bb"],
+        "federal_state": ["DE-BB"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher-bw",
+      "email": "teacher-bw@example.com",
+      "attributes": {
+        "schulnummer": ["school-bw"],
+        "federal_state": ["DE-BW"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher-sh",
+      "email": "teacher-sh@example.com",
+      "attributes": {
+        "schulnummer": ["school-sh"],
+        "federal_state": ["DE-SH"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher-sl",
+      "email": "teacher-sl@example.com",
+      "attributes": {
+        "schulnummer": ["school-sl"],
+        "federal_state": ["DE-SL"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher1-by",
+      "email": "teacher1-by@example.com",
+      "attributes": {
+        "schulnummer": ["school1-BY"],
+        "federal_state": ["DE-BY"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher2-by",
+      "email": "teacher2-by@example.com",
+      "attributes": {
+        "schulnummer": ["school1-BY"],
+        "federal_state": ["DE-BY"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    }
+  ]
+}
