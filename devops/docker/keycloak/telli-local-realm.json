@@ -53,15 +53,9 @@
         "description": "${role_default-roles}",
         "composite": true,
         "composites": {
-          "realm": [
-            "offline_access",
-            "uma_authorization"
-          ],
+          "realm": ["offline_access", "uma_authorization"],
           "client": {
-            "account": [
-              "view-profile",
-              "manage-account"
-            ]
+            "account": ["view-profile", "manage-account"]
           }
         },
         "clientRole": false,
@@ -174,10 +168,7 @@
           "composite": true,
           "composites": {
             "client": {
-              "realm-management": [
-                "query-users",
-                "query-groups"
-              ]
+              "realm-management": ["query-users", "query-groups"]
             }
           },
           "clientRole": true,
@@ -209,9 +200,7 @@
           "composite": true,
           "composites": {
             "client": {
-              "realm-management": [
-                "query-clients"
-              ]
+              "realm-management": ["query-clients"]
             }
           },
           "clientRole": true,
@@ -302,7 +291,6 @@
       ],
       "security-admin-console": [],
       "admin-cli": [],
-      "test-client": [],
       "account-console": [],
       "broker": [
         {
@@ -359,9 +347,7 @@
           "composite": true,
           "composites": {
             "client": {
-              "account": [
-                "view-consent"
-              ]
+              "account": ["view-consent"]
             }
           },
           "clientRole": true,
@@ -375,9 +361,7 @@
           "composite": true,
           "composites": {
             "client": {
-              "account": [
-                "manage-account-links"
-              ]
+              "account": ["manage-account-links"]
             }
           },
           "clientRole": true,
@@ -415,9 +399,7 @@
     "clientRole": false,
     "containerId": "d1a51226-5a15-4087-9d4f-a9e825292aeb"
   },
-  "requiredCredentials": [
-    "password"
-  ],
+  "requiredCredentials": ["password"],
   "otpPolicyType": "totp",
   "otpPolicyAlgorithm": "HmacSHA1",
   "otpPolicyInitialCounter": 0,
@@ -432,10 +414,7 @@
   ],
   "localizationTexts": {},
   "webAuthnPolicyRpEntityName": "keycloak",
-  "webAuthnPolicySignatureAlgorithms": [
-    "ES256",
-    "RS256"
-  ],
+  "webAuthnPolicySignatureAlgorithms": ["ES256", "RS256"],
   "webAuthnPolicyRpId": "",
   "webAuthnPolicyAttestationConveyancePreference": "not specified",
   "webAuthnPolicyAuthenticatorAttachment": "not specified",
@@ -446,10 +425,7 @@
   "webAuthnPolicyAcceptableAaguids": [],
   "webAuthnPolicyExtraOrigins": [],
   "webAuthnPolicyPasswordlessRpEntityName": "keycloak",
-  "webAuthnPolicyPasswordlessSignatureAlgorithms": [
-    "ES256",
-    "RS256"
-  ],
+  "webAuthnPolicyPasswordlessSignatureAlgorithms": ["ES256", "RS256"],
   "webAuthnPolicyPasswordlessRpId": "",
   "webAuthnPolicyPasswordlessAttestationConveyancePreference": "not specified",
   "webAuthnPolicyPasswordlessAuthenticatorAttachment": "not specified",
@@ -462,19 +438,14 @@
   "scopeMappings": [
     {
       "clientScope": "offline_access",
-      "roles": [
-        "offline_access"
-      ]
+      "roles": ["offline_access"]
     }
   ],
   "clientScopeMappings": {
     "account": [
       {
         "client": "account-console",
-        "roles": [
-          "manage-account",
-          "view-groups"
-        ]
+        "roles": ["manage-account", "view-groups"]
       }
     ]
   },
@@ -489,9 +460,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "redirectUris": [
-        "/realms/telli-local/account/*"
-      ],
+      "redirectUris": ["/realms/telli-local/account/*"],
       "webOrigins": [],
       "notBefore": 0,
       "bearerOnly": false,
@@ -510,14 +479,7 @@
       "authenticationFlowBindingOverrides": {},
       "fullScopeAllowed": false,
       "nodeReRegistrationTimeout": 0,
-      "defaultClientScopes": [
-        "web-origins",
-        "acr",
-        "profile",
-        "roles",
-        "basic",
-        "email"
-      ],
+      "defaultClientScopes": ["web-origins", "acr", "profile", "roles", "basic", "email"],
       "optionalClientScopes": [
         "address",
         "phone",
@@ -536,9 +498,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "redirectUris": [
-        "/realms/telli-local/account/*"
-      ],
+      "redirectUris": ["/realms/telli-local/account/*"],
       "webOrigins": [],
       "notBefore": 0,
       "bearerOnly": false,
@@ -568,14 +528,7 @@
           "config": {}
         }
       ],
-      "defaultClientScopes": [
-        "web-origins",
-        "acr",
-        "profile",
-        "roles",
-        "basic",
-        "email"
-      ],
+      "defaultClientScopes": ["web-origins", "acr", "profile", "roles", "basic", "email"],
       "optionalClientScopes": [
         "address",
         "phone",
@@ -606,19 +559,13 @@
       "protocol": "openid-connect",
       "attributes": {
         "realm_client": "false",
-        "client.use.lightweight.access.token.enabled": "true"
+        "client.use.lightweight.access.token.enabled": "true",
+        "post.logout.redirect.uris": "+"
       },
       "authenticationFlowBindingOverrides": {},
       "fullScopeAllowed": true,
       "nodeReRegistrationTimeout": 0,
-      "defaultClientScopes": [
-        "web-origins",
-        "acr",
-        "profile",
-        "roles",
-        "basic",
-        "email"
-      ],
+      "defaultClientScopes": ["web-origins", "acr", "profile", "roles", "basic", "email"],
       "optionalClientScopes": [
         "address",
         "phone",
@@ -648,19 +595,13 @@
       "frontchannelLogout": false,
       "protocol": "openid-connect",
       "attributes": {
-        "realm_client": "true"
+        "realm_client": "true",
+        "post.logout.redirect.uris": "+"
       },
       "authenticationFlowBindingOverrides": {},
       "fullScopeAllowed": false,
       "nodeReRegistrationTimeout": 0,
-      "defaultClientScopes": [
-        "web-origins",
-        "acr",
-        "profile",
-        "roles",
-        "basic",
-        "email"
-      ],
+      "defaultClientScopes": ["web-origins", "acr", "profile", "roles", "basic", "email"],
       "optionalClientScopes": [
         "address",
         "phone",
@@ -690,19 +631,13 @@
       "frontchannelLogout": false,
       "protocol": "openid-connect",
       "attributes": {
-        "realm_client": "true"
+        "realm_client": "true",
+        "post.logout.redirect.uris": "+"
       },
       "authenticationFlowBindingOverrides": {},
       "fullScopeAllowed": false,
       "nodeReRegistrationTimeout": 0,
-      "defaultClientScopes": [
-        "web-origins",
-        "acr",
-        "profile",
-        "roles",
-        "basic",
-        "email"
-      ],
+      "defaultClientScopes": ["web-origins", "acr", "profile", "roles", "basic", "email"],
       "optionalClientScopes": [
         "address",
         "phone",
@@ -721,12 +656,8 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "redirectUris": [
-        "/admin/telli-local/console/*"
-      ],
-      "webOrigins": [
-        "+"
-      ],
+      "redirectUris": ["/admin/telli-local/console/*"],
+      "webOrigins": ["+"],
       "notBefore": 0,
       "bearerOnly": false,
       "consentRequired": false,
@@ -764,14 +695,7 @@
           }
         }
       ],
-      "defaultClientScopes": [
-        "web-origins",
-        "acr",
-        "profile",
-        "roles",
-        "basic",
-        "email"
-      ],
+      "defaultClientScopes": ["web-origins", "acr", "profile", "roles", "basic", "email"],
       "optionalClientScopes": [
         "address",
         "phone",
@@ -793,12 +717,8 @@
       "alwaysDisplayInConsole": true,
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
-      "redirectUris": [
-        "http://localhost/*"
-      ],
-      "webOrigins": [
-        "http://localhost"
-      ],
+      "redirectUris": ["http://localhost/*"],
+      "webOrigins": ["http://localhost"],
       "notBefore": 0,
       "bearerOnly": false,
       "consentRequired": false,
@@ -812,6 +732,7 @@
       "attributes": {
         "request.object.signature.alg": "any",
         "frontchannel.logout.session.required": "true",
+        "post.logout.redirect.uris": "+",
         "oauth2.device.authorization.grant.enabled": "false",
         "backchannel.logout.revoke.offline.tokens": "false",
         "use.refresh.tokens": "true",
@@ -892,74 +813,7 @@
           }
         }
       ],
-      "defaultClientScopes": [
-        "web-origins",
-        "acr",
-        "profile",
-        "roles",
-        "basic",
-        "email"
-      ],
-      "optionalClientScopes": [
-        "address",
-        "phone",
-        "organization",
-        "offline_access",
-        "microprofile-jwt"
-      ]
-    },
-    {
-      "id": "cc918489-e1d7-430a-811d-97c8934af5df",
-      "clientId": "test-client",
-      "name": "",
-      "description": "",
-      "rootUrl": "",
-      "adminUrl": "",
-      "baseUrl": "",
-      "surrogateAuthRequired": false,
-      "enabled": true,
-      "alwaysDisplayInConsole": false,
-      "clientAuthenticatorType": "client-secret",
-      "secret": "**********",
-      "redirectUris": [
-        "/*"
-      ],
-      "webOrigins": [
-        "/*"
-      ],
-      "notBefore": 0,
-      "bearerOnly": false,
-      "consentRequired": false,
-      "standardFlowEnabled": true,
-      "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": false,
-      "serviceAccountsEnabled": false,
-      "publicClient": false,
-      "frontchannelLogout": true,
-      "protocol": "openid-connect",
-      "attributes": {
-        "realm_client": "false",
-        "oidc.ciba.grant.enabled": "false",
-        "client.secret.creation.time": "1761743898",
-        "backchannel.logout.session.required": "true",
-        "standard.token.exchange.enabled": "false",
-        "frontchannel.logout.session.required": "true",
-        "oauth2.device.authorization.grant.enabled": "false",
-        "display.on.consent.screen": "false",
-        "backchannel.logout.revoke.offline.tokens": "false",
-        "dpop.bound.access.tokens": "false"
-      },
-      "authenticationFlowBindingOverrides": {},
-      "fullScopeAllowed": true,
-      "nodeReRegistrationTimeout": -1,
-      "defaultClientScopes": [
-        "web-origins",
-        "acr",
-        "profile",
-        "roles",
-        "basic",
-        "email"
-      ],
+      "defaultClientScopes": ["web-origins", "acr", "profile", "roles", "basic", "email"],
       "optionalClientScopes": [
         "address",
         "phone",
@@ -988,12 +842,13 @@
           "protocolMapper": "oidc-organization-membership-mapper",
           "consentRequired": false,
           "config": {
-            "id.token.claim": "true",
             "introspection.token.claim": "true",
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "organization",
-            "jsonType.label": "String",
-            "multivalued": "true"
+            "jsonType.label": "String"
           }
         }
       ]
@@ -1026,8 +881,9 @@
           "consentRequired": false,
           "config": {
             "user.session.note": "clientAddress",
-            "id.token.claim": "true",
             "introspection.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "clientAddress",
             "jsonType.label": "String"
@@ -1041,8 +897,9 @@
           "consentRequired": false,
           "config": {
             "user.session.note": "client_id",
-            "id.token.claim": "true",
             "introspection.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "client_id",
             "jsonType.label": "String"
@@ -1056,8 +913,9 @@
           "consentRequired": false,
           "config": {
             "user.session.note": "clientHost",
-            "id.token.claim": "true",
             "introspection.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "clientHost",
             "jsonType.label": "String"
@@ -1311,6 +1169,7 @@
           "config": {
             "introspection.token.claim": "true",
             "multivalued": "true",
+            "userinfo.token.claim": "true",
             "user.attribute": "foo",
             "id.token.claim": "true",
             "access.token.claim": "true",
@@ -1583,8 +1442,9 @@
           "consentRequired": false,
           "config": {
             "user.session.note": "AUTH_TIME",
-            "id.token.claim": "true",
             "introspection.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "auth_time",
             "jsonType.label": "long"
@@ -1643,7 +1503,8 @@
           "config": {
             "id.token.claim": "true",
             "introspection.token.claim": "true",
-            "access.token.claim": "true"
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
           }
         }
       ]
@@ -1678,9 +1539,7 @@
   "smtpServer": {},
   "eventsEnabled": true,
   "eventsExpiration": 28800,
-  "eventsListeners": [
-    "jboss-logging"
-  ],
+  "eventsListeners": ["jboss-logging"],
   "enabledEventTypes": [
     "SEND_RESET_PASSWORD",
     "UPDATE_CONSENT_ERROR",
@@ -1789,9 +1648,7 @@
         "subType": "anonymous",
         "subComponents": {},
         "config": {
-          "allow-default-scopes": [
-            "true"
-          ]
+          "allow-default-scopes": ["true"]
         }
       },
       {
@@ -1802,14 +1659,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "saml-user-attribute-mapper",
-            "oidc-sha256-pairwise-sub-mapper",
-            "oidc-usermodel-attribute-mapper",
             "oidc-address-mapper",
+            "saml-user-property-mapper",
             "oidc-full-name-mapper",
-            "oidc-usermodel-property-mapper",
             "saml-role-list-mapper",
-            "saml-user-property-mapper"
+            "oidc-usermodel-property-mapper",
+            "oidc-usermodel-attribute-mapper",
+            "saml-user-attribute-mapper",
+            "oidc-sha256-pairwise-sub-mapper"
           ]
         }
       },
@@ -1820,9 +1677,7 @@
         "subType": "authenticated",
         "subComponents": {},
         "config": {
-          "allow-default-scopes": [
-            "true"
-          ]
+          "allow-default-scopes": ["true"]
         }
       },
       {
@@ -1848,12 +1703,8 @@
         "subType": "anonymous",
         "subComponents": {},
         "config": {
-          "host-sending-registration-request-must-match": [
-            "true"
-          ],
-          "client-uris-must-match": [
-            "true"
-          ]
+          "host-sending-registration-request-must-match": ["true"],
+          "client-uris-must-match": ["true"]
         }
       },
       {
@@ -1864,14 +1715,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "oidc-address-mapper",
-            "saml-role-list-mapper",
-            "oidc-full-name-mapper",
-            "saml-user-attribute-mapper",
             "saml-user-property-mapper",
-            "oidc-sha256-pairwise-sub-mapper",
+            "saml-user-attribute-mapper",
             "oidc-usermodel-attribute-mapper",
-            "oidc-usermodel-property-mapper"
+            "oidc-address-mapper",
+            "oidc-usermodel-property-mapper",
+            "oidc-full-name-mapper",
+            "oidc-sha256-pairwise-sub-mapper",
+            "saml-role-list-mapper"
           ]
         }
       },
@@ -1882,9 +1733,7 @@
         "subType": "anonymous",
         "subComponents": {},
         "config": {
-          "max-clients": [
-            "200"
-          ]
+          "max-clients": ["200"]
         }
       }
     ],
@@ -1895,7 +1744,7 @@
         "subComponents": {},
         "config": {
           "kc.user.profile.config": [
-            "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{\"length\":{\"min\":3,\"max\":255},\"username-prohibited-characters\":{},\"up-username-not-idn-homograph\":{}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{},\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"schulnummer\",\"displayName\":\"\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[],\"edit\":[\"admin\"]},\"multivalued\":true},{\"name\":\"role\",\"displayName\":\"Rolle\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[],\"edit\":[\"admin\"]},\"multivalued\":false},{\"name\":\"federal_state\",\"displayName\":\"Bundesland\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[],\"edit\":[\"admin\"]},\"multivalued\":false}],\"groups\":[{\"name\":\"user-metadata\",\"displayHeader\":\"User metadata\",\"displayDescription\":\"Attributes, which refer to user metadata\"}]}"
+            "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{\"length\":{\"min\":3,\"max\":255},\"username-prohibited-characters\":{},\"up-username-not-idn-homograph\":{}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{},\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"schulnummer\",\"displayName\":\"\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[],\"edit\":[\"admin\"]},\"multivalued\":true},{\"name\":\"role\",\"displayName\":\"Rolle\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[],\"edit\":[\"admin\"]},\"multivalued\":false},{\"name\":\"federal_state\",\"displayName\":\"Bundesland\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[],\"edit\":[\"admin\"]},\"multivalued\":false},{\"name\":\"is_ai_chat_eligble\",\"displayName\":\"Schulung\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[],\"edit\":[\"admin\"]},\"multivalued\":false},{\"name\":\"Ablaufdatum\",\"displayName\":\"Ablaufdatum\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[],\"edit\":[\"admin\"]},\"multivalued\":false}],\"groups\":[{\"name\":\"user-metadata\",\"displayHeader\":\"User metadata\",\"displayDescription\":\"Attributes, which refer to user metadata\"}]}"
           ]
         }
       }
@@ -1907,12 +1756,14 @@
         "providerId": "rsa-enc-generated",
         "subComponents": {},
         "config": {
-          "priority": [
-            "100"
+          "privateKey": [
+            "MIIEpAIBAAKCAQEAxVGSgMfovODyheAC7N+t518tpMSY+nWhq95FEUWm4YodkV5dVvXYgLRUHabJ1UTki76/fVZaGXI9GHpnkr4UMM/9zYns7pW9xVkClBJ6HooXwNVynYLCLtkDbA0b+pet+/A9nDcZPEWkwj50WqVpmCCC2LauqK2O7/+bQMTE+8pQ+jyBWU6z9tmLMGLy+SPmb4Eh3S518o62t3LLTA0zExORng/xmexN1ImV+Zqlf2Cn5qamRxkslr4GsZEK9h9FA5pZsD/IjK81SO5TXuQkOyW9pVp9pkQ1NHSOv1SFcx5YzCruEH9Y4rSJhS//x2XJZTKtvrtxjbbcvAzR64PlHwIDAQABAoIBAD+2JBDS+7IpDAXwG+GyI6vGjq1aEW8llksxXKnEDKtcdkme55KRlRORpmtglGD5erYopBnrTPJUcae6tkCqgUh1kCTSuR8cWIclQ3DeOnIr8pmAEh8Lvnlz9ufnn7YdTb9AhhQvskVE03sowVcXe+3z6WviKKksSS/zH4UdQ+Fsk7WAJIrIESz12f6aNwIDHeN08FmmBxmc551Gbx1Kx1bZsIV8ls7njF7V1TH+MnrKbL8eMAwhjkhqd3aTB0tw2drhY66aau4rrCs/AWF/SbBGa5eokK40aTEkJCpDIoUWiiNvbqevR8wCvLpFh2dWed/hr+kZR9DqIIdufI5fuZECgYEA7ZmDUAfrq3Lu4ytNLixmIeEvffyALbT0WbhLizwqzcIEPIvzZppF45llSg/dhxkrIOw8BoF0edF6G3BD9XIzer+09AcHiy5kke+j4jCkN2nU43HyCfSVHLndJ1KVsSdVi10vp5olF03coxbJSxwkA1F4wcsCtpVdAx7rgNRirBkCgYEA1Jl5w4UVzUjUvFzdFWFGkfG3RoZFGHJlvEOdIDMv01/IUGxPkU7DzyIuhMx1HpSzqewFYFDL1FeUCBVeSeF1e5vqiz+ti4AcCJVj411yazIe2qKoJHHUwESFzFCgbioROpRbSzceV6f/7C11HjknEkzt+xCPbgOdWZnZ+gM5wfcCgYEAgrjYNzr0XZLRfejAAOxqkK9NKtq2Ru9tFMPBxGwo/KWHISy6kLPGSe+Ge9X4wrCFOwreB5JH3BH1RY1hxnO7gQhibXREoT24FVasavDqGJbAixaQ3QtU0sYrt8vHEf2bIh717hdv2r966bvKqelkovK7Jpwj9QJ+dw4W8f1oAFkCgYAItPBjrYOjEKSFwlfblExLldansMALrEO2Xh6FPxNqWLXfdVAc51jllsTI84aoZfalsuDVfPmcDKonWpit9enV0iDc6xK0b962C0g3+4/ADCFvWtIADBlmdmf0Yijv2hEykPjcL7myZVL53TK6tiR/f18PtTHqk4NSNBbVQmSPKQKBgQCLsKvFaHt9HyastN+ZVYNaFRe3rkjnPeX6TuTW+a5OpTxj8YoIwqzE0F6SwdxScicF7iZhRWD3xD7x71mXMVbATbf3NFJDUSWz4WfQeuw7+BCSzCZH9X6MZbdGIFa9SlqEjEebkqY2MsofXWR4I6LAE9X98Q8TtTxgy/uHw62nPQ=="
           ],
-          "algorithm": [
-            "RSA-OAEP"
-          ]
+          "certificate": [
+            "MIICpTCCAY0CBgGakuBloDANBgkqhkiG9w0BAQsFADAWMRQwEgYDVQQDDAt0ZWxsaS1sb2NhbDAeFw0yNTExMTcxNzMxMTBaFw0zNTExMTcxNzMyNTBaMBYxFDASBgNVBAMMC3RlbGxpLWxvY2FsMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxVGSgMfovODyheAC7N+t518tpMSY+nWhq95FEUWm4YodkV5dVvXYgLRUHabJ1UTki76/fVZaGXI9GHpnkr4UMM/9zYns7pW9xVkClBJ6HooXwNVynYLCLtkDbA0b+pet+/A9nDcZPEWkwj50WqVpmCCC2LauqK2O7/+bQMTE+8pQ+jyBWU6z9tmLMGLy+SPmb4Eh3S518o62t3LLTA0zExORng/xmexN1ImV+Zqlf2Cn5qamRxkslr4GsZEK9h9FA5pZsD/IjK81SO5TXuQkOyW9pVp9pkQ1NHSOv1SFcx5YzCruEH9Y4rSJhS//x2XJZTKtvrtxjbbcvAzR64PlHwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQBfmUVsdAocFaPpyxZ4YE8KXmAxzfAkEraSOQ7mOvtizar4fL1dwxBsoSvbfzRQW3xlP9jca287GxMWmlMJHBY1uKRHPjReScAp+N0p9doFXGkuHFURCtG7NXaEPM9j40Cl4VacJgFdixozwvROCu61Q1PLtWojjvcSdDUVYG2SkYd8s4B3oCzQg+YyVv35DQWRPhUYJDErLYjPzFAhwbEybdDjGt67dK85tQxTxRWgGzJXi2W6iQ6YO1WWzai0hr+lnPS5Il+feThMZFVAmVJVyC1L6Vg/EAnR9YUH18JCmREElcNgPw+UTnqjrnu0E8NBbKtqM6mrAtfLvdxE2i3V"
+          ],
+          "priority": ["100"],
+          "algorithm": ["RSA-OAEP"]
         }
       },
       {
@@ -1921,9 +1772,9 @@
         "providerId": "aes-generated",
         "subComponents": {},
         "config": {
-          "priority": [
-            "100"
-          ]
+          "kid": ["ebf7422e-f0d0-4182-8e6d-0257ea0477d2"],
+          "secret": ["1eihT4SsfVQZAotdLNguCA"],
+          "priority": ["100"]
         }
       },
       {
@@ -1932,12 +1783,12 @@
         "providerId": "hmac-generated",
         "subComponents": {},
         "config": {
-          "priority": [
-            "100"
+          "kid": ["a05f526f-8df9-4d23-a960-08c38c2cc527"],
+          "secret": [
+            "L7UKG6uby3TbebJ6F-dXlPae-v4bJftXM_uwRxjqARk_yWc6bnJtUEwKzea8Zlh5Ue5ghg2fYdaobTCAmKGP7mebnPylvR8NzgueWiCeSzH8U80_OOF-DstplqGkQk737a4K-RCzu9uc38W38F7sTa0mSLU8YHlnM-idXA_jAbk"
           ],
-          "algorithm": [
-            "HS512"
-          ]
+          "priority": ["100"],
+          "algorithm": ["HS512"]
         }
       },
       {
@@ -1946,9 +1797,13 @@
         "providerId": "rsa-generated",
         "subComponents": {},
         "config": {
-          "priority": [
-            "100"
-          ]
+          "privateKey": [
+            "MIIEowIBAAKCAQEAt+w4wIDpqYi2KmjLzIPncdPouZy0u9KLH9SsU2Mj5XxIV26mWt2uH/tNNAT4mGMkcl8I0ShBhW6JVdnlUpHGsN30fMbC4+fZqpgT1bcFd0MpTdFkonmQ4RRL+UDGmpNGVWk9wQmhWpYzt01+8D9eEskz6SleEjn/BHa/xE1wiVWVp4mP6/cU8jTuupqmhKp02hR9Py4RRI8koEvnTD4N9+T2ZU3Ht4WSxSpe9hgGeTCmUuVQ34rwwkmx25bpuXAs5DQDYh4WC12EJQvmMJwWSMBIBUrCQ0KAw4pEkbhAmSEf5RZt5K91Oly8BhZXAd/MetSEHpApNesb7HiPWRhU7wIDAQABAoIBACP4Nc0oKQp36zB2GE1iCpSPXfdW9124Om86N42DWRTbboZy5GPm8NPeYOXohvm+gfVAMsg8+DtxN7iriZbRXatfbR4t/RV3VXFwloh4Z8BASUanyeegoL30KzuO+IhofxvbHjGvgXfm4ixaIpY3vl0sLlPOPFCSORaVZsGsZ3LkDSHmzyqToRy1Onkae/PxT9QAisMirLK0tjaVbvL/ZpP0IJ/tDLxrXVhZNam2xQvtfUii5iwOOBoBPaob06VF41SVG9hDddxYuBcTUKfW8W3xlJLtn4fzNPBGC7Wq9DOOPOGrFPyLVnSky6o2taFlgGkNoQf/ag4FP1399CQ/8DkCgYEA/UDoelA55W1v/1d5xlv4Lfs7/eQeX1DT1Mhw1ts8ZFKADHX3FrMdMurGFanw6DIyF8G4Uy6CdOQU5ue42j5FZnRT3saz7rHa9SMySu7IU6B5qScNDs8yErqp6Ikhb2b+i43Au1Q76DAx/CZhwSWwOTX8HO6nec2aJcO5I/FB3q0CgYEAuerVtpEeANV5q+Pl8+d6S7fADf4i0CT1RsoPpMu4EaQP1dIQZD/yVf3u9j/SDlgzZwl+BvXLQxQ1KK5esc208IgdVUuDwdkrOdMQZiogbuQOZ6a7FdTNCqMXhs1vNl8L8NcV+BRUaYwW48QYN1fwV9Y2IwuMXeMWT8ua4qnEwYsCgYAkVABFM2bqs0UikrDENIMoTWawp913fMe2OT5+g5ppJbB6mR1lozHoEOdzShplpHWtFLvVKtHJ5MHe0ZShsdcQuFUjmstKzTaEfZUETLZt0JJDInfsDOq45w/ibHFgYpzW9fGUraOeTfONoQ/avgZGXqkYmV9qyIR5MFdJgZ0aTQKBgB9rtNq6A9wYOAv45DAoet65G1hCDxgmZt2j4Kj1VRKGK7bzXZnTxN0LoYs0lgeemHFdhVMfz05y59kMPyzFm0LbfjmgHZBxZ4DKTwc1L24OVPDnmM7DvDOEBMHfjmAeCCKX9zqKFQoRhvzPc1hHIHN33IZnuT1U17x8qJyOHJapAoGBAKiJFqBvrkgLm/DFGBpTjHLzSwYSqI34azdnH7NDLCcTdOypU2jdZCAUIM1hH+Ft6BfKWNo2KkmjdGzSWDo1JKZ8KUZlXHYRVbWNypcB3HqjrGum2q/114Iu2RYGahiXbTkC2zzJO+l4O73XrmPz8wPp3Pc0cYW3E8gbXx7EmrJE"
+          ],
+          "certificate": [
+            "MIICpTCCAY0CBgGakuBmDTANBgkqhkiG9w0BAQsFADAWMRQwEgYDVQQDDAt0ZWxsaS1sb2NhbDAeFw0yNTExMTcxNzMxMTFaFw0zNTExMTcxNzMyNTFaMBYxFDASBgNVBAMMC3RlbGxpLWxvY2FsMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt+w4wIDpqYi2KmjLzIPncdPouZy0u9KLH9SsU2Mj5XxIV26mWt2uH/tNNAT4mGMkcl8I0ShBhW6JVdnlUpHGsN30fMbC4+fZqpgT1bcFd0MpTdFkonmQ4RRL+UDGmpNGVWk9wQmhWpYzt01+8D9eEskz6SleEjn/BHa/xE1wiVWVp4mP6/cU8jTuupqmhKp02hR9Py4RRI8koEvnTD4N9+T2ZU3Ht4WSxSpe9hgGeTCmUuVQ34rwwkmx25bpuXAs5DQDYh4WC12EJQvmMJwWSMBIBUrCQ0KAw4pEkbhAmSEf5RZt5K91Oly8BhZXAd/MetSEHpApNesb7HiPWRhU7wIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQCdUtPV6EksqqF/LtzLrWYcObz1fI6skltccZNCdk2f8wvCu4iSGMRKP3nuAdJTCgJWXxSPSbRKO84ywCNUm+KrmMV08iwg0Kom1CISAonKixrLfflmz56QW/0KkNZC/sn+KhVd5BNMNSoNwijpSjOGfVu7qBbtR0JF75WGEIXaxIvjRjJuMsSIQRGhG4IGIvfScOaiHqxKPKUoreBPP65NzUxe00tJmG5yYUMn8BFnYSiDQnt2sZwL0etFItG8XFxJOZn7TeVCxwYTFM0Hq1pLmnbPBpWbVdybMRtlN0h8KRjapzDTU9ALs/UOTKUmUz75HZ9+2zcK4voh/0C8+wsc"
+          ],
+          "priority": ["100"]
         }
       }
     ]
@@ -2778,8 +2633,8 @@
   "attributes": {
     "cibaBackchannelTokenDeliveryMode": "poll",
     "cibaAuthRequestedUserHint": "login_hint",
-    "oauth2DevicePollingInterval": "5",
     "clientOfflineSessionMaxLifespan": "0",
+    "oauth2DevicePollingInterval": "5",
     "clientSessionIdleTimeout": "0",
     "clientOfflineSessionIdleTimeout": "0",
     "cibaInterval": "5",
@@ -2790,7 +2645,7 @@
     "clientSessionMaxLifespan": "0",
     "adminEventsExpiration": ""
   },
-  "keycloakVersion": "26.4.0",
+  "keycloakVersion": "26.4.5",
   "userManagedAccessAllowed": false,
   "organizationsEnabled": false,
   "verifiableCredentialsEnabled": false,

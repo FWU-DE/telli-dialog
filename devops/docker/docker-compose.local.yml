@@ -14,7 +14,7 @@ services:
     ports:
       - '5432:5432'
     healthcheck:
-      test: [ 'CMD-SHELL', 'pg_isready -U telli_dialog_db -d telli_dialog_db' ]
+      test: ['CMD-SHELL', 'pg_isready -U telli_dialog_db -d telli_dialog_db']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -33,13 +33,24 @@ services:
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-    command: start-dev --import-realm
+    entrypoint: /opt/keycloak/data/import/entrypoint.sh
     volumes:
-      - ./keycloak:/opt/keycloak/data/import
       - keycloak_data:/opt/keycloak/data/h2
+      - ./keycloak:/opt/keycloak/data/import
     ports:
       - '8080:8080'
     restart: always
+    depends_on:
+      fix-keycloak-volume-ownership:
+        condition: service_completed_successfully
+
+  # keycloak runs with uid 1000, but docker creates volumes with root as owner; use a one-shot container to fix the permission
+  fix-keycloak-volume-ownership:
+    image: alpine
+    restart: no
+    entrypoint: /bin/sh -c "chown 1000 /keycloak"
+    volumes:
+      - keycloak_data:/keycloak
 
 volumes:
   keycloak_data:
