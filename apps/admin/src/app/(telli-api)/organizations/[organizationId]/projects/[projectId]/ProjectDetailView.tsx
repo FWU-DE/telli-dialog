@@ -13,9 +13,11 @@ import {
   TableHeader,
   TableRow,
 } from '@ui/components/Table';
+import { Button } from '@ui/components/Button';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { ROUTES } from '../../../../../../consts/routes';
+import { CreateApiKeyModal } from './CreateApiKeyModal';
 
 export type ProjectDetailViewProps = {
   organizationId: string;
@@ -30,6 +32,7 @@ export default function ProjectDetailView(props: ProjectDetailViewProps) {
   const [apiKeysLoading, setApiKeysLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [apiKeysError, setApiKeysError] = useState<string | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
     loadProject();
@@ -134,8 +137,15 @@ export default function ProjectDetailView(props: ProjectDetailViewProps) {
       {/* API Keys */}
       <Card>
         <CardHeader>
-          <CardTitle>API-Schlüssel</CardTitle>
-          <CardDescription>API-Schlüssel für dieses Projekt</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>API-Schlüssel</CardTitle>
+              <CardDescription>API-Schlüssel für dieses Projekt</CardDescription>
+            </div>
+            <Button onClick={() => setIsCreateModalOpen(true)} disabled={apiKeysLoading}>
+              Neuen API-Schlüssel erstellen
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {apiKeysLoading ? (
@@ -182,6 +192,15 @@ export default function ProjectDetailView(props: ProjectDetailViewProps) {
           )}
         </CardContent>
       </Card>
+
+      {/* Create API Key Modal */}
+      <CreateApiKeyModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={loadApiKeys}
+        organizationId={organizationId}
+        projectId={projectId}
+      />
     </div>
   );
 }
