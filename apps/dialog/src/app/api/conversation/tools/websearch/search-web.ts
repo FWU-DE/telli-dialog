@@ -8,18 +8,21 @@ import he from 'he';
 import { unstable_cacheLife as cacheLife } from 'next/cache';
 import { logDebug, logError, logInfo, logWarning } from '@/utils/logging/logging';
 import { isBinaryFile } from 'isbinaryfile';
+import { useTranslations } from 'next-intl';
 
 const headers = {
   'User-Agent':
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
 };
 
-const unsupportedContentTypeError = {
-  error: true,
-  content: 'Es werden nur Links auf Webseiten unterstützt, keine Dateien.',
-  name: 'Nicht unterstützter Link',
-  type: 'websearch',
-} as const;
+function getUnsupportedContentTypeError(t: ReturnType<typeof useTranslations>) {
+  return {
+    error: true,
+    content: t('placeholders.not-supported-content'),
+    name: t('placeholders.not-supported'),
+    type: 'websearch',
+  } as const;
+}
 
 /**
  * Checks if the URL is valid and then fetches the main content of the website.
@@ -44,7 +47,7 @@ export async function webScraperExecutable(
     if (!isPage) {
       logInfo(`URL is not a webpage: ${url}`);
       return {
-        ...unsupportedContentTypeError,
+        ...getUnsupportedContentTypeError(t),
         link: url,
       };
     }
@@ -81,7 +84,7 @@ export async function webScraperExecutable(
   if (isBinary) {
     logInfo(`Detected binary content for URL: ${url}`);
     return {
-      ...unsupportedContentTypeError,
+      ...getUnsupportedContentTypeError(t),
       link: url,
     };
   }

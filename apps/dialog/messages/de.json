@@ -58,7 +58,9 @@
     "placeholders": {
       "loading": "Titel wird geladen...",
       "not-available": "Nicht verfügbar",
-      "error-content": "Die Seite konnte nicht geladen werden. Es ist ein Fehler aufgetreten {status_code_info}. Nenne keinen Fehlercode und gib folgende Hinweise an den Nutzer weiter: Bitte stelle sicher, dass:\n- die Seite öffentlich zugänglich ist\n- keine Anmeldung erforderlich ist\n- es sich um eine gültige URL handelt"
+      "error-content": "Die Seite konnte nicht geladen werden. Es ist ein Fehler aufgetreten {status_code_info}. Nenne keinen Fehlercode und gib folgende Hinweise an den Nutzer weiter: Bitte stelle sicher, dass:\n- die Seite öffentlich zugänglich ist\n- keine Anmeldung erforderlich ist\n- es sich um eine gültige URL handelt",
+      "not-supported": "Nicht unterstützter Link",
+      "not-supported-content": "Es werden nur Links auf Webseiten unterstützt, keine Dateien."
     },
     "action": {
       "delete": "Link entfernen"
