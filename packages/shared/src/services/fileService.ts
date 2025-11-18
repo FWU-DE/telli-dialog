@@ -1,12 +1,12 @@
 import { eq } from 'drizzle-orm';
 import { db } from '@shared/db';
 import {
-  fileTable,
-  TextChunkTable,
   CharacterFileMapping,
   CustomGptFileMapping,
+  fileTable,
+  TextChunkTable,
 } from '@shared/db/schema';
-import { readFileFromS3, uploadFileToS3 } from '@shared/s3';
+import { copyFileInS3 } from '@shared/s3';
 import { cnanoid } from './randomService';
 
 /**
@@ -37,12 +37,9 @@ export async function duplicateFileWithEmbeddings(originalFileId: string): Promi
       .where(eq(TextChunkTable.fileId, originalFileId));
 
     // Copy the original file from S3
-    const fileContent = await readFileFromS3({ key: `message_attachments/${originalFileId}` });
-
-    await uploadFileToS3({
-      key: `message_attachments/${newFileId}`,
-      body: fileContent,
-      contentType: originalFile.type,
+    await copyFileInS3({
+      copySource: `message_attachments/${originalFileId}`,
+      newKey: `message_attachments/${newFileId}`,
     });
 
     // Create database records in a transaction
@@ -72,6 +69,7 @@ export async function duplicateFileWithEmbeddings(originalFileId: string): Promi
     console.error(`Error copying file from ${originalFileId}:`, error);
     throw new Error(
       `Failed to copy file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      { cause: error },
     );
   }
 }
