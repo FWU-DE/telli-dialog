@@ -126,6 +126,7 @@ export const schoolTable = pgTable(
 
 export type SchoolInsertModel = typeof schoolTable.$inferInsert;
 export type SchoolModel = typeof schoolTable.$inferSelect;
+export const schoolSelectSchema = createSelectSchema(schoolTable);
 
 export const federalStateFeatureTogglesSchema = z.object({
   isStudentAccessEnabled: z.boolean().default(true),
