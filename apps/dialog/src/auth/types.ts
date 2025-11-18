@@ -2,6 +2,7 @@ import {
   federalStateSelectSchema,
   schoolSelectSchema,
   userSchoolRoleSchema,
+  userSelectSchema,
 } from '@shared/db/schema';
 import z from 'zod';
 
@@ -10,7 +11,7 @@ const userSchoolSchema = schoolSelectSchema.extend({
   userRole: userSchoolRoleSchema,
 });
 
-export const userAndContextSchema = z.object({
+export const userAndContextSchema = userSelectSchema.extend({
   school: userSchoolSchema,
   federalState: obscuredFederalStateSchema,
   hasApiKeyAssigned: z.boolean(),

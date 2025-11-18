@@ -46,6 +46,7 @@ export const userTable = pgTable('user_entity', {
 
 export type InsertUserModel = typeof userTable.$inferInsert;
 export type UserModel = typeof userTable.$inferSelect;
+export const userSelectSchema = createSelectSchema(userTable);
 
 export const conversationTable = pgTable(
   'conversation',
