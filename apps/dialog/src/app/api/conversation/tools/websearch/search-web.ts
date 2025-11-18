@@ -7,11 +7,19 @@ import { getTranslations } from 'next-intl/server';
 import he from 'he';
 import { unstable_cacheLife as cacheLife } from 'next/cache';
 import { logDebug, logError, logInfo, logWarning } from '@/utils/logging/logging';
+import { isBinaryFile } from 'isbinaryfile';
 
 const headers = {
   'User-Agent':
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
 };
+
+const unsupportedContentTypeError = {
+  error: true,
+  content: 'Es werden nur Links auf Webseiten unterstützt, keine Dateien.',
+  name: 'Nicht unterstützter Link',
+  type: 'websearch',
+} as const;
 
 /**
  * Checks if the URL is valid and then fetches the main content of the website.
@@ -36,11 +44,8 @@ export async function webScraperExecutable(
     if (!isPage) {
       logInfo(`URL is not a webpage: ${url}`);
       return {
-        error: true,
-        content: 'Es werden nur Links auf Webseiten unterstützt, keine Dateien.',
-        name: 'Nicht unterstützter Link',
+        ...unsupportedContentTypeError,
         link: url,
-        type: 'websearch',
       };
     }
     if (url !== redirectedUrl) {
@@ -71,10 +76,18 @@ export async function webScraperExecutable(
     };
   }
 
-  const responseClone = response.clone();
+  const buffer = Buffer.from(await response.clone().arrayBuffer());
+  const isBinary = await isBinaryFile(buffer);
+  if (isBinary) {
+    logInfo(`Detected binary content for URL: ${url}`);
+    return {
+      ...unsupportedContentTypeError,
+      link: url,
+    };
+  }
 
   // Extract title
-  const html = await responseClone.text();
+  const html = await response.clone().text();
   // Extract title from meta tags or Open Graph tags first, as they're more reliable
   const ogTitleMatch = html.match(/<meta[^>]*property="og:title"[^>]*content="([^"]*)"/i);
   const metaTitleMatch = html.match(/<meta[^>]*name="title"[^>]*content="([^"]*)"/i);
