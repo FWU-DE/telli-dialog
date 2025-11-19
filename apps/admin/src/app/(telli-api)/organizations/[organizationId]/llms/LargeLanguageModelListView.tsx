@@ -6,9 +6,19 @@ import {
   TableHeader,
   TableRow,
 } from '@ui/components/Table';
-import { fetchLargeLanguageModels } from '../../../../../services/llm-service';
-
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@ui/components/Card';
+import { Button } from '@ui/components/Button';
 import { Checkbox } from '@ui/components/Checkbox';
+import { getLargeLanguageModelsAction } from './actions';
+import Link from 'next/link';
+import { Search } from 'lucide-react';
 
 export type LargeLanguageModelListViewProps = {
   organizationId: string;
@@ -17,34 +27,73 @@ export type LargeLanguageModelListViewProps = {
 export async function LargeLanguageModelListView({
   organizationId,
 }: LargeLanguageModelListViewProps) {
-  const languageModels = await fetchLargeLanguageModels(organizationId);
+  const languageModels = await getLargeLanguageModelsAction(organizationId);
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Anzeigename</TableHead>
-          <TableHead>Provider</TableHead>
-          <TableHead>Neu</TableHead>
-          <TableHead>Gelöscht</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {languageModels.map((model) => (
-          <TableRow key={model.id}>
-            <TableCell>{model.name}</TableCell>
-            <TableCell>{model.displayName}</TableCell>
-            <TableCell>{model.provider}</TableCell>
-            <TableCell>
-              <Checkbox checked={model.isNew} disabled />
-            </TableCell>
-            <TableCell>
-              <Checkbox checked={model.isDeleted} disabled />
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <Card>
+      <CardHeader>
+        <CardTitle>Sprachmodelle</CardTitle>
+        <CardDescription>
+          Liste aller verfügbaren Sprachmodelle für diese Organisation.
+        </CardDescription>
+        <CardAction>
+          <Link href={`/organizations/${organizationId}/llms/new`}>
+            <Button>Neues Modell</Button>
+          </Link>
+          <Button>Aktualisieren</Button>
+        </CardAction>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Anbieter</TableHead>
+              <TableHead>Beschreibung</TableHead>
+              <TableHead className="text-center">Neu</TableHead>
+              <TableHead className="text-center">Gelöscht</TableHead>
+              <TableHead>Erstellt am</TableHead>
+              <TableHead className="w-12">Aktionen</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {languageModels.map((model) => (
+              <TableRow key={model.id}>
+                <TableCell>
+                  <div>
+                    <div className="font-medium">{model.displayName || model.name}</div>
+                    {model.displayName && model.displayName !== model.name && (
+                      <div className="text-sm text-gray-500">{model.name}</div>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {model.provider}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <div className="max-w-xs truncate" title={model.description}>
+                    {model.description || '-'}
+                  </div>
+                </TableCell>
+                <TableCell className="text-center">
+                  <Checkbox checked={model.isNew} disabled />
+                </TableCell>
+                <TableCell className="text-center">
+                  <Checkbox checked={model.isDeleted} disabled />
+                </TableCell>
+                <TableCell>{new Date(model.createdAt).toLocaleString()}</TableCell>
+                <TableCell>
+                  <Link href={`/organizations/${organizationId}/llms/${model.id}`}>
+                    <Search className="text-primary" />
+                  </Link>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 }
