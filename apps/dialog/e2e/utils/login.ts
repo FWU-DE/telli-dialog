@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test';
 
-export async function login(page: Page, user: string) {
+export async function login(page: Page, user: string, password = 'password') {
   try {
     await page.goto('/logout');
   } catch (error) {
@@ -19,11 +19,10 @@ export async function login(page: Page, user: string) {
 
   await page.getByRole('button', { name: 'Mit VIDIS einloggen' }).click();
 
-  await page.getByPlaceholder('Enter any login').fill(user);
-  await page.getByPlaceholder('and password').fill('test');
+  await page.getByLabel('Username').fill(user);
+  await page.getByRole('textbox', { name: 'Password' }).fill(password);
 
-  await page.getByRole('button', { name: 'Sign-in' }).click();
-  await page.getByRole('button', { name: 'Continue' }).click();
+  await page.locator('button[type=submit]').click();
 
   await page.waitForURL('/');
 }

@@ -46,7 +46,7 @@ export const userTable = pgTable('user_entity', {
 
 export type InsertUserModel = typeof userTable.$inferInsert;
 export type UserModel = typeof userTable.$inferSelect;
-export const userSchema = createSelectSchema(userTable).extend({
+export const userSelectSchema = createSelectSchema(userTable).extend({
   createdAt: z.coerce.date(),
 });
 

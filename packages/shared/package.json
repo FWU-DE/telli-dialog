@@ -23,8 +23,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.931.0",
-    "@aws-sdk/s3-request-presigner": "3.931.0",
+    "@aws-sdk/client-s3": "3.934.0",
+    "@aws-sdk/s3-request-presigner": "3.934.0",
     "@dotenvx/dotenvx": "1.51.1",
     "@sentry/nextjs": "10.25.0",
     "@t3-oss/env-core": "0.13.8",
@@ -41,8 +41,8 @@
     "@telli/typescript-config": "workspace:*",
     "@types/node": "24.10.1",
     "@types/pg": "8.15.6",
-    "@typescript-eslint/eslint-plugin": "8.46.4",
-    "@typescript-eslint/parser": "8.46.4",
+    "@typescript-eslint/eslint-plugin": "8.47.0",
+    "@typescript-eslint/parser": "8.47.0",
     "eslint": "9.39.1",
     "eslint-config-prettier": "10.1.8",
     "eslint-config-turbo": "2.6.1",
