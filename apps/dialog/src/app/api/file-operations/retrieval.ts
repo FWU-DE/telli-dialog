@@ -9,7 +9,7 @@ import { UserAndContext } from '@/auth/types';
 import { processFiles } from './process-file';
 import { LanguageModelV1, Message } from 'ai';
 import { dbInsertFileWithTextChunks } from '@shared/db/functions/files';
-import { logWarning } from '@/utils/logging/logging';
+import { logWarning } from '@shared/logging';
 
 type SearchOptions = {
   keywords: string[];

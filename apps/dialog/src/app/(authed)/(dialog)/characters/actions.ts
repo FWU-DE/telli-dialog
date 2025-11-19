@@ -8,7 +8,7 @@ import {
   fetchFileMappings,
   linkFileToCharacter,
 } from '@shared/characters/character-service';
-import { withLoggingAsync } from '@shared/logging.ts/withLogging';
+import { withLoggingAsync } from '@shared/logging';
 
 export async function createNewCharacterAction({
   modelId: _modelId,

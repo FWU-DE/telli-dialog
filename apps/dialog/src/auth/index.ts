@@ -4,7 +4,7 @@ import { mockVidisConfig } from './providers/vidis-mock';
 import { credentialsProvider } from './providers/credentials';
 import { getUserAndContextByUserId } from './utils';
 import { UserAndContext } from './types';
-import { logError, logInfo } from '@/utils/logging/logging';
+import { logError, logInfo } from '@shared/logging';
 import { sessionBlockList } from './session';
 
 declare module 'next-auth' {

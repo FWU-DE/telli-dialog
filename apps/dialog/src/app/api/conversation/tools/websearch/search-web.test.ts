@@ -11,7 +11,7 @@ const TOO_LARGE_PAGE_URL = 'https://openmoji.org/library/';
 vi.mock('next-intl/server', () => ({
   getTranslations: vi.fn(() => (key: string) => key),
 }));
-vi.mock('@/utils/logging/logging', () => ({
+vi.mock('@shared/logging', () => ({
   env: {
     NEXT_PUBLIC_SENTRY_LOG_LEVEL: 'info',
   },

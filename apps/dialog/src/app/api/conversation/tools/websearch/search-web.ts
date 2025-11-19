@@ -6,7 +6,7 @@ import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
 import he from 'he';
 import { unstable_cacheLife as cacheLife } from 'next/cache';
-import { logDebug, logError, logInfo, logWarning } from '@/utils/logging/logging';
+import { logDebug, logError, logInfo, logWarning } from '@shared/logging';
 
 const headers = {
   'User-Agent':

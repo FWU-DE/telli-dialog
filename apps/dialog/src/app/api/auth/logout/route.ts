@@ -1,5 +1,5 @@
 import { auth } from '@/auth';
-import { logError, logInfo, logWarning } from '@/utils/logging/logging';
+import { logError, logInfo, logWarning } from '@shared/logging';
 import { NextResponse } from 'next/server';
 import { LOGOUT_CALLBACK_URL } from '../const';
 import { VIDIS_LOGOUT_URL } from '@/auth/providers/vidis';

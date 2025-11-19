@@ -23,7 +23,7 @@ import { ErrorChatPlaceholder } from './error-chat-placeholder';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
 import { Message } from 'ai';
-import { logDebug, logWarning } from '@/utils/logging/logging';
+import { logDebug, logWarning } from '@shared/logging';
 import { useSession } from 'next-auth/react';
 import { AssistantIcon } from './assistant-icon';
 import { messageContainsAttachments } from '@/utils/chat/messages';

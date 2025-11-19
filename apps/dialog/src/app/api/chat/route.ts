@@ -25,7 +25,7 @@ import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 import { extractImagesAndUrl } from '../file-operations/prepocess-image';
 import { formatMessagesWithImages } from './utils';
-import { logDebug } from '@/utils/logging/logging';
+import { logDebug } from '@shared/logging';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
