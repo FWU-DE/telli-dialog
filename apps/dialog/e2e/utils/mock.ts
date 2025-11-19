@@ -1,6 +1,6 @@
 import { UserAndContext } from '@/auth/types';
 import { generateRandomString } from './random';
-import { generateUUID } from '@/utils/uuid';
+import { generateUUID } from '@shared/utils/uuid';
 import {
   CharacterModel,
   ConversationUsageTrackingModel,

@@ -1,4 +1,4 @@
-import { generateUUID } from '@/utils/uuid';
+import { generateUUID } from '@shared/utils/uuid';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
 import HeaderPortal from '../../../header-portal';
 import { getUser } from '@/auth/utils';

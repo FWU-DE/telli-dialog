@@ -9,7 +9,7 @@ import { dbInsertChatContent } from '@shared/db/functions/chat';
 import { getUser, updateSession, userHasCompletedTraining } from '@/auth/utils';
 import { userHasReachedIntelliPointLimit } from './usage';
 import { getModelAndProviderWithResult, calculateCostsInCent, getAuxiliaryModel } from '../utils';
-import { generateUUID } from '@/utils/uuid';
+import { generateUUID } from '@shared/utils/uuid';
 import { getChatTitle, getMostRecentUserMessage, limitChatHistory } from './utils';
 import { constructChatSystemPrompt } from './system-prompt';
 import { checkProductAccess } from '@/utils/vidis/access';

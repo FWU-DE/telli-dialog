@@ -1,4 +1,4 @@
-import { generateUUID } from '@/utils/uuid';
+import { generateUUID } from '@shared/utils/uuid';
 import { getUser } from '@/auth/utils';
 import { redirect } from 'next/navigation';
 import Chat from '@/components/chat/chat';
