@@ -1,13 +1,8 @@
 import { auth } from '@/auth';
-import {
-  federalStateSelectSchema,
-  SchoolModel,
-  schoolSelectSchema,
-  UserModel,
-  userSchema,
-} from '@shared/db/schema';
+import { SchoolModel, schoolSelectSchema, UserModel, userSchema } from '@shared/db/schema';
 import { ObscuredFederalState } from './utils';
 import { UnauthenticatedError } from '@shared/error';
+import { federalStateSchema } from '@shared/types/federal-state';
 
 export async function requireAuth(): Promise<{
   user: UserModel;
@@ -17,8 +12,14 @@ export async function requireAuth(): Promise<{
   const session = await auth();
   if (!session) throw new UnauthenticatedError();
 
+  // hasApiKeyAssigned is assigned to the user in session object
+  const federalStateFromSession = {
+    ...session.user?.federalState,
+    hasApiKeyAssigned: session.user?.hasApiKeyAssigned,
+  };
+
   const user = userSchema.parse(session.user);
   const school = schoolSelectSchema.parse(session.user?.school);
-  const federalState = federalStateSelectSchema.parse(session.user?.federalState);
+  const federalState = federalStateSchema.parse(federalStateFromSession);
   return { user: user, school: school, federalState: federalState };
 }

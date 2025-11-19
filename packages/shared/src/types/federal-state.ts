@@ -6,6 +6,7 @@ export const federalStateSchema = federalStateSelectSchema
     encryptedApiKey: true,
   })
   .extend({
+    createdAt: z.coerce.date(),
     hasApiKeyAssigned: z.boolean(),
   });
 
