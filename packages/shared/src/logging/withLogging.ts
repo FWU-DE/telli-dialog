@@ -26,7 +26,7 @@ export function withLoggingAsync<T extends (...args: any[]) => Promise<any>>(
       return await fn(...args);
     } catch (error) {
       // Log the error
-      console.error('An error occurred:', error);
+      logError('An error occurred:', error);
       // Rethrow for further handling
       throw error;
     }
