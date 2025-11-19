@@ -7,7 +7,7 @@ import {
   userSchema,
 } from '@shared/db/schema';
 import { ObscuredFederalState } from './utils';
-import { UnauthorizedError } from '@shared/error';
+import { UnauthenticatedError } from '@shared/error';
 
 export async function requireAuth(): Promise<{
   user: UserModel;
@@ -15,7 +15,7 @@ export async function requireAuth(): Promise<{
   federalState: ObscuredFederalState;
 }> {
   const session = await auth();
-  if (!session) throw new UnauthorizedError();
+  if (!session) throw new UnauthenticatedError();
 
   const user = userSchema.parse(session.user);
   const school = schoolSelectSchema.parse(session.user?.school);
