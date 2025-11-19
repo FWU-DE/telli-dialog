@@ -36,13 +36,13 @@ export const vidisProfileSchema = z.object({
   // jti: z.string(),
   iss: z.string(),
   aud: z.string(),
-  sub: z.string(),
+  sub: z.string(), // subject - user id
   // typ: z.literal('ID'),
   // azp: z.string(),
   // session_state: z.string(),
   // at_hash: z.string(),
   // email: z.string(),
-  // sid: z.string(),
+  sid: z.string(), // session id
   is_ai_chat_eligible: z.boolean().optional(),
   rolle: z.string(),
   schulkennung: z.string().or(z.array(z.string())),

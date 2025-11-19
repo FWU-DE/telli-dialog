@@ -3,7 +3,7 @@ import { env } from '@/env';
 import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
 import { EMBEDDING_BATCH_SIZE, EMBEDDING_MAX_CONCURRENT_REQUESTS } from '@/const';
 import { TextChunkInsertModel } from '@shared/db/schema';
-import { logDebug } from '@/utils/logging/logging';
+import { logDebug } from '@shared/logging';
 
 export async function embedText({
   text,

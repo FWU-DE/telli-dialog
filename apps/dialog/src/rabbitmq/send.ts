@@ -1,6 +1,6 @@
 import { trace } from '@opentelemetry/api';
 import { Connection } from 'rabbitmq-client';
-import { logDebug, logError } from '@/utils/logging/logging';
+import { logDebug, logError } from '@shared/logging';
 import { env } from '@/env';
 
 const tracer = trace.getTracer('rabbitmq-client');

@@ -46,7 +46,9 @@ export const userTable = pgTable('user_entity', {
 
 export type InsertUserModel = typeof userTable.$inferInsert;
 export type UserModel = typeof userTable.$inferSelect;
-export const userSelectSchema = createSelectSchema(userTable);
+export const userSelectSchema = createSelectSchema(userTable).extend({
+  createdAt: z.coerce.date(),
+});
 
 export const conversationTable = pgTable(
   'conversation',
@@ -127,7 +129,9 @@ export const schoolTable = pgTable(
 
 export type SchoolInsertModel = typeof schoolTable.$inferInsert;
 export type SchoolModel = typeof schoolTable.$inferSelect;
-export const schoolSelectSchema = createSelectSchema(schoolTable);
+export const schoolSelectSchema = createSelectSchema(schoolTable).extend({
+  createdAt: z.coerce.date(),
+});
 
 export const federalStateFeatureTogglesSchema = z.object({
   isStudentAccessEnabled: z.boolean().default(true),

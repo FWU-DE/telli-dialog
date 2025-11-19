@@ -13,7 +13,7 @@ const PDF_DOC_WRONG_CONTENT_TYPE_URL =
 vi.mock('next-intl/server', () => ({
   getTranslations: vi.fn(() => (key: string) => key),
 }));
-vi.mock('@/utils/logging/logging', () => ({
+vi.mock('@shared/logging', () => ({
   env: {
     NEXT_PUBLIC_SENTRY_LOG_LEVEL: 'info',
   },

@@ -11,10 +11,10 @@ import HeaderPortal from '../../../header-portal';
 import CharacterForm from './character-form';
 import { removeNullishValues } from '@/utils/generic/object-operations';
 import { CharacterModel } from '@shared/db/schema';
-import { fetchFileMapping } from '../../actions';
+import { fetchFileMappingAction } from '../../actions';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
-import { logError } from '@/utils/logging/logging';
+import { logError } from '@shared/logging';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
@@ -43,7 +43,7 @@ export default async function Page(context: PageContext) {
     userId: user.id,
   });
   if (character === undefined) return notFound();
-  const relatedFiles = await fetchFileMapping(params.characterId);
+  const relatedFiles = await fetchFileMappingAction(params.characterId);
   if (!character) {
     return notFound();
   }

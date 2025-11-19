@@ -1,4 +1,4 @@
-import { logError } from '@/utils/logging/logging';
+import { logError } from '@shared/logging';
 import { useTranslations } from 'next-intl';
 import { useState, useCallback } from 'react';
 

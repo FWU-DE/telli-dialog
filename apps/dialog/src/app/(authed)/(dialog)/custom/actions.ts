@@ -5,7 +5,7 @@ import { db } from '@shared/db';
 import { dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
 import { CustomGptFileMapping, customGptTable, FileModel, fileTable } from '@shared/db/schema';
 import { copyFileInS3 } from '@shared/s3';
-import { generateUUID } from '@/utils/uuid';
+import { generateUUID } from '@shared/utils/uuid';
 import { eq } from 'drizzle-orm';
 import { copyRelatedTemplateFiles, copyCustomGpt } from '@shared/services/templateService';
 
