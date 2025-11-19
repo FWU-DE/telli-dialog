@@ -1,15 +1,12 @@
 import { db } from '@shared/db';
 import { FileModelAndContent, fileTable, TextChunkTable } from '@shared/db/schema';
 import { and, desc, eq, inArray, SQL, sql } from 'drizzle-orm';
-import { chunkText, groupAndSortChunks } from './process-chunks';
+import { groupAndSortChunks } from './process-chunks';
 import { condenseChatHistory, getKeywordsFromQuery } from '../chat/utils';
-import { embedText, embedTextChunks } from './embedding';
+import { embedText } from './embedding';
 import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
-import { processFiles } from './process-file';
 import { LanguageModelV1, Message } from 'ai';
-import { dbInsertFileWithTextChunks } from '@shared/db/functions/files';
-import { logWarning } from '@/utils/logging/logging';
 
 type SearchOptions = {
   keywords: string[];
@@ -50,60 +47,14 @@ export async function getRelevantFileContent({
   });
 
   const relatedFileEntityIds = relatedFileEntities.map((file) => file.id);
-  let retrievedTextChunks = await searchTextChunks({
+  const retrievedTextChunks = await searchTextChunks({
     keywords,
     embedding: queryEmbedding ?? [],
     fileIds: relatedFileEntityIds,
     limit: FILE_SEARCH_LIMIT,
   });
 
-  // Fallback: If no chunks found, process files ad-hoc and try search again
-  if (retrievedTextChunks.length === 0) {
-    logWarning('No text chunks found, attempting ad-hoc file processing...', {
-      relatedFileEntityIds,
-    });
-    const processedFiles = await processFiles(relatedFileEntities);
-    // Process each file that hasn't been processed yet
-    await Promise.all(
-      processedFiles.map(async (file) => {
-        const textChunks = chunkText({
-          text: file.content ?? '',
-          sentenceChunkOverlap: 1,
-          lowerBoundWordCount: 200,
-        });
-
-        // Enrich chunks with required properties
-        const enrichedChunks = textChunks.map((chunk, index) => ({
-          ...chunk,
-          fileId: file.id,
-          orderIndex: index,
-          pageNumber: 0, // Default page number for non-PDF files
-        }));
-
-        const chunks = await embedTextChunks({
-          values: enrichedChunks,
-          fileId: file.id,
-          federalStateId: user.federalState.id,
-        });
-        await dbInsertFileWithTextChunks(
-          { id: file.id, name: file.name, size: file.size, type: file.type },
-          chunks,
-        );
-      }),
-    );
-
-    // Try search again after processing
-    retrievedTextChunks = await searchTextChunks({
-      keywords,
-      embedding: queryEmbedding ?? [],
-      fileIds: relatedFileEntityIds,
-      limit: FILE_SEARCH_LIMIT,
-    });
-  }
-
-  const orderedChunks = groupAndSortChunks(retrievedTextChunks);
-
-  return orderedChunks;
+  return groupAndSortChunks(retrievedTextChunks);
 }
 
 /**
