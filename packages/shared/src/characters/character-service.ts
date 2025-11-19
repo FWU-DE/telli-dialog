@@ -1,4 +1,5 @@
 import { db } from '@shared/db';
+import { dbGetCharacterById } from '@shared/db/functions/character';
 import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import {
@@ -8,6 +9,7 @@ import {
   fileTable,
   UserModel,
 } from '@shared/db/schema';
+import { ForbiddenError } from '@shared/error';
 import { copyFileInS3 } from '@shared/s3';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/services/templateService';
 import { generateUUID } from '@shared/utils/uuid';
@@ -79,19 +81,17 @@ export async function createNewCharacter({
     );
   }
 
-  const insertedCharacter = (
-    await db
-      .insert(characterTable)
-      .values({
-        id: characterId,
-        name: '',
-        userId: user.id,
-        schoolId: schoolId,
-        modelId: model.id,
-        pictureId: copyOfTemplatePicture,
-      })
-      .returning()
-  )[0];
+  const [insertedCharacter] = await db
+    .insert(characterTable)
+    .values({
+      id: characterId,
+      name: '',
+      userId: user.id,
+      schoolId: schoolId,
+      modelId: model.id,
+      pictureId: copyOfTemplatePicture,
+    })
+    .returning();
 
   if (insertedCharacter === undefined) {
     throw new Error('Could not create a new character');
@@ -103,8 +103,18 @@ export async function createNewCharacter({
 /**
  * Deletes a character file mapping and the associated file entry in database.
  */
-export async function deleteFileMappingAndEntity({ fileId }: { fileId: string }) {
-  // Todo Authorization check: user must own character
+export async function deleteFileMappingAndEntity({
+  characterId,
+  fileId,
+  userId,
+}: {
+  characterId: string;
+  fileId: string;
+  userId: string;
+}) {
+  // Authorization check: user must own character
+  if ((await isUserOwnerOfCharacter(characterId, userId)) === false)
+    throw new ForbiddenError('Not authorized to delete this file mapping');
 
   // Delete the mapping and the file entry
   await db.transaction(async (tx) => {
@@ -117,7 +127,11 @@ export async function deleteFileMappingAndEntity({ fileId }: { fileId: string })
  * Get all file mappings related to a character for a specific user.
  */
 export async function fetchFileMappings(characterId: string, userId: string): Promise<FileModel[]> {
-  // Todo Authorization check: user must own character
+  // Authorization check: user must own character
+  if ((await isUserOwnerOfCharacter(characterId, userId)) === false)
+    throw new ForbiddenError('Not authorized to fetch file mappings for this character');
+
+  // Fetch and return related files
   return await dbGetRelatedCharacterFiles(characterId);
 }
 
@@ -139,4 +153,12 @@ export async function linkFileToCharacter({
   if (insertedFileMapping === undefined) {
     throw new Error('Could not link file to character');
   }
+}
+
+export async function isUserOwnerOfCharacter(
+  characterId: string,
+  userId: string,
+): Promise<boolean> {
+  const character = await dbGetCharacterById({ characterId });
+  return character?.userId === userId;
 }

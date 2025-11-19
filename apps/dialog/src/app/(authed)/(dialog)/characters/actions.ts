@@ -31,10 +31,20 @@ export async function createNewCharacterAction({
   });
 }
 
-export async function deleteFileMappingAndEntityAction({ fileId }: { fileId: string }) {
+export async function deleteFileMappingAndEntityAction({
+  characterId,
+  fileId,
+}: {
+  characterId: string;
+  fileId: string;
+}) {
   const { user } = await requireAuth();
 
-  return await withLoggingAsync(deleteFileMappingAndEntity)({ fileId });
+  return await withLoggingAsync(deleteFileMappingAndEntity)({
+    characterId,
+    fileId,
+    userId: user.id,
+  });
 }
 
 export async function fetchFileMappingAction(conversationId: string): Promise<FileModel[]> {

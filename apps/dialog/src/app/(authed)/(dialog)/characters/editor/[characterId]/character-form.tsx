@@ -158,7 +158,7 @@ export default function CharacterForm({
     });
 
     setInitialFiles(initialFiles.filter((f) => f.id !== fileId));
-    await deleteFileMappingAndEntityAction({ fileId });
+    await deleteFileMappingAndEntityAction({ characterId: character.id, fileId });
   }
   function handleNewFile(data: { id: string; name: string; file: File }) {
     linkFileToCharacterAction({ fileId: data.id, characterId: character.id })
