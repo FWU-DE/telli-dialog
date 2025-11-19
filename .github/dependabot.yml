@@ -28,7 +28,7 @@ updates:
     directory: '/'
     labels: ['dependencies']
     schedule:
-      interval: 'daily'
+      interval: 'weekly'
     groups:
       # Group safe, non-breaking bumps to reduce PRs
       minor-and-patch:
