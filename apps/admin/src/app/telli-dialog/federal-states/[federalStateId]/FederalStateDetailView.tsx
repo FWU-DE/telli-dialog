@@ -89,7 +89,7 @@ export function FederalStateView(props: FederalStateViewProps) {
       await updateFederalStateAction({
         ...data,
         supportContacts:
-          data.supportContacts.length > 0 ? data.supportContacts.map((s) => s.value) : null,
+          data.supportContacts.length > 0 ? data.supportContacts.map((s) => s.value) : [],
         designConfiguration: parsedDesignConfiguration,
       });
       toast.success('Bundesland erfolgreich aktualisiert');
