@@ -2,7 +2,13 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['ui', 'import-in-the-middle', '@t3-oss/env-nextjs', '@t3-oss/env-core'],
+  transpilePackages: [
+    '@telli/ui',
+    '@telli/shared',
+    'import-in-the-middle',
+    '@t3-oss/env-nextjs',
+    '@t3-oss/env-core',
+  ],
   typescript: {
     // should be checked in the pipeline anyway and takes a lot of time during build
     ignoreBuildErrors: true,

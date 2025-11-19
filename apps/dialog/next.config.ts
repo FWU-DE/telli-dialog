@@ -6,7 +6,13 @@ import path from 'path';
 const isDevBuild = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development';
 
 const baseNextConfig: NextConfig = {
-  transpilePackages: ['ui', 'import-in-the-middle', '@t3-oss/env-nextjs', '@t3-oss/env-core'],
+  transpilePackages: [
+    '@telli/ui',
+    '@telli/shared',
+    'import-in-the-middle',
+    '@t3-oss/env-nextjs',
+    '@t3-oss/env-core',
+  ],
   typescript: {
     // should be checked in the pipeline anyway and takes a lot of time during build
     ignoreBuildErrors: true,
