@@ -55,14 +55,6 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const federalStateToCreate = federalStateCreateSchema.parse(body);
 
-  const encryptedApiKey =
-    federalStateToCreate.decryptedApiKey !== null &&
-    federalStateToCreate.decryptedApiKey !== undefined
-      ? encrypt({
-          text: federalStateToCreate.decryptedApiKey,
-          plainEncryptionKey: env.encryptionKey,
-        })
-      : null;
   const existingFederalState = await dbGetFederalStateById(federalStateToCreate.id);
   console.log('existingFederalState', existingFederalState);
   if (existingFederalState !== undefined) {
@@ -71,6 +63,15 @@ export async function POST(request: NextRequest) {
       { status: 409 },
     );
   }
+  
+  const encryptedApiKey =
+    federalStateToCreate.decryptedApiKey !== null &&
+    federalStateToCreate.decryptedApiKey !== undefined
+      ? encrypt({
+          text: federalStateToCreate.decryptedApiKey,
+          plainEncryptionKey: env.encryptionKey,
+        })
+      : null;
   const inserted = await dbInsertFederalState({ ...federalStateToCreate, encryptedApiKey });
 
   if (inserted === undefined) {
