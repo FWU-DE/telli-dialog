@@ -77,7 +77,7 @@ export function ProjectListView({ organizationId }: ProjectListViewProps) {
           <CardAction>
             <Button onClick={handleNewProject}>Neues Projekt</Button>
             <Button disabled={isPending} onClick={handleRefresh}>
-              Refresh
+              Aktualisieren
             </Button>
           </CardAction>
         </CardHeader>

@@ -62,7 +62,7 @@ export default function TemplateListView() {
           <CardAction>
             <Button onClick={handleNewTemplate}>Neue Vorlage</Button>
             <Button disabled={isPending} onClick={loadTemplates}>
-              Refresh
+              Aktualisieren
             </Button>
           </CardAction>
         </CardHeader>
