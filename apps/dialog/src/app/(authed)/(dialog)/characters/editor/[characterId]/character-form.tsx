@@ -37,7 +37,7 @@ import {
 import ShareContainer from './share-container';
 import { CopyContainer } from '../../../_components/copy-container';
 import { LocalFileState } from '@/components/chat/send-message-form';
-import { deleteFileMappingAndEntity, linkFileToCharacter } from '../../actions';
+import { deleteFileMappingAndEntityAction, linkFileToCharacterAction } from '../../actions';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
 import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
@@ -158,10 +158,10 @@ export default function CharacterForm({
     });
 
     setInitialFiles(initialFiles.filter((f) => f.id !== fileId));
-    await deleteFileMappingAndEntity({ fileId });
+    await deleteFileMappingAndEntityAction({ fileId });
   }
   function handleNewFile(data: { id: string; name: string; file: File }) {
-    linkFileToCharacter({ fileId: data.id, characterId: character.id })
+    linkFileToCharacterAction({ fileId: data.id, characterId: character.id })
       .then()
       .catch(() => toast.error(tToast('edit-toast-error')));
   }
