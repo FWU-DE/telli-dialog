@@ -34,10 +34,6 @@ export function CreateFederalStateModal(props: CreateFederalStateModalProps) {
     reset,
   } = useForm<CreateFederalStateForm>({
     resolver: zodResolver(createFederalStateFormSchema),
-    defaultValues: {
-      id: '',
-      apiKey: '',
-    },
   });
 
   async function onSubmit(data: CreateFederalStateForm) {
@@ -92,22 +88,17 @@ export function CreateFederalStateModal(props: CreateFederalStateModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       onClick={handleClose}
     >
       <div
-        className="bg-white rounded-lg p-6 w-full max-w-md mx-4 shadow-lg"
+        className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Neues Bundesland erstellen</h2>
-          <p className="text-sm text-gray-600 mt-1">
-            Geben Sie die erforderlichen Grunddaten für das neue Bundesland ein.
-          </p>
-        </div>
+        <h2 className="text-xl font-bold mb-4">Neues Bundesland erstellen</h2>
 
         {Object.keys(errors).length > 0 && (
-          <div className="text-red-500 text-sm">
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
             <p>Bitte korrigieren Sie die folgenden Fehler:</p>
             <ul className="list-disc list-inside">
               {Object.entries(errors).map(([field, error]) => (
@@ -133,12 +124,12 @@ export function CreateFederalStateModal(props: CreateFederalStateModalProps) {
             type="password"
           />
 
-          <div className="flex gap-3 justify-end pt-4">
+          <div className="flex gap-2 justify-end">
             <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
               Abbrechen
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Erstelle...' : 'Erstellen'}
+              {isSubmitting ? 'Wird erstellt...' : 'Erstellen'}
             </Button>
           </div>
         </form>

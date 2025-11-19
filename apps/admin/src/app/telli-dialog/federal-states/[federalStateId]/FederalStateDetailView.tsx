@@ -99,11 +99,6 @@ export function FederalStateView(props: FederalStateViewProps) {
     }
   }
 
-  const handleCancel = () => {
-    // Reset form to original values
-    reset(transformToFederalStateEditForm(federalState));
-  };
-
   useEffect(() => {
     reset(transformToFederalStateEditForm(federalState));
   }, [federalState, reset]);
