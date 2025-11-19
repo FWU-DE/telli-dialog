@@ -8,6 +8,12 @@ import { env } from '../../env';
 
 export async function insertFederalStates({ skip = true }: { skip: boolean }) {
   if (skip) return;
+  if (FEDERAL_STATES.length === 0) {
+    const envVariables = FEDERAL_STATE_DEFINITIONS.map((f) => f.envKeyName);
+    throw Error(
+      `Failed to insert Federal States, configure at least one of the following env variables: ${envVariables.join(', ')}`,
+    );
+  }
   for (const federalState of FEDERAL_STATES) {
     await db
       .insert(federalStateTable)

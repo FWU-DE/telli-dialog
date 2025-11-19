@@ -6,6 +6,8 @@ const PDF_DOC_URL =
   'https://www.bpb.de/system/files/dokument_pdf/Zeitleiste_deutsch_zum-Selbstdruck_16_Einzelseiten.pdf';
 const REDIRECT_PAGE_URL = 'https://de.wikipedia.org/';
 const TOO_LARGE_PAGE_URL = 'https://openmoji.org/library/';
+const PDF_DOC_WRONG_CONTENT_TYPE_URL =
+  'https://www.wildtierportal-bw.de/filefly/api?action=download&path=%2Fjagd%2Fjagdzeitenbw2023.jpg';
 
 // mock is needed because test is not running in a next.js environment
 vi.mock('next-intl/server', () => ({
@@ -46,6 +48,14 @@ describe.skip('webScraperExecutable', () => {
     expect(output).toMatchObject({
       error: true,
       link: PDF_DOC_URL,
+    });
+  });
+
+  test('scrape pdf document with "Content-Type: text/html"', async () => {
+    const output = await webScraperExecutable(PDF_DOC_WRONG_CONTENT_TYPE_URL);
+    expect(output).toMatchObject({
+      error: true,
+      link: PDF_DOC_WRONG_CONTENT_TYPE_URL,
     });
   });
 

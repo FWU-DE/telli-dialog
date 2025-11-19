@@ -3,10 +3,9 @@ import { vidisConfig, handleVidisJWTCallback } from './providers/vidis';
 import { mockVidisConfig } from './providers/vidis-mock';
 import { credentialsProvider } from './providers/credentials';
 import { getUserAndContextByUserId } from './utils';
-import { UserAndContext } from './types';
+import { UserAndContext, userAndContextSchema } from './types';
 import { logError, logInfo } from '@/utils/logging/logging';
 import { sessionBlockList } from './session';
-import { consoleLoggingIntegration } from '@sentry/nextjs';
 
 declare module 'next-auth' {
   interface Session {
@@ -57,16 +56,13 @@ const result = NextAuth({
         if (account?.provider === 'credentials' && user?.id) {
           token.userId = user.id;
         }
-        if (trigger === 'update') {
+        const result = userAndContextSchema.safeParse(token.user);
+
+        // Update session data if there is an update or the structure has changed
+        if (trigger === 'update' || !result.success) {
           token.user = await getUserAndContextByUserId({ userId: token.userId as string });
         }
-        if (
-          token.user === undefined ||
-          (token.user as UserAndContext).school === undefined ||
-          (token.user as UserAndContext).federalState.featureToggles === undefined // temporary fix because of structural change in federalState.featureToggles
-        ) {
-          token.user = await getUserAndContextByUserId({ userId: token.userId as string });
-        }
+
         if (profile?.sid) {
           token.sessionId = profile.sid;
         }

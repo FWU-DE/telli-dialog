@@ -1,13 +1,20 @@
-import { type User } from '@shared/db/types';
-import { type SchoolModel, type UserSchoolRole } from '@shared/db/schema';
-import { ObscuredFederalState } from './utils';
+import {
+  federalStateSelectSchema,
+  schoolSelectSchema,
+  userSchoolRoleSchema,
+  userSelectSchema,
+} from '@shared/db/schema';
+import { z } from 'zod';
 
-type UserSchoolProps = SchoolModel & {
-  userRole: UserSchoolRole;
-};
+const obscuredFederalStateSchema = federalStateSelectSchema.omit({ encryptedApiKey: true });
+const userSchoolSchema = schoolSelectSchema.extend({
+  userRole: userSchoolRoleSchema,
+});
 
-export type UserAndContext = User & {
-  school: UserSchoolProps;
-  federalState: ObscuredFederalState;
-  hasApiKeyAssigned: boolean;
-};
+export const userAndContextSchema = userSelectSchema.extend({
+  school: userSchoolSchema,
+  federalState: obscuredFederalStateSchema,
+  hasApiKeyAssigned: z.boolean(),
+});
+
+export type UserAndContext = z.infer<typeof userAndContextSchema>;
