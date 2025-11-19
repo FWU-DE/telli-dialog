@@ -1,6 +1,6 @@
 services:
   keycloak:
-    image: quay.io/keycloak/keycloak:26.4.4
+    image: quay.io/keycloak/keycloak:26.4.5
     container_name: telli_dialog_keycloak
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
