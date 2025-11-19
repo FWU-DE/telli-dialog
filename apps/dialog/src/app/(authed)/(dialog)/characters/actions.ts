@@ -11,7 +11,7 @@ import {
 import { withLoggingAsync } from '@shared/logging';
 
 export async function createNewCharacterAction({
-  modelId: _modelId,
+  modelId,
   templatePictureId,
   templateId,
 }: {
@@ -23,7 +23,7 @@ export async function createNewCharacterAction({
 
   return await withLoggingAsync(createNewCharacter)({
     federalStateId: federalState.id,
-    modelId: _modelId,
+    modelId: modelId,
     schoolId: school.id,
     user,
     templatePictureId,
@@ -40,7 +40,7 @@ export async function deleteFileMappingAndEntityAction({ fileId }: { fileId: str
 export async function fetchFileMappingAction(conversationId: string): Promise<FileModel[]> {
   const { user } = await requireAuth();
 
-  return await withLoggingAsync(fetchFileMappings)(conversationId, user?.id);
+  return await withLoggingAsync(fetchFileMappings)(conversationId, user.id);
 }
 
 export async function linkFileToCharacterAction({

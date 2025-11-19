@@ -10,6 +10,8 @@ export function withLogging<T extends (...args: any[]) => any>(
     } catch (error) {
       if (error instanceof Error) {
         logError(error.message, error);
+      } else {
+        logError('An unknown error occurred', error);
       }
       throw error;
     }
@@ -25,9 +27,11 @@ export function withLoggingAsync<T extends (...args: any[]) => Promise<any>>(
       // Await the original async function
       return await fn(...args);
     } catch (error) {
-      // Log the error
-      logError('An error occurred:', error);
-      // Rethrow for further handling
+      if (error instanceof Error) {
+        logError(error.message, error);
+      } else {
+        logError('An unknown error occurred', error);
+      }
       throw error;
     }
   };

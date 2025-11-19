@@ -42,13 +42,11 @@ export async function createNewCharacter({
       });
 
       // Update the character with the new picture
-      const updatedCharacter = (
-        await db
-          .update(characterTable)
-          .set({ pictureId: copyOfTemplatePicture })
-          .where(eq(characterTable.id, insertedCharacter.id))
-          .returning()
-      )[0];
+      const [updatedCharacter] = await db
+        .update(characterTable)
+        .set({ pictureId: copyOfTemplatePicture })
+        .where(eq(characterTable.id, insertedCharacter.id))
+        .returning();
 
       if (updatedCharacter) {
         insertedCharacter = updatedCharacter;
@@ -76,7 +74,9 @@ export async function createNewCharacter({
   const model = llmModels.find((m) => m.id === _modelId) ?? llmModels[0];
 
   if (model === undefined) {
-    throw new Error('Could not find any model');
+    throw new Error(
+      `Could not find modelId ${_modelId} nor any other model for federalStateId ${federalStateId}`,
+    );
   }
 
   const insertedCharacter = (
@@ -107,20 +107,18 @@ export async function deleteFileMappingAndEntity({ fileId }: { fileId: string })
   // Todo Authorization check: user must own character
 
   // Delete the mapping and the file entry
-  await db.delete(CharacterFileMapping).where(eq(CharacterFileMapping.fileId, fileId));
-  await db.delete(fileTable).where(eq(fileTable.id, fileId));
+  await db.transaction(async (tx) => {
+    await tx.delete(CharacterFileMapping).where(eq(CharacterFileMapping.fileId, fileId));
+    await tx.delete(fileTable).where(eq(fileTable.id, fileId));
+  });
 }
 
 /**
  * Get all file mappings related to a character for a specific user.
  */
-export async function fetchFileMappings(
-  conversationId: string,
-  userId: string | undefined,
-): Promise<FileModel[]> {
-  // Todo Authorization check: user must own conversation
-  if (userId === undefined) return [];
-  return await dbGetRelatedCharacterFiles(conversationId);
+export async function fetchFileMappings(characterId: string, userId: string): Promise<FileModel[]> {
+  // Todo Authorization check: user must own character
+  return await dbGetRelatedCharacterFiles(characterId);
 }
 
 /**
