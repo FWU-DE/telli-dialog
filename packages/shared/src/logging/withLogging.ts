@@ -1,10 +1,9 @@
 import { logError } from './logging';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function withLogging<T extends (...args: any[]) => any>(
-  fn: T,
-): (...args: Parameters<T>) => ReturnType<T> {
-  return (...args: Parameters<T>): ReturnType<T> => {
+export function withLogging<TArgs extends readonly unknown[], TReturn>(
+  fn: (...args: TArgs) => TReturn,
+): (...args: TArgs) => TReturn {
+  return (...args: TArgs): TReturn => {
     try {
       return fn(...args);
     } catch (error) {
@@ -18,11 +17,10 @@ export function withLogging<T extends (...args: any[]) => any>(
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function withLoggingAsync<T extends (...args: any[]) => Promise<any>>(
-  fn: T,
-): (...args: Parameters<T>) => Promise<ReturnType<T>> {
-  return async (...args: Parameters<T>): Promise<ReturnType<T>> => {
+export function withLoggingAsync<TArgs extends readonly unknown[], TReturn>(
+  fn: (...args: TArgs) => Promise<TReturn>,
+): (...args: TArgs) => Promise<TReturn> {
+  return async (...args: TArgs): Promise<TReturn> => {
     try {
       // Await the original async function
       return await fn(...args);
