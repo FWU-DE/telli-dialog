@@ -2,8 +2,7 @@ import { createEnv } from '@t3-oss/env-core';
 import { z } from 'zod';
 
 export const env = createEnv({
-  // Empty client prefix means do not expose any variables to the client
-  clientPrefix: '',
+  clientPrefix: 'NEXT_PUBLIC_',
   client: {
     NEXT_PUBLIC_SENTRY_LOG_LEVEL: z
       .union([
