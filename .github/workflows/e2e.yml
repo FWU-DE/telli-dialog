@@ -36,10 +36,23 @@ jobs:
       NEXTAUTH_URL: http://localhost:3000
       DATABASE_URL: postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db
       VALKEY_URL: redis://127.0.0.1:6379/0
+      VIDIS_CLIENT_ID: telli-e2e-client
+      VIDIS_CLIENT_SECRET: ClientSecret-e2e
+      VIDIS_ISSUER_URI: http://localhost:8080/realms/telli-local
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
+
+      # Keycloak container cannot be started under services, because it needs to mount files from the repo
+      - name: Start keycloak container
+        run: |
+          docker run --rm --detach \
+            -v "$PWD/devops/docker/keycloak:/opt/keycloak/data/import" \
+            -p 8080:8080 \
+            -e CLIENT_NAME=$VIDIS_CLIENT_ID -e CLIENT_SECRET=$VIDIS_CLIENT_SECRET \
+            --entrypoint /opt/keycloak/data/import/entrypoint.sh \
+            quay.io/keycloak/keycloak:26.4
 
       - name: Load 1Password Secrets
         uses: 1password/load-secrets-action@v3
@@ -54,9 +67,6 @@ jobs:
           OTC_BUCKET_NAME: op://telli Engineering/.env.e2e chatbot/OTC_BUCKET_NAME
           # SENTRY_AUTH_TOKEN: op://telli Engineering/.env.e2e chatbot/SENTRY_AUTH_TOKEN
           SENTRY_ENVIRONMENT: op://telli Engineering/.env.e2e chatbot/SENTRY_ENVIRONMENT
-          VIDIS_CLIENT_ID: op://telli Engineering/.env.e2e chatbot/VIDIS_CLIENT_ID
-          VIDIS_CLIENT_SECRET: op://telli Engineering/.env.e2e chatbot/VIDIS_CLIENT_SECRET
-          VIDIS_ISSUER_URI: op://telli Engineering/.env.e2e chatbot/VIDIS_ISSUER_URI
           API_URL: op://telli Engineering/.env.e2e chatbot/API_URL
           ENCRYPTION_KEY: op://telli Engineering/.env.e2e chatbot/ENCRYPTION_KEY
           SENTRY_DSN: op://telli Engineering/.env.e2e chatbot/SENTRY_DSN
@@ -90,7 +100,6 @@ jobs:
       - name: Start application
         run: |
           NODE_ENV=test pnpm --filter telli-dialog build:envless
-          pnpm --filter telli-dialog start:oidc &
           pnpm --filter telli-dialog start &
         env:
           NEXT_TELEMETRY_DISABLED: 1
