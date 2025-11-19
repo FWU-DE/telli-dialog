@@ -6,7 +6,6 @@ import { getUserAndContextByUserId } from './utils';
 import { UserAndContext } from './types';
 import { logError, logInfo } from '@/utils/logging/logging';
 import { sessionBlockList } from './session';
-import { consoleLoggingIntegration } from '@sentry/nextjs';
 
 declare module 'next-auth' {
   interface Session {
