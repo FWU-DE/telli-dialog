@@ -11,7 +11,6 @@ import {
   FileModel,
   fileTable,
   sharedCharacterConversation,
-  UserSelectModel,
 } from '@shared/db/schema';
 import { ForbiddenError } from '@shared/error';
 import { logError } from '@shared/logging';
@@ -37,7 +36,7 @@ export async function createNewCharacter({
   federalStateId: string;
   modelId?: string;
   schoolId: string;
-  user: UserSelectModel;
+  user: UserModel;
   templatePictureId?: string;
   templateId?: string;
 }) {

@@ -94,7 +94,7 @@ export async function dbGetCopyTemplateCharacter({
   templateId: string;
   characterId: string;
   userId: string;
-}): Promise<Omit<CharacterInsertModel, 'modelId'>> {
+}): Promise<Omit<CharacterSelectModel, 'modelId'>> {
   const character = await dbGetCharacterByIdWithShareData({ characterId: templateId, userId });
   if (character?.name === undefined) {
     throw new Error('Invalid State Template Character must have a name');
