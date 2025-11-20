@@ -3,10 +3,10 @@ import {
   fetchProjects,
   fetchSingleProject,
   createProject,
-} from '../../../../../services/project-service';
-import { fetchApiKeys, createApiKey } from '../../../../../services/api-key-service';
-import { Project } from '../../../../../types/project';
-import { ApiKey } from '../../../../../types/api-key';
+} from '@/services/project-service';
+import { fetchApiKeys } from '@/services/api-key-service';
+import { Project } from '@/types/project';
+import { ApiKey } from '@/types/api-key';
 
 export async function getProjectsAction(organizationId: string) {
   // Todo: Server actions expose a public POST endpoint so we have to check if the user is authorized
@@ -49,30 +49,4 @@ export async function getApiKeysAction(organizationId: string, projectId: string
 
   // Todo: error handling
   return fetchApiKeys(organizationId, projectId);
-}
-
-export async function createApiKeyAction(
-  organizationId: string,
-  projectId: string,
-  name: string,
-  state?: 'active' | 'inactive' | 'deleted',
-  limitInCent?: number,
-  expiresAt?: Date | null,
-): Promise<ApiKey> {
-  // Todo: Server actions expose a public POST endpoint so we have to check if the user is authorized
-
-  if (!name.trim()) {
-    throw new Error('API-Schlüssel-Name ist erforderlich');
-  }
-
-  try {
-    return await createApiKey(organizationId, projectId, {
-      name: name.trim(),
-      state,
-      limitInCent,
-      expiresAt,
-    });
-  } catch (error) {
-    throw new Error('Fehler beim Erstellen des API-Schlüssels');
-  }
 }

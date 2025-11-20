@@ -1,5 +1,5 @@
 import { env } from '../consts/env';
-import { ApiKey } from '../types/api-key';
+import { ApiKey, ApiKeyWithPlainKey } from '../types/api-key';
 import { fetchFromApi } from './fetch';
 
 const apiRoutes = {
@@ -9,6 +9,8 @@ const apiRoutes = {
     `/v1/admin/organizations/${organizationId}/projects/${projectId}/api-keys/${apiKeyId}`,
   CREATE: (organizationId: string, projectId: string) =>
     `/v1/admin/organizations/${organizationId}/projects/${projectId}/api-keys`,
+  PATCH_SINGLE: (organizationId: string, projectId: string, apiKeyId: string) =>
+    `/v1/admin/organizations/${organizationId}/projects/${projectId}/api-keys/${apiKeyId}`,
 };
 
 export async function fetchApiKeys(organizationId: string, projectId: string): Promise<ApiKey[]> {
@@ -42,11 +44,34 @@ export async function createApiKey(
     limitInCent?: number;
     expiresAt?: Date | null;
   },
-): Promise<ApiKey> {
+): Promise<ApiKeyWithPlainKey> {
   const response = await fetchFromApi(
     env.telliApiBaseUrl + apiRoutes.CREATE(organizationId, projectId),
     {
       method: 'POST',
+      body: JSON.stringify(apiKeyData),
+    },
+  );
+
+  const data = await response.json();
+  return data as ApiKeyWithPlainKey;
+}
+
+export async function updateApiKey(
+  organizationId: string,
+  projectId: string,
+  apiKeyId: string,
+  apiKeyData: {
+    name: string;
+    state?: 'active' | 'inactive' | 'deleted';
+    limitInCent?: number;
+    expiresAt?: Date | null;
+  },
+): Promise<ApiKey> {
+  const response = await fetchFromApi(
+    env.telliApiBaseUrl + apiRoutes.PATCH_SINGLE(organizationId, projectId, apiKeyId),
+    {
+      method: 'PATCH',
       body: JSON.stringify(apiKeyData),
     },
   );

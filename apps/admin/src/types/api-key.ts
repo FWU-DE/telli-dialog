@@ -11,3 +11,10 @@ export const apiKeySchema = z.object({
 });
 
 export type ApiKey = z.infer<typeof apiKeySchema>;
+
+export const apiKeyWithPlainKeySchema = apiKeySchema.extend({
+  plainKey: z.string(),
+});
+
+export type ApiKeyWithPlainKey = z.infer<typeof apiKeyWithPlainKeySchema>;
+

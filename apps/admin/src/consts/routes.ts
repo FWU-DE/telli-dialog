@@ -3,8 +3,10 @@ import { TemplateTypes } from '@shared/models/templates';
 export const ROUTES = {
   home: '/',
   api: {
-    apiKeys: (organizationId: string, projectId: string) =>
-      `/organizations/${organizationId}/projects/${projectId}/api-keys`,
+    apiKeyDetails: (organizationId: string, projectId: string, apiKeyId: string) =>
+      `/organizations/${organizationId}/projects/${projectId}/api-keys/${apiKeyId}`,
+    apiKeyNew: (organizationId: string, projectId: string) =>
+      `/organizations/${organizationId}/projects/${projectId}/api-keys/new`,
     apiKeyModelMappings: (organizationId: string, projectId: string, apiKeyId: string) =>
       `/organizations/${organizationId}/projects/${projectId}/api-keys/${apiKeyId}/model-mappings`,
     models: (organizationId: string) => `/organizations/${organizationId}/models`,
