@@ -225,15 +225,26 @@ export const characterTable = pgTable(
 );
 
 export const characterSelectSchema = createSelectSchema(characterTable);
-export const characterInsertSchema = createInsertSchema(characterTable).omit({
-  id: true,
-  createdAt: true,
-});
-export const characterUpdateSchema = createUpdateSchema(characterTable).omit({
-  id: true,
-  userId: true,
-  createdAt: true,
-});
+export const characterInsertSchema = createInsertSchema(characterTable)
+  .omit({
+    id: true,
+    createdAt: true,
+  })
+  // for any reason accessLevel has a different type so we have to override it here
+  .extend({
+    accessLevel: characterAccessLevelSchema,
+  });
+export const characterUpdateSchema = createUpdateSchema(characterTable)
+  .omit({
+    id: true,
+    userId: true,
+    createdAt: true,
+  })
+  // for any reason accessLevel has a different type so we have to override it here
+  .extend({
+    accessLevel: characterAccessLevelSchema,
+  });
+
 export type CharacterSelectModel = z.infer<typeof characterSelectSchema>;
 export type CharacterInsertModel = z.infer<typeof characterInsertSchema>;
 export type CharacterUpdateModel = z.infer<typeof characterUpdateSchema>;
