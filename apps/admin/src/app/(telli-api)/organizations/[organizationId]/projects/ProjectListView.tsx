@@ -76,7 +76,7 @@ export function ProjectListView({ organizationId }: ProjectListViewProps) {
           <CardDescription>Liste aller Projekte in dieser Organisation.</CardDescription>
           <CardAction>
             <Button onClick={handleNewProject}>Neues Projekt</Button>
-            <Button disabled={isPending} onClick={handleRefresh}>
+            <Button disabled={isPending} onClick={handleRefresh} className="ml-2">
               Aktualisieren
             </Button>
           </CardAction>

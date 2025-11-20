@@ -40,7 +40,7 @@ export async function LargeLanguageModelListView({
           <Link href={`/organizations/${organizationId}/llms/new`}>
             <Button>Neues Modell</Button>
           </Link>
-          <Button>Aktualisieren</Button>
+          <Button className="ml-2">Aktualisieren</Button>
         </CardAction>
       </CardHeader>
       <CardContent>

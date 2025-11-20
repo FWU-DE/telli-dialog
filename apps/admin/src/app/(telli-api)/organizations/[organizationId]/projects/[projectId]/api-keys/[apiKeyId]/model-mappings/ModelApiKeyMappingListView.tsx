@@ -125,7 +125,7 @@ export function ModelApiKeyMappingListView({
           <Button onClick={handleSave} disabled={isSaving}>
             {isSaving ? 'Speichere...' : 'Zuordnungen speichern'}
           </Button>
-          <Button onClick={loadData} disabled={isLoading}>
+          <Button onClick={loadData} disabled={isLoading} className="ml-2">
             Aktualisieren
           </Button>
         </CardAction>

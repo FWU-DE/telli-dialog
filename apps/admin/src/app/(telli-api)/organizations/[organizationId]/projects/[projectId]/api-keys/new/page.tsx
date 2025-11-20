@@ -1,14 +1,14 @@
 import { ApiKeyDetailView } from '../ApiKeyDetailView';
 
-export default function NewApiKeyPage({
+export default async function NewApiKeyPage({
   params,
 }: {
-  params: {
+  params: Promise<{
     organizationId: string;
     projectId: string;
-  };
+  }>;
 }) {
-  const { organizationId, projectId } = params;
+  const { organizationId, projectId } = await params;
 
   return (
     <div className="container mx-auto py-8">

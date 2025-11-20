@@ -5,13 +5,13 @@ import { redirect } from 'next/navigation';
 export default async function ApiKeyDetailPage({
   params,
 }: {
-  params: {
+  params: Promise<{
     organizationId: string;
     projectId: string;
     apiKeyId: string;
-  };
+  }>;
 }) {
-  const { organizationId, projectId, apiKeyId } = params;
+  const { organizationId, projectId, apiKeyId } = await params;
 
   try {
     const apiKey = await getApiKeyByIdAction(organizationId, projectId, apiKeyId);

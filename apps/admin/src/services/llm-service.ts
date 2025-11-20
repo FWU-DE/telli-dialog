@@ -1,4 +1,3 @@
-import { POST } from '@/app/api/auth/[...nextauth]/route';
 import { env } from '../consts/env';
 import { LargeLanguageModel } from '../types/large-language-model';
 import { fetchFromApi } from './fetch';

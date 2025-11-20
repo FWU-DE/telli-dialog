@@ -67,7 +67,7 @@ export default function FederalStateListView() {
             <Button onClick={() => setIsCreateModalOpen(true)} disabled={isPending}>
               Neues Bundesland
             </Button>
-            <Button disabled={isPending} onClick={handleRefresh}>
+            <Button disabled={isPending} onClick={handleRefresh} className="ml-2">
               {isPending ? 'Lädt...' : 'Aktualisieren'}
             </Button>
           </CardAction>

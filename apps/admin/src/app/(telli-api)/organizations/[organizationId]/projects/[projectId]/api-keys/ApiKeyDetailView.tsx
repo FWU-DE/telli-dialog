@@ -55,7 +55,7 @@ export function ApiKeyDetailView({
     control,
     formState: { isValid, errors, isSubmitting, isDirty },
     handleSubmit,
-    reset,
+    setValue,
     watch,
   } = useForm<ApiKeyForm>({
     resolver: zodResolver(apiKeyFormSchema),
@@ -279,10 +279,7 @@ export function ApiKeyDetailView({
               value={formatDateTimeLocal(watch('expiresAt'))}
               onChange={(e) => {
                 const newValue = parseDateTimeLocal(e.target.value);
-                reset({
-                  ...watch(),
-                  expiresAt: newValue,
-                });
+                setValue('expiresAt', newValue);
               }}
               disabled={isSubmitting}
             />
