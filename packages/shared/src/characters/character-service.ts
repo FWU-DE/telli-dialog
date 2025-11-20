@@ -120,7 +120,7 @@ export async function deleteFileMappingAndEntity({
   userId: string;
 }) {
   // Authorization check: user must own character
-  if ((await isUserOwnerOfCharacter(characterId, userId)) === false)
+  if ((await isUserOwnerOfCharacterOrGlobal(characterId, userId)).isOwner === false)
     throw new ForbiddenError('Not authorized to delete this file mapping');
 
   // Delete the mapping and the file entry
@@ -131,11 +131,14 @@ export async function deleteFileMappingAndEntity({
 }
 
 /**
- * Get all file mappings related to a character for a specific user.
+ * Get all file mappings related to a character.
+ * The user must be the owner of the character OR
+ * it is a global character.
  */
 export async function fetchFileMappings(characterId: string, userId: string): Promise<FileModel[]> {
-  // Authorization check: user must own character
-  if ((await isUserOwnerOfCharacter(characterId, userId)) === false)
+  // Authorization check: user must own character or global character
+  const { isOwner, isGlobal } = await isUserOwnerOfCharacterOrGlobal(characterId, userId);
+  if (isOwner === false && isGlobal === false)
     throw new ForbiddenError('Not authorized to fetch file mappings for this character');
 
   // Fetch and return related files
@@ -155,7 +158,7 @@ export async function linkFileToCharacter({
   userId: string;
 }) {
   // Authorization check: user must own character
-  if ((await isUserOwnerOfCharacter(characterId, userId)) === false)
+  if ((await isUserOwnerOfCharacterOrGlobal(characterId, userId)).isOwner === false)
     throw new ForbiddenError('Not authorized to add new file for this character');
 
   const [insertedFileMapping] = await db
@@ -182,7 +185,7 @@ export async function updateCharacterAccessLevel({
   userId: string;
 }) {
   // Authorization check: user must own character
-  if ((await isUserOwnerOfCharacter(characterId, userId)) === false)
+  if ((await isUserOwnerOfCharacterOrGlobal(characterId, userId)).isOwner === false)
     throw new ForbiddenError('Not authorized to set the access level of this character');
 
   if (accessLevel === 'global') {
@@ -218,15 +221,14 @@ export async function updateCharacterPicture({
   userId: string;
 }) {
   // Authorization check: user must own character
-  if ((await isUserOwnerOfCharacter(characterId, userId)) === false)
+  if ((await isUserOwnerOfCharacterOrGlobal(characterId, userId)).isOwner === false)
     throw new ForbiddenError('Not authorized to update the picture of this character');
-  const updatedCharacter = (
-    await db
-      .update(characterTable)
-      .set({ pictureId: picturePath })
-      .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)))
-      .returning()
-  )[0];
+
+  const [updatedCharacter] = await db
+    .update(characterTable)
+    .set({ pictureId: picturePath })
+    .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)))
+    .returning();
 
   if (updatedCharacter === undefined) {
     throw new Error('Could not update the picture of the character');
@@ -255,7 +257,7 @@ export async function updateCharacter({
   ...character
 }: UpdateCharacterActionModel & { characterId: string; userId: string }) {
   // Authorization check: user must own character
-  if ((await isUserOwnerOfCharacter(characterId, userId)) === false)
+  if ((await isUserOwnerOfCharacterOrGlobal(characterId, userId)).isOwner === false)
     throw new ForbiddenError('Not authorized to update the picture of this character');
 
   const cleanedCharacter = removeNullishValues(character);
@@ -288,7 +290,7 @@ export async function deleteCharacter({
   userId: string;
 }) {
   // Authorization check: user must own character
-  if ((await isUserOwnerOfCharacter(characterId, userId)) === false)
+  if ((await isUserOwnerOfCharacterOrGlobal(characterId, userId)).isOwner === false)
     throw new ForbiddenError('Not authorized to delete this character');
 
   // delete character from db
@@ -320,16 +322,24 @@ export async function shareCharacter({
   telliPointsPercentageLimit: number;
   usageTimeLimitMinutes: number;
 }) {
-  // Authorization check: user must be a teacher
+  // Authorization check: user must be a teacher and owner of the character or it is global
+  const { isOwner, isGlobal } = await isUserOwnerOfCharacterOrGlobal(id, user.id);
+  if (isOwner === false && isGlobal === false)
+    throw new ForbiddenError('Not authorized to share this character');
+
   if (user.userRole !== 'teacher') {
     throw new ForbiddenError('Only a teacher can share a character');
   }
+
+  // validate input parameters
   if (telliPointsPercentageLimit < 0 || telliPointsPercentageLimit > 100) {
     throw new Error('telli points percentage limit must be between 0 and 100');
   }
   if (usageTimeLimitMinutes <= 0 || usageTimeLimitMinutes > 30 * 24 * 60) {
     throw new Error('usage time limit must be between 1 and 43200 minutes');
   }
+
+  // share character instance
   const [maybeExistingEntry] = await db
     .select()
     .from(sharedCharacterConversation)
@@ -402,14 +412,16 @@ export async function unshareCharacater({ id, user }: { id: string; user: UserMo
 }
 
 /**
- * Loads character from db and checks if the user is the owner.
+ * Loads character from db and returns
+ * - if the user is the owner
+ * - if the character is global
  */
-export async function isUserOwnerOfCharacter(
+export async function isUserOwnerOfCharacterOrGlobal(
   characterId: string,
   userId: string,
-): Promise<boolean> {
+): Promise<{ isOwner: boolean; isGlobal: boolean }> {
   const character = await dbGetCharacterById({ characterId });
-  return character?.userId === userId;
+  return { isOwner: character?.userId === userId, isGlobal: character?.accessLevel === 'global' };
 }
 
 /**
