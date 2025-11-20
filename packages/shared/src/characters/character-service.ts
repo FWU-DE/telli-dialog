@@ -391,7 +391,7 @@ export async function unshareCharacter({ id, user }: { id: string; user: UserMod
     throw new ForbiddenError('Not authorized to stop this shared character instance');
 
   if (user.userRole !== 'teacher') {
-    throw Error('Only a teacher can stop share a character');
+    throw new ForbiddenError('Only a teacher can unshare a character');
   }
 
   const [updatedCharacter] = await db
