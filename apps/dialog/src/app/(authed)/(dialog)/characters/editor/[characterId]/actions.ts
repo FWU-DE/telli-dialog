@@ -1,15 +1,13 @@
 'use server';
 
-import { db } from '@shared/db';
-import { CharacterAccessLevel, sharedCharacterConversation } from '@shared/db/schema';
-import { getUser } from '@/auth/utils';
-import { and, eq } from 'drizzle-orm';
+import { CharacterAccessLevel } from '@shared/db/schema';
 import { SharedConversationShareFormValues } from '../../../shared-chats/[sharedSchoolChatId]/schema';
 import { requireAuth } from '@/auth/requireAuth';
 import { withLoggingAsync } from '@shared/logging';
 import {
   deleteCharacter,
   shareCharacter,
+  unshareCharacater,
   updateCharacter,
   updateCharacterAccessLevel,
   UpdateCharacterActionModel,
@@ -77,7 +75,7 @@ export async function deleteCharacterAction({
   });
 }
 
-export async function handleInitiateCharacterShareAction({
+export async function shareCharacterAction({
   id,
   intelliPointsPercentageLimit,
   usageTimeLimit,
@@ -92,32 +90,11 @@ export async function handleInitiateCharacterShareAction({
   });
 }
 
-export async function handleStopCharacaterShareAction({ id }: { id: string }) {
-  const user = await getUser();
+export async function unshareCharacaterAction({ id }: { id: string }) {
+  const { user } = await requireAuth();
 
-  if (user.school === undefined) {
-    throw Error('User is not part of a school');
-  }
-
-  if (user.school.userRole !== 'teacher') {
-    throw Error('Only a teacher can stop share a character');
-  }
-
-  const updatedCharacter = (
-    await db
-      .delete(sharedCharacterConversation)
-      .where(
-        and(
-          eq(sharedCharacterConversation.characterId, id),
-          eq(sharedCharacterConversation.userId, user.id),
-        ),
-      )
-      .returning()
-  )[0];
-
-  if (updatedCharacter === undefined) {
-    throw Error('Could not stop share character');
-  }
-
-  return updatedCharacter;
+  return withLoggingAsync(unshareCharacater)({
+    id,
+    user: user,
+  });
 }

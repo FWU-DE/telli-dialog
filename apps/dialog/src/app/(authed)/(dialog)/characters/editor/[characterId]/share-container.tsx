@@ -8,7 +8,7 @@ import {
   usageTimeValuesInMinutes,
 } from '../../../shared-chats/[sharedSchoolChatId]/schema';
 import { CharacterSelectModel } from '@shared/db/schema';
-import { handleInitiateCharacterShareAction, handleStopCharacaterShareAction } from './actions';
+import { shareCharacterAction, unshareCharacaterAction } from './actions';
 import { calculateTimeLeftBySharedChat } from '../../../shared-chats/[sharedSchoolChatId]/utils';
 import { useToast } from '@/components/common/toast';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -49,7 +49,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
   function handleStartSharing() {
     const data = getValuesShare();
 
-    handleInitiateCharacterShareAction({ ...data, id: character.id })
+    shareCharacterAction({ ...data, id: character.id })
       .then(() => {
         toast.success(tToasts('share-toast-success'));
         router.push(shareUILink);
@@ -61,7 +61,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
   }
 
   function handleStopSharing() {
-    handleStopCharacaterShareAction({ id: character.id })
+    unshareCharacaterAction({ id: character.id })
       .then(() => {
         toast.success(tToasts('stop-share-toast-success'));
         router.refresh();

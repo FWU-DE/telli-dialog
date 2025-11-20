@@ -370,6 +370,39 @@ export async function shareCharacter({
 }
 
 /**
+ * A teacher can unshare a character if he was the one that started the sharing.
+ */
+export async function unshareCharacater({ id, user }: { id: string; user: UserModel }) {
+  // Authorization check: user must be a teacher and owner of the sharing itself
+  const [sharedCharacterConversion] = await db
+    .select()
+    .from(sharedCharacterConversation)
+    .where(eq(sharedCharacterConversation.characterId, id));
+  if (sharedCharacterConversion?.userId !== user.id)
+    throw new ForbiddenError('Not authorized to stop this shared character instance');
+
+  if (user.userRole !== 'teacher') {
+    throw Error('Only a teacher can stop share a character');
+  }
+
+  const [updatedCharacter] = await db
+    .delete(sharedCharacterConversation)
+    .where(
+      and(
+        eq(sharedCharacterConversation.characterId, id),
+        eq(sharedCharacterConversation.userId, user.id),
+      ),
+    )
+    .returning();
+
+  if (updatedCharacter === undefined) {
+    throw new Error('Could not stop sharing of character');
+  }
+
+  return updatedCharacter;
+}
+
+/**
  * Loads character from db and checks if the user is the owner.
  */
 export async function isUserOwnerOfCharacter(
@@ -380,6 +413,9 @@ export async function isUserOwnerOfCharacter(
   return character?.userId === userId;
 }
 
+/**
+ * Generates an invite code for sharing characters.
+ */
 export function generateInviteCode(length = 8) {
   const nanoid = customAlphabet('123456789ABCDEFGHIJKLMNPQRSTUVWXYZ', length);
   return nanoid().toUpperCase();
