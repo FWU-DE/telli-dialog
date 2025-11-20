@@ -2,18 +2,21 @@
 
 import { db } from '@shared/db';
 import { dbDeleteCharacterByIdAndUserId } from '@shared/db/functions/character';
-import {
-  CharacterAccessLevel,
-  CharacterInsertModel,
-  characterTable,
-  sharedCharacterConversation,
-} from '@shared/db/schema';
+import { CharacterAccessLevel, sharedCharacterConversation } from '@shared/db/schema';
 import { deleteFileFromS3 } from '@shared/s3';
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
 import { SharedConversationShareFormValues } from '../../../shared-chats/[sharedSchoolChatId]/schema';
 import { generateInviteCode } from '../../../shared-chats/[sharedSchoolChatId]/utils';
-import { removeNullishValues } from '@/utils/generic/object-operations';
+import { requireAuth } from '@/auth/requireAuth';
+import { withLoggingAsync } from '@shared/logging';
+import {
+  deleteCharacter,
+  updateCharacter,
+  updateCharacterAccessLevel,
+  UpdateCharacterActionModel,
+  updateCharacterPicture,
+} from '@shared/characters/character-service';
 
 export async function updateCharacterAccessLevelAction({
   characterId,
@@ -22,25 +25,13 @@ export async function updateCharacterAccessLevelAction({
   characterId: string;
   accessLevel: CharacterAccessLevel;
 }) {
-  if (accessLevel === 'global') {
-    throw Error('Cannot update character to be global');
-  }
+  const { user } = await requireAuth();
 
-  const user = await getUser();
-
-  const updatedCharacter = (
-    await db
-      .update(characterTable)
-      .set({ accessLevel })
-      .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, user.id)))
-      .returning()
-  )[0];
-
-  if (updatedCharacter === undefined) {
-    throw Error('Could not update the access level of the character');
-  }
-
-  return updatedCharacter;
+  return await withLoggingAsync(updateCharacterAccessLevel)({
+    characterId,
+    accessLevel,
+    userId: user.id,
+  });
 }
 
 export async function updateCharacterPictureAction({
@@ -50,45 +41,26 @@ export async function updateCharacterPictureAction({
   characterId: string;
   picturePath: string;
 }) {
-  const user = await getUser();
+  const { user } = await requireAuth();
 
-  const updatedCharacter = (
-    await db
-      .update(characterTable)
-      .set({ pictureId: picturePath })
-      .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, user.id)))
-      .returning()
-  )[0];
-
-  if (updatedCharacter === undefined) {
-    throw Error('Could not update the picture of the character');
-  }
-
-  return updatedCharacter;
+  return await withLoggingAsync(updateCharacterPicture)({
+    characterId,
+    picturePath,
+    userId: user.id,
+  });
 }
 
 export async function updateCharacterAction({
   characterId,
   ...character
-}: Omit<CharacterInsertModel, 'userId'> & { characterId: string }) {
-  const user = await getUser();
+}: UpdateCharacterActionModel & { characterId: string }) {
+  const { user } = await requireAuth();
 
-  const cleanedCharacter = removeNullishValues(character);
-  if (cleanedCharacter === undefined) return;
-
-  const { id, accessLevel, schoolId, createdAt, ...updatableProps } = cleanedCharacter;
-  const updatedCharacter = (
-    await db
-      .update(characterTable)
-      .set({ ...updatableProps })
-      .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, user.id)))
-      .returning()
-  )[0];
-
-  if (updatedCharacter === undefined) {
-    throw Error('Could not update the character');
-  }
-  return updatedCharacter;
+  return await withLoggingAsync(updateCharacter)({
+    characterId,
+    userId: user.id,
+    ...character,
+  });
 }
 
 export async function deleteCharacterAction({
@@ -98,21 +70,13 @@ export async function deleteCharacterAction({
   characterId: string;
   pictureId?: string;
 }) {
-  const user = await getUser();
+  const { user } = await requireAuth();
 
-  const deletedCharacter = await dbDeleteCharacterByIdAndUserId({ characterId, userId: user.id });
-
-  const maybePictureId = deletedCharacter.pictureId ?? pictureId;
-
-  if (maybePictureId !== null && maybePictureId !== undefined) {
-    try {
-      await deleteFileFromS3({ key: maybePictureId });
-    } catch (error) {
-      console.error({ error });
-    }
-  }
-
-  return deletedCharacter;
+  await withLoggingAsync(deleteCharacter)({
+    characterId,
+    pictureId,
+    userId: user.id,
+  });
 }
 
 export async function handleInitiateCharacterShareAction({
