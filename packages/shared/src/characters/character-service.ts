@@ -381,7 +381,7 @@ export async function shareCharacter({
 /**
  * A teacher can unshare a character if he was the one that started the sharing.
  */
-export async function unshareCharacater({ id, user }: { id: string; user: UserModel }) {
+export async function unshareCharacter({ id, user }: { id: string; user: UserModel }) {
   // Authorization check: user must be a teacher and owner of the sharing itself
   const [sharedCharacterConversion] = await db
     .select()

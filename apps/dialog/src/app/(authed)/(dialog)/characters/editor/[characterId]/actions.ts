@@ -7,7 +7,7 @@ import { withLoggingAsync } from '@shared/logging';
 import {
   deleteCharacter,
   shareCharacter,
-  unshareCharacater,
+  unshareCharacter,
   updateCharacter,
   updateCharacterAccessLevel,
   UpdateCharacterActionModel,
@@ -90,10 +90,10 @@ export async function shareCharacterAction({
   });
 }
 
-export async function unshareCharacaterAction({ id }: { id: string }) {
+export async function unshareCharacterAction({ id }: { id: string }) {
   const { user } = await requireAuth();
 
-  return withLoggingAsync(unshareCharacater)({
+  return withLoggingAsync(unshareCharacter)({
     id,
     user: user,
   });
