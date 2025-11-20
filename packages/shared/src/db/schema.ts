@@ -220,8 +220,19 @@ export const characterTable = pgTable(
   (table) => [index().on(table.userId), index().on(table.schoolId)],
 );
 
-export type CharacterInsertModel = typeof characterTable.$inferInsert;
-export type CharacterModel = typeof characterTable.$inferSelect;
+export const characterSelectSchema = createSelectSchema(characterTable);
+export const characterInsertSchema = createInsertSchema(characterTable).omit({
+  id: true,
+  createdAt: true,
+});
+export const characterUpdateSchema = createUpdateSchema(characterTable).omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+});
+export type CharacterSelectModel = z.infer<typeof characterSelectSchema>;
+export type CharacterInsertModel = z.infer<typeof characterInsertSchema>;
+export type CharacterUpdateModel = z.infer<typeof characterUpdateSchema>;
 
 export const characterTemplateMappingTable = pgTable(
   'character_template_mappings',

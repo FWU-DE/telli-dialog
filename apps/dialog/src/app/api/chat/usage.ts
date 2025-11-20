@@ -1,5 +1,5 @@
 import { getPriceLimitInCentByUser } from '@/app/school';
-import { CharacterModel, type SharedSchoolConversationModel } from '@shared/db/schema';
+import { CharacterSelectModel, type SharedSchoolConversationModel } from '@shared/db/schema';
 import { type UserAndContext } from '@/auth/types';
 import { getPriceInCentByUser } from '@/app/school';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
@@ -64,7 +64,7 @@ export async function sharedCharacterChatHasReachedIntelliPointLimit({
   character,
 }: {
   user: UserAndContext | undefined;
-  character: CharacterModel;
+  character: CharacterSelectModel;
 }) {
   if (user === undefined || user.school === undefined || user.federalState === undefined) {
     return true;

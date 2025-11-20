@@ -1,4 +1,4 @@
-import { CharacterModel } from '@shared/db/schema';
+import { CharacterSelectModel } from '@shared/db/schema';
 import { BASE_FILE_PROMPT, constructSingleFilePrompt } from '../chat/system-prompt';
 import { ChunkResult } from '../file-operations/process-chunks';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
@@ -9,7 +9,7 @@ export function constructSystemPromptByCharacterSharedChat({
   retrievedTextChunks,
   websearchSources,
 }: {
-  character: CharacterModel;
+  character: CharacterSelectModel;
   retrievedTextChunks?: Record<string, ChunkResult[]>;
   websearchSources?: WebsearchSource[];
 }) {

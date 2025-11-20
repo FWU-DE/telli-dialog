@@ -7,7 +7,7 @@ import {
   sharedConversationFormValuesSchema,
   usageTimeValuesInMinutes,
 } from '../../../shared-chats/[sharedSchoolChatId]/schema';
-import { CharacterModel } from '@shared/db/schema';
+import { CharacterSelectModel } from '@shared/db/schema';
 import { handleInitiateCharacterShareAction, handleStopCharacaterShareAction } from './actions';
 import { calculateTimeLeftBySharedChat } from '../../../shared-chats/[sharedSchoolChatId]/utils';
 import { useToast } from '@/components/common/toast';
@@ -21,7 +21,7 @@ import CountDownTimer from '../../../shared-chats/_components/count-down';
 import FilledShareIcon from '@/components/icons/filled-share';
 import { iconClassName } from '@/utils/tailwind/icon';
 
-type ShareContainerProps = CharacterModel;
+type ShareContainerProps = CharacterSelectModel;
 
 export default function ShareContainer({ ...character }: ShareContainerProps) {
   const toast = useToast();

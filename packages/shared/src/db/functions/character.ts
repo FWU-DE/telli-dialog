@@ -3,7 +3,7 @@ import { db } from '..';
 import {
   CharacterFileMapping,
   CharacterInsertModel,
-  CharacterModel,
+  CharacterSelectModel,
   characterTable,
   characterTemplateMappingTable,
   conversationMessageTable,
@@ -132,7 +132,7 @@ export async function dbGetGlobalCharacters({
 }: {
   userId: string;
   federalStateId?: string;
-}): Promise<CharacterModel[]> {
+}): Promise<CharacterSelectModel[]> {
   const characters = await db
     .select({
       ...getTableColumns(characterTable),
@@ -186,7 +186,7 @@ export async function dbGetCharactersBySchoolId({
 }: {
   schoolId: string;
   userId: string;
-}): Promise<CharacterModel[]> {
+}): Promise<CharacterSelectModel[]> {
   const characters = await db
     .select({
       ...getTableColumns(characterTable),
@@ -222,7 +222,7 @@ export async function dbGetCharactersByUserId({
   userId,
 }: {
   userId: string;
-}): Promise<CharacterModel[]> {
+}): Promise<CharacterSelectModel[]> {
   const characters = await db
     .select({
       ...getTableColumns(characterTable),
@@ -248,7 +248,7 @@ export async function dbGetCharacterByIdAndUserId({
 }: {
   characterId: string;
   userId: string;
-}): Promise<CharacterModel | undefined> {
+}): Promise<CharacterSelectModel | undefined> {
   const [row] = await db
     .select({
       ...getTableColumns(characterTable),
@@ -341,7 +341,7 @@ export async function dbGetCharacterByIdAndInviteCode({
 }: {
   id: string;
   inviteCode: string;
-}): Promise<CharacterModel | undefined> {
+}): Promise<CharacterSelectModel | undefined> {
   const [row] = await db
     .select({
       ...getTableColumns(characterTable),
@@ -366,7 +366,7 @@ export async function dbGetCharacterByIdAndInviteCode({
       .where(and(eq(characterTable.id, id)));
     return row;
   }
-  return row as CharacterModel;
+  return row as CharacterSelectModel;
 }
 
 export async function dbUpdateTokenUsageByCharacterChatId(
@@ -388,7 +388,7 @@ export async function dbGetCharacterByNameAndUserId({
 }: {
   name: string;
   userId: string;
-}): Promise<CharacterModel | undefined> {
+}): Promise<CharacterSelectModel | undefined> {
   const [character] = await db
     .select()
     .from(characterTable)
@@ -400,7 +400,7 @@ export async function dbGetGlobalCharacterByName({
   name,
 }: {
   name: string;
-}): Promise<CharacterModel | undefined> {
+}): Promise<CharacterSelectModel | undefined> {
   const [character] = await db
     .select()
     .from(characterTable)

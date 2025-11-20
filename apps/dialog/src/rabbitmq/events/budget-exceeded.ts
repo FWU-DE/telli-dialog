@@ -1,6 +1,6 @@
 import { UserAndContext } from '@/auth/types';
 import { ConversationModel } from '@shared/db/types';
-import { CharacterModel, SharedSchoolConversationModel } from '@shared/db/schema';
+import { CharacterSelectModel, SharedSchoolConversationModel } from '@shared/db/schema';
 import { TelliMonthlyTokenBudgetExceededEventType } from '../schema';
 import { hashWithoutSalt } from '@/utils/crypto';
 
@@ -17,7 +17,7 @@ type FunctionProps =
       sharedChat: SharedSchoolConversationModel;
     } & CommonProps)
   | ({
-      character: CharacterModel;
+      character: CharacterSelectModel;
     } & CommonProps);
 
 export function constructTelliBudgetExceededEvent(

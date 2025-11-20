@@ -1,7 +1,7 @@
 'use client';
 
 import DestructiveActionButton from '@/components/common/destructive-action-button';
-import { CharacterModel } from '@shared/db/schema';
+import { CharacterSelectModel } from '@shared/db/schema';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import Link from 'next/link';
 import React from 'react';
@@ -21,7 +21,7 @@ import { CreateNewCharacterFromTemplate } from './create-new-character-button';
 import { iconClassName } from '@/utils/tailwind/icon';
 import TelliClipboardButton from '@/components/common/clipboard-button';
 import { createNewCharacterAction } from './actions';
-type CharacterContainerProps = CharacterModel & {
+type CharacterContainerProps = CharacterSelectModel & {
   currentUserId: string;
   maybeSignedPictureUrl: string | undefined;
 };
