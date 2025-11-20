@@ -9,7 +9,7 @@ import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import HeaderPortal from '../../../header-portal';
 import CharacterForm from './character-form';
-import { removeNullishValues } from '@/utils/generic/object-operations';
+import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { CharacterModel } from '@shared/db/schema';
 import { fetchFileMappingAction } from '../../actions';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
