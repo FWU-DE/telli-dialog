@@ -133,9 +133,10 @@ export async function webScraperExecutable(
 function extractArticleContent(html: string, url: string): string {
   let doc: JSDOM | undefined;
   const virtualConsole = new VirtualConsole();
-  virtualConsole.forwardTo(console, {
-    jsdomErrors: ['unhandled-exception', 'not-implemented'],
-  });
+  // For JSDOM v27: use forwardTo, to log jsdom errors on the console
+  // virtualConsole.forwardTo(console, {
+  //   jsdomErrors: ['unhandled-exception', 'not-implemented'],
+  // });
   try {
     // Create a DOM document
     doc = new JSDOM(html, { url, virtualConsole });
