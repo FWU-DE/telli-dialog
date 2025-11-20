@@ -1,17 +1,15 @@
 'use server';
 
 import { db } from '@shared/db';
-import { dbDeleteCharacterByIdAndUserId } from '@shared/db/functions/character';
 import { CharacterAccessLevel, sharedCharacterConversation } from '@shared/db/schema';
-import { deleteFileFromS3 } from '@shared/s3';
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
 import { SharedConversationShareFormValues } from '../../../shared-chats/[sharedSchoolChatId]/schema';
-import { generateInviteCode } from '../../../shared-chats/[sharedSchoolChatId]/utils';
 import { requireAuth } from '@/auth/requireAuth';
 import { withLoggingAsync } from '@shared/logging';
 import {
   deleteCharacter,
+  shareCharacter,
   updateCharacter,
   updateCharacterAccessLevel,
   UpdateCharacterActionModel,
@@ -81,56 +79,17 @@ export async function deleteCharacterAction({
 
 export async function handleInitiateCharacterShareAction({
   id,
-  intelliPointsPercentageLimit: _intelliPointsPercentageLimit,
-  usageTimeLimit: _usageTimeLimit,
+  intelliPointsPercentageLimit,
+  usageTimeLimit,
 }: { id: string } & SharedConversationShareFormValues) {
-  const user = await getUser();
+  const { user } = await requireAuth();
 
-  if (user.school === undefined) {
-    throw Error('User is not part of a school');
-  }
-
-  if (user.school.userRole !== 'teacher') {
-    throw Error('Only a teacher can share a character');
-  }
-
-  const [maybeExistingEntry] = await db
-    .select()
-    .from(sharedCharacterConversation)
-    .where(
-      and(
-        eq(sharedCharacterConversation.userId, user.id),
-        eq(sharedCharacterConversation.characterId, id),
-      ),
-    );
-  const intelligencePointsLimit = _intelliPointsPercentageLimit;
-  const maxUsageTimeLimit = _usageTimeLimit;
-  const inviteCode = generateInviteCode();
-  const startedAt = new Date();
-  const updatedSharedChat = (
-    await db
-      .insert(sharedCharacterConversation)
-      .values({
-        id: maybeExistingEntry?.id,
-        userId: user.id,
-        characterId: id,
-        intelligencePointsLimit,
-        maxUsageTimeLimit,
-        inviteCode,
-        startedAt,
-      })
-      .onConflictDoUpdate({
-        target: sharedCharacterConversation.id,
-        set: { inviteCode, startedAt, maxUsageTimeLimit },
-      })
-      .returning()
-  )[0];
-
-  if (updatedSharedChat === undefined) {
-    throw Error('Could not shared character chat');
-  }
-
-  return updatedSharedChat;
+  return withLoggingAsync(shareCharacter)({
+    id,
+    telliPointsPercentageLimit: intelliPointsPercentageLimit,
+    usageTimeLimitMinutes: usageTimeLimit,
+    user: user,
+  });
 }
 
 export async function handleStopCharacaterShareAction({ id }: { id: string }) {

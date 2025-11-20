@@ -1,3 +1,4 @@
+import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
 import { dbDeleteCharacterByIdAndUserId, dbGetCharacterById } from '@shared/db/functions/character';
 import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
@@ -9,7 +10,8 @@ import {
   characterUpdateSchema,
   FileModel,
   fileTable,
-  UserModel,
+  sharedCharacterConversation,
+  UserSelectModel,
 } from '@shared/db/schema';
 import { ForbiddenError } from '@shared/error';
 import { logError } from '@shared/logging';
@@ -18,6 +20,7 @@ import { copyCharacter, copyRelatedTemplateFiles } from '@shared/services/templa
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
 import { and, eq } from 'drizzle-orm';
+import { customAlphabet } from 'nanoid';
 import z from 'zod';
 
 /**
@@ -34,7 +37,7 @@ export async function createNewCharacter({
   federalStateId: string;
   modelId?: string;
   schoolId: string;
-  user: UserModel;
+  user: UserSelectModel;
   templatePictureId?: string;
   templateId?: string;
 }) {
@@ -197,7 +200,7 @@ export async function updateCharacterAccessLevel({
   )[0];
 
   if (updatedCharacter === undefined) {
-    throw Error('Could not update the access level of the character');
+    throw new Error('Could not update the access level of the character');
   }
 
   return updatedCharacter;
@@ -227,7 +230,7 @@ export async function updateCharacterPicture({
   )[0];
 
   if (updatedCharacter === undefined) {
-    throw Error('Could not update the picture of the character');
+    throw new Error('Could not update the picture of the character');
   }
 
   return updatedCharacter;
@@ -268,7 +271,7 @@ export async function updateCharacter({
     .returning();
 
   if (updatedCharacter === undefined) {
-    throw Error('Could not update the character');
+    throw new Error('Could not update the character');
   }
   return updatedCharacter;
 }
@@ -305,6 +308,68 @@ export async function deleteCharacter({
 }
 
 /**
+ * A teacher can share a character with students.
+ */
+export async function shareCharacter({
+  id,
+  user,
+  telliPointsPercentageLimit,
+  usageTimeLimitMinutes,
+}: {
+  id: string;
+  user: UserModel;
+  telliPointsPercentageLimit: number;
+  usageTimeLimitMinutes: number;
+}) {
+  // Authorization check: user must be a teacher
+  if (user.userRole !== 'teacher') {
+    throw new ForbiddenError('Only a teacher can share a character');
+  }
+  if (telliPointsPercentageLimit < 0 || telliPointsPercentageLimit > 100) {
+    throw new Error('telli points percentage limit must be between 0 and 100');
+  }
+  if (usageTimeLimitMinutes <= 0 || usageTimeLimitMinutes > 30 * 24 * 60) {
+    throw new Error('usage time limit must be between 1 and 43200 minutes');
+  }
+  const [maybeExistingEntry] = await db
+    .select()
+    .from(sharedCharacterConversation)
+    .where(
+      and(
+        eq(sharedCharacterConversation.userId, user.id),
+        eq(sharedCharacterConversation.characterId, id),
+      ),
+    );
+
+  const intelligencePointsLimit = telliPointsPercentageLimit;
+  const maxUsageTimeLimit = usageTimeLimitMinutes;
+  const inviteCode = generateInviteCode();
+  const startedAt = new Date();
+  const [updatedSharedChat] = await db
+    .insert(sharedCharacterConversation)
+    .values({
+      id: maybeExistingEntry?.id,
+      userId: user.id,
+      characterId: id,
+      intelligencePointsLimit,
+      maxUsageTimeLimit,
+      inviteCode,
+      startedAt,
+    })
+    .onConflictDoUpdate({
+      target: sharedCharacterConversation.id,
+      set: { inviteCode, startedAt, maxUsageTimeLimit },
+    })
+    .returning();
+
+  if (updatedSharedChat === undefined) {
+    throw new Error('Could not share character chat');
+  }
+
+  return updatedSharedChat;
+}
+
+/**
  * Loads character from db and checks if the user is the owner.
  */
 export async function isUserOwnerOfCharacter(
@@ -313,4 +378,9 @@ export async function isUserOwnerOfCharacter(
 ): Promise<boolean> {
   const character = await dbGetCharacterById({ characterId });
   return character?.userId === userId;
+}
+
+export function generateInviteCode(length = 8) {
+  const nanoid = customAlphabet('123456789ABCDEFGHIJKLMNPQRSTUVWXYZ', length);
+  return nanoid().toUpperCase();
 }
