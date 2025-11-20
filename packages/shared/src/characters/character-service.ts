@@ -258,7 +258,7 @@ export async function updateCharacter({
 }: UpdateCharacterActionModel & { characterId: string; userId: string }) {
   // Authorization check: user must own character
   if ((await isUserOwnerOfCharacterOrGlobal(characterId, userId)).isOwner === false)
-    throw new ForbiddenError('Not authorized to update the picture of this character');
+    throw new ForbiddenError('Not authorized to update this character');
 
   const cleanedCharacter = removeNullishValues(character);
   if (cleanedCharacter === undefined) return;
