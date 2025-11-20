@@ -2,7 +2,7 @@ import { VidisUserInfo } from '../../types/vidis';
 import { db } from '..';
 import {
   federalStateTable,
-  InsertUserModel,
+  UserInsertModel,
   SchoolInsertModel,
   schoolTable,
   userSchoolMappingTable,
@@ -25,7 +25,7 @@ function vidisRoleToUserSchoolRole(role: string): UserSchoolRole {
   }
 }
 
-export async function dbCreateVidisUser(user: InsertUserModel) {
+export async function dbCreateVidisUser(user: UserInsertModel) {
   const insertedUser = await db
     .insert(userTable)
     .values({ ...user })
@@ -34,7 +34,7 @@ export async function dbCreateVidisUser(user: InsertUserModel) {
   return insertedUser;
 }
 
-export async function dbGetOrCreateTestUser(userInfo: InsertUserModel & VidisUserInfo) {
+export async function dbGetOrCreateTestUser(userInfo: UserInsertModel & VidisUserInfo) {
   const federalState = await dbGetOrCreateFederalState({ federalStateId: userInfo.bundesland });
 
   if (federalState === undefined) {

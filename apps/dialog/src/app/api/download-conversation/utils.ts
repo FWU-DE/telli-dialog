@@ -10,7 +10,7 @@ import {
 import { type ConversationModel, type ConversationMessageModel } from '@shared/db/types';
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { dbGetConversationAndMessages } from '@shared/db/functions/chat';
-import { UserModel } from '@shared/db/schema';
+import { UserSelectModel } from '@shared/db/schema';
 import { markdownToDocx } from './markdown';
 
 export async function generateConversationDocxFiles({
@@ -20,7 +20,7 @@ export async function generateConversationDocxFiles({
   userFullName,
 }: {
   conversationId: string;
-  user: UserModel;
+  user: UserSelectModel;
   enterpriseGptName: string | null;
   userFullName: string;
 }): Promise<

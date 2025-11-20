@@ -44,11 +44,15 @@ export const userTable = pgTable('user_entity', {
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
 });
 
-export type InsertUserModel = typeof userTable.$inferInsert;
-export type UserModel = typeof userTable.$inferSelect;
 export const userSelectSchema = createSelectSchema(userTable).extend({
   createdAt: z.coerce.date(),
 });
+export const userInsertSchema = createInsertSchema(userTable);
+export const userUpdateSchema = createUpdateSchema(userTable);
+
+export type UserSelectModel = z.infer<typeof userSelectSchema>;
+export type UserInsertModel = z.infer<typeof userInsertSchema>;
+export type UserUpdateModel = z.infer<typeof userUpdateSchema>;
 
 export const conversationTable = pgTable(
   'conversation',
