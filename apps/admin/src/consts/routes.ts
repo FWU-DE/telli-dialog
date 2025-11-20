@@ -9,6 +9,10 @@ export const ROUTES = {
       `/organizations/${organizationId}/projects/${projectId}/api-keys/new`,
     apiKeyModelMappings: (organizationId: string, projectId: string, apiKeyId: string) =>
       `/organizations/${organizationId}/projects/${projectId}/api-keys/${apiKeyId}/model-mappings`,
+    llms: (organizationId: string) => `/organizations/${organizationId}/llms`,
+    llmDetails: (organizationId: string, llmId: string) =>
+      `/organizations/${organizationId}/llms/${llmId}`,
+    llmNew: (organizationId: string) => `/organizations/${organizationId}/llms/new`,
     models: (organizationId: string) => `/organizations/${organizationId}/models`,
     organizations: '/organizations',
     organizationDetails: (organizationId: string) => `/organizations/${organizationId}`,

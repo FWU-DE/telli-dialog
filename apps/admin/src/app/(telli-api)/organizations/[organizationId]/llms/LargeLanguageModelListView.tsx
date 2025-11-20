@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Table,
   TableBody,
@@ -19,15 +21,32 @@ import { Checkbox } from '@ui/components/Checkbox';
 import { getLargeLanguageModelsAction } from './actions';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
+import { useState } from 'react';
+import type { LargeLanguageModel } from '@/types/large-language-model';
 
 export type LargeLanguageModelListViewProps = {
   organizationId: string;
+  initialData: LargeLanguageModel[];
 };
 
-export async function LargeLanguageModelListView({
+export function LargeLanguageModelListView({
   organizationId,
+  initialData,
 }: LargeLanguageModelListViewProps) {
-  const languageModels = await getLargeLanguageModelsAction(organizationId);
+  const [languageModels, setLanguageModels] = useState<LargeLanguageModel[]>(initialData);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      const refreshedData = await getLargeLanguageModelsAction(organizationId);
+      setLanguageModels(refreshedData);
+    } catch (error) {
+      console.error('Failed to refresh language models:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   return (
     <Card>
@@ -40,7 +59,9 @@ export async function LargeLanguageModelListView({
           <Link href={`/organizations/${organizationId}/llms/new`}>
             <Button>Neues Modell</Button>
           </Link>
-          <Button className="ml-2">Aktualisieren</Button>
+          <Button className="ml-2" onClick={handleRefresh} disabled={isRefreshing}>
+            Aktualisieren
+          </Button>
         </CardAction>
       </CardHeader>
       <CardContent>

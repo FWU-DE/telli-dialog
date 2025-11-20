@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import z from 'zod';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect } from 'react';
+import { ROUTES } from '@/consts/routes';
 
 export type CreateFederalStateModalProps = {
   isOpen: boolean;
@@ -18,7 +19,7 @@ export type CreateFederalStateModalProps = {
 // Minimal form schema - only mandatory fields without defaults
 export const createFederalStateFormSchema = z.object({
   id: z.string().min(1, 'ID ist erforderlich'),
-  apiKey: z.string().optional().default(''), // Optional but useful for setup
+  encryptedApiKey: z.string().optional().default(''), // Optional but useful for setup
 });
 
 export type CreateFederalStateForm = z.infer<typeof createFederalStateFormSchema>;
@@ -45,7 +46,7 @@ export function CreateFederalStateModal(props: CreateFederalStateModalProps) {
     try {
       await createFederalStateAction({
         id: data.id,
-        encryptedApiKey: data.apiKey || null,
+        encryptedApiKey: data.encryptedApiKey || null,
       });
 
       toast.success('Bundesland erfolgreich erstellt');
@@ -54,7 +55,7 @@ export function CreateFederalStateModal(props: CreateFederalStateModalProps) {
       if (onSuccess) {
         onSuccess();
       }
-      router.push(`/telli-dialog/federal-states/${data.id}`);
+      router.push(ROUTES.dialog.federalStateDetails(data.id));
     } catch (error) {
       console.error('Error creating federal state:', error);
       toast.error('Fehler beim Erstellen des Bundeslands');
@@ -117,7 +118,7 @@ export function CreateFederalStateModal(props: CreateFederalStateModalProps) {
           />
 
           <FormField
-            name="apiKey"
+            name="encryptedApiKey"
             label="API Key (Optional)"
             description="API Key für die Kommunikation mit telli-api. Kann auch später hinzugefügt werden."
             control={control}

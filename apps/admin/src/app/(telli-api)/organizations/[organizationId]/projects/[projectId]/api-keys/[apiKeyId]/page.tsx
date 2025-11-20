@@ -1,3 +1,4 @@
+import { ROUTES } from '@/consts/routes';
 import { getApiKeyByIdAction } from '../actions';
 import { ApiKeyDetailView } from '../ApiKeyDetailView';
 import { redirect } from 'next/navigation';
@@ -29,6 +30,6 @@ export default async function ApiKeyDetailPage({
   } catch (error) {
     console.error('Error fetching API key:', error);
     // Redirect to list if API key not found
-    redirect(`/organizations/${organizationId}/projects/${projectId}/api-keys`);
+    redirect(ROUTES.api.projectDetails(organizationId, projectId));
   }
 }

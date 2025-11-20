@@ -11,6 +11,7 @@ import { FormField } from '@ui/components/form/FormField';
 import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
 import { LargeLanguageModel } from '../../../../../../types/large-language-model';
 import { createLLMAction, updateLLMAction } from './actions';
+import { ROUTES } from '@/consts/routes';
 
 // Helper function to validate JSON
 const jsonStringSchema = z.string().refine((str) => {
@@ -107,7 +108,7 @@ export function LargeLanguageModelDetailView({
       if (isCreate) {
         const newModel = await createLLMAction(organizationId, data);
         toast.success('Sprachmodell erfolgreich erstellt');
-        router.push(`/organizations/${organizationId}/llms/${newModel.id}`);
+        router.push(ROUTES.api.llmDetails(organizationId, newModel.id));
       } else if (model) {
         await updateLLMAction(organizationId, model.id, data);
         toast.success('Sprachmodell erfolgreich aktualisiert');
@@ -124,7 +125,7 @@ export function LargeLanguageModelDetailView({
 
   const handleCancel = () => {
     if (isCreate) {
-      router.push(`/organizations/${organizationId}/llms`);
+      router.push(ROUTES.api.llms(organizationId));
     } else if (model) {
       reset({
         name: model.name,
