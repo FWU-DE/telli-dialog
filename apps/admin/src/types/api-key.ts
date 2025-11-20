@@ -17,4 +17,3 @@ export const apiKeyWithPlainKeySchema = apiKeySchema.extend({
 });
 
 export type ApiKeyWithPlainKey = z.infer<typeof apiKeyWithPlainKeySchema>;
-

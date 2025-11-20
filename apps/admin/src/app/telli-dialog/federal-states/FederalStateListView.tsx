@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useTransition } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { getFederalStatesAction } from './actions';
 import { CreateFederalStateModal } from './CreateFederalStateModal';
 import {
@@ -32,7 +31,6 @@ export default function FederalStateListView() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     loadFederalStates();

@@ -1,8 +1,10 @@
 'use server';
 
-import { fetchLargeLanguageModels } from "@/services/llm-service";
-import { fetchModelApiKeyMappings, saveModelApiKeyMappings } from "@/services/model-api-key-mapping-service";
-
+import { fetchLargeLanguageModels } from '@/services/llm-service';
+import {
+  fetchModelApiKeyMappings,
+  saveModelApiKeyMappings,
+} from '@/services/model-api-key-mapping-service';
 
 export async function getModelMappingsAction(
   organizationId: string,

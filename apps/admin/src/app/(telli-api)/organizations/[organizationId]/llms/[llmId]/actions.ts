@@ -15,7 +15,7 @@ export async function createLLMAction(
     additionalParameters?: string;
     isNew: boolean;
     isDeleted: boolean;
-  }
+  },
 ) {
   // TODO: Add authentication check
   try {
@@ -41,7 +41,7 @@ export async function updateLLMAction(
     additionalParameters?: string;
     isNew: boolean;
     isDeleted: boolean;
-  }
+  },
 ) {
   // TODO: Add authentication check
   try {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -45,11 +45,7 @@ export function ModelApiKeyMappingListView({
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, [organizationId, projectId, apiKeyId]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
       const [mappings, models] = await Promise.all([
@@ -68,7 +64,12 @@ export function ModelApiKeyMappingListView({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [organizationId, projectId, apiKeyId]);
+
+  useEffect(() => {
+    loadData();
+  }, [organizationId, projectId, apiKeyId, loadData]);
+
   const handleModelToggle = (modelId: string, checked: boolean) => {
     setAssignedModelIds((prev) => {
       const newSet = new Set(prev);

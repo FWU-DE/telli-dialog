@@ -7,7 +7,7 @@ import { FormField } from '@ui/components/form/FormField';
 import { toast } from 'sonner';
 import z from 'zod';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
 export type CreateFederalStateModalProps = {
   isOpen: boolean;
@@ -61,12 +61,12 @@ export function CreateFederalStateModal(props: CreateFederalStateModalProps) {
     }
   }
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (!isSubmitting) {
       reset();
       onClose();
     }
-  };
+  }, [isSubmitting, reset, onClose]);
 
   // Handle escape key
   useEffect(() => {
@@ -82,7 +82,7 @@ export function CreateFederalStateModal(props: CreateFederalStateModalProps) {
         document.removeEventListener('keydown', handleEscapeKey);
       };
     }
-  }, [isOpen, isSubmitting]);
+  }, [isOpen, isSubmitting, handleClose]);
 
   if (!isOpen) return null;
 

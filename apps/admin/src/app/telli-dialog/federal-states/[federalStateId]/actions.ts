@@ -1,8 +1,8 @@
 'use server';
-import { 
-  getFederalStateById, 
+import {
+  getFederalStateById,
   createFederalState,
-  updateFederalState
+  updateFederalState,
 } from '@shared/services/federal-state-service';
 import { federalStateFeatureTogglesSchema, FederalStateInsertModel } from '@shared/db/schema';
 
@@ -13,11 +13,16 @@ export async function getFederalStateByIdAction(federalStateId: string) {
   return getFederalStateById(federalStateId);
 }
 
-export async function createFederalStateAction(data: Omit<FederalStateInsertModel, 'createdAt' | 'featureToggles'>) {
+export async function createFederalStateAction(
+  data: Omit<FederalStateInsertModel, 'createdAt' | 'featureToggles'>,
+) {
   // Todo: Server actions expose a public POST endpoint so we have to check if the user is authorized
 
   // Todo: error handling
-  return createFederalState({...data, featureToggles: federalStateFeatureTogglesSchema.parse({})});
+  return createFederalState({
+    ...data,
+    featureToggles: federalStateFeatureTogglesSchema.parse({}),
+  });
 }
 
 export async function updateFederalStateAction(data: FederalStateInsertModel) {

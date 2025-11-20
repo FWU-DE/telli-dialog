@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getProjectByIdAction, getApiKeysAction } from '../actions';
 import { Project } from '../../../../../../types/project';
 import { ApiKey } from '../../../../../../types/api-key';
@@ -33,12 +33,7 @@ export default function ProjectDetailView(props: ProjectDetailViewProps) {
   const [error, setError] = useState<string | null>(null);
   const [apiKeysError, setApiKeysError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadProject();
-    loadApiKeys();
-  }, [organizationId, projectId]);
-
-  const loadProject = async () => {
+  const loadProject = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -52,9 +47,9 @@ export default function ProjectDetailView(props: ProjectDetailViewProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [organizationId, projectId]);
 
-  const loadApiKeys = async () => {
+  const loadApiKeys = useCallback(async () => {
     try {
       setApiKeysLoading(true);
       setApiKeysError(null);
@@ -68,7 +63,12 @@ export default function ProjectDetailView(props: ProjectDetailViewProps) {
     } finally {
       setApiKeysLoading(false);
     }
-  };
+  }, [organizationId, projectId]);
+
+  useEffect(() => {
+    loadProject();
+    loadApiKeys();
+  }, [organizationId, projectId, loadProject, loadApiKeys]);
 
   if (loading) {
     return (
@@ -112,7 +112,7 @@ export default function ProjectDetailView(props: ProjectDetailViewProps) {
       <Card>
         <CardHeader>
           <CardTitle>Projektdetails</CardTitle>
-          <CardDescription>Informationen zum Projekt "{project.name}"</CardDescription>
+          <CardDescription>Informationen zum Projekt {project.name}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">

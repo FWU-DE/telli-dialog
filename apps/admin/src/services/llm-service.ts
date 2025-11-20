@@ -31,15 +31,12 @@ export async function createLargeLanguageModel(
     additionalParameters?: string;
     isNew: boolean;
     isDeleted: boolean;
-  }
+  },
 ): Promise<LargeLanguageModel> {
-  const response = await fetchFromApi(
-    env.telliApiBaseUrl + apiRoutes.POST_NEW(organizationId),
-    {
-      method: 'POST',
-      body: JSON.stringify({ ...data, organizationId }),
-    }
-  );
+  const response = await fetchFromApi(env.telliApiBaseUrl + apiRoutes.POST_NEW(organizationId), {
+    method: 'POST',
+    body: JSON.stringify({ ...data, organizationId }),
+  });
 
   const result = await response.json();
   return result as LargeLanguageModel;
@@ -59,14 +56,14 @@ export async function updateLargeLanguageModel(
     additionalParameters?: string;
     isNew: boolean;
     isDeleted: boolean;
-  }
+  },
 ): Promise<LargeLanguageModel> {
   const response = await fetchFromApi(
     env.telliApiBaseUrl + apiRoutes.PATCH_ONE(organizationId, modelId),
     {
       method: 'PATCH',
       body: JSON.stringify(data),
-    }
+    },
   );
 
   const result = await response.json();

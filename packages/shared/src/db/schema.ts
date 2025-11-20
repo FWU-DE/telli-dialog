@@ -160,7 +160,7 @@ export const federalStateTable = pgTable('federal_state', {
 export const federalStateSelectSchema = createSelectSchema(federalStateTable);
 export const federalStateInsertSchema = createInsertSchema(federalStateTable).extend({
   featureToggles: federalStateFeatureTogglesSchema,
-  });
+});
 export const federalStateUpdateSchema = createUpdateSchema(federalStateTable).extend({
   id: z.string(),
 });

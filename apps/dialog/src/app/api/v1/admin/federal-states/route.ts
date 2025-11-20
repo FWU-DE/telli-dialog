@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       { status: 409 },
     );
   }
-  
+
   const encryptedApiKey =
     federalStateToCreate.decryptedApiKey !== null &&
     federalStateToCreate.decryptedApiKey !== undefined

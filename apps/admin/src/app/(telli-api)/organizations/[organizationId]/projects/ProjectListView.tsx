@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 import {
   Table,
   TableBody,
@@ -36,11 +36,7 @@ export function ProjectListView({ organizationId }: ProjectListViewProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadProjects();
-  }, [organizationId]);
-
-  const loadProjects = async () => {
+  const loadProjects = useCallback(async () => {
     startTransition(async () => {
       try {
         setError(null);
@@ -53,7 +49,11 @@ export function ProjectListView({ organizationId }: ProjectListViewProps) {
         toast.error(`Fehler beim Laden der Projekte: ${errorMessage}`);
       }
     });
-  };
+  }, [organizationId, startTransition]);
+
+  useEffect(() => {
+    loadProjects();
+  }, [organizationId, loadProjects]);
 
   const handleRefresh = () => {
     loadProjects();

@@ -1,9 +1,17 @@
 'use server';
 
-import { fetchApiKeys, createApiKey, updateApiKey, fetchSingleApiKey } from '@/services/api-key-service';
+import {
+  fetchApiKeys,
+  createApiKey,
+  updateApiKey,
+  fetchSingleApiKey,
+} from '@/services/api-key-service';
 import { ApiKey, ApiKeyWithPlainKey } from '@/types/api-key';
 
-export async function getApiKeysAction(organizationId: string, projectId: string): Promise<ApiKey[]> {
+export async function getApiKeysAction(
+  organizationId: string,
+  projectId: string,
+): Promise<ApiKey[]> {
   // Todo: Server actions expose a public POST endpoint so we have to check if the user is authorized
 
   // Todo: error handling
@@ -42,7 +50,7 @@ export async function createApiKeyAction(
       limitInCent,
       expiresAt,
     });
-  } catch (error) {
+  } catch {
     throw new Error('Fehler beim Erstellen des API-Schlüssels');
   }
 }
@@ -69,7 +77,7 @@ export async function updateApiKeyAction(
       limitInCent,
       expiresAt,
     });
-  } catch (error) {
+  } catch {
     throw new Error('Fehler beim Aktualisieren des API-Schlüssels');
   }
 }

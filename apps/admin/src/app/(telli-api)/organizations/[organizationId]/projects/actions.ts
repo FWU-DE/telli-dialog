@@ -1,9 +1,5 @@
 'use server';
-import {
-  fetchProjects,
-  fetchSingleProject,
-  createProject,
-} from '@/services/project-service';
+import { fetchProjects, fetchSingleProject, createProject } from '@/services/project-service';
 import { fetchApiKeys } from '@/services/api-key-service';
 import { Project } from '@/types/project';
 import { ApiKey } from '@/types/api-key';
@@ -39,12 +35,15 @@ export async function createProjectAction(
 
   try {
     return await createProject(organizationId, { id: id.trim(), name: name.trim() });
-  } catch (error) {
+  } catch {
     throw new Error('Fehler beim Erstellen des Projekts');
   }
 }
 
-export async function getApiKeysAction(organizationId: string, projectId: string): Promise<ApiKey[]> {
+export async function getApiKeysAction(
+  organizationId: string,
+  projectId: string,
+): Promise<ApiKey[]> {
   // Todo: Server actions expose a public POST endpoint so we have to check if the user is authorized
 
   // Todo: error handling
