@@ -1,5 +1,6 @@
 'use server';
 
+import { requireAdminAuth } from '@/auth/requireAdminAuth';
 import {
   fetchApiKeys,
   createApiKey,
@@ -12,8 +13,8 @@ export async function getApiKeysAction(
   organizationId: string,
   projectId: string,
 ): Promise<ApiKey[]> {
-  // Todo: Server actions expose a public POST endpoint so we have to check if the user is authorized
-
+  await requireAdminAuth();
+  
   // Todo: error handling
   return fetchApiKeys(organizationId, projectId);
 }
@@ -23,8 +24,8 @@ export async function getApiKeyByIdAction(
   projectId: string,
   apiKeyId: string,
 ): Promise<ApiKey> {
-  // Todo: Server actions expose a public POST endpoint so we have to check if the user is authorized
-
+  await requireAdminAuth();
+  
   // Todo: error handling
   return fetchSingleApiKey(organizationId, projectId, apiKeyId);
 }
@@ -37,8 +38,8 @@ export async function createApiKeyAction(
   limitInCent?: number,
   expiresAt?: Date | null,
 ): Promise<ApiKeyWithPlainKey> {
-  // Todo: Server actions expose a public POST endpoint so we have to check if the user is authorized
-
+  await requireAdminAuth();
+  
   if (!name.trim()) {
     throw new Error('API-Schlüssel-Name ist erforderlich');
   }
@@ -64,8 +65,8 @@ export async function updateApiKeyAction(
   limitInCent?: number,
   expiresAt?: Date | null,
 ): Promise<ApiKey> {
-  // Todo: Server actions expose a public POST endpoint so we have to check if the user is authorized
-
+  await requireAdminAuth();
+  
   if (!name.trim()) {
     throw new Error('API-Schlüssel-Name ist erforderlich');
   }

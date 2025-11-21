@@ -1,5 +1,6 @@
 'use server';
 
+import { requireAdminAuth } from '@/auth/requireAdminAuth';
 import { createLargeLanguageModel, updateLargeLanguageModel } from '@/services/llm-service';
 
 export async function createLLMAction(
@@ -17,7 +18,8 @@ export async function createLLMAction(
     isDeleted: boolean;
   },
 ) {
-  // TODO: Add authentication check
+  await requireAdminAuth();
+  
   try {
     const result = await createLargeLanguageModel(organizationId, data);
     return result;
@@ -43,7 +45,8 @@ export async function updateLLMAction(
     isDeleted: boolean;
   },
 ) {
-  // TODO: Add authentication check
+  await requireAdminAuth();
+  
   try {
     const result = await updateLargeLanguageModel(organizationId, llmId, data);
     return result;

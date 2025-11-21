@@ -10,7 +10,7 @@ import {
   TableRow,
 } from '@ui/components/Table';
 import { Voucher } from '../../../../../types/voucher';
-import { revokeVoucher } from '../../../../../services/voucher-service';
+import { revokeVoucherAction } from './actions';
 import { Button } from '@ui/components/Button';
 
 export default function VoucherList({
@@ -31,7 +31,7 @@ export default function VoucherList({
       return;
     }
     try {
-      await revokeVoucher(voucher.code, voucher.federalStateId, username, reason);
+      await revokeVoucherAction(voucher.code, voucher.federalStateId, username, reason);
       // update voucher list
       voucher.status = 'revoked';
       vouchers.find((v) => v.code === voucher.code)!.status = 'revoked';

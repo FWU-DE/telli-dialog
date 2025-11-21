@@ -1,4 +1,5 @@
 'use server';
+import { requireAdminAuth } from '@/auth/requireAdminAuth';
 import {
   getFederalStateById,
   createFederalState,
@@ -11,8 +12,8 @@ import {
 } from '@shared/db/schema';
 
 export async function getFederalStateByIdAction(federalStateId: string) {
-  // Todo: Server actions expose a public POST endpoint so we have to check if the user is authorized
-
+  await requireAdminAuth();
+  
   // Todo: error handling
   return getFederalStateById(federalStateId);
 }
@@ -20,8 +21,8 @@ export async function getFederalStateByIdAction(federalStateId: string) {
 export async function createFederalStateAction(
   data: Omit<FederalStateInsertModel, 'createdAt' | 'featureToggles'>,
 ) {
-  // Todo: Server actions expose a public POST endpoint so we have to check if the user is authorized
-
+  await requireAdminAuth();
+  
   // Todo: error handling
   return createFederalState({
     ...data,
@@ -30,8 +31,8 @@ export async function createFederalStateAction(
 }
 
 export async function updateFederalStateAction(data: FederalStateUpdateModel) {
-  // Todo: Server actions expose a public POST endpoint so we have to check if the user is authorized
-
+  await requireAdminAuth();
+  
   // Todo: error handling
   return updateFederalState(data);
 }
