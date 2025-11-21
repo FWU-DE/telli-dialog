@@ -15,3 +15,11 @@ export type Voucher = {
   updatedAt: Date | null;
   updateReason: string;
 };
+
+export type CreateVoucherRequest = {
+  increaseAmount: number;
+  durationMonths: number;
+  createdBy: string;
+  createReason: string;
+  numberOfCodes: number;
+};

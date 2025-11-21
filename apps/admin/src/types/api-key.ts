@@ -11,3 +11,39 @@ export const apiKeySchema = z.object({
 });
 
 export type ApiKey = z.infer<typeof apiKeySchema>;
+
+export const apiKeyWithPlainKeySchema = apiKeySchema.extend({
+  plainKey: z.string(),
+});
+
+export type ApiKeyWithPlainKey = z.infer<typeof apiKeyWithPlainKeySchema>;
+
+export const createApiKeySchema = apiKeySchema
+  .pick({
+    name: true,
+    state: true,
+    limitInCent: true,
+    expiresAt: true,
+  })
+  .partial({
+    state: true,
+    limitInCent: true,
+    expiresAt: true,
+  });
+
+export type CreateApiKey = z.infer<typeof createApiKeySchema>;
+
+export const updateApiKeySchema = apiKeySchema
+  .pick({
+    name: true,
+    state: true,
+    limitInCent: true,
+    expiresAt: true,
+  })
+  .partial({
+    state: true,
+    limitInCent: true,
+    expiresAt: true,
+  });
+
+export type UpdateApiKey = z.infer<typeof updateApiKeySchema>;

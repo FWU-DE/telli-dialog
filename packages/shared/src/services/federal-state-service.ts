@@ -2,12 +2,14 @@
 import {
   FederalStateSelectModel,
   FederalStateUpdateModel,
+  FederalStateInsertModel,
   federalStateUpdateSchema,
 } from '@shared/db/schema';
 import {
   dbGetFederalState,
   dbGetFederalStates,
   dbUpdateFederalState,
+  dbInsertFederalState,
 } from '@shared/db/functions/federal-state';
 import { FederalStateModel } from '@shared/types/federal-state';
 import { encrypt } from '@shared/db/crypto';
@@ -56,6 +58,16 @@ export async function updateApiKey(
     throw new Error(`Failed to update federal state with id ${federalStateId}`);
   }
   return transformToModel(updated);
+}
+
+export async function createFederalState(
+  data: Omit<FederalStateInsertModel, 'createdAt'>,
+): Promise<FederalStateModel> {
+  const inserted = await dbInsertFederalState(data);
+  if (!inserted) {
+    throw new Error('Failed to create federal state');
+  }
+  return transformToModel(inserted);
 }
 
 function transformToModel(federalState: FederalStateSelectModel): FederalStateModel {

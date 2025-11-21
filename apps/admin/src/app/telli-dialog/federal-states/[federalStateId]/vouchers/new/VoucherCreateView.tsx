@@ -1,10 +1,10 @@
 'use client';
 import React, { useState } from 'react';
-import { createVouchers } from '../../../../../../services/voucher-service';
+import { createVouchersAction } from '../actions';
 import { CSVLink } from 'react-csv';
 import { Input } from '@ui/components/Input';
 import { Textarea } from '@ui/components/Textarea';
-import { Voucher } from '../../../../../../types/voucher';
+import { Voucher, CreateVoucherRequest } from '../../../../../../types/voucher';
 import { Button } from '@ui/components/Button';
 import VoucherList from '../VoucherList';
 
@@ -44,14 +44,14 @@ export default function VoucherCreateView({
       return;
     }
     try {
-      const result = await createVouchers(
-        federalStateId,
-        parsedAmount,
-        parsedMonths,
-        username,
-        comment,
-        parsedCount,
-      );
+      const voucherData: CreateVoucherRequest = {
+        increaseAmount: parsedAmount,
+        durationMonths: parsedMonths,
+        createdBy: username,
+        createReason: comment,
+        numberOfCodes: parsedCount,
+      };
+      const result = await createVouchersAction(federalStateId, voucherData);
       setCreatedVouchers((prev) => [...prev, ...result]);
     } catch (err) {
       alert('Fehler beim Erstellen der Guthaben Codes: ' + (err as Error).message);

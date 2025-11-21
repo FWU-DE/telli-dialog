@@ -2,7 +2,7 @@
 import { Button } from '@ui/components/Button';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { updateFederalState } from '@shared/services/federal-state-service';
+import { updateFederalStateAction } from './actions';
 import {
   Card,
   CardAction,
@@ -18,12 +18,14 @@ import { toast } from 'sonner';
 import z from 'zod';
 import { FederalStateModel, federalStateSchema } from '@shared/types/federal-state';
 import { DesignConfigurationSchema } from '@ui/types/design-configuration';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { FormErrorDisplay } from '@/components/FormErrorDisplay';
 
 export type FederalStateViewProps = {
   federalState: FederalStateModel;
 };
 
+// Form-specific schema that extends the base schema with UI adaptations
 export const federalStateEditFormSchema = federalStateSchema.extend({
   supportContacts: z.array(
     z.object({
@@ -36,7 +38,7 @@ export const federalStateEditFormSchema = federalStateSchema.extend({
 export type FederalStateEditForm = z.infer<typeof federalStateEditFormSchema>;
 
 // Parse string as designConfiguration if not empty, otherwise set to null
-function parseAsDesignConfiguration(value: string) {
+function parseAsDesignConfiguration(value: string | null) {
   if (!value || value.trim() === '') {
     return null;
   }
@@ -46,9 +48,8 @@ function parseAsDesignConfiguration(value: string) {
 function transformToFederalStateEditForm(federalState: FederalStateModel): FederalStateEditForm {
   return {
     ...federalState,
+    // Only transform the fields that need UI-specific formatting
     supportContacts: federalState.supportContacts?.map((s) => ({ value: s })) ?? [],
-    telliName: federalState.telliName ?? '',
-    trainingLink: federalState.trainingLink ?? '',
     designConfiguration: federalState.designConfiguration
       ? JSON.stringify(federalState.designConfiguration, null, 2)
       : '',
@@ -56,23 +57,19 @@ function transformToFederalStateEditForm(federalState: FederalStateModel): Feder
 }
 
 export function FederalStateView(props: FederalStateViewProps) {
-  const [formData, setFormData] = useState<FederalStateEditForm>(
-    transformToFederalStateEditForm(props.federalState),
-  );
-  const federalState = props.federalState;
-
-  const form = useForm<FederalStateEditForm>({
-    resolver: zodResolver(federalStateEditFormSchema),
-    defaultValues: transformToFederalStateEditForm(federalState),
-  });
+  const { federalState } = props;
 
   // Destructuring is necessary, otherwise formState is not updated correctly
   // https://www.react-hook-form.com/api/useform/formstate/
   const {
     control,
-    formState: { isValid, errors, isDirty },
+    formState: { isValid, errors, isDirty, isSubmitting },
+    handleSubmit,
     reset,
-  } = form;
+  } = useForm<FederalStateEditForm>({
+    resolver: zodResolver(federalStateEditFormSchema),
+    defaultValues: transformToFederalStateEditForm(federalState),
+  });
 
   async function onSubmit(data: FederalStateEditForm) {
     if (!isValid) {
@@ -89,33 +86,37 @@ export function FederalStateView(props: FederalStateViewProps) {
     }
 
     try {
-      const updatedValues = await updateFederalState({
+      // Update existing federal state
+      await updateFederalStateAction({
         ...data,
-        supportContacts: data.supportContacts.map((s) => s.value),
+        supportContacts:
+          data.supportContacts.length > 0 ? data.supportContacts.map((s) => s.value) : [],
         designConfiguration: parsedDesignConfiguration,
       });
-      setFormData(transformToFederalStateEditForm(updatedValues));
       toast.success('Bundesland erfolgreich aktualisiert');
-    } catch {
+    } catch (error) {
+      console.error('Error saving federal state:', error);
       toast.error('Fehler beim Aktualisieren des Bundeslands');
     }
   }
 
   useEffect(() => {
-    reset({ ...formData });
-  }, [formData, reset]);
+    reset(transformToFederalStateEditForm(federalState));
+  }, [federalState, reset]);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Bundesland Detailansicht</CardTitle>
         <CardDescription>Details zum Bundesland {federalState.id}</CardDescription>
-        {Object.keys(errors).length > 0 && (
-          <div className="text-red-500">{JSON.stringify(errors)}</div>
-        )}
+        <FormErrorDisplay errors={errors} />
       </CardHeader>
       <CardContent>
-        <form className="flex flex-col gap-8" onSubmit={form.handleSubmit(onSubmit)}>
+        <form
+          className="flex flex-col gap-8"
+          onSubmit={handleSubmit(onSubmit)}
+          inert={isSubmitting}
+        >
           <FormField
             name="id"
             label="ID"
