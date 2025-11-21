@@ -46,7 +46,7 @@ export default function SelectLlmModelForm({
           <Select.Viewport className="p-1">
             {models
               .filter((m) => m.priceMetadata.type === 'text')
-              .filter((m) => !m.name.includes('mistral'))
+              .filter((m) => !m.name.includes('mistral')) // mistral should not be selectable for characters and shared school chats
               .map((model) => (
                 <Select.Item
                   key={model.id}

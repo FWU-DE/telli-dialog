@@ -97,8 +97,8 @@ export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProp
         >
           {models
             .filter((m) => m.priceMetadata.type === 'text')
+            .filter((m) => !isStudent || !m.name.includes('mistral')) // students should not be able to select mistral models
             .filter((m) => m.id !== selectedModel?.id)
-            .filter((m) => !isStudent || !m.name.includes('mistral'))
             .map((model) => {
               return (
                 <React.Fragment key={model.id}>
