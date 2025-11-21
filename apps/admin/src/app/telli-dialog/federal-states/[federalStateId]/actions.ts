@@ -14,7 +14,6 @@ import {
 export async function getFederalStateByIdAction(federalStateId: string) {
   await requireAdminAuth();
 
-  // Todo: error handling
   return getFederalStateById(federalStateId);
 }
 
@@ -23,7 +22,6 @@ export async function createFederalStateAction(
 ) {
   await requireAdminAuth();
 
-  // Todo: error handling
   return createFederalState({
     ...data,
     featureToggles: federalStateFeatureTogglesSchema.parse({}),
@@ -33,6 +31,5 @@ export async function createFederalStateAction(
 export async function updateFederalStateAction(data: FederalStateUpdateModel) {
   await requireAdminAuth();
 
-  // Todo: error handling
   return updateFederalState(data);
 }

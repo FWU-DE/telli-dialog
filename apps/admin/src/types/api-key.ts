@@ -17,3 +17,21 @@ export const apiKeyWithPlainKeySchema = apiKeySchema.extend({
 });
 
 export type ApiKeyWithPlainKey = z.infer<typeof apiKeyWithPlainKeySchema>;
+
+export const createApiKeySchema = z.object({
+  name: z.string().nonempty(),
+  state: z.literal('active').or(z.literal('inactive')).or(z.literal('deleted')).optional(),
+  limitInCent: z.number().nonnegative().optional(),
+  expiresAt: z.date().nullable().optional(),
+});
+
+export type CreateApiKey = z.infer<typeof createApiKeySchema>;
+
+export const updateApiKeySchema = z.object({
+  name: z.string().nonempty(),
+  state: z.literal('active').or(z.literal('inactive')).or(z.literal('deleted')).optional(),
+  limitInCent: z.number().nonnegative().optional(),
+  expiresAt: z.date().nullable().optional(),
+});
+
+export type UpdateApiKey = z.infer<typeof updateApiKeySchema>;

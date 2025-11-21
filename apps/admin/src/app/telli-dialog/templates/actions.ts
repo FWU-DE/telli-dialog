@@ -5,7 +5,6 @@ import { getTemplates, createTemplateFromUrl } from '@telli/shared/services/temp
 export async function getTemplatesAction() {
   await requireAdminAuth();
 
-  // Todo: error handling
   return getTemplates();
 }
 

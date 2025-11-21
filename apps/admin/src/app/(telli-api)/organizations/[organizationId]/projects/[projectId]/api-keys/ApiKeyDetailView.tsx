@@ -22,6 +22,7 @@ import React, { useState } from 'react';
 import { Input } from '@ui/components/Input';
 import { Label } from '@ui/components/Label';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@ui/components/Field';
+import { FormErrorDisplay } from '@/components/FormErrorDisplay';
 
 const apiKeyFormSchema = z.object({
   name: z.string().min(1, 'Name ist erforderlich'),
@@ -95,14 +96,12 @@ export function ApiKeyDetailView({
 
     try {
       if (isCreate) {
-        const result = await createApiKeyAction(
-          organizationId,
-          projectId,
-          data.name,
-          data.state,
-          data.limitInCent,
-          data.expiresAt,
-        );
+        const result = await createApiKeyAction(organizationId, projectId, {
+          name: data.name.trim(),
+          state: data.state,
+          limitInCent: data.limitInCent,
+          expiresAt: data.expiresAt,
+        });
 
         // Show the plainKey to the user - this is critical as it can't be retrieved later
         setCreatedApiKey({
@@ -112,15 +111,12 @@ export function ApiKeyDetailView({
 
         toast.success('API-Schlüssel erfolgreich erstellt');
       } else if (apiKey) {
-        await updateApiKeyAction(
-          organizationId,
-          projectId,
-          apiKey.id,
-          data.name,
-          data.state,
-          data.limitInCent,
-          data.expiresAt,
-        );
+        await updateApiKeyAction(organizationId, projectId, apiKey.id, {
+          name: data.name.trim(),
+          state: data.state,
+          limitInCent: data.limitInCent,
+          expiresAt: data.expiresAt,
+        });
         toast.success('API-Schlüssel erfolgreich aktualisiert');
       }
     } catch (error) {
@@ -222,16 +218,7 @@ export function ApiKeyDetailView({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {Object.keys(errors).length > 0 && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-            <p className="font-medium">Bitte korrigieren Sie die folgenden Fehler:</p>
-            <ul className="list-disc list-inside mt-2">
-              {Object.entries(errors).map(([field, error]) => (
-                <li key={field}>{error?.message}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <FormErrorDisplay errors={errors} />
 
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <FormField
@@ -290,13 +277,7 @@ export function ApiKeyDetailView({
               Abbrechen
             </Button>
             <Button type="submit" disabled={isSubmitting || (!isDirty && !isCreate)}>
-              {isSubmitting
-                ? isCreate
-                  ? 'Erstelle...'
-                  : 'Speichere...'
-                : isCreate
-                  ? 'Erstellen'
-                  : 'Speichern'}
+              {isCreate ? 'Erstellen' : 'Speichern'}
             </Button>
           </div>
         </form>

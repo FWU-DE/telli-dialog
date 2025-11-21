@@ -19,6 +19,7 @@ import z from 'zod';
 import { FederalStateModel, federalStateSchema } from '@shared/types/federal-state';
 import { DesignConfigurationSchema } from '@ui/types/design-configuration';
 import { useEffect } from 'react';
+import { FormErrorDisplay } from '@/components/FormErrorDisplay';
 
 export type FederalStateViewProps = {
   federalState: FederalStateModel;
@@ -108,9 +109,7 @@ export function FederalStateView(props: FederalStateViewProps) {
       <CardHeader>
         <CardTitle>Bundesland Detailansicht</CardTitle>
         <CardDescription>Details zum Bundesland {federalState.id}</CardDescription>
-        {Object.keys(errors).length > 0 && (
-          <div className="text-red-500">{JSON.stringify(errors)}</div>
-        )}
+        <FormErrorDisplay errors={errors} />
       </CardHeader>
       <CardContent>
         <form

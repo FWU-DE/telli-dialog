@@ -1,5 +1,9 @@
 import { env } from '../consts/env';
-import { LargeLanguageModel } from '../types/large-language-model';
+import {
+  LargeLanguageModel,
+  CreateLargeLanguageModel,
+  UpdateLargeLanguageModel,
+} from '../types/large-language-model';
 import { fetchFromApi } from './fetch';
 
 const apiRoutes = {
@@ -20,18 +24,7 @@ export async function fetchLargeLanguageModels(
 
 export async function createLargeLanguageModel(
   organizationId: string,
-  data: {
-    name: string;
-    displayName: string;
-    provider: string;
-    description?: string;
-    setting?: string;
-    priceMetadata?: string;
-    supportedImageFormats?: string;
-    additionalParameters?: string;
-    isNew: boolean;
-    isDeleted: boolean;
-  },
+  data: CreateLargeLanguageModel,
 ): Promise<LargeLanguageModel> {
   const response = await fetchFromApi(env.telliApiBaseUrl + apiRoutes.POST_NEW(organizationId), {
     method: 'POST',
@@ -45,18 +38,7 @@ export async function createLargeLanguageModel(
 export async function updateLargeLanguageModel(
   organizationId: string,
   modelId: string,
-  data: {
-    name: string;
-    displayName: string;
-    provider: string;
-    description?: string;
-    setting?: string;
-    priceMetadata?: string;
-    supportedImageFormats?: string;
-    additionalParameters?: string;
-    isNew: boolean;
-    isDeleted: boolean;
-  },
+  data: UpdateLargeLanguageModel,
 ): Promise<LargeLanguageModel> {
   const response = await fetchFromApi(
     env.telliApiBaseUrl + apiRoutes.PATCH_ONE(organizationId, modelId),

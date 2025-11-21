@@ -9,6 +9,7 @@ import z from 'zod';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect } from 'react';
 import { ROUTES } from '@/consts/routes';
+import { FormErrorDisplay } from '@/components/FormErrorDisplay';
 
 export type CreateFederalStateModalProps = {
   isOpen: boolean;
@@ -98,16 +99,7 @@ export function CreateFederalStateModal(props: CreateFederalStateModalProps) {
       >
         <h2 className="text-xl font-bold mb-4">Neues Bundesland erstellen</h2>
 
-        {Object.keys(errors).length > 0 && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            <p>Bitte korrigieren Sie die folgenden Fehler:</p>
-            <ul className="list-disc list-inside">
-              {Object.entries(errors).map(([field, error]) => (
-                <li key={field}>{error?.message}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <FormErrorDisplay errors={errors} />
 
         <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
           <FormField

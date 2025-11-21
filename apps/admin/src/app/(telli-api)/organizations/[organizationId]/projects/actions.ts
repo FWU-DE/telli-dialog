@@ -8,14 +8,12 @@ import { ApiKey } from '@/types/api-key';
 export async function getProjectsAction(organizationId: string) {
   await requireAdminAuth();
 
-  // Todo: error handling
   return fetchProjects(organizationId);
 }
 
 export async function getProjectByIdAction(organizationId: string, projectId: string) {
   await requireAdminAuth();
 
-  // Todo: error handling
   return fetchSingleProject(organizationId, projectId);
 }
 
@@ -47,6 +45,5 @@ export async function getApiKeysAction(
 ): Promise<ApiKey[]> {
   await requireAdminAuth();
 
-  // Todo: error handling
   return fetchApiKeys(organizationId, projectId);
 }

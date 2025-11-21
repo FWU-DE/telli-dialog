@@ -12,6 +12,7 @@ import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
 import { LargeLanguageModel } from '../../../../../../types/large-language-model';
 import { createLLMAction, updateLLMAction } from './actions';
 import { ROUTES } from '@/consts/routes';
+import { FormErrorDisplay } from '@/components/FormErrorDisplay';
 
 // Helper function to validate JSON
 const jsonStringSchema = z.string().refine((str) => {
@@ -65,22 +66,11 @@ export function LargeLanguageModelDetailView({
           name: model.name,
           displayName: model.displayName,
           provider: model.provider,
-          description: model.description || '',
-          setting:
-            typeof model.setting === 'object'
-              ? JSON.stringify(model.setting, null, 2)
-              : model.setting || '',
-          priceMetadata:
-            typeof model.priceMetadata === 'object'
-              ? JSON.stringify(model.priceMetadata, null, 2)
-              : model.priceMetadata || '',
-          supportedImageFormats: Array.isArray(model.supportedImageFormats)
-            ? JSON.stringify(model.supportedImageFormats, null, 2)
-            : model.supportedImageFormats || '',
-          additionalParameters:
-            typeof model.additionalParameters === 'object'
-              ? JSON.stringify(model.additionalParameters, null, 2)
-              : model.additionalParameters || '',
+          description: model.description ?? '',
+          setting: JSON.stringify(model.setting, null, 2),
+          priceMetadata: JSON.stringify(model.priceMetadata, null, 2),
+          supportedImageFormats: JSON.stringify(model.supportedImageFormats, null, 2),
+          additionalParameters: JSON.stringify(model.additionalParameters, null, 2),
           isNew: model.isNew,
           isDeleted: model.isDeleted,
         }
@@ -131,22 +121,11 @@ export function LargeLanguageModelDetailView({
         name: model.name,
         displayName: model.displayName,
         provider: model.provider,
-        description: model.description || '',
-        setting:
-          typeof model.setting === 'object'
-            ? JSON.stringify(model.setting, null, 2)
-            : model.setting || '',
-        priceMetadata:
-          typeof model.priceMetadata === 'object'
-            ? JSON.stringify(model.priceMetadata, null, 2)
-            : model.priceMetadata || '',
-        supportedImageFormats: Array.isArray(model.supportedImageFormats)
-          ? JSON.stringify(model.supportedImageFormats, null, 2)
-          : model.supportedImageFormats || '',
-        additionalParameters:
-          typeof model.additionalParameters === 'object'
-            ? JSON.stringify(model.additionalParameters, null, 2)
-            : model.additionalParameters || '',
+        description: model.description ?? '',
+        setting: JSON.stringify(model.setting, null, 2),
+        priceMetadata: JSON.stringify(model.priceMetadata, null, 2),
+        supportedImageFormats: JSON.stringify(model.supportedImageFormats, null, 2),
+        additionalParameters: JSON.stringify(model.additionalParameters, null, 2),
         isNew: model.isNew,
         isDeleted: model.isDeleted,
       });
@@ -168,16 +147,7 @@ export function LargeLanguageModelDetailView({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {Object.keys(errors).length > 0 && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-            <p className="font-medium">Bitte korrigieren Sie die folgenden Fehler:</p>
-            <ul className="list-disc list-inside mt-2">
-              {Object.entries(errors).map(([field, error]) => (
-                <li key={field}>{error?.message}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <FormErrorDisplay errors={errors} />
 
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <FormField
@@ -197,7 +167,7 @@ export function LargeLanguageModelDetailView({
           <FormField
             name="provider"
             label="Anbieter *"
-            description="Name des Modell-Anbieters (ionos, azure, openai)"
+            description="Name des Modell-Anbieters (ionos, azure, openai, google)"
             control={control}
           />
 
@@ -260,13 +230,7 @@ export function LargeLanguageModelDetailView({
               Abbrechen
             </Button>
             <Button type="submit" disabled={isSubmitting || (!isDirty && !isCreate)}>
-              {isSubmitting
-                ? isCreate
-                  ? 'Erstelle...'
-                  : 'Speichere...'
-                : isCreate
-                  ? 'Erstellen'
-                  : 'Speichern'}
+              {isCreate ? 'Erstellen' : 'Speichern'}
             </Button>
           </div>
         </form>

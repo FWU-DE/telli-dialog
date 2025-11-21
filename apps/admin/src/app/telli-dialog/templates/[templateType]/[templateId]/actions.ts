@@ -10,7 +10,6 @@ import {
 export async function getTemplateByIdAction(templateType: TemplateTypes, templateId: string) {
   await requireAdminAuth();
 
-  // Todo: error handling
   return getTemplateById(templateType, templateId);
 }
 

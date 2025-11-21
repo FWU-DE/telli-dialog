@@ -2,22 +2,9 @@
 
 import { requireAdminAuth } from '@/auth/requireAdminAuth';
 import { createLargeLanguageModel, updateLargeLanguageModel } from '@/services/llm-service';
+import { CreateLargeLanguageModel, UpdateLargeLanguageModel } from '@/types/large-language-model';
 
-export async function createLLMAction(
-  organizationId: string,
-  data: {
-    name: string;
-    displayName: string;
-    provider: string;
-    description?: string;
-    setting?: string;
-    priceMetadata?: string;
-    supportedImageFormats?: string;
-    additionalParameters?: string;
-    isNew: boolean;
-    isDeleted: boolean;
-  },
-) {
+export async function createLLMAction(organizationId: string, data: CreateLargeLanguageModel) {
   await requireAdminAuth();
 
   try {
@@ -32,18 +19,7 @@ export async function createLLMAction(
 export async function updateLLMAction(
   organizationId: string,
   llmId: string,
-  data: {
-    name: string;
-    displayName: string;
-    provider: string;
-    description?: string;
-    setting?: string;
-    priceMetadata?: string;
-    supportedImageFormats?: string;
-    additionalParameters?: string;
-    isNew: boolean;
-    isDeleted: boolean;
-  },
+  data: UpdateLargeLanguageModel,
 ) {
   await requireAdminAuth();
 

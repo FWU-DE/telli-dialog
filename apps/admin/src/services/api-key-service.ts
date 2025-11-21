@@ -1,5 +1,5 @@
 import { env } from '../consts/env';
-import { ApiKey, ApiKeyWithPlainKey } from '../types/api-key';
+import { ApiKey, ApiKeyWithPlainKey, CreateApiKey, UpdateApiKey } from '../types/api-key';
 import { fetchFromApi } from './fetch';
 
 const apiRoutes = {
@@ -38,12 +38,7 @@ export async function fetchSingleApiKey(
 export async function createApiKey(
   organizationId: string,
   projectId: string,
-  apiKeyData: {
-    name: string;
-    state?: 'active' | 'inactive' | 'deleted';
-    limitInCent?: number;
-    expiresAt?: Date | null;
-  },
+  apiKeyData: CreateApiKey,
 ): Promise<ApiKeyWithPlainKey> {
   const response = await fetchFromApi(
     env.telliApiBaseUrl + apiRoutes.CREATE(organizationId, projectId),
@@ -61,12 +56,7 @@ export async function updateApiKey(
   organizationId: string,
   projectId: string,
   apiKeyId: string,
-  apiKeyData: {
-    name: string;
-    state?: 'active' | 'inactive' | 'deleted';
-    limitInCent?: number;
-    expiresAt?: Date | null;
-  },
+  apiKeyData: UpdateApiKey,
 ): Promise<ApiKey> {
   const response = await fetchFromApi(
     env.telliApiBaseUrl + apiRoutes.PATCH_SINGLE(organizationId, projectId, apiKeyId),
