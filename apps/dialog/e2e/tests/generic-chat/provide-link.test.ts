@@ -18,3 +18,20 @@ test('teacher can provide link and it is displayed in the chat', async ({ page }
   await expect(sourceHostname).toBeVisible();
   await expect(sourceHostname).toContainText('planet-wissen.de');
 });
+
+test.describe('links in chat', () => {
+  (
+    [
+      ['https://www.bravo.de/', 'BRAVO', 'bravo.de'],
+      ['https://openmoji.org/library/', 'Library', 'openmoji.org'],
+    ] as const
+  ).forEach(([link, title, host]) => {
+    test(`provide link to complex website does not timeout (${link})`, async ({ page }) => {
+      await login(page, 'teacher');
+      await sendMessage(page, `Gib mir eine Zusammenfassung in einem Satz dieser Seite:\n${link}`);
+
+      await expect(page.getByLabel('Source Title 0 0')).toContainText(title);
+      await expect(page.getByLabel('Source Hostname 0 0')).toContainText(host);
+    });
+  });
+});
