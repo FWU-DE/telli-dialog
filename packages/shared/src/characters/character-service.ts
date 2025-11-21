@@ -1,4 +1,3 @@
-import { NotFound } from '@aws-sdk/client-s3';
 import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
 import { dbDeleteCharacterByIdAndUserId, dbGetCharacterById } from '@shared/db/functions/character';
@@ -287,24 +286,21 @@ export async function updateCharacter({
  */
 export async function deleteCharacter({
   characterId,
-  pictureId,
   userId,
 }: {
   characterId: string;
-  pictureId?: string;
   userId: string;
 }) {
   // Authorization check: user must own character
-  if ((await isUserOwnerOfCharacterOrGlobal(characterId, userId)).isOwner === false)
-    throw new ForbiddenError('Not authorized to delete this character');
+  const { isOwner, character } = await isUserOwnerOfCharacterOrGlobal(characterId, userId);
+  if (isOwner === false) throw new ForbiddenError('Not authorized to delete this character');
 
   // delete character from db
   const deletedCharacter = await dbDeleteCharacterByIdAndUserId({ characterId, userId: userId });
 
-  const maybePictureId = deletedCharacter.pictureId ?? pictureId;
-  if (maybePictureId !== null && maybePictureId !== undefined) {
+  if (character.pictureId) {
     try {
-      await deleteFileFromS3({ key: maybePictureId });
+      await deleteFileFromS3({ key: character.pictureId });
     } catch (error) {
       logError('Cannot delete picture of character ' + characterId, error);
     }

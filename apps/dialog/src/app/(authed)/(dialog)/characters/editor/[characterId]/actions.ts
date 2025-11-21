@@ -59,18 +59,11 @@ export async function updateCharacterAction({
   });
 }
 
-export async function deleteCharacterAction({
-  characterId,
-  pictureId,
-}: {
-  characterId: string;
-  pictureId?: string;
-}) {
+export async function deleteCharacterAction({ characterId }: { characterId: string }) {
   const { user } = await requireAuth();
 
   await withLoggingAsync(deleteCharacter)({
     characterId,
-    pictureId,
     userId: user.id,
   });
 }
