@@ -63,12 +63,11 @@ describe('Character Service', () => {
       );
 
       await expect(
-        async () =>
-          await fetchFileMappings({
-            characterId: 'unimportant',
-            userId: 'differentUserId',
-            schoolId: 'unimportant',
-          }),
+        fetchFileMappings({
+          characterId: 'unimportant',
+          userId: 'differentUserId',
+          schoolId: 'unimportant',
+        }),
       ).rejects.toThrowError(ForbiddenError);
     });
 
@@ -86,12 +85,11 @@ describe('Character Service', () => {
       );
 
       await expect(
-        async () =>
-          await fetchFileMappings({
-            characterId: 'unimportant',
-            userId: 'differentUserId',
-            schoolId: 'differentSchoolId',
-          }),
+        fetchFileMappings({
+          characterId: 'unimportant',
+          userId: 'differentUserId',
+          schoolId: 'differentSchoolId',
+        }),
       ).rejects.toThrowError(ForbiddenError);
     });
   });
@@ -110,12 +108,11 @@ describe('Character Service', () => {
       );
 
       await expect(
-        async () =>
-          await linkFileToCharacter({
-            characterId: 'unimportant',
-            userId: 'differentUserId',
-            fileId: 'unimportant',
-          }),
+        linkFileToCharacter({
+          characterId: 'unimportant',
+          userId: 'differentUserId',
+          fileId: 'unimportant',
+        }),
       ).rejects.toThrowError(ForbiddenError);
     });
   });
@@ -134,12 +131,11 @@ describe('Character Service', () => {
       );
 
       await expect(
-        async () =>
-          await updateCharacterAccessLevel({
-            characterId: 'unimportant',
-            userId: userId,
-            accessLevel: 'global',
-          }),
+        updateCharacterAccessLevel({
+          characterId: 'unimportant',
+          userId: userId,
+          accessLevel: 'global',
+        }),
       ).rejects.toThrowError(ForbiddenError);
     });
 
@@ -156,12 +152,11 @@ describe('Character Service', () => {
       );
 
       await expect(
-        async () =>
-          await updateCharacterAccessLevel({
-            characterId: 'unimportant',
-            userId: 'differentUserId',
-            accessLevel: 'school',
-          }),
+        updateCharacterAccessLevel({
+          characterId: 'unimportant',
+          userId: 'differentUserId',
+          accessLevel: 'school',
+        }),
       ).rejects.toThrowError(ForbiddenError);
     });
   });
@@ -180,12 +175,11 @@ describe('Character Service', () => {
       );
 
       await expect(
-        async () =>
-          await updateCharacterPicture({
-            characterId: 'unimportant',
-            userId: 'differentUserId',
-            picturePath: 'unimportant',
-          }),
+        updateCharacterPicture({
+          characterId: 'unimportant',
+          userId: 'differentUserId',
+          picturePath: 'unimportant',
+        }),
       ).rejects.toThrowError(ForbiddenError);
     });
   });
@@ -204,12 +198,11 @@ describe('Character Service', () => {
       );
 
       await expect(
-        async () =>
-          await updateCharacter({
-            characterId: 'unimportant',
-            userId: 'differentUserId',
-            name: 'unimportant',
-          }),
+        updateCharacter({
+          characterId: 'unimportant',
+          userId: 'differentUserId',
+          name: 'unimportant',
+        }),
       ).rejects.toThrowError(ForbiddenError);
     });
   });
@@ -228,11 +221,10 @@ describe('Character Service', () => {
       );
 
       await expect(
-        async () =>
-          await deleteCharacter({
-            characterId: 'unimportant',
-            userId: 'differentUserId',
-          }),
+        deleteCharacter({
+          characterId: 'unimportant',
+          userId: 'differentUserId',
+        }),
       ).rejects.toThrowError(ForbiddenError);
     });
   });
@@ -251,13 +243,12 @@ describe('Character Service', () => {
       );
 
       await expect(
-        async () =>
-          await shareCharacter({
-            characterId: 'unimportant',
-            user: { id: 'unimportant', userRole: 'student' },
-            telliPointsPercentageLimit: 10,
-            usageTimeLimitMinutes: 60,
-          }),
+        shareCharacter({
+          characterId: 'unimportant',
+          user: { id: 'unimportant', userRole: 'student' },
+          telliPointsPercentageLimit: 10,
+          usageTimeLimitMinutes: 60,
+        }),
       ).rejects.toThrowError(ForbiddenError);
     });
 
@@ -274,13 +265,12 @@ describe('Character Service', () => {
       );
 
       await expect(
-        async () =>
-          await shareCharacter({
-            characterId: 'unimportant',
-            user: { id: 'differentUserId', userRole: 'teacher' },
-            telliPointsPercentageLimit: 10,
-            usageTimeLimitMinutes: 60,
-          }),
+        shareCharacter({
+          characterId: 'unimportant',
+          user: { id: 'differentUserId', userRole: 'teacher' },
+          telliPointsPercentageLimit: 10,
+          usageTimeLimitMinutes: 60,
+        }),
       ).rejects.toThrowError(ForbiddenError);
     });
 
@@ -298,14 +288,13 @@ describe('Character Service', () => {
       );
 
       await expect(
-        async () =>
-          await shareCharacter({
-            characterId: 'unimportant',
-            user: { id: 'differentUserId', userRole: 'teacher' },
-            telliPointsPercentageLimit: 10,
-            usageTimeLimitMinutes: 60,
-            schoolId: 'differentSchoolId',
-          }),
+        shareCharacter({
+          characterId: 'unimportant',
+          user: { id: 'differentUserId', userRole: 'teacher' },
+          telliPointsPercentageLimit: 10,
+          usageTimeLimitMinutes: 60,
+          schoolId: 'differentSchoolId',
+        }),
       ).rejects.toThrowError(ForbiddenError);
     });
   });
@@ -324,11 +313,10 @@ describe('Character Service', () => {
       );
 
       await expect(
-        async () =>
-          await unshareCharacter({
-            characterId: 'unimportant',
-            user: { id: 'unimportant', userRole: 'student' },
-          }),
+        unshareCharacter({
+          characterId: 'unimportant',
+          user: { id: 'unimportant', userRole: 'student' },
+        }),
       ).rejects.toThrowError(ForbiddenError);
     });
 
@@ -350,11 +338,10 @@ describe('Character Service', () => {
       ).mockResolvedValue([] as never);
 
       await expect(
-        async () =>
-          await unshareCharacter({
-            characterId: 'unimportant',
-            user: { id: 'differentUserId', userRole: 'teacher' },
-          }),
+        unshareCharacter({
+          characterId: 'unimportant',
+          user: { id: 'differentUserId', userRole: 'teacher' },
+        }),
       ).rejects.toThrowError(ForbiddenError);
     });
   });
