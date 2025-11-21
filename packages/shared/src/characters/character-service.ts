@@ -142,7 +142,8 @@ export async function deleteFileMappingAndEntity({
  * Get all file mappings related to a character.
  *
  * If the character is private, only the owner can fetch file mappings.
- * If the public is released with the public or school, anyone can fetch file mappings.
+ * If the character is released for a school, any teacher in that school can fetch file mappings.
+ * If the character is global, any teacher can fetch those file mappings.
  */
 export async function fetchFileMappings({
   characterId,
@@ -157,7 +158,7 @@ export async function fetchFileMappings({
   const { isOwner, isPrivate, character } = await getCharacterInfo(characterId, userId);
   if (
     (isPrivate && !isOwner) ||
-    (character.accessLevel === 'school' && character.schoolId !== schoolId)
+    (!isOwner && character.accessLevel === 'school' && character.schoolId !== schoolId)
   )
     throw new ForbiddenError('Not authorized to fetch file mappings for this character');
 
@@ -216,13 +217,11 @@ export async function updateCharacterAccessLevel({
     throw new ForbiddenError('Not authorized to set the access level of this character');
 
   // Update the access level in database
-  const updatedCharacter = (
-    await db
-      .update(characterTable)
-      .set({ accessLevel })
-      .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)))
-      .returning()
-  )[0];
+  const [updatedCharacter] = await db
+    .update(characterTable)
+    .set({ accessLevel })
+    .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)))
+    .returning();
 
   if (updatedCharacter === undefined) {
     throw new Error('Could not update the access level of the character');
@@ -360,7 +359,7 @@ export async function shareCharacter({
   const { isOwner, isPrivate, character } = await getCharacterInfo(characterId, user.id);
   if (
     (isPrivate && !isOwner) ||
-    (character.accessLevel === 'school' && character.schoolId !== schoolId)
+    (!isOwner && character.accessLevel === 'school' && character.schoolId !== schoolId)
   )
     throw new ForbiddenError('Not authorized to share this character');
 
@@ -425,8 +424,11 @@ export async function unshareCharacter({
   if (user.userRole !== 'teacher')
     throw new ForbiddenError('Only a teacher can unshare a character');
 
-  const sharedConversations = dbGetSharedCharacterConversations({ characterId, userId: user.id });
-  if ((await sharedConversations).length === 0)
+  const sharedConversations = await dbGetSharedCharacterConversations({
+    characterId,
+    userId: user.id,
+  });
+  if (sharedConversations.length === 0)
     throw new ForbiddenError('Not authorized to stop this shared character instance');
 
   // unshare character instance
