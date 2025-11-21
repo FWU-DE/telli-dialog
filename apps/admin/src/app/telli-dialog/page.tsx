@@ -9,6 +9,7 @@ export default function Page() {
         <Sidebar>
           <SidebarItem label="Bundesländer" href={ROUTES.dialog.federalStates} />
           <SidebarItem label="Vorlagen" href={ROUTES.dialog.templates} />
+          <SidebarItem label="Modelle aktualisieren" href={ROUTES.dialog.modelRefresh} />
         </Sidebar>
       }
       page={<div></div>}

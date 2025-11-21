@@ -1,11 +1,11 @@
 import TwoColumnLayout from '@/components/layout/TwoColumnLayout';
-import FederalStateListView from './FederalStateListView';
+import ModelRefreshView from './ModelRefreshView';
 import { Sidebar, SidebarItem } from '@/components/navigation/Sidebar';
 import { ROUTES } from '@/consts/routes';
 
 export const dynamic = 'force-dynamic';
 
-export default function FederalStatesPage() {
+export default function ModelRefreshPage() {
   return (
     <TwoColumnLayout
       sidebar={
@@ -15,7 +15,7 @@ export default function FederalStatesPage() {
           <SidebarItem label="Modelle aktualisieren" href={ROUTES.dialog.modelRefresh} />
         </Sidebar>
       }
-      page={<FederalStateListView />}
+      page={<ModelRefreshView />}
     />
   );
 }
