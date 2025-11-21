@@ -95,6 +95,11 @@ export default function CharacterForm({
   const maybeDefaultModelId =
     models.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? models[0]?.id;
 
+  // Check if character's model is available in user's federal state
+  const isCharacterModelAvailable =
+    character.modelId && models.some((m) => m.id === character.modelId);
+  const selectedModelId = isCharacterModelAvailable ? character.modelId : maybeDefaultModelId;
+
   const {
     register,
     handleSubmit,
@@ -107,7 +112,7 @@ export default function CharacterForm({
     defaultValues: {
       ...character,
       attachedLinks: initialLinks,
-      modelId: maybeDefaultModelId,
+      modelId: selectedModelId,
     },
   });
 
@@ -275,7 +280,7 @@ export default function CharacterForm({
       <div className="flex flex-col gap-4">
         <label className={labelClassName}>{tCommon('llm-model')}</label>
         <SelectLlmModelForm
-          selectedModel={character.modelId}
+          selectedModel={selectedModelId}
           onValueChange={(value) => {
             setValue('modelId', value);
             handleAutoSave();

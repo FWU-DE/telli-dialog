@@ -8,7 +8,11 @@ import { env } from '@/env';
 import { errorifyAsyncFn } from '@shared/utils/error';
 import { LlmModel } from '@shared/db/schema';
 import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
-import { DEFAULT_AUXILIARY_MODEL, FALLBACK_AUXILIARY_MODEL } from '@/app/api/chat/models';
+import {
+  DEFAULT_AUXILIARY_MODEL,
+  DEFAULT_CHAT_MODEL,
+  FALLBACK_AUXILIARY_MODEL,
+} from '@/app/api/chat/models';
 
 export function getSearchParamsFromUrl(url: string) {
   const [, ...rest] = url.split('?');
@@ -37,10 +41,11 @@ export async function getModelAndProvider({
     throw Error(error.message);
   }
 
-  const definedModel = await dbGetModelByIdAndFederalStateId({ modelId, federalStateId });
+  let definedModel = await dbGetModelByIdAndFederalStateId({ modelId, federalStateId });
 
   if (definedModel === undefined) {
-    throw Error(`Could not find model with id ${definedModel}`);
+    // Fallback to default model if specified model is not found
+    definedModel = await getDefaultModel(federalStateId);
   }
 
   const telliConfiguration = createTelliConfiguration({
@@ -102,12 +107,31 @@ export async function getAuxiliaryModel(federalStateId: string): Promise<LlmMode
   return auxiliaryModel;
 }
 
+/**
+ * Get the default model for the federal state
+ * @returns The default model for the federal state
+ */
+export async function getDefaultModel(federalStateId: string): Promise<LlmModel> {
+  const llmModels = await dbGetLlmModelsByFederalStateId({
+    federalStateId,
+  });
+  const defaultModel = getDefaultChatModel(llmModels) ?? getFirstTextModel(llmModels);
+  if (defaultModel === undefined) {
+    throw new Error('No default model found');
+  }
+  return defaultModel;
+}
+
 function getDefaultAuxModel(models: LlmModel[]): LlmModel | undefined {
   return models.find((model) => model.name === DEFAULT_AUXILIARY_MODEL);
 }
 
 function getFallbackAuxModel(models: LlmModel[]): LlmModel | undefined {
   return models.find((model) => model.name === FALLBACK_AUXILIARY_MODEL);
+}
+
+function getDefaultChatModel(models: LlmModel[]): LlmModel | undefined {
+  return models.find((model) => model.name === DEFAULT_CHAT_MODEL);
 }
 
 function getFirstTextModel(models: LlmModel[]): LlmModel | undefined {

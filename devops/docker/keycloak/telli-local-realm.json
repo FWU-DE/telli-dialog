@@ -2799,6 +2799,24 @@
           "value": "password"
         }
       ]
+    },
+    {
+      "username": "teacher-ni",
+      "firstName": "Teacher",
+      "lastName": "Teacher",
+      "email": "teacher-ni@example.com",
+      "attributes": {
+        "schulnummer": ["school1-NI"],
+        "federal_state": ["DE-NI"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
     }
   ]
 }

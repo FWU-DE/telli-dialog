@@ -46,7 +46,6 @@ export default function SelectLlmModelForm({
           <Select.Viewport className="p-1">
             {models
               .filter((m) => m.priceMetadata.type === 'text')
-              .filter((m) => !m.name.includes('mistral'))
               .map((model) => (
                 <Select.Item
                   key={model.id}
