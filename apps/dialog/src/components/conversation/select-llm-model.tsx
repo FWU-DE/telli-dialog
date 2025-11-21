@@ -97,6 +97,7 @@ export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProp
         >
           {models
             .filter((m) => m.priceMetadata.type === 'text')
+            .filter((m) => !isStudent || !m.name.includes('mistral')) // students should not be able to select mistral models
             .filter((m) => m.id !== selectedModel?.id)
             .map((model) => {
               return (
