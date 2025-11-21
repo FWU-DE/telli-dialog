@@ -73,21 +73,22 @@ export async function shareCharacterAction({
   intelliPointsPercentageLimit,
   usageTimeLimit,
 }: { id: string } & SharedConversationShareFormValues) {
-  const { user } = await requireAuth();
+  const { user, school } = await requireAuth();
 
   return withLoggingAsync(shareCharacter)({
-    id,
+    characterId: id,
     telliPointsPercentageLimit: intelliPointsPercentageLimit,
     usageTimeLimitMinutes: usageTimeLimit,
     user: user,
+    schoolId: school?.id,
   });
 }
 
-export async function unshareCharacterAction({ id }: { id: string }) {
+export async function unshareCharacterAction({ characterId }: { characterId: string }) {
   const { user } = await requireAuth();
 
   return withLoggingAsync(unshareCharacter)({
-    id,
+    characterId,
     user: user,
   });
 }

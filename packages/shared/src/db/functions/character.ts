@@ -407,3 +407,24 @@ export async function dbGetGlobalCharacterByName({
     .where(and(eq(characterTable.name, name), eq(characterTable.accessLevel, 'global')));
   return character;
 }
+
+/**
+ * Returns all shared character conversations for a given character and user.
+ */
+export async function dbGetSharedCharacterConversations({
+  characterId,
+  userId,
+}: {
+  characterId: string;
+  userId: string;
+}) {
+  return await db
+    .select()
+    .from(sharedCharacterConversation)
+    .where(
+      and(
+        eq(sharedCharacterConversation.characterId, characterId),
+        eq(sharedCharacterConversation.userId, userId),
+      ),
+    );
+}

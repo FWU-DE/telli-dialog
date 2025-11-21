@@ -61,7 +61,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
   }
 
   function handleStopSharing() {
-    unshareCharacterAction({ id: character.id })
+    unshareCharacterAction({ characterId: character.id })
       .then(() => {
         toast.success(tToasts('stop-share-toast-success'));
         router.refresh();
