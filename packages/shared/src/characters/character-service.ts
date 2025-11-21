@@ -4,6 +4,7 @@ import {
   dbDeleteCharacterByIdAndUserId,
   dbGetCharacterById,
   dbGetSharedCharacterConversations,
+  dbGetCharacterByIdWithShareData,
 } from '@shared/db/functions/character';
 import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
@@ -447,6 +448,33 @@ export async function unshareCharacter({
   }
 
   return updatedCharacter;
+}
+
+/**
+ * This function is called when a user wants to start a chat session with a character.
+ * If the character is private, only the owner can start a chat session.
+ * If the character is shared with the school, any user from the same school can start a chat session.
+ * If the character is global, any user can start a chat session.
+ * @throws NotFoundError if character does not exist
+ * @throws ForbiddenError if user is not authorized to access the character
+ */
+export async function getCharacterForChatSession({
+  characterId,
+  userId,
+  schoolId,
+}: {
+  characterId: string;
+  userId: string;
+  schoolId: string;
+}) {
+  const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
+  if (!character) throw new NotFoundError('Character not found');
+  if (character.accessLevel === 'private' && character.userId !== userId)
+    throw new ForbiddenError('Not authorized to access this character');
+  if (character.accessLevel === 'school' && character.schoolId !== schoolId)
+    throw new ForbiddenError('Not authorized to access this character');
+
+  return character;
 }
 
 /**
