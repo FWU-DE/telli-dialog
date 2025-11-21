@@ -1,5 +1,5 @@
 import Chat from '@/components/chat/chat';
-import { generateUUID } from '@/utils/uuid';
+import { generateUUID } from '@shared/utils/uuid';
 import SelectLlmModel from '@/components/conversation/select-llm-model';
 import { NewChatButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';

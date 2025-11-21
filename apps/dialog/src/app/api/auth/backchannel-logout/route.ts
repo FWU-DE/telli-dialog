@@ -1,5 +1,5 @@
 import { sessionBlockList } from '@/auth/session';
-import { logError, logInfo, logWarning } from '@/utils/logging/logging';
+import { logError, logInfo, logWarning } from '@shared/logging';
 import * as jose from 'jose';
 import { NextRequest, NextResponse } from 'next/server';
 

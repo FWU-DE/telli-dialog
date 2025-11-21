@@ -1,12 +1,12 @@
 import { WebsearchSource } from './types';
 import { Readability } from '@mozilla/readability';
-import { JSDOM } from 'jsdom';
+import { JSDOM, VirtualConsole } from 'jsdom';
 import { CHAT_MESSAGE_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
 import he from 'he';
 import { unstable_cacheLife as cacheLife } from 'next/cache';
-import { logDebug, logError, logInfo, logWarning } from '@/utils/logging/logging';
+import { logDebug, logError, logInfo, logWarning } from '@shared/logging';
 import { isBinaryFile } from 'isbinaryfile';
 import { useTranslations } from 'next-intl';
 
@@ -132,9 +132,14 @@ export async function webScraperExecutable(
  */
 function extractArticleContent(html: string, url: string): string {
   let doc: JSDOM | undefined;
+  const virtualConsole = new VirtualConsole();
+  // For JSDOM v27: use forwardTo, to log jsdom errors on the console
+  // virtualConsole.forwardTo(console, {
+  //   jsdomErrors: ['unhandled-exception', 'not-implemented'],
+  // });
   try {
     // Create a DOM document
-    doc = new JSDOM(html, { url: url });
+    doc = new JSDOM(html, { url, virtualConsole });
 
     // Create a new Readability object and parse the document
     // Limit the max elements for performance reasons (Readability can take several minutes to parse large websites)
@@ -155,7 +160,7 @@ function extractArticleContent(html: string, url: string): string {
 
   // Fallback to basic title extraction if Readability fails
   try {
-    doc ??= new JSDOM(html);
+    doc ??= new JSDOM(html, { virtualConsole });
     const title = doc.window.document.querySelector('title')?.textContent || '';
 
     return `[Readability extraction failed] ${title}`;

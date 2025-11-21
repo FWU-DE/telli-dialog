@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/nextjs';
-import { env } from '@/env';
+import { env } from './env';
 import { isDevelopment } from '@shared/utils/isDevelopment';
 
 const logLevelOrder = ['fatal', 'error', 'warning', 'log', 'info', 'debug'] as const;

@@ -14,7 +14,7 @@ import { removeNullishValues } from '@/utils/generic/object-operations';
 import { CustomGptModel } from '@shared/db/schema';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
-import { logError } from '@/utils/logging/logging';
+import { logError } from '@shared/logging';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;

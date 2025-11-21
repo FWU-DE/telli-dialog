@@ -1,5 +1,5 @@
 import { LOGIN_PAGE_URL } from '@/app/(unauth)/login/page';
-import { logError } from '@/utils/logging/logging';
+import { logError } from '@shared/logging';
 import { NextResponse } from 'next/server';
 
 const SESSION_COOKIE_NAME = 'authjs.session-token';

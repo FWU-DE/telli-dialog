@@ -8,7 +8,7 @@ import {
 import { validateApiKeyByHeadersWithResult } from '@/utils/validation';
 import { deleteFilesFromS3, listFilesFromS3 } from '@shared/s3';
 import { NextRequest, NextResponse } from 'next/server';
-import { logInfo } from '@/utils/logging/logging';
+import { logInfo } from '@shared/logging';
 
 export async function DELETE(req: NextRequest) {
   const [error] = validateApiKeyByHeadersWithResult(req.headers);

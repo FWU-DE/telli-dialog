@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { extractFile } from '../../file-operations/extract-file';
 import { chunkText } from '../../file-operations/process-chunks';
 import { embedTextChunks } from '../../file-operations/embedding';
-import { logDebug } from '@/utils/logging/logging';
+import { logDebug } from '@shared/logging';
 import { dbInsertFileWithTextChunks } from '@shared/db/functions/files';
 
 export async function POST(req: NextRequest) {

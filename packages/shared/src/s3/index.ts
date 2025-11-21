@@ -79,6 +79,11 @@ export async function getMaybeLogoFromS3(federalStateId: string | undefined, ass
   });
 }
 
+/**
+ * Copies an existing object in S3 from the `copySource` key to the `newKey`.
+ * @param newKey the new key
+ * @param copySource the existing key to copy
+ */
 export async function copyFileInS3({ newKey, copySource }: { newKey: string; copySource: string }) {
   const copyParams: CopyObjectCommandInput = {
     Bucket: env.otcBucketName,
@@ -169,13 +174,9 @@ export async function readFileFromS3({ key }: { key: string }) {
 
   try {
     const { Body } = await s3Client.send(new GetObjectCommand(getParams));
-    const readableStream = Body as Readable;
-    const chunks: Buffer[] = [];
-    for await (const chunk of readableStream) {
-      chunks.push(chunk);
-    }
-    const content = Buffer.concat(chunks);
-    return content;
+    const byteArray = await Body?.transformToByteArray();
+    if (!byteArray) return;
+    return Buffer.from(byteArray);
   } catch (error) {
     console.error('Error reading file from S3:', error);
     throw error;
