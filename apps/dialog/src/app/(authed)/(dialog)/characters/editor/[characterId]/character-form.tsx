@@ -11,7 +11,7 @@ import {
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
-import { CharacterAccessLevel, CharacterModel, FileModel } from '@shared/db/schema';
+import { CharacterAccessLevel, CharacterSelectModel, FileModel } from '@shared/db/schema';
 import { deepCopy, deepEqual } from '@/utils/object';
 import { cn } from '@/utils/tailwind';
 import {
@@ -47,7 +47,7 @@ import { formLinks } from '@/utils/web-search/form-links';
 import FileManagement from '@/components/forms/file-management';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 
-type CharacterFormProps = CharacterModel & {
+type CharacterFormProps = CharacterSelectModel & {
   maybeSignedPictureUrl: string | undefined;
   isCreating?: boolean;
   readOnly: boolean;
@@ -210,10 +210,7 @@ export default function CharacterForm({
   }
 
   function handleDeleteCharacter() {
-    deleteCharacterAction({
-      characterId: character.id,
-      pictureId: character.pictureId ?? undefined,
-    })
+    deleteCharacterAction({ characterId: character.id })
       .then(() => {
         // do not show any toast if the avatar is being created
         if (!isCreating) {

@@ -11,7 +11,7 @@ import {
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
 import { SharedConversationShareFormValues } from './schema';
-import { generateInviteCode } from './utils';
+import { generateInviteCode } from '@shared/characters/character-service';
 import { dbGetRelatedSharedChatFiles } from '@shared/db/functions/files';
 
 export async function updateSharedSchoolChat({

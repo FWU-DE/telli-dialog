@@ -44,11 +44,15 @@ export const userTable = pgTable('user_entity', {
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
 });
 
-export type InsertUserModel = typeof userTable.$inferInsert;
-export type UserModel = typeof userTable.$inferSelect;
 export const userSelectSchema = createSelectSchema(userTable).extend({
   createdAt: z.coerce.date(),
 });
+export const userInsertSchema = createInsertSchema(userTable);
+export const userUpdateSchema = createUpdateSchema(userTable);
+
+export type UserSelectModel = z.infer<typeof userSelectSchema>;
+export type UserInsertModel = z.infer<typeof userInsertSchema>;
+export type UserUpdateModel = z.infer<typeof userUpdateSchema>;
 
 export const conversationTable = pgTable(
   'conversation',
@@ -222,8 +226,30 @@ export const characterTable = pgTable(
   (table) => [index().on(table.userId), index().on(table.schoolId)],
 );
 
-export type CharacterInsertModel = typeof characterTable.$inferInsert;
-export type CharacterModel = typeof characterTable.$inferSelect;
+export const characterSelectSchema = createSelectSchema(characterTable);
+export const characterInsertSchema = createInsertSchema(characterTable)
+  .omit({
+    id: true,
+    createdAt: true,
+  })
+  // for any reason accessLevel has a different type so we have to override it here
+  .extend({
+    accessLevel: characterAccessLevelSchema,
+  });
+export const characterUpdateSchema = createUpdateSchema(characterTable)
+  .omit({
+    id: true,
+    userId: true,
+    createdAt: true,
+  })
+  // for any reason accessLevel has a different type so we have to override it here
+  .extend({
+    accessLevel: characterAccessLevelSchema,
+  });
+
+export type CharacterSelectModel = z.infer<typeof characterSelectSchema>;
+export type CharacterInsertModel = z.infer<typeof characterInsertSchema>;
+export type CharacterUpdateModel = z.infer<typeof characterUpdateSchema>;
 
 export const characterTemplateMappingTable = pgTable(
   'character_template_mappings',

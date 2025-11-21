@@ -6,7 +6,7 @@ import {
 } from '@shared/db/functions/character';
 import {
   type CharacterAccessLevel,
-  type CharacterModel,
+  type CharacterSelectModel,
   characterAccessLevelSchema,
 } from '@shared/db/schema';
 import { PageContext } from '@/utils/next/types';
@@ -55,7 +55,7 @@ async function getCharacterByAccessLevel({
   schoolId: string | undefined;
   userId: string;
   federalStateId: string;
-}): Promise<CharacterModel[]> {
+}): Promise<CharacterSelectModel[]> {
   if (accessLevel === 'global') {
     return await dbGetGlobalCharacters({ userId, federalStateId });
   }

@@ -3,7 +3,7 @@
 import { useChat } from '@ai-sdk/react';
 import { FormEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { CharacterModel } from '@shared/db/schema';
+import { CharacterSelectModel } from '@shared/db/schema';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
@@ -23,7 +23,7 @@ const reductionBreakpoint = 'sm';
 export default function CharacterSharedChat({
   imageSource,
   ...character
-}: CharacterModel & { inviteCode: string; imageSource?: string }) {
+}: CharacterSelectModel & { inviteCode: string; imageSource?: string }) {
   const t = useTranslations('characters.shared');
 
   const { id, inviteCode } = character;

@@ -128,7 +128,8 @@ export async function POST(request: NextRequest) {
         });
 
         const character: Omit<CharacterInsertModel, 'modelId'> = {
-          id: existingGlobalCharacter?.id ?? undefined,
+          // Todo RL: Why is the id set here???
+          //          id: existingGlobalCharacter?.id ?? undefined,
           ...characterData,
           accessLevel: 'global',
           userId: DUMMY_USER_ID,

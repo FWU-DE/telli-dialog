@@ -1,19 +1,18 @@
 'use server';
 
-import { db } from '@shared/db';
-import { dbDeleteCharacterByIdAndUserId } from '@shared/db/functions/character';
-import {
-  CharacterAccessLevel,
-  CharacterInsertModel,
-  characterTable,
-  sharedCharacterConversation,
-} from '@shared/db/schema';
-import { deleteFileFromS3 } from '@shared/s3';
-import { getUser } from '@/auth/utils';
-import { and, eq } from 'drizzle-orm';
+import { CharacterAccessLevel } from '@shared/db/schema';
 import { SharedConversationShareFormValues } from '../../../shared-chats/[sharedSchoolChatId]/schema';
-import { generateInviteCode } from '../../../shared-chats/[sharedSchoolChatId]/utils';
-import { removeNullishValues } from '@/utils/generic/object-operations';
+import { requireAuth } from '@/auth/requireAuth';
+import { withLoggingAsync } from '@shared/logging';
+import {
+  deleteCharacter,
+  shareCharacter,
+  unshareCharacter,
+  updateCharacter,
+  updateCharacterAccessLevel,
+  UpdateCharacterActionModel,
+  updateCharacterPicture,
+} from '@shared/characters/character-service';
 
 export async function updateCharacterAccessLevelAction({
   characterId,
@@ -22,25 +21,13 @@ export async function updateCharacterAccessLevelAction({
   characterId: string;
   accessLevel: CharacterAccessLevel;
 }) {
-  if (accessLevel === 'global') {
-    throw Error('Cannot update character to be global');
-  }
+  const { user } = await requireAuth();
 
-  const user = await getUser();
-
-  const updatedCharacter = (
-    await db
-      .update(characterTable)
-      .set({ accessLevel })
-      .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, user.id)))
-      .returning()
-  )[0];
-
-  if (updatedCharacter === undefined) {
-    throw Error('Could not update the access level of the character');
-  }
-
-  return updatedCharacter;
+  return await withLoggingAsync(updateCharacterAccessLevel)({
+    characterId,
+    accessLevel,
+    userId: user.id,
+  });
 }
 
 export async function updateCharacterPictureAction({
@@ -50,151 +37,57 @@ export async function updateCharacterPictureAction({
   characterId: string;
   picturePath: string;
 }) {
-  const user = await getUser();
+  const { user } = await requireAuth();
 
-  const updatedCharacter = (
-    await db
-      .update(characterTable)
-      .set({ pictureId: picturePath })
-      .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, user.id)))
-      .returning()
-  )[0];
-
-  if (updatedCharacter === undefined) {
-    throw Error('Could not update the picture of the character');
-  }
-
-  return updatedCharacter;
+  return await withLoggingAsync(updateCharacterPicture)({
+    characterId,
+    picturePath,
+    userId: user.id,
+  });
 }
 
 export async function updateCharacterAction({
   characterId,
   ...character
-}: Omit<CharacterInsertModel, 'userId'> & { characterId: string }) {
-  const user = await getUser();
+}: UpdateCharacterActionModel & { characterId: string }) {
+  const { user } = await requireAuth();
 
-  const cleanedCharacter = removeNullishValues(character);
-  if (cleanedCharacter === undefined) return;
-
-  const { id, accessLevel, schoolId, createdAt, ...updatableProps } = cleanedCharacter;
-  const updatedCharacter = (
-    await db
-      .update(characterTable)
-      .set({ ...updatableProps })
-      .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, user.id)))
-      .returning()
-  )[0];
-
-  if (updatedCharacter === undefined) {
-    throw Error('Could not update the character');
-  }
-  return updatedCharacter;
+  return await withLoggingAsync(updateCharacter)({
+    characterId,
+    userId: user.id,
+    ...character,
+  });
 }
 
-export async function deleteCharacterAction({
-  characterId,
-  pictureId,
-}: {
-  characterId: string;
-  pictureId?: string;
-}) {
-  const user = await getUser();
+export async function deleteCharacterAction({ characterId }: { characterId: string }) {
+  const { user } = await requireAuth();
 
-  const deletedCharacter = await dbDeleteCharacterByIdAndUserId({ characterId, userId: user.id });
-
-  const maybePictureId = deletedCharacter.pictureId ?? pictureId;
-
-  if (maybePictureId !== null && maybePictureId !== undefined) {
-    try {
-      await deleteFileFromS3({ key: maybePictureId });
-    } catch (error) {
-      console.error({ error });
-    }
-  }
-
-  return deletedCharacter;
+  await withLoggingAsync(deleteCharacter)({
+    characterId,
+    userId: user.id,
+  });
 }
 
-export async function handleInitiateCharacterShareAction({
+export async function shareCharacterAction({
   id,
-  intelliPointsPercentageLimit: _intelliPointsPercentageLimit,
-  usageTimeLimit: _usageTimeLimit,
+  intelliPointsPercentageLimit,
+  usageTimeLimit,
 }: { id: string } & SharedConversationShareFormValues) {
-  const user = await getUser();
+  const { user } = await requireAuth();
 
-  if (user.school === undefined) {
-    throw Error('User is not part of a school');
-  }
-
-  if (user.school.userRole !== 'teacher') {
-    throw Error('Only a teacher can share a character');
-  }
-
-  const [maybeExistingEntry] = await db
-    .select()
-    .from(sharedCharacterConversation)
-    .where(
-      and(
-        eq(sharedCharacterConversation.userId, user.id),
-        eq(sharedCharacterConversation.characterId, id),
-      ),
-    );
-  const intelligencePointsLimit = _intelliPointsPercentageLimit;
-  const maxUsageTimeLimit = _usageTimeLimit;
-  const inviteCode = generateInviteCode();
-  const startedAt = new Date();
-  const updatedSharedChat = (
-    await db
-      .insert(sharedCharacterConversation)
-      .values({
-        id: maybeExistingEntry?.id,
-        userId: user.id,
-        characterId: id,
-        intelligencePointsLimit,
-        maxUsageTimeLimit,
-        inviteCode,
-        startedAt,
-      })
-      .onConflictDoUpdate({
-        target: sharedCharacterConversation.id,
-        set: { inviteCode, startedAt, maxUsageTimeLimit },
-      })
-      .returning()
-  )[0];
-
-  if (updatedSharedChat === undefined) {
-    throw Error('Could not shared character chat');
-  }
-
-  return updatedSharedChat;
+  return withLoggingAsync(shareCharacter)({
+    id,
+    telliPointsPercentageLimit: intelliPointsPercentageLimit,
+    usageTimeLimitMinutes: usageTimeLimit,
+    user: user,
+  });
 }
 
-export async function handleStopCharacaterShareAction({ id }: { id: string }) {
-  const user = await getUser();
+export async function unshareCharacterAction({ id }: { id: string }) {
+  const { user } = await requireAuth();
 
-  if (user.school === undefined) {
-    throw Error('User is not part of a school');
-  }
-
-  if (user.school.userRole !== 'teacher') {
-    throw Error('Only a teacher can stop share a character');
-  }
-
-  const updatedCharacter = (
-    await db
-      .delete(sharedCharacterConversation)
-      .where(
-        and(
-          eq(sharedCharacterConversation.characterId, id),
-          eq(sharedCharacterConversation.userId, user.id),
-        ),
-      )
-      .returning()
-  )[0];
-
-  if (updatedCharacter === undefined) {
-    throw Error('Could not stop share character');
-  }
-
-  return updatedCharacter;
+  return withLoggingAsync(unshareCharacter)({
+    id,
+    user: user,
+  });
 }

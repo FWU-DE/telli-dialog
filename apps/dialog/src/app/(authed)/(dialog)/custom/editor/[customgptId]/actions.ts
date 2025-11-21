@@ -5,7 +5,7 @@ import { CharacterAccessLevel, CustomGptInsertModel, customGptTable } from '@sha
 import { getUser } from '@/auth/utils';
 import { and, eq } from 'drizzle-orm';
 import { dbDeleteCustomGptByIdAndUserId } from '@shared/db/functions/custom-gpts';
-import { removeNullishValues } from '@/utils/generic/object-operations';
+import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 
 export async function updateCustomGptAccessLevelAction({
   gptId: gptId,
