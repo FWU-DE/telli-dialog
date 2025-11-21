@@ -40,60 +40,59 @@ describe('Character Service', () => {
       );
 
       await expect(
+        deleteFileMappingAndEntity({
+          characterId: 'unimportant',
+          fileId: 'unimportant',
+          userId: 'differentUserId',
+        }),
+      ).rejects.toThrowError(ForbiddenError);
+    });
+  });
+
+  describe('fetchFileMappings', () => {
+    it('should throw because character is private and user is not owner', async () => {
+      const userId = generateUUID();
+      const accessLevel = 'private';
+      const mockCharacter: Partial<CharacterSelectModel> = {
+        userId: userId,
+        accessLevel: accessLevel,
+      };
+
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        mockCharacter as never,
+      );
+
+      await expect(
         async () =>
-          await deleteFileMappingAndEntity({
+          await fetchFileMappings({
             characterId: 'unimportant',
-            fileId: 'unimportant',
             userId: 'differentUserId',
+            schoolId: 'unimportant',
           }),
       ).rejects.toThrowError(ForbiddenError);
     });
 
-    describe('fetchFileMappings', () => {
-      it('should throw because character is private and user is not owner', async () => {
-        const userId = generateUUID();
-        const accessLevel = 'private';
-        const mockCharacter: Partial<CharacterSelectModel> = {
-          userId: userId,
-          accessLevel: accessLevel,
-        };
+    it('should throw because character access level is school and user is from different school', async () => {
+      const userId = generateUUID();
+      const accessLevel = 'school';
+      const mockCharacter: Partial<CharacterSelectModel> = {
+        userId: userId,
+        schoolId: 'school-1',
+        accessLevel: accessLevel,
+      };
 
-        (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
-          mockCharacter as never,
-        );
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        mockCharacter as never,
+      );
 
-        await expect(
-          async () =>
-            await fetchFileMappings({
-              characterId: 'unimportant',
-              userId: 'differentUserId',
-              schoolId: 'unimportant',
-            }),
-        ).rejects.toThrowError(ForbiddenError);
-      });
-
-      it('should throw because character access level is school and user is from different school', async () => {
-        const userId = generateUUID();
-        const accessLevel = 'school';
-        const mockCharacter: Partial<CharacterSelectModel> = {
-          userId: userId,
-          schoolId: 'school-1',
-          accessLevel: accessLevel,
-        };
-
-        (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
-          mockCharacter as never,
-        );
-
-        await expect(
-          async () =>
-            await fetchFileMappings({
-              characterId: 'unimportant',
-              userId: userId,
-              schoolId: 'differentSchoolId',
-            }),
-        ).rejects.toThrowError(ForbiddenError);
-      });
+      await expect(
+        async () =>
+          await fetchFileMappings({
+            characterId: 'unimportant',
+            userId: 'differentUserId',
+            schoolId: 'differentSchoolId',
+          }),
+      ).rejects.toThrowError(ForbiddenError);
     });
   });
 
@@ -302,7 +301,7 @@ describe('Character Service', () => {
         async () =>
           await shareCharacter({
             characterId: 'unimportant',
-            user: { id: userId, userRole: 'teacher' },
+            user: { id: 'differentUserId', userRole: 'teacher' },
             telliPointsPercentageLimit: 10,
             usageTimeLimitMinutes: 60,
             schoolId: 'differentSchoolId',
