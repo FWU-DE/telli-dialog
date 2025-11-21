@@ -32,5 +32,6 @@ export const ROUTES = {
     vouchers: (federalStateId: string) => `/telli-dialog/federal-states/${federalStateId}/vouchers`,
     voucherNew: (federalStateId: string) =>
       `/telli-dialog/federal-states/${federalStateId}/vouchers/new`,
+    modelRefresh: '/telli-dialog/model-refresh',
   },
 };
