@@ -7,7 +7,7 @@ import { withLoggingAsync } from '@shared/logging';
 import {
   deleteCharacter,
   shareCharacter,
-  unshareCharacater,
+  unshareCharacter,
   updateCharacter,
   updateCharacterAccessLevel,
   UpdateCharacterActionModel,
@@ -59,18 +59,11 @@ export async function updateCharacterAction({
   });
 }
 
-export async function deleteCharacterAction({
-  characterId,
-  pictureId,
-}: {
-  characterId: string;
-  pictureId?: string;
-}) {
+export async function deleteCharacterAction({ characterId }: { characterId: string }) {
   const { user } = await requireAuth();
 
   await withLoggingAsync(deleteCharacter)({
     characterId,
-    pictureId,
     userId: user.id,
   });
 }
@@ -90,10 +83,10 @@ export async function shareCharacterAction({
   });
 }
 
-export async function unshareCharacaterAction({ id }: { id: string }) {
+export async function unshareCharacterAction({ id }: { id: string }) {
   const { user } = await requireAuth();
 
-  return withLoggingAsync(unshareCharacater)({
+  return withLoggingAsync(unshareCharacter)({
     id,
     user: user,
   });

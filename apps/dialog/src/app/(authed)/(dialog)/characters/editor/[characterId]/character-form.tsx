@@ -214,10 +214,7 @@ export default function CharacterForm({
   }
 
   function handleDeleteCharacter() {
-    deleteCharacterAction({
-      characterId: character.id,
-      pictureId: character.pictureId ?? undefined,
-    })
+    deleteCharacterAction({ characterId: character.id })
       .then(() => {
         // do not show any toast if the avatar is being created
         if (!isCreating) {
