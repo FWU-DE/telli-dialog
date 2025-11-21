@@ -1,4 +1,5 @@
 import { auth } from '../app/api/auth/[...nextauth]/auth';
+import type { Session } from 'next-auth';
 
 // TODO: Replace with shared error class when available
 export class UnauthenticatedError extends Error {
@@ -7,12 +8,11 @@ export class UnauthenticatedError extends Error {
     this.name = 'UnauthenticatedError';
   }
 }
-
 /**
  * @returns The authenticated session
  * @throws UnauthenticatedError if no session found
  */
-export async function requireAdminAuth() {
+export async function requireAdminAuth(): Promise<Session> {
   const session = await auth();
   if (!session) throw new UnauthenticatedError();
   return session;
