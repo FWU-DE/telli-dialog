@@ -48,9 +48,13 @@ export async function deleteFileMappingAndEntityAction({
 }
 
 export async function fetchFileMappingAction(conversationId: string): Promise<FileModel[]> {
-  const { user } = await requireAuth();
+  const { user, school } = await requireAuth();
 
-  return await withLoggingAsync(fetchFileMappings)(conversationId, user.id);
+  return await withLoggingAsync(fetchFileMappings)({
+    characterId: conversationId,
+    userId: user.id,
+    schoolId: school.id,
+  });
 }
 
 export async function linkFileToCharacterAction({

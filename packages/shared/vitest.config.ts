@@ -1,9 +1,11 @@
 import { defineConfig } from 'vitest/config';
+import path from 'node:path';
 
 export default defineConfig({
   resolve: {
     alias: {
-      '@/': '/src/',
+      '@/': path.resolve(__dirname, 'src'),
+      '@shared': path.resolve(__dirname, 'src'),
     },
   },
   test: {
@@ -14,6 +16,17 @@ export default defineConfig({
     environment: 'node',
 
     testTimeout: 5000,
+
+    env: {
+      API_KEY: 'test-api-key',
+      API_URL: 'https://test.api.url',
+      ENCRYPTION_KEY: 'test-encryption-key-32-characters',
+      DATABASE_URL: 'not-needed-for-tests',
+      OTC_ACCESS_KEY_ID: 'not-needed-for-tests',
+      OTC_BUCKET_NAME: 'not-needed-for-tests',
+      OTC_S3_HOSTNAME: 'not-needed-for-tests',
+      OTC_SECRET_ACCESS_KEY: 'not-needed-for-tests',
+    },
 
     coverage: {
       reporter: ['text', 'json', 'html'],

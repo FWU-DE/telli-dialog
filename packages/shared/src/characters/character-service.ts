@@ -1,6 +1,10 @@
 import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
-import { dbDeleteCharacterByIdAndUserId, dbGetCharacterById } from '@shared/db/functions/character';
+import {
+  dbDeleteCharacterByIdAndUserId,
+  dbGetCharacterById,
+  dbGetSharedCharacterConversations,
+} from '@shared/db/functions/character';
 import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import {
@@ -138,12 +142,24 @@ export async function deleteFileMappingAndEntity({
  * Get all file mappings related to a character.
  *
  * If the character is private, only the owner can fetch file mappings.
- * If the public is released with the public or school, anyone can fetch file mappings.
+ * If the character is released for a school, any teacher in that school can fetch file mappings.
+ * If the character is global, any teacher can fetch those file mappings.
  */
-export async function fetchFileMappings(characterId: string, userId: string): Promise<FileModel[]> {
+export async function fetchFileMappings({
+  characterId,
+  userId,
+  schoolId,
+}: {
+  characterId: string;
+  userId: string;
+  schoolId: string;
+}): Promise<FileModel[]> {
   // Authorization check
-  const { isOwner, isPrivate } = await getCharacterInfo(characterId, userId);
-  if (isPrivate && !isOwner)
+  const { isOwner, isPrivate, character } = await getCharacterInfo(characterId, userId);
+  if (
+    (isPrivate && !isOwner) ||
+    (!isOwner && character.accessLevel === 'school' && character.schoolId !== schoolId)
+  )
     throw new ForbiddenError('Not authorized to fetch file mappings for this character');
 
   // Fetch and return related files
@@ -201,13 +217,11 @@ export async function updateCharacterAccessLevel({
     throw new ForbiddenError('Not authorized to set the access level of this character');
 
   // Update the access level in database
-  const updatedCharacter = (
-    await db
-      .update(characterTable)
-      .set({ accessLevel })
-      .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)))
-      .returning()
-  )[0];
+  const [updatedCharacter] = await db
+    .update(characterTable)
+    .set({ accessLevel })
+    .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)))
+    .returning();
 
   if (updatedCharacter === undefined) {
     throw new Error('Could not update the access level of the character');
@@ -327,21 +341,27 @@ export async function deleteCharacter({
  * The teacher can share his own characters or characters that are released for the school or global.
  */
 export async function shareCharacter({
-  id,
+  characterId,
   user,
   telliPointsPercentageLimit,
   usageTimeLimitMinutes,
+  schoolId,
 }: {
-  id: string;
-  user: UserModel;
+  characterId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
   telliPointsPercentageLimit: number;
   usageTimeLimitMinutes: number;
+  schoolId?: string;
 }) {
   // Authorization check: user must be a teacher and owner of the character or it is global
   if (user.userRole !== 'teacher') throw new ForbiddenError('Only a teacher can share a character');
 
-  const { isOwner, isPrivate } = await getCharacterInfo(id, user.id);
-  if (isPrivate && !isOwner) throw new ForbiddenError('Not authorized to share this character');
+  const { isOwner, isPrivate, character } = await getCharacterInfo(characterId, user.id);
+  if (
+    (isPrivate && !isOwner) ||
+    (!isOwner && character.accessLevel === 'school' && character.schoolId !== schoolId)
+  )
+    throw new ForbiddenError('Not authorized to share this character');
 
   // validate input parameters
   if (telliPointsPercentageLimit < 0 || telliPointsPercentageLimit > 100) {
@@ -358,7 +378,7 @@ export async function shareCharacter({
     .where(
       and(
         eq(sharedCharacterConversation.userId, user.id),
-        eq(sharedCharacterConversation.characterId, id),
+        eq(sharedCharacterConversation.characterId, characterId),
       ),
     );
 
@@ -371,7 +391,7 @@ export async function shareCharacter({
     .values({
       id: maybeExistingEntry?.id,
       userId: user.id,
-      characterId: id,
+      characterId,
       intelligencePointsLimit,
       maxUsageTimeLimit,
       inviteCode,
@@ -393,16 +413,22 @@ export async function shareCharacter({
 /**
  * A teacher can unshare a character if he was the one that started the sharing.
  */
-export async function unshareCharacter({ id, user }: { id: string; user: UserModel }) {
+export async function unshareCharacter({
+  characterId,
+  user,
+}: {
+  characterId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
+}) {
   // Authorization check: user must be a teacher and owner of the sharing itself
   if (user.userRole !== 'teacher')
     throw new ForbiddenError('Only a teacher can unshare a character');
 
-  const [sharedCharacterConversion] = await db
-    .select()
-    .from(sharedCharacterConversation)
-    .where(eq(sharedCharacterConversation.characterId, id));
-  if (sharedCharacterConversion?.userId !== user.id)
+  const sharedConversations = await dbGetSharedCharacterConversations({
+    characterId,
+    userId: user.id,
+  });
+  if (sharedConversations.length === 0)
     throw new ForbiddenError('Not authorized to stop this shared character instance');
 
   // unshare character instance
@@ -410,7 +436,7 @@ export async function unshareCharacter({ id, user }: { id: string; user: UserMod
     .delete(sharedCharacterConversation)
     .where(
       and(
-        eq(sharedCharacterConversation.characterId, id),
+        eq(sharedCharacterConversation.characterId, characterId),
         eq(sharedCharacterConversation.userId, user.id),
       ),
     )
