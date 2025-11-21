@@ -1,3 +1,4 @@
+import { NotFound } from '@aws-sdk/client-s3';
 import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
 import { dbDeleteCharacterByIdAndUserId, dbGetCharacterById } from '@shared/db/functions/character';
@@ -6,6 +7,7 @@ import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import {
   CharacterAccessLevel,
   CharacterFileMapping,
+  CharacterSelectModel,
   characterTable,
   characterUpdateSchema,
   FileModel,
@@ -13,6 +15,7 @@ import {
   sharedCharacterConversation,
 } from '@shared/db/schema';
 import { ForbiddenError } from '@shared/error';
+import { NotFoundError } from '@shared/error/not-found-error';
 import { logError } from '@shared/logging';
 import { copyFileInS3, deleteFileFromS3 } from '@shared/s3';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/services/templateService';
@@ -40,6 +43,8 @@ export async function createNewCharacter({
   templatePictureId?: string;
   templateId?: string;
 }) {
+  if (user.userRole !== 'teacher') throw new ForbiddenError('Not authorized to create a character');
+
   if (templateId !== undefined) {
     let insertedCharacter = await copyCharacter(templateId, 'private', user.id, schoolId);
 
@@ -185,12 +190,12 @@ export async function updateCharacterAccessLevel({
   userId: string;
 }) {
   // Authorization check: user must own character
-  if ((await isUserOwnerOfCharacterOrGlobal(characterId, userId)).isOwner === false)
-    throw new ForbiddenError('Not authorized to set the access level of this character');
-
   if (accessLevel === 'global') {
     throw new ForbiddenError('Not authorized to set the access level to global');
   }
+
+  if ((await isUserOwnerOfCharacterOrGlobal(characterId, userId)).isOwner === false)
+    throw new ForbiddenError('Not authorized to set the access level of this character');
 
   // Update the access level in database
   const updatedCharacter = (
@@ -323,13 +328,11 @@ export async function shareCharacter({
   usageTimeLimitMinutes: number;
 }) {
   // Authorization check: user must be a teacher and owner of the character or it is global
+  if (user.userRole !== 'teacher') throw new ForbiddenError('Only a teacher can share a character');
+
   const { isOwner, isGlobal } = await isUserOwnerOfCharacterOrGlobal(id, user.id);
   if (isOwner === false && isGlobal === false)
     throw new ForbiddenError('Not authorized to share this character');
-
-  if (user.userRole !== 'teacher') {
-    throw new ForbiddenError('Only a teacher can share a character');
-  }
 
   // validate input parameters
   if (telliPointsPercentageLimit < 0 || telliPointsPercentageLimit > 100) {
@@ -383,16 +386,15 @@ export async function shareCharacter({
  */
 export async function unshareCharacter({ id, user }: { id: string; user: UserModel }) {
   // Authorization check: user must be a teacher and owner of the sharing itself
+  if (user.userRole !== 'teacher')
+    throw new ForbiddenError('Only a teacher can unshare a character');
+
   const [sharedCharacterConversion] = await db
     .select()
     .from(sharedCharacterConversation)
     .where(eq(sharedCharacterConversation.characterId, id));
   if (sharedCharacterConversion?.userId !== user.id)
     throw new ForbiddenError('Not authorized to stop this shared character instance');
-
-  if (user.userRole !== 'teacher') {
-    throw new ForbiddenError('Only a teacher can unshare a character');
-  }
 
   const [updatedCharacter] = await db
     .delete(sharedCharacterConversation)
@@ -412,16 +414,25 @@ export async function unshareCharacter({ id, user }: { id: string; user: UserMod
 }
 
 /**
- * Loads character from db and returns
- * - if the user is the owner
- * - if the character is global
+ * Loads character from db
+ * @returns
+ * - whether the user is the owner
+ * - whether the character is global
+ * - the character itself
+ * @throws NotFoundError if character does not exist
  */
 export async function isUserOwnerOfCharacterOrGlobal(
   characterId: string,
   userId: string,
-): Promise<{ isOwner: boolean; isGlobal: boolean }> {
+): Promise<{ isOwner: boolean; isGlobal: boolean; character: CharacterSelectModel }> {
   const character = await dbGetCharacterById({ characterId });
-  return { isOwner: character?.userId === userId, isGlobal: character?.accessLevel === 'global' };
+  if (!character) throw new NotFoundError('Character not found');
+
+  return {
+    isOwner: character?.userId === userId,
+    isGlobal: character?.accessLevel === 'global',
+    character,
+  };
 }
 
 /**
