@@ -9,8 +9,8 @@ import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import HeaderPortal from '../../../header-portal';
 import CharacterForm from './character-form';
-import { removeNullishValues } from '@/utils/generic/object-operations';
-import { CharacterModel } from '@shared/db/schema';
+import { removeNullishValues } from '@shared/utils/remove-nullish-values';
+import { CharacterSelectModel } from '@shared/db/schema';
 import { fetchFileMappingAction } from '../../actions';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
@@ -84,7 +84,7 @@ export default async function Page(context: PageContext) {
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
         <CharacterForm
-          {...(removeNullishValues(character) as CharacterModel)}
+          {...(removeNullishValues(character) as CharacterSelectModel)}
           pictureId={character.pictureId}
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           isCreating={isCreating}

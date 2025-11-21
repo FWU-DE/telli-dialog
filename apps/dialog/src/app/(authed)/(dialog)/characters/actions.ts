@@ -62,5 +62,5 @@ export async function linkFileToCharacterAction({
 }) {
   const { user } = await requireAuth();
 
-  return await withLoggingAsync(linkFileToCharacter)({ fileId, characterId });
+  return await withLoggingAsync(linkFileToCharacter)({ fileId, characterId, userId: user.id });
 }

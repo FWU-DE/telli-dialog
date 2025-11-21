@@ -116,7 +116,6 @@ async function processStaticJpegFiles(rootFolder: string, rootRemoteDir: string)
 export const defaultCharacters: Omit<CharacterInsertModel, 'modelId'>[] = [
   {
     userId: DUMMY_USER_ID,
-    id: '9ef32a4e-762e-4cce-82c0-6f8ebc633de2',
     name: 'Johann Wolfgang von Goethe',
     description: 'Dichter der Klassik und des Sturm und Drang, Verfasser des "Faust" ',
     competence: 'Die Schüler lesen den Faust und versuchen Bezüge zu unserer Zeit herzustellen.',

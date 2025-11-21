@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { checkProductAccess } from './access';
 import { UserAndContext } from '@/auth/types';
-import { UserModel, UserSchoolRole } from '@shared/db/schema';
+import { UserSelectModel, UserSchoolRole } from '@shared/db/schema';
 import { ObscuredFederalState } from '@/auth/utils';
 
 describe('checkProductAccess', () => {
@@ -42,7 +42,7 @@ describe('checkProductAccess', () => {
     createdAt: new Date(),
     lastUsedModel: null,
     versionAcceptedConditions: null,
-  } satisfies UserModel;
+  } satisfies UserSelectModel;
 
   it('should allow access when all conditions are met', () => {
     const context: UserAndContext = {

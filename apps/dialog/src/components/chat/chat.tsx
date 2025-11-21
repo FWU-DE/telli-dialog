@@ -4,7 +4,7 @@ import { useChat } from '@ai-sdk/react';
 import { FormEvent, ReactNode, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
-import { type CharacterModel, type CustomGptModel, FileModel } from '@shared/db/schema';
+import { type CharacterSelectModel, type CustomGptModel, FileModel } from '@shared/db/schema';
 import PromptSuggestions from './prompt-suggestions';
 import MarkdownDisplay from './markdown-display';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
@@ -35,7 +35,7 @@ type ChatProps = {
   id: string;
   initialMessages: Message[];
   customGpt?: CustomGptModel;
-  character?: CharacterModel;
+  character?: CharacterSelectModel;
   imageSource?: string;
   promptSuggestions?: string[];
   initialFileMapping?: Map<string, FileModel[]>;
