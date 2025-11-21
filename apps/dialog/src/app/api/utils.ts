@@ -44,7 +44,6 @@ export async function getModelAndProvider({
   let definedModel = await dbGetModelByIdAndFederalStateId({ modelId, federalStateId });
 
   if (definedModel === undefined) {
-    // Fallback to default model if specified model is not found
     definedModel = await getDefaultModel(federalStateId);
   }
 

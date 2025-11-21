@@ -95,7 +95,6 @@ export default function CharacterForm({
   const maybeDefaultModelId =
     models.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? models[0]?.id;
 
-  // Check if character's model is available in user's federal state
   const isCharacterModelAvailable =
     character.modelId && models.some((m) => m.id === character.modelId);
   const selectedModelId = isCharacterModelAvailable ? character.modelId : maybeDefaultModelId;
