@@ -100,7 +100,7 @@ export function ApiKeyDetailView({
           name: data.name.trim(),
           state: data.state,
           limitInCent: data.limitInCent,
-          expiresAt: data.expiresAt,
+          expiresAt: data.expiresAt ?? undefined,
         });
 
         // Show the plainKey to the user - this is critical as it can't be retrieved later
@@ -115,7 +115,7 @@ export function ApiKeyDetailView({
           name: data.name.trim(),
           state: data.state,
           limitInCent: data.limitInCent,
-          expiresAt: data.expiresAt,
+          expiresAt: data.expiresAt ?? undefined,
         });
         toast.success('API-Schlüssel erfolgreich aktualisiert');
       }
