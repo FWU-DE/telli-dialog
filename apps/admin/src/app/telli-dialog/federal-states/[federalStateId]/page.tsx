@@ -1,5 +1,5 @@
 import TwoColumnLayout from '@/components/layout/TwoColumnLayout';
-import { getFederalStateById } from '@shared/services/federal-state-service';
+import { getFederalStateByIdAction } from './actions';
 import { FederalStateView } from './FederalStateDetailView';
 import { Sidebar, SidebarItem } from '@/components/navigation/Sidebar';
 import { ROUTES } from '@/consts/routes';
@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function Page({ params }: { params: Promise<{ federalStateId: string }> }) {
   const { federalStateId } = await params;
-  const federalState = await getFederalStateById(federalStateId);
+  const federalState = await getFederalStateByIdAction(federalStateId);
 
   return (
     <TwoColumnLayout

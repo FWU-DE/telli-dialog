@@ -1,6 +1,5 @@
-'use server';
 import { env } from '../consts/env';
-import { type Voucher } from '../types/voucher';
+import { type Voucher, type CreateVoucherRequest } from '../types/voucher';
 import { fetchFromDialog } from './fetch';
 
 const apiRoutes = {
@@ -18,23 +17,13 @@ export async function fetchVouchers(federalStateId: string): Promise<Voucher[]> 
 
 export async function createVouchers(
   federalStateId: string,
-  increaseAmount: number,
-  durationMonths: number,
-  createdBy: string,
-  createReason: string,
-  numberOfCodes: number,
+  voucherData: CreateVoucherRequest,
 ): Promise<Voucher[]> {
   const response = await fetchFromDialog(
     env.telliDialogBaseUrl + apiRoutes.VOUCHERS_API_URL(federalStateId),
     {
       method: 'POST',
-      body: JSON.stringify({
-        increaseAmount,
-        durationMonths,
-        createdBy,
-        createReason,
-        numberOfCodes,
-      }),
+      body: JSON.stringify(voucherData),
     },
   );
 
