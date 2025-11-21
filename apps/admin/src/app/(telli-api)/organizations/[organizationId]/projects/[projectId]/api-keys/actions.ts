@@ -14,7 +14,7 @@ export async function getApiKeysAction(
   projectId: string,
 ): Promise<ApiKey[]> {
   await requireAdminAuth();
-  
+
   // Todo: error handling
   return fetchApiKeys(organizationId, projectId);
 }
@@ -25,7 +25,7 @@ export async function getApiKeyByIdAction(
   apiKeyId: string,
 ): Promise<ApiKey> {
   await requireAdminAuth();
-  
+
   // Todo: error handling
   return fetchSingleApiKey(organizationId, projectId, apiKeyId);
 }
@@ -39,7 +39,7 @@ export async function createApiKeyAction(
   expiresAt?: Date | null,
 ): Promise<ApiKeyWithPlainKey> {
   await requireAdminAuth();
-  
+
   if (!name.trim()) {
     throw new Error('API-Schlüssel-Name ist erforderlich');
   }
@@ -66,7 +66,7 @@ export async function updateApiKeyAction(
   expiresAt?: Date | null,
 ): Promise<ApiKey> {
   await requireAdminAuth();
-  
+
   if (!name.trim()) {
     throw new Error('API-Schlüssel-Name ist erforderlich');
   }

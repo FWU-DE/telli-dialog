@@ -13,13 +13,13 @@ export async function getModelMappingsAction(
   apiKeyId: string,
 ) {
   await requireAdminAuth();
-  
+
   return fetchModelApiKeyMappings(organizationId, projectId, apiKeyId);
 }
 
 export async function getLargeLanguageModelsAction(organizationId: string) {
   await requireAdminAuth();
-  
+
   return fetchLargeLanguageModels(organizationId);
 }
 
@@ -30,6 +30,6 @@ export async function saveModelMappingsAction(
   modelIds: string[],
 ) {
   await requireAdminAuth();
-  
+
   return saveModelApiKeyMappings(organizationId, projectId, apiKeyId, modelIds);
 }

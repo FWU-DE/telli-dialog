@@ -9,7 +9,7 @@ import {
 
 export async function getTemplateByIdAction(templateType: TemplateTypes, templateId: string) {
   await requireAdminAuth();
-  
+
   // Todo: error handling
   return getTemplateById(templateType, templateId);
 }
@@ -19,7 +19,7 @@ export async function getFederalStatesWithMappingsAction(
   templateId: string,
 ) {
   await requireAdminAuth();
-  
+
   return getFederalStatesWithMappings(templateType, templateId);
 }
 
@@ -29,6 +29,6 @@ export async function updateTemplateMappingsAction(
   mappings: TemplateToFederalStateMapping[],
 ) {
   await requireAdminAuth();
-  
+
   return updateTemplateMappings(templateType, templateId, mappings);
 }

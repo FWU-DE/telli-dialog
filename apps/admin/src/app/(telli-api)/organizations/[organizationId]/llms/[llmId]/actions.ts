@@ -19,7 +19,7 @@ export async function createLLMAction(
   },
 ) {
   await requireAdminAuth();
-  
+
   try {
     const result = await createLargeLanguageModel(organizationId, data);
     return result;
@@ -46,7 +46,7 @@ export async function updateLLMAction(
   },
 ) {
   await requireAdminAuth();
-  
+
   try {
     const result = await updateLargeLanguageModel(organizationId, llmId, data);
     return result;

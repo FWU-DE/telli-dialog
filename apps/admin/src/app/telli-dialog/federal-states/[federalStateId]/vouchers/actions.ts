@@ -10,7 +10,7 @@ import { type CreateVoucherRequest } from '../../../../../types/voucher';
 
 export async function fetchVouchersAction(federalStateId: string) {
   await requireAdminAuth();
-  
+
   return fetchVouchers(federalStateId);
 }
 
@@ -19,7 +19,7 @@ export async function createVouchersAction(
   voucherData: CreateVoucherRequest,
 ) {
   await requireAdminAuth();
-  
+
   return createVouchers(federalStateId, voucherData);
 }
 
@@ -30,6 +30,6 @@ export async function revokeVoucherAction(
   updateReason: string,
 ) {
   await requireAdminAuth();
-  
+
   return revokeVoucher(code, federalStateId, updatedBy, updateReason);
 }

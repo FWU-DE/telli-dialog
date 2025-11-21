@@ -13,7 +13,7 @@ import {
 
 export async function getFederalStateByIdAction(federalStateId: string) {
   await requireAdminAuth();
-  
+
   // Todo: error handling
   return getFederalStateById(federalStateId);
 }
@@ -22,7 +22,7 @@ export async function createFederalStateAction(
   data: Omit<FederalStateInsertModel, 'createdAt' | 'featureToggles'>,
 ) {
   await requireAdminAuth();
-  
+
   // Todo: error handling
   return createFederalState({
     ...data,
@@ -32,7 +32,7 @@ export async function createFederalStateAction(
 
 export async function updateFederalStateAction(data: FederalStateUpdateModel) {
   await requireAdminAuth();
-  
+
   // Todo: error handling
   return updateFederalState(data);
 }
