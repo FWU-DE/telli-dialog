@@ -1,14 +1,13 @@
 import { auth } from '@/auth';
 import { SchoolModel, schoolSelectSchema } from '@shared/db/schema';
 import { UserModel, userSchema } from '@shared/auth/user-model';
-import { ObscuredFederalState } from './utils';
 import { UnauthenticatedError } from '@shared/error';
-import { federalStateSchema } from '@shared/federal-states/types';
+import { FederalStateModel, federalStateSchema } from '@shared/federal-states/types';
 
 export async function requireAuth(): Promise<{
   user: UserModel;
   school: SchoolModel;
-  federalState: ObscuredFederalState;
+  federalState: FederalStateModel;
 }> {
   const session = await auth();
   if (!session) throw new UnauthenticatedError();
