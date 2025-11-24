@@ -1,6 +1,5 @@
 'use server';
 
-import { FileModel } from '@shared/db/schema';
 import { requireAuth } from '@/auth/requireAuth';
 import {
   createNewCharacter,
@@ -8,7 +7,12 @@ import {
   fetchFileMappings,
   linkFileToCharacter,
 } from '@shared/characters/character-service';
-import { withLoggingAsync } from '@shared/logging';
+import { runServerAction } from '@shared/actions/run-server-action';
+import { error } from 'console';
+import { BusinessError } from '@shared/error/business-error';
+import { NotFoundError } from '@shared/error/not-found-error';
+import { notFound } from 'next/navigation';
+import { ForbiddenError } from '@shared/error';
 
 export async function createNewCharacterAction({
   modelId,
@@ -21,7 +25,7 @@ export async function createNewCharacterAction({
 }) {
   const { user, school, federalState } = await requireAuth();
 
-  return await withLoggingAsync(createNewCharacter)({
+  return runServerAction(createNewCharacter)({
     federalStateId: federalState.id,
     modelId: modelId,
     schoolId: school.id,
@@ -40,17 +44,17 @@ export async function deleteFileMappingAndEntityAction({
 }) {
   const { user } = await requireAuth();
 
-  return await withLoggingAsync(deleteFileMappingAndEntity)({
+  return runServerAction(deleteFileMappingAndEntity)({
     characterId,
     fileId,
     userId: user.id,
   });
 }
 
-export async function fetchFileMappingAction(conversationId: string): Promise<FileModel[]> {
+export async function fetchFileMappingAction(conversationId: string) {
   const { user, school } = await requireAuth();
 
-  return await withLoggingAsync(fetchFileMappings)({
+  return runServerAction(fetchFileMappings)({
     characterId: conversationId,
     userId: user.id,
     schoolId: school.id,
@@ -66,5 +70,23 @@ export async function linkFileToCharacterAction({
 }) {
   const { user } = await requireAuth();
 
-  return await withLoggingAsync(linkFileToCharacter)({ fileId, characterId, userId: user.id });
+  return runServerAction(linkFileToCharacter)({ fileId, characterId, userId: user.id });
+}
+
+export async function testAction() {
+  const { user } = await requireAuth();
+
+  return runServerAction(throwExpectedNotFoundError)();
+}
+
+async function throwExpectedBusinessError() {
+  throw new ForbiddenError('not allowed');
+}
+
+async function throwExpectedNotFoundError() {
+  throw new NotFoundError('entity not found');
+}
+
+async function throwUnexpectedError() {
+  throw new Error('unexpected error');
 }
