@@ -6,7 +6,7 @@ import {
   userSchoolRoleSchema,
   userSelectSchema,
 } from '@shared/db/schema';
-import { FederalStateModel } from '@shared/types/federal-state';
+import { FederalStateModel } from '@shared/federal-states/types';
 import { z } from 'zod';
 
 const obscuredFederalStateSchema = federalStateSelectSchema.omit({ encryptedApiKey: true });
