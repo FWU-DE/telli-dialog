@@ -24,7 +24,7 @@ import { Button } from '@ui/components/Button';
 import { Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { ROUTES } from '../../../consts/routes';
-import { FederalStateModel } from '@shared/types/federal-state';
+import { FederalStateModel } from '@shared/federal-states/types';
 
 export default function FederalStateListView() {
   const [federalStates, setFederalStates] = useState<FederalStateModel[]>([]);

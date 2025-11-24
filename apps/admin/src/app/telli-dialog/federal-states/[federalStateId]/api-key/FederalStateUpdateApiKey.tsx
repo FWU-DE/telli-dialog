@@ -15,8 +15,8 @@ import { useForm } from 'react-hook-form';
 import { FormField } from '@ui/components/form/FormField';
 import { Button } from '@ui/components/Button';
 import { toast } from 'sonner';
-import { FederalStateModel } from '@shared/types/federal-state';
-import { updateApiKey } from '@shared/services/federal-state-service';
+import { FederalStateModel } from '@shared/federal-states/types';
+import { updateApiKey } from '@shared/federal-states/federal-state-service';
 
 export type FederalStateUpdateApiKeyProps = {
   federalState: FederalStateModel;

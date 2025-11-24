@@ -5,7 +5,7 @@ import {
   getFederalStatesWithMappings,
   getTemplateById,
   updateTemplateMappings,
-} from '@telli/shared/services/templateService';
+} from '@telli/shared/templates/templateService';
 
 export async function getTemplateByIdAction(templateType: TemplateTypes, templateId: string) {
   await requireAdminAuth();

@@ -11,7 +11,7 @@ import {
   dbUpdateFederalState,
   dbInsertFederalState,
 } from '@shared/db/functions/federal-state';
-import { FederalStateModel } from '@shared/types/federal-state';
+import { FederalStateModel } from '@shared/federal-states/types';
 import { encrypt } from '@shared/db/crypto';
 import { env } from '@shared/env';
 

@@ -6,7 +6,7 @@ import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import UploadImageIcon from '../icons/upload-image';
 import ImageCropModal from './crop-image-modal';
 import { CompressionOptions } from '@/utils/files/image-utils';
-import { cnanoid } from '@telli/shared/services/randomService';
+import { cnanoid } from '@telli/shared/random/randomService';
 
 type UploadImageToBeCroppedButtonProps = {
   uploadDirPath: string;

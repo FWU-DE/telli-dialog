@@ -3,7 +3,7 @@ import { SchoolModel, schoolSelectSchema } from '@shared/db/schema';
 import { UserModel, userSchema } from '@shared/auth/user-model';
 import { ObscuredFederalState } from './utils';
 import { UnauthenticatedError } from '@shared/error';
-import { federalStateSchema } from '@shared/types/federal-state';
+import { federalStateSchema } from '@shared/federal-states/types';
 
 export async function requireAuth(): Promise<{
   user: UserModel;

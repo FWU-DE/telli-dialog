@@ -7,7 +7,7 @@ import {
   TextChunkTable,
 } from '@shared/db/schema';
 import { copyFileInS3 } from '@shared/s3';
-import { cnanoid } from './randomService';
+import { cnanoid } from '../random/randomService';
 
 /**
  * Duplicates a file and all its related text chunks and embeddings.

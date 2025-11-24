@@ -21,7 +21,7 @@ import { ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
 import { logError } from '@shared/logging';
 import { copyFileInS3, deleteFileFromS3 } from '@shared/s3';
-import { copyCharacter, copyRelatedTemplateFiles } from '@shared/services/templateService';
+import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
 import { and, eq } from 'drizzle-orm';
