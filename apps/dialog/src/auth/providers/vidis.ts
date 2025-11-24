@@ -2,7 +2,7 @@ import { dbGetOrCreateVidisUser } from '@telli/shared/db/functions/vidis';
 import { env } from '@/env';
 import { Account, NextAuthConfig, Profile } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
-import { vidisAccountSchema, vidisProfileSchema } from '@telli/shared/types/vidis';
+import { vidisAccountSchema, vidisProfileSchema } from '@telli/shared/auth/vidis';
 
 export const VIDIS_LOGOUT_URL = new URL(env.vidisIssuerUri + '/protocol/openid-connect/logout');
 
