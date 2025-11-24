@@ -17,7 +17,7 @@ import { federalStateDisclaimers, VERSION } from '@/components/modals/const';
 import { setUserAcceptConditions } from './actions';
 import { FederalStateId } from '@/utils/vidis/const';
 import { getTranslations } from 'next-intl/server';
-import { getFederalStateById } from '@shared/services/federal-state-service';
+import { getFederalStateById } from '@shared/federal-states/federal-state-service';
 import { FederalStateProvider } from '@/components/providers/federal-state-provider';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {

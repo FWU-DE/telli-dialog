@@ -1,4 +1,4 @@
-import { VidisUserInfo } from '../../types/vidis';
+import { VidisUserInfo } from '../../auth/vidis';
 import { db } from '..';
 import {
   federalStateTable,

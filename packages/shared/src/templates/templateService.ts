@@ -22,7 +22,7 @@ import {
   duplicateFileWithEmbeddings,
   linkFileToCharacter,
   linkFileToCustomGpt,
-} from './fileService';
+} from '@shared/files/fileService';
 
 /**
  * Fetch all global templates from the database, including deleted templates.

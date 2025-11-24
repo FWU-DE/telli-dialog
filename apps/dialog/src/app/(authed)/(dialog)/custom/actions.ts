@@ -7,7 +7,7 @@ import { CustomGptFileMapping, customGptTable, FileModel, fileTable } from '@sha
 import { copyFileInS3 } from '@shared/s3';
 import { generateUUID } from '@shared/utils/uuid';
 import { eq } from 'drizzle-orm';
-import { copyRelatedTemplateFiles, copyCustomGpt } from '@shared/services/templateService';
+import { copyRelatedTemplateFiles, copyCustomGpt } from '@shared/templates/templateService';
 
 export async function createNewCustomGptAction({
   templatePictureId,

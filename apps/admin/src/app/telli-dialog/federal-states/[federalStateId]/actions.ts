@@ -4,7 +4,7 @@ import {
   getFederalStateById,
   createFederalState,
   updateFederalState,
-} from '@shared/services/federal-state-service';
+} from '@shared/federal-states/federal-state-service';
 import {
   federalStateFeatureTogglesSchema,
   FederalStateInsertModel,

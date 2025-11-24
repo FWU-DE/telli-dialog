@@ -16,7 +16,7 @@ import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
 import { FormFieldArray } from '../../../../components/form/FormFieldArray';
 import { toast } from 'sonner';
 import z from 'zod';
-import { FederalStateModel, federalStateSchema } from '@shared/types/federal-state';
+import { FederalStateModel, federalStateSchema } from '@shared/federal-states/types';
 import { DesignConfigurationSchema } from '@ui/types/design-configuration';
 import { useEffect } from 'react';
 import { FormErrorDisplay } from '@/components/FormErrorDisplay';
