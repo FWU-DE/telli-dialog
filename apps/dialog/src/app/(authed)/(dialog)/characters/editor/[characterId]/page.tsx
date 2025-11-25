@@ -1,9 +1,6 @@
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { PageContext } from '@/utils/next/types';
-import { awaitPageContext } from '@/utils/next/utils';
 import { notFound } from 'next/navigation';
-import { z } from 'zod';
 import HeaderPortal from '../../../header-portal';
 import CharacterForm from './character-form';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
@@ -17,28 +14,19 @@ import { buildLegacyUserAndContext } from '@/auth/types';
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
 
-const pageContextSchema = z.object({
-  params: z.object({
-    characterId: z.string(),
-  }),
-  searchParams: z
-    .object({
-      create: z.string().optional(),
-      templateId: z.string().optional(),
-    })
-    .optional(),
-});
+export default async function Page(
+  props: PageProps<'/characters/editor/[characterId]'>,
+  searchParams: Promise<{ create?: string }>,
+) {
+  const { characterId } = await props.params;
+  const { create } = await searchParams;
+  const isCreating = create === 'true';
 
-export default async function Page(context: PageContext) {
-  const result = pageContextSchema.safeParse(await awaitPageContext(context));
-  if (!result.success) notFound();
-  const { params, searchParams } = result.data;
-  const isCreating = searchParams?.create === 'true';
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
   const { character, relatedFiles, maybeSignedPictureUrl } = await getCharacterForEditView({
-    characterId: params.characterId,
+    characterId,
     userId: user.id,
     schoolId: school.id,
   }).catch(() => {
