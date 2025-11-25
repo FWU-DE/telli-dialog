@@ -30,16 +30,13 @@ export default async function Page(context: PageContext) {
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
-  let character;
-  try {
-    character = await getCharacterForChatSession({
-      characterId,
-      userId: user.id,
-      schoolId: school.id,
-    });
-  } catch (error) {
+  const character = await getCharacterForChatSession({
+    characterId,
+    userId: user.id,
+    schoolId: school.id,
+  }).catch(() => {
     notFound();
-  }
+  });
 
   const initialMessages: Message[] = character.initialMessage
     ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]

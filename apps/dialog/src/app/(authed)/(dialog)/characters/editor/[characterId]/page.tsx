@@ -37,19 +37,14 @@ export default async function Page(context: PageContext) {
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
-  let character;
-  let relatedFiles;
-  let maybeSignedPictureUrl: string | undefined;
-  try {
-    ({ character, relatedFiles, maybeSignedPictureUrl } = await getCharacterByIdForEditing({
-      characterId: params.characterId,
-      userId: user.id,
-      schoolId: school.id,
-    }));
-    if (!character) return notFound();
-  } catch (error) {
+  const { character, relatedFiles, maybeSignedPictureUrl } = await getCharacterByIdForEditing({
+    characterId: params.characterId,
+    userId: user.id,
+    schoolId: school.id,
+  }).catch(() => {
     notFound();
-  }
+  });
+
   const readOnly = user.id !== character.userId;
   const links = character.attachedLinks;
 
