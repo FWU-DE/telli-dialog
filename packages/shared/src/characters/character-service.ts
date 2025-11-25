@@ -21,7 +21,7 @@ import {
 import { ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
 import { logError } from '@shared/logging';
-import { copyFileInS3, deleteFileFromS3 } from '@shared/s3';
+import { copyFileInS3, deleteFileFromS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
@@ -475,6 +475,29 @@ export async function getCharacterForChatSession({
     throw new ForbiddenError('Not authorized to access this character');
 
   return character;
+}
+
+export async function getCharacterForEditView({
+  characterId,
+  schoolId,
+  userId,
+}: {
+  characterId: string;
+  schoolId: string;
+  userId: string;
+}) {
+  const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
+  if (!character) throw new NotFoundError('Character not found');
+  if (character.accessLevel === 'private' && character.userId !== userId)
+    throw new ForbiddenError('Not authorized to edit this character');
+  if (character.accessLevel === 'school' && character.schoolId !== schoolId)
+    throw new ForbiddenError('Not authorized to edit this character');
+
+  const relatedFiles = await fetchFileMappings({ characterId, userId, schoolId });
+  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
+    key: character.pictureId,
+  });
+  return { character, relatedFiles, maybeSignedPictureUrl };
 }
 
 /**

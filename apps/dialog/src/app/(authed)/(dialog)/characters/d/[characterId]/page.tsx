@@ -1,7 +1,6 @@
 import { generateUUID } from '@shared/utils/uuid';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
 import HeaderPortal from '../../../header-portal';
-import { getUser } from '@/auth/utils';
 import { notFound } from 'next/navigation';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import Chat from '@/components/chat/chat';
@@ -31,16 +30,13 @@ export default async function Page(context: PageContext) {
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
-  let character;
-  try {
-    character = await getCharacterForChatSession({
-      characterId,
-      userId: user.id,
-      schoolId: school.id,
-    });
-  } catch (error) {
+  const character = await getCharacterForChatSession({
+    characterId,
+    userId: user.id,
+    schoolId: school.id,
+  }).catch(() => {
     notFound();
-  }
+  });
 
   const initialMessages: Message[] = character.initialMessage
     ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
