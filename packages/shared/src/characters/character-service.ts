@@ -477,7 +477,7 @@ export async function getCharacterForChatSession({
   return character;
 }
 
-export async function getCharacterByIdForEditing({
+export async function getCharacterForEditView({
   characterId,
   schoolId,
   userId,

@@ -10,7 +10,7 @@ import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { CharacterSelectModel } from '@shared/db/schema';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
-import { getCharacterByIdForEditing } from '@shared/characters/character-service';
+import { getCharacterForEditView } from '@shared/characters/character-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 
@@ -37,7 +37,7 @@ export default async function Page(context: PageContext) {
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
-  const { character, relatedFiles, maybeSignedPictureUrl } = await getCharacterByIdForEditing({
+  const { character, relatedFiles, maybeSignedPictureUrl } = await getCharacterForEditView({
     characterId: params.characterId,
     userId: user.id,
     schoolId: school.id,
