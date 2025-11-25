@@ -20,7 +20,7 @@ export type CreateFederalStateModalProps = {
 // Minimal form schema - only mandatory fields without defaults
 export const createFederalStateFormSchema = z.object({
   id: z.string().min(1, 'ID ist erforderlich'),
-  encryptedApiKey: z.string().optional().default(''), // Optional but useful for setup
+  plainApiKey: z.string().optional().default(''), // Optional but useful for setup
 });
 
 export type CreateFederalStateForm = z.infer<typeof createFederalStateFormSchema>;
@@ -45,10 +45,12 @@ export function CreateFederalStateModal(props: CreateFederalStateModalProps) {
     }
 
     try {
-      await createFederalStateAction({
-        id: data.id,
-        encryptedApiKey: data.encryptedApiKey || null,
-      });
+      await createFederalStateAction(
+        {
+          id: data.id,
+        },
+        data.plainApiKey.trim(),
+      );
 
       toast.success('Bundesland erfolgreich erstellt');
       reset();
@@ -110,7 +112,7 @@ export function CreateFederalStateModal(props: CreateFederalStateModalProps) {
           />
 
           <FormField
-            name="encryptedApiKey"
+            name="plainApiKey"
             label="API Key (Optional)"
             description="API Key für die Kommunikation mit telli-api. Kann auch später hinzugefügt werden."
             control={control}

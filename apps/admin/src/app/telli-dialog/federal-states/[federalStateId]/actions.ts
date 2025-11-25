@@ -10,6 +10,8 @@ import {
   FederalStateInsertModel,
   FederalStateUpdateModel,
 } from '@shared/db/schema';
+import { encrypt } from '@shared/db/crypto';
+import { env } from '@shared/env';
 
 export async function getFederalStateByIdAction(federalStateId: string) {
   await requireAdminAuth();
@@ -18,13 +20,22 @@ export async function getFederalStateByIdAction(federalStateId: string) {
 }
 
 export async function createFederalStateAction(
-  data: Omit<FederalStateInsertModel, 'createdAt' | 'featureToggles'>,
+  data: Omit<FederalStateInsertModel, 'createdAt' | 'featureToggles' | 'encryptedApiKey'>,
+  plainApiKey?: string,
 ) {
   await requireAdminAuth();
 
   return createFederalState({
     ...data,
+    encryptedApiKey: plainApiKey ? encryptApiKey(plainApiKey) : undefined,
     featureToggles: federalStateFeatureTogglesSchema.parse({}),
+  });
+}
+
+function encryptApiKey(plainApiKey: string) {
+  return encrypt({
+    text: plainApiKey,
+    plainEncryptionKey: env.encryptionKey,
   });
 }
 
