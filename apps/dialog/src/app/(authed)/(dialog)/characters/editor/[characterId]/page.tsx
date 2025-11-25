@@ -1,8 +1,5 @@
-import { getUser } from '@/auth/utils';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
-import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { PageContext } from '@/utils/next/types';
 import { awaitPageContext } from '@/utils/next/utils';
 import { notFound } from 'next/navigation';
@@ -11,10 +8,11 @@ import HeaderPortal from '../../../header-portal';
 import CharacterForm from './character-form';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { CharacterSelectModel } from '@shared/db/schema';
-import { fetchFileMappingAction } from '../../actions';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
-import { logError } from '@shared/logging';
+import { getCharacterByIdForEditing } from '@shared/characters/character-service';
+import { requireAuth } from '@/auth/requireAuth';
+import { buildLegacyUserAndContext } from '@/auth/types';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
@@ -36,30 +34,23 @@ export default async function Page(context: PageContext) {
   if (!result.success) notFound();
   const { params, searchParams } = result.data;
   const isCreating = searchParams?.create === 'true';
-  const user = await getUser();
+  const { user, school, federalState } = await requireAuth();
+  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
-  const character = await dbGetCharacterByIdWithShareData({
-    characterId: params.characterId,
-    userId: user.id,
-  });
-  if (character === undefined) return notFound();
-  const relatedFiles = await fetchFileMappingAction(params.characterId);
-  if (!character) {
-    return notFound();
-  }
-  const readOnly = user.id !== character.userId;
+  let character;
+  let relatedFiles;
   let maybeSignedPictureUrl: string | undefined;
   try {
-    maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
-      key: character.pictureId,
-    });
-  } catch (e) {
-    logError(
-      `Error getting signed picture URL (key: ${character.pictureId}, character id: ${character.id}, template id: ${searchParams?.templateId})`,
-      e,
-    );
+    ({ character, relatedFiles, maybeSignedPictureUrl } = await getCharacterByIdForEditing({
+      characterId: params.characterId,
+      userId: user.id,
+      schoolId: school.id,
+    }));
+    if (!character) return notFound();
+  } catch (error) {
+    notFound();
   }
-
+  const readOnly = user.id !== character.userId;
   const links = character.attachedLinks;
 
   const initialLinks = PREFETCH_ENABLED
@@ -80,7 +71,7 @@ export default async function Page(context: PageContext) {
       <HeaderPortal>
         <ToggleSidebarButton />
         <div className="flex-grow"></div>
-        <ProfileMenu {...user} />
+        <ProfileMenu {...userAndContext} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
         <CharacterForm

@@ -1,7 +1,6 @@
 import { generateUUID } from '@shared/utils/uuid';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
 import HeaderPortal from '../../../header-portal';
-import { getUser } from '@/auth/utils';
 import { notFound } from 'next/navigation';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import Chat from '@/components/chat/chat';
