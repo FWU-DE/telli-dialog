@@ -28,7 +28,7 @@ export default async function Page(props: PageProps<'/shared-chats/[sharedSchool
   });
 
   if (!sharedSchoolChat) {
-    return notFound();
+    notFound();
   }
   const relatedFiles = await fetchFileMapping(sharedSchoolChatId);
 

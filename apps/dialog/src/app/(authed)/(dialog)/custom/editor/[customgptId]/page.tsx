@@ -33,7 +33,7 @@ export default async function Page(props: PageProps<'/custom/editor/[customgptId
   const relatedFiles = await fetchFileMapping(customgptId);
 
   if (!customGpt) {
-    return notFound();
+    notFound();
   }
   let maybeSignedPictureUrl: string | undefined;
   try {

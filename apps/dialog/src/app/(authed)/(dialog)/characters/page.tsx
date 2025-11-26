@@ -12,6 +12,7 @@ import {
 import CharacterPreviewPage from './charcter-preview-page';
 import { enrichCharactersWithImage } from './utils';
 import z from 'zod';
+import { parseSearchParams } from '@/utils/parse-search-params';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +21,7 @@ export const searchParamsSchema = z.object({
 });
 
 export default async function Page(props: PageProps<'/characters'>) {
-  const searchParams = searchParamsSchema.parse(await props.searchParams);
+  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
   const accessLevel = searchParams.visibility;
 
   const user = await getUser();
