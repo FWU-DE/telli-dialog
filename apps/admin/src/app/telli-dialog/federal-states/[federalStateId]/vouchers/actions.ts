@@ -5,8 +5,8 @@ import {
   fetchVouchers,
   createVouchers,
   revokeVoucher,
-} from '../../../../../services/voucher-service';
-import { type CreateVoucherRequest } from '../../../../../types/voucher';
+} from '@telli/shared/vouchers/voucher-service';
+import { type CreateVoucherModel } from '@telli/shared/vouchers/voucher';
 
 export async function fetchVouchersAction(federalStateId: string) {
   await requireAdminAuth();
@@ -16,7 +16,7 @@ export async function fetchVouchersAction(federalStateId: string) {
 
 export async function createVouchersAction(
   federalStateId: string,
-  voucherData: CreateVoucherRequest,
+  voucherData: CreateVoucherModel,
 ) {
   await requireAdminAuth();
 

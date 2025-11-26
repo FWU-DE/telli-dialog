@@ -1,7 +1,7 @@
 import React from 'react';
-import { Voucher } from '../../../../../types/voucher';
+import { VoucherModel } from '@telli/shared/vouchers/voucher';
 
-type VoucherStatus = Voucher['status'];
+type VoucherStatus = VoucherModel['status'];
 
 const translations: Record<VoucherStatus, string> = {
   created: 'Erstellt',

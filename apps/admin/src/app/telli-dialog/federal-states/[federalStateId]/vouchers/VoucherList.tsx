@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@ui/components/Table';
-import { Voucher } from '../../../../../types/voucher';
+import { VoucherModel } from '@telli/shared/vouchers/voucher';
 import { revokeVoucherAction } from './actions';
 import { Button } from '@ui/components/Button';
 
@@ -17,10 +17,10 @@ export default function VoucherList({
   vouchers,
   username,
 }: {
-  vouchers: Voucher[];
+  vouchers: VoucherModel[];
   username?: string;
 }) {
-  const handleRevoke = async (voucher: Voucher) => {
+  const handleRevoke = async (voucher: VoucherModel) => {
     if (!username) {
       alert('Widerrufen abgebrochen: Benutzername nicht gefunden.');
       return;

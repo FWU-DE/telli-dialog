@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { Voucher } from '../../../../../types/voucher';
+import { VoucherModel } from '@telli/shared/vouchers/voucher';
 import { Button } from '@ui/components/Button';
 import Link from 'next/link';
 import VoucherList from './VoucherList';
@@ -11,7 +11,7 @@ export default function VoucherListView({
   username,
   federalStateId,
 }: {
-  vouchers: Voucher[];
+  vouchers: VoucherModel[];
   username: string | undefined;
   federalStateId: string;
 }) {
