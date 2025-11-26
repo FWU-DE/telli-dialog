@@ -207,8 +207,6 @@ const EDUCATION_HINT_HB = `Liebe Kollegin, lieber Kollege,
 
 const EDUCATION_HINT_BW = `telli ist eine KI-Chatbotoberfläche, über die verschiedene Sprachmodelle für Lehrkräfte, Schülerinnen und Schüler zu schulischen Zwecken nutzbar sind. Die Anwendung von KI erfordert Kompetenzen über die Nutzung, Funktion und die Wirkungsweise künstlicher Intelligenz.`;
 
-
-
 // increment this number to prompt renewed acceptance from all users
 export const VERSION: number = 1;
 export type DisclaimerConfig = {
