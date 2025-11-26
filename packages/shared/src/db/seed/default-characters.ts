@@ -8,7 +8,7 @@ import { dbUpsertCustomGpt } from '../functions/custom-gpts';
 import { updateTemplateMappings } from '@shared/templates/templateService';
 import { FEDERAL_STATES } from './federal-state';
 
-export const DEFAULT_CHAT_MODEL = 'gpt-5-mini';
+export const DEFAULT_CHAT_MODEL = 'gpt-5-nano';
 
 export async function insertTemplateCharacters() {
   await processStaticJpegFiles(
