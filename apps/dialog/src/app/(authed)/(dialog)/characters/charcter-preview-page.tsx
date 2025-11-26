@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { cn } from '@/utils/tailwind';
 import HeaderPortal from '../header-portal';
 import ProfileMenu from '@/components/navigation/profile-menu';
@@ -17,10 +17,6 @@ import { CharacterAccessLevel } from '@shared/db/schema';
 import { buildGenericUrl, CharacterWithImage } from './utils';
 import { useTranslations } from 'next-intl';
 import { useFederalState } from '@/components/providers/federal-state-provider';
-import { testAction } from './actions';
-import { BusinessError } from '@shared/error';
-import { notFound } from 'next/navigation';
-import { isBusinessError } from '@shared/error/business-error';
 
 export default function CharacterPreviewPage({
   user,
@@ -33,40 +29,9 @@ export default function CharacterPreviewPage({
 }) {
   const [input, setInput] = React.useState('');
   const federalState = useFederalState();
-
   const filterDisabled = characters.length < 1;
-
   const filteredCharacters = filterCharacters({ characters, input });
-
   const t = useTranslations('characters');
-
-  useEffect(() => {
-    const callTestAction = async () => {
-      try {
-        const result = await testAction();
-        if (!result.success) {
-          console.log('Robin', JSON.stringify(result.error));
-
-          throw result.error;
-        }
-        console.log('Test action result:', result);
-      } catch (error) {
-        handleServerActionErrors(error);
-      }
-    };
-    callTestAction();
-  }, []);
-
-  function handleServerActionErrors(error: unknown) {
-    if (error && typeof error === 'object' && 'statusCode' in error) {
-      if (error.statusCode === 404 || error.statusCode === 403) {
-        console.log('calling notFound() from client component');
-        notFound();
-      }
-    } else {
-      console.error('Unknown server action error:', error);
-    }
-  }
 
   return (
     <div className="min-w-full p-6 overflow-auto">
