@@ -3,8 +3,10 @@ import { FederalStateUpdateApiKey } from './FederalStateUpdateApiKey';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Page({ params }: { params: Promise<{ federalStateId: string }> }) {
-  const federalStateId = (await params).federalStateId;
+export default async function Page(
+  props: PageProps<'/telli-dialog/federal-states/[federalStateId]/api-key'>,
+) {
+  const { federalStateId } = await props.params;
   const federalState = await getFederalStateById(federalStateId);
 
   return (

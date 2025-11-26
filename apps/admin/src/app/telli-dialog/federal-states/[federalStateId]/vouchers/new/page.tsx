@@ -2,8 +2,10 @@ import React from 'react';
 import VoucherCreateView from './VoucherCreateView';
 import { auth } from '../../../../../api/auth/[...nextauth]/auth';
 
-export default async function Page({ params }: { params: Promise<{ federalStateId: string }> }) {
-  const federalStateId = (await params).federalStateId;
+export default async function Page(
+  props: PageProps<'/telli-dialog/federal-states/[federalStateId]/vouchers/new'>,
+) {
+  const { federalStateId } = await props.params;
   const session = await auth();
   if (
     session === null ||

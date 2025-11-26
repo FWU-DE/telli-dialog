@@ -12,7 +12,6 @@ import CountDownTimer from '../../_components/count-down';
 import { calculateTimeLeftBySharedChat } from '../utils';
 import QRCode from './qr-code';
 import TelliClipboardButton from '@/components/common/clipboard-button';
-import { notFound } from 'next/navigation';
 
 export default async function Page(props: PageProps<'/shared-chats/[sharedSchoolChatId]/share'>) {
   const { sharedSchoolChatId } = await props.params;

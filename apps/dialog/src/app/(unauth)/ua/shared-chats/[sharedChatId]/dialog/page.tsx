@@ -6,7 +6,6 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { dbGetLlmModelById } from '@shared/db/functions/llm-model';
 import { dbGetFederalStateByUserId } from '@shared/db/functions/school';
 import { dbGetSharedChatByIdAndInviteCode } from '@shared/db/functions/shared-school-chat';
-import { logWarning } from '@shared/logging';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { notFound } from 'next/navigation';
 import z from 'zod';
