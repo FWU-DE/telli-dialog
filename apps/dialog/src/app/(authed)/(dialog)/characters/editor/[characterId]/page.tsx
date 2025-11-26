@@ -10,17 +10,20 @@ import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { getCharacterForEditView } from '@shared/characters/character-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
+import z from 'zod';
+import { parseSearchParams } from '@/utils/parse-search-params';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
 
-export default async function Page(
-  props: PageProps<'/characters/editor/[characterId]'>,
-  searchParams: Promise<{ create?: string }>,
-) {
+const searchParamsSchema = z.object({
+  create: z.coerce.boolean().optional().default(false),
+});
+
+export default async function Page(props: PageProps<'/characters/editor/[characterId]'>) {
   const { characterId } = await props.params;
-  const { create } = await searchParams;
-  const isCreating = create === 'true';
+  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
+  const isCreating = searchParams.create;
 
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);

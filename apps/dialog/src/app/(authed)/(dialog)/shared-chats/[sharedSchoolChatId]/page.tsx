@@ -1,46 +1,36 @@
 import { getUser } from '@/auth/utils';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import { dbGetSharedSchoolChatById } from '@shared/db/functions/shared-school-chat';
-import { awaitPageContext } from '@/utils/next/utils';
 import { notFound } from 'next/navigation';
-import { z } from 'zod';
 import HeaderPortal from '../../header-portal';
 import SharedSchoolChatForm from './shared-school-chat-form';
 import { fetchFileMapping } from './actions';
 import ProfileMenu from '@/components/navigation/profile-menu';
-import { PageContext } from '@/utils/next/types';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
-const pageContextSchema = z.object({
-  params: z.object({
-    sharedSchoolChatId: z.string(),
-  }),
-  searchParams: z
-    .object({
-      create: z.string().optional(),
-    })
-    .optional(),
-});
+import z from 'zod';
+import { parseSearchParams } from '@/utils/parse-search-params';
 
 const PREFETCH_ENABLED = false;
 
-export default async function Page(context: PageContext) {
-  const result = pageContextSchema.safeParse(await awaitPageContext(context));
-  if (!result.success) notFound();
+const searchParamsSchema = z.object({ create: z.coerce.boolean().optional().default(false) });
 
-  const { params, searchParams } = result.data;
-  const isCreating = searchParams?.create === 'true';
+export default async function Page(props: PageProps<'/shared-chats/[sharedSchoolChatId]'>) {
+  const { sharedSchoolChatId } = await props.params;
+  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
+  const isCreating = searchParams.create;
+
   const user = await getUser();
   const sharedSchoolChat = await dbGetSharedSchoolChatById({
     userId: user.id,
-    sharedChatId: params.sharedSchoolChatId,
+    sharedChatId: sharedSchoolChatId,
   });
 
   if (!sharedSchoolChat) {
     return notFound();
   }
-  const relatedFiles = await fetchFileMapping(params.sharedSchoolChatId);
+  const relatedFiles = await fetchFileMapping(sharedSchoolChatId);
 
   const initialLinks = PREFETCH_ENABLED
     ? await Promise.all(

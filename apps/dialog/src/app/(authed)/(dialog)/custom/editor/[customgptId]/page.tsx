@@ -1,12 +1,9 @@
 import { getUser } from '@/auth/utils';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { dbGetCustomGptById, dbGetCopyTemplateCustomGpt } from '@shared/db/functions/custom-gpts';
+import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
-import { PageContext } from '@/utils/next/types';
-import { awaitPageContext } from '@/utils/next/utils';
 import { notFound } from 'next/navigation';
-import { z } from 'zod';
 import HeaderPortal from '../../../header-portal';
 import CustomGptForm from './custom-gpt-form';
 import { fetchFileMapping } from '../../actions';
@@ -15,30 +12,25 @@ import { CustomGptModel } from '@shared/db/schema';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { logError } from '@shared/logging';
+import z from 'zod';
+import { parseSearchParams } from '@/utils/parse-search-params';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
 
-const pageContextSchema = z.object({
-  params: z.object({
-    customgptId: z.string(),
-  }),
-  searchParams: z
-    .object({
-      create: z.string().optional(),
-      templateId: z.string().optional(),
-    })
-    .optional(),
+const searchParamsSchema = z.object({
+  create: z.coerce.boolean().optional().default(false),
+  templateId: z.string().optional(),
 });
 
-export default async function Page(context: PageContext) {
-  const { params, searchParams } = pageContextSchema.parse(await awaitPageContext(context));
-
-  const isCreating = searchParams?.create === 'true';
+export default async function Page(props: PageProps<'/custom/editor/[customgptId]'>) {
+  const { customgptId } = await props.params;
+  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
+  const isCreating = searchParams.create;
 
   const user = await getUser();
-  const customGpt = await dbGetCustomGptById({ customGptId: params.customgptId });
-  const relatedFiles = await fetchFileMapping(params.customgptId);
+  const customGpt = await dbGetCustomGptById({ customGptId: customgptId });
+  const relatedFiles = await fetchFileMapping(customgptId);
 
   if (!customGpt) {
     return notFound();
@@ -50,7 +42,7 @@ export default async function Page(context: PageContext) {
     });
   } catch (e) {
     logError(
-      `Error getting signed picture URL (key: ${customGpt.pictureId}, customGpt id: ${customGpt.id}, template id: ${searchParams?.templateId})`,
+      `Error getting signed picture URL (key: ${customGpt.pictureId}, customGpt id: ${customGpt.id}, template id: ${searchParams.templateId})`,
       e,
     );
   }

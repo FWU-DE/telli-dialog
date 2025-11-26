@@ -4,34 +4,23 @@ import SidebarCloseIcon from '@/components/icons/sidebar-close';
 import Footer from '@/components/navigation/footer';
 import { dbGetSharedSchoolChatById } from '@shared/db/functions/shared-school-chat';
 import { getBaseUrlByHeaders, getHostByHeaders } from '@/utils/host';
-import { PageContext } from '@/utils/next/types';
-import { awaitPageContext } from '@/utils/next/utils';
 import { cn } from '@/utils/tailwind';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import { z } from 'zod';
 import CountDownTimer from '../../_components/count-down';
 import { calculateTimeLeftBySharedChat } from '../utils';
 import QRCode from './qr-code';
 import TelliClipboardButton from '@/components/common/clipboard-button';
+import { notFound } from 'next/navigation';
 
-const pageContextSchema = z.object({
-  params: z.object({
-    sharedSchoolChatId: z.string(),
-  }),
-});
+export default async function Page(props: PageProps<'/shared-chats/[sharedSchoolChatId]/share'>) {
+  const { sharedSchoolChatId } = await props.params;
 
-export default async function Page(context: PageContext) {
-  const result = pageContextSchema.safeParse(await awaitPageContext(context));
-  if (!result.success) return <NotFound />;
-
-  const { params } = result.data;
   const user = await getUser();
-
   const sharedSchoolChat = await dbGetSharedSchoolChatById({
     userId: user.id,
-    sharedChatId: params.sharedSchoolChatId,
+    sharedChatId: sharedSchoolChatId,
   });
 
   if (!sharedSchoolChat || !sharedSchoolChat.inviteCode) {
