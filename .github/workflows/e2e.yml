@@ -79,7 +79,7 @@ jobs:
           ENCRYPTION_KEY: op://telli Engineering/.env.e2e chatbot/ENCRYPTION_KEY
           SENTRY_DSN: op://telli Engineering/.env.e2e chatbot/SENTRY_DSN
           API_KEY: op://telli Engineering/.env.e2e chatbot/API_KEY
-          DE_BY_API_KEY: op://telli Engineering/.env.e2e chatbot/BAVARIA_API_KEY
+          DE_TEST_API_KEY: op://telli Engineering/.env.e2e chatbot/DE_TEST_API_KEY
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
