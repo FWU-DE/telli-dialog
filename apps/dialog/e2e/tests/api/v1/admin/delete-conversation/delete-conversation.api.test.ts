@@ -52,7 +52,7 @@ test('should return 403 if authorization header is missing', async ({ request })
 });
 
 async function createGenericChatWithFileAttachment(page: Page) {
-  await login(page, 'teacher1-BY');
+  await login(page, 'teacher');
   await uploadFile(page, './e2e/fixtures/file-upload/Große Text Datei.txt');
   await sendMessage(page, 'Gib "OK" aus.');
 }
