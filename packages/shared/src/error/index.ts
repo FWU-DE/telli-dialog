@@ -1,2 +1,4 @@
-export { UnauthenticatedError } from './unauthenticated-error';
-export { ForbiddenError } from './forbidden-error';
+export { BusinessError } from './business-error';
+export { ForbiddenError, isForbiddenError } from './forbidden-error';
+export { NotFoundError, isNotFoundError } from './not-found-error';
+export { UnauthenticatedError, isUnauthenticatedError } from './unauthenticated-error';
