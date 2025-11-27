@@ -154,6 +154,7 @@ export default function CharacterForm({
     // update the FE state
     setFiles((prev) => {
       const newMap = deepCopy(prev);
+      newMap.delete(localFileId);
       return newMap;
     });
 
@@ -162,7 +163,7 @@ export default function CharacterForm({
       characterId: character.id,
       fileId,
     });
-    if (!deleteResult) {
+    if (!deleteResult.success) {
       toast.error(tToast('edit-toast-error'));
     }
   }
