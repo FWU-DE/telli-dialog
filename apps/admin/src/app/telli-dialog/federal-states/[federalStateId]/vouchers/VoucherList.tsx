@@ -31,7 +31,7 @@ export default function VoucherList({
       return;
     }
     try {
-      await revokeVoucherAction(voucher.code, voucher.federalStateId, username, reason);
+      await revokeVoucherAction(voucher.code, voucher.federalStateId, reason);
       // update voucher list
       voucher.status = 'revoked';
       vouchers.find((v) => v.code === voucher.code)!.status = 'revoked';
