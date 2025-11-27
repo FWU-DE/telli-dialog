@@ -6,6 +6,7 @@ import { db } from '@shared/db';
 import { federalStateTable } from '@shared/db/schema';
 import { eq } from 'drizzle-orm';
 import { sendMessage, uploadFile } from '../../../../../utils/utils';
+import { E2E_FEDERAL_STATE } from '../../../../../utils/const';
 
 const deleteConversationRoute = '/api/v1/admin/delete-conversation';
 
@@ -18,20 +19,20 @@ test.describe('with chat_storage_time=0', () => {
       await db
         .select({ chatStorageTime: federalStateTable.chatStorageTime })
         .from(federalStateTable)
-        .where(eq(federalStateTable.id, 'DE-BY'))
+        .where(eq(federalStateTable.id, E2E_FEDERAL_STATE))
     )[0]?.chatStorageTime;
 
     await db
       .update(federalStateTable)
       .set({ chatStorageTime: 0 })
-      .where(eq(federalStateTable.id, 'DE-BY'));
+      .where(eq(federalStateTable.id, E2E_FEDERAL_STATE));
   });
 
   test.afterEach(async () => {
     await db
       .update(federalStateTable)
       .set({ chatStorageTime: original ?? 90 })
-      .where(eq(federalStateTable.id, 'DE-BY'));
+      .where(eq(federalStateTable.id, E2E_FEDERAL_STATE));
   });
 
   test('should delete old conversations', async ({ request }) => {
@@ -52,7 +53,7 @@ test('should return 403 if authorization header is missing', async ({ request })
 });
 
 async function createGenericChatWithFileAttachment(page: Page) {
-  await login(page, 'teacher1-BY');
+  await login(page, 'teacher');
   await uploadFile(page, './e2e/fixtures/file-upload/Große Text Datei.txt');
   await sendMessage(page, 'Gib "OK" aus.');
 }

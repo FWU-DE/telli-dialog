@@ -54,6 +54,15 @@ services:
     volumes:
       - keycloak_data:/keycloak
 
+  rabbitmq:
+    image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_PASS: password
+      RABBITMQ_DEFAULT_USER: user
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+
 volumes:
   keycloak_data:
   postgres_data:

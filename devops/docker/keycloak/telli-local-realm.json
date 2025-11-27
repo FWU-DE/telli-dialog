@@ -2662,8 +2662,8 @@
       "lastName": "Student",
       "email": "student@example.com",
       "attributes": {
-        "schulnummer": ["school1"],
-        "federal_state": ["DE-BY"],
+        "schulnummer": ["test_school1"],
+        "federal_state": ["DE-TEST"],
         "role": ["LERN"]
       },
       "enabled": true,
@@ -2680,8 +2680,26 @@
       "lastName": "Teacher",
       "email": "teacher@example.com",
       "attributes": {
-        "schulnummer": ["school1"],
-        "federal_state": ["DE-BY"],
+        "schulnummer": ["test_school1"],
+        "federal_state": ["DE-TEST"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher2",
+      "firstName": "Teacher",
+      "lastName": "Teacher",
+      "email": "teacher2@example.com",
+      "attributes": {
+        "schulnummer": ["test_school1"],
+        "federal_state": ["DE-TEST"],
         "role": ["LEHR"]
       },
       "enabled": true,
@@ -2698,7 +2716,7 @@
       "lastName": "Teacher",
       "email": "teacher-bb@example.com",
       "attributes": {
-        "schulnummer": ["school-bb"],
+        "schulnummer": ["test_school-bb"],
         "federal_state": ["DE-BB"],
         "role": ["LEHR"]
       },
@@ -2716,7 +2734,7 @@
       "lastName": "Teacher",
       "email": "teacher-bw@example.com",
       "attributes": {
-        "schulnummer": ["school-bw"],
+        "schulnummer": ["test_school-bw"],
         "federal_state": ["DE-BW"],
         "role": ["LEHR"]
       },
@@ -2734,7 +2752,7 @@
       "lastName": "Teacher",
       "email": "teacher-sh@example.com",
       "attributes": {
-        "schulnummer": ["school-sh"],
+        "schulnummer": ["test_school-sh"],
         "federal_state": ["DE-SH"],
         "role": ["LEHR"]
       },
@@ -2752,7 +2770,7 @@
       "lastName": "Teacher",
       "email": "teacher-sl@example.com",
       "attributes": {
-        "schulnummer": ["school-sl"],
+        "schulnummer": ["test_school-sl"],
         "federal_state": ["DE-SL"],
         "role": ["LEHR"]
       },
@@ -2770,7 +2788,7 @@
       "lastName": "Teacher",
       "email": "teacher1-by@example.com",
       "attributes": {
-        "schulnummer": ["school1-BY"],
+        "schulnummer": ["test_school1-BY"],
         "federal_state": ["DE-BY"],
         "role": ["LEHR"]
       },
@@ -2788,7 +2806,7 @@
       "lastName": "Teacher",
       "email": "teacher2-by@example.com",
       "attributes": {
-        "schulnummer": ["school1-BY"],
+        "schulnummer": ["test_school1-BY"],
         "federal_state": ["DE-BY"],
         "role": ["LEHR"]
       },
@@ -2806,8 +2824,44 @@
       "lastName": "Teacher",
       "email": "teacher-ni@example.com",
       "attributes": {
-        "schulnummer": ["school1-NI"],
+        "schulnummer": ["test_school1-NI"],
         "federal_state": ["DE-NI"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher-he",
+      "firstName": "Teacher",
+      "lastName": "Teacher",
+      "email": "teacher-he@example.com",
+      "attributes": {
+        "schulnummer": ["test_school1-HE"],
+        "federal_state": ["DE-HE"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher-hb",
+      "firstName": "Teacher",
+      "lastName": "Teacher",
+      "email": "teacher-hb@example.com",
+      "attributes": {
+        "schulnummer": ["test_school1-HB"],
+        "federal_state": ["DE-HB"],
         "role": ["LEHR"]
       },
       "enabled": true,
