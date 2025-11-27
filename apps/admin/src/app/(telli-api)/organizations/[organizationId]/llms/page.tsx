@@ -1,12 +1,10 @@
 import { LargeLanguageModelListView } from './LargeLanguageModelListView';
 import { getLargeLanguageModelsAction } from './actions';
 
-export default async function LargeLanguageModelsPage({
-  params,
-}: {
-  params: Promise<{ organizationId: string }>;
-}) {
-  const { organizationId } = await params;
+export default async function LargeLanguageModelsPage(
+  props: PageProps<'/organizations/[organizationId]/llms'>,
+) {
+  const { organizationId } = await props.params;
   const initialData = await getLargeLanguageModelsAction(organizationId);
   return <LargeLanguageModelListView organizationId={organizationId} initialData={initialData} />;
 }

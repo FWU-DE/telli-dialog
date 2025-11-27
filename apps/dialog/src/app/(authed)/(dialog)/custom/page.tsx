@@ -9,26 +9,22 @@ import {
   CustomGptModel,
   characterAccessLevelSchema,
 } from '@shared/db/schema';
-import { PageContext } from '@/utils/next/types';
-import { awaitPageContext } from '@/utils/next/utils';
-import { z } from 'zod';
 import Page2 from './_page';
 import { enrichGptWithImage } from './utils';
+import z from 'zod';
+import { parseSearchParams } from '@/utils/parse-search-params';
 
 export const dynamic = 'force-dynamic';
 
-const pageContextSchema = z.object({
-  searchParams: z.object({
-    visibility: characterAccessLevelSchema.default('private'),
-  }),
+export const searchParamsSchema = z.object({
+  visibility: characterAccessLevelSchema.optional().default('private'),
 });
 
-export default async function Page(context: PageContext) {
-  const {
-    searchParams: { visibility: accessLevel },
-  } = pageContextSchema.parse(await awaitPageContext(context));
-  const user = await getUser();
+export default async function Page(props: PageProps<'/custom'>) {
+  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
+  const accessLevel = searchParams.visibility;
 
+  const user = await getUser();
   const _customGpts = await getCustomGptByAccessLevel({
     accessLevel,
     schoolId: user.school?.id,

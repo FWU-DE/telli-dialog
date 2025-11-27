@@ -31,10 +31,18 @@ jobs:
         image: ghcr.io/valkey-io/valkey:8
         ports:
           - 6379:6379
+      rabbitmq:
+        image: rabbitmq:4
+        ports:
+          - 5672:5672
+        env:
+          RABBITMQ_DEFAULT_PASS: password
+          RABBITMQ_DEFAULT_USER: user
 
     env:
-      NEXTAUTH_URL: http://localhost:3000
       DATABASE_URL: postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db
+      NEXTAUTH_URL: http://localhost:3000
+      RABBITMQ_URI: amqp://user:password@127.0.0.1:5672
       VALKEY_URL: redis://127.0.0.1:6379/0
       VIDIS_CLIENT_ID: telli-e2e-client
       VIDIS_CLIENT_SECRET: ClientSecret-e2e
@@ -71,8 +79,7 @@ jobs:
           ENCRYPTION_KEY: op://telli Engineering/.env.e2e chatbot/ENCRYPTION_KEY
           SENTRY_DSN: op://telli Engineering/.env.e2e chatbot/SENTRY_DSN
           API_KEY: op://telli Engineering/.env.e2e chatbot/API_KEY
-          DE_BY_API_KEY: op://telli Engineering/.env.e2e chatbot/BAVARIA_API_KEY
-          RABBITMQ_URI: op://telli Engineering/.env.e2e chatbot/RABBITMQ_URI
+          DE_TEST_API_KEY: op://telli Engineering/.env.e2e chatbot/DE_TEST_API_KEY
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4

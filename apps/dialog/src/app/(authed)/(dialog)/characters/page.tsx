@@ -9,24 +9,20 @@ import {
   type CharacterSelectModel,
   characterAccessLevelSchema,
 } from '@shared/db/schema';
-import { PageContext } from '@/utils/next/types';
-import { awaitPageContext } from '@/utils/next/utils';
-import { z } from 'zod';
 import CharacterPreviewPage from './charcter-preview-page';
 import { enrichCharactersWithImage } from './utils';
+import z from 'zod';
+import { parseSearchParams } from '@/utils/parse-search-params';
 
 export const dynamic = 'force-dynamic';
 
-const pageContextSchema = z.object({
-  searchParams: z.object({
-    visibility: characterAccessLevelSchema.default('private'),
-  }),
+export const searchParamsSchema = z.object({
+  visibility: characterAccessLevelSchema.optional().default('private'),
 });
 
-export default async function Page(context: PageContext) {
-  const {
-    searchParams: { visibility: accessLevel },
-  } = pageContextSchema.parse(await awaitPageContext(context));
+export default async function Page(props: PageProps<'/characters'>) {
+  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
+  const accessLevel = searchParams.visibility;
 
   const user = await getUser();
 

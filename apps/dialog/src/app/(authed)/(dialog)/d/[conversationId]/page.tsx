@@ -10,9 +10,6 @@ import HeaderPortal from '../../header-portal';
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import { redirect } from 'next/navigation';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
-import { z } from 'zod';
-import { PageContext } from '@/utils/next/types';
-import { awaitPageContext } from '@/utils/next/utils';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
@@ -20,19 +17,16 @@ import { dbGetRelatedFiles } from '@shared/db/functions/files';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import Logo from '@/components/common/logo';
+import z from 'zod';
+import { parseSearchParams } from '@/utils/parse-search-params';
 
 export const dynamic = 'force-dynamic';
 
-const pageContext = z.object({
-  params: z.object({ conversationId: z.string() }),
-  searchParams: z.object({ model: z.string().optional() }).optional(),
-});
+const searchParamsSchema = z.object({ model: z.string().optional() });
 
-export default async function Page(context: PageContext) {
-  const {
-    params: { conversationId },
-    searchParams,
-  } = pageContext.parse(await awaitPageContext(context));
+export default async function Page(props: PageProps<'/d/[conversationId]'>) {
+  const { conversationId } = await props.params;
+  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
 
   const user = await getUser();
 
@@ -54,7 +48,7 @@ export default async function Page(context: PageContext) {
   const lastUsedModelInChat = messages.at(messages.length - 1)?.modelName ?? undefined;
 
   const currentModel =
-    searchParams?.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
+    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
 
   const convertedMessages = convertMessageModelToMessage(messages);
   const webSourceMapping = new Map<string, WebsearchSource[]>();

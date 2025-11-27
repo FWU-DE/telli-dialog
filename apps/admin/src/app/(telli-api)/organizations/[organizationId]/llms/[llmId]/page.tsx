@@ -3,12 +3,10 @@ import { LargeLanguageModelDetailView } from './LargeLanguageModelDetailView';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ organizationId: string; llmId: string }>;
-}) {
-  const { organizationId, llmId } = await params;
+export default async function Page(
+  props: PageProps<'/organizations/[organizationId]/llms/[llmId]'>,
+) {
+  const { organizationId, llmId } = await props.params;
 
   if (llmId === 'new') {
     // Create new LLM

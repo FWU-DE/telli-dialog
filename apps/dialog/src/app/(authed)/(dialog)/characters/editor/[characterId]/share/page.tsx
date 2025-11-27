@@ -1,5 +1,4 @@
 import { getUser } from '@/auth/utils';
-import { z } from 'zod';
 import Link from 'next/link';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { cn } from '@/utils/tailwind';
@@ -8,22 +7,14 @@ import SidebarCloseIcon from '@/components/icons/sidebar-close';
 import { getBaseUrlByHeaders, getHostByHeaders } from '@/utils/host';
 import Footer from '@/components/navigation/footer';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
-import { awaitPageContext } from '@/utils/next/utils';
-import { PageContext } from '@/utils/next/types';
 import { dbGetCharacterByIdAndUserId } from '@shared/db/functions/character';
 import CountDownTimer from '@/app/(authed)/(dialog)/shared-chats/_components/count-down';
 import QRCode from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/share/qr-code';
 import { getTranslations } from 'next-intl/server';
 import TelliClipboardButton from '@/components/common/clipboard-button';
 
-const pageContextSchema = z.object({
-  params: z.object({
-    characterId: z.string(),
-  }),
-});
-
-export default async function Page(context: PageContext) {
-  const { params } = pageContextSchema.parse(await awaitPageContext(context));
+export default async function Page(props: PageProps<'/characters/editor/[characterId]/share'>) {
+  const params = await props.params;
 
   const user = await getUser();
 

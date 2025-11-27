@@ -9,33 +9,22 @@ import { dbGetConversationById, dbGetCoversationMessages } from '@shared/db/func
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
-import { PageContext } from '@/utils/next/types';
-import { awaitPageContext } from '@/utils/next/utils';
-import { redirect } from 'next/navigation';
-import { z } from 'zod';
+import { notFound, redirect } from 'next/navigation';
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
+import z from 'zod';
+import { parseSearchParams } from '@/utils/parse-search-params';
 
 export const dynamic = 'force-dynamic';
+const searchParamsSchema = z.object({ model: z.string().optional() });
 
-const pageContextSchema = z.object({
-  params: z.object({
-    gptId: z.string(),
-    conversationId: z.string(),
-  }),
-
-  searchParams: z.object({ model: z.string().optional() }).optional(),
-});
-
-export default async function Page(context: PageContext) {
-  const result = pageContextSchema.safeParse(await awaitPageContext(context));
-  if (!result.success) redirect('/');
-
-  const { params, searchParams } = result.data;
+export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversationId]'>) {
+  const params = await props.params;
+  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
 
   const [chat, user] = await Promise.all([dbGetConversationById(params.conversationId), getUser()]);
 
   if (chat === undefined) {
-    throw new Error('Chat not found');
+    notFound();
   }
 
   const rawChatMessages = await dbGetCoversationMessages({
@@ -65,7 +54,7 @@ export default async function Page(context: PageContext) {
     rawChatMessages.at(rawChatMessages.length - 1)?.modelName ?? undefined;
 
   const currentModel =
-    searchParams?.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
+    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
 
   const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: customGpt.pictureId });
 

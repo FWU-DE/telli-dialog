@@ -29,6 +29,8 @@ updates:
     labels: ['dependencies']
     schedule:
       interval: 'weekly'
+    cooldown:
+      default-days: 5
     groups:
       # Group safe, non-breaking bumps to reduce PRs
       minor-and-patch:

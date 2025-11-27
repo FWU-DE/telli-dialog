@@ -3,16 +3,10 @@ import { getApiKeyByIdAction } from '../actions';
 import { ApiKeyDetailView } from '../ApiKeyDetailView';
 import { redirect } from 'next/navigation';
 
-export default async function ApiKeyDetailPage({
-  params,
-}: {
-  params: Promise<{
-    organizationId: string;
-    projectId: string;
-    apiKeyId: string;
-  }>;
-}) {
-  const { organizationId, projectId, apiKeyId } = await params;
+export default async function ApiKeyDetailPage(
+  props: PageProps<'/organizations/[organizationId]/projects/[projectId]/api-keys/[apiKeyId]'>,
+) {
+  const { organizationId, projectId, apiKeyId } = await props.params;
 
   try {
     const apiKey = await getApiKeyByIdAction(organizationId, projectId, apiKeyId);
