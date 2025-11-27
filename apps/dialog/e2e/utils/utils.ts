@@ -4,6 +4,10 @@ export async function waitForToast(page: Page) {
   await page.getByLabel('Notifications (F8)').locator('li').waitFor();
 }
 
+export async function waitForToastDisappear(page: Page) {
+  await page.getByLabel('Notifications (F8)').locator('li').waitFor({ state: 'detached' });
+}
+
 export async function regenerateMessage(page: Page) {
   await page.getByLabel('Reload').click();
   await page.getByLabel('Reload').waitFor({ state: 'hidden' });
