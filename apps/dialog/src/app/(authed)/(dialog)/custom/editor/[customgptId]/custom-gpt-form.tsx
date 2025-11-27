@@ -284,7 +284,6 @@ export default function CustomGptForm({
     <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
       <NavigateBack label={t('all-gpts')} onClick={handleNavigateBack} />
       <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>
-      {!isCreating && <p>isCreating === false</p>}
       {copyContainer}
       {userRole === 'teacher' && (
         <fieldset className="mt-8 gap-8">
