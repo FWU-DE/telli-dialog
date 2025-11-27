@@ -5,7 +5,7 @@ export async function waitForToast(page: Page) {
 }
 
 export async function waitForToastDisappear(page: Page) {
-  await page.getByLabel('Notifications (F8)').locator('li').waitFor({ state: 'detached' });
+  (await page.getByLabel('Notifications (F8)').locator('li').count()) === 0;
 }
 
 export async function regenerateMessage(page: Page) {
