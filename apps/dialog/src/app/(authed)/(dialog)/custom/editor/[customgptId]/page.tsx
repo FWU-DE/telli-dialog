@@ -19,14 +19,14 @@ export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
 
 const searchParamsSchema = z.object({
-  create: z.coerce.boolean().optional().default(false),
+  create: z.string().optional().default('false'),
   templateId: z.string().optional(),
 });
 
 export default async function Page(props: PageProps<'/custom/editor/[customgptId]'>) {
   const { customgptId } = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
-  const isCreating = searchParams.create;
+  const isCreating = searchParams.create === 'true';
 
   const user = await getUser();
   const customGpt = await dbGetCustomGptById({ customGptId: customgptId });

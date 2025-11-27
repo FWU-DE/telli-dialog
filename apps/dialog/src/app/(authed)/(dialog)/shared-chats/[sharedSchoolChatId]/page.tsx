@@ -14,12 +14,12 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 
 const PREFETCH_ENABLED = false;
 
-const searchParamsSchema = z.object({ create: z.coerce.boolean().optional().default(false) });
+const searchParamsSchema = z.object({ create: z.string().optional().default('false') });
 
 export default async function Page(props: PageProps<'/shared-chats/[sharedSchoolChatId]'>) {
   const { sharedSchoolChatId } = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
-  const isCreating = searchParams.create;
+  const isCreating = searchParams.create === 'true';
 
   const user = await getUser();
   const sharedSchoolChat = await dbGetSharedSchoolChatById({

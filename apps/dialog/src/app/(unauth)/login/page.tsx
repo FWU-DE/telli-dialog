@@ -11,14 +11,14 @@ export const dynamic = 'force-dynamic';
 export const LOGIN_PAGE_URL = new URL('/login', env.nextauthUrl);
 
 const searchParamsSchema = z.object({
-  testlogin: z.coerce.boolean().optional().default(false),
+  testlogin: z.string().optional().default('false'),
 });
 
 export default async function Page(props: PageProps<'/login'>) {
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
   const maybeUser = await getMaybeUser();
 
-  if (searchParams.testlogin) {
+  if (searchParams.testlogin === 'true') {
     redirect('/test-login');
   }
 

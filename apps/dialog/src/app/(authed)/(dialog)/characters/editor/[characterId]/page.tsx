@@ -17,13 +17,13 @@ export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
 
 const searchParamsSchema = z.object({
-  create: z.coerce.boolean().optional().default(false),
+  create: z.string().optional().default('false'),
 });
 
 export default async function Page(props: PageProps<'/characters/editor/[characterId]'>) {
   const { characterId } = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
-  const isCreating = searchParams.create;
+  const isCreating = searchParams.create === 'true';
 
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
