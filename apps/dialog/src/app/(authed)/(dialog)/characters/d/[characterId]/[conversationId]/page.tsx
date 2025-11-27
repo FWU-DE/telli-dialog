@@ -6,27 +6,18 @@ import Logo from '@/components/common/logo';
 import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import { dbGetConversationById, dbGetCoversationMessages } from '@shared/db/functions/chat';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
-import { PageContext } from '@/utils/next/types';
-import { awaitPageContext } from '@/utils/next/utils';
-import { redirect } from 'next/navigation';
-import { z } from 'zod';
+import { notFound, redirect } from 'next/navigation';
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
 
-const pageContextSchema = z.object({
-  params: z.object({
-    characterId: z.string(),
-    conversationId: z.string(),
-  }),
-});
+export default async function Page(
+  props: PageProps<'/characters/d/[characterId]/[conversationId]'>,
+) {
+  const params = await props.params;
 
-export default async function Page(context: PageContext) {
-  const result = pageContextSchema.safeParse(await awaitPageContext(context));
-  if (!result.success) redirect('/');
-  const params = result.data.params;
   const [chat, user] = await Promise.all([dbGetConversationById(params.conversationId), getUser()]);
 
   if (!chat) {
-    throw new Error('Chat not found');
+    notFound();
   }
 
   const rawChatMessages = await dbGetCoversationMessages({

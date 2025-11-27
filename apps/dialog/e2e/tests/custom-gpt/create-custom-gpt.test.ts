@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { sendMessage, waitForToast } from '../../utils/utils';
+import { sendMessage, waitForToast, waitForToastDisappear } from '../../utils/utils';
 
 test('teacher can login, create a custom gpt and start a chat', async ({ page }) => {
   await login(page, 'teacher');
@@ -127,6 +127,7 @@ test('data is autosaved on blur', async ({ page }) => {
   const item = page.locator('.cursor-pointer').filter({ has: child });
   await item.locator('[aria-label="Bearbeiten"]').first().click();
   await page.waitForURL('/custom/editor/**');
+  await waitForToastDisappear(page); // wait for success toast to disappear before continuing
 
   // change title to new value
   await page.getByRole('textbox', { name: 'Wie soll diese' }).fill('New Title');

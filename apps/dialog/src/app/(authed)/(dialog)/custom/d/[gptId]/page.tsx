@@ -11,8 +11,8 @@ import { ChatHeaderBar } from '@/components/chat/header-bar';
 import Logo from '@/components/common/logo';
 export const dynamic = 'force-dynamic';
 
-export default async function Page({ params }: { params: Promise<{ gptId: string }> }) {
-  const gptId = (await params).gptId;
+export default async function Page(props: PageProps<'/custom/d/[gptId]'>) {
+  const { gptId } = await props.params;
   const id = generateUUID();
   const user = await getUser();
 

@@ -3,12 +3,10 @@ import { isTemplateType } from '@shared/models/templates';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ templateType: string; templateId: string }>;
-}) {
-  const { templateType, templateId } = await params;
+export default async function Page(
+  props: PageProps<'/telli-dialog/templates/[templateType]/[templateId]'>,
+) {
+  const { templateType, templateId } = await props.params;
 
   if (!isTemplateType(templateType)) {
     throw new Error('Invalid template type');

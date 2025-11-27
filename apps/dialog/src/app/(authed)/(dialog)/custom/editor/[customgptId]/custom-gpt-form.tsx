@@ -261,6 +261,7 @@ export default function CustomGptForm({
     if (dataEquals) return;
     onSubmit(data);
   }
+
   function handleCreateCustomGpt() {
     const data = getValues();
     onSubmit(data);

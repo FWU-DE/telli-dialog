@@ -2,11 +2,9 @@ import { ProjectListView } from './ProjectListView';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ProjectsPage({
-  params,
-}: {
-  params: Promise<{ organizationId: string }>;
-}) {
-  const { organizationId } = await params;
+export default async function ProjectsPage(
+  props: PageProps<'/organizations/[organizationId]/projects'>,
+) {
+  const { organizationId } = await props.params;
   return <ProjectListView organizationId={organizationId} />;
 }

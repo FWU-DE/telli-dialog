@@ -6,8 +6,10 @@ import { ROUTES } from '@/consts/routes';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Page({ params }: { params: Promise<{ federalStateId: string }> }) {
-  const { federalStateId } = await params;
+export default async function Page(
+  props: PageProps<'/telli-dialog/federal-states/[federalStateId]'>,
+) {
+  const { federalStateId } = await props.params;
   const federalState = await getFederalStateByIdAction(federalStateId);
 
   return (

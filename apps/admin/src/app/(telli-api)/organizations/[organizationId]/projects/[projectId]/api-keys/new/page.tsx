@@ -1,14 +1,9 @@
 import { ApiKeyDetailView } from '../ApiKeyDetailView';
 
-export default async function NewApiKeyPage({
-  params,
-}: {
-  params: Promise<{
-    organizationId: string;
-    projectId: string;
-  }>;
-}) {
-  const { organizationId, projectId } = await params;
+export default async function NewApiKeyPage(
+  props: PageProps<'/organizations/[organizationId]/projects/[projectId]/api-keys/new'>,
+) {
+  const { organizationId, projectId } = await props.params;
 
   return (
     <div className="container mx-auto py-8">
