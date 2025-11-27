@@ -20,7 +20,8 @@ export async function createNewCharacterAction({
 }) {
   const { user, school, federalState } = await requireAuth();
 
-  return runServerAction(createNewCharacter)({
+  // Todo RL: use runServerAction here as soon as we have adapter custom gpt service
+  return createNewCharacter({
     federalStateId: federalState.id,
     modelId: modelId,
     schoolId: school.id,
@@ -43,16 +44,6 @@ export async function deleteFileMappingAndEntityAction({
     characterId,
     fileId,
     userId: user.id,
-  });
-}
-
-export async function fetchFileMappingAction(conversationId: string) {
-  const { user, school } = await requireAuth();
-
-  return runServerAction(fetchFileMappings)({
-    characterId: conversationId,
-    userId: user.id,
-    schoolId: school.id,
   });
 }
 

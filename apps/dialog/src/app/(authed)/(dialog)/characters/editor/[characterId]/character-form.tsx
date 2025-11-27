@@ -154,20 +154,27 @@ export default function CharacterForm({
     // update the FE state
     setFiles((prev) => {
       const newMap = deepCopy(prev);
-      const deleted = newMap.delete(localFileId);
-      if (!deleted) {
-        console.warn('Could not delete file');
-      }
       return newMap;
     });
 
     setInitialFiles(initialFiles.filter((f) => f.id !== fileId));
-    await deleteFileMappingAndEntityAction({ characterId: character.id, fileId });
+    const deleteResult = await deleteFileMappingAndEntityAction({
+      characterId: character.id,
+      fileId,
+    });
+    if (!deleteResult) {
+      toast.error(tToast('edit-toast-error'));
+    }
   }
-  function handleNewFile(data: { id: string; name: string; file: File }) {
-    linkFileToCharacterAction({ fileId: data.id, characterId: character.id })
-      .then()
-      .catch(() => toast.error(tToast('edit-toast-error')));
+
+  async function handleNewFile(data: { id: string; name: string; file: File }) {
+    const linkResult = await linkFileToCharacterAction({
+      fileId: data.id,
+      characterId: character.id,
+    });
+    if (!linkResult.success) {
+      toast.error(tToast('edit-toast-error'));
+    }
   }
 
   const backUrl = `/characters?visibility=${character.accessLevel}`;
