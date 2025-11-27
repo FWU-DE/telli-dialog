@@ -1,5 +1,7 @@
-import { fetchVouchers, createVouchers, revokeVoucher } from '@shared/vouchers/voucher-service';
-import { createVoucherSchema, patchSchema } from '@shared/vouchers/voucher';
+import { getVouchers, createVouchers, revokeVoucher } from '@shared/vouchers/voucher-service';
+import { createVoucherSchema, revokeVoucherSchema } from '@shared/vouchers/voucher';
+import { NotFoundError } from '@shared/error';
+import { VoucherAlreadyRedeemedError } from '@shared/error/voucher-errors';
 import { validateApiKeyByHeadersWithResult } from '@/utils/validation';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -14,7 +16,7 @@ export async function GET(
   }
 
   try {
-    const codes = await fetchVouchers((await params).federalStateId);
+    const codes = await getVouchers((await params).federalStateId);
     return NextResponse.json(codes, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch vouchers' }, { status: 500 });
@@ -30,10 +32,10 @@ export async function POST(
   if (error !== null) {
     return NextResponse.json({ error: error.message }, { status: 403 });
   }
-  
+
   const body = await request.json();
   const parseResult = createVoucherSchema.safeParse(body);
-  if (parseResult.error) {
+  if (!parseResult.success) {
     return NextResponse.json({ error: parseResult.error.message }, { status: 400 });
   }
 
@@ -55,33 +57,27 @@ export async function PATCH(
   }
 
   const body = await request.json();
-  const parseResult = patchSchema.safeParse(body);
+  const parseResult = revokeVoucherSchema.safeParse(body);
   if (!parseResult.success) {
     return NextResponse.json({ error: parseResult.error.message }, { status: 400 });
   }
   const parseData = parseResult.data;
 
   try {
-    if (parseData.revoked) {
-      await revokeVoucher(
-        parseData.code,
-        (await params).federalStateId,
-        parseData.updatedBy,
-        parseData.updateReason
-      );
-      return NextResponse.json({ message: 'Voucher revoked successfully' }, { status: 200 });
-    }
-    
-    // For other updates, you might need to add additional service functions
-    return NextResponse.json({ error: 'Only voucher revocation is currently supported' }, { status: 400 });
+    // Schema validation ensures parseData.revoked is true
+    await revokeVoucher(
+      parseData.code,
+      (await params).federalStateId,
+      parseData.updatedBy,
+      parseData.updateReason,
+    );
+    return NextResponse.json({ message: 'Voucher revoked successfully' }, { status: 200 });
   } catch (error) {
-    if (error instanceof Error) {
-      if (error.message === 'Voucher not found') {
-        return NextResponse.json({ error: error.message }, { status: 404 });
-      }
-      if (error.message === 'Voucher already redeemed and cannot be modified') {
-        return NextResponse.json({ error: error.message }, { status: 400 });
-      }
+    if (error instanceof NotFoundError) {
+      return NextResponse.json({ error: error.message }, { status: 404 });
+    }
+    if (error instanceof VoucherAlreadyRedeemedError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
     return NextResponse.json({ error: 'Failed to update voucher' }, { status: 500 });
   }

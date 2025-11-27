@@ -4,7 +4,7 @@ import { createVouchersAction } from '../actions';
 import { CSVLink } from 'react-csv';
 import { Input } from '@ui/components/Input';
 import { Textarea } from '@ui/components/Textarea';
-import { VoucherModel, CreateVoucherModel } from '@telli/shared/vouchers/voucher';
+import { Voucher, CreateVoucherParams } from '@telli/shared/vouchers/voucher';
 import { Button } from '@ui/components/Button';
 import VoucherList from '../VoucherList';
 
@@ -20,7 +20,7 @@ export default function VoucherCreateView({
   const [comment, setComment] = useState('');
   const [months, setMonths] = useState('3'); // default 3 months
 
-  const [createdVouchers, setCreatedVouchers] = useState<VoucherModel[]>([]);
+  const [createdVouchers, setCreatedVouchers] = useState<Voucher[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +44,7 @@ export default function VoucherCreateView({
       return;
     }
     try {
-      const voucherData: CreateVoucherModel = {
+      const voucherData: CreateVoucherParams = {
         increaseAmount: parsedAmount,
         durationMonths: parsedMonths,
         createdBy: username,

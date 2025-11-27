@@ -1,4 +1,4 @@
-import { fetchVouchersAction } from './actions';
+import { getVouchersAction } from './actions';
 import { auth } from '../../../../api/auth/[...nextauth]/auth';
 import VoucherListView from './VoucherListView';
 
@@ -10,7 +10,7 @@ export default async function VouchersByStatePage({
   params: Promise<{ federalStateId: string }>;
 }) {
   const federalStateId = (await params).federalStateId;
-  const vouchers = await fetchVouchersAction(federalStateId);
+  const vouchers = await getVouchersAction(federalStateId);
   const session = await auth();
 
   return (
