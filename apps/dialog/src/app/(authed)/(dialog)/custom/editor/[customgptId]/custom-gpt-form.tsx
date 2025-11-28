@@ -126,13 +126,13 @@ export default function CustomGptForm({
     updateCustomGptAccessLevelAction({
       gptId: customGpt.id,
       accessLevel,
-    })
-      .then(() => {
+    }).then((result) => {
+      if (result.success) {
         router.refresh();
-      })
-      .catch(() => {
+      } else {
         toast.error(tToast('edit-toast-error'));
-      });
+      }
+    });
   }
   const { fields, append, remove } = useFieldArray({
     control,
@@ -161,10 +161,9 @@ export default function CustomGptForm({
     setInitialFiles(initialFiles.filter((f) => f.id !== fileId));
     await deleteFileMappingAndEntityAction({ customGptId: customGpt.id, fileId });
   }
-  function handleNewFile(data: { id: string; name: string; file: File }) {
-    linkFileToCustomGptAction({ fileId: data.id, customGpt: customGpt.id })
-      .then()
-      .catch(() => toast.error(tToast('edit-toast-error')));
+  async function handleNewFile(data: { id: string; name: string; file: File }) {
+    const result = await linkFileToCustomGptAction({ fileId: data.id, customGptId: customGpt.id });
+    if (!result.success) toast.error(tToast('edit-toast-error'));
   }
 
   function onSubmit(data: CustomGptFormValues) {
@@ -173,14 +172,12 @@ export default function CustomGptForm({
       promptSuggestions: data.promptSuggestions?.map((p) => p.content),
       gptId: customGpt.id,
       attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
-    })
-      .then(() => {
+    }).then((result) => {
+      if (result.success) {
         if (!isCreating) toast.success(tToast('edit-toast-success'));
         router.refresh();
-      })
-      .catch(() => {
-        toast.error(tToast('edit-toast-error'));
-      });
+      } else toast.error(tToast('edit-toast-error'));
+    });
   }
 
   function cleanupPromptSuggestions(promptSuggestions: string[] | undefined) {
@@ -199,29 +196,27 @@ export default function CustomGptForm({
     updateCustomGptAction({
       gptId: customGpt.id,
       promptSuggestions: newPromptSuggestions,
-    })
-      .then(() => {
+    }).then((result) => {
+      if (result.success) {
         if (!isCreating) toast.success(tToast('edit-toast-success'));
-
         router.refresh();
-      })
-      .catch((error) => {
-        console.error({ error });
-      });
+      } else toast.error(tToast('edit-toast-error'));
+    });
   }
 
   const backUrl = `/custom?visibility=${customGpt.accessLevel}`;
 
   function handlePictureUploadComplete(picturePath: string) {
-    updateCustomGptPictureAction({ picturePath, gptId: customGpt.id })
-      .then(() => {
+    updateCustomGptPictureAction({ picturePath, gptId: customGpt.id }).then((result) => {
+      if (result.success) {
         toast.success(tToast('image-toast-success'));
         router.refresh();
-      })
-      .catch(() => {
+      } else {
         toast.error(tToast('edit-toast-error'));
-      });
+      }
+    });
   }
+
   function handleNavigateBack(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
     if (isCreating) {
@@ -232,8 +227,8 @@ export default function CustomGptForm({
   }
 
   function handleDeleteCustomGpt() {
-    deleteCustomGptAction({ gptId: customGpt.id })
-      .then(() => {
+    deleteCustomGptAction({ gptId: customGpt.id }).then((result) => {
+      if (!result.success) {
         // do not show any toast if the avatar is being created
         if (!isCreating) {
           toast.success(tToast('delete-toast-success'));
@@ -241,10 +236,8 @@ export default function CustomGptForm({
 
         // replace instead of push to avoid showing a 404 when navigating back to the now non existing custom gpt
         router.replace(backUrl);
-      })
-      .catch(() => {
-        toast.error(tToast('delete-toast-error'));
-      });
+      } else toast.error(tToast('delete-toast-error'));
+    });
   }
 
   function handleAutoSave() {

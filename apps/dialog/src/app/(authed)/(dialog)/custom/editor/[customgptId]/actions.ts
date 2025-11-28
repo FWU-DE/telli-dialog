@@ -8,6 +8,7 @@ import {
   updateCustomGptPicture,
 } from '@shared/custom-gpt/custom-gpt-service';
 import { requireAuth } from '@/auth/requireAuth';
+import { runServerAction } from '@shared/actions/run-server-action';
 
 export async function updateCustomGptAccessLevelAction({
   gptId: gptId,
@@ -18,7 +19,7 @@ export async function updateCustomGptAccessLevelAction({
 }) {
   const { user } = await requireAuth();
 
-  return updateCustomGptAccessLevel({
+  return runServerAction(updateCustomGptAccessLevel)({
     customGptId: gptId,
     accessLevel,
     userId: user.id,
@@ -34,7 +35,7 @@ export async function updateCustomGptPictureAction({
 }) {
   const { user } = await requireAuth();
 
-  return updateCustomGptPicture({
+  return runServerAction(updateCustomGptPicture)({
     customGptId: gptId,
     picturePath,
     userId: user.id,
@@ -47,7 +48,7 @@ export async function updateCustomGptAction({
 }: Partial<CustomGptInsertModel> & { gptId: string }) {
   const { user } = await requireAuth();
 
-  return updateCustomGpt({
+  return runServerAction(updateCustomGpt)({
     customGptId: gptId,
     userId: user.id,
     customGptProps: customGpt,
@@ -57,5 +58,5 @@ export async function updateCustomGptAction({
 export async function deleteCustomGptAction({ gptId }: { gptId: string }) {
   const { user } = await requireAuth();
 
-  return deleteCustomGpt({ customGptId: gptId, userId: user.id });
+  return runServerAction(deleteCustomGpt)({ customGptId: gptId, userId: user.id });
 }

@@ -25,6 +25,7 @@ import { and, eq } from 'drizzle-orm';
 /**
  * User creates a new custom gpt (assistant).
  * If a templateId is provided, the new custom gpt is created by copying the template.
+ * Throws if the user is not a teacher.
  */
 export async function createNewCustomGpt({
   schoolId,

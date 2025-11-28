@@ -1,12 +1,13 @@
 'use server';
 
-import { FileModel } from '@shared/db/schema';
 import { requireAuth } from '@/auth/requireAuth';
 import {
   createNewCustomGpt,
   deleteFileMappingAndEntity,
   getFileMappings,
+  linkFileToCustomGpt,
 } from '@shared/custom-gpt/custom-gpt-service';
+import { runServerAction } from '@shared/actions/run-server-action';
 
 export async function createNewCustomGptAction({
   templatePictureId,
@@ -33,21 +34,28 @@ export async function deleteFileMappingAndEntityAction({
   customGptId: string;
 }) {
   const { user } = await requireAuth();
-  return deleteFileMappingAndEntity({ customGptId, fileId, userId: user.id });
+
+  return runServerAction(deleteFileMappingAndEntity)({ customGptId, fileId, userId: user.id });
 }
 
-export async function fetchFileMappingAction(id: string): Promise<FileModel[]> {
+export async function fetchFileMappingAction(id: string) {
   const { user, school } = await requireAuth();
-  return getFileMappings({ customGptId: id, schoolId: school.id, userId: user.id });
+
+  return runServerAction(getFileMappings)({
+    customGptId: id,
+    schoolId: school.id,
+    userId: user.id,
+  });
 }
 
 export async function linkFileToCustomGptAction({
   fileId,
-  customGpt,
+  customGptId,
 }: {
   fileId: string;
-  customGpt: string;
+  customGptId: string;
 }) {
-  await requireAuth();
-  return linkFileToCustomGptAction({ fileId, customGpt });
+  const { user } = await requireAuth();
+
+  return runServerAction(linkFileToCustomGpt)({ fileId, customGptId, userId: user.id });
 }
