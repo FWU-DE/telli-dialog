@@ -14,7 +14,7 @@ import {
 import { VoucherInsertModel, VoucherUpdateModel } from '@shared/db/schema';
 import { cnanoid } from '../random/randomService';
 import { NotFoundError } from '../error/not-found-error';
-import { VoucherAlreadyRedeemedError } from './voucher-already-redeemed-error';
+import { InvalidArgumentError } from '../error';
 
 const VOUCHER_VALIDITY_YEARS = 2;
 
@@ -111,7 +111,7 @@ export async function revokeVoucher(
     throw new NotFoundError('Voucher not found');
   }
   if (voucher.status === 'redeemed') {
-    throw new VoucherAlreadyRedeemedError();
+    throw new InvalidArgumentError('Voucher already redeemed and cannot be modified');
   }
 
   const updatedFields: VoucherUpdateModel = {
