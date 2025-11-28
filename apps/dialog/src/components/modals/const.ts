@@ -107,24 +107,24 @@ Das FWU haftet nur für Vorsatz und grobe Fahrlässigkeit. Das gilt nicht bei de
 
 const TERMS_AND_CONDITIONS_BY = `**Liebe Kollegin, lieber Kollege,**
 
-wir freuen uns, dass Sie *telli* im Unterricht oder in der Unterrichtsvorbereitung einsetzen möchten.
+wir freuen uns, dass Sie telli im Unterricht oder in der Unterrichtsvorbereitung einsetzen möchten.
 *Wir empfehlen Ihnen, **vor der ersten Nutzung von telli** den **Selbstlernkurs „KI-Systeme verstehen und souverän anwenden"** der Akademie für Lehrerfortbildung und Personalführung Dillingen zu absolvieren.*
 
 Alle Informationen dazu finden Sie unter:
 [https://fibs.alp.dillingen.de/lehrgangssuche?container_id=423296](https://fibs.alp.dillingen.de/lehrgangssuche?container_id=423296)
 
-Dort erhalten Sie hilfreiche Informationen, Praxisbeispiele und Tipps zum Thema **KI in der Schule** – sowie speziell zum **pädagogisch verantwortungsvollen Einsatz von *telli*.**
+Dort erhalten Sie hilfreiche Informationen, Praxisbeispiele und Tipps zum Thema **KI in der Schule** – sowie speziell zum **pädagogisch verantwortungsvollen Einsatz von telli.**
 
-Bitte beachten Sie bei der Nutzung von *telli* folgende Hinweise:
+Bitte beachten Sie bei der Nutzung von telli folgende Hinweise:
 - Geben Sie **keine personenbezogenen Daten** ein (z. B. Namen, Adressen, Leistungsdaten oder vertrauliche Informationen).
 - Weisen Sie auch Ihre **Schülerinnen und Schüler** darauf hin, dass sie keine personenbezogenen oder sensiblen Daten eingeben dürfen.
-- Die Antworten von *telli* werden **automatisch generiert**. Sie können daher **Fehler oder sachliche Ungenauigkeiten** enthalten. Prüfen Sie die Ergebnisse stets kritisch, bevor Sie diese im Unterricht weiterverwenden.
+- Die Antworten von telli werden **automatisch generiert**. Sie können daher **Fehler oder sachliche Ungenauigkeiten** enthalten. Prüfen Sie die Ergebnisse stets kritisch, bevor Sie diese im Unterricht weiterverwenden.
 
 Vielen Dank für Ihre Aufmerksamkeit und Ihr Engagement, Künstliche Intelligenz verantwortungsvoll in der Schule einzusetzen.
-Wir wünschen Ihnen viel Freude und spannende Erkenntnisse beim Arbeiten mit *telli*!
+Wir wünschen Ihnen viel Freude und spannende Erkenntnisse beim Arbeiten mit telli!
 
 Mit freundlichen Grüßen
-**Ihr *telli*-Team**`;
+**Ihr telli-Team**`;
 
 const TERMS_AND_CONDITIONS_NW = `## telli - Der KI-Chatbot für die Schule
 
