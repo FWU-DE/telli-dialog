@@ -1,35 +1,33 @@
 'use server';
 
 import { requireAdminAuth } from '@/auth/requireAdminAuth';
-import {
-  fetchVouchers,
-  createVouchers,
-  revokeVoucher,
-} from '../../../../../services/voucher-service';
-import { type CreateVoucherRequest } from '../../../../../types/voucher';
+import { getVouchers, createVouchers, revokeVoucher } from '@telli/shared/vouchers/voucher-service';
+import { type CreateVoucherParams } from '@telli/shared/vouchers/voucher';
 
-export async function fetchVouchersAction(federalStateId: string) {
+export async function getVouchersAction(federalStateId: string) {
   await requireAdminAuth();
 
-  return fetchVouchers(federalStateId);
+  return getVouchers(federalStateId);
 }
 
 export async function createVouchersAction(
   federalStateId: string,
-  voucherData: CreateVoucherRequest,
+  voucherData: Omit<CreateVoucherParams, 'createdBy'>,
 ) {
-  await requireAdminAuth();
+  const session = await requireAdminAuth();
 
-  return createVouchers(federalStateId, voucherData);
+  return createVouchers(federalStateId, {
+    ...voucherData,
+    createdBy: session.user.name,
+  });
 }
 
 export async function revokeVoucherAction(
   code: string,
   federalStateId: string,
-  updatedBy: string,
   updateReason: string,
 ) {
-  await requireAdminAuth();
+  const session = await requireAdminAuth();
 
-  return revokeVoucher(code, federalStateId, updatedBy, updateReason);
+  return revokeVoucher(code, federalStateId, session.user.name, updateReason);
 }
