@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { toast } from 'sonner';
 
 import {
   Table,
@@ -12,7 +13,7 @@ import {
 import { Voucher } from '@telli/shared/vouchers/voucher';
 import { revokeVoucherAction } from './actions';
 import { Button } from '@ui/components/Button';
-import { BusinessError } from '@shared/error/business-error';
+import { BusinessError } from '@shared/error';
 
 export default function VoucherList({
   vouchers,
@@ -23,12 +24,12 @@ export default function VoucherList({
 }) {
   const handleRevoke = async (voucher: Voucher) => {
     if (!username) {
-      alert('Widerrufen abgebrochen: Benutzername nicht gefunden.');
+      toast.error('Widerrufen abgebrochen: Benutzername nicht gefunden.');
       return;
     }
     const reason = prompt('Bitte Grund für das Widerrufen des Codes angeben:');
     if (!reason || reason.trim().length === 0) {
-      alert('Widerrufen abgebrochen: Grund ist erforderlich.');
+      toast.error('Widerrufen abgebrochen: Grund ist erforderlich.');
       return;
     }
     try {
@@ -37,7 +38,9 @@ export default function VoucherList({
       voucher.status = 'revoked';
       vouchers.find((v) => v.code === voucher.code)!.status = 'revoked';
     } catch (err) {
-      alert('Fehler beim Widerrufen des Gutscheins: ' + (err as BusinessError).message);
+      const errorMessage =
+        err instanceof BusinessError ? err.message : 'Ein unbekannter Fehler ist aufgetreten';
+      toast.error('Fehler beim Widerrufen des Gutscheins: ' + errorMessage);
     }
   };
   return (
