@@ -14,7 +14,7 @@ import {
 import { VoucherInsertModel, VoucherUpdateModel } from '@shared/db/schema';
 import { cnanoid } from '../random/randomService';
 import { NotFoundError } from '../error/not-found-error';
-import { VoucherAlreadyRedeemedError } from '../error/voucher-errors';
+import { VoucherAlreadyRedeemedError } from './voucher-already-redeemed-error';
 
 const VOUCHER_VALIDITY_YEARS = 2;
 

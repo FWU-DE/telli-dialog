@@ -12,6 +12,7 @@ import {
 import { Voucher } from '@telli/shared/vouchers/voucher';
 import { revokeVoucherAction } from './actions';
 import { Button } from '@ui/components/Button';
+import { BusinessError } from '@shared/error/business-error';
 
 export default function VoucherList({
   vouchers,
@@ -36,7 +37,7 @@ export default function VoucherList({
       voucher.status = 'revoked';
       vouchers.find((v) => v.code === voucher.code)!.status = 'revoked';
     } catch (err) {
-      alert('Fehler beim Widerrufen des Gutscheins: ' + (err as Error).message);
+      alert('Fehler beim Widerrufen des Gutscheins: ' + (err as BusinessError).message);
     }
   };
   return (
