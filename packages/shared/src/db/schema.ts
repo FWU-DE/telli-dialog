@@ -466,7 +466,7 @@ export const customGptUpdateSchema = createUpdateSchema(customGptTable)
   .extend({
     id: z.string(),
     // for any reason accessLevel has a different type so we have to override it here
-    accessLevel: characterAccessLevelSchema,
+    accessLevel: characterAccessLevelSchema.optional(),
   });
 export type CustomGptModel = typeof customGptTable.$inferSelect;
 export type CustomGptInsertModel = typeof customGptTable.$inferInsert;

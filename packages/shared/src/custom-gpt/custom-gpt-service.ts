@@ -10,7 +10,6 @@ import {
   CharacterAccessLevel,
   CustomGptFileMapping,
   customGptTable,
-  CustomGptUpdateModel,
   customGptUpdateSchema,
   FileModel,
   fileTable,
@@ -18,9 +17,9 @@ import {
 import { ForbiddenError } from '@shared/error';
 import { copyFileInS3 } from '@shared/s3';
 import { copyCustomGpt, copyRelatedTemplateFiles } from '@shared/templates/templateService';
-import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
 import { and, eq } from 'drizzle-orm';
+import z from 'zod';
 
 /**
  * User creates a new custom gpt (assistant).
@@ -234,6 +233,16 @@ export async function updateCustomGptPicture({
   return updatedCustomGpt;
 }
 
+const updateCustomGptSchema = customGptUpdateSchema
+  .omit({
+    id: true,
+    pictureId: true,
+    isDeleted: true,
+    originalCustomGptId: true,
+    accessLevel: true,
+  })
+  .partial();
+
 /**
  * Update custom gpt properties.
  * Throws if the user is not the owner of the custom gpt.
@@ -245,20 +254,18 @@ export async function updateCustomGpt({
 }: {
   customGptId: string;
   userId: string;
-  customGptProps: Partial<CustomGptUpdateModel>;
+  customGptProps: z.infer<typeof updateCustomGptSchema>;
 }) {
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
     throw new ForbiddenError('Not authorized to access custom gpt');
   }
 
-  const cleanedCustomGpt = removeNullishValues(customGptProps);
-  if (cleanedCustomGpt === undefined) return;
-  const parseResult = customGptUpdateSchema.parse(cleanedCustomGpt);
+  const parsedValues = updateCustomGptSchema.parse(customGptProps);
 
   const [updatedGpt] = await db
     .update(customGptTable)
-    .set(parseResult)
+    .set(parsedValues)
     .where(and(eq(customGptTable.id, customGptId), eq(customGptTable.userId, userId)))
     .returning();
 
