@@ -159,7 +159,7 @@ export default function CustomGptForm({
     });
 
     setInitialFiles(initialFiles.filter((f) => f.id !== fileId));
-    await deleteFileMappingAndEntityAction({ fileId });
+    await deleteFileMappingAndEntityAction({ customGptId: customGpt.id, fileId });
   }
   function handleNewFile(data: { id: string; name: string; file: File }) {
     linkFileToCustomGptAction({ fileId: data.id, customGpt: customGpt.id })

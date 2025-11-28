@@ -1,14 +1,21 @@
+import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
-import { dbDeleteCustomGptByIdAndUserId } from '@shared/db/functions/custom-gpts';
+import {
+  dbDeleteCustomGptByIdAndUserId,
+  dbGetCustomGptById,
+  dbInsertCustomGptFileMapping,
+} from '@shared/db/functions/custom-gpts';
 import { dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
 import {
   CharacterAccessLevel,
   CustomGptFileMapping,
-  CustomGptInsertModel,
   customGptTable,
+  CustomGptUpdateModel,
+  customGptUpdateSchema,
   FileModel,
   fileTable,
 } from '@shared/db/schema';
+import { ForbiddenError } from '@shared/error';
 import { copyFileInS3 } from '@shared/s3';
 import { copyCustomGpt, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
@@ -23,15 +30,17 @@ export async function createNewCustomGpt({
   schoolId,
   templatePictureId,
   templateId,
-  userId,
+  user,
 }: {
   schoolId: string;
   templatePictureId?: string;
   templateId?: string;
-  userId: string;
+  user: UserModel;
 }) {
+  if (user.userRole !== 'teacher') throw new ForbiddenError('Not authorized to create custom gpt');
+
   if (templateId !== undefined) {
-    let insertedCustomGpt = await copyCustomGpt(templateId, 'private', userId, schoolId);
+    let insertedCustomGpt = await copyCustomGpt(templateId, 'private', user.id, schoolId);
 
     if (templatePictureId !== undefined) {
       const copyOfTemplatePicture = `custom-gpts/${insertedCustomGpt.id}/avatar`;
@@ -64,7 +73,7 @@ export async function createNewCustomGpt({
       id: customGptId,
       name: '',
       systemPrompt: '',
-      userId: userId,
+      userId: user.id,
       schoolId: schoolId,
       description: '',
       specification: '',
@@ -80,65 +89,113 @@ export async function createNewCustomGpt({
 }
 
 /**
- * delete file mapping and the file entity itself
- */
-export async function deleteFileMappingAndEntity({ fileId }: { fileId: string }) {
-  await db.delete(CustomGptFileMapping).where(eq(CustomGptFileMapping.fileId, fileId));
-  await db.delete(fileTable).where(eq(fileTable.id, fileId));
-}
-
-/**
- * get file mappings for a custom gpt
- */
-export async function fetchFileMapping(customGptId: string, userId: string): Promise<FileModel[]> {
-  if (userId === undefined) return [];
-  return await dbGetRelatedCustomGptFiles(customGptId);
-}
-
-/**
  * link a file to a custom gpt
  */
 export async function linkFileToCustomGpt({
   fileId,
-  customGpt,
+  customGptId,
+  userId,
 }: {
   fileId: string;
-  customGpt: string;
+  customGptId: string;
+  userId: string;
 }) {
-  const [insertedFileMapping] = await db
-    .insert(CustomGptFileMapping)
-    .values({ customGptId: customGpt, fileId: fileId })
-    .returning();
+  const customGpt = await dbGetCustomGptById({ customGptId });
+  if (customGpt.userId !== userId) {
+    throw new ForbiddenError('Not authorized to access custom gpt');
+  }
+
+  const insertedFileMapping = await dbInsertCustomGptFileMapping({
+    customGptId,
+    fileId: fileId,
+  });
+
   if (insertedFileMapping === undefined) {
     throw new Error('Could not Link file to character');
   }
 }
 
 /**
- * update access level, e.g. from private to school or back to private
+ * delete file mapping and the file entity itself
+ */
+export async function deleteFileMappingAndEntity({
+  customGptId,
+  fileId,
+  userId,
+}: {
+  customGptId: string;
+  fileId: string;
+  userId: string;
+}) {
+  const customGpt = await dbGetCustomGptById({ customGptId });
+  if (customGpt.userId !== userId) {
+    throw new ForbiddenError('Not authorized to access custom gpt');
+  }
+
+  await db.delete(CustomGptFileMapping).where(eq(CustomGptFileMapping.fileId, fileId));
+  await db.delete(fileTable).where(eq(fileTable.id, fileId));
+}
+
+/**
+ * Get file mappings for a custom gpt.
+ * Throws if the user is not authorized to access the custom gpt:
+ * - NotFound if the custom gpt does not exist
+ * - Forbidden if the custom gpt is private and the user is not the owner
+ * - Forbidden if the custom gpt is school-level and the user is not in the same school
+ */
+export async function getFileMappings({
+  customGptId,
+  schoolId,
+  userId,
+}: {
+  customGptId: string;
+  schoolId: string;
+  userId: string;
+}): Promise<FileModel[]> {
+  const customGpt = await dbGetCustomGptById({ customGptId });
+  if (customGpt.accessLevel === 'private' && customGpt.userId !== userId) {
+    throw new ForbiddenError('Not authorized to access custom gpt');
+  }
+  if (
+    customGpt.accessLevel === 'school' &&
+    customGpt.schoolId !== schoolId &&
+    customGpt.userId !== userId
+  ) {
+    throw new ForbiddenError('Not authorized to access custom gpt');
+  }
+
+  return await dbGetRelatedCustomGptFiles(customGptId);
+}
+
+/**
+ * Update access level, e.g. from private to school or back to private.
+ * Global access level is not allowed for this use case.
+ * Throws if the user is not the owner of the custom gpt.
  */
 export async function updateCustomGptAccessLevel({
-  gptId: gptId,
   accessLevel,
+  customGptId,
   userId,
 }: {
   accessLevel: CharacterAccessLevel;
-  gptId: string;
+  customGptId: string;
   userId: string;
 }) {
+  const customGpt = await dbGetCustomGptById({ customGptId });
+  if (customGpt.userId !== userId) {
+    throw new ForbiddenError('Not authorized to access custom gpt');
+  }
   if (accessLevel === 'global') {
-    throw Error('Cannot update customGpt to be global');
+    throw new ForbiddenError('Cannot update customGpt to be global');
   }
 
-  const updatedCustomGpt = (
-    await db
-      .update(customGptTable)
-      .set({ accessLevel })
-      .where(and(eq(customGptTable.id, gptId), eq(customGptTable.userId, userId)))
-      .returning()
-  )[0];
+  const [updatedCustomGpt] = await db
+    .update(customGptTable)
+    .set({ accessLevel })
+    .where(and(eq(customGptTable.id, customGptId), eq(customGptTable.userId, userId)))
+    .returning();
 
-  if (updatedCustomGpt === undefined) {
+  if (!updatedCustomGpt) {
     throw Error('Could not update the access level of the customGpt');
   }
 
@@ -146,51 +203,62 @@ export async function updateCustomGptAccessLevel({
 }
 
 /**
- * set a new picture for the custom gpt
+ * Set a new picture for the custom gpt.
+ * Throws if the user is not the owner of the custom gpt.
  */
 export async function updateCustomGptPicture({
-  gptId,
+  customGptId,
   picturePath,
   userId,
 }: {
-  gptId: string;
+  customGptId: string;
   picturePath: string;
   userId: string;
 }) {
+  const customGpt = await dbGetCustomGptById({ customGptId });
+  if (customGpt.userId !== userId) {
+    throw new ForbiddenError('Not authorized to access custom gpt');
+  }
+
   const [updatedCustomGpt] = await db
     .update(customGptTable)
     .set({ pictureId: picturePath })
-    .where(and(eq(customGptTable.id, gptId), eq(customGptTable.userId, userId)))
+    .where(and(eq(customGptTable.id, customGptId), eq(customGptTable.userId, userId)))
     .returning();
 
   if (updatedCustomGpt === undefined) {
-    throw Error('Could not update the picture of the customGpt');
+    throw new Error('Could not update the picture of the customGpt');
   }
 
   return updatedCustomGpt;
 }
 
 /**
- * update custom gpt properties
+ * Update custom gpt properties.
+ * Throws if the user is not the owner of the custom gpt.
  */
 export async function updateCustomGpt({
-  gptId,
+  customGptId,
   userId,
   customGptProps,
 }: {
-  gptId: string;
+  customGptId: string;
   userId: string;
-  customGptProps: Partial<CustomGptInsertModel>;
+  customGptProps: Partial<CustomGptUpdateModel>;
 }) {
+  const customGpt = await dbGetCustomGptById({ customGptId });
+  if (customGpt.userId !== userId) {
+    throw new ForbiddenError('Not authorized to access custom gpt');
+  }
+
   const cleanedCustomGpt = removeNullishValues(customGptProps);
   if (cleanedCustomGpt === undefined) return;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, createdAt, ...updatableProps } = cleanedCustomGpt;
+  const parseResult = customGptUpdateSchema.parse(cleanedCustomGpt);
 
   const [updatedGpt] = await db
     .update(customGptTable)
-    .set({ ...updatableProps })
-    .where(and(eq(customGptTable.id, gptId), eq(customGptTable.userId, userId)))
+    .set(parseResult)
+    .where(and(eq(customGptTable.id, customGptId), eq(customGptTable.userId, userId)))
     .returning();
 
   if (updatedGpt === undefined) {
@@ -200,6 +268,20 @@ export async function updateCustomGpt({
   return updatedGpt;
 }
 
-export async function deleteCustomGpt({ gptId, userId }: { gptId: string; userId: string }) {
-  return dbDeleteCustomGptByIdAndUserId({ gptId: gptId, userId: userId });
+/**
+ * Deletes a custom gpt.
+ * Throws if the user is not the owner of the custom gpt.
+ */
+export async function deleteCustomGpt({
+  customGptId,
+  userId,
+}: {
+  customGptId: string;
+  userId: string;
+}) {
+  const customGpt = await dbGetCustomGptById({ customGptId });
+  if (customGpt.userId !== userId) {
+    throw new ForbiddenError('Not authorized to access custom gpt');
+  }
+  return dbDeleteCustomGptByIdAndUserId({ gptId: customGptId, userId });
 }

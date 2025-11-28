@@ -457,8 +457,20 @@ export const customGptTable = pgTable(
   (table) => [index().on(table.userId), index().on(table.schoolId)],
 );
 
+export const customGptUpdateSchema = createUpdateSchema(customGptTable)
+  .omit({
+    userId: true,
+    schoolId: true,
+    createdAt: true,
+  })
+  .extend({
+    id: z.string(),
+    // for any reason accessLevel has a different type so we have to override it here
+    accessLevel: characterAccessLevelSchema,
+  });
 export type CustomGptModel = typeof customGptTable.$inferSelect;
 export type CustomGptInsertModel = typeof customGptTable.$inferInsert;
+export type CustomGptUpdateModel = z.infer<typeof customGptUpdateSchema>;
 
 export const customGptTemplateMappingTable = pgTable(
   'custom_gpt_template_mappings',

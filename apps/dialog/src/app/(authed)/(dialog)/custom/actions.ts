@@ -5,7 +5,7 @@ import { requireAuth } from '@/auth/requireAuth';
 import {
   createNewCustomGpt,
   deleteFileMappingAndEntity,
-  fetchFileMapping,
+  getFileMappings,
 } from '@shared/custom-gpt/custom-gpt-service';
 
 export async function createNewCustomGptAction({
@@ -21,18 +21,24 @@ export async function createNewCustomGptAction({
     schoolId: school.id,
     templatePictureId,
     templateId,
-    userId: user.id,
+    user: user,
   });
 }
 
-export async function deleteFileMappingAndEntityAction({ fileId }: { fileId: string }) {
-  await requireAuth();
-  return deleteFileMappingAndEntity({ fileId });
+export async function deleteFileMappingAndEntityAction({
+  fileId,
+  customGptId,
+}: {
+  fileId: string;
+  customGptId: string;
+}) {
+  const { user } = await requireAuth();
+  return deleteFileMappingAndEntity({ customGptId, fileId, userId: user.id });
 }
 
 export async function fetchFileMappingAction(id: string): Promise<FileModel[]> {
-  const { user } = await requireAuth();
-  return fetchFileMapping(id, user.id);
+  const { user, school } = await requireAuth();
+  return getFileMappings({ customGptId: id, schoolId: school.id, userId: user.id });
 }
 
 export async function linkFileToCustomGptAction({

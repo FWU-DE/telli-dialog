@@ -19,7 +19,7 @@ export async function updateCustomGptAccessLevelAction({
   const { user } = await requireAuth();
 
   return updateCustomGptAccessLevel({
-    gptId,
+    customGptId: gptId,
     accessLevel,
     userId: user.id,
   });
@@ -35,7 +35,7 @@ export async function updateCustomGptPictureAction({
   const { user } = await requireAuth();
 
   return updateCustomGptPicture({
-    gptId,
+    customGptId: gptId,
     picturePath,
     userId: user.id,
   });
@@ -48,7 +48,7 @@ export async function updateCustomGptAction({
   const { user } = await requireAuth();
 
   return updateCustomGpt({
-    gptId,
+    customGptId: gptId,
     userId: user.id,
     customGptProps: customGpt,
   });
@@ -57,5 +57,5 @@ export async function updateCustomGptAction({
 export async function deleteCustomGptAction({ gptId }: { gptId: string }) {
   const { user } = await requireAuth();
 
-  return deleteCustomGpt({ gptId, userId: user.id });
+  return deleteCustomGpt({ customGptId: gptId, userId: user.id });
 }
