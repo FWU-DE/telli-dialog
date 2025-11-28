@@ -4,9 +4,6 @@ import HeaderPortal from '../../../header-portal';
 import { notFound } from 'next/navigation';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import Chat from '@/components/chat/chat';
-import { z } from 'zod';
-import { PageContext } from '@/utils/next/types';
-import { awaitPageContext } from '@/utils/next/utils';
 import Logo from '@/components/common/logo';
 import { Message } from 'ai';
 import { getCharacterForChatSession } from '@shared/characters/character-service';
@@ -15,17 +12,9 @@ import { buildLegacyUserAndContext } from '@/auth/types';
 
 export const dynamic = 'force-dynamic';
 
-const pageContextSchema = z.object({
-  params: z.object({
-    characterId: z.string(),
-  }),
-});
+export default async function Page(props: PageProps<'/characters/d/[characterId]'>) {
+  const { characterId } = await props.params;
 
-export default async function Page(context: PageContext) {
-  const result = pageContextSchema.safeParse(await awaitPageContext(context));
-  if (!result.success) notFound();
-  const { params } = result.data;
-  const characterId = params.characterId;
   const id = generateUUID();
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);

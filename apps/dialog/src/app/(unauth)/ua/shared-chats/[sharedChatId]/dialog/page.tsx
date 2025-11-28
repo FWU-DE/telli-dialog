@@ -1,52 +1,34 @@
-import NotFound from '@/app/not-found';
 import SharedChat from '@/components/chat/shared-chat';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
+import { parseSearchParams } from '@/utils/parse-search-params';
 import { dbGetLlmModelById } from '@shared/db/functions/llm-model';
 import { dbGetFederalStateByUserId } from '@shared/db/functions/school';
 import { dbGetSharedChatByIdAndInviteCode } from '@shared/db/functions/shared-school-chat';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
-import { awaitPageContext } from '@/utils/next/utils';
-import { z } from 'zod';
+import { notFound } from 'next/navigation';
+import z from 'zod';
 
-const pageContextSchema = z.object({
-  params: z.object({
-    sharedChatId: z.string(),
-  }),
-  searchParams: z.object({
-    inviteCode: z.string(),
-  }),
-});
+const searchParamsSchema = z.object({ inviteCode: z.string() });
 
-export default async function Page(context: {
-  params: Promise<{ sharedChatId: string }>;
-  searchParams: Promise<{ inviteCode: string }>;
-}) {
-  const result = pageContextSchema.safeParse(await awaitPageContext(context));
-  if (!result.success) return <NotFound />;
-
-  const parsedContext = result.data;
-
-  if (!parsedContext) {
-    return <NotFound />;
-  }
-
-  const { params, searchParams } = parsedContext;
+export default async function Page(props: PageProps<'/ua/shared-chats/[sharedChatId]/dialog'>) {
+  const { sharedChatId } = await props.params;
+  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
 
   const sharedSchoolChat = await dbGetSharedChatByIdAndInviteCode({
-    id: params.sharedChatId,
+    id: sharedChatId,
     inviteCode: searchParams.inviteCode,
   });
 
   if (!sharedSchoolChat) {
-    return <NotFound />;
+    notFound();
   }
 
   const model = await dbGetLlmModelById({ modelId: sharedSchoolChat.modelId });
 
   if (!model) {
-    return <NotFound />;
+    notFound();
   }
 
   const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({

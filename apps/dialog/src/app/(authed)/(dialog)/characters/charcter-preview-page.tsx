@@ -29,11 +29,8 @@ export default function CharacterPreviewPage({
 }) {
   const [input, setInput] = React.useState('');
   const federalState = useFederalState();
-
   const filterDisabled = characters.length < 1;
-
   const filteredCharacters = filterCharacters({ characters, input });
-
   const t = useTranslations('characters');
 
   return (

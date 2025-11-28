@@ -3,7 +3,7 @@ import { login } from '../../utils/login';
 import { waitForToast } from '../../utils/utils';
 
 test('teacher can share character school-wide', async ({ page }) => {
-  await login(page, 'teacher1-BY');
+  await login(page, 'teacher');
   await page.goto('/characters');
   await page.waitForURL('/characters**');
 
@@ -51,7 +51,7 @@ test('teacher can share character school-wide', async ({ page }) => {
   await page.waitForURL('/characters?visibility=school**');
 
   // Login as a different teacher to verify sharing
-  await login(page, 'teacher2-BY');
+  await login(page, 'teacher2');
   await page.goto('/characters?visibility=school');
   await page.waitForURL('/characters?visibility=school**');
 

@@ -1,6 +1,5 @@
 'use server';
 
-import { FileModel } from '@shared/db/schema';
 import { requireAuth } from '@/auth/requireAuth';
 import {
   createNewCharacter,
@@ -8,7 +7,7 @@ import {
   fetchFileMappings,
   linkFileToCharacter,
 } from '@shared/characters/character-service';
-import { withLoggingAsync } from '@shared/logging';
+import { runServerAction } from '@shared/actions/run-server-action';
 
 export async function createNewCharacterAction({
   modelId,
@@ -21,7 +20,8 @@ export async function createNewCharacterAction({
 }) {
   const { user, school, federalState } = await requireAuth();
 
-  return await withLoggingAsync(createNewCharacter)({
+  // Todo RL: use runServerAction here as soon as we have adapter custom gpt service
+  return createNewCharacter({
     federalStateId: federalState.id,
     modelId: modelId,
     schoolId: school.id,
@@ -40,20 +40,10 @@ export async function deleteFileMappingAndEntityAction({
 }) {
   const { user } = await requireAuth();
 
-  return await withLoggingAsync(deleteFileMappingAndEntity)({
+  return runServerAction(deleteFileMappingAndEntity)({
     characterId,
     fileId,
     userId: user.id,
-  });
-}
-
-export async function fetchFileMappingAction(conversationId: string): Promise<FileModel[]> {
-  const { user, school } = await requireAuth();
-
-  return await withLoggingAsync(fetchFileMappings)({
-    characterId: conversationId,
-    userId: user.id,
-    schoolId: school.id,
   });
 }
 
@@ -66,5 +56,5 @@ export async function linkFileToCharacterAction({
 }) {
   const { user } = await requireAuth();
 
-  return await withLoggingAsync(linkFileToCharacter)({ fileId, characterId, userId: user.id });
+  return runServerAction(linkFileToCharacter)({ fileId, characterId, userId: user.id });
 }

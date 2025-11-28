@@ -4,12 +4,10 @@ import VoucherListView from './VoucherListView';
 
 export const dynamic = 'force-dynamic';
 
-export default async function VouchersByStatePage({
-  params,
-}: {
-  params: Promise<{ federalStateId: string }>;
-}) {
-  const federalStateId = (await params).federalStateId;
+export default async function VouchersByStatePage(
+  props: PageProps<'/telli-dialog/federal-states/[federalStateId]/vouchers'>,
+) {
+  const { federalStateId } = await props.params;
   const vouchers = await getVouchersAction(federalStateId);
   const session = await auth();
 

@@ -12,6 +12,7 @@ import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import Logo from '@/components/common/logo';
+
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
