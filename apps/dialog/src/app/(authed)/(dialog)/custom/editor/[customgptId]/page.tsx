@@ -6,7 +6,7 @@ import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { notFound } from 'next/navigation';
 import HeaderPortal from '../../../header-portal';
 import CustomGptForm from './custom-gpt-form';
-import { fetchFileMapping } from '../../actions';
+import { fetchFileMappingAction } from '../../actions';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { CustomGptModel } from '@shared/db/schema';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
@@ -30,7 +30,7 @@ export default async function Page(props: PageProps<'/custom/editor/[customgptId
 
   const user = await getUser();
   const customGpt = await dbGetCustomGptById({ customGptId: customgptId });
-  const relatedFiles = await fetchFileMapping(customgptId);
+  const relatedFiles = await fetchFileMappingAction(customgptId);
 
   if (!customGpt) {
     notFound();

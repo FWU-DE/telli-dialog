@@ -1,11 +1,13 @@
 'use server';
 
-import { db } from '@shared/db';
-import { CharacterAccessLevel, CustomGptInsertModel, customGptTable } from '@shared/db/schema';
-import { getUser } from '@/auth/utils';
-import { and, eq } from 'drizzle-orm';
-import { dbDeleteCustomGptByIdAndUserId } from '@shared/db/functions/custom-gpts';
-import { removeNullishValues } from '@shared/utils/remove-nullish-values';
+import { CharacterAccessLevel, CustomGptInsertModel } from '@shared/db/schema';
+import {
+  deleteCustomGpt,
+  updateCustomGpt,
+  updateCustomGptAccessLevel,
+  updateCustomGptPicture,
+} from '@shared/custom-gpt/custom-gpt-service';
+import { requireAuth } from '@/auth/requireAuth';
 
 export async function updateCustomGptAccessLevelAction({
   gptId: gptId,
@@ -14,25 +16,13 @@ export async function updateCustomGptAccessLevelAction({
   gptId: string;
   accessLevel: CharacterAccessLevel;
 }) {
-  if (accessLevel === 'global') {
-    throw Error('Cannot update customGpt to be global');
-  }
+  const { user } = await requireAuth();
 
-  const user = await getUser();
-
-  const updatedCustomGpt = (
-    await db
-      .update(customGptTable)
-      .set({ accessLevel })
-      .where(and(eq(customGptTable.id, gptId), eq(customGptTable.userId, user.id)))
-      .returning()
-  )[0];
-
-  if (updatedCustomGpt === undefined) {
-    throw Error('Could not update the access level of the customGpt');
-  }
-
-  return updatedCustomGpt;
+  return updateCustomGptAccessLevel({
+    gptId,
+    accessLevel,
+    userId: user.id,
+  });
 }
 
 export async function updateCustomGptPictureAction({
@@ -42,52 +32,30 @@ export async function updateCustomGptPictureAction({
   gptId: string;
   picturePath: string;
 }) {
-  const user = await getUser();
-  const updatedCustomGpt = (
-    await db
-      .update(customGptTable)
-      .set({ pictureId: picturePath })
-      .where(and(eq(customGptTable.id, gptId), eq(customGptTable.userId, user.id)))
-      .returning()
-  )[0];
+  const { user } = await requireAuth();
 
-  if (updatedCustomGpt === undefined) {
-    throw Error('Could not update the picture of the customGpt');
-  }
-
-  return updatedCustomGpt;
+  return updateCustomGptPicture({
+    gptId,
+    picturePath,
+    userId: user.id,
+  });
 }
 
 export async function updateCustomGptAction({
   gptId,
   ...customGpt
 }: Partial<CustomGptInsertModel> & { gptId: string }) {
-  const user = await getUser();
+  const { user } = await requireAuth();
 
-  const cleanedCustomGpt = removeNullishValues(customGpt);
-  if (cleanedCustomGpt === undefined) return;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, createdAt, ...updatableProps } = cleanedCustomGpt;
-
-  const updatedGpt = (
-    await db
-      .update(customGptTable)
-      .set({ ...updatableProps })
-      .where(and(eq(customGptTable.id, gptId), eq(customGptTable.userId, user.id)))
-      .returning()
-  )[0];
-
-  if (updatedGpt === undefined) {
-    throw Error('Could not update the customGpt');
-  }
-
-  return updatedGpt;
+  return updateCustomGpt({
+    gptId,
+    userId: user.id,
+    customGptProps: customGpt,
+  });
 }
 
 export async function deleteCustomGptAction({ gptId }: { gptId: string }) {
-  const user = await getUser();
+  const { user } = await requireAuth();
 
-  const deletedCustomGpt = await dbDeleteCustomGptByIdAndUserId({ gptId: gptId, userId: user.id });
-
-  return deletedCustomGpt;
+  return deleteCustomGpt({ gptId, userId: user.id });
 }

@@ -4,7 +4,6 @@ import { requireAuth } from '@/auth/requireAuth';
 import {
   createNewCharacter,
   deleteFileMappingAndEntity,
-  fetchFileMappings,
   linkFileToCharacter,
 } from '@shared/characters/character-service';
 import { runServerAction } from '@shared/actions/run-server-action';

@@ -34,7 +34,7 @@ import {
   updateCustomGptAction,
   updateCustomGptPictureAction,
 } from './actions';
-import { deleteFileMappingAndEntity, linkFileToCustomGpt } from '../../actions';
+import { deleteFileMappingAndEntityAction, linkFileToCustomGptAction } from '../../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
 import FileManagement from '@/components/forms/file-management';
 import { CopyContainer } from '../../../_components/copy-container';
@@ -159,10 +159,10 @@ export default function CustomGptForm({
     });
 
     setInitialFiles(initialFiles.filter((f) => f.id !== fileId));
-    await deleteFileMappingAndEntity({ fileId });
+    await deleteFileMappingAndEntityAction({ fileId });
   }
   function handleNewFile(data: { id: string; name: string; file: File }) {
-    linkFileToCustomGpt({ fileId: data.id, customGpt: customGpt.id })
+    linkFileToCustomGptAction({ fileId: data.id, customGpt: customGpt.id })
       .then()
       .catch(() => toast.error(tToast('edit-toast-error')));
   }
