@@ -11,6 +11,7 @@ import {
   TextChunkTable,
   customGptTemplateMappingTable,
 } from '../schema';
+import { NotFoundError } from '@shared/error';
 
 export async function dbGetCustomGptsByUserId({
   userId,
@@ -29,13 +30,13 @@ export async function dbGetCustomGptById({
   customGptId,
 }: {
   customGptId: string;
-}): Promise<CustomGptModel | undefined> {
-  const customGpt = (
-    await db
-      .select()
-      .from(customGptTable)
-      .where(and(eq(customGptTable.id, customGptId)))
-  )[0];
+}): Promise<CustomGptModel> {
+  const [customGpt] = await db
+    .select()
+    .from(customGptTable)
+    .where(and(eq(customGptTable.id, customGptId)));
+
+  if (!customGpt) throw new NotFoundError('Custom GPT not found');
 
   return customGpt;
 }
@@ -285,4 +286,22 @@ export async function dbGetCopyTemplateCustomGpt({
     accessLevel: 'private',
     userId,
   };
+}
+
+/**
+ * adds a new file mapping entry
+ */
+export async function dbInsertCustomGptFileMapping({
+  fileId,
+  customGptId,
+}: {
+  fileId: string;
+  customGptId: string;
+}) {
+  const [insertedFileMapping] = await db
+    .insert(CustomGptFileMapping)
+    .values({ fileId, customGptId })
+    .returning();
+
+  return insertedFileMapping;
 }

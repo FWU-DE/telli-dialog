@@ -1,4 +1,3 @@
-import { getUser } from '@/auth/utils';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
@@ -6,7 +5,6 @@ import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { notFound } from 'next/navigation';
 import HeaderPortal from '../../../header-portal';
 import CustomGptForm from './custom-gpt-form';
-import { fetchFileMapping } from '../../actions';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { CustomGptModel } from '@shared/db/schema';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
@@ -14,6 +12,9 @@ import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { logError } from '@shared/logging';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
+import { getFileMappings } from '@shared/custom-gpt/custom-gpt-service';
+import { requireAuth } from '@/auth/requireAuth';
+import { buildLegacyUserAndContext } from '@/auth/types';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
@@ -24,13 +25,18 @@ const searchParamsSchema = z.object({
 });
 
 export default async function Page(props: PageProps<'/custom/editor/[customgptId]'>) {
-  const { customgptId } = await props.params;
+  const { customgptId: customGptId } = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
   const isCreating = searchParams.create === 'true';
 
-  const user = await getUser();
-  const customGpt = await dbGetCustomGptById({ customGptId: customgptId });
-  const relatedFiles = await fetchFileMapping(customgptId);
+  const { user, school, federalState } = await requireAuth();
+  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const customGpt = await dbGetCustomGptById({ customGptId });
+  const relatedFiles = await getFileMappings({
+    customGptId,
+    userId: user.id,
+    schoolId: school.id,
+  }).catch(notFound);
 
   if (!customGpt) {
     notFound();
@@ -67,7 +73,7 @@ export default async function Page(props: PageProps<'/custom/editor/[customgptId
       <HeaderPortal>
         <ToggleSidebarButton />
         <div className="flex-grow"></div>
-        <ProfileMenu {...user} />
+        <ProfileMenu {...userAndContext} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
         <CustomGptForm
@@ -75,7 +81,7 @@ export default async function Page(props: PageProps<'/custom/editor/[customgptId
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           isCreating={isCreating}
           readOnly={readOnly}
-          userRole={user.school.userRole}
+          userRole={user.userRole}
           initialLinks={initialLinks}
           existingFiles={relatedFiles}
         />
