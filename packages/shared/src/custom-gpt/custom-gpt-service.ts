@@ -1,4 +1,8 @@
 import { UserModel } from '@shared/auth/user-model';
+import {
+  getConversation,
+  getConversationMessages,
+} from '@shared/conversation/conversation-service';
 import { db } from '@shared/db';
 import {
   dbDeleteCustomGptByIdAndUserId,
@@ -69,6 +73,31 @@ export async function getCustomGptForNewChat({
     throw new ForbiddenError('Not authorized to use custom gpt');
 
   return customGpt;
+}
+
+/**
+ * Returns an existing conversation along with its messages and the associated custom gpt.
+ * The custom gpt could be deleted already, but the messages do still exist.
+ * There is no check regarding the custom gpt because that may have changed in the meantime.
+ * Throws NotFoundError if the conversation does not exist.
+ * Throws ForbiddenError if the user is not the owner of the conversation.
+ */
+export async function getConversationWithMessagesAndCustomGpt({
+  conversationId,
+  customGptId,
+  userId,
+}: {
+  conversationId: string;
+  customGptId: string;
+  userId: string;
+}) {
+  const [customGpt, conversation, messages] = await Promise.all([
+    dbGetCustomGptById({ customGptId }),
+    getConversation({ conversationId, userId }),
+    getConversationMessages({ conversationId, userId }),
+  ]);
+
+  return { customGpt, conversation, messages };
 }
 
 /**
