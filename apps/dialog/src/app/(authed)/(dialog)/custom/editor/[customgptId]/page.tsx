@@ -1,6 +1,5 @@
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { notFound } from 'next/navigation';
 import HeaderPortal from '../../../header-portal';
@@ -12,7 +11,7 @@ import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { logError } from '@shared/logging';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
-import { getFileMappings } from '@shared/custom-gpt/custom-gpt-service';
+import { getCustomGptForEditView, getFileMappings } from '@shared/custom-gpt/custom-gpt-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 
@@ -31,16 +30,16 @@ export default async function Page(props: PageProps<'/custom/editor/[customgptId
 
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
-  const customGpt = await dbGetCustomGptById({ customGptId });
-  const relatedFiles = await getFileMappings({
-    customGptId,
-    userId: user.id,
-    schoolId: school.id,
-  }).catch(notFound);
 
-  if (!customGpt) {
-    notFound();
-  }
+  const [customGpt, relatedFiles] = await Promise.all([
+    getCustomGptForEditView({ customGptId, userId: user.id }),
+    getFileMappings({
+      customGptId,
+      userId: user.id,
+      schoolId: school.id,
+    }),
+  ]).catch(notFound);
+
   let maybeSignedPictureUrl: string | undefined;
   try {
     maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
