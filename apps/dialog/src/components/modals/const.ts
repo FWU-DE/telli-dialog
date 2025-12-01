@@ -255,7 +255,7 @@ export const federalStateDisclaimers: Partial<Record<FederalStateId, DisclaimerC
     pageContents: [TERMS_AND_CONDITIONS_NW],
     showCheckBox: true,
     acceptLabel:
-      'Hiermit bestätige ich, dass ich die Informationen gelesen und den KI-Selbstlernkurs absolviert habe',
+      'Hiermit bestätige ich, dass ich die Informationen gelesen und den KI-Selbstlernkurs absolviert habe.',
   },
 };
 
