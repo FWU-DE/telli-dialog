@@ -8,12 +8,22 @@ export class UnauthenticatedError extends Error {
     this.name = 'UnauthenticatedError';
   }
 }
+
+// Type for a validated admin session with guaranteed user.name
+export type ValidatedSession = Session & {
+  user: NonNullable<Session['user']> & {
+    name: string;
+  };
+};
+
 /**
- * @returns The authenticated session
- * @throws UnauthenticatedError if no session found
+ * @returns The authenticated session with validated user information
+ * @throws UnauthenticatedError if no session found or session is incomplete
  */
-export async function requireAdminAuth(): Promise<Session> {
+export async function requireAdminAuth(): Promise<ValidatedSession> {
   const session = await auth();
-  if (!session) throw new UnauthenticatedError();
-  return session;
+  if (!session || !session.user?.name) {
+    throw new UnauthenticatedError('Authentication required or session incomplete');
+  }
+  return session as ValidatedSession;
 }

@@ -2,11 +2,13 @@
 import React, { useState } from 'react';
 import { createVouchersAction } from '../actions';
 import { CSVLink } from 'react-csv';
+import { toast } from 'sonner';
 import { Input } from '@ui/components/Input';
 import { Textarea } from '@ui/components/Textarea';
-import { Voucher, CreateVoucherRequest } from '../../../../../../types/voucher';
+import { Voucher, CreateVoucherParams } from '@telli/shared/vouchers/voucher';
 import { Button } from '@ui/components/Button';
 import VoucherList from '../VoucherList';
+import { BusinessError } from '@shared/error';
 
 export default function VoucherCreateView({
   federalStateId,
@@ -26,25 +28,25 @@ export default function VoucherCreateView({
     e.preventDefault();
     const parsedAmount = parseInt(amount);
     if (!parsedAmount || parsedAmount < 1 || parsedAmount > 20000) {
-      alert('Bitte einen gültigen Guthabenbetrag zwischen 1 und 20000 Cent angeben.');
+      toast.error('Bitte einen gültigen Guthabenbetrag zwischen 1 und 20000 Cent angeben.');
       return;
     }
     const parsedCount = parseInt(count);
     if (parsedCount < 1) {
-      alert('Bitte eine gültige Anzahl von Codes angeben.');
+      toast.error('Bitte eine gültige Anzahl von Codes angeben.');
       return;
     }
     const parsedMonths = parseInt(months);
     if (parsedMonths < 1 || parsedMonths > 12) {
-      alert('Bitte eine gültige Anzahl von Monaten zwischen 1 und 12 angeben.');
+      toast.error('Bitte eine gültige Anzahl von Monaten zwischen 1 und 12 angeben.');
       return;
     }
     if (comment.length < 1) {
-      alert('Bitte einen Grund für die Erstellung angeben.');
+      toast.error('Bitte einen Grund für die Erstellung angeben.');
       return;
     }
     try {
-      const voucherData: CreateVoucherRequest = {
+      const voucherData: CreateVoucherParams = {
         increaseAmount: parsedAmount,
         durationMonths: parsedMonths,
         createdBy: username,
@@ -54,7 +56,9 @@ export default function VoucherCreateView({
       const result = await createVouchersAction(federalStateId, voucherData);
       setCreatedVouchers((prev) => [...prev, ...result]);
     } catch (err) {
-      alert('Fehler beim Erstellen der Guthaben Codes: ' + (err as Error).message);
+      const errorMessage =
+        err instanceof BusinessError ? err.message : 'Ein unbekannter Fehler ist aufgetreten';
+      toast.error('Fehler beim Erstellen der Guthaben Codes: ' + errorMessage);
     }
   };
   return (

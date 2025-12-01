@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { Voucher } from '../../../../../types/voucher';
+import { Voucher } from '@telli/shared/vouchers/voucher';
 import { Button } from '@ui/components/Button';
 import Link from 'next/link';
 import VoucherList from './VoucherList';

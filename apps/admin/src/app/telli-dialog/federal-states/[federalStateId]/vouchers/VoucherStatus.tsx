@@ -1,5 +1,5 @@
 import React from 'react';
-import { Voucher } from '../../../../../types/voucher';
+import { Voucher } from '@telli/shared/vouchers/voucher';
 
 type VoucherStatus = Voucher['status'];
 
