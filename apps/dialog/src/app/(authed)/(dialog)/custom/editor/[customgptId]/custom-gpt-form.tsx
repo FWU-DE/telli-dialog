@@ -228,7 +228,7 @@ export default function CustomGptForm({
 
   function handleDeleteCustomGpt() {
     deleteCustomGptAction({ gptId: customGpt.id }).then((result) => {
-      if (!result.success) {
+      if (result.success) {
         // do not show any toast if the avatar is being created
         if (!isCreating) {
           toast.success(tToast('delete-toast-success'));

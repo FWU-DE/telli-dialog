@@ -4,7 +4,6 @@ import { requireAuth } from '@/auth/requireAuth';
 import {
   createNewCustomGpt,
   deleteFileMappingAndEntity,
-  getFileMappings,
   linkFileToCustomGpt,
 } from '@shared/custom-gpt/custom-gpt-service';
 import { runServerAction } from '@shared/actions/run-server-action';
@@ -36,16 +35,6 @@ export async function deleteFileMappingAndEntityAction({
   const { user } = await requireAuth();
 
   return runServerAction(deleteFileMappingAndEntity)({ customGptId, fileId, userId: user.id });
-}
-
-export async function fetchFileMappingAction(id: string) {
-  const { user, school } = await requireAuth();
-
-  return runServerAction(getFileMappings)({
-    customGptId: id,
-    schoolId: school.id,
-    userId: user.id,
-  });
 }
 
 export async function linkFileToCustomGptAction({

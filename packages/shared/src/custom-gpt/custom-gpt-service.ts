@@ -112,7 +112,7 @@ export async function linkFileToCustomGpt({
   });
 
   if (!insertedFileMapping) {
-    throw new Error('Could not Link file to character');
+    throw new Error('Could not Link file to custom gpt');
   }
 }
 
