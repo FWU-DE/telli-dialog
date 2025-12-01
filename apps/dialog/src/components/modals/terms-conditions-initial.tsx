@@ -91,7 +91,7 @@ export default function TermsConditionsModal({
         <button
           onClick={acceptAndClose}
           className={buttonPrimaryClassName}
-          disabled={!(checked && scrollFinished) && disclaimerConfig.showCheckBox}
+          disabled={!checked && disclaimerConfig.showCheckBox}
         >
           {tCommon('accept')}
         </button>
