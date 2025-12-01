@@ -81,7 +81,7 @@ export async function createNewCustomGpt({
     })
     .returning();
 
-  if (insertedCustomGpt === undefined) {
+  if (!insertedCustomGpt) {
     throw Error('Could not create a new CustomGpt');
   }
 
@@ -89,7 +89,8 @@ export async function createNewCustomGpt({
 }
 
 /**
- * link a file to a custom gpt
+ * Link a file to a custom gpt.
+ * Throws if the user is not the owner of the custom gpt.
  */
 export async function linkFileToCustomGpt({
   fileId,
@@ -110,13 +111,14 @@ export async function linkFileToCustomGpt({
     fileId: fileId,
   });
 
-  if (insertedFileMapping === undefined) {
+  if (!insertedFileMapping) {
     throw new Error('Could not Link file to character');
   }
 }
 
 /**
- * delete file mapping and the file entity itself
+ * Delete file mapping and the file entity itself
+ * Throws if the user is not the owner of the custom gpt.
  */
 export async function deleteFileMappingAndEntity({
   customGptId,
@@ -132,8 +134,10 @@ export async function deleteFileMappingAndEntity({
     throw new ForbiddenError('Not authorized to access custom gpt');
   }
 
-  await db.delete(CustomGptFileMapping).where(eq(CustomGptFileMapping.fileId, fileId));
-  await db.delete(fileTable).where(eq(fileTable.id, fileId));
+  await db.transaction(async (tx) => {
+    await tx.delete(CustomGptFileMapping).where(eq(CustomGptFileMapping.fileId, fileId));
+    await tx.delete(fileTable).where(eq(fileTable.id, fileId));
+  });
 }
 
 /**
@@ -196,7 +200,7 @@ export async function updateCustomGptAccessLevel({
     .returning();
 
   if (!updatedCustomGpt) {
-    throw Error('Could not update the access level of the customGpt');
+    throw new Error('Could not update the access level of the customGpt');
   }
 
   return updatedCustomGpt;
@@ -269,8 +273,8 @@ export async function updateCustomGpt({
     .where(and(eq(customGptTable.id, customGptId), eq(customGptTable.userId, userId)))
     .returning();
 
-  if (updatedGpt === undefined) {
-    throw Error('Could not update the customGpt');
+  if (!updatedGpt) {
+    throw new Error('Could not update the customGpt');
   }
 
   return updatedGpt;
