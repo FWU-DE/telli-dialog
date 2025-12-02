@@ -114,22 +114,7 @@ export function LargeLanguageModelDetailView({
   }
 
   const handleCancel = () => {
-    if (isCreate) {
-      router.push(ROUTES.api.llms(organizationId));
-    } else if (model) {
-      reset({
-        name: model.name,
-        displayName: model.displayName,
-        provider: model.provider,
-        description: model.description ?? '',
-        setting: JSON.stringify(model.setting, null, 2),
-        priceMetadata: JSON.stringify(model.priceMetadata, null, 2),
-        supportedImageFormats: JSON.stringify(model.supportedImageFormats, null, 2),
-        additionalParameters: JSON.stringify(model.additionalParameters, null, 2),
-        isNew: model.isNew,
-        isDeleted: model.isDeleted,
-      });
-    }
+    router.push(ROUTES.api.llms(organizationId));
   };
 
   return (
