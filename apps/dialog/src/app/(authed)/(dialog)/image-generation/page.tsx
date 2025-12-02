@@ -1,0 +1,37 @@
+import { getUser } from '@/auth/utils';
+import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
+import ProfileMenu from '@/components/navigation/profile-menu';
+import HeaderPortal from '../header-portal';
+import { ImageModelsProvider } from '@/components/providers/image-model-provider';
+import ImageGenerationChat from '@/components/image-generation/image-generation-chat';
+import SelectImageModel from '@/components/image-generation/select-image-model';
+import { getAvailableImageModels } from './actions';
+
+export const dynamic = 'force-dynamic';
+
+export default async function ImageGenerationPage() {
+  const user = await getUser();
+
+  // TODO: Implement this function to fetch image models
+  const imageModels = await getAvailableImageModels();
+
+  // Use first model as default for now
+  const defaultModel = imageModels[0]?.name;
+
+  return (
+    <ImageModelsProvider models={imageModels} defaultImageModel={defaultModel}>
+      <div className="w-full h-full overflow-auto">
+        <HeaderPortal>
+          <div className="flex w-full gap-4 justify-center items-center z-30">
+            <ToggleSidebarButton />
+            <SelectImageModel />
+            <div className="flex-grow"></div>
+            <ProfileMenu {...user} />
+          </div>
+        </HeaderPortal>
+
+        <ImageGenerationChat />
+      </div>
+    </ImageModelsProvider>
+  );
+}

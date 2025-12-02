@@ -47,6 +47,7 @@
     "characters": "Dialogpartner",
     "help-mode": "Hilfe",
     "custom-gpt": "Assistenten",
+    "image-generation-new": "Neues Bild",
     "telli-points": "Meine telli-Points",
     "conversation-delete-toast-success": "Die Konversation wurde erfolgreich gelöscht.",
     "conversation-delete-toast-error": "Die Konversation konnte nicht gelöscht werden.",
