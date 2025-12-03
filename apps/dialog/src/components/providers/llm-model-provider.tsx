@@ -4,6 +4,7 @@ import { LlmModel } from '@shared/db/schema';
 import React from 'react';
 import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { saveChatModelForUserAction } from '@/app/(authed)/(dialog)/actions';
+import { getFirstTextModel } from '@shared/llm-models/llm-model-service';
 
 type LlmModelsProviderProps = {
   models: LlmModel[];
@@ -18,10 +19,6 @@ type LlmModelsContextProps = {
 };
 
 const LlmModelsContext = React.createContext<LlmModelsContextProps | undefined>(undefined);
-
-function getFirstTextModel(models: LlmModel[]): LlmModel | undefined {
-  return models.find((model) => model.priceMetadata.type === 'text');
-}
 
 export function LlmModelsProvider({
   models,

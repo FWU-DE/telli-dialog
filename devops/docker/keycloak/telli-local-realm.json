@@ -2837,6 +2837,24 @@
       ]
     },
     {
+      "username": "student-ni",
+      "firstName": "Student",
+      "lastName": "Student",
+      "email": "student-ni@example.com",
+      "attributes": {
+        "schulnummer": ["test_school1-NI"],
+        "federal_state": ["DE-NI"],
+        "role": ["LERN"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
       "username": "teacher-he",
       "firstName": "Teacher",
       "lastName": "Teacher",

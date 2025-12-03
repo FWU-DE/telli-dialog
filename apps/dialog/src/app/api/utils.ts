@@ -8,11 +8,8 @@ import { env } from '@/env';
 import { errorifyAsyncFn } from '@shared/utils/error';
 import { LlmModel } from '@shared/db/schema';
 import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
-import {
-  DEFAULT_AUXILIARY_MODEL,
-  DEFAULT_CHAT_MODEL,
-  FALLBACK_AUXILIARY_MODEL,
-} from '@/app/api/chat/models';
+import { DEFAULT_AUXILIARY_MODEL, FALLBACK_AUXILIARY_MODEL } from '@/app/api/chat/models';
+import { getDefaultModel, getFirstTextModel } from '@shared/llm-models/llm-model-service';
 
 export function getSearchParamsFromUrl(url: string) {
   const [, ...rest] = url.split('?');
@@ -44,7 +41,11 @@ export async function getModelAndProvider({
   let definedModel = await dbGetModelByIdAndFederalStateId({ modelId, federalStateId });
 
   if (definedModel === undefined) {
-    definedModel = await getDefaultModel(federalStateId);
+    definedModel = await getDefaultModelByFederalStateId(federalStateId);
+
+    if (definedModel === undefined) {
+      throw new Error(`Could not find default model for federal state with id ${federalStateId}`);
+    }
   }
 
   const telliConfiguration = createTelliConfiguration({
@@ -110,15 +111,13 @@ export async function getAuxiliaryModel(federalStateId: string): Promise<LlmMode
  * Get the default model for the federal state
  * @returns The default model for the federal state
  */
-export async function getDefaultModel(federalStateId: string): Promise<LlmModel> {
+export async function getDefaultModelByFederalStateId(
+  federalStateId: string,
+): Promise<LlmModel | undefined> {
   const llmModels = await dbGetLlmModelsByFederalStateId({
     federalStateId,
   });
-  const defaultModel = getDefaultChatModel(llmModels) ?? getFirstTextModel(llmModels);
-  if (defaultModel === undefined) {
-    throw new Error('No default model found');
-  }
-  return defaultModel;
+  return getDefaultModel(llmModels);
 }
 
 function getDefaultAuxModel(models: LlmModel[]): LlmModel | undefined {
@@ -127,12 +126,4 @@ function getDefaultAuxModel(models: LlmModel[]): LlmModel | undefined {
 
 function getFallbackAuxModel(models: LlmModel[]): LlmModel | undefined {
   return models.find((model) => model.name === FALLBACK_AUXILIARY_MODEL);
-}
-
-function getDefaultChatModel(models: LlmModel[]): LlmModel | undefined {
-  return models.find((model) => model.name === DEFAULT_CHAT_MODEL);
-}
-
-function getFirstTextModel(models: LlmModel[]): LlmModel | undefined {
-  return models.find((model) => model.priceMetadata.type === 'text');
 }

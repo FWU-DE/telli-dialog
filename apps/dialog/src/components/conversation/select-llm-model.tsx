@@ -10,6 +10,7 @@ import { cn } from '@/utils/tailwind';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { Badge } from '../common/badge';
+import { getFilteredTextModels } from '@shared/llm-models/llm-model-service';
 
 type SelectLlmModelProps = {
   isStudent?: boolean;
@@ -95,9 +96,7 @@ export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProp
           )}
           sideOffset={10}
         >
-          {models
-            .filter((m) => m.priceMetadata.type === 'text')
-            .filter((m) => !isStudent || !m.name.includes('mistral')) // students should not be able to select mistral models
+          {getFilteredTextModels(models, isStudent) // students should not be able to select mistral models
             .filter((m) => m.id !== selectedModel?.id)
             .map((model) => {
               return (
