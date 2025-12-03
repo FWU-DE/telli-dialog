@@ -35,7 +35,7 @@ export async function getConversationMessages({
   userId: string;
 }) {
   return await dbGetCoversationMessages({
-    conversationId: conversationId,
-    userId: userId,
+    conversationId,
+    userId,
   });
 }

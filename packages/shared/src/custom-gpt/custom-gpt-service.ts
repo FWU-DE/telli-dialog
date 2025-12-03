@@ -77,8 +77,7 @@ export async function getCustomGptForNewChat({
 
 /**
  * Returns an existing conversation along with its messages and the associated custom gpt.
- * The custom gpt could be deleted already, but the messages do still exist.
- * There is no check regarding the custom gpt because that may have changed in the meantime.
+ * Throws NotFoundError if the custom gpt does not exist.
  * Throws NotFoundError if the conversation does not exist.
  * Throws ForbiddenError if the user is not the owner of the conversation.
  */
