@@ -10,7 +10,7 @@ test('teacher can provide link and it is displayed in the chat', async ({ page }
   );
 
   await expect(page.getByLabel('assistant message 1')).toBeVisible();
-  await expect(page.getByLabel('assistant message 1')).toContainText('17. Jahrhunderts');
+  await expect(page.getByLabel('assistant message 1')).toContainText('17. Jahrhundert');
   const sourceTitle = page.getByLabel('Source Title 0 0');
   await expect(sourceTitle).toBeVisible();
   await expect(sourceTitle).toContainText('Das Zeitalter des Barock');

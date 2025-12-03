@@ -14,10 +14,10 @@ export async function createNewCustomGptAction({
 }: {
   templatePictureId?: string;
   templateId?: string;
-} = {}) {
+}) {
   const { user, school } = await requireAuth();
 
-  return createNewCustomGpt({
+  return runServerAction(createNewCustomGpt)({
     schoolId: school.id,
     templatePictureId,
     templateId,
