@@ -1,7 +1,6 @@
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
-import { notFound } from 'next/navigation';
 import HeaderPortal from '../../../header-portal';
 import CustomGptForm from './custom-gpt-form';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
@@ -14,7 +13,7 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { getCustomGptForEditView, getFileMappings } from '@shared/custom-gpt/custom-gpt-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
-
+import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
 
@@ -38,7 +37,7 @@ export default async function Page(props: PageProps<'/custom/editor/[customgptId
       userId: user.id,
       schoolId: school.id,
     }),
-  ]).catch(notFound);
+  ]).catch(handleErrorInServerComponent);
 
   let maybeSignedPictureUrl: string | undefined;
   try {
