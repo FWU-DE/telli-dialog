@@ -1,6 +1,5 @@
 'use client';
 
-import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import Checkbox from '@/components/common/checkbox';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { useToast } from '@/components/common/toast';
@@ -46,6 +45,7 @@ import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { formLinks } from '@/utils/web-search/form-links';
 import FileManagement from '@/components/forms/file-management';
 import { useFederalState } from '@/components/providers/federal-state-provider';
+import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 
 type CharacterFormProps = CharacterSelectModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -92,8 +92,7 @@ export default function CharacterForm({
   const federalState = useFederalState();
 
   const { models } = useLlmModels();
-  const maybeDefaultModelId =
-    models.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? models[0]?.id;
+  const maybeDefaultModelId = getDefaultModel(models)?.id;
 
   const isCharacterModelAvailable =
     character.modelId && models.some((m) => m.id === character.modelId);

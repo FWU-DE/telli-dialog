@@ -17,7 +17,6 @@ import { dbGetCharacterById, dbCreateCharacter } from '@shared/db/functions/char
 import { dbGetCustomGptById, dbUpsertCustomGpt } from '@shared/db/functions/custom-gpts';
 import { dbGetRelatedCharacterFiles, dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
 import { DUMMY_USER_ID } from '@shared/db/seed/user-entity';
-import { DEFAULT_CHAT_MODEL } from '@shared/db/seed/default-characters';
 import {
   duplicateFileWithEmbeddings,
   linkFileToCharacter,
@@ -421,7 +420,7 @@ export async function copyCharacter(
     isDeleted: false,
   };
 
-  const result = await dbCreateCharacter(newCharacter, DEFAULT_CHAT_MODEL);
+  const result = await dbCreateCharacter(newCharacter);
   const character = result?.[0];
   if (!character) {
     throw new Error('Fehler beim Erstellen des Dialogpartners');

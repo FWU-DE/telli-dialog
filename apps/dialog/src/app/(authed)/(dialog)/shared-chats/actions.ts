@@ -8,8 +8,7 @@ import {
 } from '@shared/db/schema';
 import { getUser } from '@/auth/utils';
 import { dbDeleteSharedSchoolChatByIdAndUserId } from '@shared/db/functions/shared-school-chat';
-import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
-import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
+import { getDefaultModelByFederalStateId } from '@/app/api/utils';
 
 export async function dbDeleteSharedChatAction({ id }: { id: string }) {
   const user = await getUser();
@@ -51,20 +50,15 @@ export async function createNewSharedSchoolChatAction(
 
 export async function dbCreateSharedSchoolChat({ userId }: { userId: string }) {
   const user = await getUser();
-  const llmModels = await dbGetLlmModelsByFederalStateId({
-    federalStateId: user.federalState.id,
-  });
+  const maybeDefaultModel = await getDefaultModelByFederalStateId(user.federalState.id);
 
-  const maybeDefaultModelId =
-    llmModels.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? llmModels[0]?.id;
-
-  if (maybeDefaultModelId === undefined) {
+  if (maybeDefaultModel === undefined) {
     throw new Error('Could not create default shared school chat');
   }
 
   const [insertedSharedChat] = await db
     .insert(sharedSchoolConversationTable)
-    .values({ userId, name: '', modelId: maybeDefaultModelId })
+    .values({ userId, name: '', modelId: maybeDefaultModel.id })
     .returning();
   return insertedSharedChat;
 }
