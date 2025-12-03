@@ -20,7 +20,7 @@ import {
 } from '@shared/db/schema';
 import { ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
-import { logError, withLoggingAsync } from '@shared/logging';
+import { logError } from '@shared/logging';
 import { copyFileInS3, deleteFileFromS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
@@ -32,7 +32,7 @@ import z from 'zod';
 /**
  * Creates a new character for a user, optionally based on a template.
  */
-const _createNewCharacter = async ({
+export const createNewCharacter = async ({
   federalStateId,
   modelId: _modelId,
   schoolId,
@@ -116,12 +116,10 @@ const _createNewCharacter = async ({
   return insertedCharacter;
 };
 
-export const createNewCharacter = withLoggingAsync(_createNewCharacter);
-
 /**
  * Deletes a character file mapping and the associated file entry in database.
  */
-const _deleteFileMappingAndEntity = async ({
+export const deleteFileMappingAndEntity = async ({
   characterId,
   fileId,
   userId,
@@ -141,8 +139,6 @@ const _deleteFileMappingAndEntity = async ({
   });
 };
 
-export const deleteFileMappingAndEntity = withLoggingAsync(_deleteFileMappingAndEntity);
-
 /**
  * Get all file mappings related to a character.
  *
@@ -150,7 +146,7 @@ export const deleteFileMappingAndEntity = withLoggingAsync(_deleteFileMappingAnd
  * If the character is released for a school, any teacher in that school can fetch file mappings.
  * If the character is global, any teacher can fetch those file mappings.
  */
-const _fetchFileMappings = async ({
+export const fetchFileMappings = async ({
   characterId,
   userId,
   schoolId,
@@ -171,14 +167,12 @@ const _fetchFileMappings = async ({
   return await dbGetRelatedCharacterFiles(characterId);
 };
 
-export const fetchFileMappings = withLoggingAsync(_fetchFileMappings);
-
 /**
  * Links a file to a character by creating a new CharacterFileMapping entry in the database.
  *
  * Only the owner is allowed to add new files to a character.
  */
-const _linkFileToCharacter = async ({
+export const linkFileToCharacter = async ({
   fileId,
   characterId,
   userId,
@@ -201,14 +195,12 @@ const _linkFileToCharacter = async ({
   }
 };
 
-export const linkFileToCharacter = withLoggingAsync(_linkFileToCharacter);
-
 /**
  * User can share a character he owns with the school (access level = school)
  * or unshare it (access level = private).
  * User is not allowed to set the access level to global.
  */
-const _updateCharacterAccessLevel = async ({
+export const updateCharacterAccessLevel = async ({
   characterId,
   accessLevel,
   userId,
@@ -239,14 +231,12 @@ const _updateCharacterAccessLevel = async ({
   return updatedCharacter;
 };
 
-export const updateCharacterAccessLevel = withLoggingAsync(_updateCharacterAccessLevel);
-
 /**
  * Updates the picture of a character by setting a new picture path.
  *
  * Only the owner is allowed to update the picture.
  */
-const _updateCharacterPicture = async ({
+export const updateCharacterPicture = async ({
   characterId,
   picturePath,
   userId,
@@ -273,8 +263,6 @@ const _updateCharacterPicture = async ({
   return updatedCharacter;
 };
 
-export const updateCharacterPicture = withLoggingAsync(_updateCharacterPicture);
-
 /**
  * Schema for updating character details that are allowed to be changed by the user.
  */
@@ -293,7 +281,7 @@ export type UpdateCharacterActionModel = z.infer<typeof updateCharacterSchema>;
  * Updates character details that are allowed to be changed by user afterwards
  * The user must be the owner of the character.
  */
-const _updateCharacter = async ({
+export const updateCharacter = async ({
   characterId,
   userId,
   ...character
@@ -320,13 +308,11 @@ const _updateCharacter = async ({
   return updatedCharacter;
 };
 
-export const updateCharacter = withLoggingAsync(_updateCharacter);
-
 /**
  * Deletes a character and its associated picture from S3.
  * Only the owner is allowed to delete the character.
  */
-const _deleteCharacter = async ({
+export const deleteCharacter = async ({
   characterId,
   userId,
 }: {
@@ -351,13 +337,11 @@ const _deleteCharacter = async ({
   return deletedCharacter;
 };
 
-export const deleteCharacter = withLoggingAsync(_deleteCharacter);
-
 /**
  * A teacher can share a character with students.
  * The teacher can share his own characters or characters that are released for the school or global.
  */
-const _shareCharacter = async ({
+export const shareCharacter = async ({
   characterId,
   user,
   telliPointsPercentageLimit,
@@ -427,12 +411,10 @@ const _shareCharacter = async ({
   return updatedSharedChat;
 };
 
-export const shareCharacter = withLoggingAsync(_shareCharacter);
-
 /**
  * A teacher can unshare a character if he was the one that started the sharing.
  */
-const _unshareCharacter = async ({
+export const unshareCharacter = async ({
   characterId,
   user,
 }: {
@@ -468,8 +450,6 @@ const _unshareCharacter = async ({
   return updatedCharacter;
 };
 
-export const unshareCharacter = withLoggingAsync(_unshareCharacter);
-
 /**
  * This function is called when a user wants to start a chat session with a character.
  * If the character is private, only the owner can start a chat session.
@@ -478,7 +458,7 @@ export const unshareCharacter = withLoggingAsync(_unshareCharacter);
  * @throws NotFoundError if character does not exist
  * @throws ForbiddenError if user is not authorized to access the character
  */
-const _getCharacterForChatSession = async ({
+export const getCharacterForChatSession = async ({
   characterId,
   userId,
   schoolId,
@@ -497,9 +477,7 @@ const _getCharacterForChatSession = async ({
   return character;
 };
 
-export const getCharacterForChatSession = withLoggingAsync(_getCharacterForChatSession);
-
-const _getCharacterForEditView = async ({
+export const getCharacterForEditView = async ({
   characterId,
   schoolId,
   userId,
@@ -521,8 +499,6 @@ const _getCharacterForEditView = async ({
   });
   return { character, relatedFiles, maybeSignedPictureUrl };
 };
-
-export const getCharacterForEditView = withLoggingAsync(_getCharacterForEditView);
 
 /**
  * Loads character from db
