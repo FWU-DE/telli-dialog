@@ -511,7 +511,7 @@ export const getSharedCharacter = async ({
 }: {
   characterId: string;
   userId: string;
-}) => {
+}): Promise<CharacterSelectModel> => {
   const character = await dbGetCharacterByIdAndUserId({ characterId, userId });
   if (!character || !character.inviteCode) throw new NotFoundError('Character not found');
 
