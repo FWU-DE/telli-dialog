@@ -2,12 +2,12 @@ import PlusIcon from '@/components/icons/plus';
 import { cn } from '@/utils/tailwind';
 
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
-import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { createNewSharedSchoolChatAction } from './actions';
+import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 
 export function CreateNewSharedChatButton() {
   const router = useRouter();
@@ -16,8 +16,7 @@ export function CreateNewSharedChatButton() {
 
   const { models } = useLlmModels();
 
-  const maybeDefaultModelId =
-    models.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? models[0]?.id;
+  const maybeDefaultModelId = getDefaultModel(models)?.id;
 
   function handleNewGPT() {
     if (maybeDefaultModelId === undefined) {

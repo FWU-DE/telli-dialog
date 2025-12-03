@@ -3,6 +3,7 @@ import ChevronDownIcon from '@/components/icons/chevron-down';
 import { LlmModel } from '@shared/db/schema';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/utils/tailwind';
+import { getFilteredTextModels } from '@shared/llm-models/llm-model-service';
 
 type SelectLlmFormProps = {
   selectedModel: string | undefined;
@@ -44,9 +45,7 @@ export default function SelectLlmModelForm({
         <Select.Content className="bg-white border border-gray-200 rounded-enterprise-md shadow-dropdown w-full z-50">
           <Select.ScrollUpButton className="py-2 text-gray-500">▲</Select.ScrollUpButton>
           <Select.Viewport className="p-1">
-            {models
-              .filter((m) => m.priceMetadata.type === 'text')
-              .filter((m) => !m.name.includes('mistral')) // mistral should not be selectable for characters and shared school chats
+            {getFilteredTextModels(models, true) // mistral should not be selectable for characters and shared school chats
               .map((model) => (
                 <Select.Item
                   key={model.id}

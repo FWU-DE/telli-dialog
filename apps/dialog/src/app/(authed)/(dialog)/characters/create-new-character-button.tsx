@@ -8,8 +8,8 @@ import { cn } from '@/utils/tailwind';
 import PlusIcon from '@/components/icons/plus';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
-import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { ServerActionResult } from '@shared/actions/server-action-result';
+import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 
 export function CreateNewCharacterFromTemplate({
   templateId,
@@ -41,8 +41,7 @@ export function CreateNewCharacterFromTemplate({
 
   const { models } = useLlmModels();
 
-  const maybeDefaultModelId =
-    models.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? models[0]?.id;
+  const maybeDefaultModelId = getDefaultModel(models)?.id;
 
   async function handleNewGPT() {
     const urlSearchParams = new URLSearchParams({
@@ -76,8 +75,7 @@ export function CreateNewCharacterButton() {
 
   const { models } = useLlmModels();
 
-  const maybeDefaultModelId =
-    models.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? models[0]?.id;
+  const maybeDefaultModelId = getDefaultModel(models)?.id;
 
   async function handleNewCharacter() {
     const createResult = await createNewCharacterAction({ modelId: maybeDefaultModelId });

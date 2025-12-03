@@ -1,5 +1,5 @@
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
-import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
+import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import Chat from '@/components/chat/chat';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
 import Logo from '@/components/common/logo';

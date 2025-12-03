@@ -12,7 +12,7 @@ import { redirect } from 'next/navigation';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
+import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import { dbGetRelatedFiles } from '@shared/db/functions/files';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { parseHyperlinks } from '@/utils/web-search/parsing';

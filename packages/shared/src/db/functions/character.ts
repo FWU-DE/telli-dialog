@@ -9,12 +9,13 @@ import {
   conversationMessageTable,
   conversationTable,
   fileTable,
-  llmModelTable,
   SharedCharacterChatUsageTrackingInsertModel,
   sharedCharacterChatUsageTrackingTable,
   sharedCharacterConversation,
   TextChunkTable,
 } from '../schema';
+import { dbGetModelByName } from './llm-model';
+import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 
 export async function dbGetCharacterByIdOrSchoolId({
   characterId,
@@ -109,15 +110,15 @@ export async function dbGetCopyTemplateCharacter({
 
 export async function dbCreateCharacter(
   character: Omit<CharacterInsertModel, 'modelId'> & Partial<Pick<CharacterInsertModel, 'modelId'>>,
-  defaultModelName: string,
 ) {
-  const defaultModelId = (
-    await db.select().from(llmModelTable).where(eq(llmModelTable.name, defaultModelName))
-  )[0]?.id;
-  const modelId = character.modelId ?? defaultModelId;
+  let modelId = character.modelId;
   if (!modelId) {
-    throw new Error('No default model found');
+    modelId = (await dbGetModelByName(DEFAULT_CHAT_MODEL))?.id;
+    if (!modelId) {
+      throw new Error('No default model found');
+    }
   }
+
   const created = await db
     .insert(characterTable)
     .values({ ...character, modelId })
