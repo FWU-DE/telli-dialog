@@ -5,6 +5,9 @@ import {
 } from '@shared/conversation/conversation-service';
 import { db } from '@shared/db';
 import {
+  dbGetGlobalGpts,
+  dbGetGptsBySchoolId,
+  dbGetGptsByUserId,
   dbDeleteCustomGptByIdAndUserId,
   dbGetCustomGptById,
   dbInsertCustomGptFileMapping,
@@ -13,6 +16,7 @@ import { dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
 import {
   CharacterAccessLevel,
   CustomGptFileMapping,
+  CustomGptModel,
   customGptTable,
   customGptUpdateSchema,
   FileModel,
@@ -97,6 +101,31 @@ export async function getConversationWithMessagesAndCustomGpt({
   ]);
 
   return { customGpt, conversation, messages };
+}
+
+/**
+ * Returns a list of custom gpts for the user based on
+ * userId, schoolId, federalStateId and access level.
+ */
+export async function getCustomGptByAccessLevel({
+  accessLevel,
+  schoolId,
+  userId,
+  federalStateId,
+}: {
+  accessLevel: CharacterAccessLevel;
+  schoolId: string;
+  userId: string;
+  federalStateId: string;
+}): Promise<CustomGptModel[]> {
+  if (accessLevel === 'global') {
+    return await dbGetGlobalGpts({ federalStateId });
+  } else if (accessLevel === 'school') {
+    return await dbGetGptsBySchoolId({ schoolId });
+  } else if (accessLevel === 'private') {
+    return await dbGetGptsByUserId({ userId });
+  }
+  return [];
 }
 
 /**

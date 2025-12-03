@@ -9,7 +9,8 @@ import Logo from '@/components/common/logo';
 import { getCustomGptForNewChat } from '@shared/custom-gpt/custom-gpt-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
-import { notFound } from 'next/navigation';
+import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
+
 export const dynamic = 'force-dynamic';
 
 export default async function Page(props: PageProps<'/custom/d/[gptId]'>) {
@@ -22,7 +23,7 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]'>) {
     customGptId: gptId,
     userId: user.id,
     schoolId: school.id,
-  }).catch(notFound);
+  }).catch(handleErrorInServerComponent);
 
   const logoElement = <Logo federalStateId={federalState.id} />;
   const models = await dbGetLlmModelsByFederalStateId({

@@ -21,9 +21,9 @@ export default async function Page(props: PageProps<'/characters'>) {
 
   const _characters = await getCharacterByAccessLevel({
     accessLevel,
-    schoolId: school?.id,
+    schoolId: school.id,
     userId: user.id,
-    federalStateId: federalState?.id,
+    federalStateId: federalState.id,
   });
   const characters = _characters.filter((c) => c.name !== '');
 

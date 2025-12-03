@@ -6,13 +6,13 @@ import Logo from '@/components/common/logo';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
-import { notFound } from 'next/navigation';
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { getConversationWithMessagesAndCustomGpt } from '@shared/custom-gpt/custom-gpt-service';
+import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
 
 export const dynamic = 'force-dynamic';
 const searchParamsSchema = z.object({ model: z.string().optional() });
@@ -27,7 +27,7 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversa
     conversationId: params.conversationId,
     customGptId: params.gptId,
     userId: user.id,
-  }).catch(notFound);
+  }).catch(handleErrorInServerComponent);
 
   const chatMessages = convertMessageModelToMessage(messages);
 

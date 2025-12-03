@@ -532,13 +532,13 @@ export async function getCharacterByAccessLevel({
   federalStateId,
 }: {
   accessLevel: CharacterAccessLevel;
-  schoolId: string | undefined;
+  schoolId: string;
   userId: string;
   federalStateId: string;
 }): Promise<CharacterSelectModel[]> {
   if (accessLevel === 'global') {
     return dbGetGlobalCharacters({ userId, federalStateId });
-  } else if (accessLevel === 'school' && schoolId !== undefined) {
+  } else if (accessLevel === 'school') {
     return dbGetCharactersBySchoolId({ schoolId, userId });
   } else if (accessLevel === 'private') {
     return dbGetCharactersByUserId({ userId });

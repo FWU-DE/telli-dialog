@@ -14,6 +14,7 @@ import { getCustomGptForEditView, getFileMappings } from '@shared/custom-gpt/cus
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
+
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
 
