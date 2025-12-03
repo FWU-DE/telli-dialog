@@ -223,9 +223,11 @@ jobs:
       - name: Restart Kubernetes deployment
         run: |
           echo "Restarting Kubernetes deployment to pull new latest containers"
+          kubectl rollout restart deployment/telli-admin-stage -n telli-stage
           kubectl rollout restart deployment/telli-dialog-stage -n telli-stage
 
       - name: Wait for rollout to complete
         run: |
           echo "Waiting for rollout to complete"
+          kubectl rollout status deployment/telli-admin-stage -n telli-stage
           kubectl rollout status deployment/telli-dialog-stage -n telli-stage
