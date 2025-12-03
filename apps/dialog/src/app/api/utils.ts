@@ -8,7 +8,10 @@ import { env } from '@/env';
 import { errorifyAsyncFn } from '@shared/utils/error';
 import { LlmModel } from '@shared/db/schema';
 import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
-import { DEFAULT_AUXILIARY_MODEL, FALLBACK_AUXILIARY_MODEL } from '@/app/api/chat/models';
+import {
+  DEFAULT_AUXILIARY_MODEL,
+  FALLBACK_AUXILIARY_MODEL,
+} from '@shared/llm-models/default-llm-models';
 import { getDefaultModel, getFirstTextModel } from '@shared/llm-models/llm-model-service';
 
 export function getSearchParamsFromUrl(url: string) {

@@ -1,4 +1,4 @@
-import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
+import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import { cookies } from 'next/headers';
 import { LAST_USED_MODEL_COOKIE_NAME } from './chat/const';
 

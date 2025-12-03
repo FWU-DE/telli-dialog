@@ -5,7 +5,7 @@ import Chat from '@/components/chat/chat';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
+import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
 import Logo from '@/components/common/logo';

@@ -4,7 +4,7 @@ import React, { startTransition } from 'react';
 import { useLlmModels } from '../providers/llm-model-provider';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { type LlmModel } from '@shared/db/schema';
-import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
+import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import { useSidebarVisibility } from '../navigation/sidebar/sidebar-provider';
 import { cn } from '@/utils/tailwind';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
