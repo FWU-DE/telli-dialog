@@ -5,6 +5,7 @@ import {
   dbGetCharacterById,
   dbGetSharedCharacterConversations,
   dbGetCharacterByIdWithShareData,
+  dbGetCharacterByIdAndUserId,
 } from '@shared/db/functions/character';
 import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
@@ -498,6 +499,23 @@ export const getCharacterForEditView = async ({
     key: character.pictureId,
   });
   return { character, relatedFiles, maybeSignedPictureUrl };
+};
+
+/**
+ * Returns a character with invite code and other sharing related data for sharing page.
+ * @throws NotFoundError if character does not exist or is not shared
+ */
+export const getSharedCharacter = async ({
+  characterId,
+  userId,
+}: {
+  characterId: string;
+  userId: string;
+}) => {
+  const character = await dbGetCharacterByIdAndUserId({ characterId, userId });
+  if (!character || !character.inviteCode) throw new NotFoundError('Character not found');
+
+  return character;
 };
 
 /**

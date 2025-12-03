@@ -12,13 +12,14 @@ import CountDownTimer from '@/app/(authed)/(dialog)/shared-chats/_components/cou
 import QRCode from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/share/qr-code';
 import { getTranslations } from 'next-intl/server';
 import TelliClipboardButton from '@/components/common/clipboard-button';
+import { requireAuth } from '@/auth/requireAuth';
+import { getCharacterForSharing } from '@shared/characters/character-service';
 
 export default async function Page(props: PageProps<'/characters/editor/[characterId]/share'>) {
   const params = await props.params;
+  const { user } = await requireAuth();
 
-  const user = await getUser();
-
-  const character = await dbGetCharacterByIdAndUserId({
+  const character = await getCharacterForSharing({
     userId: user.id,
     characterId: params.characterId,
   });

@@ -13,6 +13,8 @@ import { handleErrorInServerComponent } from '@shared/error/handle-error-in-serv
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { getCharacterForChatSession } from '@shared/characters/character-service';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Page(
   props: PageProps<'/characters/d/[characterId]/[conversationId]'>,
 ) {
