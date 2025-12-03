@@ -3,19 +3,16 @@ import { DEFAULT_CHAT_MODEL } from './default-llm-models';
 
 /**
  * Get the default model from a list of models
- * @param models Array of LLM models
- * @returns The default model
+ * @param models The list of LLM models
+ * @returns The default model or undefined if none found
  */
 export function getDefaultModel(models: LlmModel[]): LlmModel | undefined {
-  const defaultModel = getDefaultTextModel(models) ?? getFirstTextModel(models);
-
-  return defaultModel;
+  return models.find((m) => m.name === DEFAULT_CHAT_MODEL) ?? getFirstTextModel(models);
 }
 
 /**
- * Get the first text model from the list of models, excluding mistral models,
- * since they are not suitable for shared chats.
- * @param models The list of LlmModels
+ * Get the first text model from a list of models, excluding mistral models.
+ * @param models The list of LLM models
  * @returns The first text model or undefined if none found
  */
 export function getFirstTextModel(models: LlmModel[]): LlmModel | undefined {
@@ -24,13 +21,9 @@ export function getFirstTextModel(models: LlmModel[]): LlmModel | undefined {
   );
 }
 
-function getDefaultTextModel(models: LlmModel[]): LlmModel | undefined {
-  return models.find((m) => m.name === DEFAULT_CHAT_MODEL);
-}
-
 /**
  * Get text models from the list of provided models, optionally excluding mistral models.
- * @param models The list of LlmModels
+ * @param models The list of LLM models
  * @param excludeMistral Whether to exclude mistral models
  * @returns Filtered list of text models
  */

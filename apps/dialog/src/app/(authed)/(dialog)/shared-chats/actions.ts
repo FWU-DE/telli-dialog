@@ -50,15 +50,15 @@ export async function createNewSharedSchoolChatAction(
 
 export async function dbCreateSharedSchoolChat({ userId }: { userId: string }) {
   const user = await getUser();
-  const defaultModel = await getDefaultModelByFederalStateId(user.federalState.id);
+  const maybeDefaultModel = await getDefaultModelByFederalStateId(user.federalState.id);
 
-  if (defaultModel === undefined) {
+  if (maybeDefaultModel === undefined) {
     throw new Error('Could not create default shared school chat');
   }
 
   const [insertedSharedChat] = await db
     .insert(sharedSchoolConversationTable)
-    .values({ userId, name: '', modelId: defaultModel.id })
+    .values({ userId, name: '', modelId: maybeDefaultModel.id })
     .returning();
   return insertedSharedChat;
 }
