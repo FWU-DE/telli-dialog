@@ -6,6 +6,9 @@ import {
   dbGetSharedCharacterConversations,
   dbGetCharacterByIdWithShareData,
   dbGetCharacterByIdAndUserId,
+  dbGetCharactersBySchoolId,
+  dbGetCharactersByUserId,
+  dbGetGlobalCharacters,
 } from '@shared/db/functions/character';
 import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
@@ -517,6 +520,31 @@ export const getSharedCharacter = async ({
 
   return character;
 };
+
+/**
+ * Returns the list of available characters that the user can access
+ * based on userId, schoolId, federalStateId and access level.
+ */
+export async function getCharacterByAccessLevel({
+  accessLevel,
+  schoolId,
+  userId,
+  federalStateId,
+}: {
+  accessLevel: CharacterAccessLevel;
+  schoolId: string | undefined;
+  userId: string;
+  federalStateId: string;
+}): Promise<CharacterSelectModel[]> {
+  if (accessLevel === 'global') {
+    return dbGetGlobalCharacters({ userId, federalStateId });
+  } else if (accessLevel === 'school' && schoolId !== undefined) {
+    return dbGetCharactersBySchoolId({ schoolId, userId });
+  } else if (accessLevel === 'private') {
+    return dbGetCharactersByUserId({ userId });
+  }
+  return [];
+}
 
 /**
  * Loads character from db
