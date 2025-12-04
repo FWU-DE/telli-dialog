@@ -2,11 +2,11 @@ import { getPriceLimitInCentByUser } from '@/app/school';
 import { CharacterSelectModel, type SharedSchoolConversationModel } from '@shared/db/schema';
 import { type UserAndContext } from '@/auth/types';
 import { getPriceInCentByUser } from '@/app/school';
-import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
   dbGetSharedChatUsageInCentBySharedChatId,
 } from '@shared/db/functions/intelli-points';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 
 /**
  * Calculates the shared chat limit in cents
@@ -103,7 +103,7 @@ export function sharedChatHasExpired({
   startedAt: Date | null;
   maxUsageTimeLimit: number | null;
 }) {
-  const timeLeft = calculateTimeLeftBySharedChat({ startedAt, maxUsageTimeLimit });
+  const timeLeft = calculateTimeLeftForLearningScenario({ startedAt, maxUsageTimeLimit });
 
   if (startedAt === null || timeLeft < 1 || maxUsageTimeLimit === null) {
     // the shared chat is no viable anymore so the limit is reached

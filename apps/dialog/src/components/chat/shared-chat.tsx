@@ -4,8 +4,6 @@ import { useChat } from '@ai-sdk/react';
 import { FormEvent, RefObject, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { type SharedSchoolConversationModel } from '@shared/db/schema';
-
-import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
@@ -16,6 +14,7 @@ import { useCheckStatusCode } from '@/hooks/use-response-status';
 import { messageContainsAttachments } from '@/utils/chat/messages';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { Messages } from './messages';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
@@ -24,7 +23,7 @@ export default function SharedChat({
   const t = useTranslations('shared-chats.shared');
 
   const { id, inviteCode } = sharedSchoolChat;
-  const timeLeft = calculateTimeLeftBySharedChat(sharedSchoolChat);
+  const timeLeft = calculateTimeLeftForLearningScenario(sharedSchoolChat);
   const chatActive = timeLeft > 0;
 
   const searchParams = new URLSearchParams({ id, inviteCode });

@@ -16,11 +16,11 @@ import CountDownTimer from '../shared-chats/_components/count-down';
 import ShareIcon from '@/components/icons/share';
 import TrashIcon from '@/components/icons/trash';
 import SharedChatIcon from '@/components/icons/shared-chat';
-import { calculateTimeLeftBySharedChat } from '../shared-chats/[sharedSchoolChatId]/utils';
 import { CreateNewCharacterFromTemplate } from './create-new-character-button';
 import { iconClassName } from '@/utils/tailwind/icon';
 import TelliClipboardButton from '@/components/common/clipboard-button';
 import { createNewCharacterAction } from './actions';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 type CharacterContainerProps = CharacterSelectModel & {
   currentUserId: string;
   maybeSignedPictureUrl: string | undefined;
@@ -64,7 +64,7 @@ export default function CharacterContainer({
     router.push(`/characters/editor/${id}/share`);
   }
 
-  const timeLeft = calculateTimeLeftBySharedChat(character);
+  const timeLeft = calculateTimeLeftForLearningScenario(character);
 
   return (
     <Link

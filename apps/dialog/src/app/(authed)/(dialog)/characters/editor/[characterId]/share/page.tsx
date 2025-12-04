@@ -4,7 +4,6 @@ import { cn } from '@/utils/tailwind';
 import SidebarCloseIcon from '@/components/icons/sidebar-close';
 import { getBaseUrlByHeaders, getHostByHeaders } from '@/utils/host';
 import Footer from '@/components/navigation/footer';
-import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import CountDownTimer from '@/app/(authed)/(dialog)/shared-chats/_components/count-down';
 import QRCode from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/share/qr-code';
 import { getTranslations } from 'next-intl/server';
@@ -13,6 +12,7 @@ import { requireAuth } from '@/auth/requireAuth';
 import { getSharedCharacter } from '@shared/characters/character-service';
 import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
 import { notFound } from 'next/navigation';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 
 export default async function Page(props: PageProps<'/characters/editor/[characterId]/share'>) {
   const params = await props.params;
@@ -28,7 +28,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
   const inviteCode = character.inviteCode;
   const formattedInviteCode = `${inviteCode.substring(0, 4)} ${inviteCode.substring(4, 8)}`;
   const shareUrl = `${await getBaseUrlByHeaders()}/ua/characters/${character.id}/dialog?inviteCode=${inviteCode}`;
-  const leftTime = calculateTimeLeftBySharedChat(character);
+  const leftTime = calculateTimeLeftForLearningScenario(character);
   const t = await getTranslations('characters.share-page');
 
   return (

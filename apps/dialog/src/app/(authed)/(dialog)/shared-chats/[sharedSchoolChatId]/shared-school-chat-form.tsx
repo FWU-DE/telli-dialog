@@ -20,7 +20,7 @@ import {
 } from './actions';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
-import { dbDeleteSharedChatAction, linkFileToSharedSchoolChat } from '../actions';
+import { deleteLearningScenarioAction, linkFileToLearningScenarioAction } from '../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
 import ShareContainer from './share-container';
 import React from 'react';
@@ -103,10 +103,14 @@ export default function SharedSchoolChatForm({
       await deleteFileMappingAndEntity({ fileId });
     }
   }
-  function handleNewFile(data: { id: string; name: string; file: File }) {
-    linkFileToSharedSchoolChat({ fileId: data.id, schoolChatId: sharedSchoolChat.id })
-      .then()
-      .catch(() => toast.error(tToast('edit-toast-error')));
+  async function handleNewFile(data: { id: string; name: string; file: File }) {
+    const result = await linkFileToLearningScenarioAction({
+      fileId: data.id,
+      learningScenarioId: sharedSchoolChat.id,
+    });
+    if (!result.success) {
+      toast.error(tToast('edit-toast-error'));
+    }
   }
 
   function onSubmit(data: SharedSchoolChatFormValues) {
@@ -137,18 +141,17 @@ export default function SharedSchoolChatForm({
       });
   }
 
-  function handleDeleteSharedChat() {
-    dbDeleteSharedChatAction({ id: sharedSchoolChat.id })
-      .then(() => {
-        if (!isCreating) {
-          toast.success(tToast('delete-toast-success'));
-        }
-        // replace instead of push to avoid showing a 404 when navigating back to the now non existing shared chat
-        router.replace(backUrl);
-      })
-      .catch(() => {
-        toast.error(tToast('delete-toast-error'));
-      });
+  async function handleDeleteSharedChat() {
+    const result = await deleteLearningScenarioAction({ id: sharedSchoolChat.id });
+    if (result.success) {
+      if (!isCreating) {
+        toast.success(tToast('delete-toast-success'));
+      }
+      // replace instead of push to avoid showing a 404 when navigating back to the now non existing shared chat
+      router.replace(backUrl);
+    } else {
+      toast.error(tToast('delete-toast-error'));
+    }
   }
 
   function handleAutoSave() {

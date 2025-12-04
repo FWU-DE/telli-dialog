@@ -1,10 +1,10 @@
 import { cn } from '@/utils/tailwind';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { CreateNewCharacterFromTemplate } from '../characters/create-new-character-button';
-import { calculateTimeLeftBySharedChat } from '../shared-chats/[sharedSchoolChatId]/utils';
 import { createNewCharacterAction } from '../characters/actions';
 import { createNewCustomGptAction } from '../custom/actions';
 import { useTranslations } from 'next-intl';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 
 export function CopyContainer({
   templateId,
@@ -21,7 +21,7 @@ export function CopyContainer({
   translation_path: Parameters<typeof useTranslations>[0];
   redirectPath: 'characters' | 'custom';
 }) {
-  const sharedChatTimeLeft = calculateTimeLeftBySharedChat({ startedAt, maxUsageTimeLimit });
+  const sharedChatTimeLeft = calculateTimeLeftForLearningScenario({ startedAt, maxUsageTimeLimit });
   const sharedChatActive = sharedChatTimeLeft > 0;
   const containerBg = !sharedChatActive ? 'bg-secondary/10' : 'bg-gray-100/10';
   const createInstanceCallback =

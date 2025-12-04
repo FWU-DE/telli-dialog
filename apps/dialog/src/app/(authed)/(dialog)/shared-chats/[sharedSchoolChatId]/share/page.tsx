@@ -9,9 +9,9 @@ import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import CountDownTimer from '../../_components/count-down';
-import { calculateTimeLeftBySharedChat } from '../utils';
 import QRCode from './qr-code';
 import TelliClipboardButton from '@/components/common/clipboard-button';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 
 export default async function Page(props: PageProps<'/shared-chats/[sharedSchoolChatId]/share'>) {
   const { sharedSchoolChatId } = await props.params;
@@ -29,7 +29,7 @@ export default async function Page(props: PageProps<'/shared-chats/[sharedSchool
   const inviteCode = sharedSchoolChat.inviteCode;
   const formattedInviteCode = `${inviteCode.substring(0, 4)} ${inviteCode.substring(4, 8)}`;
   const shareUrl = `${await getBaseUrlByHeaders()}/ua/shared-chats/${sharedSchoolChat.id}/dialog?inviteCode=${inviteCode}`;
-  const leftTime = calculateTimeLeftBySharedChat(sharedSchoolChat);
+  const leftTime = calculateTimeLeftForLearningScenario(sharedSchoolChat);
   const t = await getTranslations('shared-chats.share-page');
 
   return (

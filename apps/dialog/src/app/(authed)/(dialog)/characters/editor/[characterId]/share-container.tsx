@@ -9,7 +9,6 @@ import {
 } from '../../../shared-chats/[sharedSchoolChatId]/schema';
 import { CharacterSelectModel } from '@shared/db/schema';
 import { shareCharacterAction, unshareCharacterAction } from './actions';
-import { calculateTimeLeftBySharedChat } from '../../../shared-chats/[sharedSchoolChatId]/utils';
 import { useToast } from '@/components/common/toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -20,6 +19,7 @@ import { useTranslations } from 'next-intl';
 import CountDownTimer from '../../../shared-chats/_components/count-down';
 import FilledShareIcon from '@/components/icons/filled-share';
 import { iconClassName } from '@/utils/tailwind/icon';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 
 type ShareContainerProps = CharacterSelectModel;
 
@@ -31,7 +31,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
   const tToasts = useTranslations('characters.toasts');
   const tCommon = useTranslations('common');
 
-  const sharedChatTimeLeft = calculateTimeLeftBySharedChat(character);
+  const sharedChatTimeLeft = calculateTimeLeftForLearningScenario(character);
   const sharedChatActive = sharedChatTimeLeft > 0;
 
   const { register: registerShare, getValues: getValuesShare } =
