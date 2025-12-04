@@ -14,10 +14,10 @@ export default function LoadingAnimation({
 }: LoadingAnimationProps) {
   return (
     <div
-      className={`flex flex-col items-center justify-center aspect-square border-2 border-dashed border-black bg-gray-50 rounded-enterprise-md mb-4 ${className}`}
+      className={`flex flex-col items-center justify-center aspect-square border-2 border-none bg-gray-50 rounded-enterprise-md mb-4 ${className}`}
     >
       <Image src="/loading.gif" alt="Ladeanimation" width="107" height="107" unoptimized />
-      <span className="text-gray-900">{message}</span>
+      <span className="text-gray-900 text-sm">{message}</span>
     </div>
   );
 }

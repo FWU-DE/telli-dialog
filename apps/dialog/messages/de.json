@@ -334,5 +334,10 @@
       "redeem-success": "Deine telli-Points wurden erfolgreich aufgeladen.",
       "redeem-invalid": "Der eingegebene Gutscheincode ist ungültig."
     }
+  },
+  "image-generation": {
+    "placeholder": "Beschreibe, wie das Bild aussehen soll.",
+    "generate-button": "Bild Generieren",
+    "prompt-label": "Prompt"
   }
 }

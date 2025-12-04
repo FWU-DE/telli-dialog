@@ -46,7 +46,8 @@ export async function generateImageAction({
   // Simulate processing delay
   await new Promise(resolve => setTimeout(resolve, 2000));
   
-  throw new Error('Image generation not implemented yet');
+  // Return a static test image URL for development
+  return 'https://picsum.photos/512';
 }
 
 /**
