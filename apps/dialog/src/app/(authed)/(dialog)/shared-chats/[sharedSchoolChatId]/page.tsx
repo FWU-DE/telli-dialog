@@ -13,6 +13,7 @@ import {
   getLearningScenario,
 } from '@shared/learning-scenarios/learning-scenario-service';
 import { buildLegacyUserAndContext } from '@/auth/types';
+import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,7 +37,7 @@ export default async function Page(props: PageProps<'/shared-chats/[sharedSchool
       learningScenarioId: sharedSchoolChatId,
       userId: user.id,
     }),
-  ]);
+  ]).catch(handleErrorInServerComponent);
 
   const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
     key: learningScenario.pictureId ? `shared-chats/${learningScenario.id}/avatar` : undefined,

@@ -44,7 +44,7 @@ export async function getLearningScenariosForUser({
 }
 
 /**
- * Get learning scenario by id for editing purposes.
+ * Get learning scenario by id for editing or sharing purpose.
  * @throws NotFoundError if the learning scenario does not exist.
  * @throws ForbiddenError if the user is not the owner of the learning scenario.
  */
