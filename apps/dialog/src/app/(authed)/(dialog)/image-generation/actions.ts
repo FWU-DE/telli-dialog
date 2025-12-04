@@ -31,17 +31,29 @@ export async function getAvailableImageModels(): Promise<LlmModel[]> {
 export async function generateImageAction({
   prompt,
   modelName,
+  style,
 }: {
   prompt: string;
   modelName: string;
+  style?: { name: string; displayName: string; prompt: string };
 }) {
   const user = await getUser();
 
   // TODO: Implement image generation logic
   // 1. Validate prompt and model
-  // 2. Call image generation API/service
+  // 2. Call image generation API/service with style parameter
   // 3. Save generated image to file storage
   // 4. Return image URL or file reference
+  
+  // Construct the full prompt with style prompt if provided
+  let fullPrompt = prompt;
+  if (style && style.prompt) {
+    fullPrompt = `${prompt}. Style: ${style.prompt}`;
+  }
+  
+  // Log the style and full prompt for development
+  console.log(`Generating image with style: ${style?.displayName || 'none'}`);
+  console.log(`Full prompt: ${fullPrompt}`);
   
   // Simulate processing delay
   await new Promise(resolve => setTimeout(resolve, 2000));

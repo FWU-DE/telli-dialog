@@ -338,6 +338,11 @@
   "image-generation": {
     "placeholder": "Beschreibe, wie das Bild aussehen soll.",
     "generate-button": "Bild Generieren",
-    "prompt-label": "Prompt"
+    "prompt-label": "Prompt",
+    "style-label": "Bildstil",
+    "no-style": "Kein Stil",
+    "no-style-available": "Kein Stil verfügbar",
+    "style-fotorealistic-name": "Fotorealistisch",
+    "style-cartoon-name": "Cartoon"
   }
 }

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useImageModels } from '../providers/image-model-provider';
+import { useImageStyle } from '../providers/image-style-provider';
 import { generateImageAction } from '@/app/(authed)/(dialog)/image-generation/actions';
 import { ImageGenerationInputBox } from './image-generation-input-box';
 import { useTranslations } from 'next-intl';
@@ -13,6 +14,7 @@ export default function ImageGenerationChat() {
   const [lastPrompt, setLastPrompt] = useState('');
   const [generatedImageUrl, setGeneratedImageUrl] = useState('');
   const { selectedModel } = useImageModels();
+  const { selectedStyle } = useImageStyle();
   const tImageGeneration = useTranslations('image-generation');
 
   function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -34,6 +36,7 @@ export default function ImageGenerationChat() {
       const imageUrl = await generateImageAction({
         prompt: currentPrompt,
         modelName: selectedModel.name,
+        style: selectedStyle,
       });
 
       // Save the generated image URL
