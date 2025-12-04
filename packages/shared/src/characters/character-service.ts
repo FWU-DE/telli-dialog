@@ -26,11 +26,11 @@ import { ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
 import { logError } from '@shared/logging';
 import { copyFileInS3, deleteFileFromS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { generateInviteCode } from '@shared/sharing/generateInviteCode';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
 import { and, eq } from 'drizzle-orm';
-import { customAlphabet } from 'nanoid';
 import z from 'zod';
 
 /**
@@ -567,11 +567,3 @@ export const getCharacterInfo = async (
     character,
   };
 };
-
-/**
- * Generates an invite code for sharing characters.
- */
-export function generateInviteCode(length = 8) {
-  const nanoid = customAlphabet('123456789ABCDEFGHIJKLMNPQRSTUVWXYZ', length);
-  return nanoid().toUpperCase();
-}

@@ -9,7 +9,7 @@ import {
   usageTimeValuesInMinutes,
 } from './schema';
 import { SharedSchoolConversationModel } from '@shared/db/schema';
-import { handleInitiateSharedChatShareAction, handleStopSharedChatShareAction } from './actions';
+import { shareLearningScenarioAction, unshareLearningScenarioAction } from './actions';
 import { useToast } from '@/components/common/toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -47,29 +47,32 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
 
   const shareUILink = `/shared-chats/${sharedSchoolChat.id}/share`;
 
-  function handleStartSharing() {
+  async function handleStartSharing() {
     const data = getValuesShare();
 
-    handleInitiateSharedChatShareAction({ ...data, id: sharedSchoolChat.id })
-      .then(() => {
-        toast.success(tToast('share-toast-success'));
-        router.push(shareUILink);
-        router.refresh();
-      })
-      .catch(() => {
-        toast.error(tToast('share-toast-error'));
-      });
+    const result = await shareLearningScenarioAction({
+      learningScenarioId: sharedSchoolChat.id,
+      data,
+    });
+
+    if (result.success) {
+      toast.success(tToast('share-toast-success'));
+      router.push(shareUILink);
+      router.refresh();
+    } else {
+      toast.error(tToast('share-toast-error'));
+    }
   }
 
-  function handleStopSharing() {
-    handleStopSharedChatShareAction({ id: sharedSchoolChat.id })
-      .then(() => {
-        toast.success(tToast('stop-share-toast-success'));
-        router.refresh();
-      })
-      .catch(() => {
-        toast.error(tToast('stop-share-toast-error'));
-      });
+  async function handleStopSharing() {
+    const result = await unshareLearningScenarioAction({ learningScenarioId: sharedSchoolChat.id });
+
+    if (result.success) {
+      toast.success(tToast('stop-share-toast-success'));
+      router.refresh();
+    } else {
+      toast.error(tToast('stop-share-toast-error'));
+    }
   }
 
   return (

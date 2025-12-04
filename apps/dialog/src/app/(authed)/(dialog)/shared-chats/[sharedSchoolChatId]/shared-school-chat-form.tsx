@@ -14,8 +14,8 @@ import Image from 'next/image';
 import { FileModel, SharedSchoolConversationModel } from '@shared/db/schema';
 import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../schema';
 import {
-  deleteFileMappingAndEntity,
-  updateSharedSchoolChat,
+  removeFileFromLearningScenarioAction,
+  updateSharedSchoolChatAction,
   updateSharedSchoolChatPictureAction,
 } from './actions';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
@@ -35,8 +35,8 @@ import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { AttachedLinks } from '@/components/forms/attached-links';
-
 import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
+
 export default function SharedSchoolChatForm({
   existingFiles,
   isCreating,
@@ -100,7 +100,13 @@ export default function SharedSchoolChatForm({
 
     setInitialFiles(initialFiles.filter((f) => f.id !== fileId));
     if (fileId) {
-      await deleteFileMappingAndEntity({ fileId });
+      const result = await removeFileFromLearningScenarioAction({
+        learningScenarioId: sharedSchoolChat.id,
+        fileId,
+      });
+      if (!result.success) {
+        toast.error(tToast('edit-toast-error'));
+      }
     }
   }
   async function handleNewFile(data: { id: string; name: string; file: File }) {
@@ -113,32 +119,38 @@ export default function SharedSchoolChatForm({
     }
   }
 
-  function onSubmit(data: SharedSchoolChatFormValues) {
-    updateSharedSchoolChat({
-      ...sharedSchoolChat,
-      ...data,
-      attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
-      description: data.description ?? '',
-      studentExcercise: data.studentExcercise ?? '',
-    })
-      .then(() => {
-        toast.success(tToast('edit-toast-success'));
-      })
-      .catch(() => {
-        toast.error(tToast('edit-toast-error'));
-      });
+  async function onSubmit(data: SharedSchoolChatFormValues) {
+    const result = await updateSharedSchoolChatAction({
+      learningScenarioId: sharedSchoolChat.id,
+      data: {
+        ...sharedSchoolChat,
+        ...data,
+        attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
+        description: data.description ?? '',
+        studentExcercise: data.studentExcercise ?? '',
+      },
+    });
+    if (result.success) {
+      toast.success(tToast('edit-toast-success'));
+    } else {
+      toast.error(tToast('edit-toast-error'));
+    }
   }
 
-  function handlePictureUploadComplete(picturePath: string) {
+  async function handlePictureUploadComplete(picturePath: string) {
     setValue('pictureId', picturePath);
-    updateSharedSchoolChatPictureAction({ picturePath, id: sharedSchoolChat.id })
-      .then(() => {
-        toast.success(tToast('image-toast-success'));
-        router.refresh();
-      })
-      .catch(() => {
-        toast.error(tToast('edit-toast-error'));
-      });
+
+    const result = await updateSharedSchoolChatPictureAction({
+      picturePath,
+      id: sharedSchoolChat.id,
+    });
+
+    if (result.success) {
+      toast.success(tToast('image-toast-success'));
+      router.refresh();
+    } else {
+      toast.error(tToast('edit-toast-error'));
+    }
   }
 
   async function handleDeleteSharedChat() {
