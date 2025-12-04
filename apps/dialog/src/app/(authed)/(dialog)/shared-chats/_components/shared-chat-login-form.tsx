@@ -4,7 +4,7 @@ import { useToast } from '@/components/common/toast';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { inputFieldClassName } from '@/utils/tailwind/input';
 import React from 'react';
-import { checkCharacterChatInviteCodeAction, checkSharedChatInviteCodeAction } from './actions';
+import { getChatIdByInviteCodeAction } from './actions';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
@@ -16,18 +16,8 @@ export default function SharedChatLoginForm() {
   const t = useTranslations('shared-chats.shared');
 
   async function getChatByInviteCode(formattedInviteCode: string) {
-    const sharedChat = await checkSharedChatInviteCodeAction({ inviteCode: formattedInviteCode });
-    if (sharedChat !== undefined) {
-      return { type: 'shared-chats', chatMetaData: sharedChat };
-    }
-
-    const characterChat = await checkCharacterChatInviteCodeAction({
-      inviteCode: formattedInviteCode,
-    });
-    if (characterChat !== undefined) {
-      return { type: 'characters', chatMetaData: characterChat };
-    }
-
+    const result = await getChatIdByInviteCodeAction(formattedInviteCode);
+    if (result.success) return result.value;
     return undefined;
   }
 
@@ -35,9 +25,9 @@ export default function SharedChatLoginForm() {
     const formattedInviteCode = inviteCode.replace(/\s+/g, '').toUpperCase();
     const result = await getChatByInviteCode(formattedInviteCode);
     if (result !== undefined) {
-      const { type, chatMetaData } = result;
-      const searchParams = new URLSearchParams({ inviteCode: chatMetaData.inviteCode ?? '' });
-      const route = `/ua/${type}/${chatMetaData.id}/dialog?${searchParams.toString()}`;
+      const { type, id, inviteCode } = result;
+      const searchParams = new URLSearchParams({ inviteCode: inviteCode ?? '' });
+      const route = `/ua/${type}/${id}/dialog?${searchParams.toString()}`;
       router.push(route);
       return;
     }
