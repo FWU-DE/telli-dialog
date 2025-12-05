@@ -128,7 +128,7 @@
     "eslint-config-prettier": "10.1.8",
     "eslint-config-turbo": "2.6.1",
     "eslint-plugin-prettier": "5.5.4",
-    "express": "5.1.0",
+    "express": "5.2.0",
     "jose": "6.1.2",
     "k6": "0.0.0",
     "oidc-provider": "9.5.2",
