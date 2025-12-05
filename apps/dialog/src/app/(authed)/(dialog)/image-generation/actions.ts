@@ -3,6 +3,9 @@
 import { getUser } from '@/auth/utils';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { LlmModel } from '@shared/db/schema';
+import { dbGetOrCreateConversation, dbInsertChatContent } from '@shared/db/functions/chat';
+import { redirect } from 'next/navigation';
+import { generateUUID } from '@shared/utils/uuid';
 
 /**
  * TODO: Implement image model fetching from database
@@ -25,31 +28,56 @@ export async function getAvailableImageModels(): Promise<LlmModel[]> {
 }
 
 /**
- * TODO: Implement image generation action
- * This should handle the image generation request to the AI service
+ * Creates a new conversation for image generation
+ * Returns the conversation ID without generating the image yet
+ */
+export async function createImageConversationAction() {
+  const user = await getUser();
+
+  // Create a new conversation
+  const newConversationId = generateUUID();
+  const conversation = await dbGetOrCreateConversation({
+    conversationId: newConversationId,
+    userId: user.id,
+  });
+
+  if (!conversation) {
+    throw new Error('Failed to create conversation');
+  }
+
+  return conversation.id;
+}
+
+/**
+ * Generates an image within an existing conversation
+ * Should be called after the conversation is already created and navigated to
  */
 export async function generateImageAction({
   prompt,
   modelName,
   style,
+  conversationId,
 }: {
   prompt: string;
   modelName: string;
   style?: { name: string; displayName: string; prompt: string };
+  conversationId: string;
 }) {
   const user = await getUser();
 
-  // TODO: Implement image generation logic
-  // 1. Validate prompt and model
-  // 2. Call image generation API/service with style parameter
-  // 3. Save generated image to file storage
-  // 4. Return image URL or file reference
-  
   // Construct the full prompt with style prompt if provided
   let fullPrompt = prompt;
   if (style && style.prompt) {
     fullPrompt = `${prompt}. Style: ${style.prompt}`;
   }
+  
+  // Store user prompt as a message
+  await dbInsertChatContent({
+    conversationId: conversationId,
+    role: 'user',
+    content: prompt,
+    orderNumber: Date.now(),
+  });
   
   // Log the style and full prompt for development
   console.log(`Generating image with style: ${style?.displayName || 'none'}`);
@@ -59,7 +87,22 @@ export async function generateImageAction({
   await new Promise(resolve => setTimeout(resolve, 2000));
   
   // Return a static test image URL for development
-  return 'https://picsum.photos/512';
+  const imageUrl = 'https://picsum.photos/512';
+  
+  // Store generated image as assistant message
+  await dbInsertChatContent({
+    conversationId: conversationId,
+    role: 'assistant',
+    content: imageUrl,
+    orderNumber: Date.now() + 1,
+    modelName,
+  });
+
+  // Return the image URL
+  return {
+    imageUrl,
+    conversationId,
+  };
 }
 
 /**
