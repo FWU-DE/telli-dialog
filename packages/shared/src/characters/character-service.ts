@@ -26,7 +26,7 @@ import { ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
 import { logError } from '@shared/logging';
 import { copyFileInS3, deleteFileFromS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
-import { generateInviteCode } from '@shared/sharing/generateInviteCode';
+import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';

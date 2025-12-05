@@ -17,7 +17,7 @@ import {
 } from '@shared/db/schema';
 import { ForbiddenError, NotFoundError } from '@shared/error';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
-import { generateInviteCode } from '@shared/sharing/generateInviteCode';
+import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { and, eq } from 'drizzle-orm';
 import z from 'zod';
 
