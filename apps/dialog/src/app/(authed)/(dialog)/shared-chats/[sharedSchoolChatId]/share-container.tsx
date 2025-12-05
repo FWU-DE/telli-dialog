@@ -49,10 +49,11 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
 
   async function handleStartSharing() {
     const data = getValuesShare();
-
+    // getValuesShare returns strings instead of numbers, so we have to parse/coerce them here
+    const parsedData = sharedConversationFormValuesSchema.parse(data);
     const result = await shareLearningScenarioAction({
       learningScenarioId: sharedSchoolChat.id,
-      data,
+      data: parsedData,
     });
 
     if (result.success) {

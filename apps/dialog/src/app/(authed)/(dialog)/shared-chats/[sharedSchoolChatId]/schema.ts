@@ -13,7 +13,7 @@ export const usageTimeValuesInMinutes = [
 ];
 
 export const sharedConversationFormValuesSchema = z.object({
-  intelliPointsPercentageLimit: z.number(),
-  usageTimeLimit: z.number(),
+  intelliPointsPercentageLimit: z.coerce.number(),
+  usageTimeLimit: z.coerce.number(),
 });
 export type SharedConversationShareFormValues = z.infer<typeof sharedConversationFormValuesSchema>;
