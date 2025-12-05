@@ -16,9 +16,10 @@ import {
   sharedSchoolConversationUpdateSchema,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
+import { logInfo } from '@shared/logging';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import z from 'zod';
 
 export type LearningScenarioWithImage = SharedSchoolConversationModel & {
@@ -385,4 +386,29 @@ async function enrichLearningScenarioWithPictureUrl({
       }),
     })),
   );
+}
+
+/**
+ * Cleans up learning scenarios with empty names from the database.
+ * Attention: This is an admin function that does not check any authorization!
+ */
+export function cleanupLearningScenarios() {
+  db.transaction(async (tx) => {
+    const learningScenariosToDelete = await tx
+      .select({ id: sharedSchoolConversationTable.id })
+      .from(sharedSchoolConversationTable)
+      .where(eq(sharedSchoolConversationTable.name, ''));
+
+    if (learningScenariosToDelete.length > 0) {
+      logInfo(
+        `Cleaning up ${learningScenariosToDelete.length} learning scenarios with empty names`,
+      );
+      tx.delete(sharedSchoolConversationTable).where(
+        inArray(
+          sharedSchoolConversationTable.id,
+          learningScenariosToDelete.map((c) => c.id),
+        ),
+      );
+    }
+  });
 }

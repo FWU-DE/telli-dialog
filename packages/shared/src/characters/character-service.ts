@@ -24,13 +24,13 @@ import {
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
-import { logError } from '@shared/logging';
+import { logError, logInfo } from '@shared/logging';
 import { copyFileInS3, deleteFileFromS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import z from 'zod';
 
 /**
@@ -579,3 +579,26 @@ export const getCharacterInfo = async (
     character,
   };
 };
+
+/**
+ * Cleans up characters with empty names from the database.
+ * Attention: This is an admin function that does not check any authorization!
+ */
+export function cleanupCharacters() {
+  db.transaction(async (tx) => {
+    const charactersToDelete = await tx
+      .select({ id: characterTable.id })
+      .from(characterTable)
+      .where(eq(characterTable.name, ''));
+
+    if (charactersToDelete.length > 0) {
+      logInfo(`Cleaning up ${charactersToDelete.length} characters with empty names`);
+      tx.delete(characterTable).where(
+        inArray(
+          characterTable.id,
+          charactersToDelete.map((c) => c.id),
+        ),
+      );
+    }
+  });
+}
