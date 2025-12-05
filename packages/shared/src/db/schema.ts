@@ -336,8 +336,22 @@ export const sharedSchoolConversationTable = pgTable(
   },
   (table) => [index().on(table.userId)],
 );
+
+export const sharedSchoolConversationInsertSchema = createInsertSchema(
+  sharedSchoolConversationTable,
+).omit({ id: true, createdAt: true, inviteCode: true, startedAt: true });
+export const sharedSchoolConversationSelectSchema = createSelectSchema(
+  sharedSchoolConversationTable,
+);
+export const sharedSchoolConversationUpdateSchema = createUpdateSchema(
+  sharedSchoolConversationTable,
+).omit({ id: true, userId: true, createdAt: true });
+
 export type SharedSchoolConversationInsertModel = typeof sharedSchoolConversationTable.$inferInsert;
 export type SharedSchoolConversationModel = typeof sharedSchoolConversationTable.$inferSelect;
+export type SharedSchoolConversationUpdateModel = z.infer<
+  typeof sharedSchoolConversationUpdateSchema
+>;
 
 export const sharedSchoolConversationUsageTracking = pgTable(
   'shared_school_conversation_usage_tracking',

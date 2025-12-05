@@ -9,19 +9,20 @@ import SharedChatItem from './shared-chat-item';
 import SearchBarInput from '@/components/search-bar';
 import { type UserAndContext } from '@/auth/types';
 import { useTranslations } from 'next-intl';
-import { SharedChatWithImage } from './[sharedSchoolChatId]/utils';
 import { CreateNewSharedChatButton } from './create-new-shared-chat';
+import { LearningScenarioWithImage } from '@shared/learning-scenarios/learning-scenario-service';
+
 type SharedChatContainerProps = {
-  sharedChats: SharedChatWithImage[];
+  learningScenarios: LearningScenarioWithImage[];
   user: UserAndContext;
 };
 
-export function SharedChatContainer({ sharedChats, user }: SharedChatContainerProps) {
+export function SharedChatContainer({ learningScenarios, user }: SharedChatContainerProps) {
   const [input, setInput] = React.useState('');
 
-  const filterDisabled = sharedChats.length < 1;
+  const filterDisabled = learningScenarios.length < 1;
 
-  const filteredSharedChats = filterSharedChats(sharedChats, input);
+  const filteredLearningScenarios = filterLearningScenarios(learningScenarios, input);
   const t = useTranslations('shared-chats');
 
   return (
@@ -47,11 +48,11 @@ export function SharedChatContainer({ sharedChats, user }: SharedChatContainerPr
           <div className="flex-grow" />
           <CreateNewSharedChatButton />
         </div>
-        {sharedChats.length < 1 && <p className="text-dark-gray mt-16">{t('no-dialogs')}</p>}
-        {filteredSharedChats.length > 0 && (
+        {learningScenarios.length < 1 && <p className="text-dark-gray mt-16">{t('no-dialogs')}</p>}
+        {filteredLearningScenarios.length > 0 && (
           <div className="max-w-3xl mx-auto w-full flex gap-2 flex-col mt-6">
-            {filteredSharedChats.map((sharedChat) => (
-              <SharedChatItem {...sharedChat} key={sharedChat.id} />
+            {filteredLearningScenarios.map((learningScenario) => (
+              <SharedChatItem {...learningScenario} key={learningScenario.id} />
             ))}
           </div>
         )}
@@ -60,13 +61,13 @@ export function SharedChatContainer({ sharedChats, user }: SharedChatContainerPr
   );
 }
 
-function filterSharedChats(sharedChats: SharedChatWithImage[], input: string) {
+function filterLearningScenarios(learningScenarios: LearningScenarioWithImage[], input: string) {
   const lowerCaseInput = input.toLowerCase();
 
-  return sharedChats.filter((sharedChat) => {
+  return learningScenarios.filter((learningScenario) => {
     const mainMatch =
-      sharedChat.name.toLowerCase().includes(lowerCaseInput) ||
-      sharedChat.description.toLowerCase().includes(lowerCaseInput);
+      learningScenario.name.toLowerCase().includes(lowerCaseInput) ||
+      learningScenario.description.toLowerCase().includes(lowerCaseInput);
 
     return mainMatch;
   });

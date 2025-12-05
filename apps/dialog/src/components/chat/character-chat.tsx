@@ -4,7 +4,6 @@ import { useChat } from '@ai-sdk/react';
 import { FormEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { CharacterSelectModel } from '@shared/db/schema';
-import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
 import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
@@ -17,6 +16,7 @@ import { Message } from 'ai';
 import { AssistantIcon } from './assistant-icon';
 import { messageContainsAttachments } from '@/utils/chat/messages';
 import { Messages } from './messages';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 
 const reductionBreakpoint = 'sm';
 
@@ -27,7 +27,7 @@ export default function CharacterSharedChat({
   const t = useTranslations('characters.shared');
 
   const { id, inviteCode } = character;
-  const timeLeft = calculateTimeLeftBySharedChat(character);
+  const timeLeft = calculateTimeLeftForLearningScenario(character);
   const chatActive = timeLeft > 0;
 
   const searchParams = new URLSearchParams({ id, inviteCode });

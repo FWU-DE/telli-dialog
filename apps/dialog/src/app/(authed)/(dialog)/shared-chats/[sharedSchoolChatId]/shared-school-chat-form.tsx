@@ -14,13 +14,13 @@ import Image from 'next/image';
 import { FileModel, SharedSchoolConversationModel } from '@shared/db/schema';
 import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../schema';
 import {
-  deleteFileMappingAndEntity,
-  updateSharedSchoolChat,
-  updateSharedSchoolChatPictureAction,
+  removeFileFromLearningScenarioAction,
+  updateLearningScenarioAction,
+  updateLearningScenarioPictureAction,
 } from './actions';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
-import { dbDeleteSharedChatAction, linkFileToSharedSchoolChat } from '../actions';
+import { deleteLearningScenarioAction, linkFileToLearningScenarioAction } from '../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
 import ShareContainer from './share-container';
 import React from 'react';
@@ -35,8 +35,8 @@ import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { AttachedLinks } from '@/components/forms/attached-links';
-
 import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
+
 export default function SharedSchoolChatForm({
   existingFiles,
   isCreating,
@@ -100,55 +100,70 @@ export default function SharedSchoolChatForm({
 
     setInitialFiles(initialFiles.filter((f) => f.id !== fileId));
     if (fileId) {
-      await deleteFileMappingAndEntity({ fileId });
+      const result = await removeFileFromLearningScenarioAction({
+        learningScenarioId: sharedSchoolChat.id,
+        fileId,
+      });
+      if (!result.success) {
+        toast.error(tToast('edit-toast-error'));
+      }
     }
   }
-  function handleNewFile(data: { id: string; name: string; file: File }) {
-    linkFileToSharedSchoolChat({ fileId: data.id, schoolChatId: sharedSchoolChat.id })
-      .then()
-      .catch(() => toast.error(tToast('edit-toast-error')));
+  async function handleNewFile(data: { id: string; name: string; file: File }) {
+    const result = await linkFileToLearningScenarioAction({
+      fileId: data.id,
+      learningScenarioId: sharedSchoolChat.id,
+    });
+    if (!result.success) {
+      toast.error(tToast('edit-toast-error'));
+    }
   }
 
-  function onSubmit(data: SharedSchoolChatFormValues) {
-    updateSharedSchoolChat({
-      ...sharedSchoolChat,
-      ...data,
-      attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
-      description: data.description ?? '',
-      studentExcercise: data.studentExcercise ?? '',
-    })
-      .then(() => {
-        toast.success(tToast('edit-toast-success'));
-      })
-      .catch(() => {
-        toast.error(tToast('edit-toast-error'));
-      });
+  async function onSubmit(data: SharedSchoolChatFormValues) {
+    const result = await updateLearningScenarioAction({
+      learningScenarioId: sharedSchoolChat.id,
+      data: {
+        ...sharedSchoolChat,
+        ...data,
+        attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
+        description: data.description ?? '',
+        studentExcercise: data.studentExcercise ?? '',
+      },
+    });
+    if (result.success) {
+      toast.success(tToast('edit-toast-success'));
+    } else {
+      toast.error(tToast('edit-toast-error'));
+    }
   }
 
-  function handlePictureUploadComplete(picturePath: string) {
+  async function handlePictureUploadComplete(picturePath: string) {
     setValue('pictureId', picturePath);
-    updateSharedSchoolChatPictureAction({ picturePath, id: sharedSchoolChat.id })
-      .then(() => {
-        toast.success(tToast('image-toast-success'));
-        router.refresh();
-      })
-      .catch(() => {
-        toast.error(tToast('edit-toast-error'));
-      });
+
+    const result = await updateLearningScenarioPictureAction({
+      picturePath,
+      learningScenarioId: sharedSchoolChat.id,
+    });
+
+    if (result.success) {
+      toast.success(tToast('image-toast-success'));
+      router.refresh();
+    } else {
+      toast.error(tToast('edit-toast-error'));
+    }
   }
 
-  function handleDeleteSharedChat() {
-    dbDeleteSharedChatAction({ id: sharedSchoolChat.id })
-      .then(() => {
-        if (!isCreating) {
-          toast.success(tToast('delete-toast-success'));
-        }
-        // replace instead of push to avoid showing a 404 when navigating back to the now non existing shared chat
-        router.replace(backUrl);
-      })
-      .catch(() => {
-        toast.error(tToast('delete-toast-error'));
-      });
+  async function handleDeleteSharedChat() {
+    const result = await deleteLearningScenarioAction({ id: sharedSchoolChat.id });
+    if (result.success) {
+      if (!isCreating) {
+        toast.success(tToast('delete-toast-success'));
+      }
+      // replace instead of push to avoid showing a 404 when navigating back to the now non existing shared chat
+      router.replace(backUrl);
+    } else {
+      toast.error(tToast('delete-toast-error'));
+    }
   }
 
   function handleAutoSave() {

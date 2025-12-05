@@ -22,15 +22,15 @@ import {
   fileTable,
   sharedCharacterConversation,
 } from '@shared/db/schema';
-import { ForbiddenError } from '@shared/error';
+import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
 import { logError } from '@shared/logging';
 import { copyFileInS3, deleteFileFromS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
 import { and, eq } from 'drizzle-orm';
-import { customAlphabet } from 'nanoid';
 import z from 'zod';
 
 /**
@@ -132,6 +132,7 @@ export const deleteFileMappingAndEntity = async ({
   fileId: string;
   userId: string;
 }) => {
+  checkParameterUUID(characterId, fileId);
   // Authorization check: user must own character
   if ((await getCharacterInfo(characterId, userId)).isOwner === false)
     throw new ForbiddenError('Not authorized to delete this file mapping');
@@ -159,6 +160,7 @@ export const fetchFileMappings = async ({
   userId: string;
   schoolId: string;
 }): Promise<FileModel[]> => {
+  checkParameterUUID(characterId);
   // Authorization check
   const { isOwner, isPrivate, character } = await getCharacterInfo(characterId, userId);
   if (
@@ -185,6 +187,7 @@ export const linkFileToCharacter = async ({
   characterId: string;
   userId: string;
 }) => {
+  checkParameterUUID(characterId, fileId);
   // Authorization check
   if ((await getCharacterInfo(characterId, userId)).isOwner === false)
     throw new ForbiddenError('Not authorized to add new file for this character');
@@ -213,6 +216,7 @@ export const updateCharacterAccessLevel = async ({
   accessLevel: CharacterAccessLevel;
   userId: string;
 }) => {
+  checkParameterUUID(characterId);
   // Authorization check
   if (accessLevel === 'global') {
     throw new ForbiddenError('Not authorized to set the access level to global');
@@ -249,6 +253,7 @@ export const updateCharacterPicture = async ({
   picturePath: string;
   userId: string;
 }) => {
+  checkParameterUUID(characterId);
   // Authorization check
   if ((await getCharacterInfo(characterId, userId)).isOwner === false)
     throw new ForbiddenError('Not authorized to update the picture of this character');
@@ -290,6 +295,7 @@ export const updateCharacter = async ({
   userId,
   ...character
 }: UpdateCharacterActionModel & { characterId: string; userId: string }) => {
+  checkParameterUUID(characterId);
   // Authorization check
   if ((await getCharacterInfo(characterId, userId)).isOwner === false)
     throw new ForbiddenError('Not authorized to update this character');
@@ -323,6 +329,7 @@ export const deleteCharacter = async ({
   characterId: string;
   userId: string;
 }) => {
+  checkParameterUUID(characterId);
   // Authorization check
   const { isOwner, character } = await getCharacterInfo(characterId, userId);
   if (!isOwner) throw new ForbiddenError('Not authorized to delete this character');
@@ -358,6 +365,7 @@ export const shareCharacter = async ({
   usageTimeLimitMinutes: number;
   schoolId?: string;
 }) => {
+  checkParameterUUID(characterId);
   // Authorization check: user must be a teacher and owner of the character or it is global
   if (user.userRole !== 'teacher') throw new ForbiddenError('Only a teacher can share a character');
 
@@ -425,6 +433,7 @@ export const unshareCharacter = async ({
   characterId: string;
   user: Pick<UserModel, 'id' | 'userRole'>;
 }) => {
+  checkParameterUUID(characterId);
   // Authorization check: user must be a teacher and owner of the sharing itself
   if (user.userRole !== 'teacher')
     throw new ForbiddenError('Only a teacher can unshare a character');
@@ -471,6 +480,7 @@ export const getCharacterForChatSession = async ({
   userId: string;
   schoolId: string;
 }) => {
+  checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
   if (!character) throw new NotFoundError('Character not found');
   if (character.accessLevel === 'private' && character.userId !== userId)
@@ -490,6 +500,7 @@ export const getCharacterForEditView = async ({
   schoolId: string;
   userId: string;
 }) => {
+  checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
   if (!character) throw new NotFoundError('Character not found');
   if (character.accessLevel === 'private' && character.userId !== userId)
@@ -515,6 +526,7 @@ export const getSharedCharacter = async ({
   characterId: string;
   userId: string;
 }): Promise<CharacterSelectModel> => {
+  checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdAndUserId({ characterId, userId });
   if (!character || !character.inviteCode) throw new NotFoundError('Character not found');
 
@@ -567,11 +579,3 @@ export const getCharacterInfo = async (
     character,
   };
 };
-
-/**
- * Generates an invite code for sharing characters.
- */
-export function generateInviteCode(length = 8) {
-  const nanoid = customAlphabet('123456789ABCDEFGHIJKLMNPQRSTUVWXYZ', length);
-  return nanoid().toUpperCase();
-}
