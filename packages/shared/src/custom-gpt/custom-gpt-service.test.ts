@@ -12,7 +12,7 @@ import {
   updateCustomGptAccessLevel,
   updateCustomGptPicture,
 } from './custom-gpt-service';
-import { ForbiddenError, NotFoundError } from '@shared/error';
+import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { CustomGptModel } from '@shared/db/schema';
@@ -341,5 +341,121 @@ describe('custom-gpt-service', () => {
         }),
       ).rejects.toThrowError(ForbiddenError);
     });
+  });
+
+  describe('InvalidArgumentError scenarios - invalid parameter format', () => {
+    it.each([
+      {
+        functionName: 'getCustomGptForEditView',
+        testFunction: () =>
+          getCustomGptForEditView({
+            customGptId: 'invalid-uuid',
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'getCustomGptForNewChat',
+        testFunction: () =>
+          getCustomGptForNewChat({
+            customGptId: 'invalid-uuid',
+            userId: 'user-id',
+            schoolId: 'school-id',
+          }),
+      },
+      {
+        functionName: 'getConversationWithMessagesAndCustomGpt',
+        testFunction: () =>
+          getConversationWithMessagesAndCustomGpt({
+            customGptId: 'invalid-uuid',
+            conversationId: generateUUID(),
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'getConversationWithMessagesAndCustomGpt (invalid conversationId)',
+        testFunction: () =>
+          getConversationWithMessagesAndCustomGpt({
+            customGptId: generateUUID(),
+            conversationId: 'invalid-uuid',
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'linkFileToCustomGpt',
+        testFunction: () =>
+          linkFileToCustomGpt({
+            customGptId: 'invalid-uuid',
+            fileId: generateUUID(),
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'linkFileToCustomGpt (invalid fileId)',
+        testFunction: () =>
+          linkFileToCustomGpt({
+            customGptId: generateUUID(),
+            fileId: 'invalid-uuid',
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'deleteFileMappingAndEntity',
+        testFunction: () =>
+          deleteFileMappingAndEntity({
+            customGptId: 'invalid-uuid',
+            fileId: generateUUID(),
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'deleteFileMappingAndEntity (invalid fileId)',
+        testFunction: () =>
+          deleteFileMappingAndEntity({
+            customGptId: generateUUID(),
+            fileId: 'invalid-uuid',
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'getFileMappings',
+        testFunction: () =>
+          getFileMappings({
+            customGptId: 'invalid-uuid',
+            userId: 'user-id',
+            schoolId: 'school-id',
+          }),
+      },
+      {
+        functionName: 'updateCustomGptAccessLevel',
+        testFunction: () =>
+          updateCustomGptAccessLevel({
+            customGptId: 'invalid-uuid',
+            accessLevel: 'school',
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'updateCustomGptPicture',
+        testFunction: () =>
+          updateCustomGptPicture({
+            customGptId: 'invalid-uuid',
+            picturePath: 'picture-path',
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'deleteCustomGpt',
+        testFunction: () =>
+          deleteCustomGpt({
+            customGptId: 'invalid-uuid',
+            userId: 'user-id',
+          }),
+      },
+    ])(
+      'should throw InvalidArgumentError when parameter is not a valid UUID - $functionName',
+      async ({ testFunction }) => {
+        await expect(testFunction()).rejects.toThrowError(InvalidArgumentError);
+      },
+    );
   });
 });

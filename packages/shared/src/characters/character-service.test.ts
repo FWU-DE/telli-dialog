@@ -25,7 +25,7 @@ import {
 } from '../db/functions/character';
 import { generateUUID } from '../utils/uuid';
 import { CharacterSelectModel } from '@shared/db/schema';
-import { ForbiddenError, NotFoundError } from '@shared/error';
+import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
 
 const mockUser = (userRole: 'student' | 'teacher' = 'teacher') => ({
   id: generateUUID(),
@@ -313,5 +313,85 @@ describe('character-service', () => {
         }),
       ).rejects.toThrowError(ForbiddenError);
     });
+  });
+
+  describe('InvalidArgumentError scenarios - invalid parameter format', () => {
+    it.each([
+      {
+        functionName: 'deleteFileMappingAndEntity',
+        testFunction: () =>
+          deleteFileMappingAndEntity({
+            characterId: 'invalid-uuid',
+            fileId: generateUUID(),
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'deleteFileMappingAndEntity (invalid fileId)',
+        testFunction: () =>
+          deleteFileMappingAndEntity({
+            characterId: generateUUID(),
+            fileId: 'invalid-uuid',
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'fetchFileMappings',
+        testFunction: () =>
+          fetchFileMappings({
+            characterId: 'invalid-uuid',
+            userId: 'user-id',
+            schoolId: 'school-id',
+          }),
+      },
+      {
+        functionName: 'linkFileToCharacter',
+        testFunction: () =>
+          linkFileToCharacter({
+            characterId: 'invalid-uuid',
+            userId: 'user-id',
+            fileId: generateUUID(),
+          }),
+      },
+      {
+        functionName: 'updateCharacterPicture',
+        testFunction: () =>
+          updateCharacterPicture({
+            characterId: 'invalid-uuid',
+            userId: 'user-id',
+            picturePath: 'picture-path',
+          }),
+      },
+      {
+        functionName: 'updateCharacter',
+        testFunction: () =>
+          updateCharacter({
+            characterId: 'invalid-uuid',
+            userId: 'user-id',
+            name: 'new-name',
+          }),
+      },
+      {
+        functionName: 'deleteCharacter',
+        testFunction: () =>
+          deleteCharacter({
+            characterId: 'invalid-uuid',
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'getSharedCharacter',
+        testFunction: () =>
+          getSharedCharacter({
+            characterId: 'invalid-uuid',
+            userId: 'user-id',
+          }),
+      },
+    ])(
+      'should throw InvalidArgumentError when characterId is not a valid UUID - $functionName',
+      async ({ testFunction }) => {
+        await expect(testFunction()).rejects.toThrowError(InvalidArgumentError);
+      },
+    );
   });
 });

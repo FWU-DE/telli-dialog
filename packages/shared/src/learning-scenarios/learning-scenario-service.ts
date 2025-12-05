@@ -356,6 +356,7 @@ export async function removeFileFromLearningScenario({
   fileId: string;
   userId: string;
 }) {
+  checkParameterUUID(learningScenarioId, fileId);
   await getLearningScenario({ learningScenarioId, userId });
 
   await db.transaction(async (tx) => {

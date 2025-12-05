@@ -18,7 +18,7 @@ import {
 import { dbGetSharedSchoolChatById } from '../db/functions/shared-school-chat';
 import { generateUUID } from '../utils/uuid';
 import { SharedSchoolConversationModel } from '@shared/db/schema';
-import { ForbiddenError, NotFoundError } from '@shared/error';
+import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
 import { UserModel } from '@shared/auth/user-model';
 
 const mockUser = (userRole: 'student' | 'teacher' = 'teacher'): UserModel => ({
@@ -162,5 +162,102 @@ describe('learning-scenario-service', () => {
         }),
       ).rejects.toThrowError(ForbiddenError);
     });
+  });
+
+  describe('InvalidArgumentError scenarios - invalid parameter format', () => {
+    it.each([
+      {
+        functionName: 'getLearningScenario',
+        testFunction: () =>
+          getLearningScenario({
+            learningScenarioId: 'invalid-uuid',
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'updateLearningScenario',
+        testFunction: () =>
+          updateLearningScenario({
+            learningScenarioId: 'invalid-uuid',
+            user: mockUser('teacher'),
+            data: { name: 'Test', description: 'Test' } as SharedSchoolConversationModel,
+          }),
+      },
+      {
+        functionName: 'updateLearningScenarioPicture',
+        testFunction: () =>
+          updateLearningScenarioPicture({
+            learningScenarioId: 'invalid-uuid',
+            picturePath: '/path/to/picture',
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'shareLearningScenario',
+        testFunction: () =>
+          shareLearningScenario({
+            learningScenarioId: 'invalid-uuid',
+            data: { intelliPointsPercentageLimit: 50, usageTimeLimit: 60 },
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'unshareLearningScenario',
+        testFunction: () =>
+          unshareLearningScenario({
+            learningScenarioId: 'invalid-uuid',
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'deleteLearningScenario',
+        testFunction: () =>
+          deleteLearningScenario({
+            learningScenarioId: 'invalid-uuid',
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'linkFileToLearningScenario',
+        testFunction: () =>
+          linkFileToLearningScenario({
+            learningScenarioId: 'invalid-uuid',
+            fileId: generateUUID(),
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'linkFileToLearningScenario (invalid fileId)',
+        testFunction: () =>
+          linkFileToLearningScenario({
+            learningScenarioId: generateUUID(),
+            fileId: 'invalid-uuid',
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'removeFileFromLearningScenario',
+        testFunction: () =>
+          removeFileFromLearningScenario({
+            learningScenarioId: 'invalid-uuid',
+            fileId: generateUUID(),
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'removeFileFromLearningScenario (invalid fileId)',
+        testFunction: () =>
+          removeFileFromLearningScenario({
+            learningScenarioId: generateUUID(),
+            fileId: 'invalid-uuid',
+            userId: 'user-id',
+          }),
+      },
+    ])(
+      'should throw InvalidArgumentError when parameter is not a valid UUID - $functionName',
+      async ({ testFunction }) => {
+        await expect(testFunction()).rejects.toThrowError(InvalidArgumentError);
+      },
+    );
   });
 });
