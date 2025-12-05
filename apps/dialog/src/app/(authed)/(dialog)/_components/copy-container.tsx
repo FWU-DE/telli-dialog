@@ -4,7 +4,7 @@ import { CreateNewCharacterFromTemplate } from '../characters/create-new-charact
 import { createNewCharacterAction } from '../characters/actions';
 import { createNewCustomGptAction } from '../custom/actions';
 import { useTranslations } from 'next-intl';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 
 export function CopyContainer({
   templateId,

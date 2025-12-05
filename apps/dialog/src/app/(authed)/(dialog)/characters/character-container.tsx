@@ -20,7 +20,8 @@ import { CreateNewCharacterFromTemplate } from './create-new-character-button';
 import { iconClassName } from '@/utils/tailwind/icon';
 import TelliClipboardButton from '@/components/common/clipboard-button';
 import { createNewCharacterAction } from './actions';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+
 type CharacterContainerProps = CharacterSelectModel & {
   currentUserId: string;
   maybeSignedPictureUrl: string | undefined;

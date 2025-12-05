@@ -12,7 +12,7 @@ import { requireAuth } from '@/auth/requireAuth';
 import { getSharedCharacter } from '@shared/characters/character-service';
 import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
 import { notFound } from 'next/navigation';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 
 export default async function Page(props: PageProps<'/characters/editor/[characterId]/share'>) {
   const params = await props.params;

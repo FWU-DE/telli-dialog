@@ -19,7 +19,7 @@ import { useTranslations } from 'next-intl';
 import CountDownTimer from '../../../shared-chats/_components/count-down';
 import FilledShareIcon from '@/components/icons/filled-share';
 import { iconClassName } from '@/utils/tailwind/icon';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 
 type ShareContainerProps = CharacterSelectModel;
 

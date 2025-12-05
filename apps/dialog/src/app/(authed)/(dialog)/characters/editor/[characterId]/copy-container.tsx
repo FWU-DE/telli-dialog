@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { CreateNewCharacterFromTemplate } from '../../create-new-character-button';
 import { CharacterSelectModel } from '@shared/db/schema';
 import { createNewCharacterAction } from '../../actions';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 
 export function CopyContainer({ character }: { character: CharacterSelectModel }) {
   const t = useTranslations('characters.form.copy-page');

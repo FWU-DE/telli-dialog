@@ -14,7 +14,7 @@ import { useCheckStatusCode } from '@/hooks/use-response-status';
 import { messageContainsAttachments } from '@/utils/chat/messages';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { Messages } from './messages';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
