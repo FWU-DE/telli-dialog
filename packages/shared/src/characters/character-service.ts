@@ -583,9 +583,10 @@ export const getCharacterInfo = async (
 /**
  * Cleans up characters with empty names from the database.
  * Attention: This is an admin function that does not check any authorization!
+ * @returns number of deleted characters in db
  */
-export function cleanupCharacters() {
-  db.transaction(async (tx) => {
+export async function cleanupCharacters() {
+  await db.transaction(async (tx) => {
     const charactersToDelete = await tx
       .select({ id: characterTable.id })
       .from(characterTable)
@@ -593,12 +594,17 @@ export function cleanupCharacters() {
 
     if (charactersToDelete.length > 0) {
       logInfo(`Cleaning up ${charactersToDelete.length} characters with empty names`);
-      tx.delete(characterTable).where(
-        inArray(
-          characterTable.id,
-          charactersToDelete.map((c) => c.id),
-        ),
-      );
+      const rows = await tx
+        .delete(characterTable)
+        .where(
+          inArray(
+            characterTable.id,
+            charactersToDelete.map((c) => c.id),
+          ),
+        )
+        .returning();
+      return rows.length;
     }
   });
+  return 0;
 }

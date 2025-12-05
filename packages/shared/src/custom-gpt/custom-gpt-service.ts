@@ -418,9 +418,10 @@ export async function deleteCustomGpt({
 /**
  * Cleans up custom gpts with empty names from the database.
  * Attention: This is an admin function that does not check any authorization!
+ * @returns number of deleted custom gpts in db.
  */
-export function cleanupCustomGpts() {
-  db.transaction(async (tx) => {
+export async function cleanupCustomGpts() {
+  await db.transaction(async (tx) => {
     const customGptsToDelete = await tx
       .select({ id: customGptTable.id })
       .from(customGptTable)
@@ -428,12 +429,17 @@ export function cleanupCustomGpts() {
 
     if (customGptsToDelete.length > 0) {
       logInfo(`Cleaning up ${customGptsToDelete.length} custom gpts with empty names`);
-      tx.delete(customGptTable).where(
-        inArray(
-          customGptTable.id,
-          customGptsToDelete.map((c) => c.id),
-        ),
-      );
+      const rows = await tx
+        .delete(customGptTable)
+        .where(
+          inArray(
+            customGptTable.id,
+            customGptsToDelete.map((c) => c.id),
+          ),
+        )
+        .returning();
+      return rows.length;
     }
   });
+  return 0;
 }

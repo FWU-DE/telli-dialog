@@ -391,9 +391,10 @@ async function enrichLearningScenarioWithPictureUrl({
 /**
  * Cleans up learning scenarios with empty names from the database.
  * Attention: This is an admin function that does not check any authorization!
+ * @returns number of deleted learning scenarios in db.
  */
-export function cleanupLearningScenarios() {
-  db.transaction(async (tx) => {
+export async function cleanupLearningScenarios() {
+  await db.transaction(async (tx) => {
     const learningScenariosToDelete = await tx
       .select({ id: sharedSchoolConversationTable.id })
       .from(sharedSchoolConversationTable)
@@ -403,12 +404,17 @@ export function cleanupLearningScenarios() {
       logInfo(
         `Cleaning up ${learningScenariosToDelete.length} learning scenarios with empty names`,
       );
-      tx.delete(sharedSchoolConversationTable).where(
-        inArray(
-          sharedSchoolConversationTable.id,
-          learningScenariosToDelete.map((c) => c.id),
-        ),
-      );
+      const rows = await tx
+        .delete(sharedSchoolConversationTable)
+        .where(
+          inArray(
+            sharedSchoolConversationTable.id,
+            learningScenariosToDelete.map((c) => c.id),
+          ),
+        )
+        .returning();
+      return rows.length;
     }
   });
+  return 0;
 }
