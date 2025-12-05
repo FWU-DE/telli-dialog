@@ -3,6 +3,7 @@ import { BusinessError } from './business-error';
 import { ForbiddenError } from './forbidden-error';
 import { NotFoundError } from './not-found-error';
 import { notFound } from 'next/navigation';
+import { InvalidArgumentError } from './invalid-argument-error';
 
 /**
  * In server components we handle NotFoundError and ForbiddenError by calling notFound().
@@ -17,7 +18,11 @@ import { notFound } from 'next/navigation';
  * The error message will be adapted by nextjs to not leak sensitive information.
  */
 export function handleErrorInServerComponent(error: unknown): never {
-  if (error instanceof NotFoundError || error instanceof ForbiddenError) {
+  if (
+    error instanceof NotFoundError ||
+    error instanceof ForbiddenError ||
+    error instanceof InvalidArgumentError
+  ) {
     logError(error.message, error);
     notFound();
   } else if (error instanceof BusinessError) {
