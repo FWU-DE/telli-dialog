@@ -27,7 +27,8 @@ export default function SharedChatLoginForm() {
     if (result !== undefined) {
       const { type, id, inviteCode } = result;
       const searchParams = new URLSearchParams({ inviteCode });
-      const route = `/ua/${type}/${id}/dialog?${searchParams.toString()}`;
+      const pathSegment = type === 'character' ? type : 'shared-chats'; // learning-scenarios are still mapped under shared-chats
+      const route = `/ua/${pathSegment}/${id}/dialog?${searchParams.toString()}`;
       router.push(route);
       return;
     }
