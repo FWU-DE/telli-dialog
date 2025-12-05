@@ -24,7 +24,7 @@ import {
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
-import { logError, logInfo } from '@shared/logging';
+import { logError } from '@shared/logging';
 import { copyFileInS3, deleteFileFromS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
@@ -593,7 +593,6 @@ export async function cleanupCharacters() {
       .where(eq(characterTable.name, ''));
 
     if (charactersToDelete.length > 0) {
-      logInfo(`Cleaning up ${charactersToDelete.length} characters with empty names`);
       const rows = await tx
         .delete(characterTable)
         .where(

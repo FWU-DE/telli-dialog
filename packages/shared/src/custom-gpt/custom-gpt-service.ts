@@ -23,7 +23,6 @@ import {
   fileTable,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
-import { logInfo } from '@shared/logging';
 import { copyFileInS3 } from '@shared/s3';
 import { copyCustomGpt, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { generateUUID } from '@shared/utils/uuid';
@@ -428,7 +427,6 @@ export async function cleanupCustomGpts() {
       .where(eq(customGptTable.name, ''));
 
     if (customGptsToDelete.length > 0) {
-      logInfo(`Cleaning up ${customGptsToDelete.length} custom gpts with empty names`);
       const rows = await tx
         .delete(customGptTable)
         .where(
