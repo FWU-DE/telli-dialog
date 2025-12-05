@@ -48,8 +48,9 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
 
   function handleStartSharing() {
     const data = getValuesShare();
+    const parsedData = sharedConversationFormValuesSchema.parse(data);
 
-    shareCharacterAction({ ...data, id: character.id })
+    shareCharacterAction({ ...parsedData, id: character.id })
       .then(() => {
         toast.success(tToasts('share-toast-success'));
         router.push(shareUILink);
