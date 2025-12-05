@@ -44,12 +44,14 @@ describe('custom-gpt-service', () => {
   });
 
   describe('NotFoundError scenarios', () => {
+    const customGptId = generateUUID();
+
     it.each([
       {
         functionName: 'getCustomGptForEditView',
         testFunction: () =>
           getCustomGptForEditView({
-            customGptId: 'nonexistent-id',
+            customGptId,
             userId: 'user-id',
           }),
       },
@@ -57,7 +59,7 @@ describe('custom-gpt-service', () => {
         functionName: 'getCustomGptForNewChat',
         testFunction: () =>
           getCustomGptForNewChat({
-            customGptId: 'nonexistent-id',
+            customGptId,
             userId: 'user-id',
             schoolId: 'school-id',
           }),
@@ -75,6 +77,9 @@ describe('custom-gpt-service', () => {
 
     it('should throw NotFoundError when conversation not found - getConversationWithMessagesAndCustomGpt', async () => {
       const userId = generateUUID();
+      const customGptId = generateUUID();
+      const conversationId = generateUUID();
+
       const mockCustomGpt: Partial<CustomGptModel> = { userId };
 
       (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
@@ -89,8 +94,8 @@ describe('custom-gpt-service', () => {
 
       await expect(
         getConversationWithMessagesAndCustomGpt({
-          conversationId: 'conversation-id',
-          customGptId: 'custom-gpt-id',
+          conversationId,
+          customGptId,
           userId,
         }),
       ).rejects.toThrowError(NotFoundError);
@@ -98,6 +103,8 @@ describe('custom-gpt-service', () => {
 
     it('should throw NotFoundError when custom GPT not found - getConversationWithMessagesAndCustomGpt', async () => {
       const userId = generateUUID();
+      const customGptId = generateUUID();
+      const conversationId = generateUUID();
 
       (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockRejectedValue(
         new NotFoundError('Custom Gpt not found'),
@@ -109,8 +116,8 @@ describe('custom-gpt-service', () => {
 
       await expect(
         getConversationWithMessagesAndCustomGpt({
-          conversationId: 'conversation-id',
-          customGptId: 'custom-gpt-id',
+          conversationId,
+          customGptId,
           userId,
         }),
       ).rejects.toThrowError(NotFoundError);
@@ -119,6 +126,9 @@ describe('custom-gpt-service', () => {
 
   describe('ForbiddenError scenarios - user not owner', () => {
     const userId = generateUUID();
+    const customGptId = generateUUID();
+    const fileId = generateUUID();
+
     const mockCustomGpt: Partial<CustomGptModel> = { userId };
 
     beforeEach(() => {
@@ -132,7 +142,7 @@ describe('custom-gpt-service', () => {
         functionName: 'getCustomGptForEditView',
         testFunction: () =>
           getCustomGptForEditView({
-            customGptId: 'custom-gpt-id',
+            customGptId,
             userId: 'different-user-id',
           }),
       },
@@ -140,8 +150,8 @@ describe('custom-gpt-service', () => {
         functionName: 'linkFileToCustomGpt',
         testFunction: () =>
           linkFileToCustomGpt({
-            customGptId: 'custom-gpt-id',
-            fileId: 'file-id',
+            customGptId,
+            fileId,
             userId: 'different-user-id',
           }),
       },
@@ -149,8 +159,8 @@ describe('custom-gpt-service', () => {
         functionName: 'deleteFileMappingAndEntity',
         testFunction: () =>
           deleteFileMappingAndEntity({
-            customGptId: 'custom-gpt-id',
-            fileId: 'file-id',
+            customGptId,
+            fileId,
             userId: 'different-user-id',
           }),
       },
@@ -158,7 +168,7 @@ describe('custom-gpt-service', () => {
         functionName: 'updateCustomGptAccessLevel',
         testFunction: () =>
           updateCustomGptAccessLevel({
-            customGptId: 'custom-gpt-id',
+            customGptId,
             accessLevel: 'school',
             userId: 'different-user-id',
           }),
@@ -167,7 +177,7 @@ describe('custom-gpt-service', () => {
         functionName: 'updateCustomGptPicture',
         testFunction: () =>
           updateCustomGptPicture({
-            customGptId: 'custom-gpt-id',
+            customGptId,
             picturePath: 'picture-path',
             userId: 'different-user-id',
           }),
@@ -176,7 +186,7 @@ describe('custom-gpt-service', () => {
         functionName: 'updateCustomGpt',
         testFunction: () =>
           updateCustomGpt({
-            customGptId: 'custom-gpt-id',
+            customGptId,
             userId: 'different-user-id',
             customGptProps: {},
           }),
@@ -185,7 +195,7 @@ describe('custom-gpt-service', () => {
         functionName: 'deleteCustomGpt',
         testFunction: () =>
           deleteCustomGpt({
-            customGptId: 'custom-gpt-id',
+            customGptId,
             userId: 'different-user-id',
           }),
       },
@@ -200,6 +210,8 @@ describe('custom-gpt-service', () => {
   describe('ForbiddenError scenarios - access restrictions', () => {
     it('should throw ForbiddenError when user is not owner of private custom GPT - getCustomGptForNewChat', async () => {
       const userId = generateUUID();
+      const customGptId = generateUUID();
+
       const mockCustomGpt: Partial<CustomGptModel> = { userId, accessLevel: 'private' };
 
       (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
@@ -208,7 +220,7 @@ describe('custom-gpt-service', () => {
 
       await expect(
         getCustomGptForNewChat({
-          customGptId: 'custom-gpt-id',
+          customGptId,
           userId: 'different-user-id',
           schoolId: 'school-id',
         }),
@@ -217,6 +229,7 @@ describe('custom-gpt-service', () => {
 
     it('should throw ForbiddenError when user is not in same school - getCustomGptForNewChat', async () => {
       const userId = generateUUID();
+      const customGptId = generateUUID();
       const mockCustomGpt: Partial<CustomGptModel> = {
         userId,
         accessLevel: 'school',
@@ -229,7 +242,7 @@ describe('custom-gpt-service', () => {
 
       await expect(
         getCustomGptForNewChat({
-          customGptId: 'custom-gpt-id',
+          customGptId,
           userId: 'different-user-id',
           schoolId: 'different-school-id',
         }),
@@ -238,6 +251,8 @@ describe('custom-gpt-service', () => {
 
     it('should throw ForbiddenError when user is not owner of conversation - getConversationWithMessagesAndCustomGpt', async () => {
       const userId = generateUUID();
+      const customGptId = generateUUID();
+      const conversationId = generateUUID();
 
       (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
         null as never,
@@ -251,8 +266,8 @@ describe('custom-gpt-service', () => {
 
       await expect(
         getConversationWithMessagesAndCustomGpt({
-          conversationId: 'conversation-id',
-          customGptId: 'custom-gpt-id',
+          conversationId,
+          customGptId,
           userId,
         }),
       ).rejects.toThrowError(ForbiddenError);
@@ -260,6 +275,7 @@ describe('custom-gpt-service', () => {
 
     it('should throw ForbiddenError when user is not owner of private custom GPT - getFileMappings', async () => {
       const userId = generateUUID();
+      const customGptId = generateUUID();
       const mockCustomGpt: Partial<CustomGptModel> = { accessLevel: 'private', userId };
 
       (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
@@ -268,7 +284,7 @@ describe('custom-gpt-service', () => {
 
       await expect(
         getFileMappings({
-          customGptId: 'custom-gpt-id',
+          customGptId,
           schoolId: 'school-id',
           userId: 'different-user-id',
         }),
@@ -277,6 +293,7 @@ describe('custom-gpt-service', () => {
 
     it('should throw ForbiddenError when user has not same schoolId as custom GPT - getFileMappings', async () => {
       const userId = generateUUID();
+      const customGptId = generateUUID();
       const mockCustomGpt: Partial<CustomGptModel> = {
         accessLevel: 'school',
         schoolId: 'school-1',
@@ -289,7 +306,7 @@ describe('custom-gpt-service', () => {
 
       await expect(
         getFileMappings({
-          customGptId: 'custom-gpt-id',
+          customGptId,
           schoolId: 'different-school-id',
           userId: 'different-user-id',
         }),
@@ -298,6 +315,7 @@ describe('custom-gpt-service', () => {
 
     it('should throw ForbiddenError when setting access level to global not possible - updateCustomGptAccessLevel', async () => {
       const userId = generateUUID();
+      const customGptId = generateUUID();
       const mockCustomGpt: Partial<CustomGptModel> = { userId };
 
       (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
@@ -306,7 +324,7 @@ describe('custom-gpt-service', () => {
 
       await expect(
         updateCustomGptAccessLevel({
-          customGptId: 'custom-gpt-id',
+          customGptId,
           accessLevel: 'global',
           userId: userId,
         }),

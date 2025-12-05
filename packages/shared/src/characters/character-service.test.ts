@@ -43,7 +43,7 @@ describe('character-service', () => {
         functionName: 'getSharedCharacter',
         testFunction: () =>
           getSharedCharacter({
-            characterId: 'nonexistent-character',
+            characterId: generateUUID(),
             userId: 'user-id',
           }),
       },
@@ -71,7 +71,7 @@ describe('character-service', () => {
 
       await expect(
         getSharedCharacter({
-          characterId: 'character-id',
+          characterId: generateUUID(),
           userId: 'user-id',
         }),
       ).rejects.toThrowError(NotFoundError);
@@ -96,8 +96,8 @@ describe('character-service', () => {
         functionName: 'deleteFileMappingAndEntity',
         testFunction: () =>
           deleteFileMappingAndEntity({
-            characterId: 'character-id',
-            fileId: 'file-id',
+            characterId: generateUUID(),
+            fileId: generateUUID(),
             userId: 'different-user-id',
           }),
       },
@@ -105,16 +105,16 @@ describe('character-service', () => {
         functionName: 'linkFileToCharacter',
         testFunction: () =>
           linkFileToCharacter({
-            characterId: 'character-id',
+            characterId: generateUUID(),
             userId: 'different-user-id',
-            fileId: 'file-id',
+            fileId: generateUUID(),
           }),
       },
       {
         functionName: 'updateCharacterPicture',
         testFunction: () =>
           updateCharacterPicture({
-            characterId: 'character-id',
+            characterId: generateUUID(),
             userId: 'different-user-id',
             picturePath: 'picture-path',
           }),
@@ -123,7 +123,7 @@ describe('character-service', () => {
         functionName: 'updateCharacter',
         testFunction: () =>
           updateCharacter({
-            characterId: 'character-id',
+            characterId: generateUUID(),
             userId: 'different-user-id',
             name: 'new-name',
           }),
@@ -132,7 +132,7 @@ describe('character-service', () => {
         functionName: 'deleteCharacter',
         testFunction: () =>
           deleteCharacter({
-            characterId: 'character-id',
+            characterId: generateUUID(),
             userId: 'different-user-id',
           }),
       },
@@ -158,7 +158,7 @@ describe('character-service', () => {
 
       await expect(
         updateCharacterAccessLevel({
-          characterId: 'character-id',
+          characterId: generateUUID(),
           userId: userId,
           accessLevel: 'global',
         }),
@@ -178,7 +178,7 @@ describe('character-service', () => {
 
       await expect(
         updateCharacterAccessLevel({
-          characterId: 'character-id',
+          characterId: generateUUID(),
           userId: 'different-user-id',
           accessLevel: 'school',
         }),
@@ -198,7 +198,7 @@ describe('character-service', () => {
 
       await expect(
         fetchFileMappings({
-          characterId: 'character-id',
+          characterId: generateUUID(),
           userId: 'different-user-id',
           schoolId: 'school-id',
         }),
@@ -219,7 +219,7 @@ describe('character-service', () => {
 
       await expect(
         fetchFileMappings({
-          characterId: 'character-id',
+          characterId: generateUUID(),
           userId: 'different-user-id',
           schoolId: 'different-school-id',
         }),
@@ -245,7 +245,7 @@ describe('character-service', () => {
         functionName: 'shareCharacter',
         testFunction: () =>
           shareCharacter({
-            characterId: 'character-id',
+            characterId: generateUUID(),
             user: mockUser('student'),
             telliPointsPercentageLimit: 10,
             usageTimeLimitMinutes: 60,
@@ -256,7 +256,7 @@ describe('character-service', () => {
         functionName: 'unshareCharacter',
         testFunction: () =>
           unshareCharacter({
-            characterId: 'character-id',
+            characterId: generateUUID(),
             user: mockUser('student'),
           }),
         reason: 'only teachers can unshare a character',
@@ -268,7 +268,7 @@ describe('character-service', () => {
     it('should throw ForbiddenError when character is private and teacher is not owner - shareCharacter', async () => {
       await expect(
         shareCharacter({
-          characterId: 'character-id',
+          characterId: generateUUID(),
           user: mockUser('teacher'),
           telliPointsPercentageLimit: 10,
           usageTimeLimitMinutes: 60,
@@ -290,7 +290,7 @@ describe('character-service', () => {
 
       await expect(
         shareCharacter({
-          characterId: 'character-id',
+          characterId: generateUUID(),
           user: mockUser('teacher'),
           telliPointsPercentageLimit: 10,
           usageTimeLimitMinutes: 60,
@@ -308,7 +308,7 @@ describe('character-service', () => {
 
       await expect(
         unshareCharacter({
-          characterId: 'character-id',
+          characterId: generateUUID(),
           user: mockUser('teacher'),
         }),
       ).rejects.toThrowError(ForbiddenError);

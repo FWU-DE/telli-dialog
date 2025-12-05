@@ -35,23 +35,32 @@ describe('learning-scenario-service', () => {
   });
 
   describe('NotFoundError scenarios', () => {
+    const learningScenarioId = generateUUID();
+    const fileId = generateUUID();
+
     it.each([
       {
         functionName: 'getLearningScenario',
         testFunction: () =>
-          getLearningScenario({ learningScenarioId: 'nonexistent-id', userId: 'user-id' }),
+          getLearningScenario({
+            learningScenarioId,
+            userId: 'user-id',
+          }),
       },
       {
         functionName: 'deleteLearningScenario',
         testFunction: () =>
-          deleteLearningScenario({ learningScenarioId: 'nonexistent-id', userId: 'user-id' }),
+          deleteLearningScenario({
+            learningScenarioId,
+            userId: 'user-id',
+          }),
       },
       {
         functionName: 'linkFileToLearningScenario',
         testFunction: () =>
           linkFileToLearningScenario({
-            fileId: 'file-id',
-            learningScenarioId: 'nonexistent-id',
+            fileId,
+            learningScenarioId,
             userId: 'user-id',
           }),
       },
@@ -69,9 +78,11 @@ describe('learning-scenario-service', () => {
 
   describe('ForbiddenError scenarios - user not owner', () => {
     const userId = generateUUID();
+    const learningScenarioId = generateUUID();
+    const fileId = generateUUID();
     const mockLearningScenario: Partial<SharedSchoolConversationModel> = {
       userId: userId,
-      id: 'scenario-id',
+      id: learningScenarioId,
       name: 'Test Scenario',
     };
 
@@ -85,13 +96,16 @@ describe('learning-scenario-service', () => {
       {
         functionName: 'getLearningScenario',
         testFunction: () =>
-          getLearningScenario({ learningScenarioId: 'scenario-id', userId: 'different-user-id' }),
+          getLearningScenario({
+            learningScenarioId,
+            userId: 'different-user-id',
+          }),
       },
       {
         functionName: 'updateLearningScenario',
         testFunction: () =>
           updateLearningScenario({
-            learningScenarioId: 'scenario-id',
+            learningScenarioId,
             user: mockUser('teacher'),
             data: mockLearningScenario as SharedSchoolConversationModel,
           }),
@@ -100,7 +114,7 @@ describe('learning-scenario-service', () => {
         functionName: 'updateLearningScenarioPicture',
         testFunction: () =>
           updateLearningScenarioPicture({
-            learningScenarioId: 'scenario-id',
+            learningScenarioId,
             picturePath: '/path/to/picture',
             userId: 'different-user-id',
           }),
@@ -109,7 +123,7 @@ describe('learning-scenario-service', () => {
         functionName: 'shareLearningScenario',
         testFunction: () =>
           shareLearningScenario({
-            learningScenarioId: 'scenario-id',
+            learningScenarioId,
             data: { intelliPointsPercentageLimit: 50, usageTimeLimit: 60 },
             userId: 'different-user-id',
           }),
@@ -118,7 +132,7 @@ describe('learning-scenario-service', () => {
         functionName: 'unshareLearningScenario',
         testFunction: () =>
           unshareLearningScenario({
-            learningScenarioId: 'scenario-id',
+            learningScenarioId,
             userId: 'different-user-id',
           }),
       },
@@ -126,8 +140,8 @@ describe('learning-scenario-service', () => {
         functionName: 'removeFileFromLearningScenario',
         testFunction: () =>
           removeFileFromLearningScenario({
-            learningScenarioId: 'scenario-id',
-            fileId: 'file-id',
+            learningScenarioId,
+            fileId: fileId,
             userId: 'different-user-id',
           }),
       },
