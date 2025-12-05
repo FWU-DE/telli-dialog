@@ -25,7 +25,7 @@ export async function getChatIdByInviteCode(inviteCode: string): Promise<ChatInf
   throw new NotFoundError('Chat with the provided invite code was not found.');
 }
 
-export async function tryGetLearningScenarioIdByInviteCode({ inviteCode }: { inviteCode: string }) {
+async function tryGetLearningScenarioIdByInviteCode({ inviteCode }: { inviteCode: string }) {
   const [maybeSharedChat] = await db
     .select()
     .from(sharedSchoolConversationTable)
@@ -36,7 +36,7 @@ export async function tryGetLearningScenarioIdByInviteCode({ inviteCode }: { inv
   return undefined;
 }
 
-export async function tryGetCharacterIdByInviteCode({ inviteCode }: { inviteCode: string }) {
+async function tryGetCharacterIdByInviteCode({ inviteCode }: { inviteCode: string }) {
   const [maybeCharacterChat] = await db
     .select()
     .from(sharedCharacterConversation)
