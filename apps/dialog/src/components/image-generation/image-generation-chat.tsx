@@ -34,7 +34,7 @@ export default function ImageGenerationChat() {
       // TODO: This will call the actual image generation when implemented
       await generateImageAction({
         prompt: input.trim(),
-        modelName: selectedModel.name,
+        modelId: selectedModel.id,
       });
 
       // Clear input after successful generation
