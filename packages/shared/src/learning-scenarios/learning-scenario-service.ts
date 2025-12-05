@@ -254,9 +254,10 @@ export async function getFilesForLearningScenario({
   return dbGetFilesForLearningScenario(learningScenarioId, userId);
 }
 
-const learningScenarioInsertSchema = sharedSchoolConversationInsertSchema.omit({
+export const learningScenarioInsertSchema = sharedSchoolConversationInsertSchema.omit({
   userId: true,
 });
+export type LearningScenarioInsertModel = z.infer<typeof learningScenarioInsertSchema>;
 
 /**
  * User creates a new learning scenario.
@@ -265,7 +266,7 @@ export async function createNewLearningScenario({
   data,
   user,
 }: {
-  data: z.infer<typeof learningScenarioInsertSchema>;
+  data: LearningScenarioInsertModel;
   user: UserModel;
 }) {
   if (user.userRole !== 'teacher') {
