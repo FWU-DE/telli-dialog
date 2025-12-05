@@ -13,7 +13,7 @@ describe('generateInviteCode', () => {
   });
 
   it('should only contain allowed characters', () => {
-    const code = generateInviteCode();
+    const code = generateInviteCode(200);
     const allowedChars = '123456789ABCDEFGHIJKLMNPQRSTUVWXYZ';
 
     for (const char of code) {
@@ -22,11 +22,11 @@ describe('generateInviteCode', () => {
   });
 
   it('should not contain potentially confusing characters (0, O)', () => {
-    const code = generateInviteCode();
+    const code = generateInviteCode(200);
     const confusingChars = '0O';
 
-    for (const char of code) {
-      expect(confusingChars).not.toContain(char);
+    for (const char of confusingChars) {
+      expect(code).not.toContain(char);
     }
   });
 
@@ -38,7 +38,7 @@ describe('generateInviteCode', () => {
   });
 
   it('should return uppercase characters', () => {
-    const code = generateInviteCode();
+    const code = generateInviteCode(200);
     expect(code).toBe(code.toUpperCase());
   });
 });

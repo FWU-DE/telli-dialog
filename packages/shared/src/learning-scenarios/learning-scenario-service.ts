@@ -332,6 +332,8 @@ export async function linkFileToLearningScenario({
 
 /**
  * Removes a file from a learning scenario.
+ * The file itself is not deleted from the s3 bucket.
+ * There is a cleanup job that deletes unlinked files after a certain period.
  * @throws NotFoundError if the learning scenario does not exist.
  * @throws ForbiddenError if the user is not the owner of the learning scenario.
  */
