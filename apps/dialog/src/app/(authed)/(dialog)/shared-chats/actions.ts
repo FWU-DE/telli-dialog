@@ -1,81 +1,39 @@
 'use server';
 
-import { db } from '@shared/db';
+import { requireAuth } from '@/auth/requireAuth';
+import { runServerAction } from '@shared/actions/run-server-action';
 import {
-  SharedSchoolConversationFileMapping,
-  SharedSchoolConversationInsertModel,
-  sharedSchoolConversationTable,
-} from '@shared/db/schema';
-import { getUser } from '@/auth/utils';
-import { dbDeleteSharedSchoolChatByIdAndUserId } from '@shared/db/functions/shared-school-chat';
-import { getDefaultModelByFederalStateId } from '@/app/api/utils';
+  createNewLearningScenario,
+  deleteLearningScenario,
+  LearningScenarioInsertModel,
+  linkFileToLearningScenario,
+} from '@shared/learning-scenarios/learning-scenario-service';
 
-export async function dbDeleteSharedChatAction({ id }: { id: string }) {
-  const user = await getUser();
-
-  const deletedSharedChat = await dbDeleteSharedSchoolChatByIdAndUserId({
-    sharedChatId: id,
-    userId: user.id,
-  });
-
-  return deletedSharedChat;
+export async function deleteLearningScenarioAction({ id }: { id: string }) {
+  const { user } = await requireAuth();
+  return runServerAction(deleteLearningScenario)({ learningScenarioId: id, userId: user.id });
 }
 
-export async function createNewSharedSchoolChatAction(
-  data: Omit<SharedSchoolConversationInsertModel, 'userId'>,
-) {
-  const user = await getUser();
-
-  if (user.school === undefined) {
-    throw Error('User is not part of a school');
-  }
-
-  if (user.school.userRole !== 'teacher') {
-    throw Error('Only a teacher can create shared chats');
-  }
-
-  const insertedSharedChat = (
-    await db
-      .insert(sharedSchoolConversationTable)
-      .values({ ...data, userId: user.id })
-      .returning()
-  )[0];
-
-  if (insertedSharedChat === undefined) {
-    throw Error('Could not insert chat');
-  }
-
-  return insertedSharedChat;
+export async function createNewLearningScenarioAction({
+  data,
+}: {
+  data: LearningScenarioInsertModel;
+}) {
+  const { user } = await requireAuth();
+  return runServerAction(createNewLearningScenario)({ data, user });
 }
 
-export async function dbCreateSharedSchoolChat({ userId }: { userId: string }) {
-  const user = await getUser();
-  const maybeDefaultModel = await getDefaultModelByFederalStateId(user.federalState.id);
-
-  if (maybeDefaultModel === undefined) {
-    throw new Error('Could not create default shared school chat');
-  }
-
-  const [insertedSharedChat] = await db
-    .insert(sharedSchoolConversationTable)
-    .values({ userId, name: '', modelId: maybeDefaultModel.id })
-    .returning();
-  return insertedSharedChat;
-}
-
-export async function linkFileToSharedSchoolChat({
+export async function linkFileToLearningScenarioAction({
   fileId,
-  schoolChatId,
+  learningScenarioId,
 }: {
   fileId: string;
-  schoolChatId: string;
+  learningScenarioId: string;
 }) {
-  await getUser();
-  const [insertedFileMapping] = await db
-    .insert(SharedSchoolConversationFileMapping)
-    .values({ sharedSchoolConversationId: schoolChatId, fileId: fileId })
-    .returning();
-  if (insertedFileMapping === undefined) {
-    throw new Error('Could not Link file to shared School Chat');
-  }
+  const { user } = await requireAuth();
+  return runServerAction(linkFileToLearningScenario)({
+    fileId,
+    learningScenarioId,
+    userId: user.id,
+  });
 }

@@ -9,8 +9,7 @@ import {
   usageTimeValuesInMinutes,
 } from './schema';
 import { SharedSchoolConversationModel } from '@shared/db/schema';
-import { handleInitiateSharedChatShareAction, handleStopSharedChatShareAction } from './actions';
-import { calculateTimeLeftBySharedChat } from './utils';
+import { shareLearningScenarioAction, unshareLearningScenarioAction } from './actions';
 import { useToast } from '@/components/common/toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -21,6 +20,7 @@ import { useTranslations } from 'next-intl';
 import FilledShareIcon from '@/components/icons/filled-share';
 import ChatStopIcon from '@/components/icons/chat-stop';
 import { iconClassName } from '@/utils/tailwind/icon';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 
 type ShareContainerProps = SharedSchoolConversationModel;
 
@@ -32,7 +32,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
   const tToast = useTranslations('shared-chats.toasts');
   const tCommon = useTranslations('common');
 
-  const sharedChatTimeLeft = calculateTimeLeftBySharedChat(sharedSchoolChat);
+  const sharedChatTimeLeft = calculateTimeLeftForLearningScenario(sharedSchoolChat);
   const sharedChatActive = sharedChatTimeLeft > 0;
 
   const { register: registerShare, getValues: getValuesShare } =
@@ -47,29 +47,33 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
 
   const shareUILink = `/shared-chats/${sharedSchoolChat.id}/share`;
 
-  function handleStartSharing() {
+  async function handleStartSharing() {
     const data = getValuesShare();
+    // getValuesShare returns strings instead of numbers, so we have to parse/coerce them here
+    const parsedData = sharedConversationFormValuesSchema.parse(data);
+    const result = await shareLearningScenarioAction({
+      learningScenarioId: sharedSchoolChat.id,
+      data: parsedData,
+    });
 
-    handleInitiateSharedChatShareAction({ ...data, id: sharedSchoolChat.id })
-      .then(() => {
-        toast.success(tToast('share-toast-success'));
-        router.push(shareUILink);
-        router.refresh();
-      })
-      .catch(() => {
-        toast.error(tToast('share-toast-error'));
-      });
+    if (result.success) {
+      toast.success(tToast('share-toast-success'));
+      router.push(shareUILink);
+      router.refresh();
+    } else {
+      toast.error(tToast('share-toast-error'));
+    }
   }
 
-  function handleStopSharing() {
-    handleStopSharedChatShareAction({ id: sharedSchoolChat.id })
-      .then(() => {
-        toast.success(tToast('stop-share-toast-success'));
-        router.refresh();
-      })
-      .catch(() => {
-        toast.error(tToast('stop-share-toast-error'));
-      });
+  async function handleStopSharing() {
+    const result = await unshareLearningScenarioAction({ learningScenarioId: sharedSchoolChat.id });
+
+    if (result.success) {
+      toast.success(tToast('stop-share-toast-success'));
+      router.refresh();
+    } else {
+      toast.error(tToast('stop-share-toast-error'));
+    }
   }
 
   return (

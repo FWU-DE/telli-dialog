@@ -6,11 +6,11 @@ test('teacher can provide link and it is displayed in the chat', async ({ page }
   await login(page, 'teacher');
   await sendMessage(
     page,
-    'In welchem Jahr wurde der Artikel verfasst?\nhttps://www.planet-wissen.de/geschichte/neuzeit/barock/index.html',
+    'Wann hatte der Barock seinen Anfang?\nhttps://www.planet-wissen.de/geschichte/neuzeit/barock/index.html',
   );
 
   await expect(page.getByLabel('assistant message 1')).toBeVisible();
-  await expect(page.getByLabel('assistant message 1')).toContainText('2015');
+  await expect(page.getByLabel('assistant message 1')).toContainText('17. Jahrhundert');
   const sourceTitle = page.getByLabel('Source Title 0 0');
   await expect(sourceTitle).toBeVisible();
   await expect(sourceTitle).toContainText('Das Zeitalter des Barock');

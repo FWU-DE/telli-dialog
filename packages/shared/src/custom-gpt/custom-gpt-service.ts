@@ -1,6 +1,13 @@
 import { UserModel } from '@shared/auth/user-model';
+import {
+  getConversation,
+  getConversationMessages,
+} from '@shared/conversation/conversation-service';
 import { db } from '@shared/db';
 import {
+  dbGetGlobalGpts,
+  dbGetGptsBySchoolId,
+  dbGetGptsByUserId,
   dbDeleteCustomGptByIdAndUserId,
   dbGetCustomGptById,
   dbInsertCustomGptFileMapping,
@@ -9,17 +16,120 @@ import { dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
 import {
   CharacterAccessLevel,
   CustomGptFileMapping,
+  CustomGptModel,
   customGptTable,
   customGptUpdateSchema,
   FileModel,
   fileTable,
 } from '@shared/db/schema';
-import { ForbiddenError } from '@shared/error';
+import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
 import { copyFileInS3 } from '@shared/s3';
 import { copyCustomGpt, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { generateUUID } from '@shared/utils/uuid';
 import { and, eq } from 'drizzle-orm';
 import z from 'zod';
+
+/**
+ * Loads custom gpt for edit view.
+ * Throws NotFoundError if the custom gpt does not exist.
+ * Throws ForbiddenError if the user is not authorized to edit the custom gpt.
+ */
+export async function getCustomGptForEditView({
+  customGptId,
+  userId,
+}: {
+  customGptId: string;
+  userId: string;
+}) {
+  checkParameterUUID(customGptId);
+  const customGpt = await dbGetCustomGptById({ customGptId });
+  if (!customGpt) throw new NotFoundError('Custom Gpt not found');
+  if (customGpt.userId !== userId) throw new ForbiddenError('Not authorized to edit custom gpt');
+
+  return customGpt;
+}
+
+/**
+ * User starts a new chat with a custom gpt.
+ * Conversation starts with the first message.
+ * Throws NotFoundError if the custom gpt does not exist.
+ * Throws ForbiddenError if the user is not authorized to use the custom gpt.
+ */
+export async function getCustomGptForNewChat({
+  customGptId,
+  userId,
+  schoolId,
+}: {
+  customGptId: string;
+  userId: string;
+  schoolId: string;
+}) {
+  checkParameterUUID(customGptId);
+  const customGpt = await dbGetCustomGptById({
+    customGptId,
+  });
+  if (!customGpt) throw new NotFoundError('Custom Gpt not found');
+  if (customGpt.accessLevel === 'private' && customGpt.userId !== userId)
+    throw new ForbiddenError('Not authorized to use custom gpt');
+  if (
+    customGpt.accessLevel === 'school' &&
+    customGpt.schoolId !== schoolId &&
+    customGpt.userId !== userId
+  )
+    throw new ForbiddenError('Not authorized to use custom gpt');
+
+  return customGpt;
+}
+
+/**
+ * Returns an existing conversation along with its messages and the associated custom gpt.
+ * Throws NotFoundError if the custom gpt does not exist.
+ * Throws NotFoundError if the conversation does not exist.
+ * Throws ForbiddenError if the user is not the owner of the conversation.
+ */
+export async function getConversationWithMessagesAndCustomGpt({
+  conversationId,
+  customGptId,
+  userId,
+}: {
+  conversationId: string;
+  customGptId: string;
+  userId: string;
+}) {
+  checkParameterUUID(customGptId, conversationId);
+  const [customGpt, conversation, messages] = await Promise.all([
+    dbGetCustomGptById({ customGptId }),
+    getConversation({ conversationId, userId }),
+    getConversationMessages({ conversationId, userId }),
+  ]);
+
+  return { customGpt, conversation, messages };
+}
+
+/**
+ * Returns a list of custom gpts for the user based on
+ * userId, schoolId, federalStateId and access level.
+ */
+export async function getCustomGptByAccessLevel({
+  accessLevel,
+  schoolId,
+  userId,
+  federalStateId,
+}: {
+  accessLevel: CharacterAccessLevel;
+  schoolId: string;
+  userId: string;
+  federalStateId: string;
+}): Promise<CustomGptModel[]> {
+  if (accessLevel === 'global') {
+    return await dbGetGlobalGpts({ federalStateId });
+  } else if (accessLevel === 'school') {
+    return await dbGetGptsBySchoolId({ schoolId });
+  } else if (accessLevel === 'private') {
+    return await dbGetGptsByUserId({ userId });
+  }
+  return [];
+}
 
 /**
  * User creates a new custom gpt (assistant).
@@ -101,6 +211,7 @@ export async function linkFileToCustomGpt({
   customGptId: string;
   userId: string;
 }) {
+  checkParameterUUID(customGptId, fileId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
     throw new ForbiddenError('Not authorized to access custom gpt');
@@ -129,6 +240,7 @@ export async function deleteFileMappingAndEntity({
   fileId: string;
   userId: string;
 }) {
+  checkParameterUUID(customGptId, fileId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
     throw new ForbiddenError('Not authorized to access custom gpt');
@@ -156,6 +268,7 @@ export async function getFileMappings({
   schoolId: string;
   userId: string;
 }): Promise<FileModel[]> {
+  checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.accessLevel === 'private' && customGpt.userId !== userId) {
     throw new ForbiddenError('Not authorized to access custom gpt');
@@ -185,6 +298,7 @@ export async function updateCustomGptAccessLevel({
   customGptId: string;
   userId: string;
 }) {
+  checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
     throw new ForbiddenError('Not authorized to access custom gpt');
@@ -219,6 +333,7 @@ export async function updateCustomGptPicture({
   picturePath: string;
   userId: string;
 }) {
+  checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
     throw new ForbiddenError('Not authorized to access custom gpt');
@@ -291,6 +406,7 @@ export async function deleteCustomGpt({
   customGptId: string;
   userId: string;
 }) {
+  checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
     throw new ForbiddenError('Not authorized to access custom gpt');

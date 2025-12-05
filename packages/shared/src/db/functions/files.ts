@@ -71,6 +71,36 @@ export async function dbGetRelatedSharedChatFiles(conversationId?: string): Prom
   return files;
 }
 
+export async function dbGetFilesForLearningScenario(
+  conversationId: string,
+  userId: string,
+): Promise<FileModel[]> {
+  return db
+    .select({
+      id: SharedSchoolConversationFileMapping.fileId,
+      name: fileTable.name,
+      type: fileTable.type,
+      size: fileTable.size,
+      createdAt: fileTable.createdAt,
+      metadata: fileTable.metadata,
+    })
+    .from(SharedSchoolConversationFileMapping)
+    .innerJoin(fileTable, eq(SharedSchoolConversationFileMapping.fileId, fileTable.id))
+    .innerJoin(
+      sharedSchoolConversationTable,
+      eq(
+        SharedSchoolConversationFileMapping.sharedSchoolConversationId,
+        sharedSchoolConversationTable.id,
+      ),
+    )
+    .where(
+      and(
+        eq(SharedSchoolConversationFileMapping.sharedSchoolConversationId, conversationId),
+        eq(sharedSchoolConversationTable.userId, userId),
+      ),
+    );
+}
+
 export async function dbGetRelatedCharacterFiles(conversationId?: string): Promise<FileModel[]> {
   if (conversationId === undefined) return [];
   const files = await db

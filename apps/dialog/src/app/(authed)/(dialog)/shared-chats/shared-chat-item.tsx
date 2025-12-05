@@ -6,16 +6,18 @@ import ShareIcon from '@/components/icons/share';
 import TrashIcon from '@/components/icons/trash';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { dbDeleteSharedChatAction } from './actions';
+import { deleteLearningScenarioAction } from './actions';
 import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
-import { calculateTimeLeftBySharedChat, SharedChatWithImage } from './[sharedSchoolChatId]/utils';
 import CountDownTimer from './_components/count-down';
 import { useTranslations } from 'next-intl';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import Image from 'next/image';
 import { iconClassName } from '@/utils/tailwind/icon';
-type SharedChatItemProps = SharedChatWithImage;
+import { LearningScenarioWithImage } from '@shared/learning-scenarios/learning-scenario-service';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+
+type SharedChatItemProps = LearningScenarioWithImage;
 
 export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemProps) {
   const toast = useToast();
@@ -23,18 +25,18 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
   const t = useTranslations('shared-chats');
   const tCommon = useTranslations('common');
 
-  function handleDeleteSharedChat() {
-    dbDeleteSharedChatAction({ id: sharedSchoolChat.id })
-      .then(() => {
-        toast.success(t('toasts.delete-toast-success'));
-        router.refresh();
-      })
-      .catch(() => {
-        toast.error(t('toasts.delete-toast-error'));
-      });
+  async function handleDeleteSharedChat() {
+    const result = await deleteLearningScenarioAction({ id: sharedSchoolChat.id });
+    if (result.success) {
+      toast.success(t('toasts.delete-toast-success'));
+      router.refresh();
+    } else {
+      toast.error(t('toasts.delete-toast-error'));
+    }
   }
 
-  const timeLeft = calculateTimeLeftBySharedChat(sharedSchoolChat);
+  const timeLeft = calculateTimeLeftForLearningScenario(sharedSchoolChat);
+
   return (
     <Link
       href={`/shared-chats/${sharedSchoolChat.id}`}
