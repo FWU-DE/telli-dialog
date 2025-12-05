@@ -23,3 +23,15 @@ export const conversationMessageSchema = z.object({
   metadata: conversationMessageMetadataSchema.optional().nullable(),
 });
 export type ConversationMessage = z.infer<typeof conversationMessageSchema>;
+
+export const conversationTypeSchema = z.enum(['chat', 'image-generation']);
+export type ConversationType = z.infer<typeof conversationTypeSchema>;
+
+export type ImageStyle = {
+  name: ImageStyleType;
+  displayName: string;
+  prompt: string;
+};
+
+export const imageStyleTypeSchema = z.enum(['none', 'fotorealistic', 'cartoon']);
+export type ImageStyleType = z.infer<typeof imageStyleTypeSchema>;

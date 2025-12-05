@@ -2,12 +2,7 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
-
-export type ImageStyle = {
-  name: string;
-  displayName: string;
-  prompt: string;
-};
+import { ImageStyle, ImageStyleType } from '@shared/utils/chat';
 
 type ImageStyleProviderProps = {
   children: React.ReactNode;
@@ -26,17 +21,17 @@ function useImageStyles() {
 
   return [
     {
-      name: 'none',
+      name: 'none' as ImageStyleType,
       displayName: t('no-style'),
       prompt: '',
     },
     {
-      name: 'fotorealistic',
+      name: 'fotorealistic' as ImageStyleType,
       displayName: t('style-fotorealistic-name'),
       prompt: 'Create a photorealistic image with natural lighting and realistic textures',
     },
     {
-      name: 'cartoon',
+      name: 'cartoon' as ImageStyleType,
       displayName: t('style-cartoon-name'),
       prompt: 'Create a cartoon-style image with vibrant colors and stylized features',
     },

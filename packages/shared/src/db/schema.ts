@@ -16,7 +16,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
 import { DesignConfiguration, type LlmModelPriceMetadata } from './types';
-import { conversationRoleSchema } from '../utils/chat';
+import { conversationRoleSchema, conversationTypeSchema, imageStyleTypeSchema } from '../utils/chat';
 import { isNull, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod';
 
@@ -54,6 +54,7 @@ export type UserSelectModel = z.infer<typeof userSelectSchema>;
 export type UserInsertModel = z.infer<typeof userInsertSchema>;
 export type UserUpdateModel = z.infer<typeof userUpdateSchema>;
 
+export const conversationTypeEnum = pgEnum('conversation_type', conversationTypeSchema.enum);
 export const conversationTable = pgTable(
   'conversation',
   {
@@ -66,6 +67,7 @@ export const conversationTable = pgTable(
     customGptId: uuid('custom_gpt_id').references(() => customGptTable.id),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
+    type: conversationTypeEnum('type').notNull().default('chat'),
   },
   (table) => [
     index().on(table.userId),
@@ -76,6 +78,12 @@ export const conversationTable = pgTable(
 );
 
 export const conversationRoleEnum = pgEnum('conversation_role', conversationRoleSchema.enum);
+// Define the parameters type for conversation messages
+export const conversationMessageParametersSchema = z.object({
+  imageStyle: imageStyleTypeSchema.optional(),
+});
+
+export type ConversationMessageParameters = z.infer<typeof conversationMessageParametersSchema>;
 
 export const conversationMessageTable = pgTable(
   'conversation_message',
@@ -91,6 +99,7 @@ export const conversationMessageTable = pgTable(
     orderNumber: integer('order_number').notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
+    parameters: json('parameters').$type<ConversationMessageParameters>(),
   },
   (table) => [index().on(table.conversationId), index().on(table.userId)],
 );

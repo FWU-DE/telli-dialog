@@ -1,12 +1,13 @@
 'use client';
 
 import React, { startTransition } from 'react';
-import { useImageStyle, type ImageStyle } from '../providers/image-style-provider';
+import { useImageStyle } from '../providers/image-style-provider';
 import { useTranslations } from 'next-intl';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { useSidebarVisibility } from '../navigation/sidebar/sidebar-provider';
 import { cn } from '@/utils/tailwind';
 import { iconClassName } from '@/utils/tailwind/icon';
+import { ImageStyle } from '@shared/utils/chat';
 
 export default function SelectImageStyle() {
   const { styles, selectedStyle, setSelectedStyle } = useImageStyle();
@@ -21,17 +22,6 @@ export default function SelectImageStyle() {
   }
 
   const [optimisticStyle, setOptimisticStyle] = React.useOptimistic(selectedStyle);
-
-  if (styles.length <= 0) {
-    return (
-      <div className="flex flex-col">
-        <span className="text-xs text-gray-400">{tImageGeneration('style-label')}</span>
-        <div className="flex gap-2 items-center">
-          <span>{tImageGeneration('no-style-available')}</span>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col gap-2 hover:bg-secondary/20 rounded-enterprise-md p-2">

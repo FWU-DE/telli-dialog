@@ -9,6 +9,7 @@ import { generateUUID } from '@shared/utils/uuid';
 import { generateImage } from './image-generation-service';
 import { uploadFileToS3, getSignedUrlFromS3Get } from '@shared/s3';
 import { cnanoid } from '@shared/random/randomService';
+import { ImageStyle } from '@shared/utils/chat';
 
 /**
  * TODO: Implement image model fetching from database
@@ -42,6 +43,7 @@ export async function createImageConversationAction() {
   const conversation = await dbGetOrCreateConversation({
     conversationId: newConversationId,
     userId: user.id,
+    type: 'image-generation',
   });
 
   if (!conversation) {
@@ -63,7 +65,7 @@ export async function generateImageAction({
 }: {
   prompt: string;
   modelName: string;
-  style?: { name: string; displayName: string; prompt: string };
+  style?: ImageStyle;
   conversationId: string;
 }) {
   const user = await getUser();
@@ -84,6 +86,7 @@ export async function generateImageAction({
     role: 'user',
     content: prompt,
     orderNumber: Date.now(),
+    parameters: style ? { imageStyle: style.name } : undefined,
   });
   
   try {
@@ -127,6 +130,7 @@ export async function generateImageAction({
       content: signedUrl,
       orderNumber: Date.now() + 1,
       modelName,
+      parameters: style ? { imageStyle: style.name } : undefined,
     });
 
     // Return the image URL

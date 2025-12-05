@@ -40,8 +40,6 @@ export async function generateImage({
     throw new Error('Prompt is required');
   }
 
-  logDebug(`POST image generation with modelId ${modelId}"`);
-
   const [federalStateError, federalStateObject] =
     await dbGetFederalStateWithDecryptedApiKeyWithResult({
       federalStateId: user.federalState.id,
