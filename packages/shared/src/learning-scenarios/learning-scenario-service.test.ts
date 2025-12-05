@@ -100,7 +100,7 @@ describe('learning-scenario-service', () => {
         functionName: 'updateLearningScenarioPicture',
         testFunction: () =>
           updateLearningScenarioPicture({
-            id: 'scenario-id',
+            learningScenarioId: 'scenario-id',
             picturePath: '/path/to/picture',
             userId: 'different-user-id',
           }),

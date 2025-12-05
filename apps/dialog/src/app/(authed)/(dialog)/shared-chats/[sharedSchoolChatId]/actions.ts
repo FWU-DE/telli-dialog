@@ -12,7 +12,7 @@ import {
 } from '@shared/learning-scenarios/learning-scenario-service';
 import { requireAuth } from '@/auth/requireAuth';
 
-export async function updateSharedSchoolChatAction({
+export async function updateLearningScenarioAction({
   learningScenarioId,
   data,
 }: {
@@ -28,17 +28,17 @@ export async function updateSharedSchoolChatAction({
   });
 }
 
-export async function updateSharedSchoolChatPictureAction({
-  id: sharedChatId,
+export async function updateLearningScenarioPictureAction({
+  learningScenarioId,
   picturePath,
 }: {
-  id: string;
+  learningScenarioId: string;
   picturePath: string;
 }) {
   const { user } = await requireAuth();
 
   return runServerAction(updateLearningScenarioPicture)({
-    id: sharedChatId,
+    learningScenarioId,
     picturePath,
     userId: user.id,
   });

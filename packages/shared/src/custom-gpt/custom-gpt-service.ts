@@ -22,7 +22,7 @@ import {
   FileModel,
   fileTable,
 } from '@shared/db/schema';
-import { ForbiddenError, NotFoundError } from '@shared/error';
+import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
 import { copyFileInS3 } from '@shared/s3';
 import { copyCustomGpt, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { generateUUID } from '@shared/utils/uuid';
@@ -41,6 +41,7 @@ export async function getCustomGptForEditView({
   customGptId: string;
   userId: string;
 }) {
+  checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (!customGpt) throw new NotFoundError('Custom Gpt not found');
   if (customGpt.userId !== userId) throw new ForbiddenError('Not authorized to edit custom gpt');
@@ -63,6 +64,7 @@ export async function getCustomGptForNewChat({
   userId: string;
   schoolId: string;
 }) {
+  checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({
     customGptId,
   });
@@ -94,6 +96,7 @@ export async function getConversationWithMessagesAndCustomGpt({
   customGptId: string;
   userId: string;
 }) {
+  checkParameterUUID(customGptId, conversationId);
   const [customGpt, conversation, messages] = await Promise.all([
     dbGetCustomGptById({ customGptId }),
     getConversation({ conversationId, userId }),
@@ -208,6 +211,7 @@ export async function linkFileToCustomGpt({
   customGptId: string;
   userId: string;
 }) {
+  checkParameterUUID(customGptId, fileId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
     throw new ForbiddenError('Not authorized to access custom gpt');
@@ -236,6 +240,7 @@ export async function deleteFileMappingAndEntity({
   fileId: string;
   userId: string;
 }) {
+  checkParameterUUID(customGptId, fileId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
     throw new ForbiddenError('Not authorized to access custom gpt');
@@ -263,6 +268,7 @@ export async function getFileMappings({
   schoolId: string;
   userId: string;
 }): Promise<FileModel[]> {
+  checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.accessLevel === 'private' && customGpt.userId !== userId) {
     throw new ForbiddenError('Not authorized to access custom gpt');
@@ -292,6 +298,7 @@ export async function updateCustomGptAccessLevel({
   customGptId: string;
   userId: string;
 }) {
+  checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
     throw new ForbiddenError('Not authorized to access custom gpt');
@@ -326,6 +333,7 @@ export async function updateCustomGptPicture({
   picturePath: string;
   userId: string;
 }) {
+  checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
     throw new ForbiddenError('Not authorized to access custom gpt');
@@ -398,6 +406,7 @@ export async function deleteCustomGpt({
   customGptId: string;
   userId: string;
 }) {
+  checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
     throw new ForbiddenError('Not authorized to access custom gpt');

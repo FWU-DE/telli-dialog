@@ -15,8 +15,8 @@ import { FileModel, SharedSchoolConversationModel } from '@shared/db/schema';
 import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../schema';
 import {
   removeFileFromLearningScenarioAction,
-  updateSharedSchoolChatAction,
-  updateSharedSchoolChatPictureAction,
+  updateLearningScenarioAction,
+  updateLearningScenarioPictureAction,
 } from './actions';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
@@ -120,7 +120,7 @@ export default function SharedSchoolChatForm({
   }
 
   async function onSubmit(data: SharedSchoolChatFormValues) {
-    const result = await updateSharedSchoolChatAction({
+    const result = await updateLearningScenarioAction({
       learningScenarioId: sharedSchoolChat.id,
       data: {
         ...sharedSchoolChat,
@@ -140,9 +140,9 @@ export default function SharedSchoolChatForm({
   async function handlePictureUploadComplete(picturePath: string) {
     setValue('pictureId', picturePath);
 
-    const result = await updateSharedSchoolChatPictureAction({
+    const result = await updateLearningScenarioPictureAction({
       picturePath,
-      id: sharedSchoolChat.id,
+      learningScenarioId: sharedSchoolChat.id,
     });
 
     if (result.success) {

@@ -10,12 +10,12 @@ import {
   FileModel,
   fileTable,
   SharedSchoolConversationFileMapping,
-  SharedSchoolConversationInsertModel,
+  sharedSchoolConversationInsertSchema,
   SharedSchoolConversationModel,
   sharedSchoolConversationTable,
   sharedSchoolConversationUpdateSchema,
 } from '@shared/db/schema';
-import { ForbiddenError, NotFoundError } from '@shared/error';
+import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { and, eq } from 'drizzle-orm';
@@ -55,6 +55,7 @@ export async function getLearningScenario({
   learningScenarioId: string;
   userId: string;
 }) {
+  checkParameterUUID(learningScenarioId);
   const learningScenario = await dbGetSharedSchoolChatById({
     userId,
     sharedChatId: learningScenarioId,
@@ -113,16 +114,16 @@ export async function updateLearningScenario({
  * @throws ForbiddenError if the user is not the owner of the learning scenario.
  */
 export async function updateLearningScenarioPicture({
-  id: sharedChatId,
+  learningScenarioId,
   picturePath,
   userId,
 }: {
-  id: string;
+  learningScenarioId: string;
   picturePath: string;
   userId: string;
 }) {
   await getLearningScenario({
-    learningScenarioId: sharedChatId,
+    learningScenarioId,
     userId,
   });
 
@@ -131,7 +132,7 @@ export async function updateLearningScenarioPicture({
     .set({ pictureId: picturePath })
     .where(
       and(
-        eq(sharedSchoolConversationTable.id, sharedChatId),
+        eq(sharedSchoolConversationTable.id, learningScenarioId),
         eq(sharedSchoolConversationTable.userId, userId),
       ),
     )
@@ -249,10 +250,14 @@ export async function getFilesForLearningScenario({
   learningScenarioId: string;
   userId: string;
 }): Promise<FileModel[]> {
+  checkParameterUUID(learningScenarioId);
   return dbGetFilesForLearningScenario(learningScenarioId, userId);
 }
 
-export type LearningScenarioInsertModel = Omit<SharedSchoolConversationInsertModel, 'userId'>;
+const learningScenarioInsertSchema = sharedSchoolConversationInsertSchema.omit({
+  userId: true,
+});
+
 /**
  * User creates a new learning scenario.
  */
@@ -260,16 +265,18 @@ export async function createNewLearningScenario({
   data,
   user,
 }: {
-  data: LearningScenarioInsertModel;
+  data: z.infer<typeof learningScenarioInsertSchema>;
   user: UserModel;
 }) {
   if (user.userRole !== 'teacher') {
     throw new ForbiddenError('Not authorized to create new learning scenario');
   }
 
+  const parsedData = learningScenarioInsertSchema.parse(data);
+
   const [insertedSharedChat] = await db
     .insert(sharedSchoolConversationTable)
-    .values({ ...data, userId: user.id })
+    .values({ ...parsedData, userId: user.id })
     .returning();
 
   if (!insertedSharedChat) {
@@ -290,6 +297,7 @@ export async function deleteLearningScenario({
   learningScenarioId: string;
   userId: string;
 }) {
+  checkParameterUUID(learningScenarioId);
   const learningScenario = await dbGetSharedSchoolChatById({
     sharedChatId: learningScenarioId,
     userId,
@@ -315,6 +323,7 @@ export async function linkFileToLearningScenario({
   learningScenarioId: string;
   userId: string;
 }) {
+  checkParameterUUID(learningScenarioId, fileId);
   const learningScenario = await dbGetSharedSchoolChatById({
     sharedChatId: learningScenarioId,
     userId,

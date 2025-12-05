@@ -336,6 +336,10 @@ export const sharedSchoolConversationTable = pgTable(
   },
   (table) => [index().on(table.userId)],
 );
+
+export const sharedSchoolConversationInsertSchema = createInsertSchema(
+  sharedSchoolConversationTable,
+).omit({ id: true, createdAt: true, inviteCode: true, startedAt: true });
 export const sharedSchoolConversationSelectSchema = createSelectSchema(
   sharedSchoolConversationTable,
 );
