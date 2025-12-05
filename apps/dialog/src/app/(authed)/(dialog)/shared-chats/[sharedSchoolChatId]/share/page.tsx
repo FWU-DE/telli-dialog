@@ -8,10 +8,8 @@ import Link from 'next/link';
 import CountDownTimer from '../../_components/count-down';
 import QRCode from './qr-code';
 import TelliClipboardButton from '@/components/common/clipboard-button';
-import {
-  calculateTimeLeftForLearningScenario,
-  getLearningScenario,
-} from '@shared/learning-scenarios/learning-scenario-service';
+import { getLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
 import { notFound } from 'next/navigation';

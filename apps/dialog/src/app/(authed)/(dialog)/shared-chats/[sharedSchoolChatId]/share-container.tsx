@@ -20,7 +20,7 @@ import { useTranslations } from 'next-intl';
 import FilledShareIcon from '@/components/icons/filled-share';
 import ChatStopIcon from '@/components/icons/chat-stop';
 import { iconClassName } from '@/utils/tailwind/icon';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 
 type ShareContainerProps = SharedSchoolConversationModel;
 
