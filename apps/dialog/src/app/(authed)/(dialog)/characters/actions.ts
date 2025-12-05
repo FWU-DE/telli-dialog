@@ -19,8 +19,7 @@ export async function createNewCharacterAction({
 }) {
   const { user, school, federalState } = await requireAuth();
 
-  // Todo RL: use runServerAction here as soon as we have adapter custom gpt service
-  return createNewCharacter({
+  return runServerAction(createNewCharacter)({
     federalStateId: federalState.id,
     modelId: modelId,
     schoolId: school.id,

@@ -8,6 +8,7 @@ import { cn } from '@/utils/tailwind';
 import PlusIcon from '@/components/icons/plus';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
+import { ServerActionResult } from '@shared/actions/server-action-result';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 
 export function CreateNewCharacterFromTemplate({
@@ -32,7 +33,7 @@ export function CreateNewCharacterFromTemplate({
     modelId?: string;
     templatePictureId?: string;
     templateId?: string;
-  }) => Promise<{ id: string }>;
+  }) => Promise<ServerActionResult<{ id: string }>>;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -42,19 +43,22 @@ export function CreateNewCharacterFromTemplate({
 
   const maybeDefaultModelId = getDefaultModel(models)?.id;
 
-  function handleNewGPT() {
+  async function handleNewGPT() {
     const urlSearchParams = new URLSearchParams({
       create: 'true',
       templateId,
     });
 
-    createInstanceCallback({ modelId: maybeDefaultModelId, templatePictureId, templateId })
-      .then((newInstance) => {
-        router.push(`/${redirectPath}/editor/${newInstance.id}?${urlSearchParams.toString()}`);
-      })
-      .catch(() => {
-        toast.error(t('toasts.create-toast-error'));
-      });
+    const createResult = await createInstanceCallback({
+      modelId: maybeDefaultModelId,
+      templatePictureId,
+      templateId,
+    });
+    if (createResult.success) {
+      router.push(`/${redirectPath}/editor/${createResult.value.id}?${urlSearchParams.toString()}`);
+    } else {
+      toast.error(t('toasts.create-toast-error'));
+    }
   }
 
   return (
@@ -73,19 +77,18 @@ export function CreateNewCharacterButton() {
 
   const maybeDefaultModelId = getDefaultModel(models)?.id;
 
-  function handleNewGPT() {
-    createNewCharacterAction({ modelId: maybeDefaultModelId })
-      .then((newCharacter) => {
-        router.push(`/characters/editor/${newCharacter.id}?create=true`);
-      })
-      .catch(() => {
-        toast.error(t('toasts.create-toast-error'));
-      });
+  async function handleNewCharacter() {
+    const createResult = await createNewCharacterAction({ modelId: maybeDefaultModelId });
+    if (createResult.success) {
+      router.push(`/characters/editor/${createResult.value.id}?create=true`);
+    } else {
+      toast.error(t('toasts.create-toast-error'));
+    }
   }
 
   return (
     <button
-      onClick={handleNewGPT}
+      onClick={handleNewCharacter}
       className={cn(buttonPrimaryClassName, 'flex gap-2 items-center group py-2')}
     >
       <PlusIcon className="fill-button-primary-text group-hover:fill-secondary-text w-8 h-8" />

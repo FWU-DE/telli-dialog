@@ -1,31 +1,29 @@
-import { getUser } from '@/auth/utils';
 import Link from 'next/link';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { cn } from '@/utils/tailwind';
-import NotFound from '@/app/not-found';
 import SidebarCloseIcon from '@/components/icons/sidebar-close';
 import { getBaseUrlByHeaders, getHostByHeaders } from '@/utils/host';
 import Footer from '@/components/navigation/footer';
 import { calculateTimeLeftBySharedChat } from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/utils';
-import { dbGetCharacterByIdAndUserId } from '@shared/db/functions/character';
 import CountDownTimer from '@/app/(authed)/(dialog)/shared-chats/_components/count-down';
 import QRCode from '@/app/(authed)/(dialog)/shared-chats/[sharedSchoolChatId]/share/qr-code';
 import { getTranslations } from 'next-intl/server';
 import TelliClipboardButton from '@/components/common/clipboard-button';
+import { requireAuth } from '@/auth/requireAuth';
+import { getSharedCharacter } from '@shared/characters/character-service';
+import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
+import { notFound } from 'next/navigation';
 
 export default async function Page(props: PageProps<'/characters/editor/[characterId]/share'>) {
   const params = await props.params;
+  const { user } = await requireAuth();
 
-  const user = await getUser();
-
-  const character = await dbGetCharacterByIdAndUserId({
+  const character = await getSharedCharacter({
     userId: user.id,
     characterId: params.characterId,
-  });
+  }).catch(handleErrorInServerComponent);
 
-  if (!character || !character.inviteCode) {
-    return <NotFound />;
-  }
+  if (!character.inviteCode) notFound();
 
   const inviteCode = character.inviteCode;
   const formattedInviteCode = `${inviteCode.substring(0, 4)} ${inviteCode.substring(4, 8)}`;

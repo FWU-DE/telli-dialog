@@ -3,12 +3,14 @@ import { describe, it, expect, vi, beforeEach, MockedFunction } from 'vitest';
 vi.mock('../db/functions/character', () => ({
   dbGetSharedCharacterConversations: vi.fn(),
   dbGetCharacterById: vi.fn(),
+  dbGetCharacterByIdAndUserId: vi.fn(),
 }));
 
 import {
   deleteCharacter,
   deleteFileMappingAndEntity,
   fetchFileMappings,
+  getSharedCharacter,
   linkFileToCharacter,
   shareCharacter,
   unshareCharacter,
@@ -16,10 +18,14 @@ import {
   updateCharacterAccessLevel,
   updateCharacterPicture,
 } from './character-service';
-import { dbGetCharacterById, dbGetSharedCharacterConversations } from '../db/functions/character';
+import {
+  dbGetCharacterById,
+  dbGetSharedCharacterConversations,
+  dbGetCharacterByIdAndUserId,
+} from '../db/functions/character';
 import { generateUUID } from '../utils/uuid';
 import { CharacterSelectModel } from '@shared/db/schema';
-import { ForbiddenError } from '@shared/error';
+import { ForbiddenError, NotFoundError } from '@shared/error';
 
 describe('Character Service', () => {
   beforeEach(() => {
@@ -343,6 +349,40 @@ describe('Character Service', () => {
           user: { id: 'differentUserId', userRole: 'teacher' },
         }),
       ).rejects.toThrowError(ForbiddenError);
+    });
+  });
+
+  describe('getSharedCharacter', () => {
+    it('should throw because character does not exist', async () => {
+      (
+        dbGetCharacterByIdAndUserId as MockedFunction<typeof dbGetCharacterByIdAndUserId>
+      ).mockResolvedValue(null as never);
+
+      await expect(
+        getSharedCharacter({
+          characterId: 'unimportant',
+          userId: 'unimportant',
+        }),
+      ).rejects.toThrowError(NotFoundError);
+    });
+
+    it('should throw because character has no invite code and therefore is not shared', async () => {
+      const userId = generateUUID();
+      const mockCharacter: Partial<CharacterSelectModel> = {
+        userId: userId,
+        inviteCode: null,
+      };
+
+      (
+        dbGetCharacterByIdAndUserId as MockedFunction<typeof dbGetCharacterByIdAndUserId>
+      ).mockResolvedValue(mockCharacter as never);
+
+      await expect(
+        getSharedCharacter({
+          characterId: 'unimportant',
+          userId: 'unimportant',
+        }),
+      ).rejects.toThrowError(NotFoundError);
     });
   });
 });
