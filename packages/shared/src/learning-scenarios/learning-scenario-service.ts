@@ -89,7 +89,7 @@ export async function updateLearningScenario({
 
   const parsedData = sharedSchoolConversationUpdateSchema.parse(data);
 
-  const [updatedLearningScenarion] = await db
+  const [updatedLearningScenario] = await db
     .update(sharedSchoolConversationTable)
     .set({ ...parsedData })
     .where(
@@ -100,11 +100,11 @@ export async function updateLearningScenario({
     )
     .returning();
 
-  if (!updatedLearningScenarion) {
+  if (!updatedLearningScenario) {
     throw new Error('Could not update learning scenario');
   }
 
-  return updatedLearningScenarion;
+  return updatedLearningScenario;
 }
 
 /**
@@ -174,14 +174,14 @@ export async function shareLearningScenario({
 
   const parsedValues = learningScenarioShareValuesSchema.parse(data);
 
-  const randomString = generateInviteCode();
+  const inviteCode = generateInviteCode();
 
   const [updatedSharedChat] = await db
     .update(sharedSchoolConversationTable)
     .set({
       intelligencePointsLimit: parsedValues.intelliPointsPercentageLimit,
       maxUsageTimeLimit: parsedValues.usageTimeLimit,
-      inviteCode: randomString.toUpperCase(),
+      inviteCode,
       startedAt: new Date(),
     })
     .where(
@@ -374,7 +374,12 @@ export async function removeFileFromLearningScenario({
   await db.transaction(async (tx) => {
     await tx
       .delete(SharedSchoolConversationFileMapping)
-      .where(eq(SharedSchoolConversationFileMapping.fileId, fileId));
+      .where(
+        and(
+          eq(SharedSchoolConversationFileMapping.sharedSchoolConversationId, learningScenarioId),
+          eq(SharedSchoolConversationFileMapping.fileId, fileId),
+        ),
+      );
     await tx.delete(fileTable).where(eq(fileTable.id, fileId));
   });
 }

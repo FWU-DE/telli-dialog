@@ -26,7 +26,7 @@ export default function SharedChatLoginForm() {
     const result = await getChatByInviteCode(formattedInviteCode);
     if (result !== undefined) {
       const { type, id, inviteCode } = result;
-      const searchParams = new URLSearchParams({ inviteCode: inviteCode ?? '' });
+      const searchParams = new URLSearchParams({ inviteCode });
       const route = `/ua/${type}/${id}/dialog?${searchParams.toString()}`;
       router.push(route);
       return;
