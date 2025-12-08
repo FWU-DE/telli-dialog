@@ -71,5 +71,8 @@ ENV NODE_ENV=production
 
 EXPOSE ${PORT}
 
+HEALTHCHECK --timeout=10s --start-period=5s \
+  CMD wget http://127.0.0.1:${PORT}/api/healthz -qO-
+
 # https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
 CMD ["node", "./apps/dialog/server.js"]
