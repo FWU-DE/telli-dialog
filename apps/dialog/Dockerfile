@@ -2,14 +2,7 @@
 # https://docs.docker.com/build/building/multi-stage/
 
 # Alpine image
-FROM node:24.11.0-alpine AS alpine
-RUN apk update
-RUN apk add --no-cache libc6-compat
-
-# Setup pnpm and turbo on the alpine base
-FROM alpine AS base
-RUN npm install pnpm turbo --global
-RUN pnpm config set store-dir ~/.pnpm-store
+FROM node:24.11.0-alpine AS base
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV TURBO_TELEMETRY_DISABLED=1
@@ -19,7 +12,11 @@ FROM base AS pruner
 WORKDIR /app
 
 COPY . .
-RUN turbo prune --scope=telli-dialog --docker
+
+# setup pnpm and pnpm install in order to install turbo in the correct version
+RUN corepack enable && corepack prepare
+RUN pnpm install --frozen-lockfile --dev
+RUN pnpm turbo prune telli-dialog --docker
 
 # Build the project
 FROM base AS builder
@@ -34,7 +31,7 @@ COPY --from=pruner /app/out/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=pruner /app/out/json/ .
 
 # First install the dependencies (as they change less often)
-# RUN --mount=type=cache,id=pnpm,target=~/.pnpm-store pnpm install --frozen-lockfile
+RUN corepack enable && corepack prepare
 RUN pnpm install --frozen-lockfile
 
 # Copy source code of isolated subworkspace
@@ -49,7 +46,7 @@ RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
     --mount=type=secret,id=SENTRY_ORG,env=SENTRY_ORG \
     --mount=type=secret,id=SENTRY_PROJECT,env=SENTRY_PROJECT \
     CI=${CI} \
-    turbo build:envless
+    pnpm turbo build:envless
 
 # Final image
 FROM base AS runner
@@ -59,11 +56,11 @@ RUN adduser --system --uid 1001 nodejs
 USER nodejs
 
 WORKDIR /app
+
 # copy nextjs application
 COPY --from=builder --chown=nodejs:nodejs /app/apps/dialog/.next/standalone ./
 COPY --from=builder --chown=nodejs:nodejs /app/apps/dialog/.next/static ./apps/dialog/.next/static
 COPY --from=builder --chown=nodejs:nodejs /app/apps/dialog/public ./apps/dialog/public
-COPY --from=builder --chown=nodejs:nodejs /app/packages/shared/migrations ./packages/shared/migrations
 
 ARG APP_VERSION
 ARG PORT=3000
@@ -73,6 +70,9 @@ ENV PORT=${PORT}
 ENV NODE_ENV=production
 
 EXPOSE ${PORT}
+
+HEALTHCHECK --timeout=10s --start-period=5s \
+  CMD wget http://127.0.0.1:${PORT}/api/healthz -qO-
 
 # https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
 CMD ["node", "./apps/dialog/server.js"]

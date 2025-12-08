@@ -211,10 +211,20 @@ jobs:
       - name: Build and push
         id: docker-build-admin
         uses: docker/build-push-action@v6
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
         with:
           context: .
           file: apps/admin/Dockerfile
-          build-args: APP_VERSION=${{ github.sha }}
+          secret-envs: |
+            SENTRY_AUTH_TOKEN=SENTRY_AUTH_TOKEN
+            SENTRY_ORG=SENTRY_ORG
+            SENTRY_PROJECT=SENTRY_PROJECT
+          build-args: |
+            CI=${CI}
+            APP_VERSION=${{ github.sha }}
           tags: |
             ghcr.io/fwu-de/telli-admin:latest
             ghcr.io/fwu-de/telli-admin:${{ github.sha }}
