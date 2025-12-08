@@ -25,8 +25,9 @@ import {
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
 import { copyFileInS3 } from '@shared/s3';
 import { copyCustomGpt, copyRelatedTemplateFiles } from '@shared/templates/templateService';
+import { addDays } from '@shared/utils/date';
 import { generateUUID } from '@shared/utils/uuid';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 
 /**
@@ -412,4 +413,16 @@ export async function deleteCustomGpt({
     throw new ForbiddenError('Not authorized to access custom gpt');
   }
   return dbDeleteCustomGptByIdAndUserId({ gptId: customGptId, userId });
+}
+
+/**
+ * Cleans up custom gpts with empty names from the database.
+ * Attention: This is an admin function that does not check any authorization!
+ * @returns number of deleted custom gpts in db.
+ */
+export async function cleanupCustomGpts() {
+  return await db
+    .delete(customGptTable)
+    .where(and(eq(customGptTable.name, ''), lt(customGptTable.createdAt, addDays(new Date(), -1))))
+    .returning();
 }

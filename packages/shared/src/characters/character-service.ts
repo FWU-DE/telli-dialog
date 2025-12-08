@@ -28,9 +28,10 @@ import { logError } from '@shared/logging';
 import { copyFileInS3, deleteFileFromS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
+import { addDays } from '@shared/utils/date';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 
 /**
@@ -579,3 +580,15 @@ export const getCharacterInfo = async (
     character,
   };
 };
+
+/**
+ * Cleans up characters with empty names from the database.
+ * Attention: This is an admin function that does not check any authorization!
+ * @returns number of deleted characters in db
+ */
+export async function cleanupCharacters() {
+  return await db
+    .delete(characterTable)
+    .where(and(eq(characterTable.name, ''), lt(characterTable.createdAt, addDays(new Date(), -1))))
+    .returning();
+}

@@ -18,7 +18,8 @@ import {
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
-import { and, eq } from 'drizzle-orm';
+import { addDays } from '@shared/utils/date';
+import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 
 export type LearningScenarioWithImage = SharedSchoolConversationModel & {
@@ -385,4 +386,21 @@ async function enrichLearningScenarioWithPictureUrl({
       }),
     })),
   );
+}
+
+/**
+ * Cleans up learning scenarios with empty names from the database.
+ * Attention: This is an admin function that does not check any authorization!
+ * @returns number of deleted learning scenarios in db.
+ */
+export async function cleanupLearningScenarios() {
+  return await db
+    .delete(sharedSchoolConversationTable)
+    .where(
+      and(
+        eq(sharedSchoolConversationTable.name, ''),
+        lt(sharedSchoolConversationTable.createdAt, addDays(new Date(), -1)),
+      ),
+    )
+    .returning();
 }
