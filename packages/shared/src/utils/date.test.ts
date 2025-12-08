@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  addDays,
   convertUnixTimestampToLocaleDate,
   formatDateToDayMonthYear,
   formatDateToGermanTimestamp,
@@ -53,5 +54,28 @@ describe('getWeekNumber', () => {
     const date = new Date('2022-01-01'); // 1st January 2022
     const result = getWeekNumber(date);
     expect(result).toBe(52);
+  });
+});
+
+describe('addDays', () => {
+  it('should add one day correctly', () => {
+    const date = new Date('2022-01-01');
+    const newDate = addDays(date, 1);
+    expect(newDate).toEqual(new Date('2022-01-02'));
+  });
+  it('should switch month correctly at the end of a month', () => {
+    const date = new Date('2022-03-31');
+    const newDate = addDays(date, 1);
+    expect(newDate).toEqual(new Date('2022-04-01'));
+  });
+  it('should switch year correctly at the end of a year', () => {
+    const date = new Date('2022-12-31');
+    const newDate = addDays(date, 1);
+    expect(newDate).toEqual(new Date('2023-01-01'));
+  });
+  it('should subtract one day if days is negative', () => {
+    const date = new Date('2022-03-31');
+    const newDate = addDays(date, -1);
+    expect(newDate).toEqual(new Date('2022-03-30'));
   });
 });

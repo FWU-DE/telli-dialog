@@ -25,8 +25,9 @@ import {
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
 import { copyFileInS3 } from '@shared/s3';
 import { copyCustomGpt, copyRelatedTemplateFiles } from '@shared/templates/templateService';
+import { addDays } from '@shared/utils/date';
 import { generateUUID } from '@shared/utils/uuid';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 
 /**
@@ -420,24 +421,8 @@ export async function deleteCustomGpt({
  * @returns number of deleted custom gpts in db.
  */
 export async function cleanupCustomGpts() {
-  await db.transaction(async (tx) => {
-    const customGptsToDelete = await tx
-      .select({ id: customGptTable.id })
-      .from(customGptTable)
-      .where(eq(customGptTable.name, ''));
-
-    if (customGptsToDelete.length > 0) {
-      const rows = await tx
-        .delete(customGptTable)
-        .where(
-          inArray(
-            customGptTable.id,
-            customGptsToDelete.map((c) => c.id),
-          ),
-        )
-        .returning();
-      return rows.length;
-    }
-  });
-  return 0;
+  return await db
+    .delete(customGptTable)
+    .where(and(eq(customGptTable.name, ''), lt(customGptTable.createdAt, addDays(new Date(), -1))))
+    .returning();
 }

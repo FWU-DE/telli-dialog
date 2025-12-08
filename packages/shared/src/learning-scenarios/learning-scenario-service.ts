@@ -18,7 +18,8 @@ import {
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
-import { and, eq, inArray } from 'drizzle-orm';
+import { addDays } from '@shared/utils/date';
+import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 
 export type LearningScenarioWithImage = SharedSchoolConversationModel & {
@@ -393,24 +394,13 @@ async function enrichLearningScenarioWithPictureUrl({
  * @returns number of deleted learning scenarios in db.
  */
 export async function cleanupLearningScenarios() {
-  await db.transaction(async (tx) => {
-    const learningScenariosToDelete = await tx
-      .select({ id: sharedSchoolConversationTable.id })
-      .from(sharedSchoolConversationTable)
-      .where(eq(sharedSchoolConversationTable.name, ''));
-
-    if (learningScenariosToDelete.length > 0) {
-      const rows = await tx
-        .delete(sharedSchoolConversationTable)
-        .where(
-          inArray(
-            sharedSchoolConversationTable.id,
-            learningScenariosToDelete.map((c) => c.id),
-          ),
-        )
-        .returning();
-      return rows.length;
-    }
-  });
-  return 0;
+  return await db
+    .delete(sharedSchoolConversationTable)
+    .where(
+      and(
+        eq(sharedSchoolConversationTable.name, ''),
+        lt(sharedSchoolConversationTable.createdAt, addDays(new Date(), -1)),
+      ),
+    )
+    .returning();
 }

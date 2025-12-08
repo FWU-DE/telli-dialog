@@ -28,9 +28,10 @@ import { logError } from '@shared/logging';
 import { copyFileInS3, deleteFileFromS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
+import { addDays } from '@shared/utils/date';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 
 /**
@@ -586,24 +587,8 @@ export const getCharacterInfo = async (
  * @returns number of deleted characters in db
  */
 export async function cleanupCharacters() {
-  await db.transaction(async (tx) => {
-    const charactersToDelete = await tx
-      .select({ id: characterTable.id })
-      .from(characterTable)
-      .where(eq(characterTable.name, ''));
-
-    if (charactersToDelete.length > 0) {
-      const rows = await tx
-        .delete(characterTable)
-        .where(
-          inArray(
-            characterTable.id,
-            charactersToDelete.map((c) => c.id),
-          ),
-        )
-        .returning();
-      return rows.length;
-    }
-  });
-  return 0;
+  return await db
+    .delete(characterTable)
+    .where(and(eq(characterTable.name, ''), lt(characterTable.createdAt, addDays(new Date(), -1))))
+    .returning();
 }
