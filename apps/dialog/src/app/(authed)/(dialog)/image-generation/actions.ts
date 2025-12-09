@@ -99,17 +99,12 @@ export async function generateImageAction({
   });
 
   try {
-    console.log(`Generating image with style: ${style?.displayName || 'none'}`);
-    console.log(`Full prompt: ${fullPrompt}`);
-
     // Generate image using the service
     const result = await generateImage({
       prompt: fullPrompt.trim(),
       modelId: model.id,
       conversationId,
     });
-
-    console.log('Generated images:', result);
 
     const image = result.data[0];
     if (!image?.b64_json) {

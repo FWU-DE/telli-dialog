@@ -70,7 +70,7 @@ export default function ImageGenerationChat({
                 imageUrl: signedUrl,
               });
             } catch (error) {
-              console.error('Failed to load image:', error);
+              logError('Error loading image from files:', error as Error);
             }
           }
         }

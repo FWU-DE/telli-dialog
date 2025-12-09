@@ -9,6 +9,7 @@ import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exce
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { dbGetOrCreateConversation } from '@shared/db/functions/chat';
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
+import { logError } from '@shared/logging';
 export interface ImageGenerationParams {
   prompt: string;
   modelId: string;
@@ -141,7 +142,7 @@ export async function generateImage({
       data: result.data,
     };
   } catch (error) {
-    console.error('Image generation error:', error);
+    logError('Image generation failed', { error });
     throw error instanceof Error
       ? error
       : new Error('Internal server error during image generation');
