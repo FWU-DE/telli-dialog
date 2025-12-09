@@ -16,7 +16,11 @@ import {
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
 import { DesignConfiguration, type LlmModelPriceMetadata } from './types';
-import { conversationRoleSchema, conversationTypeSchema, imageStyleTypeSchema } from '../utils/chat';
+import {
+  conversationRoleSchema,
+  conversationTypeSchema,
+  imageStyleTypeSchema,
+} from '../utils/chat';
 import { isNull, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod';
 

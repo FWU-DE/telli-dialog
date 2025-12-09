@@ -1,7 +1,6 @@
 import { getUser, userHasCompletedTraining } from '@/auth/utils';
 import { userHasReachedIntelliPointLimit } from '@/app/api/chat/usage';
 import { checkProductAccess } from '@/utils/vidis/access';
-import { logDebug } from '@shared/logging';
 import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
 import { dbGetModelByIdAndFederalStateId } from '@shared/db/functions/llm-model';
 import { env } from '@/env';
@@ -67,7 +66,7 @@ export async function generateImage({
   if (definedModel.priceMetadata.type !== 'image') {
     throw new Error('Selected model is not an image generation model');
   }
-  
+
   // Get conversation for RabbitMQ event
   const conversation = await dbGetOrCreateConversation({
     conversationId,
@@ -77,7 +76,6 @@ export async function generateImage({
   const intelliPointsLimitReached = await userHasReachedIntelliPointLimit({ user });
 
   if (intelliPointsLimitReached) {
-
     if (conversation) {
       await sendRabbitmqEvent(
         constructTelliBudgetExceededEvent({
@@ -119,7 +117,7 @@ export async function generateImage({
       userId: user.id,
       modelId: definedModel.id,
       completionTokens: 0, // Images don't have completion tokens
-      promptTokens: 0, // Images don't have prompt tokens  
+      promptTokens: 0, // Images don't have prompt tokens
       costsInCent: costsInCent,
     });
 

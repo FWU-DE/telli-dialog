@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 import AutoResizeTextarea from '../common/auto-resize-textarea';
 import { CHAT_MESSAGE_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
-import { ChangeEvent, FormEvent, KeyboardEvent } from 'react';
+import { ChangeEvent, FormEvent } from 'react';
 import { cn } from '@/utils/tailwind';
 
 export function ImageGenerationInputBox({

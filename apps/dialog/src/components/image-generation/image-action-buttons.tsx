@@ -20,10 +20,10 @@ export function ImageActionButtons({ imageUrl, prompt }: ImageActionButtonsProps
       const blob = await response.blob();
       if (blob) {
         await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-        toast.success(t('copy-image-success'));
+        toast.success('Image copied to clipboard');
       }
-    } catch (error) {
-      toast.error(t('copy-image-error'));
+    } catch {
+      toast.error('Failed to copy image');
     }
   }
 
@@ -31,10 +31,10 @@ export function ImageActionButtons({ imageUrl, prompt }: ImageActionButtonsProps
     navigator.clipboard
       .writeText(prompt)
       .then(() => {
-        toast.success(t('copy-prompt-success'));
+        toast.success('Prompt copied to clipboard');
       })
       .catch(() => {
-        toast.error(t('copy-prompt-error'));
+        toast.error('Failed to copy prompt');
       });
   }
 
@@ -43,14 +43,14 @@ export function ImageActionButtons({ imageUrl, prompt }: ImageActionButtonsProps
       <button
         onClick={handleCopyImage}
         className="flex items-center justify-center text-primary transition-colors"
-        title={t('copy-image-tooltip')}
+        title="Copy image"
       >
         <CopyIcon size={16} />
       </button>
       <button
         onClick={handleCopyPrompt}
         className="flex items-center justify-center text-primary transition-colors"
-        title={t('copy-prompt-tooltip')}
+        title="Copy prompt"
       >
         <InfoIcon size={16} />
       </button>

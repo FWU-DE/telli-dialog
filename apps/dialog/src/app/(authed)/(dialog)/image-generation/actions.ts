@@ -14,7 +14,7 @@ import { dbDeleteConversationByIdAndUserId } from '@shared/db/functions/conversa
 
 /**
  * Fetches available image generation models from database
- * Filters models by priceMetadata.type === 'image' 
+ * Filters models by priceMetadata.type === 'image'
  * and returns only image generation models available to the user's federal state
  */
 export async function getAvailableImageModels(): Promise<LlmModel[]> {
@@ -29,7 +29,6 @@ export async function getAvailableImageModels(): Promise<LlmModel[]> {
 
   return imageModels;
 }
-
 
 /**
  * Creates a new conversation for image generation
@@ -88,25 +87,26 @@ export async function generateImageAction({
   if (style && style.prompt) {
     fullPrompt = `${prompt}. Style: ${style.prompt}`;
   }
-  
+
   // Store user prompt as a message
   await dbInsertChatContent({
     conversationId: conversationId,
     role: 'user',
+    userId: user.id,
     content: prompt,
     orderNumber: 1,
     parameters: style ? { imageStyle: style.name } : undefined,
   });
-  
+
   try {
     console.log(`Generating image with style: ${style?.displayName || 'none'}`);
     console.log(`Full prompt: ${fullPrompt}`);
-    
+
     // Generate image using the service
     const result = await generateImage({
       prompt: fullPrompt.trim(),
       modelId: model.id,
-      conversationId
+      conversationId,
     });
 
     console.log('Generated images:', result);
@@ -133,12 +133,8 @@ export async function generateImageAction({
       name: `generated_image_${Date.now()}.png`,
       size: imageBuffer.length,
       type: 'image/png',
-      metadata: {
-        width: undefined, // Could be extracted from image if needed
-        height: undefined, // Could be extracted from image if needed
-      },
     });
-    
+
     // Store generated image as assistant message
     const assistantMessage = await dbInsertChatContent({
       conversationId: conversationId,
@@ -166,7 +162,6 @@ export async function generateImageAction({
       contentType: 'image/png',
       attachment: false,
     });
-
 
     // Return the image URL
     return {

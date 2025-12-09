@@ -41,7 +41,7 @@ function useImageStyles() {
 export function ImageStyleProvider({
   children,
   defaultImageStyle,
-}: ImageStyleProviderProps & { defaultImageStyle?: String }) {
+}: ImageStyleProviderProps & { defaultImageStyle?: string }) {
   const styles = useImageStyles();
   const [selectedStyle, setSelectedStyle] = React.useState<ImageStyle | undefined>(
     styles.find((style) => style.name === defaultImageStyle) || styles[0],

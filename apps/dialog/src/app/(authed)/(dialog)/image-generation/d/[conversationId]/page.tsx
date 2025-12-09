@@ -3,8 +3,6 @@ import { dbGetConversationAndMessages } from '@shared/db/functions/chat';
 import { dbGetRelatedFiles } from '@shared/db/functions/files';
 import { redirect } from 'next/navigation';
 import ImageGenerationChat from '@/components/image-generation/image-generation-chat';
-import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
-import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { ImageModelsProvider } from '@/components/providers/image-model-provider';
 import { ImageStyleProvider } from '@/components/providers/image-style-provider';
 import { getAvailableImageModels } from '../../actions';

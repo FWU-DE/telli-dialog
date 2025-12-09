@@ -27,7 +27,6 @@ interface ImageGenerationChatProps {
 }
 
 export default function ImageGenerationChat({
-  conversationId,
   initialMessages = [],
   fileMapping,
 }: ImageGenerationChatProps) {
