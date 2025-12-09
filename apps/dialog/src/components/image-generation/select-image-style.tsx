@@ -42,10 +42,7 @@ export default function SelectImageStyle() {
           </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content
-          className={cn(
-            'flex flex-col bg-white shadow-dropdown rounded-xl ml-0',
-            isOpen ? 'sm:ml-64' : 'sm:ml-44',
-          )}
+          className={cn('flex flex-col bg-white shadow-dropdown rounded-xl ml-0')}
           sideOffset={10}
         >
           {styles
@@ -62,7 +59,7 @@ export default function SelectImageStyle() {
                   <DropdownMenu.Item asChild>
                     <button
                       className={cn(
-                        'hover:bg-primary-hover text-left py-2 px-4 outline-none flex flex-col',
+                        'hover:bg-primary-hover text-left py-6 px-7 outline-none flex flex-col',
                         iconClassName,
                       )}
                       onClick={() => handleSelectStyle(style.name === 'none' ? undefined : style)}
@@ -71,9 +68,6 @@ export default function SelectImageStyle() {
                       <div className="flex gap-2 items-center">
                         <span>{style.displayName}</span>
                       </div>
-                      {style.prompt && (
-                        <span className="text-sm hover:text-text-secondary">{style.prompt}</span>
-                      )}
                     </button>
                   </DropdownMenu.Item>
                   <hr className="text-gray-200 mx-2 last:mb-2 last:hidden" />

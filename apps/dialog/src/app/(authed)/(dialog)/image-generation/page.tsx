@@ -7,7 +7,7 @@ import { ImageStyleProvider } from '@/components/providers/image-style-provider'
 import ImageGenerationChat from '@/components/image-generation/image-generation-chat';
 import SelectImageModel from '@/components/image-generation/select-image-model';
 import SelectImageStyle from '@/components/image-generation/select-image-style';
-import { getAvailableImageModels } from './actions';
+import { getAvailableImageModels, getDefaultImageModel } from './actions';
 import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
@@ -20,8 +20,7 @@ export default async function ImageGenerationPage() {
   }
   const imageModels = await getAvailableImageModels();
 
-  // Use first model as default for now
-  const selectedModel = imageModels[0];
+  const selectedModel = await getDefaultImageModel(imageModels);
   return (
     <ImageModelsProvider models={imageModels} defaultImageModel={selectedModel}>
       <ImageStyleProvider>

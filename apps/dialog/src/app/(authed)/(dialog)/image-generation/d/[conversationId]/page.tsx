@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import ImageGenerationChat from '@/components/image-generation/image-generation-chat';
 import { ImageModelsProvider } from '@/components/providers/image-model-provider';
 import { ImageStyleProvider } from '@/components/providers/image-style-provider';
-import { getAvailableImageModels } from '../../actions';
+import { getAvailableImageModels, getDefaultImageModel } from '../../actions';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import { NewChatButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import ProfileMenu from '@/components/navigation/profile-menu';
@@ -44,15 +44,18 @@ export default async function Page(props: PageProps) {
   // Get available image models
   const imageModels = await getAvailableImageModels();
 
+  const reversedMessages = messages.slice().reverse();
+
   // Find the last used model or use the first available image model
-  const lastUsedModelInChat = messages.at(-1)?.modelName ?? undefined;
-  // Use first model as default for now
+  const lastUsedModelInChat = reversedMessages.find(
+    (msg) => msg.modelName !== undefined,
+  )?.modelName;
   const selectedModel =
-    imageModels.find((model) => model.name === lastUsedModelInChat) ?? imageModels[0];
-  const lastUsedStyleInChat = messages
-    .slice()
-    .reverse()
-    .find((msg) => msg.parameters?.imageStyle !== undefined)?.parameters?.imageStyle;
+    imageModels.find((model) => model.name === lastUsedModelInChat) ??
+    (await getDefaultImageModel(imageModels));
+  const lastUsedStyleInChat = reversedMessages.find(
+    (msg) => msg.parameters?.imageStyle !== undefined,
+  )?.parameters?.imageStyle;
 
   return (
     <ImageModelsProvider models={imageModels} defaultImageModel={selectedModel}>

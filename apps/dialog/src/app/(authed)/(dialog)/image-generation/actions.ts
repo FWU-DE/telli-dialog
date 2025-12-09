@@ -10,6 +10,7 @@ import { uploadFileToS3, getSignedUrlFromS3Get } from '@shared/s3';
 import { cnanoid } from '@shared/random/randomService';
 import { ImageStyle } from '@shared/utils/chat';
 import { linkFilesToConversation, dbInsertFile } from '@shared/db/functions/files';
+import { DEFAULT_IMAGE_MODEL } from '@shared/llm-models/default-llm-models';
 
 /**
  * Fetches available image generation models from database
@@ -27,6 +28,10 @@ export async function getAvailableImageModels(): Promise<LlmModel[]> {
   const imageModels = allModels.filter((model) => model.priceMetadata.type === 'image');
 
   return imageModels;
+}
+
+export async function getDefaultImageModel(imageModels: LlmModel[]): Promise<LlmModel | undefined> {
+  return imageModels.find((m) => m.name === DEFAULT_IMAGE_MODEL) ?? imageModels[0];
 }
 
 /**
