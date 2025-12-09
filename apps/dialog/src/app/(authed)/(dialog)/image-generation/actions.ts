@@ -10,7 +10,6 @@ import { uploadFileToS3, getSignedUrlFromS3Get } from '@shared/s3';
 import { cnanoid } from '@shared/random/randomService';
 import { ImageStyle } from '@shared/utils/chat';
 import { linkFilesToConversation, dbInsertFile } from '@shared/db/functions/files';
-import { dbDeleteConversationByIdAndUserId } from '@shared/db/functions/conversation';
 
 /**
  * Fetches available image generation models from database
@@ -53,14 +52,6 @@ export async function createImageConversationAction(prompt: string): Promise<str
   return conversation.id;
 }
 
-export async function deleteImageConversationAction(conversationId: string): Promise<void> {
-  const user = await getUser();
-
-  await dbDeleteConversationByIdAndUserId({
-    conversationId,
-    userId: user.id,
-  });
-}
 /**
  * Generates an image within an existing conversation using the image generation service
  * Combines the conversation management with the actual image generation API

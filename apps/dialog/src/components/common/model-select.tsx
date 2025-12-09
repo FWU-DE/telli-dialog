@@ -12,7 +12,7 @@ import { Badge } from '../common/badge';
 type ModelSelectProps = {
   models: LlmModel[];
   selectedModel: LlmModel | undefined;
-  onModelChange: (model: LlmModel) => Promise<void>;
+  onModelChange: (model: LlmModel) => void;
   modelType: 'text' | 'image';
   label: string;
   noModelsLabel: string;

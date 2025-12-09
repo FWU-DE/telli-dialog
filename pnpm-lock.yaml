@@ -210,7 +210,7 @@ importers:
         specifier: 1.38.0
         version: 1.38.0
       '@phosphor-icons/react':
-        specifier: ^2.1.10
+        specifier: 2.1.10
         version: 2.1.10(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@radix-ui/react-alert-dialog':
         specifier: 1.1.15

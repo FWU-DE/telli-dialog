@@ -23,7 +23,7 @@ export default async function Page(props: PageProps) {
   const { conversationId } = await props.params;
   const user = await getUser();
 
-  if (!(user.federalState.featureToggles.isImageGenerationEnabled ?? false)) {
+  if (!user.federalState.featureToggles.isImageGenerationEnabled) {
     redirect('/');
   }
 

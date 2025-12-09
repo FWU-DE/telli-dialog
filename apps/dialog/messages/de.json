@@ -13,6 +13,8 @@
     "image": "Bild",
     "upload-image": "Bild hochladen",
     "llm-model": "Sprachmodell",
+    "current-language-model": "Aktuelles Sprachmodell",
+    "no-language-model-available": "Kein Sprachmodell verfügbar",
     "today": "Heute",
     "yesterday": "Gestern",
     "this-week": "In den letzten 7 Tagen",
@@ -336,6 +338,8 @@
     }
   },
   "image-generation": {
+    "image-generation-model": "Bildgenerierungs-Modell",
+    "no-model-available": "Kein Modell verfügbar",
     "placeholder": "Beschreibe, wie das Bild aussehen soll.",
     "generate-button": "Bild generieren",
     "prompt-label": "Prompt",

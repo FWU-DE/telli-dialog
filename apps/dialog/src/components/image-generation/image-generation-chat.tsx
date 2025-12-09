@@ -6,7 +6,6 @@ import { useImageStyle } from '../providers/image-style-provider';
 import {
   generateImageAction,
   createImageConversationAction,
-  deleteImageConversationAction,
 } from '@/app/(authed)/(dialog)/image-generation/actions';
 import { ImageGenerationInputBox } from './image-generation-input-box';
 import { ImageActionButtons } from './image-action-buttons';
@@ -19,6 +18,7 @@ import { FileModel } from '@shared/db/schema';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '../common/toast';
 import { logError } from '@shared/logging';
+import deleteConversationAction from '@/app/(authed)/(dialog)/actions';
 
 interface ImageGenerationChatProps {
   conversationId?: string;
@@ -126,7 +126,7 @@ export default function ImageGenerationChat({
 
       if (newConversationId) {
         try {
-          await deleteImageConversationAction(newConversationId);
+          await deleteConversationAction({ conversationId: newConversationId });
           refetchConversations();
         } catch (deletionError) {
           logError('Error deleting failed image conversation:', deletionError as Error);

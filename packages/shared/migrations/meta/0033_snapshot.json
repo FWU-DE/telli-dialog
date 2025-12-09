@@ -2663,15 +2663,6 @@
         "image-generation"
       ]
     },
-    "public.image_style_type": {
-      "name": "image_style_type",
-      "schema": "public",
-      "values": [
-        "none",
-        "fotorealistic",
-        "cartoon"
-      ]
-    },
     "public.llm_model_type": {
       "name": "llm_model_type",
       "schema": "public",

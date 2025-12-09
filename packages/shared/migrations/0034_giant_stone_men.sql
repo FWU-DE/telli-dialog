@@ -1,1 +1,0 @@
-DROP TYPE "public"."image_style_type";
