@@ -70,7 +70,7 @@ export default function ImageGenerationChat({
                 imageUrl: signedUrl,
               });
             } catch (error) {
-              logError('Error loading image from files:', error as Error);
+              logError('Error loading image from files:', error);
             }
           }
         }
@@ -122,14 +122,14 @@ export default function ImageGenerationChat({
       refetchConversations();
     } catch (error) {
       toast.error(tImageGeneration('generation-error'));
-      logError('Error generating image:', error as Error);
+      logError('Error generating image:', error);
 
       if (newConversationId) {
         try {
           await deleteConversationAction({ conversationId: newConversationId });
           refetchConversations();
         } catch (deletionError) {
-          logError('Error deleting failed image conversation:', deletionError as Error);
+          logError('Error deleting failed image conversation:', deletionError);
         }
       }
     } finally {
