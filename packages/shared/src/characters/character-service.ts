@@ -188,7 +188,6 @@ export const linkFileToCharacter = async ({
   characterId: string;
   userId: string;
 }) => {
-  console.log('Robin fileId:', fileId);
   checkParameterUUID(characterId);
   // Authorization check
   if ((await getCharacterInfo(characterId, userId)).isOwner === false)

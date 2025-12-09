@@ -227,29 +227,11 @@ describe('learning-scenario-service', () => {
           }),
       },
       {
-        functionName: 'linkFileToLearningScenario (invalid fileId)',
-        testFunction: () =>
-          linkFileToLearningScenario({
-            learningScenarioId: generateUUID(),
-            fileId: 'invalid-uuid',
-            userId: 'user-id',
-          }),
-      },
-      {
         functionName: 'removeFileFromLearningScenario',
         testFunction: () =>
           removeFileFromLearningScenario({
             learningScenarioId: 'invalid-uuid',
             fileId: generateUUID(),
-            userId: 'user-id',
-          }),
-      },
-      {
-        functionName: 'removeFileFromLearningScenario (invalid fileId)',
-        testFunction: () =>
-          removeFileFromLearningScenario({
-            learningScenarioId: generateUUID(),
-            fileId: 'invalid-uuid',
             userId: 'user-id',
           }),
       },

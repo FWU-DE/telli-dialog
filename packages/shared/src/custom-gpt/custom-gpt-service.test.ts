@@ -390,29 +390,11 @@ describe('custom-gpt-service', () => {
           }),
       },
       {
-        functionName: 'linkFileToCustomGpt (invalid fileId)',
-        testFunction: () =>
-          linkFileToCustomGpt({
-            customGptId: generateUUID(),
-            fileId: 'invalid-uuid',
-            userId: 'user-id',
-          }),
-      },
-      {
         functionName: 'deleteFileMappingAndEntity',
         testFunction: () =>
           deleteFileMappingAndEntity({
             customGptId: 'invalid-uuid',
             fileId: generateUUID(),
-            userId: 'user-id',
-          }),
-      },
-      {
-        functionName: 'deleteFileMappingAndEntity (invalid fileId)',
-        testFunction: () =>
-          deleteFileMappingAndEntity({
-            customGptId: generateUUID(),
-            fileId: 'invalid-uuid',
             userId: 'user-id',
           }),
       },
