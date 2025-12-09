@@ -212,7 +212,7 @@ export async function linkFileToCustomGpt({
   customGptId: string;
   userId: string;
 }) {
-  checkParameterUUID(customGptId, fileId);
+  checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
     throw new ForbiddenError('Not authorized to access custom gpt');
@@ -241,7 +241,7 @@ export async function deleteFileMappingAndEntity({
   fileId: string;
   userId: string;
 }) {
-  checkParameterUUID(customGptId, fileId);
+  checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
     throw new ForbiddenError('Not authorized to access custom gpt');
