@@ -33,5 +33,5 @@ export type ImageStyle = {
   prompt: string;
 };
 
-export const imageStyleTypeSchema = z.enum(['none', 'fotorealistic', 'cartoon']);
+export const imageStyleTypeSchema = z.enum(['none', 'photorealistic', 'cartoon']);
 export type ImageStyleType = z.infer<typeof imageStyleTypeSchema>;

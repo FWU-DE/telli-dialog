@@ -26,8 +26,8 @@ function useImageStyles() {
       prompt: '',
     },
     {
-      name: 'fotorealistic' as ImageStyleType,
-      displayName: t('style-fotorealistic-name'),
+      name: 'photorealistic' as ImageStyleType,
+      displayName: t('style-photorealistic-name'),
       prompt: 'Create a photorealistic image with natural lighting and realistic textures',
     },
     {

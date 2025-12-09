@@ -341,7 +341,7 @@
     "prompt-label": "Prompt",
     "style-label": "Bildstil",
     "no-style": "Kein Stil",
-    "style-fotorealistic-name": "Fotorealistisch",
+    "style-photorealistic-name": "Fotorealistisch",
     "style-cartoon-name": "Cartoon",
     "generation-error": "Die Bildgenerierung ist fehlgeschlagen. Bitte versuche es erneut.",
     "copy-image-success": "Bild in die Zwischenablage kopiert",
