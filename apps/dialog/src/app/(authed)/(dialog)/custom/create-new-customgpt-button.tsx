@@ -13,14 +13,13 @@ export default function CreateNewCustomGptButton() {
   const toast = useToast();
   const t = useTranslations('custom-gpt');
 
-  function handleNewGPT() {
-    createNewCustomGptAction()
-      .then((newGpt) => {
-        router.push(`/custom/editor/${newGpt.id}?create=true`);
-      })
-      .catch(() => {
-        toast.error(t('toasts.create-toast-error'));
-      });
+  async function handleNewGPT() {
+    const createResult = await createNewCustomGptAction({});
+    if (createResult.success) {
+      router.push(`/custom/editor/${createResult.value.id}?create=true`);
+    } else {
+      toast.error(t('toasts.create-toast-error'));
+    }
   }
 
   return (

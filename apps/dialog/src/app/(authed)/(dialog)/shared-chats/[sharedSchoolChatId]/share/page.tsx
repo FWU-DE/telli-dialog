@@ -1,41 +1,42 @@
-import NotFound from '@/app/not-found';
-import { getUser } from '@/auth/utils';
 import SidebarCloseIcon from '@/components/icons/sidebar-close';
 import Footer from '@/components/navigation/footer';
-import { dbGetSharedSchoolChatById } from '@shared/db/functions/shared-school-chat';
 import { getBaseUrlByHeaders, getHostByHeaders } from '@/utils/host';
 import { cn } from '@/utils/tailwind';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import CountDownTimer from '../../_components/count-down';
-import { calculateTimeLeftBySharedChat } from '../utils';
 import QRCode from './qr-code';
 import TelliClipboardButton from '@/components/common/clipboard-button';
+import { getLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
+import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import { requireAuth } from '@/auth/requireAuth';
+import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
+import { notFound } from 'next/navigation';
 
 export default async function Page(props: PageProps<'/shared-chats/[sharedSchoolChatId]/share'>) {
   const { sharedSchoolChatId } = await props.params;
+  const { user } = await requireAuth();
 
-  const user = await getUser();
-  const sharedSchoolChat = await dbGetSharedSchoolChatById({
+  const learningScenario = await getLearningScenario({
+    learningScenarioId: sharedSchoolChatId,
     userId: user.id,
-    sharedChatId: sharedSchoolChatId,
-  });
+  }).catch(handleErrorInServerComponent);
 
-  if (!sharedSchoolChat || !sharedSchoolChat.inviteCode) {
-    return <NotFound />;
+  if (!learningScenario.inviteCode) {
+    notFound();
   }
 
-  const inviteCode = sharedSchoolChat.inviteCode;
+  const inviteCode = learningScenario.inviteCode;
   const formattedInviteCode = `${inviteCode.substring(0, 4)} ${inviteCode.substring(4, 8)}`;
-  const shareUrl = `${await getBaseUrlByHeaders()}/ua/shared-chats/${sharedSchoolChat.id}/dialog?inviteCode=${inviteCode}`;
-  const leftTime = calculateTimeLeftBySharedChat(sharedSchoolChat);
+  const shareUrl = `${await getBaseUrlByHeaders()}/ua/shared-chats/${learningScenario.id}/dialog?inviteCode=${inviteCode}`;
+  const leftTime = calculateTimeLeftForLearningScenario(learningScenario);
   const t = await getTranslations('shared-chats.share-page');
 
   return (
     <div className="w-full px-4 sm:px-8 overflow-auto flex flex-col h-full">
       <Link
-        href={`/shared-chats/${sharedSchoolChat.id}`}
+        href={`/shared-chats/${learningScenario.id}`}
         className="flex gap-2 items-center text-primary w-full"
       >
         <SidebarCloseIcon className="w-4 h-4" />
@@ -45,7 +46,7 @@ export default async function Page(props: PageProps<'/shared-chats/[sharedSchool
         <h1 className="text-4xl sm:text-7xl font-medium mb-10 sm:mb-16">{t('join')}</h1>
         <CountDownTimer
           leftTime={Math.max(leftTime, 0)}
-          totalTime={sharedSchoolChat.maxUsageTimeLimit ?? 0}
+          totalTime={learningScenario.maxUsageTimeLimit ?? 0}
           stopWatchClassName="w-8 h-8"
         />
         <main className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] w-full gap-6 mt-6 sm:mt-8 mb-12 sm:mb-16">

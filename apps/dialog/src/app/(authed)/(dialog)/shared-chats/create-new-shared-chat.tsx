@@ -2,12 +2,12 @@ import PlusIcon from '@/components/icons/plus';
 import { cn } from '@/utils/tailwind';
 
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
-import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
-import { createNewSharedSchoolChatAction } from './actions';
+import { createNewLearningScenarioAction } from './actions';
+import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 
 export function CreateNewSharedChatButton() {
   const router = useRouter();
@@ -16,20 +16,20 @@ export function CreateNewSharedChatButton() {
 
   const { models } = useLlmModels();
 
-  const maybeDefaultModelId =
-    models.find((m) => m.name === DEFAULT_CHAT_MODEL)?.id ?? models[0]?.id;
+  const maybeDefaultModelId = getDefaultModel(models)?.id;
 
-  function handleNewGPT() {
-    if (maybeDefaultModelId === undefined) {
+  async function handleNewGPT() {
+    if (!maybeDefaultModelId) {
       throw new Error('No default model found');
     }
-    createNewSharedSchoolChatAction({ modelId: maybeDefaultModelId, name: '' })
-      .then((newCharacter) => {
-        router.push(`/shared-chats/${newCharacter.id}?create=true`);
-      })
-      .catch(() => {
-        toast.error(t('toasts.create-toast-error'));
-      });
+    const scenario = await createNewLearningScenarioAction({
+      data: { modelId: maybeDefaultModelId, name: '' },
+    });
+    if (scenario.success === true) {
+      router.push(`/shared-chats/${scenario.value.id}?create=true`);
+    } else {
+      toast.error(t('toasts.create-toast-error'));
+    }
   }
 
   return (

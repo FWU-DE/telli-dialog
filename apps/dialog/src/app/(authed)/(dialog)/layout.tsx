@@ -9,7 +9,7 @@ import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { getPriceInCentByUser, getPriceLimitInCentByUser } from '@/app/school';
 import { checkProductAccess } from '@/utils/vidis/access';
 import ProductAccessModal from '@/components/modals/product-access';
-import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
+import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 
 export const dynamic = 'force-dynamic';
 import TermsConditionsModal from '@/components/modals/terms-conditions-initial';

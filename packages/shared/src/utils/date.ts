@@ -73,3 +73,18 @@ export function getEndOfCurrentMonth(): Date {
   date.setHours(23, 59, 59, 999);
   return date;
 }
+
+/**
+ * Adds a specified number of days to a given date.
+ * This function properly handles month/year boundaries and DST transitions
+ * by working with UTC time to avoid timezone-related issues.
+ * @param date The original date
+ * @param days Number of days to add, can be negative to subtract days
+ * @returns A new Date object with the added days
+ */
+export function addDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  // Use UTC methods to avoid DST transition issues
+  result.setUTCDate(result.getUTCDate() + days);
+  return result;
+}

@@ -4,15 +4,7 @@ import { login } from '../../utils/login';
 test('test', async ({ page }) => {
   await login(page, 'teacher');
   await page.goto('/custom?visibility=global');
-  const editButton = page.locator('[aria-label="Bearbeiten"]').first();
-
-  expect(editButton).toBeVisible();
-  expect(editButton).toBeEnabled();
-  await editButton.click();
-
-  await page.waitForURL('/custom/editor/**');
-
-  const copyButton = page.getByRole('button', { name: 'Assistent bearbeiten' }).first();
+  const copyButton = page.getByTitle('Kopieren').first();
 
   expect(copyButton).toBeVisible();
   expect(copyButton).toBeEnabled();

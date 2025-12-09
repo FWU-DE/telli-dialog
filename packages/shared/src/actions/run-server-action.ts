@@ -1,6 +1,7 @@
 import { logError } from '@shared/logging';
 import { ServerActionResult } from './server-action-result';
 import { BusinessError } from '@shared/error/business-error';
+import { UnexpectedError } from '@shared/error/unexpected-error';
 
 // Helper function to serialize error objects for client transmission
 function serializeError(error: BusinessError) {
@@ -28,10 +29,13 @@ export function runServerAction<TReturn, TArgs extends readonly unknown[] = []>(
           error: serializeError(error),
         };
       } else {
-        // For other errors, log a generic message to avoid exposing sensitive information
+        // For other errors, log the error
         logError('An unexpected error occurred during server action.', error);
         // Rethrow the error to be handled by higher-level error handlers, e.g. redirect(), notFound(), etc.
-        throw error;
+        return {
+          success: false,
+          error: new UnexpectedError(),
+        };
       }
     }
   };

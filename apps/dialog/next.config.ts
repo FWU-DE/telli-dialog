@@ -46,7 +46,6 @@ const baseNextConfig: NextConfig = {
     ],
   },
   productionBrowserSourceMaps: !isDevBuild,
-  allowedDevOrigins: ['titanom.ngrok.app'],
   experimental: {
     useCache: true,
   },

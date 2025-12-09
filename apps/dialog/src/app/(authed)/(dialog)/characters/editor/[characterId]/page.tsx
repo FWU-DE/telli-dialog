@@ -1,6 +1,5 @@
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { notFound } from 'next/navigation';
 import HeaderPortal from '../../../header-portal';
 import CharacterForm from './character-form';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
@@ -12,6 +11,7 @@ import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
+import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
@@ -32,9 +32,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
     characterId,
     userId: user.id,
     schoolId: school.id,
-  }).catch(() => {
-    notFound();
-  });
+  }).catch(handleErrorInServerComponent);
 
   const readOnly = user.id !== character.userId;
   const links = character.attachedLinks;

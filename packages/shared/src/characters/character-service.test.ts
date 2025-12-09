@@ -3,12 +3,14 @@ import { describe, it, expect, vi, beforeEach, MockedFunction } from 'vitest';
 vi.mock('../db/functions/character', () => ({
   dbGetSharedCharacterConversations: vi.fn(),
   dbGetCharacterById: vi.fn(),
+  dbGetCharacterByIdAndUserId: vi.fn(),
 }));
 
 import {
   deleteCharacter,
   deleteFileMappingAndEntity,
   fetchFileMappings,
+  getSharedCharacter,
   linkFileToCharacter,
   shareCharacter,
   unshareCharacter,
@@ -16,114 +18,138 @@ import {
   updateCharacterAccessLevel,
   updateCharacterPicture,
 } from './character-service';
-import { dbGetCharacterById, dbGetSharedCharacterConversations } from '../db/functions/character';
+import {
+  dbGetCharacterById,
+  dbGetSharedCharacterConversations,
+  dbGetCharacterByIdAndUserId,
+} from '../db/functions/character';
 import { generateUUID } from '../utils/uuid';
 import { CharacterSelectModel } from '@shared/db/schema';
-import { ForbiddenError } from '@shared/error';
+import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
 
-describe('Character Service', () => {
+const mockUser = (userRole: 'student' | 'teacher' = 'teacher') => ({
+  id: generateUUID(),
+  userRole,
+});
+
+describe('character-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('deleteFileMappingAndEntity', () => {
-    it('should throw because user is not the owner of the character', async () => {
+  describe('NotFoundError scenarios', () => {
+    it.each([
+      {
+        functionName: 'getSharedCharacter',
+        testFunction: () =>
+          getSharedCharacter({
+            characterId: generateUUID(),
+            userId: 'user-id',
+          }),
+      },
+    ])(
+      'should throw NotFoundError when character does not exist - $functionName',
+      async ({ testFunction }) => {
+        (
+          dbGetCharacterByIdAndUserId as MockedFunction<typeof dbGetCharacterByIdAndUserId>
+        ).mockResolvedValue(null as never);
+
+        await expect(testFunction()).rejects.toThrowError(NotFoundError);
+      },
+    );
+
+    it('should throw NotFoundError when character has no invite code - getSharedCharacter', async () => {
       const userId = generateUUID();
-      const accessLevel = 'private';
       const mockCharacter: Partial<CharacterSelectModel> = {
         userId: userId,
-        accessLevel: accessLevel,
+        inviteCode: null,
       };
 
-      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
-        mockCharacter as never,
-      );
+      (
+        dbGetCharacterByIdAndUserId as MockedFunction<typeof dbGetCharacterByIdAndUserId>
+      ).mockResolvedValue(mockCharacter as never);
 
       await expect(
-        deleteFileMappingAndEntity({
-          characterId: 'unimportant',
-          fileId: 'unimportant',
-          userId: 'differentUserId',
+        getSharedCharacter({
+          characterId: generateUUID(),
+          userId: 'user-id',
         }),
-      ).rejects.toThrowError(ForbiddenError);
+      ).rejects.toThrowError(NotFoundError);
     });
   });
 
-  describe('fetchFileMappings', () => {
-    it('should throw because character is private and user is not owner', async () => {
-      const userId = generateUUID();
-      const accessLevel = 'private';
-      const mockCharacter: Partial<CharacterSelectModel> = {
-        userId: userId,
-        accessLevel: accessLevel,
-      };
+  describe('ForbiddenError scenarios - user not owner', () => {
+    const userId = generateUUID();
+    const mockCharacter: Partial<CharacterSelectModel> = {
+      userId: userId,
+      accessLevel: 'private',
+    };
 
+    beforeEach(() => {
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
         mockCharacter as never,
       );
-
-      await expect(
-        fetchFileMappings({
-          characterId: 'unimportant',
-          userId: 'differentUserId',
-          schoolId: 'unimportant',
-        }),
-      ).rejects.toThrowError(ForbiddenError);
     });
 
-    it('should throw because character access level is school and user is from different school', async () => {
-      const userId = generateUUID();
-      const accessLevel = 'school';
-      const mockCharacter: Partial<CharacterSelectModel> = {
-        userId: userId,
-        schoolId: 'school-1',
-        accessLevel: accessLevel,
-      };
-
-      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
-        mockCharacter as never,
-      );
-
-      await expect(
-        fetchFileMappings({
-          characterId: 'unimportant',
-          userId: 'differentUserId',
-          schoolId: 'differentSchoolId',
-        }),
-      ).rejects.toThrowError(ForbiddenError);
-    });
+    it.each([
+      {
+        functionName: 'deleteFileMappingAndEntity',
+        testFunction: () =>
+          deleteFileMappingAndEntity({
+            characterId: generateUUID(),
+            fileId: generateUUID(),
+            userId: 'different-user-id',
+          }),
+      },
+      {
+        functionName: 'linkFileToCharacter',
+        testFunction: () =>
+          linkFileToCharacter({
+            characterId: generateUUID(),
+            userId: 'different-user-id',
+            fileId: generateUUID(),
+          }),
+      },
+      {
+        functionName: 'updateCharacterPicture',
+        testFunction: () =>
+          updateCharacterPicture({
+            characterId: generateUUID(),
+            userId: 'different-user-id',
+            picturePath: 'picture-path',
+          }),
+      },
+      {
+        functionName: 'updateCharacter',
+        testFunction: () =>
+          updateCharacter({
+            characterId: generateUUID(),
+            userId: 'different-user-id',
+            name: 'new-name',
+          }),
+      },
+      {
+        functionName: 'deleteCharacter',
+        testFunction: () =>
+          deleteCharacter({
+            characterId: generateUUID(),
+            userId: 'different-user-id',
+          }),
+      },
+    ])(
+      'should throw ForbiddenError when user is not the owner - $functionName',
+      async ({ testFunction }) => {
+        await expect(testFunction()).rejects.toThrowError(ForbiddenError);
+      },
+    );
   });
 
-  describe('linkFileToCharacter', () => {
-    it('should throw because user is not owner of character', async () => {
+  describe('ForbiddenError scenarios - access restrictions', () => {
+    it('should throw ForbiddenError when setting access level to global - updateCharacterAccessLevel', async () => {
       const userId = generateUUID();
-      const accessLevel = 'private';
       const mockCharacter: Partial<CharacterSelectModel> = {
         userId: userId,
-        accessLevel: accessLevel,
-      };
-
-      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
-        mockCharacter as never,
-      );
-
-      await expect(
-        linkFileToCharacter({
-          characterId: 'unimportant',
-          userId: 'differentUserId',
-          fileId: 'unimportant',
-        }),
-      ).rejects.toThrowError(ForbiddenError);
-    });
-  });
-
-  describe('updateCharacterAccessLevel', () => {
-    it('should throw because it is not allowed to set access level to global', async () => {
-      const userId = generateUUID();
-      const accessLevel = 'private';
-      const mockCharacter: Partial<CharacterSelectModel> = {
-        userId: userId,
-        accessLevel: accessLevel,
+        accessLevel: 'private',
       };
 
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
@@ -132,19 +158,18 @@ describe('Character Service', () => {
 
       await expect(
         updateCharacterAccessLevel({
-          characterId: 'unimportant',
+          characterId: generateUUID(),
           userId: userId,
           accessLevel: 'global',
         }),
       ).rejects.toThrowError(ForbiddenError);
     });
 
-    it('should throw because user is not owner of character', async () => {
+    it('should throw ForbiddenError when user is not owner - updateCharacterAccessLevel', async () => {
       const userId = generateUUID();
-      const accessLevel = 'private';
       const mockCharacter: Partial<CharacterSelectModel> = {
         userId: userId,
-        accessLevel: accessLevel,
+        accessLevel: 'private',
       };
 
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
@@ -153,21 +178,18 @@ describe('Character Service', () => {
 
       await expect(
         updateCharacterAccessLevel({
-          characterId: 'unimportant',
-          userId: 'differentUserId',
+          characterId: generateUUID(),
+          userId: 'different-user-id',
           accessLevel: 'school',
         }),
       ).rejects.toThrowError(ForbiddenError);
     });
-  });
 
-  describe('updateCharacterPicture', () => {
-    it('should throw because user is not owner of character', async () => {
+    it('should throw ForbiddenError when character is private and user is not owner - fetchFileMappings', async () => {
       const userId = generateUUID();
-      const accessLevel = 'private';
       const mockCharacter: Partial<CharacterSelectModel> = {
         userId: userId,
-        accessLevel: accessLevel,
+        accessLevel: 'private',
       };
 
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
@@ -175,22 +197,20 @@ describe('Character Service', () => {
       );
 
       await expect(
-        updateCharacterPicture({
-          characterId: 'unimportant',
-          userId: 'differentUserId',
-          picturePath: 'unimportant',
+        fetchFileMappings({
+          characterId: generateUUID(),
+          userId: 'different-user-id',
+          schoolId: 'school-id',
         }),
       ).rejects.toThrowError(ForbiddenError);
     });
-  });
 
-  describe('updateCharacter', () => {
-    it('should throw because user is not owner of character', async () => {
+    it('should throw ForbiddenError when character access level is school and user is from different school - fetchFileMappings', async () => {
       const userId = generateUUID();
-      const accessLevel = 'private';
       const mockCharacter: Partial<CharacterSelectModel> = {
         userId: userId,
-        accessLevel: accessLevel,
+        schoolId: 'school-1',
+        accessLevel: 'school',
       };
 
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
@@ -198,88 +218,69 @@ describe('Character Service', () => {
       );
 
       await expect(
-        updateCharacter({
-          characterId: 'unimportant',
-          userId: 'differentUserId',
-          name: 'unimportant',
+        fetchFileMappings({
+          characterId: generateUUID(),
+          userId: 'different-user-id',
+          schoolId: 'different-school-id',
         }),
       ).rejects.toThrowError(ForbiddenError);
     });
   });
 
-  describe('deleteCharacter', () => {
-    it('should throw because user is not owner of character', async () => {
+  describe('ForbiddenError scenarios - role restrictions', () => {
+    beforeEach(() => {
       const userId = generateUUID();
-      const accessLevel = 'private';
       const mockCharacter: Partial<CharacterSelectModel> = {
         userId: userId,
-        accessLevel: accessLevel,
+        accessLevel: 'private',
       };
 
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
         mockCharacter as never,
       );
-
-      await expect(
-        deleteCharacter({
-          characterId: 'unimportant',
-          userId: 'differentUserId',
-        }),
-      ).rejects.toThrowError(ForbiddenError);
     });
-  });
 
-  describe('shareCharacter', () => {
-    it('should throw because only teachers can share a character', async () => {
-      const userId = generateUUID();
-      const accessLevel = 'private';
-      const mockCharacter: Partial<CharacterSelectModel> = {
-        userId: userId,
-        accessLevel: accessLevel,
-      };
+    it.each([
+      {
+        functionName: 'shareCharacter',
+        testFunction: () =>
+          shareCharacter({
+            characterId: generateUUID(),
+            user: mockUser('student'),
+            telliPointsPercentageLimit: 10,
+            usageTimeLimitMinutes: 60,
+          }),
+        reason: 'only teachers can share a character',
+      },
+      {
+        functionName: 'unshareCharacter',
+        testFunction: () =>
+          unshareCharacter({
+            characterId: generateUUID(),
+            user: mockUser('student'),
+          }),
+        reason: 'only teachers can unshare a character',
+      },
+    ])('should throw ForbiddenError because $reason - $functionName', async ({ testFunction }) => {
+      await expect(testFunction()).rejects.toThrowError(ForbiddenError);
+    });
 
-      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
-        mockCharacter as never,
-      );
-
+    it('should throw ForbiddenError when character is private and teacher is not owner - shareCharacter', async () => {
       await expect(
         shareCharacter({
-          characterId: 'unimportant',
-          user: { id: 'unimportant', userRole: 'student' },
+          characterId: generateUUID(),
+          user: mockUser('teacher'),
           telliPointsPercentageLimit: 10,
           usageTimeLimitMinutes: 60,
         }),
       ).rejects.toThrowError(ForbiddenError);
     });
 
-    it('should throw because character is private and teacher is not owner', async () => {
+    it('should throw ForbiddenError when character access level is school and user is from different school - shareCharacter', async () => {
       const userId = generateUUID();
-      const accessLevel = 'private';
       const mockCharacter: Partial<CharacterSelectModel> = {
         userId: userId,
-        accessLevel: accessLevel,
-      };
-
-      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
-        mockCharacter as never,
-      );
-
-      await expect(
-        shareCharacter({
-          characterId: 'unimportant',
-          user: { id: 'differentUserId', userRole: 'teacher' },
-          telliPointsPercentageLimit: 10,
-          usageTimeLimitMinutes: 60,
-        }),
-      ).rejects.toThrowError(ForbiddenError);
-    });
-
-    it('should throw because character access level is school and user is from different school', async () => {
-      const userId = generateUUID();
-      const accessLevel = 'school';
-      const mockCharacter: Partial<CharacterSelectModel> = {
-        userId: userId,
-        accessLevel: accessLevel,
+        accessLevel: 'school',
         schoolId: 'school-1',
       };
 
@@ -289,48 +290,16 @@ describe('Character Service', () => {
 
       await expect(
         shareCharacter({
-          characterId: 'unimportant',
-          user: { id: 'differentUserId', userRole: 'teacher' },
+          characterId: generateUUID(),
+          user: mockUser('teacher'),
           telliPointsPercentageLimit: 10,
           usageTimeLimitMinutes: 60,
-          schoolId: 'differentSchoolId',
-        }),
-      ).rejects.toThrowError(ForbiddenError);
-    });
-  });
-
-  describe('unshareCharacter', () => {
-    it('should throw because only teachers can unshare a character', async () => {
-      const userId = generateUUID();
-      const accessLevel = 'private';
-      const mockCharacter: Partial<CharacterSelectModel> = {
-        userId: userId,
-        accessLevel: accessLevel,
-      };
-
-      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
-        mockCharacter as never,
-      );
-
-      await expect(
-        unshareCharacter({
-          characterId: 'unimportant',
-          user: { id: 'unimportant', userRole: 'student' },
+          schoolId: 'different-school-id',
         }),
       ).rejects.toThrowError(ForbiddenError);
     });
 
-    it('should throw because a user can only unshare a character they started sharing', async () => {
-      const userId = generateUUID();
-      const accessLevel = 'private';
-      const mockCharacter: Partial<CharacterSelectModel> = {
-        userId: userId,
-        accessLevel: accessLevel,
-      };
-
-      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
-        mockCharacter as never,
-      );
+    it('should throw ForbiddenError when user can only unshare a character they started sharing - unshareCharacter', async () => {
       (
         dbGetSharedCharacterConversations as MockedFunction<
           typeof dbGetSharedCharacterConversations
@@ -339,10 +308,81 @@ describe('Character Service', () => {
 
       await expect(
         unshareCharacter({
-          characterId: 'unimportant',
-          user: { id: 'differentUserId', userRole: 'teacher' },
+          characterId: generateUUID(),
+          user: mockUser('teacher'),
         }),
       ).rejects.toThrowError(ForbiddenError);
     });
+  });
+
+  describe('InvalidArgumentError scenarios - invalid parameter format', () => {
+    it.each([
+      {
+        functionName: 'deleteFileMappingAndEntity',
+        testFunction: () =>
+          deleteFileMappingAndEntity({
+            characterId: 'invalid-uuid',
+            fileId: generateUUID(),
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'fetchFileMappings',
+        testFunction: () =>
+          fetchFileMappings({
+            characterId: 'invalid-uuid',
+            userId: 'user-id',
+            schoolId: 'school-id',
+          }),
+      },
+      {
+        functionName: 'linkFileToCharacter',
+        testFunction: () =>
+          linkFileToCharacter({
+            characterId: 'invalid-uuid',
+            userId: 'user-id',
+            fileId: generateUUID(),
+          }),
+      },
+      {
+        functionName: 'updateCharacterPicture',
+        testFunction: () =>
+          updateCharacterPicture({
+            characterId: 'invalid-uuid',
+            userId: 'user-id',
+            picturePath: 'picture-path',
+          }),
+      },
+      {
+        functionName: 'updateCharacter',
+        testFunction: () =>
+          updateCharacter({
+            characterId: 'invalid-uuid',
+            userId: 'user-id',
+            name: 'new-name',
+          }),
+      },
+      {
+        functionName: 'deleteCharacter',
+        testFunction: () =>
+          deleteCharacter({
+            characterId: 'invalid-uuid',
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'getSharedCharacter',
+        testFunction: () =>
+          getSharedCharacter({
+            characterId: 'invalid-uuid',
+            userId: 'user-id',
+          }),
+      },
+    ])(
+      'should throw InvalidArgumentError when characterId is not a valid UUID - $functionName',
+      async ({ testFunction }) => {
+        await expect(testFunction()).rejects.toThrowError(InvalidArgumentError);
+      },
+    );
   });
 });

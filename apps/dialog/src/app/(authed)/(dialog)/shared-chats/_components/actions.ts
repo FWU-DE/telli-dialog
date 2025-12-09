@@ -1,27 +1,8 @@
 'use server';
 
-import { db } from '@shared/db';
-import { sharedSchoolConversationTable, sharedCharacterConversation } from '@shared/db/schema';
-import { eq } from 'drizzle-orm';
+import { runServerAction } from '@shared/actions/run-server-action';
+import { getChatIdByInviteCode } from '@shared/sharing/get-chat-id-by-invite-code';
 
-export async function checkSharedChatInviteCodeAction({ inviteCode }: { inviteCode: string }) {
-  const maybeSharedChat = (
-    await db
-      .select()
-      .from(sharedSchoolConversationTable)
-      .where(eq(sharedSchoolConversationTable.inviteCode, inviteCode))
-  )[0];
-  if (maybeSharedChat === undefined) return undefined;
-  return { id: maybeSharedChat?.id, inviteCode: maybeSharedChat?.inviteCode };
-}
-
-export async function checkCharacterChatInviteCodeAction({ inviteCode }: { inviteCode: string }) {
-  const maybeCharacterChat = (
-    await db
-      .select()
-      .from(sharedCharacterConversation)
-      .where(eq(sharedCharacterConversation.inviteCode, inviteCode))
-  )[0];
-  if (maybeCharacterChat === undefined) return undefined;
-  return { id: maybeCharacterChat?.characterId, inviteCode: maybeCharacterChat?.inviteCode };
+export async function getChatIdByInviteCodeAction(inviteCode: string) {
+  return runServerAction(getChatIdByInviteCode)(inviteCode);
 }

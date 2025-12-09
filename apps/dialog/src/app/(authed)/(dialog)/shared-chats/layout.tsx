@@ -1,10 +1,10 @@
-import { getUser } from '@/auth/utils';
+import { requireAuth } from '@/auth/requireAuth';
 import { notFound } from 'next/navigation';
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
-  const user = await getUser();
+  const { user } = await requireAuth();
 
-  if (user.school.userRole !== 'teacher') {
+  if (user.userRole !== 'teacher') {
     notFound();
   }
 

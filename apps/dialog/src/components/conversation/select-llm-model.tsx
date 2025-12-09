@@ -3,6 +3,7 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
+import { getFilteredTextModels } from '@shared/llm-models/llm-model-service';
 import ModelSelect from '../common/model-select';
 
 type SelectLlmModelProps = {
@@ -15,7 +16,7 @@ export default function SelectLlmModel({ isStudent = false }: SelectLlmModelProp
 
   return (
     <ModelSelect
-      models={models}
+      models={getFilteredTextModels(models)}
       selectedModel={selectedModel}
       onModelChange={setSelectedModel}
       modelType="text"

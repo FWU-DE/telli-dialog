@@ -132,7 +132,10 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     permissions:
+      contents: read
       packages: write
+      id-token: write
+      attestations: write
 
     steps:
       - name: Checkout code
@@ -149,6 +152,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
+        id: docker-build-dialog
         uses: docker/build-push-action@v6
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -164,8 +168,18 @@ jobs:
           build-args: |
             CI=${CI}
             APP_VERSION=${{ github.sha }}
-          tags: ghcr.io/fwu-de/telli-dialog:${{ github.sha }}
+          tags: |
+            ghcr.io/fwu-de/telli-dialog:latest
+            ghcr.io/fwu-de/telli-dialog:${{ github.sha }}
           push: true
+          provenance: mode=max
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: ghcr.io/fwu-de/telli-dialog
+          subject-digest: ${{ steps.docker-build-dialog.outputs.digest }}
+          push-to-registry: true
 
   build_push_docker_image_admin:
     name: Build and push docker image telli-admin
@@ -175,7 +189,10 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     permissions:
+      contents: read
       packages: write
+      id-token: write
+      attestations: write
 
     steps:
       - name: Checkout code
@@ -192,13 +209,34 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
+        id: docker-build-admin
         uses: docker/build-push-action@v6
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
         with:
           context: .
           file: apps/admin/Dockerfile
-          build-args: APP_VERSION=${{ github.sha }}
-          tags: ghcr.io/fwu-de/telli-admin:${{ github.sha }}
+          secret-envs: |
+            SENTRY_AUTH_TOKEN=SENTRY_AUTH_TOKEN
+            SENTRY_ORG=SENTRY_ORG
+            SENTRY_PROJECT=SENTRY_PROJECT
+          build-args: |
+            CI=${CI}
+            APP_VERSION=${{ github.sha }}
+          tags: |
+            ghcr.io/fwu-de/telli-admin:latest
+            ghcr.io/fwu-de/telli-admin:${{ github.sha }}
           push: true
+          provenance: mode=max
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: ghcr.io/fwu-de/telli-admin
+          subject-digest: ${{ steps.docker-build-admin.outputs.digest }}
+          push-to-registry: true
 
   deploy_apps:
     name: Deploy to staging
@@ -216,16 +254,14 @@ jobs:
           kubeconfig: ${{ secrets.KUBECONFIG_FILE }}
           context: ''
 
-      - name: Update Kubernetes deployment
+      - name: Restart Kubernetes deployment
         run: |
-          COMMIT_HASH=${{ github.sha }}
-          echo "Updating Kubernetes deployment with image tag $COMMIT_HASH"
-          kubectl set image deployment/telli-dialog-stage \
-            telli-dialog-stage=ghcr.io/fwu-de/telli-dialog:$COMMIT_HASH -n telli-stage
-          kubectl set image deployment/telli-admin-stage \
-            telli-admin-stage=ghcr.io/fwu-de/telli-admin:$COMMIT_HASH -n telli-stage
+          echo "Restarting Kubernetes deployment to pull new latest containers"
+          kubectl rollout restart deployment/telli-admin-stage -n telli-stage
+          kubectl rollout restart deployment/telli-dialog-stage -n telli-stage
 
       - name: Wait for rollout to complete
         run: |
           echo "Waiting for rollout to complete"
+          kubectl rollout status deployment/telli-admin-stage -n telli-stage
           kubectl rollout status deployment/telli-dialog-stage -n telli-stage

@@ -4,12 +4,9 @@ import { createInsertSchema } from 'drizzle-zod';
 import {
   dbCreateCharacter,
   dbDeleteCharacterByIdAndUserId,
-  dbGetGlobalCharacterByName,
   dbGetGlobalCharacters,
 } from '@shared/db/functions/character';
 import { CharacterInsertModel, characterTable } from '@shared/db/schema';
-import { dbGetModelByName } from '@shared/db/functions/llm-model';
-import { DEFAULT_CHAT_MODEL } from '@/app/api/chat/models';
 import { DUMMY_USER_ID } from '@shared/db/seed/user-entity';
 import { validateApiKeyByHeadersWithResult } from '@/utils/validation';
 
@@ -107,25 +104,14 @@ export async function POST(request: NextRequest) {
 
     const validatedCharacters = parseResult.data;
 
-    // Get default model ID
-    const defaultModel = await dbGetModelByName(DEFAULT_CHAT_MODEL);
-    if (!defaultModel) {
-      return NextResponse.json(
-        {
-          error: 'Default model not found',
-        },
-        { status: 500 },
-      );
-    }
-
     const results = [];
 
     for (const characterData of validatedCharacters) {
       try {
         // Check if a global character with this name already exists
-        const existingGlobalCharacter = await dbGetGlobalCharacterByName({
-          name: characterData.name.trim(),
-        });
+        // const existingGlobalCharacter = await dbGetGlobalCharacterByName({
+        //  name: characterData.name.trim(),
+        // });
 
         const character: Omit<CharacterInsertModel, 'modelId'> = {
           // Todo RL: Why is the id set here???
@@ -135,7 +121,7 @@ export async function POST(request: NextRequest) {
           userId: DUMMY_USER_ID,
         };
 
-        const createdCharacter = await dbCreateCharacter(character, DEFAULT_CHAT_MODEL);
+        const createdCharacter = await dbCreateCharacter(character);
 
         results.push({
           data: createdCharacter?.[0],
