@@ -133,7 +133,7 @@ export const deleteFileMappingAndEntity = async ({
   fileId: string;
   userId: string;
 }) => {
-  checkParameterUUID(characterId, fileId);
+  checkParameterUUID(characterId);
   // Authorization check: user must own character
   if ((await getCharacterInfo(characterId, userId)).isOwner === false)
     throw new ForbiddenError('Not authorized to delete this file mapping');
@@ -188,7 +188,8 @@ export const linkFileToCharacter = async ({
   characterId: string;
   userId: string;
 }) => {
-  checkParameterUUID(characterId, fileId);
+  console.log('Robin fileId:', fileId);
+  checkParameterUUID(characterId);
   // Authorization check
   if ((await getCharacterInfo(characterId, userId)).isOwner === false)
     throw new ForbiddenError('Not authorized to add new file for this character');
