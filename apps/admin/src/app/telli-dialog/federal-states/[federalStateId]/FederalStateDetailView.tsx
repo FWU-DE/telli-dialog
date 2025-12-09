@@ -228,6 +228,13 @@ export function FederalStateView(props: FederalStateViewProps) {
             control={control}
           />
 
+          <FormFieldCheckbox
+            name="featureToggles.isImageGenerationEnabled"
+            label="Bildgenerierung aktivieren"
+            description="Erlaubt die Nutzung der Bildgenerierungsfunktion."
+            control={control}
+          />
+
           <FormField
             name="designConfiguration"
             label="Design Konfiguration"

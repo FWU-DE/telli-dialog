@@ -13,6 +13,8 @@
     "image": "Bild",
     "upload-image": "Bild hochladen",
     "llm-model": "Sprachmodell",
+    "current-language-model": "Aktuelles Sprachmodell",
+    "no-language-model-available": "Kein Sprachmodell verfügbar",
     "today": "Heute",
     "yesterday": "Gestern",
     "this-week": "In den letzten 7 Tagen",
@@ -47,6 +49,7 @@
     "characters": "Dialogpartner",
     "help-mode": "Hilfe",
     "custom-gpt": "Assistenten",
+    "image-generation-new": "Neues Bild",
     "telli-points": "Meine telli-Points",
     "conversation-delete-toast-success": "Die Konversation wurde erfolgreich gelöscht.",
     "conversation-delete-toast-error": "Die Konversation konnte nicht gelöscht werden.",
@@ -333,5 +336,23 @@
       "redeem-success": "Deine telli-Points wurden erfolgreich aufgeladen.",
       "redeem-invalid": "Der eingegebene Gutscheincode ist ungültig."
     }
+  },
+  "image-generation": {
+    "image-generation-model": "Bildgenerierungs-Modell",
+    "no-model-available": "Kein Modell verfügbar",
+    "placeholder": "Beschreibe, wie das Bild aussehen soll.",
+    "generate-button": "Bild generieren",
+    "prompt-label": "Prompt",
+    "style-label": "Bildstil",
+    "no-style": "Kein Stil",
+    "style-photorealistic-name": "Fotorealistisch",
+    "style-cartoon-name": "Cartoon",
+    "generation-error": "Die Bildgenerierung ist fehlgeschlagen. Bitte versuche es erneut.",
+    "copy-image-success": "Bild in die Zwischenablage kopiert",
+    "copy-image-error": "Bild konnte nicht kopiert werden",
+    "copy-prompt-success": "Prompt in die Zwischenablage kopiert",
+    "copy-prompt-error": "Prompt konnte nicht kopiert werden",
+    "copy-image-tooltip": "Bild kopieren",
+    "copy-prompt-tooltip": "Prompt kopieren"
   }
 }

@@ -9,6 +9,7 @@ import RobotIcon from '@/components/icons/robot';
 import SharedChatIcon from '@/components/icons/shared-chat';
 import TelliIcon from '@/components/icons/telli';
 import IntelliPointsIcon from '@/components/icons/telli-points';
+import { ImageSquareIcon } from '@phosphor-icons/react';
 import CollapsibleSidebar from '@/components/navigation/sidebar/collapsible-sidebar';
 import SidebarItem from '@/components/navigation/sidebar/conversation-item';
 import { useSidebarVisibility } from '@/components/navigation/sidebar/sidebar-provider';
@@ -119,13 +120,25 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
       <nav className="flex text-sm flex-col items-start overflow-y-hidden px-1">
         <div className="flex flex-col items-start px-5 w-full">
           <hr className="w-full my-2" />
-
           <Link href="/" className="w-full flex gap-2 items-center hover:underline px-2 py-1.5">
             <TelliIcon className="w-4 h-4 fill-primary" />
             <span className="text-base font-medium text-primary">
               {!!user.federalState.telliName ? user.federalState.telliName : 'telli'}
             </span>
           </Link>
+          {user.federalState?.featureToggles?.isImageGenerationEnabled && (
+            <Link href="/image-generation" className="w-full mt-1">
+              <div
+                className={cn(
+                  'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
+                  pathname === '/image-generation' && 'underline',
+                )}
+              >
+                <ImageSquareIcon className="w-6 h-5" />
+                <span className="text-base">{t('image-generation-new')}</span>
+              </div>
+            </Link>
+          )}
           <Link href="/custom" className="w-full mt-1">
             <div
               className={cn(
