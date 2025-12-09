@@ -152,6 +152,7 @@ export const federalStateFeatureTogglesSchema = z.object({
   isSharedChatEnabled: z.boolean().default(true),
   isCustomGptEnabled: z.boolean().default(true),
   isShareTemplateWithSchoolEnabled: z.boolean().default(true),
+  isImageGenerationEnabled: z.boolean().optional(),
 });
 
 export type FederalStateFeatureToggles = z.infer<typeof federalStateFeatureTogglesSchema>;

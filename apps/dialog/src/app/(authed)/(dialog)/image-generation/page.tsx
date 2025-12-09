@@ -8,20 +8,22 @@ import ImageGenerationChat from '@/components/image-generation/image-generation-
 import SelectImageModel from '@/components/image-generation/select-image-model';
 import SelectImageStyle from '@/components/image-generation/select-image-style';
 import { getAvailableImageModels } from './actions';
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ImageGenerationPage() {
   const user = await getUser();
 
-  // TODO: Implement this function to fetch image models
+  if (!(user.federalState.featureToggles.isImageGenerationEnabled ?? false)) {
+    redirect('/');
+  }
   const imageModels = await getAvailableImageModels();
 
   // Use first model as default for now
-  const defaultModel = imageModels[0]?.name;
-
+  const selectedModel = imageModels[0];
   return (
-    <ImageModelsProvider models={imageModels} defaultImageModel={defaultModel}>
+    <ImageModelsProvider models={imageModels} defaultImageModel={selectedModel}>
       <ImageStyleProvider>
         <div className="w-full h-full overflow-auto">
           <HeaderPortal>

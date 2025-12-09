@@ -204,6 +204,10 @@ export async function dbInsertFileWithTextChunks(
   });
 }
 
+export async function dbInsertFile(file: FileInsertModel) {
+  await db.insert(fileTable).values(file).onConflictDoNothing();
+}
+
 export async function dbDeleteFileAndDetachFromConversation(filesToDelete: string[]) {
   await db.transaction(async (tx) => {
     await tx

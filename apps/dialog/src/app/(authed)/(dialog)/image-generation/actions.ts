@@ -4,23 +4,22 @@ import { getUser } from '@/auth/utils';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { LlmModel } from '@shared/db/schema';
 import { dbGetOrCreateConversation, dbInsertChatContent } from '@shared/db/functions/chat';
-import { redirect } from 'next/navigation';
 import { generateUUID } from '@shared/utils/uuid';
 import { generateImage } from './image-generation-service';
 import { uploadFileToS3, getSignedUrlFromS3Get } from '@shared/s3';
 import { cnanoid } from '@shared/random/randomService';
 import { ImageStyle } from '@shared/utils/chat';
+import { linkFilesToConversation, dbInsertFile } from '@shared/db/functions/files';
+import { dbDeleteConversationByIdAndUserId } from '@shared/db/functions/conversation';
 
 /**
- * TODO: Implement image model fetching from database
- * This should filter models by priceMetadata.type === 'image'
- * and return only image generation models available to the user's federal state
+ * Fetches available image generation models from database
+ * Filters models by priceMetadata.type === 'image' 
+ * and returns only image generation models available to the user's federal state
  */
 export async function getAvailableImageModels(): Promise<LlmModel[]> {
   const user = await getUser();
 
-  // TODO: Implement actual database query to fetch image models
-  // For now, fetch all models and filter by image type
   const allModels = await dbGetLlmModelsByFederalStateId({
     federalStateId: user.federalState.id,
   });
@@ -31,11 +30,12 @@ export async function getAvailableImageModels(): Promise<LlmModel[]> {
   return imageModels;
 }
 
+
 /**
  * Creates a new conversation for image generation
  * Returns the conversation ID without generating the image yet
  */
-export async function createImageConversationAction() {
+export async function createImageConversationAction(prompt: string): Promise<string> {
   const user = await getUser();
 
   // Create a new conversation
@@ -44,6 +44,7 @@ export async function createImageConversationAction() {
     conversationId: newConversationId,
     userId: user.id,
     type: 'image-generation',
+    name: prompt,
   });
 
   if (!conversation) {
@@ -53,18 +54,26 @@ export async function createImageConversationAction() {
   return conversation.id;
 }
 
+export async function deleteImageConversationAction(conversationId: string): Promise<void> {
+  const user = await getUser();
+
+  await dbDeleteConversationByIdAndUserId({
+    conversationId,
+    userId: user.id,
+  });
+}
 /**
  * Generates an image within an existing conversation using the image generation service
  * Combines the conversation management with the actual image generation API
  */
 export async function generateImageAction({
   prompt,
-  modelName,
+  model,
   style,
   conversationId,
 }: {
   prompt: string;
-  modelName: string;
+  model: LlmModel;
   style?: ImageStyle;
   conversationId: string;
 }) {
@@ -85,7 +94,7 @@ export async function generateImageAction({
     conversationId: conversationId,
     role: 'user',
     content: prompt,
-    orderNumber: Date.now(),
+    orderNumber: 1,
     parameters: style ? { imageStyle: style.name } : undefined,
   });
   
@@ -96,7 +105,8 @@ export async function generateImageAction({
     // Generate image using the service
     const result = await generateImage({
       prompt: fullPrompt.trim(),
-      modelId: modelName,
+      modelId: model.id,
+      conversationId
     });
 
     console.log('Generated images:', result);
@@ -117,21 +127,46 @@ export async function generateImageAction({
       contentType: 'image/png',
     });
 
+    // Create file record in database
+    await dbInsertFile({
+      id: fileId,
+      name: `generated_image_${Date.now()}.png`,
+      size: imageBuffer.length,
+      type: 'image/png',
+      metadata: {
+        width: undefined, // Could be extracted from image if needed
+        height: undefined, // Could be extracted from image if needed
+      },
+    });
+    
+    // Store generated image as assistant message
+    const assistantMessage = await dbInsertChatContent({
+      conversationId: conversationId,
+      role: 'assistant',
+      content: '', // No content needed since we're using file attachment
+      orderNumber: 2,
+      modelName: model.name,
+      parameters: style ? { imageStyle: style.name } : undefined,
+    });
+
+    if (!assistantMessage) {
+      throw new Error('Failed to create assistant message');
+    }
+
+    // Link the image file to the assistant message
+    await linkFilesToConversation({
+      conversationMessageId: assistantMessage.id,
+      conversationId: conversationId,
+      fileIds: [fileId],
+    });
+
+    // Get signed URL for immediate return (still needed for UI display)
     const signedUrl = await getSignedUrlFromS3Get({
       key,
       contentType: 'image/png',
       attachment: false,
     });
-    
-    // Store generated image as assistant message
-    await dbInsertChatContent({
-      conversationId: conversationId,
-      role: 'assistant',
-      content: signedUrl,
-      orderNumber: Date.now() + 1,
-      modelName,
-      parameters: style ? { imageStyle: style.name } : undefined,
-    });
+
 
     // Return the image URL
     return {
@@ -139,22 +174,8 @@ export async function generateImageAction({
       conversationId,
     };
   } catch (error) {
-    console.error('Image generation failed:', error);
     throw error instanceof Error
       ? error
       : new Error('Unknown error occurred during image generation');
   }
-}
-
-/**
- * TODO: Implement save user's preferred image model
- * Similar to saveChatModelForUserAction but for image models
- */
-export async function saveImageModelForUserAction(modelName: string) {
-  const user = await getUser();
-
-  // TODO: Implement saving user's last used image model
-  // This might require adding a new field to user table: lastUsedImageModel
-
-  throw new Error('Save image model preference not implemented yet');
 }

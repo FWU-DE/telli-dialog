@@ -11,6 +11,7 @@ const featureToggleDefaults = {
   isCustomGptEnabled: true,
   isSharedChatEnabled: true,
   isShareTemplateWithSchoolEnabled: true,
+  isImageGenerationEnabled: true,
 };
 
 test('login as student with students disabled', async ({ page }) => {

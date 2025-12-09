@@ -29,12 +29,14 @@ export async function dbGetOrCreateConversation({
   characterId,
   customGptId,
   type,
+  name,
 }: {
   conversationId: string;
   userId: string;
   characterId?: string;
   customGptId?: string;
   type?: 'chat' | 'image-generation';
+  name?: string;
 }) {
   return (
     await db
@@ -45,6 +47,7 @@ export async function dbGetOrCreateConversation({
         characterId: characterId ?? null,
         customGptId: customGptId ?? null,
         type: type ?? 'chat',
+        name: name ?? null,
       })
       .onConflictDoUpdate({
         target: conversationTable.id,

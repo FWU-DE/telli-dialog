@@ -16,6 +16,7 @@ import { type ConversationModel } from '@shared/db/types';
 import Link from 'next/link';
 import { useTheme } from '@/hooks/use-theme';
 import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
+import { ImageSquareIcon } from '@phosphor-icons/react/dist/icons/ImageSquare';
 
 const renameSchema = z.object({
   name: z.string().min(1),
@@ -77,7 +78,7 @@ export default function ConversationItem({
       ) : (
         <Link
           title={conversation.name ?? undefined}
-          className={cn('overflow-hidden flex-grow', 'text-primary')}
+          className={cn('flex overflow-hidden flex-grow', 'text-primary')}
           href={buildConversationUrl({ conversation })}
           onClick={() => {
             if (!isPrivateMode && isBelow.md) {
@@ -85,6 +86,7 @@ export default function ConversationItem({
             }
           }}
         >
+          {conversation.type === 'image-generation' && <ImageSquareIcon className="w-6 h-5" />}
           <p className="w-full rounded-lg text-left truncate text-base">
             {conversation.name ?? 'Neuer Chat'}
           </p>
@@ -144,6 +146,10 @@ function buildConversationUrl({ conversation }: { conversation: ConversationMode
 
   if (conversation.customGptId !== null) {
     return `/custom/d/${conversation.customGptId}/${conversation.id}`;
+  }
+
+  if (conversation.type === 'image-generation') {
+    return `/image-generation/d/${conversation.id}`;
   }
 
   return `/d/${conversation.id}`;
