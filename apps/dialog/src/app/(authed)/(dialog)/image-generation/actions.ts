@@ -105,7 +105,7 @@ export async function generateImageAction({
     // Save image to S3
     const imageBuffer = Buffer.from(image.b64_json, 'base64');
     const fileId = `file_${cnanoid()}`;
-    const key = `generated_images/${fileId}`;
+    const key = `message_attachments/${fileId}`;
 
     await uploadFileToS3({
       key,

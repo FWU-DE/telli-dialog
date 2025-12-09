@@ -60,7 +60,7 @@ export default function ImageGenerationChat({
             try {
               // Generate signed URL for the image file
               const signedUrl = await getSignedUrlFromS3Get({
-                key: `generated_images/${imageFile.id}`,
+                key: `message_attachments/${imageFile.id}`,
                 contentType: imageFile.type,
                 attachment: false,
               });
