@@ -327,15 +327,6 @@ describe('character-service', () => {
           }),
       },
       {
-        functionName: 'deleteFileMappingAndEntity (invalid fileId)',
-        testFunction: () =>
-          deleteFileMappingAndEntity({
-            characterId: generateUUID(),
-            fileId: 'invalid-uuid',
-            userId: 'user-id',
-          }),
-      },
-      {
         functionName: 'fetchFileMappings',
         testFunction: () =>
           fetchFileMappings({

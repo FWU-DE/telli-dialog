@@ -58,7 +58,6 @@ export function LargeLanguageModelDetailView({
     control,
     formState: { isValid, errors, isSubmitting, isDirty },
     handleSubmit,
-    reset,
   } = useForm<LLMForm>({
     resolver: zodResolver(llmFormSchema),
     defaultValues: model

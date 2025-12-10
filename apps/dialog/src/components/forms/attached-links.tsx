@@ -60,6 +60,7 @@ export function AttachedLinks({
       { link: content, name: '', type: 'websearch', content: '', error: false },
     ]);
     setCurrentAttachedLink('');
+    handleAutosave();
   }
 
   function handleDeleteLink(index: number) {

@@ -325,7 +325,7 @@ export async function linkFileToLearningScenario({
   learningScenarioId: string;
   userId: string;
 }) {
-  checkParameterUUID(learningScenarioId, fileId);
+  checkParameterUUID(learningScenarioId);
   const learningScenario = await dbGetSharedSchoolChatById({
     sharedChatId: learningScenarioId,
     userId,
@@ -357,7 +357,7 @@ export async function removeFileFromLearningScenario({
   fileId: string;
   userId: string;
 }) {
-  checkParameterUUID(learningScenarioId, fileId);
+  checkParameterUUID(learningScenarioId);
   await getLearningScenario({ learningScenarioId, userId });
 
   await db.transaction(async (tx) => {
