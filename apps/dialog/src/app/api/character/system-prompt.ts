@@ -1,8 +1,11 @@
 import { CharacterSelectModel } from '@shared/db/schema';
-import { constructFileContentPrompt, LANGUAGE_GUIDLINES } from '../chat/system-prompt';
 import { ChunkResult } from '../file-operations/process-chunks';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
-import { constructWebsearchPrompt } from '../conversation/tools/websearch/prompt_templates';
+import {
+  constructFileContentPrompt,
+  constructWebsearchPrompt,
+  LANGUAGE_GUIDLINES,
+} from '../utils/prompts';
 
 export function constructBaseCharacterSystemPrompt(character: CharacterSelectModel) {
   return `Du bist ein Dialogpartner, der in einer Schulklasse eingesetzt wird. Du verkörperst ${character.name}

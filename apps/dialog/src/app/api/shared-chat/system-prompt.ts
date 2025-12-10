@@ -1,8 +1,11 @@
 import { type SharedSchoolConversationModel } from '@shared/db/schema';
-import { constructFileContentPrompt, LANGUAGE_GUIDLINES } from '../chat/system-prompt';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
-import { constructWebsearchPrompt } from '../conversation/tools/websearch/prompt_templates';
 import { ChunkResult } from '../file-operations/process-chunks';
+import {
+  constructFileContentPrompt,
+  constructWebsearchPrompt,
+  LANGUAGE_GUIDLINES,
+} from '../utils/prompts';
 
 export function constructLearningScenarioSystemPrompt({
   sharedChat,

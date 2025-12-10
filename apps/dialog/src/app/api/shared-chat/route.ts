@@ -9,11 +9,6 @@ import {
 import { dbGetSharedChatByIdAndInviteCode } from '@shared/db/functions/shared-school-chat';
 import { constructLearningScenarioSystemPrompt } from './system-prompt';
 import { dbUpdateTokenUsageBySharedChatId } from '@shared/db/functions/shared-school-chat';
-import {
-  getModelAndProviderWithResult,
-  getSearchParamsFromUrl,
-  calculateCostsInCent,
-} from '../utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
@@ -21,6 +16,9 @@ import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exce
 import { dbGetRelatedSharedChatFiles } from '@shared/db/functions/files';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { getRelevantFileContent } from '../file-operations/retrieval';
+import { getSearchParamsFromUrl } from '../utils/url';
+import { calculateCostsInCent } from '../utils/costs';
+import { getModelAndProviderWithResult } from '../utils/openAiProviderMapper';
 
 export async function POST(request: NextRequest) {
   const { messages, modelId }: { messages: Array<Message>; modelId: string } = await request.json();
