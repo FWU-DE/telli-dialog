@@ -8,12 +8,12 @@ import { ChunkResult } from '../file-operations/process-chunks';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { constructBaseCharacterSystemPrompt } from '../character/system-prompt';
 import {
-  constructFileContentPrompt,
+  constructFilePrompt,
   constructWebsearchPrompt,
   LANGUAGE_GUIDLINES,
 } from '../utils/system-prompt';
 
-export function constructTelliSystemPrompt() {
+function constructTelliSystemPrompt() {
   return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. 
 Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. 
 Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. 
@@ -22,7 +22,7 @@ Bei Fragen über telli verweise auf die Hilfe in der Sidebar.
 ${LANGUAGE_GUIDLINES}`;
 }
 
-export function constructCustomGptSystemPrompt(customGpt: CustomGptModel) {
+function constructCustomGptSystemPrompt(customGpt: CustomGptModel) {
   return `Du bist ein hifreicher Assistent, der in einer Schule eingesetzt wird. Dein Name ist ${customGpt.name}.
 ${LANGUAGE_GUIDLINES}
 ${customGpt.description ? `Dein Ziel ist es hierbei zu assistieren: ${customGpt.description}` : ''}
@@ -30,7 +30,7 @@ ${customGpt.specification ? `Deine Aufgabe ist insbesondere: ${customGpt.specifi
 `;
 }
 
-export function constructHelpModeSystemPrompt({
+function constructHelpModeSystemPrompt({
   isTeacher,
   federalStateSupportEmails,
   chatStorageDuration,
@@ -105,8 +105,8 @@ export async function constructChatSystemPrompt({
   websearchSources: WebsearchSource[];
   retrievedTextChunks?: Record<string, ChunkResult[]>;
 }) {
-  const fileContentPrompt = constructFileContentPrompt(retrievedTextChunks);
-  const websearchSourcesPrompt = constructWebsearchPrompt(websearchSources);
+  const filePrompt = constructFilePrompt(retrievedTextChunks);
+  const websearchPrompt = constructWebsearchPrompt(websearchSources);
 
   if (characterId !== undefined) {
     const character = await dbGetCharacterById({ characterId });
@@ -117,7 +117,7 @@ export async function constructChatSystemPrompt({
 
     const characterSystemPrompt = constructBaseCharacterSystemPrompt(character);
 
-    return characterSystemPrompt + fileContentPrompt + websearchSourcesPrompt;
+    return characterSystemPrompt + filePrompt + websearchPrompt;
   }
 
   if (customGptId !== undefined) {
@@ -138,8 +138,8 @@ export async function constructChatSystemPrompt({
       customGptSystemPrompt = constructCustomGptSystemPrompt(customGpt);
     }
 
-    return customGptSystemPrompt + fileContentPrompt + websearchSourcesPrompt;
+    return customGptSystemPrompt + filePrompt + websearchPrompt;
   }
 
-  return constructTelliSystemPrompt() + fileContentPrompt + websearchSourcesPrompt;
+  return constructTelliSystemPrompt() + filePrompt + websearchPrompt;
 }

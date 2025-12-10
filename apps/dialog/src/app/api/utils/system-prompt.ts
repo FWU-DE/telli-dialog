@@ -45,7 +45,7 @@ ${textChunks.map(formatTextChunk).join('\n\n')}
 `;
 }
 
-export function constructFileContentPrompt(
+export function constructFilePrompt(
   retrievedTextChunks: Record<string, ChunkResult[]> | undefined,
 ) {
   return retrievedTextChunks !== undefined && Object.keys(retrievedTextChunks).length > 0

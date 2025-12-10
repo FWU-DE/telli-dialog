@@ -2,7 +2,7 @@ import { type SharedSchoolConversationModel } from '@shared/db/schema';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { ChunkResult } from '../file-operations/process-chunks';
 import {
-  constructFileContentPrompt,
+  constructFilePrompt,
   constructWebsearchPrompt,
   LANGUAGE_GUIDLINES,
 } from '../utils/system-prompt';
@@ -16,7 +16,7 @@ export function constructLearningScenarioSystemPrompt({
   retrievedTextChunks?: Record<string, ChunkResult[]>;
   websearchSources?: WebsearchSource[];
 }) {
-  const filePrompt = constructFileContentPrompt(retrievedTextChunks);
+  const filePrompt = constructFilePrompt(retrievedTextChunks);
   const websearchPrompt = constructWebsearchPrompt(websearchSources);
 
   return `Du bist ein KI-Chatbot, der in einer Schulklasse eingesetzt wird, um Schülerinnen und Schüler zu unterstützen.

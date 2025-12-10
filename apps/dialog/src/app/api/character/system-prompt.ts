@@ -2,7 +2,7 @@ import { CharacterSelectModel } from '@shared/db/schema';
 import { ChunkResult } from '../file-operations/process-chunks';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import {
-  constructFileContentPrompt,
+  constructFilePrompt,
   constructWebsearchPrompt,
   LANGUAGE_GUIDLINES,
 } from '../utils/system-prompt';
@@ -33,7 +33,7 @@ export function constructCharacterSystemPrompt({
   retrievedTextChunks?: Record<string, ChunkResult[]>;
   websearchSources?: WebsearchSource[];
 }) {
-  const filePrompt = constructFileContentPrompt(retrievedTextChunks);
+  const filePrompt = constructFilePrompt(retrievedTextChunks);
   const websearchPrompt = constructWebsearchPrompt(websearchSources);
 
   return `
