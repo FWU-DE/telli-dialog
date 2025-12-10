@@ -11,7 +11,7 @@ import {
   getModelAndProviderWithResult,
   getSearchParamsFromUrl,
   calculateCostsInCent,
-} from '../utils';
+} from '../utils/utils';
 import {
   dbGetCharacterByIdAndInviteCode,
   dbUpdateTokenUsageByCharacterChatId,

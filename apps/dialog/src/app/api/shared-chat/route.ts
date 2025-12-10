@@ -13,7 +13,7 @@ import {
   getModelAndProviderWithResult,
   getSearchParamsFromUrl,
   calculateCostsInCent,
-} from '../utils';
+} from '../utils/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
