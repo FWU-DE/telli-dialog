@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { dbInsertChatContent } from '@shared/db/functions/chat';
 import { getUser, updateSession, userHasCompletedTraining } from '@/auth/utils';
 import { userHasReachedIntelliPointLimit } from './usage';
+import { getModelAndProviderWithResult, calculateCostsInCent, getAuxiliaryModel } from '../utils';
 import { generateUUID } from '@shared/utils/uuid';
 import { getChatTitle, getMostRecentUserMessage, limitChatHistory } from './utils';
 import { constructChatSystemPrompt } from './system-prompt';
@@ -28,9 +29,6 @@ import { logDebug } from '@shared/logging';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
-import { calculateCostsInCent } from '../utils/costs';
-import { getAuxiliaryModel } from '../utils/default-model';
-import { getModelAndProviderWithResult } from '../utils/openAiProviderMapper';
 
 export async function POST(request: NextRequest) {
   const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);

@@ -7,7 +7,11 @@ import {
   userHasReachedIntelliPointLimit,
 } from '../chat/usage';
 import { constructCharacterSystemPrompt } from './system-prompt';
-import { getSearchParamsFromUrl } from '../utils/url';
+import {
+  getModelAndProviderWithResult,
+  getSearchParamsFromUrl,
+  calculateCostsInCent,
+} from '../utils';
 import {
   dbGetCharacterByIdAndInviteCode,
   dbUpdateTokenUsageByCharacterChatId,
@@ -19,8 +23,6 @@ import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exce
 import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
-import { getModelAndProviderWithResult } from '../utils/openAiProviderMapper';
-import { calculateCostsInCent } from '../utils/costs';
 
 export async function POST(request: NextRequest) {
   const { messages, modelId }: { messages: Array<Message>; modelId: string } = await request.json();

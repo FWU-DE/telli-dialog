@@ -3,15 +3,19 @@ import { dbGetCharacterById } from '@shared/db/functions/character';
 import { ObscuredFederalState } from '@/auth/utils';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { CustomGptModel } from '@shared/db/schema';
+import { constructWebsearchPrompt } from '../conversation/tools/websearch/prompt_templates';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { ChunkResult } from '../file-operations/process-chunks';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { constructBaseCharacterSystemPrompt } from '../character/system-prompt';
-import {
-  constructFileContentPrompt,
-  constructWebsearchPrompt,
-  LANGUAGE_GUIDLINES,
-} from '../utils/prompts';
+
+export const LANGUAGE_GUIDLINES = `
+## Sprachliche Richtlinien:
+- Verwende eine Sprache, Tonalität und Inhalte, die für den Einsatz in der Schule geeignet sind.
+- Vermeide komplizierte Fachbegriffe, es sei denn, sie sind notwendig und werden erklärt.
+- Du sprichst immer die Sprache mit der du angesprochen wirst. 
+- Du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die Paarform (Beidnennung) z.B. Bürgerinnen und Bürger. 
+`;
 
 export function constructTelliSystemPrompt() {
   return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. 
@@ -20,6 +24,34 @@ Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben.
 Heute ist der ${formatDateToGermanTimestamp(new Date())}. 
 Bei Fragen über telli verweise auf die Hilfe in der Sidebar.
 ${LANGUAGE_GUIDLINES}`;
+}
+
+function formatTextChunk(textChunk: ChunkResult) {
+  return textChunk.pageNumber
+    ? `Seite ${textChunk.pageNumber}: ${textChunk.content}`
+    : textChunk.content;
+}
+
+export function constructFileContentPrompt(
+  retrievedTextChunks: Record<string, ChunkResult[]> | undefined,
+) {
+  return retrievedTextChunks !== undefined && Object.keys(retrievedTextChunks).length > 0
+    ? `\nDer Nutzer hat folgende Dateien bereitgestellt, berücksichtige den Inhalt dieser Dateien bei der Antwort: ` +
+        Object.keys(retrievedTextChunks).map((fileId) =>
+          constructSingleFilePrompt(retrievedTextChunks?.[fileId] ?? []),
+        )
+    : '';
+}
+
+function constructSingleFilePrompt(textChunks: ChunkResult[]) {
+  if (textChunks.length === 0) {
+    return '';
+  }
+
+  return `${textChunks[0]?.fileName ? `Dateiname: ${textChunks[0].fileName}` : ''} 
+Inhalt:
+${textChunks.map(formatTextChunk).join('\n\n')}
+`;
 }
 
 export function constructCustomGptSystemPrompt(customGpt: CustomGptModel) {
