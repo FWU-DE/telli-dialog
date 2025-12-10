@@ -7,7 +7,7 @@ import {
   userHasReachedIntelliPointLimit,
 } from '../chat/usage';
 import { dbGetSharedChatByIdAndInviteCode } from '@shared/db/functions/shared-school-chat';
-import { constructSystemPromptBySharedChat } from './system-prompt';
+import { constructLearningScenarioSystemPrompt } from './system-prompt';
 import { dbUpdateTokenUsageBySharedChatId } from '@shared/db/functions/shared-school-chat';
 import {
   getModelAndProviderWithResult,
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
   });
 
   const websearchSources = await Promise.all(urls);
-  const systemPrompt = constructSystemPromptBySharedChat({
+  const systemPrompt = constructLearningScenarioSystemPrompt({
     sharedChat,
     retrievedTextChunks,
     websearchSources,

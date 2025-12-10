@@ -1,68 +1,65 @@
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { dbGetCharacterById } from '@shared/db/functions/character';
-import { getUser, ObscuredFederalState } from '@/auth/utils';
+import { ObscuredFederalState } from '@/auth/utils';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { CustomGptModel } from '@shared/db/schema';
 import { constructWebsearchPrompt } from '../conversation/tools/websearch/prompt_templates';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { ChunkResult } from '../file-operations/process-chunks';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
-export function constructSchuleSystemPrompt() {
-  return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. Heute ist der ${formatDateToGermanTimestamp(new Date())}. Befolge folgende Anweisungen: Du sprichst immer die Sprache mit der du angesprochen wirst. Du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die Paarform (Beidnennung) z.B. Bürgerinnen und Bürger. Bei Fragen über telli verweise auf die Hilfe in der Sidebar.`;
+import { constructBaseCharacterSystemPrompt } from '../character/system-prompt';
+
+export const LANGUAGE_GUIDLINES = `
+## Sprachliche Richtlinien:
+- Verwende eine Sprache, Tonalität und Inhalte, die für den Einsatz in der Schule geeignet sind.
+- Vermeide komplizierte Fachbegriffe, es sei denn, sie sind notwendig und werden erklärt.
+- Du sprichst immer die Sprache mit der du angesprochen wirst. 
+- Du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die Paarform (Beidnennung) z.B. Bürgerinnen und Bürger. 
+`;
+
+export function constructTelliSystemPrompt() {
+  return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. 
+Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. 
+Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. 
+Heute ist der ${formatDateToGermanTimestamp(new Date())}. 
+Bei Fragen über telli verweise auf die Hilfe in der Sidebar.
+${LANGUAGE_GUIDLINES}`;
 }
 
 function formatTextChunk(textChunk: ChunkResult) {
-  return `Seite ${textChunk.pageNumber}: ${textChunk.content}`;
+  return textChunk.pageNumber
+    ? `Seite ${textChunk.pageNumber}: ${textChunk.content}`
+    : textChunk.content;
 }
 
-export function constructSingleFilePrompt(textChunks: ChunkResult[]) {
+export function constructFileContentPrompt(
+  retrievedTextChunks: Record<string, ChunkResult[]> | undefined,
+) {
+  return retrievedTextChunks !== undefined && Object.keys(retrievedTextChunks).length > 0
+    ? `\nDer Nutzer hat folgende Dateien bereitgestellt, berücksichtige den Inhalt dieser Dateien bei der Antwort: ` +
+        Object.keys(retrievedTextChunks).map((fileId) =>
+          constructSingleFilePrompt(retrievedTextChunks?.[fileId] ?? []),
+        )
+    : '';
+}
+
+function constructSingleFilePrompt(textChunks: ChunkResult[]) {
   if (textChunks.length === 0) {
     return '';
   }
 
-  return `Dateiname: ${textChunks[0]?.fileName ?? ''} 
-  Was folgt sind die relevanten Informationen aus der Datei:
-  --------- 
-  ${textChunks.map(formatTextChunk).join('\n\n')}
-
-  ---------
-  `;
-}
-
-export function constructCustomGptSystemPrompt({
-  customGpt,
-  fileContentPrompt,
-}: {
-  customGpt: CustomGptModel;
-  fileContentPrompt?: string;
-}) {
-  return `Du bist ein hifreicher Assistent, der in einer Schule eingesetzt wird. Dein Name ist ${customGpt.name}. 
-Dein Ziel ist es hierbei zu assistieren: ${customGpt.description}
-Deine Aufgabe ist insbesondere: ${customGpt.specification ?? ''}
-${fileContentPrompt ?? ''}
+  return `${textChunks[0]?.fileName ? `Dateiname: ${textChunks[0].fileName}` : ''} 
+Inhalt:
+${textChunks.map(formatTextChunk).join('\n\n')}
 `;
 }
 
-export async function constructCharacterSystemPrompt({
-  characterId,
-  fileContentPrompt,
-}: {
-  characterId: string;
-  fileContentPrompt: string;
-}) {
-  await getUser();
-  const character = await dbGetCharacterById({ characterId });
-
-  if (character === undefined) {
-    return '';
-  }
-
-  return `Du bist ein Dialogpartner, der in einer Schule eingesetzt wird. Du verkörperst ${character.name}. 
-Du wist aktuell im folgenden Lernkontext verwendet: ${character.learningContext ?? ''}
-${fileContentPrompt ?? ''}
-Du sollst folgendes beachten: ${character.specifications ?? ''}
-
-Folgende Dinge sollst du AUF KEINEN FALL tun: ${character.restrictions ?? ''}`;
+export function constructCustomGptSystemPrompt(customGpt: CustomGptModel) {
+  return `Du bist ein hifreicher Assistent, der in einer Schule eingesetzt wird. Dein Name ist ${customGpt.name}.
+${LANGUAGE_GUIDLINES}
+${customGpt.description ? `Dein Ziel ist es hierbei zu assistieren: ${customGpt.description}` : ''}
+${customGpt.specification ? `Deine Aufgabe ist insbesondere: ${customGpt.specification}` : ''}
+`;
 }
 
 export function constructHelpModeSystemPrompt({
@@ -74,8 +71,10 @@ export function constructHelpModeSystemPrompt({
   federalStateSupportEmails: string[] | null;
   chatStorageDuration: number;
 }) {
-  const systemPrompt = `
-Du bist der integrierte Hilfechat zu telli, dem datenschutzkonformen KI-Chatbot für den Schulunterricht. telli unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. telli wird vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. Heute ist der ${formatDateToGermanTimestamp(new Date())}. 
+  const systemPrompt = `Du bist der integrierte Hilfechat zu telli, dem datenschutzkonformen KI-Chatbot für den Schulunterricht.
+telli unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen.
+telli wird vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben.
+Heute ist der ${formatDateToGermanTimestamp(new Date())}.
 
 Informationen zu telli:
 Der Hilfe-Assistent wird durch das Öffnen eines neuen Chats beendet.
@@ -98,13 +97,10 @@ telli stellt zudem folgende Features mit einem pädagogischen Kontext bereit, we
 ${
   isTeacher
     ? `
-  Deine Funktionen in der Seitenleiste links:
-
-  Lernszenarien: Diese erlauben es der Lehrkraft, eine bestimmte pädagogische Situation oder Zielsetzung über einen Systemprompt vorab zu konfigurieren. Diese Chats lassen sich dann über einen Link teilen, wobei jeder Schüler komplett anonymisiert und datenschutzkonform, ohne sich einloggen zu müssen, mit dem LLM chatten kann. Jeder Chat besteht nur aus dem LLM und einem Gegenüber, d.h. einem Schüler.
-
-  Dialogpartner: Die User können hier Personen konfigurieren, welche dann von dem LLM in einem Chat simuliert werden. Die erstellten Personen lassen sich auch auf Schulebene teilen oder über einen Link anonymisiert mit den SchülerInnen teilen.
-  
-  Assistenten: Durch Systemprompts vorkonfigurierte KI-Chats. Sie eignen sich besonders für sich wiederholende Aufgaben, bspw. administrative Tätigkeiten`
+Deine Funktionen in der Seitenleiste links:
+- Lernszenarien: Diese erlauben es der Lehrkraft, eine bestimmte pädagogische Situation oder Zielsetzung über einen Systemprompt vorab zu konfigurieren. Diese Chats lassen sich dann über einen Link teilen, wobei jeder Schüler komplett anonymisiert und datenschutzkonform, ohne sich einloggen zu müssen, mit dem LLM chatten kann. Jeder Chat besteht nur aus dem LLM und einem Gegenüber, d.h. einem Schüler.
+- Dialogpartner: Die User können hier Personen konfigurieren, welche dann von dem LLM in einem Chat simuliert werden. Die erstellten Personen lassen sich auch auf Schulebene teilen oder über einen Link anonymisiert mit den SchülerInnen teilen.
+- Assistenten: Durch Systemprompts vorkonfigurierte KI-Chats. Sie eignen sich besonders für sich wiederholende Aufgaben, bspw. administrative Tätigkeiten`
     : ''
 }
 
@@ -126,9 +122,6 @@ ${federalStateSupportEmails !== null ? `- Kannst du nicht weiterhelfen, verweise
   return systemPrompt;
 }
 
-export const BASE_FILE_PROMPT = `Der Nutzer hat folgende Dateien bereitgestellt, berücksichtige den Inhalt dieser Dateien bei der Antwort`;
-export const BASE_WEBSEARCH_PROMPT = `Der Nutzer hat folgende Quellen bereitgestellt, berücksichtige den Inhalt dieser Quellen bei der Antwort: `;
-
 export async function constructChatSystemPrompt({
   characterId,
   customGptId,
@@ -144,44 +137,41 @@ export async function constructChatSystemPrompt({
   websearchSources: WebsearchSource[];
   retrievedTextChunks?: Record<string, ChunkResult[]>;
 }) {
-  const schoolSystemPrompt = constructSchuleSystemPrompt();
-  const fileContentPrompt =
-    retrievedTextChunks !== undefined && Object.keys(retrievedTextChunks).length > 0
-      ? BASE_FILE_PROMPT +
-        Object.keys(retrievedTextChunks).map((fileId) =>
-          constructSingleFilePrompt(retrievedTextChunks?.[fileId] ?? []),
-        )
-      : '';
+  const fileContentPrompt = constructFileContentPrompt(retrievedTextChunks);
+  const websearchSourcesPrompt = constructWebsearchPrompt(websearchSources);
 
-  const websearchSourcesPrompt = constructWebsearchPrompt({ websearchSources });
   if (characterId !== undefined) {
-    const characterSystemPrompt = await constructCharacterSystemPrompt({
-      characterId,
-      fileContentPrompt,
-    });
+    const character = await dbGetCharacterById({ characterId });
+
+    if (character === undefined) {
+      throw new Error(`Character with id ${characterId} not found`);
+    }
+
+    const characterSystemPrompt = constructBaseCharacterSystemPrompt(character);
 
     return characterSystemPrompt + fileContentPrompt + websearchSourcesPrompt;
   }
+
   if (customGptId !== undefined) {
     const customGpt = await dbGetCustomGptById({ customGptId });
 
     if (customGpt === undefined) {
       throw new Error(`GPT with id ${customGptId} not found`);
     }
-    let additionalInstruction: string;
 
-    if (customGpt.id === HELP_MODE_GPT_ID)
-      additionalInstruction = constructHelpModeSystemPrompt({
+    let customGptSystemPrompt: string;
+    if (customGpt.id === HELP_MODE_GPT_ID) {
+      customGptSystemPrompt = constructHelpModeSystemPrompt({
         isTeacher,
         federalStateSupportEmails: federalState.supportContacts,
         chatStorageDuration: federalState.chatStorageTime,
       });
-    else {
-      additionalInstruction = constructCustomGptSystemPrompt({ customGpt, fileContentPrompt });
+    } else {
+      customGptSystemPrompt = constructCustomGptSystemPrompt(customGpt);
     }
 
-    return schoolSystemPrompt + additionalInstruction + websearchSourcesPrompt;
+    return customGptSystemPrompt + fileContentPrompt + websearchSourcesPrompt;
   }
 
-  return schoolSystemPrompt + fileContentPrompt + websearchSourcesPrompt;
+  return constructTelliSystemPrompt() + fileContentPrompt + websearchSourcesPrompt;
 }

@@ -1,9 +1,10 @@
 import { type SharedSchoolConversationModel } from '@shared/db/schema';
-import { BASE_FILE_PROMPT, constructSingleFilePrompt } from '../chat/system-prompt';
+import { constructFileContentPrompt, LANGUAGE_GUIDLINES } from '../chat/system-prompt';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { constructWebsearchPrompt } from '../conversation/tools/websearch/prompt_templates';
 import { ChunkResult } from '../file-operations/process-chunks';
-export function constructSystemPromptBySharedChat({
+
+export function constructLearningScenarioSystemPrompt({
   sharedChat,
   retrievedTextChunks,
   websearchSources,
@@ -12,30 +13,23 @@ export function constructSystemPromptBySharedChat({
   retrievedTextChunks?: Record<string, ChunkResult[]>;
   websearchSources?: WebsearchSource[];
 }) {
-  const filePrompt =
-    retrievedTextChunks !== undefined && Object.keys(retrievedTextChunks).length > 0
-      ? BASE_FILE_PROMPT +
-        Object.keys(retrievedTextChunks).map((fileId) =>
-          constructSingleFilePrompt(retrievedTextChunks?.[fileId] ?? []),
-        )
-      : '';
+  const filePrompt = constructFileContentPrompt(retrievedTextChunks);
+  const websearchPrompt = constructWebsearchPrompt(websearchSources);
 
-  const websearchPrompt = constructWebsearchPrompt({ websearchSources });
-  return `
-Du bist ein KI-Chatbot, der in einer Schulklasse eingesetzt wird, um Schülerinnen und Schüler zu unterstützen. Verwende eine Sprache, Tonalität und Inhalte, die für den Einsatz in der jeweiligen Klasse geeignet ist. Vermeide komplizierte Fachbegriffe, es sei denn, sie sind notwendig und werden erklärt. Beachte die folgenden Regeln:
+  return `Du bist ein KI-Chatbot, der in einer Schulklasse eingesetzt wird, um Schülerinnen und Schüler zu unterstützen.
+${LANGUAGE_GUIDLINES}
  
-## Kontext:
+## Kontext
 - **Thema des Chats**: ${sharedChat.name}
 - **Zweck des Dialogs**: ${sharedChat.description}
-- **Schultyp**: ${sharedChat.schoolType}.
-- **Klassenstufe**: ${sharedChat.gradeLevel}.
-- **Fach**: ${sharedChat.subject}.
+${sharedChat.schoolType ? `\n- **Schultyp**: ${sharedChat.schoolType}` : ''}
+${sharedChat.gradeLevel ? `\n- **Klassenstufe**: ${sharedChat.gradeLevel}` : ''}
+${sharedChat.subject ? `\n- **Fach**: ${sharedChat.subject}` : ''}
  
 ## Anweisungen
-Folgendes sollst du tun:
-${sharedChat.additionalInstructions}
+${sharedChat.studentExcercise ? `Folgendes ist der Auftrag an die Lernenden: ${sharedChat.studentExcercise}` : ''}
+Verhalte dich entsprechend folgender Anweisungen: ${sharedChat.additionalInstructions}
 
 ${filePrompt}
-${websearchPrompt}
-`;
+${websearchPrompt}`;
 }

@@ -3,11 +3,7 @@ import { WebsearchSource } from './types';
 
 export const WEBSEARCH_PROMPT = `Der Nutzer hat folgende Quellen bereitgestellt, berücksichtige den Inhalt dieser Quellen bei der Antwort: `;
 
-export function constructWebsearchPrompt({
-  websearchSources,
-}: {
-  websearchSources?: WebsearchSource[];
-}) {
+export function constructWebsearchPrompt(websearchSources?: WebsearchSource[]) {
   if (websearchSources === undefined || websearchSources.length === 0) {
     return '';
   }

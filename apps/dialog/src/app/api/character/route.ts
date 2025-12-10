@@ -6,7 +6,7 @@ import {
   sharedChatHasExpired,
   userHasReachedIntelliPointLimit,
 } from '../chat/usage';
-import { constructSystemPromptByCharacterSharedChat } from './system-prompt';
+import { constructCharacterSystemPrompt } from './system-prompt';
 import {
   getModelAndProviderWithResult,
   getSearchParamsFromUrl,
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     model: telliProvider,
   });
   const websearchSources = await Promise.all(urls);
-  const systemPrompt = constructSystemPromptByCharacterSharedChat({
+  const systemPrompt = constructCharacterSystemPrompt({
     character,
     retrievedTextChunks: orderedChunks,
     websearchSources,
