@@ -4,7 +4,8 @@ import { ChunkResult } from '../file-operations/process-chunks';
 import {
   constructFilePrompt,
   constructWebsearchPrompt,
-  LANGUAGE_GUIDLINES,
+  formatList,
+  LANGUAGE_GUIDELINES,
 } from '../utils/system-prompt';
 
 export function constructLearningScenarioSystemPrompt({
@@ -20,18 +21,34 @@ export function constructLearningScenarioSystemPrompt({
   const websearchPrompt = constructWebsearchPrompt(websearchSources);
 
   return `Du bist ein KI-Chatbot, der in einer Schulklasse eingesetzt wird, um Schülerinnen und Schüler zu unterstützen.
-${LANGUAGE_GUIDLINES}
+${LANGUAGE_GUIDELINES}
  
-## Kontext
-- **Thema des Chats**: ${sharedChat.name}
-- **Zweck des Dialogs**: ${sharedChat.description}
-${sharedChat.schoolType ? `\n- **Schultyp**: ${sharedChat.schoolType}` : ''}
-${sharedChat.gradeLevel ? `\n- **Klassenstufe**: ${sharedChat.gradeLevel}` : ''}
-${sharedChat.subject ? `\n- **Fach**: ${sharedChat.subject}` : ''}
- 
-## Anweisungen
-${sharedChat.studentExcercise ? `Folgendes ist der Auftrag an die Lernenden: ${sharedChat.studentExcercise}` : ''}
-Verhalte dich entsprechend folgender Anweisungen: ${sharedChat.additionalInstructions}
+${formatList('## Kontext', [
+  {
+    label: 'Thema des Chats',
+    value: sharedChat.name,
+  },
+  {
+    label: 'Schultyp',
+    value: sharedChat.schoolType,
+  },
+  {
+    label: 'Klassenstufe',
+    value: sharedChat.gradeLevel,
+  },
+  {
+    label: 'Fach',
+    value: sharedChat.subject,
+  },
+])}
+
+## Zweck des Dialogs
+${sharedChat.description}
+
+${sharedChat.studentExcercise.length !== 0 ? `Folgendes ist der Auftrag an die Lernenden:\n${sharedChat.studentExcercise}` : ''}
+
+## Verhalte dich wie folgt
+${sharedChat.additionalInstructions}
 
 ${filePrompt}
 ${websearchPrompt}`;

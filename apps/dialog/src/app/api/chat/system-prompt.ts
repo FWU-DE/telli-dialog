@@ -10,7 +10,8 @@ import { constructBaseCharacterSystemPrompt } from '../character/system-prompt';
 import {
   constructFilePrompt,
   constructWebsearchPrompt,
-  LANGUAGE_GUIDLINES,
+  CUSTOM_GPT_LANGUAGE_GUIDELINES,
+  LANGUAGE_GUIDELINES,
 } from '../utils/system-prompt';
 
 function constructTelliSystemPrompt() {
@@ -19,12 +20,12 @@ Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und 
 Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. 
 Heute ist der ${formatDateToGermanTimestamp(new Date())}. 
 Bei Fragen über telli verweise auf die Hilfe in der Sidebar.
-${LANGUAGE_GUIDLINES}`;
+${LANGUAGE_GUIDELINES}`;
 }
 
 function constructCustomGptSystemPrompt(customGpt: CustomGptModel) {
-  return `Du bist ein hifreicher Assistent, der in einer Schule eingesetzt wird. Dein Name ist ${customGpt.name}.
-${LANGUAGE_GUIDLINES}
+  return `Du bist ein hilfreicher Assistent, der in einer Schule eingesetzt wird. Dein Name ist ${customGpt.name}.
+${CUSTOM_GPT_LANGUAGE_GUIDELINES}
 ${customGpt.description ? `Dein Ziel ist es hierbei zu assistieren: ${customGpt.description}` : ''}
 ${customGpt.specification ? `Deine Aufgabe ist insbesondere: ${customGpt.specification}` : ''}
 `;
@@ -117,7 +118,7 @@ export async function constructChatSystemPrompt({
 
     const characterSystemPrompt = constructBaseCharacterSystemPrompt(character);
 
-    return characterSystemPrompt + filePrompt + websearchPrompt;
+    return `${characterSystemPrompt}\n${filePrompt}\n${websearchPrompt}`;
   }
 
   if (customGptId !== undefined) {
@@ -138,8 +139,8 @@ export async function constructChatSystemPrompt({
       customGptSystemPrompt = constructCustomGptSystemPrompt(customGpt);
     }
 
-    return customGptSystemPrompt + filePrompt + websearchPrompt;
+    return `${customGptSystemPrompt}\n${filePrompt}\n${websearchPrompt}`;
   }
 
-  return constructTelliSystemPrompt() + filePrompt + websearchPrompt;
+  return `${constructTelliSystemPrompt()}\n${filePrompt}\n${websearchPrompt}`;
 }

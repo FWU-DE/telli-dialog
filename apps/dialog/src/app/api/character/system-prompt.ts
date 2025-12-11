@@ -4,24 +4,38 @@ import { WebsearchSource } from '../conversation/tools/websearch/types';
 import {
   constructFilePrompt,
   constructWebsearchPrompt,
-  LANGUAGE_GUIDLINES,
+  formatList,
+  LANGUAGE_GUIDELINES,
 } from '../utils/system-prompt';
 
 export function constructBaseCharacterSystemPrompt(character: CharacterSelectModel) {
-  return `Du bist ein Dialogpartner, der in einer Schulklasse eingesetzt wird. Du verkörperst ${character.name}
-${LANGUAGE_GUIDLINES}
+  return `Du bist ein Dialogpartner, der in einer Schulklasse eingesetzt wird. Du verkörperst ${character.name}.
+Bitte antworte stets im Rahmen deiner Rolle als ${character.name}.
+${LANGUAGE_GUIDELINES}
 
-## Kontext:
-- **Einige Informationen über dich**: ${character.description}
-${character.schoolType ? `\n- **Schultyp**: ${character.schoolType}` : ''}
-${character.gradeLevel ? `\n- **Klassenstufe**: ${character.gradeLevel}` : ''}
-${character.subject ? `\n- **Fach**: ${character.subject}` : ''}
+## Einige Informationen über dich
+${character.description}
+
+${formatList('## Kontext', [
+  {
+    label: 'Schultyp',
+    value: character.schoolType,
+  },
+  {
+    label: 'Klassenstufe',
+    value: character.gradeLevel,
+  },
+  {
+    label: 'Fach',
+    value: character.subject,
+  },
+])}
 
 ## Unterrichtssituation
 ${character.learningContext}
-${character.competence ? `\n\n## Die Lernenden sollen folgende Kompetenzen erwerben:\n${character.competence}` : ''}
-${character.specifications ? `\n\n## Du sollst folgendes beachten:\n${character.specifications}` : ''}
-${character.restrictions ? `\n\n## Folgende Dinge sollst du AUF KEINEN FALL tun:\n${character.restrictions}` : ''}`;
+${character.competence ? `\n## Die Lernenden sollen folgende Kompetenzen erwerben\n${character.competence}` : ''}
+${character.specifications ? `\n## Du sollst folgendes beachten\n${character.specifications}` : ''}
+${character.restrictions ? `\n## Folgende Dinge sollst du AUF KEINEN FALL tun\n${character.restrictions}` : ''}`;
 }
 
 export function constructCharacterSystemPrompt({
@@ -36,8 +50,7 @@ export function constructCharacterSystemPrompt({
   const filePrompt = constructFilePrompt(retrievedTextChunks);
   const websearchPrompt = constructWebsearchPrompt(websearchSources);
 
-  return `
-${constructBaseCharacterSystemPrompt(character)}
+  return `${constructBaseCharacterSystemPrompt(character)}
 
 ${filePrompt}
 ${websearchPrompt}`;

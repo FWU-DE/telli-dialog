@@ -1,11 +1,16 @@
-import { parseHostname } from '@/utils/web-search/parsing';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { ChunkResult } from '../file-operations/process-chunks';
 
-export const LANGUAGE_GUIDLINES = `
-## Sprachliche Richtlinien:
+export const LANGUAGE_GUIDELINES = `
+## Sprachliche Richtlinien
 - Verwende eine Sprache, Tonalität und Inhalte, die für den Einsatz in der Schule geeignet sind.
 - Vermeide komplizierte Fachbegriffe, es sei denn, sie sind notwendig und werden erklärt.
+- Du sprichst immer die Sprache mit der du angesprochen wirst.
+- Du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die Paarform (Beidnennung) z.B. Bürgerinnen und Bürger.`;
+
+export const CUSTOM_GPT_LANGUAGE_GUIDELINES = `
+## Sprachliche Richtlinien
+- Verwende eine Sprache, Tonalität und Inhalte, die für den Einsatz in der Schule geeignet sind.
 - Du sprichst immer die Sprache mit der du angesprochen wirst. 
 - Du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die Paarform (Beidnennung) z.B. Bürgerinnen und Bürger. 
 `;
@@ -15,23 +20,15 @@ export function constructWebsearchPrompt(websearchSources?: WebsearchSource[]) {
     return '';
   }
   return `
-Der Nutzer hat folgende Quellen bereitgestellt, berücksichtige den Inhalt dieser Quellen bei der Antwort:
+## Der Nutzer hat folgende Quellen bereitgestellt, berücksichtige den Inhalt dieser Quellen bei der Antwort:
 ${websearchSources.map((source) => constructSingleWebsearchPrompt(source)).join('\n')}`;
 }
 
 function constructSingleWebsearchPrompt(source: WebsearchSource) {
-  const hostname = parseHostname(source.link);
-  return `Titel der Website: ${hostname}
-Inhalt: ${source.content}
-Titel der Seite: ${source.name}
+  return `Titel der Seite: ${source.name}
 Quelle: ${source.link}
+Inhalt: ${source.content}
 `;
-}
-
-function formatTextChunk(textChunk: ChunkResult) {
-  return textChunk.pageNumber
-    ? `Seite ${textChunk.pageNumber}: ${textChunk.content}`
-    : textChunk.content;
 }
 
 function constructSingleFilePrompt(textChunks: ChunkResult[]) {
@@ -41,7 +38,7 @@ function constructSingleFilePrompt(textChunks: ChunkResult[]) {
 
   return `${textChunks[0]?.fileName ? `Dateiname: ${textChunks[0].fileName}` : ''} 
 Inhalt:
-${textChunks.map(formatTextChunk).join('\n\n')}
+${textChunks.map((chunk) => chunk.content).join('\n\n')}
 `;
 }
 
@@ -49,9 +46,28 @@ export function constructFilePrompt(
   retrievedTextChunks: Record<string, ChunkResult[]> | undefined,
 ) {
   return retrievedTextChunks !== undefined && Object.keys(retrievedTextChunks).length > 0
-    ? `\nDer Nutzer hat folgende Dateien bereitgestellt, berücksichtige den Inhalt dieser Dateien bei der Antwort: ` +
-        Object.keys(retrievedTextChunks).map((fileId) =>
-          constructSingleFilePrompt(retrievedTextChunks?.[fileId] ?? []),
-        )
+    ? `\n## Der Nutzer hat folgende Dateien bereitgestellt, berücksichtige den Inhalt dieser Dateien bei der Antwort:\n` +
+        Object.entries(retrievedTextChunks)
+          .map(([, textChunks]) => constructSingleFilePrompt(textChunks))
+          .join('\n')
     : '';
+}
+
+// Helper to format optional fields in a list
+// Takes a title and an array of objects with label and value, filters out undefined or null values, and formats them as a list
+export function formatList(
+  title: string,
+  fields: Array<{ label: string; value: string | undefined | null }>,
+) {
+  const filteredFields = fields.filter(
+    (f) => f.value !== undefined && f.value !== null && f.value.length !== 0,
+  );
+
+  if (filteredFields.length === 0) {
+    return '';
+  }
+
+  const formattedList = filteredFields.map((f) => `- **${f.label}**: ${f.value}`).join('\n');
+
+  return `${title}\n${formattedList}`;
 }
