@@ -5,11 +5,11 @@ import {
 } from '@shared/conversation/conversation-service';
 import { db } from '@shared/db';
 import {
+  dbDeleteCustomGptByIdAndUserId,
+  dbGetCustomGptById,
   dbGetGlobalGpts,
   dbGetGptsBySchoolId,
   dbGetGptsByUserId,
-  dbDeleteCustomGptByIdAndUserId,
-  dbGetCustomGptById,
   dbInsertCustomGptFileMapping,
 } from '@shared/db/functions/custom-gpts';
 import { dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
@@ -418,11 +418,15 @@ export async function deleteCustomGpt({
 /**
  * Cleans up custom gpts with empty names from the database.
  * Attention: This is an admin function that does not check any authorization!
+ *
+ * Note: linked files will be unlinked but removed separately by `dbDeleteDanglingFiles`
+ *
  * @returns number of deleted custom gpts in db.
  */
 export async function cleanupCustomGpts() {
-  return await db
+  const result = await db
     .delete(customGptTable)
     .where(and(eq(customGptTable.name, ''), lt(customGptTable.createdAt, addDays(new Date(), -1))))
     .returning();
+  return result.length;
 }

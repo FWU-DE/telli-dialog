@@ -71,7 +71,7 @@ test.describe('cleanup', () => {
 
     expect(response.ok()).toBeTruthy();
     const json = await response.json();
-    expect(json.deletedLearningScenarios.length).toBeGreaterThanOrEqual(1);
+    expect(json.deletedLearningScenarios).toBeGreaterThanOrEqual(1);
 
     const resultDeleted = await db
       .select()
@@ -103,7 +103,7 @@ test.describe('cleanup', () => {
 
     expect(response.ok()).toBeTruthy();
     const json = await response.json();
-    expect(json.deletedCharacters.length).toBeGreaterThanOrEqual(1);
+    expect(json.deletedCharacters).toBeGreaterThanOrEqual(1);
 
     const resultDeleted = await db
       .select()
@@ -133,7 +133,7 @@ test.describe('cleanup', () => {
 
     expect(response.ok()).toBeTruthy();
     const json = await response.json();
-    expect(json.deletedCustomGpts.length).toBeGreaterThanOrEqual(1);
+    expect(json.deletedCustomGpts).toBeGreaterThanOrEqual(1);
 
     const resultDeleted = await db
       .select()
