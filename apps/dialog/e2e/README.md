@@ -3,42 +3,6 @@
 This folder contains test files and utils for running e2e and api tests.
 For e2e tests we use [playwright](https://playwright.dev/).
 
-One of the most notable things is an oidc mock provider to mock [VIDIS](https://www.vidis.schule/)
-
-## Mock OIDC Vidis
-
-Due to the complexity of having the actual vidis authentication provider in the pipeline,
-there is a mock oidc server vidis server configured in the [`vidis-mock-server.ts`](./vidis-mock-server.ts) file.
-
-It exposes an OIDC compliant mock server (with VIDIS claims) on [http://localhost:9000](http://localhost:9000).
-
-To run the mock vidis provider:
-
-```sh
-pnpm start:oidc
-```
-
-In the console you will see the credentials that the `telli-chatbot` needs to connect to it.
-
-There are currently two users specified and returned by the provider. The username for one is `teacher` and for the other is `student`:
-
-```js
-teacher: {
-    sub: 'f4830567-2ca9-4b9c-9c27-1900d443c07c',
-    schulkennung: 'school1',
-    rolle: 'LEHR',
-    bundesland: 'DE-BY',
-},
-    student: {
-    sub: '322594dc-548c-45be-b880-fda58fe863d3',
-    schulkennung: 'school1',
-    rolle: 'LERN',
-    bundesland: 'DE-BY',
-},
-```
-
-When being directed to the oidc provider page and the username and password, you just have to specify the username. The password currently does not matter.
-
 ## Run e2e tests
 
 Make sure that there is a `.env.local` file that contains the configuration necessary for the tests to run.

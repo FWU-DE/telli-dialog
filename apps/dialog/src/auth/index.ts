@@ -1,6 +1,5 @@
 import NextAuth, { NextAuthResult } from 'next-auth';
 import { vidisConfig, handleVidisJWTCallback } from './providers/vidis';
-import { mockVidisConfig } from './providers/vidis-mock';
 import { credentialsProvider } from './providers/credentials';
 import { getUserAndContextByUserId } from './utils';
 import { UserAndContext, userAndContextSchema } from './types';
@@ -19,7 +18,7 @@ declare module 'next-auth' {
 const SESSION_LIFETIME_SECONDS = 60 * 60 * 8;
 
 const result = NextAuth({
-  providers: [vidisConfig, mockVidisConfig, credentialsProvider],
+  providers: [vidisConfig, credentialsProvider],
   jwt: {
     maxAge: SESSION_LIFETIME_SECONDS,
   },
