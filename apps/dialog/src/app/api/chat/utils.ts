@@ -182,7 +182,8 @@ export async function getKeywordsFromQuery({
 }): Promise<string[]> {
   const { text } = await generateText({
     model,
-    system: `Du bist ein Experte für die präzise Extraktion von Schlüsselwörtern. Deine Aufgabe ist es, die relevantesten Schlüsselwörter aus der gegebenen Suchanfrage (der letzten Benutzernachricht im Chatverlauf) zu extrahieren.
+    system: `Du bist ein Experte für die präzise Extraktion von Schlüsselwörtern. 
+Deine Aufgabe ist es, die relevantesten Schlüsselwörter aus der gegebenen Suchanfrage (der letzten Benutzernachricht im Chatverlauf) zu extrahieren.
 
 Regeln:
 1. Extrahiere nur die wichtigsten, fachspezifischen Schlüsselwörter
