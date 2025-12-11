@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { waitForToast } from '../../utils/utils';
+import { waitForToast, waitForToastDisappear } from '../../utils/utils';
 import { sendMessage } from '../../utils/chat';
 import { createLearningScenario } from '../../utils/learning-scenario';
 
@@ -216,6 +216,7 @@ test('data is autosaved on blur', async ({ page }) => {
   await page.waitForURL('/shared-chats/**');
   await page.getByRole('link', { name: 'Autosave Test Scenario' }).first().click();
   await page.waitForURL('/shared-chats/**');
+  await waitForToastDisappear(page); // wait for success toast to disappear before continuing
 
   // Edit and verify autosave for each field
   // Title

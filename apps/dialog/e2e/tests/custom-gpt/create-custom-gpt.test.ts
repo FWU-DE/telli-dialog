@@ -119,7 +119,7 @@ test('data is autosaved on blur', async ({ page }) => {
 
   // Add a prompt suggestion
   await page.getByPlaceholder('Erstelle einen').fill('Test prompt suggestion');
-  const submitButton = await page.getByRole('button', { name: 'Assistent erstellen' });
+  const submitButton = page.getByRole('button', { name: 'Assistent erstellen' });
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 

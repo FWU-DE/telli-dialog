@@ -5,5 +5,5 @@ export async function waitForToast(page: Page) {
 }
 
 export async function waitForToastDisappear(page: Page) {
-  await expect(page.getByLabel('Notifications (F8)').locator('li')).toBeEmpty({ timeout: 10_000 });
+  await expect(page.getByLabel('Notifications (F8)').locator('li')).toBeHidden();
 }
