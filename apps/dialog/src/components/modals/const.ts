@@ -289,9 +289,7 @@ export const federalStateDisclaimers: Partial<Record<FederalStateId, DisclaimerC
     ],
   },
   'DE-ST': {
-    pageContents: [
-      TERMS_AND_CONDITIONS_ST,
-    ],
+    pageContents: [TERMS_AND_CONDITIONS_ST],
   },
   'DE-BW': {
     pageContents: [EDUCATION_HINT_BW],
