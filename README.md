@@ -107,7 +107,7 @@ Also make sure to include the required env variables in your `.env.local`.
 
 ## E2E Tests
 
-We use playwright with a vidis mock server for e2e testing, refer to the [details](apps/dialog/e2e/README.md) for setup guide.
+We use playwright for e2e testing, refer to the [details](apps/dialog/e2e/README.md) for setup guide.
 The e2e tests are integrated into the pipeline and run on every pull request.
 
 ## Load Tests
