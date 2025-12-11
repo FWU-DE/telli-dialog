@@ -3,7 +3,6 @@ import {
   dbGetModelByIdAndFederalStateId,
   dbGetLlmModelsByFederalStateId,
 } from '@shared/db/functions/llm-model';
-import { createTelliConfiguration } from './chat/custom-model-config';
 import { env } from '@/env';
 import { errorifyAsyncFn } from '@shared/utils/error';
 import { LlmModel } from '@shared/db/schema';
@@ -13,6 +12,7 @@ import {
   FALLBACK_AUXILIARY_MODEL,
 } from '@shared/llm-models/default-llm-models';
 import { getDefaultModel, getFirstTextModel } from '@shared/llm-models/llm-model-service';
+import { createTelliConfiguration } from '../chat/custom-model-config';
 
 export function getSearchParamsFromUrl(url: string) {
   const [, ...rest] = url.split('?');

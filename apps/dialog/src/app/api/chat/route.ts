@@ -8,7 +8,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { dbInsertChatContent } from '@shared/db/functions/chat';
 import { getUser, updateSession, userHasCompletedTraining } from '@/auth/utils';
 import { userHasReachedIntelliPointLimit } from './usage';
-import { getModelAndProviderWithResult, calculateCostsInCent, getAuxiliaryModel } from '../utils';
+import {
+  getModelAndProviderWithResult,
+  calculateCostsInCent,
+  getAuxiliaryModel,
+} from '../utils/utils';
 import { generateUUID } from '@shared/utils/uuid';
 import { getChatTitle, getMostRecentUserMessage, limitChatHistory } from './utils';
 import { constructChatSystemPrompt } from './system-prompt';

@@ -7,13 +7,13 @@ import {
   userHasReachedIntelliPointLimit,
 } from '../chat/usage';
 import { dbGetSharedChatByIdAndInviteCode } from '@shared/db/functions/shared-school-chat';
-import { constructSystemPromptBySharedChat } from './system-prompt';
+import { constructLearningScenarioSystemPrompt } from './system-prompt';
 import { dbUpdateTokenUsageBySharedChatId } from '@shared/db/functions/shared-school-chat';
 import {
   getModelAndProviderWithResult,
   getSearchParamsFromUrl,
   calculateCostsInCent,
-} from '../utils';
+} from '../utils/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
   });
 
   const websearchSources = await Promise.all(urls);
-  const systemPrompt = constructSystemPromptBySharedChat({
+  const systemPrompt = constructLearningScenarioSystemPrompt({
     sharedChat,
     retrievedTextChunks,
     websearchSources,
