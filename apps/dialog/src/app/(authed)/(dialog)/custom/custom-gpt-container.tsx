@@ -13,7 +13,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React from 'react';
-import { deleteCustomGptAction } from './editor/[customgptId]/actions';
+import { deleteCustomGptAction } from './editor/[customGptId]/actions';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { CreateNewCharacterFromTemplate } from '../characters/create-new-character-button';
 import TelliClipboardButton from '@/components/common/clipboard-button';
