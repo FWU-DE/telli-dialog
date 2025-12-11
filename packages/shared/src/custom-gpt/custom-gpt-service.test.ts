@@ -45,31 +45,53 @@ describe('custom-gpt-service', () => {
 
   describe('NotFoundError scenarios', () => {
     const customGptId = generateUUID();
+    const schoolId = generateUUID();
+    const userId = generateUUID();
+    const fileId = generateUUID();
 
     it.each([
       {
         functionName: 'getCustomGptForEditView',
-        testFunction: () =>
-          getCustomGptForEditView({
-            customGptId,
-            userId: 'user-id',
-            schoolId: 'school-id',
-          }),
+        testFunction: () => getCustomGptForEditView({ customGptId, schoolId, userId }),
       },
       {
         functionName: 'getCustomGptForNewChat',
+        testFunction: () => getCustomGptForNewChat({ customGptId, schoolId, userId }),
+      },
+      {
+        functionName: 'linkFileToCustomGpt',
+        testFunction: () => linkFileToCustomGpt({ customGptId, fileId, userId }),
+      },
+      {
+        functionName: 'deleteFileMappingAndEntity',
+        testFunction: () => deleteFileMappingAndEntity({ customGptId, fileId, userId }),
+      },
+      {
+        functionName: 'getFileMappings',
+        testFunction: () => getFileMappings({ customGptId, schoolId, userId }),
+      },
+      {
+        functionName: 'updateCustomGptAccessLevel',
         testFunction: () =>
-          getCustomGptForNewChat({
-            customGptId,
-            userId: 'user-id',
-            schoolId: 'school-id',
-          }),
+          updateCustomGptAccessLevel({ customGptId, accessLevel: 'school', userId }),
+      },
+      {
+        functionName: 'updateCustomGptPicture',
+        testFunction: () => updateCustomGptPicture({ customGptId, picturePath: fileId, userId }),
+      },
+      {
+        functionName: 'updateCustomGpt',
+        testFunction: () => updateCustomGpt({ customGptId, customGptProps: {}, userId }),
+      },
+      {
+        functionName: 'deleteCustomGpt',
+        testFunction: () => deleteCustomGpt({ customGptId, userId }),
       },
     ])(
-      'should throw NotFoundError when custom GPT does not exist - $functionName',
+      'should throw NotFoundError from dbGetCustomGptById when custom GPT does not exist - $functionName',
       async ({ testFunction }) => {
-        (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
-          null as never,
+        (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockRejectedValue(
+          new NotFoundError(),
         );
 
         await expect(testFunction()).rejects.toThrowError(NotFoundError);
