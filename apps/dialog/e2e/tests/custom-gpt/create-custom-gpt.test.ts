@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { sendMessage, waitForToast, waitForToastDisappear } from '../../utils/utils';
+import { waitForToast, waitForToastDisappear } from '../../utils/utils';
+import { sendMessage } from '../../utils/chat';
 
 test('teacher can login, create a custom gpt and start a chat', async ({ page }) => {
   await login(page, 'teacher');

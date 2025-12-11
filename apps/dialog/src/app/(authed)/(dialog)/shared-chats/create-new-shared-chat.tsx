@@ -25,7 +25,7 @@ export function CreateNewSharedChatButton() {
     const scenario = await createNewLearningScenarioAction({
       data: { modelId: maybeDefaultModelId, name: '' },
     });
-    if (scenario.success === true) {
+    if (scenario.success) {
       router.push(`/shared-chats/${scenario.value.id}?create=true`);
     } else {
       toast.error(t('toasts.create-toast-error'));
