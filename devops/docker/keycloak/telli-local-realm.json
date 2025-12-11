@@ -2907,6 +2907,24 @@
           "value": "password"
         }
       ]
+    },
+    {
+      "username": "teacher-st",
+      "firstName": "Teacher",
+      "lastName": "Teacher",
+      "email": "teacher-st@example.com",
+      "attributes": {
+        "schulnummer": ["test_school1-ST"],
+        "federal_state": ["DE-ST"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
     }
   ]
 }

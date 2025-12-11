@@ -207,6 +207,50 @@ const EDUCATION_HINT_HB = `Liebe Kollegin, lieber Kollege,
 
 const EDUCATION_HINT_BW = `telli ist eine KI-Chatbotoberfläche, über die verschiedene Sprachmodelle für Lehrkräfte, Schülerinnen und Schüler zu schulischen Zwecken nutzbar sind. Die Anwendung von KI erfordert Kompetenzen über die Nutzung, Funktion und die Wirkungsweise künstlicher Intelligenz.`;
 
+const TERMS_AND_CONDITIONS_ST = `## 1 Anbieter & Geltungsbereich
+telli ist ein Dienst des FWU – Institut für Film und Bild in Wissenschaft und Unterricht gGmbH, dem Medieninstitut aller 16 Bundesländer. Der Chatbot wird im Rahmen des länderübergreifenden Projekts „AIS – Adaptives Intelligentes System" entwickelt und aus Mitteln des DigitalPakts Schule finanziert. Der Zugang für Lehrkräfte aus Sachsen-Anhalt erfolgt durch das IDM des Landes Sachsen-Anhalt über den Vidis-Dienst der FWU. Er steht ausschließlich registrierten Lehrkräften in Sachsen-Anhalt zur dienstlichen Nutzung zur Verfügung; eine private Nutzung ist ausgeschlossen.
+
+## 2 Zulässige Nutzung
+Mit der Nutzung von telli bestätigen Nutzerinnen und Nutzer, diese Bedingungen gelesen zu haben und einzuhalten. Jede Nutzerin bzw. jeder Nutzer muss für die Nutzung von KI freigeschaltet sein.
+
+## 3 Rechtliche Grundlagen
+Die Bereitstellung erfolgt gemäß VO (EU) 2024/1689 (KI-Verordnung) sowie DSGVO. telli fällt nach der Risikoclassifizierung als System mit begrenztem Risiko und erfüllt die Transparenzpflichten des Art. 50 KI-VO.
+
+## 4 Kostenfreiheit & Kontingent
+Nutzende erhalten ein begrenztes Nutzungskontingent „telli-Points". Eine Nutzung über das Kontingent hinaus ist nicht möglich, um eine Verfügbarkeit des Dienstes für eine Vielzahl von Lehrkräften gewährleisten zu können. Der Dienst ist für Nutzende kostenlos.
+
+## 5 Datenverarbeitung & Hosting
+telli verarbeitet alle Eingaben ausschließlich auf Servern innerhalb der EU. Die Large Language Models werden lokal gehostet; eine Übermittlung an Drittstaaten findet nicht statt. Mit den technischen Dienstleistern bestehen AV-Verträge nach Art. 28 DSGVO ([https://telli.schule/datenschutz](https://telli.schule/datenschutz)).
+
+## 6 Speicherung der Chatverläufe
+Gespeicherte Verläufe werden verschlüsselt im jeweiligen Benutzerkonto auf telli-Servern abgelegt und sind nur von der jeweiligen Lehrkraft einsehbar; FWU- bzw. LISA-Mitarbeitende haben darauf keinen Zugriff. Die Daten werden bei Kontolöschung unwiderruflich gelöscht.
+
+## 7 Datenschutzprinzipien / Eingabebeschränkungen
+Es dürfen keine sensiblen personenbezogenen Daten eingegeben werden. Die Verarbeitung erfolgt nach dem DSGVO-Prinzip der Datenminimierung und im Rahmen des schulgesetzlichen Bildungs- und Erziehungsauftrags.
+
+## 8 Verbot der Leistungsbewertung
+Der Einsatz von telli zur Bewertung schulischer Leistungen ist nicht erlaubt.
+
+## 9 Urheber- & Nutzungsrechte
+Weder das FWU noch beteiligte Dienstleister oder das Land Sachsen-Anhalt erheben urheberrechtliche Ansprüche an von telli erzeugten Texten / Materialien. Nutzerinnen und Nutzer müssen jedoch fremde Rechte prüfen, wenn sie Inhalte weiterverwenden.
+
+## 10 Richtigkeit & pädagogische Verantwortung
+Die inhaltliche Korrektheit der KI-Antworten wird nicht garantiert; Lehrkräfte sind verpflichtet, Ergebnisse fachlich und pädagogisch zu prüfen, bevor sie sie im Unterricht einsetzen.
+
+## 11 Haftungsausschluss
+Das Land Sachsen-Anhalt sowie die FWU haften nicht für unmittelbare oder mittelbare Schäden, die aus der Nutzung von telli entstehen, soweit gesetzlich zulässig.
+
+## 12 Dienstverfügbarkeit & Sanktionen
+Das Land Sachsen-Anhalt bzw. das FWU kann den Dienst jederzeit einschränken, ändern oder einstellen sowie bei missbräuchlicher Nutzung den Zugang vorübergehend oder dauerhaft sperren.
+
+## 13 Änderungen der Nutzungsbedingung
+Diese Bedingungen können jederzeit angepasst werden. Änderungen werden bei Nutzung von telli bekanntgegeben; die jeweils aktuelle Fassung ist dort abrufbar.
+
+## 14 Betroffenenrechte
+Nutzerinnen und Nutzer können ihre DSGVO-Rechte (Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragbarkeit, Widerspruch, Beschwerde) jederzeit geltend machen; das „Recht auf Vergessenwerden" (Art. 17 DSGVO) ist gewährleistet.
+
+Mit dem Klick auf „Gelesen und akzeptiert" bestätigen Sie, sämtliche Bedingungen verstanden zu haben und einzuhalten.`;
+
 // increment this number to prompt renewed acceptance from all users
 export const VERSION: number = 1;
 export type DisclaimerConfig = {
@@ -242,6 +286,11 @@ export const federalStateDisclaimers: Partial<Record<FederalStateId, DisclaimerC
   'DE-SL': {
     pageContents: [
       'KI-Tools neigen zu Halluzinationen und Vorurteilen. Bitte überprüfen Sie die Ausgaben des KI-Chatbots kritisch.',
+    ],
+  },
+  'DE-ST': {
+    pageContents: [
+      TERMS_AND_CONDITIONS_ST,
     ],
   },
   'DE-BW': {
