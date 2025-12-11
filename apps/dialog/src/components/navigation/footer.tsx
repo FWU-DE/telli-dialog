@@ -1,6 +1,6 @@
 import { getHostByHeaders } from '@/utils/host';
 import Link from 'next/link';
-import { IMPRESSUM_URL, PRIVACY_POLICY_URL } from './const';
+import { IMPRESSUM_URL, PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from './const';
 
 export default async function Footer() {
   const baseUrl = await getHostByHeaders();
@@ -14,6 +14,9 @@ export default async function Footer() {
       </Link>
       <Link href={IMPRESSUM_URL} className="hover:underline">
         Impressum
+      </Link>
+      <Link href={TERMS_OF_USE_URL} className="hover:underline">
+        Nutzungsbedingungen
       </Link>
     </footer>
   );
