@@ -32,20 +32,31 @@ import z from 'zod';
 
 /**
  * Loads custom gpt for edit view.
- * Throws NotFoundError if the custom gpt does not exist.
- * Throws ForbiddenError if the user is not authorized to edit the custom gpt.
+ * Throws if the user is not authorized to access the custom gpt:
+ * - NotFound if the custom gpt does not exist
+ * - Forbidden if the custom gpt is private and the user is not the owner
+ * - Forbidden if the custom gpt is school-level and the user is not in the same school
  */
 export async function getCustomGptForEditView({
   customGptId,
+  schoolId,
   userId,
 }: {
   customGptId: string;
+  schoolId: string;
   userId: string;
 }) {
   checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (!customGpt) throw new NotFoundError('Custom Gpt not found');
-  if (customGpt.userId !== userId) throw new ForbiddenError('Not authorized to edit custom gpt');
+  if (customGpt.accessLevel === 'private' && customGpt.userId !== userId)
+    throw new ForbiddenError('Not authorized to edit custom gpt');
+  if (
+    customGpt.accessLevel === 'school' &&
+    customGpt.schoolId !== schoolId &&
+    customGpt.userId !== userId
+  )
+    throw new ForbiddenError('Not authorized to edit custom gpt');
 
   return customGpt;
 }

@@ -32,7 +32,7 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
   const [customGpt, relatedFiles] = await Promise.all([
-    getCustomGptForEditView({ customGptId, userId: user.id }),
+    getCustomGptForEditView({ customGptId, schoolId: school.id, userId: user.id }),
     getFileMappings({
       customGptId,
       userId: user.id,
