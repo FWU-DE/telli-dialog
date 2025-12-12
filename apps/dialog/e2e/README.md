@@ -40,10 +40,11 @@ Ensure that all the required browsers are installed.
 pnpm playwright install
 ```
 
-Set the password for the load test user in the .env.local file
+Set the username and password for the load test user in the .env.local file
 
 ```dotenv
-LOADTEST_PASSWORD="test"
+LOADTEST_PASSWORD=test
+LOADTEST_USERNAME=test
 ```
 
 Then you can run the load tests from the directory apps/dialog.
@@ -51,13 +52,13 @@ Then you can run the load tests from the directory apps/dialog.
 This runs the tests in a visible browser:
 
 ```sh
-pnpm k6:build && K6_BROWSER_HEADLESS=false k6 run e2e/load_test/run-chat-test.js -e LOADTEST_PASSWORD=test
+pnpm k6:build && K6_BROWSER_HEADLESS=false k6 run e2e/load_test/run-chat-test.js -e LOADTEST_PASSWORD=test -e LOADTEST_USERNAME=test
 ```
 
 or
 
 ```sh
-pnpm k6:build && K6_BROWSER_HEADLESS=false k6 run e2e/load_test/run-file-test.js -e LOADTEST_PASSWORD=test
+pnpm k6:build && K6_BROWSER_HEADLESS=false k6 run e2e/load_test/run-file-test.js -e LOADTEST_PASSWORD=test -e LOADTEST_USERNAME=test
 ```
 
 This runs the tests in headless mode without a visible browser:

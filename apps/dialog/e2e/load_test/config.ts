@@ -9,9 +9,6 @@ export const WAIT_TIMES_IN_MS = {
 } as const;
 
 export const SELECTORS = {
-  USERNAME_INPUT: 'input[placeholder="Username"]',
-  PASSWORD_INPUT: 'input[placeholder="Password"]',
-  LOGIN_BUTTON: 'button[type="submit"]',
   LLM_DROPDOWN: 'button[aria-label="Select Llm Dropdown"]',
   LLAMA_MODEL: 'button[aria-label="Select meta-llama/Meta-Llama-3.1-8B-Instruct Model"]',
   LLAMA_MODEL_NAME: 'Llama-3.1-8B',

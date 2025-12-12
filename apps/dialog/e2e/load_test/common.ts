@@ -64,12 +64,12 @@ export async function runTest(
   page.setDefaultTimeout(WAIT_TIMES_IN_MS.PAGE_ELEMENT_TIMEOUT);
 
   const userIndex = `${__VU}-${__ITER}-${Date.now()}`;
-  const userName = 'test';
+  const userName = __ENV.LOADTEST_USERNAME;
   const password = __ENV.LOADTEST_PASSWORD;
 
-  if (!password) {
+  if (!userName || !password) {
     throw new Error(
-      'Please provide the password for the test user via the env variable LOADTEST_PASSWORD',
+      'Please provide the username/password for the test user via the env variables LOADTEST_USERNAME and LOADTEST_PASSWORD',
     );
   }
 
@@ -101,19 +101,21 @@ export async function runTest(
 export async function performLogin(page: Page, userName: string, password: string) {
   let successfulLogin = false;
   try {
-    await page.goto(`${BASE_URL}/login?testlogin=true`, {
+    await page.goto(`${BASE_URL}/login`, {
       timeout: WAIT_TIMES_IN_MS.NAVIGATION_TIMEOUT,
     });
 
-    const usernameInput = page.locator(SELECTORS.USERNAME_INPUT);
+    await page.getByRole('button', { name: 'Mit VIDIS einloggen' }).click();
+
+    const usernameInput = page.getByLabel('Username');
     await usernameInput.waitFor();
     await usernameInput.fill(userName);
 
-    const passwordInput = page.locator(SELECTORS.PASSWORD_INPUT);
+    const passwordInput = page.getByRole('textbox', { name: 'Password' });
     await passwordInput.waitFor();
     await passwordInput.fill(password);
 
-    const loginButton = page.locator(SELECTORS.LOGIN_BUTTON);
+    const loginButton = page.locator('button[type=submit]');
     await loginButton.waitFor();
     await loginButton.click();
 
