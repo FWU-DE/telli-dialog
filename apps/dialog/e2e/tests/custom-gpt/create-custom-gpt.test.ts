@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { sendMessage, waitForToast, waitForToastDisappear } from '../../utils/utils';
+import { waitForToast, waitForToastDisappear } from '../../utils/utils';
+import { sendMessage } from '../../utils/chat';
 
 test('teacher can login, create a custom gpt and start a chat', async ({ page }) => {
   await login(page, 'teacher');
@@ -118,7 +119,7 @@ test('data is autosaved on blur', async ({ page }) => {
 
   // Add a prompt suggestion
   await page.getByPlaceholder('Erstelle einen').fill('Test prompt suggestion');
-  const submitButton = await page.getByRole('button', { name: 'Assistent erstellen' });
+  const submitButton = page.getByRole('button', { name: 'Assistent erstellen' });
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 

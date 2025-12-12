@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { deleteChat, regenerateMessage, sendMessage } from '../../utils/utils';
+import { deleteChat, regenerateMessage, sendMessage } from '../../utils/chat';
 import path from 'path';
 
 test('should successfully regenerate a response', async ({ page }) => {

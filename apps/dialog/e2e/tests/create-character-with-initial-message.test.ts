@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../utils/login';
-import { sendMessage } from '../utils/utils';
+import { sendMessage } from '../utils/chat';
 
 test('teacher can create character with initial message and verify it appears in shared chat', async ({
   page,

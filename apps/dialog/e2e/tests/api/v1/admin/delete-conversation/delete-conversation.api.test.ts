@@ -5,7 +5,7 @@ import type { Page } from 'playwright-core';
 import { db } from '@shared/db';
 import { federalStateTable } from '@shared/db/schema';
 import { eq } from 'drizzle-orm';
-import { sendMessage, uploadFile } from '../../../../../utils/utils';
+import { sendMessage, uploadFile } from '../../../../../utils/chat';
 import { E2E_FEDERAL_STATE } from '../../../../../utils/const';
 
 const deleteConversationRoute = '/api/v1/admin/delete-conversation';

@@ -1,14 +1,13 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { sendMessage, waitForToast } from '../../utils/utils';
+import { waitForToast, waitForToastDisappear } from '../../utils/utils';
+import { sendMessage } from '../../utils/chat';
+import { createLearningScenario } from '../../utils/learning-scenario';
 
 test('teacher can login, create and join shared chat', async ({ page }) => {
   await login(page, 'teacher');
 
-  await page.goto('/shared-chats');
-  await page.waitForURL('/shared-chats');
-  await page.getByRole('button', { name: 'Szenario erstellen' }).click();
-  await page.waitForURL('/shared-chats/**');
+  await createLearningScenario(page);
 
   // configure form
   await page
@@ -217,6 +216,7 @@ test('data is autosaved on blur', async ({ page }) => {
   await page.waitForURL('/shared-chats/**');
   await page.getByRole('link', { name: 'Autosave Test Scenario' }).first().click();
   await page.waitForURL('/shared-chats/**');
+  await waitForToastDisappear(page); // wait for success toast to disappear before continuing
 
   // Edit and verify autosave for each field
   // Title

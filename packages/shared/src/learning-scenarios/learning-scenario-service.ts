@@ -358,6 +358,8 @@ export async function removeFileFromLearningScenario({
   userId: string;
 }) {
   checkParameterUUID(learningScenarioId);
+
+  // get learning scenario for access check
   await getLearningScenario({ learningScenarioId, userId });
 
   await db.transaction(async (tx) => {
@@ -391,10 +393,13 @@ async function enrichLearningScenarioWithPictureUrl({
 /**
  * Cleans up learning scenarios with empty names from the database.
  * Attention: This is an admin function that does not check any authorization!
+ *
+ * Note: linked files will be unlinked but removed separately by `dbDeleteDanglingFiles`
+ *
  * @returns number of deleted learning scenarios in db.
  */
 export async function cleanupLearningScenarios() {
-  return await db
+  const result = await db
     .delete(sharedSchoolConversationTable)
     .where(
       and(
@@ -403,4 +408,5 @@ export async function cleanupLearningScenarios() {
       ),
     )
     .returning();
+  return result.length;
 }
