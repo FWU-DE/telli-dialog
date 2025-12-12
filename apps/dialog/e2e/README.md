@@ -80,14 +80,21 @@ cd apps/dialog
 k6 cloud login
 ```
 
+Run load tests locally:
+
 ```sh
 pnpm k6:run e2e/load_test/run-chat-test.js
 pnpm k6:run e2e/load_test/run-file-test.js
 ```
 
-or
+Or run on the Grafana Cloud.
+Remember to export env variables in the same shell before running `pnpm k6:run:cloud`.
 
 ```sh
+export LOADTEST_BASE_URL=https://chat-staging.telli.schule
+export LOADTEST_IDP_HINT=telli-chatbot
+export LOADTEST_PASSWORD=your-password
+export LOADTEST_USERNAME=your-user
 pnpm k6:run:cloud e2e/load_test/run-chat-test.js
 pnpm k6:run:cloud e2e/load_test/run-file-test.js
 ```
