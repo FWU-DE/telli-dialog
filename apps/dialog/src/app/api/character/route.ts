@@ -23,6 +23,7 @@ import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exce
 import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
+import { logError } from '@shared/logging/logging';
 
 export async function POST(request: NextRequest) {
   const { messages, modelId }: { messages: Array<Message>; modelId: string } = await request.json();
@@ -136,6 +137,9 @@ export async function POST(request: NextRequest) {
         }),
       );
     },
+    async onError(error) {
+      logError('Error during streaming character response:', error);
+    }
   });
 
   return result.toDataStreamResponse();
