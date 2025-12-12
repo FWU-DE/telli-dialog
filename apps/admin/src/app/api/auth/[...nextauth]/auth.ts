@@ -2,10 +2,8 @@ import type { GetServerSidePropsContext, NextApiRequest, NextApiResponse } from 
 import type { NextAuthOptions } from 'next-auth';
 import { getServerSession } from 'next-auth';
 import KeycloakProvider from 'next-auth/providers/keycloak';
-import CredentialsProvider from 'next-auth/providers/credentials';
 import { Provider } from 'next-auth/providers/index';
 import { env } from '@/consts/env';
-import { isDevelopment } from '@shared/utils/isDevelopment';
 
 // Default provider for stage and prod
 const keycloakProvider: Provider = KeycloakProvider({
@@ -16,30 +14,8 @@ const keycloakProvider: Provider = KeycloakProvider({
   issuer: env.keycloakIssuer,
 });
 
-// Development only provider
-const credentialsProvider = CredentialsProvider({
-  name: 'Credentials',
-  credentials: {
-    username: {
-      label: 'Username',
-      type: 'text',
-      placeholder: 'jsmith',
-    },
-    password: { label: 'Password', type: 'password' },
-  },
-  async authorize() {
-    return {
-      id: '1',
-      name: 'J Smith',
-      email: 'jsmith@example.com',
-    };
-  },
-});
-
-const providers = [keycloakProvider, ...(isDevelopment() ? [credentialsProvider] : [])];
-
 export const authOptions = {
-  providers: providers,
+  providers: [keycloakProvider],
 } satisfies NextAuthOptions;
 
 // Use this function in server contexts

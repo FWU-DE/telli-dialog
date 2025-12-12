@@ -8,15 +8,13 @@ export const WAIT_TIMES_IN_MS = {
   NAVIGATION_TIMEOUT: 30_000, // Time to wait for navigation
 } as const;
 
+export const LLM_MODELS = [
+  { id: 'gpt-5-nano', displayName: 'GPT-5 nano' },
+  { id: 'gpt-4o-mini', displayName: 'GPT-4o-mini' },
+  { id: 'meta-llama/Meta-Llama-3.1-8B-Instruct', displayName: 'Llama-3.1-8B' },
+];
+
 export const SELECTORS = {
-  USERNAME_INPUT: 'input[placeholder="Username"]',
-  PASSWORD_INPUT: 'input[placeholder="Password"]',
-  LOGIN_BUTTON: 'button[type="submit"]',
-  LLM_DROPDOWN: 'button[aria-label="Select Llm Dropdown"]',
-  LLAMA_MODEL: 'button[aria-label="Select meta-llama/Meta-Llama-3.1-8B-Instruct Model"]',
-  LLAMA_MODEL_NAME: 'Llama-3.1-8B',
-  GPT_MODEL: 'button[aria-label="Select gpt-4o-mini Model"]',
-  GPT_MODEL_NAME: 'GPT-4o-mini',
   MESSAGE_INPUT: 'textarea[placeholder="Wie kann ich Dir helfen?"]',
   SEND_BUTTON: 'button[aria-label="Nachricht abschicken"]',
   AI_MESSAGE: '[aria-label="assistant message 1"]',

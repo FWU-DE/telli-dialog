@@ -25,7 +25,7 @@
     "prek6:run": "pnpm k6:build",
     "k6:run": "dotenvx run -f .env.k6 -- k6 run",
     "prek6:run:cloud": "pnpm k6:build",
-    "k6:run:cloud": "dotenvx run -f .env.k6 -- k6 cloud run"
+    "k6:run:cloud": "k6 cloud run -e LOADTEST_USERNAME=$LOADTEST_USERNAME -e LOADTEST_PASSWORD=$LOADTEST_PASSWORD -e LOADTEST_IDP_HINT=$LOADTEST_IDP_HINT -e LOADTEST_BASE_URL=$LOADTEST_BASE_URL"
   },
   "dependencies": {
     "@ai-sdk/openai": "1.1.9",

@@ -40,10 +40,11 @@ Ensure that all the required browsers are installed.
 pnpm playwright install
 ```
 
-Set the password for the load test user in the .env.local file
+Set the username and password for the load test user in the .env.local file
 
 ```dotenv
-LOADTEST_PASSWORD="test"
+LOADTEST_PASSWORD=test
+LOADTEST_USERNAME=test
 ```
 
 Then you can run the load tests from the directory apps/dialog.
@@ -51,13 +52,13 @@ Then you can run the load tests from the directory apps/dialog.
 This runs the tests in a visible browser:
 
 ```sh
-pnpm k6:build && K6_BROWSER_HEADLESS=false k6 run e2e/load_test/run-chat-test.js -e LOADTEST_PASSWORD=test
+pnpm k6:build && K6_BROWSER_HEADLESS=false k6 run e2e/load_test/run-chat-test.js -e LOADTEST_PASSWORD=test -e LOADTEST_USERNAME=test
 ```
 
 or
 
 ```sh
-pnpm k6:build && K6_BROWSER_HEADLESS=false k6 run e2e/load_test/run-file-test.js -e LOADTEST_PASSWORD=test
+pnpm k6:build && K6_BROWSER_HEADLESS=false k6 run e2e/load_test/run-file-test.js -e LOADTEST_PASSWORD=test -e LOADTEST_USERNAME=test
 ```
 
 This runs the tests in headless mode without a visible browser:
@@ -79,14 +80,21 @@ cd apps/dialog
 k6 cloud login
 ```
 
+Run load tests locally:
+
 ```sh
 pnpm k6:run e2e/load_test/run-chat-test.js
 pnpm k6:run e2e/load_test/run-file-test.js
 ```
 
-or
+Or run on the Grafana Cloud.
+Remember to export env variables in the same shell before running `pnpm k6:run:cloud`.
 
 ```sh
+export LOADTEST_BASE_URL=https://chat-staging.telli.schule
+export LOADTEST_IDP_HINT=telli-chatbot
+export LOADTEST_PASSWORD=your-password
+export LOADTEST_USERNAME=your-user
 pnpm k6:run:cloud e2e/load_test/run-chat-test.js
 pnpm k6:run:cloud e2e/load_test/run-file-test.js
 ```
