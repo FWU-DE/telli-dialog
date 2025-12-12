@@ -23,8 +23,8 @@ const searchParamsSchema = z.object({
   templateId: z.string().optional(),
 });
 
-export default async function Page(props: PageProps<'/custom/editor/[customgptId]'>) {
-  const { customgptId: customGptId } = await props.params;
+export default async function Page(props: PageProps<'/custom/editor/[customGptId]'>) {
+  const { customGptId } = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
   const isCreating = searchParams.create === 'true';
 
@@ -32,7 +32,7 @@ export default async function Page(props: PageProps<'/custom/editor/[customgptId
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
   const [customGpt, relatedFiles] = await Promise.all([
-    getCustomGptForEditView({ customGptId, userId: user.id }),
+    getCustomGptForEditView({ customGptId, schoolId: school.id, userId: user.id }),
     getFileMappings({
       customGptId,
       userId: user.id,

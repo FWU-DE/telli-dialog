@@ -1,15 +1,15 @@
 import { db } from '..';
-import { eq, and, or, desc, inArray, getTableColumns } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, inArray, or } from 'drizzle-orm';
 import {
-  customGptTable,
   conversationMessageTable,
   conversationTable,
-  type CustomGptModel,
-  type CustomGptInsertModel,
   CustomGptFileMapping,
+  type CustomGptInsertModel,
+  type CustomGptModel,
+  customGptTable,
+  customGptTemplateMappingTable,
   fileTable,
   TextChunkTable,
-  customGptTemplateMappingTable,
 } from '../schema';
 import { NotFoundError } from '@shared/error';
 
@@ -18,12 +18,7 @@ export async function dbGetCustomGptsByUserId({
 }: {
   userId: string;
 }): Promise<CustomGptModel[]> {
-  const customGpts = await db
-    .select()
-    .from(customGptTable)
-    .where(eq(customGptTable.userId, userId));
-
-  return customGpts;
+  return db.select().from(customGptTable).where(eq(customGptTable.userId, userId));
 }
 
 export async function dbGetCustomGptById({
@@ -47,7 +42,7 @@ export async function dbGetGlobalGpts({
   federalStateId?: string;
 }): Promise<CustomGptModel[]> {
   if (federalStateId) {
-    const characters = await db
+    return db
       .select({ ...getTableColumns(customGptTable) })
       .from(customGptTable)
       .innerJoin(
@@ -61,14 +56,12 @@ export async function dbGetGlobalGpts({
         ),
       )
       .orderBy(desc(customGptTable.createdAt));
-    return characters;
   } else {
-    const characters = await db
+    return db
       .select()
       .from(customGptTable)
       .where(eq(customGptTable.accessLevel, 'global'))
       .orderBy(desc(customGptTable.createdAt));
-    return characters;
   }
 }
 
@@ -89,22 +82,19 @@ export async function dbGetGptsBySchoolId({
 }: {
   schoolId: string;
 }): Promise<CustomGptModel[]> {
-  const characters = await db
+  return db
     .select()
     .from(customGptTable)
     .where(and(eq(customGptTable.schoolId, schoolId), eq(customGptTable.accessLevel, 'school')))
     .orderBy(desc(customGptTable.createdAt));
-  return characters;
 }
 
 export async function dbGetGptsByUserId({ userId }: { userId: string }): Promise<CustomGptModel[]> {
-  const characters = await db
+  return db
     .select()
     .from(customGptTable)
     .where(and(eq(customGptTable.userId, userId), eq(customGptTable.accessLevel, 'private')))
     .orderBy(desc(customGptTable.createdAt));
-
-  return characters;
 }
 
 export async function dbGetCustomGptByIdOrSchoolId({
@@ -145,16 +135,14 @@ export async function dbUpsertCustomGpt({
 }: {
   customGpt: CustomGptInsertModel;
 }): Promise<CustomGptModel | undefined> {
-  const insertedCustomGpt = (
-    await db
-      .insert(customGptTable)
-      .values(customGpt)
-      .onConflictDoUpdate({
-        target: customGptTable.id,
-        set: { ...customGpt },
-      })
-      .returning()
-  )[0];
+  const [insertedCustomGpt] = await db
+    .insert(customGptTable)
+    .values(customGpt)
+    .onConflictDoUpdate({
+      target: customGptTable.id,
+      set: { ...customGpt },
+    })
+    .returning();
 
   return insertedCustomGpt;
 }
@@ -166,13 +154,11 @@ export async function dbUpdateCustomGpt({
   customGptId: string;
   customGpt: Partial<CustomGptInsertModel>;
 }): Promise<CustomGptModel | undefined> {
-  const updatedCustomGpt = (
-    await db
-      .update(customGptTable)
-      .set(customGpt)
-      .where(eq(customGptTable.id, customGptId))
-      .returning()
-  )[0];
+  const [updatedCustomGpt] = await db
+    .update(customGptTable)
+    .set(customGpt)
+    .where(eq(customGptTable.id, customGptId))
+    .returning();
 
   return updatedCustomGpt;
 }

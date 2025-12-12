@@ -22,7 +22,7 @@ import {
   FileModel,
   fileTable,
 } from '@shared/db/schema';
-import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
+import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { copyFileInS3 } from '@shared/s3';
 import { copyCustomGpt, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { addDays } from '@shared/utils/date';
@@ -32,20 +32,30 @@ import z from 'zod';
 
 /**
  * Loads custom gpt for edit view.
- * Throws NotFoundError if the custom gpt does not exist.
- * Throws ForbiddenError if the user is not authorized to edit the custom gpt.
+ * Throws if the user is not authorized to access the custom gpt:
+ * - NotFound if the custom gpt does not exist
+ * - Forbidden if the custom gpt is private and the user is not the owner
+ * - Forbidden if the custom gpt is school-level and the user is not in the same school
  */
 export async function getCustomGptForEditView({
   customGptId,
+  schoolId,
   userId,
 }: {
   customGptId: string;
+  schoolId: string;
   userId: string;
 }) {
   checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
-  if (!customGpt) throw new NotFoundError('Custom Gpt not found');
-  if (customGpt.userId !== userId) throw new ForbiddenError('Not authorized to edit custom gpt');
+  if (customGpt.accessLevel === 'private' && customGpt.userId !== userId)
+    throw new ForbiddenError('Not authorized to edit custom gpt');
+  if (
+    customGpt.accessLevel === 'school' &&
+    customGpt.schoolId !== schoolId &&
+    customGpt.userId !== userId
+  )
+    throw new ForbiddenError('Not authorized to edit custom gpt');
 
   return customGpt;
 }
@@ -69,7 +79,6 @@ export async function getCustomGptForNewChat({
   const customGpt = await dbGetCustomGptById({
     customGptId,
   });
-  if (!customGpt) throw new NotFoundError('Custom Gpt not found');
   if (customGpt.accessLevel === 'private' && customGpt.userId !== userId)
     throw new ForbiddenError('Not authorized to use custom gpt');
   if (
@@ -193,7 +202,7 @@ export async function createNewCustomGpt({
     .returning();
 
   if (!insertedCustomGpt) {
-    throw Error('Could not create a new CustomGpt');
+    throw Error('Could not create a new custom gpt');
   }
 
   return insertedCustomGpt;
@@ -215,7 +224,7 @@ export async function linkFileToCustomGpt({
   checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
-    throw new ForbiddenError('Not authorized to access custom gpt');
+    throw new ForbiddenError('Not authorized to add new file to this custom gpt');
   }
 
   const insertedFileMapping = await dbInsertCustomGptFileMapping({
@@ -224,7 +233,7 @@ export async function linkFileToCustomGpt({
   });
 
   if (!insertedFileMapping) {
-    throw new Error('Could not Link file to custom gpt');
+    throw new Error('Could not link file to custom gpt');
   }
 }
 
@@ -244,7 +253,7 @@ export async function deleteFileMappingAndEntity({
   checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
-    throw new ForbiddenError('Not authorized to access custom gpt');
+    throw new ForbiddenError('Not authorized to delete this file mapping from custom gpt');
   }
 
   await db.transaction(async (tx) => {
@@ -300,12 +309,14 @@ export async function updateCustomGptAccessLevel({
   userId: string;
 }) {
   checkParameterUUID(customGptId);
+  // Authorization check
+  if (accessLevel === 'global') {
+    throw new ForbiddenError('Not authorized to set the access level to global');
+  }
+
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
-    throw new ForbiddenError('Not authorized to access custom gpt');
-  }
-  if (accessLevel === 'global') {
-    throw new ForbiddenError('Cannot update customGpt to be global');
+    throw new ForbiddenError('Not authorized to update custom gpt');
   }
 
   const [updatedCustomGpt] = await db
@@ -337,7 +348,7 @@ export async function updateCustomGptPicture({
   checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
-    throw new ForbiddenError('Not authorized to access custom gpt');
+    throw new ForbiddenError('Not authorized to update this custom gpt');
   }
 
   const [updatedCustomGpt] = await db
@@ -347,7 +358,7 @@ export async function updateCustomGptPicture({
     .returning();
 
   if (updatedCustomGpt === undefined) {
-    throw new Error('Could not update the picture of the customGpt');
+    throw new Error('Could not update the picture of the custom gpt');
   }
 
   return updatedCustomGpt;
@@ -378,7 +389,7 @@ export async function updateCustomGpt({
 }) {
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
-    throw new ForbiddenError('Not authorized to access custom gpt');
+    throw new ForbiddenError('Not authorized to update this custom gpt');
   }
 
   const parsedValues = updateCustomGptSchema.parse(customGptProps);
@@ -390,7 +401,7 @@ export async function updateCustomGpt({
     .returning();
 
   if (!updatedGpt) {
-    throw new Error('Could not update the customGpt');
+    throw new Error('Could not update the custom gpt');
   }
 
   return updatedGpt;
@@ -410,7 +421,7 @@ export async function deleteCustomGpt({
   checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (customGpt.userId !== userId) {
-    throw new ForbiddenError('Not authorized to access custom gpt');
+    throw new ForbiddenError('Not authorized to delete this custom gpt');
   }
   return dbDeleteCustomGptByIdAndUserId({ gptId: customGptId, userId });
 }

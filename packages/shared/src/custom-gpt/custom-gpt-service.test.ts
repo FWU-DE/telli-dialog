@@ -45,30 +45,53 @@ describe('custom-gpt-service', () => {
 
   describe('NotFoundError scenarios', () => {
     const customGptId = generateUUID();
+    const schoolId = generateUUID();
+    const userId = generateUUID();
+    const fileId = generateUUID();
 
     it.each([
       {
         functionName: 'getCustomGptForEditView',
-        testFunction: () =>
-          getCustomGptForEditView({
-            customGptId,
-            userId: 'user-id',
-          }),
+        testFunction: () => getCustomGptForEditView({ customGptId, schoolId, userId }),
       },
       {
         functionName: 'getCustomGptForNewChat',
+        testFunction: () => getCustomGptForNewChat({ customGptId, schoolId, userId }),
+      },
+      {
+        functionName: 'linkFileToCustomGpt',
+        testFunction: () => linkFileToCustomGpt({ customGptId, fileId, userId }),
+      },
+      {
+        functionName: 'deleteFileMappingAndEntity',
+        testFunction: () => deleteFileMappingAndEntity({ customGptId, fileId, userId }),
+      },
+      {
+        functionName: 'getFileMappings',
+        testFunction: () => getFileMappings({ customGptId, schoolId, userId }),
+      },
+      {
+        functionName: 'updateCustomGptAccessLevel',
         testFunction: () =>
-          getCustomGptForNewChat({
-            customGptId,
-            userId: 'user-id',
-            schoolId: 'school-id',
-          }),
+          updateCustomGptAccessLevel({ customGptId, accessLevel: 'school', userId }),
+      },
+      {
+        functionName: 'updateCustomGptPicture',
+        testFunction: () => updateCustomGptPicture({ customGptId, picturePath: fileId, userId }),
+      },
+      {
+        functionName: 'updateCustomGpt',
+        testFunction: () => updateCustomGpt({ customGptId, customGptProps: {}, userId }),
+      },
+      {
+        functionName: 'deleteCustomGpt',
+        testFunction: () => deleteCustomGpt({ customGptId, userId }),
       },
     ])(
-      'should throw NotFoundError when custom GPT does not exist - $functionName',
+      'should throw NotFoundError from dbGetCustomGptById when custom GPT does not exist - $functionName',
       async ({ testFunction }) => {
-        (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
-          null as never,
+        (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockRejectedValue(
+          new NotFoundError(),
         );
 
         await expect(testFunction()).rejects.toThrowError(NotFoundError);
@@ -128,8 +151,9 @@ describe('custom-gpt-service', () => {
     const userId = generateUUID();
     const customGptId = generateUUID();
     const fileId = generateUUID();
+    const schoolId = generateUUID();
 
-    const mockCustomGpt: Partial<CustomGptModel> = { userId };
+    const mockCustomGpt: Partial<CustomGptModel> = { userId, schoolId, accessLevel: 'private' };
 
     beforeEach(() => {
       (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
@@ -144,6 +168,7 @@ describe('custom-gpt-service', () => {
           getCustomGptForEditView({
             customGptId,
             userId: 'different-user-id',
+            schoolId: 'school-id',
           }),
       },
       {
@@ -208,46 +233,73 @@ describe('custom-gpt-service', () => {
   });
 
   describe('ForbiddenError scenarios - access restrictions', () => {
-    it('should throw ForbiddenError when user is not owner of private custom GPT - getCustomGptForNewChat', async () => {
-      const userId = generateUUID();
-      const customGptId = generateUUID();
+    const userId = generateUUID();
+    const customGptId = generateUUID();
+    const schoolId = generateUUID();
 
-      const mockCustomGpt: Partial<CustomGptModel> = { userId, accessLevel: 'private' };
+    it.each([
+      {
+        functionName: 'getCustomGptForEditView',
+        testFunction: () =>
+          getCustomGptForEditView({
+            customGptId,
+            userId: 'different-user-id',
+            schoolId: 'school-id',
+          }),
+      },
+      {
+        functionName: 'getCustomGptForNewChat',
+        testFunction: () =>
+          getCustomGptForNewChat({
+            customGptId,
+            userId: 'different-user-id',
+            schoolId: 'school-id',
+          }),
+      },
+    ])(
+      'should throw ForbiddenError when user is not owner of private custom GPT - $functionName',
+      async ({ testFunction }) => {
+        const mockCustomGpt: Partial<CustomGptModel> = { userId, schoolId, accessLevel: 'private' };
 
-      (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
-        mockCustomGpt as never,
-      );
+        (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
+          mockCustomGpt as never,
+        );
 
-      await expect(
-        getCustomGptForNewChat({
-          customGptId,
-          userId: 'different-user-id',
-          schoolId: 'school-id',
-        }),
-      ).rejects.toThrowError(ForbiddenError);
-    });
+        await expect(testFunction()).rejects.toThrowError(ForbiddenError);
+      },
+    );
 
-    it('should throw ForbiddenError when user is not in same school - getCustomGptForNewChat', async () => {
-      const userId = generateUUID();
-      const customGptId = generateUUID();
-      const mockCustomGpt: Partial<CustomGptModel> = {
-        userId,
-        accessLevel: 'school',
-        schoolId: 'school-1',
-      };
+    it.each([
+      {
+        functionName: 'getCustomGptForEditView',
+        testFunction: () =>
+          getCustomGptForEditView({
+            customGptId,
+            userId: 'different-user-id',
+            schoolId: 'different-school-id',
+          }),
+      },
+      {
+        functionName: 'getCustomGptForNewChat',
+        testFunction: () =>
+          getCustomGptForNewChat({
+            customGptId,
+            userId: 'different-user-id',
+            schoolId: 'different-school-id',
+          }),
+      },
+    ])(
+      'should throw ForbiddenError when user is not in same school - $functionName',
+      async ({ testFunction }) => {
+        const mockCustomGpt: Partial<CustomGptModel> = { userId, schoolId, accessLevel: 'school' };
 
-      (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
-        mockCustomGpt as never,
-      );
+        (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
+          mockCustomGpt as never,
+        );
 
-      await expect(
-        getCustomGptForNewChat({
-          customGptId,
-          userId: 'different-user-id',
-          schoolId: 'different-school-id',
-        }),
-      ).rejects.toThrowError(ForbiddenError);
-    });
+        await expect(testFunction()).rejects.toThrowError(ForbiddenError);
+      },
+    );
 
     it('should throw ForbiddenError when user is not owner of conversation - getConversationWithMessagesAndCustomGpt', async () => {
       const userId = generateUUID();
@@ -351,6 +403,7 @@ describe('custom-gpt-service', () => {
           getCustomGptForEditView({
             customGptId: 'invalid-uuid',
             userId: 'user-id',
+            schoolId: 'school-id',
           }),
       },
       {
@@ -439,5 +492,55 @@ describe('custom-gpt-service', () => {
         await expect(testFunction()).rejects.toThrowError(InvalidArgumentError);
       },
     );
+  });
+
+  describe('Allow access', () => {
+    const customGptId = generateUUID();
+    const schoolIdOfOwner = generateUUID();
+    const userIdOfOwner = generateUUID();
+
+    describe.each([
+      { accessLevel: 'private', schoolId: 'any', userId: userIdOfOwner },
+      { accessLevel: 'school', schoolId: schoolIdOfOwner, userId: 'different-user-id' },
+      { accessLevel: 'global', schoolId: 'different-school-id', userId: 'different-user-id' },
+    ] as const)('accessLevel=$accessLevel', ({ accessLevel, schoolId, userId }) => {
+      it.each([
+        {
+          functionName: 'getCustomGptForEditView',
+          testFunction: () =>
+            getCustomGptForEditView({
+              customGptId,
+              schoolId,
+              userId,
+            }),
+        },
+        {
+          functionName: 'getCustomGptForNewChat',
+          testFunction: () =>
+            getCustomGptForNewChat({
+              customGptId,
+              schoolId,
+              userId,
+            }),
+        },
+      ])(
+        `should return customGpt with accessLevel=${accessLevel} - $functionName`,
+        async ({ testFunction }) => {
+          const mockCustomGpt: Partial<CustomGptModel> = {
+            userId: userIdOfOwner,
+            schoolId: schoolIdOfOwner,
+            accessLevel,
+          };
+
+          (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
+            mockCustomGpt as never,
+          );
+
+          const customGpt = await testFunction();
+
+          expect(customGpt).toBe(mockCustomGpt);
+        },
+      );
+    });
   });
 });
