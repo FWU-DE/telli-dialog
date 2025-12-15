@@ -13,5 +13,5 @@ export async function hasAccessToImageModel(
   apiKeyId: string,
   imageModel: AiModel,
 ): Promise<boolean> {
-    return dbHasApiKeyAccessToModel({ apiKeyId, modelId: imageModel.id });
+  return dbHasApiKeyAccessToModel({ apiKeyId, modelId: imageModel.id });
 }

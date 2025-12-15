@@ -1,4 +1,4 @@
-import { LlmModel } from "src/temp-db";
+import { LlmModel } from '../temp-db';
 
 export type ImageResponse = {
   // Base64-encoded images

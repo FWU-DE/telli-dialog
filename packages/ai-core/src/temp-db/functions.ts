@@ -1,18 +1,19 @@
-import { and, eq, gte, sum } from "drizzle-orm";
-import { dbApi } from ".";
-import { apiKeyTable, completionUsageTrackingTable, ImageGenerationUsageInsertModel, imageGenerationUsageTrackingTable, llmModelApiKeyMappingTable, llmModelTable } from "./schema";
+import { and, eq, gte, sum } from 'drizzle-orm';
+import { dbApi } from '.';
+import {
+  apiKeyTable,
+  completionUsageTrackingTable,
+  ImageGenerationUsageInsertModel,
+  imageGenerationUsageTrackingTable,
+  llmModelApiKeyMappingTable,
+  llmModelTable,
+} from './schema';
 
 export async function dbGetModelById(id: string) {
-  return (
-    await dbApi.select().from(llmModelTable).where(eq(llmModelTable.id, id))
-  )[0];
+  return (await dbApi.select().from(llmModelTable).where(eq(llmModelTable.id, id)))[0];
 }
 
-export async function dbGetModelsByApiKeyId({
-  apiKeyId,
-}: {
-  apiKeyId: string;
-}) {
+export async function dbGetModelsByApiKeyId({ apiKeyId }: { apiKeyId: string }) {
   const rows = await dbApi
     .select()
     .from(llmModelTable)
@@ -49,7 +50,7 @@ export async function dbHasApiKeyAccessToModel({
 export async function dbCreateImageGenerationUsage(
   imageGenerationUsage: ImageGenerationUsageInsertModel,
 ) {
-  // 
+  //
 
   const insertedImageGenerationUsage = (
     await dbApi
@@ -73,11 +74,7 @@ export async function dbGetApiKeyLimit(apiKeyId: string) {
   return apiKey[0];
 }
 
-export async function dbGetCompletionUsageCostsSince({
-  apiKeyId,
-}: {
-  apiKeyId: string;
-}) {
+export async function dbGetCompletionUsageCostsSince({ apiKeyId }: { apiKeyId: string }) {
   // Get the start of the current month
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
@@ -89,18 +86,14 @@ export async function dbGetCompletionUsageCostsSince({
     .where(
       and(
         eq(completionUsageTrackingTable.apiKeyId, apiKeyId),
-        gte(completionUsageTrackingTable.createdAt, startOfMonth)
-      )
+        gte(completionUsageTrackingTable.createdAt, startOfMonth),
+      ),
     );
 
   return Number(completionUsage[0]?.total || 0);
 }
 
-export async function dbGetImageGenerationUsageCostsSince({
-  apiKeyId,
-}: {
-  apiKeyId: string;
-}) {
+export async function dbGetImageGenerationUsageCostsSince({ apiKeyId }: { apiKeyId: string }) {
   // Get the start of the current month
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
@@ -112,8 +105,8 @@ export async function dbGetImageGenerationUsageCostsSince({
     .where(
       and(
         eq(imageGenerationUsageTrackingTable.apiKeyId, apiKeyId),
-        gte(imageGenerationUsageTrackingTable.createdAt, startOfMonth)
-      )
+        gte(imageGenerationUsageTrackingTable.createdAt, startOfMonth),
+      ),
     );
 
   return Number(imageUsage[0]?.total || 0);

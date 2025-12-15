@@ -75,11 +75,11 @@ function transformToModel(federalState: FederalStateSelectModel): FederalStateMo
   const { encryptedApiKey, ...federalStateWithoutApiKey } = federalState;
 
   // @ts-expect-error
-  const apiKeyId= federalState.apiKeyId ?? '';
+  const apiKeyId = federalState.apiKeyId ?? '';
 
   return {
     ...federalStateWithoutApiKey,
     hasApiKeyAssigned: !!federalState.encryptedApiKey,
-    apiKeyId: apiKeyId
+    apiKeyId: apiKeyId,
   };
 }

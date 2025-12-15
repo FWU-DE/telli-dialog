@@ -1,10 +1,10 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
-import { env } from "../env";
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
+import { env } from '../env';
 
 const connectionString = env.apiDatabaseUrl;
 if (!connectionString) {
-  throw new Error("Database URL undefined");
+  throw new Error('Database URL undefined');
 }
 
 const pool = new Pool({
@@ -14,4 +14,4 @@ const pool = new Pool({
 
 export const dbApi = drizzle({ client: pool });
 
-export * from "./schema";
+export * from './schema';

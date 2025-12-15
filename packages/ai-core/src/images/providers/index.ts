@@ -5,11 +5,7 @@ import { constructGoogleImageGenerationFn } from './google';
 import { ProviderConfigurationError } from '../errors';
 
 // This could probably be more direct, but it would require reworking the individual provider files
-function getImageGenerationFnByModel({
-  model,
-}: {
-  model: AiModel;
-}): ImageGenerationFn | undefined {
+function getImageGenerationFnByModel({ model }: { model: AiModel }): ImageGenerationFn | undefined {
   if (model.provider === 'ionos') {
     return constructIonosImageGenerationFn(model);
   }
@@ -26,7 +22,9 @@ function getImageGenerationFnByModel({
 export async function generateImage(model: AiModel, prompt: string) {
   const generationFn = getImageGenerationFnByModel({ model });
   if (!generationFn) {
-    throw new ProviderConfigurationError(`No image generation function found for provider: ${model.provider}`);
+    throw new ProviderConfigurationError(
+      `No image generation function found for provider: ${model.provider}`,
+    );
   }
   return generationFn({ prompt, model: model.name });
 }

@@ -1,4 +1,9 @@
-import { dbCreateImageGenerationUsage, dbGetApiKeyLimit, dbGetCompletionUsageCostsSince, dbGetImageGenerationUsageCostsSince } from '../temp-db/functions';
+import {
+  dbCreateImageGenerationUsage,
+  dbGetApiKeyLimit,
+  dbGetCompletionUsageCostsSince,
+  dbGetImageGenerationUsageCostsSince,
+} from '../temp-db/functions';
 import { AiModel } from '../images/types';
 
 /**
@@ -15,7 +20,7 @@ export async function billImageGenerationUsageToApiKey(
   apiKeyId: string,
   imageModel: AiModel,
 ): Promise<number> {
-  if (imageModel.priceMetadata.type !== 'image'){
+  if (imageModel.priceMetadata.type !== 'image') {
     throw new Error(`Model ${imageModel.id} is not an image model`);
   }
   const priceInCent = imageModel.priceMetadata.pricePerImageInCent;

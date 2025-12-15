@@ -22,7 +22,7 @@ export async function generateImageWithBilling(
   trustedApiKeyId: string,
 ) {
   const model = await getImageModelById(modelId);
-  
+
   // Run access check and quota check in parallel for better performance
   const [hasAccess, isOverQuota] = await Promise.all([
     hasAccessToImageModel(trustedApiKeyId, model),
@@ -36,9 +36,7 @@ export async function generateImageWithBilling(
   }
 
   if (isOverQuota) {
-    throw new ImageGenerationError(
-      `API key has exceeded its monthly quota`,
-    );
+    throw new ImageGenerationError(`API key has exceeded its monthly quota`);
   }
 
   try {
