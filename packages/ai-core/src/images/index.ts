@@ -41,13 +41,13 @@ export async function generateImageWithBilling(
 
   try {
     // generate
-    const ImageResponse = await generateImage(model, prompt);
+    const imageResponse = await generateImage(model, prompt);
 
     // bill to api key
     const priceInCents = await billImageGenerationUsageToApiKey(trustedApiKeyId, model);
 
     return {
-      ...ImageResponse,
+      ...imageResponse,
       priceInCents,
     };
   } catch (error) {
