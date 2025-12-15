@@ -1,5 +1,5 @@
 import { getVouchersAction } from './actions';
-import { auth } from '../../../../api/auth/[...nextauth]/auth';
+import { auth } from '@/auth';
 import VoucherListView from './VoucherListView';
 
 export const dynamic = 'force-dynamic';
