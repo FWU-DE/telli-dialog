@@ -3,13 +3,13 @@ import { userHasReachedIntelliPointLimit } from '@/app/api/chat/usage';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
 import { dbGetModelByIdAndFederalStateId } from '@shared/db/functions/llm-model';
-import { env } from '@/env';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { dbGetOrCreateConversation } from '@shared/db/functions/chat';
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
 import { logError } from '@shared/logging';
+import { generateImageWithBilling } from '@telli/ai-core';
 export interface ImageGenerationParams {
   prompt: string;
   modelId: string;
@@ -17,10 +17,8 @@ export interface ImageGenerationParams {
 }
 
 export interface ImageGenerationResult {
-  created: number;
-  data: Array<{
-    b64_json?: string;
-  }>;
+  created?: number;
+  data: Array<string>;
 }
 
 /**
@@ -91,24 +89,11 @@ export async function generateImage({
   }
 
   try {
-    const response = await fetch(`${env.apiUrl}/v1/images/generations`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${federalStateObject.decryptedApiKey}`,
-      },
-      body: JSON.stringify({
-        model: definedModel.name,
-        prompt: prompt.trim(),
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error?.message || 'Failed to generate image');
-    }
-
-    const result = await response.json();
+    const result = await generateImageWithBilling(
+      definedModel.id,
+      prompt.trim(),
+      federalStateObject.trustedApiKeyId,
+    );
 
     const costsInCent = definedModel.priceMetadata.pricePerImageInCent;
 
@@ -138,7 +123,6 @@ export async function generateImage({
     }
 
     return {
-      created: result.created,
       data: result.data,
     };
   } catch (error) {

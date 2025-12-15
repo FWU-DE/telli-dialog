@@ -103,12 +103,12 @@ export async function generateImageAction({
     });
 
     const image = result.data[0];
-    if (!image?.b64_json) {
+    if (!image) {
       throw new Error('No image data received from API');
     }
 
     // Save image to S3
-    const imageBuffer = Buffer.from(image.b64_json, 'base64');
+    const imageBuffer = Buffer.from(image, 'base64');
     const fileId = `file_${cnanoid()}`;
     const key = `message_attachments/${fileId}`;
 
