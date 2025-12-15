@@ -50,8 +50,6 @@ export async function dbHasApiKeyAccessToModel({
 export async function dbCreateImageGenerationUsage(
   imageGenerationUsage: ImageGenerationUsageInsertModel,
 ) {
-  //
-
   const insertedImageGenerationUsage = (
     await dbApi
       .insert(imageGenerationUsageTrackingTable)
