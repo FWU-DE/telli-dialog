@@ -99,7 +99,7 @@ export async function generateImage({
       federalStateObject.trustedApiKeyId,
     );
 
-    const costsInCent = definedModel.priceMetadata.pricePerImageInCent;
+    const costsInCent = result.priceInCents;
 
     // Track image generation usage
     await dbInsertConversationUsage({
