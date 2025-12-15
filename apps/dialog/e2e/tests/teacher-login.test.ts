@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../utils/login';
-import { sendMessage } from '../utils/utils';
+import { sendMessage } from '../utils/chat';
 
 test('can login as teacher and send a message', async ({ page }) => {
   await login(page, 'teacher');

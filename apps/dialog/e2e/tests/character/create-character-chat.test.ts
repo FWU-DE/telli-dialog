@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { regenerateMessage, sendMessage } from '../../utils/utils';
+import { regenerateMessage, sendMessage } from '../../utils/chat';
 
 test('teacher can login, create and join shared dialogpartner chat', async ({ page }) => {
   await login(page, 'teacher');

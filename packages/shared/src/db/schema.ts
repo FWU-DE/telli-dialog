@@ -2,6 +2,7 @@ import {
   boolean,
   customType,
   doublePrecision,
+  foreignKey,
   index,
   integer,
   json,
@@ -560,12 +561,19 @@ export const SharedSchoolConversationFileMapping = pgTable(
     fileId: text('fileId')
       .references(() => fileTable.id)
       .notNull(),
-    sharedSchoolConversationId: uuid('shared_school_conversation_id')
-      .references(() => sharedSchoolConversationTable.id)
-      .notNull(),
+    sharedSchoolConversationId: uuid('shared_school_conversation_id').notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [unique().on(table.sharedSchoolConversationId, table.fileId)],
+  (table) => [
+    unique().on(table.sharedSchoolConversationId, table.fileId),
+    foreignKey({
+      columns: [table.sharedSchoolConversationId],
+      foreignColumns: [sharedSchoolConversationTable.id],
+      // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
+      // The custom name can only be set with foreignKey() function
+      name: 'shared_school_conversation_id_shared_school_conversation_id_fk',
+    }).onDelete('cascade'),
+  ],
 );
 
 export const CharacterFileMapping = pgTable(
@@ -576,7 +584,7 @@ export const CharacterFileMapping = pgTable(
       .references(() => fileTable.id)
       .notNull(),
     characterId: uuid('character_id')
-      .references(() => characterTable.id)
+      .references(() => characterTable.id, { onDelete: 'cascade' })
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
@@ -590,7 +598,7 @@ export const CustomGptFileMapping = pgTable(
       .references(() => fileTable.id)
       .notNull(),
     customGptId: uuid('custom_gpt_id')
-      .references(() => customGptTable.id)
+      .references(() => customGptTable.id, { onDelete: 'cascade' })
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },

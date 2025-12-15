@@ -14,8 +14,8 @@ const FILE_CONTENT = `Vincent van Gogh wurde 1853 in Zundert geboren und nahm 18
 1890 lebte er in Auvers-sur-Oise unter Dr. Paul Gachet und starb am 29. Juli 1890; seine große Anerkennung setzte vor allem posthum ein.`;
 
 export default async function main() {
-  await runTest(async ({ page, userIndex, userName, password }) => {
-    await performLogin(page, userName, password);
+  await runTest(async ({ page, userIndex, auth }) => {
+    await performLogin(page, auth);
     await selectModel(page, Number(__VU) + Number(__ITER));
     await uploadPdfFile(page, userIndex);
     await sendMessage(page, PROMPT);
