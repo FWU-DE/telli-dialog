@@ -117,7 +117,7 @@ jobs:
         env:
           CI: true
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-report
