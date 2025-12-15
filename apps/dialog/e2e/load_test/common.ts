@@ -1,5 +1,5 @@
 import { browser, BrowserContext, Page } from 'k6/browser';
-import { BASE_URL, SCREENSHOT_FOLDERS, SELECTORS, WAIT_TIMES_IN_MS } from './config';
+import { BASE_URL, LLM_MODELS, SCREENSHOT_FOLDERS, SELECTORS, WAIT_TIMES_IN_MS } from './config';
 import { check } from 'k6';
 
 export async function saveScreenshot(page: Page, userIndex: string, isSuccess: boolean) {
@@ -52,8 +52,7 @@ export async function runTest(
     context: BrowserContext;
     page: Page;
     userIndex: string;
-    userName: string;
-    password: string;
+    auth: { userName: string; password: string; idpHint?: string };
   }) => Promise<void>,
 ) {
   const context = await browser.newContext();
@@ -64,19 +63,21 @@ export async function runTest(
   page.setDefaultTimeout(WAIT_TIMES_IN_MS.PAGE_ELEMENT_TIMEOUT);
 
   const userIndex = `${__VU}-${__ITER}-${Date.now()}`;
-  const userName = 'test';
+  const userName = __ENV.LOADTEST_USERNAME;
   const password = __ENV.LOADTEST_PASSWORD;
+  const idpHint = __ENV.LOADTEST_IDP_HINT;
 
-  if (!password) {
+  if (!userName || !password) {
     throw new Error(
-      'Please provide the password for the test user via the env variable LOADTEST_PASSWORD',
+      'Please provide the username and password for the test user via the env variables LOADTEST_USERNAME and LOADTEST_PASSWORD',
     );
   }
 
   let testSuccessful = false;
 
   try {
-    await testFunction({ context, page, userIndex, userName, password });
+    const auth = { userName, password, idpHint };
+    await testFunction({ context, page, userIndex, auth });
 
     testSuccessful = true;
     console.log(`Test successful for user ${userIndex}`);
@@ -98,27 +99,36 @@ export async function runTest(
   }
 }
 
-export async function performLogin(page: Page, userName: string, password: string) {
+export async function performLogin(
+  page: Page,
+  { userName, password, idpHint }: { userName: string; password: string; idpHint?: string },
+) {
   let successfulLogin = false;
   try {
-    await page.goto(`${BASE_URL}/login?testlogin=true`, {
+    let url = `${BASE_URL}/login`;
+    if (idpHint) url += `?vidis_idp_hint=${idpHint}`;
+    await page.goto(url, {
       timeout: WAIT_TIMES_IN_MS.NAVIGATION_TIMEOUT,
     });
 
-    const usernameInput = page.locator(SELECTORS.USERNAME_INPUT);
+    if (!idpHint) {
+      await page.getByRole('button', { name: 'Mit VIDIS einloggen' }).click();
+    }
+
+    const usernameInput = page.getByLabel('Username');
     await usernameInput.waitFor();
     await usernameInput.fill(userName);
 
-    const passwordInput = page.locator(SELECTORS.PASSWORD_INPUT);
+    const passwordInput = page.getByRole('textbox', { name: 'Password' });
     await passwordInput.waitFor();
     await passwordInput.fill(password);
 
-    const loginButton = page.locator(SELECTORS.LOGIN_BUTTON);
-    await loginButton.waitFor();
-    await loginButton.click();
+    await page.keyboard.press('Enter');
 
     await page.waitForNavigation({ url: /\/?$/, timeout: WAIT_TIMES_IN_MS.NAVIGATION_TIMEOUT });
-    await page.locator(SELECTORS.PROFILE_BUTTON).waitFor();
+    await page
+      .locator(SELECTORS.PROFILE_BUTTON)
+      .waitFor({ timeout: WAIT_TIMES_IN_MS.NAVIGATION_TIMEOUT });
     successfulLogin = true;
   } finally {
     check(page, {
@@ -130,17 +140,19 @@ export async function performLogin(page: Page, userName: string, password: strin
 export async function selectModel(page: Page, userIndex: number) {
   let successfullySelected = false;
   try {
-    const dropdownLocator = page.locator(SELECTORS.LLM_DROPDOWN);
+    const dropdownLocator = page.getByLabel('Select text Model Dropdown');
     await dropdownLocator.waitFor();
 
     const currentSelectedText = await dropdownLocator.textContent();
-    const targetModelName =
-      userIndex % 2 === 0 ? SELECTORS.LLAMA_MODEL_NAME : SELECTORS.GPT_MODEL_NAME;
+    const targetModel = LLM_MODELS.at(userIndex % LLM_MODELS.length);
+    if (!targetModel) {
+      throw Error();
+    }
 
-    if (currentSelectedText && currentSelectedText.includes(targetModelName)) {
+    if (currentSelectedText?.includes(targetModel.displayName)) {
       successfullySelected = true;
       console.log(
-        `Model ${targetModelName} already selected for user ${userIndex}, skipping selection`,
+        `Model ${targetModel.displayName} already selected for user ${userIndex}, skipping selection`,
       );
       return;
     }
@@ -148,18 +160,18 @@ export async function selectModel(page: Page, userIndex: number) {
     await dropdownLocator.click();
     await page.locator(SELECTORS.DROPDOWN_WRAPPER).waitFor();
 
-    const modelSelector = userIndex % 2 === 0 ? 'LLAMA_MODEL' : 'GPT_MODEL';
-    const modelName = SELECTORS[`${modelSelector}_NAME` as const];
-    const modelLocator = page.locator(SELECTORS[modelSelector]);
-
+    const modelLocator = page.getByLabel(`Select ${targetModel.id} Model`);
     await modelLocator.waitFor();
 
-    const changeLlmNavigation = page.waitForURL(new RegExp(modelName, 'i'), {
-      timeout: WAIT_TIMES_IN_MS.NAVIGATION_TIMEOUT,
-    });
+    const changeLlmNavigation = page.waitForURL(
+      new RegExp(`model=${encodeURIComponent(targetModel.id)}\$`),
+      {
+        timeout: WAIT_TIMES_IN_MS.NAVIGATION_TIMEOUT,
+      },
+    );
     await modelLocator.click();
     await changeLlmNavigation;
-    console.log(`Selected model ${targetModelName} for user ${userIndex}`);
+    console.log(`Selected model ${targetModel.displayName} for user ${userIndex}`);
     successfullySelected = true;
   } finally {
     check(page, {
