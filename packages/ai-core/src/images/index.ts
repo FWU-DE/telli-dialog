@@ -35,7 +35,6 @@ export async function generateImageWithBilling(
     );
   }
 
-  // TODO: SPIKE Check if this actually works
   if (isOverQuota) {
     throw new ImageGenerationError(
       `API key has exceeded its monthly quota`,

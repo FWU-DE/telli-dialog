@@ -27,6 +27,7 @@ export type FederalStateViewProps = {
 
 // Form-specific schema that extends the base schema with UI adaptations
 export const federalStateEditFormSchema = federalStateSchema.extend({
+  apiKeyId: z.string(), // Added explicitly for admin context (excluded from standard queries for security)
   supportContacts: z.array(
     z.object({
       value: z.string(),
@@ -139,6 +140,13 @@ export function FederalStateView(props: FederalStateViewProps) {
             description="Zeigt an ob bereits ein API Key erstellt wurde. Dieser ist zwingend für die Kommunikation mit telli-api erforderlich."
             control={control}
             disabled
+          />
+
+          <FormField
+            name="apiKeyId"
+            label="API Key ID"
+            description="UUID des trusted API keys aus telli-api für Kostenmanagement und Billing."
+            control={control}
           />
 
           <FormField

@@ -53,6 +53,10 @@ export async function generateImage({
     throw new Error(federalStateError.message);
   }
 
+  if (!federalStateObject.trustedApiKeyId) {
+    throw new Error('Federal state has no API key assigned');
+  }
+
   const definedModel = await dbGetModelByIdAndFederalStateId({
     modelId,
     federalStateId: user.federalState.id,
