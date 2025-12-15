@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { deleteChat, sendMessage, uploadFile } from '../../utils/utils';
+import { deleteChat, sendMessage, uploadFile } from '../../utils/chat';
 import path from 'path';
 
 test('should successfully upload a file and get response about its contents', async ({ page }) => {

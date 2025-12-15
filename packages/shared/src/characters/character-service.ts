@@ -3,12 +3,12 @@ import { db } from '@shared/db';
 import {
   dbDeleteCharacterByIdAndUserId,
   dbGetCharacterById,
-  dbGetSharedCharacterConversations,
-  dbGetCharacterByIdWithShareData,
   dbGetCharacterByIdAndUserId,
+  dbGetCharacterByIdWithShareData,
   dbGetCharactersBySchoolId,
   dbGetCharactersByUserId,
   dbGetGlobalCharacters,
+  dbGetSharedCharacterConversations,
 } from '@shared/db/functions/character';
 import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
@@ -122,7 +122,9 @@ export const createNewCharacter = async ({
 };
 
 /**
- * Deletes a character file mapping and the associated file entry in database.
+ * Deletes a character file mapping and the associated file entry in the database.
+ *
+ * Note: the cleanup job will delete the file from S3 at a later time.
  */
 export const deleteFileMappingAndEntity = async ({
   characterId,
@@ -135,8 +137,8 @@ export const deleteFileMappingAndEntity = async ({
 }) => {
   checkParameterUUID(characterId);
   // Authorization check: user must own character
-  if ((await getCharacterInfo(characterId, userId)).isOwner === false)
-    throw new ForbiddenError('Not authorized to delete this file mapping');
+  const { isOwner } = await getCharacterInfo(characterId, userId);
+  if (!isOwner) throw new ForbiddenError('Not authorized to delete this file mapping');
 
   // Delete the mapping and the file entry
   await db.transaction(async (tx) => {
@@ -190,8 +192,8 @@ export const linkFileToCharacter = async ({
 }) => {
   checkParameterUUID(characterId);
   // Authorization check
-  if ((await getCharacterInfo(characterId, userId)).isOwner === false)
-    throw new ForbiddenError('Not authorized to add new file for this character');
+  const { isOwner } = await getCharacterInfo(characterId, userId);
+  if (!isOwner) throw new ForbiddenError('Not authorized to add new file for this character');
 
   // create a new file mapping
   const [insertedFileMapping] = await db
@@ -223,7 +225,8 @@ export const updateCharacterAccessLevel = async ({
     throw new ForbiddenError('Not authorized to set the access level to global');
   }
 
-  if ((await getCharacterInfo(characterId, userId)).isOwner === false)
+  const { isOwner } = await getCharacterInfo(characterId, userId);
+  if (!isOwner)
     throw new ForbiddenError('Not authorized to set the access level of this character');
 
   // Update the access level in database
@@ -256,8 +259,8 @@ export const updateCharacterPicture = async ({
 }) => {
   checkParameterUUID(characterId);
   // Authorization check
-  if ((await getCharacterInfo(characterId, userId)).isOwner === false)
-    throw new ForbiddenError('Not authorized to update the picture of this character');
+  const { isOwner } = await getCharacterInfo(characterId, userId);
+  if (!isOwner) throw new ForbiddenError('Not authorized to update the picture of this character');
 
   // Update the picture path in database
   const [updatedCharacter] = await db
@@ -298,8 +301,8 @@ export const updateCharacter = async ({
 }: UpdateCharacterActionModel & { characterId: string; userId: string }) => {
   checkParameterUUID(characterId);
   // Authorization check
-  if ((await getCharacterInfo(characterId, userId)).isOwner === false)
-    throw new ForbiddenError('Not authorized to update this character');
+  const { isOwner } = await getCharacterInfo(characterId, userId);
+  if (!isOwner) throw new ForbiddenError('Not authorized to update this character');
 
   // Update the character in database
   const cleanedCharacter = removeNullishValues(character);
@@ -584,11 +587,15 @@ export const getCharacterInfo = async (
 /**
  * Cleans up characters with empty names from the database.
  * Attention: This is an admin function that does not check any authorization!
+ *
+ * Note: linked files will be unlinked but removed separately by `dbDeleteDanglingFiles`
+ *
  * @returns number of deleted characters in db
  */
 export async function cleanupCharacters() {
-  return await db
+  const result = await db
     .delete(characterTable)
     .where(and(eq(characterTable.name, ''), lt(characterTable.createdAt, addDays(new Date(), -1))))
     .returning();
+  return result.length;
 }
