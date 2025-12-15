@@ -239,13 +239,6 @@
       "when": 1764929557230,
       "tag": "0033_complex_agent_zero",
       "breakpoints": true
-    },
-    {
-      "idx": 34,
-      "version": "7",
-      "when": 1765801737732,
-      "tag": "0034_omniscient_epoch",
-      "breakpoints": true
     }
   ]
 }
