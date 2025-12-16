@@ -1,10 +1,11 @@
 import { db } from '..';
-import { encrypt } from '../crypto';
+import { decrypt, encrypt } from '../crypto';
 import { FederalStateInsertModel, federalStateTable } from '../schema';
 import { fetchLlmModels } from '../../knotenpunkt';
 import { dbGetFederalStateWithDecryptedApiKey } from '../functions/federal-state';
 import { dbUpsertLlmModelsByModelsAndFederalStateId } from '../functions/llm-model';
 import { env } from '../../env';
+import { lookupApiKeys } from '@telli/ai-core/api-keys/lookup';
 
 export async function insertFederalStates({ skip = true }: { skip: boolean }) {
   if (skip) return;
@@ -14,10 +15,24 @@ export async function insertFederalStates({ skip = true }: { skip: boolean }) {
       `Failed to insert Federal States, configure at least one of the following env variables: ${envVariables.join(', ')}`,
     );
   }
+  
+  // Decrypt API keys and lookup their IDs
+  const apiKeysByState: Record<string, string> = {};
   for (const federalState of FEDERAL_STATES) {
+    const decryptedApiKey = decrypt({
+      data: federalState.encryptedApiKey,
+      plainEncryptionKey: env.encryptionKey,
+    });
+    apiKeysByState[federalState.id] = decryptedApiKey;
+  }
+  
+  const apiKeyIdsByState = await lookupApiKeys(apiKeysByState);
+  
+  for (const federalState of FEDERAL_STATES) {
+    const apiKeyId = apiKeyIdsByState[federalState.id];
     await db
       .insert(federalStateTable)
-      .values({ ...federalState })
+      .values({ ...federalState, apiKeyId })
       .onConflictDoNothing();
 
     // upsert models per federal state
