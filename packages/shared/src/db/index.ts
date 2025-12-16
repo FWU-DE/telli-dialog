@@ -7,7 +7,6 @@ import { isDevelopment } from '@shared/utils/isDevelopment';
 
 const globalState = global as unknown as {
   pool?: Pool;
-  migrationsRun?: boolean;
 };
 
 const pool =
@@ -21,25 +20,17 @@ const pool =
 if (isDevelopment()) {
   globalState.pool = pool;
 }
-const db = drizzle({ client: pool });
 
-// Ensure the migrations are executed only once
-// Note: migrations won't be run on hot reload
-if (!globalState.migrationsRun) {
-  globalState.migrationsRun = true;
+export const db = drizzle({ client: pool });
 
-  // cannot use `await` at the top level in a module, so we use an IIFE
-  (async () => {
-    try {
-      console.info('Running database migrations...');
-      await migrateWithLock(db, {
-        migrationsFolder: path.join(process.cwd(), '..', '..', 'packages', 'shared', 'migrations'),
-      });
-      console.info('Database migrations completed successfully.');
-    } catch (error) {
-      console.error('Error running database migrations:', error);
-    }
-  })();
+export async function runDatabaseMigration() {
+  try {
+    console.info('Running database migrations...');
+    await migrateWithLock(db, {
+      migrationsFolder: path.join(process.cwd(), '..', '..', 'packages', 'shared', 'migrations'),
+    });
+    console.info('Database migrations completed successfully.');
+  } catch (error) {
+    console.error('Error running database migrations:', error);
+  }
 }
-
-export { db };
