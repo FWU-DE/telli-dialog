@@ -1,4 +1,5 @@
 import { ImageAttachment } from '@/utils/files/types';
+import { logError } from '@shared/logging';
 import { generateText, LanguageModelV1, type Message } from 'ai';
 
 /**
@@ -125,7 +126,7 @@ export function limitChatHistory({
 }
 
 /**
- * Condenses chat history into a search query for vector search and text retrieval
+ * Condenses chat history into a search query for vector search
  * @param messages - The chat messages to condense
  * @param model - The LLM model to use for condensing
  * @returns A string representing the search query
@@ -148,10 +149,13 @@ export async function condenseChatHistory({
   try {
     const { text } = await generateText({
       model,
-      system: `Du bist ein hilfreicher Assistent, der Suchanfragen erstellt.
+      system: `Du bist ein hilfreicher Assistent, der semantische Suchanfragen (Vektor-Suche) für eine Wissensdatenbank erstellt.
 Basierend auf dem Chatverlauf, erstelle eine präzise Suchanfrage.
 Die Suchanfrage sollte die Hauptfrage oder das Hauptthema des Benutzers erfassen.
+Die Suchanfrage muss eigenständig und unabhängig vom Chatverlauf sein und alle notwendigen Kontextinformationen aus dem Verlauf enthalten, um die Hauptfrage oder das Hauptthema des Benutzers zu erfassen.
 Halte die Suchanfrage kurz und prägnant (maximal 200 Zeichen).
+
+Falls die Eingabe sinnlos oder irrelevant ist und keine sinnvolle Suchanfrage erstellt werden kann, gib nur die letzte Benutzernachricht als Suchanfrage zurück.
 
 ACHTUNG: Gib NUR die Suchanfrage zurück, ohne zusätzliche Erklärungen oder Formatierungen.
 Beantworte NICHT die Frage des Benutzers, sondern erstelle eine präzise Suchanfrage.
@@ -166,13 +170,19 @@ Suchanfrage: "Elterngeld Anspruch"
 
     return text.trim();
   } catch (error) {
-    console.error('Error condensing chat history:', error);
     // Fallback: Use the last user message as the search query
+    logError('Error condensing chat history, using last user message as fallback:', error);
     const lastUserMessage = messages.findLast((m) => m.role === 'user');
     return lastUserMessage?.content.slice(0, 200) || '';
   }
 }
 
+/**
+ * Extract keywords from the user's last message in the chat history
+ * @param messages - The chat messages
+ * @param model - The LLM model to use for keyword extraction
+ * @returns An array of extracted keywords or an empty array if none found
+ */
 export async function getKeywordsFromQuery({
   messages,
   model,
@@ -180,20 +190,27 @@ export async function getKeywordsFromQuery({
   messages: Array<Message>;
   model: LanguageModelV1;
 }): Promise<string[]> {
-  const { text } = await generateText({
-    model,
-    system: `Du bist ein Experte für die präzise Extraktion von Schlüsselwörtern. 
+  const lastUserMessage = messages.findLast((m) => m.role === 'user');
+
+  if (!lastUserMessage) {
+    return [];
+  }
+
+  try {
+    const { text } = await generateText({
+      model,
+      system: `Du bist ein Experte für die präzise Extraktion von Schlüsselwörtern. 
 Deine Aufgabe ist es, die relevantesten Schlüsselwörter aus der gegebenen Suchanfrage (der letzten Benutzernachricht im Chatverlauf) zu extrahieren.
 
 Regeln:
-1. Extrahiere nur die wichtigsten, fachspezifischen Schlüsselwörter
-2. Entferne allgemeine Wörter, Artikel und Präpositionen
-3. Behalte zusammengesetzte Begriffe als einzelne Schlüsselwörter
-4. Verwende die Grundform der Wörter
-5. Gib die Schlüsselwörter als kommaseparierte Liste zurück
-6. Maximal 5 Schlüsselwörter pro Anfrage
-7. Schlüsselwörter sollten spezifisch und aussagekräftig sein
-8. Falls keine Schlüsselwörter gefunden werden können, gib ein Leerzeichen zurück
+- Extrahiere nur die wichtigsten, fachspezifischen Schlüsselwörter
+- Entferne allgemeine Wörter, Artikel und Präpositionen
+- Behalte zusammengesetzte Begriffe als einzelne Schlüsselwörter
+- Verwende die Grundform der Wörter
+- Gib die Schlüsselwörter als kommaseparierte Liste zurück
+- Maximal 5 Schlüsselwörter pro Anfrage
+- Schlüsselwörter sollten spezifisch und aussagekräftig sein
+- Falls keine Schlüsselwörter gefunden werden können, gib einen leeren String zurück, also nichts zwischen den Anführungszeichen
 
 Beispiele:
 Eingabe: "Wie kann ich einen Antrag auf Elterngeld stellen?"
@@ -206,31 +223,48 @@ Eingabe: "Wo finde ich Informationen über Kindergeld?"
 Ausgabe: "Kindergeld,Informationen,Leitfaden"
 
 Eingabe: "qwertz"
-Ausgabe: " "
+Ausgabe: ""
 `,
-    messages,
-  });
-  return text.trim().split(',');
+      messages: [lastUserMessage],
+    });
+
+    const keywords = text.trim();
+    return keywords ? keywords.split(',') : [];
+  } catch (error) {
+    logError('Error extracting keywords from query, using empty array as fallback:', error);
+    return [];
+  }
 }
 
+/**
+ * Generate a chat title based on the first user message
+ * @param message - The first user message
+ * @param model - The LLM model to use for title generation
+ * @returns A string representing the generated chat title
+ */
 export async function getChatTitle({
-  messages,
+  message,
   model,
 }: {
-  messages: Array<Message>;
+  message: Message;
   model: LanguageModelV1;
 }): Promise<string> {
-  const { text } = await generateText({
-    model,
-    system: `Du erstellst einen kurzen Titel basierend auf der ersten Nachricht eines Nutzers
+  try {
+    const { text } = await generateText({
+      model,
+      system: `Du erstellst einen kurzen Titel basierend auf der ersten Nachricht eines Nutzers
   
 Regeln:
 1. Der Titel sollte eine Zusammenfassung der Nachricht sein
 2. Verwende keine Anführungszeichen oder Doppelpunkte
 3. Der Titel sollte nicht länger als 80 Zeichen sein
 `,
-    messages,
-    maxTokens: 30,
-  });
-  return text.trim();
+      messages: [message],
+      maxTokens: 30,
+    });
+    return text.trim();
+  } catch (error) {
+    logError('Error generating chat title, using default title as fallback:', error);
+    return 'Neue Konversation';
+  }
 }

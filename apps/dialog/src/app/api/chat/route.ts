@@ -240,15 +240,10 @@ export async function POST(request: NextRequest) {
       });
 
       if (messages.length === 1 || messages.length === 2 || conversation.name === null) {
-        let chatTitle = 'Neue Konversation';
-        try {
-          chatTitle = await getChatTitle({
-            model: auxiliaryModelAndProvider.telliProvider,
-            messages,
-          });
-        } catch (error) {
-          console.error('Unhandled error while generating conversation title', error);
-        }
+        const chatTitle = await getChatTitle({
+          model: auxiliaryModelAndProvider.telliProvider,
+          message: userMessage,
+        });
         await dbUpdateConversationTitle({
           name: chatTitle,
           conversationId: conversation.id,

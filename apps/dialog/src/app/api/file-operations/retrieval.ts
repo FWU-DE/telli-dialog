@@ -7,6 +7,7 @@ import { embedText } from './embedding';
 import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
 import { LanguageModelV1, Message } from 'ai';
+import { logError } from '@shared/logging';
 
 type SearchOptions = {
   keywords: string[];
@@ -41,15 +42,21 @@ export async function getRelevantFileContent({
     }),
   ]);
 
-  const [queryEmbedding] = await embedText({
-    text: [searchQuery],
-    federalStateId: user.federalState.id,
-  });
+  let queryEmbedding: number[] = [];
+  try {
+    const [embedding] = await embedText({
+      text: [searchQuery],
+      federalStateId: user.federalState.id,
+    });
+    queryEmbedding = embedding ?? [];
+  } catch (error) {
+    logError('Failed to generate embedding, using empty array as fallback:', error);
+  }
 
   const relatedFileEntityIds = relatedFileEntities.map((file) => file.id);
   const retrievedTextChunks = await searchTextChunks({
     keywords,
-    embedding: queryEmbedding ?? [],
+    embedding: queryEmbedding,
     fileIds: relatedFileEntityIds,
     limit: FILE_SEARCH_LIMIT,
   });
@@ -73,7 +80,11 @@ export async function searchTextChunks({
     return [];
   }
 
-  const cleaned_keywords = keywords.map((keyword) => keyword.replace(/[^a-zA-Z0-9]/g, ''));
+  // remove any non-alphanumeric characters from keywords and filter out empty strings
+  const cleaned_keywords = keywords
+    .map((k) => k.replace(/[^a-zA-Z0-9]/g, ''))
+    .filter((k) => k.length > 0);
+
   const embeddingResults = await db
     .select({
       id: TextChunkTable.id,
@@ -94,31 +105,33 @@ export async function searchTextChunks({
     .limit(limit)
     .orderBy((t) => [desc(t.embeddingSimilarity)]);
 
-  // Calculate text rank for each chunk see documentation https://orm.drizzle.team/docs/guides/postgresql-full-text-search
-
-  const textRankResults = await db
-    .select({
-      id: TextChunkTable.id,
-      content: TextChunkTable.content,
-      fileId: TextChunkTable.fileId,
-      fileName: fileTable.name,
-      leadingOverlap: TextChunkTable.leadingOverlap,
-      trailingOverlap: TextChunkTable.trailingOverlap,
-      pageNumber: TextChunkTable.pageNumber,
-      orderIndex: TextChunkTable.orderIndex,
-      textRank:
-        sql`ts_rank_cd(${TextChunkTable.contentTsv}, to_tsquery('german', ${cleaned_keywords.join(' | ')}))` as SQL<number>,
-    })
-    .from(TextChunkTable)
-    .leftJoin(fileTable, eq(TextChunkTable.fileId, fileTable.id))
-    .where(
-      and(
-        inArray(TextChunkTable.fileId, fileIds ?? []),
-        sql`ts_rank_cd(${TextChunkTable.contentTsv}, to_tsquery('german', ${cleaned_keywords.join(' | ')})) > 0`,
-      ),
-    )
-    .limit(limit)
-    .orderBy((t) => [desc(t.textRank)]);
+  // Calculate text rank for each chunk only if we have keywords
+  const textRankResults =
+    cleaned_keywords.length > 0
+      ? await db
+          .select({
+            id: TextChunkTable.id,
+            content: TextChunkTable.content,
+            fileId: TextChunkTable.fileId,
+            fileName: fileTable.name,
+            leadingOverlap: TextChunkTable.leadingOverlap,
+            trailingOverlap: TextChunkTable.trailingOverlap,
+            pageNumber: TextChunkTable.pageNumber,
+            orderIndex: TextChunkTable.orderIndex,
+            textRank:
+              sql`ts_rank_cd(${TextChunkTable.contentTsv}, to_tsquery('german', ${cleaned_keywords.join(' | ')}))` as SQL<number>,
+          })
+          .from(TextChunkTable)
+          .leftJoin(fileTable, eq(TextChunkTable.fileId, fileTable.id))
+          .where(
+            and(
+              inArray(TextChunkTable.fileId, fileIds ?? []),
+              sql`ts_rank_cd(${TextChunkTable.contentTsv}, to_tsquery('german', ${cleaned_keywords.join(' | ')})) > 0`,
+            ),
+          )
+          .limit(limit)
+          .orderBy((t) => [desc(t.textRank)])
+      : [];
 
   // Create a map to store all unique results
   const combinedResultsMap: Map<
