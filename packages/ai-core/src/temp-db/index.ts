@@ -3,9 +3,6 @@ import { Pool } from 'pg';
 import { env } from '../env';
 
 const connectionString = env.apiDatabaseUrl;
-if (!connectionString) {
-  throw new Error('Database URL undefined');
-}
 
 const pool = new Pool({
   connectionString,
