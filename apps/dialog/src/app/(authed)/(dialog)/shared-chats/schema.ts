@@ -6,6 +6,7 @@
 import {
   SMALL_TEXT_INPUT_FIELDS_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
 import { formLinks } from '@/utils/web-search/form-links';
 import { z } from 'zod';
@@ -26,7 +27,10 @@ export const sharedSchoolChatFormValuesSchema = z.object({
   gradeLevel: z.string().max(SMALL_TEXT_INPUT_FIELDS_LIMIT).nullable(),
   subject: z.string().max(SMALL_TEXT_INPUT_FIELDS_LIMIT).nullable(),
   studentExcercise: z.string().max(1000).nullable(),
-  additionalInstructions: z.string().min(1).max(2000),
+  additionalInstructions: z
+    .string()
+    .min(1)
+    .max(TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS),
   restrictions: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT).nullable(),
   attachedLinks: formLinks,
 });
