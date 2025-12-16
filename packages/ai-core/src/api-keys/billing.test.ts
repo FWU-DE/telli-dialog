@@ -62,7 +62,7 @@ describe('billImageGenerationUsageToApiKey', () => {
       name: 'text-model',
       provider: 'azure',
       priceMetadata: {
-        type: 'text' as any,
+        type: 'text',
       },
     } as AiModel;
 

@@ -114,7 +114,7 @@ describe('generateImage', () => {
     const model: AiModel = {
       id: 'model-999',
       name: 'unknown-model',
-      provider: 'unsupported-provider' as any,
+      provider: 'unsupported-provider',
     } as AiModel;
 
     await expect(generateImage(model, 'test prompt')).rejects.toThrow(ProviderConfigurationError);
@@ -130,7 +130,7 @@ describe('generateImage', () => {
       provider: 'ionos',
     } as AiModel;
 
-    mockConstructIonosImageGenerationFn.mockReturnValue(undefined as any);
+    mockConstructIonosImageGenerationFn.mockReturnValue(undefined!);
 
     await expect(generateImage(model, 'test prompt')).rejects.toThrow(ProviderConfigurationError);
   });
