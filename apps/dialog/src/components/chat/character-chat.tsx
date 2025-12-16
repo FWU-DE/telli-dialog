@@ -69,6 +69,7 @@ export default function CharacterSharedChat({
 
   function handleOpenNewChat() {
     setMessages([]);
+    resetError();
   }
 
   function handleReload() {
