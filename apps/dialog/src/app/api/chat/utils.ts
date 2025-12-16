@@ -152,7 +152,7 @@ export async function condenseChatHistory({
       system: `Du bist ein hilfreicher Assistent, der semantische Suchanfragen (Vektor-Suche) für eine Wissensdatenbank erstellt.
 Basierend auf dem Chatverlauf, erstelle eine präzise Suchanfrage.
 Die Suchanfrage sollte die Hauptfrage oder das Hauptthema des Benutzers erfassen.
-Die Suchanfrage muss eigenständig und unabhängig vom Chatverlauf sein und alle notwendigen Kontextinformationen aus dem Verlauf enthalten, um die Hauptfrage oder das Hauptthema des Benutzers zu erfassen
+Die Suchanfrage muss eigenständig und unabhängig vom Chatverlauf sein und alle notwendigen Kontextinformationen aus dem Verlauf enthalten, um die Hauptfrage oder das Hauptthema des Benutzers zu erfassen.
 Halte die Suchanfrage kurz und prägnant (maximal 200 Zeichen).
 
 Falls die Eingabe sinnlos oder irrelevant ist und keine sinnvolle Suchanfrage erstellt werden kann, gib nur die letzte Benutzernachricht als Suchanfrage zurück.
@@ -203,14 +203,14 @@ export async function getKeywordsFromQuery({
 Deine Aufgabe ist es, die relevantesten Schlüsselwörter aus der gegebenen Suchanfrage (der letzten Benutzernachricht im Chatverlauf) zu extrahieren.
 
 Regeln:
-1. Extrahiere nur die wichtigsten, fachspezifischen Schlüsselwörter
-2. Entferne allgemeine Wörter, Artikel und Präpositionen
-3. Behalte zusammengesetzte Begriffe als einzelne Schlüsselwörter
-4. Verwende die Grundform der Wörter
-5. Gib die Schlüsselwörter als kommaseparierte Liste zurück
-6. Maximal 5 Schlüsselwörter pro Anfrage
-7. Schlüsselwörter sollten spezifisch und aussagekräftig sein
-8. Falls keine Schlüsselwörter gefunden werden können, gib einen Leeren String zurück, also nichts zwischen den Anführungszeichen
+- Extrahiere nur die wichtigsten, fachspezifischen Schlüsselwörter
+- Entferne allgemeine Wörter, Artikel und Präpositionen
+- Behalte zusammengesetzte Begriffe als einzelne Schlüsselwörter
+- Verwende die Grundform der Wörter
+- Gib die Schlüsselwörter als kommaseparierte Liste zurück
+- Maximal 5 Schlüsselwörter pro Anfrage
+- Schlüsselwörter sollten spezifisch und aussagekräftig sein
+- Falls keine Schlüsselwörter gefunden werden können, gib einen Leeren String zurück, also nichts zwischen den Anführungszeichen
 
 Beispiele:
 Eingabe: "Wie kann ich einen Antrag auf Elterngeld stellen?"

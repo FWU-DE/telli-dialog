@@ -106,7 +106,6 @@ export async function searchTextChunks({
     .orderBy((t) => [desc(t.embeddingSimilarity)]);
 
   // Calculate text rank for each chunk only if we have keywords
-  // Skip full-text search if keywords array is empty to avoid PostgreSQL query errors
   const hasKeywords =
     cleaned_keywords.length > 0 && cleaned_keywords.filter((k) => k.length > 0).length > 0;
   const textRankResults = hasKeywords
