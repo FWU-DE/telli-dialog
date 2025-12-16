@@ -14,7 +14,7 @@ import {
 import { getDefaultModel, getFirstTextModel } from '@shared/llm-models/llm-model-service';
 import { createTelliConfiguration } from '../chat/custom-model-config';
 import { logError } from '@shared/logging';
-import { LanguageModelUsage } from 'ai';
+import { isValidPositiveNumber } from '@shared/utils/number';
 
 export function getSearchParamsFromUrl(url: string) {
   const [, ...rest] = url.split('?');
@@ -97,15 +97,6 @@ function calculateCostsInCentForTextModel(
     return 0;
   }
 
-  if (isNaN(usage.promptTokens) || isNaN(usage.completionTokens)) {
-    logError(
-      'Invalid token usage: promptTokens and completionTokens must be valid numbers, gracefully returning 0',
-      new TypeError('Invalid token usage'),
-    );
-
-    return 0;
-  }
-
   const completionTokenPrice = usage.completionTokens * model.priceMetadata.completionTokenPrice;
   const promptTokenPrice = usage.promptTokens * model.priceMetadata.promptTokenPrice;
 
@@ -130,11 +121,19 @@ function calculateCostsInCentForEmbeddingModel(
   return promptTokenPrice / PRICE_AND_CENT_MULTIPLIER;
 }
 
-export function getTokenUsage(usage: LanguageModelUsage): {
+/**
+ * Get token usage safely, ensuring valid numbers
+ * @param usage The usage object containing promptTokens and completionTokens
+ * @returns An object with valid promptTokens and completionTokens
+ */
+export function getTokenUsage(usage: { promptTokens: number; completionTokens: number }): {
   promptTokens: number;
   completionTokens: number;
 } {
-  if (isNaN(usage.promptTokens) || isNaN(usage.completionTokens)) {
+  if (
+    !isValidPositiveNumber(usage.promptTokens) ||
+    !isValidPositiveNumber(usage.completionTokens)
+  ) {
     logError(
       'Invalid token usage: promptTokens and completionTokens must be valid numbers, gracefully returning 0',
       new TypeError('Invalid token usage'),

@@ -252,8 +252,8 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      const costsInCent = calculateCostsInCent(definedModel, assistantMessage.usage);
       const { promptTokens, completionTokens } = getTokenUsage(assistantMessage.usage);
+      const costsInCent = calculateCostsInCent(definedModel, { promptTokens, completionTokens });
 
       await dbInsertConversationUsage({
         conversationId: conversation.id,

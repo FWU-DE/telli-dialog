@@ -113,8 +113,8 @@ export async function POST(request: NextRequest) {
     messages,
     experimental_transform: smoothStream({ chunking: 'word', delayInMs: 20 }),
     async onFinish(assistantMessage) {
-      const costsInCent = calculateCostsInCent(definedModel, assistantMessage.usage);
       const { promptTokens, completionTokens } = getTokenUsage(assistantMessage.usage);
+      const costsInCent = calculateCostsInCent(definedModel, { promptTokens, completionTokens });
 
       await dbUpdateTokenUsageBySharedChatId({
         modelId: definedModel.id,
