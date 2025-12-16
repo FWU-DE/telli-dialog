@@ -8,7 +8,7 @@ export const federalStateSchema = federalStateSelectSchema
   .extend({
     createdAt: z.coerce.date(),
     hasApiKeyAssigned: z.boolean(),
-    apiKeyId: z.string().nullable(),
+    apiKeyId: z.string().nullable().optional(),
   });
 
 export type FederalStateModel = z.infer<typeof federalStateSchema>;
