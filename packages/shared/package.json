@@ -32,10 +32,11 @@
     "drizzle-kit": "0.31.7",
     "drizzle-orm": "0.44.7",
     "drizzle-zod": "0.8.3",
+    "ioredis": "5.8.2",
     "nanoid": "5.1.6",
     "next": "15.5.9",
     "pg": "8.16.3",
-    "unstorage": "1.17.2",
+    "unstorage": "1.17.3",
     "zod": "4.1.12"
   },
   "devDependencies": {
