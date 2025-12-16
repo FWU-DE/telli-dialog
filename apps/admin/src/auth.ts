@@ -14,7 +14,6 @@ const keycloakProvider = KeycloakProvider({
 const result = NextAuth({
   providers: [keycloakProvider],
   trustHost: true,
-  debug: true,
   callbacks: {
     async signIn() {
       return true;
@@ -23,7 +22,7 @@ const result = NextAuth({
       // Logged in users are authenticated, otherwise redirect to login page
       return !!auth;
     },
-    async jwt({ token, account, profile, trigger, user }) {
+    async jwt({ token }) {
       return token;
     },
     async session({ session }) {
