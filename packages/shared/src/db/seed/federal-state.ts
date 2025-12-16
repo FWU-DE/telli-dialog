@@ -5,6 +5,7 @@ import { fetchLlmModels } from '../../knotenpunkt';
 import { dbGetFederalStateWithDecryptedApiKey } from '../functions/federal-state';
 import { dbUpsertLlmModelsByModelsAndFederalStateId } from '../functions/llm-model';
 import { env } from '../../env';
+import { env as aiEnv } from '@telli/ai-core/env';
 import { lookupApiKeys } from '@telli/ai-core/api-keys/lookup';
 
 export async function insertFederalStates({ skip = true }: { skip: boolean }) {
@@ -16,17 +17,21 @@ export async function insertFederalStates({ skip = true }: { skip: boolean }) {
     );
   }
 
-  // Decrypt API keys and lookup their IDs
-  const apiKeysByState: Record<string, string> = {};
-  for (const federalState of FEDERAL_STATES) {
-    const decryptedApiKey = decrypt({
-      data: federalState.encryptedApiKey,
-      plainEncryptionKey: env.encryptionKey,
-    });
-    apiKeysByState[federalState.id] = decryptedApiKey;
-  }
+  let apiKeysByState: Record<string, string> = {};
+  let apiKeyIdsByState: Record<string, string | null> = {};
 
-  const apiKeyIdsByState = await lookupApiKeys(apiKeysByState);
+  if (!aiEnv.apiDatabaseUrl) {
+    // Decrypt API keys and lookup their IDs
+    for (const federalState of FEDERAL_STATES) {
+      const decryptedApiKey = decrypt({
+        data: federalState.encryptedApiKey,
+        plainEncryptionKey: env.encryptionKey,
+      });
+      apiKeysByState[federalState.id] = decryptedApiKey;
+    }
+
+    apiKeyIdsByState = await lookupApiKeys(apiKeysByState);
+  }
 
   for (const federalState of FEDERAL_STATES) {
     const apiKeyId = apiKeyIdsByState[federalState.id];

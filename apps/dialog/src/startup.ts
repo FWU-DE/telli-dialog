@@ -2,7 +2,7 @@ import { runDatabaseMigration } from '@shared/db';
 import { dbGetFederalStates, dbUpdateFederalState } from '@shared/db/functions/federal-state';
 import { decrypt } from '@shared/db/crypto';
 import { env } from '@shared/env';
-import {env as aiEnv} from '@telli/ai-core/env';
+import { env as aiEnv } from '@telli/ai-core/env';
 import { lookupApiKeys } from '@telli/ai-core/api-keys/lookup';
 import { logError, logInfo } from '@shared/logging';
 
