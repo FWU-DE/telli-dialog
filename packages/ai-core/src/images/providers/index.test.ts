@@ -117,9 +117,7 @@ describe('generateImage', () => {
       provider: 'unsupported-provider' as any,
     } as AiModel;
 
-    await expect(generateImage(model, 'test prompt')).rejects.toThrow(
-      ProviderConfigurationError,
-    );
+    await expect(generateImage(model, 'test prompt')).rejects.toThrow(ProviderConfigurationError);
     await expect(generateImage(model, 'test prompt')).rejects.toThrow(
       'No image generation function found for provider: unsupported-provider',
     );
@@ -134,8 +132,6 @@ describe('generateImage', () => {
 
     mockConstructIonosImageGenerationFn.mockReturnValue(undefined as any);
 
-    await expect(generateImage(model, 'test prompt')).rejects.toThrow(
-      ProviderConfigurationError,
-    );
+    await expect(generateImage(model, 'test prompt')).rejects.toThrow(ProviderConfigurationError);
   });
 });
