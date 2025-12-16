@@ -1,5 +1,5 @@
 import { ImageAttachment } from '@/utils/files/types';
-import { logError } from '@shared/logging/logging';
+import { logError } from '@shared/logging';
 import { generateText, LanguageModelV1, type Message } from 'ai';
 
 /**
@@ -210,7 +210,7 @@ Regeln:
 - Gib die Schlüsselwörter als kommaseparierte Liste zurück
 - Maximal 5 Schlüsselwörter pro Anfrage
 - Schlüsselwörter sollten spezifisch und aussagekräftig sein
-- Falls keine Schlüsselwörter gefunden werden können, gib einen Leeren String zurück, also nichts zwischen den Anführungszeichen
+- Falls keine Schlüsselwörter gefunden werden können, gib einen leeren String zurück, also nichts zwischen den Anführungszeichen
 
 Beispiele:
 Eingabe: "Wie kann ich einen Antrag auf Elterngeld stellen?"
@@ -228,7 +228,8 @@ Ausgabe: ""
       messages: [lastUserMessage],
     });
 
-    return text.trim().split(',');
+    const keywords = text.trim();
+    return keywords ? keywords.split(',') : [];
   } catch (error) {
     logError('Error extracting keywords from query, using empty array as fallback:', error);
     return [];

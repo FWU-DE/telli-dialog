@@ -106,33 +106,32 @@ export async function searchTextChunks({
     .orderBy((t) => [desc(t.embeddingSimilarity)]);
 
   // Calculate text rank for each chunk only if we have keywords
-  const hasKeywords =
-    cleaned_keywords.length > 0 && cleaned_keywords.filter((k) => k.length > 0).length > 0;
-  const textRankResults = hasKeywords
-    ? await db
-        .select({
-          id: TextChunkTable.id,
-          content: TextChunkTable.content,
-          fileId: TextChunkTable.fileId,
-          fileName: fileTable.name,
-          leadingOverlap: TextChunkTable.leadingOverlap,
-          trailingOverlap: TextChunkTable.trailingOverlap,
-          pageNumber: TextChunkTable.pageNumber,
-          orderIndex: TextChunkTable.orderIndex,
-          textRank:
-            sql`ts_rank_cd(${TextChunkTable.contentTsv}, to_tsquery('german', ${cleaned_keywords.join(' | ')}))` as SQL<number>,
-        })
-        .from(TextChunkTable)
-        .leftJoin(fileTable, eq(TextChunkTable.fileId, fileTable.id))
-        .where(
-          and(
-            inArray(TextChunkTable.fileId, fileIds ?? []),
-            sql`ts_rank_cd(${TextChunkTable.contentTsv}, to_tsquery('german', ${cleaned_keywords.join(' | ')})) > 0`,
-          ),
-        )
-        .limit(limit)
-        .orderBy((t) => [desc(t.textRank)])
-    : [];
+  const textRankResults =
+    cleaned_keywords.length > 0
+      ? await db
+          .select({
+            id: TextChunkTable.id,
+            content: TextChunkTable.content,
+            fileId: TextChunkTable.fileId,
+            fileName: fileTable.name,
+            leadingOverlap: TextChunkTable.leadingOverlap,
+            trailingOverlap: TextChunkTable.trailingOverlap,
+            pageNumber: TextChunkTable.pageNumber,
+            orderIndex: TextChunkTable.orderIndex,
+            textRank:
+              sql`ts_rank_cd(${TextChunkTable.contentTsv}, to_tsquery('german', ${cleaned_keywords.join(' | ')}))` as SQL<number>,
+          })
+          .from(TextChunkTable)
+          .leftJoin(fileTable, eq(TextChunkTable.fileId, fileTable.id))
+          .where(
+            and(
+              inArray(TextChunkTable.fileId, fileIds ?? []),
+              sql`ts_rank_cd(${TextChunkTable.contentTsv}, to_tsquery('german', ${cleaned_keywords.join(' | ')})) > 0`,
+            ),
+          )
+          .limit(limit)
+          .orderBy((t) => [desc(t.textRank)])
+      : [];
 
   // Create a map to store all unique results
   const combinedResultsMap: Map<

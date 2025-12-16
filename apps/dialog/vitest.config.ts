@@ -1,9 +1,12 @@
 import { defineConfig } from 'vitest/config';
+import path from 'path';
 
 export default defineConfig({
   resolve: {
     alias: {
-      '@/': '/src/',
+      '@': path.resolve(__dirname, './src'),
+      '@ui': path.resolve(__dirname, '../../packages/ui/src'),
+      '@shared': path.resolve(__dirname, '../../packages/shared/src'),
     },
   },
   test: {
