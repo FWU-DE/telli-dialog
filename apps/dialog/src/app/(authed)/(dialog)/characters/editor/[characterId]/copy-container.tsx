@@ -8,7 +8,13 @@ import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios
 
 export function CopyContainer({ character }: { character: CharacterSelectModel }) {
   const t = useTranslations('characters.form.copy-page');
-  const sharedChatTimeLeft = calculateTimeLeftForLearningScenario(character);
+  const sharedChatTimeLeft =
+    'startedAt' in character && 'maxUsageTimeLimit' in character
+      ? calculateTimeLeftForLearningScenario({
+          startedAt: character.startedAt as Date | null,
+          maxUsageTimeLimit: character.maxUsageTimeLimit as number | null,
+        })
+      : 0;
   const sharedChatActive = sharedChatTimeLeft > 0;
   const containerBg = !sharedChatActive ? 'bg-secondary/10' : 'bg-gray-100/10';
   return (

@@ -16,6 +16,7 @@ import {
   CharacterAccessLevel,
   CharacterFileMapping,
   CharacterSelectModel,
+  CharacterWithShareDataModel,
   characterTable,
   characterUpdateSchema,
   FileModel,
@@ -503,7 +504,11 @@ export const getCharacterForEditView = async ({
   characterId: string;
   schoolId: string;
   userId: string;
-}) => {
+}): Promise<{
+  character: CharacterWithShareDataModel;
+  relatedFiles: FileModel[];
+  maybeSignedPictureUrl: string | undefined;
+}> => {
   checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
   if (!character) throw new NotFoundError('Character not found');
@@ -529,9 +534,9 @@ export const getSharedCharacter = async ({
 }: {
   characterId: string;
   userId: string;
-}): Promise<CharacterSelectModel> => {
+}): Promise<CharacterWithShareDataModel> => {
   checkParameterUUID(characterId);
-  const character = await dbGetCharacterByIdAndUserId({ characterId, userId });
+  const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
   if (!character || !character.inviteCode) throw new NotFoundError('Character not found');
 
   return character;
@@ -551,7 +556,7 @@ export async function getCharacterByAccessLevel({
   schoolId: string;
   userId: string;
   federalStateId: string;
-}): Promise<CharacterSelectModel[]> {
+}): Promise<CharacterWithShareDataModel[]> {
   if (accessLevel === 'global') {
     return dbGetGlobalCharacters({ userId, federalStateId });
   } else if (accessLevel === 'school') {

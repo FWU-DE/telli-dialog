@@ -10,7 +10,7 @@ import {
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
-import { CharacterAccessLevel, CharacterSelectModel, FileModel } from '@shared/db/schema';
+import { CharacterAccessLevel, CharacterWithShareDataModel, FileModel } from '@shared/db/schema';
 import { deepCopy, deepEqual } from '@/utils/object';
 import { cn } from '@/utils/tailwind';
 import {
@@ -47,7 +47,7 @@ import FileManagement from '@/components/forms/file-management';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 
-type CharacterFormProps = CharacterSelectModel & {
+type CharacterFormProps = CharacterWithShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
   isCreating?: boolean;
   readOnly: boolean;
@@ -260,8 +260,8 @@ export default function CharacterForm({
     <CopyContainer
       templateId={character.id}
       templatePictureId={character.pictureId ?? undefined}
-      startedAt={character.startedAt}
-      maxUsageTimeLimit={character.maxUsageTimeLimit}
+      startedAt={'startedAt' in character ? character.startedAt : null}
+      maxUsageTimeLimit={'maxUsageTimeLimit' in character ? character.maxUsageTimeLimit : null}
       translation_path="characters.form"
       redirectPath="characters"
     />

@@ -13,6 +13,7 @@ import {
   sharedCharacterChatUsageTrackingTable,
   sharedCharacterConversation,
   TextChunkTable,
+  CharacterWithShareDataModel,
 } from '../schema';
 import { dbGetModelByName } from './llm-model';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
@@ -58,7 +59,7 @@ export async function dbGetCharacterByIdWithShareData({
 }: {
   characterId: string;
   userId: string;
-}) {
+}): Promise<CharacterWithShareDataModel | undefined> {
   const [row] = await db
     .select({
       ...getTableColumns(characterTable),
@@ -133,7 +134,7 @@ export async function dbGetGlobalCharacters({
 }: {
   userId: string;
   federalStateId?: string;
-}): Promise<CharacterSelectModel[]> {
+}): Promise<CharacterWithShareDataModel[]> {
   const characters = await db
     .select({
       ...getTableColumns(characterTable),
@@ -187,7 +188,7 @@ export async function dbGetCharactersBySchoolId({
 }: {
   schoolId: string;
   userId: string;
-}): Promise<CharacterSelectModel[]> {
+}): Promise<CharacterWithShareDataModel[]> {
   const characters = await db
     .select({
       ...getTableColumns(characterTable),
@@ -223,7 +224,7 @@ export async function dbGetCharactersByUserId({
   userId,
 }: {
   userId: string;
-}): Promise<CharacterSelectModel[]> {
+}): Promise<CharacterWithShareDataModel[]> {
   const characters = await db
     .select({
       ...getTableColumns(characterTable),
@@ -249,7 +250,7 @@ export async function dbGetCharacterByIdAndUserId({
 }: {
   characterId: string;
   userId: string;
-}): Promise<CharacterSelectModel | undefined> {
+}): Promise<CharacterWithShareDataModel | undefined> {
   const [row] = await db
     .select({
       ...getTableColumns(characterTable),
@@ -342,11 +343,10 @@ export async function dbGetCharacterByIdAndInviteCode({
 }: {
   id: string;
   inviteCode: string;
-}): Promise<CharacterSelectModel | undefined> {
+}): Promise<CharacterWithShareDataModel | undefined> {
   const [row] = await db
     .select({
       ...getTableColumns(characterTable),
-      userId: sharedCharacterConversation.userId,
       intelligencePointsLimit: sharedCharacterConversation.intelligencePointsLimit,
       inviteCode: sharedCharacterConversation.inviteCode,
       maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
@@ -359,15 +359,11 @@ export async function dbGetCharacterByIdAndInviteCode({
     )
     .where(and(eq(characterTable.id, id), eq(sharedCharacterConversation.inviteCode, inviteCode)));
 
-  // if the character is not shared, return the character
-  if (row === undefined) {
-    const [row] = await db
-      .select()
-      .from(characterTable)
-      .where(and(eq(characterTable.id, id)));
-    return row;
+  // Only return characters that have sharing data (inviteCode must exist)
+  if (row === undefined || row.inviteCode === null) {
+    return undefined;
   }
-  return row as CharacterSelectModel;
+  return row;
 }
 
 export async function dbUpdateTokenUsageByCharacterChatId(

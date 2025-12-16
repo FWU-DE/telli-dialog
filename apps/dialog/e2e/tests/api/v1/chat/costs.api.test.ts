@@ -7,6 +7,8 @@ import {
   llmModelTable,
   sharedSchoolConversationTable,
   userTable,
+  characterTable,
+  sharedCharacterConversation,
 } from '@shared/db/schema';
 import { getPriceInCentByUser } from '@/app/school';
 import { UserAndContext } from '@/auth/types';
@@ -166,11 +168,24 @@ test.describe('costs', () => {
 
     const character = {
       ...mockCharacter(),
-      maxUsageTimeLimit: maxUsageTimeLimit,
-      intelligencePointsLimit: intelligencePointsLimit,
       userId: user.id,
       modelId: model.id,
+      accessLevel: 'private' as const,
     };
+
+    // Insert the character first
+    await db.insert(characterTable).values(character);
+
+    // Create the shared character conversation with the sharing parameters
+    const sharedCharacterConversationData = {
+      characterId: character.id,
+      userId: user.id,
+      intelligencePointsLimit: intelligencePointsLimit,
+      maxUsageTimeLimit: maxUsageTimeLimit,
+      inviteCode: 'test-invite-code',
+      startedAt: new Date(),
+    };
+    await db.insert(sharedCharacterConversation).values(sharedCharacterConversationData);
 
     // Insert data into shared character conversation usage tracking (30*3 = 90 cents)
     for (let i = 0; i < 3; i++) {
@@ -187,15 +202,22 @@ test.describe('costs', () => {
 
     const sharedChatUsageInCent = await dbGetSharedCharacterChatUsageInCentByCharacterId({
       characterId: character.id,
-      maxUsageTimeLimit: character.maxUsageTimeLimit!,
-      startedAt: character.startedAt!,
+      maxUsageTimeLimit: maxUsageTimeLimit,
+      startedAt: sharedCharacterConversationData.startedAt,
     });
 
     expect(sharedChatUsageInCent).toBe(90);
 
+    // To test the limit function, we need to get the character with sharing data
+    const { dbGetCharacterByIdWithShareData } = await import('@shared/db/functions/character');
+    const characterWithShareData = await dbGetCharacterByIdWithShareData({
+      characterId: character.id,
+      userId: user.id,
+    });
+
     let hasReachedLimit = await sharedCharacterChatHasReachedIntelliPointLimit({
       user: user,
-      character: character,
+      character: characterWithShareData!,
     });
 
     // Used 90 cents of 100 cents -> under the limit
@@ -213,7 +235,7 @@ test.describe('costs', () => {
 
     hasReachedLimit = await sharedCharacterChatHasReachedIntelliPointLimit({
       user: user,
-      character: character,
+      character: characterWithShareData!,
     });
 
     // Used 120 cents of 100 cents -> over the limit
