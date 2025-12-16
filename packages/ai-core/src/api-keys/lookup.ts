@@ -10,9 +10,7 @@ import { dbGetApiKey } from '../temp-db/functions';
  * @param apiKeysByState - A record mapping federal state IDs to decrypted API keys
  * @returns A promise that resolves to a record mapping federal state IDs to API key IDs (or null if not found)
  */
-export async function lookupApiKeys(
-  apiKeysByState: Record<string, string>,
-) {
+export async function lookupApiKeys(apiKeysByState: Record<string, string>) {
   const result: Record<string, string | null> = {};
 
   for (const [federalStateId, decryptedApiKey] of Object.entries(apiKeysByState)) {

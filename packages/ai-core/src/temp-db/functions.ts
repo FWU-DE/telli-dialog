@@ -118,19 +118,13 @@ export async function dbGetImageGenerationUsageCostsSinceStartOfCurrentMonth({
   return Number(imageUsage[0]?.total || 0);
 }
 
+export async function dbGetApiKey(fullApiKey: string) {
+  const [sk, keyId, secretKey] = fullApiKey.split('_');
 
-
-export async function dbGetApiKey(
-  fullApiKey: string,
-) {
-  const [sk, keyId, secretKey] = fullApiKey.split("_");
-
-  if (sk !== "sk" || keyId === undefined || secretKey === undefined) {
-    return { valid: false, reason: "Malformed api key" };
+  if (sk !== 'sk' || keyId === undefined || secretKey === undefined) {
+    return { valid: false, reason: 'Malformed api key' };
   }
 
-  const apiKey = (
-    await dbApi.select().from(apiKeyTable).where(eq(apiKeyTable.keyId, keyId))
-  )[0];
+  const apiKey = (await dbApi.select().from(apiKeyTable).where(eq(apiKeyTable.keyId, keyId)))[0];
   return apiKey;
 }

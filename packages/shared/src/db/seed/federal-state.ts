@@ -15,7 +15,7 @@ export async function insertFederalStates({ skip = true }: { skip: boolean }) {
       `Failed to insert Federal States, configure at least one of the following env variables: ${envVariables.join(', ')}`,
     );
   }
-  
+
   // Decrypt API keys and lookup their IDs
   const apiKeysByState: Record<string, string> = {};
   for (const federalState of FEDERAL_STATES) {
@@ -25,9 +25,9 @@ export async function insertFederalStates({ skip = true }: { skip: boolean }) {
     });
     apiKeysByState[federalState.id] = decryptedApiKey;
   }
-  
+
   const apiKeyIdsByState = await lookupApiKeys(apiKeysByState);
-  
+
   for (const federalState of FEDERAL_STATES) {
     const apiKeyId = apiKeyIdsByState[federalState.id];
     await db
