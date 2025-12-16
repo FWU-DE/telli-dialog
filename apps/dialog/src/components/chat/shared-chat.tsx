@@ -63,6 +63,7 @@ export default function SharedChat({
 
   function handleOpenNewChat() {
     setMessages([]);
+    resetError();
   }
 
   function handleReload() {

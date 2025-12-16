@@ -1,6 +1,6 @@
 import React from 'react';
 import VoucherCreateView from './VoucherCreateView';
-import { auth } from '../../../../../api/auth/[...nextauth]/auth';
+import { auth } from '@/auth';
 
 export default async function Page(
   props: PageProps<'/telli-dialog/federal-states/[federalStateId]/vouchers/new'>,

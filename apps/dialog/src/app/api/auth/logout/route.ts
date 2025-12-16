@@ -3,7 +3,7 @@ import { logError, logInfo, logWarning } from '@shared/logging';
 import { NextResponse } from 'next/server';
 import { LOGOUT_CALLBACK_URL } from '../const';
 import { VIDIS_LOGOUT_URL } from '@/auth/providers/vidis';
-import { LOGIN_PAGE_URL } from '@/app/(unauth)/login/page';
+import { LOGIN_PAGE_URL } from '@/app/(unauth)/login/const';
 
 function handleEmptyToken() {
   logWarning('No valid token found, redirecting to logout-callback url');

@@ -29,7 +29,7 @@ import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 import { extractImagesAndUrl } from '../file-operations/prepocess-image';
 import { formatMessagesWithImages } from './utils';
-import { logDebug } from '@shared/logging';
+import { logDebug, logError } from '@shared/logging';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
@@ -240,15 +240,10 @@ export async function POST(request: NextRequest) {
       });
 
       if (messages.length === 1 || messages.length === 2 || conversation.name === null) {
-        let chatTitle = 'Neue Konversation';
-        try {
-          chatTitle = await getChatTitle({
-            model: auxiliaryModelAndProvider.telliProvider,
-            messages,
-          });
-        } catch (error) {
-          console.error('Unhandled error while generating conversation title', error);
-        }
+        const chatTitle = await getChatTitle({
+          model: auxiliaryModelAndProvider.telliProvider,
+          message: userMessage,
+        });
         await dbUpdateConversationTitle({
           name: chatTitle,
           conversationId: conversation.id,
@@ -280,7 +275,7 @@ export async function POST(request: NextRequest) {
       );
     },
     async onError(error) {
-      console.error({ error });
+      logError('Error during streaming chat response:', error);
 
       await dbInsertChatContent({
         content: '',

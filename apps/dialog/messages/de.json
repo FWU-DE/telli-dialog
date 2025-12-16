@@ -1,7 +1,8 @@
 {
   "legal": {
     "privacy-policy": "Datenschutz",
-    "imprint": "Impressum"
+    "imprint": "Impressum",
+    "terms-of-use": "Nutzungsbedingungen"
   },
   "common": {
     "logout": "Abmelden",

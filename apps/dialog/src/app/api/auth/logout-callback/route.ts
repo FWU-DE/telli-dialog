@@ -1,4 +1,4 @@
-import { LOGIN_PAGE_URL } from '@/app/(unauth)/login/page';
+import { LOGIN_PAGE_URL } from '@/app/(unauth)/login/const';
 import { logError } from '@shared/logging';
 import { NextResponse } from 'next/server';
 

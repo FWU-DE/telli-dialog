@@ -21,6 +21,7 @@ import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exce
 import { dbGetRelatedSharedChatFiles } from '@shared/db/functions/files';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { getRelevantFileContent } from '../file-operations/retrieval';
+import { logError } from '@shared/logging';
 
 export async function POST(request: NextRequest) {
   const { messages, modelId }: { messages: Array<Message>; modelId: string } = await request.json();
@@ -133,6 +134,9 @@ export async function POST(request: NextRequest) {
           sharedChat,
         }),
       );
+    },
+    async onError(error) {
+      logError('Error during streaming shared chat response:', error);
     },
   });
 
