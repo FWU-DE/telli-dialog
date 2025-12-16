@@ -26,7 +26,7 @@ export const vidisAccountSchema = z.object({
   // session_state: z.string(),
   token_type: z.literal('bearer'),
   id_token: z.string(),
-  provider: z.literal('vidis').or(z.literal('vidis-mock')),
+  provider: z.literal('vidis'),
 });
 
 export const vidisProfileSchema = z.object({
