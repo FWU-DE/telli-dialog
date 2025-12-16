@@ -6,7 +6,7 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import React from 'react';
 import { type UserAndContext } from '@/auth/types';
 import Link from 'next/link';
-import { IMPRESSUM_URL, PRIVACY_POLICY_URL } from './const';
+import { IMPRESSUM_URL, PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from './const';
 import { useTranslations } from 'next-intl';
 import DotsHorizontalIcon from '@/components/icons/dots-horizontal';
 
@@ -50,6 +50,13 @@ export default function ProfileMenu({ email, school }: ProfileMenuProps) {
             target="_blank"
           >
             {t('imprint')}
+          </Link>
+          <Link
+            href={TERMS_OF_USE_URL}
+            className="text-vidis-hover-purple py-2 px-4 hover:underline"
+            target="_blank"
+          >
+            {t('terms-of-use')}
           </Link>
           {school === undefined && (
             <p className="py-2 px-4 truncate" title={email}>
@@ -122,6 +129,13 @@ export function ThreeDotsProfileMenu({
           >
             {tLegal('imprint')}
           </Link>
+          <Link
+            href={TERMS_OF_USE_URL}
+            className="text-primary py-2 px-4 hover:underline"
+            target="_blank"
+          >
+            {tLegal('terms-of-use')}
+          </Link>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
@@ -162,6 +176,13 @@ export function UnauthenticatedProfileMenu() {
             target="_blank"
           >
             {t('imprint')}
+          </Link>
+          <Link
+            href={TERMS_OF_USE_URL}
+            className="text-vidis-hover-purple py-2 px-4 hover:underline"
+            target="_blank"
+          >
+            {t('terms-of-use')}
           </Link>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
