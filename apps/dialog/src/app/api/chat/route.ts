@@ -12,6 +12,7 @@ import {
   getModelAndProviderWithResult,
   calculateCostsInCent,
   getAuxiliaryModel,
+  getTokenUsage,
 } from '../utils/utils';
 import { generateUUID } from '@shared/utils/uuid';
 import { getChatTitle, getMostRecentUserMessage, limitChatHistory } from './utils';
@@ -252,21 +253,22 @@ export async function POST(request: NextRequest) {
       }
 
       const costsInCent = calculateCostsInCent(definedModel, assistantMessage.usage);
+      const { promptTokens, completionTokens } = getTokenUsage(assistantMessage.usage);
 
       await dbInsertConversationUsage({
         conversationId: conversation.id,
         userId: user.id,
         modelId: definedModel.id,
-        completionTokens: assistantMessage.usage.completionTokens,
-        promptTokens: assistantMessage.usage.promptTokens,
+        completionTokens: completionTokens,
+        promptTokens: promptTokens,
         costsInCent: costsInCent,
       });
 
       await sendRabbitmqEvent(
         constructTelliNewMessageEvent({
           user,
-          promptTokens: assistantMessage.usage.promptTokens,
-          completionTokens: assistantMessage.usage.completionTokens,
+          promptTokens: promptTokens,
+          completionTokens: completionTokens,
           costsInCent: costsInCent,
           provider: definedModel.provider,
           anonymous: false,

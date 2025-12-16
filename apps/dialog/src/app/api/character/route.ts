@@ -11,6 +11,7 @@ import {
   getModelAndProviderWithResult,
   getSearchParamsFromUrl,
   calculateCostsInCent,
+  getTokenUsage,
 } from '../utils/utils';
 import {
   dbGetCharacterByIdAndInviteCode,
@@ -116,11 +117,12 @@ export async function POST(request: NextRequest) {
     experimental_transform: smoothStream({ chunking: 'word', delayInMs: 20 }),
     async onFinish(assistantMessage) {
       const costsInCent = calculateCostsInCent(definedModel, assistantMessage.usage);
+      const { promptTokens, completionTokens } = getTokenUsage(assistantMessage.usage);
 
       await dbUpdateTokenUsageByCharacterChatId({
         modelId: definedModel.id,
-        completionTokens: assistantMessage.usage.completionTokens,
-        promptTokens: assistantMessage.usage.promptTokens,
+        completionTokens: completionTokens,
+        promptTokens: promptTokens,
         characterId: character.id,
         userId: teacherUserAndContext.id,
         costsInCent: costsInCent,
@@ -128,8 +130,8 @@ export async function POST(request: NextRequest) {
       await sendRabbitmqEvent(
         constructTelliNewMessageEvent({
           user: teacherUserAndContext,
-          promptTokens: assistantMessage.usage.promptTokens,
-          completionTokens: assistantMessage.usage.completionTokens,
+          promptTokens: promptTokens,
+          completionTokens: completionTokens,
           costsInCent: costsInCent,
           provider: definedModel.provider,
           anonymous: true,
