@@ -20,7 +20,7 @@ export async function insertFederalStates({ skip = true }: { skip: boolean }) {
   let apiKeysByState: Record<string, string> = {};
   let apiKeyIdsByState: Record<string, string | null> = {};
 
-  if (!aiEnv.apiDatabaseUrl) {
+  if (aiEnv.apiDatabaseUrl) {
     // Decrypt API keys and lookup their IDs
     for (const federalState of FEDERAL_STATES) {
       const decryptedApiKey = decrypt({
