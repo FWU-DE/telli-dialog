@@ -50,7 +50,7 @@ export function constructAzureImageGenerationFn(model: AiModel): ImageGeneration
       data: result.data
         .map((item) => item.b64_json)
         .filter((item): item is string => item !== undefined),
-      output_format: 'png',
+      output_format: result.output_format,
     };
   };
 }

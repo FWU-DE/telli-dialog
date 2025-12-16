@@ -12,21 +12,21 @@ import { getImageModelById } from '../models';
  *
  * @param model - The image model to use for generation
  * @param prompt - The text prompt describing the desired image
- * @param trustedApiKeyId - The ID of the API key to verify access and bill usage
+ * @param apiKeyId - The ID of the API key to verify access and bill usage
  *
  * @returns A promise that resolves to an object containing the generated image response and the price in cents
  */
 export async function generateImageWithBilling(
   modelId: string,
   prompt: string,
-  trustedApiKeyId: string,
+  apiKeyId: string,
 ) {
   const model = await getImageModelById(modelId);
 
   // Run access check and quota check in parallel for better performance
   const [hasAccess, isOverQuota] = await Promise.all([
-    hasAccessToImageModel(trustedApiKeyId, model),
-    isApiKeyOverQuota(trustedApiKeyId),
+    hasAccessToImageModel(apiKeyId, model),
+    isApiKeyOverQuota(apiKeyId),
   ]);
 
   if (!hasAccess) {
@@ -44,7 +44,7 @@ export async function generateImageWithBilling(
     const imageResponse = await generateImage(model, prompt);
 
     // bill to api key
-    const priceInCents = await billImageGenerationUsageToApiKey(trustedApiKeyId, model);
+    const priceInCents = await billImageGenerationUsageToApiKey(apiKeyId, model);
 
     return {
       ...imageResponse,

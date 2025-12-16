@@ -1,1 +1,0 @@
-ALTER TABLE "federal_state" ADD COLUMN "api_key_id" text DEFAULT '';

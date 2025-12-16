@@ -166,8 +166,8 @@ export const federalStateTable = pgTable('federal_state', {
   id: text('id').primaryKey(),
   teacherPriceLimit: integer('teacher_price_limit').notNull().default(500),
   studentPriceLimit: integer('student_price_limit').notNull().default(200),
-  encryptedApiKey: text('encrypted_api_key'),
-  apiKeyId: text('api_key_id').default(''),
+  encryptedApiKey: text('encrypted_api_key'), // This will stay until we have migrated all usages to apiKeyId
+  apiKeyId: text('api_key_id'),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   // vidis things
   mandatoryCertificationTeacher: boolean('mandatory_certification_teacher').default(false),
@@ -181,9 +181,7 @@ export const federalStateTable = pgTable('federal_state', {
   featureToggles: json('feature_toggles').$type<FederalStateFeatureToggles>().notNull(),
 });
 
-export const federalStateSelectSchema = createSelectSchema(federalStateTable).omit({
-  apiKeyId: true,
-});
+export const federalStateSelectSchema = createSelectSchema(federalStateTable);
 export const federalStateInsertSchema = createInsertSchema(federalStateTable).extend({
   featureToggles: federalStateFeatureTogglesSchema,
 });

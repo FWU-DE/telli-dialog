@@ -3,7 +3,7 @@ import { LlmModel } from '../temp-db';
 export type ImageResponse = {
   // Base64-encoded images
   data: Array<string>;
-  output_format: 'png' | 'webp' | 'jpeg';
+  output_format?: 'png' | 'webp' | 'jpeg';
 };
 
 export type ImageGenerationFn = (args: { prompt: string; model: string }) => Promise<ImageResponse>;

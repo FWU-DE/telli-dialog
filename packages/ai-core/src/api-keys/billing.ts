@@ -1,8 +1,8 @@
 import {
   dbCreateImageGenerationUsage,
   dbGetApiKeyLimit,
-  dbGetCompletionUsageCostsSince,
-  dbGetImageGenerationUsageCostsSince,
+  dbGetCompletionUsageCostsSinceStartOfCurrentMonth,
+  dbGetImageGenerationUsageCostsSinceStartOfCurrentMonth,
 } from '../temp-db/functions';
 import { AiModel } from '../images/types';
 
@@ -42,10 +42,10 @@ export async function isApiKeyOverQuota(apiKeyId: string): Promise<boolean> {
   const { limitInCent } = apiKeyData;
 
   // Sum completion usage costs since the start of the month
-  const completionCosts = await dbGetCompletionUsageCostsSince({ apiKeyId });
+  const completionCosts = await dbGetCompletionUsageCostsSinceStartOfCurrentMonth({ apiKeyId });
 
   // Sum image generation usage costs since the start of the month
-  const imageCosts = await dbGetImageGenerationUsageCostsSince({ apiKeyId });
+  const imageCosts = await dbGetImageGenerationUsageCostsSinceStartOfCurrentMonth({ apiKeyId });
 
   // Calculate total usage
   const totalUsage = completionCosts + imageCosts;

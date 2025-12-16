@@ -40,7 +40,7 @@ export async function dbGetFederalStateWithDecryptedApiKey({
     plainEncryptionKey: env.encryptionKey,
   });
 
-  return { ...federalState, decryptedApiKey, trustedApiKeyId: federalState.apiKeyId };
+  return { ...federalState, decryptedApiKey};
 }
 
 export async function dbGetFederalStates(): Promise<FederalStateSelectModel[]> {

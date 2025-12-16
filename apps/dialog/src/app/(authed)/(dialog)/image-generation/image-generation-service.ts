@@ -53,7 +53,7 @@ export async function generateImage({
     throw new Error(federalStateError.message);
   }
 
-  if (!federalStateObject.trustedApiKeyId) {
+  if (!federalStateObject.apiKeyId) {
     throw new Error('Federal state has no API key assigned');
   }
 
@@ -96,7 +96,7 @@ export async function generateImage({
     const result = await generateImageWithBilling(
       definedModel.id,
       prompt.trim(),
-      federalStateObject.trustedApiKeyId,
+      federalStateObject.apiKeyId,
     );
 
     const costsInCent = result.priceInCents;
