@@ -16,11 +16,7 @@ import { getImageModelById } from '../models';
  *
  * @returns A promise that resolves to an object containing the generated image response and the price in cents
  */
-export async function generateImageWithBilling(
-  modelId: string,
-  prompt: string,
-  apiKeyId: string,
-) {
+export async function generateImageWithBilling(modelId: string, prompt: string, apiKeyId: string) {
   const model = await getImageModelById(modelId);
 
   // Run access check and quota check in parallel for better performance

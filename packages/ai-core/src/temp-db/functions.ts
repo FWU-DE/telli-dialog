@@ -72,7 +72,11 @@ export async function dbGetApiKeyLimit(apiKeyId: string) {
   return apiKey[0];
 }
 
-export async function dbGetCompletionUsageCostsSinceStartOfCurrentMonth({ apiKeyId }: { apiKeyId: string }) {
+export async function dbGetCompletionUsageCostsSinceStartOfCurrentMonth({
+  apiKeyId,
+}: {
+  apiKeyId: string;
+}) {
   // Get the start of the current month
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
@@ -91,7 +95,11 @@ export async function dbGetCompletionUsageCostsSinceStartOfCurrentMonth({ apiKey
   return Number(completionUsage[0]?.total || 0);
 }
 
-export async function dbGetImageGenerationUsageCostsSinceStartOfCurrentMonth({ apiKeyId }: { apiKeyId: string }) {
+export async function dbGetImageGenerationUsageCostsSinceStartOfCurrentMonth({
+  apiKeyId,
+}: {
+  apiKeyId: string;
+}) {
   // Get the start of the current month
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
