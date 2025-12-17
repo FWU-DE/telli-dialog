@@ -142,6 +142,13 @@ export function FederalStateView(props: FederalStateViewProps) {
           />
 
           <FormField
+            name="apiKeyId"
+            label="API Key ID"
+            description="UUID des API keys aus telli-api für Kostenmanagement und Billing."
+            control={control}
+          />
+
+          <FormField
             name="telliName"
             label="Name"
             description="Beschreibender Name für das Bundesland."

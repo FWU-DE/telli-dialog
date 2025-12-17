@@ -166,7 +166,8 @@ export const federalStateTable = pgTable('federal_state', {
   id: text('id').primaryKey(),
   teacherPriceLimit: integer('teacher_price_limit').notNull().default(500),
   studentPriceLimit: integer('student_price_limit').notNull().default(200),
-  encryptedApiKey: text('encrypted_api_key'),
+  encryptedApiKey: text('encrypted_api_key'), // This will stay until we have migrated all usages to apiKeyId
+  apiKeyId: uuid('api_key_id'),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   // vidis things
   mandatoryCertificationTeacher: boolean('mandatory_certification_teacher').default(false),

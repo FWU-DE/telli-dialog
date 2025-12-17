@@ -1,19 +1,14 @@
 {
-  "name": "@telli/shared",
+  "name": "@telli/ai-core",
   "version": "0.0.1",
   "main": "src/index.ts",
   "type": "module",
   "private": true,
   "exports": {
+    ".": "./src/index.ts",
     "./*": "./src/*.ts"
   },
   "scripts": {
-    "db:generate": "dotenvx run -f ../../apps/dialog/.env.local -- drizzle-kit generate --config=./drizzle.config.ts",
-    "db:drop": "dotenvx run -f ../../apps/dialog/.env.local -- drizzle-kit drop --config=./drizzle.config.ts",
-    "db:migrate": "drizzle-kit migrate --config=./drizzle.config.ts",
-    "db:migrate:local": "dotenvx run -f ../../apps/dialog/.env.local -- drizzle-kit migrate --config=./drizzle.config.ts",
-    "db:seed": "tsx src/db/seed/index.ts",
-    "db:seed:local": "ENVIRONMENT=development dotenvx run -f ../../apps/dialog/.env.local -- pnpm tsx src/db/seed/index.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "types": "tsc --noEmit",
@@ -24,24 +19,17 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.934.0",
-    "@aws-sdk/s3-request-presigner": "3.934.0",
-    "@dotenvx/dotenvx": "1.51.1",
-    "@sentry/nextjs": "10.27.0",
-    "@telli/ai-core": "workspace:*",
-    "@t3-oss/env-core": "0.13.8",
-    "drizzle-kit": "0.31.7",
+    "openai": "6.9.1",
+    "google-auth-library": "10.5.0",
+    "zod": "4.1.12",
     "drizzle-orm": "0.44.7",
     "drizzle-zod": "0.8.3",
-    "nanoid": "5.1.6",
-    "next": "15.5.9",
-    "pg": "8.16.3",
-    "unstorage": "1.17.3",
-    "zod": "4.1.12"
+    "pg": "8.16.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.1",
     "@eslint/js": "9.39.1",
+    "@t3-oss/env-core": "0.13.8",
     "@telli/typescript-config": "workspace:*",
     "@types/node": "24.10.1",
     "@types/pg": "8.15.6",

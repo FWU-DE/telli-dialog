@@ -19,6 +19,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '../common/toast';
 import { logError } from '@shared/logging';
 import deleteConversationAction from '@/app/(authed)/(dialog)/actions';
+import { ResponsibleAIError } from '@telli/ai-core/images/errors';
 
 interface ImageGenerationChatProps {
   conversationId?: string;
@@ -121,7 +122,11 @@ export default function ImageGenerationChat({
       navigateWithoutRefresh(`/image-generation/d/${newConversationId}`);
       refetchConversations();
     } catch (error) {
-      toast.error(tImageGeneration('generation-error'));
+      if (ResponsibleAIError.is(error)) {
+        toast.error(tImageGeneration('responsible-ai-error'));
+      } else {
+        toast.error(tImageGeneration('generation-error'));
+      }
       logError('Error generating image:', error);
 
       if (newConversationId) {
