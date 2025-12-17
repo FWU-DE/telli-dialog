@@ -16,7 +16,15 @@ export default function LoadingAnimation({
     <div
       className={`flex flex-col items-center justify-center aspect-square border-2 border-none bg-gray-50 rounded-enterprise-md mb-4 ${className}`}
     >
-      <Image src="/loading.gif" alt="Ladeanimation" width="107" height="107" unoptimized />
+      {/* TODO: When both gifs are combined, replace with this: */}
+      {/* <Image src="/loading.gif" alt="Ladeanimation" width="107" height="107" unoptimized /> */}
+      <Image
+        src="/loading-transparent.gif"
+        alt="Ladeanimation"
+        width="107"
+        height="107"
+        unoptimized
+      />
       <span className="text-gray-900 text-sm">{message}</span>
     </div>
   );
