@@ -6,7 +6,12 @@ export class ImageGenerationError extends Error {
   }
 
   static is(error: unknown): error is ImageGenerationError {
-    return error instanceof Error && error.name === 'ImageGenerationError';
+    if (error && typeof error === 'object') {
+      return (
+        'name' in error &&
+        error.name === 'ImageGenerationError');
+    }
+    return false;
   }
 }
 export class ResponsibleAIError extends ImageGenerationError {
@@ -16,7 +21,12 @@ export class ResponsibleAIError extends ImageGenerationError {
   }
 
   static is(error: unknown): error is ResponsibleAIError {
-    return error instanceof Error && error.name === 'ResponsibleAIError';
+    if (error && typeof error === 'object') {
+      return (
+        'name' in error &&
+        error.name === 'ResponsibleAIError');
+    }
+    return false;
   }
 }
 export class RateLimitExceededError extends ImageGenerationError {
@@ -26,7 +36,12 @@ export class RateLimitExceededError extends ImageGenerationError {
   }
 
   static is(error: unknown): error is RateLimitExceededError {
-    return error instanceof Error && error.name === 'RateLimitExceededError';
+    if (error && typeof error === 'object') {
+      return (
+        'name' in error &&
+        error.name === 'RateLimitExceededError');
+    }
+    return false;
   }
 }
 export class InvalidImageModelError extends ImageGenerationError {
@@ -36,7 +51,12 @@ export class InvalidImageModelError extends ImageGenerationError {
   }
 
   static is(error: unknown): error is InvalidImageModelError {
-    return error instanceof Error && error.name === 'InvalidImageModelError';
+    if (error && typeof error === 'object') {
+      return (
+        'name' in error &&
+        error.name === 'InvalidImageModelError');
+    }
+    return false;
   }
 }
 export class ProviderConfigurationError extends ImageGenerationError {
@@ -46,6 +66,11 @@ export class ProviderConfigurationError extends ImageGenerationError {
   }
 
   static is(error: unknown): error is ProviderConfigurationError {
-    return error instanceof Error && error.name === 'ProviderConfigurationError';
+    if (error && typeof error === 'object') {
+      return (
+        'name' in error &&
+        error.name === 'ProviderConfigurationError');
+    }
+    return false;
   }
 }

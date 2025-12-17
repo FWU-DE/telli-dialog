@@ -3,10 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useImageModels } from '../providers/image-model-provider';
 import { useImageStyle } from '../providers/image-style-provider';
-import {
-  generateImageAction,
-  createImageConversationAction,
-} from '@/app/(authed)/(dialog)/image-generation/actions';
+import { generateImageAction } from '@/app/(authed)/(dialog)/image-generation/actions';
 import { ImageGenerationInputBox } from './image-generation-input-box';
 import { ImageActionButtons } from './image-action-buttons';
 import { ImageGenerationError } from './image-generation-error';
@@ -20,6 +17,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { logError } from '@shared/logging';
 import deleteConversationAction from '@/app/(authed)/(dialog)/actions';
 import { ResponsibleAIError } from '@telli/ai-core/images/errors';
+import { runServerAction } from '@shared/actions/run-server-action';
 
 interface ImageGenerationChatProps {
   conversationId?: string;
@@ -104,44 +102,38 @@ export default function ImageGenerationChat({
     let newConversationId;
 
     try {
-      // Every image generation gets its own conversation
-      newConversationId = await createImageConversationAction(currentPrompt);
-
       const result = await generateImageAction({
         prompt: currentPrompt,
         model: selectedModel,
         style: selectedStyle,
-        conversationId: newConversationId,
       });
-
-      // Update the displayed image
-      setDisplayedImage({
-        prompt: currentPrompt,
-        imageUrl: result.imageUrl,
-      });
-      setInput('');
-      navigateWithoutRefresh(`/image-generation/d/${newConversationId}`);
-      refetchConversations();
-    } catch (error) {
-      setErrorMessage(tImageGeneration('responsible-ai-error'));
-      /*
-      TODO: @AsamMax - Re-enable specific error messages once the ResponsibleAIError is properly detected
-      if (ResponsibleAIError.is(error)) {
-        setErrorMessage(tImageGeneration('responsible-ai-error'));
+      if (result.success) {
+        // Update the displayed image
+        setDisplayedImage({
+          prompt: currentPrompt,
+          imageUrl: result.value.imageUrl,
+        });
+        setInput('');
+        navigateWithoutRefresh(`/image-generation/d/${newConversationId}`);
+        refetchConversations();
       } else {
-        setErrorMessage(tImageGeneration('generation-error'));
-      }
-      */
-      logError('Error generating image:', error);
+        const error = result.error;
+        if (ResponsibleAIError.is(error)) {
+          setErrorMessage(tImageGeneration('responsible-ai-error'));
+        } else {
+          setErrorMessage(tImageGeneration('generation-error'));
+        }
 
-      if (newConversationId) {
-        try {
-          await deleteConversationAction({ conversationId: newConversationId });
-          refetchConversations();
-        } catch (deletionError) {
-          logError('Error deleting failed image conversation:', deletionError);
+        if (newConversationId) {
+          try {
+            await deleteConversationAction({ conversationId: newConversationId });
+            refetchConversations();
+          } catch (deletionError) {
+            logError('Error deleting failed image conversation:', deletionError);
+          }
         }
       }
+    } catch (error) {
     } finally {
       setIsGenerating(false);
     }
