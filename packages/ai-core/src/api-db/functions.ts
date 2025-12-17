@@ -1,4 +1,4 @@
-import { and, eq, gte, sum } from 'drizzle-orm';
+import { and, eq, gte, sql, sum } from 'drizzle-orm';
 import { dbApi } from '.';
 import {
   apiKeyTable,
@@ -34,7 +34,7 @@ export async function dbHasApiKeyAccessToModel({
   modelId: string;
 }): Promise<boolean> {
   const rows = await dbApi
-    .select()
+    .select({ id: llmModelApiKeyMappingTable.id })
     .from(llmModelApiKeyMappingTable)
     .where(
       and(

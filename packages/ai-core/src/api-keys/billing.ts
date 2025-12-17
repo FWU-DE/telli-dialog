@@ -33,19 +33,18 @@ export async function billImageGenerationUsageToApiKey(
 }
 
 export async function isApiKeyOverQuota(apiKeyId: string): Promise<boolean> {
-  // Get the API key with its limit
-  const apiKeyData = await dbGetApiKeyLimit(apiKeyId);
+  // Get the API key limit and sum usage costs since the start of the month
+  const [apiKeyData, completionCosts, imageCosts] = await Promise.all([
+    dbGetApiKeyLimit(apiKeyId),
+    dbGetCompletionUsageCostsSinceStartOfCurrentMonth({ apiKeyId }),
+    dbGetImageGenerationUsageCostsSinceStartOfCurrentMonth({ apiKeyId }),
+  ]);
+
   if (!apiKeyData) {
     throw new Error(`API key not found: ${apiKeyId}`);
   }
 
   const { limitInCent } = apiKeyData;
-
-  // Sum completion usage costs since the start of the month
-  const completionCosts = await dbGetCompletionUsageCostsSinceStartOfCurrentMonth({ apiKeyId });
-
-  // Sum image generation usage costs since the start of the month
-  const imageCosts = await dbGetImageGenerationUsageCostsSinceStartOfCurrentMonth({ apiKeyId });
 
   // Calculate total usage
   const totalUsage = completionCosts + imageCosts;
