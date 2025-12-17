@@ -100,43 +100,39 @@ export default function ImageGenerationChat({
     setErrorMessage(null);
 
     let newConversationId;
-
-    try {
-      const result = await generateImageAction({
+    const result = await generateImageAction({
+      prompt: currentPrompt,
+      model: selectedModel,
+      style: selectedStyle,
+    });
+    if (result.success) {
+      newConversationId = result.value.conversationId;
+      // Update the displayed image
+      setDisplayedImage({
         prompt: currentPrompt,
-        model: selectedModel,
-        style: selectedStyle,
+        imageUrl: result.value.imageUrl,
       });
-      if (result.success) {
-        // Update the displayed image
-        setDisplayedImage({
-          prompt: currentPrompt,
-          imageUrl: result.value.imageUrl,
-        });
-        setInput('');
-        navigateWithoutRefresh(`/image-generation/d/${newConversationId}`);
-        refetchConversations();
+      setInput('');
+      navigateWithoutRefresh(`/image-generation/d/${newConversationId}`);
+      refetchConversations();
+    } else {
+      const error = result.error;
+      if (ResponsibleAIError.is(error)) {
+        setErrorMessage(tImageGeneration('responsible-ai-error'));
       } else {
-        const error = result.error;
-        if (ResponsibleAIError.is(error)) {
-          setErrorMessage(tImageGeneration('responsible-ai-error'));
-        } else {
-          setErrorMessage(tImageGeneration('generation-error'));
-        }
+        setErrorMessage(tImageGeneration('generation-error'));
+      }
 
-        if (newConversationId) {
-          try {
-            await deleteConversationAction({ conversationId: newConversationId });
-            refetchConversations();
-          } catch (deletionError) {
-            logError('Error deleting failed image conversation:', deletionError);
-          }
+      if (newConversationId) {
+        try {
+          await deleteConversationAction({ conversationId: newConversationId });
+          refetchConversations();
+        } catch (deletionError) {
+          logError('Error deleting failed image conversation:', deletionError);
         }
       }
-    } catch (error) {
-    } finally {
-      setIsGenerating(false);
     }
+    setIsGenerating(false);
   }
 
   return (

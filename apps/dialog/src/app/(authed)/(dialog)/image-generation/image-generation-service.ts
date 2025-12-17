@@ -65,12 +65,12 @@ export async function handleImageGeneration({
 }) {
   const user = await getUser();
 
-  // Every image generation gets its own conversation
-  const conversationId = await createImageConversation(prompt);
-
   if (!prompt || prompt.trim().length === 0) {
     throw new Error('Prompt is required');
-  }
+  }  
+
+  // Every image generation gets its own conversation
+  const conversationId = await createImageConversation(prompt);
 
   // Construct the full prompt with style prompt if provided
   let fullPrompt = prompt;
