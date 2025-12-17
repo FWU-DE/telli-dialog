@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { hasAccessToImageModel } from './model-access';
 import type { AiModel } from '../images/types';
 
-// Mock the temp-db functions
-vi.mock('../temp-db/functions', () => ({
+// Mock the api-db functions
+vi.mock('../api-db/functions', () => ({
   dbHasApiKeyAccessToModel: vi.fn(),
 }));
 

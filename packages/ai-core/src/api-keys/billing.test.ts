@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { billImageGenerationUsageToApiKey, isApiKeyOverQuota } from './billing';
 import type { AiModel } from '../images/types';
 
-// Mock the temp-db functions
-vi.mock('../temp-db/functions', () => ({
+// Mock the api-db functions
+vi.mock('../api-db/functions', () => ({
   dbCreateImageGenerationUsage: vi.fn(),
   dbGetApiKeyLimit: vi.fn(),
   dbGetCompletionUsageCostsSinceStartOfCurrentMonth: vi.fn(),

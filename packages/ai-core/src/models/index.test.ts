@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getImageModelById } from './index';
 
-// Mock the temp-db functions
-vi.mock('../temp-db/functions', () => ({
+// Mock the api-db functions
+vi.mock('../api-db/functions', () => ({
   dbGetModelById: vi.fn(),
 }));
 
