@@ -275,6 +275,9 @@ importers:
       import-in-the-middle:
         specifier: 2.0.0
         version: 2.0.0
+      ioredis:
+        specifier: 5.8.2
+        version: 5.8.2
       isbinaryfile:
         specifier: 5.0.7
         version: 5.0.7
@@ -483,9 +486,6 @@ importers:
       drizzle-zod:
         specifier: 0.8.3
         version: 0.8.3(drizzle-orm@0.44.7(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(pg@8.16.3))(zod@4.1.12)
-      ioredis:
-        specifier: 5.8.2
-        version: 5.8.2
       nanoid:
         specifier: 5.1.6
         version: 5.1.6
