@@ -3,7 +3,6 @@ import { db } from '@shared/db';
 import {
   dbDeleteCharacterByIdAndUserId,
   dbGetCharacterById,
-  dbGetCharacterByIdAndUserId,
   dbGetCharacterByIdWithShareData,
   dbGetCharactersBySchoolId,
   dbGetCharactersByUserId,
@@ -282,12 +281,10 @@ export const updateCharacterPicture = async ({
  */
 const updateCharacterSchema = characterUpdateSchema.omit({
   accessLevel: true,
-  inviteCode: true,
   isDeleted: true,
   originalCharacterId: true,
   pictureId: true,
   schoolId: true,
-  startedAt: true,
 });
 export type UpdateCharacterActionModel = z.infer<typeof updateCharacterSchema>;
 
@@ -309,7 +306,7 @@ export const updateCharacter = async ({
   const cleanedCharacter = removeNullishValues(character);
   if (cleanedCharacter === undefined) return;
 
-  const parsedCharacterValues = updateCharacterSchema.parse(cleanedCharacter);
+  const parsedCharacterValues = updateCharacterSchema.strip().parse(cleanedCharacter);
 
   const [updatedCharacter] = await db
     .update(characterTable)
