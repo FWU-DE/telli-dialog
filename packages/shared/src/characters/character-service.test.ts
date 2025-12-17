@@ -26,7 +26,6 @@ import {
 import {
   dbGetCharacterById,
   dbGetSharedCharacterConversations,
-  dbGetCharacterByIdAndUserId,
   dbGetCharacterByIdWithShareData,
 } from '../db/functions/character';
 import { generateUUID } from '../utils/uuid';
@@ -68,7 +67,6 @@ describe('character-service', () => {
       const userId = generateUUID();
       const mockCharacter: Partial<CharacterSelectModel> = {
         userId: userId,
-        inviteCode: null, // Character without invite code
       };
 
       (

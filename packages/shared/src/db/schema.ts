@@ -267,6 +267,7 @@ export type CharacterWithShareDataModel = CharacterSelectModel & {
   inviteCode: string | null;
   maxUsageTimeLimit: number | null;
   startedAt: Date | null;
+  startedBy: string | null;
 };
 
 export const characterTemplateMappingTable = pgTable(
