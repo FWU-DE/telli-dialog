@@ -46,10 +46,6 @@ const result = NextAuth({
           token = await handleVidisJWTCallback({ account, profile, token });
         }
 
-        // Ensure userId is set for credentials provider
-        if (account?.provider === 'credentials' && user?.id) {
-          token.userId = user.id;
-        }
         const result = userAndContextSchema.safeParse(token.user);
 
         // Update session data if there is an update or the structure has changed
