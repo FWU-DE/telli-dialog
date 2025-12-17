@@ -180,7 +180,9 @@ export const federalStateTable = pgTable('federal_state', {
   featureToggles: json('feature_toggles').$type<FederalStateFeatureToggles>().notNull(),
 });
 
-export const federalStateSelectSchema = createSelectSchema(federalStateTable);
+export const federalStateSelectSchema = createSelectSchema(federalStateTable).extend({
+  createdAt: z.coerce.date(),
+});
 export const federalStateInsertSchema = createInsertSchema(federalStateTable).extend({
   featureToggles: federalStateFeatureTogglesSchema,
 });
