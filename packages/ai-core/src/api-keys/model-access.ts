@@ -1,4 +1,4 @@
-import { dbHasApiKeyAccessToModel } from '../temp-db/functions';
+import { dbHasApiKeyAccessToModel } from '../api-db/functions';
 import { AiModel } from '../images/types';
 
 /**

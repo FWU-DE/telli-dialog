@@ -7,7 +7,7 @@ vi.mock('../temp-db/functions', () => ({
   dbHasApiKeyAccessToModel: vi.fn(),
 }));
 
-import { dbHasApiKeyAccessToModel } from '../temp-db/functions';
+import { dbHasApiKeyAccessToModel } from '../api-db/functions';
 
 const mockDbHasApiKeyAccessToModel = vi.mocked(dbHasApiKeyAccessToModel);
 

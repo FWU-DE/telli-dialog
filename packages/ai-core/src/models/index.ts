@@ -1,4 +1,4 @@
-import { dbGetModelById } from '../temp-db/functions';
+import { dbGetModelById } from '../api-db/functions';
 import { AiModel } from '../images/types';
 
 export async function getImageModelById(modelId: string): Promise<AiModel> {

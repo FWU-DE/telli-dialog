@@ -1,4 +1,4 @@
-import { dbGetApiKey } from '../temp-db/functions';
+import { dbGetApiKey } from '../api-db/functions';
 
 /**
  * Looks up API key IDs by federal state ID.

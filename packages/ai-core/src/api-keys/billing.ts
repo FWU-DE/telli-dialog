@@ -3,7 +3,7 @@ import {
   dbGetApiKeyLimit,
   dbGetCompletionUsageCostsSinceStartOfCurrentMonth,
   dbGetImageGenerationUsageCostsSinceStartOfCurrentMonth,
-} from '../temp-db/functions';
+} from '../api-db/functions';
 import { AiModel } from '../images/types';
 
 /**

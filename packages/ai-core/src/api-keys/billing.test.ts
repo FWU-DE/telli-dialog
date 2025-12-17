@@ -15,7 +15,7 @@ import {
   dbGetApiKeyLimit,
   dbGetCompletionUsageCostsSinceStartOfCurrentMonth,
   dbGetImageGenerationUsageCostsSinceStartOfCurrentMonth,
-} from '../temp-db/functions';
+} from '../api-db/functions';
 
 const mockDbCreateImageGenerationUsage = vi.mocked(dbCreateImageGenerationUsage);
 const mockDbGetApiKeyLimit = vi.mocked(dbGetApiKeyLimit);

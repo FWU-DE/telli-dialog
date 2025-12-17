@@ -6,7 +6,7 @@ vi.mock('../temp-db/functions', () => ({
   dbGetModelById: vi.fn(),
 }));
 
-import { dbGetModelById } from '../temp-db/functions';
+import { dbGetModelById } from '../api-db/functions';
 
 const mockDbGetModelById = vi.mocked(dbGetModelById);
 
