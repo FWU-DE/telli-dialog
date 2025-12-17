@@ -67,7 +67,7 @@ export async function handleImageGeneration({
 
   if (!prompt || prompt.trim().length === 0) {
     throw new Error('Prompt is required');
-  }  
+  }
 
   // Every image generation gets its own conversation
   const conversationId = await createImageConversation(prompt);
