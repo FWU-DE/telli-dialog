@@ -7,9 +7,7 @@ export class ImageGenerationError extends Error {
 
   static is(error: unknown): error is ImageGenerationError {
     if (error && typeof error === 'object') {
-      return (
-        'name' in error &&
-        error.name === 'ImageGenerationError');
+      return 'name' in error && error.name === 'ImageGenerationError';
     }
     return false;
   }
@@ -22,9 +20,7 @@ export class ResponsibleAIError extends ImageGenerationError {
 
   static is(error: unknown): error is ResponsibleAIError {
     if (error && typeof error === 'object') {
-      return (
-        'name' in error &&
-        error.name === 'ResponsibleAIError');
+      return 'name' in error && error.name === 'ResponsibleAIError';
     }
     return false;
   }
@@ -37,9 +33,7 @@ export class RateLimitExceededError extends ImageGenerationError {
 
   static is(error: unknown): error is RateLimitExceededError {
     if (error && typeof error === 'object') {
-      return (
-        'name' in error &&
-        error.name === 'RateLimitExceededError');
+      return 'name' in error && error.name === 'RateLimitExceededError';
     }
     return false;
   }
@@ -52,9 +46,7 @@ export class InvalidImageModelError extends ImageGenerationError {
 
   static is(error: unknown): error is InvalidImageModelError {
     if (error && typeof error === 'object') {
-      return (
-        'name' in error &&
-        error.name === 'InvalidImageModelError');
+      return 'name' in error && error.name === 'InvalidImageModelError';
     }
     return false;
   }
@@ -67,9 +59,7 @@ export class ProviderConfigurationError extends ImageGenerationError {
 
   static is(error: unknown): error is ProviderConfigurationError {
     if (error && typeof error === 'object') {
-      return (
-        'name' in error &&
-        error.name === 'ProviderConfigurationError');
+      return 'name' in error && error.name === 'ProviderConfigurationError';
     }
     return false;
   }

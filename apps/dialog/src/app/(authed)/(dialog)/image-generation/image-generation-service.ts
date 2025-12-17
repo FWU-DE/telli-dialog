@@ -6,7 +6,7 @@ import { dbGetModelByIdAndFederalStateId } from '@shared/db/functions/llm-model'
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
-import { dbInsertChatContent,dbGetOrCreateConversation } from '@shared/db/functions/chat';
+import { dbInsertChatContent, dbGetOrCreateConversation } from '@shared/db/functions/chat';
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
 import { logError } from '@shared/logging';
 import { generateImageWithBilling } from '@telli/ai-core';
@@ -26,8 +26,6 @@ export interface ImageGenerationResult {
   created?: number;
   data: Array<string>;
 }
-
-
 
 /**
  * Creates a new conversation for image generation
@@ -161,7 +159,6 @@ export async function handleImageGeneration({
       : new Error('Unknown error occurred during image generation');
   }
 }
-
 
 /**
  * Image generation service function

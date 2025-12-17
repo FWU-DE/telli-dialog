@@ -33,7 +33,7 @@ export function runServerAction<TReturn, TArgs extends readonly unknown[] = []>(
         logError('Image generation error occurred during server action.', error);
         return {
           success: false,
-          error: serializeError({...error, statusCode: 500}),
+          error: serializeError({ ...error, statusCode: 500 }),
         };
       } else {
         // For other errors, log the error

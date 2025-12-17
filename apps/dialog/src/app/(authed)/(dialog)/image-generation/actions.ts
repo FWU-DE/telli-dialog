@@ -3,13 +3,8 @@
 import { getUser } from '@/auth/utils';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { LlmModel } from '@shared/db/schema';
-import { dbGetOrCreateConversation, dbInsertChatContent } from '@shared/db/functions/chat';
-import { generateUUID } from '@shared/utils/uuid';
-import { generateImage, handleImageGeneration } from './image-generation-service';
-import { uploadFileToS3, getSignedUrlFromS3Get } from '@shared/s3';
-import { cnanoid } from '@shared/random/randomService';
+import { handleImageGeneration } from './image-generation-service';
 import { ImageStyle } from '@shared/utils/chat';
-import { linkFilesToConversation, dbInsertFile } from '@shared/db/functions/files';
 import { DEFAULT_IMAGE_MODEL } from '@shared/llm-models/default-llm-models';
 import { runServerAction } from '@shared/actions/run-server-action';
 
