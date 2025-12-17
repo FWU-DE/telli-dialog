@@ -9,6 +9,7 @@ import {
 } from '@/app/(authed)/(dialog)/image-generation/actions';
 import { ImageGenerationInputBox } from './image-generation-input-box';
 import { ImageActionButtons } from './image-action-buttons';
+import { ImageGenerationError } from './image-generation-error';
 import { useTranslations } from 'next-intl';
 import LoadingAnimation from './loading-animation';
 import { ConversationMessageModel } from '@shared/db/types';
@@ -16,9 +17,9 @@ import { navigateWithoutRefresh } from '@/utils/navigation/router';
 import { getSignedUrlFromS3Get } from '@shared/s3';
 import { FileModel } from '@shared/db/schema';
 import { useQueryClient } from '@tanstack/react-query';
-import { useToast } from '../common/toast';
 import { logError } from '@shared/logging';
 import deleteConversationAction from '@/app/(authed)/(dialog)/actions';
+import { ResponsibleAIError } from '@telli/ai-core/images/errors';
 
 interface ImageGenerationChatProps {
   conversationId?: string;
@@ -33,15 +34,15 @@ export default function ImageGenerationChat({
   const { selectedModel } = useImageModels();
   const { selectedStyle } = useImageStyle();
   const tImageGeneration = useTranslations('image-generation');
-  const toast = useToast();
 
   const [input, setInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [currentGeneratingPrompt, setCurrentGeneratingPrompt] = useState('');
+  const [lastPrompt, setLastPrompt] = useState('');
   const [displayedImage, setDisplayedImage] = useState<{
     prompt: string;
     imageUrl: string;
   } | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   // Load the single image from initial messages and file attachments
@@ -96,8 +97,9 @@ export default function ImageGenerationChat({
     }
 
     const currentPrompt = input.trim();
-    setCurrentGeneratingPrompt(currentPrompt);
+    setLastPrompt(currentPrompt);
     setIsGenerating(true);
+    setErrorMessage(null);
 
     let newConversationId;
 
@@ -121,7 +123,15 @@ export default function ImageGenerationChat({
       navigateWithoutRefresh(`/image-generation/d/${newConversationId}`);
       refetchConversations();
     } catch (error) {
-      toast.error(tImageGeneration('generation-error'));
+      setErrorMessage(tImageGeneration('responsible-ai-error'));
+      /*
+      TODO: @AsamMax - Re-enable specific error messages once the ResponsibleAIError is properly detected
+      if (ResponsibleAIError.is(error)) {
+        setErrorMessage(tImageGeneration('responsible-ai-error'));
+      } else {
+        setErrorMessage(tImageGeneration('generation-error'));
+      }
+      */
       logError('Error generating image:', error);
 
       if (newConversationId) {
@@ -134,7 +144,6 @@ export default function ImageGenerationChat({
       }
     } finally {
       setIsGenerating(false);
-      setCurrentGeneratingPrompt('');
     }
   }
 
@@ -152,12 +161,22 @@ export default function ImageGenerationChat({
           {isGenerating && (
             <div className="mt-6">
               <h3 className="text-xs text-gray-700">{tImageGeneration('prompt-label')}</h3>
-              <p className="text-sm mb-3">{currentGeneratingPrompt}</p>
+              <p className="text-sm mb-3">{lastPrompt}</p>
               <LoadingAnimation />
             </div>
           )}
+
+          {/* Error state */}
+          {errorMessage && !isGenerating && (
+            <div className="mt-6">
+              <h3 className="text-xs text-gray-700">{tImageGeneration('prompt-label')}</h3>
+              <p className="text-sm mb-3">{lastPrompt}</p>
+              <ImageGenerationError message={errorMessage} />
+            </div>
+          )}
+
           {/* Display the single image for this conversation */}
-          {displayedImage && !isGenerating && (
+          {displayedImage && !isGenerating && !errorMessage && (
             <div className="mt-6">
               <h3 className="text-xs text-gray-700">{tImageGeneration('prompt-label')}</h3>
               <p className="text-sm mb-3">{displayedImage.prompt}</p>

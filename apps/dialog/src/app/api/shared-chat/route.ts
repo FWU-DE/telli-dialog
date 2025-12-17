@@ -13,6 +13,7 @@ import {
   getModelAndProviderWithResult,
   getSearchParamsFromUrl,
   calculateCostsInCent,
+  getTokenUsage,
 } from '../utils/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
@@ -112,12 +113,13 @@ export async function POST(request: NextRequest) {
     messages,
     experimental_transform: smoothStream({ chunking: 'word', delayInMs: 20 }),
     async onFinish(assistantMessage) {
-      const costsInCent = calculateCostsInCent(definedModel, assistantMessage.usage);
+      const { promptTokens, completionTokens } = getTokenUsage(assistantMessage.usage);
+      const costsInCent = calculateCostsInCent(definedModel, { promptTokens, completionTokens });
 
       await dbUpdateTokenUsageBySharedChatId({
         modelId: definedModel.id,
-        completionTokens: assistantMessage.usage.completionTokens,
-        promptTokens: assistantMessage.usage.promptTokens,
+        completionTokens: completionTokens,
+        promptTokens: promptTokens,
         sharedSchoolConversationId: sharedChat.id,
         userId: teacherUserAndContext.id,
         costsInCent: costsInCent,
@@ -127,8 +129,8 @@ export async function POST(request: NextRequest) {
         constructTelliNewMessageEvent({
           user: teacherUserAndContext,
           provider: modelAndProvider.definedModel.provider,
-          promptTokens: assistantMessage.usage.promptTokens,
-          completionTokens: assistantMessage.usage.completionTokens,
+          promptTokens: promptTokens,
+          completionTokens: completionTokens,
           costsInCent: costsInCent,
           anonymous: true,
           sharedChat,
