@@ -13,6 +13,8 @@ import {
 } from '@shared/llm-models/default-llm-models';
 import { getDefaultModel, getFirstTextModel } from '@shared/llm-models/llm-model-service';
 import { createTelliConfiguration } from '../chat/custom-model-config';
+import { logError } from '@shared/logging';
+import { isValidPositiveNumber } from '@shared/utils/number';
 
 export function getSearchParamsFromUrl(url: string) {
   const [, ...rest] = url.split('?');
@@ -38,6 +40,7 @@ export async function getModelAndProvider({
   });
 
   if (error !== null) {
+    logError('Error fetching federal state with decrypted API key:', error);
     throw Error(error.message);
   }
 
@@ -47,7 +50,11 @@ export async function getModelAndProvider({
     definedModel = await getDefaultModelByFederalStateId(federalStateId);
 
     if (definedModel === undefined) {
-      throw new Error(`Could not find default model for federal state with id ${federalStateId}`);
+      const defaultModelError = new Error(
+        `Could not find default model for federal state with id ${federalStateId}`,
+      );
+      logError(defaultModelError.message, defaultModelError);
+      throw defaultModelError;
     }
   }
 
@@ -67,7 +74,13 @@ export function calculateCostsInCent(
     return calculateCostsInCentForTextModel(model, usage);
   } else if (model.priceMetadata.type === 'embedding') {
     return calculateCostsInCentForEmbeddingModel(model, usage);
+  } else {
+    logError(
+      'Invalid model type, gracefully returning 0: ' + model.priceMetadata.type,
+      new TypeError('Invalid model type'),
+    );
   }
+
   return 0;
 }
 
@@ -75,7 +88,14 @@ function calculateCostsInCentForTextModel(
   model: LlmModel,
   usage: { promptTokens: number; completionTokens: number },
 ) {
-  if (model.priceMetadata.type !== 'text') return 0;
+  if (model.priceMetadata.type !== 'text') {
+    logError(
+      'Invalid model type, gracefully returning 0: ' + model.name,
+      new TypeError('Invalid model type'),
+    );
+
+    return 0;
+  }
 
   const completionTokenPrice = usage.completionTokens * model.priceMetadata.completionTokenPrice;
   const promptTokenPrice = usage.promptTokens * model.priceMetadata.promptTokenPrice;
@@ -87,11 +107,42 @@ function calculateCostsInCentForEmbeddingModel(
   model: LlmModel,
   usage: { promptTokens: number; completionTokens: number },
 ) {
-  if (model.priceMetadata.type !== 'embedding') return 0;
+  if (model.priceMetadata.type !== 'embedding') {
+    logError(
+      'Invalid model type, gracefully returning 0: ' + model.name,
+      new TypeError('Invalid model type'),
+    );
+
+    return 0;
+  }
 
   const promptTokenPrice = usage.promptTokens * model.priceMetadata.promptTokenPrice;
 
   return promptTokenPrice / PRICE_AND_CENT_MULTIPLIER;
+}
+
+/**
+ * Get token usage safely, ensuring valid numbers
+ * @param usage The usage object containing promptTokens and completionTokens
+ * @returns An object with valid promptTokens and completionTokens
+ */
+export function getTokenUsage(usage: { promptTokens: number; completionTokens: number }): {
+  promptTokens: number;
+  completionTokens: number;
+} {
+  if (
+    !isValidPositiveNumber(usage.promptTokens) ||
+    !isValidPositiveNumber(usage.completionTokens)
+  ) {
+    logError(
+      'Invalid token usage: promptTokens and completionTokens must be valid numbers, gracefully returning 0',
+      new TypeError('Invalid token usage'),
+    );
+
+    return { promptTokens: 0, completionTokens: 0 };
+  }
+
+  return { promptTokens: usage.promptTokens, completionTokens: usage.completionTokens };
 }
 
 /**
@@ -105,8 +156,12 @@ export async function getAuxiliaryModel(federalStateId: string): Promise<LlmMode
   const auxiliaryModel =
     getDefaultAuxModel(llmModels) ?? getFallbackAuxModel(llmModels) ?? getFirstTextModel(llmModels);
   if (auxiliaryModel === undefined) {
-    throw new Error('No auxiliary model found');
+    const error = new Error('No auxiliary model found for federal state id ' + federalStateId);
+    logError(error.message, error);
+
+    throw error;
   }
+
   return auxiliaryModel;
 }
 
@@ -120,6 +175,7 @@ export async function getDefaultModelByFederalStateId(
   const llmModels = await dbGetLlmModelsByFederalStateId({
     federalStateId,
   });
+
   return getDefaultModel(llmModels);
 }
 
