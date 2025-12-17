@@ -3,7 +3,7 @@ import { SharedChatContainer } from './shared-chat-container';
 import { getLearningScenariosForUser } from '@shared/learning-scenarios/learning-scenario-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
-import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
+import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 
 export const dynamic = 'force-dynamic';
 

@@ -11,7 +11,7 @@ import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
-import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
+import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
