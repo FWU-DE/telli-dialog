@@ -3,12 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useImageModels } from '../providers/image-model-provider';
 import { useImageStyle } from '../providers/image-style-provider';
-import {
-  generateImageAction,
-  createImageConversationAction,
-} from '@/app/(authed)/(dialog)/image-generation/actions';
+import { generateImageAction } from '@/app/(authed)/(dialog)/image-generation/actions';
 import { ImageGenerationInputBox } from './image-generation-input-box';
 import { ImageActionButtons } from './image-action-buttons';
+import { ImageGenerationError } from './image-generation-error';
 import { useTranslations } from 'next-intl';
 import LoadingAnimation from './loading-animation';
 import { ConversationMessageModel } from '@shared/db/types';
@@ -16,9 +14,10 @@ import { navigateWithoutRefresh } from '@/utils/navigation/router';
 import { getSignedUrlFromS3Get } from '@shared/s3';
 import { FileModel } from '@shared/db/schema';
 import { useQueryClient } from '@tanstack/react-query';
-import { useToast } from '../common/toast';
 import { logError } from '@shared/logging';
 import deleteConversationAction from '@/app/(authed)/(dialog)/actions';
+import { ResponsibleAIError } from '@telli/ai-core/images/errors';
+import { runServerAction } from '@shared/actions/run-server-action';
 
 interface ImageGenerationChatProps {
   conversationId?: string;
@@ -33,15 +32,15 @@ export default function ImageGenerationChat({
   const { selectedModel } = useImageModels();
   const { selectedStyle } = useImageStyle();
   const tImageGeneration = useTranslations('image-generation');
-  const toast = useToast();
 
   const [input, setInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [currentGeneratingPrompt, setCurrentGeneratingPrompt] = useState('');
+  const [lastPrompt, setLastPrompt] = useState('');
   const [displayedImage, setDisplayedImage] = useState<{
     prompt: string;
     imageUrl: string;
   } | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   // Load the single image from initial messages and file attachments
@@ -96,33 +95,33 @@ export default function ImageGenerationChat({
     }
 
     const currentPrompt = input.trim();
-    setCurrentGeneratingPrompt(currentPrompt);
+    setLastPrompt(currentPrompt);
     setIsGenerating(true);
+    setErrorMessage(null);
 
     let newConversationId;
-
-    try {
-      // Every image generation gets its own conversation
-      newConversationId = await createImageConversationAction(currentPrompt);
-
-      const result = await generateImageAction({
-        prompt: currentPrompt,
-        model: selectedModel,
-        style: selectedStyle,
-        conversationId: newConversationId,
-      });
-
+    const result = await generateImageAction({
+      prompt: currentPrompt,
+      model: selectedModel,
+      style: selectedStyle,
+    });
+    if (result.success) {
+      newConversationId = result.value.conversationId;
       // Update the displayed image
       setDisplayedImage({
         prompt: currentPrompt,
-        imageUrl: result.imageUrl,
+        imageUrl: result.value.imageUrl,
       });
       setInput('');
       navigateWithoutRefresh(`/image-generation/d/${newConversationId}`);
       refetchConversations();
-    } catch (error) {
-      toast.error(tImageGeneration('generation-error'));
-      logError('Error generating image:', error);
+    } else {
+      const error = result.error;
+      if (ResponsibleAIError.is(error)) {
+        setErrorMessage(tImageGeneration('responsible-ai-error'));
+      } else {
+        setErrorMessage(tImageGeneration('generation-error'));
+      }
 
       if (newConversationId) {
         try {
@@ -132,10 +131,8 @@ export default function ImageGenerationChat({
           logError('Error deleting failed image conversation:', deletionError);
         }
       }
-    } finally {
-      setIsGenerating(false);
-      setCurrentGeneratingPrompt('');
     }
+    setIsGenerating(false);
   }
 
   return (
@@ -152,12 +149,22 @@ export default function ImageGenerationChat({
           {isGenerating && (
             <div className="mt-6">
               <h3 className="text-xs text-gray-700">{tImageGeneration('prompt-label')}</h3>
-              <p className="text-sm mb-3">{currentGeneratingPrompt}</p>
+              <p className="text-sm mb-3">{lastPrompt}</p>
               <LoadingAnimation />
             </div>
           )}
+
+          {/* Error state */}
+          {errorMessage && !isGenerating && (
+            <div className="mt-6">
+              <h3 className="text-xs text-gray-700">{tImageGeneration('prompt-label')}</h3>
+              <p className="text-sm mb-3">{lastPrompt}</p>
+              <ImageGenerationError message={errorMessage} />
+            </div>
+          )}
+
           {/* Display the single image for this conversation */}
-          {displayedImage && !isGenerating && (
+          {displayedImage && !isGenerating && !errorMessage && (
             <div className="mt-6">
               <h3 className="text-xs text-gray-700">{tImageGeneration('prompt-label')}</h3>
               <p className="text-sm mb-3">{displayedImage.prompt}</p>

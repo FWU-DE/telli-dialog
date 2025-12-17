@@ -28,6 +28,7 @@
     "@aws-sdk/s3-request-presigner": "3.934.0",
     "@dotenvx/dotenvx": "1.51.1",
     "@sentry/nextjs": "10.27.0",
+    "@telli/ai-core": "workspace:*",
     "@t3-oss/env-core": "0.13.8",
     "drizzle-kit": "0.31.7",
     "drizzle-orm": "0.44.7",
@@ -35,6 +36,7 @@
     "nanoid": "5.1.6",
     "next": "15.5.9",
     "pg": "8.16.3",
+    "unstorage": "1.17.3",
     "zod": "4.1.12"
   },
   "devDependencies": {

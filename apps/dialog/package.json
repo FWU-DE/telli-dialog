@@ -56,6 +56,7 @@
     "@sentry/opentelemetry": "10.27.0",
     "@t3-oss/env-nextjs": "0.13.8",
     "@tanstack/react-query": "5.90.10",
+    "@telli/ai-core": "workspace:*",
     "@telli/shared": "workspace:*",
     "@telli/ui": "workspace:*",
     "ai": "4.3.16",
@@ -101,7 +102,6 @@
     "tailwindcss-animate": "1.0.7",
     "tsx": "4.20.6",
     "unpdf": "1.4.0",
-    "unstorage": "1.17.2",
     "zod": "4.1.12"
   },
   "devDependencies": {

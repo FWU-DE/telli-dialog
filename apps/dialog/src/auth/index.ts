@@ -41,19 +41,11 @@ const result = NextAuth({
       // this callback is called when a JSON Web Token is created, updated or accessed in backend
       // returning null will invalidate the token and end the session
       try {
-        if (
-          trigger === 'signIn' &&
-          (account?.provider === 'vidis' || account?.provider === 'vidis-mock') &&
-          profile !== undefined
-        ) {
+        if (trigger === 'signIn' && account?.provider === 'vidis' && profile !== undefined) {
           // This function can throw an error if the return type does not match our schema
           token = await handleVidisJWTCallback({ account, profile, token });
         }
 
-        // Ensure userId is set for credentials provider
-        if (account?.provider === 'credentials' && user?.id) {
-          token.userId = user.id;
-        }
         const result = userAndContextSchema.safeParse(token.user);
 
         // Update session data if there is an update or the structure has changed

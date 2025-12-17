@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   transpilePackages: [
     '@telli/ui',
     '@telli/shared',
+    '@telli/ai-core',
     'import-in-the-middle',
     '@t3-oss/env-nextjs',
     '@t3-oss/env-core',

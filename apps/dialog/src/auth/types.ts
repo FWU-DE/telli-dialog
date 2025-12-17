@@ -9,7 +9,10 @@ import {
 import { FederalStateModel } from '@shared/federal-states/types';
 import { z } from 'zod';
 
-const obscuredFederalStateSchema = federalStateSelectSchema.omit({ encryptedApiKey: true });
+const obscuredFederalStateSchema = federalStateSelectSchema.omit({
+  encryptedApiKey: true,
+  apiKeyId: true,
+});
 const userSchoolSchema = schoolSelectSchema.extend({
   userRole: userSchoolRoleSchema,
 });

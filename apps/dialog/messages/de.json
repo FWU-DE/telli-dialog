@@ -349,6 +349,7 @@
     "style-photorealistic-name": "Fotorealistisch",
     "style-cartoon-name": "Cartoon",
     "generation-error": "Die Bildgenerierung ist fehlgeschlagen. Bitte versuche es erneut.",
+    "responsible-ai-error": "Diese Anfrage wurde nicht ausgeführt, da sie möglicherweise gegen die Nutzungsrichtlinien verstößt.",
     "copy-image-success": "Bild in die Zwischenablage kopiert",
     "copy-image-error": "Bild konnte nicht kopiert werden",
     "copy-prompt-success": "Prompt in die Zwischenablage kopiert",
