@@ -123,11 +123,15 @@ export default function ImageGenerationChat({
       navigateWithoutRefresh(`/image-generation/d/${newConversationId}`);
       refetchConversations();
     } catch (error) {
+      setErrorMessage(tImageGeneration('responsible-ai-error'));
+      /*
+      TODO: @AsamMax - Re-enable specific error messages once the ResponsibleAIError is properly detected
       if (ResponsibleAIError.is(error)) {
         setErrorMessage(tImageGeneration('responsible-ai-error'));
       } else {
         setErrorMessage(tImageGeneration('generation-error'));
       }
+      */
       logError('Error generating image:', error);
 
       if (newConversationId) {
