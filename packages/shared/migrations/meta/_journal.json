@@ -246,6 +246,13 @@
       "when": 1765477671793,
       "tag": "0034_bumpy_puff_adder",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1765981730649,
+      "tag": "0035_woozy_serpent_society",
+      "breakpoints": true
     }
   ]
 }
