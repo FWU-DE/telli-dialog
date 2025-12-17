@@ -1,7 +1,7 @@
 'use client';
 
 import DestructiveActionButton from '@/components/common/destructive-action-button';
-import { CharacterSelectModel, CharacterWithShareDataModel } from '@shared/db/schema';
+import { CharacterWithShareDataModel } from '@shared/db/schema';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import Link from 'next/link';
 import React from 'react';
@@ -22,7 +22,7 @@ import TelliClipboardButton from '@/components/common/clipboard-button';
 import { createNewCharacterAction } from './actions';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 
-type CharacterContainerProps = (CharacterSelectModel | CharacterWithShareDataModel) & {
+type CharacterContainerProps = CharacterWithShareDataModel & {
   currentUserId: string;
   maybeSignedPictureUrl: string | undefined;
 };
@@ -65,10 +65,7 @@ export default function CharacterContainer({
     router.push(`/characters/editor/${id}/share`);
   }
 
-  const timeLeft =
-    'startedAt' in character && 'maxUsageTimeLimit' in character
-      ? calculateTimeLeftForLearningScenario(character)
-      : 0;
+  const timeLeft = calculateTimeLeftForLearningScenario(character);
 
   return (
     <Link
@@ -95,7 +92,7 @@ export default function CharacterContainer({
         <span className={cn(truncateClassName, 'text-gray-400')}>{description}</span>
       </div>
       <div className="flex-grow" />
-      {timeLeft > 0 && 'maxUsageTimeLimit' in character && character.maxUsageTimeLimit !== null && (
+      {timeLeft > 0 && character.maxUsageTimeLimit !== null && (
         <CountDownTimer
           leftTime={timeLeft}
           totalTime={character.maxUsageTimeLimit}

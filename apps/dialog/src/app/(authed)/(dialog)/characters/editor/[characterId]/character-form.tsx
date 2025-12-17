@@ -260,8 +260,8 @@ export default function CharacterForm({
     <CopyContainer
       templateId={character.id}
       templatePictureId={character.pictureId ?? undefined}
-      startedAt={'startedAt' in character ? character.startedAt : null}
-      maxUsageTimeLimit={'maxUsageTimeLimit' in character ? character.maxUsageTimeLimit : null}
+      startedAt={character.startedAt}
+      maxUsageTimeLimit={character.maxUsageTimeLimit}
       translation_path="characters.form"
       redirectPath="characters"
     />

@@ -16,6 +16,7 @@ import {
   sharedCharacterChatHasReachedIntelliPointLimit,
   sharedChatHasReachedIntelliPointLimit,
 } from '@/app/api/chat/usage';
+import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
   dbGetSharedChatUsageInCentBySharedChatId,
@@ -209,7 +210,6 @@ test.describe('costs', () => {
     expect(sharedChatUsageInCent).toBe(90);
 
     // To test the limit function, we need to get the character with sharing data
-    const { dbGetCharacterByIdWithShareData } = await import('@shared/db/functions/character');
     const characterWithShareData = await dbGetCharacterByIdWithShareData({
       characterId: character.id,
       userId: user.id,
