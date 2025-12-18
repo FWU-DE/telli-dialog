@@ -2,7 +2,7 @@ import NextAuth, { NextAuthResult } from 'next-auth';
 import { vidisConfig, handleVidisJWTCallback } from './providers/vidis';
 import { getUserAndContextByUserId } from './utils';
 import { UserAndContext, userAndContextSchema } from './types';
-import { logError, logInfo } from '@shared/logging';
+import { logError, logInfo, logWarning } from '@shared/logging';
 import { sessionBlockList } from './session';
 
 declare module 'next-auth' {
@@ -47,6 +47,12 @@ const result = NextAuth({
         }
 
         const result = userAndContextSchema.safeParse(token.user);
+        if (token.user && !result.success) {
+          logWarning(
+            'Parsing the user from token failed. This is expected when the schema was changed due to a software update.',
+            { result },
+          );
+        }
 
         // Update session data if there is an update or the structure has changed
         if (trigger === 'update' || !result.success) {
