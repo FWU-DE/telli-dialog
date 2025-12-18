@@ -2,7 +2,7 @@
 # https://docs.docker.com/build/building/multi-stage/
 
 # Alpine image
-FROM node:24.11.0-alpine AS base
+FROM node:24.12.0-alpine AS base
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV TURBO_TELEMETRY_DISABLED=1
