@@ -13,7 +13,7 @@ Ensure that all the required browsers are installed.
 pnpm playwright install
 ```
 
-Then you can run the e2e tests.
+Then you can run the e2e tests from the apps/dialog directory.
 
 1. `pnpm e2e` - This runs all tests in headless mode without a visible browser.
 2. `pnpm e2e:headed` - This runs the tests in a visible browser.

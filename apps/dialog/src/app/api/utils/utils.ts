@@ -27,7 +27,7 @@ export function getSearchParamsFromUrl(url: string) {
 }
 
 export const getModelAndProviderWithResult = errorifyAsyncFn(getModelAndProvider);
-export async function getModelAndProvider({
+async function getModelAndProvider({
   federalStateId,
   modelId,
 }: {

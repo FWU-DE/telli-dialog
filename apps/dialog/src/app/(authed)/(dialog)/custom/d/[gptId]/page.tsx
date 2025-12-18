@@ -40,7 +40,7 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]'>) {
         id={id}
         initialMessages={[]}
         customGpt={customGpt}
-        enableFileUpload={false}
+        enableFileUpload={true}
         promptSuggestions={customGpt.promptSuggestions}
         imageSource={maybeSignedImageUrl}
         logoElement={logoElement}

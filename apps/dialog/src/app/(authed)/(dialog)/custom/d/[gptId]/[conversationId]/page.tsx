@@ -58,7 +58,7 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversa
         id={conversation.id}
         initialMessages={chatMessages}
         customGpt={customGpt}
-        enableFileUpload={false}
+        enableFileUpload={true}
         imageSource={maybeSignedImageUrl}
         logoElement={logoElement}
       />
