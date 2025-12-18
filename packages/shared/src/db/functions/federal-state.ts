@@ -25,7 +25,8 @@ export async function dbGetFederalStateWithDecryptedApiKey({
   const [federalState] = await db
     .select()
     .from(federalStateTable)
-    .where(eq(federalStateTable.id, federalStateId));
+    .where(eq(federalStateTable.id, federalStateId))
+    .$withCache();
 
   if (federalState === undefined) {
     throw Error(`Could not find federal state with id ${federalStateId}`);
@@ -44,7 +45,7 @@ export async function dbGetFederalStateWithDecryptedApiKey({
 }
 
 export async function dbGetFederalStates(): Promise<FederalStateSelectModel[]> {
-  return db.select().from(federalStateTable);
+  return db.select().from(federalStateTable).$withCache();
 }
 
 // TODO: We have two functions for getting federal state by id
@@ -52,7 +53,8 @@ export async function dbGetFederalState(id: string): Promise<FederalStateSelectM
   const [federalState] = await db
     .select()
     .from(federalStateTable)
-    .where(eq(federalStateTable.id, id));
+    .where(eq(federalStateTable.id, id))
+    .$withCache();
 
   if (!federalState) {
     throw new Error(`Federal state with id ${id} not found`);
@@ -68,7 +70,8 @@ export async function dbGetFederalStateById(id: string | undefined) {
   const [federalState] = await db
     .select()
     .from(federalStateTable)
-    .where(eq(federalStateTable.id, id));
+    .where(eq(federalStateTable.id, id))
+    .$withCache();
 
   return federalState;
 }
