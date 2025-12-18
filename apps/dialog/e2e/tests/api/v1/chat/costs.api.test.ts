@@ -7,8 +7,7 @@ import {
   llmModelTable,
   sharedSchoolConversationTable,
   userTable,
-  characterTable,
-  sharedCharacterConversation,
+  CharacterWithShareDataModel,
 } from '@shared/db/schema';
 import { getPriceInCentByUser } from '@/app/school';
 import { UserAndContext } from '@/auth/types';
@@ -30,6 +29,8 @@ import {
   mockSharedSchoolConversationUsage,
   mockUserAndContext,
 } from '../../../../utils/mock';
+import { generateUUID } from '@shared/utils/uuid';
+import { generateRandomString } from '../../../../utils/random';
 
 test.describe('costs', () => {
   test('should calculate total price from all three usage tracking tables', async () => {
@@ -167,26 +168,18 @@ test.describe('costs', () => {
     const model = mockLlmModel();
     await db.insert(llmModelTable).values(model);
 
-    const character = {
+    const character: CharacterWithShareDataModel = {
       ...mockCharacter(),
       userId: user.id,
       modelId: model.id,
+      schoolId: 'test_school1',
       accessLevel: 'private' as const,
-    };
-
-    // Insert the character first
-    await db.insert(characterTable).values(character);
-
-    // Create the shared character conversation with the sharing parameters
-    const sharedCharacterConversationData = {
-      characterId: character.id,
-      userId: user.id,
+      startedAt: new Date(),
       intelligencePointsLimit: intelligencePointsLimit,
       maxUsageTimeLimit: maxUsageTimeLimit,
-      inviteCode: 'test-invite-code',
-      startedAt: new Date(),
+      inviteCode: generateRandomString(8),
+      startedBy: user.id,
     };
-    await db.insert(sharedCharacterConversation).values(sharedCharacterConversationData);
 
     // Insert data into shared character conversation usage tracking (30*3 = 90 cents)
     for (let i = 0; i < 3; i++) {
@@ -204,20 +197,14 @@ test.describe('costs', () => {
     const sharedChatUsageInCent = await dbGetSharedCharacterChatUsageInCentByCharacterId({
       characterId: character.id,
       maxUsageTimeLimit: maxUsageTimeLimit,
-      startedAt: sharedCharacterConversationData.startedAt,
+      startedAt: character.startedAt!,
     });
 
     expect(sharedChatUsageInCent).toBe(90);
 
-    // To test the limit function, we need to get the character with sharing data
-    const characterWithShareData = await dbGetCharacterByIdWithShareData({
-      characterId: character.id,
-      userId: user.id,
-    });
-
     let hasReachedLimit = await sharedCharacterChatHasReachedIntelliPointLimit({
       user: user,
-      character: characterWithShareData!,
+      character: character!,
     });
 
     // Used 90 cents of 100 cents -> under the limit
@@ -235,7 +222,7 @@ test.describe('costs', () => {
 
     hasReachedLimit = await sharedCharacterChatHasReachedIntelliPointLimit({
       user: user,
-      character: characterWithShareData!,
+      character: character,
     });
 
     // Used 120 cents of 100 cents -> over the limit
