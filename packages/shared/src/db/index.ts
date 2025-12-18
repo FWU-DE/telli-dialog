@@ -24,10 +24,11 @@ if (isDevelopment()) {
 
 export const db = drizzle({
   client: pool,
-  cache: new MemoryCache({
-    // default expiry time of 5 minutes
-    ex: 5 * 60,
-  }),
+  cache: env.dbCacheTtlSeconds
+    ? new MemoryCache({
+        ex: env.dbCacheTtlSeconds,
+      })
+    : undefined,
 });
 
 export async function runDatabaseMigration() {

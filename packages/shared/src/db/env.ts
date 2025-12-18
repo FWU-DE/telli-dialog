@@ -8,8 +8,10 @@ export const env = createEnv({
   emptyStringAsUndefined: true,
   server: {
     databaseUrl: z.string(),
+    dbCacheTtlSeconds: z.number().optional(),
   },
   runtimeEnv: {
     databaseUrl: process.env.DATABASE_URL,
+    dbCacheTtlSeconds: process.env.DB_CACHE_TTL_SECONDS,
   },
 });
