@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.3",
-    "@eslint/js": "9.39.1",
+    "@eslint/js": "9.39.2",
     "@t3-oss/env-core": "0.13.8",
     "@telli/typescript-config": "workspace:*",
     "@types/node": "24.10.1",
@@ -36,7 +36,7 @@
     "@typescript-eslint/eslint-plugin": "8.49.0",
     "@typescript-eslint/parser": "8.49.0",
     "@vitest/coverage-v8": "4.0.15",
-    "eslint": "9.39.1",
+    "eslint": "9.39.2",
     "eslint-config-prettier": "10.1.8",
     "eslint-config-turbo": "2.6.3",
     "eslint-plugin-prettier": "5.5.4",
