@@ -10,16 +10,25 @@ import { fetchLlmModels } from '../../knotenpunkt';
 
 export async function dbGetLlmModelById({ modelId }: { modelId: string | undefined }) {
   if (modelId === undefined) return undefined;
-
-  return (await db.select().from(llmModelTable).where(eq(llmModelTable.id, modelId)))[0];
+  const [model] = await db
+    .select()
+    .from(llmModelTable)
+    .where(eq(llmModelTable.id, modelId))
+    .$withCache();
+  return model;
 }
 
 export async function dbGetModelByName(name: string) {
-  return (await db.select().from(llmModelTable).where(eq(llmModelTable.name, name)))[0];
+  const [model] = await db
+    .select()
+    .from(llmModelTable)
+    .where(eq(llmModelTable.name, name))
+    .$withCache();
+  return model;
 }
 
 export async function dbGetAllLlmModels() {
-  return await db.select().from(llmModelTable).orderBy(llmModelTable.createdAt);
+  return db.select().from(llmModelTable).orderBy(llmModelTable.createdAt).$withCache();
 }
 
 export async function dbGetLlmModelsByFederalStateId({
@@ -28,7 +37,7 @@ export async function dbGetLlmModelsByFederalStateId({
   federalStateId: string;
 }): Promise<LlmModel[]> {
   const rows = await db
-    .select()
+    .select({ llmModelTable })
     .from(llmModelTable)
     .innerJoin(
       federalStateLlmModelMappingTable,
@@ -39,9 +48,10 @@ export async function dbGetLlmModelsByFederalStateId({
         eq(federalStateLlmModelMappingTable.federalStateId, federalStateId),
         eq(llmModelTable.isDeleted, false),
       ),
-    );
+    )
+    .$withCache();
 
-  return rows.map((r) => r.llm_model);
+  return rows.map((r) => r.llmModelTable);
 }
 
 export async function dbUpdateLlmModelsByFederalStateId({
@@ -85,7 +95,7 @@ export async function dbGetModelByIdAndFederalStateId({
   federalStateId: string;
 }) {
   const [result] = await db
-    .select()
+    .select({ llmModelTable })
     .from(llmModelTable)
     .innerJoin(
       federalStateLlmModelMappingTable,
@@ -96,9 +106,10 @@ export async function dbGetModelByIdAndFederalStateId({
         eq(llmModelTable.id, modelId),
         eq(federalStateLlmModelMappingTable.federalStateId, federalStateId),
       ),
-    );
+    )
+    .$withCache();
 
-  return result?.llm_model;
+  return result?.llmModelTable;
 }
 
 export async function dbUpsertLlmModelsByModelsAndFederalStateId({
