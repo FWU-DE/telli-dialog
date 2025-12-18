@@ -15,7 +15,6 @@ import {
   sharedCharacterChatHasReachedIntelliPointLimit,
   sharedChatHasReachedIntelliPointLimit,
 } from '@/app/api/chat/usage';
-import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
   dbGetSharedChatUsageInCentBySharedChatId,
