@@ -1,9 +1,6 @@
 import { logError } from '@shared/logging';
-import { BusinessError } from './business-error';
-import { ForbiddenError } from './forbidden-error';
-import { NotFoundError } from './not-found-error';
+import { BusinessError, ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
 import { notFound } from 'next/navigation';
-import { InvalidArgumentError } from './invalid-argument-error';
 
 /**
  * In server components we handle NotFoundError and ForbiddenError by calling notFound().

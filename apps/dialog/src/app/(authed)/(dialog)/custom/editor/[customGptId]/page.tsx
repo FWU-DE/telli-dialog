@@ -13,7 +13,7 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { getCustomGptForEditView, getFileMappings } from '@shared/custom-gpt/custom-gpt-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
-import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
+import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
