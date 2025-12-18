@@ -4,5 +4,4 @@ export { NotFoundError, isNotFoundError } from './not-found-error';
 export { UnauthenticatedError, isUnauthenticatedError } from './unauthenticated-error';
 export { InvalidArgumentError, isInvalidArgumentError } from './invalid-argument-error';
 
-export { handleErrorInServerComponent } from './handle-error-in-server-component';
 export { checkParameterUUID } from './check-parameter-uuid';

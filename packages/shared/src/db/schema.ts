@@ -228,11 +228,6 @@ export const characterTable = pgTable(
     initialMessage: text('initial_message'),
     accessLevel: characterAccessLevelEnum('access_level').notNull().default('private'),
     schoolId: text('school_id').references(() => schoolTable.id),
-    // for sharing the character. These Columns are unused, instead a MappingTable is being used
-    intelligencePointsLimit: integer('intelligence_points_limit'),
-    maxUsageTimeLimit: integer('max_usage_time_limit'),
-    inviteCode: text('invite_code').unique(),
-    startedAt: timestamp('started_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     attachedLinks: text('attached_links')
       .array()
@@ -268,6 +263,15 @@ export const characterUpdateSchema = createUpdateSchema(characterTable)
 export type CharacterSelectModel = z.infer<typeof characterSelectSchema>;
 export type CharacterInsertModel = z.infer<typeof characterInsertSchema>;
 export type CharacterUpdateModel = z.infer<typeof characterUpdateSchema>;
+
+// Type for character with sharing data (from JOIN with sharedCharacterConversation)
+export type CharacterWithShareDataModel = CharacterSelectModel & {
+  intelligencePointsLimit: number | null;
+  inviteCode: string | null;
+  maxUsageTimeLimit: number | null;
+  startedAt: Date | null;
+  startedBy: string | null;
+};
 
 export const characterTemplateMappingTable = pgTable(
   'character_template_mappings',

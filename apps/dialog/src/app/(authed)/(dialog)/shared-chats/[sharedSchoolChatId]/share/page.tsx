@@ -11,7 +11,7 @@ import TelliClipboardButton from '@/components/common/clipboard-button';
 import { getLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 import { requireAuth } from '@/auth/requireAuth';
-import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
+import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { notFound } from 'next/navigation';
 
 export default async function Page(props: PageProps<'/shared-chats/[sharedSchoolChatId]/share'>) {

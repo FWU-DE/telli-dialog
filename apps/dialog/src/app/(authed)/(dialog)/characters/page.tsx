@@ -1,5 +1,5 @@
 import { characterAccessLevelSchema } from '@shared/db/schema';
-import CharacterPreviewPage from './charcter-preview-page';
+import CharacterPreviewPage from './character-preview-page';
 import { enrichCharactersWithImage } from './utils';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';

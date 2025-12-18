@@ -4,6 +4,11 @@ vi.mock('../db/functions/character', () => ({
   dbGetSharedCharacterConversations: vi.fn(),
   dbGetCharacterById: vi.fn(),
   dbGetCharacterByIdAndUserId: vi.fn(),
+  dbGetCharacterByIdWithShareData: vi.fn(),
+  dbDeleteCharacterByIdAndUserId: vi.fn(),
+  dbGetCharactersBySchoolId: vi.fn(),
+  dbGetCharactersByUserId: vi.fn(),
+  dbGetGlobalCharacters: vi.fn(),
 }));
 
 import {
@@ -21,7 +26,7 @@ import {
 import {
   dbGetCharacterById,
   dbGetSharedCharacterConversations,
-  dbGetCharacterByIdAndUserId,
+  dbGetCharacterByIdWithShareData,
 } from '../db/functions/character';
 import { generateUUID } from '../utils/uuid';
 import { CharacterSelectModel } from '@shared/db/schema';
@@ -51,7 +56,7 @@ describe('character-service', () => {
       'should throw NotFoundError when character does not exist - $functionName',
       async ({ testFunction }) => {
         (
-          dbGetCharacterByIdAndUserId as MockedFunction<typeof dbGetCharacterByIdAndUserId>
+          dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
         ).mockResolvedValue(null as never);
 
         await expect(testFunction()).rejects.toThrowError(NotFoundError);
@@ -62,11 +67,10 @@ describe('character-service', () => {
       const userId = generateUUID();
       const mockCharacter: Partial<CharacterSelectModel> = {
         userId: userId,
-        inviteCode: null,
       };
 
       (
-        dbGetCharacterByIdAndUserId as MockedFunction<typeof dbGetCharacterByIdAndUserId>
+        dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
       ).mockResolvedValue(mockCharacter as never);
 
       await expect(

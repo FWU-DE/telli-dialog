@@ -1,7 +1,7 @@
 'use client';
 
 import DestructiveActionButton from '@/components/common/destructive-action-button';
-import { CharacterSelectModel } from '@shared/db/schema';
+import { CharacterWithShareDataModel } from '@shared/db/schema';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import Link from 'next/link';
 import React from 'react';
@@ -16,13 +16,13 @@ import CountDownTimer from '../shared-chats/_components/count-down';
 import ShareIcon from '@/components/icons/share';
 import TrashIcon from '@/components/icons/trash';
 import SharedChatIcon from '@/components/icons/shared-chat';
-import { CreateNewCharacterFromTemplate } from './create-new-character-button';
+import { CreateNewCharacterFromTemplate } from '../characters/create-new-character-from-template';
 import { iconClassName } from '@/utils/tailwind/icon';
 import TelliClipboardButton from '@/components/common/clipboard-button';
 import { createNewCharacterAction } from './actions';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 
-type CharacterContainerProps = CharacterSelectModel & {
+type CharacterContainerProps = CharacterWithShareDataModel & {
   currentUserId: string;
   maybeSignedPictureUrl: string | undefined;
 };
