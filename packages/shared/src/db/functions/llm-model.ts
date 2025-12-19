@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '..';
 import { federalStateLlmModelMappingTable, LlmModel, llmModelTable } from '../schema';
 import { KnotenpunktLlmModel } from '../../knotenpunkt/schema';
@@ -54,15 +54,28 @@ export async function dbUpdateLlmModelsByFederalStateId({
     console.error({ error });
     return [];
   }
-  const models = await fetchLlmModels({ apiKey: result.decryptedApiKey });
+  // Fetch models from Knotenpunkt and load existing models in parallel
+  const [models, existingModels] = await Promise.all([
+    fetchLlmModels({ apiKey: result.decryptedApiKey }),
+    dbGetLlmModelsByFederalStateId({ federalStateId }),
+  ]);
 
-  const upsertedModels = await dbUpsertLlmModelsByModelsAndFederalStateId({
-    federalStateId,
-    models,
-  });
-  if (models.length !== upsertedModels.length) {
-    return upsertedModels;
-  }
+  // Determine models to remove
+  const modelsToRemove = existingModels
+    .filter((existingModel) => !models.some((model) => model.id === existingModel.id))
+    .map((model) => model.id);
+
+  // Remove outdated models and upsert new/updated models in parallel
+  await Promise.all([
+    dbRemoveLlmModelsFromFederalState({
+      federalStateId,
+      modelIds: modelsToRemove,
+    }),
+    dbUpsertLlmModelsByModelsAndFederalStateId({
+      federalStateId,
+      models,
+    }),
+  ]);
   return models;
 }
 
@@ -133,4 +146,42 @@ export async function dbUpsertLlmModelsByModelsAndFederalStateId({
       .onConflictDoNothing();
   }
   return insertedModels;
+}
+
+/**
+ * Removes the association between specified LLM models and a federal state.
+ *
+ * This function deletes entries from the federal state LLM model mapping table
+ * that match both the given federal state ID and any of the provided model IDs.
+ * If no model IDs are provided, the function returns early without performing any deletion.
+ *
+ * @param params.federalStateId - The ID of the federal state to remove model associations from
+ * @param params.modelIds - An array of LLM model IDs to disassociate from the federal state
+ * @returns A promise that resolves when the deletion is complete
+ *
+ * @example
+ * ```typescript
+ * await dbRemoveLlmModelsFromFederalState({
+ *   federalStateId: 'state-123',
+ *   modelIds: ['model-1', 'model-2']
+ * });
+ * ```
+ */
+export async function dbRemoveLlmModelsFromFederalState({
+  federalStateId,
+  modelIds,
+}: {
+  federalStateId: string;
+  modelIds: string[];
+}) {
+  if (modelIds.length === 0) return;
+
+  await db
+    .delete(federalStateLlmModelMappingTable)
+    .where(
+      and(
+        eq(federalStateLlmModelMappingTable.federalStateId, federalStateId),
+        inArray(federalStateLlmModelMappingTable.llmModelId, modelIds),
+      ),
+    );
 }
