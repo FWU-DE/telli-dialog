@@ -54,19 +54,29 @@ export async function dbUpdateLlmModelsByFederalStateId({
     console.error({ error });
     return [];
   }
-  const models = await fetchLlmModels({ apiKey: result.decryptedApiKey });
+  // Fetch models from Knotenpunkt and load existing models in parallel
+  const [models, existingModels] = await Promise.all([
+    fetchLlmModels({ apiKey: result.decryptedApiKey }),
+    dbGetLlmModelsByFederalStateId({ federalStateId }),
+  ]);
 
-  const upsertedModels = await dbUpsertLlmModelsByModelsAndFederalStateId({
-    federalStateId,
-    models,
-  });
-  if (models.length !== upsertedModels.length) {
-    // Remove models that are no longer available
-    const modelsToRemove = models.filter((m) => !upsertedModels.find((um) => um.id === m.id));
-    await dbRemoveLlmModelsFromFederalState({
+  // Determine models to remove
+  const modelsToRemove = existingModels
+    .filter((existingModel) => !models.some((model) => model.name === existingModel.name))
+    .map((model) => model.id);
+
+  // Remove outdated models and upsert new/updated models in parallel
+  const [, upsertedModels] = await Promise.all([
+    dbRemoveLlmModelsFromFederalState({
       federalStateId,
-      models: modelsToRemove,
-    });
+      modelIds: modelsToRemove,
+    }),
+    dbUpsertLlmModelsByModelsAndFederalStateId({
+      federalStateId,
+      models,
+    }),
+  ]);
+  if (models.length !== upsertedModels.length) {
     return upsertedModels;
   }
   return models;
@@ -143,19 +153,20 @@ export async function dbUpsertLlmModelsByModelsAndFederalStateId({
 
 export async function dbRemoveLlmModelsFromFederalState({
   federalStateId,
-  models,
+  modelIds,
 }: {
   federalStateId: string;
-  models: KnotenpunktLlmModel[];
+  modelIds: string[];
 }) {
-  for (const model of models) {
+  for (const modelId of modelIds) {
     await db
       .delete(federalStateLlmModelMappingTable)
       .where(
         and(
           eq(federalStateLlmModelMappingTable.federalStateId, federalStateId),
-          eq(federalStateLlmModelMappingTable.llmModelId, model.id),
+          eq(federalStateLlmModelMappingTable.llmModelId, modelId),
         ),
-      );
+      )
+      .returning();
   }
 }
