@@ -61,6 +61,12 @@ export async function dbUpdateLlmModelsByFederalStateId({
     models,
   });
   if (models.length !== upsertedModels.length) {
+    // Remove models that are no longer available
+    const modelsToRemove = models.filter((m) => !upsertedModels.find((um) => um.id === m.id));
+    await dbRemoveLlmModelsFromFederalState({
+      federalStateId,
+      models: modelsToRemove,
+    });
     return upsertedModels;
   }
   return models;
@@ -133,4 +139,23 @@ export async function dbUpsertLlmModelsByModelsAndFederalStateId({
       .onConflictDoNothing();
   }
   return insertedModels;
+}
+
+export async function dbRemoveLlmModelsFromFederalState({
+  federalStateId,
+  models,
+}: {
+  federalStateId: string;
+  models: KnotenpunktLlmModel[];
+}) {
+  for (const model of models) {
+    await db
+      .delete(federalStateLlmModelMappingTable)
+      .where(
+        and(
+          eq(federalStateLlmModelMappingTable.federalStateId, federalStateId),
+          eq(federalStateLlmModelMappingTable.llmModelId, model.id),
+        ),
+      );
+  }
 }
