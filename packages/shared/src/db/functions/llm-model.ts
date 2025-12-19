@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '..';
 import { federalStateLlmModelMappingTable, LlmModel, llmModelTable } from '../schema';
 import { KnotenpunktLlmModel } from '../../knotenpunkt/schema';
@@ -62,11 +62,11 @@ export async function dbUpdateLlmModelsByFederalStateId({
 
   // Determine models to remove
   const modelsToRemove = existingModels
-    .filter((existingModel) => !models.some((model) => model.name === existingModel.name))
+    .filter((existingModel) => !models.some((model) => model.id === existingModel.id))
     .map((model) => model.id);
 
   // Remove outdated models and upsert new/updated models in parallel
-  const [, upsertedModels] = await Promise.all([
+  await Promise.all([
     dbRemoveLlmModelsFromFederalState({
       federalStateId,
       modelIds: modelsToRemove,
@@ -76,9 +76,6 @@ export async function dbUpdateLlmModelsByFederalStateId({
       models,
     }),
   ]);
-  if (models.length !== upsertedModels.length) {
-    return upsertedModels;
-  }
   return models;
 }
 
@@ -158,15 +155,14 @@ export async function dbRemoveLlmModelsFromFederalState({
   federalStateId: string;
   modelIds: string[];
 }) {
-  for (const modelId of modelIds) {
-    await db
-      .delete(federalStateLlmModelMappingTable)
-      .where(
-        and(
-          eq(federalStateLlmModelMappingTable.federalStateId, federalStateId),
-          eq(federalStateLlmModelMappingTable.llmModelId, modelId),
-        ),
-      )
-      .returning();
-  }
+  if (modelIds.length === 0) return;
+
+  await db
+    .delete(federalStateLlmModelMappingTable)
+    .where(
+      and(
+        eq(federalStateLlmModelMappingTable.federalStateId, federalStateId),
+        inArray(federalStateLlmModelMappingTable.llmModelId, modelIds),
+      ),
+    );
 }
