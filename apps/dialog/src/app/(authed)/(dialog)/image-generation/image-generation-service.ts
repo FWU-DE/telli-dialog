@@ -16,6 +16,7 @@ import { generateUUID } from '@shared/utils/uuid';
 import { uploadFileToS3, getSignedUrlFromS3Get } from '@shared/s3';
 import { cnanoid } from '@shared/random/randomService';
 import { linkFilesToConversation, dbInsertFile } from '@shared/db/functions/files';
+import deleteConversationAction from '../actions';
 export interface ImageGenerationParams {
   prompt: string;
   modelId: string;
@@ -69,26 +70,28 @@ export async function handleImageGeneration({
     throw new Error('Prompt is required');
   }
 
-  // Every image generation gets its own conversation
-  const conversationId = await createImageConversation(prompt);
-
-  // Construct the full prompt with style prompt if provided
-  let fullPrompt = prompt;
-  if (style && style.prompt) {
-    fullPrompt = `${prompt}. Style: ${style.prompt}`;
-  }
-
-  // Store user prompt as a message
-  await dbInsertChatContent({
-    conversationId: conversationId,
-    role: 'user',
-    userId: user.id,
-    content: prompt,
-    orderNumber: 1,
-    parameters: style ? { imageStyle: style.name } : undefined,
-  });
+  let conversationId: string | undefined;
 
   try {
+    // Every image generation gets its own conversation
+    conversationId = await createImageConversation(prompt);
+
+    // Construct the full prompt with style prompt if provided
+    let fullPrompt = prompt;
+    if (style && style.prompt) {
+      fullPrompt = `${prompt}. Style: ${style.prompt}`;
+    }
+
+    // Store user prompt as a message
+    await dbInsertChatContent({
+      conversationId: conversationId,
+      role: 'user',
+      userId: user.id,
+      content: prompt,
+      orderNumber: 1,
+      parameters: style ? { imageStyle: style.name } : undefined,
+    });
+
     // Generate image using the service
     const result = await generateImage({
       prompt: fullPrompt.trim(),
@@ -154,6 +157,13 @@ export async function handleImageGeneration({
       conversationId,
     };
   } catch (error) {
+    if (conversationId) {
+      try {
+        await deleteConversationAction({ conversationId: conversationId });
+      } catch (deletionError) {
+        logError('Error deleting failed image conversation:', deletionError);
+      }
+    }
     throw error instanceof Error
       ? error
       : new Error('Unknown error occurred during image generation');
