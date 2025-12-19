@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, getTableColumns } from 'drizzle-orm';
 import { db } from '..';
 import { federalStateLlmModelMappingTable, LlmModel, llmModelTable } from '../schema';
 import { KnotenpunktLlmModel } from '../../knotenpunkt/schema';
@@ -36,8 +36,8 @@ export async function dbGetLlmModelsByFederalStateId({
 }: {
   federalStateId: string;
 }): Promise<LlmModel[]> {
-  const rows = await db
-    .select({ llmModelTable })
+  return db
+    .select({ ...getTableColumns(llmModelTable) })
     .from(llmModelTable)
     .innerJoin(
       federalStateLlmModelMappingTable,
@@ -50,8 +50,6 @@ export async function dbGetLlmModelsByFederalStateId({
       ),
     )
     .$withCache();
-
-  return rows.map((r) => r.llmModelTable);
 }
 
 export async function dbUpdateLlmModelsByFederalStateId({
@@ -95,7 +93,7 @@ export async function dbGetModelByIdAndFederalStateId({
   federalStateId: string;
 }) {
   const [result] = await db
-    .select({ llmModelTable })
+    .select({ ...getTableColumns(llmModelTable) })
     .from(llmModelTable)
     .innerJoin(
       federalStateLlmModelMappingTable,
@@ -109,7 +107,7 @@ export async function dbGetModelByIdAndFederalStateId({
     )
     .$withCache();
 
-  return result?.llmModelTable;
+  return result;
 }
 
 export async function dbUpsertLlmModelsByModelsAndFederalStateId({
