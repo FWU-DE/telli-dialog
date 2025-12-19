@@ -8,6 +8,10 @@ export const env = createEnv({
   emptyStringAsUndefined: true,
   server: {
     databaseUrl: z.string(),
+    /**
+     * The global ttl for cached database queries.
+     * Default is `undefined`, meaning no caching will be done.
+     */
     dbCacheTtlSeconds: z.number().optional(),
   },
   runtimeEnv: {
