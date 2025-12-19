@@ -148,6 +148,25 @@ export async function dbUpsertLlmModelsByModelsAndFederalStateId({
   return insertedModels;
 }
 
+/**
+ * Removes the association between specified LLM models and a federal state.
+ * 
+ * This function deletes entries from the federal state LLM model mapping table
+ * that match both the given federal state ID and any of the provided model IDs.
+ * If no model IDs are provided, the function returns early without performing any deletion.
+ * 
+ * @param params.federalStateId - The ID of the federal state to remove model associations from
+ * @param params.modelIds - An array of LLM model IDs to disassociate from the federal state
+ * @returns A promise that resolves when the deletion is complete
+ * 
+ * @example
+ * ```typescript
+ * await dbRemoveLlmModelsFromFederalState({
+ *   federalStateId: 'state-123',
+ *   modelIds: ['model-1', 'model-2']
+ * });
+ * ```
+ */
 export async function dbRemoveLlmModelsFromFederalState({
   federalStateId,
   modelIds,
