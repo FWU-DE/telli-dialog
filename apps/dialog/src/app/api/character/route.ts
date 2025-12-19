@@ -25,6 +25,12 @@ import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { logError } from '@shared/logging';
+import {
+  KEEP_RECENT_MESSAGES,
+  KEEP_FIRST_MESSAGES,
+  TOTAL_CHAT_LENGTH_LIMIT,
+} from '@/configuration-text-inputs/const';
+import { limitChatHistory } from '../chat/utils';
 
 export async function POST(request: NextRequest) {
   const { messages, modelId }: { messages: Array<Message>; modelId: string } = await request.json();
@@ -110,10 +116,17 @@ export async function POST(request: NextRequest) {
     websearchSources,
   });
 
+  const prunedMessages = limitChatHistory({
+    messages,
+    limitRecent: KEEP_RECENT_MESSAGES,
+    limitFirst: KEEP_FIRST_MESSAGES,
+    characterLimit: TOTAL_CHAT_LENGTH_LIMIT,
+  });
+
   const result = streamText({
     model: telliProvider,
     system: systemPrompt,
-    messages,
+    messages: prunedMessages,
     experimental_transform: smoothStream({ chunking: 'word', delayInMs: 20 }),
     async onFinish(assistantMessage) {
       const { promptTokens, completionTokens } = getTokenUsage(assistantMessage.usage);

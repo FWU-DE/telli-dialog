@@ -1,7 +1,7 @@
 import { WebsearchSource } from './types';
 import { Readability } from '@mozilla/readability';
 import { JSDOM, VirtualConsole } from 'jsdom';
-import { CHAT_MESSAGE_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import { SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
 import he from 'he';
@@ -114,7 +114,7 @@ export async function webScraperExecutable(
 
   // Normalize and clean the content
   const normalizedInfo = info.normalize('NFKD').replace(/[^\x00-\x7F]/g, '');
-  const trimmedInfo = normalizedInfo.substring(0, CHAT_MESSAGE_LENGTH_LIMIT);
+  const trimmedInfo = normalizedInfo.substring(0, SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT);
 
   return {
     content: trimmedInfo,
