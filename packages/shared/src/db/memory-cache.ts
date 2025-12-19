@@ -2,6 +2,15 @@ import { Cache, MutationOption } from 'drizzle-orm/cache/core';
 import { CacheConfig } from 'drizzle-orm/cache/core/types';
 import { entityKind } from 'drizzle-orm/entity';
 
+/**
+ * A drizzle cache provider for caching values in memory.
+ * This provider should only be used for infrequently updated tables, where eventual consistency is sufficient.
+ *
+ *  Note:
+ *  - this provider supports only the expiry time, see `CacheConfig.ex` and `CacheConfig.px`
+ *  - it does not support auto-invalidation on db updates, as invalidation of
+ *    local caches in a horizontally scaled application does not provide any benefit
+ */
 export class MemoryCache extends Cache {
   static override readonly [entityKind]: string = 'MemoryCache';
 
@@ -18,11 +27,11 @@ export class MemoryCache extends Cache {
   >();
 
   constructor(
-    config?: CacheConfig,
+    config: Required<Pick<CacheConfig, 'ex'>>,
     private readonly useGlobally?: boolean,
   ) {
     super();
-    this.ttlSeconds = config?.ex ?? 1;
+    this.ttlSeconds = config.ex;
   }
 
   public strategy() {
@@ -51,10 +60,10 @@ export class MemoryCache extends Cache {
     isTag: boolean,
     config?: CacheConfig,
   ): Promise<void> {
-    const ttlSeconds = config?.ex ?? this.ttlSeconds;
+    const ttlMilliseconds = config?.px ?? (config?.ex ? config.ex : this.ttlSeconds) * 1000;
     const now = new Date().getTime();
 
-    const expireTimestamp = now + ttlSeconds * 1000;
+    const expireTimestamp = now + ttlMilliseconds;
     this.cache.set(key, { value: response, expireTimestamp });
   }
 

@@ -24,6 +24,7 @@ if (isDevelopment()) {
 
 export const db = drizzle({
   client: pool,
+  // Setup in-memory cache if a global TTL is configured
   cache: env.dbCacheTtlSeconds
     ? new MemoryCache({
         ex: env.dbCacheTtlSeconds,
