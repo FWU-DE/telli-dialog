@@ -16,7 +16,7 @@ import { generateUUID } from '@shared/utils/uuid';
 import { uploadFileToS3, getSignedUrlFromS3Get } from '@shared/s3';
 import { cnanoid } from '@shared/random/randomService';
 import { linkFilesToConversation, dbInsertFile } from '@shared/db/functions/files';
-import deleteConversationAction from '../actions';
+import { dbDeleteConversationByIdAndUserId } from '@shared/db/functions/conversation';
 export interface ImageGenerationParams {
   prompt: string;
   modelId: string;
@@ -159,7 +159,7 @@ export async function handleImageGeneration({
   } catch (error) {
     if (conversationId) {
       try {
-        await deleteConversationAction({ conversationId: conversationId });
+        await dbDeleteConversationByIdAndUserId({ conversationId, userId: user.id });
       } catch (deletionError) {
         logError('Error deleting failed image conversation:', deletionError);
       }
