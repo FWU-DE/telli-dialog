@@ -7,6 +7,7 @@ import {
   llmModelTable,
   sharedSchoolConversationTable,
   userTable,
+  CharacterWithShareDataModel,
 } from '@shared/db/schema';
 import { getPriceInCentByUser } from '@/app/school';
 import { UserAndContext } from '@/auth/types';
@@ -27,6 +28,8 @@ import {
   mockSharedSchoolConversationUsage,
   mockUserAndContext,
 } from '../../../../utils/mock';
+import { generateUUID } from '@shared/utils/uuid';
+import { generateRandomString } from '../../../../utils/random';
 
 test.describe('costs', () => {
   test('should calculate total price from all three usage tracking tables', async () => {
@@ -164,12 +167,17 @@ test.describe('costs', () => {
     const model = mockLlmModel();
     await db.insert(llmModelTable).values(model);
 
-    const character = {
+    const character: CharacterWithShareDataModel = {
       ...mockCharacter(),
-      maxUsageTimeLimit: maxUsageTimeLimit,
-      intelligencePointsLimit: intelligencePointsLimit,
       userId: user.id,
       modelId: model.id,
+      schoolId: 'test_school1',
+      accessLevel: 'private' as const,
+      startedAt: new Date(),
+      intelligencePointsLimit: intelligencePointsLimit,
+      maxUsageTimeLimit: maxUsageTimeLimit,
+      inviteCode: generateRandomString(8),
+      startedBy: user.id,
     };
 
     // Insert data into shared character conversation usage tracking (30*3 = 90 cents)
@@ -187,7 +195,7 @@ test.describe('costs', () => {
 
     const sharedChatUsageInCent = await dbGetSharedCharacterChatUsageInCentByCharacterId({
       characterId: character.id,
-      maxUsageTimeLimit: character.maxUsageTimeLimit!,
+      maxUsageTimeLimit: maxUsageTimeLimit,
       startedAt: character.startedAt!,
     });
 
@@ -195,7 +203,7 @@ test.describe('costs', () => {
 
     let hasReachedLimit = await sharedCharacterChatHasReachedIntelliPointLimit({
       user: user,
-      character: character,
+      character: character!,
     });
 
     // Used 90 cents of 100 cents -> under the limit

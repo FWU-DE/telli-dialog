@@ -1,8 +1,8 @@
 import NextAuth, { NextAuthResult } from 'next-auth';
-import { vidisConfig, handleVidisJWTCallback } from './providers/vidis';
+import { handleVidisJWTCallback, vidisConfig } from './providers/vidis';
 import { getUserAndContextByUserId } from './utils';
 import { UserAndContext, userAndContextSchema } from './types';
-import { logError, logInfo, logWarning } from '@shared/logging';
+import { logDebug, logError, logInfo, logWarning } from '@shared/logging';
 import { sessionBlockList } from './session';
 
 declare module 'next-auth' {
@@ -28,6 +28,18 @@ const result = NextAuth({
   session: {
     strategy: 'jwt',
     maxAge: SESSION_LIFETIME_SECONDS,
+  },
+  logger: {
+    error(error) {
+      logError(`Error in nextauth`, error);
+    },
+    warn(code) {
+      const url = `https://warnings.authjs.dev`;
+      logWarning(`Warning from nextauth: ${code}. Read more: ${url}`);
+    },
+    debug(message, metadata) {
+      logDebug(message, { metadata });
+    },
   },
   trustHost: true,
   // https://next-auth.js.org/configuration/callbacks

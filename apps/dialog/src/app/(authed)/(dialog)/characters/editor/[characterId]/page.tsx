@@ -3,7 +3,7 @@ import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible
 import HeaderPortal from '../../../header-portal';
 import CharacterForm from './character-form';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
-import { CharacterSelectModel } from '@shared/db/schema';
+import { CharacterWithShareDataModel } from '@shared/db/schema';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { getCharacterForEditView } from '@shared/characters/character-service';
@@ -11,7 +11,7 @@ import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
-import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
+import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 
 export const dynamic = 'force-dynamic';
 const PREFETCH_ENABLED = false;
@@ -59,7 +59,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
         <CharacterForm
-          {...(removeNullishValues(character) as CharacterSelectModel)}
+          {...(removeNullishValues(character) as CharacterWithShareDataModel)}
           pictureId={character.pictureId}
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           isCreating={isCreating}

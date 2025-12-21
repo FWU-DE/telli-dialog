@@ -9,9 +9,9 @@ import {
   getConversation,
   getConversationMessages,
 } from '@shared/conversation/conversation-service';
-import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { getCharacterForChatSession } from '@shared/characters/character-service';
+import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 
 export const dynamic = 'force-dynamic';
 

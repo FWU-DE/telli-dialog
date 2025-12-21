@@ -1,3 +1,4 @@
+import { TOTAL_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { ChunkResult } from '../file-operations/process-chunks';
 
@@ -19,9 +20,20 @@ export function constructWebsearchPrompt(websearchSources?: WebsearchSource[]) {
   if (websearchSources === undefined || websearchSources.length === 0) {
     return '';
   }
-  return `
+
+  const promptParts = websearchSources.map((source) => constructSingleWebsearchPrompt(source));
+  const fullPrompt = `
 ## Der Nutzer hat folgende Quellen bereitgestellt, berücksichtige den Inhalt dieser Quellen bei der Antwort:
-${websearchSources.map((source) => constructSingleWebsearchPrompt(source)).join('\n')}`;
+${promptParts.join('\n')}`;
+
+  if (fullPrompt.length > TOTAL_WEBSEARCH_CONTENT_LENGTH_LIMIT) {
+    return (
+      fullPrompt.substring(0, TOTAL_WEBSEARCH_CONTENT_LENGTH_LIMIT) +
+      '\n\n[Weitere Quellen gekürzt aufgrund der Längenbegrenzung]'
+    );
+  }
+
+  return fullPrompt;
 }
 
 function constructSingleWebsearchPrompt(source: WebsearchSource) {

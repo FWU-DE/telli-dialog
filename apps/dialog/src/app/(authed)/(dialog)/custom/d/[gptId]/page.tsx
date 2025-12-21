@@ -9,7 +9,7 @@ import Logo from '@/components/common/logo';
 import { getCustomGptForNewChat } from '@shared/custom-gpt/custom-gpt-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
-import { handleErrorInServerComponent } from '@shared/error/handle-error-in-server-component';
+import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,7 +40,7 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]'>) {
         id={id}
         initialMessages={[]}
         customGpt={customGpt}
-        enableFileUpload={false}
+        enableFileUpload={true}
         promptSuggestions={customGpt.promptSuggestions}
         imageSource={maybeSignedImageUrl}
         logoElement={logoElement}

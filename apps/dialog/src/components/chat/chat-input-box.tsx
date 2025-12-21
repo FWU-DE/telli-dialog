@@ -49,6 +49,7 @@ export function ChatInputBox({
   const tFileInteraction = useTranslations('file-interaction');
   const toast = useToast();
   const [fileUploading, setFileUploading] = useState(false);
+
   useEffect(() => {
     if (files && setFiles && files.size > NUMBER_OF_FILES_LIMIT) {
       toast.error(

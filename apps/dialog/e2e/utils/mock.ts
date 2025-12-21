@@ -147,11 +147,6 @@ export const mockCharacter = (): CharacterSelectModel => {
     initialMessage: generateRandomString(10),
     accessLevel: 'private',
     schoolId: generateUUID(),
-    // for sharing the character. These Columns are unused, instead a MappingTable is being used
-    intelligencePointsLimit: 10,
-    maxUsageTimeLimit: 45,
-    inviteCode: generateRandomString(10),
-    startedAt: new Date(),
     createdAt: new Date(),
     attachedLinks: [],
     originalCharacterId: null,

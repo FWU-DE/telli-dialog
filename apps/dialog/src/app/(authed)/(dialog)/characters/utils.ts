@@ -1,4 +1,4 @@
-import { CharacterAccessLevel, CharacterSelectModel } from '@shared/db/schema';
+import { CharacterAccessLevel, CharacterWithShareDataModel } from '@shared/db/schema';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 
 export function buildGenericUrl(accessLevel: CharacterAccessLevel, route: 'characters' | 'custom') {
@@ -7,14 +7,14 @@ export function buildGenericUrl(accessLevel: CharacterAccessLevel, route: 'chara
   return `/${route}?${searchParams.toString()}`;
 }
 
-export type CharacterWithImage = CharacterSelectModel & {
+export type CharacterWithImage = CharacterWithShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
 };
 
 export async function enrichCharactersWithImage({
   characters,
 }: {
-  characters: CharacterSelectModel[];
+  characters: CharacterWithShareDataModel[];
 }): Promise<CharacterWithImage[]> {
   return await Promise.all(
     characters.map(async (character) => ({

@@ -23,7 +23,11 @@ import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { dbUpdateLastUsedModelByUserId } from '@shared/db/functions/user';
 import { dbGetAttachedFileByEntityId, linkFilesToConversation } from '@shared/db/functions/files';
-import { TOTAL_CHAT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import {
+  KEEP_FIRST_MESSAGES,
+  KEEP_RECENT_MESSAGES,
+  TOTAL_CHAT_LENGTH_LIMIT,
+} from '@/configuration-text-inputs/const';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
@@ -205,8 +209,8 @@ export async function POST(request: NextRequest) {
   });
   const prunedMessages = limitChatHistory({
     messages,
-    limitRecent: 30,
-    limitFirst: 2,
+    limitRecent: KEEP_RECENT_MESSAGES,
+    limitFirst: KEEP_FIRST_MESSAGES,
     characterLimit: TOTAL_CHAT_LENGTH_LIMIT,
   });
   const systemPrompt = await constructChatSystemPrompt({
