@@ -1,7 +1,7 @@
 import { billImageGenerationUsageToApiKey, isApiKeyOverQuota } from '../api-keys/billing';
 import { generateImage } from './providers';
 import { hasAccessToImageModel } from '../api-keys/model-access';
-import { ImageGenerationError, InvalidImageModelError } from './errors';
+import { AiGenerationError, InvalidModelError } from '../errors';
 import { getImageModelById } from '../models';
 
 /**
@@ -26,13 +26,13 @@ export async function generateImageWithBilling(modelId: string, prompt: string, 
   ]);
 
   if (!hasAccess) {
-    throw new InvalidImageModelError(
+    throw new InvalidModelError(
       `API key does not have access to the image model: ${model.name}`,
     );
   }
 
   if (isOverQuota) {
-    throw new ImageGenerationError(`API key has exceeded its monthly quota`);
+    throw new AiGenerationError(`API key has exceeded its monthly quota`);
   }
 
   try {
@@ -47,9 +47,9 @@ export async function generateImageWithBilling(modelId: string, prompt: string, 
       priceInCents,
     };
   } catch (error) {
-    // if error is not child of ImageGenerationError, wrap it
-    if (!(error instanceof ImageGenerationError)) {
-      throw new ImageGenerationError(
+    // if error is not child of AiGenerationError, wrap it
+    if (!(error instanceof AiGenerationError)) {
+      throw new AiGenerationError(
         `Image generation failed: ${error instanceof Error ? error.message : String(error)}`,
       );
     }

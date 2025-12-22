@@ -8,5 +8,5 @@ export type ImageResponse = {
 
 export type ImageGenerationFn = (args: { prompt: string; model: string }) => Promise<ImageResponse>;
 
-// Just an alias for now, since the llmModel table needs renaming (it has image and embedding models too)
+// TODO: Just an alias for now, since the llmModel table needs renaming (it has image and embedding models too)
 export type AiModel = LlmModel;

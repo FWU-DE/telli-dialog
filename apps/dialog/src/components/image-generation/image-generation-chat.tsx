@@ -16,8 +16,7 @@ import { FileModel } from '@shared/db/schema';
 import { useQueryClient } from '@tanstack/react-query';
 import { logError } from '@shared/logging';
 import deleteConversationAction from '@/app/(authed)/(dialog)/actions';
-import { ResponsibleAIError } from '@telli/ai-core/images/errors';
-import { runServerAction } from '@shared/actions/run-server-action';
+import { ResponsibleAIError } from '@telli/ai-core/errors';
 
 interface ImageGenerationChatProps {
   conversationId?: string;

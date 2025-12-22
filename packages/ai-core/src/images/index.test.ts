@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { generateImageWithBilling } from './index';
-import { ImageGenerationError, InvalidImageModelError } from './errors';
+import { AiGenerationError, InvalidModelError } from '../errors';
 import type { AiModel } from './types';
 
 // Mock all dependencies
@@ -72,14 +72,14 @@ describe('generateImageWithBilling', () => {
     });
   });
 
-  it('should throw InvalidImageModelError when API key does not have access', async () => {
+  it('should throw InvalidModelError when API key does not have access', async () => {
     mockGetImageModelById.mockResolvedValue(mockModel);
     mockHasAccessToImageModel.mockResolvedValue(false);
     mockIsApiKeyOverQuota.mockResolvedValue(false);
 
     await expect(
       generateImageWithBilling('model-123', 'test prompt', 'api-key-123'),
-    ).rejects.toThrow(InvalidImageModelError);
+    ).rejects.toThrow(InvalidModelError);
 
     await expect(
       generateImageWithBilling('model-123', 'test prompt', 'api-key-123'),
@@ -89,14 +89,14 @@ describe('generateImageWithBilling', () => {
     expect(mockBillImageGenerationUsageToApiKey).not.toHaveBeenCalled();
   });
 
-  it('should throw ImageGenerationError when API key is over quota', async () => {
+  it('should throw AiGenerationError when API key is over quota', async () => {
     mockGetImageModelById.mockResolvedValue(mockModel);
     mockHasAccessToImageModel.mockResolvedValue(true);
     mockIsApiKeyOverQuota.mockResolvedValue(true);
 
     await expect(
       generateImageWithBilling('model-123', 'test prompt', 'api-key-123'),
-    ).rejects.toThrow(ImageGenerationError);
+    ).rejects.toThrow(AiGenerationError);
 
     await expect(
       generateImageWithBilling('model-123', 'test prompt', 'api-key-123'),
@@ -120,7 +120,7 @@ describe('generateImageWithBilling', () => {
     expect(mockIsApiKeyOverQuota).toHaveBeenCalledTimes(1);
   });
 
-  it('should wrap non-ImageGenerationError errors', async () => {
+  it('should wrap non-AiGenerationError errors', async () => {
     mockGetImageModelById.mockResolvedValue(mockModel);
     mockHasAccessToImageModel.mockResolvedValue(true);
     mockIsApiKeyOverQuota.mockResolvedValue(false);
@@ -128,7 +128,7 @@ describe('generateImageWithBilling', () => {
 
     await expect(
       generateImageWithBilling('model-123', 'test prompt', 'api-key-123'),
-    ).rejects.toThrow(ImageGenerationError);
+    ).rejects.toThrow(AiGenerationError);
 
     await expect(
       generateImageWithBilling('model-123', 'test prompt', 'api-key-123'),
@@ -137,11 +137,11 @@ describe('generateImageWithBilling', () => {
     expect(mockBillImageGenerationUsageToApiKey).not.toHaveBeenCalled();
   });
 
-  it('should not wrap ImageGenerationError errors', async () => {
+  it('should not wrap AiGenerationError errors', async () => {
     mockGetImageModelById.mockResolvedValue(mockModel);
     mockHasAccessToImageModel.mockResolvedValue(true);
     mockIsApiKeyOverQuota.mockResolvedValue(false);
-    const originalError = new InvalidImageModelError('Original error');
+    const originalError = new InvalidModelError('Original error');
     mockGenerateImage.mockRejectedValue(originalError);
 
     await expect(

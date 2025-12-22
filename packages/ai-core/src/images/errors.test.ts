@@ -1,26 +1,26 @@
 import { describe, it, expect } from 'vitest';
 import {
-  ImageGenerationError,
+  AiGenerationError,
   ResponsibleAIError,
   RateLimitExceededError,
-  InvalidImageModelError,
+  InvalidModelError,
   ProviderConfigurationError,
-} from './errors';
+} from '../errors';
 
-describe('ImageGenerationError', () => {
+describe('AiGenerationError', () => {
   it('should create an error with the correct name and message', () => {
-    const error = new ImageGenerationError('Test error');
-    expect(error.name).toBe('ImageGenerationError');
+    const error = new AiGenerationError('Test error');
+    expect(error.name).toBe('AiGenerationError');
     expect(error.message).toBe('Test error');
     expect(error).toBeInstanceOf(Error);
   });
 
-  it('should correctly identify ImageGenerationError instances', () => {
-    const error = new ImageGenerationError('Test');
-    expect(ImageGenerationError.is(error)).toBe(true);
-    expect(ImageGenerationError.is(new Error('Test'))).toBe(false);
-    expect(ImageGenerationError.is('not an error')).toBe(false);
-    expect(ImageGenerationError.is(null)).toBe(false);
+  it('should correctly identify AiGenerationError instances', () => {
+    const error = new AiGenerationError('Test');
+    expect(AiGenerationError.is(error)).toBe(true);
+    expect(AiGenerationError.is(new Error('Test'))).toBe(false);
+    expect(AiGenerationError.is('not an error')).toBe(false);
+    expect(AiGenerationError.is(null)).toBe(false);
   });
 });
 
@@ -29,13 +29,13 @@ describe('ResponsibleAIError', () => {
     const error = new ResponsibleAIError('Content policy violation');
     expect(error.name).toBe('ResponsibleAIError');
     expect(error.message).toBe('Content policy violation');
-    expect(error).toBeInstanceOf(ImageGenerationError);
+    expect(error).toBeInstanceOf(AiGenerationError);
   });
 
   it('should correctly identify ResponsibleAIError instances', () => {
     const error = new ResponsibleAIError('Test');
     expect(ResponsibleAIError.is(error)).toBe(true);
-    expect(ResponsibleAIError.is(new ImageGenerationError('Test'))).toBe(false);
+    expect(ResponsibleAIError.is(new AiGenerationError('Test'))).toBe(false);
     expect(ResponsibleAIError.is(new Error('Test'))).toBe(false);
   });
 });
@@ -45,28 +45,28 @@ describe('RateLimitExceededError', () => {
     const error = new RateLimitExceededError('Too many requests');
     expect(error.name).toBe('RateLimitExceededError');
     expect(error.message).toBe('Too many requests');
-    expect(error).toBeInstanceOf(ImageGenerationError);
+    expect(error).toBeInstanceOf(AiGenerationError);
   });
 
   it('should correctly identify RateLimitExceededError instances', () => {
     const error = new RateLimitExceededError('Test');
     expect(RateLimitExceededError.is(error)).toBe(true);
-    expect(RateLimitExceededError.is(new ImageGenerationError('Test'))).toBe(false);
+    expect(RateLimitExceededError.is(new AiGenerationError('Test'))).toBe(false);
   });
 });
 
-describe('InvalidImageModelError', () => {
+describe('InvalidModelError', () => {
   it('should create an error with the correct name and message', () => {
-    const error = new InvalidImageModelError('Invalid model');
-    expect(error.name).toBe('InvalidImageModelError');
+    const error = new InvalidModelError('Invalid model');
+    expect(error.name).toBe('InvalidModelError');
     expect(error.message).toBe('Invalid model');
-    expect(error).toBeInstanceOf(ImageGenerationError);
+    expect(error).toBeInstanceOf(AiGenerationError);
   });
 
-  it('should correctly identify InvalidImageModelError instances', () => {
-    const error = new InvalidImageModelError('Test');
-    expect(InvalidImageModelError.is(error)).toBe(true);
-    expect(InvalidImageModelError.is(new ImageGenerationError('Test'))).toBe(false);
+  it('should correctly identify InvalidModelError instances', () => {
+    const error = new InvalidModelError('Test');
+    expect(InvalidModelError.is(error)).toBe(true);
+    expect(InvalidModelError.is(new AiGenerationError('Test'))).toBe(false);
   });
 });
 
@@ -75,12 +75,12 @@ describe('ProviderConfigurationError', () => {
     const error = new ProviderConfigurationError('Provider not configured');
     expect(error.name).toBe('ProviderConfigurationError');
     expect(error.message).toBe('Provider not configured');
-    expect(error).toBeInstanceOf(ImageGenerationError);
+    expect(error).toBeInstanceOf(AiGenerationError);
   });
 
   it('should correctly identify ProviderConfigurationError instances', () => {
     const error = new ProviderConfigurationError('Test');
     expect(ProviderConfigurationError.is(error)).toBe(true);
-    expect(ProviderConfigurationError.is(new ImageGenerationError('Test'))).toBe(false);
+    expect(ProviderConfigurationError.is(new AiGenerationError('Test'))).toBe(false);
   });
 });

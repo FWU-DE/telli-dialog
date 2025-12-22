@@ -1,10 +1,12 @@
 import {
   dbCreateImageGenerationUsage,
+  dbCreateCompletionUsage,
   dbGetApiKeyLimit,
   dbGetCompletionUsageCostsSinceStartOfCurrentMonth,
   dbGetImageGenerationUsageCostsSinceStartOfCurrentMonth,
 } from '../api-db/functions';
 import { AiModel } from '../images/types';
+import type { AiModel as TextAiModel, TokenUsage } from '../text/types';
 
 /**
  * Bills image generation usage to the specified API key.
@@ -27,6 +29,41 @@ export async function billImageGenerationUsageToApiKey(
   await dbCreateImageGenerationUsage({
     apiKeyId,
     modelId: imageModel.id,
+    costsInCent: priceInCent,
+  });
+  return priceInCent;
+}
+
+// TODO: combine - Very similar to billImageGenerationUsageToApiKey
+/**
+ * Bills text generation usage to the specified API key.
+ *
+ * This function records and charges the cost of text generation
+ * against the quota or billing account associated with the given API key.
+ *
+ * @param apiKeyId - The unique identifier of the API key to bill
+ * @param textModel - The text model used for generation
+ * @param usage - Token usage information
+ * @returns A promise that includes the price in cents charged for the operation
+ */
+export async function billTextGenerationUsageToApiKey(
+  apiKeyId: string,
+  textModel: TextAiModel,
+  usage: TokenUsage,
+): Promise<number> {
+  if (textModel.priceMetadata.type !== 'text') {
+    throw new Error(`Model ${textModel.id} is not a text model`);
+  }
+  const completionCost = usage.completionTokens * textModel.priceMetadata.completionTokenPrice;
+  const promptCost = usage.promptTokens * textModel.priceMetadata.promptTokenPrice;
+  const priceInCent = completionCost + promptCost;
+  
+  await dbCreateCompletionUsage({
+    apiKeyId,
+    modelId: textModel.id,
+    completionTokens: usage.completionTokens,
+    promptTokens: usage.promptTokens,
+    totalTokens: usage.totalTokens,
     costsInCent: priceInCent,
   });
   return priceInCent;

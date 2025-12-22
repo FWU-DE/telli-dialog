@@ -1,18 +1,18 @@
 // Only use if no child errors fit the case
-export class ImageGenerationError extends Error {
+export class AiGenerationError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'ImageGenerationError';
+    this.name = 'AiGenerationError';
   }
 
-  static is(error: unknown): error is ImageGenerationError {
+  static is(error: unknown): error is AiGenerationError {
     if (error && typeof error === 'object') {
-      return 'name' in error && error.name === 'ImageGenerationError';
+      return 'name' in error && error.name === 'AiGenerationError';
     }
     return false;
   }
 }
-export class ResponsibleAIError extends ImageGenerationError {
+export class ResponsibleAIError extends AiGenerationError {
   constructor(message: string) {
     super(message);
     this.name = 'ResponsibleAIError';
@@ -25,7 +25,7 @@ export class ResponsibleAIError extends ImageGenerationError {
     return false;
   }
 }
-export class RateLimitExceededError extends ImageGenerationError {
+export class RateLimitExceededError extends AiGenerationError {
   constructor(message: string) {
     super(message);
     this.name = 'RateLimitExceededError';
@@ -38,20 +38,21 @@ export class RateLimitExceededError extends ImageGenerationError {
     return false;
   }
 }
-export class InvalidImageModelError extends ImageGenerationError {
+export class InvalidModelError extends AiGenerationError {
   constructor(message: string) {
     super(message);
-    this.name = 'InvalidImageModelError';
+    this.name = 'InvalidModelError';
   }
 
-  static is(error: unknown): error is InvalidImageModelError {
+  static is(error: unknown): error is InvalidModelError {
     if (error && typeof error === 'object') {
-      return 'name' in error && error.name === 'InvalidImageModelError';
+      return 'name' in error && error.name === 'InvalidModelError';
     }
     return false;
   }
 }
-export class ProviderConfigurationError extends ImageGenerationError {
+
+export class ProviderConfigurationError extends AiGenerationError {
   constructor(message: string) {
     super(message);
     this.name = 'ProviderConfigurationError';
