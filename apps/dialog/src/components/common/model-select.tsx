@@ -54,36 +54,6 @@ export default function ModelSelect({
   const currentSelectedModel =
     models.find((model) => model.name === optimisticModelId) || selectedModel;
 
-  if (currentSelectedModel === undefined) {
-    return undefined;
-  }
-
-  if (models.length <= 0) {
-    return (
-      <div className="flex flex-col">
-        <span className="text-xs text-gray-400">{label}</span>
-        <div className="flex gap-2 items-center">
-          <span>{noModelsLabel}</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (models.length === 1) {
-    return (
-      <div className="flex flex-col">
-        <span className="text-xs text-gray-400">{label}</span>
-        <div className="flex gap-2 items-center">
-          <span className="text-primary">{currentSelectedModel.displayName}</span>
-          {modelType === 'text' && isGreenModel({ model: currentSelectedModel }) && (
-            <GreenLeafIcon />
-          )}
-          {currentSelectedModel.isNew && <Badge text="NEU" />}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-2 hover:bg-secondary/20 rounded-enterprise-md p-2">
       <span className="text-xs text-gray-400 hidden sm:block">{label}</span>
@@ -91,20 +61,20 @@ export default function ModelSelect({
         <DropdownMenu.Trigger
           disabled={models.length < 2}
           asChild
-          className="cursor-pointer disabled:cursor-none focus:outline-none"
+          className="cursor-pointer disabled:cursor-default focus:outline-none"
         >
           <button
             type="button"
-            className="flex items-center gap-2 cursor-pointer disabled:cursor-none"
+            className="flex items-center gap-2 cursor-pointer disabled:cursor-default"
             aria-label={`Select ${modelType} Model Dropdown`}
           >
             <span className="text-primary text-base font-medium">
-              {currentSelectedModel?.displayName ?? 'Kein Modell'}
+              {currentSelectedModel?.displayName ?? noModelsLabel}
             </span>
-            {modelType === 'text' && isGreenModel({ model: currentSelectedModel }) && (
-              <GreenLeafIcon />
-            )}
-            {currentSelectedModel.isNew && <Badge text="NEU" />}
+            {currentSelectedModel &&
+              modelType === 'text' &&
+              isGreenModel({ model: currentSelectedModel }) && <GreenLeafIcon />}
+            {currentSelectedModel?.isNew && <Badge text="NEU" />}
             {models.length > 1 && <ChevronDown className="text-primary" />}
           </button>
         </DropdownMenu.Trigger>
