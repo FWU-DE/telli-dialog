@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useImageModels } from '../providers/image-model-provider';
 import { useImageStyle } from '../providers/image-style-provider';
 import { generateImageAction } from '@/app/(authed)/(dialog)/image-generation/actions';
@@ -10,14 +11,11 @@ import { ImageGenerationError } from './image-generation-error';
 import { useTranslations } from 'next-intl';
 import LoadingAnimation from './loading-animation';
 import { ConversationMessageModel } from '@shared/db/types';
-import { navigateWithoutRefresh } from '@/utils/navigation/router';
 import { getSignedUrlFromS3Get } from '@shared/s3';
 import { FileModel } from '@shared/db/schema';
 import { useQueryClient } from '@tanstack/react-query';
 import { logError } from '@shared/logging';
-import deleteConversationAction from '@/app/(authed)/(dialog)/actions';
 import { ResponsibleAIError } from '@telli/ai-core/images/errors';
-import { runServerAction } from '@shared/actions/run-server-action';
 
 interface ImageGenerationChatProps {
   conversationId?: string;
@@ -30,6 +28,7 @@ export default function ImageGenerationChat({
   initialMessages = [],
   fileMapping,
 }: ImageGenerationChatProps) {
+  const router = useRouter();
   const { selectedModel } = useImageModels();
   const { selectedStyle } = useImageStyle();
   const tImageGeneration = useTranslations('image-generation');
@@ -43,16 +42,6 @@ export default function ImageGenerationChat({
   } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const queryClient = useQueryClient();
-  const [currentConversationId, setCurrentConversationId] = useState<string | undefined>(
-    conversationId,
-  );
-
-  useEffect(() => {
-    if (currentConversationId) {
-      navigateWithoutRefresh(`/image-generation/d/${currentConversationId}`);
-      refetchConversations();
-    }
-  }, [currentConversationId, navigateWithoutRefresh, refetchConversations]);
 
   // Load the single image from initial messages and file attachments
   useEffect(() => {
@@ -110,20 +99,33 @@ export default function ImageGenerationChat({
     setIsGenerating(true);
     setErrorMessage(null);
 
-    let newConversationId;
     const result = await generateImageAction({
       prompt: currentPrompt,
       model: selectedModel,
       style: selectedStyle,
     });
     if (result.success) {
-      newConversationId = result.value.conversationId;
       // Update the displayed image
       setDisplayedImage({
         prompt: currentPrompt,
         imageUrl: result.value.imageUrl,
       });
-      setCurrentConversationId(result.value.conversationId);
+
+      const newConversationId = result.value.conversationId;
+      /* TODO: improve navigation without full reload, but without causing issues with state.
+       * Using router.push here causes the component to remount,
+       * causing the image to flicker.
+       * But using something like navigateWithoutReload cauess
+       * the same remount but after the following request
+       * (possibly deleting an error message).
+       * This is undocumented behavior in Next.js
+       * (Documentation says window.history.replaceState should work without remounting).
+       * https://nextjs.org/docs/app/getting-started/linking-and-navigating#native-history-api
+       */
+      if (conversationId === undefined || conversationId !== newConversationId) {
+        router.push(`/image-generation/d/${newConversationId}`);
+      }
+      refetchConversations();
       // Clear the input after a successful generation
       setInput('');
     } else {
