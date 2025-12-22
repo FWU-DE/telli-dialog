@@ -246,7 +246,8 @@ export async function POST(request: NextRequest) {
 
       if (messages.length === 1 || messages.length === 2 || conversation.name === null) {
         const chatTitle = await getChatTitle({
-          model: auxiliaryModelAndProvider.telliProvider,
+          modelId: auxiliaryModel.id,
+          apiKeyId: auxiliaryModelAndProvider.apiKeyId,
           message: userMessage,
         });
         await dbUpdateConversationTitle({

@@ -26,25 +26,24 @@ function createAzureClient(model: AiModel): {
 export function constructAzureTextStreamFn(model: AiModel): TextStreamFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function* getAzureTextStream({ prompt, history = [] }) {
-    const messages = [...history, { role: 'user' as const, content: prompt }];
-
+  return async function* getAzureTextStream({ messages, maxTokens }) {
     const stream = await client.chat.completions.create({
       model: deployment,
       messages,
       stream: true,
       stream_options: { include_usage: true },
+      max_tokens: maxTokens,
     });
 
     let usage: TokenUsage | undefined;
 
     for await (const chunk of stream) {
       const content = chunk.choices[0]?.delta?.content;
-      
+
       if (content) {
         yield content;
       }
-      
+
       if (chunk.usage) {
         usage = {
           completionTokens: chunk.usage.completion_tokens,
@@ -65,14 +64,18 @@ export function constructAzureTextStreamFn(model: AiModel): TextStreamFn {
 export function constructAzureTextGenerationFn(model: AiModel): TextGenerationFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function getAzureTextGeneration({ prompt, history = [] }) {
-    const messages = [...history, { role: 'user' as const, content: prompt }];
-
-    const response = await client.chat.completions.create({
-      model: deployment,
-      messages,
-      stream: false,
-    });
+  return async function getAzureTextGeneration({ messages, maxTokens }) {
+    const response = await client.chat.completions.create(
+      {
+        model: deployment,
+        messages,
+        stream: false,
+        max_completion_tokens: maxTokens,
+      },
+      {
+        path: `/openai/deployments/${deployment}/chat/completions`,
+      },
+    );
 
     const text = response.choices[0]?.message?.content ?? '';
     const usage = response.usage;

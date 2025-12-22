@@ -34,7 +34,7 @@ async function getModelAndProvider({
   federalStateId: string;
   modelId: string;
   /* eslint-disable  @typescript-eslint/no-explicit-any */
-}): Promise<{ telliProvider: any; definedModel: LlmModel }> {
+}): Promise<{ telliProvider: any; definedModel: LlmModel; apiKeyId: string }> {
   const [error, federalStateObject] = await dbGetFederalStateWithDecryptedApiKeyWithResult({
     federalStateId,
   });
@@ -42,6 +42,14 @@ async function getModelAndProvider({
   if (error !== null) {
     logError('Error fetching federal state with decrypted API key:', error);
     throw Error(error.message);
+  }
+
+  if (!federalStateObject.apiKeyId) {
+    const apiKeyError = new Error(
+      `Federal state with id ${federalStateId} has no api key associated`,
+    );
+    logError(apiKeyError.message, apiKeyError);
+    throw apiKeyError;
   }
 
   let definedModel = await dbGetModelByIdAndFederalStateId({ modelId, federalStateId });
@@ -63,7 +71,11 @@ async function getModelAndProvider({
     baseUrl: `${env.apiUrl}/v1`,
   });
 
-  return { telliProvider: telliConfiguration(definedModel.name), definedModel };
+  return {
+    telliProvider: telliConfiguration(definedModel.name),
+    definedModel,
+    apiKeyId: federalStateObject.apiKeyId,
+  };
 }
 
 export function calculateCostsInCent(

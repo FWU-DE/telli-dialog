@@ -1,34 +1,32 @@
 import { billTextGenerationUsageToApiKey, isApiKeyOverQuota } from '../api-keys/billing';
 import { generateText, generateTextStream } from './providers';
-import { hasAccessToTextModel } from '../api-keys/model-access';
+import { hasAccessToModel } from '../api-keys/model-access';
 import { AiGenerationError, InvalidModelError } from '../errors';
 import { getTextModelById } from '../models';
 import type { Message } from './types';
 
 /**
- * Generates text using the specified model and prompt, with access control and billing.
+ * Generates text using the specified model and messages, with access control and billing.
  *
  * This function first verifies that the provided API key has access to the requested text model.
  * If access is granted, it generates the text and bills the usage to the API key.
  *
  * @param modelId - The ID of the text model to use for generation
- * @param prompt - The text prompt for the LLM
+ * @param messages - The conversation messages (system, user, assistant)
  * @param apiKeyId - The ID of the API key to verify access and bill usage
- * @param history - Optional conversation history
  *
  * @returns A promise that resolves to an object containing the generated text response, usage, and the price in cents
  */
 export async function generateTextWithBilling(
   modelId: string,
-  prompt: string,
+  messages: Message[],
   apiKeyId: string,
-  history?: Message[],
 ) {
   const model = await getTextModelById(modelId);
 
   // Run access check and quota check in parallel for better performance
   const [hasAccess, isOverQuota] = await Promise.all([
-    hasAccessToTextModel(apiKeyId, model),
+    hasAccessToModel(apiKeyId, model),
     isApiKeyOverQuota(apiKeyId),
   ]);
 
@@ -42,14 +40,10 @@ export async function generateTextWithBilling(
 
   try {
     // generate
-    const textResponse = await generateText(model, prompt, history);
+    const textResponse = await generateText(model, messages);
 
     // bill to api key
-    const priceInCents = await billTextGenerationUsageToApiKey(
-      apiKeyId,
-      model,
-      textResponse.usage,
-    );
+    const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, model, textResponse.usage);
 
     return {
       ...textResponse,
@@ -67,29 +61,27 @@ export async function generateTextWithBilling(
 }
 
 /**
- * Generates streaming text using the specified model and prompt, with access control.
+ * Generates streaming text using the specified model and messages, with access control.
  *
  * This function first verifies that the provided API key has access to the requested text model.
  * Note: Billing happens after the stream completes when usage data is available.
  *
  * @param modelId - The ID of the text model to use for generation
- * @param prompt - The text prompt for the LLM
+ * @param messages - The conversation messages (system, user, assistant)
  * @param apiKeyId - The ID of the API key to verify access and bill usage
- * @param history - Optional conversation history
  *
  * @returns An async generator that yields text chunks and returns usage data with price
  */
 export async function* generateTextStreamWithBilling(
   modelId: string,
-  prompt: string,
+  messages: Message[],
   apiKeyId: string,
-  history?: Message[],
 ) {
   const model = await getTextModelById(modelId);
 
   // Run access check and quota check in parallel for better performance
   const [hasAccess, isOverQuota] = await Promise.all([
-    hasAccessToTextModel(apiKeyId, model),
+    hasAccessToModel(apiKeyId, model),
     isApiKeyOverQuota(apiKeyId),
   ]);
 
@@ -103,7 +95,7 @@ export async function* generateTextStreamWithBilling(
 
   try {
     // generate stream
-    const stream = generateTextStream(model, prompt, history);
+    const stream = generateTextStream(model, messages);
 
     // Yield all text chunks
     for await (const chunk of stream) {

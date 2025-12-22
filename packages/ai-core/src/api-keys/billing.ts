@@ -33,8 +33,6 @@ export async function billImageGenerationUsageToApiKey(
   });
   return priceInCent;
 }
-
-// TODO: combine - Very similar to billImageGenerationUsageToApiKey
 /**
  * Bills text generation usage to the specified API key.
  *
@@ -57,7 +55,7 @@ export async function billTextGenerationUsageToApiKey(
   const completionCost = usage.completionTokens * textModel.priceMetadata.completionTokenPrice;
   const promptCost = usage.promptTokens * textModel.priceMetadata.promptTokenPrice;
   const priceInCent = completionCost + promptCost;
-  
+
   await dbCreateCompletionUsage({
     apiKeyId,
     modelId: textModel.id,

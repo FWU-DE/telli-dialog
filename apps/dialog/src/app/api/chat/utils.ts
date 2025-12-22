@@ -1,6 +1,7 @@
 import { ImageAttachment } from '@/utils/files/types';
 import { logError } from '@shared/logging';
 import { generateText, LanguageModelV1, type Message } from 'ai';
+import { generateTextWithBilling } from '@telli/ai-core';
 
 /**
  * Format messages to include images for models that support vision
@@ -239,29 +240,40 @@ Ausgabe: ""
 /**
  * Generate a chat title based on the first user message
  * @param message - The first user message
- * @param model - The LLM model to use for title generation
+ * @param modelId - The ID of the model to use for title generation
+ * @param apiKeyId - The API key ID for billing
  * @returns A string representing the generated chat title
  */
 export async function getChatTitle({
   message,
-  model,
+  modelId,
+  apiKeyId,
 }: {
   message: Message;
-  model: LanguageModelV1;
+  modelId: string;
+  apiKeyId: string;
 }): Promise<string> {
   try {
-    const { text } = await generateText({
-      model,
-      system: `Du erstellst einen kurzen Titel basierend auf der ersten Nachricht eines Nutzers
+    const { text } = await generateTextWithBilling(
+      modelId,
+      [
+        {
+          role: 'system',
+          content: `Du erstellst einen kurzen Titel basierend auf der ersten Nachricht eines Nutzers
   
 Regeln:
 1. Der Titel sollte eine Zusammenfassung der Nachricht sein
 2. Verwende keine Anführungszeichen oder Doppelpunkte
 3. Der Titel sollte nicht länger als 80 Zeichen sein
 `,
-      messages: [message],
-      maxTokens: 30,
-    });
+        },
+        {
+          role: 'user',
+          content: message.content,
+        },
+      ],
+      apiKeyId,
+    );
     return text.trim();
   } catch (error) {
     logError('Error generating chat title, using default title as fallback:', error);

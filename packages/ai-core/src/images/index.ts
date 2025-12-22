@@ -1,6 +1,6 @@
 import { billImageGenerationUsageToApiKey, isApiKeyOverQuota } from '../api-keys/billing';
 import { generateImage } from './providers';
-import { hasAccessToImageModel } from '../api-keys/model-access';
+import { hasAccessToModel } from '../api-keys/model-access';
 import { AiGenerationError, InvalidModelError } from '../errors';
 import { getImageModelById } from '../models';
 
@@ -21,14 +21,12 @@ export async function generateImageWithBilling(modelId: string, prompt: string, 
 
   // Run access check and quota check in parallel for better performance
   const [hasAccess, isOverQuota] = await Promise.all([
-    hasAccessToImageModel(apiKeyId, model),
+    hasAccessToModel(apiKeyId, model),
     isApiKeyOverQuota(apiKeyId),
   ]);
 
   if (!hasAccess) {
-    throw new InvalidModelError(
-      `API key does not have access to the image model: ${model.name}`,
-    );
+    throw new InvalidModelError(`API key does not have access to the image model: ${model.name}`);
   }
 
   if (isOverQuota) {

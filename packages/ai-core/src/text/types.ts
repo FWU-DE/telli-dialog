@@ -6,9 +6,9 @@ export type Message = {
 };
 
 export type TextGenerationArgs = {
-  prompt: string;
+  messages: Message[];
   model: string;
-  history?: Message[];
+  maxTokens?: number;
 };
 
 export type TokenUsage = {

@@ -18,22 +18,28 @@ function getTextStreamFnByModel({ model }: { model: AiModel }): TextStreamFn | u
   return undefined;
 }
 
-export async function generateText(model: AiModel, prompt: string, history?: Parameters<TextGenerationFn>[0]['history']) {
+export async function generateText(
+  model: AiModel,
+  messages: Parameters<TextGenerationFn>[0]['messages'],
+) {
   const generationFn = getTextGenerationFnByModel({ model });
   if (!generationFn) {
     throw new ProviderConfigurationError(
       `No text generation function found for provider: ${model.provider}`,
     );
   }
-  return generationFn({ prompt, model: model.name, history });
+  return generationFn({ messages, model: model.name });
 }
 
-export function generateTextStream(model: AiModel, prompt: string, history?: Parameters<TextStreamFn>[0]['history']) {
+export function generateTextStream(
+  model: AiModel,
+  messages: Parameters<TextStreamFn>[0]['messages'],
+) {
   const streamFn = getTextStreamFnByModel({ model });
   if (!streamFn) {
     throw new ProviderConfigurationError(
       `No text stream function found for provider: ${model.provider}`,
     );
   }
-  return streamFn({ prompt, model: model.name, history });
+  return streamFn({ messages, model: model.name });
 }
