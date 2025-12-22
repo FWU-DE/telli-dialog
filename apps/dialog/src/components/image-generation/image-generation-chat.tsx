@@ -26,6 +26,7 @@ interface ImageGenerationChatProps {
 }
 
 export default function ImageGenerationChat({
+  conversationId,
   initialMessages = [],
   fileMapping,
 }: ImageGenerationChatProps) {
@@ -42,6 +43,16 @@ export default function ImageGenerationChat({
   } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const [currentConversationId, setCurrentConversationId] = useState<string | undefined>(
+    conversationId,
+  );
+
+  useEffect(() => {
+    if (currentConversationId) {
+      navigateWithoutRefresh(`/image-generation/d/${currentConversationId}`);
+      refetchConversations();
+    }
+  }, [currentConversationId, navigateWithoutRefresh, refetchConversations]);
 
   // Load the single image from initial messages and file attachments
   useEffect(() => {
@@ -112,24 +123,15 @@ export default function ImageGenerationChat({
         prompt: currentPrompt,
         imageUrl: result.value.imageUrl,
       });
+      setCurrentConversationId(result.value.conversationId);
+      // Clear the input after a successful generation
       setInput('');
-      navigateWithoutRefresh(`/image-generation/d/${newConversationId}`);
-      refetchConversations();
     } else {
       const error = result.error;
       if (ResponsibleAIError.is(error)) {
         setErrorMessage(tImageGeneration('responsible-ai-error'));
       } else {
         setErrorMessage(tImageGeneration('generation-error'));
-      }
-
-      if (newConversationId) {
-        try {
-          await deleteConversationAction({ conversationId: newConversationId });
-          refetchConversations();
-        } catch (deletionError) {
-          logError('Error deleting failed image conversation:', deletionError);
-        }
       }
     }
     setIsGenerating(false);
