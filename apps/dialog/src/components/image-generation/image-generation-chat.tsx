@@ -115,7 +115,7 @@ export default function ImageGenerationChat({
       /* TODO: improve navigation without full reload, but without causing issues with state.
        * Using router.push here causes the component to remount,
        * causing the image to flicker.
-       * But using something like navigateWithoutReload cauess
+       * But using something like navigateWithoutReload causes
        * the same remount but after the following request
        * (possibly deleting an error message).
        * This is undocumented behavior in Next.js
