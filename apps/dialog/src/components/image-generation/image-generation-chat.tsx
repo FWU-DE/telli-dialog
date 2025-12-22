@@ -52,7 +52,7 @@ export default function ImageGenerationChat({
       navigateWithoutRefresh(`/image-generation/d/${currentConversationId}`);
       refetchConversations();
     }
-  }, [currentConversationId]);
+  }, [currentConversationId, navigateWithoutRefresh, refetchConversations]);
 
   // Load the single image from initial messages and file attachments
   useEffect(() => {
@@ -124,6 +124,8 @@ export default function ImageGenerationChat({
         imageUrl: result.value.imageUrl,
       });
       setCurrentConversationId(result.value.conversationId);
+      // Clear the input after a successful generation
+      setInput('');
     } else {
       const error = result.error;
       if (ResponsibleAIError.is(error)) {
