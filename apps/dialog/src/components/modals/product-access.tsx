@@ -7,7 +7,8 @@ import { useTranslations } from 'next-intl';
 import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { useTheme } from '@/hooks/use-theme';
 import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
-import { LOGOUT_URL } from '@/app/api/auth/const';
+
+const LOGOUT_URL = '/api/auth/logout';
 
 type ProductAccessModalProps = {
   modalTitle: string;
