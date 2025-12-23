@@ -220,10 +220,10 @@ Die Bereitstellung erfolgt gemäß VO (EU) 2024/1689 (KI-Verordnung) sowie DSGVO
 Nutzende erhalten ein begrenztes Nutzungskontingent „telli-Points". Eine Nutzung über das Kontingent hinaus ist nicht möglich, um eine Verfügbarkeit des Dienstes für eine Vielzahl von Lehrkräften gewährleisten zu können. Der Dienst ist für Nutzende kostenlos.
 
 ## 5 Datenverarbeitung & Hosting
-telli verarbeitet alle Eingaben ausschließlich auf Servern innerhalb der EU. Die Large Language Models werden lokal gehostet; eine Übermittlung an Drittstaaten findet nicht statt. Mit den technischen Dienstleistern bestehen AV-Verträge nach Art. 28 DSGVO ([https://telli.schule/datenschutz](https://telli.schule/datenschutz)).
+telli verarbeitet alle Eingaben ausschließlich auf Servern innerhalb der EU. Die Large Language Models werden in europäischen Cloud-Lösungen gehostet; eine Übermittlung an Drittstaaten findet nicht statt. Mit den technischen Dienstleistern bestehen AV-Verträge nach Art. 28 DSGVO ([https://telli.schule/datenschutz](https://telli.schule/datenschutz)).
 
 ## 6 Speicherung der Chatverläufe
-Gespeicherte Verläufe werden verschlüsselt im jeweiligen Benutzerkonto auf telli-Servern abgelegt und sind nur von der jeweiligen Lehrkraft einsehbar; FWU- bzw. LISA-Mitarbeitende haben darauf keinen Zugriff. Die Daten werden bei Kontolöschung unwiderruflich gelöscht.
+Gespeicherte Verläufe werden unverschlüsselt im jeweiligen Benutzerkonto auf telli-Servern abgelegt. Der Zugriff auf diese Daten durch die Systemadministration der FWU sowie die telli-Entwickler erfolgt ausschließlich zur Wahrung der Nutzungsbedingungen. In Einzelfällen können dazu stichpunkthafte Kontrollen durchgeführt werden. LISA-Mitarbeitende haben auf die Daten keinen Zugriff. Die Daten werden bei Kontolöschung unwiderruflich gelöscht.
 
 ## 7 Datenschutzprinzipien / Eingabebeschränkungen
 Es dürfen keine sensiblen personenbezogenen Daten eingegeben werden. Die Verarbeitung erfolgt nach dem DSGVO-Prinzip der Datenminimierung und im Rahmen des schulgesetzlichen Bildungs- und Erziehungsauftrags.
