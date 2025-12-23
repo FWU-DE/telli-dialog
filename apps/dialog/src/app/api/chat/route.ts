@@ -158,7 +158,8 @@ export async function POST(request: NextRequest) {
     messages,
     user,
     relatedFileEntities,
-    model: auxiliaryModelAndProvider.telliProvider,
+    modelId: auxiliaryModel.id,
+    apiKeyId: auxiliaryModelAndProvider.apiKeyId,
   });
 
   // attach the image url to each of the image files within relatedFileEntities

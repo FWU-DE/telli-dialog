@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "openai": "6.9.1",
+    "openaiv4": "npm:openai@4.104.0",
     "google-auth-library": "10.5.0",
     "zod": "4.1.13",
     "drizzle-orm": "0.45.1",

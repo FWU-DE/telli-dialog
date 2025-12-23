@@ -1,6 +1,6 @@
 import { ImageAttachment } from '@/utils/files/types';
 import { logError } from '@shared/logging';
-import { generateText, LanguageModelV1, type Message } from 'ai';
+import { type Message } from 'ai';
 import { generateTextWithBilling } from '@telli/ai-core';
 
 /**
@@ -129,15 +129,18 @@ export function limitChatHistory({
 /**
  * Condenses chat history into a search query for vector search
  * @param messages - The chat messages to condense
- * @param model - The LLM model to use for condensing
+ * @param modelId - The ID of the model to use for condensing
+ * @param apiKeyId - The API key ID for billing
  * @returns A string representing the search query
  */
 export async function condenseChatHistory({
   messages,
-  model,
+  modelId,
+  apiKeyId,
 }: {
   messages: Array<Message>;
-  model: LanguageModelV1;
+  modelId: string;
+  apiKeyId: string;
 }): Promise<string> {
   // Use only the most recent messages for generating the search query
   const recentMessages = limitChatHistory({
@@ -148,9 +151,12 @@ export async function condenseChatHistory({
   });
 
   try {
-    const { text } = await generateText({
-      model,
-      system: `Du bist ein hilfreicher Assistent, der semantische Suchanfragen (Vektor-Suche) für eine Wissensdatenbank erstellt.
+    const { text } = await generateTextWithBilling(
+      modelId,
+      [
+        {
+          role: 'system',
+          content: `Du bist ein hilfreicher Assistent, der semantische Suchanfragen (Vektor-Suche) für eine Wissensdatenbank erstellt.
 Basierend auf dem Chatverlauf, erstelle eine präzise Suchanfrage.
 Die Suchanfrage sollte die Hauptfrage oder das Hauptthema des Benutzers erfassen.
 Die Suchanfrage muss eigenständig und unabhängig vom Chatverlauf sein und alle notwendigen Kontextinformationen aus dem Verlauf enthalten, um die Hauptfrage oder das Hauptthema des Benutzers zu erfassen.
@@ -166,8 +172,13 @@ Beispiel:
 Benutzer: "Ich möchte wissen, ob ich in meinem Bundesland einen Anspruch auf Elterngeld habe."
 Suchanfrage: "Elterngeld Anspruch"
 `,
-      messages: recentMessages.map((m) => ({ role: m.role, content: m.content })),
-    });
+        },
+        ...recentMessages
+          .filter((m) => m.role !== 'data')
+          .map((m) => ({ role: m.role as Exclude<Message['role'], 'data'>, content: m.content })),
+      ],
+      apiKeyId,
+    );
 
     return text.trim();
   } catch (error) {
@@ -181,15 +192,18 @@ Suchanfrage: "Elterngeld Anspruch"
 /**
  * Extract keywords from the user's last message in the chat history
  * @param messages - The chat messages
- * @param model - The LLM model to use for keyword extraction
+ * @param modelId - The ID of the model to use for keyword extraction
+ * @param apiKeyId - The API key ID for billing
  * @returns An array of extracted keywords or an empty array if none found
  */
 export async function getKeywordsFromQuery({
   messages,
-  model,
+  modelId,
+  apiKeyId,
 }: {
   messages: Array<Message>;
-  model: LanguageModelV1;
+  modelId: string;
+  apiKeyId: string;
 }): Promise<string[]> {
   const lastUserMessage = messages.findLast((m) => m.role === 'user');
 
@@ -198,9 +212,12 @@ export async function getKeywordsFromQuery({
   }
 
   try {
-    const { text } = await generateText({
-      model,
-      system: `Du bist ein Experte für die präzise Extraktion von Schlüsselwörtern. 
+    const { text } = await generateTextWithBilling(
+      modelId,
+      [
+        {
+          role: 'system',
+          content: `Du bist ein Experte für die präzise Extraktion von Schlüsselwörtern. 
 Deine Aufgabe ist es, die relevantesten Schlüsselwörter aus der gegebenen Suchanfrage (der letzten Benutzernachricht im Chatverlauf) zu extrahieren.
 
 Regeln:
@@ -226,8 +243,11 @@ Ausgabe: "Kindergeld,Informationen,Leitfaden"
 Eingabe: "qwertz"
 Ausgabe: ""
 `,
-      messages: [lastUserMessage],
-    });
+        },
+        { role: 'user', content: lastUserMessage.content },
+      ],
+      apiKeyId,
+    );
 
     const keywords = text.trim();
     return keywords ? keywords.split(',') : [];

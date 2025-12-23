@@ -100,7 +100,8 @@ export async function POST(request: NextRequest) {
     .map((url) => webScraperExecutable(url));
 
   const retrievedTextChunks = await getRelevantFileContent({
-    model: telliProvider,
+    modelId: definedModel.id,
+    apiKeyId: modelAndProvider.apiKeyId,
     messages,
     user: teacherUserAndContext,
     relatedFileEntities,

@@ -1,2 +1,2 @@
 export * from './images/index';
-export * from './text/index';
+export * from './chat/index';

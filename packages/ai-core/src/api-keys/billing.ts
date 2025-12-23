@@ -6,7 +6,38 @@ import {
   dbGetImageGenerationUsageCostsSinceStartOfCurrentMonth,
 } from '../api-db/functions';
 import { AiModel } from '../images/types';
-import type { AiModel as TextAiModel, TokenUsage } from '../text/types';
+import type { AiModel as TextAiModel, TokenUsage } from '../chat/types';
+
+const TOKEN_AMOUNT_PER_PRICE = 1_000_000;
+const CENT_MULTIPLIER = 10;
+// TODO: Why are we saving Model prices in tenths of a cent?
+const PRICE_AND_CENT_MULTIPLIER = TOKEN_AMOUNT_PER_PRICE * CENT_MULTIPLIER;
+
+function calculatePriceInCentByTextModelAndUsage({
+  completionTokens,
+  promptTokens,
+  priceMetadata,
+}: {
+  priceMetadata: { completionTokenPrice: number; promptTokenPrice: number };
+  completionTokens: number;
+  promptTokens: number;
+}) {
+  const completionTokenPrice = completionTokens * priceMetadata.completionTokenPrice;
+  const promptTokenPrice = promptTokens * priceMetadata.promptTokenPrice;
+
+  return (completionTokenPrice + promptTokenPrice) / PRICE_AND_CENT_MULTIPLIER;
+}
+
+function calculatePriceInCentByEmbeddingModelAndUsage({
+  promptTokens,
+  priceMetadata,
+}: {
+  priceMetadata: { promptTokenPrice: number };
+  promptTokens: number;
+}) {
+  const promptTokenPrice = promptTokens * priceMetadata.promptTokenPrice;
+  return promptTokenPrice / PRICE_AND_CENT_MULTIPLIER;
+}
 
 /**
  * Bills image generation usage to the specified API key.
@@ -52,9 +83,11 @@ export async function billTextGenerationUsageToApiKey(
   if (textModel.priceMetadata.type !== 'text') {
     throw new Error(`Model ${textModel.id} is not a text model`);
   }
-  const completionCost = usage.completionTokens * textModel.priceMetadata.completionTokenPrice;
-  const promptCost = usage.promptTokens * textModel.priceMetadata.promptTokenPrice;
-  const priceInCent = completionCost + promptCost;
+  const priceInCent = calculatePriceInCentByTextModelAndUsage({
+    completionTokens: usage.completionTokens,
+    promptTokens: usage.promptTokens,
+    priceMetadata: textModel.priceMetadata,
+  });
 
   await dbCreateCompletionUsage({
     apiKeyId,

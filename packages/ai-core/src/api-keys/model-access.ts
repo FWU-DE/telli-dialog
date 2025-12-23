@@ -1,6 +1,6 @@
 import { dbHasApiKeyAccessToModel } from '../api-db/functions';
 import { AiModel } from '../images/types';
-import type { AiModel as TextAiModel } from '../text/types';
+import type { AiModel as TextAiModel } from '../chat/types';
 
 /**
  * Checks whether the specified API key has access to the given model.
