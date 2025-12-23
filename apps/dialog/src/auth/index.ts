@@ -49,7 +49,7 @@ const result = NextAuth({
       // Todo: we should check if custom attributes like bundesland are provided and return false if not
       return true;
     },
-    async jwt({ token, account, profile, trigger, user }) {
+    async jwt({ token, account, profile, trigger }) {
       // this callback is called when a JSON Web Token is created, updated or accessed in backend
       // returning null will invalidate the token and end the session
       try {
@@ -59,6 +59,12 @@ const result = NextAuth({
         }
 
         const result = userAndContextSchema.safeParse(token.user);
+        if (token.user && !result.success) {
+          logWarning(
+            'Parsing the user from token failed. This is expected when the schema was changed due to a software update.',
+            { result },
+          );
+        }
 
         // Update session data if there is an update or the structure has changed
         if (trigger === 'update' || !result.success) {
