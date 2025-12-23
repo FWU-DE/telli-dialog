@@ -30,7 +30,7 @@ export function runServerAction<TReturn, TArgs extends readonly unknown[] = []>(
           error: serializeError(error),
         };
       } else if (error instanceof AiGenerationError) {
-        logError('Image generation error occurred during server action.', error);
+        logError('AI generation error occurred during server action.', error);
         return {
           success: false,
           error: serializeError({ ...error, statusCode: 500 }),
