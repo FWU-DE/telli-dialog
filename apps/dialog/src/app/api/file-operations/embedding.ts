@@ -1,9 +1,11 @@
-import { OpenAI } from 'openai';
-import { env } from '@/env';
+import { generateEmbeddingsWithBilling } from '@telli/ai-core';
 import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
+import { dbGetModelByName } from '@shared/db/functions/llm-model';
 import { EMBEDDING_BATCH_SIZE, EMBEDDING_MAX_CONCURRENT_REQUESTS } from '@/const';
 import { TextChunkInsertModel } from '@shared/db/schema';
 import { logDebug } from '@shared/logging';
+
+const EMBEDDING_MODEL = 'BAAI/bge-m3';
 
 export async function embedText({
   text,
@@ -12,10 +14,19 @@ export async function embedText({
   text: string[];
   federalStateId: string;
 }) {
-  return await embedTextWithApiKey(text, await getFederalStateApiKey(federalStateId));
+  const [apiKeyId, model] = await Promise.all([
+    getFederalStateApiKeyId(federalStateId),
+    dbGetModelByName(EMBEDDING_MODEL),
+  ]);
+
+  if (!model) {
+    throw new Error(`Embedding model ${EMBEDDING_MODEL} not found`);
+  }
+
+  return await embedTextWithApiKey(text, model.id, apiKeyId);
 }
 
-async function getFederalStateApiKey(federalStateId: string) {
+async function getFederalStateApiKeyId(federalStateId: string) {
   const [error, federalStateObject] = await dbGetFederalStateWithDecryptedApiKeyWithResult({
     federalStateId,
   });
@@ -24,20 +35,21 @@ async function getFederalStateApiKey(federalStateId: string) {
     throw new Error(error?.message ?? 'Error fetching federal state');
   }
 
-  return federalStateObject.decryptedApiKey;
+  if (federalStateObject.apiKeyId === null) {
+    throw new Error('Federal state does not have an associated API key');
+  }
+
+  return federalStateObject.apiKeyId;
 }
 
-async function embedTextWithApiKey(text: string[], federalStateApiKey: string) {
-  const client = new OpenAI({
-    apiKey: federalStateApiKey,
-    baseURL: `${env.apiUrl}/v1`,
-  });
-  const result = await client.embeddings.create({
-    model: 'BAAI/bge-m3',
-    input: text,
-  });
+async function embedTextWithApiKey(text: string[], modelId: string, federalStateApiKeyId: string) {
+  const result = await generateEmbeddingsWithBilling(
+    modelId,
+    text,
+    federalStateApiKeyId,
+  );
 
-  return result.data.map((element) => element.embedding);
+  return result.embeddings;
 }
 
 export async function embedTextChunks({
@@ -49,7 +61,14 @@ export async function embedTextChunks({
   fileId: string;
   federalStateId: string;
 }): Promise<TextChunkInsertModel[]> {
-  const federalStateApiKey = await getFederalStateApiKey(federalStateId);
+  const [federalStateApiKeyId, model] = await Promise.all([
+    getFederalStateApiKeyId(federalStateId),
+    dbGetModelByName(EMBEDDING_MODEL),
+  ]);
+
+  if (!model) {
+    throw new Error(`Embedding model ${EMBEDDING_MODEL} not found`);
+  }
 
   logDebug(`Embedding ${values.length} chunks`);
   const promises: Promise<TextChunkInsertModel[]>[] = [];
@@ -62,7 +81,7 @@ export async function embedTextChunks({
           (value) => `${value.leadingOverlap ?? ''}${value.content}${value.trailingOverlap ?? ''}`,
         );
 
-        const batchEmbeddings = await embedTextWithApiKey(batchTexts, federalStateApiKey);
+        const batchEmbeddings = await embedTextWithApiKey(batchTexts, model.id, federalStateApiKeyId);
 
         return batchEmbeddings.map((embedding, batchIndex) => {
           const originalIndex = i + batchIndex;
