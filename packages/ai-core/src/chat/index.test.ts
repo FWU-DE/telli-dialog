@@ -370,6 +370,7 @@ describe('generateTextStreamWithBilling', () => {
     mockHasAccessToModel.mockResolvedValue(true);
     mockIsApiKeyOverQuota.mockResolvedValue(false);
 
+    // eslint-disable-next-line require-yield -- Generator intentionally throws error without yielding to test error handling
     const mockStreamGenerator = (async function* (): AsyncGenerator<string, TokenUsage> {
       throw new Error('Network error');
     })();
@@ -394,6 +395,7 @@ describe('generateTextStreamWithBilling', () => {
     mockIsApiKeyOverQuota.mockResolvedValue(false);
 
     const originalError = new InvalidModelError('Original error');
+    // eslint-disable-next-line require-yield -- Generator intentionally throws error without yielding to test error handling
     const mockStreamGenerator = (async function* (): AsyncGenerator<string, TokenUsage> {
       throw originalError;
     })();
