@@ -43,11 +43,7 @@ async function getFederalStateApiKeyId(federalStateId: string) {
 }
 
 async function embedTextWithApiKey(text: string[], modelId: string, federalStateApiKeyId: string) {
-  const result = await generateEmbeddingsWithBilling(
-    modelId,
-    text,
-    federalStateApiKeyId,
-  );
+  const result = await generateEmbeddingsWithBilling(modelId, text, federalStateApiKeyId);
 
   return result.embeddings;
 }
@@ -81,7 +77,11 @@ export async function embedTextChunks({
           (value) => `${value.leadingOverlap ?? ''}${value.content}${value.trailingOverlap ?? ''}`,
         );
 
-        const batchEmbeddings = await embedTextWithApiKey(batchTexts, model.id, federalStateApiKeyId);
+        const batchEmbeddings = await embedTextWithApiKey(
+          batchTexts,
+          model.id,
+          federalStateApiKeyId,
+        );
 
         return batchEmbeddings.map((embedding, batchIndex) => {
           const originalIndex = i + batchIndex;

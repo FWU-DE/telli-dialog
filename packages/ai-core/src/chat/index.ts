@@ -100,7 +100,7 @@ export async function* generateTextStreamWithBilling(
     const billingCallback = async (usage: TokenUsage) => {
       // TODO: @AsamMax - Does this make sense? Should the provider give the price instead?
       const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, model, usage);
-      
+
       // Call user's onComplete callback if provided
       if (onComplete) {
         await onComplete({ usage, priceInCents });

@@ -4,6 +4,9 @@ export type EmbeddingResponse = {
   embeddings: number[][];
 };
 
-export type EmbeddingGenerationFn = (args: { texts: string[]; model: string }) => Promise<EmbeddingResponse>;
+export type EmbeddingGenerationFn = (args: {
+  texts: string[];
+  model: string;
+}) => Promise<EmbeddingResponse>;
 
 export type AiModel = LlmModel;

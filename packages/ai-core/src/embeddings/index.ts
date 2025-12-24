@@ -31,7 +31,9 @@ export async function generateEmbeddingsWithBilling(
   ]);
 
   if (!hasAccess) {
-    throw new InvalidModelError(`API key does not have access to the embedding model: ${model.name}`);
+    throw new InvalidModelError(
+      `API key does not have access to the embedding model: ${model.name}`,
+    );
   }
 
   if (isOverQuota) {

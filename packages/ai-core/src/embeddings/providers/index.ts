@@ -3,7 +3,11 @@ import { constructIonosEmbeddingGenerationFn } from './ionos';
 import { EmbeddingGenerationFn, AiModel } from '../types';
 import { ProviderConfigurationError } from '../../errors';
 
-function getEmbeddingGenerationFnByModel({ model }: { model: AiModel }): EmbeddingGenerationFn | undefined {
+function getEmbeddingGenerationFnByModel({
+  model,
+}: {
+  model: AiModel;
+}): EmbeddingGenerationFn | undefined {
   if (model.provider === 'azure') {
     return constructAzureEmbeddingGenerationFn(model);
   }
