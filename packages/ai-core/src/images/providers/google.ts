@@ -1,6 +1,6 @@
 import { GoogleAuth } from 'google-auth-library';
 import { ImageGenerationFn, AiModel } from '../types';
-import { ImageGenerationError, ProviderConfigurationError, ResponsibleAIError } from '../errors';
+import { AiGenerationError, ProviderConfigurationError, ResponsibleAIError } from '../../errors';
 
 interface GoogleClientConfig {
   projectId: string;
@@ -90,7 +90,7 @@ export function constructGoogleImageGenerationFn(model: AiModel): ImageGeneratio
 
     if (!response.ok) {
       const errorDetails = await response.text();
-      throw new ImageGenerationError(
+      throw new AiGenerationError(
         `Google Vertex AI Image Generation request failed with status ${response.status}: ${response.statusText} \n\n ${errorDetails}`,
       );
     }
@@ -108,11 +108,11 @@ export function constructGoogleImageGenerationFn(model: AiModel): ImageGeneratio
       }
 
       if (!prediction.bytesBase64Encoded) {
-        throw new ImageGenerationError('No image data received from Google Vertex AI');
+        throw new AiGenerationError('No image data received from Google Vertex AI');
       }
       return { data: [prediction.bytesBase64Encoded], output_format: 'png' };
     } else {
-      throw new ImageGenerationError('No image generated from Google Vertex AI');
+      throw new AiGenerationError('No image generated from Google Vertex AI');
     }
   };
 }

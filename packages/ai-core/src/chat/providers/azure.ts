@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import type { AiModel, ImageGenerationFn } from '../types';
+import type { AiModel, TextStreamFn, TextGenerationFn, TokenUsage } from '../types';
 import { AiGenerationError, ProviderConfigurationError } from '../../errors';
 
 function createAzureClient(model: AiModel): {
@@ -23,34 +23,77 @@ function createAzureClient(model: AiModel): {
   return { client, deployment };
 }
 
-export function constructAzureImageGenerationFn(model: AiModel): ImageGenerationFn {
+export function constructAzureTextStreamFn(model: AiModel): TextStreamFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function getAzureImageGeneration(params: Parameters<ImageGenerationFn>[0]) {
-    const { prompt } = params;
-    const result = await client.images.generate(
+  return async function* getAzureTextStream({ messages, maxTokens }, onComplete) {
+    const stream = await client.chat.completions.create({
+      model: deployment,
+      messages,
+      stream: true,
+      stream_options: { include_usage: true },
+      max_tokens: maxTokens,
+    });
+
+    let usage: TokenUsage | undefined;
+
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content;
+
+      if (content) {
+        yield content;
+      }
+
+      if (chunk.usage) {
+        usage = {
+          completionTokens: chunk.usage.completion_tokens,
+          promptTokens: chunk.usage.prompt_tokens,
+          totalTokens: chunk.usage.total_tokens,
+        };
+      }
+    }
+
+    if (!usage) {
+      throw new AiGenerationError('No usage data returned from Azure OpenAI stream');
+    }
+
+    // Call the callback if provided
+    if (onComplete) {
+      await onComplete(usage);
+    }
+  };
+}
+
+export function constructAzureTextGenerationFn(model: AiModel): TextGenerationFn {
+  const { client, deployment } = createAzureClient(model);
+
+  return async function getAzureTextGeneration({ messages, maxTokens }) {
+    const response = await client.chat.completions.create(
       {
-        prompt,
-        size: '1024x1024',
-        n: 1,
-        quality: 'standard',
-        style: 'vivid',
-        response_format: 'b64_json',
+        model: deployment,
+        messages,
+        stream: false,
+        max_completion_tokens: maxTokens,
       },
       {
-        path: `/openai/deployments/${deployment}/images/generations`,
+        path: `/openai/deployments/${deployment}/chat/completions`,
       },
     );
 
-    if (!result.data || result.data.length === 0) {
-      throw new AiGenerationError('No image data received from Azure OpenAI');
+    const text = response.choices[0]?.message?.content ?? '';
+    const usage = response.usage;
+
+    if (!usage) {
+      throw new AiGenerationError('No usage data returned from Azure OpenAI');
     }
 
     return {
-      data: result.data
-        .map((item) => item.b64_json)
-        .filter((item): item is string => item !== undefined),
-      output_format: result.output_format,
+      text,
+      usage: {
+        completionTokens: usage.completion_tokens,
+        promptTokens: usage.prompt_tokens,
+        totalTokens: usage.total_tokens,
+      },
     };
   };
 }

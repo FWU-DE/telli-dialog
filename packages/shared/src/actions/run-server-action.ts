@@ -2,7 +2,7 @@ import { logError } from '@shared/logging';
 import { ServerActionResult } from './server-action-result';
 import { BusinessError } from '@shared/error/business-error';
 import { UnexpectedError } from '@shared/error/unexpected-error';
-import { ImageGenerationError } from '@telli/ai-core/images/errors';
+import { AiGenerationError } from '@telli/ai-core/errors';
 
 // Helper function to serialize error objects for client transmission
 function serializeError(error: BusinessError) {
@@ -29,8 +29,8 @@ export function runServerAction<TReturn, TArgs extends readonly unknown[] = []>(
           success: false,
           error: serializeError(error),
         };
-      } else if (error instanceof ImageGenerationError) {
-        logError('Image generation error occurred during server action.', error);
+      } else if (error instanceof AiGenerationError) {
+        logError('AI generation error occurred during server action.', error);
         return {
           success: false,
           error: serializeError({ ...error, statusCode: 500 }),

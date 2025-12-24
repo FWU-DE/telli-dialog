@@ -6,7 +6,7 @@ import { condenseChatHistory, getKeywordsFromQuery } from '../chat/utils';
 import { embedText } from './embedding';
 import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
-import { LanguageModelV1, Message } from 'ai';
+import { Message } from 'ai';
 import { logError } from '@shared/logging';
 
 type SearchOptions = {
@@ -17,12 +17,14 @@ type SearchOptions = {
 };
 
 export async function getRelevantFileContent({
-  model,
+  modelId,
+  apiKeyId,
   messages,
   user,
   relatedFileEntities,
 }: {
-  model: LanguageModelV1;
+  modelId: string;
+  apiKeyId: string;
   messages: Message[];
   user: UserAndContext;
   relatedFileEntities: FileModelAndContent[];
@@ -34,11 +36,13 @@ export async function getRelevantFileContent({
   const [searchQuery, keywords] = await Promise.all([
     condenseChatHistory({
       messages,
-      model,
+      modelId,
+      apiKeyId,
     }),
     getKeywordsFromQuery({
       messages,
-      model,
+      modelId,
+      apiKeyId,
     }),
   ]);
 

@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import type { AiModel, ImageGenerationFn } from '../types';
+import type { AiModel, EmbeddingGenerationFn } from '../types';
 import { AiGenerationError, ProviderConfigurationError } from '../../errors';
 
 function createAzureClient(model: AiModel): {
@@ -23,35 +23,17 @@ function createAzureClient(model: AiModel): {
   return { client, deployment };
 }
 
-export function constructAzureImageGenerationFn(model: AiModel): ImageGenerationFn {
+export function constructAzureEmbeddingGenerationFn(model: AiModel): EmbeddingGenerationFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function getAzureImageGeneration(params: Parameters<ImageGenerationFn>[0]) {
-    const { prompt } = params;
-    const result = await client.images.generate(
-      {
-        prompt,
-        size: '1024x1024',
-        n: 1,
-        quality: 'standard',
-        style: 'vivid',
-        response_format: 'b64_json',
-      },
-      {
-        path: `/openai/deployments/${deployment}/images/generations`,
-      },
-    );
+  return async function getAzureEmbedding({ texts }) {
+    const response = await client.embeddings.create({
+      model: deployment,
+      input: texts,
+    });
 
-    if (!result.data || result.data.length === 0) {
-      throw new AiGenerationError('No image data received from Azure OpenAI');
-    }
-
-    return {
-      data: result.data
-        .map((item) => item.b64_json)
-        .filter((item): item is string => item !== undefined),
-      output_format: result.output_format,
-    };
+    const embeddings = response.data.map((element) => element.embedding);
+    return { embeddings };
   };
 }
 

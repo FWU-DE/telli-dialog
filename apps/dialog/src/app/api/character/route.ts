@@ -107,7 +107,8 @@ export async function POST(request: NextRequest) {
     messages,
     user: teacherUserAndContext,
     relatedFileEntities,
-    model: telliProvider,
+    modelId: definedModel.id,
+    apiKeyId: modelAndProvider.apiKeyId,
   });
   const websearchSources = await Promise.all(urls);
   const systemPrompt = constructCharacterSystemPrompt({
