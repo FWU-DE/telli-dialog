@@ -3,7 +3,7 @@ import { generateText, generateTextStream } from './providers';
 import { hasAccessToModel } from '../api-keys/model-access';
 import { AiGenerationError, InvalidModelError } from '../errors';
 import { getTextModelById } from '../models';
-import type { Message } from './types';
+import type { Message, TokenUsage } from './types';
 
 /**
  * Generates text using the specified model and messages, with access control and billing.
@@ -69,6 +69,7 @@ export async function generateTextWithBilling(
  * @param modelId - The ID of the text model to use for generation
  * @param messages - The conversation messages (system, user, assistant)
  * @param apiKeyId - The ID of the API key to verify access and bill usage
+ * @param onComplete - Optional callback to be invoked after stream completion with usage and price data
  *
  * @returns An async generator that yields text chunks and returns usage data with price
  */
@@ -76,6 +77,7 @@ export async function* generateTextStreamWithBilling(
   modelId: string,
   messages: Message[],
   apiKeyId: string,
+  onComplete?: (result: { usage: TokenUsage; priceInCents: number }) => void | Promise<void>,
 ) {
   const model = await getTextModelById(modelId);
 
@@ -94,8 +96,19 @@ export async function* generateTextStreamWithBilling(
   }
 
   try {
-    // generate stream
-    const stream = generateTextStream(model, messages);
+    // Create billing callback
+    const billingCallback = async (usage: TokenUsage) => {
+      // TODO: @AsamMax - Does this make sense? Should the provider give the price instead?
+      const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, model, usage);
+      
+      // Call user's onComplete callback if provided
+      if (onComplete) {
+        await onComplete({ usage, priceInCents });
+      }
+    };
+
+    // generate stream with billing callback
+    const stream = generateTextStream(model, messages, billingCallback);
 
     // Yield all text chunks
     for await (const chunk of stream) {
@@ -110,7 +123,8 @@ export async function* generateTextStreamWithBilling(
       throw new AiGenerationError('No usage data returned from text generation stream');
     }
 
-    // bill to api key
+    // Note: billing already happened in the callback
+    // We need to get the price again for the return value
     const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, model, usage);
 
     return {

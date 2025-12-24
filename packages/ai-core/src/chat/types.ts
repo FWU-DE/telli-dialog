@@ -24,7 +24,10 @@ export type TextResponse = {
 
 export type TextGenerationFn = (args: TextGenerationArgs) => Promise<TextResponse>;
 
-export type TextStreamFn = (args: TextGenerationArgs) => AsyncGenerator<string, TokenUsage>;
+export type TextStreamFn = (
+  args: TextGenerationArgs,
+  onComplete?: (usage: TokenUsage) => void | Promise<void>,
+) => AsyncGenerator<string, TokenUsage>;
 
 // TODO: Just an alias for now, since the llmModel table needs renaming (it has image and embedding models too)
 export type AiModel = LlmModel;

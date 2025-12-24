@@ -26,7 +26,7 @@ function createAzureClient(model: AiModel): {
 export function constructAzureTextStreamFn(model: AiModel): TextStreamFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function* getAzureTextStream({ messages, maxTokens }) {
+  return async function* getAzureTextStream({ messages, maxTokens }, onComplete) {
     const stream = await client.chat.completions.create({
       model: deployment,
       messages,
@@ -55,6 +55,11 @@ export function constructAzureTextStreamFn(model: AiModel): TextStreamFn {
 
     if (!usage) {
       throw new AiGenerationError('No usage data returned from Azure OpenAI stream');
+    }
+
+    // Call the callback if provided
+    if (onComplete) {
+      await onComplete(usage);
     }
 
     return usage;

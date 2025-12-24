@@ -34,6 +34,7 @@ export async function generateText(
 export function generateTextStream(
   model: AiModel,
   messages: Parameters<TextStreamFn>[0]['messages'],
+  onComplete?: Parameters<TextStreamFn>[1],
 ) {
   const streamFn = getTextStreamFnByModel({ model });
   if (!streamFn) {
@@ -41,5 +42,5 @@ export function generateTextStream(
       `No text stream function found for provider: ${model.provider}`,
     );
   }
-  return streamFn({ messages, model: model.name });
+  return streamFn({ messages, model: model.name }, onComplete);
 }
