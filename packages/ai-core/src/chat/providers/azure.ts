@@ -61,8 +61,6 @@ export function constructAzureTextStreamFn(model: AiModel): TextStreamFn {
     if (onComplete) {
       await onComplete(usage);
     }
-
-    return usage;
   };
 }
 

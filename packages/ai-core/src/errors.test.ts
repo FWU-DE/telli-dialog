@@ -5,7 +5,7 @@ import {
   RateLimitExceededError,
   InvalidModelError,
   ProviderConfigurationError,
-} from '../errors';
+} from './errors';
 
 describe('AiGenerationError', () => {
   it('should create an error with the correct name and message', () => {

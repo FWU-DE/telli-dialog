@@ -114,23 +114,6 @@ export async function* generateTextStreamWithBilling(
     for await (const chunk of stream) {
       yield chunk;
     }
-
-    // Get usage from the return value
-    const result = await stream.next();
-    const usage = result.value;
-
-    if (!usage || typeof usage !== 'object') {
-      throw new AiGenerationError('No usage data returned from text generation stream');
-    }
-
-    // Note: billing already happened in the callback
-    // We need to get the price again for the return value
-    const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, model, usage);
-
-    return {
-      usage,
-      priceInCents,
-    };
   } catch (error) {
     // if error is not child of AiGenerationError, wrap it
     if (!(error instanceof AiGenerationError)) {
