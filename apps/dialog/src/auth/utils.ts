@@ -4,6 +4,7 @@ import { auth, unstable_update } from '.';
 import { type UserAndContext } from './types';
 import { dbGetSchoolAndMappingAndFederalStateByUserId } from '@shared/db/functions/school';
 import { FederalStateSelectModel } from '@shared/db/schema';
+import { LOGOUT_URL } from '@/app/api/auth/const';
 
 export async function getValidSession(): Promise<Session> {
   const session = await auth();
@@ -34,7 +35,7 @@ export async function getUser(): Promise<UserAndContext> {
   const session = await getValidSession();
 
   if (session.user === undefined) {
-    redirect('/logout');
+    redirect(LOGOUT_URL.toString());
   }
 
   return session.user;
