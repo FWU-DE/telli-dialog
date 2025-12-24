@@ -43,7 +43,7 @@ describe('generateTextWithBilling', () => {
       type: 'text',
       promptTokenPrice: 100,
       completionTokenPrice: 200,
-    }, 
+    },
   } as AiModel;
 
   const mockUsage: TokenUsage = {
