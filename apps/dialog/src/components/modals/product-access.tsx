@@ -3,9 +3,12 @@
 import React from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { useTheme } from '@/hooks/use-theme';
 import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
+
+const LOGOUT_URL = '/api/auth/logout';
 
 type ProductAccessModalProps = {
   modalTitle: string;
@@ -19,6 +22,7 @@ export default function ProductAccessModal({
   modalTitle,
 }: ProductAccessModalProps) {
   const { designConfiguration } = useTheme();
+  const t = useTranslations('common');
   return (
     <AlertDialog.Root open defaultOpen>
       <AlertDialog.Portal>
@@ -33,8 +37,8 @@ export default function ProductAccessModal({
           <AlertDialog.Description asChild>{children}</AlertDialog.Description>
           <div className="flex flex-wrap justify-end items-center gap-6 mt-10">
             <AlertDialog.Action asChild>
-              <Link href="/logout" className={buttonSecondaryClassName}>
-                Ausloggen
+              <Link href={LOGOUT_URL} className={buttonSecondaryClassName}>
+                {t('logout')}
               </Link>
             </AlertDialog.Action>
           </div>
