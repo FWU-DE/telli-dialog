@@ -21,7 +21,7 @@
   "dependencies": {
     "openai": "6.9.1",
     "google-auth-library": "10.5.0",
-    "zod": "4.1.13",
+    "zod": "4.2.1",
     "drizzle-orm": "0.45.1",
     "drizzle-zod": "0.8.3",
     "pg": "8.16.3"
@@ -29,13 +29,13 @@
   "devDependencies": {
     "@eslint/eslintrc": "3.3.3",
     "@eslint/js": "9.39.2",
-    "@t3-oss/env-core": "0.13.8",
+    "@t3-oss/env-core": "0.13.10",
     "@telli/typescript-config": "workspace:*",
     "@types/node": "24.10.1",
     "@types/pg": "8.16.0",
-    "@typescript-eslint/eslint-plugin": "8.49.0",
-    "@typescript-eslint/parser": "8.49.0",
-    "@vitest/coverage-v8": "4.0.15",
+    "@typescript-eslint/eslint-plugin": "8.50.0",
+    "@typescript-eslint/parser": "8.50.0",
+    "@vitest/coverage-v8": "4.0.16",
     "eslint": "9.39.2",
     "eslint-config-prettier": "10.1.8",
     "eslint-config-turbo": "2.6.3",
