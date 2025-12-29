@@ -23,6 +23,7 @@ export async function embedText({
     throw new Error(`Embedding model ${EMBEDDING_MODEL} not found`);
   }
 
+  // TODO: TD-526 Bill to user
   return await embedTextWithApiKey(text, model.id, apiKeyId);
 }
 
@@ -77,6 +78,7 @@ export async function embedTextChunks({
           (value) => `${value.leadingOverlap ?? ''}${value.content}${value.trailingOverlap ?? ''}`,
         );
 
+        // TODO: TD-526 Bill to user
         const batchEmbeddings = await embedTextWithApiKey(
           batchTexts,
           model.id,
