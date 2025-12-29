@@ -1,14 +1,16 @@
-import { UIMessage } from 'ai';
-import { UseChatHelpers } from '@ai-sdk/react';
+import { type UIMessage, type ChatStatus } from '@/types/chat';
 import { ChatBox } from './chat-box';
 import LoadingAnimation from './loading-animation';
 import { FileModel } from '@shared/db/schema';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 
+// Re-export for consumers that import from this file
+export type { ChatStatus };
+
 interface MessagesProps {
   messages: UIMessage[];
   isLoading: boolean;
-  status: UseChatHelpers['status'];
+  status: ChatStatus;
   reload: () => void;
   assistantIcon?: React.ReactNode;
   doesLastUserMessageContainLinkOrFile: boolean;

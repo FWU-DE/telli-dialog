@@ -28,8 +28,6 @@
     "k6:run:cloud": "k6 cloud run -e LOADTEST_USERNAME=$LOADTEST_USERNAME -e LOADTEST_PASSWORD=$LOADTEST_PASSWORD -e LOADTEST_IDP_HINT=$LOADTEST_IDP_HINT -e LOADTEST_BASE_URL=$LOADTEST_BASE_URL"
   },
   "dependencies": {
-    "@ai-sdk/openai": "1.1.9",
-    "@ai-sdk/react": "1.2.12",
     "@aws-sdk/client-s3": "3.948.0",
     "@aws-sdk/s3-request-presigner": "3.948.0",
     "@deutschlandgpt/core": "0.1.5",
@@ -59,7 +57,7 @@
     "@telli/ai-core": "workspace:*",
     "@telli/shared": "workspace:*",
     "@telli/ui": "workspace:*",
-    "ai": "4.3.16",
+    "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "date-fns": "4.1.0",
     "docx": "9.5.1",

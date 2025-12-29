@@ -15,7 +15,7 @@ import { getSignedUrlFromS3Get } from '@shared/s3';
 import { FileModel } from '@shared/db/schema';
 import { useQueryClient } from '@tanstack/react-query';
 import { logError } from '@shared/logging';
-import { ResponsibleAIError } from '@telli/ai-core/images/errors';
+import { ResponsibleAIError } from '@telli/ai-core/errors';
 
 interface ImageGenerationChatProps {
   conversationId?: string;

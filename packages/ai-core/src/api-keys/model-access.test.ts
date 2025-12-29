@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { hasAccessToImageModel } from './model-access';
+import { hasAccessToModel } from './model-access';
 import type { AiModel } from '../images/types';
 
 // Mock the api-db functions
@@ -11,7 +11,7 @@ import { dbHasApiKeyAccessToModel } from '../api-db/functions';
 
 const mockDbHasApiKeyAccessToModel = vi.mocked(dbHasApiKeyAccessToModel);
 
-describe('hasAccessToImageModel', () => {
+describe('hasAccessToModel', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -26,7 +26,7 @@ describe('hasAccessToImageModel', () => {
 
     mockDbHasApiKeyAccessToModel.mockResolvedValue(true as never);
 
-    const result = await hasAccessToImageModel(apiKeyId, imageModel);
+    const result = await hasAccessToModel(apiKeyId, imageModel);
 
     expect(result).toBe(true);
     expect(mockDbHasApiKeyAccessToModel).toHaveBeenCalledWith({
@@ -45,7 +45,7 @@ describe('hasAccessToImageModel', () => {
 
     mockDbHasApiKeyAccessToModel.mockResolvedValue(false as never);
 
-    const result = await hasAccessToImageModel(apiKeyId, imageModel);
+    const result = await hasAccessToModel(apiKeyId, imageModel);
 
     expect(result).toBe(false);
     expect(mockDbHasApiKeyAccessToModel).toHaveBeenCalledWith({

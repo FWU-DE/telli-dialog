@@ -10,7 +10,7 @@ import DownloadSharedConversationButton from '@/app/(unauth)/ua/dowload-shared-c
 import Image from 'next/image';
 import { ThreeDotsProfileMenu } from '../navigation/profile-menu';
 import { UnauthenticatedProfileMenu } from '../navigation/profile-menu';
-import { Message } from 'ai';
+import { type ChatMessage as Message } from '@/types/chat';
 
 export function SharedChatHeader({
   chatActive,

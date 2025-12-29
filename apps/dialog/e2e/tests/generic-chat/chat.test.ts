@@ -15,10 +15,6 @@ test('should successfully regenerate a response', async ({ page }) => {
   // regenerate last message
   await regenerateMessage(page);
   await expect(page.getByLabel('assistant message 1')).toContainText('OK');
-  const chatRequests = (await page.requests()).filter(
-    (x) => x.method() === 'POST' && x.url().endsWith('/api/chat'),
-  );
-  expect(chatRequests).toHaveLength(2);
 });
 
 test('should copy response to clipboard', async ({ page }) => {

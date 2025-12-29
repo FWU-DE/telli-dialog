@@ -12,9 +12,8 @@ import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { iconClassName } from '@/utils/tailwind/icon';
 import useBreakpoints from '../hooks/use-breakpoints';
 import { isImageFile } from '@/utils/files/generic';
-import { UIMessage } from 'ai';
+import { type UIMessage, type ChatStatus } from '@/types/chat';
 import { ReactNode } from 'react';
-import { UseChatHelpers } from '@ai-sdk/react';
 
 export function ChatBox({
   assistantIcon,
@@ -39,7 +38,7 @@ export function ChatBox({
   isLastUser?: boolean;
   isLoading: boolean;
   regenerateMessage: () => void;
-  status: UseChatHelpers['status'];
+  status: ChatStatus;
 }) {
   const tCommon = useTranslations('common');
   const { isAtLeast } = useBreakpoints();

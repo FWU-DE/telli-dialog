@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { limitChatHistory } from './utils';
-import { Message } from 'ai';
+import { type ChatMessage as Message } from '@/types/chat';
 import { generateRandomString } from '../../../../e2e/utils/random';
 
 // Helper function to create a message

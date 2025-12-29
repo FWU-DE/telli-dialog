@@ -9,7 +9,7 @@ import {
 } from 'docx';
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { markdownToDocx } from '../markdown';
-import { type Message } from 'ai';
+import { type ChatMessage as Message } from '@/types/chat';
 
 export async function generateSharedConversationDocxFiles({
   conversationMessages,
