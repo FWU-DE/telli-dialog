@@ -339,7 +339,7 @@
     }
   },
   "image-generation": {
-    "image-generation-model": "Bildgenerierungs-Modell",
+    "image-generation-model": "Modell",
     "no-model-available": "Kein Modell verfügbar",
     "placeholder": "Beschreibe, wie das Bild aussehen soll.",
     "generate-button": "Bild generieren",
