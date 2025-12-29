@@ -17,9 +17,9 @@ function createIonosClient(model: AiModel): OpenAI {
 export function constructIonosTextStreamFn(model: AiModel): TextStreamFn {
   const client = createIonosClient(model);
 
-  return async function* getIonosTextStream({ messages, maxTokens }, onComplete) {
+  return async function* getIonosTextStream({ messages, model: modelName, maxTokens }, onComplete) {
     const stream = await client.chat.completions.create({
-      model: model.id,
+      model: modelName,
       messages,
       stream: true,
       stream_options: { include_usage: true },
@@ -59,9 +59,9 @@ export function constructIonosTextStreamFn(model: AiModel): TextStreamFn {
 export function constructIonosTextGenerationFn(model: AiModel): TextGenerationFn {
   const client = createIonosClient(model);
 
-  return async function getIonosTextGeneration({ messages, maxTokens }) {
+  return async function getIonosTextGeneration({ messages, model: modelName, maxTokens }) {
     const response = await client.chat.completions.create({
-      model: model.id,
+      model: modelName,
       messages,
       stream: false,
       max_tokens: maxTokens,

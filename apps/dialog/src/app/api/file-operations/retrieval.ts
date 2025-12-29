@@ -6,7 +6,7 @@ import { condenseChatHistory, getKeywordsFromQuery } from '../chat/utils';
 import { embedText } from './embedding';
 import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
-import { Message } from 'ai';
+import { type ChatMessage as Message } from '@/types/chat';
 import { logError } from '@shared/logging';
 
 type SearchOptions = {

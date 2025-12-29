@@ -27,13 +27,19 @@ export function constructAzureTextStreamFn(model: AiModel): TextStreamFn {
   const { client, deployment } = createAzureClient(model);
 
   return async function* getAzureTextStream({ messages, maxTokens }, onComplete) {
-    const stream = await client.chat.completions.create({
-      model: deployment,
-      messages,
-      stream: true,
-      stream_options: { include_usage: true },
-      max_tokens: maxTokens,
-    });
+    // For Azure, we use the deployment from the URL, not the model name
+    const stream = await client.chat.completions.create(
+      {
+        model: deployment,
+        messages,
+        stream: true,
+        stream_options: { include_usage: true },
+        max_tokens: maxTokens,
+      },
+      {
+        path: `/openai/deployments/${deployment}/chat/completions`,
+      },
+    );
 
     let usage: TokenUsage | undefined;
 
@@ -68,6 +74,7 @@ export function constructAzureTextGenerationFn(model: AiModel): TextGenerationFn
   const { client, deployment } = createAzureClient(model);
 
   return async function getAzureTextGeneration({ messages, maxTokens }) {
+    // For Azure, we use the deployment from the URL, not the model name
     const response = await client.chat.completions.create(
       {
         model: deployment,

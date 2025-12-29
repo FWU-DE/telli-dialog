@@ -5,7 +5,7 @@ import React from 'react';
 import Spinner from '@/components/icons/spinner';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
-import { Message } from 'ai';
+import { type ChatMessage as Message } from '@/types/chat';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { cn } from '@/utils/tailwind';
 import { iconClassName } from '@/utils/tailwind/icon';

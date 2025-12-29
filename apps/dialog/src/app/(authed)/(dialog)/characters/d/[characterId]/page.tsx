@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import Chat from '@/components/chat/chat';
 import Logo from '@/components/common/logo';
-import { Message } from 'ai';
+import { type ChatMessage as Message } from '@/types/chat';
 import { getCharacterForChatSession } from '@shared/characters/character-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';

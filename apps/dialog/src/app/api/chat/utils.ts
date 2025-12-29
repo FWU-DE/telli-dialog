@@ -1,6 +1,6 @@
 import { ImageAttachment } from '@/utils/files/types';
 import { logError } from '@shared/logging';
-import { type Message } from 'ai';
+import { type ChatMessage as Message } from '@/types/chat';
 import { generateTextWithBilling } from '@telli/ai-core';
 
 /**
@@ -27,9 +27,9 @@ export function formatMessagesWithImages(
       continue;
     }
     message.experimental_attachments = messageImages.map((image) => ({
-      contentType: image.mimeType,
+      contentType: image.mimeType ?? 'image/jpeg',
       url: image.url,
-      type: 'image',
+      type: 'image' as const,
     }));
   }
 
@@ -173,9 +173,7 @@ Benutzer: "Ich möchte wissen, ob ich in meinem Bundesland einen Anspruch auf El
 Suchanfrage: "Elterngeld Anspruch"
 `,
         },
-        ...recentMessages
-          .filter((m) => m.role !== 'data')
-          .map((m) => ({ role: m.role as Exclude<Message['role'], 'data'>, content: m.content })),
+        ...recentMessages.map((m) => ({ role: m.role, content: m.content })),
       ],
       apiKeyId,
     );

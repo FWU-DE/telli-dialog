@@ -1,6 +1,6 @@
 'use client';
 
-import { useChat } from '@ai-sdk/react';
+import { useMainChat, convertToAiMessages, type ChatMessage } from '@/hooks/use-chat-hooks';
 import { FormEvent, ReactNode, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
@@ -21,8 +21,7 @@ import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { ChatInputBox } from './chat-input-box';
 import { ErrorChatPlaceholder } from './error-chat-placeholder';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
-import { useCheckStatusCode } from '@/hooks/use-response-status';
-import { Message } from 'ai';
+import { type ChatMessage as Message } from '@/types/chat';
 import { logDebug, logWarning } from '@shared/logging';
 import { useSession } from 'next-auth/react';
 import { AssistantIcon } from './assistant-icon';
@@ -33,7 +32,7 @@ import { Messages } from './messages';
 
 type ChatProps = {
   id: string;
-  initialMessages: Message[];
+  initialMessages: ChatMessage[];
   customGpt?: CustomGptModel;
   character?: CharacterSelectModel;
   imageSource?: string;
@@ -72,57 +71,46 @@ export default function Chat({
   const [files, setFiles] = useState<Map<string, LocalFileState>>(new Map());
   const [countOfFilesInChat, setCountOfFilesInChat] = useState(0);
   const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
+  const [chatError, setChatError] = useState<Error | null>(null);
   const queryClient = useQueryClient();
   const session = useSession();
-
-  // substitute the error object from the useChat hook, to dislay a user friendly error message in German
-  const { error, handleResponse, handleError, resetError } = useCheckStatusCode();
 
   function refetchConversations() {
     void queryClient.invalidateQueries({ queryKey: ['conversations'] });
   }
 
-  const { messages, input, setInput, handleInputChange, handleSubmit, reload, stop, status } =
-    useChat({
-      id,
-      initialMessages,
-      api: '/api/chat',
-      experimental_throttle: 100,
-      maxSteps: 2,
-      generateId: generateUUID,
-      sendExtraMessageFields: true, // content, role, name, data and annotations will be send to the server
-      body: {
-        characterId: character?.id,
-        customGptId: customGpt?.id,
-        modelId: selectedModel?.id,
-      },
-      onResponse: (response) => {
-        handleResponse(response);
-        // trigger refetch of the fileMapping from the DB
-        setCountOfFilesInChat(countOfFilesInChat + 1); // clean code: workaround to trigger reloading of fileMapping from server
-        if (messages.length > 1) {
-          return;
-        }
+  const {
+    messages,
+    setMessages,
+    input,
+    setInput,
+    handleInputChange,
+    handleSubmit,
+    reload,
+    stop,
+    status,
+  } = useMainChat({
+    conversationId: id,
+    initialMessages: initialMessages,
+    modelId: selectedModel?.id,
+    characterId: character?.id,
+    customGptId: customGpt?.id,
+    onFinish: (message) => {
+      logDebug(`onFinish called with message ${JSON.stringify(message)}`);
+      if (messages.length > 1) {
+        return;
+      }
+      logWarning('Assert: onFinish was called with zero messages.');
+      refetchConversations();
+    },
+    onError: (error) => {
+      setChatError(error);
+      refetchConversations();
+    },
+  });
 
-        logWarning('Assert: onResponse was called with zero messages.');
-        refetchConversations();
-        router.refresh();
-      },
-      onFinish: (message: Message, options: unknown) => {
-        logDebug(
-          `onFinish called with message ${JSON.stringify(message)} and options ${JSON.stringify(options)}`,
-        );
-        if (messages.length > 1) {
-          return;
-        }
-        logWarning('Assert: onFinish was called with zero messages.');
-        refetchConversations();
-      },
-      onError: (error: Error) => {
-        handleError(error);
-        refetchConversations();
-      },
-    });
+  // Convert to Vercel AI Message format for compatibility with existing components
+  const aiMessages = convertToAiMessages(messages);
 
   const scrollRef = useAutoScroll([messages, status]);
 
@@ -139,15 +127,24 @@ export default function Chat({
 
     try {
       setLastMessageHasAttachments(messageContainsAttachments(input, files));
-      handleSubmit(e, {
-        allowEmptySubmit: false,
-        body: {
-          fileIds: Array.from(files)
-            .map(([, file]) => file.fileId)
-            .filter(Boolean),
-        },
+      setChatError(null);
+
+      // Trigger refetch of the fileMapping from the DB
+      setCountOfFilesInChat(countOfFilesInChat + 1);
+
+      // If this is the first message, update navigation and refetch
+      if (messages.length === 0) {
+        navigateWithoutRefresh(conversationPath);
+        refetchConversations();
+        router.refresh();
+      }
+
+      await handleSubmit(e, {
+        fileIds: Array.from(files)
+          .map(([, file]) => file.fileId)
+          .filter(Boolean) as string[],
       });
-      navigateWithoutRefresh(conversationPath);
+
       setInitialFiles(
         Array.from(files).map(([, file]) => ({
           id: file.fileId ?? '',
@@ -165,7 +162,7 @@ export default function Chat({
   }
 
   function handleReload() {
-    resetError();
+    setChatError(null);
     void reload();
   }
 
@@ -250,7 +247,7 @@ export default function Chat({
             placeholderElement
           ) : (
             <Messages
-              messages={messages}
+              messages={aiMessages}
               isLoading={isLoading}
               status={status}
               reload={reload}
@@ -262,7 +259,7 @@ export default function Chat({
               webSourceMapping={webSourceMapping}
             />
           )}
-          <ErrorChatPlaceholder error={error} handleReload={handleReload} />
+          <ErrorChatPlaceholder error={chatError ?? undefined} handleReload={handleReload} />
         </div>
         <div className="w-full max-w-3xl pb-4 px-4 mx-auto">
           <div className="relative flex flex-col">

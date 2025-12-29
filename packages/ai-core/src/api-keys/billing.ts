@@ -28,16 +28,17 @@ function calculatePriceInCentByTextModelAndUsage({
   return (completionTokenPrice + promptTokenPrice) / PRICE_AND_CENT_MULTIPLIER;
 }
 
-function calculatePriceInCentByEmbeddingModelAndUsage({
-  promptTokens,
-  priceMetadata,
-}: {
-  priceMetadata: { promptTokenPrice: number };
-  promptTokens: number;
-}) {
-  const promptTokenPrice = promptTokens * priceMetadata.promptTokenPrice;
-  return promptTokenPrice / PRICE_AND_CENT_MULTIPLIER;
-}
+// TODO: Re-enable when embedding billing is implemented
+// function calculatePriceInCentByEmbeddingModelAndUsage({
+//   promptTokens,
+//   priceMetadata,
+// }: {
+//   priceMetadata: { promptTokenPrice: number };
+//   promptTokens: number;
+// }) {
+//   const promptTokenPrice = promptTokens * priceMetadata.promptTokenPrice;
+//   return promptTokenPrice / PRICE_AND_CENT_MULTIPLIER;
+// }
 
 /**
  * Bills image generation usage to the specified API key.

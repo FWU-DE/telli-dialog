@@ -25,7 +25,6 @@
     "openai": "6.9.1",
     "openaiv4": "npm:openai@4.104.0",
     "pg": "8.16.3",
-    "tiktoken": "^1.0.22",
     "zod": "4.1.13"
   },
   "devDependencies": {

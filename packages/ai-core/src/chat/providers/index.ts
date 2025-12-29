@@ -1,6 +1,5 @@
 import { constructAzureTextGenerationFn, constructAzureTextStreamFn } from './azure';
 import { constructIonosTextGenerationFn, constructIonosTextStreamFn } from './ionos';
-import { constructOpenAiTextGenerationFn, constructOpenAiTextStreamFn } from './openai';
 import { TextGenerationFn, TextStreamFn, AiModel } from '../types';
 import { ProviderConfigurationError } from '../../errors';
 
@@ -10,9 +9,6 @@ function getTextGenerationFnByModel({ model }: { model: AiModel }): TextGenerati
   }
   if (model.provider === 'ionos') {
     return constructIonosTextGenerationFn(model);
-  }
-  if (model.provider === 'openai') {
-    return constructOpenAiTextGenerationFn(model);
   }
 
   return undefined;
@@ -24,9 +20,6 @@ function getTextStreamFnByModel({ model }: { model: AiModel }): TextStreamFn | u
   }
   if (model.provider === 'ionos') {
     return constructIonosTextStreamFn(model);
-  }
-  if (model.provider === 'openai') {
-    return constructOpenAiTextStreamFn(model);
   }
 
   return undefined;

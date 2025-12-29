@@ -1,6 +1,6 @@
 'use client';
 
-import { useChat } from '@ai-sdk/react';
+import { useCharacterChat, convertToAiMessages, type ChatMessage } from '@/hooks/use-chat-hooks';
 import { FormEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { CharacterWithShareDataModel } from '@shared/db/schema';
@@ -10,9 +10,7 @@ import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import useBreakpoints from '../hooks/use-breakpoints';
-import { useCheckStatusCode } from '@/hooks/use-response-status';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
-import { Message } from 'ai';
 import { AssistantIcon } from './assistant-icon';
 import { messageContainsAttachments } from '@/utils/chat/messages';
 import { Messages } from './messages';
@@ -26,32 +24,28 @@ export default function CharacterSharedChat({
 }: CharacterWithShareDataModel & { inviteCode: string; imageSource?: string }) {
   const t = useTranslations('characters.shared');
 
-  const { id, inviteCode } = character;
+  const { id, inviteCode, modelId } = character;
   const timeLeft = calculateTimeLeftForLearningScenario(character);
   const chatActive = timeLeft > 0;
 
-  const searchParams = new URLSearchParams({ id, inviteCode });
-  const endpoint = `/api/character?${searchParams.toString()}`;
-
   const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
+  const [chatError, setChatError] = useState<Error | null>(null);
 
-  // substitute the error object from the useChat hook, to dislay a user friendly error message in German
-  const { error, handleResponse, handleError, resetError } = useCheckStatusCode();
-  const initialMessages: Message[] = character.initialMessage
+  const initialMessages: ChatMessage[] = character.initialMessage
     ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
     : [];
 
   const { messages, setMessages, input, handleInputChange, handleSubmit, reload, status, stop } =
-    useChat({
-      id,
+    useCharacterChat({
+      characterId: id,
+      inviteCode,
       initialMessages,
-      api: endpoint,
-      experimental_throttle: 100,
-      maxSteps: 2,
-      body: { modelId: character.modelId },
-      onResponse: handleResponse,
-      onError: handleError,
+      modelId: modelId ?? undefined,
+      onError: setChatError,
     });
+
+  // Convert to Vercel AI Message format for compatibility with existing components
+  const aiMessages = convertToAiMessages(messages);
 
   const scrollRef = useAutoScroll([messages, id, inviteCode]);
   const { isBelow } = useBreakpoints();
@@ -61,7 +55,8 @@ export default function CharacterSharedChat({
 
     try {
       setLastMessageHasAttachments(messageContainsAttachments(input));
-      handleSubmit(e, {});
+      setChatError(null);
+      await handleSubmit(e, {});
     } catch (error) {
       console.error(error);
     }
@@ -69,11 +64,11 @@ export default function CharacterSharedChat({
 
   function handleOpenNewChat() {
     setMessages([]);
-    resetError();
+    setChatError(null);
   }
 
   function handleReload() {
-    resetError();
+    setChatError(null);
     void reload();
   }
 
@@ -87,7 +82,7 @@ export default function CharacterSharedChat({
 
   return (
     <>
-      {!chatActive && <ExpiredChatModal conversationMessages={messages} title={character.name} />}
+      {!chatActive && <ExpiredChatModal conversationMessages={aiMessages} title={character.name} />}
       <div className="flex flex-col h-full w-full overflow-hidden">
         <SharedChatHeader
           chatActive={chatActive}
@@ -95,7 +90,7 @@ export default function CharacterSharedChat({
           t={t}
           handleOpenNewChat={handleOpenNewChat}
           title={character.name}
-          messages={messages}
+          messages={aiMessages}
           reductionBreakpoint={reductionBreakpoint}
           // currently this is redundant, due to the inconsisitency with the shared school chat initial page
           dialogStarted={messages.length > 0}
@@ -115,7 +110,7 @@ export default function CharacterSharedChat({
               />
             ) : (
               <Messages
-                messages={messages}
+                messages={aiMessages}
                 isLoading={isLoading}
                 status={status}
                 reload={reload}
@@ -124,7 +119,7 @@ export default function CharacterSharedChat({
                 containerClassName="flex flex-col gap-4"
               />
             )}
-            <ErrorChatPlaceholder error={error} handleReload={handleReload} />
+            <ErrorChatPlaceholder error={chatError ?? undefined} handleReload={handleReload} />
           </div>
           <div className="w-full max-w-5xl mx-auto px-4 pb-4">
             <div className="flex flex-col">

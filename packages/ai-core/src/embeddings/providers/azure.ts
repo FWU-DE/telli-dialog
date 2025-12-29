@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import type { AiModel, EmbeddingGenerationFn } from '../types';
-import { AiGenerationError, ProviderConfigurationError } from '../../errors';
+import { ProviderConfigurationError } from '../../errors';
 
 function createAzureClient(model: AiModel): {
   client: OpenAI;

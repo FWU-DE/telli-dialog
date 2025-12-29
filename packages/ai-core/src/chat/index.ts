@@ -5,6 +5,9 @@ import { AiGenerationError, InvalidModelError } from '../errors';
 import { getTextModelById } from '../models';
 import type { Message, TokenUsage } from './types';
 
+// Re-export types for external consumers
+export type { Message, TokenUsage } from './types';
+
 /**
  * Generates text using the specified model and messages, with access control and billing.
  *
