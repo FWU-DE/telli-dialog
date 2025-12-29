@@ -19,13 +19,14 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "openai": "6.9.1",
-    "openaiv4": "npm:openai@4.104.0",
-    "google-auth-library": "10.5.0",
-    "zod": "4.1.13",
     "drizzle-orm": "0.45.1",
     "drizzle-zod": "0.8.3",
-    "pg": "8.16.3"
+    "google-auth-library": "10.5.0",
+    "openai": "6.9.1",
+    "openaiv4": "npm:openai@4.104.0",
+    "pg": "8.16.3",
+    "tiktoken": "^1.0.22",
+    "zod": "4.1.13"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.3",
@@ -43,8 +44,8 @@
     "eslint-plugin-prettier": "5.5.4",
     "prettier": "3.7.4",
     "prettier-eslint": "16.4.2",
-    "typescript": "5.9.3",
     "tsx": "4.21.0",
+    "typescript": "5.9.3",
     "vitest": "4.0.15"
   }
 }
