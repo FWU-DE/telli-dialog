@@ -24,12 +24,12 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.948.0",
-    "@aws-sdk/s3-request-presigner": "3.948.0",
+    "@aws-sdk/client-s3": "3.958.0",
+    "@aws-sdk/s3-request-presigner": "3.958.0",
     "@dotenvx/dotenvx": "1.51.2",
-    "@sentry/nextjs": "10.30.0",
+    "@sentry/nextjs": "10.32.1",
     "@telli/ai-core": "workspace:*",
-    "@t3-oss/env-core": "0.13.8",
+    "@t3-oss/env-core": "0.13.10",
     "drizzle-kit": "0.31.8",
     "drizzle-orm": "0.45.1",
     "drizzle-zod": "0.8.3",
@@ -37,7 +37,7 @@
     "next": "15.5.9",
     "pg": "8.16.3",
     "unstorage": "1.17.3",
-    "zod": "4.1.13"
+    "zod": "4.2.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.3",
@@ -45,12 +45,12 @@
     "@telli/typescript-config": "workspace:*",
     "@types/node": "24.10.1",
     "@types/pg": "8.16.0",
-    "@typescript-eslint/eslint-plugin": "8.49.0",
-    "@typescript-eslint/parser": "8.49.0",
-    "@vitest/coverage-v8": "4.0.15",
+    "@typescript-eslint/eslint-plugin": "8.50.1",
+    "@typescript-eslint/parser": "8.50.1",
+    "@vitest/coverage-v8": "4.0.16",
     "eslint": "9.39.2",
     "eslint-config-prettier": "10.1.8",
-    "eslint-config-turbo": "2.6.3",
+    "eslint-config-turbo": "2.7.2",
     "eslint-plugin-prettier": "5.5.4",
     "prettier": "3.7.4",
     "prettier-eslint": "16.4.2",
