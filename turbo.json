@@ -28,7 +28,8 @@
     "SENTRY_DSN",
     "SENTRY_ENVIRONMENT",
     "NEXT_PUBLIC_SENTRY_LOG_LEVEL",
-    "API_DATABASE_URL"
+    "API_DATABASE_URL",
+    "DB_CACHE_TTL_SECONDS"
   ],
   "tasks": {
     "build": {
