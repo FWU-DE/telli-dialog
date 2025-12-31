@@ -11,7 +11,6 @@ import './scrollbar.css';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 import { dbGetFederalStateByIdWithResult } from '@shared/db/functions/federal-state';
 import { getMaybeLogoFromS3 } from '@shared/s3';
-import { Icon } from 'next/dist/lib/metadata/types/metadata-types';
 
 const barlow = Barlow({
   weight: ['400', '500', '600', '700'],
@@ -25,18 +24,14 @@ export async function generateMetadata(): Promise<Metadata> {
     dbGetFederalStateByIdWithResult(maybeUser?.school.federalStateId),
   ]);
 
-  const appleIcon: Icon[] = [
-    ...(faviconPath ? [{ url: faviconPath, type: 'image/svg+xml' }] : []),
-    { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
-  ];
-
   return {
     title: !!federalState?.telliName ? federalState?.telliName : 'telli',
     description: 'Der datenschutzkonforme KI-Chatbot für die Schule',
     icons: {
       icon: faviconPath ?? '/telli.svg',
-      apple: appleIcon,
+      apple: '/apple-touch-icon.png',
     },
+    manifest: '/manifest.webmanifest',
   };
 }
 
