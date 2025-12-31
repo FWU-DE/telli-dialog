@@ -11,7 +11,7 @@ import { ImageStyle } from '@shared/utils/chat';
 
 export default function SelectImageStyle() {
   const { styles, selectedStyle, setSelectedStyle } = useImageStyle();
-  const { isOpen } = useSidebarVisibility();
+  useSidebarVisibility();
   const tImageGeneration = useTranslations('image-generation');
 
   async function handleSelectStyle(style: ImageStyle | undefined) {

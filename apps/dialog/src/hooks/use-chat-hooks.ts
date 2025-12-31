@@ -44,7 +44,6 @@ export function useMainChat(options: {
   );
 
   return useTelliChat({
-    id: conversationId,
     sendMessage,
     ...rest,
   });
@@ -76,7 +75,6 @@ export function useCharacterChat(options: {
   );
 
   return useTelliChat({
-    id: characterId,
     sendMessage,
     ...rest,
   });
@@ -108,7 +106,6 @@ export function useSharedChat(options: {
   );
 
   return useTelliChat({
-    id: sharedChatId,
     sendMessage,
     ...rest,
   });

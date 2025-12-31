@@ -45,7 +45,7 @@ export function calculateCompletionUsage({
     total_tokens: promptTokens + completionTokens,
   };
 }
-// TODO @AsamMax: Fix tiktoken runtime issues and re-enable accurate token counting
+// TODO TD-823: Fix tiktoken runtime issues and re-enable accurate token counting
 // Original tiktoken implementation (commented out):
 // export function calculateCompletionUsage({
 //   messages,

@@ -8,7 +8,6 @@ import { type CharacterSelectModel, type CustomGptModel, FileModel } from '@shar
 import PromptSuggestions from './prompt-suggestions';
 import MarkdownDisplay from './markdown-display';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
-import { generateUUID } from '@shared/utils/uuid';
 import { useQueryClient } from '@tanstack/react-query';
 import RobotIcon from '../icons/robot';
 import { useRouter } from 'next/navigation';
@@ -21,7 +20,6 @@ import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { ChatInputBox } from './chat-input-box';
 import { ErrorChatPlaceholder } from './error-chat-placeholder';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
-import { type ChatMessage as Message } from '@/types/chat';
 import { logDebug, logWarning } from '@shared/logging';
 import { useSession } from 'next-auth/react';
 import { AssistantIcon } from './assistant-icon';
@@ -79,35 +77,26 @@ export default function Chat({
     void queryClient.invalidateQueries({ queryKey: ['conversations'] });
   }
 
-  const {
-    messages,
-    setMessages,
-    input,
-    setInput,
-    handleInputChange,
-    handleSubmit,
-    reload,
-    stop,
-    status,
-  } = useMainChat({
-    conversationId: id,
-    initialMessages: initialMessages,
-    modelId: selectedModel?.id,
-    characterId: character?.id,
-    customGptId: customGpt?.id,
-    onFinish: (message) => {
-      logDebug(`onFinish called with message ${JSON.stringify(message)}`);
-      if (messages.length > 1) {
-        return;
-      }
-      logWarning('Assert: onFinish was called with zero messages.');
-      refetchConversations();
-    },
-    onError: (error) => {
-      setChatError(error);
-      refetchConversations();
-    },
-  });
+  const { messages, input, setInput, handleInputChange, handleSubmit, reload, stop, status } =
+    useMainChat({
+      conversationId: id,
+      initialMessages: initialMessages,
+      modelId: selectedModel?.id,
+      characterId: character?.id,
+      customGptId: customGpt?.id,
+      onFinish: (message) => {
+        logDebug(`onFinish called with message ${JSON.stringify(message)}`);
+        if (messages.length > 1) {
+          return;
+        }
+        logWarning('Assert: onFinish was called with zero messages.');
+        refetchConversations();
+      },
+      onError: (error) => {
+        setChatError(error);
+        refetchConversations();
+      },
+    });
 
   // Convert to Vercel AI Message format for compatibility with existing components
   const aiMessages = convertToAiMessages(messages);
