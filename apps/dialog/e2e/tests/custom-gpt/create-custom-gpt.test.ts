@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
 import { waitForToast, waitForToastDisappear } from '../../utils/utils';
 import { sendMessage, uploadFile } from '../../utils/chat';
+import { deleteCustomGpt } from '../../utils/custom-gpt';
 
 const assistantName = 'Hausbauplaner';
 
@@ -88,13 +89,7 @@ test('teacher can delete customgpt with chat', async ({ page }) => {
   await page.goto('/custom?visibility=private');
   await page.waitForURL('/custom?visibility=private');
 
-  const deleteButton = page
-    .locator('div', { has: page.locator('> figure') })
-    .filter({ hasText: assistantName })
-    .getByLabel('Assistenten löschen')
-    .first();
-  await expect(deleteButton).toBeVisible();
-  await deleteButton.click();
+  await deleteCustomGpt(page, assistantName);
 
   const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
   await expect(deleteConfirmButton).toBeVisible();
