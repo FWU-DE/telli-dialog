@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
 import { waitForToast, waitForToastDisappear } from '../../utils/utils';
-import { sendMessage } from '../../utils/chat';
+import { sendMessage, uploadFile } from '../../utils/chat';
+
+const assistantName = 'Hausbauplaner';
 
 test('teacher can login, create a custom gpt and start a chat', async ({ page }) => {
   await login(page, 'teacher');
@@ -17,7 +19,7 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
 
   // configure form
   await page.getByRole('textbox', { name: 'Wie soll diese' }).click();
-  await page.getByRole('textbox', { name: 'Wie soll diese' }).fill('Hausbauplaner');
+  await page.getByRole('textbox', { name: 'Wie soll diese' }).fill(assistantName);
   await page.getByRole('textbox', { name: 'Wie soll diese' }).press('Tab');
   await page
     .getByRole('textbox', { name: 'Wie kann der Assistent kurz beschrieben werden? *' })
@@ -62,9 +64,9 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await submitButton.click();
 
   await page.waitForURL('/custom/**');
-  await page.getByRole('heading', { name: 'Hausbauplaner' }).first().click();
+  await page.getByRole('heading', { name: assistantName }).first().click();
   await page.waitForURL('/custom/d/**');
-  await expect(page.getByRole('heading')).toContainText('Hausbauplaner');
+  await expect(page.getByRole('heading')).toContainText(assistantName);
   await expect(page.locator('body')).toContainText(
     'Hilft bei der Planung und Budget Rechnung beim Bau eines Einfamilienhauses',
   );
@@ -73,7 +75,11 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await expect(page.locator('body')).toContainText('Wo kann man günstig Baugrund erwerben');
   await sendMessage(page, 'Wer bist du?');
 
-  await expect(page.getByLabel('assistant message 1')).toContainText('Hausbauplaner');
+  await expect(page.getByLabel('assistant message 1')).toContainText(assistantName);
+
+  await uploadFile(page, './e2e/fixtures/file-upload/Große Text Datei.txt');
+  await sendMessage(page, 'Gib "OK" aus.');
+  await expect(page.getByLabel('assistant message 2')).toBeVisible();
 });
 
 test('teacher can delete customgpt with chat', async ({ page }) => {
@@ -82,15 +88,19 @@ test('teacher can delete customgpt with chat', async ({ page }) => {
   await page.goto('/custom?visibility=private');
   await page.waitForURL('/custom?visibility=private');
 
-  const deleteChatButton = page.locator('#destructive-button').first();
-  await expect(deleteChatButton).toBeVisible();
-  await deleteChatButton.click();
+  const deleteButton = page
+    .locator('div', { has: page.locator('> figure') })
+    .filter({ hasText: assistantName })
+    .getByLabel('Assistenten löschen')
+    .first();
+  await expect(deleteButton).toBeVisible();
+  await deleteButton.click();
 
-  const deleteChatConfirmButton = page.getByRole('button', {
-    name: 'Löschen',
-  });
-  await expect(deleteChatConfirmButton).toBeVisible();
-  await deleteChatConfirmButton.click();
+  const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
+  await expect(deleteConfirmButton).toBeVisible();
+  await deleteConfirmButton.click();
+  await waitForToast(page, 'Der Assistent wurde erfolgreich gelöscht.');
+  await expect(page.getByRole('heading', { name: assistantName }).first()).not.toBeVisible();
 });
 
 test('data is autosaved on blur', async ({ page }) => {
