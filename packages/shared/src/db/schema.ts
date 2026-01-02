@@ -543,18 +543,28 @@ export const ConversationMessageFileMappingTable = pgTable(
     fileId: text('fileId')
       .references(() => fileTable.id)
       .notNull(),
-    conversationMessageId: uuid('conversationMessageId')
-      .references(() => conversationMessageTable.id)
-      .notNull(),
+    conversationMessageId: uuid('conversationMessageId').notNull(),
     // technically redundant but there files and conversations should be unique and it makes clean-up easier
-    conversationId: uuid('conversationId')
-      .references(() => conversationTable.id)
-      .notNull(),
+    conversationId: uuid('conversationId').notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
     index().on(table.conversationMessageId),
     unique().on(table.conversationId, table.fileId),
+    foreignKey({
+      columns: [table.conversationMessageId],
+      foreignColumns: [conversationMessageTable.id],
+      // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
+      // The custom name can only be set with foreignKey() function
+      name: 'conversation_message_file_mapping_conversationMessageId_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.conversationId],
+      foreignColumns: [conversationTable.id],
+      // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
+      // The custom name can only be set with foreignKey() function
+      name: 'conversation_message_file_mapping_conversationId_fk',
+    }).onDelete('cascade'),
   ],
 );
 
