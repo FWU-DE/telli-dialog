@@ -31,7 +31,6 @@ export async function generateMetadata(): Promise<Metadata> {
       icon: faviconPath ?? '/telli.svg',
       apple: '/apple-touch-icon.png',
     },
-    manifest: '/manifest.webmanifest',
   };
 }
 
