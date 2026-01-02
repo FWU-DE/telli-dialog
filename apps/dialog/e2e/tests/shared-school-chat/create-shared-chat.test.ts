@@ -2,17 +2,17 @@ import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
 import { waitForToast, waitForToastDisappear } from '../../utils/utils';
 import { sendMessage } from '../../utils/chat';
-import { createLearningScenario } from '../../utils/learning-scenario';
+import { createLearningScenario, deleteLearningScenario } from '../../utils/learning-scenario';
 
-test('teacher can login, create and join shared chat', async ({ page }) => {
+const learningScenarioName = 'Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten';
+
+test('teacher can login, create and join learning scenario', async ({ page }) => {
   await login(page, 'teacher');
 
   await createLearningScenario(page);
 
   // configure form
-  await page
-    .getByLabel('Wie heißt das Szenario? *')
-    .fill('Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten');
+  await page.getByLabel('Wie heißt das Szenario? *').fill(learningScenarioName);
 
   await page
     .getByLabel('Wie kann das Szenario kurz beschrieben werden?')
@@ -35,15 +35,13 @@ test('teacher can login, create and join shared chat', async ({ page }) => {
   const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
   await expect(submitButton).toBeVisible();
   await submitButton.click();
-  const firstSharedChat = page.getByRole('link', { name: 'Absolutismus unter Ludwig XIV' }).first();
+  const firstSharedChat = page.getByRole('link', { name: learningScenarioName }).first();
   await expect(firstSharedChat).toBeVisible();
   await firstSharedChat.click();
   await page.waitForURL('/shared-chats/**');
 
-  // check if created with right name
-  const sharedChatName = page
-    .getByText('Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten')
-    .first();
+  // check if created with the correct name
+  const sharedChatName = page.getByText(learningScenarioName).first();
   await expect(sharedChatName).toBeVisible();
 
   const stopSharingButton = page.getByRole('button', { name: 'Stop' });
@@ -77,7 +75,7 @@ test('teacher can login, create and join shared chat', async ({ page }) => {
   await page.waitForURL('/ua/shared-chats/**/dialog?inviteCode=*');
 });
 
-test('teacher can login, create and delete shared chat, student can join chat', async ({
+test('teacher can login, create and delete learning scenario, student can join chat', async ({
   page,
 }) => {
   await login(page, 'teacher');
@@ -88,9 +86,8 @@ test('teacher can login, create and delete shared chat, student can join chat', 
   await page.waitForURL('/shared-chats/**');
 
   // configure form
-  await page
-    .getByLabel('Wie heißt das Szenario? *')
-    .fill('Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten');
+  const name = learningScenarioName.replace('1', '2');
+  await page.getByLabel('Wie heißt das Szenario? *').fill(name);
 
   await page
     .getByLabel('Wie kann das Szenario kurz beschrieben werden?')
@@ -165,21 +162,19 @@ test('teacher can login, create and delete shared chat, student can join chat', 
   await deleteConfirmButton.click();
 });
 
-test('teacher can delete shared chat', async ({ page }) => {
+test('teacher can delete learning scenario', async ({ page }) => {
   await login(page, 'teacher');
 
   await page.goto('/shared-chats');
   await page.waitForURL('/shared-chats');
 
-  const deleteChatButton = page.locator('#destructive-button').first();
-  await expect(deleteChatButton).toBeVisible();
-  await deleteChatButton.click();
+  await deleteLearningScenario(page, learningScenarioName);
 
-  const deleteChatConfirmButton = page.getByRole('button', {
-    name: 'Löschen',
-  });
-  await expect(deleteChatConfirmButton).toBeVisible();
-  await deleteChatConfirmButton.click();
+  const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
+  await expect(deleteConfirmButton).toBeVisible();
+  await deleteConfirmButton.click();
+  await waitForToast(page, 'Das Lernszenario wurde erfolgreich gelöscht.');
+  await expect(page.getByRole('heading', { name: learningScenarioName }).first()).not.toBeVisible();
 });
 
 test('data is autosaved on blur', async ({ page }) => {
