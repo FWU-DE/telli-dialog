@@ -1,6 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../utils/login';
 import { sendMessage } from '../utils/chat';
+import { waitForToast } from '../utils/utils';
+import { deleteCharacter } from '../utils/character';
+
+const characterName = 'Albert Einstein';
 
 test('teacher can create character with initial message and verify it appears in shared chat', async ({
   page,
@@ -21,7 +25,7 @@ test('teacher can create character with initial message and verify it appears in
   await page.getByLabel('Klassenstufe').fill('8. Klasse');
   await page.getByLabel('Fach').fill('Deutsch');
 
-  await page.getByLabel('Wie heißt die simulierte Person? *').fill('Albert Einstein');
+  await page.getByLabel('Wie heißt die simulierte Person? *').fill(characterName);
 
   await page
     .getByLabel('Wie kann die simulierte Person kurz beschrieben werden? *')
@@ -54,8 +58,8 @@ test('teacher can create character with initial message and verify it appears in
 
   await page.waitForURL('/characters?visibility=private');
 
-  // check if created with right name
-  const dialogChatName = page.getByText('Albert Einstein').first();
+  // check if created with the correct name
+  const dialogChatName = page.getByText(characterName).first();
   await expect(dialogChatName).toBeVisible();
   await dialogChatName.click();
 
@@ -118,13 +122,11 @@ test('teacher can delete character with initial message', async ({ page }) => {
   await page.goto('/characters?visibility=private');
   await page.waitForURL('/characters?visibility=private');
 
-  const deleteChatButton = page.locator('#destructive-button').first();
-  await expect(deleteChatButton).toBeVisible();
-  await deleteChatButton.click();
+  await deleteCharacter(page, characterName);
 
-  const deleteChatConfirmButton = page.getByRole('button', {
-    name: 'Löschen',
-  });
-  await expect(deleteChatConfirmButton).toBeVisible();
-  await deleteChatConfirmButton.click();
+  const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
+  await expect(deleteConfirmButton).toBeVisible();
+  await deleteConfirmButton.click();
+  await waitForToast(page, 'Der Dialogpartner wurde erfolgreich gelöscht.');
+  await expect(page.getByRole('heading', { name: characterName }).first()).not.toBeVisible();
 });
