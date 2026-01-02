@@ -279,11 +279,18 @@ export const characterTemplateMappingTable = pgTable(
     characterId: uuid('character_id')
       .notNull()
       .references(() => characterTable.id, { onDelete: 'cascade' }),
-    federalStateId: text('federal_state_id')
-      .notNull()
-      .references(() => federalStateTable.id, { onDelete: 'cascade' }),
+    federalStateId: text('federal_state_id').notNull(),
   },
-  (table) => [primaryKey({ columns: [table.characterId, table.federalStateId] })],
+  (table) => [
+    primaryKey({ columns: [table.characterId, table.federalStateId] }),
+    foreignKey({
+      columns: [table.federalStateId],
+      foreignColumns: [federalStateTable.id],
+      // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
+      // The custom name can only be set with foreignKey() function
+      name: 'character_template_mappings_federal_state_id_fk',
+    }).onDelete('cascade'),
+  ],
 );
 export type CharacterTemplateMappingModel = typeof characterTemplateMappingTable.$inferSelect;
 export type CharacterTemplateMappingInsertModel = typeof characterTemplateMappingTable.$inferInsert;
@@ -313,15 +320,25 @@ export const federalStateLlmModelMappingTable = pgTable(
   'federal_state_llm_model_mapping',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    federalStateId: text('federal_state_id')
-      .references(() => federalStateTable.id)
-      .notNull(),
+    federalStateId: text('federal_state_id').notNull(),
     llmModelId: uuid('llm_model_id')
       .references(() => llmModelTable.id)
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [unique().on(table.federalStateId, table.llmModelId)],
+  (table) => [
+    foreignKey({
+      columns: [table.federalStateId],
+      foreignColumns: [federalStateTable.id],
+      // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
+      // The custom name can only be set with foreignKey() function
+      name: 'federal_state_llm_model_mapping_federal_state_id_fk',
+    }),
+    unique('federal_state_llm_model_mapping_federal_state_llm_model_unique').on(
+      table.federalStateId,
+      table.llmModelId,
+    ),
+  ],
 );
 
 export type LlmInsertModel = typeof llmModelTable.$inferInsert;
@@ -379,9 +396,7 @@ export const sharedSchoolConversationUsageTracking = pgTable(
   'shared_school_conversation_usage_tracking',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    modelId: uuid('model_id')
-      .notNull()
-      .references(() => llmModelTable.id),
+    modelId: uuid('model_id').notNull(),
     sharedSchoolConversationId: uuid('shared_school_conversation_id').notNull(),
     userId: uuid('user_id').notNull(),
     completionTokens: integer('completion_tokens').notNull(),
@@ -390,7 +405,17 @@ export const sharedSchoolConversationUsageTracking = pgTable(
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    index().on(table.sharedSchoolConversationId),
+    foreignKey({
+      columns: [table.modelId],
+      foreignColumns: [llmModelTable.id],
+      // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
+      // The custom name can only be set with foreignKey() function
+      name: 'shared_school_conversation_usage_tracking_model_id_fk',
+    }),
+    // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
+    index('shared_school_conversation_usage_tracking_conversation_id_index').on(
+      table.sharedSchoolConversationId,
+    ),
     index().on(table.userId),
     index().on(table.createdAt),
   ],
@@ -514,11 +539,18 @@ export const customGptTemplateMappingTable = pgTable(
     customGptId: uuid('custom_gpt_id')
       .notNull()
       .references(() => customGptTable.id, { onDelete: 'cascade' }),
-    federalStateId: text('federal_state_id')
-      .notNull()
-      .references(() => federalStateTable.id, { onDelete: 'cascade' }),
+    federalStateId: text('federal_state_id').notNull(),
   },
-  (table) => [primaryKey({ columns: [table.customGptId, table.federalStateId] })],
+  (table) => [
+    primaryKey({ columns: [table.customGptId, table.federalStateId] }),
+    foreignKey({
+      columns: [table.federalStateId],
+      foreignColumns: [federalStateTable.id],
+      // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
+      // The custom name can only be set with foreignKey() function
+      name: 'character_template_mappings_federal_state_id_fk',
+    }).onDelete('cascade'),
+  ],
 );
 export type CustomGptTemplateMappingModel = typeof customGptTemplateMappingTable.$inferSelect;
 export type CustomGptTemplateMappingInsertModel = typeof customGptTemplateMappingTable.$inferInsert;
@@ -579,7 +611,11 @@ export const SharedSchoolConversationFileMapping = pgTable(
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    unique().on(table.sharedSchoolConversationId, table.fileId),
+    // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
+    unique('shared_conversation_file_mapping_conversation_id_fileId_unique').on(
+      table.sharedSchoolConversationId,
+      table.fileId,
+    ),
     foreignKey({
       columns: [table.sharedSchoolConversationId],
       foreignColumns: [sharedSchoolConversationTable.id],

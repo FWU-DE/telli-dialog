@@ -267,6 +267,13 @@
       "when": 1767108940040,
       "tag": "0037_long_bloodstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1767378733279,
+      "tag": "0038_wonderful_naoko",
+      "breakpoints": true
     }
   ]
 }
