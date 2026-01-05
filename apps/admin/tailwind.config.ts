@@ -1,1 +1,1 @@
-export * from '../../packages/ui/tailwind.config';
+export * from '@telli/ui/tailwind.config';
