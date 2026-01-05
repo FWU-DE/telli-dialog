@@ -1,5 +1,5 @@
 // This adds authentication for the whole application. No public pages, except for the excludes in config
-export { auth as middleware } from '@/auth';
+export { auth as proxy } from '@/auth';
 
 export const config = {
   matcher: [
