@@ -7,7 +7,7 @@
  *  - it does NOT call requireAuth() or is NOT wrapped in withAuth()
  */
 
-export default {
+const requireAuthInServerActionsRule = {
   meta: {
     type: 'problem',
     docs: {
@@ -80,3 +80,5 @@ export default {
     };
   },
 };
+
+export default requireAuthInServerActionsRule;

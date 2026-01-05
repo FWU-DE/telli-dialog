@@ -51,9 +51,6 @@ const eslintConfig = [
         __filename: 'readonly',
       },
     },
-    plugins: {
-      '@typescript-eslint': typescript,
-    },
     rules: {
       ...typescript.configs.recommended.rules,
       'prettier/prettier': 'error',

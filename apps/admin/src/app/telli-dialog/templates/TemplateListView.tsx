@@ -31,10 +31,6 @@ export default function TemplateListView() {
   const [isPending, startTransition] = useTransition();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    loadTemplates();
-  }, []);
-
   const loadTemplates = async () => {
     startTransition(async () => {
       const templates = await getTemplatesAction();
@@ -42,13 +38,17 @@ export default function TemplateListView() {
     });
   };
 
+  useEffect(() => {
+    void loadTemplates();
+  }, []);
+
   const handleNewTemplate = () => {
     setIsModalOpen(true);
   };
 
   const handleModalSuccess = () => {
     // Reload templates after successful creation
-    loadTemplates();
+    void loadTemplates();
   };
 
   return (

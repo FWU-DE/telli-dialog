@@ -2,7 +2,6 @@ import test, { APIRequestContext, expect } from '@playwright/test';
 import { authorizationHeader } from '../../../../../utils/authorizationHeader';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 import { cnanoid } from '@telli/shared/random/randomService';
-import { FederalStateInsertModel } from '@shared/db/schema';
 
 const federalStateRoute = '/api/v1/admin/federal-states';
 

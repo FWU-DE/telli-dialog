@@ -17,17 +17,16 @@ export async function insertFederalStates({ skip = true }: { skip: boolean }) {
     );
   }
 
-  let apiKeysByState: Record<string, string> = {};
+  const apiKeysByState: Record<string, string> = {};
   let apiKeyIdsByState: Record<string, string | null> = {};
 
   if (aiEnv.apiDatabaseUrl) {
     // Decrypt API keys and lookup their IDs
     for (const federalState of FEDERAL_STATES) {
-      const decryptedApiKey = decrypt({
+      apiKeysByState[federalState.id] = decrypt({
         data: federalState.encryptedApiKey,
         plainEncryptionKey: env.encryptionKey,
       });
-      apiKeysByState[federalState.id] = decryptedApiKey;
     }
 
     apiKeyIdsByState = await lookupApiKeys(apiKeysByState);

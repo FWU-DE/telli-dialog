@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useForm, Controller } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -57,7 +57,6 @@ export function ApiKeyDetailView({
     formState: { isValid, errors, isSubmitting, isDirty },
     handleSubmit,
     setValue,
-    watch,
   } = useForm<ApiKeyForm>({
     resolver: zodResolver(apiKeyFormSchema),
     defaultValues: apiKey
@@ -73,6 +72,11 @@ export function ApiKeyDetailView({
           limitInCent: undefined,
           expiresAt: null,
         },
+  });
+
+  const expiresAtValue = useWatch({
+    control,
+    name: 'expiresAt',
   });
 
   // Convert expiresAt date to string for the datetime-local input
@@ -263,7 +267,7 @@ export function ApiKeyDetailView({
             <Input
               id="expiresAt"
               type="datetime-local"
-              value={formatDateTimeLocal(watch('expiresAt'))}
+              value={formatDateTimeLocal(expiresAtValue)}
               onChange={(e) => {
                 const newValue = parseDateTimeLocal(e.target.value);
                 setValue('expiresAt', newValue);

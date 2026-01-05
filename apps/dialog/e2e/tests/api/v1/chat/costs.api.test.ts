@@ -28,7 +28,6 @@ import {
   mockSharedSchoolConversationUsage,
   mockUserAndContext,
 } from '../../../../utils/mock';
-import { generateUUID } from '@shared/utils/uuid';
 import { generateRandomString } from '../../../../utils/random';
 
 test.describe('costs', () => {
