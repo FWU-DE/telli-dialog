@@ -33,7 +33,7 @@
     "@aws-sdk/client-s3": "3.958.0",
     "@aws-sdk/s3-request-presigner": "3.958.0",
     "@deutschlandgpt/core": "0.1.5",
-    "@dotenvx/dotenvx": "1.51.2",
+    "@dotenvx/dotenvx": "1.51.4",
     "@hookform/resolvers": "3.10.0",
     "@mozilla/readability": "0.6.0",
     "@opentelemetry/api": "1.9.0",
@@ -55,7 +55,7 @@
     "@sentry/nextjs": "10.32.1",
     "@sentry/opentelemetry": "10.32.1",
     "@t3-oss/env-nextjs": "0.13.10",
-    "@tanstack/react-query": "5.90.12",
+    "@tanstack/react-query": "5.90.16",
     "@telli/ai-core": "workspace:*",
     "@telli/shared": "workspace:*",
     "@telli/ui": "workspace:*",
@@ -102,7 +102,7 @@
     "tailwindcss-animate": "1.0.7",
     "tsx": "4.21.0",
     "unpdf": "1.4.0",
-    "zod": "4.2.1"
+    "zod": "4.3.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.3",
