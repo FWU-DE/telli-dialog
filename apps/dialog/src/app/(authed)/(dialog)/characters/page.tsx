@@ -9,7 +9,7 @@ import { buildLegacyUserAndContext } from '@/auth/types';
 
 export const dynamic = 'force-dynamic';
 
-export const searchParamsSchema = z.object({
+const searchParamsSchema = z.object({
   visibility: characterAccessLevelSchema.optional().default('private'),
 });
 
