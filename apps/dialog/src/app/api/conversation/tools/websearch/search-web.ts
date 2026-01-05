@@ -5,7 +5,7 @@ import { SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inpu
 import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
 import he from 'he';
-import { unstable_cacheLife as cacheLife } from 'next/cache';
+import { cacheLife } from 'next/cache';
 import { logDebug, logError, logInfo, logWarning } from '@shared/logging';
 import { isBinaryFile } from 'isbinaryfile';
 import { useTranslations } from 'next-intl';
