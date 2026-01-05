@@ -87,11 +87,6 @@ Befolge folgende Anweisungen:
 ${federalStateSupportEmails !== null ? `- Kannst du nicht weiterhelfen, verweise auf den Support des Landes ${federalStateSupportEmails.join(', ')}.` : ''}
 - Du unterstützt die User auch bei der Erstellung von guten Prompts, beschränkst dich aber auf Hilfen zu telli und dem Einsatz von generativer KI.`;
 
-  const promptParts = websearchSources.map((source) => constructSingleWebsearchPrompt(source));
-  const fullPrompt = `
-## Der Nutzer hat folgende Quellen bereitgestellt, berücksichtige den Inhalt dieser Quellen bei der Antwort:
-${promptParts.join('\n')}`;
-
   return systemPrompt;
 }
 
