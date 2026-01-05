@@ -18,8 +18,7 @@ function constructTelliSystemPrompt() {
   return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. 
 Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. 
 Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. 
-Heute ist der ${formatDateToGermanTimestamp(new Date())}. 
-Bei Fragen über telli verweise auf die Hilfe in der Sidebar.
+Heute ist der ${formatDateToGermanTimestamp(new Date())}.
 ${LANGUAGE_GUIDELINES}`;
 }
 
