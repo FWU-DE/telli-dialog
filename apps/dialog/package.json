@@ -9,7 +9,7 @@
     "build:envless": "next build --experimental-build-mode compile",
     "clean": "find . -type d \\( -name node_modules -o -name dist -o -name .next \\) -not -path \"./.vercel/*\" -prune -exec rm -rf {} \\;",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "types": "tsc",
     "check-types": "next typegen && tsc --noEmit",
     "test": "vitest run",

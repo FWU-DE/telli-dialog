@@ -8,7 +8,7 @@
     "build": "next build",
     "build:envless": "next build --experimental-build-mode compile",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "check-types": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
