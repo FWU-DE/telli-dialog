@@ -1,6 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
 import { regenerateMessage, sendMessage } from '../../utils/chat';
+import { deleteCharacter } from '../../utils/character';
+import { waitForToast } from '../../utils/utils';
+
+const characterName = 'John Cena';
 
 test('teacher can login, create and join shared dialogpartner chat', async ({ page }) => {
   await login(page, 'teacher');
@@ -19,7 +23,7 @@ test('teacher can login, create and join shared dialogpartner chat', async ({ pa
   await page.getByLabel('Klassenstufe').fill('10. Klasse');
   await page.getByLabel('Fach').fill('Geschichte');
 
-  await page.getByLabel('Wie heißt die simulierte Person? *').fill('John Cena');
+  await page.getByLabel('Wie heißt die simulierte Person? *').fill(characterName);
 
   await page
     .getByLabel('Wie kann die simulierte Person kurz beschrieben werden? *')
@@ -47,8 +51,8 @@ test('teacher can login, create and join shared dialogpartner chat', async ({ pa
 
   await page.waitForURL('/characters?visibility=private');
 
-  // check if created with right name
-  const dialogChatName = page.getByText('John Cena').first();
+  // check if created with the correct name
+  const dialogChatName = page.getByText(characterName).first();
   await expect(dialogChatName).toBeVisible();
   await dialogChatName.click();
 
@@ -84,26 +88,24 @@ test('teacher can login, create and join shared dialogpartner chat', async ({ pa
   await sendMessage(page, 'Wer bist du?');
   await page.getByTitle('Kopieren').click();
 
-  await expect(page.getByLabel('assistant message 1')).toContainText('John Cena');
+  await expect(page.getByLabel('assistant message 1')).toContainText(characterName);
 
   // regenerate last message
   await regenerateMessage(page);
-  await expect(page.getByLabel('assistant message 1')).toContainText('John Cena');
+  await expect(page.getByLabel('assistant message 1')).toContainText(characterName);
 });
 
-test('teacher can delete character chat', async ({ page }) => {
+test('teacher can delete character', async ({ page }) => {
   await login(page, 'teacher');
 
   await page.goto('/characters?visibility=private');
   await page.waitForURL('/characters?visibility=private');
 
-  const deleteChatButton = page.locator('#destructive-button').first();
-  await expect(deleteChatButton).toBeVisible();
-  await deleteChatButton.click();
+  await deleteCharacter(page, characterName);
 
-  const deleteChatConfirmButton = page.getByRole('button', {
-    name: 'Löschen',
-  });
-  await expect(deleteChatConfirmButton).toBeVisible();
-  await deleteChatConfirmButton.click();
+  const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
+  await expect(deleteConfirmButton).toBeVisible();
+  await deleteConfirmButton.click();
+  await waitForToast(page, 'Der Dialogpartner wurde erfolgreich gelöscht.');
+  await expect(page.getByRole('heading', { name: characterName }).first()).not.toBeVisible();
 });
