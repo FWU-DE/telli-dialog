@@ -1,6 +1,7 @@
 import { Cache, MutationOption } from 'drizzle-orm/cache/core';
 import { CacheConfig } from 'drizzle-orm/cache/core/types';
 import { entityKind } from 'drizzle-orm/entity';
+import * as Sentry from '@sentry/nextjs';
 
 /**
  * A drizzle cache provider for caching values in memory.
@@ -39,18 +40,31 @@ export class MemoryCache extends Cache {
   }
 
   override get(key: string): Promise<unknown[] | undefined> {
-    let entry = this.cache.get(key);
-    const now = new Date().getTime();
-    if (entry && entry.expireTimestamp < now) {
-      this.cache.delete(key);
-      entry = undefined;
-    }
+    const result = Sentry.startSpan(
+      {
+        name: 'Fetching cached db query',
+        attributes: { 'cache.key': [key] },
+        op: 'cache.get',
+      },
+      (span) => {
+        let entry = this.cache.get(key);
+        const now = new Date().getTime();
+        if (entry && entry.expireTimestamp < now) {
+          this.cache.delete(key);
+          entry = undefined;
+        }
 
-    if (entry && entry.value) {
-      return Promise.resolve(entry.value);
-    }
+        if (entry && entry.value) {
+          span.setAttribute('cache.hit', true);
+          return entry.value;
+        }
 
-    return Promise.resolve(undefined);
+        span.setAttribute('cache.hit', false);
+        return undefined;
+      },
+    );
+
+    return Promise.resolve(result);
   }
 
   override async put(
@@ -64,7 +78,20 @@ export class MemoryCache extends Cache {
     const now = new Date().getTime();
 
     const expireTimestamp = now + ttlMilliseconds;
-    this.cache.set(key, { value: response, expireTimestamp });
+
+    Sentry.startSpan(
+      {
+        name: 'Caching db query',
+        attributes: {
+          'cache.key': [key],
+          'cache.ttl': Math.floor(ttlMilliseconds / 1000),
+        },
+        op: 'cache.put',
+      },
+      () => {
+        this.cache.set(key, { value: response, expireTimestamp });
+      },
+    );
   }
 
   override async onMutate(params: MutationOption) {
@@ -73,6 +100,16 @@ export class MemoryCache extends Cache {
       : params.tags
         ? [params.tags]
         : [];
-    tags.forEach(this.cache.delete);
+
+    Sentry.startSpan(
+      {
+        name: 'Removing cached db queries',
+        attributes: { 'cache.key': tags },
+        op: 'cache.remove',
+      },
+      () => {
+        tags.forEach(this.cache.delete);
+      },
+    );
   }
 }
