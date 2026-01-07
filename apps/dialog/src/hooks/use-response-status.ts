@@ -13,7 +13,7 @@ export function useCheckStatusCode() {
       return;
     }
     if (response.status === 429) {
-      setError(new Error(`${t('rate-limit-title')}: ${t('rate-limit-error')}`));
+      setError(new Error(t('rate-limit-error')));
     } else if (response.status === 400) {
       setError(new Error(t('chat-expired')));
     } else {
@@ -23,7 +23,13 @@ export function useCheckStatusCode() {
   }, []);
 
   const handleError = useCallback((error: Error) => {
-    setError(new Error(t('generic-error')));
+    if (error.message.toLowerCase().includes('intelli points limit')) {
+      setError(new Error(t('rate-limit-error')));
+    } else if (error.message.toLowerCase().includes('expired')) {
+      setError(new Error(t('chat-expired')));
+    } else {
+      setError(new Error(t('generic-error')));
+    }
     logError('Error in chat:', error);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
