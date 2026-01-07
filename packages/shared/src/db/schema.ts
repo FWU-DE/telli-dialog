@@ -39,6 +39,9 @@ export type FileMetadata = {
   height?: number;
 };
 
+/**
+ * Schema for table user_entity
+ */
 export const userTable = pgTable('user_entity', {
   id: uuid('id').defaultRandom().primaryKey(),
   firstName: text('first_name').notNull(),
@@ -52,13 +55,16 @@ export const userTable = pgTable('user_entity', {
 export const userSelectSchema = createSelectSchema(userTable).extend({
   createdAt: z.coerce.date(),
 });
-export const userInsertSchema = createInsertSchema(userTable);
-export const userUpdateSchema = createUpdateSchema(userTable);
+export const userInsertSchema = createInsertSchema(userTable).omit({ createdAt: true, id: true });
+export const userUpdateSchema = createUpdateSchema(userTable).omit({ createdAt: true });
 
 export type UserSelectModel = z.infer<typeof userSelectSchema>;
 export type UserInsertModel = z.infer<typeof userInsertSchema>;
 export type UserUpdateModel = z.infer<typeof userUpdateSchema>;
 
+/**
+ * Schema for table conversation
+ */
 export const conversationTypeEnum = pgEnum('conversation_type', conversationTypeSchema.enum);
 export const conversationTable = pgTable(
   'conversation',
@@ -82,6 +88,23 @@ export const conversationTable = pgTable(
   ],
 );
 
+export const conversationSelectSchema = createSelectSchema(conversationTable);
+export const conversationInsertSchema = createInsertSchema(conversationTable).omit({
+  id: true,
+  createdAt: true,
+  deletedAt: true,
+});
+export const conversationUpdateSchema = createUpdateSchema(conversationTable).omit({
+  createdAt: true,
+});
+
+export type ConversationSelectModel = z.infer<typeof conversationSelectSchema>;
+export type ConversationInsertModel = z.infer<typeof conversationInsertSchema>;
+export type ConversationUpdateModel = z.infer<typeof conversationUpdateSchema>;
+
+/**
+ * Schema for table conversation_message
+ */
 export const conversationRoleEnum = pgEnum('conversation_role', conversationRoleSchema.enum);
 // Define the parameters type for conversation messages
 export const conversationMessageParametersSchema = z.object({
@@ -109,10 +132,29 @@ export const conversationMessageTable = pgTable(
   (table) => [index().on(table.conversationId), index().on(table.userId)],
 );
 
+export const conversationMessageSelectSchema = createSelectSchema(conversationMessageTable);
+export const conversationMessageInsertSchema = createInsertSchema(conversationMessageTable).omit({
+  id: true,
+  createdAt: true,
+  deletedAt: true,
+});
+export const conversationMessageUpdateSchema = createUpdateSchema(conversationMessageTable).omit({
+  createdAt: true,
+  conversationId: true,
+  userId: true,
+});
+
+export type ConversationMessageSelectModel = z.infer<typeof conversationMessageSelectSchema>;
+export type ConversationMessageInsertModel = z.infer<typeof conversationMessageInsertSchema>;
+export type ConversationMessageUpdateModel = z.infer<typeof conversationMessageUpdateSchema>;
+
 export type ConversationModelWithFiles = typeof conversationTable.$inferSelect & {
   files: FileModel[];
 };
 
+/**
+ * Schema for table user_school_mapping
+ */
 export const userSchoolRoleSchema = z.enum(['student', 'teacher']);
 export const userSchoolRoleEnum = pgEnum('user_school_role', userSchoolRoleSchema.enum);
 export type UserSchoolRole = z.infer<typeof userSchoolRoleSchema>;
@@ -133,6 +175,24 @@ export const userSchoolMappingTable = pgTable(
   (table) => [unique().on(table.userId, table.schoolId)],
 );
 
+export const userSchoolMappingSelectSchema = createSelectSchema(userSchoolMappingTable);
+export const userSchoolMappingInsertSchema = createInsertSchema(userSchoolMappingTable).omit({
+  id: true,
+  createdAt: true,
+});
+export const userSchoolMappingUpdateSchema = createUpdateSchema(userSchoolMappingTable).omit({
+  userId: true,
+  schoolId: true,
+  createdAt: true,
+});
+
+export type UserSchoolMappingSelectModel = z.infer<typeof userSchoolMappingSelectSchema>;
+export type UserSchoolMappingInsertModel = z.infer<typeof userSchoolMappingInsertSchema>;
+export type UserSchoolMappingUpdateModel = z.infer<typeof userSchoolMappingUpdateSchema>;
+
+/**
+ * Schema for table school
+ */
 export const schoolTable = pgTable(
   'school',
   {
@@ -145,12 +205,22 @@ export const schoolTable = pgTable(
   (table) => [index().on(table.federalStateId)],
 );
 
-export type SchoolInsertModel = typeof schoolTable.$inferInsert;
-export type SchoolModel = typeof schoolTable.$inferSelect;
 export const schoolSelectSchema = createSelectSchema(schoolTable).extend({
   createdAt: z.coerce.date(),
 });
+export const schoolInsertSchema = createInsertSchema(schoolTable).omit({
+  id: true,
+  createdAt: true,
+});
+export const schoolUpdateSchema = createUpdateSchema(schoolTable).omit({ createdAt: true });
 
+export type SchoolSelectModel = z.infer<typeof schoolSelectSchema>;
+export type SchoolInsertModel = z.infer<typeof schoolInsertSchema>;
+export type SchoolUpdateModel = z.infer<typeof schoolUpdateSchema>;
+
+/**
+ * Schema for table federal_state
+ */
 export const federalStateFeatureTogglesSchema = z.object({
   isStudentAccessEnabled: z.boolean().default(true),
   isCharacterEnabled: z.boolean().default(true),
@@ -180,21 +250,26 @@ export const federalStateTable = pgTable('federal_state', {
   // feature toggles
   featureToggles: json('feature_toggles').$type<FederalStateFeatureToggles>().notNull(),
 });
-
+// Todo RL: createdAt should always be z.coerce.date()
 export const federalStateSelectSchema = createSelectSchema(federalStateTable).extend({
   createdAt: z.coerce.date(),
 });
-export const federalStateInsertSchema = createInsertSchema(federalStateTable).extend({
-  featureToggles: federalStateFeatureTogglesSchema,
-});
-export const federalStateUpdateSchema = createUpdateSchema(federalStateTable).extend({
-  id: z.string(),
+export const federalStateInsertSchema = createInsertSchema(federalStateTable)
+  .extend({
+    featureToggles: federalStateFeatureTogglesSchema,
+  })
+  .omit({ id: true, createdAt: true });
+export const federalStateUpdateSchema = createUpdateSchema(federalStateTable).omit({
+  createdAt: true,
 });
 
 export type FederalStateSelectModel = z.infer<typeof federalStateSelectSchema>;
 export type FederalStateInsertModel = z.infer<typeof federalStateInsertSchema>;
 export type FederalStateUpdateModel = z.infer<typeof federalStateUpdateSchema>;
 
+/**
+ * Schema for table character
+ */
 export const characterAccessLevelSchema = z.enum(['private', 'school', 'global']);
 export const characterAccessLevelEnum = pgEnum(
   'character_access_level',
@@ -239,6 +314,8 @@ export const characterTable = pgTable(
   (table) => [index().on(table.userId), index().on(table.schoolId)],
 );
 
+// Todo RL: isDeleted can be part of InsertModelSchema
+
 export const characterSelectSchema = createSelectSchema(characterTable);
 export const characterInsertSchema = createInsertSchema(characterTable)
   .omit({
@@ -273,6 +350,9 @@ export type CharacterWithShareDataModel = CharacterSelectModel & {
   startedBy: string | null;
 };
 
+/**
+ * Schema for table character_template_mappings
+ */
 export const characterTemplateMappingTable = pgTable(
   'character_template_mappings',
   {
@@ -292,9 +372,21 @@ export const characterTemplateMappingTable = pgTable(
     }).onDelete('cascade'),
   ],
 );
-export type CharacterTemplateMappingModel = typeof characterTemplateMappingTable.$inferSelect;
+
+export const CharacterTemplateMappingSelectSchema = createSelectSchema(
+  characterTemplateMappingTable,
+);
+export const CharacterTemplateMappingInsertSchema = createInsertSchema(
+  characterTemplateMappingTable,
+);
+// no update schema as there are only two fields which are both part of the primary key
+
+export type CharacterTemplateMappingSelectModel = typeof characterTemplateMappingTable.$inferSelect;
 export type CharacterTemplateMappingInsertModel = typeof characterTemplateMappingTable.$inferInsert;
 
+/**
+ * Schema for table llm_model
+ */
 export const llmModelTypeSchema = z.enum(['text', 'image', 'fc']);
 export const llmModelTypeEnum = pgEnum('llm_model_type', llmModelTypeSchema.enum);
 export type LlmModeType = z.infer<typeof llmModelTypeSchema>;
@@ -316,6 +408,20 @@ export const llmModelTable = pgTable(
   (table) => [unique().on(table.provider, table.name)],
 );
 
+export const llmModelSelectSchema = createSelectSchema(llmModelTable);
+export const llmModelInsertSchema = createInsertSchema(llmModelTable).omit({
+  id: true,
+  createdAt: true,
+});
+export const llmModelUpdateSchema = createUpdateSchema(llmModelTable).omit({ createdAt: true });
+
+export type LlmModelSelectModel = z.infer<typeof llmModelSelectSchema>;
+export type LlmModelInsertModel = z.infer<typeof llmModelInsertSchema>;
+export type LlmModelUpdateModel = z.infer<typeof llmModelUpdateSchema>;
+
+/**
+ * Schema for table federal_state_llm_model_mapping
+ */
 export const federalStateLlmModelMappingTable = pgTable(
   'federal_state_llm_model_mapping',
   {
@@ -344,6 +450,9 @@ export const federalStateLlmModelMappingTable = pgTable(
 export type LlmInsertModel = typeof llmModelTable.$inferInsert;
 export type LlmModel = typeof llmModelTable.$inferSelect;
 
+/**
+ * Schema for table shared_school_conversation
+ */
 export const sharedSchoolConversationTable = pgTable(
   'shared_school_conversation',
   {
@@ -392,6 +501,9 @@ export type SharedSchoolConversationUpdateModel = z.infer<
   typeof sharedSchoolConversationUpdateSchema
 >;
 
+/**
+ * Schema for table shared_school_conversation_usage_tracking
+ */
 export const sharedSchoolConversationUsageTracking = pgTable(
   'shared_school_conversation_usage_tracking',
   {
@@ -425,6 +537,9 @@ export type SharedSchoolConversationUsageTrackingInsertModel =
 export type SharedSchoolConversationUsageTrackingModel =
   typeof sharedSchoolConversationUsageTracking.$inferSelect;
 
+/**
+ * Schema for table conversation_usage_tracking
+ */
 export const conversationUsageTracking = pgTable(
   'conversation_usage_tracking',
   {
@@ -451,6 +566,9 @@ export const conversationUsageTracking = pgTable(
 export type ConversationUsageTrackingInsertModel = typeof conversationUsageTracking.$inferInsert;
 export type ConversationUsageTrackingModel = typeof conversationUsageTracking.$inferSelect;
 
+/**
+ * Schema for table shared_character_conversation
+ */
 export const sharedCharacterConversation = pgTable(
   'shared_character_conversation',
   {
@@ -470,6 +588,9 @@ export const sharedCharacterConversation = pgTable(
 
 // export type sharedCharacterConversation = typeof sharedCharacterConversation.$inferSelect;
 
+/**
+ * Schema for table shared_character_chat_usage_tracking
+ */
 export const sharedCharacterChatUsageTrackingTable = pgTable(
   'shared_character_chat_usage_tracking',
   {
@@ -491,6 +612,9 @@ export type SharedCharacterChatUsageTrackingInsertModel =
 export type SharedCharacterChatUsageTrackingModel =
   typeof sharedCharacterChatUsageTrackingTable.$inferSelect;
 
+/**
+ * Schema for table custom_gpt
+ */
 export const customGptTable = pgTable(
   'custom_gpt',
   {
@@ -533,6 +657,9 @@ export type CustomGptModel = typeof customGptTable.$inferSelect;
 export type CustomGptInsertModel = typeof customGptTable.$inferInsert;
 export type CustomGptUpdateModel = z.infer<typeof customGptUpdateSchema>;
 
+/**
+ * Schema for table custom_gpt_template_mappings
+ */
 export const customGptTemplateMappingTable = pgTable(
   'custom_gpt_template_mappings',
   {
@@ -555,6 +682,9 @@ export const customGptTemplateMappingTable = pgTable(
 export type CustomGptTemplateMappingModel = typeof customGptTemplateMappingTable.$inferSelect;
 export type CustomGptTemplateMappingInsertModel = typeof customGptTemplateMappingTable.$inferInsert;
 
+/**
+ * Schema for table file_table
+ */
 export const fileTable = pgTable('file_table', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -568,6 +698,9 @@ export type FileModelAndUrl = FileModel & { signedUrl: string };
 export type FileModelAndContent = FileModel & { content?: string };
 export type FileInsertModel = typeof fileTable.$inferInsert;
 
+/**
+ * Schema for table conversation_message_file_mapping
+ */
 export const ConversationMessageFileMappingTable = pgTable(
   'conversation_message_file_mapping',
   {
@@ -600,6 +733,9 @@ export const ConversationMessageFileMappingTable = pgTable(
   ],
 );
 
+/**
+ * Schema for table shared_school_conversation_file_mapping
+ */
 export const SharedSchoolConversationFileMapping = pgTable(
   'shared_conversation_file_mapping',
   {
@@ -626,6 +762,9 @@ export const SharedSchoolConversationFileMapping = pgTable(
   ],
 );
 
+/**
+ * Schema for table character_file_mapping
+ */
 export const CharacterFileMapping = pgTable(
   'character_file_mapping',
   {
@@ -640,6 +779,10 @@ export const CharacterFileMapping = pgTable(
   },
   (table) => [unique().on(table.characterId, table.fileId)],
 );
+
+/**
+ * Schema for table custom_gpt_file_mapping
+ */
 export const CustomGptFileMapping = pgTable(
   'custom_gpt_file_mapping',
   {
@@ -655,6 +798,9 @@ export const CustomGptFileMapping = pgTable(
   (table) => [unique().on(table.customGptId, table.fileId)],
 );
 
+/**
+ * Schema for table text_chunk
+ */
 export const TextChunkTable = pgTable(
   'text_chunk',
   {
@@ -683,6 +829,9 @@ export const TextChunkTable = pgTable(
 export type TextChunkModel = typeof TextChunkTable.$inferSelect;
 export type TextChunkInsertModel = typeof TextChunkTable.$inferInsert;
 
+/**
+ * Schema for table voucher
+ */
 export const voucherStatus = z.enum(['created', 'redeemed', 'revoked']);
 export const voucherStatusEnum = pgEnum('voucher_status', voucherStatus.enum);
 
