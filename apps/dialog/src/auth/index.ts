@@ -59,6 +59,12 @@ const result = NextAuth({
         }
 
         const result = userAndContextSchema.safeParse(token.user);
+        if (token.user && !result.success) {
+          logWarning(
+            'Parsing the user from token failed. This is expected when the schema was changed due to a software update.',
+            { result },
+          );
+        }
 
         // Update session data if there is an update or the structure has changed
         if (trigger === 'update' || !result.success) {

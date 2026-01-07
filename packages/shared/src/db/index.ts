@@ -4,6 +4,7 @@ import path from 'node:path';
 import { env } from './env';
 import { migrateWithLock } from './migrate';
 import { isDevelopment } from '@shared/utils/isDevelopment';
+import { MemoryCache } from '@shared/db/memory-cache';
 
 const globalState = global as unknown as {
   pool?: Pool;
@@ -21,7 +22,15 @@ if (isDevelopment()) {
   globalState.pool = pool;
 }
 
-export const db = drizzle({ client: pool });
+export const db = drizzle({
+  client: pool,
+  // Setup in-memory cache if a global TTL is configured
+  cache: env.dbCacheTtlSeconds
+    ? new MemoryCache({
+        ex: env.dbCacheTtlSeconds,
+      })
+    : undefined,
+});
 
 export async function runDatabaseMigration() {
   try {
