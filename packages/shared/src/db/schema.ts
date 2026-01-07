@@ -56,7 +56,9 @@ export const userSelectSchema = createSelectSchema(userTable).extend({
   createdAt: z.coerce.date(),
 });
 export const userInsertSchema = createInsertSchema(userTable).omit({ createdAt: true, id: true });
-export const userUpdateSchema = createUpdateSchema(userTable).omit({ createdAt: true });
+export const userUpdateSchema = createUpdateSchema(userTable).omit({ createdAt: true }).extend({
+  id: z.string(),
+});
 
 export type UserSelectModel = z.infer<typeof userSelectSchema>;
 export type UserInsertModel = z.infer<typeof userInsertSchema>;
@@ -94,9 +96,13 @@ export const conversationInsertSchema = createInsertSchema(conversationTable).om
   createdAt: true,
   deletedAt: true,
 });
-export const conversationUpdateSchema = createUpdateSchema(conversationTable).omit({
-  createdAt: true,
-});
+export const conversationUpdateSchema = createUpdateSchema(conversationTable)
+  .omit({
+    createdAt: true,
+  })
+  .extend({
+    id: z.string(),
+  });
 
 export type ConversationSelectModel = z.infer<typeof conversationSelectSchema>;
 export type ConversationInsertModel = z.infer<typeof conversationInsertSchema>;
@@ -142,11 +148,15 @@ export const conversationMessageInsertSchema = createInsertSchema(conversationMe
   createdAt: true,
   deletedAt: true,
 });
-export const conversationMessageUpdateSchema = createUpdateSchema(conversationMessageTable).omit({
-  createdAt: true,
-  conversationId: true,
-  userId: true,
-});
+export const conversationMessageUpdateSchema = createUpdateSchema(conversationMessageTable)
+  .omit({
+    createdAt: true,
+    conversationId: true,
+    userId: true,
+  })
+  .extend({
+    id: z.string(),
+  });
 
 export type ConversationMessageSelectModel = z.infer<typeof conversationMessageSelectSchema>;
 export type ConversationMessageInsertModel = z.infer<typeof conversationMessageInsertSchema>;
@@ -180,11 +190,15 @@ export const userSchoolMappingInsertSchema = createInsertSchema(userSchoolMappin
   id: true,
   createdAt: true,
 });
-export const userSchoolMappingUpdateSchema = createUpdateSchema(userSchoolMappingTable).omit({
-  userId: true,
-  schoolId: true,
-  createdAt: true,
-});
+export const userSchoolMappingUpdateSchema = createUpdateSchema(userSchoolMappingTable)
+  .omit({
+    userId: true,
+    schoolId: true,
+    createdAt: true,
+  })
+  .extend({
+    id: z.string(),
+  });
 
 export type UserSchoolMappingSelectModel = z.infer<typeof userSchoolMappingSelectSchema>;
 export type UserSchoolMappingInsertModel = z.infer<typeof userSchoolMappingInsertSchema>;
@@ -209,10 +223,11 @@ export const schoolSelectSchema = createSelectSchema(schoolTable).extend({
   createdAt: z.coerce.date(),
 });
 export const schoolInsertSchema = createInsertSchema(schoolTable).omit({
-  id: true,
   createdAt: true,
 });
-export const schoolUpdateSchema = createUpdateSchema(schoolTable).omit({ createdAt: true });
+export const schoolUpdateSchema = createUpdateSchema(schoolTable).omit({ createdAt: true }).extend({
+  id: z.string(),
+});
 
 export type SchoolSelectModel = z.infer<typeof schoolSelectSchema>;
 export type SchoolInsertModel = z.infer<typeof schoolInsertSchema>;
@@ -251,16 +266,21 @@ export const federalStateTable = pgTable('federal_state', {
   featureToggles: json('feature_toggles').$type<FederalStateFeatureToggles>().notNull(),
 });
 export const federalStateSelectSchema = createSelectSchema(federalStateTable).extend({
+  id: z.string(),
   createdAt: z.coerce.date(),
 });
 export const federalStateInsertSchema = createInsertSchema(federalStateTable)
   .extend({
     featureToggles: federalStateFeatureTogglesSchema,
   })
-  .omit({ id: true, createdAt: true });
-export const federalStateUpdateSchema = createUpdateSchema(federalStateTable).omit({
-  createdAt: true,
-});
+  .omit({ createdAt: true });
+export const federalStateUpdateSchema = createUpdateSchema(federalStateTable)
+  .omit({
+    createdAt: true,
+  })
+  .extend({
+    id: z.string(),
+  });
 
 export type FederalStateSelectModel = z.infer<typeof federalStateSelectSchema>;
 export type FederalStateInsertModel = z.infer<typeof federalStateInsertSchema>;
@@ -325,12 +345,12 @@ export const characterInsertSchema = createInsertSchema(characterTable)
   });
 export const characterUpdateSchema = createUpdateSchema(characterTable)
   .omit({
-    id: true,
     userId: true,
     createdAt: true,
   })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
+    id: z.string(),
     accessLevel: characterAccessLevelSchema,
   });
 
@@ -414,7 +434,11 @@ export const llmModelInsertSchema = createInsertSchema(llmModelTable).omit({
   id: true,
   createdAt: true,
 });
-export const llmModelUpdateSchema = createUpdateSchema(llmModelTable).omit({ createdAt: true });
+export const llmModelUpdateSchema = createUpdateSchema(llmModelTable)
+  .omit({ createdAt: true })
+  .extend({
+    id: z.string(),
+  });
 
 export type LlmModelSelectModel = z.infer<typeof llmModelSelectSchema>;
 export type LlmModelInsertModel = z.infer<typeof llmModelInsertSchema>;
@@ -458,7 +482,11 @@ export const federalStateLlmModelMappingInsertSchema = createInsertSchema(
 ).omit({ id: true, createdAt: true });
 export const federalStateLlmModelMappingUpdateSchema = createUpdateSchema(
   federalStateLlmModelMappingTable,
-).omit({ createdAt: true });
+)
+  .omit({ createdAt: true })
+  .extend({
+    id: z.string(),
+  });
 
 export type FederalStateLlmModelMappingSelectModel = z.infer<
   typeof federalStateLlmModelMappingSelectSchema
@@ -513,7 +541,11 @@ export const sharedSchoolConversationInsertSchema = createInsertSchema(
 ).omit({ id: true, createdAt: true, inviteCode: true, startedAt: true });
 export const sharedSchoolConversationUpdateSchema = createUpdateSchema(
   sharedSchoolConversationTable,
-).omit({ id: true, userId: true, createdAt: true });
+)
+  .omit({ userId: true, createdAt: true })
+  .extend({
+    id: z.string(),
+  });
 
 export type SharedSchoolConversationSelectModel = z.infer<
   typeof sharedSchoolConversationSelectSchema
@@ -567,7 +599,11 @@ export const sharedSchoolConversationUsageTrackingInsertSchema = createInsertSch
 ).omit({ id: true, createdAt: true });
 export const sharedSchoolConversationUsageTrackingUpdateSchema = createUpdateSchema(
   sharedSchoolConversationUsageTracking,
-).omit({ createdAt: true });
+)
+  .omit({ createdAt: true })
+  .extend({
+    id: z.string(),
+  });
 
 export type SharedSchoolConversationUsageTrackingSelectModel = z.infer<
   typeof sharedSchoolConversationUsageTrackingSelectSchema
@@ -614,9 +650,11 @@ export const conversationUsageTrackingSelectSchema = createSelectSchema(
 export const conversationUsageTrackingInsertSchema = createInsertSchema(
   conversationUsageTracking,
 ).omit({ id: true, createdAt: true });
-export const conversationUsageTrackingUpdateSchema = createUpdateSchema(
-  conversationUsageTracking,
-).omit({ createdAt: true });
+export const conversationUsageTrackingUpdateSchema = createUpdateSchema(conversationUsageTracking)
+  .omit({ createdAt: true })
+  .extend({
+    id: z.string(),
+  });
 
 export type ConversationUsageTrackingSelectModel = z.infer<
   typeof conversationUsageTrackingSelectSchema
@@ -659,7 +697,11 @@ export const sharedCharacterConversationInsertSchema = createInsertSchema(
 ).omit({ id: true, createdAt: true, inviteCode: true, startedAt: true });
 export const sharedCharacterConversationUpdateSchema = createUpdateSchema(
   sharedCharacterConversation,
-).omit({ id: true, characterId: true, userId: true, createdAt: true });
+)
+  .omit({ characterId: true, userId: true, createdAt: true })
+  .extend({
+    id: z.string(),
+  });
 
 export type SharedCharacterConversationSelectModel = z.infer<
   typeof sharedCharacterConversationSelectSchema
@@ -701,7 +743,11 @@ export const sharedCharacterChatUsageTrackingInsertSchema = createInsertSchema(
 ).omit({ id: true, createdAt: true });
 export const sharedCharacterChatUsageTrackingUpdateSchema = createUpdateSchema(
   sharedCharacterChatUsageTrackingTable,
-).omit({ createdAt: true });
+)
+  .omit({ createdAt: true })
+  .extend({
+    id: z.string(),
+  });
 
 export type SharedCharacterChatUsageTrackingSelectModel = z.infer<
   typeof sharedCharacterChatUsageTrackingSelectSchema
@@ -822,7 +868,9 @@ export const fileSelectSchema = createSelectSchema(fileTable).extend({
   createdAt: z.coerce.date(),
 });
 export const fileInsertSchema = createInsertSchema(fileTable).omit({ createdAt: true });
-export const fileUpdateSchema = createUpdateSchema(fileTable).omit({ createdAt: true });
+export const fileUpdateSchema = createUpdateSchema(fileTable).omit({ createdAt: true }).extend({
+  id: z.string(),
+});
 
 export type FileSelectModel = z.infer<typeof fileSelectSchema>;
 export type FileInsertModel = z.infer<typeof fileInsertSchema>;
@@ -878,7 +926,11 @@ export const conversationMessageFileMappingInsertSchema = createInsertSchema(
 ).omit({ id: true, createdAt: true });
 export const conversationMessageFileMappingUpdateSchema = createUpdateSchema(
   ConversationMessageFileMappingTable,
-).omit({ createdAt: true });
+)
+  .omit({ createdAt: true })
+  .extend({
+    id: z.string(),
+  });
 
 export type ConversationMessageFileMappingSelectModel = z.infer<
   typeof conversationMessageFileMappingSelectSchema
@@ -929,7 +981,11 @@ export const sharedSchoolConversationFileMappingInsertSchema = createInsertSchem
 ).omit({ id: true, createdAt: true });
 export const sharedSchoolConversationFileMappingUpdateSchema = createUpdateSchema(
   SharedSchoolConversationFileMapping,
-).omit({ createdAt: true });
+)
+  .omit({ createdAt: true })
+  .extend({
+    id: z.string(),
+  });
 
 export type SharedSchoolConversationFileMappingSelectModel = z.infer<
   typeof sharedSchoolConversationFileMappingSelectSchema
@@ -966,9 +1022,13 @@ export const characterFileMappingInsertSchema = createInsertSchema(CharacterFile
   id: true,
   createdAt: true,
 });
-export const characterFileMappingUpdateSchema = createUpdateSchema(CharacterFileMapping).omit({
-  createdAt: true,
-});
+export const characterFileMappingUpdateSchema = createUpdateSchema(CharacterFileMapping)
+  .omit({
+    createdAt: true,
+  })
+  .extend({
+    id: z.string(),
+  });
 
 export type CharacterFileMappingSelectModel = z.infer<typeof characterFileMappingSelectSchema>;
 export type CharacterFileMappingInsertModel = z.infer<typeof characterFileMappingInsertSchema>;
@@ -999,9 +1059,13 @@ export const customGptFileMappingInsertSchema = createInsertSchema(CustomGptFile
   id: true,
   createdAt: true,
 });
-export const customGptFileMappingUpdateSchema = createUpdateSchema(CustomGptFileMapping).omit({
-  createdAt: true,
-});
+export const customGptFileMappingUpdateSchema = createUpdateSchema(CustomGptFileMapping)
+  .omit({
+    createdAt: true,
+  })
+  .extend({
+    id: z.string(),
+  });
 
 export type CustomGptFileMappingSelectModel = z.infer<typeof customGptFileMappingSelectSchema>;
 export type CustomGptFileMappingInsertModel = z.infer<typeof customGptFileMappingInsertSchema>;
@@ -1036,8 +1100,10 @@ export const TextChunkTable = pgTable(
 );
 
 export const textChunkSelectSchema = createSelectSchema(TextChunkTable);
-export const textChunkInsertSchema = createInsertSchema(TextChunkTable);
-export const textChunkUpdateSchema = createUpdateSchema(TextChunkTable);
+export const textChunkInsertSchema = createInsertSchema(TextChunkTable).omit({ id: true });
+export const textChunkUpdateSchema = createUpdateSchema(TextChunkTable).extend({
+  id: z.string(),
+});
 
 export type TextChunkSelectModel = z.infer<typeof textChunkSelectSchema>;
 export type TextChunkInsertModel = z.infer<typeof textChunkInsertSchema>;
@@ -1085,9 +1151,13 @@ export const voucherInsertSchema = createInsertSchema(VoucherTable).omit({
   redeemedAt: true,
   updatedAt: true,
 });
-export const voucherUpdateSchema = createUpdateSchema(VoucherTable).omit({
-  createdAt: true,
-});
+export const voucherUpdateSchema = createUpdateSchema(VoucherTable)
+  .omit({
+    createdAt: true,
+  })
+  .extend({
+    id: z.string(),
+  });
 
 export type VoucherSelectModel = z.infer<typeof voucherSelectSchema>;
 export type VoucherInsertModel = z.infer<typeof voucherInsertSchema>;
