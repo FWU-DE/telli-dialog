@@ -23,7 +23,7 @@ import {
 import { Button } from '@ui/components/Button';
 import { Search } from 'lucide-react';
 import { toast } from 'sonner';
-import { ROUTES } from '../../../consts/routes';
+import { ROUTES } from '@/consts/routes';
 import { FederalStateModel } from '@shared/federal-states/types';
 
 export default function FederalStateListView() {
@@ -31,10 +31,6 @@ export default function FederalStateListView() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    loadFederalStates();
-  }, []);
 
   const loadFederalStates = async () => {
     startTransition(async () => {
@@ -51,8 +47,12 @@ export default function FederalStateListView() {
     });
   };
 
+  useEffect(() => {
+    void loadFederalStates();
+  }, []);
+
   const handleRefresh = () => {
-    loadFederalStates();
+    void loadFederalStates();
   };
 
   return (

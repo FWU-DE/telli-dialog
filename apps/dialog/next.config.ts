@@ -18,10 +18,6 @@ const baseNextConfig: NextConfig = {
     // should be checked in the pipeline anyway and takes a lot of time during build
     ignoreBuildErrors: true,
   },
-  eslint: {
-    // should be checked in the pipeline anyway and takes a lot of time during build
-    ignoreDuringBuilds: true,
-  },
   // if you do not host it on vercel for serverless environment enable this option
   // if you want to host it on vercel, remove this option
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/output#automatically-copying-traced-files
@@ -96,11 +92,15 @@ export default withSentryConfig(baseNextConfigWithNextIntl, {
   // Upload a larger set of source maps for prettier stack traces (increases build time)
   // widenClientFileUpload: true,
 
-  // Automatically annotate React components to show their full name in breadcrumbs and session replay
-  reactComponentAnnotation: {
-    enabled: true,
-  },
+  webpack: {
+    // Automatically annotate React components to show their full name in breadcrumbs and session replay
+    reactComponentAnnotation: {
+      enabled: true,
+    },
 
-  // Automatically tree-shake Sentry logger statements to reduce bundle size
-  disableLogger: true,
+    treeshake: {
+      // Automatically tree-shake Sentry logger statements to reduce bundle size
+      removeDebugLogging: true,
+    },
+  },
 });

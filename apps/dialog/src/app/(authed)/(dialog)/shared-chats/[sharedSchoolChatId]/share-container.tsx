@@ -59,7 +59,6 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
     if (result.success) {
       toast.success(tToast('share-toast-success'));
       router.push(shareUILink);
-      router.refresh();
     } else {
       toast.error(tToast('share-toast-error'));
     }

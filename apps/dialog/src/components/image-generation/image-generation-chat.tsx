@@ -16,6 +16,7 @@ import { FileModel } from '@shared/db/schema';
 import { useQueryClient } from '@tanstack/react-query';
 import { logError } from '@shared/logging';
 import { ResponsibleAIError } from '@telli/ai-core/images/errors';
+import Image from 'next/image';
 
 interface ImageGenerationChatProps {
   conversationId?: string;
@@ -172,10 +173,14 @@ export default function ImageGenerationChat({
             <div className="mt-6">
               <h3 className="text-xs text-gray-700">{tImageGeneration('prompt-label')}</h3>
               <p className="text-sm mb-3">{displayedImage.prompt}</p>
-              <img
+              <Image
                 src={displayedImage.imageUrl}
                 alt={displayedImage.prompt}
                 className="w-full rounded-xl"
+                width={800}
+                height={800}
+                loading="eager"
+                unoptimized={true} // Since we're using signed URLs from S3
               />
               <ImageActionButtons
                 imageUrl={displayedImage.imageUrl}

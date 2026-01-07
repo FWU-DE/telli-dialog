@@ -176,6 +176,7 @@ async function createLearningScenario(data?: Partial<SharedSchoolConversationIns
   return learningScenario;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const characterInsertSchema = createInsertSchema(characterTable).omit({ accessLevel: true });
 async function createCharacter(data?: Partial<z.infer<typeof characterInsertSchema>>) {
   const [character] = await db
@@ -198,6 +199,7 @@ async function createCharacter(data?: Partial<z.infer<typeof characterInsertSche
   return character;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const customGptInsertSchema = createInsertSchema(customGptTable).omit({ accessLevel: true });
 async function createCustomGpt(data?: Partial<z.infer<typeof customGptInsertSchema>>) {
   const [customGpt] = await db

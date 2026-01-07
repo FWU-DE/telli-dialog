@@ -9,7 +9,7 @@ import { getCustomGptByAccessLevel } from '@shared/custom-gpt/custom-gpt-service
 
 export const dynamic = 'force-dynamic';
 
-export const searchParamsSchema = z.object({
+const searchParamsSchema = z.object({
   visibility: characterAccessLevelSchema.optional().default('private'),
 });
 
