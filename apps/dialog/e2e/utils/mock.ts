@@ -4,9 +4,9 @@ import { generateUUID } from '@shared/utils/uuid';
 import {
   CharacterSelectModel,
   ConversationUsageTrackingModel,
-  LlmModel,
+  LlmModelSelectModel,
   SharedCharacterChatUsageTrackingModel,
-  SharedSchoolConversationModel,
+  SharedSchoolConversationSelectModel,
   SharedSchoolConversationUsageTrackingModel,
 } from '@shared/db/schema';
 
@@ -48,7 +48,7 @@ export const mockUserAndContext = (): UserAndContext => {
   };
 };
 
-export const mockLlmModel = (): LlmModel => {
+export const mockLlmModel = (): LlmModelSelectModel => {
   return {
     id: generateUUID(),
     name: generateRandomString(10),
@@ -80,7 +80,7 @@ export const mockConversationUsage = (): ConversationUsageTrackingModel => {
   };
 };
 
-export const mockSharedSchoolConversation = (): SharedSchoolConversationModel => {
+export const mockSharedSchoolConversation = (): SharedSchoolConversationSelectModel => {
   return {
     id: generateUUID(),
     name: generateRandomString(10),

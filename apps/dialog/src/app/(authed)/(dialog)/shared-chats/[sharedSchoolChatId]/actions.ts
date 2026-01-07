@@ -1,6 +1,6 @@
 'use server';
 
-import { SharedSchoolConversationModel } from '@shared/db/schema';
+import { SharedSchoolConversationSelectModel } from '@shared/db/schema';
 import { SharedConversationShareFormValues } from './schema';
 import { runServerAction } from '@shared/actions/run-server-action';
 import {
@@ -17,7 +17,7 @@ export async function updateLearningScenarioAction({
   data,
 }: {
   learningScenarioId: string;
-  data: SharedSchoolConversationModel;
+  data: SharedSchoolConversationSelectModel;
 }) {
   const { user } = await requireAuth();
 

@@ -2,7 +2,7 @@
 
 import { getUser } from '@/auth/utils';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { LlmModel } from '@shared/db/schema';
+import { LlmModelSelectModel } from '@shared/db/schema';
 import { handleImageGeneration } from './image-generation-service';
 import { ImageStyle } from '@shared/utils/chat';
 import { DEFAULT_IMAGE_MODEL } from '@shared/llm-models/default-llm-models';
@@ -13,7 +13,7 @@ import { runServerAction } from '@shared/actions/run-server-action';
  * Filters models by priceMetadata.type === 'image'
  * and returns only image generation models available to the user's federal state
  */
-export async function getAvailableImageModels(): Promise<LlmModel[]> {
+export async function getAvailableImageModels(): Promise<LlmModelSelectModel[]> {
   const user = await getUser();
 
   const allModels = await dbGetLlmModelsByFederalStateId({
@@ -26,7 +26,9 @@ export async function getAvailableImageModels(): Promise<LlmModel[]> {
   return imageModels;
 }
 
-export async function getDefaultImageModel(imageModels: LlmModel[]): Promise<LlmModel | undefined> {
+export async function getDefaultImageModel(
+  imageModels: LlmModelSelectModel[],
+): Promise<LlmModelSelectModel | undefined> {
   return imageModels.find((m) => m.name === DEFAULT_IMAGE_MODEL) ?? imageModels[0];
 }
 
@@ -40,7 +42,7 @@ export async function generateImageAction({
   style,
 }: {
   prompt: string;
-  model: LlmModel;
+  model: LlmModelSelectModel;
   style?: ImageStyle;
 }) {
   return runServerAction(handleImageGeneration)({

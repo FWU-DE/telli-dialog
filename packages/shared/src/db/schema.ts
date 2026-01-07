@@ -102,6 +102,10 @@ export type ConversationSelectModel = z.infer<typeof conversationSelectSchema>;
 export type ConversationInsertModel = z.infer<typeof conversationInsertSchema>;
 export type ConversationUpdateModel = z.infer<typeof conversationUpdateSchema>;
 
+export type ConversationModelWithFiles = ConversationSelectModel & {
+  files: FileModel[];
+};
+
 /**
  * Schema for table conversation_message
  */
@@ -147,10 +151,6 @@ export const conversationMessageUpdateSchema = createUpdateSchema(conversationMe
 export type ConversationMessageSelectModel = z.infer<typeof conversationMessageSelectSchema>;
 export type ConversationMessageInsertModel = z.infer<typeof conversationMessageInsertSchema>;
 export type ConversationMessageUpdateModel = z.infer<typeof conversationMessageUpdateSchema>;
-
-export type ConversationModelWithFiles = typeof conversationTable.$inferSelect & {
-  files: FileModel[];
-};
 
 /**
  * Schema for table user_school_mapping
@@ -250,7 +250,6 @@ export const federalStateTable = pgTable('federal_state', {
   // feature toggles
   featureToggles: json('feature_toggles').$type<FederalStateFeatureToggles>().notNull(),
 });
-// Todo RL: createdAt should always be z.coerce.date()
 export const federalStateSelectSchema = createSelectSchema(federalStateTable).extend({
   createdAt: z.coerce.date(),
 });
@@ -313,8 +312,6 @@ export const characterTable = pgTable(
   },
   (table) => [index().on(table.userId), index().on(table.schoolId)],
 );
-
-// Todo RL: isDeleted can be part of InsertModelSchema
 
 export const characterSelectSchema = createSelectSchema(characterTable);
 export const characterInsertSchema = createInsertSchema(characterTable)
@@ -381,8 +378,12 @@ export const CharacterTemplateMappingInsertSchema = createInsertSchema(
 );
 // no update schema as there are only two fields which are both part of the primary key
 
-export type CharacterTemplateMappingSelectModel = typeof characterTemplateMappingTable.$inferSelect;
-export type CharacterTemplateMappingInsertModel = typeof characterTemplateMappingTable.$inferInsert;
+export type CharacterTemplateMappingSelectModel = z.infer<
+  typeof CharacterTemplateMappingSelectSchema
+>;
+export type CharacterTemplateMappingInsertModel = z.infer<
+  typeof CharacterTemplateMappingInsertSchema
+>;
 
 /**
  * Schema for table llm_model
@@ -418,10 +419,6 @@ export const llmModelUpdateSchema = createUpdateSchema(llmModelTable).omit({ cre
 export type LlmModelSelectModel = z.infer<typeof llmModelSelectSchema>;
 export type LlmModelInsertModel = z.infer<typeof llmModelInsertSchema>;
 export type LlmModelUpdateModel = z.infer<typeof llmModelUpdateSchema>;
-
-// Todo RL: remove $inferInsert
-// Todo RL: rename LlmModel to LlmModelSelectModel
-export type LlmModel = typeof llmModelTable.$inferSelect;
 
 /**
  * Schema for table federal_state_llm_model_mapping
@@ -508,18 +505,22 @@ export const sharedSchoolConversationTable = pgTable(
   (table) => [index().on(table.userId)],
 );
 
-export const sharedSchoolConversationInsertSchema = createInsertSchema(
-  sharedSchoolConversationTable,
-).omit({ id: true, createdAt: true, inviteCode: true, startedAt: true });
 export const sharedSchoolConversationSelectSchema = createSelectSchema(
   sharedSchoolConversationTable,
 );
+export const sharedSchoolConversationInsertSchema = createInsertSchema(
+  sharedSchoolConversationTable,
+).omit({ id: true, createdAt: true, inviteCode: true, startedAt: true });
 export const sharedSchoolConversationUpdateSchema = createUpdateSchema(
   sharedSchoolConversationTable,
 ).omit({ id: true, userId: true, createdAt: true });
 
-export type SharedSchoolConversationInsertModel = typeof sharedSchoolConversationTable.$inferInsert;
-export type SharedSchoolConversationModel = typeof sharedSchoolConversationTable.$inferSelect;
+export type SharedSchoolConversationSelectModel = z.infer<
+  typeof sharedSchoolConversationSelectSchema
+>;
+export type SharedSchoolConversationInsertModel = z.infer<
+  typeof sharedSchoolConversationInsertSchema
+>;
 export type SharedSchoolConversationUpdateModel = z.infer<
   typeof sharedSchoolConversationUpdateSchema
 >;
