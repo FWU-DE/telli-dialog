@@ -419,6 +419,10 @@ export type LlmModelSelectModel = z.infer<typeof llmModelSelectSchema>;
 export type LlmModelInsertModel = z.infer<typeof llmModelInsertSchema>;
 export type LlmModelUpdateModel = z.infer<typeof llmModelUpdateSchema>;
 
+// Todo RL: remove $inferInsert
+// Todo RL: rename LlmModel to LlmModelSelectModel
+export type LlmModel = typeof llmModelTable.$inferSelect;
+
 /**
  * Schema for table federal_state_llm_model_mapping
  */
@@ -447,8 +451,27 @@ export const federalStateLlmModelMappingTable = pgTable(
   ],
 );
 
-export type LlmInsertModel = typeof llmModelTable.$inferInsert;
-export type LlmModel = typeof llmModelTable.$inferSelect;
+export const federalStateLlmModelMappingSelectSchema = createSelectSchema(
+  federalStateLlmModelMappingTable,
+).extend({
+  createdAt: z.coerce.date(),
+});
+export const federalStateLlmModelMappingInsertSchema = createInsertSchema(
+  federalStateLlmModelMappingTable,
+).omit({ id: true, createdAt: true });
+export const federalStateLlmModelMappingUpdateSchema = createUpdateSchema(
+  federalStateLlmModelMappingTable,
+).omit({ createdAt: true });
+
+export type FederalStateLlmModelMappingSelectModel = z.infer<
+  typeof federalStateLlmModelMappingSelectSchema
+>;
+export type FederalStateLlmModelMappingInsertModel = z.infer<
+  typeof federalStateLlmModelMappingInsertSchema
+>;
+export type FederalStateLlmModelMappingUpdateModel = z.infer<
+  typeof federalStateLlmModelMappingUpdateSchema
+>;
 
 /**
  * Schema for table shared_school_conversation
@@ -532,10 +555,28 @@ export const sharedSchoolConversationUsageTracking = pgTable(
     index().on(table.createdAt),
   ],
 );
-export type SharedSchoolConversationUsageTrackingInsertModel =
-  typeof sharedSchoolConversationUsageTracking.$inferInsert;
-export type SharedSchoolConversationUsageTrackingModel =
-  typeof sharedSchoolConversationUsageTracking.$inferSelect;
+
+export const sharedSchoolConversationUsageTrackingSelectSchema = createSelectSchema(
+  sharedSchoolConversationUsageTracking,
+).extend({
+  createdAt: z.coerce.date(),
+});
+export const sharedSchoolConversationUsageTrackingInsertSchema = createInsertSchema(
+  sharedSchoolConversationUsageTracking,
+).omit({ id: true, createdAt: true });
+export const sharedSchoolConversationUsageTrackingUpdateSchema = createUpdateSchema(
+  sharedSchoolConversationUsageTracking,
+).omit({ createdAt: true });
+
+export type SharedSchoolConversationUsageTrackingSelectModel = z.infer<
+  typeof sharedSchoolConversationUsageTrackingSelectSchema
+>;
+export type SharedSchoolConversationUsageTrackingInsertModel = z.infer<
+  typeof sharedSchoolConversationUsageTrackingInsertSchema
+>;
+export type SharedSchoolConversationUsageTrackingUpdateModel = z.infer<
+  typeof sharedSchoolConversationUsageTrackingUpdateSchema
+>;
 
 /**
  * Schema for table conversation_usage_tracking
@@ -563,8 +604,28 @@ export const conversationUsageTracking = pgTable(
     index().on(table.createdAt),
   ],
 );
-export type ConversationUsageTrackingInsertModel = typeof conversationUsageTracking.$inferInsert;
-export type ConversationUsageTrackingModel = typeof conversationUsageTracking.$inferSelect;
+
+export const conversationUsageTrackingSelectSchema = createSelectSchema(
+  conversationUsageTracking,
+).extend({
+  createdAt: z.coerce.date(),
+});
+export const conversationUsageTrackingInsertSchema = createInsertSchema(
+  conversationUsageTracking,
+).omit({ id: true, createdAt: true });
+export const conversationUsageTrackingUpdateSchema = createUpdateSchema(
+  conversationUsageTracking,
+).omit({ createdAt: true });
+
+export type ConversationUsageTrackingSelectModel = z.infer<
+  typeof conversationUsageTrackingSelectSchema
+>;
+export type ConversationUsageTrackingInsertModel = z.infer<
+  typeof conversationUsageTrackingInsertSchema
+>;
+export type ConversationUsageTrackingUpdateModel = z.infer<
+  typeof conversationUsageTrackingUpdateSchema
+>;
 
 /**
  * Schema for table shared_character_conversation
@@ -586,7 +647,28 @@ export const sharedCharacterConversation = pgTable(
   (table) => [unique().on(table.characterId, table.userId)],
 );
 
-// export type sharedCharacterConversation = typeof sharedCharacterConversation.$inferSelect;
+export const sharedCharacterConversationSelectSchema = createSelectSchema(
+  sharedCharacterConversation,
+).extend({
+  createdAt: z.coerce.date(),
+  startedAt: z.coerce.date().nullable(),
+});
+export const sharedCharacterConversationInsertSchema = createInsertSchema(
+  sharedCharacterConversation,
+).omit({ id: true, createdAt: true, inviteCode: true, startedAt: true });
+export const sharedCharacterConversationUpdateSchema = createUpdateSchema(
+  sharedCharacterConversation,
+).omit({ id: true, characterId: true, userId: true, createdAt: true });
+
+export type SharedCharacterConversationSelectModel = z.infer<
+  typeof sharedCharacterConversationSelectSchema
+>;
+export type SharedCharacterConversationInsertModel = z.infer<
+  typeof sharedCharacterConversationInsertSchema
+>;
+export type SharedCharacterConversationUpdateModel = z.infer<
+  typeof sharedCharacterConversationUpdateSchema
+>;
 
 /**
  * Schema for table shared_character_chat_usage_tracking
@@ -607,10 +689,28 @@ export const sharedCharacterChatUsageTrackingTable = pgTable(
   },
   (table) => [index().on(table.characterId), index().on(table.userId), index().on(table.createdAt)],
 );
-export type SharedCharacterChatUsageTrackingInsertModel =
-  typeof sharedCharacterChatUsageTrackingTable.$inferInsert;
-export type SharedCharacterChatUsageTrackingModel =
-  typeof sharedCharacterChatUsageTrackingTable.$inferSelect;
+
+export const sharedCharacterChatUsageTrackingSelectSchema = createSelectSchema(
+  sharedCharacterChatUsageTrackingTable,
+).extend({
+  createdAt: z.coerce.date(),
+});
+export const sharedCharacterChatUsageTrackingInsertSchema = createInsertSchema(
+  sharedCharacterChatUsageTrackingTable,
+).omit({ id: true, createdAt: true });
+export const sharedCharacterChatUsageTrackingUpdateSchema = createUpdateSchema(
+  sharedCharacterChatUsageTrackingTable,
+).omit({ createdAt: true });
+
+export type SharedCharacterChatUsageTrackingSelectModel = z.infer<
+  typeof sharedCharacterChatUsageTrackingSelectSchema
+>;
+export type SharedCharacterChatUsageTrackingInsertModel = z.infer<
+  typeof sharedCharacterChatUsageTrackingInsertSchema
+>;
+export type SharedCharacterChatUsageTrackingUpdateModel = z.infer<
+  typeof sharedCharacterChatUsageTrackingUpdateSchema
+>;
 
 /**
  * Schema for table custom_gpt
@@ -642,6 +742,15 @@ export const customGptTable = pgTable(
   (table) => [index().on(table.userId), index().on(table.schoolId)],
 );
 
+export const customGptSelectSchema = createSelectSchema(customGptTable).extend({
+  createdAt: z.coerce.date(),
+  accessLevel: characterAccessLevelSchema,
+});
+export const customGptInsertSchema = createInsertSchema(customGptTable)
+  .omit({ id: true, createdAt: true })
+  .extend({
+    accessLevel: characterAccessLevelSchema,
+  });
 export const customGptUpdateSchema = createUpdateSchema(customGptTable)
   .omit({
     userId: true,
@@ -653,8 +762,9 @@ export const customGptUpdateSchema = createUpdateSchema(customGptTable)
     // for any reason accessLevel has a different type so we have to override it here
     accessLevel: characterAccessLevelSchema.optional(),
   });
-export type CustomGptModel = typeof customGptTable.$inferSelect;
-export type CustomGptInsertModel = typeof customGptTable.$inferInsert;
+
+export type CustomGptSelectModel = z.infer<typeof customGptSelectSchema>;
+export type CustomGptInsertModel = z.infer<typeof customGptInsertSchema>;
 export type CustomGptUpdateModel = z.infer<typeof customGptUpdateSchema>;
 
 /**
@@ -679,8 +789,21 @@ export const customGptTemplateMappingTable = pgTable(
     }).onDelete('cascade'),
   ],
 );
-export type CustomGptTemplateMappingModel = typeof customGptTemplateMappingTable.$inferSelect;
-export type CustomGptTemplateMappingInsertModel = typeof customGptTemplateMappingTable.$inferInsert;
+
+export const customGptTemplateMappingSelectSchema = createSelectSchema(
+  customGptTemplateMappingTable,
+);
+export const customGptTemplateMappingInsertSchema = createInsertSchema(
+  customGptTemplateMappingTable,
+);
+// no update schema as there are only two fields which are both part of the primary key
+
+export type CustomGptTemplateMappingSelectModel = z.infer<
+  typeof customGptTemplateMappingSelectSchema
+>;
+export type CustomGptTemplateMappingInsertModel = z.infer<
+  typeof customGptTemplateMappingInsertSchema
+>;
 
 /**
  * Schema for table file_table
@@ -693,10 +816,21 @@ export const fileTable = pgTable('file_table', {
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   metadata: json('metadata').$type<FileMetadata>(),
 });
+
+export const fileSelectSchema = createSelectSchema(fileTable).extend({
+  createdAt: z.coerce.date(),
+});
+export const fileInsertSchema = createInsertSchema(fileTable).omit({ createdAt: true });
+export const fileUpdateSchema = createUpdateSchema(fileTable).omit({ createdAt: true });
+
+export type FileSelectModel = z.infer<typeof fileSelectSchema>;
+export type FileInsertModel = z.infer<typeof fileInsertSchema>;
+export type FileUpdateModel = z.infer<typeof fileUpdateSchema>;
+
+// Keep existing extended types
 export type FileModel = typeof fileTable.$inferSelect;
 export type FileModelAndUrl = FileModel & { signedUrl: string };
 export type FileModelAndContent = FileModel & { content?: string };
-export type FileInsertModel = typeof fileTable.$inferInsert;
 
 /**
  * Schema for table conversation_message_file_mapping
@@ -733,6 +867,28 @@ export const ConversationMessageFileMappingTable = pgTable(
   ],
 );
 
+export const conversationMessageFileMappingSelectSchema = createSelectSchema(
+  ConversationMessageFileMappingTable,
+).extend({
+  createdAt: z.coerce.date(),
+});
+export const conversationMessageFileMappingInsertSchema = createInsertSchema(
+  ConversationMessageFileMappingTable,
+).omit({ id: true, createdAt: true });
+export const conversationMessageFileMappingUpdateSchema = createUpdateSchema(
+  ConversationMessageFileMappingTable,
+).omit({ createdAt: true });
+
+export type ConversationMessageFileMappingSelectModel = z.infer<
+  typeof conversationMessageFileMappingSelectSchema
+>;
+export type ConversationMessageFileMappingInsertModel = z.infer<
+  typeof conversationMessageFileMappingInsertSchema
+>;
+export type ConversationMessageFileMappingUpdateModel = z.infer<
+  typeof conversationMessageFileMappingUpdateSchema
+>;
+
 /**
  * Schema for table shared_school_conversation_file_mapping
  */
@@ -762,6 +918,28 @@ export const SharedSchoolConversationFileMapping = pgTable(
   ],
 );
 
+export const sharedSchoolConversationFileMappingSelectSchema = createSelectSchema(
+  SharedSchoolConversationFileMapping,
+).extend({
+  createdAt: z.coerce.date(),
+});
+export const sharedSchoolConversationFileMappingInsertSchema = createInsertSchema(
+  SharedSchoolConversationFileMapping,
+).omit({ id: true, createdAt: true });
+export const sharedSchoolConversationFileMappingUpdateSchema = createUpdateSchema(
+  SharedSchoolConversationFileMapping,
+).omit({ createdAt: true });
+
+export type SharedSchoolConversationFileMappingSelectModel = z.infer<
+  typeof sharedSchoolConversationFileMappingSelectSchema
+>;
+export type SharedSchoolConversationFileMappingInsertModel = z.infer<
+  typeof sharedSchoolConversationFileMappingInsertSchema
+>;
+export type SharedSchoolConversationFileMappingUpdateModel = z.infer<
+  typeof sharedSchoolConversationFileMappingUpdateSchema
+>;
+
 /**
  * Schema for table character_file_mapping
  */
@@ -780,6 +958,21 @@ export const CharacterFileMapping = pgTable(
   (table) => [unique().on(table.characterId, table.fileId)],
 );
 
+export const characterFileMappingSelectSchema = createSelectSchema(CharacterFileMapping).extend({
+  createdAt: z.coerce.date(),
+});
+export const characterFileMappingInsertSchema = createInsertSchema(CharacterFileMapping).omit({
+  id: true,
+  createdAt: true,
+});
+export const characterFileMappingUpdateSchema = createUpdateSchema(CharacterFileMapping).omit({
+  createdAt: true,
+});
+
+export type CharacterFileMappingSelectModel = z.infer<typeof characterFileMappingSelectSchema>;
+export type CharacterFileMappingInsertModel = z.infer<typeof characterFileMappingInsertSchema>;
+export type CharacterFileMappingUpdateModel = z.infer<typeof characterFileMappingUpdateSchema>;
+
 /**
  * Schema for table custom_gpt_file_mapping
  */
@@ -797,6 +990,21 @@ export const CustomGptFileMapping = pgTable(
   },
   (table) => [unique().on(table.customGptId, table.fileId)],
 );
+
+export const customGptFileMappingSelectSchema = createSelectSchema(CustomGptFileMapping).extend({
+  createdAt: z.coerce.date(),
+});
+export const customGptFileMappingInsertSchema = createInsertSchema(CustomGptFileMapping).omit({
+  id: true,
+  createdAt: true,
+});
+export const customGptFileMappingUpdateSchema = createUpdateSchema(CustomGptFileMapping).omit({
+  createdAt: true,
+});
+
+export type CustomGptFileMappingSelectModel = z.infer<typeof customGptFileMappingSelectSchema>;
+export type CustomGptFileMappingInsertModel = z.infer<typeof customGptFileMappingInsertSchema>;
+export type CustomGptFileMappingUpdateModel = z.infer<typeof customGptFileMappingUpdateSchema>;
 
 /**
  * Schema for table text_chunk
@@ -826,8 +1034,13 @@ export const TextChunkTable = pgTable(
   ],
 );
 
-export type TextChunkModel = typeof TextChunkTable.$inferSelect;
-export type TextChunkInsertModel = typeof TextChunkTable.$inferInsert;
+export const textChunkSelectSchema = createSelectSchema(TextChunkTable);
+export const textChunkInsertSchema = createInsertSchema(TextChunkTable);
+export const textChunkUpdateSchema = createUpdateSchema(TextChunkTable);
+
+export type TextChunkSelectModel = z.infer<typeof textChunkSelectSchema>;
+export type TextChunkInsertModel = z.infer<typeof textChunkInsertSchema>;
+export type TextChunkUpdateModel = z.infer<typeof textChunkUpdateSchema>;
 
 /**
  * Schema for table voucher
@@ -859,6 +1072,22 @@ export const VoucherTable = pgTable(
   (table) => [index().on(table.federalStateId), index().on(table.redeemedBy)],
 );
 
-export type VoucherModel = typeof VoucherTable.$inferSelect;
-export type VoucherInsertModel = typeof VoucherTable.$inferInsert;
-export type VoucherUpdateModel = Partial<VoucherInsertModel> & Pick<VoucherModel, 'id'>;
+export const voucherSelectSchema = createSelectSchema(VoucherTable).extend({
+  createdAt: z.coerce.date(),
+  validUntil: z.coerce.date(),
+  redeemedAt: z.coerce.date().nullable(),
+  updatedAt: z.coerce.date().nullable(),
+});
+export const voucherInsertSchema = createInsertSchema(VoucherTable).omit({
+  id: true,
+  createdAt: true,
+  redeemedAt: true,
+  updatedAt: true,
+});
+export const voucherUpdateSchema = createUpdateSchema(VoucherTable).omit({
+  createdAt: true,
+});
+
+export type VoucherSelectModel = z.infer<typeof voucherSelectSchema>;
+export type VoucherInsertModel = z.infer<typeof voucherInsertSchema>;
+export type VoucherUpdateModel = z.infer<typeof voucherUpdateSchema>;
