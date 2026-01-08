@@ -57,7 +57,7 @@ export async function dbGetOrCreateConversation({
   )[0];
 }
 
-export async function dbGetCoversationMessages({
+export async function dbGetConversationMessages({
   userId,
   conversationId,
 }: {
