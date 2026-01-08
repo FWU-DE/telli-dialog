@@ -367,15 +367,13 @@ export async function updateCustomGptPicture({
   return updatedCustomGpt;
 }
 
-const updateCustomGptSchema = customGptUpdateSchema
-  .omit({
-    id: true,
-    pictureId: true,
-    isDeleted: true,
-    originalCustomGptId: true,
-    accessLevel: true,
-  })
-  .partial();
+const updateCustomGptSchema = customGptUpdateSchema.omit({
+  id: true,
+  pictureId: true,
+  isDeleted: true,
+  originalCustomGptId: true,
+  accessLevel: true,
+});
 
 /**
  * Update custom gpt properties.
