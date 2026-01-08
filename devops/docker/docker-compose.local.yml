@@ -4,7 +4,7 @@ services:
   postgres:
     # Use the same postgres version as in production
     image: pgvector/pgvector:pg16
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_DB: telli_dialog_db
       POSTGRES_USER: telli_dialog_db
@@ -22,7 +22,7 @@ services:
 
   valkey:
     image: ghcr.io/valkey-io/valkey:8
-    restart: always
+    restart: unless-stopped
     volumes:
       - valkey_data:/data
     ports:
@@ -41,7 +41,7 @@ services:
       - ./keycloak:/opt/keycloak/data/import
     ports:
       - '8080:8080'
-    restart: always
+    restart: unless-stopped
     depends_on:
       fix-keycloak-volume-ownership:
         condition: service_completed_successfully
@@ -56,12 +56,30 @@ services:
 
   rabbitmq:
     image: rabbitmq:4-management
+    restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_PASS: password
       RABBITMQ_DEFAULT_USER: user
     ports:
       - '5672:5672'
       - '15672:15672'
+
+  crawl4ai:
+    image: unclecode/crawl4ai:0.7.8
+    ports:
+      - '11235:11235'
+    deploy:
+      resources:
+        limits:
+          memory: '4gb'
+    shm_size: '2gb'
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:11235/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   keycloak_data:
