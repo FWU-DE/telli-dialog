@@ -2,12 +2,11 @@ import { HELP_MODE_GPT_ID } from '../const';
 import { dbUpsertCustomGpt } from '../functions/custom-gpts';
 import { type CustomGptInsertModel } from '../schema';
 
-const hilfeModusGpt: CustomGptInsertModel = {
+const hilfeModusGpt: CustomGptInsertModel & { id: string } = {
   id: HELP_MODE_GPT_ID,
   name: 'Hilfe-Assistent',
   systemPrompt: '',
   userId: null,
-  createdAt: new Date(),
   accessLevel: 'global',
   promptSuggestions: [],
   description: null,

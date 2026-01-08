@@ -4,7 +4,7 @@ import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import HeaderPortal from '../../../header-portal';
 import CustomGptForm from './custom-gpt-form';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
-import { CustomGptModel } from '@shared/db/schema';
+import { CustomGptSelectModel } from '@shared/db/schema';
 import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { logError } from '@shared/logging';
@@ -76,7 +76,7 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
         <CustomGptForm
-          {...(removeNullishValues(customGpt) as CustomGptModel)}
+          {...(removeNullishValues(customGpt) as CustomGptSelectModel)}
           maybeSignedPictureUrl={maybeSignedPictureUrl}
           isCreating={isCreating}
           readOnly={readOnly}

@@ -5,7 +5,7 @@ import { useToast } from '@/components/common/toast';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import SettingsIcon from '@/components/icons/settings';
 import TrashIcon from '@/components/icons/trash';
-import { CharacterAccessLevel, CustomGptModel } from '@shared/db/schema';
+import { CharacterAccessLevel, CustomGptSelectModel } from '@shared/db/schema';
 import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
 import { useTranslations } from 'next-intl';
@@ -19,7 +19,7 @@ import { CreateNewCharacterFromTemplate } from '../characters/create-new-charact
 import TelliClipboardButton from '@/components/common/clipboard-button';
 import { createNewCustomGptAction } from './actions';
 
-type CustomGptContainerProps = CustomGptModel & {
+type CustomGptContainerProps = CustomGptSelectModel & {
   currentUserId: string;
   maybeSignedPictureUrl: string | undefined;
   accessLevel: CharacterAccessLevel;

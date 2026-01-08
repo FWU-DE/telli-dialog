@@ -1145,18 +1145,21 @@ export const voucherSelectSchema = createSelectSchema(VoucherTable).extend({
   redeemedAt: z.coerce.date().nullable(),
   updatedAt: z.coerce.date().nullable(),
 });
-export const voucherInsertSchema = createInsertSchema(VoucherTable).omit({
-  id: true,
-  createdAt: true,
-  redeemedAt: true,
-  updatedAt: true,
-});
+export const voucherInsertSchema = createInsertSchema(VoucherTable)
+  .extend({ status: voucherStatus })
+  .omit({
+    id: true,
+    createdAt: true,
+    redeemedAt: true,
+    updatedAt: true,
+  });
 export const voucherUpdateSchema = createUpdateSchema(VoucherTable)
   .omit({
     createdAt: true,
   })
   .extend({
     id: z.string(),
+    status: voucherStatus,
   });
 
 export type VoucherSelectModel = z.infer<typeof voucherSelectSchema>;

@@ -1,6 +1,11 @@
 'use client';
 
-import { CharacterAccessLevel, CustomGptModel, FileModel, UserSchoolRole } from '@shared/db/schema';
+import {
+  CharacterAccessLevel,
+  CustomGptSelectModel,
+  FileModel,
+  UserSchoolRole,
+} from '@shared/db/schema';
 import {
   buttonDeleteClassName,
   buttonPrimaryClassName,
@@ -47,7 +52,7 @@ import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { formLinks } from '@/utils/web-search/form-links';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 
-type CustomGptFormProps = CustomGptModel & {
+type CustomGptFormProps = CustomGptSelectModel & {
   maybeSignedPictureUrl: string | undefined;
   userRole: UserSchoolRole;
   isCreating?: boolean;
