@@ -21,6 +21,7 @@ import {
   FileModel,
   fileTable,
   sharedCharacterConversation,
+  characterAccessLevelSchema,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
@@ -220,6 +221,8 @@ export const updateCharacterAccessLevel = async ({
   userId: string;
 }) => {
   checkParameterUUID(characterId);
+  characterAccessLevelSchema.parse(accessLevel);
+
   // Authorization check
   if (accessLevel === 'global') {
     throw new ForbiddenError('Not authorized to set the access level to global');
