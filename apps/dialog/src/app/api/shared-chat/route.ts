@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
   const { telliProvider, definedModel } = modelAndProvider;
 
   if (sharedChatHasExpired(sharedChat)) {
-    return NextResponse.json({ error: 'Shared chat has reached end of life' }, { status: 400 });
+    return NextResponse.json({ error: 'Shared chat has expired.' }, { status: 400 });
   }
 
   const [sharedChatLimitReached, intelliPointsLimitReached] = await Promise.all([
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
 
   if (sharedChatLimitReached) {
     return NextResponse.json(
-      { error: 'Shared chat has reached intelli points limit' },
+      { error: 'Shared chat has reached telli points limit.' },
       { status: 429 },
     );
   }
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         sharedChat,
       }),
     );
-    return NextResponse.json({ error: 'User has reached intelli points limit' }, { status: 429 });
+    return NextResponse.json({ error: 'User has reached telli points limit.' }, { status: 429 });
   }
   const relatedFileEntities = await dbGetRelatedSharedChatFiles(sharedChat.id);
   const urls = sharedChat.attachedLinks
