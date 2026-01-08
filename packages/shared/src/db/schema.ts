@@ -390,19 +390,19 @@ export const characterTemplateMappingTable = pgTable(
   ],
 );
 
-export const CharacterTemplateMappingSelectSchema = createSelectSchema(
+export const characterTemplateMappingSelectSchema = createSelectSchema(
   characterTemplateMappingTable,
 );
-export const CharacterTemplateMappingInsertSchema = createInsertSchema(
+export const characterTemplateMappingInsertSchema = createInsertSchema(
   characterTemplateMappingTable,
 );
 // no update schema as there are only two fields which are both part of the primary key
 
 export type CharacterTemplateMappingSelectModel = z.infer<
-  typeof CharacterTemplateMappingSelectSchema
+  typeof characterTemplateMappingSelectSchema
 >;
 export type CharacterTemplateMappingInsertModel = z.infer<
-  typeof CharacterTemplateMappingInsertSchema
+  typeof characterTemplateMappingInsertSchema
 >;
 
 /**
