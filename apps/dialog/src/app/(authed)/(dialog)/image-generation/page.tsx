@@ -1,4 +1,3 @@
-import { getUser } from '@/auth/utils';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import HeaderPortal from '../header-portal';
@@ -7,20 +6,29 @@ import { ImageStyleProvider } from '@/components/providers/image-style-provider'
 import ImageGenerationChat from '@/components/image-generation/image-generation-chat';
 import SelectImageModel from '@/components/image-generation/select-image-model';
 import SelectImageStyle from '@/components/image-generation/select-image-style';
-import { getAvailableImageModels, getDefaultImageModel } from './actions';
+import {
+  getAvailableImageModelsForFederalState,
+  getDefaultImageModel,
+} from '@shared/image-generation/image-generation-service';
 import { redirect } from 'next/navigation';
+import { requireAuth } from '@/auth/requireAuth';
+import { buildLegacyUserAndContext } from '@/auth/types';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ImageGenerationPage() {
-  const user = await getUser();
+  const { user, school, federalState } = await requireAuth();
+  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
-  if (!(user.federalState.featureToggles.isImageGenerationEnabled ?? false)) {
+  if (!(federalState.featureToggles.isImageGenerationEnabled ?? false)) {
     redirect('/');
   }
-  const imageModels = await getAvailableImageModels();
 
-  const selectedModel = await getDefaultImageModel(imageModels);
+  const imageModels = await getAvailableImageModelsForFederalState({
+    federalStateId: federalState.id,
+  });
+  const selectedModel = getDefaultImageModel(imageModels);
+
   return (
     <ImageModelsProvider models={imageModels} defaultImageModel={selectedModel}>
       <ImageStyleProvider>
@@ -31,7 +39,7 @@ export default async function ImageGenerationPage() {
               <SelectImageModel />
               <SelectImageStyle />
               <div className="flex-grow"></div>
-              <ProfileMenu {...user} />
+              <ProfileMenu {...userAndContext} />
             </div>
           </HeaderPortal>
 
