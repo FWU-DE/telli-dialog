@@ -15,7 +15,7 @@ import {
 import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
-import { CustomGptModel } from '@shared/db/schema';
+import { CustomGptSelectModel } from '@shared/db/schema';
 import { UserModel } from '@shared/auth/user-model';
 import {
   getConversation,
@@ -103,7 +103,7 @@ describe('custom-gpt-service', () => {
       const customGptId = generateUUID();
       const conversationId = generateUUID();
 
-      const mockCustomGpt: Partial<CustomGptModel> = { userId };
+      const mockCustomGpt: Partial<CustomGptSelectModel> = { userId };
 
       (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
         mockCustomGpt as never,
@@ -153,7 +153,11 @@ describe('custom-gpt-service', () => {
     const fileId = generateUUID();
     const schoolId = generateUUID();
 
-    const mockCustomGpt: Partial<CustomGptModel> = { userId, schoolId, accessLevel: 'private' };
+    const mockCustomGpt: Partial<CustomGptSelectModel> = {
+      userId,
+      schoolId,
+      accessLevel: 'private',
+    };
 
     beforeEach(() => {
       (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
@@ -259,7 +263,11 @@ describe('custom-gpt-service', () => {
     ])(
       'should throw ForbiddenError when user is not owner of private custom GPT - $functionName',
       async ({ testFunction }) => {
-        const mockCustomGpt: Partial<CustomGptModel> = { userId, schoolId, accessLevel: 'private' };
+        const mockCustomGpt: Partial<CustomGptSelectModel> = {
+          userId,
+          schoolId,
+          accessLevel: 'private',
+        };
 
         (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
           mockCustomGpt as never,
@@ -291,7 +299,11 @@ describe('custom-gpt-service', () => {
     ])(
       'should throw ForbiddenError when user is not in same school - $functionName',
       async ({ testFunction }) => {
-        const mockCustomGpt: Partial<CustomGptModel> = { userId, schoolId, accessLevel: 'school' };
+        const mockCustomGpt: Partial<CustomGptSelectModel> = {
+          userId,
+          schoolId,
+          accessLevel: 'school',
+        };
 
         (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
           mockCustomGpt as never,
@@ -328,7 +340,7 @@ describe('custom-gpt-service', () => {
     it('should throw ForbiddenError when user is not owner of private custom GPT - getFileMappings', async () => {
       const userId = generateUUID();
       const customGptId = generateUUID();
-      const mockCustomGpt: Partial<CustomGptModel> = { accessLevel: 'private', userId };
+      const mockCustomGpt: Partial<CustomGptSelectModel> = { accessLevel: 'private', userId };
 
       (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
         mockCustomGpt as never,
@@ -346,7 +358,7 @@ describe('custom-gpt-service', () => {
     it('should throw ForbiddenError when user has not same schoolId as custom GPT - getFileMappings', async () => {
       const userId = generateUUID();
       const customGptId = generateUUID();
-      const mockCustomGpt: Partial<CustomGptModel> = {
+      const mockCustomGpt: Partial<CustomGptSelectModel> = {
         accessLevel: 'school',
         schoolId: 'school-1',
         userId,
@@ -368,7 +380,7 @@ describe('custom-gpt-service', () => {
     it('should throw ForbiddenError when setting access level to global not possible - updateCustomGptAccessLevel', async () => {
       const userId = generateUUID();
       const customGptId = generateUUID();
-      const mockCustomGpt: Partial<CustomGptModel> = { userId };
+      const mockCustomGpt: Partial<CustomGptSelectModel> = { userId };
 
       (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
         mockCustomGpt as never,
@@ -526,7 +538,7 @@ describe('custom-gpt-service', () => {
       ])(
         `should return customGpt with accessLevel=${accessLevel} - $functionName`,
         async ({ testFunction }) => {
-          const mockCustomGpt: Partial<CustomGptModel> = {
+          const mockCustomGpt: Partial<CustomGptSelectModel> = {
             userId: userIdOfOwner,
             schoolId: schoolIdOfOwner,
             accessLevel,

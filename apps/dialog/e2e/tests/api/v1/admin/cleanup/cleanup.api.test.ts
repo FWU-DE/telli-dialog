@@ -154,7 +154,9 @@ test('should return 403 if authorization header is missing', async ({ request })
   expect(response.status()).toBe(403);
 });
 
-async function createLearningScenario(data?: Partial<SharedSchoolConversationInsertModel>) {
+async function createLearningScenario(
+  data?: Partial<SharedSchoolConversationInsertModel> & { createdAt?: Date },
+) {
   const [learningScenario] = await db
     .insert(sharedSchoolConversationTable)
     .values({

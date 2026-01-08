@@ -1,6 +1,6 @@
 import * as Select from '@radix-ui/react-select';
 import ChevronDownIcon from '@/components/icons/chevron-down';
-import { LlmModel } from '@shared/db/schema';
+import { LlmModelSelectModel } from '@shared/db/schema';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/utils/tailwind';
 import { getFilteredTextModels } from '@shared/llm-models/llm-model-service';
@@ -8,7 +8,7 @@ import { getFilteredTextModels } from '@shared/llm-models/llm-model-service';
 type SelectLlmFormProps = {
   selectedModel: string | undefined;
   onValueChange(value: string): void;
-  models: LlmModel[];
+  models: LlmModelSelectModel[];
   disabled?: boolean;
 };
 

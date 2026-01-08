@@ -293,13 +293,12 @@ export type UpdateCharacterActionModel = z.infer<typeof updateCharacterSchema>;
  * The user must be the owner of the character.
  */
 export const updateCharacter = async ({
-  characterId,
   userId,
   ...character
-}: UpdateCharacterActionModel & { characterId: string; userId: string }) => {
-  checkParameterUUID(characterId);
+}: UpdateCharacterActionModel & { userId: string }) => {
+  checkParameterUUID(character.id);
   // Authorization check
-  const { isOwner } = await getCharacterInfo(characterId, userId);
+  const { isOwner } = await getCharacterInfo(character.id, userId);
   if (!isOwner) throw new ForbiddenError('Not authorized to update this character');
 
   // Update the character in database
@@ -311,7 +310,7 @@ export const updateCharacter = async ({
   const [updatedCharacter] = await db
     .update(characterTable)
     .set({ ...parsedCharacterValues })
-    .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)))
+    .where(and(eq(characterTable.id, character.id), eq(characterTable.userId, userId)))
     .returning();
 
   if (updatedCharacter === undefined) {

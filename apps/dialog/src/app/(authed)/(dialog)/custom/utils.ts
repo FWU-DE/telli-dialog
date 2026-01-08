@@ -1,12 +1,14 @@
-import { CustomGptModel } from '@shared/db/schema';
+import { CustomGptSelectModel } from '@shared/db/schema';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 
-export type CustomGptWithImage = CustomGptModel & { maybeSignedPictureUrl: string | undefined };
+export type CustomGptWithImage = CustomGptSelectModel & {
+  maybeSignedPictureUrl: string | undefined;
+};
 
 export async function enrichGptWithImage({
   customGpts,
 }: {
-  customGpts: CustomGptModel[];
+  customGpts: CustomGptSelectModel[];
 }): Promise<CustomGptWithImage[]> {
   return await Promise.all(
     customGpts.map(async (gpt) => ({

@@ -25,7 +25,7 @@ function vidisRoleToUserSchoolRole(role: string): UserSchoolRole {
   }
 }
 
-export async function dbCreateVidisUser(user: UserInsertModel) {
+export async function dbCreateVidisUser(user: UserInsertModel & { id: string }) {
   const insertedUser = await db
     .insert(userTable)
     .values({ ...user })

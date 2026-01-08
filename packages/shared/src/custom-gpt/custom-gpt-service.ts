@@ -16,7 +16,7 @@ import { dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
 import {
   CharacterAccessLevel,
   CustomGptFileMapping,
-  CustomGptModel,
+  CustomGptSelectModel,
   customGptTable,
   customGptUpdateSchema,
   FileModel,
@@ -130,7 +130,7 @@ export async function getCustomGptByAccessLevel({
   schoolId: string;
   userId: string;
   federalStateId: string;
-}): Promise<CustomGptModel[]> {
+}): Promise<CustomGptSelectModel[]> {
   if (accessLevel === 'global') {
     return await dbGetGlobalGpts({ federalStateId });
   } else if (accessLevel === 'school') {

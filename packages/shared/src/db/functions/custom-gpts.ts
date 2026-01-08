@@ -5,7 +5,7 @@ import {
   conversationTable,
   CustomGptFileMapping,
   type CustomGptInsertModel,
-  type CustomGptModel,
+  type CustomGptSelectModel,
   customGptTable,
   customGptTemplateMappingTable,
   fileTable,
@@ -17,7 +17,7 @@ export async function dbGetCustomGptsByUserId({
   userId,
 }: {
   userId: string;
-}): Promise<CustomGptModel[]> {
+}): Promise<CustomGptSelectModel[]> {
   return db.select().from(customGptTable).where(eq(customGptTable.userId, userId));
 }
 
@@ -25,7 +25,7 @@ export async function dbGetCustomGptById({
   customGptId,
 }: {
   customGptId: string;
-}): Promise<CustomGptModel> {
+}): Promise<CustomGptSelectModel> {
   const [customGpt] = await db
     .select()
     .from(customGptTable)
@@ -40,7 +40,7 @@ export async function dbGetGlobalGpts({
   federalStateId,
 }: {
   federalStateId?: string;
-}): Promise<CustomGptModel[]> {
+}): Promise<CustomGptSelectModel[]> {
   if (federalStateId) {
     return db
       .select({ ...getTableColumns(customGptTable) })
@@ -69,7 +69,7 @@ export async function dbGetGlobalCustomGptByName({
   name,
 }: {
   name: string;
-}): Promise<CustomGptModel | undefined> {
+}): Promise<CustomGptSelectModel | undefined> {
   const [customGpt] = await db
     .select()
     .from(customGptTable)
@@ -81,7 +81,7 @@ export async function dbGetGptsBySchoolId({
   schoolId,
 }: {
   schoolId: string;
-}): Promise<CustomGptModel[]> {
+}): Promise<CustomGptSelectModel[]> {
   return db
     .select()
     .from(customGptTable)
@@ -89,7 +89,11 @@ export async function dbGetGptsBySchoolId({
     .orderBy(desc(customGptTable.createdAt));
 }
 
-export async function dbGetGptsByUserId({ userId }: { userId: string }): Promise<CustomGptModel[]> {
+export async function dbGetGptsByUserId({
+  userId,
+}: {
+  userId: string;
+}): Promise<CustomGptSelectModel[]> {
   return db
     .select()
     .from(customGptTable)
@@ -134,7 +138,7 @@ export async function dbUpsertCustomGpt({
   customGpt,
 }: {
   customGpt: CustomGptInsertModel;
-}): Promise<CustomGptModel | undefined> {
+}): Promise<CustomGptSelectModel | undefined> {
   const [insertedCustomGpt] = await db
     .insert(customGptTable)
     .values(customGpt)
@@ -153,7 +157,7 @@ export async function dbUpdateCustomGpt({
 }: {
   customGptId: string;
   customGpt: Partial<CustomGptInsertModel>;
-}): Promise<CustomGptModel | undefined> {
+}): Promise<CustomGptSelectModel | undefined> {
   const [updatedCustomGpt] = await db
     .update(customGptTable)
     .set(customGpt)
@@ -248,30 +252,6 @@ export async function dbDeleteCustomGptByIdAndUserId({
   });
 
   return deletedGpt;
-}
-
-export async function dbGetCopyTemplateCustomGpt({
-  templateId,
-  customGptId,
-  userId,
-}: {
-  templateId: string;
-  customGptId: string;
-  userId: string;
-}): Promise<CustomGptInsertModel> {
-  console.log(templateId, customGptId, userId);
-  const customGpt = await dbGetCustomGptById({ customGptId: templateId });
-  if (customGpt?.name === undefined) {
-    throw new Error(
-      `Invalid State Template CustomGpt must have a name: provided values: ${JSON.stringify({ templateId, customGptId, userId })}`,
-    );
-  }
-  return {
-    ...customGpt,
-    id: customGptId,
-    accessLevel: 'private',
-    userId,
-  };
 }
 
 /**

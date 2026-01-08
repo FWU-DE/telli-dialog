@@ -3,7 +3,7 @@
 import { useChat } from '@ai-sdk/react';
 import { FormEvent, RefObject, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { type SharedSchoolConversationModel } from '@shared/db/schema';
+import { type SharedSchoolConversationSelectModel } from '@shared/db/schema';
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
@@ -19,7 +19,7 @@ import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios
 export default function SharedChat({
   maybeSignedPictureUrl,
   ...sharedSchoolChat
-}: SharedSchoolConversationModel & { inviteCode: string; maybeSignedPictureUrl?: string }) {
+}: SharedSchoolConversationSelectModel & { inviteCode: string; maybeSignedPictureUrl?: string }) {
   const t = useTranslations('shared-chats.shared');
 
   const { id, inviteCode } = sharedSchoolChat;

@@ -1,6 +1,6 @@
 import { and, eq, getTableColumns, inArray } from 'drizzle-orm';
 import { db } from '..';
-import { federalStateLlmModelMappingTable, LlmModel, llmModelTable } from '../schema';
+import { federalStateLlmModelMappingTable, LlmModelSelectModel, llmModelTable } from '../schema';
 import { KnotenpunktLlmModel } from '../../knotenpunkt/schema';
 import {
   dbGetFederalStateWithDecryptedApiKeyWithResult,
@@ -35,7 +35,7 @@ export async function dbGetLlmModelsByFederalStateId({
   federalStateId,
 }: {
   federalStateId: string;
-}): Promise<LlmModel[]> {
+}): Promise<LlmModelSelectModel[]> {
   return db
     .select({ ...getTableColumns(llmModelTable) })
     .from(llmModelTable)
@@ -56,7 +56,7 @@ export async function dbUpdateLlmModelsByFederalStateId({
   federalStateId,
 }: {
   federalStateId: string;
-}): Promise<LlmModel[]> {
+}): Promise<LlmModelSelectModel[]> {
   const [error, result] = await dbGetFederalStateWithDecryptedApiKeyWithResult({ federalStateId });
   if (error !== null) {
     console.error({ error });
@@ -87,10 +87,12 @@ export async function dbUpdateLlmModelsByFederalStateId({
   return models;
 }
 
-export async function dbUpdateLlmModelsForAllFederalStates(): Promise<Record<string, LlmModel[]>> {
+export async function dbUpdateLlmModelsForAllFederalStates(): Promise<
+  Record<string, LlmModelSelectModel[]>
+> {
   const states = await dbGetFederalStates();
 
-  const models: Record<string, LlmModel[]> = {};
+  const models: Record<string, LlmModelSelectModel[]> = {};
   for (const state of states) {
     models[state.id] = await dbUpdateLlmModelsByFederalStateId({ federalStateId: state.id });
   }
@@ -130,7 +132,7 @@ export async function dbUpsertLlmModelsByModelsAndFederalStateId({
   federalStateId: string;
   models: KnotenpunktLlmModel[];
 }) {
-  const insertedModels: LlmModel[] = [];
+  const insertedModels: LlmModelSelectModel[] = [];
   for (const model of models) {
     await db
       .insert(llmModelTable)
