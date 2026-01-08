@@ -393,7 +393,7 @@ export async function updateCustomGpt({
     throw new ForbiddenError('Not authorized to update this custom gpt');
   }
 
-  const parsedValues = updateCustomGptSchema.parse(customGptProps);
+  const parsedValues = updateCustomGptSchema.strip().parse(customGptProps);
 
   const [updatedGpt] = await db
     .update(customGptTable)
