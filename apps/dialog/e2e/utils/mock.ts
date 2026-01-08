@@ -3,11 +3,11 @@ import { generateRandomString } from './random';
 import { generateUUID } from '@shared/utils/uuid';
 import {
   CharacterSelectModel,
-  ConversationUsageTrackingModel,
+  ConversationUsageTrackingSelectModel,
   LlmModelSelectModel,
-  SharedCharacterChatUsageTrackingModel,
+  SharedCharacterChatUsageTrackingSelectModel,
   SharedSchoolConversationSelectModel,
-  SharedSchoolConversationUsageTrackingModel,
+  SharedSchoolConversationUsageTrackingSelectModel,
 } from '@shared/db/schema';
 
 export const mockUserAndContext = (): UserAndContext => {
@@ -67,7 +67,7 @@ export const mockLlmModel = (): LlmModelSelectModel => {
   };
 };
 
-export const mockConversationUsage = (): ConversationUsageTrackingModel => {
+export const mockConversationUsage = (): ConversationUsageTrackingSelectModel => {
   return {
     id: generateUUID(),
     userId: generateUUID(),
@@ -103,20 +103,21 @@ export const mockSharedSchoolConversation = (): SharedSchoolConversationSelectMo
   };
 };
 
-export const mockSharedSchoolConversationUsage = (): SharedSchoolConversationUsageTrackingModel => {
-  return {
-    id: generateUUID(),
-    userId: generateUUID(),
-    modelId: generateUUID(),
-    sharedSchoolConversationId: generateUUID(),
-    completionTokens: 0,
-    promptTokens: 0,
-    costsInCent: 0,
-    createdAt: new Date(),
+export const mockSharedSchoolConversationUsage =
+  (): SharedSchoolConversationUsageTrackingSelectModel => {
+    return {
+      id: generateUUID(),
+      userId: generateUUID(),
+      modelId: generateUUID(),
+      sharedSchoolConversationId: generateUUID(),
+      completionTokens: 0,
+      promptTokens: 0,
+      costsInCent: 0,
+      createdAt: new Date(),
+    };
   };
-};
 
-export const mockSharedCharacterChatUsage = (): SharedCharacterChatUsageTrackingModel => {
+export const mockSharedCharacterChatUsage = (): SharedCharacterChatUsageTrackingSelectModel => {
   return {
     id: generateUUID(),
     userId: generateUUID(),

@@ -127,7 +127,6 @@ describe('character-service', () => {
         functionName: 'updateCharacter',
         testFunction: () =>
           updateCharacter({
-            characterId: generateUUID(),
             id: generateUUID(),
             userId: 'different-user-id',
             name: 'new-name',
@@ -362,8 +361,7 @@ describe('character-service', () => {
         functionName: 'updateCharacter',
         testFunction: () =>
           updateCharacter({
-            characterId: 'invalid-uuid',
-            id: generateUUID(),
+            id: 'invalid-uuid',
             userId: 'user-id',
             name: 'new-name',
           }),

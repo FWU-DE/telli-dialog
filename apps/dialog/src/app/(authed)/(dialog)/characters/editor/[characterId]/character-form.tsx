@@ -196,7 +196,7 @@ export default function CharacterForm({
 
   function onSubmit(data: CharacterFormValues) {
     updateCharacterAction({
-      characterId: character.id,
+      id: character.id,
       ...data,
       attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
     })

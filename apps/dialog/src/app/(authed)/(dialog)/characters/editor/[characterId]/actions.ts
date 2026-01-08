@@ -46,14 +46,10 @@ export async function updateCharacterPictureAction({
   });
 }
 
-export async function updateCharacterAction({
-  characterId,
-  ...character
-}: UpdateCharacterActionModel & { characterId: string }) {
+export async function updateCharacterAction(character: UpdateCharacterActionModel) {
   const { user } = await requireAuth();
 
   return await withLoggingAsync(updateCharacter)({
-    characterId,
     userId: user.id,
     ...character,
   });
