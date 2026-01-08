@@ -165,7 +165,7 @@
     "visibility-private": "Für mich",
     "shared": {
       "title": "Dialogpartner im Unterricht einsetzen",
-      "description": "Wie viel des Tokenvolumens soll durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
+      "description": "Wie viel des monatlichen Tokenvolumens soll durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
       "share": "Teilen",
@@ -288,7 +288,7 @@
     "shared": {
       "excersise-title": "Dein Arbeitsauftrag",
       "title": "Lernszenario einsetzen",
-      "description": "Wie viel des Tokenvolumens soll durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
+      "description": "Wie viel des monatlichen Tokenvolumens soll durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
       "share": "Teilen",
