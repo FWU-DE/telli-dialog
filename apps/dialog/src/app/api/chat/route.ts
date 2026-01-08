@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (await userHasReachedIntelliPointLimit({ user })) {
-    return NextResponse.json({ error: 'User has reached intelli points limit' }, { status: 429 });
+    return NextResponse.json({ error: 'User has reached telli points limit.' }, { status: 429 });
   }
 
   const {
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
         conversation,
       }),
     );
-    return NextResponse.json({ error: 'User has reached intelli points limit' }, { status: 429 });
+    return NextResponse.json({ error: 'User has reached telli points limit.' }, { status: 429 });
   }
 
   await dbInsertChatContent({

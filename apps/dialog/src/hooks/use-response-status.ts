@@ -23,9 +23,9 @@ export function useCheckStatusCode() {
   }, []);
 
   const handleError = useCallback((error: Error) => {
-    if (error.message.toLowerCase().includes('intelli points limit')) {
+    if (error.message.toLowerCase().includes('telli points limit')) {
       setError(new Error(t('rate-limit-error')));
-    } else if (error.message.toLowerCase().includes('expired')) {
+    } else if (error.message.toLowerCase().includes('chat has expired')) {
       setError(new Error(t('chat-expired')));
     } else {
       setError(new Error(t('generic-error')));

@@ -186,7 +186,7 @@ export async function generateImage({
   }
 
   if (await userHasReachedIntelliPointLimit({ user })) {
-    throw new Error('User has reached intelli points limit');
+    throw new Error('User has reached telli points limit.');
   }
 
   if (!prompt || prompt.trim().length === 0) {
@@ -238,7 +238,7 @@ export async function generateImage({
       );
     }
 
-    throw new Error('User has reached intelli points limit');
+    throw new Error('User has reached telli points limit.');
   }
 
   try {
