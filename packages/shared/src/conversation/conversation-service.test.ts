@@ -7,7 +7,7 @@ import { ConversationModel } from '@shared/db/types';
 
 vi.mock('../db/functions/chat', () => ({
   dbGetConversationById: vi.fn(),
-  dbGetCoversationMessages: vi.fn(),
+  dbGetConversationMessages: vi.fn(),
 }));
 
 describe('conversation-service', () => {
