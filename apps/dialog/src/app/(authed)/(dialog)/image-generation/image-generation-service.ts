@@ -10,7 +10,7 @@ import { dbInsertChatContent, dbGetOrCreateConversation } from '@shared/db/funct
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
 import { logError } from '@shared/logging';
 import { generateImageWithBilling } from '@telli/ai-core';
-import { LlmModel } from '@shared/db/schema';
+import { LlmModelSelectModel } from '@shared/db/schema';
 import { ImageStyle } from '@shared/utils/chat';
 import { generateUUID } from '@shared/utils/uuid';
 import { uploadFileToS3, getSignedUrlFromS3Get } from '@shared/s3';
@@ -61,7 +61,7 @@ export async function handleImageGeneration({
   style,
 }: {
   prompt: string;
-  model: LlmModel;
+  model: LlmModelSelectModel;
   style?: ImageStyle;
 }) {
   const user = await getUser();

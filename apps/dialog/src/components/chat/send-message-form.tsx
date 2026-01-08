@@ -2,7 +2,7 @@
 
 import { FileStatus } from './upload-file-button';
 import { ConversationMessageMetadata } from '@shared/utils/chat';
-import { CustomGptModel } from '@shared/db/schema';
+import { CustomGptSelectModel } from '@shared/db/schema';
 
 export type SendMessageProps = {
   className?: string;
@@ -17,7 +17,7 @@ export type SendMessageProps = {
   customGPTName: string | undefined;
   stopResponseGeneration?: () => void;
   messages: string[];
-  customGpt?: CustomGptModel;
+  customGpt?: CustomGptSelectModel;
   hideStartMessages?: boolean;
 };
 

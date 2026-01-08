@@ -3,11 +3,11 @@ import { generateRandomString } from './random';
 import { generateUUID } from '@shared/utils/uuid';
 import {
   CharacterSelectModel,
-  ConversationUsageTrackingModel,
-  LlmModel,
-  SharedCharacterChatUsageTrackingModel,
-  SharedSchoolConversationModel,
-  SharedSchoolConversationUsageTrackingModel,
+  ConversationUsageTrackingSelectModel,
+  LlmModelSelectModel,
+  SharedCharacterChatUsageTrackingSelectModel,
+  SharedSchoolConversationSelectModel,
+  SharedSchoolConversationUsageTrackingSelectModel,
 } from '@shared/db/schema';
 
 export const mockUserAndContext = (): UserAndContext => {
@@ -48,7 +48,7 @@ export const mockUserAndContext = (): UserAndContext => {
   };
 };
 
-export const mockLlmModel = (): LlmModel => {
+export const mockLlmModel = (): LlmModelSelectModel => {
   return {
     id: generateUUID(),
     name: generateRandomString(10),
@@ -67,7 +67,7 @@ export const mockLlmModel = (): LlmModel => {
   };
 };
 
-export const mockConversationUsage = (): ConversationUsageTrackingModel => {
+export const mockConversationUsage = (): ConversationUsageTrackingSelectModel => {
   return {
     id: generateUUID(),
     userId: generateUUID(),
@@ -80,7 +80,7 @@ export const mockConversationUsage = (): ConversationUsageTrackingModel => {
   };
 };
 
-export const mockSharedSchoolConversation = (): SharedSchoolConversationModel => {
+export const mockSharedSchoolConversation = (): SharedSchoolConversationSelectModel => {
   return {
     id: generateUUID(),
     name: generateRandomString(10),
@@ -103,20 +103,21 @@ export const mockSharedSchoolConversation = (): SharedSchoolConversationModel =>
   };
 };
 
-export const mockSharedSchoolConversationUsage = (): SharedSchoolConversationUsageTrackingModel => {
-  return {
-    id: generateUUID(),
-    userId: generateUUID(),
-    modelId: generateUUID(),
-    sharedSchoolConversationId: generateUUID(),
-    completionTokens: 0,
-    promptTokens: 0,
-    costsInCent: 0,
-    createdAt: new Date(),
+export const mockSharedSchoolConversationUsage =
+  (): SharedSchoolConversationUsageTrackingSelectModel => {
+    return {
+      id: generateUUID(),
+      userId: generateUUID(),
+      modelId: generateUUID(),
+      sharedSchoolConversationId: generateUUID(),
+      completionTokens: 0,
+      promptTokens: 0,
+      costsInCent: 0,
+      createdAt: new Date(),
+    };
   };
-};
 
-export const mockSharedCharacterChatUsage = (): SharedCharacterChatUsageTrackingModel => {
+export const mockSharedCharacterChatUsage = (): SharedCharacterChatUsageTrackingSelectModel => {
   return {
     id: generateUUID(),
     userId: generateUUID(),

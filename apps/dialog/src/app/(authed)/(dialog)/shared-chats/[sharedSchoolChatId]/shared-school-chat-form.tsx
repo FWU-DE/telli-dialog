@@ -11,7 +11,7 @@ import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import Image from 'next/image';
-import { FileModel, SharedSchoolConversationModel } from '@shared/db/schema';
+import { FileModel, SharedSchoolConversationSelectModel } from '@shared/db/schema';
 import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../schema';
 import {
   removeFileFromLearningScenarioAction,
@@ -44,7 +44,7 @@ export default function SharedSchoolChatForm({
   maybeSignedPictureUrl,
   readOnly,
   ...sharedSchoolChat
-}: SharedSchoolConversationModel & {
+}: SharedSchoolConversationSelectModel & {
   existingFiles: FileModel[];
   isCreating: boolean;
   initialLinks: WebsearchSource[];

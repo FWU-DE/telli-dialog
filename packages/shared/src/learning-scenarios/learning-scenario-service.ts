@@ -11,7 +11,7 @@ import {
   fileTable,
   SharedSchoolConversationFileMapping,
   sharedSchoolConversationInsertSchema,
-  SharedSchoolConversationModel,
+  SharedSchoolConversationSelectModel,
   sharedSchoolConversationTable,
   sharedSchoolConversationUpdateSchema,
 } from '@shared/db/schema';
@@ -22,7 +22,7 @@ import { addDays } from '@shared/utils/date';
 import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 
-export type LearningScenarioWithImage = SharedSchoolConversationModel & {
+export type LearningScenarioWithImage = SharedSchoolConversationSelectModel & {
   maybeSignedPictureUrl: string | undefined;
 };
 
@@ -81,7 +81,7 @@ export async function updateLearningScenario({
 }: {
   learningScenarioId: string;
   user: UserModel;
-  data: SharedSchoolConversationModel;
+  data: SharedSchoolConversationSelectModel;
 }) {
   // this function also serves as a check that the user is the owner
   await getLearningScenario({
@@ -378,7 +378,7 @@ export async function removeFileFromLearningScenario({
 async function enrichLearningScenarioWithPictureUrl({
   learningScenarios,
 }: {
-  learningScenarios: SharedSchoolConversationModel[];
+  learningScenarios: SharedSchoolConversationSelectModel[];
 }): Promise<LearningScenarioWithImage[]> {
   return await Promise.all(
     learningScenarios.map(async (scenario) => ({

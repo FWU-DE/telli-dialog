@@ -132,7 +132,8 @@ export const defaultCharacters: Omit<CharacterInsertModel, 'modelId'>[] = [
   },
 ];
 
-export const defaultCustomGpt: CustomGptInsertModel[] = [
+export type CustomGptInsertModelWithId = CustomGptInsertModel & { id: string };
+export const defaultCustomGpt: CustomGptInsertModelWithId[] = [
   {
     id: 'edb34bca-9868-4948-af68-7e80810806ac',
     userId: DUMMY_USER_ID,

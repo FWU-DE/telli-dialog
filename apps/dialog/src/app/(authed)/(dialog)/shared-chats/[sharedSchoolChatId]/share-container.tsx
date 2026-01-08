@@ -8,7 +8,7 @@ import {
   sharedConversationFormValuesSchema,
   usageTimeValuesInMinutes,
 } from './schema';
-import { SharedSchoolConversationModel } from '@shared/db/schema';
+import { SharedSchoolConversationSelectModel } from '@shared/db/schema';
 import { shareLearningScenarioAction, unshareLearningScenarioAction } from './actions';
 import { useToast } from '@/components/common/toast';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,7 +22,7 @@ import ChatStopIcon from '@/components/icons/chat-stop';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 
-type ShareContainerProps = SharedSchoolConversationModel;
+type ShareContainerProps = SharedSchoolConversationSelectModel;
 
 export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerProps) {
   const toast = useToast();

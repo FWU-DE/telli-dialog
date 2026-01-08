@@ -13,13 +13,14 @@ import {
 import { Button } from '@ui/components/Button';
 import { toast } from 'sonner';
 import { Loader2, RefreshCw } from 'lucide-react';
-import { LlmModel } from '@shared/db/schema';
+import { LlmModelSelectModel } from '@shared/db/schema';
 
 export default function ModelRefreshView() {
   const [isPending, startTransition] = useTransition();
-  const [lastRefreshResult, setLastRefreshResult] = useState<Record<string, LlmModel[]> | null>(
-    null,
-  );
+  const [lastRefreshResult, setLastRefreshResult] = useState<Record<
+    string,
+    LlmModelSelectModel[]
+  > | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleRefresh = () => {
