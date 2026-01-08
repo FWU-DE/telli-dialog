@@ -1,7 +1,7 @@
-import { CharacterAccessLevel, CharacterWithShareDataModel } from '@shared/db/schema';
+import { AccessLevel, CharacterWithShareDataModel } from '@shared/db/schema';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 
-export function buildGenericUrl(accessLevel: CharacterAccessLevel, route: 'characters' | 'custom') {
+export function buildGenericUrl(accessLevel: AccessLevel, route: 'characters' | 'custom') {
   const searchParams = new URLSearchParams();
   searchParams.set('visibility', accessLevel);
   return `/${route}?${searchParams.toString()}`;

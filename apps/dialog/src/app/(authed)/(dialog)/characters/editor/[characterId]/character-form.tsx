@@ -10,7 +10,7 @@ import {
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
-import { CharacterAccessLevel, CharacterWithShareDataModel, FileModel } from '@shared/db/schema';
+import { AccessLevel, CharacterWithShareDataModel, FileModel } from '@shared/db/schema';
 import { deepCopy, deepEqual } from '@/utils/object';
 import { cn } from '@/utils/tailwind';
 import {
@@ -123,7 +123,7 @@ export default function CharacterForm({
 
   const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
     character.accessLevel,
-    (p, n: CharacterAccessLevel) => n,
+    (p, n: AccessLevel) => n,
   );
 
   async function handleAccessLevelChange(value: boolean) {

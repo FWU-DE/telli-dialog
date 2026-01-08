@@ -1,6 +1,6 @@
 'use server';
 
-import { CharacterAccessLevel } from '@shared/db/schema';
+import { AccessLevel } from '@shared/db/schema';
 import { SharedConversationShareFormValues } from '../../../shared-chats/[sharedSchoolChatId]/schema';
 import { requireAuth } from '@/auth/requireAuth';
 import {
@@ -19,7 +19,7 @@ export async function updateCharacterAccessLevelAction({
   accessLevel,
 }: {
   characterId: string;
-  accessLevel: CharacterAccessLevel;
+  accessLevel: AccessLevel;
 }) {
   const { user } = await requireAuth();
 

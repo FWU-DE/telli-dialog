@@ -12,7 +12,7 @@ import {
 import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import {
-  CharacterAccessLevel,
+  AccessLevel,
   CharacterFileMapping,
   CharacterSelectModel,
   CharacterWithShareDataModel,
@@ -21,7 +21,7 @@ import {
   FileModel,
   fileTable,
   sharedCharacterConversation,
-  characterAccessLevelSchema,
+  accessLevelSchema,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
@@ -217,11 +217,11 @@ export const updateCharacterAccessLevel = async ({
   userId,
 }: {
   characterId: string;
-  accessLevel: CharacterAccessLevel;
+  accessLevel: AccessLevel;
   userId: string;
 }) => {
   checkParameterUUID(characterId);
-  characterAccessLevelSchema.parse(accessLevel);
+  accessLevelSchema.parse(accessLevel);
 
   // Authorization check
   if (accessLevel === 'global') {
@@ -551,7 +551,7 @@ export async function getCharacterByAccessLevel({
   userId,
   federalStateId,
 }: {
-  accessLevel: CharacterAccessLevel;
+  accessLevel: AccessLevel;
   schoolId: string;
   userId: string;
   federalStateId: string;
