@@ -2,9 +2,9 @@ import { type Message, smoothStream, streamText } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import {
-  sharedCharacterChatHasReachedIntelliPointLimit,
+  sharedCharacterChatHasReachedTelliPointLimit,
   sharedChatHasExpired,
-  userHasReachedIntelliPointLimit,
+  userHasReachedTelliPointLimit,
 } from '../chat/usage';
 import { constructCharacterSystemPrompt } from './system-prompt';
 import {
@@ -70,12 +70,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Shared character chat has expired.' }, { status: 400 });
   }
 
-  const [sharedChatLimitReached, intelliPointsLimitReached] = await Promise.all([
-    sharedCharacterChatHasReachedIntelliPointLimit({
+  const [sharedChatLimitReached, TelliPointsLimitReached] = await Promise.all([
+    sharedCharacterChatHasReachedTelliPointLimit({
       user: teacherUserAndContext,
       character,
     }),
-    userHasReachedIntelliPointLimit({ user: teacherUserAndContext }),
+    userHasReachedTelliPointLimit({ user: teacherUserAndContext }),
   ]);
 
   if (sharedChatLimitReached) {
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (intelliPointsLimitReached) {
+  if (TelliPointsLimitReached) {
     await sendRabbitmqEvent(
       constructTelliBudgetExceededEvent({
         anonymous: true,

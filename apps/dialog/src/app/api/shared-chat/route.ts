@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import {
   sharedChatHasExpired,
-  sharedChatHasReachedIntelliPointLimit,
-  userHasReachedIntelliPointLimit,
+  sharedChatHasReachedTelliPointLimit,
+  userHasReachedTelliPointLimit,
 } from '../chat/usage';
 import { dbGetSharedChatByIdAndInviteCode } from '@shared/db/functions/shared-school-chat';
 import { constructLearningScenarioSystemPrompt } from './system-prompt';
@@ -69,12 +69,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Shared chat has expired.' }, { status: 400 });
   }
 
-  const [sharedChatLimitReached, intelliPointsLimitReached] = await Promise.all([
-    sharedChatHasReachedIntelliPointLimit({
+  const [sharedChatLimitReached, telliPointsLimitReached] = await Promise.all([
+    sharedChatHasReachedTelliPointLimit({
       user: teacherUserAndContext,
       sharedChat,
     }),
-    userHasReachedIntelliPointLimit({ user: teacherUserAndContext }),
+    userHasReachedTelliPointLimit({ user: teacherUserAndContext }),
   ]);
 
   if (sharedChatLimitReached) {
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (intelliPointsLimitReached) {
+  if (telliPointsLimitReached) {
     await sendRabbitmqEvent(
       constructTelliBudgetExceededEvent({
         anonymous: true,

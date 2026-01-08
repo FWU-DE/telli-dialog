@@ -66,14 +66,14 @@ export async function deleteCharacterAction({ characterId }: { characterId: stri
 
 export async function shareCharacterAction({
   id,
-  intelliPointsPercentageLimit,
+  telliPointsPercentageLimit,
   usageTimeLimit,
 }: { id: string } & SharedConversationShareFormValues) {
   const { user, school } = await requireAuth();
 
   return withLoggingAsync(shareCharacter)({
     characterId: id,
-    telliPointsPercentageLimit: intelliPointsPercentageLimit,
+    telliPointsPercentageLimit: telliPointsPercentageLimit,
     usageTimeLimitMinutes: usageTimeLimit,
     user: user,
     schoolId: school?.id,

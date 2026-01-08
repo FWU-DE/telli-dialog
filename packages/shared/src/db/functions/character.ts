@@ -64,7 +64,7 @@ export async function dbGetCharacterByIdWithShareData({
   const [row] = await db
     .select({
       ...getTableColumns(characterTable),
-      intelligencePointsLimit: sharedCharacterConversation.intelligencePointsLimit,
+      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
       inviteCode: sharedCharacterConversation.inviteCode,
       maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
       startedAt: sharedCharacterConversation.startedAt,
@@ -140,7 +140,7 @@ export async function dbGetGlobalCharacters({
   const characters = await db
     .select({
       ...getTableColumns(characterTable),
-      intelligencePointsLimit: sharedCharacterConversation.intelligencePointsLimit,
+      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
       inviteCode: sharedCharacterConversation.inviteCode,
       maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
       startedAt: sharedCharacterConversation.startedAt,
@@ -195,7 +195,7 @@ export async function dbGetCharactersBySchoolId({
   const characters = await db
     .select({
       ...getTableColumns(characterTable),
-      intelligencePointsLimit: sharedCharacterConversation.intelligencePointsLimit,
+      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
       inviteCode: sharedCharacterConversation.inviteCode,
       maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
       startedAt: sharedCharacterConversation.startedAt,
@@ -232,7 +232,7 @@ export async function dbGetCharactersByUserId({
   const characters = await db
     .select({
       ...getTableColumns(characterTable),
-      intelligencePointsLimit: sharedCharacterConversation.intelligencePointsLimit,
+      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
       inviteCode: sharedCharacterConversation.inviteCode,
       maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
       startedAt: sharedCharacterConversation.startedAt,
@@ -259,7 +259,7 @@ export async function dbGetCharacterByIdAndUserId({
   const [row] = await db
     .select({
       ...getTableColumns(characterTable),
-      intelligencePointsLimit: sharedCharacterConversation.intelligencePointsLimit,
+      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
       inviteCode: sharedCharacterConversation.inviteCode,
       maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
       startedAt: sharedCharacterConversation.startedAt,
@@ -353,7 +353,7 @@ export async function dbGetCharacterByIdAndInviteCode({
   const [row] = await db
     .select({
       ...getTableColumns(characterTable),
-      intelligencePointsLimit: sharedCharacterConversation.intelligencePointsLimit,
+      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
       inviteCode: sharedCharacterConversation.inviteCode,
       maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
       startedAt: sharedCharacterConversation.startedAt,
