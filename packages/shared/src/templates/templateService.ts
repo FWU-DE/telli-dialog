@@ -1,7 +1,7 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '@shared/db';
 import {
-  CharacterAccessLevel,
+  AccessLevel,
   characterTable,
   characterTemplateMappingTable,
   customGptTable,
@@ -347,7 +347,7 @@ export async function copyRelatedTemplateFiles(
  */
 export async function copyCustomGpt(
   originalId: string,
-  accessLevel: CharacterAccessLevel,
+  accessLevel: AccessLevel,
   userId: string,
   schoolId: string | null,
 ) {
@@ -401,7 +401,7 @@ async function createCustomGptTemplate(originalId: string) {
  */
 export async function copyCharacter(
   originalId: string,
-  accessLevel: CharacterAccessLevel,
+  accessLevel: AccessLevel,
   userId: string,
   schoolId: string | null,
 ) {

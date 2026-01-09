@@ -17,6 +17,8 @@ import { uploadFileToS3, getSignedUrlFromS3Get } from '@shared/s3';
 import { cnanoid } from '@shared/random/randomService';
 import { linkFilesToConversation, dbInsertFile } from '@shared/db/functions/files';
 import { dbDeleteConversationByIdAndUserId } from '@shared/db/functions/conversation';
+import { NotFoundError } from '@shared/error';
+import { getAvailableImageModelsForFederalState } from '@shared/image-generation/image-generation-service';
 export interface ImageGenerationParams {
   prompt: string;
   modelId: string;
@@ -65,6 +67,7 @@ export async function handleImageGeneration({
   style?: ImageStyle;
 }) {
   const user = await getUser();
+  await checkIfImageModelIsAssignedToFederalState(model, user.federalState.id);
 
   if (!prompt || prompt.trim().length === 0) {
     throw new Error('Prompt is required');
@@ -283,5 +286,17 @@ export async function generateImage({
     throw error instanceof Error
       ? error
       : new Error('Internal server error during image generation');
+  }
+}
+
+// Checks if the given image model is assigned to the federal state
+async function checkIfImageModelIsAssignedToFederalState(
+  imageModel: LlmModelSelectModel,
+  federalStateId: string,
+) {
+  const models = await getAvailableImageModelsForFederalState({ federalStateId });
+  const foundModel = models.find((model) => model.id === imageModel.id);
+  if (!foundModel) {
+    throw new NotFoundError('Could not find image generation model for federal state');
   }
 }

@@ -1,4 +1,4 @@
-import { characterAccessLevelSchema } from '@shared/db/schema';
+import { accessLevelSchema } from '@shared/db/schema';
 import Page2 from './_page';
 import { enrichGptWithImage } from './utils';
 import z from 'zod';
@@ -10,7 +10,7 @@ import { getCustomGptByAccessLevel } from '@shared/custom-gpt/custom-gpt-service
 export const dynamic = 'force-dynamic';
 
 const searchParamsSchema = z.object({
-  visibility: characterAccessLevelSchema.optional().default('private'),
+  visibility: accessLevelSchema.optional().default('private'),
 });
 
 export default async function Page(props: PageProps<'/custom'>) {

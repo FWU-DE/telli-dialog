@@ -289,12 +289,9 @@ export type FederalStateUpdateModel = z.infer<typeof federalStateUpdateSchema>;
 /**
  * Schema for table character
  */
-export const characterAccessLevelSchema = z.enum(['private', 'school', 'global']);
-export const characterAccessLevelEnum = pgEnum(
-  'character_access_level',
-  characterAccessLevelSchema.enum,
-);
-export type CharacterAccessLevel = z.infer<typeof characterAccessLevelSchema>;
+export const accessLevelSchema = z.enum(['private', 'school', 'global']);
+export const accessLevelEnum = pgEnum('access_level', accessLevelSchema.enum);
+export type AccessLevel = z.infer<typeof accessLevelSchema>;
 
 export const characterTable = pgTable(
   'character',
@@ -320,7 +317,7 @@ export const characterTable = pgTable(
     restrictions: text('restrictions'),
     pictureId: text('picture_id'),
     initialMessage: text('initial_message'),
-    accessLevel: characterAccessLevelEnum('access_level').notNull().default('private'),
+    accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     schoolId: text('school_id').references(() => schoolTable.id),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     attachedLinks: text('attached_links')
@@ -341,7 +338,7 @@ export const characterInsertSchema = createInsertSchema(characterTable)
   })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
-    accessLevel: characterAccessLevelSchema,
+    accessLevel: accessLevelSchema,
   });
 export const characterUpdateSchema = createUpdateSchema(characterTable)
   .omit({
@@ -351,7 +348,7 @@ export const characterUpdateSchema = createUpdateSchema(characterTable)
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
     id: z.string(),
-    accessLevel: characterAccessLevelSchema,
+    accessLevel: accessLevelSchema,
   });
 
 export type CharacterSelectModel = z.infer<typeof characterSelectSchema>;
@@ -771,7 +768,7 @@ export const customGptTable = pgTable(
     userId: uuid('user_id').references(() => userTable.id),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     schoolId: text('school_id').references(() => schoolTable.id),
-    accessLevel: characterAccessLevelEnum('access_level').notNull().default('private'),
+    accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     pictureId: text('picture_id'),
     description: text('description'),
     specification: text('specification'),
@@ -791,12 +788,12 @@ export const customGptTable = pgTable(
 
 export const customGptSelectSchema = createSelectSchema(customGptTable).extend({
   createdAt: z.coerce.date(),
-  accessLevel: characterAccessLevelSchema,
+  accessLevel: accessLevelSchema,
 });
 export const customGptInsertSchema = createInsertSchema(customGptTable)
   .omit({ id: true, createdAt: true })
   .extend({
-    accessLevel: characterAccessLevelSchema,
+    accessLevel: accessLevelSchema,
   });
 export const customGptUpdateSchema = createUpdateSchema(customGptTable)
   .omit({
@@ -807,7 +804,7 @@ export const customGptUpdateSchema = createUpdateSchema(customGptTable)
   .extend({
     id: z.string(),
     // for any reason accessLevel has a different type so we have to override it here
-    accessLevel: characterAccessLevelSchema.optional(),
+    accessLevel: accessLevelSchema.optional(),
   });
 
 export type CustomGptSelectModel = z.infer<typeof customGptSelectSchema>;

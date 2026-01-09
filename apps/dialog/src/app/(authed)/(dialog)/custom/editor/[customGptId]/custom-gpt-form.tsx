@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  CharacterAccessLevel,
-  CustomGptSelectModel,
-  FileModel,
-  UserSchoolRole,
-} from '@shared/db/schema';
+import { AccessLevel, CustomGptSelectModel, FileModel, UserSchoolRole } from '@shared/db/schema';
 import {
   buttonDeleteClassName,
   buttonPrimaryClassName,
@@ -118,7 +113,7 @@ export default function CustomGptForm({
   const getZodStringFieldMetadata = getZodStringFieldMetadataFn(customGptFormValuesSchema);
   const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
     customGpt.accessLevel,
-    (p, n: CharacterAccessLevel) => n,
+    (p, n: AccessLevel) => n,
   );
 
   function handleEnableSharing(value: boolean) {

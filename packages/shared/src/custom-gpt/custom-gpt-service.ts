@@ -14,7 +14,8 @@ import {
 } from '@shared/db/functions/custom-gpts';
 import { dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
 import {
-  CharacterAccessLevel,
+  AccessLevel,
+  accessLevelSchema,
   CustomGptFileMapping,
   CustomGptSelectModel,
   customGptTable,
@@ -126,7 +127,7 @@ export async function getCustomGptByAccessLevel({
   userId,
   federalStateId,
 }: {
-  accessLevel: CharacterAccessLevel;
+  accessLevel: AccessLevel;
   schoolId: string;
   userId: string;
   federalStateId: string;
@@ -304,11 +305,13 @@ export async function updateCustomGptAccessLevel({
   customGptId,
   userId,
 }: {
-  accessLevel: CharacterAccessLevel;
+  accessLevel: AccessLevel;
   customGptId: string;
   userId: string;
 }) {
   checkParameterUUID(customGptId);
+  accessLevelSchema.parse(accessLevel);
+
   // Authorization check
   if (accessLevel === 'global') {
     throw new ForbiddenError('Not authorized to set the access level to global');
@@ -364,15 +367,13 @@ export async function updateCustomGptPicture({
   return updatedCustomGpt;
 }
 
-const updateCustomGptSchema = customGptUpdateSchema
-  .omit({
-    id: true,
-    pictureId: true,
-    isDeleted: true,
-    originalCustomGptId: true,
-    accessLevel: true,
-  })
-  .partial();
+const updateCustomGptSchema = customGptUpdateSchema.omit({
+  id: true,
+  pictureId: true,
+  isDeleted: true,
+  originalCustomGptId: true,
+  accessLevel: true,
+});
 
 /**
  * Update custom gpt properties.

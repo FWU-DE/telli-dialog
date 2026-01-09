@@ -12,7 +12,7 @@ import {
 import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import {
-  CharacterAccessLevel,
+  AccessLevel,
   CharacterFileMapping,
   CharacterSelectModel,
   CharacterWithShareDataModel,
@@ -21,6 +21,7 @@ import {
   FileModel,
   fileTable,
   sharedCharacterConversation,
+  accessLevelSchema,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
@@ -216,10 +217,12 @@ export const updateCharacterAccessLevel = async ({
   userId,
 }: {
   characterId: string;
-  accessLevel: CharacterAccessLevel;
+  accessLevel: AccessLevel;
   userId: string;
 }) => {
   checkParameterUUID(characterId);
+  accessLevelSchema.parse(accessLevel);
+
   // Authorization check
   if (accessLevel === 'global') {
     throw new ForbiddenError('Not authorized to set the access level to global');
@@ -305,7 +308,7 @@ export const updateCharacter = async ({
   const cleanedCharacter = removeNullishValues(character);
   if (cleanedCharacter === undefined) return;
 
-  const parsedCharacterValues = updateCharacterSchema.strip().parse(cleanedCharacter);
+  const parsedCharacterValues = updateCharacterSchema.parse(cleanedCharacter);
 
   const [updatedCharacter] = await db
     .update(characterTable)
@@ -548,7 +551,7 @@ export async function getCharacterByAccessLevel({
   userId,
   federalStateId,
 }: {
-  accessLevel: CharacterAccessLevel;
+  accessLevel: AccessLevel;
   schoolId: string;
   userId: string;
   federalStateId: string;
