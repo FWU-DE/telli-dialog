@@ -17,7 +17,7 @@ export default async function Page(
   }
   return (
     <div>
-      <VoucherCreateView federalStateId={federalStateId} username={session.user.name} />
+      <VoucherCreateView federalStateId={federalStateId} />
     </div>
   );
 }

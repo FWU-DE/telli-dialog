@@ -1,5 +1,4 @@
 import { getVouchersAction } from './actions';
-import { auth } from '@/auth';
 import VoucherListView from './VoucherListView';
 
 export const dynamic = 'force-dynamic';
@@ -9,13 +8,6 @@ export default async function VouchersByStatePage(
 ) {
   const { federalStateId } = await props.params;
   const vouchers = await getVouchersAction(federalStateId);
-  const session = await auth();
 
-  return (
-    <VoucherListView
-      vouchers={vouchers}
-      federalStateId={federalStateId}
-      username={session?.user?.name ?? undefined}
-    />
-  );
+  return <VoucherListView vouchers={vouchers} federalStateId={federalStateId} />;
 }

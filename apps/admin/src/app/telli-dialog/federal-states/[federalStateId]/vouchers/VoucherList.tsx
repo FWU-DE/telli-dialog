@@ -15,18 +15,8 @@ import { revokeVoucherAction } from './actions';
 import { Button } from '@ui/components/Button';
 import { BusinessError } from '@shared/error';
 
-export default function VoucherList({
-  vouchers,
-  username,
-}: {
-  vouchers: Voucher[];
-  username?: string;
-}) {
+export default function VoucherList({ vouchers }: { vouchers: Voucher[] }) {
   const handleRevoke = async (voucher: Voucher) => {
-    if (!username) {
-      toast.error('Widerrufen abgebrochen: Benutzername nicht gefunden.');
-      return;
-    }
     const reason = prompt('Bitte Grund für das Widerrufen des Codes angeben:');
     if (!reason || reason.trim().length === 0) {
       toast.error('Widerrufen abgebrochen: Grund ist erforderlich.');
@@ -67,7 +57,7 @@ export default function VoucherList({
             <TableCell>{voucher.createdBy}</TableCell>
             <TableCell>
               {voucher.status}{' '}
-              {voucher.status === 'created' && username && (
+              {voucher.status === 'created' && (
                 <Button onClick={() => handleRevoke(voucher)}>X</Button>
               )}
             </TableCell>

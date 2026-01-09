@@ -8,11 +8,9 @@ import { ROUTES } from '../../../../../consts/routes';
 
 export default function VoucherListView({
   vouchers,
-  username,
   federalStateId,
 }: {
   vouchers: Voucher[];
-  username: string | undefined;
   federalStateId: string;
 }) {
   return (
@@ -23,7 +21,7 @@ export default function VoucherListView({
           <Button>Neue erstellen</Button>
         </Link>
       </div>
-      <VoucherList vouchers={vouchers} username={username} />
+      <VoucherList vouchers={vouchers} />
     </div>
   );
 }
