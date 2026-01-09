@@ -67,10 +67,7 @@ export async function POST(request: NextRequest) {
   const { telliProvider, definedModel } = modelAndProvider;
 
   if (sharedChatHasExpired(character)) {
-    return NextResponse.json(
-      { error: 'Shared character chat has reached end of life' },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: 'Shared character chat has expired.' }, { status: 400 });
   }
 
   const [sharedChatLimitReached, intelliPointsLimitReached] = await Promise.all([
@@ -83,7 +80,7 @@ export async function POST(request: NextRequest) {
 
   if (sharedChatLimitReached) {
     return NextResponse.json(
-      { error: 'Shared character chat has reached intelli points limit' },
+      { error: 'Shared character chat has reached telli points limit.' },
       { status: 429 },
     );
   }
@@ -96,7 +93,7 @@ export async function POST(request: NextRequest) {
         character,
       }),
     );
-    return NextResponse.json({ error: 'User has reached intelli points limit' }, { status: 429 });
+    return NextResponse.json({ error: 'User has reached telli points limit.' }, { status: 429 });
   }
 
   const relatedFileEntities = await dbGetRelatedCharacterFiles(character.id);
