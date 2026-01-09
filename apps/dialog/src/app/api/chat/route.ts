@@ -7,7 +7,7 @@ import {
 import { NextRequest, NextResponse } from 'next/server';
 import { dbInsertChatContent } from '@shared/db/functions/chat';
 import { getUser, updateSession, userHasCompletedTraining } from '@/auth/utils';
-import { userHasReachedTelliPointLimit } from './usage';
+import { userHasReachedTelliPointsLimit } from './usage';
 import {
   getModelAndProviderWithResult,
   calculateCostsInCent,
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No user message found' }, { status: 400 });
   }
 
-  const telliPointsLimitReached = await userHasReachedTelliPointLimit({ user });
+  const telliPointsLimitReached = await userHasReachedTelliPointsLimit({ user });
 
   if (telliPointsLimitReached) {
     await sendRabbitmqEvent(

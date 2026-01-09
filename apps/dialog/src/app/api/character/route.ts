@@ -2,9 +2,9 @@ import { type Message, smoothStream, streamText } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import {
-  sharedCharacterChatHasReachedTelliPointLimit,
+  sharedCharacterChatHasReachedTelliPointsLimit,
   sharedChatHasExpired,
-  userHasReachedTelliPointLimit,
+  userHasReachedTelliPointsLimit,
 } from '../chat/usage';
 import { constructCharacterSystemPrompt } from './system-prompt';
 import {
@@ -72,11 +72,11 @@ export async function POST(request: NextRequest) {
   }
 
   const [sharedChatLimitReached, TelliPointsLimitReached] = await Promise.all([
-    sharedCharacterChatHasReachedTelliPointLimit({
+    sharedCharacterChatHasReachedTelliPointsLimit({
       user: teacherUserAndContext,
       character,
     }),
-    userHasReachedTelliPointLimit({ user: teacherUserAndContext }),
+    userHasReachedTelliPointsLimit({ user: teacherUserAndContext }),
   ]);
 
   if (sharedChatLimitReached) {

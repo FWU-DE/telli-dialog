@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import {
   sharedChatHasExpired,
-  sharedChatHasReachedTelliPointLimit,
-  userHasReachedTelliPointLimit,
+  sharedChatHasReachedTelliPointsLimit,
+  userHasReachedTelliPointsLimit,
 } from '../chat/usage';
 import { dbGetSharedChatByIdAndInviteCode } from '@shared/db/functions/shared-school-chat';
 import { constructLearningScenarioSystemPrompt } from './system-prompt';
@@ -70,11 +70,11 @@ export async function POST(request: NextRequest) {
   }
 
   const [sharedChatLimitReached, telliPointsLimitReached] = await Promise.all([
-    sharedChatHasReachedTelliPointLimit({
+    sharedChatHasReachedTelliPointsLimit({
       user: teacherUserAndContext,
       sharedChat,
     }),
-    userHasReachedTelliPointLimit({ user: teacherUserAndContext }),
+    userHasReachedTelliPointsLimit({ user: teacherUserAndContext }),
   ]);
 
   if (sharedChatLimitReached) {

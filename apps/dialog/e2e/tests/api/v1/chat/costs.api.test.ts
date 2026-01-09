@@ -12,8 +12,8 @@ import {
 import { getPriceInCentByUser } from '@/app/school';
 import { UserAndContext } from '@/auth/types';
 import {
-  sharedCharacterChatHasReachedTelliPointLimit,
-  sharedChatHasReachedTelliPointLimit,
+  sharedCharacterChatHasReachedTelliPointsLimit,
+  sharedChatHasReachedTelliPointsLimit,
 } from '@/app/api/chat/usage';
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
@@ -124,7 +124,7 @@ test.describe('costs', () => {
 
     expect(sharedChatUsageInCent).toBe(90);
 
-    let hasReachedLimit = await sharedChatHasReachedTelliPointLimit({
+    let hasReachedLimit = await sharedChatHasReachedTelliPointsLimit({
       user: user,
       sharedChat: sharedSchoolConversation,
     });
@@ -142,7 +142,7 @@ test.describe('costs', () => {
     };
     await db.insert(sharedSchoolConversationUsageTracking).values(sharedSchoolConversationUsage);
 
-    hasReachedLimit = await sharedChatHasReachedTelliPointLimit({
+    hasReachedLimit = await sharedChatHasReachedTelliPointsLimit({
       user: user,
       sharedChat: sharedSchoolConversation,
     });
@@ -200,7 +200,7 @@ test.describe('costs', () => {
 
     expect(sharedChatUsageInCent).toBe(90);
 
-    let hasReachedLimit = await sharedCharacterChatHasReachedTelliPointLimit({
+    let hasReachedLimit = await sharedCharacterChatHasReachedTelliPointsLimit({
       user: user,
       character: character!,
     });
@@ -218,7 +218,7 @@ test.describe('costs', () => {
     };
     await db.insert(sharedCharacterChatUsageTrackingTable).values(sharedCharacterChatUsage);
 
-    hasReachedLimit = await sharedCharacterChatHasReachedTelliPointLimit({
+    hasReachedLimit = await sharedCharacterChatHasReachedTelliPointsLimit({
       user: user,
       character: character,
     });

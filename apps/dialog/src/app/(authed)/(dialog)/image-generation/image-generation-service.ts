@@ -1,5 +1,5 @@
 import { getUser, userHasCompletedTraining } from '@/auth/utils';
-import { userHasReachedTelliPointLimit } from '@/app/api/chat/usage';
+import { userHasReachedTelliPointsLimit } from '@/app/api/chat/usage';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
 import { dbGetModelByIdAndFederalStateId } from '@shared/db/functions/llm-model';
@@ -221,7 +221,7 @@ export async function generateImage({
     userId: user.id,
   });
 
-  const TelliPointsLimitReached = await userHasReachedTelliPointLimit({ user });
+  const TelliPointsLimitReached = await userHasReachedTelliPointsLimit({ user });
 
   if (TelliPointsLimitReached) {
     if (conversation) {

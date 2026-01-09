@@ -25,7 +25,7 @@ async function calculateSharedChatLimitInCent(
   return ((priceLimitInCent ?? 0) * telliPointsPercentageLimit) / 100;
 }
 
-export async function sharedChatHasReachedTelliPointLimit({
+export async function sharedChatHasReachedTelliPointsLimit({
   user,
   sharedChat,
 }: {
@@ -62,7 +62,7 @@ export async function sharedChatHasReachedTelliPointLimit({
   return true;
 }
 
-export async function sharedCharacterChatHasReachedTelliPointLimit({
+export async function sharedCharacterChatHasReachedTelliPointsLimit({
   user,
   character,
 }: {
@@ -114,7 +114,7 @@ export function sharedChatHasExpired({
   return false;
 }
 
-export async function userHasReachedTelliPointLimit({
+export async function userHasReachedTelliPointsLimit({
   user,
 }: {
   user: UserAndContext | undefined;
