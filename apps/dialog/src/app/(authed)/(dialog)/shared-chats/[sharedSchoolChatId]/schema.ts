@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const intelliPointsPercentageValues = [1, 5, 10, 25, 50, 100];
+export const telliPointsPercentageValues = [1, 5, 10, 25, 50, 100];
 export const usageTimeValuesInMinutes = [
   30, // 30 minutes
   45,
@@ -13,7 +13,7 @@ export const usageTimeValuesInMinutes = [
 ];
 
 export const sharedConversationFormValuesSchema = z.object({
-  intelliPointsPercentageLimit: z.coerce.number(),
+  telliPointsPercentageLimit: z.coerce.number(),
   usageTimeLimit: z.coerce.number(),
 });
 export type SharedConversationShareFormValues = z.infer<typeof sharedConversationFormValuesSchema>;

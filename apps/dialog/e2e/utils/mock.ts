@@ -89,7 +89,7 @@ export const mockSharedSchoolConversation = (): SharedSchoolConversationSelectMo
     modelId: generateUUID(),
     userId: generateUUID(),
     studentExcercise: generateRandomString(10),
-    intelligencePointsLimit: 10,
+    telliPointsLimit: 10,
     maxUsageTimeLimit: 45,
     attachedLinks: [],
     startedAt: new Date(),

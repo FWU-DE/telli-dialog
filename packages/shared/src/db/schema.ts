@@ -360,7 +360,7 @@ export type CharacterUpdateModel = z.infer<typeof characterUpdateSchema>;
 
 // Type for character with sharing data (from JOIN with sharedCharacterConversation)
 export type CharacterWithShareDataModel = CharacterSelectModel & {
-  intelligencePointsLimit: number | null;
+  telliPointsLimit: number | null;
   inviteCode: string | null;
   maxUsageTimeLimit: number | null;
   startedAt: Date | null;
@@ -519,7 +519,7 @@ export const sharedSchoolConversationTable = pgTable(
     studentExcercise: text('student_excercise').default('').notNull(),
     additionalInstructions: text('additional_instructions'),
     restrictions: text('restrictions'), // Not used anymore
-    intelligencePointsLimit: integer('intelligence_points_limit'),
+    telliPointsLimit: integer('telli_points_limit'),
     maxUsageTimeLimit: integer('max_usage_time_limit'),
     attachedLinks: text('attached_links')
       .array()
@@ -677,7 +677,7 @@ export const sharedCharacterConversation = pgTable(
     userId: uuid('user_id')
       .references(() => userTable.id)
       .notNull(),
-    intelligencePointsLimit: integer('intelligence_points_limit'),
+    telliPointsLimit: integer('telli_points_limit'),
     maxUsageTimeLimit: integer('max_usage_time_limit'),
     inviteCode: text('invite_code').unique(),
     startedAt: timestamp('started_at', { withTimezone: true }),

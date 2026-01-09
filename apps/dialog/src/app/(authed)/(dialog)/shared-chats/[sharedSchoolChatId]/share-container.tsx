@@ -4,7 +4,7 @@ import { labelClassName } from '@/utils/tailwind/input';
 import CountDownTimer from '../_components/count-down';
 import {
   SharedConversationShareFormValues,
-  intelliPointsPercentageValues,
+  telliPointsPercentageValues,
   sharedConversationFormValuesSchema,
   usageTimeValuesInMinutes,
 } from './schema';
@@ -39,7 +39,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
     useForm<SharedConversationShareFormValues>({
       resolver: zodResolver(sharedConversationFormValuesSchema),
       defaultValues: {
-        intelliPointsPercentageLimit: sharedSchoolChat.intelligencePointsLimit ?? 10,
+        telliPointsPercentageLimit: sharedSchoolChat.telliPointsLimit ?? 10,
         usageTimeLimit: sharedSchoolChat.maxUsageTimeLimit ?? 45,
       },
       disabled: sharedChatActive,
@@ -87,7 +87,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
           <select
             id="Telli-Points"
             aria-label="Telli-Points"
-            {...registerShare('intelliPointsPercentageLimit')}
+            {...registerShare('telliPointsPercentageLimit')}
             className={cn(
               'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600',
               sharedChatActive && 'cursor-not-allowed',
@@ -97,7 +97,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
               background: !sharedChatActive ? selectSVGBackground : undefined,
             }}
           >
-            {intelliPointsPercentageValues.map((value) => (
+            {telliPointsPercentageValues.map((value) => (
               <option key={value} value={value}>
                 {value} %
               </option>

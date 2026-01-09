@@ -3,7 +3,7 @@ import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { labelClassName } from '@/utils/tailwind/input';
 import {
   SharedConversationShareFormValues,
-  intelliPointsPercentageValues,
+  telliPointsPercentageValues,
   sharedConversationFormValuesSchema,
   usageTimeValuesInMinutes,
 } from '../../../shared-chats/[sharedSchoolChatId]/schema';
@@ -38,7 +38,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
     useForm<SharedConversationShareFormValues>({
       resolver: zodResolver(sharedConversationFormValuesSchema),
       defaultValues: {
-        intelliPointsPercentageLimit: character.intelligencePointsLimit ?? 10,
+        telliPointsPercentageLimit: character.telliPointsLimit ?? 10,
         usageTimeLimit: character.maxUsageTimeLimit ?? 45,
       },
       disabled: sharedChatActive,
@@ -81,7 +81,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
           <select
             id="Telli-Points"
             aria-label="Telli-Points"
-            {...registerShare('intelliPointsPercentageLimit')}
+            {...registerShare('telliPointsPercentageLimit')}
             className={cn(
               'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600 focus:outline-none',
               sharedChatActive && 'cursor-not-allowed',
@@ -91,7 +91,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
               background: !sharedChatActive ? selectSVGBackground : undefined,
             }}
           >
-            {intelliPointsPercentageValues.map((value) => (
+            {telliPointsPercentageValues.map((value) => (
               <option key={value} value={value}>
                 {value} %
               </option>

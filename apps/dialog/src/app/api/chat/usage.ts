@@ -8,24 +8,24 @@ import { getPriceInCentByUser } from '@/app/school';
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
   dbGetSharedChatUsageInCentBySharedChatId,
-} from '@shared/db/functions/intelli-points';
+} from '@shared/db/functions/telli-points';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 
 /**
  * Calculates the shared chat limit in cents
  * @param user - The user and context
- * @param intelligencePointsPercentageLimit - The percentage limit (e.g., 10 for 10%)
+ * @param telliPointsPercentageLimit - The percentage limit (e.g., 10 for 10%)
  * @returns The calculated limit in cents
  */
 async function calculateSharedChatLimitInCent(
   user: UserAndContext,
-  intelligencePointsPercentageLimit: number,
+  telliPointsPercentageLimit: number,
 ): Promise<number> {
   const priceLimitInCent = await getPriceLimitInCentByUser(user);
-  return ((priceLimitInCent ?? 0) * intelligencePointsPercentageLimit) / 100;
+  return ((priceLimitInCent ?? 0) * telliPointsPercentageLimit) / 100;
 }
 
-export async function sharedChatHasReachedIntelliPointLimit({
+export async function sharedChatHasReachedTelliPointsLimit({
   user,
   sharedChat,
 }: {
@@ -52,9 +52,9 @@ export async function sharedChatHasReachedIntelliPointLimit({
 
   if (
     user.school.userRole === 'teacher' &&
-    sharedChat.intelligencePointsLimit !== null &&
+    sharedChat.telliPointsLimit !== null &&
     sharedChatUsageInCent <
-      (await calculateSharedChatLimitInCent(user, sharedChat.intelligencePointsLimit))
+      (await calculateSharedChatLimitInCent(user, sharedChat.telliPointsLimit))
   ) {
     return false;
   }
@@ -62,7 +62,7 @@ export async function sharedChatHasReachedIntelliPointLimit({
   return true;
 }
 
-export async function sharedCharacterChatHasReachedIntelliPointLimit({
+export async function sharedCharacterChatHasReachedTelliPointsLimit({
   user,
   character,
 }: {
@@ -89,9 +89,8 @@ export async function sharedCharacterChatHasReachedIntelliPointLimit({
 
   if (
     user.school.userRole === 'teacher' &&
-    character.intelligencePointsLimit !== null &&
-    characterUsageInCent <
-      (await calculateSharedChatLimitInCent(user, character.intelligencePointsLimit))
+    character.telliPointsLimit !== null &&
+    characterUsageInCent < (await calculateSharedChatLimitInCent(user, character.telliPointsLimit))
   ) {
     return false;
   }
@@ -115,7 +114,7 @@ export function sharedChatHasExpired({
   return false;
 }
 
-export async function userHasReachedIntelliPointLimit({
+export async function userHasReachedTelliPointsLimit({
   user,
 }: {
   user: UserAndContext | undefined;

@@ -7,7 +7,7 @@ import {
 import { NextRequest, NextResponse } from 'next/server';
 import { dbInsertChatContent } from '@shared/db/functions/chat';
 import { getUser, updateSession, userHasCompletedTraining } from '@/auth/utils';
-import { userHasReachedIntelliPointLimit } from './usage';
+import { userHasReachedTelliPointsLimit } from './usage';
 import {
   getModelAndProviderWithResult,
   calculateCostsInCent,
@@ -45,10 +45,6 @@ export async function POST(request: NextRequest) {
 
   if (!productAccess.hasAccess) {
     return NextResponse.json({ error: productAccess.errorType }, { status: 403 });
-  }
-
-  if (await userHasReachedIntelliPointLimit({ user })) {
-    return NextResponse.json({ error: 'User has reached telli points limit.' }, { status: 429 });
   }
 
   const {
@@ -118,9 +114,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No user message found' }, { status: 400 });
   }
 
-  const intelliPointsLimitReached = await userHasReachedIntelliPointLimit({ user });
+  const telliPointsLimitReached = await userHasReachedTelliPointsLimit({ user });
 
-  if (intelliPointsLimitReached) {
+  if (telliPointsLimitReached) {
     await sendRabbitmqEvent(
       constructTelliBudgetExceededEvent({
         anonymous: false,

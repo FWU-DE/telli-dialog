@@ -124,7 +124,7 @@ describe('learning-scenario-service', () => {
         testFunction: () =>
           shareLearningScenario({
             learningScenarioId,
-            data: { intelliPointsPercentageLimit: 50, usageTimeLimit: 60 },
+            data: { telliPointsPercentageLimit: 50, usageTimeLimit: 60 },
             userId: 'different-user-id',
           }),
       },
@@ -197,7 +197,7 @@ describe('learning-scenario-service', () => {
         testFunction: () =>
           shareLearningScenario({
             learningScenarioId: 'invalid-uuid',
-            data: { intelliPointsPercentageLimit: 50, usageTimeLimit: 60 },
+            data: { telliPointsPercentageLimit: 50, usageTimeLimit: 60 },
             userId: 'user-id',
           }),
       },

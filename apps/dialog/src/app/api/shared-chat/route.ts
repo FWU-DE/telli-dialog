@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import {
   sharedChatHasExpired,
-  sharedChatHasReachedIntelliPointLimit,
-  userHasReachedIntelliPointLimit,
+  sharedChatHasReachedTelliPointsLimit,
+  userHasReachedTelliPointsLimit,
 } from '../chat/usage';
 import { dbGetSharedChatByIdAndInviteCode } from '@shared/db/functions/shared-school-chat';
 import { constructLearningScenarioSystemPrompt } from './system-prompt';
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
   const sharedChat = await dbGetSharedChatByIdAndInviteCode({ id: sharedChatId, inviteCode });
 
   if (sharedChat === undefined) {
-    return NextResponse.json({ error: 'Could not get shared chat' }, { status: 404 });
+    return NextResponse.json({ error: 'The shared chat was not found.' }, { status: 404 });
   }
 
   const teacherUserAndContext = await getUserAndContextByUserId({ userId: sharedChat.userId });
@@ -69,12 +69,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Shared chat has expired.' }, { status: 400 });
   }
 
-  const [sharedChatLimitReached, intelliPointsLimitReached] = await Promise.all([
-    sharedChatHasReachedIntelliPointLimit({
+  const [sharedChatLimitReached, telliPointsLimitReached] = await Promise.all([
+    sharedChatHasReachedTelliPointsLimit({
       user: teacherUserAndContext,
       sharedChat,
     }),
-    userHasReachedIntelliPointLimit({ user: teacherUserAndContext }),
+    userHasReachedTelliPointsLimit({ user: teacherUserAndContext }),
   ]);
 
   if (sharedChatLimitReached) {
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (intelliPointsLimitReached) {
+  if (telliPointsLimitReached) {
     await sendRabbitmqEvent(
       constructTelliBudgetExceededEvent({
         anonymous: true,
