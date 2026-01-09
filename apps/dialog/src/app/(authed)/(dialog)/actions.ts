@@ -1,17 +1,16 @@
 'use server';
 
-import { updateSession } from '@/auth/utils';
-import { dbUpdateLastUsedModelByUserId } from '@shared/db/functions/user';
-import { revalidatePath } from 'next/cache';
-import { dbUpdateUserTermsVersion } from '@shared/db/functions/user';
-import { FileModel } from '@shared/db/schema';
-import { VERSION } from '@/components/modals/const';
-import { dbGetRelatedFiles } from '@shared/db/functions/files';
 import { requireAuth } from '@/auth/requireAuth';
+import { updateSession } from '@/auth/utils';
+import { VERSION } from '@/components/modals/const';
 import { runServerAction } from '@shared/actions/run-server-action';
 import deleteConversation, {
   updateConversationTitle,
 } from '@shared/conversation/conversation-service';
+import { dbGetRelatedFiles } from '@shared/db/functions/files';
+import { dbUpdateLastUsedModelByUserId, dbUpdateUserTermsVersion } from '@shared/db/functions/user';
+import { FileModel } from '@shared/db/schema';
+import { revalidatePath } from 'next/cache';
 
 export default async function deleteConversationAction({
   conversationId,
