@@ -308,7 +308,7 @@ export const updateCharacter = async ({
   const cleanedCharacter = removeNullishValues(character);
   if (cleanedCharacter === undefined) return;
 
-  const parsedCharacterValues = updateCharacterSchema.strip().parse(cleanedCharacter);
+  const parsedCharacterValues = updateCharacterSchema.parse(cleanedCharacter);
 
   const [updatedCharacter] = await db
     .update(characterTable)

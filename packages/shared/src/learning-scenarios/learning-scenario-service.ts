@@ -89,7 +89,7 @@ export async function updateLearningScenario({
     userId: user.id,
   });
 
-  const parsedData = sharedSchoolConversationUpdateSchema.strip().parse(data);
+  const parsedData = sharedSchoolConversationUpdateSchema.parse(data);
 
   const [updatedLearningScenario] = await db
     .update(sharedSchoolConversationTable)
@@ -174,7 +174,7 @@ export async function shareLearningScenario({
     userId: userId,
   });
 
-  const parsedValues = learningScenarioShareValuesSchema.strip().parse(data);
+  const parsedValues = learningScenarioShareValuesSchema.parse(data);
 
   const inviteCode = generateInviteCode();
 
@@ -274,7 +274,7 @@ export async function createNewLearningScenario({
     throw new ForbiddenError('Not authorized to create new learning scenario');
   }
 
-  const parsedData = learningScenarioInsertSchema.strip().parse(data);
+  const parsedData = learningScenarioInsertSchema.parse(data);
 
   const [insertedSharedChat] = await db
     .insert(sharedSchoolConversationTable)
