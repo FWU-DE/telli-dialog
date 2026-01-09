@@ -1,6 +1,6 @@
 'use server';
 
-import { getUser, updateSession } from '@/auth/utils';
+import { updateSession } from '@/auth/utils';
 import { dbUpdateLastUsedModelByUserId } from '@shared/db/functions/user';
 import { revalidatePath } from 'next/cache';
 import { dbUpdateUserTermsVersion } from '@shared/db/functions/user';
