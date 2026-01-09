@@ -10,13 +10,7 @@ import { Button } from '@ui/components/Button';
 import VoucherList from '../VoucherList';
 import { BusinessError } from '@shared/error';
 
-export default function VoucherCreateView({
-  federalStateId,
-  username,
-}: {
-  federalStateId: string;
-  username: string;
-}) {
+export default function VoucherCreateView({ federalStateId }: { federalStateId: string }) {
   const [amount, setAmount] = useState('');
   const [count, setCount] = useState('1'); // default 1 code
   const [comment, setComment] = useState('');
@@ -49,7 +43,6 @@ export default function VoucherCreateView({
       const voucherData: CreateVoucherParams = {
         increaseAmount: parsedAmount,
         durationMonths: parsedMonths,
-        createdBy: username,
         createReason: comment,
         numberOfCodes: parsedCount,
       };
@@ -96,8 +89,6 @@ export default function VoucherCreateView({
         />
         <label>Grund für die Erstellung: </label>
         <Textarea value={comment} onChange={(e) => setComment(e.target.value)} required />
-        <label>Erstellt von: </label>
-        <span>{username}</span>
         <div className="col-span-2">
           <Button onClick={handleSubmit}>Codes erstellen</Button>
         </div>
@@ -122,7 +113,7 @@ export default function VoucherCreateView({
               <Button>Erstellte Codes als CSV herunterladen</Button>
             </CSVLink>
           </div>
-          <VoucherList vouchers={createdVouchers} username={username} />
+          <VoucherList vouchers={createdVouchers} />
         </div>
       )}
     </div>
