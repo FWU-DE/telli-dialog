@@ -220,7 +220,7 @@ export default function CharacterForm({
   async function handleDeleteCharacter() {
     const result = await deleteCharacterAction({ characterId: character.id });
     if (result.success) {
-      // do not show any toast if the avatar is being created
+      // do not show any toast if the character is being created
       if (!isCreating) {
         toast.success(tToast('delete-toast-success'));
       }
