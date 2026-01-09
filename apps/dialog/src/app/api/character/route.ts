@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Shared character chat has expired.' }, { status: 400 });
   }
 
-  const [sharedChatLimitReached, TelliPointsLimitReached] = await Promise.all([
+  const [sharedChatLimitReached, telliPointsLimitReached] = await Promise.all([
     sharedCharacterChatHasReachedTelliPointsLimit({
       user: teacherUserAndContext,
       character,
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (TelliPointsLimitReached) {
+  if (telliPointsLimitReached) {
     await sendRabbitmqEvent(
       constructTelliBudgetExceededEvent({
         anonymous: true,

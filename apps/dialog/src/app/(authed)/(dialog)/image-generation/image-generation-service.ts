@@ -221,9 +221,9 @@ export async function generateImage({
     userId: user.id,
   });
 
-  const TelliPointsLimitReached = await userHasReachedTelliPointsLimit({ user });
+  const telliPointsLimitReached = await userHasReachedTelliPointsLimit({ user });
 
-  if (TelliPointsLimitReached) {
+  if (telliPointsLimitReached) {
     if (conversation) {
       await sendRabbitmqEvent(
         constructTelliBudgetExceededEvent({
