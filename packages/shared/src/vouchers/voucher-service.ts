@@ -48,11 +48,12 @@ export async function getVouchers(federalStateId: string): Promise<Voucher[]> {
  * All vouchers are created with 'created' status.
  *
  * @param federalStateId - The ID of the federal state to create vouchers for
- * @param voucherData - The voucher creation data including amount, duration, creator info, and number of codes
+ * @param voucherData - The voucher creation data including amount, duration and number of codes
  * @returns Promise that resolves to an array of created and validated voucher models
  */
 export async function createVouchers(
   federalStateId: string,
+  createdBy: string,
   voucherData: CreateVoucherParams,
 ): Promise<Voucher[]> {
   // Validate input using zod schema
@@ -69,7 +70,7 @@ export async function createVouchers(
       durationMonths: validatedData.durationMonths,
       validUntil: validUntil,
       federalStateId: federalStateId,
-      createdBy: validatedData.createdBy,
+      createdBy,
       createReason: validatedData.createReason,
       status: 'created' as const,
       updateReason: '',
@@ -87,7 +88,7 @@ export async function createVouchers(
  *
  * @param code - The 16-character voucher code to revoke
  * @param federalStateId - The ID of the federal state the voucher belongs to
- * @param updatedBy - The user ID of the person revoking the voucher
+ * @param updatedBy - The user name of the person revoking the voucher
  * @param updateReason - The reason for revoking the voucher
  * @throws NotFoundError if voucher doesn't exist or belongs to different federal state
  * @throws VoucherAlreadyRedeemedError if voucher is already redeemed
@@ -101,7 +102,6 @@ export async function revokeVoucher(
   // Validate input using zod schema
   const validatedInput = revokeVoucherSchema.parse({
     code,
-    updatedBy,
     updateReason,
     revoked: true,
   });
@@ -116,7 +116,7 @@ export async function revokeVoucher(
 
   const updatedFields: VoucherUpdateModel = {
     id: voucher.id,
-    updatedBy: validatedInput.updatedBy,
+    updatedBy,
     updateReason: validatedInput.updateReason,
     updatedAt: new Date(),
     status: 'revoked' as const,
