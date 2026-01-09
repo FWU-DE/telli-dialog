@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateConversationDocxFiles } from './utils';
 import { getUser } from '@/auth/utils';
 import { type ConversationModel } from '@shared/db/types';
+import { logError } from '@shared/logging';
+import { getConversation } from '@shared/conversation/conversation-service';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * User wants to download a conversation as a .docx file.
+ * We generate the file on the fly and return it as a response.
+ * The user must be the owner of the conversation.
+ */
 export async function GET(req: NextRequest) {
   const searchParams = new URLSearchParams(req.url.split('?')[1]);
   const conversationId = searchParams.get('conversationId');
@@ -14,6 +21,13 @@ export async function GET(req: NextRequest) {
 
   if (conversationId === null) {
     return NextResponse.json({ error: 'Invalid conversation id' }, { status: 404 });
+  }
+
+  // Verify that the user is the owner of the conversation
+  try {
+    await getConversation({ conversationId, userId: user.id });
+  } catch {
+    return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
   }
 
   try {
@@ -41,7 +55,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Failed to generate the document', error);
+    logError('Failed to generate a document for the conversation', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
