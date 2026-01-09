@@ -3,7 +3,7 @@ import { dbGetLlmModelById } from '@shared/db/functions/llm-model';
 import { dbGetCharacterByIdAndInviteCode } from '@shared/db/functions/character';
 
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
-import CharacterSharedChat from '@/components/chat/character-chat';
+import CharacterSharedChat from '@/components/chat/character-shared-chat';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { dbGetFederalStateBySchoolId } from '@shared/db/functions/school';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';

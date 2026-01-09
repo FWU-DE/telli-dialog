@@ -19,7 +19,9 @@ import { Messages } from './messages';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 
 const reductionBreakpoint = 'sm';
-
+/**
+ * This component is used if a character is shared via invite code.
+ */
 export default function CharacterSharedChat({
   imageSource,
   ...character
@@ -48,7 +50,6 @@ export default function CharacterSharedChat({
       api: endpoint,
       experimental_throttle: 100,
       maxSteps: 2,
-      body: { modelId: character.modelId },
       onResponse: handleResponse,
       onError: handleError,
     });
