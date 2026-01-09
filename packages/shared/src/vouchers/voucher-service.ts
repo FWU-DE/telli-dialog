@@ -48,6 +48,7 @@ export async function getVouchers(federalStateId: string): Promise<Voucher[]> {
  * All vouchers are created with 'created' status.
  *
  * @param federalStateId - The ID of the federal state to create vouchers for
+ * @param createdBy - The user name of the person creating the vouchers
  * @param voucherData - The voucher creation data including amount, duration and number of codes
  * @returns Promise that resolves to an array of created and validated voucher models
  */
