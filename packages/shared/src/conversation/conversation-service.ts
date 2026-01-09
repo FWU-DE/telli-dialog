@@ -60,8 +60,6 @@ export default async function deleteConversation({
     conversationId,
     userId,
   });
-
-  return;
 }
 
 /**
