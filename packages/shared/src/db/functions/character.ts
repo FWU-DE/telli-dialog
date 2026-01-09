@@ -17,7 +17,6 @@ import {
 } from '../schema';
 import { dbGetModelByName } from './llm-model';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
-import { NotFoundError } from '@shared/error';
 
 export async function dbGetCharacterByIdOrSchoolId({
   characterId,
@@ -366,7 +365,6 @@ export async function dbGetCharacterByIdAndInviteCode({
     )
     .where(and(eq(characterTable.id, id), eq(sharedCharacterConversation.inviteCode, inviteCode)));
 
-  if (row === undefined || row.inviteCode === null) throw new NotFoundError('Character not found');
   return row;
 }
 

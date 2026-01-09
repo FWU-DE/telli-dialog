@@ -25,7 +25,10 @@ export function useCheckStatusCode() {
   const handleError = useCallback((error: Error) => {
     if (error.message.toLowerCase().includes('telli points limit')) {
       setError(new Error(t('rate-limit-error')));
-    } else if (error.message.toLowerCase().includes('chat has expired')) {
+    } else if (
+      error.message.toLowerCase().includes('chat has expired') ||
+      error.message.toLowerCase().includes('chat was not found')
+    ) {
       setError(new Error(t('chat-expired')));
     } else {
       setError(new Error(t('generic-error')));
