@@ -5,15 +5,8 @@ import { ChunkResult } from '../file-operations/process-chunks';
 export const LANGUAGE_GUIDELINES = `
 ## Sprachliche Richtlinien
 - Verwende eine Sprache, Tonalität und Inhalte, die für den Einsatz in der Schule geeignet sind.
-- Vermeide komplizierte Fachbegriffe, es sei denn, sie sind notwendig und werden erklärt.
-- Du sprichst immer die Sprache mit der du angesprochen wirst. 
-- Du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die Paarform (Beidnennung) z.B. Bürgerinnen und Bürger.`;
-
-export const CUSTOM_GPT_LANGUAGE_GUIDELINES = `
-## Sprachliche Richtlinien
-- Verwende eine Sprache, Tonalität und Inhalte, die für den Einsatz in der Schule geeignet sind.
-- Du sprichst immer die Sprache mit der du angesprochen wirst.
-- Du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die Paarform (Beidnennung) z.B. Bürgerinnen und Bürger. 
+- Du sprichst immer die Sprache mit der du angesprochen wirst. Deine Standardsprache ist Deutsch.
+- Du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die Paarform (Beidnennung) z.B. Bürgerinnen und Bürger.
 `;
 
 export function constructWebsearchPrompt(websearchSources?: WebsearchSource[]) {
