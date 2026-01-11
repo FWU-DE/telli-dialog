@@ -2,12 +2,12 @@ import { beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
 import { getConversation, getConversationMessages } from './conversation-service';
 import { ForbiddenError, NotFoundError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
-import { dbGetConversationById, dbGetCoversationMessages } from '@shared/db/functions/chat';
+import { dbGetConversationById, dbGetConversationMessages } from '@shared/db/functions/chat';
 import { ConversationModel } from '@shared/db/types';
 
 vi.mock('../db/functions/chat', () => ({
   dbGetConversationById: vi.fn(),
-  dbGetCoversationMessages: vi.fn(),
+  dbGetConversationMessages: vi.fn(),
 }));
 
 describe('conversation-service', () => {
@@ -54,13 +54,13 @@ describe('conversation-service', () => {
   });
 
   describe('getConversationMessages', () => {
-    it('should call dbGetCoversationMessages with correct parameters', async () => {
+    it('should call dbGetConversationMessages with correct parameters', async () => {
       const userId = generateUUID();
       const conversationId = generateUUID();
       const mockMessages: unknown[] = [];
 
       (
-        dbGetCoversationMessages as MockedFunction<typeof dbGetCoversationMessages>
+        dbGetConversationMessages as MockedFunction<typeof dbGetConversationMessages>
       ).mockResolvedValue(mockMessages as never);
 
       await getConversationMessages({
@@ -69,7 +69,7 @@ describe('conversation-service', () => {
       });
 
       // we rely on this function to only return messages for the given user
-      expect(dbGetCoversationMessages).toHaveBeenCalledWith({
+      expect(dbGetConversationMessages).toHaveBeenCalledWith({
         conversationId,
         userId,
       });
@@ -80,7 +80,7 @@ describe('conversation-service', () => {
       const conversationId = generateUUID();
 
       (
-        dbGetCoversationMessages as MockedFunction<typeof dbGetCoversationMessages>
+        dbGetConversationMessages as MockedFunction<typeof dbGetConversationMessages>
       ).mockRejectedValue(new NotFoundError('Messages not found'));
 
       await expect(

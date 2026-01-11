@@ -1,0 +1,1 @@
+ALTER TYPE "public"."character_access_level" RENAME TO "access_level";

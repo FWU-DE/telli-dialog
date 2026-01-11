@@ -1,2 +1,0 @@
-ALTER TABLE "shared_character_conversation" RENAME COLUMN "intelligence_points_limit" TO "telli_points_limit";--> statement-breakpoint
-ALTER TABLE "shared_school_conversation" RENAME COLUMN "intelligence_points_limit" TO "telli_points_limit";

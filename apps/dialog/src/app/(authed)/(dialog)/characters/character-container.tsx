@@ -43,15 +43,14 @@ export default function CharacterContainer({
   const tCommon = useTranslations('common');
   const tToast = useTranslations('characters.toasts');
 
-  function handleDeleteCharacter() {
-    deleteCharacterAction({ characterId: id })
-      .then(() => {
-        toast.success(tToast('delete-toast-success'));
-        router.refresh();
-      })
-      .catch(() => {
-        toast.error(tToast('delete-toast-error'));
-      });
+  async function handleDeleteCharacter() {
+    const result = await deleteCharacterAction({ characterId: id });
+    if (result.success) {
+      toast.success(tToast('delete-toast-success'));
+      router.refresh();
+    } else {
+      toast.error(tToast('delete-toast-error'));
+    }
   }
   function handleNavigateToNewUnsharedChat(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();

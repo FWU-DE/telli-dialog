@@ -23,7 +23,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
-import deleteConversationAction, { updateConversationNameAction } from './actions';
+import deleteConversationAction, { updateConversationTitleAction } from './actions';
 import { fetchClientSideConversations } from './utils';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 
@@ -91,28 +91,21 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
     return isBefore(date, subDays(new Date(), 7));
   });
 
-  function handleDeleteConversation(conversationId: string) {
-    deleteConversationAction({ conversationId })
-      .then(() => {
-        toast.success(t('conversation-delete-toast-success'));
-        refetchConversations();
-        router.replace('/');
-      })
-      .catch((error) => {
-        console.error({ error });
-        toast.error(t('conversation-delete-toast-error'));
-      });
+  async function handleDeleteConversation(conversationId: string) {
+    const result = await deleteConversationAction({ conversationId });
+    if (result.success) {
+      toast.success(t('conversation-delete-toast-success'));
+      refetchConversations();
+      router.replace('/');
+    } else {
+      toast.error(t('conversation-delete-toast-error'));
+    }
   }
 
-  function handleUpdateConversation({ id, name }: { id: string; name: string }) {
-    updateConversationNameAction({ conversationId: id, name })
-      .then(() => {
-        refetchConversations();
-        router.refresh();
-      })
-      .catch((error) => {
-        console.error({ error });
-      });
+  async function handleUpdateConversation({ id, name }: { id: string; name: string }) {
+    await updateConversationTitleAction({ conversationId: id, name });
+    refetchConversations();
+    router.refresh();
   }
 
   return (

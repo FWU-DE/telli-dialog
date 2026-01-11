@@ -1,9 +1,8 @@
 'use server';
 
-import { CharacterAccessLevel } from '@shared/db/schema';
+import { AccessLevel } from '@shared/db/schema';
 import { SharedConversationShareFormValues } from '../../../shared-chats/[sharedSchoolChatId]/schema';
 import { requireAuth } from '@/auth/requireAuth';
-import { withLoggingAsync } from '@shared/logging';
 import {
   deleteCharacter,
   shareCharacter,
@@ -13,17 +12,18 @@ import {
   UpdateCharacterActionModel,
   updateCharacterPicture,
 } from '@shared/characters/character-service';
+import { runServerAction } from '@shared/actions/run-server-action';
 
 export async function updateCharacterAccessLevelAction({
   characterId,
   accessLevel,
 }: {
   characterId: string;
-  accessLevel: CharacterAccessLevel;
+  accessLevel: AccessLevel;
 }) {
   const { user } = await requireAuth();
 
-  return await withLoggingAsync(updateCharacterAccessLevel)({
+  return runServerAction(updateCharacterAccessLevel)({
     characterId,
     accessLevel,
     userId: user.id,
@@ -39,7 +39,7 @@ export async function updateCharacterPictureAction({
 }) {
   const { user } = await requireAuth();
 
-  return await withLoggingAsync(updateCharacterPicture)({
+  return runServerAction(updateCharacterPicture)({
     characterId,
     picturePath,
     userId: user.id,
@@ -49,7 +49,7 @@ export async function updateCharacterPictureAction({
 export async function updateCharacterAction(character: UpdateCharacterActionModel) {
   const { user } = await requireAuth();
 
-  return await withLoggingAsync(updateCharacter)({
+  return runServerAction(updateCharacter)({
     userId: user.id,
     ...character,
   });
@@ -58,7 +58,7 @@ export async function updateCharacterAction(character: UpdateCharacterActionMode
 export async function deleteCharacterAction({ characterId }: { characterId: string }) {
   const { user } = await requireAuth();
 
-  await withLoggingAsync(deleteCharacter)({
+  return runServerAction(deleteCharacter)({
     characterId,
     userId: user.id,
   });
@@ -71,7 +71,7 @@ export async function shareCharacterAction({
 }: { id: string } & SharedConversationShareFormValues) {
   const { user, school } = await requireAuth();
 
-  return withLoggingAsync(shareCharacter)({
+  return runServerAction(shareCharacter)({
     characterId: id,
     telliPointsPercentageLimit: telliPointsPercentageLimit,
     usageTimeLimitMinutes: usageTimeLimit,
@@ -83,7 +83,7 @@ export async function shareCharacterAction({
 export async function unshareCharacterAction({ characterId }: { characterId: string }) {
   const { user } = await requireAuth();
 
-  return withLoggingAsync(unshareCharacter)({
+  return runServerAction(unshareCharacter)({
     characterId,
     user: user,
   });

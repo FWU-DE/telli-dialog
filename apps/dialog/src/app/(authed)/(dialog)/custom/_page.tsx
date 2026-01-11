@@ -11,7 +11,7 @@ import {
 } from '@/components/navigation/sidebar/collapsible-sidebar';
 import SearchBarInput from '@/components/search-bar';
 import { type UserAndContext } from '@/auth/types';
-import { CharacterAccessLevel } from '@shared/db/schema';
+import { AccessLevel } from '@shared/db/schema';
 import { useTranslations } from 'next-intl';
 import CustomGptContainer from './custom-gpt-container';
 import { buildGenericUrl } from '../characters/utils';
@@ -27,7 +27,7 @@ export default function Page2({
 }: {
   user: UserAndContext;
   customGpts: CustomGptWithImage[];
-  accessLevel: CharacterAccessLevel;
+  accessLevel: AccessLevel;
 }) {
   const [input, setInput] = React.useState('');
   const federalState = useFederalState();

@@ -1,5 +1,5 @@
 {
-  "id": "f64e1666-7cb1-4e3c-831c-ab599c04fb02",
+  "id": "92a2ebf1-926e-4208-8412-c1f64227780a",
   "prevId": "31e86e08-7ebf-4858-9d6e-3e917ac49018",
   "version": "7",
   "dialect": "postgresql",
@@ -747,7 +747,7 @@
         },
         "access_level": {
           "name": "access_level",
-          "type": "character_access_level",
+          "type": "access_level",
           "primaryKey": false,
           "notNull": true,
           "default": "'private'"
@@ -1398,7 +1398,7 @@
         },
         "access_level": {
           "name": "access_level",
-          "type": "character_access_level",
+          "type": "access_level",
           "primaryKey": false,
           "notNull": true,
           "default": "'private'"
@@ -2091,8 +2091,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "telli_points_limit": {
-          "name": "telli_points_limit",
+        "intelligence_points_limit": {
+          "name": "intelligence_points_limit",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -2234,8 +2234,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "telli_points_limit": {
-          "name": "telli_points_limit",
+        "intelligence_points_limit": {
+          "name": "intelligence_points_limit",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -2610,8 +2610,8 @@
     }
   },
   "enums": {
-    "public.character_access_level": {
-      "name": "character_access_level",
+    "public.access_level": {
+      "name": "access_level",
       "schema": "public",
       "values": [
         "private",

@@ -1,4 +1,9 @@
-import { dbGetConversationById, dbGetCoversationMessages } from '@shared/db/functions/chat';
+import {
+  dbGetConversationById,
+  dbGetConversationMessages,
+  dbUpdateConversationTitle,
+} from '@shared/db/functions/chat';
+import { dbDeleteConversationByIdAndUserId } from '@shared/db/functions/conversation';
 import { ConversationModel } from '@shared/db/types';
 import { ForbiddenError, NotFoundError } from '@shared/error';
 
@@ -34,8 +39,45 @@ export async function getConversationMessages({
   conversationId: string;
   userId: string;
 }) {
-  return await dbGetCoversationMessages({
+  return await dbGetConversationMessages({
     conversationId,
     userId,
   });
+}
+
+/**
+ * Deletes a conversation that belongs to the user.
+ * Throws an error if the conversation could not be deleted.
+ */
+export default async function deleteConversation({
+  conversationId,
+  userId,
+}: {
+  conversationId: string;
+  userId: string;
+}) {
+  await dbDeleteConversationByIdAndUserId({
+    conversationId,
+    userId,
+  });
+}
+
+/**
+ *  Triggered by the user if they want to update the name of a conversation.
+ *  Throws a NotFoundError if the conversation does not exist or the user is not the owner.
+ **/
+export async function updateConversationTitle({
+  conversationId,
+  name,
+  userId,
+}: {
+  conversationId: string;
+  name: string;
+  userId: string;
+}) {
+  const result = dbUpdateConversationTitle({ conversationId, name, userId });
+  if (!result) {
+    throw new NotFoundError('Could not update conversation title');
+  }
+  return result;
 }

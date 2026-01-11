@@ -50,21 +50,21 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
     const data = getValuesShare();
     const parsedData = sharedConversationFormValuesSchema.parse(data);
 
-    try {
-      await shareCharacterAction({ ...parsedData, id: character.id });
+    const result = await shareCharacterAction({ ...parsedData, id: character.id });
+    if (result.success) {
       toast.success(tToasts('share-toast-success'));
       router.push(shareUILink);
-    } catch {
+    } else {
       toast.error(tToasts('share-toast-error'));
     }
   }
 
   async function handleStopSharing() {
-    try {
-      await unshareCharacterAction({ characterId: character.id });
+    const result = await unshareCharacterAction({ characterId: character.id });
+    if (result.success) {
       toast.success(tToasts('stop-share-toast-success'));
       router.refresh();
-    } catch {
+    } else {
       toast.error(tToasts('stop-share-toast-error'));
     }
   }

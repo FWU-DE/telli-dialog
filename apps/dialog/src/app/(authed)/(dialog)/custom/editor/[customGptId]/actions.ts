@@ -1,6 +1,6 @@
 'use server';
 
-import { CharacterAccessLevel, CustomGptInsertModel } from '@shared/db/schema';
+import { AccessLevel, CustomGptInsertModel } from '@shared/db/schema';
 import {
   deleteCustomGpt,
   updateCustomGpt,
@@ -15,7 +15,7 @@ export async function updateCustomGptAccessLevelAction({
   accessLevel,
 }: {
   gptId: string;
-  accessLevel: CharacterAccessLevel;
+  accessLevel: AccessLevel;
 }) {
   const { user } = await requireAuth();
 
