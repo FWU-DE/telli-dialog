@@ -104,6 +104,11 @@ export default function Chat({
           return;
         }
 
+        // Don't refresh the page if there was an error
+        if (response.status !== 200) {
+          return;
+        }
+
         logWarning('Assert: onResponse was called with zero messages.');
         refetchConversations();
         router.refresh();

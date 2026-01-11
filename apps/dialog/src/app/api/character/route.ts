@@ -2,9 +2,9 @@ import { type Message, smoothStream, streamText } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import {
-  sharedCharacterChatHasReachedIntelliPointLimit,
+  sharedCharacterChatHasReachedTelliPointsLimit,
   sharedChatHasExpired,
-  userHasReachedIntelliPointLimit,
+  userHasReachedTelliPointsLimit,
 } from '../chat/usage';
 import { constructCharacterSystemPrompt } from './system-prompt';
 import {
@@ -37,8 +37,9 @@ export async function POST(request: NextRequest) {
 
   const { sharedChatId, inviteCode } = getSearchParamsOrThrow(request.url);
   const character = await dbGetCharacterByIdAndInviteCode({ id: sharedChatId, inviteCode });
-  if (character?.userId === undefined || character.userId === null) {
-    return NextResponse.json({ error: 'Could not get shared chat' }, { status: 404 });
+
+  if (character === undefined) {
+    return NextResponse.json({ error: 'The shared chat was not found.' }, { status: 404 });
   }
 
   const teacherUserAndContext = await getUserAndContextByUserId({ userId: character.userId });
@@ -70,12 +71,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Shared character chat has expired.' }, { status: 400 });
   }
 
-  const [sharedChatLimitReached, intelliPointsLimitReached] = await Promise.all([
-    sharedCharacterChatHasReachedIntelliPointLimit({
+  const [sharedChatLimitReached, telliPointsLimitReached] = await Promise.all([
+    sharedCharacterChatHasReachedTelliPointsLimit({
       user: teacherUserAndContext,
       character,
     }),
-    userHasReachedIntelliPointLimit({ user: teacherUserAndContext }),
+    userHasReachedTelliPointsLimit({ user: teacherUserAndContext }),
   ]);
 
   if (sharedChatLimitReached) {
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (intelliPointsLimitReached) {
+  if (telliPointsLimitReached) {
     await sendRabbitmqEvent(
       constructTelliBudgetExceededEvent({
         anonymous: true,

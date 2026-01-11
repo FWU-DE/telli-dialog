@@ -399,7 +399,7 @@ export const shareCharacter = async ({
       ),
     );
 
-  const intelligencePointsLimit = telliPointsPercentageLimit;
+  const telliPointsLimit = telliPointsPercentageLimit;
   const maxUsageTimeLimit = usageTimeLimitMinutes;
   const inviteCode = generateInviteCode();
   const startedAt = new Date();
@@ -409,7 +409,7 @@ export const shareCharacter = async ({
       id: maybeExistingEntry?.id,
       userId: user.id,
       characterId,
-      intelligencePointsLimit,
+      telliPointsLimit,
       maxUsageTimeLimit,
       inviteCode,
       startedAt,

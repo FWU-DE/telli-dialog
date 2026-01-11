@@ -10,7 +10,6 @@ import { constructBaseCharacterSystemPrompt } from '../character/system-prompt';
 import {
   constructFilePrompt,
   constructWebsearchPrompt,
-  CUSTOM_GPT_LANGUAGE_GUIDELINES,
   LANGUAGE_GUIDELINES,
 } from '../utils/system-prompt';
 
@@ -24,7 +23,7 @@ ${LANGUAGE_GUIDELINES}`;
 
 function constructCustomGptSystemPrompt(customGpt: CustomGptSelectModel) {
   return `Du bist ein hilfreicher Assistent, der in einer Schule eingesetzt wird. Dein Name ist ${customGpt.name}.
-${CUSTOM_GPT_LANGUAGE_GUIDELINES}
+${LANGUAGE_GUIDELINES}
 ${customGpt.description ? `Dein Ziel ist es hierbei zu assistieren: ${customGpt.description}` : ''}
 ${customGpt.specification ? `Deine Aufgabe ist insbesondere: ${customGpt.specification}` : ''}
 `;
@@ -43,6 +42,7 @@ function constructHelpModeSystemPrompt({
 telli unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen.
 telli wird vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben.
 Heute ist der ${formatDateToGermanTimestamp(new Date())}.
+${LANGUAGE_GUIDELINES}
 
 Informationen zu telli:
 Der Hilfe-Assistent wird durch das Öffnen eines neuen Chats beendet.
@@ -77,8 +77,6 @@ Die Datenverarbeitung von telli erfolgt ausschließlich in der EU. Nutzerdaten w
 Die Bildgenerierung wird über die Sidebar erreicht.
 
 Befolge folgende Anweisungen:
-- Du sprichst immer die Sprache, mit der du angesprochen wirst. Deine Standardsprache ist Deutsch.
-- Du duzt dein Gegenüber.
 - Hilf bei den Fragen und Problemen bei der Anwendung weiter.
 - Stelle bei Bedarf Rückfragen.
 - Gib knappe, klare und nicht zu technische Antworten. Erkläre erst auf Nachfragen detaillierter.

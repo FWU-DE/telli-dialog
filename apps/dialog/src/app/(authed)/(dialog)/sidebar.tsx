@@ -8,7 +8,7 @@ import FourBoxes from '@/components/icons/four-boxes';
 import RobotIcon from '@/components/icons/robot';
 import SharedChatIcon from '@/components/icons/shared-chat';
 import TelliIcon from '@/components/icons/telli';
-import IntelliPointsIcon from '@/components/icons/telli-points';
+import TelliPointsIcon from '@/components/icons/telli-points';
 import { ImageSquareIcon } from '@phosphor-icons/react';
 import CollapsibleSidebar from '@/components/navigation/sidebar/collapsible-sidebar';
 import SidebarItem from '@/components/navigation/sidebar/conversation-item';
@@ -198,7 +198,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
             }
             <div className="flex flex-col gap-2 w-full px-1 py-2 ml-1">
               <div className="flex gap-2 items-center w-full pb-2 text-primary">
-                <IntelliPointsIcon className="w-4 h-4" />
+                <TelliPointsIcon className="w-4 h-4" />
                 <span className="text-base">{t('telli-points')}</span>
               </div>
               <TelliPointsProgressBar
