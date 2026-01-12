@@ -13,7 +13,6 @@ export const voucherSelectSchema = createSelectSchema(VoucherTable).extend({
 export const createVoucherSchema = z.object({
   increaseAmount: z.number().min(1).max(20_000),
   durationMonths: z.number().min(1).max(12).default(3),
-  createdBy: z.string().min(1).max(100),
   createReason: z.string().min(1).max(500),
   numberOfCodes: z.number().min(1).default(1),
 });
@@ -29,6 +28,5 @@ export const revokeVoucherSchema = z.object({
   revoked: z.boolean().refine((val) => val === true, {
     message: "Only voucher revocation is supported. 'revoked' must be true.",
   }),
-  updatedBy: z.string().min(1).max(100),
   updateReason: z.string().min(1).max(500),
 });
