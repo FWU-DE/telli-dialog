@@ -17,7 +17,7 @@
   "devDependencies": {
     "@telli/typescript-config": "workspace:*",
     "prettier": "3.7.4",
-    "turbo": "2.7.2"
+    "turbo": "2.7.3"
   },
   "pnpm": {
     "overrides": {
