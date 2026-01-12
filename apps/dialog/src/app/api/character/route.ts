@@ -33,7 +33,7 @@ import {
 import { limitChatHistory } from '../chat/utils';
 
 export async function POST(request: NextRequest) {
-  const { messages, modelId }: { messages: Array<Message>; modelId: string } = await request.json();
+  const { messages }: { messages: Array<Message> } = await request.json();
 
   const { sharedChatId, inviteCode } = getSearchParamsOrThrow(request.url);
   const character = await dbGetCharacterByIdAndInviteCode({ id: sharedChatId, inviteCode });
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
   }
 
   const [error, modelAndProvider] = await getModelAndProviderWithResult({
-    modelId,
+    modelId: character.modelId,
     federalStateId: teacherUserAndContext.federalState.id,
   });
 

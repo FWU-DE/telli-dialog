@@ -42,7 +42,6 @@ export default function SharedChat({
       api: endpoint,
       experimental_throttle: 100,
       maxSteps: 2,
-      body: { modelId: sharedSchoolChat.modelId },
       onResponse: handleResponse,
       onError: handleError,
     });
