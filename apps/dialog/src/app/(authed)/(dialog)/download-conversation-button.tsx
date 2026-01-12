@@ -54,9 +54,8 @@ export default function DownloadConversationButton({
       const blob = await response.blob();
 
       downloadFileFromBlob(blob, fileName);
-    } catch (error) {
-      console.error('Error downloading document:', error);
-      toast.error('Error downloading document');
+    } catch {
+      toast.error('Der Download der Konversation ist fehlgeschlagen.');
     } finally {
       setIsLoading(false);
     }
