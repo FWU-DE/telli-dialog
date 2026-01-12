@@ -147,7 +147,7 @@ export async function updateLearningScenarioPicture({
 }
 
 export const learningScenarioShareValuesSchema = z.object({
-  intelliPointsPercentageLimit: z.number().min(1).max(100),
+  telliPointsPercentageLimit: z.number().min(1).max(100),
   usageTimeLimit: z
     .number()
     .min(30)
@@ -181,7 +181,7 @@ export async function shareLearningScenario({
   const [updatedSharedChat] = await db
     .update(sharedSchoolConversationTable)
     .set({
-      intelligencePointsLimit: parsedValues.intelliPointsPercentageLimit,
+      telliPointsLimit: parsedValues.telliPointsPercentageLimit,
       maxUsageTimeLimit: parsedValues.usageTimeLimit,
       inviteCode,
       startedAt: new Date(),
@@ -222,7 +222,7 @@ export async function unshareLearningScenario({
     .update(sharedSchoolConversationTable)
     .set({
       startedAt: null,
-      intelligencePointsLimit: null,
+      telliPointsLimit: null,
       maxUsageTimeLimit: null,
     })
     .where(

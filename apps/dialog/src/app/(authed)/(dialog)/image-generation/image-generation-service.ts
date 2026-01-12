@@ -1,5 +1,5 @@
 import { getUser, userHasCompletedTraining } from '@/auth/utils';
-import { userHasReachedIntelliPointLimit } from '@/app/api/chat/usage';
+import { userHasReachedTelliPointsLimit } from '@/app/api/chat/usage';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
 import { dbGetModelByIdAndFederalStateId } from '@shared/db/functions/llm-model';
@@ -188,10 +188,6 @@ export async function generateImage({
     throw new Error(productAccess.errorType || 'Access denied');
   }
 
-  if (await userHasReachedIntelliPointLimit({ user })) {
-    throw new Error('User has reached telli points limit.');
-  }
-
   if (!prompt || prompt.trim().length === 0) {
     throw new Error('Prompt is required');
   }
@@ -228,9 +224,9 @@ export async function generateImage({
     userId: user.id,
   });
 
-  const intelliPointsLimitReached = await userHasReachedIntelliPointLimit({ user });
+  const telliPointsLimitReached = await userHasReachedTelliPointsLimit({ user });
 
-  if (intelliPointsLimitReached) {
+  if (telliPointsLimitReached) {
     if (conversation) {
       await sendRabbitmqEvent(
         constructTelliBudgetExceededEvent({

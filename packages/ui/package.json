@@ -18,13 +18,13 @@
     "sonner": "2.0.7",
     "tailwind-merge": "3.4.0",
     "tailwindcss-animate": "1.0.7",
-    "zod": "4.3.0"
+    "zod": "4.3.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.3",
     "@tailwindcss/postcss": "4.1.18",
     "@telli/typescript-config": "workspace:*",
-    "@turbo/gen": "2.7.2",
+    "@turbo/gen": "2.7.3",
     "@types/eslint": "9.6.1",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
@@ -37,7 +37,7 @@
     "prettier": "3.7.4",
     "prettier-eslint": "16.4.2",
     "react": "19.2.3",
-    "react-hook-form": "7.69.0",
+    "react-hook-form": "7.70.0",
     "tailwindcss": "4.1.11",
     "typescript": "5.9.3"
   },
