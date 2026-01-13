@@ -8,10 +8,6 @@ import {
 
 describe('authentication-service', () => {
   describe('validateOidcProfile', () => {
-    it('should not fail', () => {
-      expect(true).toBe(true);
-    });
-
     it('should return success true for valid profile', () => {
       const profile: VidisProfile = {
         sub: 'user-123',

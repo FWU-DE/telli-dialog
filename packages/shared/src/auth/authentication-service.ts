@@ -44,16 +44,12 @@ const profileSearchParamsSchema = z.object({
 export function getMissingFieldsFromUrl(
   searchParams: Record<string, string | string[] | undefined>,
 ): string[] {
-  if (searchParams === undefined) {
-    return [];
-  }
   const parseResult = profileSearchParamsSchema.safeParse(searchParams);
   if (!parseResult.success) {
     return [];
   }
 
-  const params = new URLSearchParams(parseResult.data);
-  const missingFieldsEncoded = params.get('profile_error');
+  const missingFieldsEncoded = parseResult.data.profile_error;
   if (!missingFieldsEncoded) {
     return [];
   }

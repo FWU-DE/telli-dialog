@@ -4,6 +4,12 @@ import { getMissingFieldsFromUrl } from '@shared/auth/authentication-service';
 
 export const dynamic = 'force-dynamic';
 
+const fieldNameMappings = {
+  rolle: 'Rolle',
+  schulkennung: 'Schulkennung',
+  bundesland: 'Bundesland',
+};
+
 export default async function Page(props: PageProps<'/login/error'>) {
   const missingFieldsInProfile = getMissingFieldsFromUrl(await props.searchParams);
 
@@ -16,8 +22,12 @@ export default async function Page(props: PageProps<'/login/error'>) {
           werden:
         </div>
         <ul>
-          {missingFieldsInProfile.map((field, index) => {
-            return <li key={index}>{field.toString()}</li>;
+          {missingFieldsInProfile.map((field) => {
+            return (
+              <li key={field}>
+                {fieldNameMappings[field as keyof typeof fieldNameMappings] ?? field}
+              </li>
+            );
           })}
         </ul>
         {/* we cannot logout because there is no valid token but it works as intended */}
