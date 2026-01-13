@@ -58,7 +58,6 @@ export function ChatHeaderBar({
                   />
                 }
                 userAndContext={userAndContext}
-                deleteButtonJSX={undefined}
               />
             </>
           )}
