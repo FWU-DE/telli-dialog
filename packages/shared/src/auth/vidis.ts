@@ -32,7 +32,7 @@ export const vidisProfileSchema = z.object({
   rolle: z.string(),
   schulkennung: z.string().or(z.array(z.string())),
   bundesland: z.string(),
-  // name, preferred_username, given_name, familiy_name and email are ignored because of data privacy
+  // name, preferred_username, given_name, family_name and email are ignored because of data privacy
 });
 
 export type VidisProfile = z.infer<typeof vidisProfileSchema>;
