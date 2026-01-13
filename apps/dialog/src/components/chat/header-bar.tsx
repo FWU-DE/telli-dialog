@@ -4,42 +4,64 @@ import { UserAndContext } from '@/auth/types';
 import SelectLlmModel from '../conversation/select-llm-model';
 import { NewChatButton, ToggleSidebarButton } from '../navigation/sidebar/collapsible-sidebar';
 import DownloadConversationButton from '@/app/(authed)/(dialog)/download-conversation-button';
-import ProfileMenu from '../navigation/profile-menu';
+import ProfileMenu, { ThreeDotsProfileMenu } from '../navigation/profile-menu';
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
+import { reductionBreakpoint } from '@/utils/tailwind/layout';
+import useBreakpoints from '../hooks/use-breakpoints';
 
 export function ChatHeaderBar({
-  user,
+  userAndContext,
   title,
+  hasMessages,
   chatId,
-  downloadButtonDisabled,
 }: {
-  user: UserAndContext;
+  userAndContext: UserAndContext;
   title?: string;
+  hasMessages: boolean;
   chatId: string;
-  downloadButtonDisabled: boolean;
 }) {
+  const { isBelow } = useBreakpoints();
+  const showCompressedHeader = isBelow[reductionBreakpoint];
+
   return (
     <HeaderPortal>
       <div className="flex flex-col w-full">
         <div className="flex w-full gap-4 justify-center items-center">
           <ToggleSidebarButton />
           <NewChatButton />
-          <SelectLlmModel isStudent={user.school.userRole === 'student'} />
+          <SelectLlmModel isStudent={userAndContext.school.userRole === 'student'} />
           <div className="flex-grow"></div>
           {title !== undefined && (
             <div className="hidden sm:flex  md:w-1/2 sm:w-1/3">
               <span className="font-normal text-xl truncate">{title}</span>
             </div>
           )}
-
-          <DownloadConversationButton
-            conversationId={chatId}
-            className="flex items-center text-main-900 hover:text-main-600"
-            iconClassName="h-6 w-6"
-            characterName={title}
-            disabled={downloadButtonDisabled}
-          />
-          <ProfileMenu {...user} />
+          {!showCompressedHeader ? (
+            <>
+              <DownloadConversationButton
+                conversationId={chatId}
+                characterName={title}
+                disabled={!hasMessages}
+                showText={false}
+              />
+              <ProfileMenu userAndContext={userAndContext} />
+            </>
+          ) : (
+            <>
+              <ThreeDotsProfileMenu
+                downloadButtonJSX={
+                  <DownloadConversationButton
+                    conversationId={chatId}
+                    characterName={title}
+                    disabled={!hasMessages}
+                    showText={true}
+                  />
+                }
+                userAndContext={userAndContext}
+                deleteButtonJSX={undefined}
+              />
+            </>
+          )}
         </div>
         <div className="flex flex-1 w-full sm:hidden">
           <span className="font-normal text-xl">{title}</span>

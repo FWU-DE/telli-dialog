@@ -72,7 +72,7 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
       <HeaderPortal>
         <ToggleSidebarButton />
         <div className="flex-grow"></div>
-        <ProfileMenu {...userAndContext} />
+        <ProfileMenu userAndContext={userAndContext} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
         <CustomGptForm

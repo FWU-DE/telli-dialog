@@ -75,7 +75,7 @@ export default async function Page(props: PageProps) {
               <SelectImageModel />
               <SelectImageStyle />
               <div className="flex-grow"></div>
-              <ProfileMenu {...userAndContext} />
+              <ProfileMenu userAndContext={userAndContext} />
             </div>
           </HeaderPortal>
           <ImageGenerationChat

@@ -50,8 +50,8 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversa
         <ChatHeaderBar
           chatId={conversation.id}
           title={customGpt.name}
-          user={userAndContext}
-          downloadButtonDisabled={false}
+          hasMessages={chatMessages.length > 0}
+          userAndContext={userAndContext}
         />
       </HeaderPortal>
       <Chat
