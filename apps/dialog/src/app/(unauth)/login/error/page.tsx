@@ -20,7 +20,7 @@ export default async function Page(props: PageProps<'/login/error'>) {
             return <li key={index}>{field.toString()}</li>;
           })}
         </ul>
-        {/* // Todo RL: Logout funktioniert nicht, da kein valides token vorhanden ist */}
+        {/* we cannot logout because there is no valid token but it works as intended */}
         <LogoutButton />
       </div>
     </div>
