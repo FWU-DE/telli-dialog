@@ -50,7 +50,7 @@ const result = NextAuth({
 
       const profileResult = validateOidcProfile(profile);
       if (!profileResult.success) {
-        return generateErrorUrl(profileResult.missingFields);
+        return generateErrorUrl(profileResult.fieldErrors);
       }
       return true;
     },

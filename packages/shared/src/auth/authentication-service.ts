@@ -12,28 +12,28 @@ import { vidisProfileSchema } from './vidis';
  */
 export function validateOidcProfile(
   profile: unknown,
-): { success: true } | { success: false; missingFields: string[] } {
+): { success: true } | { success: false; fieldErrors: string[] } {
   const profileResult = vidisProfileSchema.safeParse(profile);
   if (profileResult.success) {
     return { success: true };
   }
 
   const flattened = z.flattenError(profileResult.error);
-  const missingFields = Object.keys(flattened.fieldErrors);
+  const fieldErrors = Object.keys(flattened.fieldErrors);
 
-  return { success: false, missingFields };
+  return { success: false, fieldErrors: fieldErrors };
 }
 
 /**
  * Based on the missing fields array, an error url is generated
  * that contains the missing fields as search params.
  */
-export function generateErrorUrl(missingFields: string[]) {
-  if (missingFields.length === 0) {
+export function generateErrorUrl(fieldErrors: string[]) {
+  if (fieldErrors.length === 0) {
     return '/login/error';
   }
   const searchParams = new URLSearchParams();
-  searchParams.append('profile_error', missingFields.join(','));
+  searchParams.append('profile_error', fieldErrors.join(','));
   return `/login/error?${searchParams.toString()}`;
 }
 
@@ -41,7 +41,7 @@ const profileSearchParamsSchema = z.object({
   profile_error: z.string(),
 });
 
-export function getMissingFieldsFromUrl(
+export function getFieldErrorsFromUrl(
   searchParams: Record<string, string | string[] | undefined>,
 ): string[] {
   const parseResult = profileSearchParamsSchema.safeParse(searchParams);
@@ -49,11 +49,11 @@ export function getMissingFieldsFromUrl(
     return [];
   }
 
-  const missingFieldsEncoded = parseResult.data.profile_error;
-  if (!missingFieldsEncoded) {
+  const fieldErrorsEncoded = parseResult.data.profile_error;
+  if (!fieldErrorsEncoded) {
     return [];
   }
   // we have to decode the strings because comma is encoded as %2C
-  const missingFields = decodeURIComponent(missingFieldsEncoded);
-  return missingFields.split(',');
+  const fieldErrors = decodeURIComponent(fieldErrorsEncoded);
+  return fieldErrors.split(',');
 }

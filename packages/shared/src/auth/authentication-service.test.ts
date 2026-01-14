@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { VidisProfile } from '@shared/auth/vidis';
 import {
   generateErrorUrl,
-  getMissingFieldsFromUrl,
+  getFieldErrorsFromUrl,
   validateOidcProfile,
 } from './authentication-service';
 
@@ -28,51 +28,51 @@ describe('authentication-service', () => {
       const result = validateOidcProfile(profile);
       expect(result).toEqual({
         success: false,
-        missingFields: ['rolle', 'schulkennung', 'bundesland'],
+        fieldErrors: ['rolle', 'schulkennung', 'bundesland'],
       });
     });
   });
 
   describe('generateErrorUrl', () => {
     it('should generate correct error URL', () => {
-      const missingFields = ['rolle', 'schulkennung'];
-      const errorUrl = generateErrorUrl(missingFields);
+      const fieldErrors = ['rolle', 'schulkennung'];
+      const errorUrl = generateErrorUrl(fieldErrors);
       expect(errorUrl).toBe('/login/error?profile_error=rolle%2Cschulkennung');
     });
     it('should generate empty error URL if no missing fields are provided', () => {
-      const missingFields: string[] = [];
-      const errorUrl = generateErrorUrl(missingFields);
+      const fieldErrors: string[] = [];
+      const errorUrl = generateErrorUrl(fieldErrors);
       expect(errorUrl).toBe('/login/error');
     });
   });
 
-  describe('getMissingFieldsFromUrl', () => {
-    it('should return missing fields from encoded URL search params', () => {
+  describe('getFieldErrorsFromUrl', () => {
+    it('should return field errors from encoded URL search params', () => {
       const searchParams = {
         profile_error: 'rolle%2Cschulkennung',
       };
-      const missingFields = getMissingFieldsFromUrl(searchParams);
-      expect(missingFields).toEqual(['rolle', 'schulkennung']);
+      const fieldErrors = getFieldErrorsFromUrl(searchParams);
+      expect(fieldErrors).toEqual(['rolle', 'schulkennung']);
     });
-    it('should return missing fields from decoded URL search params', () => {
+    it('should return field errors from decoded URL search params', () => {
       const searchParams = {
         profile_error: 'rolle,schulkennung',
       };
-      const missingFields = getMissingFieldsFromUrl(searchParams);
-      expect(missingFields).toEqual(['rolle', 'schulkennung']);
+      const fieldErrors = getFieldErrorsFromUrl(searchParams);
+      expect(fieldErrors).toEqual(['rolle', 'schulkennung']);
     });
 
     it('should return empty array if no profile_error param is present', () => {
       const searchParams = {
         other_param: 'value',
       };
-      const missingFields = getMissingFieldsFromUrl(searchParams);
-      expect(missingFields).toEqual([]);
+      const fieldErrors = getFieldErrorsFromUrl(searchParams);
+      expect(fieldErrors).toEqual([]);
     });
 
     it('should return empty array if profile_error is undefined', () => {
-      const missingFields = getMissingFieldsFromUrl({ profile_error: undefined });
-      expect(missingFields).toEqual([]);
+      const fieldErrors = getFieldErrorsFromUrl({ profile_error: undefined });
+      expect(fieldErrors).toEqual([]);
     });
   });
 });

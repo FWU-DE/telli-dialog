@@ -1,6 +1,6 @@
 import LogoutButton from '@/app/(authed)/logout-button';
 import WarningIcon from '@/components/icons/warning-icon';
-import { getMissingFieldsFromUrl } from '@shared/auth/authentication-service';
+import { getFieldErrorsFromUrl } from '@shared/auth/authentication-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,7 +11,7 @@ const fieldNameMappings = {
 };
 
 export default async function Page(props: PageProps<'/login/error'>) {
-  const missingFieldsInProfile = getMissingFieldsFromUrl(await props.searchParams);
+  const missingFieldsInProfile = getFieldErrorsFromUrl(await props.searchParams);
 
   return (
     <div className="flex justify-center min-h-screen items-center">
