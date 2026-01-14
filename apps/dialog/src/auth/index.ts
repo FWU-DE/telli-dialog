@@ -4,6 +4,7 @@ import { getUserAndContextByUserId } from './utils';
 import { UserAndContext, userAndContextSchema } from './types';
 import { logDebug, logError, logInfo, logWarning } from '@shared/logging';
 import { sessionBlockList } from './session';
+import { validateOidcProfile, generateErrorUrl } from '@shared/auth/authentication-service';
 
 declare module 'next-auth' {
   interface Session {
@@ -44,9 +45,13 @@ const result = NextAuth({
   trustHost: true,
   // https://next-auth.js.org/configuration/callbacks
   callbacks: {
-    async signIn() {
-      // all props are only passed the first time a user signs in, subsequent calls only provide a token
-      // Todo: we should check if custom attributes like bundesland are provided and return false if not
+    async signIn({ profile }) {
+      // during sign in we check if the profile contains all mandatory fields like federalState, role, school, etc.
+
+      const profileResult = validateOidcProfile(profile);
+      if (!profileResult.success) {
+        return generateErrorUrl(profileResult.fieldErrors);
+      }
       return true;
     },
     async jwt({ token, account, profile, trigger }) {

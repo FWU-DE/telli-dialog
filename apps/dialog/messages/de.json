@@ -355,5 +355,10 @@
     "copy-prompt-error": "Prompt konnte nicht kopiert werden",
     "copy-image-tooltip": "Bild kopieren",
     "copy-prompt-tooltip": "Prompt kopieren"
+  },
+  "authentication": {
+    "login-error": {
+      "description": "Login nicht möglich. Folgende Informationen müssem mit dem Profil übertragen werden:"
+    }
   }
 }
