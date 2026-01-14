@@ -20,6 +20,9 @@ export default function useBreakpoints() {
       setWidth(getWindowWidth());
     };
 
+    // Update width immediately on mount to get the correct client-side value
+    handleResize();
+
     window.addEventListener('resize', handleResize);
 
     return () => {

@@ -39,7 +39,7 @@ export default async function ImageGenerationPage() {
               <SelectImageModel />
               <SelectImageStyle />
               <div className="flex-grow"></div>
-              <ProfileMenu {...userAndContext} />
+              <ProfileMenu userAndContext={userAndContext} />
             </div>
           </HeaderPortal>
 

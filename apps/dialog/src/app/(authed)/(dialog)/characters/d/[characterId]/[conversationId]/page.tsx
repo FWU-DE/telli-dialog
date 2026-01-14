@@ -20,7 +20,7 @@ export default async function Page(
 ) {
   const params = await props.params;
   const { user, school, federalState } = await requireAuth();
-  const userWithContext = buildLegacyUserAndContext(user, school, federalState);
+  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
   const [chat, rawChatMessages, character] = await Promise.all([
     getConversation({
@@ -47,8 +47,8 @@ export default async function Page(
         <ChatHeaderBar
           chatId={chat.id}
           title={character.name}
-          user={userWithContext}
-          downloadButtonDisabled={false}
+          hasMessages={chatMessages.length > 0}
+          userAndContext={userAndContext}
         />
       </HeaderPortal>
       <Chat

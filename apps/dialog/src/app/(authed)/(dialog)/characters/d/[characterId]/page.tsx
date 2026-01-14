@@ -39,8 +39,8 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
         <ChatHeaderBar
           chatId={id}
           title={character.name}
-          user={userAndContext}
-          downloadButtonDisabled={true}
+          hasMessages={false}
+          userAndContext={userAndContext}
         />
       </HeaderPortal>
       <Chat

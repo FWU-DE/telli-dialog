@@ -39,7 +39,7 @@ export default function CharacterPreviewPage({
         <ToggleSidebarButton />
         <NewChatButton />
         <div className="flex-grow"></div>
-        <ProfileMenu {...user} />
+        <ProfileMenu userAndContext={user} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl mb-6">{t('character')}</h1>
