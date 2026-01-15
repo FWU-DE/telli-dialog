@@ -2,7 +2,6 @@ import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible
 import HeaderPortal from '../../header-portal';
 import SharedSchoolChatForm from './shared-school-chat-form';
 import ProfileMenu from '@/components/navigation/profile-menu';
-import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import z from 'zod';
@@ -16,8 +15,6 @@ import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 
 export const dynamic = 'force-dynamic';
-
-const PREFETCH_ENABLED = false;
 
 const searchParamsSchema = z.object({ create: z.string().optional().default('false') });
 
@@ -43,22 +40,16 @@ export default async function Page(props: PageProps<'/shared-chats/[sharedSchool
     key: learningScenario.pictureId ? `shared-chats/${learningScenario.id}/avatar` : undefined,
   });
 
-  const initialLinks = PREFETCH_ENABLED
-    ? await Promise.all(
-        learningScenario.attachedLinks
-          .filter((l) => l !== '')
-          .map((url) => webScraperExecutable(url)),
-      )
-    : learningScenario.attachedLinks
-        .filter((l) => l && l !== '')
-        .map(
-          (url) =>
-            ({
-              link: url,
-              type: 'websearch',
-              error: false,
-            }) as WebsearchSource,
-        );
+  const initialLinks = learningScenario.attachedLinks
+    .filter((l) => l && l !== '')
+    .map(
+      (url) =>
+        ({
+          link: url,
+          type: 'websearch',
+          error: false,
+        }) as WebsearchSource,
+    );
 
   return (
     <div className="w-full p-6 overflow-auto">

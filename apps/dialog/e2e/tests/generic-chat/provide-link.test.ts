@@ -13,7 +13,7 @@ test('teacher can provide link and it is displayed in the chat', async ({ page }
   await expect(page.getByLabel('assistant message 1')).toContainText('17');
   const sourceTitle = page.getByLabel('Source Title 0 0');
   await expect(sourceTitle).toBeVisible();
-  await expect(sourceTitle).toContainText('Das Zeitalter des Barock');
+  await expect(sourceTitle).toContainText('Barock');
   const sourceHostname = page.getByLabel('Source Hostname 0 0');
   await expect(sourceHostname).toBeVisible();
   await expect(sourceHostname).toContainText('planet-wissen.de');

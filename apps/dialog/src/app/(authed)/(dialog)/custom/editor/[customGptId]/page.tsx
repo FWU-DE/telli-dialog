@@ -5,7 +5,6 @@ import HeaderPortal from '../../../header-portal';
 import CustomGptForm from './custom-gpt-form';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { CustomGptSelectModel } from '@shared/db/schema';
-import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
 import { logError } from '@shared/logging';
 import z from 'zod';
@@ -16,7 +15,6 @@ import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 
 export const dynamic = 'force-dynamic';
-const PREFETCH_ENABLED = false;
 
 const searchParamsSchema = z.object({
   create: z.string().optional().default('false'),
@@ -53,19 +51,16 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
   }
 
   const readOnly = customGpt.userId !== user.id;
-  const links = customGpt.attachedLinks;
-  const initialLinks = PREFETCH_ENABLED
-    ? await Promise.all(links.filter((l) => l !== '').map((url) => webScraperExecutable(url)))
-    : links
-        .filter((l) => l !== '')
-        .map(
-          (url) =>
-            ({
-              link: url,
-              type: 'websearch',
-              error: false,
-            }) as WebsearchSource,
-        );
+  const initialLinks = customGpt.attachedLinks
+    .filter((l) => l !== '')
+    .map(
+      (url) =>
+        ({
+          link: url,
+          type: 'websearch',
+          error: false,
+        }) as WebsearchSource,
+    );
 
   return (
     <div className="min-w-full p-6 overflow-auto">

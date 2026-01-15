@@ -18,6 +18,7 @@ export const env = createEnv({
     vidisClientId: z.string(),
     vidisClientSecret: z.string(),
     vidisIssuerUri: z.string(),
+    crawl4AIUrl: z.url().default('http://localhost:11235'),
   },
   client: {
     NEXT_PUBLIC_SENTRY_LOG_LEVEL: z
@@ -47,5 +48,6 @@ export const env = createEnv({
     vidisClientSecret: process.env.VIDIS_CLIENT_SECRET,
     vidisIssuerUri: process.env.VIDIS_ISSUER_URI,
     NEXT_PUBLIC_SENTRY_LOG_LEVEL: process.env.NEXT_PUBLIC_SENTRY_LOG_LEVEL,
+    crawl4AIUrl: process.env.CRAWL4AI_URL,
   },
 });

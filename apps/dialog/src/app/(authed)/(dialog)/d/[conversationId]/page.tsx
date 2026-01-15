@@ -7,7 +7,6 @@ import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import { dbGetRelatedFiles } from '@shared/db/functions/files';
-import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import Logo from '@/components/common/logo';
 import z from 'zod';
@@ -15,6 +14,7 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { requireAuth } from '@/auth/requireAuth';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
+import { webScraperCrawl4AI } from '@/app/api/conversation/tools/websearch/search-web-crawl4ai';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,7 +55,7 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
     if (urls === undefined) {
       continue;
     }
-    const webSearchPromises = urls?.map((url) => webScraperExecutable(url));
+    const webSearchPromises = urls?.map((url) => webScraperCrawl4AI(url));
 
     try {
       const websearchSources = await Promise.all(webSearchPromises ?? []);
