@@ -29,7 +29,6 @@ import {
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
-import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { WebsearchSource } from '../conversation/tools/websearch/types';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 import { extractImagesAndUrl } from '../file-operations/prepocess-image';
@@ -38,6 +37,7 @@ import { logDebug, logError } from '@shared/logging';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
+import { webScraperCrawl4AI } from '../conversation/tools/websearch/search-web-crawl4ai';
 
 export async function POST(request: NextRequest) {
   const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);
@@ -190,7 +190,7 @@ export async function POST(request: NextRequest) {
         .filter((l) => l !== '')
         .map(async (url) => {
           try {
-            return await webScraperExecutable(url);
+            return await webScraperCrawl4AI(url);
           } catch (error) {
             console.error(`Error fetching webpage content for URL: ${url}`, error);
           }

@@ -97,7 +97,7 @@ export default function CharacterSharedChat({
           handleOpenNewChat={handleOpenNewChat}
           title={character.name}
           messages={messages}
-          // currently this is redundant, due to the inconsisitency with the shared school chat initial page
+          // currently this is redundant, due to the inconsistency with the shared school chat initial page
           dialogStarted={messages.length > 0}
         />
         <hr className="w-full border-gray-200" />

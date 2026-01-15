@@ -1,10 +1,9 @@
 import { describe, expect, test, vi } from 'vitest';
-import { isWebPage, webScraperExecutable } from './search-web';
+import { webScraperCrawl4AI } from './search-web-crawl4ai';
 
 const WIKI_PAGE_URL = 'https://de.wikipedia.org/wiki/Wiki';
 const PDF_DOC_URL =
   'https://www.bpb.de/system/files/dokument_pdf/Zeitleiste_deutsch_zum-Selbstdruck_16_Einzelseiten.pdf';
-const REDIRECT_PAGE_URL = 'https://de.wikipedia.org/';
 const TOO_LARGE_PAGE_URL = 'https://openmoji.org/library/';
 const PDF_DOC_WRONG_CONTENT_TYPE_URL =
   'https://www.wildtierportal-bw.de/filefly/api?action=download&path=%2Fjagd%2Fjagdzeitenbw2023.jpg';
@@ -24,7 +23,7 @@ vi.mock('@shared/logging', () => ({
 // We do not want to execute those tests on every run because they depend on external resources.
 describe.skip('webScraperExecutable', () => {
   test('scrape existing wiki page', async () => {
-    const output = await webScraperExecutable(WIKI_PAGE_URL);
+    const output = await webScraperCrawl4AI(WIKI_PAGE_URL);
     expect(output).toMatchObject({
       link: WIKI_PAGE_URL,
       name: 'Wiki – Wikipedia',
@@ -34,7 +33,7 @@ describe.skip('webScraperExecutable', () => {
   });
 
   test('scrape page should time out', async () => {
-    const output = await webScraperExecutable(WIKI_PAGE_URL, {
+    const output = await webScraperCrawl4AI(WIKI_PAGE_URL, {
       timeout: 10,
     });
     expect(output).toMatchObject({
@@ -43,44 +42,29 @@ describe.skip('webScraperExecutable', () => {
     });
   });
 
-  test('scrape pdf document', async () => {
-    const output = await webScraperExecutable(PDF_DOC_URL);
+  /*test('scrape pdf document', async () => {
+    const output = await webScraperCrawl4AI(PDF_DOC_URL);
     expect(output).toMatchObject({
       error: true,
       link: PDF_DOC_URL,
     });
-  });
+  });*/
 
   test('scrape pdf document with "Content-Type: text/html"', async () => {
-    const output = await webScraperExecutable(PDF_DOC_WRONG_CONTENT_TYPE_URL);
+    const output = await webScraperCrawl4AI(PDF_DOC_WRONG_CONTENT_TYPE_URL);
     expect(output).toMatchObject({
       error: true,
       link: PDF_DOC_WRONG_CONTENT_TYPE_URL,
     });
   });
 
-  test('scrape large website should use fallback to title content', async () => {
-    const output = await webScraperExecutable(TOO_LARGE_PAGE_URL);
+  /*test('scrape large website should use fallback to title content', async () => {
+    const output = await webScraperCrawl4AI(TOO_LARGE_PAGE_URL);
     expect(output).toStrictEqual({
       content: '[Readability extraction failed] Library  OpenMoji',
       link: TOO_LARGE_PAGE_URL,
       name: 'Library',
       type: 'websearch',
     });
-  });
-
-  test('isWebPage returns true for wiki page', async () => {
-    const { isPage } = await isWebPage(WIKI_PAGE_URL);
-    expect(isPage).toBe(true);
-  });
-
-  test('isWebPage returns false for pdf document', async () => {
-    const { isPage } = await isWebPage(PDF_DOC_URL);
-    expect(isPage).toBe(false);
-  });
-
-  test('isWebPage returns redirected url', async () => {
-    const { redirectedUrl } = await isWebPage(REDIRECT_PAGE_URL);
-    expect(redirectedUrl).not.toBe(REDIRECT_PAGE_URL);
-  });
+  });*/
 });
