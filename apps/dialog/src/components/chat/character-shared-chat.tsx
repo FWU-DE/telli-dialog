@@ -85,6 +85,7 @@ export default function CharacterSharedChat({
   });
 
   const isLoading = status === 'submitted';
+  const streamingFinished = status === 'ready' || status === 'error';
 
   return (
     <>
@@ -140,6 +141,7 @@ export default function CharacterSharedChat({
           </div>
         </div>
       </div>
+      {streamingFinished && <div data-testid="streaming-finished" />}
     </>
   );
 }

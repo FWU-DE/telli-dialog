@@ -120,6 +120,7 @@ export function ChatInputBox({
         'my-2 mx-2 flex items-center self-end justify-center group disabled:cursor-not-allowed text-dark-gray',
       )}
       aria-label="Nachricht abschicken"
+      data-testid="submit-button"
     >
       <ArrowRightIcon className={cn('h-9 w-9')} />
     </button>
@@ -153,6 +154,7 @@ export function ChatInputBox({
             value={input}
             onKeyDown={handleSubmitOnEnter}
             maxLength={CHAT_MESSAGE_LENGTH_LIMIT}
+            data-testid="chat-input"
           />
           {enableFileUpload && files !== undefined && setFiles !== undefined && (
             <div className="flex flex-row gap-x-3 rounded-enterprise-sm">
