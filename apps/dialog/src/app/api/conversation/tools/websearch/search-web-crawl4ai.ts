@@ -2,7 +2,7 @@ import { WebsearchSource } from './types';
 import { SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
-//import { cacheLife } from 'next/cache';
+import { cacheLife } from 'next/cache';
 import { logError, logInfo, logWarning } from '@shared/logging';
 import { useTranslations } from 'next-intl';
 import { env } from '@/env';
@@ -49,8 +49,8 @@ export async function webScraperCrawl4AI(
   url: string,
   options: { timeout: number } = { timeout: 30000 },
 ): Promise<WebsearchSource> {
-  //'use cache';
-  //cacheLife('weeks');
+  'use cache';
+  cacheLife('weeks');
 
   logInfo(`Requesting webcontent via Crawl4AI for URL: ${url}`);
   const t = await getTranslations('websearch');
