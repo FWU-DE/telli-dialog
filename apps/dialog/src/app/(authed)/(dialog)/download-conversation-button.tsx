@@ -11,18 +11,19 @@ import { iconClassName } from '@/utils/tailwind/icon';
 type DownloadConversationButtonProps = {
   conversationId: string;
   characterName?: string;
-  className?: React.ComponentProps<'button'>['className'];
-  iconClassName?: string;
   disabled: boolean;
+  showText?: boolean;
 };
 
 export default function DownloadConversationButton({
   conversationId,
   characterName,
   disabled = true,
+  showText = false,
 }: DownloadConversationButtonProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const toast = useToast();
+  const tCommon = useTranslations('common');
 
   async function handleDownload() {
     if (disabled) {
@@ -65,16 +66,13 @@ export default function DownloadConversationButton({
 
   return (
     <button
-      className={cn(
-        'hidden xs:flex justify-center items-center w-8 h-8 group',
-        iconClassName,
-        'disabled:hover:bg-transparent',
-      )}
+      className={cn('flex items-center gap-1 pl-2', iconClassName, 'disabled:hover:bg-transparent')}
       title={t('conversation-download')}
       onClick={handleDownload}
       disabled={disabled}
     >
-      {isLoading ? <Spinner className="p-2 w-8 h-8" /> : <WebDownloadIcon />}
+      {isLoading ? <Spinner className="p-2 w-8 h-8" /> : <WebDownloadIcon className="w-8 h-8" />}
+      {showText && tCommon('conversation-download')}
     </button>
   );
 }

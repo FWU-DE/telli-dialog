@@ -29,5 +29,11 @@ export default async function Page(props: PageProps<'/custom'>) {
 
   const enrichedCustomGpts = await enrichGptWithImage({ customGpts });
 
-  return <Page2 user={userAndContext} customGpts={enrichedCustomGpts} accessLevel={accessLevel} />;
+  return (
+    <Page2
+      userAndContext={userAndContext}
+      customGpts={enrichedCustomGpts}
+      accessLevel={accessLevel}
+    />
+  );
 }

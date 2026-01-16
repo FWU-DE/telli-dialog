@@ -14,6 +14,17 @@ updates:
     labels: ['dependencies']
     schedule:
       interval: 'weekly'
+    ignore:
+      # Ignore major version updates for Node.js (required to receive minor updates when staying on LTS)
+      - dependency-name: 'node'
+        update-types: ['version-update:semver-major']
+    groups:
+      # Group safe, non-breaking bumps to reduce PRs
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - 'minor'
+          - 'patch'
 
   - package-ecosystem: 'docker-compose'
     directories:

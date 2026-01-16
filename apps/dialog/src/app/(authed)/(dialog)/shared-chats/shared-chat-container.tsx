@@ -30,7 +30,7 @@ export function SharedChatContainer({ learningScenarios, user }: SharedChatConta
       <HeaderPortal>
         <ToggleSidebarButton />
         <div className="flex-grow"></div>
-        <ProfileMenu {...user} />
+        <ProfileMenu userAndContext={user} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto w-full">
         <h1 className="text-3xl mb-6">{t('title')}</h1>

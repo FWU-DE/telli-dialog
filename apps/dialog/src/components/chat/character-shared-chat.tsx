@@ -18,8 +18,8 @@ import { messageContainsAttachments } from '@/utils/chat/messages';
 import { Messages } from './messages';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 import StreamingFinishedMarker from './streaming-finished-marker';
+import { reductionBreakpoint } from '@/utils/tailwind/layout';
 
-const reductionBreakpoint = 'sm';
 /**
  * This component is used if a character is shared via invite code.
  */
@@ -98,8 +98,7 @@ export default function CharacterSharedChat({
           handleOpenNewChat={handleOpenNewChat}
           title={character.name}
           messages={messages}
-          reductionBreakpoint={reductionBreakpoint}
-          // currently this is redundant, due to the inconsisitency with the shared school chat initial page
+          // currently this is redundant, due to the inconsistency with the shared school chat initial page
           dialogStarted={messages.length > 0}
         />
         <hr className="w-full border-gray-200" />
