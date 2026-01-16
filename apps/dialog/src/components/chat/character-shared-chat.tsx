@@ -17,6 +17,7 @@ import { AssistantIcon } from './assistant-icon';
 import { messageContainsAttachments } from '@/utils/chat/messages';
 import { Messages } from './messages';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import StreamingFinishedMarker from './streaming-finished-marker';
 
 const reductionBreakpoint = 'sm';
 /**
@@ -85,7 +86,6 @@ export default function CharacterSharedChat({
   });
 
   const isLoading = status === 'submitted';
-  const streamingFinished = status === 'ready' || status === 'error';
 
   return (
     <>
@@ -141,7 +141,7 @@ export default function CharacterSharedChat({
           </div>
         </div>
       </div>
-      {streamingFinished && <div data-testid="streaming-finished" />}
+      <StreamingFinishedMarker status={status} />
     </>
   );
 }

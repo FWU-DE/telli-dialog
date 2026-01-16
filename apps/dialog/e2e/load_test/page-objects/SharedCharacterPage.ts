@@ -6,11 +6,7 @@ export class SharedCharacterPage {
     private page: Page,
     private characterId: string,
     private inviteCode: string,
-  ) {
-    this.page = page;
-    this.characterId = characterId;
-    this.inviteCode = inviteCode;
-  }
+  ) {}
 
   async goto() {
     await this.page.goto(
