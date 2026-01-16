@@ -17,6 +17,7 @@ import { AssistantIcon } from './assistant-icon';
 import { messageContainsAttachments } from '@/utils/chat/messages';
 import { Messages } from './messages';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import StreamingFinishedMarker from './streaming-finished-marker';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
 
 /**
@@ -139,6 +140,7 @@ export default function CharacterSharedChat({
           </div>
         </div>
       </div>
+      <StreamingFinishedMarker status={status} />
     </>
   );
 }
