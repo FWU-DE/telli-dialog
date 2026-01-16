@@ -26,7 +26,7 @@
     "@telli/typescript-config": "workspace:*",
     "@turbo/gen": "2.7.3",
     "@types/eslint": "9.6.1",
-    "@types/react": "19.2.7",
+    "@types/react": "19.2.8",
     "@types/react-dom": "19.2.3",
     "@types/react-syntax-highlighter": "15.5.13",
     "eslint": "9.39.2",
@@ -37,7 +37,7 @@
     "prettier": "3.7.4",
     "prettier-eslint": "16.4.2",
     "react": "19.2.3",
-    "react-hook-form": "7.70.0",
+    "react-hook-form": "7.71.0",
     "tailwindcss": "4.1.11",
     "typescript": "5.9.3"
   },
