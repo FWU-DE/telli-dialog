@@ -18,36 +18,35 @@ import {
 import { dbGetModelByName } from './llm-model';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 
-export async function dbGetCharacterByIdOrSchoolId({
-  characterId,
+/**
+ * Get all characters a user is allowed to see:
+ * - user is owner of character
+ * - character is shared with users school
+ * - character is global
+ * - character is not deleted
+ */
+export async function dbGetCharacters({
   userId,
   schoolId,
 }: {
-  characterId: string;
   userId: string;
-  schoolId: string | null;
-}) {
-  const [character] = await db
+  schoolId: string;
+}): Promise<CharacterSelectModel[]> {
+  const characters = await db
     .select()
     .from(characterTable)
     .where(
-      or(
-        and(
-          eq(characterTable.id, characterId),
+      and(
+        or(
           eq(characterTable.userId, userId),
-          eq(characterTable.accessLevel, 'private'),
+          and(eq(characterTable.schoolId, schoolId), eq(characterTable.accessLevel, 'school')),
+          eq(characterTable.accessLevel, 'global'),
         ),
-        schoolId !== null
-          ? and(
-              eq(characterTable.id, characterId),
-              eq(characterTable.schoolId, schoolId),
-              eq(characterTable.accessLevel, 'school'),
-            )
-          : undefined,
-        eq(characterTable.accessLevel, 'global'),
+        eq(characterTable.isDeleted, false),
       ),
     );
-  return character;
+
+  return characters;
 }
 
 /**
