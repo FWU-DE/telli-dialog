@@ -1,5 +1,5 @@
-import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInRoute } from '@/error/handle-error-in-route';
+import { validateApiKeyByHeaders } from '@/utils/validation';
 import { deleteCharacter, shareCharacter } from '@shared/characters/character-service';
 import { NextRequest } from 'next/server';
 import z from 'zod';
@@ -7,6 +7,7 @@ import z from 'zod';
 // PATCH /api/v1/characters/[characterId]
 export const patchCharacterSchema = z.object({
   shareCharacter: z.object({
+    userId: z.string(),
     telliPointsPercentageLimit: z.number(),
     usageTimeLimitMinutes: z.number(),
   }),
@@ -17,16 +18,18 @@ export async function PATCH(
   { params }: { params: Promise<{ characterId: string }> },
 ) {
   try {
-    const { user } = await requireAuth();
+    validateApiKeyByHeaders(request.headers);
+
     const { characterId } = await params;
     const requestBody = await request.json();
 
-    const parseResult = patchCharacterSchema.parse(requestBody);
-    const { telliPointsPercentageLimit, usageTimeLimitMinutes } = parseResult.shareCharacter;
+    const patchCharacterValues = patchCharacterSchema.parse(requestBody);
+    const { telliPointsPercentageLimit, usageTimeLimitMinutes, userId } =
+      patchCharacterValues.shareCharacter;
 
     const shareData = shareCharacter({
       characterId,
-      user,
+      user: { id: userId, userRole: 'teacher' },
       telliPointsPercentageLimit,
       usageTimeLimitMinutes,
     });
@@ -38,12 +41,20 @@ export async function PATCH(
 }
 
 // DELETE /api/v1/characters/[characterId]
-export async function DELETE({ params }: { params: Promise<{ characterId: string }> }) {
+const deleteCharacterSchema = z.object({
+  userId: z.string(),
+});
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ characterId: string }> },
+) {
   try {
-    const { user } = await requireAuth();
+    validateApiKeyByHeaders(request.headers);
     const { characterId } = await params;
+    const searchParams = request.nextUrl.searchParams;
+    const { userId } = deleteCharacterSchema.parse(searchParams);
 
-    await deleteCharacter({ characterId, userId: user.id });
+    await deleteCharacter({ characterId, userId });
 
     return new Response(null, { status: 204 });
   } catch (error) {
