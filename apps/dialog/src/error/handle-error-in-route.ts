@@ -23,7 +23,5 @@ export function handleErrorInRoute(error: unknown): Response {
   if (error instanceof NotFoundError) {
     return new Response(null, { status: 404 });
   }
-  if (error instanceof InvalidArgumentError) {
-  }
   return new Response(null, { status: 500 });
 }

@@ -1,17 +1,47 @@
 import { handleErrorInRoute } from '@/error/handle-error-in-route';
 import { validateApiKeyByHeaders } from '@/utils/validation';
-import { deleteCharacter, shareCharacter } from '@shared/characters/character-service';
+import {
+  deleteCharacter,
+  shareCharacter,
+  unshareCharacter,
+} from '@shared/characters/character-service';
+import { dbGetCharacterById } from '@shared/db/functions/character';
 import { NextRequest } from 'next/server';
 import z from 'zod';
 
+// GET /api/v1/characters/[characterId]
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ characterId: string }> },
+) {
+  try {
+    validateApiKeyByHeaders(request.headers);
+
+    const { characterId } = await params;
+
+    const character = await dbGetCharacterById({ characterId });
+    return Response.json(character);
+  } catch (error) {
+    return handleErrorInRoute(error);
+  }
+}
+
 // PATCH /api/v1/characters/[characterId]
 export const patchCharacterSchema = z.object({
-  shareCharacter: z.object({
-    userId: z.string(),
-    telliPointsPercentageLimit: z.number(),
-    usageTimeLimitMinutes: z.number(),
-  }),
+  shareCharacter: z
+    .object({
+      userId: z.string(),
+      telliPointsPercentageLimit: z.number(),
+      usageTimeLimitMinutes: z.number(),
+    })
+    .optional(),
+  unshareCharacter: z
+    .object({
+      userId: z.string(),
+    })
+    .optional(),
 });
+export type PatchCharacterSchema = z.infer<typeof patchCharacterSchema>;
 
 export async function PATCH(
   request: NextRequest,
@@ -24,17 +54,26 @@ export async function PATCH(
     const requestBody = await request.json();
 
     const patchCharacterValues = patchCharacterSchema.parse(requestBody);
-    const { telliPointsPercentageLimit, usageTimeLimitMinutes, userId } =
-      patchCharacterValues.shareCharacter;
+    // share character
+    if (patchCharacterValues.shareCharacter) {
+      const { telliPointsPercentageLimit, usageTimeLimitMinutes, userId } =
+        patchCharacterValues.shareCharacter;
 
-    const shareData = shareCharacter({
-      characterId,
-      user: { id: userId, userRole: 'teacher' },
-      telliPointsPercentageLimit,
-      usageTimeLimitMinutes,
-    });
+      const shareData = await shareCharacter({
+        characterId,
+        user: { id: userId, userRole: 'teacher' },
+        telliPointsPercentageLimit,
+        usageTimeLimitMinutes,
+      });
+      return Response.json(shareData);
+    }
 
-    return Response.json(shareData);
+    // unshare character
+    if (patchCharacterValues.unshareCharacter) {
+      const { userId } = patchCharacterValues.unshareCharacter;
+
+      unshareCharacter({ characterId, user: { id: userId, userRole: 'teacher' } });
+    }
   } catch (error) {
     return handleErrorInRoute(error);
   }
@@ -51,8 +90,8 @@ export async function DELETE(
   try {
     validateApiKeyByHeaders(request.headers);
     const { characterId } = await params;
-    const searchParams = request.nextUrl.searchParams;
-    const { userId } = deleteCharacterSchema.parse(searchParams);
+    const requestBody = await request.json();
+    const { userId } = deleteCharacterSchema.parse(requestBody);
 
     await deleteCharacter({ characterId, userId });
 
