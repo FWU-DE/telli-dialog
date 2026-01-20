@@ -59,21 +59,28 @@ export async function PATCH(
       const { telliPointsPercentageLimit, usageTimeLimitMinutes, userId } =
         patchCharacterValues.shareCharacter;
 
-      const shareData = await shareCharacter({
+      const result = await shareCharacter({
         characterId,
         user: { id: userId, userRole: 'teacher' },
         telliPointsPercentageLimit,
         usageTimeLimitMinutes,
       });
-      return Response.json(shareData);
+      return Response.json(result);
     }
 
     // unshare character
     if (patchCharacterValues.unshareCharacter) {
       const { userId } = patchCharacterValues.unshareCharacter;
 
-      unshareCharacter({ characterId, user: { id: userId, userRole: 'teacher' } });
+      const result = await unshareCharacter({
+        characterId,
+        user: { id: userId, userRole: 'teacher' },
+      });
+      return Response.json(result);
     }
+
+    // nothing to do - probably wrong arguments
+    return new Response(null, { status: 400 });
   } catch (error) {
     return handleErrorInRoute(error);
   }
