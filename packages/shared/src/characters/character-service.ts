@@ -4,6 +4,7 @@ import {
   dbDeleteCharacterByIdAndUserId,
   dbGetCharacterById,
   dbGetCharacterByIdWithShareData,
+  dbGetCharacters,
   dbGetCharactersBySchoolId,
   dbGetCharactersByUserId,
   dbGetGlobalCharacters,
@@ -540,6 +541,24 @@ export const getSharedCharacter = async ({
 
   return character;
 };
+
+/**
+ * Returns all characters a user is allowed to see. That means:
+ * - user is owner of character
+ * - character is shared with users school
+ * - character is global
+ * - character is not deleted
+ */
+export async function getCharacters({
+  schoolId,
+  userId,
+}: {
+  schoolId: string;
+  userId: string;
+}): Promise<CharacterSelectModel[]> {
+  const characters = await dbGetCharacters({ userId, schoolId });
+  return characters;
+}
 
 /**
  * Returns the list of available characters that the user can access
