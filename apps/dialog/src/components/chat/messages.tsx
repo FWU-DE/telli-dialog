@@ -43,9 +43,7 @@ export function Messages({
           regenerateMessage={reload}
           initialFiles={initialFiles}
           assistantIcon={assistantIcon}
-          initialWebsources={
-            message.role === 'user' ? webSourceMapping?.get(message.id) : undefined
-          }
+          websources={webSourceMapping?.get(message.id)}
           status={status}
         >
           {message}

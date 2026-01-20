@@ -122,8 +122,7 @@ export async function webScraperCrawl4AI(
     }
 
     // Extract markdown content from the result object
-    const md = result.markdown as Record<string, string> | undefined;
-    let markdownContent = md?.raw_markdown || '';
+    let markdownContent = result.markdown?.raw_markdown || '';
 
     // Remove markdown links, keeping only the link text: [text](url) -> text
     markdownContent = markdownContent.replace(/\[([^\]]*)\]\([^)]+\)/g, '$1').trim();
