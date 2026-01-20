@@ -95,7 +95,7 @@ export function ThreeDotsProfileMenu({
       <DropdownMenu.Trigger asChild>
         <button
           aria-label="More actions"
-          className="flex self-end focus:outline-none group rounded-enterprise-sm hover:bg-secondary-hover min-w-8"
+          className="flex items-center justify-center focus:outline-none group rounded-enterprise-sm hover:bg-secondary-hover min-w-8"
           title="More actions"
         >
           <DotsHorizontalIcon className="text-primary h-6 w-6" />
