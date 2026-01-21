@@ -180,7 +180,9 @@ export async function POST(request: NextRequest) {
       urls = character.attachedLinks;
     }
   } else {
-    urls = [userMessage, ...messages].flatMap((message) => parseHyperlinks(message.content) ?? []);
+    urls = [userMessage, ...messages]
+      .filter((message) => message.role === 'user')
+      .flatMap((message) => parseHyperlinks(message.content) ?? []);
   }
 
   const uniqueUrls = [...new Set(urls)];

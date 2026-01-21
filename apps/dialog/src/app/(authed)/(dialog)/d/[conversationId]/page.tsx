@@ -50,7 +50,11 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
   const convertedMessages = convertMessageModelToMessage(messages);
   const webSourceMapping = new Map<string, WebsearchSource[]>();
   const logoElement = <Logo federalStateId={userAndContext.school.federalStateId} />;
+
   for (const message of convertedMessages) {
+    if (message.role !== 'user') {
+      continue;
+    }
     const urls = parseHyperlinks(message.content);
     if (urls === undefined) {
       continue;
