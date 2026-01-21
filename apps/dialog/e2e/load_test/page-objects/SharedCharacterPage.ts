@@ -13,6 +13,7 @@ export class SharedCharacterPage {
       `${BASE_URL}/ua/characters/${this.characterId}/dialog?inviteCode=${this.inviteCode}`,
     );
     await this.page.waitForNavigation({ waitUntil: 'load' });
+    // check if page is loaded and url is correct
     console.log(`${__VU}-${__ITER} Navigated to shared character page`);
   }
 
@@ -26,8 +27,6 @@ export class SharedCharacterPage {
     await this.page.getByTestId('submit-button').click();
     await this.page
       .getByTestId('streaming-finished')
-      .waitFor({ state: 'attached', timeout: 60000 });
-
-    console.log(`${__VU}-${__ITER} Message sent and response received`);
+      .waitFor({ state: 'attached', timeout: 30000 });
   }
 }

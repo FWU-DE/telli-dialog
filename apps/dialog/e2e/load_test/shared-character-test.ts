@@ -1,15 +1,26 @@
+import exec from 'k6/execution';
 import { runTest } from './common';
 import { SharedCharacterPage } from './page-objects/SharedCharacterPage';
+import { SharedCharacterProxy } from './utils/shared-character-proxy';
 
-// init code goes here
+// Those values must be provided before executing the test
+// There must be an existing character that can be shared
+// const existingCharacterTemplateId = '9e6bcbf7-e35e-4d56-a3bd-278304bff06f';
+const existingCharacterTemplateId = 'd573e344-8119-46ca-bf9e-371800cf2782';
+
 export const options = {
+  cloud: {
+    distribution: {
+      distributionLabel1: { loadZone: 'amazon:de:frankfurt', percent: 100 },
+    },
+  },
   scenarios: {
     teacher_shares_character: {
       executor: 'per-vu-iterations',
       startTime: '5s',
       gracefulStop: '5s',
       iterations: 1,
-      vus: 10,
+      vus: 1,
       options: {
         browser: {
           type: 'chromium',
@@ -22,29 +33,38 @@ export const options = {
 type TestSetupParams = {
   characterId: string;
   inviteCode: string;
+  userId: string;
 };
 
 export function setup(): TestSetupParams {
-  console.log('running setup()...');
-  // Todo: call endpoint to create character and share it
-  // const response = http.post('url');
-  // if (response.status !== 200) {
-  //   exec.test.abort('Could not create shared character for load test');
-  // }
+  try {
+    console.log('running setup()...');
 
-  const characterId = '9e6bcbf7-e35e-4d56-a3bd-278304bff06f';
-  const inviteCode = '2P4NKCG4';
+    // Share existing character
+    const proxy = new SharedCharacterProxy();
+    const character = proxy.getCharacter(existingCharacterTemplateId);
+    const { inviteCode } = proxy.shareCharacter({
+      characterId: character.id,
+      userId: character.userId,
+      telliPointsPercentageLimit: 100,
+      usageTimeLimitMinutes: 60,
+    });
 
-  return { characterId, inviteCode };
+    return { characterId: existingCharacterTemplateId, inviteCode, userId: character.userId };
+  } catch (error) {
+    console.error('Error in setup():', error);
+    exec.test.abort('Setup failed');
+    throw error;
+  }
 }
 
-export function teardown(sharedCharacterData: TestSetupParams) {
-  console.log('running teardown()...');
-
-  if (sharedCharacterData?.characterId) {
-    console.log(`Cleaning up character with ID: ${sharedCharacterData.characterId}`);
-    // Todo: call endpoint to delete character by id
-    console.log('Character cleanup completed');
+export function teardown(setupData: TestSetupParams) {
+  try {
+    console.log('running teardown()...');
+    const proxy = new SharedCharacterProxy();
+    proxy.unshareCharacter({ characterId: setupData.characterId, userId: setupData.userId });
+  } catch (error) {
+    console.error('Error in teardown(): ', error);
   }
 }
 
@@ -60,7 +80,5 @@ export default async function main(sharedCharacterData: TestSetupParams) {
     await sharedCharacterPage.sendMessage('Was waren deine größten Erfindungen?');
     await sharedCharacterPage.sendMessage('Wie lange hast du gelebt?');
     await sharedCharacterPage.sendMessage('Wo bist du aufgewachsen?');
-
-    console.log('test completed successfully');
   });
 }
