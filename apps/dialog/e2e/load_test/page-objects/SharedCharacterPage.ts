@@ -26,8 +26,6 @@ export class SharedCharacterPage {
     await this.page.getByTestId('submit-button').click();
     await this.page
       .getByTestId('streaming-finished')
-      .waitFor({ state: 'attached', timeout: 60000 });
-
-    console.log(`${__VU}-${__ITER} Message sent and response received`);
+      .waitFor({ state: 'attached', timeout: 30000 });
   }
 }
