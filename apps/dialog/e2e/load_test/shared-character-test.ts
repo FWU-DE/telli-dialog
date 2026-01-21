@@ -3,9 +3,9 @@ import { runTest } from './common';
 import { SharedCharacterPage } from './page-objects/SharedCharacterPage';
 import { SharedCharacterProxy } from './utils/shared-character-proxy';
 
-// Those values must be provided before executing the test
-// There must be an existing character that can be shared
-// const existingCharacterTemplateId = '9e6bcbf7-e35e-4d56-a3bd-278304bff06f';
+// There must be an existing character that can be shared.
+// When the load test is executed, you have to pass credentials
+// of the owner of this character in order to share it.
 const existingCharacterTemplateId = 'd573e344-8119-46ca-bf9e-371800cf2782';
 
 export const options = {
