@@ -23,21 +23,13 @@ const baseNextConfig: NextConfig = {
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/output#automatically-copying-traced-files
   output: 'standalone',
   images: {
+    // When images are hosted on the same cloud as the application, access is routed on the local network and needs to be allowed
+    dangerouslyAllowLocalIP: true,
     dangerouslyAllowSVG: true,
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'telli-development.obs.eu-nl.otc.t-systems.com',
-        port: '',
-      },
-      {
-        protocol: 'https',
-        hostname: 'telli-staging.obs.eu-nl.otc.t-systems.com',
-        port: '',
-      },
-      {
-        protocol: 'https',
-        hostname: 'telli-production.obs.eu-nl.otc.t-systems.com',
+        hostname: `${process.env.OTC_BUCKET_NAME}.${process.env.OTC_S3_HOSTNAME}`,
         port: '',
       },
     ],
