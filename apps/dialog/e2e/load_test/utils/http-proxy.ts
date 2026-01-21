@@ -29,7 +29,7 @@ export class HttpProxy {
       ? url +
         '?' +
         Object.entries(queryParams)
-          .map(([k, v]) => `${k}=${v}`)
+          .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
           .join('&')
       : url;
     return http.get(`${this.baseUrl}${finalUrl}`, { headers: this.headers });

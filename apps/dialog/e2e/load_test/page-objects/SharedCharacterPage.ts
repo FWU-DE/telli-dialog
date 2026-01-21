@@ -13,7 +13,6 @@ export class SharedCharacterPage {
       `${BASE_URL}/ua/characters/${this.characterId}/dialog?inviteCode=${this.inviteCode}`,
     );
     await this.page.waitForNavigation({ waitUntil: 'load' });
-    // check if page is loaded and url is correct
     console.log(`${__VU}-${__ITER} Navigated to shared character page`);
   }
 

@@ -64,7 +64,7 @@ export function teardown(setupData: TestSetupParams) {
     const proxy = new SharedCharacterProxy();
     proxy.unshareCharacter({ characterId: setupData.characterId, userId: setupData.userId });
   } catch (error) {
-    console.error('Error in teardown(): ', error);
+    console.error('Error in teardown():', error);
   }
 }
 
