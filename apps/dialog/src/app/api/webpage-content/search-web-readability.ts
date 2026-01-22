@@ -115,7 +115,6 @@ export async function webScraperExecutable(
   const normalizedInfo = info.normalize('NFKD').replace(/[^\x00-\x7F]/g, '');
   const trimmedInfo = normalizedInfo.substring(0, SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT);
 
-  console.log('############ text: ', trimmedInfo);
   return {
     content: trimmedInfo,
     name: title,
