@@ -18,6 +18,7 @@ interface Crawl4AIResult {
   metadata?: {
     title?: string;
     description?: string;
+    'og:title'?: string;
   };
   error_message?: string;
   status_code?: number;
@@ -125,6 +126,7 @@ export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> 
 
     const title =
       result.metadata?.title ||
+      result.metadata?.['og:title'] ||
       extractTitleFromMarkdown(markdownContent) ||
       t('placeholders.unknown-title');
 
