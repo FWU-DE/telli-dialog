@@ -77,7 +77,7 @@ export function teardown(setupData: TestSetupParams) {
       userId: setupData.userId,
     });
   } catch (error) {
-    console.error('Error in teardown(): ', error);
+    console.error('Error in teardown():', error);
   }
 }
 
@@ -93,7 +93,7 @@ function getRandomMessage() {
   return messages[index] as string;
 }
 
-export default async function main(sharedCharacterData: TestSetupParams) {
-  const { characterId, inviteCode } = sharedCharacterData;
+export default function main(setupData: TestSetupParams) {
+  const { characterId, inviteCode } = setupData;
   sharedCharacterProxy.postChatMessage(characterId, inviteCode, getRandomMessage());
 }
