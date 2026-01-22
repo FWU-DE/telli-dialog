@@ -26,10 +26,23 @@ const baseNextConfig: NextConfig = {
     // When images are hosted on the same cloud as the application, access is routed on the local network and needs to be allowed
     dangerouslyAllowLocalIP: true,
     dangerouslyAllowSVG: true,
+    // Set recommended security headers to prevent XSS with SVGs
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Note: the remotePatterns is a build-time configuration; environment variables cannot be used to construct the hostname
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: `${process.env.OTC_BUCKET_NAME}.${process.env.OTC_S3_HOSTNAME}`,
+        hostname: 'telli-development.obs.eu-nl.otc.t-systems.com',
+        port: '',
+      },
+      {
+        protocol: 'https',
+        hostname: 'telli-staging.obs.eu-nl.otc.t-systems.com',
+        port: '',
+      },
+      {
+        protocol: 'https',
+        hostname: 'telli-production.obs.eu-nl.otc.t-systems.com',
         port: '',
       },
     ],
