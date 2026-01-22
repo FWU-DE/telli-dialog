@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getUser } from '@/auth/utils';
-import { webScraperCrawl4AI } from '../conversation/tools/websearch/search-web-crawl4ai';
+import { webScraperCrawl4AI } from './search-web-crawl4ai';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

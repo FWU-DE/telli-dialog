@@ -7,7 +7,7 @@ import MarkdownDisplay from './markdown-display';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
 import Citation from './sources/citation';
-import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { iconClassName } from '@/utils/tailwind/icon';
 import useBreakpoints from '../hooks/use-breakpoints';

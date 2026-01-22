@@ -20,7 +20,7 @@ import { InitialChatContentDisplay } from './initial-content-display';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { ChatInputBox } from './chat-input-box';
 import { ErrorChatPlaceholder } from './error-chat-placeholder';
-import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
 import { Message } from 'ai';
 import { logDebug, logWarning } from '@shared/logging';
