@@ -2,7 +2,7 @@ import Chat from '@/components/chat/chat';
 import { dbGetConversationAndMessages } from '@shared/db/functions/chat';
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import { redirect } from 'next/navigation';
-import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
@@ -14,7 +14,7 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { requireAuth } from '@/auth/requireAuth';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
-import { webScraperCrawl4AI } from '@/app/api/conversation/tools/websearch/search-web-crawl4ai';
+import { webScraperCrawl4AI } from '@/app/api/webpage-content/search-web-crawl4ai';
 
 export const dynamic = 'force-dynamic';
 

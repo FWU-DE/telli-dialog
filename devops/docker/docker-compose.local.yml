@@ -65,7 +65,7 @@ services:
       - '15672:15672'
 
   crawl4ai:
-    image: unclecode/crawl4ai:0.7.8
+    image: unclecode/crawl4ai:0.8.0
     ports:
       - '11235:11235'
     deploy:

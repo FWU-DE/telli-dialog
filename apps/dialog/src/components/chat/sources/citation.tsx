@@ -3,7 +3,7 @@ import './citation.css';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils/tailwind';
 import SearchIcon from '@/components/icons/search';
-import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { useToast } from '@/components/common/toast';
 import { useQuery } from '@tanstack/react-query';
 import { parseHostname } from '@/utils/web-search/parsing';

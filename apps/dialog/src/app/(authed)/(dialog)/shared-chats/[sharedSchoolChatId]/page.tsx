@@ -3,7 +3,7 @@ import HeaderPortal from '../../header-portal';
 import SharedSchoolChatForm from './shared-school-chat-form';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
-import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { WebsearchSource } from '@/app/api/webpage-content/types';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';

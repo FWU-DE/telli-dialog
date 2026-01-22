@@ -1,6 +1,6 @@
 import { CharacterSelectModel } from '@shared/db/schema';
 import { ChunkResult } from '../file-operations/process-chunks';
-import { WebsearchSource } from '../conversation/tools/websearch/types';
+import { WebsearchSource } from '../webpage-content/types';
 import {
   constructFilePrompt,
   constructWebsearchPrompt,

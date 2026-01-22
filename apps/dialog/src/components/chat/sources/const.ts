@@ -1,4 +1,4 @@
-import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { useTranslations } from 'next-intl';
 
 /**

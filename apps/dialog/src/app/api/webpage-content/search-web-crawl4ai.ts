@@ -3,9 +3,9 @@ import { SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inpu
 import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
 import { cacheLife } from 'next/cache';
-import { logError, logInfo, logWarning } from '@shared/logging';
-import { useTranslations } from 'next-intl';
+import { logError, logWarning } from '@shared/logging';
 import { env } from '@/env';
+import { extractTitleFromMarkdown } from './utils';
 
 interface Crawl4AIResult {
   url: string;
@@ -18,6 +18,7 @@ interface Crawl4AIResult {
   metadata?: {
     title?: string;
     description?: string;
+    'og:title'?: string;
   };
   error_message?: string;
   status_code?: number;
@@ -29,30 +30,16 @@ interface Crawl4AIResponse {
   error?: string;
 }
 
-function getUnsupportedContentTypeError(t: ReturnType<typeof useTranslations>) {
-  return {
-    error: true,
-    content: t('placeholders.not-supported-content'),
-    name: t('placeholders.not-supported'),
-    type: 'websearch',
-  } as const;
-}
-
 /**
  * Scrapes web content using Crawl4AI and returns markdown content.
  * Uses the Crawl4AI docker container API to extract content.
  * @param url The URL to fetch and parse.
- * @param options The options for the fetch request.
- * @returns A summary of the most important information from the page in markdown format.
+ * @returns The most important information from the page in markdown format.
  */
-export async function webScraperCrawl4AI(
-  url: string,
-  options: { timeout: number } = { timeout: 30000 },
-): Promise<WebsearchSource> {
+export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> {
   'use cache';
   cacheLife('weeks');
 
-  logInfo(`Requesting webcontent via Crawl4AI for URL: ${url}`);
   const t = await getTranslations('websearch');
 
   try {
@@ -63,36 +50,43 @@ export async function webScraperCrawl4AI(
       },
       body: JSON.stringify({
         urls: [url],
-        //cache_mode: 'ENABLED',
-        //content_filter: 'pruning',
         crawler_config: {
-          excluded_tags: [
-            'nav',
-            'header',
-            'footer',
-            'aside',
-            'form',
-            'button',
-            'iframe',
-            'script',
-            'style',
-            'svg',
-            'noscript',
-            'label',
-          ], // Delete tags that usually don't contain main content
-          exclude_external_links: true,
-          exclude_social_media_links: true,
-          exclude_all_images: true,
-          markdown_generator_config: {
-            options: {
-              ignore_links: true,
-              ignore_images: true,
-              skip_internal_links: true,
+          type: 'CrawlerRunConfig',
+          params: {
+            // cache_mode: 'enabled', // This parameter did not work, that's why we use next/cache
+            word_count_threshold: 10, // Filter out tiny text blocks, e.g. buttons, labels
+            remove_overlay_elements: true, // Remove popups
+            excluded_tags: [
+              'nav',
+              'header',
+              'footer',
+              'aside',
+              'form',
+              'button',
+              'iframe',
+              'script',
+              'style',
+              'svg',
+              'noscript',
+              'label',
+            ], // Delete tags that usually don't contain main content
+            markdown_generator: {
+              type: 'DefaultMarkdownGenerator',
+              params: {
+                options: {
+                  type: 'dict',
+                  value: {
+                    ignore_links: true,
+                    ignore_images: true,
+                    body_width: 0, // No automatic text wrapping
+                  },
+                },
+              },
             },
           },
         },
       }),
-      signal: AbortSignal.timeout(options.timeout),
+      signal: AbortSignal.timeout(30000), // 30 seconds timeout
     });
 
     if (!response.ok) {
@@ -103,7 +97,6 @@ export async function webScraperCrawl4AI(
       return {
         ...defaultErrorSource({ status_code: response.status, t }),
         link: url,
-        type: 'websearch',
       };
     }
 
@@ -117,29 +110,31 @@ export async function webScraperCrawl4AI(
       return {
         ...defaultErrorSource({ status_code: result?.status_code ?? 500, t }),
         link: url,
-        type: 'websearch',
       };
     }
 
     // Extract markdown content from the result object
-    let markdownContent = result.markdown?.raw_markdown || '';
-
-    // Remove markdown links, keeping only the link text: [text](url) -> text
-    markdownContent = markdownContent.replace(/\[([^\]]*)\]\([^)]+\)/g, '$1').trim();
+    const markdownContent = result.markdown?.raw_markdown || '';
 
     if (!markdownContent) {
       logWarning(`Crawl4AI returned no markdown content for URL: ${url}`);
       return {
-        ...getUnsupportedContentTypeError(t),
+        ...defaultErrorSource({ status_code: 500, t }),
         link: url,
       };
     }
 
     // Extract title from metadata or fallback
-    const title = result.metadata?.title ?? 'Untitled Page';
+    const title =
+      result.metadata?.title ||
+      result.metadata?.['og:title'] ||
+      extractTitleFromMarkdown(markdownContent) ||
+      t('placeholders.unknown-title');
 
     // Trim content
-    const trimmedContent = markdownContent.substring(0, SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT);
+    const trimmedContent = markdownContent
+      .trim()
+      .substring(0, SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT);
 
     return {
       content: trimmedContent,
@@ -153,7 +148,6 @@ export async function webScraperCrawl4AI(
       return {
         ...defaultErrorSource({ status_code: 408, t }),
         link: url,
-        type: 'websearch',
       };
     }
 
@@ -161,7 +155,6 @@ export async function webScraperCrawl4AI(
     return {
       ...defaultErrorSource({ status_code: 500, t }),
       link: url,
-      type: 'websearch',
     };
   }
 }

@@ -28,7 +28,7 @@ import {
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { limitChatHistory } from '../chat/utils';
-import { webScraperCrawl4AI } from '../conversation/tools/websearch/search-web-crawl4ai';
+import { webScraperCrawl4AI } from '../webpage-content/search-web-crawl4ai';
 
 export async function POST(request: NextRequest) {
   const { messages }: { messages: Array<Message> } = await request.json();

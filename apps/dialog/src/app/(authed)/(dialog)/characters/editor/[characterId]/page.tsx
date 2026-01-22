@@ -4,7 +4,7 @@ import HeaderPortal from '../../../header-portal';
 import CharacterForm from './character-form';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { CharacterWithShareDataModel } from '@shared/db/schema';
-import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { getCharacterForEditView } from '@shared/characters/character-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';

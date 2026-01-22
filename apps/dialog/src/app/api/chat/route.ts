@@ -29,7 +29,7 @@ import {
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
-import { WebsearchSource } from '../conversation/tools/websearch/types';
+import { WebsearchSource } from '../webpage-content/types';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 import { extractImagesAndUrl } from '../file-operations/prepocess-image';
 import { formatMessagesWithImages } from './utils';
@@ -37,7 +37,7 @@ import { logDebug, logError } from '@shared/logging';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
-import { webScraperCrawl4AI } from '../conversation/tools/websearch/search-web-crawl4ai';
+import { webScraperCrawl4AI } from '../webpage-content/search-web-crawl4ai';
 
 export async function POST(request: NextRequest) {
   const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);

@@ -41,7 +41,7 @@ import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
 import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
 import { AttachedLinks } from '@/components/forms/attached-links';
-import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { formLinks } from '@/utils/web-search/form-links';
 import FileManagement from '@/components/forms/file-management';
 import { useFederalState } from '@/components/providers/federal-state-provider';
