@@ -1,6 +1,8 @@
 import { PatchCharacterSchema } from '@/app/api/v1/admin/characters/[characterId]/route';
 import { HttpProxy } from './http-proxy';
 import z from 'zod';
+import { check } from 'k6';
+import { Trend } from 'k6/metrics';
 
 const getCharacterResponseSchema = z.object({
   id: z.string(),
@@ -16,6 +18,7 @@ const shareCharacterResponseSchema = z.object({
 
 export class SharedCharacterProxy {
   private proxy: HttpProxy;
+  private postMessageTrend = new Trend('shared_character_post_message_duration_ms');
 
   constructor() {
     this.proxy = new HttpProxy();
@@ -67,5 +70,26 @@ export class SharedCharacterProxy {
     if (response.status !== 200) {
       throw new Error('Could not unshare character. Status: ' + response.status);
     }
+  }
+
+  postChatMessage(characterId: string, inviteCode: string, message: string) {
+    const url = `/api/character?id=${characterId}&inviteCode=${inviteCode}`;
+    const payload = {
+      id: characterId,
+      messages: [
+        {
+          id: characterId,
+          role: 'user',
+          content: message,
+        },
+      ],
+    };
+    const start = Date.now();
+    const response = this.proxy.post(url, payload);
+    this.postMessageTrend.add(Date.now() - start);
+    check(response, {
+      'posted chat message successfully': (r) => r.status === 200,
+    });
+    return response;
   }
 }
