@@ -124,6 +124,7 @@ export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> 
       };
     }
 
+    // Extract title from metadata or fallback
     const title =
       result.metadata?.title ||
       result.metadata?.['og:title'] ||
