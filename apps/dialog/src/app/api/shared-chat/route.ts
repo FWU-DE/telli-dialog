@@ -28,7 +28,7 @@ import {
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { limitChatHistory } from '../chat/utils';
-import { webScraperCrawl4AI } from '../webpage-content/search-web-crawl4ai';
+import { webScraperExecutable } from '../webpage-content/search-web-readability';
 
 export async function POST(request: NextRequest) {
   const { messages }: { messages: Array<Message> } = await request.json();
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
   const relatedFileEntities = await dbGetRelatedSharedChatFiles(sharedChat.id);
   const urls = sharedChat.attachedLinks
     .filter((l) => l !== '')
-    .map((url) => webScraperCrawl4AI(url));
+    .map((url) => webScraperExecutable(url));
 
   const retrievedTextChunks = await getRelevantFileContent({
     model: telliProvider,

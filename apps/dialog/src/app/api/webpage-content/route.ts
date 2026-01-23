@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getUser } from '@/auth/utils';
-import { webScraperCrawl4AI } from './search-web-crawl4ai';
+import { webScraperExecutable } from './search-web-readability';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const result = await webScraperCrawl4AI(url);
+    const result = await webScraperExecutable(url);
     return NextResponse.json(result);
   } catch (error) {
     console.error(`Error fetching webpage content for URL: ${url}`, error);
