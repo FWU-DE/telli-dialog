@@ -80,6 +80,7 @@ export default function ConversationItem({
           title={conversation.name ?? undefined}
           className={cn('flex overflow-hidden flex-grow', 'text-primary')}
           href={buildConversationUrl({ conversation })}
+          prefetch={false}
           onClick={() => {
             if (!isPrivateMode && isBelow.md) {
               toggle();

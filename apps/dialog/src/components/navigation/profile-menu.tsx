@@ -22,6 +22,7 @@ function ProfileMenuContent({ userAndContext }: { userAndContext?: UserAndContex
     <>
       <Link
         href={PRIVACY_POLICY_URL}
+        prefetch={false}
         target="_blank"
         className="text-vidis-hover-purple py-2 px-4 hover:underline"
       >
@@ -29,6 +30,7 @@ function ProfileMenuContent({ userAndContext }: { userAndContext?: UserAndContex
       </Link>
       <Link
         href={IMPRESSUM_URL}
+        prefetch={false}
         className="text-vidis-hover-purple py-2 px-4 hover:underline"
         target="_blank"
       >
@@ -36,6 +38,7 @@ function ProfileMenuContent({ userAndContext }: { userAndContext?: UserAndContex
       </Link>
       <Link
         href={TERMS_OF_USE_URL}
+        prefetch={false}
         className="text-vidis-hover-purple py-2 px-4 hover:underline"
         target="_blank"
       >

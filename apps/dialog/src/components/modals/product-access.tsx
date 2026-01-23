@@ -37,7 +37,7 @@ export default function ProductAccessModal({
           <AlertDialog.Description asChild>{children}</AlertDialog.Description>
           <div className="flex flex-wrap justify-end items-center gap-6 mt-10">
             <AlertDialog.Action asChild>
-              <Link href={LOGOUT_URL} className={buttonSecondaryClassName}>
+              <Link href={LOGOUT_URL} prefetch={false} className={buttonSecondaryClassName}>
                 {t('logout')}
               </Link>
             </AlertDialog.Action>
