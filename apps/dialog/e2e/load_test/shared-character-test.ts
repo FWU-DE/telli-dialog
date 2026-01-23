@@ -19,8 +19,8 @@ export const options = {
       executor: 'per-vu-iterations',
       startTime: '5s',
       gracefulStop: '5s',
-      iterations: 1,
-      vus: 1,
+      iterations: 200,
+      vus: 50,
       options: {
         browser: {
           type: 'chromium',
@@ -29,6 +29,8 @@ export const options = {
     },
   },
 };
+
+const sharedCharacterProxy = new SharedCharacterProxy();
 
 type TestSetupParams = {
   characterId: string;
@@ -41,9 +43,9 @@ export function setup(): TestSetupParams {
     console.log('running setup()...');
 
     // Share existing character
-    const proxy = new SharedCharacterProxy();
-    const character = proxy.getCharacter(existingCharacterTemplateId);
-    const { inviteCode } = proxy.shareCharacter({
+
+    const character = sharedCharacterProxy.getCharacter(existingCharacterTemplateId);
+    const { inviteCode } = sharedCharacterProxy.shareCharacter({
       characterId: character.id,
       userId: character.userId,
       telliPointsPercentageLimit: 100,
@@ -61,8 +63,10 @@ export function setup(): TestSetupParams {
 export function teardown(setupData: TestSetupParams) {
   try {
     console.log('running teardown()...');
-    const proxy = new SharedCharacterProxy();
-    proxy.unshareCharacter({ characterId: setupData.characterId, userId: setupData.userId });
+    sharedCharacterProxy.unshareCharacter({
+      characterId: setupData.characterId,
+      userId: setupData.userId,
+    });
   } catch (error) {
     console.error('Error in teardown():', error);
   }
