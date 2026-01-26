@@ -91,6 +91,7 @@ export async function handleImageGeneration({
       role: 'user',
       userId: user.id,
       content: prompt,
+      modelName: model.name,
       orderNumber: 1,
       parameters: style ? { imageStyle: style.name } : undefined,
     });
@@ -134,6 +135,7 @@ export async function handleImageGeneration({
       orderNumber: 2,
       modelName: model.name,
       parameters: style ? { imageStyle: style.name } : undefined,
+      userId: user.id,
     });
 
     if (!assistantMessage) {
