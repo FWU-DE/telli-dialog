@@ -30,8 +30,13 @@ ${promptParts.join('\n')}`;
 }
 
 function constructSingleWebsearchPrompt(source: WebsearchSource) {
-  return `Titel der Seite: ${source.name}
-Quelle: ${source.link}
+  if (source.error || !source.content) {
+    return `Quelle: ${source.link}
+Inhalt: [Fehler - Der Inhalt dieser Webseite konnte nicht extrahiert werden]
+`;
+  }
+
+  return `Quelle: ${source.link}
 Inhalt: ${source.content}
 `;
 }

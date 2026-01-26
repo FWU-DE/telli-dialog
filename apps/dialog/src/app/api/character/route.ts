@@ -30,7 +30,7 @@ import {
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { limitChatHistory } from '../chat/utils';
-import { webScraperExecutable } from '../webpage-content/search-web-readability';
+import { webScraper } from '../webpage-content/search-web';
 
 export async function POST(request: NextRequest) {
   const { messages }: { messages: Array<Message> } = await request.json();
@@ -98,9 +98,7 @@ export async function POST(request: NextRequest) {
   }
 
   const relatedFileEntities = await dbGetRelatedCharacterFiles(character.id);
-  const urls = character.attachedLinks
-    .filter((l) => l !== '')
-    .map((url) => webScraperExecutable(url));
+  const urls = character.attachedLinks.filter((l) => l !== '').map((url) => webScraper(url));
   const orderedChunks = await getRelevantFileContent({
     messages,
     user: teacherUserAndContext,
