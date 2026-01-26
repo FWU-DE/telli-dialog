@@ -417,7 +417,7 @@ export const llmModelTable = pgTable(
     name: text('name').notNull(),
     displayName: text('display_name').notNull(),
     description: text('description').notNull().default(''),
-    priceMetadata: json('price_metada').$type<LlmModelPriceMetadata>().notNull(),
+    priceMetadata: json('price_metadata').$type<LlmModelPriceMetadata>().notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     supportedImageFormats: json('supported_image_formats').$type<string[]>(),
     isNew: boolean('is_new').notNull().default(false),
@@ -513,7 +513,7 @@ export const sharedSchoolConversationTable = pgTable(
     schoolType: text('school_type'),
     gradeLevel: text('grade_level'),
     subject: text('subject'),
-    studentExcercise: text('student_excercise').default('').notNull(),
+    studentExercise: text('student_exercise').default('').notNull(),
     additionalInstructions: text('additional_instructions'),
     restrictions: text('restrictions'), // Not used anymore
     telliPointsLimit: integer('telli_points_limit'),
