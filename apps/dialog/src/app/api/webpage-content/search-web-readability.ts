@@ -28,10 +28,7 @@ export async function webScraperReadability(url: string): Promise<WebsearchSourc
 
     if (!isPage) {
       logInfo(`URL is not a webpage: ${url}`);
-      return {
-        ...defaultErrorSource(),
-        link: url,
-      };
+      return defaultErrorSource(url);
     }
 
     if (url !== redirectedUrl) {
@@ -44,27 +41,18 @@ export async function webScraperReadability(url: string): Promise<WebsearchSourc
     });
   } catch (error) {
     logError(`Request timed out for URL: ${url}`, error);
-    return {
-      ...defaultErrorSource(),
-      link: url,
-    };
+    return defaultErrorSource(url);
   }
 
   if (!response.ok) {
-    return {
-      ...defaultErrorSource(),
-      link: url,
-    };
+    return defaultErrorSource(url);
   }
 
   const buffer = Buffer.from(await response.clone().arrayBuffer());
   const isBinary = await isBinaryFile(buffer);
   if (isBinary) {
     logInfo(`Detected binary content for URL: ${url}`);
-    return {
-      ...defaultErrorSource(),
-      link: url,
-    };
+    return defaultErrorSource(url);
   }
 
   // Extract title
@@ -84,10 +72,7 @@ export async function webScraperReadability(url: string): Promise<WebsearchSourc
     info = extractArticleContent(html, url);
   } catch (error) {
     logError(`Error in web parsing tool for URL: ${url}`, error);
-    return {
-      ...defaultErrorSource(),
-      link: url,
-    };
+    return defaultErrorSource(url);
   }
 
   // Normalize and clean the content (reduce all whitespace to single spaces)

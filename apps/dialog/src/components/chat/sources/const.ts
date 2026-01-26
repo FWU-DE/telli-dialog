@@ -2,12 +2,13 @@ import { WebsearchSource } from '@/app/api/webpage-content/types';
 
 /**
  * Get a default error source for a websearch source
+ * @param link - The link associated with the error source
  * @returns A default error source for a websearch source
  */
-export function defaultErrorSource(): WebsearchSource {
+export function defaultErrorSource(link: string): WebsearchSource {
   return {
     type: 'websearch',
     error: true,
-    link: '',
+    link: link,
   };
 }

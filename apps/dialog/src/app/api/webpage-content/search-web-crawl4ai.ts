@@ -90,10 +90,7 @@ export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> 
         `Crawl4AI request failed with status ${response.status} for URL: ${url}`,
         response.status,
       );
-      return {
-        ...defaultErrorSource(),
-        link: url,
-      };
+      return defaultErrorSource(url);
     }
 
     const data = (await response.json()) as Crawl4AIResponse;
@@ -103,10 +100,7 @@ export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> 
       logWarning(
         `Crawl4AI returned no result for URL: ${url}, error: ${data.error ?? result?.error_message}`,
       );
-      return {
-        ...defaultErrorSource(),
-        link: url,
-      };
+      return defaultErrorSource(url);
     }
 
     // Extract markdown content from the result object
@@ -114,10 +108,7 @@ export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> 
 
     if (!markdownContent) {
       logWarning(`Crawl4AI returned no markdown content for URL: ${url}`);
-      return {
-        ...defaultErrorSource(),
-        link: url,
-      };
+      return defaultErrorSource(url);
     }
 
     // Extract title from metadata or fallback
@@ -136,16 +127,10 @@ export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> 
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
       logError(`Crawl4AI request timed out for URL: ${url}`, error);
-      return {
-        ...defaultErrorSource(),
-        link: url,
-      };
+      return defaultErrorSource(url);
     }
 
     logError(`Crawl4AI request failed for URL: ${url}`, error);
-    return {
-      ...defaultErrorSource(),
-      link: url,
-    };
+    return defaultErrorSource(url);
   }
 }
