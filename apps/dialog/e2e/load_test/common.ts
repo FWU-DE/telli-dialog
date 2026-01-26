@@ -44,6 +44,22 @@ function tagHttpRequests(page: Page) {
       name: `${BASE_URL}/_next/static/*`,
       matches: [{ url: new RegExp(`^${BASE_URL}/_next/static/.+`) }],
     });
+    metric.tag({
+      name: `${BASE_URL}/api/auth/callback/vidis*`,
+      matches: [
+        {
+          url: new RegExp(`^${BASE_URL}/api/auth/callback/vidis`),
+        },
+      ],
+    });
+    metric.tag({
+      name: `https://login.fwu.de/*`,
+      matches: [{ url: /^https:\/\/login\.fwu\.de/ }],
+    });
+    metric.tag({
+      name: `https://aai-test.vidis.schule/*`,
+      matches: [{ url: /^https:\/\/aai-test\.vidis\.schule/ }],
+    });
   });
 }
 
