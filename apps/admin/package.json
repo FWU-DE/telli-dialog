@@ -30,7 +30,7 @@
     "@telli/ui": "workspace:*",
     "@telli/shared": "workspace:*",
     "lucide-react": "0.562.0",
-    "next": "16.1.3",
+    "next": "16.1.5",
     "next-auth": "5.0.0-beta.30",
     "pg": "8.17.1",
     "react": "19.2.3",
