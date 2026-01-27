@@ -108,7 +108,6 @@ export async function linkFileToCustomGpt(fileId: string, customGptId: string): 
  */
 export async function deleteMessageAttachment({ fileId }: { fileId: string }): Promise<void> {
   const filePath = `${MESSAGE_ATTACHMENTS_FOLDER_NAME}/${fileId}`;
-  console.log('Deleting message attachment with key:', filePath);
   await deleteFileFromS3({ key: filePath });
 }
 
