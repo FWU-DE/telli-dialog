@@ -15,7 +15,7 @@ const sentryClient = Sentry.init({
   environment: process.env.SENTRY_ENVIRONMENT,
   integrations: [Sentry.captureConsoleIntegration({ levels: ['warn', 'error'] })],
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  profilesSampleRate: 1,
+  profileSessionSampleRate: 0.01,
   tracesSampleRate: 1,
   // Use custom OpenTelemetry configuration, see https://docs.sentry.io/platforms/javascript/guides/node/opentelemetry/custom-setup/
   skipOpenTelemetrySetup: true,
