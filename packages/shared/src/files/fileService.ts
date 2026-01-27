@@ -115,7 +115,7 @@ export async function deleteMessageAttachment({ fileId }: { fileId: string }): P
  * Deletes an avatar picture from S3.
  *
  * @param key The pictureId for characters, customgpts and learning scenarios
- * do contain the full path so we can directly use it as key.
+ * does contain the full path so we can directly use it as key.
  * Does nothing if key is null or undefined.
  *
  * If the last file of folder is deleted, the folder in s3 automatically gets deleted as well.

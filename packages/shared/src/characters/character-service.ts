@@ -350,7 +350,9 @@ export const deleteCharacter = async ({
   await deleteAvatarPicture(character.pictureId);
 
   // delete all related files linked to this character
-  await Promise.all(relatedFiles.map((file) => deleteMessageAttachment({ fileId: file.id })));
+  await Promise.allSettled(
+    relatedFiles.map((file) => deleteMessageAttachment({ fileId: file.id })),
+  );
 
   return deletedCharacter;
 };

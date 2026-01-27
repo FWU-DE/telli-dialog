@@ -441,7 +441,9 @@ export async function deleteCustomGpt({
   await deleteAvatarPicture(customGpt.pictureId);
 
   // delete all related files from s3
-  await Promise.all(relatedFiles.map((file) => deleteMessageAttachment({ fileId: file.id })));
+  await Promise.allSettled(
+    relatedFiles.map((file) => deleteMessageAttachment({ fileId: file.id })),
+  );
 
   return deletedCustomGpt;
 }
