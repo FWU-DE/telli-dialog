@@ -26,6 +26,8 @@
     "@opentelemetry/sdk-node": "0.210.0",
     "@opentelemetry/sdk-trace-node": "2.4.0",
     "@opentelemetry/semantic-conventions": "1.39.0",
+    "@sentry/nextjs": "10.34.0",
+    "@sentry/opentelemetry": "10.34.0",
     "@t3-oss/env-nextjs": "0.13.10",
     "@telli/ui": "workspace:*",
     "@telli/shared": "workspace:*",
