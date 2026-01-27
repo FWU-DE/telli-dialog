@@ -60,9 +60,7 @@
   "websearch": {
     "placeholders": {
       "loading": "Titel wird geladen...",
-      "not-available": "Nicht verfügbar",
-      "unknown-title": "Titel unbekannt",
-      "error-content": "Die Seite konnte nicht geladen werden. Es ist ein Fehler aufgetreten {status_code_info}. Nenne keinen Fehlercode und gib folgende Hinweise an den Nutzer weiter: Bitte stelle sicher, dass:\n- die Seite öffentlich zugänglich ist\n- keine Anmeldung erforderlich ist\n- es sich um eine gültige URL handelt"
+      "unknown-title": "Titel unbekannt"
     },
     "action": {
       "delete": "Link entfernen"

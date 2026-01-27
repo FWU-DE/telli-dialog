@@ -14,7 +14,7 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { requireAuth } from '@/auth/requireAuth';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
-import { webScraperExecutable } from '@/app/api/webpage-content/search-web-readability';
+import { webScraper } from '@/app/api/webpage-content/search-web';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,7 +59,7 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
     if (urls === undefined) {
       continue;
     }
-    const webSearchPromises = urls?.map((url) => webScraperExecutable(url));
+    const webSearchPromises = urls?.map((url) => webScraper(url));
 
     try {
       const websearchSources = await Promise.all(webSearchPromises ?? []);

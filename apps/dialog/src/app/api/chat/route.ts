@@ -37,7 +37,7 @@ import { logDebug, logError } from '@shared/logging';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
-import { webScraperExecutable } from '../webpage-content/search-web-readability';
+import { webScraper } from '../webpage-content/search-web';
 
 export async function POST(request: NextRequest) {
   const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);
@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
         .filter((l) => l !== '')
         .map(async (url) => {
           try {
-            return await webScraperExecutable(url);
+            return await webScraper(url);
           } catch (error) {
             console.error(`Error fetching webpage content for URL: ${url}`, error);
           }

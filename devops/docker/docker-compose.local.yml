@@ -71,7 +71,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: '4gb'
+          memory: '2gb'
+        reservations:
+          memory: '1gb'
     shm_size: '2gb'
     restart: unless-stopped
     healthcheck:

@@ -28,7 +28,7 @@ import {
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { limitChatHistory } from '../chat/utils';
-import { webScraperExecutable } from '../webpage-content/search-web-readability';
+import { webScraper } from '../webpage-content/search-web';
 
 export async function POST(request: NextRequest) {
   const { messages }: { messages: Array<Message> } = await request.json();
@@ -95,9 +95,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'User has reached telli points limit.' }, { status: 429 });
   }
   const relatedFileEntities = await dbGetRelatedSharedChatFiles(sharedChat.id);
-  const urls = sharedChat.attachedLinks
-    .filter((l) => l !== '')
-    .map((url) => webScraperExecutable(url));
+  const urls = sharedChat.attachedLinks.filter((l) => l !== '').map((url) => webScraper(url));
 
   const retrievedTextChunks = await getRelevantFileContent({
     model: telliProvider,

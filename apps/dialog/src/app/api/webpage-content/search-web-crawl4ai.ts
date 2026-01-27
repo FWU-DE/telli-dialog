@@ -2,15 +2,14 @@ import { WebsearchSource } from './types';
 import { SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
-import { cacheLife } from 'next/cache';
-import { logError, logWarning } from '@shared/logging';
+import { logWarning } from '@shared/logging';
 import { env } from '@/env';
-import { extractTitleFromMarkdown } from './utils';
 
 interface Crawl4AIResult {
   url: string;
   html: string;
   success: boolean;
+  screenshot?: string; // Base64 encoded screenshot
   markdown?: {
     raw_markdown?: string;
     fit_markdown?: string;
@@ -31,15 +30,12 @@ interface Crawl4AIResponse {
 }
 
 /**
- * Scrapes web content using Crawl4AI and returns markdown content.
+ * Scrapes web content using Crawl4AI and returns markdown.
  * Uses the Crawl4AI docker container API to extract content.
  * @param url The URL to fetch and parse.
  * @returns The most important information from the page in markdown format.
  */
 export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> {
-  'use cache';
-  cacheLife('weeks');
-
   const t = await getTranslations('websearch');
 
   try {
@@ -53,9 +49,9 @@ export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> 
         crawler_config: {
           type: 'CrawlerRunConfig',
           params: {
-            // cache_mode: 'enabled', // This parameter did not work, that's why we use next/cache
             word_count_threshold: 10, // Filter out tiny text blocks, e.g. buttons, labels
             remove_overlay_elements: true, // Remove popups
+            screenshot: false, // for debugging
             excluded_tags: [
               'nav',
               'header',
@@ -90,14 +86,8 @@ export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> 
     });
 
     if (!response.ok) {
-      logError(
-        `Crawl4AI request failed with status ${response.status} for URL: ${url}`,
-        response.status,
-      );
-      return {
-        ...defaultErrorSource({ status_code: response.status, t }),
-        link: url,
-      };
+      logWarning(`Crawl4AI request failed with status ${response.status} for URL: ${url}`);
+      return defaultErrorSource(url);
     }
 
     const data = (await response.json()) as Crawl4AIResponse;
@@ -107,34 +97,23 @@ export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> 
       logWarning(
         `Crawl4AI returned no result for URL: ${url}, error: ${data.error ?? result?.error_message}`,
       );
-      return {
-        ...defaultErrorSource({ status_code: result?.status_code ?? 500, t }),
-        link: url,
-      };
+      return defaultErrorSource(url);
     }
 
     // Extract markdown content from the result object
-    const markdownContent = result.markdown?.raw_markdown || '';
+    const markdownContent = result.markdown?.raw_markdown?.trim() || '';
 
     if (!markdownContent) {
       logWarning(`Crawl4AI returned no markdown content for URL: ${url}`);
-      return {
-        ...defaultErrorSource({ status_code: 500, t }),
-        link: url,
-      };
+      return defaultErrorSource(url);
     }
 
     // Extract title from metadata or fallback
     const title =
-      result.metadata?.title ||
-      result.metadata?.['og:title'] ||
-      extractTitleFromMarkdown(markdownContent) ||
-      t('placeholders.unknown-title');
+      result.metadata?.['og:title'] || result.metadata?.title || t('placeholders.unknown-title');
 
     // Trim content
-    const trimmedContent = markdownContent
-      .trim()
-      .substring(0, SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT);
+    const trimmedContent = markdownContent.substring(0, SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT);
 
     return {
       content: trimmedContent,
@@ -144,17 +123,11 @@ export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> 
     };
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
-      logError(`Crawl4AI request timed out for URL: ${url}`, error);
-      return {
-        ...defaultErrorSource({ status_code: 408, t }),
-        link: url,
-      };
+      logWarning(`Crawl4AI request timed out for URL: ${url}`);
+      return defaultErrorSource(url);
     }
 
-    logError(`Crawl4AI request failed for URL: ${url}`, error);
-    return {
-      ...defaultErrorSource({ status_code: 500, t }),
-      link: url,
-    };
+    logWarning(`Crawl4AI request failed for URL: ${url}`);
+    return defaultErrorSource(url);
   }
 }
