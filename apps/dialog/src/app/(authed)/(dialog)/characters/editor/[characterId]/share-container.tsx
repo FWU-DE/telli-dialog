@@ -3,7 +3,7 @@ import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { labelClassName } from '@/utils/tailwind/input';
 import {
   SharedConversationShareFormValues,
-  intelliPointsPercentageValues,
+  telliPointsPercentageValues,
   sharedConversationFormValuesSchema,
   usageTimeValuesInMinutes,
 } from '../../../shared-chats/[sharedSchoolChatId]/schema';
@@ -38,7 +38,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
     useForm<SharedConversationShareFormValues>({
       resolver: zodResolver(sharedConversationFormValuesSchema),
       defaultValues: {
-        intelliPointsPercentageLimit: character.intelligencePointsLimit ?? 10,
+        telliPointsPercentageLimit: character.telliPointsLimit ?? 10,
         usageTimeLimit: character.maxUsageTimeLimit ?? 45,
       },
       disabled: sharedChatActive,
@@ -46,30 +46,27 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
 
   const shareUILink = `/characters/editor/${character.id}/share`;
 
-  function handleStartSharing() {
+  async function handleStartSharing() {
     const data = getValuesShare();
     const parsedData = sharedConversationFormValuesSchema.parse(data);
 
-    shareCharacterAction({ ...parsedData, id: character.id })
-      .then(() => {
-        toast.success(tToasts('share-toast-success'));
-        router.push(shareUILink);
-        router.refresh();
-      })
-      .catch(() => {
-        toast.error(tToasts('share-toast-error'));
-      });
+    const result = await shareCharacterAction({ ...parsedData, id: character.id });
+    if (result.success) {
+      toast.success(tToasts('share-toast-success'));
+      router.push(shareUILink);
+    } else {
+      toast.error(tToasts('share-toast-error'));
+    }
   }
 
-  function handleStopSharing() {
-    unshareCharacterAction({ characterId: character.id })
-      .then(() => {
-        toast.success(tToasts('stop-share-toast-success'));
-        router.refresh();
-      })
-      .catch(() => {
-        toast.error(tToasts('stop-share-toast-error'));
-      });
+  async function handleStopSharing() {
+    const result = await unshareCharacterAction({ characterId: character.id });
+    if (result.success) {
+      toast.success(tToasts('stop-share-toast-success'));
+      router.refresh();
+    } else {
+      toast.error(tToasts('stop-share-toast-error'));
+    }
   }
 
   return (
@@ -84,7 +81,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
           <select
             id="Telli-Points"
             aria-label="Telli-Points"
-            {...registerShare('intelliPointsPercentageLimit')}
+            {...registerShare('telliPointsPercentageLimit')}
             className={cn(
               'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600 focus:outline-none',
               sharedChatActive && 'cursor-not-allowed',
@@ -94,7 +91,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
               background: !sharedChatActive ? selectSVGBackground : undefined,
             }}
           >
-            {intelliPointsPercentageValues.map((value) => (
+            {telliPointsPercentageValues.map((value) => (
               <option key={value} value={value}>
                 {value} %
               </option>

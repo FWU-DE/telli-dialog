@@ -12,13 +12,13 @@ import {
 import { getPriceInCentByUser } from '@/app/school';
 import { UserAndContext } from '@/auth/types';
 import {
-  sharedCharacterChatHasReachedIntelliPointLimit,
-  sharedChatHasReachedIntelliPointLimit,
+  sharedCharacterChatHasReachedTelliPointsLimit,
+  sharedChatHasReachedTelliPointsLimit,
 } from '@/app/api/chat/usage';
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
   dbGetSharedChatUsageInCentBySharedChatId,
-} from '@shared/db/functions/intelli-points';
+} from '@shared/db/functions/telli-points';
 import {
   mockCharacter,
   mockConversationUsage,
@@ -28,7 +28,6 @@ import {
   mockSharedSchoolConversationUsage,
   mockUserAndContext,
 } from '../../../../utils/mock';
-import { generateUUID } from '@shared/utils/uuid';
 import { generateRandomString } from '../../../../utils/random';
 
 test.describe('costs', () => {
@@ -82,7 +81,7 @@ test.describe('costs', () => {
   test('shared chat - should correctly compute telli points limit', async () => {
     const maxUsageTimeLimit = 45;
     const teacherPriceLimit = 1000; // 1000 cents
-    const intelligencePointsLimit = 10; // 10% = 100 cents
+    const telliPointsLimit = 10; // 10% = 100 cents
 
     let user = mockUserAndContext();
     user = {
@@ -97,7 +96,7 @@ test.describe('costs', () => {
     // create shared school conversation
     const sharedSchoolConversation = {
       ...mockSharedSchoolConversation(),
-      intelligencePointsLimit: intelligencePointsLimit,
+      telliPointsLimit: telliPointsLimit,
       maxUsageTimeLimit: maxUsageTimeLimit,
       userId: user.id,
       modelId: model.id,
@@ -125,7 +124,7 @@ test.describe('costs', () => {
 
     expect(sharedChatUsageInCent).toBe(90);
 
-    let hasReachedLimit = await sharedChatHasReachedIntelliPointLimit({
+    let hasReachedLimit = await sharedChatHasReachedTelliPointsLimit({
       user: user,
       sharedChat: sharedSchoolConversation,
     });
@@ -143,7 +142,7 @@ test.describe('costs', () => {
     };
     await db.insert(sharedSchoolConversationUsageTracking).values(sharedSchoolConversationUsage);
 
-    hasReachedLimit = await sharedChatHasReachedIntelliPointLimit({
+    hasReachedLimit = await sharedChatHasReachedTelliPointsLimit({
       user: user,
       sharedChat: sharedSchoolConversation,
     });
@@ -155,7 +154,7 @@ test.describe('costs', () => {
   test('shared character chat - should correctly compute telli points limit', async () => {
     const maxUsageTimeLimit = 45;
     const teacherPriceLimit = 1000; // 1000 cents
-    const intelligencePointsLimit = 10; // 10% = 100 cents
+    const telliPointsLimit = 10; // 10% = 100 cents
 
     let user = mockUserAndContext();
     user = {
@@ -174,7 +173,7 @@ test.describe('costs', () => {
       schoolId: 'test_school1',
       accessLevel: 'private' as const,
       startedAt: new Date(),
-      intelligencePointsLimit: intelligencePointsLimit,
+      telliPointsLimit: telliPointsLimit,
       maxUsageTimeLimit: maxUsageTimeLimit,
       inviteCode: generateRandomString(8),
       startedBy: user.id,
@@ -201,7 +200,7 @@ test.describe('costs', () => {
 
     expect(sharedChatUsageInCent).toBe(90);
 
-    let hasReachedLimit = await sharedCharacterChatHasReachedIntelliPointLimit({
+    let hasReachedLimit = await sharedCharacterChatHasReachedTelliPointsLimit({
       user: user,
       character: character!,
     });
@@ -219,7 +218,7 @@ test.describe('costs', () => {
     };
     await db.insert(sharedCharacterChatUsageTrackingTable).values(sharedCharacterChatUsage);
 
-    hasReachedLimit = await sharedCharacterChatHasReachedIntelliPointLimit({
+    hasReachedLimit = await sharedCharacterChatHasReachedTelliPointsLimit({
       user: user,
       character: character,
     });

@@ -7,7 +7,7 @@ import MarkdownDisplay from './markdown-display';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
 import Citation from './sources/citation';
-import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { iconClassName } from '@/utils/tailwind/icon';
 import useBreakpoints from '../hooks/use-breakpoints';
@@ -21,7 +21,7 @@ export function ChatBox({
   fileMapping,
   index,
   initialFiles,
-  initialWebsources,
+  websources,
   isLastNonUser,
   isLastUser,
   isLoading,
@@ -33,7 +33,7 @@ export function ChatBox({
   fileMapping?: Map<string, FileModel[]>;
   index: number;
   initialFiles?: FileModel[];
-  initialWebsources?: WebsearchSource[];
+  websources?: WebsearchSource[];
   isLastNonUser: boolean;
   isLastUser?: boolean;
   isLoading: boolean;
@@ -49,8 +49,8 @@ export function ChatBox({
       : 'w-fit';
   const fileMatch = fileMapping?.get(children.id) !== undefined;
   const allFiles = fileMatch ? fileMapping.get(children.id) : initialFiles;
-  const urls = parseHyperlinks(children.content) ?? [];
-  const websearchSources = [...(initialWebsources ?? [])];
+  const urls = children.role === 'user' ? (parseHyperlinks(children.content) ?? []) : [];
+  const websearchSources = [...(websources ?? [])];
 
   for (const url of urls) {
     if (websearchSources.find((source) => source.link === url) === undefined) {
@@ -109,8 +109,7 @@ export function ChatBox({
       </div>
     ) : null;
 
-  const webSourceAvailable = initialWebsources !== undefined && initialWebsources.length !== 0;
-  const margin = allFiles !== undefined || webSourceAvailable ? 'm-0 mt-4' : 'm-4';
+  const margin = allFiles !== undefined || websearchSources.length > 0 ? 'm-0 mt-4' : 'm-4';
 
   const maybeShowMessageIcons =
     isLastNonUser && status !== 'streaming' ? (

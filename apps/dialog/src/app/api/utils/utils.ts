@@ -4,7 +4,7 @@ import {
   dbGetLlmModelsByFederalStateId,
 } from '@shared/db/functions/llm-model';
 import { errorifyAsyncFn } from '@shared/utils/error';
-import { LlmModel } from '@shared/db/schema';
+import { LlmModelSelectModel } from '@shared/db/schema';
 import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
 import {
   DEFAULT_AUXILIARY_MODEL,
@@ -31,7 +31,7 @@ async function getModelAndApiKey({
 }: {
   federalStateId: string;
   modelId: string;
-}): Promise<{ model: LlmModel; apiKeyId: string }> {
+}): Promise<{ model: LlmModelSelectModel; apiKeyId: string }> {
   const [error, federalStateObject] = await dbGetFederalStateWithDecryptedApiKeyWithResult({
     federalStateId,
   });
@@ -70,7 +70,7 @@ async function getModelAndApiKey({
 }
 
 export function calculateCostsInCent(
-  model: LlmModel,
+  model: LlmModelSelectModel,
   usage: { promptTokens: number; completionTokens: number },
 ) {
   if (model.priceMetadata.type === 'text') {
@@ -88,7 +88,7 @@ export function calculateCostsInCent(
 }
 
 function calculateCostsInCentForTextModel(
-  model: LlmModel,
+  model: LlmModelSelectModel,
   usage: { promptTokens: number; completionTokens: number },
 ) {
   if (model.priceMetadata.type !== 'text') {
@@ -107,7 +107,7 @@ function calculateCostsInCentForTextModel(
 }
 
 function calculateCostsInCentForEmbeddingModel(
-  model: LlmModel,
+  model: LlmModelSelectModel,
   usage: { promptTokens: number; completionTokens: number },
 ) {
   if (model.priceMetadata.type !== 'embedding') {
@@ -152,7 +152,7 @@ export function getTokenUsage(usage: { promptTokens: number; completionTokens: n
  * Get the auxiliary model for the federal state
  * @returns The auxiliary model for the federal state
  */
-export async function getAuxiliaryModel(federalStateId: string): Promise<LlmModel> {
+export async function getAuxiliaryModel(federalStateId: string): Promise<LlmModelSelectModel> {
   const llmModels = await dbGetLlmModelsByFederalStateId({
     federalStateId,
   });
@@ -174,7 +174,7 @@ export async function getAuxiliaryModel(federalStateId: string): Promise<LlmMode
  */
 export async function getDefaultModelByFederalStateId(
   federalStateId: string,
-): Promise<LlmModel | undefined> {
+): Promise<LlmModelSelectModel | undefined> {
   const llmModels = await dbGetLlmModelsByFederalStateId({
     federalStateId,
   });
@@ -182,10 +182,10 @@ export async function getDefaultModelByFederalStateId(
   return getDefaultModel(llmModels);
 }
 
-function getDefaultAuxModel(models: LlmModel[]): LlmModel | undefined {
+function getDefaultAuxModel(models: LlmModelSelectModel[]): LlmModelSelectModel | undefined {
   return models.find((model) => model.name === DEFAULT_AUXILIARY_MODEL);
 }
 
-function getFallbackAuxModel(models: LlmModel[]): LlmModel | undefined {
+function getFallbackAuxModel(models: LlmModelSelectModel[]): LlmModelSelectModel | undefined {
   return models.find((model) => model.name === FALLBACK_AUXILIARY_MODEL);
 }

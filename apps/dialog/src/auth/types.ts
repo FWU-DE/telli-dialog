@@ -1,7 +1,7 @@
 import { UserModel } from '@shared/auth/user-model';
 import {
   federalStateSelectSchema,
-  SchoolModel,
+  SchoolSelectModel,
   schoolSelectSchema,
   userSchoolRoleSchema,
   userSelectSchema,
@@ -34,7 +34,7 @@ export type UserAndContext = z.infer<typeof userAndContextSchema>;
  */
 export function buildLegacyUserAndContext(
   user: UserModel,
-  school: SchoolModel,
+  school: SchoolSelectModel,
   federalState: FederalStateModel,
 ): UserAndContext {
   return {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { generateSharedConversationDocxFiles } from './utils';
 import { formatDateToDayMonthYear } from '@shared/utils/date';
+import { logError } from '@shared/logging';
 
 const requestSchema = z.object({
   messages: z.array(
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Failed to generate the document', error);
+    logError('Failed to generate the document', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

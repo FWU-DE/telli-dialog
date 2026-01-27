@@ -1,6 +1,6 @@
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, getTableColumns, inArray } from 'drizzle-orm';
 import { db } from '..';
-import { federalStateLlmModelMappingTable, LlmModel, llmModelTable } from '../schema';
+import { federalStateLlmModelMappingTable, LlmModelSelectModel, llmModelTable } from '../schema';
 import { KnotenpunktLlmModel } from '../../knotenpunkt/schema';
 import {
   dbGetFederalStateWithDecryptedApiKeyWithResult,
@@ -10,25 +10,34 @@ import { fetchLlmModels } from '../../knotenpunkt';
 
 export async function dbGetLlmModelById({ modelId }: { modelId: string | undefined }) {
   if (modelId === undefined) return undefined;
-
-  return (await db.select().from(llmModelTable).where(eq(llmModelTable.id, modelId)))[0];
+  const [model] = await db
+    .select()
+    .from(llmModelTable)
+    .where(eq(llmModelTable.id, modelId))
+    .$withCache();
+  return model;
 }
 
 export async function dbGetModelByName(name: string) {
-  return (await db.select().from(llmModelTable).where(eq(llmModelTable.name, name)))[0];
+  const [model] = await db
+    .select()
+    .from(llmModelTable)
+    .where(eq(llmModelTable.name, name))
+    .$withCache();
+  return model;
 }
 
 export async function dbGetAllLlmModels() {
-  return await db.select().from(llmModelTable).orderBy(llmModelTable.createdAt);
+  return db.select().from(llmModelTable).orderBy(llmModelTable.createdAt).$withCache();
 }
 
 export async function dbGetLlmModelsByFederalStateId({
   federalStateId,
 }: {
   federalStateId: string;
-}): Promise<LlmModel[]> {
-  const rows = await db
-    .select()
+}): Promise<LlmModelSelectModel[]> {
+  return db
+    .select({ ...getTableColumns(llmModelTable) })
     .from(llmModelTable)
     .innerJoin(
       federalStateLlmModelMappingTable,
@@ -39,16 +48,15 @@ export async function dbGetLlmModelsByFederalStateId({
         eq(federalStateLlmModelMappingTable.federalStateId, federalStateId),
         eq(llmModelTable.isDeleted, false),
       ),
-    );
-
-  return rows.map((r) => r.llm_model);
+    )
+    .$withCache();
 }
 
 export async function dbUpdateLlmModelsByFederalStateId({
   federalStateId,
 }: {
   federalStateId: string;
-}): Promise<LlmModel[]> {
+}): Promise<LlmModelSelectModel[]> {
   const [error, result] = await dbGetFederalStateWithDecryptedApiKeyWithResult({ federalStateId });
   if (error !== null) {
     console.error({ error });
@@ -79,10 +87,12 @@ export async function dbUpdateLlmModelsByFederalStateId({
   return models;
 }
 
-export async function dbUpdateLlmModelsForAllFederalStates(): Promise<Record<string, LlmModel[]>> {
+export async function dbUpdateLlmModelsForAllFederalStates(): Promise<
+  Record<string, LlmModelSelectModel[]>
+> {
   const states = await dbGetFederalStates();
 
-  const models: Record<string, LlmModel[]> = {};
+  const models: Record<string, LlmModelSelectModel[]> = {};
   for (const state of states) {
     models[state.id] = await dbUpdateLlmModelsByFederalStateId({ federalStateId: state.id });
   }
@@ -98,7 +108,7 @@ export async function dbGetModelByIdAndFederalStateId({
   federalStateId: string;
 }) {
   const [result] = await db
-    .select()
+    .select({ ...getTableColumns(llmModelTable) })
     .from(llmModelTable)
     .innerJoin(
       federalStateLlmModelMappingTable,
@@ -109,9 +119,10 @@ export async function dbGetModelByIdAndFederalStateId({
         eq(llmModelTable.id, modelId),
         eq(federalStateLlmModelMappingTable.federalStateId, federalStateId),
       ),
-    );
+    )
+    .$withCache();
 
-  return result?.llm_model;
+  return result;
 }
 
 export async function dbUpsertLlmModelsByModelsAndFederalStateId({
@@ -121,7 +132,7 @@ export async function dbUpsertLlmModelsByModelsAndFederalStateId({
   federalStateId: string;
   models: KnotenpunktLlmModel[];
 }) {
-  const insertedModels: LlmModel[] = [];
+  const insertedModels: LlmModelSelectModel[] = [];
   for (const model of models) {
     await db
       .insert(llmModelTable)

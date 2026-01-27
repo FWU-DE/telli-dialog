@@ -1,12 +1,12 @@
 import { auth } from '@/auth';
-import { SchoolModel, schoolSelectSchema } from '@shared/db/schema';
+import { SchoolSelectModel, schoolSelectSchema } from '@shared/db/schema';
 import { UserModel, userSchema } from '@shared/auth/user-model';
 import { UnauthenticatedError } from '@shared/error';
 import { FederalStateModel, federalStateSchema } from '@shared/federal-states/types';
 
 export async function requireAuth(): Promise<{
   user: UserModel;
-  school: SchoolModel;
+  school: SchoolSelectModel;
   federalState: FederalStateModel;
 }> {
   const session = await auth();

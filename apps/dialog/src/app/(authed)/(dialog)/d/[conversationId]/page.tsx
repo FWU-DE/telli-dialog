@@ -1,24 +1,20 @@
 import Chat from '@/components/chat/chat';
 import { dbGetConversationAndMessages } from '@shared/db/functions/chat';
-import { getUser } from '@/auth/utils';
-import SelectLlmModel from '@/components/conversation/select-llm-model';
-import { NewChatButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import ProfileMenu from '@/components/navigation/profile-menu';
-import DownloadConversationButton from '../../download-conversation-button';
-import HeaderPortal from '../../header-portal';
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import { redirect } from 'next/navigation';
-import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import { dbGetRelatedFiles } from '@shared/db/functions/files';
-import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import Logo from '@/components/common/logo';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
+import { buildLegacyUserAndContext } from '@/auth/types';
+import { requireAuth } from '@/auth/requireAuth';
+import { ChatHeaderBar } from '@/components/chat/header-bar';
+import { webScraperExecutable } from '@/app/api/webpage-content/search-web-readability';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +24,8 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
   const { conversationId } = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
 
-  const user = await getUser();
+  const { user, school, federalState } = await requireAuth();
+  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
   const conversationObject = await dbGetConversationAndMessages({
     conversationId,
@@ -42,7 +39,7 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
   const { conversation, messages } = conversationObject;
 
   const models = await dbGetLlmModelsByFederalStateId({
-    federalStateId: user.federalState.id,
+    federalStateId: userAndContext.federalState.id,
   });
 
   const lastUsedModelInChat = messages.at(messages.length - 1)?.modelName ?? undefined;
@@ -52,8 +49,12 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
 
   const convertedMessages = convertMessageModelToMessage(messages);
   const webSourceMapping = new Map<string, WebsearchSource[]>();
-  const logoElement = <Logo federalStateId={user.school.federalStateId} />;
+  const logoElement = <Logo federalStateId={userAndContext.school.federalStateId} />;
+
   for (const message of convertedMessages) {
+    if (message.role !== 'user') {
+      continue;
+    }
     const urls = parseHyperlinks(message.content);
     if (urls === undefined) {
       continue;
@@ -78,16 +79,11 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
 
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
-      <HeaderPortal>
-        <div className="flex w-full gap-4 justify-center items-center z-30">
-          <ToggleSidebarButton />
-          <NewChatButton />
-          <SelectLlmModel isStudent={user.school.userRole === 'student'} />
-          <div className="flex-grow"></div>
-          <DownloadConversationButton conversationId={conversation.id} disabled={false} />
-          <ProfileMenu {...user} />
-        </div>
-      </HeaderPortal>
+      <ChatHeaderBar
+        chatId={conversation.id}
+        hasMessages={convertedMessages.length > 0}
+        userAndContext={userAndContext}
+      />
       <Chat
         id={conversation.id}
         initialMessages={convertedMessages}

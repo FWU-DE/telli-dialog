@@ -1,21 +1,21 @@
 'use client';
 
-import { LlmModel } from '@shared/db/schema';
+import { LlmModelSelectModel } from '@shared/db/schema';
 import React from 'react';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import { saveChatModelForUserAction } from '@/app/(authed)/(dialog)/actions';
 import { getFirstTextModel } from '@shared/llm-models/llm-model-service';
 
 type LlmModelsProviderProps = {
-  models: LlmModel[];
+  models: LlmModelSelectModel[];
   defaultLlmModelByCookie: string;
   children: React.ReactNode;
 };
 
 type LlmModelsContextProps = {
-  models: LlmModel[];
-  selectedModel: LlmModel | undefined;
-  setSelectedModel: (model: LlmModel) => Promise<void>;
+  models: LlmModelSelectModel[];
+  selectedModel: LlmModelSelectModel | undefined;
+  setSelectedModel: (model: LlmModelSelectModel) => Promise<void>;
 };
 
 const LlmModelsContext = React.createContext<LlmModelsContextProps | undefined>(undefined);
@@ -27,7 +27,7 @@ export function LlmModelsProvider({
 }: LlmModelsProviderProps) {
   const selectedModel = getSelectedModel({ models, defaultLlmModelByCookie });
 
-  async function setSelectedModel(model: LlmModel) {
+  async function setSelectedModel(model: LlmModelSelectModel) {
     await saveChatModelForUserAction(model.name);
   }
 
@@ -51,7 +51,7 @@ function getSelectedModel({
   models,
   defaultLlmModelByCookie,
 }: {
-  models: LlmModel[];
+  models: LlmModelSelectModel[];
   defaultLlmModelByCookie: string | undefined;
 }) {
   return (

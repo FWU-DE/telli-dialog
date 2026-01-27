@@ -4,14 +4,12 @@ import React, { startTransition } from 'react';
 import { useImageStyle } from '../providers/image-style-provider';
 import { useTranslations } from 'next-intl';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { useSidebarVisibility } from '../navigation/sidebar/sidebar-provider';
 import { cn } from '@/utils/tailwind';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { ImageStyle } from '@shared/utils/chat';
 
 export default function SelectImageStyle() {
   const { styles, selectedStyle, setSelectedStyle } = useImageStyle();
-  useSidebarVisibility();
   const tImageGeneration = useTranslations('image-generation');
 
   async function handleSelectStyle(style: ImageStyle | undefined) {

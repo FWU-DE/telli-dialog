@@ -11,7 +11,7 @@ import {
 } from '@/components/navigation/sidebar/collapsible-sidebar';
 import SearchBarInput from '@/components/search-bar';
 import { type UserAndContext } from '@/auth/types';
-import { CharacterAccessLevel } from '@shared/db/schema';
+import { AccessLevel } from '@shared/db/schema';
 import { useTranslations } from 'next-intl';
 import CustomGptContainer from './custom-gpt-container';
 import { buildGenericUrl } from '../characters/utils';
@@ -21,13 +21,13 @@ import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 
 export default function Page2({
-  user,
+  userAndContext,
   customGpts,
   accessLevel,
 }: {
-  user: UserAndContext;
+  userAndContext: UserAndContext;
   customGpts: CustomGptWithImage[];
-  accessLevel: CharacterAccessLevel;
+  accessLevel: AccessLevel;
 }) {
   const [input, setInput] = React.useState('');
   const federalState = useFederalState();
@@ -44,7 +44,7 @@ export default function Page2({
         <ToggleSidebarButton />
         <NewChatButton />
         <div className="flex-grow"></div>
-        <ProfileMenu {...user} />
+        <ProfileMenu userAndContext={userAndContext} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl mb-6">{t('title')}</h1>
@@ -73,7 +73,7 @@ export default function Page2({
         >
           {t('visibility-global')}
         </Link>
-        {user.school.userRole === 'teacher' &&
+        {userAndContext.school.userRole === 'teacher' &&
           federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
             <Link
               href={buildGenericUrl('school', 'custom')}
@@ -100,7 +100,7 @@ export default function Page2({
           {filteredCustomGpt.map((customGpt) => (
             <CustomGptContainer
               {...customGpt}
-              currentUserId={user.id}
+              currentUserId={userAndContext.id}
               key={customGpt.id}
               maybeSignedPictureUrl={customGpt.maybeSignedPictureUrl}
             />

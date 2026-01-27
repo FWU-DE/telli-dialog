@@ -1,13 +1,5 @@
 import z from 'zod';
 
-export const oAuthTokenResponseSchema = z.object({
-  access_token: z.string(),
-  expires_in: z.coerce.number(),
-  id_token: z.string(),
-  scope: z.string(),
-  token_type: z.string(),
-});
-
 export const vidisUserInfoSchema = z.object({
   sub: z.string(),
   rolle: z.string(),
@@ -16,35 +8,31 @@ export const vidisUserInfoSchema = z.object({
 });
 export type VidisUserInfo = z.infer<typeof vidisUserInfoSchema>;
 
-export const signInVidisSchema = vidisUserInfoSchema.and(oAuthTokenResponseSchema);
-
-export const vidisAccountSchema = z.object({
-  access_token: z.string(),
-  expires_in: z.number(),
-  // refresh_expires_in: z.number(),
-  // refresh_token: z.string(),
-  // session_state: z.string(),
-  token_type: z.literal('bearer'),
-  id_token: z.string(),
-  provider: z.literal('vidis'),
+// Schema for the user object provided by vidis authentication provider
+// It contains only the fields we need
+export const vidisUserSchema = z.object({
+  id: z.string(),
 });
 
+// Schema for the account object provided by vidis authentication provider
+// It contains only the fields that are mandatory for the application
+export const vidisAccountSchema = z.object({
+  token_type: z.literal('bearer'), // we only support bearer tokens
+  id_token: z.string(), // is needed for logout
+  provider: z.literal('vidis'), // we only support vidis as provider
+  type: z.literal('oidc'), // we only support oidc
+});
+
+// Schema for the profile object provided by vidis authentication provider
+// It contains only fields that are mandatory for the application
 export const vidisProfileSchema = z.object({
-  exp: z.number(),
-  iat: z.number(),
-  // auth_time: z.number(),
-  // jti: z.string(),
-  iss: z.string(),
-  aud: z.string(),
   sub: z.string(), // subject - user id
-  // typ: z.literal('ID'),
-  // azp: z.string(),
-  // session_state: z.string(),
-  // at_hash: z.string(),
-  // email: z.string(),
   sid: z.string(), // session id
   is_ai_chat_eligible: z.boolean().optional(),
   rolle: z.string(),
   schulkennung: z.string().or(z.array(z.string())),
   bundesland: z.string(),
+  // name, preferred_username, given_name, family_name and email are ignored because of data privacy
 });
+
+export type VidisProfile = z.infer<typeof vidisProfileSchema>;

@@ -18,16 +18,17 @@ const baseNextConfig: NextConfig = {
     // should be checked in the pipeline anyway and takes a lot of time during build
     ignoreBuildErrors: true,
   },
-  eslint: {
-    // should be checked in the pipeline anyway and takes a lot of time during build
-    ignoreDuringBuilds: true,
-  },
   // if you do not host it on vercel for serverless environment enable this option
   // if you want to host it on vercel, remove this option
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/output#automatically-copying-traced-files
   output: 'standalone',
   images: {
+    // When images are hosted on the same cloud as the application, access is routed on the local network and needs to be allowed
+    dangerouslyAllowLocalIP: true,
     dangerouslyAllowSVG: true,
+    // Set recommended security headers to prevent XSS with SVGs
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Note: the remotePatterns is a build-time configuration; environment variables cannot be used to construct the hostname
     remotePatterns: [
       {
         protocol: 'https',
@@ -96,11 +97,15 @@ export default withSentryConfig(baseNextConfigWithNextIntl, {
   // Upload a larger set of source maps for prettier stack traces (increases build time)
   // widenClientFileUpload: true,
 
-  // Automatically annotate React components to show their full name in breadcrumbs and session replay
-  reactComponentAnnotation: {
-    enabled: true,
-  },
+  webpack: {
+    // Automatically annotate React components to show their full name in breadcrumbs and session replay
+    reactComponentAnnotation: {
+      enabled: true,
+    },
 
-  // Automatically tree-shake Sentry logger statements to reduce bundle size
-  disableLogger: true,
+    treeshake: {
+      // Automatically tree-shake Sentry logger statements to reduce bundle size
+      removeDebugLogging: true,
+    },
+  },
 });

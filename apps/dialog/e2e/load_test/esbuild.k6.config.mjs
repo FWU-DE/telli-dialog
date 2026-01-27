@@ -1,7 +1,7 @@
 import { build } from 'esbuild';
 
 build({
-  entryPoints: ['e2e/load_test/run-chat-test.ts', 'e2e/load_test/run-file-test.ts'],
+  entryPoints: ['e2e/load_test/*-test.ts'],
   bundle: true,
   platform: 'node',
   outdir: 'e2e/load_test',

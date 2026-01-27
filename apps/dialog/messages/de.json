@@ -25,7 +25,7 @@
     "send-message-placeholder": "Wie kann ich Dir helfen?",
     "information-disclaimer": "telli kann Fehler machen. Sei kritisch und überprüfe alle Informationen.",
     "character-limit-reached": "Zeichenlimit erreicht",
-    "chat-expired": "Der Chat ist abgelaufen",
+    "chat-expired": "Der Chat ist abgelaufen.",
     "new-chat": "Neuer Chat",
     "stop": "Stop",
     "copy": "Kopieren",
@@ -33,7 +33,6 @@
     "copy-clipboard": "In die Zwischenablage kopieren",
     "regenerate-message": "Antwort erneut generieren",
     "image-load-failed": "Bild konnte nicht geladen werden",
-    "rate-limit-title": "telli-Points aufgebraucht",
     "rate-limit-error": "Das bereitgestellte Budget an telli-Points wurde aufgebraucht.",
     "generic-error": "Ein Fehler ist aufgetreten",
     "retry-button": "Erneut versuchen"
@@ -62,9 +61,8 @@
     "placeholders": {
       "loading": "Titel wird geladen...",
       "not-available": "Nicht verfügbar",
-      "error-content": "Die Seite konnte nicht geladen werden. Es ist ein Fehler aufgetreten {status_code_info}. Nenne keinen Fehlercode und gib folgende Hinweise an den Nutzer weiter: Bitte stelle sicher, dass:\n- die Seite öffentlich zugänglich ist\n- keine Anmeldung erforderlich ist\n- es sich um eine gültige URL handelt",
-      "not-supported": "Nicht unterstützter Link",
-      "not-supported-content": "Es werden nur Links auf Webseiten unterstützt, keine Dateien."
+      "unknown-title": "Titel unbekannt",
+      "error-content": "Die Seite konnte nicht geladen werden. Es ist ein Fehler aufgetreten {status_code_info}. Nenne keinen Fehlercode und gib folgende Hinweise an den Nutzer weiter: Bitte stelle sicher, dass:\n- die Seite öffentlich zugänglich ist\n- keine Anmeldung erforderlich ist\n- es sich um eine gültige URL handelt"
     },
     "action": {
       "delete": "Link entfernen"
@@ -165,7 +163,7 @@
     "visibility-private": "Für mich",
     "shared": {
       "title": "Dialogpartner im Unterricht einsetzen",
-      "description": "Wie viel des Tokenvolumens soll durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
+      "description": "Wie viel des monatlichen Tokenvolumens soll durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
       "share": "Teilen",
@@ -288,7 +286,7 @@
     "shared": {
       "excersise-title": "Dein Arbeitsauftrag",
       "title": "Lernszenario einsetzen",
-      "description": "Wie viel des Tokenvolumens soll durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
+      "description": "Wie viel des monatlichen Tokenvolumens soll durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",
       "time": "Zeit",
       "share": "Teilen",
@@ -339,7 +337,7 @@
     }
   },
   "image-generation": {
-    "image-generation-model": "Bildgenerierungs-Modell",
+    "image-generation-model": "Modell",
     "no-model-available": "Kein Modell verfügbar",
     "placeholder": "Beschreibe, wie das Bild aussehen soll.",
     "generate-button": "Bild generieren",
@@ -356,5 +354,10 @@
     "copy-prompt-error": "Prompt konnte nicht kopiert werden",
     "copy-image-tooltip": "Bild kopieren",
     "copy-prompt-tooltip": "Prompt kopieren"
+  },
+  "authentication": {
+    "login-error": {
+      "description": "Login nicht möglich. Folgende Informationen müssem mit dem Profil übertragen werden:"
+    }
   }
 }

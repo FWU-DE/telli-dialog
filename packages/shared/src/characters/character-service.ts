@@ -4,6 +4,7 @@ import {
   dbDeleteCharacterByIdAndUserId,
   dbGetCharacterById,
   dbGetCharacterByIdWithShareData,
+  dbGetCharacters,
   dbGetCharactersBySchoolId,
   dbGetCharactersByUserId,
   dbGetGlobalCharacters,
@@ -12,7 +13,7 @@ import {
 import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import {
-  CharacterAccessLevel,
+  AccessLevel,
   CharacterFileMapping,
   CharacterSelectModel,
   CharacterWithShareDataModel,
@@ -21,6 +22,7 @@ import {
   FileModel,
   fileTable,
   sharedCharacterConversation,
+  accessLevelSchema,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
@@ -216,10 +218,12 @@ export const updateCharacterAccessLevel = async ({
   userId,
 }: {
   characterId: string;
-  accessLevel: CharacterAccessLevel;
+  accessLevel: AccessLevel;
   userId: string;
 }) => {
   checkParameterUUID(characterId);
+  accessLevelSchema.parse(accessLevel);
+
   // Authorization check
   if (accessLevel === 'global') {
     throw new ForbiddenError('Not authorized to set the access level to global');
@@ -293,25 +297,24 @@ export type UpdateCharacterActionModel = z.infer<typeof updateCharacterSchema>;
  * The user must be the owner of the character.
  */
 export const updateCharacter = async ({
-  characterId,
   userId,
   ...character
-}: UpdateCharacterActionModel & { characterId: string; userId: string }) => {
-  checkParameterUUID(characterId);
+}: UpdateCharacterActionModel & { userId: string }) => {
+  checkParameterUUID(character.id);
   // Authorization check
-  const { isOwner } = await getCharacterInfo(characterId, userId);
+  const { isOwner } = await getCharacterInfo(character.id, userId);
   if (!isOwner) throw new ForbiddenError('Not authorized to update this character');
 
   // Update the character in database
   const cleanedCharacter = removeNullishValues(character);
   if (cleanedCharacter === undefined) return;
 
-  const parsedCharacterValues = updateCharacterSchema.strip().parse(cleanedCharacter);
+  const parsedCharacterValues = updateCharacterSchema.parse(cleanedCharacter);
 
   const [updatedCharacter] = await db
     .update(characterTable)
     .set({ ...parsedCharacterValues })
-    .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)))
+    .where(and(eq(characterTable.id, character.id), eq(characterTable.userId, userId)))
     .returning();
 
   if (updatedCharacter === undefined) {
@@ -397,7 +400,7 @@ export const shareCharacter = async ({
       ),
     );
 
-  const intelligencePointsLimit = telliPointsPercentageLimit;
+  const telliPointsLimit = telliPointsPercentageLimit;
   const maxUsageTimeLimit = usageTimeLimitMinutes;
   const inviteCode = generateInviteCode();
   const startedAt = new Date();
@@ -407,7 +410,7 @@ export const shareCharacter = async ({
       id: maybeExistingEntry?.id,
       userId: user.id,
       characterId,
-      intelligencePointsLimit,
+      telliPointsLimit,
       maxUsageTimeLimit,
       inviteCode,
       startedAt,
@@ -540,6 +543,24 @@ export const getSharedCharacter = async ({
 };
 
 /**
+ * Returns all characters a user is allowed to see. That means:
+ * - user is owner of character
+ * - character is shared with users school
+ * - character is global
+ * - character is not deleted
+ */
+export async function getCharacters({
+  schoolId,
+  userId,
+}: {
+  schoolId: string;
+  userId: string;
+}): Promise<CharacterSelectModel[]> {
+  const characters = await dbGetCharacters({ userId, schoolId });
+  return characters;
+}
+
+/**
  * Returns the list of available characters that the user can access
  * based on userId, schoolId, federalStateId and access level.
  */
@@ -549,7 +570,7 @@ export async function getCharacterByAccessLevel({
   userId,
   federalStateId,
 }: {
-  accessLevel: CharacterAccessLevel;
+  accessLevel: AccessLevel;
   schoolId: string;
   userId: string;
   federalStateId: string;

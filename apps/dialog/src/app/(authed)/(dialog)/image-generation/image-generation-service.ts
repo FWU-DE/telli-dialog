@@ -1,5 +1,5 @@
 import { getUser, userHasCompletedTraining } from '@/auth/utils';
-import { userHasReachedIntelliPointLimit } from '@/app/api/chat/usage';
+import { userHasReachedTelliPointsLimit } from '@/app/api/chat/usage';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
 import { dbGetModelByIdAndFederalStateId } from '@shared/db/functions/llm-model';
@@ -10,13 +10,15 @@ import { dbInsertChatContent, dbGetOrCreateConversation } from '@shared/db/funct
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
 import { logError } from '@shared/logging';
 import { generateImageWithBilling } from '@telli/ai-core';
-import { LlmModel } from '@shared/db/schema';
+import { LlmModelSelectModel } from '@shared/db/schema';
 import { ImageStyle } from '@shared/utils/chat';
 import { generateUUID } from '@shared/utils/uuid';
 import { uploadFileToS3, getSignedUrlFromS3Get } from '@shared/s3';
 import { cnanoid } from '@shared/random/randomService';
 import { linkFilesToConversation, dbInsertFile } from '@shared/db/functions/files';
 import { dbDeleteConversationByIdAndUserId } from '@shared/db/functions/conversation';
+import { NotFoundError } from '@shared/error';
+import { getAvailableImageModelsForFederalState } from '@shared/image-generation/image-generation-service';
 export interface ImageGenerationParams {
   prompt: string;
   modelId: string;
@@ -61,10 +63,11 @@ export async function handleImageGeneration({
   style,
 }: {
   prompt: string;
-  model: LlmModel;
+  model: LlmModelSelectModel;
   style?: ImageStyle;
 }) {
   const user = await getUser();
+  await checkIfImageModelIsAssignedToFederalState(model, user.federalState.id);
 
   if (!prompt || prompt.trim().length === 0) {
     throw new Error('Prompt is required');
@@ -185,10 +188,6 @@ export async function generateImage({
     throw new Error(productAccess.errorType || 'Access denied');
   }
 
-  if (await userHasReachedIntelliPointLimit({ user })) {
-    throw new Error('User has reached intelli points limit');
-  }
-
   if (!prompt || prompt.trim().length === 0) {
     throw new Error('Prompt is required');
   }
@@ -225,9 +224,9 @@ export async function generateImage({
     userId: user.id,
   });
 
-  const intelliPointsLimitReached = await userHasReachedIntelliPointLimit({ user });
+  const telliPointsLimitReached = await userHasReachedTelliPointsLimit({ user });
 
-  if (intelliPointsLimitReached) {
+  if (telliPointsLimitReached) {
     if (conversation) {
       await sendRabbitmqEvent(
         constructTelliBudgetExceededEvent({
@@ -238,7 +237,7 @@ export async function generateImage({
       );
     }
 
-    throw new Error('User has reached intelli points limit');
+    throw new Error('User has reached telli points limit.');
   }
 
   try {
@@ -283,5 +282,17 @@ export async function generateImage({
     throw error instanceof Error
       ? error
       : new Error('Internal server error during image generation');
+  }
+}
+
+// Checks if the given image model is assigned to the federal state
+async function checkIfImageModelIsAssignedToFederalState(
+  imageModel: LlmModelSelectModel,
+  federalStateId: string,
+) {
+  const models = await getAvailableImageModelsForFederalState({ federalStateId });
+  const foundModel = models.find((model) => model.id === imageModel.id);
+  if (!foundModel) {
+    throw new NotFoundError('Could not find image generation model for federal state');
   }
 }

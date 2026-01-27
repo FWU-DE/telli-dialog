@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
 import { getUser } from '@/auth/utils';
+import { webScraperExecutable } from './search-web-readability';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

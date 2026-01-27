@@ -4,7 +4,7 @@ import { useMainChat, convertToAiMessages, type ChatMessage } from '@/hooks/use-
 import { FormEvent, ReactNode, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
-import { type CharacterSelectModel, type CustomGptModel, FileModel } from '@shared/db/schema';
+import { type CharacterSelectModel, type CustomGptSelectModel, FileModel } from '@shared/db/schema';
 import PromptSuggestions from './prompt-suggestions';
 import MarkdownDisplay from './markdown-display';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
@@ -19,7 +19,7 @@ import { InitialChatContentDisplay } from './initial-content-display';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { ChatInputBox } from './chat-input-box';
 import { ErrorChatPlaceholder } from './error-chat-placeholder';
-import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { logDebug, logWarning } from '@shared/logging';
 import { useSession } from 'next-auth/react';
 import { AssistantIcon } from './assistant-icon';
@@ -31,7 +31,7 @@ import { Messages } from './messages';
 type ChatProps = {
   id: string;
   initialMessages: ChatMessage[];
-  customGpt?: CustomGptModel;
+  customGpt?: CustomGptSelectModel;
   character?: CharacterSelectModel;
   imageSource?: string;
   promptSuggestions?: string[];
@@ -86,6 +86,8 @@ export default function Chat({
       customGptId: customGpt?.id,
       onFinish: (message) => {
         logDebug(`onFinish called with message ${JSON.stringify(message)}`);
+        // Trigger refetch of the fileMapping from the DB
+        setCountOfFilesInChat(countOfFilesInChat + 1);
         if (messages.length > 1) {
           return;
         }

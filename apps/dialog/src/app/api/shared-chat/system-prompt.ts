@@ -1,5 +1,5 @@
-import { type SharedSchoolConversationModel } from '@shared/db/schema';
-import { WebsearchSource } from '../conversation/tools/websearch/types';
+import { type SharedSchoolConversationSelectModel } from '@shared/db/schema';
+import { WebsearchSource } from '../webpage-content/types';
 import { ChunkResult } from '../file-operations/process-chunks';
 import {
   constructFilePrompt,
@@ -13,7 +13,7 @@ export function constructLearningScenarioSystemPrompt({
   retrievedTextChunks,
   websearchSources,
 }: {
-  sharedChat: SharedSchoolConversationModel;
+  sharedChat: SharedSchoolConversationSelectModel;
   retrievedTextChunks?: Record<string, ChunkResult[]>;
   websearchSources?: WebsearchSource[];
 }) {

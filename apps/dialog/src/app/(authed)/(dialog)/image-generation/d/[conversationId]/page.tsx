@@ -1,17 +1,21 @@
-import { getUser } from '@/auth/utils';
 import { dbGetConversationAndMessages } from '@shared/db/functions/chat';
 import { dbGetRelatedFiles } from '@shared/db/functions/files';
 import { redirect } from 'next/navigation';
 import ImageGenerationChat from '@/components/image-generation/image-generation-chat';
 import { ImageModelsProvider } from '@/components/providers/image-model-provider';
 import { ImageStyleProvider } from '@/components/providers/image-style-provider';
-import { getAvailableImageModels, getDefaultImageModel } from '../../actions';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import { NewChatButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import HeaderPortal from '../../../header-portal';
 import SelectImageModel from '@/components/image-generation/select-image-model';
 import SelectImageStyle from '@/components/image-generation/select-image-style';
+import {
+  getAvailableImageModelsForFederalState,
+  getDefaultImageModel,
+} from '@shared/image-generation/image-generation-service';
+import { requireAuth } from '@/auth/requireAuth';
+import { buildLegacyUserAndContext } from '@/auth/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,9 +25,10 @@ interface PageProps {
 
 export default async function Page(props: PageProps) {
   const { conversationId } = await props.params;
-  const user = await getUser();
+  const { user, school, federalState } = await requireAuth();
+  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
-  if (!user.federalState.featureToggles.isImageGenerationEnabled) {
+  if (!federalState.featureToggles.isImageGenerationEnabled) {
     redirect('/');
   }
 
@@ -42,7 +47,9 @@ export default async function Page(props: PageProps) {
   const fileMapping = await dbGetRelatedFiles(conversationId);
 
   // Get available image models
-  const imageModels = await getAvailableImageModels();
+  const imageModels = await getAvailableImageModelsForFederalState({
+    federalStateId: federalState.id,
+  });
 
   const reversedMessages = messages.slice().reverse();
 
@@ -52,7 +59,7 @@ export default async function Page(props: PageProps) {
   )?.modelName;
   const selectedModel =
     imageModels.find((model) => model.name === lastUsedModelInChat) ??
-    (await getDefaultImageModel(imageModels));
+    getDefaultImageModel(imageModels);
   const lastUsedStyleInChat = reversedMessages.find(
     (msg) => msg.parameters?.imageStyle !== undefined,
   )?.parameters?.imageStyle;
@@ -68,7 +75,7 @@ export default async function Page(props: PageProps) {
               <SelectImageModel />
               <SelectImageStyle />
               <div className="flex-grow"></div>
-              <ProfileMenu {...user} />
+              <ProfileMenu userAndContext={userAndContext} />
             </div>
           </HeaderPortal>
           <ImageGenerationChat

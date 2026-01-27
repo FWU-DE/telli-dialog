@@ -2,7 +2,7 @@
 
 import React, { startTransition } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { type LlmModel } from '@shared/db/schema';
+import { type LlmModelSelectModel } from '@shared/db/schema';
 import { useSidebarVisibility } from '../navigation/sidebar/sidebar-provider';
 import { cn } from '@/utils/tailwind';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -10,9 +10,9 @@ import { iconClassName } from '@/utils/tailwind/icon';
 import { Badge } from '../common/badge';
 
 type ModelSelectProps = {
-  models: LlmModel[];
-  selectedModel: LlmModel | undefined;
-  onModelChange: (model: LlmModel) => void;
+  models: LlmModelSelectModel[];
+  selectedModel: LlmModelSelectModel | undefined;
+  onModelChange: (model: LlmModelSelectModel) => void;
   modelType: 'text' | 'image';
   label: string;
   noModelsLabel: string;
@@ -35,7 +35,7 @@ export default function ModelSelect({
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  async function handleSelectModel(model: LlmModel) {
+  async function handleSelectModel(model: LlmModelSelectModel) {
     startTransition(async () => {
       setOptimisticModelId(model.name);
     });
@@ -114,11 +114,17 @@ export default function ModelSelect({
   );
 }
 
-function isGreenModel({ model }: { model: LlmModel }) {
+function isGreenModel({ model }: { model: LlmModelSelectModel }) {
   return model.priceMetadata.type === 'text' && model.priceMetadata.promptTokenPrice < 150; // in tenth of a cent
 }
 
-function ModelSpan({ model, modelType }: { model: LlmModel; modelType: 'text' | 'image' }) {
+function ModelSpan({
+  model,
+  modelType,
+}: {
+  model: LlmModelSelectModel;
+  modelType: 'text' | 'image';
+}) {
   return (
     <>
       <div className="flex gap-2 items-center">

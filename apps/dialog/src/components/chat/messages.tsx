@@ -2,7 +2,7 @@ import { type UIMessage, type ChatStatus } from '@/types/chat';
 import { ChatBox } from './chat-box';
 import LoadingAnimation from './loading-animation';
 import { FileModel } from '@shared/db/schema';
-import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { WebsearchSource } from '@/app/api/webpage-content/types';
 
 // Re-export for consumers that import from this file
 export type { ChatStatus };
@@ -45,9 +45,7 @@ export function Messages({
           regenerateMessage={reload}
           initialFiles={initialFiles}
           assistantIcon={assistantIcon}
-          initialWebsources={
-            message.role === 'user' ? webSourceMapping?.get(message.id) : undefined
-          }
+          websources={webSourceMapping?.get(message.id)}
           status={status}
         >
           {message}

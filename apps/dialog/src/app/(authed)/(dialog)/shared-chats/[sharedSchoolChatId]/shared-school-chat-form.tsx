@@ -11,7 +11,7 @@ import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import Image from 'next/image';
-import { FileModel, SharedSchoolConversationModel } from '@shared/db/schema';
+import { FileModel, SharedSchoolConversationSelectModel } from '@shared/db/schema';
 import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../schema';
 import {
   removeFileFromLearningScenarioAction,
@@ -31,7 +31,7 @@ import SelectLlmModelForm from '../../_components/select-llm-model';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
 import { labelClassName } from '@/utils/tailwind/input';
-import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { WebsearchSource } from '@/app/api/webpage-content/types';
 import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { AttachedLinks } from '@/components/forms/attached-links';
@@ -44,7 +44,7 @@ export default function SharedSchoolChatForm({
   maybeSignedPictureUrl,
   readOnly,
   ...sharedSchoolChat
-}: SharedSchoolConversationModel & {
+}: SharedSchoolConversationSelectModel & {
   existingFiles: FileModel[];
   isCreating: boolean;
   initialLinks: WebsearchSource[];

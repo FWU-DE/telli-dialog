@@ -260,6 +260,34 @@
       "when": 1765984608173,
       "tag": "0036_fair_fenris",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1767108940040,
+      "tag": "0037_long_bloodstrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1767378733279,
+      "tag": "0038_wonderful_naoko",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1767949778012,
+      "tag": "0039_loud_carlie_cooper",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1768173572855,
+      "tag": "0040_flowery_blob",
+      "breakpoints": true
     }
   ]
 }

@@ -4,11 +4,11 @@ import { labelClassName } from '@/utils/tailwind/input';
 import CountDownTimer from '../_components/count-down';
 import {
   SharedConversationShareFormValues,
-  intelliPointsPercentageValues,
+  telliPointsPercentageValues,
   sharedConversationFormValuesSchema,
   usageTimeValuesInMinutes,
 } from './schema';
-import { SharedSchoolConversationModel } from '@shared/db/schema';
+import { SharedSchoolConversationSelectModel } from '@shared/db/schema';
 import { shareLearningScenarioAction, unshareLearningScenarioAction } from './actions';
 import { useToast } from '@/components/common/toast';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,7 +22,7 @@ import ChatStopIcon from '@/components/icons/chat-stop';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 
-type ShareContainerProps = SharedSchoolConversationModel;
+type ShareContainerProps = SharedSchoolConversationSelectModel;
 
 export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerProps) {
   const toast = useToast();
@@ -39,7 +39,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
     useForm<SharedConversationShareFormValues>({
       resolver: zodResolver(sharedConversationFormValuesSchema),
       defaultValues: {
-        intelliPointsPercentageLimit: sharedSchoolChat.intelligencePointsLimit ?? 10,
+        telliPointsPercentageLimit: sharedSchoolChat.telliPointsLimit ?? 10,
         usageTimeLimit: sharedSchoolChat.maxUsageTimeLimit ?? 45,
       },
       disabled: sharedChatActive,
@@ -59,7 +59,6 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
     if (result.success) {
       toast.success(tToast('share-toast-success'));
       router.push(shareUILink);
-      router.refresh();
     } else {
       toast.error(tToast('share-toast-error'));
     }
@@ -88,7 +87,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
           <select
             id="Telli-Points"
             aria-label="Telli-Points"
-            {...registerShare('intelliPointsPercentageLimit')}
+            {...registerShare('telliPointsPercentageLimit')}
             className={cn(
               'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600',
               sharedChatActive && 'cursor-not-allowed',
@@ -98,7 +97,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
               background: !sharedChatActive ? selectSVGBackground : undefined,
             }}
           >
-            {intelliPointsPercentageValues.map((value) => (
+            {telliPointsPercentageValues.map((value) => (
               <option key={value} value={value}>
                 {value} %
               </option>

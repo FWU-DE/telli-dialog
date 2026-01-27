@@ -8,7 +8,7 @@ import FourBoxes from '@/components/icons/four-boxes';
 import RobotIcon from '@/components/icons/robot';
 import SharedChatIcon from '@/components/icons/shared-chat';
 import TelliIcon from '@/components/icons/telli';
-import IntelliPointsIcon from '@/components/icons/telli-points';
+import TelliPointsIcon from '@/components/icons/telli-points';
 import { ImageSquareIcon } from '@phosphor-icons/react';
 import CollapsibleSidebar from '@/components/navigation/sidebar/collapsible-sidebar';
 import SidebarItem from '@/components/navigation/sidebar/conversation-item';
@@ -23,7 +23,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
-import deleteConversationAction, { updateConversationNameAction } from './actions';
+import deleteConversationAction, { updateConversationTitleAction } from './actions';
 import { fetchClientSideConversations } from './utils';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 
@@ -91,28 +91,21 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
     return isBefore(date, subDays(new Date(), 7));
   });
 
-  function handleDeleteConversation(conversationId: string) {
-    deleteConversationAction({ conversationId })
-      .then(() => {
-        toast.success(t('conversation-delete-toast-success'));
-        refetchConversations();
-        router.replace('/');
-      })
-      .catch((error) => {
-        console.error({ error });
-        toast.error(t('conversation-delete-toast-error'));
-      });
+  async function handleDeleteConversation(conversationId: string) {
+    const result = await deleteConversationAction({ conversationId });
+    if (result.success) {
+      toast.success(t('conversation-delete-toast-success'));
+      refetchConversations();
+      router.replace('/');
+    } else {
+      toast.error(t('conversation-delete-toast-error'));
+    }
   }
 
-  function handleUpdateConversation({ id, name }: { id: string; name: string }) {
-    updateConversationNameAction({ conversationId: id, name })
-      .then(() => {
-        refetchConversations();
-        router.refresh();
-      })
-      .catch((error) => {
-        console.error({ error });
-      });
+  async function handleUpdateConversation({ id, name }: { id: string; name: string }) {
+    await updateConversationTitleAction({ conversationId: id, name });
+    refetchConversations();
+    router.refresh();
   }
 
   return (
@@ -120,7 +113,11 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
       <nav className="flex text-sm flex-col items-start overflow-y-hidden px-1">
         <div className="flex flex-col items-start px-5 w-full">
           <hr className="w-full my-2" />
-          <Link href="/" className="w-full flex gap-2 items-center hover:underline px-2 py-1.5">
+          <Link
+            href="/"
+            prefetch={false}
+            className="w-full flex gap-2 items-center hover:underline px-2 py-1.5"
+          >
             <TelliIcon className="w-4 h-4 fill-primary" />
             <span className="text-base font-medium text-primary">
               {!!user.federalState.telliName ? user.federalState.telliName : 'telli'}
@@ -139,7 +136,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
               </div>
             </Link>
           )}
-          <Link href="/custom" className="w-full mt-1">
+          <Link href="/custom" prefetch={false} className="w-full mt-1">
             <div
               className={cn(
                 'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
@@ -158,7 +155,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
               <>
                 {user.school.userRole === 'teacher' &&
                   user.federalState.featureToggles.isSharedChatEnabled && (
-                    <Link prefetch href="/shared-chats" className="w-full">
+                    <Link href="/shared-chats" prefetch={false} className="w-full">
                       <div
                         className={cn(
                           'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
@@ -172,7 +169,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
                   )}
                 {user.school.userRole === 'teacher' &&
                   user.federalState.featureToggles.isCharacterEnabled && (
-                    <Link prefetch href="/characters" className="w-full">
+                    <Link href="/characters" prefetch={false} className="w-full">
                       <div
                         className={cn(
                           'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
@@ -188,7 +185,11 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
                 <hr className="w-full px-1 my-2" />
                 {user.school.userRole === 'teacher' &&
                   user.federalState.featureToggles.isCustomGptEnabled && (
-                    <Link href={`/custom/d/${HELP_MODE_GPT_ID}`} className="w-full">
+                    <Link
+                      href={`/custom/d/${HELP_MODE_GPT_ID}`}
+                      prefetch={false}
+                      className="w-full"
+                    >
                       <div
                         className={cn(
                           'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
@@ -205,7 +206,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
             }
             <div className="flex flex-col gap-2 w-full px-1 py-2 ml-1">
               <div className="flex gap-2 items-center w-full pb-2 text-primary">
-                <IntelliPointsIcon className="w-4 h-4" />
+                <TelliPointsIcon className="w-4 h-4" />
                 <span className="text-base">{t('telli-points')}</span>
               </div>
               <TelliPointsProgressBar

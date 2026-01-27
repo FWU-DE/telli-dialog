@@ -4,8 +4,7 @@ import HeaderPortal from '../../../header-portal';
 import CharacterForm from './character-form';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { CharacterWithShareDataModel } from '@shared/db/schema';
-import { webScraperExecutable } from '@/app/api/conversation/tools/websearch/search-web';
-import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { getCharacterForEditView } from '@shared/characters/character-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
@@ -14,7 +13,6 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 
 export const dynamic = 'force-dynamic';
-const PREFETCH_ENABLED = false;
 
 const searchParamsSchema = z.object({
   create: z.string().optional().default('false'),
@@ -35,27 +33,23 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
   }).catch(handleErrorInServerComponent);
 
   const readOnly = user.id !== character.userId;
-  const links = character.attachedLinks;
-
-  const initialLinks = PREFETCH_ENABLED
-    ? await Promise.all(links.filter((l) => l !== '').map((url) => webScraperExecutable(url)))
-    : links
-        .filter((l) => l !== '')
-        .map(
-          (url) =>
-            ({
-              link: url,
-              type: 'websearch',
-              error: false,
-            }) as WebsearchSource,
-        );
+  const initialLinks = character.attachedLinks
+    .filter((l) => l !== '')
+    .map(
+      (url) =>
+        ({
+          link: url,
+          type: 'websearch',
+          error: false,
+        }) as WebsearchSource,
+    );
 
   return (
     <div className="min-w-full p-6 overflow-auto">
       <HeaderPortal>
         <ToggleSidebarButton />
         <div className="flex-grow"></div>
-        <ProfileMenu {...userAndContext} />
+        <ProfileMenu userAndContext={userAndContext} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
         <CharacterForm

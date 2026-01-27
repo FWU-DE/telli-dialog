@@ -10,7 +10,7 @@ import {
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
-import { CharacterAccessLevel, CharacterWithShareDataModel, FileModel } from '@shared/db/schema';
+import { AccessLevel, CharacterWithShareDataModel, FileModel } from '@shared/db/schema';
 import { deepCopy, deepEqual } from '@/utils/object';
 import { cn } from '@/utils/tailwind';
 import {
@@ -41,7 +41,7 @@ import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
 import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
 import { AttachedLinks } from '@/components/forms/attached-links';
-import { WebsearchSource } from '@/app/api/conversation/tools/websearch/types';
+import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { formLinks } from '@/utils/web-search/form-links';
 import FileManagement from '@/components/forms/file-management';
 import { useFederalState } from '@/components/providers/federal-state-provider';
@@ -123,26 +123,25 @@ export default function CharacterForm({
 
   const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
     character.accessLevel,
-    (p, n: CharacterAccessLevel) => n,
+    (p, n: AccessLevel) => n,
   );
 
-  function handleAccessLevelChange(value: boolean) {
+  async function handleAccessLevelChange(value: boolean) {
     const accessLevel = value ? 'school' : 'private';
 
     startTransition(() => {
       addOptimisticAccessLevel(accessLevel);
     });
 
-    updateCharacterAccessLevelAction({
+    const result = await updateCharacterAccessLevelAction({
       characterId: character.id,
       accessLevel,
-    })
-      .then(() => {
-        router.refresh();
-      })
-      .catch(() => {
-        toast.error(tToast('edit-toast-error'));
-      });
+    });
+    if (result.success) {
+      router.refresh();
+    } else {
+      toast.error(tToast('edit-toast-error'));
+    }
   }
 
   async function handleDeattachFile(localFileId: string) {
@@ -183,32 +182,30 @@ export default function CharacterForm({
     name: 'attachedLinks',
   });
 
-  function handlePictureUploadComplete(picturePath: string) {
-    updateCharacterPictureAction({ picturePath, characterId: character.id })
-      .then(() => {
-        toast.success(tToast('image-toast-success'));
-        router.refresh();
-      })
-      .catch(() => {
-        toast.error(tToast('edit-toast-error'));
-      });
+  async function handlePictureUploadComplete(picturePath: string) {
+    const result = await updateCharacterPictureAction({ picturePath, characterId: character.id });
+    if (result.success) {
+      toast.success(tToast('image-toast-success'));
+      router.refresh();
+    } else {
+      toast.error(tToast('edit-toast-error'));
+    }
   }
 
-  function onSubmit(data: CharacterFormValues) {
-    updateCharacterAction({
-      characterId: character.id,
+  async function onSubmit(data: CharacterFormValues) {
+    const result = await updateCharacterAction({
+      id: character.id,
       ...data,
       attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
-    })
-      .then(() => {
-        if (!isCreating) {
-          toast.success(tToast('edit-toast-success'));
-        }
-        router.refresh();
-      })
-      .catch(() => {
-        toast.error(tToast('edit-toast-error'));
-      });
+    });
+    if (result.success) {
+      if (!isCreating) {
+        toast.success(tToast('edit-toast-success'));
+      }
+      router.refresh();
+    } else {
+      toast.error(tToast('edit-toast-error'));
+    }
   }
 
   function handleNavigateBack(e: React.MouseEvent<HTMLButtonElement>) {
@@ -220,19 +217,18 @@ export default function CharacterForm({
     router.push(backUrl);
   }
 
-  function handleDeleteCharacter() {
-    deleteCharacterAction({ characterId: character.id })
-      .then(() => {
-        // do not show any toast if the avatar is being created
-        if (!isCreating) {
-          toast.success(tToast('delete-toast-success'));
-        }
-        // replace instead of push to avoid showing a 404 when navigating back to the now non existing character
-        router.replace(backUrl);
-      })
-      .catch(() => {
-        toast.error(tToast('delete-toast-error'));
-      });
+  async function handleDeleteCharacter() {
+    const result = await deleteCharacterAction({ characterId: character.id });
+    if (result.success) {
+      // do not show any toast if the character is being created
+      if (!isCreating) {
+        toast.success(tToast('delete-toast-success'));
+      }
+      // replace instead of push to avoid showing a 404 when navigating back to the now non existing character
+      router.replace(backUrl);
+    } else {
+      toast.error(tToast('delete-toast-error'));
+    }
   }
 
   function handleAutoSave() {

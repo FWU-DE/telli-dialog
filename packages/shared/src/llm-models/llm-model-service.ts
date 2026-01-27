@@ -1,4 +1,4 @@
-import { LlmModel } from '../db/schema';
+import { LlmModelSelectModel } from '../db/schema';
 import { DEFAULT_CHAT_MODEL } from './default-llm-models';
 
 /**
@@ -6,7 +6,7 @@ import { DEFAULT_CHAT_MODEL } from './default-llm-models';
  * @param models The list of LLM models
  * @returns The default model or undefined if none found
  */
-export function getDefaultModel(models: LlmModel[]): LlmModel | undefined {
+export function getDefaultModel(models: LlmModelSelectModel[]): LlmModelSelectModel | undefined {
   return models.find((m) => m.name === DEFAULT_CHAT_MODEL) ?? getFirstTextModel(models);
 }
 
@@ -15,7 +15,7 @@ export function getDefaultModel(models: LlmModel[]): LlmModel | undefined {
  * @param models The list of LLM models
  * @returns The first text model or undefined if none found
  */
-export function getFirstTextModel(models: LlmModel[]): LlmModel | undefined {
+export function getFirstTextModel(models: LlmModelSelectModel[]): LlmModelSelectModel | undefined {
   return models.find(
     (m) => m.priceMetadata.type === 'text' && !m.name.toLowerCase().includes('mistral'),
   );
@@ -28,9 +28,9 @@ export function getFirstTextModel(models: LlmModel[]): LlmModel | undefined {
  * @returns Filtered list of text models
  */
 export function getFilteredTextModels(
-  models: LlmModel[],
+  models: LlmModelSelectModel[],
   excludeMistral: boolean = false,
-): LlmModel[] {
+): LlmModelSelectModel[] {
   let filteredModels = models.filter((m) => m.priceMetadata.type === 'text');
 
   if (excludeMistral) {

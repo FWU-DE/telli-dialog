@@ -9,13 +9,13 @@ export default async function Footer() {
     <footer className="flex gap-4 flex-wrap text-vidis-hover-purple w-full my-4 sm:my-8">
       <span>{baseUrl}</span>
       <div className="flex-grow" />
-      <Link href={PRIVACY_POLICY_URL} className="hover:underline">
+      <Link href={PRIVACY_POLICY_URL} prefetch={false} className="hover:underline">
         Datenschutz
       </Link>
-      <Link href={IMPRESSUM_URL} className="hover:underline">
+      <Link href={IMPRESSUM_URL} prefetch={false} className="hover:underline">
         Impressum
       </Link>
-      <Link href={TERMS_OF_USE_URL} className="hover:underline">
+      <Link href={TERMS_OF_USE_URL} prefetch={false} className="hover:underline">
         Nutzungsbedingungen
       </Link>
     </footer>

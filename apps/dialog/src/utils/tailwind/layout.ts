@@ -1,5 +1,7 @@
 import { DesignConfiguration } from '@ui/types/design-configuration';
 
+export const reductionBreakpoint = 'sm';
+
 export function constructRootLayoutStyle({
   designConfiguration,
 }: {

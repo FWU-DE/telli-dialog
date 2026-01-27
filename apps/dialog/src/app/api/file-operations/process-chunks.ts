@@ -1,7 +1,7 @@
 import { split as splitSentences, SentenceSplitterSyntax } from 'sentence-splitter';
-import { TextChunkModel } from '@shared/db/schema';
+import { TextChunkSelectModel } from '@shared/db/schema';
 
-export type ChunkResult = Omit<TextChunkModel, 'embedding' | 'contentTsv' | 'createdAt'> & {
+export type ChunkResult = Omit<TextChunkSelectModel, 'embedding' | 'contentTsv' | 'createdAt'> & {
   fileName: string;
 };
 

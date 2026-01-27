@@ -1,4 +1,4 @@
-import { characterAccessLevelSchema } from '@shared/db/schema';
+import { accessLevelSchema } from '@shared/db/schema';
 import Page2 from './_page';
 import { enrichGptWithImage } from './utils';
 import z from 'zod';
@@ -9,8 +9,8 @@ import { getCustomGptByAccessLevel } from '@shared/custom-gpt/custom-gpt-service
 
 export const dynamic = 'force-dynamic';
 
-export const searchParamsSchema = z.object({
-  visibility: characterAccessLevelSchema.optional().default('private'),
+const searchParamsSchema = z.object({
+  visibility: accessLevelSchema.optional().default('private'),
 });
 
 export default async function Page(props: PageProps<'/custom'>) {
@@ -29,5 +29,11 @@ export default async function Page(props: PageProps<'/custom'>) {
 
   const enrichedCustomGpts = await enrichGptWithImage({ customGpts });
 
-  return <Page2 user={userAndContext} customGpts={enrichedCustomGpts} accessLevel={accessLevel} />;
+  return (
+    <Page2
+      userAndContext={userAndContext}
+      customGpts={enrichedCustomGpts}
+      accessLevel={accessLevel}
+    />
+  );
 }

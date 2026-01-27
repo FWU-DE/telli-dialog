@@ -13,12 +13,10 @@ import { iconClassName } from '@/utils/tailwind/icon';
 type DownloadConversationButtonProps = {
   conversationMessages: Message[];
   className?: React.ComponentProps<'button'>['className'];
-  iconClassName?: string;
   disabled: boolean;
   primaryButton?: boolean;
   sharedConversationName?: string;
   characterName?: string;
-  buttonClassName?: string;
   showText?: boolean;
 };
 
@@ -28,7 +26,6 @@ export default function DownloadSharedConversationButton({
   primaryButton,
   sharedConversationName,
   characterName,
-  buttonClassName,
   showText = true,
 }: DownloadConversationButtonProps) {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -69,9 +66,8 @@ export default function DownloadSharedConversationButton({
       const blob = await response.blob();
 
       downloadFileFromBlob(blob, fileName);
-    } catch (error) {
-      console.error('Error downloading document:', error);
-      toast.error('Error downloading document');
+    } catch {
+      toast.error('Der Download der Konversation ist fehlgeschlagen.');
     } finally {
       setIsLoading(false);
     }
@@ -80,7 +76,7 @@ export default function DownloadSharedConversationButton({
   if (primaryButton) {
     return (
       <button
-        className={cn(buttonPrimaryClassName, 'text-base font-normal', buttonClassName)}
+        className={cn(buttonPrimaryClassName, 'text-base font-normal')}
         title={tCommon('conversation-download')}
         onClick={handleDownload}
         disabled={disabled}
@@ -99,12 +95,7 @@ export default function DownloadSharedConversationButton({
 
   return (
     <button
-      className={cn(
-        'flex items-center gap-1',
-        iconClassName,
-        buttonClassName,
-        'disabled:hover:bg-transparent',
-      )}
+      className={cn('flex items-center gap-1 pl-2', iconClassName, 'disabled:hover:bg-transparent')}
       title={tCommon('conversation-download')}
       onClick={handleDownload}
       disabled={disabled}

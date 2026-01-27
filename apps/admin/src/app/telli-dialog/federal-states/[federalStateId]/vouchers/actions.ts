@@ -16,10 +16,7 @@ export async function createVouchersAction(
 ) {
   const session = await requireAdminAuth();
 
-  return createVouchers(federalStateId, {
-    ...voucherData,
-    createdBy: session.user.name,
-  });
+  return createVouchers(federalStateId, session.user.name, voucherData);
 }
 
 export async function revokeVoucherAction(

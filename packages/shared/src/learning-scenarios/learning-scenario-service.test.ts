@@ -17,7 +17,7 @@ import {
 } from './learning-scenario-service';
 import { dbGetSharedSchoolChatById } from '../db/functions/shared-school-chat';
 import { generateUUID } from '../utils/uuid';
-import { SharedSchoolConversationModel } from '@shared/db/schema';
+import { SharedSchoolConversationSelectModel } from '@shared/db/schema';
 import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
 import { UserModel } from '@shared/auth/user-model';
 
@@ -80,7 +80,7 @@ describe('learning-scenario-service', () => {
     const userId = generateUUID();
     const learningScenarioId = generateUUID();
     const fileId = generateUUID();
-    const mockLearningScenario: Partial<SharedSchoolConversationModel> = {
+    const mockLearningScenario: Partial<SharedSchoolConversationSelectModel> = {
       userId: userId,
       id: learningScenarioId,
       name: 'Test Scenario',
@@ -107,7 +107,7 @@ describe('learning-scenario-service', () => {
           updateLearningScenario({
             learningScenarioId,
             user: mockUser('teacher'),
-            data: mockLearningScenario as SharedSchoolConversationModel,
+            data: mockLearningScenario as SharedSchoolConversationSelectModel,
           }),
       },
       {
@@ -124,7 +124,7 @@ describe('learning-scenario-service', () => {
         testFunction: () =>
           shareLearningScenario({
             learningScenarioId,
-            data: { intelliPointsPercentageLimit: 50, usageTimeLimit: 60 },
+            data: { telliPointsPercentageLimit: 50, usageTimeLimit: 60 },
             userId: 'different-user-id',
           }),
       },
@@ -180,7 +180,7 @@ describe('learning-scenario-service', () => {
           updateLearningScenario({
             learningScenarioId: 'invalid-uuid',
             user: mockUser('teacher'),
-            data: { name: 'Test', description: 'Test' } as SharedSchoolConversationModel,
+            data: { name: 'Test', description: 'Test' } as SharedSchoolConversationSelectModel,
           }),
       },
       {
@@ -197,7 +197,7 @@ describe('learning-scenario-service', () => {
         testFunction: () =>
           shareLearningScenario({
             learningScenarioId: 'invalid-uuid',
-            data: { intelliPointsPercentageLimit: 50, usageTimeLimit: 60 },
+            data: { telliPointsPercentageLimit: 50, usageTimeLimit: 60 },
             userId: 'user-id',
           }),
       },

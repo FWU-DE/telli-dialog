@@ -28,7 +28,6 @@ export async function getFederalStateById(federalStateId: string): Promise<Feder
 }
 
 const updateSchema = federalStateUpdateSchema.omit({
-  createdAt: true,
   encryptedApiKey: true,
 });
 

@@ -16,14 +16,12 @@
   "packageManager": "pnpm@10.24.0",
   "devDependencies": {
     "@telli/typescript-config": "workspace:*",
-    "prettier": "3.7.4",
-    "turbo": "2.6.3"
+    "prettier": "3.8.0",
+    "turbo": "2.7.5"
   },
   "pnpm": {
     "overrides": {
-      "glob@<11.1.0": ">=11.1.0",
-      "parse5": "7.3.0",
-      "require-in-the-middle": "8.0.1"
+      "glob@<11.1.0": ">=11.1.0"
     }
   }
 }

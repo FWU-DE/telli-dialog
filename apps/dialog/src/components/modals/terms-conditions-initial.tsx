@@ -112,6 +112,7 @@ export default function TermsConditionsModal({
   const currentContent = <MarkdownDisplay>{contents[pageNumber] ?? ''}</MarkdownDisplay>;
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     checkScrollState();
   }, [pageNumber, contents]);
 

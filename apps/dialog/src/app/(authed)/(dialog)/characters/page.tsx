@@ -1,4 +1,4 @@
-import { characterAccessLevelSchema } from '@shared/db/schema';
+import { accessLevelSchema } from '@shared/db/schema';
 import CharacterPreviewPage from './character-preview-page';
 import { enrichCharactersWithImage } from './utils';
 import z from 'zod';
@@ -9,8 +9,8 @@ import { buildLegacyUserAndContext } from '@/auth/types';
 
 export const dynamic = 'force-dynamic';
 
-export const searchParamsSchema = z.object({
-  visibility: characterAccessLevelSchema.optional().default('private'),
+const searchParamsSchema = z.object({
+  visibility: accessLevelSchema.optional().default('private'),
 });
 
 export default async function Page(props: PageProps<'/characters'>) {
