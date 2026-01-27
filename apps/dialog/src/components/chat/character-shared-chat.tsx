@@ -1,6 +1,6 @@
 'use client';
 
-import { useCharacterChat, convertToAiMessages, type ChatMessage } from '@/hooks/use-chat-hooks';
+import { useCharacterChat, type ChatMessage } from '@/hooks/use-chat-hooks';
 import { FormEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { CharacterWithShareDataModel } from '@shared/db/schema';
@@ -17,6 +17,7 @@ import { Messages } from './messages';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 import StreamingFinishedMarker from './streaming-finished-marker';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
+import { toUIMessages } from '@/types/chat';
 
 /**
  * This component is used if a character is shared via invite code.
@@ -48,7 +49,7 @@ export default function CharacterSharedChat({
     });
 
   // Convert to Vercel AI Message format for compatibility with existing components
-  const aiMessages = convertToAiMessages(messages);
+  const aiMessages = toUIMessages(messages);
 
   const scrollRef = useAutoScroll([messages, id, inviteCode]);
   const { isBelow } = useBreakpoints();

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMainChat, convertToAiMessages, type ChatMessage } from '@/hooks/use-chat-hooks';
+import { useMainChat, type ChatMessage } from '@/hooks/use-chat-hooks';
 import { FormEvent, ReactNode, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
@@ -27,6 +27,7 @@ import { messageContainsAttachments } from '@/utils/chat/messages';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { getConversationPath } from '@/utils/chat/path';
 import { Messages } from './messages';
+import { toUIMessages } from '@/types/chat';
 
 type ChatProps = {
   id: string;
@@ -101,7 +102,7 @@ export default function Chat({
     });
 
   // Convert to Vercel AI Message format for compatibility with existing components
-  const aiMessages = convertToAiMessages(messages);
+  const aiMessages = toUIMessages(messages);
 
   const scrollRef = useAutoScroll([messages, status]);
 

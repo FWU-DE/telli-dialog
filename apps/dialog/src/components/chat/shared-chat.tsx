@@ -1,6 +1,6 @@
 'use client';
 
-import { useSharedChat, convertToAiMessages } from '@/hooks/use-chat-hooks';
+import { useSharedChat } from '@/hooks/use-chat-hooks';
 import { FormEvent, RefObject, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { type SharedSchoolConversationSelectModel } from '@shared/db/schema';
@@ -14,6 +14,7 @@ import { messageContainsAttachments } from '@/utils/chat/messages';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { Messages } from './messages';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import { toUIMessages } from '@/types/chat';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
@@ -39,7 +40,7 @@ export default function SharedChat({
     });
 
   // Convert to Vercel AI Message format for compatibility with existing components
-  const aiMessages = convertToAiMessages(messages);
+  const aiMessages = toUIMessages(messages);
 
   const scrollRef = useAutoScroll([messages, id, inviteCode]);
   const containerRef = useRef<HTMLDivElement>(null);

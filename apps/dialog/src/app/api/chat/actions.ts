@@ -4,7 +4,7 @@ import { generateTextStreamWithBilling, type Message as AiCoreMessage } from '@t
 import { createTextStream } from '@/utils/streaming';
 import { getUser, userHasCompletedTraining } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
-import { userHasReachedIntelliPointLimit } from './usage';
+import { userHasReachedTelliPointsLimit } from './usage';
 import { getModelAndApiKeyWithResult, getAuxiliaryModel } from '../utils/utils';
 import {
   dbGetConversationAndMessages,
@@ -22,8 +22,8 @@ import { constructChatSystemPrompt } from './system-prompt';
 import { getChatTitle, limitChatHistory } from './utils';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
-import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
-import { WebsearchSource } from '../conversation/tools/websearch/types';
+import { webScraperExecutable } from '../webpage-content/search-web-readability';
+import { WebsearchSource } from '../webpage-content/types';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import { logError } from '@shared/logging';
@@ -133,7 +133,7 @@ export async function sendChatMessage({
   }
 
   // Check budget limit after we have the conversation for proper event tracking
-  if (await userHasReachedIntelliPointLimit({ user })) {
+  if (await userHasReachedTelliPointsLimit({ user })) {
     await sendRabbitmqEvent(
       constructTelliBudgetExceededEvent({
         anonymous: false,

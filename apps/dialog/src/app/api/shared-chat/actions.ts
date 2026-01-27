@@ -6,8 +6,8 @@ import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import {
   sharedChatHasExpired,
-  sharedChatHasReachedIntelliPointLimit,
-  userHasReachedIntelliPointLimit,
+  sharedChatHasReachedTelliPointsLimit,
+  userHasReachedTelliPointsLimit,
 } from '../chat/usage';
 import { getModelAndApiKeyWithResult } from '../utils/utils';
 import {
@@ -21,7 +21,7 @@ import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exce
 import { constructLearningScenarioSystemPrompt } from './system-prompt';
 import { limitChatHistory } from '../chat/utils';
 import { getRelevantFileContent } from '../file-operations/retrieval';
-import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
+import { webScraperExecutable } from '../webpage-content/search-web-readability';
 import { logError } from '@shared/logging';
 import {
   KEEP_FIRST_MESSAGES,
@@ -108,11 +108,11 @@ export async function sendSharedChatMessage({
 
   // Check limits
   const [sharedChatLimitReached, intelliPointsLimitReached] = await Promise.all([
-    sharedChatHasReachedIntelliPointLimit({
+    sharedChatHasReachedTelliPointsLimit({
       user: teacherUserAndContext,
       sharedChat,
     }),
-    userHasReachedIntelliPointLimit({ user: teacherUserAndContext }),
+    userHasReachedTelliPointsLimit({ user: teacherUserAndContext }),
   ]);
 
   if (sharedChatLimitReached) {

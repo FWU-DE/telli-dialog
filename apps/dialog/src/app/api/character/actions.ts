@@ -5,9 +5,9 @@ import { createTextStream } from '@/utils/streaming';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import {
-  sharedCharacterChatHasReachedIntelliPointLimit,
+  sharedCharacterChatHasReachedTelliPointsLimit,
   sharedChatHasExpired,
-  userHasReachedIntelliPointLimit,
+  userHasReachedTelliPointsLimit,
 } from '../chat/usage';
 import { getModelAndApiKeyWithResult } from '../utils/utils';
 import {
@@ -21,7 +21,7 @@ import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exce
 import { constructCharacterSystemPrompt } from './system-prompt';
 import { limitChatHistory } from '../chat/utils';
 import { getRelevantFileContent } from '../file-operations/retrieval';
-import { webScraperExecutable } from '../conversation/tools/websearch/search-web';
+import { webScraperExecutable } from '../webpage-content/search-web-readability';
 import { logError } from '@shared/logging';
 import {
   KEEP_FIRST_MESSAGES,
@@ -108,11 +108,11 @@ export async function sendCharacterMessage({
 
   // Check limits
   const [sharedChatLimitReached, intelliPointsLimitReached] = await Promise.all([
-    sharedCharacterChatHasReachedIntelliPointLimit({
+    sharedCharacterChatHasReachedTelliPointsLimit({
       user: teacherUserAndContext,
       character,
     }),
-    userHasReachedIntelliPointLimit({ user: teacherUserAndContext }),
+    userHasReachedTelliPointsLimit({ user: teacherUserAndContext }),
   ]);
 
   if (sharedChatLimitReached) {

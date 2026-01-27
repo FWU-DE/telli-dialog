@@ -10,7 +10,7 @@ import {
 import { sendChatMessage } from '@/app/api/chat/actions';
 import { sendCharacterMessage } from '@/app/api/character/actions';
 import { sendSharedChatMessage } from '@/app/api/shared-chat/actions';
-import { type UIMessage, type ChatStatus, toUIMessages } from '@/types/chat';
+import { type UIMessage, type ChatStatus } from '@/types/chat';
 
 // Re-export types for convenience
 export type { ChatMessage, ChatStatus, UseChatReturn, UIMessage };
@@ -109,12 +109,4 @@ export function useSharedChat(options: {
     sendMessage,
     ...rest,
   });
-}
-
-/**
- * Convert ChatMessage[] to UIMessage[] for rendering.
- * @deprecated Since v1.2.0; will be removed in or after v2.0.0. Use toUIMessages from @/types/chat instead.
- */
-export function convertToAiMessages(messages: ChatMessage[]): UIMessage[] {
-  return toUIMessages(messages);
 }
