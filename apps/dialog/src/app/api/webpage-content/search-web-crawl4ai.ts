@@ -2,7 +2,7 @@ import { WebsearchSource } from './types';
 import { SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
-import { logError, logWarning } from '@shared/logging';
+import { logWarning } from '@shared/logging';
 import { env } from '@/env';
 
 interface Crawl4AIResult {
@@ -86,10 +86,7 @@ export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> 
     });
 
     if (!response.ok) {
-      logError(
-        `Crawl4AI request failed with status ${response.status} for URL: ${url}`,
-        response.status,
-      );
+      logWarning(`Crawl4AI request failed with status ${response.status} for URL: ${url}`);
       return defaultErrorSource(url);
     }
 
@@ -113,7 +110,7 @@ export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> 
 
     // Extract title from metadata or fallback
     const title =
-      result.metadata?.title || result.metadata?.['og:title'] || t('placeholders.unknown-title');
+      result.metadata?.['og:title'] || result.metadata?.title || t('placeholders.unknown-title');
 
     // Trim content
     const trimmedContent = markdownContent.substring(0, SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT);
@@ -126,11 +123,11 @@ export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> 
     };
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
-      logError(`Crawl4AI request timed out for URL: ${url}`, error);
+      logWarning(`Crawl4AI request timed out for URL: ${url}`);
       return defaultErrorSource(url);
     }
 
-    logError(`Crawl4AI request failed for URL: ${url}`, error);
+    logWarning(`Crawl4AI request failed for URL: ${url}`);
     return defaultErrorSource(url);
   }
 }

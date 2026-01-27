@@ -2,6 +2,7 @@ import { cacheLife } from 'next/cache';
 import { WebsearchSource } from './types';
 import { webScraperCrawl4AI } from './search-web-crawl4ai';
 import { webScraperReadability } from './search-web-readability';
+import { logWarning } from '@shared/logging/logging';
 
 /**
  * Scrapes web content and returns markdown.
@@ -20,5 +21,6 @@ export async function webScraper(url: string): Promise<WebsearchSource> {
   }
 
   // Fallback to Readability-based scraper
+  logWarning(`Crawl4AI returned no result for URL: ${url}, fallback to Readability.`);
   return webScraperReadability(url);
 }
