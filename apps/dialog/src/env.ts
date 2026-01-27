@@ -6,6 +6,7 @@ export const env = createEnv({
   server: {
     apiKey: z.string(),
     apiUrl: z.url(),
+    appVersion: z.string().default('0.0.0'),
     authSecret: z.string(),
     databaseUrl: z.string(),
     encryptionKey: z.string(),
@@ -35,6 +36,7 @@ export const env = createEnv({
   runtimeEnv: {
     apiKey: process.env.API_KEY,
     apiUrl: process.env.API_URL,
+    appVersion: process.env.APP_VERSION,
     authSecret: process.env.AUTH_SECRET,
     databaseUrl: process.env.DATABASE_URL,
     encryptionKey: process.env.ENCRYPTION_KEY,

@@ -8,13 +8,14 @@ import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { SentrySampler, SentrySpanProcessor } from '@sentry/opentelemetry';
+import { env } from '@/env';
 
 const sentryClient = Sentry.init({
   debug: false,
   dsn: process.env.SENTRY_DSN,
   environment: process.env.SENTRY_ENVIRONMENT,
   integrations: [Sentry.captureConsoleIntegration({ levels: ['warn', 'error'] })],
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
+  // Define how likely traces are sampled. Adjust this value in production or use tracesSampler for greater control.
   profileSessionSampleRate: 0.01,
   tracesSampleRate: 1,
   // Use custom OpenTelemetry configuration, see https://docs.sentry.io/platforms/javascript/guides/node/opentelemetry/custom-setup/
@@ -50,7 +51,7 @@ const sdk = new NodeSDK({
   ],
   resource: resourceFromAttributes({
     [ATTR_SERVICE_NAME]: SERVICE_NAME,
-    [ATTR_SERVICE_VERSION]: process.env.APP_VERSION,
+    [ATTR_SERVICE_VERSION]: env.appVersion,
   }),
   metricReaders: [periodicExportingMetricReader],
   sampler: sentryClient ? new SentrySampler(sentryClient) : undefined,
