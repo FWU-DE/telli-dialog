@@ -26,9 +26,8 @@ import {
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
-import { deleteMessageAttachment } from '@shared/files/fileService';
-import { logError } from '@shared/logging';
-import { copyFileInS3, deleteFileFromS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { deleteAvatarPicture, deleteMessageAttachment } from '@shared/files/fileService';
+import { copyFileInS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { addDays } from '@shared/utils/date';
@@ -343,16 +342,16 @@ export const deleteCharacter = async ({
   const { isOwner, character } = await getCharacterInfo(characterId, userId);
   if (!isOwner) throw new ForbiddenError('Not authorized to delete this character');
 
+  const relatedFiles = await dbGetRelatedCharacterFiles(characterId);
+
   // delete character from db
   const deletedCharacter = await dbDeleteCharacterByIdAndUserId({ characterId, userId: userId });
 
-  if (character.pictureId) {
-    try {
-      await deleteFileFromS3({ key: character.pictureId });
-    } catch (error) {
-      logError('Cannot delete picture of character ' + characterId, error);
-    }
-  }
+  // delete avatar picture from S3
+  await deleteAvatarPicture(character.pictureId);
+
+  // delete all related files linked to this character
+  await Promise.all(relatedFiles.map((file) => deleteMessageAttachment({ fileId: file.id })));
 
   return deletedCharacter;
 };

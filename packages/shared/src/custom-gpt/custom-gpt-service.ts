@@ -24,7 +24,7 @@ import {
   fileTable,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
-import { deleteMessageAttachment } from '@shared/files/fileService';
+import { deleteAvatarPicture, deleteMessageAttachment } from '@shared/files/fileService';
 import { copyFileInS3 } from '@shared/s3';
 import { copyCustomGpt, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { addDays } from '@shared/utils/date';
@@ -417,6 +417,7 @@ export async function updateCustomGpt({
 /**
  * Deletes a custom gpt.
  * Throws if the user is not the owner of the custom gpt.
+ * Also deletes all related files and the avatar picture from S3.
  */
 export async function deleteCustomGpt({
   customGptId,
@@ -430,7 +431,19 @@ export async function deleteCustomGpt({
   if (customGpt.userId !== userId) {
     throw new ForbiddenError('Not authorized to delete this custom gpt');
   }
-  return dbDeleteCustomGptByIdAndUserId({ gptId: customGptId, userId });
+
+  const relatedFiles = await dbGetRelatedCustomGptFiles(customGptId);
+
+  // delete customGpt from db
+  const deletedCustomGpt = await dbDeleteCustomGptByIdAndUserId({ gptId: customGptId, userId });
+
+  // delete avatar picture from S3
+  await deleteAvatarPicture(customGpt.pictureId);
+
+  // delete all related files from s3
+  await Promise.all(relatedFiles.map((file) => deleteMessageAttachment({ fileId: file.id })));
+
+  return deletedCustomGpt;
 }
 
 /**

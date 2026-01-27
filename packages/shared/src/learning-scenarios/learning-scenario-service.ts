@@ -16,7 +16,7 @@ import {
   sharedSchoolConversationUpdateSchema,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
-import { deleteMessageAttachment } from '@shared/files/fileService';
+import { deleteAvatarPicture, deleteMessageAttachment } from '@shared/files/fileService';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { addDays } from '@shared/utils/date';
@@ -292,6 +292,7 @@ export async function createNewLearningScenario({
 /**
  * Deletes a learning scenario if the user is the owner.
  * @throws NotFoundError if the learning scenario does not exist or the user is not the owner.
+ * Also deletes all related files and the avatar picture from S3.
  */
 export async function deleteLearningScenario({
   learningScenarioId,
@@ -307,10 +308,21 @@ export async function deleteLearningScenario({
   });
   if (!learningScenario) throw new NotFoundError('Learning scenario not found');
 
-  return dbDeleteSharedSchoolChatByIdAndUserId({
+  const relatedFiles = await dbGetFilesForLearningScenario(learningScenarioId, userId);
+
+  // delete learning scenario from db
+  const deletedLearningScenario = await dbDeleteSharedSchoolChatByIdAndUserId({
     sharedChatId: learningScenarioId,
     userId,
   });
+
+  // delete avatar picture from S3
+  await deleteAvatarPicture(learningScenario.pictureId);
+
+  // delete all related files from s3
+  await Promise.all(relatedFiles.map((file) => deleteMessageAttachment({ fileId: file.id })));
+
+  return deletedLearningScenario;
 }
 
 /**

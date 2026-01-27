@@ -108,5 +108,19 @@ export async function linkFileToCustomGpt(fileId: string, customGptId: string): 
  */
 export async function deleteMessageAttachment({ fileId }: { fileId: string }): Promise<void> {
   const filePath = `${MESSAGE_ATTACHMENTS_FOLDER_NAME}/${fileId}`;
+  console.log('Deleting message attachment with key:', filePath);
   await deleteFileFromS3({ key: filePath });
+}
+
+/**
+ * Deletes an avatar picture from S3.
+ *
+ * @param key The pictureId for characters, customgpts and learning scenarios
+ * do contain the full path so we can directly use it as key.
+ * Does nothing if key is null or undefined.
+ *
+ * If the last file of folder is deleted, the folder in s3 automatically gets deleted as well.
+ */
+export async function deleteAvatarPicture(key: string | null | undefined): Promise<void> {
+  if (key) await deleteFileFromS3({ key });
 }
