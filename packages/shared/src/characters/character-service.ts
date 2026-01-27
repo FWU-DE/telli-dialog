@@ -26,6 +26,7 @@ import {
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
+import { deleteMessageAttachment } from '@shared/files/fileService';
 import { logError } from '@shared/logging';
 import { copyFileInS3, deleteFileFromS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
@@ -125,8 +126,7 @@ export const createNewCharacter = async ({
 
 /**
  * Deletes a character file mapping and the associated file entry in the database.
- *
- * Note: the cleanup job will delete the file from S3 at a later time.
+ * Also deletes the actual file from S3.
  */
 export const deleteFileMappingAndEntity = async ({
   characterId,
@@ -147,6 +147,9 @@ export const deleteFileMappingAndEntity = async ({
     await tx.delete(CharacterFileMapping).where(eq(CharacterFileMapping.fileId, fileId));
     await tx.delete(fileTable).where(eq(fileTable.id, fileId));
   });
+
+  // Delete the file from S3
+  await deleteMessageAttachment({ fileId });
 };
 
 /**
@@ -192,6 +195,7 @@ export const linkFileToCharacter = async ({
   characterId: string;
   userId: string;
 }) => {
+  console.log('linkFileToCharacter called with fileId:', fileId, 'characterId:', characterId);
   checkParameterUUID(characterId);
   // Authorization check
   const { isOwner } = await getCharacterInfo(characterId, userId);

@@ -16,6 +16,7 @@ import {
   sharedSchoolConversationUpdateSchema,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
+import { deleteMessageAttachment } from '@shared/files/fileService';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { addDays } from '@shared/utils/date';
@@ -343,8 +344,7 @@ export async function linkFileToLearningScenario({
 
 /**
  * Removes a file from a learning scenario.
- * The file itself is not deleted from the s3 bucket.
- * There is a cleanup job that deletes unlinked files after a certain period.
+ * Also deletes the actual file from S3.
  * @throws NotFoundError if the learning scenario does not exist.
  * @throws ForbiddenError if the user is not the owner of the learning scenario.
  */
@@ -362,6 +362,7 @@ export async function removeFileFromLearningScenario({
   // get learning scenario for access check
   await getLearningScenario({ learningScenarioId, userId });
 
+  // delete mapping and file entry in db
   await db.transaction(async (tx) => {
     await tx
       .delete(SharedSchoolConversationFileMapping)
@@ -373,6 +374,9 @@ export async function removeFileFromLearningScenario({
       );
     await tx.delete(fileTable).where(eq(fileTable.id, fileId));
   });
+
+  // Delete the file from S3
+  await deleteMessageAttachment({ fileId });
 }
 
 async function enrichLearningScenarioWithPictureUrl({
@@ -392,7 +396,8 @@ async function enrichLearningScenarioWithPictureUrl({
 
 /**
  * Cleans up learning scenarios with empty names from the database.
- * Attention: This is an admin function that does not check any authorization!
+ *
+ * CAUTION: This is an admin function that does not check any authorization!
  *
  * Note: linked files will be unlinked but removed separately by `dbDeleteDanglingFiles`
  *

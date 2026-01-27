@@ -24,6 +24,7 @@ import {
   fileTable,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
+import { deleteMessageAttachment } from '@shared/files/fileService';
 import { copyFileInS3 } from '@shared/s3';
 import { copyCustomGpt, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { addDays } from '@shared/utils/date';
@@ -239,7 +240,8 @@ export async function linkFileToCustomGpt({
 }
 
 /**
- * Delete file mapping and the file entity itself
+ * Delete file mapping and the file entity itself from database.
+ * Also deletes the actual file from S3.
  * Throws if the user is not the owner of the custom gpt.
  */
 export async function deleteFileMappingAndEntity({
@@ -257,10 +259,14 @@ export async function deleteFileMappingAndEntity({
     throw new ForbiddenError('Not authorized to delete this file mapping from custom gpt');
   }
 
+  // delete mapping and file entry in db
   await db.transaction(async (tx) => {
     await tx.delete(CustomGptFileMapping).where(eq(CustomGptFileMapping.fileId, fileId));
     await tx.delete(fileTable).where(eq(fileTable.id, fileId));
   });
+
+  // Delete the file from S3
+  await deleteMessageAttachment({ fileId });
 }
 
 /**
@@ -429,7 +435,8 @@ export async function deleteCustomGpt({
 
 /**
  * Cleans up custom gpts with empty names from the database.
- * Attention: This is an admin function that does not check any authorization!
+ *
+ * CAUTION: This is an admin function that does not check any authorization!
  *
  * Note: linked files will be unlinked but removed separately by `dbDeleteDanglingFiles`
  *
