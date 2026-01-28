@@ -91,6 +91,7 @@ export async function copyFileInS3({ newKey, copySource }: { newKey: string; cop
   }
 }
 
+// Todo RL: key should not be optional, expiresIn should be configurable
 export async function getReadOnlySignedUrl({
   key,
   filename,
@@ -124,7 +125,12 @@ export async function getReadOnlySignedUrl({
   }
 }
 
-export async function getSignedUrlFromS3Put({ key, fileType }: { key: string; fileType: string }) {
+// Todo RL: Wird nur vom crop-upload-button aufgerufen.
+// Erstens ist das eine Client-Komponente --> verschieben nach actions
+// Zweitens fehlt eine Überprüfung der Berechtigungen
+// Wenn das Problem gelöst ist, kann die 'use server' Directive entfernt werden.
+// Der Code aus dieser Datei darf nur auf dem Server ausgeführt werden.
+export async function getWriteableSignedUrl({ key, fileType }: { key: string; fileType: string }) {
   const command = new PutObjectCommand({
     Bucket: env.otcBucketName,
     Key: key,
