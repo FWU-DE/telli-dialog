@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useImageModels } from '../providers/image-model-provider';
 import { useImageStyle } from '../providers/image-style-provider';
@@ -43,6 +43,7 @@ export default function ImageGenerationChat({
   } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const imageRef = useRef<HTMLImageElement>(null);
 
   // Load the single image from initial messages and file attachments
   useEffect(() => {
@@ -174,6 +175,7 @@ export default function ImageGenerationChat({
               <h3 className="text-xs text-gray-700">{tImageGeneration('prompt-label')}</h3>
               <p className="text-sm mb-3">{displayedImage.prompt}</p>
               <Image
+                ref={imageRef}
                 src={displayedImage.imageUrl}
                 alt={displayedImage.prompt}
                 className="w-full rounded-xl"
@@ -181,11 +183,9 @@ export default function ImageGenerationChat({
                 height={800}
                 loading="eager"
                 unoptimized={true} // Since we're using signed URLs from S3
+                crossOrigin="anonymous" // Needed for clipboard copy to work
               />
-              <ImageActionButtons
-                imageUrl={displayedImage.imageUrl}
-                prompt={displayedImage.prompt}
-              />
+              <ImageActionButtons imageRef={imageRef} prompt={displayedImage.prompt} />
             </div>
           )}
         </div>
