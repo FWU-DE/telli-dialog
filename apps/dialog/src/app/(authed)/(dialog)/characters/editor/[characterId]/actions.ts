@@ -128,7 +128,6 @@ export async function uploadAvatarPictureForCharacterAction({
   croppedImageBlob: Blob;
 }) {
   const { user } = await requireAuth();
-  console.log('uploadAvatarPictureForCharacterAction called');
 
   return runServerAction(uploadAvatarPictureForCharacter)({
     characterId,

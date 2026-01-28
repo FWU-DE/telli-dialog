@@ -150,7 +150,6 @@ export type UploadAvatarPictureParams = {
 };
 
 export async function uploadAvatarPicture({ key, croppedImageBlob }: UploadAvatarPictureParams) {
-  console.log('uploadAvatarPicture called with key:', key);
   await uploadFileToS3({
     key: key,
     body: croppedImageBlob,

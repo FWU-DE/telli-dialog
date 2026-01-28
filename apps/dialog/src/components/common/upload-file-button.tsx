@@ -20,7 +20,6 @@ export default function GenericFileUploadButton({
   }
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    console.log('handleFileChange called with event:', event.target.files);
     const files = event.target.files;
 
     if (files === null) return;
