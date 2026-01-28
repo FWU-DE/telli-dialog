@@ -17,7 +17,7 @@ import {
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
 import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
-import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { getReadOnlySignedUrl } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { addDays } from '@shared/utils/date';
 import { and, eq, lt } from 'drizzle-orm';
@@ -400,7 +400,7 @@ async function enrichLearningScenarioWithPictureUrl({
   return await Promise.all(
     learningScenarios.map(async (scenario) => ({
       ...scenario,
-      maybeSignedPictureUrl: await getMaybeSignedUrlFromS3Get({
+      maybeSignedPictureUrl: await getReadOnlySignedUrl({
         key: scenario.pictureId ? `shared-chats/${scenario.id}/avatar` : undefined,
       }),
     })),

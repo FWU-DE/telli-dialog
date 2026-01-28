@@ -1,6 +1,6 @@
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { getReadOnlySignedUrl } from '@shared/s3';
 import HeaderPortal from '../../../header-portal';
 import CustomGptForm from './custom-gpt-form';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
@@ -40,7 +40,7 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
 
   let maybeSignedPictureUrl: string | undefined;
   try {
-    maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
+    maybeSignedPictureUrl = await getReadOnlySignedUrl({
       key: customGpt.pictureId,
     });
   } catch (e) {

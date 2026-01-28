@@ -91,22 +91,19 @@ export async function copyFileInS3({ newKey, copySource }: { newKey: string; cop
   }
 }
 
-export async function getMaybeSignedUrlFromS3Get({ key }: { key: string | undefined | null }) {
-  if (key === undefined || key === null || key === '') return undefined;
-  return await getSignedUrlFromS3Get({ key });
-}
-
-export async function getSignedUrlFromS3Get({
+export async function getReadOnlySignedUrl({
   key,
   filename,
   contentType,
   attachment = true,
 }: {
-  key: string;
+  key: string | null | undefined;
   filename?: string;
   contentType?: string;
   attachment?: boolean;
 }) {
+  if (!key) return undefined;
+
   let contentDisposition = attachment ? 'attachment;' : '';
   if (filename !== undefined) {
     contentDisposition = `${contentDisposition} filename=${filename}`;
@@ -224,7 +221,7 @@ async function getMaybeSignedUrlIfExists({
     );
 
     // If no error is thrown, the object exists, so generate the signed URL
-    return await getSignedUrlFromS3Get({ key, filename, contentType, attachment });
+    return await getReadOnlySignedUrl({ key, filename, contentType, attachment });
   } catch (error) {
     if (!suppressError) {
       console.error('Error getting signed URL from S3:', error);

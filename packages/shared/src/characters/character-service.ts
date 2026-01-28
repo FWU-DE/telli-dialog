@@ -27,7 +27,7 @@ import {
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
 import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
-import { copyFileInS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { copyFileInS3, getReadOnlySignedUrl } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { addDays } from '@shared/utils/date';
@@ -522,7 +522,7 @@ export const getCharacterForEditView = async ({
     throw new ForbiddenError('Not authorized to edit this character');
 
   const relatedFiles = await fetchFileMappings({ characterId, userId, schoolId });
-  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
+  const maybeSignedPictureUrl = await getReadOnlySignedUrl({
     key: character.pictureId,
   });
   return { character, relatedFiles, maybeSignedPictureUrl };
