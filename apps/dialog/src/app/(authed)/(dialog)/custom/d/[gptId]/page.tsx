@@ -3,7 +3,7 @@ import Chat from '@/components/chat/chat';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
-import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { getReadOnlySignedUrl } from '@shared/s3';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
 import Logo from '@/components/common/logo';
 import { getCustomGptForNewChat } from '@shared/custom-gpt/custom-gpt-service';
@@ -31,7 +31,7 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]'>) {
   });
 
   const currentModel = user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
-  const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: customGpt.pictureId });
+  const maybeSignedImageUrl = await getReadOnlySignedUrl({ key: customGpt.pictureId });
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
       <ChatHeaderBar chatId={id} userAndContext={userAndContext} hasMessages={false} />

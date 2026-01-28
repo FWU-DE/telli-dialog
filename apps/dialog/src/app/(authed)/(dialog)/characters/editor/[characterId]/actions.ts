@@ -13,6 +13,7 @@ import {
   updateCharacterAccessLevel,
   UpdateCharacterActionModel,
   updateCharacterPicture,
+  uploadAvatarPictureForCharacter,
 } from '@shared/characters/character-service';
 import { runServerAction } from '@shared/actions/run-server-action';
 
@@ -117,4 +118,20 @@ export async function linkFileToCharacterAction({
   const { user } = await requireAuth();
 
   return runServerAction(linkFileToCharacter)({ fileId, characterId, userId: user.id });
+}
+
+export async function uploadAvatarPictureForCharacterAction({
+  characterId,
+  croppedImageBlob,
+}: {
+  characterId: string;
+  croppedImageBlob: Blob;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(uploadAvatarPictureForCharacter)({
+    characterId,
+    croppedImageBlob,
+    userId: user.id,
+  });
 }

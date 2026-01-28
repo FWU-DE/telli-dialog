@@ -2,7 +2,7 @@ import { generateUUID } from '@shared/utils/uuid';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
 import HeaderPortal from '../../../header-portal';
 import { notFound } from 'next/navigation';
-import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { getReadOnlySignedUrl } from '@shared/s3';
 import Chat from '@/components/chat/chat';
 import Logo from '@/components/common/logo';
 import { Message } from 'ai';
@@ -31,7 +31,7 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
     ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
     : [];
 
-  const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: character.pictureId });
+  const maybeSignedImageUrl = await getReadOnlySignedUrl({ key: character.pictureId });
   const logoElement = <Logo federalStateId={federalState.id} />;
   return (
     <>

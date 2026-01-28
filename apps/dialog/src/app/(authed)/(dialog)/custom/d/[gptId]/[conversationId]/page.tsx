@@ -5,7 +5,7 @@ import { ChatHeaderBar } from '@/components/chat/header-bar';
 import Logo from '@/components/common/logo';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { getReadOnlySignedUrl } from '@shared/s3';
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
@@ -42,7 +42,7 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversa
   const currentModel =
     searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
 
-  const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: customGpt.pictureId });
+  const maybeSignedImageUrl = await getReadOnlySignedUrl({ key: customGpt.pictureId });
 
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>

@@ -27,7 +27,7 @@ import {
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
 import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
-import { copyFileInS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { copyFileInS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { addDays } from '@shared/utils/date';
@@ -126,6 +126,8 @@ export const createNewCharacter = async ({
 /**
  * Deletes a character file mapping and the associated file entry in the database.
  * Also deletes the actual file from S3.
+ *
+ * Only the owner is allowed to delete files from a character.
  */
 export const deleteFileMappingAndEntity = async ({
   characterId,
@@ -520,7 +522,7 @@ export const getCharacterForEditView = async ({
     throw new ForbiddenError('Not authorized to edit this character');
 
   const relatedFiles = await fetchFileMappings({ characterId, userId, schoolId });
-  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
+  const maybeSignedPictureUrl = await getReadOnlySignedUrl({
     key: character.pictureId,
   });
   return { character, relatedFiles, maybeSignedPictureUrl };
@@ -623,4 +625,27 @@ export async function cleanupCharacters() {
     .where(and(eq(characterTable.name, ''), lt(characterTable.createdAt, addDays(new Date(), -1))))
     .returning();
   return result.length;
+}
+
+export async function uploadAvatarPictureForCharacter({
+  characterId,
+  croppedImageBlob,
+  userId,
+}: {
+  characterId: string;
+  croppedImageBlob: Blob;
+  userId: string;
+}) {
+  const { isOwner } = await getCharacterInfo(characterId, userId);
+  if (!isOwner) throw new ForbiddenError('Not authorized to upload picture for this character');
+
+  const key = `characters/${characterId}/avatar`;
+
+  await uploadFileToS3({
+    key: key,
+    body: croppedImageBlob,
+    contentType: croppedImageBlob.type,
+  });
+
+  return key;
 }

@@ -1,6 +1,6 @@
 import { SUPPORTED_DOCUMENTS_TYPE, TRUNCATE_IMAGE_HEIGHT } from '@/const';
 import { FileMetadata, FileModel } from '@shared/db/schema';
-import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { getReadOnlySignedUrl } from '@shared/s3';
 import { isImageFile } from '@/utils/files/generic';
 import { ImageAttachment } from '@/utils/files/types';
 import sharp from 'sharp';
@@ -19,7 +19,7 @@ export async function extractImagesAndUrl(
 
   const imagePromises = imageFiles.map(async (file) => {
     try {
-      const url = await getMaybeSignedUrlFromS3Get({ key: `message_attachments/${file.id}` });
+      const url = await getReadOnlySignedUrl({ key: `message_attachments/${file.id}` });
 
       return {
         type: 'image' as const,

@@ -25,6 +25,9 @@ export default function GenericFileUploadButton({
     if (files === null) return;
 
     onSubmit(files);
+
+    // Reset the input value to allow selecting the same file again
+    event.target.value = '';
   }
 
   return (

@@ -16,7 +16,7 @@ import { useToast } from '@/components/common/toast';
 import React, { startTransition } from 'react';
 import Image from 'next/image';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
-import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
+import CropImageAndUploadButton from '@/components/crop-uploaded-image/crop-image-and-upload-button';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
@@ -33,6 +33,7 @@ import {
   updateCustomGptAccessLevelAction,
   updateCustomGptAction,
   updateCustomGptPictureAction,
+  uploadAvatarPictureForCustomGptAction,
 } from './actions';
 import { deleteFileMappingAndEntityAction, linkFileToCustomGptAction } from '../../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
@@ -262,6 +263,13 @@ export default function CustomGptForm({
     router.replace(backUrl);
   }
 
+  async function handleUploadAvatarPicture(croppedImageBlob: Blob) {
+    return await uploadAvatarPictureForCustomGptAction({
+      customGptId: customGpt.id,
+      croppedImageBlob,
+    });
+  }
+
   const copyContainer = readOnly ? (
     <CopyContainer
       templateId={customGpt.id}
@@ -348,11 +356,10 @@ export default function CustomGptForm({
                 <EmptyImageIcon className="w-10 h-10" />
               )}
             </div>
-            <UploadImageToBeCroppedButton
-              uploadDirPath={`custom-gpts/${customGpt.id}`}
+            <CropImageAndUploadButton
               aspect={1}
               onUploadComplete={handlePictureUploadComplete}
-              file_name="avatar"
+              handleUploadAvatarPicture={handleUploadAvatarPicture}
               compressionOptions={{ maxHeight: 800 }}
               disabled={readOnly}
             />

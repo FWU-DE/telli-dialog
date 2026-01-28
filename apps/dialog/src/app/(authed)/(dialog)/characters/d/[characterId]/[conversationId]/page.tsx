@@ -2,7 +2,7 @@ import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import Chat from '@/components/chat/chat';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
 import Logo from '@/components/common/logo';
-import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { getReadOnlySignedUrl } from '@shared/s3';
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import { requireAuth } from '@/auth/requireAuth';
 import {
@@ -39,7 +39,7 @@ export default async function Page(
   ]).catch(handleErrorInServerComponent);
 
   const chatMessages = convertMessageModelToMessage(rawChatMessages);
-  const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: character.pictureId });
+  const maybeSignedImageUrl = await getReadOnlySignedUrl({ key: character.pictureId });
   const logoElement = <Logo federalStateId={federalState.id} />;
   return (
     <>

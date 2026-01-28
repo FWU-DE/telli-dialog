@@ -1,6 +1,5 @@
 import { getUser } from '@/auth/utils';
 import { TextChunkInsertModel } from '@shared/db/schema';
-import { uploadFileToS3 } from '@shared/s3';
 import { getFileExtension } from '@/utils/files/generic';
 import { cnanoid } from '@telli/shared/random/randomService';
 import { NextRequest, NextResponse } from 'next/server';
@@ -9,33 +8,55 @@ import { chunkText } from '../../file-operations/process-chunks';
 import { embedTextChunks } from '../../file-operations/embedding';
 import { logDebug } from '@shared/logging';
 import { dbInsertFileWithTextChunks } from '@shared/db/functions/files';
+import { uploadMessageAttachment } from '@shared/files/fileService';
+import { handleErrorInRoute } from '@/error/handle-error-in-route';
 
+/**
+ * Handles the POST request to upload a file.
+ *
+ * This endpoint can be called by any authenticated user.
+ * No additional permissions are required.
+ * A new fileId is always generated for each upload.
+ * It is not possible to overwrite existing files.
+ */
 export async function POST(req: NextRequest) {
-  const user = await getUser();
-  if (user === undefined) {
-    return NextResponse.json({ status: 403 });
+  try {
+    const user = await getUser();
+    if (user === undefined) {
+      return NextResponse.json({ status: 403 });
+    }
+
+    const formData = await req.formData();
+    const file = formData.get('file');
+
+    if (file === null) {
+      return NextResponse.json({ error: 'Could not find file in form data' }, { status: 400 });
+    }
+
+    if (typeof file === 'string') {
+      return NextResponse.json(
+        { error: 'file FormData entry value was of type "string", but expected type "File"' },
+        { status: 400 },
+      );
+    }
+
+    return NextResponse.json({
+      body: JSON.stringify({ file_id: await handleFileUpload(file) }),
+      status: 200,
+    });
+  } catch (error) {
+    handleErrorInRoute(error);
   }
-  const formData = await req.formData();
-
-  const file = formData.get('file');
-
-  if (file === null) {
-    return NextResponse.json({ error: 'Could not find file in form data' }, { status: 400 });
-  }
-
-  if (typeof file === 'string') {
-    return NextResponse.json(
-      { error: 'file FormData entry value was of type "string", but expected type "File"' },
-      { status: 400 },
-    );
-  }
-
-  return NextResponse.json({
-    body: JSON.stringify({ file_id: await handleFileUpload(file) }),
-    status: 200,
-  });
 }
 
+/**
+ * Handles the upload of a file (images and text files).
+ * Extracts content, creates chunks and embeddings,
+ * uploads file to S3 and stores embeddings in DB.
+ *
+ * @param file the file to upload
+ * @returns path and fileId of the uploaded file in s3 bucket
+ */
 async function handleFileUpload(file: File) {
   const user = await getUser();
   const fileId = `file_${cnanoid()}`;
@@ -70,8 +91,14 @@ async function handleFileUpload(file: File) {
       fileId,
       federalStateId: user.federalState.id,
     }),
-    uploadToS3(file),
+    // Use processed buffer for images, original buffer for other files
+    await uploadMessageAttachment({
+      fileId,
+      fileExtension,
+      buffer: extractResult.processedBuffer || buffer,
+    }),
   ]);
+
   const fileModel = {
     id: fileId,
     name: file.name,
@@ -83,16 +110,4 @@ async function handleFileUpload(file: File) {
   logDebug(`File ${file.name} with type ${fileExtension} stored in db.`);
 
   return fileId;
-
-  async function uploadToS3(file: File) {
-    // Use processed buffer for images, original buffer for other files
-    const bufferToUpload = extractResult.processedBuffer || buffer;
-
-    await uploadFileToS3({
-      key: `message_attachments/${fileId}`,
-      body: bufferToUpload,
-      contentType: getFileExtension(file.name),
-    });
-    logDebug(`File ${file.name} with id ${fileId} uploaded to s3 bucket.`);
-  }
 }
