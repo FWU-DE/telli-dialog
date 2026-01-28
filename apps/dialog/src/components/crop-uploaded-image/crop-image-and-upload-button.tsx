@@ -11,7 +11,7 @@ import { uploadCroppedImage } from './actions';
 import { useToast } from '../common/toast';
 import { useTranslations } from 'next-intl';
 
-type UploadImageToBeCroppedButtonProps = {
+type CropImageAndUploadButtonProps = {
   uploadDirPath: string;
   aspect: number;
   onUploadComplete: (imagePath: string) => void;
@@ -21,7 +21,7 @@ type UploadImageToBeCroppedButtonProps = {
   disabled?: boolean;
 };
 
-export default function UploadImageToBeCroppedButton({
+export default function CropImageAndUploadButton({
   uploadDirPath,
   aspect,
   onUploadComplete,
@@ -29,7 +29,7 @@ export default function UploadImageToBeCroppedButton({
   file_prefix,
   file_name,
   disabled = false,
-}: UploadImageToBeCroppedButtonProps) {
+}: CropImageAndUploadButtonProps) {
   const [file, setFile] = React.useState<File | null>(null);
   const [imageSource, setImageSource] = React.useState<string | null>(null);
   const [showCropModal, setShowCropModal] = React.useState<boolean>(false);

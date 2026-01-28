@@ -3,7 +3,7 @@
 import Checkbox from '@/components/common/checkbox';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { useToast } from '@/components/common/toast';
-import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
+import CropImageAndUploadButton from '@/components/crop-uploaded-image/crop-image-and-upload-button';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import {
@@ -391,7 +391,7 @@ export default function CharacterForm({
               )}
             </div>
             {!readOnly && (
-              <UploadImageToBeCroppedButton
+              <CropImageAndUploadButton
                 uploadDirPath={`characters/${character.id}`}
                 aspect={1}
                 onUploadComplete={handlePictureUploadComplete}

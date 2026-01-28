@@ -16,7 +16,7 @@ import { useToast } from '@/components/common/toast';
 import React, { startTransition } from 'react';
 import Image from 'next/image';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
-import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
+import CropImageAndUploadButton from '@/components/crop-uploaded-image/crop-image-and-upload-button';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
@@ -348,7 +348,7 @@ export default function CustomGptForm({
                 <EmptyImageIcon className="w-10 h-10" />
               )}
             </div>
-            <UploadImageToBeCroppedButton
+            <CropImageAndUploadButton
               uploadDirPath={`custom-gpts/${customGpt.id}`}
               aspect={1}
               onUploadComplete={handlePictureUploadComplete}

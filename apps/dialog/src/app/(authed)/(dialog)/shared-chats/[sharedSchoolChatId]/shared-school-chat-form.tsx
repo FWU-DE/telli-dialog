@@ -32,7 +32,7 @@ import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
 import { labelClassName } from '@/utils/tailwind/input';
 import { WebsearchSource } from '@/app/api/webpage-content/types';
-import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
+import CropImageAndUploadButton from '@/components/crop-uploaded-image/crop-image-and-upload-button';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { AttachedLinks } from '@/components/forms/attached-links';
 import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
@@ -273,7 +273,7 @@ export default function SharedSchoolChatForm({
                 )}
               </div>
               {!readOnly && (
-                <UploadImageToBeCroppedButton
+                <CropImageAndUploadButton
                   uploadDirPath={`shared-chats/${sharedSchoolChat.id}`}
                   aspect={1}
                   onUploadComplete={handlePictureUploadComplete}
