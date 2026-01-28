@@ -98,10 +98,10 @@ export default function SharedChat({
             className="flex-grow w-full max-w-5xl overflow-y-auto p-4 pb-[5rem]"
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
-            {sharedSchoolChat.studentExcercise !== undefined &&
-              sharedSchoolChat.studentExcercise.trim() !== '' && (
+            {sharedSchoolChat.studentExercise !== undefined &&
+              sharedSchoolChat.studentExercise.trim() !== '' && (
                 <FloatingText
-                  learningContext={sharedSchoolChat.studentExcercise ?? ''}
+                  learningContext={sharedSchoolChat.studentExercise ?? ''}
                   dialogStarted={dialogStarted}
                   title={t('excersise-title')}
                   parentRef={containerRef as RefObject<HTMLDivElement>}
@@ -115,7 +115,7 @@ export default function SharedChat({
               <InitialChatContentDisplay
                 title={sharedSchoolChat.name}
                 description={sharedSchoolChat.description}
-                excerciseDescription={sharedSchoolChat.studentExcercise}
+                excerciseDescription={sharedSchoolChat.studentExercise}
                 imageSource={maybeSignedPictureUrl}
                 setDialogStarted={setDialogStarted}
               />

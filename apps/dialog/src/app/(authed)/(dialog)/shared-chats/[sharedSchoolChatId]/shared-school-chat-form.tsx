@@ -127,7 +127,7 @@ export default function SharedSchoolChatForm({
         ...data,
         attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
         description: data.description ?? '',
-        studentExcercise: data.studentExcercise ?? '',
+        studentExercise: data.studentExercise ?? '',
       },
     });
     if (result.success) {
@@ -175,7 +175,7 @@ export default function SharedSchoolChatForm({
       ...data,
       attachedLinks: data.attachedLinks.map((p) => p.link),
       description: data.description ?? '',
-      studentExcercise: data.studentExcercise ?? '',
+      studentExercise: data.studentExercise ?? '',
     };
 
     const dataEquals = deepEqual(defaultData, newData);
@@ -289,11 +289,11 @@ export default function SharedSchoolChatForm({
           id="student-excercise"
           label={t('student-excercise-label')}
           placeholder={t('student-excercise-placeholder')}
-          getValue={() => getValues('studentExcercise') ?? ''}
+          getValue={() => getValues('studentExercise') ?? ''}
           inputType="textarea"
           rows={5}
-          {...register('studentExcercise')}
-          {...getZodStringFieldMetadata('studentExcercise')}
+          {...register('studentExercise')}
+          {...getZodStringFieldMetadata('studentExercise')}
           onBlur={handleAutoSave}
         />
 
