@@ -24,7 +24,7 @@ import {
   fileTable,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
-import { deleteAvatarPicture, deleteMessageAttachment } from '@shared/files/fileService';
+import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
 import { copyFileInS3 } from '@shared/s3';
 import { copyCustomGpt, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { addDays } from '@shared/utils/date';
@@ -266,7 +266,7 @@ export async function deleteFileMappingAndEntity({
   });
 
   // Delete the file from S3
-  await deleteMessageAttachment({ fileId });
+  await deleteMessageAttachments([fileId]);
 }
 
 /**
@@ -441,9 +441,7 @@ export async function deleteCustomGpt({
   await deleteAvatarPicture(customGpt.pictureId);
 
   // delete all related files from s3
-  await Promise.allSettled(
-    relatedFiles.map((file) => deleteMessageAttachment({ fileId: file.id })),
-  );
+  await deleteMessageAttachments(relatedFiles.map((file) => file.id));
 
   return deletedCustomGpt;
 }

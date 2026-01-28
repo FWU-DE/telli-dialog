@@ -16,7 +16,7 @@ import {
   sharedSchoolConversationUpdateSchema,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
-import { deleteAvatarPicture, deleteMessageAttachment } from '@shared/files/fileService';
+import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
 import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { addDays } from '@shared/utils/date';
@@ -320,9 +320,7 @@ export async function deleteLearningScenario({
   await deleteAvatarPicture(learningScenario.pictureId);
 
   // delete all related files from s3
-  await Promise.allSettled(
-    relatedFiles.map((file) => deleteMessageAttachment({ fileId: file.id })),
-  );
+  await deleteMessageAttachments(relatedFiles.map((file) => file.id));
 
   return deletedLearningScenario;
 }
@@ -390,7 +388,7 @@ export async function removeFileFromLearningScenario({
   });
 
   // Delete the file from S3
-  await deleteMessageAttachment({ fileId });
+  await deleteMessageAttachments([fileId]);
 }
 
 async function enrichLearningScenarioWithPictureUrl({

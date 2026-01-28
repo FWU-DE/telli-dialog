@@ -6,7 +6,7 @@ import {
   fileTable,
   TextChunkTable,
 } from '@shared/db/schema';
-import { copyFileInS3, deleteFileFromS3 } from '@shared/s3';
+import { copyFileInS3, deleteFileFromS3, deleteFilesFromS3 } from '@shared/s3';
 import { cnanoid } from '../random/randomService';
 
 const MESSAGE_ATTACHMENTS_FOLDER_NAME = 'message_attachments';
@@ -103,12 +103,11 @@ export async function linkFileToCustomGpt(fileId: string, customGptId: string): 
 }
 
 /**
- * Deletes a file in the message attachments path in S3.
+ * Deletes a bunch of files in the message attachments path in S3.
  * CAUTION: This function does not check any permissions.
  */
-export async function deleteMessageAttachment({ fileId }: { fileId: string }): Promise<void> {
-  const filePath = `${MESSAGE_ATTACHMENTS_FOLDER_NAME}/${fileId}`;
-  await deleteFileFromS3({ key: filePath });
+export async function deleteMessageAttachments(fileIds: string[]): Promise<void> {
+  await deleteFilesFromS3(fileIds.map((fileId) => `${MESSAGE_ATTACHMENTS_FOLDER_NAME}/${fileId}`));
 }
 
 /**

@@ -26,7 +26,7 @@ import {
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
-import { deleteAvatarPicture, deleteMessageAttachment } from '@shared/files/fileService';
+import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
 import { copyFileInS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
@@ -148,7 +148,7 @@ export const deleteFileMappingAndEntity = async ({
   });
 
   // Delete the file from S3
-  await deleteMessageAttachment({ fileId });
+  await deleteMessageAttachments([fileId]);
 };
 
 /**
@@ -350,9 +350,7 @@ export const deleteCharacter = async ({
   await deleteAvatarPicture(character.pictureId);
 
   // delete all related files linked to this character
-  await Promise.allSettled(
-    relatedFiles.map((file) => deleteMessageAttachment({ fileId: file.id })),
-  );
+  await deleteMessageAttachments(relatedFiles.map((file) => file.id));
 
   return deletedCharacter;
 };
