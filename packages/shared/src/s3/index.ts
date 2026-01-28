@@ -49,10 +49,18 @@ export async function uploadFileToS3({
   body: Buffer | Uint8Array | Blob | string | Readable;
   contentType: string;
 }) {
+  let processedBody = body;
+
+  // Convert Blob to Buffer to avoid hash calculation issues
+  if (body instanceof Blob) {
+    const arrayBuffer = await body.arrayBuffer();
+    processedBody = Buffer.from(arrayBuffer);
+  }
+
   const uploadParams: PutObjectCommandInput = {
     Bucket: env.otcBucketName,
     Key: key ?? nanoid(),
-    Body: body,
+    Body: processedBody,
     ContentType: contentType,
   };
 

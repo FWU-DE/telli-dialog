@@ -645,6 +645,7 @@ export async function uploadAvatarPictureForCharacter({
 
   const key = `characters/${characterId}/avatar`;
 
+  console.log('uploadAvatarPictureForCharacter called in character-service');
   await uploadAvatarPicture({
     key,
     croppedImageBlob,
