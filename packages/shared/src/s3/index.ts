@@ -10,7 +10,6 @@ import {
   DeleteObjectsCommand,
   DeleteObjectsCommandInput,
   GetObjectCommand,
-  GetObjectCommandInput,
   HeadObjectCommand,
   ListObjectsV2Command,
   ListObjectsV2CommandInput,
@@ -152,54 +151,6 @@ export async function getSignedUrlFromS3Put({ key, fileType }: { key: string; fi
 }
 
 /**
- * Reads a file from an S3 bucket.
- *
- * @param bucketName - The name of the bucket.
- * @param key - The key (file name) of the file to read.
- * @returns The content of the file as a string.
- */
-export async function readFileFromS3({ key }: { key: string }) {
-  const getParams: GetObjectCommandInput = {
-    Bucket: env.otcBucketName,
-    Key: key,
-  };
-
-  try {
-    const { Body } = await s3Client.send(new GetObjectCommand(getParams));
-    const byteArray = await Body?.transformToByteArray();
-    if (!byteArray) return;
-    return Buffer.from(byteArray);
-  } catch (error) {
-    console.error('Error reading file from S3:', error);
-    throw error;
-  }
-}
-
-export async function streamFileFromS3({ key }: { key: string }) {
-  const getParams: GetObjectCommandInput = {
-    Bucket: env.otcBucketName,
-    Key: key,
-  };
-
-  try {
-    const { Body } = await s3Client.send(new GetObjectCommand(getParams));
-    return Body;
-  } catch (error) {
-    console.error('Error reading file from S3:', error);
-    throw error;
-  }
-}
-
-export async function streamToBuffer(stream: Readable): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    stream.on('data', (chunk) => chunks.push(chunk));
-    stream.on('error', reject);
-    stream.on('end', () => resolve(Buffer.concat(chunks)));
-  });
-}
-
-/**
  * Deletes a file from an S3 bucket.
  * CAUTION: the result is always status 204 even if the file did not exist.
  * @param key - The key (path and file name) of the file to delete.
@@ -248,7 +199,7 @@ export async function deleteFilesFromS3(keys: string[]) {
   );
 }
 
-export async function getMaybeSignedUrlIfExists({
+async function getMaybeSignedUrlIfExists({
   key,
   filename,
   contentType,
