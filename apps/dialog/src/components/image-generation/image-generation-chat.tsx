@@ -65,10 +65,12 @@ export default function ImageGenerationChat({
                 attachment: false,
               });
 
-              setDisplayedImage({
-                prompt: userMessage.content,
-                imageUrl: signedUrl,
-              });
+              if (signedUrl) {
+                setDisplayedImage({
+                  prompt: userMessage.content,
+                  imageUrl: signedUrl,
+                });
+              }
             } catch (error) {
               logError('Error loading image from files:', error);
             }
@@ -107,10 +109,12 @@ export default function ImageGenerationChat({
     });
     if (result.success) {
       // Update the displayed image
-      setDisplayedImage({
-        prompt: currentPrompt,
-        imageUrl: result.value.imageUrl,
-      });
+      if (result.value.imageUrl) {
+        setDisplayedImage({
+          prompt: currentPrompt,
+          imageUrl: result.value.imageUrl,
+        });
+      }
 
       const newConversationId = result.value.conversationId;
       /* TODO: improve navigation without full reload, but without causing issues with state.

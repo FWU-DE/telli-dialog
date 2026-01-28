@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { cn } from '@/utils/tailwind';
 import GenericFileUploadButton from '@/components/common/upload-file-button';
