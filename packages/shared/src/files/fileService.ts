@@ -143,3 +143,30 @@ export async function deleteMessageAttachments(fileIds: string[]): Promise<void>
 export async function deleteAvatarPicture(key: string | null | undefined): Promise<void> {
   if (key) await deleteFileFromS3({ key });
 }
+
+export type UploadAvatarPictureParams = {
+  uploadDirPath: string;
+  fileName?: string;
+  filePrefix?: string;
+  originalFileName: string;
+  croppedImageBlob: Blob;
+};
+
+export async function uploadAvatarPicture({
+  uploadDirPath,
+  fileName,
+  filePrefix,
+  originalFileName,
+  croppedImageBlob,
+}: UploadAvatarPictureParams) {
+  const finalFileName = fileName ?? `${filePrefix ?? ''}${cnanoid()}_${originalFileName}`;
+  const imagePath = `${uploadDirPath}/${finalFileName}`;
+
+  await uploadFileToS3({
+    key: imagePath,
+    body: croppedImageBlob,
+    contentType: croppedImageBlob.type,
+  });
+
+  return { imagePath };
+}
