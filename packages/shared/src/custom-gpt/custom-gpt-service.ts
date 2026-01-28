@@ -24,7 +24,11 @@ import {
   fileTable,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
-import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
+import {
+  deleteAvatarPicture,
+  deleteMessageAttachments,
+  uploadAvatarPicture,
+} from '@shared/files/fileService';
 import { copyFileInS3 } from '@shared/s3';
 import { copyCustomGpt, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { addDays } from '@shared/utils/date';
@@ -461,4 +465,28 @@ export async function cleanupCustomGpts() {
     .where(and(eq(customGptTable.name, ''), lt(customGptTable.createdAt, addDays(new Date(), -1))))
     .returning();
   return result.length;
+}
+
+export async function uploadAvatarPictureForCustomGpt({
+  customGptId,
+  croppedImageBlob,
+  userId,
+}: {
+  customGptId: string;
+  croppedImageBlob: Blob;
+  userId: string;
+}) {
+  const customGpt = await dbGetCustomGptById({ customGptId });
+  if (customGpt.userId !== userId) {
+    throw new ForbiddenError('Not authorized to update avatar picture for this custom gpt');
+  }
+
+  const key = `custom-gpts/${customGptId}/avatar`;
+
+  await uploadAvatarPicture({
+    key,
+    croppedImageBlob,
+  });
+
+  return key;
 }

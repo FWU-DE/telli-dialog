@@ -16,7 +16,11 @@ import {
   sharedSchoolConversationUpdateSchema,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
-import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
+import {
+  deleteAvatarPicture,
+  deleteMessageAttachments,
+  uploadAvatarPicture,
+} from '@shared/files/fileService';
 import { getReadOnlySignedUrl } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { addDays } from '@shared/utils/date';
@@ -427,4 +431,28 @@ export async function cleanupLearningScenarios() {
     )
     .returning();
   return result.length;
+}
+
+export async function uploadAvatarPictureForLearningScenario({
+  learningScenarioId,
+  croppedImageBlob,
+  userId,
+}: {
+  learningScenarioId: string;
+  croppedImageBlob: Blob;
+  userId: string;
+}) {
+  await getLearningScenario({
+    learningScenarioId,
+    userId,
+  });
+
+  const key = `shared-chats/${learningScenarioId}/avatar`;
+
+  await uploadAvatarPicture({
+    key,
+    croppedImageBlob,
+  });
+
+  return key;
 }

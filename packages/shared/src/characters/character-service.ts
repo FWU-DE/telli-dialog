@@ -26,7 +26,11 @@ import {
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
-import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
+import {
+  deleteAvatarPicture,
+  deleteMessageAttachments,
+  uploadAvatarPicture,
+} from '@shared/files/fileService';
 import { copyFileInS3, getReadOnlySignedUrl } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
@@ -625,4 +629,26 @@ export async function cleanupCharacters() {
     .where(and(eq(characterTable.name, ''), lt(characterTable.createdAt, addDays(new Date(), -1))))
     .returning();
   return result.length;
+}
+
+export async function uploadAvatarPictureForCharacter({
+  characterId,
+  croppedImageBlob,
+  userId,
+}: {
+  characterId: string;
+  croppedImageBlob: Blob;
+  userId: string;
+}) {
+  const { isOwner } = await getCharacterInfo(characterId, userId);
+  if (!isOwner) throw new ForbiddenError('Not authorized to upload picture for this character');
+
+  const key = `characters/${characterId}/avatar`;
+
+  await uploadAvatarPicture({
+    key,
+    croppedImageBlob,
+  });
+
+  return key;
 }
