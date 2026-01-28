@@ -3,12 +3,13 @@
 import React from 'react';
 import { cn } from '@/utils/tailwind';
 import GenericFileUploadButton from '@/components/common/upload-file-button';
-import { getWriteableSignedUrl } from '@shared/s3';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import UploadImageIcon from '../icons/upload-image';
 import ImageCropModal from './crop-image-modal';
 import { CompressionOptions } from '@/utils/files/image-utils';
-import { cnanoid } from '@telli/shared/random/randomService';
+import { uploadCroppedImage } from './actions';
+import { useToast } from '../common/toast';
+import { useTranslations } from 'next-intl';
 
 type UploadImageToBeCroppedButtonProps = {
   uploadDirPath: string;
@@ -32,6 +33,8 @@ export default function UploadImageToBeCroppedButton({
   const [file, setFile] = React.useState<File | null>(null);
   const [imageSource, setImageSource] = React.useState<string | null>(null);
   const [showCropModal, setShowCropModal] = React.useState<boolean>(false);
+  const toast = useToast();
+  const t = useTranslations('file-interaction');
 
   async function handleImageUpload(files: FileList) {
     const firstFile = files[0];
@@ -49,32 +52,23 @@ export default function UploadImageToBeCroppedButton({
   async function handleCroppedImage(croppedBlob: Blob) {
     if (!croppedBlob || !file) return;
 
-    const fileName = file_name ?? `${file_prefix ?? ''}${cnanoid()}_${file.name}`;
-
-    const imagePath = `${uploadDirPath}/${fileName}`;
-
-    const signedUploadUrl = await getWriteableSignedUrl({
-      key: imagePath,
-      fileType: croppedBlob.type,
+    const result = await uploadCroppedImage({
+      uploadDirPath,
+      fileName: file_name,
+      filePrefix: file_prefix,
+      originalFileName: file.name,
+      croppedImageBlob: croppedBlob,
     });
 
-    const uploadResponse = await fetch(signedUploadUrl, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': croppedBlob.type,
-      },
-      body: croppedBlob,
-      cache: 'no-cache',
-    });
-
-    if (uploadResponse.ok) {
-      onUploadComplete(imagePath);
+    if (result.success && result.value.imagePath) {
+      onUploadComplete(result.value.imagePath);
       setShowCropModal(false);
-      setFile(null);
-      setImageSource(null);
     } else {
-      console.error('Upload failed');
+      toast.error(t('toasts.upload-error'));
+      setShowCropModal(false);
     }
+    setFile(null);
+    setImageSource(null);
   }
 
   return (
