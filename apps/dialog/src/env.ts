@@ -6,6 +6,7 @@ export const env = createEnv({
   server: {
     apiKey: z.string(),
     apiUrl: z.url(),
+    appVersion: z.string().default('0.0.0'),
     authSecret: z.string(),
     databaseUrl: z.string(),
     encryptionKey: z.string(),
@@ -20,21 +21,10 @@ export const env = createEnv({
     vidisIssuerUri: z.string(),
     crawl4AIUrl: z.url().default('http://localhost:11235'),
   },
-  client: {
-    NEXT_PUBLIC_SENTRY_LOG_LEVEL: z
-      .union([
-        z.literal('fatal'),
-        z.literal('error'),
-        z.literal('warning'),
-        z.literal('log'),
-        z.literal('info'),
-        z.literal('debug'),
-      ])
-      .default('info'),
-  },
   runtimeEnv: {
     apiKey: process.env.API_KEY,
     apiUrl: process.env.API_URL,
+    appVersion: process.env.APP_VERSION,
     authSecret: process.env.AUTH_SECRET,
     databaseUrl: process.env.DATABASE_URL,
     encryptionKey: process.env.ENCRYPTION_KEY,
@@ -47,7 +37,6 @@ export const env = createEnv({
     vidisClientId: process.env.VIDIS_CLIENT_ID,
     vidisClientSecret: process.env.VIDIS_CLIENT_SECRET,
     vidisIssuerUri: process.env.VIDIS_ISSUER_URI,
-    NEXT_PUBLIC_SENTRY_LOG_LEVEL: process.env.NEXT_PUBLIC_SENTRY_LOG_LEVEL,
     crawl4AIUrl: process.env.CRAWL4AI_URL,
   },
 });
