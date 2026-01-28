@@ -24,12 +24,8 @@ import {
   fileTable,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
-import {
-  deleteAvatarPicture,
-  deleteMessageAttachments,
-  uploadAvatarPicture,
-} from '@shared/files/fileService';
-import { copyFileInS3 } from '@shared/s3';
+import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
+import { copyFileInS3, uploadFileToS3 } from '@shared/s3';
 import { copyCustomGpt, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { addDays } from '@shared/utils/date';
 import { generateUUID } from '@shared/utils/uuid';
@@ -483,9 +479,10 @@ export async function uploadAvatarPictureForCustomGpt({
 
   const key = `custom-gpts/${customGptId}/avatar`;
 
-  await uploadAvatarPicture({
-    key,
-    croppedImageBlob,
+  await uploadFileToS3({
+    key: key,
+    body: croppedImageBlob,
+    contentType: croppedImageBlob.type,
   });
 
   return key;

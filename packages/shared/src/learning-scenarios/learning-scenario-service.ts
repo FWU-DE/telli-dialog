@@ -16,12 +16,8 @@ import {
   sharedSchoolConversationUpdateSchema,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
-import {
-  deleteAvatarPicture,
-  deleteMessageAttachments,
-  uploadAvatarPicture,
-} from '@shared/files/fileService';
-import { getReadOnlySignedUrl } from '@shared/s3';
+import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
+import { getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { addDays } from '@shared/utils/date';
 import { and, eq, lt } from 'drizzle-orm';
@@ -449,9 +445,10 @@ export async function uploadAvatarPictureForLearningScenario({
 
   const key = `shared-chats/${learningScenarioId}/avatar`;
 
-  await uploadAvatarPicture({
-    key,
-    croppedImageBlob,
+  await uploadFileToS3({
+    key: key,
+    body: croppedImageBlob,
+    contentType: croppedImageBlob.type,
   });
 
   return key;

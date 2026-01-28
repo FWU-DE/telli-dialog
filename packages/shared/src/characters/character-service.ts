@@ -26,12 +26,8 @@ import {
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
-import {
-  deleteAvatarPicture,
-  deleteMessageAttachments,
-  uploadAvatarPicture,
-} from '@shared/files/fileService';
-import { copyFileInS3, getReadOnlySignedUrl } from '@shared/s3';
+import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
+import { copyFileInS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { addDays } from '@shared/utils/date';
@@ -646,9 +642,10 @@ export async function uploadAvatarPictureForCharacter({
   const key = `characters/${characterId}/avatar`;
 
   console.log('uploadAvatarPictureForCharacter called in character-service');
-  await uploadAvatarPicture({
-    key,
-    croppedImageBlob,
+  await uploadFileToS3({
+    key: key,
+    body: croppedImageBlob,
+    contentType: croppedImageBlob.type,
   });
 
   return key;
