@@ -5,6 +5,8 @@ import { SharedConversationShareFormValues } from '../../../shared-chats/[shared
 import { requireAuth } from '@/auth/requireAuth';
 import {
   deleteCharacter,
+  deleteFileMappingAndEntity,
+  linkFileToCharacter,
   shareCharacter,
   unshareCharacter,
   updateCharacter,
@@ -87,4 +89,32 @@ export async function unshareCharacterAction({ characterId }: { characterId: str
     characterId,
     user: user,
   });
+}
+
+export async function deleteFileMappingAndEntityAction({
+  characterId,
+  fileId,
+}: {
+  characterId: string;
+  fileId: string;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(deleteFileMappingAndEntity)({
+    characterId,
+    fileId,
+    userId: user.id,
+  });
+}
+
+export async function linkFileToCharacterAction({
+  fileId,
+  characterId,
+}: {
+  fileId: string;
+  characterId: string;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(linkFileToCharacter)({ fileId, characterId, userId: user.id });
 }

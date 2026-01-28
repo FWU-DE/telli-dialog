@@ -36,7 +36,7 @@ import {
 import ShareContainer from './share-container';
 import { CopyContainer } from '../../../_components/copy-container';
 import { LocalFileState } from '@/components/chat/send-message-form';
-import { deleteFileMappingAndEntityAction, linkFileToCharacterAction } from '../../actions';
+import { deleteFileMappingAndEntityAction, linkFileToCharacterAction } from './actions';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
 import { getZodStringFieldMetadataFn } from '@/components/forms/utils';

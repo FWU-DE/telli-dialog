@@ -1,11 +1,7 @@
 'use server';
 
 import { requireAuth } from '@/auth/requireAuth';
-import {
-  createNewCharacter,
-  deleteFileMappingAndEntity,
-  linkFileToCharacter,
-} from '@shared/characters/character-service';
+import { createNewCharacter } from '@shared/characters/character-service';
 import { runServerAction } from '@shared/actions/run-server-action';
 
 export async function createNewCharacterAction({
@@ -27,32 +23,4 @@ export async function createNewCharacterAction({
     templatePictureId,
     templateId,
   });
-}
-
-export async function deleteFileMappingAndEntityAction({
-  characterId,
-  fileId,
-}: {
-  characterId: string;
-  fileId: string;
-}) {
-  const { user } = await requireAuth();
-
-  return runServerAction(deleteFileMappingAndEntity)({
-    characterId,
-    fileId,
-    userId: user.id,
-  });
-}
-
-export async function linkFileToCharacterAction({
-  fileId,
-  characterId,
-}: {
-  fileId: string;
-  characterId: string;
-}) {
-  const { user } = await requireAuth();
-
-  return runServerAction(linkFileToCharacter)({ fileId, characterId, userId: user.id });
 }
