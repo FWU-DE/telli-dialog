@@ -133,34 +133,6 @@ export async function getReadOnlySignedUrl({
   }
 }
 
-// Todo RL: Wird nur vom crop-upload-button aufgerufen.
-// Erstens ist das eine Client-Komponente --> verschieben nach actions
-// Zweitens fehlt eine Überprüfung der Berechtigungen
-// Wenn das Problem gelöst ist, kann die 'use server' Directive entfernt werden.
-// Der Code aus dieser Datei darf nur auf dem Server ausgeführt werden.
-export async function getWriteableSignedUrl({ key, fileType }: { key: string; fileType: string }) {
-  const command = new PutObjectCommand({
-    Bucket: env.otcBucketName,
-    Key: key,
-    ContentType: fileType,
-  });
-
-  try {
-    const signedUrl = await getSignedUrl(s3Client, command, {
-      expiresIn: 3600,
-      signableHeaders: new Set([
-        'content-type',
-        'access-control-allow-header',
-        'access-control-allow-origin',
-      ]),
-    });
-    return signedUrl;
-  } catch (error) {
-    console.error('Error generating signed PUT URL for S3:', error);
-    throw error;
-  }
-}
-
 /**
  * Deletes a file from an S3 bucket.
  * CAUTION: the result is always status 204 even if the file did not exist.
