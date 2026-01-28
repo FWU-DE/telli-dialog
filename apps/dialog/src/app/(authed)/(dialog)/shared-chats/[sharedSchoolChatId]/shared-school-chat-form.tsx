@@ -17,6 +17,7 @@ import {
   removeFileFromLearningScenarioAction,
   updateLearningScenarioAction,
   updateLearningScenarioPictureAction,
+  uploadAvatarPictureForLearningScenarioAction,
 } from './actions';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
@@ -135,6 +136,13 @@ export default function SharedSchoolChatForm({
     } else {
       toast.error(tToast('edit-toast-error'));
     }
+  }
+
+  async function handleUploadAvatarPicture(croppedImageBlob: Blob) {
+    return await uploadAvatarPictureForLearningScenarioAction({
+      learningScenarioId: sharedSchoolChat.id,
+      croppedImageBlob,
+    });
   }
 
   async function handlePictureUploadComplete(picturePath: string) {
@@ -274,10 +282,9 @@ export default function SharedSchoolChatForm({
               </div>
               {!readOnly && (
                 <CropImageAndUploadButton
-                  uploadDirPath={`shared-chats/${sharedSchoolChat.id}`}
                   aspect={1}
+                  handleUploadAvatarPicture={handleUploadAvatarPicture}
                   onUploadComplete={handlePictureUploadComplete}
-                  file_name="avatar"
                   compressionOptions={{ maxHeight: 800 }}
                 />
               )}

@@ -32,6 +32,7 @@ import {
   updateCharacterAccessLevelAction,
   updateCharacterAction,
   updateCharacterPictureAction,
+  uploadAvatarPictureForCharacterAction,
 } from './actions';
 import ShareContainer from './share-container';
 import { CopyContainer } from '../../../_components/copy-container';
@@ -231,6 +232,14 @@ export default function CharacterForm({
     }
   }
 
+  async function handleUploadAvatarPicture(croppedImageBlob: Blob) {
+    const result = await uploadAvatarPictureForCharacterAction({
+      characterId: character.id,
+      croppedImageBlob,
+    });
+    return result;
+  }
+
   function handleAutoSave() {
     if (isCreating || readOnly) return;
     const data = getValues();
@@ -392,10 +401,9 @@ export default function CharacterForm({
             </div>
             {!readOnly && (
               <CropImageAndUploadButton
-                uploadDirPath={`characters/${character.id}`}
                 aspect={1}
+                handleUploadAvatarPicture={handleUploadAvatarPicture}
                 onUploadComplete={handlePictureUploadComplete}
-                file_name="avatar"
                 compressionOptions={{ maxHeight: 800 }}
               />
             )}

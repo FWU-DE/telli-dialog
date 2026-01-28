@@ -7,27 +7,23 @@ import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import UploadImageIcon from '../icons/upload-image';
 import ImageCropModal from './crop-image-modal';
 import { CompressionOptions } from '@/utils/files/image-utils';
-import { uploadCroppedImage } from './actions';
 import { useToast } from '../common/toast';
 import { useTranslations } from 'next-intl';
+import { ServerActionResult } from '@shared/actions/server-action-result';
 
 type CropImageAndUploadButtonProps = {
-  uploadDirPath: string;
   aspect: number;
+  handleUploadAvatarPicture: (croppedImageBlob: Blob) => Promise<ServerActionResult<string>>;
   onUploadComplete: (imagePath: string) => void;
   compressionOptions?: CompressionOptions;
-  file_prefix?: string;
-  file_name?: string;
   disabled?: boolean;
 };
 
 export default function CropImageAndUploadButton({
-  uploadDirPath,
   aspect,
+  handleUploadAvatarPicture,
   onUploadComplete,
   compressionOptions,
-  file_prefix,
-  file_name,
   disabled = false,
 }: CropImageAndUploadButtonProps) {
   const [file, setFile] = React.useState<File | null>(null);
@@ -52,16 +48,10 @@ export default function CropImageAndUploadButton({
   async function handleCroppedImage(croppedBlob: Blob) {
     if (!croppedBlob || !file) return;
 
-    const result = await uploadCroppedImage({
-      uploadDirPath,
-      fileName: file_name,
-      filePrefix: file_prefix,
-      originalFileName: file.name,
-      croppedImageBlob: croppedBlob,
-    });
+    const result = await handleUploadAvatarPicture(croppedBlob);
 
-    if (result.success && result.value.imagePath) {
-      onUploadComplete(result.value.imagePath);
+    if (result.success && result.value) {
+      onUploadComplete(result.value);
       setShowCropModal(false);
     } else {
       toast.error(t('toasts.upload-error'));

@@ -145,28 +145,15 @@ export async function deleteAvatarPicture(key: string | null | undefined): Promi
 }
 
 export type UploadAvatarPictureParams = {
-  uploadDirPath: string;
-  fileName?: string;
-  filePrefix?: string;
-  originalFileName: string;
+  key: string;
   croppedImageBlob: Blob;
 };
 
-export async function uploadAvatarPicture({
-  uploadDirPath,
-  fileName,
-  filePrefix,
-  originalFileName,
-  croppedImageBlob,
-}: UploadAvatarPictureParams) {
-  const finalFileName = fileName ?? `${filePrefix ?? ''}${cnanoid()}_${originalFileName}`;
-  const imagePath = `${uploadDirPath}/${finalFileName}`;
-
+export async function uploadAvatarPicture({ key, croppedImageBlob }: UploadAvatarPictureParams) {
+  console.log('uploadAvatarPicture called with key:', key);
   await uploadFileToS3({
-    key: imagePath,
+    key: key,
     body: croppedImageBlob,
     contentType: croppedImageBlob.type,
   });
-
-  return { imagePath };
 }

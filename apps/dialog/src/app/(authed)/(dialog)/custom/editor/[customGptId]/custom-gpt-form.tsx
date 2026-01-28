@@ -33,6 +33,7 @@ import {
   updateCustomGptAccessLevelAction,
   updateCustomGptAction,
   updateCustomGptPictureAction,
+  uploadAvatarPictureForCustomGptAction,
 } from './actions';
 import { deleteFileMappingAndEntityAction, linkFileToCustomGptAction } from '../../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
@@ -262,6 +263,13 @@ export default function CustomGptForm({
     router.replace(backUrl);
   }
 
+  async function handleUploadAvatarPicture(croppedImageBlob: Blob) {
+    return await uploadAvatarPictureForCustomGptAction({
+      customGptId: customGpt.id,
+      croppedImageBlob,
+    });
+  }
+
   const copyContainer = readOnly ? (
     <CopyContainer
       templateId={customGpt.id}
@@ -349,10 +357,9 @@ export default function CustomGptForm({
               )}
             </div>
             <CropImageAndUploadButton
-              uploadDirPath={`custom-gpts/${customGpt.id}`}
               aspect={1}
               onUploadComplete={handlePictureUploadComplete}
-              file_name="avatar"
+              handleUploadAvatarPicture={handleUploadAvatarPicture}
               compressionOptions={{ maxHeight: 800 }}
               disabled={readOnly}
             />
