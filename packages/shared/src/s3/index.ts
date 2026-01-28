@@ -37,11 +37,9 @@ const s3Client = new S3Client({
 /**
  * Uploads a file to an S3 bucket.
  *
- * @param bucketName - The name of the bucket.
  * @param key - The key (file name) for the uploaded file.
  * @param body - The content to upload.
  * @param contentType - The MIME type of the content.
- * @returns The URL of the uploaded file.
  */
 export async function uploadFileToS3({
   key,
@@ -52,21 +50,15 @@ export async function uploadFileToS3({
   body: Buffer | Uint8Array | Blob | string | Readable;
   contentType: string;
 }) {
-  const Key = key ?? nanoid();
   const uploadParams: PutObjectCommandInput = {
     Bucket: env.otcBucketName,
-    Key,
+    Key: key ?? nanoid(),
     Body: body,
     ContentType: contentType,
   };
 
-  try {
-    const command = new PutObjectCommand(uploadParams);
-    await s3Client.send(command);
-  } catch (error) {
-    console.error('Error uploading file to S3:', error);
-    throw error;
-  }
+  const command = new PutObjectCommand(uploadParams);
+  await s3Client.send(command);
 }
 
 export async function getMaybeLogoFromS3(federalStateId: string | undefined, asset: string) {

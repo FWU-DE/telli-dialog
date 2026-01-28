@@ -126,6 +126,8 @@ export const createNewCharacter = async ({
 /**
  * Deletes a character file mapping and the associated file entry in the database.
  * Also deletes the actual file from S3.
+ *
+ * Only the owner is allowed to delete files from a character.
  */
 export const deleteFileMappingAndEntity = async ({
   characterId,
