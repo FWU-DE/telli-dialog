@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
   });
 }
 
-export async function handleFileUpload(file: File) {
+async function handleFileUpload(file: File) {
   const user = await getUser();
   const fileId = `file_${cnanoid()}`;
   const bytes = await file.arrayBuffer();

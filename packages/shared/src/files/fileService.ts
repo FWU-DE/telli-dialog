@@ -6,8 +6,10 @@ import {
   fileTable,
   TextChunkTable,
 } from '@shared/db/schema';
-import { copyFileInS3 } from '@shared/s3';
+import { copyFileInS3, deleteFileFromS3, deleteFilesFromS3 } from '@shared/s3';
 import { cnanoid } from '../random/randomService';
+
+const MESSAGE_ATTACHMENTS_FOLDER_NAME = 'message_attachments';
 
 /**
  * Duplicates a file and all its related text chunks and embeddings.
@@ -98,4 +100,25 @@ export async function linkFileToCustomGpt(fileId: string, customGptId: string): 
     fileId,
     customGptId,
   });
+}
+
+/**
+ * Deletes a bunch of files in the message attachments path in S3.
+ * CAUTION: This function does not check any permissions.
+ */
+export async function deleteMessageAttachments(fileIds: string[]): Promise<void> {
+  await deleteFilesFromS3(fileIds.map((fileId) => `${MESSAGE_ATTACHMENTS_FOLDER_NAME}/${fileId}`));
+}
+
+/**
+ * Deletes an avatar picture from S3.
+ *
+ * @param key The pictureId for characters, customgpts and learning scenarios
+ * does contain the full path so we can directly use it as key.
+ * Does nothing if key is null or undefined.
+ *
+ * If the last file of folder is deleted, the folder in s3 automatically gets deleted as well.
+ */
+export async function deleteAvatarPicture(key: string | null | undefined): Promise<void> {
+  if (key) await deleteFileFromS3({ key });
 }

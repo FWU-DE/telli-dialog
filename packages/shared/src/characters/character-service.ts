@@ -26,8 +26,8 @@ import {
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
-import { logError } from '@shared/logging';
-import { copyFileInS3, deleteFileFromS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
+import { copyFileInS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { addDays } from '@shared/utils/date';
@@ -125,8 +125,7 @@ export const createNewCharacter = async ({
 
 /**
  * Deletes a character file mapping and the associated file entry in the database.
- *
- * Note: the cleanup job will delete the file from S3 at a later time.
+ * Also deletes the actual file from S3.
  */
 export const deleteFileMappingAndEntity = async ({
   characterId,
@@ -147,6 +146,9 @@ export const deleteFileMappingAndEntity = async ({
     await tx.delete(CharacterFileMapping).where(eq(CharacterFileMapping.fileId, fileId));
     await tx.delete(fileTable).where(eq(fileTable.id, fileId));
   });
+
+  // Delete the file from S3
+  await deleteMessageAttachments([fileId]);
 };
 
 /**
@@ -339,16 +341,16 @@ export const deleteCharacter = async ({
   const { isOwner, character } = await getCharacterInfo(characterId, userId);
   if (!isOwner) throw new ForbiddenError('Not authorized to delete this character');
 
+  const relatedFiles = await dbGetRelatedCharacterFiles(characterId);
+
   // delete character from db
   const deletedCharacter = await dbDeleteCharacterByIdAndUserId({ characterId, userId: userId });
 
-  if (character.pictureId) {
-    try {
-      await deleteFileFromS3({ key: character.pictureId });
-    } catch (error) {
-      logError('Cannot delete picture of character ' + characterId, error);
-    }
-  }
+  // delete avatar picture from S3
+  await deleteAvatarPicture(character.pictureId);
+
+  // delete all related files linked to this character
+  await deleteMessageAttachments(relatedFiles.map((file) => file.id));
 
   return deletedCharacter;
 };
