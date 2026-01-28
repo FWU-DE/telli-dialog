@@ -1,9 +1,9 @@
-import { WebsearchSource } from './types';
 import { SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { defaultErrorSource } from '@/components/chat/sources/const';
 import { getTranslations } from 'next-intl/server';
 import { logWarning } from '@shared/logging';
 import { env } from '@/env';
+import { WebsearchSource } from '@shared/db/types';
 
 interface Crawl4AIResult {
   url: string;

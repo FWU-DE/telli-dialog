@@ -1,8 +1,8 @@
 import { cacheLife } from 'next/cache';
-import { WebsearchSource } from './types';
 import { webScraperCrawl4AI } from './search-web-crawl4ai';
 import { webScraperReadability } from './search-web-readability';
 import { logWarning } from '@shared/logging/logging';
+import { WebsearchSource } from '@shared/db/types';
 
 /**
  * Scrapes web content and returns markdown.

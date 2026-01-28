@@ -29,7 +29,6 @@ import {
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
-import { WebsearchSource } from '../webpage-content/types';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 import { extractImagesAndUrl } from '../file-operations/prepocess-image';
 import { formatMessagesWithImages } from './utils';
@@ -38,6 +37,7 @@ import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
 import { webScraper } from '../webpage-content/search-web';
+import { WebsearchSource } from '@shared/db/types';
 
 export async function POST(request: NextRequest) {
   const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);
@@ -127,6 +127,60 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'User has reached telli points limit.' }, { status: 429 });
   }
 
+  // Collect websearch sources for the system prompt
+  const MAX_WEBSEARCH_SOURCES = 5;
+  let websearchSources: WebsearchSource[] = [];
+  let userMessageWebsearchSources: WebsearchSource[] = [];
+  let urlsToScrape: string[] = [];
+  let userMessageUrls: string[] = [];
+
+  if (customGptId !== undefined) {
+    const customGpt = await dbGetCustomGptById({ customGptId });
+    urlsToScrape = customGpt?.attachedLinks.filter((l) => l !== '') ?? [];
+  } else if (characterId !== undefined) {
+    const character = await dbGetCharacterByIdWithShareData({ characterId, userId: user.id });
+    urlsToScrape = character?.attachedLinks.filter((l) => l !== '') ?? [];
+  } else {
+    websearchSources = conversationObject.messages
+      .filter((m) => m.role === 'user')
+      .flatMap((m) => m.websearchSources);
+    const remainingSlots = MAX_WEBSEARCH_SOURCES - websearchSources.length;
+
+    if (remainingSlots > 0) {
+      // Collect URLs from current message
+      userMessageUrls = [...new Set(parseHyperlinks(userMessage.content) ?? [])].filter(
+        (l) => l !== '',
+      );
+
+      // Collect URLs from old messages without sources
+      const oldMessageUrls = conversationObject.messages
+        .filter((m) => m.role === 'user' && m.websearchSources.length === 0)
+        .flatMap((m) => parseHyperlinks(m.content) ?? []);
+
+      urlsToScrape = [...new Set([...userMessageUrls, ...oldMessageUrls])].slice(0, remainingSlots);
+    }
+  }
+
+  // Scrape collected URLs
+  const scrapedSources = await Promise.all(
+    urlsToScrape.map(async (url) => {
+      try {
+        return await webScraper(url);
+      } catch {
+        return undefined;
+      }
+    }),
+  ).then((results) => results.filter((x): x is WebsearchSource => !!x));
+
+  // Build final websearchSources
+  if (customGptId !== undefined || characterId !== undefined) {
+    websearchSources = scrapedSources;
+  } else {
+    websearchSources = [...websearchSources, ...scrapedSources].slice(0, MAX_WEBSEARCH_SOURCES);
+
+    userMessageWebsearchSources = scrapedSources.filter((s) => userMessageUrls.includes(s.link));
+  }
+
   await dbInsertChatContent({
     conversationId: conversation.id,
     id: userMessage.id,
@@ -135,6 +189,7 @@ export async function POST(request: NextRequest) {
     userId: user.id,
     modelName: definedModel.name,
     orderNumber: messages.length + 1,
+    websearchSources: userMessageWebsearchSources,
   });
 
   if (currentFileIds !== undefined) {
@@ -163,44 +218,6 @@ export async function POST(request: NextRequest) {
   // Check if the model supports images based on supportedImageFormats
   const modelSupportsImages =
     definedModel.supportedImageFormats !== null && definedModel.supportedImageFormats.length > 0;
-
-  let urls: string[] = [];
-
-  if (customGptId !== undefined) {
-    const customGpt = await dbGetCustomGptById({ customGptId });
-    if (customGpt) {
-      urls = customGpt.attachedLinks;
-    }
-  } else if (characterId !== undefined) {
-    const character = await dbGetCharacterByIdWithShareData({
-      characterId,
-      userId: user.id,
-    });
-    if (character) {
-      urls = character.attachedLinks;
-    }
-  } else {
-    urls = [userMessage, ...messages]
-      .filter((message) => message.role === 'user')
-      .flatMap((message) => parseHyperlinks(message.content) ?? []);
-  }
-
-  const uniqueUrls = [...new Set(urls)];
-  const websearchSources = (
-    await Promise.all(
-      uniqueUrls
-        .filter((l) => l !== '')
-        .map(async (url) => {
-          try {
-            return await webScraper(url);
-          } catch (error) {
-            console.error(`Error fetching webpage content for URL: ${url}`, error);
-          }
-        }),
-    )
-  ).filter((x): x is WebsearchSource => !!x);
-
-  // Condense chat history to search query to use for vector search and text retrieval
 
   await updateSession({
     user: await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id }),

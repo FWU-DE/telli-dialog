@@ -43,9 +43,9 @@ import { LocalFileState } from '@/components/chat/send-message-form';
 import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { AttachedLinks } from '@/components/forms/attached-links';
-import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { formLinks } from '@/utils/web-search/form-links';
 import { useFederalState } from '@/components/providers/federal-state-provider';
+import { WebsearchSource } from '@shared/db/types';
 
 type CustomGptFormProps = CustomGptSelectModel & {
   maybeSignedPictureUrl: string | undefined;
