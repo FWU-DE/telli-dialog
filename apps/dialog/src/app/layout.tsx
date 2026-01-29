@@ -1,6 +1,7 @@
 import { type Metadata } from 'next';
 import React from 'react';
 import { Barlow } from 'next/font/google';
+import Script from 'next/script';
 import ClientProvider from './client-provider';
 import { getMaybeSession, getMaybeUser } from '@/auth/utils';
 import { NextIntlClientProvider } from 'next-intl';
@@ -52,14 +53,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale} className={barlow.className}>
-      <head>
-        <script
-          type="text/javascript"
+      <body>
+        <Script
+          id="public-config"
           // runs as soon as the browser parses it (before client components hydrate)
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: inlineScript }}
         />
-      </head>
-      <body>
         <NextIntlClientProvider messages={messages}>
           <ClientProvider session={fullSession} designConfiguration={designConfiguration}>
             {children}

@@ -17,8 +17,8 @@ import { getPublicConfig } from './public-config';
  *
  * @param options - Optional Sentry browser options, e.g., to use custom sample rates
  */
-export function clientSentryInit(options?: Sentry.BrowserOptions) {
-  const publicConfig = getPublicConfig();
+export async function clientSentryInit(options?: Sentry.BrowserOptions) {
+  const publicConfig = await getPublicConfig();
   const dsn = publicConfig?.sentry?.dsn;
   const environment = publicConfig?.sentry?.environment;
 
