@@ -1,4 +1,4 @@
-import { WebsearchSource } from '@/app/api/webpage-content/types';
+import { WebsearchSource } from '@shared/db/types';
 
 /**
  * Get a default error source for a websearch source

@@ -129,9 +129,9 @@ export async function POST(request: NextRequest) {
   }
 
   // Collect websearch sources for the system prompt
-  let websearchSources: WebsearchSource[] = [];
-  let userMessageWebsearchSources: WebsearchSource[] = [];
-  let urlsToScrape: string[] = [];
+  let websearchSources: WebsearchSource[] = []; // Final websearch sources to be used in system prompt
+  let userMessageWebsearchSources: WebsearchSource[] = []; // Sources related to the current user message
+  let urlsToScrape: string[] = []; // New urls to scrape
   let userMessageUrls: string[] = [];
 
   if (customGptId !== undefined) {
