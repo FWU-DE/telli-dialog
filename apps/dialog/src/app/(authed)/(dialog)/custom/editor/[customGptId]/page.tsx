@@ -5,7 +5,6 @@ import HeaderPortal from '../../../header-portal';
 import CustomGptForm from './custom-gpt-form';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { CustomGptSelectModel } from '@shared/db/schema';
-import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { logError } from '@shared/logging';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
@@ -13,6 +12,7 @@ import { getCustomGptForEditView, getFileMappings } from '@shared/custom-gpt/cus
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
+import { WebsearchSource } from '@shared/db/types';
 
 export const dynamic = 'force-dynamic';
 

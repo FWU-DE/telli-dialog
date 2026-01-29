@@ -41,11 +41,11 @@ import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
 import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
 import { AttachedLinks } from '@/components/forms/attached-links';
-import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { formLinks } from '@/utils/web-search/form-links';
 import FileManagement from '@/components/forms/file-management';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
+import { WebsearchSource } from '@shared/db/types';
 
 type CharacterFormProps = CharacterWithShareDataModel & {
   maybeSignedPictureUrl: string | undefined;

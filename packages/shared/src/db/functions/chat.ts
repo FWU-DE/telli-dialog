@@ -6,23 +6,6 @@ import { conversationMessageTable, conversationTable } from '../schema';
 import { ConversationMessageModel, InsertConversationMessageModel } from '../types';
 import { isNotNull } from '../../utils/guard';
 
-export async function dbCreateConversation({
-  conversationId,
-  userId,
-  characterId,
-}: {
-  conversationId: string;
-  userId: string;
-  characterId?: string;
-}) {
-  return (
-    await db
-      .insert(conversationTable)
-      .values({ id: conversationId, userId, characterId: characterId ?? null })
-      .returning()
-  )[0];
-}
-
 export async function dbGetOrCreateConversation({
   conversationId,
   userId,
@@ -140,34 +123,6 @@ export async function dbDeleteConversation(conversationId: string) {
     .update(conversationTable)
     .set({ name: ' ', deletedAt: new Date() })
     .where(eq(conversationTable.id, conversationId));
-}
-
-export async function dbDeleteAllConversationsByUserId(userId: string) {
-  await db
-    .update(conversationMessageTable)
-    .set({ content: ' ', deletedAt: new Date() })
-    .where(eq(conversationMessageTable.userId, userId));
-  await db
-    .update(conversationTable)
-    .set({ name: ' ', deletedAt: new Date() })
-    .where(eq(conversationTable.userId, userId));
-}
-
-export async function dbDeleteConversationMessage(conversationMessageId: string) {
-  await db
-    .update(conversationMessageTable)
-    .set({ content: ' ', deletedAt: new Date() })
-    .where(eq(conversationMessageTable.id, conversationMessageId));
-}
-
-export async function dbUpdateConversationMessageContent(
-  conversationMessageId: string,
-  conversationMessageContent: string,
-) {
-  await db
-    .update(conversationMessageTable)
-    .set({ content: conversationMessageContent })
-    .where(eq(conversationMessageTable.id, conversationMessageId));
 }
 
 function getLatestMessages(messages: ConversationMessageModel[]): ConversationMessageModel[] {

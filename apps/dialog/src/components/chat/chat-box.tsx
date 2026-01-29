@@ -7,7 +7,6 @@ import MarkdownDisplay from './markdown-display';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
 import Citation from './sources/citation';
-import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { iconClassName } from '@/utils/tailwind/icon';
 import useBreakpoints from '../hooks/use-breakpoints';
@@ -15,6 +14,7 @@ import { isImageFile } from '@/utils/files/generic';
 import { UIMessage } from 'ai';
 import { ReactNode } from 'react';
 import { UseChatHelpers } from '@ai-sdk/react';
+import { WebsearchSource } from '@shared/db/types';
 
 export function ChatBox({
   assistantIcon,

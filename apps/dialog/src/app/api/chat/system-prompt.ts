@@ -3,7 +3,6 @@ import { dbGetCharacterById } from '@shared/db/functions/character';
 import { ObscuredFederalState } from '@/auth/utils';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { CustomGptSelectModel } from '@shared/db/schema';
-import { WebsearchSource } from '../webpage-content/types';
 import { ChunkResult } from '../file-operations/process-chunks';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { constructBaseCharacterSystemPrompt } from '../character/system-prompt';
@@ -12,6 +11,7 @@ import {
   constructWebsearchPrompt,
   LANGUAGE_GUIDELINES,
 } from '../utils/system-prompt';
+import { WebsearchSource } from '@shared/db/types';
 
 function constructTelliSystemPrompt() {
   return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. 

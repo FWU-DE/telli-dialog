@@ -2,7 +2,6 @@ import Chat from '@/components/chat/chat';
 import { dbGetConversationAndMessages } from '@shared/db/functions/chat';
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import { redirect } from 'next/navigation';
-import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
@@ -14,7 +13,7 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { requireAuth } from '@/auth/requireAuth';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
-import { webScraper } from '@/app/api/webpage-content/search-web';
+import { WebsearchSource } from '@shared/db/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,29 +50,24 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
   const webSourceMapping = new Map<string, WebsearchSource[]>();
   const logoElement = <Logo federalStateId={userAndContext.school.federalStateId} />;
 
-  for (const message of convertedMessages) {
+  // Load websearch sources from the database
+  // For old messages without stored sources, parse URLs from content to show citations
+  // The actual scraping will happen when user sends a new message
+  for (const message of messages) {
     if (message.role !== 'user') {
       continue;
     }
-    const urls = parseHyperlinks(message.content);
-    if (urls === undefined) {
-      continue;
-    }
-    const webSearchPromises = urls?.map((url) => webScraper(url));
-
-    try {
-      const websearchSources = await Promise.all(webSearchPromises ?? []);
-      if (websearchSources === undefined || websearchSources.length === 0) {
-        continue;
+    if (message.websearchSources.length > 0) {
+      webSourceMapping.set(message.id, message.websearchSources);
+    } else {
+      const urls = parseHyperlinks(message.content);
+      if (urls && urls.length > 0) {
+        const websearchSources: WebsearchSource[] = urls.map((url) => ({
+          type: 'websearch',
+          link: url,
+        }));
+        webSourceMapping.set(message.id, websearchSources);
       }
-      webSourceMapping.set(
-        message.id,
-        websearchSources.map((source) => {
-          return source;
-        }),
-      );
-    } catch (error) {
-      console.error('Error fetching webpage content:', error);
     }
   }
 

@@ -1,6 +1,6 @@
 import { TOTAL_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
-import { WebsearchSource } from '../webpage-content/types';
 import { ChunkResult } from '../file-operations/process-chunks';
+import { WebsearchSource } from '@shared/db/types';
 
 export const LANGUAGE_GUIDELINES = `
 ## Sprachliche Richtlinien
