@@ -26,6 +26,7 @@ import { dbGetAttachedFileByEntityId, linkFilesToConversation } from '@shared/db
 import {
   KEEP_FIRST_MESSAGES,
   KEEP_RECENT_MESSAGES,
+  MAX_WEBSEARCH_SOURCES_PER_CONVERSATION,
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
@@ -128,7 +129,6 @@ export async function POST(request: NextRequest) {
   }
 
   // Collect websearch sources for the system prompt
-  const MAX_WEBSEARCH_SOURCES = 5;
   let websearchSources: WebsearchSource[] = [];
   let userMessageWebsearchSources: WebsearchSource[] = [];
   let urlsToScrape: string[] = [];
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
     websearchSources = conversationObject.messages
       .filter((m) => m.role === 'user')
       .flatMap((m) => m.websearchSources);
-    const remainingSlots = MAX_WEBSEARCH_SOURCES - websearchSources.length;
+    const remainingSlots = MAX_WEBSEARCH_SOURCES_PER_CONVERSATION - websearchSources.length;
 
     if (remainingSlots > 0) {
       // Collect URLs from current message
@@ -176,7 +176,10 @@ export async function POST(request: NextRequest) {
   if (customGptId !== undefined || characterId !== undefined) {
     websearchSources = scrapedSources;
   } else {
-    websearchSources = [...websearchSources, ...scrapedSources].slice(0, MAX_WEBSEARCH_SOURCES);
+    websearchSources = [...websearchSources, ...scrapedSources].slice(
+      0,
+      MAX_WEBSEARCH_SOURCES_PER_CONVERSATION,
+    );
 
     userMessageWebsearchSources = scrapedSources.filter((s) => userMessageUrls.includes(s.link));
   }
