@@ -6,6 +6,7 @@ import {
   updateCustomGpt,
   updateCustomGptAccessLevel,
   updateCustomGptPicture,
+  uploadAvatarPictureForCustomGpt,
 } from '@shared/custom-gpt/custom-gpt-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { runServerAction } from '@shared/actions/run-server-action';
@@ -59,4 +60,20 @@ export async function deleteCustomGptAction({ gptId }: { gptId: string }) {
   const { user } = await requireAuth();
 
   return runServerAction(deleteCustomGpt)({ customGptId: gptId, userId: user.id });
+}
+
+export async function uploadAvatarPictureForCustomGptAction({
+  customGptId,
+  croppedImageBlob,
+}: {
+  customGptId: string;
+  croppedImageBlob: Blob;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(uploadAvatarPictureForCustomGpt)({
+    customGptId,
+    croppedImageBlob,
+    userId: user.id,
+  });
 }

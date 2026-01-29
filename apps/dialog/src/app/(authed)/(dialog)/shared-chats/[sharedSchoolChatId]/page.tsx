@@ -2,7 +2,7 @@ import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible
 import HeaderPortal from '../../header-portal';
 import SharedSchoolChatForm from './shared-school-chat-form';
 import ProfileMenu from '@/components/navigation/profile-menu';
-import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { getReadOnlySignedUrl } from '@shared/s3';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
@@ -36,7 +36,7 @@ export default async function Page(props: PageProps<'/shared-chats/[sharedSchool
     }),
   ]).catch(handleErrorInServerComponent);
 
-  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
+  const maybeSignedPictureUrl = await getReadOnlySignedUrl({
     key: learningScenario.pictureId ? `shared-chats/${learningScenario.id}/avatar` : undefined,
   });
 

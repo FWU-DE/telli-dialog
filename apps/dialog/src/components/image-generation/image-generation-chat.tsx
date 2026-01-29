@@ -11,7 +11,7 @@ import { ImageGenerationError } from './image-generation-error';
 import { useTranslations } from 'next-intl';
 import LoadingAnimation from './loading-animation';
 import { ConversationMessageModel } from '@shared/db/types';
-import { getSignedUrlFromS3Get } from '@shared/s3';
+import { getReadOnlySignedUrl } from '@shared/s3';
 import { FileModel } from '@shared/db/schema';
 import { useQueryClient } from '@tanstack/react-query';
 import { logError } from '@shared/logging';
@@ -60,16 +60,18 @@ export default function ImageGenerationChat({
           if (imageFile) {
             try {
               // Generate signed URL for the image file
-              const signedUrl = await getSignedUrlFromS3Get({
+              const signedUrl = await getReadOnlySignedUrl({
                 key: `message_attachments/${imageFile.id}`,
                 contentType: imageFile.type,
                 attachment: false,
               });
 
-              setDisplayedImage({
-                prompt: userMessage.content,
-                imageUrl: signedUrl,
-              });
+              if (signedUrl) {
+                setDisplayedImage({
+                  prompt: userMessage.content,
+                  imageUrl: signedUrl,
+                });
+              }
             } catch (error) {
               logError('Error loading image from files:', error);
             }
@@ -108,10 +110,12 @@ export default function ImageGenerationChat({
     });
     if (result.success) {
       // Update the displayed image
-      setDisplayedImage({
-        prompt: currentPrompt,
-        imageUrl: result.value.imageUrl,
-      });
+      if (result.value.imageUrl) {
+        setDisplayedImage({
+          prompt: currentPrompt,
+          imageUrl: result.value.imageUrl,
+        });
+      }
 
       const newConversationId = result.value.conversationId;
       /* TODO: improve navigation without full reload, but without causing issues with state.

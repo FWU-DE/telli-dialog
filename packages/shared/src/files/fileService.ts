@@ -6,7 +6,7 @@ import {
   fileTable,
   TextChunkTable,
 } from '@shared/db/schema';
-import { copyFileInS3, deleteFileFromS3, deleteFilesFromS3 } from '@shared/s3';
+import { copyFileInS3, deleteFileFromS3, deleteFilesFromS3, uploadFileToS3 } from '@shared/s3';
 import { cnanoid } from '../random/randomService';
 
 const MESSAGE_ATTACHMENTS_FOLDER_NAME = 'message_attachments';
@@ -103,6 +103,27 @@ export async function linkFileToCustomGpt(fileId: string, customGptId: string): 
 }
 
 /**
+ * Uploads a new file to the message attachments path in S3.
+ */
+export async function uploadMessageAttachment({
+  fileId,
+  fileExtension,
+  buffer,
+}: {
+  fileId: string;
+  fileExtension: string;
+  buffer: Buffer;
+}) {
+  const bufferToUpload = buffer;
+
+  await uploadFileToS3({
+    key: `${MESSAGE_ATTACHMENTS_FOLDER_NAME}/${fileId}`,
+    body: bufferToUpload,
+    contentType: fileExtension,
+  });
+}
+
+/**
  * Deletes a bunch of files in the message attachments path in S3.
  * CAUTION: This function does not check any permissions.
  */
@@ -121,4 +142,17 @@ export async function deleteMessageAttachments(fileIds: string[]): Promise<void>
  */
 export async function deleteAvatarPicture(key: string | null | undefined): Promise<void> {
   if (key) await deleteFileFromS3({ key });
+}
+
+export type UploadAvatarPictureParams = {
+  key: string;
+  croppedImageBlob: Blob;
+};
+
+export async function uploadAvatarPicture({ key, croppedImageBlob }: UploadAvatarPictureParams) {
+  await uploadFileToS3({
+    key: key,
+    body: croppedImageBlob,
+    contentType: croppedImageBlob.type,
+  });
 }

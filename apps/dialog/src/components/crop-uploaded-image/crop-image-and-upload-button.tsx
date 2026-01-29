@@ -1,35 +1,36 @@
+'use client';
+
 import React from 'react';
 import { cn } from '@/utils/tailwind';
 import GenericFileUploadButton from '@/components/common/upload-file-button';
-import { getSignedUrlFromS3Put } from '@shared/s3';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import UploadImageIcon from '../icons/upload-image';
 import ImageCropModal from './crop-image-modal';
 import { CompressionOptions } from '@/utils/files/image-utils';
-import { cnanoid } from '@telli/shared/random/randomService';
+import { useToast } from '../common/toast';
+import { useTranslations } from 'next-intl';
+import { ServerActionResult } from '@shared/actions/server-action-result';
 
-type UploadImageToBeCroppedButtonProps = {
-  uploadDirPath: string;
+type CropImageAndUploadButtonProps = {
   aspect: number;
+  handleUploadAvatarPicture: (croppedImageBlob: Blob) => Promise<ServerActionResult<string>>;
   onUploadComplete: (imagePath: string) => void;
   compressionOptions?: CompressionOptions;
-  file_prefix?: string;
-  file_name?: string;
   disabled?: boolean;
 };
 
-export default function UploadImageToBeCroppedButton({
-  uploadDirPath,
+export default function CropImageAndUploadButton({
   aspect,
+  handleUploadAvatarPicture,
   onUploadComplete,
   compressionOptions,
-  file_prefix,
-  file_name,
   disabled = false,
-}: UploadImageToBeCroppedButtonProps) {
+}: CropImageAndUploadButtonProps) {
   const [file, setFile] = React.useState<File | null>(null);
   const [imageSource, setImageSource] = React.useState<string | null>(null);
   const [showCropModal, setShowCropModal] = React.useState<boolean>(false);
+  const toast = useToast();
+  const t = useTranslations('file-interaction');
 
   async function handleImageUpload(files: FileList) {
     const firstFile = files[0];
@@ -47,32 +48,17 @@ export default function UploadImageToBeCroppedButton({
   async function handleCroppedImage(croppedBlob: Blob) {
     if (!croppedBlob || !file) return;
 
-    const fileName = file_name ?? `${file_prefix ?? ''}${cnanoid()}_${file.name}`;
+    const result = await handleUploadAvatarPicture(croppedBlob);
 
-    const imagePath = `${uploadDirPath}/${fileName}`;
-
-    const signedUploadUrl = await getSignedUrlFromS3Put({
-      key: imagePath,
-      fileType: croppedBlob.type,
-    });
-
-    const uploadResponse = await fetch(signedUploadUrl, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': croppedBlob.type,
-      },
-      body: croppedBlob,
-      cache: 'no-cache',
-    });
-
-    if (uploadResponse.ok) {
-      onUploadComplete(imagePath);
+    if (result.success && result.value) {
+      onUploadComplete(result.value);
       setShowCropModal(false);
-      setFile(null);
-      setImageSource(null);
     } else {
-      console.error('Upload failed');
+      toast.error(t('toasts.upload-error'));
+      setShowCropModal(false);
     }
+    setFile(null);
+    setImageSource(null);
   }
 
   return (

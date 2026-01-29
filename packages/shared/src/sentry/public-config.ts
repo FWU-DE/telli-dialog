@@ -1,6 +1,7 @@
 import { env } from '@shared/sentry/env';
 
 const publicConfigVariable = '__PUBLIC_CONFIG__';
+const publicConfigReadyEvent = 'public-config:ready';
 
 declare global {
   interface Window {
@@ -22,8 +23,28 @@ export type PublicConfig = {
 /**
  * Gets the client-side configuration object for Sentry, which was built by `buildPublicConfig`.
  */
-export function getPublicConfig(): PublicConfig | undefined {
-  return typeof window !== 'undefined' ? window[publicConfigVariable] : undefined;
+export async function getPublicConfig(): Promise<PublicConfig | undefined> {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  // Check if public config is available and return immediately
+  if (window[publicConfigVariable]) {
+    return window[publicConfigVariable];
+  }
+
+  // If public config is not yet available, wait for the ready event and try again
+  await new Promise<void>((resolve) => {
+    const onReady = () => resolve();
+    window.addEventListener(publicConfigReadyEvent, onReady, { once: true });
+    // Re-check after subscribing to avoid missing an event dispatched
+    // between the initial check and addEventListener.
+    if (window[publicConfigVariable]) {
+      window.removeEventListener(publicConfigReadyEvent, onReady);
+      resolve();
+    }
+  });
+  return window[publicConfigVariable];
 }
 
 /**
@@ -39,6 +60,8 @@ export function buildPublicConfig() {
     appVersion: env.appVersion,
   };
 
-  const inlineScript = `window.${publicConfigVariable} = ${JSON.stringify(publicConfig)};`;
+  const inlineScript = `
+    window.${publicConfigVariable} = ${JSON.stringify(publicConfig)};
+    window.dispatchEvent(new CustomEvent('${publicConfigReadyEvent}'));`;
   return { inlineScript };
 }
