@@ -31,11 +31,11 @@ export async function webScraper(url: string): Promise<WebsearchSource> {
   result = await webScraperReadability(url);
 
   if (!result.error && result.content && result.content.length > 0) {
-    incrementReadabilitySuccessCounter();
+    incrementReadabilitySuccessCounter({ url: result.link });
     return result;
   }
 
   // Both scrapers failed but we return the result anyway
-  incrementWebScraperFailedCounter();
+  incrementWebScraperFailedCounter({ url: result.link });
   return result;
 }
