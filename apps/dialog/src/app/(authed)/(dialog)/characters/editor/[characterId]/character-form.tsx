@@ -3,7 +3,7 @@
 import Checkbox from '@/components/common/checkbox';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { useToast } from '@/components/common/toast';
-import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
+import CropImageAndUploadButton from '@/components/crop-uploaded-image/crop-image-and-upload-button';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import {
@@ -32,6 +32,7 @@ import {
   updateCharacterAccessLevelAction,
   updateCharacterAction,
   updateCharacterPictureAction,
+  uploadAvatarPictureForCharacterAction,
 } from './actions';
 import ShareContainer from './share-container';
 import { CopyContainer } from '../../../_components/copy-container';
@@ -231,6 +232,14 @@ export default function CharacterForm({
     }
   }
 
+  async function handleUploadAvatarPicture(croppedImageBlob: Blob) {
+    const result = await uploadAvatarPictureForCharacterAction({
+      characterId: character.id,
+      croppedImageBlob,
+    });
+    return result;
+  }
+
   function handleAutoSave() {
     if (isCreating || readOnly) return;
     const data = getValues();
@@ -391,11 +400,10 @@ export default function CharacterForm({
               )}
             </div>
             {!readOnly && (
-              <UploadImageToBeCroppedButton
-                uploadDirPath={`characters/${character.id}`}
+              <CropImageAndUploadButton
                 aspect={1}
+                handleUploadAvatarPicture={handleUploadAvatarPicture}
                 onUploadComplete={handlePictureUploadComplete}
-                file_name="avatar"
                 compressionOptions={{ maxHeight: 800 }}
               />
             )}

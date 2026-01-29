@@ -6,7 +6,7 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { dbGetLlmModelById } from '@shared/db/functions/llm-model';
 import { dbGetFederalStateByUserId } from '@shared/db/functions/school';
 import { dbGetSharedChatByIdAndInviteCode } from '@shared/db/functions/shared-school-chat';
-import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { getReadOnlySignedUrl } from '@shared/s3';
 import { notFound } from 'next/navigation';
 import z from 'zod';
 
@@ -31,7 +31,7 @@ export default async function Page(props: PageProps<'/ua/shared-chats/[sharedCha
     notFound();
   }
 
-  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
+  const maybeSignedPictureUrl = await getReadOnlySignedUrl({
     key: sharedSchoolChat.pictureId,
   });
 

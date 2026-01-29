@@ -2,7 +2,7 @@ import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelById } from '@shared/db/functions/llm-model';
 import { dbGetCharacterByIdAndInviteCode } from '@shared/db/functions/character';
 
-import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { getReadOnlySignedUrl } from '@shared/s3';
 import CharacterSharedChat from '@/components/chat/character-shared-chat';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { dbGetFederalStateBySchoolId } from '@shared/db/functions/school';
@@ -26,7 +26,7 @@ export default async function Page(props: PageProps<'/ua/characters/[characterId
     notFound();
   }
   const model = await dbGetLlmModelById({ modelId: character.modelId });
-  const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: character.pictureId });
+  const maybeSignedImageUrl = await getReadOnlySignedUrl({ key: character.pictureId });
 
   if (model === undefined) {
     notFound();
