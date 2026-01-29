@@ -1,45 +1,69 @@
 import { Counter, metrics } from '@opentelemetry/api';
 
-const meter = metrics.getMeter('telli.webscraper.version', '0.1.0');
+/**
+ * Metric names following OpenTelemetry conventions
+ */
+const METRIC_NAMES = {
+  CRAWL4AI_SUCCESS: 'telli_crawl4ai_success_total',
+  READABILITY_SUCCESS: 'telli_readability_success_total',
+  WEBSCRAPER_FAILED: 'telli_webscraper_failed_total',
+} as const;
 
-let crawl4aiSuccessCounter: Counter | undefined;
-let readabilitySuccessCounter: Counter | undefined;
-let webScraperFailedCounter: Counter | undefined;
+/**
+ * Metric descriptions
+ */
+const METRIC_DESCRIPTIONS = {
+  CRAWL4AI_SUCCESS: 'Total number of successful crawl4ai operations',
+  READABILITY_SUCCESS: 'Total number of successful readability operations',
+  WEBSCRAPER_FAILED:
+    'Total number of failed web scraping operations (both crawl4ai and readability)',
+} as const;
 
-function getCrawl4aiSuccessCounter() {
-  if (!crawl4aiSuccessCounter) {
-    crawl4aiSuccessCounter = meter.createCounter('telli_crawl4ai_success', {
-      description: 'Counts the number of times the crawl4ai is successful.',
-    });
-  }
-  return crawl4aiSuccessCounter;
+// Initialize meter with proper naming convention
+const meter = metrics.getMeter('telli.webscraper', '0.1.0');
+
+// Initialize all counters at module load time for better performance
+const crawl4aiSuccessCounter: Counter = meter.createCounter(METRIC_NAMES.CRAWL4AI_SUCCESS, {
+  description: METRIC_DESCRIPTIONS.CRAWL4AI_SUCCESS,
+  unit: '1', // dimensionless counter
+});
+
+const readabilitySuccessCounter: Counter = meter.createCounter(METRIC_NAMES.READABILITY_SUCCESS, {
+  description: METRIC_DESCRIPTIONS.READABILITY_SUCCESS,
+  unit: '1', // dimensionless counter
+});
+
+const webScraperFailedCounter: Counter = meter.createCounter(METRIC_NAMES.WEBSCRAPER_FAILED, {
+  description: METRIC_DESCRIPTIONS.WEBSCRAPER_FAILED,
+  unit: '1', // dimensionless counter
+});
+
+/**
+ * Increments the counter for successful crawl4ai operations
+ * @param attributes - Optional attributes to add to the metric
+ */
+export function incrementCrawl4aiSuccessCounter(
+  attributes?: Record<string, string | number>,
+): void {
+  crawl4aiSuccessCounter.add(1, attributes);
 }
-function getReadabilitySuccessCounter() {
-  if (!readabilitySuccessCounter) {
-    readabilitySuccessCounter = meter.createCounter('telli_readability_success', {
-      description: 'Counts the number of times the readability is successful.',
-    });
-  }
-  return readabilitySuccessCounter;
+
+/**
+ * Increments the counter for successful readability operations
+ * @param attributes - Optional attributes to add to the metric
+ */
+export function incrementReadabilitySuccessCounter(
+  attributes?: Record<string, string | number>,
+): void {
+  readabilitySuccessCounter.add(1, attributes);
 }
 
-function getWebScraperFailedCounter() {
-  if (!webScraperFailedCounter) {
-    webScraperFailedCounter = meter.createCounter('telli_webscraper_failed', {
-      description: 'Counts the number of times crawl4ai and readability have failed.',
-    });
-  }
-  return webScraperFailedCounter;
-}
-
-export function incrementCrawl4aiSuccessCounter() {
-  getCrawl4aiSuccessCounter().add(1);
-}
-
-export function incrementReadabilitySuccessCounter() {
-  getReadabilitySuccessCounter().add(1);
-}
-
-export function incrementWebScraperFailedCounter() {
-  getWebScraperFailedCounter().add(1);
+/**
+ * Increments the counter for failed web scraping operations
+ * @param attributes - Optional attributes to add to the metric (e.g., error type, url)
+ */
+export function incrementWebScraperFailedCounter(
+  attributes?: Record<string, string | number>,
+): void {
+  webScraperFailedCounter.add(1, attributes);
 }
