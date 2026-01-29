@@ -26,19 +26,14 @@ import { dbGetAttachedFileByEntityId, linkFilesToConversation } from '@shared/db
 import {
   KEEP_FIRST_MESSAGES,
   KEEP_RECENT_MESSAGES,
-  MAX_WEBSEARCH_SOURCES_PER_CONVERSATION,
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
-import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 import { extractImagesAndUrl } from '../file-operations/prepocess-image';
 import { formatMessagesWithImages } from './utils';
 import { logDebug, logError } from '@shared/logging';
-import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
-import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
-import { webScraper } from '../webpage-content/search-web';
-import { WebsearchSource } from '@shared/db/types';
+import { searchWeb } from './websearch-service';
 
 export async function POST(request: NextRequest) {
   const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);
@@ -128,61 +123,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'User has reached telli points limit.' }, { status: 429 });
   }
 
-  // Collect websearch sources for the system prompt
-  let websearchSources: WebsearchSource[] = []; // Final websearch sources to be used in system prompt
-  let userMessageWebsearchSources: WebsearchSource[] = []; // Sources related to the current user message
-  let urlsToScrape: string[] = []; // New urls to scrape
-  let userMessageUrls: string[] = [];
-
-  if (customGptId !== undefined) {
-    const customGpt = await dbGetCustomGptById({ customGptId });
-    urlsToScrape = customGpt?.attachedLinks.filter((l) => l !== '') ?? [];
-  } else if (characterId !== undefined) {
-    const character = await dbGetCharacterByIdWithShareData({ characterId, userId: user.id });
-    urlsToScrape = character?.attachedLinks.filter((l) => l !== '') ?? [];
-  } else {
-    websearchSources = conversationObject.messages
-      .filter((m) => m.role === 'user')
-      .flatMap((m) => m.websearchSources);
-    const remainingSlots = MAX_WEBSEARCH_SOURCES_PER_CONVERSATION - websearchSources.length;
-
-    if (remainingSlots > 0) {
-      // Collect URLs from current message
-      userMessageUrls = [...new Set(parseHyperlinks(userMessage.content) ?? [])].filter(
-        (l) => l !== '',
-      );
-
-      // Collect URLs from old messages without sources
-      const oldMessageUrls = conversationObject.messages
-        .filter((m) => m.role === 'user' && m.websearchSources.length === 0)
-        .flatMap((m) => parseHyperlinks(m.content) ?? []);
-
-      urlsToScrape = [...new Set([...userMessageUrls, ...oldMessageUrls])].slice(0, remainingSlots);
-    }
-  }
-
-  // Scrape collected URLs
-  const scrapedSources = await Promise.all(
-    urlsToScrape.map(async (url) => {
-      try {
-        return await webScraper(url);
-      } catch {
-        return undefined;
-      }
-    }),
-  ).then((results) => results.filter((x): x is WebsearchSource => !!x));
-
-  // Build final websearchSources
-  if (customGptId !== undefined || characterId !== undefined) {
-    websearchSources = scrapedSources;
-  } else {
-    websearchSources = [...websearchSources, ...scrapedSources].slice(
-      0,
-      MAX_WEBSEARCH_SOURCES_PER_CONVERSATION,
-    );
-
-    userMessageWebsearchSources = scrapedSources.filter((s) => userMessageUrls.includes(s.link));
-  }
+  const { websearchSources, userMessageWebsearchSources } = await searchWeb(
+    customGptId,
+    characterId,
+    user,
+    userMessage,
+    conversationObject.messages,
+  );
 
   await dbInsertChatContent({
     conversationId: conversation.id,
