@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       status: 200,
     });
   } catch (error) {
-    handleErrorInRoute(error);
+    return handleErrorInRoute(error);
   }
 }
 
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
  * uploads file to S3 and stores embeddings in DB.
  *
  * @param file the file to upload
- * @returns path and fileId of the uploaded file in s3 bucket
+ * @returns the generated fileId of the uploaded file
  */
 async function handleFileUpload(file: File) {
   const user = await getUser();
