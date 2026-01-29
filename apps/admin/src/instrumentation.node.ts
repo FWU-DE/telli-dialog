@@ -1,3 +1,4 @@
+import Sentry, { SentryContextManager } from '@sentry/nextjs';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
@@ -6,7 +7,21 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { SentrySampler, SentrySpanProcessor } from '@sentry/opentelemetry';
 import { env } from './consts/env';
+
+const sentryClient = Sentry.init({
+  debug: false,
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.SENTRY_ENVIRONMENT,
+  integrations: [Sentry.captureConsoleIntegration({ levels: ['warn', 'error'] })],
+  // Define how likely traces are sampled. Adjust this value in production or use tracesSampler for greater control.
+  profileSessionSampleRate: 0.01,
+  tracesSampleRate: 1,
+  // Use custom OpenTelemetry configuration, see https://docs.sentry.io/platforms/javascript/guides/node/opentelemetry/custom-setup/
+  skipOpenTelemetrySetup: true,
+  registerEsmLoaderHooks: false,
+});
 
 // For debugging purposes, you can uncomment the following two lines to enable console logging
 // import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
@@ -27,8 +42,10 @@ const sdk = new NodeSDK({
   instrumentations: [
     getNodeAutoInstrumentations({
       '@opentelemetry/instrumentation-http': {
-        // instrumentation from next.js is enough
-        enabled: false,
+        requestHook: (span, msg) => {
+          const path = 'path' in msg ? msg.path : msg.url;
+          span.updateName(`${msg.method} ${path}`);
+        },
       },
     }),
   ],
@@ -37,8 +54,10 @@ const sdk = new NodeSDK({
     [ATTR_SERVICE_VERSION]: env.appVersion,
   }),
   metricReaders: [periodicExportingMetricReader],
+  sampler: sentryClient ? new SentrySampler(sentryClient) : undefined,
   serviceName: SERVICE_NAME,
-  spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter())],
+  spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter()), new SentrySpanProcessor()],
+  contextManager: new SentryContextManager(),
 });
 
 sdk.start();
@@ -51,3 +70,5 @@ process.on('SIGTERM', () => {
     .catch((error) => console.log('Error terminating tracing', error))
     .finally(() => process.exit(0));
 });
+
+Sentry.validateOpenTelemetrySetup();

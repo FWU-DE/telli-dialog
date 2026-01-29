@@ -45,7 +45,7 @@ ${formatList('## Kontext', [
 ## Zweck des Dialogs
 ${sharedChat.description}
 
-${sharedChat.studentExcercise.length !== 0 ? `Folgendes ist der Auftrag an die Lernenden:\n${sharedChat.studentExcercise}` : ''}
+${sharedChat.studentExercise.length !== 0 ? `Folgendes ist der Auftrag an die Lernenden:\n${sharedChat.studentExercise}` : ''}
 
 ## Verhalte dich wie folgt
 ${sharedChat.additionalInstructions}
