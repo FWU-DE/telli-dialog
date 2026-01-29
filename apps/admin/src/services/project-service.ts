@@ -1,6 +1,7 @@
 import { env } from '../consts/env';
 import { Project } from '../types/project';
 import { fetchFromApi } from './fetch';
+import { logInfo } from '@shared/logging';
 
 const apiRoutes = {
   GET_ALL: (organizationId: string) => `/v1/admin/organizations/${organizationId}/projects`,
@@ -36,6 +37,8 @@ export async function createProject(
     method: 'POST',
     body: JSON.stringify(projectData),
   });
+
+  logInfo('Project was created successfully', { organizationId, projectData });
 
   const data = await response.json();
   return data as Project;

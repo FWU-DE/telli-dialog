@@ -1,6 +1,7 @@
 import { env } from '../consts/env';
 import { ApiKey, ApiKeyWithPlainKey, CreateApiKey, UpdateApiKey } from '../types/api-key';
 import { fetchFromApi } from './fetch';
+import { logInfo } from '@shared/logging';
 
 const apiRoutes = {
   GET_ALL: (organizationId: string, projectId: string) =>
@@ -48,6 +49,8 @@ export async function createApiKey(
     },
   );
 
+  logInfo('API Key was created successfully', { projectId, apiKeyData });
+
   const data = await response.json();
   return data as ApiKeyWithPlainKey;
 }
@@ -65,6 +68,8 @@ export async function updateApiKey(
       body: JSON.stringify(apiKeyData),
     },
   );
+
+  logInfo('API Key was updated successfully', { projectId, apiKeyId, apiKeyData });
 
   const data = await response.json();
   return data as ApiKey;

@@ -1,10 +1,11 @@
 import { env } from '../consts/env';
 import {
-  LargeLanguageModel,
   CreateLargeLanguageModel,
+  LargeLanguageModel,
   UpdateLargeLanguageModel,
 } from '../types/large-language-model';
 import { fetchFromApi } from './fetch';
+import { logInfo } from '@shared/logging';
 
 const apiRoutes = {
   GET_ALL: (organizationId: string) => `/v1/admin/organizations/${organizationId}/models`,
@@ -31,6 +32,8 @@ export async function createLargeLanguageModel(
     body: JSON.stringify({ ...data, organizationId }),
   });
 
+  logInfo('LLM was created successfully', { organizationId, data });
+
   const result = await response.json();
   return result as LargeLanguageModel;
 }
@@ -47,6 +50,8 @@ export async function updateLargeLanguageModel(
       body: JSON.stringify(data),
     },
   );
+
+  logInfo('LLM was updated successfully', { organizationId, modelId, data });
 
   const result = await response.json();
   return result as LargeLanguageModel;
