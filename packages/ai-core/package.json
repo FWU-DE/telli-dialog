@@ -19,7 +19,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "openai": "6.9.1",
+    "openai": "6.16.0",
     "google-auth-library": "10.5.0",
     "zod": "4.3.5",
     "drizzle-orm": "0.45.1",
