@@ -13,9 +13,10 @@ declare global {
 }
 
 export type PublicConfig = {
-  sentry: {
-    dsn?: string;
-    environment?: string;
+  sentry?: {
+    dsn: string;
+    environment: string;
+    tracesSampleRate: number;
   };
   appVersion?: string;
 };
@@ -56,6 +57,7 @@ export function buildPublicConfig() {
     sentry: {
       dsn: env.sentryDsn,
       environment: env.sentryEnvironment,
+      tracesSampleRate: env.sentryTracesSampleRateClient,
     },
     appVersion: env.appVersion,
   };

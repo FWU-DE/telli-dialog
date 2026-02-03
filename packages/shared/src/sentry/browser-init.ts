@@ -19,11 +19,11 @@ import { getPublicConfig } from './public-config';
  */
 export async function clientSentryInit(options?: Sentry.BrowserOptions) {
   const publicConfig = await getPublicConfig();
-  const dsn = publicConfig?.sentry?.dsn;
-  const environment = publicConfig?.sentry?.environment;
 
   // If config is not available at runtime, skip client Sentry entirely
-  if (dsn && environment) {
+  if (publicConfig?.sentry) {
+    const { dsn, environment, tracesSampleRate } = publicConfig.sentry;
+
     Sentry.init({
       debug: false,
       dsn,
@@ -39,7 +39,7 @@ export async function clientSentryInit(options?: Sentry.BrowserOptions) {
       // https://docs.sentry.io/platforms/javascript/session-replay/configuration/#general-integration-configuration
       replaysOnErrorSampleRate: 1.0,
       replaysSessionSampleRate: 0.1,
-      tracesSampleRate: 0.1,
+      tracesSampleRate: tracesSampleRate,
 
       beforeSend(event: Sentry.ErrorEvent) {
         // do not send any logs to sentry for development or e2e environment
