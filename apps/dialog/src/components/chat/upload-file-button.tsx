@@ -188,7 +188,7 @@ export default function UploadFileButton({
         type="button"
         title={
           isUploadLimitReached
-            ? t('upload.file-limit-reached', { max_files: NUMBER_OF_FILES_LIMIT })
+            ? t('upload.upload-file-button-disabled', { max_files: NUMBER_OF_FILES_LIMIT })
             : t('upload.upload-file-button')
         }
       >

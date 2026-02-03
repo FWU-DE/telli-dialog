@@ -132,8 +132,10 @@ export const conversationMessageTable = pgTable(
     conversationId: uuid('conversation_id')
       .references(() => conversationTable.id)
       .notNull(),
-    modelName: text('model_name'),
-    userId: uuid('user_id').references(() => userTable.id),
+    modelName: text('model_name').notNull(),
+    userId: uuid('user_id')
+      .references(() => userTable.id)
+      .notNull(),
     role: conversationRoleEnum('role').notNull(),
     orderNumber: integer('order_number').notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),

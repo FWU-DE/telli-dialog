@@ -12,13 +12,6 @@ export async function register() {
     const { startup } = await import('@/startup');
     await startup();
   }
-
-  if (process.env.NEXT_RUNTIME === 'edge') {
-    console.info(
-      `NEXT_RUNTIME is ${process.env.NEXT_RUNTIME} - no instrumentation available for edge.`,
-    );
-    await import('../sentry.edge.config');
-  }
 }
 
 export const onRequestError = Sentry.captureRequestError;
