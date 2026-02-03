@@ -90,7 +90,7 @@ export async function searchWeb(
   // Scrape old message URLs with remaining slots
   const uniqueOldMessageUrls = [...new Set(oldMessageUrls)]
     .filter((url) => !uniqueUserMessageUrls.includes(url))
-    .slice(0, remainingSlots - userMessageWebsearchSources.length);
+    .slice(0, Math.max(0, remainingSlots - userMessageWebsearchSources.length));
   const oldMessageWebsearchSources = await scrapeUrls(uniqueOldMessageUrls);
 
   const websearchSources = [
