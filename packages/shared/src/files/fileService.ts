@@ -14,6 +14,7 @@ import {
   uploadFileToS3,
 } from '@shared/s3';
 import { cnanoid } from '../random/randomService';
+import { logError } from '@shared/logging';
 
 const MESSAGE_ATTACHMENTS_FOLDER_NAME = 'message_attachments';
 
@@ -172,5 +173,10 @@ export async function uploadAvatarPicture({ key, croppedImageBlob }: UploadAvata
  */
 export async function getAvatarPictureUrl(key: string | null | undefined) {
   if (!key) return undefined;
-  return await getReadOnlySignedUrl({ key, options: { expiresIn: 3600 } });
+  try {
+    return await getReadOnlySignedUrl({ key, options: { expiresIn: 3600 } });
+  } catch (error) {
+    logError('Error getting signed URL for avatar picture:', error);
+    return undefined;
+  }
 }

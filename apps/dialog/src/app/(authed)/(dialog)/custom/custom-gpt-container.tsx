@@ -9,7 +9,6 @@ import { AccessLevel, CustomGptSelectModel } from '@shared/db/schema';
 import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React from 'react';
