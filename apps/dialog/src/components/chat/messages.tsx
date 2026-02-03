@@ -3,7 +3,7 @@ import { UseChatHelpers } from '@ai-sdk/react';
 import { ChatBox } from './chat-box';
 import LoadingAnimation from './loading-animation';
 import { FileModel } from '@shared/db/schema';
-import { WebsearchSource } from '@/app/api/webpage-content/types';
+import { WebsearchSource } from '@shared/db/types';
 
 interface MessagesProps {
   messages: UIMessage[];

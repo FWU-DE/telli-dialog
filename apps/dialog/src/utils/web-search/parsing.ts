@@ -1,12 +1,8 @@
-export function parseHostname(uri: string) {
+export function stripUrlPrefix(uri: string) {
   if (!uri) {
     return '';
   }
-  try {
-    return new URL(uri).hostname.replace(/^www\./, '');
-  } catch {
-    return '';
-  }
+  return uri.replace(/^https?:\/\/(www\.)?/, '');
 }
 
 export function parseHyperlinks(content: string): string[] | undefined {

@@ -10,7 +10,6 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
-import Image from 'next/image';
 import { FileModel, SharedSchoolConversationSelectModel } from '@shared/db/schema';
 import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../schema';
 import {
@@ -32,12 +31,12 @@ import SelectLlmModelForm from '../../_components/select-llm-model';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
 import { labelClassName } from '@/utils/tailwind/input';
-import { WebsearchSource } from '@/app/api/webpage-content/types';
 import CropImageAndUploadButton from '@/components/crop-uploaded-image/crop-image-and-upload-button';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { AttachedLinks } from '@/components/forms/attached-links';
 import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
 import AvatarPicture from '@/components/common/avatar-picture';
+import { WebsearchSource } from '@shared/db/types';
 
 export default function SharedSchoolChatForm({
   existingFiles,
