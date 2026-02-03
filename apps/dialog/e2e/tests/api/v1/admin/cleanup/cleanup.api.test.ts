@@ -7,10 +7,10 @@ import {
   CustomGptFileMapping,
   customGptTable,
   fileTable,
-  llmModelTable,
   LearningScenarioFileMapping,
   LearningScenarioInsertModel,
   learningScenarioTable,
+  llmModelTable,
   userTable,
 } from '@shared/db/schema';
 import { eq } from 'drizzle-orm';
@@ -45,9 +45,7 @@ test.describe('cleanup', () => {
 
   test.afterEach(async () => {
     await db.transaction(async (tx) => {
-      await tx
-        .delete(learningScenarioTable)
-        .where(eq(learningScenarioTable.userId, userId));
+      await tx.delete(learningScenarioTable).where(eq(learningScenarioTable.userId, userId));
       await tx.delete(characterTable).where(eq(characterTable.userId, userId));
       await tx.delete(customGptTable).where(eq(customGptTable.userId, userId));
       await tx.delete(userTable).where(eq(userTable.id, userId));

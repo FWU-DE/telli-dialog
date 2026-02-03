@@ -88,10 +88,7 @@ export async function dbGetFilesForLearningScenario(
     .innerJoin(fileTable, eq(LearningScenarioFileMapping.fileId, fileTable.id))
     .innerJoin(
       learningScenarioTable,
-      eq(
-        LearningScenarioFileMapping.learningScenarioId,
-        learningScenarioTable.id,
-      ),
+      eq(LearningScenarioFileMapping.learningScenarioId, learningScenarioTable.id),
     )
     .where(
       and(
@@ -259,10 +256,7 @@ export async function dbDeleteDanglingFiles() {
       )
       .leftJoin(CharacterFileMapping, eq(fileTable.id, CharacterFileMapping.fileId))
       .leftJoin(CustomGptFileMapping, eq(fileTable.id, CustomGptFileMapping.fileId))
-      .leftJoin(
-        LearningScenarioFileMapping,
-        eq(fileTable.id, LearningScenarioFileMapping.fileId),
-      )
+      .leftJoin(LearningScenarioFileMapping, eq(fileTable.id, LearningScenarioFileMapping.fileId))
       .where(
         and(
           isNull(ConversationMessageFileMappingTable.fileId),

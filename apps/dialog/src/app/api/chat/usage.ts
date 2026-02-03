@@ -1,10 +1,6 @@
-import { getPriceLimitInCentByUser } from '@/app/school';
-import {
-  CharacterWithShareDataModel,
-  type LearningScenarioSelectModel,
-} from '@shared/db/schema';
+import { getPriceInCentByUser, getPriceLimitInCentByUser } from '@/app/school';
+import { CharacterWithShareDataModel, type LearningScenarioSelectModel } from '@shared/db/schema';
 import { type UserAndContext } from '@/auth/types';
-import { getPriceInCentByUser } from '@/app/school';
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
   dbGetSharedChatUsageInCentBySharedChatId,
