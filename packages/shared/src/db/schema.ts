@@ -520,16 +520,15 @@ export const learningScenarioTable = pgTable(
     studentExercise: text('student_exercise').default('').notNull(),
     additionalInstructions: text('additional_instructions'),
     restrictions: text('restrictions'), // Not used anymore
-    telliPointsLimit: integer('telli_points_limit'),
-    maxUsageTimeLimit: integer('max_usage_time_limit'),
     attachedLinks: text('attached_links')
       .array()
       .notNull()
       .default(sql`'{}'::text[]`),
     pictureId: text('picture_id'),
-    inviteCode: text('invite_code').unique(),
-    startedAt: timestamp('started_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    accessLevel: accessLevelEnum('access_level').notNull().default('private'),
+    schoolId: text('school_id').references(() => schoolTable.id),
+    originalLearningScenarioId: uuid('original_learning_scenario_id'),
   },
   (table) => [index().on(table.userId)],
 );
@@ -538,8 +537,6 @@ export const learningScenarioSelectSchema = createSelectSchema(learningScenarioT
 export const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable).omit({
   id: true,
   createdAt: true,
-  inviteCode: true,
-  startedAt: true,
   userId: true,
 });
 export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioTable)
@@ -551,6 +548,47 @@ export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioT
 export type LearningScenarioSelectModel = z.infer<typeof learningScenarioSelectSchema>;
 export type LearningScenarioInsertModel = z.infer<typeof learningScenarioInsertSchema>;
 export type LearningScenarioUpdateModel = z.infer<typeof learningScenarioUpdateSchema>;
+
+/**
+ * Schema for table shared_learning_scenario
+ */
+export const sharedLearningScenario = pgTable(
+  'shared_learning_scenario',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    learningScenarioId: uuid('learning_scenario_id')
+      .references(() => learningScenarioTable.id, { onDelete: 'cascade' })
+      .notNull(),
+    userId: uuid('user_id')
+      .references(() => userTable.id)
+      .notNull(),
+    telliPointsLimit: integer('telli_points_limit'),
+    maxUsageTimeLimit: integer('max_usage_time_limit'),
+    inviteCode: text('invite_code').unique(),
+    startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [unique().on(table.learningScenarioId, table.userId)],
+);
+
+export const sharedLearningScenarioSelectSchema = createSelectSchema(sharedLearningScenario).extend(
+  {
+    startedAt: z.coerce.date(),
+  },
+);
+export const sharedLearningScenarioInsertSchema = createInsertSchema(sharedLearningScenario).omit({
+  id: true,
+  inviteCode: true,
+  startedAt: true,
+});
+export const sharedLearningScenarioUpdateSchema = createUpdateSchema(sharedLearningScenario)
+  .omit({ learningScenarioId: true, userId: true, startedAt: true })
+  .extend({
+    id: z.string(),
+  });
+
+export type SharedLearningScenarioSelectModel = z.infer<typeof sharedLearningScenarioSelectSchema>;
+export type SharedLearningScenarioInsertModel = z.infer<typeof sharedLearningScenarioInsertSchema>;
+export type SharedLearningScenarioUpdateModel = z.infer<typeof sharedLearningScenarioUpdateSchema>;
 
 /**
  * Schema for table shared_learning_scenario_usage_tracking
