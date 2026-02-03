@@ -49,6 +49,14 @@ export type LlmModelPriceMetadata =
       pricePerImageInCent: number;
     };
 
+export type WebsearchSource = {
+  type: 'websearch';
+  name?: string;
+  link: string;
+  content?: string;
+  error?: boolean;
+};
+
 export type DbTransactionObject = PgTransaction<
   PostgresJsQueryResultHKT,
   Record<string, never>,

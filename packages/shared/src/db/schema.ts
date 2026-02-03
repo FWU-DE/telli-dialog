@@ -16,7 +16,7 @@ import {
   vector,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
-import { DesignConfiguration, type LlmModelPriceMetadata } from './types';
+import { DesignConfiguration, type LlmModelPriceMetadata, type WebsearchSource } from './types';
 import {
   conversationRoleSchema,
   conversationTypeSchema,
@@ -116,6 +116,7 @@ export type ConversationModelWithFiles = ConversationSelectModel & {
  * Schema for table conversation_message
  */
 export const conversationRoleEnum = pgEnum('conversation_role', conversationRoleSchema.enum);
+
 // Define the parameters type for conversation messages
 export const conversationMessageParametersSchema = z.object({
   imageStyle: imageStyleTypeSchema.optional(),
@@ -140,6 +141,7 @@ export const conversationMessageTable = pgTable(
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
     parameters: json('parameters').$type<ConversationMessageParameters>(),
+    websearchSources: json('websearch_sources').$type<WebsearchSource[]>().notNull().default([]),
   },
   (table) => [index().on(table.conversationId), index().on(table.userId)],
 );

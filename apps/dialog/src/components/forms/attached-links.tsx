@@ -10,9 +10,9 @@ import {
   NUMBER_OF_LINKS_LIMIT_FOR_SHARED_CHAT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
-import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { useToast } from '../common/toast';
 import { useTranslations } from 'next-intl';
+import { WebsearchSource } from '@shared/db/types';
 
 type AttachedLinksProps = {
   fields: FieldArrayWithId<WebsearchSource, never, 'id'>[];

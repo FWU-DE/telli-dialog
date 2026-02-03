@@ -3,7 +3,6 @@ import HeaderPortal from '../../header-portal';
 import SharedSchoolChatForm from './shared-school-chat-form';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { getReadOnlySignedUrl } from '@shared/s3';
-import { WebsearchSource } from '@/app/api/webpage-content/types';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
@@ -13,6 +12,7 @@ import {
 } from '@shared/learning-scenarios/learning-scenario-service';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
+import { WebsearchSource } from '@shared/db/types';
 
 export const dynamic = 'force-dynamic';
 

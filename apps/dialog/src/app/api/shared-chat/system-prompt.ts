@@ -1,5 +1,4 @@
 import { type SharedSchoolConversationSelectModel } from '@shared/db/schema';
-import { WebsearchSource } from '../webpage-content/types';
 import { ChunkResult } from '../file-operations/process-chunks';
 import {
   constructFilePrompt,
@@ -7,6 +6,7 @@ import {
   formatList,
   LANGUAGE_GUIDELINES,
 } from '../utils/system-prompt';
+import { WebsearchSource } from '@shared/db/types';
 
 export function constructLearningScenarioSystemPrompt({
   sharedChat,

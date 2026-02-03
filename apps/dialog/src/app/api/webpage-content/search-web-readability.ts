@@ -1,4 +1,3 @@
-import { WebsearchSource } from './types';
 import { Readability } from '@mozilla/readability';
 import { JSDOM, VirtualConsole } from 'jsdom';
 import { SINGLE_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
@@ -7,6 +6,7 @@ import { getTranslations } from 'next-intl/server';
 import he from 'he';
 import { logDebug, logError, logInfo, logWarning } from '@shared/logging';
 import { isBinaryFile } from 'isbinaryfile';
+import { WebsearchSource } from '@shared/db/types';
 
 const headers = {
   'User-Agent':
