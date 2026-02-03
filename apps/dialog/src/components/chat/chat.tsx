@@ -128,7 +128,6 @@ export default function Chat({
       if (messages.length === 0) {
         navigateWithoutRefresh(conversationPath);
         refetchConversations();
-        router.refresh();
       }
 
       await handleSubmit(e, {

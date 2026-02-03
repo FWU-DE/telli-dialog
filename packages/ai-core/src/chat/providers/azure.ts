@@ -23,7 +23,7 @@ function createAzureClient(model: AiModel): {
   return { client, deployment };
 }
 
-export function constructAzureTextStreamFn(model: AiModel): TextStreamFn {
+export function constructAzureChatCompletionStreamFn(model: AiModel): TextStreamFn {
   const { client, deployment } = createAzureClient(model);
 
   return async function* getAzureTextStream({ messages, maxTokens }, onComplete) {
@@ -70,7 +70,58 @@ export function constructAzureTextStreamFn(model: AiModel): TextStreamFn {
   };
 }
 
-export function constructAzureTextGenerationFn(model: AiModel): TextGenerationFn {
+/**
+ * Alternative streaming function using the OpenAI Responses API
+ * The Responses API provides a more flexible interface with built-in tool support
+ */
+export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
+  const { client, deployment } = createAzureClient(model);
+
+  return async function* getAzureTextStream({ messages, maxTokens }, onComplete) {
+    const response = await client.responses.create(
+      {
+        model: deployment,
+        input: messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
+        stream: true,
+        max_output_tokens: maxTokens,
+        ...model.additionalParameters,
+      },
+      {
+        path: `/openai/deployments/${deployment}/responses`,
+      },
+    );
+
+    let usage: TokenUsage | undefined;
+
+    for await (const event of response) {
+      if (event.type === 'response.output_text.delta') {
+        yield event.delta;
+      }
+
+      if (event.type === 'response.completed' && event.response.usage) {
+        usage = {
+          completionTokens: event.response.usage.output_tokens,
+          promptTokens: event.response.usage.input_tokens,
+          totalTokens: event.response.usage.total_tokens,
+        };
+      }
+    }
+
+    if (!usage) {
+      throw new AiGenerationError('No usage data returned from Azure OpenAI Responses API stream');
+    }
+
+    if (onComplete) {
+      await onComplete(usage);
+    }
+  };
+}
+
+
+export function constructAzureChatCompletionGenerationFn(model: AiModel): TextGenerationFn {
   const { client, deployment } = createAzureClient(model);
 
   return async function getAzureTextGeneration({ messages, maxTokens }) {
@@ -99,6 +150,54 @@ export function constructAzureTextGenerationFn(model: AiModel): TextGenerationFn
       usage: {
         completionTokens: usage.completion_tokens,
         promptTokens: usage.prompt_tokens,
+        totalTokens: usage.total_tokens,
+      },
+    };
+  };
+}
+/**
+ * Alternative non-streaming function using the OpenAI Responses API
+ */
+export function constructAzureResponsesGenerationFn(model: AiModel): TextGenerationFn {
+  const { client, deployment } = createAzureClient(model);
+
+  return async function getAzureTextGeneration({ messages, maxTokens }) {
+    const response = await client.responses.create(
+      {
+        model: deployment,
+        input: messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
+        stream: false,
+        max_output_tokens: maxTokens,
+      },
+      {
+        path: `/openai/deployments/${deployment}/responses`,
+      },
+    );
+
+    // Extract text from output items
+    const textOutput = response.output.find((item) => item.type === 'message');
+    const text =
+      textOutput?.type === 'message'
+        ? textOutput.content
+            .filter((c) => c.type === 'output_text')
+            .map((c) => (c.type === 'output_text' ? c.text : ''))
+            .join('')
+        : '';
+
+    const usage = response.usage;
+
+    if (!usage) {
+      throw new AiGenerationError('No usage data returned from Azure OpenAI Responses API');
+    }
+
+    return {
+      text,
+      usage: {
+        completionTokens: usage.output_tokens,
+        promptTokens: usage.input_tokens,
         totalTokens: usage.total_tokens,
       },
     };

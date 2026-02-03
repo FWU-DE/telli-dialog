@@ -14,27 +14,30 @@ export default function PromptSuggestions({
   hidden = false,
 }: PromptSuggestionsProps) {
   return (
-    <div
-      className={cn(
-        'relative grid gap-2 xs:mb-2 xs:grid-cols-1 lg:mb-4 lg:grid-cols-2 lg:gap-4',
-        suggestions.length === 1 && 'grid-cols-1',
+    <>
+      {!hidden && (
+        <div
+          className={cn(
+            'relative grid gap-2 xs:mb-2 xs:grid-cols-1 lg:mb-4 lg:grid-cols-2 lg:gap-4',
+            suggestions.length === 1 && 'grid-cols-1',
+          )}
+        >
+          {suggestions
+            .filter((s) => s.trim() !== '')
+            .map((suggestion, index) => (
+              <button
+                onClick={() => onSelectSuggestion(suggestion)}
+                key={index}
+                className={cn(
+                  'border-[1px] rounded-enterprise-md py-2.5 px-4 hover:border-primary',
+                  index === 0 && suggestions.length % 2 !== 0 ? 'col-span-2' : '',
+                )}
+              >
+                <ParagraphWithConditionalTitleTwoLine content={suggestion} />
+              </button>
+            ))}
+        </div>
       )}
-    >
-      {suggestions
-        .filter((s) => s.trim() !== '')
-        .map((suggestion, index) => (
-          <button
-            onClick={() => onSelectSuggestion(suggestion)}
-            key={index}
-            className={cn(
-              'border-[1px] rounded-enterprise-md py-2.5 px-4 hover:border-primary',
-              hidden && 'invisible',
-              index === 0 && suggestions.length % 2 !== 0 ? 'col-span-2' : '',
-            )}
-          >
-            <ParagraphWithConditionalTitleTwoLine content={suggestion} />
-          </button>
-        ))}
-    </div>
+    </>
   );
 }
