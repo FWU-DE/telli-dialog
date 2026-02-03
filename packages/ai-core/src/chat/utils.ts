@@ -1,26 +1,29 @@
-// tiktoken import commented out due to runtime issues
-// import { get_encoding } from 'tiktoken';
+import { getEncoding, type Tiktoken } from 'js-tiktoken';
 import type { Message } from './types';
 
-/**
- * Estimates token count using a heuristic approach.
- * Uses the approximation that 1 token ≈ 4 characters for English text.
- * This is a rough estimate - actual tokenization varies by model.
- *
- * @param text - The text to estimate tokens for.
- * @returns Estimated token count.
- */
-function estimateTokens(text: string): number {
-  // Heuristic: ~4 characters per token for English text
-  // This is a rough approximation used by many LLM applications
-  return Math.ceil(text.length / 4);
+// Lazy-loaded encoder instance (cl100k_base is used for GPT-4, GPT-3.5-turbo, and newer models)
+let encoder: Tiktoken | null = null;
+
+function getEncoder(): Tiktoken {
+  if (!encoder) {
+    encoder = getEncoding('cl100k_base');
+  }
+  return encoder;
 }
 
 /**
- * Concatenates the prompt messages and the model's final answer,
- * then calculates token usage using a heuristic approach.
- * This is a HEURISTIC calculation and only exists due to IONOS
- * not sending a completion usage when requesting chat completion with streams enabled.
+ * Counts tokens in text using the cl100k_base encoding.
+ *
+ * @param text - The text to count tokens for.
+ * @returns Token count.
+ */
+function countTokens(text: string): number {
+  return getEncoder().encode(text).length;
+}
+
+/**
+ * Calculates token usage for a chat completion.
+ * Uses tiktoken with cl100k_base encoding for accurate token counting.
  *
  * @param messages - An array of Message objects used as the prompt.
  * @param modelMessage - The final message returned by the model.
@@ -33,11 +36,14 @@ export function calculateCompletionUsage({
   messages: Message[];
   modelMessage: { role: 'assistant'; content: string };
 }): { prompt_tokens: number; completion_tokens: number; total_tokens: number } {
-  const promptText = messages.map((message) => message.content).join(' ');
-  const promptTokens = estimateTokens(promptText);
+  // Count tokens for all prompt messages
+  // Note: This is a simplified calculation. The OpenAI api adds overhead tokens for message formatting
+  // (roughly 3-4 tokens per message for role markers, etc.)
+  const promptTokens = messages.reduce((total, message) => {
+    return total + countTokens(message.content) + 4; // +4 for message overhead
+  }, 3); // +3 for reply priming
 
-  const completionText = modelMessage.content;
-  const completionTokens = completionText !== '' ? estimateTokens(completionText) : 0;
+  const completionTokens = modelMessage.content !== '' ? countTokens(modelMessage.content) : 0;
 
   return {
     prompt_tokens: promptTokens,
@@ -45,30 +51,3 @@ export function calculateCompletionUsage({
     total_tokens: promptTokens + completionTokens,
   };
 }
-// TODO TD-823: Fix tiktoken runtime issues and re-enable accurate token counting
-// Original tiktoken implementation (commented out):
-// export function calculateCompletionUsage({
-//   messages,
-//   modelMessage,
-// }: {
-//   messages: Message[];
-//   modelMessage: { role: 'assistant'; content: string };
-// }): { prompt_tokens: number; completion_tokens: number; total_tokens: number } {
-//   const enc = get_encoding('cl100k_base');
-//   try {
-//     const promptText = messages.map((message) => message.content).join(' ');
-//     const promptTokens = enc.encode(promptText).length;
-//
-//     const completionText = modelMessage.content;
-//     const completionTokens = completionText !== '' ? enc.encode(completionText).length : 0;
-//
-//     return {
-//       prompt_tokens: promptTokens,
-//       completion_tokens: completionTokens,
-//       total_tokens: promptTokens + completionTokens,
-//     };
-//   } finally {
-//     // Always free the encoder after using it.
-//     enc.free();
-//   }
-// }
