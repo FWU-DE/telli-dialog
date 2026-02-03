@@ -42,7 +42,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'The shared chat was not found.' }, { status: 404 });
   }
 
-  const teacherUserAndContext = await getUserAndContextByUserId({ userId: character.userId });
+  if (character.startedBy === null) {
+    return NextResponse.json(
+      { error: 'The user assigned to this chat was not found.' },
+      { status: 404 },
+    );
+  }
+
+  const teacherUserAndContext = await getUserAndContextByUserId({ userId: character.startedBy });
   const productAccess = checkProductAccess(teacherUserAndContext);
 
   if (!productAccess.hasAccess) {
