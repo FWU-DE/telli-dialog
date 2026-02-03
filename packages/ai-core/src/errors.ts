@@ -1,4 +1,7 @@
-// Only use if no child errors fit the case
+/**
+ * Base error class for AI generation errors.
+ * Only use directly if no child error class fits the case.
+ */
 export class AiGenerationError extends Error {
   constructor(message: string) {
     super(message);
@@ -12,6 +15,10 @@ export class AiGenerationError extends Error {
     return false;
   }
 }
+
+/**
+ * Error thrown when AI content moderation flags content as inappropriate.
+ */
 export class ResponsibleAIError extends AiGenerationError {
   constructor(message: string) {
     super(message);
@@ -25,6 +32,10 @@ export class ResponsibleAIError extends AiGenerationError {
     return false;
   }
 }
+
+/**
+ * Error thrown when the API rate limit is exceeded.
+ */
 export class RateLimitExceededError extends AiGenerationError {
   constructor(message: string) {
     super(message);
@@ -38,6 +49,10 @@ export class RateLimitExceededError extends AiGenerationError {
     return false;
   }
 }
+
+/**
+ * Error thrown when an invalid or inaccessible model is requested.
+ */
 export class InvalidModelError extends AiGenerationError {
   constructor(message: string) {
     super(message);
@@ -52,6 +67,9 @@ export class InvalidModelError extends AiGenerationError {
   }
 }
 
+/**
+ * Error thrown when a provider is misconfigured (e.g., missing API key, invalid URL).
+ */
 export class ProviderConfigurationError extends AiGenerationError {
   constructor(message: string) {
     super(message);

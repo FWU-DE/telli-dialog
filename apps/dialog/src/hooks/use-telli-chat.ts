@@ -97,8 +97,8 @@ export function useTelliChat({
           fileIds,
         });
 
-        // we need to handle the first chunk separately to avoid missing content
-        let firstChunk = true;        
+        // We need to handle the first chunk separately to avoid missing content
+        let firstChunk = true;
 
         // Stream the response using native ReadableStream
         for await (const content of readTextStream(result.stream)) {
@@ -108,7 +108,6 @@ export function useTelliChat({
 
           if (content !== undefined && content !== null) {
             if (firstChunk) {
-                    
               // Create assistant message placeholder
               const assistantMessage: ChatMessage = {
                 id: result.messageId,

@@ -34,10 +34,8 @@ export async function generateImageWithBilling(modelId: string, prompt: string, 
   }
 
   try {
-    // generate
     const imageResponse = await generateImage(model, prompt);
 
-    // bill to api key
     const priceInCents = await billImageGenerationUsageToApiKey(apiKeyId, model);
 
     return {
@@ -45,7 +43,7 @@ export async function generateImageWithBilling(modelId: string, prompt: string, 
       priceInCents,
     };
   } catch (error) {
-    // if error is not child of AiGenerationError, wrap it
+    // Wrap non-AiGenerationError errors
     if (!(error instanceof AiGenerationError)) {
       throw new AiGenerationError(
         `Image generation failed: ${error instanceof Error ? error.message : String(error)}`,

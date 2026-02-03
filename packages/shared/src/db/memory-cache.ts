@@ -5,12 +5,13 @@ import * as Sentry from '@sentry/nextjs';
 
 /**
  * A drizzle cache provider for caching values in memory.
- * This provider should only be used for infrequently updated tables, where eventual consistency is sufficient.
+ * This provider should only be used for infrequently updated tables,
+ * where eventual consistency is sufficient.
  *
- *  Note:
- *  - this provider supports only the expiry time, see `CacheConfig.ex` and `CacheConfig.px`
- *  - it does not support auto-invalidation on db updates, as invalidation of
- *    local caches in a horizontally scaled application does not provide any benefit
+ * Note:
+ * - This provider supports only the expiry time, see `CacheConfig.ex` and `CacheConfig.px`
+ * - It does not support auto-invalidation on db updates, as invalidation of
+ *   local caches in a horizontally scaled application does not provide any benefit
  */
 export class MemoryCache extends Cache {
   static override readonly [entityKind]: string = 'MemoryCache';

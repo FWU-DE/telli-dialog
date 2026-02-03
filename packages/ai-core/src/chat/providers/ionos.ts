@@ -38,7 +38,8 @@ export function constructIonosTextStreamFn(model: AiModel): TextStreamFn {
     }
 
     // Calculate the token usage manually as IONOS does not return it
-    // TODO: add token count for image inputs. See guide for token count calculation https://platform.openai.com/docs/guides/images-vision?api-mode=responses&format=file
+    // TODO: Add token count for image inputs
+    // See: https://platform.openai.com/docs/guides/images-vision?api-mode=responses&format=file
     const calculatedUsage = calculateCompletionUsage({
       messages,
       modelMessage: { role: 'assistant', content },

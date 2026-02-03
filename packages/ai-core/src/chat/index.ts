@@ -42,10 +42,7 @@ export async function generateTextWithBilling(
   }
 
   try {
-    // generate
     const textResponse = await generateText(model, messages);
-
-    // bill to api key
     const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, model, textResponse.usage);
 
     return {
@@ -53,7 +50,7 @@ export async function generateTextWithBilling(
       priceInCents,
     };
   } catch (error) {
-    // if error is not child of AiGenerationError, wrap it
+    // Wrap non-AiGenerationError errors
     if (!(error instanceof AiGenerationError)) {
       throw new AiGenerationError(
         `Text generation failed: ${error instanceof Error ? error.message : String(error)}`,
@@ -99,25 +96,20 @@ export async function* generateTextStreamWithBilling(
   }
 
   try {
-    // Create billing callback
     const billingCallback = async (usage: TokenUsage) => {
       const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, model, usage);
-
-      // Call user's onComplete callback if provided
       if (onComplete) {
         await onComplete({ usage, priceInCents });
       }
     };
 
-    // generate stream with billing callback
     const stream = generateTextStream(model, messages, billingCallback);
 
-    // Yield all text chunks
     for await (const chunk of stream) {
       yield chunk;
     }
   } catch (error) {
-    // if error is not child of AiGenerationError, wrap it
+    // Wrap non-AiGenerationError errors
     if (!(error instanceof AiGenerationError)) {
       throw new AiGenerationError(
         `Text generation failed: ${error instanceof Error ? error.message : String(error)}`,

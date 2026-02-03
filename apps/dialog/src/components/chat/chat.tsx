@@ -10,7 +10,6 @@ import MarkdownDisplay from './markdown-display';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
 import { useQueryClient } from '@tanstack/react-query';
 import RobotIcon from '../icons/robot';
-import { useRouter } from 'next/navigation';
 import { LocalFileState } from './send-message-form';
 import { deepCopy } from '@/utils/object';
 import { getFileExtension } from '@/utils/files/generic';
@@ -55,7 +54,6 @@ export default function Chat({
   logoElement,
 }: ChatProps) {
   const tHelpMode = useTranslations('help-mode');
-  const router = useRouter();
 
   const { selectedModel } = useLlmModels();
   const conversationPath = getConversationPath({

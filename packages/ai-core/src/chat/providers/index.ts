@@ -1,4 +1,8 @@
-import { constructAzureChatCompletionGenerationFn, constructAzureChatCompletionStreamFn, constructAzureResponsesStreamFn } from './azure';
+import {
+  constructAzureChatCompletionGenerationFn,
+  constructAzureChatCompletionStreamFn,
+  constructAzureResponsesStreamFn,
+} from './azure';
 import { constructIonosTextGenerationFn, constructIonosTextStreamFn } from './ionos';
 import { TextGenerationFn, TextStreamFn, AiModel } from '../types';
 import { ProviderConfigurationError } from '../../errors';

@@ -120,7 +120,6 @@ export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
   };
 }
 
-
 export function constructAzureChatCompletionGenerationFn(model: AiModel): TextGenerationFn {
   const { client, deployment } = createAzureClient(model);
 

@@ -41,15 +41,13 @@ export async function generateEmbeddingsWithBilling(
   }
 
   try {
-    // generate
     const embeddingResponse = await generateEmbeddings(model, texts);
 
     // TODO: Add billing for embeddings based on token usage
-    // For now, embeddings are not billed per request
 
     return embeddingResponse;
   } catch (error) {
-    // if error is not child of AiGenerationError, wrap it
+    // Wrap non-AiGenerationError errors
     if (!(error instanceof AiGenerationError)) {
       throw new AiGenerationError(
         `Embedding generation failed: ${error instanceof Error ? error.message : String(error)}`,
