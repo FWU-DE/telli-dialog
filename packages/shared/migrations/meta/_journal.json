@@ -309,6 +309,13 @@
       "when": 1770112113074,
       "tag": "0043_yielding_namorita",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1770123073889,
+      "tag": "0044_third_maximus",
+      "breakpoints": true
     }
   ]
 }
