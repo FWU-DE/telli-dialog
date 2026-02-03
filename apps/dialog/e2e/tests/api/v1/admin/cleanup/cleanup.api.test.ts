@@ -8,7 +8,6 @@ import {
   customGptTable,
   fileTable,
   LearningScenarioFileMapping,
-  LearningScenarioInsertModel,
   learningScenarioTable,
   llmModelTable,
   userTable,
@@ -152,8 +151,10 @@ test('should return 403 if authorization header is missing', async ({ request })
   expect(response.status()).toBe(403);
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable);
 async function createLearningScenario(
-  data?: Partial<LearningScenarioInsertModel> & { createdAt?: Date },
+  data?: Partial<z.infer<typeof learningScenarioInsertSchema>>,
 ) {
   const [learningScenario] = await db
     .insert(learningScenarioTable)

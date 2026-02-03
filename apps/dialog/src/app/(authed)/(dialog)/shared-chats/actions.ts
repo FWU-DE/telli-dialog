@@ -5,9 +5,9 @@ import { runServerAction } from '@shared/actions/run-server-action';
 import {
   createNewLearningScenario,
   deleteLearningScenario,
-  LearningScenarioInsertModel,
   linkFileToLearningScenario,
 } from '@shared/learning-scenarios/learning-scenario-service';
+import { LearningScenarioInsertModel } from '@shared/db/schema';
 
 export async function deleteLearningScenarioAction({ id }: { id: string }) {
   const { user } = await requireAuth();

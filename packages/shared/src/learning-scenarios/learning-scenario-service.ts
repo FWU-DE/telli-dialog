@@ -10,6 +10,7 @@ import {
   FileModel,
   fileTable,
   LearningScenarioFileMapping,
+  LearningScenarioInsertModel,
   learningScenarioInsertSchema,
   LearningScenarioSelectModel,
   learningScenarioTable,
@@ -255,11 +256,6 @@ export async function getFilesForLearningScenario({
   checkParameterUUID(learningScenarioId);
   return dbGetFilesForLearningScenario(learningScenarioId, userId);
 }
-
-export const learningScenarioWithoutUserIdInsertSchema = learningScenarioInsertSchema.omit({
-  userId: true,
-});
-export type LearningScenarioInsertModel = z.infer<typeof learningScenarioWithoutUserIdInsertSchema>;
 
 /**
  * User creates a new learning scenario.

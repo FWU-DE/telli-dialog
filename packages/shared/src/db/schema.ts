@@ -540,6 +540,7 @@ export const learningScenarioInsertSchema = createInsertSchema(learningScenarioT
   createdAt: true,
   inviteCode: true,
   startedAt: true,
+  userId: true,
 });
 export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioTable)
   .omit({ userId: true, createdAt: true })
