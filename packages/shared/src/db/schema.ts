@@ -500,10 +500,10 @@ export type FederalStateLlmModelMappingUpdateModel = z.infer<
 >;
 
 /**
- * Schema for table shared_school_conversation
+ * Schema for table learning_scenario
  */
-export const sharedSchoolConversationTable = pgTable(
-  'shared_school_conversation',
+export const learningScenarioTable = pgTable(
+  'learning_scenario',
   {
     id: uuid('id').defaultRandom().primaryKey(),
     name: text('name').notNull(),
@@ -534,39 +534,32 @@ export const sharedSchoolConversationTable = pgTable(
   (table) => [index().on(table.userId)],
 );
 
-export const sharedSchoolConversationSelectSchema = createSelectSchema(
-  sharedSchoolConversationTable,
-);
-export const sharedSchoolConversationInsertSchema = createInsertSchema(
-  sharedSchoolConversationTable,
-).omit({ id: true, createdAt: true, inviteCode: true, startedAt: true });
-export const sharedSchoolConversationUpdateSchema = createUpdateSchema(
-  sharedSchoolConversationTable,
-)
+export const learningScenarioSelectSchema = createSelectSchema(learningScenarioTable);
+export const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable).omit({
+  id: true,
+  createdAt: true,
+  inviteCode: true,
+  startedAt: true,
+});
+export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioTable)
   .omit({ userId: true, createdAt: true })
   .extend({
     id: z.string(),
   });
 
-export type SharedSchoolConversationSelectModel = z.infer<
-  typeof sharedSchoolConversationSelectSchema
->;
-export type SharedSchoolConversationInsertModel = z.infer<
-  typeof sharedSchoolConversationInsertSchema
->;
-export type SharedSchoolConversationUpdateModel = z.infer<
-  typeof sharedSchoolConversationUpdateSchema
->;
+export type LearningScenarioSelectModel = z.infer<typeof learningScenarioSelectSchema>;
+export type LearningScenarioInsertModel = z.infer<typeof learningScenarioInsertSchema>;
+export type LearningScenarioUpdateModel = z.infer<typeof learningScenarioUpdateSchema>;
 
 /**
- * Schema for table shared_school_conversation_usage_tracking
+ * Schema for table shared_learning_scenario_usage_tracking
  */
-export const sharedSchoolConversationUsageTracking = pgTable(
-  'shared_school_conversation_usage_tracking',
+export const sharedLearningScenarioUsageTracking = pgTable(
+  'shared_learning_scenario_usage_tracking',
   {
     id: uuid('id').defaultRandom().primaryKey(),
     modelId: uuid('model_id').notNull(),
-    sharedSchoolConversationId: uuid('shared_school_conversation_id').notNull(),
+    learningScenarioId: uuid('learning_scenario_id').notNull(),
     userId: uuid('user_id').notNull(),
     completionTokens: integer('completion_tokens').notNull(),
     promptTokens: integer('prompt_tokens').notNull(),
@@ -579,41 +572,40 @@ export const sharedSchoolConversationUsageTracking = pgTable(
       foreignColumns: [llmModelTable.id],
       // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
       // The custom name can only be set with foreignKey() function
-      name: 'shared_school_conversation_usage_tracking_model_id_fk',
+      name: 'shared_learning_scenario_usage_tracking_model_id_fk',
     }),
-    // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
-    index('shared_school_conversation_usage_tracking_conversation_id_index').on(
-      table.sharedSchoolConversationId,
+    index('shared_learning_scenario_usage_tracking_conversation_id_index').on(
+      table.learningScenarioId,
     ),
     index().on(table.userId),
     index().on(table.createdAt),
   ],
 );
 
-export const sharedSchoolConversationUsageTrackingSelectSchema = createSelectSchema(
-  sharedSchoolConversationUsageTracking,
+export const sharedLearningScenarioUsageTrackingSelectSchema = createSelectSchema(
+  sharedLearningScenarioUsageTracking,
 ).extend({
   createdAt: z.coerce.date(),
 });
-export const sharedSchoolConversationUsageTrackingInsertSchema = createInsertSchema(
-  sharedSchoolConversationUsageTracking,
+export const sharedLearningScenarioUsageTrackingInsertSchema = createInsertSchema(
+  sharedLearningScenarioUsageTracking,
 ).omit({ id: true, createdAt: true });
-export const sharedSchoolConversationUsageTrackingUpdateSchema = createUpdateSchema(
-  sharedSchoolConversationUsageTracking,
+export const sharedLearningScenarioUsageTrackingUpdateSchema = createUpdateSchema(
+  sharedLearningScenarioUsageTracking,
 )
   .omit({ createdAt: true })
   .extend({
     id: z.string(),
   });
 
-export type SharedSchoolConversationUsageTrackingSelectModel = z.infer<
-  typeof sharedSchoolConversationUsageTrackingSelectSchema
+export type SharedLearningScenarioUsageTrackingSelectModel = z.infer<
+  typeof sharedLearningScenarioUsageTrackingSelectSchema
 >;
-export type SharedSchoolConversationUsageTrackingInsertModel = z.infer<
-  typeof sharedSchoolConversationUsageTrackingInsertSchema
+export type SharedLearningScenarioUsageTrackingInsertModel = z.infer<
+  typeof sharedLearningScenarioUsageTrackingInsertSchema
 >;
-export type SharedSchoolConversationUsageTrackingUpdateModel = z.infer<
-  typeof sharedSchoolConversationUsageTrackingUpdateSchema
+export type SharedLearningScenarioUsageTrackingUpdateModel = z.infer<
+  typeof sharedLearningScenarioUsageTrackingUpdateSchema
 >;
 
 /**
@@ -944,58 +936,57 @@ export type ConversationMessageFileMappingUpdateModel = z.infer<
 >;
 
 /**
- * Schema for table shared_school_conversation_file_mapping
+ * Schema for table learning_scenario_file_mapping
  */
-export const SharedSchoolConversationFileMapping = pgTable(
-  'shared_conversation_file_mapping',
+export const LearningScenarioFileMapping = pgTable(
+  'learning_scenario_file_mapping',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    fileId: text('fileId')
+    fileId: text('file_id')
       .references(() => fileTable.id)
       .notNull(),
-    sharedSchoolConversationId: uuid('shared_school_conversation_id').notNull(),
+    learningScenarioId: uuid('learning_scenario_id').notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
-    unique('shared_conversation_file_mapping_conversation_id_fileId_unique').on(
-      table.sharedSchoolConversationId,
+    unique('learning_scenario_file_mapping_learningScenarioId_fileId_unique').on(
+      table.learningScenarioId,
       table.fileId,
     ),
     foreignKey({
-      columns: [table.sharedSchoolConversationId],
-      foreignColumns: [sharedSchoolConversationTable.id],
+      columns: [table.learningScenarioId],
+      foreignColumns: [learningScenarioTable.id],
       // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
       // The custom name can only be set with foreignKey() function
-      name: 'shared_school_conversation_id_shared_school_conversation_id_fk',
+      name: 'learning_scenario_file_mapping_learning_scenario_id_fk',
     }).onDelete('cascade'),
   ],
 );
 
-export const sharedSchoolConversationFileMappingSelectSchema = createSelectSchema(
-  SharedSchoolConversationFileMapping,
+export const learningScenarioFileMappingSelectSchema = createSelectSchema(
+  LearningScenarioFileMapping,
 ).extend({
   createdAt: z.coerce.date(),
 });
-export const sharedSchoolConversationFileMappingInsertSchema = createInsertSchema(
-  SharedSchoolConversationFileMapping,
+export const learningScenarioFileMappingInsertSchema = createInsertSchema(
+  LearningScenarioFileMapping,
 ).omit({ id: true, createdAt: true });
-export const sharedSchoolConversationFileMappingUpdateSchema = createUpdateSchema(
-  SharedSchoolConversationFileMapping,
+export const learningScenarioFileMappingUpdateSchema = createUpdateSchema(
+  LearningScenarioFileMapping,
 )
   .omit({ createdAt: true })
   .extend({
     id: z.string(),
   });
 
-export type SharedSchoolConversationFileMappingSelectModel = z.infer<
-  typeof sharedSchoolConversationFileMappingSelectSchema
+export type LearningScenarioFileMappingSelectModel = z.infer<
+  typeof learningScenarioFileMappingSelectSchema
 >;
-export type SharedSchoolConversationFileMappingInsertModel = z.infer<
-  typeof sharedSchoolConversationFileMappingInsertSchema
+export type LearningScenarioFileMappingInsertModel = z.infer<
+  typeof learningScenarioFileMappingInsertSchema
 >;
-export type SharedSchoolConversationFileMappingUpdateModel = z.infer<
-  typeof sharedSchoolConversationFileMappingUpdateSchema
+export type LearningScenarioFileMappingUpdateModel = z.infer<
+  typeof learningScenarioFileMappingUpdateSchema
 >;
 
 /**

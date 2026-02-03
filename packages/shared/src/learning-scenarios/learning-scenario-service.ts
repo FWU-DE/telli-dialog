@@ -9,11 +9,11 @@ import {
 import {
   FileModel,
   fileTable,
-  SharedSchoolConversationFileMapping,
-  sharedSchoolConversationInsertSchema,
-  SharedSchoolConversationSelectModel,
-  sharedSchoolConversationTable,
-  sharedSchoolConversationUpdateSchema,
+  LearningScenarioFileMapping,
+  learningScenarioInsertSchema,
+  LearningScenarioSelectModel,
+  learningScenarioTable,
+  learningScenarioUpdateSchema,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
 import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
@@ -23,7 +23,7 @@ import { addDays } from '@shared/utils/date';
 import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 
-export type LearningScenarioWithImage = SharedSchoolConversationSelectModel & {
+export type LearningScenarioWithImage = LearningScenarioSelectModel & {
   maybeSignedPictureUrl: string | undefined;
 };
 
@@ -82,7 +82,7 @@ export async function updateLearningScenario({
 }: {
   learningScenarioId: string;
   user: UserModel;
-  data: SharedSchoolConversationSelectModel;
+  data: LearningScenarioSelectModel;
 }) {
   // this function also serves as a check that the user is the owner
   await getLearningScenario({
@@ -90,15 +90,15 @@ export async function updateLearningScenario({
     userId: user.id,
   });
 
-  const parsedData = sharedSchoolConversationUpdateSchema.parse(data);
+  const parsedData = learningScenarioUpdateSchema.parse(data);
 
   const [updatedLearningScenario] = await db
-    .update(sharedSchoolConversationTable)
+    .update(learningScenarioTable)
     .set({ ...parsedData })
     .where(
       and(
-        eq(sharedSchoolConversationTable.id, learningScenarioId),
-        eq(sharedSchoolConversationTable.userId, user.id),
+        eq(learningScenarioTable.id, learningScenarioId),
+        eq(learningScenarioTable.userId, user.id),
       ),
     )
     .returning();
@@ -130,12 +130,12 @@ export async function updateLearningScenarioPicture({
   });
 
   const [updatedSharedChat] = await db
-    .update(sharedSchoolConversationTable)
+    .update(learningScenarioTable)
     .set({ pictureId: picturePath })
     .where(
       and(
-        eq(sharedSchoolConversationTable.id, learningScenarioId),
-        eq(sharedSchoolConversationTable.userId, userId),
+        eq(learningScenarioTable.id, learningScenarioId),
+        eq(learningScenarioTable.userId, userId),
       ),
     )
     .returning();
@@ -180,7 +180,7 @@ export async function shareLearningScenario({
   const inviteCode = generateInviteCode();
 
   const [updatedSharedChat] = await db
-    .update(sharedSchoolConversationTable)
+    .update(learningScenarioTable)
     .set({
       telliPointsLimit: parsedValues.telliPointsPercentageLimit,
       maxUsageTimeLimit: parsedValues.usageTimeLimit,
@@ -189,8 +189,8 @@ export async function shareLearningScenario({
     })
     .where(
       and(
-        eq(sharedSchoolConversationTable.id, learningScenarioId),
-        eq(sharedSchoolConversationTable.userId, userId),
+        eq(learningScenarioTable.id, learningScenarioId),
+        eq(learningScenarioTable.userId, userId),
       ),
     )
     .returning();
@@ -220,7 +220,7 @@ export async function unshareLearningScenario({
   });
 
   const [updatedSharedChat] = await db
-    .update(sharedSchoolConversationTable)
+    .update(learningScenarioTable)
     .set({
       startedAt: null,
       telliPointsLimit: null,
@@ -228,8 +228,8 @@ export async function unshareLearningScenario({
     })
     .where(
       and(
-        eq(sharedSchoolConversationTable.id, learningScenarioId),
-        eq(sharedSchoolConversationTable.userId, userId),
+        eq(learningScenarioTable.id, learningScenarioId),
+        eq(learningScenarioTable.userId, userId),
       ),
     )
     .returning();
@@ -256,10 +256,10 @@ export async function getFilesForLearningScenario({
   return dbGetFilesForLearningScenario(learningScenarioId, userId);
 }
 
-export const learningScenarioInsertSchema = sharedSchoolConversationInsertSchema.omit({
+export const learningScenarioWithoutUserIdInsertSchema = learningScenarioInsertSchema.omit({
   userId: true,
 });
-export type LearningScenarioInsertModel = z.infer<typeof learningScenarioInsertSchema>;
+export type LearningScenarioInsertModel = z.infer<typeof learningScenarioWithoutUserIdInsertSchema>;
 
 /**
  * User creates a new learning scenario.
@@ -278,7 +278,7 @@ export async function createNewLearningScenario({
   const parsedData = learningScenarioInsertSchema.parse(data);
 
   const [insertedSharedChat] = await db
-    .insert(sharedSchoolConversationTable)
+    .insert(learningScenarioTable)
     .values({ ...parsedData, userId: user.id })
     .returning();
 
@@ -346,8 +346,8 @@ export async function linkFileToLearningScenario({
   if (!learningScenario) throw new NotFoundError('Learning scenario not found');
 
   const [insertedFileMapping] = await db
-    .insert(SharedSchoolConversationFileMapping)
-    .values({ sharedSchoolConversationId: learningScenarioId, fileId: fileId })
+    .insert(LearningScenarioFileMapping)
+    .values({ learningScenarioId: learningScenarioId, fileId: fileId })
     .returning();
   if (insertedFileMapping === undefined) {
     throw new Error('Could not link file to learning scenario');
@@ -378,11 +378,11 @@ export async function removeFileFromLearningScenario({
   // delete mapping and file entry in db
   await db.transaction(async (tx) => {
     await tx
-      .delete(SharedSchoolConversationFileMapping)
+      .delete(LearningScenarioFileMapping)
       .where(
         and(
-          eq(SharedSchoolConversationFileMapping.sharedSchoolConversationId, learningScenarioId),
-          eq(SharedSchoolConversationFileMapping.fileId, fileId),
+          eq(LearningScenarioFileMapping.learningScenarioId, learningScenarioId),
+          eq(LearningScenarioFileMapping.fileId, fileId),
         ),
       );
     await tx.delete(fileTable).where(eq(fileTable.id, fileId));
@@ -395,7 +395,7 @@ export async function removeFileFromLearningScenario({
 async function enrichLearningScenarioWithPictureUrl({
   learningScenarios,
 }: {
-  learningScenarios: SharedSchoolConversationSelectModel[];
+  learningScenarios: LearningScenarioSelectModel[];
 }): Promise<LearningScenarioWithImage[]> {
   return await Promise.all(
     learningScenarios.map(async (scenario) => ({
@@ -418,11 +418,11 @@ async function enrichLearningScenarioWithPictureUrl({
  */
 export async function cleanupLearningScenarios() {
   const result = await db
-    .delete(sharedSchoolConversationTable)
+    .delete(learningScenarioTable)
     .where(
       and(
-        eq(sharedSchoolConversationTable.name, ''),
-        lt(sharedSchoolConversationTable.createdAt, addDays(new Date(), -1)),
+        eq(learningScenarioTable.name, ''),
+        lt(learningScenarioTable.createdAt, addDays(new Date(), -1)),
       ),
     )
     .returning();

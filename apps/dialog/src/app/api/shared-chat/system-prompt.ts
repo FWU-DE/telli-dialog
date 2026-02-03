@@ -1,4 +1,4 @@
-import { type SharedSchoolConversationSelectModel } from '@shared/db/schema';
+import { type LearningScenarioSelectModel } from '@shared/db/schema';
 import { ChunkResult } from '../file-operations/process-chunks';
 import {
   constructFilePrompt,
@@ -13,7 +13,7 @@ export function constructLearningScenarioSystemPrompt({
   retrievedTextChunks,
   websearchSources,
 }: {
-  sharedChat: SharedSchoolConversationSelectModel;
+  sharedChat: LearningScenarioSelectModel;
   retrievedTextChunks?: Record<string, ChunkResult[]>;
   websearchSources?: WebsearchSource[];
 }) {

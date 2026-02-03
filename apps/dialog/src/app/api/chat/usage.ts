@@ -1,7 +1,7 @@
 import { getPriceLimitInCentByUser } from '@/app/school';
 import {
   CharacterWithShareDataModel,
-  type SharedSchoolConversationSelectModel,
+  type LearningScenarioSelectModel,
 } from '@shared/db/schema';
 import { type UserAndContext } from '@/auth/types';
 import { getPriceInCentByUser } from '@/app/school';
@@ -30,7 +30,7 @@ export async function sharedChatHasReachedTelliPointsLimit({
   sharedChat,
 }: {
   user: UserAndContext | undefined;
-  sharedChat: SharedSchoolConversationSelectModel;
+  sharedChat: LearningScenarioSelectModel;
 }) {
   if (user === undefined || user.school === undefined || user.federalState === undefined) {
     return true;
