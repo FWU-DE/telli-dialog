@@ -16,6 +16,7 @@ import Image from 'next/image';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { LearningScenarioWithImage } from '@shared/learning-scenarios/learning-scenario-service';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import AvatarPicture from '@/components/common/avatar-picture';
 
 type SharedChatItemProps = LearningScenarioWithImage;
 
@@ -46,16 +47,13 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
         className="w-11 h-11 bg-light-gray rounded-enterprise-sm flex justify-center items-center"
         style={{ minWidth: '44px' }}
       >
-        {sharedSchoolChat.maybeSignedPictureUrl !== undefined && (
-          <Image
+        {sharedSchoolChat.maybeSignedPictureUrl ? (
+          <AvatarPicture
             src={sharedSchoolChat.maybeSignedPictureUrl}
             alt={`${sharedSchoolChat.name} Avatar`}
-            width={44}
-            height={44}
-            className="rounded-enterprise-sm"
+            variant="small"
           />
-        )}
-        {sharedSchoolChat.maybeSignedPictureUrl === undefined && (
+        ) : (
           <EmptyImageIcon className="w-4 h-4" />
         )}
       </figure>
