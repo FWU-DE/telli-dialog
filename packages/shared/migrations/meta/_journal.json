@@ -302,6 +302,13 @@
       "when": 1769429798958,
       "tag": "0042_salty_mandroid",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1770112113074,
+      "tag": "0043_yielding_namorita",
+      "breakpoints": true
     }
   ]
 }
