@@ -1,11 +1,11 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "@telli/typescript-config/react-library.json",
-  "compilerOptions": {},
-  "baseUrl": ".",
-  "paths": {
-    "@ui/*": ["./src/*"],
-    "@ui/components*": ["./src/components/*"],
-    "@ui/types*": ["./src/types/*"]
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "baseUrl": "."
   },
   "include": ["."],
   "exclude": ["node_modules", "dist"]
