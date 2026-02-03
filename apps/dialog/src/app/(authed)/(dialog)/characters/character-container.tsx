@@ -7,7 +7,6 @@ import Link from 'next/link';
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/common/toast';
-import Image from 'next/image';
 import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
 import { deleteCharacterAction } from './editor/[characterId]/actions';
@@ -21,6 +20,7 @@ import { iconClassName } from '@/utils/tailwind/icon';
 import TelliClipboardButton from '@/components/common/clipboard-button';
 import { createNewCharacterAction } from './actions';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import AvatarPicture from '@/components/common/avatar-picture';
 
 type CharacterContainerProps = CharacterWithShareDataModel & {
   currentUserId: string;
@@ -75,16 +75,11 @@ export default function CharacterContainer({
         className="w-11 h-11 bg-light-gray rounded-enterprise-sm flex justify-center items-center"
         style={{ minWidth: '44px' }}
       >
-        {maybeSignedPictureUrl !== undefined && (
-          <Image
-            src={maybeSignedPictureUrl}
-            alt={`${name} Avatar`}
-            width={44}
-            height={44}
-            className="rounded-enterprise-sm"
-          />
+        {maybeSignedPictureUrl ? (
+          <AvatarPicture src={maybeSignedPictureUrl} alt={`${name} Avatar`} variant="small" />
+        ) : (
+          <EmptyImageIcon className="w-4 h-4" />
         )}
-        {maybeSignedPictureUrl === undefined && <EmptyImageIcon className="w-4 h-4" />}
       </figure>
       <div className="flex flex-col gap-0 text-left min-w-0">
         <h2 className={cn('font-medium leading-none min-h-5', truncateClassName)}>{name}</h2>
