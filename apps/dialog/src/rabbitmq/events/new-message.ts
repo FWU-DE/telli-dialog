@@ -1,6 +1,6 @@
 import { UserAndContext } from '@/auth/types';
 import { ConversationModel } from '@shared/db/types';
-import { CharacterSelectModel, SharedSchoolConversationSelectModel } from '@shared/db/schema';
+import { CharacterSelectModel, LearningScenarioSelectModel } from '@shared/db/schema';
 import { TelliNewChatMessageEventType } from '../schema';
 import { hashWithoutSalt } from '@/utils/crypto';
 
@@ -18,7 +18,7 @@ type FunctionProps =
       conversation: ConversationModel;
     } & CommonProps)
   | ({
-      sharedChat: SharedSchoolConversationSelectModel;
+      sharedChat: LearningScenarioSelectModel;
     } & CommonProps)
   | ({
       character: CharacterSelectModel;

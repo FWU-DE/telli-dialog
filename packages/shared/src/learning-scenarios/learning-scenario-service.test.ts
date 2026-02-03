@@ -17,7 +17,7 @@ import {
 } from './learning-scenario-service';
 import { dbGetSharedSchoolChatById } from '../db/functions/shared-school-chat';
 import { generateUUID } from '../utils/uuid';
-import { SharedSchoolConversationSelectModel } from '@shared/db/schema';
+import { LearningScenarioSelectModel } from '@shared/db/schema';
 import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
 import { UserModel } from '@shared/auth/user-model';
 
@@ -80,7 +80,7 @@ describe('learning-scenario-service', () => {
     const userId = generateUUID();
     const learningScenarioId = generateUUID();
     const fileId = generateUUID();
-    const mockLearningScenario: Partial<SharedSchoolConversationSelectModel> = {
+    const mockLearningScenario: Partial<LearningScenarioSelectModel> = {
       userId: userId,
       id: learningScenarioId,
       name: 'Test Scenario',
@@ -107,7 +107,7 @@ describe('learning-scenario-service', () => {
           updateLearningScenario({
             learningScenarioId,
             user: mockUser('teacher'),
-            data: mockLearningScenario as SharedSchoolConversationSelectModel,
+            data: mockLearningScenario as LearningScenarioSelectModel,
           }),
       },
       {
@@ -180,7 +180,7 @@ describe('learning-scenario-service', () => {
           updateLearningScenario({
             learningScenarioId: 'invalid-uuid',
             user: mockUser('teacher'),
-            data: { name: 'Test', description: 'Test' } as SharedSchoolConversationSelectModel,
+            data: { name: 'Test', description: 'Test' } as LearningScenarioSelectModel,
           }),
       },
       {

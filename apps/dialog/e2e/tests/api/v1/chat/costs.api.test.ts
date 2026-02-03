@@ -2,10 +2,10 @@ import test, { expect } from '@playwright/test';
 import { db } from '@shared/db';
 import {
   conversationUsageTracking,
-  sharedSchoolConversationUsageTracking,
+  sharedLearningScenarioUsageTracking,
   sharedCharacterChatUsageTrackingTable,
   llmModelTable,
-  sharedSchoolConversationTable,
+  learningScenarioTable,
   userTable,
   CharacterWithShareDataModel,
 } from '@shared/db/schema';
@@ -60,7 +60,7 @@ test.describe('costs', () => {
       };
 
       await db.insert(conversationUsageTracking).values(conversationUsage);
-      await db.insert(sharedSchoolConversationUsageTracking).values(sharedSchoolConversationUsage);
+      await db.insert(sharedLearningScenarioUsageTracking).values(sharedSchoolConversationUsage);
       await db.insert(sharedCharacterChatUsageTrackingTable).values(sharedCharacterChatUsage);
     }
 
@@ -101,7 +101,7 @@ test.describe('costs', () => {
       userId: user.id,
       modelId: model.id,
     };
-    await db.insert(sharedSchoolConversationTable).values(sharedSchoolConversation);
+    await db.insert(learningScenarioTable).values(sharedSchoolConversation);
 
     // Insert data into shared school conversation usage tracking (30*3 = 90 cents)
     for (let i = 0; i < 3; i++) {
@@ -109,11 +109,11 @@ test.describe('costs', () => {
         ...mockSharedSchoolConversationUsage(),
         userId: user.id,
         modelId: model.id,
-        sharedSchoolConversationId: sharedSchoolConversation.id,
+        learningScenarioId: sharedSchoolConversation.id,
         costsInCent: 30,
       };
 
-      await db.insert(sharedSchoolConversationUsageTracking).values(sharedSchoolConversationUsage);
+      await db.insert(sharedLearningScenarioUsageTracking).values(sharedSchoolConversationUsage);
     }
 
     const sharedChatUsageInCent = await dbGetSharedChatUsageInCentBySharedChatId({
@@ -137,10 +137,10 @@ test.describe('costs', () => {
       ...mockSharedSchoolConversationUsage(),
       userId: user.id,
       modelId: model.id,
-      sharedSchoolConversationId: sharedSchoolConversation.id,
+      learningScenarioId: sharedSchoolConversation.id,
       costsInCent: 30,
     };
-    await db.insert(sharedSchoolConversationUsageTracking).values(sharedSchoolConversationUsage);
+    await db.insert(sharedLearningScenarioUsageTracking).values(sharedSchoolConversationUsage);
 
     hasReachedLimit = await sharedChatHasReachedTelliPointsLimit({
       user: user,

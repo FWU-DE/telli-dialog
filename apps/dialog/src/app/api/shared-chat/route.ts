@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
         modelId: definedModel.id,
         completionTokens: completionTokens,
         promptTokens: promptTokens,
-        sharedSchoolConversationId: sharedChat.id,
+        learningScenarioId: sharedChat.id,
         userId: teacherUserAndContext.id,
         costsInCent: costsInCent,
       });
