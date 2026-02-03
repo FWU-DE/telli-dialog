@@ -1,1 +1,0 @@
-ALTER TABLE "conversation_message" ADD COLUMN "websearch_sources" json DEFAULT '[]'::json NOT NULL;
