@@ -21,7 +21,6 @@ import {
 import { labelClassName } from '@/utils/tailwind/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { startTransition } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
@@ -47,6 +46,7 @@ import { formLinks } from '@/utils/web-search/form-links';
 import FileManagement from '@/components/forms/file-management';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
+import AvatarPicture from '@/components/common/avatar-picture';
 
 type CharacterFormProps = CharacterWithShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -382,19 +382,7 @@ export default function CharacterForm({
               className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4"
             >
               {maybeSignedPictureUrl ? (
-                <Image
-                  src={maybeSignedPictureUrl || ''}
-                  alt="Profile Picture"
-                  width={170}
-                  height={170}
-                  className="border-[1px] rounded-enterprise-md"
-                  unoptimized
-                  style={{
-                    width: '170px',
-                    height: '170px',
-                    objectFit: 'cover',
-                  }}
-                />
+                <AvatarPicture src={maybeSignedPictureUrl} alt="Profile Picture" variant="large" />
               ) : (
                 <EmptyImageIcon className="w-10 h-10" />
               )}

@@ -3,13 +3,13 @@ import Chat from '@/components/chat/chat';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
-import { getReadOnlySignedUrl } from '@shared/s3';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
 import Logo from '@/components/common/logo';
 import { getCustomGptForNewChat } from '@shared/custom-gpt/custom-gpt-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
+import { getAvatarPictureUrl } from '@shared/files/fileService';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +31,8 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]'>) {
   });
 
   const currentModel = user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
-  const maybeSignedImageUrl = await getReadOnlySignedUrl({ key: customGpt.pictureId });
+  const avatarPictureUrl = await getAvatarPictureUrl(customGpt.pictureId);
+
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
       <ChatHeaderBar chatId={id} userAndContext={userAndContext} hasMessages={false} />
@@ -42,7 +43,7 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]'>) {
         customGpt={customGpt}
         enableFileUpload={true}
         promptSuggestions={customGpt.promptSuggestions}
-        imageSource={maybeSignedImageUrl}
+        imageSource={avatarPictureUrl}
         logoElement={logoElement}
       />
     </LlmModelsProvider>

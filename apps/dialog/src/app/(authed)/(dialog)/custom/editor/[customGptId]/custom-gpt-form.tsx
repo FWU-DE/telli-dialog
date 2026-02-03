@@ -14,7 +14,6 @@ import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/common/toast';
 import React, { startTransition } from 'react';
-import Image from 'next/image';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import CropImageAndUploadButton from '@/components/crop-uploaded-image/crop-image-and-upload-button';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
@@ -47,6 +46,7 @@ import { AttachedLinks } from '@/components/forms/attached-links';
 import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { formLinks } from '@/utils/web-search/form-links';
 import { useFederalState } from '@/components/providers/federal-state-provider';
+import AvatarPicture from '@/components/common/avatar-picture';
 
 type CustomGptFormProps = CustomGptSelectModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -339,19 +339,7 @@ export default function CustomGptForm({
               className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4"
             >
               {maybeSignedPictureUrl ? (
-                <Image
-                  src={maybeSignedPictureUrl || ''}
-                  alt="Profile Picture"
-                  width={170}
-                  height={170}
-                  className="border-[1px] rounded-enterprise-md"
-                  unoptimized
-                  style={{
-                    width: '170px',
-                    height: '170px',
-                    objectFit: 'cover',
-                  }}
-                />
+                <AvatarPicture src={maybeSignedPictureUrl} alt="Profile Picture" variant="large" />
               ) : (
                 <EmptyImageIcon className="w-10 h-10" />
               )}

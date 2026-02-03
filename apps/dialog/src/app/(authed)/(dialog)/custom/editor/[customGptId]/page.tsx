@@ -1,18 +1,17 @@
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { getReadOnlySignedUrl } from '@shared/s3';
 import HeaderPortal from '../../../header-portal';
 import CustomGptForm from './custom-gpt-form';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { CustomGptSelectModel } from '@shared/db/schema';
 import { WebsearchSource } from '@/app/api/webpage-content/types';
-import { logError } from '@shared/logging';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { getCustomGptForEditView, getFileMappings } from '@shared/custom-gpt/custom-gpt-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
+import { getAvatarPictureUrl } from '@shared/files/fileService';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,17 +37,7 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
     }),
   ]).catch(handleErrorInServerComponent);
 
-  let maybeSignedPictureUrl: string | undefined;
-  try {
-    maybeSignedPictureUrl = await getReadOnlySignedUrl({
-      key: customGpt.pictureId,
-    });
-  } catch (e) {
-    logError(
-      `Error getting signed picture URL (key: ${customGpt.pictureId}, customGpt id: ${customGpt.id}, template id: ${searchParams.templateId})`,
-      e,
-    );
-  }
+  const avatarPictureUrl = await getAvatarPictureUrl(customGpt.pictureId);
 
   const readOnly = customGpt.userId !== user.id;
   const initialLinks = customGpt.attachedLinks
@@ -72,7 +61,7 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
       <div className="max-w-3xl mx-auto mt-4">
         <CustomGptForm
           {...(removeNullishValues(customGpt) as CustomGptSelectModel)}
-          maybeSignedPictureUrl={maybeSignedPictureUrl}
+          maybeSignedPictureUrl={avatarPictureUrl}
           isCreating={isCreating}
           readOnly={readOnly}
           userRole={user.userRole}

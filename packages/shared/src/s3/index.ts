@@ -99,17 +99,24 @@ export async function copyFileInS3({ newKey, copySource }: { newKey: string; cop
   }
 }
 
-// Todo RL: key should not be optional, expiresIn should be configurable
+/**
+ * Gets a signed URL for read-only access to an S3 object.
+ *
+ * @returns undefined if key is falsy
+ * Otherwise returns a signed URL for read-only access to the object even if the object does not exist in S3.
+ */
 export async function getReadOnlySignedUrl({
   key,
   filename,
   contentType,
   attachment = true,
+  options,
 }: {
   key: string | null | undefined;
   filename?: string;
   contentType?: string;
   attachment?: boolean;
+  options?: { expiresIn?: number };
 }) {
   if (!key) return undefined;
 
@@ -125,7 +132,7 @@ export async function getReadOnlySignedUrl({
   });
 
   try {
-    const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600, ...options });
     return signedUrl;
   } catch (error) {
     console.error('Error generating signed GET URL for S3:', error);

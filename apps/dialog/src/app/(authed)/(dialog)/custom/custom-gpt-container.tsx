@@ -18,6 +18,7 @@ import { iconClassName } from '@/utils/tailwind/icon';
 import { CreateNewCharacterFromTemplate } from '../characters/create-new-character-from-template';
 import TelliClipboardButton from '@/components/common/clipboard-button';
 import { createNewCustomGptAction } from './actions';
+import AvatarPicture from '@/components/common/avatar-picture';
 
 type CustomGptContainerProps = CustomGptSelectModel & {
   currentUserId: string;
@@ -70,16 +71,11 @@ export default function CustomGptContainer({
         className="w-11 h-11 bg-light-gray rounded-enterprise-sm flex justify-center items-center"
         style={{ minWidth: '44px' }}
       >
-        {maybeSignedPictureUrl !== undefined && (
-          <Image
-            src={maybeSignedPictureUrl}
-            alt={`${name} Avatar`}
-            width={44}
-            height={44}
-            className="rounded-enterprise-sm"
-          />
+        {maybeSignedPictureUrl ? (
+          <AvatarPicture src={maybeSignedPictureUrl} alt={`${name} Avatar`} variant="small" />
+        ) : (
+          <EmptyImageIcon className="w-4 h-4" />
         )}
-        {maybeSignedPictureUrl === undefined && <EmptyImageIcon className="w-4 h-4" />}
       </figure>
       <div className="flex flex-col gap-1 text-left min-w-0">
         <h2 className={cn('font-medium leading-none', truncateClassName)}>{name}</h2>

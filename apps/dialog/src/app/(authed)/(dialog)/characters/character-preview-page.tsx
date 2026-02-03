@@ -14,7 +14,8 @@ import {
 import SearchBarInput from '@/components/search-bar';
 import { type UserAndContext } from '@/auth/types';
 import { AccessLevel } from '@shared/db/schema';
-import { buildGenericUrl, CharacterWithImage } from './utils';
+import { CharacterWithImage } from './utils';
+import { buildGenericUrl } from './utils.client';
 import { useTranslations } from 'next-intl';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 

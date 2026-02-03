@@ -14,7 +14,7 @@ import { type UserAndContext } from '@/auth/types';
 import { AccessLevel } from '@shared/db/schema';
 import { useTranslations } from 'next-intl';
 import CustomGptContainer from './custom-gpt-container';
-import { buildGenericUrl } from '../characters/utils';
+import { buildGenericUrl } from '../characters/utils.client';
 import CreateNewCustomGptButton from './create-new-customgpt-button';
 import { CustomGptWithImage } from './utils';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';

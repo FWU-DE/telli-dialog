@@ -1,6 +1,6 @@
-import Image from 'next/image';
 import MarkdownDisplay from './markdown-display';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
+import AvatarPicture from '../common/avatar-picture';
 
 export function InitialChatContentDisplay({
   title,
@@ -17,15 +17,7 @@ export function InitialChatContentDisplay({
 }) {
   return (
     <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto p-4 gap-1">
-      {imageSource !== undefined && (
-        <Image
-          src={imageSource}
-          width={100}
-          height={100}
-          alt={title}
-          className="rounded-enterprise-md"
-        />
-      )}
+      {imageSource && <AvatarPicture src={imageSource} alt={title} variant="normal" />}
       <h1 className="text-2xl font-medium mt-8 text-center">{title}</h1>
       {description !== undefined && description.trim() !== '' && (
         <p className="max-w-full text-center">{description}</p>

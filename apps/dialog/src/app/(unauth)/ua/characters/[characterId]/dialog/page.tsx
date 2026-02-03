@@ -1,8 +1,6 @@
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelById } from '@shared/db/functions/llm-model';
 import { dbGetCharacterByIdAndInviteCode } from '@shared/db/functions/character';
-
-import { getReadOnlySignedUrl } from '@shared/s3';
 import CharacterSharedChat from '@/components/chat/character-shared-chat';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { dbGetFederalStateBySchoolId } from '@shared/db/functions/school';
@@ -10,6 +8,7 @@ import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 import { notFound } from 'next/navigation';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
+import { getAvatarPictureUrl } from '@shared/files/fileService';
 
 const searchParamsSchema = z.object({ inviteCode: z.string() });
 
@@ -26,7 +25,7 @@ export default async function Page(props: PageProps<'/ua/characters/[characterId
     notFound();
   }
   const model = await dbGetLlmModelById({ modelId: character.modelId });
-  const maybeSignedImageUrl = await getReadOnlySignedUrl({ key: character.pictureId });
+  const avatarPictureUrl = await getAvatarPictureUrl(character.pictureId);
 
   if (model === undefined) {
     notFound();
@@ -42,7 +41,7 @@ export default async function Page(props: PageProps<'/ua/characters/[characterId
             {...character}
             initialMessage={character.initialMessage ?? ''}
             inviteCode={searchParams.inviteCode}
-            imageSource={maybeSignedImageUrl}
+            imageSource={avatarPictureUrl}
           />
         </ThemeProvider>
       </LlmModelsProvider>
