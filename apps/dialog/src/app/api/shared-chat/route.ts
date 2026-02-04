@@ -6,9 +6,9 @@ import {
   sharedChatHasReachedTelliPointsLimit,
   userHasReachedTelliPointsLimit,
 } from '../chat/usage';
-import { dbGetSharedChatByIdAndInviteCode } from '@shared/db/functions/shared-school-chat';
+import { dbGetLearningScenarioByIdAndInviteCode } from '@shared/db/functions/learning-scenario';
 import { constructLearningScenarioSystemPrompt } from './system-prompt';
-import { dbUpdateTokenUsageBySharedChatId } from '@shared/db/functions/shared-school-chat';
+import { dbUpdateTokenUsageBySharedLearningScenarioId } from '@shared/db/functions/learning-scenario';
 import {
   getModelAndProviderWithResult,
   getSearchParamsFromUrl,
@@ -34,10 +34,19 @@ export async function POST(request: NextRequest) {
   const { messages }: { messages: Array<Message> } = await request.json();
 
   const { sharedChatId, inviteCode } = getSearchParamsOrThrow(request.url);
-  const sharedChat = await dbGetSharedChatByIdAndInviteCode({ id: sharedChatId, inviteCode });
+  const sharedChat = await dbGetLearningScenarioByIdAndInviteCode({
+    learningScenarioId: sharedChatId,
+    inviteCode,
+  });
 
   if (sharedChat === undefined) {
     return NextResponse.json({ error: 'The shared chat was not found.' }, { status: 404 });
+  }
+  if (sharedChat.startedBy === null) {
+    return NextResponse.json(
+      { error: 'The user assigned to this chat was not found.' },
+      { status: 404 },
+    );
   }
 
   const teacherUserAndContext = await getUserAndContextByUserId({ userId: sharedChat.userId });
@@ -127,7 +136,7 @@ export async function POST(request: NextRequest) {
       const { promptTokens, completionTokens } = getTokenUsage(assistantMessage.usage);
       const costsInCent = calculateCostsInCent(definedModel, { promptTokens, completionTokens });
 
-      await dbUpdateTokenUsageBySharedChatId({
+      await dbUpdateTokenUsageBySharedLearningScenarioId({
         modelId: definedModel.id,
         completionTokens: completionTokens,
         promptTokens: promptTokens,

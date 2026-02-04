@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, MockedFunction } from 'vitest';
 
-vi.mock('../db/functions/shared-school-chat', () => ({
-  dbGetSharedSchoolChatById: vi.fn(),
+vi.mock('../db/functions/learning-scenario', () => ({
+  dbGetLearningScenarioById: vi.fn(),
 }));
 
 import {
@@ -15,7 +15,7 @@ import {
   linkFileToLearningScenario,
   removeFileFromLearningScenario,
 } from './learning-scenario-service';
-import { dbGetSharedSchoolChatById } from '../db/functions/shared-school-chat';
+import { dbGetLearningScenarioById } from '../db/functions/learning-scenario';
 import { generateUUID } from '../utils/uuid';
 import { LearningScenarioSelectModel } from '@shared/db/schema';
 import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
@@ -68,7 +68,7 @@ describe('learning-scenario-service', () => {
       'should throw NotFoundError when learning scenario does not exist - $functionName',
       async ({ testFunction }) => {
         (
-          dbGetSharedSchoolChatById as MockedFunction<typeof dbGetSharedSchoolChatById>
+          dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
         ).mockResolvedValue(null as never);
 
         await expect(testFunction()).rejects.toThrowError(NotFoundError);
@@ -88,7 +88,7 @@ describe('learning-scenario-service', () => {
 
     beforeEach(() => {
       (
-        dbGetSharedSchoolChatById as MockedFunction<typeof dbGetSharedSchoolChatById>
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
       ).mockResolvedValue(mockLearningScenario as never);
     });
 
@@ -157,7 +157,7 @@ describe('learning-scenario-service', () => {
     it('should throw ForbiddenError when user is not a teacher - createNewLearningScenario', async () => {
       await expect(
         createNewLearningScenario({
-          data: { name: 'Test Scenario', description: 'Test Description', modelId: 'model-1' },
+          modelId: 'model-1',
           user: mockUser('student'),
         }),
       ).rejects.toThrowError(ForbiddenError);

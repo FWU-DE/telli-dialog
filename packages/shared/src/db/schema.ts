@@ -534,15 +534,22 @@ export const learningScenarioTable = pgTable(
 );
 
 export const learningScenarioSelectSchema = createSelectSchema(learningScenarioTable);
-export const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable).omit({
-  id: true,
-  createdAt: true,
-  userId: true,
-});
+export const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable)
+  .omit({
+    id: true,
+    createdAt: true,
+    userId: true,
+  })
+  // for any reason accessLevel has a different type so we have to override it here
+  .extend({
+    accessLevel: accessLevelSchema,
+  });
 export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioTable)
   .omit({ userId: true, createdAt: true })
+  // for any reason accessLevel has a different type so we have to override it here
   .extend({
     id: z.string(),
+    accessLevel: accessLevelSchema,
   });
 
 export type LearningScenarioSelectModel = z.infer<typeof learningScenarioSelectSchema>;
@@ -552,7 +559,7 @@ export type LearningScenarioUpdateModel = z.infer<typeof learningScenarioUpdateS
 /**
  * Schema for table shared_learning_scenario
  */
-export const sharedLearningScenario = pgTable(
+export const sharedLearningScenarioTable = pgTable(
   'shared_learning_scenario',
   {
     id: uuid('id').defaultRandom().primaryKey(),
@@ -570,17 +577,19 @@ export const sharedLearningScenario = pgTable(
   (table) => [unique().on(table.learningScenarioId, table.userId)],
 );
 
-export const sharedLearningScenarioSelectSchema = createSelectSchema(sharedLearningScenario).extend(
-  {
-    startedAt: z.coerce.date(),
-  },
-);
-export const sharedLearningScenarioInsertSchema = createInsertSchema(sharedLearningScenario).omit({
+export const sharedLearningScenarioSelectSchema = createSelectSchema(
+  sharedLearningScenarioTable,
+).extend({
+  startedAt: z.coerce.date().nullable(),
+});
+export const sharedLearningScenarioInsertSchema = createInsertSchema(
+  sharedLearningScenarioTable,
+).omit({
   id: true,
   inviteCode: true,
   startedAt: true,
 });
-export const sharedLearningScenarioUpdateSchema = createUpdateSchema(sharedLearningScenario)
+export const sharedLearningScenarioUpdateSchema = createUpdateSchema(sharedLearningScenarioTable)
   .omit({ learningScenarioId: true, userId: true, startedAt: true })
   .extend({
     id: z.string(),
@@ -589,6 +598,23 @@ export const sharedLearningScenarioUpdateSchema = createUpdateSchema(sharedLearn
 export type SharedLearningScenarioSelectModel = z.infer<typeof sharedLearningScenarioSelectSchema>;
 export type SharedLearningScenarioInsertModel = z.infer<typeof sharedLearningScenarioInsertSchema>;
 export type SharedLearningScenarioUpdateModel = z.infer<typeof sharedLearningScenarioUpdateSchema>;
+
+// Type for learning scenario with sharing data (from JOIN with sharedLearningScenario)
+const sharedLearningScenarioTransformedSchema = sharedLearningScenarioSelectSchema
+  .omit({ id: true, learningScenarioId: true, userId: true })
+  .extend({ startedBy: z.string() });
+export const learningScenarioWithShareDataModel = learningScenarioSelectSchema.and(
+  sharedLearningScenarioTransformedSchema,
+);
+export const learningScenarioOptionalShareDataModel = learningScenarioSelectSchema.and(
+  sharedLearningScenarioTransformedSchema.extend({
+    startedBy: z.string().nullable(),
+  }),
+);
+export type LearningScenarioWithShareDataModel = z.infer<typeof learningScenarioWithShareDataModel>;
+export type LearningScenarioOptionalShareDataModel = z.infer<
+  typeof learningScenarioOptionalShareDataModel
+>;
 
 /**
  * Schema for table shared_learning_scenario_usage_tracking
