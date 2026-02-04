@@ -15,12 +15,6 @@ import { env } from './env';
  */
 export function initSentry(opts: {
   serviceName: string;
-  /**
-   * Trace sampling rate.
-   * 0.0 = 0% chance of a given trace being sent (send no traces)
-   * 1.0 = 100% chance of a given trace being sent (send all traces).
-   */
-  traceSampleRate: number;
   /** List of URL paths, which should not be traced */
   traceExcludedUrls: string[];
 }) {
@@ -29,18 +23,17 @@ export function initSentry(opts: {
     dsn: env.sentryDsn,
     environment: env.sentryEnvironment,
     integrations: [Sentry.captureConsoleIntegration({ levels: ['warn', 'error'] })],
-    tracesSampler: (samplingContext) => {
-      const url = samplingContext.normalizedRequest?.url ?? '';
+    tracesSampler: ({ normalizedRequest, inheritOrSampleWith }) => {
+      const url = normalizedRequest?.url ?? '';
       // Extract pathname if it's a full URL, otherwise use as-is
       const pathname = url.startsWith('http') ? new URL(url).pathname : url.split('?')[0];
 
       const isExcludedUrl = opts.traceExcludedUrls.includes(pathname ?? '');
       if (isExcludedUrl) {
-        console.log('Excluded Url', url);
         return 0;
       }
 
-      return opts.traceSampleRate;
+      return inheritOrSampleWith(env.sentryTracesSampleRate);
     },
     // Use custom OpenTelemetry configuration, see https://docs.sentry.io/platforms/javascript/guides/node/opentelemetry/custom-setup/
     skipOpenTelemetrySetup: true,
