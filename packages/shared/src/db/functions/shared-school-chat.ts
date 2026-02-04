@@ -47,14 +47,6 @@ export async function dbGetSharedChatByIdAndInviteCode({
     .from(learningScenarioTable)
     .where(and(eq(learningScenarioTable.id, id), eq(learningScenarioTable.inviteCode, inviteCode)));
 
-  // if the school conversation is no longer shared, return the conversation entity
-  if (row === undefined) {
-    const [row] = await db
-      .select()
-      .from(learningScenarioTable)
-      .where(eq(learningScenarioTable.id, id));
-    return row;
-  }
   return row;
 }
 
