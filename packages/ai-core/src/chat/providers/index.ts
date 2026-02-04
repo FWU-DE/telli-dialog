@@ -10,7 +10,7 @@ import { ProviderConfigurationError } from '../../errors';
 
 function getTextGenerationFnByModel({ model }: { model: AiModel }): TextGenerationFn | undefined {
   if (model.provider === 'azure') {
-    if (["gpt-5", "gpt-5-mini", "gpt-5-nano"].includes(model.name)) {
+    if (['gpt-5', 'gpt-5-mini', 'gpt-5-nano'].includes(model.name)) {
       return constructAzureResponsesGenerationFn(model);
     }
     return constructAzureChatCompletionGenerationFn(model);
@@ -25,7 +25,7 @@ function getTextGenerationFnByModel({ model }: { model: AiModel }): TextGenerati
 function getTextStreamFnByModel({ model }: { model: AiModel }): TextStreamFn | undefined {
   if (model.provider === 'azure') {
     // GPT-5 is used with Responses endpoint
-    if (["gpt-5", "gpt-5-mini", "gpt-5-nano"].includes(model.name)) {
+    if (['gpt-5', 'gpt-5-mini', 'gpt-5-nano'].includes(model.name)) {
       return constructAzureResponsesStreamFn(model);
     }
     return constructAzureChatCompletionStreamFn(model);

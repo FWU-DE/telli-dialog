@@ -12,7 +12,6 @@ import { truncateClassName } from '@/utils/tailwind/truncate';
 import CountDownTimer from './_components/count-down';
 import { useTranslations } from 'next-intl';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
-import Image from 'next/image';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { LearningScenarioWithImage } from '@shared/learning-scenarios/learning-scenario-service';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';

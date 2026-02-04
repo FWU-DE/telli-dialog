@@ -22,8 +22,8 @@ import { constructChatSystemPrompt } from './system-prompt';
 import { getChatTitle, limitChatHistory } from './utils';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
-import { webScraperExecutable } from '../webpage-content/search-web-readability';
-import { WebsearchSource } from '../webpage-content/types';
+import { webScraper } from '../webpage-content/search-web';
+import { WebsearchSource } from '@shared/db/types';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import { logError } from '@shared/logging';
@@ -215,7 +215,7 @@ export async function sendChatMessage({
         .filter((l) => l !== '')
         .map(async (url) => {
           try {
-            return await webScraperExecutable(url);
+            return await webScraper(url);
           } catch (error) {
             console.error(`Error fetching webpage content for URL: ${url}`, error);
           }

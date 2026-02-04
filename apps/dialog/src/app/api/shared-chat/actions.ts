@@ -21,7 +21,7 @@ import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exce
 import { constructLearningScenarioSystemPrompt } from './system-prompt';
 import { limitChatHistory } from '../chat/utils';
 import { getRelevantFileContent } from '../file-operations/retrieval';
-import { webScraperExecutable } from '../webpage-content/search-web-readability';
+import { webScraper } from '../webpage-content/search-web';
 import { logError } from '@shared/logging';
 import {
   KEEP_FIRST_MESSAGES,
@@ -133,7 +133,7 @@ export async function sendSharedChatMessage({
   // Get related files and web sources
   const relatedFileEntities = await dbGetRelatedSharedChatFiles(sharedChat.id);
   const urls = sharedChat.attachedLinks.filter((l) => l !== '');
-  const websearchSources = await Promise.all(urls.map((url) => webScraperExecutable(url)));
+  const websearchSources = await Promise.all(urls.map((url) => webScraper(url)));
 
   const retrievedTextChunks = await getRelevantFileContent({
     modelId: definedModel.id,
@@ -179,7 +179,7 @@ export async function sendSharedChatMessage({
             modelId: definedModel.id,
             completionTokens,
             promptTokens,
-            sharedSchoolConversationId: sharedChat.id,
+            learningScenarioId: sharedChat.id,
             userId: teacherUserAndContext.id,
             costsInCent: priceInCents,
           });

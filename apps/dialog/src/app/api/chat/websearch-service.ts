@@ -5,7 +5,11 @@ import { ConversationMessageModel, WebsearchSource } from '@shared/db/types';
 import { webScraper } from '../webpage-content/search-web';
 import { MAX_WEBSEARCH_SOURCES_PER_CONVERSATION } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
-import { type Message } from 'ai';
+
+// Simple message type for websearch - only needs content
+type MessageWithContent = {
+  content: string;
+};
 
 // Scrape a list of URLs and return their websearch sources
 async function scrapeUrls(urls: string[]): Promise<WebsearchSource[]> {
@@ -56,7 +60,7 @@ export async function searchWeb(
   customGptId: string | undefined,
   characterId: string | undefined,
   user: UserAndContext,
-  userMessage: Message,
+  userMessage: MessageWithContent,
   messages: ConversationMessageModel[],
 ) {
   const attachedLinks = await getAttachedLinks(customGptId, characterId, user.id);
