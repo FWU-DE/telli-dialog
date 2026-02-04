@@ -2,8 +2,6 @@ import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible
 import HeaderPortal from '../../header-portal';
 import SharedSchoolChatForm from './shared-school-chat-form';
 import ProfileMenu from '@/components/navigation/profile-menu';
-import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
-import { WebsearchSource } from '@/app/api/webpage-content/types';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
@@ -13,6 +11,8 @@ import {
 } from '@shared/learning-scenarios/learning-scenario-service';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
+import { getAvatarPictureUrl } from '@shared/files/fileService';
+import { WebsearchSource } from '@shared/db/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,9 +36,7 @@ export default async function Page(props: PageProps<'/shared-chats/[sharedSchool
     }),
   ]).catch(handleErrorInServerComponent);
 
-  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
-    key: learningScenario.pictureId ? `shared-chats/${learningScenario.id}/avatar` : undefined,
-  });
+  const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
 
   const initialLinks = learningScenario.attachedLinks
     .filter((l) => l && l !== '')
@@ -64,7 +62,7 @@ export default async function Page(props: PageProps<'/shared-chats/[sharedSchool
           existingFiles={relatedFiles}
           isCreating={isCreating}
           initialLinks={initialLinks}
-          maybeSignedPictureUrl={maybeSignedPictureUrl}
+          maybeSignedPictureUrl={avatarPictureUrl}
           readOnly={false}
         />
       </div>

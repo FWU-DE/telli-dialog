@@ -18,7 +18,6 @@ import { InitialChatContentDisplay } from './initial-content-display';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { ChatInputBox } from './chat-input-box';
 import { ErrorChatPlaceholder } from './error-chat-placeholder';
-import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { logDebug, logWarning } from '@shared/logging';
 import { useSession } from 'next-auth/react';
 import { AssistantIcon } from './assistant-icon';
@@ -27,6 +26,7 @@ import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { getConversationPath } from '@/utils/chat/path';
 import { Messages } from './messages';
 import { toUIMessages } from '@/types/chat';
+import { WebsearchSource } from '@shared/db/types';
 
 type ChatProps = {
   id: string;

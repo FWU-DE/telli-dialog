@@ -6,8 +6,8 @@ import {
   ConversationUsageTrackingSelectModel,
   LlmModelSelectModel,
   SharedCharacterChatUsageTrackingSelectModel,
-  SharedSchoolConversationSelectModel,
-  SharedSchoolConversationUsageTrackingSelectModel,
+  LearningScenarioSelectModel,
+  SharedLearningScenarioUsageTrackingSelectModel,
 } from '@shared/db/schema';
 
 export const mockUserAndContext = (): UserAndContext => {
@@ -80,7 +80,7 @@ export const mockConversationUsage = (): ConversationUsageTrackingSelectModel =>
   };
 };
 
-export const mockSharedSchoolConversation = (): SharedSchoolConversationSelectModel => {
+export const mockSharedSchoolConversation = (): LearningScenarioSelectModel => {
   return {
     id: generateUUID(),
     name: generateRandomString(10),
@@ -88,7 +88,7 @@ export const mockSharedSchoolConversation = (): SharedSchoolConversationSelectMo
     description: generateRandomString(10),
     modelId: generateUUID(),
     userId: generateUUID(),
-    studentExcercise: generateRandomString(10),
+    studentExercise: generateRandomString(10),
     telliPointsLimit: 10,
     maxUsageTimeLimit: 45,
     attachedLinks: [],
@@ -104,12 +104,12 @@ export const mockSharedSchoolConversation = (): SharedSchoolConversationSelectMo
 };
 
 export const mockSharedSchoolConversationUsage =
-  (): SharedSchoolConversationUsageTrackingSelectModel => {
+  (): SharedLearningScenarioUsageTrackingSelectModel => {
     return {
       id: generateUUID(),
       userId: generateUUID(),
       modelId: generateUUID(),
-      sharedSchoolConversationId: generateUUID(),
+      learningScenarioId: generateUUID(),
       completionTokens: 0,
       promptTokens: 0,
       costsInCent: 0,

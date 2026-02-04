@@ -12,3 +12,4 @@ export const NUMBER_OF_FILES_LIMIT = 20; // Maximum number of files that can be 
 export const NUMBER_OF_IMAGES_LIMIT = 5;
 export const NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT = 5; // Maximum number of files that can be attached to a shared chat
 export const NUMBER_OF_LINKS_LIMIT_FOR_SHARED_CHAT = 5; // Maximum number of links that can be attached to a shared chat
+export const MAX_WEBSEARCH_SOURCES_PER_CONVERSATION = 5; // Maximum number of websearch sources to scrape per conversation

@@ -6,8 +6,17 @@ import {
   fileTable,
   TextChunkTable,
 } from '@shared/db/schema';
-import { copyFileInS3 } from '@shared/s3';
+import {
+  copyFileInS3,
+  deleteFileFromS3,
+  deleteFilesFromS3,
+  getReadOnlySignedUrl,
+  uploadFileToS3,
+} from '@shared/s3';
 import { cnanoid } from '../random/randomService';
+import { logError } from '@shared/logging';
+
+const MESSAGE_ATTACHMENTS_FOLDER_NAME = 'message_attachments';
 
 /**
  * Duplicates a file and all its related text chunks and embeddings.
@@ -98,4 +107,76 @@ export async function linkFileToCustomGpt(fileId: string, customGptId: string): 
     fileId,
     customGptId,
   });
+}
+
+/**
+ * Uploads a new file to the message attachments path in S3.
+ */
+export async function uploadMessageAttachment({
+  fileId,
+  fileExtension,
+  buffer,
+}: {
+  fileId: string;
+  fileExtension: string;
+  buffer: Buffer;
+}) {
+  const bufferToUpload = buffer;
+
+  await uploadFileToS3({
+    key: `${MESSAGE_ATTACHMENTS_FOLDER_NAME}/${fileId}`,
+    body: bufferToUpload,
+    contentType: fileExtension,
+  });
+}
+
+/**
+ * Deletes a bunch of files in the message attachments path in S3.
+ * CAUTION: This function does not check any permissions.
+ */
+export async function deleteMessageAttachments(fileIds: string[]): Promise<void> {
+  await deleteFilesFromS3(fileIds.map((fileId) => `${MESSAGE_ATTACHMENTS_FOLDER_NAME}/${fileId}`));
+}
+
+/**
+ * Deletes an avatar picture from S3.
+ *
+ * @param key The pictureId for characters, customgpts and learning scenarios
+ * does contain the full path so we can directly use it as key.
+ * Does nothing if key is null or undefined.
+ *
+ * If the last file of folder is deleted, the folder in s3 automatically gets deleted as well.
+ */
+export async function deleteAvatarPicture(key: string | null | undefined): Promise<void> {
+  if (key) await deleteFileFromS3({ key });
+}
+
+export type UploadAvatarPictureParams = {
+  key: string;
+  croppedImageBlob: Blob;
+};
+
+export async function uploadAvatarPicture({ key, croppedImageBlob }: UploadAvatarPictureParams) {
+  await uploadFileToS3({
+    key: key,
+    body: croppedImageBlob,
+    contentType: croppedImageBlob.type,
+  });
+}
+
+/**
+ * Gets a signed URL for read-only access to an avatar picture in S3
+ * even if the object does not exist in S3.
+ *
+ * @param key
+ * @returns undefined if key is falsy.
+ */
+export async function getAvatarPictureUrl(key: string | null | undefined) {
+  if (!key) return undefined;
+  try {
+    return await getReadOnlySignedUrl({ key, options: { expiresIn: 3600 } });
+  } catch (error) {
+    logError('Error getting signed URL for avatar picture:', error);
+    return undefined;
+  }
 }

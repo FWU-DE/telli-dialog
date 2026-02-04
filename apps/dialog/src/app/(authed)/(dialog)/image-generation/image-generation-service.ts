@@ -13,7 +13,7 @@ import { generateImageWithBilling } from '@telli/ai-core';
 import { LlmModelSelectModel } from '@shared/db/schema';
 import { ImageStyle } from '@shared/utils/chat';
 import { generateUUID } from '@shared/utils/uuid';
-import { uploadFileToS3, getSignedUrlFromS3Get } from '@shared/s3';
+import { uploadFileToS3, getReadOnlySignedUrl } from '@shared/s3';
 import { cnanoid } from '@shared/random/randomService';
 import { linkFilesToConversation, dbInsertFile } from '@shared/db/functions/files';
 import { dbDeleteConversationByIdAndUserId } from '@shared/db/functions/conversation';
@@ -91,6 +91,7 @@ export async function handleImageGeneration({
       role: 'user',
       userId: user.id,
       content: prompt,
+      modelName: model.name,
       orderNumber: 1,
       parameters: style ? { imageStyle: style.name } : undefined,
     });
@@ -134,6 +135,7 @@ export async function handleImageGeneration({
       orderNumber: 2,
       modelName: model.name,
       parameters: style ? { imageStyle: style.name } : undefined,
+      userId: user.id,
     });
 
     if (!assistantMessage) {
@@ -148,7 +150,7 @@ export async function handleImageGeneration({
     });
 
     // Get signed URL for immediate return (still needed for UI display)
-    const signedUrl = await getSignedUrlFromS3Get({
+    const signedUrl = await getReadOnlySignedUrl({
       key,
       contentType: 'image/png',
       attachment: false,

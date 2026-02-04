@@ -1,16 +1,18 @@
 import { type Metadata } from 'next';
 import React from 'react';
 import { Barlow } from 'next/font/google';
+import Script from 'next/script';
 import ClientProvider from './client-provider';
-import { getMaybeUser, getMaybeSession } from '@/auth/utils';
+import { getMaybeSession, getMaybeUser } from '@/auth/utils';
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages, getLocale } from 'next-intl/server';
+import { getLocale, getMessages } from 'next-intl/server';
 
 import './globals.css';
 import './scrollbar.css';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 import { dbGetFederalStateByIdWithResult } from '@shared/db/functions/federal-state';
 import { getMaybeLogoFromS3 } from '@shared/s3';
+import { buildPublicConfig } from '@shared/sentry/public-config';
 
 const barlow = Barlow({
   weight: ['400', '500', '600', '700'],
@@ -47,9 +49,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const [, federalState] = await dbGetFederalStateByIdWithResult(maybeUser?.school.federalStateId);
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
 
+  const { inlineScript } = buildPublicConfig();
+
   return (
     <html lang={locale} className={barlow.className}>
       <body>
+        <Script
+          id="public-config"
+          // runs as soon as the browser parses it (before client components hydrate)
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: inlineScript }}
+        />
         <NextIntlClientProvider messages={messages}>
           <ClientProvider session={fullSession} designConfiguration={designConfiguration}>
             {children}

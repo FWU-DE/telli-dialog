@@ -5,7 +5,6 @@ import { ChatHeaderBar } from '@/components/chat/header-bar';
 import Logo from '@/components/common/logo';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
-import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
@@ -13,6 +12,7 @@ import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { getConversationWithMessagesAndCustomGpt } from '@shared/custom-gpt/custom-gpt-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
+import { getAvatarPictureUrl } from '@shared/files/fileService';
 
 export const dynamic = 'force-dynamic';
 const searchParamsSchema = z.object({ model: z.string().optional() });
@@ -42,7 +42,7 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversa
   const currentModel =
     searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
 
-  const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: customGpt.pictureId });
+  const avatarPictureUrl = await getAvatarPictureUrl(customGpt.pictureId);
 
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
@@ -59,7 +59,7 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversa
         initialMessages={chatMessages}
         customGpt={customGpt}
         enableFileUpload={true}
-        imageSource={maybeSignedImageUrl}
+        imageSource={avatarPictureUrl}
         logoElement={logoElement}
       />
     </LlmModelsProvider>

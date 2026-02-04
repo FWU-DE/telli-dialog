@@ -2,7 +2,7 @@ import { type UIMessage, type ChatStatus } from '@/types/chat';
 import { ChatBox } from './chat-box';
 import LoadingAnimation from './loading-animation';
 import { FileModel } from '@shared/db/schema';
-import { WebsearchSource } from '@/app/api/webpage-content/types';
+import { WebsearchSource } from '@shared/db/types';
 
 // Re-export for consumers that import from this file
 export type { ChatStatus };

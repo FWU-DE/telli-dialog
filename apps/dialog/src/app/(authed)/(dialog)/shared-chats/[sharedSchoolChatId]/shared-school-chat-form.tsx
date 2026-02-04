@@ -10,13 +10,13 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
-import Image from 'next/image';
-import { FileModel, SharedSchoolConversationSelectModel } from '@shared/db/schema';
+import { FileModel, LearningScenarioSelectModel } from '@shared/db/schema';
 import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../schema';
 import {
   removeFileFromLearningScenarioAction,
   updateLearningScenarioAction,
   updateLearningScenarioPictureAction,
+  uploadAvatarPictureForLearningScenarioAction,
 } from './actions';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
@@ -31,11 +31,12 @@ import SelectLlmModelForm from '../../_components/select-llm-model';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
 import { labelClassName } from '@/utils/tailwind/input';
-import { WebsearchSource } from '@/app/api/webpage-content/types';
-import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
+import CropImageAndUploadButton from '@/components/crop-uploaded-image/crop-image-and-upload-button';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { AttachedLinks } from '@/components/forms/attached-links';
 import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
+import AvatarPicture from '@/components/common/avatar-picture';
+import { WebsearchSource } from '@shared/db/types';
 
 export default function SharedSchoolChatForm({
   existingFiles,
@@ -44,7 +45,7 @@ export default function SharedSchoolChatForm({
   maybeSignedPictureUrl,
   readOnly,
   ...sharedSchoolChat
-}: SharedSchoolConversationSelectModel & {
+}: LearningScenarioSelectModel & {
   existingFiles: FileModel[];
   isCreating: boolean;
   initialLinks: WebsearchSource[];
@@ -127,7 +128,7 @@ export default function SharedSchoolChatForm({
         ...data,
         attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
         description: data.description ?? '',
-        studentExcercise: data.studentExcercise ?? '',
+        studentExercise: data.studentExercise ?? '',
       },
     });
     if (result.success) {
@@ -135,6 +136,13 @@ export default function SharedSchoolChatForm({
     } else {
       toast.error(tToast('edit-toast-error'));
     }
+  }
+
+  async function handleUploadAvatarPicture(croppedImageBlob: Blob) {
+    return await uploadAvatarPictureForLearningScenarioAction({
+      learningScenarioId: sharedSchoolChat.id,
+      croppedImageBlob,
+    });
   }
 
   async function handlePictureUploadComplete(picturePath: string) {
@@ -175,7 +183,7 @@ export default function SharedSchoolChatForm({
       ...data,
       attachedLinks: data.attachedLinks.map((p) => p.link),
       description: data.description ?? '',
-      studentExcercise: data.studentExcercise ?? '',
+      studentExercise: data.studentExercise ?? '',
     };
 
     const dataEquals = deepEqual(defaultData, newData);
@@ -255,29 +263,20 @@ export default function SharedSchoolChatForm({
                 className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4"
               >
                 {maybeSignedPictureUrl ? (
-                  <Image
-                    src={maybeSignedPictureUrl || ''}
+                  <AvatarPicture
+                    src={maybeSignedPictureUrl}
                     alt="Profile Picture"
-                    width={170}
-                    height={170}
-                    className="border-[1px] rounded-enterprise-md"
-                    unoptimized
-                    style={{
-                      width: '170px',
-                      height: '170px',
-                      objectFit: 'cover',
-                    }}
+                    variant="large"
                   />
                 ) : (
                   <EmptyImageIcon className="w-10 h-10" />
                 )}
               </div>
               {!readOnly && (
-                <UploadImageToBeCroppedButton
-                  uploadDirPath={`shared-chats/${sharedSchoolChat.id}`}
+                <CropImageAndUploadButton
                   aspect={1}
+                  handleUploadAvatarPicture={handleUploadAvatarPicture}
                   onUploadComplete={handlePictureUploadComplete}
-                  file_name="avatar"
                   compressionOptions={{ maxHeight: 800 }}
                 />
               )}
@@ -289,11 +288,11 @@ export default function SharedSchoolChatForm({
           id="student-excercise"
           label={t('student-excercise-label')}
           placeholder={t('student-excercise-placeholder')}
-          getValue={() => getValues('studentExcercise') ?? ''}
+          getValue={() => getValues('studentExercise') ?? ''}
           inputType="textarea"
           rows={5}
-          {...register('studentExcercise')}
-          {...getZodStringFieldMetadata('studentExcercise')}
+          {...register('studentExercise')}
+          {...getZodStringFieldMetadata('studentExercise')}
           onBlur={handleAutoSave}
         />
 

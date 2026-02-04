@@ -4,7 +4,7 @@ import { getEndOfCurrentMonth, getStartOfCurrentMonth } from '../../utils/date';
 import {
   conversationUsageTracking,
   sharedCharacterChatUsageTrackingTable,
-  sharedSchoolConversationUsageTracking,
+  sharedLearningScenarioUsageTracking,
 } from '../schema';
 
 export async function dbGetSharedChatsUsageInCentByUserId({ userId }: { userId: string }) {
@@ -12,12 +12,12 @@ export async function dbGetSharedChatsUsageInCentByUserId({ userId }: { userId: 
   const endDate = getEndOfCurrentMonth();
 
   const costs = await db
-    .select({ totalCosts: sum(sharedSchoolConversationUsageTracking.costsInCent) })
-    .from(sharedSchoolConversationUsageTracking)
+    .select({ totalCosts: sum(sharedLearningScenarioUsageTracking.costsInCent) })
+    .from(sharedLearningScenarioUsageTracking)
     .where(
       and(
-        eq(sharedSchoolConversationUsageTracking.userId, userId),
-        between(sharedSchoolConversationUsageTracking.createdAt, startDate, endDate),
+        eq(sharedLearningScenarioUsageTracking.userId, userId),
+        between(sharedLearningScenarioUsageTracking.createdAt, startDate, endDate),
       ),
     );
 
@@ -71,12 +71,12 @@ export async function dbGetSharedChatUsageInCentBySharedChatId({
   const endDate = new Date(startedAt.getTime() + maxUsageTimeLimit * 60_000);
 
   const costs = await db
-    .select({ totalCosts: sum(sharedSchoolConversationUsageTracking.costsInCent) })
-    .from(sharedSchoolConversationUsageTracking)
+    .select({ totalCosts: sum(sharedLearningScenarioUsageTracking.costsInCent) })
+    .from(sharedLearningScenarioUsageTracking)
     .where(
       and(
-        eq(sharedSchoolConversationUsageTracking.sharedSchoolConversationId, sharedChatId),
-        between(sharedSchoolConversationUsageTracking.createdAt, startDate, endDate),
+        eq(sharedLearningScenarioUsageTracking.learningScenarioId, sharedChatId),
+        between(sharedLearningScenarioUsageTracking.createdAt, startDate, endDate),
       ),
     );
 

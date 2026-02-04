@@ -26,8 +26,8 @@ import {
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
-import { logError } from '@shared/logging';
-import { copyFileInS3, deleteFileFromS3, getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
+import { copyFileInS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { addDays } from '@shared/utils/date';
@@ -125,8 +125,9 @@ export const createNewCharacter = async ({
 
 /**
  * Deletes a character file mapping and the associated file entry in the database.
+ * Also deletes the actual file from S3.
  *
- * Note: the cleanup job will delete the file from S3 at a later time.
+ * Only the owner is allowed to delete files from a character.
  */
 export const deleteFileMappingAndEntity = async ({
   characterId,
@@ -147,6 +148,9 @@ export const deleteFileMappingAndEntity = async ({
     await tx.delete(CharacterFileMapping).where(eq(CharacterFileMapping.fileId, fileId));
     await tx.delete(fileTable).where(eq(fileTable.id, fileId));
   });
+
+  // Delete the file from S3
+  await deleteMessageAttachments([fileId]);
 };
 
 /**
@@ -339,16 +343,16 @@ export const deleteCharacter = async ({
   const { isOwner, character } = await getCharacterInfo(characterId, userId);
   if (!isOwner) throw new ForbiddenError('Not authorized to delete this character');
 
+  const relatedFiles = await dbGetRelatedCharacterFiles(characterId);
+
   // delete character from db
   const deletedCharacter = await dbDeleteCharacterByIdAndUserId({ characterId, userId: userId });
 
-  if (character.pictureId) {
-    try {
-      await deleteFileFromS3({ key: character.pictureId });
-    } catch (error) {
-      logError('Cannot delete picture of character ' + characterId, error);
-    }
-  }
+  // delete avatar picture from S3
+  await deleteAvatarPicture(character.pictureId);
+
+  // delete all related files linked to this character
+  await deleteMessageAttachments(relatedFiles.map((file) => file.id));
 
   return deletedCharacter;
 };
@@ -518,7 +522,7 @@ export const getCharacterForEditView = async ({
     throw new ForbiddenError('Not authorized to edit this character');
 
   const relatedFiles = await fetchFileMappings({ characterId, userId, schoolId });
-  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
+  const maybeSignedPictureUrl = await getReadOnlySignedUrl({
     key: character.pictureId,
   });
   return { character, relatedFiles, maybeSignedPictureUrl };
@@ -621,4 +625,27 @@ export async function cleanupCharacters() {
     .where(and(eq(characterTable.name, ''), lt(characterTable.createdAt, addDays(new Date(), -1))))
     .returning();
   return result.length;
+}
+
+export async function uploadAvatarPictureForCharacter({
+  characterId,
+  croppedImageBlob,
+  userId,
+}: {
+  characterId: string;
+  croppedImageBlob: Blob;
+  userId: string;
+}) {
+  const { isOwner } = await getCharacterInfo(characterId, userId);
+  if (!isOwner) throw new ForbiddenError('Not authorized to upload picture for this character');
+
+  const key = `characters/${characterId}/avatar`;
+
+  await uploadFileToS3({
+    key: key,
+    body: croppedImageBlob,
+    contentType: croppedImageBlob.type,
+  });
+
+  return key;
 }

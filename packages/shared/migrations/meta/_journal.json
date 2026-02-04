@@ -288,6 +288,34 @@
       "when": 1768173572855,
       "tag": "0040_flowery_blob",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1769429324975,
+      "tag": "0041_late_the_liberteens",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1769429798958,
+      "tag": "0042_salty_mandroid",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1770112113074,
+      "tag": "0043_yielding_namorita",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1770123073889,
+      "tag": "0044_third_maximus",
+      "breakpoints": true
     }
   ]
 }

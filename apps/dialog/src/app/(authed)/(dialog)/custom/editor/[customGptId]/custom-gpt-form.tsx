@@ -14,9 +14,8 @@ import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/common/toast';
 import React, { startTransition } from 'react';
-import Image from 'next/image';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
-import UploadImageToBeCroppedButton from '@/components/crop-uploaded-image/crop-upload-button';
+import CropImageAndUploadButton from '@/components/crop-uploaded-image/crop-image-and-upload-button';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
@@ -33,6 +32,7 @@ import {
   updateCustomGptAccessLevelAction,
   updateCustomGptAction,
   updateCustomGptPictureAction,
+  uploadAvatarPictureForCustomGptAction,
 } from './actions';
 import { deleteFileMappingAndEntityAction, linkFileToCustomGptAction } from '../../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
@@ -43,9 +43,10 @@ import { LocalFileState } from '@/components/chat/send-message-form';
 import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { AttachedLinks } from '@/components/forms/attached-links';
-import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { formLinks } from '@/utils/web-search/form-links';
 import { useFederalState } from '@/components/providers/federal-state-provider';
+import AvatarPicture from '@/components/common/avatar-picture';
+import { WebsearchSource } from '@shared/db/types';
 
 type CustomGptFormProps = CustomGptSelectModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -262,6 +263,13 @@ export default function CustomGptForm({
     router.replace(backUrl);
   }
 
+  async function handleUploadAvatarPicture(croppedImageBlob: Blob) {
+    return await uploadAvatarPictureForCustomGptAction({
+      customGptId: customGpt.id,
+      croppedImageBlob,
+    });
+  }
+
   const copyContainer = readOnly ? (
     <CopyContainer
       templateId={customGpt.id}
@@ -331,28 +339,15 @@ export default function CustomGptForm({
               className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4"
             >
               {maybeSignedPictureUrl ? (
-                <Image
-                  src={maybeSignedPictureUrl || ''}
-                  alt="Profile Picture"
-                  width={170}
-                  height={170}
-                  className="border-[1px] rounded-enterprise-md"
-                  unoptimized
-                  style={{
-                    width: '170px',
-                    height: '170px',
-                    objectFit: 'cover',
-                  }}
-                />
+                <AvatarPicture src={maybeSignedPictureUrl} alt="Profile Picture" variant="large" />
               ) : (
                 <EmptyImageIcon className="w-10 h-10" />
               )}
             </div>
-            <UploadImageToBeCroppedButton
-              uploadDirPath={`custom-gpts/${customGpt.id}`}
+            <CropImageAndUploadButton
               aspect={1}
               onUploadComplete={handlePictureUploadComplete}
-              file_name="avatar"
+              handleUploadAvatarPicture={handleUploadAvatarPicture}
               compressionOptions={{ maxHeight: 800 }}
               disabled={readOnly}
             />

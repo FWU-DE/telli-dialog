@@ -1,5 +1,4 @@
-import { type SharedSchoolConversationSelectModel } from '@shared/db/schema';
-import { WebsearchSource } from '../webpage-content/types';
+import { type LearningScenarioSelectModel } from '@shared/db/schema';
 import { ChunkResult } from '../file-operations/process-chunks';
 import {
   constructFilePrompt,
@@ -7,13 +6,14 @@ import {
   formatList,
   LANGUAGE_GUIDELINES,
 } from '../utils/system-prompt';
+import { WebsearchSource } from '@shared/db/types';
 
 export function constructLearningScenarioSystemPrompt({
   sharedChat,
   retrievedTextChunks,
   websearchSources,
 }: {
-  sharedChat: SharedSchoolConversationSelectModel;
+  sharedChat: LearningScenarioSelectModel;
   retrievedTextChunks?: Record<string, ChunkResult[]>;
   websearchSources?: WebsearchSource[];
 }) {
@@ -45,7 +45,7 @@ ${formatList('## Kontext', [
 ## Zweck des Dialogs
 ${sharedChat.description}
 
-${sharedChat.studentExcercise.length !== 0 ? `Folgendes ist der Auftrag an die Lernenden:\n${sharedChat.studentExcercise}` : ''}
+${sharedChat.studentExercise.length !== 0 ? `Folgendes ist der Auftrag an die Lernenden:\n${sharedChat.studentExercise}` : ''}
 
 ## Verhalte dich wie folgt
 ${sharedChat.additionalInstructions}

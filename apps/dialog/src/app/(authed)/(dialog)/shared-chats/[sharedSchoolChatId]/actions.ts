@@ -1,6 +1,6 @@
 'use server';
 
-import { SharedSchoolConversationSelectModel } from '@shared/db/schema';
+import { LearningScenarioSelectModel } from '@shared/db/schema';
 import { SharedConversationShareFormValues } from './schema';
 import { runServerAction } from '@shared/actions/run-server-action';
 import {
@@ -9,6 +9,7 @@ import {
   unshareLearningScenario,
   updateLearningScenario,
   updateLearningScenarioPicture,
+  uploadAvatarPictureForLearningScenario,
 } from '@shared/learning-scenarios/learning-scenario-service';
 import { requireAuth } from '@/auth/requireAuth';
 
@@ -17,7 +18,7 @@ export async function updateLearningScenarioAction({
   data,
 }: {
   learningScenarioId: string;
-  data: SharedSchoolConversationSelectModel;
+  data: LearningScenarioSelectModel;
 }) {
   const { user } = await requireAuth();
 
@@ -81,6 +82,22 @@ export async function removeFileFromLearningScenarioAction({
   return runServerAction(removeFileFromLearningScenario)({
     learningScenarioId,
     fileId,
+    userId: user.id,
+  });
+}
+
+export async function uploadAvatarPictureForLearningScenarioAction({
+  learningScenarioId,
+  croppedImageBlob,
+}: {
+  learningScenarioId: string;
+  croppedImageBlob: Blob;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(uploadAvatarPictureForLearningScenario)({
+    learningScenarioId,
+    croppedImageBlob,
     userId: user.id,
   });
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useImageModels } from '../providers/image-model-provider';
 import { useImageStyle } from '../providers/image-style-provider';
@@ -11,7 +11,7 @@ import { ImageGenerationError } from './image-generation-error';
 import { useTranslations } from 'next-intl';
 import LoadingAnimation from './loading-animation';
 import { ConversationMessageModel } from '@shared/db/types';
-import { getSignedUrlFromS3Get } from '@shared/s3';
+import { getReadOnlySignedUrl } from '@shared/s3';
 import { FileModel } from '@shared/db/schema';
 import { useQueryClient } from '@tanstack/react-query';
 import { logError } from '@shared/logging';
@@ -43,6 +43,7 @@ export default function ImageGenerationChat({
   } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const imageRef = useRef<HTMLImageElement>(null);
 
   // Load the single image from initial messages and file attachments
   useEffect(() => {
@@ -59,16 +60,18 @@ export default function ImageGenerationChat({
           if (imageFile) {
             try {
               // Generate signed URL for the image file
-              const signedUrl = await getSignedUrlFromS3Get({
+              const signedUrl = await getReadOnlySignedUrl({
                 key: `message_attachments/${imageFile.id}`,
                 contentType: imageFile.type,
                 attachment: false,
               });
 
-              setDisplayedImage({
-                prompt: userMessage.content,
-                imageUrl: signedUrl,
-              });
+              if (signedUrl) {
+                setDisplayedImage({
+                  prompt: userMessage.content,
+                  imageUrl: signedUrl,
+                });
+              }
             } catch (error) {
               logError('Error loading image from files:', error);
             }
@@ -107,10 +110,12 @@ export default function ImageGenerationChat({
     });
     if (result.success) {
       // Update the displayed image
-      setDisplayedImage({
-        prompt: currentPrompt,
-        imageUrl: result.value.imageUrl,
-      });
+      if (result.value.imageUrl) {
+        setDisplayedImage({
+          prompt: currentPrompt,
+          imageUrl: result.value.imageUrl,
+        });
+      }
 
       const newConversationId = result.value.conversationId;
       /* TODO: improve navigation without full reload, but without causing issues with state.
@@ -174,6 +179,7 @@ export default function ImageGenerationChat({
               <h3 className="text-xs text-gray-700">{tImageGeneration('prompt-label')}</h3>
               <p className="text-sm mb-3">{displayedImage.prompt}</p>
               <Image
+                ref={imageRef}
                 src={displayedImage.imageUrl}
                 alt={displayedImage.prompt}
                 className="w-full rounded-xl"
@@ -181,11 +187,9 @@ export default function ImageGenerationChat({
                 height={800}
                 loading="eager"
                 unoptimized={true} // Since we're using signed URLs from S3
+                crossOrigin="anonymous" // Needed for clipboard copy to work
               />
-              <ImageActionButtons
-                imageUrl={displayedImage.imageUrl}
-                prompt={displayedImage.prompt}
-              />
+              <ImageActionButtons imageRef={imageRef} prompt={displayedImage.prompt} />
             </div>
           )}
         </div>

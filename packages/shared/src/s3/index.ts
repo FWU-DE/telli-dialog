@@ -10,7 +10,6 @@ import {
   DeleteObjectsCommand,
   DeleteObjectsCommandInput,
   GetObjectCommand,
-  GetObjectCommandInput,
   HeadObjectCommand,
   ListObjectsV2Command,
   ListObjectsV2CommandInput,
@@ -37,11 +36,9 @@ const s3Client = new S3Client({
 /**
  * Uploads a file to an S3 bucket.
  *
- * @param bucketName - The name of the bucket.
  * @param key - The key (file name) for the uploaded file.
  * @param body - The content to upload.
  * @param contentType - The MIME type of the content.
- * @returns The URL of the uploaded file.
  */
 export async function uploadFileToS3({
   key,
@@ -52,21 +49,23 @@ export async function uploadFileToS3({
   body: Buffer | Uint8Array | Blob | string | Readable;
   contentType: string;
 }) {
-  const Key = key ?? nanoid();
+  let processedBody = body;
+
+  // Convert Blob to Buffer to avoid hash calculation issues
+  if (body instanceof Blob) {
+    const arrayBuffer = await body.arrayBuffer();
+    processedBody = Buffer.from(arrayBuffer);
+  }
+
   const uploadParams: PutObjectCommandInput = {
     Bucket: env.otcBucketName,
-    Key,
-    Body: body,
+    Key: key ?? nanoid(),
+    Body: processedBody,
     ContentType: contentType,
   };
 
-  try {
-    const command = new PutObjectCommand(uploadParams);
-    await s3Client.send(command);
-  } catch (error) {
-    console.error('Error uploading file to S3:', error);
-    throw error;
-  }
+  const command = new PutObjectCommand(uploadParams);
+  await s3Client.send(command);
 }
 
 export async function getMaybeLogoFromS3(federalStateId: string | undefined, asset: string) {
@@ -100,22 +99,27 @@ export async function copyFileInS3({ newKey, copySource }: { newKey: string; cop
   }
 }
 
-export async function getMaybeSignedUrlFromS3Get({ key }: { key: string | undefined | null }) {
-  if (key === undefined || key === null || key === '') return undefined;
-  return await getSignedUrlFromS3Get({ key });
-}
-
-export async function getSignedUrlFromS3Get({
+/**
+ * Gets a signed URL for read-only access to an S3 object.
+ *
+ * @returns undefined if key is falsy
+ * Otherwise returns a signed URL for read-only access to the object even if the object does not exist in S3.
+ */
+export async function getReadOnlySignedUrl({
   key,
   filename,
   contentType,
   attachment = true,
+  options,
 }: {
-  key: string;
+  key: string | null | undefined;
   filename?: string;
   contentType?: string;
   attachment?: boolean;
+  options?: { expiresIn?: number };
 }) {
+  if (!key) return undefined;
+
   let contentDisposition = attachment ? 'attachment;' : '';
   if (filename !== undefined) {
     contentDisposition = `${contentDisposition} filename=${filename}`;
@@ -128,7 +132,7 @@ export async function getSignedUrlFromS3Get({
   });
 
   try {
-    const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600, ...options });
     return signedUrl;
   } catch (error) {
     console.error('Error generating signed GET URL for S3:', error);
@@ -136,81 +140,10 @@ export async function getSignedUrlFromS3Get({
   }
 }
 
-export async function getSignedUrlFromS3Put({ key, fileType }: { key: string; fileType: string }) {
-  const command = new PutObjectCommand({
-    Bucket: env.otcBucketName,
-    Key: key,
-    ContentType: fileType,
-  });
-
-  try {
-    const signedUrl = await getSignedUrl(s3Client, command, {
-      expiresIn: 3600,
-      signableHeaders: new Set([
-        'content-type',
-        'access-control-allow-header',
-        'access-control-allow-origin',
-      ]),
-    });
-    return signedUrl;
-  } catch (error) {
-    console.error('Error generating signed PUT URL for S3:', error);
-    throw error;
-  }
-}
-
-/**
- * Reads a file from an S3 bucket.
- *
- * @param bucketName - The name of the bucket.
- * @param key - The key (file name) of the file to read.
- * @returns The content of the file as a string.
- */
-export async function readFileFromS3({ key }: { key: string }) {
-  const getParams: GetObjectCommandInput = {
-    Bucket: env.otcBucketName,
-    Key: key,
-  };
-
-  try {
-    const { Body } = await s3Client.send(new GetObjectCommand(getParams));
-    const byteArray = await Body?.transformToByteArray();
-    if (!byteArray) return;
-    return Buffer.from(byteArray);
-  } catch (error) {
-    console.error('Error reading file from S3:', error);
-    throw error;
-  }
-}
-
-export async function streamFileFromS3({ key }: { key: string }) {
-  const getParams: GetObjectCommandInput = {
-    Bucket: env.otcBucketName,
-    Key: key,
-  };
-
-  try {
-    const { Body } = await s3Client.send(new GetObjectCommand(getParams));
-    return Body;
-  } catch (error) {
-    console.error('Error reading file from S3:', error);
-    throw error;
-  }
-}
-
-export async function streamToBuffer(stream: Readable): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    stream.on('data', (chunk) => chunks.push(chunk));
-    stream.on('error', reject);
-    stream.on('end', () => resolve(Buffer.concat(chunks)));
-  });
-}
-
 /**
  * Deletes a file from an S3 bucket.
- *
- * @param key - The key (file name) of the file to delete.
+ * CAUTION: the result is always status 204 even if the file did not exist.
+ * @param key - The key (path and file name) of the file to delete.
  */
 export async function deleteFileFromS3({ key }: { key: string }) {
   const deleteParams: DeleteObjectCommandInput = {
@@ -218,14 +151,8 @@ export async function deleteFileFromS3({ key }: { key: string }) {
     Key: key,
   };
 
-  try {
-    const command = new DeleteObjectCommand(deleteParams);
-    const result = await s3Client.send(command);
-    console.log(`File with key ${key} deleted successfully`, result);
-  } catch (error) {
-    console.error('Error deleting file from S3:', error);
-    throw error;
-  }
+  const command = new DeleteObjectCommand(deleteParams);
+  await s3Client.send(command);
 }
 
 /**
@@ -252,8 +179,7 @@ export async function deleteFilesFromS3(keys: string[]) {
 
       try {
         const command = new DeleteObjectsCommand(deleteParams);
-        const result = await s3Client.send(command);
-        console.log('Files deleted successfully from S3:', result);
+        await s3Client.send(command);
       } catch (error) {
         console.error('Error deleting files from S3:', error);
         throw error;
@@ -262,7 +188,7 @@ export async function deleteFilesFromS3(keys: string[]) {
   );
 }
 
-export async function getMaybeSignedUrlIfExists({
+async function getMaybeSignedUrlIfExists({
   key,
   filename,
   contentType,
@@ -287,7 +213,7 @@ export async function getMaybeSignedUrlIfExists({
     );
 
     // If no error is thrown, the object exists, so generate the signed URL
-    return await getSignedUrlFromS3Get({ key, filename, contentType, attachment });
+    return await getReadOnlySignedUrl({ key, filename, contentType, attachment });
   } catch (error) {
     if (!suppressError) {
       console.error('Error getting signed URL from S3:', error);

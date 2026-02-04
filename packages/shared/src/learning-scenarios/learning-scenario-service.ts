@@ -9,20 +9,22 @@ import {
 import {
   FileModel,
   fileTable,
-  SharedSchoolConversationFileMapping,
-  sharedSchoolConversationInsertSchema,
-  SharedSchoolConversationSelectModel,
-  sharedSchoolConversationTable,
-  sharedSchoolConversationUpdateSchema,
+  LearningScenarioFileMapping,
+  LearningScenarioInsertModel,
+  learningScenarioInsertSchema,
+  LearningScenarioSelectModel,
+  learningScenarioTable,
+  learningScenarioUpdateSchema,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
-import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
+import { getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { addDays } from '@shared/utils/date';
 import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 
-export type LearningScenarioWithImage = SharedSchoolConversationSelectModel & {
+export type LearningScenarioWithImage = LearningScenarioSelectModel & {
   maybeSignedPictureUrl: string | undefined;
 };
 
@@ -81,7 +83,7 @@ export async function updateLearningScenario({
 }: {
   learningScenarioId: string;
   user: UserModel;
-  data: SharedSchoolConversationSelectModel;
+  data: LearningScenarioSelectModel;
 }) {
   // this function also serves as a check that the user is the owner
   await getLearningScenario({
@@ -89,15 +91,15 @@ export async function updateLearningScenario({
     userId: user.id,
   });
 
-  const parsedData = sharedSchoolConversationUpdateSchema.parse(data);
+  const parsedData = learningScenarioUpdateSchema.parse(data);
 
   const [updatedLearningScenario] = await db
-    .update(sharedSchoolConversationTable)
+    .update(learningScenarioTable)
     .set({ ...parsedData })
     .where(
       and(
-        eq(sharedSchoolConversationTable.id, learningScenarioId),
-        eq(sharedSchoolConversationTable.userId, user.id),
+        eq(learningScenarioTable.id, learningScenarioId),
+        eq(learningScenarioTable.userId, user.id),
       ),
     )
     .returning();
@@ -129,12 +131,12 @@ export async function updateLearningScenarioPicture({
   });
 
   const [updatedSharedChat] = await db
-    .update(sharedSchoolConversationTable)
+    .update(learningScenarioTable)
     .set({ pictureId: picturePath })
     .where(
       and(
-        eq(sharedSchoolConversationTable.id, learningScenarioId),
-        eq(sharedSchoolConversationTable.userId, userId),
+        eq(learningScenarioTable.id, learningScenarioId),
+        eq(learningScenarioTable.userId, userId),
       ),
     )
     .returning();
@@ -179,7 +181,7 @@ export async function shareLearningScenario({
   const inviteCode = generateInviteCode();
 
   const [updatedSharedChat] = await db
-    .update(sharedSchoolConversationTable)
+    .update(learningScenarioTable)
     .set({
       telliPointsLimit: parsedValues.telliPointsPercentageLimit,
       maxUsageTimeLimit: parsedValues.usageTimeLimit,
@@ -188,8 +190,8 @@ export async function shareLearningScenario({
     })
     .where(
       and(
-        eq(sharedSchoolConversationTable.id, learningScenarioId),
-        eq(sharedSchoolConversationTable.userId, userId),
+        eq(learningScenarioTable.id, learningScenarioId),
+        eq(learningScenarioTable.userId, userId),
       ),
     )
     .returning();
@@ -219,7 +221,7 @@ export async function unshareLearningScenario({
   });
 
   const [updatedSharedChat] = await db
-    .update(sharedSchoolConversationTable)
+    .update(learningScenarioTable)
     .set({
       startedAt: null,
       telliPointsLimit: null,
@@ -227,8 +229,8 @@ export async function unshareLearningScenario({
     })
     .where(
       and(
-        eq(sharedSchoolConversationTable.id, learningScenarioId),
-        eq(sharedSchoolConversationTable.userId, userId),
+        eq(learningScenarioTable.id, learningScenarioId),
+        eq(learningScenarioTable.userId, userId),
       ),
     )
     .returning();
@@ -255,11 +257,6 @@ export async function getFilesForLearningScenario({
   return dbGetFilesForLearningScenario(learningScenarioId, userId);
 }
 
-export const learningScenarioInsertSchema = sharedSchoolConversationInsertSchema.omit({
-  userId: true,
-});
-export type LearningScenarioInsertModel = z.infer<typeof learningScenarioInsertSchema>;
-
 /**
  * User creates a new learning scenario.
  */
@@ -277,7 +274,7 @@ export async function createNewLearningScenario({
   const parsedData = learningScenarioInsertSchema.parse(data);
 
   const [insertedSharedChat] = await db
-    .insert(sharedSchoolConversationTable)
+    .insert(learningScenarioTable)
     .values({ ...parsedData, userId: user.id })
     .returning();
 
@@ -291,6 +288,7 @@ export async function createNewLearningScenario({
 /**
  * Deletes a learning scenario if the user is the owner.
  * @throws NotFoundError if the learning scenario does not exist or the user is not the owner.
+ * Also deletes all related files and the avatar picture from S3.
  */
 export async function deleteLearningScenario({
   learningScenarioId,
@@ -306,10 +304,21 @@ export async function deleteLearningScenario({
   });
   if (!learningScenario) throw new NotFoundError('Learning scenario not found');
 
-  return dbDeleteSharedSchoolChatByIdAndUserId({
+  const relatedFiles = await dbGetFilesForLearningScenario(learningScenarioId, userId);
+
+  // delete learning scenario from db
+  const deletedLearningScenario = await dbDeleteSharedSchoolChatByIdAndUserId({
     sharedChatId: learningScenarioId,
     userId,
   });
+
+  // delete avatar picture from S3
+  await deleteAvatarPicture(learningScenario.pictureId);
+
+  // delete all related files from s3
+  await deleteMessageAttachments(relatedFiles.map((file) => file.id));
+
+  return deletedLearningScenario;
 }
 
 /**
@@ -333,8 +342,8 @@ export async function linkFileToLearningScenario({
   if (!learningScenario) throw new NotFoundError('Learning scenario not found');
 
   const [insertedFileMapping] = await db
-    .insert(SharedSchoolConversationFileMapping)
-    .values({ sharedSchoolConversationId: learningScenarioId, fileId: fileId })
+    .insert(LearningScenarioFileMapping)
+    .values({ learningScenarioId: learningScenarioId, fileId: fileId })
     .returning();
   if (insertedFileMapping === undefined) {
     throw new Error('Could not link file to learning scenario');
@@ -343,8 +352,8 @@ export async function linkFileToLearningScenario({
 
 /**
  * Removes a file from a learning scenario.
- * The file itself is not deleted from the s3 bucket.
- * There is a cleanup job that deletes unlinked files after a certain period.
+ * Also deletes the actual file from S3.
+ *
  * @throws NotFoundError if the learning scenario does not exist.
  * @throws ForbiddenError if the user is not the owner of the learning scenario.
  */
@@ -362,28 +371,32 @@ export async function removeFileFromLearningScenario({
   // get learning scenario for access check
   await getLearningScenario({ learningScenarioId, userId });
 
+  // delete mapping and file entry in db
   await db.transaction(async (tx) => {
     await tx
-      .delete(SharedSchoolConversationFileMapping)
+      .delete(LearningScenarioFileMapping)
       .where(
         and(
-          eq(SharedSchoolConversationFileMapping.sharedSchoolConversationId, learningScenarioId),
-          eq(SharedSchoolConversationFileMapping.fileId, fileId),
+          eq(LearningScenarioFileMapping.learningScenarioId, learningScenarioId),
+          eq(LearningScenarioFileMapping.fileId, fileId),
         ),
       );
     await tx.delete(fileTable).where(eq(fileTable.id, fileId));
   });
+
+  // Delete the file from S3
+  await deleteMessageAttachments([fileId]);
 }
 
 async function enrichLearningScenarioWithPictureUrl({
   learningScenarios,
 }: {
-  learningScenarios: SharedSchoolConversationSelectModel[];
+  learningScenarios: LearningScenarioSelectModel[];
 }): Promise<LearningScenarioWithImage[]> {
   return await Promise.all(
     learningScenarios.map(async (scenario) => ({
       ...scenario,
-      maybeSignedPictureUrl: await getMaybeSignedUrlFromS3Get({
+      maybeSignedPictureUrl: await getReadOnlySignedUrl({
         key: scenario.pictureId ? `shared-chats/${scenario.id}/avatar` : undefined,
       }),
     })),
@@ -392,7 +405,8 @@ async function enrichLearningScenarioWithPictureUrl({
 
 /**
  * Cleans up learning scenarios with empty names from the database.
- * Attention: This is an admin function that does not check any authorization!
+ *
+ * CAUTION: This is an admin function that does not check any authorization!
  *
  * Note: linked files will be unlinked but removed separately by `dbDeleteDanglingFiles`
  *
@@ -400,13 +414,38 @@ async function enrichLearningScenarioWithPictureUrl({
  */
 export async function cleanupLearningScenarios() {
   const result = await db
-    .delete(sharedSchoolConversationTable)
+    .delete(learningScenarioTable)
     .where(
       and(
-        eq(sharedSchoolConversationTable.name, ''),
-        lt(sharedSchoolConversationTable.createdAt, addDays(new Date(), -1)),
+        eq(learningScenarioTable.name, ''),
+        lt(learningScenarioTable.createdAt, addDays(new Date(), -1)),
       ),
     )
     .returning();
   return result.length;
+}
+
+export async function uploadAvatarPictureForLearningScenario({
+  learningScenarioId,
+  croppedImageBlob,
+  userId,
+}: {
+  learningScenarioId: string;
+  croppedImageBlob: Blob;
+  userId: string;
+}) {
+  await getLearningScenario({
+    learningScenarioId,
+    userId,
+  });
+
+  const key = `shared-chats/${learningScenarioId}/avatar`;
+
+  await uploadFileToS3({
+    key: key,
+    body: croppedImageBlob,
+    contentType: croppedImageBlob.type,
+  });
+
+  return key;
 }

@@ -24,7 +24,8 @@ import {
   fileTable,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
-import { copyFileInS3 } from '@shared/s3';
+import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
+import { copyFileInS3, uploadFileToS3 } from '@shared/s3';
 import { copyCustomGpt, copyRelatedTemplateFiles } from '@shared/templates/templateService';
 import { addDays } from '@shared/utils/date';
 import { generateUUID } from '@shared/utils/uuid';
@@ -239,7 +240,8 @@ export async function linkFileToCustomGpt({
 }
 
 /**
- * Delete file mapping and the file entity itself
+ * Delete file mapping and the file entity itself from database.
+ * Also deletes the actual file from S3.
  * Throws if the user is not the owner of the custom gpt.
  */
 export async function deleteFileMappingAndEntity({
@@ -257,10 +259,14 @@ export async function deleteFileMappingAndEntity({
     throw new ForbiddenError('Not authorized to delete this file mapping from custom gpt');
   }
 
+  // delete mapping and file entry in db
   await db.transaction(async (tx) => {
     await tx.delete(CustomGptFileMapping).where(eq(CustomGptFileMapping.fileId, fileId));
     await tx.delete(fileTable).where(eq(fileTable.id, fileId));
   });
+
+  // Delete the file from S3
+  await deleteMessageAttachments([fileId]);
 }
 
 /**
@@ -411,6 +417,7 @@ export async function updateCustomGpt({
 /**
  * Deletes a custom gpt.
  * Throws if the user is not the owner of the custom gpt.
+ * Also deletes all related files and the avatar picture from S3.
  */
 export async function deleteCustomGpt({
   customGptId,
@@ -424,12 +431,25 @@ export async function deleteCustomGpt({
   if (customGpt.userId !== userId) {
     throw new ForbiddenError('Not authorized to delete this custom gpt');
   }
-  return dbDeleteCustomGptByIdAndUserId({ gptId: customGptId, userId });
+
+  const relatedFiles = await dbGetRelatedCustomGptFiles(customGptId);
+
+  // delete customGpt from db
+  const deletedCustomGpt = await dbDeleteCustomGptByIdAndUserId({ gptId: customGptId, userId });
+
+  // delete avatar picture from S3
+  await deleteAvatarPicture(customGpt.pictureId);
+
+  // delete all related files from s3
+  await deleteMessageAttachments(relatedFiles.map((file) => file.id));
+
+  return deletedCustomGpt;
 }
 
 /**
  * Cleans up custom gpts with empty names from the database.
- * Attention: This is an admin function that does not check any authorization!
+ *
+ * CAUTION: This is an admin function that does not check any authorization!
  *
  * Note: linked files will be unlinked but removed separately by `dbDeleteDanglingFiles`
  *
@@ -441,4 +461,29 @@ export async function cleanupCustomGpts() {
     .where(and(eq(customGptTable.name, ''), lt(customGptTable.createdAt, addDays(new Date(), -1))))
     .returning();
   return result.length;
+}
+
+export async function uploadAvatarPictureForCustomGpt({
+  customGptId,
+  croppedImageBlob,
+  userId,
+}: {
+  customGptId: string;
+  croppedImageBlob: Blob;
+  userId: string;
+}) {
+  const customGpt = await dbGetCustomGptById({ customGptId });
+  if (customGpt.userId !== userId) {
+    throw new ForbiddenError('Not authorized to update avatar picture for this custom gpt');
+  }
+
+  const key = `custom-gpts/${customGptId}/avatar`;
+
+  await uploadFileToS3({
+    key: key,
+    body: croppedImageBlob,
+    contentType: croppedImageBlob.type,
+  });
+
+  return key;
 }

@@ -1,6 +1,7 @@
 import { env } from '../consts/env';
 import { ModelApiKeyMapping } from '../types/model-mappings';
 import { fetchFromApi } from './fetch';
+import { logInfo } from '@shared/logging';
 
 const apiRoutes = {
   GET_ALL: (organizationId: string, projectId: string, apiKeyId: string) =>
@@ -37,7 +38,8 @@ export async function saveModelApiKeyMappings(
     },
   );
 
-  const data = await response.json();
+  logInfo('API Key mapping was updated successfully', { projectId, apiKeyId, modelIds });
 
+  const data = await response.json();
   return data as ModelApiKeyMapping[];
 }

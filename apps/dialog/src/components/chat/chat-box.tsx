@@ -7,13 +7,13 @@ import MarkdownDisplay from './markdown-display';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
 import Citation from './sources/citation';
-import { WebsearchSource } from '@/app/api/webpage-content/types';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { iconClassName } from '@/utils/tailwind/icon';
 import useBreakpoints from '../hooks/use-breakpoints';
 import { isImageFile } from '@/utils/files/generic';
 import { type UIMessage, type ChatStatus } from '@/types/chat';
 import { ReactNode } from 'react';
+import { WebsearchSource } from '@shared/db/types';
 
 export function ChatBox({
   assistantIcon,
@@ -134,7 +134,7 @@ export function ChatBox({
     <>
       <div key={index} className={cn('w-full text-secondary-foreground', userClassName, margin)}>
         <div className="" aria-label={`${children.role} message ${Math.floor(index / 2 + 1)}`}>
-          <div className={cn('flex flex-row', isAtLeast.sm ? 'flex-row' : 'flex-col')}>
+          <div className={cn('flex', isAtLeast.sm ? 'flex-row' : 'flex-col')}>
             {children.role === 'assistant' && assistantIcon}
             <div className="flex flex-col items-start gap-2">
               {messageContent}

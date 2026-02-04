@@ -13,8 +13,8 @@ import {
   FileModel,
   FileModelAndContent,
   fileTable,
-  SharedSchoolConversationFileMapping,
-  sharedSchoolConversationTable,
+  LearningScenarioFileMapping,
+  learningScenarioTable,
   TextChunkInsertModel,
   TextChunkTable,
 } from '../schema';
@@ -57,16 +57,16 @@ export async function dbGetRelatedSharedChatFiles(conversationId?: string): Prom
   if (conversationId === undefined) return [];
   const files = await db
     .select({
-      id: SharedSchoolConversationFileMapping.fileId,
+      id: LearningScenarioFileMapping.fileId,
       name: fileTable.name,
       type: fileTable.type,
       size: fileTable.size,
       createdAt: fileTable.createdAt,
       metadata: fileTable.metadata,
     })
-    .from(SharedSchoolConversationFileMapping)
-    .innerJoin(fileTable, eq(SharedSchoolConversationFileMapping.fileId, fileTable.id))
-    .where(eq(SharedSchoolConversationFileMapping.sharedSchoolConversationId, conversationId));
+    .from(LearningScenarioFileMapping)
+    .innerJoin(fileTable, eq(LearningScenarioFileMapping.fileId, fileTable.id))
+    .where(eq(LearningScenarioFileMapping.learningScenarioId, conversationId));
 
   return files;
 }
@@ -77,26 +77,23 @@ export async function dbGetFilesForLearningScenario(
 ): Promise<FileModel[]> {
   return db
     .select({
-      id: SharedSchoolConversationFileMapping.fileId,
+      id: LearningScenarioFileMapping.fileId,
       name: fileTable.name,
       type: fileTable.type,
       size: fileTable.size,
       createdAt: fileTable.createdAt,
       metadata: fileTable.metadata,
     })
-    .from(SharedSchoolConversationFileMapping)
-    .innerJoin(fileTable, eq(SharedSchoolConversationFileMapping.fileId, fileTable.id))
+    .from(LearningScenarioFileMapping)
+    .innerJoin(fileTable, eq(LearningScenarioFileMapping.fileId, fileTable.id))
     .innerJoin(
-      sharedSchoolConversationTable,
-      eq(
-        SharedSchoolConversationFileMapping.sharedSchoolConversationId,
-        sharedSchoolConversationTable.id,
-      ),
+      learningScenarioTable,
+      eq(LearningScenarioFileMapping.learningScenarioId, learningScenarioTable.id),
     )
     .where(
       and(
-        eq(SharedSchoolConversationFileMapping.sharedSchoolConversationId, conversationId),
-        eq(sharedSchoolConversationTable.userId, userId),
+        eq(LearningScenarioFileMapping.learningScenarioId, conversationId),
+        eq(learningScenarioTable.userId, userId),
       ),
     );
 }
@@ -259,16 +256,13 @@ export async function dbDeleteDanglingFiles() {
       )
       .leftJoin(CharacterFileMapping, eq(fileTable.id, CharacterFileMapping.fileId))
       .leftJoin(CustomGptFileMapping, eq(fileTable.id, CustomGptFileMapping.fileId))
-      .leftJoin(
-        SharedSchoolConversationFileMapping,
-        eq(fileTable.id, SharedSchoolConversationFileMapping.fileId),
-      )
+      .leftJoin(LearningScenarioFileMapping, eq(fileTable.id, LearningScenarioFileMapping.fileId))
       .where(
         and(
           isNull(ConversationMessageFileMappingTable.fileId),
           isNull(CharacterFileMapping.fileId),
           isNull(CustomGptFileMapping.fileId),
-          isNull(SharedSchoolConversationFileMapping.fileId),
+          isNull(LearningScenarioFileMapping.fileId),
         ),
       );
     const fileIdsToDelete = fileIds.map((f) => f.fileId);
@@ -294,10 +288,10 @@ export async function dbGetAllS3FileKeys(): Promise<string[]> {
         .from(customGptTable),
       db
         .select({
-          id: sharedSchoolConversationTable.id,
-          pictureId: sharedSchoolConversationTable.pictureId,
+          id: learningScenarioTable.id,
+          pictureId: learningScenarioTable.pictureId,
         })
-        .from(sharedSchoolConversationTable),
+        .from(learningScenarioTable),
       db.select({ id: federalStateTable.id }).from(federalStateTable),
     ]);
 

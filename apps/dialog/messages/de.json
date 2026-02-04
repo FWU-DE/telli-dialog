@@ -60,9 +60,7 @@
   "websearch": {
     "placeholders": {
       "loading": "Titel wird geladen...",
-      "not-available": "Nicht verfügbar",
-      "unknown-title": "Titel unbekannt",
-      "error-content": "Die Seite konnte nicht geladen werden. Es ist ein Fehler aufgetreten {status_code_info}. Nenne keinen Fehlercode und gib folgende Hinweise an den Nutzer weiter: Bitte stelle sicher, dass:\n- die Seite öffentlich zugänglich ist\n- keine Anmeldung erforderlich ist\n- es sich um eine gültige URL handelt"
+      "unknown-title": "Titel unbekannt"
     },
     "action": {
       "delete": "Link entfernen"
@@ -74,6 +72,7 @@
   "file-interaction": {
     "upload": {
       "upload-file-button": "Datei hochladen",
+      "upload-file-button-disabled": "Es können maximal {max_files} Dateien hochgeladen werden",
       "file-limit-reached": "Es können maximal {max_files} Dateien hochgeladen werden. {files_exceeded} Dateien wurden nicht hochgeladen.",
       "image-limit-reached": "Es können maximal {max_images} Bilder hochgeladen werden. {images_exceeded} Bilder wurden nicht hochgeladen.",
       "drop-area": "Datei per Drag & Drop hier ablegen",

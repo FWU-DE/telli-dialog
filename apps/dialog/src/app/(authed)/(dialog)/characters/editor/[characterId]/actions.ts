@@ -5,12 +5,15 @@ import { SharedConversationShareFormValues } from '../../../shared-chats/[shared
 import { requireAuth } from '@/auth/requireAuth';
 import {
   deleteCharacter,
+  deleteFileMappingAndEntity,
+  linkFileToCharacter,
   shareCharacter,
   unshareCharacter,
   updateCharacter,
   updateCharacterAccessLevel,
   UpdateCharacterActionModel,
   updateCharacterPicture,
+  uploadAvatarPictureForCharacter,
 } from '@shared/characters/character-service';
 import { runServerAction } from '@shared/actions/run-server-action';
 
@@ -86,5 +89,49 @@ export async function unshareCharacterAction({ characterId }: { characterId: str
   return runServerAction(unshareCharacter)({
     characterId,
     user: user,
+  });
+}
+
+export async function deleteFileMappingAndEntityAction({
+  characterId,
+  fileId,
+}: {
+  characterId: string;
+  fileId: string;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(deleteFileMappingAndEntity)({
+    characterId,
+    fileId,
+    userId: user.id,
+  });
+}
+
+export async function linkFileToCharacterAction({
+  fileId,
+  characterId,
+}: {
+  fileId: string;
+  characterId: string;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(linkFileToCharacter)({ fileId, characterId, userId: user.id });
+}
+
+export async function uploadAvatarPictureForCharacterAction({
+  characterId,
+  croppedImageBlob,
+}: {
+  characterId: string;
+  croppedImageBlob: Blob;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(uploadAvatarPictureForCharacter)({
+    characterId,
+    croppedImageBlob,
+    userId: user.id,
   });
 }

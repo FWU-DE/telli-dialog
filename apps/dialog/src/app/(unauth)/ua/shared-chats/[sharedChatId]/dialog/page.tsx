@@ -6,7 +6,7 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { dbGetLlmModelById } from '@shared/db/functions/llm-model';
 import { dbGetFederalStateByUserId } from '@shared/db/functions/school';
 import { dbGetSharedChatByIdAndInviteCode } from '@shared/db/functions/shared-school-chat';
-import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
+import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { notFound } from 'next/navigation';
 import z from 'zod';
 
@@ -31,9 +31,7 @@ export default async function Page(props: PageProps<'/ua/shared-chats/[sharedCha
     notFound();
   }
 
-  const maybeSignedPictureUrl = await getMaybeSignedUrlFromS3Get({
-    key: sharedSchoolChat.pictureId,
-  });
+  const avatarPictureUrl = await getAvatarPictureUrl(sharedSchoolChat.pictureId);
 
   const federalState = await dbGetFederalStateByUserId({ userId: sharedSchoolChat.userId });
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
@@ -45,7 +43,7 @@ export default async function Page(props: PageProps<'/ua/shared-chats/[sharedCha
           <SharedChat
             {...sharedSchoolChat}
             inviteCode={searchParams.inviteCode}
-            maybeSignedPictureUrl={maybeSignedPictureUrl}
+            maybeSignedPictureUrl={avatarPictureUrl}
           />
         </ThemeProvider>
       </LlmModelsProvider>

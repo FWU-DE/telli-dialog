@@ -1,6 +1,6 @@
 import { TOTAL_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
-import { WebsearchSource } from '../webpage-content/types';
 import { ChunkResult } from '../file-operations/process-chunks';
+import { WebsearchSource } from '@shared/db/types';
 
 export const LANGUAGE_GUIDELINES = `
 ## Sprachliche Richtlinien
@@ -30,8 +30,13 @@ ${promptParts.join('\n')}`;
 }
 
 function constructSingleWebsearchPrompt(source: WebsearchSource) {
-  return `Titel der Seite: ${source.name}
-Quelle: ${source.link}
+  if (source.error || !source.content) {
+    return `Quelle: ${source.link}
+Inhalt: [Fehler - Der Inhalt dieser Webseite konnte nicht extrahiert werden]
+`;
+  }
+
+  return `Quelle: ${source.link}
 Inhalt: ${source.content}
 `;
 }

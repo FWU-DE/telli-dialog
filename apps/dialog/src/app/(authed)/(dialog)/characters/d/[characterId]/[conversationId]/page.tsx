@@ -2,7 +2,6 @@ import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import Chat from '@/components/chat/chat';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
 import Logo from '@/components/common/logo';
-import { getMaybeSignedUrlFromS3Get } from '@shared/s3';
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import { requireAuth } from '@/auth/requireAuth';
 import {
@@ -12,6 +11,7 @@ import {
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { getCharacterForChatSession } from '@shared/characters/character-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
+import { getAvatarPictureUrl } from '@shared/files/fileService';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +39,7 @@ export default async function Page(
   ]).catch(handleErrorInServerComponent);
 
   const chatMessages = convertMessageModelToMessage(rawChatMessages);
-  const maybeSignedImageUrl = await getMaybeSignedUrlFromS3Get({ key: character.pictureId });
+  const avatarPictureUrl = await getAvatarPictureUrl(character.pictureId);
   const logoElement = <Logo federalStateId={federalState.id} />;
   return (
     <>
@@ -56,7 +56,7 @@ export default async function Page(
         initialMessages={chatMessages}
         character={character}
         enableFileUpload={false}
-        imageSource={maybeSignedImageUrl}
+        imageSource={avatarPictureUrl}
         logoElement={logoElement}
       />
     </>
