@@ -11,17 +11,17 @@ const VARIANT_STYLES = {
   small: {
     width: 44,
     height: 44,
-    className: 'rounded-enterprise-sm',
+    className: 'rounded-enterprise-sm object-contain min-w-[44px] min-h-[44px]',
   },
   normal: {
     width: 100,
     height: 100,
-    className: 'rounded-enterprise-md',
+    className: 'rounded-enterprise-md object-contain min-w-[100px] min-h-[100px]',
   },
   large: {
     width: 170,
     height: 170,
-    className: 'rounded-enterprise-md',
+    className: 'rounded-enterprise-md object-contain min-w-[170px] min-h-[170px]',
   },
 };
 
