@@ -1,6 +1,7 @@
 import {
   constructAzureChatCompletionGenerationFn,
   constructAzureChatCompletionStreamFn,
+  constructAzureResponsesGenerationFn,
   constructAzureResponsesStreamFn,
 } from './azure';
 import { constructIonosTextGenerationFn, constructIonosTextStreamFn } from './ionos';
@@ -9,6 +10,9 @@ import { ProviderConfigurationError } from '../../errors';
 
 function getTextGenerationFnByModel({ model }: { model: AiModel }): TextGenerationFn | undefined {
   if (model.provider === 'azure') {
+    if (["gpt-5", "gpt-5-mini", "gpt-5-nano"].includes(model.name)) {
+      return constructAzureResponsesGenerationFn(model);
+    }
     return constructAzureChatCompletionGenerationFn(model);
   }
   if (model.provider === 'ionos') {
@@ -21,7 +25,7 @@ function getTextGenerationFnByModel({ model }: { model: AiModel }): TextGenerati
 function getTextStreamFnByModel({ model }: { model: AiModel }): TextStreamFn | undefined {
   if (model.provider === 'azure') {
     // GPT-5 is used with Responses endpoint
-    if (model.name.startsWith('gpt-5')) {
+    if (["gpt-5", "gpt-5-mini", "gpt-5-nano"].includes(model.name)) {
       return constructAzureResponsesStreamFn(model);
     }
     return constructAzureChatCompletionStreamFn(model);

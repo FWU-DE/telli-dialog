@@ -24,6 +24,7 @@ function countTokens(text: string): number {
 /**
  * Calculates token usage for a chat completion.
  * Uses tiktoken with cl100k_base encoding for accurate token counting.
+ * Only needed because IONOS does not return token usage in their streaming API responses.
  *
  * @param messages - An array of Message objects used as the prompt.
  * @param modelMessage - The final message returned by the model.
@@ -39,6 +40,7 @@ export function calculateCompletionUsage({
   // Count tokens for all prompt messages
   // Note: This is a simplified calculation. The OpenAI api adds overhead tokens for message formatting
   // (roughly 3-4 tokens per message for role markers, etc.)
+  // This can vary by model and provider and may change over time.
   const promptTokens = messages.reduce((total, message) => {
     return total + countTokens(message.content) + 4; // +4 for message overhead
   }, 3); // +3 for reply priming

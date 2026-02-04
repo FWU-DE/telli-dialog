@@ -90,7 +90,7 @@ export default function Chat({
         if (messages.length > 1) {
           return;
         }
-        logWarning('Assert: onFinish was called with zero messages.');
+        logWarning('Assert: onFinish was called with zero assistant messages.');
         refetchConversations();
       },
       onError: (error) => {

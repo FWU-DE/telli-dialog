@@ -14,7 +14,7 @@ export function convertMessageModelToMessage(
   messages: Array<ConversationMessageModel>,
 ): Array<ChatMessage> {
   return messages
-    .filter((message) => message.role !== 'data')
+    .filter((message) => message.role === 'user' || message.role === 'assistant' || message.role === 'system')
     .map((message) => ({
       id: message.id,
       role: message.role as 'user' | 'assistant' | 'system',
