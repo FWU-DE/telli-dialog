@@ -31,7 +31,7 @@ async function tryGetLearningScenarioIdByInviteCode({ inviteCode }: { inviteCode
     .from(sharedLearningScenarioTable)
     .where(eq(sharedLearningScenarioTable.inviteCode, inviteCode));
   if (maybeSharedChat?.inviteCode)
-    return { id: maybeSharedChat.id, inviteCode: maybeSharedChat.inviteCode };
+    return { id: maybeSharedChat.learningScenarioId, inviteCode: maybeSharedChat.inviteCode };
 
   return undefined;
 }

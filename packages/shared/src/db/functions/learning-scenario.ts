@@ -144,14 +144,12 @@ export async function dbGetLearningScenarioByIdAndInviteCode({
     .from(learningScenarioTable)
     .innerJoin(
       sharedLearningScenarioTable,
-      eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioTable.id),
-    )
-    .where(
       and(
-        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioTable.id),
         eq(sharedLearningScenarioTable.inviteCode, inviteCode),
       ),
-    );
+    )
+    .where(eq(learningScenarioTable.id, learningScenarioId));
 
   return row;
 }
