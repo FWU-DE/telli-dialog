@@ -90,7 +90,7 @@ export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
         ...model.additionalParameters,
       },
       {
-        path: `/openai/deployments/${deployment}/responses`,
+        path: `/openai/responses`,
       },
     );
 
@@ -172,7 +172,7 @@ export function constructAzureResponsesGenerationFn(model: AiModel): TextGenerat
         max_output_tokens: maxTokens,
       },
       {
-        path: `/openai/deployments/${deployment}/responses`,
+        path: `/openai/responses`,
       },
     );
 
