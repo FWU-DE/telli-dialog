@@ -98,13 +98,13 @@ jobs:
           OTC_BUCKET_NAME: op://telli Engineering/.env.e2e chatbot/OTC_BUCKET_NAME
           SENTRY_ENVIRONMENT: op://telli Engineering/.env.e2e chatbot/SENTRY_ENVIRONMENT
           SENTRY_DSN: op://telli Engineering/.env.e2e chatbot/SENTRY_DSN
-          DE_TEST_API_KEY: op://telli Engineering/.env.e2e chatbot/DE_TEST_API_KEY
-          LLM_IONOS_API_KEY: op://telli Engineering/.env.e2e chatbot/DE_TEST_API_KEY
-          LLM_IONOS_BASE_URL: op://telli Engineering/.env.e2e chatbot/DE_TEST_API_KEY
-          LLM_GPT4OMINI_API_KEY: op://telli Engineering/.env.e2e chatbot/DE_TEST_API_KEY
-          LLM_GPT4OMINI_BASE_URL: op://telli Engineering/.env.e2e chatbot/DE_TEST_API_KEY
-          LLM_GPT5NANO_API_KEY: op://telli Engineering/.env.e2e chatbot/DE_TEST_API_KEY
-          LLM_GPT5NANO_BASE_URL: op://telli Engineering/.env.e2e chatbot/DE_TEST_API_KEY
+          # LLM API Keys for seeding telli-api
+          LLM_IONOS_API_KEY: op://telli Engineering/.env.e2e chatbot/LLM_IONOS_API_KEY
+          LLM_IONOS_BASE_URL: op://telli Engineering/.env.e2e chatbot/LLM_IONOS_BASE_URL
+          LLM_GPT4OMINI_API_KEY: op://telli Engineering/.env.e2e chatbot/LLM_GPT4OMINI_API_KEY
+          LLM_GPT4OMINI_BASE_URL: op://telli Engineering/.env.e2e chatbot/LLM_GPT4OMINI_BASE_URL
+          LLM_GPT5NANO_API_KEY: op://telli Engineering/.env.e2e chatbot/LLM_GPT5NANO_API_KEY
+          LLM_GPT5NANO_BASE_URL: op://telli Engineering/.env.e2e chatbot/LLM_GPT5NANO_BASE_URL
 
       - name: Wait for PostgreSQL to be ready
         run: |
@@ -151,7 +151,11 @@ jobs:
         run: pnpm -filter telli-dialog exec playwright install
 
       - name: Seed telli-api database
-        run: pnpm --filter @telli/ai-core db:seed:telli-api
+        # db:seed:telli-api will print the generated API KEY on the console
+        # The output is captured in GITHUB_ENV for seeding telli-dialog
+        run: |
+          pnpm --filter @telli/ai-core db:seed:telli-api | tee /tmp/out.txt
+          grep -E '^[A-Z_][A-Z0-9_]*=' /tmp/out.txt >> "$GITHUB_ENV"
 
       - name: Run migrations and seed database (if applicable)
         run: pnpm --filter @telli/shared db:migrate && pnpm --filter @telli/shared db:seed

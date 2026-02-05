@@ -1,12 +1,9 @@
 import { dbApi, LlmInsertModel } from '../index';
 import {
-  type ApiKeyInsertModel,
   apiKeyTable,
   llmModelApiKeyMappingTable,
   llmModelTable,
-  type OrganizationInsertModel,
   organizationTable,
-  type ProjectInsertModel,
   projectTable,
 } from '../schema';
 import { env } from './env';
@@ -103,7 +100,7 @@ export async function seedDatabase() {
     .insert(organizationTable)
     .values({
       name: 'Test Organization',
-    } satisfies OrganizationInsertModel)
+    })
     .onConflictDoNothing()
     .returning();
 
@@ -116,7 +113,7 @@ export async function seedDatabase() {
       id: PROJECT_ID,
       name: 'Test Project',
       organizationId: organization.id,
-    } satisfies ProjectInsertModel)
+    })
     .onConflictDoNothing()
     .returning();
 
@@ -125,7 +122,7 @@ export async function seedDatabase() {
   // 3. Create test API key
   // Since keyId doesn't have a unique constraint, we'll check first
 
-  const { keyId, secretHash } = await createApiKeyRecord();
+  const { keyId, secretHash, fullKey } = await createApiKeyRecord();
 
   // Create new API key
   const [apiKey] = await dbApi
@@ -137,10 +134,14 @@ export async function seedDatabase() {
       projectId: PROJECT_ID,
       limitInCent: 5000, // $50.00 limit per key
       state: 'active',
-    } satisfies ApiKeyInsertModel)
+    })
     .returning();
 
   if (!apiKey) throw new Error('Failed to create API key');
+
+  // Print created API Key on console; will be used in e2e pipeline to seed telli-dialog
+  const apiKeyEnvVar = `${PROJECT_ID.replace('-', '_')}_API_KEY`;
+  console.log(`${apiKeyEnvVar}=${fullKey}`);
 
   // 5. Create API key to model mapping
   const models = getDefaultModels(organization.id);
