@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 import {
@@ -15,7 +16,14 @@ import { revokeVoucherAction } from './actions';
 import { Button } from '@ui/components/Button';
 import { BusinessError } from '@shared/error';
 
-export default function VoucherList({ vouchers }: { vouchers: Voucher[] }) {
+interface VoucherListProps {
+  vouchers: Voucher[];
+  onVoucherRevoked?: (voucherCode: string) => void;
+}
+
+export default function VoucherList({ vouchers, onVoucherRevoked }: VoucherListProps) {
+  const router = useRouter();
+
   const handleRevoke = async (voucher: Voucher) => {
     const reason = prompt('Bitte Grund für das Widerrufen des Codes angeben:');
     if (!reason || reason.trim().length === 0) {
@@ -24,9 +32,14 @@ export default function VoucherList({ vouchers }: { vouchers: Voucher[] }) {
     }
     try {
       await revokeVoucherAction(voucher.code, voucher.federalStateId, reason);
-      // update voucher list
-      voucher.status = 'revoked';
-      vouchers.find((v) => v.code === voucher.code)!.status = 'revoked';
+      toast.success('Gutschein wurde erfolgreich widerrufen.');
+
+      // If callback is provided (client state), use it; otherwise refresh from server
+      if (onVoucherRevoked) {
+        onVoucherRevoked(voucher.code);
+      } else {
+        router.refresh();
+      }
     } catch (err) {
       const errorMessage =
         err instanceof BusinessError ? err.message : 'Ein unbekannter Fehler ist aufgetreten';
