@@ -44,6 +44,15 @@ export type UseChatReturn = {
   stop: () => void;
 };
 
+function lastUserMessage(messages: ChatMessage[]): ChatMessage | null {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i]?.role === 'user') {
+      return messages[i] ?? null;
+    }
+  }
+  return null;
+}
+
 /**
  * Custom hook to manage chat state and streaming.
  * Replaces the Vercel AI SDK's useChat hook with Server Actions.
@@ -60,7 +69,7 @@ export function useTelliChat({
   const [status, setStatus] = useState<ChatStatus>('ready');
   const [error, setError] = useState<Error | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const lastUserMessageRef = useRef<ChatMessage | null>(null);
+  const lastUserMessageRef = useRef<ChatMessage | null>(lastUserMessage(initialMessages));
 
   const isLoading = status === 'submitted' || status === 'streaming';
 
@@ -72,7 +81,7 @@ export function useTelliChat({
   );
 
   const submitMessage = useCallback(
-    async (userMessage: ChatMessage, fileIds?: string[]) => {
+    async (userMessage: ChatMessage, fileIds?: string[], existingMessages?: ChatMessage[]) => {
       if (!modelId) {
         const err = new Error('No model selected');
         setError(err);
@@ -86,7 +95,8 @@ export function useTelliChat({
       abortControllerRef.current = new AbortController();
 
       // Add user message immediately
-      const newMessages = [...messages, userMessage];
+      const baseMessages = existingMessages ?? messages;
+      const newMessages = [...baseMessages, userMessage];
       setMessages(newMessages);
       lastUserMessageRef.current = userMessage;
 
@@ -184,17 +194,17 @@ export function useTelliChat({
 
   const reload = useCallback(async () => {
     if (!lastUserMessageRef.current) return;
+    const messageContent = lastUserMessageRef.current;
 
-    // Remove last assistant message and retry
-    setMessages((prev) => {
-      const last = prev[prev.length - 1];
-      if (last?.role === 'assistant') {
-        return prev.slice(0, -1);
-      }
-      return prev;
-    });
+    const lastUserIndex = messages.findIndex((msg) => msg.id === lastUserMessageRef.current!.id);
 
-    await submitMessage(lastUserMessageRef.current);
+    // Sadly this is needed, so we don't need to wait for a re-render between updating the messages and submitting
+    const curMessages = messages.slice(0, lastUserIndex)
+
+    // Remove all assistant messages after the last user message, and the user message itself
+    setMessages(curMessages);
+
+    await submitMessage(messageContent, undefined, curMessages);
   }, [submitMessage]);
 
   const stop = useCallback(() => {
