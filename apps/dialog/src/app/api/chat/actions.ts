@@ -34,6 +34,7 @@ import {
 } from '@/configuration-text-inputs/const';
 import { extractImagesAndUrl } from '../file-operations/prepocess-image';
 import { ChatAttachment } from '@/types/chat';
+import { searchWeb } from './websearch-service';
 
 export type ChatMessage = {
   id: string;
@@ -152,7 +153,14 @@ export async function sendChatMessage({
   const userMessage = messages[messages.length - 1];
   if (!userMessage || userMessage.role !== 'user') {
     throw new Error('No user message found');
-  }
+  } 
+  const { websearchSources, userMessageWebsearchSources } = await searchWeb(
+    customGptId,
+    characterId,
+    user,
+    userMessage,
+    conversationObject.messages,
+  );
 
   // Save user message to DB
   await dbInsertChatContent({
@@ -163,6 +171,7 @@ export async function sendChatMessage({
     userId: user.id,
     modelName: definedModel.name,
     orderNumber: messages.length + 1,
+    websearchSources: userMessageWebsearchSources,
   });
 
   // Link files to conversation
@@ -211,21 +220,6 @@ export async function sendChatMessage({
   } else {
     urls = messages.flatMap((message) => parseHyperlinks(message.content) ?? []);
   }
-
-  const uniqueUrls = [...new Set(urls)];
-  const websearchSources = (
-    await Promise.all(
-      uniqueUrls
-        .filter((l) => l !== '')
-        .map(async (url) => {
-          try {
-            return await webScraper(url);
-          } catch (error) {
-            console.error(`Error fetching webpage content for URL: ${url}`, error);
-          }
-        }),
-    )
-  ).filter((x): x is WebsearchSource => !!x);
 
   // Update last used model
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
