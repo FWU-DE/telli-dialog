@@ -74,12 +74,12 @@ export async function sendCharacterMessage({
 }): Promise<SendMessageResult> {
   // Get character
   const character = await dbGetCharacterByIdAndInviteCode({ id: characterId, inviteCode });
-  if (character?.userId === undefined || character.userId === null) {
+  if (character === undefined || character.startedBy === null) {
     throw new Error('Could not get character');
   }
 
   // Get teacher user context
-  const teacherUserAndContext = await getUserAndContextByUserId({ userId: character.userId });
+  const teacherUserAndContext = await getUserAndContextByUserId({ userId: character.startedBy });
   const productAccess = checkProductAccess(teacherUserAndContext);
 
   if (!productAccess.hasAccess) {

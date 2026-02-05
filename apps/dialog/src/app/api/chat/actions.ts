@@ -21,9 +21,6 @@ import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exce
 import { constructChatSystemPrompt } from './system-prompt';
 import { formatMessagesWithImages, getChatTitle, limitChatHistory } from './utils';
 import { getRelevantFileContent } from '../file-operations/retrieval';
-import { parseHyperlinks } from '@/utils/web-search/parsing';
-import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
-import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import { logError } from '@shared/logging';
 import {
   KEEP_FIRST_MESSAGES,
@@ -151,7 +148,7 @@ export async function sendChatMessage({
   const userMessage = messages[messages.length - 1];
   if (!userMessage || userMessage.role !== 'user') {
     throw new Error('No user message found');
-  } 
+  }
   const { websearchSources, userMessageWebsearchSources } = await searchWeb(
     customGptId,
     characterId,
@@ -199,25 +196,6 @@ export async function sendChatMessage({
     modelId: auxiliaryModel.id,
     apiKeyId: auxiliaryModelAndApiKey.apiKeyId,
   });
-
-  // Get URLs for web search
-  let urls: string[] = [];
-  if (customGptId) {
-    const customGpt = await dbGetCustomGptById({ customGptId });
-    if (customGpt) {
-      urls = customGpt.attachedLinks;
-    }
-  } else if (characterId) {
-    const character = await dbGetCharacterByIdWithShareData({
-      characterId,
-      userId: user.id,
-    });
-    if (character) {
-      urls = character.attachedLinks;
-    }
-  } else {
-    urls = messages.flatMap((message) => parseHyperlinks(message.content) ?? []);
-  }
 
   // Update last used model
   await dbUpdateLastUsedModelByUserId({ modelName: definedModel.name, userId: user.id });
