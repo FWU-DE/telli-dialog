@@ -116,9 +116,9 @@ jobs:
           done
 
       # telli-api container cannot be started as service, because:
-      # - it needs to mount a file from 1Password
+      # - it needs to mount a file from 1Password (Google Vertex AI, not yet implemented)
       # - it needs to wait until postgres is available
-      # The container must be started on host network, to be able to access the postgres db.
+      # The container must be started on the host network to be able to access the postgres db.
       #
       # Temporary solution: NODE_ENV=development is used to start telli-api on port 3002.
       # Port 3000 is the default and would conflict with telli-dialog.
@@ -126,13 +126,12 @@ jobs:
         run: |
           docker run --detach \
             --name telli-api \
-            -v "$PWD/devops/docker/keycloak:/opt/keycloak/data/import" \
             --network host \
             -e DATABASE_URL=$API_DATABASE_URL \
             -e API_KEY=$API_KEY \
             -e NODE_ENV=development \
             -e SENTRY_DSN=dummy \
-            -e SENTRY_ENVIRONMENT=e2e \
+            -e SENTRY_ENVIRONMENT=$SENTRY_ENVIRONMENT \
             ghcr.io/fwu-de/telli-api:latest
         env:
           API_KEY: ApiKeyForTelliApiAdminApi
