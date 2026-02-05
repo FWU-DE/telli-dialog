@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import type { AiModel, TextStreamFn, TextGenerationFn, TokenUsage } from '../types';
 import { AiGenerationError, ProviderConfigurationError } from '../../errors';
+import { toOpenAIMessages, toOpenAIResponsesInput } from '../utils';
 
 function createAzureClient(model: AiModel): {
   client: OpenAI;
@@ -31,7 +32,7 @@ export function constructAzureChatCompletionStreamFn(model: AiModel): TextStream
     const stream = await client.chat.completions.create(
       {
         model: deployment,
-        messages,
+        messages: toOpenAIMessages(messages),
         stream: true,
         stream_options: { include_usage: true },
         max_tokens: maxTokens,
@@ -81,10 +82,7 @@ export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
     const response = await client.responses.create(
       {
         model: deployment,
-        input: messages.map((m) => ({
-          role: m.role,
-          content: m.content,
-        })),
+        input: toOpenAIResponsesInput(messages),
         stream: true,
         max_output_tokens: maxTokens,
         ...model.additionalParameters,
@@ -128,7 +126,7 @@ export function constructAzureChatCompletionGenerationFn(model: AiModel): TextGe
     const response = await client.chat.completions.create(
       {
         model: deployment,
-        messages,
+        messages: toOpenAIMessages(messages),
         stream: false,
         max_completion_tokens: maxTokens,
       },
@@ -164,10 +162,7 @@ export function constructAzureResponsesGenerationFn(model: AiModel): TextGenerat
     const response = await client.responses.create(
       {
         model: deployment,
-        input: messages.map((m) => ({
-          role: m.role,
-          content: m.content,
-        })),
+        input: toOpenAIResponsesInput(messages),
         stream: false,
         max_output_tokens: maxTokens,
       },

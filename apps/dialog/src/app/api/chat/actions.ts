@@ -19,7 +19,7 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructChatSystemPrompt } from './system-prompt';
-import { getChatTitle, limitChatHistory } from './utils';
+import { formatMessagesWithImages, getChatTitle, limitChatHistory } from './utils';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { webScraper } from '../webpage-content/search-web';
@@ -32,11 +32,14 @@ import {
   KEEP_RECENT_MESSAGES,
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
+import { extractImagesAndUrl } from '../file-operations/prepocess-image';
+import { ChatAttachment } from '@/types/chat';
 
 export type ChatMessage = {
   id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
+  experimental_attachments?: ChatAttachment[];
 };
 
 export type SendMessageResult = {
@@ -55,6 +58,7 @@ function convertToAiCoreMessages(systemPrompt: string, messages: ChatMessage[]):
     result.push({
       role: msg.role === 'user' ? 'user' : 'assistant',
       content: msg.content,
+      attachments: msg.experimental_attachments,
     });
   }
 
@@ -244,8 +248,22 @@ export async function sendChatMessage({
     retrievedTextChunks: orderedChunks,
   });
 
+  // Check if the model supports images based on supportedImageFormats
+  const modelSupportsImages =
+    definedModel.supportedImageFormats !== null && definedModel.supportedImageFormats.length > 0;
+
+  // attach the image url to each of the image files within relatedFileEntities
+  const extractedImages = await extractImagesAndUrl(relatedFileEntities);
+
+  // Format messages with images if the model supports vision
+  const messagesWithImages = formatMessagesWithImages(
+    prunedMessages,
+    extractedImages,
+    modelSupportsImages,
+  );
+
   // Convert to ai-core format
-  const aiCoreMessages = convertToAiCoreMessages(systemPrompt, prunedMessages as ChatMessage[]);
+  const aiCoreMessages = convertToAiCoreMessages(systemPrompt, messagesWithImages);
 
   // Create native stream
   const { stream, update, done, error: streamError } = createTextStream();

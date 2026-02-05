@@ -1,8 +1,18 @@
 import { LlmModel } from '../api-db';
 
+/**
+ * Attachment type for images in messages.
+ */
+export type ChatAttachment = {
+  contentType: string;
+  url: string;
+  type: 'image';
+};
+
 export type Message = {
   role: 'system' | 'user' | 'assistant';
   content: string;
+  attachments?: ChatAttachment[];
 };
 
 export type TextGenerationArgs = {

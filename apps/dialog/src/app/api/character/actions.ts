@@ -19,7 +19,7 @@ import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructCharacterSystemPrompt } from './system-prompt';
-import { limitChatHistory } from '../chat/utils';
+import { formatMessagesWithImages, limitChatHistory } from '../chat/utils';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 import { webScraper } from '../webpage-content/search-web';
 import { logError } from '@shared/logging';
@@ -28,6 +28,7 @@ import {
   KEEP_RECENT_MESSAGES,
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
+import { extractImagesAndUrl } from '../file-operations/prepocess-image';
 
 export type ChatMessage = {
   id: string;
@@ -158,8 +159,22 @@ export async function sendCharacterMessage({
     characterLimit: TOTAL_CHAT_LENGTH_LIMIT,
   });
 
+  // Check if the model supports images based on supportedImageFormats
+  const modelSupportsImages =
+    definedModel.supportedImageFormats !== null && definedModel.supportedImageFormats.length > 0;
+
+  // attach the image url to each of the image files within relatedFileEntities
+  const extractedImages = await extractImagesAndUrl(relatedFileEntities);
+
+  // Format messages with images if the model supports vision
+  const messagesWithImages = formatMessagesWithImages(
+    prunedMessages,
+    extractedImages,
+    modelSupportsImages,
+  );
+
   // Convert to ai-core format
-  const aiCoreMessages = convertToAiCoreMessages(systemPrompt, prunedMessages as ChatMessage[]);
+  const aiCoreMessages = convertToAiCoreMessages(systemPrompt, messagesWithImages);
 
   // Create native stream
   const { stream, update, done, error: streamError } = createTextStream();

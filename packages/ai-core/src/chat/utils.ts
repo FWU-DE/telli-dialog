@@ -1,5 +1,80 @@
 import { getEncoding, type Tiktoken } from 'js-tiktoken';
+import type OpenAI from 'openai';
 import type { Message } from './types';
+
+/**
+ * Converts internal Message format to OpenAI ChatCompletionMessageParam format.
+ * Handles image attachments by converting them to multimodal content arrays.
+ */
+export function toOpenAIMessages(
+  messages: Message[],
+): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
+  return messages.map((message) => {
+    // If message has image attachments, convert to multimodal content format
+    if (message.attachments && message.attachments.length > 0 && message.role !== 'system') {
+      const contentParts: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [
+        { type: 'text', text: message.content },
+        ...message.attachments
+          .filter((attachment) => attachment.type === 'image')
+          .map(
+            (attachment) =>
+              ({
+                type: 'image_url',
+                image_url: { url: attachment.url },
+              }) satisfies OpenAI.Chat.Completions.ChatCompletionContentPartImage,
+          ),
+      ];
+
+      return {
+        role: message.role,
+        content: contentParts,
+      } as OpenAI.Chat.Completions.ChatCompletionMessageParam;
+    }
+
+    // Simple text message
+    return {
+      role: message.role,
+      content: message.content,
+    } as OpenAI.Chat.Completions.ChatCompletionMessageParam;
+  });
+}
+
+/**
+ * Converts internal Message format to OpenAI Responses API input format.
+ * Handles image attachments by converting them to multimodal content arrays.
+ */
+export function toOpenAIResponsesInput(
+  messages: Message[],
+): OpenAI.Responses.ResponseInputParam['input'] {
+  return messages.map((message) => {
+    // If message has image attachments, convert to multimodal content format
+    if (message.attachments && message.attachments.length > 0 && message.role !== 'system') {
+      const contentParts: OpenAI.Responses.ResponseInputContentParam[] = [
+        { type: 'input_text', text: message.content },
+        ...message.attachments
+          .filter((attachment) => attachment.type === 'image')
+          .map(
+            (attachment) =>
+              ({
+                type: 'input_image',
+                image_url: attachment.url,
+              }) satisfies OpenAI.Responses.ResponseInputImageParam,
+          ),
+      ];
+
+      return {
+        role: message.role,
+        content: contentParts,
+      } as OpenAI.Responses.EasyInputMessage;
+    }
+
+    // Simple text message
+    return {
+      role: message.role,
+      content: message.content,
+    } as OpenAI.Responses.EasyInputMessage;
+  });
+}
 
 // Lazy-loaded encoder instance (cl100k_base is used for GPT-4, GPT-3.5-turbo, and newer models)
 let encoder: Tiktoken | null = null;

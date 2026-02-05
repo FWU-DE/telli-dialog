@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import type { AiModel, TextStreamFn, TextGenerationFn, TokenUsage } from '../types';
 import { ProviderConfigurationError } from '../../errors';
-import { calculateCompletionUsage } from '../utils';
+import { calculateCompletionUsage, toOpenAIMessages } from '../utils';
 
 function createIonosClient(model: AiModel): OpenAI {
   if (model.setting.provider !== 'ionos') {
@@ -20,7 +20,7 @@ export function constructIonosTextStreamFn(model: AiModel): TextStreamFn {
   return async function* getIonosTextStream({ messages, model: modelName, maxTokens }, onComplete) {
     const stream = await client.chat.completions.create({
       model: modelName,
-      messages,
+      messages: toOpenAIMessages(messages),
       stream: true,
       stream_options: { include_usage: true },
       max_tokens: maxTokens,
@@ -63,7 +63,7 @@ export function constructIonosTextGenerationFn(model: AiModel): TextGenerationFn
   return async function getIonosTextGeneration({ messages, model: modelName, maxTokens }) {
     const response = await client.chat.completions.create({
       model: modelName,
-      messages,
+      messages: toOpenAIMessages(messages),
       stream: false,
       max_tokens: maxTokens,
     });
