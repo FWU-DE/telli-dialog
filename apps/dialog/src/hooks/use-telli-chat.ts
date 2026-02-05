@@ -28,6 +28,7 @@ export type UseChatOptions = {
   sendMessage: SendMessageFn;
   onError?: (error: Error) => void;
   onFinish?: (message: ChatMessage) => void;
+  onMessageCreated?: (messageId: string) => void;
 };
 
 export type UseChatReturn = {
@@ -63,6 +64,7 @@ export function useTelliChat({
   sendMessage,
   onError,
   onFinish,
+  onMessageCreated,
 }: UseChatOptions): UseChatReturn {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState('');
@@ -186,10 +188,13 @@ export function useTelliChat({
         content: input.trim(),
       };
 
+      // Call onMessageCreated immediately so files can be associated with this message ID
+      onMessageCreated?.(userMessage.id);
+
       setInput('');
       await submitMessage(userMessage, options?.fileIds);
     },
-    [input, isLoading, submitMessage],
+    [input, isLoading, submitMessage, onMessageCreated],
   );
 
   const reload = useCallback(async () => {

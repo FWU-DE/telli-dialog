@@ -26,6 +26,7 @@ export function useMainChat(options: {
   customGptId?: string;
   onError?: (error: Error) => void;
   onFinish?: (message: ChatMessage) => void;
+  onMessageCreated?: (messageId: string) => void;
 }): UseChatReturn {
   const { conversationId, characterId, customGptId, ...rest } = options;
 

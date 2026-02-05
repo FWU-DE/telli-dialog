@@ -22,8 +22,6 @@ import { constructChatSystemPrompt } from './system-prompt';
 import { formatMessagesWithImages, getChatTitle, limitChatHistory } from './utils';
 import { getRelevantFileContent } from '../file-operations/retrieval';
 import { parseHyperlinks } from '@/utils/web-search/parsing';
-import { webScraper } from '../webpage-content/search-web';
-import { WebsearchSource } from '@shared/db/types';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import { logError } from '@shared/logging';

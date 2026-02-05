@@ -1,7 +1,7 @@
 'use client';
 
 import { useMainChat, type ChatMessage } from '@/hooks/use-chat-hooks';
-import { FormEvent, ReactNode, useEffect, useState } from 'react';
+import React, { FormEvent, ReactNode, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
 import { type CharacterSelectModel, type CustomGptSelectModel, FileModel } from '@shared/db/schema';
@@ -12,7 +12,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import RobotIcon from '../icons/robot';
 import { LocalFileState } from './send-message-form';
 import { deepCopy } from '@/utils/object';
-import { getFileExtension } from '@/utils/files/generic';
+import { getFileExtension, isImageFile } from '@/utils/files/generic';
 import { refetchFileMapping } from '@/app/(authed)/(dialog)/actions';
 import { InitialChatContentDisplay } from './initial-content-display';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
@@ -24,7 +24,7 @@ import { AssistantIcon } from './assistant-icon';
 import { messageContainsAttachments } from '@/utils/chat/messages';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { getConversationPath } from '@/utils/chat/path';
-import { Messages } from './messages';
+import { Messages, type PendingFileModel } from './messages';
 import { toUIMessages } from '@/types/chat';
 import { WebsearchSource } from '@shared/db/types';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
@@ -62,9 +62,13 @@ export default function Chat({
     characterId: character?.id,
     conversationId: id,
   });
-  const [initialFiles, setInitialFiles] = useState<FileModel[]>();
   const [fileMapping, setFileMapping] = useState<Map<string, FileModel[]>>(
     initialFileMapping ?? new Map(),
+  );
+  // pendingFileMapping stores files for messages that haven't been persisted to DB yet
+  // This allows immediate display of attachments while the server processes the message
+  const [pendingFileMapping, setPendingFileMapping] = useState<Map<string, PendingFileModel[]>>(
+    new Map(),
   );
   const [files, setFiles] = useState<Map<string, LocalFileState>>(new Map());
   const [countOfFilesInChat, setCountOfFilesInChat] = useState(0);
@@ -76,6 +80,9 @@ export default function Chat({
     void queryClient.invalidateQueries({ queryKey: ['conversations'] });
   }
 
+  // Ref to hold pending files that will be associated with the next user message
+  const pendingFilesRef = React.useRef<PendingFileModel[]>([]);
+
   const { messages, input, setInput, handleInputChange, handleSubmit, reload, stop, status } =
     useMainChat({
       conversationId: id,
@@ -83,6 +90,18 @@ export default function Chat({
       modelId: selectedModel?.id,
       characterId: character?.id,
       customGptId: customGpt?.id,
+      onMessageCreated: (messageId) => {
+        // Associate pending files with the message ID immediately when the message is created
+        const filesToAssociate = pendingFilesRef.current;
+        if (filesToAssociate.length > 0) {
+          setPendingFileMapping((prev) => {
+            const newMap = new Map(prev);
+            newMap.set(messageId, filesToAssociate);
+            return newMap;
+          });
+          pendingFilesRef.current = [];
+        }
+      },
       onFinish: (message) => {
         logDebug(`onFinish called with message ${JSON.stringify(message)}`);
         // Trigger refetch of the fileMapping from the DB
@@ -108,8 +127,26 @@ export default function Chat({
 
   useEffect(() => {
     const fetchData = async () => {
-      const fileMapping = await refetchFileMapping(id);
-      setFileMapping(fileMapping);
+      const newFileMapping = await refetchFileMapping(id);
+      setFileMapping(newFileMapping);
+
+      // Clean up pending files that now have DB entries
+      // This also revokes blob URLs to prevent memory leaks
+      setPendingFileMapping((prev) => {
+        const updated = new Map(prev);
+        for (const [messageId, files] of prev) {
+          if (newFileMapping.has(messageId)) {
+            // Revoke blob URLs before removing
+            for (const file of files) {
+              if (file.localUrl) {
+                URL.revokeObjectURL(file.localUrl);
+              }
+            }
+            updated.delete(messageId);
+          }
+        }
+        return updated;
+      });
     };
     void fetchData();
   }, [countOfFilesInChat, id]);
@@ -130,23 +167,27 @@ export default function Chat({
         refetchConversations();
       }
 
-      await handleSubmit(e, {
-        fileIds: Array.from(files)
-          .map(([, file]) => file.fileId)
-          .filter(Boolean) as string[],
-      });
+      // Set pending files BEFORE handleSubmit so they can be associated with the message ID
+      // when onMessageCreated is called
+      const currentFiles = Array.from(files);
+      pendingFilesRef.current = currentFiles.map(([, file]) => ({
+        id: file.fileId ?? '',
+        name: file.file.name,
+        type: getFileExtension(file.file.name),
+        createdAt: new Date(),
+        size: file.file.size,
+        metadata: null,
+        // Create a blob URL for images so they display immediately without fetching from S3
+        localUrl: isImageFile(file.file.name) ? URL.createObjectURL(file.file) : undefined,
+      }));
 
-      setInitialFiles(
-        Array.from(files).map(([, file]) => ({
-          id: file.fileId ?? '',
-          name: file.file.name,
-          type: getFileExtension(file.file.name),
-          createdAt: new Date(),
-          size: file.file.size,
-          metadata: null,
-        })),
-      );
+      // Capture fileIds before clearing the files state
+      const fileIds = currentFiles.map(([, file]) => file.fileId).filter(Boolean) as string[];
+
+      // Clear files immediately so UI updates
       setFiles(new Map());
+
+      await handleSubmit(e, { fileIds });
     } catch (error) {
       console.error(error);
     }
@@ -246,7 +287,7 @@ export default function Chat({
               doesLastUserMessageContainLinkOrFile={lastMessageHasAttachments}
               containerClassName="flex flex-col gap-2 max-w-3xl mx-auto p-4"
               fileMapping={fileMapping}
-              initialFiles={initialFiles}
+              pendingFileMapping={pendingFileMapping}
               webSourceMapping={webSourceMapping}
             />
           )}
