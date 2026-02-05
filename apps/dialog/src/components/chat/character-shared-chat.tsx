@@ -40,17 +40,23 @@ export default function CharacterSharedChat({
     ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
     : [];
 
-  const { messages, setMessages, input, handleInputChange, handleSubmit, reload, status, stop } =
-    useCharacterChat({
-      characterId: id,
-      inviteCode,
-      initialMessages,
-      modelId: modelId ?? undefined,
-      onError: handleError,
-    });
-
-  // Convert to Vercel AI Message format for compatibility with existing components
-  const aiMessages = toUIMessages(messages);
+  const {
+    messages,
+    uiMessages,
+    setMessages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    reload,
+    status,
+    stop,
+  } = useCharacterChat({
+    characterId: id,
+    inviteCode,
+    initialMessages,
+    modelId: modelId ?? undefined,
+    onError: handleError,
+  });
 
   const scrollRef = useAutoScroll([messages, id, inviteCode]);
   const { isBelow } = useBreakpoints();
@@ -87,7 +93,7 @@ export default function CharacterSharedChat({
 
   return (
     <>
-      {!chatActive && <ExpiredChatModal conversationMessages={aiMessages} title={character.name} />}
+      {!chatActive && <ExpiredChatModal conversationMessages={uiMessages} title={character.name} />}
       <div className="flex flex-col h-full w-full overflow-hidden">
         <SharedChatHeader
           chatActive={chatActive}
@@ -95,7 +101,7 @@ export default function CharacterSharedChat({
           t={t}
           handleOpenNewChat={handleOpenNewChat}
           title={character.name}
-          messages={aiMessages}
+          messages={uiMessages}
           // currently this is redundant, due to the inconsistency with the shared school chat initial page
           dialogStarted={messages.length > 0}
         />
@@ -114,7 +120,7 @@ export default function CharacterSharedChat({
               />
             ) : (
               <Messages
-                messages={aiMessages}
+                messages={uiMessages}
                 isLoading={isLoading}
                 status={status}
                 reload={reload}

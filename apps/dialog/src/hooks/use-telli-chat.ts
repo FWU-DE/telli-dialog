@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { readTextStream } from '@/utils/streaming';
-import { type ChatMessage, type ChatStatus } from '@/types/chat';
+import { toUIMessages, UIMessage, type ChatMessage, type ChatStatus } from '@/types/chat';
 
 // Re-export for consumers
 export type { ChatMessage, ChatStatus };
@@ -34,6 +34,7 @@ export type UseChatOptions = {
 export type UseChatReturn = {
   messages: ChatMessage[];
   setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
+  uiMessages: UIMessage[];
   input: string;
   setInput: React.Dispatch<React.SetStateAction<string>>;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
@@ -220,6 +221,7 @@ export function useTelliChat({
   return {
     messages,
     setMessages,
+    uiMessages: toUIMessages(messages),
     input,
     setInput,
     handleInputChange,

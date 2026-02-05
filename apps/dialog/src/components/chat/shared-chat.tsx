@@ -31,17 +31,23 @@ export default function SharedChat({
   const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
   const { error, handleError, resetError } = useCheckStatusCode();
 
-  const { messages, setMessages, input, handleInputChange, handleSubmit, reload, stop, status } =
-    useSharedChat({
-      sharedChatId: id,
-      inviteCode,
-      initialMessages: [],
-      modelId: modelId ?? undefined,
-      onError: handleError,
-    });
-
-  // Convert to Vercel AI Message format for compatibility with existing components
-  const aiMessages = toUIMessages(messages);
+  const {
+    messages,
+    uiMessages,
+    setMessages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    reload,
+    stop,
+    status,
+  } = useSharedChat({
+    sharedChatId: id,
+    inviteCode,
+    initialMessages: [],
+    modelId: modelId ?? undefined,
+    onError: handleError,
+  });
 
   const scrollRef = useAutoScroll([messages, id, inviteCode]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -73,7 +79,7 @@ export default function SharedChat({
   return (
     <>
       {!chatActive && (
-        <ExpiredChatModal conversationMessages={aiMessages} title={sharedSchoolChat.name} />
+        <ExpiredChatModal conversationMessages={uiMessages} title={sharedSchoolChat.name} />
       )}
       <div className="flex flex-col h-full w-full">
         <SharedChatHeader
@@ -82,7 +88,7 @@ export default function SharedChat({
           t={t}
           handleOpenNewChat={handleOpenNewChat}
           title={sharedSchoolChat.name}
-          messages={aiMessages}
+          messages={uiMessages}
           dialogStarted={dialogStarted}
           imageSource={maybeSignedPictureUrl}
         />
@@ -119,7 +125,7 @@ export default function SharedChat({
               />
             ) : (
               <Messages
-                messages={aiMessages}
+                messages={uiMessages}
                 isLoading={isLoading}
                 status={status}
                 reload={reload}

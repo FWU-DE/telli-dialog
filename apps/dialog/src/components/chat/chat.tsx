@@ -25,6 +25,7 @@ import { messageContainsAttachments } from '@/utils/chat/messages';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { getConversationPath } from '@/utils/chat/path';
 import { Messages, type PendingFileModel } from './messages';
+import { useRouter } from 'next/navigation';
 import { toUIMessages } from '@/types/chat';
 import { WebsearchSource } from '@shared/db/types';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
@@ -83,45 +84,71 @@ export default function Chat({
   // Ref to hold pending files that will be associated with the next user message
   const pendingFilesRef = React.useRef<PendingFileModel[]>([]);
 
-  const { messages, input, setInput, handleInputChange, handleSubmit, reload, stop, status } =
-    useMainChat({
-      conversationId: id,
-      initialMessages: initialMessages,
-      modelId: selectedModel?.id,
-      characterId: character?.id,
-      customGptId: customGpt?.id,
-      onMessageCreated: (messageId) => {
-        // Associate pending files with the message ID immediately when the message is created
-        const filesToAssociate = pendingFilesRef.current;
-        if (filesToAssociate.length > 0) {
-          setPendingFileMapping((prev) => {
-            const newMap = new Map(prev);
-            newMap.set(messageId, filesToAssociate);
-            return newMap;
-          });
-          pendingFilesRef.current = [];
-        }
-      },
-      onFinish: (message) => {
-        logDebug(`onFinish called with message ${JSON.stringify(message)}`);
-        // Trigger refetch of the fileMapping from the DB
-        setCountOfFilesInChat(countOfFilesInChat + 1);
-        if (messages.length > 1) {
-          return;
-        }
-        logWarning('Assert: onFinish was called with zero assistant messages.');
-        refetchConversations();
-      },
-      onError: (error) => {
-        handleError(error);
-        refetchConversations();
-      },
-    });
+  // Track if we need to sync Next.js router after first message completes
+  const isFirstMessageRef = React.useRef(false);
+  const [needsRouterSync, setNeedsRouterSync] = React.useState(false);
+  const router = useRouter();
+
+  // Sync Next.js router with the URL after first message completes (deferred to avoid setState during render)
+  useEffect(() => {
+    if (needsRouterSync) {
+      setNeedsRouterSync(false);
+      router.replace(conversationPath);
+    }
+  }, [needsRouterSync, conversationPath, router]);
+
+  const {
+    messages,
+    uiMessages,
+    input,
+    setInput,
+    handleInputChange,
+    handleSubmit,
+    reload,
+    stop,
+    status,
+  } = useMainChat({
+    conversationId: id,
+    initialMessages: initialMessages,
+    modelId: selectedModel?.id,
+    characterId: character?.id,
+    customGptId: customGpt?.id,
+    onMessageCreated: (messageId) => {
+      // Associate pending files with the message ID immediately when the message is created
+      const filesToAssociate = pendingFilesRef.current;
+      if (filesToAssociate.length > 0) {
+        setPendingFileMapping((prev) => {
+          const newMap = new Map(prev);
+          newMap.set(messageId, filesToAssociate);
+          return newMap;
+        });
+        pendingFilesRef.current = [];
+      }
+    },
+    onFinish: (message) => {
+      logDebug(`onFinish called with message ${JSON.stringify(message)}`);
+      // Trigger refetch of the fileMapping from the DB
+      setCountOfFilesInChat(countOfFilesInChat + 1);
+
+      // Signal that we need to sync the router (done in useEffect to avoid setState during render)
+      if (isFirstMessageRef.current) {
+        isFirstMessageRef.current = false;
+        setNeedsRouterSync(true);
+      }
+
+      if (messages.length > 1) {
+        return;
+      }
+      logWarning('Assert: onFinish was called with zero assistant messages.');
+      refetchConversations();
+    },
+    onError: (error) => {
+      handleError(error);
+      refetchConversations();
+    },
+  });
 
   const { error, handleError, resetError } = useCheckStatusCode();
-
-  // Convert to Vercel AI Message format for compatibility with existing components
-  const aiMessages = toUIMessages(messages);
 
   const scrollRef = useAutoScroll([messages, status]);
 
@@ -164,6 +191,7 @@ export default function Chat({
       // If this is the first message, update navigation and refetch
       if (messages.length === 0) {
         navigateWithoutRefresh(conversationPath);
+        isFirstMessageRef.current = true; // Will sync router after request completes
         refetchConversations();
       }
 
@@ -279,7 +307,7 @@ export default function Chat({
             placeholderElement
           ) : (
             <Messages
-              messages={aiMessages}
+              messages={uiMessages}
               isLoading={isLoading}
               status={status}
               reload={reload}
