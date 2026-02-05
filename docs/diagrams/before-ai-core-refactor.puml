@@ -1,0 +1,179 @@
+@startuml Message Flow Before ai-core Refactor
+title Message Flow: User Message → Model Response (BEFORE)
+skinparam backgroundColor #FEFEFE
+skinparam sequenceMessageAlign center
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+
+box "telli-dialog (Next.js App)" #LightBlue
+  actor User
+  participant "React Component\n(Chat)" as Chat
+  participant "useChat Hook\n(@ai-sdk/react)" as Hook
+  participant "POST /api/chat\n(Next.js Route)" as Route
+  participant "AI SDK\n(streamText)" as AiSdk
+  participant "createOpenAI\n(Telli Config)" as TelliConfig
+  participant "@ai-sdk/openai\n(Provider)" as OpenAiProvider
+  participant "Model & Provider\nResolution" as ModelResolver
+end box
+
+box "telli-api (Fastify Gateway)" #LightGreen
+  participant "POST /v1/chat/completions\n(Fastify Route)" as ApiRoute
+  participant "API Key\nValidation" as ApiKeyValidation
+  participant "Limit\nChecker" as LimitChecker
+  participant "Provider\nRouter" as ProviderRouter
+  participant "Azure/IONOS\nProvider Fn" as ProviderFn
+end box
+
+participant "Azure/IONOS\nCloud API" as CloudProvider
+
+User -> Chat : Types message & submits
+activate Chat
+
+Chat -> Hook : append(userMessage)
+activate Hook
+note right of Hook
+  Vercel AI SDK's useChat
+  manages state & streaming
+end note
+
+Hook -> Route : POST /api/chat\n(with messages, modelId)
+activate Route
+
+Route -> Route : getUser()\nuserHasCompletedTraining()
+Route -> Route : checkProductAccess()
+
+Route -> ModelResolver : getModelAndProviderWithResult()
+activate ModelResolver
+
+ModelResolver -> ModelResolver : dbGetModelById()
+ModelResolver -> ModelResolver : dbGetApiKeyForFederalState()
+ModelResolver -> ModelResolver : decryptApiKey()
+
+ModelResolver -> TelliConfig : createTelliConfiguration()
+activate TelliConfig
+TelliConfig -> OpenAiProvider : createOpenAI(apiKey, baseURL)
+activate OpenAiProvider
+note right of OpenAiProvider
+  baseURL points to
+  telli-api gateway
+end note
+OpenAiProvider --> TelliConfig : LanguageModelV1
+deactivate OpenAiProvider
+TelliConfig --> ModelResolver : telliProvider
+deactivate TelliConfig
+
+ModelResolver --> Route : { telliProvider, definedModel }
+deactivate ModelResolver
+
+Route -> Route : userHasReachedTelliPointsLimit()
+Route -> Route : dbGetOrCreateConversation()
+Route -> Route : dbInsertChatContent(userMessage)
+Route -> Route : dbGetAttachedFileByEntityId()
+Route -> Route : getRelevantFileContent()\n(uses another generateText call)
+Route -> Route : extractImagesAndUrl()
+Route -> Route : webScraperExecutable()
+Route -> Route : constructChatSystemPrompt()
+Route -> Route : limitChatHistory()
+Route -> Route : formatMessagesWithImages()
+
+Route -> AiSdk : streamText(model, system, messages)
+activate AiSdk
+note right of AiSdk
+  Vercel AI SDK handles:
+  - Stream chunking
+  - smoothStream transform
+  - Message ID generation
+end note
+
+AiSdk -> OpenAiProvider : makeRequest()
+activate OpenAiProvider
+
+== HTTP Request to telli-api Gateway ==
+
+OpenAiProvider -> ApiRoute : POST /v1/chat/completions\n(OpenAI-compatible format)
+activate ApiRoute
+
+ApiRoute -> ApiKeyValidation : validateApiKey(bearer token)
+activate ApiKeyValidation
+ApiKeyValidation -> ApiKeyValidation : dbValidateApiKey()
+ApiKeyValidation --> ApiRoute : apiKey object
+deactivate ApiKeyValidation
+
+ApiRoute -> LimitChecker : checkLimitsByApiKeyId()
+activate LimitChecker
+LimitChecker -> LimitChecker : Calculate current usage
+LimitChecker --> ApiRoute : { hasReachedLimit: false }
+deactivate LimitChecker
+
+ApiRoute -> ApiRoute : dbGetModelsByApiKeyId()
+ApiRoute -> ApiRoute : Find model by name
+
+ApiRoute -> ProviderRouter : getCompletionStreamFnByModel()
+activate ProviderRouter
+ProviderRouter --> ApiRoute : completionStreamFn
+deactivate ProviderRouter
+
+ApiRoute -> ProviderFn : completionStreamFn(messages, ...)
+activate ProviderFn
+note right of ProviderFn
+  Provider-specific logic:
+  - Azure: parse deployment URL
+  - GPT-5: use Responses API
+  - Others: Chat Completions API
+end note
+
+ProviderFn -> CloudProvider : HTTP POST to actual API\n(Azure/IONOS endpoint)
+activate CloudProvider
+
+CloudProvider --> ProviderFn : SSE Stream
+deactivate CloudProvider
+
+ProviderFn --> ApiRoute : ReadableStream<chunks>
+deactivate ProviderFn
+
+note over ApiRoute
+  onUsageCallback:
+  - dbCreateCompletionUsage()
+  (billing in telli-api)
+end note
+
+ApiRoute --> OpenAiProvider : SSE Stream\n(OpenAI format)
+deactivate ApiRoute
+
+== Response back to telli-dialog ==
+
+OpenAiProvider --> AiSdk : AsyncIterator<chunks>
+deactivate OpenAiProvider
+
+AiSdk --> Route : DataStreamResponse
+note right of AiSdk
+  AI SDK wraps stream in
+  proprietary data protocol
+end note
+deactivate AiSdk
+
+Route --> Hook : Response stream\n(Data Stream Protocol)
+note right of Hook
+  AI SDK client parses
+  proprietary stream format
+end note
+deactivate Route
+
+Hook -> Hook : Parse stream chunks
+Hook -> Hook : Update messages state
+Hook --> Chat : state updates
+deactivate Hook
+
+Chat --> User : Shows streaming response
+deactivate Chat
+
+note over Route
+  onFinish callback (async):
+  - dbInsertChatContent()
+  - getChatTitle()
+  - calculateCostsInCent()
+  - dbInsertConversationUsage()
+  - sendRabbitmqEvent()
+end note
+
+@enduml
