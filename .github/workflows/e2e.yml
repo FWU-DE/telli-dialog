@@ -118,7 +118,8 @@ jobs:
       # Port 3000 is the default and would conflict with telli-dialog.
       - name: Start telli-api container
         run: |
-          docker run --rm --detach \
+          docker run --detach \
+            --name telli-api \
             -v "$PWD/devops/docker/keycloak:/opt/keycloak/data/import" \
             --network host \
             -e DATABASE_URL=$API_DATABASE_URL \
@@ -166,3 +167,9 @@ jobs:
           name: playwright-report
           path: apps/dialog/playwright-report
           retention-days: 30
+
+      - name: Print telli-api logs
+        if: always()
+        run: |
+          echo "=== telli-api logs ==="
+          docker logs --timestamps telli-api || true
