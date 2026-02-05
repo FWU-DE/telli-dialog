@@ -15,6 +15,7 @@ import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { Messages } from './messages';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 import { toUIMessages } from '@/types/chat';
+import { useCheckStatusCode } from '@/hooks/use-response-status';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
@@ -28,7 +29,7 @@ export default function SharedChat({
 
   const [dialogStarted, setDialogStarted] = useState(false);
   const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
-  const [chatError, setChatError] = useState<Error | null>(null);
+  const { error, handleError, resetError } = useCheckStatusCode();
 
   const { messages, setMessages, input, handleInputChange, handleSubmit, reload, stop, status } =
     useSharedChat({
@@ -36,7 +37,7 @@ export default function SharedChat({
       inviteCode,
       initialMessages: [],
       modelId: modelId ?? undefined,
-      onError: setChatError,
+      onError: handleError,
     });
 
   // Convert to Vercel AI Message format for compatibility with existing components
@@ -50,7 +51,7 @@ export default function SharedChat({
 
     try {
       setLastMessageHasAttachments(messageContainsAttachments(input));
-      setChatError(null);
+      resetError();
       await handleSubmit(e, {});
     } catch (error) {
       console.error(error);
@@ -59,11 +60,11 @@ export default function SharedChat({
 
   function handleOpenNewChat() {
     setMessages([]);
-    setChatError(null);
+    resetError();
   }
 
   function handleReload() {
-    setChatError(null);
+    resetError();
     reload();
   }
 
@@ -126,7 +127,7 @@ export default function SharedChat({
                 containerClassName="flex flex-col gap-4"
               />
             )}
-            <ErrorChatPlaceholder error={chatError ?? undefined} handleReload={handleReload} />
+            {error && <ErrorChatPlaceholder error={error} handleReload={handleReload} />}
           </div>
           <div className="w-full max-w-5xl mx-auto px-4 pb-4">
             {dialogStarted && (

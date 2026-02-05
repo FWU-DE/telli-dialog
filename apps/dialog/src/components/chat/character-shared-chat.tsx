@@ -18,6 +18,7 @@ import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios
 import StreamingFinishedMarker from './streaming-finished-marker';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
 import { toUIMessages } from '@/types/chat';
+import { useCheckStatusCode } from '@/hooks/use-response-status';
 
 /**
  * This component is used if a character is shared via invite code.
@@ -33,7 +34,7 @@ export default function CharacterSharedChat({
   const chatActive = timeLeft > 0;
 
   const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
-  const [chatError, setChatError] = useState<Error | null>(null);
+  const { error, handleError, resetError } = useCheckStatusCode();
 
   const initialMessages: ChatMessage[] = character.initialMessage
     ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
@@ -45,7 +46,7 @@ export default function CharacterSharedChat({
       inviteCode,
       initialMessages,
       modelId: modelId ?? undefined,
-      onError: setChatError,
+      onError: handleError,
     });
 
   // Convert to Vercel AI Message format for compatibility with existing components
@@ -59,7 +60,7 @@ export default function CharacterSharedChat({
 
     try {
       setLastMessageHasAttachments(messageContainsAttachments(input));
-      setChatError(null);
+      resetError();
       await handleSubmit(e, {});
     } catch (error) {
       console.error(error);
@@ -68,11 +69,11 @@ export default function CharacterSharedChat({
 
   function handleOpenNewChat() {
     setMessages([]);
-    setChatError(null);
+    resetError();
   }
 
   function handleReload() {
-    setChatError(null);
+    resetError();
     void reload();
   }
 
@@ -122,7 +123,7 @@ export default function CharacterSharedChat({
                 containerClassName="flex flex-col gap-4"
               />
             )}
-            <ErrorChatPlaceholder error={chatError ?? undefined} handleReload={handleReload} />
+            {error && <ErrorChatPlaceholder error={error} handleReload={handleReload} />}
           </div>
           <div className="w-full max-w-5xl mx-auto px-4 pb-4">
             <div className="flex flex-col">

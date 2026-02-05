@@ -27,6 +27,7 @@ import { getConversationPath } from '@/utils/chat/path';
 import { Messages } from './messages';
 import { toUIMessages } from '@/types/chat';
 import { WebsearchSource } from '@shared/db/types';
+import { useCheckStatusCode } from '@/hooks/use-response-status';
 
 type ChatProps = {
   id: string;
@@ -68,7 +69,6 @@ export default function Chat({
   const [files, setFiles] = useState<Map<string, LocalFileState>>(new Map());
   const [countOfFilesInChat, setCountOfFilesInChat] = useState(0);
   const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
-  const [chatError, setChatError] = useState<Error | null>(null);
   const queryClient = useQueryClient();
   const session = useSession();
 
@@ -94,10 +94,12 @@ export default function Chat({
         refetchConversations();
       },
       onError: (error) => {
-        setChatError(error);
+        handleError(error);
         refetchConversations();
       },
     });
+
+  const { error, handleError, resetError } = useCheckStatusCode();
 
   // Convert to Vercel AI Message format for compatibility with existing components
   const aiMessages = toUIMessages(messages);
@@ -117,7 +119,7 @@ export default function Chat({
 
     try {
       setLastMessageHasAttachments(messageContainsAttachments(input, files));
-      setChatError(null);
+      resetError;
 
       // Trigger refetch of the fileMapping from the DB
       setCountOfFilesInChat(countOfFilesInChat + 1);
@@ -151,7 +153,7 @@ export default function Chat({
   }
 
   function handleReload() {
-    setChatError(null);
+    resetError();
     void reload();
   }
 
@@ -248,7 +250,7 @@ export default function Chat({
               webSourceMapping={webSourceMapping}
             />
           )}
-          <ErrorChatPlaceholder error={chatError ?? undefined} handleReload={handleReload} />
+          {error && <ErrorChatPlaceholder error={error} handleReload={handleReload} />}
         </div>
         <div className="w-full max-w-3xl pb-4 px-4 mx-auto">
           <div className="relative flex flex-col">
