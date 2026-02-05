@@ -45,11 +45,11 @@ export function toOpenAIMessages(
  */
 export function toOpenAIResponsesInput(
   messages: Message[],
-): OpenAI.Responses.ResponseInputParam['input'] {
+): OpenAI.Responses.EasyInputMessage[] {
   return messages.map((message) => {
     // If message has image attachments, convert to multimodal content format
     if (message.attachments && message.attachments.length > 0 && message.role !== 'system') {
-      const contentParts: OpenAI.Responses.ResponseInputContentParam[] = [
+      const contentParts: OpenAI.Responses.ResponseInputContent[] = [
         { type: 'input_text', text: message.content },
         ...message.attachments
           .filter((attachment) => attachment.type === 'image')
@@ -58,7 +58,8 @@ export function toOpenAIResponsesInput(
               ({
                 type: 'input_image',
                 image_url: attachment.url,
-              }) satisfies OpenAI.Responses.ResponseInputImageParam,
+                detail: 'auto'
+              }) satisfies OpenAI.Responses.ResponseInputImageContent,
           ),
       ];
 
