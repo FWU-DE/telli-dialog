@@ -145,7 +145,7 @@ export async function sendChatMessage({
         conversation,
       }),
     );
-    throw new Error('User has reached intelli points limit');
+    throw new Error('User has reached telli points limit');
   }
 
   // Get the user message (last message should be from user)

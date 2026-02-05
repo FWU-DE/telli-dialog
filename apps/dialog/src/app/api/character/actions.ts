@@ -108,7 +108,7 @@ export async function sendCharacterMessage({
   }
 
   // Check limits
-  const [sharedChatLimitReached, intelliPointsLimitReached] = await Promise.all([
+  const [sharedChatLimitReached, telliPointsLimitReached] = await Promise.all([
     sharedCharacterChatHasReachedTelliPointsLimit({
       user: teacherUserAndContext,
       character,
@@ -117,10 +117,10 @@ export async function sendCharacterMessage({
   ]);
 
   if (sharedChatLimitReached) {
-    throw new Error('Shared character chat has reached intelli points limit');
+    throw new Error('Shared character chat has reached telli points limit');
   }
 
-  if (intelliPointsLimitReached) {
+  if (telliPointsLimitReached) {
     await sendRabbitmqEvent(
       constructTelliBudgetExceededEvent({
         anonymous: true,
@@ -128,7 +128,7 @@ export async function sendCharacterMessage({
         character,
       }),
     );
-    throw new Error('User has reached intelli points limit');
+    throw new Error('User has reached telli points limit');
   }
 
   // Get related files and web sources
