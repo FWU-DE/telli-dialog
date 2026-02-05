@@ -5,7 +5,7 @@ on:
     branches:
       - main
   pull_request:
-    types: [ opened, ready_for_review, synchronize ]
+    types: [opened, ready_for_review, synchronize]
     branches:
       - main
   workflow_dispatch:
@@ -70,7 +70,7 @@ jobs:
       API_KEY: ApiKeyForTelliDialogAdminApi
       ENCRYPTION_KEY: EncryptionKeyForEncryptedApiKeysToTelliApi
       # Auth.js secret
-      AUTH_SECRET: "yN1a0lQ77RgeEQam5DvGaddbdUDQoxswK+21FmEqBPs="
+      AUTH_SECRET: 'yN1a0lQ77RgeEQam5DvGaddbdUDQoxswK+21FmEqBPs='
 
     steps:
       - name: Checkout code
@@ -125,6 +125,8 @@ jobs:
             -e DATABASE_URL=$API_DATABASE_URL \
             -e API_KEY=$API_KEY \
             -e NODE_ENV=development \
+            -e SENTRY_DSN=dummy \
+            -e SENTRY_ENVIRONMENT=e2e \
             ghcr.io/fwu-de/telli-api:latest
         env:
           API_KEY: ApiKeyForTelliApiAdminApi
