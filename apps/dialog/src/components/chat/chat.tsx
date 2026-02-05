@@ -323,11 +323,12 @@ export default function Chat({
         </div>
         <div className="w-full max-w-3xl pb-4 px-4 mx-auto">
           <div className="relative flex flex-col">
-            <PromptSuggestions
-              suggestions={promptSuggestions}
-              onSelectSuggestion={(suggestion) => setInput(suggestion)}
-              hidden={input.length > 0 || messages.length > 0}
-            />
+            {input.length === 0 && messages.length === 0 && (
+              <PromptSuggestions
+                suggestions={promptSuggestions}
+                onSelectSuggestion={(suggestion) => setInput(suggestion)}
+              />
+            )}
             <ChatInputBox
               files={files}
               setFiles={setFiles}
