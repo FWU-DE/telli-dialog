@@ -13,6 +13,7 @@
     "format:check": "prettier --check .",
     "types": "tsc --noEmit",
     "check-types": "tsc --noEmit",
+    "db:seed:telli-api": "tsx src/api-db/seed/index.ts",
     "lint": "eslint \"**/*.ts*\" --max-warnings 0",
     "test": "vitest run",
     "test:watch": "vitest",

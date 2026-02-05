@@ -5,7 +5,7 @@ on:
     branches:
       - main
   pull_request:
-    types: [opened, ready_for_review, synchronize]
+    types: [ opened, ready_for_review, synchronize ]
     branches:
       - main
   workflow_dispatch:
@@ -14,7 +14,7 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     services:
-      postgres:
+      postgres-dialog:
         image: pgvector/pgvector:pg16
         ports:
           - 5432:5432
@@ -22,6 +22,19 @@ jobs:
           POSTGRES_USER: telli_dialog_db
           POSTGRES_PASSWORD: test1234
           POSTGRES_DB: telli_dialog_db
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      postgres-api:
+        image: pgvector/pgvector:pg16
+        ports:
+          - 6543:5432
+        env:
+          POSTGRES_USER: telli_api_db
+          POSTGRES_PASSWORD: test1234
+          POSTGRES_DB: telli_api_db
         options: >-
           --health-cmd "pg_isready -U postgres"
           --health-interval 10s
@@ -52,6 +65,12 @@ jobs:
       VIDIS_CLIENT_ID: telli-e2e-client
       VIDIS_CLIENT_SECRET: ClientSecret-e2e
       VIDIS_ISSUER_URI: http://localhost:8080/realms/telli-local
+      API_DATABASE_URL: postgresql://telli_api_db:test1234@127.0.0.1:6543/telli_api_db
+      API_URL: http://localhost:3002
+      API_KEY: ApiKeyForTelliDialogAdminApi
+      ENCRYPTION_KEY: EncryptionKeyForEncryptedApiKeysToTelliApi
+      # Auth.js secret
+      AUTH_SECRET: "yN1a0lQ77RgeEQam5DvGaddbdUDQoxswK+21FmEqBPs="
 
     steps:
       - name: Checkout code
@@ -73,18 +92,41 @@ jobs:
           export-env: true
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          AUTH_SECRET: op://telli Engineering/.env.e2e chatbot/AUTH_SECRET
           OTC_SECRET_ACCESS_KEY: op://telli Engineering/.env.e2e chatbot/OTC_SECRET_ACCESS_KEY
           OTC_ACCESS_KEY_ID: op://telli Engineering/.env.e2e chatbot/OTC_ACCESS_KEY_ID
           OTC_S3_HOSTNAME: op://telli Engineering/.env.e2e chatbot/OTC_S3_HOSTNAME
           OTC_BUCKET_NAME: op://telli Engineering/.env.e2e chatbot/OTC_BUCKET_NAME
-          # SENTRY_AUTH_TOKEN: op://telli Engineering/.env.e2e chatbot/SENTRY_AUTH_TOKEN
           SENTRY_ENVIRONMENT: op://telli Engineering/.env.e2e chatbot/SENTRY_ENVIRONMENT
-          API_URL: op://telli Engineering/.env.e2e chatbot/API_URL
-          ENCRYPTION_KEY: op://telli Engineering/.env.e2e chatbot/ENCRYPTION_KEY
           SENTRY_DSN: op://telli Engineering/.env.e2e chatbot/SENTRY_DSN
-          API_KEY: op://telli Engineering/.env.e2e chatbot/API_KEY
           DE_TEST_API_KEY: op://telli Engineering/.env.e2e chatbot/DE_TEST_API_KEY
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          for port in 5432 6543; do
+            until pg_isready -h localhost -p $port -U postgres; do
+              echo "$(date) - waiting for postgres on port $port to be ready"
+              sleep 1
+            done
+          done
+
+      # telli-api container cannot be started as service, because:
+      # - it needs to mount a file from 1Password
+      # - it needs to wait until postgres is available
+      # The container must be started on host network, to be able to access the postgres db.
+      #
+      # Temporary solution: NODE_ENV=development is used to start telli-api on port 3002.
+      # Port 3000 is the default and would conflict with telli-dialog.
+      - name: Start telli-api container
+        run: |
+          docker run --rm --detach \
+            -v "$PWD/devops/docker/keycloak:/opt/keycloak/data/import" \
+            --network host \
+            -e DATABASE_URL=$API_DATABASE_URL \
+            -e API_KEY=$API_KEY \
+            -e NODE_ENV=development \
+            ghcr.io/fwu-de/telli-api:latest
+        env:
+          API_KEY: ApiKeyForTelliApiAdminApi
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -99,15 +141,11 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm -filter telli-dialog exec playwright install
 
-      - name: Wait for PostgreSQL to be ready
-        run: |
-          until pg_isready -h localhost -p 5432 -U postgres; do
-            echo "$(date) - waiting for database to start"
-            sleep 1
-          done
-
       - name: Run migrations and seed database (if applicable)
         run: pnpm --filter @telli/shared db:migrate && pnpm --filter @telli/shared db:seed
+
+      - name: Seed telli-api database
+        run: pnpm --filter @telli/ai-core db:seed:telli-api
 
       - name: Start application
         run: |
