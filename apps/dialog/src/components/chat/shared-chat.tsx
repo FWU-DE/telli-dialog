@@ -91,7 +91,7 @@ export default function SharedChat({
         <hr className="w-full border-gray-200 mb-2" />
         <div
           ref={containerRef}
-          className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden"
+          className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden relative"
         >
           <div
             ref={scrollRef}
@@ -107,7 +107,6 @@ export default function SharedChat({
                   parentRef={containerRef as RefObject<HTMLDivElement>}
                   maxWidth={600}
                   maxHeight={600}
-                  initialMargin={32}
                   minMargin={16}
                 />
               )}
