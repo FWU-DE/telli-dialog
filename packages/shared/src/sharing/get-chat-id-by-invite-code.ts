@@ -1,6 +1,6 @@
 import { db } from '@shared/db';
 import { eq } from 'drizzle-orm';
-import { sharedCharacterConversation, learningScenarioTable } from '@shared/db/schema';
+import { sharedCharacterConversation, sharedLearningScenarioTable } from '@shared/db/schema';
 import { NotFoundError } from '@shared/error';
 
 export type ChatInfo = {
@@ -28,10 +28,10 @@ export async function getChatIdByInviteCode(inviteCode: string): Promise<ChatInf
 async function tryGetLearningScenarioIdByInviteCode({ inviteCode }: { inviteCode: string }) {
   const [maybeSharedChat] = await db
     .select()
-    .from(learningScenarioTable)
-    .where(eq(learningScenarioTable.inviteCode, inviteCode));
+    .from(sharedLearningScenarioTable)
+    .where(eq(sharedLearningScenarioTable.inviteCode, inviteCode));
   if (maybeSharedChat?.inviteCode)
-    return { id: maybeSharedChat.id, inviteCode: maybeSharedChat.inviteCode };
+    return { id: maybeSharedChat.learningScenarioId, inviteCode: maybeSharedChat.inviteCode };
 
   return undefined;
 }

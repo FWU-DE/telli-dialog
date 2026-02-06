@@ -8,7 +8,7 @@ import Link from 'next/link';
 import CountDownTimer from '../../_components/count-down';
 import QRCode from './qr-code';
 import TelliClipboardButton from '@/components/common/clipboard-button';
-import { getLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
+import { getSharedLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
@@ -18,7 +18,7 @@ export default async function Page(props: PageProps<'/shared-chats/[sharedSchool
   const { sharedSchoolChatId } = await props.params;
   const { user } = await requireAuth();
 
-  const learningScenario = await getLearningScenario({
+  const learningScenario = await getSharedLearningScenario({
     learningScenarioId: sharedSchoolChatId,
     userId: user.id,
   }).catch(handleErrorInServerComponent);

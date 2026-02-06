@@ -2,29 +2,36 @@ import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
 import { dbGetFilesForLearningScenario } from '@shared/db/functions/files';
 import {
-  dbDeleteSharedSchoolChatByIdAndUserId,
-  dbGetSharedChatsByUserId,
-  dbGetSharedSchoolChatById,
-} from '@shared/db/functions/shared-school-chat';
+  dbDeleteLearningScenarioByIdAndUserId,
+  dbGetLearningScenarioById,
+  dbGetLearningScenarioByIdOptionalShareData,
+  dbGetLearningScenarioByIdWithShareData,
+  dbGetLearningScenariosByUserId,
+} from '@shared/db/functions/learning-scenario';
 import {
   FileModel,
   fileTable,
   LearningScenarioFileMapping,
-  LearningScenarioInsertModel,
-  learningScenarioInsertSchema,
+  LearningScenarioOptionalShareDataModel,
   LearningScenarioSelectModel,
   learningScenarioTable,
   learningScenarioUpdateSchema,
+  LearningScenarioWithShareDataModel,
+  sharedLearningScenarioTable,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
-import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
+import {
+  deleteAvatarPicture,
+  deleteMessageAttachments,
+  getAvatarPictureUrl,
+} from '@shared/files/fileService';
 import { getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { addDays } from '@shared/utils/date';
 import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 
-export type LearningScenarioWithImage = LearningScenarioSelectModel & {
+export type LearningScenarioWithImage = LearningScenarioOptionalShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
 };
 
@@ -36,7 +43,7 @@ export async function getLearningScenariosForUser({
 }: {
   userId: string;
 }): Promise<LearningScenarioWithImage[]> {
-  const learningScenarios = await dbGetSharedChatsByUserId({ userId });
+  const learningScenarios = await dbGetLearningScenariosByUserId({ userId });
   // This is part of the old logic, keep it for now
   // If a new learning scenario is created, it has an empty name.
   const filteredScenarios = learningScenarios.filter((c) => c.name !== '');
@@ -59,9 +66,9 @@ export async function getLearningScenario({
   userId: string;
 }) {
   checkParameterUUID(learningScenarioId);
-  const learningScenario = await dbGetSharedSchoolChatById({
+  const learningScenario = await dbGetLearningScenarioById({
     userId,
-    sharedChatId: learningScenarioId,
+    learningScenarioId,
   });
 
   if (!learningScenario) throw new NotFoundError('Learning scenario not found');
@@ -70,6 +77,29 @@ export async function getLearningScenario({
   }
   return learningScenario;
 }
+
+/**
+ * Returns a learning scenario with invite code and other sharing related data for sharing page.
+ * @throws NotFoundError if learning scenario does not exist or is not shared
+ */
+export const getSharedLearningScenario = async ({
+  learningScenarioId,
+  userId,
+}: {
+  learningScenarioId: string;
+  userId: string;
+}): Promise<LearningScenarioWithShareDataModel> => {
+  checkParameterUUID(learningScenarioId);
+  const learningScenario = await dbGetLearningScenarioByIdWithShareData({
+    learningScenarioId,
+    userId,
+  });
+  if (!learningScenario || !learningScenario.inviteCode) {
+    throw new NotFoundError('Learning scenario not found');
+  }
+
+  return learningScenario;
+};
 
 /**
  * User updates a learning scenario.
@@ -171,29 +201,44 @@ export async function shareLearningScenario({
   data: LearningScenarioShareValues;
   userId: string;
 }) {
-  await getLearningScenario({
-    learningScenarioId,
-    userId: userId,
-  });
+  await getLearningScenario({ learningScenarioId, userId });
 
   const parsedValues = learningScenarioShareValuesSchema.parse(data);
 
-  const inviteCode = generateInviteCode();
-
-  const [updatedSharedChat] = await db
-    .update(learningScenarioTable)
-    .set({
-      telliPointsLimit: parsedValues.telliPointsPercentageLimit,
-      maxUsageTimeLimit: parsedValues.usageTimeLimit,
-      inviteCode,
-      startedAt: new Date(),
-    })
+  // share learning scenario instance
+  const [maybeExistingEntry] = await db
+    .select()
+    .from(sharedLearningScenarioTable)
     .where(
       and(
-        eq(learningScenarioTable.id, learningScenarioId),
-        eq(learningScenarioTable.userId, userId),
+        eq(sharedLearningScenarioTable.userId, userId),
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
       ),
-    )
+    );
+
+  const inviteCode = generateInviteCode();
+
+  const startedAt = new Date();
+  const [updatedSharedChat] = await db
+    .insert(sharedLearningScenarioTable)
+    .values({
+      id: maybeExistingEntry?.id,
+      inviteCode,
+      learningScenarioId,
+      maxUsageTimeLimit: parsedValues.usageTimeLimit,
+      startedAt,
+      telliPointsLimit: parsedValues.telliPointsPercentageLimit,
+      userId,
+    })
+    .onConflictDoUpdate({
+      target: sharedLearningScenarioTable.id,
+      set: {
+        inviteCode,
+        maxUsageTimeLimit: parsedValues.usageTimeLimit,
+        startedAt,
+        telliPointsLimit: parsedValues.telliPointsPercentageLimit,
+      },
+    })
     .returning();
 
   if (updatedSharedChat === undefined) {
@@ -220,27 +265,51 @@ export async function unshareLearningScenario({
     userId,
   });
 
-  const [updatedSharedChat] = await db
-    .update(learningScenarioTable)
-    .set({
-      startedAt: null,
-      telliPointsLimit: null,
-      maxUsageTimeLimit: null,
-    })
+  const [deletedShare] = await db
+    .delete(sharedLearningScenarioTable)
     .where(
       and(
-        eq(learningScenarioTable.id, learningScenarioId),
-        eq(learningScenarioTable.userId, userId),
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
+        eq(sharedLearningScenarioTable.userId, userId),
       ),
     )
     .returning();
 
-  if (!updatedSharedChat) {
+  if (!deletedShare) {
     throw new Error('Could not unshare learning scenario');
   }
 
-  return updatedSharedChat;
+  return deletedShare;
 }
+
+export const getLearningScenarioForEditView = async ({
+  learningScenarioId,
+  schoolId,
+  userId,
+}: {
+  learningScenarioId: string;
+  schoolId: string;
+  userId: string;
+}): Promise<{
+  learningScenario: LearningScenarioOptionalShareDataModel;
+  relatedFiles: FileModel[];
+  avatarPictureUrl: string | undefined;
+}> => {
+  checkParameterUUID(learningScenarioId);
+  const learningScenario = await dbGetLearningScenarioByIdOptionalShareData({
+    learningScenarioId,
+    userId,
+  });
+  if (!learningScenario) throw new NotFoundError('Learning scenario not found');
+  if (learningScenario.accessLevel === 'private' && learningScenario.userId !== userId)
+    throw new ForbiddenError('Not authorized to edit this learning scenario');
+  if (learningScenario.accessLevel === 'school' && learningScenario.schoolId !== schoolId)
+    throw new ForbiddenError('Not authorized to edit this learning scenario');
+
+  const relatedFiles = await getFilesForLearningScenario({ learningScenarioId, userId });
+  const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
+  return { learningScenario, relatedFiles, avatarPictureUrl };
+};
 
 /**
  * Get files linked to a learning scenario.
@@ -261,28 +330,31 @@ export async function getFilesForLearningScenario({
  * User creates a new learning scenario.
  */
 export async function createNewLearningScenario({
-  data,
+  modelId,
   user,
 }: {
-  data: LearningScenarioInsertModel;
+  modelId: string;
   user: UserModel;
 }) {
   if (user.userRole !== 'teacher') {
     throw new ForbiddenError('Not authorized to create new learning scenario');
   }
 
-  const parsedData = learningScenarioInsertSchema.parse(data);
-
-  const [insertedSharedChat] = await db
+  const [insertedLearningScenario] = await db
     .insert(learningScenarioTable)
-    .values({ ...parsedData, userId: user.id })
+    .values({
+      name: '',
+      pictureId: '',
+      modelId,
+      userId: user.id,
+    })
     .returning();
 
-  if (!insertedSharedChat) {
+  if (!insertedLearningScenario) {
     throw new Error('Could not create learning scenario');
   }
 
-  return insertedSharedChat;
+  return insertedLearningScenario;
 }
 
 /**
@@ -298,8 +370,8 @@ export async function deleteLearningScenario({
   userId: string;
 }) {
   checkParameterUUID(learningScenarioId);
-  const learningScenario = await dbGetSharedSchoolChatById({
-    sharedChatId: learningScenarioId,
+  const learningScenario = await dbGetLearningScenarioById({
+    learningScenarioId,
     userId,
   });
   if (!learningScenario) throw new NotFoundError('Learning scenario not found');
@@ -307,8 +379,8 @@ export async function deleteLearningScenario({
   const relatedFiles = await dbGetFilesForLearningScenario(learningScenarioId, userId);
 
   // delete learning scenario from db
-  const deletedLearningScenario = await dbDeleteSharedSchoolChatByIdAndUserId({
-    sharedChatId: learningScenarioId,
+  const deletedLearningScenario = await dbDeleteLearningScenarioByIdAndUserId({
+    learningScenarioId,
     userId,
   });
 
@@ -335,8 +407,8 @@ export async function linkFileToLearningScenario({
   userId: string;
 }) {
   checkParameterUUID(learningScenarioId);
-  const learningScenario = await dbGetSharedSchoolChatById({
-    sharedChatId: learningScenarioId,
+  const learningScenario = await dbGetLearningScenarioById({
+    learningScenarioId,
     userId,
   });
   if (!learningScenario) throw new NotFoundError('Learning scenario not found');
@@ -391,7 +463,7 @@ export async function removeFileFromLearningScenario({
 async function enrichLearningScenarioWithPictureUrl({
   learningScenarios,
 }: {
-  learningScenarios: LearningScenarioSelectModel[];
+  learningScenarios: LearningScenarioOptionalShareDataModel[];
 }): Promise<LearningScenarioWithImage[]> {
   return await Promise.all(
     learningScenarios.map(async (scenario) => ({

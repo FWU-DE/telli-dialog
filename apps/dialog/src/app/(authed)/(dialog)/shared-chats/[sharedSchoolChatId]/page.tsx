@@ -5,13 +5,9 @@ import ProfileMenu from '@/components/navigation/profile-menu';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
-import {
-  getFilesForLearningScenario,
-  getLearningScenario,
-} from '@shared/learning-scenarios/learning-scenario-service';
+import { getLearningScenarioForEditView } from '@shared/learning-scenarios/learning-scenario-service';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
-import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { WebsearchSource } from '@shared/db/types';
 
 export const dynamic = 'force-dynamic';
@@ -25,18 +21,13 @@ export default async function Page(props: PageProps<'/shared-chats/[sharedSchool
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
-  const [learningScenario, relatedFiles] = await Promise.all([
-    getLearningScenario({
+  const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenarioForEditView(
+    {
       learningScenarioId: sharedSchoolChatId,
+      schoolId: school.id,
       userId: user.id,
-    }),
-    getFilesForLearningScenario({
-      learningScenarioId: sharedSchoolChatId,
-      userId: user.id,
-    }),
-  ]).catch(handleErrorInServerComponent);
-
-  const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
+    },
+  ).catch(handleErrorInServerComponent);
 
   const initialLinks = learningScenario.attachedLinks
     .filter((l) => l && l !== '')

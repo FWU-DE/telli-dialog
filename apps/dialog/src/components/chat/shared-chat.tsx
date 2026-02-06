@@ -3,7 +3,7 @@
 import { useSharedChat } from '@/hooks/use-chat-hooks';
 import { FormEvent, RefObject, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { type LearningScenarioSelectModel } from '@shared/db/schema';
+import { LearningScenarioWithShareDataModel } from '@shared/db/schema';
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
@@ -18,7 +18,7 @@ import { useCheckStatusCode } from '@/hooks/use-response-status';
 export default function SharedChat({
   maybeSignedPictureUrl,
   ...sharedSchoolChat
-}: LearningScenarioSelectModel & { inviteCode: string; maybeSignedPictureUrl?: string }) {
+}: LearningScenarioWithShareDataModel & { inviteCode: string; maybeSignedPictureUrl?: string }) {
   const t = useTranslations('shared-chats.shared');
 
   const { id, inviteCode, modelId } = sharedSchoolChat;

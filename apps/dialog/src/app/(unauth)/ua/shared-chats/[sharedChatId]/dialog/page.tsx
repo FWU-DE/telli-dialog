@@ -5,7 +5,7 @@ import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { dbGetLlmModelById } from '@shared/db/functions/llm-model';
 import { dbGetFederalStateByUserId } from '@shared/db/functions/school';
-import { dbGetSharedChatByIdAndInviteCode } from '@shared/db/functions/shared-school-chat';
+import { dbGetLearningScenarioByIdAndInviteCode } from '@shared/db/functions/learning-scenario';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { notFound } from 'next/navigation';
 import z from 'zod';
@@ -16,8 +16,8 @@ export default async function Page(props: PageProps<'/ua/shared-chats/[sharedCha
   const { sharedChatId } = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
 
-  const sharedSchoolChat = await dbGetSharedChatByIdAndInviteCode({
-    id: sharedChatId,
+  const sharedSchoolChat = await dbGetLearningScenarioByIdAndInviteCode({
+    learningScenarioId: sharedChatId,
     inviteCode: searchParams.inviteCode,
   });
 

@@ -4,9 +4,9 @@ import { generateUUID } from '@shared/utils/uuid';
 import {
   CharacterSelectModel,
   ConversationUsageTrackingSelectModel,
+  LearningScenarioSelectModel,
   LlmModelSelectModel,
   SharedCharacterChatUsageTrackingSelectModel,
-  LearningScenarioSelectModel,
   SharedLearningScenarioUsageTrackingSelectModel,
 } from '@shared/db/schema';
 
@@ -80,7 +80,7 @@ export const mockConversationUsage = (): ConversationUsageTrackingSelectModel =>
   };
 };
 
-export const mockSharedSchoolConversation = (): LearningScenarioSelectModel => {
+export const mockLearningScenario = (): LearningScenarioSelectModel => {
   return {
     id: generateUUID(),
     name: generateRandomString(10),
@@ -89,17 +89,16 @@ export const mockSharedSchoolConversation = (): LearningScenarioSelectModel => {
     modelId: generateUUID(),
     userId: generateUUID(),
     studentExercise: generateRandomString(10),
-    telliPointsLimit: 10,
-    maxUsageTimeLimit: 45,
     attachedLinks: [],
-    startedAt: new Date(),
     schoolType: null,
     gradeLevel: null,
     subject: null,
     additionalInstructions: null,
     restrictions: null,
     pictureId: null,
-    inviteCode: null,
+    accessLevel: 'private',
+    schoolId: null,
+    originalLearningScenarioId: null,
   };
 };
 

@@ -7,7 +7,7 @@ import {
   sharedLearningScenarioUsageTracking,
 } from '../schema';
 
-export async function dbGetSharedChatsUsageInCentByUserId({ userId }: { userId: string }) {
+export async function dbGetLearningScenarioUsageInCentByUserId({ userId }: { userId: string }) {
   const startDate = getStartOfCurrentMonth();
   const endDate = getEndOfCurrentMonth();
 

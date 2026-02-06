@@ -7,20 +7,19 @@ import {
   deleteLearningScenario,
   linkFileToLearningScenario,
 } from '@shared/learning-scenarios/learning-scenario-service';
-import { LearningScenarioInsertModel } from '@shared/db/schema';
 
 export async function deleteLearningScenarioAction({ id }: { id: string }) {
   const { user } = await requireAuth();
   return runServerAction(deleteLearningScenario)({ learningScenarioId: id, userId: user.id });
 }
 
-export async function createNewLearningScenarioAction({
-  data,
-}: {
-  data: LearningScenarioInsertModel;
-}) {
+export async function createNewLearningScenarioAction({ modelId }: { modelId: string }) {
   const { user } = await requireAuth();
-  return runServerAction(createNewLearningScenario)({ data, user });
+
+  return runServerAction(createNewLearningScenario)({
+    modelId,
+    user,
+  });
 }
 
 export async function linkFileToLearningScenarioAction({

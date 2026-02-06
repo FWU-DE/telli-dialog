@@ -152,7 +152,9 @@ test('should return 403 if authorization header is missing', async ({ request })
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable);
+const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable).omit({
+  accessLevel: true,
+});
 async function createLearningScenario(
   data?: Partial<z.infer<typeof learningScenarioInsertSchema>>,
 ) {

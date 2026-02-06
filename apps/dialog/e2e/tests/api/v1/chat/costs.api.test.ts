@@ -1,13 +1,13 @@
 import test, { expect } from '@playwright/test';
 import { db } from '@shared/db';
 import {
-  conversationUsageTracking,
-  sharedLearningScenarioUsageTracking,
-  sharedCharacterChatUsageTrackingTable,
-  llmModelTable,
-  learningScenarioTable,
-  userTable,
   CharacterWithShareDataModel,
+  conversationUsageTracking,
+  LearningScenarioWithShareDataModel,
+  llmModelTable,
+  sharedCharacterChatUsageTrackingTable,
+  sharedLearningScenarioUsageTracking,
+  userTable,
 } from '@shared/db/schema';
 import { getPriceInCentByUser } from '@/app/school';
 import { UserAndContext } from '@/auth/types';
@@ -22,9 +22,9 @@ import {
 import {
   mockCharacter,
   mockConversationUsage,
+  mockLearningScenario,
   mockLlmModel,
   mockSharedCharacterChatUsage,
-  mockSharedSchoolConversation,
   mockSharedSchoolConversationUsage,
   mockUserAndContext,
 } from '../../../../utils/mock';
@@ -93,15 +93,17 @@ test.describe('costs', () => {
     const model = mockLlmModel();
     await db.insert(llmModelTable).values(model);
 
-    // create shared school conversation
-    const sharedSchoolConversation = {
-      ...mockSharedSchoolConversation(),
+    // create shared learning scenario
+    const sharedLearningScenario: LearningScenarioWithShareDataModel = {
+      ...mockLearningScenario(),
       telliPointsLimit: telliPointsLimit,
       maxUsageTimeLimit: maxUsageTimeLimit,
       userId: user.id,
       modelId: model.id,
+      inviteCode: generateRandomString(8),
+      startedAt: new Date(),
+      startedBy: user.id,
     };
-    await db.insert(learningScenarioTable).values(sharedSchoolConversation);
 
     // Insert data into shared school conversation usage tracking (30*3 = 90 cents)
     for (let i = 0; i < 3; i++) {
@@ -109,7 +111,7 @@ test.describe('costs', () => {
         ...mockSharedSchoolConversationUsage(),
         userId: user.id,
         modelId: model.id,
-        learningScenarioId: sharedSchoolConversation.id,
+        learningScenarioId: sharedLearningScenario.id,
         costsInCent: 30,
       };
 
@@ -117,16 +119,16 @@ test.describe('costs', () => {
     }
 
     const sharedChatUsageInCent = await dbGetSharedChatUsageInCentBySharedChatId({
-      sharedChatId: sharedSchoolConversation.id,
-      maxUsageTimeLimit: sharedSchoolConversation.maxUsageTimeLimit!,
-      startedAt: sharedSchoolConversation.startedAt!,
+      sharedChatId: sharedLearningScenario.id,
+      maxUsageTimeLimit: sharedLearningScenario.maxUsageTimeLimit!,
+      startedAt: sharedLearningScenario.startedAt!,
     });
 
     expect(sharedChatUsageInCent).toBe(90);
 
     let hasReachedLimit = await sharedChatHasReachedTelliPointsLimit({
       user: user,
-      sharedChat: sharedSchoolConversation,
+      sharedChat: sharedLearningScenario,
     });
 
     // Used 90 cents of 100 cents -> under the limit
@@ -137,14 +139,14 @@ test.describe('costs', () => {
       ...mockSharedSchoolConversationUsage(),
       userId: user.id,
       modelId: model.id,
-      learningScenarioId: sharedSchoolConversation.id,
+      learningScenarioId: sharedLearningScenario.id,
       costsInCent: 30,
     };
     await db.insert(sharedLearningScenarioUsageTracking).values(sharedSchoolConversationUsage);
 
     hasReachedLimit = await sharedChatHasReachedTelliPointsLimit({
       user: user,
-      sharedChat: sharedSchoolConversation,
+      sharedChat: sharedLearningScenario,
     });
 
     // Used 120 cents of 100 cents -> over the limit

@@ -1,5 +1,5 @@
 import { getPriceInCentByUser, getPriceLimitInCentByUser } from '@/app/school';
-import { CharacterWithShareDataModel, type LearningScenarioSelectModel } from '@shared/db/schema';
+import { CharacterWithShareDataModel, LearningScenarioWithShareDataModel } from '@shared/db/schema';
 import { type UserAndContext } from '@/auth/types';
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
@@ -26,7 +26,7 @@ export async function sharedChatHasReachedTelliPointsLimit({
   sharedChat,
 }: {
   user: UserAndContext | undefined;
-  sharedChat: LearningScenarioSelectModel;
+  sharedChat: LearningScenarioWithShareDataModel;
 }) {
   if (user === undefined || user.school === undefined || user.federalState === undefined) {
     return true;
