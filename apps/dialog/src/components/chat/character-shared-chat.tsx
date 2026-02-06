@@ -14,7 +14,6 @@ import { useCheckStatusCode } from '@/hooks/use-response-status';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { Message } from 'ai';
 import { AssistantIcon } from './assistant-icon';
-import { messageContainsAttachments } from '@/utils/chat/messages';
 import { Messages } from './messages';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 import StreamingFinishedMarker from './streaming-finished-marker';
@@ -35,8 +34,6 @@ export default function CharacterSharedChat({
 
   const searchParams = new URLSearchParams({ id, inviteCode });
   const endpoint = `/api/character?${searchParams.toString()}`;
-
-  const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
 
   // substitute the error object from the useChat hook, to dislay a user friendly error message in German
   const { error, handleResponse, handleError, resetError } = useCheckStatusCode();
@@ -62,7 +59,6 @@ export default function CharacterSharedChat({
     e.preventDefault();
 
     try {
-      setLastMessageHasAttachments(messageContainsAttachments(input));
       handleSubmit(e, {});
     } catch (error) {
       console.error(error);
@@ -121,7 +117,6 @@ export default function CharacterSharedChat({
                 status={status}
                 reload={reload}
                 assistantIcon={assistantIcon}
-                doesLastUserMessageContainLinkOrFile={lastMessageHasAttachments}
                 containerClassName="flex flex-col gap-4"
               />
             )}

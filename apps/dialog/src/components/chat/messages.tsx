@@ -11,7 +11,6 @@ interface MessagesProps {
   status: UseChatHelpers['status'];
   reload: () => void;
   assistantIcon?: React.ReactNode;
-  doesLastUserMessageContainLinkOrFile: boolean;
   containerClassName: string;
   fileMapping?: Map<string, FileModel[]>;
   initialFiles?: FileModel[];
@@ -24,7 +23,6 @@ export function Messages({
   status,
   reload,
   assistantIcon,
-  doesLastUserMessageContainLinkOrFile,
   containerClassName,
   fileMapping,
   initialFiles,
@@ -50,9 +48,7 @@ export function Messages({
         </ChatBox>
       ))}
 
-      {isLoading && (
-        <LoadingAnimation isExternalResourceUsed={doesLastUserMessageContainLinkOrFile} />
-      )}
+      {isLoading && <LoadingAnimation />}
     </div>
   );
 }

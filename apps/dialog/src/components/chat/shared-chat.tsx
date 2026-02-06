@@ -11,7 +11,6 @@ import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { FloatingText } from './floating-text';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
-import { messageContainsAttachments } from '@/utils/chat/messages';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { Messages } from './messages';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
@@ -30,7 +29,6 @@ export default function SharedChat({
   const endpoint = `/api/shared-chat?${searchParams.toString()}`;
 
   const [dialogStarted, setDialogStarted] = useState(false);
-  const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
 
   // substitute the error object from the useChat hook, to dislay a user friendly error message in German
   const { error, handleResponse, handleError, resetError } = useCheckStatusCode();
@@ -53,7 +51,6 @@ export default function SharedChat({
     e.preventDefault();
 
     try {
-      setLastMessageHasAttachments(messageContainsAttachments(input));
       handleSubmit(e, {});
     } catch (error) {
       console.error(error);
@@ -125,7 +122,6 @@ export default function SharedChat({
                 isLoading={isLoading}
                 status={status}
                 reload={reload}
-                doesLastUserMessageContainLinkOrFile={lastMessageHasAttachments}
                 containerClassName="flex flex-col gap-4"
               />
             )}
