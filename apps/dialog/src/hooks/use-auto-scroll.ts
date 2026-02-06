@@ -15,7 +15,7 @@ export function useAutoScroll(dependencies: React.DependencyList) {
   const checkIfAtBottom = useCallback(() => {
     if (scrollElement) {
       const { scrollTop, scrollHeight, clientHeight } = scrollElement;
-      const threshold = 100; // pixels from bottom to consider "at bottom"
+      const threshold = 80; // pixels from bottom to consider "at bottom"
       const isNearBottom = scrollTop + clientHeight >= scrollHeight - threshold;
       setIsAtBottom(isNearBottom);
     }
