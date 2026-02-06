@@ -14,7 +14,7 @@ import {
   TextChunkTable,
 } from '../schema';
 
-export async function dbGetLearningScenariosByUserId({ userId }: { userId: string }) {
+function baseLearningScenarioWithShareQuery() {
   return db
     .select({
       ...getTableColumns(learningScenarioTable),
@@ -24,7 +24,11 @@ export async function dbGetLearningScenariosByUserId({ userId }: { userId: strin
       startedAt: sharedLearningScenarioTable.startedAt,
       startedBy: sharedLearningScenarioTable.userId,
     })
-    .from(learningScenarioTable)
+    .from(learningScenarioTable);
+}
+
+export async function dbGetLearningScenariosByUserId({ userId }: { userId: string }) {
+  return baseLearningScenarioWithShareQuery()
     .leftJoin(
       sharedLearningScenarioTable,
       and(
@@ -73,16 +77,7 @@ export async function dbGetLearningScenarioByIdWithShareData({
   learningScenarioId: string;
   userId: string;
 }): Promise<LearningScenarioWithShareDataModel | undefined> {
-  const [row] = await db
-    .select({
-      ...getTableColumns(learningScenarioTable),
-      telliPointsLimit: sharedLearningScenarioTable.telliPointsLimit,
-      inviteCode: sharedLearningScenarioTable.inviteCode,
-      maxUsageTimeLimit: sharedLearningScenarioTable.maxUsageTimeLimit,
-      startedAt: sharedLearningScenarioTable.startedAt,
-      startedBy: sharedLearningScenarioTable.userId,
-    })
-    .from(learningScenarioTable)
+  const [row] = await baseLearningScenarioWithShareQuery()
     .innerJoin(
       sharedLearningScenarioTable,
       and(
@@ -101,16 +96,7 @@ export async function dbGetLearningScenarioByIdOptionalShareData({
   learningScenarioId: string;
   userId: string;
 }): Promise<LearningScenarioOptionalShareDataModel | undefined> {
-  const [row] = await db
-    .select({
-      ...getTableColumns(learningScenarioTable),
-      telliPointsLimit: sharedLearningScenarioTable.telliPointsLimit,
-      inviteCode: sharedLearningScenarioTable.inviteCode,
-      maxUsageTimeLimit: sharedLearningScenarioTable.maxUsageTimeLimit,
-      startedAt: sharedLearningScenarioTable.startedAt,
-      startedBy: sharedLearningScenarioTable.userId,
-    })
-    .from(learningScenarioTable)
+  const [row] = await baseLearningScenarioWithShareQuery()
     .leftJoin(
       sharedLearningScenarioTable,
       and(
@@ -132,16 +118,7 @@ export async function dbGetLearningScenarioByIdAndInviteCode({
   learningScenarioId: string;
   inviteCode: string;
 }): Promise<LearningScenarioWithShareDataModel | undefined> {
-  const [row] = await db
-    .select({
-      ...getTableColumns(learningScenarioTable),
-      telliPointsLimit: sharedLearningScenarioTable.telliPointsLimit,
-      inviteCode: sharedLearningScenarioTable.inviteCode,
-      maxUsageTimeLimit: sharedLearningScenarioTable.maxUsageTimeLimit,
-      startedAt: sharedLearningScenarioTable.startedAt,
-      startedBy: sharedLearningScenarioTable.userId,
-    })
-    .from(learningScenarioTable)
+  const [row] = await baseLearningScenarioWithShareQuery()
     .innerJoin(
       sharedLearningScenarioTable,
       and(
