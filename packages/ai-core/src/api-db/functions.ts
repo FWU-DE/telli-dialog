@@ -3,6 +3,7 @@ import { dbApi } from '.';
 import {
   apiKeyTable,
   completionUsageTrackingTable,
+  CompletionUsageInsertModel,
   ImageGenerationUsageInsertModel,
   imageGenerationUsageTrackingTable,
   llmModelApiKeyMappingTable,
@@ -60,6 +61,19 @@ export async function dbCreateImageGenerationUsage(
   )[0];
 
   return insertedImageGenerationUsage;
+}
+
+export async function dbCreateCompletionUsage(completionUsage: CompletionUsageInsertModel) {
+  const insertedCompletionUsage = (
+    await dbApi
+      .insert(completionUsageTrackingTable)
+      .values({
+        ...completionUsage,
+      })
+      .returning()
+  )[0];
+
+  return insertedCompletionUsage;
 }
 
 export async function dbGetApiKeyLimit(apiKeyId: string) {

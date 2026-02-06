@@ -21,12 +21,11 @@ export function validateOidcProfile(
   const flattened = z.flattenError(profileResult.error);
   const fieldErrors = Object.keys(flattened.fieldErrors);
 
-  return { success: false, fieldErrors: fieldErrors };
+  return { success: false, fieldErrors };
 }
 
 /**
- * Based on the missing fields array, an error url is generated
- * that contains the missing fields as search params.
+ * Generates an error URL with the missing field names as search params.
  */
 export function generateErrorUrl(fieldErrors: string[]) {
   if (fieldErrors.length === 0) {
@@ -53,7 +52,7 @@ export function getFieldErrorsFromUrl(
   if (!fieldErrorsEncoded) {
     return [];
   }
-  // we have to decode the strings because comma is encoded as %2C
+  // Decode the strings because comma is encoded as %2C
   const fieldErrors = decodeURIComponent(fieldErrorsEncoded);
   return fieldErrors.split(',');
 }

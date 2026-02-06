@@ -7,7 +7,7 @@ import { iconClassName } from '@/utils/tailwind/icon';
 import DownloadSharedConversationButton from '@/app/(unauth)/ua/dowload-shared-conversation-button';
 import Image from 'next/image';
 import ProfileMenu, { ThreeDotsProfileMenu } from '../navigation/profile-menu';
-import { Message } from 'ai';
+import { type ChatMessage as Message } from '@/types/chat';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
 
 export function SharedChatHeader({

@@ -3,7 +3,6 @@ import {
   dbGetModelByIdAndFederalStateId,
   dbGetLlmModelsByFederalStateId,
 } from '@shared/db/functions/llm-model';
-import { env } from '@/env';
 import { errorifyAsyncFn } from '@shared/utils/error';
 import { LlmModelSelectModel } from '@shared/db/schema';
 import { PRICE_AND_CENT_MULTIPLIER } from '@/db/const';
@@ -12,7 +11,6 @@ import {
   FALLBACK_AUXILIARY_MODEL,
 } from '@shared/llm-models/default-llm-models';
 import { getDefaultModel, getFirstTextModel } from '@shared/llm-models/llm-model-service';
-import { createTelliConfiguration } from '../chat/custom-model-config';
 import { logError } from '@shared/logging';
 import { isValidPositiveNumber } from '@shared/utils/number';
 
@@ -26,15 +24,14 @@ export function getSearchParamsFromUrl(url: string) {
   return new URLSearchParams(rest.join('?'));
 }
 
-export const getModelAndProviderWithResult = errorifyAsyncFn(getModelAndProvider);
-async function getModelAndProvider({
+export const getModelAndApiKeyWithResult = errorifyAsyncFn(getModelAndApiKey);
+async function getModelAndApiKey({
   federalStateId,
   modelId,
 }: {
   federalStateId: string;
   modelId: string;
-  /* eslint-disable  @typescript-eslint/no-explicit-any */
-}): Promise<{ telliProvider: any; definedModel: LlmModelSelectModel }> {
+}): Promise<{ model: LlmModelSelectModel; apiKeyId: string }> {
   const [error, federalStateObject] = await dbGetFederalStateWithDecryptedApiKeyWithResult({
     federalStateId,
   });
@@ -44,12 +41,20 @@ async function getModelAndProvider({
     throw Error(error.message);
   }
 
-  let definedModel = await dbGetModelByIdAndFederalStateId({ modelId, federalStateId });
+  if (!federalStateObject.apiKeyId) {
+    const apiKeyError = new Error(
+      `Federal state with id ${federalStateId} has no api key associated`,
+    );
+    logError(apiKeyError.message, apiKeyError);
+    throw apiKeyError;
+  }
 
-  if (definedModel === undefined) {
-    definedModel = await getDefaultModelByFederalStateId(federalStateId);
+  let model = await dbGetModelByIdAndFederalStateId({ modelId, federalStateId });
 
-    if (definedModel === undefined) {
+  if (model === undefined) {
+    model = await getDefaultModelByFederalStateId(federalStateId);
+
+    if (model === undefined) {
       const defaultModelError = new Error(
         `Could not find default model for federal state with id ${federalStateId}`,
       );
@@ -58,12 +63,10 @@ async function getModelAndProvider({
     }
   }
 
-  const telliConfiguration = createTelliConfiguration({
-    apiKey: federalStateObject.decryptedApiKey,
-    baseUrl: `${env.apiUrl}/v1`,
-  });
-
-  return { telliProvider: telliConfiguration(definedModel.name), definedModel };
+  return {
+    model,
+    apiKeyId: federalStateObject.apiKeyId,
+  };
 }
 
 export function calculateCostsInCent(

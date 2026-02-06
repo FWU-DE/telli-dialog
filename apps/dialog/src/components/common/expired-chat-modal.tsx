@@ -4,7 +4,7 @@ import React from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import StopWatchDoneIcon from '@/components/icons/stopwatch-done';
 import DownloadSharedConversationButton from '@/app/(unauth)/ua/dowload-shared-conversation-button';
-import { Message } from 'ai';
+import { type ChatMessage as Message } from '@/types/chat';
 import { useTranslations } from 'next-intl';
 import { useTheme } from '@/hooks/use-theme';
 import { constructRootLayoutStyle } from '@/utils/tailwind/layout';

@@ -1,4 +1,4 @@
-import { Message } from 'ai';
+import { type ChatMessage as Message } from '@/types/chat';
 import { consolidateMessages } from './utils';
 import { describe, it, expect } from 'vitest';
 

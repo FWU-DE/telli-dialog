@@ -1,6 +1,7 @@
 import { ImageAttachment } from '@/utils/files/types';
 import { logError } from '@shared/logging';
-import { generateText, LanguageModelV1, type Message } from 'ai';
+import { type ChatMessage as Message } from '@/types/chat';
+import { generateTextWithBilling } from '@telli/ai-core';
 
 /**
  * Format messages to include images for models that support vision
@@ -26,9 +27,9 @@ export function formatMessagesWithImages(
       continue;
     }
     message.experimental_attachments = messageImages.map((image) => ({
-      contentType: image.mimeType,
+      contentType: image.mimeType ?? 'image/jpeg',
       url: image.url,
-      type: 'image',
+      type: 'image' as const,
     }));
   }
 
@@ -128,15 +129,18 @@ export function limitChatHistory({
 /**
  * Condenses chat history into a search query for vector search
  * @param messages - The chat messages to condense
- * @param model - The LLM model to use for condensing
+ * @param modelId - The ID of the model to use for condensing
+ * @param apiKeyId - The API key ID for billing
  * @returns A string representing the search query
  */
 export async function condenseChatHistory({
   messages,
-  model,
+  modelId,
+  apiKeyId,
 }: {
   messages: Array<Message>;
-  model: LanguageModelV1;
+  modelId: string;
+  apiKeyId: string;
 }): Promise<string> {
   // Use only the most recent messages for generating the search query
   const recentMessages = limitChatHistory({
@@ -147,9 +151,12 @@ export async function condenseChatHistory({
   });
 
   try {
-    const { text } = await generateText({
-      model,
-      system: `Du bist ein hilfreicher Assistent, der semantische Suchanfragen (Vektor-Suche) für eine Wissensdatenbank erstellt.
+    const { text } = await generateTextWithBilling(
+      modelId,
+      [
+        {
+          role: 'system',
+          content: `Du bist ein hilfreicher Assistent, der semantische Suchanfragen (Vektor-Suche) für eine Wissensdatenbank erstellt.
 Basierend auf dem Chatverlauf, erstelle eine präzise Suchanfrage.
 Die Suchanfrage sollte die Hauptfrage oder das Hauptthema des Benutzers erfassen.
 Die Suchanfrage muss eigenständig und unabhängig vom Chatverlauf sein und alle notwendigen Kontextinformationen aus dem Verlauf enthalten, um die Hauptfrage oder das Hauptthema des Benutzers zu erfassen.
@@ -165,8 +172,11 @@ Beispiel:
 Benutzer: "Ich möchte wissen, ob ich in meinem Bundesland einen Anspruch auf Elterngeld habe."
 Suchanfrage: "Elterngeld Anspruch"
 `,
-      messages: recentMessages.map((m) => ({ role: m.role, content: m.content })),
-    });
+        },
+        ...recentMessages.map((m) => ({ role: m.role, content: m.content })),
+      ],
+      apiKeyId,
+    );
 
     return text.trim();
   } catch (error) {
@@ -180,15 +190,18 @@ Suchanfrage: "Elterngeld Anspruch"
 /**
  * Extract keywords from the user's last message in the chat history
  * @param messages - The chat messages
- * @param model - The LLM model to use for keyword extraction
+ * @param modelId - The ID of the model to use for keyword extraction
+ * @param apiKeyId - The API key ID for billing
  * @returns An array of extracted keywords or an empty array if none found
  */
 export async function getKeywordsFromQuery({
   messages,
-  model,
+  modelId,
+  apiKeyId,
 }: {
   messages: Array<Message>;
-  model: LanguageModelV1;
+  modelId: string;
+  apiKeyId: string;
 }): Promise<string[]> {
   const lastUserMessage = messages.findLast((m) => m.role === 'user');
 
@@ -197,9 +210,12 @@ export async function getKeywordsFromQuery({
   }
 
   try {
-    const { text } = await generateText({
-      model,
-      system: `Du bist ein Experte für die präzise Extraktion von Schlüsselwörtern. 
+    const { text } = await generateTextWithBilling(
+      modelId,
+      [
+        {
+          role: 'system',
+          content: `Du bist ein Experte für die präzise Extraktion von Schlüsselwörtern. 
 Deine Aufgabe ist es, die relevantesten Schlüsselwörter aus der gegebenen Suchanfrage (der letzten Benutzernachricht im Chatverlauf) zu extrahieren.
 
 Regeln:
@@ -225,8 +241,11 @@ Ausgabe: "Kindergeld,Informationen,Leitfaden"
 Eingabe: "qwertz"
 Ausgabe: ""
 `,
-      messages: [lastUserMessage],
-    });
+        },
+        { role: 'user', content: lastUserMessage.content },
+      ],
+      apiKeyId,
+    );
 
     const keywords = text.trim();
     return keywords ? keywords.split(',') : [];
@@ -239,29 +258,40 @@ Ausgabe: ""
 /**
  * Generate a chat title based on the first user message
  * @param message - The first user message
- * @param model - The LLM model to use for title generation
+ * @param modelId - The ID of the model to use for title generation
+ * @param apiKeyId - The API key ID for billing
  * @returns A string representing the generated chat title
  */
 export async function getChatTitle({
   message,
-  model,
+  modelId,
+  apiKeyId,
 }: {
   message: Message;
-  model: LanguageModelV1;
+  modelId: string;
+  apiKeyId: string;
 }): Promise<string> {
   try {
-    const { text } = await generateText({
-      model,
-      system: `Du erstellst einen kurzen Titel basierend auf der ersten Nachricht eines Nutzers
+    const { text } = await generateTextWithBilling(
+      modelId,
+      [
+        {
+          role: 'system',
+          content: `Du erstellst einen kurzen Titel basierend auf der ersten Nachricht eines Nutzers
   
 Regeln:
 1. Der Titel sollte eine Zusammenfassung der Nachricht sein
 2. Verwende keine Anführungszeichen oder Doppelpunkte
 3. Der Titel sollte nicht länger als 80 Zeichen sein
 `,
-      messages: [message],
-      maxTokens: 30,
-    });
+        },
+        {
+          role: 'user',
+          content: message.content,
+        },
+      ],
+      apiKeyId,
+    );
     return text.trim();
   } catch (error) {
     logError('Error generating chat title, using default title as fallback:', error);
