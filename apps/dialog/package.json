@@ -50,7 +50,7 @@
     "@telli/ai-core": "workspace:*",
     "@telli/shared": "workspace:*",
     "@telli/ui": "workspace:*",
-    "ai": "4.3.16",
+    "ai": "6.0.66",
     "clsx": "2.1.1",
     "date-fns": "4.1.0",
     "docx": "9.5.1",
