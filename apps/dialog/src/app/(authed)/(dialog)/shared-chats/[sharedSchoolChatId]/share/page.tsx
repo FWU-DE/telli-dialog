@@ -9,7 +9,7 @@ import CountDownTimer from '../../_components/count-down';
 import QRCode from './qr-code';
 import TelliClipboardButton from '@/components/common/clipboard-button';
 import { getSharedLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { notFound } from 'next/navigation';
@@ -30,7 +30,7 @@ export default async function Page(props: PageProps<'/shared-chats/[sharedSchool
   const inviteCode = learningScenario.inviteCode;
   const formattedInviteCode = `${inviteCode.substring(0, 4)} ${inviteCode.substring(4, 8)}`;
   const shareUrl = `${await getBaseUrlByHeaders()}/ua/shared-chats/${learningScenario.id}/dialog?inviteCode=${inviteCode}`;
-  const leftTime = calculateTimeLeftForLearningScenario(learningScenario);
+  const leftTime = calculateTimeLeft(learningScenario);
   const t = await getTranslations('shared-chats.share-page');
 
   return (

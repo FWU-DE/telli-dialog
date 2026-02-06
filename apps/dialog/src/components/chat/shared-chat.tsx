@@ -12,7 +12,7 @@ import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { FloatingText } from './floating-text';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { Messages } from './messages';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
 
 export default function SharedChat({
@@ -22,7 +22,7 @@ export default function SharedChat({
   const t = useTranslations('shared-chats.shared');
 
   const { id, inviteCode, modelId } = sharedSchoolChat;
-  const timeLeft = calculateTimeLeftForLearningScenario(sharedSchoolChat);
+  const timeLeft = calculateTimeLeft(sharedSchoolChat);
   const chatActive = timeLeft > 0;
 
   const [dialogStarted, setDialogStarted] = useState(false);

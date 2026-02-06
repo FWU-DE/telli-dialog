@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { LearningScenarioWithImage } from '@shared/learning-scenarios/learning-scenario-service';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import AvatarPicture from '@/components/common/avatar-picture';
 
 type SharedChatItemProps = LearningScenarioWithImage;
@@ -35,7 +35,7 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
     }
   }
 
-  const timeLeft = calculateTimeLeftForLearningScenario(sharedSchoolChat);
+  const timeLeft = calculateTimeLeft(sharedSchoolChat);
 
   return (
     <Link
