@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 /**
  * Custom hook for automatically scrolling to the bottom of a container
@@ -6,24 +6,28 @@ import { useEffect, useRef, useState, useCallback } from 'react';
  * Only scrolls if the user is currently at or near the bottom of the container.
  *
  * @param dependencies - Array of dependencies that trigger the scroll
- * @returns A ref object to attach to the scrollable container
+ * @returns A callback ref to attach to the scrollable container
  */
 export function useAutoScroll(dependencies: React.DependencyList) {
-  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
 
   const checkIfAtBottom = useCallback(() => {
-    if (scrollRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    if (scrollElement) {
+      const { scrollTop, scrollHeight, clientHeight } = scrollElement;
       const threshold = 100; // pixels from bottom to consider "at bottom"
       const isNearBottom = scrollTop + clientHeight >= scrollHeight - threshold;
       setIsAtBottom(isNearBottom);
     }
+  }, [scrollElement]);
+
+  // Callback ref that handles element attachment/detachment
+  const scrollRef = useCallback((element: HTMLDivElement | null) => {
+    setScrollElement(element);
   }, []);
 
-  // Set up scroll listener
+  // Set up scroll listener whenever the element changes
   useEffect(() => {
-    const scrollElement = scrollRef.current;
     if (scrollElement) {
       scrollElement.addEventListener('scroll', checkIfAtBottom, { passive: true });
       // Check initial position
@@ -33,18 +37,18 @@ export function useAutoScroll(dependencies: React.DependencyList) {
         scrollElement.removeEventListener('scroll', checkIfAtBottom);
       };
     }
-  }, [checkIfAtBottom]);
+  }, [scrollElement, checkIfAtBottom]);
 
   // Auto-scroll when dependencies change, but only if user is at bottom
   useEffect(() => {
-    if (scrollRef.current && isAtBottom) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
+    if (scrollElement && isAtBottom) {
+      scrollElement.scrollTo({
+        top: scrollElement.scrollHeight,
         behavior: 'smooth',
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [...dependencies]);
+  }, [...dependencies, scrollElement, isAtBottom]);
 
   return scrollRef;
 }
