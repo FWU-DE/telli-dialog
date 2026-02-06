@@ -12,12 +12,10 @@ import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import useBreakpoints from '../hooks/use-breakpoints';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { AssistantIcon } from './assistant-icon';
-import { messageContainsAttachments } from '@/utils/chat/messages';
 import { Messages } from './messages';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 import StreamingFinishedMarker from './streaming-finished-marker';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
-import { toUIMessages } from '@/types/chat';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
 
 /**
@@ -33,7 +31,6 @@ export default function CharacterSharedChat({
   const timeLeft = calculateTimeLeftForLearningScenario(character);
   const chatActive = timeLeft > 0;
 
-  const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
   const { error, handleError, resetError } = useCheckStatusCode();
 
   const initialMessages: ChatMessage[] = character.initialMessage
@@ -65,7 +62,6 @@ export default function CharacterSharedChat({
     e.preventDefault();
 
     try {
-      setLastMessageHasAttachments(messageContainsAttachments(input));
       resetError();
       await handleSubmit(e, {});
     } catch (error) {
@@ -125,7 +121,6 @@ export default function CharacterSharedChat({
                 status={status}
                 reload={reload}
                 assistantIcon={assistantIcon}
-                doesLastUserMessageContainLinkOrFile={lastMessageHasAttachments}
                 containerClassName="flex flex-col gap-4"
               />
             )}

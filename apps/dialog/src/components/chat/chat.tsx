@@ -21,7 +21,6 @@ import { ErrorChatPlaceholder } from './error-chat-placeholder';
 import { logDebug, logWarning } from '@shared/logging';
 import { useSession } from 'next-auth/react';
 import { AssistantIcon } from './assistant-icon';
-import { messageContainsAttachments } from '@/utils/chat/messages';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { getConversationPath } from '@/utils/chat/path';
 import { Messages, type PendingFileModel } from './messages';
@@ -73,7 +72,6 @@ export default function Chat({
   );
   const [files, setFiles] = useState<Map<string, LocalFileState>>(new Map());
   const [countOfFilesInChat, setCountOfFilesInChat] = useState(0);
-  const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
   const queryClient = useQueryClient();
   const session = useSession();
 
@@ -182,8 +180,7 @@ export default function Chat({
     e.preventDefault();
 
     try {
-      setLastMessageHasAttachments(messageContainsAttachments(input, files));
-      resetError;
+      resetError();
 
       // Trigger refetch of the fileMapping from the DB
       setCountOfFilesInChat(countOfFilesInChat + 1);
@@ -312,7 +309,6 @@ export default function Chat({
               status={status}
               reload={reload}
               assistantIcon={assistantIcon}
-              doesLastUserMessageContainLinkOrFile={lastMessageHasAttachments}
               containerClassName="flex flex-col gap-2 max-w-3xl mx-auto p-4"
               fileMapping={fileMapping}
               pendingFileMapping={pendingFileMapping}

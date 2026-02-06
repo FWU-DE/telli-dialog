@@ -13,7 +13,6 @@ interface MessagesProps {
   status: ChatStatus;
   reload: () => void;
   assistantIcon?: React.ReactNode;
-  doesLastUserMessageContainLinkOrFile: boolean;
   containerClassName: string;
   fileMapping?: Map<string, FileModel[]>;
   pendingFileMapping?: Map<string, PendingFileModel[]>;
@@ -26,7 +25,6 @@ export function Messages({
   status,
   reload,
   assistantIcon,
-  doesLastUserMessageContainLinkOrFile,
   containerClassName,
   fileMapping,
   pendingFileMapping,
@@ -51,9 +49,7 @@ export function Messages({
         </ChatBox>
       ))}
 
-      {isLoading && (
-        <LoadingAnimation isExternalResourceUsed={doesLastUserMessageContainLinkOrFile} />
-      )}
+      {isLoading && <LoadingAnimation />}
     </div>
   );
 }

@@ -10,11 +10,9 @@ import { InitialChatContentDisplay } from '@/components/chat/initial-content-dis
 import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { FloatingText } from './floating-text';
-import { messageContainsAttachments } from '@/utils/chat/messages';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { Messages } from './messages';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
-import { toUIMessages } from '@/types/chat';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
 
 export default function SharedChat({
@@ -28,7 +26,6 @@ export default function SharedChat({
   const chatActive = timeLeft > 0;
 
   const [dialogStarted, setDialogStarted] = useState(false);
-  const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
   const { error, handleError, resetError } = useCheckStatusCode();
 
   const {
@@ -56,7 +53,6 @@ export default function SharedChat({
     e.preventDefault();
 
     try {
-      setLastMessageHasAttachments(messageContainsAttachments(input));
       resetError();
       await handleSubmit(e, {});
     } catch (error) {
@@ -129,7 +125,6 @@ export default function SharedChat({
                 isLoading={isLoading}
                 status={status}
                 reload={reload}
-                doesLastUserMessageContainLinkOrFile={lastMessageHasAttachments}
                 containerClassName="flex flex-col gap-4"
               />
             )}
