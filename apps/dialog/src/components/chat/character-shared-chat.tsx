@@ -1,7 +1,7 @@
 'use client';
 
 import { useCharacterChat, type ChatMessage } from '@/hooks/use-chat-hooks';
-import { FormEvent, useState } from 'react';
+import { FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
 import { CharacterWithShareDataModel } from '@shared/db/schema';
 import { SharedChatHeader } from '@/components/chat/shared-header-bar';

@@ -43,9 +43,7 @@ export function toOpenAIMessages(
  * Converts internal Message format to OpenAI Responses API input format.
  * Handles image attachments by converting them to multimodal content arrays.
  */
-export function toOpenAIResponsesInput(
-  messages: Message[],
-): OpenAI.Responses.EasyInputMessage[] {
+export function toOpenAIResponsesInput(messages: Message[]): OpenAI.Responses.EasyInputMessage[] {
   return messages.map((message) => {
     // If message has image attachments, convert to multimodal content format
     if (message.attachments && message.attachments.length > 0 && message.role !== 'system') {
@@ -58,7 +56,7 @@ export function toOpenAIResponsesInput(
               ({
                 type: 'input_image',
                 image_url: attachment.url,
-                detail: 'auto'
+                detail: 'auto',
               }) satisfies OpenAI.Responses.ResponseInputImageContent,
           ),
       ];

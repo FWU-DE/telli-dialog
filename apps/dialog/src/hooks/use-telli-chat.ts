@@ -206,13 +206,13 @@ export function useTelliChat({
 
     // Sadly this is needed, so we don't need to wait for a re-render between updating the messages and submitting
     // Otherwise, i'd use setMessages with a function update. (Also note: function updates to not allow you to update surrounding variables / it happens unreliably)
-    const curMessages = messages.slice(0, lastUserIndex)
+    const curMessages = messages.slice(0, lastUserIndex);
 
     // Remove all assistant messages after the last user message, and the user message itself
     setMessages(curMessages);
 
     await submitMessage(messageContent, undefined, curMessages);
-  }, [submitMessage]);
+  }, [submitMessage, messages]);
 
   const stop = useCallback(() => {
     abortControllerRef.current?.abort();

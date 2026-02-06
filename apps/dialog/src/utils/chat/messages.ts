@@ -1,7 +1,5 @@
 import { ConversationMessageModel } from '@shared/db/types';
 import { type ChatMessage } from '@/types/chat';
-import { parseHyperlinks } from '../web-search/parsing';
-import { LocalFileState } from '@/components/chat/send-message-form';
 
 /**
  * Converts database conversation message models to AI library message format.

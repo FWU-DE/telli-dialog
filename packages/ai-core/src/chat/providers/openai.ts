@@ -17,7 +17,10 @@ function createOpenAIClient(model: AiModel): OpenAI {
 export function constructOpenAITextStreamFn(model: AiModel): TextStreamFn {
   const client = createOpenAIClient(model);
 
-  return async function* getOpenAITextStream({ messages, model: modelName, maxTokens }, onComplete) {
+  return async function* getOpenAITextStream(
+    { messages, model: modelName, maxTokens },
+    onComplete,
+  ) {
     const stream = await client.chat.completions.create({
       model: modelName,
       messages: toOpenAIMessages(messages),

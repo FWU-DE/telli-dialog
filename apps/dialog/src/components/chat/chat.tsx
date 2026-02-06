@@ -25,7 +25,6 @@ import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { getConversationPath } from '@/utils/chat/path';
 import { Messages, type PendingFileModel } from './messages';
 import { useRouter } from 'next/navigation';
-import { toUIMessages } from '@/types/chat';
 import { WebsearchSource } from '@shared/db/types';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
 
