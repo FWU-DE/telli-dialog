@@ -2,13 +2,13 @@ import { generateUUID } from '@shared/utils/uuid';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
 import HeaderPortal from '../../../header-portal';
 import { notFound } from 'next/navigation';
-import { getReadOnlySignedUrl } from '@shared/s3';
 import Chat from '@/components/chat/chat';
 import Logo from '@/components/common/logo';
-import { Message } from 'ai';
+import { type ChatMessage as Message } from '@/types/chat';
 import { getCharacterForChatSession } from '@shared/characters/character-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
+import { getAvatarPictureUrl } from '@shared/files/fileService';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +31,7 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
     ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
     : [];
 
-  const maybeSignedImageUrl = await getReadOnlySignedUrl({ key: character.pictureId });
+  const avatarPictureUrl = await getAvatarPictureUrl(character.pictureId);
   const logoElement = <Logo federalStateId={federalState.id} />;
   return (
     <>
@@ -48,7 +48,7 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
         id={id}
         initialMessages={initialMessages}
         character={character}
-        imageSource={maybeSignedImageUrl}
+        imageSource={avatarPictureUrl}
         enableFileUpload={false}
         logoElement={logoElement}
       />

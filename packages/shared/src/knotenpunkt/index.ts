@@ -3,6 +3,7 @@ import { knotenpunktLlmModelSchema } from './schema';
 import { env } from '../env';
 
 export async function fetchLlmModels({ apiKey }: { apiKey: string }) {
+  // Todo: replace when api administration is moved to this repo
   const response = await fetch(`${env.apiUrl}/v1/models`, {
     headers: { Authorization: `Bearer ${apiKey}` },
     // Todo RL: Does not exist

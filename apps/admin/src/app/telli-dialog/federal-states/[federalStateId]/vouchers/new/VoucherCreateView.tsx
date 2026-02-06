@@ -18,6 +18,14 @@ export default function VoucherCreateView({ federalStateId }: { federalStateId: 
 
   const [createdVouchers, setCreatedVouchers] = useState<Voucher[]>([]);
 
+  const handleVoucherRevoked = (voucherCode: string) => {
+    setCreatedVouchers((prev) =>
+      prev.map((voucher) =>
+        voucher.code === voucherCode ? { ...voucher, status: 'revoked' as const } : voucher,
+      ),
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsedAmount = parseInt(amount);
@@ -113,7 +121,7 @@ export default function VoucherCreateView({ federalStateId }: { federalStateId: 
               <Button>Erstellte Codes als CSV herunterladen</Button>
             </CSVLink>
           </div>
-          <VoucherList vouchers={createdVouchers} />
+          <VoucherList vouchers={createdVouchers} onVoucherRevoked={handleVoucherRevoked} />
         </div>
       )}
     </div>

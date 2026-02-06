@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { ImageGenerationFn, AiModel } from '../types';
-import { ImageGenerationError } from '../errors';
+import { AiGenerationError } from '../../errors';
 
 export function constructIonosImageGenerationFn(llmModel: AiModel): ImageGenerationFn {
   if (llmModel.setting.provider !== 'ionos') {
@@ -25,7 +25,7 @@ export function constructIonosImageGenerationFn(llmModel: AiModel): ImageGenerat
     });
 
     if (!result.data || result.data.length === 0) {
-      throw new ImageGenerationError('No image data received from IONOS');
+      throw new AiGenerationError('No image data received from IONOS');
     }
 
     return {

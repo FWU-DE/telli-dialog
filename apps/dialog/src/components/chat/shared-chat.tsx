@@ -1,50 +1,50 @@
 'use client';
 
-import { useChat } from '@ai-sdk/react';
+import { useSharedChat } from '@/hooks/use-chat-hooks';
 import { FormEvent, RefObject, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { type SharedSchoolConversationSelectModel } from '@shared/db/schema';
+import { type LearningScenarioSelectModel } from '@shared/db/schema';
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import { FloatingText } from './floating-text';
-import { useCheckStatusCode } from '@/hooks/use-response-status';
-import { messageContainsAttachments } from '@/utils/chat/messages';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { Messages } from './messages';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import { useCheckStatusCode } from '@/hooks/use-response-status';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
   ...sharedSchoolChat
-}: SharedSchoolConversationSelectModel & { inviteCode: string; maybeSignedPictureUrl?: string }) {
+}: LearningScenarioSelectModel & { inviteCode: string; maybeSignedPictureUrl?: string }) {
   const t = useTranslations('shared-chats.shared');
 
-  const { id, inviteCode } = sharedSchoolChat;
+  const { id, inviteCode, modelId } = sharedSchoolChat;
   const timeLeft = calculateTimeLeftForLearningScenario(sharedSchoolChat);
   const chatActive = timeLeft > 0;
 
-  const searchParams = new URLSearchParams({ id, inviteCode });
-  const endpoint = `/api/shared-chat?${searchParams.toString()}`;
-
   const [dialogStarted, setDialogStarted] = useState(false);
-  const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
+  const { error, handleError, resetError } = useCheckStatusCode();
 
-  // substitute the error object from the useChat hook, to dislay a user friendly error message in German
-  const { error, handleResponse, handleError, resetError } = useCheckStatusCode();
-
-  const { messages, setMessages, input, handleInputChange, handleSubmit, reload, stop, status } =
-    useChat({
-      id,
-      initialMessages: [],
-      api: endpoint,
-      experimental_throttle: 100,
-      maxSteps: 2,
-      onResponse: handleResponse,
-      onError: handleError,
-    });
+  const {
+    messages,
+    uiMessages,
+    setMessages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    reload,
+    stop,
+    status,
+  } = useSharedChat({
+    sharedChatId: id,
+    inviteCode,
+    initialMessages: [],
+    modelId: modelId ?? undefined,
+    onError: handleError,
+  });
 
   const scrollRef = useAutoScroll([messages, id, inviteCode]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -53,8 +53,8 @@ export default function SharedChat({
     e.preventDefault();
 
     try {
-      setLastMessageHasAttachments(messageContainsAttachments(input));
-      handleSubmit(e, {});
+      resetError();
+      await handleSubmit(e, {});
     } catch (error) {
       console.error(error);
     }
@@ -75,7 +75,7 @@ export default function SharedChat({
   return (
     <>
       {!chatActive && (
-        <ExpiredChatModal conversationMessages={messages} title={sharedSchoolChat.name} />
+        <ExpiredChatModal conversationMessages={uiMessages} title={sharedSchoolChat.name} />
       )}
       <div className="flex flex-col h-full w-full">
         <SharedChatHeader
@@ -84,14 +84,14 @@ export default function SharedChat({
           t={t}
           handleOpenNewChat={handleOpenNewChat}
           title={sharedSchoolChat.name}
-          messages={messages}
+          messages={uiMessages}
           dialogStarted={dialogStarted}
           imageSource={maybeSignedPictureUrl}
         />
         <hr className="w-full border-gray-200 mb-2" />
         <div
           ref={containerRef}
-          className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden"
+          className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden relative"
         >
           <div
             ref={scrollRef}
@@ -107,7 +107,6 @@ export default function SharedChat({
                   parentRef={containerRef as RefObject<HTMLDivElement>}
                   maxWidth={600}
                   maxHeight={600}
-                  initialMargin={32}
                   minMargin={16}
                 />
               )}
@@ -121,15 +120,14 @@ export default function SharedChat({
               />
             ) : (
               <Messages
-                messages={messages}
+                messages={uiMessages}
                 isLoading={isLoading}
                 status={status}
                 reload={reload}
-                doesLastUserMessageContainLinkOrFile={lastMessageHasAttachments}
                 containerClassName="flex flex-col gap-4"
               />
             )}
-            <ErrorChatPlaceholder error={error} handleReload={handleReload} />
+            {error && <ErrorChatPlaceholder error={error} handleReload={handleReload} />}
           </div>
           <div className="w-full max-w-5xl mx-auto px-4 pb-4">
             {dialogStarted && (

@@ -1,7 +1,7 @@
 'use client';
 
-import { useChat } from '@ai-sdk/react';
-import { FormEvent, useState } from 'react';
+import { useCharacterChat, type ChatMessage } from '@/hooks/use-chat-hooks';
+import { FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
 import { CharacterWithShareDataModel } from '@shared/db/schema';
 import { SharedChatHeader } from '@/components/chat/shared-header-bar';
@@ -10,15 +10,13 @@ import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { ChatInputBox } from '@/components/chat/chat-input-box';
 import { ErrorChatPlaceholder } from '@/components/chat/error-chat-placeholder';
 import useBreakpoints from '../hooks/use-breakpoints';
-import { useCheckStatusCode } from '@/hooks/use-response-status';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
-import { Message } from 'ai';
 import { AssistantIcon } from './assistant-icon';
-import { messageContainsAttachments } from '@/utils/chat/messages';
 import { Messages } from './messages';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 import StreamingFinishedMarker from './streaming-finished-marker';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
+import { useCheckStatusCode } from '@/hooks/use-response-status';
 
 /**
  * This component is used if a character is shared via invite code.
@@ -29,31 +27,33 @@ export default function CharacterSharedChat({
 }: CharacterWithShareDataModel & { inviteCode: string; imageSource?: string }) {
   const t = useTranslations('characters.shared');
 
-  const { id, inviteCode } = character;
+  const { id, inviteCode, modelId } = character;
   const timeLeft = calculateTimeLeftForLearningScenario(character);
   const chatActive = timeLeft > 0;
 
-  const searchParams = new URLSearchParams({ id, inviteCode });
-  const endpoint = `/api/character?${searchParams.toString()}`;
+  const { error, handleError, resetError } = useCheckStatusCode();
 
-  const [lastMessageHasAttachments, setLastMessageHasAttachments] = useState(false);
-
-  // substitute the error object from the useChat hook, to dislay a user friendly error message in German
-  const { error, handleResponse, handleError, resetError } = useCheckStatusCode();
-  const initialMessages: Message[] = character.initialMessage
+  const initialMessages: ChatMessage[] = character.initialMessage
     ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
     : [];
 
-  const { messages, setMessages, input, handleInputChange, handleSubmit, reload, status, stop } =
-    useChat({
-      id,
-      initialMessages,
-      api: endpoint,
-      experimental_throttle: 100,
-      maxSteps: 2,
-      onResponse: handleResponse,
-      onError: handleError,
-    });
+  const {
+    messages,
+    uiMessages,
+    setMessages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    reload,
+    status,
+    stop,
+  } = useCharacterChat({
+    characterId: id,
+    inviteCode,
+    initialMessages,
+    modelId: modelId ?? undefined,
+    onError: handleError,
+  });
 
   const scrollRef = useAutoScroll([messages, id, inviteCode]);
   const { isBelow } = useBreakpoints();
@@ -62,8 +62,8 @@ export default function CharacterSharedChat({
     e.preventDefault();
 
     try {
-      setLastMessageHasAttachments(messageContainsAttachments(input));
-      handleSubmit(e, {});
+      resetError();
+      await handleSubmit(e, {});
     } catch (error) {
       console.error(error);
     }
@@ -89,7 +89,7 @@ export default function CharacterSharedChat({
 
   return (
     <>
-      {!chatActive && <ExpiredChatModal conversationMessages={messages} title={character.name} />}
+      {!chatActive && <ExpiredChatModal conversationMessages={uiMessages} title={character.name} />}
       <div className="flex flex-col h-full w-full overflow-hidden">
         <SharedChatHeader
           chatActive={chatActive}
@@ -97,7 +97,7 @@ export default function CharacterSharedChat({
           t={t}
           handleOpenNewChat={handleOpenNewChat}
           title={character.name}
-          messages={messages}
+          messages={uiMessages}
           // currently this is redundant, due to the inconsistency with the shared school chat initial page
           dialogStarted={messages.length > 0}
         />
@@ -116,16 +116,15 @@ export default function CharacterSharedChat({
               />
             ) : (
               <Messages
-                messages={messages}
+                messages={uiMessages}
                 isLoading={isLoading}
                 status={status}
                 reload={reload}
                 assistantIcon={assistantIcon}
-                doesLastUserMessageContainLinkOrFile={lastMessageHasAttachments}
                 containerClassName="flex flex-col gap-4"
               />
             )}
-            <ErrorChatPlaceholder error={error} handleReload={handleReload} />
+            {error && <ErrorChatPlaceholder error={error} handleReload={handleReload} />}
           </div>
           <div className="w-full max-w-5xl mx-auto px-4 pb-4">
             <div className="flex flex-col">

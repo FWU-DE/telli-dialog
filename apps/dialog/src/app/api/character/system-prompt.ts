@@ -9,12 +9,9 @@ import {
 import { WebsearchSource } from '@shared/db/types';
 
 export function constructBaseCharacterSystemPrompt(character: CharacterSelectModel) {
-  return `Du bist ein Dialogpartner, der in einer Schulklasse eingesetzt wird. Du verkörperst ${character.name}.
-Bitte antworte stets im Rahmen deiner Rolle als ${character.name}.
+  return `Du bist ${character.name}. ${character.description}
+  
 ${LANGUAGE_GUIDELINES}
-
-## Einige Informationen über dich
-${character.description}
 
 ${formatList('## Kontext', [
   {
@@ -35,7 +32,9 @@ ${formatList('## Kontext', [
 ${character.learningContext}
 ${character.competence ? `\n## Die Lernenden sollen folgende Kompetenzen erwerben\n${character.competence}` : ''}
 ${character.specifications ? `\n## Du sollst folgendes beachten\n${character.specifications}` : ''}
-${character.restrictions ? `\n## Folgende Dinge sollst du AUF KEINEN FALL tun\n${character.restrictions}` : ''}`;
+${character.restrictions ? `\n## Folgende Dinge sollst du AUF KEINEN FALL tun\n${character.restrictions}` : ''}
+
+Bitte antworte stets im Rahmen deiner Rolle als ${character.name}.`;
 }
 
 export function constructCharacterSystemPrompt({

@@ -7,10 +7,9 @@ import {
   CustomGptFileMapping,
   customGptTable,
   fileTable,
+  LearningScenarioFileMapping,
+  learningScenarioTable,
   llmModelTable,
-  SharedSchoolConversationFileMapping,
-  SharedSchoolConversationInsertModel,
-  sharedSchoolConversationTable,
   userTable,
 } from '@shared/db/schema';
 import { eq } from 'drizzle-orm';
@@ -45,9 +44,7 @@ test.describe('cleanup', () => {
 
   test.afterEach(async () => {
     await db.transaction(async (tx) => {
-      await tx
-        .delete(sharedSchoolConversationTable)
-        .where(eq(sharedSchoolConversationTable.userId, userId));
+      await tx.delete(learningScenarioTable).where(eq(learningScenarioTable.userId, userId));
       await tx.delete(characterTable).where(eq(characterTable.userId, userId));
       await tx.delete(customGptTable).where(eq(customGptTable.userId, userId));
       await tx.delete(userTable).where(eq(userTable.id, userId));
@@ -75,14 +72,14 @@ test.describe('cleanup', () => {
 
     const resultDeleted = await db
       .select()
-      .from(sharedSchoolConversationTable)
-      .where(eq(sharedSchoolConversationTable.id, oldLearningScenario.id));
+      .from(learningScenarioTable)
+      .where(eq(learningScenarioTable.id, oldLearningScenario.id));
     expect(resultDeleted).toHaveLength(0);
 
     const resultExisting = await db
       .select()
-      .from(sharedSchoolConversationTable)
-      .where(eq(sharedSchoolConversationTable.id, newLearningScenario.id));
+      .from(learningScenarioTable)
+      .where(eq(learningScenarioTable.id, newLearningScenario.id));
     expect(resultExisting).toHaveLength(1);
   });
 
@@ -154,11 +151,13 @@ test('should return 403 if authorization header is missing', async ({ request })
   expect(response.status()).toBe(403);
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable);
 async function createLearningScenario(
-  data?: Partial<SharedSchoolConversationInsertModel> & { createdAt?: Date },
+  data?: Partial<z.infer<typeof learningScenarioInsertSchema>>,
 ) {
   const [learningScenario] = await db
-    .insert(sharedSchoolConversationTable)
+    .insert(learningScenarioTable)
     .values({
       name: '',
       userId: generateUUID(),
@@ -172,8 +171,8 @@ async function createLearningScenario(
 
   const fileId = await createFile();
   await db
-    .insert(SharedSchoolConversationFileMapping)
-    .values({ sharedSchoolConversationId: learningScenario.id, fileId });
+    .insert(LearningScenarioFileMapping)
+    .values({ learningScenarioId: learningScenario.id, fileId });
 
   return learningScenario;
 }

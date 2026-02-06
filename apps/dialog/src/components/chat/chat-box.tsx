@@ -1,6 +1,6 @@
 import { FileModel } from '@shared/db/schema';
 import DisplayUploadedFile from './display-uploaded-file';
-import DisplayUploadedImage from './display-uploaded-image';
+import DisplayUploadedImage, { type PendingFileModel } from './display-uploaded-image';
 import TelliClipboardButton from '../common/clipboard-button';
 import ReloadIcon from '../icons/reload';
 import MarkdownDisplay from './markdown-display';
@@ -11,20 +11,21 @@ import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { iconClassName } from '@/utils/tailwind/icon';
 import useBreakpoints from '../hooks/use-breakpoints';
 import { isImageFile } from '@/utils/files/generic';
-import { UIMessage } from 'ai';
+import { type UIMessage, type ChatStatus } from '@/types/chat';
 import { ReactNode } from 'react';
-import { UseChatHelpers } from '@ai-sdk/react';
 import { WebsearchSource } from '@shared/db/types';
+
+// Re-export for consumers
+export type { PendingFileModel };
 
 export function ChatBox({
   assistantIcon,
   children,
   fileMapping,
+  pendingFileMapping,
   index,
-  initialFiles,
   websources,
   isLastNonUser,
-  isLastUser,
   isLoading,
   regenerateMessage,
   status,
@@ -32,14 +33,13 @@ export function ChatBox({
   assistantIcon?: ReactNode;
   children: UIMessage;
   fileMapping?: Map<string, FileModel[]>;
+  pendingFileMapping?: Map<string, PendingFileModel[]>;
   index: number;
-  initialFiles?: FileModel[];
   websources?: WebsearchSource[];
   isLastNonUser: boolean;
-  isLastUser?: boolean;
   isLoading: boolean;
   regenerateMessage: () => void;
-  status: UseChatHelpers['status'];
+  status: ChatStatus;
 }) {
   const tCommon = useTranslations('common');
   const { isAtLeast } = useBreakpoints();
@@ -48,8 +48,14 @@ export function ChatBox({
     children.role === 'user'
       ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary-light text-primary-foreground max-w-[70%] break-words'
       : 'w-fit';
-  const fileMatch = fileMapping?.get(children.id) !== undefined;
-  const allFiles = fileMatch ? fileMapping.get(children.id) : initialFiles;
+
+  // Check both DB file mapping and pending files for this message
+  const dbFiles = fileMapping?.get(children.id);
+  const pendingFiles = pendingFileMapping?.get(children.id);
+  // Prefer DB files if available (they're persisted), otherwise use pending files
+  const allFiles = dbFiles ?? pendingFiles;
+  const hasFiles = allFiles !== undefined && allFiles.length > 0;
+
   const urls = children.role === 'user' ? (parseHyperlinks(children.content) ?? []) : [];
   const websearchSources = [...(websources ?? [])];
 
@@ -64,7 +70,7 @@ export function ChatBox({
   const nonImageFiles = allFiles?.filter((file) => !isImageFile(file.name)) ?? [];
 
   const maybefileAttachment =
-    allFiles !== undefined && children.role === 'user' && (isLastUser || fileMatch) ? (
+    hasFiles && children.role === 'user' ? (
       <div className="flex flex-col gap-4 pb-0 pt-0 self-end mb-4">
         {/* Display images */}
         {imageFiles.length > 0 && (
@@ -135,7 +141,7 @@ export function ChatBox({
     <>
       <div key={index} className={cn('w-full text-secondary-foreground', userClassName, margin)}>
         <div className="" aria-label={`${children.role} message ${Math.floor(index / 2 + 1)}`}>
-          <div className={cn('flex flex-row', isAtLeast.sm ? 'flex-row' : 'flex-col')}>
+          <div className={cn('flex', isAtLeast.sm ? 'flex-row' : 'flex-col')}>
             {children.role === 'assistant' && assistantIcon}
             <div className="flex flex-col items-start gap-2">
               {messageContent}

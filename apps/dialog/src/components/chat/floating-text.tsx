@@ -17,7 +17,6 @@ export function FloatingText({
   parentRef,
   maxWidth,
   maxHeight,
-  initialMargin,
   minMargin,
 }: {
   learningContext: string;
@@ -26,12 +25,11 @@ export function FloatingText({
   parentRef: React.RefObject<HTMLDivElement>;
   maxWidth: number;
   maxHeight: number;
-  initialMargin: number;
   minMargin: number;
 }) {
   const { isAtLeast } = useBreakpoints();
   const [isMinimized, setIsMinimized] = React.useState(false);
-  const [position, setPosition] = React.useState({ x: 0, y: 0 });
+  const [position, setPosition] = React.useState({ x: minMargin, y: minMargin });
   const [dragging, setDragging] = React.useState(false);
   const [rel, setRel] = React.useState<{ x: number; y: number } | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -50,29 +48,21 @@ export function FloatingText({
   }) {
     if (!parentRef.current) return { x, y };
     const parentRect = parentRef.current.getBoundingClientRect();
-    const newX = Math.max(
-      parentRect.x + minMargin,
-      Math.min(x, parentRect.width + parentRect.x - containerWidth - minMargin),
-    );
-    const newY = Math.max(
-      parentRect.y + minMargin,
-      Math.min(y, parentRect.height + parentRect.y - containerHeight - minMargin),
-    );
+    const newX = Math.max(minMargin, Math.min(x, parentRect.width - containerWidth - minMargin));
+    const newY = Math.max(minMargin, Math.min(y, parentRect.height - containerHeight - minMargin));
     return { x: newX, y: newY };
   }
 
   React.useEffect(() => {
-    // Set initial position within parent
+    // Set initial position within parent (top-left corner with minMargin)
     if (parentRef.current && containerRef.current) {
-      const parentRect = parentRef.current.getBoundingClientRect();
-      const containerRect = containerRef.current.getBoundingClientRect();
       setPosition({
-        x: parentRect.width + parentRect.x - (containerRect?.width ?? maxWidth) - initialMargin,
-        y: parentRect.height + parentRect.y - (containerRect?.height ?? maxHeight) - initialMargin,
+        x: minMargin,
+        y: minMargin,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [parentRef.current]);
+  }, [parentRef.current, minMargin]);
 
   React.useEffect(() => {
     function onMouseMove(e: MouseEvent) {
@@ -84,8 +74,9 @@ export function FloatingText({
       const containerWidth = containerRect.width;
       const containerHeight = containerRect.height;
 
-      const newX = e.clientX - rel.x;
-      const newY = e.clientY - rel.y;
+      const parentRect = parentRef.current.getBoundingClientRect();
+      const newX = e.clientX - parentRect.left - rel.x;
+      const newY = e.clientY - parentRect.top - rel.y;
 
       // Clamp values within parent
       const clamped = clampPosition({ x: newX, y: newY, containerWidth, containerHeight });
@@ -107,8 +98,9 @@ export function FloatingText({
       const containerWidth = containerRect.width;
       const containerHeight = containerRect.height;
 
-      const newX = touch.clientX - rel.x;
-      const newY = touch.clientY - rel.y;
+      const parentRect = parentRef.current.getBoundingClientRect();
+      const newX = touch.clientX - parentRect.left - rel.x;
+      const newY = touch.clientY - parentRect.top - rel.y;
 
       // Clamp values within parent
       const clamped = clampPosition({ x: newX, y: newY, containerWidth, containerHeight });
@@ -195,15 +187,12 @@ export function FloatingText({
                 const rect = containerRef.current.getBoundingClientRect();
                 const newPos = {
                   x: Math.max(
-                    0,
-                    Math.min(position.x, parentRect.width + parentRect.x - rect.width - minMargin),
+                    minMargin,
+                    Math.min(position.x, parentRect.width - rect.width - minMargin),
                   ),
                   y: Math.max(
-                    0,
-                    Math.min(
-                      position.y,
-                      parentRect.height + parentRect.y - rect.height - minMargin,
-                    ),
+                    minMargin,
+                    Math.min(position.y, parentRect.height - rect.height - minMargin),
                   ),
                 };
                 if (newPos.x !== position.x || newPos.y !== position.y) {

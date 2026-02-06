@@ -10,8 +10,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
-import Image from 'next/image';
-import { FileModel, SharedSchoolConversationSelectModel } from '@shared/db/schema';
+import { FileModel, LearningScenarioSelectModel } from '@shared/db/schema';
 import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../schema';
 import {
   removeFileFromLearningScenarioAction,
@@ -36,6 +35,7 @@ import CropImageAndUploadButton from '@/components/crop-uploaded-image/crop-imag
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { AttachedLinks } from '@/components/forms/attached-links';
 import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
+import AvatarPicture from '@/components/common/avatar-picture';
 import { WebsearchSource } from '@shared/db/types';
 
 export default function SharedSchoolChatForm({
@@ -45,7 +45,7 @@ export default function SharedSchoolChatForm({
   maybeSignedPictureUrl,
   readOnly,
   ...sharedSchoolChat
-}: SharedSchoolConversationSelectModel & {
+}: LearningScenarioSelectModel & {
   existingFiles: FileModel[];
   isCreating: boolean;
   initialLinks: WebsearchSource[];
@@ -263,18 +263,10 @@ export default function SharedSchoolChatForm({
                 className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4"
               >
                 {maybeSignedPictureUrl ? (
-                  <Image
-                    src={maybeSignedPictureUrl || ''}
+                  <AvatarPicture
+                    src={maybeSignedPictureUrl}
                     alt="Profile Picture"
-                    width={170}
-                    height={170}
-                    className="border-[1px] rounded-enterprise-md"
-                    unoptimized
-                    style={{
-                      width: '170px',
-                      height: '170px',
-                      objectFit: 'cover',
-                    }}
+                    variant="large"
                   />
                 ) : (
                   <EmptyImageIcon className="w-10 h-10" />

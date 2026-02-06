@@ -6,8 +6,15 @@ import {
   fileTable,
   TextChunkTable,
 } from '@shared/db/schema';
-import { copyFileInS3, deleteFileFromS3, deleteFilesFromS3, uploadFileToS3 } from '@shared/s3';
+import {
+  copyFileInS3,
+  deleteFileFromS3,
+  deleteFilesFromS3,
+  getReadOnlySignedUrl,
+  uploadFileToS3,
+} from '@shared/s3';
 import { cnanoid } from '../random/randomService';
+import { logError } from '@shared/logging';
 
 const MESSAGE_ATTACHMENTS_FOLDER_NAME = 'message_attachments';
 
@@ -155,4 +162,21 @@ export async function uploadAvatarPicture({ key, croppedImageBlob }: UploadAvata
     body: croppedImageBlob,
     contentType: croppedImageBlob.type,
   });
+}
+
+/**
+ * Gets a signed URL for read-only access to an avatar picture in S3
+ * even if the object does not exist in S3.
+ *
+ * @param key
+ * @returns undefined if key is falsy.
+ */
+export async function getAvatarPictureUrl(key: string | null | undefined) {
+  if (!key) return undefined;
+  try {
+    return await getReadOnlySignedUrl({ key, options: { expiresIn: 3600 } });
+  } catch (error) {
+    logError('Error getting signed URL for avatar picture:', error);
+    return undefined;
+  }
 }

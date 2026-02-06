@@ -1,7 +1,7 @@
-import { UseChatHelpers } from '@ai-sdk/react';
+import { ChatStatus } from '@/types/chat';
 
 export type StreamingFinishedMarkerProps = {
-  status: UseChatHelpers['status'];
+  status: ChatStatus;
 };
 
 /**

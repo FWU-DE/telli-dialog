@@ -1,21 +1,21 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '..';
 import {
-  sharedSchoolConversationTable,
-  sharedSchoolConversationUsageTracking,
-  SharedSchoolConversationUsageTrackingInsertModel,
-  SharedSchoolConversationFileMapping,
-  conversationTable,
   conversationMessageTable,
+  conversationTable,
   fileTable,
+  LearningScenarioFileMapping,
+  learningScenarioTable,
+  sharedLearningScenarioUsageTracking,
+  SharedLearningScenarioUsageTrackingInsertModel,
   TextChunkTable,
 } from '../schema';
 
 export async function dbGetSharedChatsByUserId({ userId }: { userId: string }) {
   return await db
     .select()
-    .from(sharedSchoolConversationTable)
-    .where(eq(sharedSchoolConversationTable.userId, userId));
+    .from(learningScenarioTable)
+    .where(eq(learningScenarioTable.userId, userId));
 }
 
 export async function dbGetSharedSchoolChatById({
@@ -28,12 +28,9 @@ export async function dbGetSharedSchoolChatById({
   return (
     await db
       .select()
-      .from(sharedSchoolConversationTable)
+      .from(learningScenarioTable)
       .where(
-        and(
-          eq(sharedSchoolConversationTable.id, sharedChatId),
-          eq(sharedSchoolConversationTable.userId, userId),
-        ),
+        and(eq(learningScenarioTable.id, sharedChatId), eq(learningScenarioTable.userId, userId)),
       )
   )[0];
 }
@@ -47,30 +44,17 @@ export async function dbGetSharedChatByIdAndInviteCode({
 }) {
   const [row] = await db
     .select()
-    .from(sharedSchoolConversationTable)
-    .where(
-      and(
-        eq(sharedSchoolConversationTable.id, id),
-        eq(sharedSchoolConversationTable.inviteCode, inviteCode),
-      ),
-    );
+    .from(learningScenarioTable)
+    .where(and(eq(learningScenarioTable.id, id), eq(learningScenarioTable.inviteCode, inviteCode)));
 
-  // if the school conversation is no longer shared, return the conversation entity
-  if (row === undefined) {
-    const [row] = await db
-      .select()
-      .from(sharedSchoolConversationTable)
-      .where(eq(sharedSchoolConversationTable.id, id));
-    return row;
-  }
   return row;
 }
 
 export async function dbUpdateTokenUsageBySharedChatId(
-  value: SharedSchoolConversationUsageTrackingInsertModel,
+  value: SharedLearningScenarioUsageTrackingInsertModel,
 ) {
   const insertedUsage = (
-    await db.insert(sharedSchoolConversationUsageTracking).values(value).returning()
+    await db.insert(sharedLearningScenarioUsageTracking).values(value).returning()
   )[0];
   if (insertedUsage === undefined) {
     throw Error('Could not track the token usage');
@@ -88,27 +72,25 @@ export async function dbDeleteSharedSchoolChatByIdAndUserId({
 }) {
   const [sharedChat] = await db
     .select()
-    .from(sharedSchoolConversationTable)
+    .from(learningScenarioTable)
     .where(
-      and(
-        eq(sharedSchoolConversationTable.id, sharedChatId),
-        eq(sharedSchoolConversationTable.userId, userId),
-      ),
+      and(eq(learningScenarioTable.id, sharedChatId), eq(learningScenarioTable.userId, userId)),
     );
 
   if (sharedChat === undefined) {
     throw Error('Shared school chat does not exist');
   }
 
-  const deletedSharedChat = await db.transaction(async (tx) => {
+  const deletedLearningScenario = await db.transaction(async (tx) => {
     const relatedFiles = await tx
-      .select({ id: SharedSchoolConversationFileMapping.fileId })
-      .from(SharedSchoolConversationFileMapping)
-      .where(eq(SharedSchoolConversationFileMapping.sharedSchoolConversationId, sharedChat.id));
+      .select({ id: LearningScenarioFileMapping.fileId })
+      .from(LearningScenarioFileMapping)
+      .where(eq(LearningScenarioFileMapping.learningScenarioId, sharedChat.id));
 
     const conversations = await tx
       .select({ id: conversationTable.id })
       .from(conversationTable)
+      // TODO: customGptId is wrong! replace with learningScenarioId, once it's available
       .where(eq(conversationTable.customGptId, sharedChat.id));
 
     if (conversations.length > 0) {
@@ -119,10 +101,11 @@ export async function dbDeleteSharedSchoolChatByIdAndUserId({
         ),
       );
     }
+    // TODO: customGptId is wrong! replace with learningScenarioId, once it's available
     await tx.delete(conversationTable).where(eq(conversationTable.customGptId, sharedChat.id));
     await tx
-      .delete(SharedSchoolConversationFileMapping)
-      .where(eq(SharedSchoolConversationFileMapping.sharedSchoolConversationId, sharedChat.id));
+      .delete(LearningScenarioFileMapping)
+      .where(eq(LearningScenarioFileMapping.learningScenarioId, sharedChat.id));
     await tx.delete(TextChunkTable).where(
       inArray(
         TextChunkTable.fileId,
@@ -135,23 +118,20 @@ export async function dbDeleteSharedSchoolChatByIdAndUserId({
         relatedFiles.map((f) => f.id),
       ),
     );
-    const deletedSharedChat = (
+    const deletedLearningScenario = (
       await tx
-        .delete(sharedSchoolConversationTable)
+        .delete(learningScenarioTable)
         .where(
-          and(
-            eq(sharedSchoolConversationTable.id, sharedChatId),
-            eq(sharedSchoolConversationTable.userId, userId),
-          ),
+          and(eq(learningScenarioTable.id, sharedChatId), eq(learningScenarioTable.userId, userId)),
         )
         .returning()
     )[0];
 
-    if (deletedSharedChat === undefined) {
+    if (deletedLearningScenario === undefined) {
       throw Error('Could not delete shared school chat');
     }
-    return deletedSharedChat;
+    return deletedLearningScenario;
   });
 
-  return deletedSharedChat;
+  return deletedLearningScenario;
 }
