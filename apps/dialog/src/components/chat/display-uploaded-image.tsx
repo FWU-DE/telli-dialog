@@ -11,8 +11,11 @@ import { EmptyImageIcon } from '../icons/empty-image';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
 
+// Extended type for pending files that includes a local blob URL
+export type PendingFileModel = FileModel & { localUrl?: string };
+
 type DisplayUploadedImageProps = {
-  file: FileModel;
+  file: FileModel | PendingFileModel;
   status: FileStatus;
   onDeattachFile?: () => void;
   showBanner?: boolean;
@@ -25,8 +28,12 @@ export default function DisplayUploadedImage({
   showBanner = true,
 }: DisplayUploadedImageProps) {
   const t = useTranslations();
+
+  // Check if file has a local URL (for pending files)
+  const localUrl = 'localUrl' in file ? file.localUrl : undefined;
+
   const {
-    data: imageUrl,
+    data: signedUrl,
     isLoading,
     error,
   } = useQuery({
@@ -37,10 +44,14 @@ export default function DisplayUploadedImage({
       });
       return signedUrl;
     },
-    enabled: status === 'processed', // Only fetch when status is processed
+    // Don't fetch if we have a local URL or status is not processed
+    enabled: status === 'processed' && !localUrl,
     staleTime: 5 * 60 * 1000, // 5 minutes - signed URLs are typically valid for longer
     gcTime: 10 * 60 * 1000, // 10 minutes garbage collection time
   });
+
+  // Use local URL if available, otherwise use signed URL from S3
+  const imageUrl = localUrl ?? signedUrl;
 
   if (status === 'uploading') {
     return (
@@ -50,7 +61,8 @@ export default function DisplayUploadedImage({
       </div>
     );
   }
-  if (isLoading) {
+  // Only show loading if we don't have a local URL and are fetching signed URL
+  if (isLoading && !localUrl) {
     return (
       <div className="flex items-center justify-center gap-2 text-sm relative group py-4 pr-6 pl-4 shrink-0 max-w-[250px] min-w-[100px] bg-gray-50 rounded-lg">
         <EmptyImageIcon className={cn(`w-[200px]`, 'text-gray-300 animate-pulse')} />
@@ -58,7 +70,7 @@ export default function DisplayUploadedImage({
     );
   }
 
-  if (error || !imageUrl) {
+  if ((error && !localUrl) || !imageUrl) {
     return (
       <div className="flex items-center justify-center gap-2 text-sm relative group py-4 pr-6 pl-4 shrink-0 max-w-[250px] min-w-[100px] bg-red-50 rounded-lg">
         <CrossIcon className="w-5 h-5 text-red-500" />

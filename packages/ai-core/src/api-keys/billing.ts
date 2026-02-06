@@ -1,10 +1,44 @@
 import {
   dbCreateImageGenerationUsage,
+  dbCreateCompletionUsage,
   dbGetApiKeyLimit,
   dbGetCompletionUsageCostsSinceStartOfCurrentMonth,
   dbGetImageGenerationUsageCostsSinceStartOfCurrentMonth,
 } from '../api-db/functions';
 import { AiModel } from '../images/types';
+import type { AiModel as TextAiModel, TokenUsage } from '../chat/types';
+
+const TOKEN_AMOUNT_PER_PRICE = 1_000_000;
+const CENT_MULTIPLIER = 10;
+// TODO: Why are we saving Model prices in tenths of a cent?
+const PRICE_AND_CENT_MULTIPLIER = TOKEN_AMOUNT_PER_PRICE * CENT_MULTIPLIER;
+
+function calculatePriceInCentByTextModelAndUsage({
+  completionTokens,
+  promptTokens,
+  priceMetadata,
+}: {
+  priceMetadata: { completionTokenPrice: number; promptTokenPrice: number };
+  completionTokens: number;
+  promptTokens: number;
+}) {
+  const completionTokenPrice = completionTokens * priceMetadata.completionTokenPrice;
+  const promptTokenPrice = promptTokens * priceMetadata.promptTokenPrice;
+
+  return (completionTokenPrice + promptTokenPrice) / PRICE_AND_CENT_MULTIPLIER;
+}
+
+// TODO: Re-enable when embedding billing is implemented
+// function calculatePriceInCentByEmbeddingModelAndUsage({
+//   promptTokens,
+//   priceMetadata,
+// }: {
+//   priceMetadata: { promptTokenPrice: number };
+//   promptTokens: number;
+// }) {
+//   const promptTokenPrice = promptTokens * priceMetadata.promptTokenPrice;
+//   return promptTokenPrice / PRICE_AND_CENT_MULTIPLIER;
+// }
 
 /**
  * Bills image generation usage to the specified API key.
@@ -27,6 +61,41 @@ export async function billImageGenerationUsageToApiKey(
   await dbCreateImageGenerationUsage({
     apiKeyId,
     modelId: imageModel.id,
+    costsInCent: priceInCent,
+  });
+  return priceInCent;
+}
+/**
+ * Bills text generation usage to the specified API key.
+ *
+ * This function records and charges the cost of text generation
+ * against the quota or billing account associated with the given API key.
+ *
+ * @param apiKeyId - The unique identifier of the API key to bill
+ * @param textModel - The text model used for generation
+ * @param usage - Token usage information
+ * @returns A promise that includes the price in cents charged for the operation
+ */
+export async function billTextGenerationUsageToApiKey(
+  apiKeyId: string,
+  textModel: TextAiModel,
+  usage: TokenUsage,
+): Promise<number> {
+  if (textModel.priceMetadata.type !== 'text') {
+    throw new Error(`Model ${textModel.id} is not a text model`);
+  }
+  const priceInCent = calculatePriceInCentByTextModelAndUsage({
+    completionTokens: usage.completionTokens,
+    promptTokens: usage.promptTokens,
+    priceMetadata: textModel.priceMetadata,
+  });
+
+  await dbCreateCompletionUsage({
+    apiKeyId,
+    modelId: textModel.id,
+    completionTokens: usage.completionTokens,
+    promptTokens: usage.promptTokens,
+    totalTokens: usage.totalTokens,
     costsInCent: priceInCent,
   });
   return priceInCent;

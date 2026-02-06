@@ -11,7 +11,6 @@ type PromptSuggestionsProps = {
 export default function PromptSuggestions({
   suggestions,
   onSelectSuggestion,
-  hidden = false,
 }: PromptSuggestionsProps) {
   return (
     <div
@@ -28,7 +27,6 @@ export default function PromptSuggestions({
             key={index}
             className={cn(
               'border-[1px] rounded-enterprise-md py-2.5 px-4 hover:border-primary',
-              hidden && 'invisible',
               index === 0 && suggestions.length % 2 !== 0 ? 'col-span-2' : '',
             )}
           >

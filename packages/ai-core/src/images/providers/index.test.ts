@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { generateImage } from './index';
-import { ProviderConfigurationError } from '../errors';
+import { ProviderConfigurationError } from '../../errors';
 import type { AiModel } from '../types';
 
 // Mock provider modules

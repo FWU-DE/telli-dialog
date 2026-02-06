@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import type { AiModel, ImageGenerationFn } from '../types';
-import { ImageGenerationError, ProviderConfigurationError } from '../errors';
+import { AiGenerationError, ProviderConfigurationError } from '../../errors';
 
 function createAzureClient(model: AiModel): {
   client: OpenAI;
@@ -43,7 +43,7 @@ export function constructAzureImageGenerationFn(model: AiModel): ImageGeneration
     );
 
     if (!result.data || result.data.length === 0) {
-      throw new ImageGenerationError('No image data received from Azure OpenAI');
+      throw new AiGenerationError('No image data received from Azure OpenAI');
     }
 
     return {

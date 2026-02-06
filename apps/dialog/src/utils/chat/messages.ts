@@ -1,19 +1,25 @@
 import { ConversationMessageModel } from '@shared/db/types';
-import { Message } from 'ai';
+import { type ChatMessage } from '@/types/chat';
 
 /**
  * Converts database conversation message models to AI library message format.
+ * Filters out 'data' role messages which are not used in chat.
  *
  * @param messages - Array of conversation messages from the database
- * @returns Array of messages compatible with the AI library format
+ * @returns Array of messages compatible with the chat format
  */
 export function convertMessageModelToMessage(
   messages: Array<ConversationMessageModel>,
-): Array<Message> {
-  return messages.map((message) => ({
-    id: message.id,
-    role: message.role,
-    content: message.content,
-    createdAt: message.createdAt,
-  }));
+): Array<ChatMessage> {
+  return messages
+    .filter(
+      (message) =>
+        message.role === 'user' || message.role === 'assistant' || message.role === 'system',
+    )
+    .map((message) => ({
+      id: message.id,
+      role: message.role as 'user' | 'assistant' | 'system',
+      content: message.content,
+      createdAt: message.createdAt,
+    }));
 }

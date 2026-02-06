@@ -1,19 +1,21 @@
-import { UIMessage } from 'ai';
-import { UseChatHelpers } from '@ai-sdk/react';
-import { ChatBox } from './chat-box';
+import { type UIMessage, type ChatStatus } from '@/types/chat';
+import { ChatBox, type PendingFileModel } from './chat-box';
 import LoadingAnimation from './loading-animation';
 import { FileModel } from '@shared/db/schema';
 import { WebsearchSource } from '@shared/db/types';
 
+// Re-export for consumers that import from this file
+export type { ChatStatus, PendingFileModel };
+
 interface MessagesProps {
   messages: UIMessage[];
   isLoading: boolean;
-  status: UseChatHelpers['status'];
+  status: ChatStatus;
   reload: () => void;
   assistantIcon?: React.ReactNode;
   containerClassName: string;
   fileMapping?: Map<string, FileModel[]>;
-  initialFiles?: FileModel[];
+  pendingFileMapping?: Map<string, PendingFileModel[]>;
   webSourceMapping?: Map<string, WebsearchSource[]>;
 }
 
@@ -25,7 +27,7 @@ export function Messages({
   assistantIcon,
   containerClassName,
   fileMapping,
-  initialFiles,
+  pendingFileMapping,
   webSourceMapping,
 }: MessagesProps) {
   return (
@@ -35,11 +37,10 @@ export function Messages({
           key={index}
           index={index}
           fileMapping={fileMapping}
-          isLastUser={index === messages.length - 1 && message.role === 'user'}
+          pendingFileMapping={pendingFileMapping}
           isLastNonUser={index === messages.length - 1 && message.role !== 'user'}
           isLoading={isLoading}
           regenerateMessage={reload}
-          initialFiles={initialFiles}
           assistantIcon={assistantIcon}
           websources={webSourceMapping?.get(message.id)}
           status={status}
