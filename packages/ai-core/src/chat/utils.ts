@@ -11,7 +11,7 @@ export function toOpenAIMessages(
 ): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
   return messages.map((message) => {
     // If message has image attachments, convert to multimodal content format
-    if (message.attachments && message.attachments.length > 0 && message.role !== 'system') {
+    if (message.attachments && message.attachments.length > 0 && message.role === 'user') {
       const contentParts: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [
         { type: 'text', text: message.content },
         ...message.attachments
@@ -26,16 +26,16 @@ export function toOpenAIMessages(
       ];
 
       return {
-        role: message.role,
+        role: 'user',
         content: contentParts,
-      } as OpenAI.Chat.Completions.ChatCompletionMessageParam;
+      } satisfies OpenAI.Chat.Completions.ChatCompletionUserMessageParam;
     }
 
     // Simple text message
     return {
       role: message.role,
       content: message.content,
-    } as OpenAI.Chat.Completions.ChatCompletionMessageParam;
+    } satisfies OpenAI.Chat.Completions.ChatCompletionMessageParam;
   });
 }
 
@@ -64,14 +64,14 @@ export function toOpenAIResponsesInput(messages: Message[]): OpenAI.Responses.Ea
       return {
         role: message.role,
         content: contentParts,
-      } as OpenAI.Responses.EasyInputMessage;
+      } satisfies OpenAI.Responses.EasyInputMessage;
     }
 
     // Simple text message
     return {
       role: message.role,
       content: message.content,
-    } as OpenAI.Responses.EasyInputMessage;
+    } satisfies OpenAI.Responses.EasyInputMessage;
   });
 }
 

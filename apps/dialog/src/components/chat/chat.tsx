@@ -81,7 +81,10 @@ export default function Chat({
   // Ref to hold pending files that will be associated with the next user message
   const pendingFilesRef = React.useRef<PendingFileModel[]>([]);
 
-  // Track if we need to sync Next.js router after first message completes
+  // Router sync: We use window.history.replaceState() to update the URL immediately
+  // on first message (no reload). This bypasses Next.js router, so router.push('/')
+  // won't work until we sync. After streaming completes, we call router.replace()
+  // via state + useEffect to avoid "setState during render" errors & odd behavior when navigating.
   const isFirstMessageRef = React.useRef(false);
   const [needsRouterSync, setNeedsRouterSync] = React.useState(false);
   const router = useRouter();
