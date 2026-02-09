@@ -45,22 +45,19 @@ export async function dbGetLearningScenariosByUserId({ userId }: { userId: strin
     .orderBy(desc(learningScenarioTable.createdAt));
 }
 
+/**
+ * The returned entity has no Shared Data attached.
+ * Use `dbGetLearningScenarioByIdWithShareData` if you need shared data.
+ */
 export async function dbGetLearningScenarioById({
-  userId,
   learningScenarioId,
 }: {
-  userId: string;
   learningScenarioId: string;
 }) {
   const [learningScenario] = await db
     .select()
     .from(learningScenarioTable)
-    .where(
-      and(
-        eq(learningScenarioTable.id, learningScenarioId),
-        eq(learningScenarioTable.userId, userId),
-      ),
-    );
+    .where(eq(learningScenarioTable.id, learningScenarioId));
   return learningScenario;
 }
 
@@ -222,4 +219,25 @@ export async function dbDeleteLearningScenarioByIdAndUserId({
   });
 
   return deletedLearningScenario;
+}
+
+/**
+ * Returns all shared learning scenarios for a given learning scenario and user.
+ */
+export async function dbGetSharedLearningScenarioConversations({
+  learningScenarioId,
+  userId,
+}: {
+  learningScenarioId: string;
+  userId: string;
+}) {
+  return await db
+    .select()
+    .from(sharedLearningScenarioTable)
+    .where(
+      and(
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
+        eq(sharedLearningScenarioTable.userId, userId),
+      ),
+    );
 }

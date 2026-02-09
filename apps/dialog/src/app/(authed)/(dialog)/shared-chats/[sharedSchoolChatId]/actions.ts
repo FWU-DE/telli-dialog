@@ -52,12 +52,13 @@ export async function shareLearningScenarioAction({
   learningScenarioId: string;
   data: SharedConversationShareFormValues;
 }) {
-  const { user } = await requireAuth();
+  const { user, school } = await requireAuth();
 
   return runServerAction(shareLearningScenario)({
     learningScenarioId,
-    userId: user.id,
+    user,
     data,
+    schoolId: school?.id,
   });
 }
 
@@ -68,7 +69,7 @@ export async function unshareLearningScenarioAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(unshareLearningScenario)({ learningScenarioId, userId: user.id });
+  return runServerAction(unshareLearningScenario)({ learningScenarioId, user });
 }
 
 export async function removeFileFromLearningScenarioAction({
