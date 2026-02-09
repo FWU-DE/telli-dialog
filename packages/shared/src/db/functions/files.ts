@@ -18,6 +18,7 @@ import {
   TextChunkInsertModel,
   TextChunkTable,
 } from '../schema';
+import { logDebug } from '@shared/logging';
 
 export async function linkFilesToConversation({
   conversationMessageId,
@@ -266,7 +267,7 @@ export async function dbDeleteDanglingFiles() {
         ),
       );
     const fileIdsToDelete = fileIds.map((f) => f.fileId);
-    console.log('fileIdsToDelete', fileIdsToDelete);
+    logDebug('fileIdsToDelete', { fileIdsToDelete });
     await tx.delete(TextChunkTable).where(inArray(TextChunkTable.fileId, fileIdsToDelete));
     await tx.delete(fileTable).where(inArray(fileTable.id, fileIdsToDelete));
     return fileIdsToDelete;

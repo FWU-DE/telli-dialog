@@ -3,6 +3,8 @@
  * Replaces ai/rsc's createStreamableValue and readStreamableValue.
  */
 
+import { logError, logWarning } from '@shared/logging';
+
 /**
  * Creates a streamable text value for Server Actions.
  * Returns a controller to update/complete the stream and a ReadableStream to consume.
@@ -29,7 +31,7 @@ export function createTextStream(): {
         controller.enqueue(text);
       } catch (err) {
         // Stream may be closed
-        console.warn('createTextStream.update: failed to enqueue text; stream may be closed.', err);
+        logError('createTextStream.update: failed to enqueue text; stream may be closed', err);
       }
     },
     done: () => {
@@ -37,10 +39,7 @@ export function createTextStream(): {
         controller.close();
       } catch (err) {
         // Stream may already be closed
-        console.warn(
-          'createTextStream.done: failed to close stream; it may already be closed.',
-          err,
-        );
+        logError('createTextStream.done: failed to close stream; it may already be closed', err);
       }
     },
     error: (err: Error) => {
@@ -48,8 +47,8 @@ export function createTextStream(): {
         controller.error(err);
       } catch (caughtErr) {
         // Stream may already be closed
-        console.warn(
-          'createTextStream.error: failed to signal error on stream; it may already be closed.',
+        logError(
+          'createTextStream.error: failed to signal error on stream; it may already be closed',
           caughtErr,
         );
       }

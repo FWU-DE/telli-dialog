@@ -7,6 +7,7 @@ import { DUMMY_USER_ID } from './user-entity';
 import { dbUpsertCustomGpt } from '../functions/custom-gpts';
 import { updateTemplateMappings } from '@shared/templates/templateService';
 import { FEDERAL_STATES } from './federal-state';
+import { logInfo, logError } from '@shared/logging';
 
 export async function insertTemplateCharacters() {
   await processStaticJpegFiles(
@@ -17,7 +18,7 @@ export async function insertTemplateCharacters() {
     const result = await dbCreateCharacter(templateCharacter);
     const id = result && result[0] ? result[0].id : undefined;
     if (!id) {
-      console.error('Failed to insert template character:', templateCharacter.name);
+      logError('Failed to seed template character', { characterName: templateCharacter.name });
       continue;
     }
     await updateTemplateMappings(
@@ -26,7 +27,7 @@ export async function insertTemplateCharacters() {
       FEDERAL_STATES.map((fs) => ({ federalStateId: fs.id, isMapped: true })),
     );
   }
-  console.log('template character seed successful');
+  logInfo('template character seed successful');
 }
 
 export async function insertTemplateCustomGpt() {
@@ -38,7 +39,7 @@ export async function insertTemplateCustomGpt() {
     const result = await dbUpsertCustomGpt({ customGpt: templateCustomGpt });
     const id = result?.id ?? undefined;
     if (!id) {
-      console.error('Failed to insert template custom gpt:', templateCustomGpt.name);
+      logError('Failed to seed template custom gpt', { customGptName: templateCustomGpt.name });
       continue;
     }
     await updateTemplateMappings(
@@ -47,7 +48,7 @@ export async function insertTemplateCustomGpt() {
       FEDERAL_STATES.map((fs) => ({ federalStateId: fs.id, isMapped: true })),
     );
   }
-  console.log('template custom gpt seed successful');
+  logInfo('template custom gpt seed successful');
 }
 
 async function findMatchingFiles(directoryPath: string, pattern: string): Promise<string[]> {
@@ -83,15 +84,15 @@ async function processStaticJpegFiles(rootFolder: string, rootRemoteDir: string)
     const matchingFiles = await findMatchingFiles(rootFolder, 'Static.jpg');
 
     if (matchingFiles.length === 0) {
-      console.log('No matching files found.');
+      logInfo('No matching files found.');
       return;
     }
 
-    console.log(`Found ${matchingFiles.length} matching files:`);
-    matchingFiles.forEach((file) => console.log(` - ${file}`));
+    logInfo(`Found ${matchingFiles.length} matching files:`);
+    matchingFiles.forEach((file) => logInfo(` - ${file}`));
 
     // Upload each file to S3
-    console.log('\nStarting uploads...');
+    logInfo('Starting uploads...');
     for (const file of matchingFiles) {
       const fileNameWithSuffix = file.split('/').at(-1) ?? '';
       const fileName = fileNameWithSuffix.split('.')[0];
@@ -102,9 +103,9 @@ async function processStaticJpegFiles(rootFolder: string, rootRemoteDir: string)
         contentType: 'image/jpeg',
       });
     }
-    console.log('\nAll uploads completed successfully!');
+    logInfo('All uploads completed successfully!');
   } catch (error) {
-    console.error('An error occurred:', error);
+    logError('An error occurred during file upload', error);
   }
 }
 

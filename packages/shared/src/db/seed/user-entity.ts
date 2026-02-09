@@ -1,4 +1,5 @@
 import { dbCreateVidisUser } from '../functions/vidis';
+import { logInfo } from '@shared/logging';
 
 export async function insertDummyUser() {
   await dbCreateVidisUser({
@@ -8,7 +9,7 @@ export async function insertDummyUser() {
     lastName: DUMMY_USER_LAST_NAME,
   });
 
-  console.log('Dummy user seed successful');
+  logInfo('Dummy user seed successful');
 }
 
 export const DUMMY_USER_ID = 'e7cdbdd7-f950-47c5-9955-61e5172b39b0';

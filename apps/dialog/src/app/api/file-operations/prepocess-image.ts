@@ -4,6 +4,7 @@ import { getReadOnlySignedUrl } from '@shared/s3';
 import { isImageFile } from '@/utils/files/generic';
 import { ImageAttachment } from '@/utils/files/types';
 import sharp from 'sharp';
+import { logError } from '@shared/logging';
 
 /**
  * fetch the signed url for the image files and return them as ImageAttachment
@@ -29,7 +30,7 @@ export async function extractImagesAndUrl(
         conversationMessageId: file.conversationMessageId,
       };
     } catch (error) {
-      console.error(`Failed to process image file ${file.id}:`, error);
+      logError(`Failed to process image file ${file.id}`, error);
       return null;
     }
   });
@@ -48,7 +49,7 @@ export async function preprocessImage(
     try {
       processedBuffer = await sharp(fileContent).png().toBuffer();
     } catch (error) {
-      console.error('Failed to convert SVG to PNG:', error);
+      logError('Failed to convert SVG to PNG', error);
       throw new Error('Failed to convert SVG to PNG');
     }
   }

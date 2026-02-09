@@ -12,6 +12,7 @@ import { useTranslations } from 'next-intl';
 import { NUMBER_OF_FILES_LIMIT, NUMBER_OF_IMAGES_LIMIT } from '@/configuration-text-inputs/const';
 import { useLlmModels } from '../providers/llm-model-provider';
 import { isImageFile } from '@/utils/files/generic';
+import { logError } from '@shared/logging';
 
 export type FileUploadMetadata = {
   directoryId: string;
@@ -110,7 +111,7 @@ export async function handleSingleFile({
           status: 'failed',
         });
       }
-      console.error(error);
+      logError('File upload error', error);
       toast.error(translations('toasts.upload-error'));
       return updatedFiles;
     });

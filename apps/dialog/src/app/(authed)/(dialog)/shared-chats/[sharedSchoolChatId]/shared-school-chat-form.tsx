@@ -18,6 +18,7 @@ import {
   updateLearningScenarioPictureAction,
   uploadAvatarPictureForLearningScenarioAction,
 } from './actions';
+import { logWarning } from '@shared/logging';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
 import { deleteLearningScenarioAction, linkFileToLearningScenarioAction } from '../actions';
@@ -94,7 +95,7 @@ export default function SharedSchoolChatForm({
       const newMap = deepCopy(prev);
       const deleted = newMap.delete(localFileId);
       if (!deleted) {
-        console.warn('Could not delete file');
+        logWarning('Could not delete file', { localFileId });
       }
       return newMap;
     });

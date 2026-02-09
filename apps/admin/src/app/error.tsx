@@ -1,7 +1,20 @@
 'use client'; // Error boundaries must be Client Components
 
 import { useEffect } from 'react';
+import { logError } from '@shared/logging';
 
+/**
+ * Error boundary component that displays error information and logs errors for debugging.
+ *
+ * The logging statement is placed in a useEffect hook to ensure it only runs when the error
+ * changes, preventing duplicate log entries on re-renders. This follows React's best practices
+ * for side effects and ensures consistent error logging behavior.
+ *
+ * @param props - Component props
+ * @param props.error - The error object containing name, message, stack trace, and optional digest
+ * @param props.reset - Function to reset the error boundary (currently unused in implementation)
+ * @returns JSX element displaying error details in a user-friendly format
+ */
 export default function Error({
   error,
 }: {
@@ -9,7 +22,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    logError('Error caught by topmost Error component', error);
   }, [error]);
 
   return (

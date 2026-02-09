@@ -7,6 +7,7 @@ import { dbUpsertLlmModelsByModelsAndFederalStateId } from '../functions/llm-mod
 import { env } from '../../env';
 import { env as aiEnv } from '@telli/ai-core/env';
 import { lookupApiKeys } from '@telli/ai-core/api-keys/lookup';
+import { logInfo } from '@shared/logging';
 
 export async function insertFederalStates({ skip = true }: { skip: boolean }) {
   if (skip) return;
@@ -54,7 +55,7 @@ export async function insertFederalStates({ skip = true }: { skip: boolean }) {
     });
   }
 
-  console.log('federalState seed successful');
+  logInfo('federalState seed successful');
 }
 
 const FEDERAL_STATE_DEFINITIONS = [

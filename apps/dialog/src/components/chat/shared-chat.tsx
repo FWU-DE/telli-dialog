@@ -14,6 +14,7 @@ import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { Messages } from './messages';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
+import { logError } from '@shared/logging';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
@@ -56,7 +57,7 @@ export default function SharedChat({
       resetError();
       await handleSubmit(e, {});
     } catch (error) {
-      console.error(error);
+      logError('Error in customHandleSubmit', error);
     }
   }
 

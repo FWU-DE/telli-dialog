@@ -13,6 +13,7 @@ import { LargeLanguageModel } from '../../../../../../types/large-language-model
 import { createLLMAction, updateLLMAction } from './actions';
 import { ROUTES } from '@/consts/routes';
 import { FormErrorDisplay } from '@/components/FormErrorDisplay';
+import { logError } from '@shared/logging';
 
 // Helper function to validate JSON
 const jsonStringSchema = z.string().refine((str) => {
@@ -103,7 +104,7 @@ export function LargeLanguageModelDetailView({
         toast.success('Sprachmodell erfolgreich aktualisiert');
       }
     } catch (error) {
-      console.error('Error saving model:', error);
+      logError('Error saving model', error);
       toast.error(
         isCreate
           ? 'Fehler beim Erstellen des Sprachmodells'

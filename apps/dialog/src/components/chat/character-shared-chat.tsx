@@ -17,6 +17,7 @@ import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios
 import StreamingFinishedMarker from './streaming-finished-marker';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
+import { logError } from '@shared/logging';
 
 /**
  * This component is used if a character is shared via invite code.
@@ -65,7 +66,7 @@ export default function CharacterSharedChat({
       resetError();
       await handleSubmit(e, {});
     } catch (error) {
-      console.error(error);
+      logError('Error in customHandleSubmit', error);
     }
   }
 

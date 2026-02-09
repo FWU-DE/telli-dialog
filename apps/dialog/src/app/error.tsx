@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
+import { logError } from '@shared/logging';
 
 export default function Error({
   error,
@@ -14,7 +15,7 @@ export default function Error({
   const router = useRouter();
 
   React.useEffect(() => {
-    console.error(error);
+    logError('Error caught by topmost Error component', error);
   }, [error, pathname]);
 
   return (
