@@ -3,13 +3,16 @@ import { db } from '@shared/db';
 import { dbGetFilesForLearningScenario } from '@shared/db/functions/files';
 import {
   dbDeleteLearningScenarioByIdAndUserId,
+  dbGetGlobalLearningScenarios,
   dbGetLearningScenarioById,
   dbGetLearningScenarioByIdOptionalShareData,
   dbGetLearningScenarioByIdWithShareData,
+  dbGetLearningScenariosBySchoolId,
   dbGetLearningScenariosByUserId,
   dbGetSharedLearningScenarioConversations,
 } from '@shared/db/functions/learning-scenario';
 import {
+  AccessLevel,
   FileModel,
   fileTable,
   LearningScenarioFileMapping,
@@ -52,6 +55,31 @@ export async function getLearningScenariosForUser({
     learningScenarios: filteredScenarios,
   });
   return enrichedScenarios;
+}
+
+/**
+ * Returns the list of available learning scenarios that the user can access
+ * based on userId, schoolId, federalStateId, and access level.
+ */
+export async function getLearningScenariosByAccessLevel({
+  accessLevel,
+  schoolId,
+  userId,
+  federalStateId,
+}: {
+  accessLevel: AccessLevel;
+  schoolId: string;
+  userId: string;
+  federalStateId: string;
+}): Promise<LearningScenarioOptionalShareDataModel[]> {
+  if (accessLevel === 'global') {
+    return dbGetGlobalLearningScenarios({ userId, federalStateId });
+  } else if (accessLevel === 'school') {
+    return dbGetLearningScenariosBySchoolId({ schoolId, userId });
+  } else if (accessLevel === 'private') {
+    return dbGetLearningScenariosByUserId({ userId });
+  }
+  return [];
 }
 
 /**
@@ -501,7 +529,7 @@ export async function removeFileFromLearningScenario({
   await deleteMessageAttachments([fileId]);
 }
 
-async function enrichLearningScenarioWithPictureUrl({
+export async function enrichLearningScenarioWithPictureUrl({
   learningScenarios,
 }: {
   learningScenarios: LearningScenarioOptionalShareDataModel[];

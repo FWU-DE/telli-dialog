@@ -557,6 +557,37 @@ export type LearningScenarioInsertModel = z.infer<typeof learningScenarioInsertS
 export type LearningScenarioUpdateModel = z.infer<typeof learningScenarioUpdateSchema>;
 
 /**
+ * Schema for table learning_scenario_template_mappings
+ */
+export const learningScenarioTemplateMappingTable = pgTable(
+  'learning_scenario_template_mappings',
+  {
+    learningScenarioId: uuid('learning_scenario_id')
+      .notNull()
+      .references(() => learningScenarioTable.id, { onDelete: 'cascade' }),
+    federalStateId: text('federal_state_id').notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.learningScenarioId, table.federalStateId] }),
+    foreignKey({
+      columns: [table.federalStateId],
+      foreignColumns: [federalStateTable.id],
+      // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
+      // The custom name can only be set with foreignKey() function
+      name: 'learning_scenario_template_mappings_federal_state_id_fk',
+    }).onDelete('cascade'),
+  ],
+);
+
+export const learningScenarioTemplateMappingSelectSchema = createSelectSchema(
+  learningScenarioTemplateMappingTable,
+);
+export const learningScenarioTemplateMappingInsertSchema = createInsertSchema(
+  learningScenarioTemplateMappingTable,
+);
+// no update schema as there are only two fields which are both part of the primary key
+
+/**
  * Schema for table shared_learning_scenario
  */
 export const sharedLearningScenarioTable = pgTable(

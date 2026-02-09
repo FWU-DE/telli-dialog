@@ -1,4 +1,4 @@
-import { and, desc, eq, getTableColumns, inArray } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, inArray, isNull, or } from 'drizzle-orm';
 import { db } from '..';
 import {
   conversationMessageTable,
@@ -7,7 +7,9 @@ import {
   LearningScenarioFileMapping,
   LearningScenarioOptionalShareDataModel,
   learningScenarioTable,
+  learningScenarioTemplateMappingTable,
   LearningScenarioWithShareDataModel,
+  SharedLearningScenarioSelectModel,
   sharedLearningScenarioTable,
   sharedLearningScenarioUsageTracking,
   SharedLearningScenarioUsageTrackingInsertModel,
@@ -27,7 +29,82 @@ function baseLearningScenarioWithShareQuery() {
     .from(learningScenarioTable);
 }
 
-export async function dbGetLearningScenariosByUserId({ userId }: { userId: string }) {
+export function dbGetGlobalLearningScenarios({
+  userId,
+  federalStateId,
+}: {
+  userId: string;
+  federalStateId?: string;
+}): Promise<LearningScenarioOptionalShareDataModel[]> {
+  return baseLearningScenarioWithShareQuery()
+    .leftJoin(
+      sharedLearningScenarioTable,
+      and(
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioTable.id),
+        eq(sharedLearningScenarioTable.userId, userId),
+      ),
+    )
+    .leftJoin(
+      learningScenarioTemplateMappingTable,
+      eq(learningScenarioTemplateMappingTable.learningScenarioId, learningScenarioTable.id),
+    )
+    .where(
+      and(
+        eq(learningScenarioTable.accessLevel, 'global'),
+        federalStateId
+          ? eq(learningScenarioTemplateMappingTable.federalStateId, federalStateId)
+          : undefined,
+        or(
+          eq(sharedLearningScenarioTable.userId, userId),
+          isNull(sharedLearningScenarioTable.userId),
+        ),
+      ),
+    )
+    .orderBy(desc(learningScenarioTable.createdAt));
+}
+
+/**
+ * Retrieves all learning scenarios associated with a specific school that are accessible to a user.
+ *
+ * This includes usage Data from the sharedLearningScenarioTable table.
+ *
+ * @param params.schoolId - The unique identifier of the school
+ * @param params.userId - The unique identifier of the user requesting the learning scenarios
+ * @returns A promise that resolves to an array of learning scenario models with associated sharing metadata
+ */
+export function dbGetLearningScenariosBySchoolId({
+  schoolId,
+  userId,
+}: {
+  schoolId: string;
+  userId: string;
+}): Promise<LearningScenarioOptionalShareDataModel[]> {
+  return baseLearningScenarioWithShareQuery()
+    .leftJoin(
+      sharedLearningScenarioTable,
+      and(
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioTable.id),
+        eq(sharedLearningScenarioTable.userId, userId), // this ensures we get the user-specific shared data, or null if not shared by this user
+      ),
+    )
+    .where(
+      and(
+        eq(learningScenarioTable.schoolId, schoolId),
+        eq(learningScenarioTable.accessLevel, 'school'),
+        or(
+          eq(sharedLearningScenarioTable.userId, userId),
+          isNull(sharedLearningScenarioTable.userId),
+        ),
+      ),
+    )
+    .orderBy(desc(learningScenarioTable.createdAt));
+}
+
+export async function dbGetLearningScenariosByUserId({
+  userId,
+}: {
+  userId: string;
+}): Promise<LearningScenarioOptionalShareDataModel[]> {
   return baseLearningScenarioWithShareQuery()
     .leftJoin(
       sharedLearningScenarioTable,
@@ -224,14 +301,14 @@ export async function dbDeleteLearningScenarioByIdAndUserId({
 /**
  * Returns all shared learning scenarios for a given learning scenario and user.
  */
-export async function dbGetSharedLearningScenarioConversations({
+export function dbGetSharedLearningScenarioConversations({
   learningScenarioId,
   userId,
 }: {
   learningScenarioId: string;
   userId: string;
-}) {
-  return await db
+}): Promise<SharedLearningScenarioSelectModel[]> {
+  return db
     .select()
     .from(sharedLearningScenarioTable)
     .where(
