@@ -11,9 +11,9 @@ import {
 } from '../chat/usage';
 import { getModelAndApiKeyWithResult } from '../utils/utils';
 import {
-  dbGetSharedChatByIdAndInviteCode,
-  dbUpdateTokenUsageBySharedChatId,
-} from '@shared/db/functions/shared-school-chat';
+  dbGetLearningScenarioByIdAndInviteCode,
+  dbUpdateTokenUsageBySharedLearningScenarioId,
+} from '@shared/db/functions/learning-scenario';
 import { dbGetRelatedSharedChatFiles } from '@shared/db/functions/files';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
@@ -73,7 +73,10 @@ export async function sendSharedChatMessage({
   modelId: string;
 }): Promise<SendMessageResult> {
   // Get shared chat
-  const sharedChat = await dbGetSharedChatByIdAndInviteCode({ id: sharedChatId, inviteCode });
+  const sharedChat = await dbGetLearningScenarioByIdAndInviteCode({
+    learningScenarioId: sharedChatId,
+    inviteCode,
+  });
   if (sharedChat === undefined) {
     throw new Error('Could not get shared chat');
   }
@@ -181,7 +184,7 @@ export async function sendSharedChatMessage({
   const assistantMessageId = crypto.randomUUID();
 
   // Start streaming in the background
-  (async () => {
+  void (async () => {
     try {
       const textStream = generateTextStreamWithBilling(
         definedModel.id,
@@ -190,7 +193,7 @@ export async function sendSharedChatMessage({
         async ({ usage, priceInCents }) => {
           const { promptTokens, completionTokens } = usage;
 
-          await dbUpdateTokenUsageBySharedChatId({
+          await dbUpdateTokenUsageBySharedLearningScenarioId({
             modelId: definedModel.id,
             completionTokens,
             promptTokens,

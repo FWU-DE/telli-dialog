@@ -119,9 +119,6 @@ jobs:
       # - it needs to mount a file from 1Password (Google Vertex AI, not yet implemented)
       # - it needs to wait until postgres is available
       # The container must be started on the host network to be able to access the postgres db.
-      #
-      # Temporary solution: NODE_ENV=development is used to start telli-api on port 3002.
-      # Port 3000 is the default and would conflict with telli-dialog.
       - name: Start telli-api container
         run: |
           docker run --detach \
@@ -129,7 +126,7 @@ jobs:
             --network host \
             -e DATABASE_URL=$API_DATABASE_URL \
             -e API_KEY=$API_KEY \
-            -e NODE_ENV=development \
+            -e PORT=3002 \
             -e SENTRY_DSN=dummy \
             -e SENTRY_ENVIRONMENT=$SENTRY_ENVIRONMENT \
             ghcr.io/fwu-de/telli-api:latest
