@@ -259,6 +259,7 @@ export default function SharedSchoolChatForm({
                 handleAutoSave();
               }}
               models={models}
+              disabled={readOnly}
             />
           </div>
           <TextInput
@@ -333,6 +334,7 @@ export default function SharedSchoolChatForm({
           {...register('studentExercise')}
           {...getZodStringFieldMetadata('studentExercise')}
           onBlur={handleAutoSave}
+          readOnly={readOnly}
         />
 
         <TextInput
@@ -345,6 +347,7 @@ export default function SharedSchoolChatForm({
           {...register('additionalInstructions')}
           {...getZodStringFieldMetadata('additionalInstructions')}
           onBlur={handleAutoSave}
+          readOnly={readOnly}
         />
         <div className="grid grid-cols-3 gap-6">
           <TextInput
@@ -355,6 +358,7 @@ export default function SharedSchoolChatForm({
             {...register('schoolType')}
             {...getZodStringFieldMetadata('schoolType')}
             onBlur={handleAutoSave}
+            readOnly={readOnly}
           />
 
           <TextInput
@@ -365,6 +369,7 @@ export default function SharedSchoolChatForm({
             {...register('gradeLevel')}
             {...getZodStringFieldMetadata('gradeLevel')}
             onBlur={handleAutoSave}
+            readOnly={readOnly}
           />
 
           <TextInput
@@ -375,21 +380,24 @@ export default function SharedSchoolChatForm({
             {...getZodStringFieldMetadata('subject')}
             {...register('subject')}
             onBlur={handleAutoSave}
+            readOnly={readOnly}
           />
         </div>
         <div className="flex flex-col gap-4">
           <h2 className="text-md font-medium">{t('additional-assets-label')}</h2>
           <span className="text-base">{t('additional-assets-content')}</span>
 
-          <FileManagement
-            files={_files}
-            setFiles={setFiles}
-            initialFiles={initialFiles}
-            onFileUploaded={handleNewFile}
-            onDeleteFile={handleDeattachFile}
-            readOnly={false}
-            translationNamespace="shared-chats.form"
-          />
+          {!readOnly && (
+            <FileManagement
+              files={_files}
+              setFiles={setFiles}
+              initialFiles={initialFiles}
+              onFileUploaded={handleNewFile}
+              onDeleteFile={handleDeattachFile}
+              readOnly={readOnly}
+              translationNamespace="shared-chats.form"
+            />
+          )}
           <AttachedLinks
             fields={fields}
             getValues={() => getValues('attachedLinks')}
@@ -400,7 +408,7 @@ export default function SharedSchoolChatForm({
             handleAutosave={handleAutoSave}
           />
         </div>
-        {!isCreating && (
+        {!isCreating && !readOnly && (
           <section className="mt-8">
             <h3 className="font-medium">{t('delete-title')}</h3>
             <p className="mt-4">{t('delete-description')}</p>
