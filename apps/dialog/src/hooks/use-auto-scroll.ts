@@ -7,7 +7,7 @@ import { useEffect, useState, useCallback } from 'react';
  * To reactivate auto-scrolling (e.g., after sending a message), call the reactivateAutoScrolling function returned by the hook.
  *
  * NOTE
- * The hook only listens to mouse wheel and touche events to determine if the user has manually scrolled away.
+ * The hook only listens to mouse wheel and touch events to determine if the user has manually scrolled away.
  * Grabbing the scrollbar or using keyboard navigation won't disable auto-scrolling.
  * Using the 'scroll' event didn't work reliably because the auto scroll itself also triggers scroll events.
  * Depending on the rendering performance the auto scroll gets deactivated without any user interaction or
