@@ -18,13 +18,11 @@ export function CreateNewSharedChatButton() {
 
   const maybeDefaultModelId = getDefaultModel(models)?.id;
 
-  async function handleNewGPT() {
+  async function handleNewLearningScenario() {
     if (!maybeDefaultModelId) {
       throw new Error('No default model found');
     }
-    const scenario = await createNewLearningScenarioAction({
-      data: { modelId: maybeDefaultModelId, name: '' },
-    });
+    const scenario = await createNewLearningScenarioAction({ modelId: maybeDefaultModelId });
     if (scenario.success) {
       router.push(`/shared-chats/${scenario.value.id}?create=true`);
     } else {
@@ -34,7 +32,7 @@ export function CreateNewSharedChatButton() {
 
   return (
     <button
-      onClick={handleNewGPT}
+      onClick={handleNewLearningScenario}
       className={cn(buttonPrimaryClassName, 'flex gap-2 items-center group py-2')}
     >
       <PlusIcon className="fill-button-primary-text group-hover:fill-secondary-text w-8 h-8" />
