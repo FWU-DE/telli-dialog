@@ -572,7 +572,7 @@ export const learningScenarioTemplateMappingTable = pgTable(
     }),
     foreignKey({
       columns: [table.learningScenarioId],
-      foreignColumns: [federalStateTable.id],
+      foreignColumns: [learningScenarioTable.id],
       // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
       // The custom name can only be set with foreignKey() function
       name: 'learning_scenario_template_mappings_learning_scenario_id_fk',
@@ -670,6 +670,7 @@ export const sharedLearningScenarioUsageTracking = pgTable(
   {
     id: uuid('id').defaultRandom().primaryKey(),
     modelId: uuid('model_id').notNull(),
+    // learningScenarioId is not a FK, because usage tracking must be kept even when the learning scenario is deleted
     learningScenarioId: uuid('learning_scenario_id').notNull(),
     userId: uuid('user_id').notNull(),
     completionTokens: integer('completion_tokens').notNull(),
