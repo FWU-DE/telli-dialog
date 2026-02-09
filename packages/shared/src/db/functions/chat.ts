@@ -158,7 +158,7 @@ export async function dbGetConversationAndMessages({
         isNull(conversationMessageTable.deletedAt),
       ),
     )
-    .leftJoin(llmModelTable, eq(conversationMessageTable.modelName, llmModelTable.name))
+
     .where(
       and(
         eq(conversationTable.id, conversationId),
