@@ -22,29 +22,36 @@ export function ImageActionButtons({ imageRef, prompt }: ImageActionButtonsProps
         throw new Error('Image not loaded');
       }
 
-      // Create a canvas in memory without adding it to the DOM
-      const canvas = document.createElement('canvas');
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
+      // construct ClipboardItem with a Promise for Safari compatibility
+      const blobPromise = new Promise<Blob>((resolve, reject) => {
+        // Create a canvas in memory without adding it to the DOM
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
 
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        throw new Error('Could not get canvas context');
-      }
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
 
-      ctx.drawImage(img, 0, 0);
+        try {
+          ctx.drawImage(img, 0, 0);
+        } catch (drawError) {
+          reject(drawError);
+          return;
+        }
 
-      // Convert canvas to blob
-      const blob = await new Promise<Blob | null>((resolve) => {
-        canvas.toBlob(resolve, 'image/png');
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error('Failed to create image blob'));
+          }
+        }, 'image/png');
       });
 
-      if (!blob) {
-        throw new Error('Failed to create image blob');
-      }
-
-      // Copy to clipboard
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blobPromise })]);
       toast.success(t('copy-image-success'));
     } catch (error) {
       logError('Failed to copy image to clipboard', error);
