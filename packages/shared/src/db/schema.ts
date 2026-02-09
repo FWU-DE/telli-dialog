@@ -334,7 +334,11 @@ export const characterTable = pgTable(
   (table) => [index().on(table.userId), index().on(table.schoolId)],
 );
 
-export const characterSelectSchema = createSelectSchema(characterTable);
+export const characterSelectSchema = createSelectSchema(characterTable)
+  // for any reason accessLevel has a different type so we have to override it here
+  .extend({
+    accessLevel: accessLevelSchema,
+  });
 export const characterInsertSchema = createInsertSchema(characterTable)
   .omit({
     id: true,
@@ -533,7 +537,11 @@ export const learningScenarioTable = pgTable(
   (table) => [index().on(table.userId)],
 );
 
-export const learningScenarioSelectSchema = createSelectSchema(learningScenarioTable);
+export const learningScenarioSelectSchema = createSelectSchema(learningScenarioTable)
+  // for any reason accessLevel has a different type so we have to override it here
+  .extend({
+    accessLevel: accessLevelSchema,
+  });
 export const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable)
   .omit({
     id: true,

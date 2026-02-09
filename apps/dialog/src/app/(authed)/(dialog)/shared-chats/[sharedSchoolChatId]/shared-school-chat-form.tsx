@@ -41,6 +41,7 @@ import AvatarPicture from '@/components/common/avatar-picture';
 import { WebsearchSource } from '@shared/db/types';
 import Checkbox from '@/components/common/checkbox';
 import { useFederalState } from '@/components/providers/federal-state-provider';
+import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
 
 export default function SharedSchoolChatForm({
   existingFiles,
@@ -108,7 +109,7 @@ export default function SharedSchoolChatForm({
       pictureId: sharedSchoolChat.pictureId ?? '',
     },
   });
-  const backUrl = '/shared-chats';
+  const backUrl = buildGenericUrl(sharedSchoolChat.accessLevel, 'shared-chats');
   const { fields } = useFieldArray({
     control,
     name: 'attachedLinks',
