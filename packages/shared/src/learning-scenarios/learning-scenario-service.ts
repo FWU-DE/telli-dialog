@@ -13,6 +13,7 @@ import {
 } from '@shared/db/functions/learning-scenario';
 import {
   AccessLevel,
+  accessLevelSchema,
   FileModel,
   fileTable,
   LearningScenarioFileMapping,
@@ -165,6 +166,51 @@ export async function updateLearningScenario({
 
   if (!updatedLearningScenario) {
     throw new Error('Could not update learning scenario');
+  }
+
+  return updatedLearningScenario;
+}
+
+/**
+ * User can share a learning scenario he owns with the school (access level = school)
+ * or unshare it (access level = private).
+ * User is not allowed to set the access level to global.
+ */
+export async function updateLearningScenarioAccessLevel({
+  learningScenarioId,
+  accessLevel,
+  userId,
+}: {
+  learningScenarioId: string;
+  accessLevel: AccessLevel;
+  userId: string;
+}) {
+  checkParameterUUID(learningScenarioId);
+  accessLevelSchema.parse(accessLevel);
+
+  // Authorization check
+  if (accessLevel === 'global') {
+    throw new ForbiddenError('Not authorized to set the access level to global');
+  }
+
+  const { isOwner } = await getLearningScenarioInfo(learningScenarioId, userId);
+  if (!isOwner)
+    throw new ForbiddenError('Not authorized to set the access level of this learning scenario');
+
+  // Update the access level in database
+  const [updatedLearningScenario] = await db
+    .update(learningScenarioTable)
+    .set({ accessLevel })
+    .where(
+      and(
+        eq(learningScenarioTable.id, learningScenarioId),
+        eq(learningScenarioTable.userId, userId),
+      ),
+    )
+    .returning();
+
+  if (updatedLearningScenario === undefined) {
+    throw new Error('Could not update the access level of the learning scenario');
   }
 
   return updatedLearningScenario;

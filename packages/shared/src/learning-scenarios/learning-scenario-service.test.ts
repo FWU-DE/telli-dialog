@@ -9,6 +9,7 @@ import {
   shareLearningScenario,
   unshareLearningScenario,
   updateLearningScenario,
+  updateLearningScenarioAccessLevel,
   updateLearningScenarioPicture,
 } from './learning-scenario-service';
 import {
@@ -75,6 +76,15 @@ describe('learning-scenario-service', () => {
         functionName: 'getSharedLearningScenario',
         testFunction: () =>
           getSharedLearningScenario({
+            learningScenarioId,
+            userId,
+          }),
+      },
+      {
+        functionName: 'updateLearningScenarioAccessLevel',
+        testFunction: () =>
+          updateLearningScenarioAccessLevel({
+            accessLevel: 'private',
             learningScenarioId,
             userId,
           }),
@@ -178,6 +188,15 @@ describe('learning-scenario-service', () => {
             userId: 'different-user-id',
           }),
       },
+      {
+        functionName: 'updateLearningScenarioAccessLevel',
+        testFunction: () =>
+          updateLearningScenarioAccessLevel({
+            accessLevel: 'private',
+            learningScenarioId,
+            userId: 'different-user-id',
+          }),
+      },
     ])(
       'should throw ForbiddenError when user is not the owner - $functionName',
       async ({ testFunction }) => {
@@ -219,6 +238,33 @@ describe('learning-scenario-service', () => {
         await expect(testFunction()).rejects.toThrowError(ForbiddenError);
       },
     );
+  });
+
+  describe('ForbiddenError scenarios - access restrictions', () => {
+    const userId = generateUUID();
+    const learningScenarioId = generateUUID();
+    const mockLearningScenario: Partial<LearningScenarioSelectModel> = {
+      userId,
+      id: learningScenarioId,
+      name: 'Test Scenario',
+      accessLevel: 'private',
+    };
+
+    beforeEach(() => {
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(mockLearningScenario as never);
+    });
+
+    it('should throw ForbiddenError when setting access level to global - updateLearningScenarioAccessLevel', async () => {
+      await expect(
+        updateLearningScenarioAccessLevel({
+          learningScenarioId: generateUUID(),
+          userId: userId,
+          accessLevel: 'global',
+        }),
+      ).rejects.toThrowError(ForbiddenError);
+    });
   });
 
   describe('InvalidArgumentError scenarios - invalid parameter format', () => {
@@ -299,6 +345,15 @@ describe('learning-scenario-service', () => {
         functionName: 'getSharedLearningScenario',
         testFunction: () =>
           getSharedLearningScenario({
+            learningScenarioId: 'invalid-uuid',
+            userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'updateLearningScenarioAccessLevel',
+        testFunction: () =>
+          updateLearningScenarioAccessLevel({
+            accessLevel: 'private',
             learningScenarioId: 'invalid-uuid',
             userId: 'user-id',
           }),

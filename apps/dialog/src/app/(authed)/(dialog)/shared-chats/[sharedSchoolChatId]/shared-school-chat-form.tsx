@@ -10,10 +10,11 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
-import { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
+import { AccessLevel, FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
 import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../schema';
 import {
   removeFileFromLearningScenarioAction,
+  updateLearningScenarioAccessLevelAction,
   updateLearningScenarioAction,
   updateLearningScenarioPictureAction,
   uploadAvatarPictureForLearningScenarioAction,
@@ -24,7 +25,7 @@ import { cn } from '@/utils/tailwind';
 import { deleteLearningScenarioAction, linkFileToLearningScenarioAction } from '../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
 import ShareContainer from './share-container';
-import React from 'react';
+import React, { startTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { LocalFileState } from '@/components/chat/send-message-form';
 import FileManagement from '@/components/forms/file-management';
@@ -38,6 +39,8 @@ import { AttachedLinks } from '@/components/forms/attached-links';
 import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
 import AvatarPicture from '@/components/common/avatar-picture';
 import { WebsearchSource } from '@shared/db/types';
+import Checkbox from '@/components/common/checkbox';
+import { useFederalState } from '@/components/providers/federal-state-provider';
 
 export default function SharedSchoolChatForm({
   existingFiles,
@@ -55,6 +58,7 @@ export default function SharedSchoolChatForm({
 }) {
   const toast = useToast();
   const router = useRouter();
+  const federalState = useFederalState();
 
   const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   const [initialFiles, setInitialFiles] = React.useState<FileModel[]>(existingFiles);
@@ -62,6 +66,29 @@ export default function SharedSchoolChatForm({
   const t = useTranslations('shared-chats.form');
   const tToast = useTranslations('shared-chats.toasts');
   const tCommon = useTranslations('common');
+
+  const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
+    sharedSchoolChat.accessLevel,
+    (p, n: AccessLevel) => n,
+  );
+
+  async function handleAccessLevelChange(value: boolean) {
+    const accessLevel = value ? 'school' : 'private';
+
+    startTransition(() => {
+      addOptimisticAccessLevel(accessLevel);
+    });
+
+    const result = await updateLearningScenarioAccessLevelAction({
+      learningScenarioId: sharedSchoolChat.id,
+      accessLevel,
+    });
+    if (result.success) {
+      router.refresh();
+    } else {
+      toast.error(tToast('edit-toast-error'));
+    }
+  }
 
   const { models } = useLlmModels();
 
@@ -207,6 +234,83 @@ export default function SharedSchoolChatForm({
 
   const getZodStringFieldMetadata = getZodStringFieldMetadataFn(sharedSchoolChatFormValuesSchema);
 
+  const shareElement = !isCreating ? <ShareContainer {...sharedSchoolChat} /> : undefined;
+  const generalSettings = (
+    <fieldset className="flex flex-col gap-4 mt-8">
+      <h2 className="font-medium mb-8">{t('settings')}</h2>
+      {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
+        <div className="flex gap-4">
+          <Checkbox
+            label={t('restriction-school')}
+            checked={optimisticAccessLevel === 'school'}
+            onCheckedChange={(value: boolean) => handleAccessLevelChange(value)}
+            disabled={readOnly}
+          />
+        </div>
+      )}
+      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
+        <div className="flex gap-4 flex-col">
+          <div className="flex gap-4 flex-col">
+            <label className="text-sm font-medium">{tCommon('llm-model')}</label>
+            <SelectLlmModelForm
+              selectedModel={sharedSchoolChat.modelId}
+              onValueChange={(value) => {
+                setValue('modelId', value);
+                handleAutoSave();
+              }}
+              models={models}
+            />
+          </div>
+          <TextInput
+            id="name"
+            label={t('name')}
+            readOnly={readOnly}
+            getValue={() => getValues('name')}
+            {...register('name')}
+            {...getZodStringFieldMetadata('name')}
+            placeholder={t('name-placeholder')}
+            onBlur={handleAutoSave}
+          />
+
+          <TextInput
+            id="description"
+            label={t('purpose-label')}
+            inputType="text"
+            readOnly={readOnly}
+            getValue={() => getValues('description') ?? ''}
+            {...register('description')}
+            {...getZodStringFieldMetadata('description')}
+            placeholder={t('purpose-placeholder')}
+            onBlur={handleAutoSave}
+          />
+        </div>
+        <section className="h-full">
+          <label htmlFor="image" className={cn(labelClassName, 'text-sm')}>
+            {tCommon('image')}
+          </label>
+          <div
+            id="image"
+            className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4"
+          >
+            {maybeSignedPictureUrl ? (
+              <AvatarPicture src={maybeSignedPictureUrl} alt="Profile Picture" variant="large" />
+            ) : (
+              <EmptyImageIcon className="w-10 h-10" />
+            )}
+          </div>
+          {!readOnly && (
+            <CropImageAndUploadButton
+              aspect={1}
+              handleUploadAvatarPicture={handleUploadAvatarPicture}
+              onUploadComplete={handlePictureUploadComplete}
+              compressionOptions={{ maxHeight: 800 }}
+            />
+          )}
+        </section>
+      </div>
+    </fieldset>
+  );
+
   return (
     <>
       <NavigateBack label={t('all-dialogs')} onClick={handleNavigateBack} />
@@ -216,74 +320,8 @@ export default function SharedSchoolChatForm({
       </h1>
 
       <form className="flex flex-col gap-8 my-12" onSubmit={handleSubmit(onSubmit)}>
-        {!isCreating && <ShareContainer {...sharedSchoolChat} />}
-        <fieldset className="flex flex-col gap-4 mt-8">
-          <h2 className="font-medium mb-8">{t('settings')}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
-            <div className="flex gap-4 flex-col">
-              <div className="flex gap-4 flex-col">
-                <label className="text-sm font-medium">{tCommon('llm-model')}</label>
-                <SelectLlmModelForm
-                  selectedModel={sharedSchoolChat.modelId}
-                  onValueChange={(value) => {
-                    setValue('modelId', value);
-                    handleAutoSave();
-                  }}
-                  models={models}
-                />
-              </div>
-              <TextInput
-                id="name"
-                label={t('name')}
-                readOnly={readOnly}
-                getValue={() => getValues('name')}
-                {...register('name')}
-                {...getZodStringFieldMetadata('name')}
-                placeholder={t('name-placeholder')}
-                onBlur={handleAutoSave}
-              />
-
-              <TextInput
-                id="description"
-                label={t('purpose-label')}
-                inputType="text"
-                readOnly={readOnly}
-                getValue={() => getValues('description') ?? ''}
-                {...register('description')}
-                {...getZodStringFieldMetadata('description')}
-                placeholder={t('purpose-placeholder')}
-                onBlur={handleAutoSave}
-              />
-            </div>
-            <section className="h-full">
-              <label htmlFor="image" className={cn(labelClassName, 'text-sm')}>
-                {tCommon('image')}
-              </label>
-              <div
-                id="image"
-                className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4"
-              >
-                {maybeSignedPictureUrl ? (
-                  <AvatarPicture
-                    src={maybeSignedPictureUrl}
-                    alt="Profile Picture"
-                    variant="large"
-                  />
-                ) : (
-                  <EmptyImageIcon className="w-10 h-10" />
-                )}
-              </div>
-              {!readOnly && (
-                <CropImageAndUploadButton
-                  aspect={1}
-                  handleUploadAvatarPicture={handleUploadAvatarPicture}
-                  onUploadComplete={handlePictureUploadComplete}
-                  compressionOptions={{ maxHeight: 800 }}
-                />
-              )}
-            </section>
-          </div>
-        </fieldset>
+        {shareElement}
+        {generalSettings}
 
         <TextInput
           id="student-excercise"
