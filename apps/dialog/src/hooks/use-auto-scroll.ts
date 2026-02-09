@@ -6,6 +6,13 @@ import { useEffect, useState, useCallback } from 'react';
  * Automatic scrolling can be disabled if the user manually scrolls away.
  * To reactivate auto-scrolling (e.g., after sending a message), call the reactivateAutoScrolling function returned by the hook.
  *
+ * NOTE
+ * The hook only listens to mouse wheel and touche events to determine if the user has manually scrolled away.
+ * Grabbing the scrollbar or using keyboard navigation won't disable auto-scrolling.
+ * Using the 'scroll' event didn't work reliably because the auto scroll itself also triggers scroll events.
+ * Depending on the rendering performance the auto scroll gets deactivated without any user interaction or
+ * the user cannot interrupt auto scrolling because rendering is too fast.
+ *
  * @param dependencies - Array of dependencies that trigger the scroll
  * @returns Object with scrollRef (callback ref to attach to the scrollable container) and reactivateAutoScrolling function
  */
@@ -22,13 +29,9 @@ export function useAutoScroll(dependencies: React.DependencyList) {
   const reactivateAutoScrolling = useCallback(() => {
     if (scrollElement) {
       setAutoScrollEnabled(true);
-      requestAnimationFrame(() => {
-        if (scrollElement) {
-          scrollElement.scrollTo({
-            top: scrollElement.scrollHeight,
-            behavior: 'smooth',
-          });
-        }
+      scrollElement.scrollTo({
+        top: scrollElement.scrollHeight,
+        behavior: 'smooth',
       });
     }
   }, [scrollElement]);
@@ -36,24 +39,39 @@ export function useAutoScroll(dependencies: React.DependencyList) {
   // Set up scroll and touch listeners whenever the element changes
   useEffect(() => {
     if (scrollElement) {
+      const isNearBottom = () => {
+        const threshold = 80; // mouse wheel movement seems to be 100px on average
+        const { scrollTop, clientHeight, scrollHeight } = scrollElement;
+
+        const bottomPosition = scrollTop + clientHeight;
+        const nearBottomThreshold = scrollHeight - threshold;
+
+        return bottomPosition >= nearBottomThreshold;
+      };
+
+      const setAutoScrollBasedOnScrollPosition = () => {
+        const nearBottom = isNearBottom();
+        setAutoScrollEnabled(nearBottom);
+      };
+
       // Handle wheel events (mouse wheel scrolling) - clear indicator of user intent
       const handleWheel = () => {
-        setAutoScrollEnabled(false);
+        setAutoScrollBasedOnScrollPosition();
       };
-      scrollElement.addEventListener('wheel', handleWheel, { passive: true });
 
       // Handle touch events to catch cases where users touch to stop momentum scrolling
-      const handleTouchStart = () => {
-        setAutoScrollEnabled(false);
+      const handleTouch = () => {
+        setAutoScrollBasedOnScrollPosition();
       };
 
-      scrollElement.addEventListener('touchstart', handleTouchStart, { passive: true });
-      scrollElement.addEventListener('touchend', handleTouchStart, { passive: true });
+      scrollElement.addEventListener('wheel', handleWheel, { passive: true });
+      scrollElement.addEventListener('touchstart', handleTouch, { passive: true });
+      scrollElement.addEventListener('touchend', handleTouch, { passive: true });
 
       return () => {
         scrollElement.removeEventListener('wheel', handleWheel);
-        scrollElement.removeEventListener('touchstart', handleTouchStart);
-        scrollElement.removeEventListener('touchend', handleTouchStart);
+        scrollElement.removeEventListener('touchstart', handleTouch);
+        scrollElement.removeEventListener('touchend', handleTouch);
       };
     }
   }, [scrollElement]);
@@ -61,15 +79,9 @@ export function useAutoScroll(dependencies: React.DependencyList) {
   // Auto-scroll when dependencies change, but only if user hasn't manually scrolled away
   useEffect(() => {
     if (scrollElement && isAutoScrollEnabled) {
-      // Use requestAnimationFrame to ensure DOM updates are complete
-      // This prevents issues on fast systems where scrollHeight might not be updated yet
-      requestAnimationFrame(() => {
-        if (scrollElement && isAutoScrollEnabled) {
-          scrollElement.scrollTo({
-            top: scrollElement.scrollHeight,
-            behavior: 'smooth',
-          });
-        }
+      scrollElement.scrollTo({
+        top: scrollElement.scrollHeight,
+        behavior: 'smooth',
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
