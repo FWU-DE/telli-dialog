@@ -129,19 +129,24 @@ export default function CharacterForm({
 
   async function handleSharingChange() {
     if (isCreating || readOnly) return;
-    const isSchoolShared = getValues('isSchoolShared');
-    const accessLevel = isSchoolShared ? 'school' : 'private';
 
-    const result = await updateCharacterAccessLevelAction({
-      characterId: character.id,
-      accessLevel,
-    });
-    if (result.success) {
-      router.refresh();
-    } else {
-      toast.error(tToast('edit-toast-error'));
+    // Check if school sharing (accessLevel) changed
+    const isSchoolShared = getValues('isSchoolShared');
+    const newAccessLevel = isSchoolShared ? 'school' : 'private';
+
+    if (newAccessLevel !== character.accessLevel) {
+      const result = await updateCharacterAccessLevelAction({
+        characterId: character.id,
+        accessLevel: newAccessLevel,
+      });
+      if (result.success) {
+        router.refresh();
+      } else {
+        toast.error(tToast('edit-toast-error'));
+      }
     }
-    // Save Link sharing changes
+
+    // Save other sharing changes (like isLinkShared) via autosave
     handleAutoSave();
   }
 
@@ -248,6 +253,7 @@ export default function CharacterForm({
       ...defaultData,
       ...data,
       attachedLinks: data.attachedLinks.map((p) => p.link),
+      isSchoolShared: undefined,
     };
     const dataEquals = deepEqual(defaultData, newData);
     if (dataEquals) return;

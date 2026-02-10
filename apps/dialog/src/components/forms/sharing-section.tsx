@@ -71,9 +71,14 @@ export default function SharingSection<T extends FieldValues>({
   const toast = useToast();
 
   function handleCopyLink() {
-    navigator.clipboard.writeText(window.location.href).then(() => {
-      toast.success(t('link-copied'));
-    });
+    navigator.clipboard
+      .writeText(window.location.href)
+      .then(() => {
+        toast.success(t('link-copied'));
+      })
+      .catch(() => {
+        toast.error(t('link-copied-error'));
+      });
   }
 
   return (

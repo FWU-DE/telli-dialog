@@ -49,7 +49,8 @@
     "link": "Via Link",
     "link-tooltip": "Über einen Link sicht- und kopierbar für Personen mit telli-Zugang.",
     "copy-link": "Link kopieren",
-    "link-copied": "Link in die Zwischenablage kopiert"
+    "link-copied": "Link in die Zwischenablage kopiert",
+    "link-copied-error": "Link konnte nicht kopiert werden"
   },
   "usage-disclaimer": {
     "initial-title": "Willkommen bei telli!",
