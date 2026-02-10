@@ -42,15 +42,19 @@ export async function clientSentryInit(options?: Sentry.BrowserOptions) {
       tracesSampleRate: tracesSampleRate,
 
       beforeSend(event: Sentry.ErrorEvent) {
-        // do not send any logs to sentry for development or e2e environment
-        if (event.environment === 'development' || event.environment === 'e2e') {
-          return null;
-        }
-        // In production and staging send fatal, error and warning events to Sentry
         const level = event.level;
-        return level === 'fatal' || level === 'error' || level === 'warning' || level === 'info'
-          ? event
-          : null;
+        // In production only send fatal, error, and warning events to Sentry
+        if (event.environment === 'production') {
+          return level === 'fatal' || level === 'error' || level === 'warning' ? event : null;
+        }
+        // In staging, send fatal, error, warning and info to Sentry
+        if (event.environment === 'staging') {
+          return level === 'fatal' || level === 'error' || level === 'warning' || level === 'info'
+            ? event
+            : null;
+        }
+        // In development and e2e, do not send any logs to Sentry
+        return null;
       },
 
       ...options,

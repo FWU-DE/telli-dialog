@@ -32,10 +32,14 @@ export function initSentry(opts: {
       if (env.sentryEnvironment === 'production') {
         return level === 'fatal' || level === 'error' || level === 'warning' ? event : null;
       }
-      // In non-production, send fatal, error, warning and info to Sentry
-      return level === 'fatal' || level === 'error' || level === 'warning' || level === 'info'
-        ? event
-        : null;
+      // In staging, send fatal, error, warning and info to Sentry
+      if (env.sentryEnvironment === 'staging') {
+        return level === 'fatal' || level === 'error' || level === 'warning' || level === 'info'
+          ? event
+          : null;
+      }
+      // In development and e2e, do not send any logs to Sentry
+      return null;
     },
     tracesSampler: ({ normalizedRequest, inheritOrSampleWith }) => {
       const url = normalizedRequest?.url ?? '';
