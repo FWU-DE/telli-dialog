@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
 import { waitForToast } from '../../utils/utils';
 
-test('can generate an image with flux.1 model', async ({ page }) => {
+test('can generate an image and copy it to clipboard', async ({ page }) => {
   await login(page, 'teacher');
 
   // navigate to image generation
