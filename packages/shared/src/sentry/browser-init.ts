@@ -30,7 +30,7 @@ export async function clientSentryInit(options?: Sentry.BrowserOptions) {
       environment,
       integrations: [
         Sentry.browserTracingIntegration(),
-        Sentry.captureConsoleIntegration({ levels: ['warn', 'error'] }),
+        Sentry.captureConsoleIntegration({ levels: ['fatal', 'error', 'warn', 'info'] }),
       ],
 
       // Capture Replay for 10% of all sessions,
@@ -46,7 +46,11 @@ export async function clientSentryInit(options?: Sentry.BrowserOptions) {
         if (event.environment === 'development' || event.environment === 'e2e') {
           return null;
         }
-        return event;
+        // In production and staging send fatal, error and warning events to Sentry
+        const level = event.level;
+        return level === 'fatal' || level === 'error' || level === 'warning' || level === 'info'
+          ? event
+          : null;
       },
 
       ...options,

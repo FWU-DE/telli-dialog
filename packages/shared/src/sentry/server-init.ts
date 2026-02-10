@@ -22,7 +22,21 @@ export function initSentry(opts: {
     debug: false,
     dsn: env.sentryDsn,
     environment: env.sentryEnvironment,
-    integrations: [Sentry.captureConsoleIntegration({ levels: ['warn', 'error'] })],
+    integrations: [
+      Sentry.captureConsoleIntegration({ levels: ['fatal', 'error', 'warn', 'info'] }),
+    ],
+    beforeSend(event) {
+      const level = event.level;
+
+      // In production only send fatal, error, and warning events to Sentry
+      if (env.sentryEnvironment === 'production') {
+        return level === 'fatal' || level === 'error' || level === 'warning' ? event : null;
+      }
+      // In non-production, send fatal, error, warning and info to Sentry
+      return level === 'fatal' || level === 'error' || level === 'warning' || level === 'info'
+        ? event
+        : null;
+    },
     tracesSampler: ({ normalizedRequest, inheritOrSampleWith }) => {
       const url = normalizedRequest?.url ?? '';
       // Extract pathname if it's a full URL, otherwise use as-is
