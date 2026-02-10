@@ -25,22 +25,6 @@ export function initSentry(opts: {
     integrations: [
       Sentry.captureConsoleIntegration({ levels: ['fatal', 'error', 'warn', 'info'] }),
     ],
-    beforeSend(event) {
-      const level = event.level;
-
-      // In production only send fatal, error, and warning events to Sentry
-      if (env.sentryEnvironment === 'production') {
-        return level === 'fatal' || level === 'error' || level === 'warning' ? event : null;
-      }
-      // In staging, send fatal, error, warning and info to Sentry
-      if (env.sentryEnvironment === 'staging') {
-        return level === 'fatal' || level === 'error' || level === 'warning' || level === 'info'
-          ? event
-          : null;
-      }
-      // In development and e2e, do not send any logs to Sentry
-      return null;
-    },
     tracesSampler: ({ normalizedRequest, inheritOrSampleWith }) => {
       const url = normalizedRequest?.url ?? '';
       // Extract pathname if it's a full URL, otherwise use as-is

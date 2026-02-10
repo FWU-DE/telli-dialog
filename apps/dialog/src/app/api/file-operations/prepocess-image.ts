@@ -48,8 +48,7 @@ export async function preprocessImage(
   if (type === 'svg') {
     try {
       processedBuffer = await sharp(fileContent).png().toBuffer();
-    } catch (error) {
-      logError('Failed to convert SVG to PNG', error);
+    } catch {
       throw new Error('Failed to convert SVG to PNG');
     }
   }

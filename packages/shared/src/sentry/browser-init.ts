@@ -41,22 +41,6 @@ export async function clientSentryInit(options?: Sentry.BrowserOptions) {
       replaysSessionSampleRate: 0.1,
       tracesSampleRate: tracesSampleRate,
 
-      beforeSend(event: Sentry.ErrorEvent) {
-        const level = event.level;
-        // In production only send fatal, error, and warning events to Sentry
-        if (event.environment === 'production') {
-          return level === 'fatal' || level === 'error' || level === 'warning' ? event : null;
-        }
-        // In staging, send fatal, error, warning and info to Sentry
-        if (event.environment === 'staging') {
-          return level === 'fatal' || level === 'error' || level === 'warning' || level === 'info'
-            ? event
-            : null;
-        }
-        // In development and e2e, do not send any logs to Sentry
-        return null;
-      },
-
       ...options,
     });
   }

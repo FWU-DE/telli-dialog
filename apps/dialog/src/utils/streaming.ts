@@ -3,7 +3,7 @@
  * Replaces ai/rsc's createStreamableValue and readStreamableValue.
  */
 
-import { logError, logWarning } from '@shared/logging';
+import { logError } from '@shared/logging';
 
 /**
  * Creates a streamable text value for Server Actions.

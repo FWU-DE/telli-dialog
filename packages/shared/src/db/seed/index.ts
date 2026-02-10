@@ -1,4 +1,3 @@
-import { logError, logInfo } from '@shared/logging';
 import { insertTemplateCharacters, insertTemplateCustomGpt } from './default-characters';
 import { insertFederalStates } from './federal-state';
 import { insertHelpModeGpt } from './help-mode';
@@ -15,9 +14,9 @@ async function add() {
 
 add()
   .then(() => {
-    logInfo('Seeding completed');
+    console.log('Seeding completed');
   })
   .catch((error) => {
-    logError('Seeding failed', error);
+    console.log('Seeding failed', error);
     process.exit(1);
   });
