@@ -30,7 +30,7 @@ export async function clientSentryInit(options?: Sentry.BrowserOptions) {
       environment,
       integrations: [
         Sentry.browserTracingIntegration(),
-        Sentry.captureConsoleIntegration({ levels: ['warn', 'error'] }),
+        Sentry.captureConsoleIntegration({ levels: ['fatal', 'error', 'warn', 'info'] }),
       ],
 
       // Capture Replay for 10% of all sessions,
@@ -40,14 +40,6 @@ export async function clientSentryInit(options?: Sentry.BrowserOptions) {
       replaysOnErrorSampleRate: 1.0,
       replaysSessionSampleRate: 0.1,
       tracesSampleRate: tracesSampleRate,
-
-      beforeSend(event: Sentry.ErrorEvent) {
-        // do not send any logs to sentry for development or e2e environment
-        if (event.environment === 'development' || event.environment === 'e2e') {
-          return null;
-        }
-        return event;
-      },
 
       ...options,
     });

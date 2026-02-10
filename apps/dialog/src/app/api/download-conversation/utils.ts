@@ -12,6 +12,7 @@ import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { dbGetConversationAndMessages } from '@shared/db/functions/chat';
 import { UserSelectModel } from '@shared/db/schema';
 import { markdownToDocx } from './markdown';
+import { logError } from '@shared/logging';
 
 export async function generateConversationDocxFiles({
   conversationId,
@@ -62,7 +63,7 @@ export async function generateConversationDocxFiles({
 
     return { buffer, conversation, gptName, messages };
   } catch (error) {
-    console.error(`Error generating conversation .docx files: ${error}`);
+    logError('Error generating conversation .docx files', error);
     return undefined;
   }
 }

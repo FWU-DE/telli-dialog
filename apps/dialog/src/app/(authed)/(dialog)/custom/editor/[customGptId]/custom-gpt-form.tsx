@@ -18,6 +18,7 @@ import { EmptyImageIcon } from '@/components/icons/empty-image';
 import CropImageAndUploadButton from '@/components/crop-uploaded-image/crop-image-and-upload-button';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
+import { logWarning } from '@shared/logging';
 import { useTranslations } from 'next-intl';
 import Checkbox from '@/components/common/checkbox';
 import {
@@ -154,7 +155,7 @@ export default function CustomGptForm({
       const newMap = deepCopy(prev);
       const deleted = newMap.delete(localFileId);
       if (!deleted) {
-        console.warn('Could not delete file');
+        logWarning('Could not delete file', { localFileId });
       }
       return newMap;
     });

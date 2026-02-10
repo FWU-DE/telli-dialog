@@ -18,6 +18,7 @@ import {
 import { ApiKey } from '@/types/api-key';
 import { createApiKeyAction, updateApiKeyAction } from './actions';
 import { ROUTES } from '@/consts/routes';
+import { logError } from '@shared/logging';
 import React, { useState } from 'react';
 import { Input } from '@ui/components/Input';
 import { Label } from '@ui/components/Label';
@@ -124,7 +125,7 @@ export function ApiKeyDetailView({
         toast.success('API-Schlüssel erfolgreich aktualisiert');
       }
     } catch (error) {
-      console.error('Error saving API key:', error);
+      logError('Error saving API key', error);
       toast.error(
         isCreate
           ? 'Fehler beim Erstellen des API-Schlüssels'

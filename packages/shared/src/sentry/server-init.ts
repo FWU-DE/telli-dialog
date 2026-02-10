@@ -22,7 +22,9 @@ export function initSentry(opts: {
     debug: false,
     dsn: env.sentryDsn,
     environment: env.sentryEnvironment,
-    integrations: [Sentry.captureConsoleIntegration({ levels: ['warn', 'error'] })],
+    integrations: [
+      Sentry.captureConsoleIntegration({ levels: ['fatal', 'error', 'warn', 'info'] }),
+    ],
     tracesSampler: ({ normalizedRequest, inheritOrSampleWith }) => {
       const url = normalizedRequest?.url ?? '';
       // Extract pathname if it's a full URL, otherwise use as-is

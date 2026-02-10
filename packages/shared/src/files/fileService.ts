@@ -75,7 +75,7 @@ export async function duplicateFileWithEmbeddings(originalFileId: string): Promi
 
     return newFileId;
   } catch (error) {
-    console.error(`Error copying file from ${originalFileId}:`, error);
+    logError(`Error copying file from ${originalFileId}`, error);
     throw new Error(
       `Failed to copy file: ${error instanceof Error ? error.message : 'Unknown error'}`,
       { cause: error },

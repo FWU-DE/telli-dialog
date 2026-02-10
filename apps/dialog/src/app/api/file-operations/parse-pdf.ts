@@ -1,4 +1,5 @@
 import { extractText, getDocumentProxy } from 'unpdf';
+import { logError, logWarning } from '@shared/logging';
 
 type OutlineItem = {
   title: string;
@@ -37,7 +38,7 @@ export async function extractTextFromPdfBuffer(
       })),
     };
   } catch (error) {
-    console.error('Error parsing PDF with unpdf (pages):', error);
+    logError('Error parsing PDF with unpdf (pages)', error);
     throw new Error(
       `Failed to parse PDF: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
@@ -97,11 +98,10 @@ export async function extractTOC(
                 pageNumber = pageIndex + 1; // Page numbers are 1-based
               }
             } catch (destError) {
-              console.warn(
-                'Failed to resolve destination for outline item:',
-                item.title,
-                destError,
-              );
+              logWarning('Failed to resolve destination for outline item', {
+                title: item.title,
+                error: destError,
+              });
               // Continue with default page number
             }
           }
@@ -120,7 +120,7 @@ export async function extractTOC(
             await processOutlineItems(item.items, level + 1, item.title);
           }
         } catch (itemError) {
-          console.warn('Failed to process outline item:', item.title, itemError);
+          logWarning('Failed to process outline item', { title: item.title, error: itemError });
           // Continue with other items
         }
       }
@@ -131,7 +131,7 @@ export async function extractTOC(
 
     return tocItems;
   } catch (error) {
-    console.error('Error extracting TOC from PDF with unpdf:', error);
+    logError('Error extracting TOC from PDF with unpdf', error);
     throw new Error(
       `Failed to extract TOC from PDF: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
@@ -197,7 +197,7 @@ export async function createPageToChapterMapping(
 
     return pageToChapterMapping;
   } catch (error) {
-    console.error('Error creating page to chapter mapping:', error);
+    logError('Error creating page to chapter mapping', error);
     throw new Error(
       `Failed to create page to chapter mapping: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
