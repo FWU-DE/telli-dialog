@@ -50,14 +50,16 @@ export async function getCustomGptForEditView({
 }) {
   checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
-  if (customGpt.accessLevel === 'private' && customGpt.userId !== userId)
-    throw new ForbiddenError('Not authorized to edit custom gpt');
-  if (
-    customGpt.accessLevel === 'school' &&
-    customGpt.schoolId !== schoolId &&
-    customGpt.userId !== userId
-  )
-    throw new ForbiddenError('Not authorized to edit custom gpt');
+  if (!customGpt.isLinkShared) {
+    if (customGpt.accessLevel === 'private' && customGpt.userId !== userId)
+      throw new ForbiddenError('Not authorized to edit custom gpt');
+    if (
+      customGpt.accessLevel === 'school' &&
+      customGpt.schoolId !== schoolId &&
+      customGpt.userId !== userId
+    )
+      throw new ForbiddenError('Not authorized to edit custom gpt');
+  }
 
   return customGpt;
 }
@@ -81,14 +83,16 @@ export async function getCustomGptForNewChat({
   const customGpt = await dbGetCustomGptById({
     customGptId,
   });
-  if (customGpt.accessLevel === 'private' && customGpt.userId !== userId)
-    throw new ForbiddenError('Not authorized to use custom gpt');
-  if (
-    customGpt.accessLevel === 'school' &&
-    customGpt.schoolId !== schoolId &&
-    customGpt.userId !== userId
-  )
-    throw new ForbiddenError('Not authorized to use custom gpt');
+  if (!customGpt.isLinkShared) {
+    if (customGpt.accessLevel === 'private' && customGpt.userId !== userId)
+      throw new ForbiddenError('Not authorized to use custom gpt');
+    if (
+      customGpt.accessLevel === 'school' &&
+      customGpt.schoolId !== schoolId &&
+      customGpt.userId !== userId
+    )
+      throw new ForbiddenError('Not authorized to use custom gpt');
+  }
 
   return customGpt;
 }
@@ -287,15 +291,17 @@ export async function getFileMappings({
 }): Promise<FileModel[]> {
   checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
-  if (customGpt.accessLevel === 'private' && customGpt.userId !== userId) {
-    throw new ForbiddenError('Not authorized to access custom gpt');
-  }
-  if (
-    customGpt.accessLevel === 'school' &&
-    customGpt.schoolId !== schoolId &&
-    customGpt.userId !== userId
-  ) {
-    throw new ForbiddenError('Not authorized to access custom gpt');
+  if (!customGpt.isLinkShared) {
+    if (customGpt.accessLevel === 'private' && customGpt.userId !== userId) {
+      throw new ForbiddenError('Not authorized to access custom gpt');
+    }
+    if (
+      customGpt.accessLevel === 'school' &&
+      customGpt.schoolId !== schoolId &&
+      customGpt.userId !== userId
+    ) {
+      throw new ForbiddenError('Not authorized to access custom gpt');
+    }
   }
 
   return await dbGetRelatedCustomGptFiles(customGptId);

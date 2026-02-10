@@ -1,6 +1,5 @@
 'use client';
 
-import Checkbox from '@/components/common/checkbox';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { useToast } from '@/components/common/toast';
 import CropImageAndUploadButton from '@/components/crop-uploaded-image/crop-image-and-upload-button';
@@ -10,7 +9,7 @@ import {
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
-import { AccessLevel, CharacterWithShareDataModel, FileModel } from '@shared/db/schema';
+import { CharacterWithShareDataModel, FileModel } from '@shared/db/schema';
 import { deepCopy, deepEqual } from '@/utils/object';
 import { cn } from '@/utils/tailwind';
 import {
@@ -22,7 +21,7 @@ import { labelClassName } from '@/utils/tailwind/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import React, { startTransition } from 'react';
+import React from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import SelectLlmModelForm from '../../../_components/select-llm-model';
@@ -47,6 +46,7 @@ import { useFederalState } from '@/components/providers/federal-state-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import AvatarPicture from '@/components/common/avatar-picture';
 import { WebsearchSource } from '@shared/db/types';
+import SharingSection from '@/components/forms/sharing-section';
 
 type CharacterFormProps = CharacterWithShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -77,6 +77,10 @@ const characterFormValuesSchema = z.object({
   restrictions: z.string().nullable(),
   initialMessage: z.string().nullable(),
   attachedLinks: formLinks,
+
+  // Sharing options
+  isSchoolShared: z.boolean(),
+  isLinkShared: z.boolean(),
 });
 type CharacterFormValues = z.infer<typeof characterFormValuesSchema>;
 
@@ -112,6 +116,7 @@ export default function CharacterForm({
       ...character,
       attachedLinks: initialLinks,
       modelId: selectedModelId,
+      isSchoolShared: character.accessLevel === 'school',
     },
   });
 
@@ -122,17 +127,10 @@ export default function CharacterForm({
   const tCommon = useTranslations('common');
   const getZodStringFieldMetadata = getZodStringFieldMetadataFn(characterFormValuesSchema);
 
-  const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
-    character.accessLevel,
-    (p, n: AccessLevel) => n,
-  );
-
-  async function handleAccessLevelChange(value: boolean) {
-    const accessLevel = value ? 'school' : 'private';
-
-    startTransition(() => {
-      addOptimisticAccessLevel(accessLevel);
-    });
+  async function handleSharingChange() {
+    if (isCreating || readOnly) return;
+    const isSchoolShared = getValues('isSchoolShared');
+    const accessLevel = isSchoolShared ? 'school' : 'private';
 
     const result = await updateCharacterAccessLevelAction({
       characterId: character.id,
@@ -143,6 +141,8 @@ export default function CharacterForm({
     } else {
       toast.error(tToast('edit-toast-error'));
     }
+    // Save Link sharing changes
+    handleAutoSave();
   }
 
   async function handleDeattachFile(localFileId: string) {
@@ -275,16 +275,6 @@ export default function CharacterForm({
   const generalSettings = (
     <fieldset className="mt-16 flex flex-col gap-8">
       <h2 className="font-medium mb-2">{t('general-settings')}</h2>
-      {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
-        <div className="flex gap-4">
-          <Checkbox
-            label={t('restriction-school')}
-            checked={optimisticAccessLevel === 'school'}
-            onCheckedChange={(value: boolean) => handleAccessLevelChange(value)}
-            disabled={readOnly}
-          />
-        </div>
-      )}
       <div className="flex flex-col gap-4">
         <label className={labelClassName}>{tCommon('llm-model')}</label>
         <SelectLlmModelForm
@@ -483,6 +473,17 @@ export default function CharacterForm({
           handleAutosave={handleAutoSave}
         />
       </fieldset>
+      <section className="mt-8">
+        {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
+          <SharingSection
+            control={control}
+            schoolSharingName="isSchoolShared"
+            linkSharingName="isLinkShared"
+            onShareChange={handleSharingChange}
+            disabled={readOnly}
+          />
+        )}
+      </section>
 
       {!isCreating && !readOnly && (
         <section className="mt-8">

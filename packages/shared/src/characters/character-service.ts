@@ -173,8 +173,9 @@ export const fetchFileMappings = async ({
   // Authorization check
   const { isOwner, isPrivate, character } = await getCharacterInfo(characterId, userId);
   if (
-    (isPrivate && !isOwner) ||
-    (!isOwner && character.accessLevel === 'school' && character.schoolId !== schoolId)
+    !character.isLinkShared &&
+    ((isPrivate && !isOwner) ||
+      (!isOwner && character.accessLevel === 'school' && character.schoolId !== schoolId))
   )
     throw new ForbiddenError('Not authorized to fetch file mappings for this character');
 
@@ -380,8 +381,9 @@ export const shareCharacter = async ({
 
   const { isOwner, isPrivate, character } = await getCharacterInfo(characterId, user.id);
   if (
-    (isPrivate && !isOwner) ||
-    (!isOwner && character.accessLevel === 'school' && character.schoolId !== schoolId)
+    !character.isLinkShared &&
+    ((isPrivate && !isOwner) ||
+      (!isOwner && character.accessLevel === 'school' && character.schoolId !== schoolId))
   )
     throw new ForbiddenError('Not authorized to share this character');
 
@@ -492,10 +494,12 @@ export const getCharacterForChatSession = async ({
   checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
   if (!character) throw new NotFoundError('Character not found');
-  if (character.accessLevel === 'private' && character.userId !== userId)
-    throw new ForbiddenError('Not authorized to access this character');
-  if (character.accessLevel === 'school' && character.schoolId !== schoolId)
-    throw new ForbiddenError('Not authorized to access this character');
+  if (!character.isLinkShared) {
+    if (character.accessLevel === 'private' && character.userId !== userId)
+      throw new ForbiddenError('Not authorized to access this character');
+    if (character.accessLevel === 'school' && character.schoolId !== schoolId)
+      throw new ForbiddenError('Not authorized to access this character');
+  }
 
   return character;
 };
@@ -516,10 +520,12 @@ export const getCharacterForEditView = async ({
   checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
   if (!character) throw new NotFoundError('Character not found');
-  if (character.accessLevel === 'private' && character.userId !== userId)
-    throw new ForbiddenError('Not authorized to edit this character');
-  if (character.accessLevel === 'school' && character.schoolId !== schoolId)
-    throw new ForbiddenError('Not authorized to edit this character');
+  if (!character.isLinkShared) {
+    if (character.accessLevel === 'private' && character.userId !== userId)
+      throw new ForbiddenError('Not authorized to edit this character');
+    if (character.accessLevel === 'school' && character.schoolId !== schoolId)
+      throw new ForbiddenError('Not authorized to edit this character');
+  }
 
   const relatedFiles = await fetchFileMappings({ characterId, userId, schoolId });
   const maybeSignedPictureUrl = await getReadOnlySignedUrl({

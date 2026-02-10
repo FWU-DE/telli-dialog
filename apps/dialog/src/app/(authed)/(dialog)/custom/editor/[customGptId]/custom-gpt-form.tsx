@@ -1,6 +1,6 @@
 'use client';
 
-import { AccessLevel, CustomGptSelectModel, FileModel, UserSchoolRole } from '@shared/db/schema';
+import { CustomGptSelectModel, FileModel, UserSchoolRole } from '@shared/db/schema';
 import {
   buttonDeleteClassName,
   buttonPrimaryClassName,
@@ -13,13 +13,12 @@ import { z } from 'zod';
 
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/common/toast';
-import React, { startTransition } from 'react';
+import React from 'react';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import CropImageAndUploadButton from '@/components/crop-uploaded-image/crop-image-and-upload-button';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
-import Checkbox from '@/components/common/checkbox';
 import {
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
@@ -47,6 +46,7 @@ import { formLinks } from '@/utils/web-search/form-links';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 import AvatarPicture from '@/components/common/avatar-picture';
 import { WebsearchSource } from '@shared/db/types';
+import SharingSection from '@/components/forms/sharing-section';
 
 type CustomGptFormProps = CustomGptSelectModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -69,6 +69,10 @@ const customGptFormValuesSchema = z.object({
   specification: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS),
   promptSuggestions: z.array(z.object({ content: z.string() })),
   attachedLinks: formLinks,
+
+  // Sharing options
+  isSchoolShared: z.boolean(),
+  isLinkShared: z.boolean(),
 });
 type CustomGptFormValues = z.infer<typeof customGptFormValuesSchema>;
 
@@ -104,6 +108,7 @@ export default function CustomGptForm({
           ? [{ content: '' }]
           : promptSuggestions.map((p) => ({ content: p })),
       attachedLinks: initialLinks,
+      isSchoolShared: customGpt.accessLevel === 'school',
     },
   });
   const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
@@ -112,17 +117,11 @@ export default function CustomGptForm({
   const tToast = useTranslations('custom-gpt.toasts');
   const tCommon = useTranslations('common');
   const getZodStringFieldMetadata = getZodStringFieldMetadataFn(customGptFormValuesSchema);
-  const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
-    customGpt.accessLevel,
-    (p, n: AccessLevel) => n,
-  );
 
-  function handleEnableSharing(value: boolean) {
-    const accessLevel = value ? 'school' : 'private';
-
-    startTransition(() => {
-      addOptimisticAccessLevel(accessLevel);
-    });
+  function handleSharingChange() {
+    if (isCreating || readOnly) return;
+    const isSchoolShared = getValues('isSchoolShared');
+    const accessLevel = isSchoolShared ? 'school' : 'private';
 
     updateCustomGptAccessLevelAction({
       gptId: customGpt.id,
@@ -134,7 +133,10 @@ export default function CustomGptForm({
         toast.error(tToast('edit-toast-error'));
       }
     });
+    // Save Link sharing changes
+    handleAutoSave();
   }
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'promptSuggestions',
@@ -286,20 +288,6 @@ export default function CustomGptForm({
       <NavigateBack label={t('all-gpts')} onClick={handleNavigateBack} />
       <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>
       {copyContainer}
-      {userRole === 'teacher' && (
-        <fieldset className="mt-8 gap-8">
-          {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
-            <div className="flex gap-4">
-              <Checkbox
-                label={t('restriction-school')}
-                checked={optimisticAccessLevel === 'school'}
-                onCheckedChange={(value: boolean) => handleEnableSharing(value)}
-                disabled={readOnly}
-              />
-            </div>
-          )}
-        </fieldset>
-      )}
       <fieldset className="flex flex-col gap-4 mt-8">
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
           <div className="flex gap-8 flex-col">
@@ -455,6 +443,18 @@ export default function CustomGptForm({
           handleAutosave={handleAutoSave}
         />
       </fieldset>
+      <section className="mt-8">
+        {userRole === 'teacher' &&
+          federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
+            <SharingSection
+              control={control}
+              schoolSharingName="isSchoolShared"
+              linkSharingName="isLinkShared"
+              onShareChange={handleSharingChange}
+              disabled={readOnly}
+            />
+          )}
+      </section>
       {!isCreating && !readOnly && (
         <section className="mt-8">
           <h3 className="font-medium">{t('delete-gpt')}</h3>

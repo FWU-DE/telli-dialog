@@ -40,6 +40,17 @@
   "errors": {
     "no-api-key": "Dem Bundesland wurde noch kein API-Schlüssel zugewiesen."
   },
+  "sharing": {
+    "label": "Freigabe",
+    "school": "Schulintern",
+    "school-tooltip": "Wird schulintern sicht- und kopierbar. \nZu beachten: Eine Lehrkraft kann mehreren Schulen zugehörig sein.",
+    "community": "Community",
+    "community-tooltip": "Wird als Community-Vorlage sicht- und kopierbar.\n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich “Hintergrundwissen” weitergegeben werden dürfen.",
+    "link": "Via Link",
+    "link-tooltip": "Über einen Link sicht- und kopierbar für Personen mit telli-Zugang.",
+    "copy-link": "Link kopieren",
+    "link-copied": "Link in die Zwischenablage kopiert"
+  },
   "usage-disclaimer": {
     "initial-title": "Willkommen bei telli!",
     "terms-and-conditions-title": "Nutzungsbedingungen"
