@@ -4,6 +4,7 @@ import 'react-image-crop/dist/ReactCrop.css';
 import { buttonPrimaryClassName, buttonSecondaryClassName } from '@/utils/tailwind/button';
 import Image from 'next/image';
 import { CompressionOptions, getCroppedImageBlob } from '@/utils/files/image-utils';
+import { logError } from '@shared/logging';
 
 type ImageCropModalProps = {
   imageSrc: string;
@@ -47,7 +48,7 @@ export default function ImageCropModal({
 
   async function handleCropConfirm() {
     if (!completedCrop || !imageRef.current) {
-      console.error('Crop data or image ref is missing');
+      logError('Crop data or image ref is missing');
       return;
     }
     const croppedBlob = await getCroppedImageBlob(

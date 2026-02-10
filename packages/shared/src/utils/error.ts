@@ -1,3 +1,5 @@
+import { logError } from '@shared/logging';
+
 type ErrorWithMessage = {
   message: string;
 };
@@ -47,7 +49,7 @@ export function errorifyAsyncFn<F extends (...args: any[]) => Promise<any>>(
       const value = await fn(...args);
       return [null, value];
     } catch (error) {
-      console.error({ error });
+      logError('Error in errorified async function', error);
       if (error instanceof Error) {
         return [error, null];
       }

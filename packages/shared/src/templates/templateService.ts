@@ -17,6 +17,7 @@ import { dbGetCharacterById, dbCreateCharacter } from '@shared/db/functions/char
 import { dbGetCustomGptById, dbUpsertCustomGpt } from '@shared/db/functions/custom-gpts';
 import { dbGetRelatedCharacterFiles, dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
 import { DUMMY_USER_ID } from '@shared/db/seed/user-entity';
+import { logError } from '@shared/logging';
 import {
   duplicateFileWithEmbeddings,
   linkFileToCharacter,
@@ -284,7 +285,7 @@ export async function createTemplateFromUrl(url: string): Promise<string> {
 
     return newTemplate.id;
   } catch (error) {
-    console.error('Error creating template from URL:', error);
+    logError('Error creating template from URL', error);
     throw new Error(error instanceof Error ? error.message : 'Fehler beim Erstellen der Vorlage');
   }
 }
@@ -319,16 +320,13 @@ export async function copyRelatedTemplateFiles(
             await linkFileToCustomGpt(newFileId, resultId);
           }
         } catch (error) {
-          console.error(
-            `Error copying file ${file.id} for ${templateType} template ${resultId}:`,
-            error,
-          );
+          logError(`Error copying file ${file.id} for ${templateType} template ${resultId}`, error);
           // Continue with other files even if one fails
         }
       }),
     );
   } catch (error) {
-    console.error(`Error processing files for ${templateType} template ${resultId}:`, error);
+    logError(`Error processing files for ${templateType} template ${resultId}`, error);
     // Don't fail the entire template creation if file copying fails
   }
 }

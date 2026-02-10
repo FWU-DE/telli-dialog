@@ -17,6 +17,6 @@ add()
     console.log('Seeding completed');
   })
   .catch((error) => {
-    console.error({ error });
+    console.log('Seeding failed', error);
     process.exit(1);
   });

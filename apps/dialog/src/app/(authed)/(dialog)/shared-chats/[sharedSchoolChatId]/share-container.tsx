@@ -1,28 +1,27 @@
 import { cn } from '@/utils/tailwind';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
+import { buttonPrimaryClassName, buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { labelClassName } from '@/utils/tailwind/input';
 import CountDownTimer from '../_components/count-down';
 import {
+  sharedConversationFormValuesSchema,
   SharedConversationShareFormValues,
   telliPointsPercentageValues,
-  sharedConversationFormValuesSchema,
   usageTimeValuesInMinutes,
 } from './schema';
-import { LearningScenarioSelectModel } from '@shared/db/schema';
+import { LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
 import { shareLearningScenarioAction, unshareLearningScenarioAction } from './actions';
 import { useToast } from '@/components/common/toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { selectSVGBackground } from '@/utils/tailwind/select';
-import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { useTranslations } from 'next-intl';
 import FilledShareIcon from '@/components/icons/filled-share';
 import ChatStopIcon from '@/components/icons/chat-stop';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 
-type ShareContainerProps = LearningScenarioSelectModel;
+type ShareContainerProps = LearningScenarioOptionalShareDataModel;
 
 export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerProps) {
   const toast = useToast();

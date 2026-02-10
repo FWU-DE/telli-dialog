@@ -5,6 +5,7 @@ import { env } from './env';
 import { migrateWithLock } from './migrate';
 import { isDevelopment } from '@shared/utils/isDevelopment';
 import { MemoryCache } from '@shared/db/memory-cache';
+import { logInfo, logError } from '@shared/logging';
 
 const globalState = global as unknown as {
   pool?: Pool;
@@ -34,12 +35,12 @@ export const db = drizzle({
 
 export async function runDatabaseMigration() {
   try {
-    console.info('Running database migrations...');
+    logInfo('Running database migrations...');
     await migrateWithLock(db, {
       migrationsFolder: path.join(process.cwd(), '..', '..', 'packages', 'shared', 'migrations'),
     });
-    console.info('Database migrations completed successfully.');
+    logInfo('Database migrations completed successfully.');
   } catch (error) {
-    console.error('Error running database migrations:', error);
+    logError('Error running database migrations', error);
   }
 }

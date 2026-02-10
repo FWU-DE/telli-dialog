@@ -10,7 +10,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
-import { FileModel, LearningScenarioSelectModel } from '@shared/db/schema';
+import { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
 import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../schema';
 import {
   removeFileFromLearningScenarioAction,
@@ -18,6 +18,7 @@ import {
   updateLearningScenarioPictureAction,
   uploadAvatarPictureForLearningScenarioAction,
 } from './actions';
+import { logWarning } from '@shared/logging';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
 import { deleteLearningScenarioAction, linkFileToLearningScenarioAction } from '../actions';
@@ -45,7 +46,7 @@ export default function SharedSchoolChatForm({
   maybeSignedPictureUrl,
   readOnly,
   ...sharedSchoolChat
-}: LearningScenarioSelectModel & {
+}: LearningScenarioOptionalShareDataModel & {
   existingFiles: FileModel[];
   isCreating: boolean;
   initialLinks: WebsearchSource[];
@@ -94,7 +95,7 @@ export default function SharedSchoolChatForm({
       const newMap = deepCopy(prev);
       const deleted = newMap.delete(localFileId);
       if (!deleted) {
-        console.warn('Could not delete file');
+        logWarning('Could not delete file', { localFileId });
       }
       return newMap;
     });

@@ -3,7 +3,7 @@
 import { useSharedChat } from '@/hooks/use-chat-hooks';
 import { FormEvent, RefObject, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { type LearningScenarioSelectModel } from '@shared/db/schema';
+import { LearningScenarioWithShareDataModel } from '@shared/db/schema';
 import ExpiredChatModal from '@/components/common/expired-chat-modal';
 import { SharedChatHeader } from '@/components/chat/shared-header-bar';
 import { InitialChatContentDisplay } from '@/components/chat/initial-content-display';
@@ -14,11 +14,12 @@ import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { Messages } from './messages';
 import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
+import { logError } from '@shared/logging';
 
 export default function SharedChat({
   maybeSignedPictureUrl,
   ...sharedSchoolChat
-}: LearningScenarioSelectModel & { inviteCode: string; maybeSignedPictureUrl?: string }) {
+}: LearningScenarioWithShareDataModel & { inviteCode: string; maybeSignedPictureUrl?: string }) {
   const t = useTranslations('shared-chats.shared');
 
   const { id, inviteCode, modelId } = sharedSchoolChat;
@@ -46,17 +47,18 @@ export default function SharedChat({
     onError: handleError,
   });
 
-  const scrollRef = useAutoScroll([messages, id, inviteCode]);
+  const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, id, inviteCode]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   async function customHandleSubmit(e: FormEvent) {
     e.preventDefault();
 
     try {
+      reactivateAutoScrolling();
       resetError();
       await handleSubmit(e, {});
     } catch (error) {
-      console.error(error);
+      logError('Error in customHandleSubmit', error);
     }
   }
 

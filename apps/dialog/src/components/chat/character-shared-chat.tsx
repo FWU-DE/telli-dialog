@@ -17,6 +17,7 @@ import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios
 import StreamingFinishedMarker from './streaming-finished-marker';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
+import { logError } from '@shared/logging';
 
 /**
  * This component is used if a character is shared via invite code.
@@ -55,17 +56,18 @@ export default function CharacterSharedChat({
     onError: handleError,
   });
 
-  const scrollRef = useAutoScroll([messages, id, inviteCode]);
+  const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, id, inviteCode]);
   const { isBelow } = useBreakpoints();
 
   async function customHandleSubmit(e: FormEvent) {
     e.preventDefault();
 
     try {
+      reactivateAutoScrolling();
       resetError();
       await handleSubmit(e, {});
     } catch (error) {
-      console.error(error);
+      logError('Error in customHandleSubmit', error);
     }
   }
 

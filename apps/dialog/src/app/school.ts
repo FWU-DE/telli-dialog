@@ -1,7 +1,7 @@
 import {
   dbGetCharacterSharedChatsUsageInCentByUserId,
   dbGetChatsUsageInCentByUserId,
-  dbGetSharedChatsUsageInCentByUserId,
+  dbGetLearningScenarioUsageInCentByUserId,
 } from '@shared/db/functions/telli-points';
 import { type UserAndContext } from '@/auth/types';
 import { dbGetCreditIncreaseForCurrentMonth } from '@shared/db/functions/voucher';
@@ -28,7 +28,7 @@ export async function getPriceInCentByUser(user: Omit<UserAndContext, 'subscript
   // students cannot have shared chats
   const sharedChatsUsageInCent =
     user.school.userRole !== 'student'
-      ? await dbGetSharedChatsUsageInCentByUserId({ userId: user.id })
+      ? await dbGetLearningScenarioUsageInCentByUserId({ userId: user.id })
       : 0;
 
   const characterSharedChatsUsageInCent = await dbGetCharacterSharedChatsUsageInCentByUserId({

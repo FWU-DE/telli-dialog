@@ -44,7 +44,6 @@ function processInlineTokens(children: Token[]): TextRun[] {
         continue;
       }
       if (child.attrs && child.attrs[0]) {
-        console.log('link_open', child.attrs[0][1]);
         runs.push(new TextRun({ text: child.attrs[0][1], size: fontSize, color: '2F80ED' }));
       }
     }

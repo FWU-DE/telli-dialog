@@ -3,6 +3,7 @@
 import { requireAdminAuth } from '@/auth/requireAdminAuth';
 import { createLargeLanguageModel, updateLargeLanguageModel } from '@/services/llm-service';
 import { CreateLargeLanguageModel, UpdateLargeLanguageModel } from '@/types/large-language-model';
+import { logError } from '@shared/logging';
 
 export async function createLLMAction(organizationId: string, data: CreateLargeLanguageModel) {
   await requireAdminAuth();
@@ -11,7 +12,7 @@ export async function createLLMAction(organizationId: string, data: CreateLargeL
     const result = await createLargeLanguageModel(organizationId, data);
     return result;
   } catch (error) {
-    console.error('Error creating LLM:', error);
+    logError('Error creating LLM', error);
     throw error;
   }
 }
@@ -27,7 +28,7 @@ export async function updateLLMAction(
     const result = await updateLargeLanguageModel(organizationId, llmId, data);
     return result;
   } catch (error) {
-    console.error('Error updating LLM:', error);
+    logError('Error updating LLM', error);
     throw error;
   }
 }
