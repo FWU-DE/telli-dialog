@@ -479,17 +479,15 @@ export default function CharacterForm({
           handleAutosave={handleAutoSave}
         />
       </fieldset>
-      <section className="mt-8">
-        {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
-          <SharingSection
-            control={control}
-            schoolSharingName="isSchoolShared"
-            linkSharingName="isLinkShared"
-            onShareChange={handleSharingChange}
-            disabled={readOnly}
-          />
-        )}
-      </section>
+      {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
+        <SharingSection
+          control={control}
+          schoolSharingName="isSchoolShared"
+          linkSharingName="isLinkShared"
+          onShareChange={handleSharingChange}
+          disabled={readOnly}
+        />
+      )}
 
       {!isCreating && !readOnly && (
         <section className="mt-8">

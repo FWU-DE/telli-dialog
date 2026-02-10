@@ -51,7 +51,7 @@ function CheckboxWithInfo({
             </button>
           </TooltipTrigger>
           <TooltipContent className="bg-white">
-            <p>{tooltip}</p>
+            <p className="whitespace-pre-line">{tooltip}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -82,7 +82,7 @@ export default function SharingSection<T extends FieldValues>({
   }
 
   return (
-    <div className="w-full">
+    <fieldset className="w-full mt-8">
       <legend className="font-medium mb-4">{t('label')}</legend>
       <div className="flex items-center gap-6 p-4 border border-gray-200 rounded-lg">
         {schoolSharingName && (
@@ -156,6 +156,6 @@ export default function SharingSection<T extends FieldValues>({
           />
         )}
       </div>
-    </div>
+    </fieldset>
   );
 }

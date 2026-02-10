@@ -479,6 +479,10 @@ export const unshareCharacter = async ({
  * If the character is private, only the owner can start a chat session.
  * If the character is shared with the school, any user from the same school can start a chat session.
  * If the character is global, any user can start a chat session.
+ *
+ * Link sharing bypass: If `isLinkShared` is true, access checks are skipped
+ * and any authenticated user can start a chat session with the character.
+ *
  * @throws NotFoundError if character does not exist
  * @throws ForbiddenError if user is not authorized to access the character
  */
@@ -504,6 +508,17 @@ export const getCharacterForChatSession = async ({
   return character;
 };
 
+/**
+ * Loads character for edit view.
+ * Throws if the user is not authorized to access the character:
+ * - NotFound if the character does not exist
+ * - Forbidden if the character is private and the user is not the owner
+ * - Forbidden if the character is school-level and the user is not in the same school
+ *
+ * Link sharing bypass: If `isLinkShared` is true, access checks are skipped
+ * and any authenticated user can view the character. Note that link sharing
+ * only grants read-only access - editing is still restricted to the owner.
+ */
 export const getCharacterForEditView = async ({
   characterId,
   schoolId,

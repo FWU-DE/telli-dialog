@@ -37,7 +37,11 @@ import z from 'zod';
  * Throws if the user is not authorized to access the custom gpt:
  * - NotFound if the custom gpt does not exist
  * - Forbidden if the custom gpt is private and the user is not the owner
- * - Forbidden if the custom gpt is school-level and the user is not in the same school
+ * - Forbidden if the custom gpt is school-level and the user is not in the same school (and not the owner)
+ *
+ * Link sharing bypass: If `isLinkShared` is true, access checks are skipped
+ * and any authenticated user can view the custom gpt. Note that link sharing
+ * only grants read-only access - editing is still restricted to the owner.
  */
 export async function getCustomGptForEditView({
   customGptId,
@@ -69,6 +73,9 @@ export async function getCustomGptForEditView({
  * Conversation starts with the first message.
  * Throws NotFoundError if the custom gpt does not exist.
  * Throws ForbiddenError if the user is not authorized to use the custom gpt.
+ *
+ * Link sharing bypass: If `isLinkShared` is true, access checks are skipped
+ * and any authenticated user can use the custom gpt for chat.
  */
 export async function getCustomGptForNewChat({
   customGptId,
