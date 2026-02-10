@@ -59,13 +59,13 @@ export async function generateConversationDocxFiles({
     });
     const lastAssistantMessage = [...messages].reverse().find((m) => m.role === 'assistant');
 
-    const TheModelName = lastAssistantMessage?.modelName ?? gptName;
+    const modelDisplayName = lastAssistantMessage?.modelName ?? gptName;
 
     messageParagraphs.push(
       new Paragraph({
         children: [
           new TextRun({
-            text: `Generiert von telli unter Nutzung von ${TheModelName}`,
+            text: `Generiert von telli unter Nutzung von ${modelDisplayName}`,
             italics: true,
             size: 18,
             color: '666666',
