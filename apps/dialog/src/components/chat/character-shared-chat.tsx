@@ -56,13 +56,14 @@ export default function CharacterSharedChat({
     onError: handleError,
   });
 
-  const scrollRef = useAutoScroll([messages, id, inviteCode]);
+  const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, id, inviteCode]);
   const { isBelow } = useBreakpoints();
 
   async function customHandleSubmit(e: FormEvent) {
     e.preventDefault();
 
     try {
+      reactivateAutoScrolling();
       resetError();
       await handleSubmit(e, {});
     } catch (error) {

@@ -47,13 +47,14 @@ export default function SharedChat({
     onError: handleError,
   });
 
-  const scrollRef = useAutoScroll([messages, id, inviteCode]);
+  const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, id, inviteCode]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   async function customHandleSubmit(e: FormEvent) {
     e.preventDefault();
 
     try {
+      reactivateAutoScrolling();
       resetError();
       await handleSubmit(e, {});
     } catch (error) {

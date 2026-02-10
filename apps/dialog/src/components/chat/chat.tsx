@@ -150,7 +150,7 @@ export default function Chat({
 
   const { error, handleError, resetError } = useCheckStatusCode();
 
-  const scrollRef = useAutoScroll([messages, status]);
+  const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, status]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -182,6 +182,7 @@ export default function Chat({
     e.preventDefault();
 
     try {
+      reactivateAutoScrolling();
       resetError();
 
       // Trigger refetch of the fileMapping from the DB
