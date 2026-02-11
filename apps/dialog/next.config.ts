@@ -63,6 +63,11 @@ const baseNextConfig: NextConfig = {
         destination: '/learning-scenarios/:path*',
         permanent: true,
       },
+      {
+        source: '/ua/shared-chats/:path*',
+        destination: '/ua/learning-scenarios/:path*',
+        permanent: true,
+      },
     ];
   },
   webpack: (config) => {
