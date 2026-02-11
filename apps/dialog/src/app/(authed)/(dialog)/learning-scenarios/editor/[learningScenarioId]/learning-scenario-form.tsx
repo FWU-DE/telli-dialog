@@ -11,7 +11,7 @@ import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { AccessLevel, FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
-import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../schema';
+import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../../schema';
 import {
   removeFileFromLearningScenarioAction,
   updateLearningScenarioAccessLevelAction,
@@ -22,14 +22,14 @@ import {
 import { logWarning } from '@shared/logging';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
-import { deleteLearningScenarioAction, linkFileToLearningScenarioAction } from '../actions';
+import { deleteLearningScenarioAction, linkFileToLearningScenarioAction } from '../../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
 import ShareContainer from './share-container';
 import React, { startTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { LocalFileState } from '@/components/chat/send-message-form';
 import FileManagement from '@/components/forms/file-management';
-import SelectLlmModelForm from '../../_components/select-llm-model';
+import SelectLlmModelForm from '../../../_components/select-llm-model';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
 import { labelClassName } from '@/utils/tailwind/input';
@@ -43,7 +43,7 @@ import Checkbox from '@/components/common/checkbox';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
 
-export default function SharedSchoolChatForm({
+export default function LearningScenarioForm({
   existingFiles,
   isCreating,
   initialLinks,

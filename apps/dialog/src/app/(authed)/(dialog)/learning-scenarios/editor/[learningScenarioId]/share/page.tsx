@@ -5,7 +5,7 @@ import { cn } from '@/utils/tailwind';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import CountDownTimer from '../../_components/count-down';
+import CountDownTimer from '../../../_components/count-down';
 import QRCode from './qr-code';
 import TelliClipboardButton from '@/components/common/clipboard-button';
 import { getSharedLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
@@ -15,13 +15,13 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { notFound } from 'next/navigation';
 
 export default async function Page(
-  props: PageProps<'/learning-scenarios/[sharedSchoolChatId]/share'>,
+  props: PageProps<'/learning-scenarios/editor/[learningScenarioId]/share'>,
 ) {
-  const { sharedSchoolChatId } = await props.params;
+  const { learningScenarioId } = await props.params;
   const { user } = await requireAuth();
 
   const learningScenario = await getSharedLearningScenario({
-    learningScenarioId: sharedSchoolChatId,
+    learningScenarioId: learningScenarioId,
     userId: user.id,
   }).catch(handleErrorInServerComponent);
 
@@ -38,7 +38,7 @@ export default async function Page(
   return (
     <div className="w-full px-4 sm:px-8 overflow-auto flex flex-col h-full">
       <Link
-        href={`/learning-scenarios/${learningScenario.id}`}
+        href={`/learning-scenarios/editor/${learningScenario.id}`}
         className="flex gap-2 items-center text-primary w-full"
       >
         <SidebarCloseIcon className="w-4 h-4" />

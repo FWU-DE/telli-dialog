@@ -13,29 +13,29 @@ import z from 'zod';
 const searchParamsSchema = z.object({ inviteCode: z.string() });
 
 export default async function Page(
-  props: PageProps<'/ua/learning-scenarios/[sharedChatId]/dialog'>,
+  props: PageProps<'/ua/learning-scenarios/[learningScenarioId]/dialog'>,
 ) {
-  const { sharedChatId } = await props.params;
+  const { learningScenarioId } = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
 
-  const sharedSchoolChat = await dbGetLearningScenarioByIdAndInviteCode({
-    learningScenarioId: sharedChatId,
+  const learningScenario = await dbGetLearningScenarioByIdAndInviteCode({
+    learningScenarioId,
     inviteCode: searchParams.inviteCode,
   });
 
-  if (!sharedSchoolChat) {
+  if (!learningScenario) {
     notFound();
   }
 
-  const model = await dbGetLlmModelById({ modelId: sharedSchoolChat.modelId });
+  const model = await dbGetLlmModelById({ modelId: learningScenario.modelId });
 
   if (!model) {
     notFound();
   }
 
-  const avatarPictureUrl = await getAvatarPictureUrl(sharedSchoolChat.pictureId);
+  const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
 
-  const federalState = await dbGetFederalStateByUserId({ userId: sharedSchoolChat.userId });
+  const federalState = await dbGetFederalStateByUserId({ userId: learningScenario.userId });
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
 
   return (
@@ -43,7 +43,7 @@ export default async function Page(
       <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
         <ThemeProvider designConfiguration={designConfiguration}>
           <SharedChat
-            {...sharedSchoolChat}
+            {...learningScenario}
             inviteCode={searchParams.inviteCode}
             maybeSignedPictureUrl={avatarPictureUrl}
           />

@@ -435,9 +435,11 @@ export async function getFilesForLearningScenario({
 export async function createNewLearningScenario({
   modelId,
   user,
+  schoolId,
 }: {
   modelId: string;
   user: UserModel;
+  schoolId: string;
 }) {
   if (user.userRole !== 'teacher') {
     throw new ForbiddenError('Not authorized to create new learning scenario');
@@ -450,6 +452,7 @@ export async function createNewLearningScenario({
       pictureId: '',
       modelId,
       userId: user.id,
+      schoolId,
     })
     .returning();
 

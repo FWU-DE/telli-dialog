@@ -1,7 +1,7 @@
 'use server';
 
 import { AccessLevel } from '@shared/db/schema';
-import { SharedConversationShareFormValues } from '../../../learning-scenarios/[sharedSchoolChatId]/schema';
+import { SharedConversationShareFormValues } from '../../../learning-scenarios/editor/[learningScenarioId]/schema';
 import { requireAuth } from '@/auth/requireAuth';
 import {
   deleteCharacter,

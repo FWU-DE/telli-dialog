@@ -6,7 +6,7 @@ import {
   telliPointsPercentageValues,
   sharedConversationFormValuesSchema,
   usageTimeValuesInMinutes,
-} from '../../../learning-scenarios/[sharedSchoolChatId]/schema';
+} from '../../../learning-scenarios/editor/[learningScenarioId]/schema';
 import { CharacterWithShareDataModel } from '@shared/db/schema';
 import { shareCharacterAction, unshareCharacterAction } from './actions';
 import { useToast } from '@/components/common/toast';

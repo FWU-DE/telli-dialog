@@ -14,11 +14,12 @@ export async function deleteLearningScenarioAction({ id }: { id: string }) {
 }
 
 export async function createNewLearningScenarioAction({ modelId }: { modelId: string }) {
-  const { user } = await requireAuth();
+  const { user, school } = await requireAuth();
 
   return runServerAction(createNewLearningScenario)({
     modelId,
     user,
+    schoolId: school.id,
   });
 }
 
