@@ -213,6 +213,7 @@ describe('learning-scenario-service', () => {
           createNewLearningScenario({
             modelId: 'model-1',
             user: mockUser('student'),
+            schoolId: generateUUID(),
           }),
       },
       {
