@@ -19,7 +19,7 @@ import { CreateNewCharacterFromTemplate } from '../characters/create-new-charact
 import { iconClassName } from '@/utils/tailwind/icon';
 import TelliClipboardButton from '@/components/common/clipboard-button';
 import { createNewCharacterAction } from './actions';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import AvatarPicture from '@/components/common/avatar-picture';
 
 type CharacterContainerProps = CharacterWithShareDataModel & {
@@ -64,7 +64,7 @@ export default function CharacterContainer({
     router.push(`/characters/editor/${id}/share`);
   }
 
-  const timeLeft = calculateTimeLeftForLearningScenario(character);
+  const timeLeft = calculateTimeLeft(character);
 
   return (
     <Link

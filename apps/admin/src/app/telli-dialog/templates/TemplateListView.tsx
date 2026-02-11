@@ -21,7 +21,7 @@ import {
 } from '@ui/components/Card';
 import { ROUTES } from '@/consts/routes';
 import Link from 'next/link';
-import { TemplateModel } from '@shared/models/templates';
+import { TemplateModel } from '@shared/templates/template';
 import { Search } from 'lucide-react';
 import { getTemplateTypeName } from './templateTypeName';
 import { CreateTemplateModal } from './CreateTemplateModal';

@@ -1,4 +1,4 @@
-import { and, desc, eq, getTableColumns, inArray } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, inArray, isNull, or } from 'drizzle-orm';
 import { db } from '..';
 import {
   conversationMessageTable,
@@ -7,14 +7,16 @@ import {
   LearningScenarioFileMapping,
   LearningScenarioOptionalShareDataModel,
   learningScenarioTable,
+  learningScenarioTemplateMappingTable,
   LearningScenarioWithShareDataModel,
+  SharedLearningScenarioSelectModel,
   sharedLearningScenarioTable,
   sharedLearningScenarioUsageTracking,
   SharedLearningScenarioUsageTrackingInsertModel,
   TextChunkTable,
 } from '../schema';
 
-export async function dbGetLearningScenariosByUserId({ userId }: { userId: string }) {
+function baseLearningScenarioWithShareQuery() {
   return db
     .select({
       ...getTableColumns(learningScenarioTable),
@@ -24,7 +26,86 @@ export async function dbGetLearningScenariosByUserId({ userId }: { userId: strin
       startedAt: sharedLearningScenarioTable.startedAt,
       startedBy: sharedLearningScenarioTable.userId,
     })
-    .from(learningScenarioTable)
+    .from(learningScenarioTable);
+}
+
+export function dbGetGlobalLearningScenarios({
+  userId,
+  federalStateId,
+}: {
+  userId: string;
+  federalStateId?: string;
+}): Promise<LearningScenarioOptionalShareDataModel[]> {
+  return baseLearningScenarioWithShareQuery()
+    .leftJoin(
+      sharedLearningScenarioTable,
+      and(
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioTable.id),
+        eq(sharedLearningScenarioTable.userId, userId),
+      ),
+    )
+    .leftJoin(
+      learningScenarioTemplateMappingTable,
+      eq(learningScenarioTemplateMappingTable.learningScenarioId, learningScenarioTable.id),
+    )
+    .where(
+      and(
+        eq(learningScenarioTable.accessLevel, 'global'),
+        federalStateId
+          ? eq(learningScenarioTemplateMappingTable.federalStateId, federalStateId)
+          : undefined,
+        or(
+          eq(sharedLearningScenarioTable.userId, userId),
+          isNull(sharedLearningScenarioTable.userId),
+        ),
+      ),
+    )
+    .orderBy(desc(learningScenarioTable.createdAt));
+}
+
+/**
+ * Retrieves all learning scenarios associated with a specific school that are accessible to a user.
+ *
+ * This includes usage Data from the sharedLearningScenarioTable table.
+ *
+ * @param params.schoolId - The unique identifier of the school
+ * @param params.userId - The unique identifier of the user requesting the learning scenarios
+ * @returns A promise that resolves to an array of learning scenario models with associated sharing metadata
+ */
+export function dbGetLearningScenariosBySchoolId({
+  schoolId,
+  userId,
+}: {
+  schoolId: string;
+  userId: string;
+}): Promise<LearningScenarioOptionalShareDataModel[]> {
+  return baseLearningScenarioWithShareQuery()
+    .leftJoin(
+      sharedLearningScenarioTable,
+      and(
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioTable.id),
+        eq(sharedLearningScenarioTable.userId, userId), // this ensures we get the user-specific shared data, or null if not shared by this user
+      ),
+    )
+    .where(
+      and(
+        eq(learningScenarioTable.schoolId, schoolId),
+        eq(learningScenarioTable.accessLevel, 'school'),
+        or(
+          eq(sharedLearningScenarioTable.userId, userId),
+          isNull(sharedLearningScenarioTable.userId),
+        ),
+      ),
+    )
+    .orderBy(desc(learningScenarioTable.createdAt));
+}
+
+export async function dbGetLearningScenariosByUserId({
+  userId,
+}: {
+  userId: string;
+}): Promise<LearningScenarioOptionalShareDataModel[]> {
+  return baseLearningScenarioWithShareQuery()
     .leftJoin(
       sharedLearningScenarioTable,
       and(
@@ -41,22 +122,19 @@ export async function dbGetLearningScenariosByUserId({ userId }: { userId: strin
     .orderBy(desc(learningScenarioTable.createdAt));
 }
 
+/**
+ * The returned entity has no Shared Data attached.
+ * Use `dbGetLearningScenarioByIdWithShareData` if you need shared data.
+ */
 export async function dbGetLearningScenarioById({
-  userId,
   learningScenarioId,
 }: {
-  userId: string;
   learningScenarioId: string;
 }) {
   const [learningScenario] = await db
     .select()
     .from(learningScenarioTable)
-    .where(
-      and(
-        eq(learningScenarioTable.id, learningScenarioId),
-        eq(learningScenarioTable.userId, userId),
-      ),
-    );
+    .where(eq(learningScenarioTable.id, learningScenarioId));
   return learningScenario;
 }
 
@@ -73,16 +151,7 @@ export async function dbGetLearningScenarioByIdWithShareData({
   learningScenarioId: string;
   userId: string;
 }): Promise<LearningScenarioWithShareDataModel | undefined> {
-  const [row] = await db
-    .select({
-      ...getTableColumns(learningScenarioTable),
-      telliPointsLimit: sharedLearningScenarioTable.telliPointsLimit,
-      inviteCode: sharedLearningScenarioTable.inviteCode,
-      maxUsageTimeLimit: sharedLearningScenarioTable.maxUsageTimeLimit,
-      startedAt: sharedLearningScenarioTable.startedAt,
-      startedBy: sharedLearningScenarioTable.userId,
-    })
-    .from(learningScenarioTable)
+  const [row] = await baseLearningScenarioWithShareQuery()
     .innerJoin(
       sharedLearningScenarioTable,
       and(
@@ -101,16 +170,7 @@ export async function dbGetLearningScenarioByIdOptionalShareData({
   learningScenarioId: string;
   userId: string;
 }): Promise<LearningScenarioOptionalShareDataModel | undefined> {
-  const [row] = await db
-    .select({
-      ...getTableColumns(learningScenarioTable),
-      telliPointsLimit: sharedLearningScenarioTable.telliPointsLimit,
-      inviteCode: sharedLearningScenarioTable.inviteCode,
-      maxUsageTimeLimit: sharedLearningScenarioTable.maxUsageTimeLimit,
-      startedAt: sharedLearningScenarioTable.startedAt,
-      startedBy: sharedLearningScenarioTable.userId,
-    })
-    .from(learningScenarioTable)
+  const [row] = await baseLearningScenarioWithShareQuery()
     .leftJoin(
       sharedLearningScenarioTable,
       and(
@@ -132,16 +192,7 @@ export async function dbGetLearningScenarioByIdAndInviteCode({
   learningScenarioId: string;
   inviteCode: string;
 }): Promise<LearningScenarioWithShareDataModel | undefined> {
-  const [row] = await db
-    .select({
-      ...getTableColumns(learningScenarioTable),
-      telliPointsLimit: sharedLearningScenarioTable.telliPointsLimit,
-      inviteCode: sharedLearningScenarioTable.inviteCode,
-      maxUsageTimeLimit: sharedLearningScenarioTable.maxUsageTimeLimit,
-      startedAt: sharedLearningScenarioTable.startedAt,
-      startedBy: sharedLearningScenarioTable.userId,
-    })
-    .from(learningScenarioTable)
+  const [row] = await baseLearningScenarioWithShareQuery()
     .innerJoin(
       sharedLearningScenarioTable,
       and(
@@ -245,4 +296,25 @@ export async function dbDeleteLearningScenarioByIdAndUserId({
   });
 
   return deletedLearningScenario;
+}
+
+/**
+ * Returns all shared learning scenarios for a given learning scenario and user.
+ */
+export function dbGetSharedLearningScenarioConversations({
+  learningScenarioId,
+  userId,
+}: {
+  learningScenarioId: string;
+  userId: string;
+}): Promise<SharedLearningScenarioSelectModel[]> {
+  return db
+    .select()
+    .from(sharedLearningScenarioTable)
+    .where(
+      and(
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
+        eq(sharedLearningScenarioTable.userId, userId),
+      ),
+    );
 }

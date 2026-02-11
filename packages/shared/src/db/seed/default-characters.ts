@@ -5,7 +5,7 @@ import { uploadFileToS3 } from '../../s3';
 import { dbCreateCharacter } from '../functions/character';
 import { DUMMY_USER_ID } from './user-entity';
 import { dbUpsertCustomGpt } from '../functions/custom-gpts';
-import { updateTemplateMappings } from '@shared/templates/templateService';
+import { updateTemplateMappings } from '@shared/templates/template-service';
 import { FEDERAL_STATES } from './federal-state';
 
 export async function insertTemplateCharacters() {
