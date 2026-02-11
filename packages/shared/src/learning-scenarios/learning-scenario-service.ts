@@ -156,12 +156,7 @@ export async function updateLearningScenario({
   const [updatedLearningScenario] = await db
     .update(learningScenarioTable)
     .set({ ...parsedData })
-    .where(
-      and(
-        eq(learningScenarioTable.id, learningScenarioId),
-        eq(learningScenarioTable.userId, user.id),
-      ),
-    )
+    .where(eq(learningScenarioTable.id, learningScenarioId))
     .returning();
 
   if (!updatedLearningScenario) {
@@ -201,12 +196,7 @@ export async function updateLearningScenarioAccessLevel({
   const [updatedLearningScenario] = await db
     .update(learningScenarioTable)
     .set({ accessLevel })
-    .where(
-      and(
-        eq(learningScenarioTable.id, learningScenarioId),
-        eq(learningScenarioTable.userId, userId),
-      ),
-    )
+    .where(eq(learningScenarioTable.id, learningScenarioId))
     .returning();
 
   if (updatedLearningScenario === undefined) {
@@ -239,12 +229,7 @@ export async function updateLearningScenarioPicture({
   const [updatedSharedChat] = await db
     .update(learningScenarioTable)
     .set({ pictureId: picturePath })
-    .where(
-      and(
-        eq(learningScenarioTable.id, learningScenarioId),
-        eq(learningScenarioTable.userId, userId),
-      ),
-    )
+    .where(eq(learningScenarioTable.id, learningScenarioId))
     .returning();
 
   if (!updatedSharedChat) {
