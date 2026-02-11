@@ -1,4 +1,4 @@
-import { TemplateModel } from '@shared/models/templates';
+import { TemplateModel } from '@shared/templates/template';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ui/components/Card';
 import { getTemplateTypeName } from '../../templateTypeName';
 
