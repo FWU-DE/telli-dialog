@@ -15,7 +15,7 @@ type ExpiredChatModalProps = {
 };
 
 export default function ExpiredChatModal({ conversationMessages, title }: ExpiredChatModalProps) {
-  const t = useTranslations('shared-chats.shared');
+  const t = useTranslations('learning-scenarios.shared');
   const { designConfiguration } = useTheme();
   return (
     <AlertDialog.Root open={true}>

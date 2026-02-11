@@ -12,7 +12,9 @@ import z from 'zod';
 
 const searchParamsSchema = z.object({ inviteCode: z.string() });
 
-export default async function Page(props: PageProps<'/ua/shared-chats/[sharedChatId]/dialog'>) {
+export default async function Page(
+  props: PageProps<'/ua/learning-scenarios/[sharedChatId]/dialog'>,
+) {
   const { sharedChatId } = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
 

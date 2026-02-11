@@ -11,7 +11,7 @@ import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
 import { deleteCharacterAction } from './editor/[characterId]/actions';
 import { useTranslations } from 'next-intl';
-import CountDownTimer from '../shared-chats/_components/count-down';
+import CountDownTimer from '../learning-scenarios/_components/count-down';
 import ShareIcon from '@/components/icons/share';
 import TrashIcon from '@/components/icons/trash';
 import SharedChatIcon from '@/components/icons/shared-chat';

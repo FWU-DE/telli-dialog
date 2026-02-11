@@ -64,8 +64,8 @@ export default function SharedSchoolChatForm({
   const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   const [initialFiles, setInitialFiles] = React.useState<FileModel[]>(existingFiles);
 
-  const t = useTranslations('shared-chats.form');
-  const tToast = useTranslations('shared-chats.toasts');
+  const t = useTranslations('learning-scenarios.form');
+  const tToast = useTranslations('learning-scenarios.toasts');
   const tCommon = useTranslations('common');
 
   const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
@@ -109,7 +109,7 @@ export default function SharedSchoolChatForm({
       pictureId: sharedSchoolChat.pictureId ?? '',
     },
   });
-  const backUrl = buildGenericUrl(sharedSchoolChat.accessLevel, 'shared-chats');
+  const backUrl = buildGenericUrl(sharedSchoolChat.accessLevel, 'learning-scenarios');
   const { fields } = useFieldArray({
     control,
     name: 'attachedLinks',
@@ -396,7 +396,7 @@ export default function SharedSchoolChatForm({
               onFileUploaded={handleNewFile}
               onDeleteFile={handleDeattachFile}
               readOnly={readOnly}
-              translationNamespace="shared-chats.form"
+              translationNamespace="learning-scenarios.form"
             />
           )}
           <AttachedLinks

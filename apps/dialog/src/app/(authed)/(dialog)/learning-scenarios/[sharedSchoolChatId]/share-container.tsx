@@ -27,8 +27,8 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
   const toast = useToast();
   const router = useRouter();
 
-  const t = useTranslations('shared-chats.shared');
-  const tToast = useTranslations('shared-chats.toasts');
+  const t = useTranslations('learning-scenarios.shared');
+  const tToast = useTranslations('learning-scenarios.toasts');
   const tCommon = useTranslations('common');
 
   const sharedChatTimeLeft = calculateTimeLeft(sharedSchoolChat);
@@ -44,7 +44,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
       disabled: sharedChatActive,
     });
 
-  const shareUILink = `/shared-chats/${sharedSchoolChat.id}/share`;
+  const shareUILink = `/learning-scenarios/${sharedSchoolChat.id}/share`;
 
   async function handleStartSharing() {
     const data = getValuesShare();

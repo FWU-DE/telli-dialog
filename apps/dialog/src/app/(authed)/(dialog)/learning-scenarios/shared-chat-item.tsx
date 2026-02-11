@@ -22,7 +22,7 @@ type SharedChatItemProps = LearningScenarioWithImage;
 export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemProps) {
   const toast = useToast();
   const router = useRouter();
-  const t = useTranslations('shared-chats');
+  const t = useTranslations('learning-scenarios');
   const tCommon = useTranslations('common');
 
   async function handleDeleteSharedChat() {
@@ -39,7 +39,7 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
 
   return (
     <Link
-      href={`/shared-chats/${sharedSchoolChat.id}`}
+      href={`/learning-scenarios/${sharedSchoolChat.id}`}
       className="flex gap-2 items-center border rounded-enterprise-md p-4 hover:border-primary"
     >
       <figure
@@ -74,7 +74,7 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
       {timeLeft > 0 && (
         <Link
           aria-label={t('shared.share')}
-          href={`/shared-chats/${sharedSchoolChat.id}/share`}
+          href={`/learning-scenarios/${sharedSchoolChat.id}/share`}
           className={cn('rounded-enterprise-sm', iconClassName)}
         >
           <ShareIcon aria-hidden="true" className="w-8 h-8" />

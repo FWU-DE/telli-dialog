@@ -20,7 +20,7 @@ export default function SharedChat({
   maybeSignedPictureUrl,
   ...sharedSchoolChat
 }: LearningScenarioWithShareDataModel & { inviteCode: string; maybeSignedPictureUrl?: string }) {
-  const t = useTranslations('shared-chats.shared');
+  const t = useTranslations('learning-scenarios.shared');
 
   const { id, inviteCode, modelId } = sharedSchoolChat;
   const timeLeft = calculateTimeLeft(sharedSchoolChat);

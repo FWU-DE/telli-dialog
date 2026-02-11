@@ -1,10 +1,10 @@
 import { expect, Page } from '@playwright/test';
 
 export async function createLearningScenario(page: Page) {
-  await page.goto('/shared-chats');
-  await page.waitForURL('/shared-chats');
+  await page.goto('/learning-scenarios');
+  await page.waitForURL('/learning-scenarios');
   await page.getByRole('button', { name: 'Szenario erstellen' }).click();
-  await page.waitForURL('/shared-chats/**');
+  await page.waitForURL('/learning-scenarios/**');
 }
 
 export async function deleteLearningScenario(page: Page, name: string) {

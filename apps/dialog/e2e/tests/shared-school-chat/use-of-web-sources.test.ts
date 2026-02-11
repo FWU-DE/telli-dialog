@@ -7,10 +7,10 @@ test('teacher can create shared chat with web sources, student can join chat and
 }) => {
   await login(page, 'teacher');
 
-  await page.goto('/shared-chats');
-  await page.waitForURL('/shared-chats');
+  await page.goto('/learning-scenarios');
+  await page.waitForURL('/learning-scenarios');
   await page.getByRole('button', { name: 'Szenario erstellen' }).click();
-  await page.waitForURL('/shared-chats/**');
+  await page.waitForURL('/learning-scenarios/**');
 
   // configure form
   await page
@@ -53,7 +53,7 @@ test('teacher can create shared chat with web sources, student can join chat and
   await expect(firstSharedChat).toBeVisible();
   await firstSharedChat.click();
 
-  await page.waitForURL('/shared-chats/**');
+  await page.waitForURL('/learning-scenarios/**');
   const stopSharingButton = page.getByRole('button', { name: 'Stop' });
   if (await stopSharingButton.isVisible()) {
     await stopSharingButton.click();

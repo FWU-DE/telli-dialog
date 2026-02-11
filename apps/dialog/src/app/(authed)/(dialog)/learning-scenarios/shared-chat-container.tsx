@@ -33,7 +33,7 @@ export function SharedChatContainer({
   const filterDisabled = learningScenarios.length < 1;
 
   const filteredLearningScenarios = filterLearningScenarios(learningScenarios, input);
-  const t = useTranslations('shared-chats');
+  const t = useTranslations('learning-scenarios');
 
   return (
     <div className="flex flex-col gap-2 w-full">
@@ -61,7 +61,7 @@ export function SharedChatContainer({
 
         <div className="flex gap-2 mt-4 text-base mb-4 max-w-3xl mx-auto w-full">
           <Link
-            href={buildGenericUrl('global', 'shared-chats')}
+            href={buildGenericUrl('global', 'learning-scenarios')}
             className={cn(
               'hover:underline px-2 p-1 text-primary',
               accessLevel === 'global' && 'underline',
@@ -71,7 +71,7 @@ export function SharedChatContainer({
           </Link>
           {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
             <Link
-              href={buildGenericUrl('school', 'shared-chats')}
+              href={buildGenericUrl('school', 'learning-scenarios')}
               className={cn(
                 'hover:underline px-2 p-1 text-primary',
                 accessLevel === 'school' && 'underline',
@@ -81,7 +81,7 @@ export function SharedChatContainer({
             </Link>
           )}
           <Link
-            href={buildGenericUrl('private', 'shared-chats')}
+            href={buildGenericUrl('private', 'learning-scenarios')}
             className={cn(
               'hover:underline px-2 p-1  text-primary',
               accessLevel === 'private' && 'underline',

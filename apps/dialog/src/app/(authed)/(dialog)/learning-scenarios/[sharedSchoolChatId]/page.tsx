@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 
 const searchParamsSchema = z.object({ create: z.string().optional().default('false') });
 
-export default async function Page(props: PageProps<'/shared-chats/[sharedSchoolChatId]'>) {
+export default async function Page(props: PageProps<'/learning-scenarios/[sharedSchoolChatId]'>) {
   const { sharedSchoolChatId } = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
   const isCreating = searchParams.create === 'true';

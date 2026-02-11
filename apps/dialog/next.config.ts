@@ -51,6 +51,20 @@ const baseNextConfig: NextConfig = {
   experimental: {
     useCache: true,
   },
+  async redirects() {
+    return [
+      {
+        source: '/shared-chats',
+        destination: '/learning-scenarios',
+        permanent: true,
+      },
+      {
+        source: '/shared-chats/:path*',
+        destination: '/learning-scenarios/:path*',
+        permanent: true,
+      },
+    ];
+  },
   webpack: (config) => {
     // Ensure proper module resolution for path aliases
     config.resolve.alias = {

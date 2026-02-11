@@ -17,7 +17,7 @@ const searchParamsSchema = z.object({
   visibility: accessLevelSchema.optional().default('private'),
 });
 
-export default async function Page(props: PageProps<'/shared-chats'>) {
+export default async function Page(props: PageProps<'/learning-scenarios'>) {
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
   const accessLevel = searchParams.visibility;
   const { user, school, federalState } = await requireAuth();

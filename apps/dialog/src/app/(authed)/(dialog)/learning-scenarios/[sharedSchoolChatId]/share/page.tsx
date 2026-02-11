@@ -14,7 +14,9 @@ import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { notFound } from 'next/navigation';
 
-export default async function Page(props: PageProps<'/shared-chats/[sharedSchoolChatId]/share'>) {
+export default async function Page(
+  props: PageProps<'/learning-scenarios/[sharedSchoolChatId]/share'>,
+) {
   const { sharedSchoolChatId } = await props.params;
   const { user } = await requireAuth();
 
@@ -29,14 +31,14 @@ export default async function Page(props: PageProps<'/shared-chats/[sharedSchool
 
   const inviteCode = learningScenario.inviteCode;
   const formattedInviteCode = `${inviteCode.substring(0, 4)} ${inviteCode.substring(4, 8)}`;
-  const shareUrl = `${await getBaseUrlByHeaders()}/ua/shared-chats/${learningScenario.id}/dialog?inviteCode=${inviteCode}`;
+  const shareUrl = `${await getBaseUrlByHeaders()}/ua/learning-scenarios/${learningScenario.id}/dialog?inviteCode=${inviteCode}`;
   const leftTime = calculateTimeLeft(learningScenario);
-  const t = await getTranslations('shared-chats.share-page');
+  const t = await getTranslations('learning-scenarios.share-page');
 
   return (
     <div className="w-full px-4 sm:px-8 overflow-auto flex flex-col h-full">
       <Link
-        href={`/shared-chats/${learningScenario.id}`}
+        href={`/learning-scenarios/${learningScenario.id}`}
         className="flex gap-2 items-center text-primary w-full"
       >
         <SidebarCloseIcon className="w-4 h-4" />
