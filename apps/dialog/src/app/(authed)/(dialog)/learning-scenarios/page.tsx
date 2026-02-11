@@ -1,5 +1,4 @@
 import Refresh from '@/components/refresh';
-import { SharedChatContainer } from './shared-chat-container';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
@@ -10,6 +9,7 @@ import {
   enrichLearningScenarioWithPictureUrl,
   getLearningScenariosByAccessLevel,
 } from '@shared/learning-scenarios/learning-scenario-service';
+import { LearningScenarioContainer } from './learning-scenario-container';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +17,7 @@ const searchParamsSchema = z.object({
   visibility: accessLevelSchema.optional().default('private'),
 });
 
-export default async function Page(props: PageProps<'/shared-chats'>) {
+export default async function Page(props: PageProps<'/learning-scenarios'>) {
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
   const accessLevel = searchParams.visibility;
   const { user, school, federalState } = await requireAuth();
@@ -37,7 +37,7 @@ export default async function Page(props: PageProps<'/shared-chats'>) {
   return (
     <main className="w-full p-6">
       <Refresh />
-      <SharedChatContainer
+      <LearningScenarioContainer
         accessLevel={accessLevel}
         learningScenarios={enrichedLearningScenarios}
         user={userAndContext}

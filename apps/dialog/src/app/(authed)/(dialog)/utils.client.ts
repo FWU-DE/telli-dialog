@@ -2,7 +2,7 @@ import { AccessLevel } from '@shared/db/schema';
 
 export function buildGenericUrl(
   accessLevel: AccessLevel,
-  route: 'characters' | 'custom' | 'shared-chats',
+  route: 'characters' | 'custom' | 'learning-scenarios',
 ) {
   const searchParams = new URLSearchParams();
   searchParams.set('visibility', accessLevel);

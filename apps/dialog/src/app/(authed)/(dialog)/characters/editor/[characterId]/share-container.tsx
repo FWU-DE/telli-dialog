@@ -6,7 +6,7 @@ import {
   telliPointsPercentageValues,
   sharedConversationFormValuesSchema,
   usageTimeValuesInMinutes,
-} from '../../../shared-chats/[sharedSchoolChatId]/schema';
+} from '../../../learning-scenarios/editor/[learningScenarioId]/schema';
 import { CharacterWithShareDataModel } from '@shared/db/schema';
 import { shareCharacterAction, unshareCharacterAction } from './actions';
 import { useToast } from '@/components/common/toast';
@@ -16,7 +16,7 @@ import { useForm } from 'react-hook-form';
 import { selectSVGBackground } from '@/utils/tailwind/select';
 import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { useTranslations } from 'next-intl';
-import CountDownTimer from '../../../shared-chats/_components/count-down';
+import CountDownTimer from '../../../learning-scenarios/_components/count-down';
 import FilledShareIcon from '@/components/icons/filled-share';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';

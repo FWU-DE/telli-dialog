@@ -11,7 +11,7 @@ import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { AccessLevel, FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
-import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../schema';
+import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../../schema';
 import {
   removeFileFromLearningScenarioAction,
   updateLearningScenarioAccessLevelAction,
@@ -22,14 +22,14 @@ import {
 import { logWarning } from '@shared/logging';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
-import { deleteLearningScenarioAction, linkFileToLearningScenarioAction } from '../actions';
+import { deleteLearningScenarioAction, linkFileToLearningScenarioAction } from '../../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
 import ShareContainer from './share-container';
 import React, { startTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { LocalFileState } from '@/components/chat/send-message-form';
 import FileManagement from '@/components/forms/file-management';
-import SelectLlmModelForm from '../../_components/select-llm-model';
+import SelectLlmModelForm from '../../../_components/select-llm-model';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
 import { labelClassName } from '@/utils/tailwind/input';
@@ -43,7 +43,7 @@ import Checkbox from '@/components/common/checkbox';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
 
-export default function SharedSchoolChatForm({
+export default function LearningScenarioForm({
   existingFiles,
   isCreating,
   initialLinks,
@@ -64,8 +64,8 @@ export default function SharedSchoolChatForm({
   const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   const [initialFiles, setInitialFiles] = React.useState<FileModel[]>(existingFiles);
 
-  const t = useTranslations('shared-chats.form');
-  const tToast = useTranslations('shared-chats.toasts');
+  const t = useTranslations('learning-scenarios.form');
+  const tToast = useTranslations('learning-scenarios.toasts');
   const tCommon = useTranslations('common');
 
   const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
@@ -109,7 +109,7 @@ export default function SharedSchoolChatForm({
       pictureId: sharedSchoolChat.pictureId ?? '',
     },
   });
-  const backUrl = buildGenericUrl(sharedSchoolChat.accessLevel, 'shared-chats');
+  const backUrl = buildGenericUrl(sharedSchoolChat.accessLevel, 'learning-scenarios');
   const { fields } = useFieldArray({
     control,
     name: 'attachedLinks',
@@ -396,7 +396,7 @@ export default function SharedSchoolChatForm({
               onFileUploaded={handleNewFile}
               onDeleteFile={handleDeattachFile}
               readOnly={readOnly}
-              translationNamespace="shared-chats.form"
+              translationNamespace="learning-scenarios.form"
             />
           )}
           <AttachedLinks

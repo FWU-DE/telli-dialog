@@ -5,35 +5,35 @@ import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible
 import ProfileMenu from '@/components/navigation/profile-menu';
 import React from 'react';
 import { cn } from '@/utils/tailwind';
-import SharedChatItem from './shared-chat-item';
 import SearchBarInput from '@/components/search-bar';
 import { type UserAndContext } from '@/auth/types';
 import { useTranslations } from 'next-intl';
-import { CreateNewSharedChatButton } from './create-new-shared-chat';
 import { LearningScenarioWithImage } from '@shared/learning-scenarios/learning-scenario-service';
 import { AccessLevel } from '@shared/db/schema';
 import Link from 'next/link';
 import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
 import { useFederalState } from '@/components/providers/federal-state-provider';
+import { CreateNewLearningScenarioButton } from './create-new-learning-scenario-button';
+import LearningScenarioItem from './learning-scenario-item';
 
-type SharedChatContainerProps = {
+type LearningScenarioContainerProps = {
   accessLevel: AccessLevel;
   learningScenarios: LearningScenarioWithImage[];
   user: UserAndContext;
 };
 
-export function SharedChatContainer({
+export function LearningScenarioContainer({
   accessLevel,
   learningScenarios,
   user,
-}: SharedChatContainerProps) {
+}: LearningScenarioContainerProps) {
   const [input, setInput] = React.useState('');
   const federalState = useFederalState();
 
   const filterDisabled = learningScenarios.length < 1;
 
   const filteredLearningScenarios = filterLearningScenarios(learningScenarios, input);
-  const t = useTranslations('shared-chats');
+  const t = useTranslations('learning-scenarios');
 
   return (
     <div className="flex flex-col gap-2 w-full">
@@ -56,12 +56,12 @@ export function SharedChatContainer({
             disabled={filterDisabled}
           />
           <div className="flex-grow" />
-          <CreateNewSharedChatButton />
+          <CreateNewLearningScenarioButton />
         </div>
 
         <div className="flex gap-2 mt-4 text-base mb-4 max-w-3xl mx-auto w-full">
           <Link
-            href={buildGenericUrl('global', 'shared-chats')}
+            href={buildGenericUrl('global', 'learning-scenarios')}
             className={cn(
               'hover:underline px-2 p-1 text-primary',
               accessLevel === 'global' && 'underline',
@@ -71,7 +71,7 @@ export function SharedChatContainer({
           </Link>
           {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
             <Link
-              href={buildGenericUrl('school', 'shared-chats')}
+              href={buildGenericUrl('school', 'learning-scenarios')}
               className={cn(
                 'hover:underline px-2 p-1 text-primary',
                 accessLevel === 'school' && 'underline',
@@ -81,7 +81,7 @@ export function SharedChatContainer({
             </Link>
           )}
           <Link
-            href={buildGenericUrl('private', 'shared-chats')}
+            href={buildGenericUrl('private', 'learning-scenarios')}
             className={cn(
               'hover:underline px-2 p-1  text-primary',
               accessLevel === 'private' && 'underline',
@@ -95,7 +95,7 @@ export function SharedChatContainer({
           <div className="max-w-3xl mx-auto w-full">
             <div className="flex gap-2 flex-col mt-6">
               {filteredLearningScenarios.map((learningScenario) => (
-                <SharedChatItem {...learningScenario} key={learningScenario.id} />
+                <LearningScenarioItem {...learningScenario} key={learningScenario.id} />
               ))}
             </div>
           </div>

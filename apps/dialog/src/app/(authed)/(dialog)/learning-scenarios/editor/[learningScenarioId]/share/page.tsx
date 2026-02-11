@@ -5,7 +5,7 @@ import { cn } from '@/utils/tailwind';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import CountDownTimer from '../../_components/count-down';
+import CountDownTimer from '../../../_components/count-down';
 import QRCode from './qr-code';
 import TelliClipboardButton from '@/components/common/clipboard-button';
 import { getSharedLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
@@ -14,12 +14,14 @@ import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { notFound } from 'next/navigation';
 
-export default async function Page(props: PageProps<'/shared-chats/[sharedSchoolChatId]/share'>) {
-  const { sharedSchoolChatId } = await props.params;
+export default async function Page(
+  props: PageProps<'/learning-scenarios/editor/[learningScenarioId]/share'>,
+) {
+  const { learningScenarioId } = await props.params;
   const { user } = await requireAuth();
 
   const learningScenario = await getSharedLearningScenario({
-    learningScenarioId: sharedSchoolChatId,
+    learningScenarioId: learningScenarioId,
     userId: user.id,
   }).catch(handleErrorInServerComponent);
 
@@ -29,14 +31,14 @@ export default async function Page(props: PageProps<'/shared-chats/[sharedSchool
 
   const inviteCode = learningScenario.inviteCode;
   const formattedInviteCode = `${inviteCode.substring(0, 4)} ${inviteCode.substring(4, 8)}`;
-  const shareUrl = `${await getBaseUrlByHeaders()}/ua/shared-chats/${learningScenario.id}/dialog?inviteCode=${inviteCode}`;
+  const shareUrl = `${await getBaseUrlByHeaders()}/ua/learning-scenarios/${learningScenario.id}/dialog?inviteCode=${inviteCode}`;
   const leftTime = calculateTimeLeft(learningScenario);
-  const t = await getTranslations('shared-chats.share-page');
+  const t = await getTranslations('learning-scenarios.share-page');
 
   return (
     <div className="w-full px-4 sm:px-8 overflow-auto flex flex-col h-full">
       <Link
-        href={`/shared-chats/${learningScenario.id}`}
+        href={`/learning-scenarios/editor/${learningScenario.id}`}
         className="flex gap-2 items-center text-primary w-full"
       >
         <SidebarCloseIcon className="w-4 h-4" />
