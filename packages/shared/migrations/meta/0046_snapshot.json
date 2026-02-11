@@ -1,5 +1,5 @@
 {
-  "id": "40066590-9a16-41d9-a047-2a1fe4348981",
+  "id": "4f789865-44d4-4fd6-a5f4-5bdcd3c682d4",
   "prevId": "a905471d-b8e7-4802-934b-81ded7eaf835",
   "version": "7",
   "dialect": "postgresql",
@@ -1896,13 +1896,6 @@
           "notNull": true,
           "default": "now()"
         },
-        "is_deleted": {
-          "name": "is_deleted",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
         "access_level": {
           "name": "access_level",
           "type": "access_level",
@@ -1982,6 +1975,66 @@
         }
       },
       "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.learning_scenario_template_mappings": {
+      "name": "learning_scenario_template_mappings",
+      "schema": "",
+      "columns": {
+        "learning_scenario_id": {
+          "name": "learning_scenario_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "federal_state_id": {
+          "name": "federal_state_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "learning_scenario_template_mappings_learning_scenario_id_fk": {
+          "name": "learning_scenario_template_mappings_learning_scenario_id_fk",
+          "tableFrom": "learning_scenario_template_mappings",
+          "tableTo": "federal_state",
+          "columnsFrom": [
+            "learning_scenario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "learning_scenario_template_mappings_federal_state_id_fk": {
+          "name": "learning_scenario_template_mappings_federal_state_id_fk",
+          "tableFrom": "learning_scenario_template_mappings",
+          "tableTo": "federal_state",
+          "columnsFrom": [
+            "federal_state_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "learning_scenario_template_mappings_pk": {
+          "name": "learning_scenario_template_mappings_pk",
+          "columns": [
+            "learning_scenario_id",
+            "federal_state_id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -2403,19 +2456,6 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "shared_learning_scenario_learning_scenario_id_learning_scenario_id_fk": {
-          "name": "shared_learning_scenario_learning_scenario_id_learning_scenario_id_fk",
-          "tableFrom": "shared_learning_scenario",
-          "tableTo": "learning_scenario",
-          "columnsFrom": [
-            "learning_scenario_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
         "shared_learning_scenario_user_id_user_entity_id_fk": {
           "name": "shared_learning_scenario_user_id_user_entity_id_fk",
           "tableFrom": "shared_learning_scenario",
@@ -2427,6 +2467,19 @@
             "id"
           ],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "shared_learning_scenario_learning_scenario_id_fk": {
+          "name": "shared_learning_scenario_learning_scenario_id_fk",
+          "tableFrom": "shared_learning_scenario",
+          "tableTo": "learning_scenario",
+          "columnsFrom": [
+            "learning_scenario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },

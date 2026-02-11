@@ -12,7 +12,7 @@ import { requireAuth } from '@/auth/requireAuth';
 import { getSharedCharacter } from '@shared/characters/character-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { notFound } from 'next/navigation';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 
 export default async function Page(props: PageProps<'/characters/editor/[characterId]/share'>) {
   const params = await props.params;
@@ -28,7 +28,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
   const inviteCode = character.inviteCode;
   const formattedInviteCode = `${inviteCode.substring(0, 4)} ${inviteCode.substring(4, 8)}`;
   const shareUrl = `${await getBaseUrlByHeaders()}/ua/characters/${character.id}/dialog?inviteCode=${inviteCode}`;
-  const leftTime = calculateTimeLeftForLearningScenario(character);
+  const leftTime = calculateTimeLeft(character);
   const t = await getTranslations('characters.share-page');
 
   return (

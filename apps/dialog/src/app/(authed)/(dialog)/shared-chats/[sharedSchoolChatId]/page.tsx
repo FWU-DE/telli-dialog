@@ -28,6 +28,7 @@ export default async function Page(props: PageProps<'/shared-chats/[sharedSchool
       userId: user.id,
     },
   ).catch(handleErrorInServerComponent);
+  const readOnly = user.id !== learningScenario.userId;
 
   const initialLinks = learningScenario.attachedLinks
     .filter((l) => l && l !== '')
@@ -54,7 +55,7 @@ export default async function Page(props: PageProps<'/shared-chats/[sharedSchool
           isCreating={isCreating}
           initialLinks={initialLinks}
           maybeSignedPictureUrl={avatarPictureUrl}
-          readOnly={false}
+          readOnly={readOnly}
         />
       </div>
     </div>

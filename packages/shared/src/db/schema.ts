@@ -334,7 +334,11 @@ export const characterTable = pgTable(
   (table) => [index().on(table.userId), index().on(table.schoolId)],
 );
 
-export const characterSelectSchema = createSelectSchema(characterTable);
+export const characterSelectSchema = createSelectSchema(characterTable)
+  // for any reason accessLevel has a different type so we have to override it here
+  .extend({
+    accessLevel: accessLevelSchema,
+  });
 export const characterInsertSchema = createInsertSchema(characterTable)
   .omit({
     id: true,
@@ -534,7 +538,11 @@ export const learningScenarioTable = pgTable(
   (table) => [index().on(table.userId)],
 );
 
-export const learningScenarioSelectSchema = createSelectSchema(learningScenarioTable);
+export const learningScenarioSelectSchema = createSelectSchema(learningScenarioTable)
+  // for any reason accessLevel has a different type so we have to override it here
+  .extend({
+    accessLevel: accessLevelSchema,
+  });
 export const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable)
   .omit({
     id: true,
@@ -558,15 +566,52 @@ export type LearningScenarioInsertModel = z.infer<typeof learningScenarioInsertS
 export type LearningScenarioUpdateModel = z.infer<typeof learningScenarioUpdateSchema>;
 
 /**
+ * Schema for table learning_scenario_template_mappings
+ */
+export const learningScenarioTemplateMappingTable = pgTable(
+  'learning_scenario_template_mappings',
+  {
+    learningScenarioId: uuid('learning_scenario_id').notNull(),
+    federalStateId: text('federal_state_id').notNull(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.learningScenarioId, table.federalStateId],
+      name: 'learning_scenario_template_mappings_pk',
+    }),
+    foreignKey({
+      columns: [table.learningScenarioId],
+      foreignColumns: [learningScenarioTable.id],
+      // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
+      // The custom name can only be set with foreignKey() function
+      name: 'learning_scenario_template_mappings_learning_scenario_id_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [table.federalStateId],
+      foreignColumns: [federalStateTable.id],
+      // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
+      // The custom name can only be set with foreignKey() function
+      name: 'learning_scenario_template_mappings_federal_state_id_fk',
+    }).onDelete('cascade'),
+  ],
+);
+
+export const learningScenarioTemplateMappingSelectSchema = createSelectSchema(
+  learningScenarioTemplateMappingTable,
+);
+export const learningScenarioTemplateMappingInsertSchema = createInsertSchema(
+  learningScenarioTemplateMappingTable,
+);
+// no update schema as there are only two fields which are both part of the primary key
+
+/**
  * Schema for table shared_learning_scenario
  */
 export const sharedLearningScenarioTable = pgTable(
   'shared_learning_scenario',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    learningScenarioId: uuid('learning_scenario_id')
-      .references(() => learningScenarioTable.id, { onDelete: 'cascade' })
-      .notNull(),
+    learningScenarioId: uuid('learning_scenario_id').notNull(),
     userId: uuid('user_id')
       .references(() => userTable.id)
       .notNull(),
@@ -575,7 +620,16 @@ export const sharedLearningScenarioTable = pgTable(
     inviteCode: text('invite_code').unique(),
     startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [unique().on(table.learningScenarioId, table.userId)],
+  (table) => [
+    unique().on(table.learningScenarioId, table.userId),
+    foreignKey({
+      columns: [table.learningScenarioId],
+      foreignColumns: [learningScenarioTable.id],
+      // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
+      // The custom name can only be set with foreignKey() function
+      name: 'shared_learning_scenario_learning_scenario_id_fk',
+    }).onDelete('cascade'),
+  ],
 );
 
 export const sharedLearningScenarioSelectSchema = createSelectSchema(
@@ -625,6 +679,7 @@ export const sharedLearningScenarioUsageTracking = pgTable(
   {
     id: uuid('id').defaultRandom().primaryKey(),
     modelId: uuid('model_id').notNull(),
+    // learningScenarioId is not a FK, because usage tracking must be kept even when the learning scenario is deleted
     learningScenarioId: uuid('learning_scenario_id').notNull(),
     userId: uuid('user_id').notNull(),
     completionTokens: integer('completion_tokens').notNull(),
