@@ -530,6 +530,7 @@ export const learningScenarioTable = pgTable(
       .default(sql`'{}'::text[]`),
     pictureId: text('picture_id'),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    isDeleted: boolean('is_deleted').notNull().default(false),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     schoolId: text('school_id').references(() => schoolTable.id),
     originalLearningScenarioId: uuid('original_learning_scenario_id'),

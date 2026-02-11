@@ -99,6 +99,7 @@ export const mockLearningScenario = (): LearningScenarioSelectModel => {
     accessLevel: 'private',
     schoolId: null,
     originalLearningScenarioId: null,
+    isDeleted: false,
   };
 };
 
