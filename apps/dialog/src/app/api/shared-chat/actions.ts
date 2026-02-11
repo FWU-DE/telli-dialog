@@ -82,7 +82,7 @@ export async function sendSharedChatMessage({
   }
 
   // Get teacher user context
-  const teacherUserAndContext = await getUserAndContextByUserId({ userId: sharedChat.userId });
+  const teacherUserAndContext = await getUserAndContextByUserId({ userId: sharedChat.startedBy });
   const productAccess = checkProductAccess(teacherUserAndContext);
 
   if (!productAccess.hasAccess) {

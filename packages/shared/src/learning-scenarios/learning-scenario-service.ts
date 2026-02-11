@@ -3,13 +3,17 @@ import { db } from '@shared/db';
 import { dbGetFilesForLearningScenario } from '@shared/db/functions/files';
 import {
   dbDeleteLearningScenarioByIdAndUserId,
+  dbGetGlobalLearningScenarios,
   dbGetLearningScenarioById,
   dbGetLearningScenarioByIdOptionalShareData,
   dbGetLearningScenarioByIdWithShareData,
+  dbGetLearningScenariosBySchoolId,
   dbGetLearningScenariosByUserId,
   dbGetSharedLearningScenarioConversations,
 } from '@shared/db/functions/learning-scenario';
 import {
+  AccessLevel,
+  accessLevelSchema,
   FileModel,
   fileTable,
   LearningScenarioFileMapping,
@@ -52,6 +56,31 @@ export async function getLearningScenariosForUser({
     learningScenarios: filteredScenarios,
   });
   return enrichedScenarios;
+}
+
+/**
+ * Returns the list of available learning scenarios that the user can access
+ * based on userId, schoolId, federalStateId, and access level.
+ */
+export async function getLearningScenariosByAccessLevel({
+  accessLevel,
+  schoolId,
+  userId,
+  federalStateId,
+}: {
+  accessLevel: AccessLevel;
+  schoolId: string;
+  userId: string;
+  federalStateId: string;
+}): Promise<LearningScenarioOptionalShareDataModel[]> {
+  if (accessLevel === 'global') {
+    return dbGetGlobalLearningScenarios({ userId, federalStateId });
+  } else if (accessLevel === 'school') {
+    return dbGetLearningScenariosBySchoolId({ schoolId, userId });
+  } else if (accessLevel === 'private') {
+    return dbGetLearningScenariosByUserId({ userId });
+  }
+  return [];
 }
 
 /**
@@ -127,16 +156,51 @@ export async function updateLearningScenario({
   const [updatedLearningScenario] = await db
     .update(learningScenarioTable)
     .set({ ...parsedData })
-    .where(
-      and(
-        eq(learningScenarioTable.id, learningScenarioId),
-        eq(learningScenarioTable.userId, user.id),
-      ),
-    )
+    .where(eq(learningScenarioTable.id, learningScenarioId))
     .returning();
 
   if (!updatedLearningScenario) {
     throw new Error('Could not update learning scenario');
+  }
+
+  return updatedLearningScenario;
+}
+
+/**
+ * User can share a learning scenario he owns with the school (access level = school)
+ * or unshare it (access level = private).
+ * User is not allowed to set the access level to global.
+ */
+export async function updateLearningScenarioAccessLevel({
+  learningScenarioId,
+  accessLevel,
+  userId,
+}: {
+  learningScenarioId: string;
+  accessLevel: AccessLevel;
+  userId: string;
+}) {
+  checkParameterUUID(learningScenarioId);
+  accessLevelSchema.parse(accessLevel);
+
+  // Authorization check
+  if (accessLevel === 'global') {
+    throw new ForbiddenError('Not authorized to set the access level to global');
+  }
+
+  const { isOwner } = await getLearningScenarioInfo(learningScenarioId, userId);
+  if (!isOwner)
+    throw new ForbiddenError('Not authorized to set the access level of this learning scenario');
+
+  // Update the access level in database
+  const [updatedLearningScenario] = await db
+    .update(learningScenarioTable)
+    .set({ accessLevel })
+    .where(eq(learningScenarioTable.id, learningScenarioId))
+    .returning();
+
+  if (updatedLearningScenario === undefined) {
+    throw new Error('Could not update the access level of the learning scenario');
   }
 
   return updatedLearningScenario;
@@ -165,12 +229,7 @@ export async function updateLearningScenarioPicture({
   const [updatedSharedChat] = await db
     .update(learningScenarioTable)
     .set({ pictureId: picturePath })
-    .where(
-      and(
-        eq(learningScenarioTable.id, learningScenarioId),
-        eq(learningScenarioTable.userId, userId),
-      ),
-    )
+    .where(eq(learningScenarioTable.id, learningScenarioId))
     .returning();
 
   if (!updatedSharedChat) {
@@ -501,7 +560,7 @@ export async function removeFileFromLearningScenario({
   await deleteMessageAttachments([fileId]);
 }
 
-async function enrichLearningScenarioWithPictureUrl({
+export async function enrichLearningScenarioWithPictureUrl({
   learningScenarios,
 }: {
   learningScenarios: LearningScenarioOptionalShareDataModel[];

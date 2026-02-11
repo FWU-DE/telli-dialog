@@ -1,6 +1,6 @@
 'use server';
 
-import { LearningScenarioSelectModel } from '@shared/db/schema';
+import { AccessLevel, LearningScenarioSelectModel } from '@shared/db/schema';
 import { SharedConversationShareFormValues } from './schema';
 import { runServerAction } from '@shared/actions/run-server-action';
 import {
@@ -8,10 +8,27 @@ import {
   shareLearningScenario,
   unshareLearningScenario,
   updateLearningScenario,
+  updateLearningScenarioAccessLevel,
   updateLearningScenarioPicture,
   uploadAvatarPictureForLearningScenario,
 } from '@shared/learning-scenarios/learning-scenario-service';
 import { requireAuth } from '@/auth/requireAuth';
+
+export async function updateLearningScenarioAccessLevelAction({
+  learningScenarioId,
+  accessLevel,
+}: {
+  learningScenarioId: string;
+  accessLevel: AccessLevel;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(updateLearningScenarioAccessLevel)({
+    learningScenarioId,
+    accessLevel,
+    userId: user.id,
+  });
+}
 
 export async function updateLearningScenarioAction({
   learningScenarioId,
