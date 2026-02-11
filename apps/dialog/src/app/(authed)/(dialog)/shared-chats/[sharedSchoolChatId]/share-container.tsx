@@ -19,7 +19,7 @@ import { useTranslations } from 'next-intl';
 import FilledShareIcon from '@/components/icons/filled-share';
 import ChatStopIcon from '@/components/icons/chat-stop';
 import { iconClassName } from '@/utils/tailwind/icon';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 
 type ShareContainerProps = LearningScenarioOptionalShareDataModel;
 
@@ -31,7 +31,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
   const tToast = useTranslations('shared-chats.toasts');
   const tCommon = useTranslations('common');
 
-  const sharedChatTimeLeft = calculateTimeLeftForLearningScenario(sharedSchoolChat);
+  const sharedChatTimeLeft = calculateTimeLeft(sharedSchoolChat);
   const sharedChatActive = sharedChatTimeLeft > 0;
 
   const { register: registerShare, getValues: getValuesShare } =

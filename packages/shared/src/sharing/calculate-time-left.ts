@@ -1,7 +1,7 @@
 /**
- * Calculates the time left for a learning scenario that is shared.
+ * Calculates the time left (in seconds) for a shared chat (either learning scenario or character).
  */
-export function calculateTimeLeftForLearningScenario({
+export function calculateTimeLeft({
   startedAt,
   maxUsageTimeLimit,
 }: {
