@@ -42,9 +42,9 @@ test('can generate an image and copy it to clipboard', async ({ page }) => {
   // the success toast and the clipboard for image/png type
   await page.getByTitle('Bild kopieren').click();
   await waitForToast(page, 'Bild in die Zwischenablage kopiert');
-  /*const clipboardItems = await page.evaluate(async () => {
+  const clipboardItems = await page.evaluate(async () => {
     const items = await navigator.clipboard.read();
     return items.map((item) => item.types).flat();
   });
-  expect(clipboardItems).toContain('image/png');*/
+  expect(clipboardItems).toContain('image/png');
 });
