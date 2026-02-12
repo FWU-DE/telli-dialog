@@ -7,6 +7,7 @@ import {
   dbGetFederalStates,
 } from './federal-state';
 import { fetchLlmModels } from '../../knotenpunkt';
+import { logError } from '@shared/logging';
 
 export async function dbGetLlmModelById({ modelId }: { modelId: string | undefined }) {
   if (modelId === undefined) return undefined;
@@ -59,7 +60,7 @@ export async function dbUpdateLlmModelsByFederalStateId({
 }): Promise<LlmModelSelectModel[]> {
   const [error, result] = await dbGetFederalStateWithDecryptedApiKeyWithResult({ federalStateId });
   if (error !== null) {
-    console.error({ error });
+    logError('Error getting federal state with decrypted API key', error, { federalStateId });
     return [];
   }
   // Fetch models from Knotenpunkt and load existing models in parallel

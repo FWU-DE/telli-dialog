@@ -1,4 +1,4 @@
-import { TemplateModel } from '@shared/models/templates';
+import { TemplateModel } from '@shared/templates/template';
 
 export function getTemplateTypeName(type: TemplateModel['type']): string {
   switch (type) {
@@ -6,5 +6,7 @@ export function getTemplateTypeName(type: TemplateModel['type']): string {
       return 'Dialogpartner';
     case 'custom-gpt':
       return 'Assistent';
+    case 'learning-scenario':
+      return 'Lernszenario';
   }
 }

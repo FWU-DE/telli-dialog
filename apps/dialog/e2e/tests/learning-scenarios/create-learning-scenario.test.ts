@@ -38,7 +38,7 @@ test('teacher can login, create and join learning scenario', async ({ page }) =>
   const firstSharedChat = page.getByRole('link', { name: learningScenarioName }).first();
   await expect(firstSharedChat).toBeVisible();
   await firstSharedChat.click();
-  await page.waitForURL('/shared-chats/**');
+  await page.waitForURL('/learning-scenarios/**');
 
   // check if created with the correct name
   const sharedChatName = page.getByText(learningScenarioName).first();
@@ -53,7 +53,7 @@ test('teacher can login, create and join learning scenario', async ({ page }) =>
   await page.selectOption('#maxUsage', '30');
   await page.getByTitle('Szenario starten').click();
 
-  await page.waitForURL('/shared-chats/**/share');
+  await page.waitForURL('/learning-scenarios/**/share');
   const code = await page.locator('#join-code').textContent();
 
   const countDown = page.locator('#countdown-timer');
@@ -72,7 +72,7 @@ test('teacher can login, create and join learning scenario', async ({ page }) =>
   await expect(loginButton).toBeVisible();
   await loginButton.click();
 
-  await page.waitForURL('/ua/shared-chats/**/dialog?inviteCode=*');
+  await page.waitForURL('/ua/learning-scenarios/**/dialog?inviteCode=*');
 });
 
 test('teacher can login, create and delete learning scenario, student can join chat', async ({
@@ -80,10 +80,10 @@ test('teacher can login, create and delete learning scenario, student can join c
 }) => {
   await login(page, 'teacher');
 
-  await page.goto('/shared-chats');
-  await page.waitForURL('/shared-chats');
+  await page.goto('/learning-scenarios');
+  await page.waitForURL('/learning-scenarios');
   await page.getByRole('button', { name: 'Szenario erstellen' }).click();
-  await page.waitForURL('/shared-chats/**');
+  await page.waitForURL('/learning-scenarios/**');
 
   // configure form
   const name = learningScenarioName.replace('1', '2');
@@ -115,7 +115,7 @@ test('teacher can login, create and delete learning scenario, student can join c
   await expect(firstSharedChat).toBeVisible();
   await firstSharedChat.click();
 
-  await page.waitForURL('/shared-chats/**');
+  await page.waitForURL('/learning-scenarios/**');
   const stopSharingButton = page.getByRole('button', { name: 'Stop' });
   if (await stopSharingButton.isVisible()) {
     await stopSharingButton.click();
@@ -126,7 +126,7 @@ test('teacher can login, create and delete learning scenario, student can join c
   await page.getByTitle('Szenario starten').click();
 
   // get code
-  await page.waitForURL('/shared-chats/**/share');
+  await page.waitForURL('/learning-scenarios/**/share');
   const code = await page.locator('#join-code').textContent();
 
   // join chat as student
@@ -139,7 +139,7 @@ test('teacher can login, create and delete learning scenario, student can join c
   await expect(loginButton).toBeVisible();
   await loginButton.click();
 
-  await page.waitForURL('/ua/shared-chats/**/dialog?inviteCode=*');
+  await page.waitForURL('/ua/learning-scenarios/**/dialog?inviteCode=*');
 
   // send first message
   const startButton = page.getByRole('button', { name: 'Dialog starten' });
@@ -165,8 +165,8 @@ test('teacher can login, create and delete learning scenario, student can join c
 test('teacher can delete learning scenario', async ({ page }) => {
   await login(page, 'teacher');
 
-  await page.goto('/shared-chats');
-  await page.waitForURL('/shared-chats');
+  await page.goto('/learning-scenarios');
+  await page.waitForURL('/learning-scenarios');
 
   await deleteLearningScenario(page, learningScenarioName);
 
@@ -180,10 +180,10 @@ test('teacher can delete learning scenario', async ({ page }) => {
 test('data is autosaved on blur', async ({ page }) => {
   await login(page, 'teacher');
 
-  await page.goto('/shared-chats');
-  await page.waitForURL('/shared-chats');
+  await page.goto('/learning-scenarios');
+  await page.waitForURL('/learning-scenarios');
   await page.getByRole('button', { name: 'Szenario erstellen' }).click();
-  await page.waitForURL('/shared-chats/**');
+  await page.waitForURL('/learning-scenarios/**');
 
   // Fill out the form initially
   await page.getByLabel('Wie heißt das Szenario? *').fill('Autosave Test Scenario');
@@ -208,9 +208,9 @@ test('data is autosaved on blur', async ({ page }) => {
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
-  await page.waitForURL('/shared-chats/**');
+  await page.waitForURL('/learning-scenarios/**');
   await page.getByRole('link', { name: 'Autosave Test Scenario' }).first().click();
-  await page.waitForURL('/shared-chats/**');
+  await page.waitForURL('/learning-scenarios/**');
   await waitForToastDisappear(page); // wait for success toast to disappear before continuing
 
   // Edit and verify autosave for each field

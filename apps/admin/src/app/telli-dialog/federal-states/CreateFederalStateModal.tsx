@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect } from 'react';
 import { ROUTES } from '@/consts/routes';
 import { FormErrorDisplay } from '@/components/FormErrorDisplay';
+import { logError } from '@shared/logging';
 
 export type CreateFederalStateModalProps = {
   isOpen: boolean;
@@ -60,7 +61,7 @@ export function CreateFederalStateModal(props: CreateFederalStateModalProps) {
       }
       router.push(ROUTES.dialog.federalStateDetails(data.id));
     } catch (error) {
-      console.error('Error creating federal state:', error);
+      logError('Error creating federal state', error);
       toast.error('Fehler beim Erstellen des Bundeslands');
     }
   }

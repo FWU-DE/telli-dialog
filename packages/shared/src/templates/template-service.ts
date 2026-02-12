@@ -7,16 +7,18 @@ import {
   customGptTable,
   customGptTemplateMappingTable,
   federalStateTable,
+  learningScenarioTable,
 } from '@shared/db/schema';
 import {
   TemplateModel,
   TemplateToFederalStateMapping,
   TemplateTypes,
-} from '@shared/models/templates';
+} from '@shared/templates/template';
 import { dbGetCharacterById, dbCreateCharacter } from '@shared/db/functions/character';
 import { dbGetCustomGptById, dbUpsertCustomGpt } from '@shared/db/functions/custom-gpts';
 import { dbGetRelatedCharacterFiles, dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
 import { DUMMY_USER_ID } from '@shared/db/seed/user-entity';
+import { logError } from '@shared/logging';
 import {
   duplicateFileWithEmbeddings,
   linkFileToCharacter,
@@ -29,16 +31,17 @@ import {
  * @returns A list of all global templates
  */
 export async function getTemplates(): Promise<TemplateModel[]> {
-  const [characterTemplates, customGptTemplates] = await Promise.all([
-    getCharacters(),
-    getCustomGpt(),
+  const [characterTemplates, customGptTemplates, learningScenarioTemplates] = await Promise.all([
+    getCharacterTemplates(),
+    getCustomGptTemplates(),
+    getLearningScenarioTemplates(),
   ]);
 
-  return [...characterTemplates, ...customGptTemplates];
+  return [...characterTemplates, ...customGptTemplates, ...learningScenarioTemplates];
 }
 
 /** Fetch all character templates from the database. */
-async function getCharacters(): Promise<TemplateModel[]> {
+async function getCharacterTemplates(): Promise<TemplateModel[]> {
   const templates = await db
     .select({
       id: characterTable.id,
@@ -57,7 +60,7 @@ async function getCharacters(): Promise<TemplateModel[]> {
 }
 
 /** Fetch all custom GPT templates from the database. */
-async function getCustomGpt(): Promise<TemplateModel[]> {
+async function getCustomGptTemplates(): Promise<TemplateModel[]> {
   const templates = await db
     .select({
       id: customGptTable.id,
@@ -72,6 +75,25 @@ async function getCustomGpt(): Promise<TemplateModel[]> {
   return templates.map((template) => ({
     ...template,
     type: 'custom-gpt',
+  }));
+}
+
+/** Fetch all learning scenario templates from the database. */
+async function getLearningScenarioTemplates(): Promise<TemplateModel[]> {
+  const templates = await db
+    .select({
+      id: learningScenarioTable.id,
+      name: learningScenarioTable.name,
+      createdAt: learningScenarioTable.createdAt,
+      originalId: learningScenarioTable.originalLearningScenarioId,
+      isDeleted: learningScenarioTable.isDeleted,
+    })
+    .from(learningScenarioTable)
+    .where(eq(learningScenarioTable.accessLevel, 'global'));
+
+  return templates.map((template) => ({
+    ...template,
+    type: 'learning-scenario',
   }));
 }
 
@@ -284,7 +306,7 @@ export async function createTemplateFromUrl(url: string): Promise<string> {
 
     return newTemplate.id;
   } catch (error) {
-    console.error('Error creating template from URL:', error);
+    logError('Error creating template from URL', error);
     throw new Error(error instanceof Error ? error.message : 'Fehler beim Erstellen der Vorlage');
   }
 }
@@ -319,16 +341,13 @@ export async function copyRelatedTemplateFiles(
             await linkFileToCustomGpt(newFileId, resultId);
           }
         } catch (error) {
-          console.error(
-            `Error copying file ${file.id} for ${templateType} template ${resultId}:`,
-            error,
-          );
+          logError(`Error copying file ${file.id} for ${templateType} template ${resultId}`, error);
           // Continue with other files even if one fails
         }
       }),
     );
   } catch (error) {
-    console.error(`Error processing files for ${templateType} template ${resultId}:`, error);
+    logError(`Error processing files for ${templateType} template ${resultId}`, error);
     // Don't fail the entire template creation if file copying fails
   }
 }

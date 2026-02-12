@@ -5,7 +5,7 @@ import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
   dbGetSharedChatUsageInCentBySharedChatId,
 } from '@shared/db/functions/telli-points';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 
 /**
  * Calculates the shared chat limit in cents
@@ -101,7 +101,7 @@ export function sharedChatHasExpired({
   startedAt: Date | null;
   maxUsageTimeLimit: number | null;
 }) {
-  const timeLeft = calculateTimeLeftForLearningScenario({ startedAt, maxUsageTimeLimit });
+  const timeLeft = calculateTimeLeft({ startedAt, maxUsageTimeLimit });
 
   if (startedAt === null || timeLeft < 1 || maxUsageTimeLimit === null) {
     // the shared chat is no viable anymore so the limit is reached

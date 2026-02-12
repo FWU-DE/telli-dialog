@@ -13,10 +13,11 @@ import useBreakpoints from '../hooks/use-breakpoints';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { AssistantIcon } from './assistant-icon';
 import { Messages } from './messages';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import StreamingFinishedMarker from './streaming-finished-marker';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
+import { logError } from '@shared/logging';
 
 /**
  * This component is used if a character is shared via invite code.
@@ -28,7 +29,7 @@ export default function CharacterSharedChat({
   const t = useTranslations('characters.shared');
 
   const { id, inviteCode, modelId } = character;
-  const timeLeft = calculateTimeLeftForLearningScenario(character);
+  const timeLeft = calculateTimeLeft(character);
   const chatActive = timeLeft > 0;
 
   const { error, handleError, resetError } = useCheckStatusCode();
@@ -66,7 +67,7 @@ export default function CharacterSharedChat({
       resetError();
       await handleSubmit(e, {});
     } catch (error) {
-      console.error(error);
+      logError('Error in customHandleSubmit', error);
     }
   }
 

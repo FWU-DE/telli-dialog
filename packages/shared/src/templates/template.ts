@@ -1,4 +1,4 @@
-export type TemplateTypes = 'character' | 'custom-gpt';
+export type TemplateTypes = 'character' | 'custom-gpt' | 'learning-scenario';
 
 /* Unified template model for characters and custom GPTs */
 export type TemplateModel = {

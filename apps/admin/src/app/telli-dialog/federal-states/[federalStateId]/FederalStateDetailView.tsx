@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import z from 'zod';
 import { FederalStateModel, federalStateSchema } from '@shared/federal-states/types';
 import { DesignConfigurationSchema } from '@ui/types/design-configuration';
+import { logError } from '@shared/logging';
 import { useEffect } from 'react';
 import { FormErrorDisplay } from '@/components/FormErrorDisplay';
 
@@ -95,7 +96,7 @@ export function FederalStateView(props: FederalStateViewProps) {
       });
       toast.success('Bundesland erfolgreich aktualisiert');
     } catch (error) {
-      console.error('Error saving federal state:', error);
+      logError('Error saving federal state', error);
       toast.error('Fehler beim Aktualisieren des Bundeslands');
     }
   }

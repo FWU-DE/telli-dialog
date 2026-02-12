@@ -1,5 +1,8 @@
 import { Page } from 'k6/browser';
+import { Trend } from 'k6/metrics';
 import { BASE_URL } from '../config';
+
+const streamingResponseTime = new Trend('streaming_response_time', true);
 
 export class SharedCharacterPage {
   constructor(
@@ -24,8 +27,10 @@ export class SharedCharacterPage {
 
     // click send button and wait for response
     await this.page.getByTestId('submit-button').click();
+    const startTime = Date.now();
     await this.page
       .getByTestId('streaming-finished')
       .waitFor({ state: 'attached', timeout: 30000 });
+    streamingResponseTime.add(Date.now() - startTime);
   }
 }

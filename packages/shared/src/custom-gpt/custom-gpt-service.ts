@@ -26,7 +26,7 @@ import {
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
 import { copyFileInS3, uploadFileToS3 } from '@shared/s3';
-import { copyCustomGpt, copyRelatedTemplateFiles } from '@shared/templates/templateService';
+import { copyCustomGpt, copyRelatedTemplateFiles } from '@shared/templates/template-service';
 import { addDays } from '@shared/utils/date';
 import { generateUUID } from '@shared/utils/uuid';
 import { and, eq, lt } from 'drizzle-orm';

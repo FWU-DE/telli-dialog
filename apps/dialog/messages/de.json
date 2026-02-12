@@ -258,13 +258,17 @@
       "duplicate-url": "Dieser Link wurde bereits hinzugefügt."
     }
   },
-  "shared-chats": {
+  "learning-scenarios": {
     "title": "Lernszenarien",
     "description": "Im Dialog mit telli setzen sich Lernende mit einem konkreten Thema auseinander und erarbeiten sich so einen Lerngegenstand interaktiv und selbstständig. Die zeitlich begrenzten Chats können einfach einzeln oder gruppenweise mit Lernenden geteilt werden.",
-    "search-placeholder": "Szenario suchen",
-    "no-dialogs": "Es wurden noch keine Lernszenarien erstellt.",
+    "search-placeholder": "Szenario suchen...",
+    "visibility-global": "Vorlagen",
+    "visibility-school": "Schulintern",
+    "visibility-private": "Für mich",
     "form": {
       "button-create": "Szenario erstellen",
+      "restriction-private": "Keine Freigabe",
+      "restriction-school": "schulintern freigeben",
       "model-label": "Sprachmodell",
       "all-dialogs": "Alle Lernszenarien",
       "title": "Lernszenario erstellen",

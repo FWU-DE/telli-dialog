@@ -22,6 +22,7 @@ import { env } from './env';
 import { nanoid } from 'nanoid';
 import { chunkArray } from '@shared/utils/arrays';
 import { S3_DELETE_OBJECTS_MAX } from '@shared/s3/const';
+import { logError } from '@shared/logging';
 
 const s3Client = new S3Client({
   // region: 'eu-de',
@@ -94,7 +95,7 @@ export async function copyFileInS3({ newKey, copySource }: { newKey: string; cop
     const command = new CopyObjectCommand(copyParams);
     await s3Client.send(command);
   } catch (error) {
-    console.error('Error copying file to S3:', error);
+    logError('Error copying file to S3', error);
     throw error;
   }
 }
@@ -135,7 +136,7 @@ export async function getReadOnlySignedUrl({
     const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600, ...options });
     return signedUrl;
   } catch (error) {
-    console.error('Error generating signed GET URL for S3:', error);
+    logError('Error generating signed GET URL for S3', error);
     throw error;
   }
 }
@@ -181,7 +182,7 @@ export async function deleteFilesFromS3(keys: string[]) {
         const command = new DeleteObjectsCommand(deleteParams);
         await s3Client.send(command);
       } catch (error) {
-        console.error('Error deleting files from S3:', error);
+        logError('Error deleting files from S3', error);
         throw error;
       }
     }),
@@ -216,7 +217,7 @@ async function getMaybeSignedUrlIfExists({
     return await getReadOnlySignedUrl({ key, filename, contentType, attachment });
   } catch (error) {
     if (!suppressError) {
-      console.error('Error getting signed URL from S3:', error);
+      logError('Error getting signed URL from S3', error);
     }
     // If an error is thrown, the object doesn't exist
     return undefined;
