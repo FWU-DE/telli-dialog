@@ -13,7 +13,7 @@ test('teacher can share character school-wide', async ({ page }) => {
 
   await page.waitForURL('/characters/editor/**');
 
-  await page.getByRole('checkbox', { name: 'schulintern freigeben' }).click();
+  await page.getByRole('checkbox', { name: 'Schulintern' }).click();
 
   // configure form
   await page.getByLabel('Schultyp').fill('Grundschule');
