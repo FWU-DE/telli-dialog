@@ -1,3 +1,0 @@
-ALTER TABLE "character" ADD COLUMN "is_link_shared" boolean DEFAULT false NOT NULL;--> statement-breakpoint
-ALTER TABLE "custom_gpt" ADD COLUMN "is_link_shared" boolean DEFAULT false NOT NULL;--> statement-breakpoint
-ALTER TABLE "shared_learning_scenario" ADD CONSTRAINT "shared_learning_scenario_learning_scenario_id_learning_scenario_id_fk" FOREIGN KEY ("learning_scenario_id") REFERENCES "public"."learning_scenario"("id") ON DELETE cascade ON UPDATE no action;
