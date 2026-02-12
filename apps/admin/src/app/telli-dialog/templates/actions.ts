@@ -1,6 +1,6 @@
 'use server';
 import { requireAdminAuth } from '@/auth/requireAdminAuth';
-import { getTemplates, createTemplateFromUrl } from '@telli/shared/templates/templateService';
+import { getTemplates, createTemplateFromUrl } from '@telli/shared/templates/template-service';
 
 export async function getTemplatesAction() {
   await requireAdminAuth();

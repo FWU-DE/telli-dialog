@@ -1,4 +1,4 @@
-import { TemplateTypes } from '@shared/models/templates';
+import { TemplateTypes } from '@shared/templates/template';
 
 export const ROUTES = {
   home: '/',

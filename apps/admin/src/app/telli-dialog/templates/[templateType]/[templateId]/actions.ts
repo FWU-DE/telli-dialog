@@ -1,11 +1,11 @@
 'use server';
 import { requireAdminAuth } from '@/auth/requireAdminAuth';
-import { TemplateToFederalStateMapping, TemplateTypes } from '@shared/models/templates';
+import { TemplateToFederalStateMapping, TemplateTypes } from '@shared/templates/template';
 import {
   getFederalStatesWithMappings,
   getTemplateById,
   updateTemplateMappings,
-} from '@telli/shared/templates/templateService';
+} from '@telli/shared/templates/template-service';
 
 export async function getTemplateByIdAction(templateType: TemplateTypes, templateId: string) {
   await requireAdminAuth();

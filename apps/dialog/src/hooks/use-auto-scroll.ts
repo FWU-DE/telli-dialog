@@ -40,7 +40,7 @@ export function useAutoScroll(dependencies: React.DependencyList) {
   useEffect(() => {
     if (scrollElement) {
       const isNearBottom = () => {
-        const threshold = 80; // mouse wheel movement seems to be 100px on average
+        const threshold = 20; // mouse wheel movement seems to be 100px on average
         const { scrollTop, clientHeight, scrollHeight } = scrollElement;
 
         const bottomPosition = scrollTop + clientHeight;

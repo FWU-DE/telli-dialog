@@ -6,7 +6,7 @@ import {
   telliPointsPercentageValues,
   sharedConversationFormValuesSchema,
   usageTimeValuesInMinutes,
-} from '../../../shared-chats/[sharedSchoolChatId]/schema';
+} from '../../../learning-scenarios/editor/[learningScenarioId]/schema';
 import { CharacterWithShareDataModel } from '@shared/db/schema';
 import { shareCharacterAction, unshareCharacterAction } from './actions';
 import { useToast } from '@/components/common/toast';
@@ -16,10 +16,10 @@ import { useForm } from 'react-hook-form';
 import { selectSVGBackground } from '@/utils/tailwind/select';
 import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { useTranslations } from 'next-intl';
-import CountDownTimer from '../../../shared-chats/_components/count-down';
+import CountDownTimer from '../../../learning-scenarios/_components/count-down';
 import FilledShareIcon from '@/components/icons/filled-share';
 import { iconClassName } from '@/utils/tailwind/icon';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 
 type ShareContainerProps = CharacterWithShareDataModel;
 
@@ -31,7 +31,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
   const tToasts = useTranslations('characters.toasts');
   const tCommon = useTranslations('common');
 
-  const sharedChatTimeLeft = calculateTimeLeftForLearningScenario(character);
+  const sharedChatTimeLeft = calculateTimeLeft(character);
   const sharedChatActive = sharedChatTimeLeft > 0;
 
   const { register: registerShare, getValues: getValuesShare } =

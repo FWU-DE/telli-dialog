@@ -28,6 +28,8 @@ import { z } from 'zod';
 import SelectLlmModelForm from '../../../_components/select-llm-model';
 import {
   deleteCharacterAction,
+  deleteFileMappingAndEntityAction,
+  linkFileToCharacterAction,
   updateCharacterAccessLevelAction,
   updateCharacterAction,
   updateCharacterPictureAction,
@@ -36,7 +38,6 @@ import {
 import ShareContainer from './share-container';
 import { CopyContainer } from '../../../_components/copy-container';
 import { LocalFileState } from '@/components/chat/send-message-form';
-import { deleteFileMappingAndEntityAction, linkFileToCharacterAction } from './actions';
 import { TextInput } from '@/components/common/text-input';
 import NavigateBack from '@/components/common/navigate-back';
 import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
@@ -47,6 +48,7 @@ import { useFederalState } from '@/components/providers/federal-state-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import AvatarPicture from '@/components/common/avatar-picture';
 import { WebsearchSource } from '@shared/db/types';
+import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
 
 type CharacterFormProps = CharacterWithShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -177,7 +179,7 @@ export default function CharacterForm({
     }
   }
 
-  const backUrl = `/characters?visibility=${character.accessLevel}`;
+  const backUrl = buildGenericUrl(character.accessLevel, 'characters');
   const { fields } = useFieldArray({
     control,
     name: 'attachedLinks',

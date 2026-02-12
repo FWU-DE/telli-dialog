@@ -1,7 +1,7 @@
 import { cn } from '@/utils/tailwind';
 import { buttonPrimaryClassName, buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { labelClassName } from '@/utils/tailwind/input';
-import CountDownTimer from '../_components/count-down';
+import CountDownTimer from '../../_components/count-down';
 import {
   sharedConversationFormValuesSchema,
   SharedConversationShareFormValues,
@@ -19,39 +19,39 @@ import { useTranslations } from 'next-intl';
 import FilledShareIcon from '@/components/icons/filled-share';
 import ChatStopIcon from '@/components/icons/chat-stop';
 import { iconClassName } from '@/utils/tailwind/icon';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 
 type ShareContainerProps = LearningScenarioOptionalShareDataModel;
 
-export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerProps) {
+export default function ShareContainer({ ...learningScenario }: ShareContainerProps) {
   const toast = useToast();
   const router = useRouter();
 
-  const t = useTranslations('shared-chats.shared');
-  const tToast = useTranslations('shared-chats.toasts');
+  const t = useTranslations('learning-scenarios.shared');
+  const tToast = useTranslations('learning-scenarios.toasts');
   const tCommon = useTranslations('common');
 
-  const sharedChatTimeLeft = calculateTimeLeftForLearningScenario(sharedSchoolChat);
+  const sharedChatTimeLeft = calculateTimeLeft(learningScenario);
   const sharedChatActive = sharedChatTimeLeft > 0;
 
   const { register: registerShare, getValues: getValuesShare } =
     useForm<SharedConversationShareFormValues>({
       resolver: zodResolver(sharedConversationFormValuesSchema),
       defaultValues: {
-        telliPointsPercentageLimit: sharedSchoolChat.telliPointsLimit ?? 10,
-        usageTimeLimit: sharedSchoolChat.maxUsageTimeLimit ?? 45,
+        telliPointsPercentageLimit: learningScenario.telliPointsLimit ?? 10,
+        usageTimeLimit: learningScenario.maxUsageTimeLimit ?? 45,
       },
       disabled: sharedChatActive,
     });
 
-  const shareUILink = `/shared-chats/${sharedSchoolChat.id}/share`;
+  const shareUILink = `/learning-scenarios/editor/${learningScenario.id}/share`;
 
   async function handleStartSharing() {
     const data = getValuesShare();
     // getValuesShare returns strings instead of numbers, so we have to parse/coerce them here
     const parsedData = sharedConversationFormValuesSchema.parse(data);
     const result = await shareLearningScenarioAction({
-      learningScenarioId: sharedSchoolChat.id,
+      learningScenarioId: learningScenario.id,
       data: parsedData,
     });
 
@@ -64,7 +64,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
   }
 
   async function handleStopSharing() {
-    const result = await unshareLearningScenarioAction({ learningScenarioId: sharedSchoolChat.id });
+    const result = await unshareLearningScenarioAction({ learningScenarioId: learningScenario.id });
 
     if (result.success) {
       toast.success(tToast('stop-share-toast-success'));
@@ -141,7 +141,7 @@ export default function ShareContainer({ ...sharedSchoolChat }: ShareContainerPr
             <label className={cn(labelClassName)}>{t('time')}</label>
             <CountDownTimer
               leftTime={sharedChatTimeLeft}
-              totalTime={sharedSchoolChat.maxUsageTimeLimit ?? 0}
+              totalTime={learningScenario.maxUsageTimeLimit ?? 0}
               stopWatchClassName="w-4 h-4"
             />
           </div>

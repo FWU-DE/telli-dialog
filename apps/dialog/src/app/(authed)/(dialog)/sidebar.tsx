@@ -67,7 +67,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
 
   // TODO: this is a dirty hack to remove the sidebar for shared chats
   if (
-    pathname.match(/^\/shared-chats\/[^/]+\/share$/) ||
+    pathname.match(/^\/learning-scenarios\/[^/]+\/share$/) ||
     pathname.match(/^\/characters\/editor\/[^/]+\/share$/)
   ) {
     return null;
@@ -155,11 +155,11 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
               <>
                 {user.school.userRole === 'teacher' &&
                   user.federalState.featureToggles.isSharedChatEnabled && (
-                    <Link href="/shared-chats" prefetch={false} className="w-full">
+                    <Link href="/learning-scenarios" prefetch={false} className="w-full">
                       <div
                         className={cn(
                           'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
-                          pathname.startsWith('/shared-chats') && 'underline',
+                          pathname.startsWith('/learning-scenarios') && 'underline',
                         )}
                       >
                         <SharedChatIcon className="w-6 h-6" />

@@ -1,6 +1,5 @@
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import HeaderPortal from '../../header-portal';
-import SharedSchoolChatForm from './shared-school-chat-form';
+import HeaderPortal from '../../../header-portal';
 import ProfileMenu from '@/components/navigation/profile-menu';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
@@ -9,13 +8,16 @@ import { getLearningScenarioForEditView } from '@shared/learning-scenarios/learn
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { WebsearchSource } from '@shared/db/types';
+import LearningScenarioForm from './learning-scenario-form';
 
 export const dynamic = 'force-dynamic';
 
 const searchParamsSchema = z.object({ create: z.string().optional().default('false') });
 
-export default async function Page(props: PageProps<'/shared-chats/[sharedSchoolChatId]'>) {
-  const { sharedSchoolChatId } = await props.params;
+export default async function Page(
+  props: PageProps<'/learning-scenarios/editor/[learningScenarioId]'>,
+) {
+  const { learningScenarioId } = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
   const isCreating = searchParams.create === 'true';
   const { user, school, federalState } = await requireAuth();
@@ -23,11 +25,12 @@ export default async function Page(props: PageProps<'/shared-chats/[sharedSchool
 
   const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenarioForEditView(
     {
-      learningScenarioId: sharedSchoolChatId,
+      learningScenarioId: learningScenarioId,
       schoolId: school.id,
       userId: user.id,
     },
   ).catch(handleErrorInServerComponent);
+  const readOnly = user.id !== learningScenario.userId;
 
   const initialLinks = learningScenario.attachedLinks
     .filter((l) => l && l !== '')
@@ -48,13 +51,13 @@ export default async function Page(props: PageProps<'/shared-chats/[sharedSchool
         <ProfileMenu userAndContext={userAndContext} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
-        <SharedSchoolChatForm
+        <LearningScenarioForm
           {...learningScenario}
           existingFiles={relatedFiles}
           isCreating={isCreating}
           initialLinks={initialLinks}
           maybeSignedPictureUrl={avatarPictureUrl}
-          readOnly={false}
+          readOnly={readOnly}
         />
       </div>
     </div>

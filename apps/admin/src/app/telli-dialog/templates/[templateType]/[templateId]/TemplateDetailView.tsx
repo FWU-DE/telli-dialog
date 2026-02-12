@@ -10,7 +10,7 @@ import {
   TemplateModel,
   TemplateToFederalStateMapping,
   TemplateTypes,
-} from '@shared/models/templates';
+} from '@shared/templates/template';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { Button } from '@ui/components/Button';
 import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';

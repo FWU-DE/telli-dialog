@@ -13,7 +13,7 @@ export default function SharedChatLoginForm() {
   const [inviteCode, setInviteCode] = React.useState('');
   const toast = useToast();
   const router = useRouter();
-  const t = useTranslations('shared-chats.shared');
+  const t = useTranslations('learning-scenarios.shared');
 
   async function getChatByInviteCode(formattedInviteCode: string) {
     const result = await getChatIdByInviteCodeAction(formattedInviteCode);
@@ -27,7 +27,7 @@ export default function SharedChatLoginForm() {
     if (result !== undefined) {
       const { type, id, inviteCode } = result;
       const searchParams = new URLSearchParams({ inviteCode });
-      const pathSegment = type === 'character' ? 'characters' : 'shared-chats'; // learning-scenarios are still mapped under shared-chats
+      const pathSegment = type === 'character' ? 'characters' : 'learning-scenarios';
       const route = `/ua/${pathSegment}/${id}/dialog?${searchParams.toString()}`;
       router.push(route);
       return;

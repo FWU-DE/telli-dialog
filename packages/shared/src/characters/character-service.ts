@@ -29,7 +29,7 @@ import { NotFoundError } from '@shared/error/not-found-error';
 import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
 import { copyFileInS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
-import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/templateService';
+import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/template-service';
 import { addDays } from '@shared/utils/date';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
