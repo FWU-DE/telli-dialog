@@ -71,8 +71,10 @@ export default function SharingSection<T extends FieldValues>({
   const toast = useToast();
 
   function handleCopyLink() {
+    const url = new URL(window.location.href);
+    url.search = '';
     navigator.clipboard
-      .writeText(window.location.href)
+      .writeText(url.toString())
       .then(() => {
         toast.success(t('link-copied'));
       })
