@@ -19,18 +19,20 @@ export function CreateTemplateModal({ isOpen, onClose, onSuccess }: CreateTempla
 
   const validateUrl = (inputUrl: string): boolean => {
     // Support both full URLs and path-only URLs
-    const urlPattern = /(?:https?:\/\/[^\/]+)?\/(custom|characters)\/editor\/([a-fA-F0-9-]+)/;
+    const urlPattern =
+      /(?:https?:\/\/[^\/]+)?\/(custom|characters|learning-scenarios)\/editor\/([a-fA-F0-9-]+)/;
     return urlPattern.test(inputUrl);
   };
 
   const extractPath = (inputUrl: string): string => {
     // Extract just the path part if it's a full URL
-    const urlPattern = /(?:https?:\/\/[^\/]+)?(\/(custom|characters)\/editor\/[a-fA-F0-9-]+)/;
+    const urlPattern =
+      /(?:https?:\/\/[^\/]+)?(\/(custom|characters|learning-scenarios)\/editor\/[a-fA-F0-9-]+)/;
     const match = inputUrl.match(urlPattern);
     return match?.[1] ?? inputUrl;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
 
     if (!url.trim()) {
@@ -40,7 +42,7 @@ export function CreateTemplateModal({ isOpen, onClose, onSuccess }: CreateTempla
 
     if (!validateUrl(url.trim())) {
       setError(
-        'URL Format ungültig. URL muss in einem der folgenden Formate sein: /custom/editor/{id} oder /characters/editor/{id}',
+        'URL Format ungültig. URL muss in einem der folgenden Formate sein:\n /custom/editor/{id}\n /characters/editor/{id}\n /learning-scenarios/editor/{id}',
       );
       return;
     }
@@ -122,7 +124,9 @@ export function CreateTemplateModal({ isOpen, onClose, onSuccess }: CreateTempla
           </div>
 
           {error && (
-            <div className="text-red-600 text-sm bg-red-50 p-2 rounded border">{error}</div>
+            <div className="text-red-600 text-sm bg-red-50 p-2 rounded border whitespace-pre-line">
+              {error}
+            </div>
           )}
 
           <div className="flex justify-end gap-3 pt-4">
