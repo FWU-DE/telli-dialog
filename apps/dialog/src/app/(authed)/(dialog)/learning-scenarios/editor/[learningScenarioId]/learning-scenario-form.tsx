@@ -10,7 +10,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
-import { AccessLevel, FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
+import { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
 import { SharedSchoolChatFormValues, sharedSchoolChatFormValuesSchema } from '../../schema';
 import {
   removeFileFromLearningScenarioAction,
@@ -25,7 +25,7 @@ import { cn } from '@/utils/tailwind';
 import { deleteLearningScenarioAction, linkFileToLearningScenarioAction } from '../../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
 import ShareContainer from './share-container';
-import React, { startTransition } from 'react';
+import React from 'react';
 import { useTranslations } from 'next-intl';
 import { LocalFileState } from '@/components/chat/send-message-form';
 import FileManagement from '@/components/forms/file-management';
@@ -39,7 +39,7 @@ import { AttachedLinks } from '@/components/forms/attached-links';
 import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
 import AvatarPicture from '@/components/common/avatar-picture';
 import { WebsearchSource } from '@shared/db/types';
-import Checkbox from '@/components/common/checkbox';
+import SharingSection from '@/components/forms/sharing-section';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
 
@@ -68,29 +68,6 @@ export default function LearningScenarioForm({
   const tToast = useTranslations('learning-scenarios.toasts');
   const tCommon = useTranslations('common');
 
-  const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
-    sharedSchoolChat.accessLevel,
-    (p, n: AccessLevel) => n,
-  );
-
-  async function handleAccessLevelChange(value: boolean) {
-    const accessLevel = value ? 'school' : 'private';
-
-    startTransition(() => {
-      addOptimisticAccessLevel(accessLevel);
-    });
-
-    const result = await updateLearningScenarioAccessLevelAction({
-      learningScenarioId: sharedSchoolChat.id,
-      accessLevel,
-    });
-    if (result.success) {
-      router.refresh();
-    } else {
-      toast.error(tToast('edit-toast-error'));
-    }
-  }
-
   const { models } = useLlmModels();
 
   const {
@@ -107,6 +84,8 @@ export default function LearningScenarioForm({
       additionalInstructions: sharedSchoolChat.additionalInstructions ?? undefined,
       attachedLinks: initialLinks,
       pictureId: sharedSchoolChat.pictureId ?? '',
+      isSchoolShared: sharedSchoolChat.accessLevel === 'school',
+      isLinkShared: sharedSchoolChat.isLinkShared,
     },
   });
   const backUrl = buildGenericUrl(sharedSchoolChat.accessLevel, 'learning-scenarios');
@@ -114,6 +93,29 @@ export default function LearningScenarioForm({
     control,
     name: 'attachedLinks',
   });
+
+  async function handleSharingChange() {
+    if (isCreating || readOnly) return;
+
+    // Check if school sharing (accessLevel) changed
+    const isSchoolShared = getValues('isSchoolShared');
+    const newAccessLevel = isSchoolShared ? 'school' : 'private';
+
+    if (newAccessLevel !== sharedSchoolChat.accessLevel) {
+      const result = await updateLearningScenarioAccessLevelAction({
+        learningScenarioId: sharedSchoolChat.id,
+        accessLevel: newAccessLevel,
+      });
+      if (result.success) {
+        router.refresh();
+      } else {
+        toast.error(tToast('edit-toast-error'));
+      }
+    }
+
+    // Save other sharing changes (like isLinkShared) via autosave
+    handleAutoSave();
+  }
 
   async function handleDeattachFile(localFileId: string) {
     const fileId: string | undefined =
@@ -213,6 +215,7 @@ export default function LearningScenarioForm({
       attachedLinks: data.attachedLinks.map((p) => p.link),
       description: data.description ?? '',
       studentExercise: data.studentExercise ?? '',
+      isSchoolShared: undefined,
     };
 
     const dataEquals = deepEqual(defaultData, newData);
@@ -239,16 +242,6 @@ export default function LearningScenarioForm({
   const generalSettings = (
     <fieldset className="flex flex-col gap-4 mt-8">
       <h2 className="font-medium mb-8">{t('settings')}</h2>
-      {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
-        <div className="flex gap-4">
-          <Checkbox
-            label={t('restriction-school')}
-            checked={optimisticAccessLevel === 'school'}
-            onCheckedChange={(value: boolean) => handleAccessLevelChange(value)}
-            disabled={readOnly}
-          />
-        </div>
-      )}
       <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
         <div className="flex gap-4 flex-col">
           <div className="flex gap-4 flex-col">
@@ -409,6 +402,15 @@ export default function LearningScenarioForm({
             handleAutosave={handleAutoSave}
           />
         </div>
+        {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
+          <SharingSection
+            control={control}
+            schoolSharingName="isSchoolShared"
+            linkSharingName="isLinkShared"
+            onShareChange={handleSharingChange}
+            disabled={readOnly}
+          />
+        )}
         {!isCreating && !readOnly && (
           <section className="mt-8">
             <h3 className="font-medium">{t('delete-title')}</h3>

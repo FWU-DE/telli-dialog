@@ -33,6 +33,8 @@ export const sharedSchoolChatFormValuesSchema = z.object({
     .max(TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS),
   restrictions: z.string().max(TEXT_INPUT_FIELDS_LENGTH_LIMIT).nullable(),
   attachedLinks: formLinks,
+  isSchoolShared: z.boolean(),
+  isLinkShared: z.boolean(),
 });
 
 export type SharedSchoolChatFormValues = z.infer<typeof sharedSchoolChatFormValuesSchema>;

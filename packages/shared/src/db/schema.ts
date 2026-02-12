@@ -535,6 +535,7 @@ export const learningScenarioTable = pgTable(
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     schoolId: text('school_id').references(() => schoolTable.id),
     originalLearningScenarioId: uuid('original_learning_scenario_id'),
+    isLinkShared: boolean('is_link_shared').notNull().default(false),
   },
   (table) => [index().on(table.userId)],
 );
