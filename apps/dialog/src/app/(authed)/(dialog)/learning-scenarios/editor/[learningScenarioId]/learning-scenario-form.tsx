@@ -223,9 +223,18 @@ export default function LearningScenarioForm({
     onSubmit(data);
     router.refresh();
   }
-  function handleCreateSharedChat() {
+  async function handleCreateSharedChat() {
     const data = getValues();
-    onSubmit(data);
+    await onSubmit(data);
+
+    // Set access level if school sharing is enabled
+    if (data.isSchoolShared) {
+      await updateLearningScenarioAccessLevelAction({
+        learningScenarioId: sharedSchoolChat.id,
+        accessLevel: 'school',
+      });
+    }
+
     toast.success(tToast('create-toast-success'));
     router.replace(backUrl);
   }

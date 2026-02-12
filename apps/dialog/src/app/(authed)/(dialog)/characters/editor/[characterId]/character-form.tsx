@@ -262,9 +262,18 @@ export default function CharacterForm({
     onSubmit(data);
   }
 
-  function handleCreateCharacter() {
+  async function handleCreateCharacter() {
     const data = getValues();
-    onSubmit(data);
+    await onSubmit(data);
+
+    // Set access level if school sharing is enabled
+    if (data.isSchoolShared) {
+      await updateCharacterAccessLevelAction({
+        characterId: character.id,
+        accessLevel: 'school',
+      });
+    }
+
     toast.success(tToast('create-toast-success'));
     router.replace(backUrl);
   }

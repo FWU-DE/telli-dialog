@@ -175,18 +175,19 @@ export default function CustomGptForm({
     if (!result.success) toast.error(tToast('edit-toast-error'));
   }
 
-  function onSubmit(data: CustomGptFormValues) {
-    updateCustomGptAction({
+  async function onSubmit(data: CustomGptFormValues) {
+    const result = await updateCustomGptAction({
       ...data,
       promptSuggestions: data.promptSuggestions?.map((p) => p.content),
       gptId: customGpt.id,
       attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
-    }).then((result) => {
-      if (result.success) {
-        if (!isCreating) toast.success(tToast('edit-toast-success'));
-        router.refresh();
-      } else toast.error(tToast('edit-toast-error'));
     });
+    if (result.success) {
+      if (!isCreating) toast.success(tToast('edit-toast-success'));
+      router.refresh();
+    } else {
+      toast.error(tToast('edit-toast-error'));
+    }
   }
 
   function cleanupPromptSuggestions(promptSuggestions: string[] | undefined) {
@@ -265,9 +266,18 @@ export default function CustomGptForm({
     onSubmit(data);
   }
 
-  function handleCreateCustomGpt() {
+  async function handleCreateCustomGpt() {
     const data = getValues();
-    onSubmit(data);
+    await onSubmit(data);
+
+    // Set access level if school sharing is enabled
+    if (data.isSchoolShared) {
+      await updateCustomGptAccessLevelAction({
+        gptId: customGpt.id,
+        accessLevel: 'school',
+      });
+    }
+
     toast.success(tToast('create-toast-success'));
     router.replace(backUrl);
   }
