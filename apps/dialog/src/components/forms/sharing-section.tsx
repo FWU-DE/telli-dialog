@@ -82,7 +82,7 @@ export default function SharingSection<T extends FieldValues>({
   }
 
   return (
-    <fieldset className="w-full mt-8">
+    <fieldset>
       <legend className="font-medium mb-4">{t('label')}</legend>
       <div className="flex items-center gap-6 p-4 border border-gray-200 rounded-lg">
         {schoolSharingName && (
@@ -142,7 +142,7 @@ export default function SharingSection<T extends FieldValues>({
                   onClick={handleCopyLink}
                   disabled={disabled || !field.value}
                   className={cn(
-                    'flex items-center gap-2 px-4 py-2 rounded-full text-white font-medium ml-auto',
+                    'flex items-center gap-2 px-4 py-2 rounded-full text-white font-medium',
                     field.value && !disabled
                       ? 'bg-primary hover:bg-primary-dark'
                       : 'bg-gray-300 cursor-not-allowed',

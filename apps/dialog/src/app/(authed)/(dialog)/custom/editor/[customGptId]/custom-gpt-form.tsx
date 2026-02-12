@@ -450,15 +450,18 @@ export default function CustomGptForm({
           handleAutosave={handleAutoSave}
         />
       </fieldset>
-      {userRole === 'teacher' && federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
-        <SharingSection
-          control={control}
-          schoolSharingName="isSchoolShared"
-          linkSharingName="isLinkShared"
-          onShareChange={handleSharingChange}
-          disabled={readOnly}
-        />
-      )}
+      <div className="w-full mt-8">
+        {userRole === 'teacher' &&
+          federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
+            <SharingSection
+              control={control}
+              schoolSharingName="isSchoolShared"
+              linkSharingName="isLinkShared"
+              onShareChange={handleSharingChange}
+              disabled={readOnly}
+            />
+          )}
+      </div>
       {!isCreating && !readOnly && (
         <section className="mt-8">
           <h3 className="font-medium">{t('delete-gpt')}</h3>
