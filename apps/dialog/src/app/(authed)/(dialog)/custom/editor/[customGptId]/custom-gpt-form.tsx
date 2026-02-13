@@ -44,7 +44,6 @@ import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { AttachedLinks } from '@/components/forms/attached-links';
 import { formLinks } from '@/utils/web-search/form-links';
-import { useFederalState } from '@/components/providers/federal-state-provider';
 import AvatarPicture from '@/components/common/avatar-picture';
 import { WebsearchSource } from '@shared/db/types';
 import SharingSection from '@/components/forms/sharing-section';

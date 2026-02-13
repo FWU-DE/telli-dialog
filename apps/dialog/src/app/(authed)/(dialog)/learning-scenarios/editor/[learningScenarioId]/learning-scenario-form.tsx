@@ -40,7 +40,6 @@ import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
 import AvatarPicture from '@/components/common/avatar-picture';
 import { WebsearchSource } from '@shared/db/types';
 import SharingSection from '@/components/forms/sharing-section';
-import { useFederalState } from '@/components/providers/federal-state-provider';
 import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
 
 export default function LearningScenarioForm({

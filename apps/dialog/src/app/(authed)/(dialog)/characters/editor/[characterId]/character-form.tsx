@@ -43,7 +43,6 @@ import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
 import { AttachedLinks } from '@/components/forms/attached-links';
 import { formLinks } from '@/utils/web-search/form-links';
 import FileManagement from '@/components/forms/file-management';
-import { useFederalState } from '@/components/providers/federal-state-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import AvatarPicture from '@/components/common/avatar-picture';
 import { WebsearchSource } from '@shared/db/types';
