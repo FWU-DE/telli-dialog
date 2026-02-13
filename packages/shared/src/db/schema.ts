@@ -545,9 +545,7 @@ export const learningScenarioSelectSchema = createSelectSchema(learningScenarioT
   });
 export const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable)
   .omit({
-    id: true,
     createdAt: true,
-    userId: true,
   })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({

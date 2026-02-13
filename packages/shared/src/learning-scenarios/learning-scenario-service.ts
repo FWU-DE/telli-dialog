@@ -426,7 +426,7 @@ export async function getFilesForLearningScenario({
   )
     throw new ForbiddenError('Not authorized to fetch file mappings for this learning scenario');
 
-  return dbGetFilesForLearningScenario(learningScenarioId, userId);
+  return dbGetFilesForLearningScenario(learningScenarioId);
 }
 
 /**
@@ -480,7 +480,7 @@ export async function deleteLearningScenario({
   const { isOwner, learningScenario } = await getLearningScenarioInfo(learningScenarioId, userId);
   if (!isOwner) throw new ForbiddenError('Not authorized to delete this learning scenario');
 
-  const relatedFiles = await dbGetFilesForLearningScenario(learningScenarioId, userId);
+  const relatedFiles = await dbGetFilesForLearningScenario(learningScenarioId);
 
   // delete learning scenario from db
   const deletedLearningScenario = await dbDeleteLearningScenarioByIdAndUserId({
