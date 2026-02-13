@@ -256,9 +256,6 @@ importers:
       next-intl:
         specifier: 4.8.2
         version: 4.8.2(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
-      openai:
-        specifier: 4.83.0
-        version: 4.83.0(ws@8.18.3)(zod@4.3.6)
       pg:
         specifier: 8.18.0
         version: 8.18.0
@@ -423,8 +420,8 @@ importers:
         specifier: ^1.0.21
         version: 1.0.21
       openai:
-        specifier: 6.9.1
-        version: 6.9.1(ws@8.18.3)(zod@4.3.6)
+        specifier: 6.18.0
+        version: 6.18.0(ws@8.18.3)(zod@4.3.6)
       openaiv4:
         specifier: npm:openai@4.104.0
         version: openai@4.104.0(ws@8.18.3)(zod@4.3.6)
@@ -6670,20 +6667,8 @@ packages:
       zod:
         optional: true
 
-  openai@4.83.0:
-    resolution: {integrity: sha512-fmTsqud0uTtRKsPC7L8Lu55dkaTwYucqncDHzVvO64DKOpNTuiYwjbR/nVgpapXuYy8xSnhQQPUm+3jQaxICgw==}
-    hasBin: true
-    peerDependencies:
-      ws: ^8.18.0
-      zod: ^3.23.8
-    peerDependenciesMeta:
-      ws:
-        optional: true
-      zod:
-        optional: true
-
-  openai@6.9.1:
-    resolution: {integrity: sha512-vQ5Rlt0ZgB3/BNmTa7bIijYFhz3YBceAA3Z4JuoMSBftBF9YqFHIEhZakSs+O/Ad7EaoEimZvHxD5ylRjN11Lg==}
+  openai@6.18.0:
+    resolution: {integrity: sha512-odLRYyz9rlzz6g8gKn61RM2oP5UUm428sE2zOxZqS9MzVfD5/XW8UoEjpnRkzTuScXP7ZbP/m7fC+bl8jCOZZw==}
     hasBin: true
     peerDependencies:
       ws: ^8.18.0
@@ -15386,22 +15371,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  openai@4.83.0(ws@8.18.3)(zod@4.3.6):
-    dependencies:
-      '@types/node': 18.19.130
-      '@types/node-fetch': 2.6.13
-      abort-controller: 3.0.0
-      agentkeepalive: 4.6.0
-      form-data-encoder: 1.7.2
-      formdata-node: 4.4.1
-      node-fetch: 2.7.0
-    optionalDependencies:
-      ws: 8.18.3
-      zod: 4.3.6
-    transitivePeerDependencies:
-      - encoding
-
-  openai@6.9.1(ws@8.18.3)(zod@4.3.6):
+  openai@6.18.0(ws@8.18.3)(zod@4.3.6):
     optionalDependencies:
       ws: 8.18.3
       zod: 4.3.6
