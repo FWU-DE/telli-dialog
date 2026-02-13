@@ -33,26 +33,25 @@ export default function FileManagement({
   const toast = useToast();
   const t = useTranslations(translationNamespace);
 
-  if (readOnly) {
-    return null;
-  }
-
   return (
     <>
       <label className={cn(labelClassName)}>{t('attached-files-label')}</label>
-      <FileDrop
-        setFiles={setFiles}
-        disabled={initialFiles.length + files.size >= NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT}
-        countOfFiles={initialFiles.length + files.size}
-        onFileUploaded={onFileUploaded}
-        showUploadConfirmation={true}
-      />
+      {!readOnly && (
+        <FileDrop
+          setFiles={setFiles}
+          disabled={initialFiles.length + files.size >= NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT}
+          countOfFiles={initialFiles.length + files.size}
+          onFileUploaded={onFileUploaded}
+          showUploadConfirmation={true}
+        />
+      )}
       <FilesTable
         files={initialFiles ?? []}
         additionalFiles={files}
         onDeleteFile={onDeleteFile}
         toast={toast}
         showUploadConfirmation={true}
+        readOnly
       />
     </>
   );
