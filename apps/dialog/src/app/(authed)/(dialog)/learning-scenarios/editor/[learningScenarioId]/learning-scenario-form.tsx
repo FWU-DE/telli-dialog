@@ -59,7 +59,6 @@ export default function LearningScenarioForm({
 }) {
   const toast = useToast();
   const router = useRouter();
-  const federalState = useFederalState();
 
   const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   const [initialFiles, setInitialFiles] = React.useState<FileModel[]>(existingFiles);

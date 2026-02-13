@@ -96,7 +96,6 @@ export default function CharacterForm({
 }: CharacterFormProps) {
   const router = useRouter();
   const toast = useToast();
-  const federalState = useFederalState();
 
   const { models } = useLlmModels();
   const maybeDefaultModelId = getDefaultModel(models)?.id;

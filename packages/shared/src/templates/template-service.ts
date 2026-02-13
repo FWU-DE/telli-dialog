@@ -382,7 +382,7 @@ export async function copyCustomGpt(
     accessLevel,
     userId,
     schoolId,
-    isDeleted: false,    
+    isDeleted: false,
     hasLinkAccess: false, // Reset sharing settings for new template
   };
 

@@ -90,7 +90,6 @@ export default function CustomGptForm({
 }: CustomGptFormProps) {
   const router = useRouter();
   const toast = useToast();
-  const federalState = useFederalState();
 
   const {
     register,
