@@ -32,6 +32,21 @@ function getDefaultModels(organizationId: string): LlmInsertModel[] {
     {
       organizationId,
       provider: 'ionos',
+      name: 'black-forest-labs/FLUX.1-schnell',
+      displayName: 'FLUX.1',
+      setting: {
+        provider: 'ionos',
+        apiKey: env.ionosApiKey,
+        baseUrl: env.ionosBaseUrl,
+      },
+      priceMetadata: {
+        type: 'image',
+        pricePerImageInCent: 2.88, // 0.02 € per 1M tokens,
+      },
+    },
+    {
+      organizationId,
+      provider: 'ionos',
       name: 'meta-llama/Llama-3.3-70B-Instruct',
       displayName: 'Llama-3.3-70B',
       description: 'Llama-3.3-70B model for testing',
