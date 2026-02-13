@@ -236,7 +236,12 @@ export default function LearningScenarioForm({
     }
 
     toast.success(tToast('create-toast-success'));
-    router.replace(backUrl);
+    // Use form's isSchoolShared to determine redirect URL since accessLevel hasn't been updated yet
+    const redirectUrl = buildGenericUrl(
+      data.isSchoolShared ? 'school' : 'private',
+      'learning-scenarios',
+    );
+    router.replace(redirectUrl);
   }
   function handleNavigateBack() {
     if (isCreating) {

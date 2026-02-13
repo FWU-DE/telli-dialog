@@ -48,6 +48,7 @@ import { useFederalState } from '@/components/providers/federal-state-provider';
 import AvatarPicture from '@/components/common/avatar-picture';
 import { WebsearchSource } from '@shared/db/types';
 import SharingSection from '@/components/forms/sharing-section';
+import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
 
 type CustomGptFormProps = CustomGptSelectModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -279,7 +280,9 @@ export default function CustomGptForm({
     }
 
     toast.success(tToast('create-toast-success'));
-    router.replace(backUrl);
+    // Use form's isSchoolShared to determine redirect URL since accessLevel hasn't been updated yet
+    const redirectUrl = buildGenericUrl(data.isSchoolShared ? 'school' : 'private', 'custom');
+    router.replace(redirectUrl);
   }
 
   async function handleUploadAvatarPicture(croppedImageBlob: Blob) {

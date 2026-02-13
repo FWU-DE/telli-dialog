@@ -275,7 +275,9 @@ export default function CharacterForm({
     }
 
     toast.success(tToast('create-toast-success'));
-    router.replace(backUrl);
+    // Use form's isSchoolShared to determine redirect URL since accessLevel hasn't been updated yet
+    const redirectUrl = buildGenericUrl(data.isSchoolShared ? 'school' : 'private', 'characters');
+    router.replace(redirectUrl);
   }
   const shareChatElement = !isCreating ? <ShareContainer {...character} /> : undefined;
   const copyContainer = readOnly ? (
