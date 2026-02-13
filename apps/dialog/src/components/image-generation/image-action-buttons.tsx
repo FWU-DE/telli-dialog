@@ -9,9 +9,10 @@ import { logError } from '@shared/logging';
 interface ImageActionButtonsProps {
   imageRef: React.RefObject<HTMLImageElement | null>;
   prompt: string;
+  isImageReady: boolean;
 }
 
-export function ImageActionButtons({ imageRef, prompt }: ImageActionButtonsProps) {
+export function ImageActionButtons({ imageRef, prompt, isImageReady }: ImageActionButtonsProps) {
   const toast = useToast();
   const t = useTranslations('image-generation');
 
@@ -76,6 +77,7 @@ export function ImageActionButtons({ imageRef, prompt }: ImageActionButtonsProps
         onClick={handleCopyImage}
         className="flex items-center justify-center text-primary transition-colors"
         title={t('copy-image-tooltip')}
+        disabled={!isImageReady}
       >
         <CopyIcon size={16} />
       </button>

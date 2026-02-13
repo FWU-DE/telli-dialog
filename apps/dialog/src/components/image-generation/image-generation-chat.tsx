@@ -44,6 +44,8 @@ export default function ImageGenerationChat({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const imageRef = useRef<HTMLImageElement>(null);
+  // isImageReady indicates if the image is loaded and visible in the browser
+  const [isImageReady, setIsImageReady] = useState(false);
 
   // Load the single image from initial messages and file attachments
   useEffect(() => {
@@ -188,8 +190,13 @@ export default function ImageGenerationChat({
                 loading="eager"
                 unoptimized={true} // Since we're using signed URLs from S3
                 crossOrigin="anonymous" // Needed for clipboard copy to work
+                onLoadingComplete={() => setIsImageReady(true)}
               />
-              <ImageActionButtons imageRef={imageRef} prompt={displayedImage.prompt} />
+              <ImageActionButtons
+                imageRef={imageRef}
+                prompt={displayedImage.prompt}
+                isImageReady={isImageReady}
+              />
             </div>
           )}
         </div>
