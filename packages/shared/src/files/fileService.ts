@@ -4,6 +4,7 @@ import {
   CharacterFileMapping,
   CustomGptFileMapping,
   fileTable,
+  LearningScenarioFileMapping,
   TextChunkTable,
 } from '@shared/db/schema';
 import {
@@ -110,6 +111,22 @@ export async function linkFileToCustomGpt(fileId: string, customGptId: string): 
 }
 
 /**
+ * Links a file to a learning scenario by creating a mapping record.
+ *
+ * @param fileId - The ID of the file to link
+ * @param learningScenarioId - The ID of the learning scenario to link to
+ */
+export async function linkFileToLearningScenario(
+  fileId: string,
+  learningScenarioId: string,
+): Promise<void> {
+  await db.insert(LearningScenarioFileMapping).values({
+    fileId,
+    learningScenarioId,
+  });
+}
+
+/**
  * Uploads a new file to the message attachments path in S3.
  */
 export async function uploadMessageAttachment({
@@ -179,4 +196,11 @@ export async function getAvatarPictureUrl(key: string | null | undefined) {
     logError('Error getting signed URL for avatar picture:', error);
     return undefined;
   }
+}
+
+export async function copyAvatarPicture(originalKey: string, newKey: string): Promise<void> {
+  await copyFileInS3({
+    copySource: originalKey,
+    newKey: newKey,
+  });
 }

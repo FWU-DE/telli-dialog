@@ -7,7 +7,10 @@ import {
   customGptTable,
   customGptTemplateMappingTable,
   federalStateTable,
+  FileModel,
+  learningScenarioInsertSchema,
   learningScenarioTable,
+  learningScenarioTemplateMappingTable,
 } from '@shared/db/schema';
 import {
   TemplateModel,
@@ -16,14 +19,29 @@ import {
 } from '@shared/templates/template';
 import { dbGetCharacterById, dbCreateCharacter } from '@shared/db/functions/character';
 import { dbGetCustomGptById, dbUpsertCustomGpt } from '@shared/db/functions/custom-gpts';
-import { dbGetRelatedCharacterFiles, dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
+import {
+  dbGetFilesForLearningScenario,
+  dbGetRelatedCharacterFiles,
+  dbGetRelatedCustomGptFiles,
+} from '@shared/db/functions/files';
 import { DUMMY_USER_ID } from '@shared/db/seed/user-entity';
 import { logError } from '@shared/logging';
 import {
+  copyAvatarPicture,
   duplicateFileWithEmbeddings,
   linkFileToCharacter,
   linkFileToCustomGpt,
+  linkFileToLearningScenario,
 } from '@shared/files/fileService';
+import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
+import { NotFoundError } from '@shared/error';
+import { generateUUID } from '@shared/utils/uuid';
+
+const templateTypeMap: Record<string, TemplateTypes> = {
+  custom: 'custom-gpt',
+  characters: 'character',
+  'learning-scenarios': 'learning-scenario',
+};
 
 /**
  * Fetch all global templates from the database, including deleted templates.
@@ -103,7 +121,7 @@ export async function getTemplateById(
   templateId: string,
 ): Promise<TemplateModel> {
   if (templateType === 'character') {
-    const character = await db
+    const [character] = await db
       .select({
         id: characterTable.id,
         originalId: characterTable.originalCharacterId,
@@ -114,16 +132,16 @@ export async function getTemplateById(
       .from(characterTable)
       .where(eq(characterTable.id, templateId));
 
-    if (!character[0]) {
+    if (!character) {
       throw new Error('Character template not found');
     }
 
     return {
-      ...character[0],
+      ...character,
       type: 'character',
     };
   } else if (templateType === 'custom-gpt') {
-    const customGpt = await db
+    const [customGpt] = await db
       .select({
         id: customGptTable.id,
         originalId: customGptTable.originalCustomGptId,
@@ -134,13 +152,33 @@ export async function getTemplateById(
       .from(customGptTable)
       .where(eq(customGptTable.id, templateId));
 
-    if (!customGpt[0]) {
+    if (!customGpt) {
       throw new Error('Custom GPT template not found');
     }
 
     return {
-      ...customGpt[0],
+      ...customGpt,
       type: 'custom-gpt',
+    };
+  } else if (templateType === 'learning-scenario') {
+    const [learningScenario] = await db
+      .select({
+        id: learningScenarioTable.id,
+        originalId: learningScenarioTable.originalLearningScenarioId,
+        name: learningScenarioTable.name,
+        createdAt: learningScenarioTable.createdAt,
+        isDeleted: learningScenarioTable.isDeleted,
+      })
+      .from(learningScenarioTable)
+      .where(eq(learningScenarioTable.id, templateId));
+
+    if (!learningScenario) {
+      throw new Error('Learning scenario template not found');
+    }
+
+    return {
+      ...learningScenario,
+      type: 'learning-scenario',
     };
   } else {
     throw new Error('Invalid template type');
@@ -162,7 +200,7 @@ export async function getFederalStatesWithMappings(
       .from(characterTemplateMappingTable)
       .where(eq(characterTemplateMappingTable.characterId, templateId))
       .as('mapping');
-  } else {
+  } else if (templateType === 'custom-gpt') {
     subquery = db
       .select({
         federalStateId: customGptTemplateMappingTable.federalStateId,
@@ -171,7 +209,19 @@ export async function getFederalStatesWithMappings(
       .from(customGptTemplateMappingTable)
       .where(eq(customGptTemplateMappingTable.customGptId, templateId))
       .as('mapping');
+  } else if (templateType === 'learning-scenario') {
+    subquery = db
+      .select({
+        federalStateId: learningScenarioTemplateMappingTable.federalStateId,
+        template: learningScenarioTemplateMappingTable.learningScenarioId,
+      })
+      .from(learningScenarioTemplateMappingTable)
+      .where(eq(learningScenarioTemplateMappingTable.learningScenarioId, templateId))
+      .as('mapping');
+  } else {
+    throw new Error('Invalid template type');
   }
+
   const federalStateMappings = await db
     .select({ federalStateId: federalStateTable.id, template: subquery.template })
     .from(federalStateTable)
@@ -186,7 +236,6 @@ export async function getFederalStatesWithMappings(
 /** Updates template to federal state mapping by:
  * - adding new mappings
  * - deleting old mappings
- *
  */
 export async function updateTemplateMappings(
   templateType: TemplateTypes,
@@ -221,7 +270,7 @@ export async function updateTemplateMappings(
           .onConflictDoNothing(); // Prevent duplicate entries
       }
     });
-  } else {
+  } else if (templateType === 'custom-gpt') {
     await db.transaction(async (tx) => {
       if (mappings.some((m) => !m.isMapped)) {
         await tx.delete(customGptTemplateMappingTable).where(
@@ -249,29 +298,63 @@ export async function updateTemplateMappings(
           .onConflictDoNothing(); // Prevent duplicate entries
       }
     });
+  } else if (templateType === 'learning-scenario') {
+    await db.transaction(async (tx) => {
+      if (mappings.some((m) => !m.isMapped)) {
+        await tx.delete(learningScenarioTemplateMappingTable).where(
+          and(
+            eq(learningScenarioTemplateMappingTable.learningScenarioId, templateId),
+            inArray(
+              learningScenarioTemplateMappingTable.federalStateId,
+              mappings.filter((m) => !m.isMapped).map((m) => m.federalStateId),
+            ),
+          ),
+        );
+      }
+
+      if (mappings.some((m) => m.isMapped)) {
+        await tx
+          .insert(learningScenarioTemplateMappingTable)
+          .values(
+            mappings
+              .filter((mapping) => mapping.isMapped)
+              .map((mapping) => ({
+                learningScenarioId: templateId,
+                federalStateId: mapping.federalStateId,
+              })),
+          )
+          .onConflictDoNothing(); // Prevent duplicate entries
+      }
+    });
+  } else {
+    throw new Error('Invalid template type');
   }
+
   return getFederalStatesWithMappings(templateType, templateId);
 }
 
 /**
  * Parses a template URL to extract the template type and ID.
  *
- * @param url - The URL containing template information in format: /custom/editor/{id} or /characters/editor/{id}
+ * @param url - The URL containing template information in format: /custom/editor/{id} or /characters/editor/{id} or /learning-scenarios/editor/{id}
  * @returns Object containing templateType and templateId
  * @throws Error if URL format is invalid or template ID is missing
  */
 function parseTemplateUrl(url: string): { templateType: TemplateTypes; originalId: string } {
-  const urlPattern = /\/(custom|characters)\/editor\/([a-fA-F0-9-]+)/;
+  const urlPattern = /\/(custom|characters|learning-scenarios)\/editor\/([a-fA-F0-9-]+)/;
   const match = url.match(urlPattern);
 
   if (!match) {
-    throw new Error(
-      'URL Format ungültig. URL muss in einem der folgenden Formate sein: /custom/editor/{id} oder /characters/editor/{id}',
-    );
+    throw new Error('Invalid url format.');
   }
 
   const [, templateTypeRaw, originalId] = match;
-  const templateType: TemplateTypes = templateTypeRaw === 'custom' ? 'custom-gpt' : 'character';
+
+  const templateType = templateTypeMap[templateTypeRaw ?? ''];
+
+  if (!templateType) {
+    throw new Error(`Invalid template type: ${templateTypeRaw}`);
+  }
 
   if (!originalId) {
     throw new Error('Template ID ist erforderlich');
@@ -296,9 +379,14 @@ export async function createTemplateFromUrl(url: string): Promise<string> {
 
     if (templateType === 'character') {
       newTemplate = await createCharacterTemplate(originalId);
-    } else {
+    } else if (templateType === 'custom-gpt') {
       // Handle custom GPT template creation
       newTemplate = await createCustomGptTemplate(originalId);
+    } else if (templateType === 'learning-scenario') {
+      // Handle learning scenario template creation
+      newTemplate = await createLearningScenarioTemplate(originalId);
+    } else {
+      throw new Error('Ungültiger Template-Typ');
     }
 
     // Copy associated files
@@ -326,10 +414,17 @@ export async function copyRelatedTemplateFiles(
   resultId: string,
 ) {
   try {
-    const relatedFiles =
-      templateType === 'character'
-        ? await dbGetRelatedCharacterFiles(templateId)
-        : await dbGetRelatedCustomGptFiles(templateId);
+    let relatedFiles: FileModel[];
+
+    if (templateType === 'character') {
+      relatedFiles = await dbGetRelatedCharacterFiles(templateId);
+    } else if (templateType === 'custom-gpt') {
+      relatedFiles = await dbGetRelatedCustomGptFiles(templateId);
+    } else if (templateType === 'learning-scenario') {
+      relatedFiles = await dbGetFilesForLearningScenario(templateId);
+    } else {
+      throw new Error('Invalid template type for copying files');
+    }
 
     await Promise.all(
       relatedFiles.map(async (file) => {
@@ -337,8 +432,12 @@ export async function copyRelatedTemplateFiles(
           const newFileId = await duplicateFileWithEmbeddings(file.id);
           if (templateType === 'character') {
             await linkFileToCharacter(newFileId, resultId);
-          } else {
+          } else if (templateType === 'custom-gpt') {
             await linkFileToCustomGpt(newFileId, resultId);
+          } else if (templateType === 'learning-scenario') {
+            await linkFileToLearningScenario(newFileId, resultId);
+          } else {
+            throw new Error('Invalid template type for linking file');
           }
         } catch (error) {
           logError(`Error copying file ${file.id} for ${templateType} template ${resultId}`, error);
@@ -383,6 +482,7 @@ export async function copyCustomGpt(
     userId,
     schoolId,
     isDeleted: false,
+    hasLinkAccess: false, // Reset sharing settings for new template
   };
 
   const result = await dbUpsertCustomGpt({ customGpt: newCustomGpt });
@@ -437,6 +537,7 @@ export async function copyCharacter(
     userId,
     schoolId,
     isDeleted: false,
+    hasLinkAccess: false, // Reset sharing settings for new template
   };
 
   const result = await dbCreateCharacter(newCharacter);
@@ -458,4 +559,51 @@ export async function copyCharacter(
  */
 async function createCharacterTemplate(originalId: string) {
   return copyCharacter(originalId, 'global', DUMMY_USER_ID, null);
+}
+
+/**
+ * Creates a new global learning scenario template based on an existing learning scenario.
+ * @param originalId - The id of the source learning scenario to create a template from.
+ */
+async function createLearningScenarioTemplate(originalId: string) {
+  return copyLearningScenario(originalId, DUMMY_USER_ID);
+}
+
+/**
+ * Creates a new global learning scenario template based on an existing learning scenario.
+ *
+ * @param learningScenarioId - The id of the source learning scenario to copy
+ * @param userId - The user id that is the owner of the new learning scenario
+ * @returns
+ */
+async function copyLearningScenario(learningScenarioId: string, userId: string) {
+  const learningScenario = await dbGetLearningScenarioById({ learningScenarioId });
+  if (!learningScenario) {
+    throw new NotFoundError('Original learning scenario not found');
+  }
+
+  const copy = learningScenarioInsertSchema.parse(learningScenario);
+  copy.id = generateUUID();
+  copy.accessLevel = 'global';
+  copy.isDeleted = false;
+  copy.schoolId = null;
+  copy.userId = userId;
+  copy.originalLearningScenarioId = learningScenarioId;
+  copy.hasLinkAccess = false; // Reset sharing settings for new template
+
+  // avatar
+  if (learningScenario.pictureId) {
+    const avatarKey = `shared-chats/${copy.id}/avatar`;
+    await copyAvatarPicture(learningScenario.pictureId, avatarKey);
+    copy.pictureId = avatarKey;
+  }
+  // attachments are copied in a separate step atm after the template is created
+
+  const [newLearningScenario] = await db.insert(learningScenarioTable).values(copy).returning();
+
+  if (!newLearningScenario) {
+    throw new Error('Could not create global learning scenario template');
+  }
+
+  return newLearningScenario;
 }
