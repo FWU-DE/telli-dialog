@@ -4,6 +4,7 @@ import {
   CharacterFileMapping,
   CustomGptFileMapping,
   fileTable,
+  LearningScenarioFileMapping,
   TextChunkTable,
 } from '@shared/db/schema';
 import {
@@ -75,7 +76,7 @@ export async function duplicateFileWithEmbeddings(originalFileId: string): Promi
 
     return newFileId;
   } catch (error) {
-    console.error(`Error copying file from ${originalFileId}:`, error);
+    logError(`Error copying file from ${originalFileId}`, error);
     throw new Error(
       `Failed to copy file: ${error instanceof Error ? error.message : 'Unknown error'}`,
       { cause: error },
@@ -106,6 +107,22 @@ export async function linkFileToCustomGpt(fileId: string, customGptId: string): 
   await db.insert(CustomGptFileMapping).values({
     fileId,
     customGptId,
+  });
+}
+
+/**
+ * Links a file to a learning scenario by creating a mapping record.
+ *
+ * @param fileId - The ID of the file to link
+ * @param learningScenarioId - The ID of the learning scenario to link to
+ */
+export async function linkFileToLearningScenario(
+  fileId: string,
+  learningScenarioId: string,
+): Promise<void> {
+  await db.insert(LearningScenarioFileMapping).values({
+    fileId,
+    learningScenarioId,
   });
 }
 
@@ -179,4 +196,11 @@ export async function getAvatarPictureUrl(key: string | null | undefined) {
     logError('Error getting signed URL for avatar picture:', error);
     return undefined;
   }
+}
+
+export async function copyAvatarPicture(originalKey: string, newKey: string): Promise<void> {
+  await copyFileInS3({
+    copySource: originalKey,
+    newKey: newKey,
+  });
 }

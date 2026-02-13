@@ -4,6 +4,7 @@ import {
   getFileUploadHistogram,
 } from '../../telemetry/metrics';
 import { randomInt } from 'crypto';
+import { logError } from '@shared/logging';
 
 export default async function MetricsPage() {
   const counter = getCounter();
@@ -14,7 +15,7 @@ export default async function MetricsPage() {
     try {
       histogram.record(randomInt(1000), { federal_state: 'Bayern' });
     } catch (error) {
-      console.log(error);
+      logError('Error adding to histogram', error);
     }
   }
 
@@ -22,7 +23,7 @@ export default async function MetricsPage() {
     try {
       gauge.record(randomInt(10), { federal_state: 'Bayern' });
     } catch (error) {
-      console.log(error);
+      logError('Error setting gauge', error);
     }
   }
 
@@ -30,7 +31,7 @@ export default async function MetricsPage() {
     try {
       counter.add(1, { federal_state: 'Bayern', page: 'Metrics' });
     } catch (error) {
-      console.log(error);
+      logError('Error incrementing counter', error);
     }
   }
 

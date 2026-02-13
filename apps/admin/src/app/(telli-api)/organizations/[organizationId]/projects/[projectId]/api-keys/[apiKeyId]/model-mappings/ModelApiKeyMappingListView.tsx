@@ -18,6 +18,7 @@ import {
   CardTitle,
 } from '@ui/components/Card';
 import { Button } from '@ui/components/Button';
+import { logError } from '@shared/logging';
 import { Checkbox } from '@ui/components/Checkbox';
 import { toast } from 'sonner';
 import {
@@ -59,7 +60,7 @@ export function ModelApiKeyMappingListView({
         new Set(mappings.map((mapping: ModelApiKeyMapping) => mapping.llmModelId)),
       );
     } catch (error) {
-      console.error('Error loading data:', error);
+      logError('Error loading data', error);
       toast.error('Fehler beim Laden der Daten');
     } finally {
       setIsLoading(false);
@@ -95,7 +96,7 @@ export function ModelApiKeyMappingListView({
       // Reload data to reflect changes
       await loadData();
     } catch (error) {
-      console.error('Error saving assignments:', error);
+      logError('Error saving assignments', error);
       toast.error('Fehler beim Speichern der Zuordnungen');
     } finally {
       setIsSaving(false);

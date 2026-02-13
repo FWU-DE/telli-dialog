@@ -1,5 +1,5 @@
 import TemplateDetailView from './TemplateDetailView';
-import { isTemplateType } from '@shared/models/templates';
+import { isTemplateType } from '@shared/templates/template';
 
 export const dynamic = 'force-dynamic';
 

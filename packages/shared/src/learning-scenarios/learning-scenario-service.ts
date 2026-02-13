@@ -2,29 +2,41 @@ import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
 import { dbGetFilesForLearningScenario } from '@shared/db/functions/files';
 import {
-  dbDeleteSharedSchoolChatByIdAndUserId,
-  dbGetSharedChatsByUserId,
-  dbGetSharedSchoolChatById,
-} from '@shared/db/functions/shared-school-chat';
+  dbDeleteLearningScenarioByIdAndUserId,
+  dbGetGlobalLearningScenarios,
+  dbGetLearningScenarioById,
+  dbGetLearningScenarioByIdOptionalShareData,
+  dbGetLearningScenarioByIdWithShareData,
+  dbGetLearningScenariosBySchoolId,
+  dbGetLearningScenariosByUserId,
+  dbGetSharedLearningScenarioConversations,
+} from '@shared/db/functions/learning-scenario';
 import {
+  AccessLevel,
+  accessLevelSchema,
   FileModel,
   fileTable,
   LearningScenarioFileMapping,
-  LearningScenarioInsertModel,
-  learningScenarioInsertSchema,
+  LearningScenarioOptionalShareDataModel,
   LearningScenarioSelectModel,
   learningScenarioTable,
   learningScenarioUpdateSchema,
+  LearningScenarioWithShareDataModel,
+  sharedLearningScenarioTable,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
-import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
+import {
+  deleteAvatarPicture,
+  deleteMessageAttachments,
+  getAvatarPictureUrl,
+} from '@shared/files/fileService';
 import { getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { addDays } from '@shared/utils/date';
 import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 
-export type LearningScenarioWithImage = LearningScenarioSelectModel & {
+export type LearningScenarioWithImage = LearningScenarioOptionalShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
 };
 
@@ -36,7 +48,7 @@ export async function getLearningScenariosForUser({
 }: {
   userId: string;
 }): Promise<LearningScenarioWithImage[]> {
-  const learningScenarios = await dbGetSharedChatsByUserId({ userId });
+  const learningScenarios = await dbGetLearningScenariosByUserId({ userId });
   // This is part of the old logic, keep it for now
   // If a new learning scenario is created, it has an empty name.
   const filteredScenarios = learningScenarios.filter((c) => c.name !== '');
@@ -47,27 +59,76 @@ export async function getLearningScenariosForUser({
 }
 
 /**
- * Get learning scenario by id for editing or sharing purpose.
- * @throws NotFoundError if the learning scenario does not exist.
- * @throws ForbiddenError if the user is not the owner of the learning scenario.
+ * Returns the list of available learning scenarios that the user can access
+ * based on userId, schoolId, federalStateId, and access level.
  */
-export async function getLearningScenario({
+export async function getLearningScenariosByAccessLevel({
+  accessLevel,
+  schoolId,
+  userId,
+  federalStateId,
+}: {
+  accessLevel: AccessLevel;
+  schoolId: string;
+  userId: string;
+  federalStateId: string;
+}): Promise<LearningScenarioOptionalShareDataModel[]> {
+  if (accessLevel === 'global') {
+    return dbGetGlobalLearningScenarios({ userId, federalStateId });
+  } else if (accessLevel === 'school') {
+    return dbGetLearningScenariosBySchoolId({ schoolId, userId });
+  } else if (accessLevel === 'private') {
+    return dbGetLearningScenariosByUserId({ userId });
+  }
+  return [];
+}
+
+/**
+ * Loads a learning scenario from db
+ * @returns
+ * - isOwner: whether the user is the owner
+ * - isPrivate: whether the learning scenario is private
+ * - the learning scenario itself
+ * @throws NotFoundError if learning scenario does not exist
+ */
+export async function getLearningScenarioInfo(
+  learningScenarioId: string,
+  userId: string,
+): Promise<{
+  isOwner: boolean;
+  isPrivate: boolean;
+  learningScenario: LearningScenarioSelectModel;
+}> {
+  const learningScenario = await dbGetLearningScenarioById({ learningScenarioId });
+  if (!learningScenario) throw new NotFoundError('Learning scenario not found');
+
+  return {
+    isOwner: learningScenario.userId === userId,
+    isPrivate: learningScenario.accessLevel === 'private',
+    learningScenario,
+  };
+}
+
+/**
+ * Returns a learning scenario with invite code and other sharing related data for sharing page.
+ * @throws NotFoundError if learning scenario does not exist or is not shared
+ */
+export async function getSharedLearningScenario({
   learningScenarioId,
   userId,
 }: {
   learningScenarioId: string;
   userId: string;
-}) {
+}): Promise<LearningScenarioWithShareDataModel> {
   checkParameterUUID(learningScenarioId);
-  const learningScenario = await dbGetSharedSchoolChatById({
+  const learningScenario = await dbGetLearningScenarioByIdWithShareData({
+    learningScenarioId,
     userId,
-    sharedChatId: learningScenarioId,
   });
-
-  if (!learningScenario) throw new NotFoundError('Learning scenario not found');
-  if (learningScenario.userId !== userId) {
-    throw new ForbiddenError('Not authorized to access this learning scenario');
+  if (!learningScenario || !learningScenario.inviteCode) {
+    throw new NotFoundError('Learning scenario not found');
   }
+
   return learningScenario;
 }
 
@@ -85,27 +146,61 @@ export async function updateLearningScenario({
   user: UserModel;
   data: LearningScenarioSelectModel;
 }) {
-  // this function also serves as a check that the user is the owner
-  await getLearningScenario({
-    learningScenarioId,
-    userId: user.id,
-  });
+  checkParameterUUID(learningScenarioId);
+  // Authorization check
+  const { isOwner } = await getLearningScenarioInfo(learningScenarioId, user.id);
+  if (!isOwner) throw new ForbiddenError('Not authorized to update this learning scenario');
 
   const parsedData = learningScenarioUpdateSchema.parse(data);
 
   const [updatedLearningScenario] = await db
     .update(learningScenarioTable)
     .set({ ...parsedData })
-    .where(
-      and(
-        eq(learningScenarioTable.id, learningScenarioId),
-        eq(learningScenarioTable.userId, user.id),
-      ),
-    )
+    .where(eq(learningScenarioTable.id, learningScenarioId))
     .returning();
 
   if (!updatedLearningScenario) {
     throw new Error('Could not update learning scenario');
+  }
+
+  return updatedLearningScenario;
+}
+
+/**
+ * User can share a learning scenario he owns with the school (access level = school)
+ * or unshare it (access level = private).
+ * User is not allowed to set the access level to global.
+ */
+export async function updateLearningScenarioAccessLevel({
+  learningScenarioId,
+  accessLevel,
+  userId,
+}: {
+  learningScenarioId: string;
+  accessLevel: AccessLevel;
+  userId: string;
+}) {
+  checkParameterUUID(learningScenarioId);
+  accessLevelSchema.parse(accessLevel);
+
+  // Authorization check
+  if (accessLevel === 'global') {
+    throw new ForbiddenError('Not authorized to set the access level to global');
+  }
+
+  const { isOwner } = await getLearningScenarioInfo(learningScenarioId, userId);
+  if (!isOwner)
+    throw new ForbiddenError('Not authorized to set the access level of this learning scenario');
+
+  // Update the access level in database
+  const [updatedLearningScenario] = await db
+    .update(learningScenarioTable)
+    .set({ accessLevel })
+    .where(eq(learningScenarioTable.id, learningScenarioId))
+    .returning();
+
+  if (updatedLearningScenario === undefined) {
+    throw new Error('Could not update the access level of the learning scenario');
   }
 
   return updatedLearningScenario;
@@ -125,20 +220,16 @@ export async function updateLearningScenarioPicture({
   picturePath: string;
   userId: string;
 }) {
-  await getLearningScenario({
-    learningScenarioId,
-    userId,
-  });
+  checkParameterUUID(learningScenarioId);
+  // Authorization check
+  const { isOwner } = await getLearningScenarioInfo(learningScenarioId, userId);
+  if (!isOwner)
+    throw new ForbiddenError('Not authorized to update the picture of this learning scenario');
 
   const [updatedSharedChat] = await db
     .update(learningScenarioTable)
     .set({ pictureId: picturePath })
-    .where(
-      and(
-        eq(learningScenarioTable.id, learningScenarioId),
-        eq(learningScenarioTable.userId, userId),
-      ),
-    )
+    .where(eq(learningScenarioTable.id, learningScenarioId))
     .returning();
 
   if (!updatedSharedChat) {
@@ -165,35 +256,68 @@ export type LearningScenarioShareValues = z.infer<typeof learningScenarioShareVa
 export async function shareLearningScenario({
   learningScenarioId,
   data,
-  userId,
+  schoolId,
+  user,
 }: {
   learningScenarioId: string;
   data: LearningScenarioShareValues;
-  userId: string;
+  schoolId?: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
-  await getLearningScenario({
+  checkParameterUUID(learningScenarioId);
+  // Authorization check: user must be a teacher and must have access to the learning scenario
+  if (user.userRole !== 'teacher')
+    throw new ForbiddenError('Only a teacher can share a learning scenario');
+
+  const { isOwner, isPrivate, learningScenario } = await getLearningScenarioInfo(
     learningScenarioId,
-    userId: userId,
-  });
+    user.id,
+  );
+  if (
+    !learningScenario.hasLinkAccess &&
+    ((isPrivate && !isOwner) ||
+      (!isOwner &&
+        learningScenario.accessLevel === 'school' &&
+        learningScenario.schoolId !== schoolId))
+  )
+    throw new ForbiddenError('Not authorized to share this learning scenario');
 
   const parsedValues = learningScenarioShareValuesSchema.parse(data);
 
-  const inviteCode = generateInviteCode();
-
-  const [updatedSharedChat] = await db
-    .update(learningScenarioTable)
-    .set({
-      telliPointsLimit: parsedValues.telliPointsPercentageLimit,
-      maxUsageTimeLimit: parsedValues.usageTimeLimit,
-      inviteCode,
-      startedAt: new Date(),
-    })
+  // share learning scenario instance
+  const [maybeExistingEntry] = await db
+    .select()
+    .from(sharedLearningScenarioTable)
     .where(
       and(
-        eq(learningScenarioTable.id, learningScenarioId),
-        eq(learningScenarioTable.userId, userId),
+        eq(sharedLearningScenarioTable.userId, user.id),
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
       ),
-    )
+    );
+
+  const inviteCode = generateInviteCode();
+
+  const startedAt = new Date();
+  const [updatedSharedChat] = await db
+    .insert(sharedLearningScenarioTable)
+    .values({
+      id: maybeExistingEntry?.id,
+      inviteCode,
+      learningScenarioId,
+      maxUsageTimeLimit: parsedValues.usageTimeLimit,
+      startedAt,
+      telliPointsLimit: parsedValues.telliPointsPercentageLimit,
+      userId: user.id,
+    })
+    .onConflictDoUpdate({
+      target: sharedLearningScenarioTable.id,
+      set: {
+        inviteCode,
+        maxUsageTimeLimit: parsedValues.usageTimeLimit,
+        startedAt,
+        telliPointsLimit: parsedValues.telliPointsPercentageLimit,
+      },
+    })
     .returning();
 
   if (updatedSharedChat === undefined) {
@@ -210,79 +334,151 @@ export async function shareLearningScenario({
  */
 export async function unshareLearningScenario({
   learningScenarioId,
-  userId,
+  user,
 }: {
   learningScenarioId: string;
-  userId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
-  await getLearningScenario({
-    learningScenarioId,
-    userId,
-  });
+  checkParameterUUID(learningScenarioId);
+  // Authorization check: user must be a teacher and owner of the sharing itself
+  if (user.userRole !== 'teacher')
+    throw new ForbiddenError('Only a teacher can unshare a learning scenario');
 
-  const [updatedSharedChat] = await db
-    .update(learningScenarioTable)
-    .set({
-      startedAt: null,
-      telliPointsLimit: null,
-      maxUsageTimeLimit: null,
-    })
+  const sharedConversations = await dbGetSharedLearningScenarioConversations({
+    learningScenarioId,
+    userId: user.id,
+  });
+  if (sharedConversations.length === 0)
+    throw new ForbiddenError('Not authorized to stop this shared learning scenario instance');
+
+  const [deletedShare] = await db
+    .delete(sharedLearningScenarioTable)
     .where(
       and(
-        eq(learningScenarioTable.id, learningScenarioId),
-        eq(learningScenarioTable.userId, userId),
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
+        eq(sharedLearningScenarioTable.userId, user.id),
       ),
     )
     .returning();
 
-  if (!updatedSharedChat) {
+  if (!deletedShare) {
     throw new Error('Could not unshare learning scenario');
   }
 
-  return updatedSharedChat;
+  return deletedShare;
+}
+
+/**
+ * Loads learning scenario for edit view.
+ * Throws if the user is not authorized to access the learning scenario:
+ * - NotFound if the learning scenario does not exist
+ * - Forbidden if the learning scenario is private and the user is not the owner
+ * - Forbidden if the learning scenario is school-level and the user is not in the same school
+ *
+ * Link sharing bypass: If `hasLinkAccess` is true, access checks are skipped
+ * and any authenticated user can view the learning scenario. Note that link sharing
+ * only grants read-only access - editing is still restricted to the owner.
+ */
+export async function getLearningScenarioForEditView({
+  learningScenarioId,
+  schoolId,
+  userId,
+}: {
+  learningScenarioId: string;
+  schoolId: string;
+  userId: string;
+}): Promise<{
+  learningScenario: LearningScenarioOptionalShareDataModel;
+  relatedFiles: FileModel[];
+  avatarPictureUrl: string | undefined;
+}> {
+  checkParameterUUID(learningScenarioId);
+  const learningScenario = await dbGetLearningScenarioByIdOptionalShareData({
+    learningScenarioId,
+    userId,
+  });
+  if (!learningScenario) throw new NotFoundError('Learning scenario not found');
+  if (!learningScenario.hasLinkAccess) {
+    if (learningScenario.accessLevel === 'private' && learningScenario.userId !== userId)
+      throw new ForbiddenError('Not authorized to edit this learning scenario');
+    if (learningScenario.accessLevel === 'school' && learningScenario.schoolId !== schoolId)
+      throw new ForbiddenError('Not authorized to edit this learning scenario');
+  }
+
+  const relatedFiles = await getFilesForLearningScenario({ learningScenarioId, schoolId, userId });
+  const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
+  return { learningScenario, relatedFiles, avatarPictureUrl };
 }
 
 /**
  * Get files linked to a learning scenario.
- * If the user is not the owner of the learning scenario, an empty array is returned.
+ *
+ * If the learning scenario is private, only the owner can fetch file mappings.
+ * If the learning scenario is shared with a school, any teacher in that school can fetch file mappings.
+ * If the learning scenario is global, any teacher can fetch those file mappings.
+ *
+ * Link sharing bypass: If `hasLinkAccess` is true, access checks are skipped
+ * and any authenticated user can access the file mappings.
  */
 export async function getFilesForLearningScenario({
   learningScenarioId,
+  schoolId,
   userId,
 }: {
   learningScenarioId: string;
+  schoolId: string;
   userId: string;
 }): Promise<FileModel[]> {
   checkParameterUUID(learningScenarioId);
-  return dbGetFilesForLearningScenario(learningScenarioId, userId);
+  // Authorization check
+  const { isOwner, isPrivate, learningScenario } = await getLearningScenarioInfo(
+    learningScenarioId,
+    userId,
+  );
+  if (
+    !learningScenario.hasLinkAccess &&
+    ((isPrivate && !isOwner) ||
+      (!isOwner &&
+        learningScenario.accessLevel === 'school' &&
+        learningScenario.schoolId !== schoolId))
+  )
+    throw new ForbiddenError('Not authorized to fetch file mappings for this learning scenario');
+
+  return dbGetFilesForLearningScenario(learningScenarioId);
 }
 
 /**
  * User creates a new learning scenario.
  */
 export async function createNewLearningScenario({
-  data,
+  modelId,
   user,
+  schoolId,
 }: {
-  data: LearningScenarioInsertModel;
+  modelId: string;
   user: UserModel;
+  schoolId: string;
 }) {
   if (user.userRole !== 'teacher') {
     throw new ForbiddenError('Not authorized to create new learning scenario');
   }
 
-  const parsedData = learningScenarioInsertSchema.parse(data);
-
-  const [insertedSharedChat] = await db
+  const [insertedLearningScenario] = await db
     .insert(learningScenarioTable)
-    .values({ ...parsedData, userId: user.id })
+    .values({
+      name: '',
+      pictureId: '',
+      modelId,
+      userId: user.id,
+      schoolId,
+    })
     .returning();
 
-  if (!insertedSharedChat) {
+  if (!insertedLearningScenario) {
     throw new Error('Could not create learning scenario');
   }
 
-  return insertedSharedChat;
+  return insertedLearningScenario;
 }
 
 /**
@@ -298,17 +494,15 @@ export async function deleteLearningScenario({
   userId: string;
 }) {
   checkParameterUUID(learningScenarioId);
-  const learningScenario = await dbGetSharedSchoolChatById({
-    sharedChatId: learningScenarioId,
-    userId,
-  });
-  if (!learningScenario) throw new NotFoundError('Learning scenario not found');
+  // Authorization check
+  const { isOwner, learningScenario } = await getLearningScenarioInfo(learningScenarioId, userId);
+  if (!isOwner) throw new ForbiddenError('Not authorized to delete this learning scenario');
 
-  const relatedFiles = await dbGetFilesForLearningScenario(learningScenarioId, userId);
+  const relatedFiles = await dbGetFilesForLearningScenario(learningScenarioId);
 
   // delete learning scenario from db
-  const deletedLearningScenario = await dbDeleteSharedSchoolChatByIdAndUserId({
-    sharedChatId: learningScenarioId,
+  const deletedLearningScenario = await dbDeleteLearningScenarioByIdAndUserId({
+    learningScenarioId,
     userId,
   });
 
@@ -335,11 +529,10 @@ export async function linkFileToLearningScenario({
   userId: string;
 }) {
   checkParameterUUID(learningScenarioId);
-  const learningScenario = await dbGetSharedSchoolChatById({
-    sharedChatId: learningScenarioId,
-    userId,
-  });
-  if (!learningScenario) throw new NotFoundError('Learning scenario not found');
+  // Authorization check
+  const { isOwner } = await getLearningScenarioInfo(learningScenarioId, userId);
+  if (!isOwner)
+    throw new ForbiddenError('Not authorized to add new file for this learning scenario');
 
   const [insertedFileMapping] = await db
     .insert(LearningScenarioFileMapping)
@@ -367,9 +560,9 @@ export async function removeFileFromLearningScenario({
   userId: string;
 }) {
   checkParameterUUID(learningScenarioId);
-
-  // get learning scenario for access check
-  await getLearningScenario({ learningScenarioId, userId });
+  // Authorization check
+  const { isOwner } = await getLearningScenarioInfo(learningScenarioId, userId);
+  if (!isOwner) throw new ForbiddenError('Not authorized to delete this file mapping');
 
   // delete mapping and file entry in db
   await db.transaction(async (tx) => {
@@ -388,10 +581,10 @@ export async function removeFileFromLearningScenario({
   await deleteMessageAttachments([fileId]);
 }
 
-async function enrichLearningScenarioWithPictureUrl({
+export async function enrichLearningScenarioWithPictureUrl({
   learningScenarios,
 }: {
-  learningScenarios: LearningScenarioSelectModel[];
+  learningScenarios: LearningScenarioOptionalShareDataModel[];
 }): Promise<LearningScenarioWithImage[]> {
   return await Promise.all(
     learningScenarios.map(async (scenario) => ({
@@ -434,10 +627,11 @@ export async function uploadAvatarPictureForLearningScenario({
   croppedImageBlob: Blob;
   userId: string;
 }) {
-  await getLearningScenario({
-    learningScenarioId,
-    userId,
-  });
+  checkParameterUUID(learningScenarioId);
+  // Authorization check
+  const { isOwner } = await getLearningScenarioInfo(learningScenarioId, userId);
+  if (!isOwner)
+    throw new ForbiddenError('Not authorized to upload picture for this learning scenario');
 
   const key = `shared-chats/${learningScenarioId}/avatar`;
 

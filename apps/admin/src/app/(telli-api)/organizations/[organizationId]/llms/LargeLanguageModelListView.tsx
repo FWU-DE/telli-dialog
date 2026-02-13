@@ -18,6 +18,7 @@ import {
 } from '@ui/components/Card';
 import { Button } from '@ui/components/Button';
 import { Checkbox } from '@ui/components/Checkbox';
+import { logError } from '@shared/logging';
 import { getLargeLanguageModelsAction } from './actions';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
@@ -42,7 +43,7 @@ export function LargeLanguageModelListView({
       const refreshedData = await getLargeLanguageModelsAction(organizationId);
       setLanguageModels(refreshedData);
     } catch (error) {
-      console.error('Failed to refresh language models:', error);
+      logError('Failed to refresh language models', error);
     } finally {
       setIsRefreshing(false);
     }

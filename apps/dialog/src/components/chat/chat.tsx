@@ -18,7 +18,7 @@ import { InitialChatContentDisplay } from './initial-content-display';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { ChatInputBox } from './chat-input-box';
 import { ErrorChatPlaceholder } from './error-chat-placeholder';
-import { logDebug, logWarning } from '@shared/logging';
+import { logError, logDebug, logWarning } from '@shared/logging';
 import { useSession } from 'next-auth/react';
 import { AssistantIcon } from './assistant-icon';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
@@ -150,7 +150,7 @@ export default function Chat({
 
   const { error, handleError, resetError } = useCheckStatusCode();
 
-  const scrollRef = useAutoScroll([messages, status]);
+  const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, status]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -182,6 +182,7 @@ export default function Chat({
     e.preventDefault();
 
     try {
+      reactivateAutoScrolling();
       resetError();
 
       // Trigger refetch of the fileMapping from the DB
@@ -216,7 +217,7 @@ export default function Chat({
 
       await handleSubmit(e, { fileIds });
     } catch (error) {
-      console.error(error);
+      logError('Error in handleSubmitWithFiles', error);
     }
   }
 
@@ -245,7 +246,7 @@ export default function Chat({
       const newMap = deepCopy(prev);
       const deleted = newMap.delete(localFileId);
       if (!deleted) {
-        console.warn('Could not delete file');
+        logWarning('Could not delete file', { localFileId });
       }
       return newMap;
     });

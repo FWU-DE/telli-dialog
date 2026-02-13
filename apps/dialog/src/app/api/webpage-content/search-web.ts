@@ -1,7 +1,7 @@
 import { cacheLife } from 'next/cache';
 import { webScraperCrawl4AI } from './search-web-crawl4ai';
 import { webScraperReadability } from './search-web-readability';
-import { logWarning } from '@shared/logging/logging';
+import { logWarning } from '@shared/logging';
 import { WebsearchSource } from '@shared/db/types';
 import {
   incrementCrawl4aiSuccessCounter,

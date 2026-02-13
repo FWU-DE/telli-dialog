@@ -18,6 +18,7 @@ import {
   TextChunkInsertModel,
   TextChunkTable,
 } from '../schema';
+import { logDebug } from '@shared/logging';
 
 export async function linkFilesToConversation({
   conversationMessageId,
@@ -72,8 +73,7 @@ export async function dbGetRelatedSharedChatFiles(conversationId?: string): Prom
 }
 
 export async function dbGetFilesForLearningScenario(
-  conversationId: string,
-  userId: string,
+  learningScenarioId: string,
 ): Promise<FileModel[]> {
   return db
     .select({
@@ -86,16 +86,7 @@ export async function dbGetFilesForLearningScenario(
     })
     .from(LearningScenarioFileMapping)
     .innerJoin(fileTable, eq(LearningScenarioFileMapping.fileId, fileTable.id))
-    .innerJoin(
-      learningScenarioTable,
-      eq(LearningScenarioFileMapping.learningScenarioId, learningScenarioTable.id),
-    )
-    .where(
-      and(
-        eq(LearningScenarioFileMapping.learningScenarioId, conversationId),
-        eq(learningScenarioTable.userId, userId),
-      ),
-    );
+    .where(eq(LearningScenarioFileMapping.learningScenarioId, learningScenarioId));
 }
 
 export async function dbGetRelatedCharacterFiles(conversationId?: string): Promise<FileModel[]> {
@@ -266,7 +257,7 @@ export async function dbDeleteDanglingFiles() {
         ),
       );
     const fileIdsToDelete = fileIds.map((f) => f.fileId);
-    console.log('fileIdsToDelete', fileIdsToDelete);
+    logDebug('fileIdsToDelete', { fileIdsToDelete });
     await tx.delete(TextChunkTable).where(inArray(TextChunkTable.fileId, fileIdsToDelete));
     await tx.delete(fileTable).where(inArray(fileTable.id, fileIdsToDelete));
     return fileIdsToDelete;

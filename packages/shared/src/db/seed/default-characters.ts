@@ -5,7 +5,7 @@ import { uploadFileToS3 } from '../../s3';
 import { dbCreateCharacter } from '../functions/character';
 import { DUMMY_USER_ID } from './user-entity';
 import { dbUpsertCustomGpt } from '../functions/custom-gpts';
-import { updateTemplateMappings } from '@shared/templates/templateService';
+import { updateTemplateMappings } from '@shared/templates/template-service';
 import { FEDERAL_STATES } from './federal-state';
 
 export async function insertTemplateCharacters() {
@@ -17,7 +17,9 @@ export async function insertTemplateCharacters() {
     const result = await dbCreateCharacter(templateCharacter);
     const id = result && result[0] ? result[0].id : undefined;
     if (!id) {
-      console.error('Failed to insert template character:', templateCharacter.name);
+      console.log('Failed to seed template character', {
+        characterName: templateCharacter.name,
+      });
       continue;
     }
     await updateTemplateMappings(
@@ -38,7 +40,9 @@ export async function insertTemplateCustomGpt() {
     const result = await dbUpsertCustomGpt({ customGpt: templateCustomGpt });
     const id = result?.id ?? undefined;
     if (!id) {
-      console.error('Failed to insert template custom gpt:', templateCustomGpt.name);
+      console.log('Failed to seed template custom gpt', {
+        customGptName: templateCustomGpt.name,
+      });
       continue;
     }
     await updateTemplateMappings(
@@ -87,11 +91,11 @@ async function processStaticJpegFiles(rootFolder: string, rootRemoteDir: string)
       return;
     }
 
-    console.log(`Found ${matchingFiles.length} matching files:`);
-    matchingFiles.forEach((file) => console.log(` - ${file}`));
+    console.log(
+      `Starting upload of ${matchingFiles.length} matching files: ${matchingFiles.join()}`,
+    );
 
     // Upload each file to S3
-    console.log('\nStarting uploads...');
     for (const file of matchingFiles) {
       const fileNameWithSuffix = file.split('/').at(-1) ?? '';
       const fileName = fileNameWithSuffix.split('.')[0];
@@ -102,9 +106,9 @@ async function processStaticJpegFiles(rootFolder: string, rootRemoteDir: string)
         contentType: 'image/jpeg',
       });
     }
-    console.log('\nAll uploads completed successfully!');
+    console.log('All uploads completed successfully!');
   } catch (error) {
-    console.error('An error occurred:', error);
+    console.log('An error occurred during file upload', error);
   }
 }
 

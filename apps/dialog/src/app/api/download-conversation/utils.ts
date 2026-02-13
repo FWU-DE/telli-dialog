@@ -12,6 +12,7 @@ import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { dbGetConversationAndMessages } from '@shared/db/functions/chat';
 import { UserSelectModel } from '@shared/db/schema';
 import { markdownToDocx } from './markdown';
+import { logError } from '@shared/logging';
 
 export async function generateConversationDocxFiles({
   conversationId,
@@ -58,13 +59,13 @@ export async function generateConversationDocxFiles({
     });
     const lastAssistantMessage = [...messages].reverse().find((m) => m.role === 'assistant');
 
-    const TheModelName = lastAssistantMessage?.modelName ?? gptName;
+    const modelDisplayName = lastAssistantMessage?.modelName ?? gptName;
 
     messageParagraphs.push(
       new Paragraph({
         children: [
           new TextRun({
-            text: `Generiert von telli unter Nutzung von ${TheModelName}`,
+            text: `Generiert von telli unter Nutzung von ${modelDisplayName}`,
             italics: true,
             size: 18,
             color: '666666',
@@ -79,7 +80,7 @@ export async function generateConversationDocxFiles({
 
     return { buffer, conversation, gptName, messages };
   } catch (error) {
-    console.error(`Error generating conversation .docx files: ${error}`);
+    logError('Error generating conversation .docx files', error);
     return undefined;
   }
 }

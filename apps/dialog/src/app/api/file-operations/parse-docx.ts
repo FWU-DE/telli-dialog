@@ -1,4 +1,5 @@
 import { extractRawText } from 'mammoth';
+import { logError } from '@shared/logging';
 
 export async function extractTextFromWordDocument(buffer: Buffer): Promise<string> {
   try {
@@ -12,7 +13,7 @@ export async function extractTextFromWordDocument(buffer: Buffer): Promise<strin
     return result.value;
   } catch (error) {
     // Proper error handling
-    console.error('Error extracting text from Word document:', error);
+    logError('Error extracting text from Word document', error);
     throw new Error(`Failed to extract text from Word document: ${error}`);
   }
 }

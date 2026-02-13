@@ -8,6 +8,7 @@ import {
   convertInchesToTwip,
 } from 'docx';
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
+import { logError } from '@shared/logging';
 import { markdownToDocx } from '../markdown';
 import { type ChatMessage as Message } from '@/types/chat';
 
@@ -36,7 +37,7 @@ export async function generateSharedConversationDocxFiles({
 
     return { buffer, messages: conversationMessages };
   } catch (error) {
-    console.error(`Error generating conversation .docx files: ${error}`);
+    logError('Error generating conversation .docx files', error);
     return undefined;
   }
 }

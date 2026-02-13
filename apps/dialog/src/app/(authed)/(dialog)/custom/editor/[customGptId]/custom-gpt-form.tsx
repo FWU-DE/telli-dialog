@@ -1,6 +1,6 @@
 'use client';
 
-import { AccessLevel, CustomGptSelectModel, FileModel, UserSchoolRole } from '@shared/db/schema';
+import { CustomGptSelectModel, FileModel, UserSchoolRole } from '@shared/db/schema';
 import {
   buttonDeleteClassName,
   buttonPrimaryClassName,
@@ -13,13 +13,13 @@ import { z } from 'zod';
 
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/common/toast';
-import React, { startTransition } from 'react';
+import React from 'react';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import CropImageAndUploadButton from '@/components/crop-uploaded-image/crop-image-and-upload-button';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
+import { logWarning } from '@shared/logging';
 import { useTranslations } from 'next-intl';
-import Checkbox from '@/components/common/checkbox';
 import {
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
@@ -44,9 +44,10 @@ import { getZodStringFieldMetadataFn } from '@/components/forms/utils';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { AttachedLinks } from '@/components/forms/attached-links';
 import { formLinks } from '@/utils/web-search/form-links';
-import { useFederalState } from '@/components/providers/federal-state-provider';
 import AvatarPicture from '@/components/common/avatar-picture';
 import { WebsearchSource } from '@shared/db/types';
+import SharingSection from '@/components/forms/sharing-section';
+import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
 
 type CustomGptFormProps = CustomGptSelectModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -69,6 +70,10 @@ const customGptFormValuesSchema = z.object({
   specification: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS),
   promptSuggestions: z.array(z.object({ content: z.string() })),
   attachedLinks: formLinks,
+
+  // Sharing options
+  isSchoolShared: z.boolean(),
+  hasLinkAccess: z.boolean(),
 });
 type CustomGptFormValues = z.infer<typeof customGptFormValuesSchema>;
 
@@ -84,7 +89,6 @@ export default function CustomGptForm({
 }: CustomGptFormProps) {
   const router = useRouter();
   const toast = useToast();
-  const federalState = useFederalState();
 
   const {
     register,
@@ -104,6 +108,7 @@ export default function CustomGptForm({
           ? [{ content: '' }]
           : promptSuggestions.map((p) => ({ content: p })),
       attachedLinks: initialLinks,
+      isSchoolShared: customGpt.accessLevel === 'school',
     },
   });
   const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
@@ -112,29 +117,31 @@ export default function CustomGptForm({
   const tToast = useTranslations('custom-gpt.toasts');
   const tCommon = useTranslations('common');
   const getZodStringFieldMetadata = getZodStringFieldMetadataFn(customGptFormValuesSchema);
-  const [optimisticAccessLevel, addOptimisticAccessLevel] = React.useOptimistic(
-    customGpt.accessLevel,
-    (p, n: AccessLevel) => n,
-  );
 
-  function handleEnableSharing(value: boolean) {
-    const accessLevel = value ? 'school' : 'private';
+  function handleSharingChange() {
+    if (isCreating || readOnly) return;
 
-    startTransition(() => {
-      addOptimisticAccessLevel(accessLevel);
-    });
+    // Check if school sharing (accessLevel) changed
+    const isSchoolShared = getValues('isSchoolShared');
+    const newAccessLevel = isSchoolShared ? 'school' : 'private';
 
-    updateCustomGptAccessLevelAction({
-      gptId: customGpt.id,
-      accessLevel,
-    }).then((result) => {
-      if (result.success) {
-        router.refresh();
-      } else {
-        toast.error(tToast('edit-toast-error'));
-      }
-    });
+    if (newAccessLevel !== customGpt.accessLevel) {
+      updateCustomGptAccessLevelAction({
+        gptId: customGpt.id,
+        accessLevel: newAccessLevel,
+      }).then((result) => {
+        if (result.success) {
+          router.refresh();
+        } else {
+          toast.error(tToast('edit-toast-error'));
+        }
+      });
+    }
+
+    // Save other sharing changes (like hasLinkAccess) via autosave
+    handleAutoSave();
   }
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'promptSuggestions',
@@ -154,7 +161,7 @@ export default function CustomGptForm({
       const newMap = deepCopy(prev);
       const deleted = newMap.delete(localFileId);
       if (!deleted) {
-        console.warn('Could not delete file');
+        logWarning('Could not delete file', { localFileId });
       }
       return newMap;
     });
@@ -167,18 +174,19 @@ export default function CustomGptForm({
     if (!result.success) toast.error(tToast('edit-toast-error'));
   }
 
-  function onSubmit(data: CustomGptFormValues) {
-    updateCustomGptAction({
+  async function onSubmit(data: CustomGptFormValues) {
+    const result = await updateCustomGptAction({
       ...data,
       promptSuggestions: data.promptSuggestions?.map((p) => p.content),
       gptId: customGpt.id,
       attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
-    }).then((result) => {
-      if (result.success) {
-        if (!isCreating) toast.success(tToast('edit-toast-success'));
-        router.refresh();
-      } else toast.error(tToast('edit-toast-error'));
     });
+    if (result.success) {
+      if (!isCreating) toast.success(tToast('edit-toast-success'));
+      router.refresh();
+    } else {
+      toast.error(tToast('edit-toast-error'));
+    }
   }
 
   function cleanupPromptSuggestions(promptSuggestions: string[] | undefined) {
@@ -250,17 +258,29 @@ export default function CustomGptForm({
       ...data,
       promptSuggestions: [],
       attachedLinks: data.attachedLinks.map((p) => p.link),
+      isSchoolShared: undefined,
     };
     const dataEquals = deepEqual(defaultData, newData);
     if (dataEquals) return;
     onSubmit(data);
   }
 
-  function handleCreateCustomGpt() {
+  async function handleCreateCustomGpt() {
     const data = getValues();
-    onSubmit(data);
+    await onSubmit(data);
+
+    // Set access level if school sharing is enabled
+    if (data.isSchoolShared) {
+      await updateCustomGptAccessLevelAction({
+        gptId: customGpt.id,
+        accessLevel: 'school',
+      });
+    }
+
     toast.success(tToast('create-toast-success'));
-    router.replace(backUrl);
+    // Use form's isSchoolShared to determine redirect URL since accessLevel hasn't been updated yet
+    const redirectUrl = buildGenericUrl(data.isSchoolShared ? 'school' : 'private', 'custom');
+    router.replace(redirectUrl);
   }
 
   async function handleUploadAvatarPicture(croppedImageBlob: Blob) {
@@ -286,20 +306,6 @@ export default function CustomGptForm({
       <NavigateBack label={t('all-gpts')} onClick={handleNavigateBack} />
       <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>
       {copyContainer}
-      {userRole === 'teacher' && (
-        <fieldset className="mt-8 gap-8">
-          {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
-            <div className="flex gap-4">
-              <Checkbox
-                label={t('restriction-school')}
-                checked={optimisticAccessLevel === 'school'}
-                onCheckedChange={(value: boolean) => handleEnableSharing(value)}
-                disabled={readOnly}
-              />
-            </div>
-          )}
-        </fieldset>
-      )}
       <fieldset className="flex flex-col gap-4 mt-8">
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
           <div className="flex gap-8 flex-col">
@@ -432,19 +438,15 @@ export default function CustomGptForm({
         <h2 className="text-md font-medium">{t('additional-assets-label')}</h2>
         <span className="text-base">{t('additional-assets-content')}</span>
 
-        {!readOnly && (
-          <>
-            <FileManagement
-              files={_files}
-              setFiles={setFiles}
-              initialFiles={initialFiles}
-              onFileUploaded={handleNewFile}
-              onDeleteFile={handleDeattachFile}
-              readOnly={readOnly}
-              translationNamespace="custom-gpt.form"
-            />
-          </>
-        )}
+        <FileManagement
+          files={_files}
+          setFiles={setFiles}
+          initialFiles={initialFiles}
+          onFileUploaded={handleNewFile}
+          onDeleteFile={handleDeattachFile}
+          readOnly={readOnly}
+          translationNamespace="custom-gpt.form"
+        />
         <AttachedLinks
           fields={attachedLinkFields}
           getValues={() => getValues('attachedLinks')}
@@ -455,6 +457,17 @@ export default function CustomGptForm({
           handleAutosave={handleAutoSave}
         />
       </fieldset>
+      <div className="w-full mt-8">
+        {userRole === 'teacher' && (
+          <SharingSection
+            control={control}
+            schoolSharingName="isSchoolShared"
+            linkSharingName="hasLinkAccess"
+            onShareChange={handleSharingChange}
+            disabled={readOnly}
+          />
+        )}
+      </div>
       {!isCreating && !readOnly && (
         <section className="mt-8">
           <h3 className="font-medium">{t('delete-gpt')}</h3>

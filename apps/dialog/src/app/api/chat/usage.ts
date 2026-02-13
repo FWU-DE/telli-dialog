@@ -1,11 +1,11 @@
 import { getPriceInCentByUser, getPriceLimitInCentByUser } from '@/app/school';
-import { CharacterWithShareDataModel, type LearningScenarioSelectModel } from '@shared/db/schema';
+import { CharacterWithShareDataModel, LearningScenarioWithShareDataModel } from '@shared/db/schema';
 import { type UserAndContext } from '@/auth/types';
 import {
   dbGetSharedCharacterChatUsageInCentByCharacterId,
   dbGetSharedChatUsageInCentBySharedChatId,
 } from '@shared/db/functions/telli-points';
-import { calculateTimeLeftForLearningScenario } from '@shared/learning-scenarios/learning-scenario-service.client';
+import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 
 /**
  * Calculates the shared chat limit in cents
@@ -26,7 +26,7 @@ export async function sharedChatHasReachedTelliPointsLimit({
   sharedChat,
 }: {
   user: UserAndContext | undefined;
-  sharedChat: LearningScenarioSelectModel;
+  sharedChat: LearningScenarioWithShareDataModel;
 }) {
   if (user === undefined || user.school === undefined || user.federalState === undefined) {
     return true;
@@ -101,7 +101,7 @@ export function sharedChatHasExpired({
   startedAt: Date | null;
   maxUsageTimeLimit: number | null;
 }) {
-  const timeLeft = calculateTimeLeftForLearningScenario({ startedAt, maxUsageTimeLimit });
+  const timeLeft = calculateTimeLeft({ startedAt, maxUsageTimeLimit });
 
   if (startedAt === null || timeLeft < 1 || maxUsageTimeLimit === null) {
     // the shared chat is no viable anymore so the limit is reached

@@ -316,6 +316,34 @@
       "when": 1770123073889,
       "tag": "0044_third_maximus",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1770154246467,
+      "tag": "0045_romantic_lord_hawal",
+      "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1770644368597,
+      "tag": "0046_fat_reaper",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1770806780019,
+      "tag": "0047_little_enchantress",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1770973729601,
+      "tag": "0048_sharp_rattler",
+      "breakpoints": true
     }
   ]
 }
