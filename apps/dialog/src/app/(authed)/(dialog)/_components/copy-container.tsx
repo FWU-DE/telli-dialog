@@ -1,10 +1,10 @@
 import { cn } from '@/utils/tailwind';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
-import { CreateNewCharacterFromTemplate } from '../characters/create-new-character-from-template';
 import { createNewCharacterAction } from '../characters/actions';
 import { createNewCustomGptAction } from '../custom/actions';
 import { useTranslations } from 'next-intl';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
+import { CreateNewInstanceFromTemplate } from './create-new-instance-from-template';
 
 export function CopyContainer({
   templateId,
@@ -28,7 +28,7 @@ export function CopyContainer({
     redirectPath === 'characters' ? createNewCharacterAction : createNewCustomGptAction;
   const t = useTranslations(translation_path);
   return (
-    <CreateNewCharacterFromTemplate
+    <CreateNewInstanceFromTemplate
       templateId={templateId}
       templatePictureId={templatePictureId}
       redirectPath={redirectPath}
@@ -54,6 +54,6 @@ export function CopyContainer({
           <span>{t('copy-page.copy-template')}</span>
         </button>
       </div>
-    </CreateNewCharacterFromTemplate>
+    </CreateNewInstanceFromTemplate>
   );
 }
