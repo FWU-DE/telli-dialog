@@ -322,6 +322,7 @@ export const characterTable = pgTable(
     pictureId: text('picture_id'),
     initialMessage: text('initial_message'),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
+    hasLinkAccess: boolean('has_link_access').notNull().default(false),
     schoolId: text('school_id').references(() => schoolTable.id),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     attachedLinks: text('attached_links')
@@ -534,6 +535,7 @@ export const learningScenarioTable = pgTable(
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     schoolId: text('school_id').references(() => schoolTable.id),
     originalLearningScenarioId: uuid('original_learning_scenario_id'),
+    hasLinkAccess: boolean('has_link_access').notNull().default(false),
   },
   (table) => [index().on(table.userId)],
 );
@@ -884,6 +886,7 @@ export const customGptTable = pgTable(
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     schoolId: text('school_id').references(() => schoolTable.id),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
+    hasLinkAccess: boolean('has_link_access').notNull().default(false),
     pictureId: text('picture_id'),
     description: text('description'),
     specification: text('specification'),

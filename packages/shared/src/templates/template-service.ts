@@ -482,6 +482,7 @@ export async function copyCustomGpt(
     userId,
     schoolId,
     isDeleted: false,
+    hasLinkAccess: false, // Reset sharing settings for new template
   };
 
   const result = await dbUpsertCustomGpt({ customGpt: newCustomGpt });
@@ -536,6 +537,7 @@ export async function copyCharacter(
     userId,
     schoolId,
     isDeleted: false,
+    hasLinkAccess: false, // Reset sharing settings for new template
   };
 
   const result = await dbCreateCharacter(newCharacter);
@@ -587,6 +589,7 @@ async function copyLearningScenario(learningScenarioId: string, userId: string) 
   copy.schoolId = null;
   copy.userId = userId;
   copy.originalLearningScenarioId = learningScenarioId;
+  copy.hasLinkAccess = false; // Reset sharing settings for new template
 
   // avatar
   if (learningScenario.pictureId) {

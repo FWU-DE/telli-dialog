@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
 import {
   createNewLearningScenario,
   deleteLearningScenario,
+  getFilesForLearningScenario,
   getLearningScenarioForEditView,
   getSharedLearningScenario,
   linkFileToLearningScenario,
@@ -18,6 +19,8 @@ import {
   dbGetLearningScenarioByIdWithShareData,
   dbGetSharedLearningScenarioConversations,
 } from '../db/functions/learning-scenario';
+import { dbGetFilesForLearningScenario } from '../db/functions/files';
+import { getAvatarPictureUrl } from '../files/fileService';
 import { generateUUID } from '../utils/uuid';
 import { LearningScenarioSelectModel } from '@shared/db/schema';
 import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
@@ -28,6 +31,12 @@ vi.mock('../db/functions/learning-scenario', () => ({
   dbGetLearningScenarioByIdOptionalShareData: vi.fn(),
   dbGetLearningScenarioByIdWithShareData: vi.fn(),
   dbGetSharedLearningScenarioConversations: vi.fn(),
+}));
+vi.mock('../db/functions/files', () => ({
+  dbGetFilesForLearningScenario: vi.fn(),
+}));
+vi.mock('../files/fileService', () => ({
+  getAvatarPictureUrl: vi.fn(),
 }));
 
 const mockUser = (userRole: 'student' | 'teacher' = 'teacher'): UserModel => ({
@@ -365,5 +374,140 @@ describe('learning-scenario-service', () => {
         await expect(testFunction()).rejects.toThrowError(InvalidArgumentError);
       },
     );
+  });
+
+  describe('Link sharing bypass scenarios', () => {
+    const learningScenarioId = generateUUID();
+    const ownerUserId = generateUUID();
+    const ownerSchoolId = generateUUID();
+    const differentUserId = generateUUID();
+    const differentSchoolId = generateUUID();
+
+    describe('should allow access when hasLinkAccess is true - bypassing normal restrictions', () => {
+      it.each([
+        {
+          accessLevel: 'private' as const,
+          description: 'private learning scenario with link sharing enabled',
+        },
+        {
+          accessLevel: 'school' as const,
+          description: 'school learning scenario with link sharing enabled (different school)',
+        },
+      ])('getLearningScenarioForEditView - $description', async ({ accessLevel }) => {
+        const mockLearningScenario = {
+          id: learningScenarioId,
+          userId: ownerUserId,
+          schoolId: ownerSchoolId,
+          accessLevel,
+          hasLinkAccess: true,
+        };
+
+        (
+          dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
+            typeof dbGetLearningScenarioByIdOptionalShareData
+          >
+        ).mockResolvedValue(mockLearningScenario as never);
+        // Also mock dbGetLearningScenarioById because getFilesForLearningScenario -> getLearningScenarioInfo uses it
+        (
+          dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+        ).mockResolvedValue(mockLearningScenario as never);
+        (
+          dbGetFilesForLearningScenario as MockedFunction<typeof dbGetFilesForLearningScenario>
+        ).mockResolvedValue([]);
+        (getAvatarPictureUrl as MockedFunction<typeof getAvatarPictureUrl>).mockResolvedValue(
+          undefined,
+        );
+
+        // User from different school trying to access - should succeed because hasLinkAccess is true
+        const result = await getLearningScenarioForEditView({
+          learningScenarioId,
+          userId: differentUserId,
+          schoolId: differentSchoolId,
+        });
+
+        expect(result.learningScenario).toBe(mockLearningScenario);
+      });
+
+      it.each([
+        {
+          accessLevel: 'private' as const,
+          description: 'private learning scenario with link sharing enabled',
+        },
+        {
+          accessLevel: 'school' as const,
+          description: 'school learning scenario with link sharing enabled (different school)',
+        },
+      ])('getFilesForLearningScenario - $description', async ({ accessLevel }) => {
+        const mockLearningScenario: Partial<LearningScenarioSelectModel> = {
+          userId: ownerUserId,
+          schoolId: ownerSchoolId,
+          accessLevel,
+          hasLinkAccess: true,
+        };
+
+        (
+          dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+        ).mockResolvedValue(mockLearningScenario as never);
+        (
+          dbGetFilesForLearningScenario as MockedFunction<typeof dbGetFilesForLearningScenario>
+        ).mockResolvedValue([]);
+
+        // Should not throw - access is allowed via link sharing
+        await expect(
+          getFilesForLearningScenario({
+            learningScenarioId,
+            userId: differentUserId,
+            schoolId: differentSchoolId,
+          }),
+        ).resolves.not.toThrow();
+      });
+    });
+
+    describe('should still enforce restrictions when hasLinkAccess is false', () => {
+      it('getLearningScenarioForEditView - private learning scenario without link sharing', async () => {
+        const mockLearningScenario = {
+          id: learningScenarioId,
+          userId: ownerUserId,
+          schoolId: ownerSchoolId,
+          accessLevel: 'private' as const,
+          hasLinkAccess: false,
+        };
+
+        (
+          dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
+            typeof dbGetLearningScenarioByIdOptionalShareData
+          >
+        ).mockResolvedValue(mockLearningScenario as never);
+
+        await expect(
+          getLearningScenarioForEditView({
+            learningScenarioId,
+            userId: differentUserId,
+            schoolId: differentSchoolId,
+          }),
+        ).rejects.toThrowError(ForbiddenError);
+      });
+
+      it('getFilesForLearningScenario - private learning scenario without link sharing', async () => {
+        const mockLearningScenario: Partial<LearningScenarioSelectModel> = {
+          userId: ownerUserId,
+          schoolId: ownerSchoolId,
+          accessLevel: 'private',
+          hasLinkAccess: false,
+        };
+
+        (
+          dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+        ).mockResolvedValue(mockLearningScenario as never);
+
+        await expect(
+          getFilesForLearningScenario({
+            learningScenarioId,
+            userId: differentUserId,
+            schoolId: differentSchoolId,
+          }),
+        ).rejects.toThrowError(ForbiddenError);
+      });
+    });
   });
 });
