@@ -72,7 +72,9 @@ export async function dbGetRelatedSharedChatFiles(conversationId?: string): Prom
   return files;
 }
 
-export async function dbGetFilesForLearningScenario(conversationId: string): Promise<FileModel[]> {
+export async function dbGetFilesForLearningScenario(
+  learningScenarioId: string,
+): Promise<FileModel[]> {
   return db
     .select({
       id: LearningScenarioFileMapping.fileId,
@@ -84,7 +86,7 @@ export async function dbGetFilesForLearningScenario(conversationId: string): Pro
     })
     .from(LearningScenarioFileMapping)
     .innerJoin(fileTable, eq(LearningScenarioFileMapping.fileId, fileTable.id))
-    .where(eq(LearningScenarioFileMapping.learningScenarioId, conversationId));
+    .where(eq(LearningScenarioFileMapping.learningScenarioId, learningScenarioId));
 }
 
 export async function dbGetRelatedCharacterFiles(conversationId?: string): Promise<FileModel[]> {

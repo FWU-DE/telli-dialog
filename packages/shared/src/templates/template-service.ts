@@ -569,10 +569,9 @@ async function createLearningScenarioTemplate(originalId: string) {
 
 /**
  * Creates a new global learning scenario template based on an existing learning scenario.
- * @param originalId
- * @param accessLevel
- * @param userId
- * @param schoolId
+ *
+ * @param learningScenarioId - The id of the source learning scenario to copy
+ * @param userId - The user id that is the owner of the new learning scenario
  * @returns
  */
 async function copyLearningScenario(learningScenarioId: string, userId: string) {
