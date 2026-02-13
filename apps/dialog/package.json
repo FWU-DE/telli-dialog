@@ -56,7 +56,7 @@
     "drizzle-orm": "0.45.1",
     "drizzle-zod": "0.8.3",
     "he": "1.2.0",
-    "import-in-the-middle": "2.0.6",
+    "import-in-the-middle": "3.0.0",
     "ioredis": "5.9.2",
     "isbinaryfile": "6.0.0",
     "jsdom": "26.1.0",
