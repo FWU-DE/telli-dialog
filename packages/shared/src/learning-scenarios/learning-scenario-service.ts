@@ -274,10 +274,11 @@ export async function shareLearningScenario({
     user.id,
   );
   if (
-    (isPrivate && !isOwner) ||
-    (!isOwner &&
-      learningScenario.accessLevel === 'school' &&
-      learningScenario.schoolId !== schoolId)
+    !learningScenario.hasLinkAccess &&
+    ((isPrivate && !isOwner) ||
+      (!isOwner &&
+        learningScenario.accessLevel === 'school' &&
+        learningScenario.schoolId !== schoolId))
   )
     throw new ForbiddenError('Not authorized to share this learning scenario');
 
