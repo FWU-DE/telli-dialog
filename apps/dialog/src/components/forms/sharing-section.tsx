@@ -1,11 +1,10 @@
 'use client';
 
 import React from 'react';
-import Checkbox from '@/components/common/checkbox';
+import CheckboxWithInfo from '@/components/common/checkbox-with-info';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
-import { InfoIcon, LinkIcon } from '@phosphor-icons/react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { LinkIcon } from '@phosphor-icons/react';
 import { cn } from '@/utils/tailwind';
 import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 import { useFederalState } from '../providers/federal-state-provider';
@@ -17,47 +16,6 @@ type SharingSectionProps<T extends FieldValues> = {
   linkSharingName?: Path<T>;
   onShareChange?: () => void;
 };
-
-function CheckboxWithInfo({
-  label,
-  tooltip,
-  checked,
-  onCheckedChange,
-  disabled,
-}: {
-  label: string;
-  tooltip: string;
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-  disabled?: boolean;
-}) {
-  return (
-    <div className="flex items-center gap-1">
-      <Checkbox
-        label={label}
-        checked={checked}
-        onCheckedChange={onCheckedChange}
-        disabled={disabled}
-      />
-      <TooltipProvider skipDelayDuration={0} delayDuration={200}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              type="button"
-              className="text-gray-500 hover:text-gray-700"
-              aria-label={tooltip}
-            >
-              <InfoIcon size={16} />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent className="bg-white">
-            <p className="whitespace-pre-line">{tooltip}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    </div>
-  );
-}
 
 export default function SharingSection<T extends FieldValues>({
   control,
