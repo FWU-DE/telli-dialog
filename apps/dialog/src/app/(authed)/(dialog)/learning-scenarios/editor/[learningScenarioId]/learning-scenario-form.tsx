@@ -388,17 +388,15 @@ export default function LearningScenarioForm({
           <h2 className="text-md font-medium">{t('additional-assets-label')}</h2>
           <span className="text-base">{t('additional-assets-content')}</span>
 
-          {!readOnly && (
-            <FileManagement
-              files={_files}
-              setFiles={setFiles}
-              initialFiles={initialFiles}
-              onFileUploaded={handleNewFile}
-              onDeleteFile={handleDeattachFile}
-              readOnly={readOnly}
-              translationNamespace="learning-scenarios.form"
-            />
-          )}
+          <FileManagement
+            files={_files}
+            setFiles={setFiles}
+            initialFiles={initialFiles}
+            onFileUploaded={handleNewFile}
+            onDeleteFile={handleDeattachFile}
+            readOnly={readOnly}
+            translationNamespace="learning-scenarios.form"
+          />
           <AttachedLinks
             fields={fields}
             getValues={() => getValues('attachedLinks')}
