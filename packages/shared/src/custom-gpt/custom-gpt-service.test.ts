@@ -15,6 +15,7 @@ import {
 import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
+import { dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
 import { CustomGptSelectModel } from '@shared/db/schema';
 import { UserModel } from '@shared/auth/user-model';
 import {
@@ -24,6 +25,9 @@ import {
 
 vi.mock('../db/functions/custom-gpts', () => ({
   dbGetCustomGptById: vi.fn(),
+}));
+vi.mock('../db/functions/files', () => ({
+  dbGetRelatedCustomGptFiles: vi.fn(),
 }));
 vi.mock('../conversation/conversation-service', () => ({
   getConversation: vi.fn(),
@@ -553,6 +557,156 @@ describe('custom-gpt-service', () => {
           expect(customGpt).toBe(mockCustomGpt);
         },
       );
+    });
+  });
+
+  describe('Link sharing bypass scenarios', () => {
+    const customGptId = generateUUID();
+    const ownerUserId = generateUUID();
+    const ownerSchoolId = generateUUID();
+    const differentUserId = generateUUID();
+    const differentSchoolId = generateUUID();
+
+    describe('should allow access when hasLinkAccess is true - bypassing normal restrictions', () => {
+      it.each([
+        {
+          accessLevel: 'private' as const,
+          description: 'private custom GPT with link sharing enabled',
+        },
+        {
+          accessLevel: 'school' as const,
+          description: 'school custom GPT with link sharing enabled (different school)',
+        },
+      ])('getCustomGptForEditView - $description', async ({ accessLevel }) => {
+        const mockCustomGpt: Partial<CustomGptSelectModel> = {
+          userId: ownerUserId,
+          schoolId: ownerSchoolId,
+          accessLevel,
+          hasLinkAccess: true,
+        };
+
+        (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
+          mockCustomGpt as never,
+        );
+
+        // User from different school trying to access - should succeed because hasLinkAccess is true
+        const result = await getCustomGptForEditView({
+          customGptId,
+          userId: differentUserId,
+          schoolId: differentSchoolId,
+        });
+
+        expect(result).toBe(mockCustomGpt);
+      });
+
+      it.each([
+        {
+          accessLevel: 'private' as const,
+          description: 'private custom GPT with link sharing enabled',
+        },
+        {
+          accessLevel: 'school' as const,
+          description: 'school custom GPT with link sharing enabled (different school)',
+        },
+      ])('getCustomGptForNewChat - $description', async ({ accessLevel }) => {
+        const mockCustomGpt: Partial<CustomGptSelectModel> = {
+          userId: ownerUserId,
+          schoolId: ownerSchoolId,
+          accessLevel,
+          hasLinkAccess: true,
+        };
+
+        (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
+          mockCustomGpt as never,
+        );
+
+        // User from different school trying to access - should succeed because hasLinkAccess is true
+        const result = await getCustomGptForNewChat({
+          customGptId,
+          userId: differentUserId,
+          schoolId: differentSchoolId,
+        });
+
+        expect(result).toBe(mockCustomGpt);
+      });
+
+      it.each([
+        {
+          accessLevel: 'private' as const,
+          description: 'private custom GPT with link sharing enabled',
+        },
+        {
+          accessLevel: 'school' as const,
+          description: 'school custom GPT with link sharing enabled (different school)',
+        },
+      ])('getFileMappings - $description', async ({ accessLevel }) => {
+        const mockCustomGpt: Partial<CustomGptSelectModel> = {
+          userId: ownerUserId,
+          schoolId: ownerSchoolId,
+          accessLevel,
+          hasLinkAccess: true,
+        };
+
+        (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
+          mockCustomGpt as never,
+        );
+        (
+          dbGetRelatedCustomGptFiles as MockedFunction<typeof dbGetRelatedCustomGptFiles>
+        ).mockResolvedValue([]);
+
+        // Should not throw - access is allowed via link sharing
+        await expect(
+          getFileMappings({
+            customGptId,
+            userId: differentUserId,
+            schoolId: differentSchoolId,
+          }),
+        ).resolves.not.toThrow();
+      });
+    });
+
+    describe('should still enforce restrictions when hasLinkAccess is false', () => {
+      it('getCustomGptForEditView - private custom GPT without link sharing', async () => {
+        const mockCustomGpt: Partial<CustomGptSelectModel> = {
+          userId: ownerUserId,
+          schoolId: ownerSchoolId,
+          accessLevel: 'private',
+          hasLinkAccess: false,
+        };
+
+        (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
+          mockCustomGpt as never,
+        );
+
+        await expect(
+          getCustomGptForEditView({
+            customGptId,
+            userId: differentUserId,
+            schoolId: differentSchoolId,
+          }),
+        ).rejects.toThrowError(ForbiddenError);
+      });
+
+      it('getCustomGptForNewChat - private custom GPT without link sharing', async () => {
+        const mockCustomGpt: Partial<CustomGptSelectModel> = {
+          userId: ownerUserId,
+          schoolId: ownerSchoolId,
+          accessLevel: 'private',
+          hasLinkAccess: false,
+        };
+
+        (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
+          mockCustomGpt as never,
+        );
+
+        await expect(
+          getCustomGptForNewChat({
+            customGptId,
+            userId: differentUserId,
+            schoolId: differentSchoolId,
+          }),
+        ).rejects.toThrowError(ForbiddenError);
+      });
     });
   });
 });

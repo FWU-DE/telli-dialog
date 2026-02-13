@@ -18,5 +18,9 @@ export type TemplateToFederalStateMapping = {
 /**** Guards ****/
 
 export function isTemplateType(templateType: string): templateType is TemplateTypes {
-  return templateType === 'character' || templateType === 'custom-gpt';
+  return (
+    templateType === 'character' ||
+    templateType === 'custom-gpt' ||
+    templateType === 'learning-scenario'
+  );
 }
