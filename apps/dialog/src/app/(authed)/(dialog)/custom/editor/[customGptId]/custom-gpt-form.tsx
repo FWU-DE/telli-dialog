@@ -438,19 +438,15 @@ export default function CustomGptForm({
         <h2 className="text-md font-medium">{t('additional-assets-label')}</h2>
         <span className="text-base">{t('additional-assets-content')}</span>
 
-        {!readOnly && (
-          <>
-            <FileManagement
-              files={_files}
-              setFiles={setFiles}
-              initialFiles={initialFiles}
-              onFileUploaded={handleNewFile}
-              onDeleteFile={handleDeattachFile}
-              readOnly={readOnly}
-              translationNamespace="custom-gpt.form"
-            />
-          </>
-        )}
+        <FileManagement
+          files={_files}
+          setFiles={setFiles}
+          initialFiles={initialFiles}
+          onFileUploaded={handleNewFile}
+          onDeleteFile={handleDeattachFile}
+          readOnly={readOnly}
+          translationNamespace="custom-gpt.form"
+        />
         <AttachedLinks
           fields={attachedLinkFields}
           getValues={() => getValues('attachedLinks')}
