@@ -2,7 +2,7 @@
 
 import { and, desc, eq, isNull } from 'drizzle-orm';
 import { db } from '..';
-import { conversationMessageTable, conversationTable, llmModelTable } from '../schema';
+import { conversationMessageTable, conversationTable } from '../schema';
 import { ConversationMessageModel, InsertConversationMessageModel } from '../types';
 import { isNotNull } from '../../utils/guard';
 
