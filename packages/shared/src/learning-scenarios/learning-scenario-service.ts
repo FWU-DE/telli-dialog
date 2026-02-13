@@ -274,10 +274,11 @@ export async function shareLearningScenario({
     user.id,
   );
   if (
-    (isPrivate && !isOwner) ||
-    (!isOwner &&
-      learningScenario.accessLevel === 'school' &&
-      learningScenario.schoolId !== schoolId)
+    !learningScenario.hasLinkAccess &&
+    ((isPrivate && !isOwner) ||
+      (!isOwner &&
+        learningScenario.accessLevel === 'school' &&
+        learningScenario.schoolId !== schoolId))
   )
     throw new ForbiddenError('Not authorized to share this learning scenario');
 
@@ -367,6 +368,17 @@ export async function unshareLearningScenario({
   return deletedShare;
 }
 
+/**
+ * Loads learning scenario for edit view.
+ * Throws if the user is not authorized to access the learning scenario:
+ * - NotFound if the learning scenario does not exist
+ * - Forbidden if the learning scenario is private and the user is not the owner
+ * - Forbidden if the learning scenario is school-level and the user is not in the same school
+ *
+ * Link sharing bypass: If `hasLinkAccess` is true, access checks are skipped
+ * and any authenticated user can view the learning scenario. Note that link sharing
+ * only grants read-only access - editing is still restricted to the owner.
+ */
 export async function getLearningScenarioForEditView({
   learningScenarioId,
   schoolId,
@@ -386,10 +398,12 @@ export async function getLearningScenarioForEditView({
     userId,
   });
   if (!learningScenario) throw new NotFoundError('Learning scenario not found');
-  if (learningScenario.accessLevel === 'private' && learningScenario.userId !== userId)
-    throw new ForbiddenError('Not authorized to edit this learning scenario');
-  if (learningScenario.accessLevel === 'school' && learningScenario.schoolId !== schoolId)
-    throw new ForbiddenError('Not authorized to edit this learning scenario');
+  if (!learningScenario.hasLinkAccess) {
+    if (learningScenario.accessLevel === 'private' && learningScenario.userId !== userId)
+      throw new ForbiddenError('Not authorized to edit this learning scenario');
+    if (learningScenario.accessLevel === 'school' && learningScenario.schoolId !== schoolId)
+      throw new ForbiddenError('Not authorized to edit this learning scenario');
+  }
 
   const relatedFiles = await getFilesForLearningScenario({ learningScenarioId, schoolId, userId });
   const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
@@ -402,6 +416,9 @@ export async function getLearningScenarioForEditView({
  * If the learning scenario is private, only the owner can fetch file mappings.
  * If the learning scenario is shared with a school, any teacher in that school can fetch file mappings.
  * If the learning scenario is global, any teacher can fetch those file mappings.
+ *
+ * Link sharing bypass: If `hasLinkAccess` is true, access checks are skipped
+ * and any authenticated user can access the file mappings.
  */
 export async function getFilesForLearningScenario({
   learningScenarioId,
@@ -419,14 +436,15 @@ export async function getFilesForLearningScenario({
     userId,
   );
   if (
-    (isPrivate && !isOwner) ||
-    (!isOwner &&
-      learningScenario.accessLevel === 'school' &&
-      learningScenario.schoolId !== schoolId)
+    !learningScenario.hasLinkAccess &&
+    ((isPrivate && !isOwner) ||
+      (!isOwner &&
+        learningScenario.accessLevel === 'school' &&
+        learningScenario.schoolId !== schoolId))
   )
     throw new ForbiddenError('Not authorized to fetch file mappings for this learning scenario');
 
-  return dbGetFilesForLearningScenario(learningScenarioId, userId);
+  return dbGetFilesForLearningScenario(learningScenarioId);
 }
 
 /**
@@ -435,9 +453,11 @@ export async function getFilesForLearningScenario({
 export async function createNewLearningScenario({
   modelId,
   user,
+  schoolId,
 }: {
   modelId: string;
   user: UserModel;
+  schoolId: string;
 }) {
   if (user.userRole !== 'teacher') {
     throw new ForbiddenError('Not authorized to create new learning scenario');
@@ -450,6 +470,7 @@ export async function createNewLearningScenario({
       pictureId: '',
       modelId,
       userId: user.id,
+      schoolId,
     })
     .returning();
 
@@ -477,7 +498,7 @@ export async function deleteLearningScenario({
   const { isOwner, learningScenario } = await getLearningScenarioInfo(learningScenarioId, userId);
   if (!isOwner) throw new ForbiddenError('Not authorized to delete this learning scenario');
 
-  const relatedFiles = await dbGetFilesForLearningScenario(learningScenarioId, userId);
+  const relatedFiles = await dbGetFilesForLearningScenario(learningScenarioId);
 
   // delete learning scenario from db
   const deletedLearningScenario = await dbDeleteLearningScenarioByIdAndUserId({

@@ -9,10 +9,10 @@ import { useRouter } from 'next/navigation';
 import { createNewLearningScenarioAction } from './actions';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 
-export function CreateNewSharedChatButton() {
+export function CreateNewLearningScenarioButton() {
   const router = useRouter();
   const toast = useToast();
-  const t = useTranslations('shared-chats');
+  const t = useTranslations('learning-scenarios');
 
   const { models } = useLlmModels();
 
@@ -24,7 +24,7 @@ export function CreateNewSharedChatButton() {
     }
     const scenario = await createNewLearningScenarioAction({ modelId: maybeDefaultModelId });
     if (scenario.success) {
-      router.push(`/shared-chats/${scenario.value.id}?create=true`);
+      router.push(`/learning-scenarios/editor/${scenario.value.id}?create=true`);
     } else {
       toast.error(t('toasts.create-toast-error'));
     }

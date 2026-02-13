@@ -17,16 +17,16 @@ import { LearningScenarioWithImage } from '@shared/learning-scenarios/learning-s
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import AvatarPicture from '@/components/common/avatar-picture';
 
-type SharedChatItemProps = LearningScenarioWithImage;
+type LearningScenarioItemProps = LearningScenarioWithImage;
 
-export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemProps) {
+export default function LearningScenarioItem({ ...learningScenario }: LearningScenarioItemProps) {
   const toast = useToast();
   const router = useRouter();
-  const t = useTranslations('shared-chats');
+  const t = useTranslations('learning-scenarios');
   const tCommon = useTranslations('common');
 
-  async function handleDeleteSharedChat() {
-    const result = await deleteLearningScenarioAction({ id: sharedSchoolChat.id });
+  async function handleDeleteLearningScenario() {
+    const result = await deleteLearningScenarioAction({ id: learningScenario.id });
     if (result.success) {
       toast.success(t('toasts.delete-toast-success'));
       router.refresh();
@@ -35,21 +35,21 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
     }
   }
 
-  const timeLeft = calculateTimeLeft(sharedSchoolChat);
+  const timeLeft = calculateTimeLeft(learningScenario);
 
   return (
     <Link
-      href={`/shared-chats/${sharedSchoolChat.id}`}
+      href={`/learning-scenarios/editor/${learningScenario.id}`}
       className="flex gap-2 items-center border rounded-enterprise-md p-4 hover:border-primary"
     >
       <figure
         className="w-11 h-11 bg-light-gray rounded-enterprise-sm flex justify-center items-center"
         style={{ minWidth: '44px' }}
       >
-        {sharedSchoolChat.maybeSignedPictureUrl ? (
+        {learningScenario.maybeSignedPictureUrl ? (
           <AvatarPicture
-            src={sharedSchoolChat.maybeSignedPictureUrl}
-            alt={`${sharedSchoolChat.name} Avatar`}
+            src={learningScenario.maybeSignedPictureUrl}
+            alt={`${learningScenario.name} Avatar`}
             variant="small"
           />
         ) : (
@@ -58,23 +58,23 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
       </figure>
       <div className="min-w-0">
         <h1 className={cn('font-medium text-primary', truncateClassName)}>
-          {sharedSchoolChat.name}
+          {learningScenario.name}
         </h1>
-        <h2 className={cn('text-gray-400', truncateClassName)}>{sharedSchoolChat.description}</h2>
+        <h2 className={cn('text-gray-400', truncateClassName)}>{learningScenario.description}</h2>
       </div>
       <div className="flex-grow" />
-      {sharedSchoolChat.startedAt !== null && timeLeft > 0 && (
+      {learningScenario.startedAt !== null && timeLeft > 0 && (
         <CountDownTimer
           className="p-1 me-2"
           leftTime={timeLeft}
-          totalTime={sharedSchoolChat.maxUsageTimeLimit ?? 0}
+          totalTime={learningScenario.maxUsageTimeLimit ?? 0}
           stopWatchClassName="w-4 h-4"
         />
       )}
       {timeLeft > 0 && (
         <Link
           aria-label={t('shared.share')}
-          href={`/shared-chats/${sharedSchoolChat.id}/share`}
+          href={`/learning-scenarios/editor/${learningScenario.id}/share`}
           className={cn('rounded-enterprise-sm', iconClassName)}
         >
           <ShareIcon aria-hidden="true" className="w-8 h-8" />
@@ -86,7 +86,7 @@ export default function SharedChatItem({ ...sharedSchoolChat }: SharedChatItemPr
         modalDescription={t('form.delete-description')}
         modalTitle={t('form.delete-title')}
         confirmText={tCommon('delete')}
-        actionFn={handleDeleteSharedChat}
+        actionFn={handleDeleteLearningScenario}
         triggerButtonClassName={cn(
           'border-transparent justify-center flex flex-col rounded-enterprise-sm p-0',
           iconClassName,

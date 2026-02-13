@@ -1,6 +1,6 @@
 'use client';
 
-import SharedChatLoginForm from '../../(authed)/(dialog)/shared-chats/_components/shared-chat-login-form';
+import SharedChatLoginForm from '../../(authed)/(dialog)/learning-scenarios/_components/shared-chat-login-form';
 import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { signIn } from 'next-auth/react';
 import React, { useEffect } from 'react';
