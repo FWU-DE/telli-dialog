@@ -100,6 +100,7 @@ export const mockLearningScenario = (): LearningScenarioSelectModel => {
     schoolId: null,
     originalLearningScenarioId: null,
     isDeleted: false,
+    hasLinkAccess: false,
   };
 };
 
@@ -152,5 +153,6 @@ export const mockCharacter = (): CharacterSelectModel => {
     attachedLinks: [],
     originalCharacterId: null,
     isDeleted: false,
+    hasLinkAccess: false,
   };
 };

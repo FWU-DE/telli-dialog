@@ -10,11 +10,19 @@ vi.mock('../db/functions/character', () => ({
   dbGetCharactersByUserId: vi.fn(),
   dbGetGlobalCharacters: vi.fn(),
 }));
+vi.mock('../db/functions/files', () => ({
+  dbGetRelatedCharacterFiles: vi.fn(),
+}));
+vi.mock('../s3', () => ({
+  getReadOnlySignedUrl: vi.fn(),
+}));
 
 import {
   deleteCharacter,
   deleteFileMappingAndEntity,
   fetchFileMappings,
+  getCharacterForChatSession,
+  getCharacterForEditView,
   getSharedCharacter,
   linkFileToCharacter,
   shareCharacter,
@@ -28,6 +36,8 @@ import {
   dbGetSharedCharacterConversations,
   dbGetCharacterByIdWithShareData,
 } from '../db/functions/character';
+import { dbGetRelatedCharacterFiles } from '../db/functions/files';
+import { getReadOnlySignedUrl } from '../s3';
 import { generateUUID } from '../utils/uuid';
 import { CharacterSelectModel } from '@shared/db/schema';
 import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
@@ -388,5 +398,190 @@ describe('character-service', () => {
         await expect(testFunction()).rejects.toThrowError(InvalidArgumentError);
       },
     );
+  });
+
+  describe('Link sharing bypass scenarios', () => {
+    const characterId = generateUUID();
+    const ownerUserId = generateUUID();
+    const ownerSchoolId = generateUUID();
+    const differentUserId = generateUUID();
+    const differentSchoolId = generateUUID();
+
+    describe('should allow access when hasLinkAccess is true - bypassing normal restrictions', () => {
+      it.each([
+        {
+          accessLevel: 'private' as const,
+          description: 'private character with link sharing enabled',
+        },
+        {
+          accessLevel: 'school' as const,
+          description: 'school character with link sharing enabled (different school)',
+        },
+      ])('getCharacterForChatSession - $description', async ({ accessLevel }) => {
+        const mockCharacter = {
+          id: characterId,
+          userId: ownerUserId,
+          schoolId: ownerSchoolId,
+          accessLevel,
+          hasLinkAccess: true,
+        };
+
+        (
+          dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
+        ).mockResolvedValue(mockCharacter as never);
+
+        // User from different school trying to access - should succeed because hasLinkAccess is true
+        const result = await getCharacterForChatSession({
+          characterId,
+          userId: differentUserId,
+          schoolId: differentSchoolId,
+        });
+
+        expect(result).toBe(mockCharacter);
+      });
+
+      it.each([
+        {
+          accessLevel: 'private' as const,
+          description: 'private character with link sharing enabled',
+        },
+        {
+          accessLevel: 'school' as const,
+          description: 'school character with link sharing enabled (different school)',
+        },
+      ])('getCharacterForEditView - $description', async ({ accessLevel }) => {
+        const mockCharacter = {
+          id: characterId,
+          userId: ownerUserId,
+          schoolId: ownerSchoolId,
+          accessLevel,
+          hasLinkAccess: true,
+        };
+
+        (
+          dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
+        ).mockResolvedValue(mockCharacter as never);
+        // Also mock dbGetCharacterById because fetchFileMappings -> getCharacterInfo uses it
+        (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+          mockCharacter as never,
+        );
+        (
+          dbGetRelatedCharacterFiles as MockedFunction<typeof dbGetRelatedCharacterFiles>
+        ).mockResolvedValue([]);
+        (getReadOnlySignedUrl as MockedFunction<typeof getReadOnlySignedUrl>).mockResolvedValue(
+          undefined,
+        );
+
+        // User from different school trying to access - should succeed because hasLinkAccess is true
+        const result = await getCharacterForEditView({
+          characterId,
+          userId: differentUserId,
+          schoolId: differentSchoolId,
+        });
+
+        expect(result.character).toBe(mockCharacter);
+      });
+
+      it.each([
+        {
+          accessLevel: 'private' as const,
+          description: 'private character with link sharing enabled',
+        },
+        {
+          accessLevel: 'school' as const,
+          description: 'school character with link sharing enabled (different school)',
+        },
+      ])('fetchFileMappings - $description', async ({ accessLevel }) => {
+        const mockCharacter: Partial<CharacterSelectModel> = {
+          userId: ownerUserId,
+          schoolId: ownerSchoolId,
+          accessLevel,
+          hasLinkAccess: true,
+        };
+
+        (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+          mockCharacter as never,
+        );
+        (
+          dbGetRelatedCharacterFiles as MockedFunction<typeof dbGetRelatedCharacterFiles>
+        ).mockResolvedValue([]);
+
+        // Should not throw - access is allowed via link sharing
+        await expect(
+          fetchFileMappings({
+            characterId,
+            userId: differentUserId,
+            schoolId: differentSchoolId,
+          }),
+        ).resolves.not.toThrow();
+      });
+    });
+
+    describe('should still enforce restrictions when hasLinkAccess is false', () => {
+      it('getCharacterForChatSession - private character without link sharing', async () => {
+        const mockCharacter = {
+          id: characterId,
+          userId: ownerUserId,
+          schoolId: ownerSchoolId,
+          accessLevel: 'private' as const,
+          hasLinkAccess: false,
+        };
+
+        (
+          dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
+        ).mockResolvedValue(mockCharacter as never);
+
+        await expect(
+          getCharacterForChatSession({
+            characterId,
+            userId: differentUserId,
+            schoolId: differentSchoolId,
+          }),
+        ).rejects.toThrowError(ForbiddenError);
+      });
+
+      it('getCharacterForEditView - private character without link sharing', async () => {
+        const mockCharacter = {
+          id: characterId,
+          userId: ownerUserId,
+          schoolId: ownerSchoolId,
+          accessLevel: 'private' as const,
+          hasLinkAccess: false,
+        };
+
+        (
+          dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
+        ).mockResolvedValue(mockCharacter as never);
+
+        await expect(
+          getCharacterForEditView({
+            characterId,
+            userId: differentUserId,
+            schoolId: differentSchoolId,
+          }),
+        ).rejects.toThrowError(ForbiddenError);
+      });
+
+      it('fetchFileMappings - private character without link sharing', async () => {
+        const mockCharacter: Partial<CharacterSelectModel> = {
+          userId: ownerUserId,
+          schoolId: ownerSchoolId,
+          accessLevel: 'private',
+          hasLinkAccess: false,
+        };
+
+        (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+          mockCharacter as never,
+        );
+
+        await expect(
+          fetchFileMappings({
+            characterId,
+            userId: differentUserId,
+            schoolId: differentSchoolId,
+          }),
+        ).rejects.toThrowError(ForbiddenError);
+      });
+    });
   });
 });
