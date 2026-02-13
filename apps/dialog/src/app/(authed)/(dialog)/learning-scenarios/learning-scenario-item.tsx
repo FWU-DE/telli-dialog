@@ -68,9 +68,9 @@ export default function LearningScenarioItem({
   });
 
   return (
-    <div
-      className="rounded-enterprise-md border p-6 flex items-center gap-4 w-full
-      hover:border-primary cursor-pointer"
+    <Link
+      href={`/learning-scenarios/editor/${learningScenario.id}`}
+      className="rounded-enterprise-md border p-6 flex items-center gap-4 w-full hover:border-primary"
     >
       <figure
         className="w-11 h-11 bg-light-gray rounded-enterprise-sm flex justify-center items-center"
@@ -131,17 +131,6 @@ export default function LearningScenarioItem({
           </CreateNewInstanceFromTemplate>
         </div>
       )}
-      <div onClick={(event) => event.stopPropagation()} className="flex items-center">
-        <Link
-          type="button"
-          aria-label={tCommon('edit')}
-          href={`/learning-scenarios/editor/${learningScenario.id}?${queryParams.toString()}`}
-          className={cn(iconClassName, 'border-transparent p-1')}
-        >
-          <SettingsIcon aria-hidden="true" className="w-6 h-6" />
-          <span className="sr-only">{tCommon('edit')}</span>
-        </Link>
-      </div>
       {currentUserId === learningScenario.userId && (
         <div onClick={(event) => event.stopPropagation()} className="flex items-center">
           <DestructiveActionButton
@@ -157,6 +146,6 @@ export default function LearningScenarioItem({
           </DestructiveActionButton>
         </div>
       )}
-    </div>
+    </Link>
   );
 }
