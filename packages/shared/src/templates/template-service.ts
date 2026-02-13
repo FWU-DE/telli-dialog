@@ -34,7 +34,7 @@ import {
   linkFileToLearningScenario,
 } from '@shared/files/fileService';
 import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
-import { NotFoundError } from '@shared/error';
+import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
 import { duplicateLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 import { UserModel } from '@shared/auth/user-model';
@@ -611,14 +611,14 @@ async function copyLearningScenario(learningScenarioId: string, userId: string) 
 }
 
 /**
- * User wants to create a new learning scenario from a template.
- * Creates a new learning scenario where the user is the owner and school is assgined.
+ * User creates a new learning scenario from a template.
  * All files are duplicated and linked to the new learning scenario.
  *
+ * Authorization checks:
  * User must be a teacher.
  * The learning scenario must be a template.
- * - or globally
- * @returns - the newly created learning scenario
+
+* @returns - the newly created learning scenario
  */
 export async function createNewLearningScenarioFromTemplate({
   schoolId,
@@ -630,7 +630,7 @@ export async function createNewLearningScenarioFromTemplate({
   user: UserModel;
 }) {
   if (user.userRole !== 'teacher') {
-    throw new Error('Only teachers can create learning scenarios from templates');
+    throw new ForbiddenError('Only teachers can create learning scenarios from templates');
   }
   const existingLearningScenario = await dbGetLearningScenarioById({
     learningScenarioId: originalLearningScenarioId,
@@ -639,7 +639,7 @@ export async function createNewLearningScenarioFromTemplate({
     throw new NotFoundError('Learning scenario not found');
   }
   if (existingLearningScenario.accessLevel !== 'global') {
-    throw new Error('Learning scenario is not a template');
+    throw new InvalidArgumentError('Learning scenario is not a template');
   }
 
   return duplicateLearningScenario({

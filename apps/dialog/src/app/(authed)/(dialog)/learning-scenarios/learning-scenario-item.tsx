@@ -19,7 +19,6 @@ import { iconClassName } from '@/utils/tailwind/icon';
 import { LearningScenarioWithImage } from '@shared/learning-scenarios/learning-scenario-service';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import AvatarPicture from '@/components/common/avatar-picture';
-import SettingsIcon from '@/components/icons/settings';
 import TelliClipboardButton from '@/components/common/clipboard-button';
 import { InvalidArgumentError } from '@shared/error';
 import { CreateNewInstanceFromTemplate } from '../_components/create-new-instance-from-template';
@@ -63,9 +62,6 @@ export default function LearningScenarioItem({
   }
 
   const timeLeft = calculateTimeLeft(learningScenario);
-  const queryParams = new URLSearchParams({
-    create: 'false',
-  });
 
   return (
     <Link
@@ -121,7 +117,7 @@ export default function LearningScenarioItem({
             templateId={learningScenario.id}
             templatePictureId={learningScenario.pictureId ?? undefined}
             className="w-8 h-8 flex items-center justify-center"
-            {...{ title: "t('form.copy-page.copy-template')", type: 'button' }}
+            {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
           >
             <TelliClipboardButton
               text={t('form.copy-page.copy-template')}
