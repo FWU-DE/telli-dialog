@@ -589,6 +589,7 @@ async function copyLearningScenario(learningScenarioId: string, userId: string) 
   copy.schoolId = null;
   copy.userId = userId;
   copy.originalLearningScenarioId = learningScenarioId;
+  copy.hasLinkAccess = false; // Reset sharing settings for new template
 
   // avatar
   if (learningScenario.pictureId) {
