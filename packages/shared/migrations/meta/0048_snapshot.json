@@ -1,5 +1,5 @@
 {
-  "id": "f7062d7a-297e-4618-8842-81e4e7a2a217",
+  "id": "2c131d47-a743-42f7-9095-139b4822fd80",
   "prevId": "7af5d91a-e8c9-4e5d-9013-e9947c0d024e",
   "version": "7",
   "dialect": "postgresql",
@@ -752,8 +752,8 @@
           "notNull": true,
           "default": "'private'"
         },
-        "is_link_shared": {
-          "name": "is_link_shared",
+        "has_link_access": {
+          "name": "has_link_access",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
@@ -1417,8 +1417,8 @@
           "notNull": true,
           "default": "'private'"
         },
-        "is_link_shared": {
-          "name": "is_link_shared",
+        "has_link_access": {
+          "name": "has_link_access",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
@@ -1936,8 +1936,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "is_link_shared": {
-          "name": "is_link_shared",
+        "has_link_access": {
+          "name": "has_link_access",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,

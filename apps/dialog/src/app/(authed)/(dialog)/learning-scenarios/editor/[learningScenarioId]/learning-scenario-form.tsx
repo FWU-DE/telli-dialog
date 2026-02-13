@@ -85,7 +85,7 @@ export default function LearningScenarioForm({
       attachedLinks: initialLinks,
       pictureId: sharedSchoolChat.pictureId ?? '',
       isSchoolShared: sharedSchoolChat.accessLevel === 'school',
-      isLinkShared: sharedSchoolChat.isLinkShared,
+      hasLinkAccess: sharedSchoolChat.hasLinkAccess,
     },
   });
   const backUrl = buildGenericUrl(sharedSchoolChat.accessLevel, 'learning-scenarios');
@@ -113,7 +113,7 @@ export default function LearningScenarioForm({
       }
     }
 
-    // Save other sharing changes (like isLinkShared) via autosave
+    // Save other sharing changes (like hasLinkAccess) via autosave
     handleAutoSave();
   }
 
@@ -416,15 +416,13 @@ export default function LearningScenarioForm({
             handleAutosave={handleAutoSave}
           />
         </div>
-        {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
-          <SharingSection
-            control={control}
-            schoolSharingName="isSchoolShared"
-            linkSharingName="isLinkShared"
-            onShareChange={handleSharingChange}
-            disabled={readOnly}
-          />
-        )}
+        <SharingSection
+          control={control}
+          schoolSharingName="isSchoolShared"
+          linkSharingName="hasLinkAccess"
+          onShareChange={handleSharingChange}
+          disabled={readOnly}
+        />
         {!isCreating && !readOnly && (
           <section className="mt-8">
             <h3 className="font-medium">{t('delete-title')}</h3>

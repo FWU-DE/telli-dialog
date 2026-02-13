@@ -39,7 +39,7 @@ import z from 'zod';
  * - Forbidden if the custom gpt is private and the user is not the owner
  * - Forbidden if the custom gpt is school-level and the user is not in the same school (and not the owner)
  *
- * Link sharing bypass: If `isLinkShared` is true, access checks are skipped
+ * Link sharing bypass: If `hasLinkAccess` is true, access checks are skipped
  * and any authenticated user can view the custom gpt. Note that link sharing
  * only grants read-only access - editing is still restricted to the owner.
  */
@@ -54,7 +54,7 @@ export async function getCustomGptForEditView({
 }) {
   checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
-  if (!customGpt.isLinkShared) {
+  if (!customGpt.hasLinkAccess) {
     if (customGpt.accessLevel === 'private' && customGpt.userId !== userId)
       throw new ForbiddenError('Not authorized to edit custom gpt');
     if (
@@ -74,7 +74,7 @@ export async function getCustomGptForEditView({
  * Throws NotFoundError if the custom gpt does not exist.
  * Throws ForbiddenError if the user is not authorized to use the custom gpt.
  *
- * Link sharing bypass: If `isLinkShared` is true, access checks are skipped
+ * Link sharing bypass: If `hasLinkAccess` is true, access checks are skipped
  * and any authenticated user can use the custom gpt for chat.
  */
 export async function getCustomGptForNewChat({
@@ -90,7 +90,7 @@ export async function getCustomGptForNewChat({
   const customGpt = await dbGetCustomGptById({
     customGptId,
   });
-  if (!customGpt.isLinkShared) {
+  if (!customGpt.hasLinkAccess) {
     if (customGpt.accessLevel === 'private' && customGpt.userId !== userId)
       throw new ForbiddenError('Not authorized to use custom gpt');
     if (
@@ -298,7 +298,7 @@ export async function getFileMappings({
 }): Promise<FileModel[]> {
   checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
-  if (!customGpt.isLinkShared) {
+  if (!customGpt.hasLinkAccess) {
     if (customGpt.accessLevel === 'private' && customGpt.userId !== userId) {
       throw new ForbiddenError('Not authorized to access custom gpt');
     }

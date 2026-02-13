@@ -82,7 +82,7 @@ const characterFormValuesSchema = z.object({
 
   // Sharing options
   isSchoolShared: z.boolean(),
-  isLinkShared: z.boolean(),
+  hasLinkAccess: z.boolean(),
 });
 type CharacterFormValues = z.infer<typeof characterFormValuesSchema>;
 
@@ -148,7 +148,7 @@ export default function CharacterForm({
       }
     }
 
-    // Save other sharing changes (like isLinkShared) via autosave
+    // Save other sharing changes (like hasLinkAccess) via autosave
     handleAutoSave();
   }
 
@@ -493,15 +493,13 @@ export default function CharacterForm({
         />
       </fieldset>
       <div className="w-full mt-8">
-        {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
-          <SharingSection
-            control={control}
-            schoolSharingName="isSchoolShared"
-            linkSharingName="isLinkShared"
-            onShareChange={handleSharingChange}
-            disabled={readOnly}
-          />
-        )}
+        <SharingSection
+          control={control}
+          schoolSharingName="isSchoolShared"
+          linkSharingName="hasLinkAccess"
+          onShareChange={handleSharingChange}
+          disabled={readOnly}
+        />
       </div>
 
       {!isCreating && !readOnly && (

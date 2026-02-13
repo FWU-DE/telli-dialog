@@ -407,7 +407,7 @@ describe('character-service', () => {
     const differentUserId = generateUUID();
     const differentSchoolId = generateUUID();
 
-    describe('should allow access when isLinkShared is true - bypassing normal restrictions', () => {
+    describe('should allow access when hasLinkAccess is true - bypassing normal restrictions', () => {
       it.each([
         {
           accessLevel: 'private' as const,
@@ -423,14 +423,14 @@ describe('character-service', () => {
           userId: ownerUserId,
           schoolId: ownerSchoolId,
           accessLevel,
-          isLinkShared: true,
+          hasLinkAccess: true,
         };
 
         (
           dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
         ).mockResolvedValue(mockCharacter as never);
 
-        // User from different school trying to access - should succeed because isLinkShared is true
+        // User from different school trying to access - should succeed because hasLinkAccess is true
         const result = await getCharacterForChatSession({
           characterId,
           userId: differentUserId,
@@ -455,7 +455,7 @@ describe('character-service', () => {
           userId: ownerUserId,
           schoolId: ownerSchoolId,
           accessLevel,
-          isLinkShared: true,
+          hasLinkAccess: true,
         };
 
         (
@@ -472,7 +472,7 @@ describe('character-service', () => {
           undefined,
         );
 
-        // User from different school trying to access - should succeed because isLinkShared is true
+        // User from different school trying to access - should succeed because hasLinkAccess is true
         const result = await getCharacterForEditView({
           characterId,
           userId: differentUserId,
@@ -496,7 +496,7 @@ describe('character-service', () => {
           userId: ownerUserId,
           schoolId: ownerSchoolId,
           accessLevel,
-          isLinkShared: true,
+          hasLinkAccess: true,
         };
 
         (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
@@ -517,14 +517,14 @@ describe('character-service', () => {
       });
     });
 
-    describe('should still enforce restrictions when isLinkShared is false', () => {
+    describe('should still enforce restrictions when hasLinkAccess is false', () => {
       it('getCharacterForChatSession - private character without link sharing', async () => {
         const mockCharacter = {
           id: characterId,
           userId: ownerUserId,
           schoolId: ownerSchoolId,
           accessLevel: 'private' as const,
-          isLinkShared: false,
+          hasLinkAccess: false,
         };
 
         (
@@ -546,7 +546,7 @@ describe('character-service', () => {
           userId: ownerUserId,
           schoolId: ownerSchoolId,
           accessLevel: 'private' as const,
-          isLinkShared: false,
+          hasLinkAccess: false,
         };
 
         (
@@ -567,7 +567,7 @@ describe('character-service', () => {
           userId: ownerUserId,
           schoolId: ownerSchoolId,
           accessLevel: 'private',
-          isLinkShared: false,
+          hasLinkAccess: false,
         };
 
         (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(

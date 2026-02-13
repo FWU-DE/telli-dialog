@@ -74,7 +74,7 @@ const customGptFormValuesSchema = z.object({
 
   // Sharing options
   isSchoolShared: z.boolean(),
-  isLinkShared: z.boolean(),
+  hasLinkAccess: z.boolean(),
 });
 type CustomGptFormValues = z.infer<typeof customGptFormValuesSchema>;
 
@@ -140,7 +140,7 @@ export default function CustomGptForm({
       });
     }
 
-    // Save other sharing changes (like isLinkShared) via autosave
+    // Save other sharing changes (like hasLinkAccess) via autosave
     handleAutoSave();
   }
 
@@ -464,16 +464,15 @@ export default function CustomGptForm({
         />
       </fieldset>
       <div className="w-full mt-8">
-        {userRole === 'teacher' &&
-          federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
-            <SharingSection
-              control={control}
-              schoolSharingName="isSchoolShared"
-              linkSharingName="isLinkShared"
-              onShareChange={handleSharingChange}
-              disabled={readOnly}
-            />
-          )}
+        {userRole === 'teacher' && (
+          <SharingSection
+            control={control}
+            schoolSharingName="isSchoolShared"
+            linkSharingName="hasLinkAccess"
+            onShareChange={handleSharingChange}
+            disabled={readOnly}
+          />
+        )}
       </div>
       {!isCreating && !readOnly && (
         <section className="mt-8">

@@ -383,7 +383,7 @@ describe('learning-scenario-service', () => {
     const differentUserId = generateUUID();
     const differentSchoolId = generateUUID();
 
-    describe('should allow access when isLinkShared is true - bypassing normal restrictions', () => {
+    describe('should allow access when hasLinkAccess is true - bypassing normal restrictions', () => {
       it.each([
         {
           accessLevel: 'private' as const,
@@ -399,7 +399,7 @@ describe('learning-scenario-service', () => {
           userId: ownerUserId,
           schoolId: ownerSchoolId,
           accessLevel,
-          isLinkShared: true,
+          hasLinkAccess: true,
         };
 
         (
@@ -418,7 +418,7 @@ describe('learning-scenario-service', () => {
           undefined,
         );
 
-        // User from different school trying to access - should succeed because isLinkShared is true
+        // User from different school trying to access - should succeed because hasLinkAccess is true
         const result = await getLearningScenarioForEditView({
           learningScenarioId,
           userId: differentUserId,
@@ -442,7 +442,7 @@ describe('learning-scenario-service', () => {
           userId: ownerUserId,
           schoolId: ownerSchoolId,
           accessLevel,
-          isLinkShared: true,
+          hasLinkAccess: true,
         };
 
         (
@@ -463,14 +463,14 @@ describe('learning-scenario-service', () => {
       });
     });
 
-    describe('should still enforce restrictions when isLinkShared is false', () => {
+    describe('should still enforce restrictions when hasLinkAccess is false', () => {
       it('getLearningScenarioForEditView - private learning scenario without link sharing', async () => {
         const mockLearningScenario = {
           id: learningScenarioId,
           userId: ownerUserId,
           schoolId: ownerSchoolId,
           accessLevel: 'private' as const,
-          isLinkShared: false,
+          hasLinkAccess: false,
         };
 
         (
@@ -493,7 +493,7 @@ describe('learning-scenario-service', () => {
           userId: ownerUserId,
           schoolId: ownerSchoolId,
           accessLevel: 'private',
-          isLinkShared: false,
+          hasLinkAccess: false,
         };
 
         (

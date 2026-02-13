@@ -382,7 +382,8 @@ export async function copyCustomGpt(
     accessLevel,
     userId,
     schoolId,
-    isDeleted: false,
+    isDeleted: false,    
+    hasLinkAccess: false, // Reset sharing settings for new template
   };
 
   const result = await dbUpsertCustomGpt({ customGpt: newCustomGpt });
@@ -437,6 +438,7 @@ export async function copyCharacter(
     userId,
     schoolId,
     isDeleted: false,
+    hasLinkAccess: false, // Reset sharing settings for new template
   };
 
   const result = await dbCreateCharacter(newCharacter);

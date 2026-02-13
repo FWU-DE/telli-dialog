@@ -173,7 +173,7 @@ export const fetchFileMappings = async ({
   // Authorization check
   const { isOwner, isPrivate, character } = await getCharacterInfo(characterId, userId);
   if (
-    !character.isLinkShared &&
+    !character.hasLinkAccess &&
     ((isPrivate && !isOwner) ||
       (!isOwner && character.accessLevel === 'school' && character.schoolId !== schoolId))
   )
@@ -381,7 +381,7 @@ export const shareCharacter = async ({
 
   const { isOwner, isPrivate, character } = await getCharacterInfo(characterId, user.id);
   if (
-    !character.isLinkShared &&
+    !character.hasLinkAccess &&
     ((isPrivate && !isOwner) ||
       (!isOwner && character.accessLevel === 'school' && character.schoolId !== schoolId))
   )
@@ -480,7 +480,7 @@ export const unshareCharacter = async ({
  * If the character is shared with the school, any user from the same school can start a chat session.
  * If the character is global, any user can start a chat session.
  *
- * Link sharing bypass: If `isLinkShared` is true, access checks are skipped
+ * Link sharing bypass: If `hasLinkAccess` is true, access checks are skipped
  * and any authenticated user can start a chat session with the character.
  *
  * @throws NotFoundError if character does not exist
@@ -498,7 +498,7 @@ export const getCharacterForChatSession = async ({
   checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
   if (!character) throw new NotFoundError('Character not found');
-  if (!character.isLinkShared) {
+  if (!character.hasLinkAccess) {
     if (character.accessLevel === 'private' && character.userId !== userId)
       throw new ForbiddenError('Not authorized to access this character');
     if (character.accessLevel === 'school' && character.schoolId !== schoolId)
@@ -515,7 +515,7 @@ export const getCharacterForChatSession = async ({
  * - Forbidden if the character is private and the user is not the owner
  * - Forbidden if the character is school-level and the user is not in the same school
  *
- * Link sharing bypass: If `isLinkShared` is true, access checks are skipped
+ * Link sharing bypass: If `hasLinkAccess` is true, access checks are skipped
  * and any authenticated user can view the character. Note that link sharing
  * only grants read-only access - editing is still restricted to the owner.
  */
@@ -535,7 +535,7 @@ export const getCharacterForEditView = async ({
   checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
   if (!character) throw new NotFoundError('Character not found');
-  if (!character.isLinkShared) {
+  if (!character.hasLinkAccess) {
     if (character.accessLevel === 'private' && character.userId !== userId)
       throw new ForbiddenError('Not authorized to edit this character');
     if (character.accessLevel === 'school' && character.schoolId !== schoolId)

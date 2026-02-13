@@ -567,7 +567,7 @@ describe('custom-gpt-service', () => {
     const differentUserId = generateUUID();
     const differentSchoolId = generateUUID();
 
-    describe('should allow access when isLinkShared is true - bypassing normal restrictions', () => {
+    describe('should allow access when hasLinkAccess is true - bypassing normal restrictions', () => {
       it.each([
         {
           accessLevel: 'private' as const,
@@ -582,14 +582,14 @@ describe('custom-gpt-service', () => {
           userId: ownerUserId,
           schoolId: ownerSchoolId,
           accessLevel,
-          isLinkShared: true,
+          hasLinkAccess: true,
         };
 
         (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
           mockCustomGpt as never,
         );
 
-        // User from different school trying to access - should succeed because isLinkShared is true
+        // User from different school trying to access - should succeed because hasLinkAccess is true
         const result = await getCustomGptForEditView({
           customGptId,
           userId: differentUserId,
@@ -613,14 +613,14 @@ describe('custom-gpt-service', () => {
           userId: ownerUserId,
           schoolId: ownerSchoolId,
           accessLevel,
-          isLinkShared: true,
+          hasLinkAccess: true,
         };
 
         (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
           mockCustomGpt as never,
         );
 
-        // User from different school trying to access - should succeed because isLinkShared is true
+        // User from different school trying to access - should succeed because hasLinkAccess is true
         const result = await getCustomGptForNewChat({
           customGptId,
           userId: differentUserId,
@@ -644,7 +644,7 @@ describe('custom-gpt-service', () => {
           userId: ownerUserId,
           schoolId: ownerSchoolId,
           accessLevel,
-          isLinkShared: true,
+          hasLinkAccess: true,
         };
 
         (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
@@ -665,13 +665,13 @@ describe('custom-gpt-service', () => {
       });
     });
 
-    describe('should still enforce restrictions when isLinkShared is false', () => {
+    describe('should still enforce restrictions when hasLinkAccess is false', () => {
       it('getCustomGptForEditView - private custom GPT without link sharing', async () => {
         const mockCustomGpt: Partial<CustomGptSelectModel> = {
           userId: ownerUserId,
           schoolId: ownerSchoolId,
           accessLevel: 'private',
-          isLinkShared: false,
+          hasLinkAccess: false,
         };
 
         (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(
@@ -692,7 +692,7 @@ describe('custom-gpt-service', () => {
           userId: ownerUserId,
           schoolId: ownerSchoolId,
           accessLevel: 'private',
-          isLinkShared: false,
+          hasLinkAccess: false,
         };
 
         (dbGetCustomGptById as MockedFunction<typeof dbGetCustomGptById>).mockResolvedValue(

@@ -8,12 +8,12 @@ import { InfoIcon, LinkIcon } from '@phosphor-icons/react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils/tailwind';
 import { Control, Controller, FieldValues, Path } from 'react-hook-form';
+import { useFederalState } from '../providers/federal-state-provider';
 
 type SharingSectionProps<T extends FieldValues> = {
   control: Control<T>;
   disabled?: boolean;
   schoolSharingName?: Path<T>;
-  communitySharingName?: Path<T>;
   linkSharingName?: Path<T>;
   onShareChange?: () => void;
 };
@@ -63,31 +63,30 @@ export default function SharingSection<T extends FieldValues>({
   control,
   disabled = false,
   schoolSharingName,
-  communitySharingName,
   linkSharingName,
   onShareChange,
 }: SharingSectionProps<T>) {
   const t = useTranslations('sharing');
   const toast = useToast();
 
-  function handleCopyLink() {
+  const federalState = useFederalState();
+
+  async function handleCopyLink() {
     const url = new URL(window.location.href);
     url.search = '';
-    navigator.clipboard
-      .writeText(url.toString())
-      .then(() => {
-        toast.success(t('link-copied'));
-      })
-      .catch(() => {
-        toast.error(t('link-copied-error'));
-      });
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      toast.success(t('link-copied'));
+    } catch {
+      toast.error(t('link-copied-error'));
+    }
   }
 
   return (
     <fieldset>
       <legend className="font-medium mb-4">{t('label')}</legend>
       <div className="flex items-center gap-6 p-4 border border-gray-200 rounded-lg">
-        {schoolSharingName && (
+        {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && schoolSharingName && (
           <Controller
             name={schoolSharingName}
             control={control}
@@ -95,24 +94,6 @@ export default function SharingSection<T extends FieldValues>({
               <CheckboxWithInfo
                 label={t('school')}
                 tooltip={t('school-tooltip')}
-                checked={field.value as boolean}
-                onCheckedChange={(value) => {
-                  field.onChange(value);
-                  onShareChange?.();
-                }}
-                disabled={disabled}
-              />
-            )}
-          />
-        )}
-        {communitySharingName && (
-          <Controller
-            name={communitySharingName}
-            control={control}
-            render={({ field }) => (
-              <CheckboxWithInfo
-                label={t('community')}
-                tooltip={t('community-tooltip')}
                 checked={field.value as boolean}
                 onCheckedChange={(value) => {
                   field.onChange(value);
