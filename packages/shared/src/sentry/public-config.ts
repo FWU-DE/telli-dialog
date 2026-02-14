@@ -14,8 +14,8 @@ declare global {
 
 export type PublicConfig = {
   sentry?: {
-    dsn: string;
-    environment: string;
+    dsn: string | undefined;
+    environment: string | undefined;
     tracesSampleRate: number;
   };
   appVersion?: string;

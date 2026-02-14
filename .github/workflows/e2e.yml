@@ -96,8 +96,6 @@ jobs:
           OTC_ACCESS_KEY_ID: op://telli Engineering/.env.e2e chatbot/OTC_ACCESS_KEY_ID
           OTC_S3_HOSTNAME: op://telli Engineering/.env.e2e chatbot/OTC_S3_HOSTNAME
           OTC_BUCKET_NAME: op://telli Engineering/.env.e2e chatbot/OTC_BUCKET_NAME
-          SENTRY_ENVIRONMENT: op://telli Engineering/.env.e2e chatbot/SENTRY_ENVIRONMENT
-          SENTRY_DSN: op://telli Engineering/.env.e2e chatbot/SENTRY_DSN
           # LLM API Keys for seeding telli-api
           LLM_IONOS_API_KEY: op://telli Engineering/.env.e2e chatbot/LLM_IONOS_API_KEY
           LLM_IONOS_BASE_URL: op://telli Engineering/.env.e2e chatbot/LLM_IONOS_BASE_URL
@@ -127,8 +125,6 @@ jobs:
             -e DATABASE_URL=$API_DATABASE_URL \
             -e API_KEY=$API_KEY \
             -e PORT=3002 \
-            -e SENTRY_DSN=dummy \
-            -e SENTRY_ENVIRONMENT=$SENTRY_ENVIRONMENT \
             ghcr.io/fwu-de/telli-api:latest
         env:
           API_KEY: ApiKeyForTelliApiAdminApi
