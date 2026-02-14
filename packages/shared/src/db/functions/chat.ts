@@ -158,6 +158,7 @@ export async function dbGetConversationAndMessages({
         isNull(conversationMessageTable.deletedAt),
       ),
     )
+
     .where(
       and(
         eq(conversationTable.id, conversationId),
