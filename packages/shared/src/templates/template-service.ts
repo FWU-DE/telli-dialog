@@ -34,8 +34,10 @@ import {
   linkFileToLearningScenario,
 } from '@shared/files/fileService';
 import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
-import { NotFoundError } from '@shared/error';
+import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
+import { duplicateLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
+import { UserModel } from '@shared/auth/user-model';
 
 const templateTypeMap: Record<string, TemplateTypes> = {
   custom: 'custom-gpt',
@@ -606,4 +608,44 @@ async function copyLearningScenario(learningScenarioId: string, userId: string) 
   }
 
   return newLearningScenario;
+}
+
+/**
+ * User creates a new learning scenario from a template.
+ * All files are duplicated and linked to the new learning scenario.
+ *
+ * Authorization checks:
+ * User must be a teacher.
+ * The learning scenario must be a template.
+
+* @returns - the newly created learning scenario
+ */
+export async function createNewLearningScenarioFromTemplate({
+  schoolId,
+  user,
+  originalLearningScenarioId,
+}: {
+  originalLearningScenarioId: string;
+  schoolId: string;
+  user: UserModel;
+}) {
+  if (user.userRole !== 'teacher') {
+    throw new ForbiddenError('Only teachers can create learning scenarios from templates');
+  }
+  const existingLearningScenario = await dbGetLearningScenarioById({
+    learningScenarioId: originalLearningScenarioId,
+  });
+  if (!existingLearningScenario) {
+    throw new NotFoundError('Learning scenario not found');
+  }
+  if (existingLearningScenario.accessLevel !== 'global') {
+    throw new InvalidArgumentError('Learning scenario is not a template');
+  }
+
+  return duplicateLearningScenario({
+    accessLevel: 'private',
+    originalLearningScenarioId,
+    user,
+    schoolId,
+  });
 }

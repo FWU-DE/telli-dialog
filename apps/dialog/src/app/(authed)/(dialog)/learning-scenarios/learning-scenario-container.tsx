@@ -36,70 +36,70 @@ export function LearningScenarioContainer({
   const t = useTranslations('learning-scenarios');
 
   return (
-    <div className="flex flex-col gap-2 w-full">
+    <div className="min-w-full p-6 overflow-auto">
       <HeaderPortal>
         <ToggleSidebarButton />
         <div className="flex-grow"></div>
         <ProfileMenu userAndContext={user} />
       </HeaderPortal>
-      <div className="max-w-3xl mx-auto w-full">
+      <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl mb-6">{t('title')}</h1>
         <p>{t('description')}</p>
-        <div className="flex flex-wrap gap-4 items-center mt-16">
-          <SearchBarInput
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            className={cn(
-              'p-2 px-4 focus:outline-none disabled:bg-light-gray disabled:border-gray-100 disabled:cursor-not-allowed',
-            )}
-            placeholder={t('search-placeholder')}
-            disabled={filterDisabled}
-          />
-          <div className="flex-grow" />
-          <CreateNewLearningScenarioButton />
-        </div>
+      </div>
+      <div className="flex flex-wrap-reverse justify-between gap-2 text-base mb-4 max-w-3xl mx-auto w-full mt-16">
+        <SearchBarInput
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          className={cn(
+            'p-2 px-4 focus:outline-none disabled:bg-light-gray disabled:border-gray-100 disabled:cursor-not-allowed',
+          )}
+          placeholder={t('search-placeholder')}
+          disabled={filterDisabled}
+        />
+        <CreateNewLearningScenarioButton />
+      </div>
 
-        <div className="flex gap-2 mt-4 text-base mb-4 max-w-3xl mx-auto w-full">
+      <div className="flex gap-2 mt-4 text-base mb-4 max-w-3xl mx-auto w-full">
+        <Link
+          href={buildGenericUrl('global', 'learning-scenarios')}
+          className={cn(
+            'hover:underline px-2 p-1 text-primary',
+            accessLevel === 'global' && 'underline',
+          )}
+        >
+          {t('visibility-global')}
+        </Link>
+        {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
           <Link
-            href={buildGenericUrl('global', 'learning-scenarios')}
+            href={buildGenericUrl('school', 'learning-scenarios')}
             className={cn(
               'hover:underline px-2 p-1 text-primary',
-              accessLevel === 'global' && 'underline',
+              accessLevel === 'school' && 'underline',
             )}
           >
-            {t('visibility-global')}
+            {t('visibility-school')}
           </Link>
-          {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && (
-            <Link
-              href={buildGenericUrl('school', 'learning-scenarios')}
-              className={cn(
-                'hover:underline px-2 p-1 text-primary',
-                accessLevel === 'school' && 'underline',
-              )}
-            >
-              {t('visibility-school')}
-            </Link>
-          )}
-          <Link
-            href={buildGenericUrl('private', 'learning-scenarios')}
-            className={cn(
-              'hover:underline px-2 p-1  text-primary',
-              accessLevel === 'private' && 'underline',
-            )}
-          >
-            {t('visibility-private')}
-          </Link>
-        </div>
-
-        {filteredLearningScenarios.length > 0 && (
-          <div className="max-w-3xl mx-auto w-full">
-            <div className="flex gap-2 flex-col mt-6">
-              {filteredLearningScenarios.map((learningScenario) => (
-                <LearningScenarioItem {...learningScenario} key={learningScenario.id} />
-              ))}
-            </div>
-          </div>
         )}
+        <Link
+          href={buildGenericUrl('private', 'learning-scenarios')}
+          className={cn(
+            'hover:underline px-2 p-1  text-primary',
+            accessLevel === 'private' && 'underline',
+          )}
+        >
+          {t('visibility-private')}
+        </Link>
+      </div>
+      <div className="max-w-3xl mx-auto w-full">
+        <div className="flex flex-col gap-2 w-full">
+          {filteredLearningScenarios.map((learningScenario) => (
+            <LearningScenarioItem
+              {...learningScenario}
+              key={learningScenario.id}
+              currentUserId={user.id}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

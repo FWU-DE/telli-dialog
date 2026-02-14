@@ -14,10 +14,10 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 import { deleteCustomGptAction } from './editor/[customGptId]/actions';
 import { iconClassName } from '@/utils/tailwind/icon';
-import { CreateNewCharacterFromTemplate } from '../characters/create-new-character-from-template';
 import TelliClipboardButton from '@/components/common/clipboard-button';
 import { createNewCustomGptAction } from './actions';
 import AvatarPicture from '@/components/common/avatar-picture';
+import { CreateNewInstanceFromTemplate } from '../_components/create-new-instance-from-template';
 
 type CustomGptContainerProps = CustomGptSelectModel & {
   currentUserId: string;
@@ -43,15 +43,14 @@ export default function CustomGptContainer({
   const tCommon = useTranslations('common');
   const tToast = useTranslations('custom-gpt.toasts');
 
-  function handleDeleteCustomGpt() {
-    deleteCustomGptAction({ gptId: id })
-      .then(() => {
-        toast.success(tToast('delete-toast-success'));
-        router.refresh();
-      })
-      .catch(() => {
-        toast.error(tToast('delete-toast-error'));
-      });
+  async function handleDeleteCustomGpt() {
+    const result = await deleteCustomGptAction({ gptId: id });
+    if (result.success) {
+      toast.success(tToast('delete-toast-success'));
+      router.refresh();
+    } else {
+      toast.error(tToast('delete-toast-error'));
+    }
   }
 
   function handleNavigateToNewChat(e: React.MouseEvent) {
@@ -83,7 +82,7 @@ export default function CustomGptContainer({
       <div className="flex-grow" />
       {accessLevel === 'global' && (
         <div onClick={(event) => event.stopPropagation()} className="flex items-center">
-          <CreateNewCharacterFromTemplate
+          <CreateNewInstanceFromTemplate
             redirectPath="custom"
             createInstanceCallback={createNewCustomGptAction}
             templateId={id}
@@ -96,22 +95,20 @@ export default function CustomGptContainer({
               className="w-6 h-6"
               outerDivClassName="p-1 rounded-enterprise-sm"
             />
-          </CreateNewCharacterFromTemplate>
+          </CreateNewInstanceFromTemplate>
         </div>
       )}
-      {
-        <div onClick={(event) => event.stopPropagation()} className="flex items-center">
-          <Link
-            type="button"
-            aria-label={tCommon('edit')}
-            href={`/custom/editor/${id}?${queryParams.toString()}`}
-            className={cn(iconClassName, 'border-transparent p-1')}
-          >
-            <SettingsIcon aria-hidden="true" className="w-6 h-6" />
-            <span className="sr-only">{tCommon('edit')}</span>
-          </Link>
-        </div>
-      }
+      <div onClick={(event) => event.stopPropagation()} className="flex items-center">
+        <Link
+          type="button"
+          aria-label={tCommon('edit')}
+          href={`/custom/editor/${id}?${queryParams.toString()}`}
+          className={cn(iconClassName, 'border-transparent p-1')}
+        >
+          <SettingsIcon aria-hidden="true" className="w-6 h-6" />
+          <span className="sr-only">{tCommon('edit')}</span>
+        </Link>
+      </div>
       {currentUserId === userId && (
         <div onClick={(event) => event.stopPropagation()} className="flex items-center">
           <DestructiveActionButton

@@ -1,4 +1,3 @@
-import Refresh from '@/components/refresh';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
@@ -35,13 +34,10 @@ export default async function Page(props: PageProps<'/learning-scenarios'>) {
   });
 
   return (
-    <main className="w-full p-6">
-      <Refresh />
-      <LearningScenarioContainer
-        accessLevel={accessLevel}
-        learningScenarios={enrichedLearningScenarios}
-        user={userAndContext}
-      />
-    </main>
+    <LearningScenarioContainer
+      accessLevel={accessLevel}
+      learningScenarios={enrichedLearningScenarios}
+      user={userAndContext}
+    />
   );
 }

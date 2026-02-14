@@ -204,7 +204,7 @@ export default function LearningScenarioForm({
   }
 
   function handleAutoSave() {
-    if (isCreating) return;
+    if (isCreating || readOnly) return;
     const data = getValues();
     const defaultData = { ...sharedSchoolChat, modelId: sharedSchoolChat.modelId };
     const newData = {

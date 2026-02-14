@@ -7,7 +7,7 @@ import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { ServerActionResult } from '@shared/actions/server-action-result';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 
-export function CreateNewCharacterFromTemplate({
+export function CreateNewInstanceFromTemplate({
   templateId,
   children,
   className,
@@ -20,7 +20,7 @@ export function CreateNewCharacterFromTemplate({
   className?: string;
   templateId: string;
   templatePictureId?: string;
-  redirectPath: 'characters' | 'custom';
+  redirectPath: 'characters' | 'custom' | 'learning-scenarios';
   createInstanceCallback: ({
     modelId,
     templatePictureId,
@@ -39,7 +39,7 @@ export function CreateNewCharacterFromTemplate({
 
   const maybeDefaultModelId = getDefaultModel(models)?.id;
 
-  async function handleNewGPT() {
+  async function handleNewInstance() {
     const urlSearchParams = new URLSearchParams({
       create: 'true',
       templateId,
@@ -58,7 +58,7 @@ export function CreateNewCharacterFromTemplate({
   }
 
   return (
-    <div {...props} onClick={handleNewGPT} className={className}>
+    <div {...props} onClick={handleNewInstance} className={className}>
       {children}
     </div>
   );
