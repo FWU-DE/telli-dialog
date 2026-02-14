@@ -18,7 +18,9 @@ export function logMessage(
   }
 
   if (isDevelopment()) {
-    console.log(`[${level.toUpperCase()}] ${message}`, extra);
+    // if `extra` arg is not provided, don't pass it to console.log; otherwise "undefined" will be logged
+    const args = extra === undefined ? [] : [extra];
+    console.log(`[${level.toUpperCase()}] ${message}`, ...args);
   }
 }
 
