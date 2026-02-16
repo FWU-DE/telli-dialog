@@ -24,7 +24,7 @@
     "drizzle-zod": "0.8.3",
     "google-auth-library": "10.5.0",
     "js-tiktoken": "^1.0.21",
-    "openai": "6.9.1",
+    "openai": "6.18.0",
     "openaiv4": "npm:openai@4.104.0",
     "pg": "8.18.0",
     "zod": "4.3.6"
@@ -43,7 +43,7 @@
     "eslint": "9.39.2",
     "eslint-config-next": "16.1.6",
     "eslint-config-prettier": "10.1.8",
-    "eslint-config-turbo": "2.8.1",
+    "eslint-config-turbo": "2.8.3",
     "eslint-plugin-prettier": "5.5.5",
     "nanoid": "5.1.6",
     "prettier": "3.8.1",
