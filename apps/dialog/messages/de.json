@@ -295,7 +295,7 @@
       "add-link": "Link hinzufügen",
       "copy-page": {
         "title": "Lernszenario in eigenen Bereich kopieren",
-        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere das Lernszenario in deinen privaten Bereich, um ihn anzupassen.",
+        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere das Lernszenario in deinen privaten Bereich, um es anzupassen.",
         "copy-template": "Lernszenario bearbeiten"
       },
       "delete-title": "Lernszenario löschen",
