@@ -1,5 +1,6 @@
 import { type Session } from 'next-auth';
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 import { auth, unstable_update } from '.';
 import { type UserAndContext } from './types';
 import { dbGetSchoolAndMappingAndFederalStateByUserId } from '@shared/db/functions/school';
@@ -10,7 +11,16 @@ export async function getValidSession(): Promise<Session> {
   const session = await auth();
 
   if (session === null) {
-    redirect('/login');
+    const headersList = await headers();
+    const pathname = headersList.get('x-pathname') || '/';
+
+    // Don't include callback for login-related pages to avoid redirect loops
+    if (pathname === '/' || pathname.startsWith('/login')) {
+      redirect('/login');
+    }
+
+    const callbackUrl = encodeURIComponent(pathname);
+    redirect(`/login?callbackUrl=${callbackUrl}`);
   }
 
   return session;

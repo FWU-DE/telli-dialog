@@ -11,13 +11,14 @@ import { useSearchParams } from 'next/navigation';
 export default function LoginForm() {
   const searchParams = useSearchParams();
   const vidis_idp_hint = searchParams.get('vidis_idp_hint');
+  const callbackUrl = searchParams.get('callbackUrl') || '/';
 
   useEffect(() => {
     // automatic sign-in if vidis_idp_hint is present
     if (!!vidis_idp_hint) {
-      signIn('vidis', undefined, { vidis_idp_hint: vidis_idp_hint });
+      signIn('vidis', { callbackUrl }, { vidis_idp_hint: vidis_idp_hint });
     }
-  }, [vidis_idp_hint]);
+  }, [vidis_idp_hint, callbackUrl]);
 
   return (
     <main className="w-full flex flex-col justify-center items-center max-w-72 mx-auto py-4 h-full">
@@ -31,7 +32,7 @@ export default function LoginForm() {
         </div>
         <button
           className={cn(buttonSecondaryClassName, 'w-full')}
-          onClick={() => signIn('vidis')}
+          onClick={() => signIn('vidis', { callbackUrl })}
           aria-label="Mit VIDIS einloggen"
         >
           Mit VIDIS einloggen
