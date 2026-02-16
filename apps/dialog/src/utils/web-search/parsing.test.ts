@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseHyperlinks, stripUrlPrefix } from './parsing';
+import { parseHyperlinks, getDisplayUrl } from './parsing';
 
 describe('parseHyperlinks', () => {
   it('should return undefined for content without URLs', () => {
@@ -25,6 +25,11 @@ describe('parseHyperlinks', () => {
   it('should parse simple HTTPS URLs', () => {
     const result = parseHyperlinks('Check out https://example.com');
     expect(result).toEqual(['https://example.com']);
+  });
+
+  it('should parse URLs with capital letters', () => {
+    const result = parseHyperlinks('Visit HTTPS://WWW.EXAMPLE.COM');
+    expect(result).toEqual(['HTTPS://WWW.EXAMPLE.COM']);
   });
 
   it('should parse URLs with www prefix', () => {
@@ -79,28 +84,32 @@ describe('parseHyperlinks', () => {
   });
 });
 
-describe('stripUrlPrefix', () => {
+describe('getDisplayUrl', () => {
   it('should strip https:// prefix', () => {
-    expect(stripUrlPrefix('https://example.com')).toBe('example.com');
+    expect(getDisplayUrl('https://example.com')).toBe('example.com');
   });
 
   it('should strip http:// prefix', () => {
-    expect(stripUrlPrefix('http://example.com')).toBe('example.com');
+    expect(getDisplayUrl('http://example.com')).toBe('example.com');
+  });
+
+  it('should strip url prefix with capital letters', () => {
+    expect(getDisplayUrl('HTTP://EXAMPLE.COM')).toBe('example.com');
   });
 
   it('should strip https://www. prefix', () => {
-    expect(stripUrlPrefix('https://www.example.com')).toBe('example.com');
+    expect(getDisplayUrl('https://www.example.com')).toBe('example.com');
   });
 
   it('should strip http://www. prefix', () => {
-    expect(stripUrlPrefix('http://www.example.com')).toBe('example.com');
+    expect(getDisplayUrl('http://www.example.com')).toBe('example.com');
   });
 
   it('should return empty string for empty input', () => {
-    expect(stripUrlPrefix('')).toBe('');
+    expect(getDisplayUrl('')).toBe('');
   });
 
   it('should preserve paths after stripping prefix', () => {
-    expect(stripUrlPrefix('https://example.com/path')).toBe('example.com/path');
+    expect(getDisplayUrl('https://example.com/path')).toBe('example.com/path');
   });
 });

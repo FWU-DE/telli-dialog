@@ -21,9 +21,14 @@ export async function webScraper(url: string): Promise<WebsearchSource> {
   'use cache';
   cacheLife('weeks');
 
-  const urlObj = new URL(url);
-  if (!ALLOWED_PROTOCOLS.includes(urlObj.protocol)) {
-    logError(`Webscraper blocked URL with disallowed protocol: ${url}`); // this should never happen since we only extract http/https URLs
+  try {
+    const urlObj = new URL(url);
+    if (!ALLOWED_PROTOCOLS.includes(urlObj.protocol)) {
+      logError(`Webscraper blocked URL with disallowed protocol: ${url}`); // this should never happen since we only extract http/https URLs
+      return defaultErrorSource(url);
+    }
+  } catch {
+    logError(`Invalid URL: ${url}`); // this should never happen since we only extract valid URLs
     return defaultErrorSource(url);
   }
 

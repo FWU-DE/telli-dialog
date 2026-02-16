@@ -1,5 +1,6 @@
 /**
  * Strips the protocol and "www." prefix from a URL for display purposes.
+ * Also converts the URL to lowercase for consistent display.
  *
  * Examples:
  * - `https://www.example.com` -> `example.com`
@@ -9,11 +10,11 @@
  * @param uri The URL string to strip the prefix from.
  * @returns The URL without the protocol and "www." prefix.
  */
-export function stripUrlPrefix(uri: string) {
+export function getDisplayUrl(uri: string) {
   if (!uri) {
     return '';
   }
-  return uri.replace(/^https?:\/\/(www\.)?/, '');
+  return uri.replace(/^https?:\/\/(www\.)?/i, '').toLowerCase();
 }
 
 /**
