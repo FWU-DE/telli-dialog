@@ -36,7 +36,10 @@ import {
 import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
 import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
-import { duplicateLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
+import {
+  buildLearningScenarioPictureKey,
+  duplicateLearningScenario,
+} from '@shared/learning-scenarios/learning-scenario-service';
 import { UserModel } from '@shared/auth/user-model';
 
 const templateTypeMap: Record<string, TemplateTypes> = {
@@ -595,7 +598,7 @@ async function copyLearningScenario(learningScenarioId: string, userId: string) 
 
   // avatar
   if (learningScenario.pictureId) {
-    const avatarKey = `shared-chats/${copy.id}/avatar`;
+    const avatarKey = buildLearningScenarioPictureKey(copy.id);
     await copyAvatarPicture(learningScenario.pictureId, avatarKey);
     copy.pictureId = avatarKey;
   }

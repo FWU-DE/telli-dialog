@@ -19,6 +19,9 @@ import {
   TextChunkTable,
 } from '../schema';
 import { logDebug } from '@shared/logging';
+import { buildCharacterPictureKey } from '@shared/characters/character-service';
+import { buildCustomGptPictureKey } from '@shared/custom-gpt/custom-gpt-service';
+import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
 
 export async function linkFilesToConversation({
   conversationMessageId,
@@ -291,9 +294,9 @@ export async function dbGetAllS3FileKeys(): Promise<string[]> {
     .map((x) => x.pictureId)
     .filter((x): x is string => !!x);
   const avatarIds = [
-    ...characters.map((x) => `characters/${x.id}/avatar`),
-    ...customGpts.map((x) => `custom-gpts/${x.id}/avatar`),
-    ...sharedSchoolConversations.map((x) => `shared-chats/${x.id}/avatar`),
+    ...characters.map((x) => buildCharacterPictureKey(x.id)),
+    ...customGpts.map((x) => buildCustomGptPictureKey(x.id)),
+    ...sharedSchoolConversations.map((x) => buildLearningScenarioPictureKey(x.id)),
   ];
   const whitelabels = federalStates.flatMap((x) => [
     `whitelabels/${x.id}/logo.svg`,
