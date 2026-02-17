@@ -46,6 +46,7 @@ import { WebsearchSource } from '@shared/db/types';
 import SharingSection from '@/components/forms/sharing-section';
 import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
 import { CopyContainer } from '@/app/(authed)/(dialog)/_components/copy-container';
+import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 
 export default function LearningScenarioForm({
   existingFiles,
@@ -72,6 +73,11 @@ export default function LearningScenarioForm({
   const tCommon = useTranslations('common');
 
   const { models } = useLlmModels();
+  const maybeDefaultModelId = getDefaultModel(models)?.id;
+
+  const isModelAvailable =
+    sharedSchoolChat.modelId && models.some((m) => m.id === sharedSchoolChat.modelId);
+  const selectedModelId = isModelAvailable ? sharedSchoolChat.modelId : maybeDefaultModelId;
 
   const {
     register,
@@ -86,11 +92,11 @@ export default function LearningScenarioForm({
       ...sharedSchoolChat,
       additionalInstructions: sharedSchoolChat.additionalInstructions ?? undefined,
       attachedLinks: initialLinks,
-      pictureId: sharedSchoolChat.pictureId ?? '',
       isSchoolShared: sharedSchoolChat.accessLevel === 'school',
-      hasLinkAccess: sharedSchoolChat.hasLinkAccess,
+      modelId: selectedModelId,
     },
   });
+
   const backUrl = buildGenericUrl(sharedSchoolChat.accessLevel, 'learning-scenarios');
   const { fields } = useFieldArray({
     control,
@@ -279,7 +285,7 @@ export default function LearningScenarioForm({
           <div className="flex gap-4 flex-col">
             <label className="text-sm font-medium">{tCommon('llm-model')}</label>
             <SelectLlmModelForm
-              selectedModel={sharedSchoolChat.modelId}
+              selectedModel={selectedModelId}
               onValueChange={(value) => {
                 setValue('modelId', value);
                 handleAutoSave();
@@ -353,8 +359,8 @@ export default function LearningScenarioForm({
       <fieldset className="flex flex-col gap-4 mt-12">
         <TextInput
           id="student-excercise"
-          label={t('student-excercise-label')}
-          placeholder={t('student-excercise-placeholder')}
+          label={t('student-exercise-label')}
+          placeholder={t('student-exercise-placeholder')}
           getValue={() => getValues('studentExercise') ?? ''}
           inputType="textarea"
           rows={5}
