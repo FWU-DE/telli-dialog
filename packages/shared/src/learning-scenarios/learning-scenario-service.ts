@@ -17,6 +17,8 @@ import {
   FileModel,
   fileTable,
   LearningScenarioFileMapping,
+  LearningScenarioInsertModel,
+  learningScenarioInsertSchema,
   LearningScenarioOptionalShareDataModel,
   LearningScenarioSelectModel,
   learningScenarioTable,
@@ -28,17 +30,24 @@ import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error
 import {
   deleteAvatarPicture,
   deleteMessageAttachments,
+  duplicateFileWithEmbeddings,
   getAvatarPictureUrl,
 } from '@shared/files/fileService';
-import { getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
+import { copyFileInS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { addDays } from '@shared/utils/date';
+import { generateUUID } from '@shared/utils/uuid';
 import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 
 export type LearningScenarioWithImage = LearningScenarioOptionalShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
 };
+
+export function buildLearningScenarioPictureKey(characterId: string) {
+  // the path still contains shared-chats because all existing learning scenarios store their picture in this folder in S3
+  return `shared-chats/${characterId}/avatar`;
+}
 
 /**
  * Returns all learning scenarios a user can access.
@@ -448,7 +457,7 @@ export async function getFilesForLearningScenario({
 }
 
 /**
- * User creates a new learning scenario.
+ * User creates a new, empty learning scenario.
  */
 export async function createNewLearningScenario({
   modelId,
@@ -479,6 +488,91 @@ export async function createNewLearningScenario({
   }
 
   return insertedLearningScenario;
+}
+
+/**
+ * This function creates a duplicate of an existing learning scenario,
+ * including copying the avatar picture and all related files.
+ */
+export async function duplicateLearningScenario({
+  accessLevel,
+  schoolId,
+  user,
+  originalLearningScenarioId,
+}: {
+  accessLevel: AccessLevel | undefined;
+  originalLearningScenarioId: string;
+  schoolId: string;
+  user: UserModel;
+}) {
+  const existingLearningScenario = await dbGetLearningScenarioById({
+    learningScenarioId: originalLearningScenarioId,
+  });
+  if (!existingLearningScenario) {
+    throw new NotFoundError('Learning scenario not found');
+  }
+
+  const learningScenarioId = generateUUID();
+
+  const avatarPictureUrl = await copyAvatarPictureIfExists(
+    existingLearningScenario.pictureId,
+    learningScenarioId,
+  );
+
+  // removes createdAt field and other unexpected fields
+  const expectedValues = learningScenarioInsertSchema.parse(existingLearningScenario);
+
+  const copy: LearningScenarioInsertModel = {
+    ...expectedValues,
+    accessLevel: accessLevel ?? 'private',
+    hasLinkAccess: false,
+    id: learningScenarioId,
+    isDeleted: false,
+    originalLearningScenarioId,
+    pictureId: avatarPictureUrl,
+    schoolId: schoolId,
+    userId: user.id,
+  };
+
+  const [insertedLearningScenario] = await db
+    .insert(learningScenarioTable)
+    .values(copy)
+    .returning();
+
+  if (!insertedLearningScenario) {
+    throw new Error('Could not duplicate learning scenario');
+  }
+
+  await copyRelatedFiles(originalLearningScenarioId, learningScenarioId);
+
+  return insertedLearningScenario;
+}
+
+async function copyAvatarPictureIfExists(
+  sourcePictureId: string | null | undefined,
+  newLearningScenarioId: string,
+) {
+  if (!sourcePictureId) return undefined;
+
+  const newAvatarPictureId = buildLearningScenarioPictureKey(newLearningScenarioId);
+  await copyFileInS3({
+    copySource: sourcePictureId,
+    newKey: newAvatarPictureId,
+  });
+  return newAvatarPictureId;
+}
+
+async function copyRelatedFiles(sourceId: string, destinationId: string) {
+  const relatedFiles = await dbGetFilesForLearningScenario(sourceId);
+  await Promise.all(
+    relatedFiles.map(async (file) => {
+      const newFileId = await duplicateFileWithEmbeddings(file.id);
+      await db.insert(LearningScenarioFileMapping).values({
+        fileId: newFileId,
+        learningScenarioId: destinationId,
+      });
+    }),
+  );
 }
 
 /**
@@ -590,7 +684,7 @@ export async function enrichLearningScenarioWithPictureUrl({
     learningScenarios.map(async (scenario) => ({
       ...scenario,
       maybeSignedPictureUrl: await getReadOnlySignedUrl({
-        key: scenario.pictureId ? `shared-chats/${scenario.id}/avatar` : undefined,
+        key: scenario.pictureId ? buildLearningScenarioPictureKey(scenario.id) : undefined,
       }),
     })),
   );
@@ -633,7 +727,7 @@ export async function uploadAvatarPictureForLearningScenario({
   if (!isOwner)
     throw new ForbiddenError('Not authorized to upload picture for this learning scenario');
 
-  const key = `shared-chats/${learningScenarioId}/avatar`;
+  const key = buildLearningScenarioPictureKey(learningScenarioId);
 
   await uploadFileToS3({
     key: key,

@@ -53,7 +53,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale} className={barlow.className}>
-      <body>
+      <body className="overflow-hidden">
         <Script
           id="public-config"
           // runs as soon as the browser parses it (before client components hydrate)

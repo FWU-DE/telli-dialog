@@ -1,13 +1,16 @@
 import { cacheLife } from 'next/cache';
 import { webScraperCrawl4AI } from './search-web-crawl4ai';
 import { webScraperReadability } from './search-web-readability';
-import { logWarning } from '@shared/logging';
+import { logError, logWarning } from '@shared/logging';
 import { WebsearchSource } from '@shared/db/types';
 import {
   incrementCrawl4aiSuccessCounter,
   incrementReadabilitySuccessCounter,
   incrementWebScraperFailedCounter,
 } from '@shared/metrics/webScraperMeter';
+import { defaultErrorSource } from '@/components/chat/sources/const';
+
+const ALLOWED_PROTOCOLS = ['http:', 'https:'];
 
 /**
  * Scrapes web content and returns markdown.
@@ -17,6 +20,17 @@ import {
 export async function webScraper(url: string): Promise<WebsearchSource> {
   'use cache';
   cacheLife('weeks');
+
+  try {
+    const urlObj = new URL(url);
+    if (!ALLOWED_PROTOCOLS.includes(urlObj.protocol)) {
+      logError(`Webscraper blocked URL with disallowed protocol: ${url}`); // this should never happen since we only extract http/https URLs
+      return defaultErrorSource(url);
+    }
+  } catch {
+    logError(`Invalid URL: ${url}`); // this should never happen since we only extract valid URLs
+    return defaultErrorSource(url);
+  }
 
   // Try Crawl4AI first
   let result = await webScraperCrawl4AI(url);
@@ -35,7 +49,7 @@ export async function webScraper(url: string): Promise<WebsearchSource> {
     return result;
   }
 
-  // Both scrapers failed but we return the result anyway
+  // Both scrapers failed
   incrementWebScraperFailedCounter({ url: result.link });
   return result;
 }

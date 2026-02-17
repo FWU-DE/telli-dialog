@@ -3,7 +3,7 @@ import './citation.css';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils/tailwind';
 import SearchIcon from '@/components/icons/search';
-import { stripUrlPrefix } from '@/utils/web-search/parsing';
+import { getDisplayUrl } from '@/utils/web-search/parsing';
 import TrashIcon from '@/components/icons/trash';
 import { WebsearchSource } from '@shared/db/types';
 
@@ -24,7 +24,7 @@ export default function Citation({
   handleDelete?: () => void;
   className?: string;
 }) {
-  const displayTitle = truncateText(stripUrlPrefix(source.link), 30);
+  const displayTitle = truncateText(getDisplayUrl(source.link), 30);
 
   return (
     <TooltipProvider skipDelayDuration={0} delayDuration={0}>
@@ -62,7 +62,7 @@ export default function Citation({
                 dir="ltr"
               >
                 <span className="font-medium overflow-ellipsis text-sm line-clamp-2">
-                  {stripUrlPrefix(source.link)}
+                  {getDisplayUrl(source.link)}
                 </span>
               </span>
             )}

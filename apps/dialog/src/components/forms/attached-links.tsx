@@ -115,7 +115,7 @@ export function AttachedLinks({
               <Citation
                 source={field as unknown as WebsearchSource}
                 className="bg-secondary-dark rounded-enterprise-sm h-10"
-                handleDelete={() => handleDeleteLink(index)}
+                handleDelete={!readOnly ? () => handleDeleteLink(index) : undefined}
                 index={index}
                 sourceIndex={0}
               />

@@ -5,7 +5,7 @@ import SidebarCloseIcon from '@/components/icons/sidebar-close';
 import { getBaseUrlByHeaders, getHostByHeaders } from '@/utils/host';
 import Footer from '@/components/navigation/footer';
 import CountDownTimer from '@/app/(authed)/(dialog)/learning-scenarios/_components/count-down';
-import QRCode from '@/app/(authed)/(dialog)/learning-scenarios/editor/[learningScenarioId]/share/qr-code';
+import { QRCodeSVG } from 'qrcode.react';
 import { getTranslations } from 'next-intl/server';
 import TelliClipboardButton from '@/components/common/clipboard-button';
 import { requireAuth } from '@/auth/requireAuth';
@@ -80,7 +80,11 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
           <div className="hidden md:block w-1 border-r-[1px]" />
           <section className="flex flex-col justify-between items-center gap-8 sm:gap-12">
             <h2 className="text-2xl sm:text-3xl text-center">{t('use-qr')}</h2>
-            <QRCode id="qr-code" className="w-64 h-64 sm:w-[400px] sm:h-[400px]" value={shareUrl} />
+            <QRCodeSVG
+              id="qr-code"
+              className="w-64 h-64 sm:w-[400px] sm:h-[400px]"
+              value={shareUrl}
+            />
           </section>
         </main>
       </div>

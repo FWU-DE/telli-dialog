@@ -7,6 +7,7 @@ import {
   deleteLearningScenario,
   linkFileToLearningScenario,
 } from '@shared/learning-scenarios/learning-scenario-service';
+import { createNewLearningScenarioFromTemplate } from '@shared/templates/template-service';
 
 export async function deleteLearningScenarioAction({ id }: { id: string }) {
   const { user } = await requireAuth();
@@ -18,6 +19,16 @@ export async function createNewLearningScenarioAction({ modelId }: { modelId: st
 
   return runServerAction(createNewLearningScenario)({
     modelId,
+    user,
+    schoolId: school.id,
+  });
+}
+
+export async function createNewLearningScenarioFromTemplateAction(templateId: string) {
+  const { user, school } = await requireAuth();
+
+  return runServerAction(createNewLearningScenarioFromTemplate)({
+    originalLearningScenarioId: templateId,
     user,
     schoolId: school.id,
   });
