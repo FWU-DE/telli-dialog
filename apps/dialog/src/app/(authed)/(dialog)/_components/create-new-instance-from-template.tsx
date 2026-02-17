@@ -13,7 +13,8 @@ export function CreateNewInstanceFromTemplate({
   className,
   templatePictureId,
   redirectPath,
-  createInstanceCallback,
+  disabled,
+  createInstanceCallbackAction,
   ...props
 }: {
   children: React.ReactNode;
@@ -21,14 +22,15 @@ export function CreateNewInstanceFromTemplate({
   templateId: string;
   templatePictureId?: string;
   redirectPath: 'characters' | 'custom' | 'learning-scenarios';
-  createInstanceCallback: ({
+  disabled?: boolean;
+  createInstanceCallbackAction: ({
     modelId,
     templatePictureId,
     templateId,
   }: {
     modelId?: string;
     templatePictureId?: string;
-    templateId?: string;
+    templateId: string;
   }) => Promise<ServerActionResult<{ id: string }>>;
 }) {
   const router = useRouter();
@@ -45,7 +47,7 @@ export function CreateNewInstanceFromTemplate({
       templateId,
     });
 
-    const createResult = await createInstanceCallback({
+    const createResult = await createInstanceCallbackAction({
       modelId: maybeDefaultModelId,
       templatePictureId,
       templateId,
@@ -58,7 +60,7 @@ export function CreateNewInstanceFromTemplate({
   }
 
   return (
-    <div {...props} onClick={handleNewInstance} className={className}>
+    <div {...props} onClick={!disabled ? handleNewInstance : undefined} className={className}>
       {children}
     </div>
   );

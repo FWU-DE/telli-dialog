@@ -84,7 +84,7 @@ export default function CustomGptContainer({
         <div onClick={(event) => event.stopPropagation()} className="flex items-center">
           <CreateNewInstanceFromTemplate
             redirectPath="custom"
-            createInstanceCallback={createNewCustomGptAction}
+            createInstanceCallbackAction={createNewCustomGptAction}
             templateId={id}
             templatePictureId={pictureId ?? undefined}
             className="w-8 h-8 flex items-center justify-center"

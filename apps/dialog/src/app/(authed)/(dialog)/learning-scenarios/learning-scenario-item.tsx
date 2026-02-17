@@ -113,7 +113,7 @@ export default function LearningScenarioItem({
         <div onClick={(event) => event.stopPropagation()} className="flex items-center">
           <CreateNewInstanceFromTemplate
             redirectPath="learning-scenarios"
-            createInstanceCallback={handleCreateNewLearningScenarioFromTemplate}
+            createInstanceCallbackAction={handleCreateNewLearningScenarioFromTemplate}
             templateId={learningScenario.id}
             templatePictureId={learningScenario.pictureId ?? undefined}
             className="w-8 h-8 flex items-center justify-center"
