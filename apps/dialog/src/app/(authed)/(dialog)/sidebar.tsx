@@ -67,7 +67,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
 
   // TODO: this is a dirty hack to remove the sidebar for shared chats
   if (
-    pathname.match(/^\/learning-scenarios\/[^/]+\/share$/) ||
+    pathname.match(/^\/learning-scenarios\/editor\/[^/]+\/share$/) ||
     pathname.match(/^\/characters\/editor\/[^/]+\/share$/)
   ) {
     return null;

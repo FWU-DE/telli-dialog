@@ -6,7 +6,7 @@ import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import CountDownTimer from '../../../_components/count-down';
-import QRCode from './qr-code';
+import { QRCodeSVG } from 'qrcode.react';
 import TelliClipboardButton from '@/components/common/clipboard-button';
 import { getSharedLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
@@ -84,7 +84,11 @@ export default async function Page(
           <div className="hidden md:block w-1 border-r-[1px]" />
           <section className="flex flex-col justify-between items-center gap-8 sm:gap-12">
             <h2 className="text-2xl sm:text-3xl text-center">{t('use-qr')}</h2>
-            <QRCode id="qr-code" className="w-64 h-64 sm:w-[400px] sm:h-[400px]" value={shareUrl} />
+            <QRCodeSVG
+              id="qr-code"
+              className="w-64 h-64 sm:w-[400px] sm:h-[400px]"
+              value={shareUrl}
+            />
           </section>
         </main>
       </div>
