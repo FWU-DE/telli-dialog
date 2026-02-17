@@ -2,8 +2,8 @@ import { auth } from '@/auth';
 import { SchoolSelectModel, schoolSelectSchema } from '@shared/db/schema';
 import { UserModel, userSchema } from '@shared/auth/user-model';
 import { FederalStateModel, federalStateSchema } from '@shared/federal-states/types';
-import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
+import { redirectToLogin } from './utils';
 
 export async function requireAuth(): Promise<{
   user: UserModel;
@@ -14,14 +14,7 @@ export async function requireAuth(): Promise<{
   if (!session) {
     const headersList = await headers();
     const pathname = headersList.get('x-pathname') || '/';
-
-    // Don't include callback for login-related pages to avoid redirect loops
-    if (pathname === '/' || pathname.startsWith('/login')) {
-      redirect('/login');
-    }
-
-    const callbackUrl = encodeURIComponent(pathname);
-    redirect(`/login?callbackUrl=${callbackUrl}`);
+    redirectToLogin(pathname);
   }
 
   const user = userSchema.parse({ ...session.user, userRole: session.user?.school?.userRole });

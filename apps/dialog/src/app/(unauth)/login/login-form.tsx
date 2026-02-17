@@ -7,11 +7,12 @@ import React, { useEffect } from 'react';
 import TelliLogo from '@/components/icons/logo';
 import { cn } from '@/utils/tailwind';
 import { useSearchParams } from 'next/navigation';
+import { getSafeCallbackUrl } from '@/auth/callback-url';
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
   const vidis_idp_hint = searchParams.get('vidis_idp_hint');
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const callbackUrl = getSafeCallbackUrl(searchParams.get('callbackUrl'));
 
   useEffect(() => {
     // automatic sign-in if vidis_idp_hint is present
