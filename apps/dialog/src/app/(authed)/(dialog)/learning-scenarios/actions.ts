@@ -24,7 +24,11 @@ export async function createNewLearningScenarioAction({ modelId }: { modelId: st
   });
 }
 
-export async function createNewLearningScenarioFromTemplateAction(templateId: string) {
+export async function createNewLearningScenarioFromTemplateAction({
+  templateId,
+}: {
+  templateId: string;
+}) {
   const { user, school } = await requireAuth();
 
   return runServerAction(createNewLearningScenarioFromTemplate)({

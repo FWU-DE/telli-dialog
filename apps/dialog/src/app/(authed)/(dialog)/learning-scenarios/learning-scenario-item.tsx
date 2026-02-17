@@ -58,7 +58,7 @@ export default function LearningScenarioItem({
         error: new InvalidArgumentError('Template ID is required'),
       };
     }
-    return createNewLearningScenarioFromTemplateAction(templateId);
+    return createNewLearningScenarioFromTemplateAction({ templateId });
   }
 
   const timeLeft = calculateTimeLeft(learningScenario);
