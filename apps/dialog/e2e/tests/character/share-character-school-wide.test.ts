@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
 import { waitForToast } from '../../utils/utils';
 
-test('teacher can share character school-wide', async ({ page }) => {
+test('share character school-wide', async ({ page }) => {
   await login(page, 'teacher');
   await page.goto('/characters');
   await page.waitForURL('/characters**');
