@@ -33,7 +33,7 @@ import {
   duplicateFileWithEmbeddings,
   getAvatarPictureUrl,
 } from '@shared/files/fileService';
-import { copyFileInS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
+import { copyFileInS3, uploadFileToS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { addDays } from '@shared/utils/date';
 import { generateUUID } from '@shared/utils/uuid';
@@ -683,9 +683,7 @@ export async function enrichLearningScenarioWithPictureUrl({
   return await Promise.all(
     learningScenarios.map(async (scenario) => ({
       ...scenario,
-      maybeSignedPictureUrl: await getReadOnlySignedUrl({
-        key: scenario.pictureId ? buildLearningScenarioPictureKey(scenario.id) : undefined,
-      }),
+      maybeSignedPictureUrl: await getAvatarPictureUrl(scenario.pictureId),
     })),
   );
 }
