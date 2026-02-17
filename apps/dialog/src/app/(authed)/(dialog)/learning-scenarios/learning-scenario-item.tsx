@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { useToast } from '@/components/common/toast';
 import ShareIcon from '@/components/icons/share';
@@ -42,6 +43,12 @@ export default function LearningScenarioItem({
     } else {
       toast.error(t('toasts.delete-toast-error'));
     }
+  }
+
+  function handleNavigateToShare(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/learning-scenarios/editor/${learningScenario.id}/share`);
   }
 
   async function handleCreateNewLearningScenarioFromTemplate({
@@ -100,14 +107,14 @@ export default function LearningScenarioItem({
         />
       )}
       {timeLeft > 0 && (
-        <Link
+        <button
           aria-label={t('shared.share')}
-          href={`/learning-scenarios/editor/${learningScenario.id}/share`}
-          className={cn('rounded-enterprise-sm', iconClassName)}
+          onClick={handleNavigateToShare}
+          className={cn(iconClassName)}
         >
-          <ShareIcon aria-hidden="true" className="w-8 h-8" />
+          <ShareIcon aria-hidden="true" className="min-w-8 min-h-8" />
           <span className="sr-only">{t('shared.share')}</span>
-        </Link>
+        </button>
       )}
       {learningScenario.accessLevel === 'global' && (
         <div onClick={(event) => event.stopPropagation()} className="flex items-center">
