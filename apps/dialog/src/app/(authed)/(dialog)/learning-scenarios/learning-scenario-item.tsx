@@ -116,38 +116,34 @@ export default function LearningScenarioItem({
           <span className="sr-only">{t('shared.share')}</span>
         </button>
       )}
-      {learningScenario.accessLevel === 'global' && (
-        <div onClick={(event) => event.stopPropagation()} className="flex items-center">
-          <CreateNewInstanceFromTemplate
-            redirectPath="learning-scenarios"
-            createInstanceCallbackAction={handleCreateNewLearningScenarioFromTemplate}
-            templateId={learningScenario.id}
-            templatePictureId={learningScenario.pictureId ?? undefined}
-            className="w-8 h-8 flex items-center justify-center"
-            {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
-          >
-            <TelliClipboardButton
-              text={t('form.copy-page.copy-template')}
-              className="w-6 h-6"
-              outerDivClassName="p-1 rounded-enterprise-sm"
-            />
-          </CreateNewInstanceFromTemplate>
-        </div>
+      {learningScenario.accessLevel === 'global' && timeLeft <= 0 && (
+        <CreateNewInstanceFromTemplate
+          redirectPath="learning-scenarios"
+          createInstanceCallbackAction={handleCreateNewLearningScenarioFromTemplate}
+          templateId={learningScenario.id}
+          templatePictureId={learningScenario.pictureId ?? undefined}
+          className="w-8 h-8 flex items-center justify-center"
+          {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
+        >
+          <TelliClipboardButton
+            text={t('form.copy-page.copy-template')}
+            className="w-6 h-6"
+            outerDivClassName="p-1 rounded-enterprise-sm"
+          />
+        </CreateNewInstanceFromTemplate>
       )}
       {currentUserId === learningScenario.userId && (
-        <div onClick={(event) => event.stopPropagation()} className="flex items-center">
-          <DestructiveActionButton
-            aria-label={tCommon('delete')}
-            modalDescription={t('form.delete-description')}
-            modalTitle={t('form.delete-title')}
-            confirmText={tCommon('delete')}
-            actionFn={handleDeleteLearningScenario}
-            triggerButtonClassName={cn('border-transparent p-0', iconClassName)}
-          >
-            <TrashIcon aria-hidden="true" className="w-8 h-8" />
-            <span className="sr-only">{tCommon('delete')}</span>
-          </DestructiveActionButton>
-        </div>
+        <DestructiveActionButton
+          aria-label={tCommon('delete')}
+          modalDescription={t('form.delete-description')}
+          modalTitle={t('form.delete-title')}
+          confirmText={tCommon('delete')}
+          actionFn={handleDeleteLearningScenario}
+          triggerButtonClassName={cn('border-transparent p-0', iconClassName)}
+        >
+          <TrashIcon aria-hidden="true" className="w-8 h-8" />
+          <span className="sr-only">{tCommon('delete')}</span>
+        </DestructiveActionButton>
       )}
     </Link>
   );
