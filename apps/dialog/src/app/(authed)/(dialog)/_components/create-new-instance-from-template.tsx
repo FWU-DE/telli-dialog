@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { ServerActionResult } from '@shared/actions/server-action-result';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
+import React, { useState } from 'react';
 
 export function CreateNewInstanceFromTemplate({
   templateId,
@@ -13,7 +14,8 @@ export function CreateNewInstanceFromTemplate({
   className,
   templatePictureId,
   redirectPath,
-  createInstanceCallback,
+  disabled,
+  createInstanceCallbackAction,
   ...props
 }: {
   children: React.ReactNode;
@@ -21,14 +23,15 @@ export function CreateNewInstanceFromTemplate({
   templateId: string;
   templatePictureId?: string;
   redirectPath: 'characters' | 'custom' | 'learning-scenarios';
-  createInstanceCallback: ({
+  disabled?: boolean;
+  createInstanceCallbackAction: ({
     modelId,
     templatePictureId,
     templateId,
   }: {
     modelId?: string;
     templatePictureId?: string;
-    templateId?: string;
+    templateId: string;
   }) => Promise<ServerActionResult<{ id: string }>>;
 }) {
   const router = useRouter();
@@ -36,29 +39,43 @@ export function CreateNewInstanceFromTemplate({
   const t = useTranslations('characters');
 
   const { models } = useLlmModels();
+  const [isLoading, setIsLoading] = useState(false);
 
   const maybeDefaultModelId = getDefaultModel(models)?.id;
 
-  async function handleNewInstance() {
-    const urlSearchParams = new URLSearchParams({
-      create: 'true',
-      templateId,
-    });
+  async function handleNewInstance(e: React.MouseEvent<HTMLDivElement>) {
+    e.preventDefault();
+    setIsLoading(true);
 
-    const createResult = await createInstanceCallback({
-      modelId: maybeDefaultModelId,
-      templatePictureId,
-      templateId,
-    });
-    if (createResult.success) {
-      router.push(`/${redirectPath}/editor/${createResult.value.id}?${urlSearchParams.toString()}`);
-    } else {
-      toast.error(t('toasts.create-toast-error'));
+    try {
+      const urlSearchParams = new URLSearchParams({
+        create: 'true',
+        templateId,
+      });
+
+      const createResult = await createInstanceCallbackAction({
+        modelId: maybeDefaultModelId,
+        templatePictureId,
+        templateId,
+      });
+      if (createResult.success) {
+        router.push(
+          `/${redirectPath}/editor/${createResult.value.id}?${urlSearchParams.toString()}`,
+        );
+      } else {
+        toast.error(t('toasts.create-toast-error'));
+      }
+    } finally {
+      setIsLoading(false);
     }
   }
 
   return (
-    <div {...props} onClick={handleNewInstance} className={className}>
+    <div
+      {...props}
+      onClick={!disabled && !isLoading ? handleNewInstance : undefined}
+      className={className}
+    >
       {children}
     </div>
   );

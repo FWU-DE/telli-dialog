@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { useToast } from '@/components/common/toast';
 import ShareIcon from '@/components/icons/share';
@@ -44,6 +45,12 @@ export default function LearningScenarioItem({
     }
   }
 
+  function handleNavigateToShare(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/learning-scenarios/editor/${learningScenario.id}/share`);
+  }
+
   async function handleCreateNewLearningScenarioFromTemplate({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     templatePictureId,
@@ -58,7 +65,7 @@ export default function LearningScenarioItem({
         error: new InvalidArgumentError('Template ID is required'),
       };
     }
-    return createNewLearningScenarioFromTemplateAction(templateId);
+    return createNewLearningScenarioFromTemplateAction({ templateId });
   }
 
   const timeLeft = calculateTimeLeft(learningScenario);
@@ -100,47 +107,43 @@ export default function LearningScenarioItem({
         />
       )}
       {timeLeft > 0 && (
-        <Link
+        <button
           aria-label={t('shared.share')}
-          href={`/learning-scenarios/editor/${learningScenario.id}/share`}
-          className={cn('rounded-enterprise-sm', iconClassName)}
+          onClick={handleNavigateToShare}
+          className={cn(iconClassName)}
         >
-          <ShareIcon aria-hidden="true" className="w-8 h-8" />
+          <ShareIcon aria-hidden="true" className="min-w-8 min-h-8" />
           <span className="sr-only">{t('shared.share')}</span>
-        </Link>
+        </button>
       )}
-      {learningScenario.accessLevel === 'global' && (
-        <div onClick={(event) => event.stopPropagation()} className="flex items-center">
-          <CreateNewInstanceFromTemplate
-            redirectPath="learning-scenarios"
-            createInstanceCallback={handleCreateNewLearningScenarioFromTemplate}
-            templateId={learningScenario.id}
-            templatePictureId={learningScenario.pictureId ?? undefined}
-            className="w-8 h-8 flex items-center justify-center"
-            {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
-          >
-            <TelliClipboardButton
-              text={t('form.copy-page.copy-template')}
-              className="w-6 h-6"
-              outerDivClassName="p-1 rounded-enterprise-sm"
-            />
-          </CreateNewInstanceFromTemplate>
-        </div>
+      {learningScenario.accessLevel === 'global' && timeLeft <= 0 && (
+        <CreateNewInstanceFromTemplate
+          redirectPath="learning-scenarios"
+          createInstanceCallbackAction={handleCreateNewLearningScenarioFromTemplate}
+          templateId={learningScenario.id}
+          templatePictureId={learningScenario.pictureId ?? undefined}
+          className="w-8 h-8 flex items-center justify-center"
+          {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
+        >
+          <TelliClipboardButton
+            text={t('form.copy-page.copy-template')}
+            className="w-6 h-6"
+            outerDivClassName="p-1 rounded-enterprise-sm"
+          />
+        </CreateNewInstanceFromTemplate>
       )}
       {currentUserId === learningScenario.userId && (
-        <div onClick={(event) => event.stopPropagation()} className="flex items-center">
-          <DestructiveActionButton
-            aria-label={tCommon('delete')}
-            modalDescription={t('form.delete-description')}
-            modalTitle={t('form.delete-title')}
-            confirmText={tCommon('delete')}
-            actionFn={handleDeleteLearningScenario}
-            triggerButtonClassName={cn('border-transparent p-0', iconClassName)}
-          >
-            <TrashIcon aria-hidden="true" className="w-8 h-8" />
-            <span className="sr-only">{tCommon('delete')}</span>
-          </DestructiveActionButton>
-        </div>
+        <DestructiveActionButton
+          aria-label={tCommon('delete')}
+          modalDescription={t('form.delete-description')}
+          modalTitle={t('form.delete-title')}
+          confirmText={tCommon('delete')}
+          actionFn={handleDeleteLearningScenario}
+          triggerButtonClassName={cn('border-transparent p-0', iconClassName)}
+        >
+          <TrashIcon aria-hidden="true" className="w-8 h-8" />
+          <span className="sr-only">{tCommon('delete')}</span>
+        </DestructiveActionButton>
       )}
     </Link>
   );
