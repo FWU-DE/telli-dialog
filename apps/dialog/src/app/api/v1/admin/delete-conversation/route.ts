@@ -40,7 +40,10 @@ export async function DELETE(req: NextRequest) {
 }
 
 async function getUnusedS3Files() {
-  const s3Files = await listFilesFromS3();
+  const s3Files = await listFilesFromS3({
+    // delete unused files from S3 after the files are at least a day old to prevent accidental deletions during file upload
+    minAgeInSeconds: 24 * 60 * 60,
+  });
   const filesFromDb = new Set(await dbGetAllS3FileKeys());
   return s3Files.filter((file) => !filesFromDb.has(file));
 }

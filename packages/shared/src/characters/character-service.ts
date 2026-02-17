@@ -14,15 +14,15 @@ import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import {
   AccessLevel,
+  accessLevelSchema,
   CharacterFileMapping,
   CharacterSelectModel,
-  CharacterWithShareDataModel,
   characterTable,
   characterUpdateSchema,
+  CharacterWithShareDataModel,
   FileModel,
   fileTable,
   sharedCharacterConversation,
-  accessLevelSchema,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
@@ -35,6 +35,10 @@ import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
 import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
+
+export function buildCharacterPictureKey(characterId: string) {
+  return `characters/${characterId}/avatar`;
+}
 
 /**
  * Creates a new character for a user, optionally based on a template.
@@ -60,7 +64,7 @@ export const createNewCharacter = async ({
     let insertedCharacter = await copyCharacter(templateId, 'private', user.id, schoolId);
 
     if (templatePictureId !== undefined) {
-      const copyOfTemplatePicture = `characters/${insertedCharacter.id}/avatar`;
+      const copyOfTemplatePicture = buildCharacterPictureKey(insertedCharacter.id);
       await copyFileInS3({
         newKey: copyOfTemplatePicture,
         copySource: templatePictureId,
@@ -86,7 +90,7 @@ export const createNewCharacter = async ({
   const characterId = generateUUID();
   let copyOfTemplatePicture;
   if (templatePictureId !== undefined) {
-    copyOfTemplatePicture = `characters/${characterId}/avatar`;
+    copyOfTemplatePicture = buildCharacterPictureKey(characterId);
     await copyFileInS3({
       newKey: copyOfTemplatePicture,
       copySource: templatePictureId,
@@ -660,7 +664,7 @@ export async function uploadAvatarPictureForCharacter({
   const { isOwner } = await getCharacterInfo(characterId, userId);
   if (!isOwner) throw new ForbiddenError('Not authorized to upload picture for this character');
 
-  const key = `characters/${characterId}/avatar`;
+  const key = buildCharacterPictureKey(characterId);
 
   await uploadFileToS3({
     key: key,

@@ -228,13 +228,16 @@ async function getMaybeSignedUrlIfExists({
  * Lists all files in an S3 bucket with optional prefix filtering.
  *
  * @param prefix Optional prefix to filter objects (e.g., 'folder/subfolder/')
- * @param maxKeys Maximum number of keys to return per page (default: 1000)
+ * @param minAge Optional minimum age in seconds to filter objects. The minimum age is defined by the last modified timestamp.
+ * If set, only objects which have at least this age will be included.
  * @returns Array of objects keys
  */
 export async function listFilesFromS3({
   prefix,
+  minAgeInSeconds,
 }: {
   prefix?: string;
+  minAgeInSeconds?: number;
 } = {}) {
   const allObjects: string[] = [];
   let continuationToken: string | undefined = undefined;
@@ -249,11 +252,18 @@ export async function listFilesFromS3({
     const command = new ListObjectsV2Command(listParams);
     const response = await s3Client.send(command);
 
-    if (response.Contents) {
-      const keys = response.Contents.map((x) => x.Key).filter(
-        // Exclude folders, their keys end with '/'
-        (x): x is string => !!x && !x.endsWith('/'),
-      );
+    let objects = response.Contents;
+    if (objects) {
+      if (minAgeInSeconds !== undefined) {
+        const maxLastModified = new Date(Date.now() - minAgeInSeconds * 1000);
+        objects = objects.filter((x) => !x.LastModified || x.LastModified < maxLastModified);
+      }
+      const keys = objects
+        .map((x) => x.Key)
+        .filter(
+          // Exclude folders, their keys end with '/'
+          (x): x is string => !!x && !x.endsWith('/'),
+        );
       allObjects.push(...keys);
     }
 

@@ -44,6 +44,11 @@ export type LearningScenarioWithImage = LearningScenarioOptionalShareDataModel &
   maybeSignedPictureUrl: string | undefined;
 };
 
+export function buildLearningScenarioPictureKey(characterId: string) {
+  // the path still contains shared-chats because all existing learning scenarios store their picture in this folder in S3
+  return `shared-chats/${characterId}/avatar`;
+}
+
 /**
  * Returns all learning scenarios a user can access.
  */
@@ -549,8 +554,7 @@ async function copyAvatarPictureIfExists(
 ) {
   if (!sourcePictureId) return undefined;
 
-  // the path still contains shared-chats because all existing learning scenarios store their picture in this folder in S3
-  const newAvatarPictureId = `shared-chats/${newLearningScenarioId}/avatar`;
+  const newAvatarPictureId = buildLearningScenarioPictureKey(newLearningScenarioId);
   await copyFileInS3({
     copySource: sourcePictureId,
     newKey: newAvatarPictureId,
@@ -680,7 +684,7 @@ export async function enrichLearningScenarioWithPictureUrl({
     learningScenarios.map(async (scenario) => ({
       ...scenario,
       maybeSignedPictureUrl: await getReadOnlySignedUrl({
-        key: scenario.pictureId ? `shared-chats/${scenario.id}/avatar` : undefined,
+        key: scenario.pictureId ? buildLearningScenarioPictureKey(scenario.id) : undefined,
       }),
     })),
   );
@@ -723,7 +727,7 @@ export async function uploadAvatarPictureForLearningScenario({
   if (!isOwner)
     throw new ForbiddenError('Not authorized to upload picture for this learning scenario');
 
-  const key = `shared-chats/${learningScenarioId}/avatar`;
+  const key = buildLearningScenarioPictureKey(learningScenarioId);
 
   await uploadFileToS3({
     key: key,

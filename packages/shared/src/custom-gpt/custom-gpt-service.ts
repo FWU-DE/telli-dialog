@@ -32,6 +32,10 @@ import { generateUUID } from '@shared/utils/uuid';
 import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 
+export function buildCustomGptPictureKey(customGptId: string) {
+  return `custom-gpts/${customGptId}/avatar`;
+}
+
 /**
  * Loads custom gpt for edit view.
  * Throws if the user is not authorized to access the custom gpt:
@@ -176,7 +180,7 @@ export async function createNewCustomGpt({
     let insertedCustomGpt = await copyCustomGpt(templateId, 'private', user.id, schoolId);
 
     if (templatePictureId !== undefined) {
-      const copyOfTemplatePicture = `custom-gpts/${insertedCustomGpt.id}/avatar`;
+      const copyOfTemplatePicture = buildCustomGptPictureKey(insertedCustomGpt.id);
       await copyFileInS3({
         newKey: copyOfTemplatePicture,
         copySource: templatePictureId,
@@ -490,7 +494,7 @@ export async function uploadAvatarPictureForCustomGpt({
     throw new ForbiddenError('Not authorized to update avatar picture for this custom gpt');
   }
 
-  const key = `custom-gpts/${customGptId}/avatar`;
+  const key = buildCustomGptPictureKey(customGptId);
 
   await uploadFileToS3({
     key: key,
