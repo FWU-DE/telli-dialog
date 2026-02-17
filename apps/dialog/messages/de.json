@@ -293,6 +293,11 @@
       "attached-links-label": "Welche Webquellen dienen telli als Grundlage?",
       "attached-links-placeholder": "URL der Webseiten",
       "add-link": "Link hinzufügen",
+      "copy-page": {
+        "title": "Lernszenario in eigenen Bereich kopieren",
+        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere das Lernszenario in deinen privaten Bereich, um es anzupassen.",
+        "copy-template": "Lernszenario bearbeiten"
+      },
       "delete-title": "Lernszenario löschen",
       "delete-description": "Beim Löschen des Lernszenarios werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
       "delete-button": "Szenario endgültig löschen",

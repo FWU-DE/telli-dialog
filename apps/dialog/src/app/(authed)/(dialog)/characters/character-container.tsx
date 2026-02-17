@@ -15,12 +15,12 @@ import CountDownTimer from '../learning-scenarios/_components/count-down';
 import ShareIcon from '@/components/icons/share';
 import TrashIcon from '@/components/icons/trash';
 import SharedChatIcon from '@/components/icons/shared-chat';
-import { CreateNewCharacterFromTemplate } from '../characters/create-new-character-from-template';
 import { iconClassName } from '@/utils/tailwind/icon';
 import TelliClipboardButton from '@/components/common/clipboard-button';
 import { createNewCharacterAction } from './actions';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import AvatarPicture from '@/components/common/avatar-picture';
+import { CreateNewInstanceFromTemplate } from '../_components/create-new-instance-from-template';
 
 type CharacterContainerProps = CharacterWithShareDataModel & {
   currentUserId: string;
@@ -95,7 +95,7 @@ export default function CharacterContainer({
         />
       )}
       {character.accessLevel === 'global' && !(timeLeft > 0) && (
-        <CreateNewCharacterFromTemplate
+        <CreateNewInstanceFromTemplate
           templateId={id}
           templatePictureId={character.pictureId ?? undefined}
           className={'w-8 h-8'}
@@ -108,7 +108,7 @@ export default function CharacterContainer({
             className="w-6 h-6"
             outerDivClassName="p-1 rounded-enterprise-sm"
           />
-        </CreateNewCharacterFromTemplate>
+        </CreateNewInstanceFromTemplate>
       )}
 
       {timeLeft > 0 && (
