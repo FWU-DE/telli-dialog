@@ -6,8 +6,8 @@ test('test', async ({ page }) => {
   await page.goto('/custom?visibility=global');
   const copyButton = page.getByTitle('Kopieren').first();
 
-  expect(copyButton).toBeVisible();
-  expect(copyButton).toBeEnabled();
+  await expect(copyButton).toBeVisible();
+  await expect(copyButton).toBeEnabled();
   await copyButton.click();
 
   await page.waitForURL('/custom/editor/**');
