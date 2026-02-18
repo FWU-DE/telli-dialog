@@ -8,8 +8,10 @@ import type { NextRequest } from 'next/server';
 export function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
 
-  // Set the current pathname for use in server components
-  requestHeaders.set('x-pathname', request.nextUrl.pathname);
+  if (!request.nextUrl.pathname.startsWith('/logout')) {
+    // Set the current pathname for use in server components
+    requestHeaders.set('x-pathname', request.nextUrl.pathname);
+  }
 
   return NextResponse.next({
     request: {
