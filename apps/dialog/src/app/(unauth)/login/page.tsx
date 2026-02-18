@@ -5,11 +5,17 @@ import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) {
   const maybeUser = await getMaybeUser();
+  const { callbackUrl } = await searchParams;
 
   if (maybeUser !== null) {
-    redirect('/');
+    // User is already logged in, redirect to callbackUrl or home
+    redirect(callbackUrl || '/');
   }
 
   return (

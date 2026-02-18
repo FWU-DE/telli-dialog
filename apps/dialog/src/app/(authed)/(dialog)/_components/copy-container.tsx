@@ -1,7 +1,5 @@
 import { cn } from '@/utils/tailwind';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
-import { createNewCharacterAction } from '../characters/actions';
-import { createNewCustomGptAction } from '../custom/actions';
 import { useTranslations } from 'next-intl';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import { CreateNewInstanceFromTemplate } from './create-new-instance-from-template';
@@ -11,28 +9,28 @@ export function CopyContainer({
   templatePictureId,
   startedAt,
   maxUsageTimeLimit,
-  translation_path,
+  translationPath,
   redirectPath,
-}: {
-  templateId: string;
-  templatePictureId?: string;
+  createInstanceCallbackAction,
+}: Pick<
+  Parameters<typeof CreateNewInstanceFromTemplate>[0],
+  'redirectPath' | 'createInstanceCallbackAction' | 'templateId' | 'templatePictureId'
+> & {
   startedAt: Date | null;
   maxUsageTimeLimit: number | null;
-  translation_path: Parameters<typeof useTranslations>[0];
-  redirectPath: 'characters' | 'custom';
+  translationPath: Parameters<typeof useTranslations>[0];
 }) {
   const sharedChatTimeLeft = calculateTimeLeft({ startedAt, maxUsageTimeLimit });
   const sharedChatActive = sharedChatTimeLeft > 0;
   const containerBg = !sharedChatActive ? 'bg-secondary/10' : 'bg-gray-100/10';
-  const createInstanceCallback =
-    redirectPath === 'characters' ? createNewCharacterAction : createNewCustomGptAction;
-  const t = useTranslations(translation_path);
+  const t = useTranslations(translationPath);
   return (
     <CreateNewInstanceFromTemplate
       templateId={templateId}
       templatePictureId={templatePictureId}
       redirectPath={redirectPath}
-      createInstanceCallback={createInstanceCallback}
+      disabled={sharedChatActive}
+      createInstanceCallbackAction={createInstanceCallbackAction}
     >
       <div
         className={cn(

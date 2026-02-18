@@ -48,6 +48,7 @@ import AvatarPicture from '@/components/common/avatar-picture';
 import { WebsearchSource } from '@shared/db/types';
 import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
 import SharingSection from '@/components/forms/sharing-section';
+import { createNewCharacterAction } from '@/app/(authed)/(dialog)/characters/actions';
 
 type CharacterFormProps = CharacterWithShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -284,8 +285,9 @@ export default function CharacterForm({
       templatePictureId={character.pictureId ?? undefined}
       startedAt={character.startedAt}
       maxUsageTimeLimit={character.maxUsageTimeLimit}
-      translation_path="characters.form"
+      translationPath="characters.form"
       redirectPath="characters"
+      createInstanceCallbackAction={createNewCharacterAction}
     />
   ) : undefined;
 

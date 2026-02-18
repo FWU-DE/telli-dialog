@@ -22,7 +22,11 @@ import {
 import { logWarning } from '@shared/logging';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
-import { deleteLearningScenarioAction, linkFileToLearningScenarioAction } from '../../actions';
+import {
+  createNewLearningScenarioFromTemplateAction,
+  deleteLearningScenarioAction,
+  linkFileToLearningScenarioAction,
+} from '../../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
 import ShareContainer from './share-container';
 import React from 'react';
@@ -41,6 +45,8 @@ import AvatarPicture from '@/components/common/avatar-picture';
 import { WebsearchSource } from '@shared/db/types';
 import SharingSection from '@/components/forms/sharing-section';
 import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
+import { CopyContainer } from '@/app/(authed)/(dialog)/_components/copy-container';
+import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 
 export default function LearningScenarioForm({
   existingFiles,
@@ -67,6 +73,11 @@ export default function LearningScenarioForm({
   const tCommon = useTranslations('common');
 
   const { models } = useLlmModels();
+  const maybeDefaultModelId = getDefaultModel(models)?.id;
+
+  const isModelAvailable =
+    sharedSchoolChat.modelId && models.some((m) => m.id === sharedSchoolChat.modelId);
+  const selectedModelId = isModelAvailable ? sharedSchoolChat.modelId : maybeDefaultModelId;
 
   const {
     register,
@@ -81,11 +92,11 @@ export default function LearningScenarioForm({
       ...sharedSchoolChat,
       additionalInstructions: sharedSchoolChat.additionalInstructions ?? undefined,
       attachedLinks: initialLinks,
-      pictureId: sharedSchoolChat.pictureId ?? '',
       isSchoolShared: sharedSchoolChat.accessLevel === 'school',
-      hasLinkAccess: sharedSchoolChat.hasLinkAccess,
+      modelId: selectedModelId,
     },
   });
+
   const backUrl = buildGenericUrl(sharedSchoolChat.accessLevel, 'learning-scenarios');
   const { fields } = useFieldArray({
     control,
@@ -206,7 +217,7 @@ export default function LearningScenarioForm({
   function handleAutoSave() {
     if (isCreating || readOnly) return;
     const data = getValues();
-    const defaultData = { ...sharedSchoolChat, modelId: sharedSchoolChat.modelId };
+    const defaultData = { ...sharedSchoolChat };
     const newData = {
       ...defaultData,
       ...data,
@@ -241,9 +252,12 @@ export default function LearningScenarioForm({
     );
     router.replace(redirectUrl);
   }
-  function handleNavigateBack() {
+
+  function handleNavigateBack(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
     if (isCreating) {
       handleDeleteSharedChat();
+      return;
     }
     router.push(backUrl);
   }
@@ -251,15 +265,27 @@ export default function LearningScenarioForm({
   const getZodStringFieldMetadata = getZodStringFieldMetadataFn(sharedSchoolChatFormValuesSchema);
 
   const shareElement = !isCreating ? <ShareContainer {...sharedSchoolChat} /> : undefined;
+  const copyContainer = readOnly ? (
+    <CopyContainer
+      templateId={sharedSchoolChat.id}
+      templatePictureId={sharedSchoolChat.pictureId ?? undefined}
+      startedAt={sharedSchoolChat.startedAt}
+      maxUsageTimeLimit={sharedSchoolChat.maxUsageTimeLimit}
+      translationPath="learning-scenarios.form"
+      redirectPath="learning-scenarios"
+      createInstanceCallbackAction={createNewLearningScenarioFromTemplateAction}
+    />
+  ) : undefined;
+
   const generalSettings = (
-    <fieldset className="flex flex-col gap-4 mt-8">
-      <h2 className="font-medium mb-8">{t('settings')}</h2>
+    <fieldset className="flex flex-col gap-8 mt-16">
+      <h2 className="font-medium mb-2">{t('settings')}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
         <div className="flex gap-4 flex-col">
           <div className="flex gap-4 flex-col">
             <label className="text-sm font-medium">{tCommon('llm-model')}</label>
             <SelectLlmModelForm
-              selectedModel={sharedSchoolChat.modelId}
+              selectedModel={selectedModelId}
               onValueChange={(value) => {
                 setValue('modelId', value);
                 handleAutoSave();
@@ -319,21 +345,22 @@ export default function LearningScenarioForm({
   );
 
   return (
-    <>
+    <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
       <NavigateBack label={t('all-dialogs')} onClick={handleNavigateBack} />
 
-      <h1 className="text-3xl font-medium mt-4">
+      <h1 className="text-2xl font-medium mt-4">
         {isCreating ? t('title') : sharedSchoolChat.name}
       </h1>
 
-      <form className="flex flex-col gap-8 my-12" onSubmit={handleSubmit(onSubmit)}>
-        {shareElement}
-        {generalSettings}
+      {copyContainer}
+      {shareElement}
+      {generalSettings}
 
+      <fieldset className="flex flex-col gap-4 mt-12">
         <TextInput
           id="student-excercise"
-          label={t('student-excercise-label')}
-          placeholder={t('student-excercise-placeholder')}
+          label={t('student-exercise-label')}
+          placeholder={t('student-exercise-placeholder')}
           getValue={() => getValues('studentExercise') ?? ''}
           inputType="textarea"
           rows={5}
@@ -355,63 +382,66 @@ export default function LearningScenarioForm({
           onBlur={handleAutoSave}
           readOnly={readOnly}
         />
-        <div className="grid grid-cols-3 gap-6">
-          <TextInput
-            id="school-type"
-            label={t('school-type-label')}
-            placeholder={t('school-type-placeholder')}
-            getValue={() => getValues('schoolType') ?? ''}
-            {...register('schoolType')}
-            {...getZodStringFieldMetadata('schoolType')}
-            onBlur={handleAutoSave}
-            readOnly={readOnly}
-          />
+      </fieldset>
+      <div className="grid grid-cols-3 gap-6 mt-8">
+        <TextInput
+          id="school-type"
+          label={t('school-type-label')}
+          placeholder={t('school-type-placeholder')}
+          getValue={() => getValues('schoolType') ?? ''}
+          {...register('schoolType')}
+          {...getZodStringFieldMetadata('schoolType')}
+          onBlur={handleAutoSave}
+          readOnly={readOnly}
+        />
 
-          <TextInput
-            id="gradeLevel"
-            label={t('grade-label')}
-            placeholder={t('grade-placeholder')}
-            getValue={() => getValues('gradeLevel') ?? ''}
-            {...register('gradeLevel')}
-            {...getZodStringFieldMetadata('gradeLevel')}
-            onBlur={handleAutoSave}
-            readOnly={readOnly}
-          />
+        <TextInput
+          id="gradeLevel"
+          label={t('grade-label')}
+          placeholder={t('grade-placeholder')}
+          getValue={() => getValues('gradeLevel') ?? ''}
+          {...register('gradeLevel')}
+          {...getZodStringFieldMetadata('gradeLevel')}
+          onBlur={handleAutoSave}
+          readOnly={readOnly}
+        />
 
-          <TextInput
-            id="subject"
-            label={t('subject-label')}
-            placeholder={t('subject-placeholder')}
-            getValue={() => getValues('subject') ?? ''}
-            {...getZodStringFieldMetadata('subject')}
-            {...register('subject')}
-            onBlur={handleAutoSave}
-            readOnly={readOnly}
-          />
-        </div>
-        <div className="flex flex-col gap-4">
-          <h2 className="text-md font-medium">{t('additional-assets-label')}</h2>
-          <span className="text-base">{t('additional-assets-content')}</span>
+        <TextInput
+          id="subject"
+          label={t('subject-label')}
+          placeholder={t('subject-placeholder')}
+          getValue={() => getValues('subject') ?? ''}
+          {...getZodStringFieldMetadata('subject')}
+          {...register('subject')}
+          onBlur={handleAutoSave}
+          readOnly={readOnly}
+        />
+      </div>
+      <fieldset className="flex flex-col gap-4 mt-8">
+        <h2 className="text-md font-medium">{t('additional-assets-label')}</h2>
+        <span className="text-base">{t('additional-assets-content')}</span>
 
-          <FileManagement
-            files={_files}
-            setFiles={setFiles}
-            initialFiles={initialFiles}
-            onFileUploaded={handleNewFile}
-            onDeleteFile={handleDeattachFile}
-            readOnly={readOnly}
-            translationNamespace="learning-scenarios.form"
-          />
-          <AttachedLinks
-            fields={fields}
-            getValues={() => getValues('attachedLinks')}
-            setValue={(value) => setValue('attachedLinks', value)}
-            t={t}
-            tToast={tToast}
-            readOnly={readOnly}
-            handleAutosave={handleAutoSave}
-          />
-        </div>
+        <FileManagement
+          files={_files}
+          setFiles={setFiles}
+          initialFiles={initialFiles}
+          onFileUploaded={handleNewFile}
+          onDeleteFile={handleDeattachFile}
+          readOnly={readOnly}
+          translationNamespace="learning-scenarios.form"
+        />
+        <AttachedLinks
+          fields={fields}
+          getValues={() => getValues('attachedLinks')}
+          setValue={(value) => setValue('attachedLinks', value)}
+          t={t}
+          tToast={tToast}
+          readOnly={readOnly}
+          handleAutosave={handleAutoSave}
+        />
+      </fieldset>
+
+      <div className="w-full mt-8">
         <SharingSection
           control={control}
           schoolSharingName="isSchoolShared"
@@ -419,44 +449,42 @@ export default function LearningScenarioForm({
           onShareChange={handleSharingChange}
           disabled={readOnly}
         />
-        {!isCreating && !readOnly && (
-          <section className="mt-8">
-            <h3 className="font-medium">{t('delete-title')}</h3>
-            <p className="mt-4">{t('delete-description')}</p>
-            <DestructiveActionButton
-              triggerButtonClassName={cn(buttonDeleteClassName, 'mt-10')}
-              modalDescription={t('delete-confirm')}
-              modalTitle={t('delete-title')}
-              confirmText={tCommon('delete')}
-              actionFn={handleDeleteSharedChat}
-            >
-              {t('delete-button')}
-            </DestructiveActionButton>
-          </section>
-        )}
-        {isCreating && (
-          <section className="mt-8 flex gap-4 items-center">
-            <button
-              className={cn(
-                buttonSecondaryClassName,
-                'hover:border-primary hover:bg-primary-hover',
-              )}
-              onClick={handleNavigateBack}
-              type="button"
-            >
-              {tCommon('cancel')}
-            </button>
-            <button
-              className={cn(buttonPrimaryClassName)}
-              disabled={!isValid}
-              onClick={handleCreateSharedChat}
-              type="button"
-            >
-              {t('button-create')}
-            </button>
-          </section>
-        )}
-      </form>
-    </>
+      </div>
+
+      {!isCreating && !readOnly && (
+        <section className="mt-8">
+          <h3 className="font-medium">{t('delete-title')}</h3>
+          <p className="mt-4">{t('delete-description')}</p>
+          <DestructiveActionButton
+            triggerButtonClassName={cn(buttonDeleteClassName, 'mt-10')}
+            modalDescription={t('delete-confirm')}
+            modalTitle={t('delete-title')}
+            confirmText={tCommon('delete')}
+            actionFn={handleDeleteSharedChat}
+          >
+            {t('delete-button')}
+          </DestructiveActionButton>
+        </section>
+      )}
+      {isCreating && (
+        <section className="mt-8 flex gap-4 items-center">
+          <button
+            className={cn(buttonSecondaryClassName, 'hover:border-primary hover:bg-primary-hover')}
+            onClick={handleNavigateBack}
+            type="button"
+          >
+            {tCommon('cancel')}
+          </button>
+          <button
+            className={cn(buttonPrimaryClassName)}
+            disabled={!isValid}
+            onClick={handleCreateSharedChat}
+            type="button"
+          >
+            {t('button-create')}
+          </button>
+        </section>
+      )}
+    </form>
   );
 }

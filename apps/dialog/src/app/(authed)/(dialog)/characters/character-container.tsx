@@ -100,7 +100,7 @@ export default function CharacterContainer({
           templatePictureId={character.pictureId ?? undefined}
           className={'w-8 h-8'}
           redirectPath="characters"
-          createInstanceCallback={createNewCharacterAction}
+          createInstanceCallbackAction={createNewCharacterAction}
           {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
         >
           <TelliClipboardButton

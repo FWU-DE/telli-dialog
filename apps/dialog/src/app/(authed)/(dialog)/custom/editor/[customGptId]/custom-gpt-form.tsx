@@ -34,7 +34,11 @@ import {
   updateCustomGptPictureAction,
   uploadAvatarPictureForCustomGptAction,
 } from './actions';
-import { deleteFileMappingAndEntityAction, linkFileToCustomGptAction } from '../../actions';
+import {
+  createNewCustomGptAction,
+  deleteFileMappingAndEntityAction,
+  linkFileToCustomGptAction,
+} from '../../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
 import FileManagement from '@/components/forms/file-management';
 import { CopyContainer } from '../../../_components/copy-container';
@@ -296,8 +300,9 @@ export default function CustomGptForm({
       templatePictureId={customGpt.pictureId ?? undefined}
       startedAt={null}
       maxUsageTimeLimit={null}
-      translation_path="custom-gpt.form"
+      translationPath="custom-gpt.form"
       redirectPath="custom"
+      createInstanceCallbackAction={createNewCustomGptAction}
     />
   ) : undefined;
 
