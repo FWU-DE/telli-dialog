@@ -463,13 +463,12 @@ export default function CustomGptForm({
         />
       </fieldset>
       <div className="w-full mt-8">
-        {userRole === 'teacher' && (
+        {userRole === 'teacher' && !readOnly && (
           <SharingSection
             control={control}
             schoolSharingName="isSchoolShared"
             linkSharingName="hasLinkAccess"
             onShareChange={handleSharingChange}
-            disabled={readOnly}
           />
         )}
       </div>

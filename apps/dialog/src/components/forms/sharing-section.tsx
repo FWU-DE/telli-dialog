@@ -19,7 +19,6 @@ type SharingSectionProps<T extends FieldValues> = {
 
 export default function SharingSection<T extends FieldValues>({
   control,
-  disabled = false,
   schoolSharingName,
   linkSharingName,
   onShareChange,
@@ -57,7 +56,6 @@ export default function SharingSection<T extends FieldValues>({
                   field.onChange(value);
                   onShareChange?.();
                 }}
-                disabled={disabled}
               />
             )}
           />
@@ -76,15 +74,14 @@ export default function SharingSection<T extends FieldValues>({
                     field.onChange(value);
                     onShareChange?.();
                   }}
-                  disabled={disabled}
                 />
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  disabled={disabled || !field.value}
+                  disabled={!field.value}
                   className={cn(
                     'flex items-center gap-2 px-4 py-2 rounded-full text-white font-medium',
-                    field.value && !disabled
+                    field.value
                       ? 'bg-primary hover:bg-primary-dark'
                       : 'bg-gray-300 cursor-not-allowed',
                   )}
