@@ -142,6 +142,18 @@ export async function getSharedLearningScenario({
 }
 
 /**
+ * Schema for updating character details that are allowed to be changed by the user.
+ */
+const updateLearningScenarioSchema = learningScenarioUpdateSchema.omit({
+  accessLevel: true,
+  isDeleted: true,
+  originalLearningScenarioId: true,
+  pictureId: true,
+  schoolId: true,
+});
+export type UpdateLearningScenarioActionModel = z.infer<typeof updateLearningScenarioSchema>;
+
+/**
  * User updates a learning scenario.
  * @throws ZodError if the data is invalid.
  * @throws ForbiddenError if the user is not the owner of the learning scenario.
@@ -160,7 +172,7 @@ export async function updateLearningScenario({
   const { isOwner } = await getLearningScenarioInfo(learningScenarioId, user.id);
   if (!isOwner) throw new ForbiddenError('Not authorized to update this learning scenario');
 
-  const parsedData = learningScenarioUpdateSchema.parse(data);
+  const parsedData = updateLearningScenarioSchema.parse(data);
 
   const [updatedLearningScenario] = await db
     .update(learningScenarioTable)
