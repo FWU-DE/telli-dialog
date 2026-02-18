@@ -86,7 +86,7 @@ export default function LearningScenarioForm({
     setValue,
     control,
     formState: { isValid },
-  } = useForm<SharedSchoolChatFormValues>({
+  } = useForm({
     resolver: zodResolver(sharedSchoolChatFormValuesSchema),
     defaultValues: {
       ...sharedSchoolChat,

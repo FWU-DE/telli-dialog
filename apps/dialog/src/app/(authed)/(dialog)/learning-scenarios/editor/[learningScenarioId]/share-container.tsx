@@ -4,7 +4,6 @@ import { labelClassName } from '@/utils/tailwind/input';
 import CountDownTimer from '../../_components/count-down';
 import {
   sharedConversationFormValuesSchema,
-  SharedConversationShareFormValues,
   telliPointsPercentageValues,
   usageTimeValuesInMinutes,
 } from './schema';
@@ -34,15 +33,14 @@ export default function ShareContainer({ ...learningScenario }: ShareContainerPr
   const sharedChatTimeLeft = calculateTimeLeft(learningScenario);
   const sharedChatActive = sharedChatTimeLeft > 0;
 
-  const { register: registerShare, getValues: getValuesShare } =
-    useForm<SharedConversationShareFormValues>({
-      resolver: zodResolver(sharedConversationFormValuesSchema),
-      defaultValues: {
-        telliPointsPercentageLimit: learningScenario.telliPointsLimit ?? 10,
-        usageTimeLimit: learningScenario.maxUsageTimeLimit ?? 45,
-      },
-      disabled: sharedChatActive,
-    });
+  const { register: registerShare, getValues: getValuesShare } = useForm({
+    resolver: zodResolver(sharedConversationFormValuesSchema),
+    defaultValues: {
+      telliPointsPercentageLimit: learningScenario.telliPointsLimit ?? 10,
+      usageTimeLimit: learningScenario.maxUsageTimeLimit ?? 45,
+    },
+    disabled: sharedChatActive,
+  });
 
   const shareUILink = `/learning-scenarios/editor/${learningScenario.id}/share`;
 

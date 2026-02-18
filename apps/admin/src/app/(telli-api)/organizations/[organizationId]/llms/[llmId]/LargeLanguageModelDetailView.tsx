@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ui/c
 import { Button } from '@ui/components/Button';
 import { FormField } from '@ui/components/form/FormField';
 import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
-import { LargeLanguageModel } from '../../../../../../types/large-language-model';
+import { LargeLanguageModel } from '@/types/large-language-model';
 import { createLLMAction, updateLLMAction } from './actions';
 import { ROUTES } from '@/consts/routes';
 import { FormErrorDisplay } from '@/components/FormErrorDisplay';
@@ -59,14 +59,14 @@ export function LargeLanguageModelDetailView({
     control,
     formState: { isValid, errors, isSubmitting, isDirty },
     handleSubmit,
-  } = useForm<LLMForm>({
+  } = useForm({
     resolver: zodResolver(llmFormSchema),
     defaultValues: model
       ? {
           name: model.name,
           displayName: model.displayName,
           provider: model.provider,
-          description: model.description ?? '',
+          description: model.description,
           setting: JSON.stringify(model.setting, null, 2),
           priceMetadata: JSON.stringify(model.priceMetadata, null, 2),
           supportedImageFormats: JSON.stringify(model.supportedImageFormats, null, 2),

@@ -1,10 +1,9 @@
 import { cn } from '@/utils/tailwind';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
+import { buttonPrimaryClassName, buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { labelClassName } from '@/utils/tailwind/input';
 import {
-  SharedConversationShareFormValues,
-  telliPointsPercentageValues,
   sharedConversationFormValuesSchema,
+  telliPointsPercentageValues,
   usageTimeValuesInMinutes,
 } from '../../../learning-scenarios/editor/[learningScenarioId]/schema';
 import { CharacterWithShareDataModel } from '@shared/db/schema';
@@ -14,7 +13,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { selectSVGBackground } from '@/utils/tailwind/select';
-import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { useTranslations } from 'next-intl';
 import CountDownTimer from '../../../learning-scenarios/_components/count-down';
 import FilledShareIcon from '@/components/icons/filled-share';
@@ -34,15 +32,14 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
   const sharedChatTimeLeft = calculateTimeLeft(character);
   const sharedChatActive = sharedChatTimeLeft > 0;
 
-  const { register: registerShare, getValues: getValuesShare } =
-    useForm<SharedConversationShareFormValues>({
-      resolver: zodResolver(sharedConversationFormValuesSchema),
-      defaultValues: {
-        telliPointsPercentageLimit: character.telliPointsLimit ?? 10,
-        usageTimeLimit: character.maxUsageTimeLimit ?? 45,
-      },
-      disabled: sharedChatActive,
-    });
+  const { register: registerShare, getValues: getValuesShare } = useForm({
+    resolver: zodResolver(sharedConversationFormValuesSchema),
+    defaultValues: {
+      telliPointsPercentageLimit: character.telliPointsLimit ?? 10,
+      usageTimeLimit: character.maxUsageTimeLimit ?? 45,
+    },
+    disabled: sharedChatActive,
+  });
 
   const shareUILink = `/characters/editor/${character.id}/share`;
 

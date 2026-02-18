@@ -4,14 +4,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import DotsHorizontalIcon from '@/components/icons/dots-horizontal';
 import CheckIcon from '@/components/icons/check';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useSidebarVisibility } from './sidebar-provider';
 import useBreakpoints from '@/components/hooks/use-breakpoints';
 import { cn } from '@/utils/tailwind';
-import { usePathname } from 'next/navigation';
 import { type ConversationModel } from '@shared/db/types';
 import Link from 'next/link';
 import { useTheme } from '@/hooks/use-theme';
@@ -36,7 +35,7 @@ export default function ConversationItem({
   onUpdateConversation(name: string): void;
   onDeleteConversation(conversationId: string): void;
 }) {
-  const renameForm = useForm<RenameData>({
+  const renameForm = useForm({
     resolver: zodResolver(renameSchema),
     defaultValues: { name: conversation.name ?? '' },
   });
