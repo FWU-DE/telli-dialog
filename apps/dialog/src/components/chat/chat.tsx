@@ -133,6 +133,8 @@ export default function Chat({
       // Signal that we need to sync the router (done in useEffect to avoid setState during render)
       if (isFirstMessageRef.current) {
         isFirstMessageRef.current = false;
+        // Preserve scroll state across the remount caused by router.replace()
+        preserveScrollState();
         setNeedsRouterSync(true);
       }
 
@@ -150,7 +152,10 @@ export default function Chat({
 
   const { error, handleError, resetError } = useCheckStatusCode();
 
-  const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, status]);
+  const { scrollRef, reactivateAutoScrolling, preserveScrollState } = useAutoScroll([
+    messages,
+    status,
+  ]);
 
   useEffect(() => {
     const fetchData = async () => {
