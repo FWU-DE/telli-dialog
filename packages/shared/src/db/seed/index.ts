@@ -1,4 +1,8 @@
-import { insertTemplateCharacters, insertTemplateCustomGpt } from './default-characters';
+import {
+  insertTemplateCharacters,
+  insertTemplateCustomGpt,
+  insertTemplateLearningScenarios,
+} from './default-templates';
 import { insertFederalStates } from './federal-state';
 import { insertHelpModeGpt } from './help-mode';
 import { insertDummyUser } from './user-entity';
@@ -9,6 +13,7 @@ async function add() {
     insertHelpModeGpt({ skip: false }),
     insertTemplateCharacters(),
     insertTemplateCustomGpt(),
+    insertTemplateLearningScenarios(),
   ]);
 }
 

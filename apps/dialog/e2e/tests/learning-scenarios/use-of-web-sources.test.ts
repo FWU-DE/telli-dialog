@@ -1,6 +1,19 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
 import { sendMessage } from '../../utils/chat';
+import { configureLearningScenario } from '../../utils/learning-scenario';
+
+const data = {
+  additionalInstructions:
+    'Der Chatbot soll aus der Perspektive eines neutralen Vermittlers im Nahostkonflikt antworten und verschiedene Sichtweisen beleuchten.',
+  description: 'Konfliktanalyse und Lösungsansätze im Nahostkonflikt',
+  gradeLevel: '11. Klasse',
+  name: 'Analyse des Nahostkonflikts – Gruppe 1 Vermittler',
+  schoolType: 'Gymnasium',
+  studentExercise:
+    'Schüler sollen die Ursachen, den Verlauf und mögliche Lösungsansätze des Nahostkonflikts analysieren.',
+  subject: 'Politik',
+};
 
 test('teacher can create shared chat with web sources, student can join chat and reference web sources', async ({
   page,
@@ -13,30 +26,7 @@ test('teacher can create shared chat with web sources, student can join chat and
   await page.waitForURL('/learning-scenarios/**');
 
   // configure form
-  await page
-    .getByLabel('Wie heißt das Szenario? *')
-    .fill('Analyse des Nahostkonflikts – Gruppe 1 Vermittler');
-
-  await page
-    .getByLabel('Wie kann das Szenario kurz beschrieben werden?')
-    .fill('Konfliktanalyse und Lösungsansätze im Nahostkonflikt');
-
-  await page.getByLabel('Schultyp').fill('Gymnasium');
-  await page.getByLabel('Klassenstufe').fill('11. Klasse');
-  await page.getByLabel('Fach').fill('Politik');
-
-  await page
-    .getByLabel('Wie lautet der Auftrag an die Lernenden?')
-    .fill(
-      'Schüler sollen die Ursachen, den Verlauf und mögliche Lösungsansätze des Nahostkonflikts analysieren.',
-    );
-
-  await page
-    .getByLabel('Wie verhält sich telli im Lernszenario? *')
-    .fill(
-      'Der Chatbot soll aus der Perspektive eines neutralen Vermittlers im Nahostkonflikt antworten und verschiedene Sichtweisen beleuchten.',
-    );
-
+  await configureLearningScenario(page, data);
   await page
     .getByRole('textbox', { name: 'URL der Webseiten' })
     .fill(

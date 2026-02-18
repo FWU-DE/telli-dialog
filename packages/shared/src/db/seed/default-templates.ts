@@ -1,4 +1,9 @@
-import { CharacterInsertModel, CustomGptInsertModel } from '../schema';
+import {
+  CharacterInsertModel,
+  CustomGptInsertModel,
+  LearningScenarioInsertModel,
+  learningScenarioTable,
+} from '../schema';
 import * as fs from 'fs';
 import * as path from 'path';
 import { uploadFileToS3 } from '../../s3';
@@ -7,13 +12,16 @@ import { DUMMY_USER_ID } from './user-entity';
 import { dbUpsertCustomGpt } from '../functions/custom-gpts';
 import { updateTemplateMappings } from '@shared/templates/template-service';
 import { FEDERAL_STATES } from './federal-state';
+import { dbGetModelByName } from '@shared/db/functions/llm-model';
+import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
+import { db } from '@shared/db';
 
 export async function insertTemplateCharacters() {
   await processStaticJpegFiles(
     `${import.meta.dirname}/assets/template-characters`,
     'characters/_templates',
   );
-  for (const templateCharacter of defaultCharacters) {
+  for (const templateCharacter of defaultTemplates) {
     const result = await dbCreateCharacter(templateCharacter);
     const id = result && result[0] ? result[0].id : undefined;
     if (!id) {
@@ -52,6 +60,42 @@ export async function insertTemplateCustomGpt() {
     );
   }
   console.log('template custom gpt seed successful');
+}
+
+export async function insertTemplateLearningScenarios() {
+  await processStaticJpegFiles(
+    `${import.meta.dirname}/assets/template-learning-scenarios`,
+    'shared-chats/_templates',
+  );
+
+  const modelId = (await dbGetModelByName(DEFAULT_CHAT_MODEL))?.id;
+  if (!modelId) {
+    throw new Error('No default model found');
+  }
+
+  for (const templateLearningScenario of defaultLearningScenario) {
+    const [newLearningScenario] = await db
+      .insert(learningScenarioTable)
+      .values({ ...templateLearningScenario, modelId })
+      .onConflictDoUpdate({
+        target: learningScenarioTable.id,
+        set: { ...templateLearningScenario, modelId },
+      })
+      .returning();
+
+    if (!newLearningScenario) {
+      console.log('Failed to seed template learning scenario', {
+        learningScenarioName: templateLearningScenario.name,
+      });
+      continue;
+    }
+    await updateTemplateMappings(
+      'learning-scenario',
+      newLearningScenario.id,
+      FEDERAL_STATES.map((fs) => ({ federalStateId: fs.id, isMapped: true })),
+    );
+  }
+  console.log('template learning scenario seed successful');
 }
 
 async function findMatchingFiles(directoryPath: string, pattern: string): Promise<string[]> {
@@ -113,9 +157,9 @@ async function processStaticJpegFiles(rootFolder: string, rootRemoteDir: string)
 }
 
 /**
- * One example value for characters and customGpt for local development and e2e tests
+ * One example value for characters, learning scenarios, and customGpt for local development and e2e tests
  */
-export const defaultCharacters: Omit<CharacterInsertModel, 'modelId'>[] = [
+export const defaultTemplates: Omit<CharacterInsertModel, 'modelId'>[] = [
   {
     userId: DUMMY_USER_ID,
     name: 'Johann Wolfgang von Goethe',
@@ -155,5 +199,27 @@ export const defaultCustomGpt: CustomGptInsertModelWithId[] = [
       'Erstelle mir einen Elternbrief zur Einladung für den Elternsprechabend in leichter Sprache (Deutsch, Kroatisch, Arabisch, Albanisch und Englisch).',
       'Erstelle mir einen Ablauf für einen 90-minütigen Elternabend.',
     ],
+  },
+];
+
+export const defaultLearningScenario: Omit<LearningScenarioInsertModel, 'modelId'>[] = [
+  {
+    id: 'bd84c3e7-7789-4284-9125-196d321c3715',
+    userId: DUMMY_USER_ID,
+    name: 'Lern was über KI',
+    description: 'Die Schüler sollen lernen wie KI funktioniert',
+    studentExercise: `1. Was kann KI?
+2. Womit hat KI Schwächen?
+3. Wo macht KI Fehler?
+4. Wie kannst du beurteilen, was von KI richtig oder falsch ist?`,
+    additionalInstructions:
+      'Du bist eine künstliche Intelligenz. Du bringst dem Schüler bei, was du gut machst, wo deine Schwächen liegen und wo du einfach nur halluzinierst. Wenn du Fehler machst, stehe dafür ein.',
+    accessLevel: 'global',
+    pictureId: 'shared-chats/_templates/AI-Lernszenario_Static',
+
+    gradeLevel: '',
+    schoolId: null,
+    schoolType: '',
+    subject: '',
   },
 ];

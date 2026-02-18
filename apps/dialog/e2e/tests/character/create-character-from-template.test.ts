@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
+import { nanoid } from 'nanoid';
 
 test('create character from template', async ({ page }) => {
   await login(page, 'teacher');
@@ -7,14 +8,14 @@ test('create character from template', async ({ page }) => {
   const link = page.getByRole('link', { name: 'Johann Wolfgang von Goethe' });
   const copyButton = link.getByRole('button', { name: 'Kopieren' });
 
-  expect(link).toBeVisible();
-  expect(copyButton).toBeVisible();
-  expect(copyButton).toBeEnabled();
+  await expect(link).toBeVisible();
+  await expect(copyButton).toBeVisible();
+  await expect(copyButton).toBeEnabled();
   await copyButton.click();
   await page.waitForURL('/characters/editor/**');
-  await page
-    .getByLabel('Wie heißt die simulierte Person? *')
-    .fill('Johann Wolfgang von Goethe Individuell');
+
+  const name = 'Johann Wolfgang von Goethe ' + nanoid(8);
+  await page.getByLabel('Wie heißt die simulierte Person? *').fill(name);
   await page.getByRole('textbox', { name: 'Schultyp' }).click();
   await page.getByRole('textbox', { name: 'Schultyp' }).fill('Gymnasium');
   await page.getByRole('textbox', { name: 'Schultyp' }).press('Tab');
@@ -23,5 +24,5 @@ test('create character from template', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Fach' }).fill('Geschichte');
   await page.getByRole('button', { name: 'Dialogpartner erstellen' }).click();
   await page.waitForURL('/characters?visibility=private');
-  await expect(page.locator('body')).toContainText('Johann Wolfgang von Goethe Individuell');
+  await expect(page.locator('body')).toContainText(name);
 });

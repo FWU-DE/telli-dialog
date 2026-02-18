@@ -52,7 +52,7 @@ jobs:
           RABBITMQ_DEFAULT_PASS: password
           RABBITMQ_DEFAULT_USER: user
       crawl4ai:
-        image: unclecode/crawl4ai:0.7.8
+        image: unclecode/crawl4ai:0.8.0
         options: --shm-size=2gb
         ports:
           - 11235:11235
@@ -152,13 +152,20 @@ jobs:
       - name: Run migrations and seed database (if applicable)
         run: pnpm --filter @telli/shared db:migrate && pnpm --filter @telli/shared db:seed
 
+      # Build and start the app the same way as in the prod container (Next.js standalone)
       - name: Start application
         run: |
-          NODE_ENV=test pnpm --filter telli-dialog build:envless
-          pnpm --filter telli-dialog start &
+          pnpm --filter telli-dialog build:envless
+          cd apps/dialog
+          mkdir -p .next/standalone/apps/dialog/.next
+          cp -a .next/static .next/standalone/apps/dialog/.next/
+          cp -a public .next/standalone/apps/dialog/
+          cd .next/standalone
+          node ./apps/dialog/server.js > /tmp/telli-dialog.log &
         env:
           NEXT_TELEMETRY_DISABLED: 1
           TURBO_TELEMETRY_DISABLED: 1
+          NODE_ENV: test
 
       - name: Run E2E tests
         run: pnpm --filter telli-dialog e2e
@@ -177,3 +184,9 @@ jobs:
         run: |
           echo "=== telli-api logs ==="
           docker logs --timestamps telli-api || true
+
+      - name: Print telli-dialog logs
+        if: always()
+        run: |
+          echo "=== telli-dialog logs ==="
+          cat /tmp/telli-dialog.log || true
