@@ -43,7 +43,7 @@ export default function SharingSection<T extends FieldValues>({
   return (
     <fieldset>
       <legend className="font-medium mb-4">{t('label')}</legend>
-      <div className="flex items-center gap-6 p-4 border border-gray-200 rounded-lg">
+      <div className="flex items-center gap-6 p-4 border border-gray-200 rounded">
         {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && schoolSharingName && (
           <Controller
             name={schoolSharingName}
