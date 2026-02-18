@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import { db } from '@shared/db';
 import { eq } from 'drizzle-orm';
 import { sharedCharacterConversation, sharedLearningScenarioTable } from '@shared/db/schema';
@@ -8,6 +9,15 @@ export type ChatInfo = {
   id: string;
   inviteCode: string;
 };
+
+export async function requireValidInviteCode(inviteCode: string): Promise<{ chatInfo: ChatInfo }> {
+  try {
+    const chatInfo = await getChatIdByInviteCode(inviteCode);
+    return { chatInfo };
+  } catch (error) {
+    redirect('/login');
+  }
+}
 
 export async function getChatIdByInviteCode(inviteCode: string): Promise<ChatInfo> {
   const [maybeSharedChat, maybeCharacterChat] = await Promise.all([
