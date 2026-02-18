@@ -155,17 +155,17 @@ jobs:
       # Build and start the app the same way as in the prod container (Next.js standalone)
       - name: Start application
         run: |
-          NODE_ENV=test pnpm --filter telli-dialog build:envless
+          pnpm --filter telli-dialog build:envless
           cd apps/dialog
           mkdir -p .next/standalone/apps/dialog/.next
           cp -a .next/static .next/standalone/apps/dialog/.next/
           cp -a public .next/standalone/apps/dialog/
           cd .next/standalone
-          node ./apps/dialog/server.js
-          pnpm --filter telli-dialog start > /tmp/telli-dialog.log &
+          node ./apps/dialog/server.js > /tmp/telli-dialog.log &
         env:
           NEXT_TELEMETRY_DISABLED: 1
           TURBO_TELEMETRY_DISABLED: 1
+          NODE_ENV: test
 
       - name: Run E2E tests
         run: pnpm --filter telli-dialog e2e

@@ -45,6 +45,7 @@ export function logError(message: string, error?: unknown, extra?: Record<string
   }
 
   if (isDevelopment()) {
-    console.log(`[ERROR] ${message}`, error);
+    const args = extra === undefined ? [] : [extra];
+    console.log(`[ERROR] ${message}`, error, ...args);
   }
 }
