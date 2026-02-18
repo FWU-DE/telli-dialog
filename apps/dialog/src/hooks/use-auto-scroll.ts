@@ -100,6 +100,7 @@ export function useAutoScroll(dependencies: React.DependencyList) {
 
   // Save current scroll position to sessionStorage so it survives a remount
   const preserveScrollState = useCallback(() => {
+    if (typeof window === 'undefined') return;
     const { isAutoScrollEnabled: enabled, scrollElement: el } = scrollStateRef.current;
     if (!enabled) {
       sessionStorage.setItem(STORAGE_KEY_AUTO_SCROLL_PAUSED, '1');
