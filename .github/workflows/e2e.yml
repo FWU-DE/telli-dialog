@@ -152,9 +152,16 @@ jobs:
       - name: Run migrations and seed database (if applicable)
         run: pnpm --filter @telli/shared db:migrate && pnpm --filter @telli/shared db:seed
 
+      # Build and start the app the same way as in the prod container (Next.js standalone)
       - name: Start application
         run: |
           NODE_ENV=test pnpm --filter telli-dialog build:envless
+          cd apps/dialog
+          mkdir -p .next/standalone/apps/dialog/.next
+          cp -a .next/static .next/standalone/apps/dialog/.next/
+          cp -a public .next/standalone/apps/dialog/
+          cd .next/standalone
+          node ./apps/dialog/server.js
           pnpm --filter telli-dialog start > /tmp/telli-dialog.log &
         env:
           NEXT_TELEMETRY_DISABLED: 1
