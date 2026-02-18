@@ -4,6 +4,7 @@ import { LlmModelSelectModel } from '@shared/db/schema';
 import { handleImageGeneration } from './image-generation-service';
 import { ImageStyle } from '@shared/utils/chat';
 import { runServerAction } from '@shared/actions/run-server-action';
+import { requireAuth } from '@/auth/requireAuth';
 
 /**
  * Generates an image within an existing conversation using the image generation service
@@ -18,9 +19,13 @@ export async function generateImageAction({
   model: LlmModelSelectModel;
   style?: ImageStyle;
 }) {
+  const { user, federalState } = await requireAuth();
+  
   return runServerAction(handleImageGeneration)({
     prompt,
     model,
     style,
+    userId: user.id,
+    federalStateId: federalState.id,
   });
 }
