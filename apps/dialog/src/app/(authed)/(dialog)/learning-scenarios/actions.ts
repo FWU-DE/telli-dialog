@@ -4,14 +4,14 @@ import { requireAuth } from '@/auth/requireAuth';
 import { runServerAction } from '@shared/actions/run-server-action';
 import {
   createNewLearningScenario,
+  createNewLearningScenarioFromTemplate,
   deleteLearningScenario,
   linkFileToLearningScenario,
 } from '@shared/learning-scenarios/learning-scenario-service';
-import { createNewLearningScenarioFromTemplate } from '@shared/templates/template-service';
 
 export async function deleteLearningScenarioAction({ id }: { id: string }) {
   const { user } = await requireAuth();
-  return runServerAction(deleteLearningScenario)({ learningScenarioId: id, userId: user.id });
+  return runServerAction(deleteLearningScenario)({ learningScenarioId: id, user });
 }
 
 export async function createNewLearningScenarioAction({ modelId }: { modelId: string }) {
@@ -49,6 +49,6 @@ export async function linkFileToLearningScenarioAction({
   return runServerAction(linkFileToLearningScenario)({
     fileId,
     learningScenarioId,
-    userId: user.id,
+    user,
   });
 }
