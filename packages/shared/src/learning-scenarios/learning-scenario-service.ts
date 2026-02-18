@@ -747,3 +747,35 @@ export async function uploadAvatarPictureForLearningScenario({
 
   return key;
 }
+
+/**
+ * User creates a new learning scenario from a template.
+ * All files are duplicated and linked to the new learning scenario.
+ *
+ * Authorization checks:
+ * - User must be a teacher.
+ * - User must have access to the template.
+ *
+ * @returns the newly created learning scenario
+ */
+export async function createNewLearningScenarioFromTemplate({
+  schoolId,
+  user,
+  originalLearningScenarioId,
+}: {
+  originalLearningScenarioId: string;
+  schoolId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
+}) {
+  checkParameterUUID(originalLearningScenarioId);
+  requireTeacherRole(user.userRole);
+  const { learningScenario } = await getLearningScenarioInfo(originalLearningScenarioId, user.id);
+  verifyReadAccess({ item: learningScenario, schoolId, userId: user.id });
+
+  return duplicateLearningScenario({
+    accessLevel: 'private',
+    originalLearningScenarioId,
+    schoolId,
+    userId: user.id,
+  });
+}
