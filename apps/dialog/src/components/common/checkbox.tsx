@@ -10,7 +10,7 @@ type CheckboxProps = {
 
 export default function Checkbox(props: CheckboxProps) {
   return (
-    <div className="flex items-center gap-3 justify-center">
+    <label className="flex items-center gap-3 justify-center cursor-pointer">
       <_Checkbox.Root
         {...props}
         aria-label={props['aria-label'] ?? props.label ?? ''}
@@ -25,8 +25,8 @@ export default function Checkbox(props: CheckboxProps) {
         </_Checkbox.Indicator>
       </_Checkbox.Root>
       {props.label !== undefined && (
-        <label className={cn(props.disabled && 'text-[#9B9B9B]')}>{props.label}</label>
+        <span className={cn(props.disabled && 'text-[#9B9B9B]')}>{props.label}</span>
       )}
-    </div>
+    </label>
   );
 }
