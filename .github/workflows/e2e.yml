@@ -52,7 +52,7 @@ jobs:
           RABBITMQ_DEFAULT_PASS: password
           RABBITMQ_DEFAULT_USER: user
       crawl4ai:
-        image: unclecode/crawl4ai:0.7.8
+        image: unclecode/crawl4ai:0.8.0
         options: --shm-size=2gb
         ports:
           - 11235:11235
