@@ -1,8 +1,9 @@
 import { auth } from '@/auth';
 import { SchoolSelectModel, schoolSelectSchema } from '@shared/db/schema';
 import { UserModel, userSchema } from '@shared/auth/user-model';
-import { UnauthenticatedError } from '@shared/error';
 import { FederalStateModel, federalStateSchema } from '@shared/federal-states/types';
+import { headers } from 'next/headers';
+import { redirectToLogin } from './utils';
 
 export async function requireAuth(): Promise<{
   user: UserModel;
@@ -10,7 +11,11 @@ export async function requireAuth(): Promise<{
   federalState: FederalStateModel;
 }> {
   const session = await auth();
-  if (!session) throw new UnauthenticatedError();
+  if (!session) {
+    const headersList = await headers();
+    const pathname = headersList.get('x-pathname') || '/';
+    redirectToLogin(pathname);
+  }
 
   const user = userSchema.parse({ ...session.user, userRole: session.user?.school?.userRole });
   const school = schoolSelectSchema.parse(session.user?.school);
