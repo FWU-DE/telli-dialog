@@ -13,6 +13,7 @@ import { dbGetConversationAndMessages } from '@shared/db/functions/chat';
 import { UserSelectModel } from '@shared/db/schema';
 import { markdownToDocx } from './markdown';
 import { logError } from '@shared/logging';
+import { dbGetModelByName } from '@shared/db/functions/llm-model';
 
 export async function generateConversationDocxFiles({
   conversationId,
@@ -59,7 +60,10 @@ export async function generateConversationDocxFiles({
     });
     const lastAssistantMessage = [...messages].reverse().find((m) => m.role === 'assistant');
 
-    const modelDisplayName = lastAssistantMessage?.modelName ?? gptName;
+    const model = lastAssistantMessage?.modelName
+      ? await dbGetModelByName(lastAssistantMessage.modelName)
+      : null;
+    const modelDisplayName = model?.displayName ?? gptName;
 
     messageParagraphs.push(
       new Paragraph({
