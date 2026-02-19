@@ -22,14 +22,14 @@ export async function sendChatMessageAction({
   customGptId?: string;
   fileIds?: string[];
 }): Promise<SendMessageResult> {
-    // TODO: Switch to requireAuth
-    // Auth and access checks
-    const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);
-    const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
+  // TODO: Switch to requireAuth
+  // Auth and access checks
+  const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);
+  const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
 
-    if (!productAccess.hasAccess) {
+  if (!productAccess.hasAccess) {
     throw new Error(productAccess.errorType);
-    }
+  }
   return sendChatMessage({
     conversationId,
     messages,

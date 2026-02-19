@@ -1,7 +1,5 @@
 import { generateTextStreamWithBilling, type Message as AiCoreMessage } from '@telli/ai-core';
 import { createTextStream } from '@/utils/streaming';
-import { getUser, userHasCompletedTraining } from '@/auth/utils';
-import { checkProductAccess } from '@/utils/vidis/access';
 import { userHasReachedTelliPointsLimit } from './usage';
 import { getModelAndApiKeyWithResult, getAuxiliaryModel } from '../utils/utils';
 import {

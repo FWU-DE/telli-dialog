@@ -20,7 +20,7 @@ export async function generateImageAction({
   style?: ImageStyle;
 }) {
   const { user, federalState } = await requireAuth();
-  
+
   return runServerAction(handleImageGeneration)({
     prompt,
     model,

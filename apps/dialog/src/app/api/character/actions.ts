@@ -18,7 +18,7 @@ export async function sendCharacterMessageAction({
   modelId: string;
 }): Promise<SendMessageResult> {
   await requireValidInviteCode(inviteCode);
-  
+
   return sendCharacterMessage({
     characterId,
     inviteCode,

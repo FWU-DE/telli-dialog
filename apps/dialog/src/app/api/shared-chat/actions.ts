@@ -17,7 +17,7 @@ export async function sendSharedChatMessageAction({
   messages: ChatMessage[];
   modelId: string;
 }): Promise<SendMessageResult> {
-  await requireValidInviteCode(inviteCode)
+  await requireValidInviteCode(inviteCode);
 
   return sendSharedChatMessage({
     sharedChatId,

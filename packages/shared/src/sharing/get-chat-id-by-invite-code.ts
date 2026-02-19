@@ -15,7 +15,10 @@ export async function requireValidInviteCode(inviteCode: string): Promise<{ chat
     const chatInfo = await getChatIdByInviteCode(inviteCode);
     return { chatInfo };
   } catch (error) {
-    redirect('/login');
+    if (error instanceof NotFoundError) {
+      redirect('/login');
+    }
+    throw error;
   }
 }
 

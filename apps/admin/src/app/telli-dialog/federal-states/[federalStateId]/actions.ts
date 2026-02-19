@@ -27,14 +27,15 @@ export async function createFederalStateAction(
 
   return createFederalState({
     ...data,
-    encryptedApiKey: plainApiKey ? encrypt({
-      text: plainApiKey,
-      plainEncryptionKey: env.encryptionKey,
-    }) : undefined,
+    encryptedApiKey: plainApiKey
+      ? encrypt({
+          text: plainApiKey,
+          plainEncryptionKey: env.encryptionKey,
+        })
+      : undefined,
     featureToggles: federalStateFeatureTogglesSchema.parse({}),
   });
 }
-
 
 export async function updateFederalStateAction(data: FederalStateUpdateModel) {
   await requireAdminAuth();
