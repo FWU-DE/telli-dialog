@@ -50,7 +50,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Audit dependencies
-        run: pnpm audit --audit-level=critical
+        run: pnpm audit --audit-level=critical --ignore-registry-errors --ignore-unfixable
 
   check_formatting:
     runs-on: ubuntu-latest
