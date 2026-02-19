@@ -2,7 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { FileModel } from '@shared/db/schema';
-import { getReadOnlySignedUrl } from '@shared/s3';
+import { getReadOnlySignedUrlAction } from '@/app/api/file-operations/actions';
 import { FileStatus } from './upload-file-button';
 import DeattachFileIcon from '../icons/file-upload-icons/deattach-file-icon';
 import Spinner from '../icons/spinner';
@@ -39,7 +39,7 @@ export default function DisplayUploadedImage({
   } = useQuery({
     queryKey: ['signed-url', file.id, file.name, file.type],
     queryFn: async () => {
-      const signedUrl = await getReadOnlySignedUrl({
+      const signedUrl = await getReadOnlySignedUrlAction({
         key: `message_attachments/${file.id}`,
       });
       return signedUrl;

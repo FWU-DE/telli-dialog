@@ -11,7 +11,7 @@ import { ImageGenerationError } from './image-generation-error';
 import { useTranslations } from 'next-intl';
 import LoadingAnimation from './loading-animation';
 import { ConversationMessageModel } from '@shared/db/types';
-import { getReadOnlySignedUrl } from '@shared/s3';
+import { getReadOnlySignedUrlAction } from '@/app/api/file-operations/actions';
 import { FileModel } from '@shared/db/schema';
 import { useQueryClient } from '@tanstack/react-query';
 import { logError } from '@shared/logging';
@@ -62,7 +62,7 @@ export default function ImageGenerationChat({
           if (imageFile) {
             try {
               // Generate signed URL for the image file
-              const signedUrl = await getReadOnlySignedUrl({
+              const signedUrl = await getReadOnlySignedUrlAction({
                 key: `message_attachments/${imageFile.id}`,
                 contentType: imageFile.type,
                 attachment: false,

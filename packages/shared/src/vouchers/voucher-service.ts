@@ -9,6 +9,7 @@ import {
   dbGetVoucherByCode,
   dbGetVouchersByFederalStateId,
   dbInsertVouchers,
+  dbRedeemVoucher,
   dbUpdateVoucher,
 } from '../db/functions/voucher';
 import { VoucherInsertModel, VoucherUpdateModel } from '@shared/db/schema';
@@ -124,4 +125,39 @@ export async function revokeVoucher(
   };
 
   await dbUpdateVoucher(updatedFields);
+}
+
+/**
+ * Redeems a voucher for a user.
+ *
+ * Validates that the voucher exists, belongs to the user's federal state,
+ * has not been redeemed or revoked, and has not expired.
+ *
+ * @param voucherCode - The 16-character voucher code to redeem
+ * @param userId - The ID of the user redeeming the voucher
+ * @param federalStateId - The ID of the user's federal state
+ * @throws NotFoundError if voucher doesn't exist or belongs to different federal state
+ * @throws InvalidArgumentError if voucher is not in 'created' status or has expired
+ */
+export async function redeemVoucher({
+  voucherCode,
+  userId,
+  federalStateId,
+}: {
+  voucherCode: string;
+  userId: string;
+  federalStateId: string;
+}) {
+  const voucher = await dbGetVoucherByCode(voucherCode);
+  if (!voucher || voucher.federalStateId !== federalStateId) {
+    throw new NotFoundError('Voucher not found');
+  }
+  if (voucher.status !== 'created') {
+    throw new InvalidArgumentError('Voucher has already been redeemed or revoked');
+  }
+  if (new Date() > voucher.validUntil) {
+    throw new InvalidArgumentError('Voucher has expired');
+  }
+
+  return dbRedeemVoucher(voucherCode, userId);
 }

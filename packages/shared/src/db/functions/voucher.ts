@@ -1,5 +1,3 @@
-'use server';
-
 import { and, eq, gt, sql, sum } from 'drizzle-orm';
 import { db } from '..';
 import { VoucherInsertModel, VoucherTable, VoucherUpdateModel } from '../schema';
