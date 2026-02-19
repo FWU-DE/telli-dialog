@@ -111,7 +111,7 @@ export default function CharacterForm({
     setValue,
     control,
     formState: { isValid },
-  } = useForm<CharacterFormValues>({
+  } = useForm({
     resolver: zodResolver(characterFormValuesSchema),
     defaultValues: {
       ...character,

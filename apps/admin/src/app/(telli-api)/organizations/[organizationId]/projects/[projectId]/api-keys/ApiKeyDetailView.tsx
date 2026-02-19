@@ -58,7 +58,7 @@ export function ApiKeyDetailView({
     formState: { isValid, errors, isSubmitting, isDirty },
     handleSubmit,
     setValue,
-  } = useForm<ApiKeyForm>({
+  } = useForm({
     resolver: zodResolver(apiKeyFormSchema),
     defaultValues: apiKey
       ? {
