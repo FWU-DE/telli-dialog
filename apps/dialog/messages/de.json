@@ -377,7 +377,7 @@
   },
   "authentication": {
     "login-error": {
-      "description": "Login nicht möglich. Folgende Informationen müssem mit dem Profil übertragen werden:"
+      "description": "Login nicht möglich. Folgende Informationen müssen mit dem Profil übertragen werden:"
     }
   }
 }
