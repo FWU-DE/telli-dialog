@@ -26,7 +26,7 @@ export async function updateLearningScenarioAccessLevelAction({
   return runServerAction(updateLearningScenarioAccessLevel)({
     learningScenarioId,
     accessLevel,
-    userId: user.id,
+    user,
   });
 }
 
@@ -58,7 +58,7 @@ export async function updateLearningScenarioPictureAction({
   return runServerAction(updateLearningScenarioPicture)({
     learningScenarioId,
     picturePath,
-    userId: user.id,
+    user,
   });
 }
 
@@ -75,7 +75,7 @@ export async function shareLearningScenarioAction({
     learningScenarioId,
     user,
     data,
-    schoolId: school?.id,
+    schoolId: school.id,
   });
 }
 
@@ -100,7 +100,7 @@ export async function removeFileFromLearningScenarioAction({
   return runServerAction(removeFileFromLearningScenario)({
     learningScenarioId,
     fileId,
-    userId: user.id,
+    user,
   });
 }
 
@@ -116,6 +116,6 @@ export async function uploadAvatarPictureForLearningScenarioAction({
   return runServerAction(uploadAvatarPictureForLearningScenario)({
     learningScenarioId,
     croppedImageBlob,
-    userId: user.id,
+    user,
   });
 }
