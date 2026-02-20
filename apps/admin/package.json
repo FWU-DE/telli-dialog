@@ -37,7 +37,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "3.3.3",
     "@telli/typescript-config": "workspace:*",
-    "@types/node": "24.10.1",
+    "@types/node": "25.2.3",
     "@types/react": "19.2.13",
     "@types/react-csv": "1.1.10",
     "@types/react-dom": "19.2.3",

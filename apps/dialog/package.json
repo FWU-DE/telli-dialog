@@ -101,7 +101,7 @@
     "@types/k6": "1.5.0",
     "@types/katex": "0.16.8",
     "@types/markdown-it": "14.1.2",
-    "@types/node": "24.10.1",
+    "@types/node": "25.2.3",
     "@types/pg": "8.16.0",
     "@types/react": "19.2.13",
     "@types/react-dom": "19.2.3",

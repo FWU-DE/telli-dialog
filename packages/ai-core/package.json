@@ -34,7 +34,7 @@
     "@eslint/js": "9.39.2",
     "@t3-oss/env-core": "0.13.10",
     "@telli/typescript-config": "workspace:*",
-    "@types/node": "24.10.1",
+    "@types/node": "25.2.3",
     "@types/pg": "8.16.0",
     "@typescript-eslint/eslint-plugin": "8.54.0",
     "@typescript-eslint/parser": "8.54.0",
