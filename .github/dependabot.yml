@@ -42,6 +42,9 @@ updates:
       interval: 'weekly'
     cooldown:
       default-days: 5
+    ignore:
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
     groups:
       # Group safe, non-breaking bumps to reduce PRs
       minor-and-patch:
