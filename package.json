@@ -13,11 +13,11 @@
     "test": "turbo run test",
     "check-types": "turbo run check-types"
   },
-  "packageManager": "pnpm@10.24.0",
+  "packageManager": "pnpm@10.30.1",
   "devDependencies": {
     "@telli/typescript-config": "workspace:*",
     "prettier": "3.8.1",
-    "turbo": "2.8.3"
+    "turbo": "2.8.9"
   },
   "pnpm": {
     "overrides": {
