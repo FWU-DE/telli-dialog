@@ -59,7 +59,7 @@
     "import-in-the-middle": "3.0.0",
     "ioredis": "5.9.3",
     "isbinaryfile": "6.0.0",
-    "jsdom": "26.1.0",
+    "jsdom": "28.1.0",
     "katex": "0.16.28",
     "mammoth": "1.11.0",
     "markdown-it": "14.1.1",
