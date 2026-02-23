@@ -57,7 +57,7 @@ export async function generateConversationDocxFiles({
       gptName,
       userFullName,
     });
-    const lastAssistantMessage = [...messages].reverse().find((m) => m.role === 'assistant');
+    const lastAssistantMessage = messages.findLast((m) => m.role === 'assistant');
 
     const modelDisplayName = lastAssistantMessage?.modelName ?? gptName;
 
