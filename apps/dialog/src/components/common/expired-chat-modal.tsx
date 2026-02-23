@@ -3,7 +3,7 @@
 import React from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import StopWatchDoneIcon from '@/components/icons/stopwatch-done';
-import DownloadSharedConversationButton from '@/app/(unauth)/ua/dowload-shared-conversation-button';
+import DownloadSharedConversationButton from '@/app/(unauth)/ua/download-shared-conversation-button';
 import { type ChatMessage as Message } from '@/types/chat';
 import { useTranslations } from 'next-intl';
 import { useTheme } from '@/hooks/use-theme';
