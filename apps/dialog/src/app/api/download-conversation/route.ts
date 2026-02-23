@@ -1,48 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateConversationDocxFiles } from './utils';
+import { generateConversationDocxFile } from './utils';
 import { getUser } from '@/auth/utils';
 import { type ConversationModel } from '@shared/db/types';
-import { logError } from '@shared/logging';
-import { getConversation } from '@shared/conversation/conversation-service';
+import { getConversationAndMessagesForExport } from '@shared/conversation/conversation-service';
+import z from 'zod';
+import { handleErrorInRoute } from '@/error/handle-error-in-route';
 
 export const dynamic = 'force-dynamic';
+
+const downloadConversationParamsSchema = z.object({
+  conversationId: z.string(),
+  enterpriseGptName: z.string().optional(),
+});
 
 /**
  * User wants to download a conversation as a .docx file.
  * We generate the file on the fly and return it as a response.
  * The user must be the owner of the conversation.
+ *
+ * enterpriseGptName contains the character name if a character was used.
  */
 export async function GET(req: NextRequest) {
-  const searchParams = new URLSearchParams(req.url.split('?')[1]);
-  const conversationId = searchParams.get('conversationId');
-  const enterpriseGptName = searchParams.get('enterpriseGptName');
-
-  const user = await getUser();
-
-  if (conversationId === null) {
-    return NextResponse.json({ error: 'Invalid conversation id' }, { status: 404 });
-  }
-
-  // Verify that the user is the owner of the conversation
   try {
-    await getConversation({ conversationId, userId: user.id });
-  } catch {
-    return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
-  }
+    // check and parse search params
+    const searchParams = req.nextUrl.searchParams;
+    const { conversationId, enterpriseGptName } = downloadConversationParamsSchema.parse(
+      Object.fromEntries(searchParams.entries()),
+    );
 
-  try {
-    const conversationObject = await generateConversationDocxFiles({
+    // check authentication
+    const user = await getUser();
+
+    const { conversation, messages } = await getConversationAndMessagesForExport({
       conversationId,
-      enterpriseGptName,
-      user,
-      userFullName: 'Nutzer/in',
+      userId: user.id,
     });
 
-    if (conversationObject === undefined) {
+    const document = await generateConversationDocxFile({
+      conversation,
+      messages,
+      enterpriseGptName,
+    });
+
+    if (document === undefined) {
       return NextResponse.json({ error: 'Failed to generate the document' }, { status: 500 });
     }
 
-    const { buffer, conversation, gptName } = conversationObject;
+    const { buffer, gptName } = document;
     const fileName = generateFileName({ conversation, gptName });
 
     return new NextResponse(buffer, {
@@ -55,8 +59,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    logError('Failed to generate a document for the conversation', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    handleErrorInRoute(error);
   }
 }
 

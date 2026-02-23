@@ -81,3 +81,25 @@ export async function updateConversationTitle({
   }
   return result;
 }
+
+/**
+ * User wants to download a conversation.
+ * Verifies that the conversation belongs to the user
+ * and returns the conversation and messages for export.
+ *
+ */
+export async function getConversationAndMessagesForExport({
+  conversationId,
+  userId,
+}: {
+  conversationId: string;
+  userId: string;
+}) {
+  const conversation = await getConversation({ conversationId, userId });
+  const messages = await getConversationMessages({ conversationId, userId });
+
+  return {
+    conversation,
+    messages,
+  };
+}
