@@ -47,11 +47,26 @@ export async function dbUpdateVoucher(voucher: VoucherUpdateModel) {
   return result;
 }
 
-export async function dbRedeemVoucher(voucher: string, userId: string) {
+export async function dbRedeemVoucher({
+  code,
+  userId,
+  federalStateId,
+}: {
+  code: string;
+  userId: string;
+  federalStateId: string;
+}) {
   const [result] = await db
     .update(VoucherTable)
     .set({ status: 'redeemed', redeemedBy: userId, redeemedAt: new Date() })
-    .where(eq(VoucherTable.code, voucher))
+    .where(
+      and(
+        eq(VoucherTable.code, code),
+        eq(VoucherTable.status, 'created'),
+        eq(VoucherTable.federalStateId, federalStateId),
+        gt(VoucherTable.validUntil, sql`now()`),
+      ),
+    )
     .returning();
   return result;
 }

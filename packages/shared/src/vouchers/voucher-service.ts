@@ -148,16 +148,11 @@ export async function redeemVoucher({
   userId: string;
   federalStateId: string;
 }) {
-  const voucher = await dbGetVoucherByCode(voucherCode);
-  if (!voucher || voucher.federalStateId !== federalStateId) {
-    throw new NotFoundError('Voucher not found');
+  const result = await dbRedeemVoucher({ code: voucherCode, userId, federalStateId });
+  if (!result) {
+    throw new InvalidArgumentError(
+      'Voucher could not be redeemed. It may not exist, has already been redeemed or revoked, has expired, or does not belong to your federal state.',
+    );
   }
-  if (voucher.status !== 'created') {
-    throw new InvalidArgumentError('Voucher has already been redeemed or revoked');
-  }
-  if (new Date() > voucher.validUntil) {
-    throw new InvalidArgumentError('Voucher has expired');
-  }
-
-  return dbRedeemVoucher(voucherCode, userId);
+  return result;
 }
