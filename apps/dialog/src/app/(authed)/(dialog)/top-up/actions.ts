@@ -6,6 +6,10 @@ import { redeemVoucher } from '@shared/vouchers/voucher-service';
 
 export async function redeemVoucherAction(voucherCode: string) {
   const { user, federalState } = await requireAuth();
-  
-  return runServerAction(redeemVoucher)({ voucherCode, userId: user.id, federalStateId: federalState.id });
+
+  return runServerAction(redeemVoucher)({
+    voucherCode,
+    userId: user.id,
+    federalStateId: federalState.id,
+  });
 }

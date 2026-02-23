@@ -1,6 +1,6 @@
 'use server';
 
-import { requireValidInviteCode } from '@shared/sharing/get-chat-id-by-invite-code';
+import { requireValidInviteCode } from '@/auth/requireValidInviteCode';
 import { sendSharedChatMessage } from './shared-chat-service';
 import type { ChatMessage, SendMessageResult } from './shared-chat-service';
 
