@@ -8,6 +8,8 @@ import { handleErrorInRoute } from '@/error/handle-error-in-route';
 
 export const dynamic = 'force-dynamic';
 
+const DEFAULT_GPT_NAME = 'telli';
+
 const downloadConversationParamsSchema = z.object({
   conversationId: z.string(),
   enterpriseGptName: z.string().optional(),
@@ -36,25 +38,26 @@ export async function GET(req: NextRequest) {
       userId: user.id,
     });
 
+    const gptName = enterpriseGptName ?? DEFAULT_GPT_NAME;
+
     const document = await generateConversationDocxFile({
       conversation,
       messages,
-      enterpriseGptName,
+      gptName,
     });
 
     if (document === undefined) {
       return NextResponse.json({ error: 'Failed to generate the document' }, { status: 500 });
     }
 
-    const { buffer, gptName } = document;
     const fileName = generateFileName({ conversation, gptName });
 
-    return new NextResponse(buffer, {
+    return new NextResponse(document, {
       status: 200,
       headers: {
         'Content-Disposition': 'attachment',
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'Content-Length': buffer.byteLength.toString(),
+        'Content-Length': document.byteLength.toString(),
         'X-Filename': encodeURIComponent(fileName),
       },
     });

@@ -13,30 +13,20 @@ import { markdownToDocx } from './markdown';
 import { logError } from '@shared/logging';
 
 const USER_FULL_NAME = 'Nutzer/in';
-const DEFAULT_GPT_NAME = 'telli';
 
 export async function generateConversationDocxFile({
   conversation,
   messages,
-  enterpriseGptName,
+  gptName,
 }: {
   conversation: ConversationModel;
   messages: ConversationMessageModel[];
-  enterpriseGptName: string | undefined;
-}): Promise<
-  | {
-      buffer: ArrayBuffer;
-      conversation: ConversationModel;
-      gptName: string;
-      messages: ConversationMessageModel[];
-    }
-  | undefined
-> {
+  gptName: string;
+}): Promise<ArrayBuffer | undefined> {
   try {
     const conversationMetadata = getConversationMetadata({
       conversation,
     });
-    const gptName = enterpriseGptName ?? DEFAULT_GPT_NAME;
     const messageParagraphs = getConversationMessages({
       messages,
       gptName,
@@ -46,7 +36,7 @@ export async function generateConversationDocxFile({
     const doc = buildDocxDocument({ conversationMetadata, messageParagraphs });
     const buffer = await Packer.toArrayBuffer(doc);
 
-    return { buffer, conversation, gptName, messages };
+    return buffer;
   } catch (error) {
     logError('Error generating conversation .docx files', error);
     return undefined;
