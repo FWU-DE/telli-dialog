@@ -12,9 +12,14 @@ import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
 type ExpiredChatModalProps = {
   conversationMessages: Message[];
   title: string;
+  inviteCode: string;
 };
 
-export default function ExpiredChatModal({ conversationMessages, title }: ExpiredChatModalProps) {
+export default function ExpiredChatModal({
+  conversationMessages,
+  title,
+  inviteCode,
+}: ExpiredChatModalProps) {
   const t = useTranslations('learning-scenarios.shared');
   const { designConfiguration } = useTheme();
   return (
@@ -41,6 +46,7 @@ export default function ExpiredChatModal({ conversationMessages, title }: Expire
                   characterName={title}
                   conversationMessages={conversationMessages}
                   disabled={conversationMessages.length === 0}
+                  inviteCode={inviteCode}
                 />
               </div>
             </AlertDialog.Action>

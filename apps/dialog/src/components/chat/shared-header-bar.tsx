@@ -19,6 +19,7 @@ export function SharedChatHeader({
   messages,
   imageSource,
   dialogStarted,
+  inviteCode,
 }: {
   chatActive: boolean;
   hasMessages: boolean;
@@ -28,6 +29,7 @@ export function SharedChatHeader({
   messages: Message[];
   imageSource?: string;
   dialogStarted: boolean;
+  inviteCode: string;
 }) {
   const { isBelow } = useBreakpoints();
   const tCommon = useTranslations('common');
@@ -85,6 +87,7 @@ export function SharedChatHeader({
             disabled={!chatActive || !hasMessages}
             sharedConversationName={title}
             showText={false}
+            inviteCode={inviteCode}
           />
           <ProfileMenu userAndContext={undefined} />
         </>
@@ -96,6 +99,7 @@ export function SharedChatHeader({
               disabled={!chatActive || !hasMessages}
               sharedConversationName={title}
               showText={true}
+              inviteCode={inviteCode}
             />
           }
           deleteButtonJSX={deleteChatElement}

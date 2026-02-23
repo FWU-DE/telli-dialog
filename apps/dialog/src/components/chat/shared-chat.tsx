@@ -77,7 +77,11 @@ export default function SharedChat({
   return (
     <>
       {!chatActive && (
-        <ExpiredChatModal conversationMessages={uiMessages} title={sharedSchoolChat.name} />
+        <ExpiredChatModal
+          conversationMessages={uiMessages}
+          title={sharedSchoolChat.name}
+          inviteCode={inviteCode}
+        />
       )}
       <div className="flex flex-col h-full w-full">
         <SharedChatHeader
@@ -89,6 +93,7 @@ export default function SharedChat({
           messages={uiMessages}
           dialogStarted={dialogStarted}
           imageSource={maybeSignedPictureUrl}
+          inviteCode={inviteCode}
         />
         <hr className="w-full border-gray-200 mb-2" />
         <div
