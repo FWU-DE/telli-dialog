@@ -67,7 +67,7 @@ export function FederalStateView(props: FederalStateViewProps) {
     formState: { isValid, errors, isDirty, isSubmitting },
     handleSubmit,
     reset,
-  } = useForm<FederalStateEditForm>({
+  } = useForm({
     resolver: zodResolver(federalStateEditFormSchema),
     defaultValues: transformToFederalStateEditForm(federalState),
   });

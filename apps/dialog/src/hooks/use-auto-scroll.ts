@@ -1,4 +1,13 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
+
+const STORAGE_KEY_AUTO_SCROLL_PAUSED = 'preserve-scroll-auto-scroll-paused';
+const STORAGE_KEY_SCROLL_POSITION = 'preserve-scroll-position';
+
+/** Check whether a scroll container is near the bottom (within threshold). */
+function isNearBottom(element: HTMLElement, threshold = 20): boolean {
+  const { scrollTop, clientHeight, scrollHeight } = element;
+  return scrollTop + clientHeight >= scrollHeight - threshold;
+}
 
 /**
  * Custom hook for automatically scrolling to the bottom of a container
@@ -14,18 +23,40 @@ import { useEffect, useState, useCallback } from 'react';
  * the user cannot interrupt auto scrolling because rendering is too fast.
  *
  * @param dependencies - Array of dependencies that trigger the scroll
- * @returns Object with scrollRef (callback ref to attach to the scrollable container) and reactivateAutoScrolling function
+ * @returns Object with scrollRef (callback ref to attach to the scrollable container),
+ *          reactivateAutoScrolling to re-enable auto-scroll,
+ *          and preserveScrollState to save scroll position before a remount
  */
 export function useAutoScroll(dependencies: React.DependencyList) {
   const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
-  const [isAutoScrollEnabled, setAutoScrollEnabled] = useState(true);
+  const [isAutoScrollEnabled, setAutoScrollEnabled] = useState(() => {
+    // On initial load, check if auto-scroll was previously paused and restore that state
+    if (typeof window !== 'undefined') {
+      const preserved = sessionStorage.getItem(STORAGE_KEY_AUTO_SCROLL_PAUSED);
+      if (preserved) {
+        sessionStorage.removeItem(STORAGE_KEY_AUTO_SCROLL_PAUSED);
+        return false;
+      }
+    }
+    return true;
+  });
 
   // Callback ref that handles element attachment/detachment
+  // and restores saved scroll position on remount
   const scrollRef = useCallback((element: HTMLDivElement | null) => {
     setScrollElement(element);
+    if (element && typeof window !== 'undefined') {
+      const savedPosition = sessionStorage.getItem(STORAGE_KEY_SCROLL_POSITION);
+      if (savedPosition) {
+        sessionStorage.removeItem(STORAGE_KEY_SCROLL_POSITION);
+        const scrollTop = parseInt(savedPosition, 10);
+        requestAnimationFrame(() => {
+          element.scrollTo({ top: scrollTop, behavior: 'instant' });
+        });
+      }
+    }
   }, []);
 
-  // Function to reactivate auto-scrolling and scroll to the end
   const reactivateAutoScrolling = useCallback(() => {
     if (scrollElement) {
       setAutoScrollEnabled(true);
@@ -36,47 +67,50 @@ export function useAutoScroll(dependencies: React.DependencyList) {
     }
   }, [scrollElement]);
 
-  // Set up scroll and touch listeners whenever the element changes
+  // Detect user scroll intent via wheel or touch events
   useEffect(() => {
-    if (scrollElement) {
-      const isNearBottom = () => {
-        const threshold = 20; // mouse wheel movement seems to be 100px on average
-        const { scrollTop, clientHeight, scrollHeight } = scrollElement;
+    if (!scrollElement) return;
 
-        const bottomPosition = scrollTop + clientHeight;
-        const nearBottomThreshold = scrollHeight - threshold;
+    const handleWheel = (e: WheelEvent) => {
+      if (e.deltaY < 0) {
+        setAutoScrollEnabled(false);
+      } else if (isNearBottom(scrollElement)) {
+        setAutoScrollEnabled(true);
+      }
+    };
 
-        return bottomPosition >= nearBottomThreshold;
-      };
+    const handleTouch = () => {
+      setAutoScrollEnabled(isNearBottom(scrollElement));
+    };
 
-      const setAutoScrollBasedOnScrollPosition = () => {
-        const nearBottom = isNearBottom();
-        setAutoScrollEnabled(nearBottom);
-      };
+    scrollElement.addEventListener('wheel', handleWheel, { passive: true });
+    scrollElement.addEventListener('touchstart', handleTouch, { passive: true });
+    scrollElement.addEventListener('touchend', handleTouch, { passive: true });
 
-      // Handle wheel events (mouse wheel scrolling) - clear indicator of user intent
-      const handleWheel = () => {
-        setAutoScrollBasedOnScrollPosition();
-      };
-
-      // Handle touch events to catch cases where users touch to stop momentum scrolling
-      const handleTouch = () => {
-        setAutoScrollBasedOnScrollPosition();
-      };
-
-      scrollElement.addEventListener('wheel', handleWheel, { passive: true });
-      scrollElement.addEventListener('touchstart', handleTouch, { passive: true });
-      scrollElement.addEventListener('touchend', handleTouch, { passive: true });
-
-      return () => {
-        scrollElement.removeEventListener('wheel', handleWheel);
-        scrollElement.removeEventListener('touchstart', handleTouch);
-        scrollElement.removeEventListener('touchend', handleTouch);
-      };
-    }
+    return () => {
+      scrollElement.removeEventListener('wheel', handleWheel);
+      scrollElement.removeEventListener('touchstart', handleTouch);
+      scrollElement.removeEventListener('touchend', handleTouch);
+    };
   }, [scrollElement]);
 
-  // Auto-scroll when dependencies change, but only if user hasn't manually scrolled away
+  // Ref keeps the latest values accessible from the preserveScrollState callback
+  const scrollStateRef = useRef({ isAutoScrollEnabled, scrollElement });
+  scrollStateRef.current = { isAutoScrollEnabled, scrollElement };
+
+  // Save current scroll position to sessionStorage so it survives a remount
+  const preserveScrollState = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    const { isAutoScrollEnabled: enabled, scrollElement: el } = scrollStateRef.current;
+    if (!enabled) {
+      sessionStorage.setItem(STORAGE_KEY_AUTO_SCROLL_PAUSED, '1');
+      if (el) {
+        sessionStorage.setItem(STORAGE_KEY_SCROLL_POSITION, String(el.scrollTop));
+      }
+    }
+  }, []);
+
+  // Auto-scroll to bottom when dependencies change
   useEffect(() => {
     if (scrollElement && isAutoScrollEnabled) {
       scrollElement.scrollTo({
@@ -87,5 +121,5 @@ export function useAutoScroll(dependencies: React.DependencyList) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...dependencies, scrollElement, isAutoScrollEnabled]);
 
-  return { scrollRef, reactivateAutoScrolling };
+  return { scrollRef, reactivateAutoScrolling, preserveScrollState };
 }

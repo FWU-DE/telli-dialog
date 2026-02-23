@@ -94,7 +94,7 @@ export default function CharacterContainer({
           stopWatchClassName="w-4 h-4"
         />
       )}
-      {character.accessLevel === 'global' && !(timeLeft > 0) && (
+      {userId !== currentUserId && timeLeft <= 0 && (
         <CreateNewInstanceFromTemplate
           templateId={id}
           templatePictureId={character.pictureId ?? undefined}

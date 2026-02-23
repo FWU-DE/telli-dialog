@@ -111,7 +111,7 @@ export default function CharacterForm({
     setValue,
     control,
     formState: { isValid },
-  } = useForm<CharacterFormValues>({
+  } = useForm({
     resolver: zodResolver(characterFormValuesSchema),
     defaultValues: {
       ...character,
@@ -489,13 +489,14 @@ export default function CharacterForm({
         />
       </fieldset>
       <div className="w-full mt-8">
-        <SharingSection
-          control={control}
-          schoolSharingName="isSchoolShared"
-          linkSharingName="hasLinkAccess"
-          onShareChange={handleSharingChange}
-          disabled={readOnly}
-        />
+        {!readOnly && (
+          <SharingSection
+            control={control}
+            schoolSharingName="isSchoolShared"
+            linkSharingName="hasLinkAccess"
+            onShareChange={handleSharingChange}
+          />
+        )}
       </div>
 
       {!isCreating && !readOnly && (

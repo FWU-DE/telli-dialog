@@ -86,7 +86,7 @@ export default function LearningScenarioForm({
     setValue,
     control,
     formState: { isValid },
-  } = useForm<SharedSchoolChatFormValues>({
+  } = useForm({
     resolver: zodResolver(sharedSchoolChatFormValuesSchema),
     defaultValues: {
       ...sharedSchoolChat,
@@ -442,13 +442,14 @@ export default function LearningScenarioForm({
       </fieldset>
 
       <div className="w-full mt-8">
-        <SharingSection
-          control={control}
-          schoolSharingName="isSchoolShared"
-          linkSharingName="hasLinkAccess"
-          onShareChange={handleSharingChange}
-          disabled={readOnly}
-        />
+        {!readOnly && (
+          <SharingSection
+            control={control}
+            schoolSharingName="isSchoolShared"
+            linkSharingName="hasLinkAccess"
+            onShareChange={handleSharingChange}
+          />
+        )}
       </div>
 
       {!isCreating && !readOnly && (

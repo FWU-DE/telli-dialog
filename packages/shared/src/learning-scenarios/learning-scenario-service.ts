@@ -2,6 +2,7 @@ import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
 import { dbGetFilesForLearningScenario } from '@shared/db/functions/files';
 import {
+  dbCreateLearningScenarioShare,
   dbDeleteLearningScenarioByIdAndUserId,
   dbGetGlobalLearningScenarios,
   dbGetLearningScenarioById,
@@ -17,8 +18,6 @@ import {
   FileModel,
   fileTable,
   LearningScenarioFileMapping,
-  LearningScenarioInsertModel,
-  learningScenarioInsertSchema,
   LearningScenarioOptionalShareDataModel,
   LearningScenarioSelectModel,
   learningScenarioTable,
@@ -30,15 +29,18 @@ import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error
 import {
   deleteAvatarPicture,
   deleteMessageAttachments,
-  duplicateFileWithEmbeddings,
   getAvatarPictureUrl,
 } from '@shared/files/fileService';
-import { copyFileInS3, uploadFileToS3 } from '@shared/s3';
+import { uploadFileToS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
-import { addDays } from '@shared/utils/date';
-import { generateUUID } from '@shared/utils/uuid';
-import { and, eq, lt } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import z from 'zod';
+import { duplicateLearningScenario } from '@shared/learning-scenarios/learning-scenario-admin-service';
+import {
+  requireTeacherRole,
+  verifyReadAccess,
+  verifyWriteAccess,
+} from '@shared/auth/authorization-service';
 
 export type LearningScenarioWithImage = LearningScenarioOptionalShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -100,7 +102,7 @@ export async function getLearningScenariosByAccessLevel({
  * - the learning scenario itself
  * @throws NotFoundError if learning scenario does not exist
  */
-export async function getLearningScenarioInfo(
+async function getLearningScenarioInfo(
   learningScenarioId: string,
   userId: string,
 ): Promise<{
@@ -164,13 +166,13 @@ export async function updateLearningScenario({
   data,
 }: {
   learningScenarioId: string;
-  user: UserModel;
+  user: Pick<UserModel, 'id' | 'userRole'>;
   data: LearningScenarioSelectModel;
 }) {
   checkParameterUUID(learningScenarioId);
-  // Authorization check
-  const { isOwner } = await getLearningScenarioInfo(learningScenarioId, user.id);
-  if (!isOwner) throw new ForbiddenError('Not authorized to update this learning scenario');
+  requireTeacherRole(user.userRole);
+  const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
+  verifyWriteAccess({ item: learningScenario, userId: user.id });
 
   const parsedData = updateLearningScenarioSchema.parse(data);
 
@@ -195,11 +197,11 @@ export async function updateLearningScenario({
 export async function updateLearningScenarioAccessLevel({
   learningScenarioId,
   accessLevel,
-  userId,
+  user,
 }: {
   learningScenarioId: string;
   accessLevel: AccessLevel;
-  userId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
   checkParameterUUID(learningScenarioId);
   accessLevelSchema.parse(accessLevel);
@@ -209,9 +211,9 @@ export async function updateLearningScenarioAccessLevel({
     throw new ForbiddenError('Not authorized to set the access level to global');
   }
 
-  const { isOwner } = await getLearningScenarioInfo(learningScenarioId, userId);
-  if (!isOwner)
-    throw new ForbiddenError('Not authorized to set the access level of this learning scenario');
+  requireTeacherRole(user.userRole);
+  const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
+  verifyWriteAccess({ item: learningScenario, userId: user.id });
 
   // Update the access level in database
   const [updatedLearningScenario] = await db
@@ -235,17 +237,16 @@ export async function updateLearningScenarioAccessLevel({
 export async function updateLearningScenarioPicture({
   learningScenarioId,
   picturePath,
-  userId,
+  user,
 }: {
   learningScenarioId: string;
   picturePath: string;
-  userId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
   checkParameterUUID(learningScenarioId);
-  // Authorization check
-  const { isOwner } = await getLearningScenarioInfo(learningScenarioId, userId);
-  if (!isOwner)
-    throw new ForbiddenError('Not authorized to update the picture of this learning scenario');
+  requireTeacherRole(user.userRole);
+  const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
+  verifyWriteAccess({ item: learningScenario, userId: user.id });
 
   const [updatedSharedChat] = await db
     .update(learningScenarioTable)
@@ -287,65 +288,29 @@ export async function shareLearningScenario({
 }) {
   checkParameterUUID(learningScenarioId);
   // Authorization check: user must be a teacher and must have access to the learning scenario
-  if (user.userRole !== 'teacher')
-    throw new ForbiddenError('Only a teacher can share a learning scenario');
+  requireTeacherRole(user.userRole);
 
-  const { isOwner, isPrivate, learningScenario } = await getLearningScenarioInfo(
-    learningScenarioId,
-    user.id,
-  );
-  if (
-    !learningScenario.hasLinkAccess &&
-    ((isPrivate && !isOwner) ||
-      (!isOwner &&
-        learningScenario.accessLevel === 'school' &&
-        learningScenario.schoolId !== schoolId))
-  )
-    throw new ForbiddenError('Not authorized to share this learning scenario');
+  const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
+  verifyReadAccess({ item: learningScenario, schoolId, userId: user.id });
 
   const parsedValues = learningScenarioShareValuesSchema.parse(data);
 
-  // share learning scenario instance
-  const [maybeExistingEntry] = await db
-    .select()
-    .from(sharedLearningScenarioTable)
-    .where(
-      and(
-        eq(sharedLearningScenarioTable.userId, user.id),
-        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
-      ),
-    );
-
   const inviteCode = generateInviteCode();
-
   const startedAt = new Date();
-  const [updatedSharedChat] = await db
-    .insert(sharedLearningScenarioTable)
-    .values({
-      id: maybeExistingEntry?.id,
-      inviteCode,
-      learningScenarioId,
-      maxUsageTimeLimit: parsedValues.usageTimeLimit,
-      startedAt,
-      telliPointsLimit: parsedValues.telliPointsPercentageLimit,
-      userId: user.id,
-    })
-    .onConflictDoUpdate({
-      target: sharedLearningScenarioTable.id,
-      set: {
-        inviteCode,
-        maxUsageTimeLimit: parsedValues.usageTimeLimit,
-        startedAt,
-        telliPointsLimit: parsedValues.telliPointsPercentageLimit,
-      },
-    })
-    .returning();
+  const sharedLearningScenario = await dbCreateLearningScenarioShare({
+    userId: user.id,
+    learningScenarioId,
+    inviteCode,
+    startedAt,
+    telliPointsLimit: parsedValues.telliPointsPercentageLimit,
+    maxUsageTimeLimit: parsedValues.usageTimeLimit,
+  });
 
-  if (updatedSharedChat === undefined) {
+  if (!sharedLearningScenario) {
     throw new Error('Could not share learning scenario');
   }
 
-  return updatedSharedChat;
+  return sharedLearningScenario;
 }
 
 /**
@@ -362,8 +327,7 @@ export async function unshareLearningScenario({
 }) {
   checkParameterUUID(learningScenarioId);
   // Authorization check: user must be a teacher and owner of the sharing itself
-  if (user.userRole !== 'teacher')
-    throw new ForbiddenError('Only a teacher can unshare a learning scenario');
+  requireTeacherRole(user.userRole);
 
   const sharedConversations = await dbGetSharedLearningScenarioConversations({
     learningScenarioId,
@@ -403,30 +367,30 @@ export async function unshareLearningScenario({
 export async function getLearningScenarioForEditView({
   learningScenarioId,
   schoolId,
-  userId,
+  user,
 }: {
   learningScenarioId: string;
   schoolId: string;
-  userId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
 }): Promise<{
   learningScenario: LearningScenarioOptionalShareDataModel;
   relatedFiles: FileModel[];
   avatarPictureUrl: string | undefined;
 }> {
   checkParameterUUID(learningScenarioId);
+  requireTeacherRole(user.userRole);
   const learningScenario = await dbGetLearningScenarioByIdOptionalShareData({
     learningScenarioId,
-    userId,
+    userId: user.id,
   });
   if (!learningScenario) throw new NotFoundError('Learning scenario not found');
-  if (!learningScenario.hasLinkAccess) {
-    if (learningScenario.accessLevel === 'private' && learningScenario.userId !== userId)
-      throw new ForbiddenError('Not authorized to edit this learning scenario');
-    if (learningScenario.accessLevel === 'school' && learningScenario.schoolId !== schoolId)
-      throw new ForbiddenError('Not authorized to edit this learning scenario');
-  }
+  verifyReadAccess({ item: learningScenario, schoolId, userId: user.id });
 
-  const relatedFiles = await getFilesForLearningScenario({ learningScenarioId, schoolId, userId });
+  const relatedFiles = await getFilesForLearningScenario({
+    learningScenarioId,
+    schoolId,
+    user,
+  });
   const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
   return { learningScenario, relatedFiles, avatarPictureUrl };
 }
@@ -444,26 +408,16 @@ export async function getLearningScenarioForEditView({
 export async function getFilesForLearningScenario({
   learningScenarioId,
   schoolId,
-  userId,
+  user,
 }: {
   learningScenarioId: string;
   schoolId: string;
-  userId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
 }): Promise<FileModel[]> {
   checkParameterUUID(learningScenarioId);
-  // Authorization check
-  const { isOwner, isPrivate, learningScenario } = await getLearningScenarioInfo(
-    learningScenarioId,
-    userId,
-  );
-  if (
-    !learningScenario.hasLinkAccess &&
-    ((isPrivate && !isOwner) ||
-      (!isOwner &&
-        learningScenario.accessLevel === 'school' &&
-        learningScenario.schoolId !== schoolId))
-  )
-    throw new ForbiddenError('Not authorized to fetch file mappings for this learning scenario');
+  requireTeacherRole(user.userRole);
+  const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
+  verifyReadAccess({ item: learningScenario, schoolId, userId: user.id });
 
   return dbGetFilesForLearningScenario(learningScenarioId);
 }
@@ -477,12 +431,10 @@ export async function createNewLearningScenario({
   schoolId,
 }: {
   modelId: string;
-  user: UserModel;
+  user: Pick<UserModel, 'id' | 'userRole'>;
   schoolId: string;
 }) {
-  if (user.userRole !== 'teacher') {
-    throw new ForbiddenError('Not authorized to create new learning scenario');
-  }
+  requireTeacherRole(user.userRole);
 
   const [insertedLearningScenario] = await db
     .insert(learningScenarioTable)
@@ -503,113 +455,28 @@ export async function createNewLearningScenario({
 }
 
 /**
- * This function creates a duplicate of an existing learning scenario,
- * including copying the avatar picture and all related files.
- */
-export async function duplicateLearningScenario({
-  accessLevel,
-  schoolId,
-  user,
-  originalLearningScenarioId,
-}: {
-  accessLevel: AccessLevel | undefined;
-  originalLearningScenarioId: string;
-  schoolId: string;
-  user: UserModel;
-}) {
-  const existingLearningScenario = await dbGetLearningScenarioById({
-    learningScenarioId: originalLearningScenarioId,
-  });
-  if (!existingLearningScenario) {
-    throw new NotFoundError('Learning scenario not found');
-  }
-
-  const learningScenarioId = generateUUID();
-
-  const avatarPictureUrl = await copyAvatarPictureIfExists(
-    existingLearningScenario.pictureId,
-    learningScenarioId,
-  );
-
-  // removes createdAt field and other unexpected fields
-  const expectedValues = learningScenarioInsertSchema.parse(existingLearningScenario);
-
-  const copy: LearningScenarioInsertModel = {
-    ...expectedValues,
-    accessLevel: accessLevel ?? 'private',
-    hasLinkAccess: false,
-    id: learningScenarioId,
-    isDeleted: false,
-    originalLearningScenarioId,
-    pictureId: avatarPictureUrl,
-    schoolId: schoolId,
-    userId: user.id,
-  };
-
-  const [insertedLearningScenario] = await db
-    .insert(learningScenarioTable)
-    .values(copy)
-    .returning();
-
-  if (!insertedLearningScenario) {
-    throw new Error('Could not duplicate learning scenario');
-  }
-
-  await copyRelatedFiles(originalLearningScenarioId, learningScenarioId);
-
-  return insertedLearningScenario;
-}
-
-async function copyAvatarPictureIfExists(
-  sourcePictureId: string | null | undefined,
-  newLearningScenarioId: string,
-) {
-  if (!sourcePictureId) return undefined;
-
-  const newAvatarPictureId = buildLearningScenarioPictureKey(newLearningScenarioId);
-  await copyFileInS3({
-    copySource: sourcePictureId,
-    newKey: newAvatarPictureId,
-  });
-  return newAvatarPictureId;
-}
-
-async function copyRelatedFiles(sourceId: string, destinationId: string) {
-  const relatedFiles = await dbGetFilesForLearningScenario(sourceId);
-  await Promise.all(
-    relatedFiles.map(async (file) => {
-      const newFileId = await duplicateFileWithEmbeddings(file.id);
-      await db.insert(LearningScenarioFileMapping).values({
-        fileId: newFileId,
-        learningScenarioId: destinationId,
-      });
-    }),
-  );
-}
-
-/**
  * Deletes a learning scenario if the user is the owner.
  * @throws NotFoundError if the learning scenario does not exist or the user is not the owner.
  * Also deletes all related files and the avatar picture from S3.
  */
 export async function deleteLearningScenario({
   learningScenarioId,
-  userId,
+  user,
 }: {
   learningScenarioId: string;
-  userId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
   checkParameterUUID(learningScenarioId);
-  // Authorization check
-  const { isOwner, learningScenario } = await getLearningScenarioInfo(learningScenarioId, userId);
-  if (!isOwner) throw new ForbiddenError('Not authorized to delete this learning scenario');
+  requireTeacherRole(user.userRole);
+  const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
+  verifyWriteAccess({ item: learningScenario, userId: user.id });
 
   const relatedFiles = await dbGetFilesForLearningScenario(learningScenarioId);
 
   // delete learning scenario from db
   const deletedLearningScenario = await dbDeleteLearningScenarioByIdAndUserId({
     learningScenarioId,
-    userId,
+    userId: user.id,
   });
 
   // delete avatar picture from S3
@@ -628,17 +495,16 @@ export async function deleteLearningScenario({
 export async function linkFileToLearningScenario({
   fileId,
   learningScenarioId,
-  userId,
+  user,
 }: {
   fileId: string;
   learningScenarioId: string;
-  userId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
   checkParameterUUID(learningScenarioId);
-  // Authorization check
-  const { isOwner } = await getLearningScenarioInfo(learningScenarioId, userId);
-  if (!isOwner)
-    throw new ForbiddenError('Not authorized to add new file for this learning scenario');
+  requireTeacherRole(user.userRole);
+  const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
+  verifyWriteAccess({ item: learningScenario, userId: user.id });
 
   const [insertedFileMapping] = await db
     .insert(LearningScenarioFileMapping)
@@ -659,16 +525,16 @@ export async function linkFileToLearningScenario({
 export async function removeFileFromLearningScenario({
   learningScenarioId,
   fileId,
-  userId,
+  user,
 }: {
   learningScenarioId: string;
   fileId: string;
-  userId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
   checkParameterUUID(learningScenarioId);
-  // Authorization check
-  const { isOwner } = await getLearningScenarioInfo(learningScenarioId, userId);
-  if (!isOwner) throw new ForbiddenError('Not authorized to delete this file mapping');
+  requireTeacherRole(user.userRole);
+  const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
+  verifyWriteAccess({ item: learningScenario, userId: user.id });
 
   // delete mapping and file entry in db
   await db.transaction(async (tx) => {
@@ -700,42 +566,19 @@ export async function enrichLearningScenarioWithPictureUrl({
   );
 }
 
-/**
- * Cleans up learning scenarios with empty names from the database.
- *
- * CAUTION: This is an admin function that does not check any authorization!
- *
- * Note: linked files will be unlinked but removed separately by `dbDeleteDanglingFiles`
- *
- * @returns number of deleted learning scenarios in db.
- */
-export async function cleanupLearningScenarios() {
-  const result = await db
-    .delete(learningScenarioTable)
-    .where(
-      and(
-        eq(learningScenarioTable.name, ''),
-        lt(learningScenarioTable.createdAt, addDays(new Date(), -1)),
-      ),
-    )
-    .returning();
-  return result.length;
-}
-
 export async function uploadAvatarPictureForLearningScenario({
   learningScenarioId,
   croppedImageBlob,
-  userId,
+  user,
 }: {
   learningScenarioId: string;
   croppedImageBlob: Blob;
-  userId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
   checkParameterUUID(learningScenarioId);
-  // Authorization check
-  const { isOwner } = await getLearningScenarioInfo(learningScenarioId, userId);
-  if (!isOwner)
-    throw new ForbiddenError('Not authorized to upload picture for this learning scenario');
+  requireTeacherRole(user.userRole);
+  const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
+  verifyWriteAccess({ item: learningScenario, userId: user.id });
 
   const key = buildLearningScenarioPictureKey(learningScenarioId);
 
@@ -746,4 +589,36 @@ export async function uploadAvatarPictureForLearningScenario({
   });
 
   return key;
+}
+
+/**
+ * User creates a new learning scenario from a template.
+ * All files are duplicated and linked to the new learning scenario.
+ *
+ * Authorization checks:
+ * - User must be a teacher.
+ * - User must have access to the template.
+ *
+ * @returns the newly created learning scenario
+ */
+export async function createNewLearningScenarioFromTemplate({
+  schoolId,
+  user,
+  originalLearningScenarioId,
+}: {
+  originalLearningScenarioId: string;
+  schoolId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
+}) {
+  checkParameterUUID(originalLearningScenarioId);
+  requireTeacherRole(user.userRole);
+  const { learningScenario } = await getLearningScenarioInfo(originalLearningScenarioId, user.id);
+  verifyReadAccess({ item: learningScenario, schoolId, userId: user.id });
+
+  return duplicateLearningScenario({
+    accessLevel: 'private',
+    originalLearningScenarioId,
+    schoolId,
+    userId: user.id,
+  });
 }
