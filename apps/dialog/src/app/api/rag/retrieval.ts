@@ -8,7 +8,7 @@ import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
 import { type ChatMessage as Message } from '@/types/chat';
 import { logError } from '@shared/logging';
-import { type VectorSearchResult, type FullTextSearchResult } from './types';
+import { type Chunk, type VectorSearchResult, type FullTextSearchResult } from './types';
 
 type SearchOptions = {
   keywords: string[];
@@ -59,7 +59,7 @@ export async function getRelevantContent({
   }
 
   const relatedFileEntityIds = relatedFileEntities.map((file) => file.id);
-  const retrievedTextChunks = await searchTextChunks({
+  const retrievedTextChunks = await hybridSearch({
     keywords,
     embedding: queryEmbedding,
     fileIds: relatedFileEntityIds,
@@ -168,13 +168,7 @@ async function fullTextSearch({
  * @param limit - Maximum number of results to return
  * @returns Array of text chunks sorted by relevance
  */
-export async function searchTextChunks({
-  keywords,
-  embedding,
-  fileIds,
-  limit = 10,
-}: SearchOptions) {
-  // Build the base query
+export async function hybridSearch({ keywords, embedding, fileIds, limit = 10 }: SearchOptions) {
   if (embedding.length === 0) {
     return [];
   }
@@ -184,69 +178,52 @@ export async function searchTextChunks({
     fullTextSearch({ keywords, fileIds: fileIds ?? [], limit }),
   ]);
 
-  // Create a map to store all unique results
-  const combinedResultsMap: Map<
-    string,
-    {
-      id: string;
-      content: string;
-      fileId: string;
-      pageNumber: number | null;
-      orderIndex: number;
-      embeddingRank: number;
-      textRank: number;
-      combinedRankScore: number;
-      fileName: string;
-      leadingOverlap: string | null;
-      trailingOverlap: string | null;
-    }
-  > = new Map();
+  return fuseResults(embeddingResults, textRankResults, limit);
+}
 
-  // Process embedding results with rank position
+/**
+ * Merges vector and full-text search results using Reciprocal Rank Fusion.
+ * Each result gets a rank position from each list (or MAX_SAFE_INTEGER if absent),
+ * and the final score is the average of both ranks (lower is better).
+ *
+ * @param embeddingResults - Results from vector search with their similarity scores
+ * @param textRankResults - Results from full-text search with their text rank scores
+ * @param limit - Maximum number of results to return after fusion
+ * @returns Array of chunks sorted by combined relevance from both methods
+ */
+function fuseResults(
+  embeddingResults: VectorSearchResult[],
+  textRankResults: FullTextSearchResult[],
+  limit: number,
+): Chunk[] {
+  const fusedMap = new Map<string, Chunk & { embeddingRank: number; textRank: number }>();
+
   embeddingResults.forEach((result, index) => {
-    combinedResultsMap.set(result.id, {
+    fusedMap.set(result.id, {
       ...result,
-      embeddingRank: index + 1, // 1-based rank
-      textRank: Number.MAX_SAFE_INTEGER, // Default rank if not in text results
-      combinedRankScore: 0, // Will be calculated after both lists are processed
-      fileName: result.fileName ?? '',
-      leadingOverlap: result.leadingOverlap ?? null,
-      trailingOverlap: result.trailingOverlap ?? null,
+      embeddingRank: index + 1,
+      textRank: Number.MAX_SAFE_INTEGER,
     });
   });
 
-  // Process text rank results with rank position
   textRankResults.forEach((result, index) => {
-    if (combinedResultsMap.has(result.id)) {
-      // Update existing entry with text rank position
-      const existingEntry = combinedResultsMap.get(result.id);
-      if (existingEntry) {
-        existingEntry.textRank = index + 1; // 1-based rank
-      }
+    const existing = fusedMap.get(result.id);
+    if (existing) {
+      existing.textRank = index + 1;
     } else {
-      // Add new entry
-      combinedResultsMap.set(result.id, {
+      fusedMap.set(result.id, {
         ...result,
-        embeddingRank: Number.MAX_SAFE_INTEGER, // Default rank if not in embedding results
-        textRank: index + 1, // 1-based rank
-        combinedRankScore: 0, // Will be calculated after both lists are processed
-        fileName: result.fileName ?? '', // Filename must be defined
-        leadingOverlap: result.leadingOverlap ?? null,
-        trailingOverlap: result.trailingOverlap ?? null,
+        embeddingRank: Number.MAX_SAFE_INTEGER,
+        textRank: index + 1,
       });
     }
   });
 
-  // Calculate combined rank score (lower is better)
-  for (const entry of combinedResultsMap.values()) {
-    // Average of ranks (with equal weighting)
-    entry.combinedRankScore = (entry.embeddingRank + entry.textRank) / 2;
-  }
-
-  // Convert map to array and sort by combined rank score (lower is better)
-  const combinedResults = Array.from(combinedResultsMap.values())
-    .sort((a, b) => a.combinedRankScore - b.combinedRankScore)
+  return Array.from(fusedMap.values())
+    .sort((a, b) => {
+      const scoreA = (a.embeddingRank + a.textRank) / 2;
+      const scoreB = (b.embeddingRank + b.textRank) / 2;
+      return scoreA - scoreB;
+    })
     .slice(0, limit);
-
-  return combinedResults.slice(0, limit);
 }
