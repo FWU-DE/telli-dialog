@@ -5,7 +5,7 @@ import { chunkText, groupAndSortChunks } from './chunking';
 import { embedText, embedChunks } from './embedding';
 import { hybridSearch } from './retrieval';
 import { TextElement } from './types';
-import { condenseChatHistory, getKeywordsFromQuery } from './query-preparaton';
+import { condenseChatHistory, getKeywordsFromQuery } from './query-preparation';
 import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { logError } from '@shared/logging';
 
