@@ -5,7 +5,7 @@ import { cnanoid } from '@telli/shared/random/randomService';
 import { NextRequest, NextResponse } from 'next/server';
 import { extractFile } from '../../file-operations/extract-file';
 import { chunkText } from '../../rag/chunking';
-import { embedTextChunks } from '../../file-operations/embedding';
+import { embedTextChunks } from '../../rag/embedding';
 import { logDebug } from '@shared/logging';
 import { dbInsertFileWithTextChunks } from '@shared/db/functions/files';
 import { uploadMessageAttachment } from '@shared/files/fileService';
