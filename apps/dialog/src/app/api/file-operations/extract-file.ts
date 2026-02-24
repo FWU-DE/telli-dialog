@@ -2,7 +2,7 @@ import { SUPPORTED_DOCUMENTS_TYPE } from '@/const';
 import { extractTextFromWordDocument } from './parse-docx';
 import { extractTextFromPdfBuffer } from './parse-pdf';
 import { FileMetadata } from '@shared/db/schema';
-import { preprocessImage } from './prepocess-image';
+import { preprocessImage } from './preprocess-image';
 import { isImageFile } from '@/utils/files/generic';
 
 type TextElement = {

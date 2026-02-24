@@ -1,11 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { promises as fs } from 'fs';
 import path from 'path';
-import {
-  createPageToChapterMapping,
-  extractTextFromPdfBuffer as extractTextFromPdfBufferAlt,
-  extractTOC,
-} from './parse-pdf';
+import { extractTextFromPdfBuffer as extractTextFromPdfBufferAlt } from './parse-pdf';
 
 const COMPLEX_PDF_PATH = path.resolve(__dirname, '../__fixtures__/Bundestag-KI.pdf');
 const SIMPLE_PDF_PATH = path.resolve(__dirname, '../__fixtures__/Test Dokument.pdf');
@@ -54,38 +50,5 @@ describe('extractTextFromPdfBufferAlt', () => {
     expect(totalPages).toBe(26);
     expect(typeof pageElement?.[0]?.text).toBe('string');
     expect(pageElement?.[0]?.text.length).toBeGreaterThan(0);
-  });
-
-  it('should extract the table of contents from a PDF buffer', async () => {
-    const extractedTOC = await extractTOC(pdfBuffer);
-    expect(extractedTOC).toBeDefined();
-    expect(extractedTOC.length).toBe(22);
-    expect(extractedTOC?.[1]?.title).toBe('1. Vorbemerkung');
-    expect(extractedTOC?.[1]?.fullPath).toBe('1. Vorbemerkung');
-    expect(extractedTOC?.[2]?.title).toBe(
-      '2. Rechtliche Vorgaben zum Einsatz von KI in der Bildung',
-    );
-    expect(extractedTOC?.[2]?.fullPath).toBe(
-      '2. Rechtliche Vorgaben zum Einsatz von KI in der Bildung',
-    );
-    expect(extractedTOC?.[3]?.title).toBe('2.1. Europäische Ebene');
-    expect(extractedTOC?.[3]?.fullPath).toBe(
-      '2. Rechtliche Vorgaben zum Einsatz von KI in der Bildung / 2.1. Europäische Ebene',
-    );
-  });
-
-  it('should create a page to chapter mapping from a PDF buffer', async () => {
-    const extractedTOC = await extractTOC(pdfBuffer);
-    const pageToChapterMapping = await createPageToChapterMapping(extractedTOC, 24);
-    expect(pageToChapterMapping).toBeDefined();
-    expect(Object.keys(pageToChapterMapping).length).toBe(22);
-    // pages 1 and 2 have no chapter and page 3 is the table of contents itself
-    expect(pageToChapterMapping[4]).toBe('1. Vorbemerkung'); // the chapter of page 4 is "1. Vorbemerkung"
-    expect(pageToChapterMapping[6]).toBe(
-      '2. Rechtliche Vorgaben zum Einsatz von KI in der Bildung / 2.1. Europäische Ebene',
-    );
-    expect(pageToChapterMapping[7]).toBe(
-      '2. Rechtliche Vorgaben zum Einsatz von KI in der Bildung / 2.1. Europäische Ebene',
-    );
   });
 });

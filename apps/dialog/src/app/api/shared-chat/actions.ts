@@ -28,7 +28,7 @@ import {
   KEEP_RECENT_MESSAGES,
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
-import { extractImagesAndUrl } from '../file-operations/prepocess-image';
+import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 
 export type ChatMessage = {
   id: string;
