@@ -4,15 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "NODE_ENV=development dotenv -e ../../.env -- tsx watch src/index.ts",
+    "dev": "NODE_ENV=development tsx watch src/index.ts",
     "clean": "find . -type d \\( -name node_modules -o -name dist -o -name .next \\) -not -path \"./.vercel/*\" -prune -exec rm -rf {} \\;",
     "start": "NODE_ENV=production tsx src/index.ts",
     "build": "tsup",
     "lint": "tsc --noEmit && eslint --max-warnings 0",
     "types": "tsc --noEmit",
     "test": "vitest run --coverage",
-    "test:watch": "dotenv -e .env.test -- vitest run --watch",
-    "test:coverage": "dotenv -e .env.test -- vitest run --coverage"
+    "test:watch": "vitest run --watch",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@telli/api-database": "workspace:*",
@@ -36,6 +36,7 @@
     "@sentry/opentelemetry": "10.38.0",
     "@sentry/profiling-node": "10.38.0",
     "@t3-oss/env-core": "0.13.10",
+    "dotenv": "17.3.1",
     "fastify": "5.7.4",
     "fastify-graceful-shutdown": "5.0.0",
     "google-auth-library": "10.5.0",
@@ -50,8 +51,6 @@
     "@sentry/esbuild-plugin": "4.9.1",
     "@types/node": "24.10.13",
     "@vitest/coverage-v8": "4.0.18",
-    "dotenv": "17.3.1",
-    "dotenv-cli": "11.0.0",
     "eslint": "9.39.2",
     "tsup": "8.5.1",
     "tsx": "4.21.0",

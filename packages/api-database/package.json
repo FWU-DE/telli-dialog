@@ -9,15 +9,16 @@
     "./helpers": "./helpers/index.ts"
   },
   "scripts": {
-    "db:generate": "dotenv -e ../../.env -- drizzle-kit generate",
-    "db:migrate": "dotenv -e ../../.env -- drizzle-kit migrate --config=./drizzle.config.ts",
+    "db:generate": "dotenv -e ../../apps/api/.env.local -- drizzle-kit generate",
+    "db:migrate": "dotenv -e ../../apps/api/.env.local -- drizzle-kit migrate --config=./drizzle.config.ts",
     "db:migrate:pipeline": "drizzle-kit migrate --config=./drizzle.config.ts",
-    "db:seed": "dotenv -e ../../.env -- tsx src/seed.ts",
-    "db:seed:from-stage": "dotenv -e ../../.env -- tsx src/seed-from-stage.ts",
+    "db:seed": "dotenv -e ../../apps/api/.env.local -- tsx src/seed.ts",
+    "db:seed:from-stage": "dotenv -e ../../apps/api/.env.local -- tsx src/seed-from-stage.ts",
     "types": "tsc --noEmit",
     "lint": "eslint \"**/*.ts*\" --max-warnings 0"
   },
   "dependencies": {
+    "@t3-oss/env-core": "0.13.10",
     "bcryptjs": "3.0.3",
     "drizzle-orm": "0.45.1",
     "drizzle-zod": "0.8.3",

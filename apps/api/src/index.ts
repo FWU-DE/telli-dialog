@@ -1,3 +1,5 @@
+// this import has to be at the very top to load env vars before anything else
+import "./load-env";
 // this import has to be at the top of the file for fastify to be instrumented properly
 import { shutdownTracing } from "@/instrumentation";
 import cors from "@fastify/cors";

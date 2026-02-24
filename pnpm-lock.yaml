@@ -199,6 +199,9 @@ importers:
       '@telli/api-utils':
         specifier: workspace:*
         version: link:../../packages/api-utils
+      dotenv:
+        specifier: 17.3.1
+        version: 17.3.1
       fastify:
         specifier: 5.7.4
         version: 5.7.4
@@ -236,12 +239,6 @@ importers:
       '@vitest/coverage-v8':
         specifier: 4.0.18
         version: 4.0.18(vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@24.10.13)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@1.8.0))(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
-      dotenv:
-        specifier: 17.3.1
-        version: 17.3.1
-      dotenv-cli:
-        specifier: 11.0.0
-        version: 11.0.0
       eslint:
         specifier: 9.39.2
         version: 9.39.2(jiti@2.6.1)
@@ -622,6 +619,9 @@ importers:
 
   packages/api-database:
     dependencies:
+      '@t3-oss/env-core':
+        specifier: 0.13.10
+        version: 0.13.10(typescript@5.9.3)(zod@4.3.6)
       bcryptjs:
         specifier: 3.0.3
         version: 3.0.3
