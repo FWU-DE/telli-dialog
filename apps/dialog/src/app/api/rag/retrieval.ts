@@ -8,6 +8,7 @@ import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
 import { type ChatMessage as Message } from '@/types/chat';
 import { logError } from '@shared/logging';
+import { type VectorSearchResult, type FullTextSearchResult } from './types';
 
 type SearchOptions = {
   keywords: string[];
@@ -70,6 +71,11 @@ export async function getRelevantContent({
 
 /**
  * Finds chunks most similar to the query embedding using cosine similarity (pgvector).
+ *
+ * @param embedding - The query embedding vector
+ * @param fileIds - The IDs of files to search within
+ * @param limit - Maximum number of results to return
+ * @returns Array of text chunks sorted by embedding similarity
  */
 async function vectorSearch({
   embedding,
@@ -79,7 +85,7 @@ async function vectorSearch({
   embedding: number[];
   fileIds: string[];
   limit: number;
-}) {
+}): Promise<VectorSearchResult[]> {
   return db
     .select({
       id: TextChunkTable.id,
@@ -94,15 +100,72 @@ async function vectorSearch({
         sql`1 - (${TextChunkTable.embedding} <=> ${JSON.stringify(embedding)})` as SQL<number>,
     })
     .from(TextChunkTable)
-    .leftJoin(fileTable, eq(TextChunkTable.fileId, fileTable.id))
+    .innerJoin(fileTable, eq(TextChunkTable.fileId, fileTable.id))
     .where(inArray(TextChunkTable.fileId, fileIds))
     .limit(limit)
     .orderBy((t) => [desc(t.embeddingSimilarity)]);
 }
 
 /**
+ * Finds chunks matching the given keywords using PostgreSQL full-text search (tsvector).
+ * Returns only chunks with a positive text rank.
+ *
+ * @param keywords - The keywords to search for
+ * @param fileIds - The IDs of files to search within
+ * @param limit - Maximum number of results to return
+ * @returns Array of matching text chunks with their text rank scores
+ */
+async function fullTextSearch({
+  keywords,
+  fileIds,
+  limit,
+}: {
+  keywords: string[];
+  fileIds: string[];
+  limit: number;
+}): Promise<FullTextSearchResult[]> {
+  // Remove any non-alphanumeric characters and filter out empty strings
+  const cleanedKeywords = keywords
+    .map((k) => k.replace(/[^a-zA-Z0-9]/g, ''))
+    .filter((k) => k.length > 0);
+
+  if (cleanedKeywords.length === 0) {
+    return [];
+  }
+
+  const tsQuery = cleanedKeywords.join(' | ');
+
+  return db
+    .select({
+      id: TextChunkTable.id,
+      content: TextChunkTable.content,
+      fileId: TextChunkTable.fileId,
+      fileName: fileTable.name,
+      leadingOverlap: TextChunkTable.leadingOverlap,
+      trailingOverlap: TextChunkTable.trailingOverlap,
+      pageNumber: TextChunkTable.pageNumber,
+      orderIndex: TextChunkTable.orderIndex,
+      textRank:
+        sql`ts_rank_cd(${TextChunkTable.contentTsv}, to_tsquery('german', ${tsQuery}))` as SQL<number>,
+    })
+    .from(TextChunkTable)
+    .innerJoin(fileTable, eq(TextChunkTable.fileId, fileTable.id))
+    .where(
+      and(
+        inArray(TextChunkTable.fileId, fileIds),
+        sql`ts_rank_cd(${TextChunkTable.contentTsv}, to_tsquery('german', ${tsQuery})) > 0`,
+      ),
+    )
+    .limit(limit)
+    .orderBy((t) => [desc(t.textRank)]);
+}
+
+/**
  * Search for relevant text chunks using both embedding similarity and full-text search
- * @param options Search parameters including query text, embedding vector, and optional filters
+ * @param keywords - The keywords extracted from the query
+ * @param embedding - The query embedding vector
+ * @param fileIds - The IDs of files to search within
+ * @param limit - Maximum number of results to return
  * @returns Array of text chunks sorted by relevance
  */
 export async function searchTextChunks({
@@ -116,44 +179,17 @@ export async function searchTextChunks({
     return [];
   }
 
-  // remove any non-alphanumeric characters from keywords and filter out empty strings
-  const cleaned_keywords = keywords
-    .map((k) => k.replace(/[^a-zA-Z0-9]/g, ''))
-    .filter((k) => k.length > 0);
-
   const embeddingResults = await vectorSearch({
     embedding,
     fileIds: fileIds ?? [],
     limit,
   });
 
-  // Calculate text rank for each chunk only if we have keywords
-  const textRankResults =
-    cleaned_keywords.length > 0
-      ? await db
-          .select({
-            id: TextChunkTable.id,
-            content: TextChunkTable.content,
-            fileId: TextChunkTable.fileId,
-            fileName: fileTable.name,
-            leadingOverlap: TextChunkTable.leadingOverlap,
-            trailingOverlap: TextChunkTable.trailingOverlap,
-            pageNumber: TextChunkTable.pageNumber,
-            orderIndex: TextChunkTable.orderIndex,
-            textRank:
-              sql`ts_rank_cd(${TextChunkTable.contentTsv}, to_tsquery('german', ${cleaned_keywords.join(' | ')}))` as SQL<number>,
-          })
-          .from(TextChunkTable)
-          .leftJoin(fileTable, eq(TextChunkTable.fileId, fileTable.id))
-          .where(
-            and(
-              inArray(TextChunkTable.fileId, fileIds ?? []),
-              sql`ts_rank_cd(${TextChunkTable.contentTsv}, to_tsquery('german', ${cleaned_keywords.join(' | ')})) > 0`,
-            ),
-          )
-          .limit(limit)
-          .orderBy((t) => [desc(t.textRank)])
-      : [];
+  const textRankResults = await fullTextSearch({
+    keywords,
+    fileIds: fileIds ?? [],
+    limit,
+  });
 
   // Create a map to store all unique results
   const combinedResultsMap: Map<
