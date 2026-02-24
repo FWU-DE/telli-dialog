@@ -20,7 +20,7 @@ import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructChatSystemPrompt } from './system-prompt';
 import { formatMessagesWithImages, getChatTitle, limitChatHistory } from './utils';
-import { getRelevantContent } from '../rag/retrieval';
+import { retrieveRelevantContent } from '../rag/rag-service';
 import { logError } from '@shared/logging';
 import {
   KEEP_FIRST_MESSAGES,
@@ -185,7 +185,7 @@ export async function sendChatMessage({
     customGptId,
   });
 
-  const orderedChunks = await getRelevantContent({
+  const orderedChunks = await retrieveRelevantContent({
     messages: messages.map((m) => ({
       id: m.id,
       role: m.role,
