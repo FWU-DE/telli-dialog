@@ -139,7 +139,7 @@ export async function sendSharedChatMessage({
   const urls = sharedChat.attachedLinks.filter((l) => l !== '');
   const websearchSources = await Promise.all(urls.map((url) => webScraper(url)));
 
-  const retrievedTextChunks = await retrieveChunks({
+  const chunks = await retrieveChunks({
     modelId: definedModel.id,
     apiKeyId,
     messages: messages.map<ChatMessage>((m) => ({ id: m.id, role: m.role, content: m.content })),
@@ -150,7 +150,7 @@ export async function sendSharedChatMessage({
   // Build system prompt
   const systemPrompt = constructLearningScenarioSystemPrompt({
     sharedChat,
-    retrievedTextChunks,
+    chunks,
     websearchSources,
   });
 

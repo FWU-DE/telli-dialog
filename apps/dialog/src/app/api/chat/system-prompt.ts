@@ -94,16 +94,16 @@ export async function constructChatSystemPrompt({
   isTeacher,
   federalState,
   websearchSources,
-  retrievedTextChunks,
+  chunks,
 }: {
   characterId?: string;
   customGptId?: string;
   isTeacher: boolean;
   federalState: ObscuredFederalState;
   websearchSources: WebsearchSource[];
-  retrievedTextChunks?: Record<string, Chunk[]>;
+  chunks?: Record<string, Chunk[]>;
 }) {
-  const filePrompt = constructFilePrompt(retrievedTextChunks);
+  const filePrompt = constructFilePrompt(chunks);
   const websearchPrompt = constructWebsearchPrompt(websearchSources);
 
   if (characterId !== undefined) {

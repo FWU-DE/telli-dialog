@@ -136,7 +136,7 @@ export async function sendCharacterMessage({
   const urls = character.attachedLinks.filter((l) => l !== '');
   const websearchSources = await Promise.all(urls.map((url) => webScraper(url)));
 
-  const orderedChunks = await retrieveChunks({
+  const chunks = await retrieveChunks({
     messages: messages.map<ChatMessage>((m) => ({ id: m.id, role: m.role, content: m.content })),
     user: teacherUserAndContext,
     relatedFileEntities,
@@ -147,7 +147,7 @@ export async function sendCharacterMessage({
   // Build system prompt
   const systemPrompt = constructCharacterSystemPrompt({
     character,
-    retrievedTextChunks: orderedChunks,
+    chunks,
     websearchSources,
   });
 

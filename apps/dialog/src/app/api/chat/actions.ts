@@ -185,7 +185,7 @@ export async function sendChatMessage({
     customGptId,
   });
 
-  const orderedChunks = await retrieveChunks({
+  const chunks = await retrieveChunks({
     messages: messages.map((m) => ({
       id: m.id,
       role: m.role,
@@ -215,7 +215,7 @@ export async function sendChatMessage({
     isTeacher: user.school.userRole === 'teacher',
     federalState: user.federalState,
     websearchSources,
-    retrievedTextChunks: orderedChunks,
+    chunks,
   });
 
   // Check if the model supports images based on supportedImageFormats

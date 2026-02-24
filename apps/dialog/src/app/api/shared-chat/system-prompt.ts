@@ -10,14 +10,14 @@ import { WebsearchSource } from '@shared/db/types';
 
 export function constructLearningScenarioSystemPrompt({
   sharedChat,
-  retrievedTextChunks,
+  chunks,
   websearchSources,
 }: {
   sharedChat: LearningScenarioSelectModel;
-  retrievedTextChunks?: Record<string, Chunk[]>;
+  chunks?: Record<string, Chunk[]>;
   websearchSources?: WebsearchSource[];
 }) {
-  const filePrompt = constructFilePrompt(retrievedTextChunks);
+  const filePrompt = constructFilePrompt(chunks);
   const websearchPrompt = constructWebsearchPrompt(websearchSources);
 
   return `Du bist ein KI-Chatbot, der in einer Schulklasse eingesetzt wird, um Schülerinnen und Schüler zu unterstützen.

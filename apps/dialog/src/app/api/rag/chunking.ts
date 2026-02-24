@@ -87,7 +87,12 @@ export function chunkText({
 }
 
 /**
- * Groups retrieved text chunks by fileId and sorts them by orderIndex within each group
+ * The hybrid search returns a flat array of chunks from potentially multiple files,
+ * ranked by relevance. This function groups the retrieved text chunks by fileId
+ * and sorts them by orderIndex within each group.
+ * Grouping ensures each file gets its own labeled section in the prompt,
+ * and sorting ensures the excerpts within each file appear in their natural reading order.
+ *
  * @param chunks Array of text chunks with fileId and orderIndex properties
  * @returns Object with fileIds as keys and arrays of sorted chunks as values
  */

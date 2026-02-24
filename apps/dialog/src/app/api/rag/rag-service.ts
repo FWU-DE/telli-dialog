@@ -2,10 +2,10 @@ import { TextChunkInsertModel, FileModelAndContent } from '@shared/db/schema';
 import { type ChatMessage as Message } from '@/types/chat';
 import { UserAndContext } from '@/auth/types';
 import { chunkText, groupAndSortChunks } from './chunking';
-import { embedText, embedTextChunks } from './embedding';
+import { embedText, embedChunks } from './embedding';
 import { hybridSearch } from './retrieval';
 import { TextElement } from './types';
-import { condenseChatHistory, getKeywordsFromQuery } from '../chat/utils';
+import { condenseChatHistory, getKeywordsFromQuery } from './query-preparaton';
 import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { logError } from '@shared/logging';
 
@@ -51,7 +51,7 @@ export async function chunkAndEmbed({
       })),
   );
 
-  return embedTextChunks({
+  return embedChunks({
     values: chunksWithoutEmbeddings,
     fileId,
     federalStateId,

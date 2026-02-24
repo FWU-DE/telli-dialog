@@ -39,14 +39,14 @@ Bitte antworte stets im Rahmen deiner Rolle als ${character.name}.`;
 
 export function constructCharacterSystemPrompt({
   character,
-  retrievedTextChunks,
+  chunks,
   websearchSources,
 }: {
   character: CharacterSelectModel;
-  retrievedTextChunks?: Record<string, Chunk[]>;
+  chunks?: Record<string, Chunk[]>;
   websearchSources?: WebsearchSource[];
 }) {
-  const filePrompt = constructFilePrompt(retrievedTextChunks);
+  const filePrompt = constructFilePrompt(chunks);
   const websearchPrompt = constructWebsearchPrompt(websearchSources);
 
   return `${constructBaseCharacterSystemPrompt(character)}
