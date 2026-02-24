@@ -1,13 +1,6 @@
 import { db } from '@shared/db';
-import { FileModelAndContent, fileTable, TextChunkTable } from '@shared/db/schema';
+import { fileTable, TextChunkTable } from '@shared/db/schema';
 import { and, desc, eq, inArray, SQL, sql } from 'drizzle-orm';
-import { groupAndSortChunks } from '../rag/chunking';
-import { condenseChatHistory, getKeywordsFromQuery } from '../chat/utils';
-import { embedText } from '../rag/embedding';
-import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
-import { UserAndContext } from '@/auth/types';
-import { type ChatMessage as Message } from '@/types/chat';
-import { logError } from '@shared/logging';
 import { type Chunk, type VectorSearchResult, type FullTextSearchResult } from './types';
 
 type SearchOptions = {
@@ -16,58 +9,6 @@ type SearchOptions = {
   fileIds?: string[];
   limit?: number;
 };
-
-export async function getRelevantContent({
-  modelId,
-  apiKeyId,
-  messages,
-  user,
-  relatedFileEntities,
-}: {
-  modelId: string;
-  apiKeyId: string;
-  messages: Message[];
-  user: UserAndContext;
-  relatedFileEntities: FileModelAndContent[];
-}) {
-  if (relatedFileEntities.length === 0) {
-    return undefined;
-  }
-
-  const [searchQuery, keywords] = await Promise.all([
-    condenseChatHistory({
-      messages,
-      modelId,
-      apiKeyId,
-    }),
-    getKeywordsFromQuery({
-      messages,
-      modelId,
-      apiKeyId,
-    }),
-  ]);
-
-  let queryEmbedding: number[] = [];
-  try {
-    const [embedding] = await embedText({
-      text: [searchQuery],
-      federalStateId: user.federalState.id,
-    });
-    queryEmbedding = embedding ?? [];
-  } catch (error) {
-    logError('Failed to generate embedding, using empty array as fallback:', error);
-  }
-
-  const relatedFileEntityIds = relatedFileEntities.map((file) => file.id);
-  const retrievedTextChunks = await hybridSearch({
-    keywords,
-    embedding: queryEmbedding,
-    fileIds: relatedFileEntityIds,
-    limit: FILE_SEARCH_LIMIT,
-  });
-
-  return groupAndSortChunks(retrievedTextChunks);
-}
 
 /**
  * Finds chunks most similar to the query embedding using cosine similarity (pgvector).

@@ -1,10 +1,13 @@
 import { TextChunkInsertModel, FileModelAndContent } from '@shared/db/schema';
 import { type ChatMessage as Message } from '@/types/chat';
 import { UserAndContext } from '@/auth/types';
-import { chunkText } from './chunking';
-import { embedTextChunks } from './embedding';
-import { getRelevantContent } from './retrieval';
+import { chunkText, groupAndSortChunks } from './chunking';
+import { embedText, embedTextChunks } from './embedding';
+import { hybridSearch } from './retrieval';
 import { TextElement } from './types';
+import { condenseChatHistory, getKeywordsFromQuery } from '../chat/utils';
+import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
+import { logError } from '@shared/logging';
 
 /**
  * Ingests raw text elements by chunking and embedding them.
@@ -81,11 +84,33 @@ export async function retrieveChunks({
   modelId: string;
   apiKeyId: string;
 }) {
-  return getRelevantContent({
-    messages,
-    user,
-    relatedFileEntities,
-    modelId,
-    apiKeyId,
+  if (relatedFileEntities.length === 0) {
+    return undefined;
+  }
+
+  const [searchQuery, keywords] = await Promise.all([
+    condenseChatHistory({ messages, modelId, apiKeyId }),
+    getKeywordsFromQuery({ messages, modelId, apiKeyId }),
+  ]);
+
+  let queryEmbedding: number[] = [];
+  try {
+    const [embedding] = await embedText({
+      text: [searchQuery],
+      federalStateId: user.federalState.id,
+    });
+    queryEmbedding = embedding ?? [];
+  } catch (error) {
+    logError('Failed to generate embedding, using empty array as fallback:', error);
+  }
+
+  const fileIds = relatedFileEntities.map((file) => file.id);
+  const chunks = await hybridSearch({
+    keywords,
+    embedding: queryEmbedding,
+    fileIds,
+    limit: FILE_SEARCH_LIMIT,
   });
+
+  return groupAndSortChunks(chunks);
 }
