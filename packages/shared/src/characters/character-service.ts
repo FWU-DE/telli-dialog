@@ -413,8 +413,7 @@ export const shareCharacter = async ({
   const telliPointsLimit = telliPointsPercentageLimit;
   const maxUsageTimeLimit = usageTimeLimitMinutes;
   const inviteCode = generateInviteCode();
-  const createdAt = new Date();
-  const startedAt = createdAt;
+  const startedAt = new Date();
   const [updatedSharedChat] = await db
     .insert(sharedCharacterConversation)
     .values({
@@ -428,7 +427,7 @@ export const shareCharacter = async ({
     })
     .onConflictDoUpdate({
       target: sharedCharacterConversation.id,
-      set: { inviteCode, startedAt, maxUsageTimeLimit, telliPointsLimit, createdAt },
+      set: { inviteCode, startedAt, maxUsageTimeLimit, telliPointsLimit },
     })
     .returning();
 
