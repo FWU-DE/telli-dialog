@@ -1,6 +1,8 @@
 'use server';
 
-import { getUser, userHasCompletedTraining } from '@/auth/utils';
+import { requireAuth } from '@/auth/requireAuth';
+import { buildLegacyUserAndContext } from '@/auth/types';
+import { userHasCompletedTraining } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
 import { sendChatMessage } from './chat-service';
 import type { ChatMessage, SendMessageResult } from './chat-service';
@@ -22,10 +24,12 @@ export async function sendChatMessageAction({
   customGptId?: string;
   fileIds?: string[];
 }): Promise<SendMessageResult> {
-  // TODO: Switch to requireAuth
-  // Auth and access checks
-  const [user, hasCompletedTraining] = await Promise.all([getUser(), userHasCompletedTraining()]);
-  const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
+  const [{ user, school, federalState }, hasCompletedTraining] = await Promise.all([
+    requireAuth(),
+    userHasCompletedTraining(),
+  ]);
+  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const productAccess = checkProductAccess({ ...userAndContext, hasCompletedTraining });
 
   if (!productAccess.hasAccess) {
     throw new Error(productAccess.errorType);
@@ -37,6 +41,6 @@ export async function sendChatMessageAction({
     characterId,
     customGptId,
     fileIds,
-    user,
+    user: userAndContext,
   });
 }
