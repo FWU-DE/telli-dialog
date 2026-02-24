@@ -22,6 +22,7 @@ export default function ExpiredChatModal({
 }: ExpiredChatModalProps) {
   const t = useTranslations('learning-scenarios.shared');
   const { designConfiguration } = useTheme();
+
   return (
     <AlertDialog.Root open={true}>
       <AlertDialog.Portal>
@@ -40,15 +41,18 @@ export default function ExpiredChatModal({
               <p className="text-3xl w-full text-center">{t('expired-modal-description')}</p>
             </AlertDialog.Description>
             <AlertDialog.Action asChild>
-              <div className="mt-6 mb-2">
-                <DownloadSharedConversationButton
-                  primaryButton
-                  characterName={title}
-                  conversationMessages={conversationMessages}
-                  disabled={conversationMessages.length === 0}
-                  inviteCode={inviteCode}
-                />
-              </div>
+              {/* If the shared chat has expired, the messages are gone, so there is no way atm to download the conversation. */}
+              {conversationMessages.length !== 0 && (
+                <div className="mt-6 mb-2">
+                  <DownloadSharedConversationButton
+                    primaryButton
+                    characterName={title}
+                    conversationMessages={conversationMessages}
+                    disabled={conversationMessages.length === 0}
+                    inviteCode={inviteCode}
+                  />
+                </div>
+              )}
             </AlertDialog.Action>
           </div>
         </AlertDialog.Content>

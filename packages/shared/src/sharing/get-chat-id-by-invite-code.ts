@@ -1,5 +1,5 @@
 import { db } from '@shared/db';
-import { eq } from 'drizzle-orm';
+import { and, eq, isNotNull } from 'drizzle-orm';
 import { sharedCharacterConversation, sharedLearningScenarioTable } from '@shared/db/schema';
 import { NotFoundError } from '@shared/error';
 
@@ -40,7 +40,12 @@ async function tryGetCharacterIdByInviteCode({ inviteCode }: { inviteCode: strin
   const [maybeCharacterChat] = await db
     .select()
     .from(sharedCharacterConversation)
-    .where(eq(sharedCharacterConversation.inviteCode, inviteCode));
+    .where(
+      and(
+        eq(sharedCharacterConversation.inviteCode, inviteCode),
+        isNotNull(sharedCharacterConversation.startedAt),
+      ),
+    );
   if (maybeCharacterChat?.inviteCode)
     return { id: maybeCharacterChat.characterId, inviteCode: maybeCharacterChat.inviteCode };
 
