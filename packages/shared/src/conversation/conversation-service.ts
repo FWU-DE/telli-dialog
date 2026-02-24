@@ -3,7 +3,10 @@ import {
   dbGetConversationMessages,
   dbUpdateConversationTitle,
 } from '@shared/db/functions/chat';
-import { dbDeleteConversationByIdAndUserId } from '@shared/db/functions/conversation';
+import {
+  dbDeleteConversationByIdAndUserId,
+  dbDoesInviteCodeExist,
+} from '@shared/db/functions/conversation';
 import { ConversationModel } from '@shared/db/types';
 import { ForbiddenError, NotFoundError } from '@shared/error';
 
@@ -83,7 +86,7 @@ export async function updateConversationTitle({
 }
 
 /**
- * User wants to download a conversation.
+ * Authenticated user wants to download a conversation.
  * Verifies that the conversation belongs to the user
  * and returns the conversation and messages for export.
  *
@@ -102,4 +105,17 @@ export async function getConversationAndMessagesForExport({
     conversation,
     messages,
   };
+}
+
+/**
+ * An unauthenticated user (student) wants to download a shared conversation.
+ * The messages are sent in the request body and are not stored in the database.
+ * The invite code needs to exist in the database, otherwise an error is thrown.
+ * @param param0
+ */
+export async function checkInviteCodeForExport({ inviteCode }: { inviteCode: string }) {
+  const exists = await dbDoesInviteCodeExist(inviteCode);
+  if (!exists) {
+    throw new NotFoundError('Invite code not found');
+  }
 }

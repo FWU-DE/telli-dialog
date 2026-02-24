@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    handleErrorInRoute(error);
+    return handleErrorInRoute(error);
   }
 }
 
