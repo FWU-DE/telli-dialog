@@ -12,6 +12,7 @@ const featureToggleDefaults = {
   isSharedChatEnabled: true,
   isShareTemplateWithSchoolEnabled: true,
   isImageGenerationEnabled: true,
+  isNewUiDesignEnabled: true,
 };
 
 test('login as student with students disabled', async ({ page }) => {

@@ -32,6 +32,23 @@ export async function generateConversationDocxFile({
       gptName,
       userFullName: USER_FULL_NAME,
     });
+    const lastAssistantMessage = messages.findLast((m) => m.role === 'assistant');
+
+    const modelDisplayName = lastAssistantMessage?.modelName ?? gptName;
+
+    messageParagraphs.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `Generiert von telli unter Nutzung von ${modelDisplayName}`,
+            italics: true,
+            size: 18,
+            color: '666666',
+          }),
+        ],
+        spacing: { before: 400 },
+      }),
+    );
 
     const doc = buildDocxDocument({ conversationMetadata, messageParagraphs });
     const buffer = await Packer.toArrayBuffer(doc);
