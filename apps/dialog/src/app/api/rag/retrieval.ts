@@ -179,17 +179,10 @@ export async function searchTextChunks({
     return [];
   }
 
-  const embeddingResults = await vectorSearch({
-    embedding,
-    fileIds: fileIds ?? [],
-    limit,
-  });
-
-  const textRankResults = await fullTextSearch({
-    keywords,
-    fileIds: fileIds ?? [],
-    limit,
-  });
+  const [embeddingResults, textRankResults] = await Promise.all([
+    vectorSearch({ embedding, fileIds: fileIds ?? [], limit }),
+    fullTextSearch({ keywords, fileIds: fileIds ?? [], limit }),
+  ]);
 
   // Create a map to store all unique results
   const combinedResultsMap: Map<
