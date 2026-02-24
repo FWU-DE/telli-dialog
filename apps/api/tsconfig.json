@@ -1,0 +1,15 @@
+{
+  "extends": "@telli/api-typescript-config/base.json",
+  "compilerOptions": {
+    "lib": ["ES2024"],
+    "outDir": "./dist",
+    "rootDir": "./",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@test/*": ["./src/test/*"]
+    },
+    "types": ["node"]
+  },
+  "exclude": ["node_modules", "coverage"],
+  "include": ["src", "tests", "*.ts", "*.mts"]
+}

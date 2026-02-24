@@ -1,0 +1,41 @@
+{
+  "name": "@telli/api-database",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./helpers": "./helpers/index.ts"
+  },
+  "scripts": {
+    "db:generate": "dotenv -e ../../.env -- drizzle-kit generate",
+    "db:migrate": "dotenv -e ../../.env -- drizzle-kit migrate --config=./drizzle.config.ts",
+    "db:migrate:pipeline": "drizzle-kit migrate --config=./drizzle.config.ts",
+    "db:seed": "dotenv -e ../../.env -- tsx src/seed.ts",
+    "db:seed:from-stage": "dotenv -e ../../.env -- tsx src/seed-from-stage.ts",
+    "types": "tsc --noEmit",
+    "lint": "eslint \"**/*.ts*\" --max-warnings 0"
+  },
+  "dependencies": {
+    "bcryptjs": "3.0.3",
+    "drizzle-orm": "0.45.1",
+    "drizzle-zod": "0.8.3",
+    "nanoid": "5.1.6",
+    "pg": "8.18.0",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@telli/api-eslint-config": "workspace:*",
+    "@telli/api-llm-model": "workspace:*",
+    "@telli/api-typescript-config": "workspace:*",
+    "@telli/api-utils": "workspace:*",
+    "@types/node": "24.10.13",
+    "@types/pg": "8.16.0",
+    "dotenv-cli": "11.0.0",
+    "drizzle-kit": "0.31.9",
+    "eslint": "9.39.2",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3"
+  }
+}
