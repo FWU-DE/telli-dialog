@@ -69,6 +69,38 @@ export async function getRelevantContent({
 }
 
 /**
+ * Finds chunks most similar to the query embedding using cosine similarity (pgvector).
+ */
+async function vectorSearch({
+  embedding,
+  fileIds,
+  limit,
+}: {
+  embedding: number[];
+  fileIds: string[];
+  limit: number;
+}) {
+  return db
+    .select({
+      id: TextChunkTable.id,
+      content: TextChunkTable.content,
+      fileId: TextChunkTable.fileId,
+      pageNumber: TextChunkTable.pageNumber,
+      fileName: fileTable.name,
+      orderIndex: TextChunkTable.orderIndex,
+      leadingOverlap: TextChunkTable.leadingOverlap,
+      trailingOverlap: TextChunkTable.trailingOverlap,
+      embeddingSimilarity:
+        sql`1 - (${TextChunkTable.embedding} <=> ${JSON.stringify(embedding)})` as SQL<number>,
+    })
+    .from(TextChunkTable)
+    .leftJoin(fileTable, eq(TextChunkTable.fileId, fileTable.id))
+    .where(inArray(TextChunkTable.fileId, fileIds))
+    .limit(limit)
+    .orderBy((t) => [desc(t.embeddingSimilarity)]);
+}
+
+/**
  * Search for relevant text chunks using both embedding similarity and full-text search
  * @param options Search parameters including query text, embedding vector, and optional filters
  * @returns Array of text chunks sorted by relevance
@@ -89,25 +121,11 @@ export async function searchTextChunks({
     .map((k) => k.replace(/[^a-zA-Z0-9]/g, ''))
     .filter((k) => k.length > 0);
 
-  const embeddingResults = await db
-    .select({
-      id: TextChunkTable.id,
-      content: TextChunkTable.content,
-      fileId: TextChunkTable.fileId,
-      pageNumber: TextChunkTable.pageNumber,
-      fileName: fileTable.name,
-      orderIndex: TextChunkTable.orderIndex,
-      leadingOverlap: TextChunkTable.leadingOverlap,
-      trailingOverlap: TextChunkTable.trailingOverlap,
-      // Calculate embedding similarity score (cosine similarity)
-      embeddingSimilarity:
-        sql`1 - (${TextChunkTable.embedding} <=> ${JSON.stringify(embedding)})` as SQL<number>,
-    })
-    .from(TextChunkTable)
-    .leftJoin(fileTable, eq(TextChunkTable.fileId, fileTable.id))
-    .where(inArray(TextChunkTable.fileId, fileIds ?? []))
-    .limit(limit)
-    .orderBy((t) => [desc(t.embeddingSimilarity)]);
+  const embeddingResults = await vectorSearch({
+    embedding,
+    fileIds: fileIds ?? [],
+    limit,
+  });
 
   // Calculate text rank for each chunk only if we have keywords
   const textRankResults =
