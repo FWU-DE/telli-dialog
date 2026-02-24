@@ -20,7 +20,7 @@ import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructCharacterSystemPrompt } from './system-prompt';
 import { formatMessagesWithImages, limitChatHistory } from '../chat/utils';
-import { retrieveRelevantContent } from '../rag/rag-service';
+import { retrieveChunks } from '../rag/rag-service';
 import { webScraper } from '../webpage-content/search-web';
 import { logError } from '@shared/logging';
 import {
@@ -136,7 +136,7 @@ export async function sendCharacterMessage({
   const urls = character.attachedLinks.filter((l) => l !== '');
   const websearchSources = await Promise.all(urls.map((url) => webScraper(url)));
 
-  const orderedChunks = await retrieveRelevantContent({
+  const orderedChunks = await retrieveChunks({
     messages: messages.map<ChatMessage>((m) => ({ id: m.id, role: m.role, content: m.content })),
     user: teacherUserAndContext,
     relatedFileEntities,

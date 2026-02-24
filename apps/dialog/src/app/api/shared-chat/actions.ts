@@ -20,7 +20,7 @@ import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructLearningScenarioSystemPrompt } from './system-prompt';
 import { formatMessagesWithImages, limitChatHistory } from '../chat/utils';
-import { retrieveRelevantContent } from '../rag/rag-service';
+import { retrieveChunks } from '../rag/rag-service';
 import { webScraper } from '../webpage-content/search-web';
 import { logError } from '@shared/logging';
 import {
@@ -139,7 +139,7 @@ export async function sendSharedChatMessage({
   const urls = sharedChat.attachedLinks.filter((l) => l !== '');
   const websearchSources = await Promise.all(urls.map((url) => webScraper(url)));
 
-  const retrievedTextChunks = await retrieveRelevantContent({
+  const retrievedTextChunks = await retrieveChunks({
     modelId: definedModel.id,
     apiKeyId,
     messages: messages.map<ChatMessage>((m) => ({ id: m.id, role: m.role, content: m.content })),

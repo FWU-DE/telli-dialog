@@ -56,7 +56,7 @@ export async function chunkAndEmbed({
 }
 
 /**
- * Retrieves relevant content chunks for a set of messages using hybrid search.
+ * Retrieves relevant chunks for a set of messages using hybrid search.
  *
  * Condenses chat history into a search query, extracts keywords,
  * generates a query embedding, and performs hybrid vector + full-text search.
@@ -68,7 +68,7 @@ export async function chunkAndEmbed({
  * @param apiKeyId - The API key for the auxiliary model
  * @returns Grouped and sorted chunks keyed by fileId, or undefined if no files
  */
-export async function retrieveRelevantContent({
+export async function retrieveChunks({
   messages,
   user,
   relatedFileEntities,
