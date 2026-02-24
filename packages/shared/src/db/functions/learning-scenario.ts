@@ -347,20 +347,20 @@ export async function dbCreateLearningScenarioShare({
     .insert(sharedLearningScenarioTable)
     .values({
       id: maybeExistingEntry?.id,
-      inviteCode,
+      userId,
       learningScenarioId,
       maxUsageTimeLimit,
-      startedAt,
       telliPointsLimit,
-      userId,
+      inviteCode,
+      startedAt,
     })
     .onConflictDoUpdate({
       target: sharedLearningScenarioTable.id,
       set: {
         inviteCode,
         maxUsageTimeLimit,
-        startedAt,
         telliPointsLimit,
+        startedAt,
       },
     })
     .returning();

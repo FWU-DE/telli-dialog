@@ -472,7 +472,7 @@ export const unshareCharacter = async ({
     )
     .returning();
 
-  if (updatedCharacter === undefined) {
+  if (!updatedCharacter) {
     throw new Error('Could not stop sharing of character');
   }
 
