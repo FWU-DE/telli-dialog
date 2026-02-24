@@ -1,10 +1,13 @@
-import { type ChunkResult } from './chunking';
+import { TextChunkSelectModel } from '@shared/db/schema';
 
+export type Chunk = Omit<TextChunkSelectModel, 'embedding' | 'contentTsv' | 'createdAt'> & {
+  fileName: string;
+};
 // Shared type between extraction and retrieval
 export type TextElement = {
   page?: number;
   text: string;
 };
 
-export type VectorSearchResult = ChunkResult & { embeddingSimilarity: number };
-export type FullTextSearchResult = ChunkResult & { textRank: number };
+export type VectorSearchResult = Chunk & { embeddingSimilarity: number };
+export type FullTextSearchResult = Chunk & { textRank: number };

@@ -3,7 +3,7 @@ import { dbGetCharacterById } from '@shared/db/functions/character';
 import { ObscuredFederalState } from '@/auth/utils';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
 import { CustomGptSelectModel } from '@shared/db/schema';
-import { ChunkResult } from '../rag/chunking';
+import { Chunk } from '../rag/types';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { constructBaseCharacterSystemPrompt } from '../character/system-prompt';
 import {
@@ -101,7 +101,7 @@ export async function constructChatSystemPrompt({
   isTeacher: boolean;
   federalState: ObscuredFederalState;
   websearchSources: WebsearchSource[];
-  retrievedTextChunks?: Record<string, ChunkResult[]>;
+  retrievedTextChunks?: Record<string, Chunk[]>;
 }) {
   const filePrompt = constructFilePrompt(retrievedTextChunks);
   const websearchPrompt = constructWebsearchPrompt(websearchSources);

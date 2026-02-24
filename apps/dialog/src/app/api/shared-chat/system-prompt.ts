@@ -1,5 +1,5 @@
 import { type LearningScenarioSelectModel } from '@shared/db/schema';
-import { ChunkResult } from '../rag/chunking';
+import { Chunk } from '../rag/types';
 import {
   constructFilePrompt,
   constructWebsearchPrompt,
@@ -14,7 +14,7 @@ export function constructLearningScenarioSystemPrompt({
   websearchSources,
 }: {
   sharedChat: LearningScenarioSelectModel;
-  retrievedTextChunks?: Record<string, ChunkResult[]>;
+  retrievedTextChunks?: Record<string, Chunk[]>;
   websearchSources?: WebsearchSource[];
 }) {
   const filePrompt = constructFilePrompt(retrievedTextChunks);

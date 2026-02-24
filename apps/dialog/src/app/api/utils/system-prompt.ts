@@ -1,5 +1,5 @@
 import { TOTAL_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
-import { ChunkResult } from '../rag/chunking';
+import { Chunk } from '../rag/types';
 import { WebsearchSource } from '@shared/db/types';
 
 export const LANGUAGE_GUIDELINES = `
@@ -41,7 +41,7 @@ Inhalt: ${source.content}
 `;
 }
 
-function constructSingleFilePrompt(textChunks: ChunkResult[]) {
+function constructSingleFilePrompt(textChunks: Chunk[]) {
   if (textChunks.length === 0) {
     return '';
   }
@@ -52,9 +52,7 @@ ${textChunks.map((chunk) => chunk.content).join('\n\n')}
 `;
 }
 
-export function constructFilePrompt(
-  retrievedTextChunks: Record<string, ChunkResult[]> | undefined,
-) {
+export function constructFilePrompt(retrievedTextChunks: Record<string, Chunk[]> | undefined) {
   return retrievedTextChunks !== undefined && Object.keys(retrievedTextChunks).length > 0
     ? `\n## Der Nutzer hat folgende Dateien bereitgestellt, berücksichtige den Inhalt dieser Dateien bei der Antwort:\n` +
         Object.entries(retrievedTextChunks)

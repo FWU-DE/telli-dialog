@@ -1,5 +1,5 @@
 import { CharacterSelectModel } from '@shared/db/schema';
-import { ChunkResult } from '../rag/chunking';
+import { Chunk } from '../rag/types';
 import {
   constructFilePrompt,
   constructWebsearchPrompt,
@@ -43,7 +43,7 @@ export function constructCharacterSystemPrompt({
   websearchSources,
 }: {
   character: CharacterSelectModel;
-  retrievedTextChunks?: Record<string, ChunkResult[]>;
+  retrievedTextChunks?: Record<string, Chunk[]>;
   websearchSources?: WebsearchSource[];
 }) {
   const filePrompt = constructFilePrompt(retrievedTextChunks);
