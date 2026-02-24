@@ -38,7 +38,7 @@ export async function generateConversationDocxFile({
 
     return buffer;
   } catch (error) {
-    logError('Error generating conversation .docx files', error);
+    logError('Error generating conversation .docx file', error);
     return undefined;
   }
 }
