@@ -9,7 +9,7 @@ export type ChatInfo = {
   inviteCode: string;
 };
 
-export async function getChatIdByInviteCode(inviteCode: string): Promise<ChatInfo> {
+export async function getChatInfoByInviteCode(inviteCode: string): Promise<ChatInfo> {
   const [maybeSharedChat, maybeCharacterChat] = await Promise.all([
     tryGetLearningScenarioIdByInviteCode({ inviteCode }),
     tryGetCharacterIdByInviteCode({ inviteCode }),
@@ -30,7 +30,7 @@ async function tryGetLearningScenarioIdByInviteCode({ inviteCode }: { inviteCode
     .select()
     .from(sharedLearningScenarioTable)
     .where(eq(sharedLearningScenarioTable.inviteCode, inviteCode));
-  if (maybeSharedChat?.inviteCode)
+  if (maybeSharedChat?.inviteCode && maybeSharedChat.startedAt !== null)
     return { id: maybeSharedChat.learningScenarioId, inviteCode: maybeSharedChat.inviteCode };
 
   return undefined;
@@ -46,7 +46,7 @@ async function tryGetCharacterIdByInviteCode({ inviteCode }: { inviteCode: strin
         isNotNull(sharedCharacterConversation.startedAt),
       ),
     );
-  if (maybeCharacterChat?.inviteCode)
+  if (maybeCharacterChat?.inviteCode && maybeCharacterChat.startedAt !== null)
     return { id: maybeCharacterChat.characterId, inviteCode: maybeCharacterChat.inviteCode };
 
   return undefined;

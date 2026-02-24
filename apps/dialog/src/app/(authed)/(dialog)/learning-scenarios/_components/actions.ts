@@ -1,8 +1,8 @@
 'use server';
 
 import { runServerAction } from '@shared/actions/run-server-action';
-import { getChatIdByInviteCode } from '@shared/sharing/get-chat-id-by-invite-code';
+import { getChatInfoByInviteCode } from '@shared/sharing/get-chat-info-by-invite-code';
 
-export async function getChatIdByInviteCodeAction(inviteCode: string) {
-  return runServerAction(getChatIdByInviteCode)(inviteCode);
+export async function getChatInfoByInviteCodeAction(inviteCode: string) {
+  return runServerAction(getChatInfoByInviteCode)(inviteCode);
 }
