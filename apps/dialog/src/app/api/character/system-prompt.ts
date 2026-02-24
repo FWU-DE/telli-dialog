@@ -1,5 +1,5 @@
 import { CharacterSelectModel } from '@shared/db/schema';
-import { ChunkResult } from '../file-operations/process-chunks';
+import { ChunkResult } from '../rag/chunking';
 import {
   constructFilePrompt,
   constructWebsearchPrompt,

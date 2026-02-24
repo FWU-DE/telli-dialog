@@ -1,7 +1,7 @@
 import { db } from '@shared/db';
 import { FileModelAndContent, fileTable, TextChunkTable } from '@shared/db/schema';
 import { and, desc, eq, inArray, SQL, sql } from 'drizzle-orm';
-import { groupAndSortChunks } from './process-chunks';
+import { groupAndSortChunks } from '../rag/chunking';
 import { condenseChatHistory, getKeywordsFromQuery } from '../chat/utils';
 import { embedText } from './embedding';
 import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';

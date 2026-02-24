@@ -199,7 +199,7 @@ export default function UploadFileButton({
   );
 }
 
-export async function fetchUploadFile(data: {
+async function fetchUploadFile(data: {
   body: Blob;
   contentType: string;
   fileName: string;

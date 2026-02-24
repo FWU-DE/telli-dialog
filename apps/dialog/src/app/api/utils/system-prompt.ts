@@ -1,5 +1,5 @@
 import { TOTAL_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
-import { ChunkResult } from '../file-operations/process-chunks';
+import { ChunkResult } from '../rag/chunking';
 import { WebsearchSource } from '@shared/db/types';
 
 export const LANGUAGE_GUIDELINES = `
