@@ -42,8 +42,8 @@ export default function ExpiredChatModal({
             </AlertDialog.Description>
             <AlertDialog.Action asChild>
               {/* If the shared chat has expired, the messages are gone, so there is no way atm to download the conversation. */}
-              {conversationMessages.length !== 0 && (
-                <div className="mt-6 mb-2">
+              <div className="mt-6 mb-2">
+                {conversationMessages.length !== 0 && (
                   <DownloadSharedConversationButton
                     primaryButton
                     characterName={title}
@@ -51,8 +51,8 @@ export default function ExpiredChatModal({
                     disabled={conversationMessages.length === 0}
                     inviteCode={inviteCode}
                   />
-                </div>
-              )}
+                )}
+              </div>
             </AlertDialog.Action>
           </div>
         </AlertDialog.Content>
