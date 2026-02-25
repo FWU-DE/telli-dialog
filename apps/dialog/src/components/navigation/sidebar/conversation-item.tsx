@@ -8,8 +8,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { useSidebarVisibility } from './sidebar-provider';
-import useBreakpoints from '@/components/hooks/use-breakpoints';
 import { cn } from '@/utils/tailwind';
 import { type ConversationModel } from '@shared/db/types';
 import Link from 'next/link';
@@ -25,13 +23,11 @@ type RenameData = z.infer<typeof renameSchema>;
 
 export default function ConversationItem({
   conversation,
-  isPrivateMode,
   onDeleteConversation,
   onUpdateConversation,
 }: {
   conversation: ConversationModel;
   active?: boolean;
-  isPrivateMode?: boolean;
   onUpdateConversation(name: string): void;
   onDeleteConversation(conversationId: string): void;
 }) {
@@ -42,8 +38,6 @@ export default function ConversationItem({
   const [isEditable, toggleEditable] = React.useReducer((s) => !s, false);
   const router = useRouter();
   const pathname = usePathname();
-  const { isBelow } = useBreakpoints();
-  const { toggle } = useSidebarVisibility();
   const { designConfiguration } = useTheme();
 
   async function onSubmit(data: RenameData) {
@@ -80,11 +74,6 @@ export default function ConversationItem({
           className={cn('flex overflow-hidden flex-grow', 'text-primary')}
           href={buildConversationUrl({ conversation })}
           prefetch={false}
-          onClick={() => {
-            if (!isPrivateMode && isBelow.md) {
-              toggle();
-            }
-          }}
         >
           {conversation.type === 'image-generation' && <ImageSquareIcon className="w-6 h-5" />}
           <p className="w-full rounded-lg text-left truncate text-base">
@@ -93,48 +82,46 @@ export default function ConversationItem({
         </Link>
       )}
       {/* TODO: Refactor this into a separate component */}
-      {!isPrivateMode && (
-        <div
-          className={cn('md:invisible group-hover:visible group-focus-within:visible')}
-          aria-label="Conversation actions"
-          aria-hidden={false}
-        >
-          <DropdownMenu.Root>
-            {!isEditable && (
-              <DropdownMenu.Trigger aria-label="Edit" asChild className="cursor-pointer">
-                <DotsHorizontalIcon aria-hidden="true" className="h-5 w-5 sm:h-4 sm:w-4" />
-              </DropdownMenu.Trigger>
+      <div
+        className={cn('md:invisible group-hover:visible group-focus-within:visible')}
+        aria-label="Conversation actions"
+        aria-hidden={false}
+      >
+        <DropdownMenu.Root>
+          {!isEditable && (
+            <DropdownMenu.Trigger aria-label="Edit" asChild className="cursor-pointer">
+              <DotsHorizontalIcon aria-hidden="true" className="h-5 w-5 sm:h-4 sm:w-4" />
+            </DropdownMenu.Trigger>
+          )}
+          <DropdownMenu.Content
+            sideOffset={5}
+            className={cn(
+              'z-20 flex flex-col w-[256px] bg-white shadow-dropdown rounded-enterprise-md',
             )}
-            <DropdownMenu.Content
-              sideOffset={5}
-              className={cn(
-                'z-20 flex flex-col w-[256px] bg-white shadow-dropdown rounded-enterprise-md',
-              )}
-              style={constructRootLayoutStyle({ designConfiguration })}
-            >
-              <DropdownMenu.Item asChild>
-                <button
-                  onClick={() => onDeleteConversation(conversation.id)}
-                  type="button"
-                  className="text-main-red text-left px-4 py-3 font-normal text-sm bg-white hover:bg-main-300 active:bg-main-200 rounded-t"
-                >
-                  Löschen
-                </button>
-              </DropdownMenu.Item>
-              <hr />
-              <DropdownMenu.Item asChild>
-                <button
-                  onClick={toggleEditable}
-                  type="button"
-                  className="text-left text-main-black px-4 py-3 font-normal text-sm bg-white hover:bg-main-300 active:bg-main-200 rounded-b"
-                >
-                  Umbenennen
-                </button>
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu.Root>
-        </div>
-      )}
+            style={constructRootLayoutStyle({ designConfiguration })}
+          >
+            <DropdownMenu.Item asChild>
+              <button
+                onClick={() => onDeleteConversation(conversation.id)}
+                type="button"
+                className="text-main-red text-left px-4 py-3 font-normal text-sm bg-white hover:bg-main-300 active:bg-main-200 rounded-t"
+              >
+                Löschen
+              </button>
+            </DropdownMenu.Item>
+            <hr />
+            <DropdownMenu.Item asChild>
+              <button
+                onClick={toggleEditable}
+                type="button"
+                className="text-left text-main-black px-4 py-3 font-normal text-sm bg-white hover:bg-main-300 active:bg-main-200 rounded-b"
+              >
+                Umbenennen
+              </button>
+            </DropdownMenu.Item>
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
+      </div>
     </div>
   );
 }
