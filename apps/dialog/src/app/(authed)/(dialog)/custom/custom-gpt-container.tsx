@@ -75,7 +75,7 @@ export default function CustomGptContainer({
       </figure>
       <div className="flex flex-col gap-1 text-left min-w-0">
         <h2 className={cn('font-medium leading-none', truncateClassName)}>{name}</h2>
-        <span className={cn(truncateClassName, 'text-gray-400')}>{description}</span>
+        <span className={cn(truncateClassName, 'text-gray-600')}>{description}</span>
       </div>
       <div className="grow" />
       {userId !== currentUserId && (

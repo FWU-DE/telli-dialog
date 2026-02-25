@@ -23,7 +23,7 @@ export default function SelectImageStyle() {
 
   return (
     <div className="flex flex-col gap-2 hover:bg-secondary/20 rounded-enterprise-md p-2">
-      <span className="text-xs text-gray-400 hidden sm:block">
+      <span className="text-xs text-gray-600 hidden sm:block">
         {tImageGeneration('style-label')}
       </span>
       <DropdownMenu.Root>

@@ -19,7 +19,7 @@ export default function SearchBarInput({ ...props }: SearchInputProps) {
           'disabled:bg-light-gray disabled:border-gray-100',
         )}
       >
-        <SearchIcon className="w-4 h-4 text-gray-400 group-focus-within:text-primary " />
+        <SearchIcon className="w-4 h-4 text-gray-600 group-focus-within:text-primary " />
       </div>
     </div>
   );
