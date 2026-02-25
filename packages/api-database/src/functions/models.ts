@@ -1,4 +1,4 @@
-import { eq, inArray, and } from "drizzle-orm";
+import { eq, inArray, and } from 'drizzle-orm';
 import {
   db,
   dbGetAllApiKeysByProjectId,
@@ -7,16 +7,14 @@ import {
   LlmModel,
   llmModelApiKeyMappingTable,
   llmModelTable,
-} from "..";
+} from '..';
 
 export async function dbGetAllModels() {
   return db.select().from(llmModelTable).orderBy(llmModelTable.createdAt);
 }
 
 export async function dbGetModelById(id: string) {
-  return (
-    await db.select().from(llmModelTable).where(eq(llmModelTable.id, id))
-  )[0];
+  return (await db.select().from(llmModelTable).where(eq(llmModelTable.id, id)))[0];
 }
 
 export async function dbGetAllModelsByOrganizationId(organizationId: string) {
@@ -33,11 +31,7 @@ export async function dbGetAllModelsByOrganizationId(organizationId: string) {
  * @param apiKeyId: The id of the API key.
  * @returns
  */
-export async function dbGetModelsByApiKeyId({
-  apiKeyId,
-}: {
-  apiKeyId: string;
-}) {
+export async function dbGetModelsByApiKeyId({ apiKeyId }: { apiKeyId: string }) {
   const rows = await db
     .select()
     .from(llmModelTable)
@@ -67,12 +61,7 @@ export async function dbUpdateLlmModel(
     await db
       .update(llmModelTable)
       .set({ ...llmModel })
-      .where(
-        and(
-          eq(llmModelTable.id, id),
-          eq(llmModelTable.organizationId, organizationId),
-        ),
-      )
+      .where(and(eq(llmModelTable.id, id), eq(llmModelTable.organizationId, organizationId)))
       .returning()
   )[0];
 
@@ -80,18 +69,13 @@ export async function dbUpdateLlmModel(
 }
 
 export async function dbDeleteLlmModelById(id: string) {
-  return (
-    await db.delete(llmModelTable).where(eq(llmModelTable.id, id)).returning()
-  )[0];
+  return (await db.delete(llmModelTable).where(eq(llmModelTable.id, id)).returning())[0];
 }
 
 export async function dbGetModelsByIds({ modelIds }: { modelIds: string[] }) {
   if (modelIds.length < 1) return [];
 
-  return await db
-    .select()
-    .from(llmModelTable)
-    .where(inArray(llmModelTable.id, modelIds));
+  return await db.select().from(llmModelTable).where(inArray(llmModelTable.id, modelIds));
 }
 
 // Helper to get all API keys in an organization
@@ -114,7 +98,7 @@ export async function dbCreateModelWithApiKeyLinks({
   provider,
   name,
   displayName,
-  description = "",
+  description = '',
   setting,
   priceMetadata,
   organizationId,
@@ -143,8 +127,7 @@ export async function dbCreateModelWithApiKeyLinks({
     );
   if (existingModel.length > 0) {
     return {
-      error:
-        "A model with this name and provider already exists for this organization.",
+      error: 'A model with this name and provider already exists for this organization.',
     };
   }
 
@@ -155,7 +138,7 @@ export async function dbCreateModelWithApiKeyLinks({
       provider,
       name,
       displayName,
-      description: description ?? "",
+      description: description ?? '',
       setting,
       priceMetadata,
       organizationId,
@@ -165,12 +148,12 @@ export async function dbCreateModelWithApiKeyLinks({
     .returning();
 
   if (!model) {
-    return { error: "Failed to create model" };
+    return { error: 'Failed to create model' };
   }
 
   const allApiKeys = await getAllApiKeys(organizationId);
   if (!allApiKeys.length) {
-    return { error: "Organization not found" };
+    return { error: 'Organization not found' };
   }
   // Find API keys by name
   const apiKeysToLink =
@@ -181,7 +164,7 @@ export async function dbCreateModelWithApiKeyLinks({
       .filter((k) => k !== undefined) ?? allApiKeys;
 
   if (apiKeysToLink === undefined) {
-    return { error: "One or more API key names not found in organization" };
+    return { error: 'One or more API key names not found in organization' };
   }
   // Link model to API keys
   if (apiKeysToLink.length > 0) {

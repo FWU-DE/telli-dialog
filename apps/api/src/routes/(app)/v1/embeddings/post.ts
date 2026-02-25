@@ -1,12 +1,12 @@
-import { getEmbeddingFnByModel } from "@/llm-model/providers";
-import { handleLlmModelError, validateApiKeyWithResult } from "@/routes/utils";
+import { getEmbeddingFnByModel } from '@/llm-model/providers';
+import { handleLlmModelError, validateApiKeyWithResult } from '@/routes/utils';
 import {
   checkLimitsByApiKeyIdWithResult,
   dbGetModelsByApiKeyId,
   dbCreateCompletionUsage,
-} from "@telli/api-database";
-import { FastifyReply, FastifyRequest } from "fastify";
-import { z } from "zod";
+} from '@telli/api-database';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { z } from 'zod';
 
 const embeddingRequestSchema = z.object({
   model: z.string(),
@@ -15,10 +15,7 @@ const embeddingRequestSchema = z.object({
 
 export type EmbeddingRequest = z.infer<typeof embeddingRequestSchema>;
 
-export async function handler(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<void> {
+export async function handler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   const [apiKeyError, apiKey] = await validateApiKeyWithResult(request, reply);
 
   if (apiKeyError !== null) {
@@ -31,17 +28,16 @@ export async function handler(
   const requestParseResult = embeddingRequestSchema.safeParse(request.body);
   if (!requestParseResult.success) {
     reply.status(400).send({
-      error: "Bad request",
+      error: 'Bad request',
       details: requestParseResult.error.message,
     });
 
     return;
   }
 
-  const [limitCalculationError, limitCalculationResult] =
-    await checkLimitsByApiKeyIdWithResult({
-      apiKeyId: apiKey.id,
-    });
+  const [limitCalculationError, limitCalculationResult] = await checkLimitsByApiKeyIdWithResult({
+    apiKeyId: apiKey.id,
+  });
 
   if (limitCalculationError !== null) {
     reply.status(500).send({
@@ -53,7 +49,7 @@ export async function handler(
 
   if (limitCalculationResult.hasReachedLimit) {
     reply.status(429).send({
-      error: "You have reached the price limit",
+      error: 'You have reached the price limit',
     });
     return;
   }
@@ -95,6 +91,6 @@ export async function handler(
 
     reply.status(200).send(result);
   } catch (error) {
-    handleLlmModelError(reply, error, "Error generating embedding");
+    handleLlmModelError(reply, error, 'Error generating embedding');
   }
 }

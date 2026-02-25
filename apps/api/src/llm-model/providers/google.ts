@@ -1,8 +1,8 @@
-import { GoogleAuth } from "google-auth-library";
-import OpenAI from "openai";
+import { GoogleAuth } from 'google-auth-library';
+import OpenAI from 'openai';
 
-import { LlmModel } from "@telli/api-database";
-import { ImageGenerationFn } from "../types";
+import { LlmModel } from '@telli/api-database';
+import { ImageGenerationFn } from '../types';
 
 interface GoogleClientConfig {
   projectId: string;
@@ -23,14 +23,9 @@ export class GoogleProviderError extends Error {
   public readonly statusText: string;
   public readonly details: unknown;
 
-  constructor(
-    message: string,
-    status: number,
-    statusText: string,
-    details: unknown,
-  ) {
+  constructor(message: string, status: number, statusText: string, details: unknown) {
     super(message);
-    this.name = "GoogleProviderError";
+    this.name = 'GoogleProviderError';
     this.status = status;
     this.statusText = statusText;
     this.details = details;
@@ -42,8 +37,8 @@ const googleClientCache = new Map<string, GoogleClientConfig>();
 
 // Create or retrieve a cached Google client configuration
 function createGoogleClient(model: LlmModel): GoogleClientConfig {
-  if (model.setting.provider !== "google") {
-    throw new Error("Invalid model configuration for Google");
+  if (model.setting.provider !== 'google') {
+    throw new Error('Invalid model configuration for Google');
   }
 
   const { projectId, location } = model.setting;
@@ -56,7 +51,7 @@ function createGoogleClient(model: LlmModel): GoogleClientConfig {
   // Initialize Google Auth with automatic credential detection
   // The GOOGLE_APPLICATION_CREDENTIALS env var should point to the service account JSON file
   const auth = new GoogleAuth({
-    scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
 
   const client = {
@@ -71,14 +66,10 @@ function createGoogleClient(model: LlmModel): GoogleClientConfig {
 }
 
 // Construct the Image Generation function for Google Vertex AI
-export function constructGoogleImageGenerationFn(
-  model: LlmModel,
-): ImageGenerationFn {
+export function constructGoogleImageGenerationFn(model: LlmModel): ImageGenerationFn {
   const clientConfig = createGoogleClient(model);
 
-  return async function getGoogleImageGeneration(
-    params: Parameters<ImageGenerationFn>[0],
-  ) {
+  return async function getGoogleImageGeneration(params: Parameters<ImageGenerationFn>[0]) {
     const { projectId, location, auth } = clientConfig;
 
     // Get access token - GoogleAuth handles caching and refresh automatically
@@ -95,19 +86,19 @@ export function constructGoogleImageGenerationFn(
       ],
       parameters: {
         sampleCount: 1,
-        aspectRatio: "1:1",
-        sampleImageSize: "1K",
-        safetySetting: "block_only_high",
-        personGeneration: "allow_adult",
-        language: "auto",
+        aspectRatio: '1:1',
+        sampleImageSize: '1K',
+        safetySetting: 'block_only_high',
+        personGeneration: 'allow_adult',
+        language: 'auto',
       },
     };
 
     const response = await fetch(endpoint, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(requestBody),
     });
@@ -131,7 +122,7 @@ export function constructGoogleImageGenerationFn(
       const prediction = result.predictions[0]!;
 
       if (!prediction.bytesBase64Encoded) {
-        throw new Error("No image data received from Google Vertex AI");
+        throw new Error('No image data received from Google Vertex AI');
       }
 
       const openAIResponse: OpenAI.Images.ImagesResponse = {
@@ -145,7 +136,7 @@ export function constructGoogleImageGenerationFn(
 
       return openAIResponse;
     } else {
-      throw new Error("No image generated from Google Vertex AI");
+      throw new Error('No image generated from Google Vertex AI');
     }
   };
 }

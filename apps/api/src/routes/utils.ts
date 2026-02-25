@@ -1,22 +1,17 @@
-import { ApiKeyModel, dbValidateApiKey } from "@telli/api-database";
-import { errorifyAsyncFn } from "@telli/api-utils";
-import { FastifyReply, FastifyRequest } from "fastify";
-import { ChatCompletionChunk } from "openai/resources/chat/completions.js";
+import { ApiKeyModel, dbValidateApiKey } from '@telli/api-database';
+import { errorifyAsyncFn } from '@telli/api-utils';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { ChatCompletionChunk } from 'openai/resources/chat/completions.js';
 
-const BEARER_PREFIX = "Bearer ";
+const BEARER_PREFIX = 'Bearer ';
 
-export function getMaybeBearerToken(
-  authorizationHeader: string | undefined,
-): string | undefined {
+export function getMaybeBearerToken(authorizationHeader: string | undefined): string | undefined {
   if (authorizationHeader === undefined) return undefined;
   if (!authorizationHeader.startsWith(BEARER_PREFIX)) {
     return undefined;
   }
 
-  return authorizationHeader.slice(
-    BEARER_PREFIX.length,
-    authorizationHeader.length,
-  );
+  return authorizationHeader.slice(BEARER_PREFIX.length, authorizationHeader.length);
 }
 
 export const validateApiKeyWithResult = errorifyAsyncFn(validateApiKey);
@@ -25,12 +20,10 @@ export async function validateApiKey(
   request: FastifyRequest,
   reply: FastifyReply,
 ): Promise<ApiKeyModel | undefined> {
-  const authorizationHeader = getMaybeBearerToken(
-    request.headers.authorization,
-  );
+  const authorizationHeader = getMaybeBearerToken(request.headers.authorization);
 
   if (!authorizationHeader) {
-    reply.status(401).send({ error: "No Bearer token found." });
+    reply.status(401).send({ error: 'No Bearer token found.' });
     return undefined;
   }
 
@@ -58,16 +51,15 @@ export function getContentFilterFailedChunk({
       {
         index: 0,
         delta: {
-          content:
-            "Die Anfrage wurde wegen unangemessener Inhalte automatisch blockiert.",
+          content: 'Die Anfrage wurde wegen unangemessener Inhalte automatisch blockiert.',
         },
-        finish_reason: "content_filter",
+        finish_reason: 'content_filter',
       },
     ],
     id,
     created,
     model,
-    object: "chat.completion.chunk",
+    object: 'chat.completion.chunk',
   };
 }
 
@@ -91,17 +83,17 @@ export function getErrorChunk({
         delta: {
           content: `Error in Chat Stream: ${errorMessage}`,
         },
-        finish_reason: "stop",
+        finish_reason: 'stop',
       },
     ],
     id,
     created,
     model,
-    object: "chat.completion.chunk",
+    object: 'chat.completion.chunk',
     error: {
       message: errorMessage,
-      code: errorCode || "unknown_error",
-      type: "error",
+      code: errorCode || 'unknown_error',
+      type: 'error',
     },
   } as ChatCompletionChunk;
 }
@@ -114,7 +106,7 @@ export function handleLlmModelError(
   console.error(`${errorContext}:`, error);
 
   let statusCode = 500;
-  let errorMessage = "An error occurred";
+  let errorMessage = 'An error occurred';
 
   if (isErrorWithStatus(error)) {
     statusCode = error.status;
@@ -131,12 +123,6 @@ export function handleLlmModelError(
 }
 
 // Type guard to check if an error has a 'status' property
-export function isErrorWithStatus(
-  error: unknown,
-): error is Error & { status: number } {
-  return (
-    error instanceof Error &&
-    "status" in error &&
-    typeof error.status === "number"
-  );
+export function isErrorWithStatus(error: unknown): error is Error & { status: number } {
+  return error instanceof Error && 'status' in error && typeof error.status === 'number';
 }

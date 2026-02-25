@@ -1,12 +1,12 @@
-import { FastifyReply, FastifyRequest } from "fastify";
-import { dbUpdateApiKey, apiKeyUpdateSchema } from "@telli/api-database";
-import { apiKeyParamsSchema } from "./apiKeyParamsSchema";
-import { handleApiError } from "@/errors";
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { dbUpdateApiKey, apiKeyUpdateSchema } from '@telli/api-database';
+import { apiKeyParamsSchema } from './apiKeyParamsSchema';
+import { handleApiError } from '@/errors';
 import {
   validateAdminApiKeyAndThrow,
   validateRequestBody,
   validateOrganizationId,
-} from "@/validation";
+} from '@/validation';
 
 const bodySchema = apiKeyUpdateSchema
   .pick({
@@ -17,27 +17,17 @@ const bodySchema = apiKeyUpdateSchema
   })
   .partial();
 
-export async function handler(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<void> {
+export async function handler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   try {
     validateAdminApiKeyAndThrow(request.headers.authorization);
 
-    const { organizationId, projectId, apiKeyId } = apiKeyParamsSchema.parse(
-      request.params,
-    );
+    const { organizationId, projectId, apiKeyId } = apiKeyParamsSchema.parse(request.params);
 
     const updates = bodySchema.parse(request.body);
     validateRequestBody(updates);
     await validateOrganizationId(organizationId);
 
-    const updatedApiKey = await dbUpdateApiKey(
-      organizationId,
-      projectId,
-      apiKeyId,
-      updates,
-    );
+    const updatedApiKey = await dbUpdateApiKey(organizationId, projectId, apiKeyId, updates);
 
     return reply.status(200).send(updatedApiKey);
   } catch (error) {

@@ -1,8 +1,8 @@
-import { FastifyReply, FastifyRequest } from "fastify";
-import { apiKeyInsertSchema, dbCreateJustTheApiKey } from "@telli/api-database";
-import { validateAdminApiKeyAndThrow } from "@/validation";
-import { projectParamsSchema } from "../projectParamsSchema";
-import { handleApiError } from "@/errors";
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { apiKeyInsertSchema, dbCreateJustTheApiKey } from '@telli/api-database';
+import { validateAdminApiKeyAndThrow } from '@/validation';
+import { projectParamsSchema } from '../projectParamsSchema';
+import { handleApiError } from '@/errors';
 
 const bodySchema = apiKeyInsertSchema.omit({
   createdAt: true,
@@ -12,16 +12,11 @@ const bodySchema = apiKeyInsertSchema.omit({
   secretHash: true,
 });
 
-export async function handler(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<void> {
+export async function handler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   try {
     validateAdminApiKeyAndThrow(request.headers.authorization);
 
-    const { organizationId, projectId } = projectParamsSchema.parse(
-      request.params,
-    );
+    const { organizationId, projectId } = projectParamsSchema.parse(request.params);
     const apiKeyValues = bodySchema.parse(request.body);
     const apiKeyToCreate = {
       organizationId,

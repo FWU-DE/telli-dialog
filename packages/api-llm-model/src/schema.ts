@@ -1,16 +1,11 @@
-import z from "zod";
-import { DEFAULT_IONOS_BASE_URL, DEFAULT_OPENAI_BASE_URL } from "./const";
+import z from 'zod';
+import { DEFAULT_IONOS_BASE_URL, DEFAULT_OPENAI_BASE_URL } from './const';
 
 export const defaultLlmProviderProps = z.object({
   name: z.string(),
 });
 
-export const llmModelProviderSchema = z.enum([
-  "ionos",
-  "openai",
-  "azure",
-  "google",
-]);
+export const llmModelProviderSchema = z.enum(['ionos', 'openai', 'azure', 'google']);
 
 export const llmModelSettingsIonos = z.object({
   provider: z.literal(llmModelProviderSchema.enum.ionos),

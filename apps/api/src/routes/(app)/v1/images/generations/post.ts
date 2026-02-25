@@ -1,41 +1,30 @@
-import { getImageGenerationFnByModel } from "@/llm-model/providers";
-import { handleLlmModelError, validateApiKeyWithResult } from "@/routes/utils";
+import { getImageGenerationFnByModel } from '@/llm-model/providers';
+import { handleLlmModelError, validateApiKeyWithResult } from '@/routes/utils';
 import {
   ApiKeyModel,
   checkLimitsByApiKeyIdWithResult,
   dbCreateImageGenerationUsage,
   dbGetModelsByApiKeyId,
   LlmModel,
-} from "@telli/api-database";
-import { FastifyReply, FastifyRequest } from "fastify";
-import { z } from "zod";
+} from '@telli/api-database';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { z } from 'zod';
 
 const imageGenerationRequestSchema = z.object({
   model: z.string(),
   prompt: z.string(),
 });
 
-export type ImageGenerationRequest = z.infer<
-  typeof imageGenerationRequestSchema
->;
+export type ImageGenerationRequest = z.infer<typeof imageGenerationRequestSchema>;
 
-async function onUsageCallback({
-  apiKey,
-  model,
-}: {
-  apiKey: ApiKeyModel;
-  model: LlmModel;
-}) {
+async function onUsageCallback({ apiKey, model }: { apiKey: ApiKeyModel; model: LlmModel }) {
   await dbCreateImageGenerationUsage({
     apiKeyId: apiKey.id,
     modelId: model.id,
   });
 }
 
-export async function handler(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<void> {
+export async function handler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   const [apiKeyError, apiKey] = await validateApiKeyWithResult(request, reply);
 
   if (apiKeyError !== null) {
@@ -45,21 +34,18 @@ export async function handler(
 
   if (apiKey === undefined) return;
 
-  const requestParseResult = imageGenerationRequestSchema.safeParse(
-    request.body,
-  );
+  const requestParseResult = imageGenerationRequestSchema.safeParse(request.body);
   if (!requestParseResult.success) {
     reply.status(400).send({
-      error: "Bad request",
+      error: 'Bad request',
       details: requestParseResult.error.message,
     });
     return;
   }
 
-  const [limitCalculationError, limitCalculationResult] =
-    await checkLimitsByApiKeyIdWithResult({
-      apiKeyId: apiKey.id,
-    });
+  const [limitCalculationError, limitCalculationResult] = await checkLimitsByApiKeyIdWithResult({
+    apiKeyId: apiKey.id,
+  });
 
   if (limitCalculationError !== null) {
     reply.status(500).send({
@@ -70,7 +56,7 @@ export async function handler(
   }
 
   if (limitCalculationResult.hasReachedLimit) {
-    reply.status(429).send({ error: "You have reached the price limit" });
+    reply.status(429).send({ error: 'You have reached the price limit' });
     return;
   }
 
@@ -105,6 +91,6 @@ export async function handler(
 
     reply.status(200).send(response);
   } catch (error) {
-    handleLlmModelError(reply, error, "Error generating image");
+    handleLlmModelError(reply, error, 'Error generating image');
   }
 }

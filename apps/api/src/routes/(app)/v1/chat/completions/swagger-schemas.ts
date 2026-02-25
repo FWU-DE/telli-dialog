@@ -1,45 +1,45 @@
-import { SWAGGER_DEFAULT_RESPONSES_SCHEMA } from "@/swagger/const";
+import { SWAGGER_DEFAULT_RESPONSES_SCHEMA } from '@/swagger/const';
 
 // NOTE: This schema is for documentation purposes only
 // Actual validation is handled by Zod schemas in the route handlers
 export const completionRequestSchemaSwagger = {
   response: {
     200: {
-      type: "object",
-      description: "Default response",
+      type: 'object',
+      description: 'Default response',
       properties: {
-        id: { type: "string" },
-        object: { type: "string", default: "chat.completion" },
-        created: { type: "number" },
-        model: { type: "string" },
+        id: { type: 'string' },
+        object: { type: 'string', default: 'chat.completion' },
+        created: { type: 'number' },
+        model: { type: 'string' },
         choices: {
-          type: "array",
+          type: 'array',
           items: {
-            type: "object",
+            type: 'object',
             properties: {
-              index: { type: "number" },
+              index: { type: 'number' },
               message: {
-                type: "object",
+                type: 'object',
                 properties: {
                   role: {
-                    type: "string",
-                    enum: ["system", "user", "assistant", "developer"],
+                    type: 'string',
+                    enum: ['system', 'user', 'assistant', 'developer'],
                   },
-                  content: { type: "string" },
+                  content: { type: 'string' },
                 },
                 // required: ["role", "content"],
               },
-              finish_reason: { type: "string" },
+              finish_reason: { type: 'string' },
             },
             // required: ["index", "message", "finish_reason"],
           },
         },
         usage: {
-          type: "object",
+          type: 'object',
           properties: {
-            prompt_tokens: { type: "number" },
-            completion_tokens: { type: "number" },
-            total_tokens: { type: "number" },
+            prompt_tokens: { type: 'number' },
+            completion_tokens: { type: 'number' },
+            total_tokens: { type: 'number' },
           },
           // required: ["prompt_tokens", "completion_tokens", "total_tokens"],
         },
@@ -49,63 +49,61 @@ export const completionRequestSchemaSwagger = {
     ...SWAGGER_DEFAULT_RESPONSES_SCHEMA,
   },
   body: {
-    type: "object",
+    type: 'object',
     properties: {
-      model: { type: "string" },
+      model: { type: 'string' },
       messages: {
-        type: "array",
+        type: 'array',
         items: {
-          type: "object",
+          type: 'object',
           properties: {
             role: {
-              type: "string",
-              enum: ["system", "user", "assistant", "developer"],
+              type: 'string',
+              enum: ['system', 'user', 'assistant', 'developer'],
             },
             content: {
               oneOf: [
                 {
-                  type: "string",
-                  description: "Text content (legacy format)",
+                  type: 'string',
+                  description: 'Text content (legacy format)',
                 },
                 {
-                  type: "array",
-                  description:
-                    "Array of content parts (supports text and images)",
+                  type: 'array',
+                  description: 'Array of content parts (supports text and images)',
                   items: {
                     oneOf: [
                       {
-                        type: "object",
+                        type: 'object',
                         properties: {
-                          type: { type: "string", enum: ["text"] },
-                          text: { type: "string" },
+                          type: { type: 'string', enum: ['text'] },
+                          text: { type: 'string' },
                         },
-                        required: ["type", "text"],
-                        description: "Text content part",
+                        required: ['type', 'text'],
+                        description: 'Text content part',
                       },
                       {
-                        type: "object",
+                        type: 'object',
                         properties: {
-                          type: { type: "string", enum: ["image_url"] },
+                          type: { type: 'string', enum: ['image_url'] },
                           image_url: {
-                            type: "object",
+                            type: 'object',
                             properties: {
                               url: {
-                                type: "string",
+                                type: 'string',
                                 description:
-                                  "URL of the image or base64 encoded image data (data:image/jpeg;base64,...)",
+                                  'URL of the image or base64 encoded image data (data:image/jpeg;base64,...)',
                               },
                               detail: {
-                                type: "string",
-                                enum: ["auto", "low", "high"],
-                                description:
-                                  "Image detail level for processing",
+                                type: 'string',
+                                enum: ['auto', 'low', 'high'],
+                                description: 'Image detail level for processing',
                               },
                             },
-                            required: ["url"],
+                            required: ['url'],
                           },
                         },
-                        required: ["type", "image_url"],
-                        description: "Image content part",
+                        required: ['type', 'image_url'],
+                        description: 'Image content part',
                       },
                     ],
                   },
@@ -113,24 +111,24 @@ export const completionRequestSchemaSwagger = {
               ],
             },
           },
-          required: ["role", "content"],
+          required: ['role', 'content'],
         },
       },
-      max_tokens: { type: "number", nullable: true },
-      temperature: { type: "number", default: 1 },
-      stream: { type: "boolean" },
+      max_tokens: { type: 'number', nullable: true },
+      temperature: { type: 'number', default: 1 },
+      stream: { type: 'boolean' },
     },
-    required: ["model", "messages"],
-    "x-examples": {
+    required: ['model', 'messages'],
+    'x-examples': {
       text: {
-        summary: "Text",
-        description: "Chat completion containing only text",
+        summary: 'Text',
+        description: 'Chat completion containing only text',
         value: {
-          model: "gpt-4o-mini",
+          model: 'gpt-4o-mini',
           messages: [
             {
-              role: "user",
-              content: "What is the capital of France?",
+              role: 'user',
+              content: 'What is the capital of France?',
             },
           ],
           max_tokens: 150,
@@ -139,23 +137,23 @@ export const completionRequestSchemaSwagger = {
         },
       },
       imageUrl: {
-        summary: "Image analysis with URL",
-        description: "Chat completion with image URL",
+        summary: 'Image analysis with URL',
+        description: 'Chat completion with image URL',
         value: {
-          model: "gpt-4o-mini",
+          model: 'gpt-4o-mini',
           messages: [
             {
-              role: "user",
+              role: 'user',
               content: [
                 {
-                  type: "text",
-                  text: "What do you see in this image?",
+                  type: 'text',
+                  text: 'What do you see in this image?',
                 },
                 {
-                  type: "image_url",
+                  type: 'image_url',
                   image_url: {
-                    url: "https://fastly.picsum.photos/id/689/200/300.jpg?hmac=vg64_CHvD_VwWyxzKJAAAZswOJG8_8xEdMcP9BHgLJM",
-                    detail: "low",
+                    url: 'https://fastly.picsum.photos/id/689/200/300.jpg?hmac=vg64_CHvD_VwWyxzKJAAAZswOJG8_8xEdMcP9BHgLJM',
+                    detail: 'low',
                   },
                 },
               ],
@@ -167,23 +165,23 @@ export const completionRequestSchemaSwagger = {
         },
       },
       imageBase64: {
-        summary: "Image analysis with base64",
-        description: "Chat completion with base64 encoded image",
+        summary: 'Image analysis with base64',
+        description: 'Chat completion with base64 encoded image',
         value: {
-          model: "gpt-4o-mini",
+          model: 'gpt-4o-mini',
           messages: [
             {
-              role: "user",
+              role: 'user',
               content: [
                 {
-                  type: "text",
-                  text: "Describe this chart and provide insights about the data trends.",
+                  type: 'text',
+                  text: 'Describe this chart and provide insights about the data trends.',
                 },
                 {
-                  type: "image_url",
+                  type: 'image_url',
                   image_url: {
-                    url: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/...[truncated for example]",
-                    detail: "auto",
+                    url: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/...[truncated for example]',
+                    detail: 'auto',
                   },
                 },
               ],
@@ -195,30 +193,30 @@ export const completionRequestSchemaSwagger = {
         },
       },
       multipleImages: {
-        summary: "Multiple images",
-        description: "Chat completion with multiple images",
+        summary: 'Multiple images',
+        description: 'Chat completion with multiple images',
         value: {
-          model: "gpt-4o-mini",
+          model: 'gpt-4o-mini',
           messages: [
             {
-              role: "user",
+              role: 'user',
               content: [
                 {
-                  type: "text",
-                  text: "Compare these two images and tell me the differences.",
+                  type: 'text',
+                  text: 'Compare these two images and tell me the differences.',
                 },
                 {
-                  type: "image_url",
+                  type: 'image_url',
                   image_url: {
-                    url: "https://example.com/image1.jpg",
-                    detail: "high",
+                    url: 'https://example.com/image1.jpg',
+                    detail: 'high',
                   },
                 },
                 {
-                  type: "image_url",
+                  type: 'image_url',
                   image_url: {
-                    url: "https://example.com/image2.jpg",
-                    detail: "high",
+                    url: 'https://example.com/image2.jpg',
+                    detail: 'high',
                   },
                 },
               ],
@@ -231,8 +229,8 @@ export const completionRequestSchemaSwagger = {
       },
     },
   },
-  summary: "Chat completion",
+  summary: 'Chat completion',
   description:
-    "proxy for openai compatible chat completion the standard is not fully implemented. Supports text input and image input. Image input is not supported for all models. If a model does not support image input, the request will fail with a generic 400 error. See examples for usage. example1 generic text usage, exampe 2-4 image usage. Usage is metered by the api key and the associated project. If the budget is exceeds the limit, the request will fail with a 429 error. o3-mini is a reasoning model and does not support max_tokens and temperature due to azure limitations.",
+    'proxy for openai compatible chat completion the standard is not fully implemented. Supports text input and image input. Image input is not supported for all models. If a model does not support image input, the request will fail with a generic 400 error. See examples for usage. example1 generic text usage, exampe 2-4 image usage. Usage is metered by the api key and the associated project. If the budget is exceeds the limit, the request will fail with a 429 error. o3-mini is a reasoning model and does not support max_tokens and temperature due to azure limitations.',
   security: [{ bearerAuth: [] }],
 };

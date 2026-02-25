@@ -1,31 +1,27 @@
-import eslint from "@eslint/js";
-import tseslint from "typescript-eslint";
-import turboConfig from "eslint-config-turbo/flat";
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import turboConfig from 'eslint-config-turbo/flat';
 
 export default tseslint.config(
   {
-    extends: [
-      eslint.configs.recommended,
-      ...tseslint.configs.recommendedTypeChecked,
-      turboConfig,
-    ],
+    extends: [eslint.configs.recommended, ...tseslint.configs.recommendedTypeChecked, turboConfig],
     languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
+      ecmaVersion: 'latest',
+      sourceType: 'module',
       parserOptions: {
         projectService: true,
       },
       globals: {
-        AsyncGenerator: "readonly",
-        AsyncIterable: "readonly",
-        AsyncIterator: "readonly",
+        AsyncGenerator: 'readonly',
+        AsyncIterable: 'readonly',
+        AsyncIterator: 'readonly',
       },
     },
     // Disable type-aware linting for config files
-    files: ["**/*.ts"],
+    files: ['**/*.ts'],
   },
   {
-    files: ["**/*.js"],
+    files: ['**/*.js'],
     ...tseslint.configs.disableTypeChecked,
   },
 );

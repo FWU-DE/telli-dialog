@@ -1,5 +1,5 @@
-import bcrypt from "bcryptjs";
-import { cnanoid } from "../utils";
+import bcrypt from 'bcryptjs';
+import { cnanoid } from '../utils';
 import {
   ApiKeyInsertModel,
   ApiKeyModel,
@@ -7,13 +7,13 @@ import {
   llmModelApiKeyMappingTable,
   llmModelTable,
   projectTable,
-} from "../schema";
-import { db, dbGetProjectById } from "..";
-import { isDateBefore } from "../date";
-import { and, eq, getTableColumns, inArray } from "drizzle-orm";
+} from '../schema';
+import { db, dbGetProjectById } from '..';
+import { isDateBefore } from '../date';
+import { and, eq, getTableColumns, inArray } from 'drizzle-orm';
 
 export async function dbCreateJustTheApiKey(
-  apiKey: Omit<ApiKeyInsertModel, "secretHash" | "keyId">,
+  apiKey: Omit<ApiKeyInsertModel, 'secretHash' | 'keyId'>,
 ) {
   const apiKeyRecord = await createApiKeyRecord();
   const apiKeyToInsert = {
@@ -21,12 +21,10 @@ export async function dbCreateJustTheApiKey(
     secretHash: apiKeyRecord.secretHash,
     keyId: apiKeyRecord.keyId,
   };
-  const insertedApiKey = (
-    await db.insert(apiKeyTable).values(apiKeyToInsert).returning()
-  )[0];
+  const insertedApiKey = (await db.insert(apiKeyTable).values(apiKeyToInsert).returning())[0];
 
   if (insertedApiKey === undefined) {
-    throw Error("Could not create api key");
+    throw Error('Could not create api key');
   }
   return { ...insertedApiKey, plainKey: apiKeyRecord.fullKey };
 }
@@ -45,13 +43,13 @@ export async function dbCreateApiKey({
   budget: number;
 }) {
   if (modelIds.length < 1) {
-    throw Error("Cannot create api key without assigned models.");
+    throw Error('Cannot create api key without assigned models.');
   }
 
   const project = await dbGetProjectById(organizationId, projectId);
 
   if (project === undefined) {
-    throw Error("Could not find project");
+    throw Error('Could not find project');
   }
 
   const apiKeyRecord = await createApiKeyRecord();
@@ -70,7 +68,7 @@ export async function dbCreateApiKey({
     )[0];
 
     if (insertedApiKey === undefined) {
-      throw Error("Could not create api key");
+      throw Error('Could not create api key');
     }
 
     // only use the models available in the organization
@@ -78,10 +76,7 @@ export async function dbCreateApiKey({
       .select()
       .from(llmModelTable)
       .where(
-        and(
-          eq(llmModelTable.organizationId, organizationId),
-          inArray(llmModelTable.id, modelIds),
-        ),
+        and(eq(llmModelTable.organizationId, organizationId), inArray(llmModelTable.id, modelIds)),
       );
 
     const insertedMappings = await tx
@@ -95,38 +90,25 @@ export async function dbCreateApiKey({
       .returning();
 
     if (insertedMappings.length < 1) {
-      throw Error("Could not create any api key to model mappings");
+      throw Error('Could not create any api key to model mappings');
     }
 
     return { ...insertedApiKey, plainKey: apiKeyRecord.fullKey };
   });
 }
 
-export async function dbGetAllApiKeysByProjectId(
-  organizationId: string,
-  projectId: string,
-) {
+export async function dbGetAllApiKeysByProjectId(organizationId: string, projectId: string) {
   return await db
     .select({ ...getTableColumns(apiKeyTable) })
     .from(apiKeyTable)
     .innerJoin(projectTable, eq(apiKeyTable.projectId, projectTable.id))
     .where(
-      and(
-        eq(apiKeyTable.projectId, projectId),
-        eq(projectTable.organizationId, organizationId),
-      ),
+      and(eq(apiKeyTable.projectId, projectId), eq(projectTable.organizationId, organizationId)),
     );
 }
 
-export async function dbGetApiKeysAndUsageByProjectId({
-  projectId,
-}: {
-  projectId: string;
-}) {
-  return await db
-    .select()
-    .from(apiKeyTable)
-    .where(eq(apiKeyTable.projectId, projectId));
+export async function dbGetApiKeysAndUsageByProjectId({ projectId }: { projectId: string }) {
+  return await db.select().from(apiKeyTable).where(eq(apiKeyTable.projectId, projectId));
 }
 
 type ApiKeyParts = {
@@ -153,42 +135,35 @@ export async function hashSecretKey(secretKey: string): Promise<string> {
 
 export async function dbValidateApiKey(
   fullApiKey: string,
-): Promise<
-  { valid: true; apiKey: ApiKeyModel } | { valid: false; reason: string }
-> {
-  const [sk, keyId, secretKey] = fullApiKey.split("_");
+): Promise<{ valid: true; apiKey: ApiKeyModel } | { valid: false; reason: string }> {
+  const [sk, keyId, secretKey] = fullApiKey.split('_');
 
-  if (sk !== "sk" || keyId === undefined || secretKey === undefined) {
-    return { valid: false, reason: "Malformed api key" };
+  if (sk !== 'sk' || keyId === undefined || secretKey === undefined) {
+    return { valid: false, reason: 'Malformed api key' };
   }
 
-  const apiKey = (
-    await db.select().from(apiKeyTable).where(eq(apiKeyTable.keyId, keyId))
-  )[0];
+  const apiKey = (await db.select().from(apiKeyTable).where(eq(apiKeyTable.keyId, keyId)))[0];
 
   if (apiKey === undefined) {
-    return { valid: false, reason: "Could not find the api key" };
+    return { valid: false, reason: 'Could not find the api key' };
   }
 
-  if (
-    apiKey.expiresAt !== null &&
-    !isDateBefore(new Date(), apiKey.expiresAt)
-  ) {
-    return { valid: false, reason: "Api key is expired" };
+  if (apiKey.expiresAt !== null && !isDateBefore(new Date(), apiKey.expiresAt)) {
+    return { valid: false, reason: 'Api key is expired' };
   }
 
-  if (apiKey.state === "inactive") {
-    return { valid: false, reason: "Api key is inactive" };
+  if (apiKey.state === 'inactive') {
+    return { valid: false, reason: 'Api key is inactive' };
   }
 
-  if (apiKey.state === "deleted") {
-    return { valid: false, reason: "Api key was deleted" };
+  if (apiKey.state === 'deleted') {
+    return { valid: false, reason: 'Api key was deleted' };
   }
 
   const isSameHash = await bcrypt.compare(secretKey, apiKey.secretHash);
 
   if (!isSameHash) {
-    return { valid: false, reason: "Api key is invalid" };
+    return { valid: false, reason: 'Api key is invalid' };
   }
 
   return { valid: true, apiKey };
@@ -210,16 +185,10 @@ export async function createApiKeyRecord(): Promise<{
 }
 
 export async function dbGetApiKeyById({ apiKeyId }: { apiKeyId: string }) {
-  return (
-    await db.select().from(apiKeyTable).where(eq(apiKeyTable.id, apiKeyId))
-  )[0];
+  return (await db.select().from(apiKeyTable).where(eq(apiKeyTable.id, apiKeyId)))[0];
 }
 
-export async function dbGetApiKey(
-  organizationId: string,
-  projectId: string,
-  apiKeyId: string,
-) {
+export async function dbGetApiKey(organizationId: string, projectId: string, apiKeyId: string) {
   return (
     await db
       .select()
@@ -259,10 +228,7 @@ export async function dbGetAllModelMappingsForApiKey(
   return await db
     .select({ ...getTableColumns(llmModelApiKeyMappingTable) })
     .from(llmModelApiKeyMappingTable)
-    .innerJoin(
-      apiKeyTable,
-      eq(llmModelApiKeyMappingTable.apiKeyId, apiKeyTable.id),
-    )
+    .innerJoin(apiKeyTable, eq(llmModelApiKeyMappingTable.apiKeyId, apiKeyTable.id))
     .innerJoin(projectTable, eq(apiKeyTable.projectId, projectTable.id))
     .where(
       and(
@@ -295,7 +261,7 @@ export async function dbUpdateModelMappingsForApiKey(
       .limit(1);
 
     if (apiKey.length === 0) {
-      throw new Error("API key not found");
+      throw new Error('API key not found');
     }
 
     // Verify all model IDs exist and belong to the organization
@@ -303,16 +269,11 @@ export async function dbUpdateModelMappingsForApiKey(
       .select()
       .from(llmModelTable)
       .where(
-        and(
-          eq(llmModelTable.organizationId, organizationId),
-          inArray(llmModelTable.id, modelIds),
-        ),
+        and(eq(llmModelTable.organizationId, organizationId), inArray(llmModelTable.id, modelIds)),
       );
 
     if (availableModels.length !== modelIds.length) {
-      throw new Error(
-        "Some model IDs are invalid or do not belong to the organization",
-      );
+      throw new Error('Some model IDs are invalid or do not belong to the organization');
     }
 
     // Delete existing mappings for this API key
@@ -334,10 +295,7 @@ export async function dbUpdateModelMappingsForApiKey(
     return await tx
       .select({ ...getTableColumns(llmModelApiKeyMappingTable) })
       .from(llmModelApiKeyMappingTable)
-      .innerJoin(
-        llmModelTable,
-        eq(llmModelApiKeyMappingTable.llmModelId, llmModelTable.id),
-      )
+      .innerJoin(llmModelTable, eq(llmModelApiKeyMappingTable.llmModelId, llmModelTable.id))
       .where(eq(llmModelApiKeyMappingTable.apiKeyId, apiKeyId));
   });
 }
@@ -348,7 +306,7 @@ export async function dbUpdateApiKey(
   apiKeyId: string,
   updates: {
     name?: string;
-    state?: "active" | "inactive" | "deleted";
+    state?: 'active' | 'inactive' | 'deleted';
     limitInCent?: number;
     expiresAt?: Date | null;
   },
@@ -369,7 +327,7 @@ export async function dbUpdateApiKey(
       .limit(1);
 
     if (existingApiKey.length === 0) {
-      throw new Error("API key not found");
+      throw new Error('API key not found');
     }
 
     // Update the API key with provided values
@@ -380,7 +338,7 @@ export async function dbUpdateApiKey(
       .returning();
 
     if (updatedApiKey === undefined) {
-      throw new Error("Failed to update API key");
+      throw new Error('Failed to update API key');
     }
 
     // Return the updated API key without sensitive fields

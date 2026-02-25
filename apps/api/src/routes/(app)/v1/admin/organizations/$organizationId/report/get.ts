@@ -1,16 +1,13 @@
-import { FastifyReply, FastifyRequest } from "fastify";
-import { validateAdminApiKey } from "../../../utils";
-import { dbGetProjectsWithApiKeys } from "@telli/api-database";
-import z from "zod";
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { validateAdminApiKey } from '../../../utils';
+import { dbGetProjectsWithApiKeys } from '@telli/api-database';
+import z from 'zod';
 import {
   convertToCSV,
   createMonthlyCostReports,
-} from "@/routes/(app)/v1/admin/organizations/$organizationId/report/utils";
+} from '@/routes/(app)/v1/admin/organizations/$organizationId/report/utils';
 
-export async function handler(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<void> {
+export async function handler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   const validationResult = validateAdminApiKey(request, reply);
 
   if (!validationResult.isValid) return;
@@ -23,14 +20,14 @@ export async function handler(
     .parse(request.params);
 
   const { format } = z
-    .object({ format: z.enum(["csv", "json"]).default("json") })
+    .object({ format: z.enum(['csv', 'json']).default('json') })
     .parse(request.query);
 
   const projects = await dbGetProjectsWithApiKeys({ organizationId });
 
   const report = await createMonthlyCostReports({ projects, year });
 
-  if (format === "csv") {
+  if (format === 'csv') {
     const csvString = convertToCSV(report);
     reply.status(200).send(csvString);
     return;

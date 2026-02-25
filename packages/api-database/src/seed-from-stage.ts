@@ -1,4 +1,4 @@
-import { db as localDb } from "./index";
+import { db as localDb } from './index';
 import {
   organizationTable,
   projectTable,
@@ -10,9 +10,9 @@ import {
   LlmModel,
   ApiKeyModel,
   LlmModelApiKeyMappingModel,
-} from "./schema";
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
+} from './schema';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
 
 // Loads all required data from the staging database into the local database
 // including organizations, projects, api keys, llm models and mappings.
@@ -21,7 +21,7 @@ import { Pool } from "pg";
 
 const connectionString = process.env.STAGE_DATABASE_URL;
 if (!connectionString) {
-  throw new Error("STAGE_DATABASE_URL is not set");
+  throw new Error('STAGE_DATABASE_URL is not set');
 }
 const pool = new Pool({
   connectionString,
@@ -50,7 +50,7 @@ async function getModelKeyMappings(): Promise<LlmModelApiKeyMappingModel[]> {
 }
 
 export async function seedDatabase() {
-  console.log("Starting database seeding...");
+  console.log('Starting database seeding...');
 
   try {
     // 1. Create organization
@@ -89,18 +89,18 @@ export async function seedDatabase() {
       .returning();
 
     // 6. Summary
-    console.log("Database seeding completed successfully!");
+    console.log('Database seeding completed successfully!');
   } catch (error) {
-    console.error("Error seeding database:", error);
+    console.error('Error seeding database:', error);
     throw error;
   }
 }
 
 try {
   await seedDatabase();
-  console.log("Seeding completed");
+  console.log('Seeding completed');
   process.exit(0);
 } catch (error) {
-  console.error("Seeding failed:", error);
+  console.error('Seeding failed:', error);
   process.exit(1);
 }

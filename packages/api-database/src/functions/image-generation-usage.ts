@@ -1,10 +1,10 @@
-import { db } from "..";
+import { db } from '..';
 import {
   ImageGenerationUsageInsertModel,
   imageGenerationUsageTrackingTable,
   llmModelTable,
-} from "../schema";
-import { eq } from "drizzle-orm";
+} from '../schema';
+import { eq } from 'drizzle-orm';
 
 export async function dbCreateImageGenerationUsage(
   imageGenerationUsage: ImageGenerationUsageInsertModel,
@@ -24,7 +24,7 @@ export async function dbCreateImageGenerationUsage(
   let costsInCent = 0;
 
   // Calculate costs based on model price metadata
-  if (modelData.priceMetadata.type === "image") {
+  if (modelData.priceMetadata.type === 'image') {
     costsInCent = modelData.priceMetadata.pricePerImageInCent;
   }
 

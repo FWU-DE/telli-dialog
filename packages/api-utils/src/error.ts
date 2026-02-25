@@ -1,4 +1,4 @@
-import { getErrorMessage } from "./error-utils";
+import { getErrorMessage } from './error-utils';
 
 export type Result<T> = [Error, null] | [null, T];
 export type AsyncResult<T> = Promise<Result<T>>;

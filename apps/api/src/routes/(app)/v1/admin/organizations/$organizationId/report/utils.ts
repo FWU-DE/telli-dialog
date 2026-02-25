@@ -1,4 +1,4 @@
-import { ApiKeyModel, getUsageInCentByApiKeyId, ProjectModel } from "@telli/api-database";
+import { ApiKeyModel, getUsageInCentByApiKeyId, ProjectModel } from '@telli/api-database';
 
 type CostReportRow = {
   // e.g. January 2024
@@ -32,9 +32,9 @@ export async function createMonthlyCostReports({
             endDate,
           });
 
-          const intervalName = startDate.toLocaleString("en-US", {
-            month: "long",
-            year: "numeric",
+          const intervalName = startDate.toLocaleString('en-US', {
+            month: 'long',
+            year: 'numeric',
           });
 
           result.push({
@@ -46,13 +46,13 @@ export async function createMonthlyCostReports({
           });
         } catch (error) {
           console.error(
-            `Error getting usage for API key ${apiKey.id} in ${startDate.toLocaleString("en-US", { month: "long", year: "numeric" })}:`,
+            `Error getting usage for API key ${apiKey.id} in ${startDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })}:`,
             error,
           );
           result.push({
-            interval: startDate.toLocaleString("en-US", {
-              month: "long",
-              year: "numeric",
+            interval: startDate.toLocaleString('en-US', {
+              month: 'long',
+              year: 'numeric',
             }),
             project: project.name,
             apiKey: apiKey.name,
@@ -68,7 +68,7 @@ export async function createMonthlyCostReports({
 }
 
 export function convertToCSV(costReports: CostReportRow[]): string {
-  const header = "Zeitraum,Bundesland,API-Key,Limit,Verbrauch";
+  const header = 'Zeitraum,Bundesland,API-Key,Limit,Verbrauch';
   const rows = costReports.map((row) => {
     // Convert cents to euros with 2 decimal places
     const limitInEuros = (row.limitInCent / 100).toFixed(2);
@@ -77,11 +77,11 @@ export function convertToCSV(costReports: CostReportRow[]): string {
     return `${row.interval},${escapeCSV(row.project)},${escapeCSV(row.apiKey)},${limitInEuros},${usageInEuros}`;
   });
   // Combine header and rows
-  return [header, ...rows].join("\n");
+  return [header, ...rows].join('\n');
 }
 
 function escapeCSV(value: string): string {
-  if (value.includes(",") || value.includes('"') || value.includes("\n")) {
+  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
     // Escape quotes by doubling them and wrap in quotes
     return `"${value.replace(/"/g, '""')}"`;
   }

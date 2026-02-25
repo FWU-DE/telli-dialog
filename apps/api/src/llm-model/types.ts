@@ -1,8 +1,5 @@
-import OpenAI from "openai";
-import {
-  ChatCompletionMessageParam,
-  CompletionUsage,
-} from "openai/resources/index.js";
+import OpenAI from 'openai';
+import { ChatCompletionMessageParam, CompletionUsage } from 'openai/resources/index.js';
 
 export type CommonLlmProviderStreamParameter = {
   messages: Array<ChatCompletionMessageParam>;

@@ -1,20 +1,14 @@
-import { env } from "@/env";
-import {
-  InvalidRequestBodyError,
-  NotFoundError,
-  UnauthorizedError,
-} from "@/errors";
-import { getMaybeBearerToken } from "@/routes/utils";
-import { dbGetOrganizationById } from "@telli/api-database";
+import { env } from '@/env';
+import { InvalidRequestBodyError, NotFoundError, UnauthorizedError } from '@/errors';
+import { getMaybeBearerToken } from '@/routes/utils';
+import { dbGetOrganizationById } from '@telli/api-database';
 
 /**
  * Validates if the organization with the given ID exists in database.
  * Throws NotFoundError if the organization does not exist.
  * @param organizationId
  */
-export async function validateOrganizationId(
-  organizationId: string,
-): Promise<void> {
+export async function validateOrganizationId(organizationId: string): Promise<void> {
   const organization = await dbGetOrganizationById(organizationId);
   if (!organization) {
     throw new NotFoundError(`Organization ${organizationId} not found`);
@@ -26,12 +20,10 @@ export async function validateOrganizationId(
  * Throws UnauthorizedError if the API key is missing or invalid.
  * @param authorizationHeader
  */
-export function validateAdminApiKeyAndThrow(
-  authorizationHeader: string | undefined,
-) {
+export function validateAdminApiKeyAndThrow(authorizationHeader: string | undefined) {
   const token = getMaybeBearerToken(authorizationHeader);
-  if (!token) throw new UnauthorizedError("No Bearer token found.");
-  if (token !== env.apiKey) throw new UnauthorizedError("Api key is not valid");
+  if (!token) throw new UnauthorizedError('No Bearer token found.');
+  if (token !== env.apiKey) throw new UnauthorizedError('Api key is not valid');
 }
 
 /**
@@ -41,7 +33,7 @@ export function validateAdminApiKeyAndThrow(
  */
 export function validateRequestBody(body: unknown) {
   if (
-    typeof body !== "object" ||
+    typeof body !== 'object' ||
     body === null ||
     Array.isArray(body) ||
     Object.keys(body).length === 0

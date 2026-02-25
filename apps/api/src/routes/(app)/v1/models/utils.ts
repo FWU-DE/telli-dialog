@@ -1,6 +1,6 @@
-import { LlmModel } from "@telli/api-database";
+import { LlmModel } from '@telli/api-database';
 
-type ObscuredLlmModel = Omit<LlmModel, "setting" | "organizationId">;
+type ObscuredLlmModel = Omit<LlmModel, 'setting' | 'organizationId'>;
 
 export function obscureModels(models: LlmModel[]): ObscuredLlmModel[] {
   return models.map((model) => {

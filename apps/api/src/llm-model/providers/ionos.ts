@@ -1,22 +1,20 @@
-import { OpenAI as OpenAIv4 } from "openaiv4";
-import OpenAI from "openai";
-import { streamToController } from "../utils";
+import { OpenAI as OpenAIv4 } from 'openaiv4';
+import OpenAI from 'openai';
+import { streamToController } from '../utils';
 import {
   CommonLlmProviderStreamParameter,
   CompletionFn,
   CompletionStreamFn,
   EmbeddingFn,
   ImageGenerationFn,
-} from "../types";
-import { LlmModel } from "@telli/api-database";
-import { calculateCompletionUsage } from "../utils";
-import { CompletionUsage } from "openai/resources/completions.js";
+} from '../types';
+import { LlmModel } from '@telli/api-database';
+import { calculateCompletionUsage } from '../utils';
+import { CompletionUsage } from 'openai/resources/completions.js';
 
-export function constructIonosCompletionStreamFn(
-  llmModel: LlmModel,
-): CompletionStreamFn {
-  if (llmModel.setting.provider !== "ionos" || !llmModel.setting) {
-    throw new Error("Invalid model configuration for IONOS");
+export function constructIonosCompletionStreamFn(llmModel: LlmModel): CompletionStreamFn {
+  if (llmModel.setting.provider !== 'ionos' || !llmModel.setting) {
+    throw new Error('Invalid model configuration for IONOS');
   }
 
   const client = new OpenAI({
@@ -28,10 +26,7 @@ export function constructIonosCompletionStreamFn(
     onUsageCallback,
     messages,
     ...props
-  }: Omit<
-    CommonLlmProviderStreamParameter,
-    "model"
-  >): ReturnType<CompletionStreamFn> {
+  }: Omit<CommonLlmProviderStreamParameter, 'model'>): ReturnType<CompletionStreamFn> {
     const stream = await client.chat.completions.create({
       model: llmModel.id,
       messages,
@@ -41,7 +36,7 @@ export function constructIonosCompletionStreamFn(
     });
 
     async function* fetchChunks() {
-      let content = "";
+      let content = '';
       let firstChunk: OpenAI.Chat.Completions.ChatCompletionChunk | null = null;
       for await (const chunk of stream) {
         if (firstChunk === null) {
@@ -57,7 +52,7 @@ export function constructIonosCompletionStreamFn(
       // TODO: add token count for image inputs. See guide for token count calculation https://platform.openai.com/docs/guides/images-vision?api-mode=responses&format=file
       const usage = calculateCompletionUsage({
         messages,
-        modelMessage: { role: "assistant", content },
+        modelMessage: { role: 'assistant', content },
       });
       onUsageCallback(usage);
       // we need to manually construct an openai compatible chunk which includes the usage
@@ -82,8 +77,8 @@ export function constructIonosCompletionStreamFn(
 }
 
 export function constructIonosCompletionFn(llmModel: LlmModel): CompletionFn {
-  if (llmModel.setting.provider !== "ionos" || !llmModel.setting) {
-    throw new Error("Invalid model configuration for IONOS");
+  if (llmModel.setting.provider !== 'ionos' || !llmModel.setting) {
+    throw new Error('Invalid model configuration for IONOS');
   }
 
   const client = new OpenAI({
@@ -102,8 +97,8 @@ export function constructIonosCompletionFn(llmModel: LlmModel): CompletionFn {
 }
 
 export function constructIonosEmbeddingFn(llmModel: LlmModel) {
-  if (llmModel.setting.provider !== "ionos" || !llmModel.setting) {
-    throw new Error("Invalid model configuration for IONOS");
+  if (llmModel.setting.provider !== 'ionos' || !llmModel.setting) {
+    throw new Error('Invalid model configuration for IONOS');
   }
 
   const client = new OpenAIv4({
@@ -111,10 +106,7 @@ export function constructIonosEmbeddingFn(llmModel: LlmModel) {
     baseURL: llmModel.setting.baseUrl,
   });
 
-  return async function getIonosEmbedding({
-    input,
-    model,
-  }: Parameters<EmbeddingFn>[0]): Promise<{
+  return async function getIonosEmbedding({ input, model }: Parameters<EmbeddingFn>[0]): Promise<{
     data: OpenAI.Embeddings.Embedding[];
     usage: CompletionUsage;
     model: string;
@@ -133,7 +125,7 @@ export function constructIonosEmbeddingFn(llmModel: LlmModel) {
     const { data, usage } = await client.embeddings.create({
       input,
       model,
-      encoding_format: "float",
+      encoding_format: 'float',
     });
     return {
       data,
@@ -143,11 +135,9 @@ export function constructIonosEmbeddingFn(llmModel: LlmModel) {
   };
 }
 
-export function constructIonosImageGenerationFn(
-  llmModel: LlmModel,
-): ImageGenerationFn {
-  if (llmModel.setting.provider !== "ionos" || !llmModel.setting) {
-    throw new Error("Invalid model configuration for IONOS");
+export function constructIonosImageGenerationFn(llmModel: LlmModel): ImageGenerationFn {
+  if (llmModel.setting.provider !== 'ionos' || !llmModel.setting) {
+    throw new Error('Invalid model configuration for IONOS');
   }
 
   const client = new OpenAI({
@@ -163,8 +153,8 @@ export function constructIonosImageGenerationFn(
       model,
       prompt,
       n: 1,
-      size: "1024x1024",
-      response_format: "b64_json",
+      size: '1024x1024',
+      response_format: 'b64_json',
     });
 
     return result;

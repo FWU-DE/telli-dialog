@@ -1,13 +1,10 @@
-import { FastifyReply, FastifyRequest } from "fastify";
-import { obscureModels } from "../../../../models/utils";
-import { dbCreateLlmModel, llmInsertModelSchema } from "@telli/api-database";
-import { handleApiError } from "@/errors";
-import { validateAdminApiKeyAndThrow } from "@/validation";
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { obscureModels } from '../../../../models/utils';
+import { dbCreateLlmModel, llmInsertModelSchema } from '@telli/api-database';
+import { handleApiError } from '@/errors';
+import { validateAdminApiKeyAndThrow } from '@/validation';
 
-export async function handler(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<void> {
+export async function handler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   try {
     validateAdminApiKeyAndThrow(request.headers.authorization);
 
@@ -15,7 +12,7 @@ export async function handler(
     const createdModel = await dbCreateLlmModel(modelToCreate);
 
     if (createdModel == undefined) {
-      return reply.status(400).send({ error: "Could not create model." });
+      return reply.status(400).send({ error: 'Could not create model.' });
     }
 
     return reply.status(200).send(obscureModels([createdModel])[0]);

@@ -1,4 +1,4 @@
-import { PRICE_AND_CENT_MULTIPLIER } from "./const";
+import { PRICE_AND_CENT_MULTIPLIER } from './const';
 
 export function calculatePriceInCentByTextModelAndUsage({
   completionTokens,
@@ -9,8 +9,7 @@ export function calculatePriceInCentByTextModelAndUsage({
   completionTokens: number;
   promptTokens: number;
 }) {
-  const completionTokenPrice =
-    completionTokens * priceMetadata.completionTokenPrice;
+  const completionTokenPrice = completionTokens * priceMetadata.completionTokenPrice;
   const promptTokenPrice = promptTokens * priceMetadata.promptTokenPrice;
 
   return (completionTokenPrice + promptTokenPrice) / PRICE_AND_CENT_MULTIPLIER;

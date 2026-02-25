@@ -1,16 +1,16 @@
-import { env } from "@/env";
-import swagger from "@fastify/swagger";
-import swaggerUI from "@fastify/swagger-ui";
-import { FastifyInstance } from "fastify/types/instance";
+import { env } from '@/env';
+import swagger from '@fastify/swagger';
+import swaggerUI from '@fastify/swagger-ui';
+import { FastifyInstance } from 'fastify/types/instance';
 
 export async function initSwagger(fastify: FastifyInstance) {
   await fastify.register(swagger, {
     openapi: {
-      openapi: "3.0.0",
+      openapi: '3.0.0',
       info: {
         title: `${env.apiName} API Documentation`,
         description: `${env.apiName} API Swagger Documentation.`,
-        version: "0.1.0",
+        version: '0.1.0',
       },
       servers: [
         {
@@ -21,21 +21,21 @@ export async function initSwagger(fastify: FastifyInstance) {
       components: {
         securitySchemes: {
           bearerAuth: {
-            type: "http",
-            scheme: "bearer",
-            bearerFormat: "JWT",
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
           },
         },
       },
       externalDocs: {
         url: env.apiBaseUrl,
-        description: "Find more info here",
+        description: 'Find more info here',
       },
     },
   });
 
   await fastify.register(swaggerUI, {
-    routePrefix: "/docs",
+    routePrefix: '/docs',
     uiConfig: {
       // docExpansion: "none",
       deepLinking: false,
@@ -44,7 +44,7 @@ export async function initSwagger(fastify: FastifyInstance) {
     transformSpecification: (swaggerObject) => {
       // load OpenApi document from relative location to prevent CSP issues
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      swaggerObject.servers[0].url = "/";
+      swaggerObject.servers[0].url = '/';
       return swaggerObject;
     },
   });

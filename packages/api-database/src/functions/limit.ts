@@ -1,18 +1,9 @@
-import {
-  getStartOfCurrentMonth,
-  getEndOfCurrentMonth,
-  errorifyAsyncFn,
-} from "@telli/api-utils";
-import { ApiKeyModel, db, dbGetApiKeyById } from "..";
-import { and, between, eq, sum } from "drizzle-orm";
-import {
-  completionUsageTrackingTable,
-  imageGenerationUsageTrackingTable,
-} from "../schema";
+import { getStartOfCurrentMonth, getEndOfCurrentMonth, errorifyAsyncFn } from '@telli/api-utils';
+import { ApiKeyModel, db, dbGetApiKeyById } from '..';
+import { and, between, eq, sum } from 'drizzle-orm';
+import { completionUsageTrackingTable, imageGenerationUsageTrackingTable } from '../schema';
 
-export const checkLimitsByApiKeyIdWithResult = errorifyAsyncFn(
-  checkLimitsByApiKeyId,
-);
+export const checkLimitsByApiKeyIdWithResult = errorifyAsyncFn(checkLimitsByApiKeyId);
 // given an api key id, checks whether the usage is in the budget for the current month
 export async function checkLimitsByApiKeyId({
   apiKeyId,
@@ -35,9 +26,7 @@ export async function checkLimitsByApiKeyId({
   return { hasReachedLimit: false };
 }
 
-export const getCurrentUsageInCentByApiKeyIdWithResult = errorifyAsyncFn(
-  getUsageInCentByApiKeyId,
-);
+export const getCurrentUsageInCentByApiKeyIdWithResult = errorifyAsyncFn(getUsageInCentByApiKeyId);
 export async function getUsageInCentByApiKeyId({
   apiKeyId,
   startDate,
@@ -50,7 +39,7 @@ export async function getUsageInCentByApiKeyId({
   const apiKey = await dbGetApiKeyById({ apiKeyId });
 
   if (apiKey === undefined) {
-    throw Error("Could not find api key");
+    throw Error('Could not find api key');
   }
 
   // Get total costs from completion usage
@@ -71,11 +60,7 @@ export async function getUsageInCentByApiKeyId({
     .where(
       and(
         eq(imageGenerationUsageTrackingTable.apiKeyId, apiKeyId),
-        between(
-          imageGenerationUsageTrackingTable.createdAt,
-          startDate,
-          endDate,
-        ),
+        between(imageGenerationUsageTrackingTable.createdAt, startDate, endDate),
       ),
     );
 

@@ -4,10 +4,10 @@ type ErrorWithMessage = {
 
 function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
   return (
-    typeof error === "object" &&
+    typeof error === 'object' &&
     error !== null &&
-    "message" in error &&
-    typeof (error as Record<string, unknown>).message === "string"
+    'message' in error &&
+    typeof (error as Record<string, unknown>).message === 'string'
   );
 }
 
@@ -30,8 +30,7 @@ export function getErrorMessage(error: unknown) {
 export function getErrorWithStack(error: unknown) {
   const isError = error instanceof Error;
 
-  if (isError)
-    return { name: error.name, message: error.message, stack: error.stack };
+  if (isError) return { name: error.name, message: error.message, stack: error.stack };
 
   return { message: getErrorMessage(error) };
 }

@@ -1,12 +1,8 @@
-import { handleApiError } from "@/errors";
-import { validateAdminApiKeyAndThrow } from "@/validation";
-import {
-  dbGetProjectById,
-  dbUpdateProject,
-  projectUpdateSchema,
-} from "@telli/api-database";
-import { FastifyReply, FastifyRequest } from "fastify";
-import { projectParamsSchema } from "./projectParamsSchema";
+import { handleApiError } from '@/errors';
+import { validateAdminApiKeyAndThrow } from '@/validation';
+import { dbGetProjectById, dbUpdateProject, projectUpdateSchema } from '@telli/api-database';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { projectParamsSchema } from './projectParamsSchema';
 
 const bodySchema = projectUpdateSchema.omit({
   id: true,
@@ -14,21 +10,16 @@ const bodySchema = projectUpdateSchema.omit({
   createdAt: true,
 });
 
-export async function handler(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<void> {
+export async function handler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   try {
     validateAdminApiKeyAndThrow(request.headers.authorization);
 
-    const { organizationId, projectId } = projectParamsSchema.parse(
-      request.params,
-    );
+    const { organizationId, projectId } = projectParamsSchema.parse(request.params);
     const valuesToUpdate = bodySchema.parse(request.body);
 
     const project = await dbGetProjectById(organizationId, projectId);
     if (!project) {
-      reply.status(404).send({ error: "Project not found" });
+      reply.status(404).send({ error: 'Project not found' });
       return;
     }
 

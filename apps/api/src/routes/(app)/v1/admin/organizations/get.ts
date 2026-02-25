@@ -1,12 +1,9 @@
-import { FastifyReply, FastifyRequest } from "fastify";
-import { dbGetAllOrganizations } from "@telli/api-database";
-import { handleApiError } from "@/errors";
-import { validateAdminApiKeyAndThrow } from "@/validation";
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { dbGetAllOrganizations } from '@telli/api-database';
+import { handleApiError } from '@/errors';
+import { validateAdminApiKeyAndThrow } from '@/validation';
 
-export async function handler(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<void> {
+export async function handler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   try {
     validateAdminApiKeyAndThrow(request.headers.authorization);
 

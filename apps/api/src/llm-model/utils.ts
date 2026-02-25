@@ -1,9 +1,6 @@
-import { get_encoding } from "tiktoken";
-import {
-  ChatCompletionMessageParam,
-  CompletionUsage,
-} from "openai/resources/index.js";
-import { ChatCompletionContentPartText } from "openai/resources/chat/completions.js";
+import { get_encoding } from 'tiktoken';
+import { ChatCompletionMessageParam, CompletionUsage } from 'openai/resources/index.js';
+import { ChatCompletionContentPartText } from 'openai/resources/chat/completions.js';
 
 const textEncoder = new TextEncoder();
 
@@ -15,16 +12,16 @@ export async function streamToController(
 ) {
   try {
     for await (const chunk of dataFetcher) {
-      if (typeof chunk === "string") {
+      if (typeof chunk === 'string') {
         controller.enqueue(textEncoder.encode(chunk));
       } else {
         controller.enqueue(chunk);
       }
-      controller.enqueue(textEncoder.encode("\n"));
+      controller.enqueue(textEncoder.encode('\n'));
     }
     controller.close();
   } catch (err) {
-    console.error("Error during streaming:", err);
+    console.error('Error during streaming:', err);
     controller.error(err);
   }
 }
@@ -33,20 +30,18 @@ export async function streamToController(
  * Extracts text content from a message, handling both string and array content formats
  */
 function extractTextFromMessage(message: ChatCompletionMessageParam): string {
-  if (typeof message.content === "string") {
+  if (typeof message.content === 'string') {
     return message.content;
   }
 
   if (Array.isArray(message.content)) {
     return message.content
-      .filter(
-        (part): part is ChatCompletionContentPartText => part.type === "text",
-      )
+      .filter((part): part is ChatCompletionContentPartText => part.type === 'text')
       .map((part) => part.text)
-      .join(" ");
+      .join(' ');
   }
 
-  return "";
+  return '';
 }
 
 /**
@@ -68,14 +63,13 @@ export function calculateCompletionUsage({
   messages: ChatCompletionMessageParam[];
   modelMessage: ChatCompletionMessageParam;
 }): CompletionUsage {
-  const enc = get_encoding("cl100k_base");
+  const enc = get_encoding('cl100k_base');
   try {
-    const promptText = messages.map(extractTextFromMessage).join(" ");
+    const promptText = messages.map(extractTextFromMessage).join(' ');
     const promptTokens = enc.encode(promptText).length;
 
     const completionText = extractTextFromMessage(modelMessage);
-    const completionTokens =
-      completionText !== "" ? enc.encode(completionText).length : 0;
+    const completionTokens = completionText !== '' ? enc.encode(completionText).length : 0;
 
     return {
       prompt_tokens: promptTokens,

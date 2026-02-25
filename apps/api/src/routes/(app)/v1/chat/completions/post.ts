@@ -1,43 +1,37 @@
-import {
-  getCompletionFnByModel,
-  getCompletionStreamFnByModel,
-} from "@/llm-model/providers";
+import { getCompletionFnByModel, getCompletionStreamFnByModel } from '@/llm-model/providers';
 import {
   getContentFilterFailedChunk,
   getErrorChunk,
   validateApiKeyWithResult,
   handleLlmModelError,
-} from "@/routes/utils";
+} from '@/routes/utils';
 import {
   ApiKeyModel,
   checkLimitsByApiKeyIdWithResult,
   dbCreateCompletionUsage,
   dbGetModelsByApiKeyId,
   LlmModel,
-} from "@telli/api-database";
-import { FastifyReply, FastifyRequest } from "fastify";
-import { ChatCompletionMessageParam } from "openai/resources/chat/completions.js";
-import { CompletionUsage } from "openai/resources/completions.js";
-import { z } from "zod";
+} from '@telli/api-database';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { ChatCompletionMessageParam } from 'openai/resources/chat/completions.js';
+import { CompletionUsage } from 'openai/resources/completions.js';
+import { z } from 'zod';
 
 // Define content part schemas for image and text
 const textContentPartSchema = z.object({
-  type: z.literal("text"),
+  type: z.literal('text'),
   text: z.string(),
 });
 
 const imageUrlContentPartSchema = z.object({
-  type: z.literal("image_url"),
+  type: z.literal('image_url'),
   image_url: z.object({
     url: z.string(),
-    detail: z.enum(["auto", "low", "high"]).optional(),
+    detail: z.enum(['auto', 'low', 'high']).optional(),
   }),
 });
 
-const contentPartSchema = z.union([
-  textContentPartSchema,
-  imageUrlContentPartSchema,
-]);
+const contentPartSchema = z.union([textContentPartSchema, imageUrlContentPartSchema]);
 
 // Content can be either a string (legacy format) or an array of content parts (new format with image support)
 const messageContentSchema = z.union([z.string(), z.array(contentPartSchema)]);
@@ -46,7 +40,7 @@ const completionRequestSchema = z.object({
   model: z.string(),
   messages: z.array(
     z.object({
-      role: z.enum(["system", "user", "assistant", "developer"]),
+      role: z.enum(['system', 'user', 'assistant', 'developer']),
       content: messageContentSchema,
     }),
   ),
@@ -75,10 +69,7 @@ async function onUsageCallback({
   });
 }
 
-export async function handler(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<void> {
+export async function handler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   const [apiKeyError, apiKey] = await validateApiKeyWithResult(request, reply);
 
   if (apiKeyError !== null) {
@@ -91,16 +82,15 @@ export async function handler(
   const requestParseResult = completionRequestSchema.safeParse(request.body);
   if (!requestParseResult.success) {
     reply.status(400).send({
-      error: "Bad request",
+      error: 'Bad request',
       details: requestParseResult.error.message,
     });
     return;
   }
 
-  const [limitCalculationError, limitCalculationResult] =
-    await checkLimitsByApiKeyIdWithResult({
-      apiKeyId: apiKey.id,
-    });
+  const [limitCalculationError, limitCalculationResult] = await checkLimitsByApiKeyIdWithResult({
+    apiKeyId: apiKey.id,
+  });
 
   if (limitCalculationError !== null) {
     reply.status(500).send({
@@ -111,7 +101,7 @@ export async function handler(
   }
 
   if (limitCalculationResult.hasReachedLimit) {
-    reply.status(429).send({ error: "You have reached the price limit" });
+    reply.status(429).send({ error: 'You have reached the price limit' });
     return;
   }
 
@@ -130,7 +120,7 @@ export async function handler(
     });
     return;
   }
-  if (model.name === "o3-mini") {
+  if (model.name === 'o3-mini') {
     body.max_tokens = undefined;
     body.temperature = undefined;
   }
@@ -146,10 +136,10 @@ export async function handler(
     }
 
     reply.raw.writeHead(200, {
-      "Content-Type": "text/event-stream; charset=utf-8",
-      "Cache-Control": "no-cache",
-      "Transfer-Encoding": "chunked",
-      Connection: "keep-alive",
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache',
+      'Transfer-Encoding': 'chunked',
+      Connection: 'keep-alive',
     });
     let stream: ReadableStream<Uint8Array>;
     try {
@@ -167,16 +157,13 @@ export async function handler(
     } catch (error) {
       // Check if error has a code field and evaluate its value not all providers have a code field
       const errorCode =
-        error instanceof Error && "code" in error
-          ? (error.code as string)
-          : undefined;
+        error instanceof Error && 'code' in error ? (error.code as string) : undefined;
 
-      const contentFilterTriggered = errorCode === "content_filter";
+      const contentFilterTriggered = errorCode === 'content_filter';
 
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-      console.error("Error processing stream:", {
+      console.error('Error processing stream:', {
         errorCode,
         contentFilterTriggered,
         message: errorMessage,
@@ -193,7 +180,7 @@ export async function handler(
                     created: Date.now(),
                     model: model.name,
                   }),
-                ) + "\n\n",
+                ) + '\n\n',
               ),
             );
           } else {
@@ -207,12 +194,12 @@ export async function handler(
                     errorMessage,
                     errorCode,
                   }),
-                ) + "\n\n",
+                ) + '\n\n',
               ),
             );
           }
           // Always send [DONE] to close the stream properly
-          controller.enqueue(new TextEncoder().encode("[DONE]\n\n"));
+          controller.enqueue(new TextEncoder().encode('[DONE]\n\n'));
           controller.close();
         },
       });
@@ -232,10 +219,10 @@ export async function handler(
 
     processStream()
       .catch((error) => {
-        console.error("Error processing stream:", error);
+        console.error('Error processing stream:', error);
       })
       .finally(() => {
-        reply.raw.write("[DONE]");
+        reply.raw.write('[DONE]');
         reply.raw.end();
         return;
       });
@@ -263,7 +250,7 @@ export async function handler(
         await onUsageCallback({ usage: response.usage, apiKey, model });
       }
     } catch (error) {
-      handleLlmModelError(reply, error, "Error in non-streaming completion");
+      handleLlmModelError(reply, error, 'Error in non-streaming completion');
     }
 
     return;

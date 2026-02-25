@@ -1,13 +1,10 @@
-import { handleApiError } from "@/errors";
-import { modelParamsSchema } from "./modelParamsSchema";
-import { validateAdminApiKeyAndThrow } from "@/validation";
-import { dbDeleteLlmModelById } from "@telli/api-database";
-import { FastifyReply, FastifyRequest } from "fastify";
+import { handleApiError } from '@/errors';
+import { modelParamsSchema } from './modelParamsSchema';
+import { validateAdminApiKeyAndThrow } from '@/validation';
+import { dbDeleteLlmModelById } from '@telli/api-database';
+import { FastifyReply, FastifyRequest } from 'fastify';
 
-export async function handler(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<void> {
+export async function handler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   try {
     validateAdminApiKeyAndThrow(request.headers.authorization);
 

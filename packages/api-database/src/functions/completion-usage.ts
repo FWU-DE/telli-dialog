@@ -1,18 +1,12 @@
-import { db } from "..";
-import {
-  CompletionUsageInsertModel,
-  completionUsageTrackingTable,
-  llmModelTable,
-} from "../schema";
-import { eq } from "drizzle-orm";
+import { db } from '..';
+import { CompletionUsageInsertModel, completionUsageTrackingTable, llmModelTable } from '../schema';
+import { eq } from 'drizzle-orm';
 import {
   calculatePriceInCentByTextModelAndUsage,
   calculatePriceInCentByEmbeddingModelAndUsage,
-} from "@telli/api-llm-model";
+} from '@telli/api-llm-model';
 
-export async function dbCreateCompletionUsage(
-  completionUsage: CompletionUsageInsertModel,
-) {
+export async function dbCreateCompletionUsage(completionUsage: CompletionUsageInsertModel) {
   // Get the model to calculate costs
   const model = await db
     .select()
@@ -28,13 +22,13 @@ export async function dbCreateCompletionUsage(
   let costsInCent = 0;
 
   // Calculate costs based on model price metadata
-  if (modelData.priceMetadata.type === "text") {
+  if (modelData.priceMetadata.type === 'text') {
     costsInCent = calculatePriceInCentByTextModelAndUsage({
       priceMetadata: modelData.priceMetadata,
       promptTokens: completionUsage.promptTokens,
       completionTokens: completionUsage.completionTokens,
     });
-  } else if (modelData.priceMetadata.type === "embedding") {
+  } else if (modelData.priceMetadata.type === 'embedding') {
     costsInCent = calculatePriceInCentByEmbeddingModelAndUsage({
       priceMetadata: modelData.priceMetadata,
       promptTokens: completionUsage.promptTokens,

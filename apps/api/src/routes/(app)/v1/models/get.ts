@@ -1,12 +1,9 @@
-import { validateApiKey } from "@/routes/utils";
-import { dbGetModelsByApiKeyId } from "@telli/api-database";
-import { FastifyReply, FastifyRequest } from "fastify";
-import { obscureModels } from "./utils";
+import { validateApiKey } from '@/routes/utils';
+import { dbGetModelsByApiKeyId } from '@telli/api-database';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { obscureModels } from './utils';
 
-export async function handler(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<void> {
+export async function handler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   const apiKey = await validateApiKey(request, reply);
 
   if (apiKey === undefined) return;

@@ -1,12 +1,6 @@
-import { eq } from "drizzle-orm";
-import {
-  db,
-  llmModelTable,
-  OrganizationInsertModel,
-  organizationTable,
-  projectTable,
-} from "..";
-import { isNotNull } from "@telli/api-utils";
+import { eq } from 'drizzle-orm';
+import { db, llmModelTable, OrganizationInsertModel, organizationTable, projectTable } from '..';
+import { isNotNull } from '@telli/api-utils';
 
 export async function dbGetAllOrganizations() {
   return await db
@@ -53,18 +47,11 @@ export async function dbGetOrganizationAndProjectsByOrganizationId({
   };
 }
 
-export async function dbGetOrganizationByProjectId({
-  projectId,
-}: {
-  projectId: string;
-}) {
+export async function dbGetOrganizationByProjectId({ projectId }: { projectId: string }) {
   const [row] = await db
     .select()
     .from(projectTable)
-    .innerJoin(
-      organizationTable,
-      eq(projectTable.organizationId, organizationTable.id),
-    )
+    .innerJoin(organizationTable, eq(projectTable.organizationId, organizationTable.id))
     .where(eq(projectTable.id, projectId));
 
   if (row === undefined) return undefined;
@@ -72,18 +59,11 @@ export async function dbGetOrganizationByProjectId({
   return row.organization;
 }
 
-export async function dbCreateOrganization(
-  organization: OrganizationInsertModel,
-) {
-  const result = await db
-    .insert(organizationTable)
-    .values(organization)
-    .returning();
+export async function dbCreateOrganization(organization: OrganizationInsertModel) {
+  const result = await db.insert(organizationTable).values(organization).returning();
   return result[0];
 }
 
 export async function dbDeleteOrganizationById(organizationId: string) {
-  await db
-    .delete(organizationTable)
-    .where(eq(organizationTable.id, organizationId));
+  await db.delete(organizationTable).where(eq(organizationTable.id, organizationId));
 }

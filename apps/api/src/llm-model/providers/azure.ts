@@ -1,20 +1,20 @@
-import OpenAI from "openai";
-import { streamToController } from "../utils";
+import OpenAI from 'openai';
+import { streamToController } from '../utils';
 import {
   CommonLlmProviderStreamParameter,
   CompletionFn,
   CompletionStreamFn,
   ImageGenerationFn,
-} from "../types";
-import { LlmModel } from "@telli/api-database";
-import { CompletionUsage } from "openai/resources/completions.js";
+} from '../types';
+import { LlmModel } from '@telli/api-database';
+import { CompletionUsage } from 'openai/resources/completions.js';
 
 function createAzureClient(model: LlmModel): {
   client: OpenAI;
   deployment: string;
 } {
-  if (model.setting.provider !== "azure") {
-    throw new Error("Invalid model configuration for Azure");
+  if (model.setting.provider !== 'azure') {
+    throw new Error('Invalid model configuration for Azure');
   }
 
   const { basePath, deployment, searchParams } = parseAzureOpenAIUrl({
@@ -30,12 +30,10 @@ function createAzureClient(model: LlmModel): {
   return { client, deployment };
 }
 
-export function constructAzureCompletionStreamFn(
-  model: LlmModel,
-): CompletionStreamFn {
+export function constructAzureCompletionStreamFn(model: LlmModel): CompletionStreamFn {
   const { client, deployment } = createAzureClient(model);
 
-  if (["gpt-5", "gpt-5-mini", "gpt-5-nano"].includes(model.name)) {
+  if (['gpt-5', 'gpt-5-mini', 'gpt-5-nano'].includes(model.name)) {
     return async function getAzureCompletionStream({
       onUsageCallback,
       ...props
@@ -58,11 +56,11 @@ export function constructAzureCompletionStreamFn(
       async function* fetchChunks() {
         const starttime = Date.now();
         for await (const chunk of stream) {
-          if (chunk.type === "response.output_text.delta") {
+          if (chunk.type === 'response.output_text.delta') {
             // Typing is important here
             const output: OpenAI.Chat.Completions.ChatCompletionChunk = {
               id: chunk.item_id,
-              object: "chat.completion.chunk",
+              object: 'chat.completion.chunk',
               model: model.name,
               choices: [
                 {
@@ -77,7 +75,7 @@ export function constructAzureCompletionStreamFn(
             yield JSON.stringify(output);
             continue;
           }
-          if (chunk.type === "response.completed") {
+          if (chunk.type === 'response.completed') {
             const usage: CompletionUsage = {
               ...chunk.response.usage,
               prompt_tokens: chunk.response.usage?.input_tokens ?? 0,
@@ -89,9 +87,9 @@ export function constructAzureCompletionStreamFn(
 
             const output: OpenAI.Chat.Completions.ChatCompletionChunk = {
               id: chunk.response.id,
-              object: "chat.completion.chunk",
+              object: 'chat.completion.chunk',
               model: model.name,
-              choices: [{ delta: {}, finish_reason: "stop", index: 0 }],
+              choices: [{ delta: {}, finish_reason: 'stop', index: 0 }],
               created: starttime,
               usage: usage,
             };
@@ -148,9 +146,7 @@ export function constructAzureCompletionStreamFn(
 export function constructAzureCompletionFn(model: LlmModel): CompletionFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function getAzureCompletion({
-    ...props
-  }: Parameters<CompletionFn>[0]) {
+  return async function getAzureCompletion({ ...props }: Parameters<CompletionFn>[0]) {
     const result = await client.chat.completions.create(
       {
         messages: props.messages,
@@ -166,23 +162,19 @@ export function constructAzureCompletionFn(model: LlmModel): CompletionFn {
   };
 }
 
-export function constructAzureImageGenerationFn(
-  model: LlmModel,
-): ImageGenerationFn {
+export function constructAzureImageGenerationFn(model: LlmModel): ImageGenerationFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function getAzureImageGeneration(
-    params: Parameters<ImageGenerationFn>[0],
-  ) {
+  return async function getAzureImageGeneration(params: Parameters<ImageGenerationFn>[0]) {
     const { prompt } = params;
     const result = await client.images.generate(
       {
         prompt,
-        size: "1024x1024",
+        size: '1024x1024',
         n: 1,
-        quality: "standard",
-        style: "vivid",
-        response_format: "b64_json",
+        quality: 'standard',
+        style: 'vivid',
+        response_format: 'b64_json',
       },
       {
         path: `/openai/deployments/${deployment}/images/generations`,
@@ -199,50 +191,47 @@ function parseAzureOpenAIUrl({ baseUrl }: { baseUrl: string }): {
   searchParams: URLSearchParams;
 } {
   // Extract query parameters if they exist
-  const [urlWithoutQuery, ...queryString] = baseUrl.split("?");
+  const [urlWithoutQuery, ...queryString] = baseUrl.split('?');
 
   if (urlWithoutQuery === undefined) {
     throw new Error(
-      "Invalid Azure baseUrl format. Expected format: https://{endpoint}.openai.azure.com/openai/deployments/{deployment-id}",
+      'Invalid Azure baseUrl format. Expected format: https://{endpoint}.openai.azure.com/openai/deployments/{deployment-id}',
     );
   }
 
-  const searchParams = new URLSearchParams(queryString.join("?"));
+  const searchParams = new URLSearchParams(queryString.join('?'));
 
-  const urlParts = urlWithoutQuery.split("/");
-  const deploymentIndex = urlParts.findIndex((part) => part === "deployments");
+  const urlParts = urlWithoutQuery.split('/');
+  const deploymentIndex = urlParts.findIndex((part) => part === 'deployments');
 
   if (deploymentIndex === -1 || deploymentIndex >= urlParts.length - 1) {
     throw new Error(
-      "Invalid Azure baseUrl format. Expected format: https://{endpoint}.openai.azure.com/openai/deployments/{deployment-id}",
+      'Invalid Azure baseUrl format. Expected format: https://{endpoint}.openai.azure.com/openai/deployments/{deployment-id}',
     );
   }
 
   const deployment = urlParts[deploymentIndex + 1];
   if (deployment === undefined) {
     throw new Error(
-      "Invalid Azure baseUrl format. Expected format: https://{endpoint}.openai.azure.com/openai/deployments/{deployment-id}",
+      'Invalid Azure baseUrl format. Expected format: https://{endpoint}.openai.azure.com/openai/deployments/{deployment-id}',
     );
   }
-  const basePath = urlParts.slice(0, deploymentIndex - 1).join("/");
+  const basePath = urlParts.slice(0, deploymentIndex - 1).join('/');
 
   return { basePath, deployment, searchParams };
 }
 
 function chatCompletionsToResponsesInputFormat(
-  input: CommonLlmProviderStreamParameter["messages"],
+  input: CommonLlmProviderStreamParameter['messages'],
 ): OpenAI.Responses.ResponseInputItem[] {
   const newInput: OpenAI.Responses.ResponseInputItem[] = [];
   for (const msg of input.filter(
     (m) =>
-      m.role === "user" ||
-      m.role === "assistant" ||
-      m.role === "developer" ||
-      m.role === "system",
+      m.role === 'user' || m.role === 'assistant' || m.role === 'developer' || m.role === 'system',
   )) {
     if (msg.content === undefined || msg.content === null) {
       continue;
-    } else if (typeof msg.content === "string") {
+    } else if (typeof msg.content === 'string') {
       newInput.push({
         role: msg.role,
         content: msg.content,
@@ -251,18 +240,18 @@ function chatCompletionsToResponsesInputFormat(
       newInput.push({
         role: msg.role,
         content: msg.content
-          .filter((part) => part.type === "text" || part.type === "image_url")
+          .filter((part) => part.type === 'text' || part.type === 'image_url')
           .map((part) => {
-            if (part.type === "text") {
+            if (part.type === 'text') {
               return {
-                type: "input_text",
+                type: 'input_text',
                 text: part.text,
               } as OpenAI.Responses.ResponseInputText;
-            } else if (part.type === "image_url") {
+            } else if (part.type === 'image_url') {
               return {
-                type: "input_image",
+                type: 'input_image',
                 image_url: part.image_url.url,
-                detail: "auto",
+                detail: 'auto',
               } as OpenAI.Responses.ResponseInputImage;
             }
           })

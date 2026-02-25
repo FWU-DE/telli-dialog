@@ -1,17 +1,11 @@
-import OpenAI from "openai";
-import { streamToController } from "../utils";
-import {
-  CommonLlmProviderStreamParameter,
-  CompletionFn,
-  CompletionStreamFn,
-} from "../types";
-import { LlmModel } from "@telli/api-database";
+import OpenAI from 'openai';
+import { streamToController } from '../utils';
+import { CommonLlmProviderStreamParameter, CompletionFn, CompletionStreamFn } from '../types';
+import { LlmModel } from '@telli/api-database';
 
-export function constructOpenAiCompletionStreamFn(
-  model: LlmModel,
-): CompletionStreamFn {
-  if (model.setting.provider !== "openai") {
-    throw new Error("Invalid model configuration for OpenAi");
+export function constructOpenAiCompletionStreamFn(model: LlmModel): CompletionStreamFn {
+  if (model.setting.provider !== 'openai') {
+    throw new Error('Invalid model configuration for OpenAi');
   }
 
   const client = new OpenAI({
@@ -52,8 +46,8 @@ export function constructOpenAiCompletionStreamFn(
 }
 
 export function constructOpenAiCompletionFn(model: LlmModel): CompletionFn {
-  if (model.setting.provider !== "openai") {
-    throw new Error("Invalid model configuration for OpenAi");
+  if (model.setting.provider !== 'openai') {
+    throw new Error('Invalid model configuration for OpenAi');
   }
 
   const client = new OpenAI({
@@ -61,9 +55,7 @@ export function constructOpenAiCompletionFn(model: LlmModel): CompletionFn {
     baseURL: model.setting.baseUrl,
   });
 
-  return async function getOpenAICompletion({
-    ...props
-  }: Parameters<CompletionFn>[0]) {
+  return async function getOpenAICompletion({ ...props }: Parameters<CompletionFn>[0]) {
     const result = await client.chat.completions.create({
       ...props,
     });

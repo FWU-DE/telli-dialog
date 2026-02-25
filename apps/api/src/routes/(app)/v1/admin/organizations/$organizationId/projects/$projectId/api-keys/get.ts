@@ -1,24 +1,16 @@
-import { validateAdminApiKeyAndThrow } from "@/validation";
-import { dbGetAllApiKeysByProjectId } from "@telli/api-database";
-import { FastifyReply, FastifyRequest } from "fastify";
-import { projectParamsSchema } from "../projectParamsSchema";
-import { handleApiError } from "@/errors";
+import { validateAdminApiKeyAndThrow } from '@/validation';
+import { dbGetAllApiKeysByProjectId } from '@telli/api-database';
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { projectParamsSchema } from '../projectParamsSchema';
+import { handleApiError } from '@/errors';
 
-export async function handler(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<void> {
+export async function handler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   try {
     validateAdminApiKeyAndThrow(request.headers.authorization);
 
-    const { organizationId, projectId } = projectParamsSchema.parse(
-      request.params,
-    );
+    const { organizationId, projectId } = projectParamsSchema.parse(request.params);
 
-    const rawApiKeys = await dbGetAllApiKeysByProjectId(
-      organizationId,
-      projectId,
-    );
+    const rawApiKeys = await dbGetAllApiKeysByProjectId(organizationId, projectId);
 
     // remove secretHash and keyId from each api key before returning
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

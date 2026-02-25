@@ -1,8 +1,8 @@
-import { defineConfig } from "tsup";
-import { sentryEsbuildPlugin } from "@sentry/esbuild-plugin";
+import { defineConfig } from 'tsup';
+import { sentryEsbuildPlugin } from '@sentry/esbuild-plugin';
 
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ['src/index.ts'],
   sourcemap: true,
   splitting: false,
   clean: true,
@@ -28,7 +28,7 @@ export default defineConfig({
       telemetry: false,
       debug: true,
       release: {
-        create: process.env.NODE_ENV === "production",
+        create: process.env.NODE_ENV === 'production',
         setCommits: {
           auto: true,
           ignoreEmpty: true,
@@ -36,7 +36,7 @@ export default defineConfig({
         },
       },
       sourcemaps: {
-        assets: "./dist/*",
+        assets: './dist/*',
       },
     }),
   ],
