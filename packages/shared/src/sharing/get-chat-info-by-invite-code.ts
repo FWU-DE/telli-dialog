@@ -10,16 +10,16 @@ export type ChatInfo = {
 };
 
 export async function getChatInfoByInviteCode(inviteCode: string): Promise<ChatInfo> {
-  const [maybeSharedChat, maybeCharacterChat] = await Promise.all([
+  const [maybeSharedChatId, maybeCharacterChatId] = await Promise.all([
     tryGetLearningScenarioIdByInviteCode({ inviteCode }),
     tryGetCharacterIdByInviteCode({ inviteCode }),
   ]);
 
-  if (maybeSharedChat !== undefined) {
-    return { type: 'learning-scenario', ...maybeSharedChat };
+  if (maybeSharedChatId !== undefined) {
+    return { type: 'learning-scenario', id: maybeSharedChatId, inviteCode };
   }
-  if (maybeCharacterChat !== undefined) {
-    return { type: 'character', ...maybeCharacterChat };
+  if (maybeCharacterChatId !== undefined) {
+    return { type: 'character', id: maybeCharacterChatId, inviteCode };
   }
 
   throw new NotFoundError('Chat with the provided invite code was not found.');
@@ -29,11 +29,13 @@ async function tryGetLearningScenarioIdByInviteCode({ inviteCode }: { inviteCode
   const [maybeSharedChat] = await db
     .select()
     .from(sharedLearningScenarioTable)
-    .where(eq(sharedLearningScenarioTable.inviteCode, inviteCode));
-  if (maybeSharedChat?.inviteCode && maybeSharedChat.startedAt !== null)
-    return { id: maybeSharedChat.learningScenarioId, inviteCode: maybeSharedChat.inviteCode };
-
-  return undefined;
+    .where(
+      and(
+        eq(sharedLearningScenarioTable.inviteCode, inviteCode),
+        isNotNull(sharedLearningScenarioTable.startedAt),
+      ),
+    );
+  return maybeSharedChat?.learningScenarioId;
 }
 
 async function tryGetCharacterIdByInviteCode({ inviteCode }: { inviteCode: string }) {
@@ -46,8 +48,5 @@ async function tryGetCharacterIdByInviteCode({ inviteCode }: { inviteCode: strin
         isNotNull(sharedCharacterConversation.startedAt),
       ),
     );
-  if (maybeCharacterChat?.inviteCode && maybeCharacterChat.startedAt !== null)
-    return { id: maybeCharacterChat.characterId, inviteCode: maybeCharacterChat.inviteCode };
-
-  return undefined;
+  return maybeCharacterChat?.characterId;
 }

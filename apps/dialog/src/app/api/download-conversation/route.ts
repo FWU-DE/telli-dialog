@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
       userId: user.id,
     });
 
-    const gptName = enterpriseGptName ?? DEFAULT_GPT_NAME;
+    const gptName = enterpriseGptName || DEFAULT_GPT_NAME;
 
     const document = await generateConversationDocxFile({
       conversation,

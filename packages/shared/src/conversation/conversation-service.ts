@@ -111,7 +111,6 @@ export async function getConversationAndMessagesForExport({
  * An unauthenticated user (student) wants to download a shared conversation.
  * The messages are sent in the request body and are not stored in the database.
  * The invite code needs to exist in the database, otherwise an error is thrown.
- * @param param0
  */
 export async function checkInviteCodeForExport({ inviteCode }: { inviteCode: string }) {
   const exists = await dbDoesInviteCodeExist(inviteCode);
