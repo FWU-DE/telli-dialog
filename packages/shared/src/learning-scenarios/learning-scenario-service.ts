@@ -336,8 +336,9 @@ export async function unshareLearningScenario({
   if (sharedConversations.length === 0)
     throw new ForbiddenError('Not authorized to stop this shared learning scenario instance');
 
-  const [deletedShare] = await db
-    .delete(sharedLearningScenarioTable)
+  const [updatedShare] = await db
+    .update(sharedLearningScenarioTable)
+    .set({ startedAt: null, maxUsageTimeLimit: null, telliPointsLimit: null })
     .where(
       and(
         eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
@@ -346,11 +347,11 @@ export async function unshareLearningScenario({
     )
     .returning();
 
-  if (!deletedShare) {
+  if (!updatedShare) {
     throw new Error('Could not unshare learning scenario');
   }
 
-  return deletedShare;
+  return updatedShare;
 }
 
 /**

@@ -5,6 +5,8 @@ import {
   conversationMessageTable,
   conversationTable,
   fileTable,
+  sharedCharacterConversation,
+  sharedLearningScenarioTable,
   TextChunkTable,
 } from '../schema';
 import { deleteFilesFromS3 } from '../../s3';
@@ -79,4 +81,22 @@ SELECT
 
   const deletedCount = Number(result.rows[0]?.['conversations_deleted']);
   return deletedCount;
+}
+
+/**
+ * @returns true if the invite code exists in either the sharedCharacterConversation
+ * or sharedLearningScenarioTable, false otherwise.
+ */
+export async function dbDoesInviteCodeExist(inviteCode: string) {
+  const result = await db
+    .select({ inviteCode: sharedCharacterConversation.inviteCode })
+    .from(sharedCharacterConversation)
+    .where(eq(sharedCharacterConversation.inviteCode, inviteCode))
+    .union(
+      db
+        .select({ inviteCode: sharedLearningScenarioTable.inviteCode })
+        .from(sharedLearningScenarioTable)
+        .where(eq(sharedLearningScenarioTable.inviteCode, inviteCode)),
+    );
+  return result.length > 0;
 }

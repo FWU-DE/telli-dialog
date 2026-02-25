@@ -38,7 +38,15 @@
     "LLM_GPT4OMINI_API_KEY",
     "LLM_GPT4OMINI_BASE_URL",
     "LLM_GPT5NANO_API_KEY",
-    "LLM_GPT5NANO_BASE_URL"
+    "LLM_GPT5NANO_BASE_URL",
+    "API_BASE_URL",
+    "API_NAME",
+    "GOOGLE_APPLICATION_CREDENTIALS",
+    "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT",
+    "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
+    "PORT",
+    "SENTRY_PROFILE_SESSION_SAMPLE_RATE",
+    "STAGE_DATABASE_URL"
   ],
   "tasks": {
     "build": {
@@ -65,6 +73,14 @@
     "db:seed": {
       "dependsOn": ["^db:seed"],
       "env": ["DATABASE_URL"]
+    },
+    "db:seed:from-stage": {
+      "cache": false,
+      "dependsOn": []
+    },
+    "db:generate": {
+      "cache": false,
+      "dependsOn": []
     },
     "lint": {
       "dependsOn": ["^lint"]

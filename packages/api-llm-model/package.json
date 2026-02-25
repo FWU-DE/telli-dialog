@@ -1,0 +1,21 @@
+{
+  "name": "@telli/api-llm-model",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "types": "tsc --noEmit",
+    "lint": "eslint \"**/*.ts*\" --max-warnings 0"
+  },
+  "devDependencies": {
+    "@telli/api-eslint-config": "workspace:*",
+    "@telli/api-typescript-config": "workspace:*",
+    "@types/node": "24.10.13",
+    "eslint": "9.39.2",
+    "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "zod": "4.3.6"
+  }
+}

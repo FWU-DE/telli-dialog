@@ -4,7 +4,7 @@ import DestructiveActionButton from '../common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
 import TrashIcon from '../icons/trash';
 import { iconClassName } from '@/utils/tailwind/icon';
-import DownloadSharedConversationButton from '@/app/(unauth)/ua/dowload-shared-conversation-button';
+import DownloadSharedConversationButton from '@/app/(unauth)/ua/download-shared-conversation-button';
 import Image from 'next/image';
 import ProfileMenu, { ThreeDotsProfileMenu } from '../navigation/profile-menu';
 import { type ChatMessage as Message } from '@/types/chat';
@@ -19,6 +19,7 @@ export function SharedChatHeader({
   messages,
   imageSource,
   dialogStarted,
+  inviteCode,
 }: {
   chatActive: boolean;
   hasMessages: boolean;
@@ -28,6 +29,7 @@ export function SharedChatHeader({
   messages: Message[];
   imageSource?: string;
   dialogStarted: boolean;
+  inviteCode: string;
 }) {
   const { isBelow } = useBreakpoints();
   const tCommon = useTranslations('common');
@@ -85,6 +87,7 @@ export function SharedChatHeader({
             disabled={!chatActive || !hasMessages}
             sharedConversationName={title}
             showText={false}
+            inviteCode={inviteCode}
           />
           <ProfileMenu userAndContext={undefined} />
         </>
@@ -96,6 +99,7 @@ export function SharedChatHeader({
               disabled={!chatActive || !hasMessages}
               sharedConversationName={title}
               showText={true}
+              inviteCode={inviteCode}
             />
           }
           deleteButtonJSX={deleteChatElement}

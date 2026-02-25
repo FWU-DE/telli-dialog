@@ -1,5 +1,5 @@
 import { db } from '@shared/db';
-import { eq } from 'drizzle-orm';
+import { and, eq, isNotNull } from 'drizzle-orm';
 import { sharedCharacterConversation, sharedLearningScenarioTable } from '@shared/db/schema';
 import { NotFoundError } from '@shared/error';
 
@@ -9,17 +9,17 @@ export type ChatInfo = {
   inviteCode: string;
 };
 
-export async function getChatIdByInviteCode(inviteCode: string): Promise<ChatInfo> {
-  const [maybeSharedChat, maybeCharacterChat] = await Promise.all([
+export async function getChatInfoByInviteCode(inviteCode: string): Promise<ChatInfo> {
+  const [maybeSharedChatId, maybeCharacterChatId] = await Promise.all([
     tryGetLearningScenarioIdByInviteCode({ inviteCode }),
     tryGetCharacterIdByInviteCode({ inviteCode }),
   ]);
 
-  if (maybeSharedChat !== undefined) {
-    return { type: 'learning-scenario', ...maybeSharedChat };
+  if (maybeSharedChatId !== undefined) {
+    return { type: 'learning-scenario', id: maybeSharedChatId, inviteCode };
   }
-  if (maybeCharacterChat !== undefined) {
-    return { type: 'character', ...maybeCharacterChat };
+  if (maybeCharacterChatId !== undefined) {
+    return { type: 'character', id: maybeCharacterChatId, inviteCode };
   }
 
   throw new NotFoundError('Chat with the provided invite code was not found.');
@@ -29,20 +29,24 @@ async function tryGetLearningScenarioIdByInviteCode({ inviteCode }: { inviteCode
   const [maybeSharedChat] = await db
     .select()
     .from(sharedLearningScenarioTable)
-    .where(eq(sharedLearningScenarioTable.inviteCode, inviteCode));
-  if (maybeSharedChat?.inviteCode)
-    return { id: maybeSharedChat.learningScenarioId, inviteCode: maybeSharedChat.inviteCode };
-
-  return undefined;
+    .where(
+      and(
+        eq(sharedLearningScenarioTable.inviteCode, inviteCode),
+        isNotNull(sharedLearningScenarioTable.startedAt),
+      ),
+    );
+  return maybeSharedChat?.learningScenarioId;
 }
 
 async function tryGetCharacterIdByInviteCode({ inviteCode }: { inviteCode: string }) {
   const [maybeCharacterChat] = await db
     .select()
     .from(sharedCharacterConversation)
-    .where(eq(sharedCharacterConversation.inviteCode, inviteCode));
-  if (maybeCharacterChat?.inviteCode)
-    return { id: maybeCharacterChat.characterId, inviteCode: maybeCharacterChat.inviteCode };
-
-  return undefined;
+    .where(
+      and(
+        eq(sharedCharacterConversation.inviteCode, inviteCode),
+        isNotNull(sharedCharacterConversation.startedAt),
+      ),
+    );
+  return maybeCharacterChat?.characterId;
 }
