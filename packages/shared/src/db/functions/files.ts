@@ -38,6 +38,30 @@ export async function linkFilesToConversation({
     .values(fileIds.map((fileId) => ({ conversationMessageId, fileId, conversationId })));
 }
 
+export async function dbVerifyFileOwnership({
+  fileId,
+  userId,
+}: {
+  fileId: string;
+  userId: string;
+}): Promise<boolean> {
+  const result = await db
+    .select({ fileId: ConversationMessageFileMappingTable.fileId })
+    .from(ConversationMessageFileMappingTable)
+    .innerJoin(
+      conversationTable,
+      eq(ConversationMessageFileMappingTable.conversationId, conversationTable.id),
+    )
+    .where(
+      and(
+        eq(ConversationMessageFileMappingTable.fileId, fileId),
+        eq(conversationTable.userId, userId),
+      ),
+    )
+    .limit(1);
+  return result.length > 0;
+}
+
 export async function dbGetRelatedFiles(conversationId: string): Promise<Map<string, FileModel[]>> {
   const files = await db
     .select({

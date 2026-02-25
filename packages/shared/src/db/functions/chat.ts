@@ -1,5 +1,3 @@
-'use server';
-
 import { and, desc, eq, isNull } from 'drizzle-orm';
 import { db } from '..';
 import { conversationMessageTable, conversationTable } from '../schema';

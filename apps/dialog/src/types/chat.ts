@@ -30,6 +30,14 @@ export type ChatMessage = {
 };
 
 /**
+ * Result returned when sending a chat message.
+ */
+export type SendMessageResult = {
+  stream: ReadableStream<string>;
+  messageId: string;
+};
+
+/**
  * Text part of a UI message for rendering.
  */
 export type TextUIPart = {

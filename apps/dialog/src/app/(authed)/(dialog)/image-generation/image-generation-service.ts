@@ -61,13 +61,16 @@ export async function handleImageGeneration({
   prompt,
   model,
   style,
+  userId,
+  federalStateId,
 }: {
   prompt: string;
   model: LlmModelSelectModel;
   style?: ImageStyle;
+  userId: string;
+  federalStateId: string;
 }) {
-  const user = await getUser();
-  await checkIfImageModelIsAssignedToFederalState(model, user.federalState.id);
+  await checkIfImageModelIsAssignedToFederalState(model, federalStateId);
 
   if (!prompt || prompt.trim().length === 0) {
     throw new Error('Prompt is required');
@@ -89,7 +92,7 @@ export async function handleImageGeneration({
     await dbInsertChatContent({
       conversationId: conversationId,
       role: 'user',
-      userId: user.id,
+      userId: userId,
       content: prompt,
       modelName: model.name,
       orderNumber: 1,
@@ -135,7 +138,7 @@ export async function handleImageGeneration({
       orderNumber: 2,
       modelName: model.name,
       parameters: style ? { imageStyle: style.name } : undefined,
-      userId: user.id,
+      userId,
     });
 
     if (!assistantMessage) {
@@ -164,7 +167,7 @@ export async function handleImageGeneration({
   } catch (error) {
     if (conversationId) {
       try {
-        await dbDeleteConversationByIdAndUserId({ conversationId, userId: user.id });
+        await dbDeleteConversationByIdAndUserId({ conversationId, userId });
       } catch (deletionError) {
         logError('Error deleting failed image conversation:', deletionError);
       }
