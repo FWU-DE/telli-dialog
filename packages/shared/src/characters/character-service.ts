@@ -427,7 +427,7 @@ export const shareCharacter = async ({
     })
     .onConflictDoUpdate({
       target: sharedCharacterConversation.id,
-      set: { inviteCode, startedAt, maxUsageTimeLimit },
+      set: { inviteCode, startedAt, maxUsageTimeLimit, telliPointsLimit },
     })
     .returning();
 
@@ -460,9 +460,10 @@ export const unshareCharacter = async ({
   if (sharedConversations.length === 0)
     throw new ForbiddenError('Not authorized to stop this shared character instance');
 
-  // unshare character instance
+  // unshare character instance by setting startedAt to null
   const [updatedCharacter] = await db
-    .delete(sharedCharacterConversation)
+    .update(sharedCharacterConversation)
+    .set({ startedAt: null, maxUsageTimeLimit: null, telliPointsLimit: null })
     .where(
       and(
         eq(sharedCharacterConversation.characterId, characterId),
@@ -471,7 +472,7 @@ export const unshareCharacter = async ({
     )
     .returning();
 
-  if (updatedCharacter === undefined) {
+  if (!updatedCharacter) {
     throw new Error('Could not stop sharing of character');
   }
 

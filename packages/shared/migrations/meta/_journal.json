@@ -344,6 +344,13 @@
       "when": 1770973729601,
       "tag": "0048_sharp_rattler",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1771931792801,
+      "tag": "0049_smart_drax",
+      "breakpoints": true
     }
   ]
 }
