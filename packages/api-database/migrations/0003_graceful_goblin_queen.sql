@@ -1,0 +1,2 @@
+ALTER TABLE "completion_usage_tracking" ADD COLUMN "costs_in_cent" real DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE "image_generation_usage_tracking" ADD COLUMN "costs_in_cent" real DEFAULT 0 NOT NULL;
