@@ -1,3 +1,6 @@
+// this import has to be at the very top to load env vars before anything else
+import "./load-env";
+
 import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
 
