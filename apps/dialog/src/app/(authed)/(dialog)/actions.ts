@@ -5,6 +5,7 @@ import { updateSession } from '@/auth/utils';
 import { VERSION } from '@/components/modals/const';
 import { runServerAction } from '@shared/actions/run-server-action';
 import deleteConversation, {
+  getConversation,
   updateConversationTitle,
 } from '@shared/conversation/conversation-service';
 import { dbGetRelatedFiles } from '@shared/db/functions/files';
@@ -56,6 +57,7 @@ export async function refetchFileMapping(
   conversationId: string,
 ): Promise<Map<string, FileModel[]>> {
   const { user } = await requireAuth();
-  if (user === undefined) return new Map();
+  // Verify the user owns this conversation before returning file data
+  await getConversation({ conversationId, userId: user.id });
   return await dbGetRelatedFiles(conversationId);
 }

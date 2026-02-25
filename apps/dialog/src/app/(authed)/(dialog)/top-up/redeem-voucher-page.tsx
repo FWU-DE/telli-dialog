@@ -1,13 +1,12 @@
 'use client';
-import { UserAndContext } from '@/auth/types';
 import SimpleTextInput from '@/components/common/simple-text-input';
 import { useToast } from '@/components/common/toast';
-import { dbGetVoucherByCode, dbRedeemVoucher } from '@shared/db/functions/voucher';
+import { redeemVoucherAction } from './actions';
 import { useTranslations } from 'next-intl';
 import React from 'react';
 import z from 'zod';
 
-export default function RedeemVoucherPage({ user }: { user: UserAndContext }) {
+export default function RedeemVoucherPage() {
   const t = useTranslations('top-up');
   const tToast = useTranslations('top-up.toasts');
   const toast = useToast();
@@ -17,18 +16,11 @@ export default function RedeemVoucherPage({ user }: { user: UserAndContext }) {
 
   const handleRedeem = async () => {
     if (voucherSchema.safeParse(voucherCode).success) {
-      const voucher = await dbGetVoucherByCode(voucherCode);
-      if (
-        !voucher ||
-        voucher.status !== 'created' ||
-        new Date() > voucher.validUntil ||
-        voucher.federalStateId !== user.federalState.id
-      ) {
+      const result = await redeemVoucherAction(voucherCode);
+      if (!result.success) {
         toast.error(tToast('redeem-invalid'));
         return;
       }
-      // Redeem the voucher
-      await dbRedeemVoucher(voucherCode, user.id);
       toast.success(tToast('redeem-success'));
     }
   };
