@@ -123,7 +123,7 @@ export async function hybridSearch({ keywords, embedding, fileIds, limit = 10 }:
 }
 
 /**
- * Merges vector and full-text search results using Reciprocal Rank Fusion.
+ * Merges vector and full-text search results by averaging their positional ranks.
  * Each result gets a rank position from each list (or MAX_SAFE_INTEGER if absent),
  * and the final score is the average of both ranks (lower is better).
  *
