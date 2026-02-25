@@ -1,6 +1,5 @@
 import {
   boolean,
-  customType,
   doublePrecision,
   foreignKey,
   index,
@@ -24,14 +23,6 @@ import {
 } from '../utils/chat';
 import { isNull, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod';
-
-export const tsvector = customType<{
-  data: string;
-}>({
-  dataType() {
-    return `tsvector`;
-  },
-});
 
 // can be expanded to include other metadata of other file types
 export type FileMetadata = {
@@ -1202,14 +1193,10 @@ export const TextChunkTable = pgTable(
     trailingOverlap: text('trailing_overlap'),
     orderIndex: integer('order_index').notNull(),
     pageNumber: integer('page_number'),
-    contentTsv: tsvector('content_tsv')
-      .notNull()
-      .generatedAlwaysAs(sql`to_tsvector('german', content)`),
   },
   (table) => [
     index().on(table.fileId),
     index('text_chunk_embedding_idx').using('hnsw', table.embedding.op('vector_cosine_ops')),
-    index('text_chunk_content_tsv_idx').using('gin', table.contentTsv),
   ],
 );
 

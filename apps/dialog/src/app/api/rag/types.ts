@@ -11,4 +11,3 @@ export type TextElement = {
 };
 
 export type VectorSearchResult = Chunk & { embeddingSimilarity: number };
-export type FullTextSearchResult = Chunk & { textRank: number };

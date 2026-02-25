@@ -3,9 +3,9 @@ import { type ChatMessage as Message } from '@/types/chat';
 import { UserAndContext } from '@/auth/types';
 import { chunkText, groupAndSortChunks } from './chunking';
 import { embedText, embedChunks } from './embedding';
-import { hybridSearch } from './retrieval';
+import { vectorSearch } from './retrieval';
 import { TextElement } from './types';
-import { condenseChatHistory, getKeywordsFromQuery } from './query-preparation';
+import { condenseChatHistory } from './query-preparation';
 import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { logError } from '@shared/logging';
 
@@ -59,10 +59,10 @@ export async function chunkAndEmbed({
 }
 
 /**
- * Retrieves relevant chunks for a set of messages using hybrid search.
+ * Retrieves relevant chunks for a set of messages using vector search.
  *
- * Condenses chat history into a search query, extracts keywords,
- * generates a query embedding, and performs hybrid vector + full-text search.
+ * Condenses chat history into a search query, generates a query embedding,
+ * and performs vector search.
  *
  * @param messages - The conversation messages
  * @param user - The authenticated user context
@@ -88,10 +88,7 @@ export async function retrieveChunks({
     return undefined;
   }
 
-  const [searchQuery, keywords] = await Promise.all([
-    condenseChatHistory({ messages, modelId, apiKeyId }),
-    getKeywordsFromQuery({ messages, modelId, apiKeyId }),
-  ]);
+  const searchQuery = await condenseChatHistory({ messages, modelId, apiKeyId });
 
   let queryEmbedding: number[] = [];
   try {
@@ -105,10 +102,9 @@ export async function retrieveChunks({
   }
 
   const fileIds = relatedFileEntities.map((file) => file.id);
-  const chunks = await hybridSearch({
-    keywords,
+  const chunks = await vectorSearch({
     embedding: queryEmbedding,
-    fileIds,
+    fileIds: fileIds ?? [],
     limit: FILE_SEARCH_LIMIT,
   });
 
