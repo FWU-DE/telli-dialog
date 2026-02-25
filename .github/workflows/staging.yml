@@ -139,6 +139,8 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
+      - name: Run database migrations
+        run: pnpm --filter @telli/api-database run db:migrate:pipeline
       - name: Check unit tests
         run: pnpm run test
 
