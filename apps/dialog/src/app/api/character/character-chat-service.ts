@@ -27,17 +27,7 @@ import {
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { extractImagesAndUrl } from '../file-operations/prepocess-image';
-
-export type ChatMessage = {
-  id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-};
-
-export type SendMessageResult = {
-  stream: ReadableStream<string>;
-  messageId: string;
-};
+import { ChatMessage, SendMessageResult } from '@/types/chat';
 
 /**
  * Converts frontend messages to ai-core message format
@@ -57,7 +47,7 @@ function convertToAiCoreMessages(systemPrompt: string, messages: ChatMessage[]):
 }
 
 /**
- * Server Action to send a character chat message and stream the response.
+ * Sends a character chat message and streams the response.
  */
 export async function sendCharacterMessage({
   characterId,

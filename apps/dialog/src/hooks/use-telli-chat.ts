@@ -2,15 +2,16 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { readTextStream } from '@/utils/streaming';
-import { toUIMessages, UIMessage, type ChatMessage, type ChatStatus } from '@/types/chat';
+import {
+  toUIMessages,
+  UIMessage,
+  type ChatMessage,
+  type ChatStatus,
+  type SendMessageResult,
+} from '@/types/chat';
 
 // Re-export for consumers
 export type { ChatMessage, ChatStatus };
-
-export type SendMessageResult = {
-  stream: ReadableStream<string>;
-  messageId: string;
-};
 
 /**
  * Function type for sending chat messages.

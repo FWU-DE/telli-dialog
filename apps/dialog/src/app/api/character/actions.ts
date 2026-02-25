@@ -1,10 +1,10 @@
 'use server';
 
 import { requireValidInviteCode } from '@/auth/requireValidInviteCode';
-import { sendCharacterMessage } from './character-service';
-import type { ChatMessage, SendMessageResult } from './character-service';
+import { sendCharacterMessage } from './character-chat-service';
+import type { ChatMessage, SendMessageResult } from '@/types/chat';
 
-export type { ChatMessage, SendMessageResult } from './character-service';
+export type { ChatMessage, SendMessageResult } from '@/types/chat';
 
 export async function sendCharacterMessageAction({
   characterId,
