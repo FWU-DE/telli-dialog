@@ -20,6 +20,9 @@ import { Pool } from "pg";
 // Useful for local development to have the same models and api keys as staging.
 
 const connectionString = process.env.STAGE_DATABASE_URL;
+if (!connectionString) {
+  throw new Error("STAGE_DATABASE_URL is not set");
+}
 const pool = new Pool({
   connectionString,
   max: 12,

@@ -1,6 +1,6 @@
-# @dgpt/api
+# telli-api
 
-This app contains the dgpt proxy api.
+This app contains the telli proxy api.
 
 Before you can start the app, you have to setup the required tooling described in the root `README.md`.
 
