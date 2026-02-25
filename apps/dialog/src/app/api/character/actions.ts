@@ -1,4 +1,3 @@
-
 'use server';
 import { requireValidInviteCode } from '@/auth/requireValidInviteCode';
 import { sendCharacterMessage } from './character-chat-service';

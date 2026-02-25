@@ -1,10 +1,13 @@
 import { redirect } from 'next/navigation';
-import { getChatIdByInviteCode, type ChatInfo } from '@shared/sharing/get-chat-id-by-invite-code';
+import {
+  getChatInfoByInviteCode,
+  type ChatInfo,
+} from '@shared/sharing/get-chat-info-by-invite-code';
 import { NotFoundError } from '@shared/error';
 
 export async function requireValidInviteCode(inviteCode: string): Promise<{ chatInfo: ChatInfo }> {
   try {
-    const chatInfo = await getChatIdByInviteCode(inviteCode);
+    const chatInfo = await getChatInfoByInviteCode(inviteCode);
     return { chatInfo };
   } catch (error) {
     if (error instanceof NotFoundError) {
