@@ -9,61 +9,53 @@ import {
 } from 'docx';
 import { type ConversationModel, type ConversationMessageModel } from '@shared/db/types';
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
-import { dbGetConversationAndMessages } from '@shared/db/functions/chat';
-import { UserSelectModel } from '@shared/db/schema';
 import { markdownToDocx } from './markdown';
 import { logError } from '@shared/logging';
 
-export async function generateConversationDocxFiles({
-  conversationId,
-  user,
-  enterpriseGptName,
-  userFullName,
+const USER_FULL_NAME = 'Nutzer/in';
+
+export async function generateConversationDocxFile({
+  conversation,
+  messages,
+  gptName,
 }: {
-  conversationId: string;
-  user: UserSelectModel;
-  enterpriseGptName: string | null;
-  userFullName: string;
-}): Promise<
-  | {
-      buffer: ArrayBuffer;
-      conversation: ConversationModel;
-      gptName: string;
-      messages: ConversationMessageModel[];
-    }
-  | undefined
-> {
+  conversation: ConversationModel;
+  messages: ConversationMessageModel[];
+  gptName: string;
+}): Promise<ArrayBuffer | undefined> {
   try {
-    const conversationObject = await dbGetConversationAndMessages({
-      conversationId,
-      userId: user.id,
-    });
-
-    if (conversationObject === undefined) {
-      throw new Error(`Failed to retrieve conversation ${conversationId}`);
-    }
-
-    if (conversationObject.conversation.userId !== user.id) {
-      throw new Error(`Conversation ${conversationId} does not belong to the user ${user.id}`);
-    }
-    const { conversation, messages } = conversationObject;
-
     const conversationMetadata = getConversationMetadata({
       conversation,
     });
-    const gptName = await getGptName({ enterpriseGptName });
     const messageParagraphs = getConversationMessages({
       messages,
       gptName,
-      userFullName,
+      userFullName: USER_FULL_NAME,
     });
+    const lastAssistantMessage = messages.findLast((m) => m.role === 'assistant');
+
+    const modelDisplayName = lastAssistantMessage?.modelName ?? gptName;
+
+    messageParagraphs.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `Generiert von telli unter Nutzung von ${modelDisplayName}`,
+            italics: true,
+            size: 18,
+            color: '666666',
+          }),
+        ],
+        spacing: { before: 400 },
+      }),
+    );
 
     const doc = buildDocxDocument({ conversationMetadata, messageParagraphs });
     const buffer = await Packer.toArrayBuffer(doc);
 
-    return { buffer, conversation, gptName, messages };
+    return buffer;
   } catch (error) {
-    logError('Error generating conversation .docx files', error);
+    logError('Error generating conversation .docx file', error);
     return undefined;
   }
 }
@@ -108,17 +100,6 @@ function getConversationMessages({
     ...markdownToDocx(message.content),
     new Paragraph({}),
   ]);
-}
-
-async function getGptName({
-  enterpriseGptName,
-}: {
-  enterpriseGptName: string | null;
-}): Promise<string> {
-  if (enterpriseGptName) {
-    return enterpriseGptName;
-  }
-  return 'telli';
 }
 
 function buildDocxDocument({

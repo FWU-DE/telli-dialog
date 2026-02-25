@@ -35,7 +35,7 @@ export function CreateFederalStateModal(props: CreateFederalStateModalProps) {
     formState: { isValid, errors, isSubmitting },
     handleSubmit,
     reset,
-  } = useForm<CreateFederalStateForm>({
+  } = useForm({
     resolver: zodResolver(createFederalStateFormSchema),
   });
 

@@ -15,6 +15,7 @@ import {
   SharedLearningScenarioUsageTrackingInsertModel,
   TextChunkTable,
 } from '../schema';
+import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 
 function baseLearningScenarioWithShareQuery() {
   return db
@@ -317,4 +318,51 @@ export function dbGetSharedLearningScenarioConversations({
         eq(sharedLearningScenarioTable.userId, userId),
       ),
     );
+}
+
+/**
+ * Create a new shared instance for a learning scenario.
+ */
+export async function dbCreateLearningScenarioShare({
+  userId,
+  learningScenarioId,
+  telliPointsLimit,
+  maxUsageTimeLimit,
+}: Omit<SharedLearningScenarioSelectModel, 'id'>) {
+  // share learning scenario instance
+  const [maybeExistingEntry] = await db
+    .select()
+    .from(sharedLearningScenarioTable)
+    .where(
+      and(
+        eq(sharedLearningScenarioTable.userId, userId),
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
+      ),
+    );
+
+  const inviteCode = generateInviteCode();
+
+  const startedAt = new Date();
+  const [updatedSharedChat] = await db
+    .insert(sharedLearningScenarioTable)
+    .values({
+      id: maybeExistingEntry?.id,
+      userId,
+      learningScenarioId,
+      maxUsageTimeLimit,
+      telliPointsLimit,
+      inviteCode,
+      startedAt,
+    })
+    .onConflictDoUpdate({
+      target: sharedLearningScenarioTable.id,
+      set: {
+        inviteCode,
+        maxUsageTimeLimit,
+        telliPointsLimit,
+        startedAt,
+      },
+    })
+    .returning();
+  return updatedSharedChat;
 }

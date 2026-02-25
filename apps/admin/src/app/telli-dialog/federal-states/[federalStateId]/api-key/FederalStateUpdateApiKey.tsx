@@ -30,7 +30,7 @@ export type PatchApiKey = z.infer<typeof patchApiKeySchema>;
 export function FederalStateUpdateApiKey(props: FederalStateUpdateApiKeyProps) {
   const federalState = props.federalState;
 
-  const form = useForm<PatchApiKey>({
+  const form = useForm({
     resolver: zodResolver(patchApiKeySchema),
     defaultValues: {
       decryptedApiKey: '',

@@ -1,7 +1,6 @@
 import { VidisUserInfo } from '../../auth/vidis';
 import { db } from '..';
 import {
-  federalStateTable,
   UserInsertModel,
   SchoolInsertModel,
   schoolTable,
@@ -79,25 +78,6 @@ export async function dbGetOrCreateVidisUser(userInfo: VidisUserInfo) {
 
     return { ...insertedUser, role: vidisRoleToUserSchoolRole(userInfo.rolle) };
   });
-}
-
-export async function dbGetOrCreateFederalState({ federalStateId }: { federalStateId: string }) {
-  return (
-    await db
-      .insert(federalStateTable)
-      .values({
-        id: federalStateId,
-        featureToggles: {
-          isStudentAccessEnabled: true,
-          isCharacterEnabled: true,
-          isCustomGptEnabled: true,
-          isSharedChatEnabled: true,
-          isShareTemplateWithSchoolEnabled: true,
-        },
-      })
-      .onConflictDoUpdate({ target: federalStateTable.id, set: { id: federalStateId } })
-      .returning()
-  )[0];
 }
 
 export async function dbGetOrCreateSchool({

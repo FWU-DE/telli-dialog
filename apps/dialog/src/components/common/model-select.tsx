@@ -3,7 +3,6 @@
 import React, { startTransition } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { type LlmModelSelectModel } from '@shared/db/schema';
-import { useSidebarVisibility } from '../navigation/sidebar/sidebar-provider';
 import { cn } from '@/utils/tailwind';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { iconClassName } from '@/utils/tailwind/icon';
@@ -30,7 +29,6 @@ export default function ModelSelect({
   isStudent = false,
   enableUrlParams = false,
 }: ModelSelectProps) {
-  const { isOpen } = useSidebarVisibility();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -79,10 +77,8 @@ export default function ModelSelect({
           </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content
-          className={cn(
-            'flex flex-col bg-white shadow-dropdown rounded-xl ml-0',
-            isOpen ? 'sm:ml-64' : 'sm:ml-44',
-          )}
+          className={cn('flex flex-col bg-white shadow-dropdown rounded-xl ml-0')}
+          align="start"
           sideOffset={10}
         >
           {models

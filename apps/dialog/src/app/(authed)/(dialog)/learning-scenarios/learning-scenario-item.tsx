@@ -116,7 +116,7 @@ export default function LearningScenarioItem({
           <span className="sr-only">{t('shared.share')}</span>
         </button>
       )}
-      {learningScenario.accessLevel === 'global' && timeLeft <= 0 && (
+      {learningScenario.userId !== currentUserId && timeLeft <= 0 && (
         <CreateNewInstanceFromTemplate
           redirectPath="learning-scenarios"
           createInstanceCallbackAction={handleCreateNewLearningScenarioFromTemplate}

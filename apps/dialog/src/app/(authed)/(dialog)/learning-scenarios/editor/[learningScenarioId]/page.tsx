@@ -27,7 +27,7 @@ export default async function Page(
     {
       learningScenarioId: learningScenarioId,
       schoolId: school.id,
-      userId: user.id,
+      user,
     },
   ).catch(handleErrorInServerComponent);
   const readOnly = user.id !== learningScenario.userId;

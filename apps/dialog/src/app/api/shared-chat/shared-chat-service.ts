@@ -26,8 +26,8 @@ import {
   KEEP_RECENT_MESSAGES,
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
-import { extractImagesAndUrl } from '../file-operations/prepocess-image';
 import { ChatMessage, SendMessageResult } from '@/types/chat';
+import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 
 /**
  * Converts frontend messages to ai-core message format

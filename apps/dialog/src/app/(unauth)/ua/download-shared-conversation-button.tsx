@@ -18,6 +18,7 @@ type DownloadConversationButtonProps = {
   sharedConversationName?: string;
   characterName?: string;
   showText?: boolean;
+  inviteCode: string;
 };
 
 export default function DownloadSharedConversationButton({
@@ -27,6 +28,7 @@ export default function DownloadSharedConversationButton({
   sharedConversationName,
   characterName,
   showText = true,
+  inviteCode,
 }: DownloadConversationButtonProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const toast = useToast();
@@ -49,6 +51,7 @@ export default function DownloadSharedConversationButton({
           messages: conversationMessages,
           characterName,
           sharedConversationName,
+          inviteCode,
         }),
       });
 

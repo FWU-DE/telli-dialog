@@ -1,10 +1,10 @@
-'use server';
 
+'use server';
 import { requireValidInviteCode } from '@/auth/requireValidInviteCode';
 import { sendSharedChatMessage } from './shared-chat-service';
-import type { ChatMessage, SendMessageResult } from './shared-chat-service';
+import { ChatMessage, SendMessageResult } from '@/types/chat';
 
-export type { ChatMessage, SendMessageResult } from './shared-chat-service';
+export type { ChatMessage, SendMessageResult } from '@/types/chat';
 
 export async function sendSharedChatMessageAction({
   sharedChatId,

@@ -3,11 +3,12 @@
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { userHasCompletedTraining } from '@/auth/utils';
-import { checkProductAccess } from '@/utils/vidis/access';
-import { sendChatMessage } from './chat-service';
-import type { ChatMessage, SendMessageResult } from './chat-service';
 
-export type { ChatMessage, SendMessageResult } from './chat-service';
+import { sendChatMessage } from './chat-service';
+import { ChatMessage, SendMessageResult } from '@/types/chat';
+import { checkProductAccess } from '@/utils/vidis/access';
+
+export type { ChatMessage, SendMessageResult } from '@/types/chat';
 
 export async function sendChatMessageAction({
   conversationId,

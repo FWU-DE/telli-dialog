@@ -101,7 +101,7 @@ export default function CustomGptForm({
     getValues,
     setValue,
     formState: { isValid },
-  } = useForm<CustomGptFormValues>({
+  } = useForm({
     resolver: zodResolver(customGptFormValuesSchema),
     defaultValues: {
       ...customGpt,

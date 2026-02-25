@@ -247,6 +247,7 @@ export const federalStateFeatureTogglesSchema = z.object({
   isCustomGptEnabled: z.boolean().default(true),
   isShareTemplateWithSchoolEnabled: z.boolean().default(true),
   isImageGenerationEnabled: z.boolean().optional(),
+  isNewUiDesignEnabled: z.boolean().default(false),
 });
 
 export type FederalStateFeatureToggles = z.infer<typeof federalStateFeatureTogglesSchema>;
@@ -618,7 +619,7 @@ export const sharedLearningScenarioTable = pgTable(
     telliPointsLimit: integer('telli_points_limit'),
     maxUsageTimeLimit: integer('max_usage_time_limit'),
     inviteCode: text('invite_code').unique(),
-    startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }).defaultNow(),
   },
   (table) => [
     unique().on(table.learningScenarioId, table.userId),
@@ -795,7 +796,6 @@ export const sharedCharacterConversation = pgTable(
     maxUsageTimeLimit: integer('max_usage_time_limit'),
     inviteCode: text('invite_code').unique(),
     startedAt: timestamp('started_at', { withTimezone: true }),
-    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [unique().on(table.characterId, table.userId)],
 );
@@ -808,11 +808,11 @@ export const sharedCharacterConversationSelectSchema = createSelectSchema(
 });
 export const sharedCharacterConversationInsertSchema = createInsertSchema(
   sharedCharacterConversation,
-).omit({ id: true, createdAt: true, inviteCode: true, startedAt: true });
+).omit({ id: true, inviteCode: true, startedAt: true });
 export const sharedCharacterConversationUpdateSchema = createUpdateSchema(
   sharedCharacterConversation,
 )
-  .omit({ characterId: true, userId: true, createdAt: true })
+  .omit({ characterId: true, userId: true })
   .extend({
     id: z.string(),
   });
