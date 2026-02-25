@@ -16,7 +16,7 @@ import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructChatSystemPrompt } from './system-prompt';
 import { formatMessagesWithImages, getChatTitle, limitChatHistory } from './utils';
-import { getRelevantFileContent } from '../file-operations/retrieval';
+import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
 import {
   KEEP_FIRST_MESSAGES,
@@ -164,7 +164,7 @@ export async function sendChatMessage({
     customGptId,
   });
 
-  const orderedChunks = await getRelevantFileContent({
+  const chunks = await retrieveChunks({
     messages: messages.map((m) => ({
       id: m.id,
       role: m.role,
@@ -194,7 +194,7 @@ export async function sendChatMessage({
     isTeacher: user.school.userRole === 'teacher',
     federalState: user.federalState,
     websearchSources,
-    retrievedTextChunks: orderedChunks,
+    chunks,
   });
 
   // Check if the model supports images based on supportedImageFormats

@@ -1,11 +1,9 @@
 import { getUser } from '@/auth/utils';
-import { TextChunkInsertModel } from '@shared/db/schema';
 import { getFileExtension } from '@/utils/files/generic';
 import { cnanoid } from '@telli/shared/random/randomService';
 import { NextRequest, NextResponse } from 'next/server';
 import { extractFile } from '../../file-operations/extract-file';
-import { chunkText } from '../../file-operations/process-chunks';
-import { embedTextChunks } from '../../file-operations/embedding';
+import { chunkAndEmbed } from '../../rag/rag-service';
 import { logDebug } from '@shared/logging';
 import { dbInsertFileWithTextChunks } from '@shared/db/functions/files';
 import { uploadMessageAttachment } from '@shared/files/fileService';
@@ -69,30 +67,13 @@ async function handleFileUpload(file: File) {
     type: fileExtension,
   });
 
-  const enrichedChunks: Omit<TextChunkInsertModel, 'embedding'>[] = extractResult.content.flatMap(
-    (element) =>
-      chunkText({
-        text: element.text,
-        sentenceChunkOverlap: 1,
-        lowerBoundWordCount: 200,
-      }).map((chunk, index) => ({
-        pageNumber: element.page,
-        fileId,
-        orderIndex: index,
-        content: chunk.content,
-        leadingOverlap: chunk.leadingOverlap,
-        trailingOverlap: chunk.trailingOverlap,
-      })),
-  );
-
   const [textChunks] = await Promise.all([
-    embedTextChunks({
-      values: enrichedChunks,
+    chunkAndEmbed({
+      textElements: extractResult.content,
       fileId,
       federalStateId: user.federalState.id,
     }),
-    // Use processed buffer for images, original buffer for other files
-    await uploadMessageAttachment({
+    uploadMessageAttachment({
       fileId,
       fileExtension,
       buffer: extractResult.processedBuffer || buffer,

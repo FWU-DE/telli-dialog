@@ -1,5 +1,5 @@
 import { expect, describe, it } from 'vitest';
-import { chunkText } from './process-chunks';
+import { chunkText } from './chunking';
 
 describe('chunkText', () => {
   it('chunks text by sentences with overlap', async () => {

@@ -1,5 +1,5 @@
 import { type LearningScenarioSelectModel } from '@shared/db/schema';
-import { ChunkResult } from '../file-operations/process-chunks';
+import { Chunk } from '../rag/types';
 import {
   constructFilePrompt,
   constructWebsearchPrompt,
@@ -10,14 +10,14 @@ import { WebsearchSource } from '@shared/db/types';
 
 export function constructLearningScenarioSystemPrompt({
   sharedChat,
-  retrievedTextChunks,
+  chunks,
   websearchSources,
 }: {
   sharedChat: LearningScenarioSelectModel;
-  retrievedTextChunks?: Record<string, ChunkResult[]>;
+  chunks?: Record<string, Chunk[]>;
   websearchSources?: WebsearchSource[];
 }) {
-  const filePrompt = constructFilePrompt(retrievedTextChunks);
+  const filePrompt = constructFilePrompt(chunks);
   const websearchPrompt = constructWebsearchPrompt(websearchSources);
 
   return `Du bist ein KI-Chatbot, der in einer Schulklasse eingesetzt wird, um Schülerinnen und Schüler zu unterstützen.
