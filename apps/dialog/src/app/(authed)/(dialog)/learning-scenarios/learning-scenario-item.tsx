@@ -97,7 +97,7 @@ export default function LearningScenarioItem({
           {learningScenario.description}
         </span>
       </div>
-      <div className="flex-grow" />
+      <div className="grow" />
       {learningScenario.startedAt !== null && timeLeft > 0 && (
         <CountDownTimer
           className="p-1 me-2"

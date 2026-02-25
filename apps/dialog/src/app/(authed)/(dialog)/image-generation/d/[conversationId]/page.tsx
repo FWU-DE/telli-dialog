@@ -74,7 +74,7 @@ export default async function Page(props: PageProps) {
               <NewChatButton />
               <SelectImageModel />
               <SelectImageStyle />
-              <div className="flex-grow"></div>
+              <div className="grow"></div>
               <ProfileMenu userAndContext={userAndContext} />
             </div>
           </HeaderPortal>

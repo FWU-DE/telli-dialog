@@ -3,7 +3,7 @@ import resolveConfig from 'tailwindcss/resolveConfig';
 import tailwindConfig from '../../../tailwind.config';
 
 const fullConfig = resolveConfig(tailwindConfig);
-export const breakpoints = fullConfig.theme.screens;
+export const breakpoints = { sm: 40 };
 
 const getWindowWidth = () => {
   if (typeof window !== 'undefined') {

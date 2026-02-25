@@ -19,7 +19,7 @@ export default async function Page({
   }
 
   return (
-    <div className="h-[100dvh] flex flex-col gap-4 sm:gap-8">
+    <div className="h-dvh flex flex-col gap-4 sm:gap-8">
       <LoginForm />
       <div className="px-4 pt-4 sm:px-8 sm:pt-8">
         <hr className="w-full" />

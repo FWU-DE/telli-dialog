@@ -39,7 +39,7 @@ export default async function Page(
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
 
   return (
-    <main className="h-[100dvh] w-full">
+    <main className="h-dvh w-full">
       <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
         <ThemeProvider designConfiguration={designConfiguration}>
           <SharedChat

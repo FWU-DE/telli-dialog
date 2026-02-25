@@ -34,7 +34,7 @@ export function CopyContainer({
     >
       <div
         className={cn(
-          'flex flex-col gap-4 border-[1px] rounded-enterprise-md border-gray-200 p-6 mt-12',
+          'flex flex-col gap-4 border rounded-enterprise-md border-gray-200 p-6 mt-12',
           containerBg,
         )}
       >

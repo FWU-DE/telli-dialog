@@ -74,7 +74,7 @@ export default function FilesTable({
         <tr className="font-normal bg-light-gray w-full text-sm">
           <th className="font-medium text-left py-3 text-dark-gray pl-3">Name</th>
           <th className="font-medium text-left py-3 text-dark-gray">Dateigröße</th>
-          <th className="font-medium text-center py-3 text-dark-gray min-w-[5rem]"></th>
+          <th className="font-medium text-center py-3 text-dark-gray min-w-20"></th>
         </tr>
       </thead> */}
       <tbody>
@@ -85,7 +85,7 @@ export default function FilesTable({
             const { Icon, fillColor } = getFileIconByFileExtension(extention);
 
             return (
-              <tr key={id} className="border-b-[1px] last:border-b-0 border-[#D9D9D9]">
+              <tr key={id} className="border-b last:border-b-0 border-[#D9D9D9]">
                 <td className="flex gap-2 items-center p-2">
                   {status === 'processed' && (
                     <Icon

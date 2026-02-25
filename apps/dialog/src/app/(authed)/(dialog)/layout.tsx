@@ -42,7 +42,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
     (user.versionAcceptedConditions === null || user.versionAcceptedConditions < VERSION);
 
   return (
-    <div className="flex h-[100dvh] w-[100dvw]">
+    <div className="flex h-dvh w-dvw">
       <FederalStateProvider federalState={federalState}>
         <SidebarVisibilityProvider>
           <LlmModelsProvider
@@ -54,10 +54,10 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
               currentModelCosts={priceInCent ?? 0}
               userPriceLimit={userPriceLimit ?? 500}
             />
-            <div className="flex flex-col max-h-[100dvh] min-h-[100dvh] w-full overflow-auto">
+            <div className="flex flex-col max-h-dvh min-h-dvh w-full overflow-auto">
               <div
                 id={HEADER_PORTAL_ID}
-                className="sticky z-10 top-0 py-4 h-[4.75rem] px-6 flex gap-4 items-center justify-between bg-white"
+                className="sticky z-10 top-0 py-4 h-19 px-6 flex gap-4 items-center justify-between bg-white"
                 style={{
                   position: '-webkit-sticky',
                 }}

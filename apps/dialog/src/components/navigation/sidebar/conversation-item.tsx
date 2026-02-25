@@ -71,7 +71,7 @@ export default function ConversationItem({
       ) : (
         <Link
           title={conversation.name ?? undefined}
-          className={cn('flex overflow-hidden flex-grow', 'text-primary')}
+          className={cn('flex overflow-hidden grow', 'text-primary')}
           href={buildConversationUrl({ conversation })}
           prefetch={false}
         >

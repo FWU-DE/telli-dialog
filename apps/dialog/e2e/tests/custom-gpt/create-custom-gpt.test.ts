@@ -98,7 +98,7 @@ test('teacher can delete customgpt with chat', async ({ page }) => {
   await expect(page.getByRole('heading', { name: assistantName }).first()).not.toBeVisible();
 });
 
-test('data is autosaved on blur', async ({ page }) => {
+test('data is autosaved on blur-sm', async ({ page }) => {
   await login(page, 'teacher');
 
   await page.goto('/custom');

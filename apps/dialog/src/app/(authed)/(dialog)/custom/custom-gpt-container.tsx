@@ -77,7 +77,7 @@ export default function CustomGptContainer({
         <h2 className={cn('font-medium leading-none', truncateClassName)}>{name}</h2>
         <span className={cn(truncateClassName, 'text-gray-400')}>{description}</span>
       </div>
-      <div className="flex-grow" />
+      <div className="grow" />
       {userId !== currentUserId && (
         <div onClick={(event) => event.stopPropagation()} className="flex items-center">
           <CreateNewInstanceFromTemplate

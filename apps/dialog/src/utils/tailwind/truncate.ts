@@ -1,2 +1,2 @@
 export const truncateClassName =
-  'block whitespace-nowrap overflow-hidden overflow-ellipsis min-w-0';
+  'block whitespace-nowrap overflow-hidden text-ellipsis min-w-0';

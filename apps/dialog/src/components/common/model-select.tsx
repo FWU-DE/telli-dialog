@@ -59,7 +59,7 @@ export default function ModelSelect({
         <DropdownMenu.Trigger
           disabled={models.length < 2}
           asChild
-          className="cursor-pointer disabled:cursor-default focus:outline-none"
+          className="cursor-pointer disabled:cursor-default focus:outline-hidden"
         >
           <button
             type="button"
@@ -91,7 +91,7 @@ export default function ModelSelect({
                   <DropdownMenu.Item asChild>
                     <button
                       className={cn(
-                        'hover:bg-primary-hover text-left py-2 px-4 outline-none flex flex-col',
+                        'hover:bg-primary-hover text-left py-2 px-4 outline-hidden flex flex-col',
                         iconClassName,
                       )}
                       onClick={() => handleSelectModel(model)}

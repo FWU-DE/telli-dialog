@@ -47,7 +47,7 @@ export default async function Page(
     <div className="w-full p-6 overflow-auto">
       <HeaderPortal>
         <ToggleSidebarButton />
-        <div className="flex-grow"></div>
+        <div className="grow"></div>
         <ProfileMenu userAndContext={userAndContext} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">

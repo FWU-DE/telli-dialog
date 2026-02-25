@@ -27,7 +27,7 @@ export default function SelectImageStyle() {
         {tImageGeneration('style-label')}
       </span>
       <DropdownMenu.Root>
-        <DropdownMenu.Trigger asChild className="cursor-pointer focus:outline-none">
+        <DropdownMenu.Trigger asChild className="cursor-pointer focus:outline-hidden">
           <button
             type="button"
             className="flex items-center gap-2 cursor-pointer"
@@ -57,7 +57,7 @@ export default function SelectImageStyle() {
                   <DropdownMenu.Item asChild>
                     <button
                       className={cn(
-                        'hover:bg-primary-hover text-left py-6 px-7 outline-none flex flex-col',
+                        'hover:bg-primary-hover text-left py-6 px-7 outline-hidden flex flex-col',
                         iconClassName,
                       )}
                       onClick={() => handleSelectStyle(style.name === 'none' ? undefined : style)}
