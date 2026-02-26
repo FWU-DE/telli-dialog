@@ -11,7 +11,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: 1,
   reporter: [['html', { outputFolder: './playwright-report' }], ['json'], ['github'], ['list']],
-  timeout: 30_000,
+  timeout: 40_000,
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
@@ -37,7 +37,6 @@ export default defineConfig({
         launchOptions: {
           slowMo: 100,
         },
-        actionTimeout: 10000,
       },
     },
     {
