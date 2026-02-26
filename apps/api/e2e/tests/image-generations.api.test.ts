@@ -31,8 +31,7 @@ test.describe('POST /v1/images/generations', () => {
     });
     const models = await modelsResponse.json();
     const imageModel = models.find(
-      (m: { name: string }) =>
-        m.name.includes('dall-e') || m.name.includes('imagen'),
+      (m: { name: string }) => m.name.includes('dall-e') || m.name.includes('imagen'),
     );
 
     // Skip if no image generation model is available

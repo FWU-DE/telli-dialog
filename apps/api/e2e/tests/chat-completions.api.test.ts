@@ -34,9 +34,7 @@ test.describe('POST /v1/chat/completions', () => {
       const models = await modelsResponse.json();
       const textModel = models.find(
         (m: { name: string }) =>
-          m.name === 'gpt-4o-mini' ||
-          m.name.includes('llama') ||
-          m.name.includes('gpt'),
+          m.name === 'gpt-4o-mini' || m.name.includes('llama') || m.name.includes('gpt'),
       );
       expect(textModel).toBeDefined();
 
@@ -80,9 +78,7 @@ test.describe('POST /v1/chat/completions', () => {
       const models = await modelsResponse.json();
       const textModel = models.find(
         (m: { name: string }) =>
-          m.name === 'gpt-4o-mini' ||
-          m.name.includes('llama') ||
-          m.name.includes('gpt'),
+          m.name === 'gpt-4o-mini' || m.name.includes('llama') || m.name.includes('gpt'),
       );
       expect(textModel).toBeDefined();
 
