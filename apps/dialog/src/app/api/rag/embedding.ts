@@ -52,23 +52,23 @@ async function embedTextWithApiKey(text: string[], modelId: string, federalState
 }
 
 export async function embedChunks({
-  values,
+  chunksWithoutEmbeddings,
   fileId,
   federalStateId,
 }: {
-  values: Omit<TextChunkInsertModel, 'embedding'>[];
+  chunksWithoutEmbeddings: Omit<TextChunkInsertModel, 'embedding'>[];
   fileId: string;
   federalStateId: string;
 }): Promise<TextChunkInsertModel[]> {
   const { apiKeyId, modelId } = await getEmbeddingModelWithApiKey(federalStateId);
 
-  logDebug(`Embedding ${values.length} chunks`);
+  logDebug(`Embedding ${chunksWithoutEmbeddings.length} chunks`);
   const promises: Promise<TextChunkInsertModel[]>[] = [];
   // Process chunks in batches of 200
-  for (let i = 0; i < values.length; i += EMBEDDING_BATCH_SIZE) {
+  for (let i = 0; i < chunksWithoutEmbeddings.length; i += EMBEDDING_BATCH_SIZE) {
     promises.push(
       (async () => {
-        const batch = values.slice(i, i + EMBEDDING_BATCH_SIZE);
+        const batch = chunksWithoutEmbeddings.slice(i, i + EMBEDDING_BATCH_SIZE);
         const batchTexts = batch.map(
           (value) => `${value.leadingOverlap ?? ''}${value.content}${value.trailingOverlap ?? ''}`,
         );
@@ -79,13 +79,13 @@ export async function embedChunks({
         return batchEmbeddings.map((embedding, batchIndex) => {
           const originalIndex = i + batchIndex;
           return {
-            content: values[originalIndex]?.content ?? '',
+            content: chunksWithoutEmbeddings[originalIndex]?.content ?? '',
             embedding,
             fileId,
             orderIndex: originalIndex,
-            pageNumber: values[originalIndex]?.pageNumber ?? 0,
-            leadingOverlap: values[originalIndex]?.leadingOverlap ?? undefined,
-            trailingOverlap: values[originalIndex]?.trailingOverlap ?? undefined,
+            pageNumber: chunksWithoutEmbeddings[originalIndex]?.pageNumber ?? 0,
+            leadingOverlap: chunksWithoutEmbeddings[originalIndex]?.leadingOverlap ?? undefined,
+            trailingOverlap: chunksWithoutEmbeddings[originalIndex]?.trailingOverlap ?? undefined,
           };
         });
       })(),
