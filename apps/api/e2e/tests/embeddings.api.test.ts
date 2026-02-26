@@ -29,11 +29,14 @@ test.describe('POST /v1/embeddings', () => {
     const modelsResponse = await request.get('/v1/models', {
       headers: authorizationHeader,
     });
-    const models = await modelsResponse.json();
+    const models = (await modelsResponse.json()) as Array<{ name: string }>;
     const embeddingModel = models.find(
       (m: { name: string }) => m.name.includes('embedding') || m.name.includes('bge'),
     );
     expect(embeddingModel).toBeDefined();
+    if (!embeddingModel) {
+      throw new Error('No embedding model available for embeddings test');
+    }
 
     const response = await request.post('/v1/embeddings', {
       headers: authorizationHeader,
