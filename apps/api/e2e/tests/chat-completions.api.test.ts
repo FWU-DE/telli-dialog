@@ -31,12 +31,15 @@ test.describe('POST /v1/chat/completions', () => {
       const modelsResponse = await request.get('/v1/models', {
         headers: authorizationHeader,
       });
-      const models = await modelsResponse.json();
+      const models = (await modelsResponse.json()) as Array<{ name: string }>;
       const textModel = models.find(
         (m: { name: string }) =>
           m.name === 'gpt-4o-mini' || m.name.includes('llama') || m.name.includes('gpt'),
       );
       expect(textModel).toBeDefined();
+      if (!textModel) {
+        throw new Error('No text model available for chat completions test');
+      }
 
       const response = await request.post('/v1/chat/completions', {
         headers: authorizationHeader,
@@ -75,12 +78,15 @@ test.describe('POST /v1/chat/completions', () => {
       const modelsResponse = await request.get('/v1/models', {
         headers: authorizationHeader,
       });
-      const models = await modelsResponse.json();
+      const models = (await modelsResponse.json()) as Array<{ name: string }>;
       const textModel = models.find(
         (m: { name: string }) =>
           m.name === 'gpt-4o-mini' || m.name.includes('llama') || m.name.includes('gpt'),
       );
       expect(textModel).toBeDefined();
+      if (!textModel) {
+        throw new Error('No text model available for streaming chat test');
+      }
 
       const response = await request.post('/v1/chat/completions', {
         headers: authorizationHeader,

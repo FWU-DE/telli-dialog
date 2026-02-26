@@ -29,13 +29,16 @@ test.describe('POST /v1/images/generations', () => {
     const modelsResponse = await request.get('/v1/models', {
       headers: authorizationHeader,
     });
-    const models = await modelsResponse.json();
+    const models = (await modelsResponse.json()) as Array<{ name: string }>;
     const imageModel = models.find(
       (m: { name: string }) => m.name.includes('dall-e') || m.name.includes('imagen'),
     );
 
     // Skip if no image generation model is available
     test.skip(!imageModel, 'No image generation model available');
+    if (!imageModel) {
+      return;
+    }
 
     const response = await request.post('/v1/images/generations', {
       headers: authorizationHeader,
