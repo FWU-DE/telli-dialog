@@ -31,6 +31,15 @@
   overflow: hidden;
 }
 
+/* Disabled button styles */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--color-gray-200);
+  color: var(--color-gray-500);
+  border-color: var(--color-gray-300);
+}
+
 .disclaimer-content h2 {
   font-size: 1.5rem;
   font-weight: 500;
