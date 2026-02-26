@@ -14,10 +14,10 @@ This is a pnpm monorepo with three apps:
 | App               | Path           | E2E location                                          | Playwright config                                      |
 | ----------------- | -------------- | ----------------------------------------------------- | ------------------------------------------------------ |
 | dialog (main app) | `apps/dialog/` | `apps/dialog/e2e/`                                    | `apps/dialog/playwright.config.ts`                     |
+| api               | `apps/api/`    | `apps/api/e2e/`                                       | `apps/api/playwright.config.ts`                        |
 | admin             | `apps/admin/`  | _(no e2e tests yet — create under `apps/admin/e2e/`)_ | _(create `apps/admin/playwright.config.ts` if needed)_ |
-| api               | `apps/api/`    | _(no e2e tests yet — create under `apps/api/e2e/`)_   | _(create `apps/api/playwright.config.ts` if needed)_   |
 
-E2E tests for the **dialog** app are already established. For **admin** and **api**, if asked to create e2e tests, mirror the dialog structure and patterns.
+E2E tests for the **dialog** and **api** apps are already established. For **admin**, if asked to create e2e tests, mirror the existing structure and patterns.
 
 ## Dialog E2E Folder Layout
 
@@ -45,6 +45,111 @@ apps/dialog/e2e/
     ├── teacher-login.test.ts
     ├── template-elements-visible.test.ts
     └── user-access.test.ts
+```
+
+## API App E2E Folder Layout
+
+The API app has its own e2e tests that test the REST API endpoints directly (no browser). Tests use Playwright's `request` API context.
+
+```
+apps/api/e2e/
+├── utils/
+│   └── api.ts               # Auth header & base URL helpers
+└── tests/                   # API endpoint tests (*.api.test.ts)
+    ├── health.api.test.ts
+    ├── chat-completions.api.test.ts
+    ├── embeddings.api.test.ts
+    ├── image-generations.api.test.ts
+    ├── models.api.test.ts
+    └── usage.api.test.ts
+```
+
+### API App Playwright Config (`apps/api/playwright.config.ts`)
+
+- `testDir`: `./e2e/tests/`
+- `baseURL`: `http://localhost:3002` (or `process.env.API_BASE_URL`)
+- `workers`: 1 (sequential execution)
+- `timeout`: 60 seconds per test
+- Single project: `api` matching `*.api.test.ts`
+- `webServer` runs `pnpm dev` and waits for `http://localhost:3002/health`
+- Loads `.env.test` for the test API key
+
+### API App Utilities (`apps/api/e2e/utils/api.ts`)
+
+| Helper                | Purpose                                              |
+| --------------------- | ---------------------------------------------------- |
+| `authorizationHeader` | `{ Authorization: 'Bearer <API_KEY>' }` from env var |
+| `baseURL`             | API base URL (defaults to `http://localhost:3002`)   |
+
+### API App Test Patterns
+
+API tests use Playwright's `request` fixture (no `page`). Every endpoint test should include:
+
+1. **Auth check** — verify 401 without authentication
+2. **Validation check** — verify 400 for invalid request bodies
+3. **Happy path** — verify correct response shape and status
+
+```typescript
+import { test, expect } from '@playwright/test';
+import { authorizationHeader } from '../utils/api.js';
+
+test.describe('POST /v1/some-endpoint', () => {
+  test('returns 401 without authentication', async ({ request }) => {
+    const response = await request.post('/v1/some-endpoint', {
+      data: {
+        /* valid body */
+      },
+    });
+    expect(response.status()).toBe(401);
+  });
+
+  test('returns 400 for invalid request body', async ({ request }) => {
+    const response = await request.post('/v1/some-endpoint', {
+      headers: authorizationHeader,
+      data: { invalid: 'body' },
+    });
+    expect(response.status()).toBe(400);
+    const body = await response.json();
+    expect(body).toHaveProperty('error');
+  });
+
+  test('returns expected response', async ({ request }) => {
+    const response = await request.post('/v1/some-endpoint', {
+      headers: authorizationHeader,
+      data: {
+        /* valid body */
+      },
+    });
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    // Assert response shape
+  });
+});
+```
+
+**Dynamic model selection** — when a test needs a specific model type, fetch `/v1/models` first:
+
+```typescript
+const modelsResponse = await request.get('/v1/models', {
+  headers: authorizationHeader,
+});
+const models = (await modelsResponse.json()) as Array<{ name: string }>;
+const targetModel = models.find((m) => m.name.includes('gpt') || m.name.includes('llama'));
+expect(targetModel).toBeDefined();
+```
+
+**Conditional skip** — skip tests when required infrastructure is unavailable:
+
+```typescript
+test.skip(!imageModel, 'No image generation model available');
+```
+
+### Running API App Tests
+
+From `apps/api/`:
+
+```sh
+pnpm e2e          # run all API e2e tests
 ```
 
 ## Conventions & Patterns
@@ -237,13 +342,13 @@ pnpm e2e:ui       # Playwright Test UI
 pnpm e2e:api      # API tests only
 ```
 
-## When creating tests for admin or api apps
+## When creating tests for the admin app
 
-If no e2e setup exists yet:
+The admin app has no e2e setup yet. If asked to create e2e tests:
 
-1. Create the folder structure mirroring `apps/dialog/e2e/` (i.e. `e2e/tests/`, `e2e/utils/`).
-2. Create a `playwright.config.ts` adapted for the app's port and test directory.
-3. Reuse patterns and conventions from dialog tests.
+1. Create the folder structure mirroring `apps/dialog/e2e/` or `apps/api/e2e/` (i.e. `e2e/tests/`, `e2e/utils/`).
+2. Create a `playwright.config.ts` adapted for the admin app's port and test directory.
+3. Reuse patterns and conventions from dialog and api tests.
 4. Add e2e scripts to the app's `package.json` (e.g. `"e2e": "playwright test"`).
 5. Document what you created.
 
