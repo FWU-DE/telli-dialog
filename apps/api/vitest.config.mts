@@ -11,6 +11,8 @@ export default defineConfig({
     },
   },
   test: {
+    // Exclude e2e tests from vitest (they run via Playwright)
+    exclude: ['e2e/**', '**/node_modules/**', '**/dist/**'],
     // Configuration options: https://vitest.dev/config/#coverage
     coverage: {
       provider: 'v8',
