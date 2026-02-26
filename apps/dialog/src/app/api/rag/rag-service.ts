@@ -4,7 +4,7 @@ import { UserAndContext } from '@/auth/types';
 import { chunkText } from './chunking';
 import { embedText, embedChunks } from './embedding';
 import { vectorSearch } from './retrieval';
-import { Chunk, TextElement } from './types';
+import { RetrievedChunk, UnembeddedChunk, TextElement } from './types';
 import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { logError } from '@shared/logging';
 
@@ -27,22 +27,20 @@ export async function chunkAndEmbed({
 }): Promise<ChunkInsertModel[]> {
   const allChunks = await Promise.all(
     textElements.map(async (element) => {
-      const chunks = await chunkText({
-        text: element.text,
-      });
-      return chunks.map((content, index) => ({
-        pageNumber: element.page ?? null,
-        fileId,
-        orderIndex: index,
-        content,
-      }));
+      const chunks = await chunkText(element.text);
+      return chunks.map(
+        (content, index): UnembeddedChunk => ({
+          pageNumber: element.page ?? null,
+          fileId,
+          orderIndex: index,
+          content,
+        }),
+      );
     }),
   );
 
-  const chunksWithoutEmbeddings: Omit<ChunkInsertModel, 'embedding'>[] = allChunks.flat();
-
   return embedChunks({
-    chunksWithoutEmbeddings,
+    chunksWithoutEmbeddings: allChunks.flat(),
     fileId,
     federalStateId,
   });
@@ -64,7 +62,7 @@ export async function retrieveChunks({
   messages: Message[];
   user: UserAndContext;
   relatedFileEntities: FileModelAndContent[];
-}): Promise<Chunk[]> {
+}): Promise<RetrievedChunk[]> {
   if (relatedFileEntities.length === 0) {
     return [];
   }

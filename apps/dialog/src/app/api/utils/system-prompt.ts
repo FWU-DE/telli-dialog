@@ -1,5 +1,5 @@
 import { TOTAL_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
-import { Chunk } from '../rag/types';
+import { RetrievedChunk } from '../rag/types';
 import { WebsearchSource } from '@shared/db/types';
 
 export const LANGUAGE_GUIDELINES = `
@@ -41,7 +41,7 @@ Inhalt: ${source.content}
 `;
 }
 
-export function constructFilePrompt(chunks: Chunk[]) {
+export function constructFilePrompt(chunks: RetrievedChunk[]) {
   if (chunks.length === 0) return '';
 
   const chunkTexts = chunks

@@ -1,5 +1,8 @@
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 
+const CHUNK_SIZE = 1500;
+const CHUNK_OVERLAP = 300;
+
 /**
  * Splits text into chunks using RecursiveCharacterTextSplitter.
  *
@@ -10,18 +13,10 @@ import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
  * The recursive splitter tries paragraph breaks first, then sentences, then words,
  * which naturally respects document structure.
  */
-export async function chunkText({
-  text,
-  chunkSize = 1500,
-  chunkOverlap = 300,
-}: {
-  text: string;
-  chunkSize?: number;
-  chunkOverlap?: number;
-}): Promise<string[]> {
+export async function chunkText(text: string): Promise<string[]> {
   const splitter = new RecursiveCharacterTextSplitter({
-    chunkSize,
-    chunkOverlap,
+    chunkSize: CHUNK_SIZE,
+    chunkOverlap: CHUNK_OVERLAP,
   });
 
   return splitter.splitText(text);

@@ -4,6 +4,7 @@ import { dbGetModelByName } from '@shared/db/functions/llm-model';
 import { EMBEDDING_BATCH_SIZE, EMBEDDING_MAX_CONCURRENT_REQUESTS } from '@/const';
 import { ChunkInsertModel } from '@shared/db/schema';
 import { logDebug } from '@shared/logging';
+import { UnembeddedChunk } from './types';
 
 const EMBEDDING_MODEL = 'BAAI/bge-m3';
 
@@ -56,7 +57,7 @@ export async function embedChunks({
   fileId,
   federalStateId,
 }: {
-  chunksWithoutEmbeddings: Omit<ChunkInsertModel, 'embedding'>[];
+  chunksWithoutEmbeddings: UnembeddedChunk[];
   fileId: string;
   federalStateId: string;
 }): Promise<ChunkInsertModel[]> {

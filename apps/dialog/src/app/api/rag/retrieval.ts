@@ -1,7 +1,7 @@
 import { db } from '@shared/db';
 import { fileTable, chunkTable } from '@shared/db/schema';
-import { desc, eq, inArray, SQL, sql } from 'drizzle-orm';
-import { type VectorSearchResult } from './types';
+import { cosineDistance, eq, inArray } from 'drizzle-orm';
+import { RetrievedChunk } from './types';
 
 /**
  * Finds chunks most similar to the query embedding using cosine similarity (pgvector).
@@ -19,7 +19,7 @@ export async function vectorSearch({
   embedding: number[];
   fileIds: string[];
   limit: number;
-}): Promise<VectorSearchResult[]> {
+}): Promise<RetrievedChunk[]> {
   return db
     .select({
       id: chunkTable.id,
@@ -30,12 +30,10 @@ export async function vectorSearch({
       orderIndex: chunkTable.orderIndex,
       sourceType: chunkTable.sourceType,
       sourceUrl: chunkTable.sourceUrl,
-      embeddingSimilarity:
-        sql`1 - (${chunkTable.embedding} <=> ${JSON.stringify(embedding)})` as SQL<number>,
     })
     .from(chunkTable)
     .innerJoin(fileTable, eq(chunkTable.fileId, fileTable.id))
     .where(inArray(chunkTable.fileId, fileIds))
     .limit(limit)
-    .orderBy((t) => [desc(t.embeddingSimilarity)]);
+    .orderBy(cosineDistance(chunkTable.embedding, embedding));
 }
