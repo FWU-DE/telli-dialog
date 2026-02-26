@@ -970,14 +970,19 @@ export type CustomGptTemplateMappingInsertModel = z.infer<
 /**
  * Schema for table file_table
  */
-export const fileTable = pgTable('file_table', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  size: integer('size').notNull(),
-  type: text('type').notNull(),
-  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-  metadata: json('metadata').$type<FileMetadata>(),
-});
+export const fileTable = pgTable(
+  'file_table',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    size: integer('size').notNull(),
+    type: text('type').notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    metadata: json('metadata').$type<FileMetadata>(),
+    userId: uuid('user_id').references(() => userTable.id),
+  },
+  (table) => [index().on(table.userId)],
+);
 
 export const fileSelectSchema = createSelectSchema(fileTable).extend({
   createdAt: z.coerce.date(),
