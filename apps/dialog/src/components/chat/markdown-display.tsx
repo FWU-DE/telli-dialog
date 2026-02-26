@@ -83,10 +83,7 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
           },
           table({ children, ...props }) {
             return (
-              <table
-                {...props}
-                className="w-full border my-4 first:mt-0 last:mb-0 border-collapse"
-              >
+              <table {...props} className="w-full border my-4 first:mt-0 last:mb-0 border-collapse">
                 {children}
               </table>
             );
@@ -130,7 +127,9 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
 
             if (language === undefined) {
               return (
-                <code className={cn(className, 'wrap-break-word bg-main-200 px-0.5 text-wrap text-sm')}>
+                <code
+                  className={cn(className, 'wrap-break-word bg-main-200 px-0.5 text-wrap text-sm')}
+                >
                   {children}
                 </code>
               );

@@ -160,7 +160,7 @@ test.describe('create, share, chat, delete', () => {
   });
 });
 
-test('data is autosaved on blur-sm', async ({ page }) => {
+test('data is autosaved on blur', async ({ page }) => {
   await login(page, 'teacher');
   await createLearningScenario(page);
 
