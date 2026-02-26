@@ -190,12 +190,12 @@ importers:
       '@t3-oss/env-core':
         specifier: 0.13.10
         version: 0.13.10(typescript@5.9.3)(zod@4.3.6)
+      '@telli/ai-core':
+        specifier: workspace:*
+        version: link:../../packages/ai-core
       '@telli/api-database':
         specifier: workspace:*
         version: link:../../packages/api-database
-      '@telli/api-llm-model':
-        specifier: workspace:*
-        version: link:../../packages/api-llm-model
       '@telli/api-utils':
         specifier: workspace:*
         version: link:../../packages/api-utils
@@ -208,18 +208,9 @@ importers:
       fastify-graceful-shutdown:
         specifier: 5.0.0
         version: 5.0.0
-      google-auth-library:
-        specifier: 10.5.0
-        version: 10.5.0
       openai:
         specifier: 6.22.0
         version: 6.22.0(ws@8.18.3)(zod@4.3.6)
-      openaiv4:
-        specifier: npm:openai@4.104.0
-        version: openai@4.104.0(ws@8.18.3)(zod@4.3.6)
-      tiktoken:
-        specifier: 1.0.22
-        version: 1.0.22
       zod:
         specifier: 4.3.6
         version: 4.3.6
@@ -8469,9 +8460,6 @@ packages:
   thread-stream@4.0.0:
     resolution: {integrity: sha512-4iMVL6HAINXWf1ZKZjIPcz5wYaOdPhtO8ATvZ+Xqp3BTdaqtAwQkNmKORqcIo5YkQqGXq5cwfswDwMqqQNrpJA==}
     engines: {node: '>=20'}
-
-  tiktoken@1.0.22:
-    resolution: {integrity: sha512-PKvy1rVF1RibfF3JlXBSP0Jrcw2uq3yXdgcEXtKTYn3QJ/cBRBHDnrJ5jHky+MENZ6DIPwNUGWpkVx+7joCpNA==}
 
   tinybench@2.9.0:
     resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
@@ -18131,8 +18119,6 @@ snapshots:
   thread-stream@4.0.0:
     dependencies:
       real-require: 0.2.0
-
-  tiktoken@1.0.22: {}
 
   tinybench@2.9.0: {}
 

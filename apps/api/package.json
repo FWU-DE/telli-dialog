@@ -15,8 +15,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@telli/ai-core": "workspace:*",
     "@telli/api-database": "workspace:*",
-    "@telli/api-llm-model": "workspace:*",
     "@telli/api-utils": "workspace:*",
     "@fastify/cors": "11.2.0",
     "@fastify/multipart": "9.4.0",
@@ -39,10 +39,7 @@
     "dotenv": "17.3.1",
     "fastify": "5.7.4",
     "fastify-graceful-shutdown": "5.0.0",
-    "google-auth-library": "10.5.0",
     "openai": "6.22.0",
-    "openaiv4": "npm:openai@4.104.0",
-    "tiktoken": "1.0.22",
     "zod": "4.3.6"
   },
   "devDependencies": {

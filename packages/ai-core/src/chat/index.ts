@@ -2,11 +2,11 @@ import { billTextGenerationUsageToApiKey, isApiKeyOverQuota } from '../api-keys/
 import { generateText, generateTextStream } from './providers';
 import { hasAccessToModel } from '../api-keys/model-access';
 import { AiGenerationError, InvalidModelError } from '../errors';
-import { getTextModelById } from '../models';
-import type { Message, TokenUsage } from './types';
+import { getTextModelById, getTextModelByName } from '../models';
+import type { Message, TokenUsage, AiModel } from './types';
 
 // Re-export types for external consumers
-export type { Message, TokenUsage } from './types';
+export type { Message, TokenUsage, ChatAttachment } from './types';
 
 /**
  * Generates text using the specified model and messages, with access control and billing.
@@ -117,4 +117,46 @@ export async function* generateTextStreamWithBilling(
     }
     throw error;
   }
+}
+
+// ── Name-based variants (for API app) ──
+
+/**
+ * Generates text using a model looked up by name, with access control and billing.
+ *
+ * @param modelName - The name of the text model to use for generation
+ * @param messages - The conversation messages (system, user, assistant)
+ * @param apiKeyId - The ID of the API key to verify access and bill usage
+ *
+ * @returns A promise that resolves to an object containing the generated text response, usage, price, and model metadata
+ */
+export async function generateTextByNameWithBilling(
+  modelName: string,
+  messages: Message[],
+  apiKeyId: string,
+) {
+  const model = await getTextModelByName(modelName, apiKeyId);
+  const textResponse = await generateTextWithBilling(model.id, messages, apiKeyId);
+  return { ...textResponse, model };
+}
+
+/**
+ * Generates streaming text using a model looked up by name, with access control.
+ *
+ * @param modelName - The name of the text model to use for generation
+ * @param messages - The conversation messages (system, user, assistant)
+ * @param apiKeyId - The ID of the API key to verify access and bill usage
+ * @param onComplete - Optional callback to be invoked after stream completion with usage and price data
+ *
+ * @returns An object with the model and an async generator that yields text chunks
+ */
+export async function generateTextStreamByNameWithBilling(
+  modelName: string,
+  messages: Message[],
+  apiKeyId: string,
+  onComplete?: (result: { usage: TokenUsage; priceInCents: number }) => void | Promise<void>,
+) {
+  const model = await getTextModelByName(modelName, apiKeyId);
+  const stream = generateTextStreamWithBilling(model.id, messages, apiKeyId, onComplete);
+  return { stream, model };
 }

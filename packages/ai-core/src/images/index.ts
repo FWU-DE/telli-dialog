@@ -2,7 +2,7 @@ import { billImageGenerationUsageToApiKey, isApiKeyOverQuota } from '../api-keys
 import { generateImage } from './providers';
 import { hasAccessToModel } from '../api-keys/model-access';
 import { AiGenerationError, InvalidModelError } from '../errors';
-import { getImageModelById } from '../models';
+import { getImageModelById, getImageModelByName } from '../models';
 
 /**
  * Generates an image using the specified model and prompt, with access control and billing.
@@ -51,4 +51,23 @@ export async function generateImageWithBilling(modelId: string, prompt: string, 
     }
     throw error;
   }
+}
+
+/**
+ * Generates an image using a model looked up by name, with access control and billing.
+ *
+ * @param modelName - The name of the image model to use
+ * @param prompt - The text prompt describing the desired image
+ * @param apiKeyId - The ID of the API key to verify access and bill usage
+ *
+ * @returns A promise that resolves to an object containing the generated image response, price, and model metadata
+ */
+export async function generateImageByNameWithBilling(
+  modelName: string,
+  prompt: string,
+  apiKeyId: string,
+) {
+  const model = await getImageModelByName(modelName, apiKeyId);
+  const result = await generateImageWithBilling(model.id, prompt, apiKeyId);
+  return { ...result, model };
 }
