@@ -45,7 +45,8 @@ export async function dbVerifyFileOwnership({
   fileId: string;
   userId: string;
 }): Promise<boolean> {
-  const result = await db
+  // Check ownership via conversation mapping (for files already linked to a message)
+  const mappingResult = await db
     .select({ fileId: ConversationMessageFileMappingTable.fileId })
     .from(ConversationMessageFileMappingTable)
     .innerJoin(
@@ -59,7 +60,15 @@ export async function dbVerifyFileOwnership({
       ),
     )
     .limit(1);
-  return result.length > 0;
+  if (mappingResult.length > 0) return true;
+
+  // Fallback: check direct ownership on file_table (for files uploaded but not yet linked to a conversation)
+  const fileResult = await db
+    .select({ id: fileTable.id })
+    .from(fileTable)
+    .where(and(eq(fileTable.id, fileId), eq(fileTable.userId, userId)))
+    .limit(1);
+  return fileResult.length > 0;
 }
 
 export async function dbGetRelatedFiles(conversationId: string): Promise<Map<string, FileModel[]>> {
@@ -72,6 +81,7 @@ export async function dbGetRelatedFiles(conversationId: string): Promise<Map<str
       size: fileTable.size,
       createdAt: fileTable.createdAt,
       metadata: fileTable.metadata,
+      userId: fileTable.userId,
     })
     .from(ConversationMessageFileMappingTable)
     .innerJoin(fileTable, eq(ConversationMessageFileMappingTable.fileId, fileTable.id))
@@ -91,6 +101,7 @@ export async function dbGetRelatedSharedChatFiles(conversationId?: string): Prom
       size: fileTable.size,
       createdAt: fileTable.createdAt,
       metadata: fileTable.metadata,
+      userId: fileTable.userId,
     })
     .from(LearningScenarioFileMapping)
     .innerJoin(fileTable, eq(LearningScenarioFileMapping.fileId, fileTable.id))
@@ -110,6 +121,7 @@ export async function dbGetFilesForLearningScenario(
       size: fileTable.size,
       createdAt: fileTable.createdAt,
       metadata: fileTable.metadata,
+      userId: fileTable.userId,
     })
     .from(LearningScenarioFileMapping)
     .innerJoin(fileTable, eq(LearningScenarioFileMapping.fileId, fileTable.id))
@@ -126,6 +138,7 @@ export async function dbGetRelatedCharacterFiles(conversationId?: string): Promi
       size: fileTable.size,
       createdAt: fileTable.createdAt,
       metadata: fileTable.metadata,
+      userId: fileTable.userId,
     })
     .from(CharacterFileMapping)
     .innerJoin(fileTable, eq(CharacterFileMapping.fileId, fileTable.id))
@@ -144,6 +157,7 @@ export async function dbGetRelatedCustomGptFiles(customGptId?: string): Promise<
       size: fileTable.size,
       createdAt: fileTable.createdAt,
       metadata: fileTable.metadata,
+      userId: fileTable.userId,
     })
     .from(CustomGptFileMapping)
     .innerJoin(fileTable, eq(CustomGptFileMapping.fileId, fileTable.id))
@@ -161,6 +175,7 @@ function convertToMap(
     size: number;
     createdAt: Date;
     metadata: FileMetadata | null;
+    userId: string | null;
   }[],
 ) {
   const resultMap: Map<string, FileModel[]> = new Map();
@@ -172,6 +187,7 @@ function convertToMap(
       createdAt: row.createdAt,
       type: row.type,
       metadata: row.metadata,
+      userId: row.userId,
     };
     const maybeFiles = resultMap.get(row.foreignId);
     if (maybeFiles === null || maybeFiles === undefined) {

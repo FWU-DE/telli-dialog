@@ -977,6 +977,7 @@ export const fileTable = pgTable('file_table', {
   type: text('type').notNull(),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   metadata: json('metadata').$type<FileMetadata>(),
+  userId: uuid('user_id').references(() => userTable.id),
 });
 
 export const fileSelectSchema = createSelectSchema(fileTable).extend({
