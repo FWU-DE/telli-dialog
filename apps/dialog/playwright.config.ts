@@ -33,6 +33,11 @@ export default defineConfig({
       testIgnore: /.*api.test.ts/,
       use: {
         ...devices['Desktop Firefox'],
+        // Firefox can be flaky in CI, so we slow it down and increase timeouts to improve stability
+        launchOptions: {
+          slowMo: 100,
+        },
+        actionTimeout: 10000,
       },
     },
     {
