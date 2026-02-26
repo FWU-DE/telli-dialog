@@ -215,6 +215,7 @@ export default function Chat({
         createdAt: new Date(),
         size: file.file.size,
         metadata: null,
+        userId: null,
         // Create a blob URL for images so they display immediately without fetching from S3
         localUrl: isImageFile(file.file.name) ? URL.createObjectURL(file.file) : undefined,
       }));

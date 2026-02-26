@@ -86,6 +86,7 @@ async function handleFileUpload(file: File) {
     size: extractResult.processedBuffer ? extractResult.processedBuffer.length : file.size,
     type: fileExtension,
     metadata: extractResult.metadata,
+    userId: user.id,
   };
   await dbInsertFileWithTextChunks(fileModel, textChunks);
   logDebug(`File ${file.name} with type ${fileExtension} stored in db.`);

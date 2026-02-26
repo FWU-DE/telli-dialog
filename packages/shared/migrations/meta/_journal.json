@@ -351,6 +351,13 @@
       "when": 1771931792801,
       "tag": "0049_smart_drax",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1772107421996,
+      "tag": "0050_parallel_ken_ellis",
+      "breakpoints": true
     }
   ]
 }
