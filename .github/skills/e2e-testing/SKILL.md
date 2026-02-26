@@ -11,11 +11,11 @@ You are an expert at writing Playwright end-to-end tests for this monorepo. Foll
 
 This is a pnpm monorepo with three apps:
 
-| App | Path | E2E location | Playwright config |
-|---|---|---|---|
-| dialog (main app) | `apps/dialog/` | `apps/dialog/e2e/` | `apps/dialog/playwright.config.ts` |
-| admin | `apps/admin/` | *(no e2e tests yet — create under `apps/admin/e2e/`)* | *(create `apps/admin/playwright.config.ts` if needed)* |
-| api | `apps/api/` | *(no e2e tests yet — create under `apps/api/e2e/`)* | *(create `apps/api/playwright.config.ts` if needed)* |
+| App               | Path           | E2E location                                          | Playwright config                                      |
+| ----------------- | -------------- | ----------------------------------------------------- | ------------------------------------------------------ |
+| dialog (main app) | `apps/dialog/` | `apps/dialog/e2e/`                                    | `apps/dialog/playwright.config.ts`                     |
+| admin             | `apps/admin/`  | _(no e2e tests yet — create under `apps/admin/e2e/`)_ | _(create `apps/admin/playwright.config.ts` if needed)_ |
+| api               | `apps/api/`    | _(no e2e tests yet — create under `apps/api/e2e/`)_   | _(create `apps/api/playwright.config.ts` if needed)_   |
 
 E2E tests for the **dialog** app are already established. For **admin** and **api**, if asked to create e2e tests, mirror the dialog structure and patterns.
 
@@ -60,8 +60,8 @@ import { expect, test } from '@playwright/test';
 Import helpers with relative paths from the `utils/` directory:
 
 ```typescript
-import { login } from '../utils/login';            // top-level tests
-import { login } from '../../utils/login';          // nested tests (e.g. character/)
+import { login } from '../utils/login'; // top-level tests
+import { login } from '../../utils/login'; // nested tests (e.g. character/)
 import { sendMessage } from '../../utils/chat';
 import { waitForToast } from '../../utils/utils';
 ```
@@ -71,8 +71,8 @@ import { waitForToast } from '../../utils/utils';
 All browser tests must start by logging in. Use the `login()` helper:
 
 ```typescript
-await login(page, 'teacher');   // log in as teacher
-await login(page, 'student');   // log in as student
+await login(page, 'teacher'); // log in as teacher
+await login(page, 'student'); // log in as student
 ```
 
 The login helper navigates to `/logout`, clears cookies, navigates to `/login`, fills credentials via Keycloak, and waits for redirect to `/`.
@@ -99,27 +99,27 @@ const characterName = 'My Character ' + nanoid(8);
 
 **Always reuse these helpers** instead of reimplementing their logic:
 
-| Helper | File | Purpose |
-|---|---|---|
-| `login(page, user, password?)` | `utils/login.ts` | Log in via Keycloak |
-| `sendMessage(page, message)` | `utils/chat.ts` | Type and send a chat message, wait for response |
-| `regenerateMessage(page)` | `utils/chat.ts` | Click reload and wait for new response |
-| `uploadFile(page, filePath)` | `utils/chat.ts` | Upload a file via file input |
-| `deleteChat(page, conversationId)` | `utils/chat.ts` | Delete a conversation via the sidebar menu |
-| `configureCharacter(page, data?)` | `utils/character.ts` | Fill in the character creation form |
-| `deleteCharacter(page, name)` | `utils/character.ts` | Delete a character by name |
-| `deleteCustomGpt(page, name)` | `utils/custom-gpt.ts` | Delete a custom GPT by name |
-| `createLearningScenario(page)` | `utils/learning-scenario.ts` | Navigate and click "Szenario erstellen" |
-| `configureLearningScenario(page, data?)` | `utils/learning-scenario.ts` | Fill in learning scenario form |
-| `deleteLearningScenario(page, name)` | `utils/learning-scenario.ts` | Delete a learning scenario by name |
-| `deleteLearningScenarioFromDetailPage(page)` | `utils/learning-scenario.ts` | Delete from the scenario detail page |
-| `waitForToast(page, msg?)` | `utils/utils.ts` | Wait for a toast notification to appear |
-| `waitForToastDisappear(page)` | `utils/utils.ts` | Wait for toasts to disappear |
-| `mockUserAndContext()` | `utils/mock.ts` | Generate mock user data for API tests |
-| `mockLlmModel()` | `utils/mock.ts` | Generate mock LLM model for API tests |
-| `mockConversationUsage()` | `utils/mock.ts` | Generate mock usage data |
-| `generateRandomString(n)` | `utils/random.ts` | Random alphanumeric string |
-| `authorizationHeader` | `utils/authorizationHeader.ts` | Bearer token header from `process.env.API_KEY` |
+| Helper                                       | File                           | Purpose                                         |
+| -------------------------------------------- | ------------------------------ | ----------------------------------------------- |
+| `login(page, user, password?)`               | `utils/login.ts`               | Log in via Keycloak                             |
+| `sendMessage(page, message)`                 | `utils/chat.ts`                | Type and send a chat message, wait for response |
+| `regenerateMessage(page)`                    | `utils/chat.ts`                | Click reload and wait for new response          |
+| `uploadFile(page, filePath)`                 | `utils/chat.ts`                | Upload a file via file input                    |
+| `deleteChat(page, conversationId)`           | `utils/chat.ts`                | Delete a conversation via the sidebar menu      |
+| `configureCharacter(page, data?)`            | `utils/character.ts`           | Fill in the character creation form             |
+| `deleteCharacter(page, name)`                | `utils/character.ts`           | Delete a character by name                      |
+| `deleteCustomGpt(page, name)`                | `utils/custom-gpt.ts`          | Delete a custom GPT by name                     |
+| `createLearningScenario(page)`               | `utils/learning-scenario.ts`   | Navigate and click "Szenario erstellen"         |
+| `configureLearningScenario(page, data?)`     | `utils/learning-scenario.ts`   | Fill in learning scenario form                  |
+| `deleteLearningScenario(page, name)`         | `utils/learning-scenario.ts`   | Delete a learning scenario by name              |
+| `deleteLearningScenarioFromDetailPage(page)` | `utils/learning-scenario.ts`   | Delete from the scenario detail page            |
+| `waitForToast(page, msg?)`                   | `utils/utils.ts`               | Wait for a toast notification to appear         |
+| `waitForToastDisappear(page)`                | `utils/utils.ts`               | Wait for toasts to disappear                    |
+| `mockUserAndContext()`                       | `utils/mock.ts`                | Generate mock user data for API tests           |
+| `mockLlmModel()`                             | `utils/mock.ts`                | Generate mock LLM model for API tests           |
+| `mockConversationUsage()`                    | `utils/mock.ts`                | Generate mock usage data                        |
+| `generateRandomString(n)`                    | `utils/random.ts`              | Random alphanumeric string                      |
+| `authorizationHeader`                        | `utils/authorizationHeader.ts` | Bearer token header from `process.env.API_KEY`  |
 
 If existing helpers don't cover the needed interaction, create a **new utility function** in the appropriate file inside `utils/`, or create a new utils file if the feature is new.
 

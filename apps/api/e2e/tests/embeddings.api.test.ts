@@ -31,8 +31,7 @@ test.describe('POST /v1/embeddings', () => {
     });
     const models = await modelsResponse.json();
     const embeddingModel = models.find(
-      (m: { name: string }) =>
-        m.name.includes('embedding') || m.name.includes('bge'),
+      (m: { name: string }) => m.name.includes('embedding') || m.name.includes('bge'),
     );
     expect(embeddingModel).toBeDefined();
 
