@@ -1,5 +1,5 @@
 import { db } from '@shared/db';
-import { fileTable, TextChunkTable } from '@shared/db/schema';
+import { fileTable, chunkTable } from '@shared/db/schema';
 import { desc, eq, inArray, SQL, sql } from 'drizzle-orm';
 import { type VectorSearchResult } from './types';
 
@@ -22,20 +22,20 @@ export async function vectorSearch({
 }): Promise<VectorSearchResult[]> {
   return db
     .select({
-      id: TextChunkTable.id,
-      content: TextChunkTable.content,
-      fileId: TextChunkTable.fileId,
-      pageNumber: TextChunkTable.pageNumber,
+      id: chunkTable.id,
+      content: chunkTable.content,
+      fileId: chunkTable.fileId,
+      pageNumber: chunkTable.pageNumber,
       fileName: fileTable.name,
-      orderIndex: TextChunkTable.orderIndex,
-      leadingOverlap: TextChunkTable.leadingOverlap,
-      trailingOverlap: TextChunkTable.trailingOverlap,
+      orderIndex: chunkTable.orderIndex,
+      sourceType: chunkTable.sourceType,
+      sourceUrl: chunkTable.sourceUrl,
       embeddingSimilarity:
-        sql`1 - (${TextChunkTable.embedding} <=> ${JSON.stringify(embedding)})` as SQL<number>,
+        sql`1 - (${chunkTable.embedding} <=> ${JSON.stringify(embedding)})` as SQL<number>,
     })
-    .from(TextChunkTable)
-    .innerJoin(fileTable, eq(TextChunkTable.fileId, fileTable.id))
-    .where(inArray(TextChunkTable.fileId, fileIds))
+    .from(chunkTable)
+    .innerJoin(fileTable, eq(chunkTable.fileId, fileTable.id))
+    .where(inArray(chunkTable.fileId, fileIds))
     .limit(limit)
     .orderBy((t) => [desc(t.embeddingSimilarity)]);
 }

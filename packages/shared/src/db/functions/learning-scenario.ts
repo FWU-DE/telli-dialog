@@ -13,7 +13,6 @@ import {
   sharedLearningScenarioTable,
   sharedLearningScenarioUsageTracking,
   SharedLearningScenarioUsageTrackingInsertModel,
-  TextChunkTable,
 } from '../schema';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 
@@ -268,12 +267,6 @@ export async function dbDeleteLearningScenarioByIdAndUserId({
     await tx
       .delete(LearningScenarioFileMapping)
       .where(eq(LearningScenarioFileMapping.learningScenarioId, learningScenario.id));
-    await tx.delete(TextChunkTable).where(
-      inArray(
-        TextChunkTable.fileId,
-        relatedFiles.map((f) => f.id),
-      ),
-    );
     await tx.delete(fileTable).where(
       inArray(
         fileTable.id,

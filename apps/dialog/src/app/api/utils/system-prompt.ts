@@ -41,24 +41,14 @@ Inhalt: ${source.content}
 `;
 }
 
-function constructSingleFilePrompt(chunks: Chunk[]) {
-  if (chunks.length === 0) {
-    return '';
-  }
+export function constructFilePrompt(chunks: Chunk[]) {
+  if (chunks.length === 0) return '';
 
-  return `${chunks[0]?.fileName ? `Dateiname: ${chunks[0].fileName}` : ''} 
-Inhalt:
-${chunks.map((chunk) => chunk.content).join('\n\n')}
-`;
-}
+  const chunkTexts = chunks
+    .map((chunk) => `${chunk.fileName ? `Dateiname: ${chunk.fileName}\n` : ''}${chunk.content}`)
+    .join('\n\n');
 
-export function constructFilePrompt(chunks: Record<string, Chunk[]> | undefined) {
-  return chunks !== undefined && Object.keys(chunks).length > 0
-    ? `\n## Der Nutzer hat folgende Dateien bereitgestellt, berücksichtige den Inhalt dieser Dateien bei der Antwort:\n` +
-        Object.entries(chunks)
-          .map(([, chunks]) => constructSingleFilePrompt(chunks))
-          .join('\n')
-    : '';
+  return `\n## Der Nutzer hat folgende Dateien bereitgestellt, berücksichtige den Inhalt dieser Dateien bei der Antwort:\n${chunkTexts}`;
 }
 
 // Helper to format optional fields in a list

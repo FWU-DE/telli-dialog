@@ -1,118 +1,28 @@
-import { split as splitSentences, SentenceSplitterSyntax } from 'sentence-splitter';
-import { Chunk } from './types';
-
-const splitWhitespaceRegex = /\s+/;
-
-/** Helper to count words */
-function countWords(str: string) {
-  return str.trim().split(splitWhitespaceRegex).length;
-}
-
-function splitLongSentence(sentence: string, maxSentenceWords: number): string[] {
-  const words = sentence.trim().split(splitWhitespaceRegex);
-  if (words.length <= maxSentenceWords) return [sentence];
-  const parts: string[] = [];
-  let i = 0;
-  while (i < words.length) {
-    parts.push(words.slice(i, i + maxSentenceWords).join(' '));
-    i += maxSentenceWords;
-  }
-  return parts;
-}
-
-export function chunkText({
-  text,
-  sentenceChunkOverlap,
-  lowerBoundWordCount = 200,
-}: {
-  text: string;
-  sentenceChunkOverlap: number;
-  lowerBoundWordCount?: number;
-}) {
-  // Try sentence splitting
-  let sentences: string[];
-  try {
-    const nodes = splitSentences(text);
-    sentences = nodes
-      .filter((node) => node.type === SentenceSplitterSyntax.Sentence)
-      .map((node) => {
-        // Join all string children for the sentence
-        return node.children
-          .filter((child) => child.type === 'Str' || child.type === 'Punctuation')
-          .map((child) => child.value)
-          .join('');
-      });
-  } catch {
-    sentences = [];
-  }
-
-  // Ensure each sentence is below 100 words
-  const maxSentenceWords = 100;
-
-  const pseudoSentences = sentences.flatMap((sentence) =>
-    splitLongSentence(sentence, maxSentenceWords),
-  );
-
-  // Sentence-based chunking
-  const chunks: {
-    content: string;
-    leadingOverlap?: string;
-    trailingOverlap?: string;
-  }[] = [];
-  let currentWordCount = 0;
-  let startIdx = 0;
-
-  while (startIdx < pseudoSentences.length) {
-    currentWordCount = 0;
-    let endIdx = startIdx;
-    // Add sentences until we reach the chunk size
-    while (endIdx < pseudoSentences.length && currentWordCount < lowerBoundWordCount) {
-      currentWordCount += countWords(pseudoSentences[endIdx] ?? '');
-      endIdx++;
-    }
-    // Add overlap: preceding and following sentence if available
-    const overlapStart = Math.max(0, startIdx - sentenceChunkOverlap);
-    const overlapEnd = Math.min(pseudoSentences.length, endIdx + sentenceChunkOverlap);
-    const chunkWithOverlap = pseudoSentences.slice(overlapStart, overlapEnd).join(' ');
-    chunks.push({
-      content: chunkWithOverlap,
-      leadingOverlap: pseudoSentences[overlapStart],
-      trailingOverlap: pseudoSentences[overlapEnd],
-    });
-    // Move to next chunk (start after the last sentence in this chunk)
-    startIdx = endIdx;
-  }
-
-  return chunks;
-}
+import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 
 /**
- * The hybrid search returns a flat array of chunks from potentially multiple files,
- * ranked by relevance. This function groups the retrieved text chunks by fileId
- * and sorts them by orderIndex within each group.
- * Grouping ensures each file gets its own labeled section in the prompt,
- * and sorting ensures the excerpts within each file appear in their natural reading order.
+ * Splits text into chunks using RecursiveCharacterTextSplitter.
  *
- * @param chunks Array of text chunks with fileId and orderIndex properties
- * @returns Object with fileIds as keys and arrays of sorted chunks as values
+ * Tuned for BAAI/bge-m3 (8192-token context window):
+ * - chunkSize: 1500 characters — captures more semantic context per embedding
+ * - chunkOverlap: 300 characters — preserves context across chunk boundaries
+ *
+ * The recursive splitter tries paragraph breaks first, then sentences, then words,
+ * which naturally respects document structure.
  */
-export function groupAndSortChunks(chunks: Array<Chunk>) {
-  // Group chunks by fileId
-  const groupedChunks = chunks.reduce(
-    (acc, chunk) => {
-      if (acc === undefined || !acc[chunk.fileId]) {
-        acc[chunk.fileId] = [];
-      }
-      acc?.[chunk.fileId]?.push(chunk);
-      return acc;
-    },
-    {} as Record<string, Chunk[]>,
-  );
-
-  // Sort each group by orderIndex and remove overlaps
-  Object.keys(groupedChunks).forEach((fileId) => {
-    groupedChunks?.[fileId]?.sort((a, b) => a.orderIndex - b.orderIndex);
+export async function chunkText({
+  text,
+  chunkSize = 1500,
+  chunkOverlap = 300,
+}: {
+  text: string;
+  chunkSize?: number;
+  chunkOverlap?: number;
+}): Promise<string[]> {
+  const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize,
+    chunkOverlap,
   });
 
-  return groupedChunks;
+  return splitter.splitText(text);
 }

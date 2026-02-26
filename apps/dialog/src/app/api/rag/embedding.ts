@@ -2,7 +2,7 @@ import { generateEmbeddingsWithBilling } from '@telli/ai-core';
 import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
 import { dbGetModelByName } from '@shared/db/functions/llm-model';
 import { EMBEDDING_BATCH_SIZE, EMBEDDING_MAX_CONCURRENT_REQUESTS } from '@/const';
-import { TextChunkInsertModel } from '@shared/db/schema';
+import { ChunkInsertModel } from '@shared/db/schema';
 import { logDebug } from '@shared/logging';
 
 const EMBEDDING_MODEL = 'BAAI/bge-m3';
@@ -56,22 +56,20 @@ export async function embedChunks({
   fileId,
   federalStateId,
 }: {
-  chunksWithoutEmbeddings: Omit<TextChunkInsertModel, 'embedding'>[];
+  chunksWithoutEmbeddings: Omit<ChunkInsertModel, 'embedding'>[];
   fileId: string;
   federalStateId: string;
-}): Promise<TextChunkInsertModel[]> {
+}): Promise<ChunkInsertModel[]> {
   const { apiKeyId, modelId } = await getEmbeddingModelWithApiKey(federalStateId);
 
   logDebug(`Embedding ${chunksWithoutEmbeddings.length} chunks`);
-  const promises: Promise<TextChunkInsertModel[]>[] = [];
+  const promises: Promise<ChunkInsertModel[]>[] = [];
   // Process chunks in batches of 200
   for (let i = 0; i < chunksWithoutEmbeddings.length; i += EMBEDDING_BATCH_SIZE) {
     promises.push(
       (async () => {
         const batch = chunksWithoutEmbeddings.slice(i, i + EMBEDDING_BATCH_SIZE);
-        const batchTexts = batch.map(
-          (value) => `${value.leadingOverlap ?? ''}${value.content}${value.trailingOverlap ?? ''}`,
-        );
+        const batchTexts = batch.map((value) => value.content);
 
         // TODO: TD-526 Bill to user
         const batchEmbeddings = await embedTextWithApiKey(batchTexts, modelId, apiKeyId);
@@ -84,8 +82,6 @@ export async function embedChunks({
             fileId,
             orderIndex: originalIndex,
             pageNumber: chunksWithoutEmbeddings[originalIndex]?.pageNumber ?? 0,
-            leadingOverlap: chunksWithoutEmbeddings[originalIndex]?.leadingOverlap ?? undefined,
-            trailingOverlap: chunksWithoutEmbeddings[originalIndex]?.trailingOverlap ?? undefined,
           };
         });
       })(),

@@ -1,7 +1,7 @@
-import { TextChunkInsertModel, FileModelAndContent } from '@shared/db/schema';
+import { ChunkInsertModel, FileModelAndContent } from '@shared/db/schema';
 import { type ChatMessage as Message } from '@/types/chat';
 import { UserAndContext } from '@/auth/types';
-import { chunkText, groupAndSortChunks } from './chunking';
+import { chunkText } from './chunking';
 import { embedText, embedChunks } from './embedding';
 import { vectorSearch } from './retrieval';
 import { Chunk, TextElement } from './types';
@@ -14,38 +14,32 @@ import { logError } from '@shared/logging';
  * @param textElements - Extracted text elements (e.g. pages from a PDF, or a single text block)
  * @param fileId - The ID to associate chunks with
  * @param federalStateId - The federal state ID of the user
- * @param sentenceChunkOverlap - Number of overlapping sentences between chunks
- * @param lowerBoundWordCount - Minimum word count per chunk
  * @returns Embedded text chunks ready for DB insertion
  */
 export async function chunkAndEmbed({
   textElements,
   fileId,
   federalStateId,
-  sentenceChunkOverlap = 1,
-  lowerBoundWordCount = 200,
 }: {
   textElements: TextElement[];
   fileId: string;
   federalStateId: string;
-  sentenceChunkOverlap?: number;
-  lowerBoundWordCount?: number;
-}): Promise<TextChunkInsertModel[]> {
-  const chunksWithoutEmbeddings: Omit<TextChunkInsertModel, 'embedding'>[] = textElements.flatMap(
-    (element) =>
-      chunkText({
+}): Promise<ChunkInsertModel[]> {
+  const allChunks = await Promise.all(
+    textElements.map(async (element) => {
+      const chunks = await chunkText({
         text: element.text,
-        sentenceChunkOverlap,
-        lowerBoundWordCount,
-      }).map((chunk, index) => ({
+      });
+      return chunks.map((content, index) => ({
         pageNumber: element.page ?? null,
         fileId,
         orderIndex: index,
-        content: chunk.content,
-        leadingOverlap: chunk.leadingOverlap,
-        trailingOverlap: chunk.trailingOverlap,
-      })),
+        content,
+      }));
+    }),
   );
+
+  const chunksWithoutEmbeddings: Omit<ChunkInsertModel, 'embedding'>[] = allChunks.flat();
 
   return embedChunks({
     chunksWithoutEmbeddings,
@@ -70,16 +64,16 @@ export async function retrieveChunks({
   messages: Message[];
   user: UserAndContext;
   relatedFileEntities: FileModelAndContent[];
-}): Promise<Record<string, Chunk[]> | undefined> {
+}): Promise<Chunk[]> {
   if (relatedFileEntities.length === 0) {
-    return undefined;
+    return [];
   }
 
   const lastUserMessage = messages.findLast((m) => m.role === 'user');
   const searchQuery = lastUserMessage?.content ?? '';
 
   if (searchQuery.trim() === '') {
-    return undefined;
+    return [];
   }
 
   let queryEmbedding: number[] = [];
@@ -100,5 +94,5 @@ export async function retrieveChunks({
     limit: FILE_SEARCH_LIMIT,
   });
 
-  return groupAndSortChunks(chunks);
+  return chunks;
 }

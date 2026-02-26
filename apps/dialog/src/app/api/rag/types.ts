@@ -1,6 +1,6 @@
-import { TextChunkSelectModel } from '@shared/db/schema';
+import { ChunkSelectModel } from '@shared/db/schema';
 
-export type Chunk = Omit<TextChunkSelectModel, 'embedding' | 'contentTsv' | 'createdAt'> & {
+export type Chunk = Omit<ChunkSelectModel, 'embedding' | 'contentTsv' | 'createdAt'> & {
   fileName: string;
 };
 

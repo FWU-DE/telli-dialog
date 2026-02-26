@@ -101,7 +101,7 @@ export async function constructChatSystemPrompt({
   isTeacher: boolean;
   federalState: ObscuredFederalState;
   websearchSources: WebsearchSource[];
-  chunks?: Record<string, Chunk[]>;
+  chunks: Chunk[];
 }) {
   const filePrompt = constructFilePrompt(chunks);
   const websearchPrompt = constructWebsearchPrompt(websearchSources);

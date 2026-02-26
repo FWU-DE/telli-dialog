@@ -43,7 +43,7 @@ export function constructCharacterSystemPrompt({
   websearchSources,
 }: {
   character: CharacterSelectModel;
-  chunks?: Record<string, Chunk[]>;
+  chunks: Chunk[];
   websearchSources?: WebsearchSource[];
 }) {
   const filePrompt = constructFilePrompt(chunks);

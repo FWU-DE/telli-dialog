@@ -1184,14 +1184,11 @@ export type CustomGptFileMappingUpdateModel = z.infer<typeof customGptFileMappin
 /**
  * Schema for table text_chunk
  */
-export const textChunkSourceTypeSchema = z.enum(['file', 'websearch']);
-export const textChunkSourceTypeEnum = pgEnum(
-  'text_chunk_source_type',
-  textChunkSourceTypeSchema.enum,
-);
-export type TextChunkSourceType = z.infer<typeof textChunkSourceTypeSchema>;
+export const chunkSourceTypeSchema = z.enum(['file', 'webpage']);
+export const chunkSourceTypeEnum = pgEnum('chunk_source_type', chunkSourceTypeSchema.enum);
+export type ChunkSourceType = z.infer<typeof chunkSourceTypeSchema>;
 
-export const TextChunkTable = pgTable(
+export const chunkTable = pgTable(
   'text_chunk',
   {
     id: uuid('id').defaultRandom().primaryKey(),
@@ -1199,11 +1196,9 @@ export const TextChunkTable = pgTable(
     embedding: vector('embedding', { dimensions: 1024 }).notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     content: text('content').notNull(),
-    leadingOverlap: text('leading_overlap'),
-    trailingOverlap: text('trailing_overlap'),
     orderIndex: integer('order_index').notNull(),
     pageNumber: integer('page_number'),
-    sourceType: textChunkSourceTypeEnum('source_type').notNull().default('file'),
+    sourceType: chunkSourceTypeEnum('source_type').notNull().default('file'),
     sourceUrl: text('source_url'),
   },
   (table) => [
@@ -1213,20 +1208,20 @@ export const TextChunkTable = pgTable(
   ],
 );
 
-export const textChunkSelectSchema = createSelectSchema(TextChunkTable).extend({
-  sourceType: textChunkSourceTypeSchema,
+export const chunkSelectSchema = createSelectSchema(chunkTable).extend({
+  sourceType: chunkSourceTypeSchema,
 });
-export const textChunkInsertSchema = createInsertSchema(TextChunkTable).omit({ id: true }).extend({
-  sourceType: textChunkSourceTypeSchema.optional(),
+export const chunkInsertSchema = createInsertSchema(chunkTable).omit({ id: true }).extend({
+  sourceType: chunkSourceTypeSchema.optional(),
 });
-export const textChunkUpdateSchema = createUpdateSchema(TextChunkTable).extend({
+export const chunkUpdateSchema = createUpdateSchema(chunkTable).extend({
   id: z.string(),
-  sourceType: textChunkSourceTypeSchema.optional(),
+  sourceType: chunkSourceTypeSchema.optional(),
 });
 
-export type TextChunkSelectModel = z.infer<typeof textChunkSelectSchema>;
-export type TextChunkInsertModel = z.infer<typeof textChunkInsertSchema>;
-export type TextChunkUpdateModel = z.infer<typeof textChunkUpdateSchema>;
+export type ChunkSelectModel = z.infer<typeof chunkSelectSchema>;
+export type ChunkInsertModel = z.infer<typeof chunkInsertSchema>;
+export type ChunkUpdateModel = z.infer<typeof chunkUpdateSchema>;
 
 /**
  * Schema for table voucher
