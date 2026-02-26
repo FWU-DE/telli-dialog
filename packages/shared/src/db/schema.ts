@@ -1184,13 +1184,18 @@ export type CustomGptFileMappingUpdateModel = z.infer<typeof customGptFileMappin
 /**
  * Schema for table text_chunk
  */
+export const textChunkSourceTypeSchema = z.enum(['file', 'websearch']);
+export const textChunkSourceTypeEnum = pgEnum(
+  'text_chunk_source_type',
+  textChunkSourceTypeSchema.enum,
+);
+export type TextChunkSourceType = z.infer<typeof textChunkSourceTypeSchema>;
+
 export const TextChunkTable = pgTable(
   'text_chunk',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    fileId: text('file_id')
-      .references(() => fileTable.id, { onDelete: 'cascade' })
-      .notNull(),
+    fileId: text('file_id').references(() => fileTable.id, { onDelete: 'cascade' }),
     embedding: vector('embedding', { dimensions: 1024 }).notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     content: text('content').notNull(),
@@ -1198,17 +1203,25 @@ export const TextChunkTable = pgTable(
     trailingOverlap: text('trailing_overlap'),
     orderIndex: integer('order_index').notNull(),
     pageNumber: integer('page_number'),
+    sourceType: textChunkSourceTypeEnum('source_type').notNull().default('file'),
+    sourceUrl: text('source_url'),
   },
   (table) => [
     index().on(table.fileId),
     index('text_chunk_embedding_idx').using('hnsw', table.embedding.op('vector_cosine_ops')),
+    index().on(table.sourceUrl),
   ],
 );
 
-export const textChunkSelectSchema = createSelectSchema(TextChunkTable);
-export const textChunkInsertSchema = createInsertSchema(TextChunkTable).omit({ id: true });
+export const textChunkSelectSchema = createSelectSchema(TextChunkTable).extend({
+  sourceType: textChunkSourceTypeSchema,
+});
+export const textChunkInsertSchema = createInsertSchema(TextChunkTable).omit({ id: true }).extend({
+  sourceType: textChunkSourceTypeSchema.optional(),
+});
 export const textChunkUpdateSchema = createUpdateSchema(TextChunkTable).extend({
   id: z.string(),
+  sourceType: textChunkSourceTypeSchema.optional(),
 });
 
 export type TextChunkSelectModel = z.infer<typeof textChunkSelectSchema>;
