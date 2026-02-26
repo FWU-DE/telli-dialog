@@ -29,10 +29,31 @@ export async function uploadFile(page: Page, filePath: string) {
 
 export async function deleteChat(page: Page, conversationId: string) {
   const label = page.locator('div', { has: page.locator(`a[href="/d/${conversationId}"]`) }).last();
-  await label.focus();
+
+  // Ensure element is in viewport
+  await label.scrollIntoViewIfNeeded();
+
+  // Firefox-specific approach: get bounding box and move mouse physically
+  const boundingBox = await label.boundingBox();
+  if (boundingBox) {
+    // Move mouse to the center of the element
+    await page.mouse.move(
+      boundingBox.x + boundingBox.width / 2,
+      boundingBox.y + boundingBox.height / 2,
+    );
+
+    // Wait a bit for Firefox to register the mouse position
+    await page.waitForTimeout(300);
+  }
+
+  // Now try hover
   await label.hover({ force: true });
+
+  // Give Firefox more time to process the hover state
+  await page.waitForTimeout(500);
+
   const dropDownMenu = label.getByLabel('Conversation actions');
-  await dropDownMenu.waitFor();
+  await dropDownMenu.waitFor({ timeout: 10000 });
   await dropDownMenu.click();
   await page.getByRole('menuitem', { name: 'Löschen' }).click();
   await waitForToast(page);
