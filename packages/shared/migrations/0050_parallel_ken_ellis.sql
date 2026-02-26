@@ -1,0 +1,3 @@
+ALTER TABLE "file_table" ADD COLUMN "user_id" uuid;--> statement-breakpoint
+ALTER TABLE "file_table" ADD CONSTRAINT "file_table_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user_entity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "file_table_user_id_index" ON "file_table" USING btree ("user_id");

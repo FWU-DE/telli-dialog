@@ -1,5 +1,5 @@
 {
-  "id": "40c64009-80c7-4eb1-adcd-790bb02d9ce5",
+  "id": "f884228b-5590-428b-9d15-f4c19c9e9257",
   "prevId": "1498581b-12b2-4846-8e58-a88f4082eb61",
   "version": "7",
   "dialect": "postgresql",
@@ -1815,7 +1815,23 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "file_table_user_id_index": {
+          "name": "file_table_user_id_index",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "file_table_user_id_user_entity_id_fk": {
           "name": "file_table_user_id_user_entity_id_fk",
