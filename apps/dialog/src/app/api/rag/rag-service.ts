@@ -96,7 +96,7 @@ export async function retrieveChunks({
   const fileIds = relatedFileEntities.map((file) => file.id);
   const chunks = await vectorSearch({
     embedding: queryEmbedding,
-    fileIds: fileIds,
+    fileIds,
     limit: FILE_SEARCH_LIMIT,
   });
 
