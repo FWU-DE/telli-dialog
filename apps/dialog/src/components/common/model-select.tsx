@@ -53,7 +53,7 @@ export default function ModelSelect({
     models.find((model) => model.name === optimisticModelId) || selectedModel;
 
   return (
-    <div className="flex flex-col gap-2 hover:bg-secondary/20 rounded-enterprise-md p-2">
+    <div className="flex flex-col gap-2 rounded-enterprise-md p-2">
       <span className="text-xs text-gray-600 hidden sm:block">{label}</span>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger

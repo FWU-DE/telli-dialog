@@ -20,16 +20,15 @@
   }
 }
 
-.no-scroll {
-  overflow: hidden;
+@theme {
+  --breakpoint-xs: 480px;
+
+  --shadow-dropdown: 0px 4px 10px 0px rgba(0, 41, 102, 0.1);
+  --shadow-3xl: 0 4px 9px 0px rgba(0, 41, 102, 0.2);
 }
 
-.truncate-custom {
-  display: block;
-  whitespace: nowrap;
+.no-scroll {
   overflow: hidden;
-  textoverflow: ellipsis;
-  minwidth: 0;
 }
 
 .disclaimer-content h2 {

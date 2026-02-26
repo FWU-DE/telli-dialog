@@ -8,9 +8,6 @@ const config = {
     container: {
       center: true,
       padding: '2rem',
-      screens: {
-        '2xl': '1400px',
-      },
     },
     extend: {
       screens: {
@@ -19,11 +16,6 @@ const config = {
       listStyleType: {
         square: 'square',
         roman: 'upper-roman',
-      },
-      boxShadow: {
-        '3xl': '0 4px 9px 0px rgba(0, 41, 102, 0.2)',
-        'modal-blur': '0px 0px 80px rgba(0, 41, 102, 0.1)',
-        dropdown: '0px 4px 10px 0px rgba(0, 41, 102, 0.10);',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
