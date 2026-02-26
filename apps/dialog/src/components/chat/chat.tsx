@@ -158,6 +158,11 @@ export default function Chat({
   ]);
 
   useEffect(() => {
+    // Skip fetching file mappings if the conversation doesn't exist yet (no messages sent)
+    if (messages.length === 0) {
+      return;
+    }
+
     const fetchData = async () => {
       const newFileMapping = await refetchFileMapping(id);
       setFileMapping(newFileMapping);
@@ -181,7 +186,7 @@ export default function Chat({
       });
     };
     void fetchData();
-  }, [countOfFilesInChat, id]);
+  }, [countOfFilesInChat, id, messages.length]);
 
   async function customHandleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -210,6 +215,7 @@ export default function Chat({
         createdAt: new Date(),
         size: file.file.size,
         metadata: null,
+        userId: null,
         // Create a blob URL for images so they display immediately without fetching from S3
         localUrl: isImageFile(file.file.name) ? URL.createObjectURL(file.file) : undefined,
       }));

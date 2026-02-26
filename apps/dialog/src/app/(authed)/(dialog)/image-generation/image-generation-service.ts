@@ -128,6 +128,7 @@ export async function handleImageGeneration({
       name: `generated_image_${Date.now()}.png`,
       size: imageBuffer.length,
       type: 'image/png',
+      userId,
     });
 
     // Store generated image as assistant message
