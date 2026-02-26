@@ -7,6 +7,15 @@ import { logDebug } from '@shared/logging';
 
 const EMBEDDING_MODEL = 'BAAI/bge-m3';
 
+async function getEmbeddingModelWithApiKey(federalStateId: string) {
+  const [apiKeyId, model] = await Promise.all([
+    getFederalStateApiKeyId(federalStateId),
+    dbGetModelByName(EMBEDDING_MODEL),
+  ]);
+  if (!model) throw new Error(`Embedding model ${EMBEDDING_MODEL} not found`);
+  return { apiKeyId, modelId: model.id };
+}
+
 export async function embedText({
   text,
   federalStateId,
@@ -14,17 +23,10 @@ export async function embedText({
   text: string[];
   federalStateId: string;
 }) {
-  const [apiKeyId, model] = await Promise.all([
-    getFederalStateApiKeyId(federalStateId),
-    dbGetModelByName(EMBEDDING_MODEL),
-  ]);
-
-  if (!model) {
-    throw new Error(`Embedding model ${EMBEDDING_MODEL} not found`);
-  }
+  const { apiKeyId, modelId } = await getEmbeddingModelWithApiKey(federalStateId);
 
   // TODO: TD-526 Bill to user
-  return await embedTextWithApiKey(text, model.id, apiKeyId);
+  return await embedTextWithApiKey(text, modelId, apiKeyId);
 }
 
 async function getFederalStateApiKeyId(federalStateId: string) {
@@ -49,7 +51,7 @@ async function embedTextWithApiKey(text: string[], modelId: string, federalState
   return result.embeddings;
 }
 
-export async function embedTextChunks({
+export async function embedChunks({
   values,
   fileId,
   federalStateId,
@@ -58,14 +60,7 @@ export async function embedTextChunks({
   fileId: string;
   federalStateId: string;
 }): Promise<TextChunkInsertModel[]> {
-  const [federalStateApiKeyId, model] = await Promise.all([
-    getFederalStateApiKeyId(federalStateId),
-    dbGetModelByName(EMBEDDING_MODEL),
-  ]);
-
-  if (!model) {
-    throw new Error(`Embedding model ${EMBEDDING_MODEL} not found`);
-  }
+  const { apiKeyId, modelId } = await getEmbeddingModelWithApiKey(federalStateId);
 
   logDebug(`Embedding ${values.length} chunks`);
   const promises: Promise<TextChunkInsertModel[]>[] = [];
@@ -79,11 +74,7 @@ export async function embedTextChunks({
         );
 
         // TODO: TD-526 Bill to user
-        const batchEmbeddings = await embedTextWithApiKey(
-          batchTexts,
-          model.id,
-          federalStateApiKeyId,
-        );
+        const batchEmbeddings = await embedTextWithApiKey(batchTexts, modelId, apiKeyId);
 
         return batchEmbeddings.map((embedding, batchIndex) => {
           const originalIndex = i + batchIndex;

@@ -257,35 +257,3 @@ jobs:
           subject-name: ghcr.io/fwu-de/telli-admin
           subject-digest: ${{ steps.docker-build-admin.outputs.digest }}
           push-to-registry: true
-
-  deploy_apps:
-    name: Deploy to staging (${{ matrix.kube_context }})
-    runs-on: ubuntu-latest
-    needs: [build_push_docker_image_dialog, build_push_docker_image_admin]
-    strategy:
-      fail-fast: false
-      matrix:
-        kube_context: [ionos, otc]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Set Kubernetes context
-        uses: azure/k8s-set-context@v4
-        with:
-          method: kubeconfig
-          kubeconfig: ${{ secrets.KUBECONFIG_FILE }}
-          context: ${{ matrix.kube_context }}
-
-      - name: Restart Kubernetes deployment
-        run: |
-          echo "Restarting Kubernetes deployment to pull new latest containers"
-          kubectl rollout restart deployment/telli-admin-stage -n telli-stage
-          kubectl rollout restart deployment/telli-dialog-stage -n telli-stage
-
-      - name: Wait for rollout to complete
-        run: |
-          echo "Waiting for rollout to complete"
-          kubectl rollout status deployment/telli-admin-stage -n telli-stage
-          kubectl rollout status deployment/telli-dialog-stage -n telli-stage

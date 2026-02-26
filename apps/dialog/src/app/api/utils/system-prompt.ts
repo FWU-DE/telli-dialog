@@ -1,5 +1,5 @@
 import { TOTAL_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
-import { ChunkResult } from '../file-operations/process-chunks';
+import { Chunk } from '../rag/types';
 import { WebsearchSource } from '@shared/db/types';
 
 export const LANGUAGE_GUIDELINES = `
@@ -41,24 +41,22 @@ Inhalt: ${source.content}
 `;
 }
 
-function constructSingleFilePrompt(textChunks: ChunkResult[]) {
-  if (textChunks.length === 0) {
+function constructSingleFilePrompt(chunks: Chunk[]) {
+  if (chunks.length === 0) {
     return '';
   }
 
-  return `${textChunks[0]?.fileName ? `Dateiname: ${textChunks[0].fileName}` : ''} 
+  return `${chunks[0]?.fileName ? `Dateiname: ${chunks[0].fileName}` : ''} 
 Inhalt:
-${textChunks.map((chunk) => chunk.content).join('\n\n')}
+${chunks.map((chunk) => chunk.content).join('\n\n')}
 `;
 }
 
-export function constructFilePrompt(
-  retrievedTextChunks: Record<string, ChunkResult[]> | undefined,
-) {
-  return retrievedTextChunks !== undefined && Object.keys(retrievedTextChunks).length > 0
+export function constructFilePrompt(chunks: Record<string, Chunk[]> | undefined) {
+  return chunks !== undefined && Object.keys(chunks).length > 0
     ? `\n## Der Nutzer hat folgende Dateien bereitgestellt, berücksichtige den Inhalt dieser Dateien bei der Antwort:\n` +
-        Object.entries(retrievedTextChunks)
-          .map(([, textChunks]) => constructSingleFilePrompt(textChunks))
+        Object.entries(chunks)
+          .map(([, chunks]) => constructSingleFilePrompt(chunks))
           .join('\n')
     : '';
 }

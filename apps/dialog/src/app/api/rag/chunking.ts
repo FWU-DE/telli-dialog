@@ -1,9 +1,5 @@
 import { split as splitSentences, SentenceSplitterSyntax } from 'sentence-splitter';
-import { TextChunkSelectModel } from '@shared/db/schema';
-
-export type ChunkResult = Omit<TextChunkSelectModel, 'embedding' | 'contentTsv' | 'createdAt'> & {
-  fileName: string;
-};
+import { Chunk } from './types';
 
 const splitWhitespaceRegex = /\s+/;
 
@@ -91,11 +87,16 @@ export function chunkText({
 }
 
 /**
- * Groups retrieved text chunks by fileId and sorts them by orderIndex within each group
+ * The hybrid search returns a flat array of chunks from potentially multiple files,
+ * ranked by relevance. This function groups the retrieved text chunks by fileId
+ * and sorts them by orderIndex within each group.
+ * Grouping ensures each file gets its own labeled section in the prompt,
+ * and sorting ensures the excerpts within each file appear in their natural reading order.
+ *
  * @param chunks Array of text chunks with fileId and orderIndex properties
  * @returns Object with fileIds as keys and arrays of sorted chunks as values
  */
-export function groupAndSortChunks(chunks: Array<ChunkResult>) {
+export function groupAndSortChunks(chunks: Array<Chunk>) {
   // Group chunks by fileId
   const groupedChunks = chunks.reduce(
     (acc, chunk) => {
@@ -105,7 +106,7 @@ export function groupAndSortChunks(chunks: Array<ChunkResult>) {
       acc?.[chunk.fileId]?.push(chunk);
       return acc;
     },
-    {} as Record<string, ChunkResult[]>,
+    {} as Record<string, Chunk[]>,
   );
 
   // Sort each group by orderIndex and remove overlaps
