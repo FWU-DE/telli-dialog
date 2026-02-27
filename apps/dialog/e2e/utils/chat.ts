@@ -34,6 +34,11 @@ export async function deleteChat(page: Page, conversationId: string) {
   await label.scrollIntoViewIfNeeded();
   await expect(label).toBeVisible();
 
+  const box = await label.boundingBox();
+  if (box) {
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  }
+
   await label.focus();
   await label.hover();
 
