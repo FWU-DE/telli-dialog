@@ -1,0 +1,1 @@
+ALTER TABLE "text_chunk" DROP COLUMN "page_number";
