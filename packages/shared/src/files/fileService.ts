@@ -5,7 +5,7 @@ import {
   CustomGptFileMapping,
   fileTable,
   LearningScenarioFileMapping,
-  TextChunkTable,
+  chunkTable,
 } from '@shared/db/schema';
 import {
   copyFileInS3,
@@ -43,8 +43,8 @@ export async function duplicateFileWithEmbeddings(originalFileId: string): Promi
     // Get all text chunks for the original file
     const originalChunks = await db
       .select()
-      .from(TextChunkTable)
-      .where(eq(TextChunkTable.fileId, originalFileId));
+      .from(chunkTable)
+      .where(eq(chunkTable.fileId, originalFileId));
 
     // Copy the original file from S3
     await copyFileInS3({
@@ -70,7 +70,7 @@ export async function duplicateFileWithEmbeddings(originalFileId: string): Promi
             fileId: newFileId,
           };
         });
-        await tx.insert(TextChunkTable).values(newChunks);
+        await tx.insert(chunkTable).values(newChunks);
       }
     });
 
