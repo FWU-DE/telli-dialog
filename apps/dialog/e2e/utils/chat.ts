@@ -34,6 +34,7 @@ export async function deleteChat(page: Page, conversationId: string) {
   await label.scrollIntoViewIfNeeded();
   await expect(label).toBeVisible();
 
+  await label.focus();
   await label.hover();
 
   const dropDownMenu = label.getByLabel('Conversation actions');
