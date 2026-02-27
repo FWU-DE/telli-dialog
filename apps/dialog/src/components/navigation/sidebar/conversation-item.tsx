@@ -83,14 +83,14 @@ export default function ConversationItem({
       )}
       {/* TODO: Refactor this into a separate component */}
       <div
-        className={cn('group-hover:visible group-focus-within:visible')}
+        className={cn('md:invisible group-hover:visible group-focus-within:visible')}
         aria-label="Conversation actions"
         aria-hidden={false}
       >
         <DropdownMenu.Root>
           {!isEditable && (
             <DropdownMenu.Trigger aria-label="Edit" asChild className="cursor-pointer">
-              <DotsHorizontalIcon aria-hidden="true" className="h-5 w-5 sm:h-4 sm:w-4" />
+              <DotsHorizontalIcon className="h-5 w-5 sm:h-4 sm:w-4" />
             </DropdownMenu.Trigger>
           )}
           <DropdownMenu.Content
