@@ -27,7 +27,7 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@types/react-syntax-highlighter": "15.5.13",
-    "eslint": "9.39.2",
+    "eslint": "10.0.1",
     "eslint-config-next": "16.1.6",
     "eslint-config-prettier": "10.1.8",
     "eslint-config-turbo": "2.8.10",
