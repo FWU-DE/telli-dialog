@@ -12,7 +12,7 @@
     "@telli/api-eslint-config": "workspace:*",
     "@telli/api-typescript-config": "workspace:*",
     "@types/node": "24.10.13",
-    "eslint": "9.39.2",
+    "eslint": "10.0.1",
     "typescript": "5.9.3"
   },
   "dependencies": {
