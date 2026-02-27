@@ -180,7 +180,7 @@ test('data is autosaved on blur', async ({ page }) => {
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
-  await page.waitForURL('/learning-scenarios/**');
+  await page.waitForURL('/learning-scenarios**');
   await page.getByRole('link', { name }).click();
   await page.waitForURL('/learning-scenarios/**');
   await waitForToastDisappear(page); // wait for success toast to disappear before continuing
