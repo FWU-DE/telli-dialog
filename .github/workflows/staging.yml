@@ -195,7 +195,7 @@ jobs:
           provenance: mode=max
 
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest@v4
         with:
           subject-name: ghcr.io/fwu-de/telli-dialog
           subject-digest: ${{ steps.docker-build-dialog.outputs.digest }}
@@ -252,7 +252,7 @@ jobs:
           provenance: mode=max
 
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest@v4
         with:
           subject-name: ghcr.io/fwu-de/telli-admin
           subject-digest: ${{ steps.docker-build-admin.outputs.digest }}
