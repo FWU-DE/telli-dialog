@@ -83,7 +83,7 @@ export default function ConversationItem({
       )}
       {/* TODO: Refactor this into a separate component */}
       <div
-        className={cn('md:invisible group-hover:visible group-focus-within:visible')}
+        className={cn('group-hover:visible group-focus-within:visible')}
         aria-label="Conversation actions"
         aria-hidden={false}
       >
