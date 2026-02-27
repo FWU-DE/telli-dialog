@@ -262,6 +262,20 @@ export async function dbInsertFileWithChunks(file: FileInsertModel, chunks: Chun
   });
 }
 
+export async function dbInsertWebChunks(chunks: ChunkInsertModel[]) {
+  if (chunks.length === 0) return;
+  await db.insert(chunkTable).values(chunks);
+}
+
+export async function dbChunksExistForSourceUrl(sourceUrl: string): Promise<boolean> {
+  const result = await db
+    .select({ id: chunkTable.id })
+    .from(chunkTable)
+    .where(eq(chunkTable.sourceUrl, sourceUrl))
+    .limit(1);
+  return result.length > 0;
+}
+
 export async function dbInsertFile(file: FileInsertModel) {
   await db.insert(fileTable).values(file).onConflictDoNothing();
 }

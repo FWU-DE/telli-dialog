@@ -4,7 +4,6 @@ import { extractTextFromPdfBuffer } from './parse-pdf';
 import { FileMetadata } from '@shared/db/schema';
 import { preprocessImage } from './preprocess-image';
 import { isImageFile } from '@/utils/files/generic';
-import { TextElement } from '../rag/types';
 
 export async function extractFile({
   fileContent,
@@ -12,19 +11,19 @@ export async function extractFile({
 }: {
   fileContent: Buffer;
   type: SUPPORTED_DOCUMENTS_TYPE;
-}): Promise<{ content: TextElement[]; metadata: FileMetadata; processedBuffer?: Buffer }> {
-  let content: TextElement[] = [];
+}): Promise<{ content: string[]; metadata: FileMetadata; processedBuffer?: Buffer }> {
+  let content: string[] = [];
   let metadata: FileMetadata = {};
   let processedBuffer: Buffer | undefined;
 
   if (type === 'pdf') {
-    const { pageElement } = await extractTextFromPdfBuffer(fileContent);
-    content = pageElement;
+    const { text } = await extractTextFromPdfBuffer(fileContent);
+    content = text;
   } else if (type === 'docx') {
     const result = await extractTextFromWordDocument(fileContent);
-    content = [{ text: result }];
+    content = [result];
   } else if (type === 'md' || type === 'txt') {
-    content = [{ text: new TextDecoder('utf-8').decode(fileContent) }];
+    content = [new TextDecoder('utf-8').decode(fileContent)];
   } else if (isImageFile(type)) {
     const imageResult = await preprocessImage(fileContent, type);
     metadata = imageResult.metadata;

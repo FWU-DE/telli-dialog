@@ -4,7 +4,7 @@ import { UserAndContext } from '@/auth/types';
 import { chunkText } from './chunking';
 import { embedText, embedChunks } from './embedding';
 import { vectorSearch } from './retrieval';
-import { RetrievedChunk, UnembeddedChunk, TextElement } from './types';
+import { RetrievedChunk, UnembeddedChunk } from './types';
 import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { logError } from '@shared/logging';
 
@@ -21,27 +21,26 @@ export async function chunkAndEmbed({
   fileId,
   federalStateId,
 }: {
-  textElements: TextElement[];
+  textElements: string[];
   fileId: string;
   federalStateId: string;
 }): Promise<ChunkInsertModel[]> {
-  const allChunks = await Promise.all(
+  const chunkedElements = await Promise.all(
     textElements.map(async (element) => {
-      const chunks = await chunkText(element.text);
-      return chunks.map(
-        (content, index): UnembeddedChunk => ({
-          pageNumber: element.page ?? null,
-          fileId,
-          orderIndex: index,
-          content,
-        }),
-      );
+      const chunks = await chunkText(element);
+      return chunks.map((content) => ({
+        fileId,
+        content,
+      }));
     }),
   );
 
+  const allChunks: UnembeddedChunk[] = chunkedElements
+    .flat()
+    .map((chunk, index) => ({ ...chunk, orderIndex: index }));
+
   return embedChunks({
-    chunksWithoutEmbeddings: allChunks.flat(),
-    fileId,
+    chunksWithoutEmbeddings: allChunks,
     federalStateId,
   });
 }

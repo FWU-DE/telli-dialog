@@ -1197,7 +1197,6 @@ export const chunkTable = pgTable(
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     content: text('content').notNull(),
     orderIndex: integer('order_index').notNull(),
-    pageNumber: integer('page_number'),
     sourceType: chunkSourceTypeEnum('source_type').notNull().default('file'),
     sourceUrl: text('source_url'),
   },

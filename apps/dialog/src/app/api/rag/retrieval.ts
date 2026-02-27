@@ -25,7 +25,6 @@ export async function vectorSearch({
       id: chunkTable.id,
       content: chunkTable.content,
       fileId: chunkTable.fileId,
-      pageNumber: chunkTable.pageNumber,
       fileName: fileTable.name,
       orderIndex: chunkTable.orderIndex,
       sourceType: chunkTable.sourceType,
