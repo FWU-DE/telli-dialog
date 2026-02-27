@@ -32,16 +32,14 @@ export async function deleteChat(page: Page, conversationId: string) {
 
   // Ensure element is in viewport
   await label.scrollIntoViewIfNeeded();
+  await expect(label).toBeVisible();
 
-  console.log('Label is visible:', await label.isVisible());
-  console.log('Label inner html:', await label.innerHTML());
-  // Now try hover
-  await label.focus();
   await label.hover();
 
   const dropDownMenu = label.getByLabel('Conversation actions');
-  await dropDownMenu.waitFor({ timeout: 10000 });
+  await expect(dropDownMenu).toBeVisible();
   await dropDownMenu.click();
+
   await page.getByRole('menuitem', { name: 'Löschen' }).click();
   await waitForToast(page);
 }
