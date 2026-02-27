@@ -128,9 +128,7 @@ export async function sendSharedChatMessage({
   const websearchSources = await Promise.all(urls.map((url) => webScraper(url)));
 
   const chunks = await retrieveChunks({
-    modelId: definedModel.id,
-    apiKeyId,
-    messages: messages.map<ChatMessage>((m) => ({ id: m.id, role: m.role, content: m.content })),
+    messages,
     user: teacherUserAndContext,
     relatedFileEntities,
   });
