@@ -1,4 +1,4 @@
-import { ChunkInsertModel, FileModelAndContent } from '@shared/db/schema';
+import { ChunkInsertModel, ChunkSourceType, FileModelAndContent } from '@shared/db/schema';
 import { type ChatMessage as Message } from '@/types/chat';
 import { UserAndContext } from '@/auth/types';
 import { chunkText } from './chunking';
@@ -19,17 +19,23 @@ import { logError } from '@shared/logging';
 export async function chunkAndEmbed({
   textElements,
   fileId,
+  sourceUrl,
+  sourceType,
   federalStateId,
 }: {
   textElements: string[];
-  fileId: string;
+  fileId?: string;
+  sourceUrl?: string;
+  sourceType?: ChunkSourceType;
   federalStateId: string;
 }): Promise<ChunkInsertModel[]> {
   const chunkedElements = await Promise.all(
     textElements.map(async (element) => {
       const chunks = await chunkText(element);
       return chunks.map((content) => ({
-        fileId,
+        fileId: fileId ?? null,
+        sourceUrl: sourceUrl ?? null,
+        sourceType,
         content,
       }));
     }),
