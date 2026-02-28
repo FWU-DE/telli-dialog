@@ -81,7 +81,7 @@ export default async function Page(
               {t('open-chat')}
             </Link>
           </section>
-          <div className="hidden md:block w-1 border-r-[1px]" />
+          <div className="hidden md:block w-1 border-r" />
           <section className="flex flex-col justify-between items-center gap-8 sm:gap-12">
             <h2 className="text-2xl sm:text-3xl text-center">{t('use-qr')}</h2>
             <QRCodeSVG
@@ -92,7 +92,7 @@ export default async function Page(
           </section>
         </main>
       </div>
-      <div className="flex-grow" />
+      <div className="grow" />
       <hr className="w-full" />
       <Footer />
     </div>

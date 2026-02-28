@@ -62,7 +62,7 @@ export default function ProfileMenu({ userAndContext }: { userAndContext?: UserA
       <DropdownMenu.Trigger asChild>
         <button
           aria-label="profileDropdown"
-          className={cn('focus:outline-none group rounded-enterprise-sm', iconClassName)}
+          className={cn('focus:outline-hidden group rounded-enterprise-sm', iconClassName)}
           title="Profil"
         >
           <UserIcon className="w-8 h-8" />
@@ -98,7 +98,7 @@ export function ThreeDotsProfileMenu({
       <DropdownMenu.Trigger asChild>
         <button
           aria-label="More actions"
-          className="flex items-center justify-center focus:outline-none group rounded-enterprise-sm hover:bg-secondary-hover min-w-8"
+          className="flex items-center justify-center focus:outline-hidden group rounded-enterprise-sm hover:bg-secondary-hover min-w-8"
           title="More actions"
         >
           <DotsHorizontalIcon className="text-primary h-6 w-6" />

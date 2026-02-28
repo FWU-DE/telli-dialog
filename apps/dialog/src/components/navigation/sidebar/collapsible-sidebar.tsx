@@ -33,17 +33,17 @@ export default function CollapsibleSidebar({ children }: { children: React.React
   }, [isBelow.md, isOpen]);
 
   return (
-    <div className="flex h-[100dvh] pointer-events-auto z-20 bg-white">
+    <div className="flex h-dvh pointer-events-auto z-20 bg-white">
       <div
         ref={ref}
         className={cn(
-          'fixed inset-y-0 h-[100dvh] shadow-3xl left-0 transition-all duration-200 transform w-72 md:relative overflow-y-auto overflow-x-hidden flex flex-col bg-semilight-gray',
+          'fixed inset-y-0 h-dvh shadow-3xl left-0 transition-all duration-200 transform w-72 md:relative overflow-y-auto overflow-x-hidden flex flex-col bg-semilight-gray',
           isOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in md:w-0 md:translate-x-0',
         )}
       >
         <div className={cn('flex gap-4 items-center px-6 mt-[22px] mb-4', !isOpen && 'invisible')}>
           <ToggleSidebarButton forceVisibility />
-          <div className="flex-grow" />
+          <div className="grow" />
           <NewChatButton forceVisibility />
         </div>
         {children}
@@ -61,7 +61,7 @@ export function ToggleSidebarButton({ forceVisibility = false }: { forceVisibili
     <button
       title="Sidebar"
       className={cn(
-        'focus:outline-none group hover:bg-light-gray rounded-enterprise-sm',
+        'focus:outline-hidden group hover:bg-light-gray rounded-enterprise-sm',
         iconClassName,
       )}
       onClick={() => toggle()}
@@ -89,7 +89,7 @@ export function NewChatButton({ forceVisibility = false }: { forceVisibility?: b
     <button
       onClick={handleOpenNewChat}
       className={cn(
-        'focus:outline-none group hover:bg-light-gray rounded-enterprise-sm',
+        'focus:outline-hidden group hover:bg-light-gray rounded-enterprise-sm',
         iconClassName,
       )}
       aria-label="Neuer Chat"

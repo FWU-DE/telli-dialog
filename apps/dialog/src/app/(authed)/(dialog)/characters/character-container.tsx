@@ -83,9 +83,9 @@ export default function CharacterContainer({
       </figure>
       <div className="flex flex-col gap-0 text-left min-w-0">
         <h2 className={cn('font-medium leading-none min-h-5', truncateClassName)}>{name}</h2>
-        <span className={cn(truncateClassName, 'text-gray-400')}>{description}</span>
+        <span className={cn(truncateClassName, 'text-gray-600')}>{description}</span>
       </div>
-      <div className="flex-grow" />
+      <div className="grow" />
       {timeLeft > 0 && character.maxUsageTimeLimit !== null && (
         <CountDownTimer
           leftTime={timeLeft}

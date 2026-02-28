@@ -35,7 +35,7 @@ export default function RedeemVoucherPage() {
           placeholder={t('voucher-placeholder')}
           maxLength={16}
           required
-          className="flex-grow"
+          className="grow"
           value={voucherCode}
           onChange={(e) => setVoucherCode(e.target.value)}
         />

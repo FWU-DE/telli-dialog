@@ -27,9 +27,9 @@ export default function LoginForm() {
         <TelliLogo className="text-primary my-8 sm:my-16 w-40" />
         <SharedChatLoginForm />
         <div className="flex gap-2 items-center w-full justify-center py-8">
-          <hr className="flex-grow border-t border-gray-200" />
+          <hr className="grow border-t border-gray-200" />
           <span className="text-sm text-gray-200">oder</span>
-          <hr className="flex-grow border-t border-gray-200" />
+          <hr className="grow border-t border-gray-200" />
         </div>
         <button
           className={cn(buttonSecondaryClassName, 'w-full')}

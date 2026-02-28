@@ -30,7 +30,7 @@ export function ChatHeaderBar({
           <ToggleSidebarButton />
           <NewChatButton />
           <SelectLlmModel isStudent={userAndContext.school.userRole === 'student'} />
-          <div className="flex-grow"></div>
+          <div className="grow"></div>
           {title !== undefined && (
             <div className="hidden sm:flex  md:w-1/2 sm:w-1/3">
               <span className="font-normal text-xl truncate">{title}</span>

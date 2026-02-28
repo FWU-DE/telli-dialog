@@ -2,17 +2,12 @@ import type { Config } from 'tailwindcss';
 import tailwindcssAnimate from 'tailwindcss-animate';
 
 const config = {
-  darkMode: ['class'],
   content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
   prefix: '',
-  safelist: ['whitespace-pre-wrap'],
   theme: {
     container: {
       center: true,
       padding: '2rem',
-      screens: {
-        '2xl': '1400px',
-      },
     },
     extend: {
       screens: {
@@ -21,11 +16,6 @@ const config = {
       listStyleType: {
         square: 'square',
         roman: 'upper-roman',
-      },
-      boxShadow: {
-        '3xl': '0 4px 9px 0px rgba(0, 41, 102, 0.2)',
-        'modal-blur': '0px 0px 80px rgba(0, 41, 102, 0.1)',
-        dropdown: '0px 4px 10px 0px rgba(0, 41, 102, 0.10);',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
@@ -39,12 +29,6 @@ const config = {
         coral: '#e94d52',
         'dark-red': '#9f070d',
         'light-red': '#fef6f6',
-        'gray-50': '#F7F7F7',
-        'gray-100': '#999999',
-        'gray-200': '#E5E5E5',
-        'gray-300': '#CDCDCD',
-        'gray-400': '#595959',
-        'gray-600': '#9B9B9B',
         'primary-hover': 'var(--primary-hover)',
         'primary-hover-text': 'var(--primary-hover-text)',
         'secondary-hover': 'var(--secondary-hover)',

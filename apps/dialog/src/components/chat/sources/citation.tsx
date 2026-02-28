@@ -41,7 +41,7 @@ export default function Citation({
             <div className="flex flex-row items-center gap-1 p-1.5">
               <SearchIcon className="w-3 h-3 ml-1" />
               <span
-                className="flex overflow-ellipsis text-xs line-clamp-1"
+                className="flex text-ellipsis text-xs line-clamp-1"
                 aria-label={`Source Title ${index} ${sourceIndex}`}
               >
                 {displayTitle}
@@ -61,7 +61,7 @@ export default function Citation({
                 // overwrite direction from parent
                 dir="ltr"
               >
-                <span className="font-medium overflow-ellipsis text-sm line-clamp-2">
+                <span className="font-medium text-ellipsis text-sm line-clamp-2">
                   {getDisplayUrl(source.link)}
                 </span>
               </span>
