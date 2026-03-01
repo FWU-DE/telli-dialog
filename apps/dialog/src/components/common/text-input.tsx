@@ -106,12 +106,12 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
               className={cn(
                 'w-full',
                 inputFieldClassName,
-                'focus:border-primary placeholder:text-gray-300',
+                'focus:border-primary placeholder:text-gray-400',
                 customInputClassName,
                 'resize-none',
                 borderErrorClass,
                 borderLongTextClass,
-                readOnly && 'text-gray-100',
+                readOnly && 'text-gray-400',
               )}
               rows={rows}
               readOnly={readOnly}
@@ -139,12 +139,12 @@ export function TextInput<T extends HTMLTextAreaElement | HTMLInputElement>({
               className={cn(
                 'w-full',
                 inputFieldClassName,
-                'focus:border-primary placeholder:text-gray-300',
+                'focus:border-primary placeholder:text-gray-400',
                 customInputClassName,
                 borderErrorClass,
                 borderLongTextClass,
                 counterVisible ? 'pr-14' : '',
-                readOnly && 'text-gray-100',
+                readOnly && 'text-gray-400',
               )}
               readOnly={readOnly}
               {...(props as React.InputHTMLAttributes<HTMLInputElement>)}

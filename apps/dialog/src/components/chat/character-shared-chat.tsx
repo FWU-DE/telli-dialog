@@ -114,7 +114,7 @@ export default function CharacterSharedChat({
         <div className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden">
           <div
             ref={scrollRef}
-            className="flex-grow w-full max-w-5xl overflow-y-auto p-4 pb-[5rem]"
+            className="grow w-full max-w-5xl overflow-y-auto p-4 pb-20"
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
             {messages.length === 0 ? (

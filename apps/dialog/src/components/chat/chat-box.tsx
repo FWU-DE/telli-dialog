@@ -46,7 +46,7 @@ export function ChatBox({
 
   const userClassName =
     children.role === 'user'
-      ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary-light text-primary-foreground max-w-[70%] break-words'
+      ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary-light text-primary-foreground max-w-[70%] wrap-break-word'
       : 'w-fit';
 
   // Check both DB file mapping and pending files for this message
@@ -99,7 +99,7 @@ export function ChatBox({
   const maybeWebpageCard =
     websearchSources.length > 0 && (!isLoading || !isLastNonUser) ? (
       <div
-        className="relative flex flex-wrap overflow-ellipsis gap-2 self-end mt-1 mb-2 w-[70%]"
+        className="relative flex flex-wrap text-ellipsis gap-2 self-end mt-1 mb-2 w-[70%]"
         dir="rtl"
       >
         {websearchSources?.map((source, sourceIndex) => {

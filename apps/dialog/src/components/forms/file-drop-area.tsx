@@ -126,7 +126,7 @@ export function FileDrop({
     <div {...restProps}>
       <div
         className={`border-2 border-dashed rounded-enterprise-sm p-6 text-center transition-colors ${
-          isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
+          isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-600'
         }`}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
