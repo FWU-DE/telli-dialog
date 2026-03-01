@@ -6,12 +6,7 @@ import { CustomGptSelectModel } from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { constructBaseCharacterSystemPrompt } from '../character/system-prompt';
-import {
-  constructFilePrompt,
-  constructWebsearchPrompt,
-  LANGUAGE_GUIDELINES,
-} from '../utils/system-prompt';
-import { WebsearchSource } from '@shared/db/types';
+import { constructRagContext, LANGUAGE_GUIDELINES } from '../utils/system-prompt';
 
 function constructTelliSystemPrompt() {
   return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. 
@@ -93,18 +88,15 @@ export async function constructChatSystemPrompt({
   customGptId,
   isTeacher,
   federalState,
-  websearchSources,
   chunks,
 }: {
   characterId?: string;
   customGptId?: string;
   isTeacher: boolean;
   federalState: ObscuredFederalState;
-  websearchSources: WebsearchSource[];
   chunks: RetrievedChunk[];
 }) {
-  const filePrompt = constructFilePrompt(chunks);
-  const websearchPrompt = constructWebsearchPrompt(websearchSources);
+  const ragContext = constructRagContext(chunks);
 
   if (characterId !== undefined) {
     const character = await dbGetCharacterById({ characterId });
@@ -115,7 +107,7 @@ export async function constructChatSystemPrompt({
 
     const characterSystemPrompt = constructBaseCharacterSystemPrompt(character);
 
-    return `${characterSystemPrompt}\n${filePrompt}\n${websearchPrompt}`;
+    return `${characterSystemPrompt}\n${ragContext}`;
   }
 
   if (customGptId !== undefined) {
@@ -136,8 +128,8 @@ export async function constructChatSystemPrompt({
       customGptSystemPrompt = constructCustomGptSystemPrompt(customGpt);
     }
 
-    return `${customGptSystemPrompt}\n${filePrompt}\n${websearchPrompt}`;
+    return `${customGptSystemPrompt}\n${ragContext}`;
   }
 
-  return `${constructTelliSystemPrompt()}\n${filePrompt}\n${websearchPrompt}`;
+  return `${constructTelliSystemPrompt()}\n${ragContext}`;
 }

@@ -41,14 +41,19 @@ Inhalt: ${source.content}
 `;
 }
 
-export function constructFilePrompt(chunks: RetrievedChunk[]) {
+export function constructRagContext(chunks: RetrievedChunk[]) {
   if (chunks.length === 0) return '';
 
   const chunkTexts = chunks
-    .map((chunk) => `${chunk.fileName ? `Dateiname: ${chunk.fileName}\n` : ''}${chunk.content}`)
+    .map((chunk) => {
+      if (chunk.sourceType === 'webpage') {
+        return `Url: ${chunk.sourceUrl}\n${chunk.content}`;
+      }
+      return `${chunk.fileName ? `Dateiname: ${chunk.fileName}\n` : ''}${chunk.content}`;
+    })
     .join('\n\n');
 
-  return `\n## Der Nutzer hat folgende Dateien bereitgestellt, berücksichtige den Inhalt dieser Dateien bei der Antwort:\n${chunkTexts}`;
+  return `\n## Der Nutzer hat folgende Informationen bereitgestellt, berücksichtige den Inhalt bei der Antwort:\n${chunkTexts}`;
 }
 
 // Helper to format optional fields in a list

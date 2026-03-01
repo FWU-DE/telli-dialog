@@ -11,8 +11,8 @@ export async function extractFile({
 }: {
   fileContent: Buffer;
   type: SUPPORTED_DOCUMENTS_TYPE;
-}): Promise<{ content: string[]; metadata: FileMetadata; processedBuffer?: Buffer }> {
-  let content: string[] = [];
+}): Promise<{ content: string; metadata: FileMetadata; processedBuffer?: Buffer }> {
+  let content: string = '';
   let metadata: FileMetadata = {};
   let processedBuffer: Buffer | undefined;
 
@@ -21,15 +21,15 @@ export async function extractFile({
     content = text;
   } else if (type === 'docx') {
     const result = await extractTextFromWordDocument(fileContent);
-    content = [result];
+    content = result;
   } else if (type === 'md' || type === 'txt') {
-    content = [new TextDecoder('utf-8').decode(fileContent)];
+    content = new TextDecoder('utf-8').decode(fileContent);
   } else if (isImageFile(type)) {
     const imageResult = await preprocessImage(fileContent, type);
     metadata = imageResult.metadata;
     processedBuffer = imageResult.buffer;
     // Images don't have text content, so content remains empty
-    content = [];
+    content = '';
   }
 
   return { content, metadata, processedBuffer };

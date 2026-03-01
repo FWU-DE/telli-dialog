@@ -1203,7 +1203,7 @@ export const chunkTable = pgTable(
   (table) => [
     index().on(table.fileId),
     index('text_chunk_embedding_idx').using('hnsw', table.embedding.op('vector_cosine_ops')),
-    index().on(table.sourceUrl),
+    unique().on(table.sourceUrl, table.orderIndex),
   ],
 );
 

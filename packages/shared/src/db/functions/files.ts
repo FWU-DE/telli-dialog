@@ -264,7 +264,7 @@ export async function dbInsertFileWithChunks(file: FileInsertModel, chunks: Chun
 
 export async function dbInsertWebChunks(chunks: ChunkInsertModel[]) {
   if (chunks.length === 0) return;
-  await db.insert(chunkTable).values(chunks);
+  await db.insert(chunkTable).values(chunks).onConflictDoNothing();
 }
 
 export async function dbChunksExistForSourceUrl(sourceUrl: string): Promise<boolean> {

@@ -1,7 +1,7 @@
 import { type LearningScenarioSelectModel } from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
 import {
-  constructFilePrompt,
+  constructRagContext,
   constructWebsearchPrompt,
   formatList,
   LANGUAGE_GUIDELINES,
@@ -17,7 +17,7 @@ export function constructLearningScenarioSystemPrompt({
   chunks: RetrievedChunk[];
   websearchSources?: WebsearchSource[];
 }) {
-  const filePrompt = constructFilePrompt(chunks);
+  const filePrompt = constructRagContext(chunks);
   const websearchPrompt = constructWebsearchPrompt(websearchSources);
 
   return `Du bist ein KI-Chatbot, der in einer Schulklasse eingesetzt wird, um Schülerinnen und Schüler zu unterstützen.

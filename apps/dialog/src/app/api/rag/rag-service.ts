@@ -9,44 +9,42 @@ import { FILE_SEARCH_LIMIT } from '@/configuration-text-inputs/const';
 import { logError } from '@shared/logging';
 
 /**
- * Chunks and embeds text elements.
+ * Chunks and embeds text.
  *
- * @param textElements - Extracted text elements (e.g. pages from a PDF, or a single text block)
+ * @param textElements - Input text
  * @param fileId - The ID to associate chunks with
  * @param federalStateId - The federal state ID of the user
  * @returns Embedded text chunks ready for DB insertion
  */
 export async function chunkAndEmbed({
-  textElements,
+  text,
   fileId,
   sourceUrl,
   sourceType,
   federalStateId,
 }: {
-  textElements: string[];
+  text: string;
   fileId?: string;
   sourceUrl?: string;
   sourceType?: ChunkSourceType;
   federalStateId: string;
 }): Promise<ChunkInsertModel[]> {
-  const chunkedElements = await Promise.all(
-    textElements.map(async (element) => {
-      const chunks = await chunkText(element);
-      return chunks.map((content) => ({
-        fileId: fileId ?? null,
-        sourceUrl: sourceUrl ?? null,
-        sourceType,
-        content,
-      }));
-    }),
-  );
+  if (text.trim() === '') {
+    return [];
+  }
 
-  const allChunks: UnembeddedChunk[] = chunkedElements
-    .flat()
-    .map((chunk, index) => ({ ...chunk, orderIndex: index }));
+  const chunks = await chunkText(text);
+
+  const enrichedChunks: UnembeddedChunk[] = chunks.map((content, index) => ({
+    fileId: fileId ?? null,
+    sourceUrl: sourceUrl ?? null,
+    sourceType,
+    content,
+    orderIndex: index,
+  }));
 
   return embedChunks({
-    chunksWithoutEmbeddings: allChunks,
+    chunksWithoutEmbeddings: enrichedChunks,
     federalStateId,
   });
 }
@@ -57,18 +55,21 @@ export async function chunkAndEmbed({
  * @param messages - The conversation messages
  * @param user - The authenticated user context
  * @param relatedFileEntities - File entities to search within
- * @returns Grouped and sorted chunks keyed by fileId, or undefined if no files
+ * @param sourceUrls - Optional source URLs to search within
+ * @returns The most relevant chunks
  */
 export async function retrieveChunks({
   messages,
   user,
   relatedFileEntities,
+  sourceUrls,
 }: {
   messages: Message[];
   user: UserAndContext;
   relatedFileEntities: FileModelAndContent[];
+  sourceUrls?: string[];
 }): Promise<RetrievedChunk[]> {
-  if (relatedFileEntities.length === 0) {
+  if (relatedFileEntities.length === 0 && (!sourceUrls || sourceUrls.length === 0)) {
     return [];
   }
 
@@ -94,6 +95,7 @@ export async function retrieveChunks({
   const chunks = await vectorSearch({
     embedding: queryEmbedding,
     fileIds,
+    sourceUrls,
     limit: FILE_SEARCH_LIMIT,
   });
 

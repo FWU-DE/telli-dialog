@@ -10,13 +10,18 @@ import {
 } from '@shared/db/functions/chat';
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
 import { dbUpdateLastUsedModelByUserId } from '@shared/db/functions/user';
-import { dbGetAttachedFileByEntityId, linkFilesToConversation } from '@shared/db/functions/files';
+import {
+  dbChunksExistForSourceUrl,
+  dbGetAttachedFileByEntityId,
+  dbInsertWebChunks,
+  linkFilesToConversation,
+} from '@shared/db/functions/files';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructChatSystemPrompt } from './system-prompt';
 import { formatMessagesWithImages, getChatTitle, limitChatHistory } from './utils';
-import { retrieveChunks } from '../rag/rag-service';
+import { chunkAndEmbed, retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
 import {
   KEEP_FIRST_MESSAGES,
@@ -136,6 +141,23 @@ export async function sendChatMessage({
     conversationObject.messages,
   );
 
+  if (!characterId && !customGptId) {
+    const validWebsearchSources = websearchSources.filter((s) => s.content && !s.error);
+    for (const source of validWebsearchSources) {
+      const exists = await dbChunksExistForSourceUrl(source.link);
+      if (!exists && source.content) {
+        const newChunks = await chunkAndEmbed({
+          text: source.content,
+          sourceUrl: source.link,
+          sourceType: 'webpage',
+          federalStateId: user.federalState.id,
+        });
+
+        await dbInsertWebChunks(newChunks);
+      }
+    }
+  }
+
   // Save user message to DB
   await dbInsertChatContent({
     conversationId: conversation.id,
@@ -168,6 +190,7 @@ export async function sendChatMessage({
     messages,
     user,
     relatedFileEntities,
+    sourceUrls: websearchSources.filter((s) => s.content && !s.error).map((s) => s.link),
   });
 
   // Update last used model
@@ -187,7 +210,6 @@ export async function sendChatMessage({
     customGptId,
     isTeacher: user.school.userRole === 'teacher',
     federalState: user.federalState,
-    websearchSources,
     chunks,
   });
 
