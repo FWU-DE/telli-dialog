@@ -1,6 +1,7 @@
 import type { APIRequestContext } from '@playwright/test';
 
-const API_KEY = process.env.DE_TEST_API_KEY ?? process.env.E2E_CLIENT_API_KEY ?? process.env.API_KEY;
+const API_KEY =
+  process.env.DE_TEST_API_KEY ?? process.env.E2E_CLIENT_API_KEY ?? process.env.API_KEY;
 
 if (!API_KEY) {
   throw new Error(
@@ -34,7 +35,7 @@ async function findModel(
   const modelsResponse = await request.get('/v1/models', {
     headers: authorizationHeader,
   });
-  const modelsPayload = await modelsResponse.json();
+  const modelsPayload = (await modelsResponse.json()) as unknown;
 
   if (!modelsResponse.ok() || !Array.isArray(modelsPayload)) {
     throw new Error(
@@ -57,7 +58,9 @@ export async function getTextModel(request: APIRequestContext) {
     (m) => {
       if (m.isDeleted) return false;
       const modelName = m.name.toLowerCase();
-      return modelName === 'gpt-4o-mini' || modelName.includes('llama') || modelName.includes('gpt');
+      return (
+        modelName === 'gpt-4o-mini' || modelName.includes('llama') || modelName.includes('gpt')
+      );
     },
     'No text model available',
   );
