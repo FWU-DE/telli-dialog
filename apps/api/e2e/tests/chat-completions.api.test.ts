@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { authorizationHeader } from '../utils/api.js';
+import { authorizationHeader, getTextModel } from '../utils/api.js';
 
 test.describe('POST /v1/chat/completions', () => {
   test.describe('Non-streaming', () => {
@@ -27,19 +27,7 @@ test.describe('POST /v1/chat/completions', () => {
     });
 
     test('returns a chat completion response', async ({ request }) => {
-      // First, get available models to find a text model
-      const modelsResponse = await request.get('/v1/models', {
-        headers: authorizationHeader,
-      });
-      const models = (await modelsResponse.json()) as Array<{ name: string }>;
-      const textModel = models.find(
-        (m: { name: string }) =>
-          m.name === 'gpt-4o-mini' || m.name.includes('llama') || m.name.includes('gpt'),
-      );
-      expect(textModel).toBeDefined();
-      if (!textModel) {
-        throw new Error('No text model available for chat completions test');
-      }
+      const textModel = await getTextModel(request);
 
       const response = await request.post('/v1/chat/completions', {
         headers: authorizationHeader,
@@ -74,19 +62,7 @@ test.describe('POST /v1/chat/completions', () => {
 
   test.describe('Streaming', () => {
     test('returns a streamed response', async ({ request }) => {
-      // Get available models
-      const modelsResponse = await request.get('/v1/models', {
-        headers: authorizationHeader,
-      });
-      const models = (await modelsResponse.json()) as Array<{ name: string }>;
-      const textModel = models.find(
-        (m: { name: string }) =>
-          m.name === 'gpt-4o-mini' || m.name.includes('llama') || m.name.includes('gpt'),
-      );
-      expect(textModel).toBeDefined();
-      if (!textModel) {
-        throw new Error('No text model available for streaming chat test');
-      }
+      const textModel = await getTextModel(request);
 
       const response = await request.post('/v1/chat/completions', {
         headers: authorizationHeader,

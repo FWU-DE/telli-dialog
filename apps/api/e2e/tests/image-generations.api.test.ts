@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { authorizationHeader } from '../utils/api.js';
+import { authorizationHeader, getImageModel } from '../utils/api.js';
 
 test.describe('POST /v1/images/generations', () => {
   test('returns 401 without authentication', async ({ request }) => {
@@ -25,20 +25,7 @@ test.describe('POST /v1/images/generations', () => {
   });
 
   test('generates an image from a prompt', async ({ request }) => {
-    // Get available models to find an image generation model
-    const modelsResponse = await request.get('/v1/models', {
-      headers: authorizationHeader,
-    });
-    const models = (await modelsResponse.json()) as Array<{ name: string }>;
-    const imageModel = models.find(
-      (m: { name: string }) => m.name.includes('dall-e') || m.name.includes('imagen'),
-    );
-
-    // Skip if no image generation model is available
-    test.skip(!imageModel, 'No image generation model available');
-    if (!imageModel) {
-      return;
-    }
+    const imageModel = await getImageModel(request);
 
     const response = await request.post('/v1/images/generations', {
       headers: authorizationHeader,

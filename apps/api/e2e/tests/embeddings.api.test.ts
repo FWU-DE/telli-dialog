@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { authorizationHeader } from '../utils/api.js';
+import { authorizationHeader, getEmbeddingModel } from '../utils/api.js';
 
 test.describe('POST /v1/embeddings', () => {
   test('returns 401 without authentication', async ({ request }) => {
@@ -25,18 +25,7 @@ test.describe('POST /v1/embeddings', () => {
   });
 
   test('returns embedding vectors', async ({ request }) => {
-    // Get available models to find an embedding model
-    const modelsResponse = await request.get('/v1/models', {
-      headers: authorizationHeader,
-    });
-    const models = (await modelsResponse.json()) as Array<{ name: string }>;
-    const embeddingModel = models.find(
-      (m: { name: string }) => m.name.includes('embedding') || m.name.includes('bge'),
-    );
-    expect(embeddingModel).toBeDefined();
-    if (!embeddingModel) {
-      throw new Error('No embedding model available for embeddings test');
-    }
+    const embeddingModel = await getEmbeddingModel(request);
 
     const response = await request.post('/v1/embeddings', {
       headers: authorizationHeader,

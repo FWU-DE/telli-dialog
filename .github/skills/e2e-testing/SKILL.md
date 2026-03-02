@@ -64,22 +64,13 @@ apps/api/e2e/
     └── usage.api.test.ts
 ```
 
-### API App Playwright Config (`apps/api/playwright.config.ts`)
+### API App Playwright Config
 
-- `testDir`: `./e2e/tests/`
-- `baseURL`: `http://localhost:3002` (or `process.env.API_BASE_URL`)
-- `workers`: 1 (sequential execution)
-- `timeout`: 60 seconds per test
-- Single project: `api` matching `*.api.test.ts`
-- `webServer` runs `pnpm dev` and waits for `http://localhost:3002/health`
-- Loads `.env.test` for the test API key
+See `apps/api/playwright.config.ts` for configuration details.
 
 ### API App Utilities (`apps/api/e2e/utils/api.ts`)
 
-| Helper                | Purpose                                              |
-| --------------------- | ---------------------------------------------------- |
-| `authorizationHeader` | `{ Authorization: 'Bearer <API_KEY>' }` from env var |
-| `baseURL`             | API base URL (defaults to `http://localhost:3002`)   |
+See the exported functions and constants in `apps/api/e2e/utils/api.ts` for available helpers (auth headers, model lookup utilities, etc.).
 
 ### API App Test Patterns
 
@@ -127,22 +118,17 @@ test.describe('POST /v1/some-endpoint', () => {
 });
 ```
 
-**Dynamic model selection** — when a test needs a specific model type, fetch `/v1/models` first:
+**Dynamic model selection** — use the utility functions in `apps/api/e2e/utils/api.ts`:
 
 ```typescript
-const modelsResponse = await request.get('/v1/models', {
-  headers: authorizationHeader,
-});
-const models = (await modelsResponse.json()) as Array<{ name: string }>;
-const targetModel = models.find((m) => m.name.includes('gpt') || m.name.includes('llama'));
-expect(targetModel).toBeDefined();
+import { getTextModel, getEmbeddingModel, getImageModel } from '../utils/api.js';
+
+const textModel = await getTextModel(request);
+const embeddingModel = await getEmbeddingModel(request);
+const imageModel = await getImageModel(request);
 ```
 
-**Conditional skip** — skip tests when required infrastructure is unavailable:
-
-```typescript
-test.skip(!imageModel, 'No image generation model available');
-```
+These throw if no matching model is found, keeping tests consistent.
 
 ### Running API App Tests
 
@@ -202,29 +188,19 @@ const characterName = 'My Character ' + nanoid(8);
 
 ### Existing utility functions
 
-**Always reuse these helpers** instead of reimplementing their logic:
+**Always reuse existing helpers** instead of reimplementing their logic. Check the utility files in `apps/dialog/e2e/utils/` and `apps/api/e2e/utils/` for available helpers — each function is documented with JSDoc comments.
 
-| Helper                                       | File                           | Purpose                                         |
-| -------------------------------------------- | ------------------------------ | ----------------------------------------------- |
-| `login(page, user, password?)`               | `utils/login.ts`               | Log in via Keycloak                             |
-| `sendMessage(page, message)`                 | `utils/chat.ts`                | Type and send a chat message, wait for response |
-| `regenerateMessage(page)`                    | `utils/chat.ts`                | Click reload and wait for new response          |
-| `uploadFile(page, filePath)`                 | `utils/chat.ts`                | Upload a file via file input                    |
-| `deleteChat(page, conversationId)`           | `utils/chat.ts`                | Delete a conversation via the sidebar menu      |
-| `configureCharacter(page, data?)`            | `utils/character.ts`           | Fill in the character creation form             |
-| `deleteCharacter(page, name)`                | `utils/character.ts`           | Delete a character by name                      |
-| `deleteCustomGpt(page, name)`                | `utils/custom-gpt.ts`          | Delete a custom GPT by name                     |
-| `createLearningScenario(page)`               | `utils/learning-scenario.ts`   | Navigate and click "Szenario erstellen"         |
-| `configureLearningScenario(page, data?)`     | `utils/learning-scenario.ts`   | Fill in learning scenario form                  |
-| `deleteLearningScenario(page, name)`         | `utils/learning-scenario.ts`   | Delete a learning scenario by name              |
-| `deleteLearningScenarioFromDetailPage(page)` | `utils/learning-scenario.ts`   | Delete from the scenario detail page            |
-| `waitForToast(page, msg?)`                   | `utils/utils.ts`               | Wait for a toast notification to appear         |
-| `waitForToastDisappear(page)`                | `utils/utils.ts`               | Wait for toasts to disappear                    |
-| `mockUserAndContext()`                       | `utils/mock.ts`                | Generate mock user data for API tests           |
-| `mockLlmModel()`                             | `utils/mock.ts`                | Generate mock LLM model for API tests           |
-| `mockConversationUsage()`                    | `utils/mock.ts`                | Generate mock usage data                        |
-| `generateRandomString(n)`                    | `utils/random.ts`              | Random alphanumeric string                      |
-| `authorizationHeader`                        | `utils/authorizationHeader.ts` | Bearer token header from `process.env.API_KEY`  |
+Key utility files:
+
+- `utils/login.ts` — Login via Keycloak
+- `utils/chat.ts` — Chat message sending, regeneration, file upload, deletion
+- `utils/character.ts` — Character creation and deletion
+- `utils/custom-gpt.ts` — Custom GPT deletion
+- `utils/learning-scenario.ts` — Learning scenario CRUD
+- `utils/utils.ts` — Toast notifications, general helpers
+- `utils/mock.ts` — Mock data generators for API tests
+- `utils/random.ts` — Random string generation
+- `utils/authorizationHeader.ts` — Bearer token header
 
 If existing helpers don't cover the needed interaction, create a **new utility function** in the appropriate file inside `utils/`, or create a new utils file if the feature is new.
 
@@ -232,12 +208,11 @@ If existing helpers don't cover the needed interaction, create a **new utility f
 
 Follow Playwright best practices. Prefer these locator strategies **in order**:
 
-1. **Role-based** — `page.getByRole('button', { name: '...' })`
-2. **Label-based** — `page.getByLabel('...')`
-3. **Text-based** — `page.getByText('...')`
-4. **Title-based** — `page.getByTitle('...')`
-5. **Placeholder-based** — `page.getByPlaceholder('...')`
-6. **CSS selectors** — use only as a last resort
+1. **Test ID** — `page.getByTestId('...')` — most stable, specific to tests
+2. **Role-based** — `page.getByRole('button', { name: '...' })`
+3. **Label-based** — `page.getByLabel('...')`
+4. **Text-based** — `page.getByText('...')`
+5. **CSS selectors** — use only as a last resort
 
 The UI is in **German**. Use German text for button names, labels, headings, and toast messages.
 
@@ -277,24 +252,9 @@ test.describe('feature lifecycle', () => {
 
 ```typescript
 await sendMessage(page, 'Your question here');
+// Wait for streaming to finish before asserting
+await page.getByTestId('streaming-finished').waitFor({ state: 'attached', timeout: 30000 });
 await expect(page.getByLabel('assistant message 1')).toContainText('expected content');
-```
-
-**Shared/invite code flow:**
-
-```typescript
-// Teacher creates and shares
-await page.selectOption('#Telli-Points', '50');
-await page.selectOption('#maxUsage', '45');
-await page.getByTitle('Feature teilen').click();
-await page.waitForURL('/feature/**/share');
-const code = await page.locator('#join-code').textContent();
-
-// Student/other user joins via code
-await page.goto('/logout');
-await page.waitForURL('/login');
-await page.locator('#login-invite-code').fill(code ?? '');
-await page.getByRole('button', { name: 'Zum Dialog' }).click();
 ```
 
 **API tests (no browser):**
@@ -321,15 +281,7 @@ API tests can import from `@shared/db` and `@shared/db/schema` to read/write tes
 
 ### Configuration
 
-The Playwright config at `apps/dialog/playwright.config.ts` defines:
-
-- `testDir`: `./e2e/tests/`
-- `baseURL`: `http://localhost:3000`
-- `workers`: 1 (sequential execution)
-- `fullyParallel`: false
-- `timeout`: 30 seconds per test
-- Browser projects: `chromium`, `firefox`, and a separate `api test` project
-- A `webServer` config that runs `pnpm dev` and waits for `http://localhost:3000`
+See `apps/dialog/playwright.config.ts` for the dialog app's Playwright configuration.
 
 ### Running tests
 

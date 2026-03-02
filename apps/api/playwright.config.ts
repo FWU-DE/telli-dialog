@@ -5,8 +5,10 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Load .env.test for the test API key (sk_ format for client auth)
-// The API server itself loads .env.local via its own load-env.ts
+// Load .env.test for e2e tests.
+// This file should define any environment variables needed by the Playwright tests,
+// e.g. a test API key in sk_ format used for client auth.
+// The API server itself loads .env.local via its own load-env.ts.
 dotenv.config({ path: path.resolve(__dirname, '.env.test') });
 
 export default defineConfig({
