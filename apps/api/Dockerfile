@@ -75,6 +75,8 @@ ARG PORT=3000
 ENV APP_VERSION=${APP_VERSION}
 ENV PORT=${PORT}
 
+EXPOSE ${PORT}
+
 WORKDIR /app/apps/api
 HEALTHCHECK --timeout=10s --start-period=5s \
   CMD wget http://127.0.0.1:${PORT}/health -qO-
