@@ -34,8 +34,8 @@ const config = {
         'secondary-hover': 'var(--secondary-hover)',
         'secondary-light': 'var(--secondary-light)',
         'button-primary-text': 'var(--button-primary-text)',
-        'primary-text': 'var(--primary-text)',
-        'secondary-text': 'var(--secondary-text)',
+        'primary-text': 'var(--primary-foreground)',
+        'secondary-text': 'var(--secondary-foreground)',
         'secondary-dark': 'var(--secondary-dark)',
         border: 'var(--border)',
         input: 'var(--input)',
@@ -44,11 +44,11 @@ const config = {
         foreground: 'var(--foreground)',
         primary: {
           DEFAULT: 'var(--primary)',
-          foreground: 'var(--primary-text)',
+          foreground: 'var(--primary-foreground)',
         },
         secondary: {
           DEFAULT: 'var(--secondary)',
-          foreground: 'var(--secondary-text)',
+          foreground: 'var(--secondary-foreground)',
         },
         destructive: {
           DEFAULT: 'var(--destructive)',
