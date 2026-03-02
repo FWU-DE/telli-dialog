@@ -49,10 +49,11 @@ export async function extractUrls(
     return attachedLinks;
   }
 
-  const urls = messages
-    .filter((m) => m.role === 'user')
-    .flatMap((m) => extractUniqueUrls(m.content))
-    .slice(0, MAX_WEBSEARCH_SOURCES_PER_CONVERSATION);
+  const urls = [
+    ...new Set(
+      messages.filter((m) => m.role === 'user').flatMap((m) => extractUniqueUrls(m.content)),
+    ),
+  ].slice(0, MAX_WEBSEARCH_SOURCES_PER_CONVERSATION);
 
   return urls;
 }

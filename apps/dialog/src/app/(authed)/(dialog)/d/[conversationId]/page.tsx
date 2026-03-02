@@ -55,7 +55,6 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
     const urls = parseHyperlinks(message.content);
     if (urls && urls.length > 0) {
       const websearchSources: WebsearchSource[] = urls.map((url) => ({
-        type: 'websearch',
         link: url,
       }));
       webSourceMapping.set(message.id, websearchSources);
