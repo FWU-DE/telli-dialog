@@ -2,9 +2,9 @@ name: Docker Build
 
 on:
   workflow_run:
-    workflows: [ "Build" ] # must match the name from `checks.yml`
-    types: [ completed ]
-    branches: [ main ]
+    workflows: ['Build'] # must match the name from `checks.yml`
+    types: [completed]
+    branches: [main]
 
 concurrency:
   group: docker-build-main
@@ -17,10 +17,29 @@ permissions:
   attestations: write
 
 jobs:
-  build_push_docker_image_api:
-    name: Build and push docker image telli-api
+  build_push_docker_images:
+    name: Build and push docker image ${{ matrix.image_name }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+
+    strategy:
+      matrix:
+        include:
+          - image_name: telli-api
+            dockerfile: apps/api/Dockerfile
+            image_ref: ghcr.io/fwu-de/telli-api
+            sentry_project: ${{ vars.SENTRY_PROJECT_API }}
+          - image_name: telli-dialog
+            dockerfile: apps/dialog/Dockerfile
+            image_ref: ghcr.io/fwu-de/telli-dialog
+            sentry_project: ${{ vars.SENTRY_PROJECT_DIALOG }}
+          - image_name: telli-admin
+            dockerfile: apps/admin/Dockerfile
+            image_ref: ghcr.io/fwu-de/telli-admin
+            sentry_project: ${{ vars.SENTRY_PROJECT_ADMIN }}
 
     steps:
       - name: Checkout repository
@@ -42,10 +61,10 @@ jobs:
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+          SENTRY_PROJECT: ${{ matrix.sentry_project }}
         with:
           context: .
-          file: apps/api/Dockerfile
+          file: ${{ matrix.dockerfile }}
           secret-envs: |
             SENTRY_AUTH_TOKEN=SENTRY_AUTH_TOKEN
             SENTRY_ORG=SENTRY_ORG
@@ -54,118 +73,16 @@ jobs:
             CI=${CI}
             APP_VERSION=${{ github.sha }}
           tags: |
-            ghcr.io/fwu-de/telli-api:latest
-            ghcr.io/fwu-de/telli-api:${{ github.sha }}
+            ${{ matrix.image_ref }}:latest
+            ${{ matrix.image_ref }}:${{ github.sha }}
           push: true
           provenance: mode=max
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest@v4
         with:
-          subject-name: ghcr.io/fwu-de/telli-api
+          subject-name: ${{ matrix.image_ref }}
           subject-digest: ${{ steps.docker-build.outputs.digest }}
-          push-to-registry: true
-
-  build_push_docker_image_dialog:
-    name: Build and push docker image telli-dialog
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push
-        id: docker-build-dialog
-        uses: docker/build-push-action@v6
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT_DIALOG }}
-        with:
-          context: .
-          file: apps/dialog/Dockerfile
-          secret-envs: |
-            SENTRY_AUTH_TOKEN=SENTRY_AUTH_TOKEN
-            SENTRY_ORG=SENTRY_ORG
-            SENTRY_PROJECT=SENTRY_PROJECT
-          build-args: |
-            CI=${CI}
-            APP_VERSION=${{ github.sha }}
-          tags: |
-            ghcr.io/fwu-de/telli-dialog:latest
-            ghcr.io/fwu-de/telli-dialog:${{ github.sha }}
-          push: true
-          provenance: mode=max
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Generate artifact attestation
-        uses: actions/attest@v4
-        with:
-          subject-name: ghcr.io/fwu-de/telli-dialog
-          subject-digest: ${{ steps.docker-build-dialog.outputs.digest }}
-          push-to-registry: true
-
-  build_push_docker_image_admin:
-    name: Build and push docker image telli-admin
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push
-        id: docker-build-admin
-        uses: docker/build-push-action@v6
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT_ADMIN }}
-        with:
-          context: .
-          file: apps/admin/Dockerfile
-          secret-envs: |
-            SENTRY_AUTH_TOKEN=SENTRY_AUTH_TOKEN
-            SENTRY_ORG=SENTRY_ORG
-            SENTRY_PROJECT=SENTRY_PROJECT
-          build-args: |
-            CI=${CI}
-            APP_VERSION=${{ github.sha }}
-          tags: |
-            ghcr.io/fwu-de/telli-admin:latest
-            ghcr.io/fwu-de/telli-admin:${{ github.sha }}
-          push: true
-          provenance: mode=max
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Generate artifact attestation
-        uses: actions/attest@v4
-        with:
-          subject-name: ghcr.io/fwu-de/telli-admin
-          subject-digest: ${{ steps.docker-build-admin.outputs.digest }}
           push-to-registry: true
