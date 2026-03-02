@@ -15,8 +15,8 @@ import {
   fileTable,
   LearningScenarioFileMapping,
   learningScenarioTable,
-  TextChunkInsertModel,
-  TextChunkTable,
+  ChunkInsertModel,
+  chunkTable,
 } from '../schema';
 import { logDebug } from '@shared/logging';
 import { buildCharacterPictureKey } from '@shared/characters/character-service';
@@ -253,14 +253,11 @@ export async function dbGetDanglingConversationFileIds(): Promise<string[]> {
   return fileMappings.map((row) => row.fileId);
 }
 
-export async function dbInsertFileWithTextChunks(
-  file: FileInsertModel,
-  textChunks: TextChunkInsertModel[],
-) {
+export async function dbInsertFileWithChunks(file: FileInsertModel, chunks: ChunkInsertModel[]) {
   await db.transaction(async (tx) => {
     await tx.insert(fileTable).values(file).onConflictDoNothing();
-    if (textChunks.length > 0) {
-      await tx.insert(TextChunkTable).values(textChunks);
+    if (chunks.length > 0) {
+      await tx.insert(chunkTable).values(chunks);
     }
   });
 }
@@ -274,7 +271,6 @@ export async function dbDeleteFileAndDetachFromConversation(filesToDelete: strin
     await tx
       .delete(ConversationMessageFileMappingTable)
       .where(inArray(ConversationMessageFileMappingTable.fileId, filesToDelete));
-    await tx.delete(TextChunkTable).where(inArray(TextChunkTable.fileId, filesToDelete));
     await tx.delete(fileTable).where(inArray(fileTable.id, filesToDelete));
   });
 }
@@ -301,7 +297,6 @@ export async function dbDeleteDanglingFiles() {
       );
     const fileIdsToDelete = fileIds.map((f) => f.fileId);
     logDebug('fileIdsToDelete', { fileIdsToDelete });
-    await tx.delete(TextChunkTable).where(inArray(TextChunkTable.fileId, fileIdsToDelete));
     await tx.delete(fileTable).where(inArray(fileTable.id, fileIdsToDelete));
     return fileIdsToDelete;
   });
