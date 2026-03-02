@@ -8,9 +8,9 @@ import { RetrievedChunk } from './types';
  *
  * @param embedding - The query embedding vector
  * @param fileIds - The IDs of files to search within
- * @param sourceUrls - The source URLs of web chunks to search within
+ * @param sourceUrls - The source URLs to search within
  * @param limit - Maximum number of results to return
- * @returns Array of text chunks sorted by embedding similarity
+ * @returns Array of chunks sorted by embedding similarity
  */
 export async function vectorSearch({
   embedding,

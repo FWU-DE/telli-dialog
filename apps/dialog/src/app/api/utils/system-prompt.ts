@@ -1,6 +1,4 @@
-import { TOTAL_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { RetrievedChunk } from '../rag/types';
-import { WebsearchSource } from '@shared/db/types';
 
 export const LANGUAGE_GUIDELINES = `
 ## Sprachliche Richtlinien
@@ -8,38 +6,6 @@ export const LANGUAGE_GUIDELINES = `
 - Du sprichst immer die Sprache mit der du angesprochen wirst. Deine Standardsprache ist Deutsch.
 - Du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die Paarform (Beidnennung) z.B. Bürgerinnen und Bürger.
 `;
-
-export function constructWebsearchPrompt(websearchSources?: WebsearchSource[]) {
-  if (websearchSources === undefined || websearchSources.length === 0) {
-    return '';
-  }
-
-  const promptParts = websearchSources.map((source) => constructSingleWebsearchPrompt(source));
-  const fullPrompt = `
-## Der Nutzer hat folgende Quellen bereitgestellt, berücksichtige den Inhalt dieser Quellen bei der Antwort:
-${promptParts.join('\n')}`;
-
-  if (fullPrompt.length > TOTAL_WEBSEARCH_CONTENT_LENGTH_LIMIT) {
-    return (
-      fullPrompt.substring(0, TOTAL_WEBSEARCH_CONTENT_LENGTH_LIMIT) +
-      '\n\n[Weitere Quellen gekürzt aufgrund der Längenbegrenzung]'
-    );
-  }
-
-  return fullPrompt;
-}
-
-function constructSingleWebsearchPrompt(source: WebsearchSource) {
-  if (source.error || !source.content) {
-    return `Quelle: ${source.link}
-Inhalt: [Fehler - Der Inhalt dieser Webseite konnte nicht extrahiert werden]
-`;
-  }
-
-  return `Quelle: ${source.link}
-Inhalt: ${source.content}
-`;
-}
 
 export function constructRagContext(chunks: RetrievedChunk[]) {
   if (chunks.length === 0) return '';

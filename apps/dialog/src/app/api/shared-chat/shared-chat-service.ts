@@ -19,7 +19,6 @@ import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exce
 import { constructLearningScenarioSystemPrompt } from './system-prompt';
 import { formatMessagesWithImages, limitChatHistory } from '../chat/utils';
 import { retrieveChunks } from '../rag/rag-service';
-import { webScraper } from '../webpage-content/search-web';
 import { logError } from '@shared/logging';
 import {
   KEEP_FIRST_MESSAGES,
@@ -28,6 +27,7 @@ import {
 } from '@/configuration-text-inputs/const';
 import { ChatMessage, SendMessageResult } from '@/types/chat';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
+import { ingestWebContentIfMissing } from '../rag/ingestWebContent';
 
 /**
  * Converts frontend messages to ai-core message format
@@ -125,19 +125,22 @@ export async function sendSharedChatMessage({
   // Get related files and web sources
   const relatedFileEntities = await dbGetRelatedSharedChatFiles(sharedChat.id);
   const urls = sharedChat.attachedLinks.filter((l) => l !== '');
-  const websearchSources = await Promise.all(urls.map((url) => webScraper(url)));
+  const processedUrls = await ingestWebContentIfMissing({
+    urls,
+    federalStateId: teacherUserAndContext.federalState.id,
+  });
 
   const chunks = await retrieveChunks({
     messages,
-    user: teacherUserAndContext,
+    federalStateId: teacherUserAndContext.federalState.id,
     relatedFileEntities,
+    sourceUrls: processedUrls,
   });
 
   // Build system prompt
   const systemPrompt = constructLearningScenarioSystemPrompt({
     sharedChat,
     chunks,
-    websearchSources,
   });
 
   // Prune messages

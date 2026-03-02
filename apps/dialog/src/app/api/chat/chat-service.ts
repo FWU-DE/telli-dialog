@@ -10,18 +10,13 @@ import {
 } from '@shared/db/functions/chat';
 import { dbInsertConversationUsage } from '@shared/db/functions/token-usage';
 import { dbUpdateLastUsedModelByUserId } from '@shared/db/functions/user';
-import {
-  dbChunksExistForSourceUrl,
-  dbGetAttachedFileByEntityId,
-  dbInsertWebChunks,
-  linkFilesToConversation,
-} from '@shared/db/functions/files';
+import { dbGetAttachedFileByEntityId, linkFilesToConversation } from '@shared/db/functions/files';
 import { sendRabbitmqEvent } from '@/rabbitmq/send';
 import { constructTelliNewMessageEvent } from '@/rabbitmq/events/new-message';
 import { constructTelliBudgetExceededEvent } from '@/rabbitmq/events/budget-exceeded';
 import { constructChatSystemPrompt } from './system-prompt';
 import { formatMessagesWithImages, getChatTitle, limitChatHistory } from './utils';
-import { chunkAndEmbed, retrieveChunks } from '../rag/rag-service';
+import { retrieveChunks } from '../rag/rag-service';
 import { logError } from '@shared/logging';
 import {
   KEEP_FIRST_MESSAGES,
@@ -29,9 +24,10 @@ import {
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { ChatMessage, SendMessageResult } from '@/types/chat';
-import { searchWeb } from './websearch-service';
+import { extractUrls } from './websearch-service';
 import { UserAndContext } from '@/auth/types';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
+import { ingestWebContentIfMissing } from '../rag/ingestWebContent';
 
 /**
  * Converts frontend messages to ai-core message format
@@ -133,30 +129,12 @@ export async function sendChatMessage({
   if (!userMessage || userMessage.role !== 'user') {
     throw new Error('No user message found');
   }
-  const { websearchSources, userMessageWebsearchSources } = await searchWeb(
-    customGptId,
-    characterId,
-    user,
-    userMessage,
-    conversationObject.messages,
-  );
 
-  if (!characterId && !customGptId) {
-    const validWebsearchSources = websearchSources.filter((s) => s.content && !s.error);
-    for (const source of validWebsearchSources) {
-      const exists = await dbChunksExistForSourceUrl(source.link);
-      if (!exists && source.content) {
-        const newChunks = await chunkAndEmbed({
-          text: source.content,
-          sourceUrl: source.link,
-          sourceType: 'webpage',
-          federalStateId: user.federalState.id,
-        });
-
-        await dbInsertWebChunks(newChunks);
-      }
-    }
-  }
+  const urls = await extractUrls(customGptId, characterId, user, conversationObject.messages);
+  const processedUrls = await ingestWebContentIfMissing({
+    urls,
+    federalStateId: user.federalState.id,
+  });
 
   // Save user message to DB
   await dbInsertChatContent({
@@ -167,7 +145,6 @@ export async function sendChatMessage({
     userId: user.id,
     modelName: definedModel.name,
     orderNumber: messages.length + 1,
-    websearchSources: userMessageWebsearchSources,
   });
 
   // Link files to conversation
@@ -188,9 +165,9 @@ export async function sendChatMessage({
 
   const chunks = await retrieveChunks({
     messages,
-    user,
+    federalStateId: user.federalState.id,
     relatedFileEntities,
-    sourceUrls: websearchSources.filter((s) => s.content && !s.error).map((s) => s.link),
+    sourceUrls: processedUrls,
   });
 
   // Update last used model

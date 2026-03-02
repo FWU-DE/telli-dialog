@@ -50,24 +50,15 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
   const webSourceMapping = new Map<string, WebsearchSource[]>();
   const logoElement = <Logo federalStateId={userAndContext.school.federalStateId} />;
 
-  // Load websearch sources from the database
-  // For old messages without stored sources, parse URLs from content to show citations
-  // The actual scraping will happen when user sends a new message
-  for (const message of messages) {
-    if (message.role !== 'user') {
-      continue;
-    }
-    if (message.websearchSources.length > 0) {
-      webSourceMapping.set(message.id, message.websearchSources);
-    } else {
-      const urls = parseHyperlinks(message.content);
-      if (urls && urls.length > 0) {
-        const websearchSources: WebsearchSource[] = urls.map((url) => ({
-          type: 'websearch',
-          link: url,
-        }));
-        webSourceMapping.set(message.id, websearchSources);
-      }
+  // prepare urls for citations
+  for (const message of messages.filter((msg) => msg.role === 'user')) {
+    const urls = parseHyperlinks(message.content);
+    if (urls && urls.length > 0) {
+      const websearchSources: WebsearchSource[] = urls.map((url) => ({
+        type: 'websearch',
+        link: url,
+      }));
+      webSourceMapping.set(message.id, websearchSources);
     }
   }
 

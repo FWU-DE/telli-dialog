@@ -1,6 +1,5 @@
 import { ChunkInsertModel, ChunkSourceType, FileModelAndContent } from '@shared/db/schema';
 import { type ChatMessage as Message } from '@/types/chat';
-import { UserAndContext } from '@/auth/types';
 import { chunkText } from './chunking';
 import { embedText, embedChunks } from './embedding';
 import { vectorSearch } from './retrieval';
@@ -11,8 +10,10 @@ import { logError } from '@shared/logging';
 /**
  * Chunks and embeds text.
  *
- * @param textElements - Input text
+ * @param text - Input text
  * @param fileId - The ID to associate chunks with
+ * @param sourceUrl - The source URL to associate chunks with
+ * @param sourceType - The source type of the chunks ('file' or 'webpage')
  * @param federalStateId - The federal state ID of the user
  * @returns Embedded text chunks ready for DB insertion
  */
@@ -53,19 +54,19 @@ export async function chunkAndEmbed({
  * Retrieves relevant chunks for a set of messages using vector search.
  *
  * @param messages - The conversation messages
- * @param user - The authenticated user context
+ * @param federalStateId - The federal state ID of the user
  * @param relatedFileEntities - File entities to search within
  * @param sourceUrls - Optional source URLs to search within
  * @returns The most relevant chunks
  */
 export async function retrieveChunks({
   messages,
-  user,
+  federalStateId,
   relatedFileEntities,
   sourceUrls,
 }: {
   messages: Message[];
-  user: UserAndContext;
+  federalStateId: string;
   relatedFileEntities: FileModelAndContent[];
   sourceUrls?: string[];
 }): Promise<RetrievedChunk[]> {
@@ -84,7 +85,7 @@ export async function retrieveChunks({
   try {
     const [embedding] = await embedText({
       text: [searchQuery],
-      federalStateId: user.federalState.id,
+      federalStateId,
     });
     queryEmbedding = embedding ?? [];
   } catch (error) {
