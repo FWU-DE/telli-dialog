@@ -167,21 +167,28 @@ jobs:
           TURBO_TELEMETRY_DISABLED: 1
           NODE_ENV: test
 
-      - name: Run E2E tests
-        run: pnpm --filter telli-dialog e2e && pnpm --filter telli-api e2e
+      - name: Run E2E tests (dialog)
+        run: pnpm --filter telli-dialog e2e
+        env:
+          CI: true
+
+      - name: Run E2E tests (api)
+        run: pnpm --filter telli-api e2e
         env:
           CI: true
           API_KEY: $API_KEY
           API_BASE_URL: http://localhost:3002
 
-      - uses: actions/upload-artifact@v7
+      - name: Upload Playwright reports (dialog)
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-report
           path: apps/dialog/playwright-report
           retention-days: 30
 
-      - uses: actions/upload-artifact@v6
+      - name: Upload Playwright reports (api)
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: api-playwright-report
