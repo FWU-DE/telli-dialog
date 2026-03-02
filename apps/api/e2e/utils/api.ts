@@ -1,9 +1,11 @@
 import type { APIRequestContext } from '@playwright/test';
 
-const API_KEY = process.env.API_KEY;
+const API_KEY = process.env.DE_TEST_API_KEY ?? process.env.E2E_CLIENT_API_KEY ?? process.env.API_KEY;
 
 if (!API_KEY) {
-  throw new Error('API_KEY environment variable is required. Set it in apps/api/.env.test');
+  throw new Error(
+    'An API key environment variable is required. Set DE_TEST_API_KEY, E2E_CLIENT_API_KEY, or API_KEY in apps/api/.env.test',
+  );
 }
 
 export const authorizationHeader = {
@@ -24,7 +26,15 @@ async function findModel(
   const modelsResponse = await request.get('/v1/models', {
     headers: authorizationHeader,
   });
-  const models = (await modelsResponse.json()) as Array<{ name: string }>;
+  const modelsPayload = await modelsResponse.json();
+
+  if (!modelsResponse.ok() || !Array.isArray(modelsPayload)) {
+    throw new Error(
+      `Failed to load models (${modelsResponse.status()}): ${JSON.stringify(modelsPayload)}`,
+    );
+  }
+
+  const models = modelsPayload as Array<{ name: string }>;
   const model = models.find(predicate);
   if (!model) {
     throw new Error(errorMessage);

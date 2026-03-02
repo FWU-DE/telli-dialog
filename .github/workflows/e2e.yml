@@ -145,7 +145,7 @@ jobs:
         # The output is captured in GITHUB_ENV for seeding telli-dialog
         run: |
           pnpm --filter @telli/ai-core db:seed:telli-api | tee /tmp/out.txt
-          grep -E '^[A-Z_][A-Z0-9_]*=' /tmp/out.txt >> "$GITHUB_ENV"
+          grep -E '^DE_[A-Z0-9_]*_API_KEY=' /tmp/out.txt >> "$GITHUB_ENV"
 
       - name: Run migrations and seed database (if applicable)
         run: pnpm --filter @telli/shared db:migrate && pnpm --filter @telli/shared db:seed
@@ -174,7 +174,8 @@ jobs:
         run: pnpm --filter telli-api e2e
         env:
           CI: true
-          API_KEY: ${{ env.API_KEY }}
+          DE_TEST_API_KEY: ${{ env.DE_TEST_API_KEY }}
+          API_KEY: ${{ env.DE_TEST_API_KEY }}
           API_BASE_URL: http://localhost:3002
 
       - name: Upload Playwright reports (dialog)
