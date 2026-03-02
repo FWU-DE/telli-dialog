@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { extractFile } from '../../file-operations/extract-file';
 import { chunkAndEmbed } from '../../rag/rag-service';
 import { logDebug } from '@shared/logging';
-import { dbInsertFileWithTextChunks } from '@shared/db/functions/files';
+import { dbInsertFileWithChunks } from '@shared/db/functions/files';
 import { uploadMessageAttachment } from '@shared/files/fileService';
 import { handleErrorInRoute } from '@/error/handle-error-in-route';
 
@@ -67,7 +67,7 @@ async function handleFileUpload(file: File) {
     type: fileExtension,
   });
 
-  const [textChunks] = await Promise.all([
+  const [chunks] = await Promise.all([
     chunkAndEmbed({
       textElements: extractResult.content,
       fileId,
@@ -88,7 +88,7 @@ async function handleFileUpload(file: File) {
     metadata: extractResult.metadata,
     userId: user.id,
   };
-  await dbInsertFileWithTextChunks(fileModel, textChunks);
+  await dbInsertFileWithChunks(fileModel, chunks);
   logDebug(`File ${file.name} with type ${fileExtension} stored in db.`);
 
   return fileId;

@@ -1,7 +1,7 @@
 import { db } from '@shared/db';
-import { fileTable, TextChunkTable } from '@shared/db/schema';
-import { desc, eq, inArray, SQL, sql } from 'drizzle-orm';
-import { type VectorSearchResult } from './types';
+import { fileTable, chunkTable } from '@shared/db/schema';
+import { cosineDistance, eq, inArray } from 'drizzle-orm';
+import { RetrievedChunk } from './types';
 
 /**
  * Finds chunks most similar to the query embedding using cosine similarity (pgvector).
@@ -19,23 +19,21 @@ export async function vectorSearch({
   embedding: number[];
   fileIds: string[];
   limit: number;
-}): Promise<VectorSearchResult[]> {
+}): Promise<RetrievedChunk[]> {
   return db
     .select({
-      id: TextChunkTable.id,
-      content: TextChunkTable.content,
-      fileId: TextChunkTable.fileId,
-      pageNumber: TextChunkTable.pageNumber,
+      id: chunkTable.id,
+      content: chunkTable.content,
+      fileId: chunkTable.fileId,
+      pageNumber: chunkTable.pageNumber,
       fileName: fileTable.name,
-      orderIndex: TextChunkTable.orderIndex,
-      leadingOverlap: TextChunkTable.leadingOverlap,
-      trailingOverlap: TextChunkTable.trailingOverlap,
-      embeddingSimilarity:
-        sql`1 - (${TextChunkTable.embedding} <=> ${JSON.stringify(embedding)})` as SQL<number>,
+      orderIndex: chunkTable.orderIndex,
+      sourceType: chunkTable.sourceType,
+      sourceUrl: chunkTable.sourceUrl,
     })
-    .from(TextChunkTable)
-    .innerJoin(fileTable, eq(TextChunkTable.fileId, fileTable.id))
-    .where(inArray(TextChunkTable.fileId, fileIds))
+    .from(chunkTable)
+    .innerJoin(fileTable, eq(chunkTable.fileId, fileTable.id))
+    .where(inArray(chunkTable.fileId, fileIds))
     .limit(limit)
-    .orderBy((t) => [desc(t.embeddingSimilarity)]);
+    .orderBy(cosineDistance(chunkTable.embedding, embedding));
 }
