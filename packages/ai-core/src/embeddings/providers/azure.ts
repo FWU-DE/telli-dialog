@@ -33,7 +33,15 @@ export function constructAzureEmbeddingGenerationFn(model: AiModel): EmbeddingGe
     });
 
     const embeddings = response.data.map((element) => element.embedding);
-    return { embeddings };
+    return {
+      embeddings,
+      usage: response.usage
+        ? {
+            promptTokens: response.usage.prompt_tokens,
+            totalTokens: response.usage.total_tokens,
+          }
+        : undefined,
+    };
   };
 }
 

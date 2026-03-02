@@ -83,7 +83,7 @@ export async function chatCompletionStream({
               },
             ],
           };
-          controller.enqueue(encoder.encode(JSON.stringify(chunkObj) + '\n\n'));
+          controller.enqueue(encoder.encode('data: ' + JSON.stringify(chunkObj) + '\n\n'));
         }
 
         // Final chunk with finish_reason
@@ -100,7 +100,7 @@ export async function chatCompletionStream({
             },
           ],
         };
-        controller.enqueue(encoder.encode(JSON.stringify(doneChunk) + '\n\n'));
+        controller.enqueue(encoder.encode('data: ' + JSON.stringify(doneChunk) + '\n\n'));
         controller.close();
       } catch (error) {
         const isContentFilter = ResponsibleAIError.is(error);
@@ -144,7 +144,7 @@ export async function chatCompletionStream({
               },
             } as OpenAI.Chat.Completions.ChatCompletionChunk);
 
-        controller.enqueue(encoder.encode(JSON.stringify(errorChunk) + '\n\n'));
+        controller.enqueue(encoder.encode('data: ' + JSON.stringify(errorChunk) + '\n\n'));
         controller.close();
       }
     },

@@ -1,7 +1,13 @@
 import { LlmModel } from '../api-db';
 
+export type EmbeddingUsage = {
+  promptTokens: number;
+  totalTokens: number;
+};
+
 export type EmbeddingResponse = {
   embeddings: number[][];
+  usage?: EmbeddingUsage;
 };
 
 export type EmbeddingGenerationFn = (args: {

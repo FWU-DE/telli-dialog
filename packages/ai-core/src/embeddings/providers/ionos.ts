@@ -20,13 +20,21 @@ export function constructIonosEmbeddingGenerationFn(model: AiModel): EmbeddingGe
       };
     }
 
-    const { data } = await client.embeddings.create({
+    const response = await client.embeddings.create({
       input: texts,
       model: model.name,
       encoding_format: 'float',
     });
 
-    const embeddings = data.map((element) => element.embedding);
-    return { embeddings };
+    const embeddings = response.data.map((element) => element.embedding);
+    return {
+      embeddings,
+      usage: response.usage
+        ? {
+            promptTokens: response.usage.prompt_tokens,
+            totalTokens: response.usage.total_tokens,
+          }
+        : undefined,
+    };
   };
 }

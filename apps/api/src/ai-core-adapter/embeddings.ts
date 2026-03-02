@@ -15,7 +15,6 @@ export async function createEmbeddings({
   const result = await generateEmbeddingsByNameWithBilling(modelName, input, apiKeyId);
 
   return {
-    object: 'list' as const,
     data: result.embeddings.map((embedding, index) => ({
       object: 'embedding' as const,
       embedding,
@@ -23,9 +22,8 @@ export async function createEmbeddings({
     })),
     model: result.model.name,
     usage: {
-      prompt_tokens: 0,
-      total_tokens: 0,
-      completion_tokens: 0,
+      prompt_tokens: result.usage?.promptTokens ?? 0,
+      total_tokens: result.usage?.totalTokens ?? 0,
     },
   };
 }
