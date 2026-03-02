@@ -58,7 +58,7 @@
     --input: #e2e8f0ff;
     --ring: #020817ff;
 
-    --sidebar: #fafafaff;
+    --sidebar-background: #fafafaff;
     --sidebar-foreground: #0a0a0aff;
     --sidebar-primary: #171717ff;
     --sidebar-primary-foreground: #fafafaff;
@@ -97,7 +97,7 @@
     --input: #1e293bff;
     --ring: #cbd5e1ff;
 
-    --sidebar: #171717ff;
+    --sidebar-background: #171717ff;
     --sidebar-foreground: #fafafaff;
     --sidebar-primary: #1447e6ff;
     --sidebar-primary-foreground: #fafafaff;
@@ -129,31 +129,42 @@
   }
 }
 
-@theme {
+@theme inline {
+  --spacing: 0.25rem;
+
   --breakpoint-xs: 30rem; /* 480px */
+  --breakpoint-sm: 40rem; /* 640px */
+  --breakpoint-md: 48rem; /* 768px */
+  --breakpoint-lg: 64rem; /* 1024px */
+  --breakpoint-xl: 80rem; /* 1280px */
+  --breakpoint-2xl: 96rem; /* 1536px */
 
   --shadow-dropdown: 0px 4px 10px 0px rgba(0, 41, 102, 0.1);
-  --shadow-3xl: 0 4px 9px 0px rgba(0, 41, 102, 0.2);
+  --shadow-3xl: 0 4px 9px 0px rgba(0, 41, 102, 0.2); /* only used in collapsible-sidbar.tsx */
+
+  --color-sidebar: var(--sidebar-background);
 }
 
-.no-scroll {
-  overflow: hidden;
-}
+@layer components {
+  .no-scroll {
+    overflow: hidden;
+  }
 
-.disclaimer-content h2 {
-  font-size: 1.5rem;
-  font-weight: 500;
-  margin-top: 0.83rem;
-  margin-bottom: 0.83em;
-}
+  .disclaimer-content h2 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-top: 0.83rem;
+    margin-bottom: 0.83em;
+  }
 
-.disclaimer-content h3 {
-  font-size: 1.25rem;
-  font-weight: 400;
-  margin-top: 1em;
-  margin-bottom: 1em;
-}
+  .disclaimer-content h3 {
+    font-size: 1.25rem;
+    font-weight: 400;
+    margin-top: 1em;
+    margin-bottom: 1em;
+  }
 
-.gradient {
-  background-image: conic-gradient(#9d174dff, #6b21a8ff, #3730a3ff);
+  .gradient {
+    background-image: conic-gradient(#9d174dff, #6b21a8ff, #3730a3ff);
+  }
 }
