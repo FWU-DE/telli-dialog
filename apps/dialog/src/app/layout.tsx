@@ -6,8 +6,7 @@ import ClientProvider from './client-provider';
 import { getMaybeSession, getMaybeUser } from '@/auth/utils';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
-
-import './globals.css';
+import '@ui/styles/globals.css';
 import './scrollbar.css';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 import { dbGetFederalStateByIdWithResult } from '@shared/db/functions/federal-state';

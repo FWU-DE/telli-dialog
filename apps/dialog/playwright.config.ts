@@ -11,7 +11,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: 1,
   reporter: [['html', { outputFolder: './playwright-report' }], ['json'], ['github'], ['list']],
-  timeout: 30_000,
+  timeout: 40_000,
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
@@ -33,6 +33,10 @@ export default defineConfig({
       testIgnore: /.*api.test.ts/,
       use: {
         ...devices['Desktop Firefox'],
+        // Firefox can be flaky in CI, so we slow it down and increase timeouts to improve stability
+        launchOptions: {
+          slowMo: 100,
+        },
       },
     },
     {

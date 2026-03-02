@@ -26,7 +26,7 @@ export default function ParagraphWithConditionalTitle({ content }: ContentDispla
 
   return (
     <p
-      className="truncate ... overflow-hidden max-w-[11rem] font-medium text-sm"
+      className="truncate ... overflow-hidden max-w-44 font-medium text-sm"
       title={isTruncated ? content : undefined}
       ref={fileNameRef}
     >

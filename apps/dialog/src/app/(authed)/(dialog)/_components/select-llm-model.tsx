@@ -29,7 +29,7 @@ export default function SelectLlmModelForm({
       <Select.Trigger
         aria-label={tCommon('llm-model')}
         className={cn(
-          'flex items-center justify-between w-full py-2 pl-4 pr-4 bg-white border border-gray-200 focus:border-primary rounded-enterprise-md focus:outline-none max-w-min min-w-max',
+          'flex items-center justify-between w-full py-2 pl-4 pr-4 bg-white border border-gray-200 focus:border-primary rounded-enterprise-md focus:outline-hidden max-w-min min-w-max',
           disabled && 'bg-light-gray border-gray-100 text-gray-100',
         )}
       >
@@ -51,7 +51,7 @@ export default function SelectLlmModelForm({
                   key={model.id}
                   value={model.id}
                   className={cn(
-                    'px-4 py-2 cursor-pointer outline-none transition',
+                    'px-4 py-2 cursor-pointer outline-hidden transition',
                     'hover:bg-primary-hover hover:text-primary-hover-text',
                   )}
                 >
