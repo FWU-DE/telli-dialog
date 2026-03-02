@@ -67,7 +67,7 @@ jobs:
       VIDIS_ISSUER_URI: http://localhost:8080/realms/telli-local
       API_DATABASE_URL: postgresql://telli_api_db:test1234@127.0.0.1:6543/telli_api_db
       API_URL: http://localhost:3002
-      API_KEY: ApiKeyForTelliDialogAdminApi
+      API_KEY: ApiKeyForTelliApiAdminApi
       ENCRYPTION_KEY: EncryptionKeyForEncryptedApiKeysToTelliApi
       # Auth.js secret
       AUTH_SECRET: 'yN1a0lQ77RgeEQam5DvGaddbdUDQoxswK+21FmEqBPs='
@@ -126,8 +126,6 @@ jobs:
             -e API_KEY=$API_KEY \
             -e PORT=3002 \
             ghcr.io/fwu-de/telli-api:latest
-        env:
-          API_KEY: ApiKeyForTelliApiAdminApi
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -176,7 +174,7 @@ jobs:
         run: pnpm --filter telli-api e2e
         env:
           CI: true
-          API_KEY: $API_KEY
+          API_KEY: ${{ env.API_KEY }}
           API_BASE_URL: http://localhost:3002
 
       - name: Upload Playwright reports (dialog)
