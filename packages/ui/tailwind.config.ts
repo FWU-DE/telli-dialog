@@ -2,11 +2,7 @@ import type { Config } from 'tailwindcss';
 import tailwindcssAnimate from 'tailwindcss-animate';
 
 const config = {
-  content: [
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    '../../packages/ui/src/components/**/*.{ts,tsx}',
-  ],
+  content: ['./src/components/**/*.{ts,tsx}'],
   prefix: '',
   theme: {
     container: {
