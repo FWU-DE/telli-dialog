@@ -14,15 +14,23 @@ export const authorizationHeader = {
 
 export const baseURL = process.env.API_BASE_URL ?? 'http://localhost:3002';
 
+type ApiModel = {
+  name: string;
+  isDeleted?: boolean;
+  priceMetadata?: {
+    type?: string;
+  };
+};
+
 /**
  * Fetches available models from the API and returns the first model matching
  * the given predicate. Throws if no matching model is found.
  */
 async function findModel(
   request: APIRequestContext,
-  predicate: (model: { name: string }) => boolean,
+  predicate: (model: ApiModel) => boolean,
   errorMessage: string,
-): Promise<{ name: string }> {
+): Promise<ApiModel> {
   const modelsResponse = await request.get('/v1/models', {
     headers: authorizationHeader,
   });
@@ -34,7 +42,7 @@ async function findModel(
     );
   }
 
-  const models = modelsPayload as Array<{ name: string }>;
+  const models = modelsPayload as Array<ApiModel>;
   const model = models.find(predicate);
   if (!model) {
     throw new Error(errorMessage);
@@ -46,7 +54,11 @@ async function findModel(
 export async function getTextModel(request: APIRequestContext) {
   return findModel(
     request,
-    (m) => m.name === 'gpt-4o-mini' || m.name.includes('llama') || m.name.includes('gpt'),
+    (m) => {
+      if (m.isDeleted) return false;
+      const modelName = m.name.toLowerCase();
+      return modelName === 'gpt-4o-mini' || modelName.includes('llama') || modelName.includes('gpt');
+    },
     'No text model available',
   );
 }
@@ -55,16 +67,23 @@ export async function getTextModel(request: APIRequestContext) {
 export async function getEmbeddingModel(request: APIRequestContext) {
   return findModel(
     request,
-    (m) => m.name.includes('embedding') || m.name.includes('bge'),
+    (m) => {
+      if (m.isDeleted) return false;
+      return (
+        m.priceMetadata?.type === 'embedding' ||
+        m.name.toLowerCase().includes('embedding') ||
+        m.name.toLowerCase().includes('bge')
+      );
+    },
     'No embedding model available',
   );
 }
 
-/** Returns an image generation model (e.g. dall-e-*, imagen-*). Throws if none available. */
+/** Returns an image generation model. Throws if none available. */
 export async function getImageModel(request: APIRequestContext) {
   return findModel(
     request,
-    (m) => m.name.includes('dall-e') || m.name.includes('imagen'),
+    (m) => !m.isDeleted && m.priceMetadata?.type === 'image',
     'No image generation model available',
   );
 }
