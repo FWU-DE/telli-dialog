@@ -89,14 +89,16 @@ export async function constructChatSystemPrompt({
   isTeacher,
   federalState,
   chunks,
+  errorUrls,
 }: {
   characterId?: string;
   customGptId?: string;
   isTeacher: boolean;
   federalState: ObscuredFederalState;
   chunks: RetrievedChunk[];
+  errorUrls: string[];
 }) {
-  const ragContext = constructRagContext(chunks);
+  const ragContext = constructRagContext(chunks, errorUrls);
 
   if (characterId !== undefined) {
     const character = await dbGetCharacterById({ characterId });

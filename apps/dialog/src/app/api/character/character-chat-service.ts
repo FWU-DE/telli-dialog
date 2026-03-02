@@ -27,7 +27,7 @@ import {
 } from '@/configuration-text-inputs/const';
 import { ChatMessage, SendMessageResult } from '@/types/chat';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
-import { ingestWebContentIfMissing } from '../rag/ingestWebContent';
+import { ingestWebContent } from '../rag/ingestWebContent';
 
 /**
  * Converts frontend messages to ai-core message format
@@ -122,7 +122,7 @@ export async function sendCharacterMessage({
   // Get related files and web sources
   const relatedFileEntities = await dbGetRelatedCharacterFiles(character.id);
   const urls = character.attachedLinks.filter((l) => l !== '');
-  const processedUrls = await ingestWebContentIfMissing({
+  const { processedUrls } = await ingestWebContent({
     urls,
     federalStateId: teacherUserAndContext.federalState.id,
   });

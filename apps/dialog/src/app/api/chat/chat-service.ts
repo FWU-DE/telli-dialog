@@ -27,7 +27,7 @@ import { ChatMessage, SendMessageResult } from '@/types/chat';
 import { extractUrls } from './websearch-service';
 import { UserAndContext } from '@/auth/types';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
-import { ingestWebContentIfMissing } from '../rag/ingestWebContent';
+import { ingestWebContent } from '../rag/ingestWebContent';
 
 /**
  * Converts frontend messages to ai-core message format
@@ -131,7 +131,7 @@ export async function sendChatMessage({
   }
 
   const urls = await extractUrls(customGptId, characterId, user, conversationObject.messages);
-  const processedUrls = await ingestWebContentIfMissing({
+  const { processedUrls, errorUrls } = await ingestWebContent({
     urls,
     federalStateId: user.federalState.id,
   });
@@ -188,6 +188,7 @@ export async function sendChatMessage({
     isTeacher: user.school.userRole === 'teacher',
     federalState: user.federalState,
     chunks,
+    errorUrls,
   });
 
   // Check if the model supports images based on supportedImageFormats

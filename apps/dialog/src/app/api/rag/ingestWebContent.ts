@@ -7,37 +7,53 @@ import { chunkAndEmbed } from './rag-service';
  *
  * @param urls The list of URLs to ingest content from.
  * @param federalStateId - The federal state ID of the user
- * @returns The list of URLs that were processed (either already existed or were newly ingested).
+ * @returns The list of URLs that were processed (either already existed or were newly ingested)
+ * and the list of URLs that encountered errors.
  */
-export async function ingestWebContentIfMissing({
+export async function ingestWebContent({
   urls,
   federalStateId,
 }: {
   urls: string[];
   federalStateId: string;
-}): Promise<string[]> {
-  const processedUrls: string[] = [];
+}): Promise<{ processedUrls: string[]; errorUrls: string[] }> {
+  // check which urls have already been ingested
+  const existenceChecks = await Promise.all(
+    urls.map(async (url) => ({ url, exists: await dbChunksExistForSourceUrl(url) })),
+  );
+  const newUrls = existenceChecks.filter((r) => !r.exists).map((r) => r.url);
 
-  for (const url of urls) {
-    const exists = await dbChunksExistForSourceUrl(url);
-    if (!exists) {
-      const source = await webScraper(url);
-
-      if (!source.content || source.error) {
-        continue;
-      }
-
-      const newChunks = await chunkAndEmbed({
-        text: source.content,
-        sourceUrl: source.link,
-        sourceType: 'webpage',
-        federalStateId,
-      });
-
-      await dbInsertWebChunks(newChunks);
-    }
-    processedUrls.push(url);
+  if (newUrls.length === 0) {
+    return { processedUrls: urls, errorUrls: [] };
   }
 
-  return processedUrls;
+  // scrape web content for new urls
+  const scraped = await Promise.all(
+    newUrls.map(async (url) => ({ url, source: await webScraper(url) })),
+  );
+  const successfulScrapes = scraped.filter((r) => r.source.content && !r.source.error);
+  const errorUrls = scraped.filter((r) => !r.source.content || r.source.error).map((r) => r.url);
+
+  // chunk and embed
+  const embedded = await Promise.all(
+    successfulScrapes.map(async (r) => ({
+      url: r.url,
+      chunks: await chunkAndEmbed({
+        text: r.source.content!,
+        sourceUrl: r.source.link,
+        sourceType: 'webpage',
+        federalStateId,
+      }),
+    })),
+  );
+
+  // insert into DB
+  await dbInsertWebChunks(embedded.flatMap((r) => r.chunks));
+
+  const processedUrls = [
+    ...existenceChecks.filter((r) => r.exists).map((r) => r.url),
+    ...embedded.map((r) => r.url),
+  ];
+
+  return { processedUrls, errorUrls };
 }

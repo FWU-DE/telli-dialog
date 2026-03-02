@@ -7,8 +7,8 @@ export const LANGUAGE_GUIDELINES = `
 - Du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die Paarform (Beidnennung) z.B. Bürgerinnen und Bürger.
 `;
 
-export function constructRagContext(chunks: RetrievedChunk[]) {
-  if (chunks.length === 0) return '';
+export function constructRagContext(chunks: RetrievedChunk[], errorUrls: string[] = []) {
+  if (chunks.length === 0 && errorUrls.length === 0) return '';
 
   const chunkTexts = chunks
     .map((chunk) => {
@@ -19,7 +19,15 @@ export function constructRagContext(chunks: RetrievedChunk[]) {
     })
     .join('\n\n');
 
-  return `\n## Der Nutzer hat folgende Informationen bereitgestellt, berücksichtige den Inhalt bei der Antwort:\n${chunkTexts}`;
+  const errorText =
+    errorUrls.length > 0
+      ? `\n\n## Es gab Probleme beim Zugriff auf die folgenden URLs:\n${errorUrls
+          .map((url) => `- ${url}`)
+          .join('\n')}`
+      : '';
+
+  return `\n## Der Nutzer hat folgende Informationen bereitgestellt, berücksichtige den Inhalt bei der Antwort:
+${chunkTexts}${errorText}`;
 }
 
 // Helper to format optional fields in a list
