@@ -15,10 +15,10 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
   SidebarSeparator,
+  useSidebar,
 } from '@telli/ui/components/Sidebar';
 import { AppMenuItem } from './app-menu-item';
 import TelliLogo from '@/components/icons/logo';
@@ -29,6 +29,7 @@ import { MyTelliPoints } from './my-telli-points';
 import { FederalStateModel } from '@shared/federal-states/types';
 import { UserModel } from '@shared/auth/user-model';
 import { useSidebarVisibility } from './sidebar-provider';
+import { useOutsideClick } from '@/components/hooks/use-outside-click';
 
 type AppSiderbarProps = {
   federalState: FederalStateModel;
@@ -45,7 +46,8 @@ export function AppSidebar({
 }: AppSiderbarProps) {
   // Todo: After ui redesign, we should switch to useSidebar()
   // const { toggleSidebar } = useSidebar();
-  const { toggle } = useSidebarVisibility();
+  const { close, isOpen, toggle } = useSidebarVisibility();
+  const { isMobile } = useSidebar();
   const { theme, setTheme } = useTheme();
   const t = useTranslations('sidebar');
 
@@ -53,9 +55,15 @@ export function AppSidebar({
     setTheme(theme === 'light' ? 'dark' : 'light');
   }
 
+  const ref = useOutsideClick<HTMLDivElement>(() => {
+    if (isOpen && isMobile && typeof window !== 'undefined') {
+      close();
+    }
+  });
+
   return (
     <Sidebar>
-      <div className="p-4">
+      <div ref={ref} className="p-4">
         <SidebarHeader>
           <div className="flex justify-between">
             <TelliLogo className="h-7 text-primary" />
