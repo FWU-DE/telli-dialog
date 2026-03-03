@@ -59,13 +59,10 @@
     --ring: #020817ff;
 
     --sidebar-background: #fafafaff;
-    --sidebar-foreground: #0a0a0aff;
-    --sidebar-primary: #171717ff;
-    --sidebar-primary-foreground: #fafafaff;
-    --sidebar-accent: #f5f5f5ff;
-    --sidebar-accent-foreground: #171717ff;
+    --sidebar-accent: #e8e4ee;
+    --sidebar-accent-foreground: #052e16ff;
     --sidebar-border: #e5e5e5ff;
-    --sidebar-ring: #a1a1a1ff;
+    --sidebar-ring: var(--primary);
   }
 
   .dark {
@@ -98,13 +95,10 @@
     --ring: #cbd5e1ff;
 
     --sidebar-background: #171717ff;
-    --sidebar-foreground: #fafafaff;
-    --sidebar-primary: #1447e6ff;
-    --sidebar-primary-foreground: #fafafaff;
-    --sidebar-accent: #262626ff;
-    --sidebar-accent-foreground: #fafafaff;
+    --sidebar-accent: #e8e4ee;
+    --sidebar-accent-foreground: #f0fdf4ff;
     --sidebar-border: #ffffff1a;
-    --sidebar-ring: #525252ff;
+    --sidebar-ring: var(--primary);
   }
 }
 
@@ -143,6 +137,10 @@
   --shadow-3xl: 0 4px 9px 0px rgba(0, 41, 102, 0.2); /* only used in collapsible-sidbar.tsx */
 
   --color-sidebar: var(--sidebar-background);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring); /* focus ring */
 }
 
 @layer components {

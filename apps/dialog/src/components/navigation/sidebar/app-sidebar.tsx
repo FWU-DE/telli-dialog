@@ -15,9 +15,10 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupContent,
   SidebarHeader,
+  SidebarMenu,
   SidebarSeparator,
-  useSidebar,
 } from '@telli/ui/components/Sidebar';
 import { AppMenuItem } from './app-menu-item';
 import TelliLogo from '@/components/icons/logo';
@@ -62,36 +63,39 @@ export function AppSidebar({
           </div>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarGroup>
-            <AppMenuItem href="/" icon={<ChatTextIcon />} text="Neuer Chat" />
-            {federalState.featureToggles?.isImageGenerationEnabled && (
-              <AppMenuItem href="/image-generation" icon={<ImageSquareIcon />} text="Neues Bild" />
-            )}
-            <AppMenuItem href="/custom" icon={<LegoSmileyIcon />} text="Assistenten" />
+          <SidebarGroup className="px-0">
+            <SidebarMenu>
+              <AppMenuItem href="/" icon={<ChatTextIcon />} text="Neuer Chat" />
+              {federalState.featureToggles?.isImageGenerationEnabled && (
+                <AppMenuItem
+                  href="/image-generation"
+                  icon={<ImageSquareIcon />}
+                  text="Neues Bild"
+                />
+              )}
+              <AppMenuItem href="/custom" icon={<LegoSmileyIcon />} text="Assistenten" />
+              <SidebarSeparator className="my-4" />
+              {user.userRole === 'teacher' && federalState.featureToggles?.isSharedChatEnabled && (
+                <AppMenuItem
+                  href="/learning-scenarios"
+                  icon={<MountainsIcon />}
+                  text="Lernszenarien"
+                />
+              )}
+              {user.userRole === 'teacher' && federalState.featureToggles?.isCharacterEnabled && (
+                <AppMenuItem href="/characters" icon={<StudentIcon />} text="Dialogpartner" />
+              )}
+              <SidebarSeparator className="my-4" />
+              {user.userRole === 'teacher' && federalState.featureToggles?.isCustomGptEnabled && (
+                <AppMenuItem
+                  href={`/custom/d/${HELP_MODE_GPT_ID}`}
+                  icon={<QuestionIcon />}
+                  text="Hilfe-Chat"
+                />
+              )}
+            </SidebarMenu>
           </SidebarGroup>
-          <SidebarSeparator />
-          <SidebarGroup>
-            {user.userRole === 'teacher' && federalState.featureToggles?.isSharedChatEnabled && (
-              <AppMenuItem
-                href="/learning-scenarios"
-                icon={<MountainsIcon />}
-                text="Lernszenarien"
-              />
-            )}
-            {user.userRole === 'teacher' && federalState.featureToggles?.isCharacterEnabled && (
-              <AppMenuItem href="/characters" icon={<StudentIcon />} text="Dialogpartner" />
-            )}
-          </SidebarGroup>
-          <SidebarSeparator />
-          <SidebarGroup>
-            {user.userRole === 'teacher' && federalState.featureToggles?.isCustomGptEnabled && (
-              <AppMenuItem
-                href={`/custom/d/${HELP_MODE_GPT_ID}`}
-                icon={<QuestionIcon />}
-                text="Hilfe-Chat"
-              />
-            )}
-          </SidebarGroup>
+
           <SidebarGroup>
             <MyTelliPoints
               text={t('telli-points')}
