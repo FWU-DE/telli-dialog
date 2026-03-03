@@ -8,14 +8,27 @@ export const dynamic = 'force-dynamic';
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ callbackUrl?: string }>;
+  searchParams: Promise<{ callbackUrl?: string; vidis_idp_hint?: string }>;
 }) {
   const maybeUser = await getMaybeUser();
-  const { callbackUrl } = await searchParams;
+  const { callbackUrl, vidis_idp_hint } = await searchParams;
+
+  const safeCallbackUrl = callbackUrl || '/';
 
   if (maybeUser !== null) {
     // User is already logged in, redirect to callbackUrl or home
-    redirect(callbackUrl || '/');
+    redirect(safeCallbackUrl);
+  } else {
+    // automatic sign-in if vidis_idp_hint is present
+    if (vidis_idp_hint) {
+      const qs = new URLSearchParams({
+        provider: 'vidis',
+        callbackUrl: safeCallbackUrl,
+        vidis_idp_hint,
+      });
+
+      redirect(`/api/auth/signin?${qs.toString()}`);
+    }
   }
 
   return (
