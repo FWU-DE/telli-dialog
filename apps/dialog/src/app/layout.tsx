@@ -12,6 +12,7 @@ import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 import { dbGetFederalStateByIdWithResult } from '@shared/db/functions/federal-state';
 import { getMaybeLogoFromS3 } from '@shared/s3';
 import { buildPublicConfig } from '@shared/sentry/public-config';
+import { cn } from '@/utils/tailwind';
 
 const barlow = Barlow({
   weight: ['400', '500', '600', '700'],
@@ -51,8 +52,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const { inlineScript } = buildPublicConfig();
 
   return (
-    <html lang={locale} className={barlow.className} suppressHydrationWarning>
-      <body className="overflow-hidden">
+    <html
+      lang={locale}
+      className={cn('overflow-hidden', barlow.className)}
+      suppressHydrationWarning
+    >
+      <body>
         <Script
           id="public-config"
           // runs as soon as the browser parses it (before client components hydrate)

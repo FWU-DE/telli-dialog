@@ -1,24 +1,15 @@
 import { type LearningScenarioSelectModel } from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
-import {
-  constructFilePrompt,
-  constructWebsearchPrompt,
-  formatList,
-  LANGUAGE_GUIDELINES,
-} from '../utils/system-prompt';
-import { WebsearchSource } from '@shared/db/types';
+import { constructRagContext, formatList, LANGUAGE_GUIDELINES } from '../utils/system-prompt';
 
 export function constructLearningScenarioSystemPrompt({
   sharedChat,
   chunks,
-  websearchSources,
 }: {
   sharedChat: LearningScenarioSelectModel;
   chunks: RetrievedChunk[];
-  websearchSources?: WebsearchSource[];
 }) {
-  const filePrompt = constructFilePrompt(chunks);
-  const websearchPrompt = constructWebsearchPrompt(websearchSources);
+  const ragContext = constructRagContext(chunks);
 
   return `Du bist ein KI-Chatbot, der in einer Schulklasse eingesetzt wird, um Schülerinnen und Schüler zu unterstützen.
 ${LANGUAGE_GUIDELINES}
@@ -50,6 +41,5 @@ ${sharedChat.studentExercise.length !== 0 ? `Folgendes ist der Auftrag an die Le
 ## Verhalte dich wie folgt
 ${sharedChat.additionalInstructions}
 
-${filePrompt}
-${websearchPrompt}`;
+${ragContext}`;
 }

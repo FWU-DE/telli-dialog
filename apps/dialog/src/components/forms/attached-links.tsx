@@ -55,10 +55,7 @@ export function AttachedLinks({
       toast.error(tToast('invalid-url'));
       return;
     }
-    setValue([
-      ...currentValues,
-      { link: content, name: '', type: 'websearch', content: '', error: false },
-    ]);
+    setValue([...currentValues, { link: content, name: '', content: '', error: false }]);
     setCurrentAttachedLink('');
     handleAutosave();
   }

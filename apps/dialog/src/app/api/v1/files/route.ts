@@ -69,7 +69,7 @@ async function handleFileUpload(file: File) {
 
   const [chunks] = await Promise.all([
     chunkAndEmbed({
-      textElements: extractResult.content,
+      text: extractResult.content,
       fileId,
       federalStateId: user.federalState.id,
     }),

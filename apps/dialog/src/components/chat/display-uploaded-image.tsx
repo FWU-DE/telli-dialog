@@ -100,7 +100,7 @@ export default function DisplayUploadedImage({
           unoptimized={true} // Since we're using signed URLs from S3
         />
         {showBanner && (
-          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2 rounded-enterprise-md">
+          <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-2 rounded-enterprise-md">
             <p className="truncate" title={file.name}>
               {file.name}
             </p>

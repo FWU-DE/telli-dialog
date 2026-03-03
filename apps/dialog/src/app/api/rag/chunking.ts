@@ -3,6 +3,11 @@ import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 const CHUNK_SIZE = 1500;
 const CHUNK_OVERLAP = 300;
 
+const splitter = new RecursiveCharacterTextSplitter({
+  chunkSize: CHUNK_SIZE,
+  chunkOverlap: CHUNK_OVERLAP,
+});
+
 /**
  * Splits text into chunks using RecursiveCharacterTextSplitter.
  *
@@ -14,10 +19,5 @@ const CHUNK_OVERLAP = 300;
  * which naturally respects document structure.
  */
 export async function chunkText(text: string): Promise<string[]> {
-  const splitter = new RecursiveCharacterTextSplitter({
-    chunkSize: CHUNK_SIZE,
-    chunkOverlap: CHUNK_OVERLAP,
-  });
-
   return splitter.splitText(text);
 }
