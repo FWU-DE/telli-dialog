@@ -78,7 +78,7 @@ describe('generateTextWithBilling', () => {
     expect(mockGetTextModelById).toHaveBeenCalledWith('model-123');
     expect(mockHasAccessToModel).toHaveBeenCalledWith('api-key-123', mockModel);
     expect(mockIsApiKeyOverQuota).toHaveBeenCalledWith('api-key-123');
-    expect(mockGenerateText).toHaveBeenCalledWith(mockModel, mockMessages);
+    expect(mockGenerateText).toHaveBeenCalledWith(mockModel, mockMessages, undefined);
     expect(mockBillTextGenerationUsageToApiKey).toHaveBeenCalledWith(
       'api-key-123',
       mockModel,

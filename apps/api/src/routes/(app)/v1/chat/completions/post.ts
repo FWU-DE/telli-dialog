@@ -66,6 +66,8 @@ export async function handler(request: FastifyRequest, reply: FastifyReply): Pro
         modelName: body.model,
         messages: body.messages as ChatCompletionMessageParam[],
         apiKeyId: apiKey.id,
+        maxTokens: body.max_tokens,
+        temperature: body.temperature,
       });
 
       reply.raw.writeHead(200, {
@@ -113,6 +115,8 @@ export async function handler(request: FastifyRequest, reply: FastifyReply): Pro
         modelName: body.model,
         messages: body.messages as ChatCompletionMessageParam[],
         apiKeyId: apiKey.id,
+        maxTokens: body.max_tokens,
+        temperature: body.temperature,
       });
 
       reply.status(200).send(response);

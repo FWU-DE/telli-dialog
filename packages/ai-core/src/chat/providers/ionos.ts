@@ -17,13 +17,17 @@ function createIonosClient(model: AiModel): OpenAI {
 export function constructIonosTextStreamFn(model: AiModel): TextStreamFn {
   const client = createIonosClient(model);
 
-  return async function* getIonosTextStream({ messages, model: modelName, maxTokens }, onComplete) {
+  return async function* getIonosTextStream(
+    { messages, model: modelName, maxTokens, temperature },
+    onComplete,
+  ) {
     const stream = await client.chat.completions.create({
       model: modelName,
       messages: toOpenAIMessages(messages),
       stream: true,
       stream_options: { include_usage: true },
       max_tokens: maxTokens,
+      temperature,
     });
 
     let content = '';
@@ -60,12 +64,13 @@ export function constructIonosTextStreamFn(model: AiModel): TextStreamFn {
 export function constructIonosTextGenerationFn(model: AiModel): TextGenerationFn {
   const client = createIonosClient(model);
 
-  return async function getIonosTextGeneration({ messages, model: modelName, maxTokens }) {
+  return async function getIonosTextGeneration({ messages, model: modelName, maxTokens, temperature }) {
     const response = await client.chat.completions.create({
       model: modelName,
       messages: toOpenAIMessages(messages),
       stream: false,
       max_tokens: maxTokens,
+      temperature,
     });
 
     const text = response.choices[0]?.message?.content ?? '';

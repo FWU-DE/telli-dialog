@@ -7,11 +7,21 @@ import type { Message, ChatAttachment } from '@telli/ai-core';
  */
 export function convertToAiCoreMessages(messages: ChatCompletionMessageParam[]): Message[] {
   return messages
-    .filter((m) => m.role === 'system' || m.role === 'user' || m.role === 'assistant')
+    .filter(
+      (m) =>
+        m.role === 'system' ||
+        m.role === 'developer' ||
+        m.role === 'user' ||
+        m.role === 'assistant',
+    )
     .map((m): Message => {
+      // Map 'developer' role to 'system' since ai-core doesn't have a developer role
+      const role: Message['role'] =
+        m.role === 'developer' ? 'system' : (m.role as 'system' | 'user' | 'assistant');
+
       if (typeof m.content === 'string') {
         return {
-          role: m.role as 'system' | 'user' | 'assistant',
+          role,
           content: m.content,
         };
       }
@@ -34,14 +44,14 @@ export function convertToAiCoreMessages(messages: ChatCompletionMessageParam[]):
         }
 
         return {
-          role: m.role as 'system' | 'user' | 'assistant',
+          role,
           content: textParts.join('\n'),
           ...(attachments.length > 0 ? { attachments } : {}),
         };
       }
 
       return {
-        role: m.role as 'system' | 'user' | 'assistant',
+        role,
         content: m.content ?? '',
       };
     });

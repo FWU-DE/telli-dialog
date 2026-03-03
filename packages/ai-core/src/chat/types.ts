@@ -15,11 +15,15 @@ export type Message = {
   attachments?: ChatAttachment[];
 };
 
+export type GenerationOptions = {
+  maxTokens?: number;
+  temperature?: number;
+};
+
 export type TextGenerationArgs = {
   messages: Message[];
   model: string;
-  maxTokens?: number;
-};
+} & GenerationOptions;
 
 export type TokenUsage = {
   completionTokens: number;

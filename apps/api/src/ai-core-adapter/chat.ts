@@ -12,13 +12,20 @@ export async function chatCompletion({
   modelName,
   messages,
   apiKeyId,
+  maxTokens,
+  temperature,
 }: {
   modelName: string;
   messages: ChatCompletionMessageParam[];
   apiKeyId: string;
+  maxTokens?: number | null;
+  temperature?: number;
 }): Promise<OpenAI.Chat.Completions.ChatCompletion> {
   const aiCoreMessages = convertToAiCoreMessages(messages);
-  const result = await generateTextByNameWithBilling(modelName, aiCoreMessages, apiKeyId);
+  const result = await generateTextByNameWithBilling(modelName, aiCoreMessages, apiKeyId, {
+    maxTokens: maxTokens ?? undefined,
+    temperature,
+  });
 
   return {
     id: `chatcmpl-${crypto.randomUUID()}`,
@@ -49,10 +56,14 @@ export async function chatCompletionStream({
   modelName,
   messages,
   apiKeyId,
+  maxTokens,
+  temperature,
 }: {
   modelName: string;
   messages: ChatCompletionMessageParam[];
   apiKeyId: string;
+  maxTokens?: number | null;
+  temperature?: number;
 }): Promise<ReadableStream<Uint8Array>> {
   const aiCoreMessages = convertToAiCoreMessages(messages);
 
@@ -60,6 +71,11 @@ export async function chatCompletionStream({
     modelName,
     aiCoreMessages,
     apiKeyId,
+    undefined,
+    {
+      maxTokens: maxTokens ?? undefined,
+      temperature,
+    },
   );
 
   const encoder = new TextEncoder();

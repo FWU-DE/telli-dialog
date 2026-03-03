@@ -3,10 +3,10 @@ import { generateText, generateTextStream } from './providers';
 import { hasAccessToModel } from '../api-keys/model-access';
 import { AiGenerationError, InvalidModelError } from '../errors';
 import { getTextModelById, getTextModelByName } from '../models';
-import type { Message, TokenUsage, AiModel } from './types';
+import type { Message, TokenUsage, GenerationOptions } from './types';
 
 // Re-export types for external consumers
-export type { Message, TokenUsage, ChatAttachment } from './types';
+export type { Message, TokenUsage, ChatAttachment, GenerationOptions } from './types';
 
 /**
  * Generates text using the specified model and messages, with access control and billing.
@@ -24,6 +24,7 @@ export async function generateTextWithBilling(
   modelId: string,
   messages: Message[],
   apiKeyId: string,
+  options?: GenerationOptions,
 ) {
   const model = await getTextModelById(modelId);
 
@@ -42,7 +43,7 @@ export async function generateTextWithBilling(
   }
 
   try {
-    const textResponse = await generateText(model, messages);
+    const textResponse = await generateText(model, messages, options);
     const priceInCents = await billTextGenerationUsageToApiKey(apiKeyId, model, textResponse.usage);
 
     return {
@@ -78,6 +79,7 @@ export async function* generateTextStreamWithBilling(
   messages: Message[],
   apiKeyId: string,
   onComplete?: (result: { usage: TokenUsage; priceInCents: number }) => void | Promise<void>,
+  options?: GenerationOptions,
 ) {
   const model = await getTextModelById(modelId);
 
@@ -103,7 +105,7 @@ export async function* generateTextStreamWithBilling(
       }
     };
 
-    const stream = generateTextStream(model, messages, billingCallback);
+    const stream = generateTextStream(model, messages, billingCallback, options);
 
     for await (const chunk of stream) {
       yield chunk;
@@ -134,9 +136,10 @@ export async function generateTextByNameWithBilling(
   modelName: string,
   messages: Message[],
   apiKeyId: string,
+  options?: GenerationOptions,
 ) {
   const model = await getTextModelByName(modelName, apiKeyId);
-  const textResponse = await generateTextWithBilling(model.id, messages, apiKeyId);
+  const textResponse = await generateTextWithBilling(model.id, messages, apiKeyId, options);
   return { ...textResponse, model };
 }
 
@@ -155,8 +158,9 @@ export async function generateTextStreamByNameWithBilling(
   messages: Message[],
   apiKeyId: string,
   onComplete?: (result: { usage: TokenUsage; priceInCents: number }) => void | Promise<void>,
+  options?: GenerationOptions,
 ) {
   const model = await getTextModelByName(modelName, apiKeyId);
-  const stream = generateTextStreamWithBilling(model.id, messages, apiKeyId, onComplete);
+  const stream = generateTextStreamWithBilling(model.id, messages, apiKeyId, onComplete, options);
   return { stream, model };
 }

@@ -6,7 +6,7 @@ import {
 } from './azure';
 import { constructIonosTextGenerationFn, constructIonosTextStreamFn } from './ionos';
 import { constructOpenAITextGenerationFn, constructOpenAITextStreamFn } from './openai';
-import { TextGenerationFn, TextStreamFn, AiModel } from '../types';
+import { TextGenerationFn, TextStreamFn, AiModel, GenerationOptions } from '../types';
 import { ProviderConfigurationError } from '../../errors';
 
 function getTextGenerationFnByModel({ model }: { model: AiModel }): TextGenerationFn | undefined {
@@ -47,6 +47,7 @@ function getTextStreamFnByModel({ model }: { model: AiModel }): TextStreamFn | u
 export async function generateText(
   model: AiModel,
   messages: Parameters<TextGenerationFn>[0]['messages'],
+  options?: GenerationOptions,
 ) {
   const generationFn = getTextGenerationFnByModel({ model });
   if (!generationFn) {
@@ -54,13 +55,14 @@ export async function generateText(
       `No text generation function found for provider: ${model.provider}`,
     );
   }
-  return generationFn({ messages, model: model.name });
+  return generationFn({ messages, model: model.name, ...options });
 }
 
 export function generateTextStream(
   model: AiModel,
   messages: Parameters<TextStreamFn>[0]['messages'],
   onComplete?: Parameters<TextStreamFn>[1],
+  options?: GenerationOptions,
 ) {
   const streamFn = getTextStreamFnByModel({ model });
   if (!streamFn) {
@@ -68,5 +70,5 @@ export function generateTextStream(
       `No text stream function found for provider: ${model.provider}`,
     );
   }
-  return streamFn({ messages, model: model.name }, onComplete);
+  return streamFn({ messages, model: model.name, ...options }, onComplete);
 }
