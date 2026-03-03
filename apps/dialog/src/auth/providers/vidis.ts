@@ -43,7 +43,7 @@ interface CachedDiscoveryDocument {
 
 let cachedDiscoveryDocument: CachedDiscoveryDocument | undefined;
 let cacheExpiresAt = 0;
-let inFlightDiscoveryRequest: Promise<Response> | undefined;
+let inFlightDiscoveryRequest: Promise<CachedDiscoveryDocument> | undefined;
 
 function resolveUrl(input: Parameters<typeof fetch>[0]): URL {
   if (input instanceof Request) {
@@ -75,7 +75,8 @@ function buildResponseFromCache(cached: CachedDiscoveryDocument): Response {
  * which can take 200ms–10s depending on the VIDIS server response time.
  *
  * Concurrent requests share the same in-flight promise to avoid duplicate upstream calls.
- * The cached data is stored as parsed JSON (not a Response object) for cross-runtime safety.
+ * The cached data is stored as a plain { body, status, headers } snapshot (not a Response
+ * object) for cross-runtime safety and to avoid issues with consumed response bodies.
  */
 async function cachedDiscoveryFetch(...args: Parameters<typeof fetch>): ReturnType<typeof fetch> {
   const url = resolveUrl(args[0]);
@@ -91,27 +92,29 @@ async function cachedDiscoveryFetch(...args: Parameters<typeof fetch>): ReturnTy
 
   if (inFlightDiscoveryRequest) {
     logDebug('Awaiting in-flight OIDC discovery request');
-    return inFlightDiscoveryRequest.then((r) => r.clone());
+    const cached = await inFlightDiscoveryRequest;
+    return buildResponseFromCache(cached);
   }
 
   logDebug('Fetching OIDC discovery document');
-  inFlightDiscoveryRequest = fetch(...args);
+  inFlightDiscoveryRequest = fetch(...args).then(async (response) => {
+    const body = await response.text();
+    const headers: Record<string, string> = {};
+    response.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    return { body, status: response.status, headers };
+  });
 
   try {
-    const response = await inFlightDiscoveryRequest;
+    const result = await inFlightDiscoveryRequest;
 
-    if (response.ok) {
-      const body = await response.text();
-      const headers: Record<string, string> = {};
-      response.headers.forEach((value, key) => {
-        headers[key] = value;
-      });
-      cachedDiscoveryDocument = { body, status: response.status, headers };
+    if (result.status >= 200 && result.status < 300) {
+      cachedDiscoveryDocument = result;
       cacheExpiresAt = Date.now() + OIDC_CONFIG_CACHE_TTL_MS;
-      return buildResponseFromCache(cachedDiscoveryDocument);
     }
 
-    return response;
+    return buildResponseFromCache(result);
   } finally {
     inFlightDiscoveryRequest = undefined;
   }
