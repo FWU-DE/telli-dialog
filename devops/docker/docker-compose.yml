@@ -45,3 +45,5 @@ networks:
 volumes:
   postgres_data_telli_dialog:
     driver: local
+  postgres_data_telli_api:
+    driver: local
