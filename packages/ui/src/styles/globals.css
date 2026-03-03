@@ -127,6 +127,10 @@
     color: var(--color-gray-500);
     border-color: var(--color-gray-300);
   }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
 }
 
 @theme {
