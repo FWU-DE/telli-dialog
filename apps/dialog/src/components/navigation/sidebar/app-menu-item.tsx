@@ -30,7 +30,6 @@ export function AppMenuItem({ href, icon, text }: AppMenuItemProps) {
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={isActive()}>
         <Link
-          className="hover:underline hover:text-primary hover:data-[active=true]:text-primary"
           href={href}
           onClick={() => {
             if (isMobile) {
@@ -40,7 +39,7 @@ export function AppMenuItem({ href, icon, text }: AppMenuItemProps) {
           prefetch={false}
         >
           <span className="text-primary">{icon}</span>
-          <span className="font-normal text-base text-primary">{text}</span>
+          <span>{text}</span>
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>

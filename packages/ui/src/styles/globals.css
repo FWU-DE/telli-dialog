@@ -60,7 +60,7 @@
 
     --sidebar-background: #fafafaff;
     --sidebar-accent: #e8e4ee;
-    --sidebar-accent-foreground: #052e16ff;
+    --sidebar-accent-foreground: var(--primary);
     --sidebar-border: #e5e5e5ff;
     --sidebar-ring: var(--primary);
   }
@@ -96,7 +96,7 @@
 
     --sidebar-background: #171717ff;
     --sidebar-accent: #e8e4ee;
-    --sidebar-accent-foreground: #f0fdf4ff;
+    --sidebar-accent-foreground: var(--primary);
     --sidebar-border: #ffffff1a;
     --sidebar-ring: var(--primary);
   }
@@ -134,7 +134,7 @@
   --breakpoint-2xl: 96rem; /* 1536px */
 
   --shadow-dropdown: 0px 4px 10px 0px rgba(0, 41, 102, 0.1);
-  --shadow-3xl: 0 4px 9px 0px rgba(0, 41, 102, 0.2); /* only used in collapsible-sidbar.tsx */
+  --shadow-3xl: 0 4px 9px 0px rgba(0, 41, 102, 0.2); /* only used in collapsible-sidebar.tsx */
 
   --color-sidebar: var(--sidebar-background);
   --color-sidebar-accent: var(--sidebar-accent);

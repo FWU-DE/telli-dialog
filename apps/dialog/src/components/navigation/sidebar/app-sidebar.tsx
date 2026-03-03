@@ -31,7 +31,7 @@ import { UserModel } from '@shared/auth/user-model';
 import { useSidebarVisibility } from './sidebar-provider';
 import { useOutsideClick } from '@/components/hooks/use-outside-click';
 
-type AppSiderbarProps = {
+type AppSidebarProps = {
   federalState: FederalStateModel;
   user: UserModel;
   currentModelCosts: number;
@@ -43,16 +43,17 @@ export function AppSidebar({
   user,
   currentModelCosts,
   userPriceLimit,
-}: AppSiderbarProps) {
+}: AppSidebarProps) {
   // Todo: After ui redesign, we should switch to useSidebar()
   // const { toggleSidebar } = useSidebar();
   const { close, isOpen, toggle } = useSidebarVisibility();
   const { isMobile } = useSidebar();
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const t = useTranslations('sidebar');
 
   function toggleTheme() {
-    setTheme(theme === 'light' ? 'dark' : 'light');
+    const currentTheme = resolvedTheme ?? 'light';
+    setTheme(currentTheme === 'light' ? 'dark' : 'light');
   }
 
   const ref = useOutsideClick<HTMLDivElement>(() => {
@@ -67,7 +68,11 @@ export function AppSidebar({
         <SidebarHeader>
           <div className="flex justify-between">
             <TelliLogo className="h-7 text-primary" />
-            <SidebarSimpleIcon className="w-6 h-6 text-primary" onClick={toggle} />
+            {/* Todo: create a separate component that is a button with click handler and icon, hover style, focusable, aria-label, etc. */}
+            <SidebarSimpleIcon
+              className="w-8 h-8 p-1 text-primary hover:bg-primary-hover rounded-enterprise-sm"
+              onClick={toggle}
+            />
           </div>
         </SidebarHeader>
         <SidebarContent>

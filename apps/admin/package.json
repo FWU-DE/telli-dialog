@@ -51,6 +51,7 @@
     "prettier": "3.8.1",
     "prettier-eslint": "16.4.2",
     "tailwindcss": "4.2.1",
+    "tailwindcss-animate": "1.0.7",
     "typescript": "5.9.3"
   }
 }
