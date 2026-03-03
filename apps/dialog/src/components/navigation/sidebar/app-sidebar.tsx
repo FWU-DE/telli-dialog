@@ -42,43 +42,45 @@ export function AppSidebar({ currentModelCosts, userPriceLimit }: AppSiderbarPro
 
   return (
     <Sidebar>
-      <SidebarHeader>
-        <div className="flex justify-between">
-          <TelliLogo className="h-7 text-primary" />
-          <SidebarSimpleIcon className="w-6 h-6 text-primary" onClick={toggleSidebar} />
-        </div>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <AppMenuItem href="/" icon={<ChatTextIcon />} text="Neuer Chat" />
-          <AppMenuItem href="/image-generation" icon={<ImageSquareIcon />} text="Neues Bild" />
-          <AppMenuItem href="/custom" icon={<LegoSmileyIcon />} text="Assistenten" />
-        </SidebarGroup>
-        <SidebarSeparator />
-        <SidebarGroup>
-          <AppMenuItem href="/learning-scenarios" icon={<MountainsIcon />} text="Lernszenarien" />
-          <AppMenuItem href="/characters" icon={<StudentIcon />} text="Dialogpartner" />
-        </SidebarGroup>
-        <SidebarSeparator />
-        <SidebarGroup>
-          <AppMenuItem
-            href={`/custom/d/${HELP_MODE_GPT_ID}`}
-            icon={<QuestionIcon />}
-            text="Hilfe-Chat"
-          />
-        </SidebarGroup>
-        <SidebarGroup>
-          <MyTelliPoints
-            text={t('telli-points')}
-            currentModelCosts={currentModelCosts}
-            userPriceLimit={userPriceLimit}
-          />
-        </SidebarGroup>
-        <SidebarGroup>Chat History</SidebarGroup>
-      </SidebarContent>
-      <SidebarFooter>
-        <MoonStarsIcon onClick={toggleTheme} />
-      </SidebarFooter>
+      <div className="p-4">
+        <SidebarHeader>
+          <div className="flex justify-between">
+            <TelliLogo className="h-7 text-primary" />
+            <SidebarSimpleIcon className="w-6 h-6 text-primary" onClick={toggleSidebar} />
+          </div>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <AppMenuItem href="/" icon={<ChatTextIcon />} text="Neuer Chat" />
+            <AppMenuItem href="/image-generation" icon={<ImageSquareIcon />} text="Neues Bild" />
+            <AppMenuItem href="/custom" icon={<LegoSmileyIcon />} text="Assistenten" />
+          </SidebarGroup>
+          <SidebarSeparator />
+          <SidebarGroup>
+            <AppMenuItem href="/learning-scenarios" icon={<MountainsIcon />} text="Lernszenarien" />
+            <AppMenuItem href="/characters" icon={<StudentIcon />} text="Dialogpartner" />
+          </SidebarGroup>
+          <SidebarSeparator />
+          <SidebarGroup>
+            <AppMenuItem
+              href={`/custom/d/${HELP_MODE_GPT_ID}`}
+              icon={<QuestionIcon />}
+              text="Hilfe-Chat"
+            />
+          </SidebarGroup>
+          <SidebarGroup>
+            <MyTelliPoints
+              text={t('telli-points')}
+              currentModelCosts={currentModelCosts}
+              userPriceLimit={userPriceLimit}
+            />
+          </SidebarGroup>
+          <SidebarGroup>Chat History</SidebarGroup>
+        </SidebarContent>
+        <SidebarFooter>
+          <MoonStarsIcon onClick={toggleTheme} />
+        </SidebarFooter>
+      </div>
     </Sidebar>
   );
 }
