@@ -61,7 +61,7 @@ export function ChatBox({
 
   for (const url of urls) {
     if (websearchSources.find((source) => source.link === url) === undefined) {
-      websearchSources.push({ link: url, type: 'websearch' });
+      websearchSources.push({ link: url });
     }
   }
 

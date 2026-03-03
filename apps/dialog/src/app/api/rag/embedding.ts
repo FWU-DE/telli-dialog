@@ -54,11 +54,9 @@ async function embedTextWithApiKey(text: string[], modelId: string, federalState
 
 export async function embedChunks({
   chunksWithoutEmbeddings,
-  fileId,
   federalStateId,
 }: {
   chunksWithoutEmbeddings: UnembeddedChunk[];
-  fileId: string;
   federalStateId: string;
 }): Promise<ChunkInsertModel[]> {
   const { apiKeyId, modelId } = await getEmbeddingModelWithApiKey(federalStateId);
@@ -76,13 +74,10 @@ export async function embedChunks({
         const batchEmbeddings = await embedTextWithApiKey(batchTexts, modelId, apiKeyId);
 
         return batchEmbeddings.map((embedding, batchIndex) => {
-          const originalIndex = i + batchIndex;
+          const chunk = chunksWithoutEmbeddings[i + batchIndex]!;
           return {
-            content: chunksWithoutEmbeddings[originalIndex]?.content ?? '',
+            ...chunk,
             embedding,
-            fileId,
-            orderIndex: originalIndex,
-            pageNumber: chunksWithoutEmbeddings[originalIndex]?.pageNumber ?? 0,
           };
         });
       })(),

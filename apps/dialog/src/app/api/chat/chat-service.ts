@@ -24,9 +24,10 @@ import {
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { ChatMessage, SendMessageResult } from '@/types/chat';
-import { searchWeb } from './websearch-service';
+import { extractUrls } from './websearch-service';
 import { UserAndContext } from '@/auth/types';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
+import { ingestWebContent } from '../rag/ingestWebContent';
 
 /**
  * Converts frontend messages to ai-core message format
@@ -128,13 +129,12 @@ export async function sendChatMessage({
   if (!userMessage || userMessage.role !== 'user') {
     throw new Error('No user message found');
   }
-  const { websearchSources, userMessageWebsearchSources } = await searchWeb(
-    customGptId,
-    characterId,
-    user,
-    userMessage,
-    conversationObject.messages,
-  );
+
+  const urls = await extractUrls(customGptId, characterId, user, messages);
+  const { processedUrls, errorUrls } = await ingestWebContent({
+    urls,
+    federalStateId: user.federalState.id,
+  });
 
   // Save user message to DB
   await dbInsertChatContent({
@@ -145,7 +145,6 @@ export async function sendChatMessage({
     userId: user.id,
     modelName: definedModel.name,
     orderNumber: messages.length + 1,
-    websearchSources: userMessageWebsearchSources,
   });
 
   // Link files to conversation
@@ -166,8 +165,9 @@ export async function sendChatMessage({
 
   const chunks = await retrieveChunks({
     messages,
-    user,
+    federalStateId: user.federalState.id,
     relatedFileEntities,
+    sourceUrls: processedUrls,
   });
 
   // Update last used model
@@ -187,8 +187,8 @@ export async function sendChatMessage({
     customGptId,
     isTeacher: user.school.userRole === 'teacher',
     federalState: user.federalState,
-    websearchSources,
     chunks,
+    errorUrls,
   });
 
   // Check if the model supports images based on supportedImageFormats

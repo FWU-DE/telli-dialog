@@ -1,12 +1,6 @@
 import { CharacterSelectModel } from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
-import {
-  constructFilePrompt,
-  constructWebsearchPrompt,
-  formatList,
-  LANGUAGE_GUIDELINES,
-} from '../utils/system-prompt';
-import { WebsearchSource } from '@shared/db/types';
+import { constructRagContext, formatList, LANGUAGE_GUIDELINES } from '../utils/system-prompt';
 
 export function constructBaseCharacterSystemPrompt(character: CharacterSelectModel) {
   return `Du bist ${character.name}. ${character.description}
@@ -40,17 +34,11 @@ Bitte antworte stets im Rahmen deiner Rolle als ${character.name}.`;
 export function constructCharacterSystemPrompt({
   character,
   chunks,
-  websearchSources,
 }: {
   character: CharacterSelectModel;
   chunks: RetrievedChunk[];
-  websearchSources?: WebsearchSource[];
 }) {
-  const filePrompt = constructFilePrompt(chunks);
-  const websearchPrompt = constructWebsearchPrompt(websearchSources);
+  const ragContext = constructRagContext(chunks);
 
-  return `${constructBaseCharacterSystemPrompt(character)}
-
-${filePrompt}
-${websearchPrompt}`;
+  return `${constructBaseCharacterSystemPrompt(character)}\n${ragContext}`;
 }

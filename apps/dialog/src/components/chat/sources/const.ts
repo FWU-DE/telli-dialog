@@ -7,7 +7,6 @@ import { WebsearchSource } from '@shared/db/types';
  */
 export function defaultErrorSource(link: string): WebsearchSource {
   return {
-    type: 'websearch',
     error: true,
     link: link,
   };
