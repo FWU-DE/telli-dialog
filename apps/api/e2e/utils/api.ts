@@ -3,9 +3,7 @@ import type { APIRequestContext } from '@playwright/test';
 const API_KEY = process.env.DE_TEST_API_KEY;
 
 if (!API_KEY) {
-  throw new Error(
-    'DE_TEST_API_KEY environment variable is required. Set it in apps/api/.env.test',
-  );
+  throw new Error('DE_TEST_API_KEY environment variable is required. Set it in apps/api/.env.test');
 }
 
 export const authorizationHeader = {
