@@ -267,13 +267,17 @@ export async function dbInsertWebChunks(chunks: ChunkInsertModel[]) {
   await db.insert(chunkTable).values(chunks).onConflictDoNothing();
 }
 
-export async function dbChunksExistForSourceUrl(sourceUrl: string): Promise<boolean> {
-  const result = await db
-    .select({ id: chunkTable.id })
+/**
+ * Checks which of the given source URLs already have chunks in the database.
+ * Returns the set of URLs that exist.
+ */
+export async function dbChunksExistForSourceUrls(sourceUrls: string[]): Promise<Set<string>> {
+  if (sourceUrls.length === 0) return new Set();
+  const results = await db
+    .selectDistinct({ sourceUrl: chunkTable.sourceUrl })
     .from(chunkTable)
-    .where(eq(chunkTable.sourceUrl, sourceUrl))
-    .limit(1);
-  return result.length > 0;
+    .where(inArray(chunkTable.sourceUrl, sourceUrls));
+  return new Set(results.map((r) => r.sourceUrl).filter((url): url is string => url !== null));
 }
 
 export async function dbInsertFile(file: FileInsertModel) {

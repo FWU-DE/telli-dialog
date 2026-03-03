@@ -1,4 +1,4 @@
-import { dbChunksExistForSourceUrl, dbInsertWebChunks } from '@shared/db/functions/files';
+import { dbChunksExistForSourceUrls, dbInsertWebChunks } from '@shared/db/functions/files';
 import { webScraper } from '../webpage-content/search-web';
 import { chunkAndEmbed } from './rag-service';
 
@@ -18,13 +18,12 @@ export async function ingestWebContent({
   federalStateId: string;
 }): Promise<{ processedUrls: string[]; errorUrls: string[] }> {
   // check which urls have already been ingested
-  const existenceChecks = await Promise.all(
-    urls.map(async (url) => ({ url, exists: await dbChunksExistForSourceUrl(url) })),
-  );
-  const newUrls = existenceChecks.filter((r) => !r.exists).map((r) => r.url);
+  const uniqueUrls = [...new Set(urls)];
+  const existingUrls = await dbChunksExistForSourceUrls(uniqueUrls);
+  const newUrls = uniqueUrls.filter((url) => !existingUrls.has(url));
 
   if (newUrls.length === 0) {
-    return { processedUrls: urls, errorUrls: [] };
+    return { processedUrls: uniqueUrls, errorUrls: [] };
   }
 
   // scrape web content for new urls
@@ -51,7 +50,7 @@ export async function ingestWebContent({
   await dbInsertWebChunks(embedded.flatMap((r) => r.chunks));
 
   const processedUrls = [
-    ...existenceChecks.filter((r) => r.exists).map((r) => r.url),
+    ...uniqueUrls.filter((url) => existingUrls.has(url)),
     ...embedded.map((r) => r.url),
   ];
 
