@@ -67,7 +67,7 @@ jobs:
       VIDIS_ISSUER_URI: http://localhost:8080/realms/telli-local
       API_DATABASE_URL: postgresql://telli_api_db:test1234@127.0.0.1:6543/telli_api_db
       API_URL: http://localhost:3002
-      API_KEY: ApiKeyForTelliDialogAdminApi
+      API_KEY: ApiKeyForTelliApiAdminApi
       ENCRYPTION_KEY: EncryptionKeyForEncryptedApiKeysToTelliApi
       # Auth.js secret
       AUTH_SECRET: 'yN1a0lQ77RgeEQam5DvGaddbdUDQoxswK+21FmEqBPs='
@@ -126,8 +126,6 @@ jobs:
             -e API_KEY=$API_KEY \
             -e PORT=3002 \
             ghcr.io/fwu-de/telli-api:latest
-        env:
-          API_KEY: ApiKeyForTelliApiAdminApi
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -147,7 +145,7 @@ jobs:
         # The output is captured in GITHUB_ENV for seeding telli-dialog
         run: |
           pnpm --filter @telli/ai-core db:seed:telli-api | tee /tmp/out.txt
-          grep -E '^[A-Z_][A-Z0-9_]*=' /tmp/out.txt >> "$GITHUB_ENV"
+          grep -E '^DE_[A-Z0-9_]*_API_KEY=' /tmp/out.txt >> "$GITHUB_ENV"
 
       - name: Run migrations and seed database (if applicable)
         run: pnpm --filter @telli/shared db:migrate && pnpm --filter @telli/shared db:seed
@@ -167,16 +165,32 @@ jobs:
           TURBO_TELEMETRY_DISABLED: 1
           NODE_ENV: test
 
-      - name: Run E2E tests
+      - name: Run E2E tests (dialog)
         run: pnpm --filter telli-dialog e2e
         env:
           CI: true
 
-      - uses: actions/upload-artifact@v7
+      - name: Run E2E tests (api)
+        run: pnpm --filter telli-api e2e
+        env:
+          CI: true
+          DE_TEST_API_KEY: ${{ env.DE_TEST_API_KEY }}
+          API_BASE_URL: http://localhost:3002
+
+      - name: Upload Playwright reports (dialog)
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-report
           path: apps/dialog/playwright-report
+          retention-days: 30
+
+      - name: Upload Playwright reports (api)
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: api-playwright-report
+          path: apps/api/playwright-report
           retention-days: 30
 
       - name: Print telli-api logs
