@@ -191,8 +191,6 @@ export async function sendChatMessage({
     errorUrls,
   });
 
-  console.log('System Prompt:', systemPrompt);
-
   // Check if the model supports images based on supportedImageFormats
   const modelSupportsImages =
     definedModel.supportedImageFormats !== null && definedModel.supportedImageFormats.length > 0;
