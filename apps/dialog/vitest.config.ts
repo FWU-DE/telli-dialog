@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { coverageConfigDefaults, defineConfig } from 'vitest/config';
 import path from 'path';
 
 export default defineConfig({
@@ -19,8 +19,9 @@ export default defineConfig({
     testTimeout: 5000,
 
     coverage: {
-      reporter: ['text', 'json', 'html'],
-      exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**'],
+      provider: 'v8',
+      reporter: ['text', 'lcov', 'json', 'html'],
+      exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**', ...coverageConfigDefaults.exclude],
     },
   },
 });
