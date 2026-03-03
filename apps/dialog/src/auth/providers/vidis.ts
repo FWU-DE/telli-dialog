@@ -4,7 +4,6 @@ import { Account, NextAuthConfig, Profile } from 'next-auth';
 import { customFetch } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 import { vidisAccountSchema, vidisProfileSchema } from '@telli/shared/auth/vidis';
-import { logDebug } from '@shared/logging';
 
 export const VIDIS_LOGOUT_URL = new URL(env.vidisIssuerUri + '/protocol/openid-connect/logout');
 
@@ -33,91 +32,42 @@ export async function handleVidisJWTCallback({
   return token;
 }
 
-const OIDC_CONFIG_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
-
-interface CachedDiscoveryDocument {
-  body: string;
-  status: number;
-  headers: Record<string, string>;
-}
-
-let cachedDiscoveryDocument: CachedDiscoveryDocument | undefined;
-let cacheExpiresAt = 0;
-let inFlightDiscoveryRequest: Promise<CachedDiscoveryDocument> | undefined;
-
-function resolveUrl(input: Parameters<typeof fetch>[0]): URL {
-  if (input instanceof Request) {
-    return new URL(input.url);
-  }
-  if (input instanceof URL) {
-    return input;
-  }
-  const inputStr = String(input);
-  try {
-    return new URL(inputStr);
-  } catch {
-    return new URL(inputStr, env.vidisIssuerUri);
-  }
-}
-
-function buildResponseFromCache(cached: CachedDiscoveryDocument): Response {
-  return new Response(cached.body, {
-    status: cached.status,
-    headers: cached.headers,
-  });
-}
+const OIDC_DISCOVERY_REVALIDATE_SECONDS = 5 * 60; // 5 minutes
 
 /**
- * Custom fetch that caches the OIDC discovery document (.well-known/openid-configuration).
+ * Custom fetch that caches the OIDC discovery document (.well-known/openid-configuration)
+ * using Next.js's built-in Data Cache via `next.revalidate`.
  * All other requests are passed through to the standard fetch.
  *
  * Without caching, auth.js fetches the discovery document on every auth operation,
  * which can take 200ms–10s depending on the VIDIS server response time.
- *
- * Concurrent requests share the same in-flight promise to avoid duplicate upstream calls.
- * The cached data is stored as a plain { body, status, headers } snapshot (not a Response
- * object) for cross-runtime safety and to avoid issues with consumed response bodies.
  */
 async function cachedDiscoveryFetch(...args: Parameters<typeof fetch>): ReturnType<typeof fetch> {
-  const url = resolveUrl(args[0]);
+  const input = args[0];
+  let url: URL;
+
+  if (input instanceof Request) {
+    url = new URL(input.url);
+  } else if (input instanceof URL) {
+    url = input;
+  } else {
+    const inputStr = String(input);
+    try {
+      url = new URL(inputStr);
+    } catch {
+      url = new URL(inputStr, env.vidisIssuerUri);
+    }
+  }
 
   if (!url.pathname.endsWith('/.well-known/openid-configuration')) {
     return fetch(...args);
   }
 
-  if (cachedDiscoveryDocument && Date.now() < cacheExpiresAt) {
-    logDebug('Using cached OIDC discovery document');
-    return buildResponseFromCache(cachedDiscoveryDocument);
-  }
-
-  if (inFlightDiscoveryRequest) {
-    logDebug('Awaiting in-flight OIDC discovery request');
-    const cached = await inFlightDiscoveryRequest;
-    return buildResponseFromCache(cached);
-  }
-
-  logDebug('Fetching OIDC discovery document');
-  inFlightDiscoveryRequest = fetch(...args).then(async (response) => {
-    const body = await response.text();
-    const headers: Record<string, string> = {};
-    response.headers.forEach((value, key) => {
-      headers[key] = value;
-    });
-    return { body, status: response.status, headers };
+  // If the cache is stale, this will serve the stale cache, before revalidating and updating the cache for subsequent requests.
+  return fetch(url, {
+    ...args[1],
+    next: { revalidate: OIDC_DISCOVERY_REVALIDATE_SECONDS },
   });
-
-  try {
-    const result = await inFlightDiscoveryRequest;
-
-    if (result.status >= 200 && result.status < 300) {
-      cachedDiscoveryDocument = result;
-      cacheExpiresAt = Date.now() + OIDC_CONFIG_CACHE_TTL_MS;
-    }
-
-    return buildResponseFromCache(result);
-  } finally {
-    inFlightDiscoveryRequest = undefined;
-  }
 }
 
 export const vidisConfig = {
