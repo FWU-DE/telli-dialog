@@ -7,10 +7,11 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_DB: telli_dialog_db
-      POSTGRES_USER: telli_dialog_db
+      POSTGRES_USER: telli
       POSTGRES_PASSWORD: test1234
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./postgres:/docker-entrypoint-initdb.d:ro
     ports:
       - '5432:5432'
     healthcheck:

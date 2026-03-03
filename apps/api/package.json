@@ -10,7 +10,7 @@
     "build": "tsup",
     "lint": "tsc --noEmit && eslint --max-warnings 0",
     "types": "tsc --noEmit",
-    "test": "vitest run --coverage",
+    "test": "vitest run",
     "test:watch": "vitest run --watch",
     "test:coverage": "vitest run --coverage"
   },

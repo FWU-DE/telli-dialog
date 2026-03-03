@@ -6,6 +6,10 @@ on:
   pull_request:
     branches:
       - main
+  workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        required: true
 
 env:
   NEXT_TELEMETRY_DISABLED: 1
@@ -142,4 +146,10 @@ jobs:
       - name: Run api database migrations
         run: pnpm --filter @telli/api-database run db:migrate:pipeline
       - name: Check unit tests
-        run: pnpm run test
+        run: pnpm run test:coverage
+
+      - name: Upload coverage results to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./apps/api/coverage/lcov.info,./apps/dialog/coverage/lcov.info,./packages/ai-core/coverage/lcov.info,./packages/shared/coverage/lcov.info
