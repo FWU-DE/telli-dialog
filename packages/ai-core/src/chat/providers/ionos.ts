@@ -64,7 +64,12 @@ export function constructIonosTextStreamFn(model: AiModel): TextStreamFn {
 export function constructIonosTextGenerationFn(model: AiModel): TextGenerationFn {
   const client = createIonosClient(model);
 
-  return async function getIonosTextGeneration({ messages, model: modelName, maxTokens, temperature }) {
+  return async function getIonosTextGeneration({
+    messages,
+    model: modelName,
+    maxTokens,
+    temperature,
+  }) {
     const response = await client.chat.completions.create({
       model: modelName,
       messages: toOpenAIMessages(messages),

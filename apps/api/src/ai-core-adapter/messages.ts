@@ -16,8 +16,7 @@ export function convertToAiCoreMessages(messages: ChatCompletionMessageParam[]):
     )
     .map((m): Message => {
       // Map 'developer' role to 'system' since ai-core doesn't have a developer role
-      const role: Message['role'] =
-        m.role === 'developer' ? 'system' : (m.role as 'system' | 'user' | 'assistant');
+      const role: Message['role'] = m.role === 'developer' ? 'system' : m.role;
 
       if (typeof m.content === 'string') {
         return {

@@ -61,7 +61,12 @@ export function constructOpenAITextStreamFn(model: AiModel): TextStreamFn {
 export function constructOpenAITextGenerationFn(model: AiModel): TextGenerationFn {
   const client = createOpenAIClient(model);
 
-  return async function getOpenAITextGeneration({ messages, model: modelName, maxTokens, temperature }) {
+  return async function getOpenAITextGeneration({
+    messages,
+    model: modelName,
+    maxTokens,
+    temperature,
+  }) {
     const response = await client.chat.completions.create({
       model: modelName,
       messages: toOpenAIMessages(messages),
