@@ -175,7 +175,6 @@ jobs:
         env:
           CI: true
           DE_TEST_API_KEY: ${{ env.DE_TEST_API_KEY }}
-          API_KEY: ${{ env.DE_TEST_API_KEY }}
           API_BASE_URL: http://localhost:3002
 
       - name: Upload Playwright reports (dialog)

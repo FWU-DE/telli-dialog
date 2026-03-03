@@ -18,7 +18,6 @@
     "KEYCLOAK_ISSUER",
     "API_KEY",
     "DE_TEST_API_KEY",
-    "E2E_CLIENT_API_KEY",
     "API_URL",
     "ENCRYPTION_KEY",
     "NEXTAUTH_URL",

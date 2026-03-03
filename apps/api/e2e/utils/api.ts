@@ -1,11 +1,10 @@
 import type { APIRequestContext } from '@playwright/test';
 
-const API_KEY =
-  process.env.DE_TEST_API_KEY ?? process.env.E2E_CLIENT_API_KEY ?? process.env.API_KEY;
+const API_KEY = process.env.DE_TEST_API_KEY;
 
 if (!API_KEY) {
   throw new Error(
-    'An API key environment variable is required. Set DE_TEST_API_KEY, E2E_CLIENT_API_KEY, or API_KEY in apps/api/.env.test',
+    'DE_TEST_API_KEY environment variable is required. Set it in apps/api/.env.test',
   );
 }
 
@@ -51,33 +50,20 @@ async function findModel(
   return model;
 }
 
-/** Returns a text/chat model (e.g. gpt-4o-mini, llama, gpt). Throws if none available. */
+/** Returns a text/chat model. Throws if none available. */
 export async function getTextModel(request: APIRequestContext) {
   return findModel(
     request,
-    (m) => {
-      if (m.isDeleted) return false;
-      const modelName = m.name.toLowerCase();
-      return (
-        modelName === 'gpt-4o-mini' || modelName.includes('llama') || modelName.includes('gpt')
-      );
-    },
+    (m) => !m.isDeleted && m.priceMetadata?.type === 'text',
     'No text model available',
   );
 }
 
-/** Returns an embedding model (e.g. text-embedding-*, bge-*). Throws if none available. */
+/** Returns an embedding model. Throws if none available. */
 export async function getEmbeddingModel(request: APIRequestContext) {
   return findModel(
     request,
-    (m) => {
-      if (m.isDeleted) return false;
-      return (
-        m.priceMetadata?.type === 'embedding' ||
-        m.name.toLowerCase().includes('embedding') ||
-        m.name.toLowerCase().includes('bge')
-      );
-    },
+    (m) => !m.isDeleted && m.priceMetadata?.type === 'embedding',
     'No embedding model available',
   );
 }
