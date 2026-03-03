@@ -1,7 +1,7 @@
 'use client';
 
 import useBreakpoints from '@/components/hooks/use-breakpoints';
-import { useSidebar } from '@ui/components/Sidebar';
+import { useSidebar } from '@telli/ui/components/Sidebar';
 import * as React from 'react';
 
 export const ReadonlyContext = React.createContext<{
@@ -14,7 +14,7 @@ export function useSidebarVisibility() {
   return React.useContext(ReadonlyContext);
 }
 
-// Todo: After ui redesign, we should switch to useSidbar() and remove this provider
+// Todo: After ui redesign, we should switch to useSidebar() and remove this provider
 export function SidebarVisibilityProvider({ children }: { children: React.ReactNode }) {
   const { isAtLeast, isBelow } = useBreakpoints();
   const [isOpen, setOpen] = React.useState(true);
