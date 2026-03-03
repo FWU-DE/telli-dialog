@@ -53,7 +53,10 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
               defaultLlmModelByCookie={user.lastUsedModel ?? DEFAULT_CHAT_MODEL}
             >
               {federalState.featureToggles.isNewUiDesignEnabled ? (
-                <AppSidebar />
+                <AppSidebar
+                  currentModelCosts={priceInCent ?? 0}
+                  userPriceLimit={userPriceLimit ?? 500}
+                />
               ) : (
                 <DialogSidebar
                   user={user}

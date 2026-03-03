@@ -23,10 +23,19 @@ import { AppMenuItem } from './app-menu-item';
 import TelliLogo from '@/components/icons/logo';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { useTheme } from 'next-themes';
+import { useTranslations } from 'next-intl';
+import { MyTelliPoints } from './my-telli-points';
 
-export function AppSidebar() {
+type AppSiderbarProps = {
+  currentModelCosts: number;
+  userPriceLimit: number;
+};
+
+export function AppSidebar({ currentModelCosts, userPriceLimit }: AppSiderbarProps) {
   const { toggleSidebar } = useSidebar();
   const { theme, setTheme } = useTheme();
+  const t = useTranslations('sidebar');
+
   function toggleTheme() {
     setTheme(theme === 'light' ? 'dark' : 'light');
   }
@@ -58,7 +67,13 @@ export function AppSidebar() {
             text="Hilfe-Chat"
           />
         </SidebarGroup>
-        <SidebarGroup>Meine telli-Points</SidebarGroup>
+        <SidebarGroup>
+          <MyTelliPoints
+            text={t('telli-points')}
+            currentModelCosts={currentModelCosts}
+            userPriceLimit={userPriceLimit}
+          />
+        </SidebarGroup>
         <SidebarGroup>Chat History</SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
