@@ -35,7 +35,7 @@ type Props = {
 
 export default function DialogSidebar({ user, currentModelCosts, userPriceLimit }: Props) {
   const { isBelow } = useBreakpoints();
-  const { toggle, isOpen } = useSidebarVisibility();
+  const { close, isOpen } = useSidebarVisibility();
   const pathname = usePathname();
   const router = useRouter();
   const toast = useToast();
@@ -60,7 +60,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
 
   React.useEffect(() => {
     if (isOpen && isBelow.md) {
-      toggle();
+      close();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);

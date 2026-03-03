@@ -27,6 +27,7 @@ import { useTranslations } from 'next-intl';
 import { MyTelliPoints } from './my-telli-points';
 import { FederalStateModel } from '@shared/federal-states/types';
 import { UserModel } from '@shared/auth/user-model';
+import { useSidebarVisibility } from './sidebar-provider';
 
 type AppSiderbarProps = {
   federalState: FederalStateModel;
@@ -41,7 +42,9 @@ export function AppSidebar({
   currentModelCosts,
   userPriceLimit,
 }: AppSiderbarProps) {
-  const { toggleSidebar } = useSidebar();
+  // Todo: After ui redesign, we should switch to useSidebar()
+  // const { toggleSidebar } = useSidebar();
+  const { toggle } = useSidebarVisibility();
   const { theme, setTheme } = useTheme();
   const t = useTranslations('sidebar');
 
@@ -55,7 +58,7 @@ export function AppSidebar({
         <SidebarHeader>
           <div className="flex justify-between">
             <TelliLogo className="h-7 text-primary" />
-            <SidebarSimpleIcon className="w-6 h-6 text-primary" onClick={toggleSidebar} />
+            <SidebarSimpleIcon className="w-6 h-6 text-primary" onClick={toggle} />
           </div>
         </SidebarHeader>
         <SidebarContent>
