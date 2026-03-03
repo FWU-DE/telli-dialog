@@ -26,14 +26,21 @@ import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
 import { MyTelliPoints } from './my-telli-points';
 import { FederalStateModel } from '@shared/federal-states/types';
+import { UserModel } from '@shared/auth/user-model';
 
 type AppSiderbarProps = {
   federalState: FederalStateModel;
+  user: UserModel;
   currentModelCosts: number;
   userPriceLimit: number;
 };
 
-export function AppSidebar({ federalState, currentModelCosts, userPriceLimit }: AppSiderbarProps) {
+export function AppSidebar({
+  federalState,
+  user,
+  currentModelCosts,
+  userPriceLimit,
+}: AppSiderbarProps) {
   const { toggleSidebar } = useSidebar();
   const { theme, setTheme } = useTheme();
   const t = useTranslations('sidebar');
@@ -61,16 +68,26 @@ export function AppSidebar({ federalState, currentModelCosts, userPriceLimit }: 
           </SidebarGroup>
           <SidebarSeparator />
           <SidebarGroup>
-            <AppMenuItem href="/learning-scenarios" icon={<MountainsIcon />} text="Lernszenarien" />
-            <AppMenuItem href="/characters" icon={<StudentIcon />} text="Dialogpartner" />
+            {user.userRole === 'teacher' && federalState.featureToggles?.isSharedChatEnabled && (
+              <AppMenuItem
+                href="/learning-scenarios"
+                icon={<MountainsIcon />}
+                text="Lernszenarien"
+              />
+            )}
+            {user.userRole === 'teacher' && federalState.featureToggles?.isCharacterEnabled && (
+              <AppMenuItem href="/characters" icon={<StudentIcon />} text="Dialogpartner" />
+            )}
           </SidebarGroup>
           <SidebarSeparator />
           <SidebarGroup>
-            <AppMenuItem
-              href={`/custom/d/${HELP_MODE_GPT_ID}`}
-              icon={<QuestionIcon />}
-              text="Hilfe-Chat"
-            />
+            {user.userRole === 'teacher' && federalState.featureToggles?.isCustomGptEnabled && (
+              <AppMenuItem
+                href={`/custom/d/${HELP_MODE_GPT_ID}`}
+                icon={<QuestionIcon />}
+                text="Hilfe-Chat"
+              />
+            )}
           </SidebarGroup>
           <SidebarGroup>
             <MyTelliPoints

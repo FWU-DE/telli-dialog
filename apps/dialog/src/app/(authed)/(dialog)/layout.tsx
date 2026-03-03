@@ -25,6 +25,7 @@ import { SidebarProvider } from '@telli/ui/components/Sidebar';
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations('errors');
   const user = await getUser();
+  const userWithRole = { ...user, userRole: user.school.userRole };
   if (!user.hasApiKeyAssigned) throw new Error(t('no-api-key'));
 
   const [federalState, models, priceInCent, userPriceLimit, hasCompletedTraining] =
@@ -54,6 +55,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
             >
               {federalState.featureToggles.isNewUiDesignEnabled ? (
                 <AppSidebar
+                  user={userWithRole}
                   federalState={federalState}
                   currentModelCosts={priceInCent ?? 0}
                   userPriceLimit={userPriceLimit ?? 500}
