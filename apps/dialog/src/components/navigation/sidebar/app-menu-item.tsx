@@ -5,6 +5,8 @@ import { SidebarMenuButton, SidebarMenuItem } from '@telli/ui/components/Sidebar
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { useSidebarVisibility } from './sidebar-provider';
+import { useSidebar } from '@telli/ui/components/Sidebar';
 
 type AppMenuItemProps = {
   href: string;
@@ -14,6 +16,9 @@ type AppMenuItemProps = {
 
 export function AppMenuItem({ href, icon, text }: AppMenuItemProps) {
   const pathname = usePathname();
+  const { close } = useSidebarVisibility();
+  const { isMobile } = useSidebar();
+
   const isActive = () => {
     // special case for help mode because it is also a custom gpt and starts with the same path
     if (pathname.startsWith(`/custom/d/${HELP_MODE_GPT_ID}`)) return pathname === href;
@@ -27,6 +32,11 @@ export function AppMenuItem({ href, icon, text }: AppMenuItemProps) {
         <Link
           className="hover:underline hover:text-primary hover:data-[active=true]:text-primary"
           href={href}
+          onClick={() => {
+            if (isMobile) {
+              close();
+            }
+          }}
           prefetch={false}
         >
           <span className="text-primary">{icon}</span>
