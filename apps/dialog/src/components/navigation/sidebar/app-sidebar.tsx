@@ -25,13 +25,15 @@ import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
 import { MyTelliPoints } from './my-telli-points';
+import { FederalStateModel } from '@shared/federal-states/types';
 
 type AppSiderbarProps = {
+  federalState: FederalStateModel;
   currentModelCosts: number;
   userPriceLimit: number;
 };
 
-export function AppSidebar({ currentModelCosts, userPriceLimit }: AppSiderbarProps) {
+export function AppSidebar({ federalState, currentModelCosts, userPriceLimit }: AppSiderbarProps) {
   const { toggleSidebar } = useSidebar();
   const { theme, setTheme } = useTheme();
   const t = useTranslations('sidebar');
@@ -52,7 +54,9 @@ export function AppSidebar({ currentModelCosts, userPriceLimit }: AppSiderbarPro
         <SidebarContent>
           <SidebarGroup>
             <AppMenuItem href="/" icon={<ChatTextIcon />} text="Neuer Chat" />
-            <AppMenuItem href="/image-generation" icon={<ImageSquareIcon />} text="Neues Bild" />
+            {federalState.featureToggles?.isImageGenerationEnabled && (
+              <AppMenuItem href="/image-generation" icon={<ImageSquareIcon />} text="Neues Bild" />
+            )}
             <AppMenuItem href="/custom" icon={<LegoSmileyIcon />} text="Assistenten" />
           </SidebarGroup>
           <SidebarSeparator />

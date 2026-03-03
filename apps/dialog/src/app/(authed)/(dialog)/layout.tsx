@@ -54,6 +54,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
             >
               {federalState.featureToggles.isNewUiDesignEnabled ? (
                 <AppSidebar
+                  federalState={federalState}
                   currentModelCosts={priceInCent ?? 0}
                   userPriceLimit={userPriceLimit ?? 500}
                 />
