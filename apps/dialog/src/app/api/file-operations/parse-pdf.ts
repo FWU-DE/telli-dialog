@@ -2,30 +2,25 @@ import { extractText } from 'unpdf';
 import { logError } from '@shared/logging';
 
 /**
- * Extract text from PDF buffer with page-by-page breakdown using unpdf library
- * Returns an array of objects with page number and text content
+ * Extract text from PDF buffer using unpdf library
+ * Returns the text content
  */
 export async function extractTextFromPdfBuffer(
   pdfBuffer: Buffer,
-): Promise<{ totalPages: number; pageElement: { page: number; text: string }[] }> {
+): Promise<{ totalPages: number; text: string }> {
   try {
     // Convert Buffer to Uint8Array as required by unpdf
     const uint8Array = new Uint8Array(pdfBuffer);
 
-    // Extract text without merging pages to get individual page content
-    const { text, totalPages } = await extractText(uint8Array, { mergePages: false });
-
-    // If text is a string array (one per page), map it to the expected format
+    // Extract text
+    const { text, totalPages } = await extractText(uint8Array, { mergePages: true });
 
     return {
       totalPages,
-      pageElement: text.map((pageText, index) => ({
-        page: index + 1,
-        text: pageText.replace(/-\n/g, '').trim(),
-      })),
+      text: text,
     };
   } catch (error) {
-    logError('Error parsing PDF with unpdf (pages)', error);
+    logError('Error parsing PDF with unpdf', error);
     throw new Error(
       `Failed to parse PDF: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );

@@ -46,7 +46,6 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
       (url) =>
         ({
           link: url,
-          type: 'websearch',
           error: false,
         }) as WebsearchSource,
     );

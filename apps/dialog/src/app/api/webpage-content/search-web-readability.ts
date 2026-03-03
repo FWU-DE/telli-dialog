@@ -83,7 +83,6 @@ export async function webScraperReadability(url: string): Promise<WebsearchSourc
     content: trimmedInfo,
     name: title,
     link: url,
-    type: 'websearch',
   };
 }
 

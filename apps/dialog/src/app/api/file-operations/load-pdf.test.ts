@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { extractTextFromPdfBuffer as extractTextFromPdfBufferAlt } from './parse-pdf';
+import { extractTextFromPdfBuffer } from './parse-pdf';
 
 const COMPLEX_PDF_PATH = path.resolve(__dirname, '../__fixtures__/Bundestag-KI.pdf');
 const SIMPLE_PDF_PATH = path.resolve(__dirname, '../__fixtures__/Test Dokument.pdf');
 
-describe('extractTextFromPdfBuffer', () => {
+describe('extractTextFromPdfBuffer simple file', () => {
   let pdfBuffer: Buffer;
 
   beforeAll(async () => {
@@ -22,21 +22,21 @@ describe('extractTextFromPdfBuffer', () => {
 
   it('should extract text from a PDF buffer', async () => {
     // This test uses the actual PDF reader with the real file
-    const { pageElement, totalPages } = await extractTextFromPdfBufferAlt(pdfBuffer);
+    const { text, totalPages } = await extractTextFromPdfBuffer(pdfBuffer);
 
     // Basic validations for the extracted text
-    expect(pageElement).toBeDefined();
+    expect(text).toBeDefined();
     expect(totalPages).toBe(1);
-    expect(typeof pageElement?.[0]?.text).toBe('string');
-    expect(pageElement?.[0]?.text.length).toBeGreaterThan(0);
+    expect(typeof text).toBe('string');
+    expect(text.length).toBeGreaterThan(0);
 
     // Add assertions based on the expected content of your test document
     // For example:
-    expect(pageElement?.[0]?.text).toContain('Einige Beispielssätze');
+    expect(text).toContain('Einige Beispielssätze');
   });
 });
 
-describe('extractTextFromPdfBufferAlt', () => {
+describe('extractTextFromPdfBuffer complex file', () => {
   let pdfBuffer: Buffer;
 
   beforeAll(async () => {
@@ -44,11 +44,11 @@ describe('extractTextFromPdfBufferAlt', () => {
   });
 
   it('should extract text from a PDF buffer', async () => {
-    const { pageElement, totalPages } = await extractTextFromPdfBufferAlt(pdfBuffer);
+    const { text, totalPages } = await extractTextFromPdfBuffer(pdfBuffer);
 
-    expect(pageElement).toBeDefined();
+    expect(text).toBeDefined();
     expect(totalPages).toBe(26);
-    expect(typeof pageElement?.[0]?.text).toBe('string');
-    expect(pageElement?.[0]?.text.length).toBeGreaterThan(0);
+    expect(typeof text).toBe('string');
+    expect(text.length).toBeGreaterThan(0);
   });
 });
