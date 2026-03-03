@@ -130,7 +130,7 @@ export async function sendChatMessage({
     throw new Error('No user message found');
   }
 
-  const urls = await extractUrls(customGptId, characterId, user, conversationObject.messages);
+  const urls = await extractUrls(customGptId, characterId, user, messages);
   const { processedUrls, errorUrls } = await ingestWebContent({
     urls,
     federalStateId: user.federalState.id,
@@ -190,6 +190,8 @@ export async function sendChatMessage({
     chunks,
     errorUrls,
   });
+
+  console.log('System Prompt:', systemPrompt);
 
   // Check if the model supports images based on supportedImageFormats
   const modelSupportsImages =

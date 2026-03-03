@@ -1,9 +1,9 @@
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
 import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
-import { ConversationMessageModel } from '@shared/db/types';
 import { MAX_WEBSEARCH_SOURCES_PER_CONVERSATION } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
+import { ChatMessage } from './actions';
 
 // Extract unique URLs from message content
 function extractUniqueUrls(content: string): string[] {
@@ -40,7 +40,7 @@ export async function extractUrls(
   customGptId: string | undefined,
   characterId: string | undefined,
   user: UserAndContext,
-  messages: ConversationMessageModel[],
+  messages: ChatMessage[],
 ): Promise<string[]> {
   const attachedLinks = await getAttachedLinks(customGptId, characterId, user.id);
 
