@@ -1,4 +1,4 @@
-FROM node:24.13.1-alpine AS base
+FROM node:24.14.0-alpine AS base
 ENV TURBO_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
@@ -74,6 +74,8 @@ ARG PORT=3000
 
 ENV APP_VERSION=${APP_VERSION}
 ENV PORT=${PORT}
+
+EXPOSE ${PORT}
 
 WORKDIR /app/apps/api
 HEALTHCHECK --timeout=10s --start-period=5s \
