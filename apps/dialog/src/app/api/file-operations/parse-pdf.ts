@@ -12,17 +12,15 @@ export async function extractTextFromPdfBuffer(
     // Convert Buffer to Uint8Array as required by unpdf
     const uint8Array = new Uint8Array(pdfBuffer);
 
-    // Extract text without merging pages to get individual page content
-    const { text, totalPages } = await extractText(uint8Array, { mergePages: false });
-
-    // If text is a string array (one per page), map it to the expected format
+    // Extract text
+    const { text, totalPages } = await extractText(uint8Array, { mergePages: true });
 
     return {
       totalPages,
-      text: text.map((pageText) => pageText.replace(/-\n/g, '').trim()).join('\n\n'),
+      text: text,
     };
   } catch (error) {
-    logError('Error parsing PDF with unpdf (pages)', error);
+    logError('Error parsing PDF with unpdf', error);
     throw new Error(
       `Failed to parse PDF: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
