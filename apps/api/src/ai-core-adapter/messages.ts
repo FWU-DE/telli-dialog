@@ -1,6 +1,41 @@
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions.js';
 import type { Message, ChatAttachment } from '@telli/ai-core';
 
+const extensionToMime: Record<string, string> = {
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  gif: 'image/gif',
+  webp: 'image/webp',
+  svg: 'image/svg+xml',
+};
+
+/**
+ * Infers the image MIME type from a URL.
+ * Supports data-URLs (`data:image/jpeg;base64,…`) and file extensions.
+ * Falls back to `image/png` when the type cannot be determined.
+ */
+function inferImageContentType(url: string): string {
+  // data-URL: extract MIME type directly
+  const dataMatch = url.match(/^data:(image\/[^;,]+)/i);
+  if (dataMatch?.[1]) {
+    return dataMatch[1];
+  }
+
+  // Regular URL: check file extension
+  try {
+    const pathname = new URL(url).pathname;
+    const ext = pathname.split('.').pop()?.toLowerCase();
+    if (ext && extensionToMime[ext]) {
+      return extensionToMime[ext];
+    }
+  } catch {
+    // not a valid URL – fall through
+  }
+
+  return 'image/png';
+}
+
 /**
  * Converts OpenAI-format messages to ai-core's Message format.
  * Handles both string content and structured content parts (text + image_url).
@@ -36,8 +71,7 @@ export function convertToAiCoreMessages(messages: ChatCompletionMessageParam[]):
             attachments.push({
               type: 'image',
               url: part.image_url.url,
-              // TODO: This might need to be determined more dynamically, perhaps by fetching the image headers
-              contentType: 'image/png',
+              contentType: inferImageContentType(part.image_url.url),
             });
           }
         }
