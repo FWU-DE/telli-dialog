@@ -2,8 +2,9 @@ import { generateEmbeddingsWithBilling } from '@telli/ai-core';
 import { dbGetFederalStateWithDecryptedApiKeyWithResult } from '@shared/db/functions/federal-state';
 import { dbGetModelByName } from '@shared/db/functions/llm-model';
 import { EMBEDDING_BATCH_SIZE, EMBEDDING_MAX_CONCURRENT_REQUESTS } from '@/const';
-import { TextChunkInsertModel } from '@shared/db/schema';
+import { ChunkInsertModel } from '@shared/db/schema';
 import { logDebug } from '@shared/logging';
+import { UnembeddedChunk } from './types';
 
 const EMBEDDING_MODEL = 'BAAI/bge-m3';
 
@@ -52,26 +53,24 @@ async function embedTextWithApiKey(text: string[], modelId: string, federalState
 }
 
 export async function embedChunks({
-  values,
+  chunksWithoutEmbeddings,
   fileId,
   federalStateId,
 }: {
-  values: Omit<TextChunkInsertModel, 'embedding'>[];
+  chunksWithoutEmbeddings: UnembeddedChunk[];
   fileId: string;
   federalStateId: string;
-}): Promise<TextChunkInsertModel[]> {
+}): Promise<ChunkInsertModel[]> {
   const { apiKeyId, modelId } = await getEmbeddingModelWithApiKey(federalStateId);
 
-  logDebug(`Embedding ${values.length} chunks`);
-  const promises: Promise<TextChunkInsertModel[]>[] = [];
+  logDebug(`Embedding ${chunksWithoutEmbeddings.length} chunks`);
+  const promises: Promise<ChunkInsertModel[]>[] = [];
   // Process chunks in batches of 200
-  for (let i = 0; i < values.length; i += EMBEDDING_BATCH_SIZE) {
+  for (let i = 0; i < chunksWithoutEmbeddings.length; i += EMBEDDING_BATCH_SIZE) {
     promises.push(
       (async () => {
-        const batch = values.slice(i, i + EMBEDDING_BATCH_SIZE);
-        const batchTexts = batch.map(
-          (value) => `${value.leadingOverlap ?? ''}${value.content}${value.trailingOverlap ?? ''}`,
-        );
+        const batch = chunksWithoutEmbeddings.slice(i, i + EMBEDDING_BATCH_SIZE);
+        const batchTexts = batch.map((value) => value.content);
 
         // TODO: TD-526 Bill to user
         const batchEmbeddings = await embedTextWithApiKey(batchTexts, modelId, apiKeyId);
@@ -79,13 +78,11 @@ export async function embedChunks({
         return batchEmbeddings.map((embedding, batchIndex) => {
           const originalIndex = i + batchIndex;
           return {
-            content: values[originalIndex]?.content ?? '',
+            content: chunksWithoutEmbeddings[originalIndex]?.content ?? '',
             embedding,
             fileId,
             orderIndex: originalIndex,
-            pageNumber: values[originalIndex]?.pageNumber ?? 0,
-            leadingOverlap: values[originalIndex]?.leadingOverlap ?? undefined,
-            trailingOverlap: values[originalIndex]?.trailingOverlap ?? undefined,
+            pageNumber: chunksWithoutEmbeddings[originalIndex]?.pageNumber ?? 0,
           };
         });
       })(),

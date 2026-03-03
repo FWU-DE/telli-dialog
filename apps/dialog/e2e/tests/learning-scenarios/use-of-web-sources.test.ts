@@ -51,8 +51,8 @@ test('teacher can create shared chat with web sources, student can join chat and
   await page.getByTitle('Szenario starten').click();
 
   // enter chat directly as a teacher
-  await page.getByRole('link', { name: 'Chat öffnen' }).click();
   const schoolChatPagePromise = page.waitForEvent('popup');
+  await page.getByRole('link', { name: 'Chat öffnen' }).click();
   const schoolChatPage = await schoolChatPagePromise;
   await schoolChatPage.getByLabel('profileDropdown').waitFor();
 

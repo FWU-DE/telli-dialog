@@ -23,11 +23,11 @@ export default function SelectImageStyle() {
 
   return (
     <div className="flex flex-col gap-2 hover:bg-secondary/20 rounded-enterprise-md p-2">
-      <span className="text-xs text-gray-400 hidden sm:block">
+      <span className="text-xs text-gray-600 hidden sm:block">
         {tImageGeneration('style-label')}
       </span>
       <DropdownMenu.Root>
-        <DropdownMenu.Trigger asChild className="cursor-pointer focus:outline-none">
+        <DropdownMenu.Trigger asChild className="cursor-pointer focus:outline-hidden">
           <button
             type="button"
             className="flex items-center gap-2 cursor-pointer"
@@ -57,7 +57,7 @@ export default function SelectImageStyle() {
                   <DropdownMenu.Item asChild>
                     <button
                       className={cn(
-                        'hover:bg-primary-hover text-left py-6 px-7 outline-none flex flex-col',
+                        'hover:bg-primary-hover text-left py-6 px-7 outline-hidden flex flex-col',
                         iconClassName,
                       )}
                       onClick={() => handleSelectStyle(style.name === 'none' ? undefined : style)}

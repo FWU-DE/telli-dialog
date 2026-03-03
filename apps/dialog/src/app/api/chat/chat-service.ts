@@ -165,15 +165,9 @@ export async function sendChatMessage({
   });
 
   const chunks = await retrieveChunks({
-    messages: messages.map((m) => ({
-      id: m.id,
-      role: m.role,
-      content: m.content,
-    })) as ChatMessage[],
+    messages,
     user,
     relatedFileEntities,
-    modelId: auxiliaryModel.id,
-    apiKeyId: auxiliaryModelAndApiKey.apiKeyId,
   });
 
   // Update last used model

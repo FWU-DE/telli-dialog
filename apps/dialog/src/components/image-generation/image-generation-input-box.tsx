@@ -23,7 +23,7 @@ export function ImageGenerationInputBox({
         <AutoResizeTextarea
           autoFocus
           placeholder={tImageGeneration('placeholder')}
-          className="w-full text-base focus:outline-none bg-transparent max-h-[10rem] sm:max-h-[15rem] overflow-y-auto placeholder-black py-3 px-4"
+          className="w-full text-base focus:outline-hidden bg-transparent max-h-40 sm:max-h-60 overflow-y-auto placeholder-black py-3 px-4"
           onChange={handleInputChange}
           value={input}
           maxLength={CHAT_MESSAGE_LENGTH_LIMIT}

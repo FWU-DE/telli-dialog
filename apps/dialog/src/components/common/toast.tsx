@@ -61,7 +61,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         >
           <Toast.Title className="text-dark-gray">{message}</Toast.Title>
         </Toast.Root>
-        <Toast.Viewport className="fixed top-0 right-0 z-[2147483647] m-0 flex w-[390px] max-w-[100vw] list-none flex-col gap-2.5 p-[var(--viewport-padding)] outline-none [--viewport-padding:_25px]" />
+        <Toast.Viewport className="fixed top-0 right-0 z-2147483647 m-0 flex w-[390px] max-w-[100vw] list-none flex-col gap-2.5 p-(--viewport-padding) outline-hidden [--viewport-padding:25px]" />
       </Toast.Provider>
     </ToastContext.Provider>
   );

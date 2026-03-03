@@ -53,13 +53,13 @@ export default function ModelSelect({
     models.find((model) => model.name === optimisticModelId) || selectedModel;
 
   return (
-    <div className="flex flex-col gap-2 hover:bg-secondary/20 rounded-enterprise-md p-2">
-      <span className="text-xs text-gray-400 hidden sm:block">{label}</span>
+    <div className="flex flex-col gap-2 rounded-enterprise-md p-2">
+      <span className="text-xs text-gray-600 hidden sm:block">{label}</span>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger
           disabled={models.length < 2}
           asChild
-          className="cursor-pointer disabled:cursor-default focus:outline-none"
+          className="cursor-pointer disabled:cursor-default focus:outline-hidden"
         >
           <button
             type="button"
@@ -91,7 +91,7 @@ export default function ModelSelect({
                   <DropdownMenu.Item asChild>
                     <button
                       className={cn(
-                        'hover:bg-primary-hover text-left py-2 px-4 outline-none flex flex-col',
+                        'hover:bg-primary-hover text-left py-2 px-4 outline-hidden flex flex-col',
                         iconClassName,
                       )}
                       onClick={() => handleSelectModel(model)}

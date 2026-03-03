@@ -1,6 +1,5 @@
 import {
   boolean,
-  customType,
   doublePrecision,
   foreignKey,
   index,
@@ -24,14 +23,6 @@ import {
 } from '../utils/chat';
 import { isNull, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod';
-
-export const tsvector = customType<{
-  data: string;
-}>({
-  dataType() {
-    return `tsvector`;
-  },
-});
 
 // can be expanded to include other metadata of other file types
 export type FileMetadata = {
@@ -970,14 +961,19 @@ export type CustomGptTemplateMappingInsertModel = z.infer<
 /**
  * Schema for table file_table
  */
-export const fileTable = pgTable('file_table', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  size: integer('size').notNull(),
-  type: text('type').notNull(),
-  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-  metadata: json('metadata').$type<FileMetadata>(),
-});
+export const fileTable = pgTable(
+  'file_table',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    size: integer('size').notNull(),
+    type: text('type').notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    metadata: json('metadata').$type<FileMetadata>(),
+    userId: uuid('user_id').references(() => userTable.id),
+  },
+  (table) => [index().on(table.userId)],
+);
 
 export const fileSelectSchema = createSelectSchema(fileTable).extend({
   createdAt: z.coerce.date(),
@@ -1188,40 +1184,44 @@ export type CustomGptFileMappingUpdateModel = z.infer<typeof customGptFileMappin
 /**
  * Schema for table text_chunk
  */
-export const TextChunkTable = pgTable(
+export const chunkSourceTypeSchema = z.enum(['file', 'webpage']);
+export const chunkSourceTypeEnum = pgEnum('chunk_source_type', chunkSourceTypeSchema.enum);
+export type ChunkSourceType = z.infer<typeof chunkSourceTypeSchema>;
+
+export const chunkTable = pgTable(
   'text_chunk',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    fileId: text('file_id')
-      .references(() => fileTable.id, { onDelete: 'cascade' })
-      .notNull(),
+    fileId: text('file_id').references(() => fileTable.id, { onDelete: 'cascade' }),
     embedding: vector('embedding', { dimensions: 1024 }).notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     content: text('content').notNull(),
-    leadingOverlap: text('leading_overlap'),
-    trailingOverlap: text('trailing_overlap'),
     orderIndex: integer('order_index').notNull(),
     pageNumber: integer('page_number'),
-    contentTsv: tsvector('content_tsv')
-      .notNull()
-      .generatedAlwaysAs(sql`to_tsvector('german', content)`),
+    sourceType: chunkSourceTypeEnum('source_type').notNull().default('file'),
+    sourceUrl: text('source_url'),
   },
   (table) => [
     index().on(table.fileId),
     index('text_chunk_embedding_idx').using('hnsw', table.embedding.op('vector_cosine_ops')),
-    index('text_chunk_content_tsv_idx').using('gin', table.contentTsv),
+    index().on(table.sourceUrl),
   ],
 );
 
-export const textChunkSelectSchema = createSelectSchema(TextChunkTable);
-export const textChunkInsertSchema = createInsertSchema(TextChunkTable).omit({ id: true });
-export const textChunkUpdateSchema = createUpdateSchema(TextChunkTable).extend({
+export const chunkSelectSchema = createSelectSchema(chunkTable).extend({
+  sourceType: chunkSourceTypeSchema,
+});
+export const chunkInsertSchema = createInsertSchema(chunkTable).omit({ id: true }).extend({
+  sourceType: chunkSourceTypeSchema.optional(),
+});
+export const chunkUpdateSchema = createUpdateSchema(chunkTable).extend({
   id: z.string(),
+  sourceType: chunkSourceTypeSchema.optional(),
 });
 
-export type TextChunkSelectModel = z.infer<typeof textChunkSelectSchema>;
-export type TextChunkInsertModel = z.infer<typeof textChunkInsertSchema>;
-export type TextChunkUpdateModel = z.infer<typeof textChunkUpdateSchema>;
+export type ChunkSelectModel = z.infer<typeof chunkSelectSchema>;
+export type ChunkInsertModel = z.infer<typeof chunkInsertSchema>;
+export type ChunkUpdateModel = z.infer<typeof chunkUpdateSchema>;
 
 /**
  * Schema for table voucher

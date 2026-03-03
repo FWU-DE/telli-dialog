@@ -42,7 +42,7 @@ export function SharedChatHeader({
       confirmText={t('delete-chat-modal-confirm-button')}
       modalDescription={t('delete-chat-modal-description')}
       triggerButtonClassName={cn(
-        'justify-center items-center focus:outline-none',
+        'justify-center items-center focus:outline-hidden',
         iconClassName,
         isBelow.sm && 'items-center justify-start',
       )}
@@ -63,9 +63,9 @@ export function SharedChatHeader({
       )}
     >
       {!showCompressedHeader && deleteChatElement}
-      <div className="flex-grow"></div>
+      <div className="grow"></div>
       {
-        <span className="flex justify-start text-xl overflow-ellipsis truncate items-center gap-2">
+        <span className="flex justify-start text-xl text-ellipsis truncate items-center gap-2">
           {dialogStarted && imageSource && (
             <Image
               src={imageSource ?? ''}
@@ -78,7 +78,7 @@ export function SharedChatHeader({
           {dialogStarted && <span className="truncate">{title}</span>}
         </span>
       }
-      <div className="flex-grow"></div>
+      <div className="grow"></div>
 
       {!showCompressedHeader ? (
         <>

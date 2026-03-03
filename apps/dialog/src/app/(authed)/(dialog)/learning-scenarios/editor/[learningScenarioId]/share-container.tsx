@@ -73,7 +73,7 @@ export default function ShareContainer({ ...learningScenario }: ShareContainerPr
   }
 
   return (
-    <div className="flex flex-col gap-4 border-[1px] mt-16 rounded-enterprise-md border-gray-200 p-6">
+    <div className="flex flex-col gap-4 border mt-16 rounded-enterprise-md border-gray-200 p-6">
       <h2 className="font-medium">{t('title')}</h2>
       <p>{t('description')}</p>
       <div className="flex gap-6 items-center flex-wrap">
@@ -86,7 +86,7 @@ export default function ShareContainer({ ...learningScenario }: ShareContainerPr
             aria-label="Telli-Points"
             {...registerShare('telliPointsPercentageLimit')}
             className={cn(
-              'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600',
+              'py-2 pl-4 pr-8 bg-[#EEEEEE] border rounded-enterprise-md border-gray-600',
               sharedChatActive && 'cursor-not-allowed',
             )}
             style={{
@@ -110,7 +110,7 @@ export default function ShareContainer({ ...learningScenario }: ShareContainerPr
             aria-label={t('max-usage')}
             {...registerShare('usageTimeLimit')}
             className={cn(
-              'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600',
+              'py-2 pl-4 pr-8 bg-[#EEEEEE] border rounded-enterprise-md border-gray-600',
               sharedChatActive && 'cursor-not-allowed',
             )}
             style={{
@@ -133,7 +133,7 @@ export default function ShareContainer({ ...learningScenario }: ShareContainerPr
             })}
           </select>
         </div>
-        <div className="flex-grow" />
+        <div className="grow" />
         {sharedChatActive && (
           <div className="flex flex-col gap-4">
             <label className={cn(labelClassName)}>{t('time')}</label>

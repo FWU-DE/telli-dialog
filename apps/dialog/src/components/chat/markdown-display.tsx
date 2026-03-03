@@ -28,7 +28,7 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
   const children = preprocessMathDelimiters(_children);
 
   return (
-    <div className="break-words text-base">
+    <div className="wrap-break-word text-base">
       <Markdown
         remarkPlugins={[RemarkMathPlugin, remarkGfm]}
         rehypePlugins={[RehypeKatex]}
@@ -66,14 +66,14 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
           },
           th({ children, ...props }) {
             return (
-              <th {...props} className="text-left p-2 border-[1px] bg-slate-100 font-medium">
+              <th {...props} className="text-left p-2 border bg-slate-100 font-medium">
                 {children}
               </th>
             );
           },
           td({ children, ...props }) {
             return (
-              <td {...props} className="p-2 border-[1px]">
+              <td {...props} className="p-2 border">
                 {children}
               </td>
             );
@@ -83,10 +83,7 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
           },
           table({ children, ...props }) {
             return (
-              <table
-                {...props}
-                className="w-full border-[1px] my-4 first:mt-0 last:mb-0 border-collapse"
-              >
+              <table {...props} className="w-full border my-4 first:mt-0 last:mb-0 border-collapse">
                 {children}
               </table>
             );
@@ -130,7 +127,9 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
 
             if (language === undefined) {
               return (
-                <code className={cn(className, 'break-words bg-main-200 px-0.5 text-wrap text-sm')}>
+                <code
+                  className={cn(className, 'wrap-break-word bg-main-200 px-0.5 text-wrap text-sm')}
+                >
                   {children}
                 </code>
               );
@@ -140,7 +139,7 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
               <div className="flex flex-col py-2 text-sm max-w-full">
                 <div className="flex items-center justify-center bg-gray-300 py-2 px-2 text-vidis-hover-purple">
                   <span>{language}</span>
-                  <div className="flex-grow" />
+                  <div className="grow" />
                   <TelliClipboardButton text={sanitizedText} />
                 </div>
                 <SyntaxHighlighter

@@ -215,6 +215,7 @@ export default function Chat({
         createdAt: new Date(),
         size: file.file.size,
         metadata: null,
+        userId: null,
         // Create a blob URL for images so they display immediately without fetching from S3
         localUrl: isImageFile(file.file.name) ? URL.createObjectURL(file.file) : undefined,
       }));
@@ -311,8 +312,8 @@ export default function Chat({
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      <div className="flex flex-col flex-grow justify-between w-full overflow-hidden">
-        <div ref={scrollRef} className="flex-grow overflow-y-auto">
+      <div className="flex flex-col grow justify-between w-full overflow-hidden">
+        <div ref={scrollRef} className="grow overflow-y-auto">
           {messages.length === 0 ? (
             placeholderElement
           ) : (

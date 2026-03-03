@@ -125,11 +125,9 @@ export async function sendCharacterMessage({
   const websearchSources = await Promise.all(urls.map((url) => webScraper(url)));
 
   const chunks = await retrieveChunks({
-    messages: messages.map<ChatMessage>((m) => ({ id: m.id, role: m.role, content: m.content })),
+    messages,
     user: teacherUserAndContext,
     relatedFileEntities,
-    modelId: definedModel.id,
-    apiKeyId,
   });
 
   // Build system prompt

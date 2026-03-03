@@ -43,7 +43,7 @@ export default function Page2({
       <HeaderPortal>
         <ToggleSidebarButton />
         <NewChatButton />
-        <div className="flex-grow"></div>
+        <div className="grow"></div>
         <ProfileMenu userAndContext={userAndContext} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto">
@@ -55,7 +55,7 @@ export default function Page2({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           className={cn(
-            'p-2 px-4 focus:outline-none disabled:bg-light-gray disabled:border-gray-100 disabled:cursor-not-allowed',
+            'p-2 px-4 focus:outline-hidden disabled:bg-light-gray disabled:border-gray-100 disabled:cursor-not-allowed',
           )}
           placeholder={t('search-placeholder')}
           disabled={filterDisabled}
