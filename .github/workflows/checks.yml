@@ -146,7 +146,7 @@ jobs:
       - name: Run api database migrations
         run: pnpm --filter @telli/api-database run db:migrate:pipeline
       - name: Check unit tests
-        run: pnpm run test
+        run: pnpm run test:coverage
 
       - name: Upload coverage results to Codecov
         uses: codecov/codecov-action@v5
