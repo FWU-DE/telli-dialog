@@ -1,10 +1,6 @@
-import { getEmbeddingFnByModel } from '@/llm-model/providers';
-import { handleLlmModelError, validateApiKeyWithResult } from '@/routes/utils';
-import {
-  checkLimitsByApiKeyIdWithResult,
-  dbGetModelsByApiKeyId,
-  dbCreateCompletionUsage,
-} from '@telli/api-database';
+import { handleAiCoreError } from '@/ai-core-adapter/errors';
+import { createEmbeddings } from '@/ai-core-adapter/embeddings';
+import { validateApiKeyWithResult } from '@/routes/utils';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 
@@ -35,62 +31,23 @@ export async function handler(request: FastifyRequest, reply: FastifyReply): Pro
     return;
   }
 
-  const [limitCalculationError, limitCalculationResult] = await checkLimitsByApiKeyIdWithResult({
-    apiKeyId: apiKey.id,
-  });
-
-  if (limitCalculationError !== null) {
-    reply.status(500).send({
-      error: `Something went wrong while calculating the current limits.`,
-      details: limitCalculationError.message,
-    });
-    return;
-  }
-
-  if (limitCalculationResult.hasReachedLimit) {
-    reply.status(429).send({
-      error: 'You have reached the price limit',
-    });
-    return;
-  }
-
   const body = requestParseResult.data;
 
-  const availableModels = await dbGetModelsByApiKeyId({ apiKeyId: apiKey.id });
-  const model = availableModels.find((model) => model.name === body.model);
-
-  if (model === undefined) {
-    reply.status(404).send({
-      error: `No model with name ${body.model} found.`,
-    });
-    return;
-  }
-
-  const embeddingFn = getEmbeddingFnByModel({ model });
-
-  if (embeddingFn === undefined) {
-    reply.status(400).send({
-      error: `Could not find a callback function for the provider ${model.provider}.`,
-    });
-    return;
-  }
-
   try {
-    const result = await embeddingFn({
+    const result = await createEmbeddings({
+      modelName: body.model,
       input: body.input,
-      model: model.name,
-    });
-
-    await dbCreateCompletionUsage({
       apiKeyId: apiKey.id,
-      modelId: model.id,
-      completionTokens: 0,
-      promptTokens: result.usage.prompt_tokens,
-      totalTokens: result.usage.total_tokens,
     });
 
     reply.status(200).send(result);
   } catch (error) {
-    handleLlmModelError(reply, error, 'Error generating embedding');
+    if (!handleAiCoreError(reply, error)) {
+      console.error('Error generating embedding:', error);
+      reply.status(500).send({
+        error: 'Error generating embedding',
+        details: error instanceof Error ? error.message : 'An error occurred',
+      });
+    }
   }
 }

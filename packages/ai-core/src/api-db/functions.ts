@@ -14,6 +14,26 @@ export async function dbGetModelById(id: string) {
   return (await dbApi.select().from(llmModelTable).where(eq(llmModelTable.id, id)))[0];
 }
 
+export async function dbGetModelByNameAndApiKeyId({
+  name,
+  apiKeyId,
+}: {
+  name: string;
+  apiKeyId: string;
+}) {
+  const rows = await dbApi
+    .select()
+    .from(llmModelTable)
+    .innerJoin(
+      llmModelApiKeyMappingTable,
+      eq(llmModelApiKeyMappingTable.llmModelId, llmModelTable.id),
+    )
+    .where(and(eq(llmModelTable.name, name), eq(llmModelApiKeyMappingTable.apiKeyId, apiKeyId)))
+    .limit(1);
+
+  return rows[0]?.llm_model;
+}
+
 export async function dbGetModelsByApiKeyId({ apiKeyId }: { apiKeyId: string }) {
   const rows = await dbApi
     .select()

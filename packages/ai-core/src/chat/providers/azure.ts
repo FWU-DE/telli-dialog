@@ -27,7 +27,7 @@ function createAzureClient(model: AiModel): {
 export function constructAzureChatCompletionStreamFn(model: AiModel): TextStreamFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function* getAzureTextStream({ messages, maxTokens }, onComplete) {
+  return async function* getAzureTextStream({ messages, maxTokens, temperature }, onComplete) {
     // For Azure, we use the deployment from the URL, not the model name
     const stream = await client.chat.completions.create(
       {
@@ -36,6 +36,7 @@ export function constructAzureChatCompletionStreamFn(model: AiModel): TextStream
         stream: true,
         stream_options: { include_usage: true },
         max_tokens: maxTokens,
+        temperature,
       },
       {
         path: `/openai/deployments/${deployment}/chat/completions`,
@@ -78,13 +79,14 @@ export function constructAzureChatCompletionStreamFn(model: AiModel): TextStream
 export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function* getAzureTextStream({ messages, maxTokens }, onComplete) {
+  return async function* getAzureTextStream({ messages, maxTokens, temperature }, onComplete) {
     const response = await client.responses.create(
       {
         model: deployment,
         input: toOpenAIResponsesInput(messages),
         stream: true,
         max_output_tokens: maxTokens,
+        temperature,
         ...model.additionalParameters,
       },
       {
@@ -121,7 +123,7 @@ export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
 export function constructAzureChatCompletionGenerationFn(model: AiModel): TextGenerationFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function getAzureTextGeneration({ messages, maxTokens }) {
+  return async function getAzureTextGeneration({ messages, maxTokens, temperature }) {
     // For Azure, we use the deployment from the URL, not the model name
     const response = await client.chat.completions.create(
       {
@@ -129,6 +131,7 @@ export function constructAzureChatCompletionGenerationFn(model: AiModel): TextGe
         messages: toOpenAIMessages(messages),
         stream: false,
         max_completion_tokens: maxTokens,
+        temperature,
       },
       {
         path: `/openai/deployments/${deployment}/chat/completions`,
@@ -158,13 +161,14 @@ export function constructAzureChatCompletionGenerationFn(model: AiModel): TextGe
 export function constructAzureResponsesGenerationFn(model: AiModel): TextGenerationFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function getAzureTextGeneration({ messages, maxTokens }) {
+  return async function getAzureTextGeneration({ messages, maxTokens, temperature }) {
     const response = await client.responses.create(
       {
         model: deployment,
         input: toOpenAIResponsesInput(messages),
         stream: false,
         max_output_tokens: maxTokens,
+        temperature,
       },
       {
         path: `/openai/responses`,
