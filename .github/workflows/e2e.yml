@@ -113,20 +113,6 @@ jobs:
             done
           done
 
-      # telli-api container cannot be started as service, because:
-      # - it needs to mount a file from 1Password (Google Vertex AI, not yet implemented)
-      # - it needs to wait until postgres is available
-      # The container must be started on the host network to be able to access the postgres db.
-      - name: Start telli-api container
-        run: |
-          docker run --detach \
-            --name telli-api \
-            --network host \
-            -e DATABASE_URL=$API_DATABASE_URL \
-            -e API_KEY=$API_KEY \
-            -e PORT=3002 \
-            ghcr.io/fwu-de/telli-api:latest
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node.js
@@ -139,6 +125,24 @@ jobs:
 
       - name: Install Playwright browsers
         run: pnpm -filter telli-dialog exec playwright install
+
+      - name: Start telli-api
+        run: |
+          pnpm --filter telli-api dev > /tmp/telli-api.log 2>&1 &
+          timeout=60
+          elapsed=0
+          until wget -qO- http://localhost:3002/health > /dev/null 2>&1; do
+            if [ $elapsed -ge $timeout ]; then
+              echo "telli-api did not become ready within ${timeout}s"
+              exit 1
+            fi
+            echo "$(date) - waiting for telli-api to be ready"
+            sleep 1
+            elapsed=$((elapsed + 1))
+          done
+        env:
+          DATABASE_URL: ${{ env.API_DATABASE_URL }}
+          PORT: 3002
 
       - name: Seed telli-api database
         # db:seed:telli-api will print the generated API KEY on the console
@@ -197,7 +201,7 @@ jobs:
         if: always()
         run: |
           echo "=== telli-api logs ==="
-          docker logs --timestamps telli-api || true
+          cat /tmp/telli-api.log || true
 
       - name: Print telli-dialog logs
         if: always()

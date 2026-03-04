@@ -46,7 +46,7 @@ export function ChatBox({
 
   const userClassName =
     children.role === 'user'
-      ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary-light text-primary-foreground max-w-[70%] wrap-break-word'
+      ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary-light max-w-[70%] wrap-break-word'
       : 'w-fit';
 
   // Check both DB file mapping and pending files for this message
@@ -69,7 +69,7 @@ export function ChatBox({
   const imageFiles = allFiles?.filter((file) => isImageFile(file.name)) ?? [];
   const nonImageFiles = allFiles?.filter((file) => !isImageFile(file.name)) ?? [];
 
-  const maybefileAttachment =
+  const maybeFileAttachment =
     hasFiles && children.role === 'user' ? (
       <div className="flex flex-col gap-4 pb-0 pt-0 self-end mb-4">
         {/* Display images */}
@@ -139,8 +139,8 @@ export function ChatBox({
 
   return (
     <>
-      <div key={index} className={cn('w-full text-secondary-foreground', userClassName, margin)}>
-        <div className="" aria-label={`${children.role} message ${Math.floor(index / 2 + 1)}`}>
+      <div key={index} className={cn('w-full', userClassName, margin)}>
+        <div aria-label={`${children.role} message ${Math.floor(index / 2 + 1)}`}>
           <div className={cn('flex', isAtLeast.sm ? 'flex-row' : 'flex-col')}>
             {children.role === 'assistant' && assistantIcon}
             <div className="flex flex-col items-start gap-2">
@@ -151,7 +151,7 @@ export function ChatBox({
         </div>
       </div>
       {maybeWebpageCard}
-      {maybefileAttachment}
+      {maybeFileAttachment}
     </>
   );
 }

@@ -124,8 +124,12 @@
     opacity: 0.5;
     cursor: not-allowed;
     background-color: var(--color-gray-200);
-    color: var(--color-gray-500);
+    color: var(--color-gray-700);
     border-color: var(--color-gray-300);
+  }
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
   }
 }
 
