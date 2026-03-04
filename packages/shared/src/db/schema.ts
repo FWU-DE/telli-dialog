@@ -15,7 +15,7 @@ import {
   vector,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
-import { DesignConfiguration, type LlmModelPriceMetadata, type WebsearchSource } from './types';
+import { DesignConfiguration, type LlmModelPriceMetadata } from './types';
 import {
   conversationRoleSchema,
   conversationTypeSchema,
@@ -132,7 +132,6 @@ export const conversationMessageTable = pgTable(
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
     parameters: json('parameters').$type<ConversationMessageParameters>(),
-    websearchSources: json('websearch_sources').$type<WebsearchSource[]>().notNull().default([]),
   },
   (table) => [index().on(table.conversationId), index().on(table.userId)],
 );
@@ -1182,14 +1181,14 @@ export type CustomGptFileMappingInsertModel = z.infer<typeof customGptFileMappin
 export type CustomGptFileMappingUpdateModel = z.infer<typeof customGptFileMappingUpdateSchema>;
 
 /**
- * Schema for table text_chunk
+ * Schema for table chunk
  */
 export const chunkSourceTypeSchema = z.enum(['file', 'webpage']);
 export const chunkSourceTypeEnum = pgEnum('chunk_source_type', chunkSourceTypeSchema.enum);
 export type ChunkSourceType = z.infer<typeof chunkSourceTypeSchema>;
 
 export const chunkTable = pgTable(
-  'text_chunk',
+  'chunk',
   {
     id: uuid('id').defaultRandom().primaryKey(),
     fileId: text('file_id').references(() => fileTable.id, { onDelete: 'cascade' }),
@@ -1197,14 +1196,13 @@ export const chunkTable = pgTable(
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     content: text('content').notNull(),
     orderIndex: integer('order_index').notNull(),
-    pageNumber: integer('page_number'),
     sourceType: chunkSourceTypeEnum('source_type').notNull().default('file'),
     sourceUrl: text('source_url'),
   },
   (table) => [
     index().on(table.fileId),
-    index('text_chunk_embedding_idx').using('hnsw', table.embedding.op('vector_cosine_ops')),
-    index().on(table.sourceUrl),
+    index('chunk_embedding_idx').using('hnsw', table.embedding.op('vector_cosine_ops')),
+    unique().on(table.sourceUrl, table.orderIndex),
   ],
 );
 

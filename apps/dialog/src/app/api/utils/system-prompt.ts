@@ -1,6 +1,4 @@
-import { TOTAL_WEBSEARCH_CONTENT_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { RetrievedChunk } from '../rag/types';
-import { WebsearchSource } from '@shared/db/types';
 
 export const LANGUAGE_GUIDELINES = `
 ## Sprachliche Richtlinien
@@ -9,46 +7,27 @@ export const LANGUAGE_GUIDELINES = `
 - Du duzt dein Gegenüber, achte auf gendersensible Sprache. Verwende hierbei die Paarform (Beidnennung) z.B. Bürgerinnen und Bürger.
 `;
 
-export function constructWebsearchPrompt(websearchSources?: WebsearchSource[]) {
-  if (websearchSources === undefined || websearchSources.length === 0) {
-    return '';
-  }
-
-  const promptParts = websearchSources.map((source) => constructSingleWebsearchPrompt(source));
-  const fullPrompt = `
-## Der Nutzer hat folgende Quellen bereitgestellt, berücksichtige den Inhalt dieser Quellen bei der Antwort:
-${promptParts.join('\n')}`;
-
-  if (fullPrompt.length > TOTAL_WEBSEARCH_CONTENT_LENGTH_LIMIT) {
-    return (
-      fullPrompt.substring(0, TOTAL_WEBSEARCH_CONTENT_LENGTH_LIMIT) +
-      '\n\n[Weitere Quellen gekürzt aufgrund der Längenbegrenzung]'
-    );
-  }
-
-  return fullPrompt;
-}
-
-function constructSingleWebsearchPrompt(source: WebsearchSource) {
-  if (source.error || !source.content) {
-    return `Quelle: ${source.link}
-Inhalt: [Fehler - Der Inhalt dieser Webseite konnte nicht extrahiert werden]
-`;
-  }
-
-  return `Quelle: ${source.link}
-Inhalt: ${source.content}
-`;
-}
-
-export function constructFilePrompt(chunks: RetrievedChunk[]) {
-  if (chunks.length === 0) return '';
+export function constructRagContext(chunks: RetrievedChunk[], errorUrls: string[] = []) {
+  if (chunks.length === 0 && errorUrls.length === 0) return '';
 
   const chunkTexts = chunks
-    .map((chunk) => `${chunk.fileName ? `Dateiname: ${chunk.fileName}\n` : ''}${chunk.content}`)
+    .map((chunk) => {
+      if (chunk.sourceType === 'webpage') {
+        return `Url: ${chunk.sourceUrl}\n${chunk.content}`;
+      }
+      return `${chunk.fileName ? `Dateiname: ${chunk.fileName}\n` : ''}${chunk.content}`;
+    })
     .join('\n\n');
 
-  return `\n## Der Nutzer hat folgende Dateien bereitgestellt, berücksichtige den Inhalt dieser Dateien bei der Antwort:\n${chunkTexts}`;
+  const errorText =
+    errorUrls.length > 0
+      ? `\n\n## Es gab Probleme beim Zugriff auf die folgenden URLs:\n${errorUrls
+          .map((url) => `- ${url}`)
+          .join('\n')}`
+      : '';
+
+  return `\n## Der Nutzer hat folgende Informationen bereitgestellt, berücksichtige den Inhalt bei der Antwort:
+${chunkTexts}${errorText}`;
 }
 
 // Helper to format optional fields in a list

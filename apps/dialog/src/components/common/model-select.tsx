@@ -59,7 +59,7 @@ export default function ModelSelect({
         <DropdownMenu.Trigger
           disabled={models.length < 2}
           asChild
-          className="cursor-pointer disabled:cursor-default focus:outline-hidden"
+          className="cursor-pointer disabled:cursor-default focus:outline-hidden bg-transparent opacity-100"
         >
           <button
             type="button"

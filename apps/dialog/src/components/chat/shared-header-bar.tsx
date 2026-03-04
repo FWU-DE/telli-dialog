@@ -42,13 +42,13 @@ export function SharedChatHeader({
       confirmText={t('delete-chat-modal-confirm-button')}
       modalDescription={t('delete-chat-modal-description')}
       triggerButtonClassName={cn(
-        'justify-center items-center focus:outline-hidden',
+        'justify-center items-center focus:outline-hidden ml-2',
         iconClassName,
         isBelow.sm && 'items-center justify-start',
       )}
       actionFn={handleOpenNewChat}
     >
-      <span className="flex items-center gap-1 pl-2">
+      <span className="flex items-center gap-1">
         <TrashIcon className="h-8 w-8" solid={true} />
         {showCompressedHeader ? tCommon('delete') : ''}
       </span>

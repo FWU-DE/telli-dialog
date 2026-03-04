@@ -39,7 +39,6 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
       (url) =>
         ({
           link: url,
-          type: 'websearch',
           error: false,
         }) as WebsearchSource,
     );

@@ -38,7 +38,6 @@ export default async function Page(
       (url) =>
         ({
           link: url,
-          type: 'websearch',
           error: false,
         }) as WebsearchSource,
     );

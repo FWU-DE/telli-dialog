@@ -1,4 +1,3 @@
-import { cacheLife } from 'next/cache';
 import { webScraperCrawl4AI } from './search-web-crawl4ai';
 import { webScraperReadability } from './search-web-readability';
 import { logError, logWarning } from '@shared/logging';
@@ -18,9 +17,6 @@ const ALLOWED_PROTOCOLS = ['http:', 'https:'];
  * @returns The most important information from the page.
  */
 export async function webScraper(url: string): Promise<WebsearchSource> {
-  'use cache';
-  cacheLife('weeks');
-
   try {
     const urlObj = new URL(url);
     if (!ALLOWED_PROTOCOLS.includes(urlObj.protocol)) {
