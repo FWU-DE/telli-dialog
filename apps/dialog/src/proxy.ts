@@ -13,7 +13,7 @@ export function proxy(request: NextRequest) {
   if (pathname === '/login') {
     const vidisIdpHint = searchParams.get('vidis_idp_hint');
     if (vidisIdpHint) {
-      // Only swap out the pathname, keep the search params for the idp hint and callback URL 
+      // Only swap out the pathname, keep the search params for the idp hint and callback URL
       const url = request.nextUrl.clone();
       url.pathname = '/api/auth/vidis-signin';
       return NextResponse.redirect(url);
