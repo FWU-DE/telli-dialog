@@ -80,6 +80,9 @@ importers:
       sonner:
         specifier: 2.0.7
         version: 2.0.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      tailwind-merge:
+        specifier: 3.5.0
+        version: 3.5.0
       zod:
         specifier: 4.3.6
         version: 4.3.6
@@ -130,8 +133,11 @@ importers:
         specifier: 16.4.2
         version: 16.4.2(typescript@5.9.3)
       tailwindcss:
-        specifier: 4.1.11
-        version: 4.1.11
+        specifier: 4.2.1
+        version: 4.2.1
+      tailwindcss-animate:
+        specifier: 1.0.7
+        version: 1.0.7(tailwindcss@4.2.1)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -265,9 +271,6 @@ importers:
       '@deutschlandgpt/core':
         specifier: 0.1.5
         version: 0.1.5
-      '@dotenvx/dotenvx':
-        specifier: 1.52.0
-        version: 1.52.0
       '@hookform/resolvers':
         specifier: 5.2.2
         version: 5.2.2(react-hook-form@7.71.2(react@19.2.4))
@@ -307,9 +310,6 @@ importers:
       '@t3-oss/env-nextjs':
         specifier: 0.13.10
         version: 0.13.10(typescript@5.9.3)(zod@4.3.6)
-      '@tailwindcss/postcss':
-        specifier: 4.2.1
-        version: 4.2.1
       '@tanstack/react-query':
         specifier: 5.90.21
         version: 5.90.21(react@19.2.4)
@@ -355,6 +355,9 @@ importers:
       isbinaryfile:
         specifier: 6.0.0
         version: 6.0.0
+      jose:
+        specifier: 6.1.3
+        version: 6.1.3
       jsdom:
         specifier: 26.1.0
         version: 26.1.0
@@ -382,12 +385,12 @@ importers:
       next-intl:
         specifier: 4.8.3
         version: 4.8.3(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
+      next-themes:
+        specifier: 0.4.6
+        version: 0.4.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       pg:
         specifier: 8.18.0
         version: 8.18.0
-      postcss:
-        specifier: 8.5.6
-        version: 8.5.6
       qrcode.react:
         specifier: 4.2.0
         version: 4.2.0(react@19.2.4)
@@ -433,15 +436,6 @@ importers:
       tailwind-merge:
         specifier: 3.5.0
         version: 3.5.0
-      tailwindcss:
-        specifier: 4.2.1
-        version: 4.2.1
-      tailwindcss-animate:
-        specifier: 1.0.7
-        version: 1.0.7(tailwindcss@4.2.1)
-      tsx:
-        specifier: 4.21.0
-        version: 4.21.0
       unpdf:
         specifier: 1.4.0
         version: 1.4.0
@@ -449,12 +443,18 @@ importers:
         specifier: 4.3.6
         version: 4.3.6
     devDependencies:
+      '@dotenvx/dotenvx':
+        specifier: 1.52.0
+        version: 1.52.0
       '@eslint/eslintrc':
         specifier: 3.3.3
         version: 3.3.3
       '@playwright/test':
         specifier: 1.58.2
         version: 1.58.2
+      '@tailwindcss/postcss':
+        specifier: 4.2.1
+        version: 4.2.1
       '@telli/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
@@ -509,21 +509,30 @@ importers:
       eslint-plugin-prettier:
         specifier: 5.5.5
         version: 5.5.5(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1))(prettier@3.8.1)
-      jose:
-        specifier: 6.1.3
-        version: 6.1.3
       k6:
         specifier: 0.0.0
         version: 0.0.0
       playwright-core:
         specifier: 1.58.2
         version: 1.58.2
+      postcss:
+        specifier: 8.5.6
+        version: 8.5.6
       prettier:
         specifier: 3.8.1
         version: 3.8.1
       prettier-eslint:
         specifier: 16.4.2
         version: 16.4.2(typescript@5.9.3)
+      tailwindcss:
+        specifier: 4.2.1
+        version: 4.2.1
+      tailwindcss-animate:
+        specifier: 1.0.7
+        version: 1.0.7(tailwindcss@4.2.1)
+      tsx:
+        specifier: 4.21.0
+        version: 4.21.0
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -905,9 +914,6 @@ importers:
       tailwind-merge:
         specifier: 3.5.0
         version: 3.5.0
-      tailwindcss-animate:
-        specifier: 1.0.7
-        version: 1.0.7(tailwindcss@4.1.11)
       zod:
         specifier: 4.3.6
         version: 4.3.6
@@ -967,8 +973,11 @@ importers:
         specifier: 7.71.2
         version: 7.71.2(react@19.2.4)
       tailwindcss:
-        specifier: 4.1.11
-        version: 4.1.11
+        specifier: 4.2.1
+        version: 4.2.1
+      tailwindcss-animate:
+        specifier: 1.0.7
+        version: 1.0.7(tailwindcss@4.2.1)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -8571,9 +8580,6 @@ packages:
     resolution: {integrity: sha512-bl6mpH3T7I3UFxuvDEXLxy/VuFxBk5bbzplh7tXI68mwMokNYd1t9qPBHlnyTwfa4JGC4zP516I1hYYtQ/vspA==}
     peerDependencies:
       tailwindcss: '>=3.0.0 || insiders'
-
-  tailwindcss@4.1.11:
-    resolution: {integrity: sha512-2E9TBm6MDD/xKYe+dvJZAmg3yxIEDNRc0jwlNyDg/4Fil2QcSLjFKGVff0lAf1jjeaArlG/M75Ey/EYr/OJtBA==}
 
   tailwindcss@4.2.0:
     resolution: {integrity: sha512-yYzTZ4++b7fNYxFfpnberEEKu43w44aqDMNM9MHMmcKuCH7lL8jJ4yJ7LGHv7rSwiqM0nkiobF9I6cLlpS2P7Q==}
@@ -18290,15 +18296,9 @@ snapshots:
 
   tailwind-merge@3.5.0: {}
 
-  tailwindcss-animate@1.0.7(tailwindcss@4.1.11):
-    dependencies:
-      tailwindcss: 4.1.11
-
   tailwindcss-animate@1.0.7(tailwindcss@4.2.1):
     dependencies:
       tailwindcss: 4.2.1
-
-  tailwindcss@4.1.11: {}
 
   tailwindcss@4.2.0: {}
 

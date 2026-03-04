@@ -169,6 +169,6 @@ export const FEDERAL_STATES = FEDERAL_STATE_DEFINITIONS.filter((state) => {
     isSharedChatEnabled: true,
     isShareTemplateWithSchoolEnabled: true,
     isImageGenerationEnabled: true,
-    isNewUiDesignEnabled: true,
+    isNewUiDesignEnabled: false, // Todo: enable after ui redesign is done and tested
   },
 })) satisfies Array<Omit<FederalStateInsertModel, 'organizationId'>>;

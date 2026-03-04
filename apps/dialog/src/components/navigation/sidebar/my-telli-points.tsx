@@ -1,0 +1,16 @@
+import TelliPointsProgressBar from '@/components/telli-points-progress-bar';
+
+type MyTelliPointsProps = {
+  text: string;
+  currentModelCosts: number;
+  userPriceLimit: number;
+};
+
+export function MyTelliPoints({ text, currentModelCosts, userPriceLimit }: MyTelliPointsProps) {
+  return (
+    <>
+      <div className="text-base mb-4">{text}</div>
+      <TelliPointsProgressBar percentage={100 - (currentModelCosts / userPriceLimit) * 100} />
+    </>
+  );
+}
