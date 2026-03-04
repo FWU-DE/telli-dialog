@@ -30,6 +30,7 @@ import { FederalStateModel } from '@shared/federal-states/types';
 import { UserModel } from '@shared/auth/user-model';
 import { useSidebarVisibility } from './sidebar-provider';
 import { useOutsideClick } from '@/components/hooks/use-outside-click';
+import { ChatHistory } from './chat-history';
 
 type AppSidebarProps = {
   federalState: FederalStateModel;
@@ -118,7 +119,9 @@ export function AppSidebar({
               userPriceLimit={userPriceLimit}
             />
           </SidebarGroup>
-          <SidebarGroup>Chat History</SidebarGroup>
+          <SidebarGroup>
+            <ChatHistory />
+          </SidebarGroup>
         </SidebarContent>
         <SidebarFooter>
           <MoonStarsIcon onClick={toggleTheme} />

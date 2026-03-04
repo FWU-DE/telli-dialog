@@ -13,11 +13,7 @@ import { dbUpdateLastUsedModelByUserId, dbUpdateUserTermsVersion } from '@shared
 import { FileModel } from '@shared/db/schema';
 import { revalidatePath } from 'next/cache';
 
-export default async function deleteConversationAction({
-  conversationId,
-}: {
-  conversationId: string;
-}) {
+export async function deleteConversationAction({ conversationId }: { conversationId: string }) {
   const { user } = await requireAuth();
 
   return runServerAction(deleteConversation)({ conversationId, userId: user.id });

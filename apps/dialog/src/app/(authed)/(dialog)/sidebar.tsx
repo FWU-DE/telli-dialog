@@ -23,7 +23,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
-import deleteConversationAction, { updateConversationTitleAction } from './actions';
+import { deleteConversationAction, updateConversationTitleAction } from './actions';
 import { fetchClientSideConversations } from './utils';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 
