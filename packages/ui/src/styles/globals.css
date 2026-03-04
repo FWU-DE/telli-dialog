@@ -30,7 +30,8 @@
     --dark-red: #9f070d;
     --light-red: #fef6f6;
 
-    --background: #ffffffff;
+    --background: #ffffffff; /* normal background for pages */
+    --background-2: #fafafaff; /* alternative background for cards, popovers, etc. */
     --foreground: #020817ff;
 
     --card: #ffffffff;
@@ -53,6 +54,13 @@
 
     --destructive: #ef4444ff;
     --destructive-foreground: #f8fafcff;
+
+    --success: #ffffff;
+    --success-foreground: #ffffff;
+    --error: #ffffff;
+    --error-foreground: #ffffff;
+    --warning: #ffffff;
+    --warning-foreground: #ffffff;
 
     --border: #e2e8f0ff;
     --input: #e2e8f0ff;
@@ -89,6 +97,13 @@
 
     --destructive: #7f1d1dff;
     --destructive-foreground: #f8fafcff;
+
+    --success: #ffffff;
+    --success-foreground: #ffffff;
+    --error: #ffffff;
+    --error-foreground: #ffffff;
+    --warning: #ffffff;
+    --warning-foreground: #ffffff;
 
     --border: #1e293bff;
     --input: #1e293bff;

@@ -86,7 +86,9 @@ export function AppSidebar({
                   text="Neues Bild"
                 />
               )}
-              <AppMenuItem href="/custom" icon={<LegoSmileyIcon />} text="Assistenten" />
+              {user.userRole === 'teacher' && federalState.featureToggles?.isCustomGptEnabled && (
+                <AppMenuItem href="/custom" icon={<LegoSmileyIcon />} text="Assistenten" />
+              )}
               <SidebarSeparator className="my-4" />
               {user.userRole === 'teacher' && federalState.featureToggles?.isSharedChatEnabled && (
                 <AppMenuItem

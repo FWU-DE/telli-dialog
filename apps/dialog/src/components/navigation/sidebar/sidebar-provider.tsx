@@ -18,7 +18,7 @@ export function useSidebarVisibility() {
 export function SidebarVisibilityProvider({ children }: { children: React.ReactNode }) {
   const { isAtLeast, isBelow } = useBreakpoints();
   const [isOpen, setOpen] = React.useState(true);
-  const { setOpen: setOpen2, setOpenMobile } = useSidebar();
+  const { setOpen: setOpenNewSidebar, setOpenMobile } = useSidebar();
 
   // set correct initial state on desktop
   React.useEffect(() => {
@@ -38,13 +38,13 @@ export function SidebarVisibilityProvider({ children }: { children: React.ReactN
 
   function close() {
     setOpen(false);
-    setOpen2(false);
+    setOpenNewSidebar(false);
     setOpenMobile(false);
   }
 
   function toggle() {
     setOpen(!isOpen);
-    setOpen2(!isOpen);
+    setOpenNewSidebar(!isOpen);
     setOpenMobile(!isOpen);
   }
 
