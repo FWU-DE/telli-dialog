@@ -128,8 +128,7 @@ jobs:
 
       - name: Build and start telli-api
         run: |
-          pnpm --filter telli-api build
-          node apps/api/dist/index.cjs > /tmp/telli-api.log 2>&1 &
+          pnpm --filter telli-api dev > /tmp/telli-api.log 2>&1 &
         env:
           DATABASE_URL: ${{ env.API_DATABASE_URL }}
           PORT: 3002
