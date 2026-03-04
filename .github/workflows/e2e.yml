@@ -126,9 +126,13 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm -filter telli-dialog exec playwright install
 
-      - name: Build and start telli-api
+      - name: Start telli-api
         run: |
           pnpm --filter telli-api dev > /tmp/telli-api.log 2>&1 &
+          until wget -qO- http://localhost:3002/health > /dev/null 2>&1; do
+            echo "$(date) - waiting for telli-api to be ready"
+            sleep 1
+          done
         env:
           DATABASE_URL: ${{ env.API_DATABASE_URL }}
           PORT: 3002
