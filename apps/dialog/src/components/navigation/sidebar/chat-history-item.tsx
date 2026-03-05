@@ -6,13 +6,25 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@telli/ui/components/Sidebar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@ui/components/DropdownMenu';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useSidebarVisibility } from './sidebar-provider';
 import { useSidebar } from '@telli/ui/components/Sidebar';
 import { ConversationModel } from '@shared/db/types';
-import { DotsThreeIcon, ImageSquareIcon, LegoSmileyIcon, StudentIcon } from '@phosphor-icons/react';
+import {
+  DotsThreeIcon,
+  ImageSquareIcon,
+  LegoSmileyIcon,
+  StudentIcon,
+  TrashIcon,
+} from '@phosphor-icons/react';
 
 type ChatHistoryItemProps = {
   conversation: ConversationModel;
@@ -55,9 +67,26 @@ export function ChatHistoryItem({
           <span>{conversation.name}</span>
         </Link>
       </SidebarMenuButton>
-      <SidebarMenuAction showOnHover={true}>
-        <DotsThreeIcon />
-      </SidebarMenuAction>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <SidebarMenuAction showOnHover={true}>
+            <DotsThreeIcon />
+          </SidebarMenuAction>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem>
+            <span>Umbenennen</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={() => onDeleteConversation(conversation.id)}
+          >
+            <TrashIcon />
+            <span>Löschen</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </SidebarMenuItem>
   );
 }
