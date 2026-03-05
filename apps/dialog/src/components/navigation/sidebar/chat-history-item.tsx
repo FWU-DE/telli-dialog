@@ -14,17 +14,29 @@ import {
 } from '@ui/components/DropdownMenu';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useSidebarVisibility } from './sidebar-provider';
 import { useSidebar } from '@telli/ui/components/Sidebar';
 import { ConversationModel } from '@shared/db/types';
 import {
+  CheckSquareIcon,
   DotsThreeIcon,
   ImageSquareIcon,
   LegoSmileyIcon,
   StudentIcon,
   TrashIcon,
+  XSquareIcon,
 } from '@phosphor-icons/react';
+import { useForm } from 'react-hook-form';
+import z from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Input } from '@ui/components/Input';
+
+const renameChatHistorySchema = z.object({
+  name: z.string().min(1).max(256),
+});
+
+type RenameChatHistoryValues = z.infer<typeof renameChatHistorySchema>;
 
 type ChatHistoryItemProps = {
   conversation: ConversationModel;
@@ -37,10 +49,14 @@ export function ChatHistoryItem({
   onUpdateConversation,
   onDeleteConversation,
 }: ChatHistoryItemProps) {
+  const [isEditable, setIsEditable] = useState(false);
   const pathname = usePathname();
   const { close } = useSidebarVisibility();
   const { isMobile } = useSidebar();
-
+  const renameForm = useForm({
+    resolver: zodResolver(renameChatHistorySchema),
+    defaultValues: { name: conversation.name ?? '' },
+  });
   const href = buildConversationUrl({ conversation });
   const icon = determineConversationIcon(conversation);
 
@@ -51,42 +67,71 @@ export function ChatHistoryItem({
     return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
   };
 
+  async function onSubmit(data: RenameChatHistoryValues) {
+    setIsEditable(false);
+    onUpdateConversation(data.name);
+  }
+
+  async function onAbort() {
+    setIsEditable(false);
+  }
+
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton asChild isActive={isActive()} className="gap-1 text-sm text-ellipsis">
-        <Link
-          href={href}
-          onClick={() => {
-            if (isMobile) {
-              close();
-            }
-          }}
-          prefetch={false}
-        >
-          {icon}
-          <span>{conversation.name}</span>
-        </Link>
-      </SidebarMenuButton>
+      {isEditable && (
+        <form className="w-full flex gap-1" onSubmit={renameForm.handleSubmit(onSubmit)}>
+          <Input
+            {...renameForm.register('name')}
+            className="min-w-0 p-1 text-black border border-black rounded-md"
+          />
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <SidebarMenuAction showOnHover={true}>
-            <DotsThreeIcon />
-          </SidebarMenuAction>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem>
-            <span>Umbenennen</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={() => onDeleteConversation(conversation.id)}
-          >
-            <TrashIcon />
-            <span>Löschen</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          <button type="submit" className={'px-2 border border-black rounded-md'}>
+            <CheckSquareIcon className="h-4 w-4" />
+          </button>
+          <button onClick={() => onAbort()} className={'px-2 border border-black rounded-md'}>
+            <XSquareIcon className="h-4 w-4" />
+          </button>
+        </form>
+      )}
+
+      {!isEditable && (
+        <>
+          <SidebarMenuButton asChild isActive={isActive()} className="gap-1 text-sm text-ellipsis">
+            <Link
+              href={href}
+              onClick={() => {
+                if (isMobile) {
+                  close();
+                }
+              }}
+              prefetch={false}
+            >
+              {icon}
+              <span>{conversation.name}</span>
+            </Link>
+          </SidebarMenuButton>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <SidebarMenuAction showOnHover={true}>
+                <DotsThreeIcon />
+              </SidebarMenuAction>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => setIsEditable(true)}>
+                <span>Umbenennen</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => onDeleteConversation(conversation.id)}
+              >
+                <TrashIcon />
+                <span>Löschen</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </>
+      )}
     </SidebarMenuItem>
   );
 }
