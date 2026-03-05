@@ -29,8 +29,8 @@ import { MyTelliPoints } from './my-telli-points';
 import { FederalStateModel } from '@shared/federal-states/types';
 import { UserModel } from '@shared/auth/user-model';
 import { useSidebarVisibility } from './sidebar-provider';
-import { useOutsideClick } from '@/components/hooks/use-outside-click';
 import { ChatHistorySidebarGroup } from './chat-history-sidebar-group';
+import React from 'react';
 
 type AppSidebarProps = {
   federalState: FederalStateModel;
@@ -48,7 +48,7 @@ export function AppSidebar({
   // Todo: After ui redesign, we should switch to useSidebar()
   // const { toggleSidebar } = useSidebar();
   const { close, isOpen, toggle } = useSidebarVisibility();
-  const { isMobile } = useSidebar();
+  const { isMobile, openMobile } = useSidebar();
   const { resolvedTheme, setTheme } = useTheme();
   const t = useTranslations('sidebar');
 
@@ -57,15 +57,15 @@ export function AppSidebar({
     setTheme(currentTheme === 'light' ? 'dark' : 'light');
   }
 
-  const ref = useOutsideClick<HTMLDivElement>(() => {
-    if (isOpen && isMobile && typeof window !== 'undefined') {
+  React.useEffect(() => {
+    if (isMobile && isOpen && !openMobile) {
       close();
     }
-  });
+  }, [close, isMobile, isOpen, openMobile]);
 
   return (
     <Sidebar>
-      <div ref={ref} className="p-2">
+      <div className="p-2">
         <SidebarHeader>
           <div className="p-2 flex justify-between">
             <TelliLogo className="h-7 text-primary" />
