@@ -6,20 +6,22 @@ import {
 } from '@/app/(authed)/(dialog)/actions';
 import { fetchClientSideConversations } from '@/app/(authed)/(dialog)/utils';
 import { useToast } from '@/components/common/toast';
-import { cn } from '@/utils/tailwind';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
+import { useMemo, useState } from 'react';
 import { SidebarGroup, SidebarMenu } from '@ui/components/Sidebar';
 import { ChatHistoryItem } from './chat-history-item';
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@ui/components/InputGroup';
+import { MagnifyingGlassIcon } from '@phosphor-icons/react';
 
 export function ChatHistorySidebarGroup() {
   const router = useRouter();
   const pathname = usePathname();
   const toast = useToast();
   const t = useTranslations('sidebar');
-  const tCommon = useTranslations('common');
   const queryClient = useQueryClient();
+  const [searchText, setSearchText] = useState('');
 
   const {
     data: conversations = [],
@@ -64,12 +66,29 @@ export function ChatHistorySidebarGroup() {
     return pathname.includes(conversationId);
   }
 
+  const filteredConversations = useMemo(() => {
+    const normalizedSearch = searchText.trim().toLowerCase();
+
+    return conversations.filter((conversation) =>
+      (conversation.name ?? '').toLowerCase().includes(normalizedSearch),
+    );
+  }, [conversations, searchText]);
+
   return (
     <>
       <SidebarGroup className="p-0">
-        <div>Suche</div>
+        <InputGroup className="mb-2 bg-sidebar-input text-sidebar-input-foreground rounded-full border-0">
+          <InputGroupInput
+            value={searchText}
+            placeholder="Chat suchen"
+            onChange={(event) => setSearchText(event.target.value)}
+          />
+          <InputGroupAddon align="inline-end">
+            <MagnifyingGlassIcon />
+          </InputGroupAddon>
+        </InputGroup>
         <SidebarMenu>
-          {conversations.map((conversation) => (
+          {filteredConversations.map((conversation) => (
             <ChatHistoryItem
               key={conversation.id}
               conversation={conversation}

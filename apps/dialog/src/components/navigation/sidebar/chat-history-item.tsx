@@ -156,10 +156,10 @@ function determineConversationIcon(conversation: ConversationModel): ReactNode {
   switch (conversation.type) {
     case 'chat':
       if (conversation.characterId) {
-        return <LegoSmileyIcon />;
+        return <StudentIcon />;
       }
       if (conversation.customGptId) {
-        return <StudentIcon />;
+        return <LegoSmileyIcon />;
       }
       return <></>;
     case 'image-generation':

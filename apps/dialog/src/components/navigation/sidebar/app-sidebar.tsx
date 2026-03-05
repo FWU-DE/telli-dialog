@@ -65,9 +65,9 @@ export function AppSidebar({
 
   return (
     <Sidebar>
-      <div ref={ref} className="p-4">
+      <div ref={ref} className="p-2">
         <SidebarHeader>
-          <div className="flex justify-between">
+          <div className="p-2 flex justify-between">
             <TelliLogo className="h-7 text-primary" />
             {/* Todo: create a separate component that is a button with click handler and icon, hover style, focusable, aria-label, etc. */}
             <SidebarSimpleIcon
@@ -77,7 +77,7 @@ export function AppSidebar({
           </div>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarGroup className="px-0">
+          <SidebarGroup>
             <SidebarMenu>
               <AppMenuItem href="/" icon={<ChatTextIcon />} text="Neuer Chat" />
               {federalState.featureToggles?.isImageGenerationEnabled && (

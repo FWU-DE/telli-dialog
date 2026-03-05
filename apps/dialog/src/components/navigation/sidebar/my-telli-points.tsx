@@ -8,9 +8,9 @@ type MyTelliPointsProps = {
 
 export function MyTelliPoints({ text, currentModelCosts, userPriceLimit }: MyTelliPointsProps) {
   return (
-    <>
+    <div className="p-2">
       <div className="text-base mb-4">{text}</div>
       <TelliPointsProgressBar percentage={100 - (currentModelCosts / userPriceLimit) * 100} />
-    </>
+    </div>
   );
 }
