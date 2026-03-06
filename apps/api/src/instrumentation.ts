@@ -27,10 +27,8 @@ const sentryClient = Sentry.init({
       error: { levels: ['fatal', 'error'] },
     }),
   ],
-  tracesSampler: ({ inheritOrSampleWith, normalizedRequest }) => {
-    const url = normalizedRequest?.url ?? '';
-    // Extract pathname if it's a full URL, otherwise use as-is
-    const pathname = url.startsWith('http') ? new URL(url).pathname : url.split('?')[0];
+  tracesSampler: ({ inheritOrSampleWith, attributes }) => {
+    const pathname = attributes?.['http.target'] ?? attributes?.['http.route'] ?? '';
 
     const isExcludedUrl = pathname === '/health';
     if (isExcludedUrl) {
