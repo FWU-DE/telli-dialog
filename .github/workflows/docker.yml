@@ -58,7 +58,7 @@ jobs:
 
       - name: Build and push
         id: docker-build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
