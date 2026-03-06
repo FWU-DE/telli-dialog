@@ -69,7 +69,10 @@ export function AppSidebar({
       <div className="flex h-full min-h-0 flex-col p-2">
         <SidebarHeader>
           <div className="p-2 flex justify-end gap-2">
-            <Link href="/" className="mr-auto">
+            <Link
+              href="/"
+              className="mr-auto rounded outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
               <TelliLogo className="h-7 text-primary" />
             </Link>
             <IconButton onClick={toggleTheme}>
