@@ -10,23 +10,18 @@ import { db, migrateWithLock } from '@telli/api-database';
 import { logger } from './logger';
 
 async function runDatabaseMigration() {
-  try {
-    logger.info('Running database migrations...');
-    await migrateWithLock(db, {
-      migrationsFolder: path.join(
-        process.cwd(),
-        '..',
-        '..',
-        'packages',
-        'api-database',
-        'migrations',
-      ),
-    });
-    logger.info('Database migrations completed successfully.');
-  } catch (error) {
-    logger.fatal(error, 'Error running database migrations:');
-    throw error;
-  }
+  logger.info('Running database migrations...');
+  await migrateWithLock(db, {
+    migrationsFolder: path.join(
+      process.cwd(),
+      '..',
+      '..',
+      'packages',
+      'api-database',
+      'migrations',
+    ),
+  });
+  logger.info('Database migrations completed successfully.');
 }
 
 async function main() {

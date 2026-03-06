@@ -16,11 +16,16 @@ import { logger } from '@/logger';
 
 const sentryClient = Sentry.init({
   dsn: env.sentryDsn,
+  enableLogs: true,
   integrations: (integrations) => [
     // exclude Fastify, to prevent duplicate registration from ./instrumentation.node
     ...integrations.filter((i) => i.name !== 'Fastify'),
     nodeProfilingIntegration(),
     Sentry.httpIntegration({ spans: false }),
+    Sentry.pinoIntegration({
+      // publish fatal and error logs as events
+      // error: { levels: ['fatal', 'error'] },
+    }),
   ],
   tracesSampler: ({ inheritOrSampleWith, normalizedRequest }) => {
     const url = normalizedRequest?.url ?? '';
