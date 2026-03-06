@@ -6,7 +6,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import z from 'zod';
 
 const bodySchema = z.object({
-  modelIds: z.array(z.string().uuid()),
+  modelIds: z.array(z.uuid()),
 });
 
 export async function handler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
