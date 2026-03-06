@@ -1,58 +1,73 @@
-import { env } from '../consts/env';
 import {
-  CreateLargeLanguageModel,
-  LargeLanguageModel,
-  UpdateLargeLanguageModel,
-} from '../types/large-language-model';
-import { fetchFromApi } from './fetch';
+  dbGetAllModelsByOrganizationId,
+  dbCreateLlmModel,
+  dbUpdateLlmModel,
+  dbGetOrganizationById,
+} from '@telli/api-database';
+import { CreateLargeLanguageModel, UpdateLargeLanguageModel } from '../types/large-language-model';
 import { logInfo } from '@shared/logging';
 
-const apiRoutes = {
-  GET_ALL: (organizationId: string) => `/v1/admin/organizations/${organizationId}/models`,
-  POST_NEW: (organizationId: string) => `/v1/admin/organizations/${organizationId}/models`,
-  PATCH_ONE: (organizationId: string, modelId: string) =>
-    `/v1/admin/organizations/${organizationId}/models/${modelId}`,
-};
-
-export async function fetchLargeLanguageModels(
-  organizationId: string,
-): Promise<LargeLanguageModel[]> {
-  const response = await fetchFromApi(env.telliApiBaseUrl + apiRoutes.GET_ALL(organizationId));
-
-  const data = await response.json();
-  return data as LargeLanguageModel[];
+export async function fetchLargeLanguageModels(organizationId: string) {
+  return dbGetAllModelsByOrganizationId(organizationId);
 }
 
 export async function createLargeLanguageModel(
   organizationId: string,
   data: CreateLargeLanguageModel,
-): Promise<LargeLanguageModel> {
-  const response = await fetchFromApi(env.telliApiBaseUrl + apiRoutes.POST_NEW(organizationId), {
-    method: 'POST',
-    body: JSON.stringify({ ...data, organizationId }),
+) {
+  const organization = await dbGetOrganizationById(organizationId);
+  if (!organization) throw new Error('Organization not found');
+
+  const model = await dbCreateLlmModel({
+    name: data.name,
+    displayName: data.displayName,
+    provider: data.provider,
+    description: data.description ?? '',
+    setting: data.setting ? JSON.parse(data.setting) : {},
+    priceMetadata: data.priceMetadata
+      ? JSON.parse(data.priceMetadata)
+      : { type: 'text' as const, completionTokenPrice: 0, promptTokenPrice: 0 },
+    supportedImageFormats: data.supportedImageFormats
+      ? JSON.parse(data.supportedImageFormats)
+      : [],
+    additionalParameters: data.additionalParameters
+      ? JSON.parse(data.additionalParameters)
+      : {},
+    organizationId,
+    isNew: data.isNew,
+    isDeleted: data.isDeleted,
   });
 
   logInfo('LLM was created successfully', { organizationId, data });
 
-  const result = await response.json();
-  return result as LargeLanguageModel;
+  if (!model) throw new Error('Failed to create model');
+  return model;
 }
 
 export async function updateLargeLanguageModel(
   organizationId: string,
   modelId: string,
   data: UpdateLargeLanguageModel,
-): Promise<LargeLanguageModel> {
-  const response = await fetchFromApi(
-    env.telliApiBaseUrl + apiRoutes.PATCH_ONE(organizationId, modelId),
-    {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    },
-  );
+) {
+  const model = await dbUpdateLlmModel(modelId, organizationId, {
+    name: data.name,
+    displayName: data.displayName,
+    provider: data.provider,
+    description: data.description,
+    setting: data.setting ? JSON.parse(data.setting) : undefined,
+    priceMetadata: data.priceMetadata ? JSON.parse(data.priceMetadata) : undefined,
+    supportedImageFormats: data.supportedImageFormats
+      ? JSON.parse(data.supportedImageFormats)
+      : undefined,
+    additionalParameters: data.additionalParameters
+      ? JSON.parse(data.additionalParameters)
+      : undefined,
+    isNew: data.isNew,
+    isDeleted: data.isDeleted,
+  });
 
   logInfo('LLM was updated successfully', { organizationId, modelId, data });
 
-  const result = await response.json();
-  return result as LargeLanguageModel;
+  if (!model) throw new Error('Failed to update model');
+  return model;
 }
