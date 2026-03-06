@@ -13,7 +13,6 @@ import {
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarMenu,
@@ -29,7 +28,7 @@ import { MyTelliPoints } from './my-telli-points';
 import { FederalStateModel } from '@shared/federal-states/types';
 import { UserModel } from '@shared/auth/user-model';
 import { useSidebarVisibility } from './sidebar-provider';
-import { ChatHistorySidebarGroup } from './chat-history-sidebar-group';
+import { ChatHistory } from './chat-history';
 import React from 'react';
 import { IconButton } from '@ui/components/IconButton';
 
@@ -46,7 +45,7 @@ export function AppSidebar({
   currentModelCosts,
   userPriceLimit,
 }: AppSidebarProps) {
-  // Todo: After ui redesign, we should switch to useSidebar()
+  // Todo TD-1004: After ui redesign, we should switch to useSidebar()
   // const { toggleSidebar } = useSidebar();
   const { close, isOpen, toggle } = useSidebarVisibility();
   const { isMobile, openMobile } = useSidebar();
@@ -66,10 +65,13 @@ export function AppSidebar({
 
   return (
     <Sidebar>
-      <div className="p-2">
+      <div className="flex h-full min-h-0 flex-col p-2">
         <SidebarHeader>
-          <div className="p-2 flex justify-between">
-            <TelliLogo className="h-7 text-primary" />
+          <div className="p-2 flex justify-end gap-2">
+            <TelliLogo className="mr-auto h-7 text-primary" />
+            <IconButton onClick={toggleTheme}>
+              <MoonStarsIcon />
+            </IconButton>
             <IconButton onClick={toggle} aria-label="Toggle sidebar">
               <SidebarSimpleIcon />
             </IconButton>
@@ -118,13 +120,11 @@ export function AppSidebar({
               userPriceLimit={userPriceLimit}
             />
           </SidebarGroup>
+
           <SidebarGroup>
-            <ChatHistorySidebarGroup />
+            <ChatHistory />
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter>
-          <MoonStarsIcon onClick={toggleTheme} />
-        </SidebarFooter>
       </div>
     </Sidebar>
   );

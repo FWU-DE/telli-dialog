@@ -76,6 +76,12 @@ export function ChatHistoryItem({
     setIsEditable(false);
   }
 
+  function closeOnMobile() {
+    if (isMobile) {
+      close();
+    }
+  }
+
   return (
     <SidebarMenuItem>
       {isEditable && (
@@ -97,15 +103,7 @@ export function ChatHistoryItem({
       {!isEditable && (
         <>
           <SidebarMenuButton asChild isActive={isActive()} className="gap-1 text-sm text-ellipsis">
-            <Link
-              href={href}
-              onClick={() => {
-                if (isMobile) {
-                  close();
-                }
-              }}
-              prefetch={false}
-            >
+            <Link href={href} onClick={closeOnMobile} prefetch={false}>
               {icon}
               <span>{conversation.name}</span>
             </Link>

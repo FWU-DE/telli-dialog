@@ -14,8 +14,9 @@ import { SidebarGroup, SidebarMenu } from '@ui/components/Sidebar';
 import { ChatHistoryItem } from './chat-history-item';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@ui/components/InputGroup';
 import { MagnifyingGlassIcon } from '@phosphor-icons/react';
+import { Button } from '@ui/components/Button';
 
-export function ChatHistorySidebarGroup() {
+export function ChatHistory() {
   const router = useRouter();
   const pathname = usePathname();
   const toast = useToast();
@@ -77,7 +78,7 @@ export function ChatHistorySidebarGroup() {
   return (
     <>
       <SidebarGroup className="p-0">
-        <InputGroup className="mb-2 bg-sidebar-input text-sidebar-input-foreground rounded-full border-0">
+        <InputGroup className="mb-2 bg-sidebar-input text-sidebar-input-foreground rounded-full">
           <InputGroupInput
             value={searchText}
             placeholder="Chat suchen"
@@ -102,7 +103,7 @@ export function ChatHistorySidebarGroup() {
       </SidebarGroup>
 
       {isLoading && (
-        <div className="flex flex-col gap-2 w-full items-center justify-center">
+        <div className="flex flex-col w-full items-center ">
           <p className="text-primary animate-pulse">{t('chats-loading')}</p>
         </div>
       )}
@@ -110,9 +111,7 @@ export function ChatHistorySidebarGroup() {
       {error && (
         <div className="flex flex-col gap-2 w-full items-center justify-center">
           <p className="text-primary">{t('chats-error')}</p>
-          <button onClick={refetchConversations} className="text-primary hover:underline mt-2">
-            {t('chats-reload')}
-          </button>
+          <Button onClick={refetchConversations}>{t('chats-reload')}</Button>
         </div>
       )}
     </>
