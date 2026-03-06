@@ -41,7 +41,7 @@
     "@telli/api-llm-model": "workspace:*",
     "@telli/api-utils": "workspace:*",
     "dotenv": "17.3.1",
-    "fastify": "5.7.4",
+    "fastify": "5.8.1",
     "fastify-graceful-shutdown": "5.0.0",
     "openai": "6.25.0",
     "zod": "4.3.6"
