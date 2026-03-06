@@ -52,6 +52,7 @@ export function AppSidebar({
   const { isMobile, openMobile } = useSidebar();
   const { resolvedTheme, setTheme } = useTheme();
   const t = useTranslations('sidebar');
+  const isDarkTheme = resolvedTheme === 'dark';
 
   function toggleTheme() {
     const currentTheme = resolvedTheme ?? 'light';
@@ -71,14 +72,23 @@ export function AppSidebar({
           <div className="p-2 flex justify-end gap-2">
             <Link
               href="/"
+              aria-label="Startseite"
               className="mr-auto rounded outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <TelliLogo className="h-7 text-primary" />
             </Link>
-            <IconButton onClick={toggleTheme}>
+            <IconButton
+              onClick={toggleTheme}
+              aria-label={isDarkTheme ? 'Helles Design aktivieren' : 'Dunkles Design aktivieren'}
+              aria-pressed={isDarkTheme}
+            >
               <MoonStarsIcon />
             </IconButton>
-            <IconButton onClick={toggle} aria-label="Toggle sidebar">
+            <IconButton
+              onClick={toggle}
+              aria-label={isOpen ? 'Seitenleiste schliessen' : 'Seitenleiste oeffnen'}
+              aria-expanded={isOpen}
+            >
               <SidebarSimpleIcon />
             </IconButton>
           </div>

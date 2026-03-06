@@ -91,13 +91,18 @@ export function ChatHistoryItem({
             className="min-w-0 p-1 text-foreground border border-foreground rounded-md"
           />
 
-          <button className={'px-2 border border-foreground rounded-md'}>
+          <button
+            type="submit"
+            aria-label="Umbenennung speichern"
+            className="px-2 border border-foreground rounded-md"
+          >
             <CheckSquareIcon className="h-4 w-4" />
           </button>
           <button
             type="button"
             onClick={onAbort}
-            className={'px-2 border border-foreground rounded-md'}
+            aria-label="Umbenennung abbrechen"
+            className="px-2 border border-foreground rounded-md"
           >
             <XSquareIcon className="h-4 w-4" />
           </button>
@@ -115,7 +120,7 @@ export function ChatHistoryItem({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <SidebarMenuAction showOnHover={true}>
+              <SidebarMenuAction showOnHover={true} aria-label="Konversationsaktionen">
                 <DotsThreeIcon />
               </SidebarMenuAction>
             </DropdownMenuTrigger>

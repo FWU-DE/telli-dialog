@@ -82,6 +82,7 @@ export function ChatHistory() {
           <InputGroupInput
             value={searchText}
             placeholder="Chat suchen"
+            aria-label="Chat suchen"
             onChange={(event) => setSearchText(event.target.value)}
           />
           <InputGroupAddon align="inline-end">
