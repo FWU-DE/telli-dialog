@@ -120,7 +120,11 @@ export function ChatHistoryItem({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <SidebarMenuAction showOnHover={true} aria-label="Konversationsaktionen">
+              <SidebarMenuAction
+                showOnHover={true}
+                aria-label="Konversationsaktionen"
+                data-testid="conversation-actions"
+              >
                 <DotsThreeIcon />
               </SidebarMenuAction>
             </DropdownMenuTrigger>
@@ -130,6 +134,7 @@ export function ChatHistoryItem({
               </DropdownMenuItem>
               <DropdownMenuItem
                 variant="destructive"
+                data-testid="delete-conversation"
                 onClick={() => onDeleteConversation(conversation.id)}
               >
                 <TrashIcon />

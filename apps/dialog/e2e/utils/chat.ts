@@ -33,21 +33,19 @@ export async function uploadFile(page: Page, filePath: string) {
  */
 export async function deleteChat(page: Page, conversationId: string) {
   try {
-    const label = page
-      .locator('div', { has: page.locator(`a[href="/d/${conversationId}"]`) })
-      .last();
+    const link = page.locator(`a[href="/d/${conversationId}"]`).first();
 
     // Ensure element is in viewport
-    await label.scrollIntoViewIfNeeded();
-    await expect(label).toBeVisible();
+    await link.scrollIntoViewIfNeeded();
+    await expect(link).toBeVisible();
 
-    await label.hover();
+    await link.hover();
 
-    const dropDownMenu = label.getByLabel('Conversation actions');
+    const dropDownMenu = link.getByTestId('conversation-actions');
     await expect(dropDownMenu).toBeVisible();
     await dropDownMenu.click();
 
-    await page.getByRole('menuitem', { name: 'Löschen' }).click();
+    await page.getByTestId('delete-conversation').click();
     await waitForToast(page);
   } catch {
     console.error('Error deleting chat. This is a known issue with firefox.');
