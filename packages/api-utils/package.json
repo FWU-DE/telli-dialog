@@ -11,7 +11,7 @@
   "devDependencies": {
     "@telli/api-eslint-config": "workspace:*",
     "@telli/api-typescript-config": "workspace:*",
-    "@types/node": "24.10.13",
+    "@types/node": "24.11.0",
     "eslint": "9.39.2",
     "typescript": "5.9.3"
   },
