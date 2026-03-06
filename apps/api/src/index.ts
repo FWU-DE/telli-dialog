@@ -7,10 +7,11 @@ import buildApp from './app';
 import { env } from './env';
 import path from 'node:path';
 import { db, migrateWithLock } from '@telli/api-database';
+import { logger } from './logger';
 
 async function runDatabaseMigration() {
   try {
-    console.info('Running database migrations...');
+    logger.info('Running database migrations...');
     await migrateWithLock(db, {
       migrationsFolder: path.join(
         process.cwd(),
@@ -21,9 +22,9 @@ async function runDatabaseMigration() {
         'migrations',
       ),
     });
-    console.info('Database migrations completed successfully.');
+    logger.info('Database migrations completed successfully.');
   } catch (error) {
-    console.error('Error running database migrations:', error);
+    logger.fatal(error, 'Error running database migrations:');
     throw error;
   }
 }
@@ -32,7 +33,7 @@ async function main() {
   await runDatabaseMigration();
 
   const fastify = await buildApp({
-    logger: true,
+    loggerInstance: logger,
     ajv: {
       customOptions: {
         keywords: ['x-examples'],
@@ -66,14 +67,14 @@ async function main() {
     },
     (err, address) => {
       if (err) throw err;
-      console.info(`Server is now listening on ${address}`);
+      logger.info(`Server is now listening on ${address}`);
     },
   );
 }
 
-main()
-  .then(() => {})
-  .catch((err) => {
-    console.error(err);
-    process.exit(1);
-  });
+try {
+  await main();
+} catch (err) {
+  logger.fatal(err);
+  process.exit(1);
+}

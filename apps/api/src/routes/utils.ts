@@ -103,7 +103,7 @@ export function handleLlmModelError(
   error: unknown,
   errorContext: string,
 ): void {
-  console.error(`${errorContext}:`, error);
+  reply.log.error({ err: error, errorContext });
 
   let statusCode = 500;
   let errorMessage = 'An error occurred';

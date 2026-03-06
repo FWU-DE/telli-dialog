@@ -12,6 +12,7 @@ import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { SentrySampler, SentrySpanProcessor } from '@sentry/opentelemetry';
 import { env } from '@/env';
+import { logger } from '@/logger';
 
 const sentryClient = Sentry.init({
   dsn: env.sentryDsn,
@@ -96,8 +97,8 @@ Sentry.validateOpenTelemetrySetup();
 export async function shutdownTracing() {
   try {
     await sdk.shutdown();
-    console.log('Tracing terminated');
+    logger.debug('Tracing terminated');
   } catch (error) {
-    console.log('Error terminating tracing', error);
+    logger.error(error, 'Error terminating tracing');
   }
 }

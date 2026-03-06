@@ -42,6 +42,7 @@
     "fastify": "5.8.1",
     "fastify-graceful-shutdown": "5.0.0",
     "openai": "6.25.0",
+    "pino": "10.3.1",
     "zod": "4.3.6"
   },
   "devDependencies": {
