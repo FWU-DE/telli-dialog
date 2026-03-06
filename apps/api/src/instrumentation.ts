@@ -24,7 +24,7 @@ const sentryClient = Sentry.init({
     Sentry.httpIntegration({ spans: false }),
     Sentry.pinoIntegration({
       // publish fatal and error logs as events
-      // error: { levels: ['fatal', 'error'] },
+      error: { levels: ['fatal', 'error'] },
     }),
   ],
   tracesSampler: ({ inheritOrSampleWith, normalizedRequest }) => {
@@ -106,4 +106,8 @@ export async function shutdownTracing() {
   } catch (error) {
     logger.error(error, 'Error terminating tracing');
   }
+}
+
+export async function flushSentry(timeout = 10_000) {
+  await Sentry.flush(timeout);
 }

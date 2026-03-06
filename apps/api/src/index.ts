@@ -1,5 +1,5 @@
 // this import has to be at the top of the file for fastify to be instrumented properly
-import { shutdownTracing } from '@/instrumentation';
+import { flushSentry, shutdownTracing } from '@/instrumentation';
 import cors from '@fastify/cors';
 
 import * as Sentry from '@sentry/node';
@@ -40,6 +40,7 @@ async function main() {
   fastify.after(() => {
     fastify.gracefulShutdown(async () => {
       await shutdownTracing();
+      await flushSentry();
     });
   });
 
@@ -62,7 +63,7 @@ async function main() {
     },
     (err, address) => {
       if (err) throw err;
-      logger.info(`Server is now listening on ${address}`);
+      fastify.log.info(`Server is now listening on ${address}`);
     },
   );
 }
@@ -71,5 +72,6 @@ try {
   await main();
 } catch (err) {
   logger.fatal(err);
+  await flushSentry();
   process.exit(1);
 }
