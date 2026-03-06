@@ -12,7 +12,7 @@ import { ConversationModel } from '@shared/db/types';
 import { ForbiddenError, NotFoundError } from '@shared/error';
 
 /**
- * Returns all conversations that belongs the the user for the chat history.
+ * Returns all conversations that belong to the user for the chat history.
  *
  * @param userId The ID of the user.
  * @returns A promise that resolves to an array of conversations.

@@ -88,13 +88,17 @@ export function ChatHistoryItem({
         <form className="w-full flex gap-1" onSubmit={renameForm.handleSubmit(onSubmit)}>
           <Input
             {...renameForm.register('name')}
-            className="min-w-0 p-1 text-black border border-black rounded-md"
+            className="min-w-0 p-1 text-foreground border border-foreground rounded-md"
           />
 
-          <button type="submit" className={'px-2 border border-black rounded-md'}>
+          <button className={'px-2 border border-foreground rounded-md'}>
             <CheckSquareIcon className="h-4 w-4" />
           </button>
-          <button onClick={() => onAbort()} className={'px-2 border border-black rounded-md'}>
+          <button
+            type="button"
+            onClick={onAbort}
+            className={'px-2 border border-foreground rounded-md'}
+          >
             <XSquareIcon className="h-4 w-4" />
           </button>
         </form>
