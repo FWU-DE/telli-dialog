@@ -31,6 +31,7 @@ import { useSidebarVisibility } from './sidebar-provider';
 import { ChatHistory } from './chat-history';
 import React from 'react';
 import { IconButton } from '@ui/components/IconButton';
+import Link from 'next/link';
 
 type AppSidebarProps = {
   federalState: FederalStateModel;
@@ -68,7 +69,9 @@ export function AppSidebar({
       <div className="flex h-full min-h-0 flex-col p-2">
         <SidebarHeader>
           <div className="p-2 flex justify-end gap-2">
-            <TelliLogo className="mr-auto h-7 text-primary" />
+            <Link href="/" className="mr-auto">
+              <TelliLogo className="h-7 text-primary" />
+            </Link>
             <IconButton onClick={toggleTheme}>
               <MoonStarsIcon />
             </IconButton>
