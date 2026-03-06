@@ -1,5 +1,5 @@
 import { ApiKeyModel, dbValidateApiKey } from '@telli/api-database';
-import { errorifyAsyncFn } from '@telli/api-utils';
+import { errorifyAsyncFn } from '@telli/api-database/utils';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { ChatCompletionChunk } from 'openai/resources/chat/completions.js';
 
