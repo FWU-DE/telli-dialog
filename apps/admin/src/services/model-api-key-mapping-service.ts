@@ -18,7 +18,12 @@ export async function saveModelApiKeyMappings(
   apiKeyId: string,
   modelIds: string[],
 ) {
-  const result = await dbUpdateModelMappingsForApiKey(organizationId, projectId, apiKeyId, modelIds);
+  const result = await dbUpdateModelMappingsForApiKey(
+    organizationId,
+    projectId,
+    apiKeyId,
+    modelIds,
+  );
 
   logInfo('API Key mapping was updated successfully', { projectId, apiKeyId, modelIds });
 

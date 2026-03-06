@@ -7,7 +7,6 @@ import { handler as v1_images_generations_postHandler } from './routes/(app)/v1/
 import { completionRequestSchemaSwagger } from './routes/(app)/v1/chat/completions/swagger-schemas';
 import { modelRequestSwaggerSchema } from './routes/(app)/v1/models/swagger-schemas';
 import { usageRequestSwaggerSchema } from './routes/(app)/v1/usage/swagger-schemas';
-import { adminRouteHandlerDefinitions } from './routes/(app)/v1/admin/const';
 import { embeddingRequestSwaggerSchema } from './routes/(app)/v1/embeddings/swagger-schemas';
 import { imageGenerationRequestSwaggerSchema } from './routes/(app)/v1/images/generations/swagger-schemas';
 
@@ -30,7 +29,6 @@ export const healthSchema = {
 };
 
 export const routeHandlerDefinitions: Array<RouteHandlerDefinition> = [
-  ...adminRouteHandlerDefinitions,
   {
     path: '/health',
     method: 'GET',

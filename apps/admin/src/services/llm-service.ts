@@ -27,12 +27,8 @@ export async function createLargeLanguageModel(
     priceMetadata: data.priceMetadata
       ? JSON.parse(data.priceMetadata)
       : { type: 'text' as const, completionTokenPrice: 0, promptTokenPrice: 0 },
-    supportedImageFormats: data.supportedImageFormats
-      ? JSON.parse(data.supportedImageFormats)
-      : [],
-    additionalParameters: data.additionalParameters
-      ? JSON.parse(data.additionalParameters)
-      : {},
+    supportedImageFormats: data.supportedImageFormats ? JSON.parse(data.supportedImageFormats) : [],
+    additionalParameters: data.additionalParameters ? JSON.parse(data.additionalParameters) : {},
     organizationId,
     isNew: data.isNew,
     isDeleted: data.isDeleted,
