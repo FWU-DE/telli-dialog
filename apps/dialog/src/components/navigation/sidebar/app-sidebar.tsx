@@ -31,6 +31,7 @@ import { UserModel } from '@shared/auth/user-model';
 import { useSidebarVisibility } from './sidebar-provider';
 import { ChatHistorySidebarGroup } from './chat-history-sidebar-group';
 import React from 'react';
+import { IconButton } from '@ui/components/IconButton';
 
 type AppSidebarProps = {
   federalState: FederalStateModel;
@@ -69,11 +70,9 @@ export function AppSidebar({
         <SidebarHeader>
           <div className="p-2 flex justify-between">
             <TelliLogo className="h-7 text-primary" />
-            {/* Todo: create a separate component that is a button with click handler and icon, hover style, focusable, aria-label, etc. */}
-            <SidebarSimpleIcon
-              className="w-8 h-8 p-1 text-primary hover:bg-primary-hover rounded-enterprise-sm"
-              onClick={toggle}
-            />
+            <IconButton onClick={toggle} aria-label="Toggle sidebar">
+              <SidebarSimpleIcon />
+            </IconButton>
           </div>
         </SidebarHeader>
         <SidebarContent>

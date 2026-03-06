@@ -64,7 +64,7 @@
 
     --border: #e2e8f0ff;
     --input: #e2e8f0ff;
-    --ring: #020817ff;
+    --ring: var(--primary);
 
     --sidebar-background: #fafafaff;
     --sidebar-accent: #e8e4ee;
