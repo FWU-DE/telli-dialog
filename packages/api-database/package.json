@@ -6,7 +6,8 @@
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./helpers": "./helpers/index.ts"
+    "./utils": "./src/api-utils/index.ts",
+    "./llm-model": "./src/llm-model/index.ts"
   },
   "scripts": {
     "db:generate": "dotenv -e ../../apps/api/.env.local -- drizzle-kit generate",
@@ -27,16 +28,16 @@
     "zod": "4.3.6"
   },
   "devDependencies": {
-    "@telli/api-eslint-config": "workspace:*",
-    "@telli/api-llm-model": "workspace:*",
-    "@telli/api-typescript-config": "workspace:*",
-    "@telli/api-utils": "workspace:*",
+    "@eslint/js": "9.39.2",
+    "@telli/typescript-config": "workspace:*",
     "@types/node": "24.11.0",
     "@types/pg": "8.18.0",
     "dotenv-cli": "11.0.0",
     "drizzle-kit": "0.31.9",
     "eslint": "9.39.2",
+    "eslint-config-turbo": "2.8.12",
     "tsx": "4.21.0",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.56.1"
   }
 }

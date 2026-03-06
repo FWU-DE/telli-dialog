@@ -1,6 +1,6 @@
 import { validateApiKey } from '@/routes/utils';
 import { getCurrentUsageInCentByApiKeyIdWithResult } from '@telli/api-database';
-import { getEndOfCurrentMonth, getStartOfCurrentMonth } from '@telli/api-utils';
+import { getEndOfCurrentMonth, getStartOfCurrentMonth } from '@telli/api-database/utils';
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 export async function handler(request: FastifyRequest, reply: FastifyReply): Promise<void> {

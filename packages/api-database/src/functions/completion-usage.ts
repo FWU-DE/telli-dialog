@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import {
   calculatePriceInCentByTextModelAndUsage,
   calculatePriceInCentByEmbeddingModelAndUsage,
-} from '@telli/api-llm-model';
+} from '../llm-model';
 
 export async function dbCreateCompletionUsage(completionUsage: CompletionUsageInsertModel) {
   // Get the model to calculate costs

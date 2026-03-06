@@ -1,5 +1,5 @@
 {
-  "extends": "@telli/api-typescript-config/base.json",
+  "extends": "@telli/typescript-config/api-base.json",
   "include": ["."],
   "exclude": ["dist", "build", "node_modules"]
 }

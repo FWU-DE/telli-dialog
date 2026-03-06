@@ -11,7 +11,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { LlmModelPriceMetadata } from './types';
-import { LlmModelProviderSettings } from '@telli/api-llm-model';
+import { LlmModelProviderSettings } from './llm-model';
 import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
 
 export const organizationTable = pgTable('organization', {
