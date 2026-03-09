@@ -1,4 +1,4 @@
-import { getStartOfCurrentMonth, getEndOfCurrentMonth, errorifyAsyncFn } from '@telli/api-utils';
+import { getStartOfCurrentMonth, getEndOfCurrentMonth, errorifyAsyncFn } from '../api-utils';
 import { ApiKeyModel, db, dbGetApiKeyById } from '..';
 import { and, between, eq, sum } from 'drizzle-orm';
 import { completionUsageTrackingTable, imageGenerationUsageTrackingTable } from '../schema';

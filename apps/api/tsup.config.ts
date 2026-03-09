@@ -18,7 +18,7 @@ export default defineConfig({
     /^@\//,
     /^\./,
     // injected by Sentry plugin; must be bundled or Node will try to require it at runtime
-    /_sentry-.*-injection-stub$/,
+    /_sentry.*injection-stub$/,
   ],
   esbuildPlugins: [
     sentryEsbuildPlugin({

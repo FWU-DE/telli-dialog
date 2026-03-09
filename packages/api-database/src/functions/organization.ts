@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { db, llmModelTable, OrganizationInsertModel, organizationTable, projectTable } from '..';
-import { isNotNull } from '@telli/api-utils';
+import { isNotNull } from '../api-utils';
 
 export async function dbGetAllOrganizations() {
   return await db
