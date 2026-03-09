@@ -30,7 +30,7 @@ test('should copy response to clipboard', async ({ page }) => {
   expect(clipboardContent).toBe(text);
 });
 
-test('should successfully delete the current chat', async ({ page, browserName }) => {
+test('should successfully delete the current chat', async ({ page }) => {
   await login(page, 'teacher');
   await sendMessage(page, 'Schreibe "OK"');
   await deleteChat(page, path.basename(page.url()));
