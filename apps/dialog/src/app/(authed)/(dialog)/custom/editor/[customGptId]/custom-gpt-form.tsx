@@ -312,7 +312,7 @@ export default function CustomGptForm({
       <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>
       {copyContainer}
       <fieldset className="flex flex-col gap-4 mt-8">
-        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 lg:gap-16">
           <div className="flex gap-8 flex-col">
             <TextInput
               label={t('gpt-name-label')}

@@ -48,7 +48,7 @@ export default function CookieModal() {
           Cookie-Einstellungen können jederzeit angepasst oder die Einwilligung mit Wirkung für die
           Zukunft widerrufen werden.
         </p>
-        <div className="flex flex-col items-center mt-10 gap-6 w-full xs:flex-row xs:items-start xs:justify-end">
+        <div className="flex flex-col items-center mt-10 gap-6 w-full sm:flex-row sm:items-start sm:justify-end">
           <button className={buttonSecondaryClassName} onClick={() => handleConsent('needed')}>
             Nur notwendige
           </button>

@@ -280,7 +280,7 @@ export default function LearningScenarioForm({
   const generalSettings = (
     <fieldset className="flex flex-col gap-8 mt-16">
       <h2 className="font-medium mb-2">{t('settings')}</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
+      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 lg:gap-16">
         <div className="flex gap-4 flex-col">
           <div className="flex gap-4 flex-col">
             <label className="text-sm font-medium">{tCommon('llm-model')}</label>

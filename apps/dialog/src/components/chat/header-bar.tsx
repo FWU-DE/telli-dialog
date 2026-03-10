@@ -33,7 +33,7 @@ export function ChatHeaderBar({
           <SelectLlmModel isStudent={userAndContext.school.userRole === 'student'} />
           <div className="grow"></div>
           {title !== undefined && (
-            <div className="hidden sm:flex  md:w-1/2 sm:w-1/3">
+            <div className="hidden sm:flex sm:w-1/3 lg:w-1/2">
               <span className="font-normal text-xl truncate">{title}</span>
             </div>
           )}
