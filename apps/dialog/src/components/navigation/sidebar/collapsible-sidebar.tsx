@@ -9,8 +9,15 @@ import SidebarToggleIcon from '@/components/icons/sidebar/sidebar-toggle';
 import { cn } from '@/utils/tailwind';
 import { useRouter } from 'next/navigation';
 import { iconClassName } from '@/utils/tailwind/icon';
+import { SidebarSimpleIcon } from '@phosphor-icons/react/dist/icons/SidebarSimple';
 
-export default function CollapsibleSidebar({ children }: { children: React.ReactNode }) {
+export default function CollapsibleSidebar({
+  children,
+  isNewUiDesignEnabled,
+}: {
+  children: React.ReactNode;
+  isNewUiDesignEnabled: boolean;
+}) {
   const { isOpen, toggle } = useSidebarVisibility();
   const { isBelow } = useBreakpoints();
 
@@ -42,7 +49,7 @@ export default function CollapsibleSidebar({ children }: { children: React.React
         )}
       >
         <div className={cn('flex gap-4 items-center px-6 mt-[22px] mb-4', !isOpen && 'invisible')}>
-          <ToggleSidebarButton forceVisibility />
+          <ToggleSidebarButton forceVisibility isNewUiDesignEnabled={isNewUiDesignEnabled} />
           <div className="grow" />
           <NewChatButton forceVisibility />
         </div>
@@ -52,7 +59,13 @@ export default function CollapsibleSidebar({ children }: { children: React.React
   );
 }
 
-export function ToggleSidebarButton({ forceVisibility = false }: { forceVisibility?: boolean }) {
+export function ToggleSidebarButton({
+  forceVisibility = false,
+  isNewUiDesignEnabled,
+}: {
+  forceVisibility?: boolean;
+  isNewUiDesignEnabled: boolean;
+}) {
   const { toggle, isOpen } = useSidebarVisibility();
 
   if (isOpen && !forceVisibility) return null;
@@ -67,7 +80,7 @@ export function ToggleSidebarButton({ forceVisibility = false }: { forceVisibili
       onClick={() => toggle()}
       aria-label="sidebar-toggle-close"
     >
-      <SidebarToggleIcon />
+      {isNewUiDesignEnabled ? <SidebarSimpleIcon className="w-6 h-6" /> : <SidebarToggleIcon />}
     </button>
   );
 }

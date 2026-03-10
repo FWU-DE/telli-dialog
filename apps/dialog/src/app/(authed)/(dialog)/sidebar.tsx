@@ -31,9 +31,15 @@ type Props = {
   user: UserAndContext;
   currentModelCosts: number;
   userPriceLimit: number;
+  isNewUiDesignEnabled: boolean;
 };
 
-export default function DialogSidebar({ user, currentModelCosts, userPriceLimit }: Props) {
+export default function DialogSidebar({
+  user,
+  currentModelCosts,
+  userPriceLimit,
+  isNewUiDesignEnabled,
+}: Props) {
   const { isBelow } = useBreakpoints();
   const { close, isOpen } = useSidebarVisibility();
   const pathname = usePathname();
@@ -109,7 +115,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
   }
 
   return (
-    <CollapsibleSidebar>
+    <CollapsibleSidebar isNewUiDesignEnabled={isNewUiDesignEnabled}>
       <nav className="flex text-sm flex-col items-start overflow-y-hidden px-1">
         <div className="flex flex-col items-start px-5 w-full">
           <hr className="w-full my-2" />

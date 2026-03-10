@@ -65,6 +65,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
                   user={user}
                   currentModelCosts={priceInCent ?? 0}
                   userPriceLimit={userPriceLimit ?? 500}
+                  isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
                 />
               )}
               <div className="flex flex-col max-h-dvh min-h-dvh w-full overflow-auto">
