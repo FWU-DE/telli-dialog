@@ -68,10 +68,15 @@ async function main() {
   );
 }
 
-try {
-  await main();
-} catch (err) {
+async function handleStartupError(err: unknown) {
   logger.fatal(err);
-  await flushSentry();
+  try {
+    await flushSentry();
+  } catch (flushErr) {
+    logger.error(flushErr, 'Error flushing Sentry during startup');
+  }
   process.exit(1);
 }
+
+// telli-api is compiled to CommonJS and therefore cannot use top-level await
+main().catch(handleStartupError);
