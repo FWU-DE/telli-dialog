@@ -15,13 +15,13 @@ export default function CollapsibleSidebar({ children }: { children: React.React
   const { isBelow } = useBreakpoints();
 
   const ref = useOutsideClick<HTMLDivElement>(() => {
-    if (isOpen && typeof window !== 'undefined' && isBelow.md) {
+    if (isOpen && typeof window !== 'undefined' && isBelow.lg) {
       toggle();
     }
   });
 
   React.useEffect(() => {
-    if (isBelow.md && isOpen) {
+    if (isBelow.lg && isOpen) {
       document.body.classList.add('no-scroll');
     } else {
       document.body.classList.remove('no-scroll');
@@ -30,15 +30,15 @@ export default function CollapsibleSidebar({ children }: { children: React.React
     return () => {
       document.body.classList.remove('no-scroll');
     };
-  }, [isBelow.md, isOpen]);
+  }, [isBelow.lg, isOpen]);
 
   return (
     <div className="flex h-dvh pointer-events-auto z-20 bg-white">
       <div
         ref={ref}
         className={cn(
-          'fixed inset-y-0 h-dvh shadow-3xl left-0 transition-all duration-200 transform w-72 md:relative overflow-y-auto overflow-x-hidden flex flex-col bg-semilight-gray',
-          isOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in md:w-0 md:translate-x-0',
+          'fixed inset-y-0 h-dvh shadow-3xl left-0 transition-all duration-200 transform w-72 lg:relative overflow-y-auto overflow-x-hidden flex flex-col bg-semilight-gray',
+          isOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in lg:w-0 lg:translate-x-0',
         )}
       >
         <div className={cn('flex gap-4 items-center px-6 mt-[22px] mb-4', !isOpen && 'invisible')}>
@@ -79,7 +79,7 @@ export function NewChatButton({ forceVisibility = false }: { forceVisibility?: b
 
   function handleOpenNewChat() {
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    isBelow.md && isOpen && toggle();
+    isBelow.lg && isOpen && toggle();
     router.push('/');
   }
 

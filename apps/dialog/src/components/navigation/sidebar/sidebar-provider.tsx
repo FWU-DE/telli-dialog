@@ -22,19 +22,19 @@ export function SidebarVisibilityProvider({ children }: { children: React.ReactN
 
   // set correct initial state on desktop
   React.useEffect(() => {
-    if (typeof window !== 'undefined' && isAtLeast.md) {
+    if (typeof window !== 'undefined' && isAtLeast.lg) {
       setOpen(true);
       setOpenMobile(false);
     }
-  }, [isAtLeast.md, setOpen, setOpenMobile]);
+  }, [isAtLeast.lg, setOpen, setOpenMobile]);
 
   // set correct initial state on mobile
   React.useEffect(() => {
-    if (typeof window !== 'undefined' && isBelow.md) {
+    if (typeof window !== 'undefined' && isBelow.lg) {
       setOpen(false);
       setOpenMobile(false);
     }
-  }, [isBelow.md, setOpen, setOpenMobile]);
+  }, [isBelow.lg, setOpen, setOpenMobile]);
 
   function close() {
     setOpen(false);

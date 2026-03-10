@@ -51,7 +51,7 @@ export default async function Page(
           totalTime={learningScenario.maxUsageTimeLimit ?? 0}
           stopWatchClassName="w-8 h-8"
         />
-        <main className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] w-full gap-6 mt-6 sm:mt-8 mb-12 sm:mb-16">
+        <main className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] w-full gap-6 mt-6 sm:mt-8 mb-12 sm:mb-16">
           <section className="flex flex-col justify-between gap-4 items-center">
             <div className="flex flex-col items-center gap-4">
               <p className="text-2xl sm:text-3xl">{t('go-to')}</p>
@@ -81,7 +81,7 @@ export default async function Page(
               {t('open-chat')}
             </Link>
           </section>
-          <div className="hidden md:block w-1 border-r" />
+          <div className="hidden sm:block w-1 border-r" />
           <section className="flex flex-col justify-between items-center gap-8 sm:gap-12">
             <h2 className="text-2xl sm:text-3xl text-center">{t('use-qr')}</h2>
             <QRCodeSVG
