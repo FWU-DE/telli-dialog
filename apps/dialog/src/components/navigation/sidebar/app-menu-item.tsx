@@ -1,12 +1,10 @@
 'use client';
 
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
-import { SidebarMenuButton, SidebarMenuItem } from '@telli/ui/components/Sidebar';
+import { SidebarMenuButton, SidebarMenuItem, useSidebar } from '@telli/ui/components/Sidebar';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { useSidebarVisibility } from './sidebar-provider';
-import { useSidebar } from '@telli/ui/components/Sidebar';
 
 type AppMenuItemProps = {
   href: string;
@@ -16,8 +14,7 @@ type AppMenuItemProps = {
 
 export function AppMenuItem({ href, icon, text }: AppMenuItemProps) {
   const pathname = usePathname();
-  const { close } = useSidebarVisibility();
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   const isActive = () => {
     // special case for help mode because it is also a custom gpt and starts with the same path
@@ -33,7 +30,7 @@ export function AppMenuItem({ href, icon, text }: AppMenuItemProps) {
           href={href}
           onClick={() => {
             if (isMobile) {
-              close();
+              setOpenMobile(false);
             }
           }}
           prefetch={false}

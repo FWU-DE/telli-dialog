@@ -27,9 +27,7 @@ import { useTranslations } from 'next-intl';
 import { MyTelliPoints } from './my-telli-points';
 import { FederalStateModel } from '@shared/federal-states/types';
 import { UserModel } from '@shared/auth/user-model';
-import { useSidebarVisibility } from './sidebar-provider';
 import { ChatHistory } from './chat-history';
-import React from 'react';
 import { IconButton } from '@ui/components/IconButton';
 import Link from 'next/link';
 
@@ -46,10 +44,7 @@ export function AppSidebar({
   currentModelCosts,
   userPriceLimit,
 }: AppSidebarProps) {
-  // Todo TD-1004: After ui redesign, we should switch to useSidebar()
-  // const { toggleSidebar } = useSidebar();
-  const { close, isOpen, toggle } = useSidebarVisibility();
-  const { isMobile, openMobile } = useSidebar();
+  const { toggleSidebar, open } = useSidebar();
   const { resolvedTheme, setTheme } = useTheme();
   const t = useTranslations('sidebar');
   const isDarkTheme = resolvedTheme === 'dark';
@@ -58,12 +53,6 @@ export function AppSidebar({
     const currentTheme = resolvedTheme ?? 'light';
     setTheme(currentTheme === 'light' ? 'dark' : 'light');
   }
-
-  React.useEffect(() => {
-    if (isMobile && isOpen && !openMobile) {
-      close();
-    }
-  }, [close, isMobile, isOpen, openMobile]);
 
   return (
     <Sidebar>
@@ -85,9 +74,9 @@ export function AppSidebar({
               <MoonStarsIcon />
             </IconButton>
             <IconButton
-              onClick={toggle}
-              aria-label={isOpen ? 'Seitenleiste schliessen' : 'Seitenleiste oeffnen'}
-              aria-expanded={isOpen}
+              onClick={toggleSidebar}
+              aria-label={open ? 'Seitenleiste schliessen' : 'Seitenleiste oeffnen'}
+              aria-expanded={open}
             >
               <SidebarSimpleIcon />
             </IconButton>

@@ -5,6 +5,7 @@ import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@telli/ui/components/Sidebar';
 import {
   DropdownMenu,
@@ -15,8 +16,6 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
-import { useSidebarVisibility } from './sidebar-provider';
-import { useSidebar } from '@telli/ui/components/Sidebar';
 import { ConversationModel } from '@shared/db/types';
 import {
   CheckSquareIcon,
@@ -51,8 +50,7 @@ export function ChatHistoryItem({
 }: ChatHistoryItemProps) {
   const [isEditable, setIsEditable] = useState(false);
   const pathname = usePathname();
-  const { close } = useSidebarVisibility();
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
   const renameForm = useForm({
     resolver: zodResolver(renameChatHistorySchema),
     defaultValues: { name: conversation.name ?? '' },
@@ -78,7 +76,7 @@ export function ChatHistoryItem({
 
   function closeOnMobile() {
     if (isMobile) {
-      close();
+      setOpenMobile(false);
     }
   }
 

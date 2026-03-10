@@ -2,7 +2,7 @@
 
 import { type UserAndContext } from '@/auth/types';
 import { useToast } from '@/components/common/toast';
-import useBreakpoints from '@/components/hooks/use-breakpoints';
+import { useSidebar } from '@telli/ui/components/Sidebar';
 import CharacterAvatarIcon from '@/components/icons/character-avatar';
 import FourBoxes from '@/components/icons/four-boxes';
 import RobotIcon from '@/components/icons/robot';
@@ -12,7 +12,6 @@ import TelliPointsIcon from '@/components/icons/telli-points';
 import { ImageSquareIcon } from '@phosphor-icons/react';
 import CollapsibleSidebar from '@/components/navigation/sidebar/collapsible-sidebar';
 import SidebarItem from '@/components/navigation/sidebar/conversation-item';
-import { useSidebarVisibility } from '@/components/navigation/sidebar/sidebar-provider';
 import TelliPointsProgressBar from '@/components/telli-points-progress-bar';
 
 import { cn } from '@/utils/tailwind';
@@ -40,8 +39,7 @@ export default function DialogSidebar({
   userPriceLimit,
   isNewUiDesignEnabled,
 }: Props) {
-  const { isBelow } = useBreakpoints();
-  const { close, isOpen } = useSidebarVisibility();
+  const { isMobile, setOpenMobile } = useSidebar();
   const pathname = usePathname();
   const router = useRouter();
   const toast = useToast();
@@ -65,8 +63,8 @@ export default function DialogSidebar({
   }
 
   React.useEffect(() => {
-    if (isOpen && isBelow.lg) {
-      close();
+    if (isMobile) {
+      setOpenMobile(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
