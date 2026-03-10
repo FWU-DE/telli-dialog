@@ -59,7 +59,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
   }
 
   React.useEffect(() => {
-    if (isOpen && isBelow.md) {
+    if (isOpen && isBelow.lg) {
       close();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

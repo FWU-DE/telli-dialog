@@ -70,14 +70,14 @@ export default function DestructiveActionButton({
                 event.preventDefault();
                 setIsOpen(false);
               }}
-              className={cn(buttonSecondaryClassName, 'max-lg:w-full')}
+              className={cn(buttonSecondaryClassName, 'w-full lg:w-auto')}
               type="button"
             >
               Abbrechen
             </button>
             <AlertDialog.Action asChild>
               <button
-                className={cn(buttonDeleteClassName, 'max-lg:w-full')}
+                className={cn(buttonDeleteClassName, 'w-full lg:w-auto')}
                 type="button"
                 onClick={(event) => {
                   event.stopPropagation();
