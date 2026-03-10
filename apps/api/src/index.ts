@@ -73,7 +73,7 @@ async function handleStartupError(err: unknown) {
   try {
     await flushSentry();
   } catch (flushErr) {
-    logger.error(flushErr);
+    logger.error(flushErr, 'Error flushing Sentry during startup');
   }
   process.exit(1);
 }
