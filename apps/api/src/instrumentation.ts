@@ -12,19 +12,23 @@ import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { SentrySampler, SentrySpanProcessor } from '@sentry/opentelemetry';
 import { env } from '@/env';
+import { logger } from '@/logger';
 
 const sentryClient = Sentry.init({
   dsn: env.sentryDsn,
+  enableLogs: true,
   integrations: (integrations) => [
     // exclude Fastify, to prevent duplicate registration from ./instrumentation.node
     ...integrations.filter((i) => i.name !== 'Fastify'),
     nodeProfilingIntegration(),
     Sentry.httpIntegration({ spans: false }),
+    Sentry.pinoIntegration({
+      // publish fatal and error logs as events
+      error: { levels: ['fatal', 'error'] },
+    }),
   ],
-  tracesSampler: ({ inheritOrSampleWith, normalizedRequest }) => {
-    const url = normalizedRequest?.url ?? '';
-    // Extract pathname if it's a full URL, otherwise use as-is
-    const pathname = url.startsWith('http') ? new URL(url).pathname : url.split('?')[0];
+  tracesSampler: ({ inheritOrSampleWith, attributes }) => {
+    const pathname = attributes?.['http.target'] ?? attributes?.['http.route'] ?? '';
 
     const isExcludedUrl = pathname === '/health';
     if (isExcludedUrl) {
@@ -96,8 +100,12 @@ Sentry.validateOpenTelemetrySetup();
 export async function shutdownTracing() {
   try {
     await sdk.shutdown();
-    console.log('Tracing terminated');
+    logger.debug('Tracing terminated');
   } catch (error) {
-    console.log('Error terminating tracing', error);
+    logger.error(error, 'Error terminating tracing');
   }
+}
+
+export async function flushSentry(timeout = 10_000) {
+  await Sentry.flush(timeout);
 }

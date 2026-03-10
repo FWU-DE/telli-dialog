@@ -92,7 +92,7 @@ export async function handler(request: FastifyRequest, reply: FastifyReply): Pro
 
       processStream()
         .catch((error) => {
-          console.error('Error processing stream:', error);
+          reply.log.error(error, 'Error processing stream');
         })
         .finally(() => {
           reply.raw.write('data: [DONE]\n\n');
@@ -102,7 +102,7 @@ export async function handler(request: FastifyRequest, reply: FastifyReply): Pro
     } catch (error) {
       // Errors thrown before the stream starts (e.g. model not found, quota exceeded)
       if (!handleAiCoreError(reply, error)) {
-        console.error('Error in streaming completion:', error);
+        reply.log.error(error, 'Error in streaming completion');
         reply.status(500).send({
           error: 'An error occurred',
           details: error instanceof Error ? error.message : 'Unknown error',
@@ -122,7 +122,7 @@ export async function handler(request: FastifyRequest, reply: FastifyReply): Pro
       reply.status(200).send(response);
     } catch (error) {
       if (!handleAiCoreError(reply, error)) {
-        console.error('Error in non-streaming completion:', error);
+        reply.log.error(error, 'Error in non-streaming completion');
         reply.status(500).send({
           error: 'An error occurred',
           details: error instanceof Error ? error.message : 'Unknown error',

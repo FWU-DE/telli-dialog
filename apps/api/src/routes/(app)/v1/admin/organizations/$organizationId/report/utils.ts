@@ -1,4 +1,5 @@
 import { ApiKeyModel, getUsageInCentByApiKeyId, ProjectModel } from '@telli/api-database';
+import { logger } from '@/logger';
 
 type CostReportRow = {
   // e.g. January 2024
@@ -25,16 +26,15 @@ export async function createMonthlyCostReports({
       for (const month of months) {
         const startDate = new Date(year, month, 1);
         const endDate = new Date(year, month + 1, 0, 23, 59, 59, 999);
+        const intervalName = startDate.toLocaleString('en-US', {
+          month: 'long',
+          year: 'numeric',
+        });
         try {
           const { actualPrice } = await getUsageInCentByApiKeyId({
             apiKeyId: apiKey.id,
             startDate,
             endDate,
-          });
-
-          const intervalName = startDate.toLocaleString('en-US', {
-            month: 'long',
-            year: 'numeric',
           });
 
           result.push({
@@ -44,16 +44,13 @@ export async function createMonthlyCostReports({
             limitInCent: apiKey.limitInCent,
             usageInCent: actualPrice,
           });
-        } catch (error) {
-          console.error(
-            `Error getting usage for API key ${apiKey.id} in ${startDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })}:`,
-            error,
+        } catch (err) {
+          logger.error(
+            { err, apiKeyId: apiKey.id, intervalName },
+            `Error getting usage for API key in interval`,
           );
           result.push({
-            interval: startDate.toLocaleString('en-US', {
-              month: 'long',
-              year: 'numeric',
-            }),
+            interval: intervalName,
             project: project.name,
             apiKey: apiKey.name,
             limitInCent: apiKey.limitInCent,

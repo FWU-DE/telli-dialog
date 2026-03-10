@@ -15,7 +15,7 @@ export async function handler(request: FastifyRequest, reply: FastifyReply): Pro
   const { organizationId, year } = z
     .object({
       organizationId: z.string(),
-      year: z.coerce.number().default(2025),
+      year: z.coerce.number(),
     })
     .parse(request.params);
 

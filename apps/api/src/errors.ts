@@ -1,4 +1,5 @@
 import { ZodError } from 'zod';
+import { logger } from '@/logger';
 
 export class UnauthorizedError extends Error {
   constructor(message: string = 'Unauthorized') {
@@ -22,7 +23,7 @@ export class InvalidRequestBodyError extends Error {
 }
 
 export function handleApiError(error: unknown) {
-  console.error('API ERROR:', JSON.stringify(error));
+  logger.error(error, 'API ERROR');
   if (error instanceof UnauthorizedError) {
     return { statusCode: 401, message: error.message };
   } else if (error instanceof NotFoundError) {
