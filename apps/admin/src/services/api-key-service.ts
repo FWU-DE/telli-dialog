@@ -31,7 +31,6 @@ export async function getSingleApiKey(
 }
 
 export async function createApiKey(
-  organizationId: string,
   projectId: string,
   apiKeyData: CreateApiKey,
 ) {

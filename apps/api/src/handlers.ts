@@ -4,6 +4,7 @@ import { handler as v1_models_getHandler } from './routes/(app)/v1/models/get';
 import { handler as v1_usage_getHandler } from './routes/(app)/v1/usage/get';
 import { handler as v1_embeddings_postHandler } from './routes/(app)/v1/embeddings/post';
 import { handler as v1_images_generations_postHandler } from './routes/(app)/v1/images/generations/post';
+import { handler as v1_admin_report_getHandler } from './routes/(app)/v1/admin/organizations/$organizationId/report/get';
 import { completionRequestSchemaSwagger } from './routes/(app)/v1/chat/completions/swagger-schemas';
 import { modelRequestSwaggerSchema } from './routes/(app)/v1/models/swagger-schemas';
 import { usageRequestSwaggerSchema } from './routes/(app)/v1/usage/swagger-schemas';
@@ -75,6 +76,12 @@ export const routeHandlerDefinitions: Array<RouteHandlerDefinition> = [
     method: 'POST',
     schema: imageGenerationRequestSwaggerSchema,
     handler: v1_images_generations_postHandler,
+  },
+  {
+    path: '/v1/admin/organizations/:organizationId/report/:year',
+    method: 'GET',
+    schema: { hide: true },
+    handler: v1_admin_report_getHandler,
   },
 ];
 
