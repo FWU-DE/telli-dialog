@@ -1,6 +1,7 @@
 import { db } from '..';
 import { CompletionUsageInsertModel, completionUsageTrackingTable, llmModelTable } from '../schema';
 import { and, eq, gte, sum } from 'drizzle-orm';
+import { getStartOfCurrentMonth } from '../api-utils';
 import {
   calculatePriceInCentByTextModelAndUsage,
   calculatePriceInCentByEmbeddingModelAndUsage,
@@ -53,9 +54,7 @@ export async function dbGetCompletionUsageCostsSinceStartOfCurrentMonth({
 }: {
   apiKeyId: string;
 }) {
-  const startOfMonth = new Date();
-  startOfMonth.setDate(1);
-  startOfMonth.setHours(0, 0, 0, 0);
+  const startOfMonth = getStartOfCurrentMonth();
 
   const completionUsage = await db
     .select({ total: sum(completionUsageTrackingTable.costsInCent) })

@@ -13,9 +13,9 @@ import { isDateBefore } from '../date';
 import { and, eq, getTableColumns, inArray } from 'drizzle-orm';
 
 export async function dbLookupApiKeyByFullKey(fullApiKey: string) {
-  const [sk, keyId, secretKey] = fullApiKey.split('_');
+  const [sk, keyId, _secretKey] = fullApiKey.split('_');
 
-  if (sk !== 'sk' || keyId === undefined || secretKey === undefined) {
+  if (sk !== 'sk' || keyId === undefined || _secretKey === undefined) {
     return { valid: false as const, reason: 'Malformed api key' };
   }
 

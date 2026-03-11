@@ -59,26 +59,22 @@ async function seedDatabase() {
     await localDb
       .insert(federalStateTable)
       .values(await getFederalStates())
-      .onConflictDoNothing()
-      .returning();
+      .onConflictDoNothing();
 
     await localDb
       .insert(schoolTable)
       .values(await getSchools())
-      .onConflictDoNothing()
-      .returning();
+      .onConflictDoNothing();
 
     await localDb
       .insert(llmModelTable)
       .values(await getLlmModels())
-      .onConflictDoNothing()
-      .returning();
+      .onConflictDoNothing();
 
     await localDb
       .insert(federalStateLlmModelMappingTable)
       .values(await getFederalStateLlmModelMappings())
-      .onConflictDoNothing()
-      .returning();
+      .onConflictDoNothing();
 
     await insertDummyUser();
     await Promise.all([
@@ -98,7 +94,7 @@ async function seedDatabase() {
 try {
   await seedDatabase();
   console.log('Seeding completed');
-  process.exit(0);
+  await pool.end();
 } catch (error) {
   console.error('Seeding failed:', error);
   process.exit(1);
