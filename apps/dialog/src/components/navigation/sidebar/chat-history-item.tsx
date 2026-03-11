@@ -30,6 +30,7 @@ import { useForm } from 'react-hook-form';
 import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@ui/components/Input';
+import { useTranslations } from 'next-intl';
 
 const renameChatHistorySchema = z.object({
   name: z.string().min(1).max(256),
@@ -51,6 +52,7 @@ export function ChatHistoryItem({
   const [isEditable, setIsEditable] = useState(false);
   const pathname = usePathname();
   const { isMobile, setOpenMobile } = useSidebar();
+  const t = useTranslations('sidebar');
   const renameForm = useForm({
     resolver: zodResolver(renameChatHistorySchema),
     defaultValues: { name: conversation.name ?? '' },
@@ -93,7 +95,7 @@ export function ChatHistoryItem({
 
           <button
             type="submit"
-            aria-label="Umbenennung speichern"
+            aria-label={t('rename-save')}
             className="px-2 border border-foreground rounded-md"
           >
             <CheckSquareIcon className="h-4 w-4" />
@@ -101,7 +103,7 @@ export function ChatHistoryItem({
           <button
             type="button"
             onClick={onAbort}
-            aria-label="Umbenennung abbrechen"
+            aria-label={t('rename-cancel')}
             className="px-2 border border-foreground rounded-md"
           >
             <XSquareIcon className="h-4 w-4" />
@@ -127,7 +129,7 @@ export function ChatHistoryItem({
             <DropdownMenuTrigger asChild>
               <SidebarMenuAction
                 showOnHover={true}
-                aria-label="Konversationsaktionen"
+                aria-label={t('conversation-actions')}
                 data-testid="conversation-actions"
               >
                 <DotsThreeIcon />
@@ -135,7 +137,7 @@ export function ChatHistoryItem({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem onClick={() => setIsEditable(true)}>
-                <span>Umbenennen</span>
+                <span>{t('rename-chat')}</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 variant="destructive"
@@ -143,7 +145,7 @@ export function ChatHistoryItem({
                 onClick={() => onDeleteConversation(conversation.id)}
               >
                 <TrashIcon />
-                <span>Löschen</span>
+                <span>{t('delete-chat')}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

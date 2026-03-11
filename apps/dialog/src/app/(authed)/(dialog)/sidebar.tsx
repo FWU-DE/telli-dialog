@@ -150,7 +150,7 @@ export default function DialogSidebar({
               )}
             >
               <FourBoxes className="w-6 h-5" />
-              <span className="text-base">{t('custom-gpt')}</span>
+              <span className="text-base">{t('assistants')}</span>
             </div>
           </Link>
           <hr className="w-full my-2" />
@@ -167,7 +167,7 @@ export default function DialogSidebar({
                         )}
                       >
                         <SharedChatIcon className="w-6 h-6" />
-                        <span className="text-base">{t('class-chats')}</span>
+                        <span className="text-base">{t('learning-scenarios')}</span>
                       </div>
                     </Link>
                   )}
