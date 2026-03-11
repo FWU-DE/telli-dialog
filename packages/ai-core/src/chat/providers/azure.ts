@@ -79,14 +79,13 @@ export function constructAzureChatCompletionStreamFn(model: AiModel): TextStream
 export function constructAzureResponsesStreamFn(model: AiModel): TextStreamFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function* getAzureTextStream({ messages, maxTokens, temperature }, onComplete) {
+  return async function* getAzureTextStream({ messages, maxTokens }, onComplete) {
     const response = await client.responses.create(
       {
         model: deployment,
         input: toOpenAIResponsesInput(messages),
         stream: true,
         max_output_tokens: maxTokens,
-        temperature,
         ...model.additionalParameters,
       },
       {
@@ -161,14 +160,13 @@ export function constructAzureChatCompletionGenerationFn(model: AiModel): TextGe
 export function constructAzureResponsesGenerationFn(model: AiModel): TextGenerationFn {
   const { client, deployment } = createAzureClient(model);
 
-  return async function getAzureTextGeneration({ messages, maxTokens, temperature }) {
+  return async function getAzureTextGeneration({ messages, maxTokens }) {
     const response = await client.responses.create(
       {
         model: deployment,
         input: toOpenAIResponsesInput(messages),
         stream: false,
         max_output_tokens: maxTokens,
-        temperature,
       },
       {
         path: `/openai/responses`,
