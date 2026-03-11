@@ -6,19 +6,22 @@ import { CustomGptSelectModel } from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { constructBaseCharacterSystemPrompt } from '../character/system-prompt';
-import { constructRagContext, LANGUAGE_GUIDELINES } from '../utils/system-prompt';
+import { constructRagContext, LANGUAGE_GUIDELINES, TOOL_GUIDELINES } from '../utils/system-prompt';
 
 function constructTelliSystemPrompt() {
   return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. 
 Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. 
 Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. 
 Heute ist der ${formatDateToGermanTimestamp(new Date())}.
-${LANGUAGE_GUIDELINES}`;
+${LANGUAGE_GUIDELINES}
+${TOOL_GUIDELINES}
+`;
 }
 
 function constructCustomGptSystemPrompt(customGpt: CustomGptSelectModel) {
   return `Du bist ein hilfreicher Assistent, der in einer Schule eingesetzt wird. Dein Name ist ${customGpt.name}.
 ${LANGUAGE_GUIDELINES}
+${TOOL_GUIDELINES}
 ${customGpt.description ? `Dein Ziel ist es hierbei zu assistieren: ${customGpt.description}` : ''}
 ${customGpt.specification ? `Deine Aufgabe ist insbesondere: ${customGpt.specification}` : ''}
 `;
@@ -38,6 +41,7 @@ telli unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen u
 telli wird vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben.
 Heute ist der ${formatDateToGermanTimestamp(new Date())}.
 ${LANGUAGE_GUIDELINES}
+${TOOL_GUIDELINES}
 
 Informationen zu telli:
 Der Hilfe-Assistent wird durch das Öffnen eines neuen Chats beendet.

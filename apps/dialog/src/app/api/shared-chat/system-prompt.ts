@@ -1,6 +1,11 @@
 import { type LearningScenarioSelectModel } from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
-import { constructRagContext, formatList, LANGUAGE_GUIDELINES } from '../utils/system-prompt';
+import {
+  constructRagContext,
+  formatList,
+  LANGUAGE_GUIDELINES,
+  TOOL_GUIDELINES,
+} from '../utils/system-prompt';
 
 export function constructLearningScenarioSystemPrompt({
   sharedChat,
@@ -13,6 +18,7 @@ export function constructLearningScenarioSystemPrompt({
 
   return `Du bist ein KI-Chatbot, der in einer Schulklasse eingesetzt wird, um Schülerinnen und Schüler zu unterstützen.
 ${LANGUAGE_GUIDELINES}
+${TOOL_GUIDELINES}
  
 ${formatList('## Kontext', [
   {

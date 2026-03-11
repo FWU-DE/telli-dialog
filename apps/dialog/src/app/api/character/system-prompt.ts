@@ -1,11 +1,17 @@
 import { CharacterSelectModel } from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
-import { constructRagContext, formatList, LANGUAGE_GUIDELINES } from '../utils/system-prompt';
+import {
+  constructRagContext,
+  formatList,
+  LANGUAGE_GUIDELINES,
+  TOOL_GUIDELINES,
+} from '../utils/system-prompt';
 
 export function constructBaseCharacterSystemPrompt(character: CharacterSelectModel) {
   return `Du bist ${character.name}. ${character.description}
   
 ${LANGUAGE_GUIDELINES}
+${TOOL_GUIDELINES}
 
 ${formatList('## Kontext', [
   {
