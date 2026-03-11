@@ -15,7 +15,7 @@ import {
 } from '@ui/components/DropdownMenu';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, type ReactNode } from 'react';
+import { cloneElement, type ReactElement, useState } from 'react';
 import { ConversationModel } from '@shared/db/types';
 import {
   CheckSquareIcon,
@@ -80,6 +80,8 @@ export function ChatHistoryItem({
     }
   }
 
+  const iconWithStyle = cloneElement(icon, { weight: isActive() ? 'bold' : 'regular' });
+
   return (
     <SidebarMenuItem>
       {isEditable && (
@@ -109,9 +111,14 @@ export function ChatHistoryItem({
 
       {!isEditable && (
         <>
-          <SidebarMenuButton asChild isActive={isActive()} className="gap-1 text-sm text-ellipsis">
+          <SidebarMenuButton
+            asChild
+            isActive={isActive()}
+            variant="history"
+            className="gap-1 text-ellipsis"
+          >
             <Link href={href} onClick={closeOnMobile} prefetch={false}>
-              {icon}
+              {iconWithStyle}
               <span>{conversation.name}</span>
             </Link>
           </SidebarMenuButton>
@@ -162,7 +169,9 @@ function buildConversationUrl({ conversation }: { conversation: ConversationMode
   return `/d/${conversation.id}`;
 }
 
-function determineConversationIcon(conversation: ConversationModel): ReactNode {
+function determineConversationIcon(
+  conversation: ConversationModel,
+): ReactElement<{ weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' }> {
   switch (conversation.type) {
     case 'chat':
       if (conversation.characterId) {
