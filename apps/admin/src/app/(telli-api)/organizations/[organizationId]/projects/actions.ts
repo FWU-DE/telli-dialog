@@ -1,20 +1,20 @@
 'use server';
 import { requireAdminAuth } from '@/auth/requireAdminAuth';
-import { fetchProjects, fetchSingleProject, createProject } from '@/services/project-service';
-import { fetchApiKeys } from '@/services/api-key-service';
+import { getProjects, getSingleProject, createProject } from '@/services/project-service';
+import { getApiKeys } from '@/services/api-key-service';
 import { Project } from '@/types/project';
 import { ApiKey } from '@/types/api-key';
 
 export async function getProjectsAction(organizationId: string) {
   await requireAdminAuth();
 
-  return fetchProjects(organizationId);
+  return getProjects(organizationId);
 }
 
 export async function getProjectByIdAction(organizationId: string, projectId: string) {
   await requireAdminAuth();
 
-  return fetchSingleProject(organizationId, projectId);
+  return getSingleProject(organizationId, projectId);
 }
 
 export async function createProjectAction(
@@ -45,5 +45,5 @@ export async function getApiKeysAction(
 ): Promise<ApiKey[]> {
   await requireAdminAuth();
 
-  return fetchApiKeys(organizationId, projectId);
+  return getApiKeys(organizationId, projectId);
 }

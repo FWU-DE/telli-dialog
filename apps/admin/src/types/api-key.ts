@@ -7,7 +7,7 @@ export const apiKeySchema = z.object({
   state: z.literal('active').or(z.literal('inactive')).or(z.literal('deleted')),
   limitInCent: z.number().nonnegative(),
   createdAt: z.date().readonly(),
-  expiresAt: z.date().optional(),
+  expiresAt: z.date().nullable(),
 });
 
 export type ApiKey = z.infer<typeof apiKeySchema>;

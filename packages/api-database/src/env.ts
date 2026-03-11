@@ -9,6 +9,6 @@ export const env = createEnv({
     databaseUrl: z.string(),
   },
   runtimeEnv: {
-    databaseUrl: process.env.DATABASE_URL,
+    databaseUrl: process.env.API_DATABASE_URL ?? process.env.DATABASE_URL,
   },
 });
