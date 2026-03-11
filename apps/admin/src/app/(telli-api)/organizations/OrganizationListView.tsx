@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { fetchOrganizations } from '../../../services/organization-service';
+import { getOrganizations } from '../../../services/organization-service';
 import {
   Table,
   TableBody,
@@ -10,7 +10,7 @@ import {
 } from '@ui/components/Table';
 
 export async function OrganizationListView() {
-  const organizations = await fetchOrganizations();
+  const organizations = await getOrganizations();
 
   return (
     <Table>

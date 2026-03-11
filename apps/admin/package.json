@@ -20,6 +20,7 @@
     "@opentelemetry/api": "1.9.0",
     "@sentry/nextjs": "10.40.0",
     "@t3-oss/env-nextjs": "0.13.10",
+    "@telli/api-database": "workspace:*",
     "@telli/ui": "workspace:*",
     "@telli/shared": "workspace:*",
     "lucide-react": "0.575.0",

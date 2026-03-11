@@ -57,6 +57,15 @@ export async function getTextModel(request: APIRequestContext) {
   );
 }
 
+/** Returns a reasoning model. Throws if none available. */
+export async function getReasoningModel(request: APIRequestContext) {
+  return findModel(
+    request,
+    (m) => !m.isDeleted && m.name.includes('gpt-5'),
+    'No reasoning model available',
+  );
+}
+
 /** Returns an embedding model. Throws if none available. */
 export async function getEmbeddingModel(request: APIRequestContext) {
   return findModel(

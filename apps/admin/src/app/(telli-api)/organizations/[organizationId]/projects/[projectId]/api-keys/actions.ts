@@ -2,10 +2,10 @@
 
 import { requireAdminAuth } from '@/auth/requireAdminAuth';
 import {
-  fetchApiKeys,
+  getApiKeys,
   createApiKey,
   updateApiKey,
-  fetchSingleApiKey,
+  getSingleApiKey,
 } from '@/services/api-key-service';
 import { ApiKey, ApiKeyWithPlainKey, CreateApiKey, UpdateApiKey } from '@/types/api-key';
 
@@ -15,7 +15,7 @@ export async function getApiKeysAction(
 ): Promise<ApiKey[]> {
   await requireAdminAuth();
 
-  return fetchApiKeys(organizationId, projectId);
+  return getApiKeys(organizationId, projectId);
 }
 
 export async function getApiKeyByIdAction(
@@ -25,7 +25,7 @@ export async function getApiKeyByIdAction(
 ): Promise<ApiKey> {
   await requireAdminAuth();
 
-  return fetchSingleApiKey(organizationId, projectId, apiKeyId);
+  return getSingleApiKey(organizationId, projectId, apiKeyId);
 }
 
 export async function createApiKeyAction(
@@ -40,7 +40,7 @@ export async function createApiKeyAction(
   }
 
   try {
-    return await createApiKey(organizationId, projectId, data);
+    return await createApiKey(projectId, data);
   } catch {
     throw new Error('Fehler beim Erstellen des API-Schlüssels');
   }
