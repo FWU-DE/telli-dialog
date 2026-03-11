@@ -1,5 +1,5 @@
 import { InvalidModelError } from '../errors';
-import { dbGetModelById, dbGetModelByNameAndApiKeyId } from '../api-db/functions';
+import { dbGetModelById, dbGetModelByNameAndApiKeyId } from '@telli/api-database';
 import { AiModel } from '../images/types';
 import type { AiModel as TextAiModel } from '../chat/types';
 import type { AiModel as EmbeddingAiModel } from '../embeddings/types';

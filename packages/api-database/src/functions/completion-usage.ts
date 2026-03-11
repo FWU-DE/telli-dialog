@@ -1,6 +1,6 @@
 import { db } from '..';
 import { CompletionUsageInsertModel, completionUsageTrackingTable, llmModelTable } from '../schema';
-import { eq } from 'drizzle-orm';
+import { and, eq, gte, sum } from 'drizzle-orm';
 import {
   calculatePriceInCentByTextModelAndUsage,
   calculatePriceInCentByEmbeddingModelAndUsage,
@@ -46,4 +46,26 @@ export async function dbCreateCompletionUsage(completionUsage: CompletionUsageIn
   )[0];
 
   return insertedCompletionUsage;
+}
+
+export async function dbGetCompletionUsageCostsSinceStartOfCurrentMonth({
+  apiKeyId,
+}: {
+  apiKeyId: string;
+}) {
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const completionUsage = await db
+    .select({ total: sum(completionUsageTrackingTable.costsInCent) })
+    .from(completionUsageTrackingTable)
+    .where(
+      and(
+        eq(completionUsageTrackingTable.apiKeyId, apiKeyId),
+        gte(completionUsageTrackingTable.createdAt, startOfMonth),
+      ),
+    );
+
+  return Number(completionUsage[0]?.total || 0);
 }

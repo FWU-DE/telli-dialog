@@ -4,7 +4,7 @@ import {
   imageGenerationUsageTrackingTable,
   llmModelTable,
 } from '../schema';
-import { eq } from 'drizzle-orm';
+import { and, eq, gte, sum } from 'drizzle-orm';
 
 export async function dbCreateImageGenerationUsage(
   imageGenerationUsage: ImageGenerationUsageInsertModel,
@@ -39,4 +39,26 @@ export async function dbCreateImageGenerationUsage(
   )[0];
 
   return insertedImageGenerationUsage;
+}
+
+export async function dbGetImageGenerationUsageCostsSinceStartOfCurrentMonth({
+  apiKeyId,
+}: {
+  apiKeyId: string;
+}) {
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const imageUsage = await db
+    .select({ total: sum(imageGenerationUsageTrackingTable.costsInCent) })
+    .from(imageGenerationUsageTrackingTable)
+    .where(
+      and(
+        eq(imageGenerationUsageTrackingTable.apiKeyId, apiKeyId),
+        gte(imageGenerationUsageTrackingTable.createdAt, startOfMonth),
+      ),
+    );
+
+  return Number(imageUsage[0]?.total || 0);
 }

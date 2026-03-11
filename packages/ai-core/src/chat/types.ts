@@ -1,4 +1,4 @@
-import { LlmModel } from '../api-db';
+import { LlmModel } from '@telli/api-database';
 
 /**
  * Attachment type for images in messages.

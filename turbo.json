@@ -70,11 +70,11 @@
     },
     "db:migrate": {
       "dependsOn": ["^db:migrate"],
-      "env": ["DATABASE_URL"]
+      "env": ["API_DATABASE_URL"]
     },
     "db:seed": {
       "dependsOn": ["^db:seed"],
-      "env": ["DATABASE_URL"]
+      "env": ["API_DATABASE_URL"]
     },
     "db:seed:from-stage": {
       "cache": false,

@@ -1,4 +1,4 @@
-import { dbGetApiKey } from '../api-db/functions';
+import { dbLookupApiKeyByFullKey } from '@telli/api-database';
 
 /**
  * Looks up API key IDs by federal state ID.
@@ -14,7 +14,7 @@ export async function lookupApiKeys(apiKeysByState: Record<string, string>) {
   const result: Record<string, string | null> = {};
 
   for (const [federalStateId, decryptedApiKey] of Object.entries(apiKeysByState)) {
-    const apiKey = await dbGetApiKey(decryptedApiKey);
+    const apiKey = await dbLookupApiKeyByFullKey(decryptedApiKey);
 
     if (apiKey && 'id' in apiKey) {
       result[federalStateId] = apiKey.id;

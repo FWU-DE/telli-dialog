@@ -141,14 +141,14 @@ jobs:
             elapsed=$((elapsed + 1))
           done
         env:
-          DATABASE_URL: ${{ env.API_DATABASE_URL }}
+          API_DATABASE_URL: ${{ env.API_DATABASE_URL }}
           PORT: 3002
 
       - name: Seed telli-api database
-        # db:seed:telli-api will print the generated API KEY on the console
+        # db:seed will print the generated API KEY on the console
         # The output is captured in GITHUB_ENV for seeding telli-dialog
         run: |
-          pnpm --filter @telli/ai-core db:seed:telli-api | tee /tmp/out.txt
+          pnpm --filter @telli/api-database db:seed | tee /tmp/out.txt
           grep -E '^DE_[A-Z0-9_]*_API_KEY=' /tmp/out.txt >> "$GITHUB_ENV"
 
       - name: Run migrations and seed database (if applicable)

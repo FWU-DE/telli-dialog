@@ -38,7 +38,7 @@ export const env = createEnv({
     apiName: process.env.API_NAME,
     apiBaseUrl: process.env.API_BASE_URL,
     apiKey: process.env.API_KEY,
-    databaseUrl: process.env.DATABASE_URL,
+    databaseUrl: process.env.API_DATABASE_URL,
     logLevel: process.env.LOG_LEVEL,
     nodeEnv: process.env.NODE_ENV,
     otelMetricExportInterval: process.env.OTEL_METRIC_EXPORT_INTERVAL,

@@ -1,4 +1,4 @@
-import { LlmModel } from '../api-db';
+import { LlmModel } from '@telli/api-database';
 
 export type ImageResponse = {
   // Base64-encoded images

@@ -1,4 +1,4 @@
-import { LlmModel } from '../api-db';
+import { LlmModel } from '@telli/api-database';
 
 export type EmbeddingUsage = {
   promptTokens: number;

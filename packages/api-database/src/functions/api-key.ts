@@ -12,6 +12,17 @@ import { db, dbGetProjectById } from '..';
 import { isDateBefore } from '../date';
 import { and, eq, getTableColumns, inArray } from 'drizzle-orm';
 
+export async function dbLookupApiKeyByFullKey(fullApiKey: string) {
+  const [sk, keyId, secretKey] = fullApiKey.split('_');
+
+  if (sk !== 'sk' || keyId === undefined || secretKey === undefined) {
+    return { valid: false as const, reason: 'Malformed api key' };
+  }
+
+  const apiKey = (await db.select().from(apiKeyTable).where(eq(apiKeyTable.keyId, keyId)))[0];
+  return apiKey;
+}
+
 export async function dbCreateJustTheApiKey(
   apiKey: Omit<ApiKeyInsertModel, 'secretHash' | 'keyId'>,
 ) {

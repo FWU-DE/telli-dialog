@@ -1,7 +1,21 @@
 import { getStartOfCurrentMonth, getEndOfCurrentMonth, errorifyAsyncFn } from '../api-utils';
 import { ApiKeyModel, db, dbGetApiKeyById } from '..';
 import { and, between, eq, sum } from 'drizzle-orm';
-import { completionUsageTrackingTable, imageGenerationUsageTrackingTable } from '../schema';
+import {
+  apiKeyTable,
+  completionUsageTrackingTable,
+  imageGenerationUsageTrackingTable,
+} from '../schema';
+
+export async function dbGetApiKeyLimit(apiKeyId: string) {
+  const apiKey = await db
+    .select({ limitInCent: apiKeyTable.limitInCent })
+    .from(apiKeyTable)
+    .where(eq(apiKeyTable.id, apiKeyId))
+    .limit(1);
+
+  return apiKey[0];
+}
 
 export const checkLimitsByApiKeyIdWithResult = errorifyAsyncFn(checkLimitsByApiKeyId);
 // given an api key id, checks whether the usage is in the budget for the current month
