@@ -47,7 +47,8 @@
     "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
     "PORT",
     "SENTRY_PROFILE_SESSION_SAMPLE_RATE",
-    "STAGE_DATABASE_URL"
+    "STAGE_DATABASE_URL",
+    "LOG_LEVEL"
   ],
   "tasks": {
     "build": {

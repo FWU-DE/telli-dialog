@@ -42,7 +42,7 @@ export async function handler(request: FastifyRequest, reply: FastifyReply): Pro
     reply.status(200).send(response);
   } catch (error) {
     if (!handleAiCoreError(reply, error)) {
-      console.error('Error generating image:', error);
+      reply.log.error(error, 'Error generating image');
       reply.status(500).send({
         error: 'Error generating image',
         details: error instanceof Error ? error.message : 'An error occurred',

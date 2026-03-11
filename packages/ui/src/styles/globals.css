@@ -64,7 +64,7 @@
 
     --border: #e2e8f0ff;
     --input: #e2e8f0ff;
-    --ring: #020817ff;
+    --ring: var(--primary);
 
     --sidebar-background: #fafafaff;
     --sidebar-accent: #e8e4ee;
@@ -145,12 +145,9 @@
 @theme inline {
   --spacing: 0.25rem;
 
-  --breakpoint-xs: 30rem; /* 480px */
+  --breakpoint-*: initial; /* reset all predefined breakpoints */
   --breakpoint-sm: 40rem; /* 640px */
-  --breakpoint-md: 48rem; /* 768px */
   --breakpoint-lg: 64rem; /* 1024px */
-  --breakpoint-xl: 80rem; /* 1280px */
-  --breakpoint-2xl: 96rem; /* 1536px */
 
   --shadow-dropdown: 0px 4px 10px 0px rgba(0, 41, 102, 0.1);
   --shadow-3xl: 0 4px 9px 0px rgba(0, 41, 102, 0.2); /* only used in collapsible-sidebar.tsx */
@@ -160,6 +157,9 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring); /* focus ring */
+
+  --color-sidebar-input: #7575751a; /* background color for chat search input */
+  --color-sidebar-input-foreground: #5b5b5b; /* text color for chat search input */
 }
 
 @layer components {

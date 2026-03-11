@@ -43,7 +43,7 @@ export async function handler(request: FastifyRequest, reply: FastifyReply): Pro
     reply.status(200).send(result);
   } catch (error) {
     if (!handleAiCoreError(reply, error)) {
-      console.error('Error generating embedding:', error);
+      reply.log.error(error, 'Error generating embedding');
       reply.status(500).send({
         error: 'Error generating embedding',
         details: error instanceof Error ? error.message : 'An error occurred',

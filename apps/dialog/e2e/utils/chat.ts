@@ -32,24 +32,18 @@ export async function uploadFile(page: Page, filePath: string) {
  * Playwright and firefox where hover actions are not properly registered.
  */
 export async function deleteChat(page: Page, conversationId: string) {
-  try {
-    const label = page
-      .locator('div', { has: page.locator(`a[href="/d/${conversationId}"]`) })
-      .last();
+  const listItem = page.locator(`li:has(a[href="/d/${conversationId}"])`).first();
 
-    // Ensure element is in viewport
-    await label.scrollIntoViewIfNeeded();
-    await expect(label).toBeVisible();
+  // Ensure element is in viewport
+  await listItem.scrollIntoViewIfNeeded();
+  await expect(listItem).toBeVisible();
 
-    await label.hover();
+  await listItem.hover();
 
-    const dropDownMenu = label.getByLabel('Conversation actions');
-    await expect(dropDownMenu).toBeVisible();
-    await dropDownMenu.click();
+  const dropDownMenu = listItem.getByTestId('conversation-actions');
+  await expect(dropDownMenu).toBeVisible();
+  await dropDownMenu.click();
 
-    await page.getByRole('menuitem', { name: 'Löschen' }).click();
-    await waitForToast(page);
-  } catch {
-    console.error('Error deleting chat. This is a known issue with firefox.');
-  }
+  await page.getByTestId('delete-conversation').click();
+  await waitForToast(page);
 }

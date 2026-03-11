@@ -10,9 +10,6 @@ const config = {
       padding: '2rem',
     },
     extend: {
-      screens: {
-        xs: '480px',
-      },
       listStyleType: {
         square: 'square',
         roman: 'upper-roman',

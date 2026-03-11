@@ -1,6 +1,7 @@
 import {
   dbGetConversationById,
   dbGetConversationMessages,
+  dbGetConversations,
   dbUpdateConversationTitle,
 } from '@shared/db/functions/chat';
 import {
@@ -9,6 +10,16 @@ import {
 } from '@shared/db/functions/conversation';
 import { ConversationModel } from '@shared/db/types';
 import { ForbiddenError, NotFoundError } from '@shared/error';
+
+/**
+ * Returns all conversations that belong to the user for the chat history.
+ *
+ * @param userId The ID of the user.
+ * @returns A promise that resolves to an array of conversations.
+ */
+export async function getChatHistory(userId: string): Promise<ConversationModel[]> {
+  return await dbGetConversations(userId);
+}
 
 /**
  * Get a conversation.

@@ -13,7 +13,6 @@ import {
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarMenu,
@@ -29,7 +28,10 @@ import { MyTelliPoints } from './my-telli-points';
 import { FederalStateModel } from '@shared/federal-states/types';
 import { UserModel } from '@shared/auth/user-model';
 import { useSidebarVisibility } from './sidebar-provider';
-import { useOutsideClick } from '@/components/hooks/use-outside-click';
+import { ChatHistory } from './chat-history';
+import React from 'react';
+import { IconButton } from '@ui/components/IconButton';
+import Link from 'next/link';
 
 type AppSidebarProps = {
   federalState: FederalStateModel;
@@ -44,39 +46,55 @@ export function AppSidebar({
   currentModelCosts,
   userPriceLimit,
 }: AppSidebarProps) {
-  // Todo: After ui redesign, we should switch to useSidebar()
+  // Todo TD-1004: After ui redesign, we should switch to useSidebar()
   // const { toggleSidebar } = useSidebar();
   const { close, isOpen, toggle } = useSidebarVisibility();
-  const { isMobile } = useSidebar();
+  const { isMobile, openMobile } = useSidebar();
   const { resolvedTheme, setTheme } = useTheme();
   const t = useTranslations('sidebar');
+  const isDarkTheme = resolvedTheme === 'dark';
 
   function toggleTheme() {
     const currentTheme = resolvedTheme ?? 'light';
     setTheme(currentTheme === 'light' ? 'dark' : 'light');
   }
 
-  const ref = useOutsideClick<HTMLDivElement>(() => {
-    if (isOpen && isMobile && typeof window !== 'undefined') {
+  React.useEffect(() => {
+    if (isMobile && isOpen && !openMobile) {
       close();
     }
-  });
+  }, [close, isMobile, isOpen, openMobile]);
 
   return (
     <Sidebar>
-      <div ref={ref} className="p-4">
+      <div className="flex h-full min-h-0 flex-col p-2">
         <SidebarHeader>
-          <div className="flex justify-between">
-            <TelliLogo className="h-7 text-primary" />
-            {/* Todo: create a separate component that is a button with click handler and icon, hover style, focusable, aria-label, etc. */}
-            <SidebarSimpleIcon
-              className="w-8 h-8 p-1 text-primary hover:bg-primary-hover rounded-enterprise-sm"
+          <div className="p-2 flex justify-end gap-2">
+            <Link
+              href="/"
+              aria-label="Startseite"
+              className="mr-auto rounded outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <TelliLogo className="h-7 text-primary" />
+            </Link>
+            <IconButton
+              onClick={toggleTheme}
+              aria-label={isDarkTheme ? 'Helles Design aktivieren' : 'Dunkles Design aktivieren'}
+              aria-pressed={isDarkTheme}
+            >
+              <MoonStarsIcon />
+            </IconButton>
+            <IconButton
               onClick={toggle}
-            />
+              aria-label={isOpen ? 'Seitenleiste schliessen' : 'Seitenleiste oeffnen'}
+              aria-expanded={isOpen}
+            >
+              <SidebarSimpleIcon />
+            </IconButton>
           </div>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarGroup className="px-0">
+          <SidebarGroup>
             <SidebarMenu>
               <AppMenuItem href="/" icon={<ChatTextIcon />} text="Neuer Chat" />
               {federalState.featureToggles?.isImageGenerationEnabled && (
@@ -118,11 +136,11 @@ export function AppSidebar({
               userPriceLimit={userPriceLimit}
             />
           </SidebarGroup>
-          <SidebarGroup>Chat History</SidebarGroup>
+
+          <SidebarGroup>
+            <ChatHistory />
+          </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter>
-          <MoonStarsIcon onClick={toggleTheme} />
-        </SidebarFooter>
       </div>
     </Sidebar>
   );

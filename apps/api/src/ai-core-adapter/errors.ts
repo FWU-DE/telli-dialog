@@ -34,7 +34,7 @@ export function handleAiCoreError(reply: FastifyReply, error: unknown): boolean 
   }
 
   if (ProviderConfigurationError.is(error)) {
-    console.error('Provider configuration error:', error);
+    reply.log.error(error, 'Provider configuration error');
     reply.status(500).send({
       error: 'Provider configuration error',
       details: (error as Error).message,
@@ -43,7 +43,7 @@ export function handleAiCoreError(reply: FastifyReply, error: unknown): boolean 
   }
 
   if (AiGenerationError.is(error)) {
-    console.error('AI generation error:', error);
+    reply.log.error(error, 'AI generation error');
 
     // Check for quota exceeded message (thrown as AiGenerationError in billing checks)
     if ((error as Error).message.includes('exceeded its monthly quota')) {

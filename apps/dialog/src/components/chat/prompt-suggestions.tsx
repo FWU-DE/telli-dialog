@@ -15,7 +15,7 @@ export default function PromptSuggestions({
   return (
     <div
       className={cn(
-        'relative grid gap-2 xs:mb-2 xs:grid-cols-1 lg:mb-4 lg:grid-cols-2 lg:gap-4',
+        'relative grid gap-2 mb-2 grid-cols-1 lg:mb-4 lg:grid-cols-2 lg:gap-4',
         suggestions.length === 1 && 'grid-cols-1',
       )}
     >

@@ -14,6 +14,16 @@ export const env = createEnv({
     apiBaseUrl: z.string().default('http://127.0.0.1:3002'),
     apiKey: z.string(),
     databaseUrl: z.string(),
+    logLevel: z
+      .union([
+        z.literal('fatal'),
+        z.literal('error'),
+        z.literal('warning'),
+        z.literal('info'),
+        z.literal('debug'),
+        z.literal('trace'),
+      ])
+      .default('info'),
     nodeEnv: z.string().default('development'),
     otelMetricExportInterval: z.coerce.number().default(60000),
     otelMetricExportTimeout: z.coerce.number().default(30000),
@@ -29,6 +39,7 @@ export const env = createEnv({
     apiBaseUrl: process.env.API_BASE_URL,
     apiKey: process.env.API_KEY,
     databaseUrl: process.env.DATABASE_URL,
+    logLevel: process.env.LOG_LEVEL,
     nodeEnv: process.env.NODE_ENV,
     otelMetricExportInterval: process.env.OTEL_METRIC_EXPORT_INTERVAL,
     otelMetricExportTimeout: process.env.OTEL_METRIC_EXPORT_TIMEOUT,

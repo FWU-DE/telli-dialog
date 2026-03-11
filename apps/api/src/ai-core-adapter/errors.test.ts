@@ -22,6 +22,9 @@ function createMockReply() {
   const reply = {
     statusCode: 0,
     body: undefined as unknown,
+    log: {
+      error: vi.fn(),
+    },
     status(code: number) {
       reply.statusCode = code;
       return reply;

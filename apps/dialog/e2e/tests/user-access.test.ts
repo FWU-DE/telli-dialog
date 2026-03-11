@@ -12,7 +12,7 @@ const featureToggleDefaults = {
   isSharedChatEnabled: true,
   isShareTemplateWithSchoolEnabled: true,
   isImageGenerationEnabled: true,
-  isNewUiDesignEnabled: false, // Todo: use new UI design as soon as it is finished
+  isNewUiDesignEnabled: true,
 };
 
 test('login as student with students disabled', async ({ page }) => {
