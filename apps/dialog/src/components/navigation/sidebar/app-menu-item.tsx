@@ -4,11 +4,11 @@ import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { SidebarMenuButton, SidebarMenuItem, useSidebar } from '@telli/ui/components/Sidebar';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { ReactNode } from 'react';
+import { cloneElement, type ReactElement } from 'react';
 
 type AppMenuItemProps = {
   href: string;
-  icon: ReactNode;
+  icon: ReactElement<{ weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' }>;
   text: string;
 };
 
@@ -35,7 +35,9 @@ export function AppMenuItem({ href, icon, text }: AppMenuItemProps) {
           }}
           prefetch={false}
         >
-          <span className="text-primary">{icon}</span>
+          <span className="text-primary">
+            {cloneElement(icon, { weight: isActive() ? 'bold' : 'regular' })}
+          </span>
           <span>{text}</span>
         </Link>
       </SidebarMenuButton>
