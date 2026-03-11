@@ -4,6 +4,7 @@ import { logError, logInfo } from '@shared/logging';
 import { cleanupCharacters } from '@shared/characters/character-service';
 import { cleanupLearningScenarios } from '@shared/learning-scenarios/learning-scenario-admin-service';
 import { cleanupCustomGpts } from '@shared/custom-gpt/custom-gpt-service';
+import { cleanupWebChunks } from '@/app/api/rag/cleanupWebChunks';
 
 export async function DELETE(req: NextRequest) {
   const [error] = validateApiKeyByHeadersWithResult(req.headers);
@@ -13,16 +14,19 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
-    const [deletedCharacters, deletedLearningScenarios, deletedCustomGpts] = await Promise.all([
-      cleanupCharacters(),
-      cleanupLearningScenarios(),
-      cleanupCustomGpts(),
-    ]);
+    const [deletedCharacters, deletedLearningScenarios, deletedCustomGpts, deletedWebChunks] =
+      await Promise.all([
+        cleanupCharacters(),
+        cleanupLearningScenarios(),
+        cleanupCustomGpts(),
+        cleanupWebChunks(),
+      ]);
     const message = {
       message: 'Cleanup finished!',
       deletedCharacters,
       deletedLearningScenarios,
       deletedCustomGpts,
+      deletedWebChunks,
     };
     logInfo('Cleanup finished:', message);
     return NextResponse.json(message, { status: 200 });
