@@ -1,5 +1,5 @@
 import { dbGetAllOrganizations } from '@telli/api-database';
 
-export async function fetchOrganizations() {
+export async function getOrganizations() {
   return dbGetAllOrganizations();
 }

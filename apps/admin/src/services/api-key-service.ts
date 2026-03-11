@@ -15,12 +15,12 @@ function stripSensitiveFields<T extends { keyId?: string; secretHash?: string }>
   return rest;
 }
 
-export async function fetchApiKeys(organizationId: string, projectId: string) {
+export async function getApiKeys(organizationId: string, projectId: string) {
   const apiKeys = await dbGetAllApiKeysByProjectId(organizationId, projectId);
   return apiKeys.map(stripSensitiveFields);
 }
 
-export async function fetchSingleApiKey(
+export async function getSingleApiKey(
   organizationId: string,
   projectId: string,
   apiKeyId: string,

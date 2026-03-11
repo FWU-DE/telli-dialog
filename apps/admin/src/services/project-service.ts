@@ -6,13 +6,13 @@ import {
 } from '@telli/api-database';
 import { logInfo } from '@shared/logging';
 
-export async function fetchProjects(organizationId: string) {
+export async function getProjects(organizationId: string) {
   const organization = await dbGetOrganizationById(organizationId);
   if (!organization) throw new Error('Organization not found');
   return dbGetAllProjectsByOrganizationId(organizationId);
 }
 
-export async function fetchSingleProject(organizationId: string, projectId: string) {
+export async function getSingleProject(organizationId: string, projectId: string) {
   const project = await dbGetProjectById(organizationId, projectId);
   if (!project) throw new Error('Project not found');
   return project;

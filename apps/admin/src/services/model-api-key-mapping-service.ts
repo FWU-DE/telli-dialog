@@ -4,7 +4,7 @@ import {
 } from '@telli/api-database';
 import { logInfo } from '@shared/logging';
 
-export async function fetchModelApiKeyMappings(
+export async function getModelApiKeyMappings(
   organizationId: string,
   projectId: string,
   apiKeyId: string,

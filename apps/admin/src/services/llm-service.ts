@@ -7,7 +7,7 @@ import {
 import { CreateLargeLanguageModel, UpdateLargeLanguageModel } from '../types/large-language-model';
 import { logInfo } from '@shared/logging';
 
-export async function fetchLargeLanguageModels(organizationId: string) {
+export async function getLargeLanguageModels(organizationId: string) {
   return dbGetAllModelsByOrganizationId(organizationId);
 }
 
