@@ -96,7 +96,7 @@ export function AppSidebar({
               {user.userRole === 'teacher' && federalState.featureToggles?.isCustomGptEnabled && (
                 <AppMenuItem href="/custom" icon={<LegoSmileyIcon />} text="Assistenten" />
               )}
-              <SidebarSeparator className="my-4" />
+              <SidebarSeparator className="my-6" />
               {user.userRole === 'teacher' && federalState.featureToggles?.isSharedChatEnabled && (
                 <AppMenuItem
                   href="/learning-scenarios"
@@ -107,7 +107,7 @@ export function AppSidebar({
               {user.userRole === 'teacher' && federalState.featureToggles?.isCharacterEnabled && (
                 <AppMenuItem href="/characters" icon={<StudentIcon />} text="Dialogpartner" />
               )}
-              <SidebarSeparator className="my-4" />
+              <SidebarSeparator className="my-6" />
               {user.userRole === 'teacher' && federalState.featureToggles?.isCustomGptEnabled && (
                 <AppMenuItem
                   href={`/custom/d/${HELP_MODE_GPT_ID}`}
@@ -118,7 +118,7 @@ export function AppSidebar({
             </SidebarMenu>
           </SidebarGroup>
 
-          <SidebarGroup>
+          <SidebarGroup className="mt-2">
             <MyTelliPoints
               text={t('telli-points')}
               currentModelCosts={currentModelCosts}
@@ -126,7 +126,7 @@ export function AppSidebar({
             />
           </SidebarGroup>
 
-          <SidebarGroup>
+          <SidebarGroup className="mt-4">
             <ChatHistory />
           </SidebarGroup>
         </SidebarContent>
