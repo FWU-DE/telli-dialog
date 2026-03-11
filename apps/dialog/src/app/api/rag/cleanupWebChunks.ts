@@ -12,10 +12,9 @@ import { addDays } from '@shared/utils/date';
 export async function cleanupWebChunks() {
   const cutoffDate = addDays(new Date(), -30);
 
-  const deleted = await db
+  const result = await db
     .delete(chunkTable)
-    .where(and(eq(chunkTable.sourceType, 'webpage'), lt(chunkTable.createdAt, cutoffDate)))
-    .returning({ id: chunkTable.id });
+    .where(and(eq(chunkTable.sourceType, 'webpage'), lt(chunkTable.createdAt, cutoffDate)));
 
-  return deleted.length;
+  return result.rowCount ?? 0;
 }
