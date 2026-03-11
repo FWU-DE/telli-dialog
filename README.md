@@ -47,21 +47,33 @@ docker volume rm telli_keycloak_data
 
 ## Database
 
-Check that you can access the local postgresql database:
+The project uses two separate PostgreSQL databases:
+
+- **Dialog database** — managed by `packages/shared`, used by the dialog and admin apps
+- **API database** — managed by `packages/api-database`, used by the API app
+
+Check that you can access the local postgresql databases:
 
 ```sh
 psql "postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db"
+psql "postgresql://telli_api_db:test1234@127.0.0.1:5433/telli_api_db"
 ```
 
-If you start with a fresh database, apply migrations and seed the database; otherwise the application will not work.
+If you start with a fresh database, apply migrations and seed both databases; otherwise the application will not work.
 
-Add api keys in your .env.local file for all federal states that you want to login with, e.g. DE_BY_API_KEY for bavaria.
+Add api keys in your `.env.local` files for all federal states that you want to seed. These keys are used to fetch the available LLM models from the telli-api (e.g. `DE_BY_API_KEY` for Bavaria). If you previously seeded the api database, use the resulting API key.
+
+The api database seed also requires LLM provider credentials for the models it creates locally, e.g.:
 
 ```sh
-# with proper values in /apps/dialog/.env.local file
-cd packages/shared
-pnpm db:seed:local
+LLM_IONOS_API_KEY=...
+LLM_IONOS_BASE_URL=...
+```
 
+Without these, placeholder values are used and the models will not work until real keys are configured.
+
+```sh
+pnpm db:seed
 ```
 
 You can now start the application from the root directory:
