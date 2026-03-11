@@ -4,6 +4,7 @@ import { db } from '@shared/db';
 import {
   CharacterFileMapping,
   characterTable,
+  chunkTable,
   CustomGptFileMapping,
   customGptTable,
   fileTable,
@@ -12,6 +13,7 @@ import {
   llmModelTable,
   userTable,
 } from '@shared/db/schema';
+import { addDays } from '@shared/utils/date';
 import { eq } from 'drizzle-orm';
 import { generateUUID } from '@shared/utils/uuid';
 import { createInsertSchema } from 'drizzle-zod';
@@ -144,6 +146,24 @@ test.describe('cleanup', () => {
       .where(eq(customGptTable.id, newCustomGpt.id));
     expect(resultExisting).toHaveLength(1);
   });
+
+  test('should delete web chunks older than 30 days', async ({ request }) => {
+    const oldChunk = await createWebChunk(addDays(new Date(), -31));
+    const newChunk = await createWebChunk(new Date());
+
+    // Delete
+    const response = await request.delete(cleanupRoute, { headers: authorizationHeader });
+
+    expect(response.ok()).toBeTruthy();
+    const json = await response.json();
+    expect(json.deletedWebChunks).toBeGreaterThanOrEqual(1);
+
+    const resultDeleted = await db.select().from(chunkTable).where(eq(chunkTable.id, oldChunk.id));
+    expect(resultDeleted).toHaveLength(0);
+
+    const resultExisting = await db.select().from(chunkTable).where(eq(chunkTable.id, newChunk.id));
+    expect(resultExisting).toHaveLength(1);
+  });
 });
 
 test('should return 403 if authorization header is missing', async ({ request }) => {
@@ -228,4 +248,22 @@ async function createFile() {
   const fileId = generateUUID();
   await db.insert(fileTable).values({ id: fileId, name: '', size: 0, type: 'plain/text' });
   return fileId;
+}
+
+async function createWebChunk(createdAt: Date) {
+  const [chunk] = await db
+    .insert(chunkTable)
+    .values({
+      content: '',
+      embedding: Array(1024).fill(0),
+      orderIndex: 0,
+      sourceType: 'webpage',
+      sourceUrl: `https://example.com/${generateUUID()}`,
+      createdAt: createdAt,
+    })
+    .returning();
+  if (!chunk) {
+    throw Error('failed to create web chunk');
+  }
+  return chunk;
 }
