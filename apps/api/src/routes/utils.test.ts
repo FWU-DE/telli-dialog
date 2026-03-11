@@ -58,9 +58,7 @@ describe('getErrorChunk', () => {
   it('defaults errorCode to unknown_error', () => {
     const chunk = getErrorChunk({ id: 'e2', created: 3000, model: 'gpt-4', errorMessage: 'oops' });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((chunk as any).error).toEqual(
-      expect.objectContaining({ code: 'unknown_error' }),
-    );
+    expect((chunk as any).error).toEqual(expect.objectContaining({ code: 'unknown_error' }));
   });
 });
 
