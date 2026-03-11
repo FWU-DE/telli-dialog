@@ -15,6 +15,7 @@ import { ChatHistoryItem } from './chat-history-item';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@ui/components/InputGroup';
 import { MagnifyingGlassIcon } from '@phosphor-icons/react';
 import { Button } from '@ui/components/Button';
+import { Spinner } from '@ui/components/Spinner';
 
 export function ChatHistory() {
   const router = useRouter();
@@ -105,7 +106,7 @@ export function ChatHistory() {
 
       {isLoading && (
         <div className="flex flex-col w-full items-center ">
-          <p className="text-primary animate-pulse">{t('chats-loading')}</p>
+          <Spinner aria-label={t('chats-loading')} />
         </div>
       )}
 
