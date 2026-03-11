@@ -20,20 +20,13 @@ export async function getApiKeys(organizationId: string, projectId: string) {
   return apiKeys.map(stripSensitiveFields);
 }
 
-export async function getSingleApiKey(
-  organizationId: string,
-  projectId: string,
-  apiKeyId: string,
-) {
+export async function getSingleApiKey(organizationId: string, projectId: string, apiKeyId: string) {
   const apiKey = await dbGetApiKey(organizationId, projectId, apiKeyId);
   if (!apiKey) throw new Error('API key not found');
   return stripSensitiveFields(apiKey);
 }
 
-export async function createApiKey(
-  projectId: string,
-  apiKeyData: CreateApiKey,
-) {
+export async function createApiKey(projectId: string, apiKeyData: CreateApiKey) {
   const result = await dbCreateJustTheApiKey({
     ...apiKeyData,
     projectId,

@@ -28,11 +28,13 @@ describe('obscureModels', () => {
 
   it('preserves all other model fields', () => {
     const [obscured] = obscureModels([baseModel]);
-    expect(obscured!.id).toBe('model-1');
-    expect(obscured!.name).toBe('gpt-4');
-    expect(obscured!.displayName).toBe('GPT-4');
-    expect(obscured!.provider).toBe('openai');
-    expect(obscured!.description).toBe('A test model');
+    expect(obscured).toMatchObject({
+      id: 'model-1',
+      name: 'gpt-4',
+      displayName: 'GPT-4',
+      provider: 'openai',
+      description: 'A test model',
+    });
   });
 
   it('returns empty array for empty input', () => {
