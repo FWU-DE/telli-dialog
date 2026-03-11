@@ -115,7 +115,7 @@ export function ChatHistoryItem({
             asChild
             isActive={isActive()}
             variant="history"
-            className="gap-1 text-ellipsis"
+            className="gap-1 text-sm text-ellipsis"
           >
             <Link href={href} onClick={closeOnMobile} prefetch={false}>
               {iconWithStyle}

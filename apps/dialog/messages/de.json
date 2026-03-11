@@ -67,7 +67,8 @@
     "conversation-delete-toast-error": "Die Konversation konnte nicht gelöscht werden.",
     "chats-loading": "Dialoge werden geladen...",
     "chats-error": "Etwas ist schiefgelaufen...",
-    "chats-reload": "Dialoge neu laden"
+    "chats-reload": "Dialoge neu laden",
+    "search-clear": "Suche löschen"
   },
   "websearch": {
     "placeholders": {

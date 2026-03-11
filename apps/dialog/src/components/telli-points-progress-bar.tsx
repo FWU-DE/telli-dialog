@@ -29,7 +29,7 @@ export default function TelliPointsProgressBar({
             style={{ width: `${Math.min(percentage, 100)}%`, backgroundColor: color }}
           ></div>
         </div>
-        <div className="mt-2 text-xs text-right text-gray-600">{percentage} %</div>
+        <div className="mt-1 text-xs text-right text-gray-600">{percentage} %</div>
       </div>
     </div>
   );

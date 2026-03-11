@@ -9,13 +9,14 @@ import { useToast } from '@/components/common/toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { SidebarGroup, SidebarMenu } from '@ui/components/Sidebar';
 import { ChatHistoryItem } from './chat-history-item';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@ui/components/InputGroup';
-import { MagnifyingGlassIcon } from '@phosphor-icons/react';
+import { MagnifyingGlassIcon, XCircleIcon } from '@phosphor-icons/react';
 import { Button } from '@ui/components/Button';
 import { Spinner } from '@ui/components/Spinner';
+import { IconButton } from '@ui/components/IconButton';
 
 export function ChatHistory() {
   const router = useRouter();
@@ -24,6 +25,8 @@ export function ChatHistory() {
   const t = useTranslations('sidebar');
   const queryClient = useQueryClient();
   const [searchText, setSearchText] = useState('');
+  const [isClearPressed, setIsClearPressed] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const {
     data: conversations = [],
@@ -81,13 +84,33 @@ export function ChatHistory() {
       <SidebarGroup className="p-0">
         <InputGroup className="mb-2 bg-sidebar-input text-sidebar-input-foreground rounded-full">
           <InputGroupInput
+            ref={inputRef}
             value={searchText}
             placeholder="Chat suchen"
             aria-label="Chat suchen"
             onChange={(event) => setSearchText(event.target.value)}
           />
           <InputGroupAddon align="inline-end">
-            <MagnifyingGlassIcon />
+            {searchText.length === 0 ? (
+              <MagnifyingGlassIcon />
+            ) : (
+              <IconButton
+                aria-label={t('search-clear')}
+                onClick={() => {
+                  setSearchText('');
+                  inputRef.current?.focus();
+                }}
+                onPointerDown={() => setIsClearPressed(true)}
+                onPointerUp={() => setIsClearPressed(false)}
+                onPointerLeave={() => setIsClearPressed(false)}
+                className="hover:bg-transparent"
+              >
+                <XCircleIcon
+                  weight={isClearPressed ? 'fill' : 'regular'}
+                  className=" size-4 text-sidebar-input-foreground"
+                />
+              </IconButton>
+            )}
           </InputGroupAddon>
         </InputGroup>
         <SidebarMenu>
