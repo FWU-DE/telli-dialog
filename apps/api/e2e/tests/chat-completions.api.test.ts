@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { authorizationHeader, getTextModel } from '../utils/api.js';
+import { authorizationHeader, getReasoningModel, getTextModel } from '../utils/api.js';
 
 test.describe('POST /v1/chat/completions', () => {
   test.describe('Non-streaming', () => {
@@ -62,10 +62,12 @@ test.describe('POST /v1/chat/completions', () => {
     test('returns a successful response when sending temperature to gpt-5-mini', async ({
       request,
     }) => {
+      const reasoningModel = await getReasoningModel(request);
+
       const response = await request.post('/v1/chat/completions', {
         headers: authorizationHeader,
         data: {
-          model: 'gpt-5-mini',
+          model: reasoningModel.name,
           messages: [{ role: 'user', content: 'Reply with exactly: hello' }],
           max_tokens: 50,
           temperature: 0.1,
