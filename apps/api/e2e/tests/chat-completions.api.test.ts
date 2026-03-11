@@ -81,7 +81,8 @@ test.describe('POST /v1/chat/completions', () => {
       expect(body).toHaveProperty('choices');
       expect(Array.isArray(body.choices)).toBe(true);
       expect(body.choices.length).toBeGreaterThan(0);
-      expect(body.choices[0]?.message).toHaveProperty('content');
+      expect(body.choices[0]).toHaveProperty('message');
+      expect(body.choices[0].message).toHaveProperty('content');
     });
   });
 
