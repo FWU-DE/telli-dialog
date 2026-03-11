@@ -59,7 +59,9 @@ test.describe('POST /v1/chat/completions', () => {
       expect(body.usage).toHaveProperty('total_tokens');
     });
 
-    test('returns a successful response when sending temperature to gpt-5-mini', async ({ request }) => {
+    test('returns a successful response when sending temperature to gpt-5-mini', async ({
+      request,
+    }) => {
       const response = await request.post('/v1/chat/completions', {
         headers: authorizationHeader,
         data: {
