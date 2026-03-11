@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { authorizationHeader, getTextModel } from '../utils/api.js';
+import { authorizationHeader, getReasoningModel, getTextModel } from '../utils/api.js';
 
 test.describe('POST /v1/chat/completions', () => {
   test.describe('Non-streaming', () => {
@@ -57,6 +57,32 @@ test.describe('POST /v1/chat/completions', () => {
       expect(body.usage).toHaveProperty('prompt_tokens');
       expect(body.usage).toHaveProperty('completion_tokens');
       expect(body.usage).toHaveProperty('total_tokens');
+    });
+
+    test('returns a successful response when sending temperature to gpt-5-mini', async ({
+      request,
+    }) => {
+      const reasoningModel = await getReasoningModel(request);
+
+      const response = await request.post('/v1/chat/completions', {
+        headers: authorizationHeader,
+        data: {
+          model: reasoningModel.name,
+          messages: [{ role: 'user', content: 'Reply with exactly: hello' }],
+          max_tokens: 50,
+          temperature: 0.1,
+          stream: false,
+        },
+      });
+
+      expect(response.status()).toBe(200);
+      const body = await response.json();
+
+      expect(body).toHaveProperty('choices');
+      expect(Array.isArray(body.choices)).toBe(true);
+      expect(body.choices.length).toBeGreaterThan(0);
+      expect(body.choices[0]).toHaveProperty('message');
+      expect(body.choices[0].message).toHaveProperty('content');
     });
   });
 

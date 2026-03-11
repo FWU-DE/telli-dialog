@@ -1,5 +1,5 @@
 import LoginForm from './login-form';
-import { getMaybeUser } from '@/auth/utils';
+import { getMaybeUser, getSafeCallbackUrl } from '@/auth/utils';
 import Footer from '@/components/navigation/footer';
 import { redirect } from 'next/navigation';
 
@@ -15,7 +15,7 @@ export default async function Page({
 
   if (maybeUser !== null) {
     // User is already logged in, redirect to callbackUrl or home
-    redirect(callbackUrl || '/');
+    redirect(getSafeCallbackUrl(callbackUrl));
   }
 
   return (

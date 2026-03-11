@@ -8,6 +8,8 @@ import { FederalStateSelectModel } from '@shared/db/schema';
 import { LOGOUT_URL } from '@/app/api/auth/const';
 import { getSafeCallbackUrl } from './callback-url';
 
+export { getSafeCallbackUrl };
+
 export async function getValidSession(): Promise<Session> {
   const session = await auth();
 

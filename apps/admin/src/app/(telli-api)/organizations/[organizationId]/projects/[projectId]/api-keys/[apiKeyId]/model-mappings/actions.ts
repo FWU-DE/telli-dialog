@@ -1,9 +1,9 @@
 'use server';
 
 import { requireAdminAuth } from '@/auth/requireAdminAuth';
-import { fetchLargeLanguageModels } from '@/services/llm-service';
+import { getLargeLanguageModels } from '@/services/llm-service';
 import {
-  fetchModelApiKeyMappings,
+  getModelApiKeyMappings,
   saveModelApiKeyMappings,
 } from '@/services/model-api-key-mapping-service';
 
@@ -14,13 +14,13 @@ export async function getModelMappingsAction(
 ) {
   await requireAdminAuth();
 
-  return fetchModelApiKeyMappings(organizationId, projectId, apiKeyId);
+  return getModelApiKeyMappings(organizationId, projectId, apiKeyId);
 }
 
 export async function getLargeLanguageModelsAction(organizationId: string) {
   await requireAdminAuth();
 
-  return fetchLargeLanguageModels(organizationId);
+  return getLargeLanguageModels(organizationId);
 }
 
 export async function saveModelMappingsAction(
