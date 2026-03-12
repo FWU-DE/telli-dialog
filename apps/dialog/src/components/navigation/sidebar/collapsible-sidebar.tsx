@@ -51,7 +51,7 @@ export default function CollapsibleSidebar({
     <div
       className={cn(
         'relative z-20 h-dvh shadow-3xl transition-[width] duration-200 flex flex-col bg-semilight-gray',
-        open ? 'w-72' : 'w-0',
+        open ? 'w-72' : 'w-0 overflow-hidden',
       )}
     >
       <div className={cn('flex gap-4 items-center px-6 mt-[22px] mb-4', !open && 'invisible')}>

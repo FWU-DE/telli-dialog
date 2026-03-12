@@ -8,7 +8,7 @@ import { cloneElement, type ReactElement } from 'react';
 
 type AppMenuItemProps = {
   href: string;
-  icon: ReactElement<{ weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' }>;
+  icon: ReactElement<{ weight?: 'regular' | 'bold' }>;
   text: string;
 };
 

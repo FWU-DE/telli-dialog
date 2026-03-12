@@ -82,7 +82,9 @@ export function ChatHistoryItem({
     }
   }
 
-  const iconWithStyle = cloneElement(icon, { weight: isActive() ? 'bold' : 'regular' });
+  const iconWithStyle = icon
+    ? cloneElement(icon, { weight: isActive() ? 'bold' : 'regular' })
+    : undefined;
 
   return (
     <SidebarMenuItem>
@@ -173,7 +175,7 @@ function buildConversationUrl({ conversation }: { conversation: ConversationMode
 
 function determineConversationIcon(
   conversation: ConversationModel,
-): ReactElement<{ weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' }> {
+): ReactElement<{ weight?: 'regular' | 'bold' }> | undefined {
   switch (conversation.type) {
     case 'chat':
       if (conversation.characterId) {
@@ -182,10 +184,10 @@ function determineConversationIcon(
       if (conversation.customGptId) {
         return <LegoSmileyIcon />;
       }
-      return <></>;
+      return undefined;
     case 'image-generation':
       return <ImageSquareIcon />;
     default:
-      return <></>;
+      return undefined;
   }
 }
