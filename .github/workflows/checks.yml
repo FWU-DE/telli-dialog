@@ -144,7 +144,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Run api database migrations
-        run: pnpm --filter @telli/api-database run db:migrate:pipeline
+        run: pnpm --filter @telli/api-database run db:migrate
       - name: Check unit tests
         run: pnpm run test:coverage
 

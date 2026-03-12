@@ -65,6 +65,10 @@ psql "postgresql://telli_api_db:test1234@127.0.0.1:5433/telli_api_db"
 
 If you start with a fresh database, apply migrations and seed both databases; otherwise the application will not work.
 
+```sh
+pnpm db:migrate
+```
+
 Add api keys in your `.env.local` files for all federal states that you want to seed. These keys are used to fetch the available LLM models from the telli-api (e.g. `DE_BY_API_KEY` for Bavaria). If you previously seeded the api database, use the resulting API key.
 
 The api database seed also requires LLM provider credentials for the models it creates locally. Add these to `apps/api/.env.local`:

@@ -14,6 +14,7 @@
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",
     "check-types": "turbo run check-types",
+    "db:migrate": "pnpm --filter @telli/shared db:migrate:local && pnpm --filter @telli/api-database db:migrate:local",
     "db:seed": "pnpm --filter @telli/api-database db:seed && pnpm --filter @telli/shared db:seed",
     "db:seed:from-stage": "pnpm --filter @telli/api-database db:seed:from-stage && pnpm --filter @telli/shared db:seed:from-stage"
   },
