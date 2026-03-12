@@ -419,5 +419,15 @@
   "toasts": {
     "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
     "image-toast-error": "Das Bild konnte nicht hochgeladen werden."
+  },
+  "entity-overview": {
+    "filter-all": "Alle",
+    "filter-mine": "Meine",
+    "filter-official": "Offiziell",
+    "filter-school": "Schulintern",
+    "filter-tabs-label": "Filteroptionen",
+    "info-tooltip-label": "Informationen anzeigen",
+    "badge-mine": "von mir"
+  }
   }
 }

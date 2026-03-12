@@ -4,6 +4,7 @@ import { dbGetFilesForLearningScenario } from '@shared/db/functions/files';
 import {
   dbCreateLearningScenarioShare,
   dbDeleteLearningScenarioByIdAndUserId,
+  dbGetAllLearningScenariosByUserId,
   dbGetGlobalLearningScenarios,
   dbGetLearningScenarioById,
   dbGetLearningScenarioByIdOptionalShareData,
@@ -23,6 +24,7 @@ import {
   learningScenarioTable,
   learningScenarioUpdateSchema,
   LearningScenarioWithShareDataModel,
+  OverviewFilter,
   sharedLearningScenarioTable,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
@@ -90,6 +92,34 @@ export async function getLearningScenariosByAccessLevel({
     return dbGetLearningScenariosBySchoolId({ schoolId, userId });
   } else if (accessLevel === 'private') {
     return dbGetLearningScenariosByUserId({ userId });
+  }
+  return [];
+}
+
+export async function getLearningScenariosByOverviewFilter({
+  filter,
+  schoolId,
+  userId,
+  federalStateId,
+}: {
+  filter: OverviewFilter;
+  schoolId: string;
+  userId: string;
+  federalStateId: string;
+}): Promise<LearningScenarioOptionalShareDataModel[]> {
+  if (filter === 'all') {
+    const [privateLs, schoolLs, globalLs] = await Promise.all([
+      dbGetLearningScenariosByUserId({ userId }),
+      dbGetLearningScenariosBySchoolId({ schoolId, userId }),
+      dbGetGlobalLearningScenarios({ userId, federalStateId }),
+    ]);
+    return [...privateLs, ...schoolLs, ...globalLs];
+  } else if (filter === 'mine') {
+    return await dbGetAllLearningScenariosByUserId({ userId });
+  } else if (filter === 'official') {
+    return await dbGetGlobalLearningScenarios({ userId, federalStateId });
+  } else if (filter === 'school') {
+    return await dbGetLearningScenariosBySchoolId({ schoolId, userId });
   }
   return [];
 }

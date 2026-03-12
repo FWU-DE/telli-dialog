@@ -7,6 +7,7 @@ import { db } from '@shared/db';
 import {
   dbDeleteAssistantByIdAndUserId,
   dbGetAssistantById,
+  dbGetAssistantsByUserId,
   dbGetGlobalGpts,
   dbGetGptsBySchoolId,
   dbGetGptsByUserId,
@@ -22,6 +23,7 @@ import {
   assistantUpdateSchema,
   FileModel,
   fileTable,
+  OverviewFilter,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
@@ -154,6 +156,34 @@ export async function getAssistantByAccessLevel({
     return await dbGetGptsBySchoolId({ schoolId });
   } else if (accessLevel === 'private') {
     return await dbGetGptsByUserId({ userId });
+  }
+  return [];
+}
+
+export async function getCustomGptsByOverviewFilter({
+  filter,
+  schoolId,
+  userId,
+  federalStateId,
+}: {
+  filter: OverviewFilter;
+  schoolId: string;
+  userId: string;
+  federalStateId: string;
+}): Promise<CustomGptSelectModel[]> {
+  if (filter === 'all') {
+    const [privateGpts, schoolGpts, globalGpts] = await Promise.all([
+      dbGetGptsByUserId({ userId }),
+      dbGetGptsBySchoolId({ schoolId }),
+      dbGetGlobalGpts({ federalStateId }),
+    ]);
+    return [...privateGpts, ...schoolGpts, ...globalGpts];
+  } else if (filter === 'mine') {
+    return await dbGetAllGptsByUserId({ userId });
+  } else if (filter === 'official') {
+    return await dbGetGlobalGpts({ federalStateId });
+  } else if (filter === 'school') {
+    return await dbGetGptsBySchoolId({ schoolId });
   }
   return [];
 }

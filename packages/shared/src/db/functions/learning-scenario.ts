@@ -123,6 +123,29 @@ export async function dbGetLearningScenariosByUserId({
 }
 
 /**
+ * Returns all learning scenarios created by the user regardless of access level
+ * (private, school, or global).
+ *
+ * Contrast with {@link dbGetLearningScenariosByUserId}, which only returns private scenarios.
+ */
+export async function dbGetAllLearningScenariosByUserId({
+  userId,
+}: {
+  userId: string;
+}): Promise<LearningScenarioOptionalShareDataModel[]> {
+  return baseLearningScenarioWithShareQuery()
+    .leftJoin(
+      sharedLearningScenarioTable,
+      and(
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioTable.id),
+        eq(sharedLearningScenarioTable.userId, userId),
+      ),
+    )
+    .where(eq(learningScenarioTable.userId, userId))
+    .orderBy(desc(learningScenarioTable.createdAt));
+}
+
+/**
  * The returned entity has no Shared Data attached.
  * Use `dbGetLearningScenarioByIdWithShareData` if you need shared data.
  */
