@@ -100,6 +100,18 @@ export async function dbGetGptsByUserId({
     .orderBy(desc(customGptTable.createdAt));
 }
 
+export async function dbGetAllGptsByUserId({
+  userId,
+}: {
+  userId: string;
+}): Promise<CustomGptSelectModel[]> {
+  return db
+    .select()
+    .from(customGptTable)
+    .where(eq(customGptTable.userId, userId))
+    .orderBy(desc(customGptTable.createdAt));
+}
+
 export async function dbGetCustomGptByIdOrSchoolId({
   customGptId: characterId,
   userId,
