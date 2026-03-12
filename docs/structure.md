@@ -21,7 +21,7 @@ Shared code used by the dialog and admin apps. Contains the dialog database sche
 Key contents:
 
 - `src/db/` — Schema definitions, migrations, seed scripts, and database access functions
-- `src/knotenpunkt/` — Client for the telli-api (knotenpunkt)
+- `src/knotenpunkt/` — Client for calling the telli-api service to access LLM providers (completions, embeddings, images). Note: ai-core now reads model configuration directly from the database, but still uses knotenpunkt to make requests to the telli-api service.
 - `src/s3/` — S3-compatible storage utilities
 - `src/logging/` — Shared logging helpers
 
