@@ -114,7 +114,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: install
     env:
-      DATABASE_URL: postgresql://test_user:test1234@localhost:5432/telli_api_db
+      API_DATABASE_URL: postgresql://test_user:test1234@localhost:5432/telli_api_db
       API_KEY: random-key-for-testing-only
 
     services:
@@ -144,7 +144,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Run api database migrations
-        run: pnpm --filter @telli/api-database run db:migrate:pipeline
+        run: pnpm --filter @telli/api-database run db:migrate
       - name: Check unit tests
         run: pnpm run test:coverage
 

@@ -17,6 +17,47 @@ export async function dbGetModelById(id: string) {
   return (await db.select().from(llmModelTable).where(eq(llmModelTable.id, id)))[0];
 }
 
+export async function dbGetModelByNameAndApiKeyId({
+  name,
+  apiKeyId,
+}: {
+  name: string;
+  apiKeyId: string;
+}) {
+  const rows = await db
+    .select()
+    .from(llmModelTable)
+    .innerJoin(
+      llmModelApiKeyMappingTable,
+      eq(llmModelApiKeyMappingTable.llmModelId, llmModelTable.id),
+    )
+    .where(and(eq(llmModelTable.name, name), eq(llmModelApiKeyMappingTable.apiKeyId, apiKeyId)))
+    .limit(1);
+
+  return rows[0]?.llm_model;
+}
+
+export async function dbHasApiKeyAccessToModel({
+  apiKeyId,
+  modelId,
+}: {
+  apiKeyId: string;
+  modelId: string;
+}): Promise<boolean> {
+  const rows = await db
+    .select({ id: llmModelApiKeyMappingTable.id })
+    .from(llmModelApiKeyMappingTable)
+    .where(
+      and(
+        eq(llmModelApiKeyMappingTable.apiKeyId, apiKeyId),
+        eq(llmModelApiKeyMappingTable.llmModelId, modelId),
+      ),
+    )
+    .limit(1);
+
+  return rows.length > 0;
+}
+
 export async function dbGetAllModelsByOrganizationId(organizationId: string) {
   return await db
     .select()

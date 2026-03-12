@@ -8,8 +8,8 @@ if (process.env.NODE_ENV !== 'production') {
   config({ path: path.resolve(import.meta.dirname, '..', '.env.local') });
 }
 
-// ai-core reads API_DATABASE_URL for its own connection pool.
-// Default to DATABASE_URL so operators only need to configure one variable.
+// Default API_DATABASE_URL to DATABASE_URL so operators only need to configure
+// one variable when both point to the same database.
 if (!process.env.API_DATABASE_URL && process.env.DATABASE_URL) {
   process.env.API_DATABASE_URL = process.env.DATABASE_URL;
 }

@@ -4,7 +4,7 @@ import {
   dbGetApiKeyLimit,
   dbGetCompletionUsageCostsSinceStartOfCurrentMonth,
   dbGetImageGenerationUsageCostsSinceStartOfCurrentMonth,
-} from '../api-db/functions';
+} from '@telli/api-database';
 import { AiModel } from '../images/types';
 import type { AiModel as TextAiModel, TokenUsage } from '../chat/types';
 

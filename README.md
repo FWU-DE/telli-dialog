@@ -18,10 +18,14 @@ pnpm i # installs the dependencies
 
 ## Environment variables
 
-You will need environment variables to work with.
-Place those in the `.env.local` file.
+The project uses environment variables in `.env.local` files for local development configuration.
 
-You can find the env variables [here](https://start.1password.com/open/i?a=ADERP2QHK5HBPLKMBFF2QU5CXI&v=jtidfrchgfg2sunjzwpzgendlq&i=a2khk5vx6hrqmtkta2gg7vonga&h=deutschlandgpt.1password.eu).
+**Required `.env.local` files:**
+
+- `apps/dialog/.env.local` — For the dialog app (database URLs, API connection, authentication, storage)
+- `apps/api/.env.local` — For the API app (database URL, logging, telemetry)
+
+For detailed variable documentation and values for local development with docker-compose, see the `.env.example` files in each app directory. Additional secrets can be found [here](https://start.1password.com/open/i?a=ADERP2QHK5HBPLKMBFF2QU5CXI&v=jtidfrchgfg2sunjzwpzgendlq&i=a2khk5vx6hrqmtkta2gg7vonga&h=deutschlandgpt.1password.eu).
 
 ## Local development
 
@@ -47,21 +51,41 @@ docker volume rm telli_keycloak_data
 
 ## Database
 
-Check that you can access the local postgresql database:
+The project uses two separate PostgreSQL databases:
+
+- **Dialog database** — managed by `packages/shared`, used by the dialog and admin apps
+- **API database** — managed by `packages/api-database`, used by the API app
+
+Check that you can access the local postgresql databases:
 
 ```sh
 psql "postgresql://telli_dialog_db:test1234@127.0.0.1:5432/telli_dialog_db"
+psql "postgresql://telli_api_db:test1234@127.0.0.1:5433/telli_api_db"
 ```
 
-If you start with a fresh database, apply migrations and seed the database; otherwise the application will not work.
-
-Add api keys in your .env.local file for all federal states that you want to login with, e.g. DE_BY_API_KEY for bavaria.
+If you start with a fresh database, apply migrations and seed both databases; otherwise the application will not work.
 
 ```sh
-# with proper values in /apps/dialog/.env.local file
-cd packages/shared
-pnpm db:seed:local
+pnpm db:migrate
+```
 
+Add api keys in your `.env.local` files for all federal states that you want to seed. These keys are used to fetch the available LLM models from the telli-api (e.g. `DE_BY_API_KEY` for Bavaria). If you previously seeded the api database, use the resulting API key.
+
+The api database seed also requires LLM provider credentials for the models it creates locally. Add these to `apps/api/.env.local`:
+
+```sh
+LLM_IONOS_API_KEY=...
+LLM_IONOS_BASE_URL=...
+LLM_GPT4OMINI_API_KEY=...
+LLM_GPT4OMINI_BASE_URL=...
+LLM_GPT5NANO_API_KEY=...
+LLM_GPT5NANO_BASE_URL=...
+```
+
+Without these, placeholder values are used and the models will not work until real keys are configured.
+
+```sh
+pnpm db:seed
 ```
 
 You can now start the application from the root directory:
