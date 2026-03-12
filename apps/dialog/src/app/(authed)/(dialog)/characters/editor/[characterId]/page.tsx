@@ -46,7 +46,9 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
   return (
     <div className="min-w-full p-6 overflow-auto">
       <HeaderPortal>
-        <ToggleSidebarButton />
+        <ToggleSidebarButton
+          isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+        />
         <div className="grow"></div>
         <ProfileMenu userAndContext={userAndContext} />
       </HeaderPortal>

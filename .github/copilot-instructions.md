@@ -76,8 +76,13 @@ apps/<app_name>/src/components/utils/ --> custom utility functions
 
 ## Logging
 
+<<<<<<< HEAD
+
+- Use a consistent logging framework for debugging and monitoring.
+- # Do not log to console.
 - Use the functions from packages/shared/src/logging/logging.ts for consistent logging.
 - Avoid direct console.\* in application code; use the shared logging helpers instead (console may be OK in scripts/tests).
+  > > > > > > > origin/main
 
 ## Comments
 

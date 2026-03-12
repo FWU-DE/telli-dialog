@@ -45,7 +45,9 @@ export default async function Page(
   return (
     <div className="w-full p-6 overflow-auto">
       <HeaderPortal>
-        <ToggleSidebarButton />
+        <ToggleSidebarButton
+          isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+        />
         <div className="grow"></div>
         <ProfileMenu userAndContext={userAndContext} />
       </HeaderPortal>
