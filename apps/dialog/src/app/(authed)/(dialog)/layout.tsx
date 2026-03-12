@@ -1,4 +1,3 @@
-import { SidebarVisibilityProvider } from '@/components/navigation/sidebar/sidebar-provider';
 import { getUser, userHasCompletedTraining } from '@/auth/utils';
 import React from 'react';
 import DialogSidebar from './sidebar';
@@ -48,37 +47,36 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
     <div className="flex h-dvh w-dvw">
       <FederalStateProvider federalState={federalState}>
         <SidebarProvider>
-          <SidebarVisibilityProvider>
-            <LlmModelsProvider
-              models={models}
-              defaultLlmModelByCookie={user.lastUsedModel ?? DEFAULT_CHAT_MODEL}
-            >
-              {federalState.featureToggles.isNewUiDesignEnabled ? (
-                <AppSidebar
-                  user={userWithRole}
-                  federalState={federalState}
-                  currentModelCosts={priceInCent ?? 0}
-                  userPriceLimit={userPriceLimit ?? 500}
-                />
-              ) : (
-                <DialogSidebar
-                  user={user}
-                  currentModelCosts={priceInCent ?? 0}
-                  userPriceLimit={userPriceLimit ?? 500}
-                />
-              )}
-              <div className="flex flex-col max-h-dvh min-h-dvh w-full overflow-auto">
-                <div
-                  id={HEADER_PORTAL_ID}
-                  className="sticky z-10 top-0 py-4 h-19 px-6 flex gap-4 items-center justify-between bg-white"
-                  style={{
-                    position: '-webkit-sticky',
-                  }}
-                ></div>
-                <div className={contentHeight}>{children}</div>
-              </div>
-            </LlmModelsProvider>
-          </SidebarVisibilityProvider>
+          <LlmModelsProvider
+            models={models}
+            defaultLlmModelByCookie={user.lastUsedModel ?? DEFAULT_CHAT_MODEL}
+          >
+            {federalState.featureToggles.isNewUiDesignEnabled ? (
+              <AppSidebar
+                user={userWithRole}
+                federalState={federalState}
+                currentModelCosts={priceInCent ?? 0}
+                userPriceLimit={userPriceLimit ?? 500}
+              />
+            ) : (
+              <DialogSidebar
+                user={user}
+                currentModelCosts={priceInCent ?? 0}
+                userPriceLimit={userPriceLimit ?? 500}
+                isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+              />
+            )}
+            <div className="flex flex-col max-h-dvh min-h-dvh w-full overflow-auto">
+              <div
+                id={HEADER_PORTAL_ID}
+                className="sticky z-10 top-0 py-4 h-19 px-6 flex gap-4 items-center justify-between bg-white"
+                style={{
+                  position: '-webkit-sticky',
+                }}
+              ></div>
+              <div className={contentHeight}>{children}</div>
+            </div>
+          </LlmModelsProvider>
         </SidebarProvider>
         {!productAccess.hasAccess && (
           <ProductAccessModal modalTitle={'Nutzung nicht möglich'}>

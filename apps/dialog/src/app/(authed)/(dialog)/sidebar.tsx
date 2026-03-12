@@ -2,7 +2,7 @@
 
 import { type UserAndContext } from '@/auth/types';
 import { useToast } from '@/components/common/toast';
-import useBreakpoints from '@/components/hooks/use-breakpoints';
+import { useSidebar } from '@telli/ui/components/Sidebar';
 import CharacterAvatarIcon from '@/components/icons/character-avatar';
 import FourBoxes from '@/components/icons/four-boxes';
 import RobotIcon from '@/components/icons/robot';
@@ -12,7 +12,6 @@ import TelliPointsIcon from '@/components/icons/telli-points';
 import { ImageSquareIcon } from '@phosphor-icons/react';
 import CollapsibleSidebar from '@/components/navigation/sidebar/collapsible-sidebar';
 import SidebarItem from '@/components/navigation/sidebar/conversation-item';
-import { useSidebarVisibility } from '@/components/navigation/sidebar/sidebar-provider';
 import TelliPointsProgressBar from '@/components/telli-points-progress-bar';
 
 import { cn } from '@/utils/tailwind';
@@ -31,11 +30,16 @@ type Props = {
   user: UserAndContext;
   currentModelCosts: number;
   userPriceLimit: number;
+  isNewUiDesignEnabled: boolean;
 };
 
-export default function DialogSidebar({ user, currentModelCosts, userPriceLimit }: Props) {
-  const { isBelow } = useBreakpoints();
-  const { close, isOpen } = useSidebarVisibility();
+export default function DialogSidebar({
+  user,
+  currentModelCosts,
+  userPriceLimit,
+  isNewUiDesignEnabled,
+}: Props) {
+  const { isMobile, setOpenMobile } = useSidebar();
   const pathname = usePathname();
   const router = useRouter();
   const toast = useToast();
@@ -59,8 +63,8 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
   }
 
   React.useEffect(() => {
-    if (isOpen && isBelow.lg) {
-      close();
+    if (isMobile) {
+      setOpenMobile(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
@@ -109,7 +113,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
   }
 
   return (
-    <CollapsibleSidebar>
+    <CollapsibleSidebar isNewUiDesignEnabled={isNewUiDesignEnabled}>
       <nav className="flex text-sm flex-col items-start overflow-y-hidden px-1">
         <div className="flex flex-col items-start px-5 w-full">
           <hr className="w-full my-2" />
@@ -146,7 +150,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
               )}
             >
               <FourBoxes className="w-6 h-5" />
-              <span className="text-base">{t('custom-gpt')}</span>
+              <span className="text-base">{t('assistants')}</span>
             </div>
           </Link>
           <hr className="w-full my-2" />
@@ -163,7 +167,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
                         )}
                       >
                         <SharedChatIcon className="w-6 h-6" />
-                        <span className="text-base">{t('class-chats')}</span>
+                        <span className="text-base">{t('learning-scenarios')}</span>
                       </div>
                     </Link>
                   )}

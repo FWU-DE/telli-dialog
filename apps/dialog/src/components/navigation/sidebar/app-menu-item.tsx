@@ -1,23 +1,20 @@
 'use client';
 
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
-import { SidebarMenuButton, SidebarMenuItem } from '@telli/ui/components/Sidebar';
+import { SidebarMenuButton, SidebarMenuItem, useSidebar } from '@telli/ui/components/Sidebar';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { ReactNode } from 'react';
-import { useSidebarVisibility } from './sidebar-provider';
-import { useSidebar } from '@telli/ui/components/Sidebar';
+import { cloneElement, type ReactElement } from 'react';
 
 type AppMenuItemProps = {
   href: string;
-  icon: ReactNode;
+  icon: ReactElement<{ weight?: 'regular' | 'bold' }>;
   text: string;
 };
 
 export function AppMenuItem({ href, icon, text }: AppMenuItemProps) {
   const pathname = usePathname();
-  const { close } = useSidebarVisibility();
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   const isActive = () => {
     // special case for help mode because it is also a custom gpt and starts with the same path
@@ -33,12 +30,14 @@ export function AppMenuItem({ href, icon, text }: AppMenuItemProps) {
           href={href}
           onClick={() => {
             if (isMobile) {
-              close();
+              setOpenMobile(false);
             }
           }}
           prefetch={false}
         >
-          <span className="text-primary">{icon}</span>
+          <span className="text-primary">
+            {cloneElement(icon, { weight: isActive() ? 'bold' : 'regular' })}
+          </span>
           <span>{text}</span>
         </Link>
       </SidebarMenuButton>

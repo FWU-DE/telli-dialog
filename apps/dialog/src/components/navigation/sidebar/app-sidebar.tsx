@@ -27,9 +27,7 @@ import { useTranslations } from 'next-intl';
 import { MyTelliPoints } from './my-telli-points';
 import { FederalStateModel } from '@shared/federal-states/types';
 import { UserModel } from '@shared/auth/user-model';
-import { useSidebarVisibility } from './sidebar-provider';
 import { ChatHistory } from './chat-history';
-import React from 'react';
 import { IconButton } from '@ui/components/IconButton';
 import Link from 'next/link';
 
@@ -46,24 +44,17 @@ export function AppSidebar({
   currentModelCosts,
   userPriceLimit,
 }: AppSidebarProps) {
-  // Todo TD-1004: After ui redesign, we should switch to useSidebar()
-  // const { toggleSidebar } = useSidebar();
-  const { close, isOpen, toggle } = useSidebarVisibility();
-  const { isMobile, openMobile } = useSidebar();
+  const { toggleSidebar, open } = useSidebar();
   const { resolvedTheme, setTheme } = useTheme();
   const t = useTranslations('sidebar');
   const isDarkTheme = resolvedTheme === 'dark';
+  const lightThemeLabel = t('toggle-light-theme');
+  const darkThemeLabel = t('toggle-dark-theme');
 
   function toggleTheme() {
     const currentTheme = resolvedTheme ?? 'light';
     setTheme(currentTheme === 'light' ? 'dark' : 'light');
   }
-
-  React.useEffect(() => {
-    if (isMobile && isOpen && !openMobile) {
-      close();
-    }
-  }, [close, isMobile, isOpen, openMobile]);
 
   return (
     <Sidebar>
@@ -72,22 +63,22 @@ export function AppSidebar({
           <div className="p-2 flex justify-end gap-2">
             <Link
               href="/"
-              aria-label="Startseite"
+              aria-label={t('home-link')}
               className="mr-auto rounded outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <TelliLogo className="h-7 text-primary" />
             </Link>
             <IconButton
               onClick={toggleTheme}
-              aria-label={isDarkTheme ? 'Helles Design aktivieren' : 'Dunkles Design aktivieren'}
+              aria-label={isDarkTheme ? lightThemeLabel : darkThemeLabel}
               aria-pressed={isDarkTheme}
             >
               <MoonStarsIcon />
             </IconButton>
             <IconButton
-              onClick={toggle}
-              aria-label={isOpen ? 'Seitenleiste schliessen' : 'Seitenleiste oeffnen'}
-              aria-expanded={isOpen}
+              onClick={toggleSidebar}
+              aria-label={open ? t('close-sidebar') : t('open-sidebar')}
+              aria-expanded={open}
             >
               <SidebarSimpleIcon />
             </IconButton>
@@ -96,40 +87,40 @@ export function AppSidebar({
         <SidebarContent>
           <SidebarGroup>
             <SidebarMenu>
-              <AppMenuItem href="/" icon={<ChatTextIcon />} text="Neuer Chat" />
+              <AppMenuItem href="/" icon={<ChatTextIcon />} text={t('new-chat')} />
               {federalState.featureToggles?.isImageGenerationEnabled && (
                 <AppMenuItem
                   href="/image-generation"
                   icon={<ImageSquareIcon />}
-                  text="Neues Bild"
+                  text={t('new-image')}
                 />
               )}
               {user.userRole === 'teacher' && federalState.featureToggles?.isCustomGptEnabled && (
-                <AppMenuItem href="/custom" icon={<LegoSmileyIcon />} text="Assistenten" />
+                <AppMenuItem href="/custom" icon={<LegoSmileyIcon />} text={t('assistants')} />
               )}
-              <SidebarSeparator className="my-4" />
+              <SidebarSeparator className="my-6" />
               {user.userRole === 'teacher' && federalState.featureToggles?.isSharedChatEnabled && (
                 <AppMenuItem
                   href="/learning-scenarios"
                   icon={<MountainsIcon />}
-                  text="Lernszenarien"
+                  text={t('learning-scenarios')}
                 />
               )}
               {user.userRole === 'teacher' && federalState.featureToggles?.isCharacterEnabled && (
-                <AppMenuItem href="/characters" icon={<StudentIcon />} text="Dialogpartner" />
+                <AppMenuItem href="/characters" icon={<StudentIcon />} text={t('characters')} />
               )}
-              <SidebarSeparator className="my-4" />
+              <SidebarSeparator className="my-6" />
               {user.userRole === 'teacher' && federalState.featureToggles?.isCustomGptEnabled && (
                 <AppMenuItem
                   href={`/custom/d/${HELP_MODE_GPT_ID}`}
                   icon={<QuestionIcon />}
-                  text="Hilfe-Chat"
+                  text={t('help-chat')}
                 />
               )}
             </SidebarMenu>
           </SidebarGroup>
 
-          <SidebarGroup>
+          <SidebarGroup className="mt-2">
             <MyTelliPoints
               text={t('telli-points')}
               currentModelCosts={currentModelCosts}
@@ -137,7 +128,7 @@ export function AppSidebar({
             />
           </SidebarGroup>
 
-          <SidebarGroup>
+          <SidebarGroup className="mt-4">
             <ChatHistory />
           </SidebarGroup>
         </SidebarContent>

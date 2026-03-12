@@ -57,17 +57,32 @@
     "terms-and-conditions-title": "Nutzungsbedingungen"
   },
   "sidebar": {
-    "class-chats": "Lernszenarien",
+    "home-link": "Startseite",
+    "toggle-light-theme": "Helles Design aktivieren",
+    "toggle-dark-theme": "Dunkles Design aktivieren",
+    "close-sidebar": "Seitenleiste schließen",
+    "open-sidebar": "Seitenleiste öffnen",
+    "new-chat": "Neuer Chat",
+    "new-image": "Neues Bild",
+    "assistants": "Assistenten",
+    "learning-scenarios": "Lernszenarien",
     "characters": "Dialogpartner",
-    "help-mode": "Hilfe",
-    "custom-gpt": "Assistenten",
-    "image-generation-new": "Neues Bild",
+    "help-chat": "Hilfe-Chat",
     "telli-points": "Meine telli-Points",
+    "chat-search-placeholder": "Chat suchen",
+    "delete-chat": "Chat löschen",
+    "rename-chat": "Umbenennen",
+    "rename-save": "Umbenennung speichern",
+    "rename-cancel": "Umbenennung abbrechen",
+    "conversation-actions": "Konversationsaktionen",
     "conversation-delete-toast-success": "Die Konversation wurde erfolgreich gelöscht.",
     "conversation-delete-toast-error": "Die Konversation konnte nicht gelöscht werden.",
     "chats-loading": "Dialoge werden geladen...",
     "chats-error": "Etwas ist schiefgelaufen...",
-    "chats-reload": "Dialoge neu laden"
+    "chats-reload": "Dialoge neu laden",
+    "search-clear": "Suche löschen",
+    "help-mode": "Hilfe",
+    "image-generation-new": "Neues Bild"
   },
   "websearch": {
     "placeholders": {

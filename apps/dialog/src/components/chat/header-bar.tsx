@@ -22,12 +22,13 @@ export function ChatHeaderBar({
 }) {
   const { isBelow } = useBreakpoints();
   const showCompressedHeader = isBelow[reductionBreakpoint];
+  const isNewUiDesignEnabled = userAndContext.federalState.featureToggles.isNewUiDesignEnabled;
 
   return (
     <HeaderPortal>
       <div className="flex flex-col w-full">
         <div className="flex w-full gap-4 justify-center items-center">
-          <ToggleSidebarButton />
+          <ToggleSidebarButton isNewUiDesignEnabled={isNewUiDesignEnabled} />
           <NewChatButton />
           <SelectLlmModel isStudent={userAndContext.school.userRole === 'student'} />
           <div className="grow"></div>

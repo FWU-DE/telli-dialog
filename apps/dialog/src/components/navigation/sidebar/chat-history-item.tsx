@@ -5,6 +5,7 @@ import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@telli/ui/components/Sidebar';
 import {
   DropdownMenu,
@@ -14,9 +15,7 @@ import {
 } from '@ui/components/DropdownMenu';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, type ReactNode } from 'react';
-import { useSidebarVisibility } from './sidebar-provider';
-import { useSidebar } from '@telli/ui/components/Sidebar';
+import { cloneElement, type ReactElement, useState } from 'react';
 import { ConversationModel } from '@shared/db/types';
 import {
   CheckSquareIcon,
@@ -31,6 +30,7 @@ import { useForm } from 'react-hook-form';
 import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@ui/components/Input';
+import { useTranslations } from 'next-intl';
 
 const renameChatHistorySchema = z.object({
   name: z.string().min(1).max(256),
@@ -51,8 +51,8 @@ export function ChatHistoryItem({
 }: ChatHistoryItemProps) {
   const [isEditable, setIsEditable] = useState(false);
   const pathname = usePathname();
-  const { close } = useSidebarVisibility();
-  const { isMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
+  const t = useTranslations('sidebar');
   const renameForm = useForm({
     resolver: zodResolver(renameChatHistorySchema),
     defaultValues: { name: conversation.name ?? '' },
@@ -78,9 +78,13 @@ export function ChatHistoryItem({
 
   function closeOnMobile() {
     if (isMobile) {
-      close();
+      setOpenMobile(false);
     }
   }
+
+  const iconWithStyle = icon
+    ? cloneElement(icon, { weight: isActive() ? 'bold' : 'regular' })
+    : undefined;
 
   return (
     <SidebarMenuItem>
@@ -93,7 +97,7 @@ export function ChatHistoryItem({
 
           <button
             type="submit"
-            aria-label="Umbenennung speichern"
+            aria-label={t('rename-save')}
             className="px-2 border border-foreground rounded-md"
           >
             <CheckSquareIcon className="h-4 w-4" />
@@ -101,7 +105,7 @@ export function ChatHistoryItem({
           <button
             type="button"
             onClick={onAbort}
-            aria-label="Umbenennung abbrechen"
+            aria-label={t('rename-cancel')}
             className="px-2 border border-foreground rounded-md"
           >
             <XSquareIcon className="h-4 w-4" />
@@ -111,9 +115,14 @@ export function ChatHistoryItem({
 
       {!isEditable && (
         <>
-          <SidebarMenuButton asChild isActive={isActive()} className="gap-1 text-sm text-ellipsis">
+          <SidebarMenuButton
+            asChild
+            isActive={isActive()}
+            variant="history"
+            className="gap-1 text-sm text-ellipsis"
+          >
             <Link href={href} onClick={closeOnMobile} prefetch={false}>
-              {icon}
+              {iconWithStyle}
               <span>{conversation.name}</span>
             </Link>
           </SidebarMenuButton>
@@ -122,7 +131,7 @@ export function ChatHistoryItem({
             <DropdownMenuTrigger asChild>
               <SidebarMenuAction
                 showOnHover={true}
-                aria-label="Konversationsaktionen"
+                aria-label={t('conversation-actions')}
                 data-testid="conversation-actions"
               >
                 <DotsThreeIcon />
@@ -130,7 +139,7 @@ export function ChatHistoryItem({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem onClick={() => setIsEditable(true)}>
-                <span>Umbenennen</span>
+                <span>{t('rename-chat')}</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 variant="destructive"
@@ -138,7 +147,7 @@ export function ChatHistoryItem({
                 onClick={() => onDeleteConversation(conversation.id)}
               >
                 <TrashIcon />
-                <span>Löschen</span>
+                <span>{t('delete-chat')}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -164,7 +173,9 @@ function buildConversationUrl({ conversation }: { conversation: ConversationMode
   return `/d/${conversation.id}`;
 }
 
-function determineConversationIcon(conversation: ConversationModel): ReactNode {
+function determineConversationIcon(
+  conversation: ConversationModel,
+): ReactElement<{ weight?: 'regular' | 'bold' }> | undefined {
   switch (conversation.type) {
     case 'chat':
       if (conversation.characterId) {
@@ -173,10 +184,10 @@ function determineConversationIcon(conversation: ConversationModel): ReactNode {
       if (conversation.customGptId) {
         return <LegoSmileyIcon />;
       }
-      return <></>;
+      return undefined;
     case 'image-generation':
       return <ImageSquareIcon />;
     default:
-      return <></>;
+      return undefined;
   }
 }
