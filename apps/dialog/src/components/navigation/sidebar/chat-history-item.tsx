@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import {
   SidebarMenuAction,
@@ -57,6 +58,15 @@ export function ChatHistoryItem({
     resolver: zodResolver(renameChatHistorySchema),
     defaultValues: { name: conversation.name ?? '' },
   });
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const { ref: registerRef, ...registerFieldProps } = renameForm.register('name');
+
+  React.useEffect(() => {
+    if (isEditable) {
+      inputRef.current?.focus();
+    }
+  }, [isEditable]);
+
   const href = buildConversationUrl({ conversation });
   const icon = determineConversationIcon(conversation);
 
@@ -91,8 +101,12 @@ export function ChatHistoryItem({
       {isEditable && (
         <form className="w-full flex gap-1" onSubmit={renameForm.handleSubmit(onSubmit)}>
           <Input
-            {...renameForm.register('name')}
+            {...registerFieldProps}
             className="min-w-0 p-1 text-foreground border border-foreground rounded-md"
+            ref={(node) => {
+              registerRef(node);
+              (inputRef as React.RefObject<HTMLInputElement | null>).current = node;
+            }}
           />
 
           <button
@@ -138,7 +152,11 @@ export function ChatHistoryItem({
               </SidebarMenuAction>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => setIsEditable(true)}>
+              <DropdownMenuItem
+                onClick={() => {
+                  setIsEditable(true);
+                }}
+              >
                 <span>{t('rename-chat')}</span>
               </DropdownMenuItem>
               <DropdownMenuItem
