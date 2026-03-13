@@ -57,11 +57,15 @@
     "terms-and-conditions-title": "Nutzungsbedingungen"
   },
   "sidebar": {
-    "home-link": "Startseite",
-    "toggle-light-theme": "Helles Design aktivieren",
-    "toggle-dark-theme": "Dunkles Design aktivieren",
-    "close-sidebar": "Seitenleiste schließen",
-    "open-sidebar": "Seitenleiste öffnen",
+    "aria": {
+      "main-navigation": "Hauptnavigation",
+      "chat-history": "Chat-Verlauf",
+      "home-link": "Startseite",
+      "toggle-light-theme": "Helles Design aktivieren",
+      "toggle-dark-theme": "Dunkles Design aktivieren",
+      "close-sidebar": "Seitenleiste schließen",
+      "open-sidebar": "Seitenleiste öffnen"
+    },
     "new-chat": "Neuer Chat",
     "new-image": "Neues Bild",
     "assistants": "Assistenten",
@@ -81,8 +85,7 @@
     "chats-error": "Etwas ist schiefgelaufen...",
     "chats-reload": "Dialoge neu laden",
     "search-clear": "Suche löschen",
-    "help-mode": "Hilfe",
-    "image-generation-new": "Neues Bild"
+    "help-mode": "Hilfe"
   },
   "websearch": {
     "placeholders": {

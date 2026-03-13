@@ -48,8 +48,8 @@ export function AppSidebar({
   const { resolvedTheme, setTheme } = useTheme();
   const t = useTranslations('sidebar');
   const isDarkTheme = resolvedTheme === 'dark';
-  const lightThemeLabel = t('toggle-light-theme');
-  const darkThemeLabel = t('toggle-dark-theme');
+  const lightThemeLabel = t('aria.toggle-light-theme');
+  const darkThemeLabel = t('aria.toggle-dark-theme');
 
   function toggleTheme() {
     const currentTheme = resolvedTheme ?? 'light';
@@ -63,7 +63,7 @@ export function AppSidebar({
           <div className="p-2 flex justify-end gap-2">
             <Link
               href="/"
-              aria-label={t('home-link')}
+              aria-label={t('aria.home-link')}
               className="mr-auto rounded outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <TelliLogo className="h-7 text-primary" />
@@ -77,7 +77,7 @@ export function AppSidebar({
             </IconButton>
             <IconButton
               onClick={toggleSidebar}
-              aria-label={open ? t('close-sidebar') : t('open-sidebar')}
+              aria-label={open ? t('aria.close-sidebar') : t('aria.open-sidebar')}
               aria-expanded={open}
             >
               <SidebarSimpleIcon />
@@ -86,38 +86,41 @@ export function AppSidebar({
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarMenu>
-              <AppMenuItem href="/" icon={<ChatTextIcon />} text={t('new-chat')} />
-              {federalState.featureToggles?.isImageGenerationEnabled && (
-                <AppMenuItem
-                  href="/image-generation"
-                  icon={<ImageSquareIcon />}
-                  text={t('new-image')}
-                />
-              )}
-              {user.userRole === 'teacher' && federalState.featureToggles?.isCustomGptEnabled && (
-                <AppMenuItem href="/custom" icon={<LegoSmileyIcon />} text={t('assistants')} />
-              )}
-              <SidebarSeparator className="my-6" />
-              {user.userRole === 'teacher' && federalState.featureToggles?.isSharedChatEnabled && (
-                <AppMenuItem
-                  href="/learning-scenarios"
-                  icon={<MountainsIcon />}
-                  text={t('learning-scenarios')}
-                />
-              )}
-              {user.userRole === 'teacher' && federalState.featureToggles?.isCharacterEnabled && (
-                <AppMenuItem href="/characters" icon={<StudentIcon />} text={t('characters')} />
-              )}
-              <SidebarSeparator className="my-6" />
-              {user.userRole === 'teacher' && federalState.featureToggles?.isCustomGptEnabled && (
-                <AppMenuItem
-                  href={`/custom/d/${HELP_MODE_GPT_ID}`}
-                  icon={<QuestionIcon />}
-                  text={t('help-chat')}
-                />
-              )}
-            </SidebarMenu>
+            <nav aria-label={t('aria.main-navigation')}>
+              <SidebarMenu>
+                <AppMenuItem href="/" icon={<ChatTextIcon />} text={t('new-chat')} />
+                {federalState.featureToggles?.isImageGenerationEnabled && (
+                  <AppMenuItem
+                    href="/image-generation"
+                    icon={<ImageSquareIcon />}
+                    text={t('new-image')}
+                  />
+                )}
+                {user.userRole === 'teacher' && federalState.featureToggles?.isCustomGptEnabled && (
+                  <AppMenuItem href="/custom" icon={<LegoSmileyIcon />} text={t('assistants')} />
+                )}
+                <SidebarSeparator className="my-6" />
+                {user.userRole === 'teacher' &&
+                  federalState.featureToggles?.isSharedChatEnabled && (
+                    <AppMenuItem
+                      href="/learning-scenarios"
+                      icon={<MountainsIcon />}
+                      text={t('learning-scenarios')}
+                    />
+                  )}
+                {user.userRole === 'teacher' && federalState.featureToggles?.isCharacterEnabled && (
+                  <AppMenuItem href="/characters" icon={<StudentIcon />} text={t('characters')} />
+                )}
+                <SidebarSeparator className="my-6" />
+                {user.userRole === 'teacher' && federalState.featureToggles?.isCustomGptEnabled && (
+                  <AppMenuItem
+                    href={`/custom/d/${HELP_MODE_GPT_ID}`}
+                    icon={<QuestionIcon />}
+                    text={t('help-chat')}
+                  />
+                )}
+              </SidebarMenu>
+            </nav>
           </SidebarGroup>
 
           <SidebarGroup className="mt-2">
