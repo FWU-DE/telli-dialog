@@ -1,5 +1,4 @@
 import React from 'react';
-import { FieldArrayWithId } from 'react-hook-form';
 import { cn } from '@/utils/tailwind';
 import { inputFieldClassName, labelClassName } from '@/utils/tailwind/input';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
@@ -13,9 +12,10 @@ import {
 import { useToast } from '../common/toast';
 import { useTranslations } from 'next-intl';
 import { WebsearchSource } from '@shared/db/types';
+import { ingestWebContentAction } from './actions';
 
 type AttachedLinksProps = {
-  fields: FieldArrayWithId<WebsearchSource, never, 'id'>[];
+  fields: WebsearchSource[];
   getValues: () => WebsearchSource[];
   setValue: (value: WebsearchSource[]) => void;
   t: ReturnType<typeof useTranslations>;
@@ -34,8 +34,10 @@ export function AttachedLinks({
   readOnly = false,
 }: AttachedLinksProps) {
   const [currentAttachedLink, setCurrentAttachedLink] = React.useState('');
+  const [processingLinks, setProcessingLinks] = React.useState<Set<string>>(new Set());
   const toast = useToast();
-  function appendLink(content: string) {
+
+  async function appendLink(content: string) {
     const currentValues = getValues() || [];
 
     if (content === '') {
@@ -55,8 +57,31 @@ export function AttachedLinks({
       toast.error(tToast('invalid-url'));
       return;
     }
+
+    // Add the link optimistically to the form
     setValue([...currentValues, { link: content, name: '', content: '', error: false }]);
     setCurrentAttachedLink('');
+
+    // Start ingestion in background
+    setProcessingLinks((prev) => new Set(prev).add(content));
+    try {
+      const result = await ingestWebContentAction({ url: content });
+      if (!result.success || result.value.errorUrls.length > 0) {
+        throw new Error('Ingestion failed');
+      }
+    } catch {
+      // Remove the link from the form if ingestion fails
+      const latestValues = getValues();
+      setValue(latestValues.filter((item: WebsearchSource) => item.link !== content));
+      toast.error(tToast('scrape-error'));
+      return;
+    } finally {
+      setProcessingLinks((prev) => {
+        const next = new Set(prev);
+        next.delete(content);
+        return next;
+      });
+    }
     handleAutosave();
   }
 
@@ -107,17 +132,21 @@ export function AttachedLinks({
       </div>
       <div>
         <div className="flex flex-wrap gap-2">
-          {fields.map((field, index) => (
-            <div className="flex flex-row gap-2" key={`${field.id}-${index}`}>
-              <Citation
-                source={field as unknown as WebsearchSource}
-                className="bg-secondary-dark rounded-enterprise-sm h-10"
-                handleDelete={!readOnly ? () => handleDeleteLink(index) : undefined}
-                index={index}
-                sourceIndex={0}
-              />
-            </div>
-          ))}
+          {fields.map((field, index) => {
+            const isLinkProcessing = processingLinks.has(field.link);
+            return (
+              <div className="flex flex-row gap-2" key={field.link}>
+                <Citation
+                  source={field}
+                  className="bg-secondary-dark rounded-enterprise-sm h-10"
+                  handleDelete={!readOnly ? () => handleDeleteLink(index) : undefined}
+                  isLoading={isLinkProcessing}
+                  index={index}
+                  sourceIndex={0}
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

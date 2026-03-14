@@ -5,6 +5,7 @@ import { cn } from '@/utils/tailwind';
 import SearchIcon from '@/components/icons/search';
 import { getDisplayUrl } from '@/utils/web-search/parsing';
 import TrashIcon from '@/components/icons/trash';
+import Spinner from '@/components/icons/spinner';
 import { WebsearchSource } from '@shared/db/types';
 
 function truncateText(text: string, maxLength: number) {
@@ -17,12 +18,14 @@ export default function Citation({
   sourceIndex,
   handleDelete,
   className,
+  isLoading = false,
 }: {
   source: WebsearchSource;
   index: number;
   sourceIndex: number;
   handleDelete?: () => void;
   className?: string;
+  isLoading?: boolean;
 }) {
   const displayTitle = truncateText(getDisplayUrl(source.link), 30);
 
@@ -68,7 +71,12 @@ export default function Citation({
             )}
           </TooltipContent>
         </Tooltip>
-        {handleDelete !== undefined && (
+        {isLoading && (
+          <div className="p-1">
+            <Spinner className="w-4 h-4" />
+          </div>
+        )}
+        {!isLoading && handleDelete !== undefined && (
           <button
             type="button"
             className="text-gray-500 text-sm h-fit"

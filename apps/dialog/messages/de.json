@@ -177,7 +177,8 @@
       "too-many-suggestions": "Das Limit von 10 Vorschlägen wurde erreicht",
       "empty-url": "Es wurde keine URL eingegeben.",
       "duplicate-url": "Dieser Link wurde bereits hinzugefügt.",
-      "invalid-url": "Die eingegebene URL ist ungültig."
+      "invalid-url": "Die eingegebene URL ist ungültig.",
+      "scrape-error": "Die URL konnte nicht verarbeitet werden."
     }
   },
   "characters": {
@@ -270,7 +271,8 @@
       "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
       "empty-url": "Es wurde keine URL eingegeben.",
       "invalid-url": "Die eingegebene URL ist ungültig.",
-      "duplicate-url": "Dieser Link wurde bereits hinzugefügt."
+      "duplicate-url": "Dieser Link wurde bereits hinzugefügt.",
+      "scrape-error": "Die URL konnte nicht verarbeitet werden."
     }
   },
   "learning-scenarios": {
@@ -357,7 +359,8 @@
       "edit-toast-error": "Das Lernszenario konnte nicht aktualisiert werden.",
       "invalid-url": "Die eingegebene URL ist ungültig.",
       "duplicate-url": "Diese URL wurde bereits hinzugefügt.",
-      "empty-url": "Es wurde keine URL eingegeben."
+      "empty-url": "Es wurde keine URL eingegeben.",
+      "scrape-error": "Die URL konnte nicht verarbeitet werden."
     }
   },
   "top-up": {
