@@ -38,46 +38,49 @@ export function AttachedLinks({
   const toast = useToast();
 
   async function appendLink(content: string) {
+    const normalizedContent = content.trim();
     const currentValues = getValues() || [];
 
-    if (content === '') {
+    if (normalizedContent === '') {
       toast.error(tToast('empty-url'));
       return;
     }
 
-    const linkExists = currentValues.find((item: WebsearchSource) => item.link === content);
+    const linkExists = currentValues.find(
+      (item: WebsearchSource) => item.link === normalizedContent,
+    );
     if (linkExists !== undefined) {
       toast.error(tToast('duplicate-url'));
       setCurrentAttachedLink('');
       return;
     }
 
-    const isValidUrl = parseHyperlinks(content);
-    if (!isValidUrl) {
+    const parsedUrls = parseHyperlinks(normalizedContent);
+    if (!parsedUrls || parsedUrls[0] !== normalizedContent) {
       toast.error(tToast('invalid-url'));
       return;
     }
 
     // Add the link optimistically to the form
-    setValue([...currentValues, { link: content, name: '', content: '', error: false }]);
+    setValue([...currentValues, { link: normalizedContent, name: '', content: '', error: false }]);
     setCurrentAttachedLink('');
 
     // Start ingestion in background
-    setProcessingLinks((prev) => new Set(prev).add(content));
+    setProcessingLinks((prev) => new Set(prev).add(normalizedContent));
     try {
-      const result = await ingestWebContentAction({ url: content });
+      const result = await ingestWebContentAction({ url: normalizedContent });
       if (!result.success || result.value.errorUrls.length > 0) {
         throw new Error('Ingestion failed');
       }
     } catch {
       // Remove the link from the form if ingestion fails
       const latestValues = getValues();
-      setValue(latestValues.filter((item: WebsearchSource) => item.link !== content));
+      setValue(latestValues.filter((item: WebsearchSource) => item.link !== normalizedContent));
       toast.error(tToast('scrape-error'));
     } finally {
       setProcessingLinks((prev) => {
         const next = new Set(prev);
-        next.delete(content);
+        next.delete(normalizedContent);
         return next;
       });
     }
