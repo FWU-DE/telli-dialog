@@ -74,7 +74,6 @@ export function AttachedLinks({
       const latestValues = getValues();
       setValue(latestValues.filter((item: WebsearchSource) => item.link !== content));
       toast.error(tToast('scrape-error'));
-      return;
     } finally {
       setProcessingLinks((prev) => {
         const next = new Set(prev);
