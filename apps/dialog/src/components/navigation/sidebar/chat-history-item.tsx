@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import {
   SidebarMenuAction,
@@ -16,7 +15,7 @@ import {
 } from '@ui/components/DropdownMenu';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { cloneElement, type ReactElement, useState } from 'react';
+import { cloneElement, type ReactElement, useEffect, useRef, useState } from 'react';
 import { ConversationModel } from '@shared/db/types';
 import {
   CheckSquareIcon,
@@ -58,10 +57,10 @@ export function ChatHistoryItem({
     resolver: zodResolver(renameChatHistorySchema),
     defaultValues: { name: conversation.name ?? '' },
   });
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const { ref: registerRef, ...registerFieldProps } = renameForm.register('name');
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isEditable) {
       inputRef.current?.focus();
     }
