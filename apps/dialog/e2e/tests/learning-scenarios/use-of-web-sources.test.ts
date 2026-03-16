@@ -28,7 +28,7 @@ test('teacher can create shared chat with web sources, student can join chat and
   // configure form
   await configureLearningScenario(page, data);
   await page
-    .getByRole('textbox', { name: 'URL der Webseiten' })
+    .getByRole('textbox', { name: 'Web-Link' })
     .fill(
       'https://www.dw.com/de/trump-im-israel-iran-konflikt-kurs-ohne-klare-linie-donald-trump-benjamin-netanjahu-atomwaffen-v2/a-72936043',
     );

@@ -105,7 +105,7 @@ export function ChatBox({
         {websearchSources?.map((source, sourceIndex) => {
           return (
             <Citation
-              className="bg-secondary-dark rounded-enterprise-sm p-0"
+              className="p-0"
               key={`user-link-${index}-${sourceIndex}`}
               source={source}
               index={index}

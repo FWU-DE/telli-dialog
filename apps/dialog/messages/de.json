@@ -162,7 +162,7 @@
       "additional-assets-content": "Es können jeweils bis zu 5 Dateien und Links hinzugefügt werden. telli nutzt diese Informationen, um den Assistenten besser auf das Thema abzustimmen.",
       "attached-files-label": "Welche Dateien dienen telli als Grundlage?",
       "attached-links-label": "Welche Webquellen dienen telli als Grundlage?",
-      "attached-links-placeholder": "URL der Webseiten",
+      "attached-links-placeholder": "Web-Link",
       "add-link": "Link hinzufügen"
     },
     "toasts": {
@@ -178,9 +178,10 @@
       "edit-toast-error": "Etwas ist beim Aktualisieren des Assistenten schief gelaufen.",
       "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
       "too-many-suggestions": "Das Limit von 10 Vorschlägen wurde erreicht",
-      "empty-url": "Es wurde keine URL eingegeben.",
+      "empty-url": "Es wurde kein Link eingegeben.",
       "duplicate-url": "Dieser Link wurde bereits hinzugefügt.",
-      "invalid-url": "Die eingegebene URL ist ungültig."
+      "invalid-url": "Der eingegebene Link ist ungültig.",
+      "scrape-error": "Der Link konnte nicht verarbeitet werden."
     }
   },
   "characters": {
@@ -256,7 +257,7 @@
       "additional-assets-content": "Es können jeweils bis zu 5 Dateien und Links hinzugefügt werden. telli nutzt diese Informationen, um den Dialogpartner besser auf das Thema abzustimmen.",
       "attached-files-label": "Welche Dateien dienen telli als Grundlage?",
       "attached-links-label": "Welche Webquellen dienen telli als Grundlage?",
-      "attached-links-placeholder": "URL der Webseiten",
+      "attached-links-placeholder": "Web-Link",
       "add-link": "Link hinzufügen"
     },
     "toasts": {
@@ -271,9 +272,10 @@
       "edit-toast-success": "Der Dialogpartner wurde erfolgreich aktualisiert.",
       "edit-toast-error": "Etwas ist beim Aktualisieren des Dialogpartners schief gelaufen.",
       "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
-      "empty-url": "Es wurde keine URL eingegeben.",
-      "invalid-url": "Die eingegebene URL ist ungültig.",
-      "duplicate-url": "Dieser Link wurde bereits hinzugefügt."
+      "empty-url": "Es wurde kein Link eingegeben.",
+      "invalid-url": "Der eingegebene Link ist ungültig.",
+      "duplicate-url": "Dieser Link wurde bereits hinzugefügt.",
+      "scrape-error": "Der Link konnte nicht verarbeitet werden."
     }
   },
   "learning-scenarios": {
@@ -309,7 +311,7 @@
       "additional-assets-content": "Es können jeweils bis zu 5 Dateien und Links hinzugefügt werden. telli nutzt diese Informationen, um das Lernszenario besser auf das Thema abzustimmen.",
       "attached-files-label": "Welche Dateien dienen telli als Grundlage?",
       "attached-links-label": "Welche Webquellen dienen telli als Grundlage?",
-      "attached-links-placeholder": "URL der Webseiten",
+      "attached-links-placeholder": "Web-Link",
       "add-link": "Link hinzufügen",
       "copy-page": {
         "title": "Lernszenario in eigenen Bereich kopieren",
@@ -358,9 +360,10 @@
       "delete-toast-error": "Das Lernszenario konnte nicht gelöscht werden.",
       "edit-toast-success": "Das Lernszenario wurde erfolgreich aktualisiert.",
       "edit-toast-error": "Das Lernszenario konnte nicht aktualisiert werden.",
-      "invalid-url": "Die eingegebene URL ist ungültig.",
-      "duplicate-url": "Diese URL wurde bereits hinzugefügt.",
-      "empty-url": "Es wurde keine URL eingegeben."
+      "invalid-url": "Der eingegebene Link ist ungültig.",
+      "duplicate-url": "Dieser Link wurde bereits hinzugefügt.",
+      "empty-url": "Es wurde kein Link eingegeben.",
+      "scrape-error": "Der Link konnte nicht verarbeitet werden."
     }
   },
   "top-up": {

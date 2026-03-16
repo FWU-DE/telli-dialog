@@ -1,5 +1,4 @@
 import React from 'react';
-import { FieldArrayWithId } from 'react-hook-form';
 import { cn } from '@/utils/tailwind';
 import { inputFieldClassName, labelClassName } from '@/utils/tailwind/input';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
@@ -13,9 +12,10 @@ import {
 import { useToast } from '../common/toast';
 import { useTranslations } from 'next-intl';
 import { WebsearchSource } from '@shared/db/types';
+import { ingestWebContentAction } from './actions';
 
 type AttachedLinksProps = {
-  fields: FieldArrayWithId<WebsearchSource, never, 'id'>[];
+  fields: WebsearchSource[];
   getValues: () => WebsearchSource[];
   setValue: (value: WebsearchSource[]) => void;
   t: ReturnType<typeof useTranslations>;
@@ -34,29 +34,51 @@ export function AttachedLinks({
   readOnly = false,
 }: AttachedLinksProps) {
   const [currentAttachedLink, setCurrentAttachedLink] = React.useState('');
+  const [processingLinks, setProcessingLinks] = React.useState<Set<string>>(new Set());
   const toast = useToast();
-  function appendLink(content: string) {
+
+  async function appendLink(content: string) {
+    const normalizedContent = content.trim();
     const currentValues = getValues() || [];
 
-    if (content === '') {
+    if (normalizedContent === '') {
       toast.error(tToast('empty-url'));
       return;
     }
 
-    const linkExists = currentValues.find((item: WebsearchSource) => item.link === content);
+    const linkExists = currentValues.find(
+      (item: WebsearchSource) => item.link === normalizedContent,
+    );
     if (linkExists !== undefined) {
       toast.error(tToast('duplicate-url'));
       setCurrentAttachedLink('');
       return;
     }
 
-    const isValidUrl = parseHyperlinks(content);
-    if (!isValidUrl) {
+    const parsedUrls = parseHyperlinks(normalizedContent);
+    if (!parsedUrls || parsedUrls[0] !== normalizedContent) {
       toast.error(tToast('invalid-url'));
       return;
     }
-    setValue([...currentValues, { link: content, name: '', content: '', error: false }]);
+
+    // Add the link optimistically to the form
+    setValue([...currentValues, { link: normalizedContent, name: '', content: '', error: false }]);
     setCurrentAttachedLink('');
+
+    // Start ingestion in background
+    setProcessingLinks((prev) => new Set(prev).add(normalizedContent));
+    const result = await ingestWebContentAction({ url: normalizedContent });
+    if (!result.success || result.value.errorUrls.length > 0) {
+      // Remove the link from the form if ingestion fails
+      const latestValues = getValues();
+      setValue(latestValues.filter((item: WebsearchSource) => item.link !== normalizedContent));
+      toast.error(tToast('scrape-error'));
+    }
+    setProcessingLinks((prev) => {
+      const next = new Set(prev);
+      next.delete(normalizedContent);
+      return next;
+    });
     handleAutosave();
   }
 
@@ -107,17 +129,21 @@ export function AttachedLinks({
       </div>
       <div>
         <div className="flex flex-wrap gap-2">
-          {fields.map((field, index) => (
-            <div className="flex flex-row gap-2" key={`${field.id}-${index}`}>
-              <Citation
-                source={field as unknown as WebsearchSource}
-                className="bg-secondary-dark rounded-enterprise-sm h-10"
-                handleDelete={!readOnly ? () => handleDeleteLink(index) : undefined}
-                index={index}
-                sourceIndex={0}
-              />
-            </div>
-          ))}
+          {fields.map((field, index) => {
+            const isLinkProcessing = processingLinks.has(field.link);
+            return (
+              <div className="flex flex-row gap-2" key={field.link}>
+                <Citation
+                  source={field}
+                  className="h-10"
+                  handleDelete={!readOnly ? () => handleDeleteLink(index) : undefined}
+                  isLoading={isLinkProcessing}
+                  index={index}
+                  sourceIndex={0}
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
