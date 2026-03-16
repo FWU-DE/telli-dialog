@@ -113,18 +113,20 @@ export function ChatHistory() {
             )}
           </InputGroupAddon>
         </InputGroup>
-        <SidebarMenu>
-          {filteredConversations.map((conversation) => (
-            <ChatHistoryItem
-              key={conversation.id}
-              conversation={conversation}
-              onDeleteConversation={handleDeleteConversation}
-              onUpdateConversation={(name) =>
-                handleUpdateConversation({ id: conversation.id, name })
-              }
-            />
-          ))}
-        </SidebarMenu>
+        <nav aria-label={t('aria.chat-history')}>
+          <SidebarMenu>
+            {filteredConversations.map((conversation) => (
+              <ChatHistoryItem
+                key={conversation.id}
+                conversation={conversation}
+                onDeleteConversation={handleDeleteConversation}
+                onUpdateConversation={(name) =>
+                  handleUpdateConversation({ id: conversation.id, name })
+                }
+              />
+            ))}
+          </SidebarMenu>
+        </nav>
       </SidebarGroup>
 
       {isLoading && (
