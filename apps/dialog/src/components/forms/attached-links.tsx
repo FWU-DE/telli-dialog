@@ -67,23 +67,18 @@ export function AttachedLinks({
 
     // Start ingestion in background
     setProcessingLinks((prev) => new Set(prev).add(normalizedContent));
-    try {
-      const result = await ingestWebContentAction({ url: normalizedContent });
-      if (!result.success || result.value.errorUrls.length > 0) {
-        throw new Error('Ingestion failed');
-      }
-    } catch {
+    const result = await ingestWebContentAction({ url: normalizedContent });
+    if (!result.success || result.value.errorUrls.length > 0) {
       // Remove the link from the form if ingestion fails
       const latestValues = getValues();
       setValue(latestValues.filter((item: WebsearchSource) => item.link !== normalizedContent));
       toast.error(tToast('scrape-error'));
-    } finally {
-      setProcessingLinks((prev) => {
-        const next = new Set(prev);
-        next.delete(normalizedContent);
-        return next;
-      });
     }
+    setProcessingLinks((prev) => {
+      const next = new Set(prev);
+      next.delete(normalizedContent);
+      return next;
+    });
     handleAutosave();
   }
 
@@ -140,7 +135,7 @@ export function AttachedLinks({
               <div className="flex flex-row gap-2" key={field.link}>
                 <Citation
                   source={field}
-                  className="bg-secondary-dark rounded-enterprise-sm h-10"
+                  className="h-10"
                   handleDelete={!readOnly ? () => handleDeleteLink(index) : undefined}
                   isLoading={isLinkProcessing}
                   index={index}

@@ -32,7 +32,10 @@ export default function Citation({
   return (
     <TooltipProvider skipDelayDuration={0} delayDuration={0}>
       <div
-        className={cn('flex flex-row  items-center gap-0 p-1', className)}
+        className={cn(
+          'flex flex-row items-center gap-0 p-1 bg-secondary-dark rounded-enterprise-sm',
+          className,
+        )}
         style={{
           direction: 'ltr',
         }}
@@ -73,7 +76,7 @@ export default function Citation({
         </Tooltip>
         {isLoading && (
           <div className="p-1">
-            <Spinner className="w-4 h-4" />
+            <Spinner className="size-4" />
           </div>
         )}
         {!isLoading && handleDelete !== undefined && (
