@@ -34,6 +34,7 @@ export function AppMenuItem({ href, icon, text }: AppMenuItemProps) {
             }
           }}
           prefetch={false}
+          aria-current={isActive() ? 'page' : undefined}
         >
           <span className="text-primary">
             {cloneElement(icon, { weight: isActive() ? 'bold' : 'regular' })}

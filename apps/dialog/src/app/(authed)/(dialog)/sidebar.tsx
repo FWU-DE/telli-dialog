@@ -136,7 +136,7 @@ export default function DialogSidebar({
                 )}
               >
                 <ImageSquareIcon className="w-6 h-5" />
-                <span className="text-base">{t('image-generation-new')}</span>
+                <span className="text-base">{t('new-image')}</span>
               </div>
             </Link>
           )}

@@ -15,7 +15,7 @@ import {
 } from '@ui/components/DropdownMenu';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { cloneElement, type ReactElement, useState } from 'react';
+import { cloneElement, type ReactElement, useEffect, useRef, useState } from 'react';
 import { ConversationModel } from '@shared/db/types';
 import {
   CheckSquareIcon,
@@ -57,6 +57,15 @@ export function ChatHistoryItem({
     resolver: zodResolver(renameChatHistorySchema),
     defaultValues: { name: conversation.name ?? '' },
   });
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { ref: registerRef, ...registerFieldProps } = renameForm.register('name');
+
+  useEffect(() => {
+    if (isEditable) {
+      inputRef.current?.focus();
+    }
+  }, [isEditable]);
+
   const href = buildConversationUrl({ conversation });
   const icon = determineConversationIcon(conversation);
 
@@ -91,8 +100,12 @@ export function ChatHistoryItem({
       {isEditable && (
         <form className="w-full flex gap-1" onSubmit={renameForm.handleSubmit(onSubmit)}>
           <Input
-            {...renameForm.register('name')}
+            {...registerFieldProps}
             className="min-w-0 p-1 text-foreground border border-foreground rounded-md"
+            ref={(node) => {
+              registerRef(node);
+              (inputRef as React.RefObject<HTMLInputElement | null>).current = node;
+            }}
           />
 
           <button
@@ -138,7 +151,11 @@ export function ChatHistoryItem({
               </SidebarMenuAction>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => setIsEditable(true)}>
+              <DropdownMenuItem
+                onClick={() => {
+                  setIsEditable(true);
+                }}
+              >
                 <span>{t('rename-chat')}</span>
               </DropdownMenuItem>
               <DropdownMenuItem
