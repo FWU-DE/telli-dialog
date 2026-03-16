@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS "chunk_embedding_idx";

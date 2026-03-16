@@ -1199,11 +1199,7 @@ export const chunkTable = pgTable(
     sourceType: chunkSourceTypeEnum('source_type').notNull().default('file'),
     sourceUrl: text('source_url'),
   },
-  (table) => [
-    index().on(table.fileId),
-    index('chunk_embedding_idx').using('hnsw', table.embedding.op('vector_cosine_ops')),
-    unique().on(table.sourceUrl, table.orderIndex),
-  ],
+  (table) => [index().on(table.fileId), unique().on(table.sourceUrl, table.orderIndex)],
 );
 
 export const chunkSelectSchema = createSelectSchema(chunkTable).extend({
