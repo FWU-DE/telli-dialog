@@ -49,6 +49,8 @@ ARG CI
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
     --mount=type=secret,id=SENTRY_ORG,env=SENTRY_ORG \
     --mount=type=secret,id=SENTRY_PROJECT,env=SENTRY_PROJECT \
+    --mount=type=secret,id=SENTRY_URL,env=SENTRY_URL \
+    CI=${CI} \
     pnpm build
 
 # Recreate node_modules as production-only

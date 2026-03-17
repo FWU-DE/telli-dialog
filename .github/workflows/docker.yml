@@ -62,6 +62,7 @@ jobs:
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_URL: ${{ vars.SENTRY_URL }}
           SENTRY_PROJECT: ${{ matrix.sentry_project }}
         with:
           context: .
@@ -70,6 +71,7 @@ jobs:
             SENTRY_AUTH_TOKEN=SENTRY_AUTH_TOKEN
             SENTRY_ORG=SENTRY_ORG
             SENTRY_PROJECT=SENTRY_PROJECT
+            SENTRY_URL=SENTRY_URL
           build-args: |
             CI=${CI}
             APP_VERSION=${{ github.sha }}

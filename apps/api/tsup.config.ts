@@ -1,6 +1,8 @@
 import { defineConfig } from 'tsup';
 import { sentryEsbuildPlugin } from '@sentry/esbuild-plugin';
 
+const isDevBuild = process.env.NODE_ENV !== 'production';
+
 export default defineConfig({
   entry: ['src/index.ts'],
   sourcemap: true,
@@ -24,18 +26,24 @@ export default defineConfig({
     sentryEsbuildPlugin({
       org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT,
+      url: process.env.SENTRY_URL,
       authToken: process.env.SENTRY_AUTH_TOKEN,
       telemetry: false,
       debug: true,
       release: {
-        create: process.env.NODE_ENV === 'production',
+        create: !isDevBuild,
         setCommits: {
           auto: true,
           ignoreEmpty: true,
           ignoreMissing: true,
         },
       },
+
+      // Only print logs for uploading source maps in CI
+      silent: !process.env.CI,
+
       sourcemaps: {
+        disable: isDevBuild,
         assets: './dist/*',
       },
     }),
