@@ -55,11 +55,11 @@
     --destructive: #ef4444ff;
     --destructive-foreground: #f8fafcff;
 
-    --success: #ffffff;
+    --success: #02a59bff;
     --success-foreground: #ffffff;
     --error: #ffffff;
     --error-foreground: #ffffff;
-    --warning: #ffffff;
+    --warning: #facc15ff;
     --warning-foreground: #ffffff;
 
     --border: #e6e6e6ff;
@@ -160,6 +160,13 @@
 
   --color-sidebar-input: #7575751a; /* background color for chat search input */
   --color-sidebar-input-foreground: #5b5b5b; /* text color for chat search input */
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-error: var(--error);
+  --color-error-foreground: var(--error-foreground);
 }
 
 @layer components {

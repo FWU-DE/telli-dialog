@@ -19,12 +19,16 @@ import { useRouter } from 'next/navigation';
 import { createNewCustomGptAction } from '../../../custom/actions';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
-import { deleteCustomGptAction } from '../../../custom/editor/[customGptId]/actions';
+import {
+  deleteCustomGptAction,
+  updateCustomGptAction,
+} from '../../../custom/editor/[customGptId]/actions';
 import { CustomChatShareInfo } from './custom-chat-share-info';
 import { CustomChatFormState } from './custom-chat-form-state';
 import { CustomChatImageUpload } from './custom-chat-image-upload';
 import { CustomChatActionSave } from './custom-chat-action-save';
 import { Textarea } from '@ui/components/Textarea';
+import { updateCustomGpt } from '@shared/custom-gpt/custom-gpt-service';
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
@@ -59,6 +63,13 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
     await new Promise((resolve) => {
       setTimeout(resolve, 2000);
     });
+
+    const updateResult = await updateCustomGptAction({ ...assistant, gptId: assistant.id });
+    if (updateResult.success) {
+      toast.success(t('toasts.edit-toast-success'));
+    } else {
+      toast.error(t('toasts.edit-toast-error'));
+    }
 
     reset(data);
   };
@@ -103,7 +114,7 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
           <CustomChatActionUse onClick={() => router.push(`/custom/d/${assistant.id}/`)} />
           <CustomChatActionDuplicate onClick={onDuplicate} />
           <CustomChatActionDelete onClick={onDelete} />
-          <CustomChatActionSave onClick={() => void handleSubmit(onSubmit)()} />
+          <CustomChatActionSave onClick={handleAutoSave} />
         </CustomChatActions>
         <CustomChatFormState isDirty={isDirty} isSubmitting={isSubmitting} />
       </div>
