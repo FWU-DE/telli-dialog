@@ -18,7 +18,7 @@ export const env = createEnv({
       .union([
         z.literal('fatal'),
         z.literal('error'),
-        z.literal('warning'),
+        z.literal('warn'),
         z.literal('info'),
         z.literal('debug'),
         z.literal('trace'),
