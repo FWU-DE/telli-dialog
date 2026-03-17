@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { CustomGptSelectModel } from '@shared/db/schema';
 import { BackButton } from './back-button';
 import { Card, CardContent } from '@ui/components/Card';
-import { Field, FieldLabel, FieldError } from '@ui/components/Field';
+import { Field, FieldLabel, FieldError, FieldGroup } from '@ui/components/Field';
 import { Input } from '@ui/components/Input';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import z from 'zod';
@@ -23,6 +23,8 @@ import { deleteCustomGptAction } from '../../../custom/editor/[customGptId]/acti
 import { CustomChatShareInfo } from './custom-chat-share-info';
 import { CustomChatFormState } from './custom-chat-form-state';
 import { CustomChatImageUpload } from './custom-chat-image-upload';
+import { CustomChatActionSave } from './custom-chat-action-save';
+import { Textarea } from '@ui/components/Textarea';
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
@@ -101,58 +103,63 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
           <CustomChatActionUse onClick={() => router.push(`/custom/d/${assistant.id}/`)} />
           <CustomChatActionDuplicate onClick={onDuplicate} />
           <CustomChatActionDelete onClick={onDelete} />
+          <CustomChatActionSave onClick={() => void handleSubmit(onSubmit)()} />
         </CustomChatActions>
         <CustomChatFormState isDirty={isDirty} isSubmitting={isSubmitting} />
       </div>
       {/* Todo: Datum/Uhrzeit letzte Aktualisierung, evtl. mit gespeicher, wird gespeichert*/}
       <CustomChatShareInfo href="#share-settings" />
-      <CustomChatImageUpload></CustomChatImageUpload>
+      <CustomChatImageUpload />
 
       <form id="assistant-edit-form" onSubmit={handleSubmit(onSubmit)}>
         <Card>
           <CardContent>
-            <Controller
-              name="name"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} aria-required="true">
-                  <FieldLabel htmlFor={field.name}>Name des Assistenten</FieldLabel>
-                  <Input
-                    {...field}
-                    id="field.name"
-                    aria-invalid={fieldState.invalid}
-                    placeholder=""
-                    autoComplete="off"
-                    onBlur={() => {
-                      field.onBlur();
-                      handleAutoSave();
-                    }}
-                  />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )}
-            />
-            <Controller
-              name="description"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Beschreibung des Assistenten</FieldLabel>
-                  <Input
-                    {...field}
-                    id="field.description"
-                    aria-invalid={fieldState.invalid}
-                    placeholder="Beschreibung des Assistenten"
-                    autoComplete="off"
-                    onBlur={() => {
-                      field.onBlur();
-                      handleAutoSave();
-                    }}
-                  />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )}
-            />
+            <FieldGroup>
+              <Controller
+                name="name"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} aria-required="true">
+                    <FieldLabel htmlFor={field.name}>Name des Assistenten</FieldLabel>
+                    <Input
+                      {...field}
+                      id="field.name"
+                      aria-invalid={fieldState.invalid}
+                      placeholder="Name des Assistenten"
+                      autoComplete="off"
+                      required
+                      onBlur={() => {
+                        field.onBlur();
+                        handleAutoSave();
+                      }}
+                    />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="description"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Kurzbeschreibung</FieldLabel>
+                    <Textarea
+                      {...field}
+                      id="field.description"
+                      className="h-27 resize-none"
+                      aria-invalid={fieldState.invalid}
+                      placeholder="Beschreibung des Assistenten"
+                      autoComplete="off"
+                      onBlur={() => {
+                        field.onBlur();
+                        handleAutoSave();
+                      }}
+                    />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+            </FieldGroup>
           </CardContent>
         </Card>
         <div>Instruktionen</div>

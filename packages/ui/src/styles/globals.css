@@ -62,8 +62,8 @@
     --warning: #ffffff;
     --warning-foreground: #ffffff;
 
-    --border: #e2e8f0ff;
-    --input: #e2e8f0ff;
+    --border: #e6e6e6ff;
+    --input: #ccccccff;
     --ring: var(--primary);
 
     --sidebar-background: #fafafaff;
