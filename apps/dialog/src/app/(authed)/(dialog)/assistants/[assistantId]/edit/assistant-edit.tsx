@@ -22,6 +22,7 @@ import { useTranslations } from 'next-intl';
 import { deleteCustomGptAction } from '../../../custom/editor/[customGptId]/actions';
 import { CustomChatShareInfo } from './custom-chat-share-info';
 import { CustomChatFormState } from './custom-chat-form-state';
+import { CustomChatImageUpload } from './custom-chat-image-upload';
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
@@ -103,10 +104,9 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
         </CustomChatActions>
         <CustomChatFormState isDirty={isDirty} isSubmitting={isSubmitting} />
       </div>
-
       {/* Todo: Datum/Uhrzeit letzte Aktualisierung, evtl. mit gespeicher, wird gespeichert*/}
-
       <CustomChatShareInfo href="#share-settings" />
+      <CustomChatImageUpload></CustomChatImageUpload>
 
       <form id="assistant-edit-form" onSubmit={handleSubmit(onSubmit)}>
         <Card>
