@@ -73,13 +73,14 @@ export function AttachedLinks({
       const latestValues = getValues();
       setValue(latestValues.filter((item: WebsearchSource) => item.link !== normalizedContent));
       toast.error(tToast('scrape-error'));
+    } else {
+      handleAutosave();
     }
     setProcessingLinks((prev) => {
       const next = new Set(prev);
       next.delete(normalizedContent);
       return next;
     });
-    handleAutosave();
   }
 
   function handleDeleteLink(index: number) {
