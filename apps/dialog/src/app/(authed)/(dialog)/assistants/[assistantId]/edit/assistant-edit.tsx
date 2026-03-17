@@ -3,7 +3,7 @@
 import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CustomGptSelectModel } from '@shared/db/schema';
-import { Button } from '@ui/components/Button';
+import { BackButton } from './back-button';
 import { Card, CardContent } from '@ui/components/Card';
 import { Field, FieldLabel, FieldError } from '@ui/components/Field';
 import { Input } from '@ui/components/Input';
@@ -56,7 +56,7 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
   return (
     // Extract that into separate component
     <div className="max-w-3xl mx-auto mt-4">
-      <Button variant="link">{'< Assistenten'}</Button>
+      <BackButton href="/assistants" text="Assistenten" aria-label="Zurück zu den Assistenten" />
       <div className="flex justify-between my-4">
         <h1 className="text-2xl font-bold">{name}</h1>
         <span>{isSubmitting ? '...wird gespeichert' : 'gespeichert'}</span>
