@@ -20,6 +20,7 @@ import { createNewCustomGptAction } from '../../../custom/actions';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { deleteCustomGptAction } from '../../../custom/editor/[customGptId]/actions';
+import { CustomChatShareInfo } from './custom-chat-share-info';
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
@@ -104,6 +105,8 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
 
       {/* Todo: Datum/Uhrzeit letzte Aktualisierung, evtl. mit gespeicher, wird gespeichert*/}
 
+      <CustomChatShareInfo href="#share-settings" />
+
       <form id="assistant-edit-form" onSubmit={handleSubmit(onSubmit)}>
         <Card>
           <CardContent>
@@ -154,7 +157,7 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
         <div>Instruktionen</div>
         <div>Liste mit Promptvorschlägen</div>
         <div>Hintergrundwissen</div>
-        <div>Freigabe</div>
+        <div id="share-settings">Freigabe</div>
       </form>
     </CustomChatLayoutContainer>
   );
