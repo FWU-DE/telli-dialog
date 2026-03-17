@@ -90,7 +90,7 @@ export default withSentryConfig(baseNextConfigWithNextIntl, {
 
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
-  sentryUrl: 'https://sentry.logging.eu-de.prod.telli.schule',
+  sentryUrl: process.env.SENTRY_URL,
   authToken: process.env.SENTRY_AUTH_TOKEN,
   debug: true,
 
