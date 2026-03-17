@@ -9,6 +9,8 @@ import { Field, FieldLabel, FieldError } from '@ui/components/Field';
 import { Input } from '@ui/components/Input';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import z from 'zod';
+import { CustomChatLayoutContainer } from './custom-chat-layout-container';
+import { CustomChatTitle } from './custom-chat-title';
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
@@ -54,11 +56,11 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
   };
 
   return (
-    // Extract that into separate component
-    <div className="max-w-3xl mx-auto mt-4">
+    <CustomChatLayoutContainer>
       <BackButton href="/assistants" text="Assistenten" aria-label="Zurück zu den Assistenten" />
+      <CustomChatTitle title={name} />
+      {/* // Todo: Design fehlt für Statusanzeige  */}
       <div className="flex justify-between my-4">
-        <h1 className="text-2xl font-bold">{name}</h1>
         <span>{isSubmitting ? '...wird gespeichert' : 'gespeichert'}</span>
       </div>
 
@@ -114,6 +116,6 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
         <div>Hintergrundwissen</div>
         <div>Freigabe</div>
       </form>
-    </div>
+    </CustomChatLayoutContainer>
   );
 }
