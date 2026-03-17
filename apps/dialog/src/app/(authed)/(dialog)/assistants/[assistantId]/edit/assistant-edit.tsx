@@ -21,6 +21,7 @@ import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { deleteCustomGptAction } from '../../../custom/editor/[customGptId]/actions';
 import { CustomChatShareInfo } from './custom-chat-share-info';
+import { CustomChatFormState } from './custom-chat-form-state';
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
@@ -94,14 +95,14 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
       <BackButton href="/custom" text="Assistenten" aria-label="Zurück zu den Assistenten" />
       <CustomChatTitle title={name} />
       {/* // Todo: Design fehlt für Statusanzeige  */}
-      <div className="flex justify-between my-4">
-        <span>{isSubmitting ? '...wird gespeichert' : 'gespeichert'}</span>
+      <div className="flex flex-row justify-between">
+        <CustomChatActions>
+          <CustomChatActionUse onClick={() => router.push(`/custom/d/${assistant.id}/`)} />
+          <CustomChatActionDuplicate onClick={onDuplicate} />
+          <CustomChatActionDelete onClick={onDelete} />
+        </CustomChatActions>
+        <CustomChatFormState isDirty={isDirty} isSubmitting={isSubmitting} />
       </div>
-      <CustomChatActions>
-        <CustomChatActionUse onClick={() => router.push(`/custom/d/${assistant.id}/`)} />
-        <CustomChatActionDuplicate onClick={onDuplicate} />
-        <CustomChatActionDelete onClick={onDelete} />
-      </CustomChatActions>
 
       {/* Todo: Datum/Uhrzeit letzte Aktualisierung, evtl. mit gespeicher, wird gespeichert*/}
 
