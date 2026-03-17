@@ -15,7 +15,7 @@ export function BackButton({ href, text, 'aria-label': ariaLabel }: BackButtonPr
 
   return (
     <Button
-      className="px-0"
+      className="px-0 justify-start"
       variant="link"
       onClick={() => router.push(href)}
       aria-label={ariaLabel}
