@@ -24,7 +24,7 @@ export function CustomChatFormState({
       )}
       {!isSubmitting && isDirty && !hasSaveError && (
         <span className="flex items-center gap-1">
-          <WarningCircleIcon className="size-5 text-color" /> Ungespeicherte Änderungen
+          <WarningCircleIcon className="size-5 text-icon" /> Ungespeicherte Änderungen
         </span>
       )}
       {!isSubmitting && !isDirty && !hasSaveError && (
