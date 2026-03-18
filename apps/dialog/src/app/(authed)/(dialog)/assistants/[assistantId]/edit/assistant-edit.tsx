@@ -4,18 +4,18 @@ import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/cons
 import { deepEqual } from '@/utils/object';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CustomGptSelectModel } from '@shared/db/schema';
-import { BackButton } from './back-button';
+import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/Card';
 import { Field, FieldLabel, FieldError, FieldGroup } from '@ui/components/Field';
 import { Input } from '@ui/components/Input';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import z from 'zod';
-import { CustomChatLayoutContainer } from './custom-chat-layout-container';
-import { CustomChatTitle } from './custom-chat-title';
-import { CustomChatActions } from './custom-chat-actions';
-import { CustomChatActionUse } from './custom-chat-action-use';
-import { CustomChatActionDuplicate } from './custom-chat-action-duplicate';
-import { CustomChatActionDelete } from './custom-chat-action-delete';
+import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
+import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
+import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions';
+import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
+import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
+import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
 import { useRouter } from 'next/navigation';
 import { createNewCustomGptAction } from '../../../custom/actions';
 import { useToast } from '@/components/common/toast';
@@ -24,10 +24,10 @@ import {
   deleteCustomGptAction,
   updateCustomGptAction,
 } from '../../../custom/editor/[customGptId]/actions';
-import { CustomChatShareInfo } from './custom-chat-share-info';
-import { CustomChatFormState } from './custom-chat-form-state';
-import { CustomChatImageUpload } from './custom-chat-image-upload';
-import { CustomChatActionSave } from './custom-chat-action-save';
+import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
+import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
+import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
+import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
 import { Textarea } from '@ui/components/Textarea';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
