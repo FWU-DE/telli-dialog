@@ -29,7 +29,7 @@ import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-s
 import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
 import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
 import { Textarea } from '@ui/components/Textarea';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 
 const assistantFormValuesSchema = z.object({
@@ -54,7 +54,6 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
 
   const [isSaving, setIsSaving] = useState(false);
   const [hasSaveError, setHasSaveError] = useState(false);
-  const latestValuesRef = useRef<AssistantFormValues>(initialValues);
   const lastSavedValuesRef = useRef<AssistantFormValues>(initialValues);
   const isSavingRef = useRef(false);
   const saveQueuedRef = useRef(false);
@@ -139,58 +138,7 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
     }
   }, [saveCurrentValues]);
 
-  const sendBestEffortSave = useCallback(() => {
-    const data = latestValuesRef.current;
-    if (deepEqual(data, lastSavedValuesRef.current)) {
-      return;
-    }
-
-    const url = `/api/assistants/${assistant.id}/autosave`;
-    const payload = JSON.stringify(data);
-
-    if (typeof navigator !== 'undefined' && 'sendBeacon' in navigator) {
-      navigator.sendBeacon(url, new Blob([payload], { type: 'application/json' }));
-      return;
-    }
-
-    void fetch(url, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: payload,
-      keepalive: true,
-    });
-  }, [assistant.id]);
-
   const name = useWatch({ control, name: 'name' });
-  const values = useWatch({ control }) as AssistantFormValues;
-
-  useEffect(() => {
-    latestValuesRef.current = values;
-    if (isSavingRef.current) {
-      saveQueuedRef.current = true;
-    }
-  }, [values]);
-
-  useEffect(() => {
-    const handlePageHide = () => {
-      sendBestEffortSave();
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        sendBestEffortSave();
-      }
-    };
-
-    window.addEventListener('pagehide', handlePageHide);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      window.removeEventListener('pagehide', handlePageHide);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [sendBestEffortSave]);
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
