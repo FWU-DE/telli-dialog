@@ -31,6 +31,7 @@ import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-actio
 import { Textarea } from '@ui/components/Textarea';
 import { useCallback, useRef, useState } from 'react';
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
+import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
@@ -51,6 +52,7 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
     name: assistant.name,
     description: assistant.description ?? '',
   };
+  useForceReloadOnBrowserBackButton();
 
   const [isSaving, setIsSaving] = useState(false);
   const [hasSaveError, setHasSaveError] = useState(false);
