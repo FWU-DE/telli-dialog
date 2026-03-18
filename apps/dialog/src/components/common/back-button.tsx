@@ -8,16 +8,24 @@ type BackButtonProps = {
   href: string;
   text: string;
   'aria-label': string;
+  onClick?: () => void;
 };
 
-export function BackButton({ href, text, 'aria-label': ariaLabel }: BackButtonProps) {
+export function BackButton({ href, text, 'aria-label': ariaLabel, onClick }: BackButtonProps) {
   const router = useRouter();
 
   return (
     <Button
       className="px-0 justify-start"
       variant="link"
-      onClick={() => router.push(href)}
+      onClick={() => {
+        if (onClick) {
+          onClick();
+          return;
+        }
+
+        router.push(href);
+      }}
       aria-label={ariaLabel}
     >
       <CaretLeftIcon className="size-4" /> {text}

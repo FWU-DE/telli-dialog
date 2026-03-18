@@ -30,6 +30,7 @@ import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-imag
 import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
 import { Textarea } from '@ui/components/Textarea';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
@@ -58,6 +59,7 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
   const isSavingRef = useRef(false);
   const saveQueuedRef = useRef(false);
   const flushRunningRef = useRef(false);
+  const currentFlushPromiseRef = useRef<Promise<boolean> | null>(null);
 
   const {
     control,
@@ -70,15 +72,15 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
     defaultValues: initialValues,
   });
 
-  const saveCurrentValues = async (): Promise<void> => {
+  const saveCurrentValues = useCallback(async (): Promise<boolean> => {
     const isValid = await trigger();
     if (!isValid) {
-      return;
+      return false;
     }
 
     const data = getValues();
     if (deepEqual(data, lastSavedValuesRef.current)) {
-      return;
+      return true;
     }
 
     isSavingRef.current = true;
@@ -93,31 +95,49 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
         setHasSaveError(false);
         lastSavedValuesRef.current = data;
         reset(data);
+        return true;
       } else {
         setHasSaveError(true);
+        return false;
       }
     } finally {
       isSavingRef.current = false;
       setIsSaving(false);
     }
-  };
+  }, [assistant.id, getValues, reset, trigger]);
 
-  const flushAutoSave = async () => {
-    if (flushRunningRef.current) {
+  const flushAutoSave = useCallback(async (): Promise<boolean> => {
+    if (flushRunningRef.current && currentFlushPromiseRef.current) {
       saveQueuedRef.current = true;
-      return;
+      return currentFlushPromiseRef.current;
     }
 
-    flushRunningRef.current = true;
+    const flushPromise = (async () => {
+      flushRunningRef.current = true;
+      let isSuccess = true;
+
+      try {
+        do {
+          saveQueuedRef.current = false;
+          const saveResult = await saveCurrentValues();
+          if (!saveResult) {
+            isSuccess = false;
+          }
+        } while (saveQueuedRef.current);
+
+        return isSuccess;
+      } finally {
+        flushRunningRef.current = false;
+      }
+    })();
+
+    currentFlushPromiseRef.current = flushPromise;
     try {
-      do {
-        saveQueuedRef.current = false;
-        await saveCurrentValues();
-      } while (saveQueuedRef.current);
+      return await flushPromise;
     } finally {
-      flushRunningRef.current = false;
+      currentFlushPromiseRef.current = null;
     }
-  };
+  }, [saveCurrentValues]);
 
   const sendBestEffortSave = useCallback(() => {
     const data = latestValuesRef.current;
@@ -172,6 +192,19 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
     };
   }, [sendBestEffortSave]);
 
+  const saveBeforeLeave = useCallback(async (): Promise<void> => {
+    if (!isDirty) {
+      return;
+    }
+
+    await flushAutoSave();
+  }, [flushAutoSave, isDirty]);
+
+  const { guardNavigation } = usePendingChangesGuard({
+    hasPendingChanges: isDirty,
+    onSaveBeforeLeave: saveBeforeLeave,
+  });
+
   const handleAutoSave = () => {
     if (!isDirty) {
       return;
@@ -183,7 +216,9 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
   const onDuplicate = async () => {
     const createResult = await createNewCustomGptAction({});
     if (createResult.success) {
-      router.push(`/assistants/${createResult.value.id}/edit`);
+      guardNavigation(() => {
+        router.push(`/assistants/${createResult.value.id}/edit`);
+      });
     } else {
       toast.error(t('toasts.create-toast-error'));
     }
@@ -197,17 +232,34 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
     if (!deleteResult.success) {
       toast.error(t('toasts.delete-toast-error'));
     }
-    router.push('/custom');
+    guardNavigation(() => {
+      router.push('/custom');
+    });
   };
 
   return (
     <CustomChatLayoutContainer>
-      <BackButton href="/custom" text="Assistenten" aria-label="Zurück zu den Assistenten" />
+      <BackButton
+        href="/custom"
+        text="Assistenten"
+        aria-label="Zurück zu den Assistenten"
+        onClick={() => {
+          guardNavigation(() => {
+            router.push('/custom');
+          });
+        }}
+      />
       <CustomChatTitle title={name} />
       {/* // Todo: Design fehlt für Statusanzeige  */}
       <div className="flex flex-row justify-between">
         <CustomChatActions>
-          <CustomChatActionUse onClick={() => router.push(`/custom/d/${assistant.id}/`)} />
+          <CustomChatActionUse
+            onClick={() => {
+              guardNavigation(() => {
+                router.push(`/custom/d/${assistant.id}/`);
+              });
+            }}
+          />
           <CustomChatActionDuplicate onClick={onDuplicate} />
           <CustomChatActionDelete onClick={onDelete} />
           <CustomChatActionSave onClick={handleAutoSave} />
