@@ -3,9 +3,11 @@ import { CheckCircleIcon, SpinnerIcon, WarningCircleIcon } from '@phosphor-icons
 export function CustomChatFormState({
   isDirty,
   isSubmitting,
+  hasSaveError,
 }: {
   isDirty: boolean;
   isSubmitting: boolean;
+  hasSaveError?: boolean;
 }) {
   return (
     <div className="flex justify-between text-sm">
@@ -15,12 +17,17 @@ export function CustomChatFormState({
           Wird gespeichert...
         </span>
       )}
-      {!isSubmitting && isDirty && (
+      {!isSubmitting && hasSaveError && (
         <span className="flex items-center gap-1">
-          <WarningCircleIcon className="size-5 text-warning" /> Ungespeicherte Änderungen
+          <WarningCircleIcon className="size-5 text-warning" /> Speichern fehlgeschlagen
         </span>
       )}
-      {!isSubmitting && !isDirty && (
+      {!isSubmitting && isDirty && !hasSaveError && (
+        <span className="flex items-center gap-1">
+          <WarningCircleIcon className="size-5 text-color" /> Ungespeicherte Änderungen
+        </span>
+      )}
+      {!isSubmitting && !isDirty && !hasSaveError && (
         <span className="flex items-center gap-1">
           <CheckCircleIcon className="size-5 text-success" /> Gespeichert
         </span>

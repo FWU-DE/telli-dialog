@@ -1,6 +1,7 @@
 'use client';
 
 import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import { deepEqual } from '@/utils/object';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CustomGptSelectModel } from '@shared/db/schema';
 import { BackButton } from './back-button';
@@ -28,7 +29,7 @@ import { CustomChatFormState } from './custom-chat-form-state';
 import { CustomChatImageUpload } from './custom-chat-image-upload';
 import { CustomChatActionSave } from './custom-chat-action-save';
 import { Textarea } from '@ui/components/Textarea';
-import { updateCustomGpt } from '@shared/custom-gpt/custom-gpt-service';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
@@ -45,43 +46,138 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
   const router = useRouter();
   const toast = useToast();
   const t = useTranslations('custom-gpt');
-
-  const {
-    handleSubmit,
-    control,
-    reset,
-    formState: { isDirty, isSubmitting },
-  } = useForm({
-    resolver: zodResolver(assistantFormValuesSchema),
-    defaultValues: {
-      name: assistant.name,
-      description: assistant.description ?? '', // Todo: warum muss man null hier gesondert behandeln?
-    },
-  });
-
-  const onSubmit = async (data: AssistantFormValues) => {
-    await new Promise((resolve) => {
-      setTimeout(resolve, 2000);
-    });
-
-    const updateResult = await updateCustomGptAction({ ...assistant, gptId: assistant.id });
-    if (updateResult.success) {
-      toast.success(t('toasts.edit-toast-success'));
-    } else {
-      toast.error(t('toasts.edit-toast-error'));
-    }
-
-    reset(data);
+  const initialValues: AssistantFormValues = {
+    name: assistant.name,
+    description: assistant.description ?? '',
   };
 
-  const name = useWatch({ control, name: 'name' });
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasSaveError, setHasSaveError] = useState(false);
+  const latestValuesRef = useRef<AssistantFormValues>(initialValues);
+  const lastSavedValuesRef = useRef<AssistantFormValues>(initialValues);
+  const isSavingRef = useRef(false);
+  const saveQueuedRef = useRef(false);
+  const flushRunningRef = useRef(false);
 
-  const handleAutoSave = () => {
-    if (isSubmitting || !isDirty) {
+  const {
+    control,
+    trigger,
+    getValues,
+    reset,
+    formState: { isDirty },
+  } = useForm({
+    resolver: zodResolver(assistantFormValuesSchema),
+    defaultValues: initialValues,
+  });
+
+  const saveCurrentValues = async (): Promise<void> => {
+    const isValid = await trigger();
+    if (!isValid) {
       return;
     }
 
-    void handleSubmit(onSubmit)();
+    const data = getValues();
+    if (deepEqual(data, lastSavedValuesRef.current)) {
+      return;
+    }
+
+    isSavingRef.current = true;
+    setIsSaving(true);
+    try {
+      const updateResult = await updateCustomGptAction({
+        gptId: assistant.id,
+        name: data.name,
+        description: data.description,
+      });
+      if (updateResult.success) {
+        setHasSaveError(false);
+        lastSavedValuesRef.current = data;
+        reset(data);
+      } else {
+        setHasSaveError(true);
+      }
+    } finally {
+      isSavingRef.current = false;
+      setIsSaving(false);
+    }
+  };
+
+  const flushAutoSave = async () => {
+    if (flushRunningRef.current) {
+      saveQueuedRef.current = true;
+      return;
+    }
+
+    flushRunningRef.current = true;
+    try {
+      do {
+        saveQueuedRef.current = false;
+        await saveCurrentValues();
+      } while (saveQueuedRef.current);
+    } finally {
+      flushRunningRef.current = false;
+    }
+  };
+
+  const sendBestEffortSave = useCallback(() => {
+    const data = latestValuesRef.current;
+    if (deepEqual(data, lastSavedValuesRef.current)) {
+      return;
+    }
+
+    const url = `/api/assistants/${assistant.id}/autosave`;
+    const payload = JSON.stringify(data);
+
+    if (typeof navigator !== 'undefined' && 'sendBeacon' in navigator) {
+      navigator.sendBeacon(url, new Blob([payload], { type: 'application/json' }));
+      return;
+    }
+
+    void fetch(url, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: payload,
+      keepalive: true,
+    });
+  }, [assistant.id]);
+
+  const name = useWatch({ control, name: 'name' });
+  const values = useWatch({ control }) as AssistantFormValues;
+
+  useEffect(() => {
+    latestValuesRef.current = values;
+    if (isSavingRef.current) {
+      saveQueuedRef.current = true;
+    }
+  }, [values]);
+
+  useEffect(() => {
+    const handlePageHide = () => {
+      sendBestEffortSave();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        sendBestEffortSave();
+      }
+    };
+
+    window.addEventListener('pagehide', handlePageHide);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      window.removeEventListener('pagehide', handlePageHide);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [sendBestEffortSave]);
+
+  const handleAutoSave = () => {
+    if (!isDirty) {
+      return;
+    }
+
+    void flushAutoSave();
   };
 
   const onDuplicate = async () => {
@@ -116,13 +212,23 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
           <CustomChatActionDelete onClick={onDelete} />
           <CustomChatActionSave onClick={handleAutoSave} />
         </CustomChatActions>
-        <CustomChatFormState isDirty={isDirty} isSubmitting={isSubmitting} />
+        <CustomChatFormState
+          isDirty={isDirty}
+          isSubmitting={isSaving}
+          hasSaveError={hasSaveError}
+        />
       </div>
       {/* Todo: Datum/Uhrzeit letzte Aktualisierung, evtl. mit gespeicher, wird gespeichert*/}
       <CustomChatShareInfo href="#share-settings" />
       <CustomChatImageUpload />
 
-      <form id="assistant-edit-form" onSubmit={handleSubmit(onSubmit)}>
+      <form
+        id="assistant-edit-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          handleAutoSave();
+        }}
+      >
         <Card>
           <CardContent>
             <FieldGroup>
