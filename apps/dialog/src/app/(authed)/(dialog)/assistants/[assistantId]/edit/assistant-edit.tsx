@@ -45,6 +45,7 @@ const assistantFormValuesSchema = z.object({
 type AssistantFormValues = z.infer<typeof assistantFormValuesSchema>;
 
 export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }) {
+  useForceReloadOnBrowserBackButton();
   const router = useRouter();
   const toast = useToast();
   const t = useTranslations('custom-gpt');
@@ -52,7 +53,6 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
     name: assistant.name,
     description: assistant.description ?? '',
   };
-  useForceReloadOnBrowserBackButton();
 
   const [isSaving, setIsSaving] = useState(false);
   const [hasSaveError, setHasSaveError] = useState(false);
@@ -152,7 +152,7 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
 
   const { guardNavigation } = usePendingChangesGuard({
     hasPendingChanges: isDirty,
-    onSaveBeforeLeave: saveBeforeLeave,
+    onBeforePageLeave: saveBeforeLeave,
   });
 
   const handleAutoSave = () => {
@@ -163,7 +163,7 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
     void flushAutoSave();
   };
 
-  const onDuplicate = async () => {
+  const handleDuplicateAssistant = async () => {
     const createResult = await createNewCustomGptAction({});
     if (createResult.success) {
       guardNavigation(() => {
@@ -174,7 +174,7 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
     }
   };
 
-  const onDelete = async () => {
+  const handleDeleteAssistant = async () => {
     const deleteResult = await deleteCustomGptAction({ gptId: assistant.id });
     if (deleteResult.success) {
       toast.success(t('toasts.delete-toast-success'));
@@ -189,6 +189,7 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
 
   return (
     <CustomChatLayoutContainer>
+      {/* // Todo: Maybe we have to remember where we come from and which filters were set */}
       <BackButton
         href="/custom"
         text="Assistenten"
@@ -210,8 +211,8 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
               });
             }}
           />
-          <CustomChatActionDuplicate onClick={onDuplicate} />
-          <CustomChatActionDelete onClick={onDelete} />
+          <CustomChatActionDuplicate onClick={handleDuplicateAssistant} />
+          <CustomChatActionDelete onClick={handleDeleteAssistant} />
           <CustomChatActionSave onClick={handleAutoSave} />
         </CustomChatActions>
         <CustomChatFormState

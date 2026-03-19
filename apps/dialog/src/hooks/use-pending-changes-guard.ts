@@ -6,14 +6,19 @@ type NavigationIntent = () => void;
 
 type UsePendingChangesGuardProps = {
   hasPendingChanges: boolean;
-  onSaveBeforeLeave: () => Promise<void>;
+  onBeforePageLeave: () => Promise<void>;
 };
 
 const HISTORY_GUARD_STATE_KEY = '__pendingChangesGuard';
 
+/**
+ * A hook that guards against navigating away from a page with pending changes.
+ * It listens for navigation events (including browser back button)
+ * and calls the provided `onBeforePageLeave` callback before allowing navigation to proceed.
+ */
 export function usePendingChangesGuard({
   hasPendingChanges,
-  onSaveBeforeLeave,
+  onBeforePageLeave,
 }: UsePendingChangesGuardProps) {
   const hasPendingChangesRef = useRef(hasPendingChanges);
   const pendingIntentRef = useRef<NavigationIntent | null>(null);
@@ -40,13 +45,13 @@ export function usePendingChangesGuard({
       pendingIntentRef.current = navigationIntent;
 
       try {
-        await onSaveBeforeLeave();
+        await onBeforePageLeave();
       } finally {
         isNavigatingRef.current = false;
         continueNavigation();
       }
     },
-    [continueNavigation, onSaveBeforeLeave],
+    [continueNavigation, onBeforePageLeave],
   );
 
   const guardNavigation = useCallback(
@@ -100,6 +105,7 @@ export function usePendingChangesGuard({
       }
 
       event.preventDefault();
+      // some older browsers require returnValue to be set, so we ignore the deprecation warning
       event.returnValue = '';
     };
 
