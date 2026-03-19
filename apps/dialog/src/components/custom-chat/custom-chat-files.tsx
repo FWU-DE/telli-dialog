@@ -39,8 +39,8 @@ export function CustomChatFiles(props: CustomChatFilesProps) {
     <>
       <FileDrop
         setFiles={setFiles}
-        disabled={initialFiles.length + files.size >= NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT}
-        countOfFiles={initialFiles.length + files.size}
+        disabled={currentFiles.length + files.size >= NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT}
+        countOfFiles={currentFiles.length + files.size}
         onFileUploaded={onFileUploaded}
         showUploadConfirmation={true}
       />
