@@ -36,7 +36,7 @@ export function CustomChatFiles(props: CustomChatFilesProps) {
   };
 
   return (
-    <div className="">
+    <>
       <FileDrop
         setFiles={setFiles}
         disabled={initialFiles.length + files.size >= NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT}
@@ -51,6 +51,6 @@ export function CustomChatFiles(props: CustomChatFilesProps) {
         showUploadConfirmation={true}
         readOnly={false}
       />
-    </div>
+    </>
   );
 }
