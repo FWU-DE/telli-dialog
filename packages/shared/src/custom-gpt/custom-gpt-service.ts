@@ -55,7 +55,7 @@ export async function getCustomGptForEditView({
   customGptId: string;
   schoolId: string;
   userId: string;
-}) {
+}): Promise<CustomGptSelectModel> {
   checkParameterUUID(customGptId);
   const customGpt = await dbGetCustomGptById({ customGptId });
   if (!customGpt.hasLinkAccess) {
