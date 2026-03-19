@@ -1,7 +1,6 @@
 'use client';
 
 import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
-import { deepEqual } from '@/utils/object';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CustomGptSelectModel } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
@@ -29,9 +28,10 @@ import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-s
 import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
 import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
 import { Textarea } from '@ui/components/Textarea';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback } from 'react';
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
+import { useFormAutosave } from '@/hooks/use-form-autosave';
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
@@ -54,91 +54,36 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
     description: assistant.description ?? '',
   };
 
-  const [isSaving, setIsSaving] = useState(false);
-  const [hasSaveError, setHasSaveError] = useState(false);
-  const lastSavedValuesRef = useRef<AssistantFormValues>(initialValues);
-  const isSavingRef = useRef(false);
-  const saveQueuedRef = useRef(false);
-  const flushRunningRef = useRef(false);
-  const currentFlushPromiseRef = useRef<Promise<boolean> | null>(null);
-
   const {
     control,
     trigger,
     getValues,
     reset,
     formState: { isDirty },
-  } = useForm({
+  } = useForm<AssistantFormValues>({
     resolver: zodResolver(assistantFormValuesSchema),
     defaultValues: initialValues,
   });
 
-  const saveCurrentValues = useCallback(async (): Promise<boolean> => {
-    const isValid = await trigger();
-    if (!isValid) {
-      return false;
-    }
+  const { isSaving, hasSaveError, flushAutoSave, handleAutoSave } =
+    useFormAutosave<AssistantFormValues>({
+      initialValues,
+      isDirty,
+      getValues,
+      reset: (values) => {
+        reset(values);
+      },
+      validate: trigger,
+      saveValues: async (data) => {
+        const updateResult = await updateCustomGptAction({
+          gptId: assistant.id,
+          name: data.name,
+          description: data.description,
+        });
 
-    const data = getValues();
-    if (deepEqual(data, lastSavedValuesRef.current)) {
-      return true;
-    }
-
-    isSavingRef.current = true;
-    setIsSaving(true);
-    try {
-      const updateResult = await updateCustomGptAction({
-        gptId: assistant.id,
-        name: data.name,
-        description: data.description,
-      });
-      if (updateResult.success) {
-        setHasSaveError(false);
-        lastSavedValuesRef.current = data;
-        reset(data);
-        return true;
-      } else {
-        setHasSaveError(true);
-        return false;
-      }
-    } finally {
-      isSavingRef.current = false;
-      setIsSaving(false);
-    }
-  }, [assistant.id, getValues, reset, trigger]);
-
-  const flushAutoSave = useCallback(async (): Promise<boolean> => {
-    if (flushRunningRef.current && currentFlushPromiseRef.current) {
-      saveQueuedRef.current = true;
-      return currentFlushPromiseRef.current;
-    }
-
-    const flushPromise = (async () => {
-      flushRunningRef.current = true;
-      let isSuccess = true;
-
-      try {
-        do {
-          saveQueuedRef.current = false;
-          const saveResult = await saveCurrentValues();
-          if (!saveResult) {
-            isSuccess = false;
-          }
-        } while (saveQueuedRef.current);
-
-        return isSuccess;
-      } finally {
-        flushRunningRef.current = false;
-      }
-    })();
-
-    currentFlushPromiseRef.current = flushPromise;
-    try {
-      return await flushPromise;
-    } finally {
-      currentFlushPromiseRef.current = null;
-    }
-  }, [saveCurrentValues]);
+        return updateResult.success;
+      },
+    });
 
   const name = useWatch({ control, name: 'name' });
 
@@ -154,14 +99,6 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
     hasPendingChanges: isDirty,
     onBeforePageLeave: saveBeforeLeave,
   });
-
-  const handleAutoSave = () => {
-    if (!isDirty) {
-      return;
-    }
-
-    void flushAutoSave();
-  };
 
   const handleDuplicateAssistant = async () => {
     const createResult = await createNewCustomGptAction({});
