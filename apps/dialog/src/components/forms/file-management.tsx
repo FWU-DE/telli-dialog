@@ -1,7 +1,6 @@
 'use client';
 
 import { LocalFileState } from '@/components/chat/send-message-form';
-import { useToast } from '@/components/common/toast';
 import FileDrop from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
 import { FileModel } from '@shared/db/schema';
@@ -30,7 +29,6 @@ export default function FileManagement({
   readOnly,
   translationNamespace,
 }: FileManagementProps) {
-  const toast = useToast();
   const t = useTranslations(translationNamespace);
 
   return (
@@ -49,7 +47,6 @@ export default function FileManagement({
         files={initialFiles ?? []}
         additionalFiles={files}
         onDeleteFile={onDeleteFile}
-        toast={toast}
         showUploadConfirmation={true}
         readOnly={readOnly}
       />

@@ -106,6 +106,8 @@ export function useFormAutosave<T>({
       return;
     }
 
+    // Fire and forget. We do not wait for the result.
+    // If you need the result, use flushAutoSave directly.
     void flushAutoSave();
   }, [flushAutoSave, isDirty]);
 
