@@ -8,6 +8,7 @@ import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { SentrySampler, SentrySpanProcessor } from '@sentry/opentelemetry';
+import { scrubSentryEvent } from '@telli/shared-core/sentry/scrub';
 import { env } from './env';
 
 /**
@@ -37,6 +38,9 @@ export function initSentry(opts: {
 
       return inheritOrSampleWith(env.sentryTracesSampleRate);
     },
+    beforeBreadcrumb: (breadcrumb) => scrubSentryEvent(breadcrumb),
+    beforeSend: (event) => scrubSentryEvent(event),
+    beforeSendTransaction: (event) => scrubSentryEvent(event),
     // Use custom OpenTelemetry configuration, see https://docs.sentry.io/platforms/javascript/guides/node/opentelemetry/custom-setup/
     skipOpenTelemetrySetup: true,
     registerEsmLoaderHooks: false,

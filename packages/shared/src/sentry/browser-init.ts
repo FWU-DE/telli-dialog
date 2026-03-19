@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/nextjs';
 import { getPublicConfig } from './public-config';
+import { scrubSentryEvent } from '@telli/shared-core/sentry/scrub';
 
 /**
  * Initializes Sentry on the browser.
@@ -17,7 +18,12 @@ import { getPublicConfig } from './public-config';
  *
  * @param options - Optional Sentry browser options, e.g., to use custom sample rates
  */
-export async function clientSentryInit(options?: Sentry.BrowserOptions) {
+export async function clientSentryInit(
+  options?: Omit<
+    Sentry.BrowserOptions,
+    'beforeSend' | 'beforeSendTransaction' | 'beforeBreadcrumb'
+  >,
+) {
   const publicConfig = await getPublicConfig();
 
   // If config is not available at runtime, skip client Sentry entirely
@@ -40,7 +46,9 @@ export async function clientSentryInit(options?: Sentry.BrowserOptions) {
       replaysOnErrorSampleRate: 1.0,
       replaysSessionSampleRate: 0.1,
       tracesSampleRate: tracesSampleRate,
-
+      beforeBreadcrumb: (breadcrumb) => scrubSentryEvent(breadcrumb),
+      beforeSend: (event) => scrubSentryEvent(event),
+      beforeSendTransaction: (event) => scrubSentryEvent(event),
       ...options,
     });
   }

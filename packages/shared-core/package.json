@@ -1,0 +1,31 @@
+{
+  "name": "@telli/shared-core",
+  "version": "0.0.1",
+  "main": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "types": "tsc --noEmit",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint \"**/*.ts*\" --max-warnings 0",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.2",
+    "@telli/typescript-config": "workspace:*",
+    "@types/node": "24.11.0",
+    "@vitest/coverage-v8": "4.0.18",
+    "eslint": "9.39.2",
+    "eslint-config-turbo": "2.8.12",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.57.1",
+    "vitest": "4.0.18"
+  }
+}

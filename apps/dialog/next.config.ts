@@ -6,9 +6,12 @@ import path from 'path';
 const isDevBuild = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development';
 
 const baseNextConfig: NextConfig = {
+  reactStrictMode: true,
   transpilePackages: [
     '@telli/ui',
     '@telli/shared',
+    '@telli/shared-core',
+    '@telli/api-database',
     '@telli/ai-core',
     'import-in-the-middle',
     '@t3-oss/env-nextjs',
