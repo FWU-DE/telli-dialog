@@ -8,6 +8,7 @@ const baseNextConfig: NextConfig = {
   transpilePackages: [
     '@telli/ui',
     '@telli/shared',
+    '@telli/shared-core',
     '@telli/api-database',
     '@telli/ai-core',
     'import-in-the-middle',

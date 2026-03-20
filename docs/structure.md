@@ -16,7 +16,8 @@ The telli proxy API. A Fastify REST API that acts as a proxy to LLM providers, h
 
 ## [`/packages/shared`](/packages/shared)
 
-Shared code used by the dialog and admin apps. Contains the dialog database schema, Drizzle ORM configuration, database access functions, services, and utilities.
+Shared code used by the `dialog` and `admin` apps (Next.js).
+Contains the dialog database schema, Drizzle ORM configuration, database access functions, services, and utilities.
 
 Key contents:
 
@@ -24,6 +25,11 @@ Key contents:
 - `src/knotenpunkt/` — Client for calling the telli-api service to access LLM providers (completions, embeddings, images). Note: ai-core now reads model configuration directly from the database, but still uses knotenpunkt to make requests to the telli-api service.
 - `src/s3/` — S3-compatible storage utilities
 - `src/logging/` — Shared logging helpers
+
+## [`/packages/shared-core`](/packages/shared-core)
+
+Cross-app shared utilities used by all applications (`admin`, `dialog`, and `api`).
+Contains framework-agnostic code that does not depend on app-specific runtimes.
 
 ## [`/packages/api-database`](/packages/api-database)
 

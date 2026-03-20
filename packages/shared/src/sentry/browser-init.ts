@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/nextjs';
 import { getPublicConfig } from './public-config';
+import { scrubSentryEvent } from '@telli/shared-core/sentry/scrub';
 
 /**
  * Initializes Sentry on the browser.
@@ -16,8 +17,14 @@ import { getPublicConfig } from './public-config';
  *    which will use the injected config to initialize Sentry.
  *
  * @param options - Optional Sentry browser options, e.g., to use custom sample rates
+ * @param scrubSensitiveData - Whether to scrub sensitive data from Sentry events before sending
  */
-export async function clientSentryInit(options?: Sentry.BrowserOptions) {
+export async function clientSentryInit({
+  scrubSensitiveData = true,
+  ...options
+}: Omit<Sentry.BrowserOptions, 'beforeSend' | 'beforeSendTransaction' | 'beforeBreadcrumb'> & {
+  scrubSensitiveData?: boolean;
+} = {}) {
   const publicConfig = await getPublicConfig();
 
   // If config is not available at runtime, skip client Sentry entirely
@@ -40,8 +47,12 @@ export async function clientSentryInit(options?: Sentry.BrowserOptions) {
       replaysOnErrorSampleRate: 1.0,
       replaysSessionSampleRate: 0.1,
       tracesSampleRate: tracesSampleRate,
-
       ...options,
+      ...(scrubSensitiveData && {
+        beforeBreadcrumb: (breadcrumb) => scrubSentryEvent(breadcrumb),
+        beforeSend: (event) => scrubSentryEvent(event),
+        beforeSendTransaction: (event) => scrubSentryEvent(event),
+      }),
     });
   }
 }
