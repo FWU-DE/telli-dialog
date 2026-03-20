@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import { cn } from '@/utils/tailwind';
 import { OverviewFilter } from '@shared/db/schema';
 import { useTranslations } from 'next-intl';
-import SearchBarInput from '@/components/search-bar';
+import { Input } from '@telli/ui/components/Input';
+import { MagnifyingGlassIcon, InfoIcon } from '@phosphor-icons/react';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 import {
   Tooltip,
@@ -13,7 +13,6 @@ import {
   TooltipTrigger,
 } from '@telli/ui/components/Tooltip';
 import { FilterTabs } from '@telli/ui/components/FilterTabs';
-import { InfoIcon } from '@phosphor-icons/react';
 
 type EntityOverviewProps = {
   title: string;
@@ -51,8 +50,8 @@ export default function EntityOverview({
   }));
 
   return (
-    <div className="min-w-full overflow-auto flex flex-col h-full">
-      <div className="bg-gray-50 px-6 pt-6 pb-4 sticky top-0 z-10">
+    <div className="min-w-full overflow-auto flex flex-col h-full bg-gray-50">
+      <div className="px-6 pt-6 pb-4 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto w-full">
           <div className="flex items-center gap-2 mb-6">
             <h1 className="text-3xl">{title}</h1>
@@ -75,16 +74,20 @@ export default function EntityOverview({
           </div>
 
           <div className="flex flex-wrap-reverse justify-between gap-2 mb-4">
-            <SearchBarInput
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className={cn(
-                'p-2 px-4 focus:outline-hidden disabled:bg-light-gray disabled:border-gray-100 disabled:cursor-not-allowed',
-              )}
-              placeholder={searchPlaceholder}
-              disabled={filterDisabled}
-              aria-label={searchPlaceholder}
-            />
+            <div className="relative max-w-sm w-full">
+              <Input
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder={searchPlaceholder}
+                disabled={filterDisabled}
+                aria-label={searchPlaceholder}
+                className="h-10 rounded-xl border-gray-300 bg-white pr-10 pl-4 shadow-none focus-visible:border-gray-400 focus-visible:ring-0"
+              />
+              <MagnifyingGlassIcon
+                className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-gray-500"
+                aria-hidden="true"
+              />
+            </div>
             {createButton}
           </div>
 
