@@ -246,6 +246,34 @@ export async function dbGetCharactersByUserId({
   return characters;
 }
 
+export async function dbGetAllCharactersByUserId({
+  userId,
+}: {
+  userId: string;
+}): Promise<CharacterWithShareDataModel[]> {
+  const characters = await db
+    .select({
+      ...getTableColumns(characterTable),
+      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
+      inviteCode: sharedCharacterConversation.inviteCode,
+      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
+      startedAt: sharedCharacterConversation.startedAt,
+      startedBy: sharedCharacterConversation.userId,
+    })
+    .from(characterTable)
+    .leftJoin(
+      sharedCharacterConversation,
+      and(
+        eq(sharedCharacterConversation.characterId, characterTable.id),
+        eq(sharedCharacterConversation.userId, userId),
+      ),
+    )
+    .where(eq(characterTable.userId, userId))
+    .orderBy(desc(characterTable.createdAt));
+
+  return characters;
+}
+
 export async function dbGetCharacterByIdAndUserId({
   characterId,
   userId,

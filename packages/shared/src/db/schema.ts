@@ -288,6 +288,9 @@ export const accessLevelSchema = z.enum(['private', 'school', 'global']);
 export const accessLevelEnum = pgEnum('access_level', accessLevelSchema.enum);
 export type AccessLevel = z.infer<typeof accessLevelSchema>;
 
+export const overviewFilterSchema = z.enum(['all', 'mine', 'official', 'school']);
+export type OverviewFilter = z.infer<typeof overviewFilterSchema>;
+
 export const characterTable = pgTable(
   'character',
   {

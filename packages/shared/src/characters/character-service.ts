@@ -2,6 +2,7 @@ import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
 import {
   dbDeleteCharacterByIdAndUserId,
+  dbGetAllCharactersByUserId,
   dbGetCharacterById,
   dbGetCharacterByIdWithShareData,
   dbGetCharacters,
@@ -22,6 +23,7 @@ import {
   CharacterWithShareDataModel,
   FileModel,
   fileTable,
+  OverviewFilter,
   sharedCharacterConversation,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
@@ -611,6 +613,34 @@ export async function getCharacterByAccessLevel({
     return dbGetCharactersBySchoolId({ schoolId, userId });
   } else if (accessLevel === 'private') {
     return dbGetCharactersByUserId({ userId });
+  }
+  return [];
+}
+
+export async function getCharactersByOverviewFilter({
+  filter,
+  schoolId,
+  userId,
+  federalStateId,
+}: {
+  filter: OverviewFilter;
+  schoolId: string;
+  userId: string;
+  federalStateId: string;
+}): Promise<CharacterWithShareDataModel[]> {
+  if (filter === 'all') {
+    const [privateChars, schoolChars, globalChars] = await Promise.all([
+      dbGetCharactersByUserId({ userId }),
+      dbGetCharactersBySchoolId({ schoolId, userId }),
+      dbGetGlobalCharacters({ userId, federalStateId }),
+    ]);
+    return [...privateChars, ...schoolChars, ...globalChars];
+  } else if (filter === 'mine') {
+    return await dbGetAllCharactersByUserId({ userId });
+  } else if (filter === 'official') {
+    return await dbGetGlobalCharacters({ userId, federalStateId });
+  } else if (filter === 'school') {
+    return await dbGetCharactersBySchoolId({ schoolId, userId });
   }
   return [];
 }
