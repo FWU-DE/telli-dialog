@@ -22,7 +22,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -45,7 +45,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -63,7 +63,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -81,7 +81,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -99,7 +99,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -135,7 +135,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
