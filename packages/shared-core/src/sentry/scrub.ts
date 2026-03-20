@@ -42,13 +42,17 @@ export function scrubSentryEvent<T extends Breadcrumb | ErrorEvent | Transaction
     delete event?.request?.cookies;
 
     // request.data (i.e., HTTP body) can contain sensitive information (e.g., prompts)
-    if (typeof event?.request?.data === 'string') {
-      try {
-        const parsed: unknown = JSON.parse(event.request.data);
-        const scrubbed = scrubObject(parsed);
-        event.request.data = JSON.stringify(scrubbed);
-      } catch {
-        // ignore parsing failures
+    if (event?.request?.data) {
+      if (typeof event.request.data === 'string') {
+        try {
+          const parsed: unknown = JSON.parse(event.request.data);
+          const scrubbed = scrubObject(parsed);
+          event.request.data = JSON.stringify(scrubbed);
+        } catch {
+          // ignore parsing failures
+        }
+      } else {
+        event.request.data = scrubObject(event.request.data);
       }
     }
   }

@@ -21,54 +21,69 @@ describe('scrubSentryEvent', () => {
     expect(scrubbed.request?.cookies).toBeUndefined();
   });
 
+  const testData = {
+    prompt: 'secret prompt',
+    content: 'secret content',
+    safe: 'visible',
+    nested: {
+      prompt: 'secret',
+      safe: 'visible',
+    },
+    caseInsensitive: {
+      PROMPT: 'secret',
+    },
+    array: [
+      42,
+      true,
+      {
+        nested: {
+          Prompt: 'secret',
+        },
+      },
+    ],
+  };
+
+  const expectedData = {
+    prompt: '[REDACTED]',
+    content: '[REDACTED]',
+    nested: {
+      prompt: '[REDACTED]',
+      safe: 'visible',
+    },
+    caseInsensitive: {
+      PROMPT: '[REDACTED]',
+    },
+    safe: 'visible',
+    array: [
+      42,
+      true,
+      {
+        nested: {
+          Prompt: '[REDACTED]',
+        },
+      },
+    ],
+  };
+
   it('scrubs sensitive properties from request body', () => {
     const event = {
       request: {
-        data: JSON.stringify({
-          prompt: 'secret prompt',
-          content: 'secret content',
-          safe: 'visible',
-          nested: {
-            prompt: 'secret',
-            safe: 'visible',
-          },
-          caseInsensitive: {
-            PROMPT: 'secret',
-          },
-          array: [
-            42,
-            true,
-            {
-              nested: {
-                Prompt: 'secret',
-              },
-            },
-          ],
-        }),
+        data: JSON.stringify(testData),
       },
     } as ErrorEvent;
     const scrubbed = scrubSentryEvent(event);
 
-    expect(JSON.parse(scrubbed.request?.data as string)).toStrictEqual({
-      prompt: '[REDACTED]',
-      content: '[REDACTED]',
-      nested: {
-        prompt: '[REDACTED]',
-        safe: 'visible',
+    expect(JSON.parse(scrubbed.request?.data as string)).toStrictEqual(expectedData);
+  });
+
+  it('scrubs sensitive properties from request body without JSON serialization', () => {
+    const event = {
+      request: {
+        data: testData,
       },
-      caseInsensitive: {
-        PROMPT: '[REDACTED]',
-      },
-      safe: 'visible',
-      array: [
-        42,
-        true,
-        {
-          nested: {
-            Prompt: '[REDACTED]',
-          },
-        },
-      ],
-    });
+    } as ErrorEvent;
+    const scrubbed = scrubSentryEvent(event);
+
+    expect(scrubbed.request?.data).toStrictEqual(expectedData);
   });
 });
