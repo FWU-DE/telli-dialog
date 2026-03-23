@@ -33,54 +33,71 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
         remarkPlugins={[RemarkMathPlugin, remarkGfm]}
         rehypePlugins={[RehypeKatex]}
         components={{
-          h1({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          h1({ children, className, node, ...props }) {
             return (
-              <h1 className="text-3xl font-bold pt-4 pb-2 first:pt-0" {...props}>
+              <h1 className={cn('text-3xl font-bold pt-4 pb-2 first:pt-0', className)} {...props}>
                 {children}
               </h1>
             );
           },
-          h2({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          h2({ children, className, node, ...props }) {
             return (
-              <h2 className="text-2xl font-bold pt-3 pb-2 first:pt-0" {...props}>
+              <h2 className={cn('text-2xl font-bold pt-3 pb-2 first:pt-0', className)} {...props}>
                 {children}
               </h2>
             );
           },
-          h3({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          h3({ children, className, node, ...props }) {
             return (
-              <h3 className="text-xl font-bold pt-3 pb-1 first:pt-0" {...props}>
+              <h3 className={cn('text-xl font-bold pt-3 pb-1 first:pt-0', className)} {...props}>
                 {children}
               </h3>
             );
           },
-          h4({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          h4({ children, className, node, ...props }) {
             return (
-              <h4 className="text-lg font-semibold pt-2 pb-1 first:pt-0" {...props}>
+              <h4
+                className={cn('text-lg font-semibold pt-2 pb-1 first:pt-0', className)}
+                {...props}
+              >
                 {children}
               </h4>
             );
           },
-          h5({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          h5({ children, className, node, ...props }) {
             return (
-              <h5 className="text-base font-semibold pt-2 pb-1 first:pt-0" {...props}>
+              <h5
+                className={cn('text-base font-semibold pt-2 pb-1 first:pt-0', className)}
+                {...props}
+              >
                 {children}
               </h5>
             );
           },
-          h6({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          h6({ children, className, node, ...props }) {
             return (
-              <h6 className="text-sm font-semibold pt-2 pb-1 first:pt-0" {...props}>
+              <h6
+                className={cn('text-sm font-semibold pt-2 pb-1 first:pt-0', className)}
+                {...props}
+              >
                 {children}
               </h6>
             );
           },
-          a({ href, children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          a({ href, children, className, node, ...props }) {
             return (
               <a
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
+                className={cn(className)}
                 style={{
                   color: '#46217E',
                   textDecoration: 'underline',
@@ -102,65 +119,93 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
               />
             );
           },
-          hr({ ...props }) {
-            return <hr className="my-2" {...props} />;
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          hr({ className, node, ...props }) {
+            return <hr className={cn('my-2', className)} {...props} />;
           },
-          th({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          th({ children, className, node, ...props }) {
             return (
-              <th {...props} className="text-left p-2 border bg-slate-100 font-medium">
+              <th
+                className={cn('text-left p-2 border bg-slate-100 font-medium', className)}
+                {...props}
+              >
                 {children}
               </th>
             );
           },
-          td({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          td({ children, className, node, ...props }) {
             return (
-              <td {...props} className="p-2 border">
+              <td className={cn('p-2 border', className)} {...props}>
                 {children}
               </td>
             );
           },
-          tr({ children, ...props }) {
-            return <tr {...props}>{children}</tr>;
-          },
-          table({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          tr({ children, className, node, ...props }) {
             return (
-              <table {...props} className="w-full border my-4 first:mt-0 last:mb-0 border-collapse">
+              <tr className={cn(className)} {...props}>
+                {children}
+              </tr>
+            );
+          },
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          table({ children, className, node, ...props }) {
+            return (
+              <table
+                className={cn('w-full border my-4 first:mt-0 last:mb-0 border-collapse', className)}
+                {...props}
+              >
                 {children}
               </table>
             );
           },
-          strong({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          strong({ children, className, node, ...props }) {
             return (
-              <strong className="font-semibold" {...props}>
+              <strong className={cn('font-semibold', className)} {...props}>
                 {children}
               </strong>
             );
           },
-          ul({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          ul({ children, className, node, ...props }) {
             return (
-              <ul className="ml-6 py-1 space-y-2 list-square" {...props}>
+              <ul className={cn('ml-6 py-1 space-y-2 list-square', className)} {...props}>
                 {children}
               </ul>
             );
           },
-          ol({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          ol({ children, className, node, ...props }) {
             return (
-              <ol className="list-decimal ml-6 py-1 space-y-2" {...props}>
+              <ol className={cn('list-decimal ml-6 py-1 space-y-2', className)} {...props}>
                 {children}
               </ol>
             );
           },
-          li({ children, ...props }) {
-            return <li {...props}>{children}</li>;
-          },
-          p({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          li({ children, className, node, ...props }) {
             return (
-              <p className="pt-1 pb-3 first:pt-0 last:pb-0 whitespace-pre-wrap" {...props}>
+              <li className={cn(className)} {...props}>
+                {children}
+              </li>
+            );
+          },
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          p({ children, className, node, ...props }) {
+            return (
+              <p
+                className={cn('pt-1 pb-3 first:pt-0 last:pb-0 whitespace-pre-wrap', className)}
+                {...props}
+              >
                 {children}
               </p>
             );
           },
-          code({ className, children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          code({ className, children, node, ...props }) {
             const sanitizedText = String(children).replace(/\n$/, '');
             const match = /language-(\w+)/.exec(className || '');
 
