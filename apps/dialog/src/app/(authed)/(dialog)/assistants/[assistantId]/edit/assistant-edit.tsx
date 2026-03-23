@@ -2,7 +2,7 @@
 
 import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CustomGptSelectModel } from '@shared/db/schema';
+import { CustomGptSelectModel, FileModel } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/Card';
 import { Field, FieldLabel, FieldError, FieldGroup } from '@ui/components/Field';
@@ -16,7 +16,11 @@ import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
 import { useRouter } from 'next/navigation';
-import { createNewCustomGptAction } from '../../../custom/actions';
+import {
+  createNewCustomGptAction,
+  deleteFileMappingAndEntityAction,
+  linkFileToCustomGptAction,
+} from '../../../custom/actions';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import {
@@ -32,6 +36,8 @@ import { useCallback } from 'react';
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
+import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
+import { WebsearchSource } from '@shared/db/types';
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
@@ -44,7 +50,15 @@ const assistantFormValuesSchema = z.object({
 });
 type AssistantFormValues = z.infer<typeof assistantFormValuesSchema>;
 
-export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }) {
+export function AssistantEdit({
+  assistant,
+  relatedFiles,
+  initialLinks,
+}: {
+  assistant: CustomGptSelectModel;
+  relatedFiles: FileModel[];
+  initialLinks: WebsearchSource[];
+}) {
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
   const toast = useToast();
@@ -124,6 +138,26 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
     });
   };
 
+  const handleFileUploaded = async (data: { id: string; name: string; file: File }) => {
+    // after a file is uploaded, we need to link it to the assistant
+    const linkResult = await linkFileToCustomGptAction({
+      fileId: data.id,
+      customGptId: assistant.id,
+    });
+
+    if (!linkResult.success) {
+      toast.error('Beim Hinzufügen der Datei zum Assistenten ist ein Fehler aufgetreten.');
+    }
+  };
+
+  const handleDeleteFile = async (fileId: string) => {
+    return await deleteFileMappingAndEntityAction({ customGptId: assistant.id, fileId });
+  };
+
+  const handleLinksChange = async (links: string[]) => {
+    return await updateCustomGptAction({ gptId: assistant.id, attachedLinks: links });
+  };
+
   return (
     <CustomChatLayoutContainer>
       {/* // Todo: Maybe we have to remember where we come from and which filters were set */}
@@ -138,7 +172,6 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
         }}
       />
       <CustomChatTitle title={name} />
-      {/* // Todo: Design fehlt für Statusanzeige  */}
       <div className="flex flex-row justify-between">
         <CustomChatActions>
           <CustomChatActionUse
@@ -158,7 +191,6 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
           hasSaveError={hasSaveError}
         />
       </div>
-      {/* Todo: Datum/Uhrzeit letzte Aktualisierung, evtl. mit gespeicher, wird gespeichert*/}
       <CustomChatShareInfo href="#share-settings" />
       <CustomChatImageUpload />
 
@@ -219,9 +251,15 @@ export function AssistantEdit({ assistant }: { assistant: CustomGptSelectModel }
             </FieldGroup>
           </CardContent>
         </Card>
-        <div>Instruktionen</div>
-        <div>Liste mit Promptvorschlägen</div>
-        <div>Hintergrundwissen</div>
+
+        <CustomChatFilesAndLinks
+          initialFiles={relatedFiles}
+          onFileUploaded={handleFileUploaded}
+          onDeleteFile={handleDeleteFile}
+          initialLinks={initialLinks}
+          onLinksChange={handleLinksChange}
+        />
+
         <div id="share-settings">Freigabe</div>
       </form>
     </CustomChatLayoutContainer>

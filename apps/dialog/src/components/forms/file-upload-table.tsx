@@ -10,7 +10,7 @@ import { getFileIconByFileExtension } from '../icons/file-upload-icons/file-icon
 import { formatBytes, getFileNameAndFileExtention, hexToRGBA } from '@/utils/files/generic';
 import { FileStatus } from '../chat/upload-file-button';
 import TrashIcon from '../icons/trash';
-import { ToastContextType } from '../common/toast';
+import { useToast } from '../common/toast';
 import { useTranslations } from 'next-intl';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { cn } from '@/utils/tailwind';
@@ -19,7 +19,6 @@ type FilesTableProps = {
   files: FileModel[];
   additionalFiles: Map<string, LocalFileState>;
   onDeleteFile(fileId: string): Promise<void>;
-  toast: ToastContextType;
   showUploadConfirmation?: boolean;
   className?: string;
   readOnly: boolean;
@@ -30,11 +29,11 @@ export default function FilesTable({
   onDeleteFile,
   additionalFiles,
   showUploadConfirmation,
-  toast,
   className,
   readOnly,
 }: FilesTableProps) {
   const t = useTranslations('file-interaction');
+  const toast = useToast();
   if (files.length < 1 && additionalFiles.size < 1) return null;
 
   function handleDeleteFile(file_id: string) {
