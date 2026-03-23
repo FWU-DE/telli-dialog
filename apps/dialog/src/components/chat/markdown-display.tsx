@@ -33,6 +33,48 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
         remarkPlugins={[RemarkMathPlugin, remarkGfm]}
         rehypePlugins={[RehypeKatex]}
         components={{
+          h1({ children, ...props }) {
+            return (
+              <h1 className="text-3xl font-bold pt-4 pb-2 first:pt-0" {...props}>
+                {children}
+              </h1>
+            );
+          },
+          h2({ children, ...props }) {
+            return (
+              <h2 className="text-2xl font-bold pt-3 pb-2 first:pt-0" {...props}>
+                {children}
+              </h2>
+            );
+          },
+          h3({ children, ...props }) {
+            return (
+              <h3 className="text-xl font-bold pt-3 pb-1 first:pt-0" {...props}>
+                {children}
+              </h3>
+            );
+          },
+          h4({ children, ...props }) {
+            return (
+              <h4 className="text-lg font-semibold pt-2 pb-1 first:pt-0" {...props}>
+                {children}
+              </h4>
+            );
+          },
+          h5({ children, ...props }) {
+            return (
+              <h5 className="text-base font-semibold pt-2 pb-1 first:pt-0" {...props}>
+                {children}
+              </h5>
+            );
+          },
+          h6({ children, ...props }) {
+            return (
+              <h6 className="text-sm font-semibold pt-2 pb-1 first:pt-0" {...props}>
+                {children}
+              </h6>
+            );
+          },
           a({ href, children, ...props }) {
             return (
               <a
@@ -60,9 +102,8 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
               />
             );
           },
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           hr({ ...props }) {
-            return <div className="py-1" />;
+            return <hr className="my-2" {...props} />;
           },
           th({ children, ...props }) {
             return (
