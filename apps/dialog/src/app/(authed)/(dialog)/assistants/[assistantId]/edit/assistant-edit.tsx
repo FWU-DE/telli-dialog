@@ -140,7 +140,14 @@ export function AssistantEdit({
 
   const handleFileUploaded = async (data: { id: string; name: string; file: File }) => {
     // after a file is uploaded, we need to link it to the assistant
-    return await linkFileToCustomGptAction({ fileId: data.id, customGptId: assistant.id });
+    const linkResult = await linkFileToCustomGptAction({
+      fileId: data.id,
+      customGptId: assistant.id,
+    });
+
+    if (!linkResult.success) {
+      toast.error('Beim Hinzufügen der Datei zum Assistenten ist ein Fehler aufgetreten.');
+    }
   };
 
   const handleDeleteFile = async (fileId: string) => {

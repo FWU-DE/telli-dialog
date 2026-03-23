@@ -9,11 +9,7 @@ import { useToast } from '../common/toast';
 
 export type CustomChatFilesProps = {
   initialFiles: FileModel[];
-  onFileUploaded: (data: {
-    id: string;
-    name: string;
-    file: File;
-  }) => Promise<ServerActionResult<void>>;
+  onFileUploaded: (data: { id: string; name: string; file: File }) => void | Promise<void>;
   onDeleteFile: (fileId: string) => Promise<ServerActionResult<void>>;
 };
 
