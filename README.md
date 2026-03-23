@@ -1,11 +1,83 @@
 # telli dialog
 
-## Requirements
+## Self-Hosted / Quick Start
+
+This guide helps you run telli using pre-built Docker images with minimal configuration.
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+### Quick Start
+
+1. **Start all services:**
+
+   ```sh
+   docker compose -f devops/docker/docker-compose.yml up -d
+   ```
+
+2. **Wait for initialization**
+
+   The first startup will automatically:
+   - Initialize empty databases and run migrations
+   - Import the Keycloak realm and create predefined users
+   - Create S3 bucket in RustFS
+
+3. **Access the applications:**
+
+   - **Dialog app**: http://localhost:3000
+   - **Admin app**: http://localhost:3001
+   - **API**: http://localhost:3002
+   - **Keycloak**: http://localhost:8080 (credentials: `admin` / `admin`)
+   - **RustFS Console**: http://localhost:9001 (S3-compatible storage, credentials: `rustfsadmin` / `rustfsadmin123`)
+
+4. **Configure the application using telli-admin:**
+
+   - Navigate to the admin app at http://localhost:3001
+   - Login with teacher credentials (username: `teacher`, password: `password`)
+   - In `telli-api` section:
+     - Create your LLM models
+     - Create Projects (i.e., federal states) and assign the models to them.
+       The federal states `DE-TEST` must exist. Others can be created optionally.
+     - Create API Key(s) for the project(s) you created and copy the key.
+   - In `telli-dialog` section:
+     - Create at least the `DE-TEST` federal state and assign the corresponding API Key to it.
+     - Configure settings as needed.
+
+5. **Login with default credentials:**
+
+   Use any of the predefined users from the Keycloak realm configuration:
+   - Username: `teacher` / Password: `password` (teacher)
+   - See [telli-local-realm.json](devops/docker/keycloak/telli-local-realm.json) for all available users
+
+### Customization
+
+All services are preconfigured with sensible defaults in `devops/docker/docker-compose.yml`.
+To customize environment variables edit `devops/docker/docker-compose.yml` directly or create a `docker-compose.override.yml`.
+
+### Stopping and Cleanup
+
+```sh
+# Stop all services
+docker compose -f devops/docker/docker-compose.yml down
+
+# Remove all data (databases, volumes)
+docker compose -f devops/docker/docker-compose.yml down -v
+```
+
+---
+
+## Local Development (from source)
+
+This section is for developers who want to run telli from source code.
+
+### Requirements
 
 - nvm
 - [docker compose](https://docs.docker.com/compose/install/)
 
-## Basic Tools
+### Basic Tools
 
 Before the application can be started, you need to install the necessary tools.
 
