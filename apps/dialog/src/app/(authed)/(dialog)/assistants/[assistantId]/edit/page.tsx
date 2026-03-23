@@ -10,6 +10,7 @@ export const dynamic = 'force-dynamic';
 export default async function Page(props: PageProps<'/assistants/[assistantId]/edit'>) {
   const { assistantId } = await props.params;
   const { user, school, federalState } = await requireAuth();
+  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
   if (!federalState.featureToggles.isNewUiDesignEnabled) {
     notFound();
