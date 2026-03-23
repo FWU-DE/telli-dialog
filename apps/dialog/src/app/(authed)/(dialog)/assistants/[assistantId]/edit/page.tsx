@@ -27,5 +27,11 @@ export default async function Page(props: PageProps<'/assistants/[assistantId]/e
     }),
   ]).catch(handleErrorInServerComponent);
 
-  return <AssistantEdit assistant={assistant} relatedFiles={relatedFiles}></AssistantEdit>;
+  const initialLinks = assistant.attachedLinks
+    .filter((l) => l !== '')
+    .map((url) => ({ link: url }));
+
+  return (
+    <AssistantEdit assistant={assistant} relatedFiles={relatedFiles} initialLinks={initialLinks} />
+  );
 }

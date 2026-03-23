@@ -33,7 +33,10 @@ export function CustomChatFiles(props: CustomChatFilesProps) {
       });
       setCurrentFiles((prev) => prev.filter((f) => f.id !== fileId));
     }
+    // Todo: Fehlerbehandlung
   };
+
+  // Todo: Fehlerbehandlung bei Upload
 
   return (
     <>

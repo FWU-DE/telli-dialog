@@ -4,7 +4,7 @@ import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/cons
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CustomGptSelectModel, FileModel } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
-import { Card, CardContent, CardHeader, CardTitle } from '@ui/components/Card';
+import { Card, CardContent } from '@ui/components/Card';
 import { Field, FieldLabel, FieldError, FieldGroup } from '@ui/components/Field';
 import { Input } from '@ui/components/Input';
 import { Controller, useForm, useWatch } from 'react-hook-form';
@@ -37,6 +37,7 @@ import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
+import { WebsearchSource } from '@shared/db/types';
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
@@ -52,9 +53,11 @@ type AssistantFormValues = z.infer<typeof assistantFormValuesSchema>;
 export function AssistantEdit({
   assistant,
   relatedFiles,
+  initialLinks,
 }: {
   assistant: CustomGptSelectModel;
   relatedFiles: FileModel[];
+  initialLinks: WebsearchSource[];
 }) {
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
@@ -142,6 +145,10 @@ export function AssistantEdit({
 
   const handleDeleteFile = async (fileId: string) => {
     return await deleteFileMappingAndEntityAction({ customGptId: assistant.id, fileId });
+  };
+
+  const handleLinksChange = async (links: string[]) => {
+    return await updateCustomGptAction({ gptId: assistant.id, attachedLinks: links });
   };
 
   return (
@@ -242,6 +249,8 @@ export function AssistantEdit({
           initialFiles={relatedFiles}
           onFileUploaded={handleFileUploaded}
           onDeleteFile={handleDeleteFile}
+          initialLinks={initialLinks}
+          onLinksChange={handleLinksChange}
         />
 
         <div id="share-settings">Freigabe</div>
