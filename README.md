@@ -4,6 +4,10 @@
 
 This guide helps you run telli using pre-built Docker images with minimal configuration.
 
+> [!CAUTION]
+> The Docker Compose setup and credentials described in this section are intended **only for local exploration and testing**.
+> They use hard-coded default secrets and users and are **not safe for production deployments**.
+
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/)
@@ -25,7 +29,6 @@ This guide helps you run telli using pre-built Docker images with minimal config
    - Create S3 bucket in RustFS
 
 3. **Access the applications:**
-
    - **Dialog app**: http://localhost:3000
    - **Admin app**: http://localhost:3001
    - **API**: http://localhost:3002
@@ -33,7 +36,6 @@ This guide helps you run telli using pre-built Docker images with minimal config
    - **RustFS Console**: http://localhost:9001 (S3-compatible storage, credentials: `rustfsadmin` / `rustfsadmin123`)
 
 4. **Configure the application using telli-admin:**
-
    - Navigate to the admin app at http://localhost:3001
    - Login with teacher credentials (username: `teacher`, password: `password`)
    - In `telli-api` section:

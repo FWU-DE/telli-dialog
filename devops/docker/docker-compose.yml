@@ -17,10 +17,10 @@ services:
       - keycloak_data:/opt/keycloak/data/h2
       - ./keycloak:/opt/keycloak/data/import
     ports:
-      - '3000:3000'   # telli-dialog
-      - '3001:3001'   # telli-admin
-      - '3002:3002'   # telli-api
-      - '8080:8080'   # keycloak
+      - '3000:3000' # telli-dialog
+      - '3001:3001' # telli-admin
+      - '3002:3002' # telli-api
+      - '8080:8080' # keycloak
     depends_on:
       fix-keycloak-volume-ownership:
         condition: service_completed_successfully
@@ -289,7 +289,7 @@ services:
         apk add --no-cache s3cmd
 
         echo '=== Creating S3 bucket: telli ==='
-        s3cmd --access_key=rustfsadmin --secret_key=rustfsadmin123 --host=localhost:9000 --host-bucket='localhost:9000/%(bucket)' --region=us-east-1 --no-ssl --no-check-certificate mb s3://telli
+        s3cmd --access_key=rustfsadmin --secret_key=rustfsadmin123 --host=rustfs:9000 --host-bucket='rustfs:9000/%(bucket)' --region=us-east-1 --no-ssl --no-check-certificate mb s3://telli
 
         echo '=== Seeding telli_api_db ==='
         apk add --no-cache postgresql-client
