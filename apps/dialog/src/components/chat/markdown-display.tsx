@@ -27,11 +27,11 @@ function preprocessMathDelimiters(markdown: string) {
 export default function MarkdownDisplay({ children: _children }: MarkdownDisplayProps) {
   const children = preprocessMathDelimiters(_children);
 
-  // remove the top-padding for all elements following an hr
-  const useSymmetricPaddingForHorizontalLines = '[&>hr+*]:pt-0';
+  // remove the top-padding for the immediate sibling element following an hr to ensure the hr has symmetric top/bottom padding
+  const removeTopPaddingAfterHrClass = '[&>hr+*]:pt-0';
 
   return (
-    <div className={cn('wrap-break-word text-base', useSymmetricPaddingForHorizontalLines)}>
+    <div className={cn('wrap-break-word text-base', removeTopPaddingAfterHrClass)}>
       <Markdown
         remarkPlugins={[RemarkMathPlugin, remarkGfm]}
         rehypePlugins={[RehypeKatex]}
