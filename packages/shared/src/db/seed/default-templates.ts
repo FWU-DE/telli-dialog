@@ -1,6 +1,6 @@
 import {
   CharacterInsertModel,
-  CustomGptInsertModel,
+  AssistantInsertModel,
   LearningScenarioInsertModel,
   learningScenarioTable,
 } from '../schema';
@@ -9,7 +9,7 @@ import * as path from 'path';
 import { uploadFileToS3 } from '../../s3';
 import { dbCreateCharacter } from '../functions/character';
 import { DUMMY_USER_ID } from './user-entity';
-import { dbUpsertCustomGpt } from '../functions/custom-gpts';
+import { dbUpsertAssistant } from '../functions/custom-gpts';
 import { updateTemplateMappings } from '@shared/templates/template-service';
 import { FEDERAL_STATES } from './federal-state';
 import { dbGetModelByName } from '@shared/db/functions/llm-model';
@@ -39,27 +39,27 @@ export async function insertTemplateCharacters() {
   console.log('template character seed successful');
 }
 
-export async function insertTemplateCustomGpt() {
+export async function insertTemplateAssistant() {
   await processStaticJpegFiles(
     `${import.meta.dirname}/assets/template-custom-gpt`,
     'custom-gpts/_templates',
   );
-  for (const templateCustomGpt of defaultCustomGpt) {
-    const result = await dbUpsertCustomGpt({ customGpt: templateCustomGpt });
+  for (const templateAssistant of defaultAssistant) {
+    const result = await dbUpsertAssistant({ assistant: templateAssistant });
     const id = result?.id ?? undefined;
     if (!id) {
       console.log('Failed to seed template custom gpt', {
-        customGptName: templateCustomGpt.name,
+        assistantName: templateAssistant.name,
       });
       continue;
     }
     await updateTemplateMappings(
-      'custom-gpt',
+      'assistant',
       id,
       FEDERAL_STATES.map((fs) => ({ federalStateId: fs.id, isMapped: true })),
     );
   }
-  console.log('template custom gpt seed successful');
+  console.log('template assistant seed successful');
 }
 
 export async function insertTemplateLearningScenarios() {
@@ -180,14 +180,14 @@ export const defaultTemplates: Omit<CharacterInsertModel, 'modelId'>[] = [
   },
 ];
 
-export type CustomGptInsertModelWithId = CustomGptInsertModel & { id: string };
-export const defaultCustomGpt: CustomGptInsertModelWithId[] = [
+export type AssistantInsertModelWithId = AssistantInsertModel & { id: string };
+export const defaultAssistant: AssistantInsertModelWithId[] = [
   {
     id: 'edb34bca-9868-4948-af68-7e80810806ac',
     userId: DUMMY_USER_ID,
     name: 'Schulorganisationsassistent',
     description: 'Planer für organisatorische Aufgaben innerhalb der Schule',
-    specification:
+    instructions:
       'Der Assistent soll mich in meiner täglichen organisatorischen Arbeit unterstützen. Er soll Vorlagen für Elternbriefe, Elternabende, Rundschreiben, Vorlagen für Protokolle für Elterngespräche, Bewertungsvorlagen für Schüler:innenarbeiten etc. generieren, die ich mir einfach anpassen kann. Das Format sollte so gewählt sein, dass ich es einfach exportieren kann, ohne große Formatänderungen vornehmen zu müssen.',
     systemPrompt: '',
     accessLevel: 'global',

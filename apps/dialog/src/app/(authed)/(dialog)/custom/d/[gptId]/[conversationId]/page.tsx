@@ -10,7 +10,7 @@ import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
-import { getConversationWithMessagesAndCustomGpt } from '@shared/custom-gpt/custom-gpt-service';
+import { getConversationWithMessagesAndAssistant } from '@shared/custom-gpt/custom-gpt-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 
@@ -23,9 +23,9 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversa
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
-  const { conversation, messages, customGpt } = await getConversationWithMessagesAndCustomGpt({
+  const { conversation, messages, assistant } = await getConversationWithMessagesAndAssistant({
     conversationId: params.conversationId,
-    customGptId: params.gptId,
+    assistantId: params.gptId,
     userId: user.id,
   }).catch(handleErrorInServerComponent);
 
@@ -42,14 +42,14 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversa
   const currentModel =
     searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
 
-  const avatarPictureUrl = await getAvatarPictureUrl(customGpt.pictureId);
+  const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
 
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
       <HeaderPortal>
         <ChatHeaderBar
           chatId={conversation.id}
-          title={customGpt.name}
+          title={assistant.name}
           hasMessages={chatMessages.length > 0}
           userAndContext={userAndContext}
         />
@@ -57,7 +57,7 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversa
       <Chat
         id={conversation.id}
         initialMessages={chatMessages}
-        customGpt={customGpt}
+        assistant={assistant}
         enableFileUpload={true}
         imageSource={avatarPictureUrl}
         logoElement={logoElement}

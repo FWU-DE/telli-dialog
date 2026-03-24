@@ -1,6 +1,6 @@
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
-import { getCustomGptForEditView, getFileMappings } from '@shared/custom-gpt/custom-gpt-service';
+import { getAssistantForEditView, getFileMappings } from '@shared/custom-gpt/custom-gpt-service';
 import { notFound } from 'next/navigation';
 import { AssistantEdit } from './assistant-edit';
 
@@ -15,13 +15,13 @@ export default async function Page(props: PageProps<'/assistants/[assistantId]/e
   }
 
   const [assistant, relatedFiles] = await Promise.all([
-    getCustomGptForEditView({
-      customGptId: assistantId,
+    getAssistantForEditView({
+      assistantId: assistantId,
       schoolId: school.id,
       userId: user.id,
     }),
     getFileMappings({
-      customGptId: assistantId,
+      assistantId: assistantId,
       userId: user.id,
       schoolId: school.id,
     }),

@@ -1,8 +1,8 @@
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { dbGetCharacterById } from '@shared/db/functions/character';
 import { ObscuredFederalState } from '@/auth/utils';
-import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
-import { CustomGptSelectModel } from '@shared/db/schema';
+import { dbGetAssistantById } from '@shared/db/functions/custom-gpts';
+import { AssistantSelectModel } from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { constructBaseCharacterSystemPrompt } from '../character/system-prompt';
@@ -18,12 +18,12 @@ ${TOOL_GUIDELINES}
 `;
 }
 
-function constructCustomGptSystemPrompt(customGpt: CustomGptSelectModel) {
-  return `Du bist ein hilfreicher Assistent, der in einer Schule eingesetzt wird. Dein Name ist ${customGpt.name}.
+function constructAssistantSystemPrompt(assistant: AssistantSelectModel) {
+  return `Du bist ein hilfreicher Assistent, der in einer Schule eingesetzt wird. Dein Name ist ${assistant.name}.
 ${LANGUAGE_GUIDELINES}
 ${TOOL_GUIDELINES}
-${customGpt.description ? `Dein Ziel ist es hierbei zu assistieren: ${customGpt.description}` : ''}
-${customGpt.specification ? `Deine Aufgabe ist insbesondere: ${customGpt.specification}` : ''}
+${assistant.description ? `Dein Ziel ist es hierbei zu assistieren: ${assistant.description}` : ''}
+${assistant.instructions ? `Deine Aufgabe ist insbesondere: ${assistant.instructions}` : ''}
 `;
 }
 
@@ -89,14 +89,14 @@ ${federalStateSupportEmails !== null ? `- Kannst du nicht weiterhelfen, verweise
 
 export async function constructChatSystemPrompt({
   characterId,
-  customGptId,
+  assistantId,
   isTeacher,
   federalState,
   chunks,
   errorUrls,
 }: {
   characterId?: string;
-  customGptId?: string;
+  assistantId?: string;
   isTeacher: boolean;
   federalState: ObscuredFederalState;
   chunks: RetrievedChunk[];
@@ -116,25 +116,25 @@ export async function constructChatSystemPrompt({
     return `${characterSystemPrompt}\n${ragContext}`;
   }
 
-  if (customGptId !== undefined) {
-    const customGpt = await dbGetCustomGptById({ customGptId });
+  if (assistantId !== undefined) {
+    const assistant = await dbGetAssistantById({ assistantId });
 
-    if (customGpt === undefined) {
-      throw new Error(`GPT with id ${customGptId} not found`);
+    if (assistant === undefined) {
+      throw new Error(`GPT with id ${assistantId} not found`);
     }
 
-    let customGptSystemPrompt: string;
-    if (customGpt.id === HELP_MODE_GPT_ID) {
-      customGptSystemPrompt = constructHelpModeSystemPrompt({
+    let assistantSystemPrompt: string;
+    if (assistant.id === HELP_MODE_GPT_ID) {
+      assistantSystemPrompt = constructHelpModeSystemPrompt({
         isTeacher,
         federalStateSupportEmails: federalState.supportContacts,
         chatStorageDuration: federalState.chatStorageTime,
       });
     } else {
-      customGptSystemPrompt = constructCustomGptSystemPrompt(customGpt);
+      assistantSystemPrompt = constructAssistantSystemPrompt(assistant);
     }
 
-    return `${customGptSystemPrompt}\n${ragContext}`;
+    return `${assistantSystemPrompt}\n${ragContext}`;
   }
 
   return `${constructTelliSystemPrompt()}\n${ragContext}`;

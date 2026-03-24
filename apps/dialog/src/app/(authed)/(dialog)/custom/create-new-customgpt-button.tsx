@@ -6,7 +6,7 @@ import { cn } from '@/utils/tailwind';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { createNewCustomGptAction } from './actions';
+import { createNewAssistantAction } from './actions';
 
 export default function CreateNewCustomGptButton() {
   const router = useRouter();
@@ -14,7 +14,7 @@ export default function CreateNewCustomGptButton() {
   const t = useTranslations('custom-gpt');
 
   async function handleNewGPT() {
-    const createResult = await createNewCustomGptAction({});
+    const createResult = await createNewAssistantAction({});
     if (createResult.success) {
       router.push(`/custom/editor/${createResult.value.id}?create=true`);
     } else {

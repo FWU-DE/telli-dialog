@@ -26,7 +26,7 @@ export async function dbGetOrCreateConversation({
         id: conversationId,
         userId,
         characterId: characterId ?? null,
-        customGptId: customGptId ?? null,
+        assistantId: customGptId ?? null,
         type: type ?? 'chat',
         name: name ?? null,
       })

@@ -5,35 +5,35 @@ import {
 } from '@shared/conversation/conversation-service';
 import { db } from '@shared/db';
 import {
-  dbDeleteCustomGptByIdAndUserId,
-  dbGetCustomGptById,
+  dbDeleteAssistantByIdAndUserId,
+  dbGetAssistantById,
   dbGetGlobalGpts,
   dbGetGptsBySchoolId,
   dbGetGptsByUserId,
-  dbInsertCustomGptFileMapping,
+  dbInsertAssistantFileMapping,
 } from '@shared/db/functions/custom-gpts';
-import { dbGetRelatedCustomGptFiles } from '@shared/db/functions/files';
+import { dbGetRelatedAssistantFiles } from '@shared/db/functions/files';
 import {
   AccessLevel,
   accessLevelSchema,
-  CustomGptFileMapping,
-  CustomGptSelectModel,
-  customGptTable,
-  customGptUpdateSchema,
+  AssistantFileMapping,
+  AssistantSelectModel,
+  assistantTable,
+  assistantUpdateSchema,
   FileModel,
   fileTable,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
 import { copyFileInS3, uploadFileToS3 } from '@shared/s3';
-import { copyCustomGpt, copyRelatedTemplateFiles } from '@shared/templates/template-service';
+import { copyAssistant, copyRelatedTemplateFiles } from '@shared/templates/template-service';
 import { addDays } from '@shared/utils/date';
 import { generateUUID } from '@shared/utils/uuid';
 import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 
-export function buildCustomGptPictureKey(customGptId: string) {
-  return `custom-gpts/${customGptId}/avatar`;
+export function buildAssistantPictureKey(assistantId: string) {
+  return `custom-gpts/${assistantId}/avatar`;
 }
 
 /**
@@ -47,29 +47,29 @@ export function buildCustomGptPictureKey(customGptId: string) {
  * and any authenticated user can view the custom gpt. Note that link sharing
  * only grants read-only access - editing is still restricted to the owner.
  */
-export async function getCustomGptForEditView({
-  customGptId,
+export async function getAssistantForEditView({
+  assistantId,
   schoolId,
   userId,
 }: {
-  customGptId: string;
+  assistantId: string;
   schoolId: string;
   userId: string;
-}): Promise<CustomGptSelectModel> {
-  checkParameterUUID(customGptId);
-  const customGpt = await dbGetCustomGptById({ customGptId });
-  if (!customGpt.hasLinkAccess) {
-    if (customGpt.accessLevel === 'private' && customGpt.userId !== userId)
-      throw new ForbiddenError('Not authorized to edit custom gpt');
+}): Promise<AssistantSelectModel> {
+  checkParameterUUID(assistantId);
+  const assistant = await dbGetAssistantById({ assistantId });
+  if (!assistant.hasLinkAccess) {
+    if (assistant.accessLevel === 'private' && assistant.userId !== userId)
+      throw new ForbiddenError('Not authorized to edit assistant');
     if (
-      customGpt.accessLevel === 'school' &&
-      customGpt.schoolId !== schoolId &&
-      customGpt.userId !== userId
+      assistant.accessLevel === 'school' &&
+      assistant.schoolId !== schoolId &&
+      assistant.userId !== userId
     )
-      throw new ForbiddenError('Not authorized to edit custom gpt');
+      throw new ForbiddenError('Not authorized to edit assistant');
   }
 
-  return customGpt;
+  return assistant;
 }
 
 /**
@@ -81,31 +81,31 @@ export async function getCustomGptForEditView({
  * Link sharing bypass: If `hasLinkAccess` is true, access checks are skipped
  * and any authenticated user can use the custom gpt for chat.
  */
-export async function getCustomGptForNewChat({
-  customGptId,
+export async function getAssistantForNewChat({
+  assistantId,
   userId,
   schoolId,
 }: {
-  customGptId: string;
+  assistantId: string;
   userId: string;
   schoolId: string;
 }) {
-  checkParameterUUID(customGptId);
-  const customGpt = await dbGetCustomGptById({
-    customGptId,
+  checkParameterUUID(assistantId);
+  const assistant = await dbGetAssistantById({
+    assistantId,
   });
-  if (!customGpt.hasLinkAccess) {
-    if (customGpt.accessLevel === 'private' && customGpt.userId !== userId)
-      throw new ForbiddenError('Not authorized to use custom gpt');
+  if (!assistant.hasLinkAccess) {
+    if (assistant.accessLevel === 'private' && assistant.userId !== userId)
+      throw new ForbiddenError('Not authorized to use assistant');
     if (
-      customGpt.accessLevel === 'school' &&
-      customGpt.schoolId !== schoolId &&
-      customGpt.userId !== userId
+      assistant.accessLevel === 'school' &&
+      assistant.schoolId !== schoolId &&
+      assistant.userId !== userId
     )
-      throw new ForbiddenError('Not authorized to use custom gpt');
+      throw new ForbiddenError('Not authorized to use assistant');
   }
 
-  return customGpt;
+  return assistant;
 }
 
 /**
@@ -114,30 +114,30 @@ export async function getCustomGptForNewChat({
  * Throws NotFoundError if the conversation does not exist.
  * Throws ForbiddenError if the user is not the owner of the conversation.
  */
-export async function getConversationWithMessagesAndCustomGpt({
+export async function getConversationWithMessagesAndAssistant({
   conversationId,
-  customGptId,
+  assistantId,
   userId,
 }: {
   conversationId: string;
-  customGptId: string;
+  assistantId: string;
   userId: string;
 }) {
-  checkParameterUUID(customGptId, conversationId);
-  const [customGpt, conversation, messages] = await Promise.all([
-    dbGetCustomGptById({ customGptId }),
+  checkParameterUUID(assistantId, conversationId);
+  const [assistant, conversation, messages] = await Promise.all([
+    dbGetAssistantById({ assistantId }),
     getConversation({ conversationId, userId }),
     getConversationMessages({ conversationId, userId }),
   ]);
 
-  return { customGpt, conversation, messages };
+  return { assistant, conversation, messages };
 }
 
 /**
  * Returns a list of custom gpts for the user based on
  * userId, schoolId, federalStateId and access level.
  */
-export async function getCustomGptByAccessLevel({
+export async function getAssistantByAccessLevel({
   accessLevel,
   schoolId,
   userId,
@@ -147,7 +147,7 @@ export async function getCustomGptByAccessLevel({
   schoolId: string;
   userId: string;
   federalStateId: string;
-}): Promise<CustomGptSelectModel[]> {
+}): Promise<AssistantSelectModel[]> {
   if (accessLevel === 'global') {
     return await dbGetGlobalGpts({ federalStateId });
   } else if (accessLevel === 'school') {
@@ -163,7 +163,7 @@ export async function getCustomGptByAccessLevel({
  * If a templateId is provided, the new custom gpt is created by copying the template.
  * Throws if the user is not a teacher.
  */
-export async function createNewCustomGpt({
+export async function createNewAssistant({
   schoolId,
   templatePictureId,
   templateId,
@@ -174,83 +174,83 @@ export async function createNewCustomGpt({
   templateId?: string;
   user: UserModel;
 }) {
-  if (user.userRole !== 'teacher') throw new ForbiddenError('Not authorized to create custom gpt');
+  if (user.userRole !== 'teacher') throw new ForbiddenError('Not authorized to create assistant');
 
   if (templateId !== undefined) {
-    let insertedCustomGpt = await copyCustomGpt(templateId, 'private', user.id, schoolId);
+    let insertedAssistant = await copyAssistant(templateId, 'private', user.id, schoolId);
 
     if (templatePictureId !== undefined) {
-      const copyOfTemplatePicture = buildCustomGptPictureKey(insertedCustomGpt.id);
+      const copyOfTemplatePicture = buildAssistantPictureKey(insertedAssistant.id);
       await copyFileInS3({
         newKey: copyOfTemplatePicture,
         copySource: templatePictureId,
       });
 
-      // Update the custom GPT with the new picture
-      const [updatedCustomGpt] = await db
-        .update(customGptTable)
+      // Update the assistant with the new picture
+      const [updatedAssistant] = await db
+        .update(assistantTable)
         .set({ pictureId: copyOfTemplatePicture })
-        .where(eq(customGptTable.id, insertedCustomGpt.id))
+        .where(eq(assistantTable.id, insertedAssistant.id))
         .returning();
 
-      if (updatedCustomGpt) {
-        insertedCustomGpt = updatedCustomGpt;
+      if (updatedAssistant) {
+        insertedAssistant = updatedAssistant;
       }
     }
 
-    await copyRelatedTemplateFiles('custom-gpt', templateId, insertedCustomGpt.id);
-    return insertedCustomGpt;
+    await copyRelatedTemplateFiles('assistant', templateId, insertedAssistant.id);
+    return insertedAssistant;
   }
 
-  const customGptId = generateUUID();
+  const assistantId = generateUUID();
 
-  const [insertedCustomGpt] = await db
-    .insert(customGptTable)
+  const [insertedAssistant] = await db
+    .insert(assistantTable)
     .values({
-      id: customGptId,
+      id: assistantId,
       name: '',
       systemPrompt: '',
       userId: user.id,
       schoolId: schoolId,
       description: '',
-      specification: '',
+      instructions: '',
       promptSuggestions: [],
     })
     .returning();
 
-  if (!insertedCustomGpt) {
-    throw Error('Could not create a new custom gpt');
+  if (!insertedAssistant) {
+    throw Error('Could not create a new assistant');
   }
 
-  return insertedCustomGpt;
+  return insertedAssistant;
 }
 
 /**
  * Link a file to a custom gpt.
  * Throws if the user is not the owner of the custom gpt.
  */
-export async function linkFileToCustomGpt({
+export async function linkFileToAssistant({
   fileId,
-  customGptId,
+  assistantId,
   userId,
 }: {
   fileId: string;
-  customGptId: string;
+  assistantId: string;
   userId: string;
 }) {
-  checkParameterUUID(customGptId);
-  const customGpt = await dbGetCustomGptById({ customGptId });
-  if (customGpt.userId !== userId) {
-    throw new ForbiddenError('Not authorized to add new file to this custom gpt');
+  checkParameterUUID(assistantId);
+  const assistant = await dbGetAssistantById({ assistantId });
+  if (assistant.userId !== userId) {
+    throw new ForbiddenError('Not authorized to add new file to this assistant');
   }
 
-  const insertedFileMapping = await dbInsertCustomGptFileMapping({
-    customGptId,
+  const insertedFileMapping = await dbInsertAssistantFileMapping({
+    assistantId,
     fileId: fileId,
   });
 
   if (!insertedFileMapping) {
-    throw new Error('Could not link file to custom gpt');
+    throw new Error('Could not link file to assistant');
   }
 }
 
@@ -260,23 +260,23 @@ export async function linkFileToCustomGpt({
  * Throws if the user is not the owner of the custom gpt.
  */
 export async function deleteFileMappingAndEntity({
-  customGptId,
+  assistantId,
   fileId,
   userId,
 }: {
-  customGptId: string;
+  assistantId: string;
   fileId: string;
   userId: string;
 }) {
-  checkParameterUUID(customGptId);
-  const customGpt = await dbGetCustomGptById({ customGptId });
-  if (customGpt.userId !== userId) {
-    throw new ForbiddenError('Not authorized to delete this file mapping from custom gpt');
+  checkParameterUUID(assistantId);
+  const assistant = await dbGetAssistantById({ assistantId });
+  if (assistant.userId !== userId) {
+    throw new ForbiddenError('Not authorized to delete this file mapping from assistant');
   }
 
   // delete mapping and file entry in db
   await db.transaction(async (tx) => {
-    await tx.delete(CustomGptFileMapping).where(eq(CustomGptFileMapping.fileId, fileId));
+    await tx.delete(AssistantFileMapping).where(eq(AssistantFileMapping.fileId, fileId));
     await tx.delete(fileTable).where(eq(fileTable.id, fileId));
   });
 
@@ -292,30 +292,30 @@ export async function deleteFileMappingAndEntity({
  * - Forbidden if the custom gpt is school-level and the user is not in the same school
  */
 export async function getFileMappings({
-  customGptId,
+  assistantId,
   schoolId,
   userId,
 }: {
-  customGptId: string;
+  assistantId: string;
   schoolId: string;
   userId: string;
 }): Promise<FileModel[]> {
-  checkParameterUUID(customGptId);
-  const customGpt = await dbGetCustomGptById({ customGptId });
-  if (!customGpt.hasLinkAccess) {
-    if (customGpt.accessLevel === 'private' && customGpt.userId !== userId) {
-      throw new ForbiddenError('Not authorized to access custom gpt');
+  checkParameterUUID(assistantId);
+  const assistant = await dbGetAssistantById({ assistantId });
+  if (!assistant.hasLinkAccess) {
+    if (assistant.accessLevel === 'private' && assistant.userId !== userId) {
+      throw new ForbiddenError('Not authorized to access assistant');
     }
     if (
-      customGpt.accessLevel === 'school' &&
-      customGpt.schoolId !== schoolId &&
-      customGpt.userId !== userId
+      assistant.accessLevel === 'school' &&
+      assistant.schoolId !== schoolId &&
+      assistant.userId !== userId
     ) {
-      throw new ForbiddenError('Not authorized to access custom gpt');
+      throw new ForbiddenError('Not authorized to access assistant');
     }
   }
 
-  return await dbGetRelatedCustomGptFiles(customGptId);
+  return await dbGetRelatedAssistantFiles(assistantId);
 }
 
 /**
@@ -323,16 +323,16 @@ export async function getFileMappings({
  * Global access level is not allowed for this use case.
  * Throws if the user is not the owner of the custom gpt.
  */
-export async function updateCustomGptAccessLevel({
+export async function updateAssistantAccessLevel({
   accessLevel,
-  customGptId,
+  assistantId,
   userId,
 }: {
   accessLevel: AccessLevel;
-  customGptId: string;
+  assistantId: string;
   userId: string;
 }) {
-  checkParameterUUID(customGptId);
+  checkParameterUUID(assistantId);
   accessLevelSchema.parse(accessLevel);
 
   // Authorization check
@@ -340,127 +340,127 @@ export async function updateCustomGptAccessLevel({
     throw new ForbiddenError('Not authorized to set the access level to global');
   }
 
-  const customGpt = await dbGetCustomGptById({ customGptId });
-  if (customGpt.userId !== userId) {
-    throw new ForbiddenError('Not authorized to update custom gpt');
+  const assistant = await dbGetAssistantById({ assistantId });
+  if (assistant.userId !== userId) {
+    throw new ForbiddenError('Not authorized to update assistant');
   }
 
-  const [updatedCustomGpt] = await db
-    .update(customGptTable)
+  const [updatedAssistant] = await db
+    .update(assistantTable)
     .set({ accessLevel })
-    .where(and(eq(customGptTable.id, customGptId), eq(customGptTable.userId, userId)))
+    .where(and(eq(assistantTable.id, assistantId), eq(assistantTable.userId, userId)))
     .returning();
 
-  if (!updatedCustomGpt) {
-    throw new Error('Could not update the access level of the customGpt');
+  if (!updatedAssistant) {
+    throw new Error('Could not update the access level of the assistant');
   }
 
-  return updatedCustomGpt;
+  return updatedAssistant;
 }
 
 /**
  * Set a new picture for the custom gpt.
  * Throws if the user is not the owner of the custom gpt.
  */
-export async function updateCustomGptPicture({
-  customGptId,
+export async function updateAssistantPicture({
+  assistantId,
   picturePath,
   userId,
 }: {
-  customGptId: string;
+  assistantId: string;
   picturePath: string;
   userId: string;
 }) {
-  checkParameterUUID(customGptId);
-  const customGpt = await dbGetCustomGptById({ customGptId });
-  if (customGpt.userId !== userId) {
-    throw new ForbiddenError('Not authorized to update this custom gpt');
+  checkParameterUUID(assistantId);
+  const assistant = await dbGetAssistantById({ assistantId });
+  if (assistant.userId !== userId) {
+    throw new ForbiddenError('Not authorized to update this assistant');
   }
 
-  const [updatedCustomGpt] = await db
-    .update(customGptTable)
+  const [updatedAssistant] = await db
+    .update(assistantTable)
     .set({ pictureId: picturePath })
-    .where(and(eq(customGptTable.id, customGptId), eq(customGptTable.userId, userId)))
+    .where(and(eq(assistantTable.id, assistantId), eq(assistantTable.userId, userId)))
     .returning();
 
-  if (updatedCustomGpt === undefined) {
-    throw new Error('Could not update the picture of the custom gpt');
+  if (updatedAssistant === undefined) {
+    throw new Error('Could not update the picture of the assistant');
   }
 
-  return updatedCustomGpt;
+  return updatedAssistant;
 }
 
-const updateCustomGptSchema = customGptUpdateSchema.omit({
+const updateAssistantSchema = assistantUpdateSchema.omit({
   id: true,
   pictureId: true,
   isDeleted: true,
-  originalCustomGptId: true,
+  originalAssistantId: true,
   accessLevel: true,
 });
 
 /**
- * Update custom gpt properties.
- * Throws if the user is not the owner of the custom gpt.
+ * Update assistant properties.
+ * Throws if the user is not the owner of the assistant.
  */
-export async function updateCustomGpt({
-  customGptId,
+export async function updateAssistant({
+  assistantId,
   userId,
-  customGptProps,
+  assistantProps,
 }: {
-  customGptId: string;
+  assistantId: string;
   userId: string;
-  customGptProps: z.infer<typeof updateCustomGptSchema>;
+  assistantProps: z.infer<typeof updateAssistantSchema>;
 }) {
-  const customGpt = await dbGetCustomGptById({ customGptId });
-  if (customGpt.userId !== userId) {
-    throw new ForbiddenError('Not authorized to update this custom gpt');
+  const assistant = await dbGetAssistantById({ assistantId });
+  if (assistant.userId !== userId) {
+    throw new ForbiddenError('Not authorized to update this assistant');
   }
 
-  const parsedValues = updateCustomGptSchema.parse(customGptProps);
+  const parsedValues = updateAssistantSchema.parse(assistantProps);
 
-  const [updatedGpt] = await db
-    .update(customGptTable)
+  const [updatedAssistant] = await db
+    .update(assistantTable)
     .set(parsedValues)
-    .where(and(eq(customGptTable.id, customGptId), eq(customGptTable.userId, userId)))
+    .where(and(eq(assistantTable.id, assistantId), eq(assistantTable.userId, userId)))
     .returning();
 
-  if (!updatedGpt) {
-    throw new Error('Could not update the custom gpt');
+  if (!updatedAssistant) {
+    throw new Error('Could not update the assistant');
   }
 
-  return updatedGpt;
+  return updatedAssistant;
 }
 
 /**
- * Deletes a custom gpt.
- * Throws if the user is not the owner of the custom gpt.
+ * Deletes an assistant.
+ * Throws if the user is not the owner of the assistant.
  * Also deletes all related files and the avatar picture from S3.
  */
-export async function deleteCustomGpt({
-  customGptId,
+export async function deleteAssistant({
+  assistantId,
   userId,
 }: {
-  customGptId: string;
+  assistantId: string;
   userId: string;
 }) {
-  checkParameterUUID(customGptId);
-  const customGpt = await dbGetCustomGptById({ customGptId });
-  if (customGpt.userId !== userId) {
-    throw new ForbiddenError('Not authorized to delete this custom gpt');
+  checkParameterUUID(assistantId);
+  const assistant = await dbGetAssistantById({ assistantId });
+  if (assistant.userId !== userId) {
+    throw new ForbiddenError('Not authorized to delete this assistant');
   }
 
-  const relatedFiles = await dbGetRelatedCustomGptFiles(customGptId);
+  const relatedFiles = await dbGetRelatedAssistantFiles(assistantId);
 
-  // delete customGpt from db
-  const deletedCustomGpt = await dbDeleteCustomGptByIdAndUserId({ gptId: customGptId, userId });
+  // delete assistant from db
+  const deletedAssistant = await dbDeleteAssistantByIdAndUserId({ gptId: assistantId, userId });
 
   // delete avatar picture from S3
-  await deleteAvatarPicture(customGpt.pictureId);
+  await deleteAvatarPicture(assistant.pictureId);
 
   // delete all related files from s3
   await deleteMessageAttachments(relatedFiles.map((file) => file.id));
 
-  return deletedCustomGpt;
+  return deletedAssistant;
 }
 
 /**
@@ -472,29 +472,29 @@ export async function deleteCustomGpt({
  *
  * @returns number of deleted custom gpts in db.
  */
-export async function cleanupCustomGpts() {
+export async function cleanupAssistants() {
   const result = await db
-    .delete(customGptTable)
-    .where(and(eq(customGptTable.name, ''), lt(customGptTable.createdAt, addDays(new Date(), -1))))
+    .delete(assistantTable)
+    .where(and(eq(assistantTable.name, ''), lt(assistantTable.createdAt, addDays(new Date(), -1))))
     .returning();
   return result.length;
 }
 
-export async function uploadAvatarPictureForCustomGpt({
-  customGptId,
+export async function uploadAvatarPictureForAssistant({
+  assistantId,
   croppedImageBlob,
   userId,
 }: {
-  customGptId: string;
+  assistantId: string;
   croppedImageBlob: Blob;
   userId: string;
 }) {
-  const customGpt = await dbGetCustomGptById({ customGptId });
-  if (customGpt.userId !== userId) {
-    throw new ForbiddenError('Not authorized to update avatar picture for this custom gpt');
+  const assistant = await dbGetAssistantById({ assistantId });
+  if (assistant.userId !== userId) {
+    throw new ForbiddenError('Not authorized to update avatar picture for this assistant');
   }
 
-  const key = buildCustomGptPictureKey(customGptId);
+  const key = buildAssistantPictureKey(assistantId);
 
   await uploadFileToS3({
     key: key,

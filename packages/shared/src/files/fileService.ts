@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '@shared/db';
 import {
   CharacterFileMapping,
-  CustomGptFileMapping,
+  AssistantFileMapping,
   fileTable,
   LearningScenarioFileMapping,
   chunkTable,
@@ -98,15 +98,15 @@ export async function linkFileToCharacter(fileId: string, characterId: string): 
 }
 
 /**
- * Links a file to a custom GPT by creating a mapping record.
+ * Links a file to an assistant by creating a mapping record.
  *
  * @param fileId - The ID of the file to link
- * @param customGptId - The ID of the custom GPT to link to
+ * @param assistantId - The ID of the assistant to link to
  */
-export async function linkFileToCustomGpt(fileId: string, customGptId: string): Promise<void> {
-  await db.insert(CustomGptFileMapping).values({
+export async function linkFileToAssistant(fileId: string, assistantId: string): Promise<void> {
+  await db.insert(AssistantFileMapping).values({
     fileId,
-    customGptId,
+    assistantId,
   });
 }
 

@@ -160,7 +160,7 @@ export async function sendChatMessage({
   const relatedFileEntities = await dbGetAttachedFileByEntityId({
     conversationId: conversation.id,
     characterId,
-    customGptId,
+    assistantId: customGptId,
   });
 
   const chunks = await retrieveChunks({
@@ -184,7 +184,7 @@ export async function sendChatMessage({
   // Build system prompt
   const systemPrompt = await constructChatSystemPrompt({
     characterId,
-    customGptId,
+    assistantId: customGptId,
     isTeacher: user.school.userRole === 'teacher',
     federalState: user.federalState,
     chunks,

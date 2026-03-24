@@ -1,17 +1,17 @@
 'use server';
 
-import { AccessLevel, CustomGptInsertModel } from '@shared/db/schema';
+import { AccessLevel, AssistantInsertModel } from '@shared/db/schema';
 import {
-  deleteCustomGpt,
-  updateCustomGpt,
-  updateCustomGptAccessLevel,
-  updateCustomGptPicture,
-  uploadAvatarPictureForCustomGpt,
+  deleteAssistant,
+  updateAssistant,
+  updateAssistantAccessLevel,
+  updateAssistantPicture,
+  uploadAvatarPictureForAssistant,
 } from '@shared/custom-gpt/custom-gpt-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { runServerAction } from '@shared/actions/run-server-action';
 
-export async function updateCustomGptAccessLevelAction({
+export async function updateAssistantAccessLevelAction({
   gptId: gptId,
   accessLevel,
 }: {
@@ -20,14 +20,14 @@ export async function updateCustomGptAccessLevelAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(updateCustomGptAccessLevel)({
-    customGptId: gptId,
+  return runServerAction(updateAssistantAccessLevel)({
+    assistantId: gptId,
     accessLevel,
     userId: user.id,
   });
 }
 
-export async function updateCustomGptPictureAction({
+export async function updateAssistantPictureAction({
   gptId,
   picturePath,
 }: {
@@ -36,43 +36,43 @@ export async function updateCustomGptPictureAction({
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(updateCustomGptPicture)({
-    customGptId: gptId,
+  return runServerAction(updateAssistantPicture)({
+    assistantId: gptId,
     picturePath,
     userId: user.id,
   });
 }
 
-export async function updateCustomGptAction({
+export async function updateAssistantAction({
   gptId,
-  ...customGpt
-}: Partial<CustomGptInsertModel> & { gptId: string }) {
+  ...assistant
+}: Partial<AssistantInsertModel> & { gptId: string }) {
   const { user } = await requireAuth();
 
-  return runServerAction(updateCustomGpt)({
-    customGptId: gptId,
+  return runServerAction(updateAssistant)({
+    assistantId: gptId,
     userId: user.id,
-    customGptProps: customGpt,
+    assistantProps: assistant,
   });
 }
 
-export async function deleteCustomGptAction({ gptId }: { gptId: string }) {
+export async function deleteAssistantAction({ gptId }: { gptId: string }) {
   const { user } = await requireAuth();
 
-  return runServerAction(deleteCustomGpt)({ customGptId: gptId, userId: user.id });
+  return runServerAction(deleteAssistant)({ assistantId: gptId, userId: user.id });
 }
 
-export async function uploadAvatarPictureForCustomGptAction({
-  customGptId,
+export async function uploadAvatarPictureForAssistantAction({
+  assistantId,
   croppedImageBlob,
 }: {
-  customGptId: string;
+  assistantId: string;
   croppedImageBlob: Blob;
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(uploadAvatarPictureForCustomGpt)({
-    customGptId,
+  return runServerAction(uploadAvatarPictureForAssistant)({
+    assistantId,
     croppedImageBlob,
     userId: user.id,
   });

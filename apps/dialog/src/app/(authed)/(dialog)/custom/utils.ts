@@ -1,19 +1,19 @@
-import { CustomGptSelectModel } from '@shared/db/schema';
+import { AssistantSelectModel } from '@shared/db/schema';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 
-export type CustomGptWithImage = CustomGptSelectModel & {
+export type AssistantWithImage = AssistantSelectModel & {
   maybeSignedPictureUrl: string | undefined;
 };
 
 export async function enrichGptWithImage({
-  customGpts,
+  assistants,
 }: {
-  customGpts: CustomGptSelectModel[];
-}): Promise<CustomGptWithImage[]> {
+  assistants: AssistantSelectModel[];
+}): Promise<AssistantWithImage[]> {
   return await Promise.all(
-    customGpts.map(async (gpt) => ({
-      ...gpt,
-      maybeSignedPictureUrl: await getAvatarPictureUrl(gpt.pictureId),
+    assistants.map(async (assistant) => ({
+      ...assistant,
+      maybeSignedPictureUrl: await getAvatarPictureUrl(assistant.pictureId),
     })),
   );
 }

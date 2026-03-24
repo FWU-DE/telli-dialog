@@ -3,179 +3,179 @@ import { and, desc, eq, getTableColumns, inArray, or } from 'drizzle-orm';
 import {
   conversationMessageTable,
   conversationTable,
-  CustomGptFileMapping,
-  type CustomGptInsertModel,
-  type CustomGptSelectModel,
-  customGptTable,
-  customGptTemplateMappingTable,
+  AssistantFileMapping,
+  type AssistantInsertModel,
+  type AssistantSelectModel,
+  assistantTable,
+  assistantTemplateMappingTable,
   fileTable,
 } from '../schema';
 import { NotFoundError } from '@shared/error';
 
-export async function dbGetCustomGptsByUserId({
+export async function dbGetAssistantsByUserId({
   userId,
 }: {
   userId: string;
-}): Promise<CustomGptSelectModel[]> {
-  return db.select().from(customGptTable).where(eq(customGptTable.userId, userId));
+}): Promise<AssistantSelectModel[]> {
+  return db.select().from(assistantTable).where(eq(assistantTable.userId, userId));
 }
 
-export async function dbGetCustomGptById({
-  customGptId,
+export async function dbGetAssistantById({
+  assistantId,
 }: {
-  customGptId: string;
-}): Promise<CustomGptSelectModel> {
-  const [customGpt] = await db
+  assistantId: string;
+}): Promise<AssistantSelectModel> {
+  const [assistant] = await db
     .select()
-    .from(customGptTable)
-    .where(and(eq(customGptTable.id, customGptId)));
+    .from(assistantTable)
+    .where(and(eq(assistantTable.id, assistantId)));
 
-  if (!customGpt) throw new NotFoundError('Custom GPT not found');
+  if (!assistant) throw new NotFoundError('Assistant not found');
 
-  return customGpt;
+  return assistant;
 }
 
 export async function dbGetGlobalGpts({
   federalStateId,
 }: {
   federalStateId?: string;
-}): Promise<CustomGptSelectModel[]> {
+}): Promise<AssistantSelectModel[]> {
   if (federalStateId) {
     return db
-      .select({ ...getTableColumns(customGptTable) })
-      .from(customGptTable)
+      .select({ ...getTableColumns(assistantTable) })
+      .from(assistantTable)
       .innerJoin(
-        customGptTemplateMappingTable,
-        eq(customGptTemplateMappingTable.customGptId, customGptTable.id),
+        assistantTemplateMappingTable,
+        eq(assistantTemplateMappingTable.assistantId, assistantTable.id),
       )
       .where(
         and(
-          eq(customGptTable.accessLevel, 'global'),
-          eq(customGptTemplateMappingTable.federalStateId, federalStateId),
+          eq(assistantTable.accessLevel, 'global'),
+          eq(assistantTemplateMappingTable.federalStateId, federalStateId),
         ),
       )
-      .orderBy(desc(customGptTable.createdAt));
+      .orderBy(desc(assistantTable.createdAt));
   } else {
     return db
       .select()
-      .from(customGptTable)
-      .where(eq(customGptTable.accessLevel, 'global'))
-      .orderBy(desc(customGptTable.createdAt));
+      .from(assistantTable)
+      .where(eq(assistantTable.accessLevel, 'global'))
+      .orderBy(desc(assistantTable.createdAt));
   }
 }
 
-export async function dbGetGlobalCustomGptByName({
+export async function dbGetGlobalAssistantByName({
   name,
 }: {
   name: string;
-}): Promise<CustomGptSelectModel | undefined> {
-  const [customGpt] = await db
+}): Promise<AssistantSelectModel | undefined> {
+  const [assistant] = await db
     .select()
-    .from(customGptTable)
-    .where(and(eq(customGptTable.name, name), eq(customGptTable.accessLevel, 'global')));
-  return customGpt;
+    .from(assistantTable)
+    .where(and(eq(assistantTable.name, name), eq(assistantTable.accessLevel, 'global')));
+  return assistant;
 }
 
 export async function dbGetGptsBySchoolId({
   schoolId,
 }: {
   schoolId: string;
-}): Promise<CustomGptSelectModel[]> {
+}): Promise<AssistantSelectModel[]> {
   return db
     .select()
-    .from(customGptTable)
-    .where(and(eq(customGptTable.schoolId, schoolId), eq(customGptTable.accessLevel, 'school')))
-    .orderBy(desc(customGptTable.createdAt));
+    .from(assistantTable)
+    .where(and(eq(assistantTable.schoolId, schoolId), eq(assistantTable.accessLevel, 'school')))
+    .orderBy(desc(assistantTable.createdAt));
 }
 
 export async function dbGetGptsByUserId({
   userId,
 }: {
   userId: string;
-}): Promise<CustomGptSelectModel[]> {
+}): Promise<AssistantSelectModel[]> {
   return db
     .select()
-    .from(customGptTable)
-    .where(and(eq(customGptTable.userId, userId), eq(customGptTable.accessLevel, 'private')))
-    .orderBy(desc(customGptTable.createdAt));
+    .from(assistantTable)
+    .where(and(eq(assistantTable.userId, userId), eq(assistantTable.accessLevel, 'private')))
+    .orderBy(desc(assistantTable.createdAt));
 }
 
-export async function dbGetCustomGptByIdOrSchoolId({
-  customGptId: characterId,
+export async function dbGetAssistantByIdOrSchoolId({
+  assistantId: characterId,
   userId,
   schoolId,
 }: {
-  customGptId: string;
+  assistantId: string;
   userId: string;
   schoolId: string | null;
 }) {
   const [character] = await db
     .select()
-    .from(customGptTable)
+    .from(assistantTable)
     .where(
       or(
         and(
-          eq(customGptTable.id, characterId),
-          eq(customGptTable.userId, userId),
-          eq(customGptTable.accessLevel, 'private'),
+          eq(assistantTable.id, characterId),
+          eq(assistantTable.userId, userId),
+          eq(assistantTable.accessLevel, 'private'),
         ),
         schoolId !== null
           ? and(
-              eq(customGptTable.id, characterId),
-              eq(customGptTable.schoolId, schoolId),
-              eq(customGptTable.accessLevel, 'school'),
+              eq(assistantTable.id, characterId),
+              eq(assistantTable.schoolId, schoolId),
+              eq(assistantTable.accessLevel, 'school'),
             )
           : undefined,
-        eq(customGptTable.accessLevel, 'global'),
+        eq(assistantTable.accessLevel, 'global'),
       ),
     );
 
   return character;
 }
 
-export async function dbUpsertCustomGpt({
-  customGpt,
+export async function dbUpsertAssistant({
+  assistant,
 }: {
-  customGpt: CustomGptInsertModel;
-}): Promise<CustomGptSelectModel | undefined> {
-  const [insertedCustomGpt] = await db
-    .insert(customGptTable)
-    .values(customGpt)
+  assistant: AssistantInsertModel;
+}): Promise<AssistantSelectModel | undefined> {
+  const [insertedAssistant] = await db
+    .insert(assistantTable)
+    .values(assistant)
     .onConflictDoUpdate({
-      target: customGptTable.id,
-      set: { ...customGpt },
+      target: assistantTable.id,
+      set: { ...assistant },
     })
     .returning();
 
-  return insertedCustomGpt;
+  return insertedAssistant;
 }
 
-export async function dbUpdateCustomGpt({
-  customGptId,
-  customGpt,
+export async function dbUpdateAssistant({
+  assistantId,
+  assistant,
 }: {
-  customGptId: string;
-  customGpt: Partial<CustomGptInsertModel>;
-}): Promise<CustomGptSelectModel | undefined> {
-  const [updatedCustomGpt] = await db
-    .update(customGptTable)
-    .set(customGpt)
-    .where(eq(customGptTable.id, customGptId))
+  assistantId: string;
+  assistant: Partial<AssistantInsertModel>;
+}): Promise<AssistantSelectModel | undefined> {
+  const [updatedAssistant] = await db
+    .update(assistantTable)
+    .set(assistant)
+    .where(eq(assistantTable.id, assistantId))
     .returning();
 
-  return updatedCustomGpt;
+  return updatedAssistant;
 }
 
-export async function dbDeleteCustomGpt({ customGptId }: { customGptId: string }) {
+export async function dbDeleteAssistant({ assistantId }: { assistantId: string }) {
   await db.transaction(async (tx) => {
-    const customGptConversations = await tx
+    const assistantConversations = await tx
       .select()
       .from(conversationTable)
-      .where(eq(conversationTable.customGptId, customGptId));
+      .where(eq(conversationTable.assistantId, assistantId));
 
-    if (customGptConversations.length > 0) {
+    if (assistantConversations.length > 0) {
       await Promise.all(
-        customGptConversations.map(async (conversation) => {
+        assistantConversations.map(async (conversation) => {
           await tx
             .delete(conversationMessageTable)
             .where(eq(conversationMessageTable.conversationId, conversation.id));
@@ -183,37 +183,37 @@ export async function dbDeleteCustomGpt({ customGptId }: { customGptId: string }
       );
     }
 
-    await tx.delete(conversationTable).where(eq(conversationTable.customGptId, customGptId));
-    await tx.delete(customGptTable).where(eq(customGptTable.id, customGptId));
+    await tx.delete(conversationTable).where(eq(conversationTable.assistantId, assistantId));
+    await tx.delete(assistantTable).where(eq(assistantTable.id, assistantId));
   });
 }
 
-export async function dbDeleteCustomGptByIdAndUserId({
+export async function dbDeleteAssistantByIdAndUserId({
   gptId: gptId,
   userId,
 }: {
   gptId: string;
   userId: string;
 }) {
-  const [customGpt] = await db
+  const [assistant] = await db
     .select()
-    .from(customGptTable)
-    .where(and(eq(customGptTable.id, gptId), eq(customGptTable.userId, userId)));
+    .from(assistantTable)
+    .where(and(eq(assistantTable.id, gptId), eq(assistantTable.userId, userId)));
 
-  if (customGpt === undefined) {
-    throw Error('Custom GPT does not exist');
+  if (assistant === undefined) {
+    throw Error('Assistant does not exist');
   }
 
-  const deletedGpt = await db.transaction(async (tx) => {
+  const deletedAssistant = await db.transaction(async (tx) => {
     const relatedFiles = await tx
-      .select({ id: CustomGptFileMapping.fileId })
-      .from(CustomGptFileMapping)
-      .where(eq(CustomGptFileMapping.customGptId, customGpt.id));
+      .select({ id: AssistantFileMapping.fileId })
+      .from(AssistantFileMapping)
+      .where(eq(AssistantFileMapping.assistantId, assistant.id));
 
     const conversations = await tx
       .select({ id: conversationTable.id })
       .from(conversationTable)
-      .where(eq(conversationTable.customGptId, customGpt.id));
+      .where(eq(conversationTable.assistantId, assistant.id));
 
     if (conversations.length > 0) {
       await tx.delete(conversationMessageTable).where(
@@ -223,43 +223,43 @@ export async function dbDeleteCustomGptByIdAndUserId({
         ),
       );
     }
-    await tx.delete(conversationTable).where(eq(conversationTable.customGptId, customGpt.id));
-    await tx.delete(CustomGptFileMapping).where(eq(CustomGptFileMapping.customGptId, customGpt.id));
+    await tx.delete(conversationTable).where(eq(conversationTable.assistantId, assistant.id));
+    await tx.delete(AssistantFileMapping).where(eq(AssistantFileMapping.assistantId, assistant.id));
     await tx.delete(fileTable).where(
       inArray(
         fileTable.id,
         relatedFiles.map((f) => f.id),
       ),
     );
-    const deletedGpt = (
+    const deletedAssistant = (
       await tx
-        .delete(customGptTable)
-        .where(and(eq(customGptTable.id, gptId), eq(customGptTable.userId, userId)))
+        .delete(assistantTable)
+        .where(and(eq(assistantTable.id, gptId), eq(assistantTable.userId, userId)))
         .returning()
     )[0];
 
-    if (deletedGpt === undefined) {
-      throw Error('Could not delete custom GPT');
+    if (deletedAssistant === undefined) {
+      throw Error('Could not delete assistant');
     }
-    return deletedGpt;
+    return deletedAssistant;
   });
 
-  return deletedGpt;
+  return deletedAssistant;
 }
 
 /**
  * adds a new file mapping entry
  */
-export async function dbInsertCustomGptFileMapping({
+export async function dbInsertAssistantFileMapping({
   fileId,
-  customGptId,
+  assistantId,
 }: {
   fileId: string;
-  customGptId: string;
+  assistantId: string;
 }) {
   const [insertedFileMapping] = await db
-    .insert(CustomGptFileMapping)
-    .values({ fileId, customGptId })
+    .insert(AssistantFileMapping)
+    .values({ fileId, assistantId })
     .returning();
 
   return insertedFileMapping;

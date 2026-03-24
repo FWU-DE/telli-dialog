@@ -1,6 +1,6 @@
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
-import { dbGetCustomGptById } from '@shared/db/functions/custom-gpts';
+import { dbGetAssistantById } from '@shared/db/functions/custom-gpts';
 import { MAX_WEBSEARCH_SOURCES_PER_CONVERSATION } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
 import { ChatMessage } from './actions';
@@ -10,15 +10,15 @@ function extractUniqueUrls(content: string): string[] {
   return [...new Set(parseHyperlinks(content) ?? [])].filter((l) => l !== '');
 }
 
-// Get attached links from custom GPT or character
+// Get attached links from assistant or character
 async function getAttachedLinks(
-  customGptId: string | undefined,
+  assistantId: string | undefined,
   characterId: string | undefined,
   userId: string,
 ): Promise<string[] | null> {
-  if (customGptId) {
-    const customGpt = await dbGetCustomGptById({ customGptId });
-    return customGpt?.attachedLinks.filter((l) => l !== '') ?? [];
+  if (assistantId) {
+    const assistant = await dbGetAssistantById({ assistantId: assistantId });
+    return assistant?.attachedLinks.filter((l) => l !== '') ?? [];
   }
   if (characterId) {
     const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
@@ -28,23 +28,23 @@ async function getAttachedLinks(
 }
 
 /**
- * Extracts URLs from the conversation messages, including any attached links from a custom GPT or character.
+ * Extracts URLs from the conversation messages, including any attached links from an assistant or character.
  *
- * @param customGptId The ID of the custom GPT, if applicable.
+ * @param assistantId The ID of the assistant, if applicable.
  * @param characterId The ID of the character, if applicable.
  * @param user The user and context information.
  * @param messages The conversation history messages.
  * @returns The aggregated websearch sources.
  */
 export async function extractUrls(
-  customGptId: string | undefined,
+  assistantId: string | undefined,
   characterId: string | undefined,
   user: UserAndContext,
   messages: ChatMessage[],
 ): Promise<string[]> {
-  const attachedLinks = await getAttachedLinks(customGptId, characterId, user.id);
+  const attachedLinks = await getAttachedLinks(assistantId, characterId, user.id);
 
-  // For custom GPTs or characters, just return their attached links
+  // For assistants or characters, just return their attached links
   if (attachedLinks !== null) {
     return attachedLinks;
   }

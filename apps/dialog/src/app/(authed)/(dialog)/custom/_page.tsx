@@ -16,7 +16,7 @@ import { useTranslations } from 'next-intl';
 import CustomGptContainer from './custom-gpt-container';
 import { buildGenericUrl } from '../utils.client';
 import CreateNewCustomGptButton from './create-new-customgpt-button';
-import { CustomGptWithImage } from './utils';
+import { AssistantWithImage } from './utils';
 import { HELP_MODE_GPT_ID } from '@shared/db/const';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 
@@ -26,7 +26,7 @@ export default function Page2({
   accessLevel,
 }: {
   userAndContext: UserAndContext;
-  customGpts: CustomGptWithImage[];
+  customGpts: AssistantWithImage[];
   accessLevel: AccessLevel;
 }) {
   const [input, setInput] = React.useState('');
@@ -113,7 +113,7 @@ export default function Page2({
   );
 }
 
-function filterCustomGpt(customGpt: CustomGptWithImage[], input: string): CustomGptWithImage[] {
+function filterCustomGpt(customGpt: AssistantWithImage[], input: string): AssistantWithImage[] {
   const lowerCaseInput = input.toLowerCase();
 
   return customGpt.filter((gpt) => {

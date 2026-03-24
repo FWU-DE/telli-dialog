@@ -1,6 +1,6 @@
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
-import { getCustomGptForEditView } from '@shared/custom-gpt/custom-gpt-service';
+import { getAssistantForEditView } from '@shared/custom-gpt/custom-gpt-service';
 import { notFound } from 'next/navigation';
 import { AssistantView } from './assistant-view';
 
@@ -15,8 +15,8 @@ export default async function Page(props: PageProps<'/assistants/[assistantId]'>
     notFound();
   }
 
-  const assistant = await getCustomGptForEditView({
-    customGptId: assistantId,
+  const assistant = await getAssistantForEditView({
+    assistantId: assistantId,
     schoolId: school.id,
     userId: user.id,
   }).catch(handleErrorInServerComponent);
