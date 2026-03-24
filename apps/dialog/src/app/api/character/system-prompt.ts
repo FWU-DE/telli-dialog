@@ -12,13 +12,12 @@ import {
 export function constructCharacterSystemPrompt({
   character,
   chunks,
-  errorUrls,
 }: {
   character: CharacterSelectModel;
   chunks: RetrievedChunk[];
-  errorUrls: string[];
 }) {
-  const ragContext = constructRagContext(chunks, errorUrls);
+  // error urls are intentionally not included in the character system prompt
+  const ragContext = constructRagContext(chunks);
 
   return `Du bist ${character.name}. ${character.description}
   

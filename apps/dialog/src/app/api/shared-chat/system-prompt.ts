@@ -16,6 +16,7 @@ export function constructLearningScenarioSystemPrompt({
   sharedChat: LearningScenarioSelectModel;
   chunks: RetrievedChunk[];
 }) {
+  // error urls are intentionally not included in the learning scenario system prompt
   const ragContext = constructRagContext(chunks);
 
   return `Du bist ein KI-Chatbot, der in einer Schulklasse eingesetzt wird, um Schülerinnen und Schüler zu unterstützen.

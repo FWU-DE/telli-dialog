@@ -108,7 +108,6 @@ ${federalStateSupportEmails !== null ? `- Kannst du nicht weiterhelfen, verweise
 ${LANGUAGE_GUIDELINES}
 ${TOOL_GUIDELINES}
 ${FORMAT_GUIDELINES}
-${SUGGESTION_GUIDELINES}
 ${ragContext}`;
 }
 
@@ -134,7 +133,7 @@ export async function constructChatSystemPrompt({
       throw new Error(`Character with id ${characterId} not found`);
     }
 
-    return constructCharacterSystemPrompt({ character, chunks, errorUrls });
+    return constructCharacterSystemPrompt({ character, chunks });
   }
 
   if (customGptId !== undefined) {

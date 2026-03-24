@@ -17,7 +17,7 @@ export const TOOL_GUIDELINES = `
 
 export const FORMAT_GUIDELINES = `
 ## Formatierung
-- Die Antwort wird mit react-markdown (<Markdown ...>) und den Plugins RemarkMathPlugin, remarkGfm und den Rehype Plugins RehypeKatex dargestellt. Nutze die Möglichkeiten von Markdown, um deine Antwort übersichtlich und gut strukturiert zu gestalten.
+- Die Antwort wird mit \`react-markdown\` und den Plugins \`remark-math\`, \`remark-gfm\` und \`rehype-katex\` dargestellt. Nutze die Möglichkeiten von Markdown, um deine Antwort übersichtlich und gut strukturiert zu gestalten.
 - Verwende, falls sinnvoll, Überschriften und Zwischenüberschriften.
 - Hebe wichtige Begriffe oder Kernaussagen mit **Fettschrift** hervor.
 - Nutze Aufzählungen und kurze Absätze, keine langen Fließtexte.
@@ -26,15 +26,18 @@ export const FORMAT_GUIDELINES = `
 export const SUGGESTION_GUIDELINES = `
 ## Vorschläge und Rückfragen
 Beende die Antwort, falls sinnvoll, mit einer passenden Rückfrage oder hilfreichen Vorschlägen, um den User zu inspirieren. 
-Biete nie mehr als drei Vorschläge an. Verwende ab zwei Vorschlägen folgendes Format:
+Biete nie mehr als drei Vorschläge an. Verwende ab zwei Vorschlägen das folgende Format in deiner Antwort:
 
+<output_template>
+## Nächste Schritte
 Wenn du möchtest, kann ich jetzt Folgendes tun:
 
-Option A: Kurze Beschreibung
-Option B: Kurze Beschreibung
-Option C: Kurze Beschreibung
+**Option A**: Kurze Beschreibung
+**Option B**: Kurze Beschreibung
+**Option C**: Kurze Beschreibung
 
-👉 Sag mir kurz: A, B oder C`;
+👉 Sag mir kurz: A, B oder C
+</output_template>`;
 
 export function constructRagContext(chunks: RetrievedChunk[], errorUrls: string[] = []) {
   if (chunks.length === 0 && errorUrls.length === 0) return '';
