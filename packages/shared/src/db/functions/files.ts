@@ -20,7 +20,7 @@ import {
 } from '../schema';
 import { logDebug } from '@shared/logging';
 import { buildCharacterPictureKey } from '@shared/characters/character-service';
-import { buildAssistantPictureKey } from '@shared/custom-gpt/custom-gpt-service';
+import { buildAssistantPictureKey } from '@shared/assistants/assistant-service';
 import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
 
 export async function linkFilesToConversation({

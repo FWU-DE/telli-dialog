@@ -5,7 +5,7 @@ import {
   createNewAssistant,
   deleteFileMappingAndEntity,
   linkFileToAssistant,
-} from '@shared/custom-gpt/custom-gpt-service';
+} from '@shared/assistants/assistant-service';
 import { runServerAction } from '@shared/actions/run-server-action';
 
 export async function createNewAssistantAction({

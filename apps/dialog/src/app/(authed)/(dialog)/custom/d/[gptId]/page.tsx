@@ -5,7 +5,7 @@ import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
 import Logo from '@/components/common/logo';
-import { getAssistantForNewChat } from '@shared/custom-gpt/custom-gpt-service';
+import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';

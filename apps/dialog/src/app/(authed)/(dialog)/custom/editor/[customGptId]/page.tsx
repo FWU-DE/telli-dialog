@@ -6,7 +6,7 @@ import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { AssistantSelectModel } from '@shared/db/schema';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
-import { getAssistantForEditView, getFileMappings } from '@shared/custom-gpt/custom-gpt-service';
+import { getAssistantForEditView, getFileMappings } from '@shared/assistants/assistant-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';

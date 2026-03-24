@@ -10,7 +10,7 @@ import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
-import { getConversationWithMessagesAndAssistant } from '@shared/custom-gpt/custom-gpt-service';
+import { getConversationWithMessagesAndAssistant } from '@shared/assistants/assistant-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 

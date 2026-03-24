@@ -1,6 +1,6 @@
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
-import { getAssistantForEditView, getFileMappings } from '@shared/custom-gpt/custom-gpt-service';
+import { getAssistantForEditView, getFileMappings } from '@shared/assistants/assistant-service';
 import { notFound } from 'next/navigation';
 import { AssistantEdit } from './assistant-edit';
 

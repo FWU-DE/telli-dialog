@@ -11,7 +11,7 @@ import {
   updateAssistant,
   updateAssistantAccessLevel,
   updateAssistantPicture,
-} from './custom-gpt-service';
+} from './assistant-service';
 import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
 import { dbGetAssistantById } from '@shared/db/functions/custom-gpts';

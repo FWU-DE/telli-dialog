@@ -158,7 +158,7 @@ export async function deleteMessageAttachments(fileIds: string[]): Promise<void>
 /**
  * Deletes an avatar picture from S3.
  *
- * @param key The pictureId for characters, customgpts and learning scenarios
+ * @param key The pictureId for characters, assistants and learning scenarios
  * does contain the full path so we can directly use it as key.
  * Does nothing if key is null or undefined.
  *

@@ -5,7 +5,7 @@ import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
-import { getAssistantByAccessLevel } from '@shared/custom-gpt/custom-gpt-service';
+import { getAssistantByAccessLevel } from '@shared/assistants/assistant-service';
 
 export const dynamic = 'force-dynamic';
 

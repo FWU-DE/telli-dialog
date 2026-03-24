@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logError, logInfo } from '@shared/logging';
 import { cleanupCharacters } from '@shared/characters/character-service';
 import { cleanupLearningScenarios } from '@shared/learning-scenarios/learning-scenario-admin-service';
-import { cleanupAssistants } from '@shared/custom-gpt/custom-gpt-service';
+import { cleanupAssistants } from '@shared/assistants/assistant-service';
 import { cleanupWebChunks } from '@/app/api/rag/cleanupWebChunks';
 
 export async function DELETE(req: NextRequest) {

@@ -7,7 +7,7 @@ import {
   updateAssistantAccessLevel,
   updateAssistantPicture,
   uploadAvatarPictureForAssistant,
-} from '@shared/custom-gpt/custom-gpt-service';
+} from '@shared/assistants/assistant-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { runServerAction } from '@shared/actions/run-server-action';
 
