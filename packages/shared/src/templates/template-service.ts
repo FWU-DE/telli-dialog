@@ -43,7 +43,7 @@ import { generateUUID } from '@shared/utils/uuid';
 import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
 
 const templateTypeMap: Record<string, TemplateTypes> = {
-  custom: 'assistant',
+  assistant: 'assistant',
   characters: 'character',
   'learning-scenarios': 'learning-scenario',
 };
@@ -82,7 +82,7 @@ async function getCharacterTemplates(): Promise<TemplateModel[]> {
   }));
 }
 
-/** Fetch all custom GPT templates from the database. */
+/** Fetch all assistant templates from the database. */
 async function getAssistantTemplates(): Promise<TemplateModel[]> {
   const templates = await db
     .select({

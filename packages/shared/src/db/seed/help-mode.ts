@@ -1,9 +1,9 @@
-import { HELP_MODE_GPT_ID } from '../const';
+import { HELP_MODE_ASSISTANT_ID } from '../const';
 import { dbUpsertAssistant } from '../functions/custom-gpts';
 import { type AssistantInsertModel } from '../schema';
 
 const hilfeModusGpt: AssistantInsertModel & { id: string } = {
-  id: HELP_MODE_GPT_ID,
+  id: HELP_MODE_ASSISTANT_ID,
   name: 'Hilfe-Assistent',
   systemPrompt: '',
   userId: null,

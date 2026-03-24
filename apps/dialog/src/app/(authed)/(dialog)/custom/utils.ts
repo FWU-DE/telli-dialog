@@ -5,7 +5,7 @@ export type AssistantWithImage = AssistantSelectModel & {
   maybeSignedPictureUrl: string | undefined;
 };
 
-export async function enrichGptWithImage({
+export async function enrichAssistantsWithImage({
   assistants,
 }: {
   assistants: AssistantSelectModel[];

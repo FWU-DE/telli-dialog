@@ -17,7 +17,7 @@ import CustomGptContainer from './custom-gpt-container';
 import { buildGenericUrl } from '../utils.client';
 import CreateNewCustomGptButton from './create-new-customgpt-button';
 import { AssistantWithImage } from './utils';
-import { HELP_MODE_GPT_ID } from '@shared/db/const';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 
 export default function Page2({
@@ -118,7 +118,7 @@ function filterCustomGpt(customGpt: AssistantWithImage[], input: string): Assist
 
   return customGpt.filter((gpt) => {
     const mainMatch = gpt.name.toLowerCase().includes(lowerCaseInput);
-    const isHelpAssistant = gpt.id === HELP_MODE_GPT_ID;
+    const isHelpAssistant = gpt.id === HELP_MODE_ASSISTANT_ID;
     return mainMatch && !isHelpAssistant;
   });
 }

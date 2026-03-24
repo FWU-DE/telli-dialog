@@ -56,7 +56,7 @@ export async function sendChatMessage({
   messages,
   modelId,
   characterId,
-  customGptId,
+  assistantId,
   fileIds,
   user,
 }: {
@@ -64,7 +64,7 @@ export async function sendChatMessage({
   messages: ChatMessage[];
   modelId: string;
   characterId?: string;
-  customGptId?: string;
+  assistantId?: string;
   fileIds?: string[];
   user: UserAndContext;
 }): Promise<SendMessageResult> {
@@ -96,7 +96,7 @@ export async function sendChatMessage({
     conversationId,
     userId: user.id,
     characterId,
-    customGptId,
+    assistantId,
   });
 
   if (conversation === undefined) {
@@ -130,7 +130,7 @@ export async function sendChatMessage({
     throw new Error('No user message found');
   }
 
-  const urls = await extractUrls(customGptId, characterId, user, messages);
+  const urls = await extractUrls(assistantId, characterId, user, messages);
   const { processedUrls, errorUrls } = await ingestWebContent({
     urls,
     federalStateId: user.federalState.id,
@@ -160,7 +160,7 @@ export async function sendChatMessage({
   const relatedFileEntities = await dbGetAttachedFileByEntityId({
     conversationId: conversation.id,
     characterId,
-    assistantId: customGptId,
+    assistantId: assistantId,
   });
 
   const chunks = await retrieveChunks({
@@ -184,7 +184,7 @@ export async function sendChatMessage({
   // Build system prompt
   const systemPrompt = await constructChatSystemPrompt({
     characterId,
-    assistantId: customGptId,
+    assistantId: assistantId,
     isTeacher: user.school.userRole === 'teacher',
     federalState: user.federalState,
     chunks,

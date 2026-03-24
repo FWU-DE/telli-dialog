@@ -1,6 +1,6 @@
 'use client';
 
-import { HELP_MODE_GPT_ID } from '@shared/db/const';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import {
   SidebarMenuAction,
   SidebarMenuButton,
@@ -71,7 +71,7 @@ export function ChatHistoryItem({
 
   const isActive = () => {
     // special case for help mode because it is also a custom gpt and starts with the same path
-    if (pathname.startsWith(`/custom/d/${HELP_MODE_GPT_ID}`)) return pathname === href;
+    if (pathname.startsWith(`/custom/d/${HELP_MODE_ASSISTANT_ID}`)) return pathname === href;
 
     return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
   };

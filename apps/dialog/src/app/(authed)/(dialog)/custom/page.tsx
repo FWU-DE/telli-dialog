@@ -1,6 +1,6 @@
 import { accessLevelSchema } from '@shared/db/schema';
 import Page2 from './_page';
-import { enrichGptWithImage } from './utils';
+import { enrichAssistantsWithImage } from './utils';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
@@ -27,7 +27,7 @@ export default async function Page(props: PageProps<'/custom'>) {
   });
   const assistants = _assistants.filter((a) => a.name !== '');
 
-  const enrichedCustomGpts = await enrichGptWithImage({ assistants });
+  const enrichedCustomGpts = await enrichAssistantsWithImage({ assistants });
 
   return (
     <Page2

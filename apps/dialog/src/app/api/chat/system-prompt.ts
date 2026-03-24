@@ -4,7 +4,7 @@ import { ObscuredFederalState } from '@/auth/utils';
 import { dbGetAssistantById } from '@shared/db/functions/custom-gpts';
 import { AssistantSelectModel } from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
-import { HELP_MODE_GPT_ID } from '@shared/db/const';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { constructBaseCharacterSystemPrompt } from '../character/system-prompt';
 import { constructRagContext, LANGUAGE_GUIDELINES, TOOL_GUIDELINES } from '../utils/system-prompt';
 
@@ -120,11 +120,11 @@ export async function constructChatSystemPrompt({
     const assistant = await dbGetAssistantById({ assistantId });
 
     if (assistant === undefined) {
-      throw new Error(`GPT with id ${assistantId} not found`);
+      throw new Error(`Assistant with id ${assistantId} not found`);
     }
 
     let assistantSystemPrompt: string;
-    if (assistant.id === HELP_MODE_GPT_ID) {
+    if (assistant.id === HELP_MODE_ASSISTANT_ID) {
       assistantSystemPrompt = constructHelpModeSystemPrompt({
         isTeacher,
         federalStateSupportEmails: federalState.supportContacts,
