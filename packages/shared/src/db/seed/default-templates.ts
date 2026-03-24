@@ -9,7 +9,7 @@ import * as path from 'path';
 import { uploadFileToS3 } from '../../s3';
 import { dbCreateCharacter } from '../functions/character';
 import { DUMMY_USER_ID } from './user-entity';
-import { dbUpsertAssistant } from '../functions/custom-gpts';
+import { dbUpsertAssistant } from '../functions/assistants';
 import { updateTemplateMappings } from '@shared/templates/template-service';
 import { FEDERAL_STATES } from './federal-state';
 import { dbGetModelByName } from '@shared/db/functions/llm-model';

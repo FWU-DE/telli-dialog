@@ -1,5 +1,5 @@
 import { HELP_MODE_ASSISTANT_ID } from '../const';
-import { dbUpsertAssistant } from '../functions/custom-gpts';
+import { dbUpsertAssistant } from '../functions/assistants';
 import { type AssistantInsertModel } from '../schema';
 
 const hilfeModusGpt: AssistantInsertModel & { id: string } = {

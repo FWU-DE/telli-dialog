@@ -22,7 +22,7 @@ import {
   TemplateTypes,
 } from '@shared/templates/template';
 import { dbCreateCharacter, dbGetCharacterById } from '@shared/db/functions/character';
-import { dbGetAssistantById, dbUpsertAssistant } from '@shared/db/functions/custom-gpts';
+import { dbGetAssistantById, dbUpsertAssistant } from '@shared/db/functions/assistants';
 import {
   dbGetFilesForLearningScenario,
   dbGetRelatedCharacterFiles,

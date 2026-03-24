@@ -14,7 +14,7 @@ import {
 } from './assistant-service';
 import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
-import { dbGetAssistantById } from '@shared/db/functions/custom-gpts';
+import { dbGetAssistantById } from '@shared/db/functions/assistants';
 import { dbGetRelatedAssistantFiles } from '@shared/db/functions/files';
 import { AssistantSelectModel } from '@shared/db/schema';
 import { UserModel } from '@shared/auth/user-model';
@@ -23,7 +23,7 @@ import {
   getConversationMessages,
 } from '@shared/conversation/conversation-service';
 
-vi.mock('../db/functions/custom-gpts', () => ({
+vi.mock('../db/functions/assistants', () => ({
   dbGetAssistantById: vi.fn(),
 }));
 vi.mock('../db/functions/files', () => ({

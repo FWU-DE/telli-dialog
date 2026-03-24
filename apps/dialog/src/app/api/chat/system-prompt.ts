@@ -1,7 +1,7 @@
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { dbGetCharacterById } from '@shared/db/functions/character';
 import { ObscuredFederalState } from '@/auth/utils';
-import { dbGetAssistantById } from '@shared/db/functions/custom-gpts';
+import { dbGetAssistantById } from '@shared/db/functions/assistants';
 import { AssistantSelectModel } from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';

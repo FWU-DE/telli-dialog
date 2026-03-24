@@ -11,7 +11,7 @@ import {
   dbGetGptsBySchoolId,
   dbGetGptsByUserId,
   dbInsertAssistantFileMapping,
-} from '@shared/db/functions/custom-gpts';
+} from '@shared/db/functions/assistants';
 import { dbGetRelatedAssistantFiles } from '@shared/db/functions/files';
 import {
   AccessLevel,

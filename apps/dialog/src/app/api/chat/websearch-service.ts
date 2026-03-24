@@ -1,6 +1,6 @@
 import { parseHyperlinks } from '@/utils/web-search/parsing';
 import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
-import { dbGetAssistantById } from '@shared/db/functions/custom-gpts';
+import { dbGetAssistantById } from '@shared/db/functions/assistants';
 import { MAX_WEBSEARCH_SOURCES_PER_CONVERSATION } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
 import { ChatMessage } from './actions';
