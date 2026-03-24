@@ -24,7 +24,7 @@ async function withAdvisoryLock(key1: number, key2: number, callback: () => Prom
 
 function dbGetCharactersWithInvalidPictureIds() {
   return db
-    .select()
+    .select({ id: characterTable.id, pictureId: characterTable.pictureId })
     .from(characterTable)
     .where(
       and(
@@ -51,7 +51,7 @@ async function dbUpdateCharacter(id: string, character: Partial<CharacterUpdateM
 
 function dbGetCustomGptsWithInvalidPictureIds() {
   return db
-    .select()
+    .select({ id: customGptTable.id, pictureId: customGptTable.pictureId })
     .from(customGptTable)
     .where(
       and(
@@ -70,7 +70,7 @@ async function dbUpdateCustomGpt(id: string, customGpt: Partial<CustomGptInsertM
     .returning();
 
   if (!updated) {
-    throw new Error(`Failed to update character with id ${id}`);
+    throw new Error(`Failed to update custom gpt with id ${id}`);
   }
 
   return updated;
