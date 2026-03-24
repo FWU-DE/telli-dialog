@@ -37,7 +37,6 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]'>) {
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
       <ChatHeaderBar chatId={id} userAndContext={userAndContext} hasMessages={false} />
       <Chat
-        key={id}
         id={id}
         initialMessages={[]}
         assistant={assistant}

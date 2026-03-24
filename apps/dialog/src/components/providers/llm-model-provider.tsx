@@ -1,7 +1,7 @@
 'use client';
 
 import { LlmModelSelectModel } from '@shared/db/schema';
-import React from 'react';
+import React, { useState } from 'react';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import { saveChatModelForUserAction } from '@/app/(authed)/(dialog)/actions';
 import { getFirstTextModel } from '@shared/llm-models/llm-model-service';
@@ -25,9 +25,12 @@ export function LlmModelsProvider({
   children,
   defaultLlmModelByCookie,
 }: LlmModelsProviderProps) {
-  const selectedModel = getSelectedModel({ models, defaultLlmModelByCookie });
+  const [selectedModel, setSelectedModelState] = useState<LlmModelSelectModel | undefined>(
+    () => getSelectedModel({ models, defaultLlmModelByCookie }),
+  );
 
   async function setSelectedModel(model: LlmModelSelectModel) {
+    setSelectedModelState(model);
     await saveChatModelForUserAction(model.name);
   }
 

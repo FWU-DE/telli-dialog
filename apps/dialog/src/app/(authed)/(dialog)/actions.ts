@@ -11,7 +11,6 @@ import deleteConversation, {
 import { dbGetRelatedFiles } from '@shared/db/functions/files';
 import { dbUpdateLastUsedModelByUserId, dbUpdateUserTermsVersion } from '@shared/db/functions/user';
 import { FileModel } from '@shared/db/schema';
-import { revalidatePath } from 'next/cache';
 
 export async function deleteConversationAction({ conversationId }: { conversationId: string }) {
   const { user } = await requireAuth();
@@ -37,7 +36,6 @@ export async function saveChatModelForUserAction(modelName: string) {
   await updateSession({
     user: await dbUpdateLastUsedModelByUserId({ userId: user.id, modelName }),
   });
-  revalidatePath('/');
 }
 
 export async function setUserAcceptConditions(): Promise<boolean> {

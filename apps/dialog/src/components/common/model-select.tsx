@@ -4,7 +4,7 @@ import React, { startTransition } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { type LlmModelSelectModel } from '@shared/db/schema';
 import { cn } from '@/utils/tailwind';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { Badge } from '../common/badge';
 
@@ -31,7 +31,6 @@ export default function ModelSelect({
 }: ModelSelectProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   async function handleSelectModel(model: LlmModelSelectModel) {
     startTransition(async () => {
@@ -39,11 +38,13 @@ export default function ModelSelect({
     });
     await onModelChange(model);
 
-    // Only update URL params for chat models, not image generation
+    // Only update URL params for chat models, not image generation.
+    // Use replaceState to update the URL without triggering a full navigation,
+    // which would remount client components and lose chat state (input, messages).
     if (enableUrlParams) {
       const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.set('model', model.name);
-      router.push(`${pathname}?${newSearchParams.toString()}`);
+      window.history.replaceState(null, '', `${pathname}?${newSearchParams.toString()}`);
     }
   }
 

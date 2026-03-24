@@ -28,12 +28,12 @@ export default async function Page() {
 
   return (
     <LlmModelsProvider
+      key={id}
       models={models}
       defaultLlmModelByCookie={userAndContext.lastUsedModel ?? DEFAULT_CHAT_MODEL}
     >
       <ChatHeaderBar chatId={id} hasMessages={false} userAndContext={userAndContext} />
       <Chat
-        key={id}
         id={id}
         initialMessages={[]}
         promptSuggestions={promptSuggestions}

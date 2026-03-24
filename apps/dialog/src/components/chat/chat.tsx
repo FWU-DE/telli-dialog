@@ -136,6 +136,9 @@ export default function Chat({
         // Preserve scroll state across the remount caused by router.replace()
         preserveScrollState();
         setNeedsRouterSync(true);
+        // Refetch after first exchange so the sidebar shows the generated title
+        refetchConversations();
+        return;
       }
 
       if (messages.length > 1) {
@@ -198,8 +201,10 @@ export default function Chat({
       // Trigger refetch of the fileMapping from the DB
       setCountOfFilesInChat(countOfFilesInChat + 1);
 
-      // If this is the first message, update navigation and refetch
-      if (messages.length === 0) {
+      // If this is the first user message, update navigation and refetch.
+      // Check for user messages specifically, since character chats may have an
+      // initial assistant message before any user message is sent.
+      if (!messages.some((m) => m.role === 'user')) {
         navigateWithoutRefresh(conversationPath);
         isFirstMessageRef.current = true; // Will sync router after request completes
         refetchConversations();
