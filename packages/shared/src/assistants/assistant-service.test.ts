@@ -42,7 +42,7 @@ const mockUser = (userRole: 'student' | 'teacher' = 'teacher'): UserModel => ({
   userRole,
 });
 
-describe('custom-gpt-service', () => {
+describe('assistant-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
