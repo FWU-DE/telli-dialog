@@ -93,12 +93,14 @@ export default function AvatarCropModal({
           keepSelection
         >
           <Image
-            ref={imageRef}
             alt="crop image"
             src={imageSrc}
             width={500}
             height={500}
-            onLoad={(e) => onImageLoad(e.currentTarget.naturalWidth, e.currentTarget.naturalHeight)}
+            onLoadingComplete={(img) => {
+              imageRef.current = img;
+              onImageLoad(img.naturalWidth, img.naturalHeight);
+            }}
             className="object-contain max-w-full max-h-[80vh]"
           />
         </ReactCrop>

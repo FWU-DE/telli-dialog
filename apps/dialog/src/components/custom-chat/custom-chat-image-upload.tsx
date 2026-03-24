@@ -18,7 +18,7 @@ export function CustomChatImageUpload({
   onUploadPicture,
 }: {
   avatarPictureUrl?: string;
-  onPictureUploadComplete: (pictureId: string) => void;
+  onPictureUploadComplete: (picturePath: string) => void;
   onUploadPicture: (croppedImageBlob: Blob) => Promise<ServerActionResult<string>>;
 }) {
   const [file, setFile] = React.useState<File | null>(null);
@@ -68,13 +68,13 @@ export function CustomChatImageUpload({
   }
 
   return (
-    <Card className="h-50 flex justify-center items-center">
+    <Card className="h-[200px] flex justify-center items-center">
       <CardContent className="flex items-center gap-4 p-4">
-        <div className="w-35 h-35 rounded-full flex items-center justify-center">
+        <div className="w-[140px] h-[140px] rounded-full flex items-center justify-center">
           {avatarPictureUrl ? (
             <AvatarPicture src={avatarPictureUrl} alt="Profile Picture" variant="customChatLarge" />
           ) : (
-            <EmptyImageIcon className="relative -left-1 -top-1 w-15 h-15" />
+            <EmptyImageIcon className="relative -left-1 -top-1 w-[60px] h-[60px]" />
           )}
         </div>
         <div className="flex flex-col gap-2">
@@ -86,6 +86,7 @@ export function CustomChatImageUpload({
             ref={fileInputRef}
           />
           <Button
+            type="button"
             onClick={handleButtonClick}
             className={cn(
               buttonPrimaryClassName,
