@@ -30,7 +30,6 @@ function dbGetCharactersWithInvalidPictureIds() {
       and(
         isNotNull(characterTable.pictureId),
         ne(characterTable.pictureId, sql`'characters/' || ${characterTable.id} || '/avatar'`),
-        ne(characterTable.accessLevel, 'global'),
       ),
     );
 }
@@ -57,7 +56,6 @@ function dbGetCustomGptsWithInvalidPictureIds() {
       and(
         isNotNull(customGptTable.pictureId),
         ne(customGptTable.pictureId, sql`'custom-gpts/' || ${customGptTable.id} || '/avatar'`),
-        ne(customGptTable.accessLevel, 'global'),
       ),
     );
 }
