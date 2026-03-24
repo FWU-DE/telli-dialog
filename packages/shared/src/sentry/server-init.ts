@@ -8,15 +8,22 @@ import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { SentrySampler, SentrySpanProcessor } from '@sentry/opentelemetry';
+import { scrubSentryEvent } from '@telli/shared-core/sentry/scrub';
 import { env } from './env';
 
 /**
  * Initializes Sentry and OpenTelemetry for server-side application.
  */
-export function initSentry(opts: {
+export function initSentry({
+  scrubSensitiveData = true,
+  serviceName,
+  traceExcludedUrls,
+}: {
   serviceName: string;
   /** List of URL paths, which should not be traced */
   traceExcludedUrls: string[];
+  /** Whether to scrub sensitive data from Sentry events before sending */
+  scrubSensitiveData?: boolean;
 }) {
   const sentryClient = Sentry.init({
     debug: false,
@@ -30,13 +37,18 @@ export function initSentry(opts: {
       // Extract pathname if it's a full URL, otherwise use as-is
       const pathname = url.startsWith('http') ? new URL(url).pathname : url.split('?')[0];
 
-      const isExcludedUrl = opts.traceExcludedUrls.includes(pathname ?? '');
+      const isExcludedUrl = traceExcludedUrls.includes(pathname ?? '');
       if (isExcludedUrl) {
         return 0;
       }
 
       return inheritOrSampleWith(env.sentryTracesSampleRate);
     },
+    ...(scrubSensitiveData && {
+      beforeBreadcrumb: (breadcrumb) => scrubSentryEvent(breadcrumb),
+      beforeSend: (event) => scrubSentryEvent(event),
+      beforeSendTransaction: (event) => scrubSentryEvent(event),
+    }),
     // Use custom OpenTelemetry configuration, see https://docs.sentry.io/platforms/javascript/guides/node/opentelemetry/custom-setup/
     skipOpenTelemetrySetup: true,
     registerEsmLoaderHooks: false,
@@ -67,12 +79,12 @@ export function initSentry(opts: {
       }),
     ],
     resource: resourceFromAttributes({
-      [ATTR_SERVICE_NAME]: opts.serviceName,
+      [ATTR_SERVICE_NAME]: serviceName,
       [ATTR_SERVICE_VERSION]: env.appVersion,
     }),
     metricReaders: [periodicExportingMetricReader],
     sampler: sentryClient ? new SentrySampler(sentryClient) : undefined,
-    serviceName: opts.serviceName,
+    serviceName: serviceName,
     spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter()), new SentrySpanProcessor()],
     contextManager: new SentryContextManager(),
   });

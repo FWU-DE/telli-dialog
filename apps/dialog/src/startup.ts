@@ -5,6 +5,7 @@ import { env } from '@shared/env';
 import { env as aiEnv } from '@telli/ai-core/env';
 import { lookupApiKeys } from '@telli/ai-core/api-keys/lookup';
 import { logError, logInfo } from '@shared/logging';
+import { fixInvalidPictureIds } from './fix-invalid-picture-ids';
 
 /**
  * Custom code that will be executed on application startup.
@@ -19,6 +20,8 @@ export async function startup() {
  */
 async function postMigration() {
   await tempAddApiKeyIdsToFederalStates();
+  // run fix in the background
+  void fixInvalidPictureIds();
 }
 
 /**
