@@ -4,7 +4,7 @@ import React from 'react';
 type AvatarPictureProps = {
   src: string;
   alt: string;
-  variant?: 'small' | 'normal' | 'large';
+  variant?: 'small' | 'normal' | 'large' | 'customChatLarge';
 };
 
 const VARIANT_STYLES = {
@@ -22,6 +22,11 @@ const VARIANT_STYLES = {
     width: 170,
     height: 170,
     className: 'rounded-enterprise-md object-contain min-w-[170px] min-h-[170px]',
+  },
+  customChatLarge: {
+    width: 140,
+    height: 140,
+    className: 'rounded-full object-contain w-[140px] h-[140px]',
   },
 };
 

@@ -26,6 +26,8 @@ import { useTranslations } from 'next-intl';
 import {
   deleteCustomGptAction,
   updateCustomGptAction,
+  updateCustomGptPictureAction,
+  uploadAvatarPictureForCustomGptAction,
 } from '../../../custom/editor/[customGptId]/actions';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
@@ -54,15 +56,17 @@ export function AssistantEdit({
   assistant,
   relatedFiles,
   initialLinks,
+  avatarPictureUrl,
 }: {
   assistant: CustomGptSelectModel;
   relatedFiles: FileModel[];
   initialLinks: WebsearchSource[];
+  avatarPictureUrl?: string;
 }) {
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
   const toast = useToast();
-  const t = useTranslations('custom-gpt');
+  const t = useTranslations('custom-chat');
   const initialValues: AssistantFormValues = {
     name: assistant.name,
     description: assistant.description ?? '',
@@ -158,6 +162,24 @@ export function AssistantEdit({
     return await updateCustomGptAction({ gptId: assistant.id, attachedLinks: links });
   };
 
+  function handlePictureUploadComplete(picturePath: string) {
+    updateCustomGptPictureAction({ gptId: assistant.id, picturePath }).then((result) => {
+      if (result.success) {
+        toast.success(t('toasts.image-toast-success'));
+        router.refresh();
+      } else {
+        toast.error(t('toasts.image-toast-error'));
+      }
+    });
+  }
+
+  async function handleUploadPicture(croppedImageBlob: Blob) {
+    return await uploadAvatarPictureForCustomGptAction({
+      customGptId: assistant.id,
+      croppedImageBlob,
+    });
+  }
+
   return (
     <CustomChatLayoutContainer>
       {/* // Todo: Maybe we have to remember where we come from and which filters were set */}
@@ -192,7 +214,11 @@ export function AssistantEdit({
         />
       </div>
       <CustomChatShareInfo href="#share-settings" />
-      <CustomChatImageUpload />
+      <CustomChatImageUpload
+        avatarPictureUrl={avatarPictureUrl}
+        onPictureUploadComplete={handlePictureUploadComplete}
+        onUploadPicture={handleUploadPicture}
+      />
 
       <form
         id="assistant-edit-form"
