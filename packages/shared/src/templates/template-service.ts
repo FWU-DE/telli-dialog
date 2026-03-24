@@ -43,7 +43,7 @@ import { generateUUID } from '@shared/utils/uuid';
 import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
 
 const templateTypeMap: Record<string, TemplateTypes> = {
-  assistant: 'assistant',
+  custom: 'custom-gpt',
   characters: 'character',
   'learning-scenarios': 'learning-scenario',
 };
@@ -97,7 +97,7 @@ async function getAssistantTemplates(): Promise<TemplateModel[]> {
 
   return templates.map((template) => ({
     ...template,
-    type: 'assistant',
+    type: 'custom-gpt',
   }));
 }
 
@@ -145,7 +145,7 @@ export async function getTemplateById(
       ...character,
       type: 'character',
     };
-  } else if (templateType === 'assistant') {
+  } else if (templateType === 'custom-gpt') {
     const [assistant] = await db
       .select({
         id: assistantTable.id,
@@ -163,7 +163,7 @@ export async function getTemplateById(
 
     return {
       ...assistant,
-      type: 'assistant',
+      type: 'custom-gpt',
     };
   } else if (templateType === 'learning-scenario') {
     const [learningScenario] = await db
@@ -205,7 +205,7 @@ export async function getFederalStatesWithMappings(
       .from(characterTemplateMappingTable)
       .where(eq(characterTemplateMappingTable.characterId, templateId))
       .as('mapping');
-  } else if (templateType === 'assistant') {
+  } else if (templateType === 'custom-gpt') {
     subquery = db
       .select({
         federalStateId: assistantTemplateMappingTable.federalStateId,
@@ -275,7 +275,7 @@ export async function updateTemplateMappings(
           .onConflictDoNothing(); // Prevent duplicate entries
       }
     });
-  } else if (templateType === 'assistant') {
+  } else if (templateType === 'custom-gpt') {
     await db.transaction(async (tx) => {
       if (mappings.some((m) => !m.isMapped)) {
         await tx.delete(assistantTemplateMappingTable).where(
@@ -346,7 +346,7 @@ export async function updateTemplateMappings(
  * @throws Error if URL format is invalid or template ID is missing
  */
 function parseTemplateUrl(url: string): { templateType: TemplateTypes; originalId: string } {
-  const urlPattern = /\/(assistant|characters|learning-scenarios)\/editor\/([a-fA-F0-9-]+)/;
+  const urlPattern = /\/(custom|characters|learning-scenarios)\/editor\/([a-fA-F0-9-]+)/;
   const match = url.match(urlPattern);
 
   if (!match) {
@@ -384,7 +384,7 @@ export async function createTemplateFromUrl(url: string): Promise<string> {
 
     if (templateType === 'character') {
       newTemplate = await createCharacterTemplate(originalId);
-    } else if (templateType === 'assistant') {
+    } else if (templateType === 'custom-gpt') {
       // Handle assistant template creation
       newTemplate = await createAssistantTemplate(originalId);
     } else if (templateType === 'learning-scenario') {
@@ -423,7 +423,7 @@ export async function copyRelatedTemplateFiles(
 
     if (templateType === 'character') {
       relatedFiles = await dbGetRelatedCharacterFiles(templateId);
-    } else if (templateType === 'assistant') {
+    } else if (templateType === 'custom-gpt') {
       relatedFiles = await dbGetRelatedAssistantFiles(templateId);
     } else if (templateType === 'learning-scenario') {
       relatedFiles = await dbGetFilesForLearningScenario(templateId);
@@ -437,7 +437,7 @@ export async function copyRelatedTemplateFiles(
           const newFileId = await duplicateFileWithEmbeddings(file.id);
           if (templateType === 'character') {
             await linkFileToCharacter(newFileId, resultId);
-          } else if (templateType === 'assistant') {
+          } else if (templateType === 'custom-gpt') {
             await linkFileToAssistant(newFileId, resultId);
           } else if (templateType === 'learning-scenario') {
             await linkFileToLearningScenario(newFileId, resultId);

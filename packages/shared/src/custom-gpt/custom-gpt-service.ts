@@ -198,7 +198,7 @@ export async function createNewAssistant({
       }
     }
 
-    await copyRelatedTemplateFiles('assistant', templateId, insertedAssistant.id);
+    await copyRelatedTemplateFiles('custom-gpt', templateId, insertedAssistant.id);
     return insertedAssistant;
   }
 

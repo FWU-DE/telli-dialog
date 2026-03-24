@@ -4,7 +4,7 @@ export function getTemplateTypeName(type: TemplateModel['type']): string {
   switch (type) {
     case 'character':
       return 'Dialogpartner';
-    case 'assistant':
+    case 'custom-gpt':
       return 'Assistent';
     case 'learning-scenario':
       return 'Lernszenario';

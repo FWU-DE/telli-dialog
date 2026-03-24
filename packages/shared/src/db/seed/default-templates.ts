@@ -54,7 +54,7 @@ export async function insertTemplateAssistant() {
       continue;
     }
     await updateTemplateMappings(
-      'assistant',
+      'custom-gpt',
       id,
       FEDERAL_STATES.map((fs) => ({ federalStateId: fs.id, isMapped: true })),
     );
