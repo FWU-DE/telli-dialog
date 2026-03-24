@@ -38,6 +38,7 @@
     "@t3-oss/env-core": "0.13.10",
     "@telli/ai-core": "workspace:*",
     "@telli/api-database": "workspace:*",
+    "@telli/shared-core": "workspace:*",
     "dotenv": "17.3.1",
     "fastify": "5.8.2",
     "fastify-graceful-shutdown": "5.0.0",

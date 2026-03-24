@@ -5,43 +5,65 @@ import { dbGetAssistantById } from '@shared/db/functions/custom-gpts';
 import { AssistantSelectModel } from '@shared/db/schema';
 import { RetrievedChunk } from '../rag/types';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
-import { constructBaseCharacterSystemPrompt } from '../character/system-prompt';
-import { constructRagContext, LANGUAGE_GUIDELINES, TOOL_GUIDELINES } from '../utils/system-prompt';
+import { constructCharacterSystemPrompt } from '../character/system-prompt';
+import {
+  constructRagContext,
+  FORMAT_GUIDELINES,
+  LANGUAGE_GUIDELINES,
+  SUGGESTION_GUIDELINES,
+  TOOL_GUIDELINES,
+} from '../utils/system-prompt';
 
-function constructTelliSystemPrompt() {
+function constructTelliSystemPrompt(chunks: RetrievedChunk[], errorUrls: string[]) {
+  const ragContext = constructRagContext(chunks, errorUrls);
+
   return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. 
 Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. 
 Du wirst vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben. 
 Heute ist der ${formatDateToGermanTimestamp(new Date())}.
 ${LANGUAGE_GUIDELINES}
 ${TOOL_GUIDELINES}
-`;
+${FORMAT_GUIDELINES}
+${SUGGESTION_GUIDELINES}
+${ragContext}`;
 }
 
-function constructAssistantSystemPrompt(assistant: AssistantSelectModel) {
+function constructAssistantSystemPrompt(
+  assistant: AssistantSelectModel,
+  chunks: RetrievedChunk[],
+  errorUrls: string[],
+) {
+  const ragContext = constructRagContext(chunks, errorUrls);
+
   return `Du bist ein hilfreicher Assistent, der in einer Schule eingesetzt wird. Dein Name ist ${assistant.name}.
-${LANGUAGE_GUIDELINES}
-${TOOL_GUIDELINES}
 ${assistant.description ? `Dein Ziel ist es hierbei zu assistieren: ${assistant.description}` : ''}
 ${assistant.instructions ? `Deine Aufgabe ist insbesondere: ${assistant.instructions}` : ''}
-`;
+${LANGUAGE_GUIDELINES}
+${TOOL_GUIDELINES}
+${FORMAT_GUIDELINES}
+${SUGGESTION_GUIDELINES}
+${ragContext}`;
 }
 
 function constructHelpModeSystemPrompt({
   isTeacher,
   federalStateSupportEmails,
   chatStorageDuration,
+  chunks,
+  errorUrls,
 }: {
   isTeacher: boolean;
   federalStateSupportEmails: string[] | null;
   chatStorageDuration: number;
+  chunks: RetrievedChunk[];
+  errorUrls: string[];
 }) {
-  const systemPrompt = `Du bist der integrierte Hilfechat zu telli, dem datenschutzkonformen KI-Chatbot für den Schulunterricht.
+  const ragContext = constructRagContext(chunks, errorUrls);
+
+  return `Du bist der integrierte Hilfechat zu telli, dem datenschutzkonformen KI-Chatbot für den Schulunterricht.
 telli unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen.
 telli wird vom FWU, dem Medieninstitut der Länder, entwickelt und betrieben.
 Heute ist der ${formatDateToGermanTimestamp(new Date())}.
-${LANGUAGE_GUIDELINES}
-${TOOL_GUIDELINES}
 
 Informationen zu telli:
 Der Hilfe-Assistent wird durch das Öffnen eines neuen Chats beendet.
@@ -82,9 +104,11 @@ Befolge folgende Anweisungen:
 - Passe dich dem Erfahrungsstand des Gegenübers an.
 - Biete weitere Hilfe nicht proaktiv an.
 ${federalStateSupportEmails !== null ? `- Kannst du nicht weiterhelfen, verweise auf den Support des Landes ${federalStateSupportEmails.join(', ')}.` : ''}
-- Du unterstützt die User auch bei der Erstellung von guten Prompts, beschränkst dich aber auf Hilfen zu telli und dem Einsatz von generativer KI.`;
-
-  return systemPrompt;
+- Du unterstützt die User auch bei der Erstellung von guten Prompts, beschränkst dich aber auf Hilfen zu telli und dem Einsatz von generativer KI.
+${LANGUAGE_GUIDELINES}
+${TOOL_GUIDELINES}
+${FORMAT_GUIDELINES}
+${ragContext}`;
 }
 
 export async function constructChatSystemPrompt({
@@ -102,8 +126,6 @@ export async function constructChatSystemPrompt({
   chunks: RetrievedChunk[];
   errorUrls: string[];
 }) {
-  const ragContext = constructRagContext(chunks, errorUrls);
-
   if (characterId !== undefined) {
     const character = await dbGetCharacterById({ characterId });
 
@@ -111,9 +133,7 @@ export async function constructChatSystemPrompt({
       throw new Error(`Character with id ${characterId} not found`);
     }
 
-    const characterSystemPrompt = constructBaseCharacterSystemPrompt(character);
-
-    return `${characterSystemPrompt}\n${ragContext}`;
+    return constructCharacterSystemPrompt({ character, chunks });
   }
 
   if (assistantId !== undefined) {
@@ -123,19 +143,18 @@ export async function constructChatSystemPrompt({
       throw new Error(`Assistant with id ${assistantId} not found`);
     }
 
-    let assistantSystemPrompt: string;
     if (assistant.id === HELP_MODE_ASSISTANT_ID) {
-      assistantSystemPrompt = constructHelpModeSystemPrompt({
+      return constructHelpModeSystemPrompt({
         isTeacher,
         federalStateSupportEmails: federalState.supportContacts,
         chatStorageDuration: federalState.chatStorageTime,
+        chunks,
+        errorUrls,
       });
     } else {
-      assistantSystemPrompt = constructAssistantSystemPrompt(assistant);
+      return constructAssistantSystemPrompt(assistant, chunks, errorUrls);
     }
-
-    return `${assistantSystemPrompt}\n${ragContext}`;
   }
 
-  return `${constructTelliSystemPrompt()}\n${ragContext}`;
+  return constructTelliSystemPrompt(chunks, errorUrls);
 }
