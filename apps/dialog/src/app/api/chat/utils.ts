@@ -168,7 +168,7 @@ export async function getChatTitle({
       ],
       apiKeyId,
     );
-    return text.trim();
+    return text.trim().slice(0, 50);
   } catch (error) {
     logError('Error generating chat title, using default title as fallback:', error);
     return 'Neue Konversation';
