@@ -1,6 +1,9 @@
 'use client';
 
-import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import {
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
+} from '@/configuration-text-inputs/const';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AssistantSelectModel, FileModel } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
@@ -49,6 +52,12 @@ const assistantFormValuesSchema = z.object({
       TEXT_INPUT_FIELDS_LENGTH_LIMIT,
       `Die Beschreibung darf maximal ${TEXT_INPUT_FIELDS_LENGTH_LIMIT} Zeichen lang sein.`,
     ),
+  instructions: z
+    .string()
+    .max(
+      TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
+      `Die Anweisungen dürfen maximal ${TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS} Zeichen lang sein.`,
+    ),
   pictureId: z.string().optional(),
 });
 type AssistantFormValues = z.infer<typeof assistantFormValuesSchema>;
@@ -71,6 +80,7 @@ export function AssistantEdit({
   const initialValues: AssistantFormValues = {
     name: assistant.name,
     description: assistant.description ?? '',
+    instructions: assistant.instructions ?? '',
     pictureId: assistant.pictureId ?? undefined,
   };
 
@@ -99,6 +109,7 @@ export function AssistantEdit({
           gptId: assistant.id,
           name: data.name,
           description: data.description,
+          instructions: data.instructions,
           pictureId: data.pictureId,
         });
 
@@ -274,6 +285,28 @@ export function AssistantEdit({
                       className="h-27 resize-none"
                       aria-invalid={fieldState.invalid}
                       placeholder="Beschreibung des Assistenten"
+                      autoComplete="off"
+                      onBlur={() => {
+                        field.onBlur();
+                        handleAutoSave();
+                      }}
+                    />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="instructions"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Anweisungen</FieldLabel>
+                    <Textarea
+                      {...field}
+                      id="field.instructions"
+                      className="h-125 resize-none"
+                      aria-invalid={fieldState.invalid}
+                      placeholder="Anweisungen für den Assistenten"
                       autoComplete="off"
                       onBlur={() => {
                         field.onBlur();
