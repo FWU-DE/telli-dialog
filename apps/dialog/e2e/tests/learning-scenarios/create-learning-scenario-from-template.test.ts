@@ -4,15 +4,18 @@ import { nanoid } from 'nanoid';
 
 test('create learning scenario from template', async ({ page }) => {
   await login(page, 'teacher');
-  await page.goto('/learning-scenarios?visibility=global');
-  const link = page.getByRole('link', { name: 'Lern was über KI' });
-  const copyButton = link.getByRole('button', { name: 'Kopieren' });
+  await page.goto('/learning-scenarios?filter=official');
 
-  await expect(link).toBeVisible();
+  const card = page.getByRole('button', { name: 'Lern was über KI' }).first();
+  await expect(card).toBeVisible();
+  await card.click();
+  await page.waitForURL('/learning-scenarios/editor/**');
+
+  const copyButton = page.getByRole('button', { name: 'Lernszenario bearbeiten' });
   await expect(copyButton).toBeVisible();
   await expect(copyButton).toBeEnabled();
   await copyButton.click();
-  await page.waitForURL('/learning-scenarios/editor/**');
+  await page.waitForURL('**?create=true**');
 
   const name = 'Kopiertes Lernszenario ' + nanoid(8);
   await page.getByLabel('Wie heißt das Szenario?').fill(name);

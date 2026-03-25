@@ -18,7 +18,7 @@ test('share learning scenario school-wide', async ({ page }) => {
   const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
   await expect(submitButton).toBeVisible();
   await submitButton.click();
-  const listItem = page.getByRole('link', { name: learningScenarioName });
+  const listItem = page.getByRole('button', { name: learningScenarioName });
   await expect(listItem).toBeVisible();
   await listItem.click();
   await page.waitForURL('/learning-scenarios/**');

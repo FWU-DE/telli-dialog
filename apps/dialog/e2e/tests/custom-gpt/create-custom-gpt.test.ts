@@ -65,7 +65,9 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await submitButton.click();
 
   await page.waitForURL('/custom**');
-  await page.getByRole('heading', { name: assistantName }).first().click();
+  const card = page.getByRole('button', { name: assistantName }).first();
+  await expect(card).toBeVisible();
+  await card.getByRole('button', { name: 'Neuer Chat' }).click();
   await page.waitForURL('/custom/d/**');
   await expect(page.getByRole('heading')).toContainText(assistantName);
   await expect(page.locator('body')).toContainText(
