@@ -125,17 +125,17 @@ export function AssistantEdit({
         router.push(`/assistants/${createResult.value.id}/edit`);
       });
     } else {
-      toast.error(t('toasts.create-toast-error'));
+      toast.error(t('assistant.toasts.create-toast-error'));
     }
   };
 
   const handleDeleteAssistant = async () => {
     const deleteResult = await deleteCustomGptAction({ gptId: assistant.id });
     if (deleteResult.success) {
-      toast.success(t('toasts.delete-toast-success'));
+      toast.success(t('assistant.toasts.delete-toast-success'));
     }
     if (!deleteResult.success) {
-      toast.error(t('toasts.delete-toast-error'));
+      toast.error(t('assistant.toasts.delete-toast-error'));
     }
     guardNavigation(() => {
       router.push('/custom');
