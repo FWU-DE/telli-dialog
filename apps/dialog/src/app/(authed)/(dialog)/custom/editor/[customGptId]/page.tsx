@@ -1,12 +1,12 @@
 import ProfileMenu from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import HeaderPortal from '../../../header-portal';
-import CustomGptForm from './custom-gpt-form';
+import AssistantForm from './custom-gpt-form';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
-import { CustomGptSelectModel } from '@shared/db/schema';
+import { AssistantSelectModel } from '@shared/db/schema';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
-import { getCustomGptForEditView, getFileMappings } from '@shared/custom-gpt/custom-gpt-service';
+import { getAssistantForEditView, getFileMappings } from '@shared/assistants/assistant-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
@@ -21,26 +21,26 @@ const searchParamsSchema = z.object({
 });
 
 export default async function Page(props: PageProps<'/custom/editor/[customGptId]'>) {
-  const { customGptId } = await props.params;
+  const { customGptId: assistantId } = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
   const isCreating = searchParams.create === 'true';
 
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
-  const [customGpt, relatedFiles] = await Promise.all([
-    getCustomGptForEditView({ customGptId, schoolId: school.id, userId: user.id }),
+  const [assistant, relatedFiles] = await Promise.all([
+    getAssistantForEditView({ assistantId, schoolId: school.id, userId: user.id }),
     getFileMappings({
-      customGptId,
+      assistantId,
       userId: user.id,
       schoolId: school.id,
     }),
   ]).catch(handleErrorInServerComponent);
 
-  const avatarPictureUrl = await getAvatarPictureUrl(customGpt.pictureId);
+  const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
 
-  const readOnly = customGpt.userId !== user.id;
-  const initialLinks = customGpt.attachedLinks
+  const readOnly = assistant.userId !== user.id;
+  const initialLinks = assistant.attachedLinks
     .filter((l) => l !== '')
     .map(
       (url) =>
@@ -60,8 +60,8 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
         <ProfileMenu userAndContext={userAndContext} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
-        <CustomGptForm
-          {...(removeNullishValues(customGpt) as CustomGptSelectModel)}
+        <AssistantForm
+          {...(removeNullishValues(assistant) as AssistantSelectModel)}
           maybeSignedPictureUrl={avatarPictureUrl}
           isCreating={isCreating}
           readOnly={readOnly}

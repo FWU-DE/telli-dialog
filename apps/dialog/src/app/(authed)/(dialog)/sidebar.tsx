@@ -24,7 +24,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 import { deleteConversationAction, updateConversationTitleAction } from './actions';
 import { fetchClientSideConversations } from './utils';
-import { HELP_MODE_GPT_ID } from '@shared/db/const';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 
 type Props = {
   user: UserAndContext;
@@ -145,7 +145,7 @@ export default function DialogSidebar({
               className={cn(
                 'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
                 (pathname === '/custom' || pathname.includes('custom/editor')) &&
-                  !pathname.includes(HELP_MODE_GPT_ID) &&
+                  !pathname.includes(HELP_MODE_ASSISTANT_ID) &&
                   'underline',
               )}
             >
@@ -190,14 +190,14 @@ export default function DialogSidebar({
                 {user.school.userRole === 'teacher' &&
                   user.federalState.featureToggles.isCustomGptEnabled && (
                     <Link
-                      href={`/custom/d/${HELP_MODE_GPT_ID}`}
+                      href={`/custom/d/${HELP_MODE_ASSISTANT_ID}`}
                       prefetch={false}
                       className="w-full"
                     >
                       <div
                         className={cn(
                           'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
-                          pathname.includes(HELP_MODE_GPT_ID) && 'underline',
+                          pathname.includes(HELP_MODE_ASSISTANT_ID) && 'underline',
                         )}
                       >
                         <RobotIcon className="w-6 h-5" />

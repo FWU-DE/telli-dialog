@@ -21,7 +21,7 @@ import {
 } from '@telli/ui/components/Sidebar';
 import { AppMenuItem } from './app-menu-item';
 import TelliLogo from '@/components/icons/logo';
-import { HELP_MODE_GPT_ID } from '@shared/db/const';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
 import { MyTelliPoints } from './my-telli-points';
@@ -114,7 +114,7 @@ export function AppSidebar({
                 <SidebarSeparator className="my-6" />
                 {user.userRole === 'teacher' && federalState.featureToggles?.isCustomGptEnabled && (
                   <AppMenuItem
-                    href={`/custom/d/${HELP_MODE_GPT_ID}`}
+                    href={`/custom/d/${HELP_MODE_ASSISTANT_ID}`}
                     icon={<QuestionIcon />}
                     text={t('help-chat')}
                   />

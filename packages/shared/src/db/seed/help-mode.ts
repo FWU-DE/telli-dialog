@@ -1,9 +1,9 @@
-import { HELP_MODE_GPT_ID } from '../const';
-import { dbUpsertCustomGpt } from '../functions/custom-gpts';
-import { type CustomGptInsertModel } from '../schema';
+import { HELP_MODE_ASSISTANT_ID } from '../const';
+import { dbUpsertAssistant } from '../functions/assistants';
+import { type AssistantInsertModel } from '../schema';
 
-const hilfeModusGpt: CustomGptInsertModel & { id: string } = {
-  id: HELP_MODE_GPT_ID,
+const hilfeModusGpt: AssistantInsertModel & { id: string } = {
+  id: HELP_MODE_ASSISTANT_ID,
   name: 'Hilfe-Assistent',
   systemPrompt: '',
   userId: null,
@@ -12,13 +12,13 @@ const hilfeModusGpt: CustomGptInsertModel & { id: string } = {
   description: null,
   pictureId: null,
   schoolId: null,
-  specification: null,
+  instructions: null,
 };
 
 export async function insertHelpModeGpt({ skip = true }: { skip: boolean }) {
   if (skip) return;
 
-  const result = await dbUpsertCustomGpt({ customGpt: hilfeModusGpt });
+  const result = await dbUpsertAssistant({ assistant: hilfeModusGpt });
   console.log('helpMode seed successful');
   return result;
 }
