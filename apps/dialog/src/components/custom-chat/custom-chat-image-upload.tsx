@@ -102,6 +102,7 @@ export function CustomChatImageUpload({
         <AvatarCropModal
           imageSrc={imageSource}
           aspect={1}
+          circularCrop
           onClose={() => {
             setShowCropModal(false);
             setFile(null);

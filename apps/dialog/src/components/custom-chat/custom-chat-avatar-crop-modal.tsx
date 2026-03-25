@@ -8,10 +8,13 @@ import Image from 'next/image';
 import { CompressionOptions, getCroppedImageBlob } from '@/utils/files/image-utils';
 import { logError } from '@shared/logging';
 import { useTranslations } from 'next-intl';
+import { Card, CardContent, CardHeader, CardTitle } from '@ui/components/Card';
+import { Button } from '@ui/components/Button';
 
 type AvatarCropModalProps = {
   imageSrc: string;
   aspect: number;
+  circularCrop?: boolean;
   onClose: () => void;
   onCropComplete: (croppedBlob: Blob) => void;
   compressionOptions?: CompressionOptions;
@@ -20,6 +23,7 @@ type AvatarCropModalProps = {
 export default function AvatarCropModal({
   imageSrc,
   aspect,
+  circularCrop = false,
   onClose,
   onCropComplete,
   compressionOptions,
@@ -82,37 +86,44 @@ export default function AvatarCropModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white border-2 py-4 flex flex-col gap-3 px-6 max-w-full max-h-full overflow-auto">
-        <h1 className="font-medium my-4">{tCustomChatImage('crop-image')}</h1>
-        <ReactCrop
-          crop={crop}
-          onChange={onChange}
-          onComplete={(c: PixelCrop) => setCompletedCrop(c)}
-          aspect={aspect}
-          circularCrop
-          keepSelection
-        >
-          <Image
-            alt="crop image"
-            src={imageSrc}
-            width={500}
-            height={500}
-            onLoadingComplete={(img) => {
-              imageRef.current = img;
-              onImageLoad(img.naturalWidth, img.naturalHeight);
-            }}
-            className="object-contain max-w-full max-h-[80vh]"
-          />
-        </ReactCrop>
-        <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onClose} type="button" className={buttonSecondaryClassName}>
-            {tCommon('cancel')}
-          </button>
-          <button className={buttonPrimaryClassName} onClick={handleCropConfirm} type="button">
-            {tCustomChatImage('upload-image')}
-          </button>
-        </div>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>{tCustomChatImage('crop-image')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* <div className="border-2 bg-card py-4 flex flex-col gap-3 px-6 max-w-full max-h-full overflow-auto rounded-lg">
+            <h1 className="font-medium my-4">{tCustomChatImage('crop-image')}</h1> */}
+          <ReactCrop
+            crop={crop}
+            onChange={onChange}
+            onComplete={(c: PixelCrop) => setCompletedCrop(c)}
+            aspect={aspect}
+            circularCrop={circularCrop}
+            keepSelection
+          >
+            <Image
+              alt="crop image"
+              src={imageSrc}
+              width={500}
+              height={500}
+              onLoadingComplete={(img) => {
+                imageRef.current = img;
+                onImageLoad(img.naturalWidth, img.naturalHeight);
+              }}
+              className="object-contain max-w-full max-h-[80vh]"
+            />
+          </ReactCrop>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button onClick={onClose} type="button" className={buttonSecondaryClassName}>
+              {tCommon('cancel')}
+            </Button>
+            <Button className={buttonPrimaryClassName} onClick={handleCropConfirm} type="button">
+              {tCustomChatImage('upload-image')}
+            </Button>
+          </div>
+          {/* </div> */}
+        </CardContent>
+      </Card>
     </div>
   );
 }
