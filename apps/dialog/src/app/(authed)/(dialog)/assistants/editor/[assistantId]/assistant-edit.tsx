@@ -111,6 +111,7 @@ export function AssistantEdit({
       },
       validate: trigger,
       saveValues: async (data) => {
+        // accessLevel is handled separately in handleSharingChange, so we need to make sure we don't overwrite it here
         const updateResult = await updateAssistantAction({
           gptId: assistant.id,
           name: data.name,
@@ -126,6 +127,7 @@ export function AssistantEdit({
 
   const name = useWatch({ control, name: 'name' });
   const onPictureIdChangeRef = useRef<(value: string) => void>(() => {});
+  const savedAccessLevelRef = useRef(assistant.accessLevel);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
@@ -197,24 +199,26 @@ export function AssistantEdit({
       croppedImageBlob,
     });
   }
-  const handleSharingChange = async () => {
-    const isSchoolShared = getValues('isSchoolShared');
-    const newAccessLevel = isSchoolShared ? 'school' : 'private';
+  const handleSharingChange = async ({ name, checked }: { name: string; checked: boolean }) => {
+    if (name === 'isSchoolShared') {
+      const newAccessLevel = checked ? 'school' : 'private';
 
-    if (newAccessLevel !== assistant.accessLevel) {
-      const result = await updateAssistantAccessLevelAction({
-        gptId: assistant.id,
-        accessLevel: newAccessLevel,
-      });
+      if (newAccessLevel !== savedAccessLevelRef.current) {
+        const result = await updateAssistantAccessLevelAction({
+          gptId: assistant.id,
+          accessLevel: newAccessLevel,
+        });
 
-      if (result.success) {
-        toast.success(t('toasts.edit-toast-success'));
-      } else {
-        toast.error(t('toasts.edit-toast-error'));
+        if (!result.success) {
+          toast.error(t('toasts.edit-toast-error'));
+          return;
+        }
+
+        savedAccessLevelRef.current = newAccessLevel;
       }
     }
 
-    handleAutoSave();
+    await flushAutoSave();
   };
 
   return (
@@ -362,6 +366,7 @@ export function AssistantEdit({
           control={control}
           schoolSharingName="isSchoolShared"
           linkSharingName="hasLinkAccess"
+          isLinkSharingEnabled={hasLinkAccess}
           onShareChange={handleSharingChange}
         />
       </form>
