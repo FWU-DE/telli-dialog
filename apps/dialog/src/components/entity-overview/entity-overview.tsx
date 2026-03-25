@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { OverviewFilter } from '@shared/db/schema';
+import { OverviewFilter, overviewFilterSchema } from '@shared/overview-filter';
 import { useTranslations } from 'next-intl';
 import { Input } from '@telli/ui/components/Input';
 import { MagnifyingGlassIcon, InfoIcon } from '@phosphor-icons/react';
@@ -25,7 +25,7 @@ type EntityOverviewProps = {
   itemCount: number;
 };
 
-const FILTER_OPTIONS: OverviewFilter[] = ['all', 'mine', 'official', 'school'];
+const FILTER_OPTIONS = overviewFilterSchema.options;
 
 export default function EntityOverview({
   title,
@@ -102,9 +102,7 @@ export default function EntityOverview({
 
       <div className="flex-1 overflow-auto px-6 pt-4 pb-6">
         <div className="max-w-3xl mx-auto w-full">
-          <div className="flex flex-col gap-2 w-full" role="tabpanel">
-            {children}
-          </div>
+          <div className="flex flex-col gap-2 w-full">{children}</div>
         </div>
       </div>
     </div>

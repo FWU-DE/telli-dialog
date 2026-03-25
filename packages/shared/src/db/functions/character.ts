@@ -274,6 +274,49 @@ export async function dbGetAllCharactersByUserId({
   return characters;
 }
 
+export async function dbGetAllAccessibleCharacters({
+  userId,
+  schoolId,
+  federalStateId,
+}: {
+  userId: string;
+  schoolId: string;
+  federalStateId: string;
+}): Promise<CharacterWithShareDataModel[]> {
+  return db
+    .select({
+      ...getTableColumns(characterTable),
+      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
+      inviteCode: sharedCharacterConversation.inviteCode,
+      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
+      startedAt: sharedCharacterConversation.startedAt,
+      startedBy: sharedCharacterConversation.userId,
+    })
+    .from(characterTable)
+    .leftJoin(
+      sharedCharacterConversation,
+      and(
+        eq(sharedCharacterConversation.characterId, characterTable.id),
+        eq(sharedCharacterConversation.userId, userId),
+      ),
+    )
+    .leftJoin(
+      characterTemplateMappingTable,
+      eq(characterTemplateMappingTable.characterId, characterTable.id),
+    )
+    .where(
+      or(
+        and(eq(characterTable.userId, userId), eq(characterTable.accessLevel, 'private')),
+        and(eq(characterTable.schoolId, schoolId), eq(characterTable.accessLevel, 'school')),
+        and(
+          eq(characterTable.accessLevel, 'global'),
+          eq(characterTemplateMappingTable.federalStateId, federalStateId),
+        ),
+      ),
+    )
+    .orderBy(desc(characterTable.createdAt));
+}
+
 export async function dbGetCharacterByIdAndUserId({
   characterId,
   userId,

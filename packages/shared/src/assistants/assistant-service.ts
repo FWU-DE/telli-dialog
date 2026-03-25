@@ -23,12 +23,12 @@ import {
   assistantUpdateSchema,
   FileModel,
   fileTable,
-  OverviewFilter,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
 import { copyFileInS3, uploadFileToS3 } from '@shared/s3';
 import { copyAssistant, copyRelatedTemplateFiles } from '@shared/templates/template-service';
+import { OverviewFilter } from '@shared/overview-filter';
 import { addDays } from '@shared/utils/date';
 import { generateUUID } from '@shared/utils/uuid';
 import { and, eq, lt } from 'drizzle-orm';
@@ -172,12 +172,7 @@ export async function getCustomGptsByOverviewFilter({
   federalStateId: string;
 }): Promise<CustomGptSelectModel[]> {
   if (filter === 'all') {
-    const [privateGpts, schoolGpts, globalGpts] = await Promise.all([
-      dbGetGptsByUserId({ userId }),
-      dbGetGptsBySchoolId({ schoolId }),
-      dbGetGlobalGpts({ federalStateId }),
-    ]);
-    return [...privateGpts, ...schoolGpts, ...globalGpts];
+    return dbGetAllAccessibleGpts({ userId, schoolId, federalStateId });
   } else if (filter === 'mine') {
     return await dbGetAllGptsByUserId({ userId });
   } else if (filter === 'official') {

@@ -3,7 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { OverviewFilter } from '@shared/db/schema';
+import { OverviewFilter } from '@shared/overview-filter';
 import { LearningScenarioWithImage } from '@shared/learning-scenarios/learning-scenario-service';
 import EntityOverview from '@/components/entity-overview/entity-overview';
 import EntityCard from '@/components/entity-overview/entity-card';

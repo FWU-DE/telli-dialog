@@ -145,6 +145,46 @@ export async function dbGetAllLearningScenariosByUserId({
     .orderBy(desc(learningScenarioTable.createdAt));
 }
 
+export async function dbGetAllAccessibleLearningScenarios({
+  userId,
+  schoolId,
+  federalStateId,
+}: {
+  userId: string;
+  schoolId: string;
+  federalStateId: string;
+}): Promise<LearningScenarioOptionalShareDataModel[]> {
+  return baseLearningScenarioWithShareQuery()
+    .leftJoin(
+      sharedLearningScenarioTable,
+      and(
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioTable.id),
+        eq(sharedLearningScenarioTable.userId, userId),
+      ),
+    )
+    .leftJoin(
+      learningScenarioTemplateMappingTable,
+      eq(learningScenarioTemplateMappingTable.learningScenarioId, learningScenarioTable.id),
+    )
+    .where(
+      or(
+        and(
+          eq(learningScenarioTable.userId, userId),
+          eq(learningScenarioTable.accessLevel, 'private'),
+        ),
+        and(
+          eq(learningScenarioTable.schoolId, schoolId),
+          eq(learningScenarioTable.accessLevel, 'school'),
+        ),
+        and(
+          eq(learningScenarioTable.accessLevel, 'global'),
+          eq(learningScenarioTemplateMappingTable.federalStateId, federalStateId),
+        ),
+      ),
+    )
+    .orderBy(desc(learningScenarioTable.createdAt));
+}
+
 /**
  * The returned entity has no Shared Data attached.
  * Use `dbGetLearningScenarioByIdWithShareData` if you need shared data.

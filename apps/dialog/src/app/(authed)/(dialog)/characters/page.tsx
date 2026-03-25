@@ -1,4 +1,5 @@
-import { accessLevelSchema, overviewFilterSchema } from '@shared/db/schema';
+import { accessLevelSchema } from '@shared/db/schema';
+import { overviewFilterSchema } from '@shared/overview-filter';
 import CharacterPreviewPage from './character-preview-page';
 import { enrichCharactersWithImage } from './utils';
 import z from 'zod';
@@ -9,7 +10,7 @@ import {
 } from '@shared/characters/character-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
-import { getFederalStateById } from '@shared/federal-states/federal-state-service';
+import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import CharacterOverview from './character-overview';
 
 export const dynamic = 'force-dynamic';
@@ -22,17 +23,18 @@ const searchParamsSchema = z.object({
 export default async function Page(props: PageProps<'/characters'>) {
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
   const { user, school, federalState } = await requireAuth();
-  const fullFederalState = await getFederalStateById(federalState.id);
-  const isNewUi = fullFederalState.featureToggles.isNewUiDesignEnabled;
+  const isNewUi = federalState.featureToggles.isNewUiDesignEnabled;
 
   if (isNewUi) {
-    const filter = searchParams.filter;
+    const isSchoolSharingEnabled = federalState.featureToggles.isShareTemplateWithSchoolEnabled;
+    const filter =
+      !isSchoolSharingEnabled && searchParams.filter === 'school' ? 'all' : searchParams.filter;
     const _characters = await getCharactersByOverviewFilter({
       filter,
       schoolId: school.id,
       userId: user.id,
       federalStateId: federalState.id,
-    });
+    }).catch(handleErrorInServerComponent);
     const characters = _characters.filter((c) => c.name !== '');
     const enrichedCharacters = await enrichCharactersWithImage({ characters });
 

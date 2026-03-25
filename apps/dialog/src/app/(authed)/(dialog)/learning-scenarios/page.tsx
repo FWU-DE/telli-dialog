@@ -2,7 +2,8 @@ import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { parseSearchParams } from '@/utils/parse-search-params';
-import { accessLevelSchema, overviewFilterSchema } from '@shared/db/schema';
+import { accessLevelSchema } from '@shared/db/schema';
+import { overviewFilterSchema } from '@shared/overview-filter';
 import { z } from 'zod';
 import {
   enrichLearningScenarioWithPictureUrl,
@@ -10,7 +11,6 @@ import {
   getLearningScenariosByOverviewFilter,
 } from '@shared/learning-scenarios/learning-scenario-service';
 import { LearningScenarioContainer } from './learning-scenario-container';
-import { getFederalStateById } from '@shared/federal-states/federal-state-service';
 import LearningScenarioOverview from './learning-scenario-overview';
 
 export const dynamic = 'force-dynamic';
@@ -23,11 +23,12 @@ const searchParamsSchema = z.object({
 export default async function Page(props: PageProps<'/learning-scenarios'>) {
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
   const { user, school, federalState } = await requireAuth();
-  const fullFederalState = await getFederalStateById(federalState.id);
-  const isNewUi = fullFederalState.featureToggles.isNewUiDesignEnabled;
+  const isNewUi = federalState.featureToggles.isNewUiDesignEnabled;
 
   if (isNewUi) {
-    const filter = searchParams.filter;
+    const isSchoolSharingEnabled = federalState.featureToggles.isShareTemplateWithSchoolEnabled;
+    const filter =
+      !isSchoolSharingEnabled && searchParams.filter === 'school' ? 'all' : searchParams.filter;
     const _learningScenarios = await getLearningScenariosByOverviewFilter({
       filter,
       schoolId: school.id,

@@ -4,6 +4,7 @@ import { dbGetFilesForLearningScenario } from '@shared/db/functions/files';
 import {
   dbCreateLearningScenarioShare,
   dbDeleteLearningScenarioByIdAndUserId,
+  dbGetAllAccessibleLearningScenarios,
   dbGetAllLearningScenariosByUserId,
   dbGetGlobalLearningScenarios,
   dbGetLearningScenarioById,
@@ -24,7 +25,6 @@ import {
   learningScenarioTable,
   learningScenarioUpdateSchema,
   LearningScenarioWithShareDataModel,
-  OverviewFilter,
   sharedLearningScenarioTable,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
@@ -36,6 +36,7 @@ import {
 import { uploadFileToS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { and, eq } from 'drizzle-orm';
+import { OverviewFilter } from '@shared/overview-filter';
 import z from 'zod';
 import { duplicateLearningScenario } from '@shared/learning-scenarios/learning-scenario-admin-service';
 import {
@@ -108,12 +109,7 @@ export async function getLearningScenariosByOverviewFilter({
   federalStateId: string;
 }): Promise<LearningScenarioOptionalShareDataModel[]> {
   if (filter === 'all') {
-    const [privateLs, schoolLs, globalLs] = await Promise.all([
-      dbGetLearningScenariosByUserId({ userId }),
-      dbGetLearningScenariosBySchoolId({ schoolId, userId }),
-      dbGetGlobalLearningScenarios({ userId, federalStateId }),
-    ]);
-    return [...privateLs, ...schoolLs, ...globalLs];
+    return dbGetAllAccessibleLearningScenarios({ userId, schoolId, federalStateId });
   } else if (filter === 'mine') {
     return await dbGetAllLearningScenariosByUserId({ userId });
   } else if (filter === 'official') {
