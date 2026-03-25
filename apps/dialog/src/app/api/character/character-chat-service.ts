@@ -1,4 +1,9 @@
-import { generateTextStreamWithBilling, type Message as AiCoreMessage } from '@telli/ai-core';
+import {
+  generateTextStreamWithBilling,
+  type Message as AiCoreMessage,
+  TelliPointsExceededError,
+  SharedChatExpiredError,
+} from '@telli/ai-core';
 import { createTextStream } from '@/utils/streaming';
 import { getUserAndContextByUserId } from '@/auth/utils';
 import { checkProductAccess } from '@/utils/vidis/access';
@@ -25,7 +30,7 @@ import {
   KEEP_RECENT_MESSAGES,
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
-import { ChatMessage, SendMessageResult } from '@/types/chat';
+import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
 
@@ -92,7 +97,7 @@ export async function sendCharacterMessage({
 
   // Check expiry
   if (sharedChatHasExpired(character)) {
-    throw new Error('Shared character chat has reached end of life');
+    return createErrorResult(new SharedChatExpiredError());
   }
 
   // Check limits
@@ -104,10 +109,6 @@ export async function sendCharacterMessage({
     userHasReachedTelliPointsLimit({ user: teacherUserAndContext }),
   ]);
 
-  if (sharedChatLimitReached) {
-    throw new Error('Shared character chat has reached telli points limit');
-  }
-
   if (telliPointsLimitReached) {
     await sendRabbitmqEvent(
       constructTelliBudgetExceededEvent({
@@ -116,7 +117,10 @@ export async function sendCharacterMessage({
         character,
       }),
     );
-    throw new Error('User has reached telli points limit');
+  }
+
+  if (sharedChatLimitReached || telliPointsLimitReached) {
+    return createErrorResult(new TelliPointsExceededError());
   }
 
   // Get related files and web sources

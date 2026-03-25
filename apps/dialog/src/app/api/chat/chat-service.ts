@@ -1,4 +1,8 @@
-import { generateTextStreamWithBilling, type Message as AiCoreMessage } from '@telli/ai-core';
+import {
+  generateTextStreamWithBilling,
+  type Message as AiCoreMessage,
+  TelliPointsExceededError,
+} from '@telli/ai-core';
 import { createTextStream } from '@/utils/streaming';
 import { userHasReachedTelliPointsLimit } from './usage';
 import { getModelAndApiKeyWithResult, getAuxiliaryModel } from '../utils/utils';
@@ -23,7 +27,7 @@ import {
   KEEP_RECENT_MESSAGES,
   TOTAL_CHAT_LENGTH_LIMIT,
 } from '@/configuration-text-inputs/const';
-import { ChatMessage, SendMessageResult } from '@/types/chat';
+import { ChatMessage, SendMessageResult, createErrorResult } from '@/types/chat';
 import { extractUrls } from './websearch-service';
 import { UserAndContext } from '@/auth/types';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
@@ -121,7 +125,7 @@ export async function sendChatMessage({
         conversation,
       }),
     );
-    throw new Error('User has reached telli points limit');
+    return createErrorResult(new TelliPointsExceededError());
   }
 
   // Get the user message (last message should be from user)

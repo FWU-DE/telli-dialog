@@ -111,6 +111,10 @@ export function useTelliChat({
           fileIds,
         });
 
+        if (result.error) {
+          throw result.error;
+        }
+
         // We need to handle the first chunk separately to avoid missing content
         let firstChunk = true;
 

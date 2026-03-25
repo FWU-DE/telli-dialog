@@ -1,3 +1,5 @@
+import { SharedChatExpiredError, TelliPointsExceededError } from '@telli/ai-core/errors';
+
 /**
  * Status of a chat conversation.
  * - 'ready': Chat is ready for input
@@ -31,11 +33,27 @@ export type ChatMessage = {
 
 /**
  * Result returned when sending a chat message.
+ * The error field handles pre-streaming errors.
  */
 export type SendMessageResult = {
   stream: ReadableStream<string>;
   messageId: string;
+  error?: TelliPointsExceededError | SharedChatExpiredError;
 };
+
+/**
+ * Creates a SendMessageResult with an error.
+ * Used when we want to return an error before streaming starts.
+ */
+export function createErrorResult(
+  error: TelliPointsExceededError | SharedChatExpiredError,
+): SendMessageResult {
+  return {
+    stream: new ReadableStream(),
+    messageId: crypto.randomUUID(),
+    error,
+  };
+}
 
 /**
  * Text part of a UI message for rendering.
