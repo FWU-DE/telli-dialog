@@ -43,7 +43,9 @@ export default function CheckboxWithInfo<
               }}
               disabled={disabled}
             />
-            <FieldLabel htmlFor={field.name + '-checkbox'}>{label}</FieldLabel>
+            <FieldLabel htmlFor={field.name + '-checkbox'} size="normal">
+              {label}
+            </FieldLabel>
           </>
         )}
       />
