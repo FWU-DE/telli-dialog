@@ -405,17 +405,17 @@
     "image": {
       "crop-image": "Bild ausschneiden",
       "upload-image": "Bild hochladen"
-    },
-    "assistant": {
-      "toasts": {
-        "create-toast-error": "Der Assistent konnte nicht erstellt werden.",
-        "delete-toast-success": "Der Assistent wurde erfolgreich gelöscht.",
-        "delete-toast-error": "Der Assistent konnte nicht gelöscht werden."
-      }
-    },
-    "toasts": {
-      "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
-      "image-toast-error": "Das Bild konnte nicht hochgeladen werden."
     }
+  },
+  "assistant": {
+    "toasts": {
+      "create-toast-error": "Der Assistent konnte nicht erstellt werden.",
+      "delete-toast-success": "Der Assistent wurde erfolgreich gelöscht.",
+      "delete-toast-error": "Der Assistent konnte nicht gelöscht werden."
+    }
+  },
+  "toasts": {
+    "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
+    "image-toast-error": "Das Bild konnte nicht hochgeladen werden."
   }
 }

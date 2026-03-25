@@ -392,7 +392,6 @@ export async function updateAssistantPicture({
 
 const updateAssistantSchema = assistantUpdateSchema.omit({
   id: true,
-  pictureId: true,
   isDeleted: true,
   originalAssistantId: true,
   accessLevel: true,

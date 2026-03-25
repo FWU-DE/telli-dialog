@@ -30,7 +30,7 @@ export default function AvatarCropModal({
   const [crop, setCrop] = React.useState<Crop>();
   const [completedCrop, setCompletedCrop] = React.useState<PixelCrop>();
   const imageRef = React.useRef<HTMLImageElement | null>(null);
-  const tCustomChatImage = useTranslations('custom-chat.image');
+  const t = useTranslations('custom-chat.image');
   const tCommon = useTranslations('common');
 
   function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: number): Crop {
@@ -87,7 +87,7 @@ export default function AvatarCropModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <Card>
         <CardHeader>
-          <CardTitle>{tCustomChatImage('crop-image')}</CardTitle>
+          <CardTitle>{t('crop-image')}</CardTitle>
         </CardHeader>
         <CardContent>
           <ReactCrop
@@ -115,7 +115,7 @@ export default function AvatarCropModal({
               {tCommon('cancel')}
             </Button>
             <Button onClick={handleCropConfirm} type="button">
-              {tCustomChatImage('upload-image')}
+              {t('upload-image')}
             </Button>
           </div>
         </CardContent>

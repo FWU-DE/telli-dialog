@@ -1,5 +1,4 @@
 import { Card, CardContent } from '@ui/components/Card';
-import AvatarPicture from '../common/avatar-picture';
 import { EmptyImageIcon } from '../icons/empty-image';
 import { ServerActionResult } from '@shared/actions/server-action-result';
 import { useTranslations } from 'next-intl';
@@ -11,22 +10,28 @@ import { cn } from '@/utils/tailwind';
 import { UploadIcon } from '@phosphor-icons/react';
 import { Button } from '@ui/components/Button';
 import AvatarCropModal from './custom-chat-avatar-crop-modal';
+import Image from 'next/image';
 
 export function CustomChatImageUpload({
   avatarPictureUrl,
   onPictureUploadComplete,
   onUploadPicture,
+  onGetSignedUrl,
 }: {
   avatarPictureUrl?: string;
-  onPictureUploadComplete: (picturePath: string) => void;
+  onPictureUploadComplete: (picturePath: string) => Promise<void>;
   onUploadPicture: (croppedImageBlob: Blob) => Promise<ServerActionResult<string>>;
+  onGetSignedUrl?: (key: string) => Promise<string | undefined>;
 }) {
   const [file, setFile] = React.useState<File | null>(null);
   const [imageSource, setImageSource] = React.useState<string | null>(null);
   const [showCropModal, setShowCropModal] = React.useState<boolean>(false);
+  const [displayedAvatarUrl, setDisplayedAvatarUrl] = React.useState<string | undefined>(
+    avatarPictureUrl,
+  );
 
   const toast = useToast();
-  const tCommon = useTranslations('common');
+  const t = useTranslations('custom-chat.image');
   const tFileInteraction = useTranslations('file-interaction');
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -57,7 +62,13 @@ export function CustomChatImageUpload({
     const result = await onUploadPicture(croppedBlob);
 
     if (result.success && result.value) {
-      onPictureUploadComplete(result.value);
+      await onPictureUploadComplete(result.value);
+      if (onGetSignedUrl) {
+        const signedUrl = await onGetSignedUrl(result.value);
+        if (signedUrl) {
+          setDisplayedAvatarUrl(signedUrl);
+        }
+      }
       setShowCropModal(false);
     } else {
       toast.error(tFileInteraction('toasts.upload-error'));
@@ -68,13 +79,19 @@ export function CustomChatImageUpload({
   }
 
   return (
-    <Card className="h-[200px] flex justify-center items-center">
-      <CardContent className="flex items-center gap-4 p-4">
-        <div className="w-[140px] h-[140px] rounded-full flex items-center justify-center">
-          {avatarPictureUrl ? (
-            <AvatarPicture src={avatarPictureUrl} alt="Profile Picture" variant="customChatLarge" />
+    <Card className="h-50 justify-center items-center">
+      <CardContent className="flex items-center gap-4">
+        <div className="relative w-35 h-35 justify-center items-center flex">
+          {displayedAvatarUrl ? (
+            <Image
+              src={displayedAvatarUrl}
+              fill
+              unoptimized
+              alt={'profile-picture'}
+              className="rounded-full object-contain"
+            />
           ) : (
-            <EmptyImageIcon className="relative -left-1 -top-1 w-[60px] h-[60px]" />
+            <EmptyImageIcon className="relative -left-1 -top-1 w-15 h-15" />
           )}
         </div>
         <div className="flex flex-col gap-2">
@@ -85,16 +102,9 @@ export function CustomChatImageUpload({
             onChange={handleImageUpload}
             ref={fileInputRef}
           />
-          <Button
-            type="button"
-            onClick={handleButtonClick}
-            className={cn(
-              buttonPrimaryClassName,
-              'flex items-center gap-2 group w-full justify-center',
-            )}
-          >
-            <UploadIcon className="size-4" weight="regular" />
-            {tCommon('upload-image')}
+          <Button type="button" onClick={handleButtonClick} className={cn(buttonPrimaryClassName)}>
+            <UploadIcon weight="regular" />
+            {t('upload-image')}
           </Button>
         </div>
       </CardContent>

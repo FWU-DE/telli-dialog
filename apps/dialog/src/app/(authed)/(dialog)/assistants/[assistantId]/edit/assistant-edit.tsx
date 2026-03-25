@@ -26,15 +26,15 @@ import { useTranslations } from 'next-intl';
 import {
   deleteAssistantAction,
   updateAssistantAction,
-  updateAssistantPictureAction,
   uploadAvatarPictureForAssistantAction,
+  getAvatarSignedUrl,
 } from '../../../custom/editor/[customGptId]/actions';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
 import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
 import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
 import { Textarea } from '@ui/components/Textarea';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
@@ -49,6 +49,7 @@ const assistantFormValuesSchema = z.object({
       TEXT_INPUT_FIELDS_LENGTH_LIMIT,
       `Die Beschreibung darf maximal ${TEXT_INPUT_FIELDS_LENGTH_LIMIT} Zeichen lang sein.`,
     ),
+  pictureId: z.string().optional(),
 });
 type AssistantFormValues = z.infer<typeof assistantFormValuesSchema>;
 
@@ -66,10 +67,11 @@ export function AssistantEdit({
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
   const toast = useToast();
-  const t = useTranslations('custom-chat');
+  const t = useTranslations('assistant');
   const initialValues: AssistantFormValues = {
     name: assistant.name,
     description: assistant.description ?? '',
+    pictureId: assistant.pictureId ?? undefined,
   };
 
   const {
@@ -97,6 +99,7 @@ export function AssistantEdit({
           gptId: assistant.id,
           name: data.name,
           description: data.description,
+          pictureId: data.pictureId,
         });
 
         return updateResult.success;
@@ -104,6 +107,7 @@ export function AssistantEdit({
     });
 
   const name = useWatch({ control, name: 'name' });
+  const onPictureIdChangeRef = useRef<(value: string) => void>(() => {});
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -125,17 +129,17 @@ export function AssistantEdit({
         router.push(`/assistants/${createResult.value.id}/edit`);
       });
     } else {
-      toast.error(t('assistant.toasts.create-toast-error'));
+      toast.error(t('toasts.create-toast-error'));
     }
   };
 
   const handleDeleteAssistant = async () => {
     const deleteResult = await deleteAssistantAction({ gptId: assistant.id });
     if (deleteResult.success) {
-      toast.success(t('assistant.toasts.delete-toast-success'));
+      toast.success(t('toasts.delete-toast-success'));
     }
     if (!deleteResult.success) {
-      toast.error(t('assistant.toasts.delete-toast-error'));
+      toast.error(t('toasts.delete-toast-error'));
     }
     guardNavigation(() => {
       router.push('/custom');
@@ -162,15 +166,8 @@ export function AssistantEdit({
     return await updateAssistantAction({ gptId: assistant.id, attachedLinks: links });
   };
 
-  function handlePictureUploadComplete(picturePath: string) {
-    updateAssistantPictureAction({ gptId: assistant.id, picturePath }).then((result) => {
-      if (result.success) {
-        toast.success(t('toasts.image-toast-success'));
-        router.refresh();
-      } else {
-        toast.error(t('toasts.image-toast-error'));
-      }
-    });
+  async function handlePictureUploadComplete(pictureId: string) {
+    onPictureIdChangeRef.current(pictureId);
   }
 
   async function handleUploadPicture(croppedImageBlob: Blob) {
@@ -218,6 +215,7 @@ export function AssistantEdit({
         avatarPictureUrl={avatarPictureUrl}
         onPictureUploadComplete={handlePictureUploadComplete}
         onUploadPicture={handleUploadPicture}
+        onGetSignedUrl={getAvatarSignedUrl}
       />
 
       <form
@@ -230,6 +228,18 @@ export function AssistantEdit({
         <Card>
           <CardContent>
             <FieldGroup>
+              <Controller
+                name="pictureId"
+                control={control}
+                render={({ field }) => {
+                  onPictureIdChangeRef.current = (value: string) => {
+                    field.onChange(value);
+                    handleAutoSave();
+                  };
+
+                  return <Input {...field} type="hidden" value={field.value ?? ''} />;
+                }}
+              />
               <Controller
                 name="name"
                 control={control}
