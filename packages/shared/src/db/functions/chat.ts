@@ -8,14 +8,14 @@ export async function dbGetOrCreateConversation({
   conversationId,
   userId,
   characterId,
-  customGptId,
+  assistantId,
   type,
   name,
 }: {
   conversationId: string;
   userId: string;
   characterId?: string;
-  customGptId?: string;
+  assistantId?: string;
   type?: 'chat' | 'image-generation';
   name?: string;
 }) {
@@ -26,7 +26,7 @@ export async function dbGetOrCreateConversation({
         id: conversationId,
         userId,
         characterId: characterId ?? null,
-        customGptId: customGptId ?? null,
+        assistantId: assistantId ?? null,
         type: type ?? 'chat',
         name: name ?? null,
       })

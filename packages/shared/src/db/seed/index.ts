@@ -1,6 +1,6 @@
 import {
   insertTemplateCharacters,
-  insertTemplateCustomGpt,
+  insertTemplateAssistant,
   insertTemplateLearningScenarios,
 } from './default-templates';
 import { insertFederalStates } from './federal-state';
@@ -12,7 +12,7 @@ async function add() {
   await Promise.all([
     insertHelpModeGpt({ skip: false }),
     insertTemplateCharacters(),
-    insertTemplateCustomGpt(),
+    insertTemplateAssistant(),
     insertTemplateLearningScenarios(),
   ]);
 }

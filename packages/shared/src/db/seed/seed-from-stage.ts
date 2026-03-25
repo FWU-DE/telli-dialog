@@ -13,7 +13,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import {
   insertTemplateCharacters,
-  insertTemplateCustomGpt,
+  insertTemplateAssistant,
   insertTemplateLearningScenarios,
 } from './default-templates';
 import { insertHelpModeGpt } from './help-mode';
@@ -80,7 +80,7 @@ async function seedDatabase() {
     await Promise.all([
       insertHelpModeGpt({ skip: false }),
       insertTemplateCharacters(),
-      insertTemplateCustomGpt(),
+      insertTemplateAssistant(),
       insertTemplateLearningScenarios(),
     ]);
 

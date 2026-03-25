@@ -68,7 +68,7 @@ export const conversationTable = pgTable(
       .references(() => userTable.id)
       .notNull(),
     characterId: uuid('character_id').references(() => characterTable.id),
-    customGptId: uuid('custom_gpt_id').references(() => customGptTable.id),
+    assistantId: uuid('assistant_id').references(() => assistantTable.id),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
     type: conversationTypeEnum('type').notNull().default('chat'),
@@ -76,7 +76,7 @@ export const conversationTable = pgTable(
   (table) => [
     index().on(table.userId),
     index().on(table.characterId),
-    index().on(table.customGptId),
+    index().on(table.assistantId),
     index().on(table.userId, table.createdAt.desc()).where(isNull(table.deletedAt)),
   ],
 );
@@ -864,22 +864,26 @@ export type SharedCharacterChatUsageTrackingUpdateModel = z.infer<
 >;
 
 /**
- * Schema for table custom_gpt
+ * Schema for table assistant
  */
-export const customGptTable = pgTable(
-  'custom_gpt',
+export const assistantTable = pgTable(
+  'assistant',
   {
     id: uuid('id').defaultRandom().primaryKey(),
     name: text('name').notNull(),
     systemPrompt: text('system_prompt').notNull(),
     userId: uuid('user_id').references(() => userTable.id),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+      .defaultNow()
+      .$onUpdateFn(() => new Date())
+      .notNull(),
     schoolId: text('school_id').references(() => schoolTable.id),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
     pictureId: text('picture_id'),
     description: text('description'),
-    specification: text('specification'),
+    instructions: text('instructions'),
     promptSuggestions: text('prompt_suggestions')
       .array()
       .notNull()
@@ -889,25 +893,27 @@ export const customGptTable = pgTable(
       .notNull()
       .default(sql`'{}'::text[]`),
     isDeleted: boolean('is_deleted').notNull().default(false),
-    originalCustomGptId: uuid('original_custom_gpt_id'),
+    originalAssistantId: uuid('original_assistant_id'),
   },
   (table) => [index().on(table.userId), index().on(table.schoolId)],
 );
 
-export const customGptSelectSchema = createSelectSchema(customGptTable).extend({
+export const assistantSelectSchema = createSelectSchema(assistantTable).extend({
   createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
   accessLevel: accessLevelSchema,
 });
-export const customGptInsertSchema = createInsertSchema(customGptTable)
-  .omit({ id: true, createdAt: true })
+export const assistantInsertSchema = createInsertSchema(assistantTable)
+  .omit({ id: true, createdAt: true, updatedAt: true })
   .extend({
     accessLevel: accessLevelSchema,
   });
-export const customGptUpdateSchema = createUpdateSchema(customGptTable)
+export const assistantUpdateSchema = createUpdateSchema(assistantTable)
   .omit({
     userId: true,
     schoolId: true,
     createdAt: true,
+    updatedAt: true,
   })
   .extend({
     id: z.string(),
@@ -915,46 +921,46 @@ export const customGptUpdateSchema = createUpdateSchema(customGptTable)
     accessLevel: accessLevelSchema.optional(),
   });
 
-export type CustomGptSelectModel = z.infer<typeof customGptSelectSchema>;
-export type CustomGptInsertModel = z.infer<typeof customGptInsertSchema>;
-export type CustomGptUpdateModel = z.infer<typeof customGptUpdateSchema>;
+export type AssistantSelectModel = z.infer<typeof assistantSelectSchema>;
+export type AssistantInsertModel = z.infer<typeof assistantInsertSchema>;
+export type AssistantUpdateModel = z.infer<typeof assistantUpdateSchema>;
 
 /**
- * Schema for table custom_gpt_template_mappings
+ * Schema for table assistant_template_mappings
  */
-export const customGptTemplateMappingTable = pgTable(
-  'custom_gpt_template_mappings',
+export const assistantTemplateMappingTable = pgTable(
+  'assistant_template_mappings',
   {
-    customGptId: uuid('custom_gpt_id')
+    assistantId: uuid('assistant_id')
       .notNull()
-      .references(() => customGptTable.id, { onDelete: 'cascade' }),
+      .references(() => assistantTable.id, { onDelete: 'cascade' }),
     federalStateId: text('federal_state_id').notNull(),
   },
   (table) => [
-    primaryKey({ columns: [table.customGptId, table.federalStateId] }),
+    primaryKey({ columns: [table.assistantId, table.federalStateId] }),
     foreignKey({
       columns: [table.federalStateId],
       foreignColumns: [federalStateTable.id],
       // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
       // The custom name can only be set with foreignKey() function
-      name: 'character_template_mappings_federal_state_id_fk',
+      name: 'assistant_template_mappings_federal_state_id_fk',
     }).onDelete('cascade'),
   ],
 );
 
-export const customGptTemplateMappingSelectSchema = createSelectSchema(
-  customGptTemplateMappingTable,
+export const assistantTemplateMappingSelectSchema = createSelectSchema(
+  assistantTemplateMappingTable,
 );
-export const customGptTemplateMappingInsertSchema = createInsertSchema(
-  customGptTemplateMappingTable,
+export const assistantTemplateMappingInsertSchema = createInsertSchema(
+  assistantTemplateMappingTable,
 );
 // no update schema as there are only two fields which are both part of the primary key
 
-export type CustomGptTemplateMappingSelectModel = z.infer<
-  typeof customGptTemplateMappingSelectSchema
+export type AssistantTemplateMappingSelectModel = z.infer<
+  typeof assistantTemplateMappingSelectSchema
 >;
-export type CustomGptTemplateMappingInsertModel = z.infer<
-  typeof customGptTemplateMappingInsertSchema
+export type AssistantTemplateMappingInsertModel = z.infer<
+  typeof assistantTemplateMappingInsertSchema
 >;
 
 /**
@@ -1144,31 +1150,31 @@ export type CharacterFileMappingInsertModel = z.infer<typeof characterFileMappin
 export type CharacterFileMappingUpdateModel = z.infer<typeof characterFileMappingUpdateSchema>;
 
 /**
- * Schema for table custom_gpt_file_mapping
+ * Schema for table assistant_file_mapping
  */
-export const CustomGptFileMapping = pgTable(
-  'custom_gpt_file_mapping',
+export const AssistantFileMapping = pgTable(
+  'assistant_file_mapping',
   {
     id: uuid('id').defaultRandom().primaryKey(),
     fileId: text('file_id')
       .references(() => fileTable.id)
       .notNull(),
-    customGptId: uuid('custom_gpt_id')
-      .references(() => customGptTable.id, { onDelete: 'cascade' })
+    assistantId: uuid('assistant_id')
+      .references(() => assistantTable.id, { onDelete: 'cascade' })
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [unique().on(table.customGptId, table.fileId)],
+  (table) => [unique().on(table.assistantId, table.fileId)],
 );
 
-export const customGptFileMappingSelectSchema = createSelectSchema(CustomGptFileMapping).extend({
+export const assistantFileMappingSelectSchema = createSelectSchema(AssistantFileMapping).extend({
   createdAt: z.coerce.date(),
 });
-export const customGptFileMappingInsertSchema = createInsertSchema(CustomGptFileMapping).omit({
+export const assistantFileMappingInsertSchema = createInsertSchema(AssistantFileMapping).omit({
   id: true,
   createdAt: true,
 });
-export const customGptFileMappingUpdateSchema = createUpdateSchema(CustomGptFileMapping)
+export const assistantFileMappingUpdateSchema = createUpdateSchema(AssistantFileMapping)
   .omit({
     createdAt: true,
   })
@@ -1176,9 +1182,9 @@ export const customGptFileMappingUpdateSchema = createUpdateSchema(CustomGptFile
     id: z.string(),
   });
 
-export type CustomGptFileMappingSelectModel = z.infer<typeof customGptFileMappingSelectSchema>;
-export type CustomGptFileMappingInsertModel = z.infer<typeof customGptFileMappingInsertSchema>;
-export type CustomGptFileMappingUpdateModel = z.infer<typeof customGptFileMappingUpdateSchema>;
+export type AssistantFileMappingSelectModel = z.infer<typeof assistantFileMappingSelectSchema>;
+export type AssistantFileMappingInsertModel = z.infer<typeof assistantFileMappingInsertSchema>;
+export type AssistantFileMappingUpdateModel = z.infer<typeof assistantFileMappingUpdateSchema>;
 
 /**
  * Schema for table chunk

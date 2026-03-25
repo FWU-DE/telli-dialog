@@ -15,14 +15,14 @@ export async function sendChatMessageAction({
   messages,
   modelId,
   characterId,
-  customGptId,
+  assistantId,
   fileIds,
 }: {
   conversationId: string;
   messages: ChatMessage[];
   modelId: string;
   characterId?: string;
-  customGptId?: string;
+  assistantId?: string;
   fileIds?: string[];
 }): Promise<SendMessageResult> {
   const [{ user, school, federalState }, hasCompletedTraining] = await Promise.all([
@@ -40,7 +40,7 @@ export async function sendChatMessageAction({
     messages,
     modelId,
     characterId,
-    customGptId,
+    assistantId,
     fileIds,
     user: userAndContext,
   });

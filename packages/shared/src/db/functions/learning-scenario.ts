@@ -250,7 +250,7 @@ export async function dbDeleteLearningScenarioByIdAndUserId({
       .select({ id: conversationTable.id })
       .from(conversationTable)
       // TODO: customGptId is wrong! replace with learningScenarioId, once it's available
-      .where(eq(conversationTable.customGptId, learningScenario.id));
+      .where(eq(conversationTable.assistantId, learningScenario.id));
 
     if (conversations.length > 0) {
       await tx.delete(conversationMessageTable).where(
@@ -263,7 +263,7 @@ export async function dbDeleteLearningScenarioByIdAndUserId({
     // TODO: customGptId is wrong! replace with learningScenarioId, once it's available
     await tx
       .delete(conversationTable)
-      .where(eq(conversationTable.customGptId, learningScenario.id));
+      .where(eq(conversationTable.assistantId, learningScenario.id));
     await tx
       .delete(LearningScenarioFileMapping)
       .where(eq(LearningScenarioFileMapping.learningScenarioId, learningScenario.id));

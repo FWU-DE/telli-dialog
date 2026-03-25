@@ -142,6 +142,9 @@ export async function getChatTitle({
   modelId: string;
   apiKeyId: string;
 }): Promise<string> {
+  const maxTitleLength = 50;
+  const fallbackTitle = 'Neue Konversation';
+
   try {
     const { text } = await generateTextWithBilling(
       modelId,
@@ -155,7 +158,7 @@ export async function getChatTitle({
 - Verwende keine Anführungszeichen oder Doppelpunkte.
 - Verwende keine Emojis oder Sonderzeichen.
 - Verwende reinen Text ohne Formatierungen.
-- Der Titel sollte nicht länger als 50 Zeichen sein.
+- Der Titel sollte nicht länger als ${maxTitleLength} Zeichen sein.
 - Antworte nur mit dem Titel, ohne weitere Erklärungen oder Einleitungen.
 - Antworte nicht auf die Nachricht des Nutzers, sondern generiere ausschließlich einen passenden Titel dafür.
 - Wenn die Nachricht des Nutzers kein klares Thema hat, generiere einen allgemeinen Titel wie "Neue Konversation".
@@ -168,9 +171,12 @@ export async function getChatTitle({
       ],
       apiKeyId,
     );
-    return text.trim();
+
+    // Remove whitespace, then cut to the length limit character-by-character
+    const title = Array.from(text.replace(/\s+/g, ' ').trim()).slice(0, maxTitleLength).join('');
+    return title || fallbackTitle;
   } catch (error) {
     logError('Error generating chat title, using default title as fallback:', error);
-    return 'Neue Konversation';
+    return fallbackTitle;
   }
 }

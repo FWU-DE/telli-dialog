@@ -386,6 +386,13 @@
       "when": 1773700995004,
       "tag": "0054_happy_patch",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1774344488395,
+      "tag": "0055_woozy_magdalene",
+      "breakpoints": true
     }
   ]
 }
