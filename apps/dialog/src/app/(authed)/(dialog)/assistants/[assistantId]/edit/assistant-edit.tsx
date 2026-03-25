@@ -31,6 +31,7 @@ import {
   updateAssistantAction,
   uploadAvatarPictureForAssistantAction,
   getAvatarSignedUrl,
+  updateAssistantAccessLevelAction,
 } from '../../../custom/editor/[customGptId]/actions';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
@@ -197,21 +198,17 @@ export function AssistantEdit({
     });
   }
   const handleSharingChange = async () => {
-    if (readOnly) {
-      return;
-    }
-
     const isSchoolShared = getValues('isSchoolShared');
     const newAccessLevel = isSchoolShared ? 'school' : 'private';
 
     if (newAccessLevel !== assistant.accessLevel) {
-      const result = await updateCustomGptAccessLevelAction({
+      const result = await updateAssistantAccessLevelAction({
         gptId: assistant.id,
         accessLevel: newAccessLevel,
       });
 
       if (result.success) {
-        router.refresh();
+        toast.success(t('toasts.edit-toast-success'));
       } else {
         toast.error(t('toasts.edit-toast-error'));
       }
@@ -361,14 +358,12 @@ export function AssistantEdit({
           onLinksChange={handleLinksChange}
         />
 
-        {userRole === 'teacher' && !readOnly && (
-          <CustomShareSection
-            control={control}
-            schoolSharingName="isSchoolShared"
-            linkSharingName="hasLinkAccess"
-            onShareChange={handleSharingChange}
-          />
-        )}
+        <CustomShareSection
+          control={control}
+          schoolSharingName="isSchoolShared"
+          linkSharingName="hasLinkAccess"
+          onShareChange={handleSharingChange}
+        />
       </form>
     </CustomChatLayoutContainer>
   );

@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import CheckboxWithInfo from '@ui/components/common/checkbox-with-info';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
@@ -22,6 +21,7 @@ export default function CustomShareSection<T extends FieldValues>({
   control,
   schoolSharingName,
   linkSharingName,
+  onShareChange,
 }: CustomShareSectionProps<T>) {
   const t = useTranslations('sharing');
   const toast = useToast();
@@ -50,6 +50,7 @@ export default function CustomShareSection<T extends FieldValues>({
               control={control}
               label={t('school')}
               tooltip={t('school-tooltip')}
+              onCheckedChange={() => onShareChange?.()}
             />
           )}
           {linkSharingName && (
@@ -58,6 +59,7 @@ export default function CustomShareSection<T extends FieldValues>({
               control={control}
               label={t('link')}
               tooltip={t('link-tooltip')}
+              onCheckedChange={() => onShareChange?.()}
             />
           )}
           {linkSharingName && (
@@ -69,10 +71,11 @@ export default function CustomShareSection<T extends FieldValues>({
                   className="shrink-0"
                   disabled={!field.value}
                   onClick={handleCopyLink}
-                  aria-label="Link kopieren"
+                  aria-label={t('copy-link')}
+                  type="button"
                 >
                   <LinkIcon className="size-4" />
-                  Link kopieren
+                  {t('copy-link')}
                 </Button>
               )}
             />

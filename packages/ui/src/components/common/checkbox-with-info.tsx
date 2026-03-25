@@ -13,32 +13,43 @@ type CheckboxWithInfoProps<
   tooltip: string;
   control: Control<TFieldValues>;
   disabled?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
 };
 
 export default function CheckboxWithInfo<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
->({ name, label, control, tooltip, disabled }: CheckboxWithInfoProps<TFieldValues, TName>) {
+>({
+  name,
+  label,
+  control,
+  tooltip,
+  disabled,
+  onCheckedChange,
+}: CheckboxWithInfoProps<TFieldValues, TName>) {
   return (
     <div className="flex items-center gap-1">
       <Controller
         name={name}
         control={control}
         render={({ field }) => (
-            <>
-          <Checkbox
-            id={field.name + '-checkbox'}
-            checked={field.value}
-            onCheckedChange={field.onChange}
-            disabled={disabled}
-          />
-          <FieldLabel htmlFor={field.name + '-checkbox'}>{label}</FieldLabel>
+          <>
+            <Checkbox
+              id={field.name + '-checkbox'}
+              checked={field.value}
+              onCheckedChange={(checked) => {
+                field.onChange(checked);
+                onCheckedChange?.(checked === true);
+              }}
+              disabled={disabled}
+            />
+            <FieldLabel htmlFor={field.name + '-checkbox'}>{label}</FieldLabel>
           </>
         )}
       />
       {tooltip && (
         <Tooltip>
-          <TooltipTrigger aria-label="Tooltip für Hintergrundwissen">
+          <TooltipTrigger aria-label="Tooltip für Checkbox">
             <InfoIcon className="size-5 text-icon" />
           </TooltipTrigger>
           <TooltipContent>{tooltip}</TooltipContent>
