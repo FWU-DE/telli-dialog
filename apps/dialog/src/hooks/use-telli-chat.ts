@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { readTextStream } from '@/utils/streaming';
 import {
+  deserializeError,
   toUIMessages,
   UIMessage,
   type ChatMessage,
@@ -112,7 +113,7 @@ export function useTelliChat({
         });
 
         if (result.error) {
-          throw result.error;
+          throw deserializeError(result.error);
         }
 
         // We need to handle the first chunk separately to avoid missing content
