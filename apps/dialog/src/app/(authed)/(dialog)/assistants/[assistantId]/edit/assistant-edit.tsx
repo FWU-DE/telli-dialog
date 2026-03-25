@@ -26,6 +26,8 @@ import { useTranslations } from 'next-intl';
 import {
   deleteAssistantAction,
   updateAssistantAction,
+  updateAssistantPictureAction,
+  uploadAvatarPictureForAssistantAction,
 } from '../../../custom/editor/[customGptId]/actions';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
@@ -161,7 +163,7 @@ export function AssistantEdit({
   };
 
   function handlePictureUploadComplete(picturePath: string) {
-    updateCustomGptPictureAction({ gptId: assistant.id, picturePath }).then((result) => {
+    updateAssistantPictureAction({ gptId: assistant.id, picturePath }).then((result) => {
       if (result.success) {
         toast.success(t('toasts.image-toast-success'));
         router.refresh();
@@ -172,8 +174,8 @@ export function AssistantEdit({
   }
 
   async function handleUploadPicture(croppedImageBlob: Blob) {
-    return await uploadAvatarPictureForCustomGptAction({
-      customGptId: assistant.id,
+    return await uploadAvatarPictureForAssistantAction({
+      assistantId: assistant.id,
       croppedImageBlob,
     });
   }
