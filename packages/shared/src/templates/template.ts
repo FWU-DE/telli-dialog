@@ -1,6 +1,6 @@
 export type TemplateTypes = 'character' | 'custom-gpt' | 'learning-scenario';
 
-/* Unified template model for characters and custom GPTs */
+/* Unified template model for characters and assistants */
 export type TemplateModel = {
   id: string;
   originalId: string | null;

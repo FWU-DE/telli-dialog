@@ -23,12 +23,12 @@ export function useMainChat(options: {
   initialMessages?: ChatMessage[];
   modelId?: string;
   characterId?: string;
-  customGptId?: string;
+  assistantId?: string;
   onError?: (error: Error) => void;
   onFinish?: (message: ChatMessage) => void;
   onMessageCreated?: (messageId: string) => void;
 }): UseChatReturn {
-  const { conversationId, characterId, customGptId, ...rest } = options;
+  const { conversationId, characterId, assistantId, ...rest } = options;
 
   const sendMessage: SendMessageFn = useCallback(
     async ({ messages, modelId, fileIds }) => {
@@ -37,11 +37,11 @@ export function useMainChat(options: {
         messages,
         modelId,
         characterId,
-        customGptId,
+        assistantId,
         fileIds,
       });
     },
-    [conversationId, characterId, customGptId],
+    [conversationId, characterId, assistantId],
   );
 
   return useTelliChat({

@@ -5,8 +5,8 @@ import {
   characterTable,
   ConversationMessageFileMappingTable,
   conversationTable,
-  CustomGptFileMapping,
-  customGptTable,
+  AssistantFileMapping,
+  assistantTable,
   federalStateTable,
   FileInsertModel,
   FileMetadata,
@@ -20,7 +20,7 @@ import {
 } from '../schema';
 import { logDebug } from '@shared/logging';
 import { buildCharacterPictureKey } from '@shared/characters/character-service';
-import { buildCustomGptPictureKey } from '@shared/custom-gpt/custom-gpt-service';
+import { buildAssistantPictureKey } from '@shared/assistants/assistant-service';
 import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
 
 export async function linkFilesToConversation({
@@ -147,11 +147,11 @@ export async function dbGetRelatedCharacterFiles(conversationId?: string): Promi
   return files;
 }
 
-export async function dbGetRelatedCustomGptFiles(customGptId?: string): Promise<FileModel[]> {
-  if (customGptId === undefined) return [];
+export async function dbGetRelatedAssistantFiles(assistantId?: string): Promise<FileModel[]> {
+  if (assistantId === undefined) return [];
   const files = await db
     .select({
-      id: CustomGptFileMapping.fileId,
+      id: AssistantFileMapping.fileId,
       name: fileTable.name,
       type: fileTable.type,
       size: fileTable.size,
@@ -159,9 +159,9 @@ export async function dbGetRelatedCustomGptFiles(customGptId?: string): Promise<
       metadata: fileTable.metadata,
       userId: fileTable.userId,
     })
-    .from(CustomGptFileMapping)
-    .innerJoin(fileTable, eq(CustomGptFileMapping.fileId, fileTable.id))
-    .where(eq(CustomGptFileMapping.customGptId, customGptId));
+    .from(AssistantFileMapping)
+    .innerJoin(fileTable, eq(AssistantFileMapping.fileId, fileTable.id))
+    .where(eq(AssistantFileMapping.assistantId, assistantId));
 
   return files;
 }
@@ -209,18 +209,18 @@ export async function dbGetAttachedFileByEntityId({
   conversationId,
   characterId,
   sharedChatId,
-  customGptId,
+  assistantId,
 }: {
   conversationId?: string;
   characterId?: string;
   sharedChatId?: string;
-  customGptId?: string;
+  assistantId?: string;
 }): Promise<(FileModel & { conversationMessageId?: string })[]> {
   const combinedFiles = await Promise.all([
     dbGetRelatedSharedChatFiles(sharedChatId),
     dbGetRelatedCharacterFiles(characterId),
     dbGetAllFileIdByConversationId(conversationId),
-    dbGetRelatedCustomGptFiles(customGptId),
+    dbGetRelatedAssistantFiles(assistantId),
   ]);
   return combinedFiles.flat();
 }
@@ -303,13 +303,13 @@ export async function dbDeleteDanglingFiles() {
         eq(fileTable.id, ConversationMessageFileMappingTable.fileId),
       )
       .leftJoin(CharacterFileMapping, eq(fileTable.id, CharacterFileMapping.fileId))
-      .leftJoin(CustomGptFileMapping, eq(fileTable.id, CustomGptFileMapping.fileId))
+      .leftJoin(AssistantFileMapping, eq(fileTable.id, AssistantFileMapping.fileId))
       .leftJoin(LearningScenarioFileMapping, eq(fileTable.id, LearningScenarioFileMapping.fileId))
       .where(
         and(
           isNull(ConversationMessageFileMappingTable.fileId),
           isNull(CharacterFileMapping.fileId),
-          isNull(CustomGptFileMapping.fileId),
+          isNull(AssistantFileMapping.fileId),
           isNull(LearningScenarioFileMapping.fileId),
         ),
       );
@@ -324,15 +324,15 @@ export async function dbDeleteDanglingFiles() {
  * Returns all S3 keys for files which are referenced in the database in any table.
  */
 export async function dbGetAllS3FileKeys(): Promise<string[]> {
-  const [files, characters, customGpts, sharedSchoolConversations, federalStates] =
+  const [files, characters, assistants, sharedSchoolConversations, federalStates] =
     await Promise.all([
       db.select({ fileId: fileTable.id }).from(fileTable),
       db
         .select({ id: characterTable.id, pictureId: characterTable.pictureId })
         .from(characterTable),
       db
-        .select({ id: customGptTable.id, pictureId: customGptTable.pictureId })
-        .from(customGptTable),
+        .select({ id: assistantTable.id, pictureId: assistantTable.pictureId })
+        .from(assistantTable),
       db
         .select({
           id: learningScenarioTable.id,
@@ -343,12 +343,12 @@ export async function dbGetAllS3FileKeys(): Promise<string[]> {
     ]);
 
   const fileIds = files.map((x) => `message_attachments/${x.fileId}`);
-  const pictureIds = [...characters, ...customGpts, ...sharedSchoolConversations]
+  const pictureIds = [...characters, ...assistants, ...sharedSchoolConversations]
     .map((x) => x.pictureId)
     .filter((x): x is string => !!x);
   const avatarIds = [
     ...characters.map((x) => buildCharacterPictureKey(x.id)),
-    ...customGpts.map((x) => buildCustomGptPictureKey(x.id)),
+    ...assistants.map((x) => buildAssistantPictureKey(x.id)),
     ...sharedSchoolConversations.map((x) => buildLearningScenarioPictureKey(x.id)),
   ];
   const whitelabels = federalStates.flatMap((x) => [

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logError, logInfo } from '@shared/logging';
 import { cleanupCharacters } from '@shared/characters/character-service';
 import { cleanupLearningScenarios } from '@shared/learning-scenarios/learning-scenario-admin-service';
-import { cleanupCustomGpts } from '@shared/custom-gpt/custom-gpt-service';
+import { cleanupAssistants } from '@shared/assistants/assistant-service';
 import { cleanupWebChunks } from '@/app/api/rag/cleanupWebChunks';
 
 export async function DELETE(req: NextRequest) {
@@ -14,18 +14,18 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
-    const [deletedCharacters, deletedLearningScenarios, deletedCustomGpts, deletedWebChunks] =
+    const [deletedCharacters, deletedLearningScenarios, deletedAssistants, deletedWebChunks] =
       await Promise.all([
         cleanupCharacters(),
         cleanupLearningScenarios(),
-        cleanupCustomGpts(),
+        cleanupAssistants(),
         cleanupWebChunks(),
       ]);
     const message = {
       message: 'Cleanup finished!',
       deletedCharacters,
       deletedLearningScenarios,
-      deletedCustomGpts,
+      deletedAssistants,
       deletedWebChunks,
     };
     logInfo('Cleanup finished:', message);

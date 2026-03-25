@@ -5,27 +5,27 @@ import { useToast } from '@/components/common/toast';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import SettingsIcon from '@/components/icons/settings';
 import TrashIcon from '@/components/icons/trash';
-import { CustomGptSelectModel } from '@shared/db/schema';
+import { AssistantSelectModel } from '@shared/db/schema';
 import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React from 'react';
-import { deleteCustomGptAction } from './editor/[customGptId]/actions';
+import { deleteAssistantAction } from './editor/[customGptId]/actions';
 import { iconClassName } from '@/utils/tailwind/icon';
 import TelliClipboardButton from '@/components/common/clipboard-button';
-import { createNewCustomGptAction } from './actions';
+import { createNewAssistantAction } from './actions';
 import AvatarPicture from '@/components/common/avatar-picture';
 import { CreateNewInstanceFromTemplate } from '../_components/create-new-instance-from-template';
 
-type CustomGptContainerProps = CustomGptSelectModel & {
+type AssistantContainerProps = AssistantSelectModel & {
   currentUserId: string;
   maybeSignedPictureUrl: string | undefined;
   pictureId: string | null;
 };
 
-export default function CustomGptContainer({
+export default function AssistantContainer({
   id,
   name,
   description,
@@ -33,7 +33,7 @@ export default function CustomGptContainer({
   currentUserId,
   maybeSignedPictureUrl,
   pictureId,
-}: CustomGptContainerProps) {
+}: AssistantContainerProps) {
   const router = useRouter();
   const toast = useToast();
 
@@ -41,8 +41,8 @@ export default function CustomGptContainer({
   const tCommon = useTranslations('common');
   const tToast = useTranslations('custom-gpt.toasts');
 
-  async function handleDeleteCustomGpt() {
-    const result = await deleteCustomGptAction({ gptId: id });
+  async function handleDeleteAssistant() {
+    const result = await deleteAssistantAction({ gptId: id });
     if (result.success) {
       toast.success(tToast('delete-toast-success'));
       router.refresh();
@@ -82,7 +82,7 @@ export default function CustomGptContainer({
         <div onClick={(event) => event.stopPropagation()} className="flex items-center">
           <CreateNewInstanceFromTemplate
             redirectPath="custom"
-            createInstanceCallbackAction={createNewCustomGptAction}
+            createInstanceCallbackAction={createNewAssistantAction}
             templateId={id}
             templatePictureId={pictureId ?? undefined}
             className="w-8 h-8 flex items-center justify-center"
@@ -113,7 +113,7 @@ export default function CustomGptContainer({
             modalTitle={t('form.delete-gpt')}
             modalDescription={t('form.gpt-delete-modal-description')}
             confirmText={tCommon('delete')}
-            actionFn={handleDeleteCustomGpt}
+            actionFn={handleDeleteAssistant}
             aria-label={t('form.delete-gpt')}
             triggerButtonClassName={cn('border-transparent p-0', iconClassName)}
           >
