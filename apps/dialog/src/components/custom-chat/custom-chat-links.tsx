@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { GlobeIcon, PlusIcon, TrashSimpleIcon } from '@phosphor-icons/react';
+import { PlusIcon, TrashSimpleIcon } from '@phosphor-icons/react';
 import { Input } from '@ui/components/Input';
 import { Button } from '@ui/components/Button';
 import { Spinner } from '@ui/components/Spinner';

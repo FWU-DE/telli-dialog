@@ -6,11 +6,13 @@ import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
-import { getAssistantByAccessLevel, getAssistantsByOverviewFilter } from '@shared/assistants/assistant-service';
-import { getFederalStateById } from '@shared/federal-states/federal-state-service';
+import {
+  getAssistantByAccessLevel,
+  getAssistantsByOverviewFilter,
+} from '@shared/assistants/assistant-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import CustomGptOverview from './custom-gpt-overview';
-import { HELP_MODE_GPT_ID } from '@shared/db/const';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,18 +30,18 @@ export default async function Page(props: PageProps<'/custom'>) {
     const isSchoolSharingEnabled = federalState.featureToggles.isShareTemplateWithSchoolEnabled;
     const filter =
       !isSchoolSharingEnabled && searchParams.filter === 'school' ? 'all' : searchParams.filter;
-    const _customGpts = await getCustomGptsByOverviewFilter({
+    const _customGpts = await getAssistantsByOverviewFilter({
       filter,
       schoolId: school.id,
       userId: user.id,
       federalStateId: federalState.id,
     }).catch(handleErrorInServerComponent);
-    const customGpts = _customGpts.filter((c) => c.name !== '' && c.id !== HELP_MODE_GPT_ID);
-    const enrichedCustomGpts = await enrichGptWithImage({ customGpts });
+    const customGpts = _customGpts.filter((c) => c.name !== '' && c.id !== HELP_MODE_ASSISTANT_ID);
+    const enrichedCustomGpts = await enrichAssistantsWithImage({ customGpts });
 
     return (
       <CustomGptOverview
-        customGpts={enrichedCustomGpts}
+        assistants={enrichedCustomGpts}
         activeFilter={filter}
         currentUserId={user.id}
       />

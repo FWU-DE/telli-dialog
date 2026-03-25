@@ -15,7 +15,7 @@ import { AccessLevel } from '@shared/db/schema';
 import { useTranslations } from 'next-intl';
 import CustomGptContainer from './custom-gpt-container';
 import { buildGenericUrl } from '../utils.client';
-import CreateNewCustomGptButton from './create-new-assistant-button';
+import CreateNewCustomGptButton from './create-new-customgpt-button';
 import { AssistantWithImage } from './utils';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { useFederalState } from '@/components/providers/federal-state-provider';

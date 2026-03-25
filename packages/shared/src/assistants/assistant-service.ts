@@ -7,7 +7,6 @@ import { db } from '@shared/db';
 import {
   dbDeleteAssistantByIdAndUserId,
   dbGetAssistantById,
-  dbGetAssistantsByUserId,
   dbGetGlobalGpts,
   dbGetGptsBySchoolId,
   dbGetGptsByUserId,
@@ -160,7 +159,7 @@ export async function getAssistantByAccessLevel({
   return [];
 }
 
-export async function getCustomGptsByOverviewFilter({
+export async function getAssistantsByOverviewFilter({
   filter,
   schoolId,
   userId,
@@ -170,11 +169,16 @@ export async function getCustomGptsByOverviewFilter({
   schoolId: string;
   userId: string;
   federalStateId: string;
-}): Promise<CustomGptSelectModel[]> {
+}): Promise<AssistantSelectModel[]> {
   if (filter === 'all') {
-    return dbGetAllAccessibleGpts({ userId, schoolId, federalStateId });
+    const [privateAssistants, schoolAssistants, globalAssistants] = await Promise.all([
+      dbGetGptsByUserId({ userId }),
+      dbGetGptsBySchoolId({ schoolId }),
+      dbGetGlobalGpts({ federalStateId }),
+    ]);
+    return [...privateAssistants, ...schoolAssistants, ...globalAssistants];
   } else if (filter === 'mine') {
-    return await dbGetAllGptsByUserId({ userId });
+    return await dbGetGptsByUserId({ userId });
   } else if (filter === 'official') {
     return await dbGetGlobalGpts({ federalStateId });
   } else if (filter === 'school') {
