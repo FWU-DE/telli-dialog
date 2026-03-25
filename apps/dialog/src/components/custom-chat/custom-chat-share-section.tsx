@@ -1,14 +1,14 @@
 'use client';
 
 import React from 'react';
-import CheckboxWithInfo from '@/components/common/checkbox-with-info';
+import CheckboxWithInfo from '@ui/components/common/checkbox-with-info';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { LinkIcon } from '@phosphor-icons/react';
 import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 import { useFederalState } from '../providers/federal-state-provider';
 import { CustomChatHeading2 } from './custom-chat-heading2';
-import { Card, CardContent } from '@ui/components/Card';
+import { Card, CardRow } from '@ui/components/Card';
 import { Button } from '@ui/components/Button';
 
 type CustomShareSectionProps<T extends FieldValues> = {
@@ -22,7 +22,6 @@ export default function CustomShareSection<T extends FieldValues>({
   control,
   schoolSharingName,
   linkSharingName,
-  onShareChange,
 }: CustomShareSectionProps<T>) {
   const t = useTranslations('sharing');
   const toast = useToast();
@@ -44,22 +43,21 @@ export default function CustomShareSection<T extends FieldValues>({
     <div className="flex flex-col gap-3 mt-10">
       <CustomChatHeading2 text={t('label')} />
       <Card>
-        <CardContent className="flex flex-row items-center gap-6">
+        <CardRow>
           {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && schoolSharingName && (
-            <Controller
+            <CheckboxWithInfo
               name={schoolSharingName}
               control={control}
-              render={({ field }) => (
-                <CheckboxWithInfo
-                  label={t('school')}
-                  tooltip={t('school-tooltip')}
-                  checked={field.value as boolean}
-                  onCheckedChange={(value) => {
-                    field.onChange(value);
-                    onShareChange?.();
-                  }}
-                />
-              )}
+              label={t('school')}
+              tooltip={t('school-tooltip')}
+            />
+          )}
+          {linkSharingName && (
+            <CheckboxWithInfo
+              name={linkSharingName}
+              control={control}
+              label={t('link')}
+              tooltip={t('link-tooltip')}
             />
           )}
           {linkSharingName && (
@@ -67,29 +65,19 @@ export default function CustomShareSection<T extends FieldValues>({
               name={linkSharingName}
               control={control}
               render={({ field }) => (
-                <>
-                  <CheckboxWithInfo
-                    label={t('link')}
-                    tooltip={t('link-tooltip')}
-                    checked={field.value as boolean}
-                    onCheckedChange={(value) => {
-                      field.onChange(value);
-                      onShareChange?.();
-                    }}
-                  />
-                  <Button
-                    disabled={!field.value}
-                    onClick={handleCopyLink}
-                    aria-label="Link kopieren"
-                  >
-                    <LinkIcon className="size-4" />
-                    Link kopieren
-                  </Button>
-                </>
+                <Button
+                  className="shrink-0"
+                  disabled={!field.value}
+                  onClick={handleCopyLink}
+                  aria-label="Link kopieren"
+                >
+                  <LinkIcon className="size-4" />
+                  Link kopieren
+                </Button>
               )}
             />
           )}
-        </CardContent>
+        </CardRow>
       </Card>
     </div>
   );

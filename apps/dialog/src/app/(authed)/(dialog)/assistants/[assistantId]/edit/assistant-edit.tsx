@@ -125,6 +125,9 @@ export function AssistantEdit({
 
   const name = useWatch({ control, name: 'name' });
   const onPictureIdChangeRef = useRef<(value: string) => void>(() => {});
+  const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
+  const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
+  const showShareInfo = isSchoolShared || hasLinkAccess;
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -250,7 +253,7 @@ export function AssistantEdit({
           hasSaveError={hasSaveError}
         />
       </div>
-      <CustomChatShareInfo href="#share-settings" />
+      {showShareInfo && <CustomChatShareInfo href="#share-settings" />}
       <CustomChatImageUpload
         avatarPictureUrl={avatarPictureUrl}
         onPictureUploadComplete={handlePictureUploadComplete}
