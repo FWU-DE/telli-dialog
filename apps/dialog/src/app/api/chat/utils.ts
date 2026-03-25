@@ -143,6 +143,7 @@ export async function getChatTitle({
   apiKeyId: string;
 }): Promise<string> {
   const maxTitleLength = 50;
+  const fallbackTitle = 'Neue Konversation';
 
   try {
     const { text } = await generateTextWithBilling(
@@ -170,9 +171,12 @@ export async function getChatTitle({
       ],
       apiKeyId,
     );
-    return text.trim().slice(0, maxTitleLength);
+
+    // Remove whitespace, then cut to the length limit character-by-character
+    const title = Array.from(text.replace(/\s+/g, ' ').trim()).slice(0, maxTitleLength).join('');
+    return title || fallbackTitle;
   } catch (error) {
     logError('Error generating chat title, using default title as fallback:', error);
-    return 'Neue Konversation';
+    return fallbackTitle;
   }
 }
