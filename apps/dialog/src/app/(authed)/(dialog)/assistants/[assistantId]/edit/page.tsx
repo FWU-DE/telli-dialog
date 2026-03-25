@@ -1,6 +1,7 @@
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAssistantForEditView, getFileMappings } from '@shared/assistants/assistant-service';
+import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { notFound } from 'next/navigation';
 import { AssistantEdit } from './assistant-edit';
 
@@ -31,7 +32,14 @@ export default async function Page(props: PageProps<'/assistants/[assistantId]/e
     .filter((l) => l !== '')
     .map((url) => ({ link: url }));
 
+  const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
+
   return (
-    <AssistantEdit assistant={assistant} relatedFiles={relatedFiles} initialLinks={initialLinks} />
+    <AssistantEdit
+      assistant={assistant}
+      relatedFiles={relatedFiles}
+      initialLinks={initialLinks}
+      avatarPictureUrl={avatarPictureUrl}
+    />
   );
 }
