@@ -139,10 +139,7 @@ export default function Chat({
 
   const { error, handleError, resetError } = useCheckStatusCode();
 
-  const { scrollRef, reactivateAutoScrolling } = useAutoScroll([
-    messages,
-    status,
-  ]);
+  const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, status]);
 
   useEffect(() => {
     // Skip fetching file mappings if the conversation doesn't exist yet (no messages sent)

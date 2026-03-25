@@ -28,8 +28,8 @@ export function LlmModelsProvider({
   defaultLlmModelByCookie,
   initialHasMessages = false,
 }: LlmModelsProviderProps) {
-  const [selectedModel, setSelectedModelState] = useState<LlmModelSelectModel | undefined>(
-    () => getSelectedModel({ models, defaultLlmModelByCookie }),
+  const [selectedModel, setSelectedModelState] = useState<LlmModelSelectModel | undefined>(() =>
+    getSelectedModel({ models, defaultLlmModelByCookie }),
   );
   const [hasMessages, setHasMessages] = useState(initialHasMessages);
 

@@ -28,6 +28,24 @@ export async function uploadFile(page: Page, filePath: string) {
 }
 
 /**
+ * Opens the LLM model dropdown and selects the first available alternative model.
+ * Returns `true` if a switch was made, `false` if the dropdown is disabled (only one model).
+ */
+export async function selectDifferentModel(page: Page): Promise<boolean> {
+  const dropdown = page.getByLabel('Select text Model Dropdown');
+  await expect(dropdown).toBeVisible();
+
+  const isDisabled = await dropdown.evaluate((el) => (el as HTMLButtonElement).disabled);
+  if (isDisabled) return false;
+
+  await dropdown.click();
+  const firstOption = page.getByRole('menuitem').first();
+  await expect(firstOption).toBeVisible();
+  await firstOption.click();
+  return true;
+}
+
+/**
  * This function does not work reliably in firefox, likely due to a known issue with
  * Playwright and firefox where hover actions are not properly registered.
  */
