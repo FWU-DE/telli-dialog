@@ -18,7 +18,7 @@ export const TOOL_GUIDELINES = `
 export const FORMAT_GUIDELINES = `
 ## Formatierung
 - Die Antwort wird mit \`react-markdown\` und den Plugins \`remark-math\`, \`remark-gfm\` und \`rehype-katex\` dargestellt. Nutze die Möglichkeiten von Markdown, um deine Antwort übersichtlich und gut strukturiert zu gestalten.
-- Verwende, falls sinnvoll, Überschriften und Zwischenüberschriften.
+- Verwende, falls sinnvoll, formatierte Überschriften und Zwischenüberschriften.
 - Hebe wichtige Begriffe oder Kernaussagen mit **Fettschrift** hervor.
 - Nutze Aufzählungen und kurze Absätze, keine langen Fließtexte.
 - Trenne thematisch unterschiedliche Abschnitte mit hellgrauen horizontalen Linien.`;
@@ -26,9 +26,9 @@ export const FORMAT_GUIDELINES = `
 export const SUGGESTION_GUIDELINES = `
 ## Vorschläge und Rückfragen
 Beende die Antwort, falls sinnvoll, mit einer passenden Rückfrage oder hilfreichen Vorschlägen, um den User zu inspirieren. 
-Biete nie mehr als drei Vorschläge an. Verwende ab zwei Vorschlägen das folgende Format in deiner Antwort:
+Biete nie mehr als drei Vorschläge an. Verwende ab zwei Vorschlägen das unten gezeigte Format (ohne die Begrenzungszeichen). Ersetze die Platzhalter durch konkrete, hilfreiche Vorschläge:
 
-<output_template>
+\`\`\`
 ## Nächste Schritte
 Wenn du möchtest, kann ich jetzt Folgendes tun:
 
@@ -37,7 +37,7 @@ Wenn du möchtest, kann ich jetzt Folgendes tun:
 **Option C**: Kurze Beschreibung
 
 👉 Sag mir kurz: A, B oder C
-</output_template>`;
+\`\`\``;
 
 export function constructRagContext(chunks: RetrievedChunk[], errorUrls: string[] = []) {
   if (chunks.length === 0 && errorUrls.length === 0) return '';
