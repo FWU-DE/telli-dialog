@@ -62,6 +62,12 @@ function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
   return <div data-slot="card-content" className={cn('px-6', className)} {...props} />;
 }
 
+function CardRow({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div data-slot="card-row" className={cn('flex flex-row gap-6 px-6', className)} {...props} />
+  );
+}
+
 function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -72,4 +78,13 @@ function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-export { Card, CardHeader, CardFooter, CardTitle, CardAction, CardDescription, CardContent };
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardAction,
+  CardDescription,
+  CardContent,
+  CardRow,
+};

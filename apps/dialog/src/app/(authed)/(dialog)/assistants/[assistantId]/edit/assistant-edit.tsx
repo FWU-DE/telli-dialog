@@ -31,6 +31,7 @@ import {
   updateAssistantAction,
   uploadAvatarPictureForAssistantAction,
   getAvatarSignedUrl,
+  updateAssistantAccessLevelAction,
 } from '../../../custom/editor/[customGptId]/actions';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
@@ -43,6 +44,7 @@ import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-b
 import { useFormAutosave } from '@/hooks/use-form-autosave';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
 import { WebsearchSource } from '@shared/db/types';
+import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
@@ -59,6 +61,8 @@ const assistantFormValuesSchema = z.object({
       `Die Anweisungen dürfen maximal ${TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS} Zeichen lang sein.`,
     ),
   pictureId: z.string().optional(),
+  isSchoolShared: z.boolean(),
+  hasLinkAccess: z.boolean(),
 });
 type AssistantFormValues = z.infer<typeof assistantFormValuesSchema>;
 
@@ -82,6 +86,8 @@ export function AssistantEdit({
     description: assistant.description ?? '',
     instructions: assistant.instructions ?? '',
     pictureId: assistant.pictureId ?? undefined,
+    isSchoolShared: assistant.accessLevel === 'school',
+    hasLinkAccess: assistant.hasLinkAccess,
   };
 
   const {
@@ -111,6 +117,7 @@ export function AssistantEdit({
           description: data.description,
           instructions: data.instructions,
           pictureId: data.pictureId,
+          hasLinkAccess: data.hasLinkAccess,
         });
 
         return updateResult.success;
@@ -119,6 +126,9 @@ export function AssistantEdit({
 
   const name = useWatch({ control, name: 'name' });
   const onPictureIdChangeRef = useRef<(value: string) => void>(() => {});
+  const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
+  const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
+  const showShareInfo = isSchoolShared || hasLinkAccess;
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -187,6 +197,25 @@ export function AssistantEdit({
       croppedImageBlob,
     });
   }
+  const handleSharingChange = async () => {
+    const isSchoolShared = getValues('isSchoolShared');
+    const newAccessLevel = isSchoolShared ? 'school' : 'private';
+
+    if (newAccessLevel !== assistant.accessLevel) {
+      const result = await updateAssistantAccessLevelAction({
+        gptId: assistant.id,
+        accessLevel: newAccessLevel,
+      });
+
+      if (result.success) {
+        toast.success(t('toasts.edit-toast-success'));
+      } else {
+        toast.error(t('toasts.edit-toast-error'));
+      }
+    }
+
+    handleAutoSave();
+  };
 
   return (
     <CustomChatLayoutContainer>
@@ -221,7 +250,7 @@ export function AssistantEdit({
           hasSaveError={hasSaveError}
         />
       </div>
-      <CustomChatShareInfo href="#share-settings" />
+      {showShareInfo && <CustomChatShareInfo href="#share-settings" />}
       <CustomChatImageUpload
         avatarPictureUrl={avatarPictureUrl}
         onPictureUploadComplete={handlePictureUploadComplete}
@@ -329,7 +358,12 @@ export function AssistantEdit({
           onLinksChange={handleLinksChange}
         />
 
-        <div id="share-settings">Freigabe</div>
+        <CustomShareSection
+          control={control}
+          schoolSharingName="isSchoolShared"
+          linkSharingName="hasLinkAccess"
+          onShareChange={handleSharingChange}
+        />
       </form>
     </CustomChatLayoutContainer>
   );

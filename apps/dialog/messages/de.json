@@ -411,7 +411,9 @@
     "toasts": {
       "create-toast-error": "Der Assistent konnte nicht erstellt werden.",
       "delete-toast-success": "Der Assistent wurde erfolgreich gelöscht.",
-      "delete-toast-error": "Der Assistent konnte nicht gelöscht werden."
+      "delete-toast-error": "Der Assistent konnte nicht gelöscht werden.",
+      "edit-toast-success": "Der Assistent wurde erfolgreich aktualisiert.",
+      "edit-toast-error": "Etwas ist beim Aktualisieren des Assistenten schief gelaufen."
     }
   },
   "toasts": {
