@@ -36,8 +36,8 @@ export default async function Page(props: PageProps<'/custom'>) {
       userId: user.id,
       federalStateId: federalState.id,
     }).catch(handleErrorInServerComponent);
-    const customGpts = _customGpts.filter((c) => c.name !== '' && c.id !== HELP_MODE_ASSISTANT_ID);
-    const enrichedCustomGpts = await enrichAssistantsWithImage({ customGpts });
+    const assistants = _customGpts.filter((c) => c.name !== '' && c.id !== HELP_MODE_ASSISTANT_ID);
+    const enrichedCustomGpts = await enrichAssistantsWithImage({ assistants });
 
     return (
       <CustomGptOverview
