@@ -1,7 +1,6 @@
 'use server';
 
 import { requireAuth } from '@/auth/requireAuth';
-import { updateSession } from '@/auth/utils';
 import { VERSION } from '@/components/modals/const';
 import { runServerAction } from '@shared/actions/run-server-action';
 import deleteConversation, {
@@ -9,7 +8,7 @@ import deleteConversation, {
   updateConversationTitle,
 } from '@shared/conversation/conversation-service';
 import { dbGetRelatedFiles } from '@shared/db/functions/files';
-import { dbUpdateLastUsedModelByUserId, dbUpdateUserTermsVersion } from '@shared/db/functions/user';
+import { dbUpdateUserTermsVersion } from '@shared/db/functions/user';
 import { FileModel } from '@shared/db/schema';
 
 export async function deleteConversationAction({ conversationId }: { conversationId: string }) {
@@ -29,13 +28,6 @@ export async function updateConversationTitleAction({
   const { user } = await requireAuth();
 
   return runServerAction(updateConversationTitle)({ conversationId, name, userId: user.id });
-}
-
-export async function saveChatModelForUserAction(modelName: string) {
-  const { user } = await requireAuth();
-  await updateSession({
-    user: await dbUpdateLastUsedModelByUserId({ userId: user.id, modelName }),
-  });
 }
 
 export async function setUserAcceptConditions(): Promise<boolean> {

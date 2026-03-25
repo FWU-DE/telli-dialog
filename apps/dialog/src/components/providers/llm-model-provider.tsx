@@ -3,7 +3,6 @@
 import { LlmModelSelectModel } from '@shared/db/schema';
 import React, { useState } from 'react';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
-import { saveChatModelForUserAction } from '@/app/(authed)/(dialog)/actions';
 import { getFirstTextModel } from '@shared/llm-models/llm-model-service';
 
 type LlmModelsProviderProps = {
@@ -31,7 +30,13 @@ export function LlmModelsProvider({
 
   async function setSelectedModel(model: LlmModelSelectModel) {
     setSelectedModelState(model);
-    await saveChatModelForUserAction(model.name);
+    // Use a route handler instead of a Server Action to avoid Next.js automatically
+    // refreshing the router cache (which happens when a Server Action writes cookies).
+    await fetch('/api/user/model', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ modelName: model.name }),
+    });
   }
 
   return (
