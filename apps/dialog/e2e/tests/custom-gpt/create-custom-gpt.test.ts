@@ -131,9 +131,7 @@ test('data is autosaved on blur', async ({ page }) => {
   await submitButton.click();
 
   await page.waitForURL('/custom/**');
-  const child = page.getByRole('heading', { name: 'Autosave Test GPT' });
-  const item = page.locator('.cursor-pointer').filter({ has: child });
-  await item.locator('[aria-label="Bearbeiten"]').first().click();
+  await page.getByRole('button', { name: 'Autosave Test GPT' }).first().click();
   await page.waitForURL('/custom/editor/**');
   await waitForToastDisappear(page); // wait for success toast to disappear before continuing
 
