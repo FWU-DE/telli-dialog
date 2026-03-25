@@ -27,7 +27,7 @@ export default function CheckboxWithInfo<
   tooltip,
   disabled,
   onCheckedChange,
-  tooltipLabel = "Tooltip für Checkbox '" + label + "'",
+  tooltipLabel = `Tooltip für Checkbox '${label}'`,
 }: CheckboxWithInfoProps<TFieldValues, TName>) {
   return (
     <div className="flex items-center gap-1">
