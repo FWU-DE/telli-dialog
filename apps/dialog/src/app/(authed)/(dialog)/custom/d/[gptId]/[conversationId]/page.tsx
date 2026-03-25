@@ -45,7 +45,11 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversa
   const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
 
   return (
-    <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
+    <LlmModelsProvider
+      models={models}
+      defaultLlmModelByCookie={currentModel}
+      initialHasMessages={chatMessages.length > 0}
+    >
       <HeaderPortal>
         <ChatHeaderBar
           chatId={conversation.id}

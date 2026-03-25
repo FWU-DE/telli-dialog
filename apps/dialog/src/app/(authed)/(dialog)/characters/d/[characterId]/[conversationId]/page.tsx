@@ -68,7 +68,11 @@ export default async function Page(
   const avatarPictureUrl = await getAvatarPictureUrl(character.pictureId);
   const logoElement = <Logo federalStateId={federalState.id} />;
   return (
-    <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
+    <LlmModelsProvider
+      models={models}
+      defaultLlmModelByCookie={currentModel}
+      initialHasMessages={rawChatMessages.length > 0}
+    >
       <HeaderPortal>
         <ChatHeaderBar
           chatId={chat.id}

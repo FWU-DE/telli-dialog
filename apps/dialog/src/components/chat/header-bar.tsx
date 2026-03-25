@@ -8,11 +8,12 @@ import ProfileMenu, { ThreeDotsProfileMenu } from '../navigation/profile-menu';
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
 import useBreakpoints from '../hooks/use-breakpoints';
+import { useLlmModels } from '../providers/llm-model-provider';
 
 export function ChatHeaderBar({
   userAndContext,
   title,
-  hasMessages,
+  hasMessages: hasMessagesProp,
   chatId,
 }: {
   userAndContext: UserAndContext;
@@ -22,6 +23,9 @@ export function ChatHeaderBar({
 }) {
   const { isBelow } = useBreakpoints();
   const showCompressedHeader = isBelow[reductionBreakpoint];
+  const { hasMessages: hasMessagesFromContext } = useLlmModels();
+  // Either the server-provided prop or the client-side context (updated after first message sent)
+  const hasMessages = hasMessagesProp || hasMessagesFromContext;
   const isNewUiDesignEnabled = userAndContext.federalState.featureToggles.isNewUiDesignEnabled;
 
   return (

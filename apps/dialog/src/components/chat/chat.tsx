@@ -24,7 +24,6 @@ import { AssistantIcon } from './assistant-icon';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { getConversationPath } from '@/utils/chat/path';
 import { Messages, type PendingFileModel } from './messages';
-import { useRouter } from 'next/navigation';
 import { WebsearchSource } from '@shared/db/types';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
 
@@ -55,7 +54,7 @@ export default function Chat({
 }: ChatProps) {
   const tHelpMode = useTranslations('help-mode');
 
-  const { selectedModel } = useLlmModels();
+  const { selectedModel, setHasMessages } = useLlmModels();
   const conversationPath = getConversationPath({
     customGptId: assistant?.id,
     characterId: character?.id,
@@ -81,21 +80,10 @@ export default function Chat({
   // Ref to hold pending files that will be associated with the next user message
   const pendingFilesRef = React.useRef<PendingFileModel[]>([]);
 
-  // Router sync: We use window.history.replaceState() to update the URL immediately
-  // on first message (no reload). This bypasses Next.js router, so router.push('/')
-  // won't work until we sync. After streaming completes, we call router.replace()
-  // via state + useEffect to avoid "setState during render" errors & odd behavior when navigating.
+  // Tracks whether this is the first user message in the conversation (used to trigger
+  // URL update and sidebar refetch). For character chats with an initial assistant message,
+  // we check for the absence of any user messages rather than checking messages.length === 0.
   const isFirstMessageRef = React.useRef(false);
-  const [needsRouterSync, setNeedsRouterSync] = React.useState(false);
-  const router = useRouter();
-
-  // Sync Next.js router with the URL after first message completes (deferred to avoid setState during render)
-  useEffect(() => {
-    if (needsRouterSync) {
-      setNeedsRouterSync(false);
-      router.replace(conversationPath);
-    }
-  }, [needsRouterSync, conversationPath, router]);
 
   const {
     messages,
@@ -130,13 +118,9 @@ export default function Chat({
       // Trigger refetch of the fileMapping from the DB
       setCountOfFilesInChat(countOfFilesInChat + 1);
 
-      // Signal that we need to sync the router (done in useEffect to avoid setState during render)
+      // After the first message exchange: update the sidebar so it shows the generated title
       if (isFirstMessageRef.current) {
         isFirstMessageRef.current = false;
-        // Preserve scroll state across the remount caused by router.replace()
-        preserveScrollState();
-        setNeedsRouterSync(true);
-        // Refetch after first exchange so the sidebar shows the generated title
         refetchConversations();
         return;
       }
@@ -155,7 +139,7 @@ export default function Chat({
 
   const { error, handleError, resetError } = useCheckStatusCode();
 
-  const { scrollRef, reactivateAutoScrolling, preserveScrollState } = useAutoScroll([
+  const { scrollRef, reactivateAutoScrolling } = useAutoScroll([
     messages,
     status,
   ]);
@@ -201,12 +185,13 @@ export default function Chat({
       // Trigger refetch of the fileMapping from the DB
       setCountOfFilesInChat(countOfFilesInChat + 1);
 
-      // If this is the first user message, update navigation and refetch.
+      // If this is the first user message, update the URL and sidebar.
       // Check for user messages specifically, since character chats may have an
       // initial assistant message before any user message is sent.
       if (!messages.some((m) => m.role === 'user')) {
         navigateWithoutRefresh(conversationPath);
-        isFirstMessageRef.current = true; // Will sync router after request completes
+        isFirstMessageRef.current = true; // Will refetch sidebar after response completes
+        setHasMessages(true); // Enable download button immediately
         refetchConversations();
       }
 

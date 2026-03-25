@@ -8,6 +8,7 @@ import { getFirstTextModel } from '@shared/llm-models/llm-model-service';
 type LlmModelsProviderProps = {
   models: LlmModelSelectModel[];
   defaultLlmModelByCookie: string;
+  initialHasMessages?: boolean;
   children: React.ReactNode;
 };
 
@@ -15,6 +16,8 @@ type LlmModelsContextProps = {
   models: LlmModelSelectModel[];
   selectedModel: LlmModelSelectModel | undefined;
   setSelectedModel: (model: LlmModelSelectModel) => Promise<void>;
+  hasMessages: boolean;
+  setHasMessages: (value: boolean) => void;
 };
 
 const LlmModelsContext = React.createContext<LlmModelsContextProps | undefined>(undefined);
@@ -23,10 +26,12 @@ export function LlmModelsProvider({
   models,
   children,
   defaultLlmModelByCookie,
+  initialHasMessages = false,
 }: LlmModelsProviderProps) {
   const [selectedModel, setSelectedModelState] = useState<LlmModelSelectModel | undefined>(
     () => getSelectedModel({ models, defaultLlmModelByCookie }),
   );
+  const [hasMessages, setHasMessages] = useState(initialHasMessages);
 
   async function setSelectedModel(model: LlmModelSelectModel) {
     setSelectedModelState(model);
@@ -40,7 +45,9 @@ export function LlmModelsProvider({
   }
 
   return (
-    <LlmModelsContext.Provider value={{ models, selectedModel, setSelectedModel }}>
+    <LlmModelsContext.Provider
+      value={{ models, selectedModel, setSelectedModel, hasMessages, setHasMessages }}
+    >
       {children}
     </LlmModelsContext.Provider>
   );
