@@ -1,6 +1,6 @@
 'use client';
 
-import { HELP_MODE_GPT_ID } from '@shared/db/const';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { SidebarMenuButton, SidebarMenuItem, useSidebar } from '@telli/ui/components/Sidebar';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -18,7 +18,7 @@ export function AppMenuItem({ href, icon, text }: AppMenuItemProps) {
 
   const isActive = () => {
     // special case for help mode because it is also a custom gpt and starts with the same path
-    if (pathname.startsWith(`/custom/d/${HELP_MODE_GPT_ID}`)) return pathname === href;
+    if (pathname.startsWith(`/custom/d/${HELP_MODE_ASSISTANT_ID}`)) return pathname === href;
 
     return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
   };

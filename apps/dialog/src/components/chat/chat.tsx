@@ -4,7 +4,7 @@ import { useMainChat, type ChatMessage } from '@/hooks/use-chat-hooks';
 import React, { FormEvent, ReactNode, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
-import { type CharacterSelectModel, type CustomGptSelectModel, FileModel } from '@shared/db/schema';
+import { type CharacterSelectModel, type AssistantSelectModel, FileModel } from '@shared/db/schema';
 import PromptSuggestions from './prompt-suggestions';
 import MarkdownDisplay from './markdown-display';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
@@ -15,7 +15,7 @@ import { deepCopy } from '@/utils/object';
 import { getFileExtension, isImageFile } from '@/utils/files/generic';
 import { refetchFileMapping } from '@/app/(authed)/(dialog)/actions';
 import { InitialChatContentDisplay } from './initial-content-display';
-import { HELP_MODE_GPT_ID } from '@shared/db/const';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { ChatInputBox } from './chat-input-box';
 import { ErrorChatPlaceholder } from './error-chat-placeholder';
 import { logError, logDebug, logWarning } from '@shared/logging';
@@ -31,7 +31,7 @@ import { useCheckStatusCode } from '@/hooks/use-response-status';
 type ChatProps = {
   id: string;
   initialMessages: ChatMessage[];
-  customGpt?: CustomGptSelectModel;
+  assistant?: AssistantSelectModel;
   character?: CharacterSelectModel;
   imageSource?: string;
   promptSuggestions?: string[];
@@ -44,7 +44,7 @@ type ChatProps = {
 export default function Chat({
   id,
   initialMessages,
-  customGpt,
+  assistant,
   character,
   imageSource,
   promptSuggestions = [],
@@ -57,7 +57,7 @@ export default function Chat({
 
   const { selectedModel } = useLlmModels();
   const conversationPath = getConversationPath({
-    customGptId: customGpt?.id,
+    customGptId: assistant?.id,
     characterId: character?.id,
     conversationId: id,
   });
@@ -112,7 +112,7 @@ export default function Chat({
     initialMessages: initialMessages,
     modelId: selectedModel?.id,
     characterId: character?.id,
-    customGptId: customGpt?.id,
+    assistantId: assistant?.id,
     onMessageCreated: (messageId) => {
       // Associate pending files with the message ID immediately when the message is created
       const filesToAssociate = pendingFilesRef.current;
@@ -273,7 +273,7 @@ export default function Chat({
         description={character.description}
       />
     );
-  } else if (customGpt !== undefined && customGpt.id === HELP_MODE_GPT_ID) {
+  } else if (assistant !== undefined && assistant.id === HELP_MODE_ASSISTANT_ID) {
     placeholderElement = (
       <div className="flex flex-col items-center justify-center gap-6 h-full max-w-3xl mx-auto p-4">
         <div className="pb-4">
@@ -288,12 +288,12 @@ export default function Chat({
         <span className="text-base font-normal">{tHelpMode('chat-placeholder')}</span>
       </div>
     );
-  } else if (customGpt !== undefined) {
+  } else if (assistant !== undefined) {
     placeholderElement = (
       <InitialChatContentDisplay
-        title={customGpt.name}
+        title={assistant.name}
         imageSource={imageSource}
-        description={customGpt.description ?? undefined}
+        description={assistant.description ?? undefined}
       />
     );
   } else {
@@ -303,8 +303,8 @@ export default function Chat({
   }
 
   const assistantIcon = AssistantIcon({
-    customGptId: customGpt?.id,
-    imageName: character?.name ?? customGpt?.name,
+    customGptId: assistant?.id,
+    imageName: character?.name ?? assistant?.name,
     imageSource,
   });
 

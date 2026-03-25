@@ -148,12 +148,17 @@ export async function getChatTitle({
       [
         {
           role: 'system',
-          content: `Du erstellst einen kurzen Titel basierend auf der ersten Nachricht eines Nutzers
+          content: `Erstelle einen kurzen Titel basierend auf der Nachricht eines Nutzers
   
-Regeln:
-1. Der Titel sollte eine Zusammenfassung der Nachricht sein
-2. Verwende keine Anführungszeichen oder Doppelpunkte
-3. Der Titel sollte nicht länger als 80 Zeichen sein
+## Regeln
+- Der Titel soll das zentrale Thema der Nachricht erfassen und Interesse wecken, damit der Nutzer die Konversation später leicht wiederfinden kann.
+- Verwende keine Anführungszeichen oder Doppelpunkte.
+- Verwende keine Emojis oder Sonderzeichen.
+- Verwende reinen Text ohne Formatierungen.
+- Der Titel sollte nicht länger als 50 Zeichen sein.
+- Antworte nur mit dem Titel, ohne weitere Erklärungen oder Einleitungen.
+- Antworte nicht auf die Nachricht des Nutzers, sondern generiere ausschließlich einen passenden Titel dafür.
+- Wenn die Nachricht des Nutzers kein klares Thema hat, generiere einen allgemeinen Titel wie "Neue Konversation".
 `,
         },
         {

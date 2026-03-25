@@ -5,8 +5,8 @@ import {
   CharacterFileMapping,
   characterTable,
   chunkTable,
-  CustomGptFileMapping,
-  customGptTable,
+  AssistantFileMapping,
+  assistantTable,
   fileTable,
   LearningScenarioFileMapping,
   learningScenarioTable,
@@ -48,7 +48,7 @@ test.describe('cleanup', () => {
     await db.transaction(async (tx) => {
       await tx.delete(learningScenarioTable).where(eq(learningScenarioTable.userId, userId));
       await tx.delete(characterTable).where(eq(characterTable.userId, userId));
-      await tx.delete(customGptTable).where(eq(customGptTable.userId, userId));
+      await tx.delete(assistantTable).where(eq(assistantTable.userId, userId));
       await tx.delete(userTable).where(eq(userTable.id, userId));
     });
   });
@@ -117,12 +117,12 @@ test.describe('cleanup', () => {
     expect(resultExisting).toHaveLength(1);
   });
 
-  test('should delete custom GPTs', async ({ request }) => {
-    const oldCustomGpt = await createCustomGpt({
+  test('should delete assistants', async ({ request }) => {
+    const oldAssistant = await createAssistant({
       userId,
       createdAt: new Date(2025, 0, 1),
     });
-    const newCustomGpt = await createCustomGpt({
+    const newAssistant = await createAssistant({
       userId,
       createdAt: new Date(),
     });
@@ -132,18 +132,18 @@ test.describe('cleanup', () => {
 
     expect(response.ok()).toBeTruthy();
     const json = await response.json();
-    expect(json.deletedCustomGpts).toBeGreaterThanOrEqual(1);
+    expect(json.deletedAssistants).toBeGreaterThanOrEqual(1);
 
     const resultDeleted = await db
       .select()
-      .from(customGptTable)
-      .where(eq(customGptTable.id, oldCustomGpt.id));
+      .from(assistantTable)
+      .where(eq(assistantTable.id, oldAssistant.id));
     expect(resultDeleted).toHaveLength(0);
 
     const resultExisting = await db
       .select()
-      .from(customGptTable)
-      .where(eq(customGptTable.id, newCustomGpt.id));
+      .from(assistantTable)
+      .where(eq(assistantTable.id, newAssistant.id));
     expect(resultExisting).toHaveLength(1);
   });
 
@@ -223,10 +223,10 @@ async function createCharacter(data?: Partial<z.infer<typeof characterInsertSche
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const customGptInsertSchema = createInsertSchema(customGptTable).omit({ accessLevel: true });
-async function createCustomGpt(data?: Partial<z.infer<typeof customGptInsertSchema>>) {
-  const [customGpt] = await db
-    .insert(customGptTable)
+const assistantInsertSchema = createInsertSchema(assistantTable).omit({ accessLevel: true });
+async function createAssistant(data?: Partial<z.infer<typeof assistantInsertSchema>>) {
+  const [assistant] = await db
+    .insert(assistantTable)
     .values({
       name: '',
       systemPrompt: '',
@@ -234,14 +234,14 @@ async function createCustomGpt(data?: Partial<z.infer<typeof customGptInsertSche
       ...data,
     })
     .returning();
-  if (!customGpt) {
-    throw Error('failed to create custom GPT');
+  if (!assistant) {
+    throw Error('failed to create assistant');
   }
 
   const fileId = await createFile();
-  await db.insert(CustomGptFileMapping).values({ customGptId: customGpt.id, fileId });
+  await db.insert(AssistantFileMapping).values({ assistantId: assistant.id, fileId });
 
-  return customGpt;
+  return assistant;
 }
 
 async function createFile() {

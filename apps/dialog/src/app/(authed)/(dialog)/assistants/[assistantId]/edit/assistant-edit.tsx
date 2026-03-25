@@ -2,7 +2,7 @@
 
 import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CustomGptSelectModel, FileModel } from '@shared/db/schema';
+import { AssistantSelectModel, FileModel } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/Card';
 import { Field, FieldLabel, FieldError, FieldGroup } from '@ui/components/Field';
@@ -17,17 +17,15 @@ import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
 import { useRouter } from 'next/navigation';
 import {
-  createNewCustomGptAction,
+  createNewAssistantAction,
   deleteFileMappingAndEntityAction,
-  linkFileToCustomGptAction,
+  linkFileToAssistantAction,
 } from '../../../custom/actions';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import {
-  deleteCustomGptAction,
-  updateCustomGptAction,
-  updateCustomGptPictureAction,
-  uploadAvatarPictureForCustomGptAction,
+  deleteAssistantAction,
+  updateAssistantAction,
 } from '../../../custom/editor/[customGptId]/actions';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
@@ -58,7 +56,7 @@ export function AssistantEdit({
   initialLinks,
   avatarPictureUrl,
 }: {
-  assistant: CustomGptSelectModel;
+  assistant: AssistantSelectModel;
   relatedFiles: FileModel[];
   initialLinks: WebsearchSource[];
   avatarPictureUrl?: string;
@@ -93,7 +91,7 @@ export function AssistantEdit({
       },
       validate: trigger,
       saveValues: async (data) => {
-        const updateResult = await updateCustomGptAction({
+        const updateResult = await updateAssistantAction({
           gptId: assistant.id,
           name: data.name,
           description: data.description,
@@ -119,7 +117,7 @@ export function AssistantEdit({
   });
 
   const handleDuplicateAssistant = async () => {
-    const createResult = await createNewCustomGptAction({});
+    const createResult = await createNewAssistantAction({});
     if (createResult.success) {
       guardNavigation(() => {
         router.push(`/assistants/${createResult.value.id}/edit`);
@@ -130,7 +128,7 @@ export function AssistantEdit({
   };
 
   const handleDeleteAssistant = async () => {
-    const deleteResult = await deleteCustomGptAction({ gptId: assistant.id });
+    const deleteResult = await deleteAssistantAction({ gptId: assistant.id });
     if (deleteResult.success) {
       toast.success(t('assistant.toasts.delete-toast-success'));
     }
@@ -144,9 +142,9 @@ export function AssistantEdit({
 
   const handleFileUploaded = async (data: { id: string; name: string; file: File }) => {
     // after a file is uploaded, we need to link it to the assistant
-    const linkResult = await linkFileToCustomGptAction({
+    const linkResult = await linkFileToAssistantAction({
       fileId: data.id,
-      customGptId: assistant.id,
+      assistantId: assistant.id,
     });
 
     if (!linkResult.success) {
@@ -155,11 +153,11 @@ export function AssistantEdit({
   };
 
   const handleDeleteFile = async (fileId: string) => {
-    return await deleteFileMappingAndEntityAction({ customGptId: assistant.id, fileId });
+    return await deleteFileMappingAndEntityAction({ assistantId: assistant.id, fileId });
   };
 
   const handleLinksChange = async (links: string[]) => {
-    return await updateCustomGptAction({ gptId: assistant.id, attachedLinks: links });
+    return await updateAssistantAction({ gptId: assistant.id, attachedLinks: links });
   };
 
   function handlePictureUploadComplete(picturePath: string) {
