@@ -7,7 +7,7 @@ import { AssistantEdit } from './assistant-edit';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Page(props: PageProps<'/assistants/[assistantId]/edit'>) {
+export default async function Page(props: PageProps<'/assistants/editor/[assistantId]'>) {
   const { assistantId } = await props.params;
   const { user, school, federalState } = await requireAuth();
 
