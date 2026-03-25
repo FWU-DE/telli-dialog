@@ -1,9 +1,127 @@
-import { Card } from '@ui/components/Card';
+import { Card, CardContent } from '@ui/components/Card';
+import { EmptyImageIcon } from '../icons/empty-image';
+import { ServerActionResult } from '@shared/actions/server-action-result';
+import { useTranslations } from 'next-intl';
+import React from 'react';
+import { useToast } from '../common/toast';
+import { Input } from '@ui/components/Input';
+import { buttonPrimaryClassName } from '@/utils/tailwind/button';
+import { cn } from '@/utils/tailwind';
+import { UploadIcon } from '@phosphor-icons/react';
+import { Button } from '@ui/components/Button';
+import AvatarCropModal from './custom-chat-avatar-crop-modal';
+import Image from 'next/image';
 
-export function CustomChatImageUpload() {
+export function CustomChatImageUpload({
+  avatarPictureUrl,
+  onPictureUploadComplete,
+  onUploadPicture,
+  onGetSignedUrl,
+}: {
+  avatarPictureUrl?: string;
+  onPictureUploadComplete: (picturePath: string) => Promise<void>;
+  onUploadPicture: (croppedImageBlob: Blob) => Promise<ServerActionResult<string>>;
+  onGetSignedUrl?: (key: string) => Promise<string | undefined>;
+}) {
+  const [file, setFile] = React.useState<File | null>(null);
+  const [imageSource, setImageSource] = React.useState<string | null>(null);
+  const [showCropModal, setShowCropModal] = React.useState<boolean>(false);
+  const [displayedAvatarUrl, setDisplayedAvatarUrl] = React.useState<string | undefined>(
+    avatarPictureUrl,
+  );
+
+  const toast = useToast();
+  const t = useTranslations('custom-chat.image');
+  const tFileInteraction = useTranslations('file-interaction');
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  function handleButtonClick() {
+    fileInputRef.current?.click();
+  }
+
+  async function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const files = event.target.files;
+    if (files === null) return;
+    const firstFile = files[0];
+    if (!firstFile) return;
+    setFile(firstFile);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageSource(reader.result as string);
+      setShowCropModal(true);
+    };
+    reader.readAsDataURL(firstFile);
+    event.target.value = '';
+  }
+
+  async function handleCroppedImage(croppedBlob: Blob) {
+    if (!croppedBlob || !file) return;
+
+    const result = await onUploadPicture(croppedBlob);
+
+    if (result.success && result.value) {
+      await onPictureUploadComplete(result.value);
+      if (onGetSignedUrl) {
+        const signedUrl = await onGetSignedUrl(result.value);
+        if (signedUrl) {
+          setDisplayedAvatarUrl(signedUrl);
+        }
+      }
+      setShowCropModal(false);
+    } else {
+      toast.error(tFileInteraction('toasts.upload-error'));
+      setShowCropModal(false);
+    }
+    setFile(null);
+    setImageSource(null);
+  }
+
   return (
-    <Card className="h-50 flex justify-center items-center">
-      <p>Platzhalter für Image Preview und Upload</p>
+    <Card className="h-50 justify-center items-center">
+      <CardContent className="flex items-center gap-4">
+        <div className="relative w-35 h-35 justify-center items-center flex">
+          {displayedAvatarUrl ? (
+            <Image
+              src={displayedAvatarUrl}
+              fill
+              unoptimized
+              alt={'profile-picture'}
+              className="rounded-full object-contain"
+            />
+          ) : (
+            <EmptyImageIcon className="relative -left-1 -top-1 w-15 h-15" />
+          )}
+        </div>
+        <div className="flex flex-col gap-2">
+          <Input
+            type="file"
+            accept="image/jpeg, image/png, image/webp"
+            className="hidden"
+            onChange={handleImageUpload}
+            ref={fileInputRef}
+          />
+          <Button type="button" onClick={handleButtonClick} className={cn(buttonPrimaryClassName)}>
+            <UploadIcon weight="regular" />
+            {t('upload-image')}
+          </Button>
+        </div>
+      </CardContent>
+      {showCropModal && imageSource && (
+        <AvatarCropModal
+          imageSrc={imageSource}
+          aspect={1}
+          circularCrop
+          onClose={() => {
+            setShowCropModal(false);
+            setFile(null);
+            setImageSource(null);
+          }}
+          onCropComplete={handleCroppedImage}
+          compressionOptions={{ maxHeight: 800 }}
+        />
+      )}
     </Card>
   );
 }

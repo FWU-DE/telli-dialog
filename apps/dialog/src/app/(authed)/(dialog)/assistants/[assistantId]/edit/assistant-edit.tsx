@@ -1,6 +1,9 @@
 'use client';
 
-import { TEXT_INPUT_FIELDS_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
+import {
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
+} from '@/configuration-text-inputs/const';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AssistantSelectModel, FileModel } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
@@ -26,13 +29,15 @@ import { useTranslations } from 'next-intl';
 import {
   deleteAssistantAction,
   updateAssistantAction,
+  uploadAvatarPictureForAssistantAction,
+  getAvatarSignedUrl,
 } from '../../../custom/editor/[customGptId]/actions';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
 import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
 import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
 import { Textarea } from '@ui/components/Textarea';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
@@ -47,6 +52,13 @@ const assistantFormValuesSchema = z.object({
       TEXT_INPUT_FIELDS_LENGTH_LIMIT,
       `Die Beschreibung darf maximal ${TEXT_INPUT_FIELDS_LENGTH_LIMIT} Zeichen lang sein.`,
     ),
+  instructions: z
+    .string()
+    .max(
+      TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
+      `Die Anweisungen dürfen maximal ${TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS} Zeichen lang sein.`,
+    ),
+  pictureId: z.string().optional(),
 });
 type AssistantFormValues = z.infer<typeof assistantFormValuesSchema>;
 
@@ -54,18 +66,22 @@ export function AssistantEdit({
   assistant,
   relatedFiles,
   initialLinks,
+  avatarPictureUrl,
 }: {
   assistant: AssistantSelectModel;
   relatedFiles: FileModel[];
   initialLinks: WebsearchSource[];
+  avatarPictureUrl?: string;
 }) {
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
   const toast = useToast();
-  const t = useTranslations('custom-gpt');
+  const t = useTranslations('assistant');
   const initialValues: AssistantFormValues = {
     name: assistant.name,
     description: assistant.description ?? '',
+    instructions: assistant.instructions ?? '',
+    pictureId: assistant.pictureId ?? undefined,
   };
 
   const {
@@ -93,6 +109,8 @@ export function AssistantEdit({
           gptId: assistant.id,
           name: data.name,
           description: data.description,
+          instructions: data.instructions,
+          pictureId: data.pictureId,
         });
 
         return updateResult.success;
@@ -100,6 +118,7 @@ export function AssistantEdit({
     });
 
   const name = useWatch({ control, name: 'name' });
+  const onPictureIdChangeRef = useRef<(value: string) => void>(() => {});
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -158,6 +177,17 @@ export function AssistantEdit({
     return await updateAssistantAction({ gptId: assistant.id, attachedLinks: links });
   };
 
+  async function handlePictureUploadComplete(pictureId: string) {
+    onPictureIdChangeRef.current(pictureId);
+  }
+
+  async function handleUploadPicture(croppedImageBlob: Blob) {
+    return await uploadAvatarPictureForAssistantAction({
+      assistantId: assistant.id,
+      croppedImageBlob,
+    });
+  }
+
   return (
     <CustomChatLayoutContainer>
       {/* // Todo: Maybe we have to remember where we come from and which filters were set */}
@@ -192,7 +222,12 @@ export function AssistantEdit({
         />
       </div>
       <CustomChatShareInfo href="#share-settings" />
-      <CustomChatImageUpload />
+      <CustomChatImageUpload
+        avatarPictureUrl={avatarPictureUrl}
+        onPictureUploadComplete={handlePictureUploadComplete}
+        onUploadPicture={handleUploadPicture}
+        onGetSignedUrl={getAvatarSignedUrl}
+      />
 
       <form
         id="assistant-edit-form"
@@ -204,6 +239,18 @@ export function AssistantEdit({
         <Card>
           <CardContent>
             <FieldGroup>
+              <Controller
+                name="pictureId"
+                control={control}
+                render={({ field }) => {
+                  onPictureIdChangeRef.current = (value: string) => {
+                    field.onChange(value);
+                    handleAutoSave();
+                  };
+
+                  return <Input {...field} type="hidden" value={field.value ?? ''} />;
+                }}
+              />
               <Controller
                 name="name"
                 control={control}
@@ -238,6 +285,28 @@ export function AssistantEdit({
                       className="h-27 resize-none"
                       aria-invalid={fieldState.invalid}
                       placeholder="Beschreibung des Assistenten"
+                      autoComplete="off"
+                      onBlur={() => {
+                        field.onBlur();
+                        handleAutoSave();
+                      }}
+                    />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="instructions"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Anweisungen</FieldLabel>
+                    <Textarea
+                      {...field}
+                      id="field.instructions"
+                      className="h-125 resize-none"
+                      aria-invalid={fieldState.invalid}
+                      placeholder="Anweisungen für den Assistenten"
                       autoComplete="off"
                       onBlur={() => {
                         field.onBlur();
