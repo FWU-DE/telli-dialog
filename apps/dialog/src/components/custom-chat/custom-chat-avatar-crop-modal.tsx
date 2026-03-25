@@ -3,7 +3,6 @@
 import React from 'react';
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
-import { buttonPrimaryClassName, buttonSecondaryClassName } from '@/utils/tailwind/button';
 import Image from 'next/image';
 import { CompressionOptions, getCroppedImageBlob } from '@/utils/files/image-utils';
 import { logError } from '@shared/logging';
@@ -91,8 +90,6 @@ export default function AvatarCropModal({
           <CardTitle>{tCustomChatImage('crop-image')}</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* <div className="border-2 bg-card py-4 flex flex-col gap-3 px-6 max-w-full max-h-full overflow-auto rounded-lg">
-            <h1 className="font-medium my-4">{tCustomChatImage('crop-image')}</h1> */}
           <ReactCrop
             crop={crop}
             onChange={onChange}
@@ -114,14 +111,13 @@ export default function AvatarCropModal({
             />
           </ReactCrop>
           <div className="flex justify-end gap-2 mt-4">
-            <Button onClick={onClose} type="button" className={buttonSecondaryClassName}>
+            <Button onClick={onClose} type="button" variant="outline">
               {tCommon('cancel')}
             </Button>
-            <Button className={buttonPrimaryClassName} onClick={handleCropConfirm} type="button">
+            <Button onClick={handleCropConfirm} type="button">
               {tCustomChatImage('upload-image')}
             </Button>
           </div>
-          {/* </div> */}
         </CardContent>
       </Card>
     </div>
