@@ -7,6 +7,7 @@ import { cn } from '@/utils/tailwind';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { Badge } from '../common/badge';
+import { navigateWithoutRefresh } from '@/utils/navigation/router';
 
 type ModelSelectProps = {
   models: LlmModelSelectModel[];
@@ -44,7 +45,7 @@ export default function ModelSelect({
     if (enableUrlParams) {
       const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.set('model', model.name);
-      window.history.replaceState(null, '', `${pathname}?${newSearchParams.toString()}`);
+      navigateWithoutRefresh(`${pathname}?${newSearchParams.toString()}`);
     }
   }
 
