@@ -1,6 +1,8 @@
 'use client';
 
 import {
+  EXAMPLE_PROMPT_LENGTH_LIMIT,
+  NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
@@ -10,7 +12,7 @@ import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/Card';
 import { Field, FieldLabel, FieldError, FieldGroup } from '@ui/components/Field';
 import { Input } from '@ui/components/Input';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import z from 'zod';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
@@ -45,6 +47,10 @@ import { useFormAutosave } from '@/hooks/use-form-autosave';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
 import { WebsearchSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
+import { PlusIcon, TrashSimpleIcon } from '@phosphor-icons/react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/Tooltip';
+import { iconClassName } from '@/utils/tailwind/icon';
+import { cn } from '@/utils/tailwind';
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
@@ -63,6 +69,16 @@ const assistantFormValuesSchema = z.object({
   pictureId: z.string().optional(),
   isSchoolShared: z.boolean(),
   hasLinkAccess: z.boolean(),
+  promptSuggestions: z.array(
+    z.object({
+      value: z
+        .string()
+        .max(
+          EXAMPLE_PROMPT_LENGTH_LIMIT,
+          `Ein Promptvorschlag darf maximal ${EXAMPLE_PROMPT_LENGTH_LIMIT} Zeichen lang sein.`,
+        ),
+    }),
+  ),
 });
 type AssistantFormValues = z.infer<typeof assistantFormValuesSchema>;
 
@@ -88,6 +104,10 @@ export function AssistantEdit({
     pictureId: assistant.pictureId ?? undefined,
     isSchoolShared: assistant.accessLevel === 'school',
     hasLinkAccess: assistant.hasLinkAccess,
+    promptSuggestions:
+      assistant.promptSuggestions && assistant.promptSuggestions.length > 0
+        ? assistant.promptSuggestions.map((s) => ({ value: s }))
+        : [{ value: '' }],
   };
 
   const {
@@ -99,6 +119,14 @@ export function AssistantEdit({
   } = useForm<AssistantFormValues>({
     resolver: zodResolver(assistantFormValuesSchema),
     defaultValues: initialValues,
+  });
+  const {
+    fields: promptSuggestionFields,
+    append: appendPromptSuggestion,
+    remove: removePromptSuggestion,
+  } = useFieldArray({
+    control,
+    name: 'promptSuggestions',
   });
 
   const { isSaving, hasSaveError, flushAutoSave, handleAutoSave } =
@@ -118,6 +146,9 @@ export function AssistantEdit({
           instructions: data.instructions,
           pictureId: data.pictureId,
           hasLinkAccess: data.hasLinkAccess,
+          promptSuggestions: data.promptSuggestions
+            .map((suggestion) => suggestion.value.trim())
+            .filter((suggestion) => suggestion.length > 0),
         });
 
         return updateResult.success;
@@ -125,6 +156,8 @@ export function AssistantEdit({
     });
 
   const name = useWatch({ control, name: 'name' });
+  const promptSuggestions = useWatch({ control, name: 'promptSuggestions' });
+  const lastPromptSuggestionValue = promptSuggestions[promptSuggestions.length - 1]?.value ?? '';
   const onPictureIdChangeRef = useRef<(value: string) => void>(() => {});
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
@@ -346,6 +379,94 @@ export function AssistantEdit({
                   </Field>
                 )}
               />
+              {promptSuggestionFields.map((fieldItem, index) => {
+                const isLastItem = index === promptSuggestionFields.length - 1;
+                const hasReachedPromptSuggestionsLimit =
+                  promptSuggestionFields.length >= NUMBER_OF_EXAMPLE_PROMPTS_LIMIT;
+
+                return (
+                  <Field key={fieldItem.id}>
+                    <FieldLabel htmlFor={`promptSuggestions.${index}.value`}>
+                      {`Promptvorschlag ${index + 1}`}
+                    </FieldLabel>
+                    <div className="flex items-center gap-3">
+                      <Controller
+                        name={`promptSuggestions.${index}.value`}
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <div className="w-full">
+                            <Input
+                              {...field}
+                              id={`promptSuggestions.${index}.value`}
+                              aria-invalid={fieldState.invalid}
+                              maxLength={EXAMPLE_PROMPT_LENGTH_LIMIT}
+                              placeholder={t('prompt-suggestion')}
+                              autoComplete="off"
+                              onBlur={() => {
+                                field.onBlur();
+                                handleAutoSave();
+                              }}
+                            />
+                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                          </div>
+                        )}
+                      />
+
+                      {isLastItem ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild aria-label="Tooltip">
+                            <span>
+                              <button
+                                type="button"
+                                className={cn(
+                                  'flex items-center justify-center size-9 disabled:hover:bg-transparent disabled:hover:text-gray-400',
+                                  iconClassName,
+                                )}
+                                disabled={
+                                  hasReachedPromptSuggestionsLimit ||
+                                  lastPromptSuggestionValue.trim() === ''
+                                }
+                                onClick={() => {
+                                  appendPromptSuggestion({ value: '' });
+                                }}
+                              >
+                                <PlusIcon className="size-5" />
+                              </button>
+                            </span>
+                          </TooltipTrigger>
+                          {hasReachedPromptSuggestionsLimit && (
+                            <TooltipContent>
+                              <p>
+                                {t('prompt-suggestions-max-tooltip', {
+                                  max: NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
+                                })}
+                              </p>
+                            </TooltipContent>
+                          )}
+                          {!hasReachedPromptSuggestionsLimit &&
+                            lastPromptSuggestionValue.trim() === '' && (
+                              <TooltipContent>
+                                <p>{t('prompt-suggestions-empty-tooltip')}</p>
+                              </TooltipContent>
+                            )}
+                        </Tooltip>
+                      ) : (
+                        <button
+                          type="button"
+                          className={cn('flex items-center justify-center size-9', iconClassName)}
+                          aria-label={t('prompt-suggestions-delete-button', { index: index + 1 })}
+                          onClick={() => {
+                            removePromptSuggestion(index);
+                            handleAutoSave();
+                          }}
+                        >
+                          <TrashSimpleIcon className="size-5 " />
+                        </button>
+                      )}
+                    </div>
+                  </Field>
+                );
+              })}
             </FieldGroup>
           </CardContent>
         </Card>

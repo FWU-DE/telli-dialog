@@ -408,6 +408,11 @@
     }
   },
   "assistant": {
+    "prompt-suggestion": "Promptvorschlag",
+    "prompt-suggestions-add-button": "Promptvorschlag hinzufügen",
+    "prompt-suggestions-delete-button": "Promptvorschlag {index} löschen",
+    "prompt-suggestions-max-tooltip": "Es können maximal {max} Vorschläge hinzugefügt werden",
+    "prompt-suggestions-empty-tooltip": "Bitte füllen Sie den aktuellen Vorschlag aus, bevor Sie einen weiteren hinzufügen.",
     "toasts": {
       "create-toast-error": "Der Assistent konnte nicht erstellt werden.",
       "delete-toast-success": "Der Assistent wurde erfolgreich gelöscht.",
