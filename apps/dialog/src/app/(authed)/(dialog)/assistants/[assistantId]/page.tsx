@@ -3,6 +3,7 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { getAssistantForEditView } from '@shared/assistants/assistant-service';
 import { notFound } from 'next/navigation';
 import { AssistantView } from './assistant-view';
+import { getAvatarPictureUrl } from '@shared/files/fileService';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,11 +16,14 @@ export default async function Page(props: PageProps<'/assistants/[assistantId]'>
     notFound();
   }
 
+  // Todo: getAssistantForReadOnlyView
   const assistant = await getAssistantForEditView({
     assistantId: assistantId,
     schoolId: school.id,
     userId: user.id,
   }).catch(handleErrorInServerComponent);
 
-  return <AssistantView assistant={assistant}></AssistantView>;
+  const pictureUrl = await getAvatarPictureUrl(assistant.pictureId);
+
+  return <AssistantView assistant={assistant} pictureUrl={pictureUrl} />;
 }
