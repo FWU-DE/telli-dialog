@@ -1,49 +1,318 @@
+name: telli-local
+
 services:
-  telli_dialog_db:
+  # Keycloak for authentication (PRIMARY NETWORK HOST)
+  # telli containers share this network namespace via network_mode: "service:keycloak"
+  # This is required to access keycloak using the same URL from within the container and the browser
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.5.6
+    restart: unless-stopped
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      CLIENT_NAME: telli-dev-client
+      CLIENT_SECRET: ClientSecret
+    entrypoint: /opt/keycloak/data/import/entrypoint.sh
+    volumes:
+      - keycloak_data:/opt/keycloak/data/h2
+      - ./keycloak:/opt/keycloak/data/import
+    ports:
+      - '3000:3000' # telli-dialog
+      - '3001:3001' # telli-admin
+      - '3002:3002' # telli-api
+      - '8080:8080' # keycloak
+    depends_on:
+      fix-keycloak-volume-ownership:
+        condition: service_completed_successfully
+
+  # Fix keycloak volume permissions (runs with uid 1000)
+  fix-keycloak-volume-ownership:
+    image: alpine
+    restart: no
+    entrypoint: /bin/sh -c "chown 1000 /keycloak"
+    volumes:
+      - keycloak_data:/keycloak
+
+  # PostgreSQL database with pgvector extension
+  # Creates both telli_dialog_db (default) and telli_api_db
+  postgres:
     image: pgvector/pgvector:pg16
-    container_name: telli_dialog_db
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_DB: telli_dialog_db
-      POSTGRES_USER: telli_dialog_db
+      POSTGRES_USER: telli
       POSTGRES_PASSWORD: test1234
     volumes:
-      - postgres_data_telli_dialog:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres:/docker-entrypoint-initdb.d:ro
     ports:
       - '5432:5432'
-    networks:
-      - postgres_network
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U telli_dialog_db -d telli_dialog_db']
+      test: ['CMD-SHELL', 'pg_isready -U telli -d telli_dialog_db']
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
 
-  telli_dialog_app:
-    build:
-      context: ../../
-      dockerfile: Dockerfile
-    container_name: telli_dialog_app
-    restart: always
-    env_file:
-      - ../../.env
-    environment:
-      DATABASE_URL: postgresql://telli_dialog_db:test1234@telli_dialog_db:5432/telli_dialog_db
-    depends_on:
-      telli_dialog_db:
-        condition: service_healthy
+  # Valkey (Redis-compatible) for session storage
+  valkey:
+    image: ghcr.io/valkey-io/valkey:8
+    restart: unless-stopped
+    volumes:
+      - valkey_data:/data
     ports:
-      - '3000:3000'
-    networks:
-      - postgres_network
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'valkey-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-networks:
-  postgres_network:
-    driver: bridge
+  # RabbitMQ for async messaging and reporting
+  rabbitmq:
+    image: rabbitmq:4-management
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', 'ping']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Crawl4AI for web scraping capabilities
+  crawl4ai:
+    image: unclecode/crawl4ai:0.8.0
+    restart: unless-stopped
+    ports:
+      - '11235:11235'
+    deploy:
+      resources:
+        limits:
+          memory: '2gb'
+        reservations:
+          memory: '1gb'
+    shm_size: '2gb'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://127.0.0.1:11235/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # RustFS - S3-compatible object storage
+  rustfs:
+    image: rustfs/rustfs:latest
+    restart: unless-stopped
+    environment:
+      RUSTFS_ADDRESS: 0.0.0.0:9000
+      RUSTFS_CONSOLE_ADDRESS: 0.0.0.0:9001
+      RUSTFS_CONSOLE_ENABLE: 'true'
+      RUSTFS_ACCESS_KEY: rustfsadmin
+      RUSTFS_SECRET_KEY: rustfsadmin123
+      RUSTFS_VOLUMES: /data
+    volumes:
+      - rustfs_data:/data
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://127.0.0.1:9000/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Telli API - OpenAI compatible API service
+  telli-api:
+    image: ghcr.io/fwu-de/telli-api:latest
+    restart: unless-stopped
+    environment:
+      # Database
+      DATABASE_URL: postgresql://telli:test1234@postgres:5432/telli_api_db
+
+      # API Configuration
+      API_BASE_URL: http://localhost:3002
+      API_NAME: telli
+      API_KEY: telli-api_api-key
+      PORT: 3002
+
+      # Logging
+      LOG_LEVEL: info
+
+      # LLM Provider Credentials (placeholders - configure via admin UI after setup)
+      LLM_IONOS_API_KEY: API_KEY_PLACEHOLDER
+      LLM_IONOS_BASE_URL: PLACEHOLDER_BASE_URL
+      LLM_GPT4OMINI_API_KEY: API_KEY_PLACEHOLDER
+      LLM_GPT4OMINI_BASE_URL: PLACEHOLDER_BASE_URL
+      LLM_GPT5NANO_API_KEY: API_KEY_PLACEHOLDER
+      LLM_GPT5NANO_BASE_URL: PLACEHOLDER_BASE_URL
+    network_mode: service:keycloak
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+
+  # Telli Dialog - Main user-facing application
+  telli-dialog:
+    image: ghcr.io/fwu-de/telli-dialog:latest
+    restart: unless-stopped
+    environment:
+      # Application
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+      API_KEY: telli-dialog_api-key
+      NODE_ENV: development
+
+      # Authentication
+      # IMPORTANT: Change AUTH_SECRET in production! Generate with: openssl rand -base64 32
+      AUTH_SECRET: telli-default-secret-please-change-in-production-use-openssl-rand-base64-32
+      NEXTAUTH_URL: http://localhost:3000
+
+      # Keycloak
+      VIDIS_CLIENT_ID: telli-dev-client
+      VIDIS_CLIENT_SECRET: ClientSecret
+      VIDIS_BASE_URI: http://localhost:8080/realms/telli-local
+      VIDIS_ISSUER_URI: http://localhost:8080/realms/telli-local
+
+      # Databases
+      DATABASE_URL: postgresql://telli:test1234@postgres:5432/telli_dialog_db
+      API_DATABASE_URL: postgresql://telli:test1234@postgres:5432/telli_api_db
+      DB_CACHE_TTL_SECONDS: 300
+
+      # Valkey (Redis) for sessions
+      VALKEY_URL: redis://valkey:6379/0
+
+      # RabbitMQ for reporting
+      RABBITMQ_URI: amqp://user:password@rabbitmq:5672
+
+      # Telli API connection
+      API_URL: http://localhost:3002
+
+      # Crawl4AI
+      CRAWL4AI_URL: http://crawl4ai:11235
+
+      # S3 Object Storage for file uploads and image generation
+      # Note: must be changed to a publicly accessible S3 storage, when LLM should have file access (e.g., uploading pictures and asking about content)
+      OTC_SECRET_ACCESS_KEY: rustfsadmin123
+      OTC_ACCESS_KEY_ID: rustfsadmin
+      OTC_S3_HOSTNAME: http://rustfs:9000
+      OTC_BUCKET_NAME: telli
+
+      # Encryption key for sensitive data (IMPORTANT: Change in production!)
+      ENCRYPTION_KEY: default-encryption-key-change-in-production
+
+      # Google Vertex AI (optional - for image generation)
+      GOOGLE_APPLICATION_CREDENTIALS: ''
+
+      # Logging
+      NEXT_PUBLIC_SENTRY_LOG_LEVEL: debug
+    network_mode: service:keycloak
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      crawl4ai:
+        condition: service_healthy
+      rustfs:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+
+  # Telli Admin - Administration interface
+  telli-admin:
+    image: ghcr.io/fwu-de/telli-admin:latest
+    restart: unless-stopped
+    environment:
+      # Application
+      HOSTNAME: 0.0.0.0
+      PORT: 3001
+
+      # Authentication
+      # IMPORTANT: Change AUTH_SECRET in production! Generate with: openssl rand -base64 32
+      AUTH_SECRET: telli-default-secret-please-change-in-production-use-openssl-rand-base64-32
+      NEXTAUTH_URL: http://localhost:3001
+
+      # Keycloak
+      KEYCLOAK_CLIENT_ID: telli-dev-client
+      KEYCLOAK_CLIENT_SECRET: ClientSecret
+      KEYCLOAK_ISSUER: http://localhost:8080/realms/telli-local
+
+      # telli-dialog
+      DATABASE_URL: postgresql://telli:test1234@postgres:5432/telli_dialog_db
+      ENCRYPTION_KEY: default-encryption-key-change-in-production
+
+      # telli-api
+      API_DATABASE_URL: postgresql://telli:test1234@postgres:5432/telli_api_db
+      API_KEY: telli-api_api-key
+      API_URL: http://localhost:3002
+      # Note: DB_CACHE_TTL_SECONDS should NOT be set in admin app
+
+      # Monitoring (optional, leave empty to disable)
+      NEXT_PUBLIC_SENTRY_LOG_LEVEL: info
+    network_mode: service:keycloak
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+
+  # Initialization container
+  telli-init:
+    image: alpine:3.23.3
+    restart: no
+    environment:
+      # Database URLs for both databases
+      DATABASE_URL: postgresql://telli:test1234@postgres:5432/telli_dialog_db
+      API_DATABASE_URL: postgresql://telli:test1234@postgres:5432/telli_api_db
+
+      # LLM Provider Credentials (placeholders for seeding)
+      LLM_IONOS_API_KEY: API_KEY_PLACEHOLDER
+      LLM_IONOS_BASE_URL: PLACEHOLDER_BASE_URL
+      LLM_GPT4OMINI_API_KEY: API_KEY_PLACEHOLDER
+      LLM_GPT4OMINI_BASE_URL: PLACEHOLDER_BASE_URL
+      LLM_GPT5NANO_API_KEY: API_KEY_PLACEHOLDER
+      LLM_GPT5NANO_BASE_URL: PLACEHOLDER_BASE_URL
+    command: >
+      sh -c "
+        echo '=== Starting Telli Initialization ==='
+
+        echo '=== Installing s3cmd ==='
+        apk add --no-cache s3cmd
+
+        echo '=== Creating S3 bucket: telli ==='
+        s3cmd --access_key=rustfsadmin --secret_key=rustfsadmin123 --host=rustfs:9000 --host-bucket='rustfs:9000/%(bucket)' --region=us-east-1 --no-ssl --no-check-certificate mb s3://telli
+
+        echo '=== Seeding telli_api_db ==='
+        apk add --no-cache postgresql-client
+        PGPASSWORD=test1234 psql -h postgres -U telli -d telli_api_db -c \"INSERT INTO organization (name) SELECT 'LOCAL' WHERE NOT EXISTS (SELECT 1 FROM organization);\"
+        # Remaining seeding is done manually via telli-admin interface
+
+        echo '=== Telli initialization completed successfully ==='
+      "
+    network_mode: service:keycloak
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rustfs:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+      telli-api:
+        condition: service_healthy
+      telli-dialog:
+        condition: service_healthy
 
 volumes:
-  postgres_data_telli_dialog:
-    driver: local
-  postgres_data_telli_api:
-    driver: local
+  postgres_data:
+  valkey_data:
+  keycloak_data:
+  rustfs_data:
