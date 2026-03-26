@@ -13,6 +13,7 @@ import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { z } from 'zod';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
+import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 
 export const dynamic = 'force-dynamic';
 const searchParamsSchema = z.object({ model: z.string().optional() });
@@ -40,8 +41,10 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
   const models = await dbGetLlmModelsByFederalStateId({
     federalStateId: federalState.id,
   });
+  const characterModel = models.find((m) => m.id === character.modelId)?.name;
 
-  const currentModel = searchParams.model ?? character.modelId;
+  const currentModel =
+    searchParams.model ?? characterModel ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
 
   const avatarPictureUrl = await getAvatarPictureUrl(character.pictureId);
   const logoElement = <Logo federalStateId={federalState.id} />;

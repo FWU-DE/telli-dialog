@@ -41,7 +41,7 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
     federalStateId: userAndContext.federalState.id,
   });
 
-  const lastUsedModelInChat = messages.at(messages.length - 1)?.modelName ?? undefined;
+  const lastUsedModelInChat = messages.at(-1)?.modelName;
 
   const currentModel =
     searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
