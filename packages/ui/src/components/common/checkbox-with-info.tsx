@@ -51,7 +51,7 @@ export default function CheckboxWithInfo<
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             {tooltip && (
               <Tooltip>
-                <TooltipTrigger aria-label={tooltipLabel}>
+                <TooltipTrigger aria-label={tooltip}>
                   <InfoIcon className="size-5 text-icon" />
                 </TooltipTrigger>
                 <TooltipContent>{tooltip}</TooltipContent>
