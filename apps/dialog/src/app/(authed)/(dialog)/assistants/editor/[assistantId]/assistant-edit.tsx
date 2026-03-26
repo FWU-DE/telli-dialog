@@ -111,7 +111,7 @@ export function AssistantEdit({
       },
       validate: trigger,
       saveValues: async (data) => {
-        // accessLevel is handled separately in handleSharingChange, so we need to make sure we don't overwrite it here
+        // accessLevel is handled separately in handleSharingChange
         const updateResult = await updateAssistantAction({
           gptId: assistant.id,
           name: data.name,
