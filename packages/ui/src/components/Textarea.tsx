@@ -4,17 +4,18 @@ import * as React from 'react';
 import { useState } from 'react';
 
 import { cn } from '../lib/utils';
-import { TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS } from './constants/constants';
 
 type TextareaProps = React.ComponentProps<'textarea'> & {
   showCharacterCount?: boolean;
   maxLength?: number;
+  errorMessage?: string;
 };
 
 function Textarea({
   className,
   showCharacterCount = true,
-  maxLength = TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
+  maxLength,
+  errorMessage: maxLengthErrorMessage,
   value,
   onChange,
   onFocus,
@@ -28,8 +29,8 @@ function Textarea({
   const [isFocused, setIsFocused] = useState(false);
 
   const charCount = typeof value === 'string' ? value.length : internalCharCount;
-  const isMaxLengthReached = charCount >= maxLength;
-  const isCounterVisible = showCharacterCount && isFocused;
+  const isMaxLengthReached = maxLength !== undefined && charCount >= maxLength;
+  const isCounterVisible = showCharacterCount && isFocused && maxLength !== undefined;
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = event.currentTarget.value;
@@ -76,9 +77,9 @@ function Textarea({
           </div>
         )}
       </div>
-      {isMaxLengthReached && (
+      {isMaxLengthReached && maxLengthErrorMessage && (
         <p className="text-destructive text-xs" aria-live="polite">
-          Die Beschreibung darf maximal {maxLength} Zeichen lang sein.
+          {maxLengthErrorMessage}
         </p>
       )}
     </div>
