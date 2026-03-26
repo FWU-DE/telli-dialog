@@ -366,7 +366,6 @@ export function AssistantEdit({
           control={control}
           schoolSharingName="isSchoolShared"
           linkSharingName="hasLinkAccess"
-          isLinkSharingEnabled={hasLinkAccess}
           onShareChange={handleSharingChange}
         />
       </form>
