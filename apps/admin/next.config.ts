@@ -31,7 +31,6 @@ const baseNextConfig: NextConfig = {
       '@telli/shared',
       '@telli/ai-core',
       'lucide-react',
-      '@radix-ui/react-icons',
     ],
   },
 };
