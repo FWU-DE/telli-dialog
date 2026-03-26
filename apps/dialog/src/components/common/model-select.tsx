@@ -4,7 +4,8 @@ import React, { startTransition } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { type LlmModelSelectModel } from '@shared/db/schema';
 import { cn } from '@/utils/tailwind';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useCustomPathname } from '@/hooks/use-custom-pathname';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { Badge } from '../common/badge';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
@@ -30,7 +31,7 @@ export default function ModelSelect({
   isStudent = false,
   enableUrlParams = false,
 }: ModelSelectProps) {
-  const pathname = usePathname();
+  const pathname = useCustomPathname();
   const searchParams = useSearchParams();
 
   async function handleSelectModel(model: LlmModelSelectModel) {
