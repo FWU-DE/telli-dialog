@@ -24,6 +24,16 @@ const baseNextConfig: NextConfig = {
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/output#automatically-copying-traced-files
   output: 'standalone',
   productionBrowserSourceMaps: !isDevBuild,
+  experimental: {
+    // Speed up dev builds by pre-bundling heavy packages instead of re-resolving on every HMR
+    optimizePackageImports: [
+      '@telli/ui',
+      '@telli/shared',
+      '@telli/ai-core',
+      'lucide-react',
+      '@radix-ui/react-icons',
+    ],
+  },
 };
 
 export default withSentryConfig(baseNextConfig, {
@@ -34,7 +44,7 @@ export default withSentryConfig(baseNextConfig, {
   project: process.env.SENTRY_PROJECT,
   sentryUrl: process.env.SENTRY_URL,
   authToken: process.env.SENTRY_AUTH_TOKEN,
-  debug: true,
+  debug: !isDevBuild,
 
   release: {
     create: !isDevBuild,
@@ -61,7 +71,7 @@ export default withSentryConfig(baseNextConfig, {
   webpack: {
     // Automatically annotate React components to show their full name in breadcrumbs and session replay
     reactComponentAnnotation: {
-      enabled: true,
+      enabled: !isDevBuild,
     },
 
     treeshake: {

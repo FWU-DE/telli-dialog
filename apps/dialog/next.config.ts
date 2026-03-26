@@ -52,6 +52,14 @@ const baseNextConfig: NextConfig = {
   productionBrowserSourceMaps: !isDevBuild,
   experimental: {
     useCache: true,
+    // Speed up dev builds by pre-bundling heavy packages instead of re-resolving on every HMR
+    optimizePackageImports: [
+      '@telli/ui',
+      '@telli/shared',
+      '@telli/ai-core',
+      'lucide-react',
+      '@radix-ui/react-icons',
+    ],
   },
   async redirects() {
     return [
@@ -94,7 +102,7 @@ export default withSentryConfig(baseNextConfigWithNextIntl, {
   project: process.env.SENTRY_PROJECT,
   sentryUrl: process.env.SENTRY_URL,
   authToken: process.env.SENTRY_AUTH_TOKEN,
-  debug: true,
+  debug: !isDevBuild,
 
   release: {
     create: !isDevBuild,
@@ -121,7 +129,7 @@ export default withSentryConfig(baseNextConfigWithNextIntl, {
   webpack: {
     // Automatically annotate React components to show their full name in breadcrumbs and session replay
     reactComponentAnnotation: {
-      enabled: true,
+      enabled: !isDevBuild,
     },
 
     treeshake: {
