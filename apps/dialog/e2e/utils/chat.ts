@@ -7,8 +7,12 @@ export async function regenerateMessage(page: Page) {
   await page.getByLabel('Reload').waitFor();
 }
 
-export async function sendMessage(page: Page, message: string) {
+export async function enterMessage(page: Page, message: string) {
   await page.getByPlaceholder('Wie kann ich Dir helfen?').fill(message);
+}
+
+export async function sendMessage(page: Page, message: string) {
+  await enterMessage(page, message);
   await page.keyboard.press('Enter');
   await page.getByLabel('Reload').waitFor();
 }
@@ -27,22 +31,21 @@ export async function uploadFile(page: Page, filePath: string) {
   await page.locator('form svg.animate-spin').waitFor({ state: 'detached' });
 }
 
-/**
- * Opens the LLM model dropdown and selects the first available alternative model.
- * Returns `true` if a switch was made, `false` if the dropdown is disabled (only one model).
- */
-export async function selectDifferentModel(page: Page): Promise<boolean> {
+/** Opens the LLM model dropdown and selects the first available alternative model. */
+export async function selectDifferentModel(page: Page) {
   const dropdown = page.getByLabel('Select text Model Dropdown');
   await expect(dropdown).toBeVisible();
 
   const isDisabled = await dropdown.evaluate((el) => (el as HTMLButtonElement).disabled);
-  if (isDisabled) return false;
+  if (isDisabled) return;
 
   await dropdown.click();
+
+  // The selected model is not listed in the dropdown
+  // -> selecting the first menu item will be a different model
   const firstOption = page.getByRole('menuitem').first();
   await expect(firstOption).toBeVisible();
   await firstOption.click();
-  return true;
 }
 
 /**

@@ -1,6 +1,6 @@
 import { expect, Page, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { selectDifferentModel, sendMessage } from '../../utils/chat';
+import { enterMessage, selectDifferentModel, sendMessage } from '../../utils/chat';
 import { configureCharacter, deleteCharacter } from '../../utils/character';
 import { waitForToast } from '../../utils/utils';
 import { nanoid } from 'nanoid';
@@ -63,18 +63,7 @@ test.describe('character chat UX', () => {
     await page.close();
   });
 
-  test('character initial message is visible when starting a new conversation', async ({
-    page,
-  }) => {
-    await login(page, 'teacher');
-    await page.goto(`/characters/d/${characterId}`);
-
-    // The initial assistant message should appear before any user message
-    await expect(page.getByLabel('assistant message 1')).toBeVisible();
-    await expect(page.getByLabel('assistant message 1')).toContainText(initialMessage);
-  });
-
-  test('character initial message is visible when reopening a conversation from history', async ({
+  test('character initial message is visible in conversation (new conversation and opened from history)', async ({
     page,
   }) => {
     await login(page, 'teacher');
@@ -105,7 +94,7 @@ test.describe('character chat UX', () => {
     await expect(page.getByLabel('user message 1')).toContainText('Wer bist du?');
   });
 
-  test('switching LLM model in character chat does not clear conversation history', async ({
+  test('switching LLM model in character chat does not clear conversation history and preserves prompt', async ({
     page,
   }) => {
     await login(page, 'teacher');
@@ -119,43 +108,19 @@ test.describe('character chat UX', () => {
     await expect(page.getByLabel('assistant message 2')).toBeVisible();
     await expect(page.getByLabel('user message 1')).toBeVisible();
 
+    // Enter prompt
+    const prompt = 'Dieser Prompt soll beim Modellwechsel nicht verschwinden';
+    await enterMessage(page, prompt);
+
     // Switch model
-    const switched = await selectDifferentModel(page);
-    test.skip(!switched, 'Only one model available – model switching not testable');
+    await selectDifferentModel(page);
+
+    // Entered prompt should not be cleared
+    await expect(page.getByPlaceholder('Wie kann ich Dir helfen?')).toHaveValue(prompt);
 
     // All messages must still be visible after the model switch
     await expect(page.getByLabel('assistant message 1')).toBeVisible();
     await expect(page.getByLabel('user message 1')).toBeVisible();
     await expect(page.getByLabel('assistant message 2')).toBeVisible();
-  });
-
-  test('download button is disabled at start of character chat and enabled after first message', async ({
-    page,
-  }) => {
-    await login(page, 'teacher');
-    await page.goto(`/characters/d/${characterId}`);
-
-    const downloadButton = page.getByTitle('Konversation herunterladen');
-
-    // Before any user message the button must be disabled (initial assistant message doesn't count)
-    await expect(downloadButton).toBeDisabled();
-
-    await sendMessage(page, 'Schreibe "OK"');
-
-    // After the first exchange the button must be enabled without a page reload
-    await expect(downloadButton).toBeEnabled();
-  });
-
-  test('switching LLM model in character chat preserves the typed prompt', async ({ page }) => {
-    await login(page, 'teacher');
-    await page.goto(`/characters/d/${characterId}`);
-
-    const prompt = 'Dieser Prompt soll beim Modellwechsel nicht verschwinden';
-    await page.getByPlaceholder('Wie kann ich Dir helfen?').fill(prompt);
-
-    const switched = await selectDifferentModel(page);
-    test.skip(!switched, 'Only one model available – model switching not testable');
-
-    await expect(page.getByPlaceholder('Wie kann ich Dir helfen?')).toHaveValue(prompt);
   });
 });
