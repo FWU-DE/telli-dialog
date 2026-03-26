@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     const updatedUser = await dbUpdateLastUsedModelByUserId({ userId: user.id, modelName });
     await updateSession({ user: updatedUser });
 
-    return NextResponse.json({});
+    return NextResponse.json({ ok: true });
   } catch (error) {
     return handleErrorInRoute(error);
   }

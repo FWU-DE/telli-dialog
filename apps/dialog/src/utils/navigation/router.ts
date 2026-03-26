@@ -7,6 +7,6 @@
  * @param path - The new URL path to navigate to.
  */
 export function navigateWithoutRefresh(path: string) {
-  window.history.replaceState({ ...window.history.state }, '', path);
+  window.history.replaceState(window.history.state, '', path);
   window.dispatchEvent(new Event('telli:pathnameChange'));
 }

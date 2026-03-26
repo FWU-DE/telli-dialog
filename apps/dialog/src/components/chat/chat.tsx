@@ -116,7 +116,7 @@ export default function Chat({
     onFinish: (message) => {
       logDebug(`onFinish called with message ${JSON.stringify(message)}`);
       // Trigger refetch of the fileMapping from the DB
-      setCountOfFilesInChat(countOfFilesInChat + 1);
+      setCountOfFilesInChat((prev) => prev + 1);
 
       // After the first message exchange: update the sidebar so it shows the generated title
       if (isFirstMessageRef.current) {
@@ -180,7 +180,7 @@ export default function Chat({
       resetError();
 
       // Trigger refetch of the fileMapping from the DB
-      setCountOfFilesInChat(countOfFilesInChat + 1);
+      setCountOfFilesInChat((prev) => prev + 1);
 
       // If this is the first user message, update the URL and sidebar.
       // Check for user messages specifically, since character chats may have an

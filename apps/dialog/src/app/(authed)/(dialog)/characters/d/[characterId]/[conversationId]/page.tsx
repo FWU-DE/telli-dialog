@@ -77,7 +77,7 @@ export default async function Page(
         <ChatHeaderBar
           chatId={chat.id}
           title={character.name}
-          downloadConversationEnabled={chatMessages.length > 0}
+          downloadConversationEnabled={rawChatMessages.length > 0}
           userAndContext={userAndContext}
         />
       </HeaderPortal>
