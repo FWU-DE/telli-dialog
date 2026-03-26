@@ -65,11 +65,11 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
     <LlmModelsProvider
       models={models}
       defaultLlmModelByCookie={currentModel}
-      initialHasMessages={convertedMessages.length > 0}
+      initialDownloadConversationEnabled={convertedMessages.length > 0}
     >
       <ChatHeaderBar
         chatId={conversation.id}
-        hasMessages={convertedMessages.length > 0}
+        downloadConversationEnabled={convertedMessages.length > 0}
         userAndContext={userAndContext}
       />
       <Chat

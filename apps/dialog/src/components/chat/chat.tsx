@@ -54,7 +54,7 @@ export default function Chat({
 }: ChatProps) {
   const tHelpMode = useTranslations('help-mode');
 
-  const { selectedModel, setHasMessages } = useLlmModels();
+  const { selectedModel, setDownloadConversationEnabled } = useLlmModels();
   const conversationPath = getConversationPath({
     customGptId: assistant?.id,
     characterId: character?.id,
@@ -188,7 +188,7 @@ export default function Chat({
       if (!messages.some((m) => m.role === 'user')) {
         navigateWithoutRefresh(conversationPath);
         isFirstMessageRef.current = true; // Will refetch sidebar after response completes
-        setHasMessages(true); // Enable download button immediately
+        setDownloadConversationEnabled(true); // Enable download button immediately
         refetchConversations();
       }
 

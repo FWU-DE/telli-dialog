@@ -13,19 +13,20 @@ import { useLlmModels } from '../providers/llm-model-provider';
 export function ChatHeaderBar({
   userAndContext,
   title,
-  hasMessages: hasMessagesProp,
+  downloadConversationEnabled: downloadConversationEnabledProp,
   chatId,
 }: {
   userAndContext: UserAndContext;
   title?: string;
-  hasMessages: boolean;
+  downloadConversationEnabled: boolean;
   chatId: string;
 }) {
   const { isBelow } = useBreakpoints();
   const showCompressedHeader = isBelow[reductionBreakpoint];
-  const { hasMessages: hasMessagesFromContext } = useLlmModels();
+  const { downloadConversationEnabled: downloadConversationEnabledFromContext } = useLlmModels();
   // Either the server-provided prop or the client-side context (updated after first message sent)
-  const hasMessages = hasMessagesProp || hasMessagesFromContext;
+  const downloadConversationEnabled =
+    downloadConversationEnabledProp || downloadConversationEnabledFromContext;
   const isNewUiDesignEnabled = userAndContext.federalState.featureToggles.isNewUiDesignEnabled;
 
   return (
@@ -46,7 +47,7 @@ export function ChatHeaderBar({
               <DownloadConversationButton
                 conversationId={chatId}
                 characterName={title}
-                disabled={!hasMessages}
+                disabled={!downloadConversationEnabled}
                 showText={false}
               />
               <ProfileMenu userAndContext={userAndContext} />
@@ -58,7 +59,7 @@ export function ChatHeaderBar({
                   <DownloadConversationButton
                     conversationId={chatId}
                     characterName={title}
-                    disabled={!hasMessages}
+                    disabled={!downloadConversationEnabled}
                     showText={true}
                   />
                 }
