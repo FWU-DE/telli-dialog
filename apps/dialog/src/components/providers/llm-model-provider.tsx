@@ -36,14 +36,20 @@ export function LlmModelsProvider({
   );
 
   async function setSelectedModel(model: LlmModelSelectModel) {
+    // optimistically update selected model
+    const previousModel = selectedModel;
     setSelectedModelState(model);
-    // Use a route handler instead of a Server Action to avoid Next.js automatically
-    // refreshing the router cache (which happens when a Server Action writes cookies).
-    await fetch('/api/user/model', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ modelName: model.name }),
-    });
+    try {
+      // Use a route handler instead of a Server Action to avoid Next.js automatically
+      // refreshing the router cache (which happens when a Server Action writes cookies).
+      await fetch('/api/user/model', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ modelName: model.name }),
+      });
+    } catch {
+      setSelectedModelState(previousModel);
+    }
   }
 
   return (

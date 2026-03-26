@@ -187,8 +187,8 @@ export default function Chat({
       // initial assistant message before any user message is sent.
       if (!messages.some((m) => m.role === 'user')) {
         navigateWithoutRefresh(conversationPath);
-        isFirstMessageRef.current = true; // Will refetch sidebar after response completes
-        setDownloadConversationEnabled(true); // Enable download button immediately
+        isFirstMessageRef.current = true;
+        setDownloadConversationEnabled(true);
         refetchConversations();
       }
 

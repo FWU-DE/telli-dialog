@@ -12,6 +12,7 @@ import React from 'react';
 import NewDialogIcon from '@/components/icons/sidebar/new-dialog';
 import SidebarToggleIcon from '@/components/icons/sidebar/sidebar-toggle';
 import { cn } from '@/utils/tailwind';
+import { useRouter } from 'next/navigation';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { SidebarSimpleIcon } from '@phosphor-icons/react/dist/icons/SidebarSimple';
 
@@ -92,17 +93,14 @@ export function ToggleSidebarButton({
 
 export function NewChatButton({ forceVisibility = false }: { forceVisibility?: boolean }) {
   const { open, toggleSidebar, isMobile, openMobile } = useSidebar();
+  const router = useRouter();
   const isOpen = isMobile ? openMobile : open;
 
   function handleOpenNewChat() {
     if (isMobile && openMobile) {
       toggleSidebar();
     }
-    // After the first message in a new chat the URL is updated via window.history.replaceState
-    // (to avoid a full component remount). Next.js's router doesn't know about that change, so
-    // router.push('/') may serve a cached page render with the same UUID key — leaving the old
-    // conversation visible. A hard navigation always produces a fresh server render.
-    window.location.href = '/';
+    router.push('/');
   }
 
   if (isOpen && !forceVisibility) return null;
