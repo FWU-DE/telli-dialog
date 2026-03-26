@@ -53,13 +53,7 @@ const baseNextConfig: NextConfig = {
   experimental: {
     useCache: true,
     // Speed up dev builds by pre-bundling heavy packages instead of re-resolving on every HMR
-    optimizePackageImports: [
-      '@telli/ui',
-      '@telli/shared',
-      '@telli/ai-core',
-      'lucide-react',
-      '@radix-ui/react-icons',
-    ],
+    optimizePackageImports: ['@telli/ui', '@telli/shared', '@telli/ai-core', 'lucide-react'],
   },
   async redirects() {
     return [
