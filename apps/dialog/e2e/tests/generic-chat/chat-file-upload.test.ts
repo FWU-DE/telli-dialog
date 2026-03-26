@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { deleteChat, sendMessage, uploadFile } from '../../utils/chat';
+import { deleteChat, selectDifferentModel, sendMessage, uploadFile } from '../../utils/chat';
 import path from 'path';
+
+const modelWithImageSupport = 'GPT-5 nano';
 
 test('should successfully upload a file and get response about its contents', async ({ page }) => {
   await login(page, 'teacher');
@@ -27,6 +29,7 @@ test('should successfully upload an image and get response about its contents', 
   page,
 }) => {
   await login(page, 'teacher');
+  await selectDifferentModel(page, modelWithImageSupport);
 
   await uploadFile(page, './e2e/fixtures/lazy.webp');
 
