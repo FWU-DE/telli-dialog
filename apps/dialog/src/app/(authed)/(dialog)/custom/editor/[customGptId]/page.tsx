@@ -6,11 +6,10 @@ import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { AssistantSelectModel } from '@shared/db/schema';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
-import { getAssistantForEditView, getFileMappings } from '@shared/assistants/assistant-service';
+import { getAssistantByUser } from '@shared/assistants/assistant-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
-import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { WebsearchSource } from '@shared/db/types';
 
 export const dynamic = 'force-dynamic';
@@ -28,16 +27,11 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
-  const [assistant, relatedFiles] = await Promise.all([
-    getAssistantForEditView({ assistantId, schoolId: school.id, userId: user.id }),
-    getFileMappings({
-      assistantId,
-      userId: user.id,
-      schoolId: school.id,
-    }),
-  ]).catch(handleErrorInServerComponent);
-
-  const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
+  const { assistant, fileMappings, pictureUrl } = await getAssistantByUser({
+    assistantId,
+    schoolId: school.id,
+    userId: user.id,
+  }).catch(handleErrorInServerComponent);
 
   const readOnly = assistant.userId !== user.id;
   const initialLinks = assistant.attachedLinks
@@ -62,12 +56,12 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
       <div className="max-w-3xl mx-auto mt-4">
         <AssistantForm
           {...(removeNullishValues(assistant) as AssistantSelectModel)}
-          maybeSignedPictureUrl={avatarPictureUrl}
+          maybeSignedPictureUrl={pictureUrl}
           isCreating={isCreating}
           readOnly={readOnly}
           userRole={user.userRole}
           initialLinks={initialLinks}
-          existingFiles={relatedFiles}
+          existingFiles={fileMappings}
         />
       </div>
     </div>

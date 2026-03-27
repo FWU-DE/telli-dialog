@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { EmptyImageIcon } from '../icons/empty-image';
 
-export async function CustomChatAvatarImage({
+export function CustomChatAvatarImage({
   pictureUrl,
 }: {
   pictureUrl: string | undefined;

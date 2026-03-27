@@ -1,7 +1,6 @@
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
-import { getAssistantForEditView, getFileMappings } from '@shared/assistants/assistant-service';
-import { getAvatarPictureUrl } from '@shared/files/fileService';
+import { getAssistantByUser } from '@shared/assistants/assistant-service';
 import { notFound } from 'next/navigation';
 import { AssistantEdit } from './assistant-edit';
 
@@ -15,31 +14,22 @@ export default async function Page(props: PageProps<'/assistants/editor/[assista
     notFound();
   }
 
-  const [assistant, relatedFiles] = await Promise.all([
-    getAssistantForEditView({
-      assistantId: assistantId,
-      schoolId: school.id,
-      userId: user.id,
-    }),
-    getFileMappings({
-      assistantId: assistantId,
-      userId: user.id,
-      schoolId: school.id,
-    }),
-  ]).catch(handleErrorInServerComponent);
+  const { assistant, fileMappings, pictureUrl } = await getAssistantByUser({
+    assistantId: assistantId,
+    schoolId: school.id,
+    userId: user.id,
+  }).catch(handleErrorInServerComponent);
 
   const initialLinks = assistant.attachedLinks
     .filter((l) => l !== '')
     .map((url) => ({ link: url }));
 
-  const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
-
   return (
     <AssistantEdit
       assistant={assistant}
-      relatedFiles={relatedFiles}
+      relatedFiles={fileMappings}
       initialLinks={initialLinks}
-      avatarPictureUrl={avatarPictureUrl}
+      avatarPictureUrl={pictureUrl}
     />
   );
 }

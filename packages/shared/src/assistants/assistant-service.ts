@@ -24,7 +24,11 @@ import {
   fileTable,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
-import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
+import {
+  deleteAvatarPicture,
+  deleteMessageAttachments,
+  getAvatarPictureUrl,
+} from '@shared/files/fileService';
 import { copyFileInS3, uploadFileToS3 } from '@shared/s3';
 import { copyAssistant, copyRelatedTemplateFiles } from '@shared/templates/template-service';
 import { addDays } from '@shared/utils/date';
@@ -37,17 +41,17 @@ export function buildAssistantPictureKey(assistantId: string) {
 }
 
 /**
- * Loads custom gpt for edit view.
- * Throws if the user is not authorized to access the custom gpt:
- * - NotFound if the custom gpt does not exist
- * - Forbidden if the custom gpt is private and the user is not the owner
- * - Forbidden if the custom gpt is school-level and the user is not in the same school (and not the owner)
+ * Loads assistant for editing or viewing in the frontend.
+ * Throws if the user is not authorized to access the assistant:
+ * - NotFound if the assistant does not exist
+ * - Forbidden if the assistant is private and the user is not the owner
+ * - Forbidden if the assistant is school-level and the user is not in the same school (and not the owner)
  *
  * Link sharing bypass: If `hasLinkAccess` is true, access checks are skipped
- * and any authenticated user can view the custom gpt. Note that link sharing
+ * and any authenticated user can view the assistant. Note that link sharing
  * only grants read-only access - editing is still restricted to the owner.
  */
-export async function getAssistantForEditView({
+export async function getAssistantByUser({
   assistantId,
   schoolId,
   userId,
@@ -55,7 +59,11 @@ export async function getAssistantForEditView({
   assistantId: string;
   schoolId: string;
   userId: string;
-}): Promise<AssistantSelectModel> {
+}): Promise<{
+  assistant: AssistantSelectModel;
+  fileMappings: FileModel[];
+  pictureUrl: string | undefined;
+}> {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
   if (!assistant.hasLinkAccess) {
@@ -69,7 +77,10 @@ export async function getAssistantForEditView({
       throw new ForbiddenError('Not authorized to edit assistant');
   }
 
-  return assistant;
+  const fileMappings = await dbGetRelatedAssistantFiles(assistantId);
+  const pictureUrl = await getAvatarPictureUrl(assistant.pictureId);
+
+  return { assistant, fileMappings, pictureUrl };
 }
 
 /**
