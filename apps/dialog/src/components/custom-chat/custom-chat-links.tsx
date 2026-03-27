@@ -97,7 +97,7 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
   const maxLinksReached = links.length >= NUMBER_OF_LINKS_LIMIT_FOR_SHARED_CHAT;
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-8">
       {!isReadonly && (
         <div className="flex flex-row gap-2">
           <Input
@@ -126,14 +126,14 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
         </div>
       )}
       {links.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-8 mb-2">
+        <div className="flex flex-wrap gap-2">
           {links.map((link, index) => {
             const isProcessing = processingLinks.has(link.link);
             const displayTitle = getDisplayUrl(link.link);
             return (
               <div
                 key={link.link}
-                className="flex items-center gap-1 px-3 py-0.5 rounded-md bg-primary/10 text-primary text-sm font-medium"
+                className="flex items-center gap-1 h-9 px-3 py-0.5 rounded-md bg-primary/10 text-primary text-sm font-medium"
               >
                 {isProcessing ?? <Spinner className="size-4" />}
                 <Tooltip>
