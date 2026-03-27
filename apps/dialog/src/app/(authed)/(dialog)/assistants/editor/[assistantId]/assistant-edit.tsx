@@ -363,7 +363,7 @@ export function AssistantEdit({
                     <Textarea
                       {...field}
                       id="field.instructions"
-                      className="h-125 resize-none"
+                      className="h-125"
                       aria-invalid={fieldState.invalid}
                       placeholder="Anweisungen für den Assistenten"
                       autoComplete="off"
