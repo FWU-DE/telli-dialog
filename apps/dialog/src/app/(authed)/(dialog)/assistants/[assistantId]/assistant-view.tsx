@@ -68,8 +68,8 @@ export function AssistantView({
           {assistant.accessLevel === 'global' && (
             <Card className="w-full">
               <CardContent className="flex flex-col items-center">
-                <div className="text-sm text-foreground/70">Autor/in</div>
-                <div className="text-base font-medium">FWU</div>
+                <div className="text-sm text-foreground/70">{t('author-label')}</div>
+                <div className="text-base font-medium">{t('author-text')}</div>
               </CardContent>
             </Card>
           )}
@@ -83,9 +83,12 @@ export function AssistantView({
           <Card className="w-full">
             <CardContent>
               <CustomChatFields>
-                <CustomChatFieldInfo label="Name des Assistenten" value={assistant.name} />
-                <CustomChatFieldInfo label="Kurzbeschreibung" value={assistant.description} />
-                <CustomChatFieldInfo label="Instruktionen" value={assistant.instructions} />
+                <CustomChatFieldInfo label={t('name-label')} value={assistant.name} />
+                <CustomChatFieldInfo label={t('description-label')} value={assistant.description} />
+                <CustomChatFieldInfo
+                  label={t('instructions-label')}
+                  value={assistant.instructions}
+                />
                 {assistant.promptSuggestions.map((suggestion, index) => (
                   <CustomChatFieldInfo
                     key={index}
