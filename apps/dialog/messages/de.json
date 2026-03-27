@@ -408,7 +408,7 @@
     }
   },
   "assistant": {
-    "back-button-text": "Zurück zu den Assistenten",
+    "back-button-text": "Assistenten",
     "back-button-aria": "Zurück zur Übersicht der Assistenten",
     "toasts": {
       "create-toast-error": "Der Assistent konnte nicht erstellt werden.",
