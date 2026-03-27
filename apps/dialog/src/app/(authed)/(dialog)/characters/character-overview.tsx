@@ -41,17 +41,21 @@ export default function CharacterOverview({ currentUserId }: CharacterOverviewPr
       onFilterChange={handleFilterChange}
       itemCount={visibleCharacters.length}
     >
-      {visibleCharacters.map((character) => (
-        <EntityCard
-          key={character.id}
-          name={character.name}
-          description={character.description}
-          avatarUrl={character.maybeSignedPictureUrl}
-          isOwned={character.userId === currentUserId}
-          onCardClick={() => router.push(`/characters/editor/${character.id}`)}
-          onChatClick={() => router.push(`/characters/d/${character.id}`)}
-        />
-      ))}
+      {(searchQuery) =>
+        visibleCharacters
+          .filter((character) => character.name.toLowerCase().includes(searchQuery.toLowerCase()))
+          .map((character) => (
+            <EntityCard
+              key={character.id}
+              name={character.name}
+              description={character.description}
+              avatarUrl={character.maybeSignedPictureUrl}
+              isOwned={character.userId === currentUserId}
+              onCardClick={() => router.push(`/characters/editor/${character.id}`)}
+              onChatClick={() => router.push(`/characters/d/${character.id}`)}
+            />
+          ))
+      }
     </EntityOverview>
   );
 }

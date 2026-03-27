@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { OverviewFilter, overviewFilterSchema } from '@shared/overview-filter';
+import { OverviewFilter } from '@shared/overview-filter';
 import { useTranslations } from 'next-intl';
 import { Input } from '@telli/ui/components/Input';
 import { MagnifyingGlassIcon, InfoIcon } from '@phosphor-icons/react';
@@ -13,10 +13,6 @@ import {
   TooltipTrigger,
 } from '@telli/ui/components/Tooltip';
 import { FilterTabs } from '@telli/ui/components/FilterTabs';
-import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
-import ProfileMenu from '../navigation/profile-menu';
-import { ToggleSidebarButton, NewChatButton } from '../navigation/sidebar/collapsible-sidebar';
-import { useSession } from 'next-auth/react';
 
 type EntityOverviewProps = {
   title: string;
@@ -25,11 +21,11 @@ type EntityOverviewProps = {
   createButton: React.ReactNode;
   activeFilter: OverviewFilter;
   onFilterChange: (filter: OverviewFilter) => void;
-  children: React.ReactNode;
+  children: (searchQuery: string) => React.ReactNode;
   itemCount: number;
 };
 
-const FILTER_OPTIONS = overviewFilterSchema.options;
+const FILTER_OPTIONS: OverviewFilter[] = ['all', 'mine', 'official', 'school'];
 
 export default function EntityOverview({
   title,
@@ -43,8 +39,6 @@ export default function EntityOverview({
 }: EntityOverviewProps) {
   const [searchInput, setSearchInput] = React.useState('');
   const federalState = useFederalState();
-  const { data: session } = useSession();
-  const user = session?.user;
   const t = useTranslations('entity-overview');
 
   const showSchoolFilter = federalState?.featureToggles?.isShareTemplateWithSchoolEnabled ?? false;
@@ -57,13 +51,6 @@ export default function EntityOverview({
 
   return (
     <div className="min-w-full overflow-auto flex flex-col h-full bg-gray-50">
-      <HeaderPortal>
-        <ToggleSidebarButton
-          isNewUiDesignEnabled={federalState?.featureToggles?.isNewUiDesignEnabled ?? false}
-        />
-        <div className="grow"></div>
-        <ProfileMenu userAndContext={user} />
-      </HeaderPortal>
       <div className="px-6 pt-6 pb-4 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto w-full">
           <div className="flex items-center gap-2 mb-6">
@@ -115,7 +102,9 @@ export default function EntityOverview({
 
       <div className="flex-1 overflow-auto px-6 pt-4 pb-6">
         <div className="max-w-3xl mx-auto w-full">
-          <div className="flex flex-col gap-2 w-full">{children}</div>
+          <div className="flex flex-col gap-2 w-full" role="tabpanel">
+            {children(searchInput)}
+          </div>
         </div>
       </div>
     </div>

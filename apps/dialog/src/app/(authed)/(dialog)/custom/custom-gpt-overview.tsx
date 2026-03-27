@@ -41,17 +41,21 @@ export default function CustomGptOverview({ currentUserId }: CustomGptOverviewPr
       onFilterChange={handleFilterChange}
       itemCount={visibleAssistants.length}
     >
-      {visibleAssistants.map((gpt) => (
-        <EntityCard
-          key={gpt.id}
-          name={gpt.name}
-          description={gpt.description}
-          avatarUrl={gpt.maybeSignedPictureUrl}
-          isOwned={gpt.userId === currentUserId}
-          onCardClick={() => router.push(`/custom/editor/${gpt.id}?create=false`)}
-          onChatClick={() => router.push(`/custom/d/${gpt.id}`)}
-        />
-      ))}
+      {(searchQuery) =>
+        visibleAssistants
+          .filter((gpt) => gpt.name.toLowerCase().includes(searchQuery.toLowerCase()))
+          .map((gpt) => (
+            <EntityCard
+              key={gpt.id}
+              name={gpt.name}
+              description={gpt.description}
+              avatarUrl={gpt.maybeSignedPictureUrl}
+              isOwned={gpt.userId === currentUserId}
+              onCardClick={() => router.push(`/custom/editor/${gpt.id}?create=false`)}
+              onChatClick={() => router.push(`/custom/d/${gpt.id}`)}
+            />
+          ))
+      }
     </EntityOverview>
   );
 }
