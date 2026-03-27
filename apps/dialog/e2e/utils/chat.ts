@@ -7,8 +7,12 @@ export async function regenerateMessage(page: Page) {
   await page.getByLabel('Reload').waitFor();
 }
 
-export async function sendMessage(page: Page, message: string) {
+export async function enterMessage(page: Page, message: string) {
   await page.getByPlaceholder('Wie kann ich Dir helfen?').fill(message);
+}
+
+export async function sendMessage(page: Page, message: string) {
+  await enterMessage(page, message);
   await page.keyboard.press('Enter');
   await page.getByLabel('Reload').waitFor();
 }
@@ -25,6 +29,33 @@ export async function uploadFile(page: Page, filePath: string) {
 
   // Wait for the loading spinner to disappear
   await page.locator('form svg.animate-spin').waitFor({ state: 'detached' });
+}
+
+/** Opens the LLM model dropdown and selects the first available alternative model. */
+export async function selectDifferentModel(page: Page, modelName?: string) {
+  const dropdown = page.getByLabel('Select text Model Dropdown');
+  await expect(dropdown).toBeVisible();
+
+  const isDisabled = await dropdown.evaluate((el) => (el as HTMLButtonElement).disabled);
+  if (isDisabled) return;
+
+  const selectedModel = await dropdown.innerText();
+  if (modelName && selectedModel.includes(modelName)) {
+    // requested model is already selected
+    return;
+  }
+
+  await dropdown.click();
+
+  if (modelName) {
+    const option = page.getByRole('menuitem').filter({ hasText: modelName });
+    await option.click();
+  } else {
+    // The selected model is not listed in the dropdown
+    // -> selecting the first menu item will be a different model
+    const firstOption = page.getByRole('menuitem').first();
+    await firstOption.click();
+  }
 }
 
 /**

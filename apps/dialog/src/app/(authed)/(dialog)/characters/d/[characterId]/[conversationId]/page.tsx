@@ -12,13 +12,21 @@ import { buildLegacyUserAndContext } from '@/auth/types';
 import { getCharacterForChatSession } from '@shared/characters/character-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
+import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
+import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
+import { parseSearchParams } from '@/utils/parse-search-params';
+import { z } from 'zod';
+import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
+import type { ChatMessage as Message } from '@/types/chat';
 
 export const dynamic = 'force-dynamic';
+const searchParamsSchema = z.object({ model: z.string().optional() });
 
 export default async function Page(
   props: PageProps<'/characters/d/[characterId]/[conversationId]'>,
 ) {
   const params = await props.params;
+  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
@@ -38,16 +46,38 @@ export default async function Page(
     }),
   ]).catch(handleErrorInServerComponent);
 
-  const chatMessages = convertMessageModelToMessage(rawChatMessages);
+  const dbMessages = convertMessageModelToMessage(rawChatMessages);
+
+  // Prepend the character's initial message since it is not persisted in DB
+  const chatMessages: Message[] = character.initialMessage
+    ? [
+        { id: 'initial-message', role: 'assistant', content: character.initialMessage },
+        ...dbMessages,
+      ]
+    : dbMessages;
+
+  const models = await dbGetLlmModelsByFederalStateId({
+    federalStateId: federalState.id,
+  });
+
+  const lastUsedModelInChat = rawChatMessages.at(-1)?.modelName;
+
+  const currentModel =
+    searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
+
   const avatarPictureUrl = await getAvatarPictureUrl(character.pictureId);
   const logoElement = <Logo federalStateId={federalState.id} />;
   return (
-    <>
+    <LlmModelsProvider
+      models={models}
+      defaultLlmModelByCookie={currentModel}
+      initialDownloadConversationEnabled={rawChatMessages.length > 0}
+    >
       <HeaderPortal>
         <ChatHeaderBar
           chatId={chat.id}
           title={character.name}
-          hasMessages={chatMessages.length > 0}
+          downloadConversationEnabled={rawChatMessages.length > 0}
           userAndContext={userAndContext}
         />
       </HeaderPortal>
@@ -59,6 +89,6 @@ export default async function Page(
         imageSource={avatarPictureUrl}
         logoElement={logoElement}
       />
-    </>
+    </LlmModelsProvider>
   );
 }
