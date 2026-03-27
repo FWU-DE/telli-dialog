@@ -3,7 +3,7 @@
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { SidebarMenuButton, SidebarMenuItem, useSidebar } from '@telli/ui/components/Sidebar';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useCustomPathname } from '@/hooks/use-custom-pathname';
 import { cloneElement, type ReactElement } from 'react';
 
 type AppMenuItemProps = {
@@ -13,7 +13,7 @@ type AppMenuItemProps = {
 };
 
 export function AppMenuItem({ href, icon, text }: AppMenuItemProps) {
-  const pathname = usePathname();
+  const pathname = useCustomPathname();
   const { isMobile, setOpenMobile } = useSidebar();
 
   const isActive = () => {
