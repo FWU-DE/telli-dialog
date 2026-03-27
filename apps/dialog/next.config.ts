@@ -52,6 +52,8 @@ const baseNextConfig: NextConfig = {
   productionBrowserSourceMaps: !isDevBuild,
   experimental: {
     useCache: true,
+    // Speed up dev builds by pre-bundling heavy packages instead of re-resolving on every HMR
+    optimizePackageImports: ['@telli/ui', '@telli/shared', '@telli/ai-core'],
   },
   async redirects() {
     return [

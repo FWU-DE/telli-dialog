@@ -1,6 +1,8 @@
 'use client';
 
 import {
+  EXAMPLE_PROMPT_LENGTH_LIMIT,
+  NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
@@ -45,6 +47,7 @@ import { useFormAutosave } from '@/hooks/use-form-autosave';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
 import { WebsearchSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
+import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-chat-prompt-suggestions';
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
@@ -53,8 +56,24 @@ const assistantFormValuesSchema = z.object({
   pictureId: z.string().optional(),
   isSchoolShared: z.boolean(),
   hasLinkAccess: z.boolean(),
+  promptSuggestions: z
+    .array(
+      z.object({
+        value: z
+          .string()
+          .max(
+            EXAMPLE_PROMPT_LENGTH_LIMIT,
+            `Ein Promptvorschlag darf maximal ${EXAMPLE_PROMPT_LENGTH_LIMIT} Zeichen lang sein.`,
+          ),
+      }),
+    )
+    .max(
+      NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
+      `Es dürfen maximal ${NUMBER_OF_EXAMPLE_PROMPTS_LIMIT} Promptvorschläge angegeben werden.`,
+    ),
 });
-type AssistantFormValues = z.infer<typeof assistantFormValuesSchema>;
+
+export type AssistantFormValues = z.infer<typeof assistantFormValuesSchema>;
 
 export function AssistantEdit({
   assistant,
@@ -78,6 +97,10 @@ export function AssistantEdit({
     pictureId: assistant.pictureId ?? undefined,
     isSchoolShared: assistant.accessLevel === 'school',
     hasLinkAccess: assistant.hasLinkAccess,
+    promptSuggestions:
+      assistant.promptSuggestions && assistant.promptSuggestions.length > 0
+        ? assistant.promptSuggestions.map((s) => ({ value: s }))
+        : [{ value: '' }],
   };
 
   const {
@@ -109,6 +132,9 @@ export function AssistantEdit({
           instructions: data.instructions,
           pictureId: data.pictureId,
           hasLinkAccess: data.hasLinkAccess,
+          promptSuggestions: data.promptSuggestions
+            .map((suggestion) => suggestion.value.trim())
+            .filter((suggestion) => suggestion.length > 0),
         });
 
         return updateResult.success;
@@ -343,6 +369,12 @@ export function AssistantEdit({
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 )}
+              />
+              <CustomChatPromptSuggestions
+                control={control}
+                onBlur={() => {
+                  handleAutoSave();
+                }}
               />
             </FieldGroup>
           </CardContent>
