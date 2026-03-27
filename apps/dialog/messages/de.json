@@ -404,7 +404,11 @@
   "custom-chat": {
     "image": {
       "crop-image": "Bild ausschneiden",
-      "upload-image": "Bild hochladen"
+      "upload-image": "Bild hochladen",
+      "toasts": {
+        "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
+        "image-toast-error": "Das Bild konnte nicht hochgeladen werden."
+      }
     }
   },
   "assistant": {
@@ -415,9 +419,5 @@
       "edit-toast-success": "Der Assistent wurde erfolgreich aktualisiert.",
       "edit-toast-error": "Etwas ist beim Aktualisieren des Assistenten schief gelaufen."
     }
-  },
-  "toasts": {
-    "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
-    "image-toast-error": "Das Bild konnte nicht hochgeladen werden."
   }
 }

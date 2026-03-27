@@ -5,12 +5,12 @@ import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-im
 import 'react-image-crop/dist/ReactCrop.css';
 import Image from 'next/image';
 import { CompressionOptions, getCroppedImageBlob } from '@/utils/files/image-utils';
-import { logError } from '@shared/logging';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@ui/components/Card';
 import { Button } from '@ui/components/Button';
 import { cn } from '@/utils/tailwind';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
+import { useToast } from '../common/toast';
 
 type AvatarCropModalProps = {
   imageSrc: string;
@@ -33,6 +33,7 @@ export default function AvatarCropModal({
   const [completedCrop, setCompletedCrop] = React.useState<PixelCrop>();
   const [isUploading, setIsUploading] = React.useState(false);
   const imageRef = React.useRef<HTMLImageElement | null>(null);
+  const toast = useToast();
   const t = useTranslations('custom-chat.image');
   const tCommon = useTranslations('common');
 
@@ -59,7 +60,7 @@ export default function AvatarCropModal({
 
   async function handleCropConfirm() {
     if (!completedCrop || !imageRef.current) {
-      logError('Crop data or image ref is missing');
+      toast.error(t('toasts.image-toast-error'));
       return;
     }
     setIsUploading(true);
@@ -71,9 +72,9 @@ export default function AvatarCropModal({
         0,
         compressionOptions,
       );
-      if (croppedBlob) {
-        await onCropComplete(croppedBlob);
-      }
+      await onCropComplete(croppedBlob);
+    } catch {
+      toast.error(t('toasts.image-toast-error'));
     } finally {
       setIsUploading(false);
     }
