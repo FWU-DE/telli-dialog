@@ -35,11 +35,13 @@ export default async function Page(props: PageProps<'/assistants/editor/[assista
   const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
 
   return (
-    <AssistantEdit
-      assistant={assistant}
-      relatedFiles={relatedFiles}
-      initialLinks={initialLinks}
-      avatarPictureUrl={avatarPictureUrl}
-    />
+    <div className="min-w-full p-6 overflow-auto">
+      <AssistantEdit
+        assistant={assistant}
+        relatedFiles={relatedFiles}
+        initialLinks={initialLinks}
+        avatarPictureUrl={avatarPictureUrl}
+      />
+    </div>
   );
 }

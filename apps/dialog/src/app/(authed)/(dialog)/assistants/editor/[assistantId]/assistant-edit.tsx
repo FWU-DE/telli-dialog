@@ -16,10 +16,6 @@ import { Controller, useForm, useWatch } from 'react-hook-form';
 import z from 'zod';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
-import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions';
-import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
-import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
-import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
 import { useRouter } from 'next/navigation';
 import {
   createNewAssistantAction,
@@ -36,9 +32,7 @@ import {
   updateAssistantAccessLevelAction,
 } from '../../../custom/editor/[customGptId]/actions';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
-import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
 import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
-import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
 import { Textarea } from '@ui/components/Textarea';
 import { useCallback, useRef } from 'react';
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
@@ -48,6 +42,7 @@ import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-fi
 import { WebsearchSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-chat-prompt-suggestions';
+import { CustomChatActionSection } from '@/components/custom-chat/custom-chat-action-section';
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
@@ -261,25 +256,19 @@ export function AssistantEdit({
         }}
       />
       <CustomChatTitle title={name} />
-      <div className="flex flex-row justify-between">
-        <CustomChatActions>
-          <CustomChatActionUse
-            onClick={() => {
-              guardNavigation(() => {
-                router.push(`/custom/d/${assistant.id}/`);
-              });
-            }}
-          />
-          <CustomChatActionDuplicate onClick={handleDuplicateAssistant} />
-          <CustomChatActionDelete onClick={handleDeleteAssistant} />
-          <CustomChatActionSave onClick={handleAutoSave} />
-        </CustomChatActions>
-        <CustomChatFormState
-          isDirty={isDirty}
-          isSubmitting={isSaving}
-          hasSaveError={hasSaveError}
-        />
-      </div>
+      <CustomChatActionSection
+        onUse={() => {
+          guardNavigation(() => {
+            router.push(`/custom/d/${assistant.id}/`);
+          });
+        }}
+        onDuplicate={handleDuplicateAssistant}
+        onDelete={handleDeleteAssistant}
+        onSave={handleAutoSave}
+        isDirty={isDirty}
+        isSubmitting={isSaving}
+        hasSaveError={hasSaveError}
+      />
       {showShareInfo && <CustomChatShareInfo href="#share-settings" />}
       <CustomChatImageUpload
         avatarPictureUrl={avatarPictureUrl}
@@ -401,6 +390,19 @@ export function AssistantEdit({
           onShareChange={handleSharingChange}
         />
       </form>
+      <CustomChatActionSection
+        onUse={() => {
+          guardNavigation(() => {
+            router.push(`/custom/d/${assistant.id}/`);
+          });
+        }}
+        onDuplicate={handleDuplicateAssistant}
+        onDelete={handleDeleteAssistant}
+        onSave={handleAutoSave}
+        isDirty={isDirty}
+        isSubmitting={isSaving}
+        hasSaveError={hasSaveError}
+      />
     </CustomChatLayoutContainer>
   );
 }
