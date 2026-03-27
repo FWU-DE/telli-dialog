@@ -1,7 +1,7 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '../Tooltip';
 import { Checkbox } from '../Checkbox';
 import { Control, Controller, FieldPath, FieldValues } from 'react-hook-form';
-import { FieldLabel } from '../Field';
+import { FieldLabel, Field, FieldError } from '../Field';
 import { InfoIcon } from 'lucide-react';
 
 type CheckboxWithInfoProps<
@@ -32,8 +32,8 @@ export default function CheckboxWithInfo<
       <Controller
         name={name}
         control={control}
-        render={({ field }) => (
-          <>
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid} orientation="horizontal">
             <Checkbox
               id={field.name + '-checkbox'}
               checked={field.value}
@@ -46,17 +46,18 @@ export default function CheckboxWithInfo<
             <FieldLabel htmlFor={field.name + '-checkbox'} size="normal">
               {label}
             </FieldLabel>
-          </>
+            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            {tooltip && (
+              <Tooltip>
+                <TooltipTrigger aria-label={tooltip}>
+                  <InfoIcon className="size-5 text-icon" />
+                </TooltipTrigger>
+                <TooltipContent>{tooltip}</TooltipContent>
+              </Tooltip>
+            )}
+          </Field>
         )}
       />
-      {tooltip && (
-        <Tooltip>
-          <TooltipTrigger aria-label="Tooltip für Checkbox">
-            <InfoIcon className="size-5 text-icon" />
-          </TooltipTrigger>
-          <TooltipContent>{tooltip}</TooltipContent>
-        </Tooltip>
-      )}
     </div>
   );
 }

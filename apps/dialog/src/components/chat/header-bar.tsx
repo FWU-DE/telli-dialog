@@ -8,20 +8,25 @@ import ProfileMenu, { ThreeDotsProfileMenu } from '../navigation/profile-menu';
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
 import useBreakpoints from '../hooks/use-breakpoints';
+import { useLlmModels } from '../providers/llm-model-provider';
 
 export function ChatHeaderBar({
   userAndContext,
   title,
-  hasMessages,
+  downloadConversationEnabled: downloadConversationEnabledProp,
   chatId,
 }: {
   userAndContext: UserAndContext;
   title?: string;
-  hasMessages: boolean;
+  downloadConversationEnabled: boolean;
   chatId: string;
 }) {
   const { isBelow } = useBreakpoints();
   const showCompressedHeader = isBelow[reductionBreakpoint];
+  const { downloadConversationEnabled: downloadConversationEnabledFromContext } = useLlmModels();
+  // Either the server-provided prop or the client-side context (updated after first message sent)
+  const downloadConversationEnabled =
+    downloadConversationEnabledProp || downloadConversationEnabledFromContext;
   const isNewUiDesignEnabled = userAndContext.federalState.featureToggles.isNewUiDesignEnabled;
 
   return (
@@ -42,7 +47,7 @@ export function ChatHeaderBar({
               <DownloadConversationButton
                 conversationId={chatId}
                 characterName={title}
-                disabled={!hasMessages}
+                disabled={!downloadConversationEnabled}
                 showText={false}
               />
               <ProfileMenu userAndContext={userAndContext} />
@@ -54,7 +59,7 @@ export function ChatHeaderBar({
                   <DownloadConversationButton
                     conversationId={chatId}
                     characterName={title}
-                    disabled={!hasMessages}
+                    disabled={!downloadConversationEnabled}
                     showText={true}
                   />
                 }

@@ -40,7 +40,7 @@
     "@telli/api-database": "workspace:*",
     "@telli/shared-core": "workspace:*",
     "dotenv": "17.3.1",
-    "fastify": "5.8.2",
+    "fastify": "5.8.3",
     "fastify-graceful-shutdown": "5.0.0",
     "openai": "6.29.0",
     "pino": "10.3.1",

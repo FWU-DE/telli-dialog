@@ -1,7 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-
-const STORAGE_KEY_AUTO_SCROLL_PAUSED = 'preserve-scroll-auto-scroll-paused';
-const STORAGE_KEY_SCROLL_POSITION = 'preserve-scroll-position';
+import { useCallback, useEffect, useState } from 'react';
 
 /** Check whether a scroll container is near the bottom (within threshold). */
 function isNearBottom(element: HTMLElement, threshold = 20): boolean {
@@ -24,37 +21,15 @@ function isNearBottom(element: HTMLElement, threshold = 20): boolean {
  *
  * @param dependencies - Array of dependencies that trigger the scroll
  * @returns Object with scrollRef (callback ref to attach to the scrollable container),
- *          reactivateAutoScrolling to re-enable auto-scroll,
- *          and preserveScrollState to save scroll position before a remount
+ *          reactivateAutoScrolling to re-enable auto-scroll
  */
 export function useAutoScroll(dependencies: React.DependencyList) {
   const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
-  const [isAutoScrollEnabled, setAutoScrollEnabled] = useState(() => {
-    // On initial load, check if auto-scroll was previously paused and restore that state
-    if (typeof window !== 'undefined') {
-      const preserved = sessionStorage.getItem(STORAGE_KEY_AUTO_SCROLL_PAUSED);
-      if (preserved) {
-        sessionStorage.removeItem(STORAGE_KEY_AUTO_SCROLL_PAUSED);
-        return false;
-      }
-    }
-    return true;
-  });
+  const [isAutoScrollEnabled, setAutoScrollEnabled] = useState(true);
 
   // Callback ref that handles element attachment/detachment
-  // and restores saved scroll position on remount
   const scrollRef = useCallback((element: HTMLDivElement | null) => {
     setScrollElement(element);
-    if (element && typeof window !== 'undefined') {
-      const savedPosition = sessionStorage.getItem(STORAGE_KEY_SCROLL_POSITION);
-      if (savedPosition) {
-        sessionStorage.removeItem(STORAGE_KEY_SCROLL_POSITION);
-        const scrollTop = parseInt(savedPosition, 10);
-        requestAnimationFrame(() => {
-          element.scrollTo({ top: scrollTop, behavior: 'instant' });
-        });
-      }
-    }
   }, []);
 
   const reactivateAutoScrolling = useCallback(() => {
@@ -94,22 +69,6 @@ export function useAutoScroll(dependencies: React.DependencyList) {
     };
   }, [scrollElement]);
 
-  // Ref keeps the latest values accessible from the preserveScrollState callback
-  const scrollStateRef = useRef({ isAutoScrollEnabled, scrollElement });
-  scrollStateRef.current = { isAutoScrollEnabled, scrollElement };
-
-  // Save current scroll position to sessionStorage so it survives a remount
-  const preserveScrollState = useCallback(() => {
-    if (typeof window === 'undefined') return;
-    const { isAutoScrollEnabled: enabled, scrollElement: el } = scrollStateRef.current;
-    if (!enabled) {
-      sessionStorage.setItem(STORAGE_KEY_AUTO_SCROLL_PAUSED, '1');
-      if (el) {
-        sessionStorage.setItem(STORAGE_KEY_SCROLL_POSITION, String(el.scrollTop));
-      }
-    }
-  }, []);
-
   // Auto-scroll to bottom when dependencies change
   useEffect(() => {
     if (scrollElement && isAutoScrollEnabled) {
@@ -121,5 +80,5 @@ export function useAutoScroll(dependencies: React.DependencyList) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...dependencies, scrollElement, isAutoScrollEnabled]);
 
-  return { scrollRef, reactivateAutoScrolling, preserveScrollState };
+  return { scrollRef, reactivateAutoScrolling };
 }
