@@ -3,7 +3,7 @@ import { login } from '../../utils/login';
 
 test('test', async ({ page }) => {
   await login(page, 'teacher');
-  await page.goto('/custom?filter=official');
+  await page.goto('/custom');
 
   const card = page.getByRole('button', { name: 'Schulorganisationsassistent' }).first();
   await expect(card).toBeVisible();

@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid';
 
 test('create learning scenario from template', async ({ page }) => {
   await login(page, 'teacher');
-  await page.goto('/learning-scenarios?filter=official');
+  await page.goto('/learning-scenarios');
 
   const card = page.getByRole('button', { name: 'Lern was über KI' }).first();
   await expect(card).toBeVisible();

@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid';
 
 test('create character from template', async ({ page }) => {
   await login(page, 'teacher');
-  await page.goto('/characters?filter=official');
+  await page.goto('/characters');
 
   const card = page.getByRole('button', { name: 'Johann Wolfgang von Goethe' }).first();
   await expect(card).toBeVisible();
