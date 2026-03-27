@@ -4,15 +4,7 @@ import {
   EXAMPLE_PROMPT_LENGTH_LIMIT,
   NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
 } from '@/configuration-text-inputs/const';
-import {
-  ArrayPath,
-  Control,
-  Controller,
-  FieldValues,
-  Path,
-  useFieldArray,
-  useWatch,
-} from 'react-hook-form';
+import { Control, Controller, useFieldArray, useWatch } from 'react-hook-form';
 import { Field, FieldLabel, FieldError } from '@ui/components/Field';
 import { Input } from '@ui/components/Input';
 import { useTranslations } from 'next-intl';
@@ -20,25 +12,24 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/Tooltip'
 import { cn } from '@/utils/tailwind';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { PlusIcon, TrashSimpleIcon } from '@phosphor-icons/react';
+import { AssistantFormValues } from '@/app/(authed)/(dialog)/assistants/editor/[assistantId]/assistant-edit';
 
 type WithPromptSuggestions = {
   promptSuggestions: { value: string }[];
 };
 
-type CustomChatPromptSuggestionsProps<T extends FieldValues & WithPromptSuggestions> = {
-  control: Control<T>;
+type CustomChatPromptSuggestionsProps = {
+  control: Control<AssistantFormValues>;
   onBlur: () => void;
 };
 
-export function CustomChatPromptSuggestions<T extends FieldValues & WithPromptSuggestions>(
-  props: CustomChatPromptSuggestionsProps<T>,
-) {
+export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsProps) {
   const { control, onBlur } = props;
   const t = useTranslations('assistant');
   const promptSuggestions = useWatch({
     control,
-    name: 'promptSuggestions' as Path<T>,
-  }) as WithPromptSuggestions['promptSuggestions'];
+    name: 'promptSuggestions',
+  });
   const lastPromptSuggestionValue = promptSuggestions[promptSuggestions.length - 1]?.value ?? '';
 
   const {
@@ -47,7 +38,7 @@ export function CustomChatPromptSuggestions<T extends FieldValues & WithPromptSu
     remove: removePromptSuggestion,
   } = useFieldArray({
     control: control,
-    name: 'promptSuggestions' as ArrayPath<T>,
+    name: 'promptSuggestions',
   });
   const appendPromptSuggestion = append as (
     value: WithPromptSuggestions['promptSuggestions'][number],
@@ -65,7 +56,7 @@ export function CustomChatPromptSuggestions<T extends FieldValues & WithPromptSu
         </FieldLabel>
         <div className="flex items-center gap-3">
           <Controller
-            name={`promptSuggestions.${index}.value` as Path<T>}
+            name={`promptSuggestions.${index}.value`}
             control={control}
             render={({ field, fieldState }) => (
               <div className="w-full">
@@ -88,24 +79,23 @@ export function CustomChatPromptSuggestions<T extends FieldValues & WithPromptSu
 
           {isLastItem ? (
             <Tooltip>
-              <TooltipTrigger asChild aria-label="Tooltip">
-                <span>
-                  <button
-                    type="button"
-                    className={cn(
-                      'flex items-center justify-center size-9 disabled:hover:bg-transparent disabled:hover:text-gray-400',
-                      iconClassName,
-                    )}
-                    disabled={
-                      hasReachedPromptSuggestionsLimit || lastPromptSuggestionValue.trim() === ''
-                    }
-                    onClick={() => {
-                      appendPromptSuggestion({ value: '' });
-                    }}
-                  >
-                    <PlusIcon className="size-5" />
-                  </button>
-                </span>
+              <TooltipTrigger asChild aria-label="Tooltip für das Hinzufügen von Promptvorschlägen">
+                <button
+                  type="button"
+                  className={cn(
+                    'flex items-center justify-center size-9 disabled:hover:bg-transparent disabled:hover:text-gray-400',
+                    iconClassName,
+                  )}
+                  aria-label={t('prompt-suggestions-add-button')}
+                  disabled={
+                    hasReachedPromptSuggestionsLimit || lastPromptSuggestionValue.trim() === ''
+                  }
+                  onClick={() => {
+                    appendPromptSuggestion({ value: '' });
+                  }}
+                >
+                  <PlusIcon className="size-5" />
+                </button>
               </TooltipTrigger>
               {hasReachedPromptSuggestionsLimit && (
                 <TooltipContent>

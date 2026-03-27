@@ -2,6 +2,7 @@
 
 import {
   EXAMPLE_PROMPT_LENGTH_LIMIT,
+  NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
@@ -65,16 +66,21 @@ const assistantFormValuesSchema = z.object({
   pictureId: z.string().optional(),
   isSchoolShared: z.boolean(),
   hasLinkAccess: z.boolean(),
-  promptSuggestions: z.array(
-    z.object({
-      value: z
-        .string()
-        .max(
-          EXAMPLE_PROMPT_LENGTH_LIMIT,
-          `Ein Promptvorschlag darf maximal ${EXAMPLE_PROMPT_LENGTH_LIMIT} Zeichen lang sein.`,
-        ),
-    }),
-  ),
+  promptSuggestions: z
+    .array(
+      z.object({
+        value: z
+          .string()
+          .max(
+            EXAMPLE_PROMPT_LENGTH_LIMIT,
+            `Ein Promptvorschlag darf maximal ${EXAMPLE_PROMPT_LENGTH_LIMIT} Zeichen lang sein.`,
+          ),
+      }),
+    )
+    .max(
+      NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
+      `Es dürfen maximal ${NUMBER_OF_EXAMPLE_PROMPTS_LIMIT} Promptvorschläge angegeben werden.`,
+    ),
 });
 
 export type AssistantFormValues = z.infer<typeof assistantFormValuesSchema>;
