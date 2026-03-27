@@ -5,17 +5,19 @@ import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-im
 import 'react-image-crop/dist/ReactCrop.css';
 import Image from 'next/image';
 import { CompressionOptions, getCroppedImageBlob } from '@/utils/files/image-utils';
-import { logError } from '@shared/logging';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@ui/components/Card';
 import { Button } from '@ui/components/Button';
+import { cn } from '@/utils/tailwind';
+import { buttonPrimaryClassName } from '@/utils/tailwind/button';
+import { useToast } from '../common/toast';
 
 type AvatarCropModalProps = {
   imageSrc: string;
   aspect: number;
   circularCrop?: boolean;
   onClose: () => void;
-  onCropComplete: (croppedBlob: Blob) => void;
+  onCropComplete: (croppedBlob: Blob) => Promise<void>;
   compressionOptions?: CompressionOptions;
 };
 
@@ -29,7 +31,9 @@ export default function AvatarCropModal({
 }: AvatarCropModalProps) {
   const [crop, setCrop] = React.useState<Crop>();
   const [completedCrop, setCompletedCrop] = React.useState<PixelCrop>();
+  const [isUploading, setIsUploading] = React.useState(false);
   const imageRef = React.useRef<HTMLImageElement | null>(null);
+  const toast = useToast();
   const t = useTranslations('custom-chat.image');
   const tCommon = useTranslations('common');
 
@@ -56,18 +60,23 @@ export default function AvatarCropModal({
 
   async function handleCropConfirm() {
     if (!completedCrop || !imageRef.current) {
-      logError('Crop data or image ref is missing');
+      toast.error(t('toasts.image-toast-error'));
       return;
     }
-    const croppedBlob = await getCroppedImageBlob(
-      imageRef.current,
-      completedCrop,
-      1,
-      0,
-      compressionOptions,
-    );
-    if (croppedBlob) {
-      onCropComplete(croppedBlob);
+    setIsUploading(true);
+    try {
+      const croppedBlob = await getCroppedImageBlob(
+        imageRef.current,
+        completedCrop,
+        1,
+        0,
+        compressionOptions,
+      );
+      await onCropComplete(croppedBlob);
+    } catch {
+      toast.error(t('toasts.image-toast-error'));
+    } finally {
+      setIsUploading(false);
     }
   }
 
@@ -111,10 +120,15 @@ export default function AvatarCropModal({
             />
           </ReactCrop>
           <div className="flex justify-end gap-2 mt-4">
-            <Button onClick={onClose} type="button" variant="outline">
+            <Button onClick={onClose} type="button" variant="outline" disabled={isUploading}>
               {tCommon('cancel')}
             </Button>
-            <Button onClick={handleCropConfirm} type="button">
+            <Button
+              onClick={handleCropConfirm}
+              type="button"
+              disabled={isUploading}
+              className={cn(buttonPrimaryClassName)}
+            >
               {t('upload-image')}
             </Button>
           </div>
