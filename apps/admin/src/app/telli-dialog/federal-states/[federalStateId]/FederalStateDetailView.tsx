@@ -189,6 +189,7 @@ export function FederalStateView(props: FederalStateViewProps) {
             label="Support Kontaktadressen"
             description="Emailadressen, Telefonnummern oder auch Webadressen die im Supportfall benutzt werden können. Diese werden im Disclaimer angezeigt."
             control={control}
+            defaultAppendValue={{ value: '' }}
           />
           <FormFieldCheckbox
             name="featureToggles.isStudentAccessEnabled"
