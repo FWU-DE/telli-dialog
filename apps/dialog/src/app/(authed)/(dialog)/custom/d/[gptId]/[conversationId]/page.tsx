@@ -37,7 +37,7 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversa
 
   const logoElement = <Logo federalStateId={federalState.id} />;
 
-  const lastUsedModelInChat = messages.at(messages.length - 1)?.modelName ?? undefined;
+  const lastUsedModelInChat = messages.at(-1)?.modelName;
 
   const currentModel =
     searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
@@ -45,12 +45,16 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversa
   const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
 
   return (
-    <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
+    <LlmModelsProvider
+      models={models}
+      defaultLlmModelByCookie={currentModel}
+      initialDownloadConversationEnabled={chatMessages.length > 0}
+    >
       <HeaderPortal>
         <ChatHeaderBar
           chatId={conversation.id}
           title={assistant.name}
-          hasMessages={chatMessages.length > 0}
+          downloadConversationEnabled={chatMessages.length > 0}
           userAndContext={userAndContext}
         />
       </HeaderPortal>

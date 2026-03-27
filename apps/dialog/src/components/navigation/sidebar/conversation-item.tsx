@@ -4,7 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import DotsHorizontalIcon from '@/components/icons/dots-horizontal';
 import CheckIcon from '@/components/icons/check';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useCustomPathname } from '@/hooks/use-custom-pathname';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -37,7 +38,7 @@ export default function ConversationItem({
   });
   const [isEditable, toggleEditable] = React.useReducer((s) => !s, false);
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = useCustomPathname();
   const { designConfiguration } = useTheme();
 
   async function onSubmit(data: RenameData) {

@@ -41,7 +41,7 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
     federalStateId: userAndContext.federalState.id,
   });
 
-  const lastUsedModelInChat = messages.at(messages.length - 1)?.modelName ?? undefined;
+  const lastUsedModelInChat = messages.at(-1)?.modelName;
 
   const currentModel =
     searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
@@ -62,10 +62,14 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
   }
 
   return (
-    <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
+    <LlmModelsProvider
+      models={models}
+      defaultLlmModelByCookie={currentModel}
+      initialDownloadConversationEnabled={convertedMessages.length > 0}
+    >
       <ChatHeaderBar
         chatId={conversation.id}
-        hasMessages={convertedMessages.length > 0}
+        downloadConversationEnabled={convertedMessages.length > 0}
         userAndContext={userAndContext}
       />
       <Chat

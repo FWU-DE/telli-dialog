@@ -8,6 +8,9 @@
     "build:docker:admin": "docker build -t telli-admin -f ./apps/admin/Dockerfile .",
     "build:docker:api": "docker build -t telli-api -f ./apps/api/Dockerfile .",
     "dev": "turbo run dev",
+    "dev:dialog": "pnpm --filter telli-dialog dev",
+    "dev:admin": "pnpm --filter telli-admin dev",
+    "dev:api": "pnpm --filter telli-api dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "turbo run lint",
@@ -22,7 +25,7 @@
   "devDependencies": {
     "@telli/typescript-config": "workspace:*",
     "prettier": "3.8.1",
-    "turbo": "2.8.17"
+    "turbo": "2.8.20"
   },
   "pnpm": {
     "overrides": {

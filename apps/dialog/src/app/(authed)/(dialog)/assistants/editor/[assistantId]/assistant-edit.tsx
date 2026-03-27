@@ -1,6 +1,8 @@
 'use client';
 
 import {
+  EXAMPLE_PROMPT_LENGTH_LIMIT,
+  NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
@@ -45,6 +47,7 @@ import { useFormAutosave } from '@/hooks/use-form-autosave';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
 import { WebsearchSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
+import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-chat-prompt-suggestions';
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
@@ -63,8 +66,24 @@ const assistantFormValuesSchema = z.object({
   pictureId: z.string().optional(),
   isSchoolShared: z.boolean(),
   hasLinkAccess: z.boolean(),
+  promptSuggestions: z
+    .array(
+      z.object({
+        value: z
+          .string()
+          .max(
+            EXAMPLE_PROMPT_LENGTH_LIMIT,
+            `Ein Promptvorschlag darf maximal ${EXAMPLE_PROMPT_LENGTH_LIMIT} Zeichen lang sein.`,
+          ),
+      }),
+    )
+    .max(
+      NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
+      `Es dürfen maximal ${NUMBER_OF_EXAMPLE_PROMPTS_LIMIT} Promptvorschläge angegeben werden.`,
+    ),
 });
-type AssistantFormValues = z.infer<typeof assistantFormValuesSchema>;
+
+export type AssistantFormValues = z.infer<typeof assistantFormValuesSchema>;
 
 export function AssistantEdit({
   assistant,
@@ -88,6 +107,10 @@ export function AssistantEdit({
     pictureId: assistant.pictureId ?? undefined,
     isSchoolShared: assistant.accessLevel === 'school',
     hasLinkAccess: assistant.hasLinkAccess,
+    promptSuggestions:
+      assistant.promptSuggestions && assistant.promptSuggestions.length > 0
+        ? assistant.promptSuggestions.map((s) => ({ value: s }))
+        : [{ value: '' }],
   };
 
   const {
@@ -111,6 +134,7 @@ export function AssistantEdit({
       },
       validate: trigger,
       saveValues: async (data) => {
+        // accessLevel is handled separately in handleSharingChange
         const updateResult = await updateAssistantAction({
           gptId: assistant.id,
           name: data.name,
@@ -118,6 +142,9 @@ export function AssistantEdit({
           instructions: data.instructions,
           pictureId: data.pictureId,
           hasLinkAccess: data.hasLinkAccess,
+          promptSuggestions: data.promptSuggestions
+            .map((suggestion) => suggestion.value.trim())
+            .filter((suggestion) => suggestion.length > 0),
         });
 
         return updateResult.success;
@@ -126,6 +153,7 @@ export function AssistantEdit({
 
   const name = useWatch({ control, name: 'name' });
   const onPictureIdChangeRef = useRef<(value: string) => void>(() => {});
+  const savedAccessLevelRef = useRef(assistant.accessLevel);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
@@ -197,24 +225,26 @@ export function AssistantEdit({
       croppedImageBlob,
     });
   }
-  const handleSharingChange = async () => {
-    const isSchoolShared = getValues('isSchoolShared');
-    const newAccessLevel = isSchoolShared ? 'school' : 'private';
+  const handleSharingChange = async ({ name, checked }: { name: string; checked: boolean }) => {
+    if (name === 'isSchoolShared') {
+      const newAccessLevel = checked ? 'school' : 'private';
 
-    if (newAccessLevel !== assistant.accessLevel) {
-      const result = await updateAssistantAccessLevelAction({
-        gptId: assistant.id,
-        accessLevel: newAccessLevel,
-      });
+      if (newAccessLevel !== savedAccessLevelRef.current) {
+        const result = await updateAssistantAccessLevelAction({
+          gptId: assistant.id,
+          accessLevel: newAccessLevel,
+        });
 
-      if (result.success) {
-        toast.success(t('toasts.edit-toast-success'));
-      } else {
-        toast.error(t('toasts.edit-toast-error'));
+        if (!result.success) {
+          toast.error(t('toasts.edit-toast-error'));
+          return;
+        }
+
+        savedAccessLevelRef.current = newAccessLevel;
       }
     }
 
-    handleAutoSave();
+    await flushAutoSave();
   };
 
   return (
@@ -345,6 +375,12 @@ export function AssistantEdit({
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 )}
+              />
+              <CustomChatPromptSuggestions
+                control={control}
+                onBlur={() => {
+                  handleAutoSave();
+                }}
               />
             </FieldGroup>
           </CardContent>
