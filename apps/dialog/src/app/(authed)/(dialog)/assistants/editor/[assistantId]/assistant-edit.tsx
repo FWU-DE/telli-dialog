@@ -335,7 +335,7 @@ export function AssistantEdit({
                       aria-invalid={fieldState.invalid}
                       placeholder="Beschreibung des Assistenten"
                       autoComplete="off"
-                      errorMessage={`Die Beschreibung darf maximal ${TEXT_INPUT_FIELDS_LENGTH_LIMIT} Zeichen lang sein.`}
+                      maxLengthErrorMessage={`Die Beschreibung darf maximal ${TEXT_INPUT_FIELDS_LENGTH_LIMIT} Zeichen lang sein.`}
                       maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
                       onBlur={() => {
                         field.onBlur();
@@ -359,7 +359,7 @@ export function AssistantEdit({
                       aria-invalid={fieldState.invalid}
                       placeholder="Anweisungen für den Assistenten"
                       maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS}
-                      errorMessage={`Die Anweisungen dürfen maximal ${TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS} Zeichen lang sein.`}
+                      maxLengthErrorMessage={`Die Anweisungen dürfen maximal ${TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS} Zeichen lang sein.`}
                       autoComplete="off"
                       onBlur={() => {
                         field.onBlur();

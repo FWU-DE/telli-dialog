@@ -8,14 +8,21 @@ import { cn } from '../lib/utils';
 type TextareaProps = React.ComponentProps<'textarea'> & {
   showCharacterCount?: boolean;
   maxLength?: number;
-  errorMessage?: string;
+  maxLengthErrorMessage?: string;
+  wrapperClassName?: string;
 };
 
+/* CAVE: The native textarea is no longer at root level because the word count should be displayed inside the TextArea component.
+ *  This can lead to issues with components which try to apply styles directly to the textarea element (via selector, etc).
+ *  In such cases, please apply styles to the Textarea component via the wrapperClassName prop or use data-slot="textarea" selector for targeting the textarea element.
+ *  Example: see InputGroupTextarea component in InputGroup.tsx
+ */
 function Textarea({
   className,
   showCharacterCount = true,
   maxLength,
-  errorMessage: maxLengthErrorMessage,
+  maxLengthErrorMessage,
+  wrapperClassName,
   value,
   onChange,
   onFocus,
@@ -49,7 +56,7 @@ function Textarea({
   };
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className={cn('flex flex-col gap-1', wrapperClassName)}>
       <div className="relative">
         <textarea
           data-slot="textarea"
