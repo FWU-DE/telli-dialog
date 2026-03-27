@@ -13,6 +13,7 @@ import { cn } from '@/utils/tailwind';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { PlusIcon, TrashSimpleIcon } from '@phosphor-icons/react';
 import { AssistantFormValues } from '@/app/(authed)/(dialog)/assistants/editor/[assistantId]/assistant-edit';
+import { Button } from '@ui/components/Button';
 
 type WithPromptSuggestions = {
   promptSuggestions: { value: string }[];
@@ -52,7 +53,7 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
     return (
       <Field key={fieldItem.id}>
         <FieldLabel htmlFor={`promptSuggestions.${index}.value`}>
-          {`Promptvorschlag ${index + 1}`}
+          {`${t('prompt-suggestion')} ${index + 1}`}
         </FieldLabel>
         <div className="flex items-center gap-3">
           <Controller
@@ -79,13 +80,11 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
 
           {isLastItem ? (
             <Tooltip>
-              <TooltipTrigger asChild aria-label="Tooltip für das Hinzufügen von Promptvorschlägen">
-                <button
+              <TooltipTrigger asChild aria-label={t('prompt-suggestions-add-button-tooltip')}>
+                <Button
                   type="button"
-                  className={cn(
-                    'flex items-center justify-center size-9 disabled:hover:bg-transparent disabled:hover:text-gray-400',
-                    iconClassName,
-                  )}
+                  variant="ghost"
+                  className={cn(iconClassName)}
                   aria-label={t('prompt-suggestions-add-button')}
                   disabled={
                     hasReachedPromptSuggestionsLimit || lastPromptSuggestionValue.trim() === ''
@@ -95,7 +94,7 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
                   }}
                 >
                   <PlusIcon className="size-5" />
-                </button>
+                </Button>
               </TooltipTrigger>
               {hasReachedPromptSuggestionsLimit && (
                 <TooltipContent>
@@ -113,9 +112,10 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
               )}
             </Tooltip>
           ) : (
-            <button
+            <Button
               type="button"
-              className={cn('flex items-center justify-center size-9', iconClassName)}
+              variant="ghost"
+              className={cn(iconClassName)}
               aria-label={t('prompt-suggestions-delete-button', { index: index + 1 })}
               onClick={() => {
                 removePromptSuggestion(index);
@@ -123,7 +123,7 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
               }}
             >
               <TrashSimpleIcon className="size-5 " />
-            </button>
+            </Button>
           )}
         </div>
       </Field>
