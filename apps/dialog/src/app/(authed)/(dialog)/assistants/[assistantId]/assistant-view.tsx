@@ -51,61 +51,52 @@ export function AssistantView({
         }}
       />
       <CustomChatTitle title={assistant.name} />
-      <div className="flex flex-row justify-between">
-        <CustomChatActions>
-          <CustomChatActionUse
-            onClick={() => {
-              router.push(`/assistants/d/${assistant.id}/`);
-            }}
-          />
-          <CustomChatActionDuplicate onClick={handleDuplicateAssistant} />
-        </CustomChatActions>
-        <CustomChatLastUpdate date={assistant.updatedAt} />
-      </div>
-
-      <div>
-        <div className="flex flex-col gap-3">
-          {assistant.accessLevel === 'global' && (
-            <Card className="w-full">
-              <CardContent className="flex flex-col items-center">
-                <div className="text-sm text-foreground/70">{t('author-label')}</div>
-                <div className="text-base font-medium">{t('author-text')}</div>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card>
-            <CardContent className="flex justify-center items-center">
-              <CustomChatAvatarImage pictureUrl={pictureUrl} />
-            </CardContent>
-          </Card>
-
-          <Card className="w-full">
-            <CardContent>
-              <CustomChatFields>
-                <CustomChatFieldInfo label={t('name-label')} value={assistant.name} />
-                <CustomChatFieldInfo label={t('description-label')} value={assistant.description} />
-                <CustomChatFieldInfo
-                  label={t('instructions-label')}
-                  value={assistant.instructions}
-                />
-                {assistant.promptSuggestions.map((suggestion, index) => (
-                  <CustomChatFieldInfo
-                    key={index}
-                    label={`Promptvorschlag ${index + 1}`}
-                    value={suggestion}
-                  />
-                ))}
-              </CustomChatFields>
-            </CardContent>
-          </Card>
-        </div>
-
-        <CustomChatFilesAndLinks
-          initialFiles={fileMappings}
-          initialLinks={assistant.attachedLinks.map((l) => ({ link: l }))}
+      <CustomChatActions>
+        <CustomChatActionUse
+          onClick={() => {
+            router.push(`/assistants/d/${assistant.id}/`);
+          }}
         />
-      </div>
+        <CustomChatActionDuplicate onClick={handleDuplicateAssistant} />
+        <CustomChatLastUpdate date={assistant.updatedAt} />
+      </CustomChatActions>
+
+      {assistant.accessLevel === 'global' && (
+        <Card className="w-full">
+          <CardContent className="flex flex-col items-center">
+            <div className="text-sm text-foreground/70">{t('author-label')}</div>
+            <div className="text-base font-medium">{t('author-text')}</div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardContent className="flex justify-center items-center">
+          <CustomChatAvatarImage pictureUrl={pictureUrl} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent>
+          <CustomChatFields>
+            <CustomChatFieldInfo label={t('name-label')} value={assistant.name} />
+            <CustomChatFieldInfo label={t('description-label')} value={assistant.description} />
+            <CustomChatFieldInfo label={t('instructions-label')} value={assistant.instructions} />
+            {assistant.promptSuggestions.map((suggestion, index) => (
+              <CustomChatFieldInfo
+                key={index}
+                label={`Promptvorschlag ${index + 1}`}
+                value={suggestion}
+              />
+            ))}
+          </CustomChatFields>
+        </CardContent>
+      </Card>
+
+      <CustomChatFilesAndLinks
+        initialFiles={fileMappings}
+        initialLinks={assistant.attachedLinks.map((l) => ({ link: l }))}
+      />
     </CustomChatLayoutContainer>
   );
 }
