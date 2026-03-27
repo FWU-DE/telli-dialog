@@ -51,18 +51,8 @@ import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-cha
 
 const assistantFormValuesSchema = z.object({
   name: z.string().min(1, 'Der Name darf nicht leer sein.'),
-  description: z
-    .string()
-    .max(
-      TEXT_INPUT_FIELDS_LENGTH_LIMIT,
-      `Die Beschreibung darf maximal ${TEXT_INPUT_FIELDS_LENGTH_LIMIT} Zeichen lang sein.`,
-    ),
-  instructions: z
-    .string()
-    .max(
-      TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
-      `Die Anweisungen dürfen maximal ${TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS} Zeichen lang sein.`,
-    ),
+  description: z.string(),
+  instructions: z.string(),
   pictureId: z.string().optional(),
   isSchoolShared: z.boolean(),
   hasLinkAccess: z.boolean(),
@@ -345,6 +335,8 @@ export function AssistantEdit({
                       aria-invalid={fieldState.invalid}
                       placeholder="Beschreibung des Assistenten"
                       autoComplete="off"
+                      maxLengthErrorMessage={`Die Beschreibung darf maximal ${TEXT_INPUT_FIELDS_LENGTH_LIMIT} Zeichen lang sein.`}
+                      maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
                       onBlur={() => {
                         field.onBlur();
                         handleAutoSave();
@@ -366,6 +358,8 @@ export function AssistantEdit({
                       className="h-125"
                       aria-invalid={fieldState.invalid}
                       placeholder="Anweisungen für den Assistenten"
+                      maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS}
+                      maxLengthErrorMessage={`Die Anweisungen dürfen maximal ${TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS} Zeichen lang sein.`}
                       autoComplete="off"
                       onBlur={() => {
                         field.onBlur();
