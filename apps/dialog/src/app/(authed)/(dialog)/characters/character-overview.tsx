@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { OverviewFilter } from '@shared/overview-filter';
@@ -8,25 +8,27 @@ import { CharacterWithImage } from './utils';
 import EntityOverview from '@/components/entity-overview/entity-overview';
 import EntityCard from '@/components/entity-overview/entity-card';
 import { CreateNewCharacterButton } from './create-new-character-button';
+import { useOverviewFilter } from '@/components/hooks/use-overview-filter';
+import { getCharactersByFilterAction } from '../actions/entity-filter-actions';
 
 type CharacterOverviewProps = {
-  characters: CharacterWithImage[];
-  activeFilter: OverviewFilter;
   currentUserId: string;
 };
 
-export default function CharacterOverview({
-  characters,
-  activeFilter,
-  currentUserId,
-}: CharacterOverviewProps) {
+export default function CharacterOverview({ currentUserId }: CharacterOverviewProps) {
   const router = useRouter();
   const t = useTranslations('characters');
+  const [visibleCharacters, setVisibleCharacters] = useState<CharacterWithImage[]>([]);
 
-  function handleFilterChange(filter: OverviewFilter) {
-    const searchParams = new URLSearchParams();
-    searchParams.set('filter', filter);
-    router.push(`/characters?${searchParams.toString()}`);
+  const fetchCharacters = useCallback(async (filter: OverviewFilter) => {
+    const entities = await getCharactersByFilterAction(filter);
+    setVisibleCharacters(entities);
+  }, []);
+
+  const [activeFilter, setActiveFilter] = useOverviewFilter('characters', fetchCharacters);
+
+  async function handleFilterChange(filter: OverviewFilter) {
+    await setActiveFilter(filter);
   }
 
   return (
@@ -37,9 +39,9 @@ export default function CharacterOverview({
       createButton={<CreateNewCharacterButton />}
       activeFilter={activeFilter}
       onFilterChange={handleFilterChange}
-      itemCount={characters.length}
+      itemCount={visibleCharacters.length}
     >
-      {characters.map((character) => (
+      {visibleCharacters.map((character) => (
         <EntityCard
           key={character.id}
           name={character.name}

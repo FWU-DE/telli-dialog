@@ -1,13 +1,9 @@
 import { accessLevelSchema } from '@shared/db/schema';
-import { overviewFilterSchema } from '@shared/overview-filter';
 import CharacterPreviewPage from './character-preview-page';
 import { enrichCharactersWithImage } from './utils';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
-import {
-  getCharacterByAccessLevel,
-  getCharactersByOverviewFilter,
-} from '@shared/characters/character-service';
+import { getCharacterByAccessLevel } from '@shared/characters/character-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
@@ -17,7 +13,6 @@ export const dynamic = 'force-dynamic';
 
 const searchParamsSchema = z.object({
   visibility: accessLevelSchema.optional().default('private'),
-  filter: overviewFilterSchema.optional().default('all'),
 });
 
 export default async function Page(props: PageProps<'/characters'>) {
@@ -26,25 +21,7 @@ export default async function Page(props: PageProps<'/characters'>) {
   const isNewUi = federalState.featureToggles.isNewUiDesignEnabled;
 
   if (isNewUi) {
-    const isSchoolSharingEnabled = federalState.featureToggles.isShareTemplateWithSchoolEnabled;
-    const filter =
-      !isSchoolSharingEnabled && searchParams.filter === 'school' ? 'all' : searchParams.filter;
-    const _characters = await getCharactersByOverviewFilter({
-      filter,
-      schoolId: school.id,
-      userId: user.id,
-      federalStateId: federalState.id,
-    }).catch(handleErrorInServerComponent);
-    const characters = _characters.filter((c) => c.name !== '');
-    const enrichedCharacters = await enrichCharactersWithImage({ characters });
-
-    return (
-      <CharacterOverview
-        characters={enrichedCharacters}
-        activeFilter={filter}
-        currentUserId={user.id}
-      />
-    );
+    return <CharacterOverview currentUserId={user.id} />;
   }
 
   const accessLevel = searchParams.visibility;

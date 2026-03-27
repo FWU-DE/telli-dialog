@@ -1,24 +1,18 @@
 import { accessLevelSchema } from '@shared/db/schema';
-import { overviewFilterSchema } from '@shared/overview-filter';
 import Page2 from './_page';
 import { enrichAssistantsWithImage } from './utils';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
-import {
-  getAssistantByAccessLevel,
-  getAssistantsByOverviewFilter,
-} from '@shared/assistants/assistant-service';
+import { getAssistantByAccessLevel } from '@shared/assistants/assistant-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import CustomGptOverview from './custom-gpt-overview';
-import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 
 export const dynamic = 'force-dynamic';
 
 const searchParamsSchema = z.object({
   visibility: accessLevelSchema.optional().default('private'),
-  filter: overviewFilterSchema.optional().default('all'),
 });
 
 export default async function Page(props: PageProps<'/custom'>) {
@@ -27,25 +21,7 @@ export default async function Page(props: PageProps<'/custom'>) {
   const isNewUi = federalState.featureToggles.isNewUiDesignEnabled;
 
   if (isNewUi) {
-    const isSchoolSharingEnabled = federalState.featureToggles.isShareTemplateWithSchoolEnabled;
-    const filter =
-      !isSchoolSharingEnabled && searchParams.filter === 'school' ? 'all' : searchParams.filter;
-    const _customGpts = await getAssistantsByOverviewFilter({
-      filter,
-      schoolId: school.id,
-      userId: user.id,
-      federalStateId: federalState.id,
-    }).catch(handleErrorInServerComponent);
-    const assistants = _customGpts.filter((c) => c.name !== '' && c.id !== HELP_MODE_ASSISTANT_ID);
-    const enrichedCustomGpts = await enrichAssistantsWithImage({ assistants });
-
-    return (
-      <CustomGptOverview
-        assistants={enrichedCustomGpts}
-        activeFilter={filter}
-        currentUserId={user.id}
-      />
-    );
+    return <CustomGptOverview currentUserId={user.id} />;
   }
 
   const accessLevel = searchParams.visibility;

@@ -13,6 +13,10 @@ import {
   TooltipTrigger,
 } from '@telli/ui/components/Tooltip';
 import { FilterTabs } from '@telli/ui/components/FilterTabs';
+import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
+import ProfileMenu from '../navigation/profile-menu';
+import { ToggleSidebarButton, NewChatButton } from '../navigation/sidebar/collapsible-sidebar';
+import { useSession } from 'next-auth/react';
 
 type EntityOverviewProps = {
   title: string;
@@ -39,6 +43,8 @@ export default function EntityOverview({
 }: EntityOverviewProps) {
   const [searchInput, setSearchInput] = React.useState('');
   const federalState = useFederalState();
+  const { data: session } = useSession();
+  const user = session?.user;
   const t = useTranslations('entity-overview');
 
   const showSchoolFilter = federalState?.featureToggles?.isShareTemplateWithSchoolEnabled ?? false;
@@ -51,6 +57,13 @@ export default function EntityOverview({
 
   return (
     <div className="min-w-full overflow-auto flex flex-col h-full bg-gray-50">
+      <HeaderPortal>
+        <ToggleSidebarButton
+          isNewUiDesignEnabled={federalState?.featureToggles?.isNewUiDesignEnabled ?? false}
+        />
+        <div className="grow"></div>
+        <ProfileMenu userAndContext={user} />
+      </HeaderPortal>
       <div className="px-6 pt-6 pb-4 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto w-full">
           <div className="flex items-center gap-2 mb-6">

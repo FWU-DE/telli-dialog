@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { OverviewFilter } from '@shared/overview-filter';
@@ -8,25 +8,29 @@ import { LearningScenarioWithImage } from '@shared/learning-scenarios/learning-s
 import EntityOverview from '@/components/entity-overview/entity-overview';
 import EntityCard from '@/components/entity-overview/entity-card';
 import { CreateNewLearningScenarioButton } from './create-new-learning-scenario-button';
+import { useOverviewFilter } from '@/components/hooks/use-overview-filter';
+import { getLearningScenariosByFilterAction } from '../actions/entity-filter-actions';
 
 type LearningScenarioOverviewProps = {
-  learningScenarios: LearningScenarioWithImage[];
-  activeFilter: OverviewFilter;
   currentUserId: string;
 };
 
-export default function LearningScenarioOverview({
-  learningScenarios,
-  activeFilter,
-  currentUserId,
-}: LearningScenarioOverviewProps) {
+export default function LearningScenarioOverview({ currentUserId }: LearningScenarioOverviewProps) {
   const router = useRouter();
   const t = useTranslations('learning-scenarios');
+  const [visibleLearningScenarios, setVisibleLearningScenarios] = useState<
+    LearningScenarioWithImage[]
+  >([]);
 
-  function handleFilterChange(filter: OverviewFilter) {
-    const searchParams = new URLSearchParams();
-    searchParams.set('filter', filter);
-    router.push(`/learning-scenarios?${searchParams.toString()}`);
+  const fetchLearningScenarios = useCallback(async (filter: OverviewFilter) => {
+    const entities = await getLearningScenariosByFilterAction(filter);
+    setVisibleLearningScenarios(entities);
+  }, []);
+
+  const [activeFilter, setActiveFilter] = useOverviewFilter('scenarios', fetchLearningScenarios);
+
+  async function handleFilterChange(filter: OverviewFilter) {
+    await setActiveFilter(filter);
   }
 
   return (
@@ -37,9 +41,9 @@ export default function LearningScenarioOverview({
       createButton={<CreateNewLearningScenarioButton />}
       activeFilter={activeFilter}
       onFilterChange={handleFilterChange}
-      itemCount={learningScenarios.length}
+      itemCount={visibleLearningScenarios.length}
     >
-      {learningScenarios.map((ls) => (
+      {visibleLearningScenarios.map((ls) => (
         <EntityCard
           key={ls.id}
           name={ls.name}
