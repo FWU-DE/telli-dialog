@@ -1,25 +1,40 @@
 'use client';
 import { Button } from '@ui/components/Button';
 import { Input } from '@ui/components/Input';
-import { Controller, Control, useFieldArray } from 'react-hook-form';
+import {
+  ArrayPath,
+  Control,
+  Controller,
+  FieldArray,
+  FieldValues,
+  Path,
+  useFieldArray,
+} from 'react-hook-form';
 import { Field, FieldDescription, FieldError, FieldLegend, FieldSet } from '@ui/components/Field';
 
-export type FormFieldArrayProps = {
-  name: string;
+export type FormFieldArrayProps<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends ArrayPath<TFieldValues> = ArrayPath<TFieldValues>,
+> = {
+  name: TName;
+  control: Control<TFieldValues>;
   label: string;
   description: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  control: Control<any>;
   inputType?: string;
+  defaultAppendValue: FieldArray<TFieldValues, TName>;
 };
 
-export function FormFieldArray({
+export function FormFieldArray<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends ArrayPath<TFieldValues> = ArrayPath<TFieldValues>,
+>({
   name,
   label,
   description,
   control,
   inputType = 'text',
-}: FormFieldArrayProps) {
+  defaultAppendValue,
+}: FormFieldArrayProps<TFieldValues, TName>) {
   const { fields, append, remove } = useFieldArray({
     control,
     name,
@@ -33,7 +48,7 @@ export function FormFieldArray({
         {fields.map((item, index) => (
           <div key={item.id} className="flex gap-2">
             <Controller
-              name={`${name}.${index}.value`}
+              name={`${name}.${index}.value` as Path<TFieldValues>}
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
@@ -49,7 +64,7 @@ export function FormFieldArray({
             />
           </div>
         ))}
-        <Button type="button" onClick={() => append({ value: '' })}>
+        <Button type="button" onClick={() => append(defaultAppendValue)}>
           Hinzufügen
         </Button>
       </div>

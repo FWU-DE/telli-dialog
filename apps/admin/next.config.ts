@@ -24,6 +24,10 @@ const baseNextConfig: NextConfig = {
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/output#automatically-copying-traced-files
   output: 'standalone',
   productionBrowserSourceMaps: !isDevBuild,
+  experimental: {
+    // Speed up dev builds by pre-bundling heavy packages instead of re-resolving on every HMR
+    optimizePackageImports: ['@telli/ui', '@telli/shared', '@telli/ai-core'],
+  },
 };
 
 export default withSentryConfig(baseNextConfig, {

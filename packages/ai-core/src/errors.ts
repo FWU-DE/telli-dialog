@@ -83,3 +83,37 @@ export class ProviderConfigurationError extends AiGenerationError {
     return false;
   }
 }
+
+/**
+ * Error thrown when the user has exceeded their Telli points limit.
+ */
+export class TelliPointsExceededError extends AiGenerationError {
+  constructor(message: string = 'User has reached Telli points limit') {
+    super(message);
+    this.name = 'TelliPointsExceededError';
+  }
+
+  static is(error: unknown): error is TelliPointsExceededError {
+    if (error && typeof error === 'object') {
+      return 'name' in error && error.name === 'TelliPointsExceededError';
+    }
+    return false;
+  }
+}
+
+/**
+ * Error thrown when the shared chat has expired.
+ */
+export class SharedChatExpiredError extends AiGenerationError {
+  constructor(message: string = 'Shared chat has expired') {
+    super(message);
+    this.name = 'SharedChatExpiredError';
+  }
+
+  static is(error: unknown): error is SharedChatExpiredError {
+    if (error && typeof error === 'object') {
+      return 'name' in error && error.name === 'SharedChatExpiredError';
+    }
+    return false;
+  }
+}

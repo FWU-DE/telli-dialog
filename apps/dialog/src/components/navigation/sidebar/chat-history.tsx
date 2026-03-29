@@ -8,7 +8,8 @@ import { fetchClientSideConversations } from '@/app/(authed)/(dialog)/utils';
 import { useToast } from '@/components/common/toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useCustomPathname } from '@/hooks/use-custom-pathname';
 import { useMemo, useState, useRef } from 'react';
 import { SidebarGroup, SidebarMenu } from '@ui/components/Sidebar';
 import { ChatHistoryItem } from './chat-history-item';
@@ -20,7 +21,7 @@ import { IconButton } from '@ui/components/IconButton';
 
 export function ChatHistory() {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = useCustomPathname();
   const toast = useToast();
   const t = useTranslations('sidebar');
   const queryClient = useQueryClient();

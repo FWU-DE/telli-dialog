@@ -20,7 +20,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAfter, isBefore, isToday, isYesterday, subDays } from 'date-fns';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { useCustomPathname } from '@/hooks/use-custom-pathname';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 import { deleteConversationAction, updateConversationTitleAction } from './actions';
 import { fetchClientSideConversations } from './utils';
@@ -40,7 +41,7 @@ export default function DialogSidebar({
   isNewUiDesignEnabled,
 }: Props) {
   const { isMobile, setOpenMobile } = useSidebar();
-  const pathname = usePathname();
+  const pathname = useCustomPathname();
   const router = useRouter();
   const toast = useToast();
   const tCommon = useTranslations('common');
