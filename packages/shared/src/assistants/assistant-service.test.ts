@@ -510,7 +510,7 @@ describe('assistant-service', () => {
     );
   });
 
-  describe('Allow access', () => {
+  describe('getAssistantForNewChat', () => {
     const assistantId = generateUUID();
     const schoolIdOfOwner = generateUUID();
     const userIdOfOwner = generateUUID();
@@ -520,43 +520,57 @@ describe('assistant-service', () => {
       { accessLevel: 'school', schoolId: schoolIdOfOwner, userId: 'different-user-id' },
       { accessLevel: 'global', schoolId: 'different-school-id', userId: 'different-user-id' },
     ] as const)('accessLevel=$accessLevel', ({ accessLevel, schoolId, userId }) => {
-      it.each([
-        {
-          functionName: 'getAssistantByUser',
-          testFunction: () =>
-            getAssistantByUser({
-              assistantId,
-              schoolId,
-              userId,
-            }),
-        },
-        {
-          functionName: 'getAssistantForNewChat',
-          testFunction: () =>
-            getAssistantForNewChat({
-              assistantId,
-              schoolId,
-              userId,
-            }),
-        },
-      ])(
-        `should return assistant with accessLevel=${accessLevel} - $functionName`,
-        async ({ testFunction }) => {
-          const mockAssistant: Partial<AssistantSelectModel> = {
-            userId: userIdOfOwner,
-            schoolId: schoolIdOfOwner,
-            accessLevel,
-          };
+      it(`should return assistant with accessLevel=${accessLevel} - $functionName`, async () => {
+        const mockAssistant: Partial<AssistantSelectModel> = {
+          userId: userIdOfOwner,
+          schoolId: schoolIdOfOwner,
+          accessLevel,
+        };
 
-          (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
-            mockAssistant as never,
-          );
+        const assistant = getAssistantForNewChat({
+          assistantId,
+          schoolId,
+          userId,
+        });
 
-          const assistant = await testFunction();
+        (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
+          mockAssistant as never,
+        );
 
-          expect(assistant).toBe(mockAssistant);
-        },
-      );
+        expect(assistant).toBe(mockAssistant);
+      });
+    });
+  });
+
+  describe('getAssistantByUser', () => {
+    const assistantId = generateUUID();
+    const schoolIdOfOwner = generateUUID();
+    const userIdOfOwner = generateUUID();
+
+    describe.each([
+      { accessLevel: 'private', schoolId: 'any', userId: userIdOfOwner },
+      { accessLevel: 'school', schoolId: schoolIdOfOwner, userId: 'different-user-id' },
+      { accessLevel: 'global', schoolId: 'different-school-id', userId: 'different-user-id' },
+    ] as const)('accessLevel=$accessLevel', ({ accessLevel, schoolId, userId }) => {
+      it(`should return assistant with accessLevel=${accessLevel} - $functionName`, async () => {
+        const mockAssistant: Partial<AssistantSelectModel> = {
+          userId: userIdOfOwner,
+          schoolId: schoolIdOfOwner,
+          accessLevel,
+        };
+
+        (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
+          mockAssistant as never,
+        );
+
+        const { assistant } = await getAssistantByUser({
+          assistantId,
+          schoolId,
+          userId,
+        });
+
+        expect(assistant).toBe(mockAssistant);
+      });
     });
   });
 
@@ -596,7 +610,7 @@ describe('assistant-service', () => {
           schoolId: differentSchoolId,
         });
 
-        expect(result).toBe(mockAssistant);
+        expect(result.assistant).toBe(mockAssistant);
       });
 
       it.each([
