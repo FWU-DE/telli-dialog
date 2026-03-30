@@ -4,6 +4,7 @@ import { getAssistantForEditView, getFileMappings } from '@shared/assistants/ass
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { notFound } from 'next/navigation';
 import { AssistantEdit } from './assistant-edit';
+import { ResponsiveLayoutWrapper } from '../../../_components/responsive-layout-wrapper';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,13 +36,13 @@ export default async function Page(props: PageProps<'/assistants/editor/[assista
   const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
 
   return (
-    <div className="min-w-full p-6 overflow-auto">
+    <ResponsiveLayoutWrapper>
       <AssistantEdit
         assistant={assistant}
         relatedFiles={relatedFiles}
         initialLinks={initialLinks}
         avatarPictureUrl={avatarPictureUrl}
       />
-    </div>
+    </ResponsiveLayoutWrapper>
   );
 }

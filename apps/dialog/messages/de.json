@@ -105,7 +105,7 @@
       "upload-file-button-disabled": "Es können maximal {max_files} Dateien hochgeladen werden",
       "file-limit-reached": "Es können maximal {max_files} Dateien hochgeladen werden. {files_exceeded} Dateien wurden nicht hochgeladen.",
       "image-limit-reached": "Es können maximal {max_images} Bilder hochgeladen werden. {images_exceeded} Bilder wurden nicht hochgeladen.",
-      "drop-area": "Dateien per Drag & Drop hier ablegen",
+      "drop-area": "Dateien per Drag & Drop hier ablegen <b> (pdf, txt, docx) </b>",
       "choice-word": "oder"
     },
     "toasts": {

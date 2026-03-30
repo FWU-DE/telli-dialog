@@ -49,7 +49,7 @@ export default function CustomShareSection<T extends FieldValues>({
     <div className="flex flex-col gap-3 mt-10">
       <CustomChatHeading2 text={t('label')} />
       <Card>
-        <CardRow className="flex-wrap justify-center sm:justify-start">
+        <CardRow className="justify-center sm:justify-start">
           {federalState?.featureToggles?.isShareTemplateWithSchoolEnabled && schoolSharingName && (
             <CheckboxWithInfo
               name={schoolSharingName}
