@@ -2,6 +2,8 @@ import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
 import {
   dbDeleteCharacterByIdAndUserId,
+  dbGetAllAccessibleCharacters,
+  dbGetAllCharactersByUserId,
   dbGetCharacterById,
   dbGetCharacterByIdWithShareData,
   dbGetCharacters,
@@ -30,6 +32,7 @@ import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fil
 import { copyFileInS3, getReadOnlySignedUrl, uploadFileToS3, deleteFileFromS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/template-service';
+import { OverviewFilter } from '@shared/overview-filter';
 import { addDays } from '@shared/utils/date';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
@@ -620,6 +623,29 @@ export async function getCharacterByAccessLevel({
     return dbGetCharactersBySchoolId({ schoolId, userId });
   } else if (accessLevel === 'private') {
     return dbGetCharactersByUserId({ userId });
+  }
+  return [];
+}
+
+export async function getCharactersByOverviewFilter({
+  filter,
+  schoolId,
+  userId,
+  federalStateId,
+}: {
+  filter: OverviewFilter;
+  schoolId: string;
+  userId: string;
+  federalStateId: string;
+}): Promise<CharacterWithShareDataModel[]> {
+  if (filter === 'all') {
+    return dbGetAllAccessibleCharacters({ userId, schoolId, federalStateId });
+  } else if (filter === 'mine') {
+    return await dbGetAllCharactersByUserId({ userId });
+  } else if (filter === 'official') {
+    return await dbGetGlobalCharacters({ userId, federalStateId });
+  } else if (filter === 'school') {
+    return await dbGetCharactersBySchoolId({ schoolId, userId });
   }
   return [];
 }

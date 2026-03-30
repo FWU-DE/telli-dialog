@@ -24,9 +24,14 @@ import {
   fileTable,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
-import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
+import {
+  deleteAvatarPicture,
+  deleteMessageAttachments,
+  getAvatarPictureUrl,
+} from '@shared/files/fileService';
 import { copyFileInS3, deleteFileFromS3, uploadFileToS3 } from '@shared/s3';
 import { copyAssistant, copyRelatedTemplateFiles } from '@shared/templates/template-service';
+import { OverviewFilter } from '@shared/overview-filter';
 import { addDays } from '@shared/utils/date';
 import { generateUUID } from '@shared/utils/uuid';
 import { and, eq, lt } from 'drizzle-orm';
@@ -43,17 +48,17 @@ function buildAvatarFilename(hash: string) {
 }
 
 /**
- * Loads custom gpt for edit view.
- * Throws if the user is not authorized to access the custom gpt:
- * - NotFound if the custom gpt does not exist
- * - Forbidden if the custom gpt is private and the user is not the owner
- * - Forbidden if the custom gpt is school-level and the user is not in the same school (and not the owner)
+ * Loads assistant for editing or viewing in the frontend.
+ * Throws if the user is not authorized to access the assistant:
+ * - NotFound if the assistant does not exist
+ * - Forbidden if the assistant is private and the user is not the owner
+ * - Forbidden if the assistant is school-level and the user is not in the same school (and not the owner)
  *
  * Link sharing bypass: If `hasLinkAccess` is true, access checks are skipped
- * and any authenticated user can view the custom gpt. Note that link sharing
+ * and any authenticated user can view the assistant. Note that link sharing
  * only grants read-only access - editing is still restricted to the owner.
  */
-export async function getAssistantForEditView({
+export async function getAssistantByUser({
   assistantId,
   schoolId,
   userId,
@@ -61,21 +66,30 @@ export async function getAssistantForEditView({
   assistantId: string;
   schoolId: string;
   userId: string;
-}): Promise<AssistantSelectModel> {
+}): Promise<{
+  assistant: AssistantSelectModel;
+  fileMappings: FileModel[];
+  pictureUrl: string | undefined;
+}> {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
   if (!assistant.hasLinkAccess) {
     if (assistant.accessLevel === 'private' && assistant.userId !== userId)
-      throw new ForbiddenError('Not authorized to edit assistant');
+      throw new ForbiddenError('Not authorized to access assistant');
     if (
       assistant.accessLevel === 'school' &&
       assistant.schoolId !== schoolId &&
       assistant.userId !== userId
     )
-      throw new ForbiddenError('Not authorized to edit assistant');
+      throw new ForbiddenError('Not authorized to access assistant');
   }
 
-  return assistant;
+  const [fileMappings, pictureUrl] = await Promise.all([
+    dbGetRelatedAssistantFiles(assistantId),
+    getAvatarPictureUrl(assistant.pictureId),
+  ]);
+
+  return { assistant, fileMappings, pictureUrl };
 }
 
 /**
@@ -160,6 +174,34 @@ export async function getAssistantByAccessLevel({
     return await dbGetGptsBySchoolId({ schoolId });
   } else if (accessLevel === 'private') {
     return await dbGetGptsByUserId({ userId });
+  }
+  return [];
+}
+
+export async function getAssistantsByOverviewFilter({
+  filter,
+  schoolId,
+  userId,
+  federalStateId,
+}: {
+  filter: OverviewFilter;
+  schoolId: string;
+  userId: string;
+  federalStateId: string;
+}): Promise<AssistantSelectModel[]> {
+  if (filter === 'all') {
+    const [privateAssistants, schoolAssistants, globalAssistants] = await Promise.all([
+      dbGetGptsByUserId({ userId }),
+      dbGetGptsBySchoolId({ schoolId }),
+      dbGetGlobalGpts({ federalStateId }),
+    ]);
+    return [...privateAssistants, ...schoolAssistants, ...globalAssistants];
+  } else if (filter === 'mine') {
+    return await dbGetGptsByUserId({ userId });
+  } else if (filter === 'official') {
+    return await dbGetGlobalGpts({ federalStateId });
+  } else if (filter === 'school') {
+    return await dbGetGptsBySchoolId({ schoolId });
   }
   return [];
 }

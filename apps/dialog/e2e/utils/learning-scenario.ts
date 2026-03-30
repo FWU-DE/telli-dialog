@@ -14,11 +14,11 @@ async function confirmDelete(page: Page) {
 }
 
 export async function deleteLearningScenario(page: Page, name: string) {
-  const deleteButton = page
-    .locator('a', { has: page.locator('> figure') })
-    .filter({ hasText: name })
-    .getByLabel('Löschen')
-    .first();
+  const card = page.getByRole('button', { name }).first();
+  await expect(card).toBeVisible();
+  await card.click();
+  await page.waitForURL('/learning-scenarios/editor/**');
+  const deleteButton = page.getByRole('button', { name: 'Szenario endgültig löschen' });
   await expect(deleteButton).toBeVisible();
   await deleteButton.click();
   await confirmDelete(page);

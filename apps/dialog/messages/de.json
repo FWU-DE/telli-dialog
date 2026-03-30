@@ -105,7 +105,7 @@
       "upload-file-button-disabled": "Es können maximal {max_files} Dateien hochgeladen werden",
       "file-limit-reached": "Es können maximal {max_files} Dateien hochgeladen werden. {files_exceeded} Dateien wurden nicht hochgeladen.",
       "image-limit-reached": "Es können maximal {max_images} Bilder hochgeladen werden. {images_exceeded} Bilder wurden nicht hochgeladen.",
-      "drop-area": "Datei per Drag & Drop hier ablegen",
+      "drop-area": "Dateien per Drag & Drop hier ablegen <b> (pdf, txt, docx) </b>",
       "choice-word": "oder"
     },
     "toasts": {
@@ -412,6 +412,13 @@
     }
   },
   "assistant": {
+    "back-button-text": "Assistenten",
+    "back-button-aria": "Zurück zur Übersicht der Assistenten",
+    "author-label": "Autor/in",
+    "author-text": "FWU",
+    "name-label": "Name des Assistenten",
+    "description-label": "Kurzbeschreibung",
+    "instructions-label": "Instruktionen",
     "prompt-suggestion": "Promptvorschlag",
     "prompt-suggestions-add-button": "Promptvorschlag hinzufügen",
     "prompt-suggestions-add-button-tooltip": "Tooltip für das Hinzufügen von Promptvorschlägen",
@@ -425,5 +432,14 @@
       "edit-toast-success": "Der Assistent wurde erfolgreich aktualisiert.",
       "edit-toast-error": "Etwas ist beim Aktualisieren des Assistenten schief gelaufen."
     }
+  },
+  "entity-overview": {
+    "filter-all": "Alle",
+    "filter-mine": "Meine",
+    "filter-official": "Offiziell",
+    "filter-school": "Schulintern",
+    "filter-tabs-label": "Filteroptionen",
+    "info-tooltip-label": "Informationen anzeigen",
+    "badge-mine": "von mir"
   }
 }

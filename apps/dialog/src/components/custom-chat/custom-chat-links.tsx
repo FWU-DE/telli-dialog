@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { GlobeIcon, PlusIcon, TrashSimpleIcon } from '@phosphor-icons/react';
+import { PlusIcon, TrashSimpleIcon } from '@phosphor-icons/react';
 import { Input } from '@ui/components/Input';
 import { Button } from '@ui/components/Button';
 import { Spinner } from '@ui/components/Spinner';
@@ -18,7 +18,8 @@ import { IconButton } from '@ui/components/IconButton';
 
 export type CustomChatLinksProps = {
   initialLinks: WebsearchSource[];
-  onLinksChange: (links: string[]) => Promise<{ success: boolean }>;
+  // If onLinksChange is undefined, the component will be in read-only mode
+  onLinksChange?: (links: string[]) => Promise<{ success: boolean }>;
 };
 
 export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinksProps) {
@@ -26,8 +27,11 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
   const [currentLink, setCurrentLink] = React.useState('');
   const [processingLinks, setProcessingLinks] = React.useState<Set<string>>(new Set());
   const toast = useToast();
+  const isReadonly = onLinksChange === undefined;
 
   async function handleAddLink() {
+    if (isReadonly) return;
+
     const normalizedLink = currentLink.trim();
 
     if (normalizedLink === '') {
@@ -75,6 +79,8 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
   }
 
   async function handleDeleteLink(index: number) {
+    if (isReadonly) return;
+
     const linkToDelete = links[index];
     if (linkToDelete === undefined) return;
 
@@ -91,40 +97,45 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
   const maxLinksReached = links.length >= NUMBER_OF_LINKS_LIMIT_FOR_SHARED_CHAT;
 
   return (
-    <div className="flex flex-col">
-      <div className="flex flex-row gap-2">
-        <Input
-          type="url"
-          placeholder="https://..."
-          maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-          value={currentLink}
-          disabled={maxLinksReached}
-          aria-label="URL eingeben"
-          onChange={(e) => setCurrentLink(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              handleAddLink();
-            }
-          }}
-        />
-        <Button disabled={maxLinksReached} onClick={handleAddLink} aria-label="Webseite hinzufügen">
-          <PlusIcon className="size-4" />
-          Link hinzufügen
-        </Button>
-      </div>
-
+    <div className="flex flex-col gap-8">
+      {!isReadonly && (
+        <div className="flex flex-row gap-2">
+          <Input
+            type="url"
+            placeholder="https://..."
+            maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+            value={currentLink}
+            disabled={maxLinksReached}
+            aria-label="URL eingeben"
+            onChange={(e) => setCurrentLink(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleAddLink();
+              }
+            }}
+          />
+          <Button
+            disabled={maxLinksReached}
+            onClick={handleAddLink}
+            aria-label="Webseite hinzufügen"
+          >
+            <PlusIcon className="size-4" />
+            Link hinzufügen
+          </Button>
+        </div>
+      )}
       {links.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-8 mb-2">
+        <div className="flex flex-wrap gap-2">
           {links.map((link, index) => {
             const isProcessing = processingLinks.has(link.link);
             const displayTitle = getDisplayUrl(link.link);
             return (
               <div
                 key={link.link}
-                className="flex items-center gap-1 px-3 py-0.5 rounded-md bg-primary/10 text-primary text-sm font-medium"
+                className="flex items-center gap-1 h-9 px-3 py-0.5 rounded-md bg-primary/10 text-primary text-sm font-medium"
               >
-                {isProcessing ?? <Spinner className="size-4" />}
+                {isProcessing && <Spinner className="size-4" />}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <a
@@ -138,16 +149,18 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
                   </TooltipTrigger>
                   <TooltipContent>{link.link}</TooltipContent>
                 </Tooltip>
-                <IconButton
-                  variant="primary"
-                  size="md"
-                  className="hover:bg-primary/40"
-                  disabled={isProcessing}
-                  aria-label={`Webseite ${displayTitle} entfernen`}
-                  onClick={() => handleDeleteLink(index)}
-                >
-                  <TrashSimpleIcon className="size-4" />
-                </IconButton>
+                {!isReadonly && (
+                  <IconButton
+                    variant="primary"
+                    size="md"
+                    className="hover:bg-primary/40"
+                    disabled={isProcessing}
+                    aria-label={`Webseite ${displayTitle} entfernen`}
+                    onClick={() => handleDeleteLink(index)}
+                  >
+                    <TrashSimpleIcon className="size-4" />
+                  </IconButton>
+                )}
               </div>
             );
           })}

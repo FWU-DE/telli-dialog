@@ -4,6 +4,8 @@ import { dbGetFilesForLearningScenario } from '@shared/db/functions/files';
 import {
   dbCreateLearningScenarioShare,
   dbDeleteLearningScenarioByIdAndUserId,
+  dbGetAllAccessibleLearningScenarios,
+  dbGetAllLearningScenariosByUserId,
   dbGetGlobalLearningScenarios,
   dbGetLearningScenarioById,
   dbGetLearningScenarioByIdOptionalShareData,
@@ -34,6 +36,7 @@ import {
 import { deleteFileFromS3, uploadFileToS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { and, eq } from 'drizzle-orm';
+import { OverviewFilter } from '@shared/overview-filter';
 import z from 'zod';
 import { duplicateLearningScenario } from '@shared/learning-scenarios/learning-scenario-admin-service';
 import {
@@ -94,6 +97,29 @@ export async function getLearningScenariosByAccessLevel({
     return dbGetLearningScenariosBySchoolId({ schoolId, userId });
   } else if (accessLevel === 'private') {
     return dbGetLearningScenariosByUserId({ userId });
+  }
+  return [];
+}
+
+export async function getLearningScenariosByOverviewFilter({
+  filter,
+  schoolId,
+  userId,
+  federalStateId,
+}: {
+  filter: OverviewFilter;
+  schoolId: string;
+  userId: string;
+  federalStateId: string;
+}): Promise<LearningScenarioOptionalShareDataModel[]> {
+  if (filter === 'all') {
+    return dbGetAllAccessibleLearningScenarios({ userId, schoolId, federalStateId });
+  } else if (filter === 'mine') {
+    return await dbGetAllLearningScenariosByUserId({ userId });
+  } else if (filter === 'official') {
+    return await dbGetGlobalLearningScenarios({ userId, federalStateId });
+  } else if (filter === 'school') {
+    return await dbGetLearningScenariosBySchoolId({ schoolId, userId });
   }
   return [];
 }

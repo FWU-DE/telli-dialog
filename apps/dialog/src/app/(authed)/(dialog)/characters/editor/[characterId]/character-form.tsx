@@ -208,8 +208,8 @@ export default function CharacterForm({
     if (result.success) {
       if (!isCreating) {
         toast.success(tToast('edit-toast-success'));
+        router.refresh();
       }
-      router.refresh();
     } else {
       toast.error(tToast('edit-toast-error'));
     }
