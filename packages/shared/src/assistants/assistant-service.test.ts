@@ -527,15 +527,15 @@ describe('assistant-service', () => {
           accessLevel,
         };
 
+        (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
+          mockAssistant as never,
+        );
+
         const assistant = await getAssistantForNewChat({
           assistantId,
           schoolId,
           userId,
         });
-
-        (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
-          mockAssistant as never,
-        );
 
         expect(assistant).toBe(mockAssistant);
       });

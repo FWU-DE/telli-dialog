@@ -1,5 +1,16 @@
 import { coverageConfigDefaults, defineConfig } from 'vitest/config';
 import path from 'path';
+import fs from 'node:fs';
+import { config as dotenvConfig } from '@dotenvx/dotenvx';
+
+const envTestPath = path.resolve(__dirname, '.env.test');
+const envLocalPath = path.resolve(__dirname, '.env.local');
+
+if (fs.existsSync(envTestPath)) {
+  dotenvConfig({ path: envTestPath });
+} else {
+  dotenvConfig({ path: envLocalPath });
+}
 
 export default defineConfig({
   resolve: {
