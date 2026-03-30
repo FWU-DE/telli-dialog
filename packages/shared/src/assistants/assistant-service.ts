@@ -68,17 +68,19 @@ export async function getAssistantByUser({
   const assistant = await dbGetAssistantById({ assistantId });
   if (!assistant.hasLinkAccess) {
     if (assistant.accessLevel === 'private' && assistant.userId !== userId)
-      throw new ForbiddenError('Not authorized to edit assistant');
+      throw new ForbiddenError('Not authorized to access assistant');
     if (
       assistant.accessLevel === 'school' &&
       assistant.schoolId !== schoolId &&
       assistant.userId !== userId
     )
-      throw new ForbiddenError('Not authorized to edit assistant');
+      throw new ForbiddenError('Not authorized to access assistant');
   }
 
-  const fileMappings = await dbGetRelatedAssistantFiles(assistantId);
-  const pictureUrl = await getAvatarPictureUrl(assistant.pictureId);
+  const [fileMappings, pictureUrl] = await Promise.all([
+    dbGetRelatedAssistantFiles(assistantId),
+    getAvatarPictureUrl(assistant.pictureId),
+  ]);
 
   return { assistant, fileMappings, pictureUrl };
 }

@@ -3,12 +3,7 @@
 import Image from 'next/image';
 import { EmptyImageIcon } from '../icons/empty-image';
 
-export function CustomChatAvatarImage({
-  pictureUrl,
-}: {
-  pictureUrl: string | undefined;
-  size?: number;
-}) {
+export function CustomChatAvatarImage({ pictureUrl }: { pictureUrl: string | undefined }) {
   return (
     <div className="relative w-35 h-35 justify-center items-center flex">
       {pictureUrl ? (

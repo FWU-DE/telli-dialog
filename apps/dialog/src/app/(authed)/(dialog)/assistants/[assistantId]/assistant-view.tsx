@@ -34,7 +34,7 @@ export function AssistantView({
   const handleDuplicateAssistant = async () => {
     const createResult = await createNewAssistantAction({});
     if (createResult.success) {
-      router.push(`/assistants/${createResult.value.id}/edit`);
+      router.push(`/assistants/editor/${createResult.value.id}`);
     } else {
       toast.error(t('toasts.create-toast-error'));
     }
