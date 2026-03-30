@@ -108,6 +108,11 @@
       "drop-area": "Datei per Drag & Drop hier ablegen",
       "choice-word": "oder"
     },
+    "delete": {
+      "modal-description": "Möchten Sie diese Datei wirklich dauerhaft löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
+      "modal-title": "Datei löschen",
+      "confirm": "Datei löschen"
+    },
     "toasts": {
       "upload-success": "Die Datei wurde erfolgreich hochgeladen",
       "upload-error": "Die Datei konnte leider nicht hochgeladen werden. Bitte versuchen Sie es erneut",
@@ -402,6 +407,10 @@
     }
   },
   "custom-chat": {
+    "chat": "Chatten",
+    "duplicate": "Duplizieren",
+    "delete": "Löschen",
+    "save": "Speichern",
     "image": {
       "crop-image": "Bild ausschneiden",
       "upload-image": "Bild hochladen",
@@ -409,21 +418,61 @@
         "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
         "image-toast-error": "Das Bild konnte nicht hochgeladen werden."
       }
+    },
+    "form": {
+      "saving": "Wird gespeichert...",
+      "save-error": "Speichern fehlgeschlagen",
+      "unsaved-changes": "Ungespeicherte Änderungen",
+      "saved": "Gespeichert"
+    },
+    "links": {
+      "empty-error": "Bitte gib eine URL ein.",
+      "duplicate-error": "Diese URL wurde bereits hinzugefügt",
+      "invalid-error": "Bitte gib eine gültige URL ein.",
+      "loading-error": "Die Webseite konnte nicht geladen werden.",
+      "saving-error": "Der Link auf die Webseite konnte nicht gespeichert werden.",
+      "delete-error": "Der Link auf die Webseite konnte nicht gelöscht werden.",
+      "aria-input": "URL eingeben",
+      "add-link": "Link hinzufügen",
+      "aria-add-link": "Webseite hinzufügen",
+      "aria-delete": "Webseite {link} entfernen"
     }
   },
-  "assistant": {
+  "assistants": {
+    "back-button": "Assistenten",
+    "back-button-aria-label": "Zurück zu den Assistenten",
+    "name-label": "Name des Assistenten",
+    "name-placeholder": "Name des Assistenten",
+    "name-required": "Der Name darf nicht leer sein.",
+    "name-max-length": "Der Name darf maximal {maxLength} Zeichen lang sein.",
+    "description-label": "Kurzbeschreibung",
+    "description-placeholder": "Beschreibung des Assistenten",
+    "description-max-length": "Die Beschreibung darf maximal {maxLength} Zeichen lang sein.",
+    "instructions-label": "Anweisungen",
+    "instructions-placeholder": "Anweisungen für den Assistenten",
+    "instructions-max-length": "Die Anweisungen dürfen maximal {maxLength} Zeichen lang sein.",
     "prompt-suggestion": "Promptvorschlag",
     "prompt-suggestions-add-button": "Promptvorschlag hinzufügen",
     "prompt-suggestions-add-button-tooltip": "Tooltip für das Hinzufügen von Promptvorschlägen",
     "prompt-suggestions-delete-button": "Promptvorschlag {index} löschen",
-    "prompt-suggestions-max-tooltip": "Es können maximal {max} Vorschläge hinzugefügt werden",
+    "prompt-suggestions-max-count": "Es können maximal {maxCount} Vorschläge hinzugefügt werden",
+    "prompt-suggestions-max-length": "Ein Promptvorschlag darf maximal {maxLength} Zeichen lang sein.",
     "prompt-suggestions-empty-tooltip": "Bitte fülle den aktuellen Vorschlag aus, bevor du einen weiteren hinzufügst.",
+    "prompt-suggestions-count-max": "Es dürfen maximal {max} Promptvorschläge angegeben werden.",
+    "custom-assets-files": "Dateien",
+    "custom-assets-label": "Hintergrundwissen",
+    "custom-assets-content": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Der Assistent bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: pdf, txt, docx",
+    "custom-assets-links": "Webseiten",
+    "sharing-info": "Dieser Assistent ist für andere freigegeben.",
+    "sharing-settings": "Freigabe-Einstellungen",
     "toasts": {
       "create-toast-error": "Der Assistent konnte nicht erstellt werden.",
       "delete-toast-success": "Der Assistent wurde erfolgreich gelöscht.",
       "delete-toast-error": "Der Assistent konnte nicht gelöscht werden.",
       "edit-toast-success": "Der Assistent wurde erfolgreich aktualisiert.",
-      "edit-toast-error": "Etwas ist beim Aktualisieren des Assistenten schief gelaufen."
+      "edit-toast-error": "Etwas ist beim Aktualisieren des Assistenten schief gelaufen.",
+      "file-link-error": "Beim Hinzufügen der Datei zum Assistenten ist ein Fehler aufgetreten.",
+      "custom-file-delete-error": "Fehler beim Löschen der Datei"
     }
   }
 }
