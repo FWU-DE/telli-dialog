@@ -128,10 +128,13 @@ test('data is autosaved on blur', async ({ page }) => {
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
-  await page.waitForURL('/custom/**');
-  const child = page.getByRole('heading', { name: 'Autosave Test GPT' });
-  const item = page.locator('.cursor-pointer').filter({ has: child });
-  await item.locator('[aria-label="Bearbeiten"]').first().click();
+  // Wait for creation to succeed, then navigate explicitly.
+  // router.replace() changes the URL immediately but Next.js RSC fetch may not complete in time.
+  await waitForToast(page, 'Der Assistent wurde erfolgreich erstellt.');
+  await page.goto('/custom');
+  const autosaveCard = page.getByRole('button', { name: 'Autosave Test GPT' }).first();
+  await expect(autosaveCard).toBeVisible({ timeout: 15000 });
+  await autosaveCard.click();
   await page.waitForURL('/custom/editor/**');
   await waitForToastDisappear(page); // wait for success toast to disappear before continuing
 
