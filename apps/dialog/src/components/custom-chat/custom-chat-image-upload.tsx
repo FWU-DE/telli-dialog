@@ -11,6 +11,7 @@ import { UploadIcon } from '@phosphor-icons/react';
 import { Button } from '@ui/components/Button';
 import AvatarCropModal from './custom-chat-avatar-crop-modal';
 import Image from 'next/image';
+import { CustomChatAvatarImage } from './custom-chat-avatar-image';
 
 export function CustomChatImageUpload({
   avatarPictureUrl,
@@ -79,8 +80,8 @@ export function CustomChatImageUpload({
   }
 
   return (
-    <Card className="justify-center items-center">
-      <CardContent className="flex items-center gap-4 flex-wrap justify-center">
+    <Card className="h-50 justify-center items-center">
+      <CardContent className="flex items-center gap-4">
         <div className="relative w-35 h-35 justify-center items-center flex">
           {displayedAvatarUrl ? (
             <Image

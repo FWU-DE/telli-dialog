@@ -412,6 +412,13 @@
     }
   },
   "assistant": {
+    "back-button-text": "Assistenten",
+    "back-button-aria": "Zurück zur Übersicht der Assistenten",
+    "author-label": "Autor/in",
+    "author-text": "FWU",
+    "name-label": "Name des Assistenten",
+    "description-label": "Kurzbeschreibung",
+    "instructions-label": "Instruktionen",
     "prompt-suggestion": "Promptvorschlag",
     "prompt-suggestions-add-button": "Promptvorschlag hinzufügen",
     "prompt-suggestions-add-button-tooltip": "Tooltip für das Hinzufügen von Promptvorschlägen",
