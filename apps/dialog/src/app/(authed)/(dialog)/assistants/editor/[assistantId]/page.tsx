@@ -3,6 +3,7 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { getAssistantByUser } from '@shared/assistants/assistant-service';
 import { notFound } from 'next/navigation';
 import { AssistantEdit } from './assistant-edit';
+import { ResponsiveLayoutWrapper } from '../../../_components/responsive-layout-wrapper';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,11 +26,13 @@ export default async function Page(props: PageProps<'/assistants/editor/[assista
     .map((url) => ({ link: url }));
 
   return (
-    <AssistantEdit
-      assistant={assistant}
-      relatedFiles={fileMappings}
-      initialLinks={initialLinks}
-      avatarPictureUrl={pictureUrl}
-    />
+    <ResponsiveLayoutWrapper>
+      <AssistantEdit
+        assistant={assistant}
+        relatedFiles={fileMappings}
+        initialLinks={initialLinks}
+        avatarPictureUrl={pictureUrl}
+      />
+    </ResponsiveLayoutWrapper>
   );
 }

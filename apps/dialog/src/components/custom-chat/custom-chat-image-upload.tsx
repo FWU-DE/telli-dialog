@@ -82,7 +82,19 @@ export function CustomChatImageUpload({
   return (
     <Card className="h-50 justify-center items-center">
       <CardContent className="flex items-center gap-4">
-        <CustomChatAvatarImage pictureUrl={displayedAvatarUrl} />
+        <div className="relative w-35 h-35 justify-center items-center flex">
+          {displayedAvatarUrl ? (
+            <Image
+              src={displayedAvatarUrl}
+              fill
+              unoptimized
+              alt={'profile-picture'}
+              className="rounded-full object-contain"
+            />
+          ) : (
+            <EmptyImageIcon className="relative -left-1 -top-1 w-15 h-15" />
+          )}
+        </div>
         <div className="flex flex-col gap-2">
           <Input
             type="file"
