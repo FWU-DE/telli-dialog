@@ -3,6 +3,7 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { getAssistantForEditView } from '@shared/assistants/assistant-service';
 import { notFound } from 'next/navigation';
 import { AssistantView } from './assistant-view';
+import { ResponsiveLayoutWrapper } from '../../_components/responsive-layout-wrapper';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,5 +22,9 @@ export default async function Page(props: PageProps<'/assistants/[assistantId]'>
     userId: user.id,
   }).catch(handleErrorInServerComponent);
 
-  return <AssistantView assistant={assistant}></AssistantView>;
+  return (
+    <ResponsiveLayoutWrapper>
+      <AssistantView assistant={assistant}></AssistantView>
+    </ResponsiveLayoutWrapper>
+  );
 }

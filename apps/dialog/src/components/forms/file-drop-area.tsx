@@ -145,7 +145,11 @@ export function FileDrop({
         />
         <div className="mt-4 flex flex-col text-sm gap-4 items-center">
           <FileUploadIcon className="w-8 h-8 text-primary" />
-          <span className="text-xl">{t('upload.drop-area')}</span>
+          <span className="text-base">
+            {t.rich('upload.drop-area', {
+              b: (chunks) => <strong className="font-semibold">{chunks}</strong>,
+            })}
+          </span>
           <span className="text-gray-600">{t('upload.choice-word')}</span>
           <button
             className={cn(buttonPrimaryClassName)}
