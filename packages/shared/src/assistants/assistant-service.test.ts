@@ -520,14 +520,14 @@ describe('assistant-service', () => {
       { accessLevel: 'school', schoolId: schoolIdOfOwner, userId: 'different-user-id' },
       { accessLevel: 'global', schoolId: 'different-school-id', userId: 'different-user-id' },
     ] as const)('accessLevel=$accessLevel', ({ accessLevel, schoolId, userId }) => {
-      it(`should return assistant with accessLevel=${accessLevel} - $functionName`, async () => {
+      it(`should return assistant with accessLevel=${accessLevel} - getAssistantForNewChat`, async () => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId: userIdOfOwner,
           schoolId: schoolIdOfOwner,
           accessLevel,
         };
 
-        const assistant = getAssistantForNewChat({
+        const assistant = await getAssistantForNewChat({
           assistantId,
           schoolId,
           userId,
@@ -552,7 +552,7 @@ describe('assistant-service', () => {
       { accessLevel: 'school', schoolId: schoolIdOfOwner, userId: 'different-user-id' },
       { accessLevel: 'global', schoolId: 'different-school-id', userId: 'different-user-id' },
     ] as const)('accessLevel=$accessLevel', ({ accessLevel, schoolId, userId }) => {
-      it(`should return assistant with accessLevel=${accessLevel} - $functionName`, async () => {
+      it(`should return assistant with accessLevel=${accessLevel} - getAssistantByUser`, async () => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId: userIdOfOwner,
           schoolId: schoolIdOfOwner,
