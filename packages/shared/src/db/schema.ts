@@ -316,6 +316,10 @@ export const characterTable = pgTable(
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
     schoolId: text('school_id').references(() => schoolTable.id),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+      .defaultNow()
+      .$onUpdateFn(() => new Date())
+      .notNull(),
     attachedLinks: text('attached_links')
       .array()
       .notNull()
@@ -329,12 +333,15 @@ export const characterTable = pgTable(
 export const characterSelectSchema = createSelectSchema(characterTable)
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
+    createdAt: z.coerce.date(),
+    updatedAt: z.coerce.date(),
     accessLevel: accessLevelSchema,
   });
 export const characterInsertSchema = createInsertSchema(characterTable)
   .omit({
     id: true,
     createdAt: true,
+    updatedAt: true,
   })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
@@ -344,6 +351,7 @@ export const characterUpdateSchema = createUpdateSchema(characterTable)
   .omit({
     userId: true,
     createdAt: true,
+    updatedAt: true,
   })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
@@ -522,6 +530,10 @@ export const learningScenarioTable = pgTable(
       .default(sql`'{}'::text[]`),
     pictureId: text('picture_id'),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+      .defaultNow()
+      .$onUpdateFn(() => new Date())
+      .notNull(),
     isDeleted: boolean('is_deleted').notNull().default(false),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     schoolId: text('school_id').references(() => schoolTable.id),
@@ -534,18 +546,21 @@ export const learningScenarioTable = pgTable(
 export const learningScenarioSelectSchema = createSelectSchema(learningScenarioTable)
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
+    createdAt: z.coerce.date(),
+    updatedAt: z.coerce.date(),
     accessLevel: accessLevelSchema,
   });
 export const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable)
   .omit({
     createdAt: true,
+    updatedAt: true,
   })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
     accessLevel: accessLevelSchema,
   });
 export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioTable)
-  .omit({ userId: true, createdAt: true })
+  .omit({ userId: true, createdAt: true, updatedAt: true })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
     id: z.string(),
