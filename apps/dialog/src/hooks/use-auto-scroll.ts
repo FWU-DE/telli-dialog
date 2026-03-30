@@ -49,8 +49,6 @@ export function useAutoScroll(dependencies: React.DependencyList) {
     const handleWheel = (e: WheelEvent) => {
       if (e.deltaY < 0) {
         setAutoScrollEnabled(false);
-      } else if (isNearBottom(scrollElement)) {
-        setAutoScrollEnabled(true);
       }
     };
 

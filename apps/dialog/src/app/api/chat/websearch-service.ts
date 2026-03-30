@@ -28,7 +28,10 @@ async function getAttachedLinks(
 }
 
 /**
- * Extracts URLs from the conversation messages, including any attached links from an assistant or character.
+ * Collects URLs based on the conversation context.
+ * For characters, only the attached links are returned.
+ * For assistants, both attached links and URLs from user messages are included.
+ * For regular chat, only URLs from user messages are included.
  *
  * @param assistantId The ID of the assistant, if applicable.
  * @param characterId The ID of the character, if applicable.
@@ -44,15 +47,20 @@ export async function extractUrls(
 ): Promise<string[]> {
   const attachedLinks = await getAttachedLinks(assistantId, characterId, user.id);
 
-  // For assistants or characters, just return their attached links
-  if (attachedLinks !== null) {
-    return attachedLinks;
+  // For characters, just return their attached links
+  if (characterId) {
+    return attachedLinks ?? [];
   }
 
-  const urls = [
+  const userMessageUrls = [
     ...new Set(
       messages.filter((m) => m.role === 'user').flatMap((m) => extractUniqueUrls(m.content)),
     ),
+  ];
+
+  const urls = [
+    ...(attachedLinks ?? []),
+    ...userMessageUrls.filter((url) => !attachedLinks?.includes(url)),
   ].slice(0, MAX_WEBSEARCH_SOURCES_PER_CONVERSATION);
 
   return urls;
