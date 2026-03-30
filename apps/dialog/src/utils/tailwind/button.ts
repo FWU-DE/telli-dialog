@@ -12,3 +12,6 @@ export const buttonDeleteClassName =
 
 export const smallButtonPrimaryClassName =
   'p-2 text-button-primary-text bg-primary hover:bg-secondary rounded-enterprise-full hover:text-secondary-text text-xs';
+
+export const customChatDeleteButtonClassName =
+  'inline-flex h-10 items-center justify-center gap-2 rounded-full border border-primary bg-background px-2.5 text-base font-normal text-primary transition-all hover:bg-primary/20 hover:text-primary disabled:pointer-events-none disabled:opacity-50';
