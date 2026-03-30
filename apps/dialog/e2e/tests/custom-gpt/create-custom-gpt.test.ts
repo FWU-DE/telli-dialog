@@ -130,7 +130,10 @@ test('data is autosaved on blur', async ({ page }) => {
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
-  await page.waitForURL(/\/custom(\?|$)/);
+  // Wait for creation to succeed, then navigate explicitly.
+  // router.replace() changes the URL immediately but Next.js RSC fetch may not complete in time.
+  await waitForToast(page, 'Der Assistent wurde erfolgreich erstellt.');
+  await page.goto('/custom');
   const autosaveCard = page.getByRole('button', { name: 'Autosave Test GPT' }).first();
   await expect(autosaveCard).toBeVisible({ timeout: 15000 });
   await autosaveCard.click();
