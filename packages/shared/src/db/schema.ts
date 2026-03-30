@@ -333,12 +333,15 @@ export const characterTable = pgTable(
 export const characterSelectSchema = createSelectSchema(characterTable)
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
+    createdAt: z.coerce.date(),
+    updatedAt: z.coerce.date(),
     accessLevel: accessLevelSchema,
   });
 export const characterInsertSchema = createInsertSchema(characterTable)
   .omit({
     id: true,
     createdAt: true,
+    updatedAt: true,
   })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
@@ -348,6 +351,7 @@ export const characterUpdateSchema = createUpdateSchema(characterTable)
   .omit({
     userId: true,
     createdAt: true,
+    updatedAt: true,
   })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
@@ -542,18 +546,21 @@ export const learningScenarioTable = pgTable(
 export const learningScenarioSelectSchema = createSelectSchema(learningScenarioTable)
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
+    createdAt: z.coerce.date(),
+    updatedAt: z.coerce.date(),
     accessLevel: accessLevelSchema,
   });
 export const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable)
   .omit({
     createdAt: true,
+    updatedAt: true,
   })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
     accessLevel: accessLevelSchema,
   });
 export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioTable)
-  .omit({ userId: true, createdAt: true })
+  .omit({ userId: true, createdAt: true, updatedAt: true })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
     id: z.string(),
