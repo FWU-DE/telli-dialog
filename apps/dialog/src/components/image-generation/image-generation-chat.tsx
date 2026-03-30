@@ -17,6 +17,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { logError } from '@shared/logging';
 import { ResponsibleAIError } from '@telli/ai-core/errors';
 import Image from 'next/image';
+import { navigateWithoutRefresh } from '@/utils/navigation/router';
 
 interface ImageGenerationChatProps {
   conversationId?: string;
@@ -120,18 +121,8 @@ export default function ImageGenerationChat({
       }
 
       const newConversationId = result.value.conversationId;
-      /* TODO: improve navigation without full reload, but without causing issues with state.
-       * Using router.push here causes the component to remount,
-       * causing the image to flicker.
-       * But using something like navigateWithoutReload causes
-       * the same remount but after the following request
-       * (possibly deleting an error message).
-       * This is undocumented behavior in Next.js
-       * (Documentation says window.history.replaceState should work without remounting).
-       * https://nextjs.org/docs/app/getting-started/linking-and-navigating#native-history-api
-       */
       if (conversationId === undefined || conversationId !== newConversationId) {
-        router.push(`/image-generation/d/${newConversationId}`);
+        navigateWithoutRefresh(`/image-generation/d/${newConversationId}`);
       }
       refetchConversations();
       // Clear the input after a successful generation

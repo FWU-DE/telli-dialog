@@ -9,11 +9,18 @@ import { getCharacterForChatSession } from '@shared/characters/character-service
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
+import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
+import { parseSearchParams } from '@/utils/parse-search-params';
+import { z } from 'zod';
+import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
+import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 
 export const dynamic = 'force-dynamic';
+const searchParamsSchema = z.object({ model: z.string().optional() });
 
 export default async function Page(props: PageProps<'/characters/d/[characterId]'>) {
   const { characterId } = await props.params;
+  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
 
   const id = generateUUID();
   const { user, school, federalState } = await requireAuth();
@@ -31,20 +38,27 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
     ? [{ id: 'initial-message', role: 'assistant', content: character.initialMessage }]
     : [];
 
+  const models = await dbGetLlmModelsByFederalStateId({
+    federalStateId: federalState.id,
+  });
+  const characterModel = models.find((m) => m.id === character.modelId)?.name;
+
+  const currentModel =
+    searchParams.model ?? characterModel ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
+
   const avatarPictureUrl = await getAvatarPictureUrl(character.pictureId);
   const logoElement = <Logo federalStateId={federalState.id} />;
   return (
-    <>
+    <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
       <HeaderPortal>
         <ChatHeaderBar
           chatId={id}
           title={character.name}
-          hasMessages={false}
+          downloadConversationEnabled={false}
           userAndContext={userAndContext}
         />
       </HeaderPortal>
       <Chat
-        key={id}
         id={id}
         initialMessages={initialMessages}
         character={character}
@@ -52,6 +66,6 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
         enableFileUpload={false}
         logoElement={logoElement}
       />
-    </>
+    </LlmModelsProvider>
   );
 }

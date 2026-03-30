@@ -108,7 +108,7 @@ export function CustomChatImageUpload({
             setImageSource(null);
           }}
           onCropComplete={handleCroppedImage}
-          compressionOptions={{ maxHeight: 800 }}
+          compressionOptions={{ maxWidth: 400, maxHeight: 400 }}
         />
       )}
     </Card>

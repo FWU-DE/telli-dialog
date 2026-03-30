@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@ui/components/DropdownMenu';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useCustomPathname } from '@/hooks/use-custom-pathname';
 import { cloneElement, type ReactElement, useEffect, useRef, useState } from 'react';
 import { ConversationModel } from '@shared/db/types';
 import {
@@ -50,7 +50,7 @@ export function ChatHistoryItem({
   onDeleteConversation,
 }: ChatHistoryItemProps) {
   const [isEditable, setIsEditable] = useState(false);
-  const pathname = usePathname();
+  const pathname = useCustomPathname();
   const { isMobile, setOpenMobile } = useSidebar();
   const t = useTranslations('sidebar');
   const renameForm = useForm({

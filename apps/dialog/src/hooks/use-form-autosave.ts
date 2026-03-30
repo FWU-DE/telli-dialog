@@ -57,7 +57,11 @@ export function useFormAutosave<T>({
       if (updateResult) {
         setHasSaveError(false);
         lastSavedValuesRef.current = data;
-        reset(data);
+        // Only reset the form (including isDirty) if the current values are the same as the values we just saved.
+        // if the form is dirty again, we do not want to reset the form state for the user
+        if (deepEqual(getValues(), data)) {
+          reset(data);
+        }
         return true;
       }
 
@@ -79,13 +83,10 @@ export function useFormAutosave<T>({
       let isSuccess = true;
 
       try {
-        do {
-          saveQueuedRef.current = false;
-          const saveResult = await saveCurrentValues();
-          if (!saveResult) {
-            isSuccess = false;
-          }
-        } while (saveQueuedRef.current);
+        const saveResult = await saveCurrentValues();
+        if (!saveResult) {
+          isSuccess = false;
+        }
 
         return isSuccess;
       } finally {

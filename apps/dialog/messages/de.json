@@ -404,7 +404,11 @@
   "custom-chat": {
     "image": {
       "crop-image": "Bild ausschneiden",
-      "upload-image": "Bild hochladen"
+      "upload-image": "Bild hochladen",
+      "toasts": {
+        "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
+        "image-toast-error": "Das Bild konnte nicht hochgeladen werden."
+      }
     }
   },
   "assistant": {
@@ -415,6 +419,12 @@
     "name-label": "Name des Assistenten",
     "description-label": "Kurzbeschreibung",
     "instructions-label": "Instruktionen",
+    "prompt-suggestion": "Promptvorschlag",
+    "prompt-suggestions-add-button": "Promptvorschlag hinzufügen",
+    "prompt-suggestions-add-button-tooltip": "Tooltip für das Hinzufügen von Promptvorschlägen",
+    "prompt-suggestions-delete-button": "Promptvorschlag {index} löschen",
+    "prompt-suggestions-max-tooltip": "Es können maximal {max} Vorschläge hinzugefügt werden",
+    "prompt-suggestions-empty-tooltip": "Bitte fülle den aktuellen Vorschlag aus, bevor du einen weiteren hinzufügst.",
     "toasts": {
       "create-toast-error": "Der Assistent konnte nicht erstellt werden.",
       "delete-toast-success": "Der Assistent wurde erfolgreich gelöscht.",
@@ -422,9 +432,5 @@
       "edit-toast-success": "Der Assistent wurde erfolgreich aktualisiert.",
       "edit-toast-error": "Etwas ist beim Aktualisieren des Assistenten schief gelaufen."
     }
-  },
-  "toasts": {
-    "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
-    "image-toast-error": "Das Bild konnte nicht hochgeladen werden."
   }
 }

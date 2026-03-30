@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { deleteChat, regenerateMessage, sendMessage } from '../../utils/chat';
+import { deleteChat, enterMessage, regenerateMessage, sendMessage } from '../../utils/chat';
 import path from 'path';
 
 test('should successfully regenerate a response', async ({ page }) => {
@@ -38,4 +38,18 @@ test('should successfully delete the current chat', async ({ page }) => {
   await page.waitForURL('/');
 
   expect(page.url()).not.toContain('/d/');
+});
+
+test('after receiving the first message the typed prompt is not lost', async ({ page }) => {
+  await login(page, 'teacher');
+
+  await enterMessage(page, 'Schreibe "OK"');
+  await page.keyboard.press('Enter');
+
+  const prompt = 'Dieser Prompt soll nicht verschwinden';
+  await enterMessage(page, prompt);
+  await page.getByLabel('Reload').waitFor();
+
+  await expect(page).toHaveURL(/\/d\//);
+  await expect(page.getByPlaceholder('Wie kann ich Dir helfen?')).toHaveValue(prompt);
 });
