@@ -297,7 +297,6 @@ export default function AssistantForm({
   const copyContainer = readOnly ? (
     <CopyContainer
       templateId={assistant.id}
-      templatePictureId={assistant.pictureId ?? undefined}
       startedAt={null}
       maxUsageTimeLimit={null}
       translationPath="custom-gpt.form"

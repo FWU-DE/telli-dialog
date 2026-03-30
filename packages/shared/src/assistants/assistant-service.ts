@@ -165,18 +165,16 @@ export async function getAssistantByAccessLevel({
 }
 
 /**
- * User creates a new custom gpt (assistant).
- * If a templateId is provided, the new custom gpt is created by copying the template.
+ * User creates a new assistant.
+ * If a templateId is provided, the new assistant is created by copying the template.
  * Throws if the user is not a teacher.
  */
 export async function createNewAssistant({
   schoolId,
-  templatePictureId,
   templateId,
   user,
 }: {
   schoolId: string;
-  templatePictureId?: string;
   templateId?: string;
   user: UserModel;
 }) {
@@ -185,14 +183,14 @@ export async function createNewAssistant({
   if (templateId !== undefined) {
     let insertedAssistant = await copyAssistant(templateId, 'private', user.id, schoolId);
 
-    if (templatePictureId !== undefined) {
+    if (insertedAssistant.pictureId) {
       const copyOfTemplatePicture = buildAssistantPictureKey(
         insertedAssistant.id,
-        path.basename(templatePictureId),
+        path.basename(insertedAssistant.pictureId),
       );
       await copyFileInS3({
         newKey: copyOfTemplatePicture,
-        copySource: templatePictureId,
+        copySource: insertedAssistant.pictureId,
       });
 
       // Update the assistant with the new picture
@@ -404,6 +402,7 @@ const updateAssistantSchema = assistantUpdateSchema.omit({
   isDeleted: true,
   originalAssistantId: true,
   accessLevel: true,
+  pictureId: true,
 });
 
 /**
