@@ -8,18 +8,11 @@ import {
 } from '@shared/assistants/assistant-service';
 import { runServerAction } from '@shared/actions/run-server-action';
 
-export async function createNewAssistantAction({
-  templatePictureId,
-  templateId,
-}: {
-  templatePictureId?: string;
-  templateId?: string;
-}) {
+export async function createNewAssistantAction({ templateId }: { templateId?: string }) {
   const { user, school } = await requireAuth();
 
   return runServerAction(createNewAssistant)({
     schoolId: school.id,
-    templatePictureId,
     templateId,
     user: user,
   });
