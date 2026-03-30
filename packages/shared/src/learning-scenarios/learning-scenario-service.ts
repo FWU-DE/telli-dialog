@@ -31,7 +31,7 @@ import {
   deleteMessageAttachments,
   getAvatarPictureUrl,
 } from '@shared/files/fileService';
-import { uploadFileToS3 } from '@shared/s3';
+import { deleteFileFromS3, uploadFileToS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { and, eq } from 'drizzle-orm';
 import z from 'zod';
@@ -41,14 +41,18 @@ import {
   verifyReadAccess,
   verifyWriteAccess,
 } from '@shared/auth/authorization-service';
+import { computeBlobHash } from '@telli/shared-core/crypto/blob-hash';
 
 export type LearningScenarioWithImage = LearningScenarioOptionalShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
 };
 
-export function buildLearningScenarioPictureKey(characterId: string) {
+export function buildLearningScenarioPictureKey(learningScenarioId: string, filename: string) {
   // the path still contains shared-chats because all existing learning scenarios store their picture in this folder in S3
-  return `shared-chats/${characterId}/avatar`;
+  return `shared-chats/${learningScenarioId}/${filename}`;
+}
+function buildAvatarFilename(hash: string) {
+  return `avatar_${hash}`;
 }
 
 /**
@@ -581,13 +585,25 @@ export async function uploadAvatarPictureForLearningScenario({
   const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
   verifyWriteAccess({ item: learningScenario, userId: user.id });
 
-  const key = buildLearningScenarioPictureKey(learningScenarioId);
+  // Compute hash of the blob for cache busting
+  const hash = await computeBlobHash(croppedImageBlob);
+  const key = buildLearningScenarioPictureKey(learningScenarioId, buildAvatarFilename(hash));
 
+  // Upload new avatar
   await uploadFileToS3({
-    key: key,
+    key,
     body: croppedImageBlob,
     contentType: croppedImageBlob.type,
   });
+
+  // Delete old avatar if it exists
+  if (learningScenario.pictureId) {
+    try {
+      await deleteFileFromS3({ key: learningScenario.pictureId });
+    } catch {
+      // Silently ignore error, cleanup job will delete unreferenced files later
+    }
+  }
 
   return key;
 }

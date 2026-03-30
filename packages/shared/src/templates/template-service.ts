@@ -6,10 +6,10 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '@shared/db';
 import {
   AccessLevel,
-  characterTable,
-  characterTemplateMappingTable,
   assistantTable,
   assistantTemplateMappingTable,
+  characterTable,
+  characterTemplateMappingTable,
   federalStateTable,
   FileModel,
   learningScenarioInsertSchema,
@@ -25,22 +25,23 @@ import { dbCreateCharacter, dbGetCharacterById } from '@shared/db/functions/char
 import { dbGetAssistantById, dbUpsertAssistant } from '@shared/db/functions/assistants';
 import {
   dbGetFilesForLearningScenario,
-  dbGetRelatedCharacterFiles,
   dbGetRelatedAssistantFiles,
+  dbGetRelatedCharacterFiles,
 } from '@shared/db/functions/files';
 import { DUMMY_USER_ID } from '@shared/db/seed/user-entity';
 import { logError } from '@shared/logging';
 import {
   copyAvatarPicture,
   duplicateFileWithEmbeddings,
-  linkFileToCharacter,
   linkFileToAssistant,
+  linkFileToCharacter,
   linkFileToLearningScenario,
 } from '@shared/files/fileService';
 import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
 import { NotFoundError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
 import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
+import path from 'node:path';
 
 const templateTypeMap: Record<string, TemplateTypes> = {
   custom: 'custom-gpt',
@@ -598,7 +599,10 @@ async function copyLearningScenario(learningScenarioId: string, userId: string) 
 
   // avatar
   if (learningScenario.pictureId) {
-    const avatarKey = buildLearningScenarioPictureKey(copy.id);
+    const avatarKey = buildLearningScenarioPictureKey(
+      copy.id,
+      path.basename(learningScenario.pictureId),
+    );
     await copyAvatarPicture(learningScenario.pictureId, avatarKey);
     copy.pictureId = avatarKey;
   }

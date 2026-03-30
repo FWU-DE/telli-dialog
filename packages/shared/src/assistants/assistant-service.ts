@@ -25,15 +25,21 @@ import {
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
-import { copyFileInS3, uploadFileToS3 } from '@shared/s3';
+import { copyFileInS3, deleteFileFromS3, uploadFileToS3 } from '@shared/s3';
 import { copyAssistant, copyRelatedTemplateFiles } from '@shared/templates/template-service';
 import { addDays } from '@shared/utils/date';
 import { generateUUID } from '@shared/utils/uuid';
 import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
+import { computeBlobHash } from '@telli/shared-core/crypto/blob-hash';
+import { verifyWriteAccess } from '@shared/auth/authorization-service';
+import path from 'node:path';
 
-export function buildAssistantPictureKey(assistantId: string) {
-  return `custom-gpts/${assistantId}/avatar`;
+export function buildAssistantPictureKey(assistantId: string, filename: string) {
+  return `custom-gpts/${assistantId}/${filename}`;
+}
+function buildAvatarFilename(hash: string) {
+  return `avatar_${hash}`;
 }
 
 /**
@@ -180,7 +186,10 @@ export async function createNewAssistant({
     let insertedAssistant = await copyAssistant(templateId, 'private', user.id, schoolId);
 
     if (templatePictureId !== undefined) {
-      const copyOfTemplatePicture = buildAssistantPictureKey(insertedAssistant.id);
+      const copyOfTemplatePicture = buildAssistantPictureKey(
+        insertedAssistant.id,
+        path.basename(templatePictureId),
+      );
       await copyFileInS3({
         newKey: copyOfTemplatePicture,
         copySource: templatePictureId,
@@ -489,17 +498,27 @@ export async function uploadAvatarPictureForAssistant({
   userId: string;
 }) {
   const assistant = await dbGetAssistantById({ assistantId });
-  if (assistant.userId !== userId) {
-    throw new ForbiddenError('Not authorized to update avatar picture for this assistant');
-  }
+  verifyWriteAccess({ item: assistant, userId: userId });
 
-  const key = buildAssistantPictureKey(assistantId);
+  // Compute hash of the blob for cache busting
+  const hash = await computeBlobHash(croppedImageBlob);
+  const key = buildAssistantPictureKey(assistantId, buildAvatarFilename(hash));
 
+  // Upload new avatar
   await uploadFileToS3({
-    key: key,
+    key,
     body: croppedImageBlob,
     contentType: croppedImageBlob.type,
   });
+
+  // Delete old avatar if it exists
+  if (assistant.pictureId) {
+    try {
+      await deleteFileFromS3({ key: assistant.pictureId });
+    } catch {
+      // Silently ignore error, cleanup job will delete unreferenced files later
+    }
+  }
 
   return key;
 }
