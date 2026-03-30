@@ -130,8 +130,10 @@ test('data is autosaved on blur', async ({ page }) => {
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
-  await page.waitForURL('/custom/**');
-  await page.getByRole('button', { name: 'Autosave Test GPT' }).first().click();
+  await page.waitForURL(/\/custom(\?|$)/);
+  const autosaveCard = page.getByRole('button', { name: 'Autosave Test GPT' }).first();
+  await expect(autosaveCard).toBeVisible();
+  await autosaveCard.click();
   await page.waitForURL('/custom/editor/**');
   await waitForToastDisappear(page); // wait for success toast to disappear before continuing
 

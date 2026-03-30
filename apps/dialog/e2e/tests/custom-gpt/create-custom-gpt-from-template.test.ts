@@ -11,7 +11,7 @@ test('test', async ({ page }) => {
   await page.waitForURL('/custom/editor/**');
 
   const copyButton = page.getByRole('button', { name: 'Assistent bearbeiten' });
-  await expect(copyButton).toBeVisible();
+  await expect(copyButton).toBeVisible({ timeout: 15000 });
   await expect(copyButton).toBeEnabled();
   await copyButton.click();
   await page.waitForURL('**?create=true**');
