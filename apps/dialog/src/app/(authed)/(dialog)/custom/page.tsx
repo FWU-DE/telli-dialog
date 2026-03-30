@@ -6,6 +6,8 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { getAssistantByAccessLevel } from '@shared/assistants/assistant-service';
+import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
+import CustomGptOverview from './custom-gpt-overview';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,8 +17,14 @@ const searchParamsSchema = z.object({
 
 export default async function Page(props: PageProps<'/custom'>) {
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
-  const accessLevel = searchParams.visibility;
   const { user, school, federalState } = await requireAuth();
+  const isNewUi = federalState.featureToggles.isNewUiDesignEnabled;
+
+  if (isNewUi) {
+    return <CustomGptOverview currentUserId={user.id} />;
+  }
+
+  const accessLevel = searchParams.visibility;
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
   const _assistants = await getAssistantByAccessLevel({

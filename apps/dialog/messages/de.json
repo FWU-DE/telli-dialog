@@ -432,5 +432,14 @@
       "edit-toast-success": "Der Assistent wurde erfolgreich aktualisiert.",
       "edit-toast-error": "Etwas ist beim Aktualisieren des Assistenten schief gelaufen."
     }
+  },
+  "entity-overview": {
+    "filter-all": "Alle",
+    "filter-mine": "Meine",
+    "filter-official": "Offiziell",
+    "filter-school": "Schulintern",
+    "filter-tabs-label": "Filteroptionen",
+    "info-tooltip-label": "Informationen anzeigen",
+    "badge-mine": "von mir"
   }
 }

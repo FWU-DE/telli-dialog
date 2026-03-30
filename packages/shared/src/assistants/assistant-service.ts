@@ -31,6 +31,7 @@ import {
 } from '@shared/files/fileService';
 import { copyFileInS3, uploadFileToS3 } from '@shared/s3';
 import { copyAssistant, copyRelatedTemplateFiles } from '@shared/templates/template-service';
+import { OverviewFilter } from '@shared/overview-filter';
 import { addDays } from '@shared/utils/date';
 import { generateUUID } from '@shared/utils/uuid';
 import { and, eq, lt } from 'drizzle-orm';
@@ -167,6 +168,34 @@ export async function getAssistantByAccessLevel({
     return await dbGetGptsBySchoolId({ schoolId });
   } else if (accessLevel === 'private') {
     return await dbGetGptsByUserId({ userId });
+  }
+  return [];
+}
+
+export async function getAssistantsByOverviewFilter({
+  filter,
+  schoolId,
+  userId,
+  federalStateId,
+}: {
+  filter: OverviewFilter;
+  schoolId: string;
+  userId: string;
+  federalStateId: string;
+}): Promise<AssistantSelectModel[]> {
+  if (filter === 'all') {
+    const [privateAssistants, schoolAssistants, globalAssistants] = await Promise.all([
+      dbGetGptsByUserId({ userId }),
+      dbGetGptsBySchoolId({ schoolId }),
+      dbGetGlobalGpts({ federalStateId }),
+    ]);
+    return [...privateAssistants, ...schoolAssistants, ...globalAssistants];
+  } else if (filter === 'mine') {
+    return await dbGetGptsByUserId({ userId });
+  } else if (filter === 'official') {
+    return await dbGetGlobalGpts({ federalStateId });
+  } else if (filter === 'school') {
+    return await dbGetGptsBySchoolId({ schoolId });
   }
   return [];
 }

@@ -3,14 +3,21 @@ import { login } from '../../utils/login';
 
 test('test', async ({ page }) => {
   await login(page, 'teacher');
-  await page.goto('/custom?visibility=global');
-  const copyButton = page.getByTitle('Kopieren').first();
+  await page.goto('/custom');
 
-  await expect(copyButton).toBeVisible();
+  const card = page
+    .getByRole('button', { name: 'Schulorganisationsassistent', exact: true })
+    .first();
+  await expect(card).toBeVisible({ timeout: 15000 });
+  await card.click();
+  await page.waitForURL('/custom/editor/**');
+
+  const copyButton = page.getByRole('button', { name: 'Assistent bearbeiten' });
+  await expect(copyButton).toBeVisible({ timeout: 15000 });
   await expect(copyButton).toBeEnabled();
   await copyButton.click();
+  await page.waitForURL('**?create=true**');
 
-  await page.waitForURL('/custom/editor/**');
   await page
     .getByRole('textbox', { name: 'Wie soll diese' })
     .fill('Schulorganisationsassistent Individuell');

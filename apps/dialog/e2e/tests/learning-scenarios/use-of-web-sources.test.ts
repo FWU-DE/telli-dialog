@@ -39,7 +39,7 @@ test('teacher can create shared chat with web sources, student can join chat and
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
-  const firstSharedChat = page.getByRole('link', { name: 'Analyse des Nahostkonflikts' }).first();
+  const firstSharedChat = page.getByRole('button', { name: 'Analyse des Nahostkonflikts' }).first();
   await expect(firstSharedChat).toBeVisible();
   await firstSharedChat.click();
 
