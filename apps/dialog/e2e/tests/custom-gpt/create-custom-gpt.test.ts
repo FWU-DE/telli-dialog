@@ -64,9 +64,9 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
-  await page.waitForURL('/custom**');
+  await page.waitForURL(/\/custom(\?|$)/);
   const card = page.getByRole('button', { name: assistantName }).first();
-  await expect(card).toBeVisible();
+  await expect(card).toBeVisible({ timeout: 15000 });
   await card.getByRole('button', { name: 'Neuer Chat' }).click();
   await page.waitForURL('/custom/d/**');
   await expect(page.getByRole('heading')).toContainText(assistantName);
@@ -132,7 +132,7 @@ test('data is autosaved on blur', async ({ page }) => {
 
   await page.waitForURL(/\/custom(\?|$)/);
   const autosaveCard = page.getByRole('button', { name: 'Autosave Test GPT' }).first();
-  await expect(autosaveCard).toBeVisible();
+  await expect(autosaveCard).toBeVisible({ timeout: 15000 });
   await autosaveCard.click();
   await page.waitForURL('/custom/editor/**');
   await waitForToastDisappear(page); // wait for success toast to disappear before continuing

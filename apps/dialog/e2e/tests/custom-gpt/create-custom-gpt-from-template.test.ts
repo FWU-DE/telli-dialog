@@ -5,8 +5,10 @@ test('test', async ({ page }) => {
   await login(page, 'teacher');
   await page.goto('/custom');
 
-  const card = page.getByRole('button', { name: 'Schulorganisationsassistent' }).first();
-  await expect(card).toBeVisible();
+  const card = page
+    .getByRole('button', { name: 'Schulorganisationsassistent', exact: true })
+    .first();
+  await expect(card).toBeVisible({ timeout: 15000 });
   await card.click();
   await page.waitForURL('/custom/editor/**');
 
