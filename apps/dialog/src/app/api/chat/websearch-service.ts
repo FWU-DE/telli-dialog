@@ -58,10 +58,10 @@ export async function extractUrls(
     ),
   ];
 
-  const urls = [
-    ...(attachedLinks ?? []),
-    ...userMessageUrls.filter((url) => !attachedLinks?.includes(url)),
-  ].slice(0, MAX_WEBSEARCH_SOURCES_PER_CONVERSATION);
+  const urls = [...new Set([...(attachedLinks ?? []), ...userMessageUrls])].slice(
+    0,
+    MAX_WEBSEARCH_SOURCES_PER_CONVERSATION,
+  );
 
   return urls;
 }
