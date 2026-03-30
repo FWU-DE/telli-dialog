@@ -41,21 +41,28 @@ export default function CustomGptOverview({ currentUserId }: CustomGptOverviewPr
       onFilterChange={handleFilterChange}
       itemCount={visibleAssistants.length}
     >
-      {(searchQuery) => {
+      {(searchQuery, sortBy) => {
         const q = searchQuery.trim().toLowerCase();
         const filtered = q
-          ? visibleAssistants.filter((gpt) => gpt.name.toLowerCase().includes(q))
+          ? visibleAssistants
+              .filter((assistant) => assistant.name.toLowerCase().includes(q))
+              .slice()
+              .sort((a, b) =>
+                sortBy === 'name'
+                  ? a.name.localeCompare(b.name)
+                  : b.updatedAt.getTime() - a.updatedAt.getTime(),
+              )
           : visibleAssistants;
 
-        return filtered.map((gpt) => (
+        return filtered.map((assistant) => (
           <EntityCard
-            key={gpt.id}
-            name={gpt.name}
-            description={gpt.description}
-            avatarUrl={gpt.maybeSignedPictureUrl}
-            isOwned={gpt.userId === currentUserId}
-            onCardClick={() => router.push(`/custom/editor/${gpt.id}?create=false`)}
-            onChatClick={() => router.push(`/custom/d/${gpt.id}`)}
+            key={assistant.id}
+            name={assistant.name}
+            description={assistant.description}
+            avatarUrl={assistant.maybeSignedPictureUrl}
+            isOwned={assistant.userId === currentUserId}
+            onCardClick={() => router.push(`/custom/editor/${assistant.id}?create=false`)}
+            onChatClick={() => router.push(`/custom/d/${assistant.id}`)}
           />
         ));
       }}
