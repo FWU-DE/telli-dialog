@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import React from 'react';
 import { cn } from '@/utils/tailwind';
-import HeaderPortal from '../header-portal';
 import ProfileMenu from '@/components/navigation/profile-menu';
+import RegisterDialogHeader from '@/components/header/register-dialog-header';
 import {
   NewChatButton,
   ToggleSidebarButton,
@@ -40,14 +40,14 @@ export default function Page2({
 
   return (
     <div className="min-w-full p-6 overflow-auto">
-      <HeaderPortal>
+      <RegisterDialogHeader>
         <ToggleSidebarButton
           isNewUiDesignEnabled={federalState?.featureToggles?.isNewUiDesignEnabled ?? false}
         />
         <NewChatButton />
         <div className="grow"></div>
         <ProfileMenu userAndContext={userAndContext} />
-      </HeaderPortal>
+      </RegisterDialogHeader>
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl mb-6">{t('title')}</h1>
         <span>{t('description')}</span>

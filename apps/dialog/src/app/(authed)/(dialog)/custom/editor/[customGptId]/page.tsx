@@ -1,6 +1,3 @@
-import ProfileMenu from '@/components/navigation/profile-menu';
-import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import HeaderPortal from '../../../header-portal';
 import AssistantForm from './custom-gpt-form';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { AssistantSelectModel } from '@shared/db/schema';
@@ -8,7 +5,6 @@ import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { getAssistantForEditView, getFileMappings } from '@shared/assistants/assistant-service';
 import { requireAuth } from '@/auth/requireAuth';
-import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { WebsearchSource } from '@shared/db/types';
@@ -25,8 +21,7 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
   const isCreating = searchParams.create === 'true';
 
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user, school } = await requireAuth();
 
   const [assistant, relatedFiles] = await Promise.all([
     getAssistantForEditView({ assistantId, schoolId: school.id, userId: user.id }),
@@ -52,13 +47,6 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
 
   return (
     <div className="min-w-full p-6 overflow-auto">
-      <HeaderPortal>
-        <ToggleSidebarButton
-          isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
-        />
-        <div className="grow"></div>
-        <ProfileMenu userAndContext={userAndContext} />
-      </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">
         <AssistantForm
           {...(removeNullishValues(assistant) as AssistantSelectModel)}

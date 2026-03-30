@@ -9,6 +9,7 @@ import Image from 'next/image';
 import ProfileMenu, { ThreeDotsProfileMenu } from '../navigation/profile-menu';
 import { type ChatMessage as Message } from '@/types/chat';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
+import { useRegisterDialogHeader } from '../providers/dialog-header-provider';
 
 export function SharedChatHeader({
   chatActive,
@@ -55,7 +56,7 @@ export function SharedChatHeader({
     </DestructiveActionButton>
   );
 
-  return (
+  const headerContent = (
     <header
       className={cn(
         'flex gap-4 justify-between items-center py-[1.15rem] px-2',
@@ -107,4 +108,8 @@ export function SharedChatHeader({
       )}
     </header>
   );
+
+  useRegisterDialogHeader(headerContent);
+
+  return null;
 }

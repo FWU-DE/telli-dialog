@@ -1,8 +1,5 @@
 'use client';
 
-import HeaderPortal from '../header-portal';
-import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import ProfileMenu from '@/components/navigation/profile-menu';
 import React from 'react';
 import { cn } from '@/utils/tailwind';
 import SearchBarInput from '@/components/search-bar';
@@ -37,13 +34,6 @@ export function LearningScenarioContainer({
 
   return (
     <div className="min-w-full p-6 overflow-auto">
-      <HeaderPortal>
-        <ToggleSidebarButton
-          isNewUiDesignEnabled={federalState?.featureToggles?.isNewUiDesignEnabled ?? false}
-        />
-        <div className="grow"></div>
-        <ProfileMenu userAndContext={user} />
-      </HeaderPortal>
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl mb-6">{t('title')}</h1>
         <p>{t('description')}</p>
