@@ -316,6 +316,10 @@ export const characterTable = pgTable(
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
     schoolId: text('school_id').references(() => schoolTable.id),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+      .defaultNow()
+      .$onUpdateFn(() => new Date())
+      .notNull(),
     attachedLinks: text('attached_links')
       .array()
       .notNull()
@@ -522,6 +526,10 @@ export const learningScenarioTable = pgTable(
       .default(sql`'{}'::text[]`),
     pictureId: text('picture_id'),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+      .defaultNow()
+      .$onUpdateFn(() => new Date())
+      .notNull(),
     isDeleted: boolean('is_deleted').notNull().default(false),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     schoolId: text('school_id').references(() => schoolTable.id),
