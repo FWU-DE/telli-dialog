@@ -29,7 +29,6 @@ import {
   unshareCharacter,
   updateCharacter,
   updateCharacterAccessLevel,
-  updateCharacterPicture,
   uploadAvatarPictureForCharacter,
 } from './character-service';
 import {
@@ -132,15 +131,6 @@ describe('character-service', () => {
             characterId: generateUUID(),
             userId: 'different-user-id',
             fileId: generateUUID(),
-          }),
-      },
-      {
-        functionName: 'updateCharacterPicture',
-        testFunction: () =>
-          updateCharacterPicture({
-            characterId: generateUUID(),
-            userId: 'different-user-id',
-            picturePath: 'picture-path',
           }),
       },
       {
@@ -375,15 +365,6 @@ describe('character-service', () => {
             characterId: 'invalid-uuid',
             userId: 'user-id',
             fileId: generateUUID(),
-          }),
-      },
-      {
-        functionName: 'updateCharacterPicture',
-        testFunction: () =>
-          updateCharacterPicture({
-            characterId: 'invalid-uuid',
-            userId: 'user-id',
-            picturePath: 'picture-path',
           }),
       },
       {

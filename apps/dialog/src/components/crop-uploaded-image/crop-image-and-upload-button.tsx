@@ -11,10 +11,17 @@ import { useToast } from '../common/toast';
 import { useTranslations } from 'next-intl';
 import { ServerActionResult } from '@shared/actions/server-action-result';
 
+export type AvatarUploadResult = {
+  picturePath: string;
+  signedUrl?: string;
+};
+
 type CropImageAndUploadButtonProps = {
   aspect: number;
-  handleUploadAvatarPicture: (croppedImageBlob: Blob) => Promise<ServerActionResult<string>>;
-  onUploadComplete: (imagePath: string) => void;
+  handleUploadAvatarPicture: (
+    croppedImageBlob: Blob,
+  ) => Promise<ServerActionResult<AvatarUploadResult>>;
+  onUploadComplete?: (uploadResult: AvatarUploadResult) => void;
   compressionOptions?: CompressionOptions;
   disabled?: boolean;
 };
@@ -51,7 +58,7 @@ export default function CropImageAndUploadButton({
     const result = await handleUploadAvatarPicture(croppedBlob);
 
     if (result.success && result.value) {
-      onUploadComplete(result.value);
+      onUploadComplete?.(result.value);
       setShowCropModal(false);
     } else {
       toast.error(t('toasts.upload-error'));

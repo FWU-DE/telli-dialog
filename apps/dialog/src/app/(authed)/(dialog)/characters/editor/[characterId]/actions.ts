@@ -12,7 +12,6 @@ import {
   updateCharacter,
   updateCharacterAccessLevel,
   UpdateCharacterActionModel,
-  updateCharacterPicture,
   uploadAvatarPictureForCharacter,
 } from '@shared/characters/character-service';
 import { runServerAction } from '@shared/actions/run-server-action';
@@ -29,22 +28,6 @@ export async function updateCharacterAccessLevelAction({
   return runServerAction(updateCharacterAccessLevel)({
     characterId,
     accessLevel,
-    userId: user.id,
-  });
-}
-
-export async function updateCharacterPictureAction({
-  characterId,
-  picturePath,
-}: {
-  characterId: string;
-  picturePath: string;
-}) {
-  const { user } = await requireAuth();
-
-  return runServerAction(updateCharacterPicture)({
-    characterId,
-    picturePath,
     userId: user.id,
   });
 }

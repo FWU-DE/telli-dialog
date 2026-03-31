@@ -259,38 +259,6 @@ export async function updateLearningScenarioAccessLevel({
   return updatedLearningScenario;
 }
 
-/**
- * User updates the picture of a learning scenario.
- * @throws NotFoundError if the learning scenario does not exist.
- * @throws ForbiddenError if the user is not the owner of the learning scenario.
- */
-export async function updateLearningScenarioPicture({
-  learningScenarioId,
-  picturePath,
-  user,
-}: {
-  learningScenarioId: string;
-  picturePath: string;
-  user: Pick<UserModel, 'id' | 'userRole'>;
-}) {
-  checkParameterUUID(learningScenarioId);
-  requireTeacherRole(user.userRole);
-  const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
-  verifyWriteAccess({ item: learningScenario, userId: user.id });
-
-  const [updatedSharedChat] = await db
-    .update(learningScenarioTable)
-    .set({ pictureId: picturePath })
-    .where(eq(learningScenarioTable.id, learningScenarioId))
-    .returning();
-
-  if (!updatedSharedChat) {
-    throw new Error('Could not update learning scenario picture');
-  }
-
-  return updatedSharedChat;
-}
-
 export const learningScenarioShareValuesSchema = z.object({
   telliPointsPercentageLimit: z.number().min(1).max(100),
   usageTimeLimit: z
@@ -617,7 +585,10 @@ export async function uploadAvatarPictureForLearningScenario({
   const oldKey = learningScenario.pictureId;
   if (oldKey === key) {
     // image didn't change, skip update
-    return key;
+    return {
+      picturePath: key,
+      signedUrl: await getAvatarPictureUrl(key),
+    };
   }
   // Upload new avatar
   await uploadFileToS3({
@@ -646,7 +617,10 @@ export async function uploadAvatarPictureForLearningScenario({
     }
   }
 
-  return key;
+  return {
+    picturePath: key,
+    signedUrl: await getAvatarPictureUrl(key),
+  };
 }
 
 /**

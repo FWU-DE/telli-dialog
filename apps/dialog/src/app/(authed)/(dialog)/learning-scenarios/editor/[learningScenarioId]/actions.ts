@@ -9,7 +9,6 @@ import {
   unshareLearningScenario,
   updateLearningScenario,
   updateLearningScenarioAccessLevel,
-  updateLearningScenarioPicture,
   uploadAvatarPictureForLearningScenario,
 } from '@shared/learning-scenarios/learning-scenario-service';
 import { requireAuth } from '@/auth/requireAuth';
@@ -43,22 +42,6 @@ export async function updateLearningScenarioAction({
     learningScenarioId,
     user,
     data,
-  });
-}
-
-export async function updateLearningScenarioPictureAction({
-  learningScenarioId,
-  picturePath,
-}: {
-  learningScenarioId: string;
-  picturePath: string;
-}) {
-  const { user } = await requireAuth();
-
-  return runServerAction(updateLearningScenarioPicture)({
-    learningScenarioId,
-    picturePath,
-    user,
   });
 }
 

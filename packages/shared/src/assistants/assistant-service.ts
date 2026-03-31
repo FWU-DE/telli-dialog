@@ -372,36 +372,6 @@ export async function updateAssistantAccessLevel({
   return updatedAssistant;
 }
 
-/**
- * Set a new picture for the custom gpt.
- * Throws if the user is not the owner of the custom gpt.
- */
-export async function updateAssistantPicture({
-  assistantId,
-  picturePath,
-  userId,
-}: {
-  assistantId: string;
-  picturePath: string;
-  userId: string;
-}) {
-  checkParameterUUID(assistantId);
-  const assistant = await dbGetAssistantById({ assistantId });
-  verifyWriteAccess({ item: assistant, userId });
-
-  const [updatedAssistant] = await db
-    .update(assistantTable)
-    .set({ pictureId: picturePath })
-    .where(and(eq(assistantTable.id, assistantId), eq(assistantTable.userId, userId)))
-    .returning();
-
-  if (updatedAssistant === undefined) {
-    throw new Error('Could not update the picture of the assistant');
-  }
-
-  return updatedAssistant;
-}
-
 const updateAssistantSchema = assistantUpdateSchema.omit({
   id: true,
   isDeleted: true,
@@ -508,7 +478,10 @@ export async function uploadAvatarPictureForAssistant({
   const oldKey = assistant.pictureId;
   if (oldKey === key) {
     // image didn't change, skip update
-    return key;
+    return {
+      picturePath: key,
+      signedUrl: await getAvatarPictureUrl(key),
+    };
   }
 
   // Upload new avatar
@@ -538,5 +511,8 @@ export async function uploadAvatarPictureForAssistant({
     }
   }
 
-  return key;
+  return {
+    picturePath: key,
+    signedUrl: await getAvatarPictureUrl(key),
+  };
 }

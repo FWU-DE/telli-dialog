@@ -9,7 +9,6 @@ import {
   linkFileToAssistant,
   updateAssistant,
   updateAssistantAccessLevel,
-  updateAssistantPicture,
   getAssistantByUser,
   uploadAvatarPictureForAssistant,
 } from './assistant-service';
@@ -79,10 +78,6 @@ describe('assistant-service', () => {
         functionName: 'updateAssistantAccessLevel',
         testFunction: () =>
           updateAssistantAccessLevel({ assistantId, accessLevel: 'school', userId }),
-      },
-      {
-        functionName: 'updateAssistantPicture',
-        testFunction: () => updateAssistantPicture({ assistantId, picturePath: fileId, userId }),
       },
       {
         functionName: 'updateAssistant',
@@ -213,15 +208,6 @@ describe('assistant-service', () => {
           updateAssistantAccessLevel({
             assistantId,
             accessLevel: 'school',
-            userId: 'different-user-id',
-          }),
-      },
-      {
-        functionName: 'updateAssistantPicture',
-        testFunction: () =>
-          updateAssistantPicture({
-            assistantId,
-            picturePath: 'picture-path',
             userId: 'different-user-id',
           }),
       },
@@ -501,15 +487,6 @@ describe('assistant-service', () => {
           updateAssistantAccessLevel({
             assistantId: 'invalid-uuid',
             accessLevel: 'school',
-            userId: 'user-id',
-          }),
-      },
-      {
-        functionName: 'updateAssistantPicture',
-        testFunction: () =>
-          updateAssistantPicture({
-            assistantId: 'invalid-uuid',
-            picturePath: 'picture-path',
             userId: 'user-id',
           }),
       },

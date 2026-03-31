@@ -11,7 +11,6 @@ import {
   unshareLearningScenario,
   updateLearningScenario,
   updateLearningScenarioAccessLevel,
-  updateLearningScenarioPicture,
   uploadAvatarPictureForLearningScenario,
 } from './learning-scenario-service';
 import {
@@ -111,15 +110,6 @@ function buildFunctionList(
       testFunction: () =>
         updateLearningScenario({
           data: {} as LearningScenarioSelectModel,
-          learningScenarioId,
-          user,
-        }),
-    },
-    {
-      functionName: updateLearningScenarioPicture.name,
-      testFunction: () =>
-        updateLearningScenarioPicture({
-          picturePath: 'path',
           learningScenarioId,
           user,
         }),

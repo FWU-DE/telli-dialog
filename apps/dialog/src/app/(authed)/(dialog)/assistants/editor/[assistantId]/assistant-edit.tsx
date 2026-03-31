@@ -34,7 +34,6 @@ import {
   deleteAssistantAction,
   updateAssistantAction,
   uploadAvatarPictureForAssistantAction,
-  getAvatarSignedUrl,
   updateAssistantAccessLevelAction,
 } from '../../../custom/editor/[customGptId]/actions';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
@@ -56,7 +55,6 @@ function createAssistantFormValuesSchema(t: AssistantTranslator) {
     name: z.string().min(1, t('name-required')),
     description: z.string(),
     instructions: z.string(),
-    pictureId: z.string().optional(),
     isSchoolShared: z.boolean(),
     hasLinkAccess: z.boolean(),
     promptSuggestions: z
@@ -94,7 +92,6 @@ export function AssistantEdit({
     name: assistant.name,
     description: assistant.description ?? '',
     instructions: assistant.instructions ?? '',
-    pictureId: assistant.pictureId ?? undefined,
     isSchoolShared: assistant.accessLevel === 'school',
     hasLinkAccess: assistant.hasLinkAccess,
     promptSuggestions:
@@ -130,7 +127,6 @@ export function AssistantEdit({
           name: data.name,
           description: data.description,
           instructions: data.instructions,
-          pictureId: data.pictureId,
           hasLinkAccess: data.hasLinkAccess,
           promptSuggestions: data.promptSuggestions
             .map((suggestion) => suggestion.value.trim())
@@ -142,7 +138,6 @@ export function AssistantEdit({
     });
 
   const name = useWatch({ control, name: 'name' });
-  const onPictureIdChangeRef = useRef<(value: string) => void>(() => {});
   const savedAccessLevelRef = useRef(assistant.accessLevel);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
@@ -205,15 +200,17 @@ export function AssistantEdit({
     return await updateAssistantAction({ gptId: assistant.id, attachedLinks: links });
   };
 
-  async function handlePictureUploadComplete(pictureId: string) {
-    onPictureIdChangeRef.current(pictureId);
-  }
-
   async function handleUploadPicture(croppedImageBlob: Blob) {
-    return await uploadAvatarPictureForAssistantAction({
+    const result = await uploadAvatarPictureForAssistantAction({
       assistantId: assistant.id,
       croppedImageBlob,
     });
+
+    if (result.success) {
+      toast.success(t('toasts.edit-toast-success'));
+    }
+
+    return result;
   }
   const handleSharingChange = async ({ name, checked }: { name: string; checked: boolean }) => {
     if (name === 'isSchoolShared') {
@@ -273,9 +270,7 @@ export function AssistantEdit({
       {showShareInfo && <CustomChatShareInfo href="#share-settings" variant="assistants" />}
       <CustomChatImageUpload
         avatarPictureUrl={avatarPictureUrl}
-        onPictureUploadComplete={handlePictureUploadComplete}
         onUploadPicture={handleUploadPicture}
-        onGetSignedUrl={getAvatarSignedUrl}
       />
 
       <form
@@ -288,18 +283,6 @@ export function AssistantEdit({
         <Card>
           <CardContent>
             <FieldGroup>
-              <Controller
-                name="pictureId"
-                control={control}
-                render={({ field }) => {
-                  onPictureIdChangeRef.current = (value: string) => {
-                    field.onChange(value);
-                    void flushAutoSave();
-                  };
-
-                  return <Input {...field} type="hidden" value={field.value ?? ''} />;
-                }}
-              />
               <Controller
                 name="name"
                 control={control}

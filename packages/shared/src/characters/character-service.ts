@@ -28,7 +28,11 @@ import {
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
-import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
+import {
+  deleteAvatarPicture,
+  deleteMessageAttachments,
+  getAvatarPictureUrl,
+} from '@shared/files/fileService';
 import { copyFileInS3, deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/template-service';
@@ -261,39 +265,6 @@ export const updateCharacterAccessLevel = async ({
 
   if (updatedCharacter === undefined) {
     throw new Error('Could not update the access level of the character');
-  }
-
-  return updatedCharacter;
-};
-
-/**
- * Updates the picture of a character by setting a new picture path.
- *
- * Only the owner is allowed to update the picture.
- */
-export const updateCharacterPicture = async ({
-  characterId,
-  picturePath,
-  userId,
-}: {
-  characterId: string;
-  picturePath: string;
-  userId: string;
-}) => {
-  checkParameterUUID(characterId);
-  // Authorization check
-  const { character } = await getCharacterInfo(characterId, userId);
-  verifyWriteAccess({ item: character, userId });
-
-  // Update the picture path in database
-  const [updatedCharacter] = await db
-    .update(characterTable)
-    .set({ pictureId: picturePath })
-    .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)))
-    .returning();
-
-  if (updatedCharacter === undefined) {
-    throw new Error('Could not update the picture of the character');
   }
 
   return updatedCharacter;
@@ -689,7 +660,10 @@ export async function uploadAvatarPictureForCharacter({
   const oldKey = character.pictureId;
   if (oldKey === key) {
     // image didn't change, skip update
-    return key;
+    return {
+      picturePath: key,
+      signedUrl: await getAvatarPictureUrl(key),
+    };
   }
 
   // Upload new avatar
@@ -719,5 +693,8 @@ export async function uploadAvatarPictureForCharacter({
     }
   }
 
-  return key;
+  return {
+    picturePath: key,
+    signedUrl: await getAvatarPictureUrl(key),
+  };
 }

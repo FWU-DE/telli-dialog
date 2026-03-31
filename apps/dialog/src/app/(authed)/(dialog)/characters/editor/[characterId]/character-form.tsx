@@ -31,7 +31,6 @@ import {
   linkFileToCharacterAction,
   updateCharacterAccessLevelAction,
   updateCharacterAction,
-  updateCharacterPictureAction,
   uploadAvatarPictureForCharacterAction,
 } from './actions';
 import ShareContainer from './share-container';
@@ -190,16 +189,6 @@ export default function CharacterForm({
     name: 'attachedLinks',
   });
 
-  async function handlePictureUploadComplete(picturePath: string) {
-    const result = await updateCharacterPictureAction({ picturePath, characterId: character.id });
-    if (result.success) {
-      toast.success(tToast('image-toast-success'));
-      router.refresh();
-    } else {
-      toast.error(tToast('edit-toast-error'));
-    }
-  }
-
   async function onSubmit(data: CharacterFormValues) {
     const result = await updateCharacterAction({
       id: character.id,
@@ -244,6 +233,12 @@ export default function CharacterForm({
       characterId: character.id,
       croppedImageBlob,
     });
+
+    if (result.success) {
+      toast.success(tToast('image-toast-success'));
+      router.refresh();
+    }
+
     return result;
   }
 
@@ -401,7 +396,6 @@ export default function CharacterForm({
               <CropImageAndUploadButton
                 aspect={1}
                 handleUploadAvatarPicture={handleUploadAvatarPicture}
-                onUploadComplete={handlePictureUploadComplete}
                 compressionOptions={{ maxWidth: AVATAR_MAX_SIZE, maxHeight: AVATAR_MAX_SIZE }}
               />
             )}
