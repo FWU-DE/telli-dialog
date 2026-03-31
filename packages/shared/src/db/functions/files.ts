@@ -336,17 +336,16 @@ export async function dbGetAllS3FileKeys(): Promise<string[]> {
           pictureId: learningScenarioTable.pictureId,
         })
         .from(learningScenarioTable),
-      db.select({ id: federalStateTable.id }).from(federalStateTable),
+      db.select({ pictureUrls: federalStateTable.pictureUrls }).from(federalStateTable),
     ]);
 
   const fileIds = files.map((x) => `message_attachments/${x.fileId}`);
   const pictureIds = [...characters, ...assistants, ...sharedSchoolConversations]
     .map((x) => x.pictureId)
     .filter((x): x is string => !!x);
-  const whitelabels = federalStates.flatMap((x) => [
-    `whitelabels/${x.id}/logo.svg`,
-    `whitelabels/${x.id}/favicon.svg`,
-  ]);
+  const federalStatePictureUrls = federalStates
+    .flatMap((x) => [x.pictureUrls?.favicon, x.pictureUrls?.logo])
+    .filter((x): x is string => !!x);
 
-  return [...fileIds, ...pictureIds, ...whitelabels];
+  return [...fileIds, ...pictureIds, ...federalStatePictureUrls];
 }

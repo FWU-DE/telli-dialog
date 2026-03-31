@@ -25,7 +25,7 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]'>) {
     schoolId: school.id,
   }).catch(handleErrorInServerComponent);
 
-  const logoElement = <Logo federalStateId={federalState.id} />;
+  const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
   const models = await dbGetLlmModelsByFederalStateId({
     federalStateId: federalState.id,
   });

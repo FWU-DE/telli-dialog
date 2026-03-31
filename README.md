@@ -253,17 +253,22 @@ These are hidden in the sidebar, but the routes are still accessible.
 
 ### Whitelabel
 
+All whitelabel configurations can be set up in the telli-admin interface.
 Custom designs and titles for federal states:
 
 - **telliName**:  
   Custom name appearing in the sidebar and as website title.
-  This value is configured in the SQL column federal_state/telli_name.
+  This value is configured in the SQL column `federal_state/telli_name`.
 
 - **logos**:  
-  The logo and favicon are stored in the OTC S3 Bucket at a fixed path:  
-  `/whitelabels/<Federal-State-ID>/logo.svg`
-  `/whitelabels/<Federal-State-ID>/favicon.svg`
+  The logo and favicon are stored in the S3 Bucket and referenced from the SQL column `federal_state/picture_urls`:
+  ```
+  {
+    "logo": "/whitelabels/Federal-State-ID/logo.svg",
+    "favicon": "/whitelabels/Federal-State-ID/favicon.svg"
+  }
+  ```
 
 - **design configuration**:  
   Custom color palette for buttons, icons, etc. (see Figma designs).  
-  This value is configured in the SQL column federal_state/design_configuration.
+  This value is configured in the SQL column `federal_state/design_configuration`.

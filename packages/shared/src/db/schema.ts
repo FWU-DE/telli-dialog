@@ -239,8 +239,13 @@ export const federalStateFeatureTogglesSchema = z.object({
   isImageGenerationEnabled: z.boolean().optional(),
   isNewUiDesignEnabled: z.boolean().default(false),
 });
-
 export type FederalStateFeatureToggles = z.infer<typeof federalStateFeatureTogglesSchema>;
+
+export const federalStatePictureUrlsSchema = z.object({
+  logo: z.string().optional(),
+  favicon: z.string().optional(),
+});
+export type FederalStatePictureUrls = z.infer<typeof federalStatePictureUrlsSchema>;
 
 export const federalStateTable = pgTable('federal_state', {
   id: text('id').primaryKey(),
@@ -257,6 +262,7 @@ export const federalStateTable = pgTable('federal_state', {
   // whitelabel configuration
   designConfiguration: json('design_configuration').$type<DesignConfiguration>(),
   telliName: text('telli_name'),
+  pictureUrls: json('picture_urls').$type<FederalStatePictureUrls>(),
   // feature toggles
   featureToggles: json('feature_toggles').$type<FederalStateFeatureToggles>().notNull(),
 });
