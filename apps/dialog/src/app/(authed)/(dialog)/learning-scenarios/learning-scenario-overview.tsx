@@ -43,16 +43,31 @@ export default function LearningScenarioOverview({ currentUserId }: LearningScen
       onFilterChange={handleFilterChange}
       itemCount={visibleLearningScenarios.length}
     >
-      {visibleLearningScenarios.map((ls) => (
-        <EntityCard
-          key={ls.id}
-          name={ls.name}
-          description={ls.description}
-          avatarUrl={ls.maybeSignedPictureUrl}
-          isOwned={ls.userId === currentUserId}
-          onCardClick={() => router.push(`/learning-scenarios/editor/${ls.id}`)}
-        />
-      ))}
+      {(searchQuery, sortBy) => {
+        const q = searchQuery.trim().toLowerCase();
+        const filtered = q
+          ? visibleLearningScenarios
+              .filter((scenario) => scenario.name.toLowerCase().includes(q))
+              .slice()
+              .sort((a, b) =>
+                sortBy === 'name'
+                  ? a.name.localeCompare(b.name)
+                  : b.updatedAt.getTime() - a.updatedAt.getTime(),
+              )
+          : visibleLearningScenarios;
+
+        return filtered.map((scenario) => (
+          <EntityCard
+            key={scenario.id}
+            name={scenario.name}
+            description={scenario.description}
+            avatarUrl={scenario.maybeSignedPictureUrl}
+            isOwned={scenario.userId === currentUserId}
+            onCardClick={() => router.push(`/learning-scenarios/editor/${scenario.id}`)}
+            onChatClick={() => router.push(`/learning-scenarios/d/${scenario.id}`)}
+          />
+        ));
+      }}
     </EntityOverview>
   );
 }

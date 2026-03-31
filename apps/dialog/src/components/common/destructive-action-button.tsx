@@ -48,6 +48,7 @@ export default function DestructiveActionButton({
             setIsOpen(true);
           }}
           type="button"
+          data-testid="custom-chat-delete-button"
           {...buttonProps}
         >
           {children}
@@ -75,7 +76,7 @@ export default function DestructiveActionButton({
               className={cn(buttonSecondaryClassName, 'w-full lg:w-auto')}
               type="button"
             >
-              Abbrechen
+              {t('cancel')}
             </button>
             <AlertDialog.Action asChild>
               <button

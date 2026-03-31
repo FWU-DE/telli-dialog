@@ -471,6 +471,11 @@
     "custom-assets-links": "Webseiten",
     "sharing-info": "Dieser Assistent ist für andere freigegeben.",
     "sharing-settings": "Freigabe-Einstellungen",
+    "delete-button": "Löschen",
+    "delete-modal-title": "Assistent löschen",
+    "delete-modal-description": "Soll der Assistent wirklich gelöscht werden?",
+    "delete-modal-confirm-button": "Löschen",
+    "delete-modal-cancel-button": "Abbrechen",
     "toasts": {
       "create-toast-error": "Der Assistent konnte nicht erstellt werden.",
       "delete-toast-success": "Der Assistent wurde erfolgreich gelöscht.",
@@ -488,6 +493,8 @@
     "filter-school": "Schulintern",
     "filter-tabs-label": "Filteroptionen",
     "info-tooltip-label": "Informationen anzeigen",
-    "badge-mine": "von mir"
+    "badge-mine": "von mir",
+    "sort-date": "Nach Aktualität",
+    "sort-name": "Nach Name"
   }
 }

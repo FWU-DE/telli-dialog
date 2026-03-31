@@ -52,6 +52,7 @@ import AvatarPicture from '@/components/common/avatar-picture';
 import { WebsearchSource } from '@shared/db/types';
 import SharingSection from '@/components/forms/sharing-section';
 import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
+import { AVATAR_MAX_SIZE } from '@/const';
 
 type AssistantFormProps = AssistantSelectModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -360,7 +361,7 @@ export default function AssistantForm({
               aspect={1}
               onUploadComplete={handlePictureUploadComplete}
               handleUploadAvatarPicture={handleUploadAvatarPicture}
-              compressionOptions={{ maxHeight: 800 }}
+              compressionOptions={{ maxWidth: AVATAR_MAX_SIZE, maxHeight: AVATAR_MAX_SIZE }}
               disabled={readOnly}
             />
           </section>
