@@ -49,6 +49,7 @@ import { WebsearchSource } from '@shared/db/types';
 import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
 import SharingSection from '@/components/forms/sharing-section';
 import { createNewCharacterAction } from '@/app/(authed)/(dialog)/characters/actions';
+import { AVATAR_MAX_SIZE } from '@/const';
 
 type CharacterFormProps = CharacterWithShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -401,7 +402,7 @@ export default function CharacterForm({
                 aspect={1}
                 handleUploadAvatarPicture={handleUploadAvatarPicture}
                 onUploadComplete={handlePictureUploadComplete}
-                compressionOptions={{ maxHeight: 800 }}
+                compressionOptions={{ maxWidth: AVATAR_MAX_SIZE, maxHeight: AVATAR_MAX_SIZE }}
               />
             )}
           </section>

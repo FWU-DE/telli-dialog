@@ -4,6 +4,11 @@ export type SUPPORTED_DOCUMENTS_TYPE = (typeof SUPPORTED_DOCUMENTS_EXTENSIONS)[n
 /** This is currently only used to check if a file is an image */
 export const SUPPORTED_IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp', 'svg'] as const;
 export type SUPPORTED_IMAGE_TYPE = (typeof SUPPORTED_IMAGE_EXTENSIONS)[number];
+/**
+ * The maximum size in pixels (width or height) of an avatar. Larger images will be scaled down.
+ * The maximum CSS size for avatars is 170px in the UI. For high DPR screens, we allow images up to 2x the maximum CSS size to ensure they look sharp.
+ */
+export const AVATAR_MAX_SIZE = 340;
 
 export const TRUNCATE_IMAGE_HEIGHT = 720;
 
