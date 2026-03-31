@@ -7,38 +7,28 @@ type CustomChatActionDeleteProps = {
   onClick: () => void;
   modalTitle?: string;
   modalDescription?: string;
-  confirmText?: string;
-  cancelText?: string;
-  buttonText?: string;
 };
 
 export function CustomChatActionDelete({
   onClick,
   modalTitle,
   modalDescription,
-  confirmText,
-  cancelText,
-  buttonText,
 }: CustomChatActionDeleteProps) {
-  const t = useTranslations('assistants');
+  const t = useTranslations();
 
-  const resolvedModalTitle = modalTitle ?? t('delete-modal-title');
-  const resolvedModalDescription = modalDescription ?? t('delete-modal-description');
-  const resolvedConfirmText = confirmText ?? t('delete-modal-confirm-button');
-  const resolvedCancelText = cancelText ?? t('delete-modal-cancel-button');
-  const resolvedButtonText = buttonText ?? t('delete-button');
+  const resolvedModalTitle = modalTitle ?? t('assistants.delete-modal-title');
+  const resolvedModalDescription = modalDescription ?? t('assistants.delete-modal-description');
 
   return (
     <DestructiveActionButton
       triggerButtonClassName={customChatDeleteButtonClassName}
       modalTitle={resolvedModalTitle}
       modalDescription={resolvedModalDescription}
-      confirmText={resolvedConfirmText}
-      cancelText={resolvedCancelText}
+      confirmText={t('assistants.delete-modal-confirm-button')}
       actionFn={onClick}
     >
       <TrashSimpleIcon className="size-5" />
-      {resolvedButtonText}
+      {t('common.delete')}
     </DestructiveActionButton>
   );
 }

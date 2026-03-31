@@ -13,7 +13,6 @@ type DestructiveActionButtonProps = {
   modalTitle: string;
   modalDescription: string;
   confirmText?: string;
-  cancelText?: string;
   actionFn: () => void;
 } & React.ComponentProps<'button'>;
 
@@ -26,7 +25,6 @@ export default function DestructiveActionButton({
   modalTitle,
   modalDescription,
   confirmText,
-  cancelText,
   ...buttonProps
 }: DestructiveActionButtonProps) {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -77,7 +75,7 @@ export default function DestructiveActionButton({
               className={cn(buttonSecondaryClassName, 'w-full lg:w-auto')}
               type="button"
             >
-              {cancelText ?? 'Abbrechen'}
+              {t('cancel')}
             </button>
             <AlertDialog.Action asChild>
               <button
