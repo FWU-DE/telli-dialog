@@ -60,11 +60,13 @@ export function useRegisterDialogHeader(content: React.ReactNode | null) {
 
   React.useEffect(() => {
     setHeaderContent(content);
+  }, [content, setHeaderContent]);
 
+  React.useEffect(() => {
     return () => {
       clearHeader();
     };
-  }, [clearHeader, content, setHeaderContent]);
+  }, [clearHeader]);
 }
 
 export function useDialogHeaderDocumentStatus(status: DialogHeaderDocumentStatus | null) {
@@ -72,9 +74,11 @@ export function useDialogHeaderDocumentStatus(status: DialogHeaderDocumentStatus
 
   React.useEffect(() => {
     setDocumentStatus(status);
+  }, [setDocumentStatus, status]);
 
+  React.useEffect(() => {
     return () => {
       setDocumentStatus(null);
     };
-  }, [setDocumentStatus, status]);
+  }, [setDocumentStatus]);
 }
