@@ -64,6 +64,7 @@ function Input({
             className,
           )}
           value={value}
+          maxLength={maxLength}
           {...props}
           onChange={handleChange}
           onFocus={handleFocus}
