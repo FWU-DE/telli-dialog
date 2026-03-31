@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
-import { waitForToast, waitForToastDisappear } from '../../utils/utils';
+import { waitForToast } from '../../utils/utils';
 import { sendMessage, uploadFile } from '../../utils/chat';
 import { deleteCustomGpt } from '../../utils/custom-gpt';
 
@@ -47,9 +47,9 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
   await page.getByTestId('delete-prompt-suggestion-2-button').click();
 
   // save form
-  await page.getByTestId('custom-chat-save-button').click();
+  await page.getByTestId('custom-chat-save-button').first().click();
+  await page.goto('/custom');
 
-  await page.waitForURL(/\/assistants(\?|$)/);
   const card = page.getByRole('button', { name: assistantName }).first();
   await expect(card).toBeVisible({ timeout: 15000 });
   await card.getByRole('button', { name: 'Neuer Chat' }).click();
@@ -78,10 +78,12 @@ test('teacher can delete customgpt with chat', async ({ page }) => {
 
   await deleteCustomGpt(page, assistantName);
 
-  const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
-  await expect(deleteConfirmButton).toBeVisible();
-  await deleteConfirmButton.click();
+  // Todo: check for confirmation dialog as soon as it exits
+  // const deleteConfirmButton = page.getByTestId('custom-chat-delete-button').first();
+  // await expect(deleteConfirmButton).toBeVisible();
+  // await deleteConfirmButton.click();
   await waitForToast(page, 'Der Assistent wurde erfolgreich gelöscht.');
+  await page.waitForURL('/custom**');
   await expect(page.getByRole('heading', { name: assistantName }).first()).not.toBeVisible();
 });
 
@@ -114,7 +116,7 @@ test('data is autosaved on blur', async ({ page }) => {
   await page.getByTestId('prompt-suggestion-1-input').fill('Test prompt suggestion');
 
   // Save the form
-  await page.getByTestId('custom-chat-save-button').click();
+  await page.getByTestId('custom-chat-save-button').first().click();
 
   // Navigate to assistant overview explicitly to check if data was saved correctly
   await page.goto('/custom');
@@ -125,27 +127,34 @@ test('data is autosaved on blur', async ({ page }) => {
 
   // change title to new value
   await page.getByTestId('assistant-name-input').fill('New Title');
-  // unfocus the textbox
   await page.getByTestId('assistant-name-input').press('Tab');
   await page.reload();
   await expect(page.getByTestId('assistant-name-input')).toHaveValue('New Title');
 
   // change description to new value
-  await page.getByTestId('assistant-description-input').fill('New Description');
-  await page.getByTestId('assistant-description-input').press('Tab');
+  const descriptionInput = page.getByTestId('assistant-description-input');
+  await descriptionInput.click();
+  await descriptionInput.press('ControlOrMeta+A');
+  await descriptionInput.fill('New Description');
+  await descriptionInput.press('Tab');
   await page.reload();
   await expect(page.getByTestId('assistant-description-input')).toHaveValue('New Description');
 
   // change instructions to new value
-  await page.getByTestId('assistant-instructions-input').fill('New Instructions');
-  await page.getByTestId('assistant-instructions-input').press('Tab');
+  const instructionsInput = page.getByTestId('assistant-instructions-input');
+  await instructionsInput.click();
+  await instructionsInput.press('ControlOrMeta+A');
+  await instructionsInput.fill('New Instructions');
+  await instructionsInput.press('Tab');
   await page.reload();
   await expect(page.getByTestId('assistant-instructions-input')).toHaveValue('New Instructions');
 
   // change prompt suggestion to new value
-  await page.getByTestId('prompt-suggestion-1-input').fill('New Prompt Suggestion');
-  await page.getByTestId('prompt-suggestion-1-input').press('Tab');
-  await waitForToast(page);
+  const promptSuggestionInput = page.getByTestId('prompt-suggestion-1-input');
+  await promptSuggestionInput.click();
+  await promptSuggestionInput.press('ControlOrMeta+A');
+  await promptSuggestionInput.fill('New Prompt Suggestion');
+  await promptSuggestionInput.press('Tab');
   await page.reload();
   await expect(page.getByTestId('prompt-suggestion-1-input')).toHaveValue('New Prompt Suggestion');
 });

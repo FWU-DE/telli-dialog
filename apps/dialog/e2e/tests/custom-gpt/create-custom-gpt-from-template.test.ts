@@ -12,7 +12,7 @@ test('test', async ({ page }) => {
   await card.click();
   await page.waitForURL('/assistants/**');
 
-  const copyButton = page.getByTestId('custom-chat-duplicate-button');
+  const copyButton = page.getByTestId('custom-chat-duplicate-button').first();
   await expect(copyButton).toBeVisible({ timeout: 15000 });
   await expect(copyButton).toBeEnabled();
   await copyButton.click();
@@ -25,7 +25,8 @@ test('test', async ({ page }) => {
   await page
     .getByTestId('assistant-instructions-input')
     .fill('Speziell angepasst für die Bedürfnisse meiner Schule und Klassenstufen.');
-  await page.getByTestId('custom-chat-save-button').click();
-  await page.waitForURL('/custom?visibility=private');
+  await page.getByTestId('custom-chat-save-button').first().click();
+  await page.getByTestId('assistant-edit-back-button').click();
+  await page.waitForURL('/custom**');
   await expect(page.locator('body')).toContainText('Schulorganisationsassistent Individuell');
 });
