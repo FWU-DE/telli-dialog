@@ -57,7 +57,7 @@ export default function EntityOverview({
 
   return (
     <div className="min-w-full overflow-auto flex flex-col h-full bg-gray-50">
-      <HeaderPortal>
+      <HeaderPortal className="bg-gray-50">
         <ToggleSidebarButton
           isNewUiDesignEnabled={federalState?.featureToggles?.isNewUiDesignEnabled ?? false}
         />
