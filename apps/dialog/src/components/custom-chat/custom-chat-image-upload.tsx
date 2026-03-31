@@ -88,7 +88,7 @@ export function CustomChatImageUpload({
               src={displayedAvatarUrl}
               fill
               unoptimized
-              alt={'profile-picture'}
+              alt={t('profile-picture')}
               className="rounded-full object-contain"
             />
           ) : (
@@ -102,6 +102,7 @@ export function CustomChatImageUpload({
             className="hidden"
             onChange={handleImageUpload}
             ref={fileInputRef}
+            aria-label={t('upload-image')}
           />
           <Button type="button" onClick={handleButtonClick} className={cn(buttonPrimaryClassName)}>
             <UploadIcon weight="regular" />

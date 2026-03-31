@@ -29,7 +29,7 @@ export function AssistantView({
 }) {
   const router = useRouter();
   const toast = useToast();
-  const t = useTranslations('assistant');
+  const t = useTranslations('assistants');
 
   const handleDuplicateAssistant = async () => {
     const createResult = await createNewAssistantAction({});

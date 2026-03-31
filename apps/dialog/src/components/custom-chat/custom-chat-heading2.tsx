@@ -7,7 +7,7 @@ export function CustomChatHeading2({ text, tooltip }: { text: string; tooltip?: 
       <h2 className="text-lg font-medium">{text}</h2>
       {tooltip && (
         <Tooltip>
-          <TooltipTrigger aria-label="Tooltip für Hintergrundwissen">
+          <TooltipTrigger aria-label={text}>
             <InfoIcon className="size-5 text-icon" />
           </TooltipTrigger>
           <TooltipContent>{tooltip}</TooltipContent>

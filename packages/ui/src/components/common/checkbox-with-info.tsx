@@ -36,6 +36,7 @@ export default function CheckboxWithInfo<
           <Field data-invalid={fieldState.invalid} orientation="horizontal">
             <Checkbox
               id={field.name + '-checkbox'}
+              aria-label={label}
               checked={field.value}
               onCheckedChange={(checked) => {
                 field.onChange(checked);
@@ -50,7 +51,7 @@ export default function CheckboxWithInfo<
             {tooltip && (
               <Tooltip>
                 <TooltipTrigger aria-label={tooltip}>
-                  <InfoIcon className="size-5 text-icon" />
+                  <InfoIcon className="size-5 text-icon" aria-hidden="true" />
                 </TooltipTrigger>
                 <TooltipContent>{tooltip}</TooltipContent>
               </Tooltip>
