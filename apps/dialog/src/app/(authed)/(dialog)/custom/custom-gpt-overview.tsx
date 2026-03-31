@@ -31,6 +31,17 @@ export default function CustomGptOverview({ currentUserId }: CustomGptOverviewPr
     await setActiveFilter(filter);
   }
 
+  const handleCardClick = (gptId: string) => {
+    const assistant = visibleAssistants.find((gpt) => gpt.id === gptId);
+    if (assistant) {
+      if (assistant.userId === currentUserId) {
+        router.push(`/assistants/editor/${gptId}`);
+      } else {
+        router.push(`/assistants/${gptId}`);
+      }
+    }
+  };
+
   return (
     <EntityOverview
       title={t('title')}
@@ -48,8 +59,8 @@ export default function CustomGptOverview({ currentUserId }: CustomGptOverviewPr
           description={gpt.description}
           avatarUrl={gpt.maybeSignedPictureUrl}
           isOwned={gpt.userId === currentUserId}
-          onCardClick={() => router.push(`/custom/editor/${gpt.id}?create=false`)}
-          onChatClick={() => router.push(`/custom/d/${gpt.id}`)}
+          onCardClick={() => handleCardClick(gpt.id)}
+          onChatClick={() => router.push(`/assistants/d/${gpt.id}`)}
         />
       ))}
     </EntityOverview>

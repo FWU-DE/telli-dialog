@@ -161,11 +161,17 @@ export function AssistantEdit({
     onBeforePageLeave: saveBeforeLeave,
   });
 
+  const handleUseChat = () => {
+    guardNavigation(() => {
+      router.push(`/assistants/d/${assistant.id}/`);
+    });
+  };
+
   const handleDuplicateAssistant = async () => {
-    const createResult = await createNewAssistantAction({});
+    const createResult = await createNewAssistantAction({ templateId: assistant.id });
     if (createResult.success) {
       guardNavigation(() => {
-        router.push(`/assistants/${createResult.value.id}/edit`);
+        router.push(`/assistants/editor/${createResult.value.id}`);
       });
     } else {
       toast.error(t('toasts.create-toast-error'));
@@ -253,13 +259,7 @@ export function AssistantEdit({
       <CustomChatTitle title={name} />
       <div className="flex flex-row justify-between">
         <CustomChatActions>
-          <CustomChatActionUse
-            onClick={() => {
-              guardNavigation(() => {
-                router.push(`/custom/d/${assistant.id}/`);
-              });
-            }}
-          />
+          <CustomChatActionUse onClick={handleUseChat} />
           <CustomChatActionDuplicate onClick={handleDuplicateAssistant} />
           <CustomChatActionDelete onClick={handleDeleteAssistant} />
           <CustomChatActionSave onClick={handleAutoSave} />
