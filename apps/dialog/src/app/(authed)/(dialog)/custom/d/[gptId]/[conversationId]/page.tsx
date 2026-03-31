@@ -1,4 +1,3 @@
-import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import Chat from '@/components/chat/chat';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
@@ -50,14 +49,12 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversa
       defaultLlmModelByCookie={currentModel}
       initialDownloadConversationEnabled={chatMessages.length > 0}
     >
-      <HeaderPortal>
-        <ChatHeaderBar
-          chatId={conversation.id}
-          title={assistant.name}
-          downloadConversationEnabled={chatMessages.length > 0}
-          userAndContext={userAndContext}
-        />
-      </HeaderPortal>
+      <ChatHeaderBar
+        chatId={conversation.id}
+        title={assistant.name}
+        downloadConversationEnabled={chatMessages.length > 0}
+        userAndContext={userAndContext}
+      />
       <Chat
         id={conversation.id}
         initialMessages={chatMessages}

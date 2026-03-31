@@ -1,7 +1,6 @@
 import { getUser, userHasCompletedTraining } from '@/auth/utils';
 import React from 'react';
 import DialogSidebar from './sidebar';
-import { HEADER_PORTAL_ID } from './header-portal';
 import { contentHeight } from '@/utils/tailwind/height';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
@@ -20,6 +19,8 @@ import { getFederalStateById } from '@shared/federal-states/federal-state-servic
 import { FederalStateProvider } from '@/components/providers/federal-state-provider';
 import AppSidebar from '@/components/navigation/sidebar/app-sidebar';
 import { SidebarProvider } from '@telli/ui/components/Sidebar';
+import { DialogHeaderProvider } from '@/components/providers/dialog-header-provider';
+import DialogHeaderSlot from './dialog-header-slot';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations('errors');
@@ -51,31 +52,30 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
             models={models}
             defaultLlmModelByCookie={user.lastUsedModel ?? DEFAULT_CHAT_MODEL}
           >
-            {federalState.featureToggles.isNewUiDesignEnabled ? (
-              <AppSidebar
-                user={userWithRole}
-                federalState={federalState}
-                currentModelCosts={priceInCent ?? 0}
-                userPriceLimit={userPriceLimit ?? 500}
-              />
-            ) : (
-              <DialogSidebar
-                user={user}
-                currentModelCosts={priceInCent ?? 0}
-                userPriceLimit={userPriceLimit ?? 500}
-                isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
-              />
-            )}
-            <div className="flex flex-col max-h-dvh min-h-dvh w-full overflow-auto">
-              <div
-                id={HEADER_PORTAL_ID}
-                className="sticky z-10 top-0 py-4 h-19 px-6 flex gap-4 items-center justify-between bg-white"
-                style={{
-                  position: '-webkit-sticky',
-                }}
-              ></div>
-              <div className={contentHeight}>{children}</div>
-            </div>
+            <DialogHeaderProvider>
+              {federalState.featureToggles.isNewUiDesignEnabled ? (
+                <AppSidebar
+                  user={userWithRole}
+                  federalState={federalState}
+                  currentModelCosts={priceInCent ?? 0}
+                  userPriceLimit={userPriceLimit ?? 500}
+                />
+              ) : (
+                <DialogSidebar
+                  user={user}
+                  currentModelCosts={priceInCent ?? 0}
+                  userPriceLimit={userPriceLimit ?? 500}
+                  isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+                />
+              )}
+              <div className="flex flex-col max-h-dvh min-h-dvh w-full overflow-auto">
+                <DialogHeaderSlot
+                  userAndContext={user}
+                  isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+                />
+                <div className={contentHeight}>{children}</div>
+              </div>
+            </DialogHeaderProvider>
           </LlmModelsProvider>
         </SidebarProvider>
         {!productAccess.hasAccess && (

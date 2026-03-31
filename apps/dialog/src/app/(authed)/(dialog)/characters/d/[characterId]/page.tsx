@@ -1,6 +1,5 @@
 import { generateUUID } from '@shared/utils/uuid';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
-import HeaderPortal from '../../../header-portal';
 import { notFound } from 'next/navigation';
 import Chat from '@/components/chat/chat';
 import Logo from '@/components/common/logo';
@@ -50,14 +49,12 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
   const logoElement = <Logo federalStateId={federalState.id} />;
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
-      <HeaderPortal>
-        <ChatHeaderBar
-          chatId={id}
-          title={character.name}
-          downloadConversationEnabled={false}
-          userAndContext={userAndContext}
-        />
-      </HeaderPortal>
+      <ChatHeaderBar
+        chatId={id}
+        title={character.name}
+        downloadConversationEnabled={false}
+        userAndContext={userAndContext}
+      />
       <Chat
         id={id}
         initialMessages={initialMessages}
