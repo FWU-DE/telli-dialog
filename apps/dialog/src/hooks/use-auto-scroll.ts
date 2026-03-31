@@ -1,11 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 
-/** Check whether a scroll container is near the bottom (within threshold). */
-function isNearBottom(element: HTMLElement, threshold = 20): boolean {
-  const { scrollTop, clientHeight, scrollHeight } = element;
-  return scrollTop + clientHeight >= scrollHeight - threshold;
-}
-
 /**
  * Custom hook for automatically scrolling to the bottom of a container
  * when dependencies change (typically when new messages are added or loading state changes).
@@ -46,14 +40,12 @@ export function useAutoScroll(dependencies: React.DependencyList) {
   useEffect(() => {
     if (!scrollElement) return;
 
-    const handleWheel = (e: WheelEvent) => {
-      if (e.deltaY < 0) {
-        setAutoScrollEnabled(false);
-      }
+    const handleWheel = () => {
+      setAutoScrollEnabled(false);
     };
 
     const handleTouch = () => {
-      setAutoScrollEnabled(isNearBottom(scrollElement));
+      setAutoScrollEnabled(false);
     };
 
     scrollElement.addEventListener('wheel', handleWheel, { passive: true });
