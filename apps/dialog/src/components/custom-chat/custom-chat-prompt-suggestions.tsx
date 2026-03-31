@@ -26,7 +26,7 @@ type CustomChatPromptSuggestionsProps = {
 
 export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsProps) {
   const { control, onBlur } = props;
-  const t = useTranslations('assistant');
+  const t = useTranslations('assistants');
   const promptSuggestions = useWatch({
     control,
     name: 'promptSuggestions',
@@ -66,6 +66,9 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
                   id={`promptSuggestions.${index}.value`}
                   aria-invalid={fieldState.invalid}
                   maxLength={EXAMPLE_PROMPT_LENGTH_LIMIT}
+                  maxLengthErrorMessage={t('prompt-suggestions-max-length', {
+                    maxLength: EXAMPLE_PROMPT_LENGTH_LIMIT,
+                  })}
                   placeholder={t('prompt-suggestion')}
                   autoComplete="off"
                   onBlur={() => {
@@ -99,8 +102,8 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
               {hasReachedPromptSuggestionsLimit && (
                 <TooltipContent>
                   <p>
-                    {t('prompt-suggestions-max-tooltip', {
-                      max: NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
+                    {t('prompt-suggestions-max-count', {
+                      maxCount: NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
                     })}
                   </p>
                 </TooltipContent>

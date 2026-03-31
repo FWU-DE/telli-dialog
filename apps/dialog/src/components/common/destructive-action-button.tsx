@@ -5,6 +5,7 @@ import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTheme } from '@/hooks/use-theme';
 import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
+import { useTranslations } from 'next-intl';
 
 type DestructiveActionButtonProps = {
   triggerButtonClassName?: string;
@@ -29,6 +30,7 @@ export default function DestructiveActionButton({
   const [isOpen, setIsOpen] = React.useState(false);
 
   const queryClient = useQueryClient();
+  const t = useTranslations('common');
 
   function refetchConversations() {
     void queryClient.invalidateQueries({ queryKey: ['conversations'] });
@@ -87,7 +89,7 @@ export default function DestructiveActionButton({
                   refetchConversations();
                 }}
               >
-                {confirmText ?? 'Löschen'}
+                {confirmText ?? t('delete')}
               </button>
             </AlertDialog.Action>
           </div>

@@ -6,6 +6,7 @@ import { NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT } from '@/configuration-text-inpu
 import FilesTable from '../forms/file-upload-table';
 import { ServerActionResult } from '@shared/actions/server-action-result';
 import { useToast } from '../common/toast';
+import { useTranslations } from 'next-intl';
 
 export type CustomChatFilesProps = {
   initialFiles: FileModel[];
@@ -18,6 +19,7 @@ export function CustomChatFiles(props: CustomChatFilesProps) {
   const [files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   const [currentFiles, setCurrentFiles] = React.useState<FileModel[]>(initialFiles);
   const toast = useToast();
+  const t = useTranslations('assistants');
 
   const handleDeleteFile = async (localFileId: string) => {
     if (!onDeleteFile) return;
@@ -35,7 +37,7 @@ export function CustomChatFiles(props: CustomChatFilesProps) {
       });
       setCurrentFiles((prev) => prev.filter((f) => f.id !== fileId));
     } else {
-      toast.error('Fehler beim Löschen der Datei');
+      toast.error(t('toasts.custom-file-delete-error'));
     }
   };
 

@@ -80,15 +80,15 @@ export function CustomChatImageUpload({
   }
 
   return (
-    <Card className="h-50 justify-center items-center">
-      <CardContent className="flex items-center gap-4">
+    <Card className="justify-center items-center">
+      <CardContent className="flex items-center gap-4 flex-wrap justify-center">
         <div className="relative w-35 h-35 justify-center items-center flex">
           {displayedAvatarUrl ? (
             <Image
               src={displayedAvatarUrl}
               fill
               unoptimized
-              alt={'profile-picture'}
+              alt={t('profile-picture')}
               className="rounded-full object-contain"
             />
           ) : (
@@ -102,6 +102,7 @@ export function CustomChatImageUpload({
             className="hidden"
             onChange={handleImageUpload}
             ref={fileInputRef}
+            aria-label={t('upload-image')}
           />
           <Button type="button" onClick={handleButtonClick} className={cn(buttonPrimaryClassName)}>
             <UploadIcon weight="regular" />

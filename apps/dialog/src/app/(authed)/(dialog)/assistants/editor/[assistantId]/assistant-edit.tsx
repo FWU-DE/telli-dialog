@@ -1,8 +1,8 @@
 'use client';
 
 import {
-  EXAMPLE_PROMPT_LENGTH_LIMIT,
   NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
+  SMALL_TEXT_INPUT_FIELDS_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
@@ -41,7 +41,7 @@ import {
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
 import { Textarea } from '@ui/components/Textarea';
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
@@ -50,31 +50,30 @@ import { WebsearchSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-chat-prompt-suggestions';
 
-const assistantFormValuesSchema = z.object({
-  name: z.string().min(1, 'Der Name darf nicht leer sein.'),
-  description: z.string(),
-  instructions: z.string(),
-  pictureId: z.string().optional(),
-  isSchoolShared: z.boolean(),
-  hasLinkAccess: z.boolean(),
-  promptSuggestions: z
-    .array(
-      z.object({
-        value: z
-          .string()
-          .max(
-            EXAMPLE_PROMPT_LENGTH_LIMIT,
-            `Ein Promptvorschlag darf maximal ${EXAMPLE_PROMPT_LENGTH_LIMIT} Zeichen lang sein.`,
-          ),
-      }),
-    )
-    .max(
-      NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
-      `Es dürfen maximal ${NUMBER_OF_EXAMPLE_PROMPTS_LIMIT} Promptvorschläge angegeben werden.`,
-    ),
-});
+type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
-export type AssistantFormValues = z.infer<typeof assistantFormValuesSchema>;
+function createAssistantFormValuesSchema(t: AssistantTranslator) {
+  return z.object({
+    name: z.string().min(1, t('name-required')),
+    description: z.string(),
+    instructions: z.string(),
+    pictureId: z.string().optional(),
+    isSchoolShared: z.boolean(),
+    hasLinkAccess: z.boolean(),
+    promptSuggestions: z
+      .array(
+        z.object({
+          value: z.string(),
+        }),
+      )
+      .max(
+        NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
+        t('prompt-suggestions-max-count', { maxCount: NUMBER_OF_EXAMPLE_PROMPTS_LIMIT }),
+      ),
+  });
+}
+
+export type AssistantFormValues = z.infer<ReturnType<typeof createAssistantFormValuesSchema>>;
 
 export function AssistantEdit({
   assistant,
@@ -90,7 +89,8 @@ export function AssistantEdit({
   useForceReloadOnBrowserBackButton();
   const router = useRouter();
   const toast = useToast();
-  const t = useTranslations('assistant');
+  const t = useTranslations('assistants');
+  const assistantFormValuesSchema = useMemo(() => createAssistantFormValuesSchema(t), [t]);
   const initialValues: AssistantFormValues = {
     name: assistant.name,
     description: assistant.description ?? '',
@@ -207,7 +207,7 @@ export function AssistantEdit({
     });
 
     if (!linkResult.success) {
-      toast.error('Beim Hinzufügen der Datei zum Assistenten ist ein Fehler aufgetreten.');
+      toast.error(t('toasts.file-link-error'));
     }
   };
 
@@ -256,8 +256,8 @@ export function AssistantEdit({
       {/* // Todo: Maybe we have to remember where we come from and which filters were set */}
       <BackButton
         href="/custom"
-        text="Assistenten"
-        aria-label="Zurück zu den Assistenten"
+        text={t('back-button')}
+        aria-label={t('back-button-aria-label')}
         onClick={() => {
           guardNavigation(() => {
             router.push('/custom');
@@ -278,7 +278,7 @@ export function AssistantEdit({
           hasSaveError={hasSaveError}
         />
       </div>
-      {showShareInfo && <CustomChatShareInfo href="#share-settings" />}
+      {showShareInfo && <CustomChatShareInfo href="#share-settings" variant="assistants" />}
       <CustomChatImageUpload
         avatarPictureUrl={avatarPictureUrl}
         onPictureUploadComplete={handlePictureUploadComplete}
@@ -313,14 +313,19 @@ export function AssistantEdit({
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid} aria-required="true">
-                    <FieldLabel htmlFor={field.name}>Name des Assistenten</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>{t('name-label')}</FieldLabel>
                     <Input
                       {...field}
-                      ref={nameInputRef}
-                      id="field.name"
+                      ref={nameInputRef}              
+                      id={field.name}
                       aria-invalid={fieldState.invalid}
-                      placeholder="Name des Assistenten"
+                      aria-label={t('name-label')}
+                      placeholder={t('name-placeholder')}
                       autoComplete="off"
+                      maxLength={SMALL_TEXT_INPUT_FIELDS_LIMIT}
+                      maxLengthErrorMessage={t('name-max-length', {
+                        maxLength: SMALL_TEXT_INPUT_FIELDS_LIMIT,
+                      })}
                       required
                       onBlur={() => {
                         field.onBlur();
@@ -336,15 +341,18 @@ export function AssistantEdit({
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Kurzbeschreibung</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>{t('description-label')}</FieldLabel>
                     <Textarea
                       {...field}
-                      id="field.description"
+                      id={field.name}
                       className="h-27 resize-none"
                       aria-invalid={fieldState.invalid}
-                      placeholder="Beschreibung des Assistenten"
+                      aria-label={t('description-label')}
+                      placeholder={t('description-placeholder')}
                       autoComplete="off"
-                      maxLengthErrorMessage={`Die Beschreibung darf maximal ${TEXT_INPUT_FIELDS_LENGTH_LIMIT} Zeichen lang sein.`}
+                      maxLengthErrorMessage={t('description-max-length', {
+                        maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+                      })}
                       maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
                       onBlur={() => {
                         field.onBlur();
@@ -360,15 +368,18 @@ export function AssistantEdit({
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Anweisungen</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>{t('instructions-label')}</FieldLabel>
                     <Textarea
                       {...field}
-                      id="field.instructions"
+                      id={field.name}
                       className="h-125"
                       aria-invalid={fieldState.invalid}
-                      placeholder="Anweisungen für den Assistenten"
+                      placeholder={t('instructions-placeholder')}
+                      aria-label={t('instructions-label')}
                       maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS}
-                      maxLengthErrorMessage={`Die Anweisungen dürfen maximal ${TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS} Zeichen lang sein.`}
+                      maxLengthErrorMessage={t('instructions-max-length', {
+                        maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
+                      })}
                       autoComplete="off"
                       onBlur={() => {
                         field.onBlur();
