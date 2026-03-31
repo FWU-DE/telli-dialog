@@ -15,7 +15,7 @@ import {
 import { FilterTabs } from '@telli/ui/components/FilterTabs';
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import ProfileMenu from '../navigation/profile-menu';
-import { ToggleSidebarButton, NewChatButton } from '../navigation/sidebar/collapsible-sidebar';
+import { ToggleSidebarButton } from '../navigation/sidebar/collapsible-sidebar';
 import { useSession } from 'next-auth/react';
 
 type EntityOverviewProps = {
@@ -25,7 +25,7 @@ type EntityOverviewProps = {
   createButton: React.ReactNode;
   activeFilter: OverviewFilter;
   onFilterChange: (filter: OverviewFilter) => void;
-  children: React.ReactNode;
+  children: (searchQuery: string) => React.ReactNode;
   itemCount: number;
 };
 
@@ -57,7 +57,7 @@ export default function EntityOverview({
 
   return (
     <div className="min-w-full overflow-auto flex flex-col h-full bg-gray-50">
-      <HeaderPortal>
+      <HeaderPortal className="bg-gray-50">
         <ToggleSidebarButton
           isNewUiDesignEnabled={federalState?.featureToggles?.isNewUiDesignEnabled ?? false}
         />
@@ -112,10 +112,9 @@ export default function EntityOverview({
           />
         </div>
       </div>
-
       <div className="flex-1 overflow-auto px-6 pt-4 pb-6">
         <div className="max-w-3xl mx-auto w-full">
-          <div className="flex flex-col gap-2 w-full">{children}</div>
+          <div className="flex flex-col gap-2 w-full">{children(searchInput)}</div>
         </div>
       </div>
     </div>

@@ -7,17 +7,14 @@ import { useTranslations } from 'next-intl';
 type CustomChatFilesAndLinksProps = CustomChatFilesProps & CustomChatLinksProps;
 
 export function CustomChatFilesAndLinks(props: CustomChatFilesAndLinksProps) {
-  const t = useTranslations('custom-gpt.form');
+  const t = useTranslations('assistants');
 
   return (
     <div className="flex flex-col gap-3 mt-10">
-      <CustomChatHeading2
-        text={t('additional-assets-label')}
-        tooltip={t('additional-assets-content')}
-      />
+      <CustomChatHeading2 text={t('custom-assets-label')} tooltip={t('custom-assets-content')} />
       <Card>
         <CardHeader>
-          <CardTitle>Dateien</CardTitle>
+          <CardTitle>{t('custom-assets-files')}</CardTitle>
         </CardHeader>
         <CardContent>
           <CustomChatFiles
@@ -30,7 +27,7 @@ export function CustomChatFilesAndLinks(props: CustomChatFilesAndLinksProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Webseiten</CardTitle>
+          <CardTitle>{t('custom-assets-links')}</CardTitle>
         </CardHeader>
         <CardContent>
           <CustomChatLinks initialLinks={props.initialLinks} onLinksChange={props.onLinksChange} />

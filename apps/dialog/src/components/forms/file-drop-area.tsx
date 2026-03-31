@@ -142,6 +142,7 @@ export function FileDrop({
           onChange={handleFileChange}
           accept={SUPPORTED_DOCUMENTS_EXTENSIONS.map((e) => `.${e}`).join(',')}
           multiple
+          aria-label={t('upload.upload-input-aria-label')}
         />
         <div className="mt-4 flex flex-col text-sm gap-4 items-center">
           <FileUploadIcon className="w-8 h-8 text-primary" />

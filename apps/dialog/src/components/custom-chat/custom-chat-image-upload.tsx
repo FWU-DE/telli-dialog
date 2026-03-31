@@ -11,7 +11,7 @@ import { UploadIcon } from '@phosphor-icons/react';
 import { Button } from '@ui/components/Button';
 import AvatarCropModal from './custom-chat-avatar-crop-modal';
 import Image from 'next/image';
-import { CustomChatAvatarImage } from './custom-chat-avatar-image';
+import { AVATAR_MAX_SIZE } from '@/const';
 
 export function CustomChatImageUpload({
   avatarPictureUrl,
@@ -80,15 +80,15 @@ export function CustomChatImageUpload({
   }
 
   return (
-    <Card className="h-50 justify-center items-center">
-      <CardContent className="flex items-center gap-4">
+    <Card className="justify-center items-center">
+      <CardContent className="flex items-center gap-4 flex-wrap justify-center">
         <div className="relative w-35 h-35 justify-center items-center flex">
           {displayedAvatarUrl ? (
             <Image
               src={displayedAvatarUrl}
               fill
               unoptimized
-              alt={'profile-picture'}
+              alt={t('profile-picture')}
               className="rounded-full object-contain"
             />
           ) : (
@@ -102,6 +102,7 @@ export function CustomChatImageUpload({
             className="hidden"
             onChange={handleImageUpload}
             ref={fileInputRef}
+            aria-label={t('upload-image')}
           />
           <Button type="button" onClick={handleButtonClick} className={cn(buttonPrimaryClassName)}>
             <UploadIcon weight="regular" />
@@ -120,7 +121,7 @@ export function CustomChatImageUpload({
             setImageSource(null);
           }}
           onCropComplete={handleCroppedImage}
-          compressionOptions={{ maxWidth: 400, maxHeight: 400 }}
+          compressionOptions={{ maxWidth: AVATAR_MAX_SIZE, maxHeight: AVATAR_MAX_SIZE }}
         />
       )}
     </Card>

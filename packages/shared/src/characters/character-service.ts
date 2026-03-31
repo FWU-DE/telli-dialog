@@ -29,7 +29,7 @@ import {
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
 import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
-import { copyFileInS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
+import { copyFileInS3, getReadOnlySignedUrl, uploadFileToS3, deleteFileFromS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
@@ -38,9 +38,15 @@ import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
 import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
+import { computeBlobHash } from '@telli/shared-core/crypto/blob-hash';
+import { verifyWriteAccess } from '@shared/auth/authorization-service';
+import path from 'node:path';
 
-export function buildCharacterPictureKey(characterId: string) {
-  return `characters/${characterId}/avatar`;
+export function buildCharacterPictureKey(characterId: string, filename: string) {
+  return `characters/${characterId}/${filename}`;
+}
+function buildAvatarFilename(hash: string) {
+  return `avatar_${hash}`;
 }
 
 /**
@@ -67,7 +73,10 @@ export const createNewCharacter = async ({
     let insertedCharacter = await copyCharacter(templateId, 'private', user.id, schoolId);
 
     if (templatePictureId !== undefined) {
-      const copyOfTemplatePicture = buildCharacterPictureKey(insertedCharacter.id);
+      const copyOfTemplatePicture = buildCharacterPictureKey(
+        insertedCharacter.id,
+        path.basename(templatePictureId),
+      );
       await copyFileInS3({
         newKey: copyOfTemplatePicture,
         copySource: templatePictureId,
@@ -89,11 +98,11 @@ export const createNewCharacter = async ({
     return insertedCharacter;
   }
 
-  // Generate uuid before hand to avoid two db transactions for create and immediate update
+  // Generate uuid beforehand to avoid two db transactions for create and immediate update
   const characterId = generateUUID();
   let copyOfTemplatePicture;
   if (templatePictureId !== undefined) {
-    copyOfTemplatePicture = buildCharacterPictureKey(characterId);
+    copyOfTemplatePicture = buildCharacterPictureKey(characterId, path.basename(templatePictureId));
     await copyFileInS3({
       newKey: copyOfTemplatePicture,
       copySource: templatePictureId,
@@ -688,16 +697,28 @@ export async function uploadAvatarPictureForCharacter({
   croppedImageBlob: Blob;
   userId: string;
 }) {
-  const { isOwner } = await getCharacterInfo(characterId, userId);
-  if (!isOwner) throw new ForbiddenError('Not authorized to upload picture for this character');
+  const { character } = await getCharacterInfo(characterId, userId);
+  verifyWriteAccess({ item: character, userId: userId });
 
-  const key = buildCharacterPictureKey(characterId);
+  // Compute hash of the blob for cache busting
+  const hash = await computeBlobHash(croppedImageBlob);
+  const key = buildCharacterPictureKey(characterId, buildAvatarFilename(hash));
 
+  // Upload new avatar
   await uploadFileToS3({
-    key: key,
+    key,
     body: croppedImageBlob,
     contentType: croppedImageBlob.type,
   });
+
+  // Delete old avatar if it exists
+  if (character.pictureId) {
+    try {
+      await deleteFileFromS3({ key: character.pictureId });
+    } catch {
+      // Silently ignore error, cleanup job will delete unreferenced files later
+    }
+  }
 
   return key;
 }

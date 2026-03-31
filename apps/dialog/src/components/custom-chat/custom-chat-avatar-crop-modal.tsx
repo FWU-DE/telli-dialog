@@ -108,7 +108,7 @@ export default function AvatarCropModal({
             keepSelection
           >
             <Image
-              alt="crop image"
+              alt={t('crop-image')}
               src={imageSrc}
               width={500}
               height={500}
