@@ -41,10 +41,17 @@ export default function CharacterOverview({ currentUserId }: CharacterOverviewPr
       onFilterChange={handleFilterChange}
       itemCount={visibleCharacters.length}
     >
-      {(searchQuery) => {
+      {(searchQuery, sortBy) => {
         const q = searchQuery.trim().toLowerCase();
         const filtered = q
-          ? visibleCharacters.filter((character) => character.name.toLowerCase().includes(q))
+          ? visibleCharacters
+              .filter((character) => character.name.toLowerCase().includes(q))
+              .slice()
+              .sort((a, b) =>
+                sortBy === 'name'
+                  ? a.name.localeCompare(b.name)
+                  : b.updatedAt.getTime() - a.updatedAt.getTime(),
+              )
           : visibleCharacters;
 
         return filtered.map((character) => (
