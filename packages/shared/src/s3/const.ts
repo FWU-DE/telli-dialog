@@ -4,4 +4,5 @@
  */
 export const S3_DELETE_OBJECTS_MAX = 1000;
 
-export const SEVEN_DAYS = 7 * 24 * 3600;
+export const ONE_DAY = 24 * 3600;
+export const SEVEN_DAYS = 7 * ONE_DAY;

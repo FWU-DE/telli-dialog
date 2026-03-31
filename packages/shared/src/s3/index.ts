@@ -18,7 +18,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from './env';
 import { nanoid } from 'nanoid';
 import { chunkArray } from '@shared/utils/arrays';
-import { S3_DELETE_OBJECTS_MAX } from '@shared/s3/const';
+import { ONE_DAY, S3_DELETE_OBJECTS_MAX } from '@shared/s3/const';
 import { logError } from '@shared/logging';
 
 const s3Client = new S3Client({
@@ -100,8 +100,8 @@ export async function getReadOnlySignedUrl(args: {
   attachment?: boolean;
   options?: { expiresIn?: number };
 }) {
-  // Default expiry of 1 hour and revalidation after 30min
-  const expiresIn = args.options?.expiresIn ?? 3600;
+  // Default expiry of 1 day and revalidation after 12 hours
+  const expiresIn = args.options?.expiresIn ?? ONE_DAY;
   const revalidate = expiresIn / 2;
   return await cache(
     async ({
@@ -119,7 +119,7 @@ export async function getReadOnlySignedUrl(args: {
       const command = new GetObjectCommand({
         Bucket: env.otcBucketName,
         Key: key,
-        ResponseCacheControl: 'public, max-age=31536000, immutable',
+        ResponseCacheControl: `public, max-age=${expiresIn}, immutable`,
         ...(contentDisposition !== '' ? { ResponseContentDisposition: contentDisposition } : {}),
         ...(contentType !== undefined ? { ResponseContentType: contentType } : {}),
       });

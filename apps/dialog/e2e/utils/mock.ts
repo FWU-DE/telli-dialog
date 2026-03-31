@@ -44,6 +44,7 @@ export const mockUserAndContext = (): UserAndContext => {
         isShareTemplateWithSchoolEnabled: false,
         isNewUiDesignEnabled: false,
       },
+      pictureUrls: null,
     },
     createdAt: new Date(),
   };
