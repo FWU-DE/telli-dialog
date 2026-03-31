@@ -186,8 +186,10 @@ export default function AssistantForm({
       attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
     });
     if (result.success) {
-      if (!isCreating) toast.success(tToast('edit-toast-success'));
-      router.refresh();
+      if (!isCreating) {
+        toast.success(tToast('edit-toast-success'));
+        router.refresh();
+      }
     } else {
       toast.error(tToast('edit-toast-error'));
     }
@@ -297,7 +299,6 @@ export default function AssistantForm({
   const copyContainer = readOnly ? (
     <CopyContainer
       templateId={assistant.id}
-      templatePictureId={assistant.pictureId ?? undefined}
       startedAt={null}
       maxUsageTimeLimit={null}
       translationPath="custom-gpt.form"

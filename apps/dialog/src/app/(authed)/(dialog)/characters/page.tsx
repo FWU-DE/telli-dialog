@@ -6,6 +6,8 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { getCharacterByAccessLevel } from '@shared/characters/character-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
+import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
+import CharacterOverview from './character-overview';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,8 +17,14 @@ const searchParamsSchema = z.object({
 
 export default async function Page(props: PageProps<'/characters'>) {
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
-  const accessLevel = searchParams.visibility;
   const { user, school, federalState } = await requireAuth();
+  const isNewUi = federalState.featureToggles.isNewUiDesignEnabled;
+
+  if (isNewUi) {
+    return <CharacterOverview currentUserId={user.id} />;
+  }
+
+  const accessLevel = searchParams.visibility;
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
   const _characters = await getCharacterByAccessLevel({
@@ -26,7 +34,6 @@ export default async function Page(props: PageProps<'/characters'>) {
     federalStateId: federalState.id,
   });
   const characters = _characters.filter((c) => c.name !== '');
-
   const enrichedCharacters = await enrichCharactersWithImage({ characters });
 
   return (

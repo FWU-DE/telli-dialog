@@ -106,7 +106,7 @@
       "upload-file-button-disabled": "Es können maximal {max_files} Dateien hochgeladen werden",
       "file-limit-reached": "Es können maximal {max_files} Dateien hochgeladen werden. {files_exceeded} Dateien wurden nicht hochgeladen.",
       "image-limit-reached": "Es können maximal {max_images} Bilder hochgeladen werden. {images_exceeded} Bilder wurden nicht hochgeladen.",
-      "drop-area": "Datei per Drag & Drop hier ablegen",
+      "drop-area": "Dateien per Drag & Drop hier ablegen <b> (pdf, txt, docx) </b>",
       "choice-word": "oder"
     },
     "delete": {
@@ -450,9 +450,13 @@
     "description-label": "Kurzbeschreibung",
     "description-placeholder": "Beschreibung des Assistenten",
     "description-max-length": "Die Beschreibung darf maximal {maxLength} Zeichen lang sein.",
-    "instructions-label": "Anweisungen",
-    "instructions-placeholder": "Anweisungen für den Assistenten",
-    "instructions-max-length": "Die Anweisungen dürfen maximal {maxLength} Zeichen lang sein.",
+    "instructions-label": "Instruktionen",
+    "instructions-placeholder": "Instruktionen für den Assistenten",
+    "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
+    "back-button-text": "Assistenten",
+    "back-button-aria": "Zurück zur Übersicht der Assistenten",
+    "author-label": "Autor/in",
+    "author-text": "FWU",
     "prompt-suggestion": "Promptvorschlag",
     "prompt-suggestions-add-button": "Promptvorschlag hinzufügen",
     "prompt-suggestions-add-button-tooltip": "Tooltip für das Hinzufügen von Promptvorschlägen",
@@ -476,5 +480,14 @@
       "file-link-error": "Beim Hinzufügen der Datei zum Assistenten ist ein Fehler aufgetreten.",
       "custom-file-delete-error": "Fehler beim Löschen der Datei"
     }
+  },
+  "entity-overview": {
+    "filter-all": "Alle",
+    "filter-mine": "Meine",
+    "filter-official": "Offiziell",
+    "filter-school": "Schulintern",
+    "filter-tabs-label": "Filteroptionen",
+    "info-tooltip-label": "Informationen anzeigen",
+    "badge-mine": "von mir"
   }
 }

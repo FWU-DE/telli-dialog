@@ -30,11 +30,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
 
 function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
   return (
-    <div
-      data-slot="card-title"
-      className={cn('leading-none font-semibold', className)}
-      {...props}
-    />
+    <div data-slot="card-title" className={cn('leading-none font-medium', className)} {...props} />
   );
 }
 
@@ -64,7 +60,11 @@ function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
 
 function CardRow({ className, ...props }: React.ComponentProps<'div'>) {
   return (
-    <div data-slot="card-row" className={cn('flex flex-row gap-6 px-6', className)} {...props} />
+    <div
+      data-slot="card-row"
+      className={cn('flex flex-wrap flex-row gap-6 px-6', className)}
+      {...props}
+    />
   );
 }
 

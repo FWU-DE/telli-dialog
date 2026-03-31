@@ -68,7 +68,7 @@ export default function FilesTable({
     status: FileStatus;
   }[];
   return (
-    <table className={className}>
+    <table className={cn('w-full', className)}>
       {/* <thead>
         <tr className="font-normal bg-light-gray w-full text-sm">
           <th className="font-medium text-left py-3 text-dark-gray pl-3">Name</th>
@@ -84,8 +84,11 @@ export default function FilesTable({
             const { Icon, fillColor } = getFileIconByFileExtension(extention);
 
             return (
-              <tr key={id} className="border-b last:border-b-0 border-[#D9D9D9]">
-                <td className="flex gap-2 items-center p-2">
+              <tr
+                key={id}
+                className="flex items-center justify-between gap-4 border-b last:border-b-0 border-[#D9D9D9] p-2"
+              >
+                <td className="flex gap-2 items-center flex-1">
                   {status === 'processed' && (
                     <Icon
                       className="w-9 h-9 p-1.5"
@@ -96,12 +99,14 @@ export default function FilesTable({
                   {status === 'failed' && <CrossIcon className="w-9 h-9 p-1.5 text-red-500" />}
                   <div className="flex flex-col">
                     <span className="text-sm font-medium">{fileStem}</span>
-                    <span className="text-gray-600 text-xs">.{extention}</span>
                   </div>
                 </td>
-                <td>{formatBytes(size)}</td>
-                {!readOnly && (
-                  <td className="w-8">
+                <td className="flex items-center gap-4 ml-auto">
+                  <span className="text-sm whitespace-nowrap">{formatBytes(size)}</span>
+                  {status === 'uploading' && (
+                    <span className="text-sm text-gray-500">Uploading...</span>
+                  )}
+                  {!readOnly && (
                     <DestructiveActionButton
                       modalDescription={t('delete.modal-description')}
                       triggerButtonClassName={cn('flex items-center', iconClassName)}
@@ -111,8 +116,8 @@ export default function FilesTable({
                     >
                       <TrashIcon className="w-9 h-9" />
                     </DestructiveActionButton>
-                  </td>
-                )}
+                  )}
+                </td>
               </tr>
             );
           })}

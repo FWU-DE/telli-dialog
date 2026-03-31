@@ -24,30 +24,41 @@ import {
   fileTable,
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
-import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
-import { copyFileInS3, uploadFileToS3 } from '@shared/s3';
+import {
+  deleteAvatarPicture,
+  deleteMessageAttachments,
+  getAvatarPictureUrl,
+} from '@shared/files/fileService';
+import { copyFileInS3, deleteFileFromS3, uploadFileToS3 } from '@shared/s3';
 import { copyAssistant, copyRelatedTemplateFiles } from '@shared/templates/template-service';
+import { OverviewFilter } from '@shared/overview-filter';
 import { addDays } from '@shared/utils/date';
 import { generateUUID } from '@shared/utils/uuid';
 import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
+import { computeBlobHash } from '@telli/shared-core/crypto/blob-hash';
+import { verifyWriteAccess } from '@shared/auth/authorization-service';
+import path from 'node:path';
 
-export function buildAssistantPictureKey(assistantId: string) {
-  return `custom-gpts/${assistantId}/avatar`;
+export function buildAssistantPictureKey(assistantId: string, filename: string) {
+  return `custom-gpts/${assistantId}/${filename}`;
+}
+function buildAvatarFilename(hash: string) {
+  return `avatar_${hash}`;
 }
 
 /**
- * Loads custom gpt for edit view.
- * Throws if the user is not authorized to access the custom gpt:
- * - NotFound if the custom gpt does not exist
- * - Forbidden if the custom gpt is private and the user is not the owner
- * - Forbidden if the custom gpt is school-level and the user is not in the same school (and not the owner)
+ * Loads assistant for editing or viewing in the frontend.
+ * Throws if the user is not authorized to access the assistant:
+ * - NotFound if the assistant does not exist
+ * - Forbidden if the assistant is private and the user is not the owner
+ * - Forbidden if the assistant is school-level and the user is not in the same school (and not the owner)
  *
  * Link sharing bypass: If `hasLinkAccess` is true, access checks are skipped
- * and any authenticated user can view the custom gpt. Note that link sharing
+ * and any authenticated user can view the assistant. Note that link sharing
  * only grants read-only access - editing is still restricted to the owner.
  */
-export async function getAssistantForEditView({
+export async function getAssistantByUser({
   assistantId,
   schoolId,
   userId,
@@ -55,21 +66,30 @@ export async function getAssistantForEditView({
   assistantId: string;
   schoolId: string;
   userId: string;
-}): Promise<AssistantSelectModel> {
+}): Promise<{
+  assistant: AssistantSelectModel;
+  fileMappings: FileModel[];
+  pictureUrl: string | undefined;
+}> {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
   if (!assistant.hasLinkAccess) {
     if (assistant.accessLevel === 'private' && assistant.userId !== userId)
-      throw new ForbiddenError('Not authorized to edit assistant');
+      throw new ForbiddenError('Not authorized to access assistant');
     if (
       assistant.accessLevel === 'school' &&
       assistant.schoolId !== schoolId &&
       assistant.userId !== userId
     )
-      throw new ForbiddenError('Not authorized to edit assistant');
+      throw new ForbiddenError('Not authorized to access assistant');
   }
 
-  return assistant;
+  const [fileMappings, pictureUrl] = await Promise.all([
+    dbGetRelatedAssistantFiles(assistantId),
+    getAvatarPictureUrl(assistant.pictureId),
+  ]);
+
+  return { assistant, fileMappings, pictureUrl };
 }
 
 /**
@@ -158,19 +178,45 @@ export async function getAssistantByAccessLevel({
   return [];
 }
 
+export async function getAssistantsByOverviewFilter({
+  filter,
+  schoolId,
+  userId,
+  federalStateId,
+}: {
+  filter: OverviewFilter;
+  schoolId: string;
+  userId: string;
+  federalStateId: string;
+}): Promise<AssistantSelectModel[]> {
+  if (filter === 'all') {
+    const [privateAssistants, schoolAssistants, globalAssistants] = await Promise.all([
+      dbGetGptsByUserId({ userId }),
+      dbGetGptsBySchoolId({ schoolId }),
+      dbGetGlobalGpts({ federalStateId }),
+    ]);
+    return [...privateAssistants, ...schoolAssistants, ...globalAssistants];
+  } else if (filter === 'mine') {
+    return await dbGetGptsByUserId({ userId });
+  } else if (filter === 'official') {
+    return await dbGetGlobalGpts({ federalStateId });
+  } else if (filter === 'school') {
+    return await dbGetGptsBySchoolId({ schoolId });
+  }
+  return [];
+}
+
 /**
- * User creates a new custom gpt (assistant).
- * If a templateId is provided, the new custom gpt is created by copying the template.
+ * User creates a new assistant.
+ * If a templateId is provided, the new assistant is created by copying the template.
  * Throws if the user is not a teacher.
  */
 export async function createNewAssistant({
   schoolId,
-  templatePictureId,
   templateId,
   user,
 }: {
   schoolId: string;
-  templatePictureId?: string;
   templateId?: string;
   user: UserModel;
 }) {
@@ -179,11 +225,14 @@ export async function createNewAssistant({
   if (templateId !== undefined) {
     let insertedAssistant = await copyAssistant(templateId, 'private', user.id, schoolId);
 
-    if (templatePictureId !== undefined) {
-      const copyOfTemplatePicture = buildAssistantPictureKey(insertedAssistant.id);
+    if (insertedAssistant.pictureId) {
+      const copyOfTemplatePicture = buildAssistantPictureKey(
+        insertedAssistant.id,
+        path.basename(insertedAssistant.pictureId),
+      );
       await copyFileInS3({
         newKey: copyOfTemplatePicture,
-        copySource: templatePictureId,
+        copySource: insertedAssistant.pictureId,
       });
 
       // Update the assistant with the new picture
@@ -395,6 +444,7 @@ const updateAssistantSchema = assistantUpdateSchema.omit({
   isDeleted: true,
   originalAssistantId: true,
   accessLevel: true,
+  pictureId: true,
 });
 
 /**
@@ -489,17 +539,27 @@ export async function uploadAvatarPictureForAssistant({
   userId: string;
 }) {
   const assistant = await dbGetAssistantById({ assistantId });
-  if (assistant.userId !== userId) {
-    throw new ForbiddenError('Not authorized to update avatar picture for this assistant');
-  }
+  verifyWriteAccess({ item: assistant, userId: userId });
 
-  const key = buildAssistantPictureKey(assistantId);
+  // Compute hash of the blob for cache busting
+  const hash = await computeBlobHash(croppedImageBlob);
+  const key = buildAssistantPictureKey(assistantId, buildAvatarFilename(hash));
 
+  // Upload new avatar
   await uploadFileToS3({
-    key: key,
+    key,
     body: croppedImageBlob,
     contentType: croppedImageBlob.type,
   });
+
+  // Delete old avatar if it exists
+  if (assistant.pictureId) {
+    try {
+      await deleteFileFromS3({ key: assistant.pictureId });
+    } catch {
+      // Silently ignore error, cleanup job will delete unreferenced files later
+    }
+  }
 
   return key;
 }

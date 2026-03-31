@@ -4,13 +4,13 @@ import {
   deleteAssistant,
   deleteFileMappingAndEntity,
   getConversationWithMessagesAndAssistant,
-  getAssistantForEditView,
   getAssistantForNewChat,
   getFileMappings,
   linkFileToAssistant,
   updateAssistant,
   updateAssistantAccessLevel,
   updateAssistantPicture,
+  getAssistantByUser,
 } from './assistant-service';
 import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
@@ -55,8 +55,8 @@ describe('assistant-service', () => {
 
     it.each([
       {
-        functionName: 'getAssistantForEditView',
-        testFunction: () => getAssistantForEditView({ assistantId, schoolId, userId }),
+        functionName: 'getAssistantByUser',
+        testFunction: () => getAssistantByUser({ assistantId, schoolId, userId }),
       },
       {
         functionName: 'getAssistantForNewChat',
@@ -171,9 +171,9 @@ describe('assistant-service', () => {
 
     it.each([
       {
-        functionName: 'getAssistantForEditView',
+        functionName: 'getAssistantByUser',
         testFunction: () =>
-          getAssistantForEditView({
+          getAssistantByUser({
             assistantId,
             userId: 'different-user-id',
             schoolId: 'school-id',
@@ -247,9 +247,9 @@ describe('assistant-service', () => {
 
     it.each([
       {
-        functionName: 'getAssistantForEditView',
+        functionName: 'getAssistantByUser',
         testFunction: () =>
-          getAssistantForEditView({
+          getAssistantByUser({
             assistantId,
             userId: 'different-user-id',
             schoolId: 'school-id',
@@ -283,9 +283,9 @@ describe('assistant-service', () => {
 
     it.each([
       {
-        functionName: 'getAssistantForEditView',
+        functionName: 'getAssistantByUser',
         testFunction: () =>
-          getAssistantForEditView({
+          getAssistantByUser({
             assistantId,
             userId: 'different-user-id',
             schoolId: 'different-school-id',
@@ -414,9 +414,9 @@ describe('assistant-service', () => {
   describe('InvalidArgumentError scenarios - invalid parameter format', () => {
     it.each([
       {
-        functionName: 'getAssistantForEditView',
+        functionName: 'getAssistantByUser',
         testFunction: () =>
-          getAssistantForEditView({
+          getAssistantByUser({
             assistantId: 'invalid-uuid',
             userId: 'user-id',
             schoolId: 'school-id',
@@ -510,7 +510,7 @@ describe('assistant-service', () => {
     );
   });
 
-  describe('Allow access', () => {
+  describe('getAssistantForNewChat', () => {
     const assistantId = generateUUID();
     const schoolIdOfOwner = generateUUID();
     const userIdOfOwner = generateUUID();
@@ -520,43 +520,57 @@ describe('assistant-service', () => {
       { accessLevel: 'school', schoolId: schoolIdOfOwner, userId: 'different-user-id' },
       { accessLevel: 'global', schoolId: 'different-school-id', userId: 'different-user-id' },
     ] as const)('accessLevel=$accessLevel', ({ accessLevel, schoolId, userId }) => {
-      it.each([
-        {
-          functionName: 'getAssistantForEditView',
-          testFunction: () =>
-            getAssistantForEditView({
-              assistantId,
-              schoolId,
-              userId,
-            }),
-        },
-        {
-          functionName: 'getAssistantForNewChat',
-          testFunction: () =>
-            getAssistantForNewChat({
-              assistantId,
-              schoolId,
-              userId,
-            }),
-        },
-      ])(
-        `should return assistant with accessLevel=${accessLevel} - $functionName`,
-        async ({ testFunction }) => {
-          const mockAssistant: Partial<AssistantSelectModel> = {
-            userId: userIdOfOwner,
-            schoolId: schoolIdOfOwner,
-            accessLevel,
-          };
+      it(`should return assistant with accessLevel=${accessLevel} - getAssistantForNewChat`, async () => {
+        const mockAssistant: Partial<AssistantSelectModel> = {
+          userId: userIdOfOwner,
+          schoolId: schoolIdOfOwner,
+          accessLevel,
+        };
 
-          (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
-            mockAssistant as never,
-          );
+        (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
+          mockAssistant as never,
+        );
 
-          const assistant = await testFunction();
+        const assistant = await getAssistantForNewChat({
+          assistantId,
+          schoolId,
+          userId,
+        });
 
-          expect(assistant).toBe(mockAssistant);
-        },
-      );
+        expect(assistant).toBe(mockAssistant);
+      });
+    });
+  });
+
+  describe('getAssistantByUser', () => {
+    const assistantId = generateUUID();
+    const schoolIdOfOwner = generateUUID();
+    const userIdOfOwner = generateUUID();
+
+    describe.each([
+      { accessLevel: 'private', schoolId: 'any', userId: userIdOfOwner },
+      { accessLevel: 'school', schoolId: schoolIdOfOwner, userId: 'different-user-id' },
+      { accessLevel: 'global', schoolId: 'different-school-id', userId: 'different-user-id' },
+    ] as const)('accessLevel=$accessLevel', ({ accessLevel, schoolId, userId }) => {
+      it(`should return assistant with accessLevel=${accessLevel} - getAssistantByUser`, async () => {
+        const mockAssistant: Partial<AssistantSelectModel> = {
+          userId: userIdOfOwner,
+          schoolId: schoolIdOfOwner,
+          accessLevel,
+        };
+
+        (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
+          mockAssistant as never,
+        );
+
+        const { assistant } = await getAssistantByUser({
+          assistantId,
+          schoolId,
+          userId,
+        });
+
+        expect(assistant).toBe(mockAssistant);
+      });
     });
   });
 
@@ -577,7 +591,7 @@ describe('assistant-service', () => {
           accessLevel: 'school' as const,
           description: 'school custom GPT with link sharing enabled (different school)',
         },
-      ])('getAssistantForEditView - $description', async ({ accessLevel }) => {
+      ])('getAssistantByUser - $description', async ({ accessLevel }) => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId: ownerUserId,
           schoolId: ownerSchoolId,
@@ -590,13 +604,13 @@ describe('assistant-service', () => {
         );
 
         // User from different school trying to access - should succeed because hasLinkAccess is true
-        const result = await getAssistantForEditView({
+        const result = await getAssistantByUser({
           assistantId,
           userId: differentUserId,
           schoolId: differentSchoolId,
         });
 
-        expect(result).toBe(mockAssistant);
+        expect(result.assistant).toBe(mockAssistant);
       });
 
       it.each([
@@ -666,7 +680,7 @@ describe('assistant-service', () => {
     });
 
     describe('should still enforce restrictions when hasLinkAccess is false', () => {
-      it('getAssistantForEditView - private custom GPT without link sharing', async () => {
+      it('getAssistantByUser - private custom GPT without link sharing', async () => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId: ownerUserId,
           schoolId: ownerSchoolId,
@@ -679,7 +693,7 @@ describe('assistant-service', () => {
         );
 
         await expect(
-          getAssistantForEditView({
+          getAssistantByUser({
             assistantId,
             userId: differentUserId,
             schoolId: differentSchoolId,

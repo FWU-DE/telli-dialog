@@ -18,6 +18,7 @@ import { copyFileInS3 } from '@shared/s3';
 import { duplicateFileWithEmbeddings } from '@shared/files/fileService';
 import { and, eq, lt } from 'drizzle-orm';
 import { addDays } from '@shared/utils/date';
+import path from 'node:path';
 
 /**
  * This function creates a duplicate of an existing learning scenario,
@@ -83,7 +84,10 @@ async function copyAvatarPictureIfExists(
 ) {
   if (!sourcePictureId) return undefined;
 
-  const newAvatarPictureId = buildLearningScenarioPictureKey(newLearningScenarioId);
+  const newAvatarPictureId = buildLearningScenarioPictureKey(
+    newLearningScenarioId,
+    path.basename(sourcePictureId),
+  );
   await copyFileInS3({
     copySource: sourcePictureId,
     newKey: newAvatarPictureId,

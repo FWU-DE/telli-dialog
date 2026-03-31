@@ -10,8 +10,8 @@ import { useTranslations } from 'next-intl';
 
 export type CustomChatFilesProps = {
   initialFiles: FileModel[];
-  onFileUploaded: (data: { id: string; name: string; file: File }) => void | Promise<void>;
-  onDeleteFile: (fileId: string) => Promise<ServerActionResult<void>>;
+  onFileUploaded?: (data: { id: string; name: string; file: File }) => void | Promise<void>;
+  onDeleteFile?: (fileId: string) => Promise<ServerActionResult<void>>;
 };
 
 export function CustomChatFiles(props: CustomChatFilesProps) {
@@ -22,6 +22,8 @@ export function CustomChatFiles(props: CustomChatFilesProps) {
   const t = useTranslations('assistants');
 
   const handleDeleteFile = async (localFileId: string) => {
+    if (!onDeleteFile) return;
+
     const fileId =
       files.get(localFileId)?.fileId ?? currentFiles.find((f) => f.id === localFileId)?.id;
     if (fileId === undefined) return;
@@ -41,19 +43,21 @@ export function CustomChatFiles(props: CustomChatFilesProps) {
 
   return (
     <>
-      <FileDrop
-        setFiles={setFiles}
-        disabled={currentFiles.length + files.size >= NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT}
-        countOfFiles={currentFiles.length + files.size}
-        onFileUploaded={onFileUploaded}
-        showUploadConfirmation={true}
-      />
+      {onFileUploaded && (
+        <FileDrop
+          setFiles={setFiles}
+          disabled={currentFiles.length + files.size >= NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT}
+          countOfFiles={currentFiles.length + files.size}
+          onFileUploaded={onFileUploaded}
+          showUploadConfirmation={true}
+        />
+      )}
       <FilesTable
         files={currentFiles}
         additionalFiles={files}
         onDeleteFile={handleDeleteFile}
         showUploadConfirmation={true}
-        readOnly={false}
+        readOnly={!onDeleteFile}
       />
     </>
   );

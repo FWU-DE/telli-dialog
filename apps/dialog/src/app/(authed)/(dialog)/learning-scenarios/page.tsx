@@ -9,6 +9,7 @@ import {
   getLearningScenariosByAccessLevel,
 } from '@shared/learning-scenarios/learning-scenario-service';
 import { LearningScenarioContainer } from './learning-scenario-container';
+import LearningScenarioOverview from './learning-scenario-overview';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,8 +19,14 @@ const searchParamsSchema = z.object({
 
 export default async function Page(props: PageProps<'/learning-scenarios'>) {
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
-  const accessLevel = searchParams.visibility;
   const { user, school, federalState } = await requireAuth();
+  const isNewUi = federalState.featureToggles.isNewUiDesignEnabled;
+
+  if (isNewUi) {
+    return <LearningScenarioOverview currentUserId={user.id} />;
+  }
+
+  const accessLevel = searchParams.visibility;
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
   const _learningScenarios = await getLearningScenariosByAccessLevel({

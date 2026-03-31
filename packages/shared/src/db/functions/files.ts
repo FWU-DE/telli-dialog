@@ -1,12 +1,14 @@
 import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import { db } from '..';
 import {
-  CharacterFileMapping,
-  characterTable,
-  ConversationMessageFileMappingTable,
-  conversationTable,
   AssistantFileMapping,
   assistantTable,
+  CharacterFileMapping,
+  characterTable,
+  ChunkInsertModel,
+  chunkTable,
+  ConversationMessageFileMappingTable,
+  conversationTable,
   federalStateTable,
   FileInsertModel,
   FileMetadata,
@@ -15,13 +17,8 @@ import {
   fileTable,
   LearningScenarioFileMapping,
   learningScenarioTable,
-  ChunkInsertModel,
-  chunkTable,
 } from '../schema';
 import { logDebug } from '@shared/logging';
-import { buildCharacterPictureKey } from '@shared/characters/character-service';
-import { buildAssistantPictureKey } from '@shared/assistants/assistant-service';
-import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
 
 export async function linkFilesToConversation({
   conversationMessageId,
@@ -346,15 +343,10 @@ export async function dbGetAllS3FileKeys(): Promise<string[]> {
   const pictureIds = [...characters, ...assistants, ...sharedSchoolConversations]
     .map((x) => x.pictureId)
     .filter((x): x is string => !!x);
-  const avatarIds = [
-    ...characters.map((x) => buildCharacterPictureKey(x.id)),
-    ...assistants.map((x) => buildAssistantPictureKey(x.id)),
-    ...sharedSchoolConversations.map((x) => buildLearningScenarioPictureKey(x.id)),
-  ];
   const whitelabels = federalStates.flatMap((x) => [
     `whitelabels/${x.id}/logo.svg`,
     `whitelabels/${x.id}/favicon.svg`,
   ]);
 
-  return [...fileIds, ...pictureIds, ...avatarIds, ...whitelabels];
+  return [...fileIds, ...pictureIds, ...whitelabels];
 }

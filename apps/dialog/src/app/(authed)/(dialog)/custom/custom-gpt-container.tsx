@@ -22,7 +22,6 @@ import { CreateNewInstanceFromTemplate } from '../_components/create-new-instanc
 type AssistantContainerProps = AssistantSelectModel & {
   currentUserId: string;
   maybeSignedPictureUrl: string | undefined;
-  pictureId: string | null;
 };
 
 export default function AssistantContainer({
@@ -32,7 +31,6 @@ export default function AssistantContainer({
   userId,
   currentUserId,
   maybeSignedPictureUrl,
-  pictureId,
 }: AssistantContainerProps) {
   const router = useRouter();
   const toast = useToast();
@@ -84,7 +82,6 @@ export default function AssistantContainer({
             redirectPath="custom"
             createInstanceCallbackAction={createNewAssistantAction}
             templateId={id}
-            templatePictureId={pictureId ?? undefined}
             className="w-8 h-8 flex items-center justify-center"
             {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
           >

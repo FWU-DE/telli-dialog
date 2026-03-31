@@ -38,7 +38,7 @@ test.describe('create, share, chat, delete', () => {
     const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
     await expect(submitButton).toBeVisible();
     await submitButton.click();
-    const listItem = page.getByRole('link', { name: data.name });
+    const listItem = page.getByRole('button', { name: data.name });
     await expect(listItem).toBeVisible();
     await listItem.click();
     await page.waitForURL('/learning-scenarios/**');
@@ -91,7 +91,7 @@ test.describe('create, share, chat, delete', () => {
     await expect(submitButton).toBeVisible();
     await submitButton.click();
 
-    const listItem = page.getByRole('link', { name: data.name });
+    const listItem = page.getByRole('button', { name: data.name });
     await expect(listItem).toBeVisible();
     await listItem.click();
 
@@ -150,7 +150,7 @@ test.describe('create, share, chat, delete', () => {
     const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
     await expect(submitButton).toBeVisible();
     await submitButton.click();
-    const listItem = page.getByRole('link', { name: data.name });
+    const listItem = page.getByRole('button', { name: data.name });
     await expect(listItem).toBeVisible();
 
     await deleteLearningScenario(page, data.name);
@@ -181,7 +181,7 @@ test('data is autosaved on blur', async ({ page }) => {
   await submitButton.click();
 
   await page.waitForURL('/learning-scenarios**');
-  await page.getByRole('link', { name }).click();
+  await page.getByRole('button', { name }).click();
   await page.waitForURL('/learning-scenarios/**');
   await waitForToastDisappear(page); // wait for success toast to disappear before continuing
 
