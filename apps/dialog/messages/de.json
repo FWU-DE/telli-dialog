@@ -101,6 +101,7 @@
   },
   "file-interaction": {
     "upload": {
+      "upload-input-aria-label": "Datei hochladen",
       "upload-file-button": "Datei hochladen",
       "upload-file-button-disabled": "Es können maximal {max_files} Dateien hochgeladen werden",
       "file-limit-reached": "Es können maximal {max_files} Dateien hochgeladen werden. {files_exceeded} Dateien wurden nicht hochgeladen.",
@@ -414,6 +415,7 @@
     "image": {
       "crop-image": "Bild ausschneiden",
       "upload-image": "Bild hochladen",
+      "profile-picture": "Profilbild",
       "toasts": {
         "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
         "image-toast-error": "Das Bild konnte nicht hochgeladen werden."

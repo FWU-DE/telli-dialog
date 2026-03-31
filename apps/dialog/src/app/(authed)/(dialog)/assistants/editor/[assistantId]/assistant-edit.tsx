@@ -308,8 +308,9 @@ export function AssistantEdit({
                     <FieldLabel htmlFor={field.name}>{t('name-label')}</FieldLabel>
                     <Input
                       {...field}
-                      id="field.name"
+                      id={field.name}
                       aria-invalid={fieldState.invalid}
+                      aria-label={t('name-label')}
                       placeholder={t('name-placeholder')}
                       autoComplete="off"
                       maxLength={SMALL_TEXT_INPUT_FIELDS_LIMIT}
@@ -334,9 +335,10 @@ export function AssistantEdit({
                     <FieldLabel htmlFor={field.name}>{t('description-label')}</FieldLabel>
                     <Textarea
                       {...field}
-                      id="field.description"
+                      id={field.name}
                       className="h-27 resize-none"
                       aria-invalid={fieldState.invalid}
+                      aria-label={t('description-label')}
                       placeholder={t('description-placeholder')}
                       autoComplete="off"
                       maxLengthErrorMessage={t('description-max-length', {
@@ -360,10 +362,11 @@ export function AssistantEdit({
                     <FieldLabel htmlFor={field.name}>{t('instructions-label')}</FieldLabel>
                     <Textarea
                       {...field}
-                      id="field.instructions"
+                      id={field.name}
                       className="h-125"
                       aria-invalid={fieldState.invalid}
                       placeholder={t('instructions-placeholder')}
+                      aria-label={t('instructions-label')}
                       maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS}
                       maxLengthErrorMessage={t('instructions-max-length', {
                         maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
