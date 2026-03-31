@@ -411,6 +411,15 @@ describe('character-service', () => {
             userId: 'user-id',
           }),
       },
+      {
+        functionName: 'uploadAvatarPictureForCharacter',
+        testFunction: () =>
+          uploadAvatarPictureForCharacter({
+            characterId: 'invalid-uuid',
+            userId: 'user-id',
+            croppedImageBlob: new Blob(),
+          }),
+      },
     ])(
       'should throw InvalidArgumentError when characterId is not a valid UUID - $functionName',
       async ({ testFunction }) => {

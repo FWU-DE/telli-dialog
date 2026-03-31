@@ -37,7 +37,7 @@ import { generateUUID } from '@shared/utils/uuid';
 import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 import { computeBlobHash } from '@telli/shared-core/crypto/blob-hash';
-import { verifyWriteAccess } from '@shared/auth/authorization-service';
+import { verifyReadAccess, verifyWriteAccess } from '@shared/auth/authorization-service';
 import path from 'node:path';
 
 export function buildAssistantPictureKey(assistantId: string, filename: string) {
@@ -73,16 +73,7 @@ export async function getAssistantByUser({
 }> {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  if (!assistant.hasLinkAccess) {
-    if (assistant.accessLevel === 'private' && assistant.userId !== userId)
-      throw new ForbiddenError('Not authorized to access assistant');
-    if (
-      assistant.accessLevel === 'school' &&
-      assistant.schoolId !== schoolId &&
-      assistant.userId !== userId
-    )
-      throw new ForbiddenError('Not authorized to access assistant');
-  }
+  verifyReadAccess({ item: assistant, schoolId, userId });
 
   const [fileMappings, pictureUrl] = await Promise.all([
     dbGetRelatedAssistantFiles(assistantId),
@@ -114,16 +105,7 @@ export async function getAssistantForNewChat({
   const assistant = await dbGetAssistantById({
     assistantId,
   });
-  if (!assistant.hasLinkAccess) {
-    if (assistant.accessLevel === 'private' && assistant.userId !== userId)
-      throw new ForbiddenError('Not authorized to use assistant');
-    if (
-      assistant.accessLevel === 'school' &&
-      assistant.schoolId !== schoolId &&
-      assistant.userId !== userId
-    )
-      throw new ForbiddenError('Not authorized to use assistant');
-  }
+  verifyReadAccess({ item: assistant, schoolId, userId });
 
   return assistant;
 }
@@ -289,9 +271,7 @@ export async function linkFileToAssistant({
 }) {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  if (assistant.userId !== userId) {
-    throw new ForbiddenError('Not authorized to add new file to this assistant');
-  }
+  verifyWriteAccess({ item: assistant, userId });
 
   const insertedFileMapping = await dbInsertAssistantFileMapping({
     assistantId,
@@ -319,9 +299,7 @@ export async function deleteFileMappingAndEntity({
 }) {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  if (assistant.userId !== userId) {
-    throw new ForbiddenError('Not authorized to delete this file mapping from assistant');
-  }
+  verifyWriteAccess({ item: assistant, userId });
 
   // delete mapping and file entry in db
   await db.transaction(async (tx) => {
@@ -351,18 +329,7 @@ export async function getFileMappings({
 }): Promise<FileModel[]> {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  if (!assistant.hasLinkAccess) {
-    if (assistant.accessLevel === 'private' && assistant.userId !== userId) {
-      throw new ForbiddenError('Not authorized to access assistant');
-    }
-    if (
-      assistant.accessLevel === 'school' &&
-      assistant.schoolId !== schoolId &&
-      assistant.userId !== userId
-    ) {
-      throw new ForbiddenError('Not authorized to access assistant');
-    }
-  }
+  verifyReadAccess({ item: assistant, schoolId, userId });
 
   return await dbGetRelatedAssistantFiles(assistantId);
 }
@@ -390,9 +357,7 @@ export async function updateAssistantAccessLevel({
   }
 
   const assistant = await dbGetAssistantById({ assistantId });
-  if (assistant.userId !== userId) {
-    throw new ForbiddenError('Not authorized to update assistant');
-  }
+  verifyWriteAccess({ item: assistant, userId });
 
   const [updatedAssistant] = await db
     .update(assistantTable)
@@ -422,9 +387,7 @@ export async function updateAssistantPicture({
 }) {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  if (assistant.userId !== userId) {
-    throw new ForbiddenError('Not authorized to update this assistant');
-  }
+  verifyWriteAccess({ item: assistant, userId });
 
   const [updatedAssistant] = await db
     .update(assistantTable)
@@ -460,10 +423,9 @@ export async function updateAssistant({
   userId: string;
   assistantProps: z.infer<typeof updateAssistantSchema>;
 }) {
+  checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  if (assistant.userId !== userId) {
-    throw new ForbiddenError('Not authorized to update this assistant');
-  }
+  verifyWriteAccess({ item: assistant, userId });
 
   const parsedValues = updateAssistantSchema.parse(assistantProps);
 
@@ -494,9 +456,7 @@ export async function deleteAssistant({
 }) {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  if (assistant.userId !== userId) {
-    throw new ForbiddenError('Not authorized to delete this assistant');
-  }
+  verifyWriteAccess({ item: assistant, userId });
 
   const relatedFiles = await dbGetRelatedAssistantFiles(assistantId);
 
@@ -538,6 +498,7 @@ export async function uploadAvatarPictureForAssistant({
   croppedImageBlob: Blob;
   userId: string;
 }) {
+  checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
   verifyWriteAccess({ item: assistant, userId: userId });
 
