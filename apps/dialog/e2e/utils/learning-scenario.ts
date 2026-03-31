@@ -3,7 +3,7 @@ import { expect, Page } from '@playwright/test';
 export async function createLearningScenario(page: Page) {
   await page.goto('/learning-scenarios');
   await page.waitForURL('/learning-scenarios');
-  await page.getByRole('button', { name: 'Szenario erstellen' }).click();
+  await page.getByRole('button', { name: 'Lernszenario erstellen' }).click();
   await page.waitForURL('/learning-scenarios/**');
 }
 

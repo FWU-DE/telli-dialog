@@ -33,10 +33,24 @@ export default function LearningScenarioOverview({ currentUserId }: LearningScen
     await setActiveFilter(filter);
   }
 
+  const infoContent = (
+    <div className="flex flex-col gap-4">
+      <div>
+        <p className="font-semibold">{t('info-dialog.q1')}</p>
+        <p>{t('info-dialog.a1')}</p>
+      </div>
+      <p>{t('info-dialog.a1-2')}</p>
+      <div>
+        <p className="font-semibold">{t('info-dialog.q2')}</p>
+        <p>{t('info-dialog.a2')}</p>
+      </div>
+    </div>
+  );
+
   return (
     <EntityOverview
       title={t('title')}
-      infoTooltip={t('description')}
+      infoTooltip={infoContent}
       searchPlaceholder={t('search-placeholder')}
       createButton={<CreateNewLearningScenarioButton />}
       activeFilter={activeFilter}
