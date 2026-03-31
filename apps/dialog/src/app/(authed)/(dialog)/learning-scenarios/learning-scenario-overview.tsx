@@ -43,16 +43,23 @@ export default function LearningScenarioOverview({ currentUserId }: LearningScen
       onFilterChange={handleFilterChange}
       itemCount={visibleLearningScenarios.length}
     >
-      {visibleLearningScenarios.map((ls) => (
-        <EntityCard
-          key={ls.id}
-          name={ls.name}
-          description={ls.description}
-          avatarUrl={ls.maybeSignedPictureUrl}
-          isOwned={ls.userId === currentUserId}
-          onCardClick={() => router.push(`/learning-scenarios/editor/${ls.id}`)}
-        />
-      ))}
+      {(searchQuery) => {
+        const q = searchQuery.trim().toLowerCase();
+        const filtered = q
+          ? visibleLearningScenarios.filter((ls) => ls.name.toLowerCase().includes(q))
+          : visibleLearningScenarios;
+
+        return filtered.map((ls) => (
+          <EntityCard
+            key={ls.id}
+            name={ls.name}
+            description={ls.description}
+            avatarUrl={ls.maybeSignedPictureUrl}
+            isOwned={ls.userId === currentUserId}
+            onCardClick={() => router.push(`/learning-scenarios/editor/${ls.id}`)}
+          />
+        ));
+      }}
     </EntityOverview>
   );
 }
