@@ -26,7 +26,7 @@ export default function HeaderPortal({
   React.useEffect(() => {
     if (!headerElement || !className) return;
 
-    const classes = className.split(' ').filter(Boolean);
+    const classes = className.trim().split(/\s+/).filter(Boolean);
     classes.forEach((cls) => headerElement.classList.add(cls));
 
     return () => {
