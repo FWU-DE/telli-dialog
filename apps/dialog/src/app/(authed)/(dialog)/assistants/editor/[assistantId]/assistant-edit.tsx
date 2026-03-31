@@ -327,6 +327,7 @@ export function AssistantEdit({
                         maxLength: SMALL_TEXT_INPUT_FIELDS_LIMIT,
                       })}
                       required
+                      data-testid="assistant-name-input"
                       onBlur={() => {
                         field.onBlur();
                         handleAutoSave();
@@ -354,6 +355,7 @@ export function AssistantEdit({
                         maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
                       })}
                       maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+                      data-testid="assistant-description-input"
                       onBlur={() => {
                         field.onBlur();
                         handleAutoSave();
@@ -381,6 +383,7 @@ export function AssistantEdit({
                         maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
                       })}
                       autoComplete="off"
+                      data-testid="assistant-instructions-input"
                       onBlur={() => {
                         field.onBlur();
                         handleAutoSave();

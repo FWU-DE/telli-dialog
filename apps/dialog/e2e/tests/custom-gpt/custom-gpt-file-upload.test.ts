@@ -15,8 +15,8 @@ test('should upload file and chat with custom GPT template (Schulorganisationsas
   await expect(card).toBeVisible();
   await card.getByRole('button', { name: 'Neuer Chat' }).click();
 
-  // Wait for the custom GPT chat page to load
-  await page.waitForURL('/custom/d/**');
+  // Wait for the assistant chat page to load
+  await page.waitForURL('/assistants/d/**');
   await expect(page.getByRole('heading')).toContainText('Schulorganisationsassistent');
 
   // Upload a file

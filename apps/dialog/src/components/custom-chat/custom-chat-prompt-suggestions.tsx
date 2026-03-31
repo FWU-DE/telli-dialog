@@ -71,6 +71,7 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
                   })}
                   placeholder={t('prompt-suggestion')}
                   autoComplete="off"
+                  data-testid={`prompt-suggestion-${index + 1}-input`}
                   onBlur={() => {
                     field.onBlur();
                     onBlur();
@@ -89,6 +90,7 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
                   variant="ghost"
                   className={cn(iconClassName)}
                   aria-label={t('prompt-suggestions-add-button')}
+                  data-testid={`add-prompt-suggestion-${index + 1}-button`}
                   disabled={
                     hasReachedPromptSuggestionsLimit || lastPromptSuggestionValue.trim() === ''
                   }
@@ -120,6 +122,7 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
               variant="ghost"
               className={cn(iconClassName)}
               aria-label={t('prompt-suggestions-delete-button', { index: index + 1 })}
+              data-testid={`delete-prompt-suggestion-${index + 1}-button`}
               onClick={() => {
                 removePromptSuggestion(index);
                 onBlur();

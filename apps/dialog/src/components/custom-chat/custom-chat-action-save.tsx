@@ -6,7 +6,7 @@ export function CustomChatActionSave({ onClick }: { onClick: () => void }) {
   const t = useTranslations('custom-chat');
 
   return (
-    <Button variant="outline" onClick={onClick}>
+    <Button variant="outline" onClick={onClick} data-testid="custom-chat-save-button">
       <FloppyDiskIcon className="size-5" />
       {t('save')}
     </Button>
