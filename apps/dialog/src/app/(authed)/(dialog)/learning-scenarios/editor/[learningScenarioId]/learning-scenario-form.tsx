@@ -47,6 +47,7 @@ import SharingSection from '@/components/forms/sharing-section';
 import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
 import { CopyContainer } from '@/app/(authed)/(dialog)/_components/copy-container';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
+import { AVATAR_MAX_SIZE } from '@/const';
 
 export default function LearningScenarioForm({
   existingFiles,
@@ -336,7 +337,7 @@ export default function LearningScenarioForm({
               aspect={1}
               handleUploadAvatarPicture={handleUploadAvatarPicture}
               onUploadComplete={handlePictureUploadComplete}
-              compressionOptions={{ maxHeight: 800 }}
+              compressionOptions={{ maxWidth: AVATAR_MAX_SIZE, maxHeight: AVATAR_MAX_SIZE }}
             />
           )}
         </section>
