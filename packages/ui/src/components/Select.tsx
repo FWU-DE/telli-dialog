@@ -50,6 +50,17 @@ function SelectTrigger({
   );
 }
 
+/**
+ * SelectContent wraps the dropdown content in a Select component.
+ *
+ * @param position - Controls how the content is positioned relative to the trigger (default: 'item-aligned')
+ *   - 'item-aligned': Aligns content with the selected item, ignoring the `align` prop
+ *   - 'popper': Positions content relative to the trigger, respecting the `align` prop
+ *
+ * @param align - Controls horizontal alignment of the content (default: 'center')
+ *   - 'start', 'center', 'end': Only applies when position="popper"
+ *   - Use align="end" with position="popper" to right-align the dropdown
+ */
 function SelectContent({
   className,
   children,

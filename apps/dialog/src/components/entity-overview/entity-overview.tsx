@@ -7,11 +7,15 @@ import { Input } from '@telli/ui/components/Input';
 import { MagnifyingGlassIcon, InfoIcon } from '@phosphor-icons/react';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@telli/ui/components/Tooltip';
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+  DialogFooter,
+} from '@telli/ui/components/Dialog';
+import { Button } from '@telli/ui/components/Button';
 import { FilterTabs } from '@telli/ui/components/FilterTabs';
 import {
   Select,
@@ -30,7 +34,7 @@ export type SortOption = (typeof VALID_SORT_OPTIONS)[number];
 
 type EntityOverviewProps = {
   title: string;
-  infoTooltip: string;
+  infoTooltip: React.ReactNode;
   searchPlaceholder: string;
   createButton: React.ReactNode;
   activeFilter: OverviewFilter;
@@ -53,6 +57,7 @@ export default function EntityOverview({
 }: EntityOverviewProps) {
   const [searchInput, setSearchInput] = React.useState('');
   const [sortBy, setSortBy] = React.useState<SortOption>('date');
+  const [infoDialogOpen, setInfoDialogOpen] = React.useState(false);
   const federalState = useFederalState();
   const { data: session } = useSession();
   const user = session?.user;
@@ -79,22 +84,28 @@ export default function EntityOverview({
         <div className="max-w-3xl mx-auto w-full">
           <div className="flex items-center gap-2 mb-6">
             <h1 className="text-3xl">{title}</h1>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    className="text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full"
-                    aria-label={t('info-tooltip-label')}
-                  >
-                    <InfoIcon className="w-5 h-5" aria-hidden="true" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-sm">
-                  <p>{infoTooltip}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Dialog open={infoDialogOpen} onOpenChange={setInfoDialogOpen}>
+              <DialogTrigger asChild>
+                <button
+                  type="button"
+                  className="text-primary hover:text-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full"
+                  aria-label={t('info-tooltip-label')}
+                >
+                  <InfoIcon className="w-8 h-8" aria-hidden="true" />
+                </button>
+              </DialogTrigger>
+              <DialogContent showCloseButton={false}>
+                <DialogTitle>{title}</DialogTitle>
+                <DialogDescription asChild>
+                  <div>{infoTooltip}</div>
+                </DialogDescription>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button>{t('close')}</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div className="flex flex-wrap-reverse justify-between gap-2 mb-4">
@@ -108,7 +119,7 @@ export default function EntityOverview({
                 className="h-10 rounded-xl border-gray-300 bg-white pr-10 pl-4 shadow-none focus-visible:border-gray-400 focus-visible:ring-0"
               />
               <MagnifyingGlassIcon
-                className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-gray-500"
+                className="pointer-events-none absolute right-3 top-1/2 size-5 -translate-y-2/3 text-gray-500"
                 aria-hidden="true"
               />
             </div>
@@ -135,11 +146,11 @@ export default function EntityOverview({
         >
           <SelectTrigger
             size="sm"
-            className="w-fit gap-1 border-0 bg-transparent shadow-none text-sm text-gray-600 hover:text-gray-900"
+            className="w-fit gap-1 border-0 bg-transparent shadow-none text-sm text-primary hover:text-primary-dark"
           >
             <SelectValue />
           </SelectTrigger>
-          <SelectContent align="end">
+          <SelectContent align="end" position="popper">
             <SelectItem value="date">{t('sort-date')}</SelectItem>
             <SelectItem value="name">{t('sort-name')}</SelectItem>
           </SelectContent>
