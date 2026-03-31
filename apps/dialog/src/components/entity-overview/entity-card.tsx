@@ -5,7 +5,6 @@ import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
 import AvatarPicture from '@/components/common/avatar-picture';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
-import SharedChatIcon from '@/components/icons/shared-chat';
 import { useTranslations } from 'next-intl';
 import { ChatTextIcon } from '@phosphor-icons/react';
 
