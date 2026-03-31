@@ -25,11 +25,10 @@ export async function getCompressedImageBlob(
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error("Couldn't get the canvas context");
 
-  if (source instanceof HTMLImageElement) {
-    ctx.drawImage(source, 0, 0, newWidth, newHeight);
-  } else {
-    ctx.drawImage(source, 0, 0, newWidth, newHeight);
-  }
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  ctx.drawImage(source, 0, 0, newWidth, newHeight);
 
   return await canvasToBlob(canvas, quality);
 }
@@ -135,23 +134,16 @@ function canvasToBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob>
 export async function getCroppedImageBlob(
   image: HTMLImageElement,
   crop: PixelCrop,
-  scale: number = 1,
-  rotate: number = 0,
   compressionOptions?: CompressionOptions,
 ): Promise<Blob> {
   if (!image || !crop.width || !crop.height) {
     throw new Error('Image or crop data is missing');
   }
-  const croppedCanvas = createCroppedCanvas(image, crop, scale, rotate);
+  const croppedCanvas = createCroppedCanvas(image, crop);
   return await getCompressedImageBlob(croppedCanvas, compressionOptions);
 }
 
-function createCroppedCanvas(
-  image: HTMLImageElement,
-  crop: PixelCrop,
-  scale: number,
-  rotate: number,
-): HTMLCanvasElement {
+function createCroppedCanvas(image: HTMLImageElement, crop: PixelCrop): HTMLCanvasElement {
   const scaleX = image.naturalWidth / image.width;
   const scaleY = image.naturalHeight / image.height;
 
@@ -161,17 +153,11 @@ function createCroppedCanvas(
     throw new Error('Canvas context is not available');
   }
 
-  canvas.width = crop.width * scaleX * scale;
-  canvas.height = crop.height * scaleY * scale;
+  canvas.width = crop.width * scaleX;
+  canvas.height = crop.height * scaleY;
 
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  if (rotate !== 0) {
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.rotate((rotate * Math.PI) / 180);
-    ctx.translate(-canvas.width / 2, -canvas.height / 2);
-  }
 
   ctx.drawImage(
     image,
