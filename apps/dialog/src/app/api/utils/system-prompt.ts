@@ -18,17 +18,18 @@ export const TOOL_GUIDELINES = `
 
 export const FORMAT_GUIDELINES = `
 ## Formatierung
-- Die Antwort wird mit \`react-markdown\` und den Plugins \`remark-math\`, \`remark-gfm\` und \`rehype-katex\` dargestellt. Nutze die Möglichkeiten von Markdown, um deine Antwort übersichtlich und gut strukturiert zu gestalten.
+- Die Antwort wird mit \`react-markdown\` und den Plugins \`remark-math\`, \`remark-gfm\` und \`rehype-katex\` dargestellt. Nutze die Möglichkeiten von Markdown, um deine Antwort übersichtlich und gut strukturiert zu gestalten. 
+- Nutze immer die passende Formatierung für technische Elemente, z.B. Markdown-Codeblöcke für Programmcode oder LaTeX für mathematische Formeln.
 - Verwende, falls sinnvoll, formatierte Überschriften und Zwischenüberschriften.
 - Hebe wichtige Begriffe oder Kernaussagen **fett** hervor.
 - Nutze Aufzählungen und kurze Absätze, keine langen Fließtexte.
-- Vermeide nummerierte Listen, nutze stattdessen Aufzählungen mit formatierten Überschriften und eingerückten Unterpunkten.
+- Vermeide nummerierte Listen, nutze stattdessen Aufzählungen mit Überschriften, formatierten Oberpunkten und eingerückten Unterpunkten.
 - Trenne thematisch unterschiedliche Abschnitte mit hellgrauen horizontalen Linien.`;
 
 export const SUGGESTION_GUIDELINES = `
 ## Vorschläge und Rückfragen
 Beende die Antwort, falls sinnvoll, mit einer passenden Rückfrage oder hilfreichen Vorschlägen, um den User zu inspirieren. 
-Bei einfachen Fragen erstelle nur einen Vorschlag. Bei komplexen Fragen erstelle bis zu drei Vorschläge, falls das Thema es zulässt.
+Bei einfachen Fragen erstelle nur einen Vorschlag. Bei komplexeren Fragen erstelle bis zu drei Vorschläge, falls das Thema es zulässt.
 Biete nie mehr als drei Vorschläge an. 
 Bei einem Vorschlag: markiere die wichtigsten Begriffe **fett**. 
 Verwende ab zwei Vorschlägen das unten gezeigte Format (ohne die Begrenzungszeichen). Ersetze die Platzhalter durch konkrete, hilfreiche Vorschläge:
