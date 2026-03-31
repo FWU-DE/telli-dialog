@@ -54,8 +54,6 @@ export default function ImageCropModal({
     const croppedBlob = await getCroppedImageBlob(
       imageRef.current,
       completedCrop,
-      1,
-      0,
       compressionOptions,
     );
     if (croppedBlob) {

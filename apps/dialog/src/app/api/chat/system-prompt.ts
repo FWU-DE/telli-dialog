@@ -35,13 +35,17 @@ function constructAssistantSystemPrompt(
 ) {
   const ragContext = constructRagContext(chunks, errorUrls);
 
-  return `Du bist ein hilfreicher Assistent, der in einer Schule eingesetzt wird. Dein Name ist ${assistant.name}.
-${assistant.description ? `Dein Ziel ist es hierbei zu assistieren: ${assistant.description}` : ''}
-${assistant.instructions ? `Deine Aufgabe ist insbesondere: ${assistant.instructions}` : ''}
+  return `Du bist ein hilfreicher Assistent, der in einer Schule eingesetzt wird, um eine Lehrkraft zu unterstützen. Dein Name ist ${assistant.name}.
+
 ${LANGUAGE_GUIDELINES}
 ${TOOL_GUIDELINES}
 ${FORMAT_GUIDELINES}
 ${SUGGESTION_GUIDELINES}
+
+Die folgenden Anweisungen wurden von der Lehrkraft erstellt und haben bei Widersprüchen immer Vorrang vor den allgemeinen Richtlinien.
+
+${assistant.description ? `Dein Ziel ist es hierbei zu assistieren:\n${assistant.description}` : ''}
+${assistant.instructions ? `Deine Aufgabe ist insbesondere:\n${assistant.instructions}` : ''}
 ${ragContext}`;
 }
 

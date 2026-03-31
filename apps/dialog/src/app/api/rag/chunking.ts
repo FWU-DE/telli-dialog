@@ -1,7 +1,8 @@
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 
-const CHUNK_SIZE = 1500;
-const CHUNK_OVERLAP = 300;
+// Tuned for BAAI/bge-m3 (8192-token context window)
+const CHUNK_SIZE = 2500; // typical sweet spot to balance context richness with retrieval relevance
+const CHUNK_OVERLAP = 0; // no overlap to prevent duplicate text in retrieval results
 
 const splitter = new RecursiveCharacterTextSplitter({
   chunkSize: CHUNK_SIZE,
@@ -10,10 +11,6 @@ const splitter = new RecursiveCharacterTextSplitter({
 
 /**
  * Splits text into chunks using RecursiveCharacterTextSplitter.
- *
- * Tuned for BAAI/bge-m3 (8192-token context window):
- * - chunkSize: 1500 characters — captures more semantic context per embedding
- * - chunkOverlap: 300 characters — preserves context across chunk boundaries
  *
  * The recursive splitter tries paragraph breaks first, then sentences, then words,
  * which naturally respects document structure.
