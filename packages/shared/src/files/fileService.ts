@@ -183,7 +183,7 @@ export async function uploadAvatarPicture({ key, croppedImageBlob }: UploadAvata
 
 /**
  * Gets a signed URL for read-only access to an avatar picture in S3.
- * If the object does not exist in S3, `undefined` is returned and no error is thrown.
+ * If the object does not exist in S3, a signed URL is still created but will return 404.
  *
  * @param key
  * @returns undefined if key is falsy.

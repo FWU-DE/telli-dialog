@@ -262,10 +262,11 @@ Custom designs and titles for federal states:
 
 - **logos**:  
   The logo and favicon are stored in the S3 Bucket and referenced from the SQL column `federal_state/picture_urls`:
+
   ```
   {
-    "logo": "/whitelabels/Federal-State-ID/logo.svg",
-    "favicon": "/whitelabels/Federal-State-ID/favicon.svg"
+    "logo": "whitelabels/Federal-State-ID/logo.svg",
+    "favicon": "whitelabels/Federal-State-ID/favicon.svg"
   }
   ```
 

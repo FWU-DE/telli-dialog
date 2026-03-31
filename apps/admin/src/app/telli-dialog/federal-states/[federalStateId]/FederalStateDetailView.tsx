@@ -37,6 +37,11 @@ export const federalStateEditFormSchema = federalStateSchema.extend({
   designConfiguration: z.string(), // Will be parsed as JSON before submitting
   pictureUrls: z.string(), // Will be parsed as JSON before submitting
 });
+// Form-specific schema that extends the base schema with UI adaptations
+export const federalStatePictureUrlsEditFormSchema = federalStatePictureUrlsSchema.extend({
+  logo: z.string().startsWith('whitelabels/').optional(),
+  favicon: z.string().startsWith('whitelabels/').optional(),
+});
 
 export type FederalStateEditForm = z.infer<typeof federalStateEditFormSchema>;
 
@@ -87,14 +92,16 @@ export function FederalStateView(props: FederalStateViewProps) {
         DesignConfigurationSchema,
         data.designConfiguration,
       );
-    } catch {
+    } catch (e) {
+      console.error(e);
       toast.error('Fehler: designConfiguration ist nicht im korrekten Format');
       return;
     }
     let parsedPictureUrls = null;
     try {
-      parsedPictureUrls = parseAsSchema(federalStatePictureUrlsSchema, data.pictureUrls);
-    } catch {
+      parsedPictureUrls = parseAsSchema(federalStatePictureUrlsEditFormSchema, data.pictureUrls);
+    } catch (e) {
+      console.error(e);
       toast.error('Fehler: pictureUrls ist nicht im korrekten Format');
       return;
     }
