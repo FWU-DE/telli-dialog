@@ -46,7 +46,7 @@ export default function CustomShareSection<T extends FieldValues>({
   }
 
   return (
-    <div className="flex flex-col gap-3 mt-10">
+    <div className="flex flex-col gap-3 mt-10" id="share-settings">
       <CustomChatHeading2 text={t('label')} />
       <Card>
         <CardRow className="justify-center sm:justify-start">

@@ -106,6 +106,7 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
             type="url"
             placeholder="https://..."
             maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+            showCharacterCount={false}
             value={currentLink}
             disabled={maxLinksReached}
             aria-label={t('aria-input')}
