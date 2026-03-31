@@ -75,7 +75,7 @@ export default function DestructiveActionButton({
               className={cn(buttonSecondaryClassName, 'w-full lg:w-auto')}
               type="button"
             >
-              Abbrechen
+              {t('cancel')}
             </button>
             <AlertDialog.Action asChild>
               <button
