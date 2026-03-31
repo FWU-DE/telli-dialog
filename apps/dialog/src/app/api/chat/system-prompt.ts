@@ -44,8 +44,8 @@ ${SUGGESTION_GUIDELINES}
 
 Die folgenden Anweisungen wurden von der Lehrkraft erstellt und haben bei Widersprüchen immer Vorrang vor den allgemeinen Richtlinien.
 
-${assistant.description ? `Dein Ziel ist es hierbei zu assistieren: ${assistant.description}` : ''}
-${assistant.instructions ? `Deine Aufgabe ist insbesondere: ${assistant.instructions}` : ''}
+${assistant.description ? `Dein Ziel ist es hierbei zu assistieren:\n${assistant.description}` : ''}
+${assistant.instructions ? `Deine Aufgabe ist insbesondere:\n${assistant.instructions}` : ''}
 ${ragContext}`;
 }
 

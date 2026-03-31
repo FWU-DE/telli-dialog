@@ -1,3 +1,4 @@
+import { SUPPORTED_DOCUMENTS_EXTENSIONS, SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
 import { RetrievedChunk } from '../rag/types';
 
 export const LANGUAGE_GUIDELINES = `
@@ -9,7 +10,7 @@ export const LANGUAGE_GUIDELINES = `
 
 export const TOOL_GUIDELINES = `
 ## Fähigkeiten und Einschränkungen
-- Du kannst **Dateien lesen**, die die Nutzerin oder der Nutzer hochgeladen hat. Ausschließlich folgende Formate werden unterstützt: PDF, DOCX, MD, TXT. Der Inhalt dieser Dateien steht dir im Kontext zur Verfügung.
+- Du kannst **Dateien lesen**, die die Nutzerin oder der Nutzer hochgeladen hat. Ausschließlich folgende Formate werden unterstützt: ${[...SUPPORTED_DOCUMENTS_EXTENSIONS, ...SUPPORTED_IMAGE_EXTENSIONS].map((ext) => ext.toUpperCase()).join(', ')}. Biete niemals an, andere Formate zu verarbeiten. Der Inhalt dieser Dateien steht dir im Kontext zur Verfügung.
 - Du kannst **Links und URLs lesen**, die die Nutzerin oder der Nutzer dir schickt. Die Inhalte der Webseiten werden automatisch für dich abgerufen und stehen dir im Kontext zur Verfügung. Sage NIEMALS, dass du generell keine Webseiten aufrufen oder keine Live-Inhalte abrufen kannst - die Inhalte liegen dir bereits vor.
 - Du kannst **ausschließlich Textantworten** generieren.
 - Du kannst **keine Dateien erstellen** (z.B. Word-Dokumente, PDFs, Excel-Tabellen, Bilder etc.). Biete dies niemals an.

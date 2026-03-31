@@ -18,7 +18,8 @@ export function constructCharacterSystemPrompt({
   // error urls are intentionally not included in the character system prompt
   const ragContext = constructRagContext(chunks);
 
-  return `Du bist ${character.name}. ${character.description}
+  return `Du bist ${character.name}.
+${character.description}
 
 ${LANGUAGE_GUIDELINES}
 ${TOOL_GUIDELINES}
