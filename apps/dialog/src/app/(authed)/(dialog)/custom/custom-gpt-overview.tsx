@@ -47,7 +47,7 @@ export default function CustomGptOverview({ currentUserId }: CustomGptOverviewPr
       title={t('title')}
       infoTooltip={t('description')}
       searchPlaceholder={t('search-placeholder')}
-      createButton={<CreateNewCustomGptButton />}
+      createButton={<CreateNewCustomGptButton isNewUiDesignEnabled={true} />}
       activeFilter={activeFilter}
       onFilterChange={handleFilterChange}
       itemCount={visibleAssistants.length}

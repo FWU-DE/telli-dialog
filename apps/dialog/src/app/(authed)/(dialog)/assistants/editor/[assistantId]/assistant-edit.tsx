@@ -13,6 +13,7 @@ import { Card, CardContent } from '@ui/components/Card';
 import { Field, FieldLabel, FieldError, FieldGroup } from '@ui/components/Field';
 import { Input } from '@ui/components/Input';
 import { Controller, useForm, useWatch } from 'react-hook-form';
+import { useEffect } from 'react';
 import z from 'zod';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
@@ -144,9 +145,16 @@ export function AssistantEdit({
   const name = useWatch({ control, name: 'name' });
   const onPictureIdChangeRef = useRef<(value: string) => void>(() => {});
   const savedAccessLevelRef = useRef(assistant.accessLevel);
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
+
+  useEffect(() => {
+    if (!name || name.trim().length === 0) {
+      nameInputRef.current?.focus();
+    }
+  }, [name]);
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -308,6 +316,7 @@ export function AssistantEdit({
                     <FieldLabel htmlFor={field.name}>Name des Assistenten</FieldLabel>
                     <Input
                       {...field}
+                      ref={nameInputRef}
                       id="field.name"
                       aria-invalid={fieldState.invalid}
                       placeholder="Name des Assistenten"
