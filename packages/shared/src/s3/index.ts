@@ -93,13 +93,7 @@ export async function copyFileInS3({ newKey, copySource }: { newKey: string; cop
  * @returns undefined if key is falsy
  * Otherwise returns a signed URL for read-only access to the object even if the object does not exist in S3.
  */
-export async function getReadOnlySignedUrl({
-  key,
-  filename,
-  contentType,
-  attachment = true,
-  options,
-}: {
+export async function getReadOnlySignedUrl(args: {
   key: string | null | undefined;
   filename?: string;
   contentType?: string;
@@ -107,10 +101,15 @@ export async function getReadOnlySignedUrl({
   options?: { expiresIn?: number };
 }) {
   // Default expiry of 1 hour and revalidation after 30min
-  const expiresIn = options?.expiresIn ?? 3600;
+  const expiresIn = args.options?.expiresIn ?? 3600;
   const revalidate = expiresIn / 2;
   return await cache(
-    async () => {
+    async ({
+      key,
+      filename,
+      contentType,
+      attachment = true,
+    }: Parameters<typeof getReadOnlySignedUrl>[0]) => {
       if (!key) return undefined;
 
       let contentDisposition = attachment ? 'attachment;' : '';
@@ -133,9 +132,9 @@ export async function getReadOnlySignedUrl({
         throw error;
       }
     },
-    null,
+    [],
     { revalidate },
-  )();
+  )(args);
 }
 
 /**
