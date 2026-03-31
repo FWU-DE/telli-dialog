@@ -294,7 +294,7 @@ export function AssistantEdit({
                 render={({ field }) => {
                   onPictureIdChangeRef.current = (value: string) => {
                     field.onChange(value);
-                    handleAutoSave();
+                    void flushAutoSave();
                   };
 
                   return <Input {...field} type="hidden" value={field.value ?? ''} />;

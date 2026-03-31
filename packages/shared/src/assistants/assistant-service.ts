@@ -544,6 +544,11 @@ export async function uploadAvatarPictureForAssistant({
   // Compute hash of the blob for cache busting
   const hash = await computeBlobHash(croppedImageBlob);
   const key = buildAssistantPictureKey(assistantId, buildAvatarFilename(hash));
+  const oldKey = assistant.pictureId;
+  if (oldKey === key) {
+    // image didn't change, skip update
+    return key;
+  }
 
   // Upload new avatar
   await uploadFileToS3({
@@ -551,6 +556,17 @@ export async function uploadAvatarPictureForAssistant({
     body: croppedImageBlob,
     contentType: croppedImageBlob.type,
   });
+
+  // Change pictureId in db
+  const [updatedAssistant] = await db
+    .update(assistantTable)
+    .set({ pictureId: key })
+    .where(and(eq(assistantTable.id, assistantId), eq(assistantTable.userId, userId)))
+    .returning();
+
+  if (!updatedAssistant) {
+    throw new Error('Could not update the assistant');
+  }
 
   // Delete old avatar if it exists
   if (assistant.pictureId) {

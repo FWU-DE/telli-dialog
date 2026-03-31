@@ -614,13 +614,28 @@ export async function uploadAvatarPictureForLearningScenario({
   // Compute hash of the blob for cache busting
   const hash = await computeBlobHash(croppedImageBlob);
   const key = buildLearningScenarioPictureKey(learningScenarioId, buildAvatarFilename(hash));
-
+  const oldKey = learningScenario.pictureId;
+  if (oldKey === key) {
+    // image didn't change, skip update
+    return key;
+  }
   // Upload new avatar
   await uploadFileToS3({
     key,
     body: croppedImageBlob,
     contentType: croppedImageBlob.type,
   });
+
+  // Change pictureId in db
+  const [updatedLearningScenario] = await db
+    .update(learningScenarioTable)
+    .set({ pictureId: key })
+    .where(eq(learningScenarioTable.id, learningScenarioId))
+    .returning();
+
+  if (!updatedLearningScenario) {
+    throw new Error('Could not update learning scenario');
+  }
 
   // Delete old avatar if it exists
   if (learningScenario.pictureId) {

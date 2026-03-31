@@ -11,6 +11,7 @@ import {
   updateAssistantAccessLevel,
   updateAssistantPicture,
   getAssistantByUser,
+  uploadAvatarPictureForAssistant,
 } from './assistant-service';
 import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
@@ -91,8 +92,17 @@ describe('assistant-service', () => {
         functionName: 'deleteAssistant',
         testFunction: () => deleteAssistant({ assistantId, userId }),
       },
+      {
+        functionName: 'uploadAvatarPictureForAssistant',
+        testFunction: () =>
+          uploadAvatarPictureForAssistant({
+            assistantId,
+            userId: 'different-user-id',
+            croppedImageBlob: new Blob(),
+          }),
+      },
     ])(
-      'should throw NotFoundError from dbGetAssistantById when custom GPT does not exist - $functionName',
+      'should throw NotFoundError from dbGetAssistantById when assistant does not exist - $functionName',
       async ({ testFunction }) => {
         (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockRejectedValue(
           new NotFoundError(),
@@ -128,13 +138,13 @@ describe('assistant-service', () => {
       ).rejects.toThrowError(NotFoundError);
     });
 
-    it('should throw NotFoundError when custom GPT not found - getConversationWithMessagesAndAssistant', async () => {
+    it('should throw NotFoundError when assistant not found - getConversationWithMessagesAndAssistant', async () => {
       const userId = generateUUID();
       const assistantId = generateUUID();
       const conversationId = generateUUID();
 
       (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockRejectedValue(
-        new NotFoundError('Custom Gpt not found'),
+        new NotFoundError('assistant not found'),
       );
       (getConversation as MockedFunction<typeof getConversation>).mockResolvedValue(null as never);
       (getConversationMessages as MockedFunction<typeof getConversationMessages>).mockResolvedValue(
@@ -232,6 +242,15 @@ describe('assistant-service', () => {
             userId: 'different-user-id',
           }),
       },
+      {
+        functionName: 'uploadAvatarPictureForAssistant',
+        testFunction: () =>
+          uploadAvatarPictureForAssistant({
+            assistantId,
+            userId: 'different-user-id',
+            croppedImageBlob: new Blob(),
+          }),
+      },
     ])(
       'should throw ForbiddenError when user is not the owner - $functionName',
       async ({ testFunction }) => {
@@ -265,7 +284,7 @@ describe('assistant-service', () => {
           }),
       },
     ])(
-      'should throw ForbiddenError when user is not owner of private custom GPT - $functionName',
+      'should throw ForbiddenError when user is not owner of private assistant - $functionName',
       async ({ testFunction }) => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId,
@@ -341,7 +360,7 @@ describe('assistant-service', () => {
       ).rejects.toThrowError(ForbiddenError);
     });
 
-    it('should throw ForbiddenError when user is not owner of private custom GPT - getFileMappings', async () => {
+    it('should throw ForbiddenError when user is not owner of private assistant - getFileMappings', async () => {
       const userId = generateUUID();
       const assistantId = generateUUID();
       const mockAssistant: Partial<AssistantSelectModel> = { accessLevel: 'private', userId };
@@ -359,7 +378,7 @@ describe('assistant-service', () => {
       ).rejects.toThrowError(ForbiddenError);
     });
 
-    it('should throw ForbiddenError when user has not same schoolId as custom GPT - getFileMappings', async () => {
+    it('should throw ForbiddenError when user has not same schoolId as assistant - getFileMappings', async () => {
       const userId = generateUUID();
       const assistantId = generateUUID();
       const mockAssistant: Partial<AssistantSelectModel> = {
@@ -585,11 +604,11 @@ describe('assistant-service', () => {
       it.each([
         {
           accessLevel: 'private' as const,
-          description: 'private custom GPT with link sharing enabled',
+          description: 'private assistant with link sharing enabled',
         },
         {
           accessLevel: 'school' as const,
-          description: 'school custom GPT with link sharing enabled (different school)',
+          description: 'school assistant with link sharing enabled (different school)',
         },
       ])('getAssistantByUser - $description', async ({ accessLevel }) => {
         const mockAssistant: Partial<AssistantSelectModel> = {
@@ -616,11 +635,11 @@ describe('assistant-service', () => {
       it.each([
         {
           accessLevel: 'private' as const,
-          description: 'private custom GPT with link sharing enabled',
+          description: 'private assistant with link sharing enabled',
         },
         {
           accessLevel: 'school' as const,
-          description: 'school custom GPT with link sharing enabled (different school)',
+          description: 'school assistant with link sharing enabled (different school)',
         },
       ])('getAssistantForNewChat - $description', async ({ accessLevel }) => {
         const mockAssistant: Partial<AssistantSelectModel> = {
@@ -647,11 +666,11 @@ describe('assistant-service', () => {
       it.each([
         {
           accessLevel: 'private' as const,
-          description: 'private custom GPT with link sharing enabled',
+          description: 'private assistant with link sharing enabled',
         },
         {
           accessLevel: 'school' as const,
-          description: 'school custom GPT with link sharing enabled (different school)',
+          description: 'school assistant with link sharing enabled (different school)',
         },
       ])('getFileMappings - $description', async ({ accessLevel }) => {
         const mockAssistant: Partial<AssistantSelectModel> = {
@@ -680,7 +699,7 @@ describe('assistant-service', () => {
     });
 
     describe('should still enforce restrictions when hasLinkAccess is false', () => {
-      it('getAssistantByUser - private custom GPT without link sharing', async () => {
+      it('getAssistantByUser - private assistant without link sharing', async () => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId: ownerUserId,
           schoolId: ownerSchoolId,
@@ -701,7 +720,7 @@ describe('assistant-service', () => {
         ).rejects.toThrowError(ForbiddenError);
       });
 
-      it('getAssistantForNewChat - private custom GPT without link sharing', async () => {
+      it('getAssistantForNewChat - private assistant without link sharing', async () => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId: ownerUserId,
           schoolId: ownerSchoolId,

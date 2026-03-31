@@ -280,6 +280,7 @@ describe('learning-scenario-service', () => {
         buildFunctionList(
           { learningScenarioId, schoolId: differentUser.schoolId, user: differentUser },
           'read',
+          'write',
         ),
       )(
         'should throw ForbiddenError when school shared but user is not in the same school - $functionName',

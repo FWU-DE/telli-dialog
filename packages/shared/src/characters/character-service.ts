@@ -29,7 +29,7 @@ import {
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
 import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
-import { copyFileInS3, getReadOnlySignedUrl, uploadFileToS3, deleteFileFromS3 } from '@shared/s3';
+import { copyFileInS3, deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
@@ -703,6 +703,11 @@ export async function uploadAvatarPictureForCharacter({
   // Compute hash of the blob for cache busting
   const hash = await computeBlobHash(croppedImageBlob);
   const key = buildCharacterPictureKey(characterId, buildAvatarFilename(hash));
+  const oldKey = character.pictureId;
+  if (oldKey === key) {
+    // image didn't change, skip update
+    return key;
+  }
 
   // Upload new avatar
   await uploadFileToS3({
@@ -710,6 +715,17 @@ export async function uploadAvatarPictureForCharacter({
     body: croppedImageBlob,
     contentType: croppedImageBlob.type,
   });
+
+  // Change pictureId in db
+  const [updatedCharacter] = await db
+    .update(characterTable)
+    .set({ pictureId: key })
+    .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)))
+    .returning();
+
+  if (!updatedCharacter) {
+    throw new Error('Could not update the character');
+  }
 
   // Delete old avatar if it exists
   if (character.pictureId) {

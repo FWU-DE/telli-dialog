@@ -30,6 +30,7 @@ import {
   updateCharacter,
   updateCharacterAccessLevel,
   updateCharacterPicture,
+  uploadAvatarPictureForCharacter,
 } from './character-service';
 import {
   dbGetCharacterById,
@@ -60,6 +61,15 @@ describe('character-service', () => {
           getSharedCharacter({
             characterId: generateUUID(),
             userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'uploadAvatarPictureForCharacter',
+        testFunction: () =>
+          uploadAvatarPictureForCharacter({
+            characterId: generateUUID(),
+            userId: 'user-id',
+            croppedImageBlob: new Blob(),
           }),
       },
     ])(
@@ -148,6 +158,15 @@ describe('character-service', () => {
           deleteCharacter({
             characterId: generateUUID(),
             userId: 'different-user-id',
+          }),
+      },
+      {
+        functionName: 'uploadAvatarPictureForCharacter',
+        testFunction: () =>
+          uploadAvatarPictureForCharacter({
+            characterId: generateUUID(),
+            userId: 'different-user-id',
+            croppedImageBlob: new Blob(),
           }),
       },
     ])(
