@@ -11,7 +11,7 @@ export function CustomChatShareInfo({
 }) {
   return (
     <div className="flex px-6 py-4 justify-between text-base font-medium rounded-xl bg-secondary/40">
-      <span className="">{info}</span>
+      <span>{info}</span>
       <Link href={href}>
         <span className="text-primary">{linkText}</span>
       </Link>
