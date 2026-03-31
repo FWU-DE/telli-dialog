@@ -316,7 +316,7 @@ export function AssistantEdit({
                     <FieldLabel htmlFor={field.name}>{t('name-label')}</FieldLabel>
                     <Input
                       {...field}
-                      ref={nameInputRef}              
+                      ref={nameInputRef}
                       id={field.name}
                       aria-invalid={fieldState.invalid}
                       aria-label={t('name-label')}

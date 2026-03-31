@@ -15,7 +15,7 @@ import {
 import { FilterTabs } from '@telli/ui/components/FilterTabs';
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import ProfileMenu from '../navigation/profile-menu';
-import { ToggleSidebarButton, NewChatButton } from '../navigation/sidebar/collapsible-sidebar';
+import { ToggleSidebarButton } from '../navigation/sidebar/collapsible-sidebar';
 import { useSession } from 'next-auth/react';
 
 type EntityOverviewProps = {

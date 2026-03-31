@@ -11,7 +11,6 @@ import { UploadIcon } from '@phosphor-icons/react';
 import { Button } from '@ui/components/Button';
 import AvatarCropModal from './custom-chat-avatar-crop-modal';
 import Image from 'next/image';
-import { CustomChatAvatarImage } from './custom-chat-avatar-image';
 
 export function CustomChatImageUpload({
   avatarPictureUrl,

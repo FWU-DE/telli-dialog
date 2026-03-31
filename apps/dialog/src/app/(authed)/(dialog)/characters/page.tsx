@@ -6,7 +6,6 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { getCharacterByAccessLevel } from '@shared/characters/character-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
-import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import CharacterOverview from './character-overview';
 
 export const dynamic = 'force-dynamic';
