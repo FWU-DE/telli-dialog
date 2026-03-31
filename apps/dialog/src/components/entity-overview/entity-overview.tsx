@@ -13,10 +13,20 @@ import {
   TooltipTrigger,
 } from '@telli/ui/components/Tooltip';
 import { FilterTabs } from '@telli/ui/components/FilterTabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@telli/ui/components/Select';
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import ProfileMenu from '../navigation/profile-menu';
-import { ToggleSidebarButton, NewChatButton } from '../navigation/sidebar/collapsible-sidebar';
+import { ToggleSidebarButton } from '../navigation/sidebar/collapsible-sidebar';
 import { useSession } from 'next-auth/react';
+
+const VALID_SORT_OPTIONS = ['name', 'date'] as const;
+export type SortOption = (typeof VALID_SORT_OPTIONS)[number];
 
 type EntityOverviewProps = {
   title: string;
@@ -25,7 +35,7 @@ type EntityOverviewProps = {
   createButton: React.ReactNode;
   activeFilter: OverviewFilter;
   onFilterChange: (filter: OverviewFilter) => void;
-  children: React.ReactNode;
+  children: (searchQuery: string, sortBy: SortOption) => React.ReactNode;
   itemCount: number;
 };
 
@@ -42,6 +52,7 @@ export default function EntityOverview({
   itemCount,
 }: EntityOverviewProps) {
   const [searchInput, setSearchInput] = React.useState('');
+  const [sortBy, setSortBy] = React.useState<SortOption>('date');
   const federalState = useFederalState();
   const { data: session } = useSession();
   const user = session?.user;
@@ -57,14 +68,14 @@ export default function EntityOverview({
 
   return (
     <div className="min-w-full overflow-auto flex flex-col h-full bg-gray-50">
-      <HeaderPortal>
+      <HeaderPortal className="bg-gray-50">
         <ToggleSidebarButton
           isNewUiDesignEnabled={federalState?.featureToggles?.isNewUiDesignEnabled ?? false}
         />
         <div className="grow"></div>
         <ProfileMenu userAndContext={user} />
       </HeaderPortal>
-      <div className="px-6 pt-6 pb-4 sticky top-0 z-10">
+      <div className="px-6 pt-6 pb-2 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto w-full">
           <div className="flex items-center gap-2 mb-6">
             <h1 className="text-3xl">{title}</h1>
@@ -113,9 +124,31 @@ export default function EntityOverview({
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto px-6 pt-4 pb-6">
+      <div className="max-w-3xl mx-auto w-full flex justify-end">
+        <Select
+          value={sortBy}
+          onValueChange={(v) => {
+            if (VALID_SORT_OPTIONS.includes(v as SortOption)) {
+              setSortBy(v as SortOption);
+            }
+          }}
+        >
+          <SelectTrigger
+            size="sm"
+            className="w-fit gap-1 border-0 bg-transparent shadow-none text-sm text-gray-600 hover:text-gray-900"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent align="end">
+            <SelectItem value="date">{t('sort-date')}</SelectItem>
+            <SelectItem value="name">{t('sort-name')}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex-1 overflow-auto px-6 pt-2 pb-6">
         <div className="max-w-3xl mx-auto w-full">
-          <div className="flex flex-col gap-2 w-full">{children}</div>
+          <div className="flex flex-col gap-2 w-full">{children(searchInput, sortBy)}</div>
         </div>
       </div>
     </div>

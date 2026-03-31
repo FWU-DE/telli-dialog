@@ -493,6 +493,8 @@
     "filter-school": "Schulintern",
     "filter-tabs-label": "Filteroptionen",
     "info-tooltip-label": "Informationen anzeigen",
-    "badge-mine": "von mir"
+    "badge-mine": "von mir",
+    "sort-date": "Nach Aktualität",
+    "sort-name": "Nach Name"
   }
 }
