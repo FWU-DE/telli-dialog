@@ -38,7 +38,7 @@ export default async function Page(
     federalStateId: federalState.id,
   });
 
-  const logoElement = <Logo federalStateId={federalState.id} />;
+  const logoElement = <Logo logoPath={federalState.pictureUrls?.logo} />;
 
   const lastUsedModelInChat = messages.at(-1)?.modelName;
 
