@@ -34,22 +34,34 @@ function TooltipProvider({
   );
 }
 
-function Tooltip({ onOpenChange, ...props }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
-  const [isOpen, setIsOpen] = React.useState(false);
+type TooltipProps = React.ComponentProps<typeof TooltipPrimitive.Root>;
+
+function Tooltip({
+  onOpenChange,
+  open: openProp,
+  defaultOpen,
+  ...props
+}: TooltipProps) {
+  const isControlled = openProp !== undefined;
+  const [uncontrolledOpen, setUncontrolledOpen] = React.useState<boolean | undefined>(defaultOpen);
+
+  const isOpen = isControlled ? (openProp as boolean) : !!uncontrolledOpen;
 
   const handleOpenChange = React.useCallback(
     (newOpen: boolean) => {
-      setIsOpen(newOpen);
+      if (!isControlled) {
+        setUncontrolledOpen(newOpen);
+      }
       onOpenChange?.(newOpen);
     },
-    [onOpenChange],
+    [isControlled, onOpenChange],
   );
 
   return (
     <TooltipContext.Provider value={{ isOpen, setIsOpen: handleOpenChange }}>
       <TooltipPrimitive.Root
         data-slot="tooltip"
-        open={isOpen}
+        {...(isControlled ? { open: openProp } : { defaultOpen })}
         onOpenChange={handleOpenChange}
         {...props}
       />
@@ -88,7 +100,7 @@ function TooltipTrigger({
   );
 
   const handleClick = React.useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
+    (event: React.MouseEvent<HTMLElement>) => {
       setIsOpen(!isOpen);
       onClick?.(event);
     },
