@@ -9,6 +9,7 @@ import { labelClassName } from '@/utils/tailwind/input';
 import { useTranslations } from 'next-intl';
 import React from 'react';
 import { NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT } from '@/configuration-text-inputs/const';
+import { KnowledgeFileEntityType } from '@/app/api/file-operations/actions';
 
 interface FileManagementProps {
   files: Map<string, LocalFileState>;
@@ -18,6 +19,8 @@ interface FileManagementProps {
   onDeleteFile: (localFileId: string) => Promise<void>;
   readOnly: boolean;
   translationNamespace?: Parameters<typeof useTranslations>[0];
+  entityType?: KnowledgeFileEntityType;
+  entityId?: string;
 }
 
 export default function FileManagement({
@@ -28,6 +31,8 @@ export default function FileManagement({
   onDeleteFile,
   readOnly,
   translationNamespace,
+  entityType,
+  entityId,
 }: FileManagementProps) {
   const t = useTranslations(translationNamespace);
 
@@ -49,7 +54,10 @@ export default function FileManagement({
         onDeleteFile={onDeleteFile}
         showUploadConfirmation={true}
         readOnly={readOnly}
+        entityType={entityType}
+        entityId={entityId}
       />
     </>
   );
 }
+

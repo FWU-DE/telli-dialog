@@ -14,6 +14,12 @@ import { useToast } from '../common/toast';
 import { useTranslations } from 'next-intl';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { cn } from '@/utils/tailwind';
+import {
+  downloadKnowledgeFileAction,
+  KnowledgeFileEntityType,
+} from '@/app/api/file-operations/actions';
+import WebDownloadIcon from '../icons/web-download';
+import { IconButton } from '@ui/components/IconButton';
 
 type FilesTableProps = {
   files: FileModel[];
@@ -22,7 +28,43 @@ type FilesTableProps = {
   showUploadConfirmation?: boolean;
   className?: string;
   readOnly: boolean;
+  entityType?: KnowledgeFileEntityType;
+  entityId?: string;
 };
+
+function DownloadKnowledgeFileButton({
+  fileId,
+  entityType,
+  entityId,
+}: {
+  fileId: string;
+  entityType: KnowledgeFileEntityType;
+  entityId: string;
+}) {
+  const [isDownloading, setIsDownloading] = React.useState(false);
+  const t = useTranslations('file-interaction');
+  const toast = useToast();
+
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      const url = await downloadKnowledgeFileAction({ entityType, entityId, fileId });
+      if (url) {
+        window.open(url, '_blank');
+      }
+    } catch {
+      toast.error(t('toasts.download-error'));
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  return (
+    <IconButton aria-label={t('download.aria-label')} onClick={handleDownload} disabled={isDownloading}>
+      {isDownloading ? <Spinner className="size-5" /> : <WebDownloadIcon />}
+    </IconButton>
+  );
+}
 
 export default function FilesTable({
   files,
@@ -31,6 +73,8 @@ export default function FilesTable({
   showUploadConfirmation,
   className,
   readOnly,
+  entityType,
+  entityId,
 }: FilesTableProps) {
   const t = useTranslations('file-interaction');
   const toast = useToast();
@@ -41,6 +85,9 @@ export default function FilesTable({
       if (showUploadConfirmation) toast.success(t('toasts.delete-from-form'));
     });
   }
+
+  const persistedFileIds = new Set(files.map((f) => f.id));
+
   const mergedFiles = [
     ...files.map((f) => ({
       id: f.id,
@@ -106,6 +153,13 @@ export default function FilesTable({
                   {status === 'uploading' && (
                     <span className="text-sm text-gray-500">Uploading...</span>
                   )}
+                  {entityType && entityId && id && persistedFileIds.has(id) && (
+                    <DownloadKnowledgeFileButton
+                      fileId={id}
+                      entityType={entityType}
+                      entityId={entityId}
+                    />
+                  )}
                   {!readOnly && (
                     <DestructiveActionButton
                       modalDescription={t('delete.modal-description')}
@@ -125,3 +179,4 @@ export default function FilesTable({
     </table>
   );
 }
+

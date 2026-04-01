@@ -398,6 +398,8 @@ export function AssistantEdit({
           onDeleteFile={handleDeleteFile}
           initialLinks={initialLinks}
           onLinksChange={handleLinksChange}
+          entityType="assistant"
+          entityId={assistant.id}
         />
 
         <CustomShareSection

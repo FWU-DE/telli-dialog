@@ -472,6 +472,8 @@ export default function CharacterForm({
           onDeleteFile={handleDeattachFile}
           readOnly={readOnly}
           translationNamespace="characters.form"
+          entityType="character"
+          entityId={character.id}
         />
         <AttachedLinks
           fields={fields}

@@ -120,7 +120,11 @@
       "file-too-large": "Die Datei {file_name} ist zu groß. Es sind maximal {max_file_size} MB erlaubt. Versuche die Datei zu verkleinern.",
       "delete-from-form": "Die Datei wurde erfolgreich gelöscht",
       "invalid-file-format": "Das Dateiformat wird nicht unterstützt, folgende Dateitypen können hochgeladen werden: {supported_formats}",
-      "file-limit-exceeded": "Es können maximal {max_files} Dateien hochgeladen werden."
+      "file-limit-exceeded": "Es können maximal {max_files} Dateien hochgeladen werden.",
+      "download-error": "Die Datei konnte leider nicht heruntergeladen werden. Bitte versuchen Sie es erneut."
+    },
+    "download": {
+      "aria-label": "Datei herunterladen"
     }
   },
   "help-mode": {

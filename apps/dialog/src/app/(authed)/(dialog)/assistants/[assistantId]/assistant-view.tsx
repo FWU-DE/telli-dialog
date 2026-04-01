@@ -96,6 +96,8 @@ export function AssistantView({
       <CustomChatFilesAndLinks
         initialFiles={fileMappings}
         initialLinks={assistant.attachedLinks.map((l) => ({ link: l }))}
+        entityType="assistant"
+        entityId={assistant.id}
       />
     </CustomChatLayoutContainer>
   );

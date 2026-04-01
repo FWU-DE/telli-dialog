@@ -419,6 +419,8 @@ export default function LearningScenarioForm({
           onDeleteFile={handleDeattachFile}
           readOnly={readOnly}
           translationNamespace="learning-scenarios.form"
+          entityType="learningScenario"
+          entityId={sharedSchoolChat.id}
         />
         <AttachedLinks
           fields={fields}
