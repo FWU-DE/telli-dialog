@@ -22,6 +22,8 @@ import {
   getConversation,
   getConversationMessages,
 } from '@shared/conversation/conversation-service';
+import { uploadFileToS3 } from '../s3';
+import { getAvatarPictureUrl } from '../files/fileService';
 
 vi.mock('../db/functions/assistants', () => ({
   dbGetAssistantById: vi.fn(),
@@ -33,6 +35,24 @@ vi.mock('../conversation/conversation-service', () => ({
   getConversation: vi.fn(),
   getConversationMessages: vi.fn(),
 }));
+vi.mock('../s3', () => ({
+  uploadFileToS3: vi.fn(),
+  deleteFileFromS3: vi.fn(),
+  copyFileInS3: vi.fn(),
+}));
+vi.mock('../files/fileService', () => ({
+  getAvatarPictureUrl: vi.fn(),
+  deleteAvatarPicture: vi.fn(),
+  deleteMessageAttachments: vi.fn(),
+}));
+const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
+  const mockDbReturning = vi.fn();
+  const mockDbWhere = vi.fn(() => ({ returning: mockDbReturning }));
+  const mockDbSet = vi.fn(() => ({ where: mockDbWhere }));
+  const mockDbUpdate = vi.fn(() => ({ set: mockDbSet }));
+  return { mockDbReturning, mockDbUpdate };
+});
+vi.mock('@shared/db', () => ({ db: { update: mockDbUpdate } }));
 
 const mockUser = (userRole: 'student' | 'teacher' = 'teacher'): UserModel => ({
   id: generateUUID(),
@@ -103,7 +123,7 @@ describe('assistant-service', () => {
           new NotFoundError(),
         );
 
-        await expect(testFunction()).rejects.toThrowError(NotFoundError);
+        await expect(testFunction()).rejects.toThrow(NotFoundError);
       },
     );
 
@@ -130,7 +150,7 @@ describe('assistant-service', () => {
           assistantId,
           userId,
         }),
-      ).rejects.toThrowError(NotFoundError);
+      ).rejects.toThrow(NotFoundError);
     });
 
     it('should throw NotFoundError when assistant not found - getConversationWithMessagesAndAssistant', async () => {
@@ -152,7 +172,7 @@ describe('assistant-service', () => {
           assistantId,
           userId,
         }),
-      ).rejects.toThrowError(NotFoundError);
+      ).rejects.toThrow(NotFoundError);
     });
   });
 
@@ -240,7 +260,7 @@ describe('assistant-service', () => {
     ])(
       'should throw ForbiddenError when user is not the owner - $functionName',
       async ({ testFunction }) => {
-        await expect(testFunction()).rejects.toThrowError(ForbiddenError);
+        await expect(testFunction()).rejects.toThrow(ForbiddenError);
       },
     );
   });
@@ -282,7 +302,7 @@ describe('assistant-service', () => {
           mockAssistant as never,
         );
 
-        await expect(testFunction()).rejects.toThrowError(ForbiddenError);
+        await expect(testFunction()).rejects.toThrow(ForbiddenError);
       },
     );
 
@@ -318,7 +338,7 @@ describe('assistant-service', () => {
           mockAssistant as never,
         );
 
-        await expect(testFunction()).rejects.toThrowError(ForbiddenError);
+        await expect(testFunction()).rejects.toThrow(ForbiddenError);
       },
     );
 
@@ -343,7 +363,7 @@ describe('assistant-service', () => {
           assistantId,
           userId,
         }),
-      ).rejects.toThrowError(ForbiddenError);
+      ).rejects.toThrow(ForbiddenError);
     });
 
     it('should throw ForbiddenError when user is not owner of private assistant - getFileMappings', async () => {
@@ -361,7 +381,7 @@ describe('assistant-service', () => {
           schoolId: 'school-id',
           userId: 'different-user-id',
         }),
-      ).rejects.toThrowError(ForbiddenError);
+      ).rejects.toThrow(ForbiddenError);
     });
 
     it('should throw ForbiddenError when user has not same schoolId as assistant - getFileMappings', async () => {
@@ -383,7 +403,7 @@ describe('assistant-service', () => {
           schoolId: 'different-school-id',
           userId: 'different-user-id',
         }),
-      ).rejects.toThrowError(ForbiddenError);
+      ).rejects.toThrow(ForbiddenError);
     });
 
     it('should throw ForbiddenError when setting access level to global not possible - updateAssistantAccessLevel', async () => {
@@ -401,7 +421,7 @@ describe('assistant-service', () => {
           accessLevel: 'global',
           userId: userId,
         }),
-      ).rejects.toThrowError(ForbiddenError);
+      ).rejects.toThrow(ForbiddenError);
     });
   });
 
@@ -412,7 +432,7 @@ describe('assistant-service', () => {
           schoolId: 'school-id',
           user: mockUser('student'),
         }),
-      ).rejects.toThrowError(ForbiddenError);
+      ).rejects.toThrow(ForbiddenError);
     });
   });
 
@@ -501,7 +521,7 @@ describe('assistant-service', () => {
     ])(
       'should throw InvalidArgumentError when parameter is not a valid UUID - $functionName',
       async ({ testFunction }) => {
-        await expect(testFunction()).rejects.toThrowError(InvalidArgumentError);
+        await expect(testFunction()).rejects.toThrow(InvalidArgumentError);
       },
     );
   });
@@ -694,7 +714,7 @@ describe('assistant-service', () => {
             userId: differentUserId,
             schoolId: differentSchoolId,
           }),
-        ).rejects.toThrowError(ForbiddenError);
+        ).rejects.toThrow(ForbiddenError);
       });
 
       it('getAssistantForNewChat - private assistant without link sharing', async () => {
@@ -715,7 +735,48 @@ describe('assistant-service', () => {
             userId: differentUserId,
             schoolId: differentSchoolId,
           }),
-        ).rejects.toThrowError(ForbiddenError);
+        ).rejects.toThrow(ForbiddenError);
+      });
+    });
+  });
+
+  describe('uploadAvatarPictureForAssistant', () => {
+    const assistantId = generateUUID();
+    const userId = generateUUID();
+
+    beforeEach(() => {
+      const mockAssistant: Partial<AssistantSelectModel> = {
+        id: assistantId,
+        userId,
+        accessLevel: 'private',
+        pictureId: null,
+      };
+      (dbGetAssistantById as MockedFunction<typeof dbGetAssistantById>).mockResolvedValue(
+        mockAssistant as never,
+      );
+      (uploadFileToS3 as MockedFunction<typeof uploadFileToS3>).mockResolvedValue(
+        undefined as never,
+      );
+      mockDbReturning.mockResolvedValue([
+        { id: assistantId, userId, pictureId: `custom-gpts/${assistantId}/avatar_abc123` },
+      ]);
+      (getAvatarPictureUrl as MockedFunction<typeof getAvatarPictureUrl>).mockResolvedValue(
+        'https://signed-url',
+      );
+    });
+
+    it('should upload avatar, update db and return picturePath and signedUrl', async () => {
+      const result = await uploadAvatarPictureForAssistant({
+        assistantId,
+        userId,
+        croppedImageBlob: new Blob(['data'], { type: 'image/png' }),
+      });
+
+      expect(uploadFileToS3).toHaveBeenCalled();
+      expect(mockDbUpdate).toHaveBeenCalled();
+      expect(result).toEqual({
+        picturePath: `custom-gpts/${assistantId}/avatar_3a6eb0790f39`,
+        signedUrl: 'https://signed-url',
       });
     });
   });

@@ -1,22 +1,4 @@
-import { describe, it, expect, vi, beforeEach, MockedFunction } from 'vitest';
-
-vi.mock('../db/functions/character', () => ({
-  dbGetSharedCharacterConversations: vi.fn(),
-  dbGetCharacterById: vi.fn(),
-  dbGetCharacterByIdAndUserId: vi.fn(),
-  dbGetCharacterByIdWithShareData: vi.fn(),
-  dbDeleteCharacterByIdAndUserId: vi.fn(),
-  dbGetCharactersBySchoolId: vi.fn(),
-  dbGetCharactersByUserId: vi.fn(),
-  dbGetGlobalCharacters: vi.fn(),
-}));
-vi.mock('../db/functions/files', () => ({
-  dbGetRelatedCharacterFiles: vi.fn(),
-}));
-vi.mock('../s3', () => ({
-  getReadOnlySignedUrl: vi.fn(),
-}));
-
+import { beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
 import {
   deleteCharacter,
   deleteFileMappingAndEntity,
@@ -33,14 +15,47 @@ import {
 } from './character-service';
 import {
   dbGetCharacterById,
-  dbGetSharedCharacterConversations,
   dbGetCharacterByIdWithShareData,
+  dbGetSharedCharacterConversations,
 } from '../db/functions/character';
 import { dbGetRelatedCharacterFiles } from '../db/functions/files';
-import { getReadOnlySignedUrl } from '../s3';
+import { getReadOnlySignedUrl, uploadFileToS3 } from '../s3';
+import { getAvatarPictureUrl } from '../files/fileService';
 import { generateUUID } from '../utils/uuid';
 import { CharacterSelectModel } from '@shared/db/schema';
-import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
+import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
+
+vi.mock('../db/functions/character', () => ({
+  dbGetSharedCharacterConversations: vi.fn(),
+  dbGetCharacterById: vi.fn(),
+  dbGetCharacterByIdAndUserId: vi.fn(),
+  dbGetCharacterByIdWithShareData: vi.fn(),
+  dbDeleteCharacterByIdAndUserId: vi.fn(),
+  dbGetCharactersBySchoolId: vi.fn(),
+  dbGetCharactersByUserId: vi.fn(),
+  dbGetGlobalCharacters: vi.fn(),
+}));
+vi.mock('../db/functions/files', () => ({
+  dbGetRelatedCharacterFiles: vi.fn(),
+}));
+vi.mock('../s3', () => ({
+  getReadOnlySignedUrl: vi.fn(),
+  uploadFileToS3: vi.fn(),
+  deleteFileFromS3: vi.fn(),
+}));
+vi.mock('../files/fileService', () => ({
+  getAvatarPictureUrl: vi.fn(),
+  deleteAvatarPicture: vi.fn(),
+  deleteMessageAttachments: vi.fn(),
+}));
+const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
+  const mockDbReturning = vi.fn();
+  const mockDbWhere = vi.fn(() => ({ returning: mockDbReturning }));
+  const mockDbSet = vi.fn(() => ({ where: mockDbWhere }));
+  const mockDbUpdate = vi.fn(() => ({ set: mockDbSet }));
+  return { mockDbReturning, mockDbUpdate };
+});
+vi.mock('@shared/db', () => ({ db: { update: mockDbUpdate } }));
 
 const mockUser = (userRole: 'student' | 'teacher' = 'teacher') => ({
   id: generateUUID(),
@@ -62,15 +77,6 @@ describe('character-service', () => {
             userId: 'user-id',
           }),
       },
-      {
-        functionName: 'uploadAvatarPictureForCharacter',
-        testFunction: () =>
-          uploadAvatarPictureForCharacter({
-            characterId: generateUUID(),
-            userId: 'user-id',
-            croppedImageBlob: new Blob(),
-          }),
-      },
     ])(
       'should throw NotFoundError when character does not exist - $functionName',
       async ({ testFunction }) => {
@@ -78,9 +84,23 @@ describe('character-service', () => {
           dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
         ).mockResolvedValue(null as never);
 
-        await expect(testFunction()).rejects.toThrowError(NotFoundError);
+        await expect(testFunction()).rejects.toThrow(NotFoundError);
       },
     );
+
+    it('should throw NotFoundError when character does not exist - uploadAvatarPictureForCharacter', async () => {
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        null as never,
+      );
+
+      await expect(
+        uploadAvatarPictureForCharacter({
+          characterId: generateUUID(),
+          userId: 'user-id',
+          croppedImageBlob: new Blob(),
+        }),
+      ).rejects.toThrow(NotFoundError);
+    });
 
     it('should throw NotFoundError when character has no invite code - getSharedCharacter', async () => {
       const userId = generateUUID();
@@ -97,7 +117,7 @@ describe('character-service', () => {
           characterId: generateUUID(),
           userId: 'user-id',
         }),
-      ).rejects.toThrowError(NotFoundError);
+      ).rejects.toThrow(NotFoundError);
     });
   });
 
@@ -162,7 +182,7 @@ describe('character-service', () => {
     ])(
       'should throw ForbiddenError when user is not the owner - $functionName',
       async ({ testFunction }) => {
-        await expect(testFunction()).rejects.toThrowError(ForbiddenError);
+        await expect(testFunction()).rejects.toThrow(ForbiddenError);
       },
     );
   });
@@ -185,7 +205,7 @@ describe('character-service', () => {
           userId: userId,
           accessLevel: 'global',
         }),
-      ).rejects.toThrowError(ForbiddenError);
+      ).rejects.toThrow(ForbiddenError);
     });
 
     it('should throw ForbiddenError when user is not owner - updateCharacterAccessLevel', async () => {
@@ -205,7 +225,7 @@ describe('character-service', () => {
           userId: 'different-user-id',
           accessLevel: 'school',
         }),
-      ).rejects.toThrowError(ForbiddenError);
+      ).rejects.toThrow(ForbiddenError);
     });
 
     it('should throw ForbiddenError when character is private and user is not owner - fetchFileMappings', async () => {
@@ -225,7 +245,7 @@ describe('character-service', () => {
           userId: 'different-user-id',
           schoolId: 'school-id',
         }),
-      ).rejects.toThrowError(ForbiddenError);
+      ).rejects.toThrow(ForbiddenError);
     });
 
     it('should throw ForbiddenError when character access level is school and user is from different school - fetchFileMappings', async () => {
@@ -246,7 +266,7 @@ describe('character-service', () => {
           userId: 'different-user-id',
           schoolId: 'different-school-id',
         }),
-      ).rejects.toThrowError(ForbiddenError);
+      ).rejects.toThrow(ForbiddenError);
     });
   });
 
@@ -285,7 +305,7 @@ describe('character-service', () => {
         reason: 'only teachers can unshare a character',
       },
     ])('should throw ForbiddenError because $reason - $functionName', async ({ testFunction }) => {
-      await expect(testFunction()).rejects.toThrowError(ForbiddenError);
+      await expect(testFunction()).rejects.toThrow(ForbiddenError);
     });
 
     it('should throw ForbiddenError when character is private and teacher is not owner - shareCharacter', async () => {
@@ -296,7 +316,7 @@ describe('character-service', () => {
           telliPointsPercentageLimit: 10,
           usageTimeLimitMinutes: 60,
         }),
-      ).rejects.toThrowError(ForbiddenError);
+      ).rejects.toThrow(ForbiddenError);
     });
 
     it('should throw ForbiddenError when character access level is school and user is from different school - shareCharacter', async () => {
@@ -319,7 +339,7 @@ describe('character-service', () => {
           usageTimeLimitMinutes: 60,
           schoolId: 'different-school-id',
         }),
-      ).rejects.toThrowError(ForbiddenError);
+      ).rejects.toThrow(ForbiddenError);
     });
 
     it('should throw ForbiddenError when user can only unshare a character they started sharing - unshareCharacter', async () => {
@@ -334,7 +354,7 @@ describe('character-service', () => {
           characterId: generateUUID(),
           user: mockUser('teacher'),
         }),
-      ).rejects.toThrowError(ForbiddenError);
+      ).rejects.toThrow(ForbiddenError);
     });
   });
 
@@ -404,7 +424,7 @@ describe('character-service', () => {
     ])(
       'should throw InvalidArgumentError when characterId is not a valid UUID - $functionName',
       async ({ testFunction }) => {
-        await expect(testFunction()).rejects.toThrowError(InvalidArgumentError);
+        await expect(testFunction()).rejects.toThrow(InvalidArgumentError);
       },
     );
   });
@@ -546,7 +566,7 @@ describe('character-service', () => {
             userId: differentUserId,
             schoolId: differentSchoolId,
           }),
-        ).rejects.toThrowError(ForbiddenError);
+        ).rejects.toThrow(ForbiddenError);
       });
 
       it('getCharacterForEditView - private character without link sharing', async () => {
@@ -568,7 +588,7 @@ describe('character-service', () => {
             userId: differentUserId,
             schoolId: differentSchoolId,
           }),
-        ).rejects.toThrowError(ForbiddenError);
+        ).rejects.toThrow(ForbiddenError);
       });
 
       it('fetchFileMappings - private character without link sharing', async () => {
@@ -589,7 +609,48 @@ describe('character-service', () => {
             userId: differentUserId,
             schoolId: differentSchoolId,
           }),
-        ).rejects.toThrowError(ForbiddenError);
+        ).rejects.toThrow(ForbiddenError);
+      });
+    });
+  });
+
+  describe('uploadAvatarPictureForCharacter', () => {
+    const characterId = generateUUID();
+    const userId = generateUUID();
+
+    beforeEach(() => {
+      const mockCharacter: Partial<CharacterSelectModel> = {
+        id: characterId,
+        userId,
+        accessLevel: 'private',
+        pictureId: null,
+      };
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        mockCharacter as never,
+      );
+      (uploadFileToS3 as MockedFunction<typeof uploadFileToS3>).mockResolvedValue(
+        undefined as never,
+      );
+      mockDbReturning.mockResolvedValue([
+        { id: characterId, userId, pictureId: `characters/${characterId}/avatar_abc123` },
+      ]);
+      (getAvatarPictureUrl as MockedFunction<typeof getAvatarPictureUrl>).mockResolvedValue(
+        'https://signed-url',
+      );
+    });
+
+    it('should upload avatar, update db and return picturePath and signedUrl', async () => {
+      const result = await uploadAvatarPictureForCharacter({
+        characterId,
+        userId,
+        croppedImageBlob: new Blob(['data'], { type: 'image/png' }),
+      });
+
+      expect(uploadFileToS3).toHaveBeenCalled();
+      expect(mockDbUpdate).toHaveBeenCalled();
+      expect(result).toEqual({
+        picturePath: `characters/${characterId}/avatar_3a6eb0790f39`,
+        signedUrl: 'https://signed-url',
       });
     });
   });
