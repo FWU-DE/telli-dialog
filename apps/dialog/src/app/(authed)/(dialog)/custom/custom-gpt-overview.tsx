@@ -41,7 +41,7 @@ export default function CustomGptOverview({ currentUserId }: CustomGptOverviewPr
       }
     }
   };
-  
+
   const infoContent = (
     <div className="flex flex-col gap-4">
       <div>
