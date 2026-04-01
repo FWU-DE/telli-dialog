@@ -12,17 +12,14 @@ import { Button } from '@ui/components/Button';
 import AvatarCropModal from './custom-chat-avatar-crop-modal';
 import Image from 'next/image';
 import { AVATAR_MAX_SIZE } from '@/const';
+import { AvatarUploadResult } from '../crop-uploaded-image/crop-image-and-upload-button';
 
 export function CustomChatImageUpload({
   avatarPictureUrl,
-  onPictureUploadComplete,
   onUploadPicture,
-  onGetSignedUrl,
 }: {
   avatarPictureUrl?: string;
-  onPictureUploadComplete: (picturePath: string) => Promise<void>;
-  onUploadPicture: (croppedImageBlob: Blob) => Promise<ServerActionResult<string>>;
-  onGetSignedUrl?: (key: string) => Promise<string | undefined>;
+  onUploadPicture: (croppedImageBlob: Blob) => Promise<ServerActionResult<AvatarUploadResult>>;
 }) {
   const [file, setFile] = React.useState<File | null>(null);
   const [imageSource, setImageSource] = React.useState<string | null>(null);
@@ -63,12 +60,8 @@ export function CustomChatImageUpload({
     const result = await onUploadPicture(croppedBlob);
 
     if (result.success && result.value) {
-      await onPictureUploadComplete(result.value);
-      if (onGetSignedUrl) {
-        const signedUrl = await onGetSignedUrl(result.value);
-        if (signedUrl) {
-          setDisplayedAvatarUrl(signedUrl);
-        }
+      if (result.value.signedUrl) {
+        setDisplayedAvatarUrl(result.value.signedUrl);
       }
       setShowCropModal(false);
     } else {

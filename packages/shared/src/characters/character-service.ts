@@ -28,8 +28,12 @@ import {
 } from '@shared/db/schema';
 import { checkParameterUUID, ForbiddenError } from '@shared/error';
 import { NotFoundError } from '@shared/error/not-found-error';
-import { deleteAvatarPicture, deleteMessageAttachments } from '@shared/files/fileService';
-import { copyFileInS3, getReadOnlySignedUrl, uploadFileToS3, deleteFileFromS3 } from '@shared/s3';
+import {
+  deleteAvatarPicture,
+  deleteMessageAttachments,
+  getAvatarPictureUrl,
+} from '@shared/files/fileService';
+import { copyFileInS3, deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
@@ -39,7 +43,11 @@ import { generateUUID } from '@shared/utils/uuid';
 import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 import { computeBlobHash } from '@telli/shared-core/crypto/blob-hash';
-import { verifyWriteAccess } from '@shared/auth/authorization-service';
+import {
+  requireTeacherRole,
+  verifyReadAccess,
+  verifyWriteAccess,
+} from '@shared/auth/authorization-service';
 import path from 'node:path';
 
 export function buildCharacterPictureKey(characterId: string, filename: string) {
@@ -67,7 +75,7 @@ export const createNewCharacter = async ({
   templatePictureId?: string;
   templateId?: string;
 }) => {
-  if (user.userRole !== 'teacher') throw new ForbiddenError('Not authorized to create a character');
+  requireTeacherRole(user.userRole);
 
   if (templateId !== undefined) {
     let insertedCharacter = await copyCharacter(templateId, 'private', user.id, schoolId);
@@ -156,8 +164,8 @@ export const deleteFileMappingAndEntity = async ({
 }) => {
   checkParameterUUID(characterId);
   // Authorization check: user must own character
-  const { isOwner } = await getCharacterInfo(characterId, userId);
-  if (!isOwner) throw new ForbiddenError('Not authorized to delete this file mapping');
+  const { character } = await getCharacterInfo(characterId, userId);
+  verifyWriteAccess({ item: character, userId });
 
   // Delete the mapping and the file entry
   await db.transaction(async (tx) => {
@@ -187,13 +195,8 @@ export const fetchFileMappings = async ({
 }): Promise<FileModel[]> => {
   checkParameterUUID(characterId);
   // Authorization check
-  const { isOwner, isPrivate, character } = await getCharacterInfo(characterId, userId);
-  if (
-    !character.hasLinkAccess &&
-    ((isPrivate && !isOwner) ||
-      (!isOwner && character.accessLevel === 'school' && character.schoolId !== schoolId))
-  )
-    throw new ForbiddenError('Not authorized to fetch file mappings for this character');
+  const { character } = await getCharacterInfo(characterId, userId);
+  verifyReadAccess({ item: character, schoolId, userId });
 
   // Fetch and return related files
   return await dbGetRelatedCharacterFiles(characterId);
@@ -215,8 +218,8 @@ export const linkFileToCharacter = async ({
 }) => {
   checkParameterUUID(characterId);
   // Authorization check
-  const { isOwner } = await getCharacterInfo(characterId, userId);
-  if (!isOwner) throw new ForbiddenError('Not authorized to add new file for this character');
+  const { character } = await getCharacterInfo(characterId, userId);
+  verifyWriteAccess({ item: character, userId });
 
   // create a new file mapping
   const [insertedFileMapping] = await db
@@ -250,9 +253,8 @@ export const updateCharacterAccessLevel = async ({
     throw new ForbiddenError('Not authorized to set the access level to global');
   }
 
-  const { isOwner } = await getCharacterInfo(characterId, userId);
-  if (!isOwner)
-    throw new ForbiddenError('Not authorized to set the access level of this character');
+  const { character } = await getCharacterInfo(characterId, userId);
+  verifyWriteAccess({ item: character, userId });
 
   // Update the access level in database
   const [updatedCharacter] = await db
@@ -263,39 +265,6 @@ export const updateCharacterAccessLevel = async ({
 
   if (updatedCharacter === undefined) {
     throw new Error('Could not update the access level of the character');
-  }
-
-  return updatedCharacter;
-};
-
-/**
- * Updates the picture of a character by setting a new picture path.
- *
- * Only the owner is allowed to update the picture.
- */
-export const updateCharacterPicture = async ({
-  characterId,
-  picturePath,
-  userId,
-}: {
-  characterId: string;
-  picturePath: string;
-  userId: string;
-}) => {
-  checkParameterUUID(characterId);
-  // Authorization check
-  const { isOwner } = await getCharacterInfo(characterId, userId);
-  if (!isOwner) throw new ForbiddenError('Not authorized to update the picture of this character');
-
-  // Update the picture path in database
-  const [updatedCharacter] = await db
-    .update(characterTable)
-    .set({ pictureId: picturePath })
-    .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)))
-    .returning();
-
-  if (updatedCharacter === undefined) {
-    throw new Error('Could not update the picture of the character');
   }
 
   return updatedCharacter;
@@ -323,8 +292,8 @@ export const updateCharacter = async ({
 }: UpdateCharacterActionModel & { userId: string }) => {
   checkParameterUUID(character.id);
   // Authorization check
-  const { isOwner } = await getCharacterInfo(character.id, userId);
-  if (!isOwner) throw new ForbiddenError('Not authorized to update this character');
+  const { character: existingCharacter } = await getCharacterInfo(character.id, userId);
+  verifyWriteAccess({ item: existingCharacter, userId });
 
   // Update the character in database
   const cleanedCharacter = removeNullishValues(character);
@@ -357,8 +326,8 @@ export const deleteCharacter = async ({
 }) => {
   checkParameterUUID(characterId);
   // Authorization check
-  const { isOwner, character } = await getCharacterInfo(characterId, userId);
-  if (!isOwner) throw new ForbiddenError('Not authorized to delete this character');
+  const { character } = await getCharacterInfo(characterId, userId);
+  verifyWriteAccess({ item: character, userId });
 
   const relatedFiles = await dbGetRelatedCharacterFiles(characterId);
 
@@ -393,15 +362,10 @@ export const shareCharacter = async ({
 }) => {
   checkParameterUUID(characterId);
   // Authorization check: user must be a teacher and owner of the character or it is global
-  if (user.userRole !== 'teacher') throw new ForbiddenError('Only a teacher can share a character');
+  requireTeacherRole(user.userRole);
 
-  const { isOwner, isPrivate, character } = await getCharacterInfo(characterId, user.id);
-  if (
-    !character.hasLinkAccess &&
-    ((isPrivate && !isOwner) ||
-      (!isOwner && character.accessLevel === 'school' && character.schoolId !== schoolId))
-  )
-    throw new ForbiddenError('Not authorized to share this character');
+  const { character } = await getCharacterInfo(characterId, user.id);
+  verifyReadAccess({ item: character, schoolId, userId: user.id });
 
   // validate input parameters
   if (telliPointsPercentageLimit < 0 || telliPointsPercentageLimit > 100) {
@@ -462,8 +426,7 @@ export const unshareCharacter = async ({
 }) => {
   checkParameterUUID(characterId);
   // Authorization check: user must be a teacher and owner of the sharing itself
-  if (user.userRole !== 'teacher')
-    throw new ForbiddenError('Only a teacher can unshare a character');
+  requireTeacherRole(user.userRole);
 
   const sharedConversations = await dbGetSharedCharacterConversations({
     characterId,
@@ -515,12 +478,7 @@ export const getCharacterForChatSession = async ({
   checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
   if (!character) throw new NotFoundError('Character not found');
-  if (!character.hasLinkAccess) {
-    if (character.accessLevel === 'private' && character.userId !== userId)
-      throw new ForbiddenError('Not authorized to access this character');
-    if (character.accessLevel === 'school' && character.schoolId !== schoolId)
-      throw new ForbiddenError('Not authorized to access this character');
-  }
+  verifyReadAccess({ item: character, schoolId, userId });
 
   return character;
 };
@@ -552,12 +510,7 @@ export const getCharacterForEditView = async ({
   checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
   if (!character) throw new NotFoundError('Character not found');
-  if (!character.hasLinkAccess) {
-    if (character.accessLevel === 'private' && character.userId !== userId)
-      throw new ForbiddenError('Not authorized to edit this character');
-    if (character.accessLevel === 'school' && character.schoolId !== schoolId)
-      throw new ForbiddenError('Not authorized to edit this character');
-  }
+  verifyReadAccess({ item: character, schoolId, userId });
 
   const relatedFiles = await fetchFileMappings({ characterId, userId, schoolId });
   const maybeSignedPictureUrl = await getReadOnlySignedUrl({
@@ -697,12 +650,21 @@ export async function uploadAvatarPictureForCharacter({
   croppedImageBlob: Blob;
   userId: string;
 }) {
+  checkParameterUUID(characterId);
   const { character } = await getCharacterInfo(characterId, userId);
   verifyWriteAccess({ item: character, userId: userId });
 
   // Compute hash of the blob for cache busting
   const hash = await computeBlobHash(croppedImageBlob);
   const key = buildCharacterPictureKey(characterId, buildAvatarFilename(hash));
+  const oldKey = character.pictureId;
+  if (oldKey === key) {
+    // image didn't change, skip update
+    return {
+      picturePath: key,
+      signedUrl: await getAvatarPictureUrl(key),
+    };
+  }
 
   // Upload new avatar
   await uploadFileToS3({
@@ -710,6 +672,17 @@ export async function uploadAvatarPictureForCharacter({
     body: croppedImageBlob,
     contentType: croppedImageBlob.type,
   });
+
+  // Change pictureId in db
+  const [updatedCharacter] = await db
+    .update(characterTable)
+    .set({ pictureId: key })
+    .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)))
+    .returning();
+
+  if (!updatedCharacter) {
+    throw new Error('Could not update the character');
+  }
 
   // Delete old avatar if it exists
   if (character.pictureId) {
@@ -720,5 +693,8 @@ export async function uploadAvatarPictureForCharacter({
     }
   }
 
-  return key;
+  return {
+    picturePath: key,
+    signedUrl: await getAvatarPictureUrl(key),
+  };
 }

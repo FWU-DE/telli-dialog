@@ -11,7 +11,6 @@ import {
   unshareLearningScenario,
   updateLearningScenario,
   updateLearningScenarioAccessLevel,
-  updateLearningScenarioPicture,
   uploadAvatarPictureForLearningScenario,
 } from './learning-scenario-service';
 import {
@@ -27,6 +26,7 @@ import { generateUUID } from '../utils/uuid';
 import { LearningScenarioSelectModel } from '@shared/db/schema';
 import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
 import { UserModel } from '@shared/auth/user-model';
+import { uploadFileToS3 } from '../s3';
 
 vi.mock('../db/functions/learning-scenario', () => ({
   dbCreateLearningScenarioShare: vi.fn(),
@@ -43,7 +43,21 @@ vi.mock('../db/functions/files', () => ({
 }));
 vi.mock('../files/fileService', () => ({
   getAvatarPictureUrl: vi.fn(),
+  deleteAvatarPicture: vi.fn(),
+  deleteMessageAttachments: vi.fn(),
 }));
+vi.mock('../s3', () => ({
+  uploadFileToS3: vi.fn(),
+  deleteFileFromS3: vi.fn(),
+}));
+const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
+  const mockDbReturning = vi.fn();
+  const mockDbWhere = vi.fn(() => ({ returning: mockDbReturning }));
+  const mockDbSet = vi.fn(() => ({ where: mockDbWhere }));
+  const mockDbUpdate = vi.fn(() => ({ set: mockDbSet }));
+  return { mockDbReturning, mockDbUpdate };
+});
+vi.mock('@shared/db', () => ({ db: { update: mockDbUpdate } }));
 
 const mockUser = (userRole: 'student' | 'teacher' = 'teacher'): UserModel => ({
   id: generateUUID(),
@@ -111,15 +125,6 @@ function buildFunctionList(
       testFunction: () =>
         updateLearningScenario({
           data: {} as LearningScenarioSelectModel,
-          learningScenarioId,
-          user,
-        }),
-    },
-    {
-      functionName: updateLearningScenarioPicture.name,
-      testFunction: () =>
-        updateLearningScenarioPicture({
-          picturePath: 'path',
           learningScenarioId,
           user,
         }),
@@ -217,7 +222,7 @@ describe('learning-scenario-service', () => {
           dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
         ).mockResolvedValue(null as never);
 
-        await expect(testFunction()).rejects.toThrowError(NotFoundError);
+        await expect(testFunction()).rejects.toThrow(NotFoundError);
       },
     );
   });
@@ -263,7 +268,7 @@ describe('learning-scenario-service', () => {
       it.each(buildFunctionList({ learningScenarioId, user: differentUser }, 'read', 'write'))(
         'should throw ForbiddenError when user is not the owner - $functionName',
         async ({ testFunction }) => {
-          await expect(testFunction()).rejects.toThrowError(ForbiddenError);
+          await expect(testFunction()).rejects.toThrow(ForbiddenError);
         },
       );
     });
@@ -280,11 +285,12 @@ describe('learning-scenario-service', () => {
         buildFunctionList(
           { learningScenarioId, schoolId: differentUser.schoolId, user: differentUser },
           'read',
+          'write',
         ),
       )(
         'should throw ForbiddenError when school shared but user is not in the same school - $functionName',
         async ({ testFunction }) => {
-          await expect(testFunction()).rejects.toThrowError(ForbiddenError);
+          await expect(testFunction()).rejects.toThrow(ForbiddenError);
         },
       );
     });
@@ -296,7 +302,7 @@ describe('learning-scenario-service', () => {
     it.each(buildFunctionList({ user: student }, 'read', 'write', 'unshare'))(
       'should throw ForbiddenError when user is not a teacher - $functionName',
       async ({ testFunction }) => {
-        await expect(testFunction()).rejects.toThrowError(ForbiddenError);
+        await expect(testFunction()).rejects.toThrow(ForbiddenError);
       },
     );
   });
@@ -324,7 +330,7 @@ describe('learning-scenario-service', () => {
           user,
           accessLevel: 'global',
         }),
-      ).rejects.toThrowError(ForbiddenError);
+      ).rejects.toThrow(ForbiddenError);
     });
   });
 
@@ -340,7 +346,7 @@ describe('learning-scenario-service', () => {
     )(
       'should throw InvalidArgumentError when learningScenarioId is not a valid UUID - $functionName',
       async ({ testFunction }) => {
-        await expect(testFunction()).rejects.toThrowError(InvalidArgumentError);
+        await expect(testFunction()).rejects.toThrow(InvalidArgumentError);
       },
     );
   });
@@ -454,7 +460,7 @@ describe('learning-scenario-service', () => {
             user: differentUser,
             schoolId: differentSchoolId,
           }),
-        ).rejects.toThrowError(ForbiddenError);
+        ).rejects.toThrow(ForbiddenError);
       });
 
       it('getFilesForLearningScenario - private learning scenario without link sharing', async () => {
@@ -475,7 +481,7 @@ describe('learning-scenario-service', () => {
             user: differentUser,
             schoolId: differentSchoolId,
           }),
-        ).rejects.toThrowError(ForbiddenError);
+        ).rejects.toThrow(ForbiddenError);
       });
     });
   });
@@ -570,6 +576,51 @@ describe('learning-scenario-service', () => {
           await expect(testFunction()).resolves.not.toThrow();
         },
       );
+    });
+  });
+
+  describe('uploadAvatarPictureForLearningScenario', () => {
+    const learningScenarioId = generateUUID();
+    const user = mockUser();
+
+    beforeEach(() => {
+      const mockLearningScenario: Partial<LearningScenarioSelectModel> = {
+        id: learningScenarioId,
+        userId: user.id,
+        accessLevel: 'private',
+        pictureId: null,
+      };
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(mockLearningScenario as never);
+      (uploadFileToS3 as MockedFunction<typeof uploadFileToS3>).mockResolvedValue(
+        undefined as never,
+      );
+      mockDbReturning.mockResolvedValue([
+        {
+          id: learningScenarioId,
+          userId: user.id,
+          pictureId: `shared-chats/${learningScenarioId}/avatar_abc123`,
+        },
+      ]);
+      (getAvatarPictureUrl as MockedFunction<typeof getAvatarPictureUrl>).mockResolvedValue(
+        'https://signed-url',
+      );
+    });
+
+    it('should upload avatar, update db and return picturePath and signedUrl', async () => {
+      const result = await uploadAvatarPictureForLearningScenario({
+        learningScenarioId,
+        user,
+        croppedImageBlob: new Blob(['data'], { type: 'image/png' }),
+      });
+
+      expect(uploadFileToS3).toHaveBeenCalled();
+      expect(mockDbUpdate).toHaveBeenCalled();
+      expect(result).toEqual({
+        picturePath: `shared-chats/${learningScenarioId}/avatar_3a6eb0790f39`,
+        signedUrl: 'https://signed-url',
+      });
     });
   });
 });

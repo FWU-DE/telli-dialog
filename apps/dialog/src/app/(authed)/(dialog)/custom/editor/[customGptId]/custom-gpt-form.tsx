@@ -31,7 +31,6 @@ import {
   deleteAssistantAction,
   updateAssistantAccessLevelAction,
   updateAssistantAction,
-  updateAssistantPictureAction,
   uploadAvatarPictureForAssistantAction,
 } from './actions';
 import {
@@ -222,17 +221,6 @@ export default function AssistantForm({
 
   const backUrl = `/custom?visibility=${assistant.accessLevel}`;
 
-  function handlePictureUploadComplete(picturePath: string) {
-    updateAssistantPictureAction({ picturePath, gptId: assistant.id }).then((result) => {
-      if (result.success) {
-        toast.success(tToast('image-toast-success'));
-        router.refresh();
-      } else {
-        toast.error(tToast('edit-toast-error'));
-      }
-    });
-  }
-
   function handleNavigateBack(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
     if (isCreating) {
@@ -291,10 +279,17 @@ export default function AssistantForm({
   }
 
   async function handleUploadAvatarPicture(croppedImageBlob: Blob) {
-    return await uploadAvatarPictureForAssistantAction({
+    const result = await uploadAvatarPictureForAssistantAction({
       assistantId: assistant.id,
       croppedImageBlob,
     });
+
+    if (result.success) {
+      toast.success(tToast('image-toast-success'));
+      router.refresh();
+    }
+
+    return result;
   }
 
   const copyContainer = readOnly ? (
@@ -359,7 +354,6 @@ export default function AssistantForm({
             </div>
             <CropImageAndUploadButton
               aspect={1}
-              onUploadComplete={handlePictureUploadComplete}
               handleUploadAvatarPicture={handleUploadAvatarPicture}
               compressionOptions={{ maxWidth: AVATAR_MAX_SIZE, maxHeight: AVATAR_MAX_SIZE }}
               disabled={readOnly}

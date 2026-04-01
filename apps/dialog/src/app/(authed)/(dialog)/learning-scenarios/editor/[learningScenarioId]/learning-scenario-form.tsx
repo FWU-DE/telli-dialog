@@ -16,7 +16,6 @@ import {
   removeFileFromLearningScenarioAction,
   updateLearningScenarioAccessLevelAction,
   updateLearningScenarioAction,
-  updateLearningScenarioPictureAction,
   uploadAvatarPictureForLearningScenarioAction,
 } from './actions';
 import { logWarning } from '@shared/logging';
@@ -180,26 +179,17 @@ export default function LearningScenarioForm({
   }
 
   async function handleUploadAvatarPicture(croppedImageBlob: Blob) {
-    return await uploadAvatarPictureForLearningScenarioAction({
+    const result = await uploadAvatarPictureForLearningScenarioAction({
       learningScenarioId: sharedSchoolChat.id,
       croppedImageBlob,
-    });
-  }
-
-  async function handlePictureUploadComplete(picturePath: string) {
-    setValue('pictureId', picturePath);
-
-    const result = await updateLearningScenarioPictureAction({
-      picturePath,
-      learningScenarioId: sharedSchoolChat.id,
     });
 
     if (result.success) {
       toast.success(tToast('image-toast-success'));
       router.refresh();
-    } else {
-      toast.error(tToast('edit-toast-error'));
     }
+
+    return result;
   }
 
   async function handleDeleteSharedChat() {
@@ -336,7 +326,6 @@ export default function LearningScenarioForm({
             <CropImageAndUploadButton
               aspect={1}
               handleUploadAvatarPicture={handleUploadAvatarPicture}
-              onUploadComplete={handlePictureUploadComplete}
               compressionOptions={{ maxWidth: AVATAR_MAX_SIZE, maxHeight: AVATAR_MAX_SIZE }}
             />
           )}

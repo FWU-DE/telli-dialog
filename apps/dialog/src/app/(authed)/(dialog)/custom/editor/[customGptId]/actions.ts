@@ -5,10 +5,8 @@ import {
   deleteAssistant,
   updateAssistant,
   updateAssistantAccessLevel,
-  updateAssistantPicture,
   uploadAvatarPictureForAssistant,
 } from '@shared/assistants/assistant-service';
-import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { requireAuth } from '@/auth/requireAuth';
 import { runServerAction } from '@shared/actions/run-server-action';
 
@@ -24,22 +22,6 @@ export async function updateAssistantAccessLevelAction({
   return runServerAction(updateAssistantAccessLevel)({
     assistantId: gptId,
     accessLevel,
-    userId: user.id,
-  });
-}
-
-export async function updateAssistantPictureAction({
-  gptId,
-  picturePath,
-}: {
-  gptId: string;
-  picturePath: string;
-}) {
-  const { user } = await requireAuth();
-
-  return runServerAction(updateAssistantPicture)({
-    assistantId: gptId,
-    picturePath,
     userId: user.id,
   });
 }
@@ -77,8 +59,4 @@ export async function uploadAvatarPictureForAssistantAction({
     croppedImageBlob,
     userId: user.id,
   });
-}
-
-export async function getAvatarSignedUrl(key: string | null | undefined) {
-  return await getAvatarPictureUrl(key);
 }
