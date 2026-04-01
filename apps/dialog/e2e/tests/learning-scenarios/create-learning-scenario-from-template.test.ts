@@ -29,7 +29,7 @@ test('create learning scenario from template', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Fach' }).fill('Geschichte');
   await page.keyboard.press('Tab');
 
-  await page.getByRole('button', { name: 'Szenario erstellen' }).click();
+  await page.getByRole('button', { name: 'Lernszenario erstellen' }).click();
   await page.waitForURL('/learning-scenarios?visibility=private');
   await expect(page.locator('body')).toContainText(name);
 });

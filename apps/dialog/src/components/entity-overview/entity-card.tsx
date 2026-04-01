@@ -5,8 +5,8 @@ import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
 import AvatarPicture from '@/components/common/avatar-picture';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
-import SharedChatIcon from '@/components/icons/shared-chat';
 import { useTranslations } from 'next-intl';
+import { ChatTextIcon } from '@phosphor-icons/react';
 
 type EntityCardProps = {
   name: string;
@@ -60,7 +60,7 @@ export default function EntityCard({
 
       <div className="flex flex-col gap-1 text-left min-w-0">
         <div className="flex items-center gap-2">
-          <h2 className={cn('font-medium leading-none', truncateClassName)}>{name}</h2>
+          <h2 className={cn('font-medium leading-none py-0.5', truncateClassName)}>{name}</h2>
           {isOwned && (
             <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary shrink-0">
               {t('badge-mine')}
@@ -81,7 +81,7 @@ export default function EntityCard({
           onClick={handleChatClick}
           className="p-1 rounded-enterprise-sm hover:bg-gray-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <SharedChatIcon aria-hidden="true" className="w-8 h-8" />
+          <ChatTextIcon aria-hidden="true" className="w-6 h-6 text-primary" />
           <span className="sr-only">{tCommon('new-chat')}</span>
         </button>
       )}
