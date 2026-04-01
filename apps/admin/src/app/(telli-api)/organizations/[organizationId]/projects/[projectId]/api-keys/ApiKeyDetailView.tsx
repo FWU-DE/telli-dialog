@@ -186,6 +186,7 @@ export function ApiKeyDetailView({
                   type="text"
                   value={createdApiKey.plainKey}
                   readOnly
+                  wrapperClassName="flex-1"
                   className="font-mono text-sm"
                 />
                 <Button

@@ -101,6 +101,7 @@ export function ChatHistoryItem({
         <form className="w-full flex gap-1" onSubmit={renameForm.handleSubmit(onSubmit)}>
           <Input
             {...registerFieldProps}
+            wrapperClassName="flex-1"
             className="min-w-0 p-1 text-foreground border border-foreground rounded-md"
             ref={(node) => {
               registerRef(node);
