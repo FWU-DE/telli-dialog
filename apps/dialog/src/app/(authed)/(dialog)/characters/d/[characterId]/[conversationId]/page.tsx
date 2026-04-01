@@ -66,7 +66,7 @@ export default async function Page(
     searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
 
   const avatarPictureUrl = await getAvatarPictureUrl(character.pictureId);
-  const logoElement = <Logo federalStateId={federalState.id} />;
+  const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
   return (
     <LlmModelsProvider
       models={models}

@@ -10,9 +10,10 @@ import '@ui/styles/globals.css';
 import './scrollbar.css';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 import { dbGetFederalStateByIdWithResult } from '@shared/db/functions/federal-state';
-import { getMaybeLogoFromS3 } from '@shared/s3';
 import { buildPublicConfig } from '@shared/sentry/public-config';
 import { cn } from '@/utils/tailwind';
+import { getReadOnlySignedUrl } from '@shared/s3';
+import { SEVEN_DAYS } from '@shared/s3/const';
 
 const barlow = Barlow({
   weight: ['400', '500', '600', '700'],
@@ -21,16 +22,17 @@ const barlow = Barlow({
 
 export async function generateMetadata(): Promise<Metadata> {
   const maybeUser = await getMaybeUser();
-  const [faviconPath, [, federalState]] = await Promise.all([
-    getMaybeLogoFromS3(maybeUser?.school.federalStateId, 'favicon.svg'),
-    dbGetFederalStateByIdWithResult(maybeUser?.school.federalStateId),
-  ]);
+  const [, federalState] = await dbGetFederalStateByIdWithResult(maybeUser?.school.federalStateId);
+  const favicon = federalState?.pictureUrls?.favicon;
+  const faviconPreSignedUrl = favicon
+    ? await getReadOnlySignedUrl({ key: favicon, options: { expiresIn: SEVEN_DAYS } })
+    : undefined;
 
   return {
     title: !!federalState?.telliName ? federalState?.telliName : 'telli',
     description: 'Der datenschutzkonforme KI-Chatbot für die Schule',
     icons: {
-      icon: faviconPath ?? '/telli.svg',
+      icon: faviconPreSignedUrl ?? '/telli.svg',
       apple: '/apple-touch-icon.png',
     },
   };

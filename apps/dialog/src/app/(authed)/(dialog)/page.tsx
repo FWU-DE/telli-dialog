@@ -24,7 +24,7 @@ export default async function Page() {
     federalStateId: userAndContext.federalState.id,
   });
 
-  const logoElement = <Logo federalStateId={userAndContext.school.federalStateId} />;
+  const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
 
   return (
     <LlmModelsProvider

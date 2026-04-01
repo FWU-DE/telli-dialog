@@ -48,7 +48,7 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
 
   const convertedMessages = convertMessageModelToMessage(messages);
   const webSourceMapping = new Map<string, WebsearchSource[]>();
-  const logoElement = <Logo federalStateId={userAndContext.school.federalStateId} />;
+  const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
 
   // prepare urls for citations
   for (const message of messages.filter((msg) => msg.role === 'user')) {

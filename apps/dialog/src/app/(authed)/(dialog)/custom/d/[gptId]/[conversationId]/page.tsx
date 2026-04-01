@@ -35,7 +35,7 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversa
     federalStateId: federalState.id,
   });
 
-  const logoElement = <Logo federalStateId={federalState.id} />;
+  const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
 
   const lastUsedModelInChat = messages.at(-1)?.modelName;
 

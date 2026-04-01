@@ -1,11 +1,11 @@
 import { eq } from 'drizzle-orm';
 import { db } from '@shared/db';
 import {
-  CharacterFileMapping,
   AssistantFileMapping,
+  CharacterFileMapping,
+  chunkTable,
   fileTable,
   LearningScenarioFileMapping,
-  chunkTable,
 } from '@shared/db/schema';
 import {
   copyFileInS3,
@@ -182,8 +182,8 @@ export async function uploadAvatarPicture({ key, croppedImageBlob }: UploadAvata
 }
 
 /**
- * Gets a signed URL for read-only access to an avatar picture in S3
- * even if the object does not exist in S3.
+ * Gets a signed URL for read-only access to an avatar picture in S3.
+ * If the object does not exist in S3, a signed URL is still created but will return 404.
  *
  * @param key
  * @returns undefined if key is falsy.
@@ -191,7 +191,7 @@ export async function uploadAvatarPicture({ key, croppedImageBlob }: UploadAvata
 export async function getAvatarPictureUrl(key: string | null | undefined) {
   if (!key) return undefined;
   try {
-    return await getReadOnlySignedUrl({ key, options: { expiresIn: 3600 } });
+    return await getReadOnlySignedUrl({ key });
   } catch (error) {
     logError('Error getting signed URL for avatar picture:', error);
     return undefined;

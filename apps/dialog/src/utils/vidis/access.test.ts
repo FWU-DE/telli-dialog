@@ -26,6 +26,7 @@ describe('checkProductAccess', () => {
       isShareTemplateWithSchoolEnabled: true,
       isNewUiDesignEnabled: true,
     },
+    pictureUrls: null,
   };
 
   const baseSchool = {

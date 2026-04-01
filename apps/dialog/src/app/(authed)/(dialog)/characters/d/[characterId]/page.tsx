@@ -47,7 +47,7 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
     searchParams.model ?? characterModel ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
 
   const avatarPictureUrl = await getAvatarPictureUrl(character.pictureId);
-  const logoElement = <Logo federalStateId={federalState.id} />;
+  const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
       <HeaderPortal>
