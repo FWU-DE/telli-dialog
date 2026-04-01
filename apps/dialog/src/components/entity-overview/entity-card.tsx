@@ -4,9 +4,8 @@ import React from 'react';
 import { cn } from '@/utils/tailwind';
 import { truncateClassName } from '@/utils/tailwind/truncate';
 import AvatarPicture from '@/components/common/avatar-picture';
-import { EmptyImageIcon } from '@/components/icons/empty-image';
 import { useTranslations } from 'next-intl';
-import { ChatTextIcon } from '@phosphor-icons/react';
+import { ChatTextIcon, ImageSquareIcon } from '@phosphor-icons/react';
 
 type EntityCardProps = {
   name: string;
@@ -36,7 +35,7 @@ export default function EntityCard({
   return (
     <div
       onClick={onCardClick}
-      className="rounded-enterprise-md border p-6 flex items-center gap-4 w-full hover:border-primary cursor-pointer bg-white"
+      className="rounded-enterprise-md border p-4 flex items-center gap-4 w-full hover:border-primary cursor-pointer bg-white"
       role="button"
       tabIndex={0}
       aria-label={name}
@@ -47,14 +46,11 @@ export default function EntityCard({
         }
       }}
     >
-      <figure
-        className="w-11 h-11 bg-light-gray rounded-enterprise-sm flex justify-center items-center shrink-0"
-        style={{ minWidth: '44px' }}
-      >
+      <figure className="w-15 h-15 bg-light-gray rounded-full flex justify-center items-center shrink-0">
         {avatarUrl ? (
-          <AvatarPicture src={avatarUrl} alt={`${name} Avatar`} variant="small" />
+          <AvatarPicture src={avatarUrl} alt={`${name} Avatar`} variant="smallCircle" />
         ) : (
-          <EmptyImageIcon className="w-4 h-4" aria-hidden="true" />
+          <ImageSquareIcon className="w-8 h-8 text-primary" aria-hidden="true" weight="thin" />
         )}
       </figure>
 
@@ -62,7 +58,7 @@ export default function EntityCard({
         <div className="flex items-center gap-2">
           <h2 className={cn('font-medium leading-none py-0.5', truncateClassName)}>{name}</h2>
           {isOwned && (
-            <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary shrink-0">
+            <span className="inline-flex items-center rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary shrink-0 uppercase tracking-wider">
               {t('badge-mine')}
             </span>
           )}
