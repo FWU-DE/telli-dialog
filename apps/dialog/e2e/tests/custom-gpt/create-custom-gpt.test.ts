@@ -78,10 +78,7 @@ test('teacher can delete customgpt with chat', async ({ page }) => {
 
   await deleteCustomGpt(page, assistantName);
 
-  // Todo: check for confirmation dialog as soon as it exits
-  // const deleteConfirmButton = page.getByTestId('custom-chat-delete-button').first();
-  // await expect(deleteConfirmButton).toBeVisible();
-  // await deleteConfirmButton.click();
+  await page.getByTestId('custom-chat-confirm-button').first().click();
   await waitForToast(page, 'Der Assistent wurde erfolgreich gelöscht.');
   await page.waitForURL('/custom**');
   await expect(page.getByRole('heading', { name: assistantName }).first()).not.toBeVisible();

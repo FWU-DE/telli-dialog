@@ -89,6 +89,7 @@ export default function DestructiveActionButton({
                   setIsOpen(false);
                   refetchConversations();
                 }}
+                data-testid="custom-chat-confirm-button"
               >
                 {confirmText ?? t('delete')}
               </button>
