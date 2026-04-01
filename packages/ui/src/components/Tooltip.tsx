@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Tooltip as TooltipPrimitive } from 'radix-ui';
 
-import { DEFAULT_TOOLTIP_DELAY_DURATION } from './const';
+import { DEFAULT_TOOLTIP_DELAY_DURATION, DEFAULT_SCROLLING_TOOLTIP_DELAY_DURATION } from './const';
 import { cn } from '../lib/utils';
 
 type TooltipContextType = {
@@ -35,17 +35,13 @@ function TooltipProvider({
 }
 
 type TooltipProps = React.ComponentProps<typeof TooltipPrimitive.Root>;
+type TooltipTriggerProps = React.ComponentProps<typeof TooltipPrimitive.Trigger>;
 
-function Tooltip({
-  onOpenChange,
-  open: openProp,
-  defaultOpen,
-  ...props
-}: TooltipProps) {
-  const isControlled = openProp !== undefined;
-  const [uncontrolledOpen, setUncontrolledOpen] = React.useState<boolean | undefined>(defaultOpen);
+function Tooltip({ onOpenChange, open: isOpenProp, defaultOpen, ...props }: TooltipProps) {
+  const isControlled = isOpenProp !== undefined;
+  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(Boolean(defaultOpen));
 
-  const isOpen = isControlled ? (openProp as boolean) : !!uncontrolledOpen;
+  const isOpen = isOpenProp ?? uncontrolledOpen;
 
   const handleOpenChange = React.useCallback(
     (newOpen: boolean) => {
@@ -61,7 +57,7 @@ function Tooltip({
     <TooltipContext.Provider value={{ isOpen, setIsOpen: handleOpenChange }}>
       <TooltipPrimitive.Root
         data-slot="tooltip"
-        {...(isControlled ? { open: openProp } : { defaultOpen })}
+        open={isOpen}
         onOpenChange={handleOpenChange}
         {...props}
       />
@@ -69,51 +65,46 @@ function Tooltip({
   );
 }
 
-function TooltipTrigger({
-  onKeyDown,
-  onClick,
-  onFocus,
-  onBlur,
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
+function TooltipTrigger({ onKeyDown, onClick, onFocus, onBlur, ...props }: TooltipTriggerProps) {
   const { isOpen, setIsOpen } = useTooltip();
-  const focusTimerRef = React.useRef<number | null>(null);
+  const focusTimerRef = React.useRef<ReturnType<typeof window.setTimeout> | null>(null);
 
-  React.useEffect(() => {
-    return () => {
-      if (focusTimerRef.current !== null) {
-        window.clearTimeout(focusTimerRef.current);
-      }
-    };
+  const clearFocusTimer = React.useCallback(() => {
+    if (focusTimerRef.current !== null) {
+      window.clearTimeout(focusTimerRef.current);
+      focusTimerRef.current = null;
+    }
   }, []);
 
-  const handleKeyDown = React.useCallback(
-    (event: React.KeyboardEvent) => {
+  React.useEffect(() => {
+    return clearFocusTimer;
+  }, [clearFocusTimer]);
+
+  const handleKeyDown = React.useCallback<NonNullable<TooltipTriggerProps['onKeyDown']>>(
+    (event) => {
       // Allow toggling tooltip with Enter or Space key for key navigation accessibility
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
         setIsOpen(!isOpen);
       }
-      onKeyDown?.(event as React.KeyboardEvent<HTMLButtonElement>);
+      onKeyDown?.(event);
     },
     [isOpen, setIsOpen, onKeyDown],
   );
 
-  const handleClick = React.useCallback(
-    (event: React.MouseEvent<HTMLElement>) => {
+  const handleClick = React.useCallback<NonNullable<TooltipTriggerProps['onClick']>>(
+    (event) => {
       setIsOpen(!isOpen);
       onClick?.(event);
     },
     [isOpen, setIsOpen, onClick],
   );
 
-  const handleFocus = React.useCallback(
-    (event: React.FocusEvent<HTMLButtonElement>) => {
+  const handleFocus = React.useCallback<NonNullable<TooltipTriggerProps['onFocus']>>(
+    (event) => {
       const currentTarget = event.currentTarget;
 
-      if (focusTimerRef.current !== null) {
-        window.clearTimeout(focusTimerRef.current);
-      }
+      clearFocusTimer();
 
       // Delay opening slightly so browser/container scroll can finish first.
       // This prevents that the tooltip vanishes on scrolling with key navigation
@@ -121,24 +112,21 @@ function TooltipTrigger({
         if (document.activeElement === currentTarget) {
           setIsOpen(true);
         }
-      }, 75);
+      }, DEFAULT_SCROLLING_TOOLTIP_DELAY_DURATION);
 
       onFocus?.(event);
     },
-    [setIsOpen, onFocus],
+    [clearFocusTimer, setIsOpen, onFocus],
   );
 
-  const handleBlur = React.useCallback(
-    (event: React.FocusEvent<HTMLButtonElement>) => {
-      if (focusTimerRef.current !== null) {
-        window.clearTimeout(focusTimerRef.current);
-        focusTimerRef.current = null;
-      }
+  const handleBlur = React.useCallback<NonNullable<TooltipTriggerProps['onBlur']>>(
+    (event) => {
+      clearFocusTimer();
 
       setIsOpen(false);
       onBlur?.(event);
     },
-    [setIsOpen, onBlur],
+    [clearFocusTimer, setIsOpen, onBlur],
   );
 
   return (
