@@ -31,6 +31,17 @@ export default function CustomGptOverview({ currentUserId }: CustomGptOverviewPr
     await setActiveFilter(filter);
   }
 
+  const handleCardClick = (gptId: string) => {
+    const assistant = visibleAssistants.find((gpt) => gpt.id === gptId);
+    if (assistant) {
+      if (assistant.userId === currentUserId) {
+        router.push(`/assistants/editor/${gptId}`);
+      } else {
+        router.push(`/assistants/${gptId}`);
+      }
+    }
+  };
+
   const infoContent = (
     <div className="flex flex-col gap-4">
       <div>
@@ -53,7 +64,7 @@ export default function CustomGptOverview({ currentUserId }: CustomGptOverviewPr
       title={t('title')}
       infoTooltip={infoContent}
       searchPlaceholder={t('search-placeholder')}
-      createButton={<CreateNewCustomGptButton />}
+      createButton={<CreateNewCustomGptButton isNewUiDesignEnabled={true} />}
       activeFilter={activeFilter}
       onFilterChange={handleFilterChange}
       itemCount={visibleAssistants.length}
@@ -78,8 +89,8 @@ export default function CustomGptOverview({ currentUserId }: CustomGptOverviewPr
             description={assistant.description}
             avatarUrl={assistant.maybeSignedPictureUrl}
             isOwned={assistant.userId === currentUserId}
-            onCardClick={() => router.push(`/custom/editor/${assistant.id}?create=false`)}
-            onChatClick={() => router.push(`/custom/d/${assistant.id}`)}
+            onCardClick={() => handleCardClick(assistant.id)}
+            onChatClick={() => router.push(`/assistants/d/${assistant.id}`)}
           />
         ));
       }}

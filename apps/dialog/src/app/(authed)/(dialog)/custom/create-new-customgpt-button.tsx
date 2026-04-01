@@ -8,7 +8,11 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { createNewAssistantAction } from './actions';
 
-export default function CreateNewCustomGptButton() {
+export default function CreateNewCustomGptButton({
+  isNewUiDesignEnabled = false,
+}: {
+  isNewUiDesignEnabled?: boolean;
+}) {
   const router = useRouter();
   const toast = useToast();
   const t = useTranslations('custom-gpt');
@@ -16,7 +20,11 @@ export default function CreateNewCustomGptButton() {
   async function handleNewGPT() {
     const createResult = await createNewAssistantAction({});
     if (createResult.success) {
-      router.push(`/custom/editor/${createResult.value.id}?create=true`);
+      if (isNewUiDesignEnabled) {
+        router.push(`/assistants/editor/${createResult.value.id}`);
+      } else {
+        router.push(`/custom/editor/${createResult.value.id}?create=true`);
+      }
     } else {
       toast.error(t('toasts.create-toast-error'));
     }

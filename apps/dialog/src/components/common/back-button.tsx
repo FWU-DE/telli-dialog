@@ -27,6 +27,7 @@ export function BackButton({ href, text, 'aria-label': ariaLabel, onClick }: Bac
         router.push(href);
       }}
       aria-label={ariaLabel}
+      data-testid="assistant-edit-back-button"
     >
       <CaretLeftIcon className="size-4" /> {text}
     </Button>

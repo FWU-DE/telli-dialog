@@ -6,7 +6,6 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { getAssistantByAccessLevel } from '@shared/assistants/assistant-service';
-import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import CustomGptOverview from './custom-gpt-overview';
 
 export const dynamic = 'force-dynamic';

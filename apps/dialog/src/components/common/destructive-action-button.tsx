@@ -48,6 +48,7 @@ export default function DestructiveActionButton({
             setIsOpen(true);
           }}
           type="button"
+          data-testid="custom-chat-delete-button"
           {...buttonProps}
         >
           {children}
@@ -88,6 +89,7 @@ export default function DestructiveActionButton({
                   setIsOpen(false);
                   refetchConversations();
                 }}
+                data-testid="custom-chat-confirm-button"
               >
                 {confirmText ?? t('delete')}
               </button>

@@ -13,6 +13,7 @@ import { Card, CardContent } from '@ui/components/Card';
 import { Field, FieldLabel, FieldError, FieldGroup } from '@ui/components/Field';
 import { Input } from '@ui/components/Input';
 import { Controller, useForm, useWatch } from 'react-hook-form';
+import { useEffect } from 'react';
 import z from 'zod';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
@@ -139,9 +140,16 @@ export function AssistantEdit({
 
   const name = useWatch({ control, name: 'name' });
   const savedAccessLevelRef = useRef(assistant.accessLevel);
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
+
+  useEffect(() => {
+    if (!name || name.trim().length === 0) {
+      nameInputRef.current?.focus();
+    }
+  }, [name]);
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -156,11 +164,17 @@ export function AssistantEdit({
     onBeforePageLeave: saveBeforeLeave,
   });
 
+  const handleUseChat = () => {
+    guardNavigation(() => {
+      router.push(`/assistants/d/${assistant.id}/`);
+    });
+  };
+
   const handleDuplicateAssistant = async () => {
-    const createResult = await createNewAssistantAction({});
+    const createResult = await createNewAssistantAction({ templateId: assistant.id });
     if (createResult.success) {
       guardNavigation(() => {
-        router.push(`/assistants/${createResult.value.id}/edit`);
+        router.push(`/assistants/editor/${createResult.value.id}`);
       });
     } else {
       toast.error(t('toasts.create-toast-error'));
@@ -250,13 +264,7 @@ export function AssistantEdit({
       <CustomChatTitle title={name} />
       <div className="flex flex-row justify-between">
         <CustomChatActions>
-          <CustomChatActionUse
-            onClick={() => {
-              guardNavigation(() => {
-                router.push(`/custom/d/${assistant.id}/`);
-              });
-            }}
-          />
+          <CustomChatActionUse onClick={handleUseChat} />
           <CustomChatActionDuplicate onClick={handleDuplicateAssistant} />
           <CustomChatActionDelete onClick={handleDeleteAssistant} />
           <CustomChatActionSave onClick={handleAutoSave} />
@@ -297,6 +305,7 @@ export function AssistantEdit({
                     <FieldLabel htmlFor={field.name}>{t('name-label')}</FieldLabel>
                     <Input
                       {...field}
+                      ref={nameInputRef}
                       id={field.name}
                       aria-invalid={fieldState.invalid}
                       aria-label={t('name-label')}
@@ -307,6 +316,7 @@ export function AssistantEdit({
                         maxLength: SMALL_TEXT_INPUT_FIELDS_LIMIT,
                       })}
                       required
+                      data-testid="assistant-name-input"
                       onBlur={() => {
                         field.onBlur();
                         handleAutoSave();
@@ -334,6 +344,7 @@ export function AssistantEdit({
                         maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
                       })}
                       maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+                      data-testid="assistant-description-input"
                       onBlur={() => {
                         field.onBlur();
                         handleAutoSave();
@@ -361,6 +372,7 @@ export function AssistantEdit({
                         maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
                       })}
                       autoComplete="off"
+                      data-testid="assistant-instructions-input"
                       onBlur={() => {
                         field.onBlur();
                         handleAutoSave();

@@ -30,7 +30,6 @@ export default function ImageGenerationChat({
   initialMessages = [],
   fileMapping,
 }: ImageGenerationChatProps) {
-  const router = useRouter();
   const { selectedModel } = useImageModels();
   const { selectedStyle } = useImageStyle();
   const tImageGeneration = useTranslations('image-generation');
