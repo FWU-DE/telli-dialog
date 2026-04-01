@@ -35,7 +35,7 @@ test.describe('create, share, chat, delete', () => {
     // configure form
     await configureLearningScenario(page, data);
 
-    const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
+    const submitButton = page.getByRole('button', { name: 'Lernszenario erstellen' });
     await expect(submitButton).toBeVisible();
     await submitButton.click();
     const listItem = page.getByRole('button', { name: data.name });
@@ -87,7 +87,7 @@ test.describe('create, share, chat, delete', () => {
     // configure form
     await configureLearningScenario(page, data);
 
-    const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
+    const submitButton = page.getByRole('button', { name: 'Lernszenario erstellen' });
     await expect(submitButton).toBeVisible();
     await submitButton.click();
 
@@ -147,7 +147,7 @@ test.describe('create, share, chat, delete', () => {
     // create learning scenario
     await createLearningScenario(page);
     await configureLearningScenario(page, data);
-    const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
+    const submitButton = page.getByRole('button', { name: 'Lernszenario erstellen' });
     await expect(submitButton).toBeVisible();
     await submitButton.click();
     const listItem = page.getByRole('button', { name: data.name });
@@ -176,7 +176,7 @@ test('data is autosaved on blur', async ({ page }) => {
     subject: 'Autosave Subject',
   });
 
-  const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
+  const submitButton = page.getByRole('button', { name: 'Lernszenario erstellen' });
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
