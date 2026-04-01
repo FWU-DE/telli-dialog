@@ -78,7 +78,6 @@ export default function LearningScenarioOverview({ currentUserId }: LearningScen
             avatarUrl={scenario.maybeSignedPictureUrl}
             isOwned={scenario.userId === currentUserId}
             onCardClick={() => router.push(`/learning-scenarios/editor/${scenario.id}`)}
-            onChatClick={() => router.push(`/learning-scenarios/d/${scenario.id}`)}
           />
         ));
       }}
