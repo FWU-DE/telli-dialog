@@ -278,7 +278,13 @@ export function AssistantEdit({
           hasSaveError={hasSaveError}
         />
       </div>
-      {showShareInfo && <CustomChatShareInfo href="#share-settings" variant="assistants" />}
+      {showShareInfo && (
+        <CustomChatShareInfo
+          href="#share-settings"
+          info={t('sharing-info')}
+          linkText={t('sharing-settings')}
+        />
+      )}
       <CustomChatImageUpload
         avatarPictureUrl={avatarPictureUrl}
         onPictureUploadComplete={handlePictureUploadComplete}

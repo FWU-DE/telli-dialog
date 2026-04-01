@@ -53,7 +53,12 @@ export function FormFieldArray<
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <div className="flex flex-row gap-2">
-                    <Input {...field} id={`${name}.${index}.name`} type={inputType} />
+                    <Input
+                      {...field}
+                      id={`${name}.${index}.name`}
+                      type={inputType}
+                      wrapperClassName="flex-1"
+                    />
                     <Button type="button" variant="destructive" onClick={() => remove(index)}>
                       Entfernen
                     </Button>

@@ -5,7 +5,6 @@ import {
   FORMAT_GUIDELINES,
   formatList,
   LANGUAGE_GUIDELINES,
-  SUGGESTION_GUIDELINES,
   TOOL_GUIDELINES,
 } from '../utils/system-prompt';
 
@@ -19,8 +18,15 @@ export function constructCharacterSystemPrompt({
   // error urls are intentionally not included in the character system prompt
   const ragContext = constructRagContext(chunks);
 
-  return `Du bist ${character.name}. ${character.description}
-  
+  return `Du bist ${character.name}.
+${character.description}
+
+${LANGUAGE_GUIDELINES}
+${TOOL_GUIDELINES}
+${FORMAT_GUIDELINES}
+
+Die folgenden Anweisungen wurden von der Lehrkraft erstellt und haben bei Widersprüchen immer Vorrang vor den allgemeinen Richtlinien.
+
 ${formatList('## Kontext', [
   {
     label: 'Schultyp',
@@ -43,9 +49,5 @@ ${character.specifications ? `\n## Du sollst folgendes beachten\n${character.spe
 ${character.restrictions ? `\n## Folgende Dinge sollst du AUF KEINEN FALL tun\n${character.restrictions}` : ''}
 
 Bitte antworte stets im Rahmen deiner Rolle als ${character.name}.
-${LANGUAGE_GUIDELINES}
-${TOOL_GUIDELINES}
-${FORMAT_GUIDELINES}
-${SUGGESTION_GUIDELINES}
 ${ragContext}`;
 }

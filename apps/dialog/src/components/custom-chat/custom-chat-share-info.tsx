@@ -1,19 +1,19 @@
-import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 export function CustomChatShareInfo({
   href,
-  variant,
+  info,
+  linkText,
 }: {
   href: string;
-  variant: 'assistants' | 'learning-scenarios' | 'characters';
+  info: string;
+  linkText: string;
 }) {
-  const t = useTranslations(variant);
   return (
     <div className="flex px-6 py-4 justify-between text-base font-medium rounded-xl bg-secondary/40">
-      <span className="">{t('sharing-info')}</span>
+      <span>{info}</span>
       <Link href={href}>
-        <span className="text-primary">{t('sharing-settings')}</span>
+        <span className="text-primary">{linkText}</span>
       </Link>
     </div>
   );

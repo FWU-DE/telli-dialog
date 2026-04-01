@@ -68,8 +68,6 @@ export default function AvatarCropModal({
       const croppedBlob = await getCroppedImageBlob(
         imageRef.current,
         completedCrop,
-        1,
-        0,
         compressionOptions,
       );
       await onCropComplete(croppedBlob);

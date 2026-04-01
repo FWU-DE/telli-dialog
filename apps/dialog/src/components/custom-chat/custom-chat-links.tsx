@@ -101,11 +101,13 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
   return (
     <div className="flex flex-col gap-8">
       {!isReadonly && (
-        <div className="flex flex-row gap-2">
+        <div className="flex flex-row gap-2 w-full">
           <Input
+            wrapperClassName="flex-1"
             type="url"
             placeholder="https://..."
             maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+            showCharacterCount={false}
             value={currentLink}
             disabled={maxLinksReached}
             aria-label={t('aria-input')}

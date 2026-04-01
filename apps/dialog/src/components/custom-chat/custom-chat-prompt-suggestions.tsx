@@ -4,6 +4,7 @@ import {
   EXAMPLE_PROMPT_LENGTH_LIMIT,
   NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
 } from '@/configuration-text-inputs/const';
+import { useEffect, useRef } from 'react';
 import { Control, Controller, useFieldArray, useWatch } from 'react-hook-form';
 import { Field, FieldLabel, FieldError } from '@ui/components/Field';
 import { Input } from '@ui/components/Input';
@@ -31,6 +32,17 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
     control,
     name: 'promptSuggestions',
   });
+  const promptSuggestionsCount = promptSuggestions.length;
+  const previousPromptSuggestionsCountRef = useRef(promptSuggestionsCount);
+
+  useEffect(() => {
+    if (promptSuggestionsCount < previousPromptSuggestionsCountRef.current) {
+      onBlur();
+    }
+
+    previousPromptSuggestionsCountRef.current = promptSuggestionsCount;
+  }, [onBlur, promptSuggestionsCount]);
+
   const lastPromptSuggestionValue = promptSuggestions[promptSuggestions.length - 1]?.value ?? '';
 
   const {
@@ -49,6 +61,8 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
     const isLastItem = index === promptSuggestionFields.length - 1;
     const hasReachedPromptSuggestionsLimit =
       promptSuggestionFields.length >= NUMBER_OF_EXAMPLE_PROMPTS_LIMIT;
+    const isAddPromptSuggestionDisabled =
+      hasReachedPromptSuggestionsLimit || lastPromptSuggestionValue.trim() === '';
 
     return (
       <Field key={fieldItem.id}>
@@ -85,21 +99,22 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
           {isLastItem ? (
             <Tooltip>
               <TooltipTrigger asChild aria-label={t('prompt-suggestions-add-button-tooltip')}>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className={cn(iconClassName)}
-                  aria-label={t('prompt-suggestions-add-button')}
-                  data-testid={`add-prompt-suggestion-${index + 1}-button`}
-                  disabled={
-                    hasReachedPromptSuggestionsLimit || lastPromptSuggestionValue.trim() === ''
-                  }
-                  onClick={() => {
-                    appendPromptSuggestion({ value: '' });
-                  }}
-                >
-                  <PlusIcon className="size-5" />
-                </Button>
+                <span tabIndex={0} className="inline-flex">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className={cn(iconClassName)}
+                    aria-label={t('prompt-suggestions-add-button')}
+                    data-testid={`add-prompt-suggestion-${index + 1}-button`}
+                    disabled={isAddPromptSuggestionDisabled}
+                    style={isAddPromptSuggestionDisabled ? { pointerEvents: 'none' } : undefined}
+                    onClick={() => {
+                      appendPromptSuggestion({ value: '' });
+                    }}
+                  >
+                    <PlusIcon className="size-5" />
+                  </Button>
+                </span>
               </TooltipTrigger>
               {hasReachedPromptSuggestionsLimit && (
                 <TooltipContent>
@@ -125,7 +140,6 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
               data-testid={`delete-prompt-suggestion-${index + 1}-button`}
               onClick={() => {
                 removePromptSuggestion(index);
-                onBlur();
               }}
             >
               <TrashSimpleIcon className="size-5 " />
