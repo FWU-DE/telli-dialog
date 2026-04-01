@@ -34,23 +34,18 @@ function TooltipProvider({
   );
 }
 
-type TooltipProps = React.ComponentProps<typeof TooltipPrimitive.Root>;
+type TooltipProps = Omit<React.ComponentProps<typeof TooltipPrimitive.Root>, 'open'>;
 type TooltipTriggerProps = React.ComponentProps<typeof TooltipPrimitive.Trigger>;
 
-function Tooltip({ onOpenChange, open: isOpenProp, defaultOpen, ...props }: TooltipProps) {
-  const isControlled = isOpenProp !== undefined;
-  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(Boolean(defaultOpen));
-
-  const isOpen = isOpenProp ?? uncontrolledOpen;
+function Tooltip({ onOpenChange, defaultOpen, ...props }: TooltipProps) {
+  const [isOpen, setIsOpen] = React.useState(Boolean(defaultOpen));
 
   const handleOpenChange = React.useCallback(
     (newOpen: boolean) => {
-      if (!isControlled) {
-        setUncontrolledOpen(newOpen);
-      }
+      setIsOpen(newOpen);
       onOpenChange?.(newOpen);
     },
-    [isControlled, onOpenChange],
+    [onOpenChange],
   );
 
   return (
@@ -67,7 +62,7 @@ function Tooltip({ onOpenChange, open: isOpenProp, defaultOpen, ...props }: Tool
 
 function TooltipTrigger({ onKeyDown, onClick, onFocus, onBlur, ...props }: TooltipTriggerProps) {
   const { isOpen, setIsOpen } = useTooltip();
-  const focusTimerRef = React.useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const focusTimerRef = React.useRef<number | null>(null);
 
   const clearFocusTimer = React.useCallback(() => {
     if (focusTimerRef.current !== null) {
