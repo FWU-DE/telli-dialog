@@ -1,4 +1,7 @@
 import type { MetadataRoute } from 'next';
+import telliIcon from '@/assets/telli.svg';
+import appleTouchIcon from '@/assets/apple-touch-icon.png';
+import iconMaskable from '@/assets/icon-maskable.png';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -13,19 +16,19 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: '#fff',
     icons: [
       {
-        src: '/telli.svg',
+        src: telliIcon.src,
         sizes: 'any',
         type: 'image/svg+xml',
         purpose: 'any',
       },
       {
-        src: '/apple-touch-icon.png',
+        src: appleTouchIcon.src,
         sizes: '180x180',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/icon-maskable.png',
+        src: iconMaskable.src,
         sizes: '512x512',
         type: 'image/png',
         purpose: 'maskable',
