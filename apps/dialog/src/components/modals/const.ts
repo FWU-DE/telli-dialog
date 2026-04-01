@@ -1,4 +1,5 @@
 import { FederalStateId } from '@/utils/vidis/const';
+import disclaimerDeBw from '@/assets/disclaimer/disclaimer-de-bw.png';
 
 /**
  * The following markdown options are allowed in disclaimer texts:
@@ -296,7 +297,7 @@ export const federalStateDisclaimers: Partial<Record<FederalStateId, DisclaimerC
     showCheckBox: true,
     acceptLabel:
       'Es dürfen keine privaten oder rechtswidrigen Inhalte über telli eingegeben werden. Der Output von KI-Systemen muss geprüft werden, bevor er weiterverwendet wird. Weiterführende Informationen, Hilfen und Materialien zum Einsatz von telli an Schulen sind [hier](https://edubw.link/telli-taskcards) zu finden. Ich bestätige, dies zur Kenntnis genommen zu haben.',
-    image: '/disclaimer/disclaimer-de-bw.png',
+    image: disclaimerDeBw.src,
   },
   'DE-NW': {
     pageContents: [TERMS_AND_CONDITIONS_NW],
