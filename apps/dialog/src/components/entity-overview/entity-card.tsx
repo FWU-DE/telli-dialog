@@ -35,7 +35,7 @@ export default function EntityCard({
   return (
     <div
       onClick={onCardClick}
-      className="rounded-enterprise-md border p-4 flex items-center gap-4 w-full hover:border-primary cursor-pointer bg-white"
+      className="rounded-enterprise-md border p-4 flex items-center gap-4 w-full hover:border-primary cursor-pointer bg-card"
       role="button"
       tabIndex={0}
       aria-label={name}

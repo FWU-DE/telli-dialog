@@ -70,10 +70,6 @@ export default function EntityOverview({
     inputRef.current?.focus();
   };
 
-  const handleSearchIconClick = () => {
-    inputRef.current?.focus();
-  };
-
   const showSchoolFilter = federalState?.featureToggles?.isShareTemplateWithSchoolEnabled ?? false;
   const filterDisabled = itemCount < 1;
 
@@ -135,7 +131,7 @@ export default function EntityOverview({
                   placeholder={searchPlaceholder}
                   disabled={filterDisabled}
                   aria-label={searchPlaceholder}
-                  className="h-10 rounded-xl border-gray-300 bg-white pr-10 pl-4 shadow-none focus-visible:border-gray-400 focus-visible:ring-0"
+                  className="h-10 rounded-xl border-gray-300 bg-card pr-10 pl-4 shadow-none focus-visible:border-gray-400 focus-visible:ring-0"
                 />
                 {searchInput ? (
                   <XCircleIcon
@@ -196,7 +192,7 @@ export default function EntityOverview({
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto px-6 pb-6">
+        <div className="overflow-auto px-6 pb-6">
           <div className="max-w-3xl mx-auto w-full">
             <div className="flex flex-col gap-2 w-full">{children(searchInput, sortBy)}</div>
           </div>
