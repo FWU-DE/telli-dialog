@@ -56,11 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const { inlineScript } = buildPublicConfig();
 
   return (
-    <html
-      lang={locale}
-      className={cn('overflow-hidden', barlow.className)}
-      suppressHydrationWarning
-    >
+    <html lang={locale} className={cn(barlow.className)} suppressHydrationWarning>
       <body>
         <Script
           id="public-config"

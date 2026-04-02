@@ -253,7 +253,6 @@ export function AssistantEdit({
 
   return (
     <CustomChatLayoutContainer>
-      {/* // Todo: Maybe we have to remember where we come from and which filters were set */}
       <BackButton
         href="/custom"
         text={t('back-button')}
