@@ -458,16 +458,17 @@ export async function copyRelatedTemplateFiles(
 }
 
 /**
- * Copies a custom GPT and creates a new one based on an existing custom GPT.
- * The new custom GPT inherits all properties from the source but can have customized
+ * Copies an assistant and creates a new one based on an existing assistant.
+ * The new assistant inherits all properties from the source but can have customized
  * access level, user, and school assignments.
  *
- * @param originalId - The ID of the source custom GPT to copy
- * @param accessLevel - The access level for the new custom GPT
- * @param userId - The user ID to assign to the new custom GPT
- * @param schoolId - The school ID to assign to the new custom GPT
- * @returns Promise resolving to the newly created custom GPT object
- * @throws Error if source custom GPT is not found or custom GPT creation fails
+ * @param originalId - The ID of the source assistant to copy
+ * @param accessLevel - The access level for the new assistant
+ * @param userId - The user ID to assign to the new assistant
+ * @param schoolId - The school ID to assign to the new assistant
+ * @param duplicateAssistantName - Optional name for the new assistant, defaults to source name if not provided
+ * @returns Promise resolving to the newly created assistant object
+ * @throws Error if source assistant is not found or assistant creation fails
  */
 export async function copyAssistant(
   originalId: string,
@@ -502,13 +503,13 @@ export async function copyAssistant(
 }
 
 /**
- * Creates a new global custom GPT template based on an existing custom GPT.
+ * Creates a new global assistant template based on an existing assistant.
  * The new template inherits all properties from the source but becomes a global template
  * accessible across all schools.
  *
- * @param originalId - The ID of the source custom GPT to create a template from
- * @returns Promise resolving to the newly created custom GPT template object
- * @throws Error if source custom GPT is not found or template creation fails
+ * @param originalId - The ID of the source assistant to create a template from
+ * @returns Promise resolving to the newly created assistant template object
+ * @throws Error if source assistant is not found or template creation fails
  */
 async function createAssistantTemplate(originalId: string) {
   return copyAssistant(originalId, 'global', DUMMY_USER_ID, null);
