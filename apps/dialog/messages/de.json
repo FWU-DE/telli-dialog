@@ -498,6 +498,7 @@
     "delete-modal-description": "Soll der Assistent wirklich gelöscht werden?",
     "delete-modal-confirm-button": "Löschen",
     "delete-modal-cancel-button": "Abbrechen",
+    "duplicate-name-format-string": "Duplikat von {sourceAssistantName}",
     "toasts": {
       "create-toast-error": "Der Assistent konnte nicht erstellt werden.",
       "delete-toast-success": "Der Assistent wurde erfolgreich gelöscht.",

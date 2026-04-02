@@ -474,6 +474,7 @@ export async function copyAssistant(
   accessLevel: AccessLevel,
   userId: string,
   schoolId: string | null,
+  duplicateAssistantName?: string,
 ) {
   const sourceAssistant = await dbGetAssistantById({ assistantId: originalId });
   if (!sourceAssistant) {
@@ -482,6 +483,7 @@ export async function copyAssistant(
 
   const newAssistant = {
     ...sourceAssistant,
+    name: duplicateAssistantName ?? sourceAssistant.name,
     id: undefined,
     originalAssistantId: originalId,
     accessLevel,
