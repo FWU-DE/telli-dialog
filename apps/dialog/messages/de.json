@@ -125,7 +125,7 @@
   },
   "help-mode": {
     "chat-heading": "Hallo, ich bin tellis Hilfe",
-    "chat-subheading": "Ich kenne mich hier aus und kann Dir hoffentlich Fragen beantworten oder Dir bei Problemen weiterhelfen. Ansonsten kannst Du auch gerne meine {FAQ_LINK} besuchen oder dich an den Support unter {SUPPORT_ADRESSES} wenden.",
+    "chat-subheading": "Ich kenne mich hier aus und kann hoffentlich alle Fragen beantworten oder bei Problemen weiterhelfen. Ansonsten kann auch gerne meine {FAQ_LINK} besucht oder der Support unter {SUPPORT_ADRESSES} kontaktiert werden.",
     "chat-placeholder": "Wie kann ich helfen?",
     "faq-link": "[FAQ Seite](https://telli.schule/faq/)",
     "support-addresses-concat": "oder"
@@ -166,10 +166,10 @@
       "prompt-suggestion-placeholder": "Erstelle einen Stundenvorschlag für das Fach Deutsch zum Thema Fake News für die 8. Jahrgangsstufe.",
       "suggestions-used": "Vorschläge",
       "gpt-delete-description": "Beim Löschen des Assistenten werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
-      "gpt-delete-modal-description": "Bist du sicher, dass du diesen Assistent löschen möchtest? Dabei werden alle mit diesem Assistenten verbundenen Konversationen unwiderruflich gelöscht.",
+      "gpt-delete-modal-description": "Soll der Assistent wirklich gelöscht werden? Dabei werden alle mit diesem Assistenten verbundenen Konversationen unwiderruflich gelöscht.",
       "copy-page": {
         "title": "Assistent in eigenen Bereich kopieren",
-        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Assistenten in deinen privaten Bereich, um ihn anzupassen.",
+        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn die Seite verlassen wird. Um den Assistenten anzupassen, muss er zuvor in den privaten Bereich kopiert werden.",
         "copy-template": "Assistent bearbeiten"
       },
       "additional-assets-label": "Hintergrundwissen",
@@ -220,7 +220,7 @@
       "share": "Teilen",
       "button-start": "Dialogpartner teilen",
       "delete-chat-modal-title": "Neuer Chat",
-      "delete-chat-modal-description": "Wenn du einen neuen Chat beginnst verfällt der aktuelle Chat unwiderruflich.",
+      "delete-chat-modal-description": "Wird ein neuer Chat begonnen, verfällt der aktuelle Chat unwiderruflich.",
       "delete-chat-modal-confirm-button": "Aktuellen Chat verwerfen und neu beginnen",
       "expired-modal-description": "Der Dialog ist abgelaufen"
     },
@@ -234,7 +234,7 @@
     },
     "copy-modal": {
       "title": "Dialogpartner kopieren",
-      "content": "Dieser Dialogpartner ist schreibgeschützt. Möchtest du eine Kopie in deinem eigenen Bereich erstellen? Danach kannst du ihn frei bearbeiten und anpassen.",
+      "content": "Dieser Dialogpartner ist schreibgeschützt. Soll eine Kopie im eigenen Bereich erstellt werden? Danach kann dieser frei bearbeitet und angepasst werden.",
       "copy-button": "Kopieren & bearbeiten"
     },
     "form": {
@@ -260,7 +260,7 @@
       "character-restriction-label": "Wie soll der Dialogpartner nicht antworten?",
       "character-restriction-placeholder": "Bilde keine Nebensätze. Lass dich nicht ablenken. Antworte nicht in einer anderen Sprache als Deutsch.",
       "character-delete-description": "Beim Löschen des Dialogpartners werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
-      "character-delete-modal-description": "Bist du sicher, dass du diesen Dialogpartner löschen möchtest? Dabei werden alle mit diesem Dialogpartner verbundenen Konversationen unwiderruflich gelöscht.",
+      "character-delete-modal-description": "Soll der Dialogpartner wirklich gelöscht werden? Dabei werden alle mit diesem Dialogpartner verbundenen Konversationen unwiderruflich gelöscht.",
       "school-type": "Schultyp",
       "school-type-placeholder": "Gesamtschule",
       "grade": "Klassenstufe",
@@ -271,7 +271,7 @@
       "character-initial-message-placeholder": "Hallo! Ich bin Emre. Alles klar bei dir?",
       "copy-page": {
         "title": "Dialogpartner in eigenen Bereich kopieren",
-        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Dialogpartner in deinen privaten Bereich, um ihn anzupassen.",
+        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn die Seite verlassen wird. Kopiere den Dialogpartner in den privaten Bereich, um ihn anzupassen.",
         "copy-template": "Dialogpartner bearbeiten"
       },
       "additional-assets-label": "Hintergrundwissen für telli",
@@ -343,13 +343,13 @@
       "add-link": "Link hinzufügen",
       "copy-page": {
         "title": "Lernszenario in eigenen Bereich kopieren",
-        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere das Lernszenario in deinen privaten Bereich, um es anzupassen.",
+        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn die Seite verlassen wird. Kopiere das Lernszenario in den privaten Bereich, um es anzupassen.",
         "copy-template": "Lernszenario bearbeiten"
       },
       "delete-title": "Lernszenario löschen",
       "delete-description": "Beim Löschen des Lernszenarios werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
       "delete-button": "Szenario endgültig löschen",
-      "delete-confirm": "Bist du sicher, dass du diesen Lernszenario löschen möchtest? Dabei werden alle mit diesem Dialog verbundenen Konversationen unwiderruflich gelöscht."
+      "delete-confirm": "Soll das Lernszenario wirklich gelöscht werden? Dabei werden alle mit diesem Dialog verbundenen Konversationen unwiderruflich gelöscht."
     },
     "shared": {
       "excersise-title": "Dein Arbeitsauftrag",
@@ -363,7 +363,7 @@
       "join-code": "Mit Code beitreten",
       "enter-chat": "Zum Dialog",
       "delete-chat-modal-title": "Neuer Chat",
-      "delete-chat-modal-description": "Wenn du einen neuen Chat beginnst verfällt der aktuelle Chat unwiderruflich.",
+      "delete-chat-modal-description": "Wird ein neuer Chat begonnen, verfällt der aktuelle Chat unwiderruflich.",
       "delete-chat-modal-confirm-button": "Aktuellen Chat verwerfen und neu beginnen",
       "expired-modal-description": "Der Dialog ist abgelaufen"
     },
@@ -477,7 +477,7 @@
     "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
     "back-button-text": "Assistenten",
     "back-button-aria": "Zurück zur Übersicht der Assistenten",
-    "author-label": "Autor/in",
+    "author-label": "Erstellt von",
     "author-text": "FWU",
     "prompt-suggestion": "Promptvorschlag",
     "prompt-suggestions-add-button": "Promptvorschlag hinzufügen",
@@ -485,7 +485,7 @@
     "prompt-suggestions-delete-button": "Promptvorschlag {index} löschen",
     "prompt-suggestions-max-count": "Es können maximal {maxCount} Vorschläge hinzugefügt werden",
     "prompt-suggestions-max-length": "Ein Promptvorschlag darf maximal {maxLength} Zeichen lang sein.",
-    "prompt-suggestions-empty-tooltip": "Bitte fülle den aktuellen Vorschlag aus, bevor du einen weiteren hinzufügst.",
+    "prompt-suggestions-empty-tooltip": "Der Promptvorschlag muss einen Text enthalten, bevor ein weiterer hinzugefügt werden kann.",
     "prompt-suggestions-count-max": "Es dürfen maximal {max} Promptvorschläge angegeben werden.",
     "custom-assets-files": "Dateien",
     "custom-assets-label": "Hintergrundwissen",

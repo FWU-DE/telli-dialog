@@ -1,4 +1,4 @@
-import Link from 'next/link';
+'use client';
 
 export function CustomChatShareInfo({
   href,
@@ -9,12 +9,27 @@ export function CustomChatShareInfo({
   info: string;
   linkText: string;
 }) {
+  const handleClick = () => {
+    const targetId = href.startsWith('#') ? href.slice(1) : null;
+
+    if (!targetId) {
+      return;
+    }
+
+    const targetElement = document.getElementById(targetId);
+    if (!targetElement) {
+      return;
+    }
+
+    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
     <div className="flex px-6 py-4 justify-between text-base font-medium rounded-xl bg-secondary/40">
       <span>{info}</span>
-      <Link href={href}>
-        <span className="text-primary">{linkText}</span>
-      </Link>
+      <button type="button" className="text-primary" onClick={handleClick}>
+        {linkText}
+      </button>
     </div>
   );
 }
