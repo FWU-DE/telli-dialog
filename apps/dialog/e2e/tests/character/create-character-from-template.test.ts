@@ -6,7 +6,9 @@ test('create character from template', async ({ page }) => {
   await login(page, 'teacher');
   await page.goto('/characters');
 
-  const card = page.getByRole('button', { name: 'Johann Wolfgang von Goethe' }).first();
+  const card = page
+    .getByRole('button', { name: 'Johann Wolfgang von Goethe', exact: true })
+    .first();
   await expect(card).toBeVisible();
   await card.click();
   await page.waitForURL('/characters/editor/**');
