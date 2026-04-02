@@ -1,6 +1,5 @@
 import {
   boolean,
-  customType,
   doublePrecision,
   foreignKey,
   index,
@@ -16,7 +15,7 @@ import {
   vector,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
-import { DesignConfiguration, type LlmModelPriceMetadata, type WebsearchSource } from './types';
+import { DesignConfiguration, type LlmModelPriceMetadata } from './types';
 import {
   conversationRoleSchema,
   conversationTypeSchema,
@@ -24,14 +23,6 @@ import {
 } from '../utils/chat';
 import { isNull, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod';
-
-export const tsvector = customType<{
-  data: string;
-}>({
-  dataType() {
-    return `tsvector`;
-  },
-});
 
 // can be expanded to include other metadata of other file types
 export type FileMetadata = {
@@ -77,7 +68,7 @@ export const conversationTable = pgTable(
       .references(() => userTable.id)
       .notNull(),
     characterId: uuid('character_id').references(() => characterTable.id),
-    customGptId: uuid('custom_gpt_id').references(() => customGptTable.id),
+    assistantId: uuid('assistant_id').references(() => assistantTable.id),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
     type: conversationTypeEnum('type').notNull().default('chat'),
@@ -85,7 +76,7 @@ export const conversationTable = pgTable(
   (table) => [
     index().on(table.userId),
     index().on(table.characterId),
-    index().on(table.customGptId),
+    index().on(table.assistantId),
     index().on(table.userId, table.createdAt.desc()).where(isNull(table.deletedAt)),
   ],
 );
@@ -141,7 +132,6 @@ export const conversationMessageTable = pgTable(
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
     parameters: json('parameters').$type<ConversationMessageParameters>(),
-    websearchSources: json('websearch_sources').$type<WebsearchSource[]>().notNull().default([]),
   },
   (table) => [index().on(table.conversationId), index().on(table.userId)],
 );
@@ -247,9 +237,15 @@ export const federalStateFeatureTogglesSchema = z.object({
   isCustomGptEnabled: z.boolean().default(true),
   isShareTemplateWithSchoolEnabled: z.boolean().default(true),
   isImageGenerationEnabled: z.boolean().optional(),
+  isNewUiDesignEnabled: z.boolean().default(false),
 });
-
 export type FederalStateFeatureToggles = z.infer<typeof federalStateFeatureTogglesSchema>;
+
+export const federalStatePictureUrlsSchema = z.object({
+  logo: z.string().optional(),
+  favicon: z.string().optional(),
+});
+export type FederalStatePictureUrls = z.infer<typeof federalStatePictureUrlsSchema>;
 
 export const federalStateTable = pgTable('federal_state', {
   id: text('id').primaryKey(),
@@ -266,6 +262,7 @@ export const federalStateTable = pgTable('federal_state', {
   // whitelabel configuration
   designConfiguration: json('design_configuration').$type<DesignConfiguration>(),
   telliName: text('telli_name'),
+  pictureUrls: json('picture_urls').$type<FederalStatePictureUrls>(),
   // feature toggles
   featureToggles: json('feature_toggles').$type<FederalStateFeatureToggles>().notNull(),
 });
@@ -325,6 +322,10 @@ export const characterTable = pgTable(
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
     schoolId: text('school_id').references(() => schoolTable.id),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+      .defaultNow()
+      .$onUpdateFn(() => new Date())
+      .notNull(),
     attachedLinks: text('attached_links')
       .array()
       .notNull()
@@ -338,12 +339,15 @@ export const characterTable = pgTable(
 export const characterSelectSchema = createSelectSchema(characterTable)
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
+    createdAt: z.coerce.date(),
+    updatedAt: z.coerce.date(),
     accessLevel: accessLevelSchema,
   });
 export const characterInsertSchema = createInsertSchema(characterTable)
   .omit({
     id: true,
     createdAt: true,
+    updatedAt: true,
   })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
@@ -353,6 +357,7 @@ export const characterUpdateSchema = createUpdateSchema(characterTable)
   .omit({
     userId: true,
     createdAt: true,
+    updatedAt: true,
   })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
@@ -531,6 +536,10 @@ export const learningScenarioTable = pgTable(
       .default(sql`'{}'::text[]`),
     pictureId: text('picture_id'),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+      .defaultNow()
+      .$onUpdateFn(() => new Date())
+      .notNull(),
     isDeleted: boolean('is_deleted').notNull().default(false),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     schoolId: text('school_id').references(() => schoolTable.id),
@@ -543,18 +552,21 @@ export const learningScenarioTable = pgTable(
 export const learningScenarioSelectSchema = createSelectSchema(learningScenarioTable)
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
+    createdAt: z.coerce.date(),
+    updatedAt: z.coerce.date(),
     accessLevel: accessLevelSchema,
   });
 export const learningScenarioInsertSchema = createInsertSchema(learningScenarioTable)
   .omit({
     createdAt: true,
+    updatedAt: true,
   })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
     accessLevel: accessLevelSchema,
   });
 export const learningScenarioUpdateSchema = createUpdateSchema(learningScenarioTable)
-  .omit({ userId: true, createdAt: true })
+  .omit({ userId: true, createdAt: true, updatedAt: true })
   // for any reason accessLevel has a different type so we have to override it here
   .extend({
     id: z.string(),
@@ -618,7 +630,7 @@ export const sharedLearningScenarioTable = pgTable(
     telliPointsLimit: integer('telli_points_limit'),
     maxUsageTimeLimit: integer('max_usage_time_limit'),
     inviteCode: text('invite_code').unique(),
-    startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }).defaultNow(),
   },
   (table) => [
     unique().on(table.learningScenarioId, table.userId),
@@ -795,7 +807,6 @@ export const sharedCharacterConversation = pgTable(
     maxUsageTimeLimit: integer('max_usage_time_limit'),
     inviteCode: text('invite_code').unique(),
     startedAt: timestamp('started_at', { withTimezone: true }),
-    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [unique().on(table.characterId, table.userId)],
 );
@@ -808,11 +819,11 @@ export const sharedCharacterConversationSelectSchema = createSelectSchema(
 });
 export const sharedCharacterConversationInsertSchema = createInsertSchema(
   sharedCharacterConversation,
-).omit({ id: true, createdAt: true, inviteCode: true, startedAt: true });
+).omit({ id: true, inviteCode: true, startedAt: true });
 export const sharedCharacterConversationUpdateSchema = createUpdateSchema(
   sharedCharacterConversation,
 )
-  .omit({ characterId: true, userId: true, createdAt: true })
+  .omit({ characterId: true, userId: true })
   .extend({
     id: z.string(),
   });
@@ -874,22 +885,26 @@ export type SharedCharacterChatUsageTrackingUpdateModel = z.infer<
 >;
 
 /**
- * Schema for table custom_gpt
+ * Schema for table assistant
  */
-export const customGptTable = pgTable(
-  'custom_gpt',
+export const assistantTable = pgTable(
+  'assistant',
   {
     id: uuid('id').defaultRandom().primaryKey(),
     name: text('name').notNull(),
     systemPrompt: text('system_prompt').notNull(),
     userId: uuid('user_id').references(() => userTable.id),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+      .defaultNow()
+      .$onUpdateFn(() => new Date())
+      .notNull(),
     schoolId: text('school_id').references(() => schoolTable.id),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
     pictureId: text('picture_id'),
     description: text('description'),
-    specification: text('specification'),
+    instructions: text('instructions'),
     promptSuggestions: text('prompt_suggestions')
       .array()
       .notNull()
@@ -899,25 +914,27 @@ export const customGptTable = pgTable(
       .notNull()
       .default(sql`'{}'::text[]`),
     isDeleted: boolean('is_deleted').notNull().default(false),
-    originalCustomGptId: uuid('original_custom_gpt_id'),
+    originalAssistantId: uuid('original_assistant_id'),
   },
   (table) => [index().on(table.userId), index().on(table.schoolId)],
 );
 
-export const customGptSelectSchema = createSelectSchema(customGptTable).extend({
+export const assistantSelectSchema = createSelectSchema(assistantTable).extend({
   createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
   accessLevel: accessLevelSchema,
 });
-export const customGptInsertSchema = createInsertSchema(customGptTable)
-  .omit({ id: true, createdAt: true })
+export const assistantInsertSchema = createInsertSchema(assistantTable)
+  .omit({ id: true, createdAt: true, updatedAt: true })
   .extend({
     accessLevel: accessLevelSchema,
   });
-export const customGptUpdateSchema = createUpdateSchema(customGptTable)
+export const assistantUpdateSchema = createUpdateSchema(assistantTable)
   .omit({
     userId: true,
     schoolId: true,
     createdAt: true,
+    updatedAt: true,
   })
   .extend({
     id: z.string(),
@@ -925,59 +942,64 @@ export const customGptUpdateSchema = createUpdateSchema(customGptTable)
     accessLevel: accessLevelSchema.optional(),
   });
 
-export type CustomGptSelectModel = z.infer<typeof customGptSelectSchema>;
-export type CustomGptInsertModel = z.infer<typeof customGptInsertSchema>;
-export type CustomGptUpdateModel = z.infer<typeof customGptUpdateSchema>;
+export type AssistantSelectModel = z.infer<typeof assistantSelectSchema>;
+export type AssistantInsertModel = z.infer<typeof assistantInsertSchema>;
+export type AssistantUpdateModel = z.infer<typeof assistantUpdateSchema>;
 
 /**
- * Schema for table custom_gpt_template_mappings
+ * Schema for table assistant_template_mappings
  */
-export const customGptTemplateMappingTable = pgTable(
-  'custom_gpt_template_mappings',
+export const assistantTemplateMappingTable = pgTable(
+  'assistant_template_mappings',
   {
-    customGptId: uuid('custom_gpt_id')
+    assistantId: uuid('assistant_id')
       .notNull()
-      .references(() => customGptTable.id, { onDelete: 'cascade' }),
+      .references(() => assistantTable.id, { onDelete: 'cascade' }),
     federalStateId: text('federal_state_id').notNull(),
   },
   (table) => [
-    primaryKey({ columns: [table.customGptId, table.federalStateId] }),
+    primaryKey({ columns: [table.assistantId, table.federalStateId] }),
     foreignKey({
       columns: [table.federalStateId],
       foreignColumns: [federalStateTable.id],
       // Set a custom name because the auto-generated name is too long and will be silently truncated to 63 characters
       // The custom name can only be set with foreignKey() function
-      name: 'character_template_mappings_federal_state_id_fk',
+      name: 'assistant_template_mappings_federal_state_id_fk',
     }).onDelete('cascade'),
   ],
 );
 
-export const customGptTemplateMappingSelectSchema = createSelectSchema(
-  customGptTemplateMappingTable,
+export const assistantTemplateMappingSelectSchema = createSelectSchema(
+  assistantTemplateMappingTable,
 );
-export const customGptTemplateMappingInsertSchema = createInsertSchema(
-  customGptTemplateMappingTable,
+export const assistantTemplateMappingInsertSchema = createInsertSchema(
+  assistantTemplateMappingTable,
 );
 // no update schema as there are only two fields which are both part of the primary key
 
-export type CustomGptTemplateMappingSelectModel = z.infer<
-  typeof customGptTemplateMappingSelectSchema
+export type AssistantTemplateMappingSelectModel = z.infer<
+  typeof assistantTemplateMappingSelectSchema
 >;
-export type CustomGptTemplateMappingInsertModel = z.infer<
-  typeof customGptTemplateMappingInsertSchema
+export type AssistantTemplateMappingInsertModel = z.infer<
+  typeof assistantTemplateMappingInsertSchema
 >;
 
 /**
  * Schema for table file_table
  */
-export const fileTable = pgTable('file_table', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  size: integer('size').notNull(),
-  type: text('type').notNull(),
-  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-  metadata: json('metadata').$type<FileMetadata>(),
-});
+export const fileTable = pgTable(
+  'file_table',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    size: integer('size').notNull(),
+    type: text('type').notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    metadata: json('metadata').$type<FileMetadata>(),
+    userId: uuid('user_id').references(() => userTable.id),
+  },
+  (table) => [index().on(table.userId)],
+);
 
 export const fileSelectSchema = createSelectSchema(fileTable).extend({
   createdAt: z.coerce.date(),
@@ -1149,31 +1171,31 @@ export type CharacterFileMappingInsertModel = z.infer<typeof characterFileMappin
 export type CharacterFileMappingUpdateModel = z.infer<typeof characterFileMappingUpdateSchema>;
 
 /**
- * Schema for table custom_gpt_file_mapping
+ * Schema for table assistant_file_mapping
  */
-export const CustomGptFileMapping = pgTable(
-  'custom_gpt_file_mapping',
+export const AssistantFileMapping = pgTable(
+  'assistant_file_mapping',
   {
     id: uuid('id').defaultRandom().primaryKey(),
     fileId: text('file_id')
       .references(() => fileTable.id)
       .notNull(),
-    customGptId: uuid('custom_gpt_id')
-      .references(() => customGptTable.id, { onDelete: 'cascade' })
+    assistantId: uuid('assistant_id')
+      .references(() => assistantTable.id, { onDelete: 'cascade' })
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [unique().on(table.customGptId, table.fileId)],
+  (table) => [unique().on(table.assistantId, table.fileId)],
 );
 
-export const customGptFileMappingSelectSchema = createSelectSchema(CustomGptFileMapping).extend({
+export const assistantFileMappingSelectSchema = createSelectSchema(AssistantFileMapping).extend({
   createdAt: z.coerce.date(),
 });
-export const customGptFileMappingInsertSchema = createInsertSchema(CustomGptFileMapping).omit({
+export const assistantFileMappingInsertSchema = createInsertSchema(AssistantFileMapping).omit({
   id: true,
   createdAt: true,
 });
-export const customGptFileMappingUpdateSchema = createUpdateSchema(CustomGptFileMapping)
+export const assistantFileMappingUpdateSchema = createUpdateSchema(AssistantFileMapping)
   .omit({
     createdAt: true,
   })
@@ -1181,47 +1203,46 @@ export const customGptFileMappingUpdateSchema = createUpdateSchema(CustomGptFile
     id: z.string(),
   });
 
-export type CustomGptFileMappingSelectModel = z.infer<typeof customGptFileMappingSelectSchema>;
-export type CustomGptFileMappingInsertModel = z.infer<typeof customGptFileMappingInsertSchema>;
-export type CustomGptFileMappingUpdateModel = z.infer<typeof customGptFileMappingUpdateSchema>;
+export type AssistantFileMappingSelectModel = z.infer<typeof assistantFileMappingSelectSchema>;
+export type AssistantFileMappingInsertModel = z.infer<typeof assistantFileMappingInsertSchema>;
+export type AssistantFileMappingUpdateModel = z.infer<typeof assistantFileMappingUpdateSchema>;
 
 /**
- * Schema for table text_chunk
+ * Schema for table chunk
  */
-export const TextChunkTable = pgTable(
-  'text_chunk',
+export const chunkSourceTypeSchema = z.enum(['file', 'webpage']);
+export const chunkSourceTypeEnum = pgEnum('chunk_source_type', chunkSourceTypeSchema.enum);
+export type ChunkSourceType = z.infer<typeof chunkSourceTypeSchema>;
+
+export const chunkTable = pgTable(
+  'chunk',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    fileId: text('file_id')
-      .references(() => fileTable.id, { onDelete: 'cascade' })
-      .notNull(),
+    fileId: text('file_id').references(() => fileTable.id, { onDelete: 'cascade' }),
     embedding: vector('embedding', { dimensions: 1024 }).notNull(),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     content: text('content').notNull(),
-    leadingOverlap: text('leading_overlap'),
-    trailingOverlap: text('trailing_overlap'),
     orderIndex: integer('order_index').notNull(),
-    pageNumber: integer('page_number'),
-    contentTsv: tsvector('content_tsv')
-      .notNull()
-      .generatedAlwaysAs(sql`to_tsvector('german', content)`),
+    sourceType: chunkSourceTypeEnum('source_type').notNull().default('file'),
+    sourceUrl: text('source_url'),
   },
-  (table) => [
-    index().on(table.fileId),
-    index('text_chunk_embedding_idx').using('hnsw', table.embedding.op('vector_cosine_ops')),
-    index('text_chunk_content_tsv_idx').using('gin', table.contentTsv),
-  ],
+  (table) => [index().on(table.fileId), unique().on(table.sourceUrl, table.orderIndex)],
 );
 
-export const textChunkSelectSchema = createSelectSchema(TextChunkTable);
-export const textChunkInsertSchema = createInsertSchema(TextChunkTable).omit({ id: true });
-export const textChunkUpdateSchema = createUpdateSchema(TextChunkTable).extend({
+export const chunkSelectSchema = createSelectSchema(chunkTable).extend({
+  sourceType: chunkSourceTypeSchema,
+});
+export const chunkInsertSchema = createInsertSchema(chunkTable).omit({ id: true }).extend({
+  sourceType: chunkSourceTypeSchema.optional(),
+});
+export const chunkUpdateSchema = createUpdateSchema(chunkTable).extend({
   id: z.string(),
+  sourceType: chunkSourceTypeSchema.optional(),
 });
 
-export type TextChunkSelectModel = z.infer<typeof textChunkSelectSchema>;
-export type TextChunkInsertModel = z.infer<typeof textChunkInsertSchema>;
-export type TextChunkUpdateModel = z.infer<typeof textChunkUpdateSchema>;
+export type ChunkSelectModel = z.infer<typeof chunkSelectSchema>;
+export type ChunkInsertModel = z.infer<typeof chunkInsertSchema>;
+export type ChunkUpdateModel = z.infer<typeof chunkUpdateSchema>;
 
 /**
  * Schema for table voucher

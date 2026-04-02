@@ -1,59 +1,78 @@
 'use client';
 
-import { useSidebarVisibility } from './sidebar-provider';
-import { useOutsideClick } from '@/components/hooks/use-outside-click';
-import useBreakpoints from '@/components/hooks/use-breakpoints';
+import { useSidebar } from '@telli/ui/components/Sidebar';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@telli/ui/components/Sheet';
 import React from 'react';
 import NewDialogIcon from '@/components/icons/sidebar/new-dialog';
 import SidebarToggleIcon from '@/components/icons/sidebar/sidebar-toggle';
 import { cn } from '@/utils/tailwind';
 import { useRouter } from 'next/navigation';
 import { iconClassName } from '@/utils/tailwind/icon';
+import { SidebarSimpleIcon } from '@phosphor-icons/react/dist/icons/SidebarSimple';
 
-export default function CollapsibleSidebar({ children }: { children: React.ReactNode }) {
-  const { isOpen, toggle } = useSidebarVisibility();
-  const { isBelow } = useBreakpoints();
+export default function CollapsibleSidebar({
+  children,
+  isNewUiDesignEnabled,
+}: {
+  children: React.ReactNode;
+  isNewUiDesignEnabled: boolean;
+}) {
+  const { open, isMobile, openMobile, setOpenMobile } = useSidebar();
 
-  const ref = useOutsideClick<HTMLDivElement>(() => {
-    if (isOpen && typeof window !== 'undefined' && isBelow.md) {
-      toggle();
-    }
-  });
-
-  React.useEffect(() => {
-    if (isBelow.md && isOpen) {
-      document.body.classList.add('no-scroll');
-    } else {
-      document.body.classList.remove('no-scroll');
-    }
-
-    return () => {
-      document.body.classList.remove('no-scroll');
-    };
-  }, [isBelow.md, isOpen]);
+  if (isMobile) {
+    return (
+      <Sheet open={openMobile} onOpenChange={setOpenMobile}>
+        <SheetContent
+          side="left"
+          className="w-72 p-0 bg-semilight-gray overflow-y-auto overflow-x-hidden flex flex-col [&>button]:hidden"
+        >
+          <SheetHeader className="sr-only">
+            <SheetTitle>Navigation</SheetTitle>
+            <SheetDescription>Hauptnavigation</SheetDescription>
+          </SheetHeader>
+          <div className="flex gap-4 items-center px-6 mt-[22px] mb-4">
+            <ToggleSidebarButton forceVisibility isNewUiDesignEnabled={isNewUiDesignEnabled} />
+            <div className="grow" />
+            <NewChatButton forceVisibility />
+          </div>
+          {children}
+        </SheetContent>
+      </Sheet>
+    );
+  }
 
   return (
-    <div className="flex h-[100dvh] pointer-events-auto z-20 bg-white">
-      <div
-        ref={ref}
-        className={cn(
-          'fixed inset-y-0 h-[100dvh] shadow-3xl left-0 transition-all duration-200 transform w-72 md:relative overflow-y-auto overflow-x-hidden flex flex-col bg-semilight-gray',
-          isOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in md:w-0 md:translate-x-0',
-        )}
-      >
-        <div className={cn('flex gap-4 items-center px-6 mt-[22px] mb-4', !isOpen && 'invisible')}>
-          <ToggleSidebarButton forceVisibility />
-          <div className="flex-grow" />
-          <NewChatButton forceVisibility />
-        </div>
-        {children}
+    <div
+      className={cn(
+        'relative z-20 h-dvh shadow-3xl transition-[width] duration-200 flex flex-col bg-semilight-gray',
+        open ? 'w-72' : 'w-0 overflow-hidden',
+      )}
+    >
+      <div className={cn('flex gap-4 items-center px-6 mt-[22px] mb-4', !open && 'invisible')}>
+        <ToggleSidebarButton forceVisibility isNewUiDesignEnabled={isNewUiDesignEnabled} />
+        <div className="grow" />
+        <NewChatButton forceVisibility />
       </div>
+      {children}
     </div>
   );
 }
 
-export function ToggleSidebarButton({ forceVisibility = false }: { forceVisibility?: boolean }) {
-  const { toggle, isOpen } = useSidebarVisibility();
+export function ToggleSidebarButton({
+  forceVisibility = false,
+  isNewUiDesignEnabled,
+}: {
+  forceVisibility?: boolean;
+  isNewUiDesignEnabled: boolean;
+}) {
+  const { toggleSidebar, open, isMobile, openMobile } = useSidebar();
+  const isOpen = isMobile ? openMobile : open;
 
   if (isOpen && !forceVisibility) return null;
 
@@ -61,25 +80,26 @@ export function ToggleSidebarButton({ forceVisibility = false }: { forceVisibili
     <button
       title="Sidebar"
       className={cn(
-        'focus:outline-none group hover:bg-light-gray rounded-enterprise-sm',
+        'focus:outline-hidden group hover:bg-light-gray rounded-enterprise-sm',
         iconClassName,
       )}
-      onClick={() => toggle()}
+      onClick={toggleSidebar}
       aria-label="sidebar-toggle-close"
     >
-      <SidebarToggleIcon />
+      {isNewUiDesignEnabled ? <SidebarSimpleIcon className="w-6 h-6" /> : <SidebarToggleIcon />}
     </button>
   );
 }
 
 export function NewChatButton({ forceVisibility = false }: { forceVisibility?: boolean }) {
-  const { isOpen, toggle } = useSidebarVisibility();
-  const { isBelow } = useBreakpoints();
+  const { open, toggleSidebar, isMobile, openMobile } = useSidebar();
   const router = useRouter();
+  const isOpen = isMobile ? openMobile : open;
 
   function handleOpenNewChat() {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    isBelow.md && isOpen && toggle();
+    if (isMobile && openMobile) {
+      toggleSidebar();
+    }
     router.push('/');
   }
 
@@ -89,7 +109,7 @@ export function NewChatButton({ forceVisibility = false }: { forceVisibility?: b
     <button
       onClick={handleOpenNewChat}
       className={cn(
-        'focus:outline-none group hover:bg-light-gray rounded-enterprise-sm',
+        'focus:outline-hidden group hover:bg-light-gray rounded-enterprise-sm',
         iconClassName,
       )}
       aria-label="Neuer Chat"

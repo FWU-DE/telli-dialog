@@ -4,7 +4,7 @@ import { useMainChat, type ChatMessage } from '@/hooks/use-chat-hooks';
 import React, { FormEvent, ReactNode, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '../providers/llm-model-provider';
-import { type CharacterSelectModel, type CustomGptSelectModel, FileModel } from '@shared/db/schema';
+import { type CharacterSelectModel, type AssistantSelectModel, FileModel } from '@shared/db/schema';
 import PromptSuggestions from './prompt-suggestions';
 import MarkdownDisplay from './markdown-display';
 import { navigateWithoutRefresh } from '@/utils/navigation/router';
@@ -15,7 +15,7 @@ import { deepCopy } from '@/utils/object';
 import { getFileExtension, isImageFile } from '@/utils/files/generic';
 import { refetchFileMapping } from '@/app/(authed)/(dialog)/actions';
 import { InitialChatContentDisplay } from './initial-content-display';
-import { HELP_MODE_GPT_ID } from '@shared/db/const';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { ChatInputBox } from './chat-input-box';
 import { ErrorChatPlaceholder } from './error-chat-placeholder';
 import { logError, logDebug, logWarning } from '@shared/logging';
@@ -24,14 +24,13 @@ import { AssistantIcon } from './assistant-icon';
 import { useAutoScroll } from '@/hooks/use-auto-scroll';
 import { getConversationPath } from '@/utils/chat/path';
 import { Messages, type PendingFileModel } from './messages';
-import { useRouter } from 'next/navigation';
 import { WebsearchSource } from '@shared/db/types';
 import { useCheckStatusCode } from '@/hooks/use-response-status';
 
 type ChatProps = {
   id: string;
   initialMessages: ChatMessage[];
-  customGpt?: CustomGptSelectModel;
+  assistant?: AssistantSelectModel;
   character?: CharacterSelectModel;
   imageSource?: string;
   promptSuggestions?: string[];
@@ -44,7 +43,7 @@ type ChatProps = {
 export default function Chat({
   id,
   initialMessages,
-  customGpt,
+  assistant,
   character,
   imageSource,
   promptSuggestions = [],
@@ -55,9 +54,9 @@ export default function Chat({
 }: ChatProps) {
   const tHelpMode = useTranslations('help-mode');
 
-  const { selectedModel } = useLlmModels();
+  const { selectedModel, setDownloadConversationEnabled } = useLlmModels();
   const conversationPath = getConversationPath({
-    customGptId: customGpt?.id,
+    customGptId: assistant?.id,
     characterId: character?.id,
     conversationId: id,
   });
@@ -81,21 +80,10 @@ export default function Chat({
   // Ref to hold pending files that will be associated with the next user message
   const pendingFilesRef = React.useRef<PendingFileModel[]>([]);
 
-  // Router sync: We use window.history.replaceState() to update the URL immediately
-  // on first message (no reload). This bypasses Next.js router, so router.push('/')
-  // won't work until we sync. After streaming completes, we call router.replace()
-  // via state + useEffect to avoid "setState during render" errors & odd behavior when navigating.
+  // Tracks whether this is the first user message in the conversation (used to trigger
+  // URL update and sidebar refetch). For character chats with an initial assistant message,
+  // we check for the absence of any user messages rather than checking messages.length === 0.
   const isFirstMessageRef = React.useRef(false);
-  const [needsRouterSync, setNeedsRouterSync] = React.useState(false);
-  const router = useRouter();
-
-  // Sync Next.js router with the URL after first message completes (deferred to avoid setState during render)
-  useEffect(() => {
-    if (needsRouterSync) {
-      setNeedsRouterSync(false);
-      router.replace(conversationPath);
-    }
-  }, [needsRouterSync, conversationPath, router]);
 
   const {
     messages,
@@ -112,7 +100,7 @@ export default function Chat({
     initialMessages: initialMessages,
     modelId: selectedModel?.id,
     characterId: character?.id,
-    customGptId: customGpt?.id,
+    assistantId: assistant?.id,
     onMessageCreated: (messageId) => {
       // Associate pending files with the message ID immediately when the message is created
       const filesToAssociate = pendingFilesRef.current;
@@ -128,12 +116,13 @@ export default function Chat({
     onFinish: (message) => {
       logDebug(`onFinish called with message ${JSON.stringify(message)}`);
       // Trigger refetch of the fileMapping from the DB
-      setCountOfFilesInChat(countOfFilesInChat + 1);
+      setCountOfFilesInChat((prev) => prev + 1);
 
-      // Signal that we need to sync the router (done in useEffect to avoid setState during render)
+      // After the first message exchange: update the sidebar so it shows the generated title
       if (isFirstMessageRef.current) {
         isFirstMessageRef.current = false;
-        setNeedsRouterSync(true);
+        refetchConversations();
+        return;
       }
 
       if (messages.length > 1) {
@@ -153,6 +142,11 @@ export default function Chat({
   const { scrollRef, reactivateAutoScrolling } = useAutoScroll([messages, status]);
 
   useEffect(() => {
+    // Skip fetching file mappings if the conversation doesn't exist yet (no messages sent)
+    if (messages.length === 0) {
+      return;
+    }
+
     const fetchData = async () => {
       const newFileMapping = await refetchFileMapping(id);
       setFileMapping(newFileMapping);
@@ -176,7 +170,7 @@ export default function Chat({
       });
     };
     void fetchData();
-  }, [countOfFilesInChat, id]);
+  }, [countOfFilesInChat, id, messages.length]);
 
   async function customHandleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -186,12 +180,15 @@ export default function Chat({
       resetError();
 
       // Trigger refetch of the fileMapping from the DB
-      setCountOfFilesInChat(countOfFilesInChat + 1);
+      setCountOfFilesInChat((prev) => prev + 1);
 
-      // If this is the first message, update navigation and refetch
-      if (messages.length === 0) {
+      // If this is the first user message, update the URL and sidebar.
+      // Check for user messages specifically, since character chats may have an
+      // initial assistant message before any user message is sent.
+      if (!messages.some((m) => m.role === 'user')) {
         navigateWithoutRefresh(conversationPath);
-        isFirstMessageRef.current = true; // Will sync router after request completes
+        isFirstMessageRef.current = true;
+        setDownloadConversationEnabled(true);
         refetchConversations();
       }
 
@@ -205,6 +202,7 @@ export default function Chat({
         createdAt: new Date(),
         size: file.file.size,
         metadata: null,
+        userId: null,
         // Create a blob URL for images so they display immediately without fetching from S3
         localUrl: isImageFile(file.file.name) ? URL.createObjectURL(file.file) : undefined,
       }));
@@ -262,7 +260,7 @@ export default function Chat({
         description={character.description}
       />
     );
-  } else if (customGpt !== undefined && customGpt.id === HELP_MODE_GPT_ID) {
+  } else if (assistant !== undefined && assistant.id === HELP_MODE_ASSISTANT_ID) {
     placeholderElement = (
       <div className="flex flex-col items-center justify-center gap-6 h-full max-w-3xl mx-auto p-4">
         <div className="pb-4">
@@ -277,12 +275,12 @@ export default function Chat({
         <span className="text-base font-normal">{tHelpMode('chat-placeholder')}</span>
       </div>
     );
-  } else if (customGpt !== undefined) {
+  } else if (assistant !== undefined) {
     placeholderElement = (
       <InitialChatContentDisplay
-        title={customGpt.name}
+        title={assistant.name}
         imageSource={imageSource}
-        description={customGpt.description ?? undefined}
+        description={assistant.description ?? undefined}
       />
     );
   } else {
@@ -292,8 +290,8 @@ export default function Chat({
   }
 
   const assistantIcon = AssistantIcon({
-    customGptId: customGpt?.id,
-    imageName: character?.name ?? customGpt?.name,
+    customGptId: assistant?.id,
+    imageName: character?.name ?? assistant?.name,
     imageSource,
   });
 
@@ -301,8 +299,8 @@ export default function Chat({
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      <div className="flex flex-col flex-grow justify-between w-full overflow-hidden">
-        <div ref={scrollRef} className="flex-grow overflow-y-auto">
+      <div className="flex flex-col grow justify-between w-full overflow-hidden">
+        <div ref={scrollRef} className="grow overflow-y-auto">
           {messages.length === 0 ? (
             placeholderElement
           ) : (

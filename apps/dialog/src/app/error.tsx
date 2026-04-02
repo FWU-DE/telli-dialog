@@ -20,7 +20,7 @@ export default function Error({
 
   return (
     <div className="w-screen h-screen flex flex-col justify-center items-center">
-      <h1 className="text-[10rem] font-bold max-md:text-[6rem]">
+      <h1 className="text-[6rem] sm:text-[10rem] font-bold">
         <span>Fehler</span>
       </h1>
       <h2 className="text-xl font-bold">Es ist leider ein Fehler aufgetreten.</h2>

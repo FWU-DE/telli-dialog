@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { generateSharedConversationDocxFiles } from './utils';
 import { formatDateToDayMonthYear } from '@shared/utils/date';
-import { logError } from '@shared/logging';
+import { handleErrorInRoute } from '@/error/handle-error-in-route';
+import { checkInviteCodeForExport } from '@shared/conversation/conversation-service';
 
 const requestSchema = z.object({
   messages: z.array(
@@ -14,19 +15,17 @@ const requestSchema = z.object({
   ),
   characterName: z.string().optional(),
   sharedConversationName: z.string().optional(),
+  inviteCode: z.string(),
 });
 
 export async function POST(request: NextRequest) {
-  const json = await request.json();
-  const parsed = requestSchema.safeParse(json);
-
-  if (!parsed.success) {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
-  }
-
-  const { messages, characterName, sharedConversationName } = parsed.data;
-
   try {
+    const json = await request.json();
+    const parseResult = requestSchema.parse(json);
+    await checkInviteCodeForExport({ inviteCode: parseResult.inviteCode });
+
+    const { messages, characterName, sharedConversationName } = parseResult;
+
     const conversationObject = await generateSharedConversationDocxFiles({
       conversationMessages: messages,
       userFullName: 'Nutzer/in',
@@ -49,8 +48,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    logError('Failed to generate the document', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return handleErrorInRoute(error);
   }
 }
 

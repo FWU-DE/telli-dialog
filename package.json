@@ -6,23 +6,32 @@
     "build": "turbo run build",
     "build:docker:dialog": "docker build -t telli-dialog -f ./apps/dialog/Dockerfile .",
     "build:docker:admin": "docker build -t telli-admin -f ./apps/admin/Dockerfile .",
+    "build:docker:api": "docker build -t telli-api -f ./apps/api/Dockerfile .",
     "dev": "turbo run dev",
+    "dev:dialog": "pnpm --filter telli-dialog dev",
+    "dev:admin": "pnpm --filter telli-admin dev",
+    "dev:api": "pnpm --filter telli-api dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "check-types": "turbo run check-types"
+    "test:coverage": "turbo run test:coverage",
+    "check-types": "turbo run check-types",
+    "db:migrate": "pnpm --filter @telli/shared db:migrate:local && pnpm --filter @telli/api-database db:migrate:local",
+    "db:seed": "pnpm --filter @telli/api-database db:seed && pnpm --filter @telli/shared db:seed",
+    "db:seed:from-stage": "pnpm --filter @telli/api-database db:seed:from-stage && pnpm --filter @telli/shared db:seed:from-stage"
   },
-  "packageManager": "pnpm@10.24.0",
+  "packageManager": "pnpm@10.32.1",
   "devDependencies": {
     "@telli/typescript-config": "workspace:*",
     "prettier": "3.8.1",
-    "turbo": "2.8.3"
+    "turbo": "2.8.20"
   },
   "pnpm": {
     "overrides": {
-      "@isaacs/brace-expansion@<5.0.1": ">=5.0.1",
-      "glob@<11.1.0": ">=11.1.0"
+      "glob@<11.1.0": ">=11.1.0",
+      "minimatch@~3.1.4": "^3.1.4",
+      "minimatch@~9.0.0": "^9.0.7"
     }
   }
 }

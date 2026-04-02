@@ -1,4 +1,4 @@
-import { dbHasApiKeyAccessToModel } from '../api-db/functions';
+import { dbHasApiKeyAccessToModel } from '@telli/api-database';
 import { AiModel } from '../images/types';
 import type { AiModel as TextAiModel } from '../chat/types';
 

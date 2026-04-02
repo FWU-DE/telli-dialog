@@ -7,15 +7,16 @@ test('should upload file and chat with custom GPT template (Schulorganisationsas
 }) => {
   await login(page, 'teacher');
 
-  await page.goto('/custom?visibility=global');
-  await page.waitForURL('/custom?visibility=global');
+  await page.goto('/custom?filter=official');
+  await page.waitForURL('/custom?filter=official');
 
-  // Wait for the Schulorganisationsassistent template to be visible and click on it
-  await expect(page.getByText('Schulorganisationsassistent')).toBeVisible();
-  await page.getByText('Schulorganisationsassistent').click();
+  // Wait for the Schulorganisationsassistent template card and click the chat button
+  const card = page.getByRole('button', { name: 'Schulorganisationsassistent' }).first();
+  await expect(card).toBeVisible();
+  await card.getByRole('button', { name: 'Neuer Chat' }).click();
 
-  // Wait for the custom GPT chat page to load
-  await page.waitForURL('/custom/d/**');
+  // Wait for the assistant chat page to load
+  await page.waitForURL('/assistants/d/**');
   await expect(page.getByRole('heading')).toContainText('Schulorganisationsassistent');
 
   // Upload a file

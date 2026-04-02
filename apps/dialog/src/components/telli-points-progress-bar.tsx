@@ -25,11 +25,11 @@ export default function TelliPointsProgressBar({
             style={{ width: '100%' }}
           ></div>
           <div
-            className="h-3 transition-all duration-500 ease-in-out absolute left-0"
+            className="h-3 transition-all duration-500 ease-in-out absolute left-0 rounded-1"
             style={{ width: `${Math.min(percentage, 100)}%`, backgroundColor: color }}
           ></div>
         </div>
-        <div className="mt-2 text-sm text-right text-dark-gray">{percentage} %</div>
+        <div className="mt-1 text-xs text-right text-gray-600">{percentage} %</div>
       </div>
     </div>
   );

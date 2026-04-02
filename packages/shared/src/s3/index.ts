@@ -1,7 +1,5 @@
-'use server';
-
 import { Readable } from 'stream';
-
+import { unstable_cache as cache } from 'next/cache';
 import {
   CopyObjectCommand,
   CopyObjectCommandInput,
@@ -10,7 +8,6 @@ import {
   DeleteObjectsCommand,
   DeleteObjectsCommandInput,
   GetObjectCommand,
-  HeadObjectCommand,
   ListObjectsV2Command,
   ListObjectsV2CommandInput,
   PutObjectCommand,
@@ -21,7 +18,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from './env';
 import { nanoid } from 'nanoid';
 import { chunkArray } from '@shared/utils/arrays';
-import { S3_DELETE_OBJECTS_MAX } from '@shared/s3/const';
+import { ONE_DAY, S3_DELETE_OBJECTS_MAX } from '@shared/s3/const';
 import { logError } from '@shared/logging';
 
 const s3Client = new S3Client({
@@ -69,16 +66,6 @@ export async function uploadFileToS3({
   await s3Client.send(command);
 }
 
-export async function getMaybeLogoFromS3(federalStateId: string | undefined, asset: string) {
-  if (federalStateId === undefined) {
-    return undefined;
-  }
-  return await getMaybeSignedUrlIfExists({
-    key: `whitelabels/${federalStateId}/${asset}`,
-    suppressError: true,
-  });
-}
-
 /**
  * Copies an existing object in S3 from the `copySource` key to the `newKey`.
  * @param newKey the new key
@@ -106,39 +93,48 @@ export async function copyFileInS3({ newKey, copySource }: { newKey: string; cop
  * @returns undefined if key is falsy
  * Otherwise returns a signed URL for read-only access to the object even if the object does not exist in S3.
  */
-export async function getReadOnlySignedUrl({
-  key,
-  filename,
-  contentType,
-  attachment = true,
-  options,
-}: {
+export async function getReadOnlySignedUrl(args: {
   key: string | null | undefined;
   filename?: string;
   contentType?: string;
   attachment?: boolean;
   options?: { expiresIn?: number };
 }) {
-  if (!key) return undefined;
+  // Default expiry of 1 day and revalidation after 12 hours
+  const expiresIn = args.options?.expiresIn ?? ONE_DAY;
+  const revalidate = expiresIn / 2;
+  return await cache(
+    async ({
+      key,
+      filename,
+      contentType,
+      attachment = true,
+    }: Parameters<typeof getReadOnlySignedUrl>[0]) => {
+      if (!key) return undefined;
 
-  let contentDisposition = attachment ? 'attachment;' : '';
-  if (filename !== undefined) {
-    contentDisposition = `${contentDisposition} filename=${filename}`;
-  }
-  const command = new GetObjectCommand({
-    Bucket: env.otcBucketName,
-    Key: key,
-    ...(contentDisposition !== '' ? { ResponseContentDisposition: contentDisposition } : {}),
-    ...(contentType !== undefined ? { ResponseContentType: contentType } : {}),
-  });
+      let contentDisposition = attachment ? 'attachment;' : '';
+      if (filename !== undefined) {
+        contentDisposition = `${contentDisposition} filename=${filename}`;
+      }
+      const command = new GetObjectCommand({
+        Bucket: env.otcBucketName,
+        Key: key,
+        ResponseCacheControl: `public, max-age=${expiresIn}, immutable`,
+        ...(contentDisposition !== '' ? { ResponseContentDisposition: contentDisposition } : {}),
+        ...(contentType !== undefined ? { ResponseContentType: contentType } : {}),
+      });
 
-  try {
-    const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600, ...options });
-    return signedUrl;
-  } catch (error) {
-    logError('Error generating signed GET URL for S3', error);
-    throw error;
-  }
+      try {
+        const signedUrl = await getSignedUrl(s3Client, command, { expiresIn });
+        return signedUrl;
+      } catch (error) {
+        logError('Error generating signed GET URL for S3', error);
+        throw error;
+      }
+    },
+    [],
+    { revalidate },
+  )(args);
 }
 
 /**
@@ -187,41 +183,6 @@ export async function deleteFilesFromS3(keys: string[]) {
       }
     }),
   );
-}
-
-async function getMaybeSignedUrlIfExists({
-  key,
-  filename,
-  contentType,
-  attachment = true,
-  suppressError = false,
-}: {
-  key?: string | null;
-  filename?: string;
-  contentType?: string;
-  attachment?: boolean;
-  suppressError?: boolean;
-}) {
-  if (key === undefined || key === null || key === '') return undefined;
-  // Todo: unstable_cache from next was used here with revalidate of 3000 seconds
-  try {
-    // Check if the object exists by attempting to get its metadata
-    await s3Client.send(
-      new HeadObjectCommand({
-        Bucket: env.otcBucketName,
-        Key: key,
-      }),
-    );
-
-    // If no error is thrown, the object exists, so generate the signed URL
-    return await getReadOnlySignedUrl({ key, filename, contentType, attachment });
-  } catch (error) {
-    if (!suppressError) {
-      logError('Error getting signed URL from S3', error);
-    }
-    // If an error is thrown, the object doesn't exist
-    return undefined;
-  }
 }
 
 /**

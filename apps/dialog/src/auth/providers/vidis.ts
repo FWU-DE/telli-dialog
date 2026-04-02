@@ -1,6 +1,7 @@
 import { dbGetOrCreateVidisUser } from '@telli/shared/db/functions/vidis';
 import { env } from '@/env';
 import { Account, NextAuthConfig, Profile } from 'next-auth';
+import { customFetch } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 import { vidisAccountSchema, vidisProfileSchema } from '@telli/shared/auth/vidis';
 
@@ -31,6 +32,44 @@ export async function handleVidisJWTCallback({
   return token;
 }
 
+const OIDC_DISCOVERY_REVALIDATE_SECONDS = 5 * 60; // 5 minutes
+
+/**
+ * Custom fetch that caches the OIDC discovery document (.well-known/openid-configuration)
+ * using Next.js's built-in Data Cache via `next.revalidate`.
+ * All other requests are passed through to the standard fetch.
+ *
+ * Without caching, auth.js fetches the discovery document on every auth operation,
+ * which can take 200ms–10s depending on the VIDIS server response time.
+ */
+async function cachedDiscoveryFetch(...args: Parameters<typeof fetch>): ReturnType<typeof fetch> {
+  const input = args[0];
+  let url: URL;
+
+  if (input instanceof Request) {
+    url = new URL(input.url);
+  } else if (input instanceof URL) {
+    url = input;
+  } else {
+    const inputStr = String(input);
+    try {
+      url = new URL(inputStr);
+    } catch {
+      url = new URL(inputStr, env.vidisIssuerUri);
+    }
+  }
+
+  if (!url.pathname.endsWith('/.well-known/openid-configuration')) {
+    return fetch(...args);
+  }
+
+  // If the cache is stale, this will serve the stale cache, before revalidating and updating the cache for subsequent requests.
+  return fetch(url, {
+    ...args[1],
+    next: { revalidate: OIDC_DISCOVERY_REVALIDATE_SECONDS },
+  });
+}
+
 export const vidisConfig = {
   id: 'vidis',
   name: 'vidis',
@@ -42,4 +81,5 @@ export const vidisConfig = {
   clientId: env.vidisClientId,
   clientSecret: env.vidisClientSecret,
   issuer: env.vidisIssuerUri,
+  [customFetch]: cachedDiscoveryFetch,
 } satisfies NextAuthConfig['providers'][number];

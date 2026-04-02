@@ -22,24 +22,24 @@ test('teacher can create shared chat with web sources, student can join chat and
 
   await page.goto('/learning-scenarios');
   await page.waitForURL('/learning-scenarios');
-  await page.getByRole('button', { name: 'Szenario erstellen' }).click();
+  await page.getByRole('button', { name: 'Lernszenario erstellen' }).click();
   await page.waitForURL('/learning-scenarios/**');
 
   // configure form
   await configureLearningScenario(page, data);
   await page
-    .getByRole('textbox', { name: 'URL der Webseiten' })
+    .getByRole('textbox', { name: 'Web-Link' })
     .fill(
       'https://www.dw.com/de/trump-im-israel-iran-konflikt-kurs-ohne-klare-linie-donald-trump-benjamin-netanjahu-atomwaffen-v2/a-72936043',
     );
   await page.getByRole('button', { name: 'Link hinzufügen' }).click();
 
-  const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
+  const submitButton = page.getByRole('button', { name: 'Lernszenario erstellen' });
 
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
-  const firstSharedChat = page.getByRole('link', { name: 'Analyse des Nahostkonflikts' }).first();
+  const firstSharedChat = page.getByRole('button', { name: 'Analyse des Nahostkonflikts' }).first();
   await expect(firstSharedChat).toBeVisible();
   await firstSharedChat.click();
 
@@ -51,8 +51,8 @@ test('teacher can create shared chat with web sources, student can join chat and
   await page.getByTitle('Szenario starten').click();
 
   // enter chat directly as a teacher
-  await page.getByRole('link', { name: 'Chat öffnen' }).click();
   const schoolChatPagePromise = page.waitForEvent('popup');
+  await page.getByRole('link', { name: 'Chat öffnen' }).click();
   const schoolChatPage = await schoolChatPagePromise;
   await schoolChatPage.getByLabel('profileDropdown').waitFor();
 

@@ -27,7 +27,7 @@ export default async function Page(
     {
       learningScenarioId: learningScenarioId,
       schoolId: school.id,
-      userId: user.id,
+      user,
     },
   ).catch(handleErrorInServerComponent);
   const readOnly = user.id !== learningScenario.userId;
@@ -38,7 +38,6 @@ export default async function Page(
       (url) =>
         ({
           link: url,
-          type: 'websearch',
           error: false,
         }) as WebsearchSource,
     );
@@ -46,8 +45,10 @@ export default async function Page(
   return (
     <div className="w-full p-6 overflow-auto">
       <HeaderPortal>
-        <ToggleSidebarButton />
-        <div className="flex-grow"></div>
+        <ToggleSidebarButton
+          isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+        />
+        <div className="grow"></div>
         <ProfileMenu userAndContext={userAndContext} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto mt-4">

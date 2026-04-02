@@ -2,83 +2,63 @@
 
 This document provides an overview of the top-level directories in the project with brief explanations of their purpose and contents.
 
-## [`/app`](/app)
+## [`/apps/dialog`](/apps/dialog)
 
-The main application directory, containing Next.js app router structure with both authenticated and unauthenticated routes. Houses the primary UI layouts, error handling components, and global styling for the application.
+The main user-facing web application. A Next.js app with the app router used by students and teachers.
 
-Key components:
+## [`/apps/admin`](/apps/admin)
 
-- Authentication-based routing (`(authed)` and `(unauth)`)
-- API endpoints
-- Root layout and error handling
+The admin web application. A Next.js app that allows admins to configure telli-api and telli-dialog (federal state settings, models, etc.).
 
-## [`/auth`](/auth)
+## [`/apps/api`](/apps/api)
 
-Authentication system implementation including providers integration, utility functions, and type definitions.
+The telli proxy API. A Fastify REST API that acts as a proxy to LLM providers, handling billing and access control. Swagger docs are served at `/docs`.
 
-Key components:
+## [`/packages/shared`](/packages/shared)
 
-- Authentication providers (likely OAuth integrations)
-- Authentication-related utility functions
-- Type definitions for the auth system
+Shared code used by the `dialog` and `admin` apps (Next.js).
+Contains the dialog database schema, Drizzle ORM configuration, database access functions, services, and utilities.
 
-## [`/components`](/components)
+Key contents:
 
-Reusable UI components organized by functionality, including authentication components, chat interface elements, and navigation.
+- `src/db/` — Schema definitions, migrations, seed scripts, and database access functions
+- `src/knotenpunkt/` — Client for calling the telli-api service to access LLM providers (completions, embeddings, images). Note: ai-core now reads model configuration directly from the database, but still uses knotenpunkt to make requests to the telli-api service.
+- `src/s3/` — S3-compatible storage utilities
+- `src/logging/` — Shared logging helpers
 
-Key components:
+## [`/packages/shared-core`](/packages/shared-core)
 
-- Common shared components
-- Chat and conversation UI elements
-- Navigation components
-- Custom icons and hooks
+Cross-app shared utilities used by all applications (`admin`, `dialog`, and `api`).
+Contains framework-agnostic code that does not depend on app-specific runtimes.
 
-## [`/db`](/db)
+## [`/packages/api-database`](/packages/api-database)
 
-Database configuration, schema definitions, and utility functions for database interactions. Includes Drizzle ORM configuration and migration management.
+Database schema, Drizzle ORM configuration, and seed scripts for the API app. Manages the separate PostgreSQL database used exclusively by `apps/api`.
 
-Key components:
+Key contents:
 
-- Schema definitions
-- Database migrations
-- Cryptography utilities for data security
-- Database seeding logic
+- `src/schema.ts` — Table definitions (organizations, projects, API keys, LLM models)
+- `src/seed.ts` — Database seed script
+- `src/migrate.ts` — Migration runner
 
-## [`/env`](/env)
+## [`/packages/ai-core`](/packages/ai-core)
 
-Environment configuration management and validation of required environment variables.
+Logic to communicate with AI providers and LLMs. Handles chat completions, embeddings, image generation, and API key management including billing and access control.
 
-## [`/i18n`](/i18n)
+## [`/packages/ui`](/packages/ui)
 
-Internationalization and localization support, enabling multi-language functionality throughout the application.
+Shared UI component library based on [shadcn/ui](https://ui.shadcn.com/). Contains reusable React components and global Tailwind styles used across dialog and admin apps.
 
-## [`/icons`](/icons)
+## [`/packages/typescript-config`](/packages/typescript-config)
 
-SVG icon library organized by category for use throughout the application, separated from the components directory for better organization.
+Shared TypeScript configuration presets (`base.json`, `nextjs.json`, `react-library.json`, `api-base.json`) used across all apps and packages.
 
-Key categories:
+## [`/devops`](/devops)
 
-- UI action icons
-- Character representations
-- Feature-specific icon sets
+Infrastructure configuration.
 
-## [`/knotenpunkt`](/knotenpunkt)
+Key contents:
 
-Containing utils for callen the telli-api based on the open-source [knotenpunkt](https://github.com/deutschlandgpt/knotenpunkt)
-
-## [`/s3`](/s3)
-
-Contains util function for accessing s3 compatible stores (like IONOS or OTC)
-
-## [`/utils`](/utils)
-
-General utility functions and helpers organized by functionality, providing common operations used throughout the application.
-
-Key utilities:
-
-- Array and object manipulation
-- Date handling and formatting
-- File management utilities
-- Error handling
-- Navigation helpers
-- Random generation functions
+- `docker/docker-compose.local.yml` — Local development services (PostgreSQL, Keycloak, Valkey)
+- `docker/monitoring.yml` — Local monitoring stack (OpenTelemetry, Jaeger)
+- `docker/keycloak/` — Keycloak realm configuration

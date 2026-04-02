@@ -77,7 +77,11 @@ export default function SharedChat({
   return (
     <>
       {!chatActive && (
-        <ExpiredChatModal conversationMessages={uiMessages} title={sharedSchoolChat.name} />
+        <ExpiredChatModal
+          conversationMessages={uiMessages}
+          title={sharedSchoolChat.name}
+          inviteCode={inviteCode}
+        />
       )}
       <div className="flex flex-col h-full w-full">
         <SharedChatHeader
@@ -89,6 +93,7 @@ export default function SharedChat({
           messages={uiMessages}
           dialogStarted={dialogStarted}
           imageSource={maybeSignedPictureUrl}
+          inviteCode={inviteCode}
         />
         <hr className="w-full border-gray-200 mb-2" />
         <div
@@ -97,7 +102,7 @@ export default function SharedChat({
         >
           <div
             ref={scrollRef}
-            className="flex-grow w-full max-w-5xl overflow-y-auto p-4 pb-[5rem]"
+            className="grow w-full max-w-5xl overflow-y-auto p-4 pb-20"
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
             {sharedSchoolChat.studentExercise !== undefined &&

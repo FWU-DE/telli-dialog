@@ -1,10 +1,9 @@
 import { cn } from '@/utils/tailwind';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
+import { buttonPrimaryClassName, buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { labelClassName } from '@/utils/tailwind/input';
 import {
-  SharedConversationShareFormValues,
-  telliPointsPercentageValues,
   sharedConversationFormValuesSchema,
+  telliPointsPercentageValues,
   usageTimeValuesInMinutes,
 } from '../../../learning-scenarios/editor/[learningScenarioId]/schema';
 import { CharacterWithShareDataModel } from '@shared/db/schema';
@@ -14,7 +13,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { selectSVGBackground } from '@/utils/tailwind/select';
-import { buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { useTranslations } from 'next-intl';
 import CountDownTimer from '../../../learning-scenarios/_components/count-down';
 import FilledShareIcon from '@/components/icons/filled-share';
@@ -34,15 +32,14 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
   const sharedChatTimeLeft = calculateTimeLeft(character);
   const sharedChatActive = sharedChatTimeLeft > 0;
 
-  const { register: registerShare, getValues: getValuesShare } =
-    useForm<SharedConversationShareFormValues>({
-      resolver: zodResolver(sharedConversationFormValuesSchema),
-      defaultValues: {
-        telliPointsPercentageLimit: character.telliPointsLimit ?? 10,
-        usageTimeLimit: character.maxUsageTimeLimit ?? 45,
-      },
-      disabled: sharedChatActive,
-    });
+  const { register: registerShare, getValues: getValuesShare } = useForm({
+    resolver: zodResolver(sharedConversationFormValuesSchema),
+    defaultValues: {
+      telliPointsPercentageLimit: character.telliPointsLimit ?? 10,
+      usageTimeLimit: character.maxUsageTimeLimit ?? 45,
+    },
+    disabled: sharedChatActive,
+  });
 
   const shareUILink = `/characters/editor/${character.id}/share`;
 
@@ -70,7 +67,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4 border-[1px] mt-16 rounded-enterprise-md border-gray-200 p-6">
+    <div className="flex flex-col gap-4 border mt-16 rounded-enterprise-md border-gray-200 p-6">
       <h2 className="font-medium">{t('title')}</h2>
       <p>{t('description')}</p>
       <div className="flex gap-6 items-center flex-wrap">
@@ -83,7 +80,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
             aria-label="Telli-Points"
             {...registerShare('telliPointsPercentageLimit')}
             className={cn(
-              'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600 focus:outline-none',
+              'py-2 pl-4 pr-8 bg-[#EEEEEE] border rounded-enterprise-md border-gray-600 focus:outline-hidden',
               sharedChatActive && 'cursor-not-allowed',
             )}
             style={{
@@ -107,7 +104,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
             aria-label={t('max-usage')}
             {...registerShare('usageTimeLimit')}
             className={cn(
-              'py-2 pl-4 pr-8 bg-[#EEEEEE] border-[1px] rounded-enterprise-md border-gray-600 focus:outline-none',
+              'py-2 pl-4 pr-8 bg-[#EEEEEE] border rounded-enterprise-md border-gray-600 focus:outline-hidden',
               sharedChatActive && 'cursor-not-allowed',
             )}
             style={{
@@ -130,7 +127,7 @@ export default function ShareContainer({ ...character }: ShareContainerProps) {
             })}
           </select>
         </div>
-        <div className="flex-grow" />
+        <div className="grow" />
         {!sharedChatActive && <div />}
         {sharedChatActive && (
           <div className="flex flex-col gap-4">

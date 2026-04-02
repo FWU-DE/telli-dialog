@@ -2,7 +2,7 @@
 
 import { type UserAndContext } from '@/auth/types';
 import { useToast } from '@/components/common/toast';
-import useBreakpoints from '@/components/hooks/use-breakpoints';
+import { useSidebar } from '@telli/ui/components/Sidebar';
 import CharacterAvatarIcon from '@/components/icons/character-avatar';
 import FourBoxes from '@/components/icons/four-boxes';
 import RobotIcon from '@/components/icons/robot';
@@ -12,7 +12,6 @@ import TelliPointsIcon from '@/components/icons/telli-points';
 import { ImageSquareIcon } from '@phosphor-icons/react';
 import CollapsibleSidebar from '@/components/navigation/sidebar/collapsible-sidebar';
 import SidebarItem from '@/components/navigation/sidebar/conversation-item';
-import { useSidebarVisibility } from '@/components/navigation/sidebar/sidebar-provider';
 import TelliPointsProgressBar from '@/components/telli-points-progress-bar';
 
 import { cn } from '@/utils/tailwind';
@@ -21,22 +20,28 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAfter, isBefore, isToday, isYesterday, subDays } from 'date-fns';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { useCustomPathname } from '@/hooks/use-custom-pathname';
+import { useRouter } from 'next/navigation';
 import React from 'react';
-import deleteConversationAction, { updateConversationTitleAction } from './actions';
+import { deleteConversationAction, updateConversationTitleAction } from './actions';
 import { fetchClientSideConversations } from './utils';
-import { HELP_MODE_GPT_ID } from '@shared/db/const';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 
 type Props = {
   user: UserAndContext;
   currentModelCosts: number;
   userPriceLimit: number;
+  isNewUiDesignEnabled: boolean;
 };
 
-export default function DialogSidebar({ user, currentModelCosts, userPriceLimit }: Props) {
-  const { isBelow } = useBreakpoints();
-  const { toggle, isOpen } = useSidebarVisibility();
-  const pathname = usePathname();
+export default function DialogSidebar({
+  user,
+  currentModelCosts,
+  userPriceLimit,
+  isNewUiDesignEnabled,
+}: Props) {
+  const { isMobile, setOpenMobile } = useSidebar();
+  const pathname = useCustomPathname();
   const router = useRouter();
   const toast = useToast();
   const tCommon = useTranslations('common');
@@ -59,8 +64,8 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
   }
 
   React.useEffect(() => {
-    if (isOpen && isBelow.md) {
-      toggle();
+    if (isMobile) {
+      setOpenMobile(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
@@ -109,7 +114,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
   }
 
   return (
-    <CollapsibleSidebar>
+    <CollapsibleSidebar isNewUiDesignEnabled={isNewUiDesignEnabled}>
       <nav className="flex text-sm flex-col items-start overflow-y-hidden px-1">
         <div className="flex flex-col items-start px-5 w-full">
           <hr className="w-full my-2" />
@@ -132,7 +137,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
                 )}
               >
                 <ImageSquareIcon className="w-6 h-5" />
-                <span className="text-base">{t('image-generation-new')}</span>
+                <span className="text-base">{t('new-image')}</span>
               </div>
             </Link>
           )}
@@ -141,12 +146,12 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
               className={cn(
                 'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
                 (pathname === '/custom' || pathname.includes('custom/editor')) &&
-                  !pathname.includes(HELP_MODE_GPT_ID) &&
+                  !pathname.includes(HELP_MODE_ASSISTANT_ID) &&
                   'underline',
               )}
             >
               <FourBoxes className="w-6 h-5" />
-              <span className="text-base">{t('custom-gpt')}</span>
+              <span className="text-base">{t('assistants')}</span>
             </div>
           </Link>
           <hr className="w-full my-2" />
@@ -163,7 +168,7 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
                         )}
                       >
                         <SharedChatIcon className="w-6 h-6" />
-                        <span className="text-base">{t('class-chats')}</span>
+                        <span className="text-base">{t('learning-scenarios')}</span>
                       </div>
                     </Link>
                   )}
@@ -186,14 +191,14 @@ export default function DialogSidebar({ user, currentModelCosts, userPriceLimit 
                 {user.school.userRole === 'teacher' &&
                   user.federalState.featureToggles.isCustomGptEnabled && (
                     <Link
-                      href={`/custom/d/${HELP_MODE_GPT_ID}`}
+                      href={`/custom/d/${HELP_MODE_ASSISTANT_ID}`}
                       prefetch={false}
                       className="w-full"
                     >
                       <div
                         className={cn(
                           'flex items-center gap-2 stroke-main-900 text-primary hover:underline py-1.5 w-full',
-                          pathname.includes(HELP_MODE_GPT_ID) && 'underline',
+                          pathname.includes(HELP_MODE_ASSISTANT_ID) && 'underline',
                         )}
                       >
                         <RobotIcon className="w-6 h-5" />

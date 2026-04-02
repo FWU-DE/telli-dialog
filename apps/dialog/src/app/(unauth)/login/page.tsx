@@ -1,5 +1,5 @@
 import LoginForm from './login-form';
-import { getMaybeUser } from '@/auth/utils';
+import { getMaybeUser, getSafeCallbackUrl } from '@/auth/utils';
 import Footer from '@/components/navigation/footer';
 import { redirect } from 'next/navigation';
 
@@ -15,11 +15,11 @@ export default async function Page({
 
   if (maybeUser !== null) {
     // User is already logged in, redirect to callbackUrl or home
-    redirect(callbackUrl || '/');
+    redirect(getSafeCallbackUrl(callbackUrl));
   }
 
   return (
-    <div className="h-[100dvh] flex flex-col gap-4 sm:gap-8">
+    <div className="h-dvh flex flex-col gap-4 sm:gap-8">
       <LoginForm />
       <div className="px-4 pt-4 sm:px-8 sm:pt-8">
         <hr className="w-full" />

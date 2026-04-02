@@ -46,7 +46,7 @@ function FieldGroup({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="field-group"
       className={cn(
-        'group/field-group @container/field-group flex w-full flex-col gap-7 data-[slot=checkbox-group]:gap-3 [&>[data-slot=field-group]]:gap-4',
+        'group/field-group @container/field-group flex w-full flex-col gap-8 data-[slot=checkbox-group]:gap-3 [&>[data-slot=field-group]]:gap-4',
         className,
       )}
       {...props}
@@ -54,7 +54,7 @@ function FieldGroup({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-const fieldVariants = cva('group/field flex w-full gap-3 data-[invalid=true]:text-destructive', {
+const fieldVariants = cva('group/field flex w-full gap-2 data-[invalid=true]:text-destructive', {
   variants: {
     orientation: {
       vertical: ['flex-col [&>*]:w-full [&>.sr-only]:w-auto'],
@@ -72,6 +72,18 @@ const fieldVariants = cva('group/field flex w-full gap-3 data-[invalid=true]:tex
   },
   defaultVariants: {
     orientation: 'vertical',
+  },
+});
+
+const fieldLabelVariants = cva('', {
+  variants: {
+    size: {
+      small: 'text-sm font-medium',
+      normal: 'text-base font-normal',
+    },
+  },
+  defaultVariants: {
+    size: 'small',
   },
 });
 
@@ -101,11 +113,16 @@ function FieldContent({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-function FieldLabel({ className, ...props }: React.ComponentProps<typeof Label>) {
+function FieldLabel({
+  className,
+  size,
+  ...props
+}: React.ComponentProps<typeof Label> & VariantProps<typeof fieldLabelVariants>) {
   return (
     <Label
       data-slot="field-label"
       className={cn(
+        fieldLabelVariants({ size }),
         'group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50',
         'has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-4',
         'has-data-[state=checked]:bg-primary/5 has-data-[state=checked]:border-primary dark:has-data-[state=checked]:bg-primary/10',

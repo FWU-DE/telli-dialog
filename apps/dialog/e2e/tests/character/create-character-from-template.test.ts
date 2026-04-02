@@ -4,15 +4,20 @@ import { nanoid } from 'nanoid';
 
 test('create character from template', async ({ page }) => {
   await login(page, 'teacher');
-  await page.goto('/characters?visibility=global');
-  const link = page.getByRole('link', { name: 'Johann Wolfgang von Goethe' });
-  const copyButton = link.getByRole('button', { name: 'Kopieren' });
+  await page.goto('/characters');
 
-  await expect(link).toBeVisible();
+  const card = page
+    .getByRole('button', { name: 'Johann Wolfgang von Goethe', exact: true })
+    .first();
+  await expect(card).toBeVisible();
+  await card.click();
+  await page.waitForURL('/characters/editor/**');
+
+  const copyButton = page.getByRole('button', { name: 'Dialogpartner bearbeiten' });
   await expect(copyButton).toBeVisible();
   await expect(copyButton).toBeEnabled();
   await copyButton.click();
-  await page.waitForURL('/characters/editor/**');
+  await page.waitForURL('**?create=true**');
 
   const name = 'Johann Wolfgang von Goethe ' + nanoid(8);
   await page.getByLabel('Wie heißt die simulierte Person? *').fill(name);

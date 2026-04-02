@@ -37,9 +37,11 @@ export default function CharacterPreviewPage({
   return (
     <div className="min-w-full p-6 overflow-auto">
       <HeaderPortal>
-        <ToggleSidebarButton />
+        <ToggleSidebarButton
+          isNewUiDesignEnabled={federalState?.featureToggles?.isNewUiDesignEnabled ?? false}
+        />
         <NewChatButton />
-        <div className="flex-grow"></div>
+        <div className="grow"></div>
         <ProfileMenu userAndContext={user} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto">
@@ -51,7 +53,7 @@ export default function CharacterPreviewPage({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           className={cn(
-            'p-2 px-4 focus:outline-none disabled:bg-light-gray disabled:border-gray-100 disabled:cursor-not-allowed',
+            'p-2 px-4 focus:outline-hidden disabled:bg-light-gray disabled:border-gray-100 disabled:cursor-not-allowed',
           )}
           placeholder={t('search-placeholder')}
           disabled={filterDisabled}

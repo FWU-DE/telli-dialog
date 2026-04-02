@@ -1,12 +1,14 @@
 import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
 import { db } from '..';
 import {
+  AssistantFileMapping,
+  assistantTable,
   CharacterFileMapping,
   characterTable,
+  ChunkInsertModel,
+  chunkTable,
   ConversationMessageFileMappingTable,
   conversationTable,
-  CustomGptFileMapping,
-  customGptTable,
   federalStateTable,
   FileInsertModel,
   FileMetadata,
@@ -15,13 +17,8 @@ import {
   fileTable,
   LearningScenarioFileMapping,
   learningScenarioTable,
-  TextChunkInsertModel,
-  TextChunkTable,
 } from '../schema';
 import { logDebug } from '@shared/logging';
-import { buildCharacterPictureKey } from '@shared/characters/character-service';
-import { buildCustomGptPictureKey } from '@shared/custom-gpt/custom-gpt-service';
-import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
 
 export async function linkFilesToConversation({
   conversationMessageId,
@@ -38,6 +35,39 @@ export async function linkFilesToConversation({
     .values(fileIds.map((fileId) => ({ conversationMessageId, fileId, conversationId })));
 }
 
+export async function dbVerifyFileOwnership({
+  fileId,
+  userId,
+}: {
+  fileId: string;
+  userId: string;
+}): Promise<boolean> {
+  // Check ownership via conversation mapping (for files already linked to a message)
+  const mappingResult = await db
+    .select({ fileId: ConversationMessageFileMappingTable.fileId })
+    .from(ConversationMessageFileMappingTable)
+    .innerJoin(
+      conversationTable,
+      eq(ConversationMessageFileMappingTable.conversationId, conversationTable.id),
+    )
+    .where(
+      and(
+        eq(ConversationMessageFileMappingTable.fileId, fileId),
+        eq(conversationTable.userId, userId),
+      ),
+    )
+    .limit(1);
+  if (mappingResult.length > 0) return true;
+
+  // Fallback: check direct ownership on file_table (for files uploaded but not yet linked to a conversation)
+  const fileResult = await db
+    .select({ id: fileTable.id })
+    .from(fileTable)
+    .where(and(eq(fileTable.id, fileId), eq(fileTable.userId, userId)))
+    .limit(1);
+  return fileResult.length > 0;
+}
+
 export async function dbGetRelatedFiles(conversationId: string): Promise<Map<string, FileModel[]>> {
   const files = await db
     .select({
@@ -48,6 +78,7 @@ export async function dbGetRelatedFiles(conversationId: string): Promise<Map<str
       size: fileTable.size,
       createdAt: fileTable.createdAt,
       metadata: fileTable.metadata,
+      userId: fileTable.userId,
     })
     .from(ConversationMessageFileMappingTable)
     .innerJoin(fileTable, eq(ConversationMessageFileMappingTable.fileId, fileTable.id))
@@ -67,6 +98,7 @@ export async function dbGetRelatedSharedChatFiles(conversationId?: string): Prom
       size: fileTable.size,
       createdAt: fileTable.createdAt,
       metadata: fileTable.metadata,
+      userId: fileTable.userId,
     })
     .from(LearningScenarioFileMapping)
     .innerJoin(fileTable, eq(LearningScenarioFileMapping.fileId, fileTable.id))
@@ -86,6 +118,7 @@ export async function dbGetFilesForLearningScenario(
       size: fileTable.size,
       createdAt: fileTable.createdAt,
       metadata: fileTable.metadata,
+      userId: fileTable.userId,
     })
     .from(LearningScenarioFileMapping)
     .innerJoin(fileTable, eq(LearningScenarioFileMapping.fileId, fileTable.id))
@@ -102,6 +135,7 @@ export async function dbGetRelatedCharacterFiles(conversationId?: string): Promi
       size: fileTable.size,
       createdAt: fileTable.createdAt,
       metadata: fileTable.metadata,
+      userId: fileTable.userId,
     })
     .from(CharacterFileMapping)
     .innerJoin(fileTable, eq(CharacterFileMapping.fileId, fileTable.id))
@@ -110,20 +144,21 @@ export async function dbGetRelatedCharacterFiles(conversationId?: string): Promi
   return files;
 }
 
-export async function dbGetRelatedCustomGptFiles(customGptId?: string): Promise<FileModel[]> {
-  if (customGptId === undefined) return [];
+export async function dbGetRelatedAssistantFiles(assistantId?: string): Promise<FileModel[]> {
+  if (assistantId === undefined) return [];
   const files = await db
     .select({
-      id: CustomGptFileMapping.fileId,
+      id: AssistantFileMapping.fileId,
       name: fileTable.name,
       type: fileTable.type,
       size: fileTable.size,
       createdAt: fileTable.createdAt,
       metadata: fileTable.metadata,
+      userId: fileTable.userId,
     })
-    .from(CustomGptFileMapping)
-    .innerJoin(fileTable, eq(CustomGptFileMapping.fileId, fileTable.id))
-    .where(eq(CustomGptFileMapping.customGptId, customGptId));
+    .from(AssistantFileMapping)
+    .innerJoin(fileTable, eq(AssistantFileMapping.fileId, fileTable.id))
+    .where(eq(AssistantFileMapping.assistantId, assistantId));
 
   return files;
 }
@@ -137,6 +172,7 @@ function convertToMap(
     size: number;
     createdAt: Date;
     metadata: FileMetadata | null;
+    userId: string | null;
   }[],
 ) {
   const resultMap: Map<string, FileModel[]> = new Map();
@@ -148,6 +184,7 @@ function convertToMap(
       createdAt: row.createdAt,
       type: row.type,
       metadata: row.metadata,
+      userId: row.userId,
     };
     const maybeFiles = resultMap.get(row.foreignId);
     if (maybeFiles === null || maybeFiles === undefined) {
@@ -169,18 +206,18 @@ export async function dbGetAttachedFileByEntityId({
   conversationId,
   characterId,
   sharedChatId,
-  customGptId,
+  assistantId,
 }: {
   conversationId?: string;
   characterId?: string;
   sharedChatId?: string;
-  customGptId?: string;
+  assistantId?: string;
 }): Promise<(FileModel & { conversationMessageId?: string })[]> {
   const combinedFiles = await Promise.all([
     dbGetRelatedSharedChatFiles(sharedChatId),
     dbGetRelatedCharacterFiles(characterId),
     dbGetAllFileIdByConversationId(conversationId),
-    dbGetRelatedCustomGptFiles(customGptId),
+    dbGetRelatedAssistantFiles(assistantId),
   ]);
   return combinedFiles.flat();
 }
@@ -213,16 +250,31 @@ export async function dbGetDanglingConversationFileIds(): Promise<string[]> {
   return fileMappings.map((row) => row.fileId);
 }
 
-export async function dbInsertFileWithTextChunks(
-  file: FileInsertModel,
-  textChunks: TextChunkInsertModel[],
-) {
+export async function dbInsertFileWithChunks(file: FileInsertModel, chunks: ChunkInsertModel[]) {
   await db.transaction(async (tx) => {
     await tx.insert(fileTable).values(file).onConflictDoNothing();
-    if (textChunks.length > 0) {
-      await tx.insert(TextChunkTable).values(textChunks);
+    if (chunks.length > 0) {
+      await tx.insert(chunkTable).values(chunks);
     }
   });
+}
+
+export async function dbInsertWebChunks(chunks: ChunkInsertModel[]) {
+  if (chunks.length === 0) return;
+  await db.insert(chunkTable).values(chunks).onConflictDoNothing();
+}
+
+/**
+ * Checks which of the given source URLs already have chunks in the database.
+ * Returns the set of URLs that exist.
+ */
+export async function dbChunksExistForSourceUrls(sourceUrls: string[]): Promise<Set<string>> {
+  if (sourceUrls.length === 0) return new Set();
+  const results = await db
+    .selectDistinct({ sourceUrl: chunkTable.sourceUrl })
+    .from(chunkTable)
+    .where(inArray(chunkTable.sourceUrl, sourceUrls));
+  return new Set(results.map((r) => r.sourceUrl).filter((url): url is string => url !== null));
 }
 
 export async function dbInsertFile(file: FileInsertModel) {
@@ -234,7 +286,6 @@ export async function dbDeleteFileAndDetachFromConversation(filesToDelete: strin
     await tx
       .delete(ConversationMessageFileMappingTable)
       .where(inArray(ConversationMessageFileMappingTable.fileId, filesToDelete));
-    await tx.delete(TextChunkTable).where(inArray(TextChunkTable.fileId, filesToDelete));
     await tx.delete(fileTable).where(inArray(fileTable.id, filesToDelete));
   });
 }
@@ -249,19 +300,18 @@ export async function dbDeleteDanglingFiles() {
         eq(fileTable.id, ConversationMessageFileMappingTable.fileId),
       )
       .leftJoin(CharacterFileMapping, eq(fileTable.id, CharacterFileMapping.fileId))
-      .leftJoin(CustomGptFileMapping, eq(fileTable.id, CustomGptFileMapping.fileId))
+      .leftJoin(AssistantFileMapping, eq(fileTable.id, AssistantFileMapping.fileId))
       .leftJoin(LearningScenarioFileMapping, eq(fileTable.id, LearningScenarioFileMapping.fileId))
       .where(
         and(
           isNull(ConversationMessageFileMappingTable.fileId),
           isNull(CharacterFileMapping.fileId),
-          isNull(CustomGptFileMapping.fileId),
+          isNull(AssistantFileMapping.fileId),
           isNull(LearningScenarioFileMapping.fileId),
         ),
       );
     const fileIdsToDelete = fileIds.map((f) => f.fileId);
     logDebug('fileIdsToDelete', { fileIdsToDelete });
-    await tx.delete(TextChunkTable).where(inArray(TextChunkTable.fileId, fileIdsToDelete));
     await tx.delete(fileTable).where(inArray(fileTable.id, fileIdsToDelete));
     return fileIdsToDelete;
   });
@@ -271,37 +321,31 @@ export async function dbDeleteDanglingFiles() {
  * Returns all S3 keys for files which are referenced in the database in any table.
  */
 export async function dbGetAllS3FileKeys(): Promise<string[]> {
-  const [files, characters, customGpts, sharedSchoolConversations, federalStates] =
+  const [files, characters, assistants, sharedSchoolConversations, federalStates] =
     await Promise.all([
       db.select({ fileId: fileTable.id }).from(fileTable),
       db
         .select({ id: characterTable.id, pictureId: characterTable.pictureId })
         .from(characterTable),
       db
-        .select({ id: customGptTable.id, pictureId: customGptTable.pictureId })
-        .from(customGptTable),
+        .select({ id: assistantTable.id, pictureId: assistantTable.pictureId })
+        .from(assistantTable),
       db
         .select({
           id: learningScenarioTable.id,
           pictureId: learningScenarioTable.pictureId,
         })
         .from(learningScenarioTable),
-      db.select({ id: federalStateTable.id }).from(federalStateTable),
+      db.select({ pictureUrls: federalStateTable.pictureUrls }).from(federalStateTable),
     ]);
 
   const fileIds = files.map((x) => `message_attachments/${x.fileId}`);
-  const pictureIds = [...characters, ...customGpts, ...sharedSchoolConversations]
+  const pictureIds = [...characters, ...assistants, ...sharedSchoolConversations]
     .map((x) => x.pictureId)
     .filter((x): x is string => !!x);
-  const avatarIds = [
-    ...characters.map((x) => buildCharacterPictureKey(x.id)),
-    ...customGpts.map((x) => buildCustomGptPictureKey(x.id)),
-    ...sharedSchoolConversations.map((x) => buildLearningScenarioPictureKey(x.id)),
-  ];
-  const whitelabels = federalStates.flatMap((x) => [
-    `whitelabels/${x.id}/logo.svg`,
-    `whitelabels/${x.id}/favicon.svg`,
-  ]);
+  const federalStatePictureUrls = federalStates
+    .flatMap((x) => [x.pictureUrls?.favicon, x.pictureUrls?.logo])
+    .filter((x): x is string => !!x);
 
-  return [...fileIds, ...pictureIds, ...avatarIds, ...whitelabels];
+  return [...fileIds, ...pictureIds, ...federalStatePictureUrls];
 }

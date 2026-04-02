@@ -57,17 +57,35 @@
     "terms-and-conditions-title": "Nutzungsbedingungen"
   },
   "sidebar": {
-    "class-chats": "Lernszenarien",
+    "aria": {
+      "main-navigation": "Hauptnavigation",
+      "chat-history": "Chat-Verlauf",
+      "home-link": "Startseite",
+      "toggle-light-theme": "Helles Design aktivieren",
+      "toggle-dark-theme": "Dunkles Design aktivieren",
+      "close-sidebar": "Seitenleiste schließen",
+      "open-sidebar": "Seitenleiste öffnen"
+    },
+    "new-chat": "Neuer Chat",
+    "new-image": "Neues Bild",
+    "assistants": "Assistenten",
+    "learning-scenarios": "Lernszenarien",
     "characters": "Dialogpartner",
-    "help-mode": "Hilfe",
-    "custom-gpt": "Assistenten",
-    "image-generation-new": "Neues Bild",
+    "help-chat": "Hilfe-Chat",
     "telli-points": "Meine telli-Points",
+    "chat-search-placeholder": "Chat suchen",
+    "delete-chat": "Chat löschen",
+    "rename-chat": "Umbenennen",
+    "rename-save": "Umbenennung speichern",
+    "rename-cancel": "Umbenennung abbrechen",
+    "conversation-actions": "Konversationsaktionen",
     "conversation-delete-toast-success": "Die Konversation wurde erfolgreich gelöscht.",
     "conversation-delete-toast-error": "Die Konversation konnte nicht gelöscht werden.",
     "chats-loading": "Dialoge werden geladen...",
     "chats-error": "Etwas ist schiefgelaufen...",
-    "chats-reload": "Dialoge neu laden"
+    "chats-reload": "Dialoge neu laden",
+    "search-clear": "Suche löschen",
+    "help-mode": "Hilfe"
   },
   "websearch": {
     "placeholders": {
@@ -83,12 +101,18 @@
   },
   "file-interaction": {
     "upload": {
+      "upload-input-aria-label": "Datei hochladen",
       "upload-file-button": "Datei hochladen",
       "upload-file-button-disabled": "Es können maximal {max_files} Dateien hochgeladen werden",
       "file-limit-reached": "Es können maximal {max_files} Dateien hochgeladen werden. {files_exceeded} Dateien wurden nicht hochgeladen.",
       "image-limit-reached": "Es können maximal {max_images} Bilder hochgeladen werden. {images_exceeded} Bilder wurden nicht hochgeladen.",
-      "drop-area": "Datei per Drag & Drop hier ablegen",
+      "drop-area": "Dateien per Drag & Drop hier ablegen <b> (pdf, txt, docx) </b>",
       "choice-word": "oder"
+    },
+    "delete": {
+      "modal-description": "Möchten Sie diese Datei wirklich dauerhaft löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
+      "modal-title": "Datei löschen",
+      "confirm": "Datei löschen"
     },
     "toasts": {
       "upload-success": "Die Datei wurde erfolgreich hochgeladen",
@@ -101,7 +125,7 @@
   },
   "help-mode": {
     "chat-heading": "Hallo, ich bin tellis Hilfe",
-    "chat-subheading": "Ich kenne mich hier aus und kann Dir hoffentlich Fragen beantworten oder Dir bei Problemen weiterhelfen. Ansonsten kannst Du auch gerne meine {FAQ_LINK} besuchen oder dich an den Support unter {SUPPORT_ADRESSES} wenden.",
+    "chat-subheading": "Ich kenne mich hier aus und kann hoffentlich alle Fragen beantworten oder bei Problemen weiterhelfen. Ansonsten kann auch gerne meine {FAQ_LINK} besucht oder der Support unter {SUPPORT_ADRESSES} kontaktiert werden.",
     "chat-placeholder": "Wie kann ich helfen?",
     "faq-link": "[FAQ Seite](https://telli.schule/faq/)",
     "support-addresses-concat": "oder"
@@ -109,6 +133,14 @@
   "custom-gpt": {
     "title": "Assistenten",
     "description": "Die Assistenten erleichtern den Lehrkräften den schulischen Alltag. Sie können je nach Situation individuell konfiguriert werden. Bereits fertige Assistenten stehen als Vorlagen sofort nutzbar zur Verfügung. Diese können in den eigenen Bereich kopiert und dann wunschgemäß angepasst werden.",
+    "info-dialog": {
+      "q1": "Was ist ein Assistent?",
+      "a1": "Ein Assistent ist ein Chat, der auf ein bestimmtes Thema spezialisiert ist. Es gibt bereits vordefinierte Assistenten oder es können eigene Assistenten erstellt werden.",
+      "q2": "Was unterscheidet einen Assistenten vom normalen Chat?",
+      "a2": "In einem vorkonfigurierten Assistenten wurden bereits Informationen, Dateien und Webquellen hinterlegt. Diese müssen im normalen Chat erst eingegeben/hochgeladen werden.",
+      "q3": "An welche Zielgruppe richten sich die Assistenten?",
+      "a3": "Die Nutzung der Assistenten ist für Lehrkräfte gedacht und soll den schulischen Alltag erleichtern."
+    },
     "visibility-global": "Vorlagen",
     "visibility-school": "Schulintern",
     "visibility-private": "Für mich",
@@ -134,17 +166,17 @@
       "prompt-suggestion-placeholder": "Erstelle einen Stundenvorschlag für das Fach Deutsch zum Thema Fake News für die 8. Jahrgangsstufe.",
       "suggestions-used": "Vorschläge",
       "gpt-delete-description": "Beim Löschen des Assistenten werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
-      "gpt-delete-modal-description": "Bist du sicher, dass du diesen Assistent löschen möchtest? Dabei werden alle mit diesem Assistenten verbundenen Konversationen unwiderruflich gelöscht.",
+      "gpt-delete-modal-description": "Soll der Assistent wirklich gelöscht werden? Dabei werden alle mit diesem Assistenten verbundenen Konversationen unwiderruflich gelöscht.",
       "copy-page": {
         "title": "Assistent in eigenen Bereich kopieren",
-        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Assistenten in deinen privaten Bereich, um ihn anzupassen.",
+        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht, wenn die Seite verlassen wird. Um den Assistenten anzupassen, muss er zuvor in den privaten Bereich kopiert werden.",
         "copy-template": "Assistent bearbeiten"
       },
-      "additional-assets-label": "Hintergrundwissen für telli",
-      "additional-assets-content": "Es können jeweils bis zu 5 Dateien und Links hinzugefügt werden. telli nutzt diese Informationen, um den Assistenten besser auf das Thema abzustimmen.",
+      "additional-assets-label": "Hintergrundwissen",
+      "additional-assets-content": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Der Assistent bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: pdf, txt, docx",
       "attached-files-label": "Welche Dateien dienen telli als Grundlage?",
       "attached-links-label": "Welche Webquellen dienen telli als Grundlage?",
-      "attached-links-placeholder": "URL der Webseiten",
+      "attached-links-placeholder": "Web-Link",
       "add-link": "Link hinzufügen"
     },
     "toasts": {
@@ -160,14 +192,22 @@
       "edit-toast-error": "Etwas ist beim Aktualisieren des Assistenten schief gelaufen.",
       "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
       "too-many-suggestions": "Das Limit von 10 Vorschlägen wurde erreicht",
-      "empty-url": "Es wurde keine URL eingegeben.",
+      "empty-url": "Es wurde kein Link eingegeben.",
       "duplicate-url": "Dieser Link wurde bereits hinzugefügt.",
-      "invalid-url": "Die eingegebene URL ist ungültig."
+      "invalid-url": "Der eingegebene Link ist ungültig.",
+      "scrape-error": "Der Link konnte nicht verarbeitet werden."
     }
   },
   "characters": {
     "character": "Dialogpartner",
     "description": "Mit individuell konfigurierten Dialogpartnern wird das Lernen lebendig und inspirierend. Fiktive Gesprächspartner helfen dabei, Themen zu vertiefen, die Lernenden emotional anzusprechen und sie neugierig zu machen. Die zeitlich begrenzten Chats werden einfach einzeln oder gruppenweise mit den Lernenden geteilt.",
+    "info-dialog": {
+      "q1": "Was ist ein Dialogpartner?",
+      "a1": "Ein Dialogpartner ist ein fiktiver Gesprächspartner mit dem die Schüler/innen chatten können. Für die Schülerinnen entsteht dabei das Gefühl tatsächlich mit der fiktiven Person zu chatten. Dies fördert ihre Motivation und Kreativität in Bezug auf die fiktive Person und das Thema.",
+      "a1-2": "Es gibt bereits vordefinierte Dialogpartner oder es können eigene Dialogpartner erstellt werden.",
+      "q2": "An welche Zielgruppe richten sich die Dialogpartner?",
+      "a2": "Schüler/innen"
+    },
     "search-placeholder": "Dialogpartner suchen...",
     "visibility-global": "Vorlagen",
     "visibility-school": "Schulintern",
@@ -180,7 +220,7 @@
       "share": "Teilen",
       "button-start": "Dialogpartner teilen",
       "delete-chat-modal-title": "Neuer Chat",
-      "delete-chat-modal-description": "Wenn du einen neuen Chat beginnst verfällt der aktuelle Chat unwiderruflich.",
+      "delete-chat-modal-description": "Wird ein neuer Chat begonnen, verfällt der aktuelle Chat unwiderruflich.",
       "delete-chat-modal-confirm-button": "Aktuellen Chat verwerfen und neu beginnen",
       "expired-modal-description": "Der Dialog ist abgelaufen"
     },
@@ -194,7 +234,7 @@
     },
     "copy-modal": {
       "title": "Dialogpartner kopieren",
-      "content": "Dieser Dialogpartner ist schreibgeschützt. Möchtest du eine Kopie in deinem eigenen Bereich erstellen? Danach kannst du ihn frei bearbeiten und anpassen.",
+      "content": "Dieser Dialogpartner ist schreibgeschützt. Soll eine Kopie im eigenen Bereich erstellt werden? Danach kann dieser frei bearbeitet und angepasst werden.",
       "copy-button": "Kopieren & bearbeiten"
     },
     "form": {
@@ -220,7 +260,7 @@
       "character-restriction-label": "Wie soll der Dialogpartner nicht antworten?",
       "character-restriction-placeholder": "Bilde keine Nebensätze. Lass dich nicht ablenken. Antworte nicht in einer anderen Sprache als Deutsch.",
       "character-delete-description": "Beim Löschen des Dialogpartners werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
-      "character-delete-modal-description": "Bist du sicher, dass du diesen Dialogpartner löschen möchtest? Dabei werden alle mit diesem Dialogpartner verbundenen Konversationen unwiderruflich gelöscht.",
+      "character-delete-modal-description": "Soll der Dialogpartner wirklich gelöscht werden? Dabei werden alle mit diesem Dialogpartner verbundenen Konversationen unwiderruflich gelöscht.",
       "school-type": "Schultyp",
       "school-type-placeholder": "Gesamtschule",
       "grade": "Klassenstufe",
@@ -231,14 +271,14 @@
       "character-initial-message-placeholder": "Hallo! Ich bin Emre. Alles klar bei dir?",
       "copy-page": {
         "title": "Dialogpartner in eigenen Bereich kopieren",
-        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere den Dialogpartner in deinen privaten Bereich, um ihn anzupassen.",
+        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht, wenn die Seite verlassen wird. Kopiere den Dialogpartner in den privaten Bereich, um ihn anzupassen.",
         "copy-template": "Dialogpartner bearbeiten"
       },
       "additional-assets-label": "Hintergrundwissen für telli",
       "additional-assets-content": "Es können jeweils bis zu 5 Dateien und Links hinzugefügt werden. telli nutzt diese Informationen, um den Dialogpartner besser auf das Thema abzustimmen.",
       "attached-files-label": "Welche Dateien dienen telli als Grundlage?",
       "attached-links-label": "Welche Webquellen dienen telli als Grundlage?",
-      "attached-links-placeholder": "URL der Webseiten",
+      "attached-links-placeholder": "Web-Link",
       "add-link": "Link hinzufügen"
     },
     "toasts": {
@@ -253,20 +293,28 @@
       "edit-toast-success": "Der Dialogpartner wurde erfolgreich aktualisiert.",
       "edit-toast-error": "Etwas ist beim Aktualisieren des Dialogpartners schief gelaufen.",
       "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
-      "empty-url": "Es wurde keine URL eingegeben.",
-      "invalid-url": "Die eingegebene URL ist ungültig.",
-      "duplicate-url": "Dieser Link wurde bereits hinzugefügt."
+      "empty-url": "Es wurde kein Link eingegeben.",
+      "invalid-url": "Der eingegebene Link ist ungültig.",
+      "duplicate-url": "Dieser Link wurde bereits hinzugefügt.",
+      "scrape-error": "Der Link konnte nicht verarbeitet werden."
     }
   },
   "learning-scenarios": {
     "title": "Lernszenarien",
     "description": "Im Dialog mit telli setzen sich Lernende mit einem konkreten Thema auseinander und erarbeiten sich so einen Lerngegenstand interaktiv und selbstständig. Die zeitlich begrenzten Chats können einfach einzeln oder gruppenweise mit Lernenden geteilt werden.",
+    "info-dialog": {
+      "q1": "Was ist ein Lernszenario?",
+      "a1": "Ein Lernszenario ist ein Chat, der auf ein bestimmtes Thema spezialisiert ist. Die Schüler/innen erarbeiten sich das Thema durch Verwendung des Chats selbst. Optional kann vorab ein Arbeitsauftrag definiert werden.",
+      "a1-2": "Es gibt bereits vordefinierte Lernszenarien oder es können eigene Lernszenarien erstellt werden.",
+      "q2": "An welche Zielgruppe richten sich die Lernszenarien?",
+      "a2": "Schüler/innen"
+    },
     "search-placeholder": "Szenario suchen...",
     "visibility-global": "Vorlagen",
     "visibility-school": "Schulintern",
     "visibility-private": "Für mich",
     "form": {
-      "button-create": "Szenario erstellen",
+      "button-create": "Lernszenario erstellen",
       "restriction-private": "Keine Freigabe",
       "restriction-school": "schulintern freigeben",
       "model-label": "Sprachmodell",
@@ -291,17 +339,17 @@
       "additional-assets-content": "Es können jeweils bis zu 5 Dateien und Links hinzugefügt werden. telli nutzt diese Informationen, um das Lernszenario besser auf das Thema abzustimmen.",
       "attached-files-label": "Welche Dateien dienen telli als Grundlage?",
       "attached-links-label": "Welche Webquellen dienen telli als Grundlage?",
-      "attached-links-placeholder": "URL der Webseiten",
+      "attached-links-placeholder": "Web-Link",
       "add-link": "Link hinzufügen",
       "copy-page": {
         "title": "Lernszenario in eigenen Bereich kopieren",
-        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn du diese Seite verlässt. Kopiere das Lernszenario in deinen privaten Bereich, um es anzupassen.",
+        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht, wenn die Seite verlassen wird. Kopiere das Lernszenario in den privaten Bereich, um es anzupassen.",
         "copy-template": "Lernszenario bearbeiten"
       },
       "delete-title": "Lernszenario löschen",
       "delete-description": "Beim Löschen des Lernszenarios werden alle damit verbundenen Konversationen unwiderruflich gelöscht.",
       "delete-button": "Szenario endgültig löschen",
-      "delete-confirm": "Bist du sicher, dass du diesen Lernszenario löschen möchtest? Dabei werden alle mit diesem Dialog verbundenen Konversationen unwiderruflich gelöscht."
+      "delete-confirm": "Soll das Lernszenario wirklich gelöscht werden? Dabei werden alle mit diesem Dialog verbundenen Konversationen unwiderruflich gelöscht."
     },
     "shared": {
       "excersise-title": "Dein Arbeitsauftrag",
@@ -315,7 +363,7 @@
       "join-code": "Mit Code beitreten",
       "enter-chat": "Zum Dialog",
       "delete-chat-modal-title": "Neuer Chat",
-      "delete-chat-modal-description": "Wenn du einen neuen Chat beginnst verfällt der aktuelle Chat unwiderruflich.",
+      "delete-chat-modal-description": "Wird ein neuer Chat begonnen, verfällt der aktuelle Chat unwiderruflich.",
       "delete-chat-modal-confirm-button": "Aktuellen Chat verwerfen und neu beginnen",
       "expired-modal-description": "Der Dialog ist abgelaufen"
     },
@@ -340,9 +388,10 @@
       "delete-toast-error": "Das Lernszenario konnte nicht gelöscht werden.",
       "edit-toast-success": "Das Lernszenario wurde erfolgreich aktualisiert.",
       "edit-toast-error": "Das Lernszenario konnte nicht aktualisiert werden.",
-      "invalid-url": "Die eingegebene URL ist ungültig.",
-      "duplicate-url": "Diese URL wurde bereits hinzugefügt.",
-      "empty-url": "Es wurde keine URL eingegeben."
+      "invalid-url": "Der eingegebene Link ist ungültig.",
+      "duplicate-url": "Dieser Link wurde bereits hinzugefügt.",
+      "empty-url": "Es wurde kein Link eingegeben.",
+      "scrape-error": "Der Link konnte nicht verarbeitet werden."
     }
   },
   "top-up": {
@@ -377,7 +426,100 @@
   },
   "authentication": {
     "login-error": {
-      "description": "Login nicht möglich. Folgende Informationen müssem mit dem Profil übertragen werden:"
+      "description": "Login nicht möglich. Folgende Informationen müssen mit dem Profil übertragen werden:"
     }
+  },
+  "custom-chat": {
+    "chat": "Chatten",
+    "duplicate": "Duplizieren",
+    "delete": "Löschen",
+    "save": "Speichern",
+    "image": {
+      "crop-image": "Bild ausschneiden",
+      "upload-image": "Bild hochladen",
+      "profile-picture": "Profilbild",
+      "toasts": {
+        "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
+        "image-toast-error": "Das Bild konnte nicht hochgeladen werden."
+      }
+    },
+    "form": {
+      "saving": "Wird gespeichert...",
+      "save-error": "Speichern fehlgeschlagen",
+      "unsaved-changes": "Ungespeicherte Änderungen",
+      "saved": "Gespeichert"
+    },
+    "links": {
+      "empty-error": "Bitte gib eine URL ein.",
+      "duplicate-error": "Diese URL wurde bereits hinzugefügt",
+      "invalid-error": "Bitte gib eine gültige URL ein.",
+      "loading-error": "Die Webseite konnte nicht geladen werden.",
+      "saving-error": "Der Link auf die Webseite konnte nicht gespeichert werden.",
+      "delete-error": "Der Link auf die Webseite konnte nicht gelöscht werden.",
+      "aria-input": "URL eingeben",
+      "add-link": "Link hinzufügen",
+      "aria-add-link": "Webseite hinzufügen",
+      "aria-delete": "Webseite {link} entfernen"
+    }
+  },
+  "assistants": {
+    "back-button": "Assistenten",
+    "back-button-aria-label": "Zurück zu den Assistenten",
+    "name-label": "Name des Assistenten",
+    "name-placeholder": "Name des Assistenten",
+    "name-required": "Der Name darf nicht leer sein.",
+    "name-max-length": "Der Name darf maximal {maxLength} Zeichen lang sein.",
+    "description-label": "Kurzbeschreibung",
+    "description-placeholder": "Beschreibung des Assistenten",
+    "description-max-length": "Die Beschreibung darf maximal {maxLength} Zeichen lang sein.",
+    "instructions-label": "Instruktionen",
+    "instructions-placeholder": "Instruktionen für den Assistenten",
+    "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
+    "back-button-text": "Assistenten",
+    "back-button-aria": "Zurück zur Übersicht der Assistenten",
+    "author-label": "Erstellt von",
+    "author-text": "FWU",
+    "prompt-suggestion": "Promptvorschlag",
+    "prompt-suggestions-add-button": "Promptvorschlag hinzufügen",
+    "prompt-suggestions-add-button-tooltip": "Tooltip für das Hinzufügen von Promptvorschlägen",
+    "prompt-suggestions-delete-button": "Promptvorschlag {index} löschen",
+    "prompt-suggestions-max-count": "Es können maximal {maxCount} Vorschläge hinzugefügt werden",
+    "prompt-suggestions-max-length": "Ein Promptvorschlag darf maximal {maxLength} Zeichen lang sein.",
+    "prompt-suggestions-empty-tooltip": "Der Promptvorschlag muss einen Text enthalten, bevor ein weiterer hinzugefügt werden kann.",
+    "prompt-suggestions-count-max": "Es dürfen maximal {max} Promptvorschläge angegeben werden.",
+    "custom-assets-files": "Dateien",
+    "custom-assets-label": "Hintergrundwissen",
+    "custom-assets-content": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Der Assistent bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: pdf, txt, docx",
+    "custom-assets-links": "Webseiten",
+    "custom-assets-links-content": "Bei Webseiten wird nur die angegebene Webseite selbst als Hintergrundwissen genutzt. Unterseiten werden nicht berücksichtigt.",
+    "sharing-info": "Dieser Assistent ist für andere freigegeben.",
+    "sharing-settings": "Freigabe-Einstellungen",
+    "delete-button": "Löschen",
+    "delete-modal-title": "Assistent löschen",
+    "delete-modal-description": "Soll der Assistent wirklich gelöscht werden?",
+    "delete-modal-confirm-button": "Löschen",
+    "delete-modal-cancel-button": "Abbrechen",
+    "duplicate-name-format-string": "Duplikat von {sourceAssistantName}",
+    "toasts": {
+      "create-toast-error": "Der Assistent konnte nicht erstellt werden.",
+      "delete-toast-success": "Der Assistent wurde erfolgreich gelöscht.",
+      "delete-toast-error": "Der Assistent konnte nicht gelöscht werden.",
+      "edit-toast-success": "Der Assistent wurde erfolgreich aktualisiert.",
+      "edit-toast-error": "Etwas ist beim Aktualisieren des Assistenten schief gelaufen.",
+      "file-link-error": "Beim Hinzufügen der Datei zum Assistenten ist ein Fehler aufgetreten.",
+      "custom-file-delete-error": "Fehler beim Löschen der Datei"
+    }
+  },
+  "entity-overview": {
+    "filter-all": "Alle",
+    "filter-mine": "Meine",
+    "filter-official": "Offiziell",
+    "filter-school": "Schulintern",
+    "filter-tabs-label": "Filteroptionen",
+    "info-tooltip-label": "Informationen anzeigen",
+    "badge-mine": "von mir",
+    "sort-date": "Nach Aktualität",
+    "sort-name": "Nach Name",
+    "close": "Schließen"
   }
 }

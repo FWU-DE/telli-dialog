@@ -58,7 +58,7 @@ export function ApiKeyDetailView({
     formState: { isValid, errors, isSubmitting, isDirty },
     handleSubmit,
     setValue,
-  } = useForm<ApiKeyForm>({
+  } = useForm({
     resolver: zodResolver(apiKeyFormSchema),
     defaultValues: apiKey
       ? {
@@ -186,6 +186,7 @@ export function ApiKeyDetailView({
                   type="text"
                   value={createdApiKey.plainKey}
                   readOnly
+                  wrapperClassName="flex-1"
                   className="font-mono text-sm"
                 />
                 <Button

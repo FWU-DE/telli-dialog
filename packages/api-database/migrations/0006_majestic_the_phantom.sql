@@ -1,0 +1,2 @@
+ALTER TABLE "completion_usage_tracking" ALTER COLUMN "costs_in_cent" SET DATA TYPE double precision;--> statement-breakpoint
+ALTER TABLE "image_generation_usage_tracking" ALTER COLUMN "costs_in_cent" SET DATA TYPE double precision;

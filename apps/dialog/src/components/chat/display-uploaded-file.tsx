@@ -8,7 +8,7 @@ import DeattachFileIcon from '../icons/file-upload-icons/deattach-file-icon';
 import Spinner from '../icons/spinner';
 import CrossIcon from '../icons/cross';
 import { getFileExtension, isImageFile } from '@/utils/files/generic';
-import { getReadOnlySignedUrl } from '@shared/s3';
+import { getReadOnlySignedUrlAction } from '@/app/api/file-operations/actions';
 import { useQuery } from '@tanstack/react-query';
 import { LocalFileState } from './send-message-form';
 
@@ -38,7 +38,7 @@ export default function DisplayUploadedFile({
       if (!file) {
         throw new Error('File is undefined');
       }
-      const signedUrl = await getReadOnlySignedUrl({
+      const signedUrl = await getReadOnlySignedUrlAction({
         key: `message_attachments/${file.fileId}`,
       });
       return signedUrl;

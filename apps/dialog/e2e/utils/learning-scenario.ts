@@ -3,7 +3,7 @@ import { expect, Page } from '@playwright/test';
 export async function createLearningScenario(page: Page) {
   await page.goto('/learning-scenarios');
   await page.waitForURL('/learning-scenarios');
-  await page.getByRole('button', { name: 'Szenario erstellen' }).click();
+  await page.getByRole('button', { name: 'Lernszenario erstellen' }).click();
   await page.waitForURL('/learning-scenarios/**');
 }
 
@@ -14,11 +14,11 @@ async function confirmDelete(page: Page) {
 }
 
 export async function deleteLearningScenario(page: Page, name: string) {
-  const deleteButton = page
-    .locator('a', { has: page.locator('> figure') })
-    .filter({ hasText: name })
-    .getByLabel('Löschen')
-    .first();
+  const card = page.getByRole('button', { name }).first();
+  await expect(card).toBeVisible();
+  await card.click();
+  await page.waitForURL('/learning-scenarios/editor/**');
+  const deleteButton = page.getByRole('button', { name: 'Szenario endgültig löschen' });
   await expect(deleteButton).toBeVisible();
   await deleteButton.click();
   await confirmDelete(page);

@@ -4,7 +4,7 @@ import DestructiveActionButton from '../common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
 import TrashIcon from '../icons/trash';
 import { iconClassName } from '@/utils/tailwind/icon';
-import DownloadSharedConversationButton from '@/app/(unauth)/ua/dowload-shared-conversation-button';
+import DownloadSharedConversationButton from '@/app/(unauth)/ua/download-shared-conversation-button';
 import Image from 'next/image';
 import ProfileMenu, { ThreeDotsProfileMenu } from '../navigation/profile-menu';
 import { type ChatMessage as Message } from '@/types/chat';
@@ -19,6 +19,7 @@ export function SharedChatHeader({
   messages,
   imageSource,
   dialogStarted,
+  inviteCode,
 }: {
   chatActive: boolean;
   hasMessages: boolean;
@@ -28,6 +29,7 @@ export function SharedChatHeader({
   messages: Message[];
   imageSource?: string;
   dialogStarted: boolean;
+  inviteCode: string;
 }) {
   const { isBelow } = useBreakpoints();
   const tCommon = useTranslations('common');
@@ -40,13 +42,13 @@ export function SharedChatHeader({
       confirmText={t('delete-chat-modal-confirm-button')}
       modalDescription={t('delete-chat-modal-description')}
       triggerButtonClassName={cn(
-        'justify-center items-center focus:outline-none',
+        'justify-center items-center focus:outline-hidden ml-2',
         iconClassName,
         isBelow.sm && 'items-center justify-start',
       )}
       actionFn={handleOpenNewChat}
     >
-      <span className="flex items-center gap-1 pl-2">
+      <span className="flex items-center gap-1">
         <TrashIcon className="h-8 w-8" solid={true} />
         {showCompressedHeader ? tCommon('delete') : ''}
       </span>
@@ -61,9 +63,9 @@ export function SharedChatHeader({
       )}
     >
       {!showCompressedHeader && deleteChatElement}
-      <div className="flex-grow"></div>
+      <div className="grow"></div>
       {
-        <span className="flex justify-start text-xl overflow-ellipsis truncate items-center gap-2">
+        <span className="flex justify-start text-xl text-ellipsis truncate items-center gap-2">
           {dialogStarted && imageSource && (
             <Image
               src={imageSource ?? ''}
@@ -76,7 +78,7 @@ export function SharedChatHeader({
           {dialogStarted && <span className="truncate">{title}</span>}
         </span>
       }
-      <div className="flex-grow"></div>
+      <div className="grow"></div>
 
       {!showCompressedHeader ? (
         <>
@@ -85,6 +87,7 @@ export function SharedChatHeader({
             disabled={!chatActive || !hasMessages}
             sharedConversationName={title}
             showText={false}
+            inviteCode={inviteCode}
           />
           <ProfileMenu userAndContext={undefined} />
         </>
@@ -96,6 +99,7 @@ export function SharedChatHeader({
               disabled={!chatActive || !hasMessages}
               sharedConversationName={title}
               showText={true}
+              inviteCode={inviteCode}
             />
           }
           deleteButtonJSX={deleteChatElement}

@@ -5,6 +5,8 @@ import {
   RateLimitExceededError,
   InvalidModelError,
   ProviderConfigurationError,
+  TelliPointsExceededError,
+  SharedChatExpiredError,
 } from './errors';
 
 describe('AiGenerationError', () => {
@@ -82,5 +84,47 @@ describe('ProviderConfigurationError', () => {
     const error = new ProviderConfigurationError('Test');
     expect(ProviderConfigurationError.is(error)).toBe(true);
     expect(ProviderConfigurationError.is(new AiGenerationError('Test'))).toBe(false);
+  });
+});
+
+describe('TelliPointsExceededError', () => {
+  it('should create an error with the correct name and message', () => {
+    const error = new TelliPointsExceededError('Points exceeded');
+    expect(error.name).toBe('TelliPointsExceededError');
+    expect(error.message).toBe('Points exceeded');
+    expect(error).toBeInstanceOf(AiGenerationError);
+  });
+
+  it('should use the default message when none is provided', () => {
+    const error = new TelliPointsExceededError();
+    expect(error.message).toBe('User has reached Telli points limit');
+  });
+
+  it('should correctly identify TelliPointsExceededError instances', () => {
+    const error = new TelliPointsExceededError('Test');
+    expect(TelliPointsExceededError.is(error)).toBe(true);
+    expect(TelliPointsExceededError.is(new AiGenerationError('Test'))).toBe(false);
+    expect(TelliPointsExceededError.is(new Error('Test'))).toBe(false);
+  });
+});
+
+describe('SharedChatExpiredError', () => {
+  it('should create an error with the correct name and message', () => {
+    const error = new SharedChatExpiredError('Chat expired');
+    expect(error.name).toBe('SharedChatExpiredError');
+    expect(error.message).toBe('Chat expired');
+    expect(error).toBeInstanceOf(AiGenerationError);
+  });
+
+  it('should use the default message when none is provided', () => {
+    const error = new SharedChatExpiredError();
+    expect(error.message).toBe('Shared chat has expired');
+  });
+
+  it('should correctly identify SharedChatExpiredError instances', () => {
+    const error = new SharedChatExpiredError('Test');
+    expect(SharedChatExpiredError.is(error)).toBe(true);
+    expect(SharedChatExpiredError.is(new AiGenerationError('Test'))).toBe(false);
+    expect(SharedChatExpiredError.is(new Error('Test'))).toBe(false);
   });
 });

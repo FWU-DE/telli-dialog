@@ -1,6 +1,6 @@
 'use client';
 
-import { CustomGptSelectModel, FileModel, UserSchoolRole } from '@shared/db/schema';
+import { AssistantSelectModel, FileModel, UserSchoolRole } from '@shared/db/schema';
 import {
   buttonDeleteClassName,
   buttonPrimaryClassName,
@@ -28,16 +28,15 @@ import TrashIcon from '@/components/icons/trash';
 import PlusIcon from '@/components/icons/plus';
 import { TextInput } from '@/components/common/text-input';
 import {
-  deleteCustomGptAction,
-  updateCustomGptAccessLevelAction,
-  updateCustomGptAction,
-  updateCustomGptPictureAction,
-  uploadAvatarPictureForCustomGptAction,
+  deleteAssistantAction,
+  updateAssistantAccessLevelAction,
+  updateAssistantAction,
+  uploadAvatarPictureForAssistantAction,
 } from './actions';
 import {
-  createNewCustomGptAction,
+  createNewAssistantAction,
   deleteFileMappingAndEntityAction,
-  linkFileToCustomGptAction,
+  linkFileToAssistantAction,
 } from '../../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
 import FileManagement from '@/components/forms/file-management';
@@ -52,8 +51,9 @@ import AvatarPicture from '@/components/common/avatar-picture';
 import { WebsearchSource } from '@shared/db/types';
 import SharingSection from '@/components/forms/sharing-section';
 import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
+import { AVATAR_MAX_SIZE } from '@/const';
 
-type CustomGptFormProps = CustomGptSelectModel & {
+type AssistantFormProps = AssistantSelectModel & {
   maybeSignedPictureUrl: string | undefined;
   userRole: UserSchoolRole;
   isCreating?: boolean;
@@ -68,10 +68,10 @@ type CustomGptFormProps = CustomGptSelectModel & {
  * - behavior of the textInput component is based on the nullable property (required behavior vs optional behavior)
  * - the max length property controls the behavior of the textInput component and blocks user input if the max length is reached
  */
-const customGptFormValuesSchema = z.object({
+const assistantFormValuesSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
-  specification: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS),
+  instructions: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS),
   promptSuggestions: z.array(z.object({ content: z.string() })),
   attachedLinks: formLinks,
 
@@ -79,9 +79,9 @@ const customGptFormValuesSchema = z.object({
   isSchoolShared: z.boolean(),
   hasLinkAccess: z.boolean(),
 });
-type CustomGptFormValues = z.infer<typeof customGptFormValuesSchema>;
+type AssistantFormValues = z.infer<typeof assistantFormValuesSchema>;
 
-export default function CustomGptForm({
+export default function AssistantForm({
   maybeSignedPictureUrl,
   isCreating = false,
   promptSuggestions,
@@ -89,8 +89,8 @@ export default function CustomGptForm({
   existingFiles,
   readOnly,
   initialLinks,
-  ...customGpt
-}: CustomGptFormProps) {
+  ...assistant
+}: AssistantFormProps) {
   const router = useRouter();
   const toast = useToast();
 
@@ -101,18 +101,18 @@ export default function CustomGptForm({
     getValues,
     setValue,
     formState: { isValid },
-  } = useForm<CustomGptFormValues>({
-    resolver: zodResolver(customGptFormValuesSchema),
+  } = useForm({
+    resolver: zodResolver(assistantFormValuesSchema),
     defaultValues: {
-      ...customGpt,
-      description: customGpt.description ?? undefined,
-      specification: customGpt.specification ?? undefined,
+      ...assistant,
+      description: assistant.description ?? undefined,
+      instructions: assistant.instructions ?? undefined,
       promptSuggestions:
         promptSuggestions.length < 1
           ? [{ content: '' }]
           : promptSuggestions.map((p) => ({ content: p })),
       attachedLinks: initialLinks,
-      isSchoolShared: customGpt.accessLevel === 'school',
+      isSchoolShared: assistant.accessLevel === 'school',
     },
   });
   const [_files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
@@ -120,7 +120,7 @@ export default function CustomGptForm({
   const t = useTranslations('custom-gpt.form');
   const tToast = useTranslations('custom-gpt.toasts');
   const tCommon = useTranslations('common');
-  const getZodStringFieldMetadata = getZodStringFieldMetadataFn(customGptFormValuesSchema);
+  const getZodStringFieldMetadata = getZodStringFieldMetadataFn(assistantFormValuesSchema);
 
   function handleSharingChange() {
     if (isCreating || readOnly) return;
@@ -129,9 +129,9 @@ export default function CustomGptForm({
     const isSchoolShared = getValues('isSchoolShared');
     const newAccessLevel = isSchoolShared ? 'school' : 'private';
 
-    if (newAccessLevel !== customGpt.accessLevel) {
-      updateCustomGptAccessLevelAction({
-        gptId: customGpt.id,
+    if (newAccessLevel !== assistant.accessLevel) {
+      updateAssistantAccessLevelAction({
+        gptId: assistant.id,
         accessLevel: newAccessLevel,
       }).then((result) => {
         if (result.success) {
@@ -171,23 +171,25 @@ export default function CustomGptForm({
     });
 
     setInitialFiles(initialFiles.filter((f) => f.id !== fileId));
-    await deleteFileMappingAndEntityAction({ customGptId: customGpt.id, fileId });
+    await deleteFileMappingAndEntityAction({ assistantId: assistant.id, fileId });
   }
   async function handleNewFile(data: { id: string; name: string; file: File }) {
-    const result = await linkFileToCustomGptAction({ fileId: data.id, customGptId: customGpt.id });
+    const result = await linkFileToAssistantAction({ fileId: data.id, assistantId: assistant.id });
     if (!result.success) toast.error(tToast('edit-toast-error'));
   }
 
-  async function onSubmit(data: CustomGptFormValues) {
-    const result = await updateCustomGptAction({
+  async function onSubmit(data: AssistantFormValues) {
+    const result = await updateAssistantAction({
       ...data,
       promptSuggestions: data.promptSuggestions?.map((p) => p.content),
-      gptId: customGpt.id,
+      gptId: assistant.id,
       attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
     });
     if (result.success) {
-      if (!isCreating) toast.success(tToast('edit-toast-success'));
-      router.refresh();
+      if (!isCreating) {
+        toast.success(tToast('edit-toast-success'));
+        router.refresh();
+      }
     } else {
       toast.error(tToast('edit-toast-error'));
     }
@@ -206,8 +208,8 @@ export default function CustomGptForm({
     const newPromptSuggestions = cleanupPromptSuggestions(_promptSuggestions.map((p) => p.content));
     const dataEquals = deepEqual(promptSuggestions, newPromptSuggestions);
     if (dataEquals) return;
-    updateCustomGptAction({
-      gptId: customGpt.id,
+    updateAssistantAction({
+      gptId: assistant.id,
       promptSuggestions: newPromptSuggestions,
     }).then((result) => {
       if (result.success) {
@@ -217,30 +219,19 @@ export default function CustomGptForm({
     });
   }
 
-  const backUrl = `/custom?visibility=${customGpt.accessLevel}`;
-
-  function handlePictureUploadComplete(picturePath: string) {
-    updateCustomGptPictureAction({ picturePath, gptId: customGpt.id }).then((result) => {
-      if (result.success) {
-        toast.success(tToast('image-toast-success'));
-        router.refresh();
-      } else {
-        toast.error(tToast('edit-toast-error'));
-      }
-    });
-  }
+  const backUrl = `/custom?visibility=${assistant.accessLevel}`;
 
   function handleNavigateBack(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
     if (isCreating) {
-      handleDeleteCustomGpt();
+      handleDeleteAssistant();
       return;
     }
     router.push(backUrl);
   }
 
-  function handleDeleteCustomGpt() {
-    deleteCustomGptAction({ gptId: customGpt.id }).then((result) => {
+  function handleDeleteAssistant() {
+    deleteAssistantAction({ gptId: assistant.id }).then((result) => {
       if (result.success) {
         // do not show any toast if the avatar is being created
         if (!isCreating) {
@@ -256,7 +247,7 @@ export default function CustomGptForm({
   function handleAutoSave() {
     if (isCreating) return;
     const data = getValues();
-    const defaultData = { ...customGpt, promptSuggestions: [] };
+    const defaultData = { ...assistant, promptSuggestions: [] };
     const newData = {
       ...defaultData,
       ...data,
@@ -269,14 +260,14 @@ export default function CustomGptForm({
     onSubmit(data);
   }
 
-  async function handleCreateCustomGpt() {
+  async function handleCreateAssistant() {
     const data = getValues();
     await onSubmit(data);
 
     // Set access level if school sharing is enabled
     if (data.isSchoolShared) {
-      await updateCustomGptAccessLevelAction({
-        gptId: customGpt.id,
+      await updateAssistantAccessLevelAction({
+        gptId: assistant.id,
         accessLevel: 'school',
       });
     }
@@ -288,31 +279,37 @@ export default function CustomGptForm({
   }
 
   async function handleUploadAvatarPicture(croppedImageBlob: Blob) {
-    return await uploadAvatarPictureForCustomGptAction({
-      customGptId: customGpt.id,
+    const result = await uploadAvatarPictureForAssistantAction({
+      assistantId: assistant.id,
       croppedImageBlob,
     });
+
+    if (result.success) {
+      toast.success(tToast('image-toast-success'));
+      router.refresh();
+    }
+
+    return result;
   }
 
   const copyContainer = readOnly ? (
     <CopyContainer
-      templateId={customGpt.id}
-      templatePictureId={customGpt.pictureId ?? undefined}
+      templateId={assistant.id}
       startedAt={null}
       maxUsageTimeLimit={null}
       translationPath="custom-gpt.form"
       redirectPath="custom"
-      createInstanceCallbackAction={createNewCustomGptAction}
+      createInstanceCallbackAction={createNewAssistantAction}
     />
   ) : undefined;
 
   return (
     <form className="flex flex-col mb-8" onSubmit={handleSubmit(onSubmit)}>
       <NavigateBack label={t('all-gpts')} onClick={handleNavigateBack} />
-      <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : customGpt.name}</h1>
+      <h1 className="text-2xl mt-4 font-medium">{isCreating ? t('create-gpt') : assistant.name}</h1>
       {copyContainer}
       <fieldset className="flex flex-col gap-4 mt-8">
-        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 lg:gap-16">
           <div className="flex gap-8 flex-col">
             <TextInput
               label={t('gpt-name-label')}
@@ -357,9 +354,8 @@ export default function CustomGptForm({
             </div>
             <CropImageAndUploadButton
               aspect={1}
-              onUploadComplete={handlePictureUploadComplete}
               handleUploadAvatarPicture={handleUploadAvatarPicture}
-              compressionOptions={{ maxHeight: 800 }}
+              compressionOptions={{ maxWidth: AVATAR_MAX_SIZE, maxHeight: AVATAR_MAX_SIZE }}
               disabled={readOnly}
             />
           </section>
@@ -370,13 +366,13 @@ export default function CustomGptForm({
           label={t('gpt-specification-label')}
           placeholder={t('gpt-specification-placeholder')}
           inputType="textarea"
-          getValue={() => getValues('specification') ?? ''}
-          {...getZodStringFieldMetadata('specification')}
-          {...register('specification')}
+          getValue={() => getValues('instructions') ?? ''}
+          {...getZodStringFieldMetadata('instructions')}
+          {...register('instructions')}
           rows={7}
           readOnly={readOnly}
           maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS}
-          id="specification"
+          id="instructions"
           onBlur={handleAutoSave}
         />
         <section className="mt-8 flex flex-col gap-3 w-full">
@@ -463,13 +459,12 @@ export default function CustomGptForm({
         />
       </fieldset>
       <div className="w-full mt-8">
-        {userRole === 'teacher' && (
+        {userRole === 'teacher' && !readOnly && (
           <SharingSection
             control={control}
             schoolSharingName="isSchoolShared"
             linkSharingName="hasLinkAccess"
             onShareChange={handleSharingChange}
-            disabled={readOnly}
           />
         )}
       </div>
@@ -482,7 +477,7 @@ export default function CustomGptForm({
             modalDescription={t('gpt-delete-modal-description')}
             modalTitle={t('delete-gpt')}
             confirmText={tCommon('delete')}
-            actionFn={handleDeleteCustomGpt}
+            actionFn={handleDeleteAssistant}
           >
             {t('delete-gpt')}
           </DestructiveActionButton>
@@ -492,7 +487,7 @@ export default function CustomGptForm({
         <section className="mt-8 flex gap-4 items-center">
           <button
             className={cn(buttonSecondaryClassName, 'hover:border-primary hover:bg-primary-hover')}
-            onClick={handleDeleteCustomGpt}
+            onClick={handleDeleteAssistant}
             type="button"
           >
             {tCommon('cancel')}
@@ -500,7 +495,7 @@ export default function CustomGptForm({
           <button
             className={cn(buttonPrimaryClassName)}
             disabled={!isValid}
-            onClick={handleCreateCustomGpt}
+            onClick={handleCreateAssistant}
             type="button"
           >
             {t('create-gpt')}

@@ -41,41 +41,35 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
     federalStateId: userAndContext.federalState.id,
   });
 
-  const lastUsedModelInChat = messages.at(messages.length - 1)?.modelName ?? undefined;
+  const lastUsedModelInChat = messages.at(-1)?.modelName;
 
   const currentModel =
     searchParams.model ?? lastUsedModelInChat ?? user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
 
   const convertedMessages = convertMessageModelToMessage(messages);
   const webSourceMapping = new Map<string, WebsearchSource[]>();
-  const logoElement = <Logo federalStateId={userAndContext.school.federalStateId} />;
+  const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
 
-  // Load websearch sources from the database
-  // For old messages without stored sources, parse URLs from content to show citations
-  // The actual scraping will happen when user sends a new message
-  for (const message of messages) {
-    if (message.role !== 'user') {
-      continue;
-    }
-    if (message.websearchSources.length > 0) {
-      webSourceMapping.set(message.id, message.websearchSources);
-    } else {
-      const urls = parseHyperlinks(message.content);
-      if (urls && urls.length > 0) {
-        const websearchSources: WebsearchSource[] = urls.map((url) => ({
-          type: 'websearch',
-          link: url,
-        }));
-        webSourceMapping.set(message.id, websearchSources);
-      }
+  // prepare urls for citations
+  for (const message of messages.filter((msg) => msg.role === 'user')) {
+    const urls = parseHyperlinks(message.content);
+    if (urls && urls.length > 0) {
+      const websearchSources: WebsearchSource[] = urls.map((url) => ({
+        link: url,
+      }));
+      webSourceMapping.set(message.id, websearchSources);
     }
   }
 
   return (
-    <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
+    <LlmModelsProvider
+      models={models}
+      defaultLlmModelByCookie={currentModel}
+      initialDownloadConversationEnabled={convertedMessages.length > 0}
+    >
       <ChatHeaderBar
         chatId={conversation.id}
-        hasMessages={convertedMessages.length > 0}
+        downloadConversationEnabled={convertedMessages.length > 0}
         userAndContext={userAndContext}
       />
       <Chat

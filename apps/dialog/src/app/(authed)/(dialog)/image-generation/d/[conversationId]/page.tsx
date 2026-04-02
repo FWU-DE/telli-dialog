@@ -70,11 +70,13 @@ export default async function Page(props: PageProps) {
         <div className="w-full h-full overflow-auto">
           <HeaderPortal>
             <div className="flex w-full gap-4 justify-center items-center z-30">
-              <ToggleSidebarButton />
+              <ToggleSidebarButton
+                isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+              />
               <NewChatButton />
               <SelectImageModel />
               <SelectImageStyle />
-              <div className="flex-grow"></div>
+              <div className="grow"></div>
               <ProfileMenu userAndContext={userAndContext} />
             </div>
           </HeaderPortal>

@@ -16,8 +16,8 @@ import { useTranslations } from 'next-intl';
 import CustomGptContainer from './custom-gpt-container';
 import { buildGenericUrl } from '../utils.client';
 import CreateNewCustomGptButton from './create-new-customgpt-button';
-import { CustomGptWithImage } from './utils';
-import { HELP_MODE_GPT_ID } from '@shared/db/const';
+import { AssistantWithImage } from './utils';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import { useFederalState } from '@/components/providers/federal-state-provider';
 
 export default function Page2({
@@ -26,7 +26,7 @@ export default function Page2({
   accessLevel,
 }: {
   userAndContext: UserAndContext;
-  customGpts: CustomGptWithImage[];
+  customGpts: AssistantWithImage[];
   accessLevel: AccessLevel;
 }) {
   const [input, setInput] = React.useState('');
@@ -41,9 +41,11 @@ export default function Page2({
   return (
     <div className="min-w-full p-6 overflow-auto">
       <HeaderPortal>
-        <ToggleSidebarButton />
+        <ToggleSidebarButton
+          isNewUiDesignEnabled={federalState?.featureToggles?.isNewUiDesignEnabled ?? false}
+        />
         <NewChatButton />
-        <div className="flex-grow"></div>
+        <div className="grow"></div>
         <ProfileMenu userAndContext={userAndContext} />
       </HeaderPortal>
       <div className="max-w-3xl mx-auto">
@@ -55,7 +57,7 @@ export default function Page2({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           className={cn(
-            'p-2 px-4 focus:outline-none disabled:bg-light-gray disabled:border-gray-100 disabled:cursor-not-allowed',
+            'p-2 px-4 focus:outline-hidden disabled:bg-light-gray disabled:border-gray-100 disabled:cursor-not-allowed',
           )}
           placeholder={t('search-placeholder')}
           disabled={filterDisabled}
@@ -111,12 +113,12 @@ export default function Page2({
   );
 }
 
-function filterCustomGpt(customGpt: CustomGptWithImage[], input: string): CustomGptWithImage[] {
+function filterCustomGpt(customGpt: AssistantWithImage[], input: string): AssistantWithImage[] {
   const lowerCaseInput = input.toLowerCase();
 
   return customGpt.filter((gpt) => {
     const mainMatch = gpt.name.toLowerCase().includes(lowerCaseInput);
-    const isHelpAssistant = gpt.id === HELP_MODE_GPT_ID;
+    const isHelpAssistant = gpt.id === HELP_MODE_ASSISTANT_ID;
     return mainMatch && !isHelpAssistant;
   });
 }

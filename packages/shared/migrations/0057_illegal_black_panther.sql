@@ -1,0 +1,1 @@
+ALTER TABLE "federal_state" ADD COLUMN "picture_urls" json;

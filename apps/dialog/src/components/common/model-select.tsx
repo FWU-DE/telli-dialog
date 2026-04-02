@@ -3,11 +3,12 @@
 import React, { startTransition } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { type LlmModelSelectModel } from '@shared/db/schema';
-import { useSidebarVisibility } from '../navigation/sidebar/sidebar-provider';
 import { cn } from '@/utils/tailwind';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useCustomPathname } from '@/hooks/use-custom-pathname';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { Badge } from '../common/badge';
+import { navigateWithoutRefresh } from '@/utils/navigation/router';
 
 type ModelSelectProps = {
   models: LlmModelSelectModel[];
@@ -30,10 +31,8 @@ export default function ModelSelect({
   isStudent = false,
   enableUrlParams = false,
 }: ModelSelectProps) {
-  const { isOpen } = useSidebarVisibility();
-  const pathname = usePathname();
+  const pathname = useCustomPathname();
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   async function handleSelectModel(model: LlmModelSelectModel) {
     startTransition(async () => {
@@ -41,11 +40,13 @@ export default function ModelSelect({
     });
     await onModelChange(model);
 
-    // Only update URL params for chat models, not image generation
+    // Only update URL params for chat models, not image generation.
+    // Use replaceState to update the URL without triggering a full navigation,
+    // which would remount client components and lose chat state (input, messages).
     if (enableUrlParams) {
       const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.set('model', model.name);
-      router.push(`${pathname}?${newSearchParams.toString()}`);
+      navigateWithoutRefresh(`${pathname}?${newSearchParams.toString()}`);
     }
   }
 
@@ -55,13 +56,13 @@ export default function ModelSelect({
     models.find((model) => model.name === optimisticModelId) || selectedModel;
 
   return (
-    <div className="flex flex-col gap-2 hover:bg-secondary/20 rounded-enterprise-md p-2">
-      <span className="text-xs text-gray-400 hidden sm:block">{label}</span>
+    <div className="flex flex-col gap-2 rounded-enterprise-md p-2">
+      <span className="text-xs text-gray-600 hidden sm:block">{label}</span>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger
           disabled={models.length < 2}
           asChild
-          className="cursor-pointer disabled:cursor-default focus:outline-none"
+          className="cursor-pointer disabled:cursor-default focus:outline-hidden bg-transparent opacity-100"
         >
           <button
             type="button"
@@ -79,10 +80,8 @@ export default function ModelSelect({
           </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content
-          className={cn(
-            'flex flex-col bg-white shadow-dropdown rounded-xl ml-0',
-            isOpen ? 'sm:ml-64' : 'sm:ml-44',
-          )}
+          className={cn('flex flex-col bg-white shadow-dropdown rounded-xl ml-0')}
+          align="start"
           sideOffset={10}
         >
           {models
@@ -95,7 +94,7 @@ export default function ModelSelect({
                   <DropdownMenu.Item asChild>
                     <button
                       className={cn(
-                        'hover:bg-primary-hover text-left py-2 px-4 outline-none flex flex-col',
+                        'hover:bg-primary-hover text-left py-2 px-4 outline-hidden flex flex-col',
                         iconClassName,
                       )}
                       onClick={() => handleSelectModel(model)}

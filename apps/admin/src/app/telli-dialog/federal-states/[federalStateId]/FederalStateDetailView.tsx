@@ -13,7 +13,7 @@ import {
 } from '@ui/components/Card';
 import { FormField } from '@ui/components/form/FormField';
 import { FormFieldCheckbox } from '@ui/components/form/FormFieldCheckbox';
-import { FormFieldArray } from '../../../../components/form/FormFieldArray';
+import { FormFieldArray } from '@/components/form/FormFieldArray';
 import { toast } from 'sonner';
 import z from 'zod';
 import { FederalStateModel, federalStateSchema } from '@shared/federal-states/types';
@@ -21,6 +21,7 @@ import { DesignConfigurationSchema } from '@ui/types/design-configuration';
 import { logError } from '@shared/logging';
 import { useEffect } from 'react';
 import { FormErrorDisplay } from '@/components/FormErrorDisplay';
+import { federalStatePictureUrlsSchema } from '@shared/db/schema';
 
 export type FederalStateViewProps = {
   federalState: FederalStateModel;
@@ -34,16 +35,22 @@ export const federalStateEditFormSchema = federalStateSchema.extend({
     }),
   ),
   designConfiguration: z.string(), // Will be parsed as JSON before submitting
+  pictureUrls: z.string(), // Will be parsed as JSON before submitting
+});
+// Form-specific schema that extends the base schema with UI adaptations
+export const federalStatePictureUrlsEditFormSchema = federalStatePictureUrlsSchema.extend({
+  logo: z.string().startsWith('whitelabels/').optional(),
+  favicon: z.string().startsWith('whitelabels/').optional(),
 });
 
 export type FederalStateEditForm = z.infer<typeof federalStateEditFormSchema>;
 
-// Parse string as designConfiguration if not empty, otherwise set to null
-function parseAsDesignConfiguration(value: string | null) {
+// Parse string as schema if not empty, otherwise set to null
+function parseAsSchema<T>(schema: z.ZodType<T>, value: string | null): T | null {
   if (!value || value.trim() === '') {
     return null;
   }
-  return DesignConfigurationSchema.parse(JSON.parse(value));
+  return schema.parse(JSON.parse(value));
 }
 
 function transformToFederalStateEditForm(federalState: FederalStateModel): FederalStateEditForm {
@@ -54,6 +61,7 @@ function transformToFederalStateEditForm(federalState: FederalStateModel): Feder
     designConfiguration: federalState.designConfiguration
       ? JSON.stringify(federalState.designConfiguration, null, 2)
       : '',
+    pictureUrls: federalState.pictureUrls ? JSON.stringify(federalState.pictureUrls, null, 2) : '',
   };
 }
 
@@ -67,7 +75,7 @@ export function FederalStateView(props: FederalStateViewProps) {
     formState: { isValid, errors, isDirty, isSubmitting },
     handleSubmit,
     reset,
-  } = useForm<FederalStateEditForm>({
+  } = useForm({
     resolver: zodResolver(federalStateEditFormSchema),
     defaultValues: transformToFederalStateEditForm(federalState),
   });
@@ -80,9 +88,21 @@ export function FederalStateView(props: FederalStateViewProps) {
 
     let parsedDesignConfiguration = null;
     try {
-      parsedDesignConfiguration = parseAsDesignConfiguration(data.designConfiguration);
-    } catch {
+      parsedDesignConfiguration = parseAsSchema(
+        DesignConfigurationSchema,
+        data.designConfiguration,
+      );
+    } catch (e) {
+      console.error(e);
       toast.error('Fehler: designConfiguration ist nicht im korrekten Format');
+      return;
+    }
+    let parsedPictureUrls = null;
+    try {
+      parsedPictureUrls = parseAsSchema(federalStatePictureUrlsEditFormSchema, data.pictureUrls);
+    } catch (e) {
+      console.error(e);
+      toast.error('Fehler: pictureUrls ist nicht im korrekten Format');
       return;
     }
 
@@ -93,6 +113,7 @@ export function FederalStateView(props: FederalStateViewProps) {
         supportContacts:
           data.supportContacts.length > 0 ? data.supportContacts.map((s) => s.value) : [],
         designConfiguration: parsedDesignConfiguration,
+        pictureUrls: parsedPictureUrls,
       });
       toast.success('Bundesland erfolgreich aktualisiert');
     } catch (error) {
@@ -125,7 +146,6 @@ export function FederalStateView(props: FederalStateViewProps) {
             control={control}
             disabled
           />
-
           <FormField
             name="createdAt"
             label="Erstellt am"
@@ -133,7 +153,6 @@ export function FederalStateView(props: FederalStateViewProps) {
             control={control}
             disabled
           />
-
           <FormFieldCheckbox
             name="hasApiKeyAssigned"
             label="API Key vorhanden?"
@@ -141,21 +160,18 @@ export function FederalStateView(props: FederalStateViewProps) {
             control={control}
             disabled
           />
-
           <FormField
             name="apiKeyId"
             label="API Key ID"
             description="UUID des API keys aus telli-api für Kostenmanagement und Billing."
             control={control}
           />
-
           <FormField
             name="telliName"
             label="Name"
             description="Beschreibender Name für das Bundesland."
             control={control}
           />
-
           <FormField
             name="teacherPriceLimit"
             label="Preislimit für Unterrichtende"
@@ -163,7 +179,6 @@ export function FederalStateView(props: FederalStateViewProps) {
             control={control}
             type="number"
           />
-
           <FormField
             name="studentPriceLimit"
             label="Preislimit für Lernende"
@@ -171,7 +186,6 @@ export function FederalStateView(props: FederalStateViewProps) {
             control={control}
             type="number"
           />
-
           <FormField
             name="chatStorageTime"
             label="Speicherzeit für Chats"
@@ -179,70 +193,67 @@ export function FederalStateView(props: FederalStateViewProps) {
             control={control}
             type="number"
           />
-
           <FormFieldCheckbox
             name="mandatoryCertificationTeacher"
             label="Pflichtschulung für Unterrichtende aktivieren"
             description="Lehrer müssen zuerst eine Schulung abschließen bevor die Verwendung erlaubt wird."
             control={control}
           />
-
           <FormField
             name="trainingLink"
             label="Link für die Schulung"
             description="Legt den Link für die Schulung fest."
             control={control}
           />
-
           <FormFieldArray
             name="supportContacts"
             label="Support Kontaktadressen"
             description="Emailadressen, Telefonnummern oder auch Webadressen die im Supportfall benutzt werden können. Diese werden im Disclaimer angezeigt."
             control={control}
+            defaultAppendValue={{ value: '' }}
           />
-
           <FormFieldCheckbox
             name="featureToggles.isStudentAccessEnabled"
             label="Zugriff für Lernende erlaubt?"
             description="Erlaubt den Zugriff auch für Lernende."
             control={control}
           />
-
           <FormFieldCheckbox
             name="featureToggles.isCharacterEnabled"
             label="Aktiviere Dialogpartner"
             description="Schaltet die Verwendung von Dialogpartnern frei."
             control={control}
           />
-
           <FormFieldCheckbox
             name="featureToggles.isCustomGptEnabled"
             label="Aktiviere Assistenten"
             description="Schaltet die Verwendung von Assistenten frei."
             control={control}
           />
-
           <FormFieldCheckbox
             name="featureToggles.isSharedChatEnabled"
             label="Lernszenarien aktivieren"
             description="Schaltet die Verwendung von Lernszenarien frei."
             control={control}
           />
-
           <FormFieldCheckbox
             name="featureToggles.isShareTemplateWithSchoolEnabled"
             label="Vorlage mit Schule teilen aktivieren"
             description="Schaltet die Möglichkeit frei, Vorlagen mit allen Benutzern einer Schule zu teilen."
             control={control}
           />
-
           <FormFieldCheckbox
             name="featureToggles.isImageGenerationEnabled"
             label="Bildgenerierung aktivieren"
             description="Erlaubt die Nutzung der Bildgenerierungsfunktion."
             control={control}
           />
-
+          <FormFieldCheckbox
+            name="featureToggles.isNewUiDesignEnabled"
+            label="Neues UI Design aktivieren"
+            description="Erlaubt die Nutzung des neuen UI Designs."
+            control={control}
+          />
           <FormField
             name="designConfiguration"
             label="Design Konfiguration"
@@ -250,7 +261,13 @@ export function FederalStateView(props: FederalStateViewProps) {
             control={control}
             type="textArea"
           />
-
+          <FormField
+            name="pictureUrls"
+            label="Picture URLs"
+            description='Legt die Whitelabel-Bilder fest, z.B. {"logo":"whitelabels/<id>/logo.svg","favicon":"whitelabels/<id>/favicon.svg"}.'
+            control={control}
+            type="textArea"
+          />
           <CardAction>
             <Button type="submit" disabled={!isDirty}>
               Speichern

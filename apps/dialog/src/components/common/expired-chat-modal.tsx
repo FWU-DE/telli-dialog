@@ -3,7 +3,7 @@
 import React from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import StopWatchDoneIcon from '@/components/icons/stopwatch-done';
-import DownloadSharedConversationButton from '@/app/(unauth)/ua/dowload-shared-conversation-button';
+import DownloadSharedConversationButton from '@/app/(unauth)/ua/download-shared-conversation-button';
 import { type ChatMessage as Message } from '@/types/chat';
 import { useTranslations } from 'next-intl';
 import { useTheme } from '@/hooks/use-theme';
@@ -12,11 +12,17 @@ import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
 type ExpiredChatModalProps = {
   conversationMessages: Message[];
   title: string;
+  inviteCode: string;
 };
 
-export default function ExpiredChatModal({ conversationMessages, title }: ExpiredChatModalProps) {
+export default function ExpiredChatModal({
+  conversationMessages,
+  title,
+  inviteCode,
+}: ExpiredChatModalProps) {
   const t = useTranslations('learning-scenarios.shared');
   const { designConfiguration } = useTheme();
+
   return (
     <AlertDialog.Root open={true}>
       <AlertDialog.Portal>
@@ -35,13 +41,17 @@ export default function ExpiredChatModal({ conversationMessages, title }: Expire
               <p className="text-3xl w-full text-center">{t('expired-modal-description')}</p>
             </AlertDialog.Description>
             <AlertDialog.Action asChild>
+              {/* If the shared chat has expired, the messages are gone, so there is no way atm to download the conversation. */}
               <div className="mt-6 mb-2">
-                <DownloadSharedConversationButton
-                  primaryButton
-                  characterName={title}
-                  conversationMessages={conversationMessages}
-                  disabled={conversationMessages.length === 0}
-                />
+                {conversationMessages.length !== 0 && (
+                  <DownloadSharedConversationButton
+                    primaryButton
+                    characterName={title}
+                    conversationMessages={conversationMessages}
+                    disabled={conversationMessages.length === 0}
+                    inviteCode={inviteCode}
+                  />
+                )}
               </div>
             </AlertDialog.Action>
           </div>

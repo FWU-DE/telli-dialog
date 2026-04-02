@@ -22,25 +22,30 @@ export default function SelectImageStyle() {
   const [optimisticStyle, setOptimisticStyle] = React.useOptimistic(selectedStyle);
 
   return (
-    <div className="flex flex-col gap-2 hover:bg-secondary/20 rounded-enterprise-md p-2">
-      <span className="text-xs text-gray-400 hidden sm:block">
+    <div className="flex flex-col gap-2 rounded-enterprise-md p-2">
+      <span className="text-xs text-gray-600 hidden sm:block">
         {tImageGeneration('style-label')}
       </span>
       <DropdownMenu.Root>
-        <DropdownMenu.Trigger asChild className="cursor-pointer focus:outline-none">
+        <DropdownMenu.Trigger
+          disabled={styles.length < 2}
+          asChild
+          className="cursor-pointer disabled:cursor-default focus:outline-hidden"
+        >
           <button
             type="button"
-            className="flex items-center gap-2 cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer disabled:cursor-default bg-transparent opacity-100"
             aria-label="Select Style Dropdown"
           >
             <span className="text-primary text-base font-medium">
               {optimisticStyle?.displayName ?? tImageGeneration('no-style')}
             </span>
-            <ChevronDown className="text-primary" />
+            {styles.length > 1 && <ChevronDown className="text-primary" />}
           </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content
           className={cn('flex flex-col bg-white shadow-dropdown rounded-xl ml-0')}
+          align="start"
           sideOffset={10}
         >
           {styles
@@ -57,7 +62,7 @@ export default function SelectImageStyle() {
                   <DropdownMenu.Item asChild>
                     <button
                       className={cn(
-                        'hover:bg-primary-hover text-left py-6 px-7 outline-none flex flex-col',
+                        'hover:bg-primary-hover text-left py-6 px-7 outline-hidden flex flex-col',
                         iconClassName,
                       )}
                       onClick={() => handleSelectStyle(style.name === 'none' ? undefined : style)}

@@ -344,6 +344,69 @@
       "when": 1770973729601,
       "tag": "0048_sharp_rattler",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1771931792801,
+      "tag": "0049_smart_drax",
+      "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1772107421996,
+      "tag": "0050_parallel_ken_ellis",
+      "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1772118958131,
+      "tag": "0051_foamy_the_call",
+      "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1772146044657,
+      "tag": "0052_superb_gressill",
+      "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1772494182172,
+      "tag": "0053_familiar_mandroid",
+      "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1773700995004,
+      "tag": "0054_happy_patch",
+      "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1774344488395,
+      "tag": "0055_woozy_magdalene",
+      "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1774873919201,
+      "tag": "0056_harsh_piledriver",
+      "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "7",
+      "when": 1774905391197,
+      "tag": "0057_illegal_black_panther",
+      "breakpoints": true
     }
   ]
 }

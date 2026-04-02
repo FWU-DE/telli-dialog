@@ -119,7 +119,6 @@ export async function webScraperCrawl4AI(url: string): Promise<WebsearchSource> 
       content: trimmedContent,
       name: title,
       link: url,
-      type: 'websearch',
     };
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {

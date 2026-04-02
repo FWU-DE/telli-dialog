@@ -5,6 +5,7 @@ import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTheme } from '@/hooks/use-theme';
 import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
+import { useTranslations } from 'next-intl';
 
 type DestructiveActionButtonProps = {
   triggerButtonClassName?: string;
@@ -29,6 +30,7 @@ export default function DestructiveActionButton({
   const [isOpen, setIsOpen] = React.useState(false);
 
   const queryClient = useQueryClient();
+  const t = useTranslations('common');
 
   function refetchConversations() {
     void queryClient.invalidateQueries({ queryKey: ['conversations'] });
@@ -46,6 +48,7 @@ export default function DestructiveActionButton({
             setIsOpen(true);
           }}
           type="button"
+          data-testid="custom-chat-delete-button"
           {...buttonProps}
         >
           {children}
@@ -70,14 +73,14 @@ export default function DestructiveActionButton({
                 event.preventDefault();
                 setIsOpen(false);
               }}
-              className={cn(buttonSecondaryClassName, 'max-lg:w-full')}
+              className={cn(buttonSecondaryClassName, 'w-full lg:w-auto')}
               type="button"
             >
-              Abbrechen
+              {t('cancel')}
             </button>
             <AlertDialog.Action asChild>
               <button
-                className={cn(buttonDeleteClassName, 'max-lg:w-full')}
+                className={cn(buttonDeleteClassName, 'w-full lg:w-auto')}
                 type="button"
                 onClick={(event) => {
                   event.stopPropagation();
@@ -86,8 +89,9 @@ export default function DestructiveActionButton({
                   setIsOpen(false);
                   refetchConversations();
                 }}
+                data-testid="custom-chat-confirm-button"
               >
-                {confirmText ?? 'Löschen'}
+                {confirmText ?? t('delete')}
               </button>
             </AlertDialog.Action>
           </div>

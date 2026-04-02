@@ -1,28 +1,31 @@
 import { type LearningScenarioSelectModel } from '@shared/db/schema';
-import { ChunkResult } from '../file-operations/process-chunks';
+import { RetrievedChunk } from '../rag/types';
 import {
-  constructFilePrompt,
-  constructWebsearchPrompt,
+  constructRagContext,
+  FORMAT_GUIDELINES,
   formatList,
   LANGUAGE_GUIDELINES,
+  TOOL_GUIDELINES,
 } from '../utils/system-prompt';
-import { WebsearchSource } from '@shared/db/types';
 
 export function constructLearningScenarioSystemPrompt({
   sharedChat,
-  retrievedTextChunks,
-  websearchSources,
+  chunks,
 }: {
   sharedChat: LearningScenarioSelectModel;
-  retrievedTextChunks?: Record<string, ChunkResult[]>;
-  websearchSources?: WebsearchSource[];
+  chunks: RetrievedChunk[];
 }) {
-  const filePrompt = constructFilePrompt(retrievedTextChunks);
-  const websearchPrompt = constructWebsearchPrompt(websearchSources);
+  // error urls are intentionally not included in the learning scenario system prompt
+  const ragContext = constructRagContext(chunks);
 
   return `Du bist ein KI-Chatbot, der in einer Schulklasse eingesetzt wird, um Schülerinnen und Schüler zu unterstützen.
+
 ${LANGUAGE_GUIDELINES}
- 
+${TOOL_GUIDELINES}
+${FORMAT_GUIDELINES}
+
+Die folgenden Anweisungen wurden von der Lehrkraft erstellt und haben bei Widersprüchen immer Vorrang vor den allgemeinen Richtlinien.
+
 ${formatList('## Kontext', [
   {
     label: 'Thema des Chats',
@@ -49,7 +52,5 @@ ${sharedChat.studentExercise.length !== 0 ? `Folgendes ist der Auftrag an die Le
 
 ## Verhalte dich wie folgt
 ${sharedChat.additionalInstructions}
-
-${filePrompt}
-${websearchPrompt}`;
+${ragContext}`;
 }

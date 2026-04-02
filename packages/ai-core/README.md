@@ -1,14 +1,14 @@
 # @telli/ai-core
 
-A package for API response standardization and utilities.
+A package for communicating with AI providers and LLMs.
 
 ## Features
 
-- Standardized API response types
-- Response creation utilities
-- Type guards for response validation
-- Zod schema validation
-- Takes care of Billing and Access control for API keys
+- Chat completions
+- Embeddings
+- Image generation
+- API key management including billing and access control
+- Zod schema validation for provider responses
 
 ## Installation
 

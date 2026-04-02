@@ -9,7 +9,6 @@ import {
   unshareLearningScenario,
   updateLearningScenario,
   updateLearningScenarioAccessLevel,
-  updateLearningScenarioPicture,
   uploadAvatarPictureForLearningScenario,
 } from '@shared/learning-scenarios/learning-scenario-service';
 import { requireAuth } from '@/auth/requireAuth';
@@ -26,7 +25,7 @@ export async function updateLearningScenarioAccessLevelAction({
   return runServerAction(updateLearningScenarioAccessLevel)({
     learningScenarioId,
     accessLevel,
-    userId: user.id,
+    user,
   });
 }
 
@@ -46,22 +45,6 @@ export async function updateLearningScenarioAction({
   });
 }
 
-export async function updateLearningScenarioPictureAction({
-  learningScenarioId,
-  picturePath,
-}: {
-  learningScenarioId: string;
-  picturePath: string;
-}) {
-  const { user } = await requireAuth();
-
-  return runServerAction(updateLearningScenarioPicture)({
-    learningScenarioId,
-    picturePath,
-    userId: user.id,
-  });
-}
-
 export async function shareLearningScenarioAction({
   learningScenarioId,
   data,
@@ -75,7 +58,7 @@ export async function shareLearningScenarioAction({
     learningScenarioId,
     user,
     data,
-    schoolId: school?.id,
+    schoolId: school.id,
   });
 }
 
@@ -100,7 +83,7 @@ export async function removeFileFromLearningScenarioAction({
   return runServerAction(removeFileFromLearningScenario)({
     learningScenarioId,
     fileId,
-    userId: user.id,
+    user,
   });
 }
 
@@ -116,6 +99,6 @@ export async function uploadAvatarPictureForLearningScenarioAction({
   return runServerAction(uploadAvatarPictureForLearningScenario)({
     learningScenarioId,
     croppedImageBlob,
-    userId: user.id,
+    user,
   });
 }

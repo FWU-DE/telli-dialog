@@ -16,7 +16,6 @@ import {
   removeFileFromLearningScenarioAction,
   updateLearningScenarioAccessLevelAction,
   updateLearningScenarioAction,
-  updateLearningScenarioPictureAction,
   uploadAvatarPictureForLearningScenarioAction,
 } from './actions';
 import { logWarning } from '@shared/logging';
@@ -47,6 +46,7 @@ import SharingSection from '@/components/forms/sharing-section';
 import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
 import { CopyContainer } from '@/app/(authed)/(dialog)/_components/copy-container';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
+import { AVATAR_MAX_SIZE } from '@/const';
 
 export default function LearningScenarioForm({
   existingFiles,
@@ -86,7 +86,7 @@ export default function LearningScenarioForm({
     setValue,
     control,
     formState: { isValid },
-  } = useForm<SharedSchoolChatFormValues>({
+  } = useForm({
     resolver: zodResolver(sharedSchoolChatFormValuesSchema),
     defaultValues: {
       ...sharedSchoolChat,
@@ -179,26 +179,17 @@ export default function LearningScenarioForm({
   }
 
   async function handleUploadAvatarPicture(croppedImageBlob: Blob) {
-    return await uploadAvatarPictureForLearningScenarioAction({
+    const result = await uploadAvatarPictureForLearningScenarioAction({
       learningScenarioId: sharedSchoolChat.id,
       croppedImageBlob,
-    });
-  }
-
-  async function handlePictureUploadComplete(picturePath: string) {
-    setValue('pictureId', picturePath);
-
-    const result = await updateLearningScenarioPictureAction({
-      picturePath,
-      learningScenarioId: sharedSchoolChat.id,
     });
 
     if (result.success) {
       toast.success(tToast('image-toast-success'));
       router.refresh();
-    } else {
-      toast.error(tToast('edit-toast-error'));
     }
+
+    return result;
   }
 
   async function handleDeleteSharedChat() {
@@ -280,7 +271,7 @@ export default function LearningScenarioForm({
   const generalSettings = (
     <fieldset className="flex flex-col gap-8 mt-16">
       <h2 className="font-medium mb-2">{t('settings')}</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
+      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 lg:gap-16">
         <div className="flex gap-4 flex-col">
           <div className="flex gap-4 flex-col">
             <label className="text-sm font-medium">{tCommon('llm-model')}</label>
@@ -335,8 +326,7 @@ export default function LearningScenarioForm({
             <CropImageAndUploadButton
               aspect={1}
               handleUploadAvatarPicture={handleUploadAvatarPicture}
-              onUploadComplete={handlePictureUploadComplete}
-              compressionOptions={{ maxHeight: 800 }}
+              compressionOptions={{ maxWidth: AVATAR_MAX_SIZE, maxHeight: AVATAR_MAX_SIZE }}
             />
           )}
         </section>
@@ -442,13 +432,14 @@ export default function LearningScenarioForm({
       </fieldset>
 
       <div className="w-full mt-8">
-        <SharingSection
-          control={control}
-          schoolSharingName="isSchoolShared"
-          linkSharingName="hasLinkAccess"
-          onShareChange={handleSharingChange}
-          disabled={readOnly}
-        />
+        {!readOnly && (
+          <SharingSection
+            control={control}
+            schoolSharingName="isSchoolShared"
+            linkSharingName="hasLinkAccess"
+            onShareChange={handleSharingChange}
+          />
+        )}
       </div>
 
       {!isCreating && !readOnly && (

@@ -1,5 +1,5 @@
 import { cn } from '@/utils/tailwind';
-import { HELP_MODE_GPT_ID } from '@shared/db/const';
+import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 import RobotIcon from '../icons/robot';
 import AvatarPicture from '../common/avatar-picture';
 
@@ -14,7 +14,7 @@ export function AssistantIcon({
   imageSource?: string;
   className?: string;
 }) {
-  if (customGptId === HELP_MODE_GPT_ID) {
+  if (customGptId === HELP_MODE_ASSISTANT_ID) {
     return (
       <div className="rounded-enterprise-sm bg-secondary/5 w-8 h-8 place-self-start m-4 mt-1">
         <RobotIcon className="w-8 h-8 text-primary p-1" />

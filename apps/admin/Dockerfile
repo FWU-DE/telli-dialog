@@ -2,7 +2,7 @@
 # https://docs.docker.com/build/building/multi-stage/
 
 # Alpine image
-FROM node:24.13.1-alpine AS base
+FROM node:24.14.1-alpine AS base
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV TURBO_TELEMETRY_DISABLED=1
@@ -45,6 +45,7 @@ ARG CI
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN,env=SENTRY_AUTH_TOKEN \
     --mount=type=secret,id=SENTRY_ORG,env=SENTRY_ORG \
     --mount=type=secret,id=SENTRY_PROJECT,env=SENTRY_PROJECT \
+    --mount=type=secret,id=SENTRY_URL,env=SENTRY_URL \
     CI=${CI} \
     pnpm turbo build:envless
 

@@ -4,7 +4,7 @@ import { useToast } from '@/components/common/toast';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { inputFieldClassName } from '@/utils/tailwind/input';
 import React from 'react';
-import { getChatIdByInviteCodeAction } from './actions';
+import { getChatInfoByInviteCodeAction } from './actions';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
@@ -16,7 +16,7 @@ export default function SharedChatLoginForm() {
   const t = useTranslations('learning-scenarios.shared');
 
   async function getChatByInviteCode(formattedInviteCode: string) {
-    const result = await getChatIdByInviteCodeAction(formattedInviteCode);
+    const result = await getChatInfoByInviteCodeAction(formattedInviteCode);
     if (result.success) return result.value;
     return undefined;
   }

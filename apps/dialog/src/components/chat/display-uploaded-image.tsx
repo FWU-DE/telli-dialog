@@ -2,7 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { FileModel } from '@shared/db/schema';
-import { getReadOnlySignedUrl } from '@shared/s3';
+import { getReadOnlySignedUrlAction } from '@/app/api/file-operations/actions';
 import { FileStatus } from './upload-file-button';
 import DeattachFileIcon from '../icons/file-upload-icons/deattach-file-icon';
 import Spinner from '../icons/spinner';
@@ -39,7 +39,7 @@ export default function DisplayUploadedImage({
   } = useQuery({
     queryKey: ['signed-url', file.id, file.name, file.type],
     queryFn: async () => {
-      const signedUrl = await getReadOnlySignedUrl({
+      const signedUrl = await getReadOnlySignedUrlAction({
         key: `message_attachments/${file.id}`,
       });
       return signedUrl;
@@ -100,7 +100,7 @@ export default function DisplayUploadedImage({
           unoptimized={true} // Since we're using signed URLs from S3
         />
         {showBanner && (
-          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2 rounded-enterprise-md">
+          <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-2 rounded-enterprise-md">
             <p className="truncate" title={file.name}>
               {file.name}
             </p>

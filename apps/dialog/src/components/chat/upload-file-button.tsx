@@ -26,7 +26,7 @@ export type FileStatus = 'uploading' | 'processed' | 'failed' | 'success';
 
 export type UploadFileButtonProps = {
   setFiles: React.Dispatch<React.SetStateAction<Map<string, LocalFileState>>>;
-  onFileUploaded?: (data: { id: string; name: string; file: File }) => void;
+  onFileUploaded?: (data: { id: string; name: string; file: File }) => void | Promise<void>;
   triggerButton?: React.ReactNode;
   fileUploadFn?: (file: File) => Promise<FileUploadResponse>;
   onFileUploadStart?: () => void;
@@ -49,7 +49,7 @@ export async function handleSingleFile({
 }: {
   file: File;
   setFiles: React.Dispatch<React.SetStateAction<Map<string, LocalFileState>>>;
-  onFileUploaded?: (data: { id: string; name: string; file: File }) => void;
+  onFileUploaded?: (data: { id: string; name: string; file: File }) => void | Promise<void>;
   session: ReturnType<typeof useSession>;
   conversation?: ReturnType<typeof useConversation>;
   toast: ToastContextType;
@@ -99,7 +99,7 @@ export async function handleSingleFile({
       }
       return updatedFiles;
     });
-    onFileUploaded?.({ id: fileId, name: file.name, file });
+    await onFileUploaded?.({ id: fileId, name: file.name, file });
     if (showUploadConfirmation) toast.success(translations('toasts.upload-success'));
   } catch (error) {
     setFiles((prevFiles) => {
@@ -199,7 +199,7 @@ export default function UploadFileButton({
   );
 }
 
-export async function fetchUploadFile(data: {
+async function fetchUploadFile(data: {
   body: Blob;
   contentType: string;
   fileName: string;

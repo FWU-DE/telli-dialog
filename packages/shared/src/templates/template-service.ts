@@ -1,11 +1,15 @@
+/**
+ * @description Service functions for handling global templates of characters, assistants, and learning scenarios.
+ * Only for admin use, does not check for user authorization.
+ */
 import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '@shared/db';
 import {
   AccessLevel,
+  assistantTable,
+  assistantTemplateMappingTable,
   characterTable,
   characterTemplateMappingTable,
-  customGptTable,
-  customGptTemplateMappingTable,
   federalStateTable,
   FileModel,
   learningScenarioInsertSchema,
@@ -17,30 +21,27 @@ import {
   TemplateToFederalStateMapping,
   TemplateTypes,
 } from '@shared/templates/template';
-import { dbGetCharacterById, dbCreateCharacter } from '@shared/db/functions/character';
-import { dbGetCustomGptById, dbUpsertCustomGpt } from '@shared/db/functions/custom-gpts';
+import { dbCreateCharacter, dbGetCharacterById } from '@shared/db/functions/character';
+import { dbGetAssistantById, dbUpsertAssistant } from '@shared/db/functions/assistants';
 import {
   dbGetFilesForLearningScenario,
+  dbGetRelatedAssistantFiles,
   dbGetRelatedCharacterFiles,
-  dbGetRelatedCustomGptFiles,
 } from '@shared/db/functions/files';
 import { DUMMY_USER_ID } from '@shared/db/seed/user-entity';
 import { logError } from '@shared/logging';
 import {
   copyAvatarPicture,
   duplicateFileWithEmbeddings,
+  linkFileToAssistant,
   linkFileToCharacter,
-  linkFileToCustomGpt,
   linkFileToLearningScenario,
 } from '@shared/files/fileService';
 import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
-import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
+import { NotFoundError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
-import {
-  buildLearningScenarioPictureKey,
-  duplicateLearningScenario,
-} from '@shared/learning-scenarios/learning-scenario-service';
-import { UserModel } from '@shared/auth/user-model';
+import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
+import path from 'node:path';
 
 const templateTypeMap: Record<string, TemplateTypes> = {
   custom: 'custom-gpt',
@@ -54,13 +55,13 @@ const templateTypeMap: Record<string, TemplateTypes> = {
  * @returns A list of all global templates
  */
 export async function getTemplates(): Promise<TemplateModel[]> {
-  const [characterTemplates, customGptTemplates, learningScenarioTemplates] = await Promise.all([
+  const [characterTemplates, assistantTemplates, learningScenarioTemplates] = await Promise.all([
     getCharacterTemplates(),
-    getCustomGptTemplates(),
+    getAssistantTemplates(),
     getLearningScenarioTemplates(),
   ]);
 
-  return [...characterTemplates, ...customGptTemplates, ...learningScenarioTemplates];
+  return [...characterTemplates, ...assistantTemplates, ...learningScenarioTemplates];
 }
 
 /** Fetch all character templates from the database. */
@@ -82,18 +83,18 @@ async function getCharacterTemplates(): Promise<TemplateModel[]> {
   }));
 }
 
-/** Fetch all custom GPT templates from the database. */
-async function getCustomGptTemplates(): Promise<TemplateModel[]> {
+/** Fetch all assistant templates from the database. */
+async function getAssistantTemplates(): Promise<TemplateModel[]> {
   const templates = await db
     .select({
-      id: customGptTable.id,
-      name: customGptTable.name,
-      createdAt: customGptTable.createdAt,
-      originalId: customGptTable.originalCustomGptId,
-      isDeleted: customGptTable.isDeleted,
+      id: assistantTable.id,
+      name: assistantTable.name,
+      createdAt: assistantTable.createdAt,
+      originalId: assistantTable.originalAssistantId,
+      isDeleted: assistantTable.isDeleted,
     })
-    .from(customGptTable)
-    .where(eq(customGptTable.accessLevel, 'global'));
+    .from(assistantTable)
+    .where(eq(assistantTable.accessLevel, 'global'));
 
   return templates.map((template) => ({
     ...template,
@@ -146,23 +147,23 @@ export async function getTemplateById(
       type: 'character',
     };
   } else if (templateType === 'custom-gpt') {
-    const [customGpt] = await db
+    const [assistant] = await db
       .select({
-        id: customGptTable.id,
-        originalId: customGptTable.originalCustomGptId,
-        name: customGptTable.name,
-        createdAt: customGptTable.createdAt,
-        isDeleted: customGptTable.isDeleted,
+        id: assistantTable.id,
+        originalId: assistantTable.originalAssistantId,
+        name: assistantTable.name,
+        createdAt: assistantTable.createdAt,
+        isDeleted: assistantTable.isDeleted,
       })
-      .from(customGptTable)
-      .where(eq(customGptTable.id, templateId));
+      .from(assistantTable)
+      .where(eq(assistantTable.id, templateId));
 
-    if (!customGpt) {
-      throw new Error('Custom GPT template not found');
+    if (!assistant) {
+      throw new Error('Assistant template not found');
     }
 
     return {
-      ...customGpt,
+      ...assistant,
       type: 'custom-gpt',
     };
   } else if (templateType === 'learning-scenario') {
@@ -208,11 +209,11 @@ export async function getFederalStatesWithMappings(
   } else if (templateType === 'custom-gpt') {
     subquery = db
       .select({
-        federalStateId: customGptTemplateMappingTable.federalStateId,
-        template: customGptTemplateMappingTable.customGptId,
+        federalStateId: assistantTemplateMappingTable.federalStateId,
+        template: assistantTemplateMappingTable.assistantId,
       })
-      .from(customGptTemplateMappingTable)
-      .where(eq(customGptTemplateMappingTable.customGptId, templateId))
+      .from(assistantTemplateMappingTable)
+      .where(eq(assistantTemplateMappingTable.assistantId, templateId))
       .as('mapping');
   } else if (templateType === 'learning-scenario') {
     subquery = db
@@ -278,11 +279,11 @@ export async function updateTemplateMappings(
   } else if (templateType === 'custom-gpt') {
     await db.transaction(async (tx) => {
       if (mappings.some((m) => !m.isMapped)) {
-        await tx.delete(customGptTemplateMappingTable).where(
+        await tx.delete(assistantTemplateMappingTable).where(
           and(
-            eq(customGptTemplateMappingTable.customGptId, templateId),
+            eq(assistantTemplateMappingTable.assistantId, templateId),
             inArray(
-              customGptTemplateMappingTable.federalStateId,
+              assistantTemplateMappingTable.federalStateId,
               mappings.filter((m) => !m.isMapped).map((m) => m.federalStateId),
             ),
           ),
@@ -291,12 +292,12 @@ export async function updateTemplateMappings(
 
       if (mappings.some((m) => m.isMapped)) {
         await tx
-          .insert(customGptTemplateMappingTable)
+          .insert(assistantTemplateMappingTable)
           .values(
             mappings
               .filter((mapping) => mapping.isMapped)
               .map((mapping) => ({
-                customGptId: templateId,
+                assistantId: templateId,
                 federalStateId: mapping.federalStateId,
               })),
           )
@@ -385,8 +386,8 @@ export async function createTemplateFromUrl(url: string): Promise<string> {
     if (templateType === 'character') {
       newTemplate = await createCharacterTemplate(originalId);
     } else if (templateType === 'custom-gpt') {
-      // Handle custom GPT template creation
-      newTemplate = await createCustomGptTemplate(originalId);
+      // Handle assistant template creation
+      newTemplate = await createAssistantTemplate(originalId);
     } else if (templateType === 'learning-scenario') {
       // Handle learning scenario template creation
       newTemplate = await createLearningScenarioTemplate(originalId);
@@ -408,7 +409,7 @@ export async function createTemplateFromUrl(url: string): Promise<string> {
  * Copies all files associated with a template to a new template, including embeddings and text chunks.
  * Files are duplicated in S3 and database records are created for the new template.
  *
- * @param templateType - The type of template ('character' or 'custom-gpt')
+ * @param templateType - The type of template ('character' or 'assistant')
  * @param templateId - The ID of the source template to copy files from
  * @param resultId - The ID of the new template to link copied files to
  * @throws Error if file copying fails, but continues with remaining files
@@ -424,7 +425,7 @@ export async function copyRelatedTemplateFiles(
     if (templateType === 'character') {
       relatedFiles = await dbGetRelatedCharacterFiles(templateId);
     } else if (templateType === 'custom-gpt') {
-      relatedFiles = await dbGetRelatedCustomGptFiles(templateId);
+      relatedFiles = await dbGetRelatedAssistantFiles(templateId);
     } else if (templateType === 'learning-scenario') {
       relatedFiles = await dbGetFilesForLearningScenario(templateId);
     } else {
@@ -438,7 +439,7 @@ export async function copyRelatedTemplateFiles(
           if (templateType === 'character') {
             await linkFileToCharacter(newFileId, resultId);
           } else if (templateType === 'custom-gpt') {
-            await linkFileToCustomGpt(newFileId, resultId);
+            await linkFileToAssistant(newFileId, resultId);
           } else if (templateType === 'learning-scenario') {
             await linkFileToLearningScenario(newFileId, resultId);
           } else {
@@ -457,32 +458,35 @@ export async function copyRelatedTemplateFiles(
 }
 
 /**
- * Copies a custom GPT and creates a new one based on an existing custom GPT.
- * The new custom GPT inherits all properties from the source but can have customized
+ * Copies an assistant and creates a new one based on an existing assistant.
+ * The new assistant inherits all properties from the source but can have customized
  * access level, user, and school assignments.
  *
- * @param originalId - The ID of the source custom GPT to copy
- * @param accessLevel - The access level for the new custom GPT
- * @param userId - The user ID to assign to the new custom GPT
- * @param schoolId - The school ID to assign to the new custom GPT
- * @returns Promise resolving to the newly created custom GPT object
- * @throws Error if source custom GPT is not found or custom GPT creation fails
+ * @param originalId - The ID of the source assistant to copy
+ * @param accessLevel - The access level for the new assistant
+ * @param userId - The user ID to assign to the new assistant
+ * @param schoolId - The school ID to assign to the new assistant
+ * @param duplicateAssistantName - Optional name for the new assistant, defaults to source name if not provided
+ * @returns Promise resolving to the newly created assistant object
+ * @throws Error if source assistant is not found or assistant creation fails
  */
-export async function copyCustomGpt(
+export async function copyAssistant(
   originalId: string,
   accessLevel: AccessLevel,
   userId: string,
   schoolId: string | null,
+  duplicateAssistantName?: string,
 ) {
-  const sourceCustomGpt = await dbGetCustomGptById({ customGptId: originalId });
-  if (!sourceCustomGpt) {
+  const sourceAssistant = await dbGetAssistantById({ assistantId: originalId });
+  if (!sourceAssistant) {
     throw new Error('Assistent nicht gefunden');
   }
 
-  const newCustomGpt = {
-    ...sourceCustomGpt,
+  const newAssistant = {
+    ...sourceAssistant,
+    name: duplicateAssistantName ?? sourceAssistant.name,
     id: undefined,
-    originalCustomGptId: originalId,
+    originalAssistantId: originalId,
     accessLevel,
     userId,
     schoolId,
@@ -490,25 +494,25 @@ export async function copyCustomGpt(
     hasLinkAccess: false, // Reset sharing settings for new template
   };
 
-  const result = await dbUpsertCustomGpt({ customGpt: newCustomGpt });
-  const customGptId = result?.id;
-  if (!customGptId) {
+  const result = await dbUpsertAssistant({ assistant: newAssistant });
+  const assistantId = result?.id;
+  if (!assistantId) {
     throw new Error('Fehler beim Erstellen des Assistenten');
   }
   return result;
 }
 
 /**
- * Creates a new global custom GPT template based on an existing custom GPT.
+ * Creates a new global assistant template based on an existing assistant.
  * The new template inherits all properties from the source but becomes a global template
  * accessible across all schools.
  *
- * @param originalId - The ID of the source custom GPT to create a template from
- * @returns Promise resolving to the newly created custom GPT template object
- * @throws Error if source custom GPT is not found or template creation fails
+ * @param originalId - The ID of the source assistant to create a template from
+ * @returns Promise resolving to the newly created assistant template object
+ * @throws Error if source assistant is not found or template creation fails
  */
-async function createCustomGptTemplate(originalId: string) {
-  return copyCustomGpt(originalId, 'global', DUMMY_USER_ID, null);
+async function createAssistantTemplate(originalId: string) {
+  return copyAssistant(originalId, 'global', DUMMY_USER_ID, null);
 }
 
 /**
@@ -598,7 +602,10 @@ async function copyLearningScenario(learningScenarioId: string, userId: string) 
 
   // avatar
   if (learningScenario.pictureId) {
-    const avatarKey = buildLearningScenarioPictureKey(copy.id);
+    const avatarKey = buildLearningScenarioPictureKey(
+      copy.id,
+      path.basename(learningScenario.pictureId),
+    );
     await copyAvatarPicture(learningScenario.pictureId, avatarKey);
     copy.pictureId = avatarKey;
   }
@@ -611,44 +618,4 @@ async function copyLearningScenario(learningScenarioId: string, userId: string) 
   }
 
   return newLearningScenario;
-}
-
-/**
- * User creates a new learning scenario from a template.
- * All files are duplicated and linked to the new learning scenario.
- *
- * Authorization checks:
- * User must be a teacher.
- * The learning scenario must be a template.
-
-* @returns - the newly created learning scenario
- */
-export async function createNewLearningScenarioFromTemplate({
-  schoolId,
-  user,
-  originalLearningScenarioId,
-}: {
-  originalLearningScenarioId: string;
-  schoolId: string;
-  user: UserModel;
-}) {
-  if (user.userRole !== 'teacher') {
-    throw new ForbiddenError('Only teachers can create learning scenarios from templates');
-  }
-  const existingLearningScenario = await dbGetLearningScenarioById({
-    learningScenarioId: originalLearningScenarioId,
-  });
-  if (!existingLearningScenario) {
-    throw new NotFoundError('Learning scenario not found');
-  }
-  if (existingLearningScenario.accessLevel !== 'global') {
-    throw new InvalidArgumentError('Learning scenario is not a template');
-  }
-
-  return duplicateLearningScenario({
-    accessLevel: 'private',
-    originalLearningScenarioId,
-    user,
-    schoolId,
-  });
 }

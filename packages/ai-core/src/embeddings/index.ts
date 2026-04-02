@@ -2,7 +2,7 @@ import { isApiKeyOverQuota } from '../api-keys/billing';
 import { generateEmbeddings } from './providers';
 import { hasAccessToModel } from '../api-keys/model-access';
 import { AiGenerationError, InvalidModelError } from '../errors';
-import { getEmbeddingModelById } from '../models';
+import { getEmbeddingModelById, getEmbeddingModelByName } from '../models';
 
 /**
  * Generates embeddings using the specified model and texts, with access control.
@@ -55,4 +55,23 @@ export async function generateEmbeddingsWithBilling(
     }
     throw error;
   }
+}
+
+/**
+ * Generates embeddings using a model looked up by name, with access control.
+ *
+ * @param modelName - The name of the embedding model to use
+ * @param texts - Array of text strings to embed
+ * @param apiKeyId - The ID of the API key to verify access
+ *
+ * @returns A promise that resolves to an object containing the generated embeddings and model metadata
+ */
+export async function generateEmbeddingsByNameWithBilling(
+  modelName: string,
+  texts: string[],
+  apiKeyId: string,
+) {
+  const model = await getEmbeddingModelByName(modelName, apiKeyId);
+  const result = await generateEmbeddingsWithBilling(model.id, texts, apiKeyId);
+  return { ...result, model };
 }

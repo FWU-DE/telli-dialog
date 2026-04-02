@@ -6,13 +6,16 @@ import ClientProvider from './client-provider';
 import { getMaybeSession, getMaybeUser } from '@/auth/utils';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
-
-import './globals.css';
+import '@ui/styles/globals.css';
 import './scrollbar.css';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 import { dbGetFederalStateByIdWithResult } from '@shared/db/functions/federal-state';
-import { getMaybeLogoFromS3 } from '@shared/s3';
 import { buildPublicConfig } from '@shared/sentry/public-config';
+import { cn } from '@/utils/tailwind';
+import { getReadOnlySignedUrl } from '@shared/s3';
+import { SEVEN_DAYS } from '@shared/s3/const';
+import telliIcon from '@/assets/telli.svg';
+import appleTouchIcon from '@/assets/apple-touch-icon.png';
 
 const barlow = Barlow({
   weight: ['400', '500', '600', '700'],
@@ -21,17 +24,18 @@ const barlow = Barlow({
 
 export async function generateMetadata(): Promise<Metadata> {
   const maybeUser = await getMaybeUser();
-  const [faviconPath, [, federalState]] = await Promise.all([
-    getMaybeLogoFromS3(maybeUser?.school.federalStateId, 'favicon.svg'),
-    dbGetFederalStateByIdWithResult(maybeUser?.school.federalStateId),
-  ]);
+  const [, federalState] = await dbGetFederalStateByIdWithResult(maybeUser?.school.federalStateId);
+  const favicon = federalState?.pictureUrls?.favicon;
+  const faviconPreSignedUrl = favicon
+    ? await getReadOnlySignedUrl({ key: favicon, options: { expiresIn: SEVEN_DAYS } })
+    : undefined;
 
   return {
     title: !!federalState?.telliName ? federalState?.telliName : 'telli',
     description: 'Der datenschutzkonforme KI-Chatbot für die Schule',
     icons: {
-      icon: faviconPath ?? '/telli.svg',
-      apple: '/apple-touch-icon.png',
+      icon: faviconPreSignedUrl ?? telliIcon.src,
+      apple: appleTouchIcon.src,
     },
   };
 }
@@ -52,8 +56,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const { inlineScript } = buildPublicConfig();
 
   return (
-    <html lang={locale} className={barlow.className}>
-      <body className="overflow-hidden">
+    <html lang={locale} className={cn(barlow.className)} suppressHydrationWarning>
+      <body>
         <Script
           id="public-config"
           // runs as soon as the browser parses it (before client components hydrate)

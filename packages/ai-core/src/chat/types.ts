@@ -1,4 +1,4 @@
-import { LlmModel } from '../api-db';
+import type { LlmModel } from '@telli/api-database';
 
 /**
  * Attachment type for images in messages.
@@ -15,11 +15,15 @@ export type Message = {
   attachments?: ChatAttachment[];
 };
 
+export type GenerationOptions = {
+  maxTokens?: number;
+  temperature?: number;
+};
+
 export type TextGenerationArgs = {
   messages: Message[];
   model: string;
-  maxTokens?: number;
-};
+} & GenerationOptions;
 
 export type TokenUsage = {
   completionTokens: number;

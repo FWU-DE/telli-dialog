@@ -9,6 +9,8 @@ const baseNextConfig: NextConfig = {
   transpilePackages: [
     '@telli/ui',
     '@telli/shared',
+    '@telli/shared-core',
+    '@telli/api-database',
     '@telli/ai-core',
     'import-in-the-middle',
     '@t3-oss/env-nextjs',
@@ -50,6 +52,8 @@ const baseNextConfig: NextConfig = {
   productionBrowserSourceMaps: !isDevBuild,
   experimental: {
     useCache: true,
+    // Speed up dev builds by pre-bundling heavy packages instead of re-resolving on every HMR
+    optimizePackageImports: ['@telli/ui', '@telli/shared', '@telli/ai-core'],
   },
   async redirects() {
     return [
@@ -90,7 +94,7 @@ export default withSentryConfig(baseNextConfigWithNextIntl, {
 
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
-  sentryUrl: 'https://sentry.logging.eu-de.prod.telli.schule',
+  sentryUrl: process.env.SENTRY_URL,
   authToken: process.env.SENTRY_AUTH_TOKEN,
   debug: true,
 

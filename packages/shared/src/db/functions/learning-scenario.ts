@@ -13,8 +13,8 @@ import {
   sharedLearningScenarioTable,
   sharedLearningScenarioUsageTracking,
   SharedLearningScenarioUsageTrackingInsertModel,
-  TextChunkTable,
 } from '../schema';
+import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 
 function baseLearningScenarioWithShareQuery() {
   return db
@@ -117,6 +117,69 @@ export async function dbGetLearningScenariosByUserId({
       and(
         eq(learningScenarioTable.userId, userId),
         eq(learningScenarioTable.accessLevel, 'private'),
+      ),
+    )
+    .orderBy(desc(learningScenarioTable.createdAt));
+}
+
+/**
+ * Returns all learning scenarios created by the user regardless of access level
+ * (private, school, or global).
+ *
+ * Contrast with {@link dbGetLearningScenariosByUserId}, which only returns private scenarios.
+ */
+export async function dbGetAllLearningScenariosByUserId({
+  userId,
+}: {
+  userId: string;
+}): Promise<LearningScenarioOptionalShareDataModel[]> {
+  return baseLearningScenarioWithShareQuery()
+    .leftJoin(
+      sharedLearningScenarioTable,
+      and(
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioTable.id),
+        eq(sharedLearningScenarioTable.userId, userId),
+      ),
+    )
+    .where(eq(learningScenarioTable.userId, userId))
+    .orderBy(desc(learningScenarioTable.createdAt));
+}
+
+export async function dbGetAllAccessibleLearningScenarios({
+  userId,
+  schoolId,
+  federalStateId,
+}: {
+  userId: string;
+  schoolId: string;
+  federalStateId: string;
+}): Promise<LearningScenarioOptionalShareDataModel[]> {
+  return baseLearningScenarioWithShareQuery()
+    .leftJoin(
+      sharedLearningScenarioTable,
+      and(
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioTable.id),
+        eq(sharedLearningScenarioTable.userId, userId),
+      ),
+    )
+    .leftJoin(
+      learningScenarioTemplateMappingTable,
+      eq(learningScenarioTemplateMappingTable.learningScenarioId, learningScenarioTable.id),
+    )
+    .where(
+      or(
+        and(
+          eq(learningScenarioTable.userId, userId),
+          eq(learningScenarioTable.accessLevel, 'private'),
+        ),
+        and(
+          eq(learningScenarioTable.schoolId, schoolId),
+          eq(learningScenarioTable.accessLevel, 'school'),
+        ),
+        and(
+          eq(learningScenarioTable.accessLevel, 'global'),
+          eq(learningScenarioTemplateMappingTable.federalStateId, federalStateId),
+        ),
       ),
     )
     .orderBy(desc(learningScenarioTable.createdAt));
@@ -250,7 +313,7 @@ export async function dbDeleteLearningScenarioByIdAndUserId({
       .select({ id: conversationTable.id })
       .from(conversationTable)
       // TODO: customGptId is wrong! replace with learningScenarioId, once it's available
-      .where(eq(conversationTable.customGptId, learningScenario.id));
+      .where(eq(conversationTable.assistantId, learningScenario.id));
 
     if (conversations.length > 0) {
       await tx.delete(conversationMessageTable).where(
@@ -263,16 +326,10 @@ export async function dbDeleteLearningScenarioByIdAndUserId({
     // TODO: customGptId is wrong! replace with learningScenarioId, once it's available
     await tx
       .delete(conversationTable)
-      .where(eq(conversationTable.customGptId, learningScenario.id));
+      .where(eq(conversationTable.assistantId, learningScenario.id));
     await tx
       .delete(LearningScenarioFileMapping)
       .where(eq(LearningScenarioFileMapping.learningScenarioId, learningScenario.id));
-    await tx.delete(TextChunkTable).where(
-      inArray(
-        TextChunkTable.fileId,
-        relatedFiles.map((f) => f.id),
-      ),
-    );
     await tx.delete(fileTable).where(
       inArray(
         fileTable.id,
@@ -317,4 +374,51 @@ export function dbGetSharedLearningScenarioConversations({
         eq(sharedLearningScenarioTable.userId, userId),
       ),
     );
+}
+
+/**
+ * Create a new shared instance for a learning scenario.
+ */
+export async function dbCreateLearningScenarioShare({
+  userId,
+  learningScenarioId,
+  telliPointsLimit,
+  maxUsageTimeLimit,
+}: Omit<SharedLearningScenarioSelectModel, 'id'>) {
+  // share learning scenario instance
+  const [maybeExistingEntry] = await db
+    .select()
+    .from(sharedLearningScenarioTable)
+    .where(
+      and(
+        eq(sharedLearningScenarioTable.userId, userId),
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
+      ),
+    );
+
+  const inviteCode = generateInviteCode();
+
+  const startedAt = new Date();
+  const [updatedSharedChat] = await db
+    .insert(sharedLearningScenarioTable)
+    .values({
+      id: maybeExistingEntry?.id,
+      userId,
+      learningScenarioId,
+      maxUsageTimeLimit,
+      telliPointsLimit,
+      inviteCode,
+      startedAt,
+    })
+    .onConflictDoUpdate({
+      target: sharedLearningScenarioTable.id,
+      set: {
+        inviteCode,
+        maxUsageTimeLimit,
+        telliPointsLimit,
+        startedAt,
+      },
+    })
+    .returning();
+  return updatedSharedChat;
 }

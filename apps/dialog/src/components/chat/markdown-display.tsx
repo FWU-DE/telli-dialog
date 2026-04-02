@@ -27,18 +27,80 @@ function preprocessMathDelimiters(markdown: string) {
 export default function MarkdownDisplay({ children: _children }: MarkdownDisplayProps) {
   const children = preprocessMathDelimiters(_children);
 
+  // remove the top-padding for the immediate sibling element following an hr to ensure the hr has symmetric top/bottom padding
+  const removeTopPaddingAfterHrClass = '[&>hr+*]:pt-0';
+
   return (
-    <div className="break-words text-base">
+    <div className={cn('wrap-break-word text-base', removeTopPaddingAfterHrClass)}>
       <Markdown
         remarkPlugins={[RemarkMathPlugin, remarkGfm]}
         rehypePlugins={[RehypeKatex]}
         components={{
-          a({ href, children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          h1({ children, className, node, ...props }) {
+            return (
+              <h1 className={cn('text-3xl font-bold pt-4 pb-2 first:pt-0', className)} {...props}>
+                {children}
+              </h1>
+            );
+          },
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          h2({ children, className, node, ...props }) {
+            return (
+              <h2 className={cn('text-2xl font-bold pt-3 pb-2 first:pt-0', className)} {...props}>
+                {children}
+              </h2>
+            );
+          },
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          h3({ children, className, node, ...props }) {
+            return (
+              <h3 className={cn('text-xl font-bold pt-3 pb-1 first:pt-0', className)} {...props}>
+                {children}
+              </h3>
+            );
+          },
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          h4({ children, className, node, ...props }) {
+            return (
+              <h4
+                className={cn('text-lg font-semibold pt-2 pb-1 first:pt-0', className)}
+                {...props}
+              >
+                {children}
+              </h4>
+            );
+          },
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          h5({ children, className, node, ...props }) {
+            return (
+              <h5
+                className={cn('text-base font-semibold pt-2 pb-1 first:pt-0', className)}
+                {...props}
+              >
+                {children}
+              </h5>
+            );
+          },
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          h6({ children, className, node, ...props }) {
+            return (
+              <h6
+                className={cn('text-sm font-semibold pt-2 pb-1 first:pt-0', className)}
+                {...props}
+              >
+                {children}
+              </h6>
+            );
+          },
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          a({ href, children, className, node, ...props }) {
             return (
               <a
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
+                className={cn(className)}
                 style={{
                   color: '#46217E',
                   textDecoration: 'underline',
@@ -61,68 +123,92 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
             );
           },
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          hr({ ...props }) {
-            return <div className="py-1" />;
+          hr({ className, node, ...props }) {
+            return <hr className={cn('my-6', className)} {...props} />;
           },
-          th({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          th({ children, className, node, ...props }) {
             return (
-              <th {...props} className="text-left p-2 border-[1px] bg-slate-100 font-medium">
+              <th
+                className={cn('text-left p-2 border bg-slate-100 font-medium', className)}
+                {...props}
+              >
                 {children}
               </th>
             );
           },
-          td({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          td({ children, className, node, ...props }) {
             return (
-              <td {...props} className="p-2 border-[1px]">
+              <td className={cn('p-2 border', className)} {...props}>
                 {children}
               </td>
             );
           },
-          tr({ children, ...props }) {
-            return <tr {...props}>{children}</tr>;
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          tr({ children, className, node, ...props }) {
+            return (
+              <tr className={cn(className)} {...props}>
+                {children}
+              </tr>
+            );
           },
-          table({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          table({ children, className, node, ...props }) {
             return (
               <table
+                className={cn('w-full border my-4 first:mt-0 last:mb-0 border-collapse', className)}
                 {...props}
-                className="w-full border-[1px] my-4 first:mt-0 last:mb-0 border-collapse"
               >
                 {children}
               </table>
             );
           },
-          strong({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          strong({ children, className, node, ...props }) {
             return (
-              <strong className="font-semibold" {...props}>
+              <strong className={cn('font-semibold', className)} {...props}>
                 {children}
               </strong>
             );
           },
-          ul({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          ul({ children, className, node, ...props }) {
             return (
-              <ul className="ml-6 py-1 space-y-2 list-square" {...props}>
+              <ul className={cn('ml-6 py-1 space-y-2 list-square', className)} {...props}>
                 {children}
               </ul>
             );
           },
-          ol({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          ol({ children, className, node, ...props }) {
             return (
-              <ol className="list-decimal ml-6 py-1 space-y-2" {...props}>
+              <ol className={cn('list-decimal ml-6 py-1 space-y-2', className)} {...props}>
                 {children}
               </ol>
             );
           },
-          li({ children, ...props }) {
-            return <li {...props}>{children}</li>;
-          },
-          p({ children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          li({ children, className, node, ...props }) {
             return (
-              <p className="pt-1 pb-3 first:pt-0 last:pb-0 whitespace-pre-wrap" {...props}>
+              <li className={cn(className)} {...props}>
+                {children}
+              </li>
+            );
+          },
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          p({ children, className, node, ...props }) {
+            return (
+              <p
+                className={cn('pt-1 pb-3 first:pt-0 last:pb-0 whitespace-pre-wrap', className)}
+                {...props}
+              >
                 {children}
               </p>
             );
           },
-          code({ className, children, ...props }) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          code({ className, children, node, ...props }) {
             const sanitizedText = String(children).replace(/\n$/, '');
             const match = /language-(\w+)/.exec(className || '');
 
@@ -130,7 +216,9 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
 
             if (language === undefined) {
               return (
-                <code className={cn(className, 'break-words bg-main-200 px-0.5 text-wrap text-sm')}>
+                <code
+                  className={cn(className, 'wrap-break-word bg-main-200 px-0.5 text-wrap text-sm')}
+                >
                   {children}
                 </code>
               );
@@ -140,7 +228,7 @@ export default function MarkdownDisplay({ children: _children }: MarkdownDisplay
               <div className="flex flex-col py-2 text-sm max-w-full">
                 <div className="flex items-center justify-center bg-gray-300 py-2 px-2 text-vidis-hover-purple">
                   <span>{language}</span>
-                  <div className="flex-grow" />
+                  <div className="grow" />
                   <TelliClipboardButton text={sanitizedText} />
                 </div>
                 <SyntaxHighlighter

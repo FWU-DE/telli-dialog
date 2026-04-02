@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import resolveConfig from 'tailwindcss/resolveConfig';
-import tailwindConfig from '../../../tailwind.config';
 
-const fullConfig = resolveConfig(tailwindConfig);
-export const breakpoints = fullConfig.theme.screens;
+// That is original definition of breakpoints with tailwindcss v3.
+// In future we should use helper variables from tailwind directly and get rid of this file.
+export const breakpoints = {
+  sm: '640px',
+  lg: '1024px',
+};
 
 const getWindowWidth = () => {
   if (typeof window !== 'undefined') {

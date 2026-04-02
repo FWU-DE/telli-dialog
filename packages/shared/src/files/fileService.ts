@@ -1,11 +1,11 @@
 import { eq } from 'drizzle-orm';
 import { db } from '@shared/db';
 import {
+  AssistantFileMapping,
   CharacterFileMapping,
-  CustomGptFileMapping,
+  chunkTable,
   fileTable,
   LearningScenarioFileMapping,
-  TextChunkTable,
 } from '@shared/db/schema';
 import {
   copyFileInS3,
@@ -43,8 +43,8 @@ export async function duplicateFileWithEmbeddings(originalFileId: string): Promi
     // Get all text chunks for the original file
     const originalChunks = await db
       .select()
-      .from(TextChunkTable)
-      .where(eq(TextChunkTable.fileId, originalFileId));
+      .from(chunkTable)
+      .where(eq(chunkTable.fileId, originalFileId));
 
     // Copy the original file from S3
     await copyFileInS3({
@@ -70,7 +70,7 @@ export async function duplicateFileWithEmbeddings(originalFileId: string): Promi
             fileId: newFileId,
           };
         });
-        await tx.insert(TextChunkTable).values(newChunks);
+        await tx.insert(chunkTable).values(newChunks);
       }
     });
 
@@ -98,15 +98,15 @@ export async function linkFileToCharacter(fileId: string, characterId: string): 
 }
 
 /**
- * Links a file to a custom GPT by creating a mapping record.
+ * Links a file to an assistant by creating a mapping record.
  *
  * @param fileId - The ID of the file to link
- * @param customGptId - The ID of the custom GPT to link to
+ * @param assistantId - The ID of the assistant to link to
  */
-export async function linkFileToCustomGpt(fileId: string, customGptId: string): Promise<void> {
-  await db.insert(CustomGptFileMapping).values({
+export async function linkFileToAssistant(fileId: string, assistantId: string): Promise<void> {
+  await db.insert(AssistantFileMapping).values({
     fileId,
-    customGptId,
+    assistantId,
   });
 }
 
@@ -158,7 +158,7 @@ export async function deleteMessageAttachments(fileIds: string[]): Promise<void>
 /**
  * Deletes an avatar picture from S3.
  *
- * @param key The pictureId for characters, customgpts and learning scenarios
+ * @param key The pictureId for characters, assistants and learning scenarios
  * does contain the full path so we can directly use it as key.
  * Does nothing if key is null or undefined.
  *
@@ -182,8 +182,8 @@ export async function uploadAvatarPicture({ key, croppedImageBlob }: UploadAvata
 }
 
 /**
- * Gets a signed URL for read-only access to an avatar picture in S3
- * even if the object does not exist in S3.
+ * Gets a signed URL for read-only access to an avatar picture in S3.
+ * If the object does not exist in S3, a signed URL is still created but will return 404.
  *
  * @param key
  * @returns undefined if key is falsy.
@@ -191,7 +191,7 @@ export async function uploadAvatarPicture({ key, croppedImageBlob }: UploadAvata
 export async function getAvatarPictureUrl(key: string | null | undefined) {
   if (!key) return undefined;
   try {
-    return await getReadOnlySignedUrl({ key, options: { expiresIn: 3600 } });
+    return await getReadOnlySignedUrl({ key });
   } catch (error) {
     logError('Error getting signed URL for avatar picture:', error);
     return undefined;

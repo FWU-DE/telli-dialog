@@ -2,24 +2,17 @@
 
 import { requireAuth } from '@/auth/requireAuth';
 import {
-  createNewCustomGpt,
+  createNewAssistant,
   deleteFileMappingAndEntity,
-  linkFileToCustomGpt,
-} from '@shared/custom-gpt/custom-gpt-service';
+  linkFileToAssistant,
+} from '@shared/assistants/assistant-service';
 import { runServerAction } from '@shared/actions/run-server-action';
 
-export async function createNewCustomGptAction({
-  templatePictureId,
-  templateId,
-}: {
-  templatePictureId?: string;
-  templateId?: string;
-}) {
+export async function createNewAssistantAction({ templateId }: { templateId?: string }) {
   const { user, school } = await requireAuth();
 
-  return runServerAction(createNewCustomGpt)({
+  return runServerAction(createNewAssistant)({
     schoolId: school.id,
-    templatePictureId,
     templateId,
     user: user,
   });
@@ -27,24 +20,24 @@ export async function createNewCustomGptAction({
 
 export async function deleteFileMappingAndEntityAction({
   fileId,
-  customGptId,
+  assistantId,
 }: {
   fileId: string;
-  customGptId: string;
+  assistantId: string;
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(deleteFileMappingAndEntity)({ customGptId, fileId, userId: user.id });
+  return runServerAction(deleteFileMappingAndEntity)({ assistantId, fileId, userId: user.id });
 }
 
-export async function linkFileToCustomGptAction({
+export async function linkFileToAssistantAction({
   fileId,
-  customGptId,
+  assistantId,
 }: {
   fileId: string;
-  customGptId: string;
+  assistantId: string;
 }) {
   const { user } = await requireAuth();
 
-  return runServerAction(linkFileToCustomGpt)({ fileId, customGptId, userId: user.id });
+  return runServerAction(linkFileToAssistant)({ fileId, assistantId, userId: user.id });
 }

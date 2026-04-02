@@ -1,3 +1,13 @@
+import type { SharedChatExpiredError, TelliPointsExceededError } from '@telli/ai-core/errors';
+
+/**
+ * Serialized error that can be safely transmitted across the Server Action boundary.
+ */
+export type SerializedError = {
+  name: string;
+  message: string;
+};
+
 /**
  * Status of a chat conversation.
  * - 'ready': Chat is ready for input
@@ -28,6 +38,42 @@ export type ChatMessage = {
   createdAt?: Date;
   experimental_attachments?: ChatAttachment[];
 };
+
+/**
+ * Result returned when sending a chat message.
+ * The error field handles pre-streaming errors as a serialized plain object.
+ */
+export type SendMessageResult = {
+  stream: ReadableStream<string>;
+  messageId: string;
+  error?: SerializedError;
+};
+
+/**
+ * Creates a SendMessageResult with a serialized error.
+ */
+export function createErrorResult(
+  error: TelliPointsExceededError | SharedChatExpiredError,
+): SendMessageResult {
+  return {
+    stream: new ReadableStream<string>({
+      start(controller) {
+        controller.close(); // already closed stream
+      },
+    }),
+    messageId: crypto.randomUUID(),
+    error: { name: error.name, message: error.message },
+  };
+}
+
+/**
+ * Reconstructs an Error from a serialized error object.
+ */
+export function deserializeError(serialized: SerializedError): Error {
+  const error = new Error(serialized.message);
+  error.name = serialized.name;
+  return error;
+}
 
 /**
  * Text part of a UI message for rendering.

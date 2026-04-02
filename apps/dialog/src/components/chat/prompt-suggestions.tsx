@@ -15,7 +15,7 @@ export default function PromptSuggestions({
   return (
     <div
       className={cn(
-        'relative grid gap-2 xs:mb-2 xs:grid-cols-1 lg:mb-4 lg:grid-cols-2 lg:gap-4',
+        'relative grid gap-2 mb-2 grid-cols-1 lg:mb-4 lg:grid-cols-2 lg:gap-4',
         suggestions.length === 1 && 'grid-cols-1',
       )}
     >
@@ -26,7 +26,7 @@ export default function PromptSuggestions({
             onClick={() => onSelectSuggestion(suggestion)}
             key={index}
             className={cn(
-              'border-[1px] rounded-enterprise-md py-2.5 px-4 hover:border-primary',
+              'border rounded-enterprise-md py-2.5 px-4 hover:border-primary',
               index === 0 && suggestions.length % 2 !== 0 ? 'col-span-2' : '',
             )}
           >

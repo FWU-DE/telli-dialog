@@ -91,7 +91,13 @@ export default function CharacterSharedChat({
 
   return (
     <>
-      {!chatActive && <ExpiredChatModal conversationMessages={uiMessages} title={character.name} />}
+      {!chatActive && (
+        <ExpiredChatModal
+          conversationMessages={uiMessages}
+          title={character.name}
+          inviteCode={inviteCode}
+        />
+      )}
       <div className="flex flex-col h-full w-full overflow-hidden">
         <SharedChatHeader
           chatActive={chatActive}
@@ -100,6 +106,7 @@ export default function CharacterSharedChat({
           handleOpenNewChat={handleOpenNewChat}
           title={character.name}
           messages={uiMessages}
+          inviteCode={inviteCode}
           // currently this is redundant, due to the inconsistency with the shared school chat initial page
           dialogStarted={messages.length > 0}
         />
@@ -107,7 +114,7 @@ export default function CharacterSharedChat({
         <div className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden">
           <div
             ref={scrollRef}
-            className="flex-grow w-full max-w-5xl overflow-y-auto p-4 pb-[5rem]"
+            className="grow w-full max-w-5xl overflow-y-auto p-4 pb-20"
             style={{ maxHeight: 'calc(100vh - 150px)' }}
           >
             {messages.length === 0 ? (

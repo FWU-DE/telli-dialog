@@ -10,7 +10,7 @@ import { getFileIconByFileExtension } from '../icons/file-upload-icons/file-icon
 import { formatBytes, getFileNameAndFileExtention, hexToRGBA } from '@/utils/files/generic';
 import { FileStatus } from '../chat/upload-file-button';
 import TrashIcon from '../icons/trash';
-import { ToastContextType } from '../common/toast';
+import { useToast } from '../common/toast';
 import { useTranslations } from 'next-intl';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { cn } from '@/utils/tailwind';
@@ -19,7 +19,6 @@ type FilesTableProps = {
   files: FileModel[];
   additionalFiles: Map<string, LocalFileState>;
   onDeleteFile(fileId: string): Promise<void>;
-  toast: ToastContextType;
   showUploadConfirmation?: boolean;
   className?: string;
   readOnly: boolean;
@@ -30,11 +29,11 @@ export default function FilesTable({
   onDeleteFile,
   additionalFiles,
   showUploadConfirmation,
-  toast,
   className,
   readOnly,
 }: FilesTableProps) {
   const t = useTranslations('file-interaction');
+  const toast = useToast();
   if (files.length < 1 && additionalFiles.size < 1) return null;
 
   function handleDeleteFile(file_id: string) {
@@ -69,12 +68,12 @@ export default function FilesTable({
     status: FileStatus;
   }[];
   return (
-    <table className={className}>
+    <table className={cn('w-full', className)}>
       {/* <thead>
         <tr className="font-normal bg-light-gray w-full text-sm">
           <th className="font-medium text-left py-3 text-dark-gray pl-3">Name</th>
           <th className="font-medium text-left py-3 text-dark-gray">Dateigröße</th>
-          <th className="font-medium text-center py-3 text-dark-gray min-w-[5rem]"></th>
+          <th className="font-medium text-center py-3 text-dark-gray min-w-20"></th>
         </tr>
       </thead> */}
       <tbody>
@@ -85,8 +84,11 @@ export default function FilesTable({
             const { Icon, fillColor } = getFileIconByFileExtension(extention);
 
             return (
-              <tr key={id} className="border-b-[1px] last:border-b-0 border-[#D9D9D9]">
-                <td className="flex gap-2 items-center p-2">
+              <tr
+                key={id}
+                className="flex items-center justify-between gap-4 border-b last:border-b-0 border-[#D9D9D9] p-2"
+              >
+                <td className="flex gap-2 items-center flex-1">
                   {status === 'processed' && (
                     <Icon
                       className="w-9 h-9 p-1.5"
@@ -97,23 +99,25 @@ export default function FilesTable({
                   {status === 'failed' && <CrossIcon className="w-9 h-9 p-1.5 text-red-500" />}
                   <div className="flex flex-col">
                     <span className="text-sm font-medium">{fileStem}</span>
-                    <span className="text-gray-600 text-xs">.{extention}</span>
                   </div>
                 </td>
-                <td>{formatBytes(size)}</td>
-                {!readOnly && (
-                  <td className="w-8">
+                <td className="flex items-center gap-4 ml-auto">
+                  <span className="text-sm whitespace-nowrap">{formatBytes(size)}</span>
+                  {status === 'uploading' && (
+                    <span className="text-sm text-gray-500">Uploading...</span>
+                  )}
+                  {!readOnly && (
                     <DestructiveActionButton
-                      modalDescription="Möchten Sie diese Datei wirklich dauerhaft löschen? Dieser Vorgang kann nicht rückgängig gemacht werden."
+                      modalDescription={t('delete.modal-description')}
                       triggerButtonClassName={cn('flex items-center', iconClassName)}
-                      modalTitle="Datei löschen"
-                      confirmText="Datei löschen"
+                      modalTitle={t('delete.modal-title')}
+                      confirmText={t('delete.confirm')}
                       actionFn={() => handleDeleteFile(id)}
                     >
                       <TrashIcon className="w-9 h-9" />
                     </DestructiveActionButton>
-                  </td>
-                )}
+                  )}
+                </td>
               </tr>
             );
           })}

@@ -12,6 +12,7 @@
   },
   "aliases": {
     "components": "@telli/ui/components",
+    "hooks": "@telli/ui/hooks",
     "utils": "@telli/ui/lib/utils",
     "lib": "@telli/ui/lib",
     "types": "@telli/ui/types"

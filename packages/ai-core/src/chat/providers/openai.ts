@@ -18,7 +18,7 @@ export function constructOpenAITextStreamFn(model: AiModel): TextStreamFn {
   const client = createOpenAIClient(model);
 
   return async function* getOpenAITextStream(
-    { messages, model: modelName, maxTokens },
+    { messages, model: modelName, maxTokens, temperature },
     onComplete,
   ) {
     const stream = await client.chat.completions.create({
@@ -27,6 +27,7 @@ export function constructOpenAITextStreamFn(model: AiModel): TextStreamFn {
       stream: true,
       stream_options: { include_usage: true },
       max_tokens: maxTokens,
+      temperature,
     });
 
     let usage: TokenUsage | undefined;
@@ -60,12 +61,18 @@ export function constructOpenAITextStreamFn(model: AiModel): TextStreamFn {
 export function constructOpenAITextGenerationFn(model: AiModel): TextGenerationFn {
   const client = createOpenAIClient(model);
 
-  return async function getOpenAITextGeneration({ messages, model: modelName, maxTokens }) {
+  return async function getOpenAITextGeneration({
+    messages,
+    model: modelName,
+    maxTokens,
+    temperature,
+  }) {
     const response = await client.chat.completions.create({
       model: modelName,
       messages: toOpenAIMessages(messages),
       stream: false,
       max_tokens: maxTokens,
+      temperature,
     });
 
     const text = response.choices[0]?.message?.content ?? '';

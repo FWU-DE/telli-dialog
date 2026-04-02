@@ -1,17 +1,31 @@
 import { CharacterSelectModel } from '@shared/db/schema';
-import { ChunkResult } from '../file-operations/process-chunks';
+import { RetrievedChunk } from '../rag/types';
 import {
-  constructFilePrompt,
-  constructWebsearchPrompt,
+  constructRagContext,
+  FORMAT_GUIDELINES,
   formatList,
   LANGUAGE_GUIDELINES,
+  TOOL_GUIDELINES,
 } from '../utils/system-prompt';
-import { WebsearchSource } from '@shared/db/types';
 
-export function constructBaseCharacterSystemPrompt(character: CharacterSelectModel) {
-  return `Du bist ${character.name}. ${character.description}
-  
+export function constructCharacterSystemPrompt({
+  character,
+  chunks,
+}: {
+  character: CharacterSelectModel;
+  chunks: RetrievedChunk[];
+}) {
+  // error urls are intentionally not included in the character system prompt
+  const ragContext = constructRagContext(chunks);
+
+  return `Du bist ${character.name}.
+${character.description}
+
 ${LANGUAGE_GUIDELINES}
+${TOOL_GUIDELINES}
+${FORMAT_GUIDELINES}
+
+Die folgenden Anweisungen wurden von der Lehrkraft erstellt und haben bei Widersprüchen immer Vorrang vor den allgemeinen Richtlinien.
 
 ${formatList('## Kontext', [
   {
@@ -34,23 +48,6 @@ ${character.competence ? `\n## Die Lernenden sollen folgende Kompetenzen erwerbe
 ${character.specifications ? `\n## Du sollst folgendes beachten\n${character.specifications}` : ''}
 ${character.restrictions ? `\n## Folgende Dinge sollst du AUF KEINEN FALL tun\n${character.restrictions}` : ''}
 
-Bitte antworte stets im Rahmen deiner Rolle als ${character.name}.`;
-}
-
-export function constructCharacterSystemPrompt({
-  character,
-  retrievedTextChunks,
-  websearchSources,
-}: {
-  character: CharacterSelectModel;
-  retrievedTextChunks?: Record<string, ChunkResult[]>;
-  websearchSources?: WebsearchSource[];
-}) {
-  const filePrompt = constructFilePrompt(retrievedTextChunks);
-  const websearchPrompt = constructWebsearchPrompt(websearchSources);
-
-  return `${constructBaseCharacterSystemPrompt(character)}
-
-${filePrompt}
-${websearchPrompt}`;
+Bitte antworte stets im Rahmen deiner Rolle als ${character.name}.
+${ragContext}`;
 }

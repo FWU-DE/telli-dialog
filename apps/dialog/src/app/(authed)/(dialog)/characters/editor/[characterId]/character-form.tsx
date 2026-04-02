@@ -31,7 +31,6 @@ import {
   linkFileToCharacterAction,
   updateCharacterAccessLevelAction,
   updateCharacterAction,
-  updateCharacterPictureAction,
   uploadAvatarPictureForCharacterAction,
 } from './actions';
 import ShareContainer from './share-container';
@@ -49,6 +48,7 @@ import { WebsearchSource } from '@shared/db/types';
 import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
 import SharingSection from '@/components/forms/sharing-section';
 import { createNewCharacterAction } from '@/app/(authed)/(dialog)/characters/actions';
+import { AVATAR_MAX_SIZE } from '@/const';
 
 type CharacterFormProps = CharacterWithShareDataModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -111,7 +111,7 @@ export default function CharacterForm({
     setValue,
     control,
     formState: { isValid },
-  } = useForm<CharacterFormValues>({
+  } = useForm({
     resolver: zodResolver(characterFormValuesSchema),
     defaultValues: {
       ...character,
@@ -189,16 +189,6 @@ export default function CharacterForm({
     name: 'attachedLinks',
   });
 
-  async function handlePictureUploadComplete(picturePath: string) {
-    const result = await updateCharacterPictureAction({ picturePath, characterId: character.id });
-    if (result.success) {
-      toast.success(tToast('image-toast-success'));
-      router.refresh();
-    } else {
-      toast.error(tToast('edit-toast-error'));
-    }
-  }
-
   async function onSubmit(data: CharacterFormValues) {
     const result = await updateCharacterAction({
       id: character.id,
@@ -208,8 +198,8 @@ export default function CharacterForm({
     if (result.success) {
       if (!isCreating) {
         toast.success(tToast('edit-toast-success'));
+        router.refresh();
       }
-      router.refresh();
     } else {
       toast.error(tToast('edit-toast-error'));
     }
@@ -243,6 +233,12 @@ export default function CharacterForm({
       characterId: character.id,
       croppedImageBlob,
     });
+
+    if (result.success) {
+      toast.success(tToast('image-toast-success'));
+      router.refresh();
+    }
+
     return result;
   }
 
@@ -358,7 +354,7 @@ export default function CharacterForm({
       {generalSettings}
       <fieldset className="flex flex-col gap-4 mt-12">
         <h2 className="font-medium mb-8">{t('character-settings')}</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 md:gap-16">
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:gap-8 lg:gap-16">
           <div className="flex gap-4 flex-col">
             <TextInput
               id="name"
@@ -400,8 +396,7 @@ export default function CharacterForm({
               <CropImageAndUploadButton
                 aspect={1}
                 handleUploadAvatarPicture={handleUploadAvatarPicture}
-                onUploadComplete={handlePictureUploadComplete}
-                compressionOptions={{ maxHeight: 800 }}
+                compressionOptions={{ maxWidth: AVATAR_MAX_SIZE, maxHeight: AVATAR_MAX_SIZE }}
               />
             )}
           </section>
@@ -489,13 +484,14 @@ export default function CharacterForm({
         />
       </fieldset>
       <div className="w-full mt-8">
-        <SharingSection
-          control={control}
-          schoolSharingName="isSchoolShared"
-          linkSharingName="hasLinkAccess"
-          onShareChange={handleSharingChange}
-          disabled={readOnly}
-        />
+        {!readOnly && (
+          <SharingSection
+            control={control}
+            schoolSharingName="isSchoolShared"
+            linkSharingName="hasLinkAccess"
+            onShareChange={handleSharingChange}
+          />
+        )}
       </div>
 
       {!isCreating && !readOnly && (

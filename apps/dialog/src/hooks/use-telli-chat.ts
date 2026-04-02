@@ -2,15 +2,17 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { readTextStream } from '@/utils/streaming';
-import { toUIMessages, UIMessage, type ChatMessage, type ChatStatus } from '@/types/chat';
+import {
+  deserializeError,
+  toUIMessages,
+  UIMessage,
+  type ChatMessage,
+  type ChatStatus,
+  type SendMessageResult,
+} from '@/types/chat';
 
 // Re-export for consumers
 export type { ChatMessage, ChatStatus };
-
-export type SendMessageResult = {
-  stream: ReadableStream<string>;
-  messageId: string;
-};
 
 /**
  * Function type for sending chat messages.
@@ -109,6 +111,10 @@ export function useTelliChat({
           modelId,
           fileIds,
         });
+
+        if (result.error) {
+          throw deserializeError(result.error);
+        }
 
         // We need to handle the first chunk separately to avoid missing content
         let firstChunk = true;

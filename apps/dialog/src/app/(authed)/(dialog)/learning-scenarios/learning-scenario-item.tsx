@@ -93,11 +93,11 @@ export default function LearningScenarioItem({
         <h2 className={cn('font-medium leading-none', truncateClassName)}>
           {learningScenario.name}
         </h2>
-        <span className={cn('text-gray-400', truncateClassName)}>
+        <span className={cn('text-gray-600', truncateClassName)}>
           {learningScenario.description}
         </span>
       </div>
-      <div className="flex-grow" />
+      <div className="grow" />
       {learningScenario.startedAt !== null && timeLeft > 0 && (
         <CountDownTimer
           className="p-1 me-2"
@@ -116,7 +116,7 @@ export default function LearningScenarioItem({
           <span className="sr-only">{t('shared.share')}</span>
         </button>
       )}
-      {learningScenario.accessLevel === 'global' && timeLeft <= 0 && (
+      {learningScenario.userId !== currentUserId && timeLeft <= 0 && (
         <CreateNewInstanceFromTemplate
           redirectPath="learning-scenarios"
           createInstanceCallbackAction={handleCreateNewLearningScenarioFromTemplate}

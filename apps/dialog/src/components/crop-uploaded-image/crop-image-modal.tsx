@@ -54,8 +54,6 @@ export default function ImageCropModal({
     const croppedBlob = await getCroppedImageBlob(
       imageRef.current,
       completedCrop,
-      1,
-      0,
       compressionOptions,
     );
     if (croppedBlob) {
@@ -76,7 +74,7 @@ export default function ImageCropModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white border-2 py-4 flex flex-col gap-3 px-6 max-w-full max-h-full overflow-auto">
         <h1 className="font-medium my-4">Bild ausschneiden</h1>
         <ReactCrop

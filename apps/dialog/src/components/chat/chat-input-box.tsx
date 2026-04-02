@@ -149,7 +149,7 @@ export function ChatInputBox({
           <AutoResizeTextarea
             autoFocus
             placeholder={tCommon('send-message-placeholder')}
-            className="w-full text-base focus:outline-none bg-transparent max-h-[10rem] sm:max-h-[15rem] overflow-y-auto placeholder-black p-2"
+            className="w-full text-base focus:outline-hidden bg-transparent max-h-40 sm:max-h-60 overflow-y-auto placeholder-black p-2"
             onChange={handleInputChange}
             value={input}
             onKeyDown={handleSubmitOnEnter}

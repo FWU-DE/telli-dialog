@@ -16,6 +16,7 @@
     "KEYCLOAK_CLIENT_ID",
     "KEYCLOAK_CLIENT_SECRET",
     "KEYCLOAK_ISSUER",
+    "DE_TEST_API_KEY",
     "API_KEY",
     "API_URL",
     "ENCRYPTION_KEY",
@@ -27,6 +28,7 @@
     "OTEL_METRIC_EXPORT_TIMEOUT",
     "SENTRY_DSN",
     "SENTRY_ENVIRONMENT",
+    "SENTRY_URL",
     "SENTRY_TRACES_SAMPLE_RATE",
     "SENTRY_TRACES_SAMPLE_RATE_CLIENT",
     "NEXT_PUBLIC_SENTRY_LOG_LEVEL",
@@ -38,18 +40,27 @@
     "LLM_GPT4OMINI_API_KEY",
     "LLM_GPT4OMINI_BASE_URL",
     "LLM_GPT5NANO_API_KEY",
-    "LLM_GPT5NANO_BASE_URL"
+    "LLM_GPT5NANO_BASE_URL",
+    "API_BASE_URL",
+    "API_NAME",
+    "GOOGLE_APPLICATION_CREDENTIALS",
+    "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT",
+    "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
+    "PORT",
+    "SENTRY_PROFILE_SESSION_SAMPLE_RATE",
+    "STAGE_DATABASE_URL",
+    "LOG_LEVEL"
   ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "passThroughEnv": ["CI", "SENTRY_AUTH_TOKEN", "SENTRY_ORG", "SENTRY_PROJECT"]
+      "passThroughEnv": ["CI", "SENTRY_AUTH_TOKEN", "SENTRY_ORG", "SENTRY_PROJECT", "SENTRY_URL"]
     },
     "build:envless": {
       "dependsOn": ["^build:envless"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "passThroughEnv": ["CI", "SENTRY_AUTH_TOKEN", "SENTRY_ORG", "SENTRY_PROJECT"]
+      "passThroughEnv": ["CI", "SENTRY_AUTH_TOKEN", "SENTRY_ORG", "SENTRY_PROJECT", "SENTRY_URL"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]
@@ -60,17 +71,28 @@
     },
     "db:migrate": {
       "dependsOn": ["^db:migrate"],
-      "env": ["DATABASE_URL"]
+      "env": ["API_DATABASE_URL"]
     },
     "db:seed": {
       "dependsOn": ["^db:seed"],
-      "env": ["DATABASE_URL"]
+      "env": ["API_DATABASE_URL"]
+    },
+    "db:seed:from-stage": {
+      "cache": false,
+      "dependsOn": []
+    },
+    "db:generate": {
+      "cache": false,
+      "dependsOn": []
     },
     "lint": {
       "dependsOn": ["^lint"]
     },
     "test": {
       "dependsOn": ["^test"]
+    },
+    "test:coverage": {
+      "dependsOn": ["^test:coverage"]
     }
   }
 }

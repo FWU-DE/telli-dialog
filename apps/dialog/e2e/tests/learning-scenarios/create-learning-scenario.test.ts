@@ -35,10 +35,10 @@ test.describe('create, share, chat, delete', () => {
     // configure form
     await configureLearningScenario(page, data);
 
-    const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
+    const submitButton = page.getByRole('button', { name: 'Lernszenario erstellen' });
     await expect(submitButton).toBeVisible();
     await submitButton.click();
-    const listItem = page.getByRole('link', { name: data.name });
+    const listItem = page.getByRole('button', { name: data.name });
     await expect(listItem).toBeVisible();
     await listItem.click();
     await page.waitForURL('/learning-scenarios/**');
@@ -87,11 +87,11 @@ test.describe('create, share, chat, delete', () => {
     // configure form
     await configureLearningScenario(page, data);
 
-    const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
+    const submitButton = page.getByRole('button', { name: 'Lernszenario erstellen' });
     await expect(submitButton).toBeVisible();
     await submitButton.click();
 
-    const listItem = page.getByRole('link', { name: data.name });
+    const listItem = page.getByRole('button', { name: data.name });
     await expect(listItem).toBeVisible();
     await listItem.click();
 
@@ -147,10 +147,10 @@ test.describe('create, share, chat, delete', () => {
     // create learning scenario
     await createLearningScenario(page);
     await configureLearningScenario(page, data);
-    const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
+    const submitButton = page.getByRole('button', { name: 'Lernszenario erstellen' });
     await expect(submitButton).toBeVisible();
     await submitButton.click();
-    const listItem = page.getByRole('link', { name: data.name });
+    const listItem = page.getByRole('button', { name: data.name });
     await expect(listItem).toBeVisible();
 
     await deleteLearningScenario(page, data.name);
@@ -176,12 +176,12 @@ test('data is autosaved on blur', async ({ page }) => {
     subject: 'Autosave Subject',
   });
 
-  const submitButton = page.getByRole('button', { name: 'Szenario erstellen' });
+  const submitButton = page.getByRole('button', { name: 'Lernszenario erstellen' });
   await expect(submitButton).toBeVisible();
   await submitButton.click();
 
-  await page.waitForURL('/learning-scenarios/**');
-  await page.getByRole('link', { name }).click();
+  await page.waitForURL('/learning-scenarios**');
+  await page.getByRole('button', { name }).click();
   await page.waitForURL('/learning-scenarios/**');
   await waitForToastDisappear(page); // wait for success toast to disappear before continuing
 

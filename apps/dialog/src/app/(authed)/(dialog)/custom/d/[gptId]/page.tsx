@@ -5,7 +5,7 @@ import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
 import Logo from '@/components/common/logo';
-import { getCustomGptForNewChat } from '@shared/custom-gpt/custom-gpt-service';
+import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
@@ -19,30 +19,33 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]'>) {
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
-  const customGpt = await getCustomGptForNewChat({
-    customGptId: gptId,
+  const assistant = await getAssistantForNewChat({
+    assistantId: gptId,
     userId: user.id,
     schoolId: school.id,
   }).catch(handleErrorInServerComponent);
 
-  const logoElement = <Logo federalStateId={federalState.id} />;
+  const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
   const models = await dbGetLlmModelsByFederalStateId({
     federalStateId: federalState.id,
   });
 
   const currentModel = user.lastUsedModel ?? DEFAULT_CHAT_MODEL;
-  const avatarPictureUrl = await getAvatarPictureUrl(customGpt.pictureId);
+  const avatarPictureUrl = await getAvatarPictureUrl(assistant.pictureId);
 
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
-      <ChatHeaderBar chatId={id} userAndContext={userAndContext} hasMessages={false} />
+      <ChatHeaderBar
+        chatId={id}
+        userAndContext={userAndContext}
+        downloadConversationEnabled={false}
+      />
       <Chat
-        key={id}
         id={id}
         initialMessages={[]}
-        customGpt={customGpt}
+        assistant={assistant}
         enableFileUpload={true}
-        promptSuggestions={customGpt.promptSuggestions}
+        promptSuggestions={assistant.promptSuggestions}
         imageSource={avatarPictureUrl}
         logoElement={logoElement}
       />

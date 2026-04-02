@@ -7,9 +7,9 @@ import {
   type SendMessageFn,
   type UseChatReturn,
 } from './use-telli-chat';
-import { sendChatMessage } from '@/app/api/chat/actions';
-import { sendCharacterMessage } from '@/app/api/character/actions';
-import { sendSharedChatMessage } from '@/app/api/shared-chat/actions';
+import { sendChatMessageAction } from '@/app/api/chat/actions';
+import { sendCharacterMessageAction } from '@/app/api/character/actions';
+import { sendSharedChatMessageAction } from '@/app/api/shared-chat/actions';
 import { type UIMessage, type ChatStatus } from '@/types/chat';
 
 // Re-export types for convenience
@@ -23,25 +23,25 @@ export function useMainChat(options: {
   initialMessages?: ChatMessage[];
   modelId?: string;
   characterId?: string;
-  customGptId?: string;
+  assistantId?: string;
   onError?: (error: Error) => void;
   onFinish?: (message: ChatMessage) => void;
   onMessageCreated?: (messageId: string) => void;
 }): UseChatReturn {
-  const { conversationId, characterId, customGptId, ...rest } = options;
+  const { conversationId, characterId, assistantId, ...rest } = options;
 
   const sendMessage: SendMessageFn = useCallback(
     async ({ messages, modelId, fileIds }) => {
-      return sendChatMessage({
+      return sendChatMessageAction({
         conversationId,
         messages,
         modelId,
         characterId,
-        customGptId,
+        assistantId,
         fileIds,
       });
     },
-    [conversationId, characterId, customGptId],
+    [conversationId, characterId, assistantId],
   );
 
   return useTelliChat({
@@ -65,7 +65,7 @@ export function useCharacterChat(options: {
 
   const sendMessage: SendMessageFn = useCallback(
     async ({ messages, modelId }) => {
-      return sendCharacterMessage({
+      return sendCharacterMessageAction({
         characterId,
         inviteCode,
         messages,
@@ -96,7 +96,7 @@ export function useSharedChat(options: {
 
   const sendMessage: SendMessageFn = useCallback(
     async ({ messages, modelId }) => {
-      return sendSharedChatMessage({
+      return sendSharedChatMessageAction({
         sharedChatId,
         inviteCode,
         messages,

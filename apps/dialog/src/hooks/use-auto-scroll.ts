@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * Custom hook for automatically scrolling to the bottom of a container
@@ -14,7 +14,8 @@ import { useEffect, useState, useCallback } from 'react';
  * the user cannot interrupt auto scrolling because rendering is too fast.
  *
  * @param dependencies - Array of dependencies that trigger the scroll
- * @returns Object with scrollRef (callback ref to attach to the scrollable container) and reactivateAutoScrolling function
+ * @returns Object with scrollRef (callback ref to attach to the scrollable container),
+ *          reactivateAutoScrolling to re-enable auto-scroll
  */
 export function useAutoScroll(dependencies: React.DependencyList) {
   const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
@@ -25,7 +26,6 @@ export function useAutoScroll(dependencies: React.DependencyList) {
     setScrollElement(element);
   }, []);
 
-  // Function to reactivate auto-scrolling and scroll to the end
   const reactivateAutoScrolling = useCallback(() => {
     if (scrollElement) {
       setAutoScrollEnabled(true);
@@ -36,47 +36,30 @@ export function useAutoScroll(dependencies: React.DependencyList) {
     }
   }, [scrollElement]);
 
-  // Set up scroll and touch listeners whenever the element changes
+  // Detect user scroll intent via wheel or touch events
   useEffect(() => {
-    if (scrollElement) {
-      const isNearBottom = () => {
-        const threshold = 20; // mouse wheel movement seems to be 100px on average
-        const { scrollTop, clientHeight, scrollHeight } = scrollElement;
+    if (!scrollElement) return;
 
-        const bottomPosition = scrollTop + clientHeight;
-        const nearBottomThreshold = scrollHeight - threshold;
+    const handleWheel = () => {
+      setAutoScrollEnabled(false);
+    };
 
-        return bottomPosition >= nearBottomThreshold;
-      };
+    const handleTouch = () => {
+      setAutoScrollEnabled(false);
+    };
 
-      const setAutoScrollBasedOnScrollPosition = () => {
-        const nearBottom = isNearBottom();
-        setAutoScrollEnabled(nearBottom);
-      };
+    scrollElement.addEventListener('wheel', handleWheel, { passive: true });
+    scrollElement.addEventListener('touchstart', handleTouch, { passive: true });
+    scrollElement.addEventListener('touchend', handleTouch, { passive: true });
 
-      // Handle wheel events (mouse wheel scrolling) - clear indicator of user intent
-      const handleWheel = () => {
-        setAutoScrollBasedOnScrollPosition();
-      };
-
-      // Handle touch events to catch cases where users touch to stop momentum scrolling
-      const handleTouch = () => {
-        setAutoScrollBasedOnScrollPosition();
-      };
-
-      scrollElement.addEventListener('wheel', handleWheel, { passive: true });
-      scrollElement.addEventListener('touchstart', handleTouch, { passive: true });
-      scrollElement.addEventListener('touchend', handleTouch, { passive: true });
-
-      return () => {
-        scrollElement.removeEventListener('wheel', handleWheel);
-        scrollElement.removeEventListener('touchstart', handleTouch);
-        scrollElement.removeEventListener('touchend', handleTouch);
-      };
-    }
+    return () => {
+      scrollElement.removeEventListener('wheel', handleWheel);
+      scrollElement.removeEventListener('touchstart', handleTouch);
+      scrollElement.removeEventListener('touchend', handleTouch);
+    };
   }, [scrollElement]);
 
-  // Auto-scroll when dependencies change, but only if user hasn't manually scrolled away
+  // Auto-scroll to bottom when dependencies change
   useEffect(() => {
     if (scrollElement && isAutoScrollEnabled) {
       scrollElement.scrollTo({

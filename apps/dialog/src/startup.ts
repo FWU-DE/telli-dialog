@@ -5,6 +5,7 @@ import { env } from '@shared/env';
 import { env as aiEnv } from '@telli/ai-core/env';
 import { lookupApiKeys } from '@telli/ai-core/api-keys/lookup';
 import { logError, logInfo } from '@shared/logging';
+import { listFilesFromS3 } from '@shared/s3';
 
 /**
  * Custom code that will be executed on application startup.
@@ -19,6 +20,7 @@ export async function startup() {
  */
 async function postMigration() {
   await tempAddApiKeyIdsToFederalStates();
+  await tempAddPictureUrlsToFederalStates();
 }
 
 /**
@@ -78,4 +80,41 @@ async function tempAddApiKeyIdsToFederalStates() {
   }
 
   logInfo(`Completed API key ID updates for ${statesToUpdate.length} federal states`);
+}
+
+/**
+ * Temporary migration function that fills missing federal state picture URLs from existing S3 whitelabel files.
+ */
+async function tempAddPictureUrlsToFederalStates() {
+  const federalStates = await dbGetFederalStates();
+  const statesToUpdate = federalStates.filter((state) => !state.pictureUrls);
+  if (!statesToUpdate.length) return;
+
+  const whitelabelFiles = await listFilesFromS3({ prefix: 'whitelabels/' });
+  const whitelabelFileSet = new Set(whitelabelFiles);
+
+  for (const state of statesToUpdate) {
+    const logoKey = `whitelabels/${state.id}/logo.svg`;
+    const faviconKey = `whitelabels/${state.id}/favicon.svg`;
+
+    const currentPictureUrls = state.pictureUrls ?? {};
+    const shouldAddLogo = !currentPictureUrls.logo && whitelabelFileSet.has(logoKey);
+    const shouldAddFavicon = !currentPictureUrls.favicon && whitelabelFileSet.has(faviconKey);
+
+    try {
+      await dbUpdateFederalState({
+        id: state.id,
+        pictureUrls: {
+          ...currentPictureUrls,
+          ...(shouldAddLogo ? { logo: logoKey } : {}),
+          ...(shouldAddFavicon ? { favicon: faviconKey } : {}),
+        },
+      });
+      logInfo(`Updated picture URLs for federal state ${state.id}`);
+    } catch (error) {
+      logError(`Failed to update picture URLs for federal state ${state.id}`, error);
+    }
+  }
+
+  logInfo(`Completed picture URL updates for ${statesToUpdate.length} federal states`);
 }
