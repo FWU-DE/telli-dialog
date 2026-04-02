@@ -169,7 +169,7 @@
       "gpt-delete-modal-description": "Soll der Assistent wirklich gelöscht werden? Dabei werden alle mit diesem Assistenten verbundenen Konversationen unwiderruflich gelöscht.",
       "copy-page": {
         "title": "Assistent in eigenen Bereich kopieren",
-        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn die Seite verlassen wird. Um den Assistenten anzupassen, muss er zuvor in den privaten Bereich kopiert werden.",
+        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht, wenn die Seite verlassen wird. Um den Assistenten anzupassen, muss er zuvor in den privaten Bereich kopiert werden.",
         "copy-template": "Assistent bearbeiten"
       },
       "additional-assets-label": "Hintergrundwissen",
@@ -271,7 +271,7 @@
       "character-initial-message-placeholder": "Hallo! Ich bin Emre. Alles klar bei dir?",
       "copy-page": {
         "title": "Dialogpartner in eigenen Bereich kopieren",
-        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn die Seite verlassen wird. Kopiere den Dialogpartner in den privaten Bereich, um ihn anzupassen.",
+        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht, wenn die Seite verlassen wird. Kopiere den Dialogpartner in den privaten Bereich, um ihn anzupassen.",
         "copy-template": "Dialogpartner bearbeiten"
       },
       "additional-assets-label": "Hintergrundwissen für telli",
@@ -343,7 +343,7 @@
       "add-link": "Link hinzufügen",
       "copy-page": {
         "title": "Lernszenario in eigenen Bereich kopieren",
-        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht wenn die Seite verlassen wird. Kopiere das Lernszenario in den privaten Bereich, um es anzupassen.",
+        "content": "Diese Einstellungen sind schreibgeschützt. Die Einstellungen werden rückgängig gemacht, wenn die Seite verlassen wird. Kopiere das Lernszenario in den privaten Bereich, um es anzupassen.",
         "copy-template": "Lernszenario bearbeiten"
       },
       "delete-title": "Lernszenario löschen",

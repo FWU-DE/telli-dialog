@@ -9,7 +9,8 @@ export function CustomChatShareInfo({
   info: string;
   linkText: string;
 }) {
-  const handleClick = () => {
+  const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
     const targetId = href.startsWith('#') ? href.slice(1) : null;
 
     if (!targetId) {
@@ -25,11 +26,11 @@ export function CustomChatShareInfo({
   };
 
   return (
-    <div className="flex px-6 py-4 justify-between text-base font-medium rounded-xl bg-secondary/40">
+    <div className="flex items-center px-6 py-4 justify-between text-base font-medium rounded-xl bg-secondary/40">
       <span>{info}</span>
-      <button type="button" className="text-primary" onClick={handleClick}>
+      <a href={href} className="text-primary" onClick={handleClick}>
         {linkText}
-      </button>
+      </a>
     </div>
   );
 }
