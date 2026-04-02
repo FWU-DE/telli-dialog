@@ -24,6 +24,7 @@ import {
 } from '@shared/conversation/conversation-service';
 import { uploadFileToS3 } from '../s3';
 import { getAvatarPictureUrl } from '../files/fileService';
+import { copyAssistant, copyRelatedTemplateFiles } from '../templates/template-service';
 
 vi.mock('../db/functions/assistants', () => ({
   dbGetAssistantById: vi.fn(),
@@ -44,6 +45,10 @@ vi.mock('../files/fileService', () => ({
   getAvatarPictureUrl: vi.fn(),
   deleteAvatarPicture: vi.fn(),
   deleteMessageAttachments: vi.fn(),
+}));
+vi.mock('../templates/template-service', () => ({
+  copyAssistant: vi.fn(),
+  copyRelatedTemplateFiles: vi.fn(),
 }));
 const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
@@ -433,6 +438,70 @@ describe('assistant-service', () => {
           user: mockUser('student'),
         }),
       ).rejects.toThrow(ForbiddenError);
+    });
+  });
+
+  describe('createNewAssistant', () => {
+    const schoolId = generateUUID();
+    const templateId = generateUUID();
+    const duplicatedAssistantName = 'Copy of Biology Assistant';
+
+    it('should pass duplicateAssistantName to copyAssistant when creating from template', async () => {
+      const insertedAssistant = {
+        id: generateUUID(),
+        pictureId: null,
+      } as AssistantSelectModel;
+
+      (copyAssistant as MockedFunction<typeof copyAssistant>).mockResolvedValue(
+        insertedAssistant as never,
+      );
+      (
+        copyRelatedTemplateFiles as MockedFunction<typeof copyRelatedTemplateFiles>
+      ).mockResolvedValue(undefined as never);
+
+      const result = await createNewAssistant({
+        schoolId,
+        templateId,
+        user: mockUser('teacher'),
+        duplicateAssistantName: duplicatedAssistantName,
+      });
+
+      expect(copyAssistant).toHaveBeenCalledWith(
+        templateId,
+        'private',
+        expect.any(String),
+        schoolId,
+        duplicatedAssistantName,
+      );
+      expect(result).toBe(insertedAssistant);
+    });
+
+    it('should pass undefined duplicateAssistantName to copyAssistant when not provided', async () => {
+      const insertedAssistant = {
+        id: generateUUID(),
+        pictureId: null,
+      } as AssistantSelectModel;
+
+      (copyAssistant as MockedFunction<typeof copyAssistant>).mockResolvedValue(
+        insertedAssistant as never,
+      );
+      (
+        copyRelatedTemplateFiles as MockedFunction<typeof copyRelatedTemplateFiles>
+      ).mockResolvedValue(undefined as never);
+
+      await createNewAssistant({
+        schoolId,
+        templateId,
+        user: mockUser('teacher'),
+      });
+
+      expect(copyAssistant).toHaveBeenCalledWith(
+        templateId,
+        'private',
+        expect.any(String),
+        schoolId,
+        undefined,
+      );
     });
   });
 

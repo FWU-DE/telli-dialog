@@ -5,16 +5,28 @@ import {
   createNewAssistant,
   deleteFileMappingAndEntity,
   linkFileToAssistant,
+  deleteAssistant,
+  updateAssistant,
+  updateAssistantAccessLevel,
+  uploadAvatarPictureForAssistant,
 } from '@shared/assistants/assistant-service';
 import { runServerAction } from '@shared/actions/run-server-action';
+import { AccessLevel, AssistantInsertModel } from '@shared/db/schema';
 
-export async function createNewAssistantAction({ templateId }: { templateId?: string }) {
+export async function createNewAssistantAction({
+  templateId,
+  duplicateAssistantName,
+}: {
+  templateId?: string;
+  duplicateAssistantName?: string;
+}) {
   const { user, school } = await requireAuth();
 
   return runServerAction(createNewAssistant)({
     schoolId: school.id,
     templateId,
     user: user,
+    duplicateAssistantName,
   });
 }
 
@@ -40,4 +52,55 @@ export async function linkFileToAssistantAction({
   const { user } = await requireAuth();
 
   return runServerAction(linkFileToAssistant)({ fileId, assistantId, userId: user.id });
+}
+
+export async function updateAssistantAccessLevelAction({
+  gptId,
+  accessLevel,
+}: {
+  gptId: string;
+  accessLevel: AccessLevel;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(updateAssistantAccessLevel)({
+    assistantId: gptId,
+    accessLevel,
+    userId: user.id,
+  });
+}
+
+export async function updateAssistantAction({
+  gptId,
+  ...assistant
+}: Partial<AssistantInsertModel> & { gptId: string }) {
+  const { user } = await requireAuth();
+
+  return runServerAction(updateAssistant)({
+    assistantId: gptId,
+    userId: user.id,
+    assistantProps: assistant,
+  });
+}
+
+export async function deleteAssistantAction({ gptId }: { gptId: string }) {
+  const { user } = await requireAuth();
+
+  return runServerAction(deleteAssistant)({ assistantId: gptId, userId: user.id });
+}
+
+export async function uploadAvatarPictureForAssistantAction({
+  assistantId,
+  croppedImageBlob,
+}: {
+  assistantId: string;
+  croppedImageBlob: Blob;
+}) {
+  const { user } = await requireAuth();
+
+  return runServerAction(uploadAvatarPictureForAssistant)({
+    assistantId,
+    croppedImageBlob,
+    userId: user.id,
+  });
 }

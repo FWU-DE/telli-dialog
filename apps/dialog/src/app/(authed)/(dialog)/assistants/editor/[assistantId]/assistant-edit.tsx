@@ -28,15 +28,13 @@ import {
   createNewAssistantAction,
   deleteFileMappingAndEntityAction,
   linkFileToAssistantAction,
-} from '../../../custom/actions';
-import { useToast } from '@/components/common/toast';
-import { useTranslations } from 'next-intl';
-import {
   deleteAssistantAction,
   updateAssistantAction,
   uploadAvatarPictureForAssistantAction,
   updateAssistantAccessLevelAction,
-} from '../../../custom/editor/[customGptId]/actions';
+} from '../../actions';
+import { useToast } from '@/components/common/toast';
+import { useTranslations } from 'next-intl';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
 import { Textarea } from '@ui/components/Textarea';
@@ -171,7 +169,12 @@ export function AssistantEdit({
   };
 
   const handleDuplicateAssistant = async () => {
-    const createResult = await createNewAssistantAction({ templateId: assistant.id });
+    const createResult = await createNewAssistantAction({
+      templateId: assistant.id,
+      duplicateAssistantName: t('duplicate-name-format-string', {
+        sourceAssistantName: assistant.name,
+      }),
+    });
     if (createResult.success) {
       guardNavigation(() => {
         router.push(`/assistants/editor/${createResult.value.id}`);

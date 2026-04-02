@@ -32,7 +32,12 @@ export function AssistantView({
   const t = useTranslations('assistants');
 
   const handleDuplicateAssistant = async () => {
-    const createResult = await createNewAssistantAction({});
+    const createResult = await createNewAssistantAction({
+      templateId: assistant.id,
+      duplicateAssistantName: t('duplicate-name-format-string', {
+        sourceAssistantName: assistant.name,
+      }),
+    });
     if (createResult.success) {
       router.push(`/assistants/editor/${createResult.value.id}`);
     } else {
