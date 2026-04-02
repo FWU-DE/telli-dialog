@@ -136,11 +136,7 @@ function getConversationMessages({
   ]);
 }
 
-function getGptName({
-  enterpriseGptName,
-}: {
-  enterpriseGptName: string | null;
-}): string {
+function getGptName({ enterpriseGptName }: { enterpriseGptName: string | null }): string {
   return enterpriseGptName ?? 'telli';
 }
 
