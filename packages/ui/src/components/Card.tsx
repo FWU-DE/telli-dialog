@@ -1,6 +1,6 @@
 import * as React from 'react';
-
 import { cn } from '../lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from './Tooltip';
 
 function Card({ className, ...props }: React.ComponentProps<'div'>) {
   return (
@@ -28,9 +28,36 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
+type CardTitleProps = React.ComponentProps<'div'> & {
+  tooltipAriaLabel?: string;
+  tooltipContent?: string;
+  tooltipIcon?: React.ReactNode;
+};
+
+function CardTitle({
+  className,
+  children,
+  tooltipAriaLabel,
+  tooltipContent,
+  tooltipIcon,
+  ...props
+}: CardTitleProps) {
+  const hasTooltip = Boolean(tooltipAriaLabel && tooltipContent && tooltipIcon);
+
   return (
-    <div data-slot="card-title" className={cn('leading-none font-medium', className)} {...props} />
+    <div data-slot="card-title" className={cn('leading-none font-medium', className)} {...props}>
+      {hasTooltip ? (
+        <div className="flex items-center gap-1">
+          <span>{children}</span>
+          <Tooltip>
+            <TooltipTrigger aria-label={tooltipAriaLabel}>{tooltipIcon}</TooltipTrigger>
+            <TooltipContent>{tooltipContent}</TooltipContent>
+          </Tooltip>
+        </div>
+      ) : (
+        children
+      )}
+    </div>
   );
 }
 
