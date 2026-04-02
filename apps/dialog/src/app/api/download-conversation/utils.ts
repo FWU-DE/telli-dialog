@@ -10,12 +10,12 @@ import {
 import { type ConversationModel, type ConversationMessageModel } from '@shared/db/types';
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { dbGetConversationAndMessages } from '@shared/db/functions/chat';
-import { UserSelectModel } from '@shared/db/schema';
+import { type UserSelectModel, llmModelTable } from '@shared/db/schema';
 import { markdownToDocx } from './markdown';
 import { logError } from '@shared/logging';
 import { db } from '@shared/db';
-import { llmModelTable } from '@shared/db/schema';
 import { eq } from 'drizzle-orm';
+
 export async function generateConversationDocxFiles({
   conversationId,
   user,
@@ -50,7 +50,7 @@ export async function generateConversationDocxFiles({
     const conversationMetadata = getConversationMetadata({
       conversation,
     });
-    const gptName = await getGptName({ enterpriseGptName });
+    const gptName = getGptName({ enterpriseGptName });
     const messageParagraphs = getConversationMessages({
       messages,
       gptName,
@@ -136,15 +136,12 @@ function getConversationMessages({
   ]);
 }
 
-async function getGptName({
+function getGptName({
   enterpriseGptName,
 }: {
   enterpriseGptName: string | null;
-}): Promise<string> {
-  if (enterpriseGptName) {
-    return enterpriseGptName;
-  }
-  return 'telli';
+}): string {
+  return enterpriseGptName ?? 'telli';
 }
 
 function buildDocxDocument({

@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateConversationDocxFile } from './utils';
+import { generateConversationDocxFiles } from './utils';
 import { getUser } from '@/auth/utils';
 import { type ConversationModel } from '@shared/db/types';
-import { getConversationAndMessagesForExport } from '@shared/conversation/conversation-service';
 import z from 'zod';
 import { handleErrorInRoute } from '@/error/handle-error-in-route';
 
 export const dynamic = 'force-dynamic';
-
-const DEFAULT_GPT_NAME = 'telli';
 
 const downloadConversationParamsSchema = z.object({
   conversationId: z.string(),
@@ -33,31 +30,28 @@ export async function GET(req: NextRequest) {
     // check authentication
     const user = await getUser();
 
-    const { conversation, messages } = await getConversationAndMessagesForExport({
+    const userFullName = [user.firstName, user.lastName].filter(Boolean).join(' ') || 'Nutzer/in';
+
+    const result = await generateConversationDocxFiles({
       conversationId,
-      userId: user.id,
+      user,
+      enterpriseGptName: enterpriseGptName ?? null,
+      userFullName,
     });
 
-    const gptName = enterpriseGptName || DEFAULT_GPT_NAME;
-
-    const document = await generateConversationDocxFile({
-      conversation,
-      messages,
-      gptName,
-    });
-
-    if (document === undefined) {
+    if (result === undefined) {
       return NextResponse.json({ error: 'Failed to generate the document' }, { status: 500 });
     }
 
+    const { buffer, conversation, gptName } = result;
     const fileName = generateFileName({ conversation, gptName });
 
-    return new NextResponse(document, {
+    return new NextResponse(buffer, {
       status: 200,
       headers: {
         'Content-Disposition': 'attachment',
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'Content-Length': document.byteLength.toString(),
+        'Content-Length': buffer.byteLength.toString(),
         'X-Filename': encodeURIComponent(fileName),
       },
     });
