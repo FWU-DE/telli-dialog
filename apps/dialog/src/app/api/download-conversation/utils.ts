@@ -13,7 +13,9 @@ import { dbGetConversationAndMessages } from '@shared/db/functions/chat';
 import { UserSelectModel } from '@shared/db/schema';
 import { markdownToDocx } from './markdown';
 import { logError } from '@shared/logging';
-
+import { db } from '@shared/db';
+import { llmModelTable } from '@shared/db/schema';
+import { eq } from 'drizzle-orm';
 export async function generateConversationDocxFiles({
   conversationId,
   user,
@@ -59,7 +61,17 @@ export async function generateConversationDocxFiles({
     });
     const lastAssistantMessage = messages.findLast((m) => m.role === 'assistant');
 
-    const modelDisplayName = lastAssistantMessage?.modelName ?? gptName;
+    const modelFromDb = lastAssistantMessage?.modelName
+      ? ((
+          await db
+            .select({ displayName: llmModelTable.displayName })
+            .from(llmModelTable)
+            .where(eq(llmModelTable.name, lastAssistantMessage.modelName))
+            .limit(1)
+        )[0] ?? null)
+      : null;
+
+    const modelDisplayName = modelFromDb?.displayName ?? lastAssistantMessage?.modelName ?? gptName;
 
     messageParagraphs.push(
       new Paragraph({
