@@ -3,8 +3,23 @@
 import * as React from 'react';
 import { Tooltip as TooltipPrimitive } from 'radix-ui';
 
-import { DEFAULT_TOOLTIP_DELAY_DURATION } from './const';
+import { DEFAULT_TOOLTIP_DELAY_DURATION, DEFAULT_SCROLLING_TOOLTIP_DELAY_DURATION } from './const';
 import { cn } from '../lib/utils';
+
+type TooltipContextType = {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+};
+
+const TooltipContext = React.createContext<TooltipContextType | undefined>(undefined);
+
+function useTooltip() {
+  const context = React.useContext(TooltipContext);
+  if (!context) {
+    throw new Error('useTooltip must be used within a Tooltip component');
+  }
+  return context;
+}
 
 function TooltipProvider({
   delayDuration = DEFAULT_TOOLTIP_DELAY_DURATION,
@@ -19,12 +34,106 @@ function TooltipProvider({
   );
 }
 
-function Tooltip({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
-  return <TooltipPrimitive.Root data-slot="tooltip" {...props} />;
+type TooltipProps = Omit<React.ComponentProps<typeof TooltipPrimitive.Root>, 'open'>;
+type TooltipTriggerProps = React.ComponentProps<typeof TooltipPrimitive.Trigger>;
+
+function Tooltip({ onOpenChange, defaultOpen, ...props }: TooltipProps) {
+  const [isOpen, setIsOpen] = React.useState(Boolean(defaultOpen));
+
+  const handleOpenChange = React.useCallback(
+    (newOpen: boolean) => {
+      setIsOpen(newOpen);
+      onOpenChange?.(newOpen);
+    },
+    [onOpenChange],
+  );
+
+  return (
+    <TooltipContext.Provider value={{ isOpen, setIsOpen: handleOpenChange }}>
+      <TooltipPrimitive.Root
+        data-slot="tooltip"
+        open={isOpen}
+        onOpenChange={handleOpenChange}
+        {...props}
+      />
+    </TooltipContext.Provider>
+  );
 }
 
-function TooltipTrigger({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
+function TooltipTrigger({ onKeyDown, onClick, onFocus, onBlur, ...props }: TooltipTriggerProps) {
+  const { isOpen, setIsOpen } = useTooltip();
+  const focusTimerRef = React.useRef<number | null>(null);
+
+  const clearFocusTimer = React.useCallback(() => {
+    if (focusTimerRef.current !== null) {
+      window.clearTimeout(focusTimerRef.current);
+      focusTimerRef.current = null;
+    }
+  }, []);
+
+  React.useEffect(() => {
+    return clearFocusTimer;
+  }, [clearFocusTimer]);
+
+  const handleKeyDown = React.useCallback<NonNullable<TooltipTriggerProps['onKeyDown']>>(
+    (event) => {
+      // Allow toggling tooltip with Enter or Space key for key navigation accessibility
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        setIsOpen(!isOpen);
+      }
+      onKeyDown?.(event);
+    },
+    [isOpen, setIsOpen, onKeyDown],
+  );
+
+  const handleClick = React.useCallback<NonNullable<TooltipTriggerProps['onClick']>>(
+    (event) => {
+      setIsOpen(!isOpen);
+      onClick?.(event);
+    },
+    [isOpen, setIsOpen, onClick],
+  );
+
+  const handleFocus = React.useCallback<NonNullable<TooltipTriggerProps['onFocus']>>(
+    (event) => {
+      const currentTarget = event.currentTarget;
+
+      clearFocusTimer();
+
+      // Delay opening slightly so browser/container scroll can finish first.
+      // This prevents that the tooltip vanishes on scrolling with key navigation
+      focusTimerRef.current = window.setTimeout(() => {
+        if (document.activeElement === currentTarget) {
+          setIsOpen(true);
+        }
+      }, DEFAULT_SCROLLING_TOOLTIP_DELAY_DURATION);
+
+      onFocus?.(event);
+    },
+    [clearFocusTimer, setIsOpen, onFocus],
+  );
+
+  const handleBlur = React.useCallback<NonNullable<TooltipTriggerProps['onBlur']>>(
+    (event) => {
+      clearFocusTimer();
+
+      setIsOpen(false);
+      onBlur?.(event);
+    },
+    [clearFocusTimer, setIsOpen, onBlur],
+  );
+
+  return (
+    <TooltipPrimitive.Trigger
+      data-slot="tooltip-trigger"
+      onKeyDown={handleKeyDown}
+      onClick={handleClick}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      {...props}
+    />
+  );
 }
 
 function TooltipContent({
