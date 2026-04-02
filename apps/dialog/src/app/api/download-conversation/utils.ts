@@ -45,9 +45,6 @@ export async function generateConversationDocxFiles({
       throw new Error(`Failed to retrieve conversation ${conversationId}`);
     }
 
-    if (conversationObject.conversation.userId !== user.id) {
-      throw new Error(`Conversation ${conversationId} does not belong to the user ${user.id}`);
-    }
     const { conversation, messages } = conversationObject;
 
     const conversationMetadata = getConversationMetadata({
