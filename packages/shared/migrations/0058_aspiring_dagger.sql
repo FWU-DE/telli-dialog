@@ -1,0 +1,1 @@
+ALTER TABLE "character" ADD COLUMN "instructions" text DEFAULT '' NOT NULL;
