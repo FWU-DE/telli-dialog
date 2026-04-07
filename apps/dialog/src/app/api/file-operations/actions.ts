@@ -1,7 +1,11 @@
 'use server';
 
 import { requireAuth } from '@/auth/requireAuth';
-import { dbVerifyFileOwnership, dbGetFilesForLearningScenario, dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
+import {
+  dbGetFilesForLearningScenario,
+  dbGetRelatedCharacterFiles,
+  dbVerifyFileOwnership,
+} from '@shared/db/functions/files';
 import { ForbiddenError, NotFoundError } from '@shared/error';
 import { getReadOnlySignedUrl } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
@@ -101,4 +105,3 @@ export async function downloadKnowledgeFileAction({
     options: { expiresIn: ONE_HOUR },
   });
 }
-

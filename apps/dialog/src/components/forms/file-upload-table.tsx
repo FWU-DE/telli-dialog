@@ -1,6 +1,7 @@
 import DestructiveActionButton from '@/components/common/destructive-action-button';
 import { FileModel } from '@shared/db/schema';
 import React from 'react';
+import { DownloadSimpleIcon } from '@phosphor-icons/react/dist/icons/DownloadSimple';
 
 import { isNotNull } from '@shared/utils/guard';
 import Spinner from '../icons/spinner';
@@ -18,7 +19,6 @@ import {
   downloadKnowledgeFileAction,
   KnowledgeFileEntityType,
 } from '@/app/api/file-operations/actions';
-import WebDownloadIcon from '../icons/web-download';
 import { IconButton } from '@ui/components/IconButton';
 
 type FilesTableProps = {
@@ -30,21 +30,16 @@ type FilesTableProps = {
   readOnly: boolean;
   entityType?: KnowledgeFileEntityType;
   entityId?: string;
-  showFilenameAsLink?: boolean;
 };
 
 function DownloadKnowledgeFileButton({
   fileId,
-  fileName,
   entityType,
   entityId,
-  variant = 'icon',
 }: {
   fileId: string;
-  fileName?: string;
   entityType: KnowledgeFileEntityType;
   entityId: string;
-  variant?: 'icon' | 'link';
 }) {
   const [isDownloading, setIsDownloading] = React.useState(false);
   const t = useTranslations('file-interaction');
@@ -64,23 +59,13 @@ function DownloadKnowledgeFileButton({
     }
   };
 
-  if (variant === 'link') {
-    return (
-      <button
-        type="button"
-        className="text-sm font-medium text-primary hover:underline text-left disabled:opacity-50 flex items-center gap-1"
-        onClick={handleDownload}
-        disabled={isDownloading}
-      >
-        {isDownloading && <Spinner className="size-4 shrink-0" />}
-        {fileName}
-      </button>
-    );
-  }
-
   return (
-    <IconButton aria-label={t('download.aria-label')} onClick={handleDownload} disabled={isDownloading}>
-      {isDownloading ? <Spinner className="size-5" /> : <WebDownloadIcon />}
+    <IconButton
+      aria-label={t('download.aria-label')}
+      onClick={handleDownload}
+      disabled={isDownloading}
+    >
+      {isDownloading ? <Spinner className="size-5" /> : <DownloadSimpleIcon />}
     </IconButton>
   );
 }
@@ -94,7 +79,6 @@ export default function FilesTable({
   readOnly,
   entityType,
   entityId,
-  showFilenameAsLink = false,
 }: FilesTableProps) {
   const t = useTranslations('file-interaction');
   const toast = useToast();
@@ -165,17 +149,7 @@ export default function FilesTable({
                   {status === 'uploading' && <Spinner className="w-9 h-9 p-1.5" />}
                   {status === 'failed' && <CrossIcon className="w-9 h-9 p-1.5 text-red-500" />}
                   <div className="flex flex-col">
-                    {showFilenameAsLink && entityType && entityId && id && persistedFileIds.has(id) ? (
-                      <DownloadKnowledgeFileButton
-                        fileId={id}
-                        fileName={fileStem}
-                        entityType={entityType}
-                        entityId={entityId}
-                        variant="link"
-                      />
-                    ) : (
-                      <span className="text-sm font-medium">{fileStem}</span>
-                    )}
+                    <span className="text-sm font-medium">{fileStem}</span>
                   </div>
                 </td>
                 <td className="flex items-center gap-4 ml-auto">
@@ -209,4 +183,3 @@ export default function FilesTable({
     </table>
   );
 }
-

@@ -63,7 +63,6 @@ export function CustomChatFiles(props: CustomChatFilesProps) {
         readOnly={!onDeleteFile}
         entityType={entityType}
         entityId={entityId}
-        showFilenameAsLink={true}
       />
     </>
   );
