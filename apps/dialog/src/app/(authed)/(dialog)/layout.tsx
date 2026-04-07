@@ -2,7 +2,6 @@ import { getUser, userHasCompletedTraining } from '@/auth/utils';
 import React from 'react';
 import DialogSidebar from './sidebar';
 import { HEADER_PORTAL_ID } from './header-portal';
-import { contentHeight } from '@/utils/tailwind/height';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { getPriceInCentByUser, getPriceLimitInCentByUser } from '@/app/school';
@@ -20,6 +19,7 @@ import { getFederalStateById } from '@shared/federal-states/federal-state-servic
 import { FederalStateProvider } from '@/components/providers/federal-state-provider';
 import AppSidebar from '@/components/navigation/sidebar/app-sidebar';
 import { SidebarProvider } from '@telli/ui/components/Sidebar';
+import SessionWatcher from '@/auth/SessionWatcher';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations('errors');
@@ -44,9 +44,9 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
     (user.versionAcceptedConditions === null || user.versionAcceptedConditions < VERSION);
 
   return (
-    <div className="flex h-dvh w-dvw">
+    <SessionWatcher redirectTo="/api/auth/logout-callback">
       <FederalStateProvider federalState={federalState}>
-        <SidebarProvider>
+        <SidebarProvider className="min-h-0">
           <LlmModelsProvider
             models={models}
             defaultLlmModelByCookie={user.lastUsedModel ?? DEFAULT_CHAT_MODEL}
@@ -66,15 +66,13 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
                 isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
               />
             )}
-            <div className="flex flex-col max-h-dvh min-h-dvh w-full overflow-auto">
-              <div
+            <div className="relative flex flex-col h-dvh w-dvw overflow-hidden">
+              {/* Todo: Refactor HeaderPortal and header components to not rely on style of this div */}
+              <header
                 id={HEADER_PORTAL_ID}
-                className="sticky z-10 top-0 py-4 h-19 px-6 flex gap-4 items-center justify-between"
-                style={{
-                  position: '-webkit-sticky',
-                }}
-              ></div>
-              <div className={contentHeight}>{children}</div>
+                className="h-19 flex-none px-6 py-4 flex items-center justify-between gap-4"
+              ></header>
+              <main className="min-h-0 w-full mx-auto flex-1 overflow-auto">{children}</main>
             </div>
           </LlmModelsProvider>
         </SidebarProvider>
@@ -90,6 +88,6 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
           ></TermsConditionsModal>
         ) : null}
       </FederalStateProvider>
-    </div>
+    </SessionWatcher>
   );
 }

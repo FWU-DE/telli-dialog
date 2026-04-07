@@ -141,6 +141,7 @@ export const mockCharacter = (): CharacterSelectModel => {
     modelId: generateUUID(),
     name: generateRandomString(10),
     description: generateRandomString(10),
+    instructions: generateRandomString(10),
     learningContext: generateRandomString(10),
     competence: generateRandomString(10),
     schoolType: generateRandomString(10),

@@ -198,15 +198,23 @@ export async function createNewAssistant({
   schoolId,
   templateId,
   user,
+  duplicateAssistantName,
 }: {
   schoolId: string;
   templateId?: string;
   user: UserModel;
+  duplicateAssistantName?: string;
 }) {
   if (user.userRole !== 'teacher') throw new ForbiddenError('Not authorized to create assistant');
 
   if (templateId !== undefined) {
-    let insertedAssistant = await copyAssistant(templateId, 'private', user.id, schoolId);
+    let insertedAssistant = await copyAssistant(
+      templateId,
+      'private',
+      user.id,
+      schoolId,
+      duplicateAssistantName,
+    );
 
     if (insertedAssistant.pictureId) {
       const copyOfTemplatePicture = buildAssistantPictureKey(
