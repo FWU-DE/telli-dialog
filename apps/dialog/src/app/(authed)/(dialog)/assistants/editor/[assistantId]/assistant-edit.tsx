@@ -37,6 +37,7 @@ import {
   uploadAvatarPictureForAssistantAction,
   updateAssistantAccessLevelAction,
 } from '../../../custom/editor/[customGptId]/actions';
+import { downloadKnowledgeFileAction } from '@/app/api/file-operations/actions';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
 import { Textarea } from '@ui/components/Textarea';
@@ -208,6 +209,10 @@ export function AssistantEdit({
 
   const handleDeleteFile = async (fileId: string) => {
     return await deleteFileMappingAndEntityAction({ assistantId: assistant.id, fileId });
+  };
+
+  const handleDownloadFile = async (fileId: string) => {
+    return downloadKnowledgeFileAction({ entityType: 'assistant', entityId: assistant.id, fileId });
   };
 
   const handleLinksChange = async (links: string[]) => {
@@ -396,10 +401,9 @@ export function AssistantEdit({
           initialFiles={relatedFiles}
           onFileUploaded={handleFileUploaded}
           onDeleteFile={handleDeleteFile}
+          onDownloadFile={handleDownloadFile}
           initialLinks={initialLinks}
           onLinksChange={handleLinksChange}
-          entityType="assistant"
-          entityId={assistant.id}
         />
 
         <CustomShareSection

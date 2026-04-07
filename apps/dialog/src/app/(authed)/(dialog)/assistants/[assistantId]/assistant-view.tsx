@@ -17,6 +17,7 @@ import { CustomChatFields } from '@/components/custom-chat/custom-chat-fields';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
+import { downloadKnowledgeFileAction } from '@/app/api/file-operations/actions';
 
 export function AssistantView({
   assistant,
@@ -38,6 +39,10 @@ export function AssistantView({
     } else {
       toast.error(t('toasts.create-toast-error'));
     }
+  };
+
+  const handleDownloadFile = async (fileId: string) => {
+    return downloadKnowledgeFileAction({ entityType: 'assistant', entityId: assistant.id, fileId });
   };
 
   return (
@@ -96,8 +101,7 @@ export function AssistantView({
       <CustomChatFilesAndLinks
         initialFiles={fileMappings}
         initialLinks={assistant.attachedLinks.map((l) => ({ link: l }))}
-        entityType="assistant"
-        entityId={assistant.id}
+        onDownloadFile={handleDownloadFile}
       />
     </CustomChatLayoutContainer>
   );

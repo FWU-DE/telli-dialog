@@ -7,18 +7,16 @@ import FilesTable from '../forms/file-upload-table';
 import { ServerActionResult } from '@shared/actions/server-action-result';
 import { useToast } from '../common/toast';
 import { useTranslations } from 'next-intl';
-import { KnowledgeFileEntityType } from '@/app/api/file-operations/actions';
 
 export type CustomChatFilesProps = {
   initialFiles: FileModel[];
   onFileUploaded?: (data: { id: string; name: string; file: File }) => void | Promise<void>;
   onDeleteFile?: (fileId: string) => Promise<ServerActionResult<void>>;
-  entityType?: KnowledgeFileEntityType;
-  entityId?: string;
+  onDownloadFile?: (fileId: string) => Promise<string | undefined>;
 };
 
 export function CustomChatFiles(props: CustomChatFilesProps) {
-  const { initialFiles, onFileUploaded: onFileUploaded, onDeleteFile, entityType, entityId } = props;
+  const { initialFiles, onFileUploaded: onFileUploaded, onDeleteFile, onDownloadFile } = props;
   const [files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   const [currentFiles, setCurrentFiles] = React.useState<FileModel[]>(initialFiles);
   const toast = useToast();
@@ -61,8 +59,7 @@ export function CustomChatFiles(props: CustomChatFilesProps) {
         onDeleteFile={handleDeleteFile}
         showUploadConfirmation={true}
         readOnly={!onDeleteFile}
-        entityType={entityType}
-        entityId={entityId}
+        onDownloadFile={onDownloadFile}
       />
     </>
   );

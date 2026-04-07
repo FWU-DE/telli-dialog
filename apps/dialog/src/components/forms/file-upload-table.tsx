@@ -15,10 +15,6 @@ import { useToast } from '../common/toast';
 import { useTranslations } from 'next-intl';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { cn } from '@/utils/tailwind';
-import {
-  downloadKnowledgeFileAction,
-  KnowledgeFileEntityType,
-} from '@/app/api/file-operations/actions';
 import { IconButton } from '@ui/components/IconButton';
 
 type FilesTableProps = {
@@ -28,18 +24,15 @@ type FilesTableProps = {
   showUploadConfirmation?: boolean;
   className?: string;
   readOnly: boolean;
-  entityType?: KnowledgeFileEntityType;
-  entityId?: string;
+  onDownloadFile?: (fileId: string) => Promise<string | undefined>;
 };
 
 function DownloadKnowledgeFileButton({
   fileId,
-  entityType,
-  entityId,
+  onDownloadFile,
 }: {
   fileId: string;
-  entityType: KnowledgeFileEntityType;
-  entityId: string;
+  onDownloadFile: (fileId: string) => Promise<string | undefined>;
 }) {
   const [isDownloading, setIsDownloading] = React.useState(false);
   const t = useTranslations('file-interaction');
@@ -48,7 +41,7 @@ function DownloadKnowledgeFileButton({
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
-      const url = await downloadKnowledgeFileAction({ entityType, entityId, fileId });
+      const url = await onDownloadFile(fileId);
       if (url) {
         window.open(url, '_blank');
       }
@@ -77,8 +70,7 @@ export default function FilesTable({
   showUploadConfirmation,
   className,
   readOnly,
-  entityType,
-  entityId,
+  onDownloadFile,
 }: FilesTableProps) {
   const t = useTranslations('file-interaction');
   const toast = useToast();
@@ -157,11 +149,10 @@ export default function FilesTable({
                   {status === 'uploading' && (
                     <span className="text-sm text-gray-500">Uploading...</span>
                   )}
-                  {entityType && entityId && id && persistedFileIds.has(id) && (
+                  {onDownloadFile && id && persistedFileIds.has(id) && (
                     <DownloadKnowledgeFileButton
                       fileId={id}
-                      entityType={entityType}
-                      entityId={entityId}
+                      onDownloadFile={onDownloadFile}
                     />
                   )}
                   {!readOnly && (
