@@ -11,7 +11,7 @@ export const buttonDeleteClassName =
   'px-4 py-3 text-dark-red border border-dark-red rounded-enterprise-full hover:bg-[#FFF8F8]';
 
 export const smallButtonPrimaryClassName =
-  'p-2 text-primary-foreground bg-primary hover:bg-secondary rounded-enterprise-full hover:text-secondary-text text-xs';
+  'p-2 text-primary-foreground bg-primary hover:bg-secondary rounded-enterprise-full hover:text-secondary-foreground text-xs';
 
 export const customChatDeleteButtonClassName =
   'inline-flex h-10 items-center justify-center gap-2 rounded-full border border-primary bg-background px-2.5 text-base font-normal text-primary transition-all hover:bg-primary/20 hover:text-primary disabled:pointer-events-none disabled:opacity-50';

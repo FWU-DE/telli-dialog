@@ -123,7 +123,7 @@ export function AttachedLinks({
               appendLink(currentAttachedLink);
             }}
           >
-            <PlusIcon className="fill-primary-text w-8 h-8" />
+            <PlusIcon className="text-primary-foreground w-8 h-8" />
             {t('add-link')}
           </button>
         )}

@@ -8,10 +8,10 @@ export const CENT_MULTIPLIER = 10;
 export const PRICE_AND_CENT_MULTIPLIER = TOKEN_AMOUNT_PER_PRICE * CENT_MULTIPLIER;
 
 export const DEFAULT_DESIGN_CONFIGURATION: DesignConfiguration = {
-  primaryColor: 'rgba(70, 33, 126, 1)', // vidis-purple
-  primaryTextColor: 'rgba(70, 33, 126, 1)', // primary-text
-  secondaryColor: 'rgba(108, 233, 215, 1)', // vidis-hover-green
-  secondaryTextColor: 'rgba(238, 238, 238, 1)', // secondary-text
+  primaryColor: 'rgba(70, 33, 126, 1)', // primary
+  primaryTextColor: 'rgba(70, 33, 126, 1)', // primary-foreground
+  secondaryColor: 'rgba(108, 233, 215, 1)', // secondary
+  secondaryTextColor: 'rgba(238, 238, 238, 1)', // secondary-foreground
   secondaryLightColor: 'rgba(226, 251, 247, 1)', // replaced by secondary/30
   secondaryDarkColor: 'rgba(196, 246, 239, 1)', // replaced by secondary/50
   primaryHoverColor: 'rgba(226, 251, 247, 1)', // replaced by primary

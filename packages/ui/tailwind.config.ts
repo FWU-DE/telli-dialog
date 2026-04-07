@@ -27,8 +27,6 @@ const config = {
         coral: 'var(--coral)',
         'dark-red': 'var(--dark-red)',
         'light-red': 'var(--light-red)',
-        'primary-text': 'var(--primary-foreground)',
-        'secondary-text': 'var(--secondary-foreground)',
         border: 'var(--border)',
         input: 'var(--input)',
         ring: 'var(--ring)',

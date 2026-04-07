@@ -9,8 +9,8 @@ export function constructRootLayoutStyle({
 }) {
   return {
     '--primary': designConfiguration?.primaryColor,
-    '--primary-text': designConfiguration?.primaryTextColor,
+    '--primary-foreground': designConfiguration?.primaryTextColor,
     '--secondary': designConfiguration?.secondaryColor,
-    '--secondary-text': designConfiguration?.secondaryTextColor,
+    '--secondary-foreground': designConfiguration?.secondaryTextColor,
   } as React.CSSProperties;
 }
