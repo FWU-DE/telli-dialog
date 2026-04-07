@@ -31,7 +31,6 @@ const config = {
         'primary-hover-text': 'var(--primary-hover-text)',
         'secondary-hover': 'var(--secondary-hover)',
         'secondary-light': 'var(--secondary-light)',
-        'button-primary-text': 'var(--button-primary-text)',
         'primary-text': 'var(--primary-foreground)',
         'secondary-text': 'var(--secondary-foreground)',
         'secondary-dark': 'var(--secondary-dark)',

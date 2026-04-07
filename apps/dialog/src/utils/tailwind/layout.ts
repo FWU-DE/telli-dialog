@@ -17,6 +17,5 @@ export function constructRootLayoutStyle({
     '--primary-hover': designConfiguration?.primaryHoverColor,
     '--primary-hover-text': designConfiguration?.primaryHoverTextColor,
     '--chat-message-background': designConfiguration?.chatMessageBackgroundColor,
-    '--button-primary-text': designConfiguration?.buttonPrimaryTextColor,
   } as React.CSSProperties;
 }

@@ -35,7 +35,7 @@ export function CreateNewLearningScenarioButton() {
       onClick={handleNewLearningScenario}
       className={cn(buttonPrimaryClassName, 'flex gap-2 items-center group py-2')}
     >
-      <PlusIcon className="fill-button-primary-text group-hover:fill-secondary-text w-8 h-8" />
+      <PlusIcon className="w-8 h-8" />
       <span>{t('form.button-create')}</span>
     </button>
   );
