@@ -2,7 +2,7 @@ export const buttonLabelClassName = 'text-main-black text-xl font-normal';
 export const textButtonClassName = 'hover:underline text-sm font-semibold';
 
 export const buttonPrimaryClassName =
-  'px-4 py-3 text-primary-foreground bg-primary hover:bg-secondary hover:text-primary-hover-text rounded-enterprise-full disabled:bg-gray-200 disabled:text-gray-700 border border-transparent active:bg-secondary-dark';
+  'px-4 py-3 text-primary-foreground bg-primary hover:bg-secondary hover:text-primary-foreground rounded-enterprise-full disabled:bg-gray-200 disabled:text-gray-700 border border-transparent active:bg-secondary-dark';
 
 export const buttonSecondaryClassName =
   'px-4 py-3 border border-primary text-primary hover:bg-secondary focus:bg-gray-200 rounded-enterprise-full disabled:bg-gray-200 disabled:border-gray-100 disabled:text-gray-100 active:bg-secondary-dark';

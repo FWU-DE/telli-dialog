@@ -94,7 +94,7 @@ export default function ModelSelect({
                   <DropdownMenu.Item asChild>
                     <button
                       className={cn(
-                        'hover:bg-primary-hover text-left py-2 px-4 outline-hidden flex flex-col',
+                        'hover:bg-primary text-left py-2 px-4 outline-hidden flex flex-col',
                         iconClassName,
                       )}
                       onClick={() => handleSelectModel(model)}

@@ -460,7 +460,7 @@ export default function LearningScenarioForm({
       {isCreating && (
         <section className="mt-8 flex gap-4 items-center">
           <button
-            className={cn(buttonSecondaryClassName, 'hover:border-primary hover:bg-primary-hover')}
+            className={cn(buttonSecondaryClassName, 'hover:border-primary hover:bg-primary')}
             onClick={handleNavigateBack}
             type="button"
           >

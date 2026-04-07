@@ -14,7 +14,5 @@ export function constructRootLayoutStyle({
     '--secondary-dark': designConfiguration?.secondaryDarkColor,
     '--secondary-text': designConfiguration?.secondaryTextColor,
     '--secondary-light': designConfiguration?.secondaryLightColor,
-    '--primary-hover': designConfiguration?.primaryHoverColor,
-    '--primary-hover-text': designConfiguration?.primaryHoverTextColor,
   } as React.CSSProperties;
 }
