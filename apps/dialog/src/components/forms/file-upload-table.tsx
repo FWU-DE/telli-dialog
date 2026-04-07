@@ -59,7 +59,7 @@ export default function FilesTable({
           return null;
         }
         return {
-          id,
+          id: fileObject.fileId ?? id,
           fileName: fileObject.file.name,
           size: fileObject.file.size,
           status: fileObject.status,
