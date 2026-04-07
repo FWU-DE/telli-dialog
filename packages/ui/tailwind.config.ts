@@ -29,7 +29,6 @@ const config = {
         'light-red': 'var(--light-red)',
         'primary-text': 'var(--primary-foreground)',
         'secondary-text': 'var(--secondary-foreground)',
-        'secondary-dark': 'var(--secondary-dark)',
         border: 'var(--border)',
         input: 'var(--input)',
         ring: 'var(--ring)',

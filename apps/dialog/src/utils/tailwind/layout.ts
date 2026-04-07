@@ -11,7 +11,6 @@ export function constructRootLayoutStyle({
     '--primary': designConfiguration?.primaryColor,
     '--primary-text': designConfiguration?.primaryTextColor,
     '--secondary': designConfiguration?.secondaryColor,
-    '--secondary-dark': designConfiguration?.secondaryDarkColor,
     '--secondary-text': designConfiguration?.secondaryTextColor,
   } as React.CSSProperties;
 }

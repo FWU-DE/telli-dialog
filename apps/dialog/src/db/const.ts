@@ -13,7 +13,7 @@ export const DEFAULT_DESIGN_CONFIGURATION: DesignConfiguration = {
   secondaryColor: 'rgba(108, 233, 215, 1)', // vidis-hover-green
   secondaryTextColor: 'rgba(238, 238, 238, 1)', // secondary-text
   secondaryLightColor: 'rgba(226, 251, 247, 1)', // replaced by secondary/30
-  secondaryDarkColor: 'rgba(196, 246, 239, 1)', // secondary-dark
+  secondaryDarkColor: 'rgba(196, 246, 239, 1)', // replaced by secondary/50
   primaryHoverColor: 'rgba(226, 251, 247, 1)', // replaced by primary
   primaryHoverTextColor: 'rgba(70, 33, 126, 1)', // replaced by primary-text
   chatMessageBackgroundColor: 'rgba(245, 245, 245, 1)', // unused
