@@ -91,14 +91,16 @@ export async function getLearningScenariosByAccessLevel({
   userId: string;
   federalStateId: string;
 }): Promise<LearningScenarioOptionalShareDataModel[]> {
-  if (accessLevel === 'global') {
-    return dbGetGlobalLearningScenarios({ userId, federalStateId });
-  } else if (accessLevel === 'school') {
-    return dbGetLearningScenariosBySchoolId({ schoolId, userId });
-  } else if (accessLevel === 'private') {
-    return dbGetLearningScenariosByUserId({ userId });
+  switch (accessLevel) {
+    case 'global':
+      return dbGetGlobalLearningScenarios({ userId, federalStateId });
+    case 'school':
+      return dbGetLearningScenariosBySchoolId({ schoolId, userId });
+    case 'private':
+      return dbGetLearningScenariosByUserId({ userId });
+    default:
+      return [];
   }
-  return [];
 }
 
 export async function getLearningScenariosByOverviewFilter({
@@ -112,16 +114,18 @@ export async function getLearningScenariosByOverviewFilter({
   userId: string;
   federalStateId: string;
 }): Promise<LearningScenarioOptionalShareDataModel[]> {
-  if (filter === 'all') {
-    return dbGetAllAccessibleLearningScenarios({ userId, schoolId, federalStateId });
-  } else if (filter === 'mine') {
-    return await dbGetAllLearningScenariosByUserId({ userId });
-  } else if (filter === 'official') {
-    return await dbGetGlobalLearningScenarios({ userId, federalStateId });
-  } else if (filter === 'school') {
-    return await dbGetLearningScenariosBySchoolId({ schoolId, userId });
+  switch (filter) {
+    case 'all':
+      return dbGetAllAccessibleLearningScenarios({ userId, schoolId, federalStateId });
+    case 'mine':
+      return await dbGetAllLearningScenariosByUserId({ userId });
+    case 'official':
+      return await dbGetGlobalLearningScenarios({ userId, federalStateId });
+    case 'school':
+      return await dbGetLearningScenariosBySchoolId({ schoolId, userId });
+    default:
+      return [];
   }
-  return [];
 }
 
 /**

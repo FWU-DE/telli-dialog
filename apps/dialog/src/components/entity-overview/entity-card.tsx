@@ -36,7 +36,6 @@ export default function EntityCard({
     <div
       onClick={onCardClick}
       className="rounded-enterprise-md border p-4 flex items-center gap-4 w-full hover:border-primary cursor-pointer bg-card"
-      role="button"
       tabIndex={0}
       aria-label={name}
       onKeyDown={(e) => {
@@ -54,7 +53,7 @@ export default function EntityCard({
         )}
       </figure>
 
-      <div className="flex flex-col gap-1 text-left min-w-0">
+      <div className="flex flex-col gap-1 text-left min-w-0" role="button">
         <div className="flex items-center gap-2">
           <h2 className={cn('font-medium leading-none py-0.5', truncateClassName)}>{name}</h2>
           {isOwned && (

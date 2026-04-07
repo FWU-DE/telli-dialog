@@ -150,14 +150,16 @@ export async function getAssistantByAccessLevel({
   userId: string;
   federalStateId: string;
 }): Promise<AssistantSelectModel[]> {
-  if (accessLevel === 'global') {
-    return await dbGetGlobalGpts({ federalStateId });
-  } else if (accessLevel === 'school') {
-    return await dbGetGptsBySchoolId({ schoolId });
-  } else if (accessLevel === 'private') {
-    return await dbGetGptsByUserId({ userId });
+  switch (accessLevel) {
+    case 'global':
+      return await dbGetGlobalGpts({ federalStateId });
+    case 'school':
+      return await dbGetGptsBySchoolId({ schoolId });
+    case 'private':
+      return await dbGetGptsByUserId({ userId });
+    default:
+      return [];
   }
-  return [];
 }
 
 export async function getAssistantsByOverviewFilter({
@@ -171,21 +173,24 @@ export async function getAssistantsByOverviewFilter({
   userId: string;
   federalStateId: string;
 }): Promise<AssistantSelectModel[]> {
-  if (filter === 'all') {
-    const [privateAssistants, schoolAssistants, globalAssistants] = await Promise.all([
-      dbGetGptsByUserId({ userId }),
-      dbGetGptsBySchoolId({ schoolId }),
-      dbGetGlobalGpts({ federalStateId }),
-    ]);
-    return [...privateAssistants, ...schoolAssistants, ...globalAssistants];
-  } else if (filter === 'mine') {
-    return await dbGetGptsByUserId({ userId });
-  } else if (filter === 'official') {
-    return await dbGetGlobalGpts({ federalStateId });
-  } else if (filter === 'school') {
-    return await dbGetGptsBySchoolId({ schoolId });
+  switch (filter) {
+    case 'all': {
+      const [privateAssistants, schoolAssistants, globalAssistants] = await Promise.all([
+        dbGetGptsByUserId({ userId }),
+        dbGetGptsBySchoolId({ schoolId }),
+        dbGetGlobalGpts({ federalStateId }),
+      ]);
+      return [...privateAssistants, ...schoolAssistants, ...globalAssistants];
+    }
+    case 'mine':
+      return await dbGetGptsByUserId({ userId });
+    case 'official':
+      return await dbGetGlobalGpts({ federalStateId });
+    case 'school':
+      return await dbGetGptsBySchoolId({ schoolId });
+    default:
+      return [];
   }
-  return [];
 }
 
 /**
