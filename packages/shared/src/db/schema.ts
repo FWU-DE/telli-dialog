@@ -307,6 +307,7 @@ export const characterTable = pgTable(
     // required
     name: text('name').notNull(),
     description: text('description').notNull().default(''),
+    instructions: text('instructions').notNull().default(''),
     learningContext: text('learning_context').notNull().default(''),
     competence: text('competence').notNull().default(''),
     // new
