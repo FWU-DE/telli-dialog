@@ -20,24 +20,26 @@ import { Button } from '@ui/components/Button';
 import { ShareFatIcon, StopIcon } from '@phosphor-icons/react';
 import CountDownTimer from '../../app/(authed)/(dialog)/learning-scenarios/_components/count-down';
 import RichText from '../common/rich-text';
+import { z } from 'zod';
+
+const shareFormSchema = z.object({
+  telliPointsPercentageLimit: z.coerce.number(),
+  usageTimeLimit: z.coerce.number(),
+});
 
 interface CustomChatShareWithLearnersProps {
-  id: string;
   startedAt: Date | null;
   maxUsageTimeLimit: number | null;
-  formSchema: any;
   pointsPercentageValues: number[];
   usageTimeValues: number[];
-  onShare: (data: unknown) => Promise<{ success: boolean }>;
+  onShare: (data: z.infer<typeof shareFormSchema>) => Promise<{ success: boolean }>;
   onUnshare: () => Promise<{ success: boolean }>;
   shareUILink: string;
 }
 
 export function CustomChatShareWithLearners({
-  id,
   startedAt,
   maxUsageTimeLimit,
-  formSchema,
   pointsPercentageValues,
   usageTimeValues,
   onShare,
@@ -56,8 +58,8 @@ export function CustomChatShareWithLearners({
   });
   const sharedChatActive = sharedChatTimeLeft > 0;
 
-  const { getValues: getValuesShare, setValue: setShareValue } = useForm<any>({
-    resolver: zodResolver(formSchema),
+  const { getValues: getValuesShare, setValue: setShareValue } = useForm({
+    resolver: zodResolver(shareFormSchema),
     defaultValues: {
       telliPointsPercentageLimit: 10,
       usageTimeLimit: maxUsageTimeLimit ?? 45,
@@ -66,7 +68,7 @@ export function CustomChatShareWithLearners({
 
   async function handleStartSharing() {
     const data = getValuesShare();
-    const parsedData = formSchema.parse(data);
+    const parsedData = shareFormSchema.parse(data);
     const result = await onShare(parsedData);
 
     if (result.success) {

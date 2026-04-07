@@ -50,11 +50,7 @@ import CustomShareSection from '@/components/custom-chat/custom-chat-share-secti
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
-import {
-  sharedConversationFormValuesSchema,
-  telliPointsPercentageValues,
-  usageTimeValuesInMinutes,
-} from './schema';
+import { telliPointsPercentageValues, usageTimeValuesInMinutes } from './schema';
 import { shareLearningScenarioAction, unshareLearningScenarioAction } from './actions';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 
@@ -175,12 +171,6 @@ export function LearningScenarioEdit({
     hasPendingChanges: isDirty,
     onBeforePageLeave: saveBeforeLeave,
   });
-
-  const handleUseChat = () => {
-    guardNavigation(() => {
-      router.push(`/learning-scenarios/d/${learningScenario.id}/`);
-    });
-  };
 
   const handleDuplicateLearningScenario = async () => {
     const createResult = await createNewLearningScenarioFromTemplateAction({
@@ -309,10 +299,8 @@ export function LearningScenarioEdit({
       )}
 
       <CustomChatShareWithLearners
-        id={learningScenario.id}
         startedAt={learningScenario.startedAt ?? null}
         maxUsageTimeLimit={learningScenario.maxUsageTimeLimit ?? null}
-        formSchema={sharedConversationFormValuesSchema}
         pointsPercentageValues={telliPointsPercentageValues}
         usageTimeValues={usageTimeValuesInMinutes}
         onShare={async (data) => {
