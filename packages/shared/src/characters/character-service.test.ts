@@ -12,6 +12,7 @@ import {
   updateCharacter,
   updateCharacterAccessLevel,
   uploadAvatarPictureForCharacter,
+  downloadFileFromCharacter,
 } from './character-service';
 import {
   dbGetCharacterById,
@@ -75,6 +76,16 @@ describe('character-service', () => {
           getSharedCharacter({
             characterId: generateUUID(),
             userId: 'user-id',
+          }),
+      },
+      {
+        functionName: 'downloadFileFromCharacter',
+        testFunction: () =>
+          downloadFileFromCharacter({
+            characterId: generateUUID(),
+            fileId: generateUUID(),
+            schoolId: generateUUID(),
+            user: mockUser(),
           }),
       },
     ])(

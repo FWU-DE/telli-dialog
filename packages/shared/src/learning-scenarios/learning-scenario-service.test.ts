@@ -12,6 +12,7 @@ import {
   updateLearningScenario,
   updateLearningScenarioAccessLevel,
   uploadAvatarPictureForLearningScenario,
+  downloadFileFromLearningScenario,
 } from './learning-scenario-service';
 import {
   dbCreateLearningScenarioShare,
@@ -164,6 +165,16 @@ function buildFunctionList(
         shareLearningScenario({
           data: { telliPointsPercentageLimit: 50, usageTimeLimit: 60 },
           learningScenarioId,
+          schoolId,
+          user,
+        }),
+    },
+    {
+      functionName: downloadFileFromLearningScenario.name,
+      testFunction: () =>
+        downloadFileFromLearningScenario({
+          learningScenarioId,
+          fileId,
           schoolId,
           user,
         }),
