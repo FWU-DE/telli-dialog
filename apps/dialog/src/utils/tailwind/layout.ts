@@ -13,6 +13,5 @@ export function constructRootLayoutStyle({
     '--secondary': designConfiguration?.secondaryColor,
     '--secondary-dark': designConfiguration?.secondaryDarkColor,
     '--secondary-text': designConfiguration?.secondaryTextColor,
-    '--secondary-light': designConfiguration?.secondaryLightColor,
   } as React.CSSProperties;
 }
