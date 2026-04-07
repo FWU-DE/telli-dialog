@@ -109,7 +109,7 @@ export default function FilesTable({
                 <td className="flex items-center gap-4 ml-auto">
                   <span className="text-sm whitespace-nowrap">{formatBytes(size)}</span>
                   {status === 'uploading' && (
-                    <span className="text-sm text-gray-500">Uploading...</span>
+                    <span className="text-sm text-gray-500">{t('upload.uploading')}</span>
                   )}
                   {status === 'processed' && onDownloadFile && (
                     <DownloadFileButton fileId={id} onDownloadFile={onDownloadFile} />
