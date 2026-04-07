@@ -111,10 +111,10 @@ export default function FilesTable({
                   {status === 'uploading' && (
                     <span className="text-sm text-gray-500">Uploading...</span>
                   )}
-                  {onDownloadFile && (
+                  {status === 'processed' && onDownloadFile && (
                     <DownloadFileButton fileId={id} onDownloadFile={onDownloadFile} />
                   )}
-                  {!readOnly && (
+                  {status === 'processed' && !readOnly && (
                     <DestructiveActionButton
                       modalDescription={t('delete.modal-description')}
                       triggerButtonClassName={cn('flex items-center', iconClassName)}
