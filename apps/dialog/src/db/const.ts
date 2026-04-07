@@ -12,10 +12,10 @@ export const DEFAULT_DESIGN_CONFIGURATION: DesignConfiguration = {
   primaryTextColor: 'rgba(70, 33, 126, 1)', // primary-text
   secondaryColor: 'rgba(108, 233, 215, 1)', // vidis-hover-green
   secondaryTextColor: 'rgba(238, 238, 238, 1)', // secondary-text
+  secondaryLightColor: 'rgba(226, 251, 247, 1)', // secondary-light
   secondaryDarkColor: 'rgba(196, 246, 239, 1)', // secondary-dark
-  primaryHoverColor: 'rgba(226, 251, 247, 1)', // primary with slight opacity for hover
-  primaryHoverTextColor: 'rgba(70, 33, 126, 1)', // primary with slight opacity for hover
+  primaryHoverColor: 'rgba(226, 251, 247, 1)', // replaced by primary
+  primaryHoverTextColor: 'rgba(70, 33, 126, 1)', // replaced by primary-text
   chatMessageBackgroundColor: 'rgba(245, 245, 245, 1)', // unused
   buttonPrimaryTextColor: 'rgba(255, 255, 255, 1)', // replaced by primary-foreground
-  secondaryLightColor: 'rgba(226, 251, 247, 1)', // secondary-light
 };
