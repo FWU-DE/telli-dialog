@@ -15,7 +15,7 @@ export const DEFAULT_DESIGN_CONFIGURATION: DesignConfiguration = {
   secondaryDarkColor: 'rgba(196, 246, 239, 1)', // secondary-dark
   primaryHoverColor: 'rgba(226, 251, 247, 1)', // primary with slight opacity for hover
   primaryHoverTextColor: 'rgba(70, 33, 126, 1)', // primary with slight opacity for hover
-  chatMessageBackgroundColor: 'rgba(245, 245, 245, 1)', // chat-message-background
-  buttonPrimaryTextColor: 'rgba(255, 255, 255, 1)', // is not used any longer
+  chatMessageBackgroundColor: 'rgba(245, 245, 245, 1)', // unused
+  buttonPrimaryTextColor: 'rgba(255, 255, 255, 1)', // replaced by primary-foreground
   secondaryLightColor: 'rgba(226, 251, 247, 1)', // secondary-light
 };
