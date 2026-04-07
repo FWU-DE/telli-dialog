@@ -11,9 +11,7 @@ import { type ConversationModel, type ConversationMessageModel } from '@shared/d
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { markdownToDocx } from './markdown';
 import { logError } from '@shared/logging';
-import { db } from '@shared/db';
-import { llmModelTable } from '@shared/db/schema';
-import { eq } from 'drizzle-orm';
+import { dbGetModelByName } from '@shared/db/functions/llm-model';
 
 const USER_FULL_NAME = 'Nutzer/in';
 
@@ -41,14 +39,9 @@ export async function generateConversationDocxFile({
     let modelDisplayName = lastAssistantMessage?.modelName ?? gptName;
 
     if (lastAssistantMessage?.modelName) {
-      const modelDbEntry = await db
-        .select({ displayName: llmModelTable.displayName })
-        .from(llmModelTable)
-        .where(eq(llmModelTable.name, lastAssistantMessage.modelName))
-        .limit(1);
-
-      if (modelDbEntry[0]?.displayName) {
-        modelDisplayName = modelDbEntry[0].displayName;
+      const modelDbEntry = await dbGetModelByName(lastAssistantMessage.modelName);
+      if (modelDbEntry?.displayName) {
+        modelDisplayName = modelDbEntry.displayName;
       }
     }
 
@@ -116,10 +109,6 @@ function getConversationMessages({
     ...markdownToDocx(message.content),
     new Paragraph({}),
   ]);
-}
-
-function getGptName({ enterpriseGptName }: { enterpriseGptName: string | null }): string {
-  return enterpriseGptName ?? 'telli';
 }
 
 function buildDocxDocument({
