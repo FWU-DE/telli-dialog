@@ -1,6 +1,9 @@
 import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
-import { dbGetFilesForLearningScenario } from '@shared/db/functions/files';
+import {
+  dbGetFileForLearningScenario,
+  dbGetFilesForLearningScenario,
+} from '@shared/db/functions/files';
 import {
   dbCreateLearningScenarioShare,
   dbDeleteLearningScenarioByIdAndUserId,
@@ -33,7 +36,7 @@ import {
   deleteMessageAttachments,
   getAvatarPictureUrl,
 } from '@shared/files/fileService';
-import { deleteFileFromS3, uploadFileToS3, getReadOnlySignedUrl } from '@shared/s3';
+import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { and, eq } from 'drizzle-orm';
@@ -678,10 +681,9 @@ export async function downloadFileFromLearningScenario({
   const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
   verifyReadAccess({ item: learningScenario, schoolId, userId: user.id });
 
-  const files = await dbGetFilesForLearningScenario(learningScenarioId);
-  const file = files.find((f) => f.id === fileId);
+  const file = await dbGetFileForLearningScenario({ fileId, learningScenarioId });
   if (!file) {
-    throw new ForbiddenError('File not found or not authorized');
+    throw new NotFoundError('File not found');
   }
 
   return getReadOnlySignedUrl({

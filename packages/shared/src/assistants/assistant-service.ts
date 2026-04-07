@@ -12,7 +12,7 @@ import {
   dbGetGptsByUserId,
   dbInsertAssistantFileMapping,
 } from '@shared/db/functions/assistants';
-import { dbGetRelatedAssistantFiles } from '@shared/db/functions/files';
+import { dbGetFileForAssistant, dbGetRelatedAssistantFiles } from '@shared/db/functions/files';
 import {
   AccessLevel,
   accessLevelSchema,
@@ -23,7 +23,7 @@ import {
   FileModel,
   fileTable,
 } from '@shared/db/schema';
-import { checkParameterUUID, ForbiddenError } from '@shared/error';
+import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
 import {
   deleteAvatarPicture,
   deleteMessageAttachments,
@@ -539,11 +539,10 @@ export async function downloadFileFromAssistant({
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
   verifyReadAccess({ item: assistant, schoolId, userId: user.id });
-  const files = await dbGetRelatedAssistantFiles(assistantId);
 
-  const file = files.find((f) => f.id === fileId);
+  const file = await dbGetFileForAssistant({ fileId, assistantId });
   if (!file) {
-    throw new ForbiddenError('File not found or not authorized');
+    throw new NotFoundError('File not found');
   }
 
   return getReadOnlySignedUrl({

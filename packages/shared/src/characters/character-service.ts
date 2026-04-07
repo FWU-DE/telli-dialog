@@ -12,7 +12,7 @@ import {
   dbGetGlobalCharacters,
   dbGetSharedCharacterConversations,
 } from '@shared/db/functions/character';
-import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
+import { dbGetFileForCharacter, dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import {
   AccessLevel,
@@ -726,10 +726,9 @@ export async function downloadFileFromCharacter({
   if (!character) throw new NotFoundError('Character not found');
   verifyReadAccess({ item: character, schoolId, userId: user.id });
 
-  const files = await dbGetRelatedCharacterFiles(characterId);
-  const file = files.find((f) => f.id === fileId);
+  const file = await dbGetFileForCharacter({ fileId, characterId });
   if (!file) {
-    throw new ForbiddenError('File not found or not authorized');
+    throw new NotFoundError('File not found');
   }
 
   return getReadOnlySignedUrl({
