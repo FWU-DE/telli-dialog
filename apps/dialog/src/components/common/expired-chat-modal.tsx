@@ -6,7 +6,7 @@ import StopWatchDoneIcon from '@/components/icons/stopwatch-done';
 import DownloadSharedConversationButton from '@/app/(unauth)/ua/download-shared-conversation-button';
 import { type ChatMessage as Message } from '@/types/chat';
 import { useTranslations } from 'next-intl';
-import { useTheme } from '@/hooks/use-theme';
+import { useTheme } from '@/components/providers/theme-provider';
 import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
 
 type ExpiredChatModalProps = {
