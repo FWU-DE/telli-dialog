@@ -14,14 +14,14 @@ const iconButtonVariants = cva(
     variants: {
       variant: {
         /* icons that use the primary color for the icon */
-        primary: 'text-primary',
+        primary: 'text-primary hover:bg-primary',
         /* destructive not styled yet */
         destructive:
           'bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30',
       },
       size: {
-        md: "size-8 [&_svg:not([class*='size-'])]:size-6 hover:bg-primary",
-        lg: "size-10 [&_svg:not([class*='size-'])]:size-7 hover:bg-primary",
+        md: "size-8 [&_svg:not([class*='size-'])]:size-6",
+        lg: "size-10 [&_svg:not([class*='size-'])]:size-7",
       },
     },
     defaultVariants: {
