@@ -719,6 +719,7 @@ export async function downloadFileFromCharacter({
   user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
   checkParameterUUID(characterId);
+  requireTeacherRole(user.userRole);
   const character = await dbGetCharacterByIdWithShareData({
     characterId,
     userId: user.id,

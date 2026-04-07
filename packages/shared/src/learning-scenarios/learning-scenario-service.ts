@@ -678,6 +678,7 @@ export async function downloadFileFromLearningScenario({
   user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
   checkParameterUUID(learningScenarioId);
+  requireTeacherRole(user.userRole);
   const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
   verifyReadAccess({ item: learningScenario, schoolId, userId: user.id });
 

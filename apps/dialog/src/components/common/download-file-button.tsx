@@ -21,7 +21,7 @@ export default function DownloadFileButton({ fileId, onDownloadFile }: DownloadF
     try {
       const result = await onDownloadFile(fileId);
       if (result.success && result.value) {
-        window.open(result.value, '_blank');
+        window.open(result.value, '_blank', 'noopener,noreferrer');
       } else {
         toast.error(t('toasts.download-error'));
       }
