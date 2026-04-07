@@ -16,7 +16,7 @@ import { logError } from '@shared/logging';
 import { db } from '@shared/db';
 import { eq } from 'drizzle-orm';
 
-export async function generateConversationDocxFiles({
+export async function generateConversationDocxFile({
   conversationId,
   user,
   enterpriseGptName,
