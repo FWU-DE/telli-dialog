@@ -8,7 +8,7 @@ import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
 import { AssistantSelectModel, FileModel } from '@shared/db/schema';
 import { useRouter } from 'next/navigation';
-import { createNewAssistantAction } from '../actions';
+import { createNewAssistantAction, downloadFileFromAssistantAction } from '../actions';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { CustomChatLastUpdate } from '@/components/custom-chat/custom-chat-last-update';
@@ -17,7 +17,6 @@ import { CustomChatFields } from '@/components/custom-chat/custom-chat-fields';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
 import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avatar-image';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
-import { downloadKnowledgeFileAction } from '@/app/api/file-operations/actions';
 
 export function AssistantView({
   assistant,
@@ -41,9 +40,9 @@ export function AssistantView({
     }
   };
 
-  const handleDownloadFile = async (fileId: string) => {
-    return downloadKnowledgeFileAction({ entityType: 'assistant', entityId: assistant.id, fileId });
-  };
+  async function handleDownloadFile(fileId: string) {
+    return downloadFileFromAssistantAction({ assistantId: assistant.id, fileId });
+  }
 
   return (
     <CustomChatLayoutContainer>

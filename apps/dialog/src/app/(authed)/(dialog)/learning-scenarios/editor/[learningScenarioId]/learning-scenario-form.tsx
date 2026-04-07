@@ -24,6 +24,7 @@ import { cn } from '@/utils/tailwind';
 import {
   createNewLearningScenarioFromTemplateAction,
   deleteLearningScenarioAction,
+  downloadFileFromLearningScenarioAction,
   linkFileToLearningScenarioAction,
 } from '../../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
@@ -158,6 +159,13 @@ export default function LearningScenarioForm({
     if (!result.success) {
       toast.error(tToast('edit-toast-error'));
     }
+  }
+
+  async function handleDownloadFile(fileId: string) {
+    return downloadFileFromLearningScenarioAction({
+      learningScenarioId: sharedSchoolChat.id,
+      fileId,
+    });
   }
 
   async function onSubmit(data: SharedSchoolChatFormValues) {
@@ -419,8 +427,7 @@ export default function LearningScenarioForm({
           onDeleteFile={handleDeattachFile}
           readOnly={readOnly}
           translationNamespace="learning-scenarios.form"
-          entityType="learningScenario"
-          entityId={sharedSchoolChat.id}
+          onDownloadFile={handleDownloadFile}
         />
         <AttachedLinks
           fields={fields}

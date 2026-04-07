@@ -33,7 +33,8 @@ import {
   deleteMessageAttachments,
   getAvatarPictureUrl,
 } from '@shared/files/fileService';
-import { deleteFileFromS3, uploadFileToS3 } from '@shared/s3';
+import { deleteFileFromS3, uploadFileToS3, getReadOnlySignedUrl } from '@shared/s3';
+import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { and, eq } from 'drizzle-orm';
 import { OverviewFilter } from '@shared/overview-filter';
@@ -652,5 +653,41 @@ export async function createNewLearningScenarioFromTemplate({
     originalLearningScenarioId,
     schoolId,
     userId: user.id,
+  });
+}
+
+/**
+ * Downloads a file for a learning scenario.
+ *
+ * Authorization checks:
+ * - User must have read access to the learning scenario.
+ * - The file must belong to the learning scenario.
+ */
+export async function downloadFileFromLearningScenario({
+  learningScenarioId,
+  fileId,
+  schoolId,
+  user,
+}: {
+  learningScenarioId: string;
+  fileId: string;
+  schoolId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
+}) {
+  checkParameterUUID(learningScenarioId);
+  const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
+  verifyReadAccess({ item: learningScenario, schoolId, userId: user.id });
+
+  const files = await dbGetFilesForLearningScenario(learningScenarioId);
+  const file = files.find((f) => f.id === fileId);
+  if (!file) {
+    throw new ForbiddenError('File not found or not authorized');
+  }
+
+  return getReadOnlySignedUrl({
+    key: `message_attachments/${fileId}`,
+    filename: file.name,
+    attachment: true,
+    options: { expiresIn: ONE_HOUR },
   });
 }

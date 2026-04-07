@@ -4,6 +4,7 @@ import { requireAuth } from '@/auth/requireAuth';
 import {
   createNewAssistant,
   deleteFileMappingAndEntity,
+  downloadFileFromAssistant,
   linkFileToAssistant,
 } from '@shared/assistants/assistant-service';
 import { runServerAction } from '@shared/actions/run-server-action';
@@ -40,4 +41,21 @@ export async function linkFileToAssistantAction({
   const { user } = await requireAuth();
 
   return runServerAction(linkFileToAssistant)({ fileId, assistantId, userId: user.id });
+}
+
+export async function downloadFileFromAssistantAction({
+  assistantId,
+  fileId,
+}: {
+  assistantId: string;
+  fileId: string;
+}) {
+  const { user, school } = await requireAuth();
+
+  return runServerAction(downloadFileFromAssistant)({
+    assistantId,
+    fileId,
+    schoolId: school.id,
+    user,
+  });
 }

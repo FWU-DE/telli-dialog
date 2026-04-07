@@ -12,7 +12,7 @@ export type CustomChatFilesProps = {
   initialFiles: FileModel[];
   onFileUploaded?: (data: { id: string; name: string; file: File }) => void | Promise<void>;
   onDeleteFile?: (fileId: string) => Promise<ServerActionResult<void>>;
-  onDownloadFile?: (fileId: string) => Promise<string | undefined>;
+  onDownloadFile?: (fileId: string) => Promise<ServerActionResult<string | undefined>>;
 };
 
 export function CustomChatFiles(props: CustomChatFilesProps) {

@@ -34,6 +34,7 @@ import {
   getAvatarPictureUrl,
 } from '@shared/files/fileService';
 import { copyFileInS3, deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
+import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
@@ -697,4 +698,44 @@ export async function uploadAvatarPictureForCharacter({
     picturePath: key,
     signedUrl: await getAvatarPictureUrl(key),
   };
+}
+
+/**
+ * Downloads a file for a character.
+ *
+ * Authorization checks:
+ * - User must have read access to the character.
+ * - The file must belong to the character.
+ */
+export async function downloadFileFromCharacter({
+  characterId,
+  fileId,
+  schoolId,
+  user,
+}: {
+  characterId: string;
+  fileId: string;
+  schoolId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
+}) {
+  checkParameterUUID(characterId);
+  const character = await dbGetCharacterByIdWithShareData({
+    characterId,
+    userId: user.id,
+  });
+  if (!character) throw new NotFoundError('Character not found');
+  verifyReadAccess({ item: character, schoolId, userId: user.id });
+
+  const files = await dbGetRelatedCharacterFiles(characterId);
+  const file = files.find((f) => f.id === fileId);
+  if (!file) {
+    throw new ForbiddenError('File not found or not authorized');
+  }
+
+  return getReadOnlySignedUrl({
+    key: `message_attachments/${fileId}`,
+    filename: file.name,
+    attachment: true,
+    options: { expiresIn: ONE_HOUR },
+  });
 }

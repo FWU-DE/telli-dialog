@@ -29,7 +29,8 @@ import {
   deleteMessageAttachments,
   getAvatarPictureUrl,
 } from '@shared/files/fileService';
-import { copyFileInS3, deleteFileFromS3, uploadFileToS3 } from '@shared/s3';
+import { copyFileInS3, deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
+import { ONE_HOUR } from '@shared/s3/const';
 import { copyAssistant, copyRelatedTemplateFiles } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
 import { addDays } from '@shared/utils/date';
@@ -515,4 +516,40 @@ export async function uploadAvatarPictureForAssistant({
     picturePath: key,
     signedUrl: await getAvatarPictureUrl(key),
   };
+}
+
+/**
+ * Downloads a file for an assistant.
+ *
+ * Authorization checks:
+ * - User must have access to the assistant.
+ * - The file must belong to the assistant.
+ */
+export async function downloadFileFromAssistant({
+  assistantId,
+  fileId,
+  schoolId,
+  user,
+}: {
+  assistantId: string;
+  fileId: string;
+  schoolId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
+}) {
+  checkParameterUUID(assistantId);
+  const assistant = await dbGetAssistantById({ assistantId });
+  verifyReadAccess({ item: assistant, schoolId, userId: user.id });
+  const files = await dbGetRelatedAssistantFiles(assistantId);
+
+  const file = files.find((f) => f.id === fileId);
+  if (!file) {
+    throw new ForbiddenError('File not found or not authorized');
+  }
+
+  return getReadOnlySignedUrl({
+    key: `message_attachments/${fileId}`,
+    filename: file.name,
+    attachment: true,
+    options: { expiresIn: ONE_HOUR },
+  });
 }

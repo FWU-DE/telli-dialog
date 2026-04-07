@@ -1,7 +1,7 @@
 import DestructiveActionButton from '@/components/common/destructive-action-button';
+import DownloadFileButton from '@/components/common/download-file-button';
 import { FileModel } from '@shared/db/schema';
 import React from 'react';
-import { DownloadSimpleIcon } from '@phosphor-icons/react/dist/icons/DownloadSimple';
 
 import { isNotNull } from '@shared/utils/guard';
 import Spinner from '../icons/spinner';
@@ -15,7 +15,7 @@ import { useToast } from '../common/toast';
 import { useTranslations } from 'next-intl';
 import { iconClassName } from '@/utils/tailwind/icon';
 import { cn } from '@/utils/tailwind';
-import { IconButton } from '@ui/components/IconButton';
+import { ServerActionResult } from '@shared/actions/server-action-result';
 
 type FilesTableProps = {
   files: FileModel[];
@@ -24,44 +24,8 @@ type FilesTableProps = {
   showUploadConfirmation?: boolean;
   className?: string;
   readOnly: boolean;
-  onDownloadFile?: (fileId: string) => Promise<string | undefined>;
+  onDownloadFile?: (fileId: string) => Promise<ServerActionResult<string | undefined>>;
 };
-
-function DownloadKnowledgeFileButton({
-  fileId,
-  onDownloadFile,
-}: {
-  fileId: string;
-  onDownloadFile: (fileId: string) => Promise<string | undefined>;
-}) {
-  const [isDownloading, setIsDownloading] = React.useState(false);
-  const t = useTranslations('file-interaction');
-  const toast = useToast();
-
-  const handleDownload = async () => {
-    setIsDownloading(true);
-    try {
-      const url = await onDownloadFile(fileId);
-      if (url) {
-        window.open(url, '_blank');
-      }
-    } catch {
-      toast.error(t('toasts.download-error'));
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
-  return (
-    <IconButton
-      aria-label={t('download.aria-label')}
-      onClick={handleDownload}
-      disabled={isDownloading}
-    >
-      {isDownloading ? <Spinner className="size-5" /> : <DownloadSimpleIcon />}
-    </IconButton>
-  );
-}
 
 export default function FilesTable({
   files,
@@ -81,8 +45,6 @@ export default function FilesTable({
       if (showUploadConfirmation) toast.success(t('toasts.delete-from-form'));
     });
   }
-
-  const persistedFileIds = new Set(files.map((f) => f.id));
 
   const mergedFiles = [
     ...files.map((f) => ({
@@ -149,11 +111,8 @@ export default function FilesTable({
                   {status === 'uploading' && (
                     <span className="text-sm text-gray-500">Uploading...</span>
                   )}
-                  {onDownloadFile && id && persistedFileIds.has(id) && (
-                    <DownloadKnowledgeFileButton
-                      fileId={id}
-                      onDownloadFile={onDownloadFile}
-                    />
+                  {onDownloadFile && (
+                    <DownloadFileButton fileId={id} onDownloadFile={onDownloadFile} />
                   )}
                   {!readOnly && (
                     <DestructiveActionButton
