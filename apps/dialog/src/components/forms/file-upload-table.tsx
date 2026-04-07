@@ -40,10 +40,11 @@ export default function FilesTable({
   const toast = useToast();
   if (files.length < 1 && additionalFiles.size < 1) return null;
 
-  function handleDeleteFile(file_id: string) {
-    onDeleteFile(file_id).then(() => {
-      if (showUploadConfirmation) toast.success(t('toasts.delete-from-form'));
-    });
+  async function handleDeleteFile(fileId: string) {
+    await onDeleteFile(fileId);
+    if (showUploadConfirmation) {
+      toast.success(t('toasts.delete-from-form'));
+    }
   }
 
   const mergedFiles = [
