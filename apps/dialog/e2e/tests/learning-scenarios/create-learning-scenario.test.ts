@@ -35,13 +35,7 @@ test.describe('create, share, chat, delete', () => {
     // configure form
     await configureLearningScenario(page, data);
 
-    // In the new UI, form auto-saves, so navigate back to verify creation
-    const listItem = page.getByRole('button', { name: data.name });
-    await expect(listItem).toBeVisible();
-    await listItem.click();
-    await page.waitForURL('/learning-scenarios/**');
-
-    // check if created with the correct name
+    // check if created with the correct name (still on the editor page)
     await expect(page.getByRole('heading', { name: data.name })).toBeVisible();
 
     const stopSharingButton = page.getByRole('button', { name: 'Stop' });
@@ -85,12 +79,7 @@ test.describe('create, share, chat, delete', () => {
     // configure form
     await configureLearningScenario(page, data);
 
-    // In the new UI, form auto-saves, so navigate back to verify creation
-    const listItem = page.getByRole('button', { name: data.name });
-    await expect(listItem).toBeVisible();
-    await listItem.click();
-
-    await page.waitForURL('/learning-scenarios/**');
+    // Still on the editor page after autosave
     const stopSharingButton = page.getByRole('button', { name: 'Stop' });
     if (await stopSharingButton.isVisible()) {
       await stopSharingButton.click();
@@ -142,9 +131,10 @@ test.describe('create, share, chat, delete', () => {
     // create learning scenario
     await createLearningScenario(page);
     await configureLearningScenario(page, data);
-    // In the new UI, form auto-saves, so navigate back to verify creation
-    const listItem = page.getByRole('button', { name: data.name });
-    await expect(listItem).toBeVisible();
+
+    // Navigate back to list to find and delete
+    await page.goto('/learning-scenarios');
+    await page.waitForURL('/learning-scenarios');
 
     await deleteLearningScenario(page, data.name);
 
@@ -167,7 +157,8 @@ test('data is autosaved on blur', async ({ page }) => {
   });
 
   // Navigate back to list and then click to open for editing
-  await page.waitForTimeout(300);
+  await page.goto('/learning-scenarios');
+  await page.waitForURL('/learning-scenarios');
   const listItem = page.getByRole('button', { name });
   await expect(listItem).toBeVisible();
   await listItem.click();

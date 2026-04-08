@@ -28,18 +28,14 @@ test('teacher can create shared chat with web sources, student can join chat and
   // configure form
   await configureLearningScenario(page, data);
   await page
-    .getByRole('textbox', { name: 'Web-Link' })
+    .getByRole('textbox', { name: 'URL eingeben' })
     .fill(
       'https://www.dw.com/de/trump-im-israel-iran-konflikt-kurs-ohne-klare-linie-donald-trump-benjamin-netanjahu-atomwaffen-v2/a-72936043',
     );
-  await page.getByRole('button', { name: 'Link hinzufügen' }).click();
+  await page.getByRole('button', { name: 'Webseite hinzufügen' }).click();
 
-  // In the new UI, form auto-saves, so navigate back to verify creation
-  const listItem = page.getByRole('button', { name: data.name });
-  await expect(listItem).toBeVisible();
-  await listItem.click();
-
-  await page.waitForURL('/learning-scenarios/**');
+  // Still on the editor page after autosave
+  await page.waitForTimeout(2000);
   const stopSharingButton = page.getByRole('button', { name: 'Stop' });
   if (await stopSharingButton.isVisible()) {
     await stopSharingButton.click();
