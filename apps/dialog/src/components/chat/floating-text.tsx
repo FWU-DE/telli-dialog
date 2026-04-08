@@ -155,7 +155,7 @@ export function FloatingText({
     <div
       ref={containerRef}
       className={cn(
-        'flex flex-col z-10 bg-secondary/30 rounded-xl border select-none',
+        'flex flex-col z-200 bg-secondary rounded-xl border select-none',
         // using string interpolations is extremly flaky, so we're using a static class name
         isAtLeast.lg ? `absolute` : 'sticky',
         dragging ? 'cursor-grabbing' : 'cursor-grab',

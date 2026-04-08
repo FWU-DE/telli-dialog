@@ -98,7 +98,7 @@ export default function CharacterSharedChat({
           inviteCode={inviteCode}
         />
       )}
-      <div className="flex flex-col h-full w-full overflow-hidden">
+      <div className="flex h-dvh min-h-0 flex-col overflow-hidden">
         <SharedChatHeader
           chatActive={chatActive}
           hasMessages={messages.length > 0}
@@ -111,11 +111,10 @@ export default function CharacterSharedChat({
           dialogStarted={messages.length > 0}
         />
         <hr className="w-full border-gray-200" />
-        <div className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden">
+        <div className="flex min-h-0 flex-1 flex-col items-center">
           <div
             ref={scrollRef}
-            className="grow w-full max-w-5xl overflow-y-auto p-4 pb-20"
-            style={{ maxHeight: 'calc(100vh - 150px)' }}
+            className="min-h-0 w-full flex-1 max-w-5xl overflow-y-auto p-4 pb-20"
           >
             {messages.length === 0 ? (
               <InitialChatContentDisplay
@@ -135,7 +134,7 @@ export default function CharacterSharedChat({
             )}
             {error && <ErrorChatPlaceholder error={error} handleReload={handleReload} />}
           </div>
-          <div className="w-full max-w-5xl mx-auto px-4 pb-4">
+          <div className="w-full max-w-5xl shrink-0 mx-auto px-4 pb-4">
             <div className="flex flex-col">
               <ChatInputBox
                 handleStopGeneration={stop}
