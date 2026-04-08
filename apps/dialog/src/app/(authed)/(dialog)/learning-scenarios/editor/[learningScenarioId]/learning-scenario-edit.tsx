@@ -197,7 +197,7 @@ export function LearningScenarioEdit({
       toast.error(tToast('delete-toast-error'));
     }
     guardNavigation(() => {
-      router.push('/custom');
+      router.push('/learning-scenarios');
     });
   };
 
