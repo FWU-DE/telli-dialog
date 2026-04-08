@@ -18,14 +18,14 @@ export async function deleteLearningScenario(page: Page, name: string) {
   await expect(card).toBeVisible();
   await card.click();
   await page.waitForURL('/learning-scenarios/editor/**');
-  const deleteButton = page.getByRole('button', { name: 'Szenario endgültig löschen' });
+  const deleteButton = page.getByTestId('custom-chat-delete-button').first();
   await expect(deleteButton).toBeVisible();
   await deleteButton.click();
   await confirmDelete(page);
 }
 
 export async function deleteLearningScenarioFromDetailPage(page: Page) {
-  const deleteButton = page.getByRole('button', { name: 'Szenario endgültig löschen' });
+  const deleteButton = page.getByTestId('custom-chat-delete-button').first();
   await expect(deleteButton).toBeVisible();
   await deleteButton.click();
   await confirmDelete(page);

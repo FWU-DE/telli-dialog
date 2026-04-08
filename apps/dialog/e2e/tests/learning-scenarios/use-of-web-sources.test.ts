@@ -40,7 +40,11 @@ test('teacher can create shared chat with web sources, student can join chat and
   if (await stopSharingButton.isVisible()) {
     await stopSharingButton.click();
   }
-  await page.getByTitle('Szenario starten').click();
+  await page.getByTestId('telli-points-select').click();
+  await page.getByRole('option', { name: '50 %' }).click();
+  await page.getByTestId('usage-time-select').click();
+  await page.getByRole('option', { name: '30 Minuten' }).click();
+  await page.getByRole('button', { name: 'Jetzt bereitstellen' }).click();
 
   // enter chat directly as a teacher
   const schoolChatPagePromise = page.waitForEvent('popup');

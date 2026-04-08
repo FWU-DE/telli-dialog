@@ -43,9 +43,11 @@ test.describe('create, share, chat, delete', () => {
       await stopSharingButton.click();
     }
     // test share page
-    await page.selectOption('#Telli-Points', '50');
-    await page.selectOption('#maxUsage', '30');
-    await page.getByTitle('Szenario starten').click();
+    await page.getByTestId('telli-points-select').click();
+    await page.getByRole('option', { name: '50 %' }).click();
+    await page.getByTestId('usage-time-select').click();
+    await page.getByRole('option', { name: '30 Minuten' }).click();
+    await page.getByRole('button', { name: 'Jetzt bereitstellen' }).click();
 
     await page.waitForURL('/learning-scenarios/**/share');
     const code = await page.locator('#join-code').textContent();
@@ -85,9 +87,11 @@ test.describe('create, share, chat, delete', () => {
       await stopSharingButton.click();
     }
     // test share page
-    await page.selectOption('#Telli-Points', '25');
-    await page.selectOption('#maxUsage', '30');
-    await page.getByTitle('Szenario starten').click();
+    await page.getByTestId('telli-points-select').click();
+    await page.getByRole('option', { name: '25 %' }).click();
+    await page.getByTestId('usage-time-select').click();
+    await page.getByRole('option', { name: '30 Minuten' }).click();
+    await page.getByRole('button', { name: 'Jetzt bereitstellen' }).click();
 
     // get code
     await page.waitForURL('/learning-scenarios/**/share');
