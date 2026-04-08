@@ -74,5 +74,5 @@ export async function configureLearningScenario(
 
   // Wait for autosave to complete (triggered by blur on last field)
   await page.waitForTimeout(500);
-  await expect(page.getByText('Gespeichert')).toBeVisible({ timeout: 5000 });
+  await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
 }

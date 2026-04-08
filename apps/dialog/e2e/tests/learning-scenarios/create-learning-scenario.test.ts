@@ -179,7 +179,7 @@ test('data is autosaved on blur', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Name des Lernszenarios' }).fill('New Title');
   await page.getByRole('textbox', { name: 'Name des Lernszenarios' }).press('Tab');
   await page.waitForTimeout(300);
-  await expect(page.locator('text=Gespeichert')).toBeVisible({ timeout: 5000 });
+  await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
   await page.reload();
   await expect(page.getByRole('textbox', { name: 'Name des Lernszenarios' })).toHaveValue(
     'New Title',
@@ -189,7 +189,7 @@ test('data is autosaved on blur', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Kurzbeschreibung' }).fill('New Description');
   await page.getByRole('textbox', { name: 'Kurzbeschreibung' }).press('Tab');
   await page.waitForTimeout(300);
-  await expect(page.locator('text=Gespeichert')).toBeVisible({ timeout: 5000 });
+  await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
   await page.reload();
   await expect(page.getByRole('textbox', { name: 'Kurzbeschreibung' })).toHaveValue(
     'New Description',
@@ -199,7 +199,7 @@ test('data is autosaved on blur', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Instruktionen' }).fill('New Instructions');
   await page.getByRole('textbox', { name: 'Instruktionen' }).press('Tab');
   await page.waitForTimeout(300);
-  await expect(page.locator('text=Gespeichert')).toBeVisible({ timeout: 5000 });
+  await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
   await page.reload();
   await expect(page.getByRole('textbox', { name: 'Instruktionen' })).toHaveValue(
     'New Instructions',
@@ -209,7 +209,7 @@ test('data is autosaved on blur', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Arbeitsauftrag' }).fill('New Exercise');
   await page.getByRole('textbox', { name: 'Arbeitsauftrag' }).press('Tab');
   await page.waitForTimeout(300);
-  await expect(page.locator('text=Gespeichert')).toBeVisible({ timeout: 5000 });
+  await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
   await page.reload();
   await expect(page.getByRole('textbox', { name: 'Arbeitsauftrag' })).toHaveValue('New Exercise');
 
