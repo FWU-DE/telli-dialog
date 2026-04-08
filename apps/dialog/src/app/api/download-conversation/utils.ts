@@ -11,6 +11,7 @@ import { type ConversationModel, type ConversationMessageModel } from '@shared/d
 import { formatDateToGermanTimestamp } from '@shared/utils/date';
 import { markdownToDocx } from './markdown';
 import { logError } from '@shared/logging';
+import { dbGetModelByName } from '@shared/db/functions/llm-model';
 
 const USER_FULL_NAME = 'Nutzer/in';
 
@@ -32,9 +33,17 @@ export async function generateConversationDocxFile({
       gptName,
       userFullName: USER_FULL_NAME,
     });
+
     const lastAssistantMessage = messages.findLast((m) => m.role === 'assistant');
 
-    const modelDisplayName = lastAssistantMessage?.modelName ?? gptName;
+    let modelDisplayName = lastAssistantMessage?.modelName ?? gptName;
+
+    if (lastAssistantMessage?.modelName) {
+      const modelDbEntry = await dbGetModelByName(lastAssistantMessage.modelName);
+      if (modelDbEntry?.displayName) {
+        modelDisplayName = modelDbEntry.displayName;
+      }
+    }
 
     messageParagraphs.push(
       new Paragraph({
