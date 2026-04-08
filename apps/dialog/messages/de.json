@@ -498,7 +498,7 @@
     },
     "files-and-links": {
       "heading": "Hintergrundwissen",
-      "heading-tooltip": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Der Dialogpartner bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: pdf, txt, docx",
+      "heading-tooltip": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Telli bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: pdf, txt, docx",
       "files": "Dateien",
       "links": "Webseiten",
       "links-tooltip": "Bei Webseiten wird nur die angegebene Webseite selbst als Hintergrundwissen genutzt. Unterseiten werden nicht berücksichtigt.",
