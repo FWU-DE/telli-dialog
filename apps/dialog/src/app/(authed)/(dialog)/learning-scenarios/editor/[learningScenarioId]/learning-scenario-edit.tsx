@@ -9,25 +9,26 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/Card';
-import { Field, FieldLabel, FieldError, FieldGroup } from '@ui/components/Field';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@ui/components/Field';
 import { Input } from '@ui/components/Input';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import z from 'zod';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
 import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions';
-import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
 import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
 import { useRouter } from 'next/navigation';
 import {
-  updateLearningScenarioAction,
   removeFileFromLearningScenarioAction,
-  uploadAvatarPictureForLearningScenarioAction,
+  shareLearningScenarioAction,
+  unshareLearningScenarioAction,
   updateLearningScenarioAccessLevelAction,
+  updateLearningScenarioAction,
+  uploadAvatarPictureForLearningScenarioAction,
 } from './actions';
 import {
   createNewLearningScenarioFromTemplateAction,
@@ -39,7 +40,6 @@ import { useTranslations } from 'next-intl';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
 import { Textarea } from '@ui/components/Textarea';
-import { useCallback, useMemo, useRef } from 'react';
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
@@ -51,7 +51,6 @@ import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
 import { telliPointsPercentageValues, usageTimeValuesInMinutes } from './schema';
-import { shareLearningScenarioAction, unshareLearningScenarioAction } from './actions';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
@@ -121,7 +120,7 @@ export function LearningScenarioEdit({
     defaultValues: initialValues,
   });
 
-  const { isSaving, hasSaveError, flushAutoSave, handleAutoSave } =
+  const { isSaving, hasSaveError, flushAutoSave, handleAutoSave, withAutoSaveOnBlur } =
     useFormAutosave<LearningScenarioFormValues>({
       initialValues,
       isDirty,
@@ -310,19 +309,17 @@ export function LearningScenarioEdit({
         maxUsageTimeLimit={learningScenario.maxUsageTimeLimit ?? null}
         pointsPercentageValues={telliPointsPercentageValues}
         usageTimeValues={usageTimeValuesInMinutes}
-        onShare={async (data) => {
-          const result = await shareLearningScenarioAction({
+        onShare={async (data) =>
+          await shareLearningScenarioAction({
             learningScenarioId: learningScenario.id,
             data: data as Parameters<typeof shareLearningScenarioAction>[0]['data'],
-          });
-          return result;
-        }}
-        onUnshare={async () => {
-          const result = await unshareLearningScenarioAction({
+          })
+        }
+        onUnshare={async () =>
+          await unshareLearningScenarioAction({
             learningScenarioId: learningScenario.id,
-          });
-          return result;
-        }}
+          })
+        }
         shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}
         sharingDisabled={!name || name.trim().length === 0}
       />
@@ -350,9 +347,11 @@ export function LearningScenarioEdit({
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid} aria-required="true">
-                      <FieldLabel htmlFor={field.name}>{t('name-label')}</FieldLabel>
+                      <FieldLabel htmlFor={field.name} required>
+                        {t('name-label')}
+                      </FieldLabel>
                       <Input
-                        {...field}
+                        {...withAutoSaveOnBlur(field)}
                         ref={nameInputRef}
                         id={field.name}
                         aria-invalid={fieldState.invalid}
@@ -365,10 +364,6 @@ export function LearningScenarioEdit({
                         })}
                         required
                         data-testid="learning-scenario-name-input"
-                        onBlur={() => {
-                          field.onBlur();
-                          handleAutoSave();
-                        }}
                       />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -381,7 +376,7 @@ export function LearningScenarioEdit({
                     <Field data-invalid={fieldState.invalid} aria-required="true">
                       <FieldLabel htmlFor={field.name}>{t('description-label')}</FieldLabel>
                       <Textarea
-                        {...field}
+                        {...withAutoSaveOnBlur(field)}
                         id={field.name}
                         className="h-27 resize-none"
                         aria-label={t('description-label')}
@@ -392,10 +387,6 @@ export function LearningScenarioEdit({
                         })}
                         maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
                         data-testid="learning-scenario-description-input"
-                        onBlur={() => {
-                          field.onBlur();
-                          handleAutoSave();
-                        }}
                       />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -416,7 +407,7 @@ export function LearningScenarioEdit({
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor={field.name}>{t('instructions-label')}</FieldLabel>
                       <Textarea
-                        {...field}
+                        {...withAutoSaveOnBlur(field)}
                         id={field.name}
                         className="h-125"
                         aria-invalid={fieldState.invalid}
@@ -428,10 +419,6 @@ export function LearningScenarioEdit({
                         })}
                         autoComplete="off"
                         data-testid="learning-scenario-instructions-input"
-                        onBlur={() => {
-                          field.onBlur();
-                          handleAutoSave();
-                        }}
                       />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -446,7 +433,7 @@ export function LearningScenarioEdit({
                         {t('student-exercise-label')}
                       </FieldLabel>
                       <Textarea
-                        {...field}
+                        {...withAutoSaveOnBlur(field)}
                         id={field.name}
                         className="h-27 resize-none"
                         aria-invalid={fieldState.invalid}
@@ -458,10 +445,6 @@ export function LearningScenarioEdit({
                         })}
                         autoComplete="off"
                         data-testid="learning-scenario-student-exercise-input"
-                        onBlur={() => {
-                          field.onBlur();
-                          handleAutoSave();
-                        }}
                       />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
