@@ -18,12 +18,12 @@ test('create learning scenario from template', async ({ page }) => {
   await page.waitForURL('**?create=true**');
 
   const name = 'Kopiertes Lernszenario ' + nanoid(8);
-  await page.getByLabel('Name des Lernszenarios').fill(name);
+  await page.getByRole('textbox', { name: 'Name des Lernszenarios' }).fill(name);
 
   // Fill in other required fields (the new form auto-saves)
-  await page.getByLabel('Kurzbeschreibung').fill('Beschreibung');
-  await page.getByLabel('Instruktionen').fill('Instruktionen');
-  await page.getByLabel('Arbeitsauftrag').fill('Arbeitsauftrag');
+  await page.getByRole('textbox', { name: 'Kurzbeschreibung' }).fill('Beschreibung');
+  await page.getByRole('textbox', { name: 'Instruktionen' }).fill('Instruktionen');
+  await page.getByRole('textbox', { name: 'Arbeitsauftrag' }).fill('Arbeitsauftrag');
 
   // Wait for autosave to complete
   await page.waitForTimeout(500);

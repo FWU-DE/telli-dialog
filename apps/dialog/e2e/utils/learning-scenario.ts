@@ -45,12 +45,12 @@ export async function configureLearningScenario(
 ) {
   // Fill name field
   await page
-    .getByLabel('Name des Lernszenarios')
+    .getByRole('textbox', { name: 'Name des Lernszenarios' })
     .fill(data?.name ?? 'Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten');
 
   // Fill description field
   await page
-    .getByLabel('Kurzbeschreibung')
+    .getByRole('textbox', { name: 'Kurzbeschreibung' })
     .fill(data?.description ?? 'Zwischen Absolutismus und Demokratie (Ludwig XIV)');
 
   // Note: schoolType, gradeLevel, and subject fields no longer exist in the new UI
@@ -58,7 +58,7 @@ export async function configureLearningScenario(
 
   // Fill instructions field
   await page
-    .getByLabel('Instruktionen')
+    .getByRole('textbox', { name: 'Instruktionen' })
     .fill(
       data?.additionalInstructions ??
         'Der Chatbot soll aus der Perspektive eines Soldaten im Herrschaftssystem unter Ludwig XIV antworten.',
@@ -66,7 +66,7 @@ export async function configureLearningScenario(
 
   // Fill student exercise field
   await page
-    .getByLabel('Arbeitsauftrag')
+    .getByRole('textbox', { name: 'Arbeitsauftrag' })
     .fill(
       data?.studentExercise ??
         'Schüler sollen den Unterschied zwischen Absolutismus und Demokratie verstehen.',

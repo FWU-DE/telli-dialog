@@ -176,36 +176,42 @@ test('data is autosaved on blur', async ({ page }) => {
 
   // Edit and verify autosave for each field
   // Title
-  await page.getByLabel('Name des Lernszenarios').fill('New Title');
-  await page.getByLabel('Name des Lernszenarios').press('Tab');
+  await page.getByRole('textbox', { name: 'Name des Lernszenarios' }).fill('New Title');
+  await page.getByRole('textbox', { name: 'Name des Lernszenarios' }).press('Tab');
   await page.waitForTimeout(300);
   await expect(page.locator('text=Gespeichert')).toBeVisible({ timeout: 5000 });
   await page.reload();
-  await expect(page.getByLabel('Name des Lernszenarios')).toHaveValue('New Title');
+  await expect(page.getByRole('textbox', { name: 'Name des Lernszenarios' })).toHaveValue(
+    'New Title',
+  );
 
   // Description
-  await page.getByLabel('Kurzbeschreibung').fill('New Description');
-  await page.getByLabel('Kurzbeschreibung').press('Tab');
+  await page.getByRole('textbox', { name: 'Kurzbeschreibung' }).fill('New Description');
+  await page.getByRole('textbox', { name: 'Kurzbeschreibung' }).press('Tab');
   await page.waitForTimeout(300);
   await expect(page.locator('text=Gespeichert')).toBeVisible({ timeout: 5000 });
   await page.reload();
-  await expect(page.getByLabel('Kurzbeschreibung')).toHaveValue('New Description');
+  await expect(page.getByRole('textbox', { name: 'Kurzbeschreibung' })).toHaveValue(
+    'New Description',
+  );
 
   // Instructions
-  await page.getByLabel('Instruktionen').fill('New Instructions');
-  await page.getByLabel('Instruktionen').press('Tab');
+  await page.getByRole('textbox', { name: 'Instruktionen' }).fill('New Instructions');
+  await page.getByRole('textbox', { name: 'Instruktionen' }).press('Tab');
   await page.waitForTimeout(300);
   await expect(page.locator('text=Gespeichert')).toBeVisible({ timeout: 5000 });
   await page.reload();
-  await expect(page.getByLabel('Instruktionen')).toHaveValue('New Instructions');
+  await expect(page.getByRole('textbox', { name: 'Instruktionen' })).toHaveValue(
+    'New Instructions',
+  );
 
   // Student Exercise
-  await page.getByLabel('Arbeitsauftrag').fill('New Exercise');
-  await page.getByLabel('Arbeitsauftrag').press('Tab');
+  await page.getByRole('textbox', { name: 'Arbeitsauftrag' }).fill('New Exercise');
+  await page.getByRole('textbox', { name: 'Arbeitsauftrag' }).press('Tab');
   await page.waitForTimeout(300);
   await expect(page.locator('text=Gespeichert')).toBeVisible({ timeout: 5000 });
   await page.reload();
-  await expect(page.getByLabel('Arbeitsauftrag')).toHaveValue('New Exercise');
+  await expect(page.getByRole('textbox', { name: 'Arbeitsauftrag' })).toHaveValue('New Exercise');
 
   // cleanup
   await deleteLearningScenarioFromDetailPage(page);
