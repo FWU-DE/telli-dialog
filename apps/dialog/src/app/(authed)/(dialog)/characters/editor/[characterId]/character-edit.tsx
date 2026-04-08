@@ -12,11 +12,46 @@ import { useRouter } from 'next/dist/client/components/navigation';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
-import { useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod/dist/zod.js';
-import { updateCharacterAction } from './actions';
+import {
+  deleteCharacterAction,
+  deleteFileMappingAndEntityAction,
+  linkFileToCharacterAction,
+  shareCharacterAction,
+  unshareCharacterAction,
+  updateCharacterAccessLevelAction,
+  updateCharacterAction,
+  uploadAvatarPictureForCharacterAction,
+} from './actions';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
+import { BackButton } from '@/components/common/back-button';
+import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions';
+import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
+import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
+import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
+import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
+import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
+import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
+import {
+  telliPointsPercentageValues,
+  usageTimeValuesInMinutes,
+} from '../../../learning-scenarios/editor/[learningScenarioId]/schema';
+import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
+import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@ui/components/Field';
+import { Card, CardContent } from '@ui/components/Card';
+import { Input } from '@ui/components/Input';
+import {
+  SMALL_TEXT_INPUT_FIELDS_LIMIT,
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+  TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
+} from '@/configuration-text-inputs/const';
+import { Textarea } from '@ui/components/Textarea';
+import { CustomChatModelSelect } from '@/components/custom-chat/custom-chat-model-select';
+import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
+import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
 
@@ -71,6 +106,7 @@ export function CharacterEdit({
     trigger,
     getValues,
     reset,
+    setValue,
     formState: { isDirty },
   } = useForm<CharacterFormValues>({
     resolver: zodResolver(characterFormValuesSchema),
@@ -135,12 +171,324 @@ export function CharacterEdit({
     });
   };
 
-  // TODO handleDuplicateAssistant
-  // TODO handleDeleteAssistant
+  // TODO handleDuplicateCharacter
+
+  const handleDeleteCharacter = async () => {
+    const deleteResult = await deleteCharacterAction({ characterId: character.id });
+    if (deleteResult.success) {
+      toast.success(t('toasts.delete-toast-success'));
+    }
+    if (!deleteResult.success) {
+      toast.error(t('toasts.delete-toast-error'));
+    }
+    guardNavigation(() => {
+      router.push('/characters');
+    });
+  };
+
+  const handleFileUploaded = async (data: { id: string; name: string; file: File }) => {
+    const linkResult = await linkFileToCharacterAction({
+      fileId: data.id,
+      characterId: character.id,
+    });
+
+    if (!linkResult.success) {
+      toast.error(t('toasts.file-link-error'));
+    }
+  };
+
+  const handleDeleteFile = async (fileId: string) => {
+    return await deleteFileMappingAndEntityAction({
+      characterId: character.id,
+      fileId,
+    });
+  };
+
+  const handleLinksChange = async (links: string[]) => {
+    return await updateCharacterAction({ id: character.id, attachedLinks: links });
+  };
+
+  async function handleUploadPicture(croppedImageBlob: Blob) {
+    const result = await uploadAvatarPictureForCharacterAction({
+      characterId: character.id,
+      croppedImageBlob,
+    });
+
+    if (result.success) {
+      toast.success(t('toasts.edit-toast-success'));
+    }
+
+    return result;
+  }
+
+  const handleSharingChange = async ({ name, checked }: { name: string; checked: boolean }) => {
+    if (name === 'isSchoolShared') {
+      const newAccessLevel = checked ? 'school' : 'private';
+
+      if (newAccessLevel !== savedAccessLevelRef.current) {
+        const result = await updateCharacterAccessLevelAction({
+          characterId: character.id,
+          accessLevel: newAccessLevel,
+        });
+
+        if (!result.success) {
+          toast.error(t('toasts.edit-toast-error'));
+          return;
+        }
+
+        savedAccessLevelRef.current = newAccessLevel;
+      }
+    }
+
+    await flushAutoSave();
+  };
 
   return (
     <CustomChatLayoutContainer>
-      <CustomChatTitle title={'test'} />
+      <BackButton
+        href="/characters"
+        text={t('back-button')}
+        aria-label={t('back-button-aria-label')}
+        onClick={() => {
+          guardNavigation(() => {
+            router.push('/characters');
+          });
+        }}
+      />
+      <CustomChatTitle title={name} />
+      <div className="flex flex-row justify-between">
+        <CustomChatActions>
+          <CustomChatActionUse onClick={handleUseChat} />
+          {/*<CustomChatActionDuplicate onClick={handleDuplicateCharacter} />*/}
+          <CustomChatActionDelete
+            onClick={handleDeleteCharacter}
+            modalTitle={t('delete-modal-title')}
+            modalDescription={t('delete-modal-description')}
+          />
+          <CustomChatActionSave onClick={handleAutoSave} />
+        </CustomChatActions>
+        <CustomChatFormState
+          isDirty={isDirty}
+          isSubmitting={isSaving}
+          hasSaveError={hasSaveError}
+        />
+      </div>
+      {showShareInfo && (
+        <CustomChatShareInfo
+          href="#share-settings"
+          info={t('sharing-info')}
+          linkText={t('sharing-settings')}
+        />
+      )}
+
+      <CustomChatShareWithLearners
+        startedAt={character.startedAt ?? null}
+        maxUsageTimeLimit={character.maxUsageTimeLimit ?? null}
+        pointsPercentageValues={telliPointsPercentageValues}
+        usageTimeValues={usageTimeValuesInMinutes}
+        onShare={async (data) => {
+          const result = await shareCharacterAction({
+            id: character.id,
+            telliPointsPercentageLimit: data.telliPointsPercentageLimit,
+            usageTimeLimit: data.usageTimeLimit,
+          });
+          return result;
+        }}
+        onUnshare={async () => {
+          const result = await unshareCharacterAction({
+            characterId: character.id,
+          });
+          return result;
+        }}
+        shareUILink={`/characters/editor/${character.id}/share`}
+        sharingDisabled={!name || name.trim().length === 0}
+      />
+
+      <div className="flex flex-col gap-3">
+        <CustomChatHeading2 text={t('configuration-heading')} />
+
+        <CustomChatImageUpload
+          avatarPictureUrl={avatarPictureUrl}
+          onUploadPicture={handleUploadPicture}
+        />
+
+        <form
+          id="character-edit-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleAutoSave();
+          }}
+        >
+          <Card>
+            <CardContent>
+              <FieldGroup>
+                <Controller
+                  name="name"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid} aria-required="true">
+                      <FieldLabel htmlFor={field.name}>{t('name-label')}</FieldLabel>
+                      <Input
+                        {...field}
+                        ref={nameInputRef}
+                        id={field.name}
+                        aria-invalid={fieldState.invalid}
+                        aria-label={t('name-label')}
+                        placeholder={t('name-placeholder')}
+                        autoComplete="off"
+                        maxLength={SMALL_TEXT_INPUT_FIELDS_LIMIT}
+                        maxLengthErrorMessage={t('name-max-length', {
+                          maxLength: SMALL_TEXT_INPUT_FIELDS_LIMIT,
+                        })}
+                        required
+                        data-testid="character-name-input"
+                        onBlur={() => {
+                          field.onBlur();
+                          handleAutoSave();
+                        }}
+                      />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>{t('description-label')}</FieldLabel>
+                      <Textarea
+                        {...field}
+                        id={field.name}
+                        className="h-27 resize-none"
+                        aria-invalid={fieldState.invalid}
+                        aria-label={t('description-label')}
+                        placeholder={t('description-placeholder')}
+                        autoComplete="off"
+                        maxLengthErrorMessage={t('description-max-length', {
+                          maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+                        })}
+                        maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+                        data-testid="character-description-input"
+                        onBlur={() => {
+                          field.onBlur();
+                          handleAutoSave();
+                        }}
+                      />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                  )}
+                />
+                <CustomChatModelSelect
+                  models={models}
+                  selectedModelId={selectedModelId ?? undefined}
+                  onValueChange={(value) => {
+                    setValue('modelId', value, { shouldDirty: true });
+                    handleAutoSave();
+                  }}
+                />
+                <Controller
+                  name="instructions"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>{t('instructions-label')}</FieldLabel>
+                      <Textarea
+                        {...field}
+                        id={field.name}
+                        className="h-125"
+                        aria-invalid={fieldState.invalid}
+                        placeholder={t('instructions-placeholder')}
+                        aria-label={t('instructions-label')}
+                        maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS}
+                        maxLengthErrorMessage={t('instructions-max-length', {
+                          maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
+                        })}
+                        autoComplete="off"
+                        data-testid="character-instructions-input"
+                        onBlur={() => {
+                          field.onBlur();
+                          handleAutoSave();
+                        }}
+                      />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="initialMessage"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name} tooltip={t('initial-message-tooltip')}>
+                        {t('initial-message-label')}
+                      </FieldLabel>
+                      <Textarea
+                        {...field}
+                        id={field.name}
+                        className="h-27 resize-none"
+                        aria-invalid={fieldState.invalid}
+                        placeholder={t('initial-message-placeholder')}
+                        aria-label={t('initial-message-label')}
+                        maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
+                        maxLengthErrorMessage={t('initial-message-max-length', {
+                          maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+                        })}
+                        autoComplete="off"
+                        data-testid="character-initial-message-input"
+                        onBlur={() => {
+                          field.onBlur();
+                          handleAutoSave();
+                        }}
+                      />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                  )}
+                />
+              </FieldGroup>
+            </CardContent>
+          </Card>
+
+          <CustomChatFilesAndLinks
+            initialFiles={relatedFiles}
+            onFileUploaded={handleFileUploaded}
+            onDeleteFile={handleDeleteFile}
+            initialLinks={initialLinks}
+            onLinksChange={handleLinksChange}
+          />
+
+          <CustomShareSection
+            control={control}
+            schoolSharingName="isSchoolShared"
+            linkSharingName="hasLinkAccess"
+            onShareChange={handleSharingChange}
+          />
+        </form>
+
+        <div className="flex flex-row justify-between">
+          <CustomChatActions>
+            <CustomChatActionUse
+              onClick={() => {
+                guardNavigation(() => {
+                  router.push(`/custom/d/${character.id}/`);
+                });
+              }}
+            />
+            {/*<CustomChatActionDuplicate onClick={handleDuplicateCharacter} />*/}
+            <CustomChatActionDelete
+              onClick={handleDeleteCharacter}
+              modalTitle={t('delete-modal-title')}
+              modalDescription={t('delete-modal-description')}
+            />
+            <CustomChatActionSave onClick={handleAutoSave} />
+          </CustomChatActions>
+          <CustomChatFormState
+            isDirty={isDirty}
+            isSubmitting={isSaving}
+            hasSaveError={hasSaveError}
+          />
+        </div>
+      </div>
     </CustomChatLayoutContainer>
   );
 }

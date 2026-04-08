@@ -17,7 +17,6 @@ import z from 'zod';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
 import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions';
-import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
 import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
@@ -208,7 +207,7 @@ export function LearningScenarioEdit({
     });
 
     if (!linkResult.success) {
-      toast.error(tToast('edit-toast-error'));
+      toast.error(tToast('file-link-error'));
     }
   };
 
