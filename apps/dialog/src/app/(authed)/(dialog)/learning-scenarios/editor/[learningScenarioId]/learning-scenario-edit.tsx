@@ -328,7 +328,7 @@ export function LearningScenarioEdit({
       />
 
       <div className="flex flex-col gap-3">
-        <CustomChatHeading2 text="Konfiguration" />
+        <CustomChatHeading2 text={t('configuration-heading')} />
 
         <CustomChatImageUpload
           avatarPictureUrl={avatarPictureUrl}

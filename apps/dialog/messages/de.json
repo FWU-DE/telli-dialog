@@ -318,6 +318,7 @@
     "student-exercise-tooltip": "Hier kann ein Arbeitsauftrag für die Lernenden formuliert werden.",
     "student-exercise-placeholder": "Arbeitsauftrag für die Lernenden",
     "student-exercise-max-length": "Der Arbeitsauftrag darf maximal {maxLength} Zeichen lang sein.",
+    "configuration-heading": "Konfiguration",
     "sharing-info": "Dieses Lernszenario ist für andere freigegeben.",
     "sharing-settings": "Freigabe-Einstellungen",
     "delete-modal-title": "Lernszenario löschen",
