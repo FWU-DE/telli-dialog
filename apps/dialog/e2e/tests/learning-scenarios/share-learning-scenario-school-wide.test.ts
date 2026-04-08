@@ -15,9 +15,7 @@ test('share learning scenario school-wide', async ({ page }) => {
 
   await page.getByRole('checkbox', { name: 'Schulintern' }).click();
 
-  const submitButton = page.getByRole('button', { name: 'Lernszenario erstellen' });
-  await expect(submitButton).toBeVisible();
-  await submitButton.click();
+  // Navigate back to learning scenarios list (form auto-saves)
   const listItem = page.getByRole('button', { name: learningScenarioName });
   await expect(listItem).toBeVisible();
   await listItem.click();

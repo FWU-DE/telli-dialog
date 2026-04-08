@@ -43,29 +43,36 @@ export async function configureLearningScenario(
     additionalInstructions?: string;
   },
 ) {
+  // Fill name field
   await page
-    .getByLabel('Wie heißt das Szenario?')
+    .getByLabel('Name des Lernszenarios')
     .fill(data?.name ?? 'Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten');
 
+  // Fill description field
   await page
-    .getByLabel('Wie kann das Szenario kurz beschrieben werden?')
+    .getByLabel('Kurzbeschreibung')
     .fill(data?.description ?? 'Zwischen Absolutismus und Demokratie (Ludwig XIV)');
 
-  await page.getByLabel('Schultyp').fill(data?.schoolType ?? 'Gymnasium');
-  await page.getByLabel('Klassenstufe').fill(data?.gradeLevel ?? '10. Klasse');
-  await page.getByLabel('Fach').fill(data?.subject ?? 'Geschichte');
+  // Note: schoolType, gradeLevel, and subject fields no longer exist in the new UI
+  // They have been consolidated into the instructions field
 
+  // Fill instructions field
   await page
-    .getByLabel('Wie lautet der Auftrag an die Lernenden?')
+    .getByLabel('Instruktionen')
+    .fill(
+      data?.additionalInstructions ??
+        'Der Chatbot soll aus der Perspektive eines Soldaten im Herrschaftssystem unter Ludwig XIV antworten.',
+    );
+
+  // Fill student exercise field
+  await page
+    .getByLabel('Arbeitsauftrag')
     .fill(
       data?.studentExercise ??
         'Schüler sollen den Unterschied zwischen Absolutismus und Demokratie verstehen.',
     );
 
-  await page
-    .getByLabel('Wie verhält sich telli im Lernszenario? *')
-    .fill(
-      data?.additionalInstructions ??
-        'Der Chatbot soll aus der Perspektive eines Soldaten im Herrschaftssystem unter Ludwig XIV antworten.',
-    );
+  // Wait for autosave to complete (triggered by blur on last field)
+  await page.waitForTimeout(500);
+  await expect(page.getByText('Gespeichert')).toBeVisible({ timeout: 5000 });
 }

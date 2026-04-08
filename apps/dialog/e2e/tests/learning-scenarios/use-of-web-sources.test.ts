@@ -34,14 +34,10 @@ test('teacher can create shared chat with web sources, student can join chat and
     );
   await page.getByRole('button', { name: 'Link hinzufügen' }).click();
 
-  const submitButton = page.getByRole('button', { name: 'Lernszenario erstellen' });
-
-  await expect(submitButton).toBeVisible();
-  await submitButton.click();
-
-  const firstSharedChat = page.getByRole('button', { name: 'Analyse des Nahostkonflikts' }).first();
-  await expect(firstSharedChat).toBeVisible();
-  await firstSharedChat.click();
+  // In the new UI, form auto-saves, so navigate back to verify creation
+  const listItem = page.getByRole('button', { name: data.name });
+  await expect(listItem).toBeVisible();
+  await listItem.click();
 
   await page.waitForURL('/learning-scenarios/**');
   const stopSharingButton = page.getByRole('button', { name: 'Stop' });
