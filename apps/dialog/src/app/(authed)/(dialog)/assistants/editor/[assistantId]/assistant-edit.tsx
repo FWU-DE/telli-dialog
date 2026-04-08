@@ -122,7 +122,7 @@ export function AssistantEdit({
       saveValues: async (data) => {
         // accessLevel is handled separately in handleSharingChange
         const updateResult = await updateAssistantAction({
-          gptId: assistant.id,
+          assistantId: assistant.id,
           name: data.name,
           description: data.description,
           instructions: data.instructions,
@@ -185,7 +185,7 @@ export function AssistantEdit({
   };
 
   const handleDeleteAssistant = async () => {
-    const deleteResult = await deleteAssistantAction({ gptId: assistant.id });
+    const deleteResult = await deleteAssistantAction({ assistantId: assistant.id });
     if (deleteResult.success) {
       toast.success(t('toasts.delete-toast-success'));
     }
@@ -214,7 +214,7 @@ export function AssistantEdit({
   };
 
   const handleLinksChange = async (links: string[]) => {
-    return await updateAssistantAction({ gptId: assistant.id, attachedLinks: links });
+    return await updateAssistantAction({ assistantId: assistant.id, attachedLinks: links });
   };
 
   async function handleUploadPicture(croppedImageBlob: Blob) {
@@ -235,7 +235,7 @@ export function AssistantEdit({
 
       if (newAccessLevel !== savedAccessLevelRef.current) {
         const result = await updateAssistantAccessLevelAction({
-          gptId: assistant.id,
+          assistantId: assistant.id,
           accessLevel: newAccessLevel,
         });
 

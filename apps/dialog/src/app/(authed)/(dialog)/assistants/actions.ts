@@ -55,38 +55,38 @@ export async function linkFileToAssistantAction({
 }
 
 export async function updateAssistantAccessLevelAction({
-  gptId,
+  assistantId,
   accessLevel,
 }: {
-  gptId: string;
+  assistantId: string;
   accessLevel: AccessLevel;
 }) {
   const { user } = await requireAuth();
 
   return runServerAction(updateAssistantAccessLevel)({
-    assistantId: gptId,
+    assistantId,
     accessLevel,
     userId: user.id,
   });
 }
 
 export async function updateAssistantAction({
-  gptId,
+  assistantId,
   ...assistant
-}: Partial<AssistantInsertModel> & { gptId: string }) {
+}: Partial<AssistantInsertModel> & { assistantId: string }) {
   const { user } = await requireAuth();
 
   return runServerAction(updateAssistant)({
-    assistantId: gptId,
+    assistantId,
     userId: user.id,
     assistantProps: assistant,
   });
 }
 
-export async function deleteAssistantAction({ gptId }: { gptId: string }) {
+export async function deleteAssistantAction({ assistantId }: { assistantId: string }) {
   const { user } = await requireAuth();
 
-  return runServerAction(deleteAssistant)({ assistantId: gptId, userId: user.id });
+  return runServerAction(deleteAssistant)({ assistantId, userId: user.id });
 }
 
 export async function uploadAvatarPictureForAssistantAction({
