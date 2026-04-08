@@ -201,6 +201,8 @@
   "characters": {
     "character": "Dialogpartner",
     "description": "Mit individuell konfigurierten Dialogpartnern wird das Lernen lebendig und inspirierend. Fiktive Gesprächspartner helfen dabei, Themen zu vertiefen, die Lernenden emotional anzusprechen und sie neugierig zu machen. Die zeitlich begrenzten Chats werden einfach einzeln oder gruppenweise mit den Lernenden geteilt.",
+    "name-required": "Der Name darf nicht leer sein.",
+    "description-label": "Kurzbeschreibung",
     "info-dialog": {
       "q1": "Was ist ein Dialogpartner?",
       "a1": "Ein Dialogpartner ist ein fiktiver Gesprächspartner mit dem die Schüler/innen chatten können. Für die Schülerinnen entsteht dabei das Gefühl tatsächlich mit der fiktiven Person zu chatten. Dies fördert ihre Motivation und Kreativität in Bezug auf die fiktive Person und das Thema.",

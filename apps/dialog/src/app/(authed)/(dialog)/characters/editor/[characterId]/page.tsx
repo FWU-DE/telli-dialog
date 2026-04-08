@@ -11,6 +11,8 @@ import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { WebsearchSource } from '@shared/db/types';
+import { ResponsiveLayoutWrapper } from '../../../_components/responsive-layout-wrapper';
+import { CharacterEdit } from './character-edit';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,6 +44,19 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
           error: false,
         }) as WebsearchSource,
     );
+
+  if (federalState.featureToggles.isNewUiDesignEnabled && !readOnly) {
+    return (
+      <ResponsiveLayoutWrapper>
+        <CharacterEdit
+          character={character}
+          relatedFiles={relatedFiles}
+          initialLinks={initialLinks}
+          avatarPictureUrl={maybeSignedPictureUrl}
+        />
+      </ResponsiveLayoutWrapper>
+    );
+  }
 
   return (
     <div className="min-w-full p-6 overflow-auto">
