@@ -51,7 +51,7 @@ type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
 function createAssistantFormValuesSchema(t: AssistantTranslator) {
   return z.object({
-    name: z.string().min(1, t('name-required')),
+    name: z.string().min(1, t('name-required')).max(SMALL_TEXT_INPUT_FIELDS_LIMIT),
     description: z.string(),
     instructions: z.string(),
     isSchoolShared: z.boolean(),
@@ -304,7 +304,9 @@ export function AssistantEdit({
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid} aria-required="true">
-                    <FieldLabel htmlFor={field.name}>{t('name-label')}</FieldLabel>
+                    <FieldLabel htmlFor={field.name} required>
+                      {t('name-label')}
+                    </FieldLabel>
                     <Input
                       {...field}
                       ref={nameInputRef}

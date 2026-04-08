@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { InfoIcon } from 'lucide-react';
 
@@ -116,13 +116,14 @@ function FieldContent({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 function FieldLabel({
+  children,
   className,
+  required,
   size,
   tooltip,
-  children,
   ...props
 }: React.ComponentProps<typeof Label> &
-  VariantProps<typeof fieldLabelVariants> & { tooltip?: string }) {
+  VariantProps<typeof fieldLabelVariants> & { required?: boolean; tooltip?: string }) {
   return (
     <Label
       data-slot="field-label"
@@ -144,6 +145,7 @@ function FieldLabel({
           <TooltipContent>{tooltip}</TooltipContent>
         </Tooltip>
       )}
+      {required && <span className="text-destructive">*</span>}
     </Label>
   );
 }
