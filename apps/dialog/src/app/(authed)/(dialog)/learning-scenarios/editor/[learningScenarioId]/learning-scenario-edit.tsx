@@ -59,7 +59,7 @@ type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-sc
 function createLearningScenarioFormValuesSchema(t: LearningScenarioTranslator) {
   return z.object({
     name: z.string().min(1, t('name-required')),
-    description: z.string().min(1, t('description-label')),
+    description: z.string(),
     additionalInstructions: z.string(),
     studentExercise: z.string(),
     modelId: z.string(),
@@ -317,6 +317,7 @@ export function LearningScenarioEdit({
           return result;
         }}
         shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}
+        sharingDisabled={!name || name.trim().length === 0}
       />
 
       <div className="flex flex-col gap-3">
@@ -376,7 +377,6 @@ export function LearningScenarioEdit({
                         {...field}
                         id={field.name}
                         className="h-27 resize-none"
-                        aria-invalid={fieldState.invalid}
                         aria-label={t('description-label')}
                         placeholder={t('description-placeholder')}
                         autoComplete="off"
@@ -393,6 +393,14 @@ export function LearningScenarioEdit({
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
                   )}
+                />
+                <CustomChatModelSelect
+                  models={models}
+                  selectedModelId={selectedModelId ?? undefined}
+                  onValueChange={(value) => {
+                    setValue('modelId', value, { shouldDirty: true });
+                    handleAutoSave();
+                  }}
                 />
                 <Controller
                   name="additionalInstructions"
@@ -427,7 +435,9 @@ export function LearningScenarioEdit({
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor={field.name}>{t('student-exercise-label')}</FieldLabel>
+                      <FieldLabel htmlFor={field.name} tooltip={t('student-exercise-tooltip')}>
+                        {t('student-exercise-label')}
+                      </FieldLabel>
                       <Textarea
                         {...field}
                         id={field.name}
@@ -449,14 +459,6 @@ export function LearningScenarioEdit({
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
                   )}
-                />
-                <CustomChatModelSelect
-                  models={models}
-                  selectedModelId={selectedModelId ?? undefined}
-                  onValueChange={(value) => {
-                    setValue('modelId', value, { shouldDirty: true });
-                    handleAutoSave();
-                  }}
                 />
               </FieldGroup>
             </CardContent>
@@ -480,13 +482,6 @@ export function LearningScenarioEdit({
       </div>
       <div className="flex flex-row justify-between">
         <CustomChatActions>
-          <CustomChatActionUse
-            onClick={() => {
-              guardNavigation(() => {
-                router.push(`/learning-scenarios/d/${learningScenario.id}/`);
-              });
-            }}
-          />
           <CustomChatActionDuplicate onClick={handleDuplicateLearningScenario} />
           <CustomChatActionDelete
             onClick={handleDeleteLearningScenario}

@@ -315,6 +315,7 @@
     "instructions-placeholder": "Instruktionen für das Lernszenario",
     "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
     "student-exercise-label": "Arbeitsauftrag",
+    "student-exercise-tooltip": "Hier kann ein Arbeitsauftrag für die Lernenden formuliert werden.",
     "student-exercise-placeholder": "Arbeitsauftrag für die Lernenden",
     "student-exercise-max-length": "Der Arbeitsauftrag darf maximal {maxLength} Zeichen lang sein.",
     "sharing-info": "Dieses Lernszenario ist für andere freigegeben.",

@@ -21,6 +21,8 @@ import { ShareFatIcon, StopIcon } from '@phosphor-icons/react';
 import CountDownTimer from '../../app/(authed)/(dialog)/learning-scenarios/_components/count-down';
 import RichText from '../common/rich-text';
 import { z } from 'zod';
+import { cn } from '@/utils/tailwind';
+import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 
 const shareFormSchema = z.object({
   telliPointsPercentageLimit: z.coerce.number(),
@@ -35,6 +37,7 @@ interface CustomChatShareWithLearnersProps {
   onShare: (data: z.infer<typeof shareFormSchema>) => Promise<{ success: boolean }>;
   onUnshare: () => Promise<{ success: boolean }>;
   shareUILink: string;
+  sharingDisabled?: boolean;
 }
 
 export function CustomChatShareWithLearners({
@@ -45,6 +48,7 @@ export function CustomChatShareWithLearners({
   onShare,
   onUnshare,
   shareUILink,
+  sharingDisabled = false,
 }: CustomChatShareWithLearnersProps) {
   const toast = useToast();
   const router = useRouter();
@@ -98,7 +102,7 @@ export function CustomChatShareWithLearners({
           <p className="mb-4">
             <RichText>{(tags) => t.rich('description', tags)}</RichText>
           </p>
-          <div className="flex gap-4 items-end">
+          <div className="flex flex-wrap gap-4 items-end">
             <div className="whitespace-nowrap flex-1">
               <Field>
                 <FieldLabel>telli-Points</FieldLabel>
@@ -154,7 +158,12 @@ export function CustomChatShareWithLearners({
             <div className="grow" />
 
             {!sharedChatActive && (
-              <Button type="button" onClick={handleStartSharing}>
+              <Button
+                type="button"
+                onClick={handleStartSharing}
+                className={cn(buttonPrimaryClassName)}
+                disabled={sharingDisabled}
+              >
                 <ShareFatIcon className="size-5" />
                 {t('button-start')}
               </Button>
@@ -170,16 +179,10 @@ export function CustomChatShareWithLearners({
 
             {sharedChatActive && (
               <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={handleStopSharing}
-                  aria-label={t('button-stop')}
-                >
+                <Button type="button" onClick={handleStopSharing} aria-label={t('button-stop')}>
                   <StopIcon className="size-5" />
                 </Button>
                 <Button
-                  variant="outline"
                   type="button"
                   onClick={() => router.push(shareUILink)}
                   aria-label={t('share')}

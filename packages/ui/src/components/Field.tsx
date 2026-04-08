@@ -2,10 +2,12 @@
 
 import { useMemo } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { InfoIcon } from 'lucide-react';
 
 import { cn } from '../lib/utils';
 import { Label } from './Label';
 import { Separator } from './Separator';
+import { Tooltip, TooltipContent, TooltipTrigger } from './Tooltip';
 
 function FieldSet({ className, ...props }: React.ComponentProps<'fieldset'>) {
   return (
@@ -116,8 +118,11 @@ function FieldContent({ className, ...props }: React.ComponentProps<'div'>) {
 function FieldLabel({
   className,
   size,
+  tooltip,
+  children,
   ...props
-}: React.ComponentProps<typeof Label> & VariantProps<typeof fieldLabelVariants>) {
+}: React.ComponentProps<typeof Label> &
+  VariantProps<typeof fieldLabelVariants> & { tooltip?: string }) {
   return (
     <Label
       data-slot="field-label"
@@ -129,7 +134,17 @@ function FieldLabel({
         className,
       )}
       {...props}
-    />
+    >
+      {children}
+      {tooltip && (
+        <Tooltip>
+          <TooltipTrigger type="button" aria-label={tooltip}>
+            <InfoIcon className="size-3.5 text-muted-foreground" />
+          </TooltipTrigger>
+          <TooltipContent>{tooltip}</TooltipContent>
+        </Tooltip>
+      )}
+    </Label>
   );
 }
 
