@@ -72,8 +72,12 @@ export function CustomChatShareWithLearners({
 
   async function handleStartSharing() {
     const data = getValuesShare();
-    const parsedData = shareFormSchema.parse(data);
-    const result = await onShare(parsedData);
+    const parseResult = shareFormSchema.safeParse(data);
+    if (!parseResult.success) {
+      toast.error(tToast('share-toast-error'));
+      return;
+    }
+    const result = await onShare(parseResult.data);
 
     if (result.success) {
       toast.success(tToast('share-toast-success'));

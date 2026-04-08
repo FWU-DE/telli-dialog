@@ -138,7 +138,7 @@ export function LearningScenarioEdit({
             ...data,
             description: data.description ?? '',
             studentExercise: data.studentExercise ?? '',
-            attachedLinks: learningScenario.attachedLinks,
+            attachedLinks: attachedLinksRef.current,
           },
         });
 
@@ -148,6 +148,7 @@ export function LearningScenarioEdit({
 
   const name = useWatch({ control, name: 'name' });
   const savedAccessLevelRef = useRef(learningScenario.accessLevel);
+  const attachedLinksRef = useRef(learningScenario.attachedLinks);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
@@ -175,6 +176,9 @@ export function LearningScenarioEdit({
   const handleDuplicateLearningScenario = async () => {
     const createResult = await createNewLearningScenarioFromTemplateAction({
       templateId: learningScenario.id,
+      duplicateLearningScenarioName: t('duplicate-name-format-string', {
+        sourceName: learningScenario.name,
+      }),
     });
     if (createResult.success) {
       guardNavigation(() => {
@@ -223,6 +227,9 @@ export function LearningScenarioEdit({
         attachedLinks: links,
       },
     });
+    if (result.success) {
+      attachedLinksRef.current = links;
+    }
     return result;
   };
 
@@ -233,7 +240,7 @@ export function LearningScenarioEdit({
     });
 
     if (result.success) {
-      toast.success(tToast('edit-toast-success'));
+      toast.success(tToast('image-toast-success'));
     }
 
     return result;
