@@ -75,7 +75,7 @@ export default function CropImageAndUploadButton({
         disabled={disabled}
         triggerButton={
           <>
-            <UploadImageIcon className="group-hover:text-secondary-foreground w-4 h-4" />
+            <UploadImageIcon className="group-hover:text-primary w-4 h-4" />
             <span>Bild hochladen</span>
           </>
         }

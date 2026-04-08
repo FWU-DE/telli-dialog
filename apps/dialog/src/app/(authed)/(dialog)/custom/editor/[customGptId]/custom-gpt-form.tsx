@@ -486,7 +486,7 @@ export default function AssistantForm({
       {isCreating && !readOnly && (
         <section className="mt-8 flex gap-4 items-center">
           <button
-            className={cn(buttonSecondaryClassName, 'hover:border-primary hover:bg-primary')}
+            className={cn(buttonSecondaryClassName, 'hover:border-primary hover:bg-secondary/30')}
             onClick={handleDeleteAssistant}
             type="button"
           >
