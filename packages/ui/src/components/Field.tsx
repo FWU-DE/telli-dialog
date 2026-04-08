@@ -137,7 +137,11 @@ function FieldLabel({
       {...props}
     >
       {children}
-      {required && <span className="text-destructive">*</span>}
+      {required && (
+        <span aria-hidden="true" className="text-destructive">
+          *
+        </span>
+      )}
       {tooltip && (
         <Tooltip>
           <TooltipTrigger type="button" aria-label={tooltip}>

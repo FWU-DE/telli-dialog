@@ -25,7 +25,6 @@ type DestructiveActionButtonProps = {
 export default function DestructiveActionButton({
   triggerButtonClassName,
   children,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onClick,
   actionFn,
   modalTitle,
@@ -46,6 +45,10 @@ export default function DestructiveActionButton({
         <button
           id="destructive-button"
           className={triggerButtonClassName}
+          onClick={(event) => {
+            event.stopPropagation();
+            onClick?.(event);
+          }}
           type="button"
           data-testid="custom-chat-delete-button"
           {...buttonProps}
