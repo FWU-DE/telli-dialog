@@ -71,16 +71,25 @@ export default function LearningScenarioOverview({ currentUserId }: LearningScen
             : b.updatedAt.getTime() - a.updatedAt.getTime(),
         );
 
-        return filtered.map((scenario) => (
-          <EntityCard
-            key={scenario.id}
-            name={scenario.name}
-            description={scenario.description}
-            avatarUrl={scenario.maybeSignedPictureUrl}
-            isOwned={scenario.userId === currentUserId}
-            onCardClick={() => router.push(`/learning-scenarios/editor/${scenario.id}`)}
-          />
-        ));
+        return filtered.map((scenario) => {
+          const isOwned = scenario.userId === currentUserId;
+          return (
+            <EntityCard
+              key={scenario.id}
+              name={scenario.name}
+              description={scenario.description}
+              avatarUrl={scenario.maybeSignedPictureUrl}
+              isOwned={isOwned}
+              onCardClick={() =>
+                router.push(
+                  isOwned
+                    ? `/learning-scenarios/editor/${scenario.id}`
+                    : `/learning-scenarios/${scenario.id}`,
+                )
+              }
+            />
+          );
+        });
       }}
     </EntityOverview>
   );

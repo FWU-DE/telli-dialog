@@ -11,6 +11,7 @@ import { WebsearchSource } from '@shared/db/types';
 import LearningScenarioForm from './learning-scenario-form';
 import { LearningScenarioEdit } from './learning-scenario-edit';
 import { ResponsiveLayoutWrapper } from '../../../_components/responsive-layout-wrapper';
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +34,10 @@ export default async function Page(
     },
   ).catch(handleErrorInServerComponent);
   const readOnly = user.id !== learningScenario.userId;
+
+  if (federalState.featureToggles.isNewUiDesignEnabled && readOnly) {
+    redirect(`/learning-scenarios/${learningScenarioId}`);
+  }
 
   const initialLinks = learningScenario.attachedLinks
     .filter((l) => l && l !== '')

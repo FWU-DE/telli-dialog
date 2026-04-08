@@ -9,38 +9,52 @@ type CustomChatFilesAndLinksProps = CustomChatFilesProps & CustomChatLinksProps;
 
 export function CustomChatFilesAndLinks(props: CustomChatFilesAndLinksProps) {
   const t = useTranslations('custom-chat.files-and-links');
+  const filesVisible = props.initialFiles.length > 0 || props.onFileUploaded;
+  const linksVisible = props.initialLinks.length > 0 || props.onLinksChange;
 
   return (
-    <div className="flex flex-col gap-3 mt-10">
-      <CustomChatHeading2 text={t('heading')} tooltip={t('heading-tooltip')} />
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('files')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CustomChatFiles
-            initialFiles={props.initialFiles}
-            onFileUploaded={props.onFileUploaded}
-            onDeleteFile={props.onDeleteFile}
-            onDownloadFile={props.onDownloadFile}
-          />
-        </CardContent>
-      </Card>
+    <>
+      {(filesVisible || linksVisible) && (
+        <div className="flex flex-col gap-3 mt-10">
+          <CustomChatHeading2 text={t('heading')} tooltip={t('heading-tooltip')} />
 
-      <Card>
-        <CardHeader>
-          <CardTitle
-            tooltipAriaLabel={t('links')}
-            tooltipContent={t('links-tooltip')}
-            tooltipIcon={<InfoIcon className="size-5 text-icon" />}
-          >
-            {t('links')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CustomChatLinks initialLinks={props.initialLinks} onLinksChange={props.onLinksChange} />
-        </CardContent>
-      </Card>
-    </div>
+          {filesVisible && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('files')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CustomChatFiles
+                  initialFiles={props.initialFiles}
+                  onFileUploaded={props.onFileUploaded}
+                  onDeleteFile={props.onDeleteFile}
+                  onDownloadFile={props.onDownloadFile}
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {linksVisible && (
+            <Card>
+              <CardHeader>
+                <CardTitle
+                  tooltipAriaLabel={t('links')}
+                  tooltipContent={t('links-tooltip')}
+                  tooltipIcon={<InfoIcon className="size-5 text-icon" />}
+                >
+                  {t('links')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CustomChatLinks
+                  initialLinks={props.initialLinks}
+                  onLinksChange={props.onLinksChange}
+                />
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+    </>
   );
 }
