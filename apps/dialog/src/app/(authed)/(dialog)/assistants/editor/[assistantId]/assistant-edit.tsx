@@ -110,7 +110,7 @@ export function AssistantEdit({
     defaultValues: initialValues,
   });
 
-  const { isSaving, hasSaveError, flushAutoSave, handleAutoSave } =
+  const { isSaving, hasSaveError, flushAutoSave, handleAutoSave, withAutoSaveOnBlur } =
     useFormAutosave<AssistantFormValues>({
       initialValues,
       isDirty,
@@ -308,7 +308,7 @@ export function AssistantEdit({
                       {t('name-label')}
                     </FieldLabel>
                     <Input
-                      {...field}
+                      {...withAutoSaveOnBlur(field)}
                       ref={nameInputRef}
                       id={field.name}
                       aria-invalid={fieldState.invalid}
@@ -321,10 +321,6 @@ export function AssistantEdit({
                       })}
                       required
                       data-testid="assistant-name-input"
-                      onBlur={() => {
-                        field.onBlur();
-                        handleAutoSave();
-                      }}
                     />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -337,7 +333,7 @@ export function AssistantEdit({
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>{t('description-label')}</FieldLabel>
                     <Textarea
-                      {...field}
+                      {...withAutoSaveOnBlur(field)}
                       id={field.name}
                       className="h-27 resize-none"
                       aria-invalid={fieldState.invalid}
@@ -349,10 +345,6 @@ export function AssistantEdit({
                       })}
                       maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
                       data-testid="assistant-description-input"
-                      onBlur={() => {
-                        field.onBlur();
-                        handleAutoSave();
-                      }}
                     />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -365,7 +357,7 @@ export function AssistantEdit({
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>{t('instructions-label')}</FieldLabel>
                     <Textarea
-                      {...field}
+                      {...withAutoSaveOnBlur(field)}
                       id={field.name}
                       className="h-125"
                       aria-invalid={fieldState.invalid}
@@ -377,21 +369,12 @@ export function AssistantEdit({
                       })}
                       autoComplete="off"
                       data-testid="assistant-instructions-input"
-                      onBlur={() => {
-                        field.onBlur();
-                        handleAutoSave();
-                      }}
                     />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 )}
               />
-              <CustomChatPromptSuggestions
-                control={control}
-                onBlur={() => {
-                  handleAutoSave();
-                }}
-              />
+              <CustomChatPromptSuggestions control={control} onBlur={handleAutoSave} />
             </FieldGroup>
           </CardContent>
         </Card>

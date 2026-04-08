@@ -17,6 +17,7 @@ type UseFormAutosaveResult = {
   hasSaveError: boolean;
   flushAutoSave: () => Promise<boolean>;
   handleAutoSave: () => void;
+  withAutoSaveOnBlur: <T extends { onBlur: () => void }>(field: T) => T;
 };
 
 /**
@@ -112,10 +113,22 @@ export function useFormAutosave<T>({
     void flushAutoSave();
   }, [flushAutoSave, isDirty]);
 
+  const withAutoSaveOnBlur = useCallback(
+    <T extends { onBlur: () => void }>(field: T) => ({
+      ...field,
+      onBlur: (): void => {
+        field.onBlur();
+        handleAutoSave();
+      },
+    }),
+    [handleAutoSave],
+  );
+
   return {
     isSaving,
     hasSaveError,
     flushAutoSave,
     handleAutoSave,
+    withAutoSaveOnBlur,
   };
 }
