@@ -1,5 +1,9 @@
 @import 'tailwindcss';
-@config "../../tailwind.config.ts";
+@source "../";
+@source "../../../../apps/admin/src";
+@source "../../../../apps/dialog/src";
+@plugin "tailwindcss-animate";
+@custom-variant dark (&:where(.dark, .dark *));
 
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
@@ -151,8 +155,57 @@
   --breakpoint-sm: 40rem; /* 640px */
   --breakpoint-lg: 64rem; /* 1024px */
 
+  --color-main-black: var(--main-black);
+  --color-dark-gray: var(--dark-gray);
+  --color-light-gray: var(--light-gray);
+  --color-semilight-gray: var(--semilight-gray);
+  --color-coral: var(--coral);
+  --color-dark-red: var(--dark-red);
+  --color-light-red: var(--light-red);
+  --color-background: var(--background);
+  --color-background-2: var(--background-2);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
   --shadow-dropdown: 0px 4px 10px 0px rgba(0, 41, 102, 0.1);
   --shadow-3xl: 0 4px 9px 0px rgba(0, 41, 102, 0.2); /* only used in collapsible-sidebar.tsx */
+
+  --radius-1: 1px;
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-xs: calc(var(--radius) - 6px);
+  --radius-enterprise-full: 999px;
+  --radius-enterprise-md: 12px;
+  --radius-enterprise-sm: 6px;
+
+  --background-image-gradient-radial: radial-gradient(var(--tw-gradient-stops));
+  --background-image-gradient-conic: conic-gradient(
+    from 180deg at 50% 50%,
+    var(--tw-gradient-stops)
+  );
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-hide: hide 100ms ease-in;
+  --animate-slideIn: slideIn 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-swipeOut: swipeOut 100ms ease-out;
 
   --color-sidebar: var(--sidebar-background);
   --color-sidebar-accent: var(--sidebar-accent);
@@ -171,6 +224,82 @@
   --color-error-foreground: var(--error-foreground);
 
   --color-icon: var(--icon);
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+
+  to {
+    height: 0;
+  }
+}
+
+@keyframes hide {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(calc(100% + var(--viewport-padding)));
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes swipeOut {
+  from {
+    transform: translateX(var(--radix-toast-swipe-end-x));
+  }
+
+  to {
+    transform: translateX(calc(100% + var(--viewport-padding)));
+  }
+}
+
+@utility list-square {
+  list-style-type: square;
+}
+
+@utility list-roman {
+  list-style-type: upper-roman;
+}
+
+@utility container {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 2rem;
+}
+
+@media (width >= 40rem) {
+  .container {
+    max-width: 40rem;
+  }
+}
+
+@media (width >= 64rem) {
+  .container {
+    max-width: 64rem;
+  }
 }
 
 @layer components {
