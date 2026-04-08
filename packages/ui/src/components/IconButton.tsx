@@ -14,7 +14,7 @@ const iconButtonVariants = cva(
     variants: {
       variant: {
         /* icons that use the primary color for the icon */
-        primary: 'text-primary hover:bg-primary',
+        primary: 'text-primary hover:bg-secondary/15',
         /* destructive not styled yet */
         destructive:
           'bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30',

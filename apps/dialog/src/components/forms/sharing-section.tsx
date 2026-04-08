@@ -82,7 +82,7 @@ export default function SharingSection<T extends FieldValues>({
                   className={cn(
                     'flex items-center gap-2 px-4 py-2 rounded-full text-white font-medium',
                     field.value
-                      ? 'bg-primary hover:bg-primary/80'
+                      ? 'bg-primary hover:bg-primary/85'
                       : 'bg-gray-300 cursor-not-allowed',
                   )}
                 >

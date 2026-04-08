@@ -137,7 +137,7 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
             return (
               <div
                 key={link.link}
-                className="flex items-center gap-1 h-9 px-3 py-0.5 rounded-md bg-primary/10 text-primary text-sm font-medium"
+                className="flex items-center gap-1 h-9 px-3 py-0.5 rounded-md bg-primary/15 text-primary text-sm font-medium"
               >
                 {isProcessing && <Spinner className="size-4" />}
                 <Tooltip>
