@@ -29,11 +29,13 @@ export async function duplicateLearningScenario({
   schoolId,
   userId,
   originalLearningScenarioId,
+  duplicateLearningScenarioName,
 }: {
   accessLevel: AccessLevel | undefined;
   originalLearningScenarioId: string;
   schoolId: string;
   userId: string;
+  duplicateLearningScenarioName?: string;
 }) {
   const existingLearningScenario = await dbGetLearningScenarioById({
     learningScenarioId: originalLearningScenarioId,
@@ -58,6 +60,7 @@ export async function duplicateLearningScenario({
     hasLinkAccess: false,
     id: learningScenarioId,
     isDeleted: false,
+    name: duplicateLearningScenarioName ?? expectedValues.name,
     originalLearningScenarioId,
     pictureId: avatarPictureUrl,
     schoolId,

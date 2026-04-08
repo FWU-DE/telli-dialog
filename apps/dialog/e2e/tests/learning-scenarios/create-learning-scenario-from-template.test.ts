@@ -18,18 +18,18 @@ test('create learning scenario from template', async ({ page }) => {
   await page.waitForURL('**?create=true**');
 
   const name = 'Kopiertes Lernszenario ' + nanoid(8);
-  await page.getByLabel('Wie heißt das Szenario?').fill(name);
+  await page.getByRole('textbox', { name: 'Name des Lernszenarios' }).fill(name);
 
-  await page.getByRole('textbox', { name: 'Schultyp' }).fill('Gymnasium');
-  await page.keyboard.press('Tab');
+  // Fill in other required fields (the new form auto-saves)
+  await page.getByRole('textbox', { name: 'Kurzbeschreibung' }).fill('Beschreibung');
+  await page.getByRole('textbox', { name: 'Instruktionen' }).fill('Instruktionen');
+  await page.getByRole('textbox', { name: 'Arbeitsauftrag' }).fill('Arbeitsauftrag');
 
-  await page.getByRole('textbox', { name: 'Klassenstufe' }).fill('5. Klasse');
-  await page.keyboard.press('Tab');
+  // Wait for autosave to complete
+  await page.waitForTimeout(500);
+  await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
 
-  await page.getByRole('textbox', { name: 'Fach' }).fill('Geschichte');
-  await page.keyboard.press('Tab');
-
-  await page.getByRole('button', { name: 'Lernszenario erstellen' }).click();
-  await page.waitForURL('/learning-scenarios?visibility=private');
+  // Navigate back to learning scenarios list to verify creation
+  await page.goto('/learning-scenarios?visibility=private');
   await expect(page.locator('body')).toContainText(name);
 });

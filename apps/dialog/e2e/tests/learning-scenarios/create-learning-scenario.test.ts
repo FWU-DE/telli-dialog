@@ -35,15 +35,7 @@ test.describe('create, share, chat, delete', () => {
     // configure form
     await configureLearningScenario(page, data);
 
-    const submitButton = page.getByRole('button', { name: 'Lernszenario erstellen' });
-    await expect(submitButton).toBeVisible();
-    await submitButton.click();
-    const listItem = page.getByRole('button', { name: data.name });
-    await expect(listItem).toBeVisible();
-    await listItem.click();
-    await page.waitForURL('/learning-scenarios/**');
-
-    // check if created with the correct name
+    // check if created with the correct name (still on the editor page)
     await expect(page.getByRole('heading', { name: data.name })).toBeVisible();
 
     const stopSharingButton = page.getByRole('button', { name: 'Stop' });
@@ -51,9 +43,11 @@ test.describe('create, share, chat, delete', () => {
       await stopSharingButton.click();
     }
     // test share page
-    await page.selectOption('#Telli-Points', '50');
-    await page.selectOption('#maxUsage', '30');
-    await page.getByTitle('Szenario starten').click();
+    await page.getByTestId('telli-points-select').click();
+    await page.getByRole('option', { name: '50 %' }).click();
+    await page.getByTestId('usage-time-select').click();
+    await page.getByRole('option', { name: '30 Minuten' }).click();
+    await page.getByRole('button', { name: 'Jetzt bereitstellen' }).click();
 
     await page.waitForURL('/learning-scenarios/**/share');
     const code = await page.locator('#join-code').textContent();
@@ -87,23 +81,17 @@ test.describe('create, share, chat, delete', () => {
     // configure form
     await configureLearningScenario(page, data);
 
-    const submitButton = page.getByRole('button', { name: 'Lernszenario erstellen' });
-    await expect(submitButton).toBeVisible();
-    await submitButton.click();
-
-    const listItem = page.getByRole('button', { name: data.name });
-    await expect(listItem).toBeVisible();
-    await listItem.click();
-
-    await page.waitForURL('/learning-scenarios/**');
+    // Still on the editor page after autosave
     const stopSharingButton = page.getByRole('button', { name: 'Stop' });
     if (await stopSharingButton.isVisible()) {
       await stopSharingButton.click();
     }
     // test share page
-    await page.selectOption('#Telli-Points', '25');
-    await page.selectOption('#maxUsage', '30');
-    await page.getByTitle('Szenario starten').click();
+    await page.getByTestId('telli-points-select').click();
+    await page.getByRole('option', { name: '25 %' }).click();
+    await page.getByTestId('usage-time-select').click();
+    await page.getByRole('option', { name: '30 Minuten' }).click();
+    await page.getByRole('button', { name: 'Jetzt bereitstellen' }).click();
 
     // get code
     await page.waitForURL('/learning-scenarios/**/share');
@@ -147,11 +135,10 @@ test.describe('create, share, chat, delete', () => {
     // create learning scenario
     await createLearningScenario(page);
     await configureLearningScenario(page, data);
-    const submitButton = page.getByRole('button', { name: 'Lernszenario erstellen' });
-    await expect(submitButton).toBeVisible();
-    await submitButton.click();
-    const listItem = page.getByRole('button', { name: data.name });
-    await expect(listItem).toBeVisible();
+
+    // Navigate back to list to find and delete
+    await page.goto('/learning-scenarios');
+    await page.waitForURL('/learning-scenarios');
 
     await deleteLearningScenario(page, data.name);
 
@@ -170,74 +157,56 @@ test('data is autosaved on blur', async ({ page }) => {
     name,
     additionalInstructions: 'Test behavior for autosave validation',
     description: 'Test description for autosave validation',
-    gradeLevel: 'Autosave Grade',
-    schoolType: 'Autosave School',
     studentExercise: 'Test task for autosave validation',
-    subject: 'Autosave Subject',
   });
 
-  const submitButton = page.getByRole('button', { name: 'Lernszenario erstellen' });
-  await expect(submitButton).toBeVisible();
-  await submitButton.click();
-
-  await page.waitForURL('/learning-scenarios**');
-  await page.getByRole('button', { name }).click();
+  // Navigate back to list and then click to open for editing
+  await page.goto('/learning-scenarios');
+  await page.waitForURL('/learning-scenarios');
+  const listItem = page.getByRole('button', { name });
+  await expect(listItem).toBeVisible();
+  await listItem.click();
   await page.waitForURL('/learning-scenarios/**');
   await waitForToastDisappear(page); // wait for success toast to disappear before continuing
 
   // Edit and verify autosave for each field
   // Title
-  await page.getByLabel('Wie heißt das Szenario? *').fill('New Title');
-  await page.getByLabel('Wie heißt das Szenario? *').press('Tab');
-  await waitForToast(page);
+  await page.getByRole('textbox', { name: 'Name des Lernszenarios' }).fill('New Title');
+  await page.getByRole('textbox', { name: 'Name des Lernszenarios' }).press('Tab');
+  await page.waitForTimeout(300);
+  await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
   await page.reload();
-  await expect(page.getByLabel('Wie heißt das Szenario? *')).toHaveValue('New Title');
+  await expect(page.getByRole('textbox', { name: 'Name des Lernszenarios' })).toHaveValue(
+    'New Title',
+  );
 
   // Description
-  await page.getByLabel('Wie kann das Szenario kurz beschrieben werden?').fill('New Description');
-  await page.getByLabel('Wie kann das Szenario kurz beschrieben werden?').press('Tab');
-  await waitForToast(page);
+  await page.getByRole('textbox', { name: 'Kurzbeschreibung' }).fill('New Description');
+  await page.getByRole('textbox', { name: 'Kurzbeschreibung' }).press('Tab');
+  await page.waitForTimeout(300);
+  await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
   await page.reload();
-  await expect(page.getByLabel('Wie kann das Szenario kurz beschrieben werden?')).toHaveValue(
+  await expect(page.getByRole('textbox', { name: 'Kurzbeschreibung' })).toHaveValue(
     'New Description',
   );
 
-  // School Type
-  await page.getByLabel('Schultyp').fill('Realschule');
-  await page.getByLabel('Schultyp').press('Tab');
-  await waitForToast(page);
+  // Instructions
+  await page.getByRole('textbox', { name: 'Instruktionen' }).fill('New Instructions');
+  await page.getByRole('textbox', { name: 'Instruktionen' }).press('Tab');
+  await page.waitForTimeout(300);
+  await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
   await page.reload();
-  await expect(page.getByLabel('Schultyp')).toHaveValue('Realschule');
-
-  // Grade Level
-  await page.getByLabel('Klassenstufe').fill('9. Klasse');
-  await page.getByLabel('Klassenstufe').press('Tab');
-  await waitForToast(page);
-  await page.reload();
-  await expect(page.getByLabel('Klassenstufe')).toHaveValue('9. Klasse');
-
-  // Subject
-  await page.getByLabel('Fach').fill('Mathematik');
-  await page.getByLabel('Fach').press('Tab');
-  await waitForToast(page);
-  await page.reload();
-  await expect(page.getByLabel('Fach')).toHaveValue('Mathematik');
-
-  // Task
-  await page.getByLabel('Wie lautet der Auftrag an die Lernenden?').fill('New Task');
-  await page.getByLabel('Wie lautet der Auftrag an die Lernenden?').press('Tab');
-  await waitForToast(page);
-  await page.reload();
-  await expect(page.getByLabel('Wie lautet der Auftrag an die Lernenden?')).toHaveValue('New Task');
-
-  // Behavior
-  await page.getByLabel('Wie verhält sich telli im Lernszenario? *').fill('New Behavior');
-  await page.getByLabel('Wie verhält sich telli im Lernszenario? *').press('Tab');
-  await waitForToast(page);
-  await page.reload();
-  await expect(page.getByLabel('Wie verhält sich telli im Lernszenario? *')).toHaveValue(
-    'New Behavior',
+  await expect(page.getByRole('textbox', { name: 'Instruktionen' })).toHaveValue(
+    'New Instructions',
   );
+
+  // Student Exercise
+  await page.getByRole('textbox', { name: 'Arbeitsauftrag' }).fill('New Exercise');
+  await page.getByRole('textbox', { name: 'Arbeitsauftrag' }).press('Tab');
+  await page.waitForTimeout(300);
+  await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
+  await page.reload();
+  await expect(page.getByRole('textbox', { name: 'Arbeitsauftrag' })).toHaveValue('New Exercise');
 
   // cleanup
   await deleteLearningScenarioFromDetailPage(page);

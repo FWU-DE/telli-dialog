@@ -9,6 +9,8 @@ import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { WebsearchSource } from '@shared/db/types';
 import LearningScenarioForm from './learning-scenario-form';
+import { LearningScenarioEdit } from './learning-scenario-edit';
+import { ResponsiveLayoutWrapper } from '../../../_components/responsive-layout-wrapper';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +43,19 @@ export default async function Page(
           error: false,
         }) as WebsearchSource,
     );
+
+  if (federalState.featureToggles.isNewUiDesignEnabled && !readOnly) {
+    return (
+      <ResponsiveLayoutWrapper>
+        <LearningScenarioEdit
+          learningScenario={learningScenario}
+          relatedFiles={relatedFiles}
+          initialLinks={initialLinks}
+          avatarPictureUrl={avatarPictureUrl}
+        />
+      </ResponsiveLayoutWrapper>
+    );
+  }
 
   return (
     <div className="w-full p-6 overflow-auto">

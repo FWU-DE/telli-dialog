@@ -19,7 +19,7 @@ export function CustomChatFiles(props: CustomChatFilesProps) {
   const [files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
   const [currentFiles, setCurrentFiles] = React.useState<FileModel[]>(initialFiles);
   const toast = useToast();
-  const t = useTranslations('assistants');
+  const t = useTranslations('custom-chat.files-and-links');
 
   const handleDeleteFile = async (localFileId: string) => {
     if (!onDeleteFile) return;
@@ -37,7 +37,7 @@ export function CustomChatFiles(props: CustomChatFilesProps) {
       });
       setCurrentFiles((prev) => prev.filter((f) => f.id !== fileId));
     } else {
-      toast.error(t('toasts.custom-file-delete-error'));
+      toast.error(t('file-delete-error'));
     }
   };
 
