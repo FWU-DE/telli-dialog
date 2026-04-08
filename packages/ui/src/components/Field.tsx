@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { InfoIcon } from 'lucide-react';
+import { InfoIcon } from '@phosphor-icons/react';
 
 import { cn } from '../lib/utils';
 import { Label } from './Label';
@@ -137,6 +137,7 @@ function FieldLabel({
       {...props}
     >
       {children}
+      {required && <span className="text-destructive">*</span>}
       {tooltip && (
         <Tooltip>
           <TooltipTrigger type="button" aria-label={tooltip}>
@@ -145,7 +146,6 @@ function FieldLabel({
           <TooltipContent>{tooltip}</TooltipContent>
         </Tooltip>
       )}
-      {required && <span className="text-destructive">*</span>}
     </Label>
   );
 }
