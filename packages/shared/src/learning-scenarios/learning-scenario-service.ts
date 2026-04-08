@@ -637,10 +637,12 @@ export async function createNewLearningScenarioFromTemplate({
   schoolId,
   user,
   originalLearningScenarioId,
+  duplicateLearningScenarioName,
 }: {
   originalLearningScenarioId: string;
   schoolId: string;
   user: Pick<UserModel, 'id' | 'userRole'>;
+  duplicateLearningScenarioName?: string;
 }) {
   checkParameterUUID(originalLearningScenarioId);
   requireTeacherRole(user.userRole);
@@ -652,5 +654,6 @@ export async function createNewLearningScenarioFromTemplate({
     originalLearningScenarioId,
     schoolId,
     userId: user.id,
+    duplicateLearningScenarioName,
   });
 }

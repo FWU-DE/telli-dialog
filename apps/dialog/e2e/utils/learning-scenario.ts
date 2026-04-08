@@ -18,14 +18,14 @@ export async function deleteLearningScenario(page: Page, name: string) {
   await expect(card).toBeVisible();
   await card.click();
   await page.waitForURL('/learning-scenarios/editor/**');
-  const deleteButton = page.getByRole('button', { name: 'Szenario endgültig löschen' });
+  const deleteButton = page.getByTestId('custom-chat-delete-button').first();
   await expect(deleteButton).toBeVisible();
   await deleteButton.click();
   await confirmDelete(page);
 }
 
 export async function deleteLearningScenarioFromDetailPage(page: Page) {
-  const deleteButton = page.getByRole('button', { name: 'Szenario endgültig löschen' });
+  const deleteButton = page.getByTestId('custom-chat-delete-button').first();
   await expect(deleteButton).toBeVisible();
   await deleteButton.click();
   await confirmDelete(page);
@@ -43,29 +43,36 @@ export async function configureLearningScenario(
     additionalInstructions?: string;
   },
 ) {
+  // Fill name field
   await page
-    .getByLabel('Wie heißt das Szenario?')
+    .getByRole('textbox', { name: 'Name des Lernszenarios' })
     .fill(data?.name ?? 'Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten');
 
+  // Fill description field
   await page
-    .getByLabel('Wie kann das Szenario kurz beschrieben werden?')
+    .getByRole('textbox', { name: 'Kurzbeschreibung' })
     .fill(data?.description ?? 'Zwischen Absolutismus und Demokratie (Ludwig XIV)');
 
-  await page.getByLabel('Schultyp').fill(data?.schoolType ?? 'Gymnasium');
-  await page.getByLabel('Klassenstufe').fill(data?.gradeLevel ?? '10. Klasse');
-  await page.getByLabel('Fach').fill(data?.subject ?? 'Geschichte');
+  // Note: schoolType, gradeLevel, and subject fields no longer exist in the new UI
+  // They have been consolidated into the instructions field
 
+  // Fill instructions field
   await page
-    .getByLabel('Wie lautet der Auftrag an die Lernenden?')
+    .getByRole('textbox', { name: 'Instruktionen' })
+    .fill(
+      data?.additionalInstructions ??
+        'Der Chatbot soll aus der Perspektive eines Soldaten im Herrschaftssystem unter Ludwig XIV antworten.',
+    );
+
+  // Fill student exercise field
+  await page
+    .getByRole('textbox', { name: 'Arbeitsauftrag' })
     .fill(
       data?.studentExercise ??
         'Schüler sollen den Unterschied zwischen Absolutismus und Demokratie verstehen.',
     );
 
-  await page
-    .getByLabel('Wie verhält sich telli im Lernszenario? *')
-    .fill(
-      data?.additionalInstructions ??
-        'Der Chatbot soll aus der Perspektive eines Soldaten im Herrschaftssystem unter Ludwig XIV antworten.',
-    );
+  // Wait for autosave to complete (triggered by blur on last field)
+  await page.waitForTimeout(500);
+  await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
 }

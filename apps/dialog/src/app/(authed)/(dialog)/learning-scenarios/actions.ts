@@ -26,8 +26,10 @@ export async function createNewLearningScenarioAction({ modelId }: { modelId: st
 
 export async function createNewLearningScenarioFromTemplateAction({
   templateId,
+  duplicateLearningScenarioName,
 }: {
   templateId: string;
+  duplicateLearningScenarioName?: string;
 }) {
   const { user, school } = await requireAuth();
 
@@ -35,6 +37,7 @@ export async function createNewLearningScenarioFromTemplateAction({
     originalLearningScenarioId: templateId,
     user,
     schoolId: school.id,
+    duplicateLearningScenarioName,
   });
 }
 

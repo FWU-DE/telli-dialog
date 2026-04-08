@@ -74,10 +74,6 @@ const sdk = new NodeSDK({
         // Disable dns instrumentation, as it creates single spans without parents
         enabled: false,
       },
-      '@opentelemetry/instrumentation-fastify': {
-        // This plugin is deprecated, instead the official FastifyOtelInstrumentation is used
-        enabled: false,
-      },
       '@opentelemetry/instrumentation-http': {
         requestHook: (span, msg) => {
           const path = 'path' in msg ? msg.path : msg.url;

@@ -28,27 +28,23 @@ test('teacher can create shared chat with web sources, student can join chat and
   // configure form
   await configureLearningScenario(page, data);
   await page
-    .getByRole('textbox', { name: 'Web-Link' })
+    .getByRole('textbox', { name: 'URL eingeben' })
     .fill(
       'https://www.dw.com/de/trump-im-israel-iran-konflikt-kurs-ohne-klare-linie-donald-trump-benjamin-netanjahu-atomwaffen-v2/a-72936043',
     );
-  await page.getByRole('button', { name: 'Link hinzufügen' }).click();
+  await page.getByRole('button', { name: 'Webseite hinzufügen' }).click();
 
-  const submitButton = page.getByRole('button', { name: 'Lernszenario erstellen' });
-
-  await expect(submitButton).toBeVisible();
-  await submitButton.click();
-
-  const firstSharedChat = page.getByRole('button', { name: 'Analyse des Nahostkonflikts' }).first();
-  await expect(firstSharedChat).toBeVisible();
-  await firstSharedChat.click();
-
-  await page.waitForURL('/learning-scenarios/**');
+  // Still on the editor page after autosave
+  await page.waitForTimeout(2000);
   const stopSharingButton = page.getByRole('button', { name: 'Stop' });
   if (await stopSharingButton.isVisible()) {
     await stopSharingButton.click();
   }
-  await page.getByTitle('Szenario starten').click();
+  await page.getByTestId('telli-points-select').click();
+  await page.getByRole('option', { name: '50 %' }).click();
+  await page.getByTestId('usage-time-select').click();
+  await page.getByRole('option', { name: '30 Minuten' }).click();
+  await page.getByRole('button', { name: 'Jetzt bereitstellen' }).click();
 
   // enter chat directly as a teacher
   const schoolChatPagePromise = page.waitForEvent('popup');
