@@ -344,7 +344,7 @@ export default function AssistantForm({
             </label>
             <div
               id="image"
-              className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4"
+              className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4 overflow-hidden"
             >
               {maybeSignedPictureUrl ? (
                 <AvatarPicture src={maybeSignedPictureUrl} alt="Profile Picture" variant="large" />
