@@ -140,7 +140,7 @@ function FieldLabel({
       {tooltip && (
         <Tooltip>
           <TooltipTrigger type="button" aria-label={tooltip}>
-            <InfoIcon className="size-5 text-muted-foreground" />
+            <InfoIcon className="size-5 text-icon" />
           </TooltipTrigger>
           <TooltipContent>{tooltip}</TooltipContent>
         </Tooltip>
