@@ -101,7 +101,7 @@ export function LearningScenarioView({
       />
 
       <div className="flex flex-col gap-3">
-        <CustomChatHeading2 text="Konfiguration" />
+        <CustomChatHeading2 text={t('configuration-heading')} />
 
         <Card>
           <CardContent className="flex justify-center items-center">
