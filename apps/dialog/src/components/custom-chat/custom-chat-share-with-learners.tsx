@@ -180,7 +180,7 @@ export function CustomChatShareWithLearners({
                   type="button"
                   onClick={handleStopSharing}
                   aria-label={t('button-stop')}
-                  size={'icon-round'}
+                  size="icon-round"
                 >
                   <StopIcon className="size-5" />
                 </Button>
@@ -188,7 +188,7 @@ export function CustomChatShareWithLearners({
                   type="button"
                   onClick={() => router.push(shareUILink)}
                   aria-label={t('share')}
-                  size={'icon-round'}
+                  size="icon-round"
                 >
                   <ShareFatIcon className="size-5" />
                 </Button>
