@@ -33,7 +33,7 @@ export default function Citation({
     <TooltipProvider skipDelayDuration={0} delayDuration={0}>
       <div
         className={cn(
-          'flex flex-row items-center gap-0 p-1 bg-secondary-dark rounded-enterprise-sm',
+          'flex flex-row items-center gap-0 p-1 bg-secondary/50 rounded-enterprise-sm',
           className,
         )}
         style={{

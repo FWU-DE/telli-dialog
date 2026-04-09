@@ -9,14 +9,8 @@ export function constructRootLayoutStyle({
 }) {
   return {
     '--primary': designConfiguration?.primaryColor,
-    '--primary-text': designConfiguration?.primaryTextColor,
+    '--primary-foreground': designConfiguration?.primaryTextColor,
     '--secondary': designConfiguration?.secondaryColor,
-    '--secondary-dark': designConfiguration?.secondaryDarkColor,
-    '--secondary-text': designConfiguration?.secondaryTextColor,
-    '--secondary-light': designConfiguration?.secondaryLightColor,
-    '--primary-hover': designConfiguration?.primaryHoverColor,
-    '--primary-hover-text': designConfiguration?.primaryHoverTextColor,
-    '--chat-message-background': designConfiguration?.chatMessageBackgroundColor,
-    '--button-primary-text': designConfiguration?.buttonPrimaryTextColor,
+    '--secondary-foreground': designConfiguration?.secondaryTextColor,
   } as React.CSSProperties;
 }

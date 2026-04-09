@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 import MarkdownDisplay from '../chat/markdown-display';
-import { useTheme } from '@/hooks/use-theme';
+import { useTheme } from '@/components/providers/theme-provider';
 import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
 import { useSession } from 'next-auth/react';
 

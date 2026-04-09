@@ -33,8 +33,8 @@ export function FilterTabs<T extends string>({
             'px-4 py-1.5 rounded-full text-sm font-medium transition-colors border',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             activeTab === tab.value
-              ? 'bg-primary text-primary-foreground border-primary'
-              : 'bg-background text-foreground border-border hover:bg-muted',
+              ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/85'
+              : 'bg-background text-foreground border-border hover:bg-primary/15',
           )}
         >
           {tab.label}

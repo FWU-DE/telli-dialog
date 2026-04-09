@@ -20,7 +20,7 @@ const VARIANT_STYLES = {
   large: {
     width: 170,
     height: 170,
-    className: 'rounded-enterprise-md object-contain min-w-[170px] min-h-[170px]',
+    className: 'w-full h-full object-cover',
   },
 };
 
