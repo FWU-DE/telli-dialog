@@ -15,13 +15,8 @@ export async function configureCharacter(
   data?: {
     name?: string;
     description?: string;
-    schoolType?: string;
-    gradeLevel?: string;
-    subject?: string;
-    competence?: string;
-    learningContext?: string;
-    specifications?: string;
-    restrictions?: string;
+    initialMessage?: string;
+    instructions?: string;
   },
 ) {
   await page.getByTestId('character-name-input').fill(data?.name ?? 'John Cena');
@@ -34,6 +29,16 @@ export async function configureCharacter(
     );
 
   await page
+    .getByTestId('character-initial-message-input')
+    .fill(
+      data?.initialMessage ??
+        'Hallo, ich bin John Cena! Was möchtest du über Wrestling oder meine Karriere wissen?',
+    );
+
+  await page
     .getByTestId('character-instructions-input')
-    .fill(data?.specifications ?? 'John Cena soll über seine Karriere und Erfolge sprechen.');
+    .fill(data?.instructions ?? 'John Cena soll über seine Karriere und Erfolge sprechen.');
+
+  await page.waitForTimeout(500);
+  await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
 }

@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { login } from '../../utils/login';
 import { sendMessage } from '../../utils/chat';
 import { waitForToast } from '../../utils/utils';
-import { deleteCharacter } from '../../utils/character';
+import { configureCharacter, deleteCharacter } from '../../utils/character';
 
 const characterName = 'Albert Einstein';
 
@@ -20,26 +20,17 @@ test('teacher can create character with initial message and verify it appears in
 
   await page.waitForURL('/characters/editor/**');
 
-  await page.getByTestId('character-name-input').fill(characterName);
-
-  await page
-    .getByTestId('character-description-input')
-    .fill('Ein brillanter Physiker, der die Relativitätstheorie entwickelt hat.');
-
-  // Add the initial message - this is the key part of this test
   const initialMessage =
     'Hallo! Ich bin Albert Einstein. Ich freue mich sehr, mit dir über die Geheimnisse des Universums zu sprechen. Was möchtest du über Physik oder meine Arbeit wissen?';
-  await page.getByTestId('character-initial-message-input').fill(initialMessage);
 
-  await page
-    .getByTestId('character-instructions-input')
-    .fill('Einstein soll verständlich und inspirierend über Wissenschaft sprechen.');
+  await configureCharacter(page, {
+    name: characterName,
+    description: 'Ein brillanter Physiker, der die Relativitätstheorie entwickelt hat.',
+    instructions: 'Einstein soll verständlich und inspirierend über Wissenschaft sprechen.',
+    initialMessage: initialMessage,
+  });
 
-  const submitButton = page.getByRole('button', { name: 'Dialogpartner erstellen' });
-  await expect(submitButton).toBeVisible();
-  await submitButton.click();
-
-  await page.waitForURL('/characters?visibility=private');
+  await page.goto('/characters?visibility=private');
 
   // check if created with the correct name
   const dialogChatName = page.getByText(characterName).first();
@@ -49,9 +40,11 @@ test('teacher can create character with initial message and verify it appears in
   await page.waitForURL('/characters/editor/**');
 
   // test share page
-  await page.selectOption('#Telli-Points', '50');
-  await page.selectOption('#maxUsage', '45');
-  await page.getByTitle('Dialogpartner teilen').click();
+  await page.getByTestId('telli-points-select').click();
+  await page.getByRole('option', { name: '50 %' }).click();
+  await page.getByTestId('usage-time-select').click();
+  await page.getByRole('option', { name: '45 Minuten' }).click();
+  await page.getByRole('button', { name: 'Jetzt bereitstellen' }).click();
 
   await page.waitForURL('/characters/editor/**/share');
   const code = await page.locator('#join-code').textContent();
