@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
-import { login } from '../utils/login';
-import { sendMessage } from '../utils/chat';
-import { waitForToast } from '../utils/utils';
-import { deleteCharacter } from '../utils/character';
+import { login } from '../../utils/login';
+import { sendMessage } from '../../utils/chat';
+import { waitForToast } from '../../utils/utils';
+import { configureCharacter, deleteCharacter } from '../../utils/character';
 
 const characterName = 'Albert Einstein';
 
@@ -20,43 +20,17 @@ test('teacher can create character with initial message and verify it appears in
 
   await page.waitForURL('/characters/editor/**');
 
-  // configure form with basic details
-  await page.getByLabel('Schultyp').fill('Gymnasium');
-  await page.getByLabel('Klassenstufe').fill('8. Klasse');
-  await page.getByLabel('Fach').fill('Deutsch');
-
-  await page.getByLabel('Wie heißt die simulierte Person? *').fill(characterName);
-
-  await page
-    .getByLabel('Wie kann die simulierte Person kurz beschrieben werden? *')
-    .fill('Ein brillanter Physiker, der die Relativitätstheorie entwickelt hat.');
-
-  await page
-    .getByLabel('Welche Kompetenzen sollen die Lernenden erwerben? *')
-    .fill('Verständnis für wissenschaftliches Denken und Neugier auf die Physik entwickeln.');
-
-  await page
-    .getByLabel('Was ist die konkrete Unterrichtssituation? *')
-    .fill('Ein Gespräch mit Einstein über seine Entdeckungen und wissenschaftliche Methoden.');
-
-  // Add the initial message - this is the key part of this test
   const initialMessage =
     'Hallo! Ich bin Albert Einstein. Ich freue mich sehr, mit dir über die Geheimnisse des Universums zu sprechen. Was möchtest du über Physik oder meine Arbeit wissen?';
-  await page.getByRole('textbox', { name: 'Mit welcher Einstiegsfrage' }).fill(initialMessage);
 
-  await page
-    .getByLabel('Wie soll der Dialogpartner antworten?')
-    .fill('Einstein soll verständlich und inspirierend über Wissenschaft sprechen.');
+  await configureCharacter(page, {
+    name: characterName,
+    description: 'Ein brillanter Physiker, der die Relativitätstheorie entwickelt hat.',
+    instructions: 'Einstein soll verständlich und inspirierend über Wissenschaft sprechen.',
+    initialMessage: initialMessage,
+  });
 
-  await page
-    .getByLabel('Wie soll der Dialogpartner nicht antworten?')
-    .fill('Einstein soll nicht zu technisch oder unverständlich antworten.');
-
-  const submitButton = page.getByRole('button', { name: 'Dialogpartner erstellen' });
-  await expect(submitButton).toBeVisible();
-  await submitButton.click();
-
-  await page.waitForURL('/characters?visibility=private');
+  await page.goto('/characters?visibility=private');
 
   // check if created with the correct name
   const dialogChatName = page.getByText(characterName).first();
@@ -66,9 +40,11 @@ test('teacher can create character with initial message and verify it appears in
   await page.waitForURL('/characters/editor/**');
 
   // test share page
-  await page.selectOption('#Telli-Points', '50');
-  await page.selectOption('#maxUsage', '45');
-  await page.getByTitle('Dialogpartner teilen').click();
+  await page.getByTestId('telli-points-select').click();
+  await page.getByRole('option', { name: '50 %' }).click();
+  await page.getByTestId('usage-time-select').click();
+  await page.getByRole('option', { name: '45 Minuten' }).click();
+  await page.getByRole('button', { name: 'Jetzt bereitstellen' }).click();
 
   await page.waitForURL('/characters/editor/**/share');
   const code = await page.locator('#join-code').textContent();

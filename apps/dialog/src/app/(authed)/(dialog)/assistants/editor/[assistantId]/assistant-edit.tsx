@@ -233,6 +233,7 @@ export function AssistantEdit({
 
     return result;
   }
+
   const handleSharingChange = async ({ name, checked }: { name: string; checked: boolean }) => {
     if (name === 'isSchoolShared') {
       const newAccessLevel = checked ? 'school' : 'private';
@@ -272,7 +273,11 @@ export function AssistantEdit({
         <CustomChatActions>
           <CustomChatActionUse onClick={handleUseChat} />
           <CustomChatActionDuplicate onClick={handleDuplicateAssistant} />
-          <CustomChatActionDelete onClick={handleDeleteAssistant} />
+          <CustomChatActionDelete
+            onClick={handleDeleteAssistant}
+            modalTitle={t('delete-modal-title')}
+            modalDescription={t('delete-modal-description')}
+          />
           <CustomChatActionSave onClick={handleAutoSave} />
         </CustomChatActions>
         <CustomChatFormState
@@ -424,7 +429,11 @@ export function AssistantEdit({
             }}
           />
           <CustomChatActionDuplicate onClick={handleDuplicateAssistant} />
-          <CustomChatActionDelete onClick={handleDeleteAssistant} />
+          <CustomChatActionDelete
+            onClick={handleDeleteAssistant}
+            modalTitle={t('delete-modal-title')}
+            modalDescription={t('delete-modal-description')}
+          />
           <CustomChatActionSave onClick={handleAutoSave} />
         </CustomChatActions>
         <CustomChatFormState

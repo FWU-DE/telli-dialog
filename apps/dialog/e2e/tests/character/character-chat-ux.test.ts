@@ -19,13 +19,10 @@ async function createCharacterWithInitialMessage(
   await page.getByRole('button', { name: 'Dialogpartner erstellen' }).click();
   await page.waitForURL('/characters/editor/**');
 
-  await configureCharacter(page, { name });
+  await configureCharacter(page, { name, initialMessage });
 
-  // Fill the optional "initial message" field
-  await page.locator('#initialMessage').fill(initialMessage);
-
-  await page.getByRole('button', { name: 'Dialogpartner erstellen' }).click();
-  await page.waitForURL('/characters?visibility=private');
+  // Navigate back to character list to verify creation
+  await page.goto('/characters?visibility=private');
 
   // Click on the card to open its editor and extract the character ID from the URL
   await page.getByText(name).first().click();
