@@ -43,7 +43,6 @@ export default function DestructiveActionButton({
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <button
-          id="destructive-button"
           className={triggerButtonClassName}
           onClick={(event) => {
             event.stopPropagation();
