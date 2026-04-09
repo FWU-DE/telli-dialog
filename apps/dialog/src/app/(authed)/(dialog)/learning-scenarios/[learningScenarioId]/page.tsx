@@ -1,6 +1,6 @@
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
-import { getLearningScenarioForEditView } from '@shared/learning-scenarios/learning-scenario-service';
+import { getLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 import { notFound } from 'next/navigation';
 import { LearningScenarioView } from './learning-scenario-view';
 import { ResponsiveLayoutWrapper } from '../../_components/responsive-layout-wrapper';
@@ -15,17 +15,13 @@ export default async function Page(props: PageProps<'/learning-scenarios/[learni
     notFound();
   }
 
-  const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenarioForEditView(
-    {
-      learningScenarioId,
-      schoolId: school.id,
-      user,
-    },
-  ).catch(handleErrorInServerComponent);
+  const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenario({
+    learningScenarioId,
+    schoolId: school.id,
+    user,
+  }).catch(handleErrorInServerComponent);
 
-  const initialLinks = learningScenario.attachedLinks
-    .filter((l) => l && l !== '')
-    .map((url) => ({ link: url }));
+  const initialLinks = learningScenario.attachedLinks.map((url) => ({ link: url }));
 
   return (
     <ResponsiveLayoutWrapper>

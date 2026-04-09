@@ -9,8 +9,8 @@ type CustomChatFilesAndLinksProps = CustomChatFilesProps & CustomChatLinksProps;
 
 export function CustomChatFilesAndLinks(props: CustomChatFilesAndLinksProps) {
   const t = useTranslations('custom-chat.files-and-links');
-  const filesVisible = props.initialFiles.length > 0 || props.onFileUploaded;
-  const linksVisible = props.initialLinks.length > 0 || props.onLinksChange;
+  const filesVisible = props.initialFiles.length > 0 || !!props.onFileUploaded;
+  const linksVisible = props.initialLinks.length > 0 || !!props.onLinksChange;
 
   return (
     <>

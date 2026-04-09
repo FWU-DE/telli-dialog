@@ -10,8 +10,8 @@ import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avat
 import { CustomChatFields } from '@/components/custom-chat/custom-chat-fields';
 import { CustomChatFieldInfo } from '@/components/custom-chat/custom-chat-field-info';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
-import { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
-import { WebsearchSource } from '@shared/db/types';
+import type { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
+import type { WebsearchSource } from '@shared/db/types';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
@@ -62,6 +62,23 @@ export function LearningScenarioView({
     }
   };
 
+  const handleShareLearningScenario = async (
+    data: Parameters<typeof shareLearningScenarioAction>[0]['data'],
+  ) => {
+    const result = await shareLearningScenarioAction({
+      learningScenarioId: learningScenario.id,
+      data,
+    });
+    return result;
+  };
+
+  const handleUnshareLearningScenario = async () => {
+    const result = await unshareLearningScenarioAction({
+      learningScenarioId: learningScenario.id,
+    });
+    return result;
+  };
+
   return (
     <CustomChatLayoutContainer>
       <BackButton
@@ -83,19 +100,8 @@ export function LearningScenarioView({
         maxUsageTimeLimit={learningScenario.maxUsageTimeLimit ?? null}
         pointsPercentageValues={telliPointsPercentageValues}
         usageTimeValues={usageTimeValuesInMinutes}
-        onShare={async (data) => {
-          const result = await shareLearningScenarioAction({
-            learningScenarioId: learningScenario.id,
-            data: data as Parameters<typeof shareLearningScenarioAction>[0]['data'],
-          });
-          return result;
-        }}
-        onUnshare={async () => {
-          const result = await unshareLearningScenarioAction({
-            learningScenarioId: learningScenario.id,
-          });
-          return result;
-        }}
+        onShare={handleShareLearningScenario}
+        onUnshare={handleUnshareLearningScenario}
         shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}
         sharingDisabled={!learningScenario.name || learningScenario.name.trim().length === 0}
       />
