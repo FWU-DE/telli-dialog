@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
 import {
   createNewLearningScenarioFromTemplate,
   deleteLearningScenario,
+  downloadFileFromLearningScenario,
   getFilesForLearningScenario,
   getLearningScenarioForEditView,
   getSharedLearningScenario,
@@ -20,13 +21,13 @@ import {
   dbGetLearningScenarioByIdWithShareData,
   dbGetSharedLearningScenarioConversations,
 } from '../db/functions/learning-scenario';
-import { dbGetFilesForLearningScenario } from '../db/functions/files';
+import { dbGetFileForLearningScenario, dbGetFilesForLearningScenario } from '../db/functions/files';
 import { getAvatarPictureUrl } from '../files/fileService';
 import { generateUUID } from '../utils/uuid';
 import { LearningScenarioSelectModel } from '@shared/db/schema';
 import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
 import { UserModel } from '@shared/auth/user-model';
-import { uploadFileToS3 } from '../s3';
+import { getReadOnlySignedUrl, uploadFileToS3 } from '../s3';
 
 vi.mock('../db/functions/learning-scenario', () => ({
   dbCreateLearningScenarioShare: vi.fn(),
@@ -39,6 +40,7 @@ vi.mock('./learning-scenario-admin-service', () => ({
   duplicateLearningScenario: vi.fn(),
 }));
 vi.mock('../db/functions/files', () => ({
+  dbGetFileForLearningScenario: vi.fn(),
   dbGetFilesForLearningScenario: vi.fn(),
 }));
 vi.mock('../files/fileService', () => ({
@@ -47,6 +49,7 @@ vi.mock('../files/fileService', () => ({
   deleteMessageAttachments: vi.fn(),
 }));
 vi.mock('../s3', () => ({
+  getReadOnlySignedUrl: vi.fn(),
   uploadFileToS3: vi.fn(),
   deleteFileFromS3: vi.fn(),
 }));
@@ -164,6 +167,16 @@ function buildFunctionList(
         shareLearningScenario({
           data: { telliPointsPercentageLimit: 50, usageTimeLimit: 60 },
           learningScenarioId,
+          schoolId,
+          user,
+        }),
+    },
+    {
+      functionName: downloadFileFromLearningScenario.name,
+      testFunction: () =>
+        downloadFileFromLearningScenario({
+          learningScenarioId,
+          fileId,
           schoolId,
           user,
         }),
@@ -523,6 +536,12 @@ describe('learning-scenario-service', () => {
           typeof dbGetSharedLearningScenarioConversations
         >
       ).mockResolvedValue([] as never);
+      (
+        dbGetFileForLearningScenario as MockedFunction<typeof dbGetFileForLearningScenario>
+      ).mockResolvedValue({} as never);
+      (getReadOnlySignedUrl as MockedFunction<typeof getReadOnlySignedUrl>).mockResolvedValue(
+        undefined,
+      );
     });
 
     describe('user is owner', () => {
