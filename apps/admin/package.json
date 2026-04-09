@@ -14,17 +14,17 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.1014.0",
-    "@aws-sdk/s3-request-presigner": "3.1014.0",
+    "@aws-sdk/client-s3": "3.1022.0",
+    "@aws-sdk/s3-request-presigner": "3.1022.0",
     "@hookform/resolvers": "5.2.2",
-    "@opentelemetry/api": "1.9.0",
-    "@sentry/nextjs": "10.45.0",
-    "@t3-oss/env-nextjs": "0.13.10",
+    "@opentelemetry/api": "1.9.1",
+    "@sentry/nextjs": "10.47.0",
+    "@t3-oss/env-nextjs": "0.13.11",
     "@telli/api-database": "workspace:*",
     "@telli/ui": "workspace:*",
     "@telli/shared": "workspace:*",
-    "lucide-react": "0.577.0",
-    "next": "16.2.1",
+    "lucide-react": "1.7.0",
+    "next": "16.2.2",
     "next-auth": "5.0.0-beta.30",
     "pg": "8.20.0",
     "react": "19.2.4",
@@ -44,9 +44,9 @@
     "@types/react-csv": "1.1.10",
     "@types/react-dom": "19.2.3",
     "@types/react-syntax-highlighter": "15.5.13",
-    "esbuild": "0.27.4",
+    "esbuild": "0.27.5",
     "eslint": "9.39.4",
-    "eslint-config-next": "16.2.1",
+    "eslint-config-next": "16.2.2",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-prettier": "5.5.5",
     "postcss": "8.5.8",
@@ -54,6 +54,6 @@
     "prettier-eslint": "16.4.2",
     "tailwindcss": "4.2.2",
     "tailwindcss-animate": "1.0.7",
-    "typescript": "5.9.3"
+    "typescript": "6.0.2"
   }
 }

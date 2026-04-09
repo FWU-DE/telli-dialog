@@ -6,6 +6,7 @@ import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { handleSingleFile, UploadFileButtonProps } from '../chat/upload-file-button';
 import { useSession } from 'next-auth/react';
 import { useToast } from '../common/toast';
+import RichText from '../common/rich-text';
 import { SUPPORTED_DOCUMENTS_EXTENSIONS } from '@/const';
 import { validateFileExtentsion as validateFileExtension } from '@/utils/files/generic';
 import { NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT } from '@/configuration-text-inputs/const';
@@ -147,9 +148,7 @@ export function FileDrop({
         <div className="mt-4 flex flex-col text-sm gap-4 items-center">
           <FileUploadIcon className="w-8 h-8 text-primary" />
           <span className="text-base">
-            {t.rich('upload.drop-area', {
-              b: (chunks) => <strong className="font-semibold">{chunks}</strong>,
-            })}
+            <RichText>{(tags) => t.rich('upload.drop-area', tags)}</RichText>
           </span>
           <span className="text-gray-600">{t('upload.choice-word')}</span>
           <button
