@@ -1,7 +1,7 @@
 'use client';
 
 import { LocalFileState } from '@/components/chat/send-message-form';
-import FileDrop from '@/components/forms/file-drop-area';
+import { FileDrop } from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
 import { FileModel } from '@shared/db/schema';
 import { cn } from '@/utils/tailwind';
@@ -50,7 +50,6 @@ export default function FileManagement({
         files={initialFiles ?? []}
         additionalFiles={files}
         onDeleteFile={onDeleteFile}
-        showUploadConfirmation={true}
         readOnly={readOnly}
         onDownloadFile={onDownloadFile}
       />

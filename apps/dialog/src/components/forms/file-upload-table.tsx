@@ -21,7 +21,6 @@ type FilesTableProps = {
   files: FileModel[];
   additionalFiles: Map<string, LocalFileState>;
   onDeleteFile(fileId: string): Promise<void>;
-  showUploadConfirmation?: boolean;
   className?: string;
   readOnly: boolean;
   onDownloadFile?: (fileId: string) => Promise<ServerActionResult<string | undefined>>;
@@ -31,7 +30,6 @@ export default function FilesTable({
   files,
   onDeleteFile,
   additionalFiles,
-  showUploadConfirmation,
   className,
   readOnly,
   onDownloadFile,
@@ -42,9 +40,7 @@ export default function FilesTable({
 
   async function handleDeleteFile(fileId: string) {
     await onDeleteFile(fileId);
-    if (showUploadConfirmation) {
-      toast.success(t('toasts.delete-from-form'));
-    }
+    toast.success(t('toasts.delete-from-form'));
   }
 
   const mergedFiles = [

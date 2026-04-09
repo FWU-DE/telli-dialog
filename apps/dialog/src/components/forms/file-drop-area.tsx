@@ -164,5 +164,3 @@ export function FileDrop({
     </div>
   );
 }
-
-export default FileDrop;

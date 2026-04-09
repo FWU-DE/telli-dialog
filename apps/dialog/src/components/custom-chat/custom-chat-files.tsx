@@ -1,7 +1,7 @@
 import React from 'react';
 import { FileModel } from '@shared/db/schema';
 import { LocalFileState } from '../chat/send-message-form';
-import FileDrop from '../forms/file-drop-area';
+import { FileDrop } from '../forms/file-drop-area';
 import { NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT } from '@/configuration-text-inputs/const';
 import FilesTable from '../forms/file-upload-table';
 import { ServerActionResult } from '@shared/actions/server-action-result';
@@ -61,7 +61,6 @@ export function CustomChatFiles(props: CustomChatFilesProps) {
         files={currentFiles}
         additionalFiles={additionalFiles}
         onDeleteFile={handleDeleteFile}
-        showUploadConfirmation={true}
         readOnly={!onDeleteFile}
         onDownloadFile={onDownloadFile}
       />

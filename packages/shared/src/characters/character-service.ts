@@ -724,10 +724,7 @@ export async function downloadFileFromCharacter({
 }) {
   checkParameterUUID(characterId);
   requireTeacherRole(user.userRole);
-  const character = await dbGetCharacterByIdWithShareData({
-    characterId,
-    userId: user.id,
-  });
+  const { character } = await getCharacterInfo(characterId, user.id);
   if (!character) throw new NotFoundError('Character not found');
   verifyReadAccess({ item: character, schoolId, userId: user.id });
 
