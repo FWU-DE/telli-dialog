@@ -1,3 +1,5 @@
+'use client';
+
 import * as Select from '@radix-ui/react-select';
 import ChevronDownIcon from '@/components/icons/chevron-down';
 import { LlmModelSelectModel } from '@shared/db/schema';
@@ -45,7 +47,10 @@ export default function SelectLlmModelForm({
       </Select.Trigger>
 
       <Select.Portal>
-        <Select.Content className="bg-white border border-gray-200 rounded-enterprise-md shadow-dropdown w-full z-50">
+        <Select.Content
+          style={constructRootLayoutStyle({ designConfiguration })}
+          className="bg-white border border-gray-200 rounded-enterprise-md shadow-dropdown w-full z-50"
+        >
           <Select.ScrollUpButton className="py-2 text-gray-500">▲</Select.ScrollUpButton>
           <Select.Viewport className="p-1">
             {getFilteredTextModels(models, true) // mistral should not be selectable for characters and shared school chats
@@ -53,7 +58,6 @@ export default function SelectLlmModelForm({
                 <Select.Item
                   key={model.id}
                   value={model.id}
-                  style={constructRootLayoutStyle({ designConfiguration })}
                   className={cn(
                     'px-4 py-2 cursor-pointer outline-hidden transition',
                     'hover:bg-primary/15 hover:text-primary',
