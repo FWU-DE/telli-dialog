@@ -1,8 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { FileUploadIcon } from '../icons/file-upload-icons/file-upload-tray-icon';
 import { useTranslations } from 'next-intl';
-import { cn } from '@/utils/tailwind';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { handleSingleFile, UploadFileButtonProps } from '../chat/upload-file-button';
 import { useSession } from 'next-auth/react';
 import { useToast } from '../common/toast';

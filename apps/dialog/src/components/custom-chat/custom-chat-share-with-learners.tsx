@@ -21,8 +21,6 @@ import { ShareFatIcon, StopIcon } from '@phosphor-icons/react';
 import CountDownTimer from '../../app/(authed)/(dialog)/learning-scenarios/_components/count-down';
 import RichText from '../common/rich-text';
 import { z } from 'zod';
-import { cn } from '@/utils/tailwind';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 
 const shareFormSchema = z.object({
   telliPointsPercentageLimit: z.coerce.number(),

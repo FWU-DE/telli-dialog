@@ -1,8 +1,6 @@
 'use client';
 
 import { useToast } from '@/components/common/toast';
-import { cn } from '@/utils/tailwind';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { createNewAssistantAction } from './actions';

@@ -5,8 +5,6 @@ import { useTranslations } from 'next-intl';
 import React from 'react';
 import { useToast } from '../common/toast';
 import { Input } from '@ui/components/Input';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
-import { cn } from '@/utils/tailwind';
 import { UploadIcon } from '@phosphor-icons/react';
 import { Button } from '@ui/components/Button';
 import AvatarCropModal from './custom-chat-avatar-crop-modal';

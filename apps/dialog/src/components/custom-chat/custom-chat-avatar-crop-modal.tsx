@@ -8,8 +8,6 @@ import { CompressionOptions, getCroppedImageBlob } from '@/utils/files/image-uti
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@ui/components/Card';
 import { Button } from '@ui/components/Button';
-import { cn } from '@/utils/tailwind';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { useToast } from '../common/toast';
 
 type AvatarCropModalProps = {
