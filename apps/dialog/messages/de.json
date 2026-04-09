@@ -110,6 +110,7 @@
       "choice-word": "oder"
     },
     "delete": {
+      "button": "Datei löschen",
       "modal-description": "Möchten Sie diese Datei wirklich dauerhaft löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
       "modal-title": "Datei löschen",
       "confirm": "Datei löschen"
