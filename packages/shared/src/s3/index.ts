@@ -21,6 +21,20 @@ import { chunkArray } from '@shared/utils/arrays';
 import { ONE_DAY, S3_DELETE_OBJECTS_MAX } from '@shared/s3/const';
 import { logError } from '@shared/logging';
 
+/**
+ * Encodes a filename for Content-Disposition `filename*` (RFC 5987).
+ *
+ * This is necessary because raw filenames may contain spaces or special characters
+ * that break downloads when sent in headers, and unsafe characters (e.g., CR/LF, quotes)
+ * can enable header injection if passed through directly.
+ */
+function encodeRFC5987Value(value: string) {
+  return encodeURIComponent(value).replace(
+    /['()*]/g,
+    (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+}
+
 const s3Client = new S3Client({
   // region: 'eu-de',
   region: 'eu-nl',
@@ -114,7 +128,7 @@ export async function getReadOnlySignedUrl(args: {
 
       let contentDisposition = attachment ? 'attachment;' : '';
       if (filename !== undefined) {
-        contentDisposition = `${contentDisposition} filename=${filename}`;
+        contentDisposition = `${contentDisposition}; filename*=UTF-8''${encodeRFC5987Value(filename)}`;
       }
       const command = new GetObjectCommand({
         Bucket: env.otcBucketName,

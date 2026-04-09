@@ -6,6 +6,7 @@ import {
   createNewLearningScenario,
   createNewLearningScenarioFromTemplate,
   deleteLearningScenario,
+  downloadFileFromLearningScenario,
   linkFileToLearningScenario,
 } from '@shared/learning-scenarios/learning-scenario-service';
 
@@ -26,8 +27,10 @@ export async function createNewLearningScenarioAction({ modelId }: { modelId: st
 
 export async function createNewLearningScenarioFromTemplateAction({
   templateId,
+  duplicateLearningScenarioName,
 }: {
   templateId: string;
+  duplicateLearningScenarioName?: string;
 }) {
   const { user, school } = await requireAuth();
 
@@ -35,6 +38,7 @@ export async function createNewLearningScenarioFromTemplateAction({
     originalLearningScenarioId: templateId,
     user,
     schoolId: school.id,
+    duplicateLearningScenarioName,
   });
 }
 
@@ -49,6 +53,23 @@ export async function linkFileToLearningScenarioAction({
   return runServerAction(linkFileToLearningScenario)({
     fileId,
     learningScenarioId,
+    user,
+  });
+}
+
+export async function downloadFileFromLearningScenarioAction({
+  learningScenarioId,
+  fileId,
+}: {
+  learningScenarioId: string;
+  fileId: string;
+}) {
+  const { user, school } = await requireAuth();
+
+  return runServerAction(downloadFileFromLearningScenario)({
+    learningScenarioId,
+    fileId,
+    schoolId: school.id,
     user,
   });
 }

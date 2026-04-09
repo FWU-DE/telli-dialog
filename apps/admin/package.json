@@ -23,7 +23,7 @@
     "@telli/api-database": "workspace:*",
     "@telli/ui": "workspace:*",
     "@telli/shared": "workspace:*",
-    "lucide-react": "0.577.0",
+    "lucide-react": "1.7.0",
     "next": "16.2.2",
     "next-auth": "5.0.0-beta.30",
     "pg": "8.20.0",
@@ -54,6 +54,6 @@
     "prettier-eslint": "16.4.2",
     "tailwindcss": "4.2.2",
     "tailwindcss-animate": "1.0.7",
-    "typescript": "5.9.3"
+    "typescript": "6.0.2"
   }
 }

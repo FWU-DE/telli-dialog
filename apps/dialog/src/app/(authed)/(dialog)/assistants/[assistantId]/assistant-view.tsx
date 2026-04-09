@@ -8,7 +8,7 @@ import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
 import { AssistantSelectModel, FileModel } from '@shared/db/schema';
 import { useRouter } from 'next/navigation';
-import { createNewAssistantAction } from '../actions';
+import { createNewAssistantAction, downloadFileFromAssistantAction } from '../actions';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { CustomChatLastUpdate } from '@/components/custom-chat/custom-chat-last-update';
@@ -44,6 +44,10 @@ export function AssistantView({
       toast.error(t('toasts.create-toast-error'));
     }
   };
+
+  async function handleDownloadFile(fileId: string) {
+    return downloadFileFromAssistantAction({ assistantId: assistant.id, fileId });
+  }
 
   return (
     <CustomChatLayoutContainer>
@@ -101,6 +105,7 @@ export function AssistantView({
       <CustomChatFilesAndLinks
         initialFiles={fileMappings}
         initialLinks={assistant.attachedLinks.map((l) => ({ link: l }))}
+        onDownloadFile={handleDownloadFile}
       />
     </CustomChatLayoutContainer>
   );

@@ -160,13 +160,13 @@ export default function EntityOverview({
 
         <div className="px-6 py-2 pb-4 sticky top-0 z-10 bg-gray-50">
           <div className="max-w-3xl mx-auto w-full">
-            <div className="flex items-end justify-between gap-4">
+            <div className="flex items-end flex-wrap gap-2" aria-label={t('filter-tabs-label')}>
               <FilterTabs
                 tabs={visibleTabs}
                 activeTab={activeFilter}
                 onTabChange={onFilterChange}
-                aria-label={t('filter-tabs-label')}
               />
+              <div className="grow" />
               <div className="text-primary hover:text-primary-dark">
                 <Select
                   value={sortBy}

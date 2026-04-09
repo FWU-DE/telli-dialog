@@ -8,20 +8,21 @@ import { useTranslations } from 'next-intl';
 type CustomChatFilesAndLinksProps = CustomChatFilesProps & CustomChatLinksProps;
 
 export function CustomChatFilesAndLinks(props: CustomChatFilesAndLinksProps) {
-  const t = useTranslations('assistants');
+  const t = useTranslations('custom-chat.files-and-links');
 
   return (
     <div className="flex flex-col gap-3 mt-10">
-      <CustomChatHeading2 text={t('custom-assets-label')} tooltip={t('custom-assets-content')} />
+      <CustomChatHeading2 text={t('heading')} tooltip={t('heading-tooltip')} />
       <Card>
         <CardHeader>
-          <CardTitle>{t('custom-assets-files')}</CardTitle>
+          <CardTitle>{t('files')}</CardTitle>
         </CardHeader>
         <CardContent>
           <CustomChatFiles
             initialFiles={props.initialFiles}
             onFileUploaded={props.onFileUploaded}
             onDeleteFile={props.onDeleteFile}
+            onDownloadFile={props.onDownloadFile}
           />
         </CardContent>
       </Card>
@@ -29,11 +30,11 @@ export function CustomChatFilesAndLinks(props: CustomChatFilesAndLinksProps) {
       <Card>
         <CardHeader>
           <CardTitle
-            tooltipAriaLabel={t('custom-assets-links')}
-            tooltipContent={t('custom-assets-links-content')}
+            tooltipAriaLabel={t('links')}
+            tooltipContent={t('links-tooltip')}
             tooltipIcon={<InfoIcon className="size-4 text-icon" />}
           >
-            {t('custom-assets-links')}
+            {t('links')}
           </CardTitle>
         </CardHeader>
         <CardContent>

@@ -36,9 +36,9 @@ export default function EntityCard({
     <div
       onClick={onCardClick}
       className="rounded-enterprise-md border p-4 flex items-center gap-4 w-full hover:border-primary cursor-pointer bg-card"
-      role="button"
       tabIndex={0}
       aria-label={name}
+      role="button"
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -58,7 +58,7 @@ export default function EntityCard({
         <div className="flex items-center gap-2">
           <h2 className={cn('font-medium leading-none py-0.5', truncateClassName)}>{name}</h2>
           {isOwned && (
-            <span className="inline-flex items-center rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary shrink-0 uppercase tracking-wider">
+            <span className="hidden sm:inline-flex items-center rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary shrink-0 uppercase tracking-wider">
               {t('badge-mine')}
             </span>
           )}

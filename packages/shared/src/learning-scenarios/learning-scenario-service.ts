@@ -1,6 +1,9 @@
 import { UserModel } from '@shared/auth/user-model';
 import { db } from '@shared/db';
-import { dbGetFilesForLearningScenario } from '@shared/db/functions/files';
+import {
+  dbGetFileForLearningScenario,
+  dbGetFilesForLearningScenario,
+} from '@shared/db/functions/files';
 import {
   dbCreateLearningScenarioShare,
   dbDeleteLearningScenarioByIdAndUserId,
@@ -33,7 +36,8 @@ import {
   deleteMessageAttachments,
   getAvatarPictureUrl,
 } from '@shared/files/fileService';
-import { deleteFileFromS3, uploadFileToS3 } from '@shared/s3';
+import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
+import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { and, eq } from 'drizzle-orm';
 import { OverviewFilter } from '@shared/overview-filter';
@@ -91,14 +95,16 @@ export async function getLearningScenariosByAccessLevel({
   userId: string;
   federalStateId: string;
 }): Promise<LearningScenarioOptionalShareDataModel[]> {
-  if (accessLevel === 'global') {
-    return dbGetGlobalLearningScenarios({ userId, federalStateId });
-  } else if (accessLevel === 'school') {
-    return dbGetLearningScenariosBySchoolId({ schoolId, userId });
-  } else if (accessLevel === 'private') {
-    return dbGetLearningScenariosByUserId({ userId });
+  switch (accessLevel) {
+    case 'global':
+      return dbGetGlobalLearningScenarios({ userId, federalStateId });
+    case 'school':
+      return dbGetLearningScenariosBySchoolId({ schoolId, userId });
+    case 'private':
+      return dbGetLearningScenariosByUserId({ userId });
+    default:
+      return [];
   }
-  return [];
 }
 
 export async function getLearningScenariosByOverviewFilter({
@@ -112,16 +118,18 @@ export async function getLearningScenariosByOverviewFilter({
   userId: string;
   federalStateId: string;
 }): Promise<LearningScenarioOptionalShareDataModel[]> {
-  if (filter === 'all') {
-    return dbGetAllAccessibleLearningScenarios({ userId, schoolId, federalStateId });
-  } else if (filter === 'mine') {
-    return await dbGetAllLearningScenariosByUserId({ userId });
-  } else if (filter === 'official') {
-    return await dbGetGlobalLearningScenarios({ userId, federalStateId });
-  } else if (filter === 'school') {
-    return await dbGetLearningScenariosBySchoolId({ schoolId, userId });
+  switch (filter) {
+    case 'all':
+      return dbGetAllAccessibleLearningScenarios({ userId, schoolId, federalStateId });
+    case 'mine':
+      return await dbGetAllLearningScenariosByUserId({ userId });
+    case 'official':
+      return await dbGetGlobalLearningScenarios({ userId, federalStateId });
+    case 'school':
+      return await dbGetLearningScenariosBySchoolId({ schoolId, userId });
+    default:
+      return [];
   }
-  return [];
 }
 
 /**
@@ -637,10 +645,12 @@ export async function createNewLearningScenarioFromTemplate({
   schoolId,
   user,
   originalLearningScenarioId,
+  duplicateLearningScenarioName,
 }: {
   originalLearningScenarioId: string;
   schoolId: string;
   user: Pick<UserModel, 'id' | 'userRole'>;
+  duplicateLearningScenarioName?: string;
 }) {
   checkParameterUUID(originalLearningScenarioId);
   requireTeacherRole(user.userRole);
@@ -652,5 +662,42 @@ export async function createNewLearningScenarioFromTemplate({
     originalLearningScenarioId,
     schoolId,
     userId: user.id,
+    duplicateLearningScenarioName,
+  });
+}
+
+/**
+ * Downloads a file for a learning scenario.
+ *
+ * Authorization checks:
+ * - User must have read access to the learning scenario.
+ * - The file must belong to the learning scenario.
+ */
+export async function downloadFileFromLearningScenario({
+  learningScenarioId,
+  fileId,
+  schoolId,
+  user,
+}: {
+  learningScenarioId: string;
+  fileId: string;
+  schoolId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
+}) {
+  checkParameterUUID(learningScenarioId);
+  requireTeacherRole(user.userRole);
+  const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
+  verifyReadAccess({ item: learningScenario, schoolId, userId: user.id });
+
+  const file = await dbGetFileForLearningScenario({ fileId, learningScenarioId });
+  if (!file) {
+    throw new NotFoundError('File not found');
+  }
+
+  return getReadOnlySignedUrl({
+    key: `message_attachments/${fileId}`,
+    filename: file.name,
+    attachment: true,
+    options: { expiresIn: ONE_HOUR },
   });
 }

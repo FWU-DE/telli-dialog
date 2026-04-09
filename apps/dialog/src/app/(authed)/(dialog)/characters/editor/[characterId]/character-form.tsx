@@ -47,7 +47,10 @@ import AvatarPicture from '@/components/common/avatar-picture';
 import { WebsearchSource } from '@shared/db/types';
 import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
 import SharingSection from '@/components/forms/sharing-section';
-import { createNewCharacterAction } from '@/app/(authed)/(dialog)/characters/actions';
+import {
+  createNewCharacterAction,
+  downloadFileFromCharacterAction,
+} from '@/app/(authed)/(dialog)/characters/actions';
 import { AVATAR_MAX_SIZE } from '@/const';
 
 type CharacterFormProps = CharacterWithShareDataModel & {
@@ -181,6 +184,13 @@ export default function CharacterForm({
     if (!linkResult.success) {
       toast.error(tToast('edit-toast-error'));
     }
+  }
+
+  async function handleDownloadFile(fileId: string) {
+    return downloadFileFromCharacterAction({
+      characterId: character.id,
+      fileId,
+    });
   }
 
   const backUrl = buildGenericUrl(character.accessLevel, 'characters');
@@ -384,7 +394,7 @@ export default function CharacterForm({
             </label>
             <div
               id="image"
-              className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4"
+              className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4 overflow-hidden"
             >
               {maybeSignedPictureUrl ? (
                 <AvatarPicture src={maybeSignedPictureUrl} alt="Profile Picture" variant="large" />
@@ -472,6 +482,7 @@ export default function CharacterForm({
           onDeleteFile={handleDeattachFile}
           readOnly={readOnly}
           translationNamespace="characters.form"
+          onDownloadFile={handleDownloadFile}
         />
         <AttachedLinks
           fields={fields}

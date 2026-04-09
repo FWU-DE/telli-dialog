@@ -1,4 +1,3 @@
-import PlusIcon from '@/components/icons/plus';
 import { cn } from '@/utils/tailwind';
 
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
@@ -8,6 +7,8 @@ import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { createNewLearningScenarioAction } from './actions';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
+import { Button } from '@ui/components/Button';
+import { PlusIcon } from '@phosphor-icons/react';
 
 export function CreateNewLearningScenarioButton() {
   const router = useRouter();
@@ -31,12 +32,13 @@ export function CreateNewLearningScenarioButton() {
   }
 
   return (
-    <button
+    <Button
+      type="button"
       onClick={handleNewLearningScenario}
-      className={cn(buttonPrimaryClassName, 'flex gap-2 items-center group py-2')}
+      className={cn(buttonPrimaryClassName)}
     >
-      <PlusIcon className="fill-button-primary-text group-hover:fill-secondary-text w-8 h-8" />
-      <span>{t('form.button-create')}</span>
-    </button>
+      <PlusIcon className="size-5" />
+      {t('form.button-create')}
+    </Button>
   );
 }

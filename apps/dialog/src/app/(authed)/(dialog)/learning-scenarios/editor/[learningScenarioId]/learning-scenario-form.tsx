@@ -24,6 +24,7 @@ import { cn } from '@/utils/tailwind';
 import {
   createNewLearningScenarioFromTemplateAction,
   deleteLearningScenarioAction,
+  downloadFileFromLearningScenarioAction,
   linkFileToLearningScenarioAction,
 } from '../../actions';
 import { deepCopy, deepEqual } from '@/utils/object';
@@ -158,6 +159,13 @@ export default function LearningScenarioForm({
     if (!result.success) {
       toast.error(tToast('edit-toast-error'));
     }
+  }
+
+  async function handleDownloadFile(fileId: string) {
+    return downloadFileFromLearningScenarioAction({
+      learningScenarioId: sharedSchoolChat.id,
+      fileId,
+    });
   }
 
   async function onSubmit(data: SharedSchoolChatFormValues) {
@@ -314,7 +322,7 @@ export default function LearningScenarioForm({
           </label>
           <div
             id="image"
-            className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4"
+            className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4 overflow-hidden"
           >
             {maybeSignedPictureUrl ? (
               <AvatarPicture src={maybeSignedPictureUrl} alt="Profile Picture" variant="large" />
@@ -419,6 +427,7 @@ export default function LearningScenarioForm({
           onDeleteFile={handleDeattachFile}
           readOnly={readOnly}
           translationNamespace="learning-scenarios.form"
+          onDownloadFile={handleDownloadFile}
         />
         <AttachedLinks
           fields={fields}
@@ -460,7 +469,7 @@ export default function LearningScenarioForm({
       {isCreating && (
         <section className="mt-8 flex gap-4 items-center">
           <button
-            className={cn(buttonSecondaryClassName, 'hover:border-primary hover:bg-primary-hover')}
+            className={cn(buttonSecondaryClassName, 'hover:border-primary hover:bg-secondary/30')}
             onClick={handleNavigateBack}
             type="button"
           >

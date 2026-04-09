@@ -107,7 +107,8 @@
       "file-limit-reached": "Es können maximal {max_files} Dateien hochgeladen werden. {files_exceeded} Dateien wurden nicht hochgeladen.",
       "image-limit-reached": "Es können maximal {max_images} Bilder hochgeladen werden. {images_exceeded} Bilder wurden nicht hochgeladen.",
       "drop-area": "Dateien per Drag & Drop hier ablegen <b> (pdf, txt, docx) </b>",
-      "choice-word": "oder"
+      "choice-word": "oder",
+      "uploading": "Wird hochgeladen..."
     },
     "delete": {
       "modal-description": "Möchten Sie diese Datei wirklich dauerhaft löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
@@ -120,7 +121,11 @@
       "file-too-large": "Die Datei {file_name} ist zu groß. Es sind maximal {max_file_size} MB erlaubt. Versuche die Datei zu verkleinern.",
       "delete-from-form": "Die Datei wurde erfolgreich gelöscht",
       "invalid-file-format": "Das Dateiformat wird nicht unterstützt, folgende Dateitypen können hochgeladen werden: {supported_formats}",
-      "file-limit-exceeded": "Es können maximal {max_files} Dateien hochgeladen werden."
+      "file-limit-exceeded": "Es können maximal {max_files} Dateien hochgeladen werden.",
+      "download-error": "Die Datei konnte leider nicht heruntergeladen werden. Bitte versuchen Sie es erneut."
+    },
+    "download": {
+      "aria-label": "Datei herunterladen"
     }
   },
   "help-mode": {
@@ -302,6 +307,29 @@
   "learning-scenarios": {
     "title": "Lernszenarien",
     "description": "Im Dialog mit telli setzen sich Lernende mit einem konkreten Thema auseinander und erarbeiten sich so einen Lerngegenstand interaktiv und selbstständig. Die zeitlich begrenzten Chats können einfach einzeln oder gruppenweise mit Lernenden geteilt werden.",
+    "back-button": "Lernszenarien",
+    "back-button-aria-label": "Zurück zu den Lernszenarien",
+    "name-label": "Name des Lernszenarios",
+    "name-placeholder": "Name des Lernszenarios",
+    "name-required": "Der Name darf nicht leer sein.",
+    "name-max-length": "Der Name darf maximal {maxLength} Zeichen lang sein.",
+    "description-label": "Kurzbeschreibung",
+    "description-placeholder": "Beschreibung des Lernszenarios",
+    "description-max-length": "Die Beschreibung darf maximal {maxLength} Zeichen lang sein.",
+    "instructions-label": "Instruktionen",
+    "instructions-placeholder": "Instruktionen für das Lernszenario",
+    "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
+    "student-exercise-label": "Arbeitsauftrag",
+    "student-exercise-tooltip": "Hier kann ein Arbeitsauftrag für die Lernenden formuliert werden.",
+    "student-exercise-placeholder": "Arbeitsauftrag für die Lernenden",
+    "student-exercise-max-length": "Der Arbeitsauftrag darf maximal {maxLength} Zeichen lang sein.",
+    "configuration-heading": "Details",
+    "sharing-info": "Dieses Lernszenario ist für andere freigegeben.",
+    "sharing-settings": "Freigabe-Einstellungen",
+    "delete-modal-title": "Lernszenario löschen",
+    "delete-modal-description": "Soll das Lernszenario wirklich gelöscht werden?",
+    "delete-modal-confirm-button": "Löschen",
+    "duplicate-name-format-string": "Duplikat von {sourceName}",
     "info-dialog": {
       "q1": "Was ist ein Lernszenario?",
       "a1": "Ein Lernszenario ist ein Chat, der auf ein bestimmtes Thema spezialisiert ist. Die Schüler/innen erarbeiten sich das Thema durch Verwendung des Chats selbst. Optional kann vorab ein Arbeitsauftrag definiert werden.",
@@ -366,6 +394,14 @@
       "delete-chat-modal-description": "Wird ein neuer Chat begonnen, verfällt der aktuelle Chat unwiderruflich.",
       "delete-chat-modal-confirm-button": "Aktuellen Chat verwerfen und neu beginnen",
       "expired-modal-description": "Der Dialog ist abgelaufen"
+    },
+    "share-with-learners": {
+      "title": "Mit Lernenden teilen",
+      "description": "Lege fest, <b>wie viele</b> deiner <b>telli-Points</b> durch diesen Chat verbraucht werden dürfen und <b>wie lange</b> der Chat aktiv benutzt werden kann.",
+      "max-usage": "Maximale Nutzungszeit",
+      "button-start": "Jetzt bereitstellen",
+      "button-stop": "Stoppen",
+      "share": "Teilen"
     },
     "share-page": {
       "back-button": "Zum Lernszenario",
@@ -460,6 +496,19 @@
       "add-link": "Link hinzufügen",
       "aria-add-link": "Webseite hinzufügen",
       "aria-delete": "Webseite {link} entfernen"
+    },
+    "model": {
+      "label": "Sprachmodell",
+      "placeholder": "Modell auswählen",
+      "no-models": "Keine Modelle verfügbar"
+    },
+    "files-and-links": {
+      "heading": "Hintergrundwissen",
+      "heading-tooltip": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Telli bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: pdf, txt, docx",
+      "files": "Dateien",
+      "links": "Webseiten",
+      "links-tooltip": "Bei Webseiten wird nur die angegebene Webseite selbst als Hintergrundwissen genutzt. Unterseiten werden nicht berücksichtigt.",
+      "file-delete-error": "Fehler beim Löschen der Datei"
     }
   },
   "assistants": {

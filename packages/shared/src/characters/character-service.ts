@@ -12,7 +12,7 @@ import {
   dbGetGlobalCharacters,
   dbGetSharedCharacterConversations,
 } from '@shared/db/functions/character';
-import { dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
+import { dbGetFileForCharacter, dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import {
   AccessLevel,
@@ -34,6 +34,7 @@ import {
   getAvatarPictureUrl,
 } from '@shared/files/fileService';
 import { copyFileInS3, deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
+import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
 import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
@@ -570,14 +571,16 @@ export async function getCharacterByAccessLevel({
   userId: string;
   federalStateId: string;
 }): Promise<CharacterWithShareDataModel[]> {
-  if (accessLevel === 'global') {
-    return dbGetGlobalCharacters({ userId, federalStateId });
-  } else if (accessLevel === 'school') {
-    return dbGetCharactersBySchoolId({ schoolId, userId });
-  } else if (accessLevel === 'private') {
-    return dbGetCharactersByUserId({ userId });
+  switch (accessLevel) {
+    case 'global':
+      return dbGetGlobalCharacters({ userId, federalStateId });
+    case 'school':
+      return dbGetCharactersBySchoolId({ schoolId, userId });
+    case 'private':
+      return dbGetCharactersByUserId({ userId });
+    default:
+      return [];
   }
-  return [];
 }
 
 export async function getCharactersByOverviewFilter({
@@ -591,16 +594,18 @@ export async function getCharactersByOverviewFilter({
   userId: string;
   federalStateId: string;
 }): Promise<CharacterWithShareDataModel[]> {
-  if (filter === 'all') {
-    return dbGetAllAccessibleCharacters({ userId, schoolId, federalStateId });
-  } else if (filter === 'mine') {
-    return await dbGetAllCharactersByUserId({ userId });
-  } else if (filter === 'official') {
-    return await dbGetGlobalCharacters({ userId, federalStateId });
-  } else if (filter === 'school') {
-    return await dbGetCharactersBySchoolId({ schoolId, userId });
+  switch (filter) {
+    case 'all':
+      return dbGetAllAccessibleCharacters({ userId, schoolId, federalStateId });
+    case 'mine':
+      return await dbGetAllCharactersByUserId({ userId });
+    case 'official':
+      return await dbGetGlobalCharacters({ userId, federalStateId });
+    case 'school':
+      return await dbGetCharactersBySchoolId({ schoolId, userId });
+    default:
+      return [];
   }
-  return [];
 }
 
 /**
@@ -697,4 +702,41 @@ export async function uploadAvatarPictureForCharacter({
     picturePath: key,
     signedUrl: await getAvatarPictureUrl(key),
   };
+}
+
+/**
+ * Downloads a file for a character.
+ *
+ * Authorization checks:
+ * - User must have read access to the character.
+ * - The file must belong to the character.
+ */
+export async function downloadFileFromCharacter({
+  characterId,
+  fileId,
+  schoolId,
+  user,
+}: {
+  characterId: string;
+  fileId: string;
+  schoolId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
+}) {
+  checkParameterUUID(characterId);
+  requireTeacherRole(user.userRole);
+  const { character } = await getCharacterInfo(characterId, user.id);
+  if (!character) throw new NotFoundError('Character not found');
+  verifyReadAccess({ item: character, schoolId, userId: user.id });
+
+  const file = await dbGetFileForCharacter({ fileId, characterId });
+  if (!file) {
+    throw new NotFoundError('File not found');
+  }
+
+  return getReadOnlySignedUrl({
+    key: `message_attachments/${fileId}`,
+    filename: file.name,
+    attachment: true,
+    options: { expiresIn: ONE_HOUR },
+  });
 }
