@@ -22,6 +22,7 @@ export function CustomChatFilesAndLinks(props: CustomChatFilesAndLinksProps) {
             initialFiles={props.initialFiles}
             onFileUploaded={props.onFileUploaded}
             onDeleteFile={props.onDeleteFile}
+            onDownloadFile={props.onDownloadFile}
           />
         </CardContent>
       </Card>

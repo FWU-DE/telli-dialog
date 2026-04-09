@@ -1,7 +1,7 @@
 import React from 'react';
 import { FileModel } from '@shared/db/schema';
 import { LocalFileState } from '../chat/send-message-form';
-import FileDrop from '../forms/file-drop-area';
+import { FileDrop } from '../forms/file-drop-area';
 import { NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT } from '@/configuration-text-inputs/const';
 import FilesTable from '../forms/file-upload-table';
 import { ServerActionResult } from '@shared/actions/server-action-result';
@@ -12,11 +12,12 @@ export type CustomChatFilesProps = {
   initialFiles: FileModel[];
   onFileUploaded?: (data: { id: string; name: string; file: File }) => void | Promise<void>;
   onDeleteFile?: (fileId: string) => Promise<ServerActionResult<void>>;
+  onDownloadFile?: (fileId: string) => Promise<ServerActionResult<string | undefined>>;
 };
 
 export function CustomChatFiles(props: CustomChatFilesProps) {
-  const { initialFiles, onFileUploaded: onFileUploaded, onDeleteFile } = props;
-  const [files, setFiles] = React.useState<Map<string, LocalFileState>>(new Map());
+  const { initialFiles, onFileUploaded: onFileUploaded, onDeleteFile, onDownloadFile } = props;
+  const [additionalFiles, setAdditionalFiles] = React.useState(new Map<string, LocalFileState>());
   const [currentFiles, setCurrentFiles] = React.useState<FileModel[]>(initialFiles);
   const toast = useToast();
   const t = useTranslations('custom-chat.files-and-links');
@@ -25,16 +26,18 @@ export function CustomChatFiles(props: CustomChatFilesProps) {
     if (!onDeleteFile) return;
 
     const fileId =
-      files.get(localFileId)?.fileId ?? currentFiles.find((f) => f.id === localFileId)?.id;
+      [...additionalFiles.values()].find((f) => f.fileId === localFileId)?.fileId ??
+      currentFiles.find((f) => f.id === localFileId)?.id;
     if (fileId === undefined) return;
 
     const result = await onDeleteFile(fileId);
     if (result.success) {
-      setFiles((prev) => {
-        const newFiles = new Map(prev);
-        newFiles.delete(localFileId);
-        return newFiles;
-      });
+      setAdditionalFiles(
+        (prev) =>
+          new Map(
+            [...prev.entries()].filter(([k, f]) => k !== localFileId && f.fileId !== localFileId),
+          ),
+      );
       setCurrentFiles((prev) => prev.filter((f) => f.id !== fileId));
     } else {
       toast.error(t('file-delete-error'));
@@ -45,19 +48,21 @@ export function CustomChatFiles(props: CustomChatFilesProps) {
     <>
       {onFileUploaded && (
         <FileDrop
-          setFiles={setFiles}
-          disabled={currentFiles.length + files.size >= NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT}
-          countOfFiles={currentFiles.length + files.size}
+          setFiles={setAdditionalFiles}
+          disabled={
+            currentFiles.length + additionalFiles.size >= NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT
+          }
+          countOfFiles={currentFiles.length + additionalFiles.size}
           onFileUploaded={onFileUploaded}
           showUploadConfirmation={true}
         />
       )}
       <FilesTable
         files={currentFiles}
-        additionalFiles={files}
+        additionalFiles={additionalFiles}
         onDeleteFile={handleDeleteFile}
-        showUploadConfirmation={true}
         readOnly={!onDeleteFile}
+        onDownloadFile={onDownloadFile}
       />
     </>
   );

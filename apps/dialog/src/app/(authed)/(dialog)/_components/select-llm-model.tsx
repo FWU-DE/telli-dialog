@@ -1,9 +1,13 @@
+'use client';
+
 import * as Select from '@radix-ui/react-select';
 import ChevronDownIcon from '@/components/icons/chevron-down';
 import { LlmModelSelectModel } from '@shared/db/schema';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/utils/tailwind';
 import { getFilteredTextModels } from '@shared/llm-models/llm-model-service';
+import { useTheme } from '@/components/providers/theme-provider';
+import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
 
 type SelectLlmFormProps = {
   selectedModel: string | undefined;
@@ -19,6 +23,7 @@ export default function SelectLlmModelForm({
   disabled,
 }: SelectLlmFormProps) {
   const tCommon = useTranslations('common');
+  const { designConfiguration } = useTheme();
 
   if (selectedModel === undefined) {
     return <p>Keine Modelle verfügbar</p>;
@@ -42,7 +47,10 @@ export default function SelectLlmModelForm({
       </Select.Trigger>
 
       <Select.Portal>
-        <Select.Content className="bg-white border border-gray-200 rounded-enterprise-md shadow-dropdown w-full z-50">
+        <Select.Content
+          style={constructRootLayoutStyle({ designConfiguration })}
+          className="bg-white border border-gray-200 rounded-enterprise-md shadow-dropdown w-full z-50"
+        >
           <Select.ScrollUpButton className="py-2 text-gray-500">▲</Select.ScrollUpButton>
           <Select.Viewport className="p-1">
             {getFilteredTextModels(models, true) // mistral should not be selectable for characters and shared school chats
@@ -52,7 +60,7 @@ export default function SelectLlmModelForm({
                   value={model.id}
                   className={cn(
                     'px-4 py-2 cursor-pointer outline-hidden transition',
-                    'hover:bg-primary hover:text-primary-foreground',
+                    'hover:bg-primary/15 hover:text-primary',
                   )}
                 >
                   <Select.ItemText>{model.displayName}</Select.ItemText>

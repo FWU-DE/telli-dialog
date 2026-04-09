@@ -107,7 +107,8 @@
       "file-limit-reached": "Es können maximal {max_files} Dateien hochgeladen werden. {files_exceeded} Dateien wurden nicht hochgeladen.",
       "image-limit-reached": "Es können maximal {max_images} Bilder hochgeladen werden. {images_exceeded} Bilder wurden nicht hochgeladen.",
       "drop-area": "Dateien per Drag & Drop hier ablegen <b> (pdf, txt, docx) </b>",
-      "choice-word": "oder"
+      "choice-word": "oder",
+      "uploading": "Wird hochgeladen..."
     },
     "delete": {
       "modal-description": "Möchten Sie diese Datei wirklich dauerhaft löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
@@ -120,7 +121,11 @@
       "file-too-large": "Die Datei {file_name} ist zu groß. Es sind maximal {max_file_size} MB erlaubt. Versuche die Datei zu verkleinern.",
       "delete-from-form": "Die Datei wurde erfolgreich gelöscht",
       "invalid-file-format": "Das Dateiformat wird nicht unterstützt, folgende Dateitypen können hochgeladen werden: {supported_formats}",
-      "file-limit-exceeded": "Es können maximal {max_files} Dateien hochgeladen werden."
+      "file-limit-exceeded": "Es können maximal {max_files} Dateien hochgeladen werden.",
+      "download-error": "Die Datei konnte leider nicht heruntergeladen werden. Bitte versuchen Sie es erneut."
+    },
+    "download": {
+      "aria-label": "Datei herunterladen"
     }
   },
   "help-mode": {

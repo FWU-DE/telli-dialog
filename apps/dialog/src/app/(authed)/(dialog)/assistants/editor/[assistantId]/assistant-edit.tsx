@@ -10,10 +10,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AssistantSelectModel, FileModel } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/Card';
-import { Field, FieldLabel, FieldError, FieldGroup } from '@ui/components/Field';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@ui/components/Field';
 import { Input } from '@ui/components/Input';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import z from 'zod';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
@@ -26,19 +26,19 @@ import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-s
 import { useRouter } from 'next/navigation';
 import {
   createNewAssistantAction,
-  deleteFileMappingAndEntityAction,
-  linkFileToAssistantAction,
   deleteAssistantAction,
+  deleteFileMappingAndEntityAction,
+  downloadFileFromAssistantAction,
+  linkFileToAssistantAction,
+  updateAssistantAccessLevelAction,
   updateAssistantAction,
   uploadAvatarPictureForAssistantAction,
-  updateAssistantAccessLevelAction,
 } from '../../actions';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
 import { Textarea } from '@ui/components/Textarea';
-import { useCallback, useMemo, useRef } from 'react';
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
@@ -212,6 +212,10 @@ export function AssistantEdit({
   const handleDeleteFile = async (fileId: string) => {
     return await deleteFileMappingAndEntityAction({ assistantId: assistant.id, fileId });
   };
+
+  async function handleDownloadFile(fileId: string) {
+    return downloadFileFromAssistantAction({ assistantId: assistant.id, fileId });
+  }
 
   const handleLinksChange = async (links: string[]) => {
     return await updateAssistantAction({ gptId: assistant.id, attachedLinks: links });
@@ -403,6 +407,7 @@ export function AssistantEdit({
           initialFiles={relatedFiles}
           onFileUploaded={handleFileUploaded}
           onDeleteFile={handleDeleteFile}
+          onDownloadFile={handleDownloadFile}
           initialLinks={initialLinks}
           onLinksChange={handleLinksChange}
         />

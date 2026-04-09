@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm';
+import { and, eq, getTableColumns, inArray, isNotNull, isNull } from 'drizzle-orm';
 import { db } from '..';
 import {
   AssistantFileMapping,
@@ -161,6 +161,72 @@ export async function dbGetRelatedAssistantFiles(assistantId?: string): Promise<
     .where(eq(AssistantFileMapping.assistantId, assistantId));
 
   return files;
+}
+
+export async function dbGetFileForLearningScenario({
+  learningScenarioId,
+  fileId,
+}: {
+  learningScenarioId: string;
+  fileId: string;
+}): Promise<FileModel | undefined> {
+  const [file] = await db
+    .select({ ...getTableColumns(fileTable) })
+    .from(LearningScenarioFileMapping)
+    .innerJoin(fileTable, eq(LearningScenarioFileMapping.fileId, fileTable.id))
+    .where(
+      and(
+        eq(LearningScenarioFileMapping.learningScenarioId, learningScenarioId),
+        eq(LearningScenarioFileMapping.fileId, fileId),
+      ),
+    )
+    .limit(1);
+
+  return file;
+}
+
+export async function dbGetFileForCharacter({
+  characterId,
+  fileId,
+}: {
+  characterId: string;
+  fileId: string;
+}): Promise<FileModel | undefined> {
+  const [file] = await db
+    .select({ ...getTableColumns(fileTable) })
+    .from(CharacterFileMapping)
+    .innerJoin(fileTable, eq(CharacterFileMapping.fileId, fileTable.id))
+    .where(
+      and(
+        eq(CharacterFileMapping.characterId, characterId),
+        eq(CharacterFileMapping.fileId, fileId),
+      ),
+    )
+    .limit(1);
+
+  return file;
+}
+
+export async function dbGetFileForAssistant({
+  assistantId,
+  fileId,
+}: {
+  assistantId: string;
+  fileId: string;
+}): Promise<FileModel | undefined> {
+  const [file] = await db
+    .select({ ...getTableColumns(fileTable) })
+    .from(AssistantFileMapping)
+    .innerJoin(fileTable, eq(AssistantFileMapping.fileId, fileTable.id))
+    .where(
+      and(
+        eq(AssistantFileMapping.assistantId, assistantId),
+        eq(AssistantFileMapping.fileId, fileId),
+      ),
+    )
+    .limit(1);
+
+  return file;
 }
 
 function convertToMap(

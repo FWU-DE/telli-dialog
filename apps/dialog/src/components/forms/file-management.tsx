@@ -1,7 +1,7 @@
 'use client';
 
 import { LocalFileState } from '@/components/chat/send-message-form';
-import FileDrop from '@/components/forms/file-drop-area';
+import { FileDrop } from '@/components/forms/file-drop-area';
 import FilesTable from '@/components/forms/file-upload-table';
 import { FileModel } from '@shared/db/schema';
 import { cn } from '@/utils/tailwind';
@@ -9,6 +9,7 @@ import { labelClassName } from '@/utils/tailwind/input';
 import { useTranslations } from 'next-intl';
 import React from 'react';
 import { NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT } from '@/configuration-text-inputs/const';
+import { ServerActionResult } from '@shared/actions/server-action-result';
 
 interface FileManagementProps {
   files: Map<string, LocalFileState>;
@@ -18,6 +19,7 @@ interface FileManagementProps {
   onDeleteFile: (localFileId: string) => Promise<void>;
   readOnly: boolean;
   translationNamespace?: Parameters<typeof useTranslations>[0];
+  onDownloadFile?: (fileId: string) => Promise<ServerActionResult<string | undefined>>;
 }
 
 export default function FileManagement({
@@ -28,6 +30,7 @@ export default function FileManagement({
   onDeleteFile,
   readOnly,
   translationNamespace,
+  onDownloadFile,
 }: FileManagementProps) {
   const t = useTranslations(translationNamespace);
 
@@ -47,8 +50,8 @@ export default function FileManagement({
         files={initialFiles ?? []}
         additionalFiles={files}
         onDeleteFile={onDeleteFile}
-        showUploadConfirmation={true}
         readOnly={readOnly}
+        onDownloadFile={onDownloadFile}
       />
     </>
   );

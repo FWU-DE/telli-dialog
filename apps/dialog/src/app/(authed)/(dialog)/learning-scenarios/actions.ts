@@ -6,6 +6,7 @@ import {
   createNewLearningScenario,
   createNewLearningScenarioFromTemplate,
   deleteLearningScenario,
+  downloadFileFromLearningScenario,
   linkFileToLearningScenario,
 } from '@shared/learning-scenarios/learning-scenario-service';
 
@@ -52,6 +53,23 @@ export async function linkFileToLearningScenarioAction({
   return runServerAction(linkFileToLearningScenario)({
     fileId,
     learningScenarioId,
+    user,
+  });
+}
+
+export async function downloadFileFromLearningScenarioAction({
+  learningScenarioId,
+  fileId,
+}: {
+  learningScenarioId: string;
+  fileId: string;
+}) {
+  const { user, school } = await requireAuth();
+
+  return runServerAction(downloadFileFromLearningScenario)({
+    learningScenarioId,
+    fileId,
+    schoolId: school.id,
     user,
   });
 }

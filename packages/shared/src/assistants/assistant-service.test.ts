@@ -11,6 +11,7 @@ import {
   updateAssistantAccessLevel,
   getAssistantByUser,
   uploadAvatarPictureForAssistant,
+  downloadFileFromAssistant,
 } from './assistant-service';
 import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
@@ -119,6 +120,16 @@ describe('assistant-service', () => {
             assistantId,
             userId: 'different-user-id',
             croppedImageBlob: new Blob(),
+          }),
+      },
+      {
+        functionName: 'downloadFileFromAssistant',
+        testFunction: () =>
+          downloadFileFromAssistant({
+            assistantId,
+            fileId,
+            schoolId: generateUUID(),
+            user: mockUser(),
           }),
       },
     ])(
