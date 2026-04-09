@@ -5,7 +5,7 @@ export async function deleteCharacter(page: Page, name: string) {
   await expect(card).toBeVisible();
   await card.click();
   await page.waitForURL('/characters/editor/**');
-  const deleteButton = page.getByRole('button', { name: 'Dialogpartner endgültig löschen' });
+  const deleteButton = page.getByTestId('custom-chat-delete-button').first();
   await expect(deleteButton).toBeVisible();
   await deleteButton.click();
 }

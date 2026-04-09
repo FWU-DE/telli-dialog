@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
-import { login } from '../utils/login';
-import { sendMessage } from '../utils/chat';
-import { waitForToast } from '../utils/utils';
-import { deleteCharacter } from '../utils/character';
+import { login } from '../../utils/login';
+import { sendMessage } from '../../utils/chat';
+import { waitForToast } from '../../utils/utils';
+import { deleteCharacter } from '../../utils/character';
 
 const characterName = 'Albert Einstein';
 
@@ -20,24 +20,11 @@ test('teacher can create character with initial message and verify it appears in
 
   await page.waitForURL('/characters/editor/**');
 
-  // configure form with basic details
-  await page.getByLabel('Schultyp').fill('Gymnasium');
-  await page.getByLabel('Klassenstufe').fill('8. Klasse');
-  await page.getByLabel('Fach').fill('Deutsch');
-
-  await page.getByLabel('Wie heißt die simulierte Person? *').fill(characterName);
+  await page.getByLabel('Name des Dialogpartners').fill(characterName);
 
   await page
-    .getByLabel('Wie kann die simulierte Person kurz beschrieben werden? *')
+    .getByLabel('Kurzbeschreibung')
     .fill('Ein brillanter Physiker, der die Relativitätstheorie entwickelt hat.');
-
-  await page
-    .getByLabel('Welche Kompetenzen sollen die Lernenden erwerben? *')
-    .fill('Verständnis für wissenschaftliches Denken und Neugier auf die Physik entwickeln.');
-
-  await page
-    .getByLabel('Was ist die konkrete Unterrichtssituation? *')
-    .fill('Ein Gespräch mit Einstein über seine Entdeckungen und wissenschaftliche Methoden.');
 
   // Add the initial message - this is the key part of this test
   const initialMessage =
@@ -45,12 +32,8 @@ test('teacher can create character with initial message and verify it appears in
   await page.getByRole('textbox', { name: 'Mit welcher Einstiegsfrage' }).fill(initialMessage);
 
   await page
-    .getByLabel('Wie soll der Dialogpartner antworten?')
+    .getByLabel('Einstiegsfrage')
     .fill('Einstein soll verständlich und inspirierend über Wissenschaft sprechen.');
-
-  await page
-    .getByLabel('Wie soll der Dialogpartner nicht antworten?')
-    .fill('Einstein soll nicht zu technisch oder unverständlich antworten.');
 
   const submitButton = page.getByRole('button', { name: 'Dialogpartner erstellen' });
   await expect(submitButton).toBeVisible();
