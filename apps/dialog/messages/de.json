@@ -345,7 +345,6 @@
     "sharing-settings": "Freigabe-Einstellungen",
     "delete-modal-title": "Lernszenario löschen",
     "delete-modal-description": "Soll das Lernszenario wirklich gelöscht werden?",
-    "delete-modal-confirm-button": "Löschen",
     "duplicate-name-format-string": "Duplikat von {sourceName}",
     "info-dialog": {
       "q1": "Was ist ein Lernszenario?",
@@ -564,7 +563,6 @@
     "delete-button": "Löschen",
     "delete-modal-title": "Assistent löschen",
     "delete-modal-description": "Soll der Assistent wirklich gelöscht werden?",
-    "delete-modal-confirm-button": "Löschen",
     "delete-modal-cancel-button": "Abbrechen",
     "duplicate-name-format-string": "Duplikat von {sourceAssistantName}",
     "toasts": {

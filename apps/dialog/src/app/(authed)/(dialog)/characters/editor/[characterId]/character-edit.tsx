@@ -8,12 +8,12 @@ import { WebsearchSource } from '@shared/db/types';
 import { useTranslations } from 'next-intl';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 import { useToast } from '@/components/common/toast';
-import { useRouter } from 'next/dist/client/components/navigation';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod/dist/zod.js';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   deleteCharacterAction,
   deleteFileMappingAndEntityAction,
@@ -470,7 +470,7 @@ export function CharacterEdit({
             <CustomChatActionUse
               onClick={() => {
                 guardNavigation(() => {
-                  router.push(`/custom/d/${character.id}/`);
+                  router.push(`/characters/d/${character.id}/`);
                 });
               }}
             />

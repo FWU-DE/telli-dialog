@@ -21,7 +21,7 @@ export function CustomChatActionDelete({
       triggerButtonClassName={customChatDeleteButtonClassName}
       modalTitle={modalTitle}
       modalDescription={modalDescription}
-      confirmText={t('assistants.delete-modal-confirm-button')}
+      confirmText={t('common.delete')}
       actionFn={onClick}
     >
       <TrashSimpleIcon className="size-5" />

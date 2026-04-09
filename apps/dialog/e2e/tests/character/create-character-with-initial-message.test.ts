@@ -20,19 +20,19 @@ test('teacher can create character with initial message and verify it appears in
 
   await page.waitForURL('/characters/editor/**');
 
-  await page.getByLabel('Name des Dialogpartners').fill(characterName);
+  await page.getByTestId('character-name-input').fill(characterName);
 
   await page
-    .getByLabel('Kurzbeschreibung')
+    .getByTestId('character-description-input')
     .fill('Ein brillanter Physiker, der die Relativitätstheorie entwickelt hat.');
 
   // Add the initial message - this is the key part of this test
   const initialMessage =
     'Hallo! Ich bin Albert Einstein. Ich freue mich sehr, mit dir über die Geheimnisse des Universums zu sprechen. Was möchtest du über Physik oder meine Arbeit wissen?';
-  await page.getByRole('textbox', { name: 'Mit welcher Einstiegsfrage' }).fill(initialMessage);
+  await page.getByTestId('character-initial-message-input').fill(initialMessage);
 
   await page
-    .getByLabel('Einstiegsfrage')
+    .getByTestId('character-instructions-input')
     .fill('Einstein soll verständlich und inspirierend über Wissenschaft sprechen.');
 
   const submitButton = page.getByRole('button', { name: 'Dialogpartner erstellen' });
