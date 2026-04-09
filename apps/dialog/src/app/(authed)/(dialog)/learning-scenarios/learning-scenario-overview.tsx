@@ -59,16 +59,17 @@ export default function LearningScenarioOverview({ currentUserId }: LearningScen
     >
       {(searchQuery, sortBy) => {
         const q = searchQuery.trim().toLowerCase();
+
         const filtered = q
           ? visibleLearningScenarios
               .filter((scenario) => scenario.name.toLowerCase().includes(q))
               .slice()
-              .sort((a, b) =>
-                sortBy === 'name'
-                  ? a.name.localeCompare(b.name)
-                  : b.updatedAt.getTime() - a.updatedAt.getTime(),
-              )
-          : visibleLearningScenarios;
+          : visibleLearningScenarios.slice();
+        filtered.sort((a, b) =>
+          sortBy === 'name'
+            ? a.name.localeCompare(b.name)
+            : b.updatedAt.getTime() - a.updatedAt.getTime(),
+        );
 
         return filtered.map((scenario) => (
           <EntityCard

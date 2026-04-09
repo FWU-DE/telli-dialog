@@ -12,17 +12,11 @@ type FilterTabsProps<T extends string> = {
   tabs: FilterTabItem<T>[];
   activeTab: T;
   onTabChange: (value: T) => void;
-  'aria-label'?: string;
 };
 
-export function FilterTabs<T extends string>({
-  tabs,
-  activeTab,
-  onTabChange,
-  'aria-label': ariaLabel,
-}: FilterTabsProps<T>) {
+export function FilterTabs<T extends string>({ tabs, activeTab, onTabChange }: FilterTabsProps<T>) {
   return (
-    <div className="flex gap-2 flex-wrap" role="group" aria-label={ariaLabel}>
+    <>
       {tabs.map((tab) => (
         <button
           key={tab.value}
@@ -40,6 +34,6 @@ export function FilterTabs<T extends string>({
           {tab.label}
         </button>
       ))}
-    </div>
+    </>
   );
 }
