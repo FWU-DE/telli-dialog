@@ -83,7 +83,7 @@ export default function SharedChat({
           inviteCode={inviteCode}
         />
       )}
-      <div className="flex flex-col h-full w-full">
+      <div className="flex h-dvh min-h-0 w-full flex-col overflow-hidden">
         <SharedChatHeader
           chatActive={chatActive}
           hasMessages={messages.length > 0}
@@ -98,12 +98,11 @@ export default function SharedChat({
         <hr className="w-full border-gray-200 mb-2" />
         <div
           ref={containerRef}
-          className="flex flex-col flex-1 justify-between items-center w-full overflow-hidden relative"
+          className="relative flex min-h-0 flex-1 flex-col items-center w-full"
         >
           <div
             ref={scrollRef}
-            className="grow w-full max-w-5xl overflow-y-auto p-4 pb-20"
-            style={{ maxHeight: 'calc(100vh - 150px)' }}
+            className="min-h-0 w-full flex-1 max-w-5xl overflow-y-auto p-4 pb-20"
           >
             {sharedSchoolChat.studentExercise !== undefined &&
               sharedSchoolChat.studentExercise.trim() !== '' && (
@@ -136,7 +135,7 @@ export default function SharedChat({
             )}
             {error && <ErrorChatPlaceholder error={error} handleReload={handleReload} />}
           </div>
-          <div className="w-full max-w-5xl mx-auto px-4 pb-4">
+          <div className="w-full max-w-5xl shrink-0 mx-auto px-4 pb-4">
             {dialogStarted && (
               <div className="flex flex-col">
                 <ChatInputBox

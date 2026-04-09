@@ -12,17 +12,11 @@ type FilterTabsProps<T extends string> = {
   tabs: FilterTabItem<T>[];
   activeTab: T;
   onTabChange: (value: T) => void;
-  'aria-label'?: string;
 };
 
-export function FilterTabs<T extends string>({
-  tabs,
-  activeTab,
-  onTabChange,
-  'aria-label': ariaLabel,
-}: FilterTabsProps<T>) {
+export function FilterTabs<T extends string>({ tabs, activeTab, onTabChange }: FilterTabsProps<T>) {
   return (
-    <div className="flex gap-2 flex-wrap" role="group" aria-label={ariaLabel}>
+    <>
       {tabs.map((tab) => (
         <button
           key={tab.value}
@@ -33,13 +27,13 @@ export function FilterTabs<T extends string>({
             'px-4 py-1.5 rounded-full text-sm font-medium transition-colors border',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             activeTab === tab.value
-              ? 'bg-primary text-primary-foreground border-primary'
-              : 'bg-background text-foreground border-border hover:bg-muted',
+              ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/85'
+              : 'bg-background text-foreground border-border hover:bg-primary/15',
           )}
         >
           {tab.label}
         </button>
       ))}
-    </div>
+    </>
   );
 }

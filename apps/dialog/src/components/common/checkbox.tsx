@@ -15,8 +15,8 @@ export default function Checkbox(props: CheckboxProps) {
         {...props}
         aria-label={props['aria-label'] ?? props.label ?? ''}
         className={cn(
-          'rounded-[3px] border-[1.5px] border-[var(--dark-gray)] w-4 h-4 hover:border-primary hover:bg-secondary-light disabled:border-[#9B9B9B] disabled:bg-[#EEEEEE]',
-          props.checked && 'border-primary bg-secondary-light',
+          'rounded-[3px] border-[1.5px] border-[var(--dark-gray)] w-4 h-4 hover:border-primary hover:bg-secondary/30 disabled:border-[#9B9B9B] disabled:bg-[#EEEEEE]',
+          props.checked && 'border-primary bg-secondary/30',
           props.className,
         )}
       >

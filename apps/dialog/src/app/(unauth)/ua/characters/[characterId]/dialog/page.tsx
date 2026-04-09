@@ -34,17 +34,15 @@ export default async function Page(props: PageProps<'/ua/characters/[characterId
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
 
   return (
-    <main className="h-dvh w-full">
-      <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
-        <ThemeProvider designConfiguration={designConfiguration}>
-          <CharacterSharedChat
-            {...character}
-            initialMessage={character.initialMessage ?? ''}
-            inviteCode={searchParams.inviteCode}
-            imageSource={avatarPictureUrl}
-          />
-        </ThemeProvider>
-      </LlmModelsProvider>
-    </main>
+    <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
+      <ThemeProvider designConfiguration={designConfiguration}>
+        <CharacterSharedChat
+          {...character}
+          initialMessage={character.initialMessage ?? ''}
+          inviteCode={searchParams.inviteCode}
+          imageSource={avatarPictureUrl}
+        />
+      </ThemeProvider>
+    </LlmModelsProvider>
   );
 }

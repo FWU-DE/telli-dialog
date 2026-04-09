@@ -12,7 +12,7 @@ import { z } from 'zod';
 import { cn } from '@/utils/tailwind';
 import { type ConversationModel } from '@shared/db/types';
 import Link from 'next/link';
-import { useTheme } from '@/hooks/use-theme';
+import { useTheme } from '@/components/providers/theme-provider';
 import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
 import { ImageSquareIcon } from '@phosphor-icons/react/dist/icons/ImageSquare';
 

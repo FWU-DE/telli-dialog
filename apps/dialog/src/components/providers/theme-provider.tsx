@@ -27,9 +27,7 @@ export function ThemeProvider({
 }) {
   return (
     <ThemeContext.Provider value={{ designConfiguration }}>
-      <main style={constructRootLayoutStyle({ designConfiguration })} className="h-full">
-        {children}
-      </main>
+      <div style={constructRootLayoutStyle({ designConfiguration })}>{children}</div>
     </ThemeContext.Provider>
   );
 }
