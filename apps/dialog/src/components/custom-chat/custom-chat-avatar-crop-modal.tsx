@@ -121,12 +121,7 @@ export default function AvatarCropModal({
             <Button onClick={onClose} type="button" variant="outline" disabled={isUploading}>
               {tCommon('cancel')}
             </Button>
-            <Button
-              onClick={handleCropConfirm}
-              type="button"
-              disabled={isUploading}
-              className={cn(buttonPrimaryClassName)}
-            >
+            <Button onClick={handleCropConfirm} type="button" disabled={isUploading}>
               {t('upload-image')}
             </Button>
           </div>

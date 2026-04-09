@@ -162,12 +162,7 @@ export function CustomChatShareWithLearners({
             <div className="grow" />
 
             {!sharedChatActive && (
-              <Button
-                type="button"
-                onClick={handleStartSharing}
-                className={cn(buttonPrimaryClassName)}
-                disabled={sharingDisabled}
-              >
+              <Button type="button" onClick={handleStartSharing} disabled={sharingDisabled}>
                 <ShareFatIcon className="size-5" />
                 {t('button-start')}
               </Button>
@@ -183,13 +178,19 @@ export function CustomChatShareWithLearners({
 
             {sharedChatActive && (
               <div className="flex gap-3">
-                <Button type="button" onClick={handleStopSharing} aria-label={t('button-stop')}>
+                <Button
+                  type="button"
+                  onClick={handleStopSharing}
+                  aria-label={t('button-stop')}
+                  size={'icon-round'}
+                >
                   <StopIcon className="size-5" />
                 </Button>
                 <Button
                   type="button"
                   onClick={() => router.push(shareUILink)}
                   aria-label={t('share')}
+                  size={'icon-round'}
                 >
                   <ShareFatIcon className="size-5" />
                 </Button>

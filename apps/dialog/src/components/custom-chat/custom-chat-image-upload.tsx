@@ -97,7 +97,7 @@ export function CustomChatImageUpload({
             ref={fileInputRef}
             aria-label={t('upload-image')}
           />
-          <Button type="button" onClick={handleButtonClick} className={cn(buttonPrimaryClassName)}>
+          <Button type="button" onClick={handleButtonClick}>
             <UploadIcon weight="regular" />
             {t('upload-image')}
           </Button>

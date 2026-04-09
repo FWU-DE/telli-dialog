@@ -32,7 +32,7 @@ export default function CreateNewCustomGptButton({
   }
 
   return (
-    <Button type="button" onClick={handleNewGPT} className={cn(buttonPrimaryClassName)}>
+    <Button type="button" onClick={handleNewGPT}>
       <PlusIcon className="size-5" />
       {t('form.create-gpt')}
     </Button>
