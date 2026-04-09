@@ -131,9 +131,10 @@ export async function getReadOnlySignedUrl({
 
   if (!key) return undefined;
 
-  let contentDisposition = attachment ? 'attachment;' : '';
+  let contentDisposition = attachment ? 'attachment' : '';
   if (filename !== undefined) {
-    contentDisposition = `${contentDisposition}; filename*=UTF-8''${encodeRFC5987Value(filename)}`;
+    const dispositionType = attachment ? 'attachment' : 'inline';
+    contentDisposition = `${dispositionType}; filename*=UTF-8''${encodeRFC5987Value(filename)}`;
   }
   const command = new GetObjectCommand({
     Bucket: env.otcBucketName,
