@@ -24,32 +24,16 @@ export async function configureCharacter(
     restrictions?: string;
   },
 ) {
-  await page.getByLabel('Schultyp').fill(data?.schoolType ?? 'Gymnasium');
-  await page.getByLabel('Klassenstufe').fill(data?.gradeLevel ?? '10. Klasse');
-  await page.getByLabel('Fach').fill(data?.subject ?? 'Geschichte');
-
-  await page.getByLabel('Wie heißt die simulierte Person? *').fill(data?.name ?? 'John Cena');
+  await page.getByTestId('character-name-input').fill(data?.name ?? 'John Cena');
 
   await page
-    .getByLabel('Wie kann die simulierte Person kurz beschrieben werden? *')
+    .getByTestId('character-description-input')
     .fill(
       data?.description ??
         'Er ist bekannt für seinen Spruch „You can`t see me“ und seine Wrestling-Karriere.',
     );
 
   await page
-    .getByLabel('Welche Kompetenzen sollen die Lernenden erwerben? *')
-    .fill(data?.competence ?? 'Gut wrestlen können');
-
-  await page
-    .getByLabel('Was ist die konkrete Unterrichtssituation? *')
-    .fill(data?.learningContext ?? 'Ein Dialog mit John Cena über Erfolg im Leben.');
-
-  await page
-    .getByLabel('Wie soll der Dialogpartner antworten?')
+    .getByTestId('character-instructions-input')
     .fill(data?.specifications ?? 'John Cena soll über seine Karriere und Erfolge sprechen.');
-
-  await page
-    .getByLabel('Wie soll der Dialogpartner nicht antworten?')
-    .fill(data?.restrictions ?? 'John Cena soll nicht über sein Privatleben sprechen.');
 }
