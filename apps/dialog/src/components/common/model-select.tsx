@@ -80,7 +80,7 @@ export default function ModelSelect({
           </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content
-          className={cn('flex flex-col bg-white shadow-dropdown rounded-xl ml-0')}
+          className={cn('flex flex-col bg-white shadow-dropdown rounded-xl ml-0 z-100')}
           align="start"
           sideOffset={10}
         >
@@ -94,7 +94,7 @@ export default function ModelSelect({
                   <DropdownMenu.Item asChild>
                     <button
                       className={cn(
-                        'hover:bg-primary-hover text-left py-2 px-4 outline-hidden flex flex-col',
+                        'hover:bg-primary text-left py-2 px-4 outline-hidden flex flex-col',
                         iconClassName,
                       )}
                       onClick={() => handleSelectModel(model)}

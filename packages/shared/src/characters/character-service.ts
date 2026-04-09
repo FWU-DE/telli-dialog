@@ -571,14 +571,16 @@ export async function getCharacterByAccessLevel({
   userId: string;
   federalStateId: string;
 }): Promise<CharacterWithShareDataModel[]> {
-  if (accessLevel === 'global') {
-    return dbGetGlobalCharacters({ userId, federalStateId });
-  } else if (accessLevel === 'school') {
-    return dbGetCharactersBySchoolId({ schoolId, userId });
-  } else if (accessLevel === 'private') {
-    return dbGetCharactersByUserId({ userId });
+  switch (accessLevel) {
+    case 'global':
+      return dbGetGlobalCharacters({ userId, federalStateId });
+    case 'school':
+      return dbGetCharactersBySchoolId({ schoolId, userId });
+    case 'private':
+      return dbGetCharactersByUserId({ userId });
+    default:
+      return [];
   }
-  return [];
 }
 
 export async function getCharactersByOverviewFilter({
@@ -592,16 +594,18 @@ export async function getCharactersByOverviewFilter({
   userId: string;
   federalStateId: string;
 }): Promise<CharacterWithShareDataModel[]> {
-  if (filter === 'all') {
-    return dbGetAllAccessibleCharacters({ userId, schoolId, federalStateId });
-  } else if (filter === 'mine') {
-    return await dbGetAllCharactersByUserId({ userId });
-  } else if (filter === 'official') {
-    return await dbGetGlobalCharacters({ userId, federalStateId });
-  } else if (filter === 'school') {
-    return await dbGetCharactersBySchoolId({ schoolId, userId });
+  switch (filter) {
+    case 'all':
+      return dbGetAllAccessibleCharacters({ userId, schoolId, federalStateId });
+    case 'mine':
+      return await dbGetAllCharactersByUserId({ userId });
+    case 'official':
+      return await dbGetGlobalCharacters({ userId, federalStateId });
+    case 'school':
+      return await dbGetCharactersBySchoolId({ schoolId, userId });
+    default:
+      return [];
   }
-  return [];
 }
 
 /**

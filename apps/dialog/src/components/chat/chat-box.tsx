@@ -46,7 +46,7 @@ export function ChatBox({
 
   const userClassName =
     children.role === 'user'
-      ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary-light max-w-[70%] wrap-break-word'
+      ? 'w-fit p-4 rounded-2xl rounded-br-none self-end bg-secondary/30 max-w-[70%] wrap-break-word'
       : 'w-fit';
 
   // Check both DB file mapping and pending files for this message

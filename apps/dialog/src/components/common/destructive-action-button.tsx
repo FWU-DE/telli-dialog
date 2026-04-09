@@ -3,7 +3,7 @@ import { buttonDeleteClassName, buttonSecondaryClassName } from '@/utils/tailwin
 import React from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { useQueryClient } from '@tanstack/react-query';
-import { useTheme } from '@/hooks/use-theme';
+import { useTheme } from '@/components/providers/theme-provider';
 import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
 import { useTranslations } from 'next-intl';
 

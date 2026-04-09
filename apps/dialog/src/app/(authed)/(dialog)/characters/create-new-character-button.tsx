@@ -5,10 +5,11 @@ import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { createNewCharacterAction } from './actions';
 import { useToast } from '@/components/common/toast';
 import { cn } from '@/utils/tailwind';
-import PlusIcon from '@/components/icons/plus';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
+import { Button } from '@ui/components/Button';
+import { PlusIcon } from '@phosphor-icons/react';
 
 export function CreateNewCharacterButton() {
   const router = useRouter();
@@ -29,12 +30,9 @@ export function CreateNewCharacterButton() {
   }
 
   return (
-    <button
-      onClick={handleNewCharacter}
-      className={cn(buttonPrimaryClassName, 'flex gap-2 items-center group py-2')}
-    >
-      <PlusIcon className="fill-button-primary-text group-hover:fill-secondary-text w-8 h-8" />
-      <span>{t('form.create-character')}</span>
-    </button>
+    <Button type="button" onClick={handleNewCharacter} className={cn(buttonPrimaryClassName)}>
+      <PlusIcon className="size-5" />
+      {t('form.create-character')}
+    </Button>
   );
 }

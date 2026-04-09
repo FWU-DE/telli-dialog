@@ -62,7 +62,7 @@ export default function SelectImageStyle() {
                   <DropdownMenu.Item asChild>
                     <button
                       className={cn(
-                        'hover:bg-primary-hover text-left py-6 px-7 outline-hidden flex flex-col',
+                        'hover:bg-primary text-left py-6 px-7 outline-hidden flex flex-col',
                         iconClassName,
                       )}
                       onClick={() => handleSelectStyle(style.name === 'none' ? undefined : style)}

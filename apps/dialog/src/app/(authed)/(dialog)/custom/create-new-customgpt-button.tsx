@@ -1,12 +1,13 @@
 'use client';
 
 import { useToast } from '@/components/common/toast';
-import PlusIcon from '@/components/icons/plus';
 import { cn } from '@/utils/tailwind';
 import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { createNewAssistantAction } from './actions';
+import { Button } from '@ui/components/Button';
+import { PlusIcon } from '@phosphor-icons/react';
 
 export default function CreateNewCustomGptButton({
   isNewUiDesignEnabled = false,
@@ -31,12 +32,9 @@ export default function CreateNewCustomGptButton({
   }
 
   return (
-    <button
-      onClick={handleNewGPT}
-      className={cn(buttonPrimaryClassName, 'flex gap-2 items-center group py-2')}
-    >
-      <PlusIcon className="fill-white group-hover:fill-secondary-text w-8 h-8" />
-      <span>{t('form.create-gpt')}</span>
-    </button>
+    <Button type="button" onClick={handleNewGPT} className={cn(buttonPrimaryClassName)}>
+      <PlusIcon className="size-5" />
+      {t('form.create-gpt')}
+    </Button>
   );
 }

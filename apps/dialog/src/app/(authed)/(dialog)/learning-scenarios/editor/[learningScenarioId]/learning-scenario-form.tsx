@@ -322,7 +322,7 @@ export default function LearningScenarioForm({
           </label>
           <div
             id="image"
-            className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4"
+            className="relative bg-light-gray rounded-enterprise-md flex items-center justify-center w-[170px] h-[170px] mt-4 overflow-hidden"
           >
             {maybeSignedPictureUrl ? (
               <AvatarPicture src={maybeSignedPictureUrl} alt="Profile Picture" variant="large" />
@@ -469,7 +469,7 @@ export default function LearningScenarioForm({
       {isCreating && (
         <section className="mt-8 flex gap-4 items-center">
           <button
-            className={cn(buttonSecondaryClassName, 'hover:border-primary hover:bg-primary-hover')}
+            className={cn(buttonSecondaryClassName, 'hover:border-primary hover:bg-secondary/30')}
             onClick={handleNavigateBack}
             type="button"
           >
