@@ -75,12 +75,12 @@ export default function CustomGptOverview({ currentUserId }: CustomGptOverviewPr
           ? visibleAssistants
               .filter((assistant) => assistant.name.toLowerCase().includes(q))
               .slice()
-              .sort((a, b) =>
-                sortBy === 'name'
-                  ? a.name.localeCompare(b.name)
-                  : b.updatedAt.getTime() - a.updatedAt.getTime(),
-              )
-          : visibleAssistants;
+          : visibleAssistants.slice();
+        filtered.sort((a, b) =>
+          sortBy === 'name'
+            ? a.name.localeCompare(b.name)
+            : b.updatedAt.getTime() - a.updatedAt.getTime(),
+        );
 
         return filtered.map((assistant) => (
           <EntityCard

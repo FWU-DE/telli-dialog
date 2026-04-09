@@ -79,37 +79,35 @@ export default function ModelSelect({
             {models.length > 1 && <ChevronDown className="text-primary" />}
           </button>
         </DropdownMenu.Trigger>
-        <DropdownMenu.Portal>
-          <DropdownMenu.Content
-            className={cn('flex flex-col bg-white shadow-dropdown rounded-xl ml-0 z-100')}
-            align="start"
-            sideOffset={10}
-          >
-            {models
-              .filter((m) => m.priceMetadata.type === modelType)
-              .filter((m) => !isStudent || !m.name.includes('mistral')) // students should not be able to select mistral models
-              .filter((m) => m.id !== currentSelectedModel?.id)
-              .map((model) => {
-                return (
-                  <React.Fragment key={model.id}>
-                    <DropdownMenu.Item asChild>
-                      <button
-                        className={cn(
-                          'hover:bg-primary text-left py-2 px-4 outline-hidden flex flex-col',
-                          iconClassName,
-                        )}
-                        onClick={() => handleSelectModel(model)}
-                        aria-label={`Select ${model.name} Model`}
-                      >
-                        <ModelSpan model={model} modelType={modelType} />
-                      </button>
-                    </DropdownMenu.Item>
-                    <hr className="text-gray-200 mx-2 last:mb-2 last:hidden" />
-                  </React.Fragment>
-                );
-              })}
-          </DropdownMenu.Content>
-        </DropdownMenu.Portal>
+        <DropdownMenu.Content
+          className={cn('flex flex-col bg-white shadow-dropdown rounded-xl ml-0 z-100')}
+          align="start"
+          sideOffset={10}
+        >
+          {models
+            .filter((m) => m.priceMetadata.type === modelType)
+            .filter((m) => !isStudent || !m.name.includes('mistral')) // students should not be able to select mistral models
+            .filter((m) => m.id !== currentSelectedModel?.id)
+            .map((model) => {
+              return (
+                <React.Fragment key={model.id}>
+                  <DropdownMenu.Item asChild>
+                    <button
+                      className={cn(
+                        'hover:bg-primary text-left py-2 px-4 outline-hidden flex flex-col',
+                        iconClassName,
+                      )}
+                      onClick={() => handleSelectModel(model)}
+                      aria-label={`Select ${model.name} Model`}
+                    >
+                      <ModelSpan model={model} modelType={modelType} />
+                    </button>
+                  </DropdownMenu.Item>
+                  <hr className="text-gray-200 mx-2 last:mb-2 last:hidden" />
+                </React.Fragment>
+              );
+            })}
+        </DropdownMenu.Content>
       </DropdownMenu.Root>
     </div>
   );
