@@ -39,16 +39,14 @@ export default async function Page(
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
 
   return (
-    <main className="h-dvh w-full">
-      <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
-        <ThemeProvider designConfiguration={designConfiguration}>
-          <SharedChat
-            {...learningScenario}
-            inviteCode={searchParams.inviteCode}
-            maybeSignedPictureUrl={avatarPictureUrl}
-          />
-        </ThemeProvider>
-      </LlmModelsProvider>
-    </main>
+    <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
+      <ThemeProvider designConfiguration={designConfiguration}>
+        <SharedChat
+          {...learningScenario}
+          inviteCode={searchParams.inviteCode}
+          maybeSignedPictureUrl={avatarPictureUrl}
+        />
+      </ThemeProvider>
+    </LlmModelsProvider>
   );
 }

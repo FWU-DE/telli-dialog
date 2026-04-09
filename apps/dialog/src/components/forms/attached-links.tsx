@@ -116,14 +116,14 @@ export function AttachedLinks({
         {!readOnly && (
           <button
             type="button"
-            className={cn(buttonPrimaryClassName, 'flex items-center gap-2 py-1 my-0')}
+            className={cn(buttonPrimaryClassName, 'flex items-center gap-2 py-1 my-0 group')}
             disabled={maxLinksReached}
             onClick={(e) => {
               e.stopPropagation();
               appendLink(currentAttachedLink);
             }}
           >
-            <PlusIcon className="fill-primary-text w-8 h-8" />
+            <PlusIcon className="text-primary-foreground w-8 h-8 group-hover:text-primary" />
             {t('add-link')}
           </button>
         )}

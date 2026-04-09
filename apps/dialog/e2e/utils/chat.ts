@@ -14,7 +14,7 @@ export async function enterMessage(page: Page, message: string) {
 export async function sendMessage(page: Page, message: string) {
   await enterMessage(page, message);
   await page.keyboard.press('Enter');
-  await page.getByLabel('Reload').waitFor();
+  await page.getByLabel('Reload').waitFor({ timeout: 20000 });
 }
 
 export async function uploadFile(page: Page, filePath: string) {

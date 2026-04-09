@@ -5,7 +5,7 @@ import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { buttonSecondaryClassName } from '@/utils/tailwind/button';
-import { useTheme } from '@/hooks/use-theme';
+import { useTheme } from '@/components/providers/theme-provider';
 import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
 
 const LOGOUT_URL = '/api/auth/logout';
