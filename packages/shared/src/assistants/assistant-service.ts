@@ -12,7 +12,7 @@ import {
   dbGetGptsByUserId,
   dbInsertAssistantFileMapping,
 } from '@shared/db/functions/assistants';
-import { dbGetRelatedAssistantFiles } from '@shared/db/functions/files';
+import { dbGetFileForAssistant, dbGetRelatedAssistantFiles } from '@shared/db/functions/files';
 import {
   AccessLevel,
   accessLevelSchema,
@@ -23,13 +23,14 @@ import {
   FileModel,
   fileTable,
 } from '@shared/db/schema';
-import { checkParameterUUID, ForbiddenError } from '@shared/error';
+import { checkParameterUUID, ForbiddenError, NotFoundError } from '@shared/error';
 import {
   deleteAvatarPicture,
   deleteMessageAttachments,
   getAvatarPictureUrl,
 } from '@shared/files/fileService';
-import { copyFileInS3, deleteFileFromS3, uploadFileToS3 } from '@shared/s3';
+import { copyFileInS3, deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
+import { ONE_HOUR } from '@shared/s3/const';
 import { copyAssistant, copyRelatedTemplateFiles } from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
 import { addDays } from '@shared/utils/date';
@@ -528,4 +529,39 @@ export async function uploadAvatarPictureForAssistant({
     picturePath: key,
     signedUrl: await getAvatarPictureUrl(key),
   };
+}
+
+/**
+ * Downloads a file for an assistant.
+ *
+ * Authorization checks:
+ * - User must have access to the assistant.
+ * - The file must belong to the assistant.
+ */
+export async function downloadFileFromAssistant({
+  assistantId,
+  fileId,
+  schoolId,
+  user,
+}: {
+  assistantId: string;
+  fileId: string;
+  schoolId: string;
+  user: Pick<UserModel, 'id' | 'userRole'>;
+}) {
+  checkParameterUUID(assistantId);
+  const assistant = await dbGetAssistantById({ assistantId });
+  verifyReadAccess({ item: assistant, schoolId, userId: user.id });
+
+  const file = await dbGetFileForAssistant({ fileId, assistantId });
+  if (!file) {
+    throw new NotFoundError('File not found');
+  }
+
+  return getReadOnlySignedUrl({
+    key: `message_attachments/${fileId}`,
+    filename: file.name,
+    attachment: true,
+    options: { expiresIn: ONE_HOUR },
+  });
 }

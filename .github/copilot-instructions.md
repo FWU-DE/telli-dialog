@@ -32,7 +32,7 @@ Follow the instructions below when generating or modifying code.
 - apps/admin/ --> contains the admin web application
 - apps/api/ --> contains the public REST API
 - apps/dialog/ --> contains the main web application
-- packages/shared/ --> contains shared code for Next.js apps, mainly types, services and utilities that can be used in admin and dialog apps
+- packages/shared/ --> contains shared code for Next.js apps, mainly types, services, and utilities that can be used in admin and dialog apps
 - packages/shared-core/ --> contains cross-app shared utilities used by all apps (admin, dialog, api)
 - packages/ai-core/ --> contains logic to communicate with AI providers and LLMs
 - packages/api-database/ --> contains database access logic and models for the api app
@@ -92,3 +92,9 @@ apps/<app_name>/src/components/utils/ --> custom utility functions
 ## Unit Testing (Vitest)
 
 Only write tests when the user asks for them.
+
+## Verification Commands
+
+- After making any file changes, run `pnpm format`, then `pnpm lint`, and then `pnpm test` from the repository root.
+- Treat formatting, lint, and test issues as blocking: fix problems when possible before finishing.
+- If verification cannot be run (for example, due to missing dependencies or environment limitations), clearly report that.

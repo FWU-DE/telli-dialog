@@ -4,6 +4,7 @@ import { requireAuth } from '@/auth/requireAuth';
 import {
   createNewAssistant,
   deleteFileMappingAndEntity,
+  downloadFileFromAssistant,
   linkFileToAssistant,
   deleteAssistant,
   updateAssistant,
@@ -102,5 +103,22 @@ export async function uploadAvatarPictureForAssistantAction({
     assistantId,
     croppedImageBlob,
     userId: user.id,
+  });
+}
+
+export async function downloadFileFromAssistantAction({
+  assistantId,
+  fileId,
+}: {
+  assistantId: string;
+  fileId: string;
+}) {
+  const { user, school } = await requireAuth();
+
+  return runServerAction(downloadFileFromAssistant)({
+    assistantId,
+    fileId,
+    schoolId: school.id,
+    user,
   });
 }

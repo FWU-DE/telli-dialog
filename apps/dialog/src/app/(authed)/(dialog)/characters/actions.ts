@@ -1,7 +1,10 @@
 'use server';
 
 import { requireAuth } from '@/auth/requireAuth';
-import { createNewCharacter } from '@shared/characters/character-service';
+import {
+  createNewCharacter,
+  downloadFileFromCharacter,
+} from '@shared/characters/character-service';
 import { runServerAction } from '@shared/actions/run-server-action';
 
 export async function createNewCharacterAction({
@@ -22,5 +25,22 @@ export async function createNewCharacterAction({
     user,
     templatePictureId,
     templateId,
+  });
+}
+
+export async function downloadFileFromCharacterAction({
+  characterId,
+  fileId,
+}: {
+  characterId: string;
+  fileId: string;
+}) {
+  const { user, school } = await requireAuth();
+
+  return runServerAction(downloadFileFromCharacter)({
+    characterId,
+    fileId,
+    schoolId: school.id,
+    user,
   });
 }
