@@ -123,7 +123,7 @@ export function AttachedLinks({
               appendLink(currentAttachedLink);
             }}
           >
-            <PlusIcon className="text-primary-foreground w-8 h-8 group-hover:text-primary" />
+            <PlusIcon className="text-white w-8 h-8 group-hover:text-primary" />
             {t('add-link')}
           </button>
         )}

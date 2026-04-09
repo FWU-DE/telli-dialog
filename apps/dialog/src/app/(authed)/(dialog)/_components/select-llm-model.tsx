@@ -4,6 +4,8 @@ import { LlmModelSelectModel } from '@shared/db/schema';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/utils/tailwind';
 import { getFilteredTextModels } from '@shared/llm-models/llm-model-service';
+import { useTheme } from '@/components/providers/theme-provider';
+import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
 
 type SelectLlmFormProps = {
   selectedModel: string | undefined;
@@ -19,6 +21,7 @@ export default function SelectLlmModelForm({
   disabled,
 }: SelectLlmFormProps) {
   const tCommon = useTranslations('common');
+  const { designConfiguration } = useTheme();
 
   if (selectedModel === undefined) {
     return <p>Keine Modelle verfügbar</p>;
@@ -50,9 +53,10 @@ export default function SelectLlmModelForm({
                 <Select.Item
                   key={model.id}
                   value={model.id}
+                  style={constructRootLayoutStyle({ designConfiguration })}
                   className={cn(
                     'px-4 py-2 cursor-pointer outline-hidden transition',
-                    'hover:bg-primary hover:text-primary-foreground',
+                    'hover:bg-primary/15 hover:text-primary',
                   )}
                 >
                   <Select.ItemText>{model.displayName}</Select.ItemText>
