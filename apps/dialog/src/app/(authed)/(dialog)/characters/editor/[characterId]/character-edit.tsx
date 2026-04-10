@@ -17,6 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   deleteCharacterAction,
   deleteFileMappingAndEntityAction,
+  downloadFileFromCharacterAction,
   linkFileToCharacterAction,
   shareCharacterAction,
   unshareCharacterAction,
@@ -202,6 +203,10 @@ export function CharacterEdit({
       characterId: character.id,
       fileId,
     });
+  };
+
+  const handleDownloadFile = async (fileId: string) => {
+    return await downloadFileFromCharacterAction({ characterId: character.id, fileId });
   };
 
   const handleLinksChange = async (links: string[]) => {
@@ -455,6 +460,7 @@ export function CharacterEdit({
             onDeleteFile={handleDeleteFile}
             initialLinks={initialLinks}
             onLinksChange={handleLinksChange}
+            onDownloadFile={handleDownloadFile}
           />
 
           <CustomShareSection

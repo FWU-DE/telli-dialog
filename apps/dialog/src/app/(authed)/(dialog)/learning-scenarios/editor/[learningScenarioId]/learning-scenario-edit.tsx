@@ -9,10 +9,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/Card';
-import { Field, FieldLabel, FieldError, FieldGroup } from '@ui/components/Field';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@ui/components/Field';
 import { Input } from '@ui/components/Input';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import z from 'zod';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
@@ -23,14 +23,17 @@ import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-actio
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
 import { useRouter } from 'next/navigation';
 import {
-  updateLearningScenarioAction,
   removeFileFromLearningScenarioAction,
-  uploadAvatarPictureForLearningScenarioAction,
+  shareLearningScenarioAction,
+  unshareLearningScenarioAction,
   updateLearningScenarioAccessLevelAction,
+  updateLearningScenarioAction,
+  uploadAvatarPictureForLearningScenarioAction,
 } from './actions';
 import {
   createNewLearningScenarioFromTemplateAction,
   deleteLearningScenarioAction,
+  downloadFileFromLearningScenarioAction,
   linkFileToLearningScenarioAction,
 } from '../../actions';
 import { useToast } from '@/components/common/toast';
@@ -38,7 +41,6 @@ import { useTranslations } from 'next-intl';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
 import { Textarea } from '@ui/components/Textarea';
-import { useCallback, useMemo, useRef } from 'react';
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
@@ -50,7 +52,6 @@ import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
 import { telliPointsPercentageValues, usageTimeValuesInMinutes } from './schema';
-import { shareLearningScenarioAction, unshareLearningScenarioAction } from './actions';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
@@ -213,6 +214,13 @@ export function LearningScenarioEdit({
 
   const handleDeleteFile = async (fileId: string) => {
     return await removeFileFromLearningScenarioAction({
+      learningScenarioId: learningScenario.id,
+      fileId,
+    });
+  };
+
+  const handleDownloadFile = async (fileId: string) => {
+    return await downloadFileFromLearningScenarioAction({
       learningScenarioId: learningScenario.id,
       fileId,
     });
@@ -476,6 +484,7 @@ export function LearningScenarioEdit({
             onDeleteFile={handleDeleteFile}
             initialLinks={initialLinks}
             onLinksChange={handleLinksChange}
+            onDownloadFile={handleDownloadFile}
           />
 
           <CustomShareSection
