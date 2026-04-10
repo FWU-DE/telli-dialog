@@ -71,11 +71,7 @@ export function CharacterViewOnly({
   };
 
   const handleDownloadFile = async (fileId: string) => {
-    const result = await downloadFileFromCharacterAction({ characterId: character.id, fileId });
-    if (!result.success) {
-      toast.error(t('toasts.edit-toast-error'));
-    }
-    return result;
+    return await downloadFileFromCharacterAction({ characterId: character.id, fileId });
   };
 
   return (
