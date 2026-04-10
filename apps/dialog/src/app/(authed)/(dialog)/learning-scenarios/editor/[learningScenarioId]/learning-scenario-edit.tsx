@@ -33,6 +33,7 @@ import {
 import {
   createNewLearningScenarioFromTemplateAction,
   deleteLearningScenarioAction,
+  downloadFileFromLearningScenarioAction,
   linkFileToLearningScenarioAction,
 } from '../../actions';
 import { useToast } from '@/components/common/toast';
@@ -213,6 +214,13 @@ export function LearningScenarioEdit({
 
   const handleDeleteFile = async (fileId: string) => {
     return await removeFileFromLearningScenarioAction({
+      learningScenarioId: learningScenario.id,
+      fileId,
+    });
+  };
+
+  const handleDownloadFile = async (fileId: string) => {
+    return await downloadFileFromLearningScenarioAction({
       learningScenarioId: learningScenario.id,
       fileId,
     });
@@ -460,6 +468,7 @@ export function LearningScenarioEdit({
             onDeleteFile={handleDeleteFile}
             initialLinks={initialLinks}
             onLinksChange={handleLinksChange}
+            onDownloadFile={handleDownloadFile}
           />
 
           <CustomShareSection
