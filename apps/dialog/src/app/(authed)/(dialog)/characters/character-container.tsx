@@ -67,85 +67,88 @@ export default function CharacterContainer({
   const timeLeft = calculateTimeLeft(character);
 
   return (
-    <Link
-      href={`/characters/editor/${id}`}
-      className="rounded-enterprise-md border p-6 flex items-center gap-4 w-full hover:border-primary"
-    >
-      <figure
-        className="w-11 h-11 bg-light-gray rounded-enterprise-sm flex justify-center items-center"
-        style={{ minWidth: '44px' }}
+    <div className="rounded-enterprise-md border flex items-center w-full hover:border-primary">
+      <Link
+        href={`/characters/editor/${id}`}
+        className="p-6 flex items-center gap-4 flex-1 min-w-0"
       >
-        {maybeSignedPictureUrl ? (
-          <AvatarPicture src={maybeSignedPictureUrl} alt={`${name} Avatar`} variant="small" />
-        ) : (
-          <EmptyImageIcon className="w-4 h-4" />
-        )}
-      </figure>
-      <div className="flex flex-col gap-0 text-left min-w-0">
-        <h2 className={cn('font-medium leading-none min-h-5', truncateClassName)}>{name}</h2>
-        <span className={cn(truncateClassName, 'text-gray-600')}>{description}</span>
-      </div>
-      <div className="grow" />
-      {timeLeft > 0 && character.maxUsageTimeLimit !== null && (
-        <CountDownTimer
-          leftTime={timeLeft}
-          totalTime={character.maxUsageTimeLimit}
-          className="p-1 me-2"
-          stopWatchClassName="w-4 h-4"
-        />
-      )}
-      {userId !== currentUserId && timeLeft <= 0 && (
-        <CreateNewInstanceFromTemplate
-          templateId={id}
-          templatePictureId={character.pictureId ?? undefined}
-          className={'w-8 h-8'}
-          redirectPath="characters"
-          createInstanceCallbackAction={createNewCharacterAction}
-          {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
+        <figure
+          className="w-11 h-11 bg-light-gray rounded-enterprise-sm flex justify-center items-center"
+          style={{ minWidth: '44px' }}
         >
-          <TelliClipboardButton
-            text={t('form.copy-page.copy-template')}
-            className="w-6 h-6"
-            outerDivClassName="p-1 rounded-enterprise-sm"
+          {maybeSignedPictureUrl ? (
+            <AvatarPicture src={maybeSignedPictureUrl} alt={`${name} Avatar`} variant="small" />
+          ) : (
+            <EmptyImageIcon className="w-4 h-4" />
+          )}
+        </figure>
+        <div className="flex flex-col gap-0 text-left min-w-0">
+          <h2 className={cn('font-medium leading-none min-h-5', truncateClassName)}>{name}</h2>
+          <span className={cn(truncateClassName, 'text-gray-600')}>{description}</span>
+        </div>
+      </Link>
+      <div className="flex items-center gap-2 pr-6">
+        {timeLeft > 0 && character.maxUsageTimeLimit !== null && (
+          <CountDownTimer
+            leftTime={timeLeft}
+            totalTime={character.maxUsageTimeLimit}
+            className="p-1 me-2"
+            stopWatchClassName="w-4 h-4"
           />
-        </CreateNewInstanceFromTemplate>
-      )}
+        )}
+        {userId !== currentUserId && timeLeft <= 0 && (
+          <CreateNewInstanceFromTemplate
+            templateId={id}
+            templatePictureId={character.pictureId ?? undefined}
+            className={'w-8 h-8'}
+            redirectPath="characters"
+            createInstanceCallbackAction={createNewCharacterAction}
+            {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
+          >
+            <TelliClipboardButton
+              text={t('form.copy-page.copy-template')}
+              className="w-6 h-6"
+              outerDivClassName="p-1 rounded-enterprise-sm"
+            />
+          </CreateNewInstanceFromTemplate>
+        )}
 
-      {timeLeft > 0 && (
-        <button
-          aria-label={t('shared.share')}
-          onClick={handleNavigateToShare}
-          className={cn(iconClassName)}
-        >
-          <ShareIcon aria-hidden="true" className="min-w-8 min-h-8" />
-          <span className="sr-only">{t('shared.share')}</span>
-        </button>
-      )}
-      {timeLeft < 1 && (
-        <button
-          type="button"
-          aria-label={tCommon('new-chat')}
-          onClick={handleNavigateToNewUnsharedChat}
-          className={cn(iconClassName, 'min-w-8 min-h-8')}
-        >
-          <SharedChatIcon aria-hidden="true" className="min-w-8 min-h-8" />
-          <span className="sr-only">{tCommon('new-chat')}</span>
-        </button>
-      )}
+        {timeLeft > 0 && (
+          <button
+            aria-label={t('shared.share')}
+            onClick={handleNavigateToShare}
+            className={cn(iconClassName)}
+          >
+            <ShareIcon aria-hidden="true" className="min-w-8 min-h-8" />
+            <span className="sr-only">{t('shared.share')}</span>
+          </button>
+        )}
+        {timeLeft < 1 && (
+          <button
+            type="button"
+            aria-label={tCommon('new-chat')}
+            onClick={handleNavigateToNewUnsharedChat}
+            className={cn(iconClassName, 'min-w-8 min-h-8')}
+          >
+            <SharedChatIcon aria-hidden="true" className="min-w-8 min-h-8" />
+            <span className="sr-only">{tCommon('new-chat')}</span>
+          </button>
+        )}
 
-      {currentUserId === userId && character.accessLevel !== 'global' && (
-        <DestructiveActionButton
-          modalTitle={t('form.delete-character')}
-          modalDescription={t('form.character-delete-modal-description')}
-          confirmText={tCommon('delete')}
-          actionFn={handleDeleteCharacter}
-          aria-label={t('form.delete-character')}
-          triggerButtonClassName={cn('border-transparent p-0', iconClassName)}
-        >
-          <TrashIcon aria-hidden="true" className="min-w-8 min-h-8" />
-          <span className="sr-only">{t('form.delete-character')}</span>
-        </DestructiveActionButton>
-      )}
-    </Link>
+        {currentUserId === userId && character.accessLevel !== 'global' && (
+          <DestructiveActionButton
+            modalTitle={t('form.delete-character')}
+            modalDescription={t('form.character-delete-modal-description')}
+            confirmText={tCommon('delete')}
+            actionFn={handleDeleteCharacter}
+            aria-label={t('form.delete-character')}
+            triggerButtonClassName={cn('border-transparent p-0', iconClassName)}
+          >
+            <TrashIcon aria-hidden="true" className="min-w-8 min-h-8" />
+            <span className="sr-only">{t('form.delete-character')}</span>
+          </DestructiveActionButton>
+        )}
+      </div>
+    </div>
   );
 }
