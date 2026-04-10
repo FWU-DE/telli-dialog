@@ -64,6 +64,7 @@ export function CharacterViewOnly({
         );
       } else {
         toast.error(t('toasts.create-toast-error'));
+        return;
       }
     } finally {
       setIsCopying(false);
