@@ -45,9 +45,7 @@ export default function LearningScenarioItem({
     }
   }
 
-  function handleNavigateToShare(e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
-    e.stopPropagation();
+  function handleNavigateToShare() {
     router.push(`/learning-scenarios/editor/${learningScenario.id}/share`);
   }
 

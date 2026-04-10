@@ -52,15 +52,11 @@ export default function CharacterContainer({
       toast.error(tToast('delete-toast-error'));
     }
   }
-  function handleNavigateToNewUnsharedChat(e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
-    e.stopPropagation();
+  function handleNavigateToNewUnsharedChat() {
     router.push(`/characters/d/${id}`);
   }
 
-  function handleNavigateToShare(e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
-    e.stopPropagation();
+  function handleNavigateToShare() {
     router.push(`/characters/editor/${id}/share`);
   }
 
