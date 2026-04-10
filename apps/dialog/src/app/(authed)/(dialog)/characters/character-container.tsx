@@ -52,14 +52,6 @@ export default function CharacterContainer({
       toast.error(tToast('delete-toast-error'));
     }
   }
-  function handleNavigateToNewUnsharedChat() {
-    router.push(`/characters/d/${id}`);
-  }
-
-  function handleNavigateToShare() {
-    router.push(`/characters/editor/${id}/share`);
-  }
-
   const timeLeft = calculateTimeLeft(character);
 
   return (
@@ -110,25 +102,24 @@ export default function CharacterContainer({
         )}
 
         {timeLeft > 0 && (
-          <button
+          <Link
             aria-label={t('shared.share')}
-            onClick={handleNavigateToShare}
+            href={`/characters/editor/${id}/share`}
             className={cn(iconClassName)}
           >
             <ShareIcon aria-hidden="true" className="min-w-8 min-h-8" />
             <span className="sr-only">{t('shared.share')}</span>
-          </button>
+          </Link>
         )}
         {timeLeft < 1 && (
-          <button
-            type="button"
+          <Link
             aria-label={tCommon('new-chat')}
-            onClick={handleNavigateToNewUnsharedChat}
+            href={`/characters/d/${id}`}
             className={cn(iconClassName, 'min-w-8 min-h-8')}
           >
             <SharedChatIcon aria-hidden="true" className="min-w-8 min-h-8" />
             <span className="sr-only">{tCommon('new-chat')}</span>
-          </button>
+          </Link>
         )}
 
         {currentUserId === userId && character.accessLevel !== 'global' && (

@@ -45,10 +45,6 @@ export default function LearningScenarioItem({
     }
   }
 
-  function handleNavigateToShare() {
-    router.push(`/learning-scenarios/editor/${learningScenario.id}/share`);
-  }
-
   async function handleCreateNewLearningScenarioFromTemplate({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     templatePictureId,
@@ -107,14 +103,14 @@ export default function LearningScenarioItem({
           />
         )}
         {timeLeft > 0 && (
-          <button
+          <Link
             aria-label={t('shared.share')}
-            onClick={handleNavigateToShare}
+            href={`/learning-scenarios/editor/${learningScenario.id}/share`}
             className={cn(iconClassName)}
           >
             <ShareIcon aria-hidden="true" className="min-w-8 min-h-8" />
             <span className="sr-only">{t('shared.share')}</span>
-          </button>
+          </Link>
         )}
         {learningScenario.userId !== currentUserId && timeLeft <= 0 && (
           <CreateNewInstanceFromTemplate
