@@ -64,16 +64,14 @@ export function CharacterViewOnly({
         );
       } else {
         toast.error(t('toasts.create-toast-error'));
-        return;
       }
     } finally {
       setIsCopying(false);
     }
   };
 
-  const handleDownloadFile = async (fileId: string) => {
-    return await downloadFileFromCharacterAction({ characterId: character.id, fileId });
-  };
+  const handleDownloadFile = (fileId: string) =>
+    downloadFileFromCharacterAction({ characterId: character.id, fileId });
 
   return (
     <CustomChatLayoutContainer>
