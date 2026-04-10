@@ -13,6 +13,7 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { WebsearchSource } from '@shared/db/types';
 import { ResponsiveLayoutWrapper } from '../../../_components/responsive-layout-wrapper';
 import { CharacterEdit } from './character-edit';
+import { CharacterViewOnly } from './character-view-only';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +50,19 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
     return (
       <ResponsiveLayoutWrapper>
         <CharacterEdit
+          character={character}
+          relatedFiles={relatedFiles}
+          initialLinks={initialLinks}
+          avatarPictureUrl={maybeSignedPictureUrl}
+        />
+      </ResponsiveLayoutWrapper>
+    );
+  }
+
+  if (federalState.featureToggles.isNewUiDesignEnabled && readOnly) {
+    return (
+      <ResponsiveLayoutWrapper>
+        <CharacterViewOnly
           character={character}
           relatedFiles={relatedFiles}
           initialLinks={initialLinks}
