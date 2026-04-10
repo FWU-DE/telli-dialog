@@ -1,8 +1,6 @@
 'use client';
 
 import { useToast } from '@/components/common/toast';
-import { cn } from '@/utils/tailwind';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { createNewAssistantAction } from './actions';
@@ -32,7 +30,7 @@ export default function CreateNewCustomGptButton({
   }
 
   return (
-    <Button type="button" onClick={handleNewGPT} className={cn(buttonPrimaryClassName)}>
+    <Button type="button" onClick={handleNewGPT}>
       <PlusIcon className="size-5" />
       {t('form.create-gpt')}
     </Button>

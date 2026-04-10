@@ -8,8 +8,6 @@ import { CompressionOptions, getCroppedImageBlob } from '@/utils/files/image-uti
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@ui/components/Card';
 import { Button } from '@ui/components/Button';
-import { cn } from '@/utils/tailwind';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { useToast } from '../common/toast';
 
 type AvatarCropModalProps = {
@@ -121,12 +119,7 @@ export default function AvatarCropModal({
             <Button onClick={onClose} type="button" variant="outline" disabled={isUploading}>
               {tCommon('cancel')}
             </Button>
-            <Button
-              onClick={handleCropConfirm}
-              type="button"
-              disabled={isUploading}
-              className={cn(buttonPrimaryClassName)}
-            >
+            <Button onClick={handleCropConfirm} type="button" disabled={isUploading}>
               {t('upload-image')}
             </Button>
           </div>
