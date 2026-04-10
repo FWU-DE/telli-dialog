@@ -71,7 +71,8 @@ export function FormField<
   const value = useWatch({ control, name });
 
   useEffect(() => {
-    if (autoFocusWhenEmpty && (!value || !String(value).trim())) {
+    const isEmptyValue = value === null || value === undefined || !String(value).trim();
+    if (autoFocusWhenEmpty && isEmptyValue) {
       (type === 'textArea' ? textareaRef : inputRef).current?.focus();
     }
   }, [autoFocusWhenEmpty, value, type]);
