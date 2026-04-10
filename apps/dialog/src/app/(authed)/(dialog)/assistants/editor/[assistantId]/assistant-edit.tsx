@@ -51,7 +51,7 @@ type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
 function createAssistantFormValuesSchema(t: AssistantTranslator) {
   return z.object({
-    name: z.string().min(1, t('name-required')),
+    name: z.string().min(1, t('name-required')).max(SMALL_TEXT_INPUT_FIELDS_LIMIT),
     description: z.string(),
     instructions: z.string(),
     isSchoolShared: z.boolean(),
@@ -110,7 +110,7 @@ export function AssistantEdit({
     defaultValues: initialValues,
   });
 
-  const { isSaving, hasSaveError, flushAutoSave, handleAutoSave } =
+  const { isSaving, hasSaveError, flushAutoSave, handleAutoSave, withAutoSaveOnBlur } =
     useFormAutosave<AssistantFormValues>({
       initialValues,
       isDirty,
@@ -122,7 +122,7 @@ export function AssistantEdit({
       saveValues: async (data) => {
         // accessLevel is handled separately in handleSharingChange
         const updateResult = await updateAssistantAction({
-          gptId: assistant.id,
+          assistantId: assistant.id,
           name: data.name,
           description: data.description,
           instructions: data.instructions,
@@ -185,7 +185,7 @@ export function AssistantEdit({
   };
 
   const handleDeleteAssistant = async () => {
-    const deleteResult = await deleteAssistantAction({ gptId: assistant.id });
+    const deleteResult = await deleteAssistantAction({ assistantId: assistant.id });
     if (deleteResult.success) {
       toast.success(t('toasts.delete-toast-success'));
     }
@@ -218,7 +218,7 @@ export function AssistantEdit({
   }
 
   const handleLinksChange = async (links: string[]) => {
-    return await updateAssistantAction({ gptId: assistant.id, attachedLinks: links });
+    return await updateAssistantAction({ assistantId: assistant.id, attachedLinks: links });
   };
 
   async function handleUploadPicture(croppedImageBlob: Blob) {
@@ -240,7 +240,7 @@ export function AssistantEdit({
 
       if (newAccessLevel !== savedAccessLevelRef.current) {
         const result = await updateAssistantAccessLevelAction({
-          gptId: assistant.id,
+          assistantId: assistant.id,
           accessLevel: newAccessLevel,
         });
 
@@ -313,9 +313,11 @@ export function AssistantEdit({
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid} aria-required="true">
-                    <FieldLabel htmlFor={field.name}>{t('name-label')}</FieldLabel>
+                    <FieldLabel htmlFor={field.name} required>
+                      {t('name-label')}
+                    </FieldLabel>
                     <Input
-                      {...field}
+                      {...withAutoSaveOnBlur(field)}
                       ref={nameInputRef}
                       id={field.name}
                       aria-invalid={fieldState.invalid}
@@ -328,10 +330,6 @@ export function AssistantEdit({
                       })}
                       required
                       data-testid="assistant-name-input"
-                      onBlur={() => {
-                        field.onBlur();
-                        handleAutoSave();
-                      }}
                     />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -344,7 +342,7 @@ export function AssistantEdit({
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>{t('description-label')}</FieldLabel>
                     <Textarea
-                      {...field}
+                      {...withAutoSaveOnBlur(field)}
                       id={field.name}
                       className="h-27 resize-none"
                       aria-invalid={fieldState.invalid}
@@ -356,10 +354,6 @@ export function AssistantEdit({
                       })}
                       maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
                       data-testid="assistant-description-input"
-                      onBlur={() => {
-                        field.onBlur();
-                        handleAutoSave();
-                      }}
                     />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -372,7 +366,7 @@ export function AssistantEdit({
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>{t('instructions-label')}</FieldLabel>
                     <Textarea
-                      {...field}
+                      {...withAutoSaveOnBlur(field)}
                       id={field.name}
                       className="h-125"
                       aria-invalid={fieldState.invalid}
@@ -384,21 +378,12 @@ export function AssistantEdit({
                       })}
                       autoComplete="off"
                       data-testid="assistant-instructions-input"
-                      onBlur={() => {
-                        field.onBlur();
-                        handleAutoSave();
-                      }}
                     />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 )}
               />
-              <CustomChatPromptSuggestions
-                control={control}
-                onBlur={() => {
-                  handleAutoSave();
-                }}
-              />
+              <CustomChatPromptSuggestions control={control} onBlur={handleAutoSave} />
             </FieldGroup>
           </CardContent>
         </Card>

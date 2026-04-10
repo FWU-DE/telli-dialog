@@ -32,7 +32,7 @@ export function CustomChatFilesAndLinks(props: CustomChatFilesAndLinksProps) {
           <CardTitle
             tooltipAriaLabel={t('links')}
             tooltipContent={t('links-tooltip')}
-            tooltipIcon={<InfoIcon className="size-4 text-icon" />}
+            tooltipIcon={<InfoIcon className="size-5 text-icon" />}
           >
             {t('links')}
           </CardTitle>

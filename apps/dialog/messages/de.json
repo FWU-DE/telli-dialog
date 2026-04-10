@@ -111,6 +111,7 @@
       "uploading": "Wird hochgeladen..."
     },
     "delete": {
+      "button": "Datei löschen",
       "modal-description": "Möchten Sie diese Datei wirklich dauerhaft löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
       "modal-title": "Datei löschen",
       "confirm": "Datei löschen"
@@ -142,7 +143,7 @@
       "q1": "Was ist ein Assistent?",
       "a1": "Ein Assistent ist ein Chat, der auf ein bestimmtes Thema spezialisiert ist. Es gibt bereits vordefinierte Assistenten oder es können eigene Assistenten erstellt werden.",
       "q2": "Was unterscheidet einen Assistenten vom normalen Chat?",
-      "a2": "In einem vorkonfigurierten Assistenten wurden bereits Informationen, Dateien und Webquellen hinterlegt. Diese müssen im normalen Chat erst eingegeben/hochgeladen werden.",
+      "a2": "In einem vorkonfigurierten Assistenten wurden bereits Informationen, Dateien und Webquellen hinterlegt. Diese müssten im normalen Chat erst eingegeben/hochgeladen werden.",
       "q3": "An welche Zielgruppe richten sich die Assistenten?",
       "a3": "Die Nutzung der Assistenten ist für Lehrkräfte gedacht und soll den schulischen Alltag erleichtern."
     },
@@ -515,6 +516,7 @@
       "saving-error": "Der Link auf die Webseite konnte nicht gespeichert werden.",
       "delete-error": "Der Link auf die Webseite konnte nicht gelöscht werden.",
       "aria-input": "URL eingeben",
+      "placeholder": "https://www.beispielwebseite.de/unterseite",
       "add-link": "Link hinzufügen",
       "aria-add-link": "Webseite hinzufügen",
       "aria-delete": "Webseite {link} entfernen"
@@ -529,7 +531,7 @@
       "heading-tooltip": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Telli bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: pdf, txt, docx",
       "files": "Dateien",
       "links": "Webseiten",
-      "links-tooltip": "Bei Webseiten wird nur die angegebene Webseite selbst als Hintergrundwissen genutzt. Unterseiten werden nicht berücksichtigt.",
+      "links-tooltip": "Wichtig: Bitte jeweils konkrete Webseiten angeben (z.B. wikipedia.de/Regenwürmer). Nur wikipedia.de ist nicht ausreichend.",
       "file-delete-error": "Fehler beim Löschen der Datei"
     }
   },

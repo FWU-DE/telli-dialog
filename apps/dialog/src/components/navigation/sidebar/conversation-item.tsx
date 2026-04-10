@@ -14,7 +14,7 @@ import { type ConversationModel } from '@shared/db/types';
 import Link from 'next/link';
 import { useTheme } from '@/components/providers/theme-provider';
 import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
-import { ImageSquareIcon } from '@phosphor-icons/react/dist/icons/ImageSquare';
+import { ImageSquareIcon } from '@phosphor-icons/react';
 
 const renameSchema = z.object({
   name: z.string().min(1),

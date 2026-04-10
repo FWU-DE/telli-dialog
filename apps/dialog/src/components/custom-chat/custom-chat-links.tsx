@@ -105,7 +105,7 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
           <Input
             wrapperClassName="flex-1"
             type="url"
-            placeholder="https://..."
+            placeholder={t('placeholder')}
             maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
             showCharacterCount={false}
             value={currentLink}

@@ -327,7 +327,9 @@ export function CharacterEdit({
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid} aria-required="true">
-                      <FieldLabel htmlFor={field.name}>{t('name-label')}</FieldLabel>
+                      <FieldLabel htmlFor={field.name} required>
+                        {t('name-label')}
+                      </FieldLabel>
                       <Input
                         {...field}
                         ref={nameInputRef}
