@@ -44,11 +44,11 @@
     --popover: #ffffffff;
     --popover-foreground: #020817ff;
 
-    --primary: #46217dff; /* design config: primaryColor */
-    --primary-foreground: #ffffffff; /* design config: primaryTextColor */
+    --primary: #46217dff; /* overwritten by theme: primaryColor */
+    --primary-foreground: #ffffffff; /* overwritten by theme: primaryTextColor */
 
-    --secondary: #6de9d6ff; /* design config: secondaryColor */
-    --secondary-foreground: #020817ff; /* design config: secondaryTextColor */
+    --secondary: #6de9d6ff; /* overwritten by theme: secondaryColor */
+    --secondary-foreground: #020817ff; /* overwritten by theme: secondaryTextColor */
 
     --muted: #f1f5f9ff;
     --muted-foreground: #64748bff;
@@ -72,10 +72,10 @@
     --ring: var(--primary);
 
     --sidebar-background: #fafafaff;
-    --sidebar-accent: color-mix(in srgb, var(--primary) 15%, transparent);
-    --sidebar-accent-foreground: var(--primary);
+    --sidebar-accent: #e8e4ee; /* overwritten by theme: based on primary color */
+    --sidebar-accent-foreground: var(--primary); /* overwritten by theme: based on primary color */
     --sidebar-border: #e5e5e5ff;
-    --sidebar-ring: var(--primary);
+    --sidebar-ring: var(--primary); /* overwritten by theme: based on primary color */
   }
 
   .dark {
