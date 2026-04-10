@@ -371,7 +371,7 @@ export async function unshareLearningScenario({
  * and any authenticated user can view the learning scenario. Note that link sharing
  * only grants read-only access - editing is still restricted to the owner.
  */
-export async function getLearningScenarioForEditView({
+export async function getLearningScenario({
   learningScenarioId,
   schoolId,
   user,

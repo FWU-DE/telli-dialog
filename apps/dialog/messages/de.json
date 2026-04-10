@@ -352,6 +352,8 @@
     "delete-modal-title": "Lernszenario löschen",
     "delete-modal-description": "Soll das Lernszenario wirklich gelöscht werden?",
     "duplicate-name-format-string": "Duplikat von {sourceName}",
+    "author-label": "Erstellt von",
+    "author-text": "FWU",
     "info-dialog": {
       "q1": "Was ist ein Lernszenario?",
       "a1": "Ein Lernszenario ist ein Chat, der auf ein bestimmtes Thema spezialisiert ist. Die Schüler/innen erarbeiten sich das Thema durch Verwendung des Chats selbst. Optional kann vorab ein Arbeitsauftrag definiert werden.",
