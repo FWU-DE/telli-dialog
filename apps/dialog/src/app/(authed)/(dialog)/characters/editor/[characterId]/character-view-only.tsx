@@ -54,7 +54,7 @@ export function CharacterViewOnly({
     setIsCopying(true);
     try {
       const createResult = await createNewCharacterAction({
-        modelId: maybeDefaultModelId,
+        modelId: selectedModelId ?? undefined,
         templatePictureId: character.pictureId ?? undefined,
         templateId: character.id,
       });
@@ -80,7 +80,6 @@ export function CharacterViewOnly({
         href="/characters"
         text={t('back-button')}
         aria-label={t('back-button-aria-label')}
-        onClick={() => router.push('/characters')}
       />
       <CustomChatTitle title={character.name} />
       <CustomChatActions>
