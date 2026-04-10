@@ -52,6 +52,7 @@ import { WebsearchSource } from '@shared/db/types';
 import SharingSection from '@/components/forms/sharing-section';
 import { buildGenericUrl } from '@/app/(authed)/(dialog)/utils.client';
 import { AVATAR_MAX_SIZE } from '@/const';
+import { downloadFileFromAssistantAction } from '@/app/(authed)/(dialog)/assistants/actions';
 
 type AssistantFormProps = AssistantSelectModel & {
   maybeSignedPictureUrl: string | undefined;
@@ -176,6 +177,9 @@ export default function AssistantForm({
   async function handleNewFile(data: { id: string; name: string; file: File }) {
     const result = await linkFileToAssistantAction({ fileId: data.id, assistantId: assistant.id });
     if (!result.success) toast.error(tToast('edit-toast-error'));
+  }
+  async function handleDownloadFile(fileId: string) {
+    return await downloadFileFromAssistantAction({ assistantId: assistant.id, fileId });
   }
 
   async function onSubmit(data: AssistantFormValues) {
@@ -445,6 +449,7 @@ export default function AssistantForm({
           initialFiles={initialFiles}
           onFileUploaded={handleNewFile}
           onDeleteFile={handleDeattachFile}
+          onDownloadFile={handleDownloadFile}
           readOnly={readOnly}
           translationNamespace="custom-gpt.form"
         />
