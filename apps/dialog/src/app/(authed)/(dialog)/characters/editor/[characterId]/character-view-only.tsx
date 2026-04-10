@@ -47,7 +47,7 @@ export function CharacterViewOnly({
   const [isCopying, setIsCopying] = useState(false);
 
   const handleUseChat = () => {
-    router.push(`/characters/d/${character.id}/`);
+    router.push(`/characters/d/${character.id}`);
   };
 
   const handleCopyCharacter = async () => {
@@ -71,7 +71,11 @@ export function CharacterViewOnly({
   };
 
   const handleDownloadFile = async (fileId: string) => {
-    return await downloadFileFromCharacterAction({ characterId: character.id, fileId });
+    const result = await downloadFileFromCharacterAction({ characterId: character.id, fileId });
+    if (!result.success) {
+      toast.error(t('toasts.edit-toast-error'));
+    }
+    return result;
   };
 
   return (
