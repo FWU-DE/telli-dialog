@@ -5,6 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 
 export default defineConfig({
+  globalSetup: './e2e/global-setup',
   testDir: './e2e/tests/',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
