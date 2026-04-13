@@ -3,19 +3,33 @@ import { db } from '..';
 import {
   CharacterFileMapping,
   CharacterInsertModel,
+  CharacterOptionalShareDataModel,
   CharacterSelectModel,
   characterTable,
   characterTemplateMappingTable,
+  CharacterWithShareDataModel,
   conversationMessageTable,
   conversationTable,
   fileTable,
   SharedCharacterChatUsageTrackingInsertModel,
   sharedCharacterChatUsageTrackingTable,
   sharedCharacterConversation,
-  CharacterWithShareDataModel,
 } from '../schema';
 import { dbGetModelByName } from './llm-model';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
+
+function baseCharacterWithShareQuery() {
+  return db
+    .select({
+      ...getTableColumns(characterTable),
+      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
+      inviteCode: sharedCharacterConversation.inviteCode,
+      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
+      startedAt: sharedCharacterConversation.startedAt,
+      startedBy: sharedCharacterConversation.userId,
+    })
+    .from(characterTable);
+}
 
 /**
  * Get all characters a user is allowed to see:
@@ -49,7 +63,8 @@ export async function dbGetCharacters({
 }
 
 /**
- * needs userId because the meta data for shared chararters are both tied to the user and character, this is especially important for shared charcters (school wide or global)
+ * Needs userId because the metadata for shared characters is both tied to the user and character,
+ * this is especially important for shared characters (school wide or global).
  */
 export async function dbGetCharacterByIdWithShareData({
   characterId,
@@ -58,20 +73,30 @@ export async function dbGetCharacterByIdWithShareData({
   characterId: string;
   userId: string;
 }): Promise<CharacterWithShareDataModel | undefined> {
-  const [row] = await db
-    .select({
-      ...getTableColumns(characterTable),
-      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
-      inviteCode: sharedCharacterConversation.inviteCode,
-      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
-      startedAt: sharedCharacterConversation.startedAt,
-      startedBy: sharedCharacterConversation.userId,
-    })
-    .from(characterTable)
+  const [row] = await baseCharacterWithShareQuery()
+    .innerJoin(
+      sharedCharacterConversation,
+      and(
+        eq(sharedCharacterConversation.characterId, characterTable.id),
+        eq(sharedCharacterConversation.userId, userId),
+      ),
+    )
+    .where(eq(characterTable.id, characterId));
+  return row;
+}
+
+export async function dbGetCharacterByIdOptionalShareData({
+  characterId,
+  userId,
+}: {
+  characterId: string;
+  userId: string;
+}): Promise<CharacterOptionalShareDataModel | undefined> {
+  const [row] = await baseCharacterWithShareQuery()
     .leftJoin(
       sharedCharacterConversation,
       and(
-        eq(sharedCharacterConversation.characterId, characterId),
+        eq(sharedCharacterConversation.characterId, characterTable.id),
         eq(sharedCharacterConversation.userId, userId),
       ),
     )
@@ -133,17 +158,8 @@ export async function dbGetGlobalCharacters({
 }: {
   userId: string;
   federalStateId?: string;
-}): Promise<CharacterWithShareDataModel[]> {
-  const characters = await db
-    .select({
-      ...getTableColumns(characterTable),
-      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
-      inviteCode: sharedCharacterConversation.inviteCode,
-      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
-      startedAt: sharedCharacterConversation.startedAt,
-      startedBy: sharedCharacterConversation.userId,
-    })
-    .from(characterTable)
+}): Promise<CharacterOptionalShareDataModel[]> {
+  const characters = await baseCharacterWithShareQuery()
     .leftJoin(
       sharedCharacterConversation,
       and(
@@ -188,17 +204,8 @@ export async function dbGetCharactersBySchoolId({
 }: {
   schoolId: string;
   userId: string;
-}): Promise<CharacterWithShareDataModel[]> {
-  const characters = await db
-    .select({
-      ...getTableColumns(characterTable),
-      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
-      inviteCode: sharedCharacterConversation.inviteCode,
-      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
-      startedAt: sharedCharacterConversation.startedAt,
-      startedBy: sharedCharacterConversation.userId,
-    })
-    .from(characterTable)
+}): Promise<CharacterOptionalShareDataModel[]> {
+  const characters = await baseCharacterWithShareQuery()
     .leftJoin(
       sharedCharacterConversation,
       and(
@@ -225,17 +232,8 @@ export async function dbGetCharactersByUserId({
   userId,
 }: {
   userId: string;
-}): Promise<CharacterWithShareDataModel[]> {
-  const characters = await db
-    .select({
-      ...getTableColumns(characterTable),
-      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
-      inviteCode: sharedCharacterConversation.inviteCode,
-      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
-      startedAt: sharedCharacterConversation.startedAt,
-      startedBy: sharedCharacterConversation.userId,
-    })
-    .from(characterTable)
+}): Promise<CharacterOptionalShareDataModel[]> {
+  const characters = await baseCharacterWithShareQuery()
     .leftJoin(
       sharedCharacterConversation,
       eq(sharedCharacterConversation.characterId, characterTable.id),
@@ -250,17 +248,8 @@ export async function dbGetAllCharactersByUserId({
   userId,
 }: {
   userId: string;
-}): Promise<CharacterWithShareDataModel[]> {
-  const characters = await db
-    .select({
-      ...getTableColumns(characterTable),
-      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
-      inviteCode: sharedCharacterConversation.inviteCode,
-      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
-      startedAt: sharedCharacterConversation.startedAt,
-      startedBy: sharedCharacterConversation.userId,
-    })
-    .from(characterTable)
+}): Promise<CharacterOptionalShareDataModel[]> {
+  const characters = await baseCharacterWithShareQuery()
     .leftJoin(
       sharedCharacterConversation,
       and(
@@ -282,17 +271,8 @@ export async function dbGetAllAccessibleCharacters({
   userId: string;
   schoolId: string;
   federalStateId: string;
-}): Promise<CharacterWithShareDataModel[]> {
-  return db
-    .select({
-      ...getTableColumns(characterTable),
-      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
-      inviteCode: sharedCharacterConversation.inviteCode,
-      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
-      startedAt: sharedCharacterConversation.startedAt,
-      startedBy: sharedCharacterConversation.userId,
-    })
-    .from(characterTable)
+}): Promise<CharacterOptionalShareDataModel[]> {
+  return baseCharacterWithShareQuery()
     .leftJoin(
       sharedCharacterConversation,
       and(
@@ -324,20 +304,11 @@ export async function dbGetCharacterByIdAndUserId({
   characterId: string;
   userId: string;
 }): Promise<CharacterWithShareDataModel | undefined> {
-  const [row] = await db
-    .select({
-      ...getTableColumns(characterTable),
-      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
-      inviteCode: sharedCharacterConversation.inviteCode,
-      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
-      startedAt: sharedCharacterConversation.startedAt,
-      startedBy: sharedCharacterConversation.userId,
-    })
-    .from(characterTable)
-    .leftJoin(
+  const [row] = await baseCharacterWithShareQuery()
+    .innerJoin(
       sharedCharacterConversation,
       and(
-        eq(sharedCharacterConversation.characterId, characterId),
+        eq(sharedCharacterConversation.characterId, characterTable.id),
         eq(sharedCharacterConversation.userId, userId),
       ),
     )
@@ -412,17 +383,8 @@ export async function dbGetCharacterByIdAndInviteCode({
   id: string;
   inviteCode: string;
 }): Promise<CharacterWithShareDataModel | undefined> {
-  const [row] = await db
-    .select({
-      ...getTableColumns(characterTable),
-      telliPointsLimit: sharedCharacterConversation.telliPointsLimit,
-      inviteCode: sharedCharacterConversation.inviteCode,
-      maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
-      startedAt: sharedCharacterConversation.startedAt,
-      startedBy: sharedCharacterConversation.userId,
-    })
-    .from(characterTable)
-    .leftJoin(
+  const [row] = await baseCharacterWithShareQuery()
+    .innerJoin(
       sharedCharacterConversation,
       eq(sharedCharacterConversation.characterId, characterTable.id),
     )

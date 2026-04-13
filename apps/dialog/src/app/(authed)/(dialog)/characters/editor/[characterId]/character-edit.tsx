@@ -3,7 +3,7 @@
 import z from 'zod';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
-import { CharacterWithShareDataModel, FileModel } from '@shared/db/schema';
+import { CharacterOptionalShareDataModel, FileModel } from '@shared/db/schema';
 import { WebsearchSource } from '@shared/db/types';
 import { useTranslations } from 'next-intl';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
@@ -105,7 +105,7 @@ export function CharacterEdit({
   initialLinks,
   avatarPictureUrl,
 }: {
-  character: CharacterWithShareDataModel;
+  character: CharacterOptionalShareDataModel;
   relatedFiles: FileModel[];
   initialLinks: WebsearchSource[];
   avatarPictureUrl?: string;

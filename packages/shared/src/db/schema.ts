@@ -370,15 +370,6 @@ export type CharacterSelectModel = z.infer<typeof characterSelectSchema>;
 export type CharacterInsertModel = z.infer<typeof characterInsertSchema>;
 export type CharacterUpdateModel = z.infer<typeof characterUpdateSchema>;
 
-// Type for character with sharing data (from JOIN with sharedCharacterConversation)
-export type CharacterWithShareDataModel = CharacterSelectModel & {
-  telliPointsLimit: number | null;
-  inviteCode: string | null;
-  maxUsageTimeLimit: number | null;
-  startedAt: Date | null;
-  startedBy: string | null;
-};
-
 /**
  * Schema for table character_template_mappings
  */
@@ -838,6 +829,21 @@ export type SharedCharacterConversationInsertModel = z.infer<
 export type SharedCharacterConversationUpdateModel = z.infer<
   typeof sharedCharacterConversationUpdateSchema
 >;
+
+// Type for character with sharing data (from JOIN with sharedCharacterConversation)
+const sharedCharacterTransformedSchema = sharedCharacterConversationSelectSchema
+  .omit({ id: true, characterId: true, userId: true })
+  .extend({ startedBy: z.string() });
+export const characterWithShareDataModel = characterSelectSchema.and(
+  sharedCharacterTransformedSchema,
+);
+export const characterOptionalShareDataModel = characterSelectSchema.and(
+  sharedCharacterTransformedSchema.extend({
+    startedBy: z.string().nullable(),
+  }),
+);
+export type CharacterWithShareDataModel = z.infer<typeof characterWithShareDataModel>;
+export type CharacterOptionalShareDataModel = z.infer<typeof characterOptionalShareDataModel>;
 
 /**
  * Schema for table shared_character_chat_usage_tracking

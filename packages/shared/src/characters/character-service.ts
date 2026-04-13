@@ -5,6 +5,7 @@ import {
   dbGetAllAccessibleCharacters,
   dbGetAllCharactersByUserId,
   dbGetCharacterById,
+  dbGetCharacterByIdOptionalShareData,
   dbGetCharacterByIdWithShareData,
   dbGetCharacters,
   dbGetCharactersBySchoolId,
@@ -18,6 +19,7 @@ import {
   AccessLevel,
   accessLevelSchema,
   CharacterFileMapping,
+  CharacterOptionalShareDataModel,
   CharacterSelectModel,
   characterTable,
   characterUpdateSchema,
@@ -477,7 +479,7 @@ export const getCharacterForChatSession = async ({
   schoolId: string;
 }) => {
   checkParameterUUID(characterId);
-  const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
+  const character = await dbGetCharacterById({ characterId });
   if (!character) throw new NotFoundError('Character not found');
   verifyReadAccess({ item: character, schoolId, userId });
 
@@ -504,12 +506,12 @@ export const getCharacterForEditView = async ({
   schoolId: string;
   userId: string;
 }): Promise<{
-  character: CharacterWithShareDataModel;
+  character: CharacterOptionalShareDataModel;
   relatedFiles: FileModel[];
   maybeSignedPictureUrl: string | undefined;
 }> => {
   checkParameterUUID(characterId);
-  const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
+  const character = await dbGetCharacterByIdOptionalShareData({ characterId, userId });
   if (!character) throw new NotFoundError('Character not found');
   verifyReadAccess({ item: character, schoolId, userId });
 
@@ -570,7 +572,7 @@ export async function getCharacterByAccessLevel({
   schoolId: string;
   userId: string;
   federalStateId: string;
-}): Promise<CharacterWithShareDataModel[]> {
+}): Promise<CharacterOptionalShareDataModel[]> {
   switch (accessLevel) {
     case 'global':
       return dbGetGlobalCharacters({ userId, federalStateId });
@@ -593,7 +595,7 @@ export async function getCharactersByOverviewFilter({
   schoolId: string;
   userId: string;
   federalStateId: string;
-}): Promise<CharacterWithShareDataModel[]> {
+}): Promise<CharacterOptionalShareDataModel[]> {
   switch (filter) {
     case 'all':
       return dbGetAllAccessibleCharacters({ userId, schoolId, federalStateId });
