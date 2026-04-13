@@ -165,6 +165,14 @@ jobs:
       - name: Run migrations and seed database (if applicable)
         run: pnpm --filter @telli/shared db:migrate && pnpm --filter @telli/shared db:seed
 
+      - name: Cache turbo build cache
+        uses: actions/cache@v5
+        with:
+          path: .turbo
+          key: turbo-e2e-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-e2e-${{ runner.os }}-
+
       # Build and start the app the same way as in the prod container (Next.js standalone)
       - name: Start application
         run: |
