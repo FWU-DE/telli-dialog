@@ -1,9 +1,8 @@
 import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
 import { regenerateMessage, sendMessage } from '../../utils/chat';
-import { deleteCharacter } from '../../utils/character';
+import { configureCharacter, deleteCharacter } from '../../utils/character';
 import { waitForToast } from '../../utils/utils';
-import { configureCharacter } from '../../utils/character';
 import { nanoid } from 'nanoid';
 
 test.use({ storageState: AUTH_FILES.teacher });
@@ -24,8 +23,7 @@ test.describe('create, share, chat, delete', () => {
     // configure form
     await configureCharacter(page, {
       name: characterName,
-      description:
-        'Er ist bekannt für seinen Spruch „You can`t see me" und seine Wrestling-Karriere.',
+      description: `Er ist bekannt für seinen Spruch „You can't see me“ und seine Wrestling-Karriere.`,
       instructions: 'John Cena soll über seine Karriere und Erfolge sprechen.',
     });
 

@@ -5,23 +5,22 @@ import { login } from './utils/login';
 import { AUTH_FILES } from './utils/const';
 
 export default async function globalSetup(config: FullConfig) {
-  const baseURL = config.projects[0]?.use.baseURL;
-  if (!baseURL) return;
+  const baseUrl = config.projects[0]?.use.baseURL;
+  if (!baseUrl) {
+    throw new Error('Playwright globalSetup requires `use.baseURL` to be configured. ');
+  }
 
-  const browser = await chromium.launch();
+  await using browser = await chromium.launch();
 
   for (const [user, file] of Object.entries(AUTH_FILES)) {
     await fs.mkdir(path.dirname(file), { recursive: true });
 
-    const context = await browser.newContext({ baseURL });
+    await using context = await browser.newContext({ baseURL: baseUrl });
     const page = await context.newPage();
 
     await login(page, user);
     await context.storageState({ path: file });
 
     await page.close();
-    await context.close();
   }
-
-  await browser.close();
 }
