@@ -6,8 +6,7 @@ import StopWatchDoneIcon from '@/components/icons/stopwatch-done';
 import DownloadSharedConversationButton from '@/app/(unauth)/ua/download-shared-conversation-button';
 import { type ChatMessage as Message } from '@/types/chat';
 import { useTranslations } from 'next-intl';
-import { useTheme } from '@/components/providers/theme-provider';
-import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
+import { usePortalContainer } from '@ui/components/portal-container';
 
 type ExpiredChatModalProps = {
   conversationMessages: Message[];
@@ -21,16 +20,13 @@ export default function ExpiredChatModal({
   inviteCode,
 }: ExpiredChatModalProps) {
   const t = useTranslations('learning-scenarios.shared');
-  const { designConfiguration } = useTheme();
+  const container = usePortalContainer();
 
   return (
     <AlertDialog.Root open={true}>
-      <AlertDialog.Portal>
+      <AlertDialog.Portal container={container}>
         <AlertDialog.Overlay className="fixed inset-0 bg-dark-gray z-30 opacity-30 shadow-[0px_0px_80px_0px_rgba(0,41,102,0.1)]" />
-        <AlertDialog.Content
-          className="z-50 fixed left-1/2 top-1/2 max-h-[85vh] -translate-x-1/2 -translate-y-1/2 rounded-enterprise-md bg-white p-10 w-[350px] lg:w-[564px] max-w-xl"
-          style={constructRootLayoutStyle({ designConfiguration })}
-        >
+        <AlertDialog.Content className="z-50 fixed left-1/2 top-1/2 max-h-[85vh] -translate-x-1/2 -translate-y-1/2 rounded-enterprise-md bg-white p-10 w-[350px] lg:w-[564px] max-w-xl">
           <div className="flex flex-col justify-center items-center gap-4">
             <AlertDialog.Title asChild>
               <h1 className="text-3xl font-medium">

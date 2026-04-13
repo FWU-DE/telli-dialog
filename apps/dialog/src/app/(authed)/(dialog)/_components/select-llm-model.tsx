@@ -6,8 +6,7 @@ import { LlmModelSelectModel } from '@shared/db/schema';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/utils/tailwind';
 import { getFilteredTextModels } from '@shared/llm-models/llm-model-service';
-import { useTheme } from '@/components/providers/theme-provider';
-import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
+import { usePortalContainer } from '@ui/components/portal-container';
 
 type SelectLlmFormProps = {
   selectedModel: string | undefined;
@@ -23,7 +22,7 @@ export default function SelectLlmModelForm({
   disabled,
 }: SelectLlmFormProps) {
   const tCommon = useTranslations('common');
-  const { designConfiguration } = useTheme();
+  const container = usePortalContainer();
 
   if (selectedModel === undefined) {
     return <p>Keine Modelle verfügbar</p>;
@@ -46,11 +45,8 @@ export default function SelectLlmModelForm({
         <span className="sr-only">{tCommon('llm-model')}</span>
       </Select.Trigger>
 
-      <Select.Portal>
-        <Select.Content
-          style={constructRootLayoutStyle({ designConfiguration })}
-          className="bg-white border border-gray-200 rounded-enterprise-md shadow-dropdown w-full z-50"
-        >
+      <Select.Portal container={container}>
+        <Select.Content className="bg-white border border-gray-200 rounded-enterprise-md shadow-dropdown w-full z-50">
           <Select.ScrollUpButton className="py-2 text-gray-500">▲</Select.ScrollUpButton>
           <Select.Viewport className="p-1">
             {getFilteredTextModels(models, true) // mistral should not be selectable for characters and shared school chats

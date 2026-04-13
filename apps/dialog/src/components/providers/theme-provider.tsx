@@ -3,6 +3,7 @@
 import React from 'react';
 import { DesignConfiguration } from '@ui/types/design-configuration';
 import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
+import { PortalContainerProvider } from '@ui/components/portal-container';
 
 type ThemeContextType = {
   designConfiguration: DesignConfiguration;
@@ -25,9 +26,15 @@ export function ThemeProvider({
   children: React.ReactNode;
   designConfiguration: DesignConfiguration;
 }) {
+  const [container, setContainer] = React.useState<HTMLElement | null>(null);
+
   return (
     <ThemeContext.Provider value={{ designConfiguration }}>
-      <div style={constructRootLayoutStyle({ designConfiguration })}>{children}</div>
+      <PortalContainerProvider container={container}>
+        <div ref={setContainer} style={constructRootLayoutStyle({ designConfiguration })}>
+          {children}
+        </div>
+      </PortalContainerProvider>
     </ThemeContext.Provider>
   );
 }
