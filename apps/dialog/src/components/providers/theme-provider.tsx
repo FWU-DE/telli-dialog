@@ -26,12 +26,20 @@ export function ThemeProvider({
   children: React.ReactNode;
   designConfiguration: DesignConfiguration;
 }) {
+  const [containerRef, setContainerRef] = React.useState<HTMLElement | null>(null);
   const [container, setContainer] = React.useState<HTMLElement | null>(null);
+
+  React.useEffect(() => {
+    if (containerRef) {
+      // Do not set null values on `container` to prevent re-renders on teardown
+      setContainer(containerRef);
+    }
+  }, [containerRef]);
 
   return (
     <ThemeContext.Provider value={{ designConfiguration }}>
       <PortalContainerProvider container={container}>
-        <div ref={setContainer} style={constructRootLayoutStyle({ designConfiguration })}>
+        <div ref={setContainerRef} style={constructRootLayoutStyle({ designConfiguration })}>
           {children}
         </div>
       </PortalContainerProvider>

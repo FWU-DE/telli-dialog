@@ -48,7 +48,7 @@ export default function ExpiredChatModal({
                 primaryButton
                 characterName={title}
                 conversationMessages={conversationMessages}
-                disabled={!hasUserMessages}
+                disabled={false}
                 inviteCode={inviteCode}
               />
             </AlertDialogAction>
