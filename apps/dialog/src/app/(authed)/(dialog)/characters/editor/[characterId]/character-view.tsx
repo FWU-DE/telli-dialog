@@ -24,7 +24,7 @@ import { useToast } from '@/components/common/toast';
 import { createNewCharacterAction } from '../../actions';
 import { downloadFileFromCharacterAction } from './actions';
 
-export function CharacterViewOnly({
+export function CharacterView({
   character,
   relatedFiles,
   initialLinks,
@@ -59,9 +59,7 @@ export function CharacterViewOnly({
         templateId: character.id,
       });
       if (createResult.success) {
-        router.push(
-          `/characters/editor/${createResult.value.id}?create=true&templateId=${character.id}`,
-        );
+        router.push(`/characters/editor/${createResult.value.id}?create=true`);
       } else {
         toast.error(t('toasts.create-toast-error'));
       }
