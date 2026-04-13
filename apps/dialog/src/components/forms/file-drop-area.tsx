@@ -107,7 +107,7 @@ export function FileDrop({
       if (!validateFileExtensions(files)) {
         toast.error(
           t('toasts.invalid-file-format', {
-            supported_formats: SUPPORTED_DOCUMENTS_EXTENSIONS.join(','),
+            supported_formats: SUPPORTED_DOCUMENTS_EXTENSIONS.join(', '),
           }),
         );
         return;
@@ -141,14 +141,21 @@ export function FileDrop({
           type="file"
           className="hidden"
           onChange={handleFileChange}
-          accept={SUPPORTED_DOCUMENTS_EXTENSIONS.map((e) => `.${e}`).join(',')}
+          accept={SUPPORTED_DOCUMENTS_EXTENSIONS.map((e) => `.${e}`).join(', ')}
           multiple
           aria-label={t('upload.upload-input-aria-label')}
         />
         <div className="mt-4 flex flex-col text-sm gap-4 items-center">
           <FileUploadIcon className="w-8 h-8 text-primary" />
           <span className="text-base">
-            <RichText>{(tags) => t.rich('upload.drop-area', tags)}</RichText>
+            <RichText>
+              {(tags) =>
+                t.rich('upload.drop-area', {
+                  ...tags,
+                  supported_formats: SUPPORTED_DOCUMENTS_EXTENSIONS.join(', '),
+                })
+              }
+            </RichText>
           </span>
           <span className="text-gray-600">{t('upload.choice-word')}</span>
           <button

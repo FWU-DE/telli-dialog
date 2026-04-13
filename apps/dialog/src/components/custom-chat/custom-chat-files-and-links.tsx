@@ -4,6 +4,7 @@ import { CustomChatFiles, CustomChatFilesProps } from './custom-chat-files';
 import { CustomChatHeading2 } from './custom-chat-heading2';
 import { CustomChatLinks, CustomChatLinksProps } from './custom-chat-links';
 import { useTranslations } from 'next-intl';
+import { SUPPORTED_DOCUMENTS_EXTENSIONS } from '@/const';
 
 type CustomChatFilesAndLinksProps = CustomChatFilesProps & CustomChatLinksProps;
 
@@ -12,7 +13,12 @@ export function CustomChatFilesAndLinks(props: CustomChatFilesAndLinksProps) {
 
   return (
     <div className="flex flex-col gap-3 mt-10">
-      <CustomChatHeading2 text={t('heading')} tooltip={t('heading-tooltip')} />
+      <CustomChatHeading2
+        text={t('heading')}
+        tooltip={t('heading-tooltip', {
+          supported_formats: SUPPORTED_DOCUMENTS_EXTENSIONS.join(', '),
+        })}
+      />
       <Card>
         <CardHeader>
           <CardTitle>{t('files')}</CardTitle>

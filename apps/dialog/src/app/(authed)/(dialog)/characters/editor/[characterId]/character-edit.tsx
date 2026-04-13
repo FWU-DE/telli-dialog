@@ -53,6 +53,7 @@ import { Textarea } from '@ui/components/Textarea';
 import { CustomChatModelSelect } from '@/components/custom-chat/custom-chat-model-select';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
+import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
 
@@ -146,6 +147,28 @@ export function CharacterEdit({
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
+
+  const instructionPlaceholderSections = [
+    ['instructions-placeholder.p1.heading', 'instructions-placeholder.p1.content'],
+    ['instructions-placeholder.p2.heading', 'instructions-placeholder.p2.content'],
+    ['instructions-placeholder.p3.heading', 'instructions-placeholder.p3.content'],
+    ['instructions-placeholder.p4.heading', 'instructions-placeholder.p4.content'],
+  ] as const;
+
+  const instructionsPlaceholder = instructionPlaceholderSections
+    .map(([headingKey, contentKey]) => [t(headingKey), t(contentKey)].join('\n'))
+    .join('\n\n');
+
+  const instructionsExampleDialogContent = (
+    <div className="whitespace-pre-wrap">
+      {instructionPlaceholderSections.map(([headingKey, contentKey]) => (
+        <div key={headingKey} className="mb-4">
+          <p className="text-gray-500">{t(headingKey)}</p>
+          <p>{t(contentKey)}</p>
+        </div>
+      ))}
+    </div>
+  );
 
   useEffect(() => {
     if (!name || name.trim().length === 0) {
@@ -399,13 +422,18 @@ export function CharacterEdit({
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor={field.name}>{t('instructions-label')}</FieldLabel>
+                      <div className="flex items-center justify-between">
+                        <FieldLabel htmlFor={field.name}>{t('instructions-label')}</FieldLabel>
+                        <CustomChatInstructionsExampleDialog
+                          descriptionContent={instructionsExampleDialogContent}
+                        />
+                      </div>
                       <Textarea
                         {...field}
                         id={field.name}
                         className="h-125"
                         aria-invalid={fieldState.invalid}
-                        placeholder={t('instructions-placeholder')}
+                        placeholder={instructionsPlaceholder}
                         aria-label={t('instructions-label')}
                         maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS}
                         maxLengthErrorMessage={t('instructions-max-length', {

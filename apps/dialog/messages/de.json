@@ -43,11 +43,11 @@
   "sharing": {
     "label": "Freigabe",
     "school": "Schulintern",
-    "school-tooltip": "Wird schulintern sicht- und kopierbar. \nZu beachten: Eine Lehrkraft kann mehreren Schulen zugehörig sein.",
+    "school-tooltip": "Wird schulintern sicht- und kopierbar. \nZu beachten: Eine Lehrkraft kann mehreren Schulen zugehörig sein. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich “Hintergrundwissen” weitergegeben werden dürfen.",
     "community": "Community",
     "community-tooltip": "Wird als Community-Vorlage sicht- und kopierbar.\n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich “Hintergrundwissen” weitergegeben werden dürfen.",
     "link": "Via Link",
-    "link-tooltip": "Über einen Link sicht- und kopierbar für Personen mit telli-Zugang.",
+    "link-tooltip": "Über einen Link sicht- und kopierbar für Personen mit telli-Zugang. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich “Hintergrundwissen” weitergegeben werden dürfen.",
     "copy-link": "Link kopieren",
     "link-copied": "Link in die Zwischenablage kopiert",
     "link-copied-error": "Link konnte nicht kopiert werden"
@@ -106,7 +106,7 @@
       "upload-file-button-disabled": "Es können maximal {max_files} Dateien hochgeladen werden",
       "file-limit-reached": "Es können maximal {max_files} Dateien hochgeladen werden. {files_exceeded} Dateien wurden nicht hochgeladen.",
       "image-limit-reached": "Es können maximal {max_images} Bilder hochgeladen werden. {images_exceeded} Bilder wurden nicht hochgeladen.",
-      "drop-area": "Dateien per Drag & Drop hier ablegen <b> (pdf, txt, docx) </b>",
+      "drop-area": "Dateien per Drag & Drop hier ablegen <b> ({supported_formats}) </b>",
       "choice-word": "oder",
       "uploading": "Wird hochgeladen..."
     },
@@ -211,13 +211,30 @@
     "back-button-aria-label": "Zurück zu den Dialogpartnern",
     "name-required": "Der Name darf nicht leer sein.",
     "description-label": "Kurzbeschreibung",
-    "description-placeholder": "Beschreibung des Dialogpartners",
+    "description-placeholder": "Neuer Schüler in einer DaZ-Klasse",
     "description-max-length": "Die Beschreibung darf maximal {maxLength} Zeichen lang sein.",
     "instructions-label": "Instruktionen",
-    "instructions-placeholder": "Instruktionen für den Dialogpartner",
+    "instructions-placeholder": {
+      "p1": {
+        "heading": "SIMULIERTE PERSON",
+        "content": "Du bist Emre, ein neuer Mitschüler in einer Klasse für Deutsch als Zweitsprache."
+      },
+      "p2": {
+        "heading": "ZIELGRUPPE",
+        "content": "Du unterhältst dich mit Lernenden einer Klasse für Deutsch als Zweitsprache (5. Jahrgangsstufe, Mittelschule). Euer Deutsch-Sprachniveau ist A1 GER."
+      },
+      "p3": {
+        "heading": "KONTEXT",
+        "content": "Ihr lernt euch gegenseitig kennen (Alter, Hobbys, Familie). Du fragst auch nach Informationen über die neue Schule, z.B. Fächer, Stundenplan, Räume, Mittagessen, Busfahrplan."
+      },
+      "p4": {
+        "heading": "VERHALTEN",
+        "content": "Sei authentisch. Antworte ausschließlich auf dem Niveau A1. Bilde nur einfache Sätze. Formuliere in Alltagssprache. Bleibe thematisch in der Lebenswelt eines 10-Jährigen."
+      }
+    },
     "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
     "initial-message-label": "Einstiegsfrage",
-    "initial-message-placeholder": "Einstiegsfrage",
+    "initial-message-placeholder": "Hallo! Ich bin Emre. Alles klar bei dir?",
     "initial-message-max-length": "Die Einstiegsfrage darf maximal {maxLength} Zeichen lang sein.",
     "initial-message-tooltip": "Mit welcher Einstiegsfrage soll der Dialogpartner die Lernenden begrüßen?",
     "sharing-info": "Dieser Dialogpartner ist für andere freigegeben.",
@@ -226,7 +243,7 @@
     "delete-modal-description": "Soll der Dialogpartner wirklich gelöscht werden?",
     "configuration-heading": "Details",
     "name-label": "Name des Dialogpartners",
-    "name-placeholder": "Neuer Dialogpartner",
+    "name-placeholder": "Name des Dialogpartners",
     "name-max-length": "Der Name darf maximal {maxLength} Zeichen lang sein.",
     "info-dialog": {
       "q1": "Was ist ein Dialogpartner?",
@@ -337,14 +354,28 @@
     "name-required": "Der Name darf nicht leer sein.",
     "name-max-length": "Der Name darf maximal {maxLength} Zeichen lang sein.",
     "description-label": "Kurzbeschreibung",
-    "description-placeholder": "Beschreibung des Lernszenarios",
+    "description-placeholder": "Meinen individuellen Lernplan erstellen",
     "description-max-length": "Die Beschreibung darf maximal {maxLength} Zeichen lang sein.",
     "instructions-label": "Instruktionen",
-    "instructions-placeholder": "Instruktionen für das Lernszenario",
+    "instructions-placeholder": {
+      "p1": { "heading": "ROLLE", "content": "Du bist ein erfahrener Lerncoach." },
+      "p2": {
+        "heading": "KONTEXT",
+        "content": "Erstelle einen Lernplan für eine anstehende Prüfung, der optimal an die individuellen Bedürfnisse wie z.B. verfügbare Zeit, Wissensstand, Themen, Lernstrategien angepasst ist."
+      },
+      "p3": {
+        "heading": "VERHALTEN",
+        "content": "Stelle immer nur 1-2 Fragen. Frage nach dem Fach, den Themen und der konkret verfügbaren Zeit pro Wochentag. Schlage am Ende drei fach- bzw. themenspezifische Lernstrategien vor."
+      },
+      "p4": {
+        "heading": "FORMAT",
+        "content": "Erstelle einen Wochenplan als Tabelle mit Lernphasen, Wiederholungsphasen und Pausen."
+      }
+    },
     "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
     "student-exercise-label": "Arbeitsauftrag",
     "student-exercise-tooltip": "Hier kann ein Arbeitsauftrag für die Lernenden formuliert werden.",
-    "student-exercise-placeholder": "Arbeitsauftrag für die Lernenden",
+    "student-exercise-placeholder": "Nutze KI, um einen realistischen Lernplan für dich aufzustellen.",
     "student-exercise-max-length": "Der Arbeitsauftrag darf maximal {maxLength} Zeichen lang sein.",
     "configuration-heading": "Details",
     "sharing-info": "Dieses Lernszenario ist für andere freigegeben.",
@@ -528,11 +559,16 @@
     },
     "files-and-links": {
       "heading": "Hintergrundwissen",
-      "heading-tooltip": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Telli bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: pdf, txt, docx",
+      "heading-tooltip": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Telli bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: {supported_formats}",
       "files": "Dateien",
       "links": "Webseiten",
       "links-tooltip": "Wichtig: Bitte jeweils konkrete Webseiten angeben (z.B. wikipedia.de/Regenwürmer). Nur wikipedia.de ist nicht ausreichend.",
       "file-delete-error": "Fehler beim Löschen der Datei"
+    },
+    "instructions-example": {
+      "button": "Beispiel anzeigen",
+      "title": "Instruktionen: Beispielhafter Inhalt",
+      "close": "Schließen"
     }
   },
   "assistants": {
@@ -543,16 +579,34 @@
     "name-required": "Der Name darf nicht leer sein.",
     "name-max-length": "Der Name darf maximal {maxLength} Zeichen lang sein.",
     "description-label": "Kurzbeschreibung",
-    "description-placeholder": "Beschreibung des Assistenten",
+    "description-placeholder": "Assistenz zur Generierung von differenziertem Lernmaterial",
     "description-max-length": "Die Beschreibung darf maximal {maxLength} Zeichen lang sein.",
     "instructions-label": "Instruktionen",
-    "instructions-placeholder": "Instruktionen für den Assistenten",
+    "instructions-placeholder": {
+      "p1": {
+        "heading": "ROLLE",
+        "content": "Du bist Experte für die Erstellung von differenziertem Lernmaterial."
+      },
+      "p2": {
+        "heading": "KONTEXT",
+        "content": "Passe das im Hintergrundwissen hochgeladene Arbeitsmaterial an drei unterschiedliche Lernniveaus an. (leicht, mittel, schwer)"
+      },
+      "p3": {
+        "heading": "VERHALTEN",
+        "content": "Formuliere sachlich, klar und praxisnah."
+      },
+      "p4": {
+        "heading": "FORMAT",
+        "content": "Strukturiere die Antwort in Abschnitte."
+      }
+    },
     "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
     "back-button-text": "Assistenten",
     "back-button-aria": "Zurück zur Übersicht der Assistenten",
     "author-label": "Erstellt von",
     "author-text": "FWU",
     "prompt-suggestion": "Promptvorschlag",
+    "prompt-suggestion-placeholder": "Erstelle einen Assistenten für XY mit folgenden Eigenschaften: X, Y, Z.",
     "prompt-suggestions-add-button": "Promptvorschlag hinzufügen",
     "prompt-suggestions-add-button-tooltip": "Tooltip für das Hinzufügen von Promptvorschlägen",
     "prompt-suggestions-delete-button": "Promptvorschlag {index} löschen",
@@ -562,7 +616,6 @@
     "prompt-suggestions-count-max": "Es dürfen maximal {max} Promptvorschläge angegeben werden.",
     "custom-assets-files": "Dateien",
     "custom-assets-label": "Hintergrundwissen",
-    "custom-assets-content": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Der Assistent bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: pdf, txt, docx",
     "custom-assets-links": "Webseiten",
     "custom-assets-links-content": "Bei Webseiten wird nur die angegebene Webseite selbst als Hintergrundwissen genutzt. Unterseiten werden nicht berücksichtigt.",
     "sharing-info": "Dieser Assistent ist für andere freigegeben.",

@@ -83,7 +83,7 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
                   maxLengthErrorMessage={t('prompt-suggestions-max-length', {
                     maxLength: EXAMPLE_PROMPT_LENGTH_LIMIT,
                   })}
-                  placeholder={t('prompt-suggestion')}
+                  placeholder={t('prompt-suggestion-placeholder')}
                   autoComplete="off"
                   data-testid={`prompt-suggestion-${index + 1}-input`}
                   onBlur={() => {
