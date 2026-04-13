@@ -15,7 +15,10 @@ import type { WebsearchSource } from '@shared/db/types';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
-import { createNewLearningScenarioFromTemplateAction } from '../actions';
+import {
+  createNewLearningScenarioFromTemplateAction,
+  downloadFileFromLearningScenarioAction,
+} from '../actions';
 import { Card, CardContent } from '@ui/components/Card';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
@@ -79,15 +82,19 @@ export function LearningScenarioView({
     return result;
   };
 
+  async function handleDownloadFile(fileId: string) {
+    return downloadFileFromLearningScenarioAction({
+      learningScenarioId: learningScenario.id,
+      fileId,
+    });
+  }
+
   return (
     <CustomChatLayoutContainer>
       <BackButton
         href="/learning-scenarios"
         text={t('back-button')}
         aria-label={t('back-button-aria-label')}
-        onClick={() => {
-          router.push('/learning-scenarios');
-        }}
       />
       <CustomChatTitle title={learningScenario.name} />
       <CustomChatActions>
@@ -147,7 +154,11 @@ export function LearningScenarioView({
           </CardContent>
         </Card>
       </div>
-      <CustomChatFilesAndLinks initialFiles={fileMappings} initialLinks={initialLinks} />
+      <CustomChatFilesAndLinks
+        initialFiles={fileMappings}
+        initialLinks={initialLinks}
+        onDownloadFile={handleDownloadFile}
+      />
     </CustomChatLayoutContainer>
   );
 }

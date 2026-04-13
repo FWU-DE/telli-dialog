@@ -361,7 +361,7 @@ export async function unshareLearningScenario({
 }
 
 /**
- * Loads learning scenario for edit view.
+ * Loads learning scenario for editing / viewing.
  * Throws if the user is not authorized to access the learning scenario:
  * - NotFound if the learning scenario does not exist
  * - Forbidden if the learning scenario is private and the user is not the owner
