@@ -230,8 +230,7 @@
     "name-max-length": "Der Name darf maximal {maxLength} Zeichen lang sein.",
     "info-dialog": {
       "q1": "Was ist ein Dialogpartner?",
-      "a1": "Ein Dialogpartner ist ein fiktiver Gesprächspartner mit dem die Schüler/innen chatten können. Für die Schülerinnen entsteht dabei das Gefühl tatsächlich mit der fiktiven Person zu chatten. Dies fördert ihre Motivation und Kreativität in Bezug auf die fiktive Person und das Thema.",
-      "a1-2": "Es gibt bereits vordefinierte Dialogpartner oder es können eigene Dialogpartner erstellt werden.",
+      "a1": "Ein Dialogpartner ist ein fiktiver Gesprächspartner mit dem die Schüler/innen chatten können. Für die Schülerinnen entsteht dabei das Gefühl tatsächlich mit der fiktiven Person zu chatten. Dies fördert ihre Motivation und Kreativität in Bezug auf die fiktive Person und das Thema.\n\nEs gibt bereits vordefinierte Dialogpartner oder es können eigene Dialogpartner erstellt werden.",
       "q2": "An welche Zielgruppe richten sich die Dialogpartner?",
       "a2": "Schüler/innen"
     },
@@ -356,8 +355,7 @@
     "author-text": "FWU",
     "info-dialog": {
       "q1": "Was ist ein Lernszenario?",
-      "a1": "Ein Lernszenario ist ein Chat, der auf ein bestimmtes Thema spezialisiert ist. Die Schüler/innen erarbeiten sich das Thema durch Verwendung des Chats selbst. Optional kann vorab ein Arbeitsauftrag definiert werden.",
-      "a1-2": "Es gibt bereits vordefinierte Lernszenarien oder es können eigene Lernszenarien erstellt werden.",
+      "a1": "Ein Lernszenario ist ein Chat, der auf ein bestimmtes Thema spezialisiert ist. Die Schüler/innen erarbeiten sich das Thema durch Verwendung des Chats selbst. Optional kann vorab ein Arbeitsauftrag definiert werden.\n\nEs gibt bereits vordefinierte Lernszenarien oder es können eigene Lernszenarien erstellt werden.",
       "q2": "An welche Zielgruppe richten sich die Lernszenarien?",
       "a2": "Schüler/innen"
     },

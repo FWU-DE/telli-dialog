@@ -77,7 +77,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
           </LlmModelsProvider>
         </SidebarProvider>
         {!productAccess.hasAccess && (
-          <ProductAccessModal modalTitle={'Nutzung nicht möglich'}>
+          <ProductAccessModal modalTitle="Nutzung nicht möglich">
             {productAccess.errorMessage}
           </ProductAccessModal>
         )}
