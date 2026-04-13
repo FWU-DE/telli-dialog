@@ -54,7 +54,6 @@ export function CharacterView({
     setIsCopying(true);
     try {
       const createResult = await createNewCharacterAction({
-        modelId: selectedModelId ?? undefined,
         templatePictureId: character.pictureId ?? undefined,
         templateId: character.id,
       });
