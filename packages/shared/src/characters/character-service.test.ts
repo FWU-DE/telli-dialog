@@ -468,9 +468,9 @@ describe('character-service', () => {
           hasLinkAccess: true,
         };
 
-        (
-          dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
-        ).mockResolvedValue(mockCharacter as never);
+        (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+          mockCharacter as never,
+        );
 
         // User from different school trying to access - should succeed because hasLinkAccess is true
         const result = await getCharacterForChatSession({
@@ -571,9 +571,9 @@ describe('character-service', () => {
           hasLinkAccess: false,
         };
 
-        (
-          dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
-        ).mockResolvedValue(mockCharacter as never);
+        (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+          mockCharacter as never,
+        );
 
         await expect(
           getCharacterForChatSession({
