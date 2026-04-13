@@ -9,13 +9,15 @@ test('create learning scenario from template', async ({ page }) => {
   const card = page.getByRole('button', { name: 'Lern was über KI' }).first();
   await expect(card).toBeVisible();
   await card.click();
-  await page.waitForURL('/learning-scenarios/editor/**');
+  // Non-owned scenarios now route to read-only view instead of editor
+  await page.waitForURL('/learning-scenarios/**');
 
-  const copyButton = page.getByRole('button', { name: 'Lernszenario bearbeiten' });
-  await expect(copyButton).toBeVisible();
-  await expect(copyButton).toBeEnabled();
-  await copyButton.click();
-  await page.waitForURL('**?create=true**');
+  const duplicateButton = page.getByRole('button', { name: 'Duplizieren' });
+  await expect(duplicateButton).toBeVisible();
+  await expect(duplicateButton).toBeEnabled();
+  await duplicateButton.click();
+  // After duplicating, should be redirected to the editor of the new scenario
+  await page.waitForURL('/learning-scenarios/editor/**');
 
   const name = 'Kopiertes Lernszenario ' + nanoid(8);
   await page.getByRole('textbox', { name: 'Name des Lernszenarios' }).fill(name);
