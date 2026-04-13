@@ -1,10 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { createNewCharacterAction } from './actions';
 import { useToast } from '@/components/common/toast';
-import { cn } from '@/utils/tailwind';
 import { useTranslations } from 'next-intl';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
@@ -30,7 +28,7 @@ export function CreateNewCharacterButton() {
   }
 
   return (
-    <Button type="button" onClick={handleNewCharacter} className={cn(buttonPrimaryClassName)}>
+    <Button type="button" onClick={handleNewCharacter}>
       <PlusIcon className="size-5" />
       {t('form.create-character')}
     </Button>
