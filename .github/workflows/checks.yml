@@ -152,4 +152,4 @@ jobs:
         uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./apps/api/coverage/lcov.info,./apps/dialog/coverage/lcov.info,./packages/ai-core/coverage/lcov.info,./packages/shared/coverage/lcov.info
+          files: ./apps/api/coverage/lcov.info,./apps/dialog/coverage/lcov.info,./packages/ai-core/coverage/lcov.info,./packages/shared/coverage/lcov.info,./packages/shared-core/coverage/lcov.info
