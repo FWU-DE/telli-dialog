@@ -89,7 +89,7 @@ jobs:
             --name crawl4ai \
             --shm-size=2gb \
             -p 11235:11235 \
-            unclecode/crawl4ai:0.8.0 &
+            unclecode/crawl4ai:0.8.6 &
 
       - name: Load 1Password Secrets
         uses: 1password/load-secrets-action@v4
