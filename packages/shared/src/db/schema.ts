@@ -806,7 +806,6 @@ export const sharedCharacterConversation = pgTable(
 export const sharedCharacterConversationSelectSchema = createSelectSchema(
   sharedCharacterConversation,
 ).extend({
-  createdAt: z.coerce.date(),
   startedAt: z.coerce.date().nullable(),
 });
 export const sharedCharacterConversationInsertSchema = createInsertSchema(
