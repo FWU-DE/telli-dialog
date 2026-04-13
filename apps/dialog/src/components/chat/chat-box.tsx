@@ -104,13 +104,7 @@ export function ChatBox({
       >
         {websearchSources?.map((source, sourceIndex) => {
           return (
-            <Citation
-              className="p-0"
-              key={`user-link-${index}-${sourceIndex}`}
-              source={source}
-              index={index}
-              sourceIndex={sourceIndex}
-            />
+            <Citation className="p-0" key={`user-link-${index}-${sourceIndex}`} source={source} />
           );
         })}
       </div>

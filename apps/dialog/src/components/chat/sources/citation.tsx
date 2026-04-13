@@ -4,6 +4,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/utils/tailwind';
 import SearchIcon from '@/components/icons/search';
 import { getDisplayUrl } from '@/utils/web-search/parsing';
+import { openInNewTab } from '@/utils/navigation/router';
 import TrashIcon from '@/components/icons/trash';
 import Spinner from '@/components/icons/spinner';
 import { WebsearchSource } from '@shared/db/types';
@@ -14,20 +15,17 @@ function truncateText(text: string, maxLength: number) {
 
 export default function Citation({
   source,
-  index,
-  sourceIndex,
   handleDelete,
   className,
   isLoading = false,
 }: {
   source: WebsearchSource;
-  index: number;
-  sourceIndex: number;
   handleDelete?: () => void;
   className?: string;
   isLoading?: boolean;
 }) {
-  const displayTitle = truncateText(getDisplayUrl(source.link), 30);
+  const displayUrl = getDisplayUrl(source.link);
+  const displayTitle = truncateText(displayUrl, 30);
 
   return (
     <TooltipProvider skipDelayDuration={0} delayDuration={0}>
@@ -40,16 +38,20 @@ export default function Citation({
           direction: 'ltr',
         }}
         role="button"
-        onClick={() => window.open(source.link, '_blank', 'noopener noreferrer')}
+        tabIndex={0}
+        onClick={() => openInNewTab(source.link)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openInNewTab(source.link);
+          }
+        }}
       >
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="flex flex-row items-center gap-1 p-1.5">
               <SearchIcon className="w-3 h-3 ml-1" />
-              <span
-                className="flex text-ellipsis text-xs line-clamp-1"
-                aria-label={`Source Title ${index} ${sourceIndex}`}
-              >
+              <span className="flex text-ellipsis text-xs line-clamp-1" aria-label={displayUrl}>
                 {displayTitle}
               </span>
             </div>
@@ -63,13 +65,12 @@ export default function Citation({
             {!source.error && (
               <span
                 role="button"
-                onClick={() => window.open(source.link, '_blank', 'noopener noreferrer')}
+                aria-hidden="true"
+                onClick={() => openInNewTab(source.link)}
                 // overwrite direction from parent
                 dir="ltr"
               >
-                <span className="font-medium text-ellipsis text-sm line-clamp-2">
-                  {getDisplayUrl(source.link)}
-                </span>
+                <span className="font-medium text-ellipsis text-sm line-clamp-2">{displayUrl}</span>
               </span>
             )}
           </TooltipContent>
