@@ -1,12 +1,13 @@
 import { expect, test } from '@playwright/test';
-import { login } from '../utils/login';
+import { AUTH_FILES } from '../utils/const';
 
 const templateCharactersIdentifier = ['Johann Wolfgang von Goethe'];
 const templateCustomGptsIdentifier = ['Schulorganisationsassistent'];
 const templateLearningScenariosIdentifier = ['Lern was über KI'];
 
+test.use({ storageState: AUTH_FILES.teacher });
+
 test('all predefined characters are visible for everyone', async ({ page }) => {
-  await login(page, 'teacher');
   await page.goto('/characters?filter=official');
 
   await page.waitForURL('/characters**');
@@ -17,7 +18,6 @@ test('all predefined characters are visible for everyone', async ({ page }) => {
 });
 
 test('all predefined custom-gpt templates are visible for everyone', async ({ page }) => {
-  await login(page, 'teacher');
   await page.goto('/custom?filter=official');
 
   await page.waitForURL('/custom**');
@@ -28,7 +28,6 @@ test('all predefined custom-gpt templates are visible for everyone', async ({ pa
 });
 
 test('all predefined learning scenarios are visible for everyone', async ({ page }) => {
-  await login(page, 'teacher');
   await page.goto('/learning-scenarios?filter=official');
 
   await page.waitForURL('/learning-scenarios**');

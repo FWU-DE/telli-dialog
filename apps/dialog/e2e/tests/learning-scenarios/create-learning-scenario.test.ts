@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { login } from '../../utils/login';
+import { AUTH_FILES } from '../../utils/const';
 import { waitForToast, waitForToastDisappear } from '../../utils/utils';
 import { sendMessage } from '../../utils/chat';
 import {
@@ -9,6 +9,8 @@ import {
   deleteLearningScenarioFromDetailPage,
 } from '../../utils/learning-scenario';
 import { nanoid } from 'nanoid';
+
+test.use({ storageState: AUTH_FILES.teacher });
 
 test.describe('create, share, chat, delete', () => {
   const data = {
@@ -28,8 +30,6 @@ test.describe('create, share, chat, delete', () => {
   });
 
   test('teacher can login, create and join learning scenario', async ({ page }) => {
-    await login(page, 'teacher');
-
     await createLearningScenario(page);
 
     // configure form
@@ -74,8 +74,6 @@ test.describe('create, share, chat, delete', () => {
   test('teacher can login and create learning scenario, student can join and restart chat', async ({
     page,
   }) => {
-    await login(page, 'teacher');
-
     await createLearningScenario(page);
 
     // configure form
@@ -131,7 +129,6 @@ test.describe('create, share, chat, delete', () => {
   });
 
   test('teacher can delete learning scenario', async ({ page }) => {
-    await login(page, 'teacher');
     // create learning scenario
     await createLearningScenario(page);
     await configureLearningScenario(page, data);
@@ -148,7 +145,6 @@ test.describe('create, share, chat, delete', () => {
 });
 
 test('data is autosaved on blur', async ({ page }) => {
-  await login(page, 'teacher');
   await createLearningScenario(page);
 
   // Fill out the form initially

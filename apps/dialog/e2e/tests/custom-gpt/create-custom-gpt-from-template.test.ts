@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../utils/login';
+import { AUTH_FILES } from '../../utils/const';
+
+test.use({ storageState: AUTH_FILES.teacher });
 
 test('test', async ({ page }) => {
-  await login(page, 'teacher');
   await page.goto('/custom');
 
   const card = page

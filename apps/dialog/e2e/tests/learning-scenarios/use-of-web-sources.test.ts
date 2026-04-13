@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { login } from '../../utils/login';
+import { AUTH_FILES } from '../../utils/const';
 import { sendMessage } from '../../utils/chat';
 import { configureLearningScenario } from '../../utils/learning-scenario';
+
+test.use({ storageState: AUTH_FILES.teacher });
 
 const data = {
   additionalInstructions:
@@ -18,8 +20,6 @@ const data = {
 test('teacher can create shared chat with web sources, student can join chat and reference web sources', async ({
   page,
 }) => {
-  await login(page, 'teacher');
-
   await page.goto('/learning-scenarios');
   await page.waitForURL('/learning-scenarios');
   await page.getByRole('button', { name: 'Lernszenario erstellen' }).click();

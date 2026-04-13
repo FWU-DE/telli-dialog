@@ -1,12 +1,12 @@
 import { expect, test } from '@playwright/test';
-import { login } from '../../utils/login';
+import { AUTH_FILES } from '../../utils/const';
 import { sendMessage, uploadFile } from '../../utils/chat';
+
+test.use({ storageState: AUTH_FILES.teacher });
 
 test('should upload file and chat with custom GPT template (Schulorganisationsassistent)', async ({
   page,
 }) => {
-  await login(page, 'teacher');
-
   await page.goto('/custom?filter=official');
   await page.waitForURL('/custom?filter=official');
 

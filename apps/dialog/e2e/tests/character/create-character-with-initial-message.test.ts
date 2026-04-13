@@ -1,16 +1,16 @@
 import { expect, test } from '@playwright/test';
-import { login } from '../../utils/login';
+import { AUTH_FILES } from '../../utils/const';
 import { sendMessage } from '../../utils/chat';
 import { waitForToast } from '../../utils/utils';
 import { configureCharacter, deleteCharacter } from '../../utils/character';
+
+test.use({ storageState: AUTH_FILES.teacher });
 
 const characterName = 'Albert Einstein';
 
 test('teacher can create character with initial message and verify it appears in shared chat', async ({
   page,
 }) => {
-  await login(page, 'teacher');
-
   await page.goto('/characters');
   await page.waitForURL('/characters**');
 
@@ -93,8 +93,6 @@ test('teacher can create character with initial message and verify it appears in
 });
 
 test('teacher can delete character with initial message', async ({ page }) => {
-  await login(page, 'teacher');
-
   await page.goto('/characters?visibility=private');
   await page.waitForURL('/characters?visibility=private');
 

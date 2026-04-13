@@ -1,14 +1,14 @@
 import { expect, test } from '@playwright/test';
-import { login } from '../../utils/login';
+import { AUTH_FILES } from '../../utils/const';
 import { waitForToast } from '../../utils/utils';
 import { sendMessage, uploadFile } from '../../utils/chat';
 import { deleteCustomGpt } from '../../utils/custom-gpt';
 
+test.use({ storageState: AUTH_FILES.teacher });
+
 const assistantName = 'Hausbauplaner';
 
 test('teacher can login, create a custom gpt and start a chat', async ({ page }) => {
-  await login(page, 'teacher');
-
   await page.goto('/custom');
   await page.waitForURL('/custom');
 
@@ -71,8 +71,6 @@ test('teacher can login, create a custom gpt and start a chat', async ({ page })
 });
 
 test('teacher can delete customgpt with chat', async ({ page }) => {
-  await login(page, 'teacher');
-
   await page.goto('/custom?visibility=private');
   await page.waitForURL('/custom?visibility=private');
 
@@ -85,8 +83,6 @@ test('teacher can delete customgpt with chat', async ({ page }) => {
 });
 
 test('data is autosaved on blur', async ({ page }) => {
-  await login(page, 'teacher');
-
   await page.goto('/custom');
   await page.waitForURL('/custom');
 
