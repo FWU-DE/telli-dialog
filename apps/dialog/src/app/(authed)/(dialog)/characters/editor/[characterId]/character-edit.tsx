@@ -428,6 +428,7 @@ export function CharacterEdit({
             control={control}
             schoolSharingName="isSchoolShared"
             linkSharingName="hasLinkAccess"
+            linkToShare={`/characters/${character.id}`}
             onShareChange={handleSharingChange}
           />
         </form>
