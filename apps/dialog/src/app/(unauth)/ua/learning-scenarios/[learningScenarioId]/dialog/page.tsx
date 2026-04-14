@@ -9,7 +9,6 @@ import { dbGetLearningScenarioByIdAndInviteCode } from '@shared/db/functions/lea
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { notFound } from 'next/navigation';
 import z from 'zod';
-import { ThemeProvider as NextThemeProvider } from '@ui/components/theme-provider';
 
 const searchParamsSchema = z.object({ inviteCode: z.string() });
 
@@ -41,20 +40,13 @@ export default async function Page(
 
   return (
     <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
-      <NextThemeProvider
-        attribute="class"
-        defaultTheme="light"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <ThemeProvider designConfiguration={designConfiguration}>
-          <SharedChat
-            {...learningScenario}
-            inviteCode={searchParams.inviteCode}
-            maybeSignedPictureUrl={avatarPictureUrl}
-          />
-        </ThemeProvider>
-      </NextThemeProvider>
+      <ThemeProvider designConfiguration={designConfiguration}>
+        <SharedChat
+          {...learningScenario}
+          inviteCode={searchParams.inviteCode}
+          maybeSignedPictureUrl={avatarPictureUrl}
+        />
+      </ThemeProvider>
     </LlmModelsProvider>
   );
 }
