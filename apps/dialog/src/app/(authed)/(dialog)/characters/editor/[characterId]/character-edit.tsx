@@ -25,6 +25,7 @@ import { BackButton } from '@/components/common/back-button';
 import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions';
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
+import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
@@ -44,7 +45,7 @@ import {
 } from '@/configuration-text-inputs/const';
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { useForm, useWatch } from 'react-hook-form';
@@ -52,6 +53,7 @@ import { CustomChatModelSelect } from '@/components/custom-chat/custom-chat-mode
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { FormField } from '@ui/components/form/FormField';
+import { createNewCharacterAction } from '../../actions';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
 
@@ -194,7 +196,22 @@ export function CharacterEdit({
     });
   };
 
-  // TODO handleDuplicateCharacter
+  const handleDuplicateCharacter = async () => {
+    const createResult = await createNewCharacterAction({
+      templatePictureId: character.pictureId ?? undefined,
+      templateId: character.id,
+      duplicateCharacterName: t('duplicate-name-format-string', {
+        sourceName: character.name,
+      }),
+    });
+    if (createResult.success) {
+      guardNavigation(() => {
+        router.push(`/characters/editor/${createResult.value.id}?create=true`);
+      });
+    } else {
+      toast.error(t('toasts.create-toast-error'));
+    }
+  };
 
   const handleDeleteCharacter = async () => {
     const deleteResult = await deleteCharacterAction({ characterId: character.id });
@@ -286,7 +303,7 @@ export function CharacterEdit({
       <div className="flex flex-row justify-between">
         <CustomChatActions>
           <CustomChatActionUse onClick={handleUseChat} />
-          {/*<CustomChatActionDuplicate onClick={handleDuplicateCharacter} />*/}
+          <CustomChatActionDuplicate onClick={handleDuplicateCharacter} />
           <CustomChatActionDelete
             onClick={handleDeleteCharacter}
             modalTitle={t('delete-modal-title')}
@@ -431,7 +448,7 @@ export function CharacterEdit({
                 });
               }}
             />
-            {/*<CustomChatActionDuplicate onClick={handleDuplicateCharacter} />*/}
+            <CustomChatActionDuplicate onClick={handleDuplicateCharacter} />
             <CustomChatActionDelete
               onClick={handleDeleteCharacter}
               modalTitle={t('delete-modal-title')}

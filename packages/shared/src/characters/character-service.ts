@@ -70,6 +70,7 @@ export const createNewCharacter = async ({
   user,
   templatePictureId,
   templateId,
+  duplicateCharacterName,
 }: {
   federalStateId: string;
   modelId?: string;
@@ -77,11 +78,18 @@ export const createNewCharacter = async ({
   user: UserModel;
   templatePictureId?: string;
   templateId?: string;
+  duplicateCharacterName?: string;
 }) => {
   requireTeacherRole(user.userRole);
 
   if (templateId !== undefined) {
-    let insertedCharacter = await copyCharacter(templateId, 'private', user.id, schoolId);
+    let insertedCharacter = await copyCharacter(
+      templateId,
+      'private',
+      user.id,
+      schoolId,
+      duplicateCharacterName,
+    );
 
     if (templatePictureId !== undefined) {
       const copyOfTemplatePicture = buildCharacterPictureKey(

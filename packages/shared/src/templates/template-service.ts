@@ -532,6 +532,7 @@ export async function copyCharacter(
   accessLevel: AccessLevel,
   userId: string,
   schoolId: string | null,
+  duplicateCharacterName?: string,
 ) {
   const sourceCharacter = await dbGetCharacterById({ characterId: originalId });
   if (!sourceCharacter) {
@@ -540,6 +541,7 @@ export async function copyCharacter(
 
   const newCharacter = {
     ...sourceCharacter,
+    name: duplicateCharacterName ?? sourceCharacter.name,
     id: undefined,
     originalCharacterId: originalId,
     accessLevel,

@@ -11,10 +11,12 @@ export async function createNewCharacterAction({
   modelId,
   templatePictureId,
   templateId,
+  duplicateCharacterName,
 }: {
   modelId?: string;
   templatePictureId?: string;
   templateId?: string;
+  duplicateCharacterName?: string;
 }) {
   const { user, school, federalState } = await requireAuth();
 
@@ -25,6 +27,7 @@ export async function createNewCharacterAction({
     user,
     templatePictureId,
     templateId,
+    duplicateCharacterName,
   });
 }
 

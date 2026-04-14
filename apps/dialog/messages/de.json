@@ -238,6 +238,7 @@
     "visibility-global": "Vorlagen",
     "visibility-school": "Schulintern",
     "visibility-private": "Für mich",
+    "duplicate-name-format-string": "Duplikat von {sourceName}",
     "shared": {
       "title": "Dialogpartner im Unterricht einsetzen",
       "description": "Wie viel des monatlichen Tokenvolumens soll durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
