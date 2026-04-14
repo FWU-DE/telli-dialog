@@ -43,7 +43,7 @@ export default function CustomGptOverview({ currentUserId }: CustomGptOverviewPr
   };
 
   const infoContent = (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-8 whitespace-pre-line">
       <div>
         <p className="font-semibold">{t('info-dialog.q1')}</p>
         <p>{t('info-dialog.a1')}</p>

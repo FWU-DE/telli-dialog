@@ -10,10 +10,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AssistantSelectModel, FileModel } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/Card';
-import { Field, FieldError, FieldGroup, FieldLabel } from '@ui/components/Field';
-import { Input } from '@ui/components/Input';
-import { Controller, useForm, useWatch } from 'react-hook-form';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { FieldGroup } from '@ui/components/Field';
+import { FormField } from '@ui/components/form/FormField';
+import { useRouter } from 'next/navigation';
+import { useForm, useWatch } from 'react-hook-form';
+import { useCallback, useMemo, useRef } from 'react';
 import z from 'zod';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
@@ -23,7 +24,6 @@ import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
 import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
-import { useRouter } from 'next/navigation';
 import {
   createNewAssistantAction,
   deleteAssistantAction,
@@ -38,7 +38,6 @@ import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
-import { Textarea } from '@ui/components/Textarea';
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
@@ -49,6 +48,34 @@ import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-cha
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
+
+/**
+ * Creates field validation configuration with pre-translated error messages.
+ * Called inside the component where the translation function is available.
+ */
+function createAssistantFieldValidationConfig(t: AssistantTranslator) {
+  return {
+    name: {
+      required: true,
+      maxLength: SMALL_TEXT_INPUT_FIELDS_LIMIT,
+      maxLengthErrorMessage: t('name-max-length', {
+        maxLength: SMALL_TEXT_INPUT_FIELDS_LIMIT,
+      }),
+    },
+    description: {
+      maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+      maxLengthErrorMessage: t('description-max-length', {
+        maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+      }),
+    },
+    instructions: {
+      maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
+      maxLengthErrorMessage: t('instructions-max-length', {
+        maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
+      }),
+    },
+  } as const;
+}
 
 function createAssistantFormValuesSchema(t: AssistantTranslator) {
   return z.object({
@@ -88,6 +115,10 @@ export function AssistantEdit({
   const toast = useToast();
   const t = useTranslations('assistants');
   const assistantFormValuesSchema = useMemo(() => createAssistantFormValuesSchema(t), [t]);
+  const assistantFieldValidationConfig = useMemo(
+    () => createAssistantFieldValidationConfig(t),
+    [t],
+  );
   const initialValues: AssistantFormValues = {
     name: assistant.name,
     description: assistant.description ?? '',
@@ -111,7 +142,7 @@ export function AssistantEdit({
     defaultValues: initialValues,
   });
 
-  const { isSaving, hasSaveError, flushAutoSave, handleAutoSave, withAutoSaveOnBlur } =
+  const { isSaving, hasSaveError, flushAutoSave, handleAutoSave } =
     useFormAutosave<AssistantFormValues>({
       initialValues,
       isDirty,
@@ -139,7 +170,6 @@ export function AssistantEdit({
 
   const name = useWatch({ control, name: 'name' });
   const savedAccessLevelRef = useRef(assistant.accessLevel);
-  const nameInputRef = useRef<HTMLInputElement>(null);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
@@ -165,12 +195,6 @@ export function AssistantEdit({
       ))}
     </div>
   );
-
-  useEffect(() => {
-    if (!name || name.trim().length === 0) {
-      nameInputRef.current?.focus();
-    }
-  }, [name]);
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -331,85 +355,40 @@ export function AssistantEdit({
         <Card>
           <CardContent>
             <FieldGroup>
-              <Controller
+              <FormField
                 name="name"
                 control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid} aria-required="true">
-                    <FieldLabel htmlFor={field.name} required>
-                      {t('name-label')}
-                    </FieldLabel>
-                    <Input
-                      {...withAutoSaveOnBlur(field)}
-                      ref={nameInputRef}
-                      id={field.name}
-                      aria-invalid={fieldState.invalid}
-                      aria-label={t('name-label')}
-                      placeholder={t('name-placeholder')}
-                      autoComplete="off"
-                      maxLength={SMALL_TEXT_INPUT_FIELDS_LIMIT}
-                      maxLengthErrorMessage={t('name-max-length', {
-                        maxLength: SMALL_TEXT_INPUT_FIELDS_LIMIT,
-                      })}
-                      required
-                      data-testid="assistant-name-input"
-                    />
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  </Field>
-                )}
+                {...assistantFieldValidationConfig.name}
+                label={t('name-label')}
+                placeholder={t('name-placeholder')}
+                autoFocusWhenEmpty
+                testId="assistant-name-input"
+                onBlur={handleAutoSave}
               />
-              <Controller
+              <FormField
                 name="description"
                 control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>{t('description-label')}</FieldLabel>
-                    <Textarea
-                      {...withAutoSaveOnBlur(field)}
-                      id={field.name}
-                      className="h-27 resize-none"
-                      aria-invalid={fieldState.invalid}
-                      aria-label={t('description-label')}
-                      placeholder={t('description-placeholder')}
-                      autoComplete="off"
-                      maxLengthErrorMessage={t('description-max-length', {
-                        maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
-                      })}
-                      maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-                      data-testid="assistant-description-input"
-                    />
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  </Field>
-                )}
+                {...assistantFieldValidationConfig.description}
+                label={t('description-label')}
+                placeholder={t('description-placeholder')}
+                testId="assistant-description-input"
+                onBlur={handleAutoSave}
+                type="textArea"
+                className="h-27 resize-none"
               />
-              <Controller
+              <FormField
                 name="instructions"
                 control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <div className="flex items-center justify-between">
-                      <FieldLabel htmlFor={field.name}>{t('instructions-label')}</FieldLabel>
-                      <CustomChatInstructionsExampleDialog
-                        descriptionContent={instructionsExampleDialogContent}
-                      />
-                    </div>
-                    <Textarea
-                      {...withAutoSaveOnBlur(field)}
-                      id={field.name}
-                      className="h-125"
-                      aria-invalid={fieldState.invalid}
-                      placeholder={instructionsPlaceholder}
-                      aria-label={t('instructions-label')}
-                      maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS}
-                      maxLengthErrorMessage={t('instructions-max-length', {
-                        maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
-                      })}
-                      autoComplete="off"
-                      data-testid="assistant-instructions-input"
-                    />
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  </Field>
-                )}
+                {...assistantFieldValidationConfig.instructions}
+                label={t('instructions-label')}
+                placeholder={instructionsPlaceholder}
+                testId="assistant-instructions-input"
+                onBlur={handleAutoSave}
+                type="textArea"
+                className="h-125"
+              />
+              <CustomChatInstructionsExampleDialog
+                descriptionContent={instructionsExampleDialogContent}
               />
               <CustomChatPromptSuggestions control={control} onBlur={handleAutoSave} />
             </FieldGroup>

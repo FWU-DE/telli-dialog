@@ -3,16 +3,10 @@
 import z from 'zod';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
-import { CharacterWithShareDataModel, FileModel } from '@shared/db/schema';
+import { CharacterOptionalShareDataModel, FileModel } from '@shared/db/schema';
 import { WebsearchSource } from '@shared/db/types';
 import { useTranslations } from 'next-intl';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
-import { useToast } from '@/components/common/toast';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useLlmModels } from '@/components/providers/llm-model-provider';
-import { getDefaultModel } from '@shared/llm-models/llm-model-service';
-import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   deleteCharacterAction,
@@ -41,21 +35,56 @@ import {
 } from '../../../learning-scenarios/editor/[learningScenarioId]/schema';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
-import { Field, FieldError, FieldGroup, FieldLabel } from '@ui/components/Field';
+import { FieldGroup } from '@ui/components/Field';
 import { Card, CardContent } from '@ui/components/Card';
-import { Input } from '@ui/components/Input';
 import {
   SMALL_TEXT_INPUT_FIELDS_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT,
   TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
 } from '@/configuration-text-inputs/const';
-import { Textarea } from '@ui/components/Textarea';
+import { useToast } from '@/components/common/toast';
+import { useRouter } from 'next/navigation';
+import { useCallback, useMemo, useRef } from 'react';
+import { useLlmModels } from '@/components/providers/llm-model-provider';
+import { getDefaultModel } from '@shared/llm-models/llm-model-service';
+import { useForm, useWatch } from 'react-hook-form';
 import { CustomChatModelSelect } from '@/components/custom-chat/custom-chat-model-select';
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
+import { FormField } from '@ui/components/form/FormField';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
+
+function createCharacterFieldValidationConfig(t: CharacterTranslator) {
+  return {
+    name: {
+      required: true,
+      maxLength: SMALL_TEXT_INPUT_FIELDS_LIMIT,
+      maxLengthErrorMessage: t('name-max-length', {
+        maxLength: SMALL_TEXT_INPUT_FIELDS_LIMIT,
+      }),
+    },
+    description: {
+      maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+      maxLengthErrorMessage: t('description-max-length', {
+        maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+      }),
+    },
+    instructions: {
+      maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
+      maxLengthErrorMessage: t('instructions-max-length', {
+        maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
+      }),
+    },
+    initialMessage: {
+      maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+      maxLengthErrorMessage: t('initial-message-max-length', {
+        maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+      }),
+    },
+  };
+}
 
 function createCharacterFormValuesSchema(t: CharacterTranslator) {
   return z.object({
@@ -77,7 +106,7 @@ export function CharacterEdit({
   initialLinks,
   avatarPictureUrl,
 }: {
-  character: CharacterWithShareDataModel;
+  character: CharacterOptionalShareDataModel;
   relatedFiles: FileModel[];
   initialLinks: WebsearchSource[];
   avatarPictureUrl?: string;
@@ -143,7 +172,6 @@ export function CharacterEdit({
 
   const name = useWatch({ control, name: 'name' });
   const savedAccessLevelRef = useRef(character.accessLevel);
-  const nameInputRef = useRef<HTMLInputElement>(null);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
@@ -169,12 +197,6 @@ export function CharacterEdit({
       ))}
     </div>
   );
-
-  useEffect(() => {
-    if (!name || name.trim().length === 0) {
-      nameInputRef.current?.focus();
-    }
-  }, [name]);
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -350,64 +372,26 @@ export function CharacterEdit({
           <Card>
             <CardContent>
               <FieldGroup>
-                <Controller
+                <FormField
                   name="name"
                   control={control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid} aria-required="true">
-                      <FieldLabel htmlFor={field.name} required>
-                        {t('name-label')}
-                      </FieldLabel>
-                      <Input
-                        {...field}
-                        ref={nameInputRef}
-                        id={field.name}
-                        aria-invalid={fieldState.invalid}
-                        aria-label={t('name-label')}
-                        placeholder={t('name-placeholder')}
-                        autoComplete="off"
-                        maxLength={SMALL_TEXT_INPUT_FIELDS_LIMIT}
-                        maxLengthErrorMessage={t('name-max-length', {
-                          maxLength: SMALL_TEXT_INPUT_FIELDS_LIMIT,
-                        })}
-                        required
-                        data-testid="character-name-input"
-                        onBlur={() => {
-                          field.onBlur();
-                          handleAutoSave();
-                        }}
-                      />
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
+                  {...createCharacterFieldValidationConfig(t).name}
+                  label={t('name-label')}
+                  placeholder={t('name-placeholder')}
+                  autoFocusWhenEmpty
+                  testId="character-name-input"
+                  onBlur={handleAutoSave}
                 />
-                <Controller
+                <FormField
                   name="description"
                   control={control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor={field.name}>{t('description-label')}</FieldLabel>
-                      <Textarea
-                        {...field}
-                        id={field.name}
-                        className="h-27 resize-none"
-                        aria-invalid={fieldState.invalid}
-                        aria-label={t('description-label')}
-                        placeholder={t('description-placeholder')}
-                        autoComplete="off"
-                        maxLengthErrorMessage={t('description-max-length', {
-                          maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
-                        })}
-                        maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-                        data-testid="character-description-input"
-                        onBlur={() => {
-                          field.onBlur();
-                          handleAutoSave();
-                        }}
-                      />
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
+                  {...createCharacterFieldValidationConfig(t).description}
+                  label={t('description-label')}
+                  placeholder={t('description-placeholder')}
+                  testId="character-description-input"
+                  onBlur={handleAutoSave}
+                  type="textArea"
+                  className="h-27 resize-none"
                 />
                 <CustomChatModelSelect
                   models={models}
@@ -417,68 +401,31 @@ export function CharacterEdit({
                     handleAutoSave();
                   }}
                 />
-                <Controller
+                <FormField
                   name="instructions"
                   control={control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <div className="flex items-center justify-between">
-                        <FieldLabel htmlFor={field.name}>{t('instructions-label')}</FieldLabel>
-                        <CustomChatInstructionsExampleDialog
-                          descriptionContent={instructionsExampleDialogContent}
-                        />
-                      </div>
-                      <Textarea
-                        {...field}
-                        id={field.name}
-                        className="h-125"
-                        aria-invalid={fieldState.invalid}
-                        placeholder={instructionsPlaceholder}
-                        aria-label={t('instructions-label')}
-                        maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS}
-                        maxLengthErrorMessage={t('instructions-max-length', {
-                          maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
-                        })}
-                        autoComplete="off"
-                        data-testid="character-instructions-input"
-                        onBlur={() => {
-                          field.onBlur();
-                          handleAutoSave();
-                        }}
-                      />
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
+                  {...createCharacterFieldValidationConfig(t).instructions}
+                  label={t('instructions-label')}
+                  placeholder={instructionsPlaceholder}
+                  testId="character-instructions-input"
+                  onBlur={handleAutoSave}
+                  type="textArea"
+                  className="h-125"
                 />
-                <Controller
+                <CustomChatInstructionsExampleDialog
+                  descriptionContent={instructionsExampleDialogContent}
+                />
+                <FormField
                   name="initialMessage"
                   control={control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor={field.name} tooltip={t('initial-message-tooltip')}>
-                        {t('initial-message-label')}
-                      </FieldLabel>
-                      <Textarea
-                        {...field}
-                        id={field.name}
-                        className="h-27 resize-none"
-                        aria-invalid={fieldState.invalid}
-                        placeholder={t('initial-message-placeholder')}
-                        aria-label={t('initial-message-label')}
-                        maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-                        maxLengthErrorMessage={t('initial-message-max-length', {
-                          maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
-                        })}
-                        autoComplete="off"
-                        data-testid="character-initial-message-input"
-                        onBlur={() => {
-                          field.onBlur();
-                          handleAutoSave();
-                        }}
-                      />
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
+                  {...createCharacterFieldValidationConfig(t).initialMessage}
+                  label={t('initial-message-label')}
+                  tooltip={t('initial-message-tooltip')}
+                  placeholder={t('initial-message-placeholder')}
+                  testId="character-initial-message-input"
+                  onBlur={handleAutoSave}
+                  type="textArea"
+                  className="h-27 resize-none"
                 />
               </FieldGroup>
             </CardContent>

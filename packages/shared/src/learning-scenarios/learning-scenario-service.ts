@@ -361,7 +361,7 @@ export async function unshareLearningScenario({
 }
 
 /**
- * Loads learning scenario for edit view.
+ * Loads learning scenario for editing / viewing.
  * Throws if the user is not authorized to access the learning scenario:
  * - NotFound if the learning scenario does not exist
  * - Forbidden if the learning scenario is private and the user is not the owner
@@ -371,7 +371,7 @@ export async function unshareLearningScenario({
  * and any authenticated user can view the learning scenario. Note that link sharing
  * only grants read-only access - editing is still restricted to the owner.
  */
-export async function getLearningScenarioForEditView({
+export async function getLearningScenario({
   learningScenarioId,
   schoolId,
   user,

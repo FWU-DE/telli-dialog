@@ -4,7 +4,7 @@ import {
   deleteLearningScenario,
   downloadFileFromLearningScenario,
   getFilesForLearningScenario,
-  getLearningScenarioForEditView,
+  getLearningScenario,
   getSharedLearningScenario,
   linkFileToLearningScenario,
   removeFileFromLearningScenario,
@@ -144,9 +144,9 @@ function buildFunctionList(
   ];
   const readAccess = [
     {
-      functionName: getLearningScenarioForEditView.name,
+      functionName: getLearningScenario.name,
       testFunction: () =>
-        getLearningScenarioForEditView({
+        getLearningScenario({
           learningScenarioId,
           schoolId,
           user,
@@ -381,7 +381,7 @@ describe('learning-scenario-service', () => {
           accessLevel: 'school' as const,
           description: 'school learning scenario with link sharing enabled (different school)',
         },
-      ])('getLearningScenarioForEditView - $description', async ({ accessLevel }) => {
+      ])('getLearningScenario - $description', async ({ accessLevel }) => {
         const mockLearningScenario = {
           id: learningScenarioId,
           userId: ownerUserId,
@@ -407,7 +407,7 @@ describe('learning-scenario-service', () => {
         );
 
         // User from different school trying to access - should succeed because hasLinkAccess is true
-        const result = await getLearningScenarioForEditView({
+        const result = await getLearningScenario({
           learningScenarioId,
           user: differentUser,
           schoolId: differentSchoolId,
@@ -452,7 +452,7 @@ describe('learning-scenario-service', () => {
     });
 
     describe('should still enforce restrictions when hasLinkAccess is false', () => {
-      it('getLearningScenarioForEditView - private learning scenario without link sharing', async () => {
+      it('getLearningScenario - private learning scenario without link sharing', async () => {
         const mockLearningScenario = {
           id: learningScenarioId,
           userId: ownerUserId,
@@ -468,7 +468,7 @@ describe('learning-scenario-service', () => {
         ).mockResolvedValue(mockLearningScenario as never);
 
         await expect(
-          getLearningScenarioForEditView({
+          getLearningScenario({
             learningScenarioId,
             user: differentUser,
             schoolId: differentSchoolId,

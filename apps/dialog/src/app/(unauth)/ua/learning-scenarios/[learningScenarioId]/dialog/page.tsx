@@ -9,6 +9,7 @@ import { dbGetLearningScenarioByIdAndInviteCode } from '@shared/db/functions/lea
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { notFound } from 'next/navigation';
 import z from 'zod';
+import { ThemeProvider as NextThemeProvider } from '@ui/components/theme-provider';
 
 const searchParamsSchema = z.object({ inviteCode: z.string() });
 
@@ -35,18 +36,25 @@ export default async function Page(
 
   const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
 
-  const federalState = await dbGetFederalStateByUserId({ userId: learningScenario.userId });
+  const federalState = await dbGetFederalStateByUserId({ userId: learningScenario.startedBy });
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
 
   return (
     <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
-      <ThemeProvider designConfiguration={designConfiguration}>
-        <SharedChat
-          {...learningScenario}
-          inviteCode={searchParams.inviteCode}
-          maybeSignedPictureUrl={avatarPictureUrl}
-        />
-      </ThemeProvider>
+      <NextThemeProvider
+        attribute="class"
+        defaultTheme="light"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <ThemeProvider designConfiguration={designConfiguration}>
+          <SharedChat
+            {...learningScenario}
+            inviteCode={searchParams.inviteCode}
+            maybeSignedPictureUrl={avatarPictureUrl}
+          />
+        </ThemeProvider>
+      </NextThemeProvider>
     </LlmModelsProvider>
   );
 }

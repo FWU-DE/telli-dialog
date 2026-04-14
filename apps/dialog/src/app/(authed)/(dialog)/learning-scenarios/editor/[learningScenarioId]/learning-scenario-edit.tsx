@@ -9,10 +9,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { FileModel, LearningScenarioOptionalShareDataModel } from '@shared/db/schema';
 import { BackButton } from '@/components/common/back-button';
 import { Card, CardContent } from '@ui/components/Card';
-import { Field, FieldError, FieldGroup, FieldLabel } from '@ui/components/Field';
-import { Input } from '@ui/components/Input';
-import { Controller, useForm, useWatch } from 'react-hook-form';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { FieldGroup } from '@ui/components/Field';
+import { useForm, useWatch } from 'react-hook-form';
+import { useCallback, useMemo, useRef } from 'react';
 import z from 'zod';
 import { CustomChatLayoutContainer } from '@/components/custom-chat/custom-chat-layout-container';
 import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
@@ -40,7 +39,6 @@ import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatImageUpload } from '@/components/custom-chat/custom-chat-image-upload';
-import { Textarea } from '@ui/components/Textarea';
 import { usePendingChangesGuard } from '@/hooks/use-pending-changes-guard';
 import { useForceReloadOnBrowserBackButton } from '@/hooks/use-force-reload-on-browser-back-button';
 import { useFormAutosave } from '@/hooks/use-form-autosave';
@@ -54,8 +52,39 @@ import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-cha
 import { telliPointsPercentageValues, usageTimeValuesInMinutes } from './schema';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
+import { FormField } from '@ui/components/form/FormField';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
+
+function createLearningScenarioFieldValidationConfig(t: LearningScenarioTranslator) {
+  return {
+    name: {
+      required: true,
+      maxLength: SMALL_TEXT_INPUT_FIELDS_LIMIT,
+      maxLengthErrorMessage: t('name-max-length', {
+        maxLength: SMALL_TEXT_INPUT_FIELDS_LIMIT,
+      }),
+    },
+    description: {
+      maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+      maxLengthErrorMessage: t('description-max-length', {
+        maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+      }),
+    },
+    additionalInstructions: {
+      maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
+      maxLengthErrorMessage: t('instructions-max-length', {
+        maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
+      }),
+    },
+    studentExercise: {
+      maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+      maxLengthErrorMessage: t('student-exercise-max-length', {
+        maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
+      }),
+    },
+  };
+}
 
 function createLearningScenarioFormValuesSchema(t: LearningScenarioTranslator) {
   return z.object({
@@ -122,7 +151,7 @@ export function LearningScenarioEdit({
     defaultValues: initialValues,
   });
 
-  const { isSaving, hasSaveError, flushAutoSave, handleAutoSave, withAutoSaveOnBlur } =
+  const { isSaving, hasSaveError, flushAutoSave, handleAutoSave } =
     useFormAutosave<LearningScenarioFormValues>({
       initialValues,
       isDirty,
@@ -150,7 +179,6 @@ export function LearningScenarioEdit({
   const name = useWatch({ control, name: 'name' });
   const savedAccessLevelRef = useRef(learningScenario.accessLevel);
   const attachedLinksRef = useRef(learningScenario.attachedLinks);
-  const nameInputRef = useRef<HTMLInputElement>(null);
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
@@ -176,12 +204,6 @@ export function LearningScenarioEdit({
       ))}
     </div>
   );
-
-  useEffect(() => {
-    if (!name || name.trim().length === 0) {
-      nameInputRef.current?.focus();
-    }
-  }, [name]);
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -373,55 +395,26 @@ export function LearningScenarioEdit({
           <Card>
             <CardContent>
               <FieldGroup>
-                <Controller
+                <FormField
                   name="name"
                   control={control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid} aria-required="true">
-                      <FieldLabel htmlFor={field.name} required>
-                        {t('name-label')}
-                      </FieldLabel>
-                      <Input
-                        {...withAutoSaveOnBlur(field)}
-                        ref={nameInputRef}
-                        id={field.name}
-                        aria-invalid={fieldState.invalid}
-                        aria-label={t('name-label')}
-                        placeholder={t('name-placeholder')}
-                        autoComplete="off"
-                        maxLength={SMALL_TEXT_INPUT_FIELDS_LIMIT}
-                        maxLengthErrorMessage={t('name-max-length', {
-                          maxLength: SMALL_TEXT_INPUT_FIELDS_LIMIT,
-                        })}
-                        required
-                        data-testid="learning-scenario-name-input"
-                      />
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
+                  {...createLearningScenarioFieldValidationConfig(t).name}
+                  label={t('name-label')}
+                  placeholder={t('name-placeholder')}
+                  autoFocusWhenEmpty
+                  testId="learning-scenario-name-input"
+                  onBlur={handleAutoSave}
                 />
-                <Controller
+                <FormField
                   name="description"
                   control={control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid} aria-required="true">
-                      <FieldLabel htmlFor={field.name}>{t('description-label')}</FieldLabel>
-                      <Textarea
-                        {...withAutoSaveOnBlur(field)}
-                        id={field.name}
-                        className="h-27 resize-none"
-                        aria-label={t('description-label')}
-                        placeholder={t('description-placeholder')}
-                        autoComplete="off"
-                        maxLengthErrorMessage={t('description-max-length', {
-                          maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
-                        })}
-                        maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-                        data-testid="learning-scenario-description-input"
-                      />
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
+                  {...createLearningScenarioFieldValidationConfig(t).description}
+                  label={t('description-label')}
+                  placeholder={t('description-placeholder')}
+                  testId="learning-scenario-description-input"
+                  onBlur={handleAutoSave}
+                  type="textArea"
+                  className="h-27 resize-none"
                 />
                 <CustomChatModelSelect
                   models={models}
@@ -431,60 +424,31 @@ export function LearningScenarioEdit({
                     handleAutoSave();
                   }}
                 />
-                <Controller
+                <FormField
                   name="additionalInstructions"
                   control={control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <div className="flex items-center justify-between">
-                        <FieldLabel htmlFor={field.name}>{t('instructions-label')}</FieldLabel>
-                        <CustomChatInstructionsExampleDialog
-                          descriptionContent={instructionsExampleDialogContent}
-                        />
-                      </div>
-                      <Textarea
-                        {...withAutoSaveOnBlur(field)}
-                        id={field.name}
-                        className="h-125"
-                        aria-invalid={fieldState.invalid}
-                        placeholder={instructionsPlaceholder}
-                        aria-label={t('instructions-label')}
-                        maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS}
-                        maxLengthErrorMessage={t('instructions-max-length', {
-                          maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS,
-                        })}
-                        autoComplete="off"
-                        data-testid="learning-scenario-instructions-input"
-                      />
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
+                  {...createLearningScenarioFieldValidationConfig(t).additionalInstructions}
+                  label={t('instructions-label')}
+                  placeholder={instructionsPlaceholder}
+                  testId="learning-scenario-instructions-input"
+                  onBlur={handleAutoSave}
+                  type="textArea"
+                  className="h-125"
                 />
-                <Controller
+                <CustomChatInstructionsExampleDialog
+                  descriptionContent={instructionsExampleDialogContent}
+                />
+                <FormField
                   name="studentExercise"
                   control={control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor={field.name} tooltip={t('student-exercise-tooltip')}>
-                        {t('student-exercise-label')}
-                      </FieldLabel>
-                      <Textarea
-                        {...withAutoSaveOnBlur(field)}
-                        id={field.name}
-                        className="h-27 resize-none"
-                        aria-invalid={fieldState.invalid}
-                        placeholder={t('student-exercise-placeholder')}
-                        aria-label={t('student-exercise-label')}
-                        maxLength={TEXT_INPUT_FIELDS_LENGTH_LIMIT}
-                        maxLengthErrorMessage={t('student-exercise-max-length', {
-                          maxLength: TEXT_INPUT_FIELDS_LENGTH_LIMIT,
-                        })}
-                        autoComplete="off"
-                        data-testid="learning-scenario-student-exercise-input"
-                      />
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
+                  {...createLearningScenarioFieldValidationConfig(t).studentExercise}
+                  label={t('student-exercise-label')}
+                  tooltip={t('student-exercise-tooltip')}
+                  placeholder={t('student-exercise-placeholder')}
+                  testId="learning-scenario-student-exercise-input"
+                  onBlur={handleAutoSave}
+                  type="textArea"
+                  className="h-27 resize-none"
                 />
               </FieldGroup>
             </CardContent>

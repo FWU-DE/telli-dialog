@@ -1,13 +1,19 @@
 'use client';
 
 import React from 'react';
-import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import StopWatchDoneIcon from '@/components/icons/stopwatch-done';
 import DownloadSharedConversationButton from '@/app/(unauth)/ua/download-shared-conversation-button';
 import { type ChatMessage as Message } from '@/types/chat';
 import { useTranslations } from 'next-intl';
-import { useTheme } from '@/components/providers/theme-provider';
-import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@ui/components/AlertDialog';
 
 type ExpiredChatModalProps = {
   conversationMessages: Message[];
@@ -21,42 +27,34 @@ export default function ExpiredChatModal({
   inviteCode,
 }: ExpiredChatModalProps) {
   const t = useTranslations('learning-scenarios.shared');
-  const { designConfiguration } = useTheme();
+  const hasUserMessages = conversationMessages.some((message) => message.role === 'user');
 
   return (
-    <AlertDialog.Root open={true}>
-      <AlertDialog.Portal>
-        <AlertDialog.Overlay className="fixed inset-0 bg-dark-gray z-30 opacity-30 shadow-[0px_0px_80px_0px_rgba(0,41,102,0.1)]" />
-        <AlertDialog.Content
-          className="z-50 fixed left-1/2 top-1/2 max-h-[85vh] -translate-x-1/2 -translate-y-1/2 rounded-enterprise-md bg-white p-10 w-[350px] lg:w-[564px] max-w-xl"
-          style={constructRootLayoutStyle({ designConfiguration })}
-        >
-          <div className="flex flex-col justify-center items-center gap-4">
-            <AlertDialog.Title asChild>
-              <h1 className="text-3xl font-medium">
-                <StopWatchDoneIcon className="text-dark-red" />
-              </h1>
-            </AlertDialog.Title>
-            <AlertDialog.Description asChild>
-              <p className="text-3xl w-full text-center">{t('expired-modal-description')}</p>
-            </AlertDialog.Description>
-            <AlertDialog.Action asChild>
-              {/* If the shared chat has expired, the messages are gone, so there is no way atm to download the conversation. */}
-              <div className="mt-6 mb-2">
-                {conversationMessages.length !== 0 && (
-                  <DownloadSharedConversationButton
-                    primaryButton
-                    characterName={title}
-                    conversationMessages={conversationMessages}
-                    disabled={conversationMessages.length === 0}
-                    inviteCode={inviteCode}
-                  />
-                )}
-              </div>
-            </AlertDialog.Action>
-          </div>
-        </AlertDialog.Content>
-      </AlertDialog.Portal>
-    </AlertDialog.Root>
+    <AlertDialog open={true}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            <StopWatchDoneIcon className="text-dark-red" />
+          </AlertDialogTitle>
+        </AlertDialogHeader>
+        <AlertDialogDescription>
+          <p className="text-3xl w-full text-center">{t('expired-modal-description')}</p>
+        </AlertDialogDescription>
+        <AlertDialogFooter className="items-center sm:justify-center">
+          {/* If the shared chat has expired, the messages are gone, so there is no way atm to download the conversation. */}
+          {hasUserMessages && (
+            <AlertDialogAction asChild>
+              <DownloadSharedConversationButton
+                primaryButton
+                characterName={title}
+                conversationMessages={conversationMessages}
+                disabled={false}
+                inviteCode={inviteCode}
+              />
+            </AlertDialogAction>
+          )}
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
