@@ -51,8 +51,8 @@ export function CustomChatShareWithLearners({
   const toast = useToast();
   const router = useRouter();
 
-  const t = useTranslations('learning-scenarios.share-with-learners');
-  const tToast = useTranslations('learning-scenarios.toasts');
+  const t = useTranslations('custom-chat.share-with-learners');
+  const tToast = useTranslations('custom-chat.toasts');
 
   const sharedChatTimeLeft = calculateTimeLeft({
     startedAt,

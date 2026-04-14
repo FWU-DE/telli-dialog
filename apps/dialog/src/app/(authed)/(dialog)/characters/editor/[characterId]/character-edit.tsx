@@ -45,7 +45,7 @@ import {
 } from '@/configuration-text-inputs/const';
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { useForm, useWatch } from 'react-hook-form';
@@ -53,7 +53,6 @@ import { CustomChatModelSelect } from '@/components/custom-chat/custom-chat-mode
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { FormField } from '@ui/components/form/FormField';
-import { createNewCharacterAction } from '../../actions';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
 

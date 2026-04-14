@@ -4,7 +4,7 @@ import { CharacterOptionalShareDataModel, FileModel } from '@shared/db/schema';
 import { WebsearchSource } from '@shared/db/types';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { BackButton } from '@/components/common/back-button';
@@ -18,8 +18,6 @@ import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avat
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
 import { Card, CardContent } from '@ui/components/Card';
 import { FieldGroup } from '@ui/components/Field';
-import { Button } from '@ui/components/Button';
-import { CopyIcon } from '@phosphor-icons/react';
 import { useToast } from '@/components/common/toast';
 import { createNewCharacterAction } from '../../actions';
 import {

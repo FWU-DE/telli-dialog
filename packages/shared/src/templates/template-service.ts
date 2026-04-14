@@ -42,6 +42,7 @@ import { NotFoundError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
 import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
 import path from 'node:path';
+import { MAX_ENTITY_NAME_LENGTH } from '@shared/entities/const';
 
 const templateTypeMap: Record<string, TemplateTypes> = {
   custom: 'custom-gpt',
@@ -484,7 +485,7 @@ export async function copyAssistant(
 
   const newAssistant = {
     ...sourceAssistant,
-    name: duplicateAssistantName ?? sourceAssistant.name,
+    name: (duplicateAssistantName ?? sourceAssistant.name).substring(0, MAX_ENTITY_NAME_LENGTH),
     id: undefined,
     originalAssistantId: originalId,
     accessLevel,
@@ -524,6 +525,7 @@ async function createAssistantTemplate(originalId: string) {
  * @param accessLevel - The access level for the new character
  * @param userId - The user ID to assign to the new character
  * @param schoolId - The school ID to assign to the new character
+ * @param duplicateCharacterName - Optional custom name for the new character. If not provided, uses the source character's name.
  * @returns Promise resolving to the newly created character object
  * @throws Error if source character is not found or character creation fails
  */
@@ -541,7 +543,7 @@ export async function copyCharacter(
 
   const newCharacter = {
     ...sourceCharacter,
-    name: duplicateCharacterName ?? sourceCharacter.name,
+    name: (duplicateCharacterName ?? sourceCharacter.name).substring(0, MAX_ENTITY_NAME_LENGTH),
     id: undefined,
     originalCharacterId: originalId,
     accessLevel,
@@ -587,7 +589,11 @@ async function createLearningScenarioTemplate(originalId: string) {
  * @param userId - The user id that is the owner of the new learning scenario
  * @returns
  */
-async function copyLearningScenario(learningScenarioId: string, userId: string) {
+async function copyLearningScenario(
+  learningScenarioId: string,
+  userId: string,
+  duplicateLearningScenarioName?: string,
+) {
   const learningScenario = await dbGetLearningScenarioById({ learningScenarioId });
   if (!learningScenario) {
     throw new NotFoundError('Original learning scenario not found');
@@ -601,6 +607,10 @@ async function copyLearningScenario(learningScenarioId: string, userId: string) 
   copy.userId = userId;
   copy.originalLearningScenarioId = learningScenarioId;
   copy.hasLinkAccess = false; // Reset sharing settings for new template
+  copy.name = (duplicateLearningScenarioName ?? learningScenario.name).substring(
+    0,
+    MAX_ENTITY_NAME_LENGTH,
+  );
 
   // avatar
   if (learningScenario.pictureId) {

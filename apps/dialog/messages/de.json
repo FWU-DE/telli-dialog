@@ -527,6 +527,20 @@
       "placeholder": "Modell auswählen",
       "no-models": "Keine Modelle verfügbar"
     },
+    "share-with-learners": {
+      "title": "Mit Lernenden teilen",
+      "description": "<tag>Du kannst diesen Chat zeitlich begrenzt mit Lernenden teilen. Lerne selbst, wie das funktioniert:</tag> <link>https://wiki.telli.de/index.php/Shared_Chat_teilen</link>",
+      "max-usage": "Maximale Nutzungsdauer",
+      "button-start": "Teilen aktivieren",
+      "button-stop": "Teilen beenden",
+      "share": "Teilungseinstellungen öffnen"
+    },
+    "toasts": {
+      "share-toast-error": "Das Teilen konnte nicht aktiviert werden.",
+      "share-toast-success": "Erfolgreich zum Teilen freigegeben!",
+      "stop-share-toast-success": "Das Teilen wurde erfolgreich beendet.",
+      "stop-share-toast-error": "Das Teilen konnte nicht beendet werden."
+    },
     "files-and-links": {
       "heading": "Hintergrundwissen",
       "heading-tooltip": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Telli bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: pdf, txt, docx",
