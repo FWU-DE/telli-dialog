@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
-import { copyAssistant, copyCharacter, copyRelatedTemplateFiles, createTemplateFromUrl } from './template-service';
+import {
+  copyAssistant,
+  copyCharacter,
+  copyRelatedTemplateFiles,
+  createTemplateFromUrl,
+} from './template-service';
 import { dbGetAssistantById, dbUpsertAssistant } from '@shared/db/functions/assistants';
 import { dbCreateCharacter, dbGetCharacterById } from '@shared/db/functions/character';
 import {
@@ -153,9 +158,9 @@ describe('template-service', () => {
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
         sourceCharacter as never,
       );
-      (dbCreateCharacter as MockedFunction<typeof dbCreateCharacter>).mockResolvedValue(
-        [createdCharacter] as never,
-      );
+      (dbCreateCharacter as MockedFunction<typeof dbCreateCharacter>).mockResolvedValue([
+        createdCharacter,
+      ] as never);
 
       const result = await copyCharacter(
         originalId,
@@ -190,9 +195,9 @@ describe('template-service', () => {
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
         sourceCharacter as never,
       );
-      (dbCreateCharacter as MockedFunction<typeof dbCreateCharacter>).mockResolvedValue(
-        [createdCharacter] as never,
-      );
+      (dbCreateCharacter as MockedFunction<typeof dbCreateCharacter>).mockResolvedValue([
+        createdCharacter,
+      ] as never);
 
       await copyCharacter('character-origin', 'global', 'user-1', null);
 
@@ -216,9 +221,9 @@ describe('template-service', () => {
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
         sourceCharacter as never,
       );
-      (dbCreateCharacter as MockedFunction<typeof dbCreateCharacter>).mockResolvedValue(
-        [createdCharacter] as never,
-      );
+      (dbCreateCharacter as MockedFunction<typeof dbCreateCharacter>).mockResolvedValue([
+        createdCharacter,
+      ] as never);
 
       await copyCharacter('character-origin', 'private', 'user-1', 'school-1', longName);
 
