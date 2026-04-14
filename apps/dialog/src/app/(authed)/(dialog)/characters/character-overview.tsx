@@ -58,17 +58,24 @@ export default function CharacterOverview({ currentUserId }: CharacterOverviewPr
       {(searchQuery, sortBy) => {
         const filtered = filterAndSortEntities(visibleCharacters, searchQuery, sortBy);
 
-        return filtered.map((character) => (
-          <EntityCard
-            key={character.id}
-            name={character.name}
-            description={character.description}
-            avatarUrl={character.maybeSignedPictureUrl}
-            isOwned={character.userId === currentUserId}
-            onCardClick={() => router.push(`/characters/editor/${character.id}`)}
-            onChatClick={() => router.push(`/characters/d/${character.id}`)}
-          />
-        ));
+        return filtered.map((character) => {
+          const isOwned = character.userId === currentUserId;
+          return (
+            <EntityCard
+              key={character.id}
+              name={character.name}
+              description={character.description}
+              avatarUrl={character.maybeSignedPictureUrl}
+              isOwned={isOwned}
+              onCardClick={() =>
+                router.push(
+                  isOwned ? `/characters/editor/${character.id}` : `/characters/${character.id}`,
+                )
+              }
+              onChatClick={() => router.push(`/characters/d/${character.id}`)}
+            />
+          );
+        });
       }}
     </EntityOverview>
   );
