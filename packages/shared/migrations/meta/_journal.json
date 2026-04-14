@@ -414,6 +414,13 @@
       "when": 1775516666682,
       "tag": "0058_aspiring_dagger",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1775836800000,
+      "tag": "0059_small_mephisto",
+      "breakpoints": true
     }
   ]
 }
