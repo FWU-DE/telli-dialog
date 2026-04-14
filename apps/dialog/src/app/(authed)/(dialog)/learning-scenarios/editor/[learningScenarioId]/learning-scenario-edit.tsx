@@ -52,6 +52,7 @@ import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-cha
 import { telliPointsPercentageValues, usageTimeValuesInMinutes } from './schema';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
+import { useInstructionsExample } from '@/hooks/use-instructions-example';
 import { FormField } from '@ui/components/form/FormField';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
@@ -183,27 +184,8 @@ export function LearningScenarioEdit({
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
 
-  const instructionPlaceholderSections = [
-    ['instructions-placeholder.p1.heading', 'instructions-placeholder.p1.content'],
-    ['instructions-placeholder.p2.heading', 'instructions-placeholder.p2.content'],
-    ['instructions-placeholder.p3.heading', 'instructions-placeholder.p3.content'],
-    ['instructions-placeholder.p4.heading', 'instructions-placeholder.p4.content'],
-  ] as const;
-
-  const instructionsPlaceholder = instructionPlaceholderSections
-    .map(([headingKey, contentKey]) => [t(headingKey), t(contentKey)].join('\n'))
-    .join('\n\n');
-
-  const instructionsExampleDialogContent = (
-    <div className="whitespace-pre-wrap">
-      {instructionPlaceholderSections.map(([headingKey, contentKey]) => (
-        <div key={headingKey} className="mb-4">
-          <p className="text-gray-500">{t(headingKey)}</p>
-          <p>{t(contentKey)}</p>
-        </div>
-      ))}
-    </div>
-  );
+  const { instructionsPlaceholder, instructionsExampleDialogContent } =
+    useInstructionsExample('learning-scenarios');
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {

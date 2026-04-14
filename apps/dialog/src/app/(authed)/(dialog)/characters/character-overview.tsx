@@ -10,6 +10,7 @@ import EntityCard from '@/components/entity-overview/entity-card';
 import { CreateNewCharacterButton } from './create-new-character-button';
 import { useOverviewFilter } from '@/components/hooks/use-overview-filter';
 import { getCharactersByFilterAction } from '../actions/entity-filter-actions';
+import { filterAndSortEntities } from '@/components/entity-overview/utils';
 
 type CharacterOverviewProps = {
   currentUserId: string;
@@ -55,25 +56,7 @@ export default function CharacterOverview({ currentUserId }: CharacterOverviewPr
       itemCount={visibleCharacters.length}
     >
       {(searchQuery, sortBy) => {
-        const q = searchQuery.trim().toLowerCase();
-        const filtered = q
-          ? visibleCharacters
-              .filter((character) => character.name.toLowerCase().includes(q))
-              .slice()
-          : visibleCharacters.slice();
-        filtered.sort((a, b) => {
-          switch (sortBy) {
-            case 'name':
-              return a.name.localeCompare(b.name);
-            case 'name-asc':
-              return b.name.localeCompare(a.name);
-            case 'date-asc':
-              return a.updatedAt.getTime() - b.updatedAt.getTime();
-            case 'date':
-            default:
-              return b.updatedAt.getTime() - a.updatedAt.getTime();
-          }
-        });
+        const filtered = filterAndSortEntities(visibleCharacters, searchQuery, sortBy);
 
         return filtered.map((character) => (
           <EntityCard

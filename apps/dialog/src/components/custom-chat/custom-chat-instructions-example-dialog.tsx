@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import {
   Dialog,
   DialogClose,
@@ -14,7 +14,7 @@ import { Button } from '@ui/components/Button';
 import { useTranslations } from 'next-intl';
 
 type CustomChatInstructionsExampleDialogProps = {
-  descriptionContent: ReactNode;
+  descriptionContent: ReactElement;
 };
 
 export function CustomChatInstructionsExampleDialog({
@@ -29,6 +29,7 @@ export function CustomChatInstructionsExampleDialog({
       <DialogTrigger asChild>
         <Button
           variant="link"
+          type="button"
           className="text-sm font-medium h-auto p-0 leading-none"
           aria-label={t('button')}
         >
@@ -40,7 +41,7 @@ export function CustomChatInstructionsExampleDialog({
         <DialogDescription asChild>{descriptionContent}</DialogDescription>
         <DialogFooter>
           <DialogClose asChild>
-            <Button>{t('close')}</Button>
+            <Button type="button">{t('close')}</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

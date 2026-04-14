@@ -43,11 +43,11 @@
   "sharing": {
     "label": "Freigabe",
     "school": "Schulintern",
-    "school-tooltip": "Wird schulintern sicht- und kopierbar. \nZu beachten: Eine Lehrkraft kann mehreren Schulen zugehörig sein. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich “Hintergrundwissen” weitergegeben werden dürfen.",
+    "school-tooltip": "Wird schulintern sicht- und kopierbar. \nZu beachten: Eine Lehrkraft kann mehreren Schulen zugehörig sein. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
     "community": "Community",
-    "community-tooltip": "Wird als Community-Vorlage sicht- und kopierbar.\n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich “Hintergrundwissen” weitergegeben werden dürfen.",
+    "community-tooltip": "Wird als Community-Vorlage sicht- und kopierbar.\n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
     "link": "Via Link",
-    "link-tooltip": "Über einen Link sicht- und kopierbar für Personen mit telli-Zugang. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich “Hintergrundwissen” weitergegeben werden dürfen.",
+    "link-tooltip": "Über einen Link sicht- und kopierbar für Personen mit telli-Zugang. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
     "copy-link": "Link kopieren",
     "link-copied": "Link in die Zwischenablage kopiert",
     "link-copied-error": "Link konnte nicht kopiert werden"
@@ -643,10 +643,10 @@
     "filter-tabs-label": "Filteroptionen",
     "info-tooltip-label": "Informationen anzeigen",
     "badge-mine": "von mir",
-    "sort-date": "Neueste zuerst",
+    "sort-date-desc": "Neueste zuerst",
     "sort-date-asc": "Älteste zuerst",
-    "sort-name": "Alphabetisch A-Z",
-    "sort-name-asc": "Alphabetisch Z-A",
+    "sort-name-asc": "Alphabetisch A-Z",
+    "sort-name-desc": "Alphabetisch Z-A",
     "close": "Schließen"
   }
 }

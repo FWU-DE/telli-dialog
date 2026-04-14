@@ -10,6 +10,7 @@ import EntityCard from '@/components/entity-overview/entity-card';
 import { CreateNewLearningScenarioButton } from './create-new-learning-scenario-button';
 import { useOverviewFilter } from '@/components/hooks/use-overview-filter';
 import { getLearningScenariosByFilterAction } from '../actions/entity-filter-actions';
+import { filterAndSortEntities } from '@/components/entity-overview/utils';
 
 type LearningScenarioOverviewProps = {
   currentUserId: string;
@@ -57,26 +58,7 @@ export default function LearningScenarioOverview({ currentUserId }: LearningScen
       itemCount={visibleLearningScenarios.length}
     >
       {(searchQuery, sortBy) => {
-        const q = searchQuery.trim().toLowerCase();
-
-        const filtered = q
-          ? visibleLearningScenarios
-              .filter((scenario) => scenario.name.toLowerCase().includes(q))
-              .slice()
-          : visibleLearningScenarios.slice();
-        filtered.sort((a, b) => {
-          switch (sortBy) {
-            case 'name':
-              return a.name.localeCompare(b.name);
-            case 'name-asc':
-              return b.name.localeCompare(a.name);
-            case 'date-asc':
-              return a.updatedAt.getTime() - b.updatedAt.getTime();
-            case 'date':
-            default:
-              return b.updatedAt.getTime() - a.updatedAt.getTime();
-          }
-        });
+        const filtered = filterAndSortEntities(visibleLearningScenarios, searchQuery, sortBy);
 
         return filtered.map((scenario) => {
           const isOwned = scenario.userId === currentUserId;

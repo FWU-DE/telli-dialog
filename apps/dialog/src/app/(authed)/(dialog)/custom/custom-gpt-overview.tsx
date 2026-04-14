@@ -10,6 +10,7 @@ import EntityCard from '@/components/entity-overview/entity-card';
 import CreateNewCustomGptButton from './create-new-customgpt-button';
 import { useOverviewFilter } from '@/components/hooks/use-overview-filter';
 import { getAssistantsByFilterAction } from '../actions/entity-filter-actions';
+import { filterAndSortEntities } from '@/components/entity-overview/utils';
 
 type CustomGptOverviewProps = {
   currentUserId: string;
@@ -70,25 +71,7 @@ export default function CustomGptOverview({ currentUserId }: CustomGptOverviewPr
       itemCount={visibleAssistants.length}
     >
       {(searchQuery, sortBy) => {
-        const q = searchQuery.trim().toLowerCase();
-        const filtered = q
-          ? visibleAssistants
-              .filter((assistant) => assistant.name.toLowerCase().includes(q))
-              .slice()
-          : visibleAssistants.slice();
-        filtered.sort((a, b) => {
-          switch (sortBy) {
-            case 'name':
-              return a.name.localeCompare(b.name);
-            case 'name-asc':
-              return b.name.localeCompare(a.name);
-            case 'date-asc':
-              return a.updatedAt.getTime() - b.updatedAt.getTime();
-            case 'date':
-            default:
-              return b.updatedAt.getTime() - a.updatedAt.getTime();
-          }
-        });
+        const filtered = filterAndSortEntities(visibleAssistants, searchQuery, sortBy);
 
         return filtered.map((assistant) => (
           <EntityCard
