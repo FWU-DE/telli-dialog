@@ -1,7 +1,7 @@
 'use client';
 
 import DestructiveActionButton from '@/components/common/destructive-action-button';
-import { CharacterWithShareDataModel } from '@shared/db/schema';
+import { CharacterOptionalShareDataModel } from '@shared/db/schema';
 import { EmptyImageIcon } from '@/components/icons/empty-image';
 import Link from 'next/link';
 import React from 'react';
@@ -22,7 +22,7 @@ import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import AvatarPicture from '@/components/common/avatar-picture';
 import { CreateNewInstanceFromTemplate } from '../_components/create-new-instance-from-template';
 
-type CharacterContainerProps = CharacterWithShareDataModel & {
+type CharacterContainerProps = CharacterOptionalShareDataModel & {
   currentUserId: string;
   maybeSignedPictureUrl: string | undefined;
 };

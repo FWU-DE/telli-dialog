@@ -3,12 +3,13 @@ import { dbGetLlmModelById } from '@shared/db/functions/llm-model';
 import { dbGetCharacterByIdAndInviteCode } from '@shared/db/functions/character';
 import CharacterSharedChat from '@/components/chat/character-shared-chat';
 import { ThemeProvider } from '@/components/providers/theme-provider';
-import { dbGetFederalStateBySchoolId } from '@shared/db/functions/school';
+import { dbGetFederalStateByUserId } from '@shared/db/functions/school';
 import { DEFAULT_DESIGN_CONFIGURATION } from '@/db/const';
 import { notFound } from 'next/navigation';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
+import { ThemeProvider as NextThemeProvider } from '@ui/components/theme-provider';
 
 const searchParamsSchema = z.object({ inviteCode: z.string() });
 
@@ -30,19 +31,26 @@ export default async function Page(props: PageProps<'/ua/characters/[characterId
   if (model === undefined) {
     notFound();
   }
-  const federalState = await dbGetFederalStateBySchoolId({ schoolId: character.schoolId });
+  const federalState = await dbGetFederalStateByUserId({ userId: character.startedBy });
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
 
   return (
     <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
-      <ThemeProvider designConfiguration={designConfiguration}>
-        <CharacterSharedChat
-          {...character}
-          initialMessage={character.initialMessage ?? ''}
-          inviteCode={searchParams.inviteCode}
-          imageSource={avatarPictureUrl}
-        />
-      </ThemeProvider>
+      <NextThemeProvider
+        attribute="class"
+        defaultTheme="light"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <ThemeProvider designConfiguration={designConfiguration}>
+          <CharacterSharedChat
+            {...character}
+            initialMessage={character.initialMessage ?? ''}
+            inviteCode={searchParams.inviteCode}
+            imageSource={avatarPictureUrl}
+          />
+        </ThemeProvider>
+      </NextThemeProvider>
     </LlmModelsProvider>
   );
 }
