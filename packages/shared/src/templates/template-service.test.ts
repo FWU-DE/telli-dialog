@@ -205,6 +205,30 @@ describe('template-service', () => {
       );
     });
 
+    it('should truncate the name to 50 characters', async () => {
+      const longName = 'A'.repeat(60);
+      const sourceCharacter = {
+        id: 'character-origin',
+        name: 'Source',
+      };
+      const createdCharacter = { id: 'character-copy', name: longName.substring(0, 50) };
+
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        sourceCharacter as never,
+      );
+      (dbCreateCharacter as MockedFunction<typeof dbCreateCharacter>).mockResolvedValue(
+        [createdCharacter] as never,
+      );
+
+      await copyCharacter('character-origin', 'private', 'user-1', 'school-1', longName);
+
+      expect(dbCreateCharacter).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'A'.repeat(50),
+        }),
+      );
+    });
+
     it('should throw if source character does not exist', async () => {
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
         undefined as never,
