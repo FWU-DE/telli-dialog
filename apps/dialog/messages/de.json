@@ -560,11 +560,11 @@
     },
     "share-with-learners": {
       "title": "Mit Lernenden teilen",
-      "description": "<tag>Du kannst diesen Chat zeitlich begrenzt mit Lernenden teilen. Lerne selbst, wie das funktioniert:</tag> <link>https://wiki.telli.de/index.php/Shared_Chat_teilen</link>",
-      "max-usage": "Maximale Nutzungsdauer",
-      "button-start": "Teilen aktivieren",
-      "button-stop": "Teilen beenden",
-      "share": "Teilungseinstellungen öffnen"
+      "description": "Lege fest, <b>wie viele</b> deiner <b>telli-Points</b> durch diesen Chat verbraucht werden dürfen und <b>wie lange</b> der Chat aktiv benutzt werden kann.",
+      "max-usage": "Maximale Nutzungszeit",
+      "button-start": "Jetzt bereitstellen",
+      "button-stop": "Stoppen",
+      "share": "Teilen"
     },
     "toasts": {
       "share-toast-error": "Das Teilen konnte nicht aktiviert werden.",
