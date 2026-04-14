@@ -34,12 +34,11 @@ export default function LearningScenarioOverview({ currentUserId }: LearningScen
   }
 
   const infoContent = (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-8 whitespace-pre-line">
       <div>
         <p className="font-semibold">{t('info-dialog.q1')}</p>
         <p>{t('info-dialog.a1')}</p>
       </div>
-      <p>{t('info-dialog.a1-2')}</p>
       <div>
         <p className="font-semibold">{t('info-dialog.q2')}</p>
         <p>{t('info-dialog.a2')}</p>
@@ -71,16 +70,25 @@ export default function LearningScenarioOverview({ currentUserId }: LearningScen
             : b.updatedAt.getTime() - a.updatedAt.getTime(),
         );
 
-        return filtered.map((scenario) => (
-          <EntityCard
-            key={scenario.id}
-            name={scenario.name}
-            description={scenario.description}
-            avatarUrl={scenario.maybeSignedPictureUrl}
-            isOwned={scenario.userId === currentUserId}
-            onCardClick={() => router.push(`/learning-scenarios/editor/${scenario.id}`)}
-          />
-        ));
+        return filtered.map((scenario) => {
+          const isOwned = scenario.userId === currentUserId;
+          return (
+            <EntityCard
+              key={scenario.id}
+              name={scenario.name}
+              description={scenario.description}
+              avatarUrl={scenario.maybeSignedPictureUrl}
+              isOwned={isOwned}
+              onCardClick={() =>
+                router.push(
+                  isOwned
+                    ? `/learning-scenarios/editor/${scenario.id}`
+                    : `/learning-scenarios/${scenario.id}`,
+                )
+              }
+            />
+          );
+        });
       }}
     </EntityOverview>
   );

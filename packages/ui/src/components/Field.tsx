@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { InfoIcon } from 'lucide-react';
+import { InfoIcon } from '@phosphor-icons/react';
 
 import { cn } from '../lib/utils';
 import { Label } from './Label';
@@ -116,13 +116,14 @@ function FieldContent({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 function FieldLabel({
+  children,
   className,
+  required,
   size,
   tooltip,
-  children,
   ...props
 }: React.ComponentProps<typeof Label> &
-  VariantProps<typeof fieldLabelVariants> & { tooltip?: string }) {
+  VariantProps<typeof fieldLabelVariants> & { required?: boolean; tooltip?: string }) {
   return (
     <Label
       data-slot="field-label"
@@ -136,10 +137,15 @@ function FieldLabel({
       {...props}
     >
       {children}
+      {required && (
+        <span aria-hidden="true" className="text-destructive">
+          *
+        </span>
+      )}
       {tooltip && (
         <Tooltip>
           <TooltipTrigger type="button" aria-label={tooltip}>
-            <InfoIcon className="size-5 text-muted-foreground" />
+            <InfoIcon className="size-5 text-icon" />
           </TooltipTrigger>
           <TooltipContent>{tooltip}</TooltipContent>
         </Tooltip>

@@ -12,9 +12,8 @@ import { z } from 'zod';
 import { cn } from '@/utils/tailwind';
 import { type ConversationModel } from '@shared/db/types';
 import Link from 'next/link';
-import { useTheme } from '@/components/providers/theme-provider';
-import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
-import { ImageSquareIcon } from '@phosphor-icons/react/dist/icons/ImageSquare';
+import { usePortalContainer } from '@ui/components/portal-container';
+import { ImageSquareIcon } from '@phosphor-icons/react';
 
 const renameSchema = z.object({
   name: z.string().min(1),
@@ -39,7 +38,7 @@ export default function ConversationItem({
   const [isEditable, toggleEditable] = React.useReducer((s) => !s, false);
   const router = useRouter();
   const pathname = useCustomPathname();
-  const { designConfiguration } = useTheme();
+  const container = usePortalContainer();
 
   async function onSubmit(data: RenameData) {
     toggleEditable();
@@ -96,33 +95,34 @@ export default function ConversationItem({
               <DotsHorizontalIcon className="h-5 w-5 sm:h-4 sm:w-4" />
             </DropdownMenu.Trigger>
           )}
-          <DropdownMenu.Content
-            sideOffset={5}
-            className={cn(
-              'z-20 flex flex-col w-[256px] bg-white shadow-dropdown rounded-enterprise-md',
-            )}
-            style={constructRootLayoutStyle({ designConfiguration })}
-          >
-            <DropdownMenu.Item asChild>
-              <button
-                onClick={() => onDeleteConversation(conversation.id)}
-                type="button"
-                className="text-main-red text-left px-4 py-3 font-normal text-sm bg-white hover:bg-main-300 active:bg-main-200 rounded-t"
-              >
-                Löschen
-              </button>
-            </DropdownMenu.Item>
-            <hr />
-            <DropdownMenu.Item asChild>
-              <button
-                onClick={toggleEditable}
-                type="button"
-                className="text-left text-main-black px-4 py-3 font-normal text-sm bg-white hover:bg-main-300 active:bg-main-200 rounded-b"
-              >
-                Umbenennen
-              </button>
-            </DropdownMenu.Item>
-          </DropdownMenu.Content>
+          <DropdownMenu.Portal container={container}>
+            <DropdownMenu.Content
+              sideOffset={5}
+              className={cn(
+                'z-20 flex flex-col w-[256px] bg-white shadow-dropdown rounded-enterprise-md',
+              )}
+            >
+              <DropdownMenu.Item asChild>
+                <button
+                  onClick={() => onDeleteConversation(conversation.id)}
+                  type="button"
+                  className="text-main-red text-left px-4 py-3 font-normal text-sm bg-white hover:bg-main-300 active:bg-main-200 rounded-t"
+                >
+                  Löschen
+                </button>
+              </DropdownMenu.Item>
+              <hr />
+              <DropdownMenu.Item asChild>
+                <button
+                  onClick={toggleEditable}
+                  type="button"
+                  className="text-left text-main-black px-4 py-3 font-normal text-sm bg-white hover:bg-main-300 active:bg-main-200 rounded-b"
+                >
+                  Umbenennen
+                </button>
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
         </DropdownMenu.Root>
       </div>
     </div>

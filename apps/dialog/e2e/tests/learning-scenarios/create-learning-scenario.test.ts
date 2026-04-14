@@ -119,7 +119,7 @@ test.describe('create, share, chat, delete', () => {
     await expect(page.getByLabel('assistant message 1')).toContainText('Ludwig XIV');
 
     // new chat
-    const newChatButton = page.locator('#destructive-button');
+    const newChatButton = page.getByTestId('custom-chat-delete-button').first();
     await expect(newChatButton).toBeVisible();
     await newChatButton.click();
 
