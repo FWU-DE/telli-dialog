@@ -71,7 +71,7 @@
     --input: #ccccccff;
     --ring: var(--primary);
 
-    --sidebar-background: #fafafaff;
+    --sidebar-background: var(--background-2);
     --sidebar-accent: #e8e4ee; /* overwritten by theme: based on primary color */
     --sidebar-accent-foreground: var(--primary); /* overwritten by theme: based on primary color */
     --sidebar-border: #e5e5e5ff;
@@ -80,6 +80,7 @@
 
   .dark {
     --background: #020817ff;
+    --background-2: #171717ff;
     --foreground: #f8fafcff;
 
     --card: #020817ff;
@@ -115,7 +116,7 @@
     --input: #1e293bff;
     --ring: #cbd5e1ff;
 
-    --sidebar-background: #171717ff;
+    --sidebar-background: var(--background-2);
     --sidebar-accent: color-mix(in srgb, var(--primary) 15%, transparent);
     --sidebar-accent-foreground: var(--primary);
     --sidebar-border: #ffffff1a;
