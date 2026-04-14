@@ -13,8 +13,8 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { WebsearchSource } from '@shared/db/types';
 import { ResponsiveLayoutWrapper } from '../../../_components/responsive-layout-wrapper';
 import { CharacterEdit } from './character-edit';
-import { CharacterView } from './character-view';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,7 +36,6 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
     schoolId: school.id,
   }).catch(handleErrorInServerComponent);
 
-  const readOnly = user.id !== character.userId;
   const initialLinks = character.attachedLinks
     .filter((l) => l !== '')
     .map(
@@ -47,7 +46,13 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
         }) as WebsearchSource,
     );
 
-  if (federalState.featureToggles.isNewUiDesignEnabled && !readOnly) {
+  const readOnly = user.id !== character.userId;
+
+  if (federalState.featureToggles.isNewUiDesignEnabled) {
+    if (readOnly) {
+      redirect(`/characters/${characterId}`);
+    }
+
     return (
       <ResponsiveLayoutWrapper>
         <CustomChatHeader
@@ -55,19 +60,6 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
           isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
         />
         <CharacterEdit
-          character={character}
-          relatedFiles={relatedFiles}
-          initialLinks={initialLinks}
-          avatarPictureUrl={maybeSignedPictureUrl}
-        />
-      </ResponsiveLayoutWrapper>
-    );
-  }
-
-  if (federalState.featureToggles.isNewUiDesignEnabled && readOnly) {
-    return (
-      <ResponsiveLayoutWrapper>
-        <CharacterView
           character={character}
           relatedFiles={relatedFiles}
           initialLinks={initialLinks}

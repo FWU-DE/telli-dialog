@@ -12,9 +12,9 @@ test('create character from template', async ({ page }) => {
     .first();
   await expect(card).toBeVisible();
   await card.click();
-  await page.waitForURL('/characters/editor/**');
+  await page.waitForURL('/characters/**');
 
-  const copyButton = page.getByRole('button', { name: 'Kopieren & bearbeiten' });
+  const copyButton = page.getByTestId('custom-chat-duplicate-button');
   await expect(copyButton).toBeVisible();
   await expect(copyButton).toBeEnabled();
   await copyButton.click();

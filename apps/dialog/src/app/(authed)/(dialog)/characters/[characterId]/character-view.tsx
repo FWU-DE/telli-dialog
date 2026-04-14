@@ -4,7 +4,7 @@ import { CharacterOptionalShareDataModel, FileModel } from '@shared/db/schema';
 import { WebsearchSource } from '@shared/db/types';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { BackButton } from '@/components/common/back-button';
@@ -18,11 +18,19 @@ import { CustomChatAvatarImage } from '@/components/custom-chat/custom-chat-avat
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
 import { Card, CardContent } from '@ui/components/Card';
 import { FieldGroup } from '@ui/components/Field';
-import { Button } from '@ui/components/Button';
-import { CopyIcon } from '@phosphor-icons/react';
 import { useToast } from '@/components/common/toast';
-import { createNewCharacterAction } from '../../actions';
-import { downloadFileFromCharacterAction } from './actions';
+import { createNewCharacterAction } from '../actions';
+import {
+  downloadFileFromCharacterAction,
+  shareCharacterAction,
+  unshareCharacterAction,
+} from '../editor/[characterId]/actions';
+import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
+import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
+import {
+  telliPointsPercentageValues,
+  usageTimeValuesInMinutes,
+} from '../../learning-scenarios/editor/[learningScenarioId]/schema';
 
 export function CharacterView({
   character,
@@ -44,26 +52,23 @@ export function CharacterView({
   const isModelAvailable = character.modelId && models.some((m) => m.id === character.modelId);
   const selectedModelId = isModelAvailable ? character.modelId : maybeDefaultModelId;
   const selectedModel = models.find((m) => m.id === selectedModelId);
-  const [isCopying, setIsCopying] = useState(false);
 
   const handleUseChat = () => {
     router.push(`/characters/d/${character.id}`);
   };
 
-  const handleCopyCharacter = async () => {
-    setIsCopying(true);
-    try {
-      const createResult = await createNewCharacterAction({
-        templatePictureId: character.pictureId ?? undefined,
-        templateId: character.id,
-      });
-      if (createResult.success) {
-        router.push(`/characters/editor/${createResult.value.id}?create=true`);
-      } else {
-        toast.error(t('toasts.create-toast-error'));
-      }
-    } finally {
-      setIsCopying(false);
+  const handleDuplicateCharacter = async () => {
+    const createResult = await createNewCharacterAction({
+      templatePictureId: character.pictureId ?? undefined,
+      templateId: character.id,
+      duplicateCharacterName: t('duplicate-name-format-string', {
+        sourceName: character.name,
+      }),
+    });
+    if (createResult.success) {
+      router.push(`/characters/editor/${createResult.value.id}?create=true`);
+    } else {
+      toast.error(t('toasts.create-toast-error'));
     }
   };
 
@@ -80,11 +85,30 @@ export function CharacterView({
       <CustomChatTitle title={character.name} />
       <CustomChatActions>
         <CustomChatActionUse onClick={handleUseChat} />
-        <Button variant="outline" onClick={handleCopyCharacter} disabled={isCopying}>
-          <CopyIcon className="size-5" />
-          {t('copy-modal.copy-button')}
-        </Button>
+        <CustomChatActionDuplicate onClick={handleDuplicateCharacter} />
       </CustomChatActions>
+
+      <CustomChatShareWithLearners
+        startedAt={character.startedAt ?? null}
+        maxUsageTimeLimit={character.maxUsageTimeLimit ?? null}
+        pointsPercentageValues={telliPointsPercentageValues}
+        usageTimeValues={usageTimeValuesInMinutes}
+        onShare={async (data) => {
+          const result = await shareCharacterAction({
+            id: character.id,
+            telliPointsPercentageLimit: data.telliPointsPercentageLimit,
+            usageTimeLimit: data.usageTimeLimit,
+          });
+          return result;
+        }}
+        onUnshare={async () => {
+          const result = await unshareCharacterAction({
+            characterId: character.id,
+          });
+          return result;
+        }}
+        shareUILink={`/characters/editor/${character.id}/share`}
+      />
 
       <div className="flex flex-col gap-3">
         <CustomChatHeading2 text={t('configuration-heading')} />

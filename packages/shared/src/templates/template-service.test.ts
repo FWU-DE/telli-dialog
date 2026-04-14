@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
-import { copyAssistant, copyRelatedTemplateFiles, createTemplateFromUrl } from './template-service';
+import {
+  copyAssistant,
+  copyCharacter,
+  copyRelatedTemplateFiles,
+  createTemplateFromUrl,
+} from './template-service';
 import { dbGetAssistantById, dbUpsertAssistant } from '@shared/db/functions/assistants';
+import { dbCreateCharacter, dbGetCharacterById } from '@shared/db/functions/character';
 import {
   dbGetFilesForLearningScenario,
   dbGetRelatedAssistantFiles,
@@ -17,6 +23,11 @@ import { logError } from '@shared/logging';
 vi.mock('@shared/db/functions/assistants', () => ({
   dbGetAssistantById: vi.fn(),
   dbUpsertAssistant: vi.fn(),
+}));
+
+vi.mock('@shared/db/functions/character', () => ({
+  dbGetCharacterById: vi.fn(),
+  dbCreateCharacter: vi.fn(),
 }));
 
 vi.mock('@shared/db/functions/files', () => ({
@@ -130,6 +141,121 @@ describe('template-service', () => {
       await expect(
         copyAssistant('assistant-origin', 'private', 'user-1', 'school-1'),
       ).rejects.toThrow('Fehler beim Erstellen des Assistenten');
+    });
+  });
+
+  describe('copyCharacter', () => {
+    it('should use duplicateCharacterName when provided', async () => {
+      const originalId = 'character-origin';
+      const sourceCharacter = {
+        id: originalId,
+        name: 'Original character',
+        description: 'description',
+        hasLinkAccess: true,
+      };
+      const createdCharacter = { id: 'character-copy', name: 'Duplicated character' };
+
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        sourceCharacter as never,
+      );
+      (dbCreateCharacter as MockedFunction<typeof dbCreateCharacter>).mockResolvedValue([
+        createdCharacter,
+      ] as never);
+
+      const result = await copyCharacter(
+        originalId,
+        'private',
+        'user-1',
+        'school-1',
+        'Duplicated character',
+      );
+
+      expect(dbGetCharacterById).toHaveBeenCalledWith({ characterId: originalId });
+      expect(dbCreateCharacter).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Duplicated character',
+          originalCharacterId: originalId,
+          accessLevel: 'private',
+          userId: 'user-1',
+          schoolId: 'school-1',
+          isDeleted: false,
+          hasLinkAccess: false,
+        }),
+      );
+      expect(result).toBe(createdCharacter);
+    });
+
+    it('should fallback to source name when duplicateCharacterName is not provided', async () => {
+      const sourceCharacter = {
+        id: 'character-origin',
+        name: 'Source character name',
+      };
+      const createdCharacter = { id: 'character-copy', name: 'Source character name' };
+
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        sourceCharacter as never,
+      );
+      (dbCreateCharacter as MockedFunction<typeof dbCreateCharacter>).mockResolvedValue([
+        createdCharacter,
+      ] as never);
+
+      await copyCharacter('character-origin', 'global', 'user-1', null);
+
+      expect(dbCreateCharacter).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Source character name',
+          schoolId: null,
+          accessLevel: 'global',
+        }),
+      );
+    });
+
+    it('should truncate the name to 50 characters', async () => {
+      const longName = 'A'.repeat(60);
+      const sourceCharacter = {
+        id: 'character-origin',
+        name: 'Source',
+      };
+      const createdCharacter = { id: 'character-copy', name: longName.substring(0, 50) };
+
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        sourceCharacter as never,
+      );
+      (dbCreateCharacter as MockedFunction<typeof dbCreateCharacter>).mockResolvedValue([
+        createdCharacter,
+      ] as never);
+
+      await copyCharacter('character-origin', 'private', 'user-1', 'school-1', longName);
+
+      expect(dbCreateCharacter).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'A'.repeat(50),
+        }),
+      );
+    });
+
+    it('should throw if source character does not exist', async () => {
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        undefined as never,
+      );
+
+      await expect(copyCharacter('missing-id', 'private', 'user-1', 'school-1')).rejects.toThrow(
+        'Dialogpartner nicht gefunden',
+      );
+    });
+
+    it('should throw if created character has no id', async () => {
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue({
+        id: 'character-origin',
+        name: 'Original name',
+      } as never);
+      (dbCreateCharacter as MockedFunction<typeof dbCreateCharacter>).mockResolvedValue(
+        [] as never,
+      );
+
+      await expect(
+        copyCharacter('character-origin', 'private', 'user-1', 'school-1'),
+      ).rejects.toThrow('Fehler beim Erstellen des Dialogpartners');
     });
   });
 

@@ -255,6 +255,7 @@
     "visibility-global": "Vorlagen",
     "visibility-school": "Schulintern",
     "visibility-private": "Für mich",
+    "duplicate-name-format-string": "Duplikat von {sourceName}",
     "shared": {
       "title": "Dialogpartner im Unterricht einsetzen",
       "description": "Wie viel des monatlichen Tokenvolumens soll durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
@@ -556,6 +557,20 @@
       "label": "Sprachmodell",
       "placeholder": "Modell auswählen",
       "no-models": "Keine Modelle verfügbar"
+    },
+    "share-with-learners": {
+      "title": "Mit Lernenden teilen",
+      "description": "Lege fest, <b>wie viele</b> deiner <b>telli-Points</b> durch diesen Chat verbraucht werden dürfen und <b>wie lange</b> der Chat aktiv benutzt werden kann.",
+      "max-usage": "Maximale Nutzungszeit",
+      "button-start": "Jetzt bereitstellen",
+      "button-stop": "Stoppen",
+      "share": "Teilen"
+    },
+    "toasts": {
+      "share-toast-error": "Das Teilen konnte nicht aktiviert werden.",
+      "share-toast-success": "Erfolgreich zum Teilen freigegeben!",
+      "stop-share-toast-success": "Das Teilen wurde erfolgreich beendet.",
+      "stop-share-toast-error": "Das Teilen konnte nicht beendet werden."
     },
     "files-and-links": {
       "heading": "Hintergrundwissen",
