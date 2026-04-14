@@ -42,13 +42,14 @@ import { NotFoundError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
 import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
 import path from 'node:path';
-import { MAX_ENTITY_NAME_LENGTH } from '@shared/entities/const';
 
 const templateTypeMap: Record<string, TemplateTypes> = {
   custom: 'custom-gpt',
   characters: 'character',
   'learning-scenarios': 'learning-scenario',
 };
+
+const MAX_ENTITY_NAME_LENGTH = 50;
 
 /**
  * Fetch all global templates from the database, including deleted templates.
