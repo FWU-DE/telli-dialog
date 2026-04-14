@@ -429,14 +429,16 @@ export function LearningScenarioEdit({
                   control={control}
                   {...createLearningScenarioFieldValidationConfig(t).additionalInstructions}
                   label={t('instructions-label')}
+                  labelAction={
+                    <CustomChatInstructionsExampleDialog
+                      descriptionContent={instructionsExampleDialogContent}
+                    />
+                  }
                   placeholder={instructionsPlaceholder}
                   testId="learning-scenario-instructions-input"
                   onBlur={handleAutoSave}
                   type="textArea"
                   className="h-125"
-                />
-                <CustomChatInstructionsExampleDialog
-                  descriptionContent={instructionsExampleDialogContent}
                 />
                 <FormField
                   name="studentExercise"

@@ -381,14 +381,16 @@ export function AssistantEdit({
                 control={control}
                 {...assistantFieldValidationConfig.instructions}
                 label={t('instructions-label')}
+                labelAction={
+                  <CustomChatInstructionsExampleDialog
+                    descriptionContent={instructionsExampleDialogContent}
+                  />
+                }
                 placeholder={instructionsPlaceholder}
                 testId="assistant-instructions-input"
                 onBlur={handleAutoSave}
                 type="textArea"
                 className="h-125"
-              />
-              <CustomChatInstructionsExampleDialog
-                descriptionContent={instructionsExampleDialogContent}
               />
               <CustomChatPromptSuggestions control={control} onBlur={handleAutoSave} />
             </FieldGroup>

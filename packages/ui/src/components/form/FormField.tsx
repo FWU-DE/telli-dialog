@@ -5,6 +5,7 @@ import { Field, FieldDescription, FieldError, FieldLabel } from '../Field';
 import { Input } from '../Input';
 import { Textarea } from '../Textarea';
 import { useEffect, useRef } from 'react';
+import { ReactNode } from 'react';
 
 export type FormFieldProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -20,6 +21,8 @@ export type FormFieldProps<
   description?: string;
   /** Tooltip text displayed next to the label */
   tooltip?: string;
+  /** Optional action element rendered on the right side of the label row */
+  labelAction?: ReactNode;
   /** Input type: 'text', 'textArea', 'number', 'email', 'password', or 'checkbox' */
   type?: 'text' | 'textArea' | 'number' | 'email' | 'password' | 'checkbox';
   /** Whether the field is required */
@@ -55,6 +58,7 @@ export function FormField<
   label,
   description,
   tooltip,
+  labelAction,
   type = 'text',
   required,
   maxLength,
@@ -106,7 +110,12 @@ export function FormField<
 
         return (
           <Field data-invalid={fieldState.invalid} aria-required={required}>
-            <FieldLabel htmlFor={field.name} required={required} tooltip={tooltip}>
+            <FieldLabel
+              htmlFor={field.name}
+              required={required}
+              tooltip={tooltip}
+              labelAction={labelAction}
+            >
               {label}
             </FieldLabel>
             {description && <FieldDescription>{description}</FieldDescription>}

@@ -27,7 +27,11 @@ export function CustomChatInstructionsExampleDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="link" className="text-sm font-medium h-auto" aria-label={t('button')}>
+        <Button
+          variant="link"
+          className="text-sm font-medium h-auto p-0 leading-none"
+          aria-label={t('button')}
+        >
           {t('button')}
         </Button>
       </DialogTrigger>

@@ -406,14 +406,16 @@ export function CharacterEdit({
                   control={control}
                   {...createCharacterFieldValidationConfig(t).instructions}
                   label={t('instructions-label')}
+                  labelAction={
+                    <CustomChatInstructionsExampleDialog
+                      descriptionContent={instructionsExampleDialogContent}
+                    />
+                  }
                   placeholder={instructionsPlaceholder}
                   testId="character-instructions-input"
                   onBlur={handleAutoSave}
                   type="textArea"
                   className="h-125"
-                />
-                <CustomChatInstructionsExampleDialog
-                  descriptionContent={instructionsExampleDialogContent}
                 />
                 <FormField
                   name="initialMessage"
