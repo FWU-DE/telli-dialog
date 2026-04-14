@@ -124,12 +124,23 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
       - name: Install Playwright browsers
-        run: pnpm -filter telli-dialog exec playwright install
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm --filter telli-dialog exec playwright install
 
       - name: Start telli-api
         run: |
@@ -158,6 +169,14 @@ jobs:
 
       - name: Run migrations and seed database (if applicable)
         run: pnpm --filter @telli/shared db:migrate && pnpm --filter @telli/shared db:seed
+
+      - name: Cache turbo build cache
+        uses: actions/cache@v5
+        with:
+          path: .turbo
+          key: turbo-e2e-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-e2e-${{ runner.os }}-
 
       # Build and start the app the same way as in the prod container (Next.js standalone)
       - name: Start application
