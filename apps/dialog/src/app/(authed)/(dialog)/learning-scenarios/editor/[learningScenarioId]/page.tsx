@@ -12,6 +12,7 @@ import LearningScenarioForm from './learning-scenario-form';
 import { LearningScenarioEdit } from './learning-scenario-edit';
 import { ResponsiveLayoutWrapper } from '../../../_components/responsive-layout-wrapper';
 import { redirect } from 'next/navigation';
+import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,6 +51,10 @@ export default async function Page(
   if (federalState.featureToggles.isNewUiDesignEnabled && !readOnly) {
     return (
       <ResponsiveLayoutWrapper>
+        <CustomChatHeader
+          userAndContext={userAndContext}
+          isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+        />
         <LearningScenarioEdit
           learningScenario={learningScenario}
           relatedFiles={relatedFiles}
