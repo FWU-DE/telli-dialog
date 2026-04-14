@@ -45,6 +45,8 @@ import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-fi
 import { WebsearchSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-chat-prompt-suggestions';
+import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
+import { useInstructionsExample } from '@/hooks/use-instructions-example';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
@@ -172,6 +174,9 @@ export function AssistantEdit({
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
+
+  const { instructionsPlaceholder, instructionsExampleDialogContent } =
+    useInstructionsExample('assistants');
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -358,7 +363,12 @@ export function AssistantEdit({
                 control={control}
                 {...assistantFieldValidationConfig.instructions}
                 label={t('instructions-label')}
-                placeholder={t('instructions-placeholder')}
+                labelAction={
+                  <CustomChatInstructionsExampleDialog
+                    descriptionContent={instructionsExampleDialogContent}
+                  />
+                }
+                placeholder={instructionsPlaceholder}
                 testId="assistant-instructions-input"
                 onBlur={handleAutoSave}
                 type="textArea"

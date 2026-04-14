@@ -54,6 +54,8 @@ import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-fi
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { FormField } from '@ui/components/form/FormField';
 import { createNewCharacterAction } from '../../actions';
+import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
+import { useInstructionsExample } from '@/hooks/use-instructions-example';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
 
@@ -176,6 +178,9 @@ export function CharacterEdit({
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
+
+  const { instructionsPlaceholder, instructionsExampleDialogContent } =
+    useInstructionsExample('characters');
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -400,7 +405,12 @@ export function CharacterEdit({
                   control={control}
                   {...createCharacterFieldValidationConfig(t).instructions}
                   label={t('instructions-label')}
-                  placeholder={t('instructions-placeholder')}
+                  labelAction={
+                    <CustomChatInstructionsExampleDialog
+                      descriptionContent={instructionsExampleDialogContent}
+                    />
+                  }
+                  placeholder={instructionsPlaceholder}
                   testId="character-instructions-input"
                   onBlur={handleAutoSave}
                   type="textArea"

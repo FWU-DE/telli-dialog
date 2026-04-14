@@ -55,7 +55,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 flex flex-col gap-8 rounded-3xl p-8 px-12 shadow-lg duration-200 w-full max-w-xl max-h-[85vh] overflow-y-auto',
+          'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-1/2 left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 flex flex-col gap-8 rounded-2xl p-8 px-12 shadow-lg duration-200 w-full max-w-xl max-h-[85vh] overflow-y-auto',
           className,
         )}
         {...props}
@@ -90,7 +90,7 @@ function DialogTitle({ className, ...props }: React.ComponentProps<typeof Dialog
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn('text-foreground text-2xl font-semibold', className)}
+      className={cn('text-foreground text-3xl font-semibold', className)}
       {...props}
     />
   );
