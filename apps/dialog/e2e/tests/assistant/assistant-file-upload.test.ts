@@ -4,7 +4,7 @@ import { sendMessage, uploadFile } from '../../utils/chat';
 
 test.use({ storageState: AUTH_FILES.teacher });
 
-test('should upload file and chat with custom GPT template (Schulorganisationsassistent)', async ({
+test('should upload file and chat with assistant template (Schulorganisationsassistent)', async ({
   page,
 }) => {
   await page.goto('/custom?filter=official');

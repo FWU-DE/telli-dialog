@@ -1,9 +1,9 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
 
 test.use({ storageState: AUTH_FILES.teacher });
 
-test('test', async ({ page }) => {
+test('create assistant from template', async ({ page }) => {
   await page.goto('/custom');
 
   const card = page
