@@ -451,6 +451,7 @@ export function LearningScenarioEdit({
             control={control}
             schoolSharingName="isSchoolShared"
             linkSharingName="hasLinkAccess"
+            linkToShare={`/learning-scenarios/${learningScenario.id}`}
             onShareChange={handleSharingChange}
           />
         </form>

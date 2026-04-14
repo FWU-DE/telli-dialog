@@ -392,6 +392,7 @@ export function AssistantEdit({
           control={control}
           schoolSharingName="isSchoolShared"
           linkSharingName="hasLinkAccess"
+          linkToShare={`/assistants/${assistant.id}`}
           onShareChange={handleSharingChange}
         />
       </form>
