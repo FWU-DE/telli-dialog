@@ -102,7 +102,7 @@ export default function EntityOverview({
                 <DialogTrigger asChild>
                   <button
                     type="button"
-                    className="text-primary hover:text-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full"
+                    className="text-primary hover:text-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full pt-1.5"
                     aria-label={t('info-tooltip-label')}
                   >
                     <InfoIcon className="w-8 h-8" aria-hidden="true" />
@@ -148,7 +148,7 @@ export default function EntityOverview({
                   />
                 ) : (
                   <MagnifyingGlassIcon
-                    className="pointer-events-none absolute right-3 top-1/2 size-5 -translate-y-2/3 text-gray-500"
+                    className="pointer-events-none absolute right-3 top-3/5 size-5 -translate-y-2/3 text-gray-500"
                     aria-hidden="true"
                   />
                 )}
@@ -179,6 +179,7 @@ export default function EntityOverview({
                   <SelectTrigger
                     size="sm"
                     className="w-fit gap-1 border-0 bg-transparent shadow-none text-sm"
+                    aria-label={t('sort-label')}
                   >
                     <SelectValue />
                   </SelectTrigger>
