@@ -12,7 +12,7 @@ test('create character from template', async ({ page }) => {
     .first();
   await expect(card).toBeVisible();
   await card.click();
-  await page.waitForURL('/characters/editor/**');
+  await page.waitForURL('/characters/**');
 
   const copyButton = page.getByTestId('custom-chat-duplicate-button');
   await expect(copyButton).toBeVisible();
