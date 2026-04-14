@@ -28,9 +28,7 @@ import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import ProfileMenu from '../navigation/profile-menu';
 import { ToggleSidebarButton } from '../navigation/sidebar/collapsible-sidebar';
 import { useSession } from 'next-auth/react';
-
-const VALID_SORT_OPTIONS = ['name', 'date'] as const;
-export type SortOption = (typeof VALID_SORT_OPTIONS)[number];
+import { isSortOption, SortOption } from './utils';
 
 type EntityOverviewProps = {
   title: string;
@@ -56,7 +54,7 @@ export default function EntityOverview({
   itemCount,
 }: EntityOverviewProps) {
   const [searchInput, setSearchInput] = React.useState('');
-  const [sortBy, setSortBy] = React.useState<SortOption>('date');
+  const [sortBy, setSortBy] = React.useState<SortOption>('date-desc');
   const [infoDialogOpen, setInfoDialogOpen] = React.useState(false);
   const federalState = useFederalState();
   const { data: session } = useSession();
@@ -171,8 +169,8 @@ export default function EntityOverview({
                 <Select
                   value={sortBy}
                   onValueChange={(v) => {
-                    if (VALID_SORT_OPTIONS.includes(v as SortOption)) {
-                      setSortBy(v as SortOption);
+                    if (isSortOption(v)) {
+                      setSortBy(v);
                     }
                   }}
                 >
@@ -184,8 +182,10 @@ export default function EntityOverview({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent align="end" position="popper">
-                    <SelectItem value="date">{t('sort-date')}</SelectItem>
-                    <SelectItem value="name">{t('sort-name')}</SelectItem>
+                    <SelectItem value="date-desc">{t('sort-date-desc')}</SelectItem>
+                    <SelectItem value="date-asc">{t('sort-date-asc')}</SelectItem>
+                    <SelectItem value="name-asc">{t('sort-name-asc')}</SelectItem>
+                    <SelectItem value="name-desc">{t('sort-name-desc')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

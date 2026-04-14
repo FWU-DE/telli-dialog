@@ -51,6 +51,8 @@ import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
 import { telliPointsPercentageValues, usageTimeValuesInMinutes } from './schema';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
+import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
+import { useInstructionsExample } from '@/hooks/use-instructions-example';
 import { FormField } from '@ui/components/form/FormField';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
@@ -181,6 +183,9 @@ export function LearningScenarioEdit({
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
+
+  const { instructionsPlaceholder, instructionsExampleDialogContent } =
+    useInstructionsExample('learning-scenarios');
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -406,7 +411,12 @@ export function LearningScenarioEdit({
                   control={control}
                   {...createLearningScenarioFieldValidationConfig(t).additionalInstructions}
                   label={t('instructions-label')}
-                  placeholder={t('instructions-placeholder')}
+                  labelAction={
+                    <CustomChatInstructionsExampleDialog
+                      descriptionContent={instructionsExampleDialogContent}
+                    />
+                  }
+                  placeholder={instructionsPlaceholder}
                   testId="learning-scenario-instructions-input"
                   onBlur={handleAutoSave}
                   type="textArea"
