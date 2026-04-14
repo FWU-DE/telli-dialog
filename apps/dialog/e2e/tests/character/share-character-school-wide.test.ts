@@ -1,36 +1,40 @@
 import { expect, test } from '@playwright/test';
-import { login } from '../../utils/login';
+import { AUTH_FILES } from '../../utils/const';
 import { configureCharacter } from '../../utils/character';
 import { nanoid } from 'nanoid';
 
-test('share character school-wide', async ({ page }) => {
-  await login(page, 'teacher');
-  await page.goto('/characters');
-  await page.waitForURL('/characters**');
+const characterName = 'Ada Lovelace - ' + nanoid(8);
 
-  const createButton = page.getByRole('button', { name: 'Dialogpartner erstellen' });
-  await expect(createButton).toBeVisible();
-  await createButton.click();
+test.describe('share character school-wide', () => {
+  test.use({ storageState: AUTH_FILES.teacher2 });
 
-  await page.waitForURL('/characters/editor/**');
+  test.beforeAll(async ({ browser }) => {
+    const page = await browser.newPage({ storageState: AUTH_FILES.teacher });
 
-  await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await page.goto('/characters');
+    await page.waitForURL('/characters**');
 
-  // configure form
-  const characterName = 'Ada Lovelace - ' + nanoid(8);
-  await configureCharacter(page, {
-    name: characterName,
-    description: 'Sie gilt als erste Programmiererin der Welt.',
-    instructions: 'Ada Lovelace soll kindgerecht und verständlich antworten.',
+    const createButton = page.getByRole('button', { name: 'Dialogpartner erstellen' });
+    await expect(createButton).toBeVisible();
+    await createButton.click();
+
+    await page.waitForURL('/characters/editor/**');
+
+    await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+
+    await configureCharacter(page, {
+      name: characterName,
+      description: 'Sie gilt als erste Programmiererin der Welt.',
+      instructions: 'Ada Lovelace soll kindgerecht und verständlich antworten.',
+    });
+
+    await page.close();
   });
 
-  await page.goto('/characters?visibility=school**');
+  test('shared character is visible for teacher2', async ({ page }) => {
+    await page.goto('/characters?visibility=school');
+    await page.waitForURL('/characters?visibility=school**');
 
-  // Login as a different teacher to verify sharing
-  await login(page, 'teacher2');
-  await page.goto('/characters?visibility=school');
-  await page.waitForURL('/characters?visibility=school**');
-
-  // Verify the shared character is visible
-  await expect(page.getByText(characterName).first()).toBeVisible();
+    await expect(page.getByText(characterName).first()).toBeVisible();
+  });
 });

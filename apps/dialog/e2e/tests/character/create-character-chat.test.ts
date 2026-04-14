@@ -1,17 +1,16 @@
 import { expect, test } from '@playwright/test';
-import { login } from '../../utils/login';
+import { AUTH_FILES } from '../../utils/const';
 import { regenerateMessage, sendMessage } from '../../utils/chat';
-import { deleteCharacter } from '../../utils/character';
+import { configureCharacter, deleteCharacter } from '../../utils/character';
 import { waitForToast } from '../../utils/utils';
-import { configureCharacter } from '../../utils/character';
 import { nanoid } from 'nanoid';
+
+test.use({ storageState: AUTH_FILES.teacher });
 
 test.describe('create, share, chat, delete', () => {
   const characterName = 'John Cena ' + nanoid(8);
 
   test('teacher can login, create and join shared dialogpartner chat', async ({ page }) => {
-    await login(page, 'teacher');
-
     await page.goto('/characters');
     await page.waitForURL('/characters**');
 
@@ -24,8 +23,7 @@ test.describe('create, share, chat, delete', () => {
     // configure form
     await configureCharacter(page, {
       name: characterName,
-      description:
-        'Er ist bekannt für seinen Spruch „You can`t see me“ und seine Wrestling-Karriere.',
+      description: `Er ist bekannt für seinen Spruch „You can't see me“ und seine Wrestling-Karriere.`,
       instructions: 'John Cena soll über seine Karriere und Erfolge sprechen.',
     });
 
@@ -78,8 +76,6 @@ test.describe('create, share, chat, delete', () => {
   });
 
   test('teacher can delete character', async ({ page }) => {
-    await login(page, 'teacher');
-
     await page.goto('/characters?visibility=private');
     await page.waitForURL('/characters?visibility=private');
 

@@ -1,9 +1,10 @@
 import { expect, test } from '@playwright/test';
-import { login } from '../../utils/login';
+import { AUTH_FILES } from '../../utils/const';
 import { nanoid } from 'nanoid';
 
+test.use({ storageState: AUTH_FILES.teacher });
+
 test('create character from template', async ({ page }) => {
-  await login(page, 'teacher');
   await page.goto('/characters');
 
   const card = page

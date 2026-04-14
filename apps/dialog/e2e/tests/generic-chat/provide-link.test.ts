@@ -1,9 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { login } from '../../utils/login';
+import { AUTH_FILES } from '../../utils/const';
 import { sendMessage } from '../../utils/chat';
 
+test.use({ storageState: AUTH_FILES.teacher });
+
 test('teacher can provide link and it is displayed in the chat', async ({ page }) => {
-  await login(page, 'teacher');
+  await page.goto('/');
   await sendMessage(
     page,
     'Wann hatte der Barock seinen Anfang?\nhttps://www.planet-wissen.de/geschichte/neuzeit/barock/index.html',
@@ -22,7 +24,7 @@ test.describe('links in chat', () => {
     ] as const
   ).forEach(([link, host]) => {
     test(`provide link to complex website does not timeout (${link})`, async ({ page }) => {
-      await login(page, 'teacher');
+      await page.goto('/');
       await sendMessage(
         page,
         `Gib mir eine Zusammenfassung in einem Satz dieser Seite:\n${link} Beende die Antwort mit "ENDE".`,
