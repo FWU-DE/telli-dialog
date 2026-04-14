@@ -4,10 +4,8 @@ import { getAssistantByUser } from '@shared/assistants/assistant-service';
 import { notFound } from 'next/navigation';
 import { AssistantEdit } from './assistant-edit';
 import { ResponsiveLayoutWrapper } from '../../../_components/responsive-layout-wrapper';
-import HeaderPortal from '../../../header-portal';
-import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import ProfileMenu from '@/components/navigation/profile-menu';
 import { buildLegacyUserAndContext } from '@/auth/types';
+import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,13 +30,10 @@ export default async function Page(props: PageProps<'/assistants/editor/[assista
 
   return (
     <ResponsiveLayoutWrapper>
-      <HeaderPortal>
-        <ToggleSidebarButton
-          isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
-        />
-        <div className="grow"></div>
-        <ProfileMenu userAndContext={userAndContext} />
-      </HeaderPortal>
+      <CustomChatHeader
+        userAndContext={userAndContext}
+        isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+      />
       <AssistantEdit
         assistant={assistant}
         relatedFiles={fileMappings}
