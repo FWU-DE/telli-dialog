@@ -109,15 +109,6 @@ jobs:
           LLM_GPT5NANO_API_KEY: op://telli Engineering/.env.e2e chatbot/LLM_GPT5NANO_API_KEY
           LLM_GPT5NANO_BASE_URL: op://telli Engineering/.env.e2e chatbot/LLM_GPT5NANO_BASE_URL
 
-      - name: Wait for PostgreSQL to be ready
-        run: |
-          for port in 5432 6543; do
-            until pg_isready -h localhost -p $port -U postgres; do
-              echo "$(date) - waiting for postgres on port $port to be ready"
-              sleep 1
-            done
-          done
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v5
       - name: Setup Node.js
@@ -139,8 +130,7 @@ jobs:
             playwright-${{ runner.os }}-
 
       - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm --filter telli-dialog exec playwright install
+        run: pnpm --filter telli-dialog exec playwright install chromium firefox
 
       - name: Start telli-api
         run: |
