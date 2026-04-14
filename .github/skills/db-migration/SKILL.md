@@ -3,10 +3,6 @@ name: db-migration
 description: 'Create a database migration if there are any changes to the database schema. Use when asked to create a database migration or apply changes to the database schema.'
 ---
 
-# Database Migration for telli-dialog
-
-Use this skill to create and apply database migrations for schema changes.
-
 ## When to use
 
 Use this skill when the user asks to:
