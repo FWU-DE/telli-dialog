@@ -19,18 +19,18 @@ import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-fi
 import { Card, CardContent } from '@ui/components/Card';
 import { FieldGroup } from '@ui/components/Field';
 import { useToast } from '@/components/common/toast';
-import { createNewCharacterAction } from '../../actions';
+import { createNewCharacterAction } from '../actions';
 import {
   downloadFileFromCharacterAction,
   shareCharacterAction,
   unshareCharacterAction,
-} from './actions';
+} from '../editor/[characterId]/actions';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
 import {
   telliPointsPercentageValues,
   usageTimeValuesInMinutes,
-} from '../../../learning-scenarios/editor/[learningScenarioId]/schema';
+} from '../../learning-scenarios/editor/[learningScenarioId]/schema';
 
 export function CharacterView({
   character,
