@@ -12,7 +12,7 @@ SET "design_configuration" = (
         - 'buttonPrimaryTextColor'
       ),
       '{primaryTextColor}',
-      '"rgba(255, 255, 255, 1)"'::jsonb,
+      to_jsonb(COALESCE("design_configuration"::jsonb ->> 'buttonPrimaryTextColor', 'rgba(255, 255, 255, 1)')),
       true
     ),
     '{secondaryTextColor}',
