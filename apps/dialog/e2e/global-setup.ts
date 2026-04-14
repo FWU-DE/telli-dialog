@@ -1,9 +1,23 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { FullConfig, chromium } from '@playwright/test';
+import { chromium, FullConfig } from '@playwright/test';
 import { login } from './utils/login';
 import { AUTH_FILES } from './utils/const';
 
+/**
+ * Global Playwright setup — runs once before all test suites.
+ *
+ * For each user defined in AUTH_FILES, it performs a real browser login
+ * and saves the resulting storage state (cookies + localStorage) to a JSON
+ * file under `.playwright-auth/`.
+ *
+ * Tests consume the saved state via `test.use({ storageState: AUTH_FILES.<user> })`,
+ * which restores the session without repeating the login flow. This keeps
+ * tests fast and avoids hitting the VIDIS OAuth flow on every test run.
+ *
+ * The auth files are git-ignored and regenerated automatically before each
+ * `playwright test` invocation.
+ */
 export default async function globalSetup(config: FullConfig) {
   const baseUrl = config.projects[0]?.use.baseURL;
   if (!baseUrl) {
