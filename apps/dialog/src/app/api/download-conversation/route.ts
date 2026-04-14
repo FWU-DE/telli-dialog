@@ -33,7 +33,6 @@ export async function GET(req: NextRequest) {
     );
 
     // check authentication
-
     const user = await getUser();
 
     const { conversation, messages } = await getConversationAndMessagesForExport({
