@@ -157,7 +157,7 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
                   <IconButton
                     variant="primary"
                     size="md"
-                    className="hover:bg-primary/40"
+                    className="hover:bg-primary/15"
                     disabled={isProcessing}
                     aria-label={t('aria-delete', { link: displayTitle })}
                     onClick={() => handleDeleteLink(index)}

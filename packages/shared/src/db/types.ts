@@ -17,12 +17,6 @@ export type DesignConfiguration = {
   primaryTextColor: string;
   secondaryColor: string;
   secondaryTextColor: string;
-  secondaryDarkColor: string;
-  secondaryLightColor: string;
-  primaryHoverColor: string;
-  primaryHoverTextColor: string;
-  chatMessageBackgroundColor: string;
-  buttonPrimaryTextColor: string;
 };
 
 export type CustomTool = {

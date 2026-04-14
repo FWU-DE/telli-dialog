@@ -51,6 +51,7 @@ next-env.d.ts
 certificates
 
 playwright-report/
+.playwright-auth/
 test-results/
 
 # Sentry Config File

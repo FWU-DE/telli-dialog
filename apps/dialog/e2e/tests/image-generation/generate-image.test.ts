@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test';
-import { login } from '../../utils/login';
+import { AUTH_FILES } from '../../utils/const';
 import { waitForToast } from '../../utils/utils';
 
-test('can generate an image and copy it to clipboard', async ({ page }) => {
-  await login(page, 'teacher');
+test.use({ storageState: AUTH_FILES.teacher });
 
+test('can generate an image and copy it to clipboard', async ({ page }) => {
   // navigate to image generation
   await page.goto('/image-generation');
   await page.waitForURL('/image-generation**');

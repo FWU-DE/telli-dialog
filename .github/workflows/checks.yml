@@ -27,16 +27,9 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
+          cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
-
-      - name: Cache turbo build cache
-        uses: actions/cache@v5
-        with:
-          path: .turbo
-          key: turbo-${{ runner.os }}-${{ hashFiles('**/turbo.json') }}-${{ github.sha }}
-          restore-keys: |
-            turbo-${{ runner.os }}-
 
   check_audit:
     runs-on: ubuntu-latest
@@ -89,6 +82,13 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
+      - name: Cache turbo build cache
+        uses: actions/cache@v5
+        with:
+          path: .turbo
+          key: turbo-check-types-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-check-types-${{ runner.os }}-
       - name: Check types
         run: pnpm run check-types
 
@@ -107,6 +107,13 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
+      - name: Cache turbo build cache
+        uses: actions/cache@v5
+        with:
+          path: .turbo
+          key: turbo-lint-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-lint-${{ runner.os }}-
       - name: Check linter
         run: pnpm run lint
 
@@ -143,6 +150,13 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
+      - name: Cache turbo build cache
+        uses: actions/cache@v5
+        with:
+          path: .turbo
+          key: turbo-test-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-test-${{ runner.os }}-
       - name: Run api database migrations
         run: pnpm --filter @telli/api-database run db:migrate
       - name: Check unit tests
@@ -152,4 +166,4 @@ jobs:
         uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./apps/api/coverage/lcov.info,./apps/dialog/coverage/lcov.info,./packages/ai-core/coverage/lcov.info,./packages/shared/coverage/lcov.info
+          files: ./apps/api/coverage/lcov.info,./apps/dialog/coverage/lcov.info,./packages/ai-core/coverage/lcov.info,./packages/shared/coverage/lcov.info,./packages/shared-core/coverage/lcov.info

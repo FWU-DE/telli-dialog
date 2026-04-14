@@ -1,6 +1,6 @@
 import { expect, Page } from '@playwright/test';
 
-export async function deleteCustomGpt(page: Page, name: string) {
+export async function deleteAssistant(page: Page, name: string) {
   const card = page.getByRole('button', { name }).first();
   await expect(card).toBeVisible({ timeout: 15000 });
   await card.click();

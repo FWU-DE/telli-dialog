@@ -14,6 +14,7 @@ import { WebsearchSource } from '@shared/db/types';
 import { ResponsiveLayoutWrapper } from '../../../_components/responsive-layout-wrapper';
 import { CharacterEdit } from './character-edit';
 import { CharacterView } from './character-view';
+import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +50,10 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
   if (federalState.featureToggles.isNewUiDesignEnabled && !readOnly) {
     return (
       <ResponsiveLayoutWrapper>
+        <CustomChatHeader
+          userAndContext={userAndContext}
+          isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+        />
         <CharacterEdit
           character={character}
           relatedFiles={relatedFiles}
