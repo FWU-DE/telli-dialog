@@ -9,7 +9,6 @@ import { notFound } from 'next/navigation';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
-import { ThemeProvider as NextThemeProvider } from '@ui/components/theme-provider';
 
 const searchParamsSchema = z.object({ inviteCode: z.string() });
 
@@ -36,21 +35,14 @@ export default async function Page(props: PageProps<'/ua/characters/[characterId
 
   return (
     <LlmModelsProvider models={[model]} defaultLlmModelByCookie={model.name}>
-      <NextThemeProvider
-        attribute="class"
-        defaultTheme="light"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <ThemeProvider designConfiguration={designConfiguration}>
-          <CharacterSharedChat
-            {...character}
-            initialMessage={character.initialMessage ?? ''}
-            inviteCode={searchParams.inviteCode}
-            imageSource={avatarPictureUrl}
-          />
-        </ThemeProvider>
-      </NextThemeProvider>
+      <ThemeProvider designConfiguration={designConfiguration}>
+        <CharacterSharedChat
+          {...character}
+          initialMessage={character.initialMessage ?? ''}
+          inviteCode={searchParams.inviteCode}
+          imageSource={avatarPictureUrl}
+        />
+      </ThemeProvider>
     </LlmModelsProvider>
   );
 }
