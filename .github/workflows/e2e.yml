@@ -135,7 +135,7 @@ jobs:
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm -filter telli-dialog exec playwright install
+        run: pnpm --filter telli-dialog exec playwright install
 
       - name: Start telli-api
         run: |
