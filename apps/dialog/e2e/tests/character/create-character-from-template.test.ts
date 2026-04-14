@@ -14,7 +14,7 @@ test('create character from template', async ({ page }) => {
   await card.click();
   await page.waitForURL('/characters/editor/**');
 
-  const copyButton = page.getByRole('button', { name: 'Kopieren & bearbeiten' });
+  const copyButton = page.getByTestId('custom-chat-duplicate-button');
   await expect(copyButton).toBeVisible();
   await expect(copyButton).toBeEnabled();
   await copyButton.click();
