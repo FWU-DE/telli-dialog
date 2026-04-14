@@ -53,6 +53,7 @@ import { CustomChatModelSelect } from '@/components/custom-chat/custom-chat-mode
 import { CustomChatFilesAndLinks } from '@/components/custom-chat/custom-chat-files-and-links';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { FormField } from '@ui/components/form/FormField';
+import { createNewCharacterAction } from '../../actions';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
 
