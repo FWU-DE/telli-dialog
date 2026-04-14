@@ -29,7 +29,7 @@ import ProfileMenu from '../navigation/profile-menu';
 import { ToggleSidebarButton } from '../navigation/sidebar/collapsible-sidebar';
 import { useSession } from 'next-auth/react';
 
-const VALID_SORT_OPTIONS = ['name', 'date'] as const;
+const VALID_SORT_OPTIONS = ['date', 'date-asc', 'name', 'name-asc'] as const;
 export type SortOption = (typeof VALID_SORT_OPTIONS)[number];
 
 type EntityOverviewProps = {
@@ -184,7 +184,9 @@ export default function EntityOverview({
                   </SelectTrigger>
                   <SelectContent align="end" position="popper">
                     <SelectItem value="date">{t('sort-date')}</SelectItem>
+                    <SelectItem value="date-asc">{t('sort-date-asc')}</SelectItem>
                     <SelectItem value="name">{t('sort-name')}</SelectItem>
+                    <SelectItem value="name-asc">{t('sort-name-asc')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

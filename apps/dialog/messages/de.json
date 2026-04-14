@@ -643,8 +643,10 @@
     "filter-tabs-label": "Filteroptionen",
     "info-tooltip-label": "Informationen anzeigen",
     "badge-mine": "von mir",
-    "sort-date": "Nach Aktualität",
-    "sort-name": "Nach Name",
+    "sort-date": "Neueste zuerst",
+    "sort-date-asc": "Älteste zuerst",
+    "sort-name": "Alphabetisch A-Z",
+    "sort-name-asc": "Alphabetisch Z-A",
     "close": "Schließen"
   }
 }

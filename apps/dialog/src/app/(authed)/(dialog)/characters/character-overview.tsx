@@ -62,11 +62,19 @@ export default function CharacterOverview({ currentUserId }: CharacterOverviewPr
               .filter((character) => character.name.toLowerCase().includes(q))
               .slice()
           : visibleCharacters.slice();
-        filtered.sort((a, b) =>
-          sortBy === 'name'
-            ? a.name.localeCompare(b.name)
-            : b.updatedAt.getTime() - a.updatedAt.getTime(),
-        );
+        filtered.sort((a, b) => {
+          switch (sortBy) {
+            case 'name':
+              return a.name.localeCompare(b.name);
+            case 'name-asc':
+              return b.name.localeCompare(a.name);
+            case 'date-asc':
+              return a.updatedAt.getTime() - b.updatedAt.getTime();
+            case 'date':
+            default:
+              return b.updatedAt.getTime() - a.updatedAt.getTime();
+          }
+        });
 
         return filtered.map((character) => (
           <EntityCard
