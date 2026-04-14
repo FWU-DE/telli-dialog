@@ -19,10 +19,12 @@ export async function generateConversationDocxFile({
   conversation,
   messages,
   gptName,
+  initialMessage,
 }: {
   conversation: ConversationModel;
   messages: ConversationMessageModel[];
   gptName: string;
+  initialMessage?: string | null;
 }): Promise<ArrayBuffer | undefined> {
   try {
     const conversationMetadata = getConversationMetadata({
@@ -33,6 +35,22 @@ export async function generateConversationDocxFile({
       gptName,
       userFullName: USER_FULL_NAME,
     });
+
+    if (initialMessage && messages[0]?.content !== initialMessage) {
+      messageParagraphs.unshift(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `${gptName}:`,
+              bold: true,
+              size: 22,
+            }),
+          ],
+        }),
+        ...markdownToDocx(initialMessage),
+        new Paragraph({}),
+      );
+    }
 
     const lastAssistantMessage = messages.findLast((m) => m.role === 'assistant');
 

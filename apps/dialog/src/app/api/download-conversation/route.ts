@@ -5,6 +5,7 @@ import { type ConversationModel } from '@shared/db/types';
 import { getConversationAndMessagesForExport } from '@shared/conversation/conversation-service';
 import z from 'zod';
 import { handleErrorInRoute } from '@/error/handle-error-in-route';
+import { dbGetCharacterById } from '@shared/db/functions/character';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +23,7 @@ const downloadConversationParamsSchema = z.object({
  *
  * enterpriseGptName contains the character name if a character was used.
  */
+
 export async function GET(req: NextRequest) {
   try {
     // check and parse search params
@@ -31,6 +33,7 @@ export async function GET(req: NextRequest) {
     );
 
     // check authentication
+
     const user = await getUser();
 
     const { conversation, messages } = await getConversationAndMessagesForExport({
@@ -38,12 +41,18 @@ export async function GET(req: NextRequest) {
       userId: user.id,
     });
 
+    const character = conversation.characterId
+      ? await dbGetCharacterById({ characterId: conversation.characterId })
+      : null;
+    const initialMessage = character?.initialMessage;
+
     const gptName = enterpriseGptName || DEFAULT_GPT_NAME;
 
     const document = await generateConversationDocxFile({
       conversation,
       messages,
       gptName,
+      initialMessage,
     });
 
     if (document === undefined) {
