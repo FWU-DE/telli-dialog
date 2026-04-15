@@ -18,9 +18,9 @@ test('all predefined characters are visible for everyone', async ({ page }) => {
 });
 
 test('all predefined assistants are visible for everyone', async ({ page }) => {
-  await page.goto('/custom?filter=official');
+  await page.goto('/assistants?filter=official');
 
-  await page.waitForURL('/custom**');
+  await page.waitForURL('/assistants**');
 
   for (const elementIdentifier of templateAssistantsIdentifier) {
     await expect(page.getByRole('button', { name: elementIdentifier })).toBeVisible();
