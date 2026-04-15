@@ -83,8 +83,8 @@ export default function EntityOverview({
   }, [activeFilter]);
 
   return (
-    <div className="min-w-full overflow-auto flex flex-col h-full bg-gray-50">
-      <HeaderPortal className="bg-gray-50">
+    <div className="min-w-full overflow-auto flex flex-col h-full">
+      <HeaderPortal>
         <ToggleSidebarButton
           isNewUiDesignEnabled={federalState?.featureToggles?.isNewUiDesignEnabled ?? false}
         />
