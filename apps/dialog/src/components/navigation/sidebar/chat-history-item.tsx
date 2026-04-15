@@ -71,7 +71,7 @@ export function ChatHistoryItem({
   const icon = determineConversationIcon(conversation);
 
   const isActive = () => {
-    // special case for help mode because it is also a custom gpt and starts with the same path
+    // special case for help mode because it is also an assistant and starts with the same path
     if (pathname.startsWith(`/assistants/d/${HELP_MODE_ASSISTANT_ID}`)) return pathname === href;
 
     return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);

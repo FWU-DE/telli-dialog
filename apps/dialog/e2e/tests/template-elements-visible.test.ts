@@ -8,7 +8,7 @@ const templateLearningScenariosIdentifier = ['Lern was über KI'];
 test.use({ storageState: AUTH_FILES.teacher });
 
 test('all predefined characters are visible for everyone', async ({ page }) => {
-  await page.goto('/characters?filter=official');
+  await page.goto('/characters');
 
   await page.waitForURL('/characters**');
 
@@ -18,7 +18,7 @@ test('all predefined characters are visible for everyone', async ({ page }) => {
 });
 
 test('all predefined assistants are visible for everyone', async ({ page }) => {
-  await page.goto('/assistants?filter=official');
+  await page.goto('/assistants');
 
   await page.waitForURL('/assistants**');
 
@@ -28,7 +28,7 @@ test('all predefined assistants are visible for everyone', async ({ page }) => {
 });
 
 test('all predefined learning scenarios are visible for everyone', async ({ page }) => {
-  await page.goto('/learning-scenarios?filter=official');
+  await page.goto('/learning-scenarios');
 
   await page.waitForURL('/learning-scenarios**');
 
