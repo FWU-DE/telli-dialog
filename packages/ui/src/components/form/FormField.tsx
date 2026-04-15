@@ -4,8 +4,7 @@ import { Control, Controller, FieldPath, FieldValues, useWatch } from 'react-hoo
 import { Field, FieldDescription, FieldError, FieldLabel } from '../Field';
 import { Input } from '../Input';
 import { Textarea } from '../Textarea';
-import { useEffect, useRef } from 'react';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 
 export type FormFieldProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -23,6 +22,8 @@ export type FormFieldProps<
   tooltip?: string;
   /** Optional action element rendered on the right side of the label row */
   labelAction?: ReactNode;
+  /** Optional wrapper function rendered around the input, allowing consumers to place elements alongside it */
+  children?: (input: ReactNode) => ReactNode;
   /** Input type: 'text', 'textArea', 'number', 'email', 'password', or 'checkbox' */
   type?: 'text' | 'textArea' | 'number' | 'email' | 'password' | 'checkbox';
   /** Whether the field is required */
@@ -37,13 +38,17 @@ export type FormFieldProps<
   disabled?: boolean;
   /** Callback when field loses focus */
   onBlur?: () => void;
-  /** CSS class name for the input component */
+  /** CSS class name applied to the input component */
   className?: string;
+  /** CSS class name applied to the input wrapper element */
+  wrapperClassName?: string;
   /** Test ID for the input element */
   testId?: string;
   /** When true, automatically focuses the input when its value is empty */
   autoFocusWhenEmpty?: boolean;
 };
+
+const identityWrapper = (input: ReactNode) => input;
 
 /**
  * Reusable form field component that automatically handles validation display,
@@ -59,6 +64,7 @@ export function FormField<
   description,
   tooltip,
   labelAction,
+  children = identityWrapper,
   type = 'text',
   required,
   maxLength,
@@ -67,6 +73,7 @@ export function FormField<
   disabled = false,
   onBlur,
   className,
+  wrapperClassName,
   testId,
   autoFocusWhenEmpty,
 }: FormFieldProps<TFieldValues, TName>) {
@@ -108,6 +115,27 @@ export function FormField<
               }),
         };
 
+        const inputElement =
+          type === 'textArea' ? (
+            <Textarea {...field} {...sharedProps} ref={textareaRef} />
+          ) : (
+            <Input
+              {...field}
+              {...sharedProps}
+              type={type}
+              ref={inputRef}
+              wrapperClassName={wrapperClassName}
+              onChange={(e) => {
+                if (type === 'number') {
+                  field.onChange(e.target.valueAsNumber);
+                } else {
+                  field.onChange(e.target.value);
+                }
+              }}
+              onWheel={(e) => type === 'number' && (e.target as HTMLElement).blur()}
+            />
+          );
+
         return (
           <Field data-invalid={fieldState.invalid} aria-required={required}>
             <FieldLabel
@@ -119,24 +147,7 @@ export function FormField<
               {label}
             </FieldLabel>
             {description && <FieldDescription>{description}</FieldDescription>}
-            {type === 'textArea' ? (
-              <Textarea {...field} {...sharedProps} ref={textareaRef} />
-            ) : (
-              <Input
-                {...field}
-                {...sharedProps}
-                type={type}
-                ref={inputRef}
-                onChange={(e) => {
-                  if (type === 'number') {
-                    field.onChange(e.target.valueAsNumber);
-                  } else {
-                    field.onChange(e.target.value);
-                  }
-                }}
-                onWheel={(e) => type === 'number' && (e.target as HTMLElement).blur()}
-              />
-            )}
+            {children(inputElement)}
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
           </Field>
         );

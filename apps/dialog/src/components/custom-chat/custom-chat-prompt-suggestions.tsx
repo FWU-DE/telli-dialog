@@ -5,14 +5,13 @@ import {
   NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
 } from '@/configuration-text-inputs/const';
 import { useEffect, useRef } from 'react';
-import { Control, Controller, useFieldArray, useWatch } from 'react-hook-form';
-import { Field, FieldLabel, FieldError } from '@ui/components/Field';
-import { Input } from '@ui/components/Input';
+import { Control, useFieldArray, useWatch } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/Tooltip';
 import { PlusIcon, TrashSimpleIcon } from '@phosphor-icons/react';
 import { AssistantFormValues } from '@/app/(authed)/(dialog)/assistants/editor/[assistantId]/assistant-edit';
-import { Button } from '@ui/components/Button';
+import { IconButton } from '@ui/components/IconButton';
+import { FormField } from '@ui/components/form/FormField';
 
 type WithPromptSuggestions = {
   promptSuggestions: { value: string }[];
@@ -62,87 +61,69 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
     const isAddPromptSuggestionDisabled =
       hasReachedPromptSuggestionsLimit || lastPromptSuggestionValue.trim() === '';
 
-    return (
-      <Field key={fieldItem.id}>
-        <FieldLabel htmlFor={`promptSuggestions.${index}.value`}>
-          {`${t('prompt-suggestion')} ${index + 1}`}
-        </FieldLabel>
-        <div className="flex items-center gap-3">
-          <Controller
-            name={`promptSuggestions.${index}.value`}
-            control={control}
-            render={({ field, fieldState }) => (
-              <div className="w-full">
-                <Input
-                  {...field}
-                  id={`promptSuggestions.${index}.value`}
-                  aria-invalid={fieldState.invalid}
-                  maxLength={EXAMPLE_PROMPT_LENGTH_LIMIT}
-                  maxLengthErrorMessage={t('prompt-suggestions-max-length', {
-                    maxLength: EXAMPLE_PROMPT_LENGTH_LIMIT,
-                  })}
-                  placeholder={t('prompt-suggestion-placeholder')}
-                  autoComplete="off"
-                  data-testid={`prompt-suggestion-${index + 1}-input`}
-                  onBlur={() => {
-                    field.onBlur();
-                    onBlur();
-                  }}
-                />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </div>
-            )}
-          />
+    const addIconButton = (
+      <IconButton
+        aria-label={t('prompt-suggestions-add-button')}
+        data-testid={`add-prompt-suggestion-${index + 1}-button`}
+        aria-disabled={isAddPromptSuggestionDisabled}
+        onClick={
+          isAddPromptSuggestionDisabled ? undefined : () => appendPromptSuggestion({ value: '' })
+        }
+      >
+        <PlusIcon className="size-5" />
+      </IconButton>
+    );
 
-          {isLastItem ? (
-            <Tooltip>
-              <TooltipTrigger asChild aria-label={t('prompt-suggestions-add-button-tooltip')}>
-                <span tabIndex={0} className="inline-flex">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    aria-label={t('prompt-suggestions-add-button')}
-                    data-testid={`add-prompt-suggestion-${index + 1}-button`}
-                    disabled={isAddPromptSuggestionDisabled}
-                    style={isAddPromptSuggestionDisabled ? { pointerEvents: 'none' } : undefined}
-                    onClick={() => {
-                      appendPromptSuggestion({ value: '' });
-                    }}
-                  >
-                    <PlusIcon className="size-5" />
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {hasReachedPromptSuggestionsLimit && (
-                <TooltipContent>
-                  <p>
-                    {t('prompt-suggestions-max-count', {
-                      maxCount: NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
-                    })}
-                  </p>
-                </TooltipContent>
+    return (
+      <FormField
+        key={index}
+        name={`promptSuggestions.${index}.value`}
+        control={control}
+        label={`${t('prompt-suggestion')} ${index + 1}`}
+        testId="learning-scenario-instructions-input"
+        onBlur={onBlur}
+        type="text"
+        wrapperClassName="w-full"
+        maxLength={EXAMPLE_PROMPT_LENGTH_LIMIT}
+        maxLengthErrorMessage={t('prompt-suggestions-max-length', {
+          maxLength: EXAMPLE_PROMPT_LENGTH_LIMIT,
+        })}
+        placeholder={t('prompt-suggestion-placeholder')}
+      >
+        {(input) => (
+          <div className="flex items-start gap-3">
+            {input}
+            <div className="mt-1.5">
+              {isLastItem ? (
+                isAddPromptSuggestionDisabled ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>{addIconButton}</TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {hasReachedPromptSuggestionsLimit
+                          ? t('prompt-suggestions-max-count', {
+                              maxCount: NUMBER_OF_EXAMPLE_PROMPTS_LIMIT,
+                            })
+                          : t('prompt-suggestions-empty-tooltip')}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  addIconButton
+                )
+              ) : (
+                <IconButton
+                  aria-label={t('prompt-suggestions-delete-button', { index: index + 1 })}
+                  data-testid={`delete-prompt-suggestion-${index + 1}-button`}
+                  onClick={() => removePromptSuggestion(index)}
+                >
+                  <TrashSimpleIcon className="size-5 " />
+                </IconButton>
               )}
-              {!hasReachedPromptSuggestionsLimit && lastPromptSuggestionValue.trim() === '' && (
-                <TooltipContent>
-                  <p>{t('prompt-suggestions-empty-tooltip')}</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          ) : (
-            <Button
-              type="button"
-              variant="ghost"
-              aria-label={t('prompt-suggestions-delete-button', { index: index + 1 })}
-              data-testid={`delete-prompt-suggestion-${index + 1}-button`}
-              onClick={() => {
-                removePromptSuggestion(index);
-              }}
-            >
-              <TrashSimpleIcon className="size-5 " />
-            </Button>
-          )}
-        </div>
-      </Field>
+            </div>
+          </div>
+        )}
+      </FormField>
     );
   });
 }
