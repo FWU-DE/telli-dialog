@@ -10,8 +10,6 @@ import { Field, FieldLabel, FieldError } from '@ui/components/Field';
 import { Input } from '@ui/components/Input';
 import { useTranslations } from 'next-intl';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/Tooltip';
-import { cn } from '@/utils/tailwind';
-import { iconClassName } from '@/utils/tailwind/icon';
 import { PlusIcon, TrashSimpleIcon } from '@phosphor-icons/react';
 import { AssistantFormValues } from '@/app/(authed)/(dialog)/assistants/editor/[assistantId]/assistant-edit';
 import { Button } from '@ui/components/Button';
@@ -103,7 +101,6 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
                   <Button
                     type="button"
                     variant="ghost"
-                    className={cn(iconClassName)}
                     aria-label={t('prompt-suggestions-add-button')}
                     data-testid={`add-prompt-suggestion-${index + 1}-button`}
                     disabled={isAddPromptSuggestionDisabled}
@@ -135,7 +132,6 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
             <Button
               type="button"
               variant="ghost"
-              className={cn(iconClassName)}
               aria-label={t('prompt-suggestions-delete-button', { index: index + 1 })}
               data-testid={`delete-prompt-suggestion-${index + 1}-button`}
               onClick={() => {
