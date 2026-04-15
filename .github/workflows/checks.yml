@@ -47,7 +47,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Audit dependencies
-        run: pnpm audit --audit-level=critical
+        # pnpm audit is not used because the npm registry audit endpoint it
+        # relies on has been retired (HTTP 410). Trivy scans the filesystem
+        # (including pnpm-lock.yaml) for known vulnerable dependencies instead.
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'CRITICAL'
+          exit-code: '1'
 
   check_formatting:
     runs-on: ubuntu-latest
