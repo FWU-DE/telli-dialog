@@ -103,7 +103,6 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
                   <Button
                     type="button"
                     variant="ghost"
-                    className={cn(iconClassName)}
                     aria-label={t('prompt-suggestions-add-button')}
                     data-testid={`add-prompt-suggestion-${index + 1}-button`}
                     disabled={isAddPromptSuggestionDisabled}
@@ -135,7 +134,6 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
             <Button
               type="button"
               variant="ghost"
-              className={cn(iconClassName)}
               aria-label={t('prompt-suggestions-delete-button', { index: index + 1 })}
               data-testid={`delete-prompt-suggestion-${index + 1}-button`}
               onClick={() => {
