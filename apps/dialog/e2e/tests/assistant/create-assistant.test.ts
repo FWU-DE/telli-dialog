@@ -71,8 +71,8 @@ test('teacher can login, create an assistant and start a chat', async ({ page })
 });
 
 test('teacher can delete assistant with chat', async ({ page }) => {
-  await page.goto('/assistants?visibility=private');
-  await page.waitForURL('/assistants?visibility=private');
+  await page.goto('/assistants');
+  await page.waitForURL('/assistants');
 
   await deleteAssistant(page, assistantName);
 
