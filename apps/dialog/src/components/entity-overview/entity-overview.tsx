@@ -25,6 +25,10 @@ import {
   SelectValue,
 } from '@telli/ui/components/Select';
 import { isSortOption, SortOption } from './utils';
+import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
+import { ToggleSidebarButton } from '../navigation/sidebar/collapsible-sidebar';
+import ProfileMenu from '../navigation/profile-menu';
+import { useSession } from 'next-auth/react';
 
 type EntityOverviewProps = {
   title: string;
@@ -106,16 +110,46 @@ export default function EntityOverview({
             </Dialog>
           </div>
 
-          <div className="flex flex-wrap-reverse justify-between gap-2 mb-4">
-            <div className="relative max-w-sm w-full">
-              <Input
-                ref={inputRef}
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                placeholder={searchPlaceholder}
-                disabled={filterDisabled}
-                aria-label={searchPlaceholder}
-                className="h-10 rounded-xl border-gray-300 bg-card pr-10 pl-4 shadow-none focus-visible:border-gray-400 focus-visible:ring-0"
+          <div className="px-6 py-2 pb-4 sticky top-0 z-10">
+            <div className="max-w-3xl mx-auto w-full">
+              <div className="flex items-end flex-wrap gap-2" aria-label={t('filter-tabs-label')}>
+                <FilterTabs
+                  tabs={visibleTabs}
+                  activeTab={activeFilter}
+                  onTabChange={onFilterChange}
+                />
+                {searchInput ? (
+                  <XCircleIcon
+                    className="absolute right-3 top-1/2 size-5 -translate-y-2/3 text-gray-500 hover:text-gray-700 cursor-pointer transition-colors"
+                    aria-hidden="true"
+                    onClick={handleClearSearch}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        handleClearSearch();
+                      }
+                    }}
+                  />
+                ) : (
+                  <MagnifyingGlassIcon
+                    className="pointer-events-none absolute right-3 top-3/5 size-5 -translate-y-2/3 text-gray-500"
+                    aria-hidden="true"
+                  />
+                )}
+              </div>
+              {createButton}
+            </div>
+          </div>
+        </div>
+
+        <div className="px-6 py-2 pb-4 sticky top-0 z-10 bg-gray-50">
+          <div className="mx-auto w-full">
+            <div className="flex items-end flex-wrap gap-2" aria-label={t('filter-tabs-label')}>
+              <FilterTabs
+                tabs={visibleTabs}
+                activeTab={activeFilter}
+                onTabChange={onFilterChange}
               />
               {searchInput ? (
                 <XCircleIcon
