@@ -8,8 +8,9 @@ import {
   dbDeleteConversationByIdAndUserId,
   dbDoesInviteCodeExist,
 } from '@shared/db/functions/conversation';
-import { ConversationModel } from '@shared/db/types';
+import { ConversationMessageModel, ConversationModel } from '@shared/db/types';
 import { ForbiddenError, NotFoundError } from '@shared/error';
+import { dbGetCharacterById } from '@shared/db/functions/character';
 
 /**
  * Returns all conversations that belong to the user for the chat history.
@@ -110,8 +111,20 @@ export async function getConversationAndMessagesForExport({
   userId: string;
 }) {
   const conversation = await getConversation({ conversationId, userId });
-  const messages = await getConversationMessages({ conversationId, userId });
+  let messages = await getConversationMessages({ conversationId, userId });
 
+  if (conversation.characterId) {
+    const character = await dbGetCharacterById({ characterId: conversation.characterId });
+
+    if (character?.initialMessage) {
+      const initialMessage = {
+        role: 'assistant',
+        content: character.initialMessage,
+      } as ConversationMessageModel;
+
+      messages = [initialMessage, ...messages];
+    }
+  }
   return {
     conversation,
     messages,
