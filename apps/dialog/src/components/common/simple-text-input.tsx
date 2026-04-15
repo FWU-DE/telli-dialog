@@ -17,7 +17,6 @@ const SimpleTextInput = forwardRef<HTMLInputElement, SimpleTextInputProps>(
         )}
         <input
           type="text"
-          autoFocus
           className={cn(
             inputFieldClassName,
             value === undefined || value.toString().length < 1 ? 'h-10' : 'h-fit',

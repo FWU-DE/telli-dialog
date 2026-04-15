@@ -32,6 +32,8 @@ export default function RedeemVoucherPage() {
       <div className="flex flex-row gap-4">
         <SimpleTextInput
           id="voucher"
+          /* eslint-disable-next-line jsx-a11y/no-autofocus */
+          autoFocus
           placeholder={t('voucher-placeholder')}
           maxLength={16}
           required
