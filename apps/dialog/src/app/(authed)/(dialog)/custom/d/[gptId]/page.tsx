@@ -1,4 +1,5 @@
 import { generateUUID } from '@shared/utils/uuid';
+import { redirect } from 'next/navigation';
 import Chat from '@/components/chat/chat';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
@@ -15,8 +16,13 @@ export const dynamic = 'force-dynamic';
 
 export default async function Page(props: PageProps<'/custom/d/[gptId]'>) {
   const { gptId } = await props.params;
-  const id = generateUUID();
   const { user, school, federalState } = await requireAuth();
+
+  if (federalState.featureToggles.isNewUiDesignEnabled) {
+    redirect(`/assistants/d/${gptId}`);
+  }
+
+  const id = generateUUID();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
   const assistant = await getAssistantForNewChat({
