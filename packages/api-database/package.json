@@ -16,7 +16,7 @@
     "db:seed": "dotenv -e ../../apps/api/.env.local -- tsx src/seed.ts",
     "db:seed:from-stage": "dotenv -e ../../apps/api/.env.local -- tsx src/seed-from-stage.ts",
     "types": "tsc --noEmit",
-    "lint": "eslint \"**/*.ts*\" --max-warnings 0"
+    "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
     "@t3-oss/env-core": "0.13.11",
