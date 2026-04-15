@@ -45,9 +45,14 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install
-      - name: Audit dependencies
-        run: pnpm audit --audit-level=critical
+        run: pnpm install --frozen-lockfile
+      - name: Dependency security scan
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: 'fs'
+          scanners: 'vuln'
+          severity: 'CRITICAL'
+          exit-code: '1'
 
   check_formatting:
     runs-on: ubuntu-latest
