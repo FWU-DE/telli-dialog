@@ -35,12 +35,7 @@ export function CustomChatModelSelect({
       <div className="text-sm font-medium">{t('label')}</div>
       <div className="text-primary hover:text-primary-dark">
         <Select defaultValue={selectedModelId} onValueChange={onValueChange} disabled={disabled}>
-          <SelectTrigger
-            size="sm"
-            className="w-fit gap-1 border-0 bg-transparent shadow-none text-sm pl-0"
-            aria-label={t('label')}
-            data-testid="model-select"
-          >
+          <SelectTrigger aria-label={t('label')} data-testid="model-select">
             <SelectValue />
           </SelectTrigger>
           <SelectContent align="start">
