@@ -152,11 +152,12 @@ export function FloatingText({
   if (!dialogStarted) return null;
 
   return (
-    <div
+    <aside
       ref={containerRef}
+      aria-labelledby="floating-text-title"
       className={cn(
         'flex flex-col z-200 bg-secondary rounded-xl border select-none',
-        // using string interpolations is extremly flaky, so we're using a static class name
+        // using string interpolations is extremely flaky, so we're using a static class name
         isAtLeast.lg ? `absolute` : 'sticky',
         dragging ? 'cursor-grabbing' : 'cursor-grab',
       )}
@@ -168,17 +169,21 @@ export function FloatingText({
       }}
     >
       <div
+        role="presentation"
         className="flex items-center justify-between pl-4 py-2 rounded-t-xl mr-1"
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
       >
         <span
+          id="floating-text-title"
           className={cn(dragging ? 'cursor-grabbing' : 'cursor-grab', 'font-semibold text-base')}
         >
           {title}
         </span>
         <button
           aria-label="Minimize"
+          aria-expanded={!isMinimized}
+          aria-controls="floating-text-content"
           onClick={() => {
             setIsMinimized(!isMinimized);
             setTimeout(() => {
@@ -215,6 +220,6 @@ export function FloatingText({
           <MarkdownDisplay>{learningContext ?? ''}</MarkdownDisplay>
         </div>
       )}
-    </div>
+    </aside>
   );
 }
