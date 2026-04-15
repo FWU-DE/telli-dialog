@@ -1,6 +1,6 @@
 {
-  "id": "5f6ad4bb-c557-49eb-b06b-19ec1e0686d0",
-  "prevId": "014b1be7-641a-49c0-adf3-d9d593da0575",
+  "id": "afa597d3-ccf2-48cf-b151-a0967c0523cd",
+  "prevId": "5f6ad4bb-c557-49eb-b06b-19ec1e0686d0",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -40,39 +40,39 @@
         "assistant_file_mapping_file_id_file_table_id_fk": {
           "name": "assistant_file_mapping_file_id_file_table_id_fk",
           "tableFrom": "assistant_file_mapping",
-          "tableTo": "file_table",
           "columnsFrom": [
             "file_id"
           ],
+          "tableTo": "file_table",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "assistant_file_mapping_assistant_id_assistant_id_fk": {
           "name": "assistant_file_mapping_assistant_id_assistant_id_fk",
           "tableFrom": "assistant_file_mapping",
-          "tableTo": "assistant",
           "columnsFrom": [
             "assistant_id"
           ],
+          "tableTo": "assistant",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "assistant_file_mapping_assistant_id_file_id_unique": {
           "name": "assistant_file_mapping_assistant_id_file_id_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "assistant_id",
             "file_id"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -115,39 +115,39 @@
         "character_file_mapping_file_id_file_table_id_fk": {
           "name": "character_file_mapping_file_id_file_table_id_fk",
           "tableFrom": "character_file_mapping",
-          "tableTo": "file_table",
           "columnsFrom": [
             "file_id"
           ],
+          "tableTo": "file_table",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "character_file_mapping_character_id_character_id_fk": {
           "name": "character_file_mapping_character_id_character_id_fk",
           "tableFrom": "character_file_mapping",
-          "tableTo": "character",
           "columnsFrom": [
             "character_id"
           ],
+          "tableTo": "character",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "character_file_mapping_character_id_file_id_unique": {
           "name": "character_file_mapping_character_id_file_id_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "character_id",
             "file_id"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -203,61 +203,61 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "conversation_message_file_mapping_fileId_file_table_id_fk": {
           "name": "conversation_message_file_mapping_fileId_file_table_id_fk",
           "tableFrom": "conversation_message_file_mapping",
-          "tableTo": "file_table",
           "columnsFrom": [
             "fileId"
           ],
+          "tableTo": "file_table",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "conversation_message_file_mapping_conversationMessageId_fk": {
           "name": "conversation_message_file_mapping_conversationMessageId_fk",
           "tableFrom": "conversation_message_file_mapping",
-          "tableTo": "conversation_message",
           "columnsFrom": [
             "conversationMessageId"
           ],
+          "tableTo": "conversation_message",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "conversation_message_file_mapping_conversationId_fk": {
           "name": "conversation_message_file_mapping_conversationId_fk",
           "tableFrom": "conversation_message_file_mapping",
-          "tableTo": "conversation",
           "columnsFrom": [
             "conversationId"
           ],
+          "tableTo": "conversation",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "conversation_message_file_mapping_conversationId_fileId_unique": {
           "name": "conversation_message_file_mapping_conversationId_fileId_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "conversationId",
             "fileId"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -300,39 +300,39 @@
         "learning_scenario_file_mapping_file_id_file_table_id_fk": {
           "name": "learning_scenario_file_mapping_file_id_file_table_id_fk",
           "tableFrom": "learning_scenario_file_mapping",
-          "tableTo": "file_table",
           "columnsFrom": [
             "file_id"
           ],
+          "tableTo": "file_table",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "learning_scenario_file_mapping_learning_scenario_id_fk": {
           "name": "learning_scenario_file_mapping_learning_scenario_id_fk",
           "tableFrom": "learning_scenario_file_mapping",
-          "tableTo": "learning_scenario",
           "columnsFrom": [
             "learning_scenario_id"
           ],
+          "tableTo": "learning_scenario",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "learning_scenario_file_mapping_learningScenarioId_fileId_unique": {
           "name": "learning_scenario_file_mapping_learningScenarioId_fileId_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "learning_scenario_id",
             "file_id"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -451,9 +451,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "voucher_redeemed_by_index": {
           "name": "voucher_redeemed_by_index",
@@ -466,47 +466,47 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "voucher_federal_state_id_federal_state_id_fk": {
           "name": "voucher_federal_state_id_federal_state_id_fk",
           "tableFrom": "voucher",
-          "tableTo": "federal_state",
           "columnsFrom": [
             "federal_state_id"
           ],
+          "tableTo": "federal_state",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "voucher_redeemed_by_user_entity_id_fk": {
           "name": "voucher_redeemed_by_user_entity_id_fk",
           "tableFrom": "voucher",
-          "tableTo": "user_entity",
           "columnsFrom": [
             "redeemed_by"
           ],
+          "tableTo": "user_entity",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "voucher_code_unique": {
           "name": "voucher_code_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "code"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -634,9 +634,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "assistant_school_id_index": {
           "name": "assistant_school_id_index",
@@ -649,37 +649,37 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "assistant_user_id_user_entity_id_fk": {
           "name": "assistant_user_id_user_entity_id_fk",
           "tableFrom": "assistant",
-          "tableTo": "user_entity",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user_entity",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "assistant_school_id_school_id_fk": {
           "name": "assistant_school_id_school_id_fk",
           "tableFrom": "assistant",
-          "tableTo": "school",
           "columnsFrom": [
             "school_id"
           ],
+          "tableTo": "school",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -710,28 +710,28 @@
         "assistant_template_mappings_assistant_id_assistant_id_fk": {
           "name": "assistant_template_mappings_assistant_id_assistant_id_fk",
           "tableFrom": "assistant_template_mappings",
-          "tableTo": "assistant",
           "columnsFrom": [
             "assistant_id"
           ],
+          "tableTo": "assistant",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "assistant_template_mappings_federal_state_id_fk": {
           "name": "assistant_template_mappings_federal_state_id_fk",
           "tableFrom": "assistant_template_mappings",
-          "tableTo": "federal_state",
           "columnsFrom": [
             "federal_state_id"
           ],
+          "tableTo": "federal_state",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -914,9 +914,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "character_school_id_index": {
           "name": "character_school_id_index",
@@ -929,50 +929,50 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "character_user_id_user_entity_id_fk": {
           "name": "character_user_id_user_entity_id_fk",
           "tableFrom": "character",
-          "tableTo": "user_entity",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user_entity",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "character_model_id_llm_model_id_fk": {
           "name": "character_model_id_llm_model_id_fk",
           "tableFrom": "character",
-          "tableTo": "llm_model",
           "columnsFrom": [
             "model_id"
           ],
+          "tableTo": "llm_model",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "character_school_id_school_id_fk": {
           "name": "character_school_id_school_id_fk",
           "tableFrom": "character",
-          "tableTo": "school",
           "columnsFrom": [
             "school_id"
           ],
+          "tableTo": "school",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1003,28 +1003,28 @@
         "character_template_mappings_character_id_character_id_fk": {
           "name": "character_template_mappings_character_id_character_id_fk",
           "tableFrom": "character_template_mappings",
-          "tableTo": "character",
           "columnsFrom": [
             "character_id"
           ],
+          "tableTo": "character",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "character_template_mappings_federal_state_id_fk": {
           "name": "character_template_mappings_federal_state_id_fk",
           "tableFrom": "character_template_mappings",
-          "tableTo": "federal_state",
           "columnsFrom": [
             "federal_state_id"
           ],
+          "tableTo": "federal_state",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -1109,35 +1109,35 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "chunk_file_id_file_table_id_fk": {
           "name": "chunk_file_id_file_table_id_fk",
           "tableFrom": "chunk",
-          "tableTo": "file_table",
           "columnsFrom": [
             "file_id"
           ],
+          "tableTo": "file_table",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "chunk_source_url_order_index_unique": {
           "name": "chunk_source_url_order_index_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "source_url",
             "order_index"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -1223,9 +1223,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "conversation_message_user_id_index": {
           "name": "conversation_message_user_id_index",
@@ -1238,37 +1238,37 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "conversation_message_conversation_id_conversation_id_fk": {
           "name": "conversation_message_conversation_id_conversation_id_fk",
           "tableFrom": "conversation_message",
-          "tableTo": "conversation",
           "columnsFrom": [
             "conversation_id"
           ],
+          "tableTo": "conversation",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "conversation_message_user_id_user_entity_id_fk": {
           "name": "conversation_message_user_id_user_entity_id_fk",
           "tableFrom": "conversation_message",
-          "tableTo": "user_entity",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user_entity",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1345,9 +1345,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "conversation_character_id_index": {
           "name": "conversation_character_id_index",
@@ -1360,9 +1360,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "conversation_assistant_id_index": {
           "name": "conversation_assistant_id_index",
@@ -1375,9 +1375,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "conversation_user_id_created_at_index": {
           "name": "conversation_user_id_created_at_index",
@@ -1396,51 +1396,51 @@
             }
           ],
           "isUnique": false,
-          "where": "\"conversation\".\"deleted_at\" is null",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "\"conversation\".\"deleted_at\" is null",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "conversation_user_id_user_entity_id_fk": {
           "name": "conversation_user_id_user_entity_id_fk",
           "tableFrom": "conversation",
-          "tableTo": "user_entity",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user_entity",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "conversation_character_id_character_id_fk": {
           "name": "conversation_character_id_character_id_fk",
           "tableFrom": "conversation",
-          "tableTo": "character",
           "columnsFrom": [
             "character_id"
           ],
+          "tableTo": "character",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "conversation_assistant_id_assistant_id_fk": {
           "name": "conversation_assistant_id_assistant_id_fk",
           "tableFrom": "conversation",
-          "tableTo": "assistant",
           "columnsFrom": [
             "assistant_id"
           ],
+          "tableTo": "assistant",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1517,9 +1517,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "conversation_usage_tracking_user_id_index": {
           "name": "conversation_usage_tracking_user_id_index",
@@ -1532,9 +1532,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "conversation_usage_tracking_created_at_index": {
           "name": "conversation_usage_tracking_created_at_index",
@@ -1547,24 +1547,24 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "conversation_usage_tracking_model_id_llm_model_id_fk": {
           "name": "conversation_usage_tracking_model_id_llm_model_id_fk",
           "tableFrom": "conversation_usage_tracking",
-          "tableTo": "llm_model",
           "columnsFrom": [
             "model_id"
           ],
+          "tableTo": "llm_model",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1609,39 +1609,39 @@
         "federal_state_llm_model_mapping_llm_model_id_llm_model_id_fk": {
           "name": "federal_state_llm_model_mapping_llm_model_id_llm_model_id_fk",
           "tableFrom": "federal_state_llm_model_mapping",
-          "tableTo": "llm_model",
           "columnsFrom": [
             "llm_model_id"
           ],
+          "tableTo": "llm_model",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "federal_state_llm_model_mapping_federal_state_id_fk": {
           "name": "federal_state_llm_model_mapping_federal_state_id_fk",
           "tableFrom": "federal_state_llm_model_mapping",
-          "tableTo": "federal_state",
           "columnsFrom": [
             "federal_state_id"
           ],
+          "tableTo": "federal_state",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "federal_state_llm_model_mapping_federal_state_llm_model_unique": {
           "name": "federal_state_llm_model_mapping_federal_state_llm_model_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "federal_state_id",
             "llm_model_id"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -1810,24 +1810,24 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "file_table_user_id_user_entity_id_fk": {
           "name": "file_table_user_id_user_entity_id_fk",
           "tableFrom": "file_table",
-          "tableTo": "user_entity",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user_entity",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1982,50 +1982,50 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "learning_scenario_model_id_llm_model_id_fk": {
           "name": "learning_scenario_model_id_llm_model_id_fk",
           "tableFrom": "learning_scenario",
-          "tableTo": "llm_model",
           "columnsFrom": [
             "model_id"
           ],
+          "tableTo": "llm_model",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "learning_scenario_user_id_user_entity_id_fk": {
           "name": "learning_scenario_user_id_user_entity_id_fk",
           "tableFrom": "learning_scenario",
-          "tableTo": "user_entity",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user_entity",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "learning_scenario_school_id_school_id_fk": {
           "name": "learning_scenario_school_id_school_id_fk",
           "tableFrom": "learning_scenario",
-          "tableTo": "school",
           "columnsFrom": [
             "school_id"
           ],
+          "tableTo": "school",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2056,28 +2056,28 @@
         "learning_scenario_template_mappings_learning_scenario_id_fk": {
           "name": "learning_scenario_template_mappings_learning_scenario_id_fk",
           "tableFrom": "learning_scenario_template_mappings",
-          "tableTo": "learning_scenario",
           "columnsFrom": [
             "learning_scenario_id"
           ],
+          "tableTo": "learning_scenario",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "learning_scenario_template_mappings_federal_state_id_fk": {
           "name": "learning_scenario_template_mappings_federal_state_id_fk",
           "tableFrom": "learning_scenario_template_mappings",
-          "tableTo": "federal_state",
           "columnsFrom": [
             "federal_state_id"
           ],
+          "tableTo": "federal_state",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -2169,11 +2169,11 @@
       "uniqueConstraints": {
         "llm_model_owner_name_unique": {
           "name": "llm_model_owner_name_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "owner",
             "name"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -2216,24 +2216,24 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "school_federal_state_id_federal_state_id_fk": {
           "name": "school_federal_state_id_federal_state_id_fk",
           "tableFrom": "school",
-          "tableTo": "federal_state",
           "columnsFrom": [
             "federal_state_id"
           ],
+          "tableTo": "federal_state",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2310,9 +2310,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "shared_character_chat_usage_tracking_user_id_index": {
           "name": "shared_character_chat_usage_tracking_user_id_index",
@@ -2325,9 +2325,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "shared_character_chat_usage_tracking_created_at_index": {
           "name": "shared_character_chat_usage_tracking_created_at_index",
@@ -2340,24 +2340,24 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "shared_character_chat_usage_tracking_model_id_llm_model_id_fk": {
           "name": "shared_character_chat_usage_tracking_model_id_llm_model_id_fk",
           "tableFrom": "shared_character_chat_usage_tracking",
-          "tableTo": "llm_model",
           "columnsFrom": [
             "model_id"
           ],
+          "tableTo": "llm_model",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2419,33 +2419,33 @@
         "shared_character_conversation_user_id_user_entity_id_fk": {
           "name": "shared_character_conversation_user_id_user_entity_id_fk",
           "tableFrom": "shared_character_conversation",
-          "tableTo": "user_entity",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user_entity",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "shared_character_conversation_invite_code_unique": {
           "name": "shared_character_conversation_invite_code_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "invite_code"
-          ]
+          ],
+          "nullsNotDistinct": false
         },
         "shared_character_conversation_character_id_user_id_unique": {
           "name": "shared_character_conversation_character_id_user_id_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "character_id",
             "user_id"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -2506,46 +2506,46 @@
         "shared_learning_scenario_user_id_user_entity_id_fk": {
           "name": "shared_learning_scenario_user_id_user_entity_id_fk",
           "tableFrom": "shared_learning_scenario",
-          "tableTo": "user_entity",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user_entity",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "shared_learning_scenario_learning_scenario_id_fk": {
           "name": "shared_learning_scenario_learning_scenario_id_fk",
           "tableFrom": "shared_learning_scenario",
-          "tableTo": "learning_scenario",
           "columnsFrom": [
             "learning_scenario_id"
           ],
+          "tableTo": "learning_scenario",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "shared_learning_scenario_invite_code_unique": {
           "name": "shared_learning_scenario_invite_code_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "invite_code"
-          ]
+          ],
+          "nullsNotDistinct": false
         },
         "shared_learning_scenario_learning_scenario_id_user_id_unique": {
           "name": "shared_learning_scenario_learning_scenario_id_user_id_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "learning_scenario_id",
             "user_id"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -2620,9 +2620,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "shared_learning_scenario_usage_tracking_user_id_index": {
           "name": "shared_learning_scenario_usage_tracking_user_id_index",
@@ -2635,9 +2635,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "shared_learning_scenario_usage_tracking_created_at_index": {
           "name": "shared_learning_scenario_usage_tracking_created_at_index",
@@ -2650,24 +2650,24 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "shared_learning_scenario_usage_tracking_model_id_fk": {
           "name": "shared_learning_scenario_usage_tracking_model_id_fk",
           "tableFrom": "shared_learning_scenario_usage_tracking",
-          "tableTo": "llm_model",
           "columnsFrom": [
             "model_id"
           ],
+          "tableTo": "llm_model",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2718,39 +2718,39 @@
         "user_school_mapping_user_id_user_entity_id_fk": {
           "name": "user_school_mapping_user_id_user_entity_id_fk",
           "tableFrom": "user_school_mapping",
-          "tableTo": "user_entity",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user_entity",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "user_school_mapping_school_id_school_id_fk": {
           "name": "user_school_mapping_school_id_school_id_fk",
           "tableFrom": "user_school_mapping",
-          "tableTo": "school",
           "columnsFrom": [
             "school_id"
           ],
+          "tableTo": "school",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "user_school_mapping_user_id_school_id_unique": {
           "name": "user_school_mapping_user_id_school_id_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "user_id",
             "school_id"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -2812,10 +2812,10 @@
       "uniqueConstraints": {
         "user_entity_email_unique": {
           "name": "user_entity_email_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "email"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -2887,10 +2887,10 @@
     }
   },
   "schemas": {},
+  "views": {},
   "sequences": {},
   "roles": {},
   "policies": {},
-  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},

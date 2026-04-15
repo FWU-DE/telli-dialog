@@ -1,3 +1,4 @@
+-- Custom SQL migration file, put your code below! --
 -- Populate the instructions field from existing legacy fields
 -- (learningContext, competence, specifications, restrictions, schoolType, gradeLevel, subject)
 -- Only updates characters where instructions is still empty.

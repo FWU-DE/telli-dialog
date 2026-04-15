@@ -1,3 +1,4 @@
+-- Custom SQL migration file, put your code below! --
 -- Prepend schoolType/gradeLevel/subject context into additionalInstructions
 -- for existing learning scenarios that have those fields filled.
 -- Only prepends when at least one of the context fields is non-null.
