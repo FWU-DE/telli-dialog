@@ -135,7 +135,7 @@ function buildConversationUrl({ conversation }: { conversation: ConversationMode
   }
 
   if (conversation.assistantId !== null) {
-    return `/custom/d/${conversation.assistantId}/${conversation.id}`;
+    return `/assistants/d/${conversation.assistantId}/${conversation.id}`;
   }
 
   if (conversation.type === 'image-generation') {

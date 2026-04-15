@@ -1,4 +1,5 @@
 import ProfileMenu from '@/components/navigation/profile-menu';
+import { permanentRedirect } from 'next/navigation';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import HeaderPortal from '../../../header-portal';
 import AssistantForm from './custom-gpt-form';
@@ -25,6 +26,7 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
   const isCreating = searchParams.create === 'true';
 
   const { user, school, federalState } = await requireAuth();
+
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
   const { assistant, fileMappings, pictureUrl } = await getAssistantByUser({
@@ -34,6 +36,14 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
   }).catch(handleErrorInServerComponent);
 
   const readOnly = assistant.userId !== user.id;
+
+  if (federalState.featureToggles.isNewUiDesignEnabled) {
+    if (readOnly) {
+      permanentRedirect(`/assistants/${assistantId}`);
+    }
+    permanentRedirect(`/assistants/editor/${assistantId}`);
+  }
+
   const initialLinks = assistant.attachedLinks
     .filter((l) => l !== '')
     .map(

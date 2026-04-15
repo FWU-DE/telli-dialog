@@ -20,7 +20,7 @@ export function getConversationPath({
   }
 
   if (customGptId !== undefined) {
-    return `/custom/d/${customGptId}/${conversationId}`;
+    return `/assistants/d/${customGptId}/${conversationId}`;
   }
 
   return `/d/${conversationId}`;

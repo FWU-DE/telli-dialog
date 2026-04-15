@@ -30,7 +30,7 @@ test('teacher can create character with initial message and verify it appears in
     initialMessage: initialMessage,
   });
 
-  await page.goto('/characters?visibility=private');
+  await page.goto('/characters');
 
   // check if created with the correct name
   const dialogChatName = page.getByText(characterName).first();
@@ -93,8 +93,8 @@ test('teacher can create character with initial message and verify it appears in
 });
 
 test('teacher can delete character with initial message', async ({ page }) => {
-  await page.goto('/characters?visibility=private');
-  await page.waitForURL('/characters?visibility=private');
+  await page.goto('/characters');
+  await page.waitForURL('/characters');
 
   await deleteCharacter(page, characterName);
 

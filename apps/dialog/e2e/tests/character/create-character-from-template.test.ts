@@ -23,6 +23,6 @@ test('create character from template', async ({ page }) => {
   const name = 'Johann Wolfgang von Goethe ' + nanoid(8);
   await page.getByTestId('character-name-input').fill(name);
   await page.getByTestId('character-initial-message-input').fill('Hallo');
-  await page.goto('/characters?visibility=private');
+  await page.goto('/characters');
   await expect(page.locator('body')).toContainText(name);
 });
