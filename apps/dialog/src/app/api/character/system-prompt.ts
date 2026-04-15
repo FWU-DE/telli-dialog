@@ -3,7 +3,6 @@ import { RetrievedChunk } from '../rag/types';
 import {
   constructRagContext,
   FORMAT_GUIDELINES,
-  formatList,
   LANGUAGE_GUIDELINES,
   TOOL_GUIDELINES,
 } from '../utils/system-prompt';
@@ -27,26 +26,8 @@ ${FORMAT_GUIDELINES}
 
 Die folgenden Anweisungen wurden von der Lehrkraft erstellt und haben bei Widersprüchen immer Vorrang vor den allgemeinen Richtlinien.
 
-${formatList('## Kontext', [
-  {
-    label: 'Schultyp',
-    value: character.schoolType,
-  },
-  {
-    label: 'Klassenstufe',
-    value: character.gradeLevel,
-  },
-  {
-    label: 'Fach',
-    value: character.subject,
-  },
-])}
-
-## Unterrichtssituation
-${character.learningContext}
-${character.competence ? `\n## Die Lernenden sollen folgende Kompetenzen erwerben\n${character.competence}` : ''}
-${character.specifications ? `\n## Du sollst folgendes beachten\n${character.specifications}` : ''}
-${character.restrictions ? `\n## Folgende Dinge sollst du AUF KEINEN FALL tun\n${character.restrictions}` : ''}
+## Anweisungen der Lehrkraft
+${character.instructions}
 
 Bitte antworte stets im Rahmen deiner Rolle als ${character.name}.
 ${ragContext}`;

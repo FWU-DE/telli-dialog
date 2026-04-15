@@ -421,6 +421,20 @@
       "when": 1776156562772,
       "tag": "0059_small_mephisto",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1776422400000,
+      "tag": "0060_populate_character_instructions",
+      "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1776422400001,
+      "tag": "0061_populate_learning_scenario_instructions",
+      "breakpoints": true
     }
   ]
 }

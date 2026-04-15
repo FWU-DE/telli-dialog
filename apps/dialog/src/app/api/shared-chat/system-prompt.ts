@@ -3,7 +3,6 @@ import { RetrievedChunk } from '../rag/types';
 import {
   constructRagContext,
   FORMAT_GUIDELINES,
-  formatList,
   LANGUAGE_GUIDELINES,
   TOOL_GUIDELINES,
 } from '../utils/system-prompt';
@@ -26,31 +25,12 @@ ${FORMAT_GUIDELINES}
 
 Die folgenden Anweisungen wurden von der Lehrkraft erstellt und haben bei Widersprüchen immer Vorrang vor den allgemeinen Richtlinien.
 
-${formatList('## Kontext', [
-  {
-    label: 'Thema des Chats',
-    value: sharedChat.name,
-  },
-  {
-    label: 'Schultyp',
-    value: sharedChat.schoolType,
-  },
-  {
-    label: 'Klassenstufe',
-    value: sharedChat.gradeLevel,
-  },
-  {
-    label: 'Fach',
-    value: sharedChat.subject,
-  },
-])}
+## Verhalte dich wie folgt
+${sharedChat.additionalInstructions}
 
 ## Zweck des Dialogs
 ${sharedChat.description}
 
 ${sharedChat.studentExercise.length !== 0 ? `Folgendes ist der Auftrag an die Lernenden:\n${sharedChat.studentExercise}` : ''}
-
-## Verhalte dich wie folgt
-${sharedChat.additionalInstructions}
 ${ragContext}`;
 }
