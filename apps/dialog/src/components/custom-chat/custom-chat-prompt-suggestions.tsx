@@ -10,8 +10,6 @@ import { Field, FieldLabel, FieldError } from '@ui/components/Field';
 import { Input } from '@ui/components/Input';
 import { useTranslations } from 'next-intl';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/Tooltip';
-import { cn } from '@/utils/tailwind';
-import { iconClassName } from '@/utils/tailwind/icon';
 import { PlusIcon, TrashSimpleIcon } from '@phosphor-icons/react';
 import { AssistantFormValues } from '@/app/(authed)/(dialog)/assistants/editor/[assistantId]/assistant-edit';
 import { Button } from '@ui/components/Button';
