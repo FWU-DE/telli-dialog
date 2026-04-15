@@ -17,8 +17,8 @@ export function AppMenuItem({ href, icon, text }: AppMenuItemProps) {
   const { isMobile, setOpenMobile } = useSidebar();
 
   const isActive = () => {
-    // special case for help mode because it is also a custom gpt and starts with the same path
-    if (pathname.startsWith(`/custom/d/${HELP_MODE_ASSISTANT_ID}`)) return pathname === href;
+    // special case for help mode because it is also an assistant and starts with the same path
+    if (pathname.startsWith(`/assistants/d/${HELP_MODE_ASSISTANT_ID}`)) return pathname === href;
 
     return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
   };

@@ -19,8 +19,8 @@ test.describe('share learning scenario school-wide', () => {
   });
 
   test('shared learning scenario is visible for teacher2', async ({ page }) => {
-    await page.goto('/learning-scenarios?visibility=school');
-    await page.waitForURL('/learning-scenarios?visibility=school**');
+    await page.goto('/learning-scenarios');
+    await page.waitForURL('/learning-scenarios**');
 
     await expect(page.getByText(learningScenarioName).first()).toBeVisible();
   });

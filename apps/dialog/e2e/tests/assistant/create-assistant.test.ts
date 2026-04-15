@@ -9,8 +9,8 @@ test.use({ storageState: AUTH_FILES.teacher });
 const assistantName = 'Hausbauplaner';
 
 test('teacher can login, create an assistant and start a chat', async ({ page }) => {
-  await page.goto('/custom');
-  await page.waitForURL('/custom');
+  await page.goto('/assistants');
+  await page.waitForURL('/assistants');
 
   const createButton = page.getByRole('button', { name: 'Assistent erstellen' });
   await expect(createButton).toBeVisible();
@@ -48,7 +48,7 @@ test('teacher can login, create an assistant and start a chat', async ({ page })
 
   // save form
   await page.getByTestId('custom-chat-save-button').first().click();
-  await page.goto('/custom');
+  await page.goto('/assistants');
 
   const card = page.getByRole('button', { name: assistantName }).first();
   await expect(card).toBeVisible({ timeout: 15000 });
@@ -71,20 +71,20 @@ test('teacher can login, create an assistant and start a chat', async ({ page })
 });
 
 test('teacher can delete assistant with chat', async ({ page }) => {
-  await page.goto('/custom?visibility=private');
-  await page.waitForURL('/custom?visibility=private');
+  await page.goto('/assistants');
+  await page.waitForURL('/assistants');
 
   await deleteAssistant(page, assistantName);
 
   await page.getByTestId('custom-chat-confirm-button').first().click();
   await waitForToast(page, 'Der Assistent wurde erfolgreich gelöscht.');
-  await page.waitForURL('/custom**');
+  await page.waitForURL('/assistants**');
   await expect(page.getByRole('heading', { name: assistantName }).first()).not.toBeVisible();
 });
 
 test('data is autosaved on blur', async ({ page }) => {
-  await page.goto('/custom');
-  await page.waitForURL('/custom');
+  await page.goto('/assistants');
+  await page.waitForURL('/assistants');
 
   const createButton = page.getByRole('button', { name: 'Assistent erstellen' });
   await expect(createButton).toBeVisible();
@@ -112,7 +112,7 @@ test('data is autosaved on blur', async ({ page }) => {
   await page.getByTestId('custom-chat-save-button').first().click();
 
   // Navigate to assistant overview explicitly to check if data was saved correctly
-  await page.goto('/custom');
+  await page.goto('/assistants');
   const autosaveCard = page.getByRole('button', { name: 'Autosave Test GPT' }).first();
   await expect(autosaveCard).toBeVisible({ timeout: 15000 });
   await autosaveCard.click();

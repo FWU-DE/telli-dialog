@@ -4,7 +4,7 @@ import { AUTH_FILES } from '../../utils/const';
 test.use({ storageState: AUTH_FILES.teacher });
 
 test('create assistant from template', async ({ page }) => {
-  await page.goto('/custom');
+  await page.goto('/assistants');
 
   const card = page
     .getByRole('button', { name: 'Schulorganisationsassistent', exact: true })
@@ -28,6 +28,6 @@ test('create assistant from template', async ({ page }) => {
     .fill('Speziell angepasst für die Bedürfnisse meiner Schule und Klassenstufen.');
   await page.getByTestId('custom-chat-save-button').first().click();
   await page.getByTestId('assistant-edit-back-button').click();
-  await page.waitForURL('/custom**');
+  await page.waitForURL('/assistants**');
   await expect(page.locator('body')).toContainText('Schulorganisationsassistent Individuell');
 });

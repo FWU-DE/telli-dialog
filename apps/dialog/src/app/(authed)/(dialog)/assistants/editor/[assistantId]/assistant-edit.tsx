@@ -401,7 +401,7 @@ export function AssistantEdit({
           <CustomChatActionUse
             onClick={() => {
               guardNavigation(() => {
-                router.push(`/custom/d/${assistant.id}/`);
+                router.push(`/assistants/d/${assistant.id}/`);
               });
             }}
           />
