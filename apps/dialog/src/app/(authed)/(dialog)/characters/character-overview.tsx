@@ -24,8 +24,12 @@ export default function CharacterOverview({ currentUserId }: CharacterOverviewPr
 
   const fetchCharacters = useCallback(
     async (filter: OverviewFilter) => {
-      const entities = await getCharactersByFilterAction(filter, emptyNamePlaceholder);
-      setVisibleCharacters(entities);
+      const entities = await getCharactersByFilterAction(filter);
+      const entitiesWithPlaceholder = entities.map((entity) => {
+        const trimmedName = entity.name?.trim() ?? '';
+        return { ...entity, name: trimmedName || emptyNamePlaceholder };
+      });
+      setVisibleCharacters(entitiesWithPlaceholder);
     },
     [emptyNamePlaceholder],
   );

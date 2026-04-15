@@ -19,7 +19,6 @@ function resolveFilter(filter: OverviewFilter, isSchoolSharingEnabled: boolean):
 
 export async function getCharactersByFilterAction(
   filter: OverviewFilter,
-  emptyNamePlaceholder: string,
 ): Promise<CharacterWithImage[]> {
   const { user, school, federalState } = await requireAuth();
   const effectiveFilter = resolveFilter(
@@ -34,16 +33,11 @@ export async function getCharactersByFilterAction(
     federalStateId: federalState.id,
   });
 
-  const enrichedCharacters = await enrichCharactersWithImage({ characters });
-  return enrichedCharacters.map((c) => {
-    const trimmedName = c.name?.trim() ?? '';
-    return { ...c, name: trimmedName || emptyNamePlaceholder };
-  });
+  return enrichCharactersWithImage({ characters });
 }
 
 export async function getLearningScenariosByFilterAction(
   filter: OverviewFilter,
-  emptyNamePlaceholder: string,
 ): Promise<LearningScenarioWithImage[]> {
   const { user, school, federalState } = await requireAuth();
   const effectiveFilter = resolveFilter(
@@ -61,15 +55,11 @@ export async function getLearningScenariosByFilterAction(
   const enrichedLearningScenarios = await enrichLearningScenarioWithPictureUrl({
     learningScenarios,
   });
-  return enrichedLearningScenarios.map((s) => {
-    const trimmedName = s.name?.trim() ?? '';
-    return { ...s, name: trimmedName || emptyNamePlaceholder };
-  });
+  return enrichedLearningScenarios;
 }
 
 export async function getAssistantsByFilterAction(
   filter: OverviewFilter,
-  emptyNamePlaceholder: string,
 ): Promise<AssistantWithImage[]> {
   const { user, school, federalState } = await requireAuth();
   const effectiveFilter = resolveFilter(
@@ -87,8 +77,5 @@ export async function getAssistantsByFilterAction(
   const enrichedAssistants = await enrichAssistantsWithImage({
     assistants: assistants.filter((a) => a.id !== HELP_MODE_ASSISTANT_ID),
   });
-  return enrichedAssistants.map((a) => {
-    const trimmedName = a.name?.trim() ?? '';
-    return { ...a, name: trimmedName || emptyNamePlaceholder };
-  });
+  return enrichedAssistants;
 }

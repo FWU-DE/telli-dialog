@@ -26,8 +26,12 @@ export default function LearningScenarioOverview({ currentUserId }: LearningScen
 
   const fetchLearningScenarios = useCallback(
     async (filter: OverviewFilter) => {
-      const entities = await getLearningScenariosByFilterAction(filter, emptyNamePlaceholder);
-      setVisibleLearningScenarios(entities);
+      const entities = await getLearningScenariosByFilterAction(filter);
+      const entitiesWithPlaceholder = entities.map((entity) => {
+        const trimmedName = entity.name?.trim() ?? '';
+        return { ...entity, name: trimmedName || emptyNamePlaceholder };
+      });
+      setVisibleLearningScenarios(entitiesWithPlaceholder);
     },
     [emptyNamePlaceholder],
   );

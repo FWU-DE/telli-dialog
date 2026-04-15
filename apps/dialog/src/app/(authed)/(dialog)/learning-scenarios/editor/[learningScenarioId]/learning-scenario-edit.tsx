@@ -168,6 +168,7 @@ export function LearningScenarioEdit({
           data: {
             ...learningScenario,
             ...data,
+            name: data.name.trim(),
             description: data.description ?? '',
             studentExercise: data.studentExercise ?? '',
             attachedLinks: attachedLinksRef.current,

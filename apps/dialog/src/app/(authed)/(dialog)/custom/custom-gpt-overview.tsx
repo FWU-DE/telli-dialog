@@ -24,8 +24,12 @@ export default function CustomGptOverview({ currentUserId }: CustomGptOverviewPr
 
   const fetchAssistants = useCallback(
     async (filter: OverviewFilter) => {
-      const entities = await getAssistantsByFilterAction(filter, emptyNamePlaceholder);
-      setVisibleAssistants(entities);
+      const entities = await getAssistantsByFilterAction(filter);
+      const entitiesWithPlaceholder = entities.map((entity) => {
+        const trimmedName = entity.name?.trim() ?? '';
+        return { ...entity, name: trimmedName || emptyNamePlaceholder };
+      });
+      setVisibleAssistants(entitiesWithPlaceholder);
     },
     [emptyNamePlaceholder],
   );

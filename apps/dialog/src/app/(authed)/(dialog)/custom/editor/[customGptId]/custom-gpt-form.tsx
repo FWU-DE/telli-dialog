@@ -185,6 +185,7 @@ export default function AssistantForm({
   async function onSubmit(data: AssistantFormValues) {
     const result = await updateAssistantAction({
       ...data,
+      name: data.name.trim(),
       promptSuggestions: data.promptSuggestions?.map((p) => p.content),
       gptId: assistant.id,
       attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
@@ -261,7 +262,7 @@ export default function AssistantForm({
     };
     const dataEquals = deepEqual(defaultData, newData);
     if (dataEquals) return;
-    onSubmit(data);
+    void handleSubmit(onSubmit)();
   }
 
   async function handleCreateAssistant() {

@@ -162,7 +162,7 @@ export function CharacterEdit({
         // attachedLinks are handled separately in handleLinksChange
         const updateResult = await updateCharacterAction({
           id: character.id,
-          name: data.name,
+          name: data.name.trim(),
           description: data.description,
           instructions: data.instructions,
           initialMessage: data.initialMessage,
