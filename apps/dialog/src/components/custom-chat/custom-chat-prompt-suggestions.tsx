@@ -63,6 +63,7 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
 
     const addIconButton = (
       <IconButton
+        type="button"
         aria-label={t('prompt-suggestions-add-button')}
         data-testid={`add-prompt-suggestion-${index + 1}-button`}
         aria-disabled={isAddPromptSuggestionDisabled}
@@ -80,7 +81,7 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
         name={`promptSuggestions.${index}.value`}
         control={control}
         label={`${t('prompt-suggestion')} ${index + 1}`}
-        testId="learning-scenario-instructions-input"
+        testId={`prompt-suggestion-${index + 1}-input`}
         onBlur={onBlur}
         type="text"
         wrapperClassName="w-full"
@@ -113,6 +114,7 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
                 )
               ) : (
                 <IconButton
+                  type="button"
                   aria-label={t('prompt-suggestions-delete-button', { index: index + 1 })}
                   data-testid={`delete-prompt-suggestion-${index + 1}-button`}
                   onClick={() => removePromptSuggestion(index)}

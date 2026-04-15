@@ -183,7 +183,6 @@ export function FloatingText({
         <button
           aria-label="Minimize"
           aria-expanded={!isMinimized}
-          aria-controls="floating-text-content"
           onClick={() => {
             setIsMinimized(!isMinimized);
             setTimeout(() => {
