@@ -19,7 +19,7 @@
     "format:check": "prettier --check .",
     "types": "tsc --noEmit",
     "check-types": "tsc --noEmit",
-    "lint": "eslint \"**/*.ts*\" --max-warnings 0",
+    "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
