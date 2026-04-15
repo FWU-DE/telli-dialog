@@ -1,5 +1,5 @@
 import { generateUUID } from '@shared/utils/uuid';
-import { redirect } from 'next/navigation';
+import { permanentRedirect } from 'next/navigation';
 import Chat from '@/components/chat/chat';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
@@ -19,7 +19,7 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]'>) {
   const { user, school, federalState } = await requireAuth();
 
   if (federalState.featureToggles.isNewUiDesignEnabled) {
-    redirect(`/assistants/d/${gptId}`);
+    permanentRedirect(`/assistants/d/${gptId}`);
   }
 
   const id = generateUUID();

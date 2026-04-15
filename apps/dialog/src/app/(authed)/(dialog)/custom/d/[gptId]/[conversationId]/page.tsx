@@ -1,5 +1,5 @@
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
-import { redirect } from 'next/navigation';
+import { permanentRedirect } from 'next/navigation';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import Chat from '@/components/chat/chat';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
@@ -24,7 +24,7 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversa
   const { user, school, federalState } = await requireAuth();
 
   if (federalState.featureToggles.isNewUiDesignEnabled) {
-    redirect(`/assistants/d/${params.gptId}/${params.conversationId}`);
+    permanentRedirect(`/assistants/d/${params.gptId}/${params.conversationId}`);
   }
 
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);

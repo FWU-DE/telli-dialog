@@ -1,5 +1,5 @@
 import ProfileMenu from '@/components/navigation/profile-menu';
-import { redirect } from 'next/navigation';
+import { permanentRedirect } from 'next/navigation';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import HeaderPortal from '../../../header-portal';
 import AssistantForm from './custom-gpt-form';
@@ -39,9 +39,9 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
 
   if (federalState.featureToggles.isNewUiDesignEnabled) {
     if (readOnly) {
-      redirect(`/assistants/${assistantId}`);
+      permanentRedirect(`/assistants/${assistantId}`);
     }
-    redirect(`/assistants/editor/${assistantId}`);
+    permanentRedirect(`/assistants/editor/${assistantId}`);
   }
 
   const initialLinks = assistant.attachedLinks
