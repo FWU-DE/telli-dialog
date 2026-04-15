@@ -13,7 +13,7 @@ test('all predefined characters are visible for everyone', async ({ page }) => {
   await page.waitForURL('/characters**');
 
   for (const elementIdentifier of templateCharactersIdentifier) {
-    await expect(page.getByRole('button', { name: elementIdentifier })).toBeVisible();
+    await expect(page.getByRole('button', { name: elementIdentifier }).first()).toBeVisible();
   }
 });
 
@@ -23,7 +23,7 @@ test('all predefined assistants are visible for everyone', async ({ page }) => {
   await page.waitForURL('/assistants**');
 
   for (const elementIdentifier of templateAssistantsIdentifier) {
-    await expect(page.getByRole('button', { name: elementIdentifier })).toBeVisible();
+    await expect(page.getByRole('button', { name: elementIdentifier }).first()).toBeVisible();
   }
 });
 
@@ -33,6 +33,6 @@ test('all predefined learning scenarios are visible for everyone', async ({ page
   await page.waitForURL('/learning-scenarios**');
 
   for (const elementIdentifier of templateLearningScenariosIdentifier) {
-    await expect(page.getByRole('button', { name: elementIdentifier })).toBeVisible();
+    await expect(page.getByRole('button', { name: elementIdentifier }).first()).toBeVisible();
   }
 });
