@@ -4,6 +4,9 @@ import turboConfig from 'eslint-config-turbo/flat';
 
 export default tseslint.config(
   {
+    ignores: ['node_modules/**', 'dist/**', 'coverage/**'],
+  },
+  {
     extends: [eslint.configs.recommended, ...tseslint.configs.recommendedTypeChecked, turboConfig],
     languageOptions: {
       ecmaVersion: 'latest',
@@ -12,7 +15,6 @@ export default tseslint.config(
         projectService: true,
       },
     },
-    ignores: ['**/node_modules/**', '**/dist/**'],
     files: ['**/*.ts'],
   },
   {
