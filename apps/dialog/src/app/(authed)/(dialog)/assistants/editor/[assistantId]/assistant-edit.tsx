@@ -201,7 +201,7 @@ export function AssistantEdit({
     const createResult = await createNewAssistantAction({
       templateId: assistant.id,
       duplicateAssistantName: t('duplicate-name-format-string', {
-        sourceAssistantName: assistant.name,
+        sourceName: assistant.name,
       }),
     });
     if (createResult.success) {
