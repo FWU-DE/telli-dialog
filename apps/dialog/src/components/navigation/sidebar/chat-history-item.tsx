@@ -22,6 +22,7 @@ import {
   DotsThreeIcon,
   ImageSquareIcon,
   LegoSmileyIcon,
+  QuestionIcon,
   StudentIcon,
   TrashIcon,
   XSquareIcon,
@@ -71,7 +72,7 @@ export function ChatHistoryItem({
 
   const isActive = () => {
     // special case for help mode because it is also a custom gpt and starts with the same path
-    if (pathname.startsWith(`/custom/d/${HELP_MODE_ASSISTANT_ID}`)) return pathname === href;
+    if (pathname.startsWith(`/assistants/d/${HELP_MODE_ASSISTANT_ID}`)) return pathname === href;
 
     return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
   };
@@ -181,7 +182,7 @@ function buildConversationUrl({ conversation }: { conversation: ConversationMode
   }
 
   if (conversation.assistantId !== null) {
-    return `/custom/d/${conversation.assistantId}/${conversation.id}`;
+    return `/assistants/d/${conversation.assistantId}/${conversation.id}`;
   }
 
   if (conversation.type === 'image-generation') {
@@ -200,6 +201,9 @@ function determineConversationIcon(
         return <StudentIcon />;
       }
       if (conversation.assistantId) {
+        if (conversation.assistantId === HELP_MODE_ASSISTANT_ID) {
+          return <QuestionIcon />;
+        }
         return <LegoSmileyIcon />;
       }
       return undefined;
