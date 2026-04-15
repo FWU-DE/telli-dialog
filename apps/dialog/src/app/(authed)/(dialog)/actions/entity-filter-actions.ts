@@ -35,7 +35,10 @@ export async function getCharactersByFilterAction(
   });
 
   const enrichedCharacters = await enrichCharactersWithImage({ characters });
-  return enrichedCharacters.map((c) => ({ ...c, name: c.name || emptyNamePlaceholder }));
+  return enrichedCharacters.map((c) => {
+    const trimmedName = c.name?.trim() ?? '';
+    return { ...c, name: trimmedName || emptyNamePlaceholder };
+  });
 }
 
 export async function getLearningScenariosByFilterAction(
@@ -58,7 +61,10 @@ export async function getLearningScenariosByFilterAction(
   const enrichedLearningScenarios = await enrichLearningScenarioWithPictureUrl({
     learningScenarios,
   });
-  return enrichedLearningScenarios.map((s) => ({ ...s, name: s.name || emptyNamePlaceholder }));
+  return enrichedLearningScenarios.map((s) => {
+    const trimmedName = s.name?.trim() ?? '';
+    return { ...s, name: trimmedName || emptyNamePlaceholder };
+  });
 }
 
 export async function getAssistantsByFilterAction(
@@ -81,5 +87,8 @@ export async function getAssistantsByFilterAction(
   const enrichedAssistants = await enrichAssistantsWithImage({
     assistants: assistants.filter((a) => a.id !== HELP_MODE_ASSISTANT_ID),
   });
-  return enrichedAssistants.map((a) => ({ ...a, name: a.name || emptyNamePlaceholder }));
+  return enrichedAssistants.map((a) => {
+    const trimmedName = a.name?.trim() ?? '';
+    return { ...a, name: trimmedName || emptyNamePlaceholder };
+  });
 }

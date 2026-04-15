@@ -89,7 +89,7 @@ function createLearningScenarioFieldValidationConfig(t: LearningScenarioTranslat
 
 function createLearningScenarioFormValuesSchema(t: LearningScenarioTranslator) {
   return z.object({
-    name: z.string().min(1, t('name-required')),
+    name: z.string().trim().min(1, t('name-required')),
     description: z.string(),
     additionalInstructions: z.string(),
     studentExercise: z.string(),

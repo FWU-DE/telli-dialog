@@ -19,7 +19,7 @@ import { z } from 'zod';
  * - the max length property controls the behavior of the TextInput component and blocks user input if the max length is reached
  */
 export const sharedSchoolChatFormValuesSchema = z.object({
-  name: z.string().min(1).max(SMALL_TEXT_INPUT_FIELDS_LIMIT),
+  name: z.string().trim().min(1).max(SMALL_TEXT_INPUT_FIELDS_LIMIT),
   description: z.string().min(1).max(SMALL_TEXT_INPUT_FIELDS_LIMIT),
   pictureId: z.string().nullable(),
   modelId: z.string(),

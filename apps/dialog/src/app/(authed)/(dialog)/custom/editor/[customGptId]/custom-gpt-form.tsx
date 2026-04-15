@@ -70,7 +70,7 @@ type AssistantFormProps = AssistantSelectModel & {
  * - the max length property controls the behavior of the textInput component and blocks user input if the max length is reached
  */
 const assistantFormValuesSchema = z.object({
-  name: z.string().min(1),
+  name: z.string().trim().min(1),
   description: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   instructions: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS),
   promptSuggestions: z.array(z.object({ content: z.string() })),

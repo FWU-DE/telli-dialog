@@ -91,7 +91,7 @@ function createCharacterFieldValidationConfig(t: CharacterTranslator) {
 
 function createCharacterFormValuesSchema(t: CharacterTranslator) {
   return z.object({
-    name: z.string().min(1, t('name-required')),
+    name: z.string().trim().min(1, t('name-required')),
     description: z.string(),
     instructions: z.string(),
     initialMessage: z.string(),
