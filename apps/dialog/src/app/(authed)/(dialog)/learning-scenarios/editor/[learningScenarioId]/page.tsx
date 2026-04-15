@@ -1,6 +1,3 @@
-import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import HeaderPortal from '../../../header-portal';
-import ProfileMenu from '@/components/navigation/profile-menu';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
@@ -10,9 +7,9 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { WebsearchSource } from '@shared/db/types';
 import LearningScenarioForm from './learning-scenario-form';
 import { LearningScenarioEdit } from './learning-scenario-edit';
-import { ResponsiveLayoutWrapper } from '../../../_components/responsive-layout-wrapper';
 import { redirect } from 'next/navigation';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +47,7 @@ export default async function Page(
 
   if (federalState.featureToggles.isNewUiDesignEnabled && !readOnly) {
     return (
-      <ResponsiveLayoutWrapper>
+      <DefaultPageLayout>
         <CustomChatHeader
           userAndContext={userAndContext}
           isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
@@ -61,20 +58,17 @@ export default async function Page(
           initialLinks={initialLinks}
           avatarPictureUrl={avatarPictureUrl}
         />
-      </ResponsiveLayoutWrapper>
+      </DefaultPageLayout>
     );
   }
 
   return (
-    <div className="w-full p-6 overflow-auto">
-      <HeaderPortal>
-        <ToggleSidebarButton
-          isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
-        />
-        <div className="grow"></div>
-        <ProfileMenu userAndContext={userAndContext} />
-      </HeaderPortal>
-      <div className="max-w-3xl mx-auto mt-4">
+    <DefaultPageLayout>
+      <CustomChatHeader
+        userAndContext={userAndContext}
+        isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+      />
+      <div className="mx-auto mt-4">
         <LearningScenarioForm
           {...learningScenario}
           existingFiles={relatedFiles}
@@ -84,6 +78,6 @@ export default async function Page(
           readOnly={readOnly}
         />
       </div>
-    </div>
+    </DefaultPageLayout>
   );
 }

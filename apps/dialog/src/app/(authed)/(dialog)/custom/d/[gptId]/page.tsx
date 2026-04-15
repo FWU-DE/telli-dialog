@@ -10,6 +10,7 @@ import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,15 +41,17 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]'>) {
         userAndContext={userAndContext}
         downloadConversationEnabled={false}
       />
-      <Chat
-        id={id}
-        initialMessages={[]}
-        assistant={assistant}
-        enableFileUpload={true}
-        promptSuggestions={assistant.promptSuggestions}
-        imageSource={avatarPictureUrl}
-        logoElement={logoElement}
-      />
+      <DefaultPageLayout>
+        <Chat
+          id={id}
+          initialMessages={[]}
+          assistant={assistant}
+          enableFileUpload={true}
+          promptSuggestions={assistant.promptSuggestions}
+          imageSource={avatarPictureUrl}
+          logoElement={logoElement}
+        />
+      </DefaultPageLayout>
     </LlmModelsProvider>
   );
 }

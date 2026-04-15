@@ -7,6 +7,8 @@ import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { getAssistantByAccessLevel } from '@shared/assistants/assistant-service';
 import CustomGptOverview from './custom-gpt-overview';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
+import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +22,15 @@ export default async function Page(props: PageProps<'/custom'>) {
   const isNewUi = federalState.featureToggles.isNewUiDesignEnabled;
 
   if (isNewUi) {
-    return <CustomGptOverview currentUserId={user.id} />;
+    return (
+      <DefaultPageLayout>
+        <CustomChatHeader
+          userAndContext={buildLegacyUserAndContext(user, school, federalState)}
+          isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+        />
+        <CustomGptOverview currentUserId={user.id} />
+      </DefaultPageLayout>
+    );
   }
 
   const accessLevel = searchParams.visibility;

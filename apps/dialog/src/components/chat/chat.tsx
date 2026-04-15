@@ -262,7 +262,7 @@ export default function Chat({
     );
   } else if (assistant !== undefined && assistant.id === HELP_MODE_ASSISTANT_ID) {
     placeholderElement = (
-      <div className="flex flex-col items-center justify-center gap-6 h-full max-w-3xl mx-auto p-4">
+      <div className="flex flex-col items-center justify-center gap-6 h-full p-4">
         <div className="pb-4">
           <RobotIcon className="w-14 h-14 text-primary" />
         </div>
@@ -310,7 +310,7 @@ export default function Chat({
               status={status}
               reload={reload}
               assistantIcon={assistantIcon}
-              containerClassName="flex flex-col gap-2 max-w-3xl mx-auto p-4"
+              containerClassName="flex flex-col gap-2 mx-auto p-4"
               fileMapping={fileMapping}
               pendingFileMapping={pendingFileMapping}
               webSourceMapping={webSourceMapping}
@@ -318,7 +318,7 @@ export default function Chat({
           )}
           {error && <ErrorChatPlaceholder error={error} handleReload={handleReload} />}
         </div>
-        <div className="w-full max-w-3xl pb-4 px-4 mx-auto">
+        <div className="w-full pb-4 px-4 mx-auto">
           <div className="relative flex flex-col">
             {input.length === 0 && messages.length === 0 && (
               <PromptSuggestions
