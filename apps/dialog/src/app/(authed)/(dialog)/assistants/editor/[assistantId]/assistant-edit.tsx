@@ -141,6 +141,7 @@ export function AssistantEdit({
   } = useForm<AssistantFormValues>({
     resolver: zodResolver(assistantFormValuesSchema),
     defaultValues: initialValues,
+    mode: 'onBlur',
   });
 
   const { isSaving, hasSaveError, flushAutoSave, handleAutoSave } =

@@ -19,12 +19,16 @@ type CharacterOverviewProps = {
 export default function CharacterOverview({ currentUserId }: CharacterOverviewProps) {
   const router = useRouter();
   const t = useTranslations('characters');
+  const emptyNamePlaceholder = t('empty-name-placeholder');
   const [visibleCharacters, setVisibleCharacters] = useState<CharacterWithImage[]>([]);
 
-  const fetchCharacters = useCallback(async (filter: OverviewFilter) => {
-    const entities = await getCharactersByFilterAction(filter);
-    setVisibleCharacters(entities);
-  }, []);
+  const fetchCharacters = useCallback(
+    async (filter: OverviewFilter) => {
+      const entities = await getCharactersByFilterAction(filter, emptyNamePlaceholder);
+      setVisibleCharacters(entities);
+    },
+    [emptyNamePlaceholder],
+  );
 
   const [activeFilter, setActiveFilter] = useOverviewFilter('characters', fetchCharacters);
 

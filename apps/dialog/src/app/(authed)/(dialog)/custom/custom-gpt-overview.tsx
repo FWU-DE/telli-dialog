@@ -19,12 +19,16 @@ type CustomGptOverviewProps = {
 export default function CustomGptOverview({ currentUserId }: CustomGptOverviewProps) {
   const router = useRouter();
   const t = useTranslations('custom-gpt');
+  const emptyNamePlaceholder = t('empty-name-placeholder');
   const [visibleAssistants, setVisibleAssistants] = useState<AssistantWithImage[]>([]);
 
-  const fetchAssistants = useCallback(async (filter: OverviewFilter) => {
-    const entities = await getAssistantsByFilterAction(filter);
-    setVisibleAssistants(entities);
-  }, []);
+  const fetchAssistants = useCallback(
+    async (filter: OverviewFilter) => {
+      const entities = await getAssistantsByFilterAction(filter, emptyNamePlaceholder);
+      setVisibleAssistants(entities);
+    },
+    [emptyNamePlaceholder],
+  );
 
   const [activeFilter, setActiveFilter] = useOverviewFilter('gpts', fetchAssistants);
 

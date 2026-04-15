@@ -145,6 +145,7 @@ export function CharacterEdit({
   } = useForm<CharacterFormValues>({
     resolver: zodResolver(characterFormValuesSchema),
     defaultValues: initialValues,
+    mode: 'onBlur',
   });
 
   const { isSaving, hasSaveError, flushAutoSave, handleAutoSave } =

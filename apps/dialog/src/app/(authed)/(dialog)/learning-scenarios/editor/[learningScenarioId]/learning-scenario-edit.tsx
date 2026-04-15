@@ -150,6 +150,7 @@ export function LearningScenarioEdit({
   } = useForm<LearningScenarioFormValues>({
     resolver: zodResolver(learningScenarioFormValuesSchema),
     defaultValues: initialValues,
+    mode: 'onBlur',
   });
 
   const { isSaving, hasSaveError, flushAutoSave, handleAutoSave } =

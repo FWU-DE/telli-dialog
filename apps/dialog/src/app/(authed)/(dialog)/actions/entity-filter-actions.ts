@@ -19,6 +19,7 @@ function resolveFilter(filter: OverviewFilter, isSchoolSharingEnabled: boolean):
 
 export async function getCharactersByFilterAction(
   filter: OverviewFilter,
+  emptyNamePlaceholder: string,
 ): Promise<CharacterWithImage[]> {
   const { user, school, federalState } = await requireAuth();
   const effectiveFilter = resolveFilter(
@@ -33,11 +34,13 @@ export async function getCharactersByFilterAction(
     federalStateId: federalState.id,
   });
 
-  return enrichCharactersWithImage({ characters: characters.filter((c) => c.name !== '') });
+  const enrichedCharacters = await enrichCharactersWithImage({ characters });
+  return enrichedCharacters.map((c) => ({ ...c, name: c.name || emptyNamePlaceholder }));
 }
 
 export async function getLearningScenariosByFilterAction(
   filter: OverviewFilter,
+  emptyNamePlaceholder: string,
 ): Promise<LearningScenarioWithImage[]> {
   const { user, school, federalState } = await requireAuth();
   const effectiveFilter = resolveFilter(
@@ -52,13 +55,15 @@ export async function getLearningScenariosByFilterAction(
     federalStateId: federalState.id,
   });
 
-  return enrichLearningScenarioWithPictureUrl({
-    learningScenarios: learningScenarios.filter((s) => s.name !== ''),
+  const enrichedLearningScenarios = await enrichLearningScenarioWithPictureUrl({
+    learningScenarios,
   });
+  return enrichedLearningScenarios.map((s) => ({ ...s, name: s.name || emptyNamePlaceholder }));
 }
 
 export async function getAssistantsByFilterAction(
   filter: OverviewFilter,
+  emptyNamePlaceholder: string,
 ): Promise<AssistantWithImage[]> {
   const { user, school, federalState } = await requireAuth();
   const effectiveFilter = resolveFilter(
@@ -73,7 +78,8 @@ export async function getAssistantsByFilterAction(
     federalStateId: federalState.id,
   });
 
-  return enrichAssistantsWithImage({
-    assistants: assistants.filter((a) => a.name !== '' && a.id !== HELP_MODE_ASSISTANT_ID),
+  const enrichedAssistants = await enrichAssistantsWithImage({
+    assistants: assistants.filter((a) => a.id !== HELP_MODE_ASSISTANT_ID),
   });
+  return enrichedAssistants.map((a) => ({ ...a, name: a.name || emptyNamePlaceholder }));
 }
