@@ -49,7 +49,7 @@ export default function Citation({
       >
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="flex flex-row items-center gap-1 p-1.5">
+            <div className="flex flex-row items-center gap-1 p-1.5" data-testid="citation">
               <SearchIcon className="w-3 h-3 ml-1" />
               <span className="flex text-ellipsis text-xs line-clamp-1" aria-label={displayUrl}>
                 {displayTitle}

@@ -11,7 +11,7 @@ test('teacher can provide link and it is displayed in the chat', async ({ page }
     'Wann hatte der Barock seinen Anfang?\nhttps://www.planet-wissen.de/geschichte/neuzeit/barock/index.html',
   );
 
-  await expect(page.getByLabel('Source Title 0 0')).toContainText('planet-wissen.de');
+  await expect(page.getByTestId('citation').first()).toContainText('planet-wissen.de');
   await expect(page.getByLabel('assistant message 1')).toBeVisible();
   await expect(page.getByLabel('assistant message 1')).toContainText('17');
 });
@@ -30,7 +30,7 @@ test.describe('links in chat', () => {
         `Gib mir eine Zusammenfassung in einem Satz dieser Seite:\n${link} Beende die Antwort mit "ENDE".`,
       );
 
-      await expect(page.getByLabel('Source Title 0 0')).toContainText(host);
+      await expect(page.getByTestId('citation').first()).toContainText(host);
       await expect(page.getByLabel('assistant message 1')).toBeVisible();
       await expect(page.getByLabel('assistant message 1')).toContainText('ENDE');
     });
