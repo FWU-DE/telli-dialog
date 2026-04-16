@@ -150,7 +150,7 @@ export function AssistantEdit({
       isDirty,
       getValues,
       reset: (values) => {
-        reset(values);
+        reset({ ...values, name: values.name.trim() });
       },
       validate: trigger,
       saveValues: async (data) => {

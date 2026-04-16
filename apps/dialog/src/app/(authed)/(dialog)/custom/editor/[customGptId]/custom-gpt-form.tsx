@@ -256,6 +256,7 @@ export default function AssistantForm({
     const newData = {
       ...defaultData,
       ...data,
+      name: data.name.trim(),
       promptSuggestions: [],
       attachedLinks: data.attachedLinks.map((p) => p.link),
       isSchoolShared: undefined,
