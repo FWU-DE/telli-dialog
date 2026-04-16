@@ -22,7 +22,7 @@ async function createCharacterWithInitialMessage(
   await configureCharacter(page, { name, initialMessage });
 
   // Navigate back to character list to verify creation
-  await page.goto('/characters?visibility=private');
+  await page.goto('/characters');
 
   // Click on the card to open its editor and extract the character ID from the URL
   await page.getByText(name).first().click();
@@ -50,8 +50,8 @@ test.describe('character chat UX', () => {
   test.afterAll(async ({ browser }) => {
     if (!characterId) return;
     const page = await browser.newPage({ storageState: AUTH_FILES.teacher });
-    await page.goto('/characters?visibility=private');
-    await page.waitForURL('/characters?visibility=private');
+    await page.goto('/characters');
+    await page.waitForURL('/characters');
     await deleteCharacter(page, characterName);
     const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
     await expect(deleteConfirmButton).toBeVisible();

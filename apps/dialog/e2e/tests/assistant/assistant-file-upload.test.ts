@@ -7,8 +7,8 @@ test.use({ storageState: AUTH_FILES.teacher });
 test('should upload file and chat with assistant template (Schulorganisationsassistent)', async ({
   page,
 }) => {
-  await page.goto('/custom?filter=official');
-  await page.waitForURL('/custom?filter=official');
+  await page.goto('/assistants');
+  await page.waitForURL('/assistants');
 
   // Wait for the Schulorganisationsassistent template card and click the chat button
   const card = page.getByRole('button', { name: 'Schulorganisationsassistent' }).first();

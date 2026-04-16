@@ -27,7 +27,7 @@ test.describe('create, share, chat, delete', () => {
       instructions: 'John Cena soll über seine Karriere und Erfolge sprechen.',
     });
 
-    await page.goto('/characters?visibility=private');
+    await page.goto('/characters');
 
     // check if created with the correct name
     const dialogChatName = page.getByText(characterName).first();
@@ -76,8 +76,8 @@ test.describe('create, share, chat, delete', () => {
   });
 
   test('teacher can delete character', async ({ page }) => {
-    await page.goto('/characters?visibility=private');
-    await page.waitForURL('/characters?visibility=private');
+    await page.goto('/characters');
+    await page.waitForURL('/characters');
 
     await deleteCharacter(page, characterName);
 

@@ -7,7 +7,7 @@ import { createNewAssistantAction } from './actions';
 import { Button } from '@ui/components/Button';
 import { PlusIcon } from '@phosphor-icons/react';
 
-export default function CreateNewCustomGptButton({
+export default function CreateNewAssistantButton({
   isNewUiDesignEnabled = false,
 }: {
   isNewUiDesignEnabled?: boolean;

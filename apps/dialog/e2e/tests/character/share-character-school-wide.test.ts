@@ -32,8 +32,8 @@ test.describe('share character school-wide', () => {
   });
 
   test('shared character is visible for teacher2', async ({ page }) => {
-    await page.goto('/characters?visibility=school');
-    await page.waitForURL('/characters?visibility=school**');
+    await page.goto('/characters');
+    await page.waitForURL('/characters**');
 
     await expect(page.getByText(characterName).first()).toBeVisible();
   });

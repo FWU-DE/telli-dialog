@@ -33,6 +33,6 @@ test('create learning scenario from template', async ({ page }) => {
   await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
 
   // Navigate back to learning scenarios list to verify creation
-  await page.goto('/learning-scenarios?visibility=private');
+  await page.goto('/learning-scenarios');
   await expect(page.locator('body')).toContainText(name);
 });
