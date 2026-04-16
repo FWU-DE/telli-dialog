@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { OverviewFilter } from '@shared/overview-filter';
 import { LearningScenarioWithImage } from '@shared/learning-scenarios/learning-scenario-service';
@@ -17,7 +16,6 @@ type LearningScenarioOverviewProps = {
 };
 
 export default function LearningScenarioOverview({ currentUserId }: LearningScenarioOverviewProps) {
-  const router = useRouter();
   const t = useTranslations('learning-scenarios');
   const [visibleLearningScenarios, setVisibleLearningScenarios] = useState<
     LearningScenarioWithImage[]
@@ -69,12 +67,10 @@ export default function LearningScenarioOverview({ currentUserId }: LearningScen
               description={scenario.description}
               avatarUrl={scenario.maybeSignedPictureUrl}
               isOwned={isOwned}
-              onCardClick={() =>
-                router.push(
-                  isOwned
-                    ? `/learning-scenarios/editor/${scenario.id}`
-                    : `/learning-scenarios/${scenario.id}`,
-                )
+              href={
+                isOwned
+                  ? `/learning-scenarios/editor/${scenario.id}`
+                  : `/learning-scenarios/${scenario.id}`
               }
             />
           );

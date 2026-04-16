@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { OverviewFilter } from '@shared/overview-filter';
 import { AssistantWithImage } from '../custom/utils';
@@ -17,7 +16,6 @@ type AssistantOverviewProps = {
 };
 
 export default function AssistantOverview({ currentUserId }: AssistantOverviewProps) {
-  const router = useRouter();
   const t = useTranslations('custom-gpt');
   const [visibleAssistants, setVisibleAssistants] = useState<AssistantWithImage[]>([]);
 
@@ -31,17 +29,6 @@ export default function AssistantOverview({ currentUserId }: AssistantOverviewPr
   async function handleFilterChange(filter: OverviewFilter) {
     await setActiveFilter(filter);
   }
-
-  const handleCardClick = (gptId: string) => {
-    const assistant = visibleAssistants.find((gpt) => gpt.id === gptId);
-    if (assistant) {
-      if (assistant.userId === currentUserId) {
-        router.push(`/assistants/editor/${gptId}`);
-      } else {
-        router.push(`/assistants/${gptId}`);
-      }
-    }
-  };
 
   const infoContent = (
     <div className="flex flex-col gap-8 whitespace-pre-line">
@@ -80,8 +67,12 @@ export default function AssistantOverview({ currentUserId }: AssistantOverviewPr
             description={assistant.description}
             avatarUrl={assistant.maybeSignedPictureUrl}
             isOwned={assistant.userId === currentUserId}
-            onCardClick={() => handleCardClick(assistant.id)}
-            onChatClick={() => router.push(`/assistants/d/${assistant.id}`)}
+            href={
+              assistant.userId === currentUserId
+                ? `/assistants/editor/${assistant.id}`
+                : `/assistants/${assistant.id}`
+            }
+            chatHref={`/assistants/d/${assistant.id}`}
           />
         ));
       }}
