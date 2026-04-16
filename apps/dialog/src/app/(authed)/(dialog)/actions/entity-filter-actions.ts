@@ -33,7 +33,7 @@ export async function getCharactersByFilterAction(
     federalStateId: federalState.id,
   });
 
-  return enrichCharactersWithImage({ characters });
+  return enrichCharactersWithImage({ characters: characters.filter((c) => c.name.trim() !== '') });
 }
 
 export async function getLearningScenariosByFilterAction(
@@ -52,10 +52,9 @@ export async function getLearningScenariosByFilterAction(
     federalStateId: federalState.id,
   });
 
-  const enrichedLearningScenarios = await enrichLearningScenarioWithPictureUrl({
-    learningScenarios,
+  return enrichLearningScenarioWithPictureUrl({
+    learningScenarios: learningScenarios.filter((s) => s.name.trim() !== ''),
   });
-  return enrichedLearningScenarios;
 }
 
 export async function getAssistantsByFilterAction(
@@ -74,8 +73,7 @@ export async function getAssistantsByFilterAction(
     federalStateId: federalState.id,
   });
 
-  const enrichedAssistants = await enrichAssistantsWithImage({
-    assistants: assistants.filter((a) => a.id !== HELP_MODE_ASSISTANT_ID),
+  return enrichAssistantsWithImage({
+    assistants: assistants.filter((a) => a.name.trim() !== '' && a.id !== HELP_MODE_ASSISTANT_ID),
   });
-  return enrichedAssistants;
 }

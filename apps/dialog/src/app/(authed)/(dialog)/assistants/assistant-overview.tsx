@@ -19,20 +19,12 @@ type AssistantOverviewProps = {
 export default function AssistantOverview({ currentUserId }: AssistantOverviewProps) {
   const router = useRouter();
   const t = useTranslations('custom-gpt');
-  const emptyNamePlaceholder = t('empty-name-placeholder');
   const [visibleAssistants, setVisibleAssistants] = useState<AssistantWithImage[]>([]);
 
-  const fetchAssistants = useCallback(
-    async (filter: OverviewFilter) => {
-      const entities = await getAssistantsByFilterAction(filter);
-      const entitiesWithPlaceholder = entities.map((entity) => {
-        const trimmedName = entity.name?.trim() ?? '';
-        return { ...entity, name: trimmedName || emptyNamePlaceholder };
-      });
-      setVisibleAssistants(entitiesWithPlaceholder);
-    },
-    [emptyNamePlaceholder],
-  );
+  const fetchAssistants = useCallback(async (filter: OverviewFilter) => {
+    const entities = await getAssistantsByFilterAction(filter);
+    setVisibleAssistants(entities);
+  }, []);
 
   const [activeFilter, setActiveFilter] = useOverviewFilter('gpts', fetchAssistants);
 

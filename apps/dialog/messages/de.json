@@ -139,7 +139,6 @@
   "custom-gpt": {
     "title": "Assistenten",
     "description": "Die Assistenten erleichtern den Lehrkräften den schulischen Alltag. Sie können je nach Situation individuell konfiguriert werden. Bereits fertige Assistenten stehen als Vorlagen sofort nutzbar zur Verfügung. Diese können in den eigenen Bereich kopiert und dann wunschgemäß angepasst werden.",
-    "empty-name-placeholder": "unbenannter Assistent",
     "info-dialog": {
       "q1": "Was ist ein Assistent?",
       "a1": "Ein Assistent ist ein Chat, der auf ein bestimmtes Thema spezialisiert ist. Es gibt bereits vordefinierte Assistenten oder es können eigene Assistenten erstellt werden.",
@@ -245,7 +244,6 @@
     "configuration-heading": "Details",
     "name-label": "Name des Dialogpartners",
     "name-placeholder": "Name des Dialogpartners",
-    "empty-name-placeholder": "unbenannter Dialogpartner",
     "name-max-length": "Der Name darf maximal {maxLength} Zeichen lang sein.",
     "info-dialog": {
       "q1": "Was ist ein Dialogpartner?",
@@ -353,7 +351,6 @@
     "back-button-aria-label": "Zurück zu den Lernszenarien",
     "name-label": "Name des Lernszenarios",
     "name-placeholder": "Name des Lernszenarios",
-    "empty-name-placeholder": "unbenanntes Lernszenario",
     "name-required": "Der Name darf nicht leer sein.",
     "name-max-length": "Der Name darf maximal {maxLength} Zeichen lang sein.",
     "description-label": "Kurzbeschreibung",
@@ -594,7 +591,6 @@
     "back-button-aria-label": "Zurück zu den Assistenten",
     "name-label": "Name des Assistenten",
     "name-placeholder": "Name des Assistenten",
-    "empty-name-placeholder": "unbenannter Assistent",
     "name-required": "Der Name darf nicht leer sein.",
     "name-max-length": "Der Name darf maximal {maxLength} Zeichen lang sein.",
     "description-label": "Kurzbeschreibung",

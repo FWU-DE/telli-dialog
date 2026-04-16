@@ -19,22 +19,14 @@ type LearningScenarioOverviewProps = {
 export default function LearningScenarioOverview({ currentUserId }: LearningScenarioOverviewProps) {
   const router = useRouter();
   const t = useTranslations('learning-scenarios');
-  const emptyNamePlaceholder = t('empty-name-placeholder');
   const [visibleLearningScenarios, setVisibleLearningScenarios] = useState<
     LearningScenarioWithImage[]
   >([]);
 
-  const fetchLearningScenarios = useCallback(
-    async (filter: OverviewFilter) => {
-      const entities = await getLearningScenariosByFilterAction(filter);
-      const entitiesWithPlaceholder = entities.map((entity) => {
-        const trimmedName = entity.name?.trim() ?? '';
-        return { ...entity, name: trimmedName || emptyNamePlaceholder };
-      });
-      setVisibleLearningScenarios(entitiesWithPlaceholder);
-    },
-    [emptyNamePlaceholder],
-  );
+  const fetchLearningScenarios = useCallback(async (filter: OverviewFilter) => {
+    const entities = await getLearningScenariosByFilterAction(filter);
+    setVisibleLearningScenarios(entities);
+  }, []);
 
   const [activeFilter, setActiveFilter] = useOverviewFilter('scenarios', fetchLearningScenarios);
 
