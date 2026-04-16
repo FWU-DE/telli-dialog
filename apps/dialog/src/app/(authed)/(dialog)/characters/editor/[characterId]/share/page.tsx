@@ -13,6 +13,7 @@ import { getSharedCharacter } from '@shared/characters/character-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { notFound } from 'next/navigation';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
+import CollapseSidebar from '@/components/common/collapse-sidebar';
 
 export default async function Page(props: PageProps<'/characters/editor/[characterId]/share'>) {
   const params = await props.params;
@@ -33,6 +34,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
 
   return (
     <div className="w-full px-4 sm:px-8 overflow-auto flex flex-col h-full">
+      <CollapseSidebar />
       <Link
         href={`/characters/editor/${character.id}`}
         className="flex gap-2 items-center text-primary w-full"
@@ -40,8 +42,8 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
         <SidebarCloseIcon className="w-4 h-4" />
         <span className="text-base font-normal hover:underline">{t('back-button')}</span>
       </Link>
-      <div className="mx-auto mt-10 sm:mt-16 flex flex-col justify-center items-center text-center w-full">
-        <h1 className="text-4xl sm:text-7xl font-medium mb-10 sm:mb-16">{t('join')}</h1>
+      <div className="mx-auto mt-2 flex flex-col justify-center items-center text-center w-full">
+        <h1 className="text-4xl sm:text-5xl font-medium mb-10">{t('join')}</h1>
         <CountDownTimer
           leftTime={Math.max(leftTime, 0)}
           totalTime={character.maxUsageTimeLimit ?? 0}
