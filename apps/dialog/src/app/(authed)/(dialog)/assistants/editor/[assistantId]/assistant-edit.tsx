@@ -80,7 +80,7 @@ function createAssistantFieldValidationConfig(t: AssistantTranslator) {
 
 function createAssistantFormValuesSchema(t: AssistantTranslator) {
   return z.object({
-    name: z.string().min(1, t('name-required')).max(SMALL_TEXT_INPUT_FIELDS_LIMIT),
+    name: z.string().trim().min(1, t('name-required')).max(SMALL_TEXT_INPUT_FIELDS_LIMIT),
     description: z.string(),
     instructions: z.string(),
     isSchoolShared: z.boolean(),
@@ -141,6 +141,7 @@ export function AssistantEdit({
   } = useForm<AssistantFormValues>({
     resolver: zodResolver(assistantFormValuesSchema),
     defaultValues: initialValues,
+    mode: 'onBlur',
   });
 
   const { isSaving, hasSaveError, flushAutoSave, handleAutoSave } =
@@ -149,14 +150,14 @@ export function AssistantEdit({
       isDirty,
       getValues,
       reset: (values) => {
-        reset(values);
+        reset({ ...values, name: values.name.trim() });
       },
       validate: trigger,
       saveValues: async (data) => {
         // accessLevel is handled separately in handleSharingChange
         const updateResult = await updateAssistantAction({
           assistantId: assistant.id,
-          name: data.name,
+          name: data.name.trim(),
           description: data.description,
           instructions: data.instructions,
           hasLinkAccess: data.hasLinkAccess,

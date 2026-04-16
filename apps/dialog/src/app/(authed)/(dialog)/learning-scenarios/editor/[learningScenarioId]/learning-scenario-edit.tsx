@@ -89,7 +89,7 @@ function createLearningScenarioFieldValidationConfig(t: LearningScenarioTranslat
 
 function createLearningScenarioFormValuesSchema(t: LearningScenarioTranslator) {
   return z.object({
-    name: z.string().min(1, t('name-required')),
+    name: z.string().trim().min(1, t('name-required')),
     description: z.string(),
     additionalInstructions: z.string(),
     studentExercise: z.string(),
@@ -150,6 +150,7 @@ export function LearningScenarioEdit({
   } = useForm<LearningScenarioFormValues>({
     resolver: zodResolver(learningScenarioFormValuesSchema),
     defaultValues: initialValues,
+    mode: 'onBlur',
   });
 
   const { isSaving, hasSaveError, flushAutoSave, handleAutoSave } =
@@ -158,7 +159,7 @@ export function LearningScenarioEdit({
       isDirty,
       getValues,
       reset: (values) => {
-        reset(values);
+        reset({ ...values, name: values.name.trim() });
       },
       validate: trigger,
       saveValues: async (data) => {
@@ -167,6 +168,7 @@ export function LearningScenarioEdit({
           data: {
             ...learningScenario,
             ...data,
+            name: data.name.trim(),
             description: data.description ?? '',
             studentExercise: data.studentExercise ?? '',
             attachedLinks: attachedLinksRef.current,

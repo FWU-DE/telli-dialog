@@ -33,7 +33,7 @@ export async function getCharactersByFilterAction(
     federalStateId: federalState.id,
   });
 
-  return enrichCharactersWithImage({ characters: characters.filter((c) => c.name !== '') });
+  return enrichCharactersWithImage({ characters: characters.filter((c) => c.name.trim() !== '') });
 }
 
 export async function getLearningScenariosByFilterAction(
@@ -53,7 +53,7 @@ export async function getLearningScenariosByFilterAction(
   });
 
   return enrichLearningScenarioWithPictureUrl({
-    learningScenarios: learningScenarios.filter((s) => s.name !== ''),
+    learningScenarios: learningScenarios.filter((s) => s.name.trim() !== ''),
   });
 }
 
@@ -74,6 +74,6 @@ export async function getAssistantsByFilterAction(
   });
 
   return enrichAssistantsWithImage({
-    assistants: assistants.filter((a) => a.name !== '' && a.id !== HELP_MODE_ASSISTANT_ID),
+    assistants: assistants.filter((a) => a.name.trim() !== '' && a.id !== HELP_MODE_ASSISTANT_ID),
   });
 }
