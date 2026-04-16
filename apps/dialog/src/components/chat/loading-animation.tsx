@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import loadingGif from '@/assets/loading.gif';
+import loadingGif from '@/assets/loading-transparent.gif';
 
 export default function LoadingAnimation() {
   return (

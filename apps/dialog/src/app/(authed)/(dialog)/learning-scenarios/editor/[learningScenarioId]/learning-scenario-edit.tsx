@@ -302,6 +302,18 @@ export function LearningScenarioEdit({
     await flushAutoSave();
   };
 
+  const actionButtons = (
+    <CustomChatActions>
+      <CustomChatActionDuplicate onClick={handleDuplicateLearningScenario} />
+      <CustomChatActionDelete
+        onClick={handleDeleteLearningScenario}
+        modalTitle={t('delete-modal-title')}
+        modalDescription={t('delete-modal-description')}
+      />
+      <CustomChatActionSave onClick={handleAutoSave} />
+    </CustomChatActions>
+  );
+
   return (
     <CustomChatLayoutContainer>
       <BackButton
@@ -316,15 +328,7 @@ export function LearningScenarioEdit({
       />
       <CustomChatTitle title={name} />
       <div className="flex flex-row justify-between">
-        <CustomChatActions>
-          <CustomChatActionDuplicate onClick={handleDuplicateLearningScenario} />
-          <CustomChatActionDelete
-            onClick={handleDeleteLearningScenario}
-            modalTitle={t('delete-modal-title')}
-            modalDescription={t('delete-modal-description')}
-          />
-          <CustomChatActionSave onClick={handleAutoSave} />
-        </CustomChatActions>
+        {actionButtons}
         <CustomChatFormState
           isDirty={isDirty}
           isSubmitting={isSaving}
@@ -457,15 +461,7 @@ export function LearningScenarioEdit({
         </form>
       </div>
       <div className="flex flex-row justify-between">
-        <CustomChatActions>
-          <CustomChatActionDuplicate onClick={handleDuplicateLearningScenario} />
-          <CustomChatActionDelete
-            onClick={handleDeleteLearningScenario}
-            modalTitle={t('delete-modal-title')}
-            modalDescription={t('delete-modal-description')}
-          />
-          <CustomChatActionSave onClick={handleAutoSave} />
-        </CustomChatActions>
+        {actionButtons}
         <CustomChatFormState
           isDirty={isDirty}
           isSubmitting={isSaving}

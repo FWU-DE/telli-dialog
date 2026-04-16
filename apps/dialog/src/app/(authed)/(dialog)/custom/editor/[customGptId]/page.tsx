@@ -1,7 +1,4 @@
-import ProfileMenu from '@/components/navigation/profile-menu';
 import { permanentRedirect } from 'next/navigation';
-import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import HeaderPortal from '../../../header-portal';
 import AssistantForm from './custom-gpt-form';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { AssistantSelectModel } from '@shared/db/schema';
@@ -12,6 +9,8 @@ import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { WebsearchSource } from '@shared/db/types';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
+import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,15 +54,12 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
     );
 
   return (
-    <div className="min-w-full p-6 overflow-auto">
-      <HeaderPortal>
-        <ToggleSidebarButton
-          isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
-        />
-        <div className="grow"></div>
-        <ProfileMenu userAndContext={userAndContext} />
-      </HeaderPortal>
-      <div className="max-w-3xl mx-auto mt-4">
+    <DefaultPageLayout>
+      <CustomChatHeader
+        userAndContext={userAndContext}
+        isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+      />
+      <div className="mx-auto mt-4">
         <AssistantForm
           {...(removeNullishValues(assistant) as AssistantSelectModel)}
           maybeSignedPictureUrl={pictureUrl}
@@ -74,6 +70,6 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
           existingFiles={fileMappings}
         />
       </div>
-    </div>
+    </DefaultPageLayout>
   );
 }

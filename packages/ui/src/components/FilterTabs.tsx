@@ -28,7 +28,7 @@ export function FilterTabs<T extends string>({ tabs, activeTab, onTabChange }: F
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             activeTab === tab.value
               ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/85'
-              : 'bg-background text-foreground border-border hover:bg-primary/15',
+              : 'bg-background text-primary border-primary hover:bg-primary/15',
           )}
         >
           {tab.label}

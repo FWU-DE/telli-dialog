@@ -11,10 +11,10 @@ import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { WebsearchSource } from '@shared/db/types';
-import { ResponsiveLayoutWrapper } from '../../../_components/responsive-layout-wrapper';
 import { CharacterEdit } from './character-edit';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 import { redirect } from 'next/navigation';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +54,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
     }
 
     return (
-      <ResponsiveLayoutWrapper>
+      <DefaultPageLayout>
         <CustomChatHeader
           userAndContext={userAndContext}
           isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
@@ -65,7 +65,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
           initialLinks={initialLinks}
           avatarPictureUrl={maybeSignedPictureUrl}
         />
-      </ResponsiveLayoutWrapper>
+      </DefaultPageLayout>
     );
   }
 
@@ -78,7 +78,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
         <div className="grow"></div>
         <ProfileMenu userAndContext={userAndContext} />
       </HeaderPortal>
-      <div className="max-w-3xl mx-auto mt-4">
+      <div className="mx-auto mt-4">
         <CharacterForm
           {...(removeNullishValues(character) as CharacterWithShareDataModel)}
           pictureId={character.pictureId}

@@ -18,6 +18,7 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { z } from 'zod';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import type { ChatMessage as Message } from '@/types/chat';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
 const searchParamsSchema = z.object({ model: z.string().optional() });
@@ -81,14 +82,16 @@ export default async function Page(
           userAndContext={userAndContext}
         />
       </HeaderPortal>
-      <Chat
-        id={chat.id}
-        initialMessages={chatMessages}
-        character={character}
-        enableFileUpload={false}
-        imageSource={avatarPictureUrl}
-        logoElement={logoElement}
-      />
+      <DefaultPageLayout>
+        <Chat
+          id={chat.id}
+          initialMessages={chatMessages}
+          character={character}
+          enableFileUpload={false}
+          imageSource={avatarPictureUrl}
+          logoElement={logoElement}
+        />
+      </DefaultPageLayout>
     </LlmModelsProvider>
   );
 }

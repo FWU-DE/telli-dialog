@@ -138,7 +138,7 @@ export default function ImageGenerationChat({
 
   return (
     <div className="flex flex-col h-full w-full">
-      <div className="flex-1 flex flex-col justify-start p-6 w-full max-w-3xl mx-auto">
+      <div className="flex-1 flex flex-col justify-start p-6 w-full mx-auto">
         <ImageGenerationInputBox
           isLoading={isGenerating}
           handleInputChange={handleInputChange}
