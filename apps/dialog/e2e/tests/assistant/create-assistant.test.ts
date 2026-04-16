@@ -22,6 +22,7 @@ test('teacher can login, create an assistant and start a chat', async ({ page })
   await page.getByTestId('assistant-name-input').click();
   await page.getByTestId('assistant-name-input').fill(assistantName);
   await page.getByTestId('assistant-name-input').press('Tab');
+  await waitForAutosave(page);
   await page
     .getByTestId('assistant-description-input')
     .fill('Hilft bei der Planung und Budget Rechnung beim Bau eines Einfamilienhauses');
@@ -97,17 +98,24 @@ test('data is autosaved on blur', async ({ page }) => {
   await page.getByTestId('assistant-name-input').click();
   await page.getByTestId('assistant-name-input').fill('Autosave Test GPT');
   await page.getByTestId('assistant-name-input').press('Tab');
+  await waitForAutosave(page);
 
   await page
     .getByTestId('assistant-description-input')
     .fill('Test description for autosave validation');
+  await page.getByTestId('assistant-description-input').press('Tab');
+  await waitForAutosave(page);
 
   await page
     .getByTestId('assistant-instructions-input')
     .fill('Test functions for autosave validation');
+  await page.getByTestId('assistant-instructions-input').press('Tab');
+  await waitForAutosave(page);
 
   // Add a prompt suggestion
   await page.getByTestId('prompt-suggestion-1-input').fill('Test prompt suggestion');
+  await page.getByTestId('prompt-suggestion-1-input').press('Tab');
+  await waitForAutosave(page);
 
   // Save the form
   await page.getByTestId('custom-chat-save-button').first().click();
@@ -124,35 +132,37 @@ test('data is autosaved on blur', async ({ page }) => {
   await page.waitForURL('/assistants/editor/**');
 
   // change title to new value
+  await page.getByTestId('assistant-name-input').fill('');
   await page.getByTestId('assistant-name-input').fill('New Title');
   await page.getByTestId('assistant-name-input').press('Tab');
+  await waitForAutosave(page);
   await page.reload();
   await expect(page.getByTestId('assistant-name-input')).toHaveValue('New Title');
 
   // change description to new value
   const descriptionInput = page.getByTestId('assistant-description-input');
-  await descriptionInput.click();
-  await descriptionInput.press('ControlOrMeta+A');
+  await descriptionInput.fill('');
   await descriptionInput.fill('New Description');
   await descriptionInput.press('Tab');
+  await waitForAutosave(page);
   await page.reload();
   await expect(page.getByTestId('assistant-description-input')).toHaveValue('New Description');
 
   // change instructions to new value
   const instructionsInput = page.getByTestId('assistant-instructions-input');
-  await instructionsInput.click();
-  await instructionsInput.press('ControlOrMeta+A');
+  await instructionsInput.fill('');
   await instructionsInput.fill('New Instructions');
   await instructionsInput.press('Tab');
+  await waitForAutosave(page);
   await page.reload();
   await expect(page.getByTestId('assistant-instructions-input')).toHaveValue('New Instructions');
 
   // change prompt suggestion to new value
   const promptSuggestionInput = page.getByTestId('prompt-suggestion-1-input');
-  await promptSuggestionInput.click();
-  await promptSuggestionInput.press('ControlOrMeta+A');
+  await promptSuggestionInput.fill('');
   await promptSuggestionInput.fill('New Prompt Suggestion');
   await promptSuggestionInput.press('Tab');
+  await waitForAutosave(page);
   await page.reload();
   await expect(page.getByTestId('prompt-suggestion-1-input')).toHaveValue('New Prompt Suggestion');
 });

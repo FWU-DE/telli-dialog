@@ -167,6 +167,7 @@ test('data is autosaved on blur', async ({ page }) => {
 
   // Edit and verify autosave for each field
   // Title
+  await page.getByRole('textbox', { name: 'Name des Lernszenarios' }).fill('');
   await page.getByRole('textbox', { name: 'Name des Lernszenarios' }).fill('New Title');
   await page.getByRole('textbox', { name: 'Name des Lernszenarios' }).press('Tab');
   await waitForAutosave(page);
@@ -176,6 +177,7 @@ test('data is autosaved on blur', async ({ page }) => {
   );
 
   // Description
+  await page.getByRole('textbox', { name: 'Kurzbeschreibung' }).fill('');
   await page.getByRole('textbox', { name: 'Kurzbeschreibung' }).fill('New Description');
   await page.getByRole('textbox', { name: 'Kurzbeschreibung' }).press('Tab');
   await waitForAutosave(page);
@@ -185,6 +187,7 @@ test('data is autosaved on blur', async ({ page }) => {
   );
 
   // Instructions
+  await page.getByRole('textbox', { name: 'Instruktionen' }).fill('');
   await page.getByRole('textbox', { name: 'Instruktionen' }).fill('New Instructions');
   await page.getByRole('textbox', { name: 'Instruktionen' }).press('Tab');
   await waitForAutosave(page);
@@ -194,6 +197,7 @@ test('data is autosaved on blur', async ({ page }) => {
   );
 
   // Student Exercise
+  await page.getByRole('textbox', { name: 'Arbeitsauftrag' }).fill('');
   await page.getByRole('textbox', { name: 'Arbeitsauftrag' }).fill('New Exercise');
   await page.getByRole('textbox', { name: 'Arbeitsauftrag' }).press('Tab');
   await waitForAutosave(page);

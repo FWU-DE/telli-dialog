@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
 import { waitForAutosave } from '../../utils/utils';
 import { nanoid } from 'nanoid';
+import { configureLearningScenario } from '../../utils/learning-scenario';
 
 test.use({ storageState: AUTH_FILES.teacher });
 
@@ -22,12 +23,14 @@ test('create learning scenario from template', async ({ page }) => {
   await page.waitForURL('/learning-scenarios/editor/**');
 
   const name = 'Kopiertes Lernszenario ' + nanoid(8);
-  await page.getByRole('textbox', { name: 'Name des Lernszenarios' }).fill(name);
 
   // Fill in other required fields (the new form auto-saves)
-  await page.getByRole('textbox', { name: 'Kurzbeschreibung' }).fill('Beschreibung');
-  await page.getByRole('textbox', { name: 'Instruktionen' }).fill('Instruktionen');
-  await page.getByRole('textbox', { name: 'Arbeitsauftrag' }).fill('Arbeitsauftrag');
+  await configureLearningScenario(page, {
+    name,
+    description: 'Beschreibung',
+    additionalInstructions: 'Instruktionen',
+    studentExercise: 'Arbeitsauftrag',
+  });
 
   // Wait for autosave to complete
   await waitForAutosave(page);
