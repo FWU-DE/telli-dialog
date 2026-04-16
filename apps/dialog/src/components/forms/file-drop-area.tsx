@@ -132,7 +132,6 @@ export function FileDrop({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        tabIndex={0}
         aria-label="File Drop Area"
       >
         <input
