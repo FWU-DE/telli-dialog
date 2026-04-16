@@ -14,10 +14,13 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { notFound } from 'next/navigation';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import CollapseSidebar from '@/components/common/collapse-sidebar';
+import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
+import { buildLegacyUserAndContext } from '@/auth/types';
 
 export default async function Page(props: PageProps<'/characters/editor/[characterId]/share'>) {
   const params = await props.params;
-  const { user } = await requireAuth();
+  const { user, school, federalState } = await requireAuth();
+  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
   const character = await getSharedCharacter({
     userId: user.id,
@@ -35,6 +38,10 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
   return (
     <div className="w-full px-4 sm:px-8 overflow-auto flex flex-col h-full">
       <CollapseSidebar />
+      <CustomChatHeader
+        isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+        userAndContext={userAndContext}
+      />
       <Link
         href={`/characters/editor/${character.id}`}
         className="flex gap-2 items-center text-primary w-full"
