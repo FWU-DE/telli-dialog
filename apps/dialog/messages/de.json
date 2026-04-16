@@ -84,6 +84,7 @@
     "chats-loading": "Dialoge werden geladen...",
     "chats-error": "Etwas ist schiefgelaufen...",
     "chats-reload": "Dialoge neu laden",
+    "untitled-conversation": "Neuer Chat",
     "search-clear": "Suche löschen",
     "help-mode": "Hilfe"
   },

@@ -61,11 +61,7 @@ export function AppSidebar({
       <div className="flex h-full min-h-0 flex-col p-2">
         <SidebarHeader>
           <div className="p-2 flex justify-end gap-2">
-            <Link
-              href="/"
-              aria-label={t('aria.home-link')}
-              className="mr-auto rounded outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
+            <Link href="/" aria-hidden="true" tabIndex={-1} className="mr-auto rounded">
               <TelliLogo className="h-7 text-primary" />
             </Link>
             <IconButton
