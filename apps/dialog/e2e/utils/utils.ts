@@ -14,6 +14,5 @@ export async function waitForChatHistory(page: Page) {
 }
 
 export async function waitForAutosave(page: Page) {
-  await page.getByTestId('custom-chat-save-button').first().click();
   await expect(page.getByTestId('autosave-saved').first()).toBeVisible({ timeout: 5000 });
 }

@@ -40,5 +40,6 @@ export async function configureCharacter(
     .getByTestId('character-instructions-input')
     .fill(data?.instructions ?? 'John Cena soll über seine Karriere und Erfolge sprechen.');
 
+  await page.getByTestId('custom-chat-save-button').first().click();
   await waitForAutosave(page);
 }
