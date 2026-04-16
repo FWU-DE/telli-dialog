@@ -35,7 +35,7 @@ export default async function Page(
 
   const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
 
-  const federalState = await dbGetFederalStateByUserId({ userId: learningScenario.userId });
+  const federalState = await dbGetFederalStateByUserId({ userId: learningScenario.startedBy });
   const designConfiguration = federalState?.designConfiguration ?? DEFAULT_DESIGN_CONFIGURATION;
 
   return (

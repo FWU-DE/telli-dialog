@@ -145,11 +145,11 @@ export function ChatInputBox({
             ))}
           </div>
         )}
-        <div className="flex items-center">
+        <div className="flex items-center bg-background">
           <AutoResizeTextarea
             autoFocus
             placeholder={tCommon('send-message-placeholder')}
-            className="w-full text-base focus:outline-hidden bg-transparent max-h-40 sm:max-h-60 overflow-y-auto placeholder-black p-2"
+            className="w-full text-base focus:outline-hidden max-h-40 sm:max-h-60 overflow-y-auto placeholder-black p-2"
             onChange={handleInputChange}
             value={input}
             onKeyDown={handleSubmitOnEnter}

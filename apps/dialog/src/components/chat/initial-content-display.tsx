@@ -16,7 +16,7 @@ export function InitialChatContentDisplay({
   setDialogStarted?: (dialogStarted: boolean) => void;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center h-full max-w-3xl mx-auto p-4 gap-1">
+    <div className="flex flex-col items-center justify-center h-full mx-auto p-4 gap-1">
       {imageSource && <AvatarPicture src={imageSource} alt={title} variant="normal" />}
       <h1 className="text-2xl font-medium mt-8 text-center">{title}</h1>
       {description !== undefined && description.trim() !== '' && (

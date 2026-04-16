@@ -97,7 +97,11 @@ export function AppSidebar({
                   />
                 )}
                 {user.userRole === 'teacher' && federalState.featureToggles?.isCustomGptEnabled && (
-                  <AppMenuItem href="/custom" icon={<LegoSmileyIcon />} text={t('assistants')} />
+                  <AppMenuItem
+                    href="/assistants"
+                    icon={<LegoSmileyIcon />}
+                    text={t('assistants')}
+                  />
                 )}
                 <SidebarSeparator className="my-6" />
                 {user.userRole === 'teacher' &&
@@ -114,7 +118,7 @@ export function AppSidebar({
                 <SidebarSeparator className="my-6" />
                 {user.userRole === 'teacher' && federalState.featureToggles?.isCustomGptEnabled && (
                   <AppMenuItem
-                    href={`/custom/d/${HELP_MODE_ASSISTANT_ID}`}
+                    href={`/assistants/d/${HELP_MODE_ASSISTANT_ID}`}
                     icon={<QuestionIcon />}
                     text={t('help-chat')}
                   />

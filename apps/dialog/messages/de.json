@@ -43,11 +43,11 @@
   "sharing": {
     "label": "Freigabe",
     "school": "Schulintern",
-    "school-tooltip": "Wird schulintern sicht- und kopierbar. \nZu beachten: Eine Lehrkraft kann mehreren Schulen zugehörig sein.",
+    "school-tooltip": "Wird schulintern sicht- und kopierbar. \nZu beachten: Eine Lehrkraft kann mehreren Schulen zugehörig sein. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
     "community": "Community",
-    "community-tooltip": "Wird als Community-Vorlage sicht- und kopierbar.\n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich “Hintergrundwissen” weitergegeben werden dürfen.",
+    "community-tooltip": "Wird als Community-Vorlage sicht- und kopierbar.\n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
     "link": "Via Link",
-    "link-tooltip": "Über einen Link sicht- und kopierbar für Personen mit telli-Zugang.",
+    "link-tooltip": "Über einen Link sicht- und kopierbar für Personen mit telli-Zugang. \n\nBitte darauf achten, dass die hinterlegten Dateien im Bereich „Hintergrundwissen” weitergegeben werden dürfen.",
     "copy-link": "Link kopieren",
     "link-copied": "Link in die Zwischenablage kopiert",
     "link-copied-error": "Link konnte nicht kopiert werden"
@@ -106,11 +106,12 @@
       "upload-file-button-disabled": "Es können maximal {max_files} Dateien hochgeladen werden",
       "file-limit-reached": "Es können maximal {max_files} Dateien hochgeladen werden. {files_exceeded} Dateien wurden nicht hochgeladen.",
       "image-limit-reached": "Es können maximal {max_images} Bilder hochgeladen werden. {images_exceeded} Bilder wurden nicht hochgeladen.",
-      "drop-area": "Dateien per Drag & Drop hier ablegen <b> (pdf, txt, docx) </b>",
+      "drop-area": "Dateien per Drag & Drop hier ablegen <b> ({supported_formats}) </b>",
       "choice-word": "oder",
       "uploading": "Wird hochgeladen..."
     },
     "delete": {
+      "button": "Datei löschen",
       "modal-description": "Möchten Sie diese Datei wirklich dauerhaft löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
       "modal-title": "Datei löschen",
       "confirm": "Datei löschen"
@@ -142,7 +143,7 @@
       "q1": "Was ist ein Assistent?",
       "a1": "Ein Assistent ist ein Chat, der auf ein bestimmtes Thema spezialisiert ist. Es gibt bereits vordefinierte Assistenten oder es können eigene Assistenten erstellt werden.",
       "q2": "Was unterscheidet einen Assistenten vom normalen Chat?",
-      "a2": "In einem vorkonfigurierten Assistenten wurden bereits Informationen, Dateien und Webquellen hinterlegt. Diese müssen im normalen Chat erst eingegeben/hochgeladen werden.",
+      "a2": "In einem vorkonfigurierten Assistenten wurden bereits Informationen, Dateien und Webquellen hinterlegt. Diese müssten im normalen Chat erst eingegeben/hochgeladen werden.",
       "q3": "An welche Zielgruppe richten sich die Assistenten?",
       "a3": "Die Nutzung der Assistenten ist für Lehrkräfte gedacht und soll den schulischen Alltag erleichtern."
     },
@@ -206,10 +207,47 @@
   "characters": {
     "character": "Dialogpartner",
     "description": "Mit individuell konfigurierten Dialogpartnern wird das Lernen lebendig und inspirierend. Fiktive Gesprächspartner helfen dabei, Themen zu vertiefen, die Lernenden emotional anzusprechen und sie neugierig zu machen. Die zeitlich begrenzten Chats werden einfach einzeln oder gruppenweise mit den Lernenden geteilt.",
+    "back-button": "Dialogpartner",
+    "back-button-aria-label": "Zurück zu den Dialogpartnern",
+    "name-required": "Der Name darf nicht leer sein.",
+    "description-label": "Kurzbeschreibung",
+    "description-placeholder": "Neuer Schüler in einer DaZ-Klasse",
+    "description-max-length": "Die Beschreibung darf maximal {maxLength} Zeichen lang sein.",
+    "instructions-label": "Instruktionen",
+    "instructions-placeholder": {
+      "p1": {
+        "heading": "SIMULIERTE PERSON",
+        "content": "Du bist Emre, ein neuer Mitschüler in einer Klasse für Deutsch als Zweitsprache."
+      },
+      "p2": {
+        "heading": "ZIELGRUPPE",
+        "content": "Du unterhältst dich mit Lernenden einer Klasse für Deutsch als Zweitsprache (5. Jahrgangsstufe, Mittelschule). Euer Deutsch-Sprachniveau ist A1 GER."
+      },
+      "p3": {
+        "heading": "KONTEXT",
+        "content": "Ihr lernt euch gegenseitig kennen (Alter, Hobbys, Familie). Du fragst auch nach Informationen über die neue Schule, z.B. Fächer, Stundenplan, Räume, Mittagessen, Busfahrplan."
+      },
+      "p4": {
+        "heading": "VERHALTEN",
+        "content": "Sei authentisch. Antworte ausschließlich auf dem Niveau A1. Bilde nur einfache Sätze. Formuliere in Alltagssprache. Bleibe thematisch in der Lebenswelt eines 10-Jährigen."
+      }
+    },
+    "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
+    "initial-message-label": "Einstiegsfrage",
+    "initial-message-placeholder": "Hallo! Ich bin Emre. Alles klar bei dir?",
+    "initial-message-max-length": "Die Einstiegsfrage darf maximal {maxLength} Zeichen lang sein.",
+    "initial-message-tooltip": "Mit welcher Einstiegsfrage soll der Dialogpartner die Lernenden begrüßen?",
+    "sharing-info": "Dieser Dialogpartner ist für andere freigegeben.",
+    "sharing-settings": "Freigabe-Einstellungen",
+    "delete-modal-title": "Dialogpartner löschen",
+    "delete-modal-description": "Soll der Dialogpartner wirklich gelöscht werden?",
+    "configuration-heading": "Details",
+    "name-label": "Name des Dialogpartners",
+    "name-placeholder": "Name des Dialogpartners",
+    "name-max-length": "Der Name darf maximal {maxLength} Zeichen lang sein.",
     "info-dialog": {
       "q1": "Was ist ein Dialogpartner?",
-      "a1": "Ein Dialogpartner ist ein fiktiver Gesprächspartner mit dem die Schüler/innen chatten können. Für die Schülerinnen entsteht dabei das Gefühl tatsächlich mit der fiktiven Person zu chatten. Dies fördert ihre Motivation und Kreativität in Bezug auf die fiktive Person und das Thema.",
-      "a1-2": "Es gibt bereits vordefinierte Dialogpartner oder es können eigene Dialogpartner erstellt werden.",
+      "a1": "Ein Dialogpartner ist ein fiktiver Gesprächspartner mit dem die Schüler/innen chatten können. Für die Schülerinnen entsteht dabei das Gefühl tatsächlich mit der fiktiven Person zu chatten. Dies fördert ihre Motivation und Kreativität in Bezug auf die fiktive Person und das Thema.\n\nEs gibt bereits vordefinierte Dialogpartner oder es können eigene Dialogpartner erstellt werden.",
       "q2": "An welche Zielgruppe richten sich die Dialogpartner?",
       "a2": "Schüler/innen"
     },
@@ -217,6 +255,7 @@
     "visibility-global": "Vorlagen",
     "visibility-school": "Schulintern",
     "visibility-private": "Für mich",
+    "duplicate-name-format-string": "Duplikat von {sourceName}",
     "shared": {
       "title": "Dialogpartner im Unterricht einsetzen",
       "description": "Wie viel des monatlichen Tokenvolumens soll durch diesen Chat maximal verbraucht und wie lange darf er aktiv benutzt werden?",
@@ -297,6 +336,7 @@
       "delete-toast-error": "Der Dialogpartner konnte nicht gelöscht werden.",
       "edit-toast-success": "Der Dialogpartner wurde erfolgreich aktualisiert.",
       "edit-toast-error": "Etwas ist beim Aktualisieren des Dialogpartners schief gelaufen.",
+      "file-link-error": "Beim Hinzufügen der Datei zum Dialogpartner ist ein Fehler aufgetreten.",
       "image-toast-success": "Das Bild wurde erfolgreich hochgeladen.",
       "empty-url": "Es wurde kein Link eingegeben.",
       "invalid-url": "Der eingegebene Link ist ungültig.",
@@ -314,26 +354,40 @@
     "name-required": "Der Name darf nicht leer sein.",
     "name-max-length": "Der Name darf maximal {maxLength} Zeichen lang sein.",
     "description-label": "Kurzbeschreibung",
-    "description-placeholder": "Beschreibung des Lernszenarios",
+    "description-placeholder": "Meinen individuellen Lernplan erstellen",
     "description-max-length": "Die Beschreibung darf maximal {maxLength} Zeichen lang sein.",
     "instructions-label": "Instruktionen",
-    "instructions-placeholder": "Instruktionen für das Lernszenario",
+    "instructions-placeholder": {
+      "p1": { "heading": "ROLLE", "content": "Du bist ein erfahrener Lerncoach." },
+      "p2": {
+        "heading": "KONTEXT",
+        "content": "Erstelle einen Lernplan für eine anstehende Prüfung, der optimal an die individuellen Bedürfnisse wie z.B. verfügbare Zeit, Wissensstand, Themen, Lernstrategien angepasst ist."
+      },
+      "p3": {
+        "heading": "VERHALTEN",
+        "content": "Stelle immer nur 1-2 Fragen. Frage nach dem Fach, den Themen und der konkret verfügbaren Zeit pro Wochentag. Schlage am Ende drei fach- bzw. themenspezifische Lernstrategien vor."
+      },
+      "p4": {
+        "heading": "FORMAT",
+        "content": "Erstelle einen Wochenplan als Tabelle mit Lernphasen, Wiederholungsphasen und Pausen."
+      }
+    },
     "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
     "student-exercise-label": "Arbeitsauftrag",
     "student-exercise-tooltip": "Hier kann ein Arbeitsauftrag für die Lernenden formuliert werden.",
-    "student-exercise-placeholder": "Arbeitsauftrag für die Lernenden",
+    "student-exercise-placeholder": "Nutze KI, um einen realistischen Lernplan für dich aufzustellen.",
     "student-exercise-max-length": "Der Arbeitsauftrag darf maximal {maxLength} Zeichen lang sein.",
     "configuration-heading": "Details",
     "sharing-info": "Dieses Lernszenario ist für andere freigegeben.",
     "sharing-settings": "Freigabe-Einstellungen",
     "delete-modal-title": "Lernszenario löschen",
     "delete-modal-description": "Soll das Lernszenario wirklich gelöscht werden?",
-    "delete-modal-confirm-button": "Löschen",
     "duplicate-name-format-string": "Duplikat von {sourceName}",
+    "author-label": "Erstellt von",
+    "author-text": "FWU",
     "info-dialog": {
       "q1": "Was ist ein Lernszenario?",
-      "a1": "Ein Lernszenario ist ein Chat, der auf ein bestimmtes Thema spezialisiert ist. Die Schüler/innen erarbeiten sich das Thema durch Verwendung des Chats selbst. Optional kann vorab ein Arbeitsauftrag definiert werden.",
-      "a1-2": "Es gibt bereits vordefinierte Lernszenarien oder es können eigene Lernszenarien erstellt werden.",
+      "a1": "Ein Lernszenario ist ein Chat, der auf ein bestimmtes Thema spezialisiert ist. Die Schüler/innen erarbeiten sich das Thema durch Verwendung des Chats selbst. Optional kann vorab ein Arbeitsauftrag definiert werden.\n\nEs gibt bereits vordefinierte Lernszenarien oder es können eigene Lernszenarien erstellt werden.",
       "q2": "An welche Zielgruppe richten sich die Lernszenarien?",
       "a2": "Schüler/innen"
     },
@@ -424,6 +478,7 @@
       "delete-toast-error": "Das Lernszenario konnte nicht gelöscht werden.",
       "edit-toast-success": "Das Lernszenario wurde erfolgreich aktualisiert.",
       "edit-toast-error": "Das Lernszenario konnte nicht aktualisiert werden.",
+      "file-link-error": "Beim Hinzufügen der Datei zum Lernszenario ist ein Fehler aufgetreten.",
       "invalid-url": "Der eingegebene Link ist ungültig.",
       "duplicate-url": "Dieser Link wurde bereits hinzugefügt.",
       "empty-url": "Es wurde kein Link eingegeben.",
@@ -493,6 +548,7 @@
       "saving-error": "Der Link auf die Webseite konnte nicht gespeichert werden.",
       "delete-error": "Der Link auf die Webseite konnte nicht gelöscht werden.",
       "aria-input": "URL eingeben",
+      "placeholder": "https://www.beispielwebseite.de/unterseite",
       "add-link": "Link hinzufügen",
       "aria-add-link": "Webseite hinzufügen",
       "aria-delete": "Webseite {link} entfernen"
@@ -502,13 +558,32 @@
       "placeholder": "Modell auswählen",
       "no-models": "Keine Modelle verfügbar"
     },
+    "share-with-learners": {
+      "title": "Mit Lernenden teilen",
+      "description": "Lege fest, <b>wie viele</b> deiner <b>telli-Points</b> durch diesen Chat verbraucht werden dürfen und <b>wie lange</b> der Chat aktiv benutzt werden kann.",
+      "max-usage": "Maximale Nutzungszeit",
+      "button-start": "Jetzt bereitstellen",
+      "button-stop": "Stoppen",
+      "share": "Teilen"
+    },
+    "toasts": {
+      "share-toast-error": "Das Teilen konnte nicht aktiviert werden.",
+      "share-toast-success": "Erfolgreich zum Teilen freigegeben!",
+      "stop-share-toast-success": "Das Teilen wurde erfolgreich beendet.",
+      "stop-share-toast-error": "Das Teilen konnte nicht beendet werden."
+    },
     "files-and-links": {
       "heading": "Hintergrundwissen",
-      "heading-tooltip": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Telli bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: pdf, txt, docx",
+      "heading-tooltip": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Telli bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: {supported_formats}",
       "files": "Dateien",
       "links": "Webseiten",
-      "links-tooltip": "Bei Webseiten wird nur die angegebene Webseite selbst als Hintergrundwissen genutzt. Unterseiten werden nicht berücksichtigt.",
+      "links-tooltip": "Wichtig: Bitte jeweils konkrete Webseiten angeben (z.B. wikipedia.de/Regenwürmer). Nur wikipedia.de ist nicht ausreichend.",
       "file-delete-error": "Fehler beim Löschen der Datei"
+    },
+    "instructions-example": {
+      "button": "Beispiel anzeigen",
+      "title": "Instruktionen: Beispielhafter Inhalt",
+      "close": "Schließen"
     }
   },
   "assistants": {
@@ -519,16 +594,34 @@
     "name-required": "Der Name darf nicht leer sein.",
     "name-max-length": "Der Name darf maximal {maxLength} Zeichen lang sein.",
     "description-label": "Kurzbeschreibung",
-    "description-placeholder": "Beschreibung des Assistenten",
+    "description-placeholder": "Assistenz zur Generierung von differenziertem Lernmaterial",
     "description-max-length": "Die Beschreibung darf maximal {maxLength} Zeichen lang sein.",
     "instructions-label": "Instruktionen",
-    "instructions-placeholder": "Instruktionen für den Assistenten",
+    "instructions-placeholder": {
+      "p1": {
+        "heading": "ROLLE",
+        "content": "Du bist Experte für die Erstellung von differenziertem Lernmaterial."
+      },
+      "p2": {
+        "heading": "KONTEXT",
+        "content": "Passe das im Hintergrundwissen hochgeladene Arbeitsmaterial an drei unterschiedliche Lernniveaus an. (leicht, mittel, schwer)"
+      },
+      "p3": {
+        "heading": "VERHALTEN",
+        "content": "Formuliere sachlich, klar und praxisnah."
+      },
+      "p4": {
+        "heading": "FORMAT",
+        "content": "Strukturiere die Antwort in Abschnitte."
+      }
+    },
     "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
     "back-button-text": "Assistenten",
     "back-button-aria": "Zurück zur Übersicht der Assistenten",
     "author-label": "Erstellt von",
     "author-text": "FWU",
     "prompt-suggestion": "Promptvorschlag",
+    "prompt-suggestion-placeholder": "Erstelle einen Assistenten für XY mit folgenden Eigenschaften: X, Y, Z.",
     "prompt-suggestions-add-button": "Promptvorschlag hinzufügen",
     "prompt-suggestions-add-button-tooltip": "Tooltip für das Hinzufügen von Promptvorschlägen",
     "prompt-suggestions-delete-button": "Promptvorschlag {index} löschen",
@@ -538,7 +631,6 @@
     "prompt-suggestions-count-max": "Es dürfen maximal {max} Promptvorschläge angegeben werden.",
     "custom-assets-files": "Dateien",
     "custom-assets-label": "Hintergrundwissen",
-    "custom-assets-content": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Der Assistent bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: pdf, txt, docx",
     "custom-assets-links": "Webseiten",
     "custom-assets-links-content": "Bei Webseiten wird nur die angegebene Webseite selbst als Hintergrundwissen genutzt. Unterseiten werden nicht berücksichtigt.",
     "sharing-info": "Dieser Assistent ist für andere freigegeben.",
@@ -546,9 +638,8 @@
     "delete-button": "Löschen",
     "delete-modal-title": "Assistent löschen",
     "delete-modal-description": "Soll der Assistent wirklich gelöscht werden?",
-    "delete-modal-confirm-button": "Löschen",
     "delete-modal-cancel-button": "Abbrechen",
-    "duplicate-name-format-string": "Duplikat von {sourceAssistantName}",
+    "duplicate-name-format-string": "Duplikat von {sourceName}",
     "toasts": {
       "create-toast-error": "Der Assistent konnte nicht erstellt werden.",
       "delete-toast-success": "Der Assistent wurde erfolgreich gelöscht.",
@@ -567,8 +658,11 @@
     "filter-tabs-label": "Filteroptionen",
     "info-tooltip-label": "Informationen anzeigen",
     "badge-mine": "von mir",
-    "sort-date": "Nach Aktualität",
-    "sort-name": "Nach Name",
+    "sort-label": "Sortierung",
+    "sort-date-desc": "Neueste zuerst",
+    "sort-date-asc": "Älteste zuerst",
+    "sort-name-asc": "Alphabetisch A-Z",
+    "sort-name-desc": "Alphabetisch Z-A",
     "close": "Schließen"
   }
 }

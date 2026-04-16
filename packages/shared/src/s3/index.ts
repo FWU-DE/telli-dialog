@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { unstable_cache as cache } from 'next/cache';
+import { cacheLife } from 'next/cache';
 import {
   CopyObjectCommand,
   CopyObjectCommandInput,
@@ -18,7 +18,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from './env';
 import { nanoid } from 'nanoid';
 import { chunkArray } from '@shared/utils/arrays';
-import { ONE_DAY, S3_DELETE_OBJECTS_MAX } from '@shared/s3/const';
+import { ONE_DAY, ONE_HOUR, S3_DELETE_OBJECTS_MAX } from '@shared/s3/const';
 import { logError } from '@shared/logging';
 
 /**
@@ -107,48 +107,49 @@ export async function copyFileInS3({ newKey, copySource }: { newKey: string; cop
  * @returns undefined if key is falsy
  * Otherwise returns a signed URL for read-only access to the object even if the object does not exist in S3.
  */
-export async function getReadOnlySignedUrl(args: {
+export async function getReadOnlySignedUrl({
+  key,
+  filename,
+  contentType,
+  attachment = true,
+  // Default expiry of 1 day
+  options: { expiresIn = ONE_DAY } = {},
+}: {
   key: string | null | undefined;
   filename?: string;
   contentType?: string;
   attachment?: boolean;
   options?: { expiresIn?: number };
 }) {
-  // Default expiry of 1 day and revalidation after 12 hours
-  const expiresIn = args.options?.expiresIn ?? ONE_DAY;
-  const revalidate = expiresIn / 2;
-  return await cache(
-    async ({
-      key,
-      filename,
-      contentType,
-      attachment = true,
-    }: Parameters<typeof getReadOnlySignedUrl>[0]) => {
-      if (!key) return undefined;
+  'use cache';
+  cacheLife({
+    // Set expire time to ensure the stale URL is not returned after expiry
+    expire: expiresIn,
+    // Refresh URL in the background before it expires
+    revalidate: Math.max(expiresIn - ONE_HOUR, expiresIn / 2),
+  });
 
-      let contentDisposition = attachment ? 'attachment;' : '';
-      if (filename !== undefined) {
-        contentDisposition = `${contentDisposition}; filename*=UTF-8''${encodeRFC5987Value(filename)}`;
-      }
-      const command = new GetObjectCommand({
-        Bucket: env.otcBucketName,
-        Key: key,
-        ResponseCacheControl: `public, max-age=${expiresIn}, immutable`,
-        ...(contentDisposition !== '' ? { ResponseContentDisposition: contentDisposition } : {}),
-        ...(contentType !== undefined ? { ResponseContentType: contentType } : {}),
-      });
+  if (!key) return undefined;
 
-      try {
-        const signedUrl = await getSignedUrl(s3Client, command, { expiresIn });
-        return signedUrl;
-      } catch (error) {
-        logError('Error generating signed GET URL for S3', error);
-        throw error;
-      }
-    },
-    [],
-    { revalidate },
-  )(args);
+  let contentDisposition = attachment ? 'attachment' : '';
+  if (filename !== undefined) {
+    const dispositionType = attachment ? 'attachment' : 'inline';
+    contentDisposition = `${dispositionType}; filename*=UTF-8''${encodeRFC5987Value(filename)}`;
+  }
+  const command = new GetObjectCommand({
+    Bucket: env.otcBucketName,
+    Key: key,
+    ResponseCacheControl: `public, max-age=${expiresIn}, immutable`,
+    ...(contentDisposition !== '' ? { ResponseContentDisposition: contentDisposition } : {}),
+    ...(contentType !== undefined ? { ResponseContentType: contentType } : {}),
+  });
+
+  try {
+    return await getSignedUrl(s3Client, command, { expiresIn });
+  } catch (error) {
+    logError('Error generating signed GET URL for S3', error);
+    throw error;
+  }
 }
 
 /**

@@ -66,7 +66,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
                 isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
               />
             )}
-            <div className="relative flex flex-col h-dvh w-dvw overflow-hidden">
+            <div className="relative flex flex-col h-dvh w-dvw overflow-hidden bg-background-2">
               {/* Todo: Refactor HeaderPortal and header components to not rely on style of this div */}
               <header
                 id={HEADER_PORTAL_ID}
@@ -77,7 +77,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
           </LlmModelsProvider>
         </SidebarProvider>
         {!productAccess.hasAccess && (
-          <ProductAccessModal modalTitle={'Nutzung nicht möglich'}>
+          <ProductAccessModal modalTitle="Nutzung nicht möglich">
             {productAccess.errorMessage}
           </ProductAccessModal>
         )}

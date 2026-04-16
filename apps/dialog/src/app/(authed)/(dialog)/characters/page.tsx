@@ -7,6 +7,8 @@ import { getCharacterByAccessLevel } from '@shared/characters/character-service'
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import CharacterOverview from './character-overview';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
+import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,15 +19,23 @@ const searchParamsSchema = z.object({
 export default async function Page(props: PageProps<'/characters'>) {
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
   const { user, school, federalState } = await requireAuth();
+  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
   const isNewUi = federalState.featureToggles.isNewUiDesignEnabled;
 
   if (isNewUi) {
-    return <CharacterOverview currentUserId={user.id} />;
+    return (
+      <DefaultPageLayout>
+        <CustomChatHeader
+          userAndContext={userAndContext}
+          isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+        />
+
+        <CharacterOverview currentUserId={user.id} />
+      </DefaultPageLayout>
+    );
   }
 
   const accessLevel = searchParams.visibility;
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
-
   const _characters = await getCharacterByAccessLevel({
     accessLevel,
     schoolId: school.id,

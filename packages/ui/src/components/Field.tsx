@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { InfoIcon } from 'lucide-react';
+import { InfoIcon } from '@phosphor-icons/react';
 
 import { cn } from '../lib/utils';
 import { Label } from './Label';
@@ -116,13 +116,19 @@ function FieldContent({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 function FieldLabel({
+  children,
   className,
+  required,
   size,
   tooltip,
-  children,
+  labelAction,
   ...props
 }: React.ComponentProps<typeof Label> &
-  VariantProps<typeof fieldLabelVariants> & { tooltip?: string }) {
+  VariantProps<typeof fieldLabelVariants> & {
+    required?: boolean;
+    tooltip?: string;
+    labelAction?: React.ReactNode;
+  }) {
   return (
     <Label
       data-slot="field-label"
@@ -131,18 +137,29 @@ function FieldLabel({
         'group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50',
         'has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-4',
         'has-data-[state=checked]:bg-primary/5 has-data-[state=checked]:border-primary dark:has-data-[state=checked]:bg-primary/10',
+        labelAction && 'w-full flex-wrap items-center',
         className,
       )}
       {...props}
     >
       {children}
+      {required && (
+        <span aria-hidden="true" className="text-destructive">
+          *
+        </span>
+      )}
       {tooltip && (
         <Tooltip>
           <TooltipTrigger type="button" aria-label={tooltip}>
-            <InfoIcon className="size-5 text-muted-foreground" />
+            <InfoIcon className="size-5 text-icon" />
           </TooltipTrigger>
           <TooltipContent>{tooltip}</TooltipContent>
         </Tooltip>
+      )}
+      {labelAction && (
+        <span className="inline-flex basis-full items-center sm:ml-auto sm:basis-auto">
+          {labelAction}
+        </span>
       )}
     </Label>
   );

@@ -14,6 +14,7 @@ type CustomShareSectionProps<T extends FieldValues> = {
   control: Control<T>;
   schoolSharingName?: Path<T>;
   linkSharingName: Path<T>;
+  linkToShare: string;
   onShareChange?: (change: { name: Path<T>; checked: boolean }) => void;
 };
 
@@ -21,6 +22,7 @@ export default function CustomShareSection<T extends FieldValues>({
   control,
   schoolSharingName,
   linkSharingName,
+  linkToShare,
   onShareChange,
 }: CustomShareSectionProps<T>) {
   const t = useTranslations('sharing');
@@ -35,10 +37,9 @@ export default function CustomShareSection<T extends FieldValues>({
   const federalState = useFederalState();
 
   async function handleCopyLink() {
-    const url = new URL(window.location.href);
-    url.search = '';
+    const url = new URL(linkToShare, window.location.origin);
     try {
-      await navigator.clipboard.writeText(url.toString());
+      await navigator.clipboard.writeText(url.href);
       toast.success(t('link-copied'));
     } catch {
       toast.error(t('link-copied-error'));

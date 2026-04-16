@@ -10,6 +10,7 @@ import EntityCard from '@/components/entity-overview/entity-card';
 import { CreateNewCharacterButton } from './create-new-character-button';
 import { useOverviewFilter } from '@/components/hooks/use-overview-filter';
 import { getCharactersByFilterAction } from '../actions/entity-filter-actions';
+import { filterAndSortEntities } from '@/components/entity-overview/utils';
 
 type CharacterOverviewProps = {
   currentUserId: string;
@@ -32,12 +33,11 @@ export default function CharacterOverview({ currentUserId }: CharacterOverviewPr
   }
 
   const infoContent = (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-8 whitespace-pre-line">
       <div>
         <p className="font-semibold">{t('info-dialog.q1')}</p>
         <p>{t('info-dialog.a1')}</p>
       </div>
-      <p>{t('info-dialog.a1-2')}</p>
       <div>
         <p className="font-semibold">{t('info-dialog.q2')}</p>
         <p>{t('info-dialog.a2')}</p>
@@ -56,29 +56,26 @@ export default function CharacterOverview({ currentUserId }: CharacterOverviewPr
       itemCount={visibleCharacters.length}
     >
       {(searchQuery, sortBy) => {
-        const q = searchQuery.trim().toLowerCase();
-        const filtered = q
-          ? visibleCharacters
-              .filter((character) => character.name.toLowerCase().includes(q))
-              .slice()
-          : visibleCharacters.slice();
-        filtered.sort((a, b) =>
-          sortBy === 'name'
-            ? a.name.localeCompare(b.name)
-            : b.updatedAt.getTime() - a.updatedAt.getTime(),
-        );
+        const filtered = filterAndSortEntities(visibleCharacters, searchQuery, sortBy);
 
-        return filtered.map((character) => (
-          <EntityCard
-            key={character.id}
-            name={character.name}
-            description={character.description}
-            avatarUrl={character.maybeSignedPictureUrl}
-            isOwned={character.userId === currentUserId}
-            onCardClick={() => router.push(`/characters/editor/${character.id}`)}
-            onChatClick={() => router.push(`/characters/d/${character.id}`)}
-          />
-        ));
+        return filtered.map((character) => {
+          const isOwned = character.userId === currentUserId;
+          return (
+            <EntityCard
+              key={character.id}
+              name={character.name}
+              description={character.description}
+              avatarUrl={character.maybeSignedPictureUrl}
+              isOwned={isOwned}
+              onCardClick={() =>
+                router.push(
+                  isOwned ? `/characters/editor/${character.id}` : `/characters/${character.id}`,
+                )
+              }
+              onChatClick={() => router.push(`/characters/d/${character.id}`)}
+            />
+          );
+        });
       }}
     </EntityOverview>
   );

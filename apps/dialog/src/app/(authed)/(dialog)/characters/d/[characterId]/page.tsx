@@ -14,6 +14,7 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { z } from 'zod';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
 const searchParamsSchema = z.object({ model: z.string().optional() });
@@ -58,14 +59,16 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
           userAndContext={userAndContext}
         />
       </HeaderPortal>
-      <Chat
-        id={id}
-        initialMessages={initialMessages}
-        character={character}
-        imageSource={avatarPictureUrl}
-        enableFileUpload={false}
-        logoElement={logoElement}
-      />
+      <DefaultPageLayout>
+        <Chat
+          id={id}
+          initialMessages={initialMessages}
+          character={character}
+          imageSource={avatarPictureUrl}
+          enableFileUpload={false}
+          logoElement={logoElement}
+        />
+      </DefaultPageLayout>
     </LlmModelsProvider>
   );
 }

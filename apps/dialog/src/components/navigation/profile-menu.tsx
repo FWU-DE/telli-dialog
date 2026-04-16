@@ -12,8 +12,7 @@ import DotsHorizontalIcon from '@/components/icons/dots-horizontal';
 
 import { cn } from '@/utils/tailwind';
 import { iconClassName } from '@/utils/tailwind/icon';
-import { useTheme } from '../providers/theme-provider';
-import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
+import { usePortalContainer } from '@ui/components/portal-container';
 
 function ProfileMenuContent({ userAndContext }: { userAndContext?: UserAndContext }) {
   const t = useTranslations('legal');
@@ -56,7 +55,7 @@ function ProfileMenuContent({ userAndContext }: { userAndContext?: UserAndContex
   );
 }
 export default function ProfileMenu({ userAndContext }: { userAndContext?: UserAndContext }) {
-  const { designConfiguration } = useTheme();
+  const container = usePortalContainer();
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
@@ -68,12 +67,11 @@ export default function ProfileMenu({ userAndContext }: { userAndContext?: UserA
           <UserIcon className="w-8 h-8" />
         </button>
       </DropdownMenu.Trigger>
-      <DropdownMenu.Portal>
+      <DropdownMenu.Portal container={container}>
         <DropdownMenu.Content
           align="end"
           sideOffset={10}
           className="z-20 flex flex-col gap-2 py-2 w-[256px] rounded-enterprise-md mb-4 bg-white shadow-dropdown"
-          style={constructRootLayoutStyle({ designConfiguration })}
         >
           <ProfileMenuContent userAndContext={userAndContext} />
         </DropdownMenu.Content>
@@ -91,7 +89,7 @@ export function ThreeDotsProfileMenu({
   deleteButtonJSX?: React.ReactNode;
   userAndContext?: UserAndContext;
 }) {
-  const { designConfiguration } = useTheme();
+  const container = usePortalContainer();
 
   return (
     <DropdownMenu.Root>
@@ -104,12 +102,11 @@ export function ThreeDotsProfileMenu({
           <DotsHorizontalIcon className="text-primary h-6 w-6" />
         </button>
       </DropdownMenu.Trigger>
-      <DropdownMenu.Portal>
+      <DropdownMenu.Portal container={container}>
         <DropdownMenu.Content
           align="end"
           sideOffset={10}
           className="z-20 flex flex-col gap-2 py-2 w-[256px] rounded-enterprise-md mb-4 bg-white shadow-dropdown"
-          style={constructRootLayoutStyle({ designConfiguration })}
         >
           {deleteButtonJSX && <DropdownMenu.Item asChild>{deleteButtonJSX}</DropdownMenu.Item>}
           {downloadButtonJSX && <DropdownMenu.Item asChild>{downloadButtonJSX}</DropdownMenu.Item>}

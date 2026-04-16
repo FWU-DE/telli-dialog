@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
 import {
   deleteCharacter,
   deleteFileMappingAndEntity,
+  downloadFileFromCharacter,
   fetchFileMappings,
   getCharacterForChatSession,
   getCharacterForEditView,
@@ -12,10 +13,10 @@ import {
   updateCharacter,
   updateCharacterAccessLevel,
   uploadAvatarPictureForCharacter,
-  downloadFileFromCharacter,
 } from './character-service';
 import {
   dbGetCharacterById,
+  dbGetCharacterByIdOptionalShareData,
   dbGetCharacterByIdWithShareData,
   dbGetSharedCharacterConversations,
 } from '../db/functions/character';
@@ -30,6 +31,7 @@ vi.mock('../db/functions/character', () => ({
   dbGetSharedCharacterConversations: vi.fn(),
   dbGetCharacterById: vi.fn(),
   dbGetCharacterByIdAndUserId: vi.fn(),
+  dbGetCharacterByIdOptionalShareData: vi.fn(),
   dbGetCharacterByIdWithShareData: vi.fn(),
   dbDeleteCharacterByIdAndUserId: vi.fn(),
   dbGetCharactersBySchoolId: vi.fn(),
@@ -466,9 +468,9 @@ describe('character-service', () => {
           hasLinkAccess: true,
         };
 
-        (
-          dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
-        ).mockResolvedValue(mockCharacter as never);
+        (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+          mockCharacter as never,
+        );
 
         // User from different school trying to access - should succeed because hasLinkAccess is true
         const result = await getCharacterForChatSession({
@@ -499,7 +501,9 @@ describe('character-service', () => {
         };
 
         (
-          dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
+          dbGetCharacterByIdOptionalShareData as MockedFunction<
+            typeof dbGetCharacterByIdOptionalShareData
+          >
         ).mockResolvedValue(mockCharacter as never);
         // Also mock dbGetCharacterById because fetchFileMappings -> getCharacterInfo uses it
         (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
@@ -567,9 +571,9 @@ describe('character-service', () => {
           hasLinkAccess: false,
         };
 
-        (
-          dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
-        ).mockResolvedValue(mockCharacter as never);
+        (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+          mockCharacter as never,
+        );
 
         await expect(
           getCharacterForChatSession({
@@ -590,7 +594,9 @@ describe('character-service', () => {
         };
 
         (
-          dbGetCharacterByIdWithShareData as MockedFunction<typeof dbGetCharacterByIdWithShareData>
+          dbGetCharacterByIdOptionalShareData as MockedFunction<
+            typeof dbGetCharacterByIdOptionalShareData
+          >
         ).mockResolvedValue(mockCharacter as never);
 
         await expect(

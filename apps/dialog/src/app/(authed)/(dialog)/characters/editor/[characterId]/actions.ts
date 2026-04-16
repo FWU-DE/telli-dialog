@@ -6,6 +6,7 @@ import { requireAuth } from '@/auth/requireAuth';
 import {
   deleteCharacter,
   deleteFileMappingAndEntity,
+  downloadFileFromCharacter,
   linkFileToCharacter,
   shareCharacter,
   unshareCharacter,
@@ -116,5 +117,22 @@ export async function uploadAvatarPictureForCharacterAction({
     characterId,
     croppedImageBlob,
     userId: user.id,
+  });
+}
+
+export async function downloadFileFromCharacterAction({
+  characterId,
+  fileId,
+}: {
+  characterId: string;
+  fileId: string;
+}) {
+  const { user, school } = await requireAuth();
+
+  return runServerAction(downloadFileFromCharacter)({
+    characterId,
+    fileId,
+    schoolId: school.id,
+    user,
   });
 }

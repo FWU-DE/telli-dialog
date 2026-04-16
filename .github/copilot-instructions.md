@@ -75,6 +75,12 @@ apps/<app_name>/src/components/utils/ --> custom utility functions
 
 - Use try-catch blocks to handle exceptions.
 
+## Database access and migrations
+
+- Use drizzle-orm for database access.
+- Use the migration system provided by drizzle-orm for database schema changes.
+- Follow the instructions in .github/skills/db-migration/SKILL.md for creating and applying database migrations.
+
 ## Logging
 
 - Use a consistent logging framework for debugging and monitoring.

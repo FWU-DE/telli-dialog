@@ -14,6 +14,7 @@ import { buildLegacyUserAndContext } from '@/auth/types';
 import { requireAuth } from '@/auth/requireAuth';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
 import { WebsearchSource } from '@shared/db/types';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,14 +73,16 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
         downloadConversationEnabled={convertedMessages.length > 0}
         userAndContext={userAndContext}
       />
-      <Chat
-        id={conversation.id}
-        initialMessages={convertedMessages}
-        initialFileMapping={fileMapping}
-        enableFileUpload={true}
-        webSourceMapping={webSourceMapping}
-        logoElement={logoElement}
-      />
+      <DefaultPageLayout>
+        <Chat
+          id={conversation.id}
+          initialMessages={convertedMessages}
+          initialFileMapping={fileMapping}
+          enableFileUpload={true}
+          webSourceMapping={webSourceMapping}
+          logoElement={logoElement}
+        />
+      </DefaultPageLayout>
     </LlmModelsProvider>
   );
 }

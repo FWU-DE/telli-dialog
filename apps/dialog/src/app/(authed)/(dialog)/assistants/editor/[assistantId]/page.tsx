@@ -3,13 +3,16 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { getAssistantByUser } from '@shared/assistants/assistant-service';
 import { notFound } from 'next/navigation';
 import { AssistantEdit } from './assistant-edit';
-import { ResponsiveLayoutWrapper } from '../../../_components/responsive-layout-wrapper';
+import { buildLegacyUserAndContext } from '@/auth/types';
+import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Page(props: PageProps<'/assistants/editor/[assistantId]'>) {
   const { assistantId } = await props.params;
   const { user, school, federalState } = await requireAuth();
+  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
   if (!federalState.featureToggles.isNewUiDesignEnabled) {
     notFound();
@@ -26,13 +29,17 @@ export default async function Page(props: PageProps<'/assistants/editor/[assista
     .map((url) => ({ link: url }));
 
   return (
-    <ResponsiveLayoutWrapper>
+    <DefaultPageLayout>
+      <CustomChatHeader
+        userAndContext={userAndContext}
+        isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+      />
       <AssistantEdit
         assistant={assistant}
         relatedFiles={fileMappings}
         initialLinks={initialLinks}
         avatarPictureUrl={pictureUrl}
       />
-    </ResponsiveLayoutWrapper>
+    </DefaultPageLayout>
   );
 }

@@ -11,6 +11,10 @@ import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { WebsearchSource } from '@shared/db/types';
+import { CharacterEdit } from './character-edit';
+import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
+import { redirect } from 'next/navigation';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +36,6 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
     schoolId: school.id,
   }).catch(handleErrorInServerComponent);
 
-  const readOnly = user.id !== character.userId;
   const initialLinks = character.attachedLinks
     .filter((l) => l !== '')
     .map(
@@ -43,6 +46,29 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
         }) as WebsearchSource,
     );
 
+  const readOnly = user.id !== character.userId;
+
+  if (federalState.featureToggles.isNewUiDesignEnabled) {
+    if (readOnly) {
+      redirect(`/characters/${characterId}`);
+    }
+
+    return (
+      <DefaultPageLayout>
+        <CustomChatHeader
+          userAndContext={userAndContext}
+          isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+        />
+        <CharacterEdit
+          character={character}
+          relatedFiles={relatedFiles}
+          initialLinks={initialLinks}
+          avatarPictureUrl={maybeSignedPictureUrl}
+        />
+      </DefaultPageLayout>
+    );
+  }
+
   return (
     <div className="min-w-full p-6 overflow-auto">
       <HeaderPortal>
@@ -52,7 +78,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
         <div className="grow"></div>
         <ProfileMenu userAndContext={userAndContext} />
       </HeaderPortal>
-      <div className="max-w-3xl mx-auto mt-4">
+      <div className="mx-auto mt-4">
         <CharacterForm
           {...(removeNullishValues(character) as CharacterWithShareDataModel)}
           pictureId={character.pictureId}

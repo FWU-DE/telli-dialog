@@ -21,8 +21,6 @@ import { ShareFatIcon, StopIcon } from '@phosphor-icons/react';
 import CountDownTimer from '../../app/(authed)/(dialog)/learning-scenarios/_components/count-down';
 import RichText from '../common/rich-text';
 import { z } from 'zod';
-import { cn } from '@/utils/tailwind';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 
 const shareFormSchema = z.object({
   telliPointsPercentageLimit: z.coerce.number(),
@@ -53,8 +51,8 @@ export function CustomChatShareWithLearners({
   const toast = useToast();
   const router = useRouter();
 
-  const t = useTranslations('learning-scenarios.share-with-learners');
-  const tToast = useTranslations('learning-scenarios.toasts');
+  const t = useTranslations('custom-chat.share-with-learners');
+  const tToast = useTranslations('custom-chat.toasts');
 
   const sharedChatTimeLeft = calculateTimeLeft({
     startedAt,
@@ -162,12 +160,7 @@ export function CustomChatShareWithLearners({
             <div className="grow" />
 
             {!sharedChatActive && (
-              <Button
-                type="button"
-                onClick={handleStartSharing}
-                className={cn(buttonPrimaryClassName)}
-                disabled={sharingDisabled}
-              >
+              <Button type="button" onClick={handleStartSharing} disabled={sharingDisabled}>
                 <ShareFatIcon className="size-5" />
                 {t('button-start')}
               </Button>
@@ -183,13 +176,19 @@ export function CustomChatShareWithLearners({
 
             {sharedChatActive && (
               <div className="flex gap-3">
-                <Button type="button" onClick={handleStopSharing} aria-label={t('button-stop')}>
+                <Button
+                  type="button"
+                  onClick={handleStopSharing}
+                  aria-label={t('button-stop')}
+                  size="icon-round"
+                >
                   <StopIcon className="size-5" />
                 </Button>
                 <Button
                   type="button"
                   onClick={() => router.push(shareUILink)}
                   aria-label={t('share')}
+                  size="icon-round"
                 >
                   <ShareFatIcon className="size-5" />
                 </Button>

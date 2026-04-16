@@ -1,6 +1,3 @@
-import { cn } from '@/utils/tailwind';
-
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/common/toast';
@@ -32,11 +29,7 @@ export function CreateNewLearningScenarioButton() {
   }
 
   return (
-    <Button
-      type="button"
-      onClick={handleNewLearningScenario}
-      className={cn(buttonPrimaryClassName)}
-    >
+    <Button type="button" onClick={handleNewLearningScenario}>
       <PlusIcon className="size-5" />
       {t('form.button-create')}
     </Button>

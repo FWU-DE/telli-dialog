@@ -1,9 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { login } from '../../utils/login';
+import { AUTH_FILES } from '../../utils/const';
 import { selectDifferentModel } from '../../utils/chat';
 
+test.use({ storageState: AUTH_FILES.teacher });
+
 test('switching LLM model preserves the typed prompt in generic chat', async ({ page }) => {
-  await login(page, 'teacher');
+  await page.goto('/');
 
   const prompt = 'This prompt must not disappear when changing models';
   await page.getByPlaceholder('Wie kann ich Dir helfen?').fill(prompt);
@@ -16,7 +18,7 @@ test('switching LLM model preserves the typed prompt in generic chat', async ({ 
 test('Starting a new chat clears the prompt and resets the page when already on home page', async ({
   page,
 }) => {
-  await login(page, 'teacher');
+  await page.goto('/');
 
   const prompt = 'Prompt that should be cleared on new chat';
   await page.getByPlaceholder('Wie kann ich Dir helfen?').fill(prompt);

@@ -14,7 +14,7 @@ import SidebarToggleIcon from '@/components/icons/sidebar/sidebar-toggle';
 import { cn } from '@/utils/tailwind';
 import { useRouter } from 'next/navigation';
 import { iconClassName } from '@/utils/tailwind/icon';
-import { SidebarSimpleIcon } from '@phosphor-icons/react/dist/icons/SidebarSimple';
+import { SidebarSimpleIcon } from '@phosphor-icons/react';
 
 export default function CollapsibleSidebar({
   children,

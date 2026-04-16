@@ -23,13 +23,14 @@ E2E tests for the **dialog** and **api** apps are already established. For **adm
 
 ```
 apps/dialog/e2e/
+├── global-setup.ts      # Runs once before all tests — logs in each user and saves auth state
 ├── fixtures/            # Test fixture files (e.g. images for upload)
 ├── utils/               # Shared test helpers (login, chat, character, etc.)
 │   ├── authorizationHeader.ts
 │   ├── character.ts
 │   ├── chat.ts
 │   ├── const.ts
-│   ├── custom-gpt.ts
+│   ├── assistant.ts
 │   ├── learning-scenario.ts
 │   ├── login.ts
 │   ├── mock.ts
@@ -151,22 +152,40 @@ import { expect, test } from '@playwright/test';
 Import helpers with relative paths from the `utils/` directory:
 
 ```typescript
-import { login } from '../utils/login'; // top-level tests
-import { login } from '../../utils/login'; // nested tests (e.g. character/)
+import { AUTH_FILES } from '../utils/const'; // top-level tests
+import { AUTH_FILES } from '../../utils/const'; // nested tests (e.g. character/)
 import { sendMessage } from '../../utils/chat';
 import { waitForToast } from '../../utils/utils';
 ```
 
-### Login
+### Login / Authentication
 
-All browser tests must start by logging in. Use the `login()` helper:
+Browser tests use **pre-authenticated storage state** instead of logging in during each test.
+The `global-setup.ts` runs once before all tests — it logs in for each user in `AUTH_FILES` and saves the resulting cookies and localStorage to `.playwright-auth/<user>.json`.
+
+To apply an auth state to a test file, add `test.use()` at the top of the file, or inside a `test.describe` block:
 
 ```typescript
-await login(page, 'teacher'); // log in as teacher
-await login(page, 'student'); // log in as student
+import { AUTH_FILES } from '../utils/const'; // adjust depth as needed
+
+test.use({ storageState: AUTH_FILES.teacher });
 ```
 
-The login helper navigates to `/logout`, clears cookies, navigates to `/login`, fills credentials via Keycloak, and waits for redirect to `/`.
+Available users: `teacher`, `teacher2`
+
+With `storageState` set, tests can navigate directly to the page under test — no login step needed:
+
+```typescript
+test('can create a character', async ({ page }) => {
+  await page.goto('/characters');
+  // ...
+});
+```
+
+The `.playwright-auth/` directory is git-ignored and regenerated automatically before each `playwright test` invocation.
+
+> **Prefer not to call `login()` directly in tests.**
+> The `login()` function should only be used when a new session is necessary (e.g., for changed federal state config).
 
 ### Test file naming
 
@@ -193,9 +212,10 @@ const characterName = 'My Character ' + nanoid(8);
 Key utility files:
 
 - `utils/login.ts` — Login via Keycloak
+- `utils/const.ts` — `AUTH_FILES` map of user → storage state file path for pre-authenticated sessions
 - `utils/chat.ts` — Chat message sending, regeneration, file upload, deletion
-- `utils/character.ts` — Character creation and deletion
-- `utils/custom-gpt.ts` — Custom GPT deletion
+- `utils/character.ts` — Character CRUD
+- `utils/assistant.ts` — Assistant CRUD
 - `utils/learning-scenario.ts` — Learning scenario CRUD
 - `utils/utils.ts` — Toast notifications, general helpers
 - `utils/mock.ts` — Mock data generators for API tests
@@ -228,20 +248,22 @@ The UI is in **German**. Use German text for button names, labels, headings, and
 **Navigate, create, verify, clean up:**
 
 ```typescript
+import { AUTH_FILES } from '../../utils/const';
+
+test.use({ storageState: AUTH_FILES.teacher });
+
 test.describe('feature lifecycle', () => {
   const name = 'Test Item ' + nanoid(8);
 
   test('create item', async ({ page }) => {
-    await login(page, 'teacher');
-    // navigate to feature page
+    await page.goto('/feature-page');
     // fill form
     // submit
     // verify item appears
   });
 
   test('delete item', async ({ page }) => {
-    await login(page, 'teacher');
-    // navigate to listing
+    await page.goto('/feature-page');
     // delete the item
     // verify it's gone
   });
@@ -307,8 +329,9 @@ The admin app has no e2e setup yet. If asked to create e2e tests:
 ## Checklist before finishing
 
 - [ ] Tests import from `@playwright/test` and use the existing utility helpers.
+- [ ] `test.use({ storageState: AUTH_FILES.<user> })` is set at the top of every browser test file — no `login()` calls inside tests.
 - [ ] New utility functions are added to `utils/` and exported, not inlined in tests.
-- [ ] Tests use German UI text for locators (button names, labels, headings).
+- [ ] Tests use TestIds when available and fall back to German UI text for locators (button names, labels, headings).
 - [ ] Tests clean up after themselves (delete created entities).
 - [ ] Unique identifiers use `nanoid` to avoid collisions.
 - [ ] API test files are named `*.api.test.ts`.

@@ -1,10 +1,12 @@
 import { expect, test } from '@playwright/test';
-import { login } from '../../utils/login';
+import { AUTH_FILES } from '../../utils/const';
 import { deleteChat, enterMessage, regenerateMessage, sendMessage } from '../../utils/chat';
 import path from 'path';
 
+test.use({ storageState: AUTH_FILES.teacher });
+
 test('should successfully regenerate a response', async ({ page }) => {
-  await login(page, 'teacher');
+  await page.goto('/');
   await sendMessage(page, 'Schreibe "OK" und eine Zufallszahl von 0 bis 1.000.000');
 
   // Verify the response contains the expected content
@@ -18,7 +20,7 @@ test('should successfully regenerate a response', async ({ page }) => {
 });
 
 test('should copy response to clipboard', async ({ page }) => {
-  await login(page, 'teacher');
+  await page.goto('/');
   await sendMessage(page, 'Schreibe "OK"');
 
   const assistantMessage = page.getByLabel('assistant message 1');
@@ -31,7 +33,7 @@ test('should copy response to clipboard', async ({ page }) => {
 });
 
 test('should successfully delete the current chat', async ({ page }) => {
-  await login(page, 'teacher');
+  await page.goto('/');
   await sendMessage(page, 'Schreibe "OK"');
   await deleteChat(page, path.basename(page.url()));
 
@@ -41,7 +43,7 @@ test('should successfully delete the current chat', async ({ page }) => {
 });
 
 test('after receiving the first message the typed prompt is not lost', async ({ page }) => {
-  await login(page, 'teacher');
+  await page.goto('/');
 
   await enterMessage(page, 'Schreibe "OK"');
   await page.keyboard.press('Enter');

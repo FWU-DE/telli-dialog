@@ -6,7 +6,7 @@ import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { getAssistantByAccessLevel } from '@shared/assistants/assistant-service';
-import CustomGptOverview from './custom-gpt-overview';
+import { permanentRedirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +20,7 @@ export default async function Page(props: PageProps<'/custom'>) {
   const isNewUi = federalState.featureToggles.isNewUiDesignEnabled;
 
   if (isNewUi) {
-    return <CustomGptOverview currentUserId={user.id} />;
+    permanentRedirect('/assistants');
   }
 
   const accessLevel = searchParams.visibility;

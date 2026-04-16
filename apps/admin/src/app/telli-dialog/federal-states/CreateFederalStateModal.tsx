@@ -110,6 +110,8 @@ export function CreateFederalStateModal(props: CreateFederalStateModalProps) {
             label="ID"
             description="Eindeutige ID des Bundeslandes (z.B. DE-BY, DE-NW)."
             control={control}
+            required
+            autoFocusWhenEmpty
           />
 
           <FormField

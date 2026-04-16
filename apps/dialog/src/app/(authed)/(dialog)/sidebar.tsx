@@ -191,7 +191,7 @@ export default function DialogSidebar({
                 {user.school.userRole === 'teacher' &&
                   user.federalState.featureToggles.isCustomGptEnabled && (
                     <Link
-                      href={`/custom/d/${HELP_MODE_ASSISTANT_ID}`}
+                      href={`/assistants/d/${HELP_MODE_ASSISTANT_ID}`}
                       prefetch={false}
                       className="w-full"
                     >

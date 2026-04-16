@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { buttonPrimaryClassName, buttonSecondaryClassName } from '@/utils/tailwind/button';
 import { DisclaimerConfig } from './const';
@@ -10,8 +10,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 import MarkdownDisplay from '../chat/markdown-display';
-import { useTheme } from '@/components/providers/theme-provider';
-import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
+import { usePortalContainer } from '@ui/components/portal-container';
 import { useSession } from 'next-auth/react';
 
 type TermsConditionsModalProps = {
@@ -33,7 +32,7 @@ export default function TermsConditionsModal({
   const router = useRouter();
   const tUsage = useTranslations('usage-disclaimer');
   const tCommon = useTranslations('common');
-  const { designConfiguration } = useTheme();
+  const container = usePortalContainer();
   const session = useSession();
 
   const nextPage = () => {
@@ -118,12 +117,9 @@ export default function TermsConditionsModal({
 
   return (
     <AlertDialog.Root open defaultOpen>
-      <AlertDialog.Portal>
+      <AlertDialog.Portal container={container}>
         <AlertDialog.Overlay className="fixed inset-0 bg-[#333333] z-30 opacity-30 shadow-[0px_0px_80px_0px_rgba(0,41,102,0.1)]" />
-        <AlertDialog.Content
-          className="z-50 fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-enterprise-md bg-white p-5 lg:p-10 w-full sm:w-[450px] lg:w-[720px]"
-          style={constructRootLayoutStyle({ designConfiguration })}
-        >
+        <AlertDialog.Content className="z-50 fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-enterprise-md bg-white p-5 lg:p-10 w-full sm:w-[450px] lg:w-[720px]">
           <AlertDialog.Title asChild>
             <h1 className="text-3xl font-medium pb-5 mb-auto mt-auto">{currentTitle}</h1>
           </AlertDialog.Title>

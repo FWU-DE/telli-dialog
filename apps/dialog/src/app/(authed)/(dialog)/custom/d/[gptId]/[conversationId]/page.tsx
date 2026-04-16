@@ -1,4 +1,5 @@
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
+import { permanentRedirect } from 'next/navigation';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import Chat from '@/components/chat/chat';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
@@ -13,6 +14,7 @@ import { buildLegacyUserAndContext } from '@/auth/types';
 import { getConversationWithMessagesAndAssistant } from '@shared/assistants/assistant-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
 const searchParamsSchema = z.object({ model: z.string().optional() });
@@ -21,6 +23,11 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversa
   const params = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
   const { user, school, federalState } = await requireAuth();
+
+  if (federalState.featureToggles.isNewUiDesignEnabled) {
+    permanentRedirect(`/assistants/d/${params.gptId}/${params.conversationId}`);
+  }
+
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
   const { conversation, messages, assistant } = await getConversationWithMessagesAndAssistant({
@@ -58,14 +65,16 @@ export default async function Page(props: PageProps<'/custom/d/[gptId]/[conversa
           userAndContext={userAndContext}
         />
       </HeaderPortal>
-      <Chat
-        id={conversation.id}
-        initialMessages={chatMessages}
-        assistant={assistant}
-        enableFileUpload={true}
-        imageSource={avatarPictureUrl}
-        logoElement={logoElement}
-      />
+      <DefaultPageLayout>
+        <Chat
+          id={conversation.id}
+          initialMessages={chatMessages}
+          assistant={assistant}
+          enableFileUpload={true}
+          imageSource={avatarPictureUrl}
+          logoElement={logoElement}
+        />
+      </DefaultPageLayout>
     </LlmModelsProvider>
   );
 }

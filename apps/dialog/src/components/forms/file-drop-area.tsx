@@ -1,8 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { FileUploadIcon } from '../icons/file-upload-icons/file-upload-tray-icon';
 import { useTranslations } from 'next-intl';
-import { cn } from '@/utils/tailwind';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
 import { handleSingleFile, UploadFileButtonProps } from '../chat/upload-file-button';
 import { useSession } from 'next-auth/react';
 import { useToast } from '../common/toast';
@@ -10,6 +8,7 @@ import RichText from '../common/rich-text';
 import { SUPPORTED_DOCUMENTS_EXTENSIONS } from '@/const';
 import { validateFileExtentsion as validateFileExtension } from '@/utils/files/generic';
 import { NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT } from '@/configuration-text-inputs/const';
+import { Button } from '@ui/components/Button';
 
 export function FileDrop({
   onFileUploaded,
@@ -107,7 +106,7 @@ export function FileDrop({
       if (!validateFileExtensions(files)) {
         toast.error(
           t('toasts.invalid-file-format', {
-            supported_formats: SUPPORTED_DOCUMENTS_EXTENSIONS.join(','),
+            supported_formats: SUPPORTED_DOCUMENTS_EXTENSIONS.join(', '),
           }),
         );
         return;
@@ -141,24 +140,26 @@ export function FileDrop({
           type="file"
           className="hidden"
           onChange={handleFileChange}
-          accept={SUPPORTED_DOCUMENTS_EXTENSIONS.map((e) => `.${e}`).join(',')}
+          accept={SUPPORTED_DOCUMENTS_EXTENSIONS.map((e) => `.${e}`).join(', ')}
           multiple
           aria-label={t('upload.upload-input-aria-label')}
         />
         <div className="mt-4 flex flex-col text-sm gap-4 items-center">
           <FileUploadIcon className="w-8 h-8 text-primary" />
           <span className="text-base">
-            <RichText>{(tags) => t.rich('upload.drop-area', tags)}</RichText>
+            <RichText>
+              {(tags) =>
+                t.rich('upload.drop-area', {
+                  ...tags,
+                  supported_formats: SUPPORTED_DOCUMENTS_EXTENSIONS.join(', '),
+                })
+              }
+            </RichText>
           </span>
           <span className="text-gray-600">{t('upload.choice-word')}</span>
-          <button
-            className={cn(buttonPrimaryClassName)}
-            disabled={disabled}
-            onClick={handleButtonClick}
-            type="button"
-          >
+          <Button disabled={disabled} onClick={handleButtonClick} type="button">
             {t('upload.upload-file-button')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

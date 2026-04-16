@@ -1,8 +1,8 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '../Tooltip';
 import { Checkbox } from '../Checkbox';
 import { Control, Controller, FieldPath, FieldValues } from 'react-hook-form';
-import { FieldLabel, Field, FieldError } from '../Field';
-import { InfoIcon } from 'lucide-react';
+import { Field, FieldError, FieldLabel } from '../Field';
+import { InfoIcon } from '@phosphor-icons/react';
 
 type CheckboxWithInfoProps<
   TFieldValues extends FieldValues = FieldValues,

@@ -1,5 +1,5 @@
 import { expect, Page, test } from '@playwright/test';
-import { login } from '../../utils/login';
+import { AUTH_FILES } from '../../utils/const';
 import { enterMessage, selectDifferentModel, sendMessage } from '../../utils/chat';
 import { configureCharacter, deleteCharacter } from '../../utils/character';
 import { waitForToast } from '../../utils/utils';
@@ -19,13 +19,10 @@ async function createCharacterWithInitialMessage(
   await page.getByRole('button', { name: 'Dialogpartner erstellen' }).click();
   await page.waitForURL('/characters/editor/**');
 
-  await configureCharacter(page, { name });
+  await configureCharacter(page, { name, initialMessage });
 
-  // Fill the optional "initial message" field
-  await page.locator('#initialMessage').fill(initialMessage);
-
-  await page.getByRole('button', { name: 'Dialogpartner erstellen' }).click();
-  await page.waitForURL('/characters?visibility=private');
+  // Navigate back to character list to verify creation
+  await page.goto('/characters');
 
   // Click on the card to open its editor and extract the character ID from the URL
   await page.getByText(name).first().click();
@@ -42,19 +39,19 @@ test.describe('character chat UX', () => {
   const initialMessage = 'Hallo! Ich bin ein Testcharakter. Wie kann ich helfen?';
   let characterId = '';
 
+  test.use({ storageState: AUTH_FILES.teacher });
+
   test.beforeAll(async ({ browser }) => {
-    const page = await browser.newPage();
-    await login(page, 'teacher');
+    const page = await browser.newPage({ storageState: AUTH_FILES.teacher });
     characterId = await createCharacterWithInitialMessage(page, characterName, initialMessage);
     await page.close();
   });
 
   test.afterAll(async ({ browser }) => {
     if (!characterId) return;
-    const page = await browser.newPage();
-    await login(page, 'teacher');
-    await page.goto('/characters?visibility=private');
-    await page.waitForURL('/characters?visibility=private');
+    const page = await browser.newPage({ storageState: AUTH_FILES.teacher });
+    await page.goto('/characters');
+    await page.waitForURL('/characters');
     await deleteCharacter(page, characterName);
     const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
     await expect(deleteConfirmButton).toBeVisible();
@@ -66,8 +63,8 @@ test.describe('character chat UX', () => {
   test('character initial message is visible in conversation (new conversation and opened from history)', async ({
     page,
   }) => {
-    await login(page, 'teacher');
     await page.goto(`/characters/d/${characterId}`);
+    await page.getByPlaceholder('Wie kann ich Dir helfen?').waitFor();
 
     // The initial message is visible at the start
     await expect(page.getByLabel('assistant message 1')).toBeVisible();
@@ -84,6 +81,7 @@ test.describe('character chat UX', () => {
 
     // Come back to the same conversation
     await page.goto(conversationUrl);
+    await page.getByPlaceholder('Wie kann ich Dir helfen?').waitFor();
 
     // The character's initial message must still appear at position 1
     await expect(page.getByLabel('assistant message 1')).toBeVisible();
@@ -97,8 +95,8 @@ test.describe('character chat UX', () => {
   test('switching LLM model in character chat does not clear conversation history and preserves prompt', async ({
     page,
   }) => {
-    await login(page, 'teacher');
     await page.goto(`/characters/d/${characterId}`);
+    await page.getByPlaceholder('Wie kann ich Dir helfen?').waitFor();
 
     // Send first message
     await sendMessage(page, 'Schreibe "OK"');

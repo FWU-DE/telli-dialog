@@ -113,6 +113,7 @@ export default function FilesTable({
                   )}
                   {status === 'processed' && !readOnly && (
                     <DestructiveActionButton
+                      aria-label={t('delete.button')}
                       modalDescription={t('delete.modal-description')}
                       triggerButtonClassName={cn('flex items-center', iconClassName)}
                       modalTitle={t('delete.modal-title')}
@@ -120,6 +121,7 @@ export default function FilesTable({
                       actionFn={() => handleDeleteFile(id)}
                     >
                       <TrashIcon className="w-9 h-9" />
+                      <span className="sr-only">{t('delete.button')}</span>
                     </DestructiveActionButton>
                   )}
                 </td>

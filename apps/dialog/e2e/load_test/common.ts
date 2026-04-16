@@ -33,12 +33,14 @@ function tagHttpRequests(page: Page) {
       ],
     });
     metric.tag({
-      name: `${BASE_URL}/custom/d/[gptId]`,
-      matches: [{ url: new RegExp(`^${BASE_URL}/custom/d/[a-zA-Z0-9-]+($|\\?)`) }],
+      name: `${BASE_URL}/assistants/d/[gptId]`,
+      matches: [{ url: new RegExp(`^${BASE_URL}/assistants/d/[a-zA-Z0-9-]+($|\\?)`) }],
     });
     metric.tag({
-      name: `${BASE_URL}/custom/d/[gptId]/[conversationId]`,
-      matches: [{ url: new RegExp(`^${BASE_URL}/custom/d/[a-zA-Z0-9-]+/[a-zA-Z0-9-]+($|\\?)`) }],
+      name: `${BASE_URL}/assistants/d/[gptId]/[conversationId]`,
+      matches: [
+        { url: new RegExp(`^${BASE_URL}/assistants/d/[a-zA-Z0-9-]+/[a-zA-Z0-9-]+($|\\?)`) },
+      ],
     });
     metric.tag({
       name: `${BASE_URL}/_next/static/*`,

@@ -3,13 +3,14 @@ import Chat from '@/components/chat/chat';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
-import { ChatHeaderBar } from '@/components/chat/header-bar';
 import Logo from '@/components/common/logo';
 import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
+import { ChatHeaderBar } from '@/components/chat/header-bar';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,15 +41,17 @@ export default async function Page(props: PageProps<'/assistants/d/[assistantId]
         userAndContext={userAndContext}
         downloadConversationEnabled={false}
       />
-      <Chat
-        id={id}
-        initialMessages={[]}
-        assistant={assistant}
-        enableFileUpload={true}
-        promptSuggestions={assistant.promptSuggestions}
-        imageSource={avatarPictureUrl}
-        logoElement={logoElement}
-      />
+      <DefaultPageLayout>
+        <Chat
+          id={id}
+          initialMessages={[]}
+          assistant={assistant}
+          enableFileUpload={true}
+          promptSuggestions={assistant.promptSuggestions}
+          imageSource={avatarPictureUrl}
+          logoElement={logoElement}
+        />
+      </DefaultPageLayout>
     </LlmModelsProvider>
   );
 }

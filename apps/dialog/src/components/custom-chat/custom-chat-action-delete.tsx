@@ -5,8 +5,8 @@ import { customChatDeleteButtonClassName } from '@/utils/tailwind/button';
 
 type CustomChatActionDeleteProps = {
   onClick: () => void;
-  modalTitle?: string;
-  modalDescription?: string;
+  modalTitle: string;
+  modalDescription: string;
 };
 
 export function CustomChatActionDelete({
@@ -16,15 +16,12 @@ export function CustomChatActionDelete({
 }: CustomChatActionDeleteProps) {
   const t = useTranslations();
 
-  const resolvedModalTitle = modalTitle ?? t('assistants.delete-modal-title');
-  const resolvedModalDescription = modalDescription ?? t('assistants.delete-modal-description');
-
   return (
     <DestructiveActionButton
       triggerButtonClassName={customChatDeleteButtonClassName}
-      modalTitle={resolvedModalTitle}
-      modalDescription={resolvedModalDescription}
-      confirmText={t('assistants.delete-modal-confirm-button')}
+      modalTitle={modalTitle}
+      modalDescription={modalDescription}
+      confirmText={t('common.delete')}
       actionFn={onClick}
     >
       <TrashSimpleIcon className="size-5" />

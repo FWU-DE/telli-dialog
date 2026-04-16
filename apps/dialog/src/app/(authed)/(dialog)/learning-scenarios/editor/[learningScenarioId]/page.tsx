@@ -1,16 +1,15 @@
-import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import HeaderPortal from '../../../header-portal';
-import ProfileMenu from '@/components/navigation/profile-menu';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
-import { getLearningScenarioForEditView } from '@shared/learning-scenarios/learning-scenario-service';
+import { getLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { WebsearchSource } from '@shared/db/types';
 import LearningScenarioForm from './learning-scenario-form';
 import { LearningScenarioEdit } from './learning-scenario-edit';
-import { ResponsiveLayoutWrapper } from '../../../_components/responsive-layout-wrapper';
+import { redirect } from 'next/navigation';
+import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,14 +24,16 @@ export default async function Page(
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
-  const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenarioForEditView(
-    {
-      learningScenarioId: learningScenarioId,
-      schoolId: school.id,
-      user,
-    },
-  ).catch(handleErrorInServerComponent);
+  const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenario({
+    learningScenarioId: learningScenarioId,
+    schoolId: school.id,
+    user,
+  }).catch(handleErrorInServerComponent);
   const readOnly = user.id !== learningScenario.userId;
+
+  if (federalState.featureToggles.isNewUiDesignEnabled && readOnly) {
+    redirect(`/learning-scenarios/${learningScenarioId}`);
+  }
 
   const initialLinks = learningScenario.attachedLinks
     .filter((l) => l && l !== '')
@@ -46,27 +47,28 @@ export default async function Page(
 
   if (federalState.featureToggles.isNewUiDesignEnabled && !readOnly) {
     return (
-      <ResponsiveLayoutWrapper>
+      <DefaultPageLayout>
+        <CustomChatHeader
+          userAndContext={userAndContext}
+          isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+        />
         <LearningScenarioEdit
           learningScenario={learningScenario}
           relatedFiles={relatedFiles}
           initialLinks={initialLinks}
           avatarPictureUrl={avatarPictureUrl}
         />
-      </ResponsiveLayoutWrapper>
+      </DefaultPageLayout>
     );
   }
 
   return (
-    <div className="w-full p-6 overflow-auto">
-      <HeaderPortal>
-        <ToggleSidebarButton
-          isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
-        />
-        <div className="grow"></div>
-        <ProfileMenu userAndContext={userAndContext} />
-      </HeaderPortal>
-      <div className="max-w-3xl mx-auto mt-4">
+    <DefaultPageLayout>
+      <CustomChatHeader
+        userAndContext={userAndContext}
+        isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+      />
+      <div className="mx-auto mt-4">
         <LearningScenarioForm
           {...learningScenario}
           existingFiles={relatedFiles}
@@ -76,6 +78,6 @@ export default async function Page(
           readOnly={readOnly}
         />
       </div>
-    </div>
+    </DefaultPageLayout>
   );
 }

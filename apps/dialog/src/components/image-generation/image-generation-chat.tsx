@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useRef, useState } from 'react';
 import { useImageModels } from '../providers/image-model-provider';
 import { useImageStyle } from '../providers/image-style-provider';
 import { generateImageAction } from '@/app/(authed)/(dialog)/image-generation/actions';
@@ -139,7 +138,7 @@ export default function ImageGenerationChat({
 
   return (
     <div className="flex flex-col h-full w-full">
-      <div className="flex-1 flex flex-col justify-start p-6 w-full max-w-3xl mx-auto">
+      <div className="flex-1 flex flex-col justify-start p-6 w-full mx-auto">
         <ImageGenerationInputBox
           isLoading={isGenerating}
           handleInputChange={handleInputChange}

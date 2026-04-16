@@ -10,6 +10,8 @@ import {
 } from '@shared/learning-scenarios/learning-scenario-service';
 import { LearningScenarioContainer } from './learning-scenario-container';
 import LearningScenarioOverview from './learning-scenario-overview';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
+import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,15 +22,22 @@ const searchParamsSchema = z.object({
 export default async function Page(props: PageProps<'/learning-scenarios'>) {
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
   const { user, school, federalState } = await requireAuth();
+  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
   const isNewUi = federalState.featureToggles.isNewUiDesignEnabled;
 
   if (isNewUi) {
-    return <LearningScenarioOverview currentUserId={user.id} />;
+    return (
+      <DefaultPageLayout>
+        <CustomChatHeader
+          userAndContext={userAndContext}
+          isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+        />
+        <LearningScenarioOverview currentUserId={user.id} />
+      </DefaultPageLayout>
+    );
   }
 
   const accessLevel = searchParams.visibility;
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
-
   const _learningScenarios = await getLearningScenariosByAccessLevel({
     accessLevel,
     schoolId: school.id,

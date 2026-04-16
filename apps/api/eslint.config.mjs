@@ -4,7 +4,7 @@ import turboConfig from 'eslint-config-turbo/flat';
 
 export default [
   {
-    ignores: ['coverage/**', 'dist/**'],
+    ignores: ['node_modules/**', 'coverage/**', 'dist/**', 'playwright-report/**'],
   },
   ...tseslint.config(
     {

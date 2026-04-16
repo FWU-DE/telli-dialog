@@ -28,9 +28,7 @@ import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import ProfileMenu from '../navigation/profile-menu';
 import { ToggleSidebarButton } from '../navigation/sidebar/collapsible-sidebar';
 import { useSession } from 'next-auth/react';
-
-const VALID_SORT_OPTIONS = ['name', 'date'] as const;
-export type SortOption = (typeof VALID_SORT_OPTIONS)[number];
+import { isSortOption, SortOption } from './utils';
 
 type EntityOverviewProps = {
   title: string;
@@ -56,7 +54,7 @@ export default function EntityOverview({
   itemCount,
 }: EntityOverviewProps) {
   const [searchInput, setSearchInput] = React.useState('');
-  const [sortBy, setSortBy] = React.useState<SortOption>('date');
+  const [sortBy, setSortBy] = React.useState<SortOption>('date-desc');
   const [infoDialogOpen, setInfoDialogOpen] = React.useState(false);
   const federalState = useFederalState();
   const { data: session } = useSession();
@@ -85,8 +83,8 @@ export default function EntityOverview({
   }, [activeFilter]);
 
   return (
-    <div className="min-w-full overflow-auto flex flex-col h-full bg-gray-50">
-      <HeaderPortal className="bg-gray-50">
+    <div className="min-w-full overflow-auto flex flex-col h-full">
+      <HeaderPortal>
         <ToggleSidebarButton
           isNewUiDesignEnabled={federalState?.featureToggles?.isNewUiDesignEnabled ?? false}
         />
@@ -102,7 +100,7 @@ export default function EntityOverview({
                 <DialogTrigger asChild>
                   <button
                     type="button"
-                    className="text-primary hover:text-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full"
+                    className="text-primary hover:text-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full pt-1.5"
                     aria-label={t('info-tooltip-label')}
                   >
                     <InfoIcon className="w-8 h-8" aria-hidden="true" />
@@ -148,7 +146,7 @@ export default function EntityOverview({
                   />
                 ) : (
                   <MagnifyingGlassIcon
-                    className="pointer-events-none absolute right-3 top-1/2 size-5 -translate-y-2/3 text-gray-500"
+                    className="pointer-events-none absolute right-3 top-3/5 size-5 -translate-y-2/3 text-gray-500"
                     aria-hidden="true"
                   />
                 )}
@@ -158,7 +156,7 @@ export default function EntityOverview({
           </div>
         </div>
 
-        <div className="px-6 py-2 pb-4 sticky top-0 z-10 bg-gray-50">
+        <div className="px-6 py-2 pb-4 sticky top-0 z-10 bg-background-2">
           <div className="max-w-3xl mx-auto w-full">
             <div className="flex items-end flex-wrap gap-2" aria-label={t('filter-tabs-label')}>
               <FilterTabs
@@ -171,20 +169,23 @@ export default function EntityOverview({
                 <Select
                   value={sortBy}
                   onValueChange={(v) => {
-                    if (VALID_SORT_OPTIONS.includes(v as SortOption)) {
-                      setSortBy(v as SortOption);
+                    if (isSortOption(v)) {
+                      setSortBy(v);
                     }
                   }}
                 >
                   <SelectTrigger
                     size="sm"
                     className="w-fit gap-1 border-0 bg-transparent shadow-none text-sm"
+                    aria-label={t('sort-label')}
                   >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent align="end" position="popper">
-                    <SelectItem value="date">{t('sort-date')}</SelectItem>
-                    <SelectItem value="name">{t('sort-name')}</SelectItem>
+                    <SelectItem value="date-desc">{t('sort-date-desc')}</SelectItem>
+                    <SelectItem value="date-asc">{t('sort-date-asc')}</SelectItem>
+                    <SelectItem value="name-asc">{t('sort-name-asc')}</SelectItem>
+                    <SelectItem value="name-desc">{t('sort-name-desc')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

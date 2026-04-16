@@ -5,7 +5,7 @@ export async function deleteCharacter(page: Page, name: string) {
   await expect(card).toBeVisible();
   await card.click();
   await page.waitForURL('/characters/editor/**');
-  const deleteButton = page.getByRole('button', { name: 'Dialogpartner endgültig löschen' });
+  const deleteButton = page.getByTestId('custom-chat-delete-button').first();
   await expect(deleteButton).toBeVisible();
   await deleteButton.click();
 }
@@ -15,41 +15,30 @@ export async function configureCharacter(
   data?: {
     name?: string;
     description?: string;
-    schoolType?: string;
-    gradeLevel?: string;
-    subject?: string;
-    competence?: string;
-    learningContext?: string;
-    specifications?: string;
-    restrictions?: string;
+    initialMessage?: string;
+    instructions?: string;
   },
 ) {
-  await page.getByLabel('Schultyp').fill(data?.schoolType ?? 'Gymnasium');
-  await page.getByLabel('Klassenstufe').fill(data?.gradeLevel ?? '10. Klasse');
-  await page.getByLabel('Fach').fill(data?.subject ?? 'Geschichte');
-
-  await page.getByLabel('Wie heißt die simulierte Person? *').fill(data?.name ?? 'John Cena');
+  await page.getByTestId('character-name-input').fill(data?.name ?? 'John Cena');
 
   await page
-    .getByLabel('Wie kann die simulierte Person kurz beschrieben werden? *')
+    .getByTestId('character-description-input')
     .fill(
       data?.description ??
         'Er ist bekannt für seinen Spruch „You can`t see me“ und seine Wrestling-Karriere.',
     );
 
   await page
-    .getByLabel('Welche Kompetenzen sollen die Lernenden erwerben? *')
-    .fill(data?.competence ?? 'Gut wrestlen können');
+    .getByTestId('character-initial-message-input')
+    .fill(
+      data?.initialMessage ??
+        'Hallo, ich bin John Cena! Was möchtest du über Wrestling oder meine Karriere wissen?',
+    );
 
   await page
-    .getByLabel('Was ist die konkrete Unterrichtssituation? *')
-    .fill(data?.learningContext ?? 'Ein Dialog mit John Cena über Erfolg im Leben.');
+    .getByTestId('character-instructions-input')
+    .fill(data?.instructions ?? 'John Cena soll über seine Karriere und Erfolge sprechen.');
 
-  await page
-    .getByLabel('Wie soll der Dialogpartner antworten?')
-    .fill(data?.specifications ?? 'John Cena soll über seine Karriere und Erfolge sprechen.');
-
-  await page
-    .getByLabel('Wie soll der Dialogpartner nicht antworten?')
-    .fill(data?.restrictions ?? 'John Cena soll nicht über sein Privatleben sprechen.');
+  await page.waitForTimeout(500);
+  await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
 }

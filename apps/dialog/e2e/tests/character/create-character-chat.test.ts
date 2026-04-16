@@ -1,17 +1,16 @@
 import { expect, test } from '@playwright/test';
-import { login } from '../../utils/login';
+import { AUTH_FILES } from '../../utils/const';
 import { regenerateMessage, sendMessage } from '../../utils/chat';
-import { deleteCharacter } from '../../utils/character';
+import { configureCharacter, deleteCharacter } from '../../utils/character';
 import { waitForToast } from '../../utils/utils';
-import { configureCharacter } from '../../utils/character';
 import { nanoid } from 'nanoid';
+
+test.use({ storageState: AUTH_FILES.teacher });
 
 test.describe('create, share, chat, delete', () => {
   const characterName = 'John Cena ' + nanoid(8);
 
   test('teacher can login, create and join shared dialogpartner chat', async ({ page }) => {
-    await login(page, 'teacher');
-
     await page.goto('/characters');
     await page.waitForURL('/characters**');
 
@@ -24,22 +23,11 @@ test.describe('create, share, chat, delete', () => {
     // configure form
     await configureCharacter(page, {
       name: characterName,
-      competence: 'Gut wrestlen können',
-      description:
-        'Er ist bekannt für seinen Spruch „You can`t see me“ und seine Wrestling-Karriere.',
-      gradeLevel: '10. Klasse',
-      learningContext: 'Ein Dialog mit John Cena über Erfolg im Leben.',
-      restrictions: 'John Cena soll nicht über sein Privatleben sprechen.',
-      schoolType: 'Gymnasium',
-      specifications: 'John Cena soll über seine Karriere und Erfolge sprechen.',
-      subject: 'Geschichte',
+      description: `Er ist bekannt für seinen Spruch „You can't see me“ und seine Wrestling-Karriere.`,
+      instructions: 'John Cena soll über seine Karriere und Erfolge sprechen.',
     });
 
-    const submitButton = page.getByRole('button', { name: 'Dialogpartner erstellen' });
-    await expect(submitButton).toBeVisible();
-    await submitButton.click();
-
-    await page.waitForURL('/characters?visibility=private');
+    await page.goto('/characters');
 
     // check if created with the correct name
     const dialogChatName = page.getByText(characterName).first();
@@ -49,9 +37,11 @@ test.describe('create, share, chat, delete', () => {
     await page.waitForURL('/characters/editor/**');
 
     // test share page
-    await page.selectOption('#Telli-Points', '50');
-    await page.selectOption('#maxUsage', '45');
-    await page.getByTitle('Dialogpartner teilen').click();
+    await page.getByTestId('telli-points-select').click();
+    await page.getByRole('option', { name: '50 %' }).click();
+    await page.getByTestId('usage-time-select').click();
+    await page.getByRole('option', { name: '45 Minuten' }).click();
+    await page.getByRole('button', { name: 'Jetzt bereitstellen' }).click();
 
     await page.waitForURL('/characters/editor/**/share');
     const code = await page.locator('#join-code').textContent();
@@ -86,10 +76,8 @@ test.describe('create, share, chat, delete', () => {
   });
 
   test('teacher can delete character', async ({ page }) => {
-    await login(page, 'teacher');
-
-    await page.goto('/characters?visibility=private');
-    await page.waitForURL('/characters?visibility=private');
+    await page.goto('/characters');
+    await page.waitForURL('/characters');
 
     await deleteCharacter(page, characterName);
 

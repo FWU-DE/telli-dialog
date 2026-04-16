@@ -51,7 +51,7 @@ export default function AssistantContainer({
 
   function handleNavigateToNewChat(e: React.MouseEvent) {
     e.preventDefault();
-    router.push(`/custom/d/${id}`);
+    router.push(`/assistants/d/${id}`);
   }
   const queryParams = new URLSearchParams({
     create: 'false',

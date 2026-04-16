@@ -8,6 +8,7 @@ import Logo from '@/components/common/logo';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { requireAuth } from '@/auth/requireAuth';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,18 +33,20 @@ export default async function Page() {
       models={models}
       defaultLlmModelByCookie={userAndContext.lastUsedModel ?? DEFAULT_CHAT_MODEL}
     >
-      <ChatHeaderBar
-        chatId={id}
-        downloadConversationEnabled={false}
-        userAndContext={userAndContext}
-      />
-      <Chat
-        id={id}
-        initialMessages={[]}
-        promptSuggestions={promptSuggestions}
-        enableFileUpload={true}
-        logoElement={logoElement}
-      />
+      <DefaultPageLayout>
+        <ChatHeaderBar
+          chatId={id}
+          downloadConversationEnabled={false}
+          userAndContext={userAndContext}
+        />
+        <Chat
+          id={id}
+          initialMessages={[]}
+          promptSuggestions={promptSuggestions}
+          enableFileUpload={true}
+          logoElement={logoElement}
+        />
+      </DefaultPageLayout>
     </LlmModelsProvider>
   );
 }
