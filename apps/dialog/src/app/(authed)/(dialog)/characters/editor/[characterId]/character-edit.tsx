@@ -204,7 +204,6 @@ export function CharacterEdit({
 
   const handleDuplicateCharacter = async () => {
     const createResult = await createNewCharacterAction({
-      templatePictureId: character.pictureId ?? undefined,
       templateId: character.id,
       duplicateCharacterName: t('duplicate-name-format-string', {
         sourceName: character.name,

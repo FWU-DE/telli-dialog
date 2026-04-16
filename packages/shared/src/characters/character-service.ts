@@ -68,7 +68,6 @@ export const createNewCharacter = async ({
   modelId: _modelId,
   schoolId,
   user,
-  templatePictureId,
   templateId,
   duplicateCharacterName,
 }: {
@@ -76,7 +75,6 @@ export const createNewCharacter = async ({
   modelId?: string;
   schoolId: string;
   user: UserModel;
-  templatePictureId?: string;
   templateId?: string;
   duplicateCharacterName?: string;
 }) => {
@@ -91,14 +89,14 @@ export const createNewCharacter = async ({
       duplicateCharacterName,
     );
 
-    if (templatePictureId !== undefined) {
+    if (insertedCharacter.pictureId) {
       const copyOfTemplatePicture = buildCharacterPictureKey(
         insertedCharacter.id,
-        path.basename(templatePictureId),
+        path.basename(insertedCharacter.pictureId),
       );
       await copyFileInS3({
         newKey: copyOfTemplatePicture,
-        copySource: templatePictureId,
+        copySource: insertedCharacter.pictureId,
       });
 
       // Update the character with the new picture
@@ -119,14 +117,6 @@ export const createNewCharacter = async ({
 
   // Generate uuid beforehand to avoid two db transactions for create and immediate update
   const characterId = generateUUID();
-  let copyOfTemplatePicture;
-  if (templatePictureId !== undefined) {
-    copyOfTemplatePicture = buildCharacterPictureKey(characterId, path.basename(templatePictureId));
-    await copyFileInS3({
-      newKey: copyOfTemplatePicture,
-      copySource: templatePictureId,
-    });
-  }
   const llmModels = await dbGetLlmModelsByFederalStateId({
     federalStateId: federalStateId,
   });
@@ -147,7 +137,6 @@ export const createNewCharacter = async ({
       userId: user.id,
       schoolId: schoolId,
       modelId: model.id,
-      pictureId: copyOfTemplatePicture,
     })
     .returning();
 
