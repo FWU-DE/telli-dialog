@@ -104,6 +104,11 @@ export function ChatHistoryItem({
             {...registerFieldProps}
             wrapperClassName="flex-1"
             className="min-w-0 p-1 text-foreground border border-foreground rounded-md"
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') {
+                onAbort();
+              }
+            }}
             ref={(node) => {
               registerRef(node);
               (inputRef as React.RefObject<HTMLInputElement | null>).current = node;
