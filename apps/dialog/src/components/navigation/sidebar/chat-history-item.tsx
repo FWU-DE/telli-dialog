@@ -143,7 +143,7 @@ export function ChatHistoryItem({
           >
             <Link href={href} onClick={closeOnMobile} prefetch={false}>
               {iconWithStyle}
-              <span>{conversation.name}</span>
+              <span>{conversation.name ?? t('untitled-conversation')}</span>
             </Link>
           </SidebarMenuButton>
 
