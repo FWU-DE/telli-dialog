@@ -1,11 +1,9 @@
 /**
  * @description Service functions for learning scenarios without authorization checks.
  */
-import { dbGetFilesForLearningScenario } from '@shared/db/functions/files';
 import { db } from '@shared/db';
 import {
   AccessLevel,
-  LearningScenarioFileMapping,
   LearningScenarioInsertModel,
   learningScenarioInsertSchema,
   learningScenarioTable,
@@ -15,10 +13,10 @@ import { NotFoundError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
 import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
 import { copyFileInS3 } from '@shared/s3';
-import { duplicateFileWithEmbeddings } from '@shared/files/fileService';
 import { and, eq, lt } from 'drizzle-orm';
 import { addDays } from '@shared/utils/date';
 import path from 'node:path';
+import { copyRelatedTemplateFiles } from '@shared/templates/template-service';
 
 /**
  * This function creates a duplicate of an existing learning scenario,
@@ -76,7 +74,11 @@ export async function duplicateLearningScenario({
     throw new Error('Could not duplicate learning scenario');
   }
 
-  await copyRelatedFiles(originalLearningScenarioId, learningScenarioId);
+  await copyRelatedTemplateFiles(
+    'learning-scenario',
+    originalLearningScenarioId,
+    learningScenarioId,
+  );
 
   return insertedLearningScenario;
 }
@@ -96,19 +98,6 @@ async function copyAvatarPictureIfExists(
     newKey: newAvatarPictureId,
   });
   return newAvatarPictureId;
-}
-
-async function copyRelatedFiles(sourceId: string, destinationId: string) {
-  const relatedFiles = await dbGetFilesForLearningScenario(sourceId);
-  await Promise.all(
-    relatedFiles.map(async (file) => {
-      const newFileId = await duplicateFileWithEmbeddings(file.id);
-      await db.insert(LearningScenarioFileMapping).values({
-        fileId: newFileId,
-        learningScenarioId: destinationId,
-      });
-    }),
-  );
 }
 
 /**
