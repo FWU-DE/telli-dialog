@@ -285,6 +285,19 @@ export function AssistantEdit({
     await flushAutoSave();
   };
 
+  const assistantActions = (
+    <CustomChatActions>
+      <CustomChatActionUse onClick={handleUseChat} />
+      <CustomChatActionDuplicate onClick={handleDuplicateAssistant} />
+      <CustomChatActionDelete
+        onClick={handleDeleteAssistant}
+        modalTitle={t('delete-modal-title')}
+        modalDescription={t('delete-modal-description')}
+      />
+      <CustomChatActionSave onClick={handleAutoSave} />
+    </CustomChatActions>
+  );
+
   return (
     <CustomChatLayoutContainer>
       <BackButton
@@ -299,16 +312,7 @@ export function AssistantEdit({
       />
       <CustomChatTitle title={name} />
       <div className="flex flex-row justify-between">
-        <CustomChatActions>
-          <CustomChatActionUse onClick={handleUseChat} />
-          <CustomChatActionDuplicate onClick={handleDuplicateAssistant} />
-          <CustomChatActionDelete
-            onClick={handleDeleteAssistant}
-            modalTitle={t('delete-modal-title')}
-            modalDescription={t('delete-modal-description')}
-          />
-          <CustomChatActionSave onClick={handleAutoSave} />
-        </CustomChatActions>
+        {assistantActions}
         <CustomChatFormState
           isDirty={isDirty}
           isSubmitting={isSaving}
@@ -397,22 +401,7 @@ export function AssistantEdit({
         />
       </form>
       <div className="flex flex-row justify-between">
-        <CustomChatActions>
-          <CustomChatActionUse
-            onClick={() => {
-              guardNavigation(() => {
-                router.push(`/assistants/d/${assistant.id}/`);
-              });
-            }}
-          />
-          <CustomChatActionDuplicate onClick={handleDuplicateAssistant} />
-          <CustomChatActionDelete
-            onClick={handleDeleteAssistant}
-            modalTitle={t('delete-modal-title')}
-            modalDescription={t('delete-modal-description')}
-          />
-          <CustomChatActionSave onClick={handleAutoSave} />
-        </CustomChatActions>
+        {assistantActions}
         <CustomChatFormState
           isDirty={isDirty}
           isSubmitting={isSaving}

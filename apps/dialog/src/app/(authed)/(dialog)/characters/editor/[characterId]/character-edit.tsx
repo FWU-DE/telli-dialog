@@ -292,6 +292,19 @@ export function CharacterEdit({
     await flushAutoSave();
   };
 
+  const actionButtons = (
+    <CustomChatActions>
+      <CustomChatActionUse onClick={handleUseChat} />
+      <CustomChatActionDuplicate onClick={handleDuplicateCharacter} />
+      <CustomChatActionDelete
+        onClick={handleDeleteCharacter}
+        modalTitle={t('delete-modal-title')}
+        modalDescription={t('delete-modal-description')}
+      />
+      <CustomChatActionSave onClick={handleAutoSave} />
+    </CustomChatActions>
+  );
+
   return (
     <CustomChatLayoutContainer>
       <BackButton
@@ -306,16 +319,7 @@ export function CharacterEdit({
       />
       <CustomChatTitle title={name} />
       <div className="flex flex-row justify-between">
-        <CustomChatActions>
-          <CustomChatActionUse onClick={handleUseChat} />
-          <CustomChatActionDuplicate onClick={handleDuplicateCharacter} />
-          <CustomChatActionDelete
-            onClick={handleDeleteCharacter}
-            modalTitle={t('delete-modal-title')}
-            modalDescription={t('delete-modal-description')}
-          />
-          <CustomChatActionSave onClick={handleAutoSave} />
-        </CustomChatActions>
+        {actionButtons}
         <CustomChatFormState
           isDirty={isDirty}
           isSubmitting={isSaving}
@@ -360,119 +364,104 @@ export function CharacterEdit({
           avatarPictureUrl={avatarPictureUrl}
           onUploadPicture={handleUploadPicture}
         />
+      </div>
 
-        <form
-          id="character-edit-form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            handleAutoSave();
-          }}
-        >
-          <Card>
-            <CardContent>
-              <FieldGroup>
-                <FormField
-                  name="name"
-                  control={control}
-                  {...createCharacterFieldValidationConfig(t).name}
-                  label={t('name-label')}
-                  placeholder={t('name-placeholder')}
-                  autoFocusWhenEmpty
-                  testId="character-name-input"
-                  onBlur={handleAutoSave}
-                />
-                <FormField
-                  name="description"
-                  control={control}
-                  {...createCharacterFieldValidationConfig(t).description}
-                  label={t('description-label')}
-                  placeholder={t('description-placeholder')}
-                  testId="character-description-input"
-                  onBlur={handleAutoSave}
-                  type="textArea"
-                  className="h-27 resize-none"
-                />
-                <CustomChatModelSelect
-                  models={models}
-                  selectedModelId={selectedModelId ?? undefined}
-                  onValueChange={(value) => {
-                    setValue('modelId', value, { shouldDirty: true });
-                    handleAutoSave();
-                  }}
-                />
-                <FormField
-                  name="instructions"
-                  control={control}
-                  {...createCharacterFieldValidationConfig(t).instructions}
-                  label={t('instructions-label')}
-                  labelAction={
-                    <CustomChatInstructionsExampleDialog
-                      descriptionContent={instructionsExampleDialogContent}
-                    />
-                  }
-                  placeholder={instructionsPlaceholder}
-                  testId="character-instructions-input"
-                  onBlur={handleAutoSave}
-                  type="textArea"
-                  className="h-125"
-                />
-                <FormField
-                  name="initialMessage"
-                  control={control}
-                  {...createCharacterFieldValidationConfig(t).initialMessage}
-                  label={t('initial-message-label')}
-                  tooltip={t('initial-message-tooltip')}
-                  placeholder={t('initial-message-placeholder')}
-                  testId="character-initial-message-input"
-                  onBlur={handleAutoSave}
-                  type="textArea"
-                  className="h-27 resize-none"
-                />
-              </FieldGroup>
-            </CardContent>
-          </Card>
+      <form
+        id="character-edit-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          handleAutoSave();
+        }}
+      >
+        <Card>
+          <CardContent>
+            <FieldGroup>
+              <FormField
+                name="name"
+                control={control}
+                {...createCharacterFieldValidationConfig(t).name}
+                label={t('name-label')}
+                placeholder={t('name-placeholder')}
+                autoFocusWhenEmpty
+                testId="character-name-input"
+                onBlur={handleAutoSave}
+              />
+              <FormField
+                name="description"
+                control={control}
+                {...createCharacterFieldValidationConfig(t).description}
+                label={t('description-label')}
+                placeholder={t('description-placeholder')}
+                testId="character-description-input"
+                onBlur={handleAutoSave}
+                type="textArea"
+                className="h-27 resize-none"
+              />
+              <CustomChatModelSelect
+                models={models}
+                selectedModelId={selectedModelId ?? undefined}
+                onValueChange={(value) => {
+                  setValue('modelId', value, { shouldDirty: true });
+                  handleAutoSave();
+                }}
+              />
+              <FormField
+                name="instructions"
+                control={control}
+                {...createCharacterFieldValidationConfig(t).instructions}
+                label={t('instructions-label')}
+                labelAction={
+                  <CustomChatInstructionsExampleDialog
+                    descriptionContent={instructionsExampleDialogContent}
+                  />
+                }
+                placeholder={instructionsPlaceholder}
+                testId="character-instructions-input"
+                onBlur={handleAutoSave}
+                type="textArea"
+                className="h-125"
+              />
+              <FormField
+                name="initialMessage"
+                control={control}
+                {...createCharacterFieldValidationConfig(t).initialMessage}
+                label={t('initial-message-label')}
+                tooltip={t('initial-message-tooltip')}
+                placeholder={t('initial-message-placeholder')}
+                testId="character-initial-message-input"
+                onBlur={handleAutoSave}
+                type="textArea"
+                className="h-27 resize-none"
+              />
+            </FieldGroup>
+          </CardContent>
+        </Card>
 
-          <CustomChatFilesAndLinks
-            initialFiles={relatedFiles}
-            onFileUploaded={handleFileUploaded}
-            onDeleteFile={handleDeleteFile}
-            initialLinks={initialLinks}
-            onLinksChange={handleLinksChange}
-            onDownloadFile={handleDownloadFile}
-          />
+        <CustomChatFilesAndLinks
+          initialFiles={relatedFiles}
+          onFileUploaded={handleFileUploaded}
+          onDeleteFile={handleDeleteFile}
+          initialLinks={initialLinks}
+          onLinksChange={handleLinksChange}
+          onDownloadFile={handleDownloadFile}
+        />
 
-          <CustomShareSection
-            control={control}
-            schoolSharingName="isSchoolShared"
-            linkSharingName="hasLinkAccess"
-            linkToShare={`/characters/${character.id}`}
-            onShareChange={handleSharingChange}
-          />
-        </form>
+        <CustomShareSection
+          control={control}
+          schoolSharingName="isSchoolShared"
+          linkSharingName="hasLinkAccess"
+          linkToShare={`/characters/${character.id}`}
+          onShareChange={handleSharingChange}
+        />
+      </form>
 
-        <div className="flex flex-row justify-between">
-          <CustomChatActions>
-            <CustomChatActionUse
-              onClick={() => {
-                guardNavigation(() => {
-                  router.push(`/characters/d/${character.id}/`);
-                });
-              }}
-            />
-            <CustomChatActionDuplicate onClick={handleDuplicateCharacter} />
-            <CustomChatActionDelete
-              onClick={handleDeleteCharacter}
-              modalTitle={t('delete-modal-title')}
-              modalDescription={t('delete-modal-description')}
-            />
-            <CustomChatActionSave onClick={handleAutoSave} />
-          </CustomChatActions>
-          <CustomChatFormState
-            isDirty={isDirty}
-            isSubmitting={isSaving}
-            hasSaveError={hasSaveError}
-          />
-        </div>
+      <div className="flex flex-row justify-between">
+        {actionButtons}
+        <CustomChatFormState
+          isDirty={isDirty}
+          isSubmitting={isSaving}
+          hasSaveError={hasSaveError}
+        />
       </div>
     </CustomChatLayoutContainer>
   );
