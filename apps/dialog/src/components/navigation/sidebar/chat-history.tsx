@@ -90,6 +90,7 @@ export function ChatHistory() {
             placeholder={t('chat-search-placeholder')}
             aria-label={t('chat-search-placeholder')}
             onChange={(event) => setSearchText(event.target.value)}
+            data-testid="chat-search"
           />
           <InputGroupAddon align="inline-end">
             {searchText.length === 0 ? (

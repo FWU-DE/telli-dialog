@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
-import { waitForToast } from '../../utils/utils';
+import { waitForAutosave, waitForToast } from '../../utils/utils';
 import { sendMessage, uploadFile } from '../../utils/chat';
 import { deleteAssistant } from '../../utils/assistant';
 
@@ -48,11 +48,12 @@ test('teacher can login, create an assistant and start a chat', async ({ page })
 
   // save form
   await page.getByTestId('custom-chat-save-button').first().click();
+  await waitForAutosave(page);
   await page.goto('/assistants');
 
-  const card = page.getByRole('button', { name: assistantName }).first();
+  const card = page.getByTestId('entity-card').filter({ hasText: assistantName }).first();
   await expect(card).toBeVisible({ timeout: 15000 });
-  await card.getByRole('button', { name: 'Neuer Chat' }).click();
+  await card.getByTestId('chat-button').click();
   await page.waitForURL('/assistants/d/**');
   await expect(page.getByRole('heading')).toContainText(assistantName);
   await expect(page.locator('body')).toContainText(
@@ -110,12 +111,16 @@ test('data is autosaved on blur', async ({ page }) => {
 
   // Save the form
   await page.getByTestId('custom-chat-save-button').first().click();
+  await waitForAutosave(page);
 
   // Navigate to assistant overview explicitly to check if data was saved correctly
   await page.goto('/assistants');
-  const autosaveCard = page.getByRole('button', { name: 'Autosave Test GPT' }).first();
+  const autosaveCard = page
+    .getByTestId('entity-card')
+    .filter({ hasText: 'Autosave Test GPT' })
+    .first();
   await expect(autosaveCard).toBeVisible({ timeout: 15000 });
-  await autosaveCard.click();
+  await autosaveCard.getByTestId('entity-link').click();
   await page.waitForURL('/assistants/editor/**');
 
   // change title to new value

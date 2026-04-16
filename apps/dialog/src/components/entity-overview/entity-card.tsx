@@ -30,12 +30,16 @@ export default function EntityCard({
   const tCommon = useTranslations('common');
 
   return (
-    <div className="rounded-enterprise-md border flex items-center w-full hover:border-primary bg-card has-[[data-card-link]:focus-visible]:ring-2 has-[[data-card-link]:focus-visible]:ring-ring">
+    <div
+      className="rounded-enterprise-md border flex items-center w-full hover:border-primary bg-card has-[[data-card-link]:focus-visible]:ring-2 has-[[data-card-link]:focus-visible]:ring-ring"
+      data-testid="entity-card"
+    >
       <Link
         href={href}
         aria-label={name}
         data-card-link
         className="flex items-center gap-4 grow min-w-0 p-4 outline-none"
+        data-testid="entity-link"
       >
         <figure className="w-15 h-15 bg-light-gray rounded-full flex justify-center items-center shrink-0">
           {avatarUrl ? (
@@ -61,7 +65,7 @@ export default function EntityCard({
       </Link>
 
       {chatHref && (
-        <IconButton asChild className="shrink-0 p-1 mx-4">
+        <IconButton asChild className="shrink-0 p-1 mx-4" data-testid="chat-button">
           <Link href={chatHref} aria-label={tCommon('new-chat')}>
             <ChatTextIcon aria-hidden="true" className="w-6 h-6 text-primary" />
           </Link>

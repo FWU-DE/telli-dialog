@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
+import { waitForAutosave } from '../../utils/utils';
 import { nanoid } from 'nanoid';
 
 test.use({ storageState: AUTH_FILES.teacher });
@@ -7,13 +8,13 @@ test.use({ storageState: AUTH_FILES.teacher });
 test('create learning scenario from template', async ({ page }) => {
   await page.goto('/learning-scenarios');
 
-  const card = page.getByRole('button', { name: 'Lern was über KI' }).first();
+  const card = page.getByTestId('entity-card').filter({ hasText: 'Lern was über KI' }).first();
   await expect(card).toBeVisible();
-  await card.click();
+  await card.getByTestId('entity-link').click();
   // Non-owned scenarios now route to read-only view instead of editor
   await page.waitForURL('/learning-scenarios/**');
 
-  const duplicateButton = page.getByRole('button', { name: 'Duplizieren' });
+  const duplicateButton = page.getByRole('button', { name: 'Duplizieren' }).first();
   await expect(duplicateButton).toBeVisible();
   await expect(duplicateButton).toBeEnabled();
   await duplicateButton.click();
@@ -29,8 +30,7 @@ test('create learning scenario from template', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Arbeitsauftrag' }).fill('Arbeitsauftrag');
 
   // Wait for autosave to complete
-  await page.waitForTimeout(500);
-  await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
+  await waitForAutosave(page);
 
   // Navigate back to learning scenarios list to verify creation
   await page.goto('/learning-scenarios');

@@ -19,7 +19,7 @@ test.describe('accessibility checks', () => {
   test.describe('unauthenticated', () => {
     test('login page has no axe violations', async ({ page }) => {
       await page.goto('/login');
-      await page.getByRole('button', { name: 'Mit VIDIS einloggen' }).waitFor();
+      await page.getByTestId('vidis-login-button').waitFor();
 
       await expectNoAccessibilityViolations(page);
     });

@@ -1,9 +1,10 @@
 import { expect, Page } from '@playwright/test';
+import { waitForAutosave } from './utils';
 
 export async function deleteCharacter(page: Page, name: string) {
-  const card = page.getByRole('button', { name }).first();
-  await expect(card).toBeVisible();
-  await card.click();
+  const card = page.getByTestId('entity-card').filter({ hasText: name }).first();
+  await expect(card).toBeVisible({ timeout: 15000 });
+  await card.getByTestId('entity-link').click();
   await page.waitForURL('/characters/editor/**');
   const deleteButton = page.getByTestId('custom-chat-delete-button').first();
   await expect(deleteButton).toBeVisible();
@@ -39,6 +40,5 @@ export async function configureCharacter(
     .getByTestId('character-instructions-input')
     .fill(data?.instructions ?? 'John Cena soll über seine Karriere und Erfolge sprechen.');
 
-  await page.waitForTimeout(500);
-  await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
+  await waitForAutosave(page);
 }

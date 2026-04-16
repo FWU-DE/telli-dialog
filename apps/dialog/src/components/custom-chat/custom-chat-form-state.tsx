@@ -30,7 +30,7 @@ export function CustomChatFormState({
         </span>
       )}
       {!isSubmitting && !isDirty && !hasSaveError && (
-        <span className="flex items-center gap-1">
+        <span className="flex items-center gap-1" data-testid="autosave-saved">
           <CheckCircleIcon className="size-5 text-success" /> {t('saved')}
         </span>
       )}

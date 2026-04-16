@@ -11,9 +11,12 @@ test('should upload file and chat with assistant template (Schulorganisationsass
   await page.waitForURL('/assistants');
 
   // Wait for the Schulorganisationsassistent template card and click the chat button
-  const card = page.getByRole('button', { name: 'Schulorganisationsassistent' }).first();
+  const card = page
+    .getByTestId('entity-card')
+    .filter({ hasText: 'Schulorganisationsassistent' })
+    .first();
   await expect(card).toBeVisible();
-  await card.getByRole('button', { name: 'Neuer Chat' }).click();
+  await card.getByTestId('chat-button').click();
 
   // Wait for the assistant chat page to load
   await page.waitForURL('/assistants/d/**');
@@ -26,7 +29,7 @@ test('should upload file and chat with assistant template (Schulorganisationsass
   await expect(page.locator('form').getByRole('img').nth(1)).toBeVisible();
 
   // Send message about file contents
-  await sendMessage(page, 'Wie heißt die Hauptperson die in dieser Datei genannnt wird?');
+  await sendMessage(page, 'Wie heißt die Hauptperson die in dieser Datei genannt wird?');
 
   // Verify the response contains expected content
   const assistantMessage = page.getByLabel('assistant message 1');

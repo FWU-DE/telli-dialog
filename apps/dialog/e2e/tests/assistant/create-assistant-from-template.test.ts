@@ -7,10 +7,11 @@ test('create assistant from template', async ({ page }) => {
   await page.goto('/assistants');
 
   const card = page
-    .getByRole('button', { name: 'Schulorganisationsassistent', exact: true })
+    .getByTestId('entity-card')
+    .filter({ hasText: 'Schulorganisationsassistent' })
     .first();
   await expect(card).toBeVisible({ timeout: 15000 });
-  await card.click();
+  await card.getByTestId('entity-link').click();
   await page.waitForURL('/assistants/**');
 
   const copyButton = page.getByTestId('custom-chat-duplicate-button').first();

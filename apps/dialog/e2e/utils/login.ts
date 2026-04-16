@@ -19,7 +19,7 @@ export async function login(page: Page, user: string, password = 'password') {
     await page.waitForURL('/login');
   }
 
-  await page.getByRole('button', { name: 'Mit VIDIS einloggen' }).click();
+  await page.getByTestId('vidis-login-button').click();
 
   await page.getByLabel('Username').fill(user);
   await page.getByRole('textbox', { name: 'Password' }).fill(password);

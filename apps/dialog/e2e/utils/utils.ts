@@ -9,6 +9,11 @@ export async function waitForToastDisappear(page: Page) {
 }
 
 export async function waitForChatHistory(page: Page) {
-  await page.getByLabel('Chat suchen').waitFor();
+  await page.getByTestId('chat-search').waitFor();
   await expect(page.getByTestId('chat-history-loading')).toBeHidden();
+}
+
+export async function waitForAutosave(page: Page) {
+  await page.getByTestId('custom-chat-save-button').first().click();
+  await expect(page.getByTestId('autosave-saved').first()).toBeVisible({ timeout: 5000 });
 }

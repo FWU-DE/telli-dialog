@@ -1,4 +1,5 @@
 import { expect, Page } from '@playwright/test';
+import { waitForAutosave } from './utils';
 
 export async function createLearningScenario(page: Page) {
   await page.goto('/learning-scenarios');
@@ -14,9 +15,9 @@ async function confirmDelete(page: Page) {
 }
 
 export async function deleteLearningScenario(page: Page, name: string) {
-  const card = page.getByRole('button', { name }).first();
-  await expect(card).toBeVisible();
-  await card.click();
+  const card = page.getByTestId('entity-card').filter({ hasText: name }).first();
+  await expect(card).toBeVisible({ timeout: 15000 });
+  await card.getByTestId('entity-link').click();
   await page.waitForURL('/learning-scenarios/editor/**');
   const deleteButton = page.getByTestId('custom-chat-delete-button').first();
   await expect(deleteButton).toBeVisible();
@@ -73,6 +74,5 @@ export async function configureLearningScenario(
     );
 
   // Wait for autosave to complete (triggered by blur on last field)
-  await page.waitForTimeout(500);
-  await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
+  await waitForAutosave(page);
 }
