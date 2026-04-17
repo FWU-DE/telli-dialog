@@ -69,7 +69,7 @@ type CharacterFormProps = CharacterWithShareDataModel & {
  * - the max length property controls the behavior of the textInput component and blocks user input if the max length is reached
  */
 const characterFormValuesSchema = z.object({
-  name: z.string().min(1),
+  name: z.string().trim().min(1),
   description: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   learningContext: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS),
   competence: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS),
@@ -288,7 +288,6 @@ export default function CharacterForm({
   const copyContainer = readOnly ? (
     <CopyContainer
       templateId={character.id}
-      templatePictureId={character.pictureId ?? undefined}
       startedAt={character.startedAt}
       maxUsageTimeLimit={character.maxUsageTimeLimit}
       translationPath="characters.form"

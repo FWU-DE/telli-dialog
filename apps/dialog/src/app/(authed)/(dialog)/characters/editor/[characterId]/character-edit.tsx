@@ -91,7 +91,7 @@ function createCharacterFieldValidationConfig(t: CharacterTranslator) {
 
 function createCharacterFormValuesSchema(t: CharacterTranslator) {
   return z.object({
-    name: z.string().min(1, t('name-required')),
+    name: z.string().trim().min(1, t('name-required')),
     description: z.string(),
     instructions: z.string(),
     initialMessage: z.string(),
@@ -145,6 +145,7 @@ export function CharacterEdit({
   } = useForm<CharacterFormValues>({
     resolver: zodResolver(characterFormValuesSchema),
     defaultValues: initialValues,
+    mode: 'onBlur',
   });
 
   const { isSaving, hasSaveError, flushAutoSave, handleAutoSave } =
@@ -153,7 +154,7 @@ export function CharacterEdit({
       isDirty,
       getValues,
       reset: (values) => {
-        reset(values);
+        reset({ ...values, name: values.name.trim() });
       },
       validate: trigger,
       saveValues: async (data) => {
@@ -161,7 +162,7 @@ export function CharacterEdit({
         // attachedLinks are handled separately in handleLinksChange
         const updateResult = await updateCharacterAction({
           id: character.id,
-          name: data.name,
+          name: data.name.trim(),
           description: data.description,
           instructions: data.instructions,
           initialMessage: data.initialMessage,
@@ -203,7 +204,6 @@ export function CharacterEdit({
 
   const handleDuplicateCharacter = async () => {
     const createResult = await createNewCharacterAction({
-      templatePictureId: character.pictureId ?? undefined,
       templateId: character.id,
       duplicateCharacterName: t('duplicate-name-format-string', {
         sourceName: character.name,

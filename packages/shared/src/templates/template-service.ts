@@ -31,25 +31,47 @@ import {
 import { DUMMY_USER_ID } from '@shared/db/seed/user-entity';
 import { logError } from '@shared/logging';
 import {
-  copyAvatarPicture,
   duplicateFileWithEmbeddings,
   linkFileToAssistant,
   linkFileToCharacter,
   linkFileToLearningScenario,
 } from '@shared/files/fileService';
+import { buildLearningScenarioPictureKey } from '@shared/utils/picture-key';
 import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
 import { NotFoundError } from '@shared/error';
+import { copyFileInS3 } from '@shared/s3';
 import { generateUUID } from '@shared/utils/uuid';
-import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
 import path from 'node:path';
 
 const templateTypeMap: Record<string, TemplateTypes> = {
-  custom: 'custom-gpt',
+  custom: 'assistant',
   characters: 'character',
   'learning-scenarios': 'learning-scenario',
 };
 
 const MAX_ENTITY_NAME_LENGTH = 50;
+
+export async function copyEntityPictureIfExists({
+  sourcePictureId,
+  newEntityId,
+  buildPictureKey,
+}: {
+  sourcePictureId: string | null | undefined;
+  newEntityId: string;
+  buildPictureKey: (entityId: string, filename: string) => string;
+}) {
+  if (!sourcePictureId) {
+    return undefined;
+  }
+
+  const copiedPictureKey = buildPictureKey(newEntityId, path.basename(sourcePictureId));
+  await copyFileInS3({
+    copySource: sourcePictureId,
+    newKey: copiedPictureKey,
+  });
+
+  return copiedPictureKey;
+}
 
 /**
  * Fetch all global templates from the database, including deleted templates.
@@ -100,7 +122,7 @@ async function getAssistantTemplates(): Promise<TemplateModel[]> {
 
   return templates.map((template) => ({
     ...template,
-    type: 'custom-gpt',
+    type: 'assistant',
   }));
 }
 
@@ -148,7 +170,7 @@ export async function getTemplateById(
       ...character,
       type: 'character',
     };
-  } else if (templateType === 'custom-gpt') {
+  } else if (templateType === 'assistant') {
     const [assistant] = await db
       .select({
         id: assistantTable.id,
@@ -166,7 +188,7 @@ export async function getTemplateById(
 
     return {
       ...assistant,
-      type: 'custom-gpt',
+      type: 'assistant',
     };
   } else if (templateType === 'learning-scenario') {
     const [learningScenario] = await db
@@ -208,7 +230,7 @@ export async function getFederalStatesWithMappings(
       .from(characterTemplateMappingTable)
       .where(eq(characterTemplateMappingTable.characterId, templateId))
       .as('mapping');
-  } else if (templateType === 'custom-gpt') {
+  } else if (templateType === 'assistant') {
     subquery = db
       .select({
         federalStateId: assistantTemplateMappingTable.federalStateId,
@@ -278,7 +300,7 @@ export async function updateTemplateMappings(
           .onConflictDoNothing(); // Prevent duplicate entries
       }
     });
-  } else if (templateType === 'custom-gpt') {
+  } else if (templateType === 'assistant') {
     await db.transaction(async (tx) => {
       if (mappings.some((m) => !m.isMapped)) {
         await tx.delete(assistantTemplateMappingTable).where(
@@ -349,7 +371,7 @@ export async function updateTemplateMappings(
  * @throws Error if URL format is invalid or template ID is missing
  */
 function parseTemplateUrl(url: string): { templateType: TemplateTypes; originalId: string } {
-  const urlPattern = /\/(custom|characters|learning-scenarios)\/editor\/([a-fA-F0-9-]+)/;
+  const urlPattern = /\/(assistants|characters|learning-scenarios)\/editor\/([a-fA-F0-9-]+)/;
   const match = url.match(urlPattern);
 
   if (!match) {
@@ -387,7 +409,7 @@ export async function createTemplateFromUrl(url: string): Promise<string> {
 
     if (templateType === 'character') {
       newTemplate = await createCharacterTemplate(originalId);
-    } else if (templateType === 'custom-gpt') {
+    } else if (templateType === 'assistant') {
       // Handle assistant template creation
       newTemplate = await createAssistantTemplate(originalId);
     } else if (templateType === 'learning-scenario') {
@@ -411,7 +433,7 @@ export async function createTemplateFromUrl(url: string): Promise<string> {
  * Copies all files associated with a template to a new template, including embeddings and text chunks.
  * Files are duplicated in S3 and database records are created for the new template.
  *
- * @param templateType - The type of template ('character' or 'assistant')
+ * @param templateType - The type of template ('character', 'assistant' or 'learning-scenario')
  * @param templateId - The ID of the source template to copy files from
  * @param resultId - The ID of the new template to link copied files to
  * @throws Error if file copying fails, but continues with remaining files
@@ -426,7 +448,7 @@ export async function copyRelatedTemplateFiles(
 
     if (templateType === 'character') {
       relatedFiles = await dbGetRelatedCharacterFiles(templateId);
-    } else if (templateType === 'custom-gpt') {
+    } else if (templateType === 'assistant') {
       relatedFiles = await dbGetRelatedAssistantFiles(templateId);
     } else if (templateType === 'learning-scenario') {
       relatedFiles = await dbGetFilesForLearningScenario(templateId);
@@ -440,7 +462,7 @@ export async function copyRelatedTemplateFiles(
           const newFileId = await duplicateFileWithEmbeddings(file.id);
           if (templateType === 'character') {
             await linkFileToCharacter(newFileId, resultId);
-          } else if (templateType === 'custom-gpt') {
+          } else if (templateType === 'assistant') {
             await linkFileToAssistant(newFileId, resultId);
           } else if (templateType === 'learning-scenario') {
             await linkFileToLearningScenario(newFileId, resultId);
@@ -613,15 +635,11 @@ async function copyLearningScenario(
     MAX_ENTITY_NAME_LENGTH,
   );
 
-  // avatar
-  if (learningScenario.pictureId) {
-    const avatarKey = buildLearningScenarioPictureKey(
-      copy.id,
-      path.basename(learningScenario.pictureId),
-    );
-    await copyAvatarPicture(learningScenario.pictureId, avatarKey);
-    copy.pictureId = avatarKey;
-  }
+  copy.pictureId = await copyEntityPictureIfExists({
+    sourcePictureId: learningScenario.pictureId,
+    newEntityId: copy.id,
+    buildPictureKey: buildLearningScenarioPictureKey,
+  });
   // attachments are copied in a separate step atm after the template is created
 
   const [newLearningScenario] = await db.insert(learningScenarioTable).values(copy).returning();

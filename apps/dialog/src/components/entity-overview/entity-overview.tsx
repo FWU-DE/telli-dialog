@@ -24,10 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@telli/ui/components/Select';
-import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
-import ProfileMenu from '../navigation/profile-menu';
-import { ToggleSidebarButton } from '../navigation/sidebar/collapsible-sidebar';
-import { useSession } from 'next-auth/react';
 import { isSortOption, SortOption } from './utils';
 
 type EntityOverviewProps = {
@@ -57,8 +53,6 @@ export default function EntityOverview({
   const [sortBy, setSortBy] = React.useState<SortOption>('date-desc');
   const [infoDialogOpen, setInfoDialogOpen] = React.useState(false);
   const federalState = useFederalState();
-  const { data: session } = useSession();
-  const user = session?.user;
   const t = useTranslations('entity-overview');
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -77,126 +71,107 @@ export default function EntityOverview({
   }));
 
   React.useEffect(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = 0;
-    }
+    scrollContainerRef.current?.closest('main')?.scrollTo({ top: 0 });
   }, [activeFilter]);
 
   return (
-    <div className="min-w-full overflow-auto flex flex-col h-full">
-      <HeaderPortal>
-        <ToggleSidebarButton
-          isNewUiDesignEnabled={federalState?.featureToggles?.isNewUiDesignEnabled ?? false}
-        />
-        <div className="grow"></div>
-        <ProfileMenu userAndContext={user} />
-      </HeaderPortal>
-      <div className="overflow-auto" ref={scrollContainerRef}>
-        <div className="px-6 pt-6 pb-0">
-          <div className="max-w-3xl mx-auto w-full">
-            <div className="flex items-center gap-2 mb-6">
-              <h1 className="text-3xl">{title}</h1>
-              <Dialog open={infoDialogOpen} onOpenChange={setInfoDialogOpen}>
-                <DialogTrigger asChild>
-                  <button
-                    type="button"
-                    className="text-primary hover:text-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full pt-1.5"
-                    aria-label={t('info-tooltip-label')}
-                  >
-                    <InfoIcon className="w-8 h-8" aria-hidden="true" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent showCloseButton={false}>
-                  <DialogTitle>{title}</DialogTitle>
-                  <DialogDescription asChild>
-                    <div>{infoTooltip}</div>
-                  </DialogDescription>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button>{t('close')}</Button>
-                    </DialogClose>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            <div className="flex flex-wrap-reverse justify-between gap-2 mb-4">
-              <div className="relative max-w-sm w-full">
-                <Input
-                  ref={inputRef}
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  placeholder={searchPlaceholder}
-                  disabled={filterDisabled}
-                  aria-label={searchPlaceholder}
-                  className="h-10 rounded-xl border-gray-300 bg-card pr-10 pl-4 shadow-none focus-visible:border-gray-400 focus-visible:ring-0"
-                />
-                {searchInput ? (
-                  <XCircleIcon
-                    className="absolute right-3 top-1/2 size-5 -translate-y-2/3 text-gray-500 hover:text-gray-700 cursor-pointer transition-colors"
-                    aria-hidden="true"
-                    onClick={handleClearSearch}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        handleClearSearch();
-                      }
-                    }}
-                  />
-                ) : (
-                  <MagnifyingGlassIcon
-                    className="pointer-events-none absolute right-3 top-3/5 size-5 -translate-y-2/3 text-gray-500"
-                    aria-hidden="true"
-                  />
-                )}
-              </div>
-              {createButton}
-            </div>
+    <div className="min-w-full flex flex-col">
+      <div className="px-6" ref={scrollContainerRef}>
+        <div className="pt-6">
+          <div className="flex items-center gap-2 mb-6">
+            <h1 className="text-3xl">{title}</h1>
+            <Dialog open={infoDialogOpen} onOpenChange={setInfoDialogOpen}>
+              <DialogTrigger asChild>
+                <button
+                  type="button"
+                  className="text-primary hover:text-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full pt-1.5"
+                  aria-label={t('info-tooltip-label')}
+                >
+                  <InfoIcon className="w-8 h-8" aria-hidden="true" />
+                </button>
+              </DialogTrigger>
+              <DialogContent showCloseButton={false}>
+                <DialogTitle>{title}</DialogTitle>
+                <DialogDescription asChild>
+                  <div>{infoTooltip}</div>
+                </DialogDescription>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button>{t('close')}</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
-        </div>
 
-        <div className="px-6 py-2 pb-4 sticky top-0 z-10 bg-background-2">
-          <div className="max-w-3xl mx-auto w-full">
-            <div className="flex items-end flex-wrap gap-2" aria-label={t('filter-tabs-label')}>
-              <FilterTabs
-                tabs={visibleTabs}
-                activeTab={activeFilter}
-                onTabChange={onFilterChange}
+          <div className="flex flex-wrap-reverse justify-between gap-2 mb-4">
+            <div className="relative max-w-sm w-full">
+              <Input
+                ref={inputRef}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder={searchPlaceholder}
+                disabled={filterDisabled}
+                aria-label={searchPlaceholder}
+                className="h-10 rounded-xl border-gray-300 bg-card pr-10 pl-4 shadow-none focus-visible:border-gray-400 focus-visible:ring-0"
               />
-              <div className="grow" />
-              <div className="text-primary hover:text-primary-dark">
-                <Select
-                  value={sortBy}
-                  onValueChange={(v) => {
-                    if (isSortOption(v)) {
-                      setSortBy(v);
+              {searchInput ? (
+                <XCircleIcon
+                  className="absolute right-3 top-1/2 size-5 -translate-y-2/3 text-gray-500 hover:text-gray-700 cursor-pointer transition-colors"
+                  aria-hidden="true"
+                  onClick={handleClearSearch}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      handleClearSearch();
                     }
                   }}
+                />
+              ) : (
+                <MagnifyingGlassIcon
+                  className="pointer-events-none absolute right-3 top-3/5 size-5 -translate-y-2/3 text-gray-500"
+                  aria-hidden="true"
+                />
+              )}
+            </div>
+            {createButton}
+          </div>
+        </div>
+
+        <div className="py-2 pb-4 sticky top-0 z-10 bg-background-2">
+          <div className="flex items-end flex-wrap gap-2" aria-label={t('filter-tabs-label')}>
+            <FilterTabs tabs={visibleTabs} activeTab={activeFilter} onTabChange={onFilterChange} />
+            <div className="grow" />
+            <div className="text-primary hover:text-primary-dark">
+              <Select
+                value={sortBy}
+                onValueChange={(v) => {
+                  if (isSortOption(v)) {
+                    setSortBy(v);
+                  }
+                }}
+              >
+                <SelectTrigger
+                  size="sm"
+                  className="w-fit gap-1 border-0 bg-transparent shadow-none text-sm"
+                  aria-label={t('sort-label')}
                 >
-                  <SelectTrigger
-                    size="sm"
-                    className="w-fit gap-1 border-0 bg-transparent shadow-none text-sm"
-                    aria-label={t('sort-label')}
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent align="end" position="popper">
-                    <SelectItem value="date-desc">{t('sort-date-desc')}</SelectItem>
-                    <SelectItem value="date-asc">{t('sort-date-asc')}</SelectItem>
-                    <SelectItem value="name-asc">{t('sort-name-asc')}</SelectItem>
-                    <SelectItem value="name-desc">{t('sort-name-desc')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent align="end" position="popper">
+                  <SelectItem value="date-desc">{t('sort-date-desc')}</SelectItem>
+                  <SelectItem value="date-asc">{t('sort-date-asc')}</SelectItem>
+                  <SelectItem value="name-asc">{t('sort-name-asc')}</SelectItem>
+                  <SelectItem value="name-desc">{t('sort-name-desc')}</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
 
-        <div className="overflow-auto px-6 pb-6">
-          <div className="max-w-3xl mx-auto w-full">
-            <div className="flex flex-col gap-2 w-full">{children(searchInput, sortBy)}</div>
-          </div>
+        <div className="pb-6">
+          <div className="flex flex-col gap-2 w-full py-1">{children(searchInput, sortBy)}</div>
         </div>
       </div>
     </div>

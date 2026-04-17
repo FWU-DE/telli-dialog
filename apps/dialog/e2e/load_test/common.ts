@@ -130,7 +130,7 @@ export async function performLogin(
     });
 
     if (!idpHint) {
-      await page.getByRole('button', { name: 'Mit VIDIS einloggen' }).click();
+      await page.getByTestId('vidis-login-button').click();
     }
 
     const usernameInput = page.getByLabel('Username');

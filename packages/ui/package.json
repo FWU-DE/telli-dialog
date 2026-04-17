@@ -31,6 +31,7 @@
     "eslint-config-next": "16.2.2",
     "eslint-config-prettier": "10.1.8",
     "eslint-config-turbo": "2.9.3",
+    "eslint-plugin-jsx-a11y": "6.10.2",
     "eslint-plugin-prettier": "5.5.5",
     "postcss": "8.5.8",
     "prettier": "3.8.1",

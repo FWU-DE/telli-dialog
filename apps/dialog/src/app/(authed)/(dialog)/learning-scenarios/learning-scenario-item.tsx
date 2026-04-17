@@ -46,11 +46,8 @@ export default function LearningScenarioItem({
   }
 
   async function handleCreateNewLearningScenarioFromTemplate({
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    templatePictureId,
     templateId,
   }: {
-    templatePictureId?: string;
     templateId?: string;
   }) {
     if (!templateId) {
@@ -117,7 +114,6 @@ export default function LearningScenarioItem({
             redirectPath="learning-scenarios"
             createInstanceCallbackAction={handleCreateNewLearningScenarioFromTemplate}
             templateId={learningScenario.id}
-            templatePictureId={learningScenario.pictureId ?? undefined}
             className="w-8 h-8 flex items-center justify-center"
             {...{ title: t('form.copy-page.copy-template'), type: 'button' }}
           >

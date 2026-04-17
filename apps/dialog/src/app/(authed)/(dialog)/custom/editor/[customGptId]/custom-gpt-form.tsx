@@ -70,7 +70,7 @@ type AssistantFormProps = AssistantSelectModel & {
  * - the max length property controls the behavior of the textInput component and blocks user input if the max length is reached
  */
 const assistantFormValuesSchema = z.object({
-  name: z.string().min(1),
+  name: z.string().trim().min(1),
   description: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT),
   instructions: z.string().min(1).max(TEXT_INPUT_FIELDS_LENGTH_LIMIT_FOR_DETAILED_SETTINGS),
   promptSuggestions: z.array(z.object({ content: z.string() })),
@@ -185,6 +185,7 @@ export default function AssistantForm({
   async function onSubmit(data: AssistantFormValues) {
     const result = await updateAssistantAction({
       ...data,
+      name: data.name.trim(),
       promptSuggestions: data.promptSuggestions?.map((p) => p.content),
       gptId: assistant.id,
       attachedLinks: data.attachedLinks.map((p) => p?.link ?? ''),
@@ -255,13 +256,14 @@ export default function AssistantForm({
     const newData = {
       ...defaultData,
       ...data,
+      name: data.name.trim(),
       promptSuggestions: [],
       attachedLinks: data.attachedLinks.map((p) => p.link),
       isSchoolShared: undefined,
     };
     const dataEquals = deepEqual(defaultData, newData);
     if (dataEquals) return;
-    onSubmit(data);
+    void handleSubmit(onSubmit)();
   }
 
   async function handleCreateAssistant() {

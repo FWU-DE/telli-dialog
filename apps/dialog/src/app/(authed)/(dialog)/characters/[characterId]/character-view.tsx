@@ -59,7 +59,6 @@ export function CharacterView({
 
   const handleDuplicateCharacter = async () => {
     const createResult = await createNewCharacterAction({
-      templatePictureId: character.pictureId ?? undefined,
       templateId: character.id,
       duplicateCharacterName: t('duplicate-name-format-string', {
         sourceName: character.name,
@@ -118,6 +117,15 @@ export function CharacterView({
             <CustomChatAvatarImage pictureUrl={avatarPictureUrl} />
           </CardContent>
         </Card>
+
+        {character.accessLevel === 'global' && (
+          <Card className="w-full">
+            <CardContent className="flex flex-col items-center">
+              <div className="text-sm text-foreground/70">{t('author-label')}</div>
+              <div className="text-base font-medium">{t('author-text')}</div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardContent>

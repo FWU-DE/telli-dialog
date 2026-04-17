@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -12,7 +13,6 @@ export function CreateNewInstanceFromTemplate({
   templateId,
   children,
   className,
-  templatePictureId,
   redirectPath,
   disabled,
   createInstanceCallbackAction,
@@ -21,16 +21,13 @@ export function CreateNewInstanceFromTemplate({
   children: React.ReactNode;
   className?: string;
   templateId: string;
-  templatePictureId?: string;
   redirectPath: 'characters' | 'custom' | 'learning-scenarios';
   disabled?: boolean;
   createInstanceCallbackAction: ({
     modelId,
-    templatePictureId,
     templateId,
   }: {
     modelId?: string;
-    templatePictureId?: string;
     templateId: string;
   }) => Promise<ServerActionResult<{ id: string }>>;
 }) {
@@ -55,7 +52,6 @@ export function CreateNewInstanceFromTemplate({
 
       const createResult = await createInstanceCallbackAction({
         modelId: maybeDefaultModelId,
-        templatePictureId,
         templateId,
       });
       if (createResult.success) {

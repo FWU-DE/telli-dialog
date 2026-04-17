@@ -10,8 +10,8 @@ import {
 } from '@shared/learning-scenarios/learning-scenario-service';
 import { LearningScenarioContainer } from './learning-scenario-container';
 import LearningScenarioOverview from './learning-scenario-overview';
-import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
 

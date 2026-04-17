@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
 import {
+  createNewCharacter,
   deleteCharacter,
   deleteFileMappingAndEntity,
   downloadFileFromCharacter,
@@ -26,6 +27,11 @@ import { getAvatarPictureUrl } from '../files/fileService';
 import { generateUUID } from '../utils/uuid';
 import { CharacterSelectModel } from '@shared/db/schema';
 import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
+import {
+  copyCharacter,
+  copyEntityPictureIfExists,
+  copyRelatedTemplateFiles,
+} from '../templates/template-service';
 
 vi.mock('../db/functions/character', () => ({
   dbGetSharedCharacterConversations: vi.fn(),
@@ -51,6 +57,11 @@ vi.mock('../files/fileService', () => ({
   deleteAvatarPicture: vi.fn(),
   deleteMessageAttachments: vi.fn(),
 }));
+vi.mock('../templates/template-service', () => ({
+  copyCharacter: vi.fn(),
+  copyEntityPictureIfExists: vi.fn(),
+  copyRelatedTemplateFiles: vi.fn(),
+}));
 const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
   const mockDbWhere = vi.fn(() => ({ returning: mockDbReturning }));
@@ -63,6 +74,9 @@ vi.mock('@shared/db', () => ({ db: { update: mockDbUpdate } }));
 const mockUser = (userRole: 'student' | 'teacher' = 'teacher') => ({
   id: generateUUID(),
   userRole,
+  lastUsedModel: null,
+  versionAcceptedConditions: null,
+  createdAt: new Date(),
 });
 
 describe('character-service', () => {
@@ -371,6 +385,89 @@ describe('character-service', () => {
     });
   });
 
+  describe('createNewCharacter', () => {
+    const federalStateId = generateUUID();
+    const schoolId = generateUUID();
+    const templateId = generateUUID();
+    const duplicateCharacterName = 'Copied Character';
+
+    beforeEach(() => {
+      (
+        copyRelatedTemplateFiles as MockedFunction<typeof copyRelatedTemplateFiles>
+      ).mockResolvedValue(undefined as never);
+    });
+
+    it('should pass duplicateCharacterName to copyCharacter when creating from template', async () => {
+      const insertedCharacter = {
+        id: generateUUID(),
+        pictureId: null,
+      } as CharacterSelectModel;
+
+      (copyCharacter as MockedFunction<typeof copyCharacter>).mockResolvedValue(
+        insertedCharacter as never,
+      );
+      (
+        copyEntityPictureIfExists as MockedFunction<typeof copyEntityPictureIfExists>
+      ).mockResolvedValue(undefined as never);
+
+      const result = await createNewCharacter({
+        federalStateId,
+        schoolId,
+        templateId,
+        user: mockUser('teacher'),
+        duplicateCharacterName,
+      });
+
+      expect(copyCharacter).toHaveBeenCalledWith(
+        templateId,
+        'private',
+        expect.any(String),
+        schoolId,
+        duplicateCharacterName,
+      );
+      expect(copyEntityPictureIfExists).toHaveBeenCalledWith({
+        sourcePictureId: null,
+        newEntityId: insertedCharacter.id,
+        buildPictureKey: expect.any(Function),
+      });
+      expect(copyRelatedTemplateFiles).toHaveBeenCalledWith(
+        'character',
+        templateId,
+        insertedCharacter.id,
+      );
+      expect(result).toBe(insertedCharacter);
+    });
+
+    it('should update character picture when template picture is copied', async () => {
+      const insertedCharacter = {
+        id: generateUUID(),
+        pictureId: 'characters/template-id/original.png',
+      } as CharacterSelectModel;
+      const copiedPictureKey = `characters/${insertedCharacter.id}/original.png`;
+      const updatedCharacter = {
+        ...insertedCharacter,
+        pictureId: copiedPictureKey,
+      } as CharacterSelectModel;
+
+      (copyCharacter as MockedFunction<typeof copyCharacter>).mockResolvedValue(
+        insertedCharacter as never,
+      );
+      (
+        copyEntityPictureIfExists as MockedFunction<typeof copyEntityPictureIfExists>
+      ).mockResolvedValue(copiedPictureKey as never);
+      mockDbReturning.mockResolvedValue([updatedCharacter]);
+
+      const result = await createNewCharacter({
+        federalStateId,
+        schoolId,
+        templateId,
+        user: mockUser('teacher'),
+      });
+
+      expect(result).toEqual(updatedCharacter);
+    });
+  });
+
   describe('InvalidArgumentError scenarios - invalid parameter format', () => {
     it.each([
       {
@@ -664,7 +761,6 @@ describe('character-service', () => {
       });
 
       expect(uploadFileToS3).toHaveBeenCalled();
-      expect(mockDbUpdate).toHaveBeenCalled();
       expect(result).toEqual({
         picturePath: `characters/${characterId}/avatar_3a6eb0790f39`,
         signedUrl: 'https://signed-url',

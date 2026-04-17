@@ -139,8 +139,6 @@ export function AttachedLinks({
                   className="h-10"
                   handleDelete={!readOnly ? () => handleDeleteLink(index) : undefined}
                   isLoading={isLinkProcessing}
-                  index={index}
-                  sourceIndex={0}
                 />
               </div>
             );

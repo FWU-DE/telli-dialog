@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { OverviewFilter } from '@shared/overview-filter';
 import { CharacterWithImage } from './utils';
@@ -11,13 +10,13 @@ import { CreateNewCharacterButton } from './create-new-character-button';
 import { useOverviewFilter } from '@/components/hooks/use-overview-filter';
 import { getCharactersByFilterAction } from '../actions/entity-filter-actions';
 import { filterAndSortEntities } from '@/components/entity-overview/utils';
+import RichText from '@/components/common/rich-text';
 
 type CharacterOverviewProps = {
   currentUserId: string;
 };
 
 export default function CharacterOverview({ currentUserId }: CharacterOverviewProps) {
-  const router = useRouter();
   const t = useTranslations('characters');
   const [visibleCharacters, setVisibleCharacters] = useState<CharacterWithImage[]>([]);
 
@@ -33,15 +32,8 @@ export default function CharacterOverview({ currentUserId }: CharacterOverviewPr
   }
 
   const infoContent = (
-    <div className="flex flex-col gap-8 whitespace-pre-line">
-      <div>
-        <p className="font-semibold">{t('info-dialog.q1')}</p>
-        <p>{t('info-dialog.a1')}</p>
-      </div>
-      <div>
-        <p className="font-semibold">{t('info-dialog.q2')}</p>
-        <p>{t('info-dialog.a2')}</p>
-      </div>
+    <div className="whitespace-pre-line">
+      <RichText>{(tags) => t.rich('info-dialog', tags)}</RichText>
     </div>
   );
 
@@ -67,12 +59,8 @@ export default function CharacterOverview({ currentUserId }: CharacterOverviewPr
               description={character.description}
               avatarUrl={character.maybeSignedPictureUrl}
               isOwned={isOwned}
-              onCardClick={() =>
-                router.push(
-                  isOwned ? `/characters/editor/${character.id}` : `/characters/${character.id}`,
-                )
-              }
-              onChatClick={() => router.push(`/characters/d/${character.id}`)}
+              href={isOwned ? `/characters/editor/${character.id}` : `/characters/${character.id}`}
+              chatHref={`/characters/d/${character.id}`}
             />
           );
         });

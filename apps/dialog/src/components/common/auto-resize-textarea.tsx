@@ -9,7 +9,6 @@ const AutoResizeTextarea = forwardRef<HTMLTextAreaElement, React.ComponentProps<
     return (
       // @ts-expect-error - we need to pass the ref to the TextareaAutosize component
       <TextareaAutosize
-        autoFocus
         className={cn(
           'w-full py-1.5 border-slate-400 focus:border-yellow-700 focus:outline-hidden resize-none',
           value === undefined || value.toString().length < 1 ? 'h-10' : 'h-fit',

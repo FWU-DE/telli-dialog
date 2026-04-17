@@ -91,6 +91,7 @@
     "zod": "4.3.6"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.11.1",
     "@eslint/eslintrc": "3.3.5",
     "@playwright/test": "1.59.1",
     "@dotenvx/dotenvx": "1.59.1",
@@ -112,6 +113,7 @@
     "eslint-config-next": "16.2.2",
     "eslint-config-prettier": "10.1.8",
     "eslint-config-turbo": "2.9.3",
+    "eslint-plugin-jsx-a11y": "6.10.2",
     "eslint-plugin-prettier": "5.5.5",
     "k6": "0.0.0",
     "playwright-core": "1.59.1",

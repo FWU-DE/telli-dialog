@@ -7,8 +7,8 @@ import { getCharacterByAccessLevel } from '@shared/characters/character-service'
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import CharacterOverview from './character-overview';
-import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
 

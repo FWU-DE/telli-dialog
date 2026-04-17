@@ -27,6 +27,7 @@ export default function LoginForm() {
           className={cn(buttonSecondaryClassName, 'w-full')}
           onClick={() => signIn('vidis', { callbackUrl })}
           aria-label="Mit VIDIS einloggen"
+          data-testid="vidis-login-button"
         >
           Mit VIDIS einloggen
         </button>

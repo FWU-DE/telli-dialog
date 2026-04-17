@@ -5,6 +5,7 @@ import Spinner from '../icons/spinner';
 import { useToast } from './toast';
 import { IconButton } from '@ui/components/IconButton';
 import { ServerActionResult } from '@shared/actions/server-action-result';
+import { openInNewTab } from '@/utils/navigation/router';
 
 type DownloadFileButtonProps = {
   fileId: string;
@@ -21,7 +22,7 @@ export default function DownloadFileButton({ fileId, onDownloadFile }: DownloadF
     try {
       const result = await onDownloadFile(fileId);
       if (result.success && result.value) {
-        window.open(result.value, '_blank', 'noopener,noreferrer');
+        openInNewTab(result.value);
       } else {
         toast.error(t('toasts.download-error'));
       }

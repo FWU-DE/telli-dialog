@@ -13,12 +13,16 @@ import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { notFound } from 'next/navigation';
+import CollapseSidebar from '@/components/common/collapse-sidebar';
+import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
+import { buildLegacyUserAndContext } from '@/auth/types';
 
 export default async function Page(
   props: PageProps<'/learning-scenarios/editor/[learningScenarioId]/share'>,
 ) {
   const { learningScenarioId } = await props.params;
-  const { user } = await requireAuth();
+  const { user, school, federalState } = await requireAuth();
+  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
   const learningScenario = await getSharedLearningScenario({
     learningScenarioId: learningScenarioId,
@@ -37,6 +41,11 @@ export default async function Page(
 
   return (
     <div className="w-full px-4 sm:px-8 overflow-auto flex flex-col h-full">
+      <CollapseSidebar />
+      <CustomChatHeader
+        isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+        userAndContext={userAndContext}
+      />
       <Link
         href={`/learning-scenarios/editor/${learningScenario.id}`}
         className="flex gap-2 items-center text-primary w-full"

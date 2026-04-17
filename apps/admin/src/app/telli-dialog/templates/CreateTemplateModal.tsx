@@ -20,14 +20,14 @@ export function CreateTemplateModal({ isOpen, onClose, onSuccess }: CreateTempla
   const validateUrl = (inputUrl: string): boolean => {
     // Support both full URLs and path-only URLs
     const urlPattern =
-      /(?:https?:\/\/[^\/]+)?\/(custom|characters|learning-scenarios)\/editor\/([a-fA-F0-9-]+)/;
+      /(?:https?:\/\/[^\/]+)?\/(assistants|characters|learning-scenarios)\/editor\/([a-fA-F0-9-]+)/;
     return urlPattern.test(inputUrl);
   };
 
   const extractPath = (inputUrl: string): string => {
     // Extract just the path part if it's a full URL
     const urlPattern =
-      /(?:https?:\/\/[^\/]+)?(\/(custom|characters|learning-scenarios)\/editor\/[a-fA-F0-9-]+)/;
+      /(?:https?:\/\/[^\/]+)?(\/(assistants|characters|learning-scenarios)\/editor\/[a-fA-F0-9-]+)/;
     const match = inputUrl.match(urlPattern);
     return match?.[1] ?? inputUrl;
   };

@@ -6,7 +6,6 @@ import { CreateNewInstanceFromTemplate } from './create-new-instance-from-templa
 
 export function CopyContainer({
   templateId,
-  templatePictureId,
   startedAt,
   maxUsageTimeLimit,
   translationPath,
@@ -14,7 +13,7 @@ export function CopyContainer({
   createInstanceCallbackAction,
 }: Pick<
   Parameters<typeof CreateNewInstanceFromTemplate>[0],
-  'redirectPath' | 'createInstanceCallbackAction' | 'templateId' | 'templatePictureId'
+  'redirectPath' | 'createInstanceCallbackAction' | 'templateId'
 > & {
   startedAt: Date | null;
   maxUsageTimeLimit: number | null;
@@ -27,7 +26,6 @@ export function CopyContainer({
   return (
     <CreateNewInstanceFromTemplate
       templateId={templateId}
-      templatePictureId={templatePictureId}
       redirectPath={redirectPath}
       disabled={sharedChatActive}
       createInstanceCallbackAction={createInstanceCallbackAction}
