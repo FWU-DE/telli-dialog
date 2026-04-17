@@ -84,13 +84,6 @@ export default function EntityOverview({
 
   return (
     <div className="min-w-full overflow-auto flex flex-col h-full">
-      <HeaderPortal>
-        <ToggleSidebarButton
-          isNewUiDesignEnabled={federalState?.featureToggles?.isNewUiDesignEnabled ?? false}
-        />
-        <div className="grow"></div>
-        <ProfileMenu userAndContext={user} />
-      </HeaderPortal>
       <div className="overflow-auto" ref={scrollContainerRef}>
         <div className="px-6 pt-6 pb-0">
           <div className="max-w-3xl mx-auto w-full">
