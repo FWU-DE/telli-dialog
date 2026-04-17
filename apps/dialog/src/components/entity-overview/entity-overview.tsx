@@ -71,14 +71,12 @@ export default function EntityOverview({
   }));
 
   React.useEffect(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = 0;
-    }
+    scrollContainerRef.current?.closest('main')?.scrollTo({ top: 0 });
   }, [activeFilter]);
 
   return (
-    <div className="min-w-full overflow-auto flex flex-col h-full">
-      <div className="overflow-auto px-6" ref={scrollContainerRef}>
+    <div className="min-w-full flex flex-col">
+      <div className="px-6" ref={scrollContainerRef}>
         <div className="pt-6">
           <div className="flex items-center gap-2 mb-6">
             <h1 className="text-3xl">{title}</h1>
@@ -172,7 +170,7 @@ export default function EntityOverview({
           </div>
         </div>
 
-        <div className="overflow-auto pb-6">
+        <div className="pb-6">
           <div className="flex flex-col gap-2 w-full">{children(searchInput, sortBy)}</div>
         </div>
       </div>
