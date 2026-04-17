@@ -246,6 +246,8 @@
     "name-label": "Name des Dialogpartners",
     "name-placeholder": "Name des Dialogpartners",
     "name-max-length": "Der Name darf maximal {maxLength} Zeichen lang sein.",
+    "author-label": "Erstellt von",
+    "author-text": "FWU-Redaktion",
     "info-dialog": {
       "q1": "Was ist ein Dialogpartner?",
       "a1": "Ein Dialogpartner ist ein fiktiver Gesprächspartner mit dem die Schüler/innen chatten können. Für die Schülerinnen entsteht dabei das Gefühl tatsächlich mit der fiktiven Person zu chatten. Dies fördert ihre Motivation und Kreativität in Bezug auf die fiktive Person und das Thema.\n\nEs gibt bereits vordefinierte Dialogpartner oder es können eigene Dialogpartner erstellt werden.",
@@ -620,7 +622,7 @@
     "back-button-text": "Assistenten",
     "back-button-aria": "Zurück zur Übersicht der Assistenten",
     "author-label": "Erstellt von",
-    "author-text": "FWU",
+    "author-text": "FWU-Redaktion",
     "prompt-suggestion": "Promptvorschlag",
     "prompt-suggestion-placeholder": "Erstelle einen Assistenten für XY mit folgenden Eigenschaften: X, Y, Z.",
     "prompt-suggestions-add-button": "Promptvorschlag hinzufügen",

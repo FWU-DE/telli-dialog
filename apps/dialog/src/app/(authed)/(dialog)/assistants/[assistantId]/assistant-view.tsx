@@ -70,6 +70,12 @@ export function AssistantView({
         <CustomChatLastUpdate date={assistant.updatedAt} />
       </CustomChatActions>
 
+      <Card>
+        <CardContent className="flex justify-center items-center">
+          <CustomChatAvatarImage pictureUrl={pictureUrl} />
+        </CardContent>
+      </Card>
+
       {assistant.accessLevel === 'global' && (
         <Card className="w-full">
           <CardContent className="flex flex-col items-center">
@@ -78,12 +84,6 @@ export function AssistantView({
           </CardContent>
         </Card>
       )}
-
-      <Card>
-        <CardContent className="flex justify-center items-center">
-          <CustomChatAvatarImage pictureUrl={pictureUrl} />
-        </CardContent>
-      </Card>
 
       <Card>
         <CardContent>

@@ -119,6 +119,15 @@ export function CharacterView({
           </CardContent>
         </Card>
 
+        {character.accessLevel === 'global' && (
+          <Card className="w-full">
+            <CardContent className="flex flex-col items-center">
+              <div className="text-sm text-foreground/70">{t('author-label')}</div>
+              <div className="text-base font-medium">{t('author-text')}</div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardContent>
             <FieldGroup>
