@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, MockedFunction, vi } from 'vitest';
 import {
   copyAssistant,
   copyCharacter,
+  copyEntityPictureIfExists,
   copyRelatedTemplateFiles,
   createTemplateFromUrl,
 } from './template-service';
@@ -19,6 +20,7 @@ import {
   linkFileToLearningScenario,
 } from '@shared/files/fileService';
 import { logError } from '@shared/logging';
+import { copyFileInS3 } from '@shared/s3';
 
 vi.mock('@shared/db/functions/assistants', () => ({
   dbGetAssistantById: vi.fn(),
@@ -48,9 +50,62 @@ vi.mock('@shared/logging', () => ({
   logError: vi.fn(),
 }));
 
+vi.mock('@shared/s3', () => ({
+  copyFileInS3: vi.fn(),
+}));
+
 describe('template-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe('copyEntityPictureIfExists', () => {
+    it('should return undefined when sourcePictureId is missing', async () => {
+      const buildPictureKey = vi.fn();
+
+      const result = await copyEntityPictureIfExists({
+        sourcePictureId: null,
+        newEntityId: 'entity-1',
+        buildPictureKey,
+      });
+
+      expect(result).toBeUndefined();
+      expect(buildPictureKey).not.toHaveBeenCalled();
+      expect(copyFileInS3).not.toHaveBeenCalled();
+    });
+
+    it('should build target key from basename and copy file in s3', async () => {
+      const buildPictureKey = vi.fn(
+        (entityId: string, filename: string) => `entities/${entityId}/${filename}`,
+      );
+
+      const result = await copyEntityPictureIfExists({
+        sourcePictureId: 'avatars/source-123/profile.png',
+        newEntityId: 'entity-1',
+        buildPictureKey,
+      });
+
+      expect(buildPictureKey).toHaveBeenCalledWith('entity-1', 'profile.png');
+      expect(copyFileInS3).toHaveBeenCalledWith({
+        copySource: 'avatars/source-123/profile.png',
+        newKey: 'entities/entity-1/profile.png',
+      });
+      expect(result).toBe('entities/entity-1/profile.png');
+    });
+
+    it('should bubble up s3 copy errors', async () => {
+      (copyFileInS3 as MockedFunction<typeof copyFileInS3>).mockRejectedValue(
+        new Error('S3 copy failed') as never,
+      );
+
+      await expect(
+        copyEntityPictureIfExists({
+          sourcePictureId: 'avatars/source-123/profile.png',
+          newEntityId: 'entity-1',
+          buildPictureKey: (entityId, filename) => `entities/${entityId}/${filename}`,
+        }),
+      ).rejects.toThrow('S3 copy failed');
+    });
   });
 
   describe('copyAssistant', () => {
@@ -313,7 +368,7 @@ describe('template-service', () => {
       await copyRelatedTemplateFiles('assistant', 'template-1', 'result-1');
 
       expect(logError).toHaveBeenCalledWith(
-        expect.stringContaining('Error copying file file-1'),
+        expect.stringContaining('Error copying file'),
         expect.any(Error),
       );
       expect(linkFileToAssistant).toHaveBeenCalledWith('file-copy-2', 'result-1');

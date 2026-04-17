@@ -25,7 +25,11 @@ import {
 } from '@shared/conversation/conversation-service';
 import { uploadFileToS3 } from '../s3';
 import { getAvatarPictureUrl } from '../files/fileService';
-import { copyAssistant, copyRelatedTemplateFiles } from '../templates/template-service';
+import {
+  copyAssistant,
+  copyEntityPictureIfExists,
+  copyRelatedTemplateFiles,
+} from '../templates/template-service';
 
 vi.mock('../db/functions/assistants', () => ({
   dbGetAssistantById: vi.fn(),
@@ -458,6 +462,12 @@ describe('assistant-service', () => {
     const templateId = generateUUID();
     const duplicatedAssistantName = 'Copy of Biology Assistant';
 
+    beforeEach(() => {
+      (
+        copyRelatedTemplateFiles as MockedFunction<typeof copyRelatedTemplateFiles>
+      ).mockResolvedValue(undefined as never);
+    });
+
     it('should pass duplicateAssistantName to copyAssistant when creating from template', async () => {
       const insertedAssistant = {
         id: generateUUID(),
@@ -468,7 +478,7 @@ describe('assistant-service', () => {
         insertedAssistant as never,
       );
       (
-        copyRelatedTemplateFiles as MockedFunction<typeof copyRelatedTemplateFiles>
+        copyEntityPictureIfExists as MockedFunction<typeof copyEntityPictureIfExists>
       ).mockResolvedValue(undefined as never);
 
       const result = await createNewAssistant({
@@ -485,6 +495,16 @@ describe('assistant-service', () => {
         schoolId,
         duplicatedAssistantName,
       );
+      expect(copyEntityPictureIfExists).toHaveBeenCalledWith({
+        sourcePictureId: null,
+        newEntityId: insertedAssistant.id,
+        buildPictureKey: expect.any(Function),
+      });
+      expect(copyRelatedTemplateFiles).toHaveBeenCalledWith(
+        'assistant',
+        templateId,
+        insertedAssistant.id,
+      );
       expect(result).toBe(insertedAssistant);
     });
 
@@ -498,7 +518,7 @@ describe('assistant-service', () => {
         insertedAssistant as never,
       );
       (
-        copyRelatedTemplateFiles as MockedFunction<typeof copyRelatedTemplateFiles>
+        copyEntityPictureIfExists as MockedFunction<typeof copyEntityPictureIfExists>
       ).mockResolvedValue(undefined as never);
 
       await createNewAssistant({
@@ -514,6 +534,61 @@ describe('assistant-service', () => {
         schoolId,
         undefined,
       );
+    });
+
+    it('should update assistant picture when template picture is copied', async () => {
+      const insertedAssistant = {
+        id: generateUUID(),
+        pictureId: 'custom-gpts/template-id/original.png',
+      } as AssistantSelectModel;
+      const copiedPictureKey = `custom-gpts/${insertedAssistant.id}/original.png`;
+      const updatedAssistant = {
+        ...insertedAssistant,
+        pictureId: copiedPictureKey,
+      } as AssistantSelectModel;
+
+      (copyAssistant as MockedFunction<typeof copyAssistant>).mockResolvedValue(
+        insertedAssistant as never,
+      );
+      (
+        copyEntityPictureIfExists as MockedFunction<typeof copyEntityPictureIfExists>
+      ).mockResolvedValue(copiedPictureKey as never);
+      mockDbReturning.mockResolvedValue([updatedAssistant]);
+
+      const result = await createNewAssistant({
+        schoolId,
+        templateId,
+        user: mockUser('teacher'),
+      });
+
+      expect(copyEntityPictureIfExists).toHaveBeenCalledWith({
+        sourcePictureId: insertedAssistant.pictureId,
+        newEntityId: insertedAssistant.id,
+        buildPictureKey: expect.any(Function),
+      });
+      expect(result).toEqual(updatedAssistant);
+    });
+
+    it('should keep assistant unchanged when no copied picture key is returned', async () => {
+      const insertedAssistant = {
+        id: generateUUID(),
+        pictureId: 'custom-gpts/template-id/original.png',
+      } as AssistantSelectModel;
+
+      (copyAssistant as MockedFunction<typeof copyAssistant>).mockResolvedValue(
+        insertedAssistant as never,
+      );
+      (
+        copyEntityPictureIfExists as MockedFunction<typeof copyEntityPictureIfExists>
+      ).mockResolvedValue(undefined as never);
+
+      const result = await createNewAssistant({
+        schoolId,
+        templateId,
+        user: mockUser('teacher'),
+      });
+
+      expect(result).toEqual(insertedAssistant);
     });
   });
 
@@ -854,7 +929,6 @@ describe('assistant-service', () => {
       });
 
       expect(uploadFileToS3).toHaveBeenCalled();
-      expect(mockDbUpdate).toHaveBeenCalled();
       expect(result).toEqual({
         picturePath: `custom-gpts/${assistantId}/avatar_3a6eb0790f39`,
         signedUrl: 'https://signed-url',
