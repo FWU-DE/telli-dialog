@@ -29,9 +29,14 @@ import {
   deleteMessageAttachments,
   getAvatarPictureUrl,
 } from '@shared/files/fileService';
-import { copyFileInS3, deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
+import { buildAssistantPictureKey } from '@shared/utils/picture-key';
+import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
-import { copyAssistant, copyRelatedTemplateFiles } from '@shared/templates/template-service';
+import {
+  copyAssistant,
+  copyEntityPictureIfExists,
+  copyRelatedTemplateFiles,
+} from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
 import { addDays } from '@shared/utils/date';
 import { generateUUID } from '@shared/utils/uuid';
@@ -39,11 +44,7 @@ import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 import { computeBlobHash } from '@telli/shared-core/crypto/blob-hash';
 import { verifyReadAccess, verifyWriteAccess } from '@shared/auth/authorization-service';
-import path from 'node:path';
 
-export function buildAssistantPictureKey(assistantId: string, filename: string) {
-  return `custom-gpts/${assistantId}/${filename}`;
-}
 function buildAvatarFilename(hash: string) {
   return `avatar_${hash}`;
 }
@@ -221,16 +222,13 @@ export async function createNewAssistant({
       duplicateAssistantName,
     );
 
-    if (insertedAssistant.pictureId) {
-      const copyOfTemplatePicture = buildAssistantPictureKey(
-        insertedAssistant.id,
-        path.basename(insertedAssistant.pictureId),
-      );
-      await copyFileInS3({
-        newKey: copyOfTemplatePicture,
-        copySource: insertedAssistant.pictureId,
-      });
+    const copyOfTemplatePicture = await copyEntityPictureIfExists({
+      sourcePictureId: insertedAssistant.pictureId,
+      newEntityId: insertedAssistant.id,
+      buildPictureKey: buildAssistantPictureKey,
+    });
 
+    if (copyOfTemplatePicture) {
       // Update the assistant with the new picture
       const [updatedAssistant] = await db
         .update(assistantTable)
@@ -243,7 +241,7 @@ export async function createNewAssistant({
       }
     }
 
-    await copyRelatedTemplateFiles('custom-gpt', templateId, insertedAssistant.id);
+    await copyRelatedTemplateFiles('assistant', templateId, insertedAssistant.id);
     return insertedAssistant;
   }
 

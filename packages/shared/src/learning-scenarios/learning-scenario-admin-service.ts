@@ -1,11 +1,9 @@
 /**
  * @description Service functions for learning scenarios without authorization checks.
  */
-import { dbGetFilesForLearningScenario } from '@shared/db/functions/files';
 import { db } from '@shared/db';
 import {
   AccessLevel,
-  LearningScenarioFileMapping,
   LearningScenarioInsertModel,
   learningScenarioInsertSchema,
   learningScenarioTable,
@@ -13,12 +11,13 @@ import {
 import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
 import { NotFoundError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
-import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
-import { copyFileInS3 } from '@shared/s3';
-import { duplicateFileWithEmbeddings } from '@shared/files/fileService';
 import { and, eq, lt } from 'drizzle-orm';
 import { addDays } from '@shared/utils/date';
-import path from 'node:path';
+import {
+  copyEntityPictureIfExists,
+  copyRelatedTemplateFiles,
+} from '@shared/templates/template-service';
+import { buildLearningScenarioPictureKey } from '@shared/utils/picture-key';
 
 /**
  * This function creates a duplicate of an existing learning scenario,
@@ -46,10 +45,11 @@ export async function duplicateLearningScenario({
 
   const learningScenarioId = generateUUID();
 
-  const avatarPictureUrl = await copyAvatarPictureIfExists(
-    existingLearningScenario.pictureId,
-    learningScenarioId,
-  );
+  const avatarPictureUrl = await copyEntityPictureIfExists({
+    sourcePictureId: existingLearningScenario.pictureId,
+    newEntityId: learningScenarioId,
+    buildPictureKey: buildLearningScenarioPictureKey,
+  });
 
   // removes createdAt field and other unexpected fields
   const expectedValues = learningScenarioInsertSchema.parse(existingLearningScenario);
@@ -76,39 +76,13 @@ export async function duplicateLearningScenario({
     throw new Error('Could not duplicate learning scenario');
   }
 
-  await copyRelatedFiles(originalLearningScenarioId, learningScenarioId);
+  await copyRelatedTemplateFiles(
+    'learning-scenario',
+    originalLearningScenarioId,
+    learningScenarioId,
+  );
 
   return insertedLearningScenario;
-}
-
-async function copyAvatarPictureIfExists(
-  sourcePictureId: string | null | undefined,
-  newLearningScenarioId: string,
-) {
-  if (!sourcePictureId) return undefined;
-
-  const newAvatarPictureId = buildLearningScenarioPictureKey(
-    newLearningScenarioId,
-    path.basename(sourcePictureId),
-  );
-  await copyFileInS3({
-    copySource: sourcePictureId,
-    newKey: newAvatarPictureId,
-  });
-  return newAvatarPictureId;
-}
-
-async function copyRelatedFiles(sourceId: string, destinationId: string) {
-  const relatedFiles = await dbGetFilesForLearningScenario(sourceId);
-  await Promise.all(
-    relatedFiles.map(async (file) => {
-      const newFileId = await duplicateFileWithEmbeddings(file.id);
-      await db.insert(LearningScenarioFileMapping).values({
-        fileId: newFileId,
-        learningScenarioId: destinationId,
-      });
-    }),
-  );
 }
 
 /**

@@ -87,7 +87,6 @@ export default function CharacterContainer({
         {userId !== currentUserId && timeLeft <= 0 && (
           <CreateNewInstanceFromTemplate
             templateId={id}
-            templatePictureId={character.pictureId ?? undefined}
             className={'w-8 h-8'}
             redirectPath="characters"
             createInstanceCallbackAction={createNewCharacterAction}

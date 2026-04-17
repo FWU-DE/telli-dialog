@@ -288,7 +288,6 @@ export default function CharacterForm({
   const copyContainer = readOnly ? (
     <CopyContainer
       templateId={character.id}
-      templatePictureId={character.pictureId ?? undefined}
       startedAt={character.startedAt}
       maxUsageTimeLimit={character.maxUsageTimeLimit}
       translationPath="characters.form"

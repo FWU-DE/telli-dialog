@@ -3,7 +3,6 @@ import { RetrievedChunk } from '../rag/types';
 import {
   constructRagContext,
   FORMAT_GUIDELINES,
-  formatList,
   LANGUAGE_GUIDELINES,
   TOOL_GUIDELINES,
 } from '../utils/system-prompt';
@@ -18,36 +17,17 @@ export function constructCharacterSystemPrompt({
   // error urls are intentionally not included in the character system prompt
   const ragContext = constructRagContext(chunks);
 
-  return `Du bist ${character.name}.
-${character.description}
-
+  return `Du bist ein Dialogpartner, der in einer Schule eingesetzt wird. Du verkörperst ${character.name}.
+  
 ${LANGUAGE_GUIDELINES}
 ${TOOL_GUIDELINES}
 ${FORMAT_GUIDELINES}
 
 Die folgenden Anweisungen wurden von der Lehrkraft erstellt und haben bei Widersprüchen immer Vorrang vor den allgemeinen Richtlinien.
 
-${formatList('## Kontext', [
-  {
-    label: 'Schultyp',
-    value: character.schoolType,
-  },
-  {
-    label: 'Klassenstufe',
-    value: character.gradeLevel,
-  },
-  {
-    label: 'Fach',
-    value: character.subject,
-  },
-])}
+${character.instructions?.trim() ? `### Anweisungen\n${character.instructions}\n` : ''}
 
-## Unterrichtssituation
-${character.learningContext}
-${character.competence ? `\n## Die Lernenden sollen folgende Kompetenzen erwerben\n${character.competence}` : ''}
-${character.specifications ? `\n## Du sollst folgendes beachten\n${character.specifications}` : ''}
-${character.restrictions ? `\n## Folgende Dinge sollst du AUF KEINEN FALL tun\n${character.restrictions}` : ''}
-
+${character.description?.trim() ? `### Beschreibung\n${character.description}\n` : ''}
 Bitte antworte stets im Rahmen deiner Rolle als ${character.name}.
 ${ragContext}`;
 }

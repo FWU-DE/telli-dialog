@@ -9,12 +9,10 @@ import { runServerAction } from '@shared/actions/run-server-action';
 
 export async function createNewCharacterAction({
   modelId,
-  templatePictureId,
   templateId,
   duplicateCharacterName,
 }: {
   modelId?: string;
-  templatePictureId?: string;
   templateId?: string;
   duplicateCharacterName?: string;
 }) {
@@ -25,7 +23,6 @@ export async function createNewCharacterAction({
     modelId: modelId,
     schoolId: school.id,
     user,
-    templatePictureId,
     templateId,
     duplicateCharacterName,
   });

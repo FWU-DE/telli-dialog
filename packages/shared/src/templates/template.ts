@@ -1,4 +1,4 @@
-export type TemplateTypes = 'character' | 'custom-gpt' | 'learning-scenario';
+export type TemplateTypes = 'character' | 'assistant' | 'learning-scenario';
 
 /* Unified template model for characters and assistants */
 export type TemplateModel = {
@@ -20,7 +20,7 @@ export type TemplateToFederalStateMapping = {
 export function isTemplateType(templateType: string): templateType is TemplateTypes {
   return (
     templateType === 'character' ||
-    templateType === 'custom-gpt' ||
+    templateType === 'assistant' ||
     templateType === 'learning-scenario'
   );
 }

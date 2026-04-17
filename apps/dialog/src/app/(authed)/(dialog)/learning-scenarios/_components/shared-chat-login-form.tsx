@@ -38,9 +38,12 @@ export default function SharedChatLoginForm() {
 
   return (
     <form className="flex flex-col gap-4 w-full">
-      <h2 className="text-3xl mb-2 font-medium text-center w-full">{t('join-code')}</h2>
+      <h2 id="login-invite-code-label" className="text-3xl mb-2 font-medium text-center w-full">
+        {t('join-code')}
+      </h2>
       <input
         id="login-invite-code"
+        aria-labelledby="login-invite-code-label"
         value={inviteCode}
         onChange={(e) => setInviteCode(e.target.value)}
         onKeyDown={(e) => {

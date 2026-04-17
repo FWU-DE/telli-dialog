@@ -36,6 +36,7 @@ import {
   deleteMessageAttachments,
   getAvatarPictureUrl,
 } from '@shared/files/fileService';
+import { buildLearningScenarioPictureKey } from '@shared/utils/picture-key';
 import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
@@ -54,10 +55,6 @@ export type LearningScenarioWithImage = LearningScenarioOptionalShareDataModel &
   maybeSignedPictureUrl: string | undefined;
 };
 
-export function buildLearningScenarioPictureKey(learningScenarioId: string, filename: string) {
-  // the path still contains shared-chats because all existing learning scenarios store their picture in this folder in S3
-  return `shared-chats/${learningScenarioId}/${filename}`;
-}
 function buildAvatarFilename(hash: string) {
   return `avatar_${hash}`;
 }

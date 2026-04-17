@@ -421,6 +421,20 @@
       "when": 1776156562772,
       "tag": "0059_small_mephisto",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1776262350763,
+      "tag": "0060_many_franklin_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1776262365188,
+      "tag": "0061_open_absorbing_man",
+      "breakpoints": true
     }
   ]
 }

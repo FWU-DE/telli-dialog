@@ -1,4 +1,5 @@
 import { expect, Page } from '@playwright/test';
+import { waitForAutosave } from './utils';
 
 export async function createLearningScenario(page: Page) {
   await page.goto('/learning-scenarios');
@@ -14,9 +15,9 @@ async function confirmDelete(page: Page) {
 }
 
 export async function deleteLearningScenario(page: Page, name: string) {
-  const card = page.getByRole('button', { name }).first();
-  await expect(card).toBeVisible();
-  await card.click();
+  const card = page.getByTestId('entity-card').filter({ hasText: name }).first();
+  await expect(card).toBeVisible({ timeout: 15000 });
+  await card.getByTestId('entity-link').click();
   await page.waitForURL('/learning-scenarios/editor/**');
   const deleteButton = page.getByTestId('custom-chat-delete-button').first();
   await expect(deleteButton).toBeVisible();
@@ -45,34 +46,38 @@ export async function configureLearningScenario(
 ) {
   // Fill name field
   await page
-    .getByRole('textbox', { name: 'Name des Lernszenarios' })
+    .getByTestId('learning-scenario-name-input')
     .fill(data?.name ?? 'Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten');
+  await page.getByTestId('learning-scenario-name-input').press('Tab');
+  await waitForAutosave(page);
 
   // Fill description field
   await page
-    .getByRole('textbox', { name: 'Kurzbeschreibung' })
+    .getByTestId('learning-scenario-description-input')
     .fill(data?.description ?? 'Zwischen Absolutismus und Demokratie (Ludwig XIV)');
+  await page.getByTestId('learning-scenario-description-input').press('Tab');
+  await waitForAutosave(page);
 
   // Note: schoolType, gradeLevel, and subject fields no longer exist in the new UI
   // They have been consolidated into the instructions field
 
   // Fill instructions field
   await page
-    .getByRole('textbox', { name: 'Instruktionen' })
+    .getByTestId('learning-scenario-instructions-input')
     .fill(
       data?.additionalInstructions ??
         'Der Chatbot soll aus der Perspektive eines Soldaten im Herrschaftssystem unter Ludwig XIV antworten.',
     );
+  await page.getByTestId('learning-scenario-instructions-input').press('Tab');
+  await waitForAutosave(page);
 
   // Fill student exercise field
   await page
-    .getByRole('textbox', { name: 'Arbeitsauftrag' })
+    .getByTestId('learning-scenario-student-exercise-input')
     .fill(
       data?.studentExercise ??
         'Schüler sollen den Unterschied zwischen Absolutismus und Demokratie verstehen.',
     );
-
-  // Wait for autosave to complete (triggered by blur on last field)
-  await page.waitForTimeout(500);
-  await expect(page.getByText('Gespeichert').first()).toBeVisible({ timeout: 5000 });
+  await page.getByTestId('learning-scenario-student-exercise-input').press('Tab');
+  await waitForAutosave(page);
 }

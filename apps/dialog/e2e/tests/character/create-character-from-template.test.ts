@@ -8,13 +8,14 @@ test('create character from template', async ({ page }) => {
   await page.goto('/characters');
 
   const card = page
-    .getByRole('button', { name: 'Johann Wolfgang von Goethe', exact: true })
+    .getByTestId('entity-card')
+    .filter({ hasText: 'Johann Wolfgang von Goethe' })
     .first();
   await expect(card).toBeVisible();
-  await card.click();
+  await card.getByTestId('entity-link').click();
   await page.waitForURL('/characters/**');
 
-  const copyButton = page.getByTestId('custom-chat-duplicate-button');
+  const copyButton = page.getByTestId('custom-chat-duplicate-button').first();
   await expect(copyButton).toBeVisible();
   await expect(copyButton).toBeEnabled();
   await copyButton.click();

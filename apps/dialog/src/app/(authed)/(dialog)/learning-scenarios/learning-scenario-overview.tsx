@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { OverviewFilter } from '@shared/overview-filter';
 import { LearningScenarioWithImage } from '@shared/learning-scenarios/learning-scenario-service';
@@ -11,13 +10,13 @@ import { CreateNewLearningScenarioButton } from './create-new-learning-scenario-
 import { useOverviewFilter } from '@/components/hooks/use-overview-filter';
 import { getLearningScenariosByFilterAction } from '../actions/entity-filter-actions';
 import { filterAndSortEntities } from '@/components/entity-overview/utils';
+import RichText from '@/components/common/rich-text';
 
 type LearningScenarioOverviewProps = {
   currentUserId: string;
 };
 
 export default function LearningScenarioOverview({ currentUserId }: LearningScenarioOverviewProps) {
-  const router = useRouter();
   const t = useTranslations('learning-scenarios');
   const [visibleLearningScenarios, setVisibleLearningScenarios] = useState<
     LearningScenarioWithImage[]
@@ -35,15 +34,8 @@ export default function LearningScenarioOverview({ currentUserId }: LearningScen
   }
 
   const infoContent = (
-    <div className="flex flex-col gap-8 whitespace-pre-line">
-      <div>
-        <p className="font-semibold">{t('info-dialog.q1')}</p>
-        <p>{t('info-dialog.a1')}</p>
-      </div>
-      <div>
-        <p className="font-semibold">{t('info-dialog.q2')}</p>
-        <p>{t('info-dialog.a2')}</p>
-      </div>
+    <div className="whitespace-pre-line">
+      <RichText>{(tags) => t.rich('info-dialog', tags)}</RichText>
     </div>
   );
 
@@ -69,12 +61,10 @@ export default function LearningScenarioOverview({ currentUserId }: LearningScen
               description={scenario.description}
               avatarUrl={scenario.maybeSignedPictureUrl}
               isOwned={isOwned}
-              onCardClick={() =>
-                router.push(
-                  isOwned
-                    ? `/learning-scenarios/editor/${scenario.id}`
-                    : `/learning-scenarios/${scenario.id}`,
-                )
+              href={
+                isOwned
+                  ? `/learning-scenarios/editor/${scenario.id}`
+                  : `/learning-scenarios/${scenario.id}`
               }
             />
           );

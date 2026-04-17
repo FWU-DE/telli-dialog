@@ -35,10 +35,15 @@ import {
   deleteMessageAttachments,
   getAvatarPictureUrl,
 } from '@shared/files/fileService';
-import { copyFileInS3, deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
+import { buildCharacterPictureKey } from '@shared/utils/picture-key';
+import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
-import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/template-service';
+import {
+  copyCharacter,
+  copyEntityPictureIfExists,
+  copyRelatedTemplateFiles,
+} from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
 import { addDays } from '@shared/utils/date';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
@@ -51,11 +56,7 @@ import {
   verifyReadAccess,
   verifyWriteAccess,
 } from '@shared/auth/authorization-service';
-import path from 'node:path';
 
-export function buildCharacterPictureKey(characterId: string, filename: string) {
-  return `characters/${characterId}/${filename}`;
-}
 function buildAvatarFilename(hash: string) {
   return `avatar_${hash}`;
 }
@@ -68,7 +69,6 @@ export const createNewCharacter = async ({
   modelId: _modelId,
   schoolId,
   user,
-  templatePictureId,
   templateId,
   duplicateCharacterName,
 }: {
@@ -76,7 +76,6 @@ export const createNewCharacter = async ({
   modelId?: string;
   schoolId: string;
   user: UserModel;
-  templatePictureId?: string;
   templateId?: string;
   duplicateCharacterName?: string;
 }) => {
@@ -91,16 +90,13 @@ export const createNewCharacter = async ({
       duplicateCharacterName,
     );
 
-    if (templatePictureId !== undefined) {
-      const copyOfTemplatePicture = buildCharacterPictureKey(
-        insertedCharacter.id,
-        path.basename(templatePictureId),
-      );
-      await copyFileInS3({
-        newKey: copyOfTemplatePicture,
-        copySource: templatePictureId,
-      });
+    const copyOfTemplatePicture = await copyEntityPictureIfExists({
+      sourcePictureId: insertedCharacter.pictureId,
+      newEntityId: insertedCharacter.id,
+      buildPictureKey: buildCharacterPictureKey,
+    });
 
+    if (copyOfTemplatePicture) {
       // Update the character with the new picture
       const [updatedCharacter] = await db
         .update(characterTable)
@@ -119,14 +115,6 @@ export const createNewCharacter = async ({
 
   // Generate uuid beforehand to avoid two db transactions for create and immediate update
   const characterId = generateUUID();
-  let copyOfTemplatePicture;
-  if (templatePictureId !== undefined) {
-    copyOfTemplatePicture = buildCharacterPictureKey(characterId, path.basename(templatePictureId));
-    await copyFileInS3({
-      newKey: copyOfTemplatePicture,
-      copySource: templatePictureId,
-    });
-  }
   const llmModels = await dbGetLlmModelsByFederalStateId({
     federalStateId: federalStateId,
   });
@@ -147,7 +135,6 @@ export const createNewCharacter = async ({
       userId: user.id,
       schoolId: schoolId,
       modelId: model.id,
-      pictureId: copyOfTemplatePicture,
     })
     .returning();
 
