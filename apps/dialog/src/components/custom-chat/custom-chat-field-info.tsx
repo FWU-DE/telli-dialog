@@ -8,7 +8,7 @@ export function CustomChatFieldInfo({
   return (
     <div className="flex flex-col gap-1 text-base">
       <div className="font-semibold">{label}</div>
-      <div className="font-normal">{value ?? '-'}</div>
+      <div className="font-normal whitespace-pre-wrap">{value ?? '-'}</div>
     </div>
   );
 }
