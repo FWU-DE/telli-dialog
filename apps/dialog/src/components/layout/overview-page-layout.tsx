@@ -5,7 +5,7 @@ type OverviewPageLayoutProps = {
 };
 
 /**
- * This page layout is exspecially designed for overview pages like the character overview or the assistant overview.
+ * This page layout is especially designed for overview pages like the character overview or the assistant overview.
  * It takes the full height of the screen to allow for scrollable content areas.
  */
 export function OverviewPageLayout({ children }: OverviewPageLayoutProps) {

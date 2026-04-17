@@ -78,7 +78,7 @@ export default function EntityOverview({
 
   return (
     <div className="min-w-full overflow-auto flex flex-col h-full">
-      <div className="overflow-auto" ref={scrollContainerRef}>
+      <div className="overflow-auto px-6" ref={scrollContainerRef}>
         <div className="pt-6 pb-0">
           <div className="flex items-center gap-2 mb-6">
             <h1 className="text-3xl">{title}</h1>
