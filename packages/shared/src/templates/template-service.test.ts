@@ -268,7 +268,7 @@ describe('template-service', () => {
         duplicateFileWithEmbeddings as MockedFunction<typeof duplicateFileWithEmbeddings>
       ).mockResolvedValue('file-copy-1' as never);
 
-      await copyRelatedTemplateFiles('custom-gpt', 'template-1', 'result-1');
+      await copyRelatedTemplateFiles('assistant', 'template-1', 'result-1');
 
       expect(duplicateFileWithEmbeddings).toHaveBeenCalledWith('file-1');
       expect(linkFileToAssistant).toHaveBeenCalledWith('file-copy-1', 'result-1');
@@ -310,7 +310,7 @@ describe('template-service', () => {
         .mockRejectedValueOnce(new Error('copy failed'))
         .mockResolvedValueOnce('file-copy-2' as never);
 
-      await copyRelatedTemplateFiles('custom-gpt', 'template-1', 'result-1');
+      await copyRelatedTemplateFiles('assistant', 'template-1', 'result-1');
 
       expect(logError).toHaveBeenCalledWith(
         expect.stringContaining('Error copying file file-1'),
