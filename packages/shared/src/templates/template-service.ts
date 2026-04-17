@@ -36,9 +36,9 @@ import {
   linkFileToCharacter,
   linkFileToLearningScenario,
 } from '@shared/files/fileService';
+import { buildLearningScenarioPictureKey } from '@shared/utils/picture-key';
 import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
 import { NotFoundError } from '@shared/error';
-import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
 import { copyFileInS3 } from '@shared/s3';
 import { generateUUID } from '@shared/utils/uuid';
 import path from 'node:path';
@@ -371,7 +371,7 @@ export async function updateTemplateMappings(
  * @throws Error if URL format is invalid or template ID is missing
  */
 function parseTemplateUrl(url: string): { templateType: TemplateTypes; originalId: string } {
-  const urlPattern = /\/(custom|characters|learning-scenarios)\/editor\/([a-fA-F0-9-]+)/;
+  const urlPattern = /\/(assistants|characters|learning-scenarios)\/editor\/([a-fA-F0-9-]+)/;
   const match = url.match(urlPattern);
 
   if (!match) {

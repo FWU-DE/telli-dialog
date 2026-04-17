@@ -17,7 +17,7 @@ import {
   copyEntityPictureIfExists,
   copyRelatedTemplateFiles,
 } from '@shared/templates/template-service';
-import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
+import { buildLearningScenarioPictureKey } from '@shared/utils/picture-key';
 
 /**
  * This function creates a duplicate of an existing learning scenario,

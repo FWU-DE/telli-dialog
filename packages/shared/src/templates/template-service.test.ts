@@ -315,7 +315,7 @@ describe('template-service', () => {
   });
 
   describe('copyRelatedTemplateFiles', () => {
-    it('should copy and link files for custom-gpt templates', async () => {
+    it('should copy and link files for assistant templates', async () => {
       (
         dbGetRelatedAssistantFiles as MockedFunction<typeof dbGetRelatedAssistantFiles>
       ).mockResolvedValue([{ id: 'file-1' }] as never);

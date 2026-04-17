@@ -35,6 +35,7 @@ import {
   deleteMessageAttachments,
   getAvatarPictureUrl,
 } from '@shared/files/fileService';
+import { buildCharacterPictureKey } from '@shared/utils/picture-key';
 import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
@@ -55,10 +56,6 @@ import {
   verifyReadAccess,
   verifyWriteAccess,
 } from '@shared/auth/authorization-service';
-
-export function buildCharacterPictureKey(characterId: string, filename: string) {
-  return `characters/${characterId}/${filename}`;
-}
 
 function buildAvatarFilename(hash: string) {
   return `avatar_${hash}`;

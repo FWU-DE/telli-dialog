@@ -29,6 +29,7 @@ import {
   deleteMessageAttachments,
   getAvatarPictureUrl,
 } from '@shared/files/fileService';
+import { buildAssistantPictureKey } from '@shared/utils/picture-key';
 import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
 import {
@@ -44,10 +45,6 @@ import z from 'zod';
 import { computeBlobHash } from '@telli/shared-core/crypto/blob-hash';
 import { verifyReadAccess, verifyWriteAccess } from '@shared/auth/authorization-service';
 
-export function buildAssistantPictureKey(assistantId: string, filename: string) {
-  // the path still contains custom-gpts because all existing assistants store their picture in this folder in S3
-  return `custom-gpts/${assistantId}/${filename}`;
-}
 function buildAvatarFilename(hash: string) {
   return `avatar_${hash}`;
 }
