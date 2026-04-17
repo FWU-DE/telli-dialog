@@ -32,9 +32,9 @@ export default function CharacterOverview({ currentUserId }: CharacterOverviewPr
   }
 
   const infoContent = (
-    <p className="whitespace-pre-line">
+    <div className="whitespace-pre-line">
       <RichText>{(tags) => t.rich('info-dialog', tags)}</RichText>
-    </p>
+    </div>
   );
 
   return (

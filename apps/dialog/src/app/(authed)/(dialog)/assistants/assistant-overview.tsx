@@ -32,9 +32,9 @@ export default function AssistantOverview({ currentUserId }: AssistantOverviewPr
   }
 
   const infoContent = (
-    <p className="whitespace-pre-line">
+    <div className="whitespace-pre-line">
       <RichText>{(tags) => t.rich('info-dialog', tags)}</RichText>
-    </p>
+    </div>
   );
 
   return (
