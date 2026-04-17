@@ -50,6 +50,7 @@ vi.mock('../files/fileService', () => ({
 vi.mock('../templates/template-service', () => ({
   copyAssistant: vi.fn(),
   copyRelatedTemplateFiles: vi.fn(),
+  copyEntityPictureIfExists: vi.fn(),
 }));
 const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();

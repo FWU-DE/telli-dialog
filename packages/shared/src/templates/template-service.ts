@@ -31,7 +31,6 @@ import {
 import { DUMMY_USER_ID } from '@shared/db/seed/user-entity';
 import { logError } from '@shared/logging';
 import {
-  copyAvatarPicture,
   duplicateFileWithEmbeddings,
   linkFileToAssistant,
   linkFileToCharacter,
@@ -39,8 +38,9 @@ import {
 } from '@shared/files/fileService';
 import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
 import { NotFoundError } from '@shared/error';
-import { generateUUID } from '@shared/utils/uuid';
 import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
+import { copyFileInS3 } from '@shared/s3';
+import { generateUUID } from '@shared/utils/uuid';
 import path from 'node:path';
 
 const templateTypeMap: Record<string, TemplateTypes> = {
@@ -50,6 +50,28 @@ const templateTypeMap: Record<string, TemplateTypes> = {
 };
 
 const MAX_ENTITY_NAME_LENGTH = 50;
+
+export async function copyEntityPictureIfExists({
+  sourcePictureId,
+  newEntityId,
+  buildPictureKey,
+}: {
+  sourcePictureId: string | null | undefined;
+  newEntityId: string;
+  buildPictureKey: (entityId: string, filename: string) => string;
+}) {
+  if (!sourcePictureId) {
+    return undefined;
+  }
+
+  const copiedPictureKey = buildPictureKey(newEntityId, path.basename(sourcePictureId));
+  await copyFileInS3({
+    copySource: sourcePictureId,
+    newKey: copiedPictureKey,
+  });
+
+  return copiedPictureKey;
+}
 
 /**
  * Fetch all global templates from the database, including deleted templates.
@@ -613,15 +635,11 @@ async function copyLearningScenario(
     MAX_ENTITY_NAME_LENGTH,
   );
 
-  // avatar
-  if (learningScenario.pictureId) {
-    const avatarKey = buildLearningScenarioPictureKey(
-      copy.id,
-      path.basename(learningScenario.pictureId),
-    );
-    await copyAvatarPicture(learningScenario.pictureId, avatarKey);
-    copy.pictureId = avatarKey;
-  }
+  copy.pictureId = await copyEntityPictureIfExists({
+    sourcePictureId: learningScenario.pictureId,
+    newEntityId: copy.id,
+    buildPictureKey: buildLearningScenarioPictureKey,
+  });
   // attachments are copied in a separate step atm after the template is created
 
   const [newLearningScenario] = await db.insert(learningScenarioTable).values(copy).returning();

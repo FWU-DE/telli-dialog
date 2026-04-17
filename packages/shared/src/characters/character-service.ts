@@ -35,10 +35,14 @@ import {
   deleteMessageAttachments,
   getAvatarPictureUrl,
 } from '@shared/files/fileService';
-import { copyFileInS3, deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
+import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
-import { copyCharacter, copyRelatedTemplateFiles } from '@shared/templates/template-service';
+import {
+  copyCharacter,
+  copyEntityPictureIfExists,
+  copyRelatedTemplateFiles,
+} from '@shared/templates/template-service';
 import { OverviewFilter } from '@shared/overview-filter';
 import { addDays } from '@shared/utils/date';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
@@ -51,11 +55,11 @@ import {
   verifyReadAccess,
   verifyWriteAccess,
 } from '@shared/auth/authorization-service';
-import path from 'node:path';
 
 export function buildCharacterPictureKey(characterId: string, filename: string) {
   return `characters/${characterId}/${filename}`;
 }
+
 function buildAvatarFilename(hash: string) {
   return `avatar_${hash}`;
 }
@@ -89,16 +93,13 @@ export const createNewCharacter = async ({
       duplicateCharacterName,
     );
 
-    if (insertedCharacter.pictureId) {
-      const copyOfTemplatePicture = buildCharacterPictureKey(
-        insertedCharacter.id,
-        path.basename(insertedCharacter.pictureId),
-      );
-      await copyFileInS3({
-        newKey: copyOfTemplatePicture,
-        copySource: insertedCharacter.pictureId,
-      });
+    const copyOfTemplatePicture = await copyEntityPictureIfExists({
+      sourcePictureId: insertedCharacter.pictureId,
+      newEntityId: insertedCharacter.id,
+      buildPictureKey: buildCharacterPictureKey,
+    });
 
+    if (copyOfTemplatePicture) {
       // Update the character with the new picture
       const [updatedCharacter] = await db
         .update(characterTable)

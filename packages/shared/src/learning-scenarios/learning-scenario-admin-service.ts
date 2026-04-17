@@ -11,12 +11,13 @@ import {
 import { dbGetLearningScenarioById } from '@shared/db/functions/learning-scenario';
 import { NotFoundError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
-import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
-import { copyFileInS3 } from '@shared/s3';
 import { and, eq, lt } from 'drizzle-orm';
 import { addDays } from '@shared/utils/date';
-import path from 'node:path';
-import { copyRelatedTemplateFiles } from '@shared/templates/template-service';
+import {
+  copyEntityPictureIfExists,
+  copyRelatedTemplateFiles,
+} from '@shared/templates/template-service';
+import { buildLearningScenarioPictureKey } from '@shared/learning-scenarios/learning-scenario-service';
 
 /**
  * This function creates a duplicate of an existing learning scenario,
@@ -44,10 +45,11 @@ export async function duplicateLearningScenario({
 
   const learningScenarioId = generateUUID();
 
-  const avatarPictureUrl = await copyAvatarPictureIfExists(
-    existingLearningScenario.pictureId,
-    learningScenarioId,
-  );
+  const avatarPictureUrl = await copyEntityPictureIfExists({
+    sourcePictureId: existingLearningScenario.pictureId,
+    newEntityId: learningScenarioId,
+    buildPictureKey: buildLearningScenarioPictureKey,
+  });
 
   // removes createdAt field and other unexpected fields
   const expectedValues = learningScenarioInsertSchema.parse(existingLearningScenario);
@@ -81,23 +83,6 @@ export async function duplicateLearningScenario({
   );
 
   return insertedLearningScenario;
-}
-
-async function copyAvatarPictureIfExists(
-  sourcePictureId: string | null | undefined,
-  newLearningScenarioId: string,
-) {
-  if (!sourcePictureId) return undefined;
-
-  const newAvatarPictureId = buildLearningScenarioPictureKey(
-    newLearningScenarioId,
-    path.basename(sourcePictureId),
-  );
-  await copyFileInS3({
-    copySource: sourcePictureId,
-    newKey: newAvatarPictureId,
-  });
-  return newAvatarPictureId;
 }
 
 /**
