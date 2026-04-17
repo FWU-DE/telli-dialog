@@ -11,7 +11,7 @@ import {
 import { LearningScenarioContainer } from './learning-scenario-container';
 import LearningScenarioOverview from './learning-scenario-overview';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
-import { OverviewPageLayout } from '@/components/layout/overview-page-layout';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,13 +27,13 @@ export default async function Page(props: PageProps<'/learning-scenarios'>) {
 
   if (isNewUi) {
     return (
-      <OverviewPageLayout>
+      <DefaultPageLayout>
         <CustomChatHeader
           userAndContext={userAndContext}
           isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
         />
         <LearningScenarioOverview currentUserId={user.id} />
-      </OverviewPageLayout>
+      </DefaultPageLayout>
     );
   }
 
