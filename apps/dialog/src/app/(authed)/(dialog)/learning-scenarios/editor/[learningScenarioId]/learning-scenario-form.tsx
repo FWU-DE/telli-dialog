@@ -267,7 +267,6 @@ export default function LearningScenarioForm({
   const copyContainer = readOnly ? (
     <CopyContainer
       templateId={sharedSchoolChat.id}
-      templatePictureId={sharedSchoolChat.pictureId ?? undefined}
       startedAt={sharedSchoolChat.startedAt}
       maxUsageTimeLimit={sharedSchoolChat.maxUsageTimeLimit}
       translationPath="learning-scenarios.form"

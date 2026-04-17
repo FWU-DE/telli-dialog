@@ -48,13 +48,13 @@ export async function insertTemplateAssistant() {
     const result = await dbUpsertAssistant({ assistant: templateAssistant });
     const id = result?.id ?? undefined;
     if (!id) {
-      console.log('Failed to seed template custom gpt', {
+      console.log('Failed to seed template assistant', {
         assistantName: templateAssistant.name,
       });
       continue;
     }
     await updateTemplateMappings(
-      'custom-gpt',
+      'assistant',
       id,
       FEDERAL_STATES.map((fs) => ({ federalStateId: fs.id, isMapped: true })),
     );
