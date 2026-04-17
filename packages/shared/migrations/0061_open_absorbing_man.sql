@@ -7,7 +7,8 @@ SET "additional_instructions" = concat_ws(
   E'\n\n',
   COALESCE("additional_instructions", ''),
   CASE
-    concat_ws(', ',
+    WHEN COALESCE(TRIM("school_type"), '') != '' OR COALESCE(TRIM("grade_level"), '') != '' OR COALESCE(TRIM("subject"), '') != ''
+    THEN concat_ws(', ',
       CASE WHEN COALESCE(TRIM("school_type"), '') != '' THEN 'Schultyp: ' || "school_type" END,
       CASE WHEN COALESCE(TRIM("grade_level"), '') != '' THEN 'Klassenstufe: ' || "grade_level" END,
       CASE WHEN COALESCE(TRIM("subject"), '') != '' THEN 'Fach: ' || "subject" END
