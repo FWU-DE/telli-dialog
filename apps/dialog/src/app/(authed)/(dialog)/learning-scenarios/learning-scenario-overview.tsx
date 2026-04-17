@@ -10,6 +10,7 @@ import { CreateNewLearningScenarioButton } from './create-new-learning-scenario-
 import { useOverviewFilter } from '@/components/hooks/use-overview-filter';
 import { getLearningScenariosByFilterAction } from '../actions/entity-filter-actions';
 import { filterAndSortEntities } from '@/components/entity-overview/utils';
+import RichText from '@/components/common/rich-text';
 
 type LearningScenarioOverviewProps = {
   currentUserId: string;
@@ -33,15 +34,8 @@ export default function LearningScenarioOverview({ currentUserId }: LearningScen
   }
 
   const infoContent = (
-    <div className="flex flex-col gap-8 whitespace-pre-line">
-      <div>
-        <p className="font-semibold">{t('info-dialog.q1')}</p>
-        <p>{t('info-dialog.a1')}</p>
-      </div>
-      <div>
-        <p className="font-semibold">{t('info-dialog.q2')}</p>
-        <p>{t('info-dialog.a2')}</p>
-      </div>
+    <div className="whitespace-pre-line">
+      <RichText>{(tags) => t.rich('info-dialog', tags)}</RichText>
     </div>
   );
 

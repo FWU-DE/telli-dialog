@@ -140,14 +140,7 @@
   "custom-gpt": {
     "title": "Assistenten",
     "description": "Die Assistenten erleichtern den Lehrkräften den schulischen Alltag. Sie können je nach Situation individuell konfiguriert werden. Bereits fertige Assistenten stehen als Vorlagen sofort nutzbar zur Verfügung. Diese können in den eigenen Bereich kopiert und dann wunschgemäß angepasst werden.",
-    "info-dialog": {
-      "q1": "Was ist ein Assistent?",
-      "a1": "Ein Assistent ist ein Chat, der auf ein bestimmtes Thema spezialisiert ist. Es gibt bereits vordefinierte Assistenten oder es können eigene Assistenten erstellt werden.",
-      "q2": "Was unterscheidet einen Assistenten vom normalen Chat?",
-      "a2": "In einem vorkonfigurierten Assistenten wurden bereits Informationen, Dateien und Webquellen hinterlegt. Diese müssten im normalen Chat erst eingegeben/hochgeladen werden.",
-      "q3": "An welche Zielgruppe richten sich die Assistenten?",
-      "a3": "Die Nutzung der Assistenten ist für Lehrkräfte gedacht und soll den schulischen Alltag erleichtern."
-    },
+    "info-dialog": "<b>Was sind Assistenten?</b>\n\nAssistenten erleichtern Lehrkräften den schulischen Alltag. Sie können für wiederkehrende Tätigkeiten konfiguriert werden, individuell auf die eigenen Fächer, Jahrgangsstufen oder Arbeitskontexte angepasst. Einmal mit dem entsprechenden Hintergrundwissen angereichert und erstellt, liefert jeder Assistent Vorschläge, Impulse und Ideen, die für das gesamte Schuljahr und darüber hinaus genutzt werden können.\n\nLehrkräfte können bereits konfigurierte Vorlagen nutzen und selbst eigene Assistenten erstellen.\n\n<b>Zielgruppe:</b>\nLehrkräfte",
     "visibility-global": "Vorlagen",
     "visibility-school": "Schulintern",
     "visibility-private": "Für mich",
@@ -246,12 +239,7 @@
     "name-label": "Name des Dialogpartners",
     "name-placeholder": "Name des Dialogpartners",
     "name-max-length": "Der Name darf maximal {maxLength} Zeichen lang sein.",
-    "info-dialog": {
-      "q1": "Was ist ein Dialogpartner?",
-      "a1": "Ein Dialogpartner ist ein fiktiver Gesprächspartner mit dem die Schüler/innen chatten können. Für die Schülerinnen entsteht dabei das Gefühl tatsächlich mit der fiktiven Person zu chatten. Dies fördert ihre Motivation und Kreativität in Bezug auf die fiktive Person und das Thema.\n\nEs gibt bereits vordefinierte Dialogpartner oder es können eigene Dialogpartner erstellt werden.",
-      "q2": "An welche Zielgruppe richten sich die Dialogpartner?",
-      "a2": "Schüler/innen"
-    },
+    "info-dialog": "<b>Was sind Dialogpartner?</b>\n\nDialogpartner sind fiktive Gesprächspartner, mit denen die Lernenden chatten können. Die Schülerinnen und Schüler setzen sich in Form eines Rollenspiels aktiv mit einem bestimmten Thema auseinander, indem sie mit simulierten Dialogpartnern virtuell in Kontakt treten. Dadurch entsteht Lebensweltbezug, Motivation und Kreativität.\n\nLehrkräfte können bereits konfigurierte Vorlagen nutzen und selbst eigene Dialogpartner erstellen.\n\nDer Chat beginnt mit einer Einstiegsfrage des Dialogpartners, die durch die Lehrkraft im Vorfeld festgelegt wird.\n\n<b>Zielgruppe:</b>\nSchülerinnen und Schüler",
     "search-placeholder": "Dialogpartner suchen...",
     "visibility-global": "Vorlagen",
     "visibility-school": "Schulintern",
@@ -386,12 +374,7 @@
     "duplicate-name-format-string": "Duplikat von {sourceName}",
     "author-label": "Erstellt von",
     "author-text": "FWU",
-    "info-dialog": {
-      "q1": "Was ist ein Lernszenario?",
-      "a1": "Ein Lernszenario ist ein Chat, der auf ein bestimmtes Thema spezialisiert ist. Die Schüler/innen erarbeiten sich das Thema durch Verwendung des Chats selbst. Optional kann vorab ein Arbeitsauftrag definiert werden.\n\nEs gibt bereits vordefinierte Lernszenarien oder es können eigene Lernszenarien erstellt werden.",
-      "q2": "An welche Zielgruppe richten sich die Lernszenarien?",
-      "a2": "Schüler/innen"
-    },
+    "info-dialog": "<b>Was sind Lernszenarien?</b>\n\nLernszenarien bieten Schülerinnen und Schüler die Möglichkeit, KI für ihren Lernprozess aktiv zu nutzen. Im Dialog mit der KI setzen sie sich kreativ mit einem konkreten Thema auseinander und erhalten Impulse und Ideen, um darauf aufbauend die Antworten des Chatbots kritisch zu hinterfragen und selbstständig weiterzudenken.\n\nLehrkräfte können bereits konfigurierte Vorlagen nutzen und selbst eigene Lernszenarien erstellen.\n\nDie Aufgabenstellung für ein Lernszenario wird von der Lehrkraft im Vorfeld definiert. Die Lernenden können sie während des Chats auf- und einklappen sowie frei verschieben.\n\n<b>Zielgruppe:</b>\nSchülerinnen und Schüler",
     "search-placeholder": "Szenario suchen...",
     "visibility-global": "Vorlagen",
     "visibility-school": "Schulintern",

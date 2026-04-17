@@ -10,6 +10,7 @@ import CreateNewAssistantButton from '../custom/create-new-assistant-button';
 import { useOverviewFilter } from '@/components/hooks/use-overview-filter';
 import { getAssistantsByFilterAction } from '../actions/entity-filter-actions';
 import { filterAndSortEntities } from '@/components/entity-overview/utils';
+import RichText from '@/components/common/rich-text';
 
 type AssistantOverviewProps = {
   currentUserId: string;
@@ -31,19 +32,8 @@ export default function AssistantOverview({ currentUserId }: AssistantOverviewPr
   }
 
   const infoContent = (
-    <div className="flex flex-col gap-8 whitespace-pre-line">
-      <div>
-        <p className="font-semibold">{t('info-dialog.q1')}</p>
-        <p>{t('info-dialog.a1')}</p>
-      </div>
-      <div>
-        <p className="font-semibold">{t('info-dialog.q2')}</p>
-        <p>{t('info-dialog.a2')}</p>
-      </div>
-      <div>
-        <p className="font-semibold">{t('info-dialog.q3')}</p>
-        <p>{t('info-dialog.a3')}</p>
-      </div>
+    <div className="whitespace-pre-line">
+      <RichText>{(tags) => t.rich('info-dialog', tags)}</RichText>
     </div>
   );
 
