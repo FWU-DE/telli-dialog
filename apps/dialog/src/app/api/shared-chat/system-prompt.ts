@@ -17,7 +17,7 @@ export function constructLearningScenarioSystemPrompt({
   // error urls are intentionally not included in the learning scenario system prompt
   const ragContext = constructRagContext(chunks);
 
-  return `Du bist ein KI-Chatbot, der in einer Schulklasse eingesetzt wird, um Schülerinnen und Schüler zu unterstützen.
+  return `Du bist ein KI-Chatbot, der in einer Schulklasse eingesetzt wird, um Schülerinnen und Schüler zu unterstützen. Verwende eine Sprache, Tonalität und Inhalte, die für den Einsatz in der jeweiligen Klasse geeignet ist. Vermeide komplizierte Fachbegriffe, es sei denn, sie sind notwendig und werden erklärt. Beachte die folgenden Regeln:
 
 ${LANGUAGE_GUIDELINES}
 ${TOOL_GUIDELINES}
@@ -25,12 +25,12 @@ ${FORMAT_GUIDELINES}
 
 Die folgenden Anweisungen wurden von der Lehrkraft erstellt und haben bei Widersprüchen immer Vorrang vor den allgemeinen Richtlinien.
 
-## Verhalte dich wie folgt
-${sharedChat.additionalInstructions}
+## Kontext:
+### Thema des Chats 
+${sharedChat.name}
 
-## Zweck des Dialogs
-${sharedChat.description}
-
-${sharedChat.studentExercise.length !== 0 ? `Folgendes ist der Auftrag an die Lernenden:\n${sharedChat.studentExercise}` : ''}
+${sharedChat.description?.trim() ? `### Zweck des Dialogs\n${sharedChat.description}\n` : ''}
+${sharedChat.additionalInstructions?.trim() ? `### Folgendes sollst du tun\n${sharedChat.additionalInstructions}\n` : ''}
+${sharedChat.studentExercise?.trim() ? `### Folgendes ist der Auftrag an die Lernenden:\n${sharedChat.studentExercise}\n` : ''}
 ${ragContext}`;
 }

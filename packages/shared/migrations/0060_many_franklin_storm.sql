@@ -6,25 +6,28 @@ UPDATE "character"
 SET "instructions" = concat_ws(
   E'\n\n',
   CASE
-    WHEN "school_type" IS NOT NULL OR "grade_level" IS NOT NULL OR "subject" IS NOT NULL
-    THEN concat_ws(', ',
-      CASE WHEN "school_type" IS NOT NULL THEN 'Schultyp: ' || "school_type" END,
-      CASE WHEN "grade_level" IS NOT NULL THEN 'Klassenstufe: ' || "grade_level" END,
-      CASE WHEN "subject" IS NOT NULL THEN 'Fach: ' || "subject" END
-    )
+    WHEN COALESCE(TRIM("specifications"), '') != ''
+    THEN 'Du sollst folgendes beachten:\n' || "specifications"
   END,
-  NULLIF("learning_context", ''),
   CASE
-    WHEN "competence" IS NOT NULL AND "competence" != ''
+    WHEN COALESCE(TRIM("restrictions"), '') != ''
+    THEN 'Folgende Dinge sollst du AUF KEINEN FALL tun: \n' || "restrictions"
+  END,
+  CASE
+    WHEN COALESCE(TRIM("learning_context"), '') != ''
+    THEN 'Du wist im folgenden Lernkontext verwendet: \n' || "learning_context"
+  END,
+  CASE
+    WHEN COALESCE(TRIM("competence"), '') != ''
     THEN 'Die Lernenden sollen folgende Kompetenzen erwerben: ' || "competence"
   END,
   CASE
-    WHEN "specifications" IS NOT NULL AND "specifications" != ''
-    THEN 'Bitte beachte: ' || "specifications"
-  END,
-  CASE
-    WHEN "restrictions" IS NOT NULL AND "restrictions" != ''
-    THEN 'Auf keinen Fall: ' || "restrictions"
+    WHEN COALESCE(TRIM("school_type"), '') != '' OR COALESCE(TRIM("grade_level"), '') != '' OR COALESCE(TRIM("subject"), '') != ''
+      THEN concat_ws(', ',
+        CASE WHEN COALESCE(TRIM("school_type"), '') != '' THEN 'Schultyp: ' || "school_type" END,
+        CASE WHEN COALESCE(TRIM("grade_level"), '') != '' THEN 'Klassenstufe: ' || "grade_level" END,
+        CASE WHEN COALESCE(TRIM("subject"), '') != '' THEN 'Fach: ' || "subject" END
+      )
   END
 )
-WHERE "instructions" = '' OR "instructions" IS NULL;
+WHERE COALESCE(TRIM("instructions"), '') = '';

@@ -5,16 +5,15 @@
 UPDATE "learning_scenario"
 SET "additional_instructions" = concat_ws(
   E'\n\n',
+  COALESCE("additional_instructions", ''),
   CASE
-    WHEN "school_type" IS NOT NULL OR "grade_level" IS NOT NULL OR "subject" IS NOT NULL
-    THEN concat_ws(', ',
-      CASE WHEN "school_type" IS NOT NULL THEN 'Schultyp: ' || "school_type" END,
-      CASE WHEN "grade_level" IS NOT NULL THEN 'Klassenstufe: ' || "grade_level" END,
-      CASE WHEN "subject" IS NOT NULL THEN 'Fach: ' || "subject" END
+    concat_ws(', ',
+      CASE WHEN COALESCE(TRIM("school_type"), '') != '' THEN 'Schultyp: ' || "school_type" END,
+      CASE WHEN COALESCE(TRIM("grade_level"), '') != '' THEN 'Klassenstufe: ' || "grade_level" END,
+      CASE WHEN COALESCE(TRIM("subject"), '') != '' THEN 'Fach: ' || "subject" END
     )
-  END,
-  NULLIF("additional_instructions", '')
+  END
 )
-WHERE "school_type" IS NOT NULL
-   OR "grade_level" IS NOT NULL
-   OR "subject" IS NOT NULL;
+WHERE COALESCE(TRIM("school_type"), '') != ''
+   OR COALESCE(TRIM("grade_level"), '') != ''
+   OR COALESCE(TRIM("subject"), '') != '';
