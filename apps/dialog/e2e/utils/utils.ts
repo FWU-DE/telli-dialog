@@ -7,3 +7,12 @@ export async function waitForToast(page: Page, msg?: string) {
 export async function waitForToastDisappear(page: Page) {
   await expect(page.getByLabel('Notifications (F8)').locator('li')).toBeHidden();
 }
+
+export async function waitForChatHistory(page: Page) {
+  await page.getByTestId('chat-search').waitFor();
+  await expect(page.getByTestId('chat-history-loading')).toBeHidden();
+}
+
+export async function waitForAutosave(page: Page) {
+  await expect(page.getByTestId('autosave-saved').first()).toBeVisible({ timeout: 5000 });
+}

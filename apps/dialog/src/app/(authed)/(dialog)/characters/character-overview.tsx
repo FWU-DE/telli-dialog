@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { OverviewFilter } from '@shared/overview-filter';
 import { CharacterWithImage } from './utils';
@@ -17,7 +16,6 @@ type CharacterOverviewProps = {
 };
 
 export default function CharacterOverview({ currentUserId }: CharacterOverviewProps) {
-  const router = useRouter();
   const t = useTranslations('characters');
   const [visibleCharacters, setVisibleCharacters] = useState<CharacterWithImage[]>([]);
 
@@ -67,12 +65,8 @@ export default function CharacterOverview({ currentUserId }: CharacterOverviewPr
               description={character.description}
               avatarUrl={character.maybeSignedPictureUrl}
               isOwned={isOwned}
-              onCardClick={() =>
-                router.push(
-                  isOwned ? `/characters/editor/${character.id}` : `/characters/${character.id}`,
-                )
-              }
-              onChatClick={() => router.push(`/characters/d/${character.id}`)}
+              href={isOwned ? `/characters/editor/${character.id}` : `/characters/${character.id}`}
+              chatHref={`/characters/d/${character.id}`}
             />
           );
         });

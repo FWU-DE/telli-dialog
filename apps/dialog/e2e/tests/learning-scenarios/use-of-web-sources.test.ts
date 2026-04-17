@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
 import { sendMessage } from '../../utils/chat';
 import { configureLearningScenario } from '../../utils/learning-scenario';
+import { waitForAutosave } from '../../utils/utils';
 
 test.use({ storageState: AUTH_FILES.teacher });
 
@@ -35,7 +36,7 @@ test('teacher can create shared chat with web sources, student can join chat and
   await page.getByRole('button', { name: 'Webseite hinzufügen' }).click();
 
   // Still on the editor page after autosave
-  await page.waitForTimeout(2000);
+  await waitForAutosave(page);
   const stopSharingButton = page.getByRole('button', { name: 'Stop' });
   if (await stopSharingButton.isVisible()) {
     await stopSharingButton.click();

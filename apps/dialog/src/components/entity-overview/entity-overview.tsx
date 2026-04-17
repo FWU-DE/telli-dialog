@@ -195,7 +195,7 @@ export default function EntityOverview({
 
         <div className="overflow-auto px-6 pb-6">
           <div className="max-w-3xl mx-auto w-full">
-            <div className="flex flex-col gap-2 w-full">{children(searchInput, sortBy)}</div>
+            <div className="flex flex-col gap-2 w-full py-1">{children(searchInput, sortBy)}</div>
           </div>
         </div>
       </div>

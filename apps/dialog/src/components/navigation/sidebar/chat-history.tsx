@@ -10,7 +10,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useCustomPathname } from '@/hooks/use-custom-pathname';
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { SidebarGroup, SidebarMenu } from '@ui/components/Sidebar';
 import { ChatHistoryItem } from './chat-history-item';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@ui/components/InputGroup';
@@ -90,6 +90,7 @@ export function ChatHistory() {
             placeholder={t('chat-search-placeholder')}
             aria-label={t('chat-search-placeholder')}
             onChange={(event) => setSearchText(event.target.value)}
+            data-testid="chat-search"
           />
           <InputGroupAddon align="inline-end">
             {searchText.length === 0 ? (
@@ -131,7 +132,7 @@ export function ChatHistory() {
       </SidebarGroup>
 
       {isLoading && (
-        <div className="flex flex-col w-full items-center ">
+        <div className="flex flex-col w-full items-center" data-testid="chat-history-loading">
           <Spinner aria-label={t('chats-loading')} />
         </div>
       )}

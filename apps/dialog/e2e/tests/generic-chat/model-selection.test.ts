@@ -24,7 +24,7 @@ test('Starting a new chat clears the prompt and resets the page when already on 
   await page.getByPlaceholder('Wie kann ich Dir helfen?').fill(prompt);
 
   // Start a new chat when already on the home page (/)
-  await page.getByText('Neuer Chat').click();
+  await page.getByLabel('Hauptnavigation').getByText('Neuer Chat').click();
 
   // The prompt should be gone after the page resets
   await expect(page.getByPlaceholder('Wie kann ich Dir helfen?')).toHaveValue('');
