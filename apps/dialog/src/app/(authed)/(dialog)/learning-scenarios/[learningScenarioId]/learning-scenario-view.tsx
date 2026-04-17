@@ -122,7 +122,7 @@ export function LearningScenarioView({
           </CardContent>
         </Card>
 
-        {learningScenario.accessLevel !== 'global' && (
+        {learningScenario.accessLevel === 'global' && (
           <Card className="w-full">
             <CardContent className="flex flex-col items-center">
               <div className="text-sm text-foreground/70">{t('author-label')}</div>
