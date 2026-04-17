@@ -24,7 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@telli/ui/components/Select';
-import { useSession } from 'next-auth/react';
 import { isSortOption, SortOption } from './utils';
 
 type EntityOverviewProps = {
@@ -54,8 +53,6 @@ export default function EntityOverview({
   const [sortBy, setSortBy] = React.useState<SortOption>('date-desc');
   const [infoDialogOpen, setInfoDialogOpen] = React.useState(false);
   const federalState = useFederalState();
-  const { data: session } = useSession();
-  const user = session?.user;
   const t = useTranslations('entity-overview');
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
