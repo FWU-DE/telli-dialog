@@ -3,13 +3,16 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { getLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 import { notFound } from 'next/navigation';
 import { LearningScenarioView } from './learning-scenario-view';
-import { ResponsiveLayoutWrapper } from '../../_components/responsive-layout-wrapper';
+import { DefaultPageLayout } from '@/components/layout/default-page-layout';
+import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
+import { buildLegacyUserAndContext } from '@/auth/types';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Page(props: PageProps<'/learning-scenarios/[learningScenarioId]'>) {
   const { learningScenarioId } = await props.params;
   const { user, school, federalState } = await requireAuth();
+  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
   if (!federalState.featureToggles.isNewUiDesignEnabled) {
     notFound();
@@ -24,13 +27,17 @@ export default async function Page(props: PageProps<'/learning-scenarios/[learni
   const initialLinks = learningScenario.attachedLinks.map((url) => ({ link: url }));
 
   return (
-    <ResponsiveLayoutWrapper>
+    <DefaultPageLayout>
+      <CustomChatHeader
+        userAndContext={userAndContext}
+        isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
+      />
       <LearningScenarioView
         learningScenario={learningScenario}
         fileMappings={relatedFiles}
         pictureUrl={avatarPictureUrl}
         initialLinks={initialLinks}
       />
-    </ResponsiveLayoutWrapper>
+    </DefaultPageLayout>
   );
 }
