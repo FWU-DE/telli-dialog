@@ -82,7 +82,7 @@ export default function EntityOverview({
   return (
     <div className="min-w-full overflow-auto flex flex-col h-full">
       <div className="overflow-auto" ref={scrollContainerRef}>
-        <div className="px-6 pt-6 pb-0">
+        <div className="pt-6 pb-0">
           <div className="flex items-center gap-2 mb-6">
             <h1 className="text-3xl">{title}</h1>
             <Dialog open={infoDialogOpen} onOpenChange={setInfoDialogOpen}>
@@ -144,7 +144,7 @@ export default function EntityOverview({
           </div>
         </div>
 
-        <div className="px-6 py-2 pb-4 sticky top-0 z-10 bg-background-2">
+        <div className="py-2 pb-4 sticky top-0 z-10 bg-background-2">
           <div className="flex items-end flex-wrap gap-2" aria-label={t('filter-tabs-label')}>
             <FilterTabs tabs={visibleTabs} activeTab={activeFilter} onTabChange={onFilterChange} />
             <div className="grow" />
@@ -175,7 +175,7 @@ export default function EntityOverview({
           </div>
         </div>
 
-        <div className="overflow-auto px-6 pb-6">
+        <div className="overflow-auto pb-6">
           <div className="flex flex-col gap-2 w-full">{children(searchInput, sortBy)}</div>
         </div>
       </div>

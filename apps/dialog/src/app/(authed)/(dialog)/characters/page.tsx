@@ -7,8 +7,8 @@ import { getCharacterByAccessLevel } from '@shared/characters/character-service'
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import CharacterOverview from './character-overview';
-import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
+import { OverviewPageLayout } from '@/components/layout/overview-page-layout';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,14 +24,14 @@ export default async function Page(props: PageProps<'/characters'>) {
 
   if (isNewUi) {
     return (
-      <DefaultPageLayout>
+      <OverviewPageLayout>
         <CustomChatHeader
           userAndContext={userAndContext}
           isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
         />
 
         <CharacterOverview currentUserId={user.id} />
-      </DefaultPageLayout>
+      </OverviewPageLayout>
     );
   }
 
