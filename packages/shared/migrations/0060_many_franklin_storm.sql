@@ -7,15 +7,15 @@ SET "instructions" = concat_ws(
   E'\n\n',
   CASE
     WHEN COALESCE(TRIM("specifications"), '') != ''
-    THEN 'Du sollst folgendes beachten:\n' || "specifications"
+    THEN 'Du sollst folgendes beachten:' || E'\n' || "specifications"
   END,
   CASE
     WHEN COALESCE(TRIM("restrictions"), '') != ''
-    THEN 'Folgende Dinge sollst du AUF KEINEN FALL tun: \n' || "restrictions"
+    THEN 'Folgende Dinge sollst du AUF KEINEN FALL tun:' || E'\n' || "restrictions"
   END,
   CASE
     WHEN COALESCE(TRIM("learning_context"), '') != ''
-    THEN 'Du wist im folgenden Lernkontext verwendet: \n' || "learning_context"
+    THEN 'Du wist im folgenden Lernkontext verwendet:' || E'\n' || "learning_context"
   END,
   CASE
     WHEN COALESCE(TRIM("competence"), '') != ''
