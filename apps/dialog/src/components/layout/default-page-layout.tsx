@@ -5,5 +5,5 @@ type DefaultPageLayoutProps = {
 };
 
 export function DefaultPageLayout({ children }: DefaultPageLayoutProps) {
-  return <div className="max-w-5xl mx-auto px-6 h-full">{children}</div>;
+  return <div className="data-page-layout max-w-5xl mx-auto px-6 h-full">{children}</div>;
 }
