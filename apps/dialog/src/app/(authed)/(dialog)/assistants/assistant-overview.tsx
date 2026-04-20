@@ -25,7 +25,7 @@ export default function AssistantOverview({ currentUserId }: AssistantOverviewPr
     setVisibleAssistants(entities);
   }, []);
 
-  const [activeFilter, setActiveFilter] = useOverviewFilter('gpts', fetchAssistants);
+  const [activeFilter, setActiveFilter] = useOverviewFilter('assistants', fetchAssistants);
 
   async function handleFilterChange(filter: OverviewFilter) {
     await setActiveFilter(filter);
