@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl';
 import AutoResizeTextarea from '../common/auto-resize-textarea';
 import { CHAT_MESSAGE_LENGTH_LIMIT } from '@/configuration-text-inputs/const';
 import { ChangeEvent, FormEvent } from 'react';
-import { cn } from '@/utils/tailwind';
+import { Button } from '@ui/components/Button';
 
 export function ImageGenerationInputBox({
   isLoading,
@@ -31,17 +31,14 @@ export function ImageGenerationInputBox({
         />
       </div>
       <div className="flex justify-end mt-3">
-        <button
+        <Button
           type="button"
           onClick={customHandleSubmit}
           disabled={input.trim().length === 0 || isLoading}
-          className={cn(
-            'bg-primary disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2 px-4 rounded-full transition-colors',
-          )}
           aria-label={tImageGeneration('generate-button')}
         >
           {tImageGeneration('generate-button')}
-        </button>
+        </Button>
       </div>
     </>
   );
