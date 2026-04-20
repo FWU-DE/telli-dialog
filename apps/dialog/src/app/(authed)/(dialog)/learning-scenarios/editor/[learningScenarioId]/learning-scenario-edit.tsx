@@ -52,8 +52,8 @@ import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-cha
 import { telliPointsPercentageValues, usageTimeValuesInMinutes } from './schema';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
-import { useInstructionsExample } from '@/hooks/use-instructions-example';
 import { FormField } from '@ui/components/form/FormField';
+import RichText from '@/components/common/rich-text';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
 
@@ -185,9 +185,6 @@ export function LearningScenarioEdit({
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
-
-  const { instructionsPlaceholder, instructionsExampleDialogContent } =
-    useInstructionsExample('learning-scenarios');
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -419,10 +416,17 @@ export function LearningScenarioEdit({
                   label={t('instructions-label')}
                   labelAction={
                     <CustomChatInstructionsExampleDialog
-                      descriptionContent={instructionsExampleDialogContent}
+                      descriptionContent={
+                        <div className="whitespace-pre-line">
+                          <RichText>{(tags) => t.rich('instructions-placeholder', tags)}</RichText>
+                        </div>
+                      }
                     />
                   }
-                  placeholder={instructionsPlaceholder}
+                  placeholder={t
+                    .raw('instructions-placeholder')
+                    .replaceAll('<b>', '')
+                    .replaceAll('</b>', '')}
                   testId="learning-scenario-instructions-input"
                   onBlur={handleAutoSave}
                   type="textArea"

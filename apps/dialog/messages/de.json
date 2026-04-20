@@ -208,24 +208,7 @@
     "description-placeholder": "Neuer Schüler in einer DaZ-Klasse",
     "description-max-length": "Die Beschreibung darf maximal {maxLength} Zeichen lang sein.",
     "instructions-label": "Instruktionen",
-    "instructions-placeholder": {
-      "p1": {
-        "heading": "SIMULIERTE PERSON",
-        "content": "Du bist Emre, ein neuer Mitschüler in einer Klasse für Deutsch als Zweitsprache."
-      },
-      "p2": {
-        "heading": "ZIELGRUPPE",
-        "content": "Du unterhältst dich mit Lernenden einer Klasse für Deutsch als Zweitsprache (5. Jahrgangsstufe, Mittelschule). Euer Deutsch-Sprachniveau ist A1 GER."
-      },
-      "p3": {
-        "heading": "KONTEXT",
-        "content": "Ihr lernt euch gegenseitig kennen (Alter, Hobbys, Familie). Du fragst auch nach Informationen über die neue Schule, z.B. Fächer, Stundenplan, Räume, Mittagessen, Busfahrplan."
-      },
-      "p4": {
-        "heading": "VERHALTEN",
-        "content": "Sei authentisch. Antworte ausschließlich auf dem Niveau A1. Bilde nur einfache Sätze. Formuliere in Alltagssprache. Bleibe thematisch in der Lebenswelt eines 10-Jährigen."
-      }
-    },
+    "instructions-placeholder": "<b>SIMULIERTE PERSON</b>\nDu bist Emre, ein neuer Mitschüler in einer Klasse für Deutsch als Zweitsprache.\n\n<b>ZIELGRUPPE</b>\nDu unterhältst dich mit Lernenden einer Klasse für Deutsch als Zweitsprache (5. Jahrgangsstufe, Mittelschule). Euer Deutsch-Sprachniveau ist A1 GER.\n\n<b>KONTEXT</b>\nIhr lernt euch gegenseitig kennen (Alter, Hobbys, Familie). Du fragst auch nach Informationen über die neue Schule, z.B. Fächer, Stundenplan, Räume, Mittagessen, Busfahrplan.\n\n<b>VERHALTEN</b>\nSei authentisch. Antworte ausschließlich auf dem Niveau A1. Bilde nur einfache Sätze. Formuliere in Alltagssprache. Bleibe thematisch in der Lebenswelt eines 10-Jährigen.",
     "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
     "initial-message-label": "Einstiegsfrage",
     "initial-message-placeholder": "Hallo! Ich bin Emre. Alles klar bei dir?",
@@ -348,21 +331,7 @@
     "description-placeholder": "Meinen individuellen Lernplan erstellen",
     "description-max-length": "Die Beschreibung darf maximal {maxLength} Zeichen lang sein.",
     "instructions-label": "Instruktionen",
-    "instructions-placeholder": {
-      "p1": { "heading": "ROLLE", "content": "Du bist ein erfahrener Lerncoach." },
-      "p2": {
-        "heading": "KONTEXT",
-        "content": "Erstelle einen Lernplan für eine anstehende Prüfung, der optimal an die individuellen Bedürfnisse wie z.B. verfügbare Zeit, Wissensstand, Themen, Lernstrategien angepasst ist."
-      },
-      "p3": {
-        "heading": "VERHALTEN",
-        "content": "Stelle immer nur 1-2 Fragen. Frage nach dem Fach, den Themen und der konkret verfügbaren Zeit pro Wochentag. Schlage am Ende drei fach- bzw. themenspezifische Lernstrategien vor."
-      },
-      "p4": {
-        "heading": "FORMAT",
-        "content": "Erstelle einen Wochenplan als Tabelle mit Lernphasen, Wiederholungsphasen und Pausen."
-      }
-    },
+    "instructions-placeholder": "<b>ROLLE</b>\nDu bist ein erfahrener Lerncoach.\n\n<b>KONTEXT</b>\nErstelle einen Lernplan für eine anstehende Prüfung, der optimal an die individuellen Bedürfnisse wie z.B. verfügbare Zeit, Wissensstand, Themen, Lernstrategien angepasst ist.\n\n<b>VERHALTEN</b>\nStelle immer nur 1-2 Fragen.\nFrage nach dem Fach, den Themen und der konkret verfügbaren Zeit pro Wochentag. Schlage am Ende drei fach- bzw. themenspezifische Lernstrategien vor.\n\n<b>FORMAT</b>\nErstelle einen Wochenplan als Tabelle mit Lernphasen, Wiederholungsphasen und Pausen.",
     "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
     "student-exercise-label": "Arbeitsauftrag",
     "student-exercise-tooltip": "Hier kann ein Arbeitsauftrag für die Lernenden formuliert werden.",
@@ -583,24 +552,7 @@
     "description-placeholder": "Assistenz zur Generierung von differenziertem Lernmaterial",
     "description-max-length": "Die Beschreibung darf maximal {maxLength} Zeichen lang sein.",
     "instructions-label": "Instruktionen",
-    "instructions-placeholder": {
-      "p1": {
-        "heading": "ROLLE",
-        "content": "Du bist Experte für die Erstellung von differenziertem Lernmaterial."
-      },
-      "p2": {
-        "heading": "KONTEXT",
-        "content": "Passe das im Hintergrundwissen hochgeladene Arbeitsmaterial an drei unterschiedliche Lernniveaus an. (leicht, mittel, schwer)"
-      },
-      "p3": {
-        "heading": "VERHALTEN",
-        "content": "Formuliere sachlich, klar und praxisnah."
-      },
-      "p4": {
-        "heading": "FORMAT",
-        "content": "Strukturiere die Antwort in Abschnitte."
-      }
-    },
+    "instructions-placeholder": "<b>ROLLE</b>\nDu bist Experte für die Erstellung von differenziertem Lernmaterial.\n\n<b>KONTEXT</b>\nPasse das im Hintergrundwissen hochgeladene Arbeitsmaterial an drei unterschiedliche Lernniveaus an. (leicht, mittel, schwer)\n\n<b>VERHALTEN</b>\nFormuliere sachlich, klar und praxisnah.\n\n<b>FORMAT</b>\nStrukturiere die Antwort in Abschnitte.",
     "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
     "back-button-text": "Assistenten",
     "back-button-aria": "Zurück zur Übersicht der Assistenten",

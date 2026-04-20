@@ -46,7 +46,7 @@ import { WebsearchSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-chat-prompt-suggestions';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
-import { useInstructionsExample } from '@/hooks/use-instructions-example';
+import RichText from '@/components/common/rich-text';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
@@ -175,9 +175,6 @@ export function AssistantEdit({
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
-
-  const { instructionsPlaceholder, instructionsExampleDialogContent } =
-    useInstructionsExample('assistants');
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -370,10 +367,17 @@ export function AssistantEdit({
                 label={t('instructions-label')}
                 labelAction={
                   <CustomChatInstructionsExampleDialog
-                    descriptionContent={instructionsExampleDialogContent}
+                    descriptionContent={
+                      <div className="whitespace-pre-line">
+                        <RichText>{(tags) => t.rich('instructions-placeholder', tags)}</RichText>
+                      </div>
+                    }
                   />
                 }
-                placeholder={instructionsPlaceholder}
+                placeholder={t
+                  .raw('instructions-placeholder')
+                  .replaceAll('<b>', '')
+                  .replaceAll('</b>', '')}
                 testId="assistant-instructions-input"
                 onBlur={handleAutoSave}
                 type="textArea"
