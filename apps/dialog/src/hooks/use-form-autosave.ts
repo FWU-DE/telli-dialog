@@ -67,6 +67,9 @@ export function useFormAutosave<T>({
 
       setHasSaveError(true);
       return false;
+    } catch {
+      setHasSaveError(true);
+      return false;
     } finally {
       setIsSaving(false);
     }
