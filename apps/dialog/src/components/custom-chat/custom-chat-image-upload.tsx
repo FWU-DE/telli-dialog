@@ -1,11 +1,10 @@
 import { Card, CardContent } from '@ui/components/Card';
-import { EmptyImageIcon } from '../icons/empty-image';
 import { ServerActionResult } from '@shared/actions/server-action-result';
 import { useTranslations } from 'next-intl';
 import React from 'react';
 import { useToast } from '../common/toast';
 import { Input } from '@ui/components/Input';
-import { UploadIcon } from '@phosphor-icons/react';
+import { ImageSquareIcon, UploadIcon } from '@phosphor-icons/react';
 import { Button } from '@ui/components/Button';
 import AvatarCropModal from './custom-chat-avatar-crop-modal';
 import Image from 'next/image';
@@ -83,7 +82,9 @@ export function CustomChatImageUpload({
               className="rounded-full object-contain"
             />
           ) : (
-            <EmptyImageIcon className="relative -left-1 -top-1 w-15 h-15" />
+            <div className="rounded-full bg-primary/7 flex items-center justify-center w-full h-full">
+              <ImageSquareIcon className="text-primary/30 rounded-full size-18" weight="thin" />
+            </div>
           )}
         </div>
         <div className="flex flex-col gap-2">

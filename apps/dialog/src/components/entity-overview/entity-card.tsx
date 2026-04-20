@@ -41,11 +41,15 @@ export default function EntityCard({
         className="flex items-center gap-4 grow min-w-0 p-4 outline-none"
         data-testid="entity-link"
       >
-        <figure className="w-15 h-15 bg-light-gray rounded-full flex justify-center items-center shrink-0">
+        <figure className="w-15 h-15 bg-primary/7 rounded-full flex justify-center items-center shrink-0">
           {avatarUrl ? (
             <AvatarPicture src={avatarUrl} alt={`${name} Avatar`} variant="smallCircle" />
           ) : (
-            <ImageSquareIcon className="w-8 h-8 text-primary" aria-hidden="true" weight="thin" />
+            <ImageSquareIcon
+              className="w-8 h-8 text-primary/30 "
+              aria-hidden="true"
+              weight="thin"
+            />
           )}
         </figure>
 
