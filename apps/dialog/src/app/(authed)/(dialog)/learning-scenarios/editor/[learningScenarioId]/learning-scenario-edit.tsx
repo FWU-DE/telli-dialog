@@ -203,7 +203,7 @@ export function LearningScenarioEdit({
     const createResult = await createNewLearningScenarioFromTemplateAction({
       templateId: learningScenario.id,
       duplicateLearningScenarioName: t('duplicate-name-format-string', {
-        sourceName: learningScenario.name,
+        sourceName: name,
       }),
     });
     if (createResult.success) {

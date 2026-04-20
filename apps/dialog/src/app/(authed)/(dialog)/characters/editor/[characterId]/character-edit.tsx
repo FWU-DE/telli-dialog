@@ -203,7 +203,7 @@ export function CharacterEdit({
     const createResult = await createNewCharacterAction({
       templateId: character.id,
       duplicateCharacterName: t('duplicate-name-format-string', {
-        sourceName: character.name,
+        sourceName: name,
       }),
     });
     if (createResult.success) {
