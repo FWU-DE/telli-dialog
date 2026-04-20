@@ -78,23 +78,28 @@ export default function EntityOverview({
     <div className="min-w-full flex flex-col">
       <div className="px-6" ref={scrollContainerRef}>
         <div className="pt-6">
-          <div className="flex items-center gap-2 mb-6">
+          <div className="flex items-end gap-2 mb-6">
             <h1 className="text-3xl">{title}</h1>
             <Dialog open={infoDialogOpen} onOpenChange={setInfoDialogOpen}>
               <DialogTrigger asChild>
-                <button
+                <Button
                   type="button"
-                  className="text-primary hover:text-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full pt-1.5"
+                  variant="ghost"
+                  size="icon-round"
+                  className="text-primary size-8"
                   aria-label={t('info-tooltip-label')}
                 >
-                  <InfoIcon className="w-8 h-8" aria-hidden="true" />
-                </button>
+                  <InfoIcon className="size-8" aria-hidden="true" />
+                </Button>
               </DialogTrigger>
-              <DialogContent showCloseButton={false}>
-                <DialogTitle>{title}</DialogTitle>
-                <DialogDescription asChild>
-                  <div>{infoTooltip}</div>
-                </DialogDescription>
+              <DialogContent showCloseButton={false} className="overflow-hidden">
+                <div className="min-h-0 overflow-y-auto">
+                  <DialogTitle>{title}</DialogTitle>
+                  <DialogDescription asChild>
+                    <div>{infoTooltip}</div>
+                  </DialogDescription>
+                </div>
+
                 <DialogFooter>
                   <DialogClose asChild>
                     <Button>{t('close')}</Button>

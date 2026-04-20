@@ -193,7 +193,7 @@ function InfoTooltip({
       <Tooltip>
         <TooltipTrigger
           aria-label={resolvedAriaLabel}
-          className="focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring  focus-visible:rounded-full"
+          className="rounded-full focus:outline-primary focus:outline-1 hover:bg-muted dark:hover:bg-muted/50 focus-visible:ring-3 focus-visible:border-ring focus-visible:ring-ring/50"
         >
           <InfoIcon className={'size-5 text-icon'} aria-hidden="true" />
         </TooltipTrigger>

@@ -36,9 +36,11 @@ export function CustomChatInstructionsExampleDialog({
           {t('button')}
         </Button>
       </DialogTrigger>
-      <DialogContent showCloseButton={false}>
-        <DialogTitle>{t('title')}</DialogTitle>
-        <DialogDescription asChild>{descriptionContent}</DialogDescription>
+      <DialogContent showCloseButton={false} className="overflow-hidden">
+        <div className="min-h-0 overflow-y-auto">
+          <DialogTitle className="mb-2">{t('title')}</DialogTitle>
+          <DialogDescription asChild>{descriptionContent}</DialogDescription>
+        </div>
         <DialogFooter>
           <DialogClose asChild>
             <Button type="button">{t('close')}</Button>
