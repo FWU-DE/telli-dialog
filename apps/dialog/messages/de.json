@@ -113,18 +113,18 @@
     },
     "delete": {
       "button": "Datei löschen",
-      "modal-description": "Möchten Sie diese Datei wirklich dauerhaft löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
+      "modal-description": "Soll diese Datei wirklich dauerhaft gelöscht werden? Dieser Vorgang kann nicht rückgängig gemacht werden.",
       "modal-title": "Datei löschen",
       "confirm": "Datei löschen"
     },
     "toasts": {
       "upload-success": "Die Datei wurde erfolgreich hochgeladen",
-      "upload-error": "Die Datei konnte leider nicht hochgeladen werden. Bitte versuchen Sie es erneut",
+      "upload-error": "Die Datei konnte leider nicht hochgeladen werden. Bitte erneut versuchen.",
       "file-too-large": "Die Datei {file_name} ist zu groß. Es sind maximal {max_file_size} MB erlaubt. Versuche die Datei zu verkleinern.",
       "delete-from-form": "Die Datei wurde erfolgreich gelöscht",
       "invalid-file-format": "Das Dateiformat wird nicht unterstützt, folgende Dateitypen können hochgeladen werden: {supported_formats}",
       "file-limit-exceeded": "Es können maximal {max_files} Dateien hochgeladen werden.",
-      "download-error": "Die Datei konnte leider nicht heruntergeladen werden. Bitte versuchen Sie es erneut."
+      "download-error": "Die Datei konnte leider nicht heruntergeladen werden. Bitte erneut versuchen."
     },
     "download": {
       "aria-label": "Datei herunterladen"
@@ -406,7 +406,7 @@
     },
     "share-with-learners": {
       "title": "Mit Lernenden teilen",
-      "description": "Lege fest, <b>wie viele</b> deiner <b>telli-Points</b> durch diesen Chat verbraucht werden dürfen und <b>wie lange</b> der Chat aktiv benutzt werden kann.",
+      "description": "<b>Wie viele telli-Points</b> darf dieser Chat verbrauchen und <b>wie lange</b> kann der Chat aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",
       "button-start": "Jetzt bereitstellen",
       "button-stop": "Stoppen",
@@ -515,7 +515,7 @@
     },
     "share-with-learners": {
       "title": "Mit Lernenden teilen",
-      "description": "Lege fest, <b>wie viele</b> deiner <b>telli-Points</b> durch diesen Chat verbraucht werden dürfen und <b>wie lange</b> der Chat aktiv benutzt werden kann.",
+      "description": "<b>Wie viele telli-Points</b> darf dieser Chat verbrauchen und <b>wie lange</b> kann der Chat aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",
       "button-start": "Jetzt bereitstellen",
       "button-stop": "Stoppen",
