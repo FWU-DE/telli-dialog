@@ -14,7 +14,10 @@ export async function enterMessage(page: Page, message: string) {
 export async function sendMessage(page: Page, message: string) {
   await enterMessage(page, message);
   await page.keyboard.press('Enter');
-  await page.getByLabel('Reload').waitFor({ timeout: 20000 });
+  // Wait for the loading spinner to disappear, which indicates that the response has started streaming
+  await page.getByAltText('Ladeanimation').waitFor({ state: 'hidden', timeout: 60_000 });
+  // Wait for the "reload" button to appear, which indicates that the response has finished streaming
+  await page.getByLabel('Reload').waitFor({ timeout: 20_000 });
 }
 
 export async function uploadFile(page: Page, filePath: string) {
