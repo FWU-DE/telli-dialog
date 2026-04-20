@@ -16,37 +16,41 @@ export function createTextStream(): {
   error: (err: Error) => void;
 } {
   let controller: ReadableStreamDefaultController<string>;
+  let cancelledByConsumer = false;
 
   const stream = new ReadableStream<string>({
     start(c) {
       controller = c;
+    },
+    cancel() {
+      // Consumer canceled the stream (e.g., user reloaded or closed the tab)
+      cancelledByConsumer = true;
     },
   });
 
   return {
     stream,
     update: (text: string) => {
+      if (cancelledByConsumer) return;
       try {
-        // Encode the text chunk for streaming
         controller.enqueue(text);
       } catch (err) {
-        // Stream may be closed
         logError('createTextStream.update: failed to enqueue text; stream may be closed', err);
       }
     },
     done: () => {
+      if (cancelledByConsumer) return;
       try {
         controller.close();
       } catch (err) {
-        // Stream may already be closed
         logError('createTextStream.done: failed to close stream; it may already be closed', err);
       }
     },
     error: (err: Error) => {
+      if (cancelledByConsumer) return;
       try {
         controller.error(err);
       } catch (caughtErr) {
-        // Stream may already be closed
         logError(
           'createTextStream.error: failed to signal error on stream; it may already be closed',
           caughtErr,
