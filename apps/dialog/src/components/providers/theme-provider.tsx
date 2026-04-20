@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { startTransition } from 'react';
 import { DesignConfiguration } from '@ui/types/design-configuration';
 import { constructRootLayoutStyle } from '@/utils/tailwind/layout';
 import { PortalContainerProvider } from '@ui/components/portal-container';
@@ -32,7 +32,7 @@ export function ThemeProvider({
   React.useEffect(() => {
     if (containerRef) {
       // Do not set null values on `container` to prevent re-renders on teardown
-      setContainer(containerRef);
+      startTransition(() => setContainer(containerRef));
     }
   }, [containerRef]);
 
