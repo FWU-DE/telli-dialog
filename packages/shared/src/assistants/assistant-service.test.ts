@@ -69,6 +69,7 @@ const mockUser = (userRole: 'student' | 'teacher' = 'teacher'): UserModel => ({
   id: generateUUID(),
   lastUsedModel: null,
   versionAcceptedConditions: null,
+  loginCount: 0,
   createdAt: new Date(),
   userRole,
 });

@@ -40,6 +40,7 @@ export const userTable = pgTable('user_entity', {
   email: text('email').notNull().unique(),
   lastUsedModel: text('last_used_model'),
   versionAcceptedConditions: integer(),
+  loginCount: integer('login_count').notNull().default(0),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -286,6 +287,96 @@ export const federalStateUpdateSchema = createUpdateSchema(federalStateTable)
 export type FederalStateSelectModel = z.infer<typeof federalStateSelectSchema>;
 export type FederalStateInsertModel = z.infer<typeof federalStateInsertSchema>;
 export type FederalStateUpdateModel = z.infer<typeof federalStateUpdateSchema>;
+
+/**
+ * Schema for table info_banner
+ */
+export const infoBannerTypeSchema = z.enum(['warning', 'info']);
+export const infoBannerTypeEnum = pgEnum('info_banner_type', infoBannerTypeSchema.enum);
+export type InfoBannerType = z.infer<typeof infoBannerTypeSchema>;
+
+export const infoBannerTable = pgTable(
+  'info_banner',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    type: infoBannerTypeEnum('type').notNull(),
+    message: text('message').notNull(),
+    ctaLabel: text('cta_label'),
+    ctaUrl: text('cta_url'),
+    startsAt: timestamp('starts_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    endsAt: timestamp('ends_at', { mode: 'date', withTimezone: true }).notNull(),
+    maxLoginCount: integer('max_login_count'),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+      .defaultNow()
+      .$onUpdateFn(() => new Date())
+      .notNull(),
+    isDeleted: boolean('is_deleted').notNull().default(false),
+  },
+  (table) => [index().on(table.startsAt), index().on(table.endsAt), index().on(table.isDeleted)],
+);
+
+export const infoBannerSelectSchema = createSelectSchema(infoBannerTable).extend({
+  type: infoBannerTypeSchema,
+  startsAt: z.coerce.date(),
+  endsAt: z.coerce.date(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+});
+export const infoBannerInsertSchema = createInsertSchema(infoBannerTable)
+  .extend({
+    type: infoBannerTypeSchema,
+  })
+  .omit({ id: true, createdAt: true, updatedAt: true, isDeleted: true });
+export const infoBannerUpdateSchema = createUpdateSchema(infoBannerTable)
+  .omit({
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    id: z.string(),
+    type: infoBannerTypeSchema,
+  });
+
+export type InfoBannerSelectModel = z.infer<typeof infoBannerSelectSchema>;
+export type InfoBannerInsertModel = z.infer<typeof infoBannerInsertSchema>;
+export type InfoBannerUpdateModel = z.infer<typeof infoBannerUpdateSchema>;
+
+/**
+ * Schema for table info_banner_federal_state_mapping
+ */
+export const infoBannerFederalStateMappingTable = pgTable(
+  'info_banner_federal_state_mapping',
+  {
+    infoBannerId: uuid('info_banner_id')
+      .notNull()
+      .references(() => infoBannerTable.id, { onDelete: 'cascade' }),
+    federalStateId: text('federal_state_id').notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.infoBannerId, table.federalStateId] }),
+    foreignKey({
+      columns: [table.federalStateId],
+      foreignColumns: [federalStateTable.id],
+      name: 'info_banner_mapping_federal_state_id_fk',
+    }).onDelete('cascade'),
+    index().on(table.federalStateId),
+  ],
+);
+
+export const infoBannerFederalStateMappingSelectSchema = createSelectSchema(
+  infoBannerFederalStateMappingTable,
+);
+export const infoBannerFederalStateMappingInsertSchema = createInsertSchema(
+  infoBannerFederalStateMappingTable,
+);
+
+export type InfoBannerFederalStateMappingSelectModel = z.infer<
+  typeof infoBannerFederalStateMappingSelectSchema
+>;
+export type InfoBannerFederalStateMappingInsertModel = z.infer<
+  typeof infoBannerFederalStateMappingInsertSchema
+>;
 
 /**
  * Schema for table character

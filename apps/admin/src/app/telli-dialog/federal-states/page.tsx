@@ -1,21 +1,9 @@
 import TwoColumnLayout from '@/components/layout/TwoColumnLayout';
 import FederalStateListView from './FederalStateListView';
-import { Sidebar, SidebarItem } from '@/components/navigation/Sidebar';
-import { ROUTES } from '@/consts/routes';
+import { TelliDialogSidebar } from '../TelliDialogSidebar';
 
 export const dynamic = 'force-dynamic';
 
 export default function FederalStatesPage() {
-  return (
-    <TwoColumnLayout
-      sidebar={
-        <Sidebar>
-          <SidebarItem label="Bundesländer" href={ROUTES.dialog.federalStates} />
-          <SidebarItem label="Vorlagen" href={ROUTES.dialog.templates} />
-          <SidebarItem label="Modelle aktualisieren" href={ROUTES.dialog.modelRefresh} />
-        </Sidebar>
-      }
-      page={<FederalStateListView />}
-    />
-  );
+  return <TwoColumnLayout sidebar={<TelliDialogSidebar />} page={<FederalStateListView />} />;
 }
