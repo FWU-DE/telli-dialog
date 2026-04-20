@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@ui/components/Card';
-import { InfoIcon } from '@phosphor-icons/react';
 import { CustomChatFiles, CustomChatFilesProps } from './custom-chat-files';
 import { CustomChatHeading2 } from './custom-chat-heading2';
 import { CustomChatLinks, CustomChatLinksProps } from './custom-chat-links';
@@ -43,11 +42,7 @@ export function CustomChatFilesAndLinks(props: CustomChatFilesAndLinksProps) {
           {linksVisible && (
             <Card>
               <CardHeader>
-                <CardTitle
-                  tooltipAriaLabel={t('links')}
-                  tooltipContent={t('links-tooltip')}
-                  tooltipIcon={<InfoIcon className="size-5 text-icon" />}
-                >
+                <CardTitle tooltipAriaLabel={t('links')} tooltipContent={t('links-tooltip')}>
                   {t('links')}
                 </CardTitle>
               </CardHeader>

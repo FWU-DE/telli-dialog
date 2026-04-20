@@ -2,12 +2,11 @@
 
 import React, { useMemo } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { InfoIcon } from '@phosphor-icons/react';
 
 import { cn } from '../lib/utils';
 import { Label } from './Label';
 import { Separator } from './Separator';
-import { Tooltip, TooltipContent, TooltipTrigger } from './Tooltip';
+import { InfoTooltip } from './Tooltip';
 
 function FieldSet({ className, ...props }: React.ComponentProps<'fieldset'>) {
   return (
@@ -148,14 +147,7 @@ function FieldLabel({
           *
         </span>
       )}
-      {tooltip && (
-        <Tooltip>
-          <TooltipTrigger type="button" aria-label={tooltip}>
-            <InfoIcon className="size-5 text-icon" />
-          </TooltipTrigger>
-          <TooltipContent>{tooltip}</TooltipContent>
-        </Tooltip>
-      )}
+      {tooltip && <InfoTooltip tooltip={tooltip} ariaLabel={tooltip} />}
       {labelAction && (
         <span className="inline-flex basis-full items-center sm:ml-auto sm:basis-auto">
           {labelAction}

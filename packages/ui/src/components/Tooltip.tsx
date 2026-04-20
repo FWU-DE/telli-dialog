@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { InfoIcon } from '@phosphor-icons/react';
 import { Tooltip as TooltipPrimitive } from 'radix-ui';
 
 import { DEFAULT_TOOLTIP_DELAY_DURATION, DEFAULT_SCROLLING_TOOLTIP_DELAY_DURATION } from './const';
@@ -160,4 +161,46 @@ function TooltipContent({
   );
 }
 
-export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger };
+type InfoTooltipProps = {
+  tooltip: React.ReactNode;
+  ariaLabel?: string;
+  icon?: React.ReactNode;
+  iconClassName?: string;
+  triggerClassName?: string;
+  contentClassName?: string;
+  delayDuration?: number;
+  skipDelayDuration?: number;
+};
+
+function resolveAriaLabel(tooltip: React.ReactNode, ariaLabel?: string) {
+  if (ariaLabel) {
+    return ariaLabel;
+  }
+
+  return typeof tooltip === 'string' ? tooltip : undefined;
+}
+
+function InfoTooltip({
+  tooltip,
+  ariaLabel,
+  delayDuration = DEFAULT_TOOLTIP_DELAY_DURATION,
+  skipDelayDuration = 0,
+}: InfoTooltipProps) {
+  const resolvedAriaLabel = resolveAriaLabel(tooltip, ariaLabel);
+
+  return (
+    <TooltipProvider skipDelayDuration={skipDelayDuration} delayDuration={delayDuration}>
+      <Tooltip>
+        <TooltipTrigger
+          aria-label={resolvedAriaLabel}
+          className="focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring  focus-visible:rounded-full"
+        >
+          <InfoIcon className={'size-5 text-icon'} aria-hidden="true" />
+        </TooltipTrigger>
+        <TooltipContent>{tooltip}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
+export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, InfoTooltip };
