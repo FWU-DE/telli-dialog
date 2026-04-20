@@ -42,7 +42,7 @@ export default function AssistantOverview({ currentUserId }: AssistantOverviewPr
       title={t('title')}
       infoTooltip={infoContent}
       searchPlaceholder={t('search-placeholder')}
-      createButton={<CreateNewAssistantButton isNewUiDesignEnabled={true} />}
+      createButton={<CreateNewAssistantButton />}
       activeFilter={activeFilter}
       onFilterChange={handleFilterChange}
       itemCount={visibleAssistants.length}

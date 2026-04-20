@@ -1,16 +1,9 @@
 import { permanentRedirect } from 'next/navigation';
-import AssistantForm from './custom-gpt-form';
-import { removeNullishValues } from '@shared/utils/remove-nullish-values';
-import { AssistantSelectModel } from '@shared/db/schema';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { getAssistantByUser } from '@shared/assistants/assistant-service';
 import { requireAuth } from '@/auth/requireAuth';
-import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
-import { WebsearchSource } from '@shared/db/types';
-import { DefaultPageLayout } from '@/components/layout/default-page-layout';
-import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,14 +14,11 @@ const searchParamsSchema = z.object({
 
 export default async function Page(props: PageProps<'/custom/editor/[customGptId]'>) {
   const { customGptId: assistantId } = await props.params;
-  const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
-  const isCreating = searchParams.create === 'true';
+  const { create } = parseSearchParams(searchParamsSchema, await props.searchParams);
 
-  const { user, school, federalState } = await requireAuth();
+  const { user, school } = await requireAuth();
 
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
-
-  const { assistant, fileMappings, pictureUrl } = await getAssistantByUser({
+  const { assistant } = await getAssistantByUser({
     assistantId,
     schoolId: school.id,
     userId: user.id,
@@ -36,40 +26,8 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
 
   const readOnly = assistant.userId !== user.id;
 
-  if (federalState.featureToggles.isNewUiDesignEnabled) {
-    if (readOnly) {
-      permanentRedirect(`/assistants/${assistantId}`);
-    }
-    permanentRedirect(`/assistants/editor/${assistantId}`);
+  if (readOnly) {
+    permanentRedirect(`/assistants/${assistantId}`);
   }
-
-  const initialLinks = assistant.attachedLinks
-    .filter((l) => l !== '')
-    .map(
-      (url) =>
-        ({
-          link: url,
-          error: false,
-        }) as WebsearchSource,
-    );
-
-  return (
-    <DefaultPageLayout>
-      <CustomChatHeader
-        userAndContext={userAndContext}
-        isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
-      />
-      <div className="mx-auto mt-4">
-        <AssistantForm
-          {...(removeNullishValues(assistant) as AssistantSelectModel)}
-          maybeSignedPictureUrl={pictureUrl}
-          isCreating={isCreating}
-          readOnly={readOnly}
-          userRole={user.userRole}
-          initialLinks={initialLinks}
-          existingFiles={fileMappings}
-        />
-      </div>
-    </DefaultPageLayout>
-  );
+  permanentRedirect(`/assistants/editor/${assistantId}${create === 'true' ? '?create=true' : ''}`);
 }

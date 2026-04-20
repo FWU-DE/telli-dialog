@@ -34,8 +34,8 @@
     --dark-red: #9f070d;
     --light-red: #fef6f6;
 
-    --background: #ffffffff; /* normal background for pages */
-    --background-2: #fafafaff; /* alternative background for cards, popovers, etc. */
+    --background: #f4f5f7ff; /* normal background for pages */
+    --background-2: #ffffffff; /* alternative background for cards, popovers, etc. */
     --foreground: #020817ff;
 
     --card: #ffffffff;
@@ -71,56 +71,11 @@
     --input: #ccccccff;
     --ring: var(--primary);
 
-    --sidebar-background: var(--background-2);
+    --sidebar-background: #ffffffff;
     --sidebar-accent: #e8e4ee; /* overwritten by theme: based on primary color */
     --sidebar-accent-foreground: var(--primary); /* overwritten by theme: based on primary color */
     --sidebar-border: #e5e5e5ff;
     --sidebar-ring: var(--primary); /* overwritten by theme: based on primary color */
-  }
-
-  .dark {
-    --background: #020817ff;
-    --background-2: #171717ff;
-    --foreground: #f8fafcff;
-
-    --card: #020817ff;
-    --card-foreground: #f8fafcff;
-
-    --popover: #020817ff;
-    --popover-foreground: #f8fafcff;
-
-    --primary: #d8b4ffff;
-    --primary-foreground: #1a0033ff;
-
-    --secondary: #6ee7b7ff;
-    --secondary-foreground: #020817ff;
-
-    --muted: #1e293bff;
-    --muted-foreground: #94a3b8ff;
-
-    --accent: #1e293bff;
-    --accent-foreground: #f8fafcff;
-
-    --destructive: #7f1d1dff;
-    --destructive-foreground: #f8fafcff;
-
-    --success: #ffffff;
-    --success-foreground: #ffffff;
-    --error: #ffffff;
-    --error-foreground: #ffffff;
-    --warning: #ffffff;
-    --warning-foreground: #ffffff;
-
-    --icon: #999999;
-    --border: #1e293bff;
-    --input: #1e293bff;
-    --ring: #cbd5e1ff;
-
-    --sidebar-background: var(--background-2);
-    --sidebar-accent: color-mix(in srgb, var(--primary) 15%, transparent);
-    --sidebar-accent-foreground: var(--primary);
-    --sidebar-border: #ffffff1a;
-    --sidebar-ring: var(--primary);
   }
 }
 
@@ -185,7 +140,6 @@
   --color-ring: var(--ring);
 
   --shadow-dropdown: 0px 4px 10px 0px rgba(0, 41, 102, 0.1);
-  --shadow-3xl: 0 4px 9px 0px rgba(0, 41, 102, 0.2); /* only used in collapsible-sidebar.tsx */
 
   --radius-1: 1px;
   --radius-lg: var(--radius);
@@ -320,9 +274,5 @@
     font-weight: 400;
     margin-top: 1em;
     margin-bottom: 1em;
-  }
-
-  .gradient {
-    background-image: conic-gradient(#9d174dff, #6b21a8ff, #3730a3ff);
   }
 }

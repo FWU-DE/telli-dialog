@@ -38,9 +38,7 @@ export function LearningScenarioContainer({
   return (
     <div className="min-w-full p-6 overflow-auto">
       <HeaderPortal>
-        <ToggleSidebarButton
-          isNewUiDesignEnabled={federalState?.featureToggles?.isNewUiDesignEnabled ?? false}
-        />
+        <ToggleSidebarButton />
         <div className="grow"></div>
         <ProfileMenu userAndContext={user} />
       </HeaderPortal>

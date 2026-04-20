@@ -98,7 +98,7 @@ export default function AssistantContainer({
         <Link
           type="button"
           aria-label={tCommon('edit')}
-          href={`/custom/editor/${id}?${queryParams.toString()}`}
+          href={`/assistants/editor/${id}?${queryParams.toString()}`}
           className={cn(iconClassName, 'border-transparent p-1')}
         >
           <SettingsIcon aria-hidden="true" className="w-6 h-6" />

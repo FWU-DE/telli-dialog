@@ -70,9 +70,7 @@ export default async function Page(props: PageProps) {
       <ImageStyleProvider defaultImageStyle={lastUsedStyleInChat}>
         <HeaderPortal>
           <div className="flex w-full gap-4 justify-center items-center z-30">
-            <ToggleSidebarButton
-              isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
-            />
+            <ToggleSidebarButton />
             <NewChatButton />
             <SelectImageModel />
             <SelectImageStyle />
