@@ -164,7 +164,9 @@ export async function selectModel(page: Page, userIndex: number) {
     const currentSelectedText = await dropdownLocator.textContent();
     const targetModel = LLM_MODELS.at(userIndex % LLM_MODELS.length);
     if (!targetModel) {
-      throw new Error();
+      throw new Error(
+        `No target model found for computed index during load test model selection (userIndex=${userIndex}, LLM_MODELS.length=${LLM_MODELS.length})`,
+      );
     }
 
     if (currentSelectedText?.includes(targetModel.displayName)) {
