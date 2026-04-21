@@ -493,7 +493,8 @@
       "saving": "Wird gespeichert...",
       "save-error": "Speichern\nfehlgeschlagen",
       "unsaved-changes": "Ungespeicherte\nÄnderungen",
-      "saved": "Gespeichert"
+      "saved": "Gespeichert",
+      "tooltip": "Alle Änderungen werden automatisch gespeichert, sobald ein Eingabefeld verlassen wird."
     },
     "links": {
       "empty-error": "Bitte gib eine URL ein.",
@@ -532,7 +533,7 @@
       "heading-tooltip": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Telli bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: {supported_formats}",
       "files": "Dateien",
       "links": "Webseiten",
-      "links-tooltip": "Wichtig: Bitte jeweils konkrete Webseiten angeben (z.B. wikipedia.de/Regenwürmer). Nur wikipedia.de ist nicht ausreichend.",
+      "links-tooltip": "Wichtig: Bitte jeweils konkrete Webseiten angeben (z.B. http://wikipedia.org/wiki/Astronomie). Nur http://wikipedia.org ist nicht ausreichend.",
       "file-delete-error": "Fehler beim Löschen der Datei"
     },
     "instructions-example": {
