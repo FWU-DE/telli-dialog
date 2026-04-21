@@ -22,7 +22,6 @@ import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions'
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
-import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
 import {
   createNewAssistantAction,
@@ -292,7 +291,6 @@ export function AssistantEdit({
         modalTitle={t('delete-modal-title')}
         modalDescription={t('delete-modal-description')}
       />
-      <CustomChatActionSave onClick={handleAutoSave} />
     </CustomChatActions>
   );
 
@@ -309,7 +307,7 @@ export function AssistantEdit({
         }}
       />
       <CustomChatTitle title={name} />
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-wrap items-start gap-3">
         {assistantActions}
         <CustomChatFormState
           isDirty={isDirty}
@@ -405,7 +403,7 @@ export function AssistantEdit({
           onShareChange={handleSharingChange}
         />
       </form>
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-wrap items-start gap-3">
         {assistantActions}
         <CustomChatFormState
           isDirty={isDirty}

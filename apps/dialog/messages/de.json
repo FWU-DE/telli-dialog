@@ -491,8 +491,8 @@
     },
     "form": {
       "saving": "Wird gespeichert...",
-      "save-error": "Speichern fehlgeschlagen",
-      "unsaved-changes": "Ungespeicherte Änderungen",
+      "save-error": "Speichern\nfehlgeschlagen",
+      "unsaved-changes": "Ungespeicherte\nÄnderungen",
       "saved": "Gespeichert"
     },
     "links": {

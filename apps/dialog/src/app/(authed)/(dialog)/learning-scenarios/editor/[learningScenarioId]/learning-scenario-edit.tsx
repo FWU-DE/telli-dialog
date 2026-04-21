@@ -18,7 +18,6 @@ import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
 import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
-import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
 import { useRouter } from 'next/navigation';
 import {
@@ -309,7 +308,6 @@ export function LearningScenarioEdit({
         modalTitle={t('delete-modal-title')}
         modalDescription={t('delete-modal-description')}
       />
-      <CustomChatActionSave onClick={handleAutoSave} />
     </CustomChatActions>
   );
 
@@ -326,7 +324,7 @@ export function LearningScenarioEdit({
         }}
       />
       <CustomChatTitle title={name} />
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-wrap items-start gap-3">
         {actionButtons}
         <CustomChatFormState
           isDirty={isDirty}
@@ -466,7 +464,7 @@ export function LearningScenarioEdit({
           />
         </form>
       </div>
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-wrap items-start gap-3">
         {actionButtons}
         <CustomChatFormState
           isDirty={isDirty}

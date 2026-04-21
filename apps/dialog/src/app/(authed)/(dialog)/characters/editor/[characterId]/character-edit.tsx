@@ -26,7 +26,6 @@ import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions'
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
-import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
@@ -298,7 +297,6 @@ export function CharacterEdit({
         modalTitle={t('delete-modal-title')}
         modalDescription={t('delete-modal-description')}
       />
-      <CustomChatActionSave onClick={handleAutoSave} />
     </CustomChatActions>
   );
 
@@ -315,7 +313,7 @@ export function CharacterEdit({
         }}
       />
       <CustomChatTitle title={name} />
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-wrap items-start gap-3">
         {actionButtons}
         <CustomChatFormState
           isDirty={isDirty}
@@ -459,7 +457,7 @@ export function CharacterEdit({
         />
       </form>
 
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-wrap items-start gap-3">
         {actionButtons}
         <CustomChatFormState
           isDirty={isDirty}
