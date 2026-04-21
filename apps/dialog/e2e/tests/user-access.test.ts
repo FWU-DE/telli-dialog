@@ -5,6 +5,9 @@ import { federalStateTable } from '@shared/db/schema';
 import { eq } from 'drizzle-orm';
 import { E2E_FEDERAL_STATE } from '../utils/const';
 
+// Tests modify global DB feature flags and must not run concurrently with each other
+test.describe.configure({ mode: 'serial' });
+
 const featureToggleDefaults = {
   isStudentAccessEnabled: true,
   isCharacterEnabled: true,

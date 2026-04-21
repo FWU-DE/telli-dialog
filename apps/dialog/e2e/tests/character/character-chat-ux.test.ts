@@ -96,7 +96,6 @@ test.describe('character chat UX', () => {
     page,
   }) => {
     await page.goto(`/characters/d/${characterId}`);
-    await page.getByPlaceholder('Wie kann ich Dir helfen?').waitFor();
 
     // Send first message
     await sendMessage(page, 'Schreibe "OK"');
