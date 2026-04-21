@@ -1,4 +1,4 @@
-import { expect, Page } from '@playwright/test';
+import { expect, Page, test } from '@playwright/test';
 import { waitForToast } from './utils';
 
 export async function regenerateMessage(page: Page) {
@@ -12,9 +12,18 @@ export async function enterMessage(page: Page, message: string) {
 }
 
 export async function sendMessage(page: Page, message: string) {
-  await enterMessage(page, message);
-  await page.keyboard.press('Enter');
-  await page.getByLabel('Reload').waitFor({ timeout: 20000 });
+  await test.step('send message and wait for response', async () => {
+    const loadingSpinner = page.getByAltText('Ladeanimation');
+    await enterMessage(page, message);
+    const waitForLoadingSpinner = loadingSpinner.waitFor();
+    await page.keyboard.press('Enter');
+    // Wait for the loading spinner to appear after sending the message
+    await waitForLoadingSpinner;
+    // Wait for the loading spinner to disappear, which indicates that the response has started streaming
+    await loadingSpinner.waitFor({ state: 'detached', timeout: 60_000 });
+    // Wait for the "reload" button to appear, which indicates that the response has finished streaming
+    await page.getByLabel('Reload').waitFor({ timeout: 20_000 });
+  });
 }
 
 export async function uploadFile(page: Page, filePath: string) {
