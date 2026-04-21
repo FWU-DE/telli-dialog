@@ -402,7 +402,7 @@ export function CharacterEdit({
                 selectedModelId={selectedModelId ?? undefined}
                 onValueChange={(value) => {
                   setValue('modelId', value, { shouldDirty: true });
-                  handleAutoSave();
+                  void flushAutoSave();
                 }}
               />
               <FormField

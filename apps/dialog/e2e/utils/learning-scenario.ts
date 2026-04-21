@@ -19,10 +19,7 @@ export async function deleteLearningScenario(page: Page, name: string) {
   await expect(card).toBeVisible({ timeout: 15000 });
   await card.getByTestId('entity-link').click();
   await page.waitForURL('/learning-scenarios/editor/**');
-  const deleteButton = page.getByTestId('custom-chat-delete-button').first();
-  await expect(deleteButton).toBeVisible();
-  await deleteButton.click();
-  await confirmDelete(page);
+  await deleteLearningScenarioFromDetailPage(page);
 }
 
 export async function deleteLearningScenarioFromDetailPage(page: Page) {
@@ -49,14 +46,12 @@ export async function configureLearningScenario(
     .getByTestId('learning-scenario-name-input')
     .fill(data?.name ?? 'Absolutismus unter Ludwig XIV – Gruppe 1 Soldaten');
   await page.getByTestId('learning-scenario-name-input').press('Tab');
-  await waitForAutosave(page);
 
   // Fill description field
   await page
     .getByTestId('learning-scenario-description-input')
     .fill(data?.description ?? 'Zwischen Absolutismus und Demokratie (Ludwig XIV)');
   await page.getByTestId('learning-scenario-description-input').press('Tab');
-  await waitForAutosave(page);
 
   // Note: schoolType, gradeLevel, and subject fields no longer exist in the new UI
   // They have been consolidated into the instructions field
@@ -69,7 +64,6 @@ export async function configureLearningScenario(
         'Der Chatbot soll aus der Perspektive eines Soldaten im Herrschaftssystem unter Ludwig XIV antworten.',
     );
   await page.getByTestId('learning-scenario-instructions-input').press('Tab');
-  await waitForAutosave(page);
 
   // Fill student exercise field
   await page

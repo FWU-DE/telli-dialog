@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
 import { waitForAutosave, waitForToast } from '../../utils/utils';
 import { sendMessage, uploadFile } from '../../utils/chat';
-import { deleteAssistant } from '../../utils/assistant';
+import { configureAssistant, deleteAssistant } from '../../utils/assistant';
 
 test.use({ storageState: AUTH_FILES.teacher });
 
@@ -19,36 +19,19 @@ test('teacher can login, create an assistant and start a chat', async ({ page })
   await page.waitForURL('/assistants/editor/**');
 
   // configure form
-  await page.getByTestId('assistant-name-input').click();
-  await page.getByTestId('assistant-name-input').fill(assistantName);
-  await page.getByTestId('assistant-name-input').press('Tab');
-  await waitForAutosave(page);
-  await page
-    .getByTestId('assistant-description-input')
-    .fill('Hilft bei der Planung und Budget Rechnung beim Bau eines Einfamilienhauses');
-
-  await page
-    .getByTestId('assistant-instructions-input')
-    .fill('Die Währung ist US-Dollar, du berätst mich inwiefern sind ein Bausparkredit lohnt');
-
-  // first Prompt Suggestion Box
-  await page.getByTestId('prompt-suggestion-1-input').fill('Was kostet ein Grundstück in München?');
-  await page.getByTestId('add-prompt-suggestion-1-button').click();
-
-  // fill three more Suggestions and delete one of them afterwards
-  await page
-    .getByTestId('prompt-suggestion-2-input')
-    .fill('Dieser Promptvorschlag wird wieder gelöscht.');
-  await page.getByTestId('add-prompt-suggestion-2-button').click();
-  await page.getByTestId('prompt-suggestion-3-input').fill('Was ist das aktuelle Zinsniveau');
-  await page.getByTestId('add-prompt-suggestion-3-button').click();
-  await page.getByTestId('prompt-suggestion-4-input').fill('Wo kann man günstig Baugrund erwerben');
+  await configureAssistant(page, {
+    promptSuggestions: [
+      'Was kostet ein Grundstück in München?',
+      'Dieser Promptvorschlag wird wieder gelöscht.',
+      'Was ist das aktuelle Zinsniveau',
+      'Wo kann man günstig Baugrund erwerben',
+    ],
+  });
 
   // delete one suggestion again
   await page.getByTestId('delete-prompt-suggestion-2-button').click();
 
   // save form
-  await page.getByTestId('custom-chat-save-button').first().click();
   await waitForAutosave(page);
   await page.goto('/assistants');
 
@@ -95,31 +78,12 @@ test('data is autosaved on blur', async ({ page }) => {
   await page.waitForURL('/assistants/editor/**');
 
   // Fill out the form
-  await page.getByTestId('assistant-name-input').click();
-  await page.getByTestId('assistant-name-input').fill('Autosave Test GPT');
-  await page.getByTestId('assistant-name-input').press('Tab');
-  await waitForAutosave(page);
-
-  await page
-    .getByTestId('assistant-description-input')
-    .fill('Test description for autosave validation');
-  await page.getByTestId('assistant-description-input').press('Tab');
-  await waitForAutosave(page);
-
-  await page
-    .getByTestId('assistant-instructions-input')
-    .fill('Test functions for autosave validation');
-  await page.getByTestId('assistant-instructions-input').press('Tab');
-  await waitForAutosave(page);
-
-  // Add a prompt suggestion
-  await page.getByTestId('prompt-suggestion-1-input').fill('Test prompt suggestion');
-  await page.getByTestId('prompt-suggestion-1-input').press('Tab');
-  await waitForAutosave(page);
-
-  // Save the form
-  await page.getByTestId('custom-chat-save-button').first().click();
-  await waitForAutosave(page);
+  await configureAssistant(page, {
+    name: 'Autosave Test GPT',
+    description: 'Test description for autosave validation',
+    instructions: 'Test functions for autosave validation',
+    promptSuggestions: ['Test prompt suggestion'],
+  });
 
   // Navigate to assistant overview explicitly to check if data was saved correctly
   await page.goto('/assistants');
