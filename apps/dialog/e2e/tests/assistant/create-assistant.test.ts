@@ -22,7 +22,6 @@ test('teacher can login, create an assistant and start a chat', async ({ page })
   await page.getByTestId('assistant-name-input').click();
   await page.getByTestId('assistant-name-input').fill(assistantName);
   await page.getByTestId('assistant-name-input').press('Tab');
-  await waitForAutosave(page);
   await page
     .getByTestId('assistant-description-input')
     .fill('Hilft bei der Planung und Budget Rechnung beim Bau eines Einfamilienhauses');
@@ -104,21 +103,17 @@ test('data is autosaved on blur', async ({ page }) => {
     .getByTestId('assistant-description-input')
     .fill('Test description for autosave validation');
   await page.getByTestId('assistant-description-input').press('Tab');
-  await waitForAutosave(page);
 
   await page
     .getByTestId('assistant-instructions-input')
     .fill('Test functions for autosave validation');
   await page.getByTestId('assistant-instructions-input').press('Tab');
-  await waitForAutosave(page);
 
   // Add a prompt suggestion
   await page.getByTestId('prompt-suggestion-1-input').fill('Test prompt suggestion');
   await page.getByTestId('prompt-suggestion-1-input').press('Tab');
-  await waitForAutosave(page);
 
   // Save the form
-  await page.getByTestId('custom-chat-save-button').first().click();
   await waitForAutosave(page);
 
   // Navigate to assistant overview explicitly to check if data was saved correctly
