@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { startTransition, useCallback, useEffect, useRef, useState } from 'react';
 import type { OverviewFilter } from '@shared/overview-filter';
 
-type EntityType = 'characters' | 'scenarios' | 'gpts';
+type EntityType = 'characters' | 'learning-scenarios' | 'assistants';
 
 const VALID_FILTERS: OverviewFilter[] = ['all', 'mine', 'official', 'school'];
 
@@ -19,7 +19,7 @@ function parseFilter(value: string | null): OverviewFilter | null {
  * Calls onLoad on mount with the initial filter (from session storage or legacy URL param).
  * Supports legacy URL params for backward compatibility with old bookmarks.
  *
- * @param entityType - The type of entity (characters, scenarios, gpts)
+ * @param entityType - The type of entity
  * @param onLoad - Callback to fetch entities for a given filter (called on mount and on change)
  * @returns [filter, setFilter, isLoading]
  */
@@ -52,9 +52,11 @@ export function useOverviewFilter(
       }
     }
 
-    setFilterState(initialFilter);
-    setIsLoading(true);
-    onLoadRef.current(initialFilter).finally(() => setIsLoading(false));
+    startTransition(() => {
+      setFilterState(initialFilter);
+      setIsLoading(true);
+    });
+    onLoadRef.current(initialFilter).finally(() => startTransition(() => setIsLoading(false)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

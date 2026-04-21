@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { getProjectByIdAction, getApiKeysAction } from '../actions';
-import { Project } from '../../../../../../types/project';
-import { ApiKey } from '../../../../../../types/api-key';
+import { startTransition, useCallback, useEffect, useState } from 'react';
+import { getApiKeysAction, getProjectByIdAction } from '../actions';
+import { Project } from '@/types/project';
+import { ApiKey } from '@/types/api-key';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ui/components/Card';
 import {
   Table,
@@ -16,7 +16,7 @@ import {
 import { Button } from '@ui/components/Button';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { ROUTES } from '../../../../../../consts/routes';
+import { ROUTES } from '@/consts/routes';
 import { Search } from 'lucide-react';
 
 export type ProjectDetailViewProps = {
@@ -66,8 +66,9 @@ export default function ProjectDetailView(props: ProjectDetailViewProps) {
   }, [organizationId, projectId]);
 
   useEffect(() => {
-    loadProject();
-    loadApiKeys();
+    startTransition(async () => {
+      await Promise.all([loadProject(), loadApiKeys()]);
+    });
   }, [organizationId, projectId, loadProject, loadApiKeys]);
 
   if (loading) {

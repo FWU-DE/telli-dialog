@@ -61,8 +61,7 @@ export function FloatingText({
         y: minMargin,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [parentRef.current, minMargin]);
+  }, [minMargin, parentRef, containerRef]);
 
   React.useEffect(() => {
     function onMouseMove(e: MouseEvent) {

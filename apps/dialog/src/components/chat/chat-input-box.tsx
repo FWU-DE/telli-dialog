@@ -17,6 +17,7 @@ import {
   FormEvent,
   KeyboardEvent,
   SetStateAction,
+  startTransition,
   useEffect,
   useState,
 } from 'react';
@@ -59,8 +60,10 @@ export function ChatInputBox({
         }),
       );
       const trimmedFiles = new Map(Array.from(files.entries()).slice(0, NUMBER_OF_FILES_LIMIT));
-      setFiles(trimmedFiles);
-      setFileUploading(false);
+      startTransition(() => {
+        setFiles(trimmedFiles);
+        setFileUploading(false);
+      });
     }
     const imageEntries = Array.from(files?.entries() ?? []).filter(([, file]) =>
       isImageFile(file.file.name),
@@ -80,8 +83,10 @@ export function ChatInputBox({
       imagesExceedingLimit.forEach(([localId]) => {
         newFiles.delete(localId);
       });
-      setFiles(newFiles);
-      setFileUploading(false);
+      startTransition(() => {
+        setFiles(newFiles);
+        setFileUploading(false);
+      });
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

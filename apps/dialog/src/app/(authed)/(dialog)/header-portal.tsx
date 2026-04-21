@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { startTransition } from 'react';
 import { createPortal } from 'react-dom';
 
 export const HEADER_PORTAL_ID = 'header-portal';
@@ -17,10 +17,12 @@ export default function HeaderPortal({
 
   React.useEffect(() => {
     const maybeHeaderPortal = document.getElementById(HEADER_PORTAL_ID);
-    if (maybeHeaderPortal !== null) {
-      setHeaderElement(maybeHeaderPortal);
-    }
-    setMounted(true);
+    startTransition(() => {
+      if (maybeHeaderPortal !== null) {
+        setHeaderElement(maybeHeaderPortal);
+      }
+      setMounted(true);
+    });
   }, []);
 
   React.useEffect(() => {
