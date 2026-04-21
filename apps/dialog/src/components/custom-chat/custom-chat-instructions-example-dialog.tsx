@@ -12,6 +12,7 @@ import {
 } from '@ui/components/Dialog';
 import { Button } from '@ui/components/Button';
 import { useTranslations } from 'next-intl';
+import { CaretRightIcon } from '@phosphor-icons/react';
 
 type CustomChatInstructionsExampleDialogProps = {
   descriptionContent: ReactElement;
@@ -30,10 +31,11 @@ export function CustomChatInstructionsExampleDialog({
         <Button
           variant="link"
           type="button"
-          className="text-sm font-medium h-auto p-0 leading-none"
+          className="text-sm font-medium h-auto p-0 leading-none gap-0 flex items-center"
           aria-label={t('button')}
         >
           {t('button')}
+          <CaretRightIcon className="size-3.5 text-primary" />
         </Button>
       </DialogTrigger>
       <DialogContent showCloseButton={false} className="overflow-hidden">

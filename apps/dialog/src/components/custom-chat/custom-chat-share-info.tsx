@@ -1,5 +1,7 @@
 'use client';
 
+import { CaretRightIcon } from '@phosphor-icons/react/dist/icons/CaretRight';
+
 export function CustomChatShareInfo({
   href,
   info,
@@ -26,10 +28,11 @@ export function CustomChatShareInfo({
   };
 
   return (
-    <div className="flex items-center px-6 py-4 justify-between text-base font-medium rounded-xl bg-secondary/40">
+    <div className="flex items-center px-6 py-4 justify-between text-base font-medium rounded-xl bg-secondary/30">
       <span>{info}</span>
       <a href={href} className="text-primary" onClick={handleClick}>
         {linkText}
+        <CaretRightIcon className="inline-block size-4 text-primary mb-0.5" />
       </a>
     </div>
   );

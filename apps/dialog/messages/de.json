@@ -480,6 +480,12 @@
     "duplicate": "Duplizieren",
     "delete": "Löschen",
     "save": "Speichern",
+    "duplicate-dialog": {
+      "title": "Duplikat erstellen?",
+      "description": "Soll ein Duplikat erstellt werden?",
+      "confirm": "Duplikat erstellen",
+      "cancel": "Abbrechen"
+    },
     "image": {
       "crop-image": "Bild ausschneiden",
       "upload-image": "Bild hochladen",
