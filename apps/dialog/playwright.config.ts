@@ -3,14 +3,13 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
-
 export default defineConfig({
   globalSetup: './e2e/global-setup',
   testDir: './e2e/tests/',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: 1,
+  workers: process.env.CI ? 3 : 1,
   reporter: [['html', { outputFolder: './playwright-report' }], ['json'], ['github'], ['list']],
   timeout: 90_000,
   use: {
