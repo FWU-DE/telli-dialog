@@ -201,7 +201,7 @@ export async function dbDeleteAssistantByIdAndUserId({
     .where(and(eq(assistantTable.id, gptId), eq(assistantTable.userId, userId)));
 
   if (assistant === undefined) {
-    throw Error('Assistant does not exist');
+    throw new Error('Assistant does not exist');
   }
 
   const deletedAssistant = await db.transaction(async (tx) => {
@@ -239,7 +239,7 @@ export async function dbDeleteAssistantByIdAndUserId({
     )[0];
 
     if (deletedAssistant === undefined) {
-      throw Error('Could not delete assistant');
+      throw new Error('Could not delete assistant');
     }
     return deletedAssistant;
   });

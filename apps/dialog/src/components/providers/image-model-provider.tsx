@@ -41,7 +41,7 @@ export function useImageModels(): ImageModelsContextProps {
   const maybeContext = React.useContext(ImageModelsContext);
 
   if (maybeContext === undefined) {
-    throw Error('useImageModels can only be used inside a ImageModelsProvider');
+    throw new Error('useImageModels can only be used inside a ImageModelsProvider');
   }
   return maybeContext;
 }

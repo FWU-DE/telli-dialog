@@ -58,7 +58,7 @@ export function useImageStyle(): ImageStyleContextProps {
   const maybeContext = React.useContext(ImageStyleContext);
 
   if (maybeContext === undefined) {
-    throw Error('useImageStyle can only be used inside a ImageStyleProvider');
+    throw new Error('useImageStyle can only be used inside a ImageStyleProvider');
   }
   return maybeContext;
 }

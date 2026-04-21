@@ -28,7 +28,7 @@ export function decrypt({
   const [ivHex, encryptedTextHex] = data.split(':');
 
   if (ivHex === undefined || encryptedTextHex === undefined) {
-    throw Error('Could not decrypt data');
+    throw new Error('Could not decrypt data');
   }
 
   const iv = Buffer.from(ivHex, 'hex');

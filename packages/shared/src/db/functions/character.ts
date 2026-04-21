@@ -330,7 +330,7 @@ export async function dbDeleteCharacterByIdAndUserId({
     .where(and(eq(characterTable.id, characterId), eq(characterTable.userId, userId)));
 
   if (character === undefined) {
-    throw Error('Character does not exist');
+    throw new Error('Character does not exist');
   }
 
   const deletedCharacter = await db.transaction(async (tx) => {
@@ -368,7 +368,7 @@ export async function dbDeleteCharacterByIdAndUserId({
     )[0];
 
     if (deletedCharacter === undefined) {
-      throw Error('Could not delete character');
+      throw new Error('Could not delete character');
     }
     return deletedCharacter;
   });
@@ -400,7 +400,7 @@ export async function dbUpdateTokenUsageByCharacterChatId(
     await db.insert(sharedCharacterChatUsageTrackingTable).values(value).returning()
   )[0];
   if (insertedUsage === undefined) {
-    throw Error('Could not track the token usage');
+    throw new Error('Could not track the token usage');
   }
 
   return insertedUsage;

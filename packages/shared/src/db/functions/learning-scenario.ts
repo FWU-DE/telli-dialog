@@ -276,7 +276,7 @@ export async function dbUpdateTokenUsageBySharedLearningScenarioId(
     .values(value)
     .returning();
   if (insertedUsage === undefined) {
-    throw Error('Could not track the token usage');
+    throw new Error('Could not track the token usage');
   }
 
   return insertedUsage;
@@ -300,7 +300,7 @@ export async function dbDeleteLearningScenarioByIdAndUserId({
     );
 
   if (learningScenario === undefined) {
-    throw Error('Learning scenario does not exist');
+    throw new Error('Learning scenario does not exist');
   }
 
   const deletedLearningScenario = await db.transaction(async (tx) => {
@@ -347,7 +347,7 @@ export async function dbDeleteLearningScenarioByIdAndUserId({
       .returning();
 
     if (deletedLearningScenario === undefined) {
-      throw Error('Could not delete learning scenario');
+      throw new Error('Could not delete learning scenario');
     }
     return deletedLearningScenario;
   });
