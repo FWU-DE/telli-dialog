@@ -1,6 +1,22 @@
 import { expect, Page } from '@playwright/test';
 import { waitForAutosave } from './utils';
 
+export async function createCharacter(page: Page) {
+  await page.goto('/characters');
+  await page.waitForURL('/characters**');
+  await page.getByRole('button', { name: 'Dialogpartner erstellen' }).click();
+  await page.waitForURL('/characters/editor/**');
+}
+
+export async function deleteCharacterFromDetailPage(page: Page) {
+  const deleteButton = page.getByTestId('custom-chat-delete-button').first();
+  await expect(deleteButton).toBeVisible();
+  await deleteButton.click();
+  const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
+  await expect(deleteConfirmButton).toBeVisible();
+  await deleteConfirmButton.click();
+}
+
 export async function deleteCharacter(page: Page, name: string) {
   const card = page.getByTestId('entity-card').filter({ hasText: name }).first();
   await expect(card).toBeVisible({ timeout: 15000 });

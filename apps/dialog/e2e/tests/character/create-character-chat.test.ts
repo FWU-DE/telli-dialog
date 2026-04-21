@@ -1,8 +1,13 @@
 import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
 import { regenerateMessage, sendMessage } from '../../utils/chat';
-import { configureCharacter, deleteCharacter } from '../../utils/character';
-import { waitForToast } from '../../utils/utils';
+import {
+  configureCharacter,
+  createCharacter,
+  deleteCharacter,
+  deleteCharacterFromDetailPage,
+} from '../../utils/character';
+import { waitForAutosave, waitForToast, waitForToastDisappear } from '../../utils/utils';
 import { nanoid } from 'nanoid';
 
 test.use({ storageState: AUTH_FILES.teacher });
@@ -87,4 +92,63 @@ test.describe('create, share, chat, delete', () => {
     await waitForToast(page, 'Der Dialogpartner wurde erfolgreich gelöscht.');
     await expect(page.getByRole('heading', { name: characterName }).first()).not.toBeVisible();
   });
+});
+
+test('data is autosaved on blur', async ({ page }) => {
+  await createCharacter(page);
+
+  const name = 'Autosave Test Character ' + nanoid(8);
+  await configureCharacter(page, {
+    name,
+    description: 'Test description for autosave validation',
+    instructions: 'Test instructions for autosave validation',
+    initialMessage: 'Test initial message for autosave validation',
+  });
+
+  // Navigate back to list and open for editing
+  await page.goto('/characters');
+  await page.waitForURL('/characters');
+  const listItem = page.getByTestId('entity-card').filter({ hasText: name }).first();
+  await expect(listItem).toBeVisible();
+  await listItem.getByTestId('entity-link').click();
+  await page.waitForURL('/characters/editor/**');
+  await waitForToastDisappear(page);
+
+  // Name
+  await page.getByTestId('character-name-input').fill('');
+  await page.getByTestId('character-name-input').fill('New Name');
+  await page.getByTestId('character-name-input').press('Tab');
+  await waitForAutosave(page);
+  await page.reload();
+  await expect(page.getByTestId('character-name-input')).toHaveValue('New Name');
+
+  // Description
+  await page.getByTestId('character-description-input').fill('');
+  await page.getByTestId('character-description-input').fill('New Description');
+  await page.getByTestId('character-description-input').press('Tab');
+  await waitForAutosave(page);
+  await page.reload();
+  await expect(page.getByTestId('character-description-input')).toHaveValue('New Description');
+
+  // Instructions
+  await page.getByTestId('character-instructions-input').fill('');
+  await page.getByTestId('character-instructions-input').fill('New Instructions');
+  await page.getByTestId('character-instructions-input').press('Tab');
+  await waitForAutosave(page);
+  await page.reload();
+  await expect(page.getByTestId('character-instructions-input')).toHaveValue('New Instructions');
+
+  // Initial message
+  await page.getByTestId('character-initial-message-input').fill('');
+  await page.getByTestId('character-initial-message-input').fill('New Initial Message');
+  await page.getByTestId('character-initial-message-input').press('Tab');
+  await waitForAutosave(page);
+  await page.reload();
+  await expect(page.getByTestId('character-initial-message-input')).toHaveValue(
+    'New Initial Message',
+  );
+
+  // cleanup
+  await deleteCharacterFromDetailPage(page);
+  await waitForToast(page, 'Der Dialogpartner wurde erfolgreich gelöscht.');
 });
