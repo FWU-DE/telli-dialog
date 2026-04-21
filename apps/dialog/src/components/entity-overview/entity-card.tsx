@@ -7,7 +7,8 @@ import { truncateClassName } from '@/utils/tailwind/truncate';
 import AvatarPicture from '@/components/common/avatar-picture';
 import { useTranslations } from 'next-intl';
 import { ChatTextIcon, ImageSquareIcon } from '@phosphor-icons/react';
-import { IconButton } from '@ui/components/IconButton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/Tooltip';
+import { Button } from '@ui/components/Button';
 
 type EntityCardProps = {
   name: string;
@@ -69,11 +70,22 @@ export default function EntityCard({
       </Link>
 
       {chatHref && (
-        <IconButton asChild className="shrink-0 p-1 mx-4" data-testid="chat-button">
-          <Link href={chatHref} aria-label={tCommon('new-chat')}>
-            <ChatTextIcon aria-hidden="true" className="w-6 h-6 text-primary" />
-          </Link>
-        </IconButton>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              asChild
+              data-testid="chat-button"
+              variant="ghost"
+              size="icon-round"
+              className=" mx-4"
+            >
+              <Link href={chatHref} aria-label={tCommon('new-chat')}>
+                <ChatTextIcon aria-hidden="true" className="size-6   text-primary" />
+              </Link>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t('chat')}</TooltipContent>
+        </Tooltip>
       )}
     </div>
   );
