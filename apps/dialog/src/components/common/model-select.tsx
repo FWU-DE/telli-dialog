@@ -81,7 +81,7 @@ export default function ModelSelect({
         </DropdownMenu.Trigger>
         <DropdownMenu.Content
           className={cn(
-            'flex flex-col bg-white shadow-dropdown rounded-xl ml-0 z-100 overflow-y-auto max-h-(--radix-dropdown-menu-content-available-height)',
+            'flex flex-col bg-background shadow-dropdown rounded-xl ml-0 z-100 overflow-y-auto max-h-(--radix-dropdown-menu-content-available-height)',
           )}
           align="start"
           sideOffset={10}
