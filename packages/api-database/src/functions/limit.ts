@@ -53,7 +53,7 @@ export async function getUsageInCentByApiKeyId({
   const apiKey = await dbGetApiKeyById({ apiKeyId });
 
   if (apiKey === undefined) {
-    throw Error('Could not find api key');
+    throw new Error('Could not find api key');
   }
 
   // Get total costs from completion usage

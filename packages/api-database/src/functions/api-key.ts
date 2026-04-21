@@ -35,7 +35,7 @@ export async function dbCreateJustTheApiKey(
   const insertedApiKey = (await db.insert(apiKeyTable).values(apiKeyToInsert).returning())[0];
 
   if (insertedApiKey === undefined) {
-    throw Error('Could not create api key');
+    throw new Error('Could not create api key');
   }
   return { ...insertedApiKey, plainKey: apiKeyRecord.fullKey };
 }
@@ -54,13 +54,13 @@ export async function dbCreateApiKey({
   budget: number;
 }) {
   if (modelIds.length < 1) {
-    throw Error('Cannot create api key without assigned models.');
+    throw new Error('Cannot create api key without assigned models.');
   }
 
   const project = await dbGetProjectById(organizationId, projectId);
 
   if (project === undefined) {
-    throw Error('Could not find project');
+    throw new Error('Could not find project');
   }
 
   const apiKeyRecord = await createApiKeyRecord();
@@ -79,7 +79,7 @@ export async function dbCreateApiKey({
     )[0];
 
     if (insertedApiKey === undefined) {
-      throw Error('Could not create api key');
+      throw new Error('Could not create api key');
     }
 
     // only use the models available in the organization
@@ -101,7 +101,7 @@ export async function dbCreateApiKey({
       .returning();
 
     if (insertedMappings.length < 1) {
-      throw Error('Could not create any api key to model mappings');
+      throw new Error('Could not create any api key to model mappings');
     }
 
     return { ...insertedApiKey, plainKey: apiKeyRecord.fullKey };

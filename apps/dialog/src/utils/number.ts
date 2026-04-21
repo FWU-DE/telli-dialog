@@ -1,7 +1,7 @@
 export function parseNumberOrThrow(value: string): number {
   const maybeNumber = Number(value);
   if (isNaN(maybeNumber)) {
-    throw Error(`Expected '${value}' to be a number`);
+    throw new Error(`Expected '${value}' to be a number`);
   }
   return maybeNumber;
 }
