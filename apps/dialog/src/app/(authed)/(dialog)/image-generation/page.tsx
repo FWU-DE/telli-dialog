@@ -35,9 +35,7 @@ export default async function ImageGenerationPage() {
       <ImageStyleProvider>
         <HeaderPortal>
           <div className="flex w-full gap-4 justify-center items-center z-30">
-            <ToggleSidebarButton
-              isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
-            />
+            <ToggleSidebarButton />
             <SelectImageModel />
             <SelectImageStyle />
             <div className="grow"></div>

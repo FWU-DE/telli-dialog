@@ -5,16 +5,12 @@ import { UserAndContext } from '@/auth/types';
 
 type CustomChatHeaderProps = {
   userAndContext: UserAndContext;
-  isNewUiDesignEnabled: boolean;
 };
 
-export default function CustomChatHeader({
-  userAndContext,
-  isNewUiDesignEnabled,
-}: CustomChatHeaderProps) {
+export default function CustomChatHeader({ userAndContext }: CustomChatHeaderProps) {
   return (
     <HeaderPortal>
-      <ToggleSidebarButton isNewUiDesignEnabled={isNewUiDesignEnabled} />
+      <ToggleSidebarButton />
       <div className="grow"></div>
       <ProfileMenu userAndContext={userAndContext} />
     </HeaderPortal>

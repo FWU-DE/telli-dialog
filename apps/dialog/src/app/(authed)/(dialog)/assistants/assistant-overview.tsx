@@ -3,10 +3,10 @@
 import React, { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { OverviewFilter } from '@shared/overview-filter';
-import { AssistantWithImage } from '../custom/utils';
+import { AssistantWithImage } from './utils';
 import EntityOverview from '@/components/entity-overview/entity-overview';
 import EntityCard from '@/components/entity-overview/entity-card';
-import CreateNewAssistantButton from '../custom/create-new-assistant-button';
+import CreateNewAssistantButton from './create-new-assistant-button';
 import { useOverviewFilter } from '@/components/hooks/use-overview-filter';
 import { getAssistantsByFilterAction } from '../actions/entity-filter-actions';
 import { filterAndSortEntities } from '@/components/entity-overview/utils';
@@ -42,7 +42,7 @@ export default function AssistantOverview({ currentUserId }: AssistantOverviewPr
       title={t('title')}
       infoTooltip={infoContent}
       searchPlaceholder={t('search-placeholder')}
-      createButton={<CreateNewAssistantButton isNewUiDesignEnabled={true} />}
+      createButton={<CreateNewAssistantButton />}
       activeFilter={activeFilter}
       onFilterChange={handleFilterChange}
       itemCount={visibleAssistants.length}

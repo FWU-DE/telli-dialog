@@ -1,6 +1,5 @@
 import { getUser, userHasCompletedTraining } from '@/auth/utils';
 import React from 'react';
-import DialogSidebar from './sidebar';
 import { HEADER_PORTAL_ID } from './header-portal';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
@@ -51,21 +50,12 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
             models={models}
             defaultLlmModelByCookie={user.lastUsedModel ?? DEFAULT_CHAT_MODEL}
           >
-            {federalState.featureToggles.isNewUiDesignEnabled ? (
-              <AppSidebar
-                user={userWithRole}
-                federalState={federalState}
-                currentModelCosts={priceInCent ?? 0}
-                userPriceLimit={userPriceLimit ?? 500}
-              />
-            ) : (
-              <DialogSidebar
-                user={user}
-                currentModelCosts={priceInCent ?? 0}
-                userPriceLimit={userPriceLimit ?? 500}
-                isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
-              />
-            )}
+            <AppSidebar
+              user={userWithRole}
+              federalState={federalState}
+              currentModelCosts={priceInCent ?? 0}
+              userPriceLimit={userPriceLimit ?? 500}
+            />
             <div className="relative flex flex-col h-dvh w-dvw overflow-hidden bg-background-2">
               {/* Todo: Refactor HeaderPortal and header components to not rely on style of this div */}
               <header

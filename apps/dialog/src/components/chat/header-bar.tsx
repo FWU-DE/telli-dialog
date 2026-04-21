@@ -27,13 +27,12 @@ export function ChatHeaderBar({
   // Either the server-provided prop or the client-side context (updated after first message sent)
   const downloadConversationEnabled =
     downloadConversationEnabledProp || downloadConversationEnabledFromContext;
-  const isNewUiDesignEnabled = userAndContext.federalState.featureToggles.isNewUiDesignEnabled;
 
   return (
     <HeaderPortal>
       <div className="flex flex-col w-full">
         <div className="flex w-full gap-4 justify-center items-center">
-          <ToggleSidebarButton isNewUiDesignEnabled={isNewUiDesignEnabled} />
+          <ToggleSidebarButton />
           <NewChatButton />
           <SelectLlmModel isStudent={userAndContext.school.userRole === 'student'} />
           <div className="grow"></div>

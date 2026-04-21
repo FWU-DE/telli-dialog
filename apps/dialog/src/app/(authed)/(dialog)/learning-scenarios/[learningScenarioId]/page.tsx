@@ -1,7 +1,6 @@
 import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
-import { notFound } from 'next/navigation';
 import { LearningScenarioView } from './learning-scenario-view';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
@@ -14,10 +13,6 @@ export default async function Page(props: PageProps<'/learning-scenarios/[learni
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
-  if (!federalState.featureToggles.isNewUiDesignEnabled) {
-    notFound();
-  }
-
   const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenario({
     learningScenarioId,
     schoolId: school.id,
@@ -28,10 +23,7 @@ export default async function Page(props: PageProps<'/learning-scenarios/[learni
 
   return (
     <DefaultPageLayout>
-      <CustomChatHeader
-        userAndContext={userAndContext}
-        isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
-      />
+      <CustomChatHeader userAndContext={userAndContext} />
       <LearningScenarioView
         learningScenario={learningScenario}
         fileMappings={relatedFiles}

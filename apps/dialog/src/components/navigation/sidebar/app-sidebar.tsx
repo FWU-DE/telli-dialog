@@ -4,7 +4,6 @@ import {
   ChatTextIcon,
   ImageSquareIcon,
   LegoSmileyIcon,
-  MoonStarsIcon,
   MountainsIcon,
   QuestionIcon,
   SidebarSimpleIcon,
@@ -22,7 +21,6 @@ import {
 import { AppMenuItem } from './app-menu-item';
 import TelliLogo from '@/components/icons/logo';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
-import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
 import { MyTelliPoints } from './my-telli-points';
 import { FederalStateModel } from '@shared/federal-states/types';
@@ -45,16 +43,7 @@ export function AppSidebar({
   userPriceLimit,
 }: AppSidebarProps) {
   const { toggleSidebar, open } = useSidebar();
-  const { resolvedTheme, setTheme } = useTheme();
   const t = useTranslations('sidebar');
-  const isDarkTheme = resolvedTheme === 'dark';
-  const lightThemeLabel = t('aria.toggle-light-theme');
-  const darkThemeLabel = t('aria.toggle-dark-theme');
-
-  function toggleTheme() {
-    const currentTheme = resolvedTheme ?? 'light';
-    setTheme(currentTheme === 'light' ? 'dark' : 'light');
-  }
 
   return (
     <Sidebar>
@@ -64,13 +53,6 @@ export function AppSidebar({
             <Link href="/" aria-hidden="true" tabIndex={-1} className="mr-auto rounded">
               <TelliLogo className="h-7 text-primary" />
             </Link>
-            <IconButton
-              onClick={toggleTheme}
-              aria-label={isDarkTheme ? lightThemeLabel : darkThemeLabel}
-              aria-pressed={isDarkTheme}
-            >
-              <MoonStarsIcon />
-            </IconButton>
             <IconButton
               onClick={toggleSidebar}
               aria-label={open ? t('aria.close-sidebar') : t('aria.open-sidebar')}
