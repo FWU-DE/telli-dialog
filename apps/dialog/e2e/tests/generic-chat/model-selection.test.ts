@@ -8,11 +8,13 @@ test.use({ storageState: AUTH_FILES.teacher });
 test.afterAll(async ({ browser }) => {
   const page = await browser.newPage({ storageState: AUTH_FILES.teacher });
 
-  // restore default text model
-  await page.goto('/');
-  await selectDifferentModel(page, LLM_MODELS.TEXT_MODEL_1);
-
-  await page.close();
+  try {
+    // restore default text model
+    await page.goto('/');
+    await selectDifferentModel(page, LLM_MODELS.TEXT_MODEL_1);
+  } finally {
+    await page.close();
+  }
 });
 
 test('switching LLM model preserves the typed prompt in generic chat', async ({ page }) => {

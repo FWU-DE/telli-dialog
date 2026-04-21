@@ -31,8 +31,9 @@ async function createCharacterWithInitialMessage(
 
   const url = page.url();
   // URL shape: /characters/editor/[characterId]
-  const [characterId] = url.split('/characters/editor/')[1]!.split('?');
-  return characterId ?? '';
+  const [characterId] = url.split('/characters/editor/')[1]?.split('?') ?? [];
+  if (!characterId) throw new Error(`Unexpected URL shape, could not extract characterId: ${url}`);
+  return characterId;
 }
 
 test.describe('character chat UX', () => {
@@ -52,20 +53,22 @@ test.describe('character chat UX', () => {
     if (!characterId) return;
     const page = await browser.newPage({ storageState: AUTH_FILES.teacher });
 
-    // restore default text model
-    await page.goto('/');
-    await selectDifferentModel(page, LLM_MODELS.TEXT_MODEL_1);
+    try {
+      // restore default text model
+      await page.goto('/');
+      await selectDifferentModel(page, LLM_MODELS.TEXT_MODEL_1);
 
-    // delete character
-    await page.goto('/characters');
-    await page.waitForURL('/characters');
-    await deleteCharacter(page, characterName);
-    const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
-    await expect(deleteConfirmButton).toBeVisible();
-    await deleteConfirmButton.click();
-    await waitForToast(page, 'Der Dialogpartner wurde erfolgreich gelöscht.');
-
-    await page.close();
+      // delete character
+      await page.goto('/characters');
+      await page.waitForURL('/characters');
+      await deleteCharacter(page, characterName);
+      const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
+      await expect(deleteConfirmButton).toBeVisible();
+      await deleteConfirmButton.click();
+      await waitForToast(page, 'Der Dialogpartner wurde erfolgreich gelöscht.');
+    } finally {
+      await page.close();
+    }
   });
 
   test('character initial message is visible in conversation (new conversation and opened from history)', async ({

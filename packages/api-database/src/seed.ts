@@ -66,7 +66,7 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
     provider: 'ionos',
     name: 'meta-llama/Meta-Llama-3.1-8B-Instruct',
     displayName: 'Llama-3.1-8B',
-    description: 'Effizient für leichtere Aufgaben',
+    description: 'Efficient for lighter tasks',
     setting: {
       provider: 'ionos',
       apiKey: ionosApiKey,
@@ -84,7 +84,7 @@ const DEFAULT_MODELS: LlmInsertModel[] = [
     provider: 'ionos',
     name: 'mistralai/Mistral-Nemo-Instruct-2407',
     displayName: 'Mistral Nemo Instruct',
-    description: 'multilingual, Open Source und effizient',
+    description: 'Multilingual, open source and efficient',
     setting: {
       provider: 'ionos',
       apiKey: ionosApiKey,
