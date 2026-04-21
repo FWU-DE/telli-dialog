@@ -144,7 +144,6 @@ export function FileDrop({
           aria-label={t('upload.upload-input-aria-label')}
         />
         <div className="mt-4 flex flex-col text-sm gap-4 items-center">
-          <FileUploadIcon className="w-8 h-8 text-primary" />
           <span className="text-base">
             <RichText>
               {(tags) =>
@@ -157,6 +156,7 @@ export function FileDrop({
           </span>
           <span className="text-gray-600">{t('upload.choice-word')}</span>
           <Button disabled={disabled} onClick={handleButtonClick} type="button">
+            <FileUploadIcon className="size-4" />
             {t('upload.upload-file-button')}
           </Button>
         </div>

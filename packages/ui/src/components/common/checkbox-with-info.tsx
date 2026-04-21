@@ -1,7 +1,6 @@
 import { Checkbox } from '../Checkbox';
 import { Control, Controller, FieldPath, FieldValues } from 'react-hook-form';
 import { Field, FieldError, FieldLabel } from '../Field';
-import { InfoTooltip } from '../Tooltip';
 
 type CheckboxWithInfoProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -43,11 +42,10 @@ export default function CheckboxWithInfo<
               }}
               disabled={disabled}
             />
-            <FieldLabel htmlFor={field.name + '-checkbox'} size="normal">
+            <FieldLabel htmlFor={field.name + '-checkbox'} size="normal" tooltip={tooltip}>
               {label}
             </FieldLabel>
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            {tooltip && <InfoTooltip tooltip={tooltip} ariaLabel={tooltip} />}
           </Field>
         )}
       />

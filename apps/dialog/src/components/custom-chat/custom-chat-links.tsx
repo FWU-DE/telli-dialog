@@ -101,7 +101,8 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
   return (
     <div className="flex flex-col gap-8">
       {!isReadonly && (
-        <div className="flex flex-row gap-2 w-full">
+        // the breakpoint is lg because the sidebar collapses at sm, we want the input to be big enough also between sm and lg
+        <div className="flex w-full flex-col gap-2 lg:flex-row">
           <Input
             wrapperClassName="flex-1"
             type="url"
@@ -120,6 +121,7 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
             }}
           />
           <Button
+            className="self-center"
             disabled={maxLinksReached}
             onClick={handleAddLink}
             aria-label={t('aria-add-link')}

@@ -133,7 +133,7 @@ function FieldLabel({
       data-slot="field-label"
       className={cn(
         fieldLabelVariants({ size }),
-        'group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50',
+        'group/field-label peer/field-label flex w-fit gap-0 leading-snug group-data-[disabled=true]/field:opacity-50',
         'has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-4',
         'has-data-[state=checked]:bg-primary/5 has-data-[state=checked]:border-primary dark:has-data-[state=checked]:bg-primary/10',
         labelAction && 'w-full flex-wrap items-center',
@@ -141,13 +141,22 @@ function FieldLabel({
       )}
       {...props}
     >
-      {children}
-      {required && (
-        <span aria-hidden="true" className="text-destructive">
-          *
+      <span
+        data-slot="field-label-text"
+        className={cn('inline-flex items-center', required && 'gap-0.5')}
+      >
+        {children}
+        {required && (
+          <span aria-hidden="true" className="text-destructive">
+            *
+          </span>
+        )}
+      </span>
+      {tooltip && (
+        <span data-slot="field-label-tooltip" className="ml-1 inline-flex items-center">
+          <InfoTooltip tooltip={tooltip} ariaLabel={tooltip} />
         </span>
       )}
-      {tooltip && <InfoTooltip tooltip={tooltip} ariaLabel={tooltip} />}
       {labelAction && (
         <span className="inline-flex basis-full items-center sm:ml-auto sm:basis-auto">
           {labelAction}

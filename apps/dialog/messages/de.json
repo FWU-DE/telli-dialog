@@ -406,7 +406,7 @@
     },
     "share-with-learners": {
       "title": "Mit Lernenden teilen",
-      "description": "<b>Wie viele telli-Points</b> darf dieser Chat verbrauchen und <b>wie lange</b> kann der Chat aktiv benutzt werden?",
+      "description": "<b>Wie viel des monatlichen Tokenvolumens</b> soll durch diesen Chat maximal verbraucht und <b>wie lange</b> darf er aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",
       "button-start": "Jetzt bereitstellen",
       "button-stop": "Stoppen",
@@ -515,7 +515,7 @@
     },
     "share-with-learners": {
       "title": "Mit Lernenden teilen",
-      "description": "<b>Wie viele telli-Points</b> darf dieser Chat verbrauchen und <b>wie lange</b> kann der Chat aktiv benutzt werden?",
+      "description": "<b>Wie viel des monatlichen Tokenvolumens</b> soll durch diesen Chat maximal verbraucht und <b>wie lange</b> darf er aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",
       "button-start": "Jetzt bereitstellen",
       "button-stop": "Stoppen",
