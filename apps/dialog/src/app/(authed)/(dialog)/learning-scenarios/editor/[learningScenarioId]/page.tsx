@@ -14,7 +14,6 @@ export default async function Page(
   props: PageProps<'/learning-scenarios/editor/[learningScenarioId]'>,
 ) {
   const { learningScenarioId } = await props.params;
-  await props.searchParams;
   const { user, school, federalState } = await requireAuth();
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
