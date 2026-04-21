@@ -16,7 +16,7 @@ export function BackButton({ href, text, 'aria-label': ariaLabel, onClick }: Bac
 
   return (
     <Button
-      className="px-0 w-fit"
+      className="px-0 w-fit h-auto"
       variant="link"
       onClick={() => {
         if (onClick) {
