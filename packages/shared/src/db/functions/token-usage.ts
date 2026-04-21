@@ -5,7 +5,7 @@ export async function dbInsertConversationUsage(value: ConversationUsageTracking
   const [insertedUsage] = await db.insert(conversationUsageTracking).values(value).returning();
 
   if (insertedUsage === undefined) {
-    throw Error('Could not insert usage');
+    throw new Error('Could not insert usage');
   }
 
   return insertedUsage;

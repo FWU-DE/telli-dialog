@@ -19,7 +19,7 @@ export async function dbGetFederalStateWithDecryptedApiKey({
   federalStateId: string | undefined;
 }) {
   if (federalStateId === undefined) {
-    throw Error('No federal state id given');
+    throw new Error('No federal state id given');
   }
 
   const [federalState] = await db
@@ -29,11 +29,11 @@ export async function dbGetFederalStateWithDecryptedApiKey({
     .$withCache();
 
   if (federalState === undefined) {
-    throw Error(`Could not find federal state with id ${federalStateId}`);
+    throw new Error(`Could not find federal state with id ${federalStateId}`);
   }
 
   if (federalState.encryptedApiKey === null) {
-    throw Error(`Federal state ${federalState.id} has no api key attached`);
+    throw new Error(`Federal state ${federalState.id} has no api key attached`);
   }
 
   const decryptedApiKey = decrypt({

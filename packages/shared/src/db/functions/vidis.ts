@@ -37,7 +37,7 @@ export async function dbGetOrCreateVidisUser(userInfo: VidisUserInfo) {
   const federalState = await dbGetFederalStateById(userInfo.bundesland);
 
   if (!federalState) {
-    throw Error('Could not get federal state');
+    throw new Error('Could not get federal state');
   }
 
   const schoolIds =
@@ -48,7 +48,7 @@ export async function dbGetOrCreateVidisUser(userInfo: VidisUserInfo) {
   });
 
   if (schools.length < 1) {
-    throw Error('Could not insert school');
+    throw new Error('Could not insert school');
   }
 
   return await db.transaction(async (tx) => {
@@ -74,7 +74,7 @@ export async function dbGetOrCreateVidisUser(userInfo: VidisUserInfo) {
       { dbObject: tx },
     );
 
-    if (insertedSchoolMappings.length < 1) throw Error('Could not insert user');
+    if (insertedSchoolMappings.length < 1) throw new Error('Could not insert user');
 
     return { ...insertedUser, role: vidisRoleToUserSchoolRole(userInfo.rolle) };
   });

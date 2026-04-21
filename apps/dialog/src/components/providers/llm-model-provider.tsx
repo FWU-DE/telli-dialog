@@ -75,7 +75,7 @@ export function useLlmModels(): LlmModelsContextProps {
   const maybeContext = React.useContext(LlmModelsContext);
 
   if (maybeContext === undefined) {
-    throw Error('useLlmModels can only be used inside a LlmModelsProvider');
+    throw new Error('useLlmModels can only be used inside a LlmModelsProvider');
   }
   return maybeContext;
 }

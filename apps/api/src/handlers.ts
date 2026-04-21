@@ -43,7 +43,7 @@ export const routeHandlerDefinitions: Array<RouteHandlerDefinition> = [
     method: 'GET',
     schema: { hide: true },
     handler() {
-      throw Error('Test Error');
+      throw new Error('Test Error');
     },
   },
   {

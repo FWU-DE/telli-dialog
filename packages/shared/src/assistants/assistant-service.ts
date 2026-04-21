@@ -262,7 +262,7 @@ export async function createNewAssistant({
     .returning();
 
   if (!insertedAssistant) {
-    throw Error('Could not create a new assistant');
+    throw new Error('Could not create a new assistant');
   }
 
   return insertedAssistant;

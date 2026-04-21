@@ -164,7 +164,7 @@ export async function selectModel(page: Page, userIndex: number) {
     const currentSelectedText = await dropdownLocator.textContent();
     const targetModel = LLM_MODELS.at(userIndex % LLM_MODELS.length);
     if (!targetModel) {
-      throw Error();
+      throw new Error();
     }
 
     if (currentSelectedText?.includes(targetModel.displayName)) {

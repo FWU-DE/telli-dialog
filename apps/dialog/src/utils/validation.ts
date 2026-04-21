@@ -6,13 +6,13 @@ export function validateApiKeyByHeaders(headers: Headers) {
   const authorization = headers.get('Authorization')?.toString();
 
   if (authorization === undefined) {
-    throw Error('Could not get Authorization header');
+    throw new Error('Could not get Authorization header');
   }
 
   const bareApiKey = authorization.substring('Bearer '.length);
 
   if (bareApiKey !== env.apiKey) {
-    throw Error('Wrong api key');
+    throw new Error('Wrong api key');
   }
 
   return true;

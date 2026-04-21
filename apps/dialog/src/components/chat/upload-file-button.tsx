@@ -211,7 +211,7 @@ async function fetchUploadFile(data: {
     body: formData,
   });
   if (!response.ok) {
-    throw Error('Could not upload file');
+    throw new Error('Could not upload file');
   }
 
   const json = await response.json();

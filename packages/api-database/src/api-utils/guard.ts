@@ -7,6 +7,6 @@ export function isNotNull<TValue>(value: TValue | null): value is TValue {
 }
 
 export function getDefinedOrThrow<T>(value: T | undefined, symbolName: string): T {
-  if (value === undefined) throw Error(`Expected ${symbolName} to be defined.`);
+  if (value === undefined) throw new Error(`Expected ${symbolName} to be defined.`);
   return value;
 }
