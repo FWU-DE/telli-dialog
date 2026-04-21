@@ -1,8 +1,19 @@
 import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
 import { selectDifferentModel } from '../../utils/chat';
+import { LLM_MODELS } from '../../utils/llm-models';
 
 test.use({ storageState: AUTH_FILES.teacher });
+
+test.afterAll(async ({ browser }) => {
+  const page = await browser.newPage({ storageState: AUTH_FILES.teacher });
+
+  // restore default text model
+  await page.goto('/');
+  await selectDifferentModel(page, LLM_MODELS.TEXT_MODEL_1);
+
+  await page.close();
+});
 
 test('switching LLM model preserves the typed prompt in generic chat', async ({ page }) => {
   await page.goto('/');
@@ -10,8 +21,10 @@ test('switching LLM model preserves the typed prompt in generic chat', async ({ 
   const prompt = 'This prompt must not disappear when changing models';
   await page.getByPlaceholder('Wie kann ich Dir helfen?').fill(prompt);
 
-  await selectDifferentModel(page);
+  // Switch to the second model
+  await selectDifferentModel(page, LLM_MODELS.TEXT_MODEL_2);
 
+  // Verify prompt is preserved
   await expect(page.getByPlaceholder('Wie kann ich Dir helfen?')).toHaveValue(prompt);
 });
 

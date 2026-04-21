@@ -40,7 +40,7 @@ export async function uploadFile(page: Page, filePath: string) {
   await page.locator('form svg.animate-spin').waitFor({ state: 'detached' });
 }
 
-/** Opens the LLM model dropdown and selects the first available alternative model. */
+/** Opens the LLM model dropdown and selects a specific model by displayName, or the first available alternative if no name is provided. */
 export async function selectDifferentModel(page: Page, modelName?: string) {
   const dropdown = page.getByLabel('Select text Model Dropdown');
   await expect(dropdown).toBeVisible();

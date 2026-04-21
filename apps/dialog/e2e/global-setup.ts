@@ -3,6 +3,8 @@ import path from 'node:path';
 import { chromium, FullConfig } from '@playwright/test';
 import { login } from './utils/login';
 import { AUTH_FILES } from './utils/const';
+import { selectDifferentModel } from './utils/chat';
+import { LLM_MODELS } from './utils/llm-models';
 
 /**
  * Global Playwright setup — runs once before all test suites.
@@ -33,6 +35,7 @@ export default async function globalSetup(config: FullConfig) {
     const page = await context.newPage();
 
     await login(page, user);
+    await selectDifferentModel(page, LLM_MODELS.TEXT_MODEL_1);
     await context.storageState({ path: file });
 
     await page.close();

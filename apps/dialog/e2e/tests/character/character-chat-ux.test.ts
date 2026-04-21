@@ -3,6 +3,7 @@ import { AUTH_FILES } from '../../utils/const';
 import { enterMessage, selectDifferentModel, sendMessage } from '../../utils/chat';
 import { configureCharacter, deleteCharacter } from '../../utils/character';
 import { waitForToast } from '../../utils/utils';
+import { LLM_MODELS } from '../../utils/llm-models';
 import { nanoid } from 'nanoid';
 
 /**
@@ -30,8 +31,8 @@ async function createCharacterWithInitialMessage(
 
   const url = page.url();
   // URL shape: /characters/editor/[characterId]
-  const characterId = url.split('/characters/editor/')[1]!.split('?')[0]!;
-  return characterId;
+  const [characterId] = url.split('/characters/editor/')[1]!.split('?');
+  return characterId ?? '';
 }
 
 test.describe('character chat UX', () => {
@@ -50,6 +51,12 @@ test.describe('character chat UX', () => {
   test.afterAll(async ({ browser }) => {
     if (!characterId) return;
     const page = await browser.newPage({ storageState: AUTH_FILES.teacher });
+
+    // restore default text model
+    await page.goto('/');
+    await selectDifferentModel(page, LLM_MODELS.TEXT_MODEL_1);
+
+    // delete character
     await page.goto('/characters');
     await page.waitForURL('/characters');
     await deleteCharacter(page, characterName);
@@ -57,6 +64,7 @@ test.describe('character chat UX', () => {
     await expect(deleteConfirmButton).toBeVisible();
     await deleteConfirmButton.click();
     await waitForToast(page, 'Der Dialogpartner wurde erfolgreich gelöscht.');
+
     await page.close();
   });
 
@@ -110,8 +118,8 @@ test.describe('character chat UX', () => {
     const prompt = 'Dieser Prompt soll beim Modellwechsel nicht verschwinden';
     await enterMessage(page, prompt);
 
-    // Switch model
-    await selectDifferentModel(page);
+    // Switch model to the secondary model
+    await selectDifferentModel(page, LLM_MODELS.TEXT_MODEL_2);
 
     // Entered prompt should not be cleared
     await expect(page.getByPlaceholder('Wie kann ich Dir helfen?')).toHaveValue(prompt);
