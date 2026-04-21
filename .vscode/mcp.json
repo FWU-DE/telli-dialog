@@ -3,6 +3,9 @@
     "Figma": {
       "url": "https://mcp.figma.com/mcp",
       "type": "http"
+    },
+    "atlassian": {
+      "url": "https://mcp.atlassian.com/v1/mcp"
     }
   },
   "inputs": []
