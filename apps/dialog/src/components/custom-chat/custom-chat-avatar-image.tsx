@@ -13,6 +13,7 @@ export function CustomChatAvatarImage({ pictureUrl }: { pictureUrl: string | und
           unoptimized
           alt={'profile-picture'}
           className="rounded-full object-contain"
+          priority
         />
       ) : (
         <EmptyImageIcon className="relative -left-1 -top-1 w-15 h-15" />

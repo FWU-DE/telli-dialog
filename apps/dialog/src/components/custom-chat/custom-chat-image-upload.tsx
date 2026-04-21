@@ -81,6 +81,7 @@ export function CustomChatImageUpload({
               unoptimized
               alt={t('profile-picture')}
               className="rounded-full object-contain"
+              priority
             />
           ) : (
             <EmptyImageIcon className="relative -left-1 -top-1 w-15 h-15" />
