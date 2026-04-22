@@ -97,7 +97,10 @@ apps/<app_name>/src/components/utils/ --> custom utility functions
 
 ## Unit Testing (Vitest)
 
-Only write tests when the user asks for them.
+- Only write unit tests when the user asks for them.
+- Wrap tests in describe block that contains the name of the service or component being tested.
+- Wrapt tests in another describe block that contains the name of the function being tested.
+- The name of the test should clearly indicate what is being tested and what the expected outcome is and follow the 'should' naming convention.
 
 ## Verification Commands
 

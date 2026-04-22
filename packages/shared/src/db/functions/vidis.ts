@@ -1,28 +1,15 @@
 import { VidisUserInfo } from '../../auth/vidis';
-import { db } from '..';
+import { assignUserToSchools } from '../../users/user-school-assignment-service';
 import {
-  UserInsertModel,
   SchoolInsertModel,
+  UserInsertModel,
   schoolTable,
-  userSchoolMappingTable,
   UserSchoolRole,
+  userSchoolMappingTable,
   userTable,
 } from '../schema';
 import { PgTransactionObject } from '../types';
-import { dbGetFederalStateById } from './federal-state';
-
-function vidisRoleToUserSchoolRole(role: string): UserSchoolRole {
-  switch (role) {
-    case 'LEHR':
-      return 'teacher';
-    case 'LERN':
-      return 'student';
-    case 'LEIT':
-      return 'teacher';
-    default:
-      return 'student';
-  }
-}
+import { db } from '..';
 
 export async function dbCreateVidisUser(user: UserInsertModel & { id: string }) {
   const insertedUser = await db
@@ -34,50 +21,9 @@ export async function dbCreateVidisUser(user: UserInsertModel & { id: string }) 
 }
 
 export async function dbGetOrCreateVidisUser(userInfo: VidisUserInfo) {
-  const federalState = await dbGetFederalStateById(userInfo.bundesland);
-
-  if (!federalState) {
-    throw new Error('Could not get federal state');
-  }
-
-  const schoolIds =
-    typeof userInfo.schulkennung === 'string' ? [userInfo.schulkennung] : userInfo.schulkennung;
-
-  const schools = await dbGetOrCreateSchools({
-    schools: schoolIds.map((school) => ({ id: school, federalStateId: federalState.id })),
-  });
-
-  if (schools.length < 1) {
-    throw new Error('Could not insert school');
-  }
-
-  return await db.transaction(async (tx) => {
-    const insertedUser = (
-      await tx
-        .insert(userTable)
-        .values({
-          id: userInfo.sub,
-          firstName: '',
-          lastName: '',
-          email: `${userInfo.sub}@vidis.schule`,
-        })
-        .onConflictDoUpdate({ target: [userTable.id], set: { id: userInfo.sub } })
-        .returning()
-    )[0];
-
-    const insertedSchoolMappings = await dbUpsertUserSchoolMappings(
-      {
-        schoolIds,
-        role: vidisRoleToUserSchoolRole(userInfo.rolle),
-        userId: userInfo.sub,
-      },
-      { dbObject: tx },
-    );
-
-    if (insertedSchoolMappings.length < 1) throw new Error('Could not insert user');
-
-    return { ...insertedUser, role: vidisRoleToUserSchoolRole(userInfo.rolle) };
-  });
+  // Business logic for user-school assignment has been moved to a service
+  // This function now delegates to the service
+  return await assignUserToSchools(userInfo);
 }
 
 export async function dbGetOrCreateSchool({
