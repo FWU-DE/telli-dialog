@@ -177,6 +177,8 @@ function Sidebar({
           style={
             {
               '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
+              '--tw-enter-translate-x': side === 'left' ? '-100%' : '100%',
+              '--tw-exit-translate-x': side === 'left' ? '-100%' : '100%',
             } as React.CSSProperties
           }
           side={side}
