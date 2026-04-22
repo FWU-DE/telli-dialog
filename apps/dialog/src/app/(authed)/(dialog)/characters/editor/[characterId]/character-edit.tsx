@@ -306,15 +306,13 @@ export function CharacterEdit({
 
   return (
     <>
-      {!isFormStateVisible && (
-        <CustomChatHeaderContent>
-          <CustomChatFormState
-            isDirty={isDirty}
-            isSubmitting={isSaving}
-            hasSaveError={hasSaveError}
-          />
-        </CustomChatHeaderContent>
-      )}
+      <CustomChatHeaderContent centered isVisible={!isFormStateVisible}>
+        <CustomChatFormState
+          isDirty={isDirty}
+          isSubmitting={isSaving}
+          hasSaveError={hasSaveError}
+        />
+      </CustomChatHeaderContent>
       <CustomChatLayoutContainer>
         <BackButton
           href="/characters"
@@ -329,7 +327,10 @@ export function CharacterEdit({
         <CustomChatTitle title={name} />
         <div className="flex flex-wrap items-start gap-3">
           {actionButtons}
-          <div ref={formStateRef}>
+          <div
+            ref={formStateRef}
+            className={`transition-opacity duration-200 ${isFormStateVisible ? 'opacity-100' : 'opacity-0'}`}
+          >
             <CustomChatFormState
               isDirty={isDirty}
               isSubmitting={isSaving}

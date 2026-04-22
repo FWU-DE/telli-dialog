@@ -41,16 +41,45 @@ export function useCustomChatHeaderContent() {
   return context;
 }
 
-export function CustomChatHeaderContent({ children }: { children: ReactNode }) {
+export function CustomChatHeaderContent({
+  children,
+  centered,
+  isVisible,
+}: {
+  children: ReactNode;
+  centered?: boolean;
+  isVisible?: boolean;
+}) {
   const { setHeaderContent } = useCustomChatHeaderContent();
 
   useEffect(() => {
-    setHeaderContent(children);
+    let content: ReactNode = children;
+
+    if (isVisible !== undefined) {
+      content = (
+        <div
+          className={`transition-opacity duration-200 ${
+            isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
+          aria-hidden={!isVisible}
+        >
+          {content}
+        </div>
+      );
+    }
+
+    if (centered) {
+      content = (
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-4">{content}</div>
+      );
+    }
+
+    setHeaderContent(content);
 
     return () => {
       setHeaderContent(null);
     };
-  }, [children, setHeaderContent]);
+  }, [children, centered, isVisible, setHeaderContent]);
 
   return null;
 }
