@@ -16,6 +16,7 @@ import { Button } from '@ui/components/Button';
 
 type DestructiveActionButtonProps = {
   triggerButtonVariant?: React.ComponentProps<typeof Button>['variant'];
+  triggerButtonSize?: React.ComponentProps<typeof Button>['size'];
   triggerButtonClassName?: string;
   children: React.ReactNode;
   modalTitle: string;
@@ -26,6 +27,7 @@ type DestructiveActionButtonProps = {
 
 export default function DestructiveActionButton({
   triggerButtonVariant = 'outline',
+  triggerButtonSize,
   triggerButtonClassName,
   children,
   onClick,
@@ -47,6 +49,7 @@ export default function DestructiveActionButton({
       <AlertDialogTrigger asChild>
         <Button
           variant={triggerButtonVariant}
+          size={triggerButtonSize}
           className={triggerButtonClassName}
           onClick={(event) => {
             event.stopPropagation();

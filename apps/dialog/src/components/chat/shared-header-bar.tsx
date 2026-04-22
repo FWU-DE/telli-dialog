@@ -3,7 +3,6 @@ import { useTranslations } from 'next-intl';
 import DestructiveActionButton from '../common/destructive-action-button';
 import { cn } from '@/utils/tailwind';
 import TrashIcon from '../icons/trash';
-import { iconClassName } from '@/utils/tailwind/icon';
 import DownloadSharedConversationButton from '@/app/(unauth)/ua/download-shared-conversation-button';
 import Image from 'next/image';
 import ProfileMenu, { ThreeDotsProfileMenu } from '../navigation/profile-menu';
@@ -38,18 +37,16 @@ export function SharedChatHeader({
 
   const deleteChatElement = (
     <DestructiveActionButton
+      triggerButtonVariant="ghost"
+      triggerButtonSize="icon-round"
       modalTitle={t('delete-chat-modal-title')}
       confirmText={t('delete-chat-modal-confirm-button')}
       modalDescription={t('delete-chat-modal-description')}
-      triggerButtonClassName={cn(
-        'justify-center items-center focus:outline-hidden ml-2',
-        iconClassName,
-        isBelow.sm && 'items-center justify-start',
-      )}
+      triggerButtonClassName="text-primary"
       actionFn={handleOpenNewChat}
     >
       <span className="flex items-center gap-1">
-        <TrashIcon className="h-8 w-8" solid={true} />
+        <TrashIcon className="size-8" solid={true} />
         {showCompressedHeader ? tCommon('delete') : ''}
       </span>
     </DestructiveActionButton>

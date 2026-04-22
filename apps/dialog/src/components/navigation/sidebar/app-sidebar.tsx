@@ -26,8 +26,8 @@ import { MyTelliPoints } from './my-telli-points';
 import { FederalStateModel } from '@shared/federal-states/types';
 import { UserModel } from '@shared/auth/user-model';
 import { ChatHistory } from './chat-history';
-import { IconButton } from '@ui/components/IconButton';
 import Link from 'next/link';
+import { Button } from '@ui/components/Button';
 
 type AppSidebarProps = {
   federalState: FederalStateModel;
@@ -53,13 +53,16 @@ export function AppSidebar({
             <Link href="/" aria-hidden="true" tabIndex={-1} className="mr-auto rounded">
               <TelliLogo className="h-7 text-primary" />
             </Link>
-            <IconButton
+            <Button
+              variant="toggle"
+              size="icon-round"
+              className="text-primary -mt-1"
               onClick={toggleSidebar}
               aria-label={open ? t('aria.close-sidebar') : t('aria.open-sidebar')}
               aria-expanded={open}
             >
-              <SidebarSimpleIcon />
-            </IconButton>
+              <SidebarSimpleIcon className="size-6" />
+            </Button>
           </div>
         </SidebarHeader>
         <SidebarContent>

@@ -2,10 +2,9 @@
 
 import { useSidebar } from '@telli/ui/components/Sidebar';
 import NewDialogIcon from '@/components/icons/sidebar/new-dialog';
-import { cn } from '@/utils/tailwind';
 import { useRouter } from 'next/navigation';
-import { iconClassName } from '@/utils/tailwind/icon';
 import { SidebarSimpleIcon } from '@phosphor-icons/react';
+import { Button } from '@ui/components/Button';
 
 export function ToggleSidebarButton({ forceVisibility = false }: { forceVisibility?: boolean }) {
   const { toggleSidebar, open, isMobile, openMobile } = useSidebar();
@@ -14,17 +13,16 @@ export function ToggleSidebarButton({ forceVisibility = false }: { forceVisibili
   if (isOpen && !forceVisibility) return null;
 
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="icon-round"
       title="Sidebar"
-      className={cn(
-        'focus:outline-hidden group hover:bg-light-gray rounded-enterprise-sm',
-        iconClassName,
-      )}
+      className="text-primary"
       onClick={toggleSidebar}
       aria-label="sidebar-toggle-close"
     >
-      <SidebarSimpleIcon className="w-6 h-6" />
-    </button>
+      <SidebarSimpleIcon className="size-6" />
+    </Button>
   );
 }
 
@@ -43,16 +41,15 @@ export function NewChatButton({ forceVisibility = false }: { forceVisibility?: b
   if (isOpen && !forceVisibility) return null;
 
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="icon-round"
       onClick={handleOpenNewChat}
-      className={cn(
-        'focus:outline-hidden group hover:bg-light-gray rounded-enterprise-sm',
-        iconClassName,
-      )}
+      className="text-primary"
       aria-label="Neuer Chat"
       title="Neuer Chat"
     >
-      <NewDialogIcon className="w-8 h-8" />
-    </button>
+      <NewDialogIcon className="size-8" />
+    </Button>
   );
 }

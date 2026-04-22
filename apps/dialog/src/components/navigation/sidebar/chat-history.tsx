@@ -17,7 +17,6 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@ui/components/Inp
 import { MagnifyingGlassIcon, XCircleIcon } from '@phosphor-icons/react';
 import { Button } from '@ui/components/Button';
 import { Spinner } from '@ui/components/Spinner';
-import { IconButton } from '@ui/components/IconButton';
 
 export function ChatHistory() {
   const router = useRouter();
@@ -96,22 +95,26 @@ export function ChatHistory() {
             {searchText.length === 0 ? (
               <MagnifyingGlassIcon />
             ) : (
-              <IconButton
-                aria-label={t('search-clear')}
-                onClick={() => {
-                  setSearchText('');
-                  inputRef.current?.focus();
-                }}
-                onPointerDown={() => setIsClearPressed(true)}
-                onPointerUp={() => setIsClearPressed(false)}
-                onPointerLeave={() => setIsClearPressed(false)}
-                className="hover:bg-transparent"
-              >
-                <XCircleIcon
-                  weight={isClearPressed ? 'fill' : 'regular'}
-                  className=" size-4 text-sidebar-input-foreground"
-                />
-              </IconButton>
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={t('search-clear')}
+                  onClick={() => {
+                    setSearchText('');
+                    inputRef.current?.focus();
+                  }}
+                  onPointerDown={() => setIsClearPressed(true)}
+                  onPointerUp={() => setIsClearPressed(false)}
+                  onPointerLeave={() => setIsClearPressed(false)}
+                  className="hover:bg-transparent"
+                >
+                  <XCircleIcon
+                    weight={isClearPressed ? 'fill' : 'regular'}
+                    className=" size-4 text-sidebar-input-foreground"
+                  />
+                </Button>
+              </>
             )}
           </InputGroupAddon>
         </InputGroup>

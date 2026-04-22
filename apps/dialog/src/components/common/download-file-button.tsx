@@ -3,9 +3,9 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import Spinner from '../icons/spinner';
 import { useToast } from './toast';
-import { IconButton } from '@ui/components/IconButton';
 import { ServerActionResult } from '@shared/actions/server-action-result';
 import { openInNewTab } from '@/utils/navigation/router';
+import { Button } from '@ui/components/Button';
 
 type DownloadFileButtonProps = {
   fileId: string;
@@ -32,12 +32,17 @@ export default function DownloadFileButton({ fileId, onDownloadFile }: DownloadF
   };
 
   return (
-    <IconButton
-      aria-label={t('download.aria-label')}
-      onClick={handleDownload}
-      disabled={isDownloading}
-    >
-      {isDownloading ? <Spinner className="size-5" /> : <DownloadSimpleIcon />}
-    </IconButton>
+    <>
+      <Button
+        variant="ghost"
+        size="icon-round"
+        className="text-primary"
+        aria-label={t('download.aria-label')}
+        onClick={handleDownload}
+        disabled={isDownloading}
+      >
+        {isDownloading ? <Spinner className="size-5" /> : <DownloadSimpleIcon className="size-6" />}
+      </Button>
+    </>
   );
 }

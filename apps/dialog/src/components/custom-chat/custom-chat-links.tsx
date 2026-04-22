@@ -14,7 +14,6 @@ import {
 } from '@/configuration-text-inputs/const';
 import { useToast } from '@/components/common/toast';
 import { ingestWebContentAction } from '@/components/forms/actions';
-import { IconButton } from '@ui/components/IconButton';
 import { useTranslations } from 'next-intl';
 
 export type CustomChatLinksProps = {
@@ -156,16 +155,16 @@ export function CustomChatLinks({ initialLinks, onLinksChange }: CustomChatLinks
                   <TooltipContent>{link.link}</TooltipContent>
                 </Tooltip>
                 {!isReadonly && (
-                  <IconButton
-                    variant="primary"
-                    size="md"
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="hover:bg-primary/15"
                     disabled={isProcessing}
                     aria-label={t('aria-delete', { link: displayTitle })}
                     onClick={() => handleDeleteLink(index)}
                   >
                     <TrashSimpleIcon className="size-4" />
-                  </IconButton>
+                  </Button>
                 )}
               </div>
             );
