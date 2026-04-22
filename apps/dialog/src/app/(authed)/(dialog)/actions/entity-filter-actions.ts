@@ -10,7 +10,7 @@ import {
 } from '@shared/learning-scenarios/learning-scenario-service';
 import { getAssistantsByOverviewFilter } from '@shared/assistants/assistant-service';
 import { enrichCharactersWithImage, type CharacterWithImage } from '../characters/utils';
-import { enrichAssistantsWithImage, type AssistantWithImage } from '../custom/utils';
+import { enrichAssistantsWithImage, type AssistantWithImage } from '../assistants/utils';
 import { HELP_MODE_ASSISTANT_ID } from '@shared/db/const';
 
 function resolveFilter(filter: OverviewFilter, isSchoolSharingEnabled: boolean): OverviewFilter {

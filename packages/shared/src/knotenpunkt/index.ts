@@ -11,7 +11,7 @@ export async function fetchLlmModels({ apiKey }: { apiKey: string }) {
   });
 
   if (!response.ok) {
-    throw Error('Could not fetch the llm models');
+    throw new Error('Could not fetch the llm models');
   }
 
   const json = await response.json();

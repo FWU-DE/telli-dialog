@@ -10,10 +10,7 @@ export default async function Page() {
 
   return (
     <DefaultPageLayout>
-      <CustomChatHeader
-        userAndContext={userAndContext}
-        isNewUiDesignEnabled={federalState.featureToggles.isNewUiDesignEnabled}
-      />
+      <CustomChatHeader userAndContext={userAndContext} />
       <RedeemVoucherPage />
     </DefaultPageLayout>
   );

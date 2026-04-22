@@ -86,10 +86,13 @@ export function useFormAutosave<T>({
       let isSuccess = true;
 
       try {
-        const saveResult = await saveCurrentValues();
-        if (!saveResult) {
-          isSuccess = false;
-        }
+        do {
+          saveQueuedRef.current = false;
+          const saveResult = await saveCurrentValues();
+          if (!saveResult) {
+            isSuccess = false;
+          }
+        } while (saveQueuedRef.current);
 
         return isSuccess;
       } finally {

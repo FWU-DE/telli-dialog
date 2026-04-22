@@ -85,7 +85,7 @@ export async function getUserAndContextByUserId({
   });
 
   if (userAndContext === undefined) {
-    throw Error('Could not extract the school and federal state for the user');
+    throw new Error('Could not extract the school and federal state for the user');
   }
 
   return {

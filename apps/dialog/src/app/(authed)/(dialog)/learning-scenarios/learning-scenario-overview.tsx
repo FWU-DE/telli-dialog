@@ -27,7 +27,10 @@ export default function LearningScenarioOverview({ currentUserId }: LearningScen
     setVisibleLearningScenarios(entities);
   }, []);
 
-  const [activeFilter, setActiveFilter] = useOverviewFilter('scenarios', fetchLearningScenarios);
+  const [activeFilter, setActiveFilter] = useOverviewFilter(
+    'learning-scenarios',
+    fetchLearningScenarios,
+  );
 
   async function handleFilterChange(filter: OverviewFilter) {
     await setActiveFilter(filter);

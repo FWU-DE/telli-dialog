@@ -4,7 +4,7 @@ import { env } from './src/db/env';
 const databaseUrl = env.databaseUrl;
 
 if (databaseUrl === undefined) {
-  throw Error('Expected process.env.DATABASE_URL to be defined');
+  throw new Error('Expected process.env.DATABASE_URL to be defined');
 }
 
 export default defineConfig({

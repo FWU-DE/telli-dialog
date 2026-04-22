@@ -58,6 +58,21 @@ const baseNextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: '/custom',
+        destination: '/assistants',
+        permanent: true,
+      },
+      {
+        source: '/custom/d/:gptId',
+        destination: '/assistants/d/:gptId',
+        permanent: true,
+      },
+      {
+        source: '/custom/d/:gptId/:conversationId',
+        destination: '/assistants/d/:gptId/:conversationId',
+        permanent: true,
+      },
+      {
         source: '/shared-chats',
         destination: '/learning-scenarios',
         permanent: true,

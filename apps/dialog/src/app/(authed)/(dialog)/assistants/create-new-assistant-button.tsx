@@ -7,11 +7,7 @@ import { createNewAssistantAction } from './actions';
 import { Button } from '@ui/components/Button';
 import { PlusIcon } from '@phosphor-icons/react';
 
-export default function CreateNewAssistantButton({
-  isNewUiDesignEnabled = false,
-}: {
-  isNewUiDesignEnabled?: boolean;
-}) {
+export default function CreateNewAssistantButton() {
   const router = useRouter();
   const toast = useToast();
   const t = useTranslations('custom-gpt');
@@ -19,11 +15,7 @@ export default function CreateNewAssistantButton({
   async function handleNewGPT() {
     const createResult = await createNewAssistantAction({});
     if (createResult.success) {
-      if (isNewUiDesignEnabled) {
-        router.push(`/assistants/editor/${createResult.value.id}`);
-      } else {
-        router.push(`/custom/editor/${createResult.value.id}?create=true`);
-      }
+      router.push(`/assistants/editor/${createResult.value.id}?create=true`);
     } else {
       toast.error(t('toasts.create-toast-error'));
     }

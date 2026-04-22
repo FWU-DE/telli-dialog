@@ -31,7 +31,7 @@ export async function dbDeleteConversationByIdAndUserId({
     )[0];
 
     if (deletedConversation === undefined) {
-      throw Error('Could not delete the conversation');
+      throw new Error('Could not delete the conversation');
     }
 
     const filesToDelete = (

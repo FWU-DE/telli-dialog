@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { startTransition, useCallback, useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -22,12 +22,12 @@ import { logError } from '@shared/logging';
 import { Checkbox } from '@ui/components/Checkbox';
 import { toast } from 'sonner';
 import {
-  getModelMappingsAction,
   getLargeLanguageModelsAction,
+  getModelMappingsAction,
   saveModelMappingsAction,
 } from './actions';
-import { LargeLanguageModel } from '../../../../../../../../../types/large-language-model';
-import { ModelApiKeyMapping } from '../../../../../../../../../types/model-mappings';
+import { LargeLanguageModel } from '@/types/large-language-model';
+import { ModelApiKeyMapping } from '@/types/model-mappings';
 
 export type ModelApiKeyMappingListViewProps = {
   organizationId: string;
@@ -68,7 +68,9 @@ export function ModelApiKeyMappingListView({
   }, [organizationId, projectId, apiKeyId]);
 
   useEffect(() => {
-    loadData();
+    startTransition(async () => {
+      await loadData();
+    });
   }, [organizationId, projectId, apiKeyId, loadData]);
 
   const handleModelToggle = (modelId: string, checked: boolean) => {
