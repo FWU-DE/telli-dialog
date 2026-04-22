@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { InfoIcon } from '@phosphor-icons/react';
 import { Tooltip as TooltipPrimitive } from 'radix-ui';
 
 import { DEFAULT_TOOLTIP_DELAY_DURATION, DEFAULT_SCROLLING_TOOLTIP_DELAY_DURATION } from './const';
@@ -35,7 +36,9 @@ function TooltipProvider({
 }
 
 type TooltipProps = Omit<React.ComponentProps<typeof TooltipPrimitive.Root>, 'open'>;
-type TooltipTriggerProps = React.ComponentProps<typeof TooltipPrimitive.Trigger>;
+type TooltipTriggerProps = React.ComponentProps<typeof TooltipPrimitive.Trigger> & {
+  disableKeyboardToggle?: boolean;
+};
 
 function Tooltip({ onOpenChange, defaultOpen, ...props }: TooltipProps) {
   const [isOpen, setIsOpen] = React.useState(Boolean(defaultOpen));
@@ -60,7 +63,14 @@ function Tooltip({ onOpenChange, defaultOpen, ...props }: TooltipProps) {
   );
 }
 
-function TooltipTrigger({ onKeyDown, onClick, onFocus, onBlur, ...props }: TooltipTriggerProps) {
+function TooltipTrigger({
+  onKeyDown,
+  onClick,
+  onFocus,
+  onBlur,
+  disableKeyboardToggle = false,
+  ...props
+}: TooltipTriggerProps) {
   const { isOpen, setIsOpen } = useTooltip();
   const focusTimerRef = React.useRef<number | null>(null);
 
@@ -78,13 +88,13 @@ function TooltipTrigger({ onKeyDown, onClick, onFocus, onBlur, ...props }: Toolt
   const handleKeyDown = React.useCallback<NonNullable<TooltipTriggerProps['onKeyDown']>>(
     (event) => {
       // Allow toggling tooltip with Enter or Space key for key navigation accessibility
-      if (event.key === 'Enter' || event.key === ' ') {
+      if (!disableKeyboardToggle && (event.key === 'Enter' || event.key === ' ')) {
         event.preventDefault();
         setIsOpen(!isOpen);
       }
       onKeyDown?.(event);
     },
-    [isOpen, setIsOpen, onKeyDown],
+    [disableKeyboardToggle, isOpen, setIsOpen, onKeyDown],
   );
 
   const handleClick = React.useCallback<NonNullable<TooltipTriggerProps['onClick']>>(
@@ -160,4 +170,50 @@ function TooltipContent({
   );
 }
 
-export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger };
+type InfoTooltipBaseProps = {
+  delayDuration?: number;
+  skipDelayDuration?: number;
+};
+
+type InfoTooltipProps =
+  | (InfoTooltipBaseProps & {
+      tooltip: string;
+      ariaLabel?: string;
+    })
+  | (InfoTooltipBaseProps & {
+      tooltip: React.ReactNode;
+      ariaLabel: string;
+    });
+
+function resolveAriaLabel(tooltip: React.ReactNode, ariaLabel?: string) {
+  if (ariaLabel) {
+    return ariaLabel;
+  }
+
+  return typeof tooltip === 'string' ? tooltip : undefined;
+}
+
+function InfoTooltip({
+  tooltip,
+  ariaLabel,
+  delayDuration = DEFAULT_TOOLTIP_DELAY_DURATION,
+  skipDelayDuration = 0,
+}: InfoTooltipProps) {
+  const resolvedAriaLabel = resolveAriaLabel(tooltip, ariaLabel);
+
+  return (
+    <TooltipProvider skipDelayDuration={skipDelayDuration} delayDuration={delayDuration}>
+      <Tooltip>
+        <TooltipTrigger
+          aria-label={resolvedAriaLabel}
+          className="rounded-full focus-visible:outline-primary focus-visible:outline-1 hover:bg-muted dark:hover:bg-muted/50 focus-visible:ring-3 focus-visible:border-ring focus-visible:ring-ring/50"
+        >
+          <InfoIcon className={'size-5 text-icon'} aria-hidden="true" />
+        </TooltipTrigger>
+        <TooltipContent>{tooltip}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
+export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, InfoTooltip };

@@ -1,8 +1,6 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from '../Tooltip';
 import { Checkbox } from '../Checkbox';
 import { Control, Controller, FieldPath, FieldValues } from 'react-hook-form';
 import { Field, FieldError, FieldLabel } from '../Field';
-import { InfoIcon } from '@phosphor-icons/react';
 
 type CheckboxWithInfoProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -44,18 +42,10 @@ export default function CheckboxWithInfo<
               }}
               disabled={disabled}
             />
-            <FieldLabel htmlFor={field.name + '-checkbox'} size="normal">
+            <FieldLabel htmlFor={field.name + '-checkbox'} size="normal" tooltip={tooltip}>
               {label}
             </FieldLabel>
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            {tooltip && (
-              <Tooltip>
-                <TooltipTrigger aria-label={tooltip}>
-                  <InfoIcon className="size-5 text-icon" aria-hidden="true" />
-                </TooltipTrigger>
-                <TooltipContent>{tooltip}</TooltipContent>
-              </Tooltip>
-            )}
           </Field>
         )}
       />

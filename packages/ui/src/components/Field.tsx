@@ -2,12 +2,11 @@
 
 import React, { useMemo } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { InfoIcon } from '@phosphor-icons/react';
 
 import { cn } from '../lib/utils';
 import { Label } from './Label';
 import { Separator } from './Separator';
-import { Tooltip, TooltipContent, TooltipTrigger } from './Tooltip';
+import { InfoTooltip } from './Tooltip';
 
 function FieldSet({ className, ...props }: React.ComponentProps<'fieldset'>) {
   return (
@@ -134,7 +133,7 @@ function FieldLabel({
       data-slot="field-label"
       className={cn(
         fieldLabelVariants({ size }),
-        'group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50',
+        'group/field-label peer/field-label flex w-fit gap-0 leading-snug group-data-[disabled=true]/field:opacity-50',
         'has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-4',
         'has-data-[state=checked]:bg-primary/5 has-data-[state=checked]:border-primary dark:has-data-[state=checked]:bg-primary/10',
         labelAction && 'w-full flex-wrap items-center',
@@ -142,19 +141,21 @@ function FieldLabel({
       )}
       {...props}
     >
-      {children}
-      {required && (
-        <span aria-hidden="true" className="text-destructive">
-          *
-        </span>
-      )}
+      <span
+        data-slot="field-label-text"
+        className={cn('inline-flex items-center', required && 'gap-0.5')}
+      >
+        {children}
+        {required && (
+          <span aria-hidden="true" className="text-destructive">
+            *
+          </span>
+        )}
+      </span>
       {tooltip && (
-        <Tooltip>
-          <TooltipTrigger type="button" aria-label={tooltip}>
-            <InfoIcon className="size-5 text-icon" />
-          </TooltipTrigger>
-          <TooltipContent>{tooltip}</TooltipContent>
-        </Tooltip>
+        <span data-slot="field-label-tooltip" className="ml-1 inline-flex items-center">
+          <InfoTooltip tooltip={tooltip} ariaLabel={tooltip} />
+        </span>
       )}
       {labelAction && (
         <span className="inline-flex basis-full items-center sm:ml-auto sm:basis-auto">

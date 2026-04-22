@@ -18,7 +18,6 @@ import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
 import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
-import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
 import { useRouter } from 'next/navigation';
 import {
@@ -52,8 +51,8 @@ import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-cha
 import { telliPointsPercentageValues, usageTimeValuesInMinutes } from './schema';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
-import { useInstructionsExample } from '@/hooks/use-instructions-example';
 import { FormField } from '@ui/components/form/FormField';
+import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
 
@@ -186,9 +185,6 @@ export function LearningScenarioEdit({
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
 
-  const { instructionsPlaceholder, instructionsExampleDialogContent } =
-    useInstructionsExample('learning-scenarios');
-
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
       return;
@@ -206,7 +202,7 @@ export function LearningScenarioEdit({
     const createResult = await createNewLearningScenarioFromTemplateAction({
       templateId: learningScenario.id,
       duplicateLearningScenarioName: t('duplicate-name-format-string', {
-        sourceName: learningScenario.name,
+        sourceName: name,
       }),
     });
     if (createResult.success) {
@@ -312,7 +308,6 @@ export function LearningScenarioEdit({
         modalTitle={t('delete-modal-title')}
         modalDescription={t('delete-modal-description')}
       />
-      <CustomChatActionSave onClick={handleAutoSave} />
     </CustomChatActions>
   );
 
@@ -329,7 +324,7 @@ export function LearningScenarioEdit({
         }}
       />
       <CustomChatTitle title={name} />
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-wrap items-start gap-3">
         {actionButtons}
         <CustomChatFormState
           isDirty={isDirty}
@@ -419,10 +414,14 @@ export function LearningScenarioEdit({
                   label={t('instructions-label')}
                   labelAction={
                     <CustomChatInstructionsExampleDialog
-                      descriptionContent={instructionsExampleDialogContent}
+                      descriptionContent={
+                        <div className="whitespace-pre-line">
+                          <RichText>{(tags) => t.rich('instructions-placeholder', tags)}</RichText>
+                        </div>
+                      }
                     />
                   }
-                  placeholder={instructionsPlaceholder}
+                  placeholder={stripRichTextTags(t.raw('instructions-placeholder'))}
                   testId="learning-scenario-instructions-input"
                   onBlur={handleAutoSave}
                   type="textArea"
@@ -462,7 +461,7 @@ export function LearningScenarioEdit({
           />
         </form>
       </div>
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-wrap items-start gap-3">
         {actionButtons}
         <CustomChatFormState
           isDirty={isDirty}

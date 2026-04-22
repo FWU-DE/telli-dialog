@@ -1,7 +1,6 @@
 import React from 'react';
 import Checkbox from '@/components/common/checkbox';
-import { InfoIcon } from '@phosphor-icons/react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { InfoTooltip } from '@ui/components/Tooltip';
 
 type CheckboxWithInfoProps = {
   label: string;
@@ -26,22 +25,7 @@ export default function CheckboxWithInfo({
         onCheckedChange={onCheckedChange}
         disabled={disabled}
       />
-      <TooltipProvider skipDelayDuration={0} delayDuration={200}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              type="button"
-              className="text-gray-500 hover:text-gray-700"
-              aria-label={tooltip}
-            >
-              <InfoIcon size={16} />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent className="bg-white">
-            <p className="whitespace-pre-line">{tooltip}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <InfoTooltip tooltip={tooltip} ariaLabel={tooltip} />
     </div>
   );
 }

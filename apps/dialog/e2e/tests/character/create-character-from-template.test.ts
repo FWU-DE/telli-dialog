@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
 import { nanoid } from 'nanoid';
+import { confirmDuplicate } from '../../utils/utils';
 
 test.use({ storageState: AUTH_FILES.teacher });
 
@@ -19,6 +20,7 @@ test('create character from template', async ({ page }) => {
   await expect(copyButton).toBeVisible();
   await expect(copyButton).toBeEnabled();
   await copyButton.click();
+  await confirmDuplicate(page);
   await page.waitForURL('**?create=true**');
 
   const name = 'Johann Wolfgang von Goethe ' + nanoid(8);

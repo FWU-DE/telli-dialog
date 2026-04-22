@@ -113,18 +113,18 @@
     },
     "delete": {
       "button": "Datei löschen",
-      "modal-description": "Möchten Sie diese Datei wirklich dauerhaft löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
+      "modal-description": "Soll diese Datei wirklich dauerhaft gelöscht werden? Dieser Vorgang kann nicht rückgängig gemacht werden.",
       "modal-title": "Datei löschen",
       "confirm": "Datei löschen"
     },
     "toasts": {
       "upload-success": "Die Datei wurde erfolgreich hochgeladen",
-      "upload-error": "Die Datei konnte leider nicht hochgeladen werden. Bitte versuchen Sie es erneut",
+      "upload-error": "Die Datei konnte leider nicht hochgeladen werden. Bitte erneut versuchen.",
       "file-too-large": "Die Datei {file_name} ist zu groß. Es sind maximal {max_file_size} MB erlaubt. Versuche die Datei zu verkleinern.",
       "delete-from-form": "Die Datei wurde erfolgreich gelöscht",
       "invalid-file-format": "Das Dateiformat wird nicht unterstützt, folgende Dateitypen können hochgeladen werden: {supported_formats}",
       "file-limit-exceeded": "Es können maximal {max_files} Dateien hochgeladen werden.",
-      "download-error": "Die Datei konnte leider nicht heruntergeladen werden. Bitte versuchen Sie es erneut."
+      "download-error": "Die Datei konnte leider nicht heruntergeladen werden. Bitte erneut versuchen."
     },
     "download": {
       "aria-label": "Datei herunterladen"
@@ -140,7 +140,7 @@
   "custom-gpt": {
     "title": "Assistenten",
     "description": "Die Assistenten erleichtern den Lehrkräften den schulischen Alltag. Sie können je nach Situation individuell konfiguriert werden. Bereits fertige Assistenten stehen als Vorlagen sofort nutzbar zur Verfügung. Diese können in den eigenen Bereich kopiert und dann wunschgemäß angepasst werden.",
-    "info-dialog": "<b>Was sind Assistenten?</b>\n\nAssistenten erleichtern Lehrkräften den schulischen Alltag. Sie können für wiederkehrende Tätigkeiten konfiguriert werden, individuell auf die eigenen Fächer, Jahrgangsstufen oder Arbeitskontexte angepasst. Einmal mit dem entsprechenden Hintergrundwissen angereichert und erstellt, liefert jeder Assistent Vorschläge, Impulse und Ideen, die für das gesamte Schuljahr und darüber hinaus genutzt werden können.\n\nLehrkräfte können bereits konfigurierte Vorlagen nutzen und selbst eigene Assistenten erstellen.\n\n<b>Zielgruppe:</b>\nLehrkräfte",
+    "info-dialog": "<b>Was sind Assistenten?</b>\nAssistenten erleichtern Lehrkräften den schulischen Alltag. Sie können für wiederkehrende Tätigkeiten konfiguriert werden, individuell auf die eigenen Fächer, Jahrgangsstufen oder Arbeitskontexte angepasst. Einmal mit dem entsprechenden Hintergrundwissen angereichert und erstellt, liefert jeder Assistent Vorschläge, Impulse und Ideen, die für das gesamte Schuljahr und darüber hinaus genutzt werden können.\n\nLehrkräfte können bereits konfigurierte Vorlagen nutzen und selbst eigene Assistenten erstellen.\n\n<b>Zielgruppe:</b>\nLehrkräfte",
     "visibility-global": "Vorlagen",
     "visibility-school": "Schulintern",
     "visibility-private": "Für mich",
@@ -208,24 +208,7 @@
     "description-placeholder": "Neuer Schüler in einer DaZ-Klasse",
     "description-max-length": "Die Beschreibung darf maximal {maxLength} Zeichen lang sein.",
     "instructions-label": "Instruktionen",
-    "instructions-placeholder": {
-      "p1": {
-        "heading": "SIMULIERTE PERSON",
-        "content": "Du bist Emre, ein neuer Mitschüler in einer Klasse für Deutsch als Zweitsprache."
-      },
-      "p2": {
-        "heading": "ZIELGRUPPE",
-        "content": "Du unterhältst dich mit Lernenden einer Klasse für Deutsch als Zweitsprache (5. Jahrgangsstufe, Mittelschule). Euer Deutsch-Sprachniveau ist A1 GER."
-      },
-      "p3": {
-        "heading": "KONTEXT",
-        "content": "Ihr lernt euch gegenseitig kennen (Alter, Hobbys, Familie). Du fragst auch nach Informationen über die neue Schule, z.B. Fächer, Stundenplan, Räume, Mittagessen, Busfahrplan."
-      },
-      "p4": {
-        "heading": "VERHALTEN",
-        "content": "Sei authentisch. Antworte ausschließlich auf dem Niveau A1. Bilde nur einfache Sätze. Formuliere in Alltagssprache. Bleibe thematisch in der Lebenswelt eines 10-Jährigen."
-      }
-    },
+    "instructions-placeholder": "<b>SIMULIERTE PERSON</b>\nDu bist Emre, ein neuer Mitschüler in einer Klasse für Deutsch als Zweitsprache.\n\n<b>ZIELGRUPPE</b>\nDu unterhältst dich mit Lernenden einer Klasse für Deutsch als Zweitsprache (5. Jahrgangsstufe, Mittelschule). Euer Deutsch-Sprachniveau ist A1 GER.\n\n<b>KONTEXT</b>\nIhr lernt euch gegenseitig kennen (Alter, Hobbys, Familie). Du fragst auch nach Informationen über die neue Schule, z.B. Fächer, Stundenplan, Räume, Mittagessen, Busfahrplan.\n\n<b>VERHALTEN</b>\nSei authentisch. Antworte ausschließlich auf dem Niveau A1. Bilde nur einfache Sätze. Formuliere in Alltagssprache. Bleibe thematisch in der Lebenswelt eines 10-Jährigen.",
     "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
     "initial-message-label": "Einstiegsfrage",
     "initial-message-placeholder": "Hallo! Ich bin Emre. Alles klar bei dir?",
@@ -241,7 +224,7 @@
     "name-max-length": "Der Name darf maximal {maxLength} Zeichen lang sein.",
     "author-label": "Erstellt von",
     "author-text": "FWU-Redaktion",
-    "info-dialog": "<b>Was sind Dialogpartner?</b>\n\nDialogpartner sind fiktive Gesprächspartner, mit denen die Lernenden chatten können. Die Schülerinnen und Schüler setzen sich in Form eines Rollenspiels aktiv mit einem bestimmten Thema auseinander, indem sie mit simulierten Dialogpartnern virtuell in Kontakt treten. Dadurch entsteht Lebensweltbezug, Motivation und Kreativität.\n\nLehrkräfte können bereits konfigurierte Vorlagen nutzen und selbst eigene Dialogpartner erstellen.\n\nDer Chat beginnt mit einer Einstiegsfrage des Dialogpartners, die durch die Lehrkraft im Vorfeld festgelegt wird.\n\n<b>Zielgruppe:</b>\nSchülerinnen und Schüler",
+    "info-dialog": "<b>Was sind Dialogpartner?</b>\nDialogpartner sind fiktive Gesprächspartner, mit denen die Lernenden chatten können. Die Schülerinnen und Schüler setzen sich in Form eines Rollenspiels aktiv mit einem bestimmten Thema auseinander, indem sie mit simulierten Dialogpartnern virtuell in Kontakt treten. Dadurch entsteht Lebensweltbezug, Motivation und Kreativität.\n\nLehrkräfte können bereits konfigurierte Vorlagen nutzen und selbst eigene Dialogpartner erstellen.\n\nDer Chat beginnt mit einer Einstiegsfrage des Dialogpartners, die durch die Lehrkraft im Vorfeld festgelegt wird.\n\n<b>Zielgruppe:</b>\nSchülerinnen und Schüler",
     "search-placeholder": "Dialogpartner suchen...",
     "visibility-global": "Vorlagen",
     "visibility-school": "Schulintern",
@@ -348,21 +331,7 @@
     "description-placeholder": "Meinen individuellen Lernplan erstellen",
     "description-max-length": "Die Beschreibung darf maximal {maxLength} Zeichen lang sein.",
     "instructions-label": "Instruktionen",
-    "instructions-placeholder": {
-      "p1": { "heading": "ROLLE", "content": "Du bist ein erfahrener Lerncoach." },
-      "p2": {
-        "heading": "KONTEXT",
-        "content": "Erstelle einen Lernplan für eine anstehende Prüfung, der optimal an die individuellen Bedürfnisse wie z.B. verfügbare Zeit, Wissensstand, Themen, Lernstrategien angepasst ist."
-      },
-      "p3": {
-        "heading": "VERHALTEN",
-        "content": "Stelle immer nur 1-2 Fragen. Frage nach dem Fach, den Themen und der konkret verfügbaren Zeit pro Wochentag. Schlage am Ende drei fach- bzw. themenspezifische Lernstrategien vor."
-      },
-      "p4": {
-        "heading": "FORMAT",
-        "content": "Erstelle einen Wochenplan als Tabelle mit Lernphasen, Wiederholungsphasen und Pausen."
-      }
-    },
+    "instructions-placeholder": "<b>ROLLE</b>\nDu bist ein erfahrener Lerncoach.\n\n<b>KONTEXT</b>\nErstelle einen Lernplan für eine anstehende Prüfung, der optimal an die individuellen Bedürfnisse wie z.B. verfügbare Zeit, Wissensstand, Themen, Lernstrategien angepasst ist.\n\n<b>VERHALTEN</b>\nStelle immer nur 1-2 Fragen.\nFrage nach dem Fach, den Themen und der konkret verfügbaren Zeit pro Wochentag. Schlage am Ende drei fach- bzw. themenspezifische Lernstrategien vor.\n\n<b>FORMAT</b>\nErstelle einen Wochenplan als Tabelle mit Lernphasen, Wiederholungsphasen und Pausen.",
     "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
     "student-exercise-label": "Arbeitsauftrag",
     "student-exercise-tooltip": "Hier kann ein Arbeitsauftrag für die Lernenden formuliert werden.",
@@ -376,7 +345,7 @@
     "duplicate-name-format-string": "Duplikat von {sourceName}",
     "author-label": "Erstellt von",
     "author-text": "FWU-Redaktion",
-    "info-dialog": "<b>Was sind Lernszenarien?</b>\n\nLernszenarien bieten Schülerinnen und Schüler die Möglichkeit, KI für ihren Lernprozess aktiv zu nutzen. Im Dialog mit der KI setzen sie sich kreativ mit einem konkreten Thema auseinander und erhalten Impulse und Ideen, um darauf aufbauend die Antworten des Chatbots kritisch zu hinterfragen und selbstständig weiterzudenken.\n\nLehrkräfte können bereits konfigurierte Vorlagen nutzen und selbst eigene Lernszenarien erstellen.\n\nDie Aufgabenstellung für ein Lernszenario wird von der Lehrkraft im Vorfeld definiert. Die Lernenden können sie während des Chats auf- und einklappen sowie frei verschieben.\n\n<b>Zielgruppe:</b>\nSchülerinnen und Schüler",
+    "info-dialog": "<b>Was sind Lernszenarien?</b>\nLernszenarien bieten Schülerinnen und Schüler die Möglichkeit, KI für ihren Lernprozess aktiv zu nutzen. Im Dialog mit der KI setzen sie sich kreativ mit einem konkreten Thema auseinander und erhalten Impulse und Ideen, um darauf aufbauend die Antworten des Chatbots kritisch zu hinterfragen und selbstständig weiterzudenken.\n\nLehrkräfte können bereits konfigurierte Vorlagen nutzen und selbst eigene Lernszenarien erstellen.\n\nDie Aufgabenstellung für ein Lernszenario wird von der Lehrkraft im Vorfeld definiert. Die Lernenden können sie während des Chats auf- und einklappen sowie frei verschieben.\n\n<b>Zielgruppe:</b>\nSchülerinnen und Schüler",
     "search-placeholder": "Szenario suchen...",
     "visibility-global": "Vorlagen",
     "visibility-school": "Schulintern",
@@ -437,7 +406,7 @@
     },
     "share-with-learners": {
       "title": "Mit Lernenden teilen",
-      "description": "Lege fest, <b>wie viele</b> deiner <b>telli-Points</b> durch diesen Chat verbraucht werden dürfen und <b>wie lange</b> der Chat aktiv benutzt werden kann.",
+      "description": "<b>Wie viel des monatlichen Tokenvolumens</b> soll durch diesen Chat maximal verbraucht und <b>wie lange</b> darf er aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",
       "button-start": "Jetzt bereitstellen",
       "button-stop": "Stoppen",
@@ -511,6 +480,12 @@
     "duplicate": "Duplizieren",
     "delete": "Löschen",
     "save": "Speichern",
+    "duplicate-dialog": {
+      "title": "Duplikat erstellen?",
+      "description": "Soll ein Duplikat erstellt werden?",
+      "confirm": "Duplikat erstellen",
+      "cancel": "Abbrechen"
+    },
     "image": {
       "crop-image": "Bild ausschneiden",
       "upload-image": "Bild hochladen",
@@ -522,9 +497,10 @@
     },
     "form": {
       "saving": "Wird gespeichert...",
-      "save-error": "Speichern fehlgeschlagen",
-      "unsaved-changes": "Ungespeicherte Änderungen",
-      "saved": "Gespeichert"
+      "save-error": "Speichern\nfehlgeschlagen",
+      "unsaved-changes": "Ungespeicherte\nÄnderungen",
+      "saved": "Gespeichert",
+      "tooltip": "Alle Änderungen werden automatisch gespeichert, sobald ein Eingabefeld verlassen wird."
     },
     "links": {
       "empty-error": "Bitte gib eine URL ein.",
@@ -546,7 +522,7 @@
     },
     "share-with-learners": {
       "title": "Mit Lernenden teilen",
-      "description": "Lege fest, <b>wie viele</b> deiner <b>telli-Points</b> durch diesen Chat verbraucht werden dürfen und <b>wie lange</b> der Chat aktiv benutzt werden kann.",
+      "description": "<b>Wie viel des monatlichen Tokenvolumens</b> soll durch diesen Chat maximal verbraucht und <b>wie lange</b> darf er aktiv benutzt werden?",
       "max-usage": "Maximale Nutzungszeit",
       "button-start": "Jetzt bereitstellen",
       "button-stop": "Stoppen",
@@ -563,7 +539,7 @@
       "heading-tooltip": "Hier können Dateien und Webseiten als Hintergrundwissen hinterlegt werden. Telli bezieht dieses Wissen bei Bedarf bei seinen Antworten mit ein.\n \nEs können bis zu 5 Dateien bzw. Links hinzugefügt werden.\n \nMögliche Dateiformate: {supported_formats}",
       "files": "Dateien",
       "links": "Webseiten",
-      "links-tooltip": "Wichtig: Bitte jeweils konkrete Webseiten angeben (z.B. wikipedia.de/Regenwürmer). Nur wikipedia.de ist nicht ausreichend.",
+      "links-tooltip": "Wichtig: Bitte jeweils konkrete Webseiten angeben (z.B. http://wikipedia.org/wiki/Astronomie). Nur http://wikipedia.org ist nicht ausreichend.",
       "file-delete-error": "Fehler beim Löschen der Datei"
     },
     "instructions-example": {
@@ -583,24 +559,7 @@
     "description-placeholder": "Assistenz zur Generierung von differenziertem Lernmaterial",
     "description-max-length": "Die Beschreibung darf maximal {maxLength} Zeichen lang sein.",
     "instructions-label": "Instruktionen",
-    "instructions-placeholder": {
-      "p1": {
-        "heading": "ROLLE",
-        "content": "Du bist Experte für die Erstellung von differenziertem Lernmaterial."
-      },
-      "p2": {
-        "heading": "KONTEXT",
-        "content": "Passe das im Hintergrundwissen hochgeladene Arbeitsmaterial an drei unterschiedliche Lernniveaus an. (leicht, mittel, schwer)"
-      },
-      "p3": {
-        "heading": "VERHALTEN",
-        "content": "Formuliere sachlich, klar und praxisnah."
-      },
-      "p4": {
-        "heading": "FORMAT",
-        "content": "Strukturiere die Antwort in Abschnitte."
-      }
-    },
+    "instructions-placeholder": "<b>ROLLE</b>\nDu bist Experte für die Erstellung von differenziertem Lernmaterial.\n\n<b>KONTEXT</b>\nPasse das im Hintergrundwissen hochgeladene Arbeitsmaterial an drei unterschiedliche Lernniveaus an. (leicht, mittel, schwer)\n\n<b>VERHALTEN</b>\nFormuliere sachlich, klar und praxisnah.\n\n<b>FORMAT</b>\nStrukturiere die Antwort in Abschnitte.",
     "instructions-max-length": "Die Instruktionen dürfen maximal {maxLength} Zeichen lang sein.",
     "back-button-text": "Assistenten",
     "back-button-aria": "Zurück zur Übersicht der Assistenten",
@@ -649,6 +608,7 @@
     "sort-date-asc": "Älteste zuerst",
     "sort-name-asc": "Alphabetisch A-Z",
     "sort-name-desc": "Alphabetisch Z-A",
-    "close": "Schließen"
+    "close": "Schließen",
+    "chat": "Chatten"
   }
 }

@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { handleSingleFile, UploadFileButtonProps } from '../chat/upload-file-button';
 import { useSession } from 'next-auth/react';
 import { useToast } from '../common/toast';
-import RichText from '../common/rich-text';
+import { RichText } from '../common/rich-text';
 import { SUPPORTED_DOCUMENTS_EXTENSIONS } from '@/const';
 import { validateFileExtentsion as validateFileExtension } from '@/utils/files/generic';
 import { NUMBER_OF_FILES_LIMIT_FOR_SHARED_CHAT } from '@/configuration-text-inputs/const';
@@ -143,8 +143,7 @@ export function FileDrop({
           multiple
           aria-label={t('upload.upload-input-aria-label')}
         />
-        <div className="mt-4 flex flex-col text-sm gap-4 items-center">
-          <FileUploadIcon className="w-8 h-8 text-primary" />
+        <div className="flex flex-col text-sm gap-4 items-center">
           <span className="text-base">
             <RichText>
               {(tags) =>
@@ -157,6 +156,7 @@ export function FileDrop({
           </span>
           <span className="text-gray-600">{t('upload.choice-word')}</span>
           <Button disabled={disabled} onClick={handleButtonClick} type="button">
+            <FileUploadIcon className="size-4" />
             {t('upload.upload-file-button')}
           </Button>
         </div>

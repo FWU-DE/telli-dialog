@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { EmptyImageIcon } from '../icons/empty-image';
+import { ImageSquareIcon } from '@phosphor-icons/react';
 
 export function CustomChatAvatarImage({ pictureUrl }: { pictureUrl: string | undefined }) {
   return (
@@ -12,11 +12,13 @@ export function CustomChatAvatarImage({ pictureUrl }: { pictureUrl: string | und
           fill
           unoptimized
           alt={'profile-picture'}
-          className="rounded-full object-contain"
+          className="rounded-full"
           priority
         />
       ) : (
-        <EmptyImageIcon className="relative -left-1 -top-1 w-15 h-15" />
+        <div className="rounded-full bg-primary/7 flex items-center justify-center w-full h-full">
+          <ImageSquareIcon className="text-primary/30 rounded-full size-18" weight="thin" />
+        </div>
       )}
     </div>
   );

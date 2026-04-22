@@ -10,8 +10,8 @@ import { useTranslations } from 'next-intl';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@ui/components/Tooltip';
 import { PlusIcon, TrashSimpleIcon } from '@phosphor-icons/react';
 import { AssistantFormValues } from '@/app/(authed)/(dialog)/assistants/editor/[assistantId]/assistant-edit';
-import { IconButton } from '@ui/components/IconButton';
 import { FormField } from '@ui/components/form/FormField';
+import { Button } from '@ui/components/Button';
 
 type WithPromptSuggestions = {
   promptSuggestions: { value: string }[];
@@ -62,17 +62,19 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
       hasReachedPromptSuggestionsLimit || lastPromptSuggestionValue.trim() === '';
 
     const addIconButton = (
-      <IconButton
+      <Button
         type="button"
+        variant="ghost"
+        size="icon-round"
+        className="text-primary"
+        disabled={isAddPromptSuggestionDisabled}
         aria-label={t('prompt-suggestions-add-button')}
         data-testid={`add-prompt-suggestion-${index + 1}-button`}
         aria-disabled={isAddPromptSuggestionDisabled}
-        onClick={
-          isAddPromptSuggestionDisabled ? undefined : () => appendPromptSuggestion({ value: '' })
-        }
+        onClick={() => appendPromptSuggestion({ value: '' })}
       >
         <PlusIcon className="size-5" />
-      </IconButton>
+      </Button>
     );
 
     return (
@@ -92,13 +94,15 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
         placeholder={t('prompt-suggestion-placeholder')}
       >
         {(input) => (
-          <div className="flex items-start gap-3">
+          <div className="flex items-center gap-3">
             {input}
             <div className="mt-1.5">
               {isLastItem ? (
                 isAddPromptSuggestionDisabled ? (
                   <Tooltip>
-                    <TooltipTrigger asChild>{addIconButton}</TooltipTrigger>
+                    <TooltipTrigger asChild>
+                      <span className="inline-flex cursor-not-allowed">{addIconButton}</span>
+                    </TooltipTrigger>
                     <TooltipContent>
                       <p>
                         {hasReachedPromptSuggestionsLimit
@@ -113,14 +117,17 @@ export function CustomChatPromptSuggestions(props: CustomChatPromptSuggestionsPr
                   addIconButton
                 )
               ) : (
-                <IconButton
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon-round"
+                  className="text-primary"
                   aria-label={t('prompt-suggestions-delete-button', { index: index + 1 })}
                   data-testid={`delete-prompt-suggestion-${index + 1}-button`}
                   onClick={() => removePromptSuggestion(index)}
                 >
                   <TrashSimpleIcon className="size-5 " />
-                </IconButton>
+                </Button>
               )}
             </div>
           </div>

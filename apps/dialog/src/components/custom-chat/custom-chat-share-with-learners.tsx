@@ -19,7 +19,7 @@ import {
 import { Button } from '@ui/components/Button';
 import { ShareFatIcon, StopIcon } from '@phosphor-icons/react';
 import CountDownTimer from '../../app/(authed)/(dialog)/learning-scenarios/_components/count-down';
-import RichText from '../common/rich-text';
+import { RichText } from '../common/rich-text';
 import { z } from 'zod';
 
 const shareFormSchema = z.object({

@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
-import { cn } from '@/utils/tailwind';
+import { Button } from '@ui/components/Button';
 import SidebarCloseIcon from '@/components/icons/sidebar-close';
 import { getBaseUrlByHeaders, getHostByHeaders } from '@/utils/host';
 import Footer from '@/components/navigation/footer';
@@ -75,22 +74,16 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
                 />
               </div>
             </div>
-            <Link
-              href={shareUrl}
-              target="_blank"
-              className={cn(buttonPrimaryClassName, 'mt-10 sm:mt-16')}
-            >
-              {t('open-chat')}
-            </Link>
+            <Button asChild className="mt-10 sm:mt-16">
+              <Link href={shareUrl} target="_blank">
+                {t('open-chat')}
+              </Link>
+            </Button>
           </section>
           <div className="hidden sm:block w-1 border-r" />
           <section className="flex flex-col justify-between items-center gap-8 sm:gap-12">
             <h2 className="text-2xl sm:text-3xl text-center">{t('use-qr')}</h2>
-            <QRCodeSVG
-              id="qr-code"
-              className="w-64 h-64 sm:w-[400px] sm:h-[400px]"
-              value={shareUrl}
-            />
+            <QRCodeSVG id="qr-code" className="w-64 h-64 sm:w-100 sm:h-100" value={shareUrl} />
           </section>
         </main>
       </div>

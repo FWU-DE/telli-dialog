@@ -10,7 +10,7 @@ import { CreateNewCharacterButton } from './create-new-character-button';
 import { useOverviewFilter } from '@/components/hooks/use-overview-filter';
 import { getCharactersByFilterAction } from '../actions/entity-filter-actions';
 import { filterAndSortEntities } from '@/components/entity-overview/utils';
-import RichText from '@/components/common/rich-text';
+import { RichText } from '@/components/common/rich-text';
 
 type CharacterOverviewProps = {
   currentUserId: string;

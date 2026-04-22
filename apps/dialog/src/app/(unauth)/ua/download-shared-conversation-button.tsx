@@ -6,9 +6,7 @@ import Spinner from '@/components/icons/spinner';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { type ChatMessage as Message } from '@/types/chat';
-import { buttonPrimaryClassName } from '@/utils/tailwind/button';
-import { cn } from '@/utils/tailwind';
-import { iconClassName } from '@/utils/tailwind/icon';
+import { Button } from '@ui/components/Button';
 
 type DownloadConversationButtonProps = {
   conversationMessages: Message[];
@@ -78,34 +76,34 @@ export default function DownloadSharedConversationButton({
 
   if (primaryButton) {
     return (
-      <button
-        className={cn(buttonPrimaryClassName, 'text-base font-normal')}
+      <Button
+        variant={showText ? 'outline' : 'ghost'}
+        size={showText ? 'default' : 'icon-round'}
+        className="text-primary"
         title={tCommon('conversation-download')}
         onClick={handleDownload}
         disabled={disabled}
       >
         <div className="flex items-center gap-1">
-          {isLoading ? (
-            <Spinner className="p-2 w-8 h-8" />
-          ) : (
-            <WebDownloadIcon className="w-8 h-8" />
-          )}
+          {isLoading ? <Spinner className="p-2 size-8" /> : <WebDownloadIcon className="size-8" />}
           {showText && tCommon('conversation-download')}
         </div>
-      </button>
+      </Button>
     );
   }
 
   return (
-    <button
-      className={cn('flex items-center gap-1 ml-2', iconClassName, 'disabled:bg-transparent')}
+    <Button
+      variant={showText ? 'outline' : 'ghost'}
+      size={showText ? 'default' : 'icon-round'}
+      className="text-primary"
       title={tCommon('conversation-download')}
       onClick={handleDownload}
       disabled={disabled}
     >
-      {isLoading ? <Spinner className="p-2 w-8 h-8" /> : <WebDownloadIcon className="w-8 h-8" />}
+      {isLoading ? <Spinner className="p-2 size-8" /> : <WebDownloadIcon className="size-8" />}
       {showText && tCommon('conversation-download')}
-    </button>
+    </Button>
   );
 }
 

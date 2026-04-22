@@ -1,7 +1,6 @@
 import { TrashSimpleIcon } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import DestructiveActionButton from '@/components/common/destructive-action-button';
-import { customChatDeleteButtonClassName } from '@/utils/tailwind/button';
 
 type CustomChatActionDeleteProps = {
   onClick: () => void;
@@ -18,7 +17,6 @@ export function CustomChatActionDelete({
 
   return (
     <DestructiveActionButton
-      triggerButtonClassName={customChatDeleteButtonClassName}
       modalTitle={modalTitle}
       modalDescription={modalDescription}
       confirmText={t('common.delete')}

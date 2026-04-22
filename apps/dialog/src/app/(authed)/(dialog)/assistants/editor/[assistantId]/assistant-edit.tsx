@@ -22,7 +22,6 @@ import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions'
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
-import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
 import {
   createNewAssistantAction,
@@ -46,7 +45,7 @@ import { WebsearchSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-chat-prompt-suggestions';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
-import { useInstructionsExample } from '@/hooks/use-instructions-example';
+import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
@@ -176,9 +175,6 @@ export function AssistantEdit({
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
 
-  const { instructionsPlaceholder, instructionsExampleDialogContent } =
-    useInstructionsExample('assistants');
-
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
       return;
@@ -202,7 +198,7 @@ export function AssistantEdit({
     const createResult = await createNewAssistantAction({
       templateId: assistant.id,
       duplicateAssistantName: t('duplicate-name-format-string', {
-        sourceName: assistant.name,
+        sourceName: name,
       }),
     });
     if (createResult.success) {
@@ -295,7 +291,6 @@ export function AssistantEdit({
         modalTitle={t('delete-modal-title')}
         modalDescription={t('delete-modal-description')}
       />
-      <CustomChatActionSave onClick={handleAutoSave} />
     </CustomChatActions>
   );
 
@@ -312,7 +307,7 @@ export function AssistantEdit({
         }}
       />
       <CustomChatTitle title={name} />
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-wrap items-start gap-3">
         {assistantActions}
         <CustomChatFormState
           isDirty={isDirty}
@@ -370,10 +365,14 @@ export function AssistantEdit({
                 label={t('instructions-label')}
                 labelAction={
                   <CustomChatInstructionsExampleDialog
-                    descriptionContent={instructionsExampleDialogContent}
+                    descriptionContent={
+                      <div className="whitespace-pre-line">
+                        <RichText>{(tags) => t.rich('instructions-placeholder', tags)}</RichText>
+                      </div>
+                    }
                   />
                 }
-                placeholder={instructionsPlaceholder}
+                placeholder={stripRichTextTags(t.raw('instructions-placeholder'))}
                 testId="assistant-instructions-input"
                 onBlur={handleAutoSave}
                 type="textArea"
@@ -401,7 +400,7 @@ export function AssistantEdit({
           onShareChange={handleSharingChange}
         />
       </form>
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-wrap items-start gap-3">
         {assistantActions}
         <CustomChatFormState
           isDirty={isDirty}

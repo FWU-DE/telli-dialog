@@ -26,7 +26,6 @@ import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions'
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
-import { CustomChatActionSave } from '@/components/custom-chat/custom-chat-action-save';
 import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
@@ -55,7 +54,7 @@ import CustomShareSection from '@/components/custom-chat/custom-chat-share-secti
 import { FormField } from '@ui/components/form/FormField';
 import { createNewCharacterAction } from '../../actions';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
-import { useInstructionsExample } from '@/hooks/use-instructions-example';
+import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
 
@@ -180,9 +179,6 @@ export function CharacterEdit({
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
 
-  const { instructionsPlaceholder, instructionsExampleDialogContent } =
-    useInstructionsExample('characters');
-
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
       return;
@@ -206,7 +202,7 @@ export function CharacterEdit({
     const createResult = await createNewCharacterAction({
       templateId: character.id,
       duplicateCharacterName: t('duplicate-name-format-string', {
-        sourceName: character.name,
+        sourceName: name,
       }),
     });
     if (createResult.success) {
@@ -301,7 +297,6 @@ export function CharacterEdit({
         modalTitle={t('delete-modal-title')}
         modalDescription={t('delete-modal-description')}
       />
-      <CustomChatActionSave onClick={handleAutoSave} />
     </CustomChatActions>
   );
 
@@ -318,7 +313,7 @@ export function CharacterEdit({
         }}
       />
       <CustomChatTitle title={name} />
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-wrap items-start gap-3">
         {actionButtons}
         <CustomChatFormState
           isDirty={isDirty}
@@ -412,10 +407,14 @@ export function CharacterEdit({
                 label={t('instructions-label')}
                 labelAction={
                   <CustomChatInstructionsExampleDialog
-                    descriptionContent={instructionsExampleDialogContent}
+                    descriptionContent={
+                      <div className="whitespace-pre-line">
+                        <RichText>{(tags) => t.rich('instructions-placeholder', tags)}</RichText>
+                      </div>
+                    }
                   />
                 }
-                placeholder={instructionsPlaceholder}
+                placeholder={stripRichTextTags(t.raw('instructions-placeholder'))}
                 testId="character-instructions-input"
                 onBlur={handleAutoSave}
                 type="textArea"
@@ -455,7 +454,7 @@ export function CharacterEdit({
         />
       </form>
 
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-wrap items-start gap-3">
         {actionButtons}
         <CustomChatFormState
           isDirty={isDirty}
