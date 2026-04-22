@@ -40,7 +40,7 @@ function CardTitle({
   tooltipContent,
   ...props
 }: CardTitleProps) {
-  const hasTooltip = Boolean(tooltipAriaLabel && tooltipContent);
+  const hasTooltip = typeof tooltipAriaLabel === 'string' && typeof tooltipContent === 'string';
 
   return (
     <div data-slot="card-title" className={cn('leading-none font-medium', className)} {...props}>
