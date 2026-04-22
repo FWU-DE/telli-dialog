@@ -10,9 +10,11 @@ export async function configureAssistant(
     promptSuggestions?: string[];
   },
 ) {
+  await page.getByTestId('assistant-name-input').fill('');
   await page.getByTestId('assistant-name-input').fill(data?.name ?? 'Hausbauplaner');
   await page.getByTestId('assistant-name-input').press('Tab');
 
+  await page.getByTestId('assistant-description-input').fill('');
   await page
     .getByTestId('assistant-description-input')
     .fill(
@@ -21,6 +23,7 @@ export async function configureAssistant(
     );
   await page.getByTestId('assistant-description-input').press('Tab');
 
+  await page.getByTestId('assistant-instructions-input').fill('');
   await page
     .getByTestId('assistant-instructions-input')
     .fill(
@@ -32,6 +35,7 @@ export async function configureAssistant(
   const suggestions = data?.promptSuggestions ?? [];
   for (const [index, suggestion] of suggestions.entries()) {
     const slot = index + 1;
+    await page.getByTestId(`prompt-suggestion-${slot}-input`).fill('');
     await page.getByTestId(`prompt-suggestion-${slot}-input`).fill(suggestion);
     if (index < suggestions.length - 1) {
       await page.getByTestId(`add-prompt-suggestion-${slot}-button`).click();

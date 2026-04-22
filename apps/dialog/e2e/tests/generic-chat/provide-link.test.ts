@@ -27,12 +27,18 @@ test.describe('links in chat', () => {
       await page.goto('/');
       await sendMessage(
         page,
-        `Gib mir eine Zusammenfassung in einem Satz dieser Seite:\n${link} Beende die Antwort mit "ENDE".`,
+        `Fasse die Seite in genau einem Satz zusammen.
+
+Wichtige Ausgabe-Regeln:
+- Antworte nur mit genau einem Satz.
+- Schreibe vor dem Satz exakt das Wort "START".
+
+Seite: ${link}`,
       );
 
       await expect(page.getByTestId('citation').first()).toContainText(host);
       await expect(page.getByLabel('assistant message 1')).toBeVisible();
-      await expect(page.getByLabel('assistant message 1')).toContainText('ENDE');
+      await expect(page.getByLabel('assistant message 1')).toContainText('START');
     });
   });
 });
