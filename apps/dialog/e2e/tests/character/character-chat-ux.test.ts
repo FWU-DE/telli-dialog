@@ -3,6 +3,7 @@ import { AUTH_FILES } from '../../utils/const';
 import { enterMessage, selectDifferentModel, sendMessage } from '../../utils/chat';
 import { configureCharacter, deleteCharacter } from '../../utils/character';
 import { waitForToast } from '../../utils/utils';
+import { LLM_MODELS } from '../../utils/llm-models';
 import { nanoid } from 'nanoid';
 
 /**
@@ -30,7 +31,8 @@ async function createCharacterWithInitialMessage(
 
   const url = page.url();
   // URL shape: /characters/editor/[characterId]
-  const characterId = url.split('/characters/editor/')[1]!.split('?')[0]!;
+  const [characterId] = url.split('/characters/editor/')[1]?.split('?') ?? [];
+  if (!characterId) throw new Error(`Unexpected URL shape, could not extract characterId: ${url}`);
   return characterId;
 }
 
@@ -50,14 +52,23 @@ test.describe('character chat UX', () => {
   test.afterAll(async ({ browser }) => {
     if (!characterId) return;
     const page = await browser.newPage({ storageState: AUTH_FILES.teacher });
-    await page.goto('/characters');
-    await page.waitForURL('/characters');
-    await deleteCharacter(page, characterName);
-    const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
-    await expect(deleteConfirmButton).toBeVisible();
-    await deleteConfirmButton.click();
-    await waitForToast(page, 'Der Dialogpartner wurde erfolgreich gelöscht.');
-    await page.close();
+
+    try {
+      // restore default text model
+      await page.goto('/');
+      await selectDifferentModel(page, LLM_MODELS.TEXT_MODEL_1);
+
+      // delete character
+      await page.goto('/characters');
+      await page.waitForURL('/characters');
+      await deleteCharacter(page, characterName);
+      const deleteConfirmButton = page.getByRole('button', { name: 'Löschen' });
+      await expect(deleteConfirmButton).toBeVisible();
+      await deleteConfirmButton.click();
+      await waitForToast(page, 'Der Dialogpartner wurde erfolgreich gelöscht.');
+    } finally {
+      await page.close();
+    }
   });
 
   test('character initial message is visible in conversation (new conversation and opened from history)', async ({
@@ -96,7 +107,6 @@ test.describe('character chat UX', () => {
     page,
   }) => {
     await page.goto(`/characters/d/${characterId}`);
-    await page.getByPlaceholder('Wie kann ich Dir helfen?').waitFor();
 
     // Send first message
     await sendMessage(page, 'Schreibe "OK"');
@@ -110,8 +120,8 @@ test.describe('character chat UX', () => {
     const prompt = 'Dieser Prompt soll beim Modellwechsel nicht verschwinden';
     await enterMessage(page, prompt);
 
-    // Switch model
-    await selectDifferentModel(page);
+    // Switch model to the secondary model
+    await selectDifferentModel(page, LLM_MODELS.TEXT_MODEL_2);
 
     // Entered prompt should not be cleared
     await expect(page.getByPlaceholder('Wie kann ich Dir helfen?')).toHaveValue(prompt);

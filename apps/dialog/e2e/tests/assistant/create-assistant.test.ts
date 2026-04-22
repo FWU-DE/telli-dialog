@@ -3,10 +3,11 @@ import { AUTH_FILES } from '../../utils/const';
 import { waitForAutosave, waitForToast } from '../../utils/utils';
 import { sendMessage, uploadFile } from '../../utils/chat';
 import { configureAssistant, deleteAssistant } from '../../utils/assistant';
+import { nanoid } from 'nanoid';
 
 test.use({ storageState: AUTH_FILES.teacher });
 
-const assistantName = 'Hausbauplaner';
+const assistantName = 'Hausbauplaner ' + nanoid(8);
 
 test('teacher can login, create an assistant and start a chat', async ({ page }) => {
   await page.goto('/assistants');
@@ -20,6 +21,7 @@ test('teacher can login, create an assistant and start a chat', async ({ page })
 
   // configure form
   await configureAssistant(page, {
+    name: assistantName,
     promptSuggestions: [
       'Was kostet ein Grundstück in München?',
       'Dieser Promptvorschlag wird wieder gelöscht.',
@@ -46,7 +48,7 @@ test('teacher can login, create an assistant and start a chat', async ({ page })
   await expect(page.locator('body')).toContainText('Was kostet ein Grundstück in München?');
   await expect(page.locator('body')).toContainText('Was ist das aktuelle Zinsniveau');
   await expect(page.locator('body')).toContainText('Wo kann man günstig Baugrund erwerben');
-  await sendMessage(page, 'Wer bist du?');
+  await sendMessage(page, 'Gib deinen vollständigen Namen aus');
 
   await expect(page.getByLabel('assistant message 1')).toContainText(assistantName);
 
@@ -77,9 +79,11 @@ test('data is autosaved on blur', async ({ page }) => {
 
   await page.waitForURL('/assistants/editor/**');
 
+  const autosaveAssistantName = 'Autosave Test GPT ' + nanoid(8);
+
   // Fill out the form
   await configureAssistant(page, {
-    name: 'Autosave Test GPT',
+    name: autosaveAssistantName,
     description: 'Test description for autosave validation',
     instructions: 'Test functions for autosave validation',
     promptSuggestions: ['Test prompt suggestion'],
@@ -89,7 +93,7 @@ test('data is autosaved on blur', async ({ page }) => {
   await page.goto('/assistants');
   const autosaveCard = page
     .getByTestId('entity-card')
-    .filter({ hasText: 'Autosave Test GPT' })
+    .filter({ hasText: autosaveAssistantName })
     .first();
   await expect(autosaveCard).toBeVisible({ timeout: 15000 });
   await autosaveCard.getByTestId('entity-link').click();

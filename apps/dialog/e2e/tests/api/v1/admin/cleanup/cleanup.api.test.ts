@@ -25,6 +25,9 @@ test.describe('cleanup', () => {
   let userId = '';
   let modelId = '';
 
+  // cleanup tests must not run in parallel as they all call the same cleanup endpoint
+  test.describe.configure({ mode: 'default' });
+
   test.beforeEach(async () => {
     await db.transaction(async (tx) => {
       const [user] = await tx
