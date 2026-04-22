@@ -81,6 +81,19 @@ vi.mock('@shared/db', () => ({
 const dialect = new PgDialect();
 const fixedNow = new Date('2026-04-22T11:00:00.000Z');
 
+function getRequiredMockCall<T extends unknown[]>(
+  calls: ReadonlyArray<ReadonlyArray<unknown>>,
+  index: number,
+  label: string,
+): T {
+  const call = calls[index];
+  if (!call) {
+    throw new Error(`Expected ${label} call ${index + 1} to exist`);
+  }
+
+  return call as T;
+}
+
 function buildInfoBanner(overrides: Partial<InfoBanner> = {}): InfoBanner {
   return {
     id: '00000000-0000-4000-8000-000000000001',
@@ -127,7 +140,8 @@ describe('info-banner-service', () => {
     expect(result).toEqual([warningBanner, infoBanner]);
     expect(mockDbInnerJoin).toHaveBeenCalledOnce();
 
-    const whereQuery = dialect.sqlToQuery(mockDbWhere.mock.calls[0][0] as SQL);
+    const [whereClause] = getRequiredMockCall<[SQL]>(mockDbWhere.mock.calls, 0, 'where');
+    const whereQuery = dialect.sqlToQuery(whereClause);
     expect(whereQuery.sql).toContain('"info_banner_federal_state_mapping"."federal_state_id" = $1');
     expect(whereQuery.sql).toContain('"info_banner"."is_deleted" = $2');
     expect(whereQuery.sql).toContain('"info_banner"."starts_at" <= $3');
@@ -143,7 +157,11 @@ describe('info-banner-service', () => {
       3,
     ]);
 
-    const [typeOrder, startsAtOrder, createdAtOrder] = mockDbOrderBy.mock.calls[0] as SQL[];
+    const [typeOrder, startsAtOrder, createdAtOrder] = getRequiredMockCall<[SQL, SQL, SQL]>(
+      mockDbOrderBy.mock.calls,
+      0,
+      'orderBy',
+    );
     expect(dialect.sqlToQuery(typeOrder).sql).toContain(
       `case when "info_banner"."type" = 'warning' then 0 else 1 end`,
     );
@@ -175,7 +193,10 @@ describe('info-banner-service', () => {
     expect(result).toEqual(createdInfoBanner);
     expect(mockDbTransaction).toHaveBeenCalledOnce();
     expect(mockTxInsert).toHaveBeenCalledTimes(2);
-    expect(mockTxInsertValues.mock.calls[1][0]).toEqual([
+    const [createdMappings] = getRequiredMockCall<
+      [Array<{ infoBannerId: string; federalStateId: string }>]
+    >(mockTxInsertValues.mock.calls, 1, 'insert values');
+    expect(createdMappings).toEqual([
       { infoBannerId: createdInfoBanner.id, federalStateId: 'BY' },
       { infoBannerId: createdInfoBanner.id, federalStateId: 'BE' },
     ]);
@@ -207,9 +228,10 @@ describe('info-banner-service', () => {
 
     expect(result).toEqual(updatedInfoBanner);
     expect(mockTxDeleteWhere).toHaveBeenCalledOnce();
-    expect(mockTxInsertValues.mock.calls[0][0]).toEqual([
-      { infoBannerId: updatedInfoBanner.id, federalStateId: 'BW' },
-    ]);
+    const [updatedMappings] = getRequiredMockCall<
+      [Array<{ infoBannerId: string; federalStateId: string }>]
+    >(mockTxInsertValues.mock.calls, 0, 'insert values');
+    expect(updatedMappings).toEqual([{ infoBannerId: updatedInfoBanner.id, federalStateId: 'BW' }]);
   });
 
   it('throws NotFoundError when deleting an unknown info banner', async () => {
