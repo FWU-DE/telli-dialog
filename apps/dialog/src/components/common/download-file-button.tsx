@@ -32,17 +32,15 @@ export default function DownloadFileButton({ fileId, onDownloadFile }: DownloadF
   };
 
   return (
-    <>
-      <Button
-        variant="ghost"
-        size="icon-round"
-        className="text-primary"
-        aria-label={t('download.aria-label')}
-        onClick={handleDownload}
-        disabled={isDownloading}
-      >
-        {isDownloading ? <Spinner className="size-5" /> : <DownloadSimpleIcon className="size-6" />}
-      </Button>
-    </>
+    <Button
+      variant="ghost"
+      size="icon-round"
+      className="text-primary"
+      aria-label={t('download.aria-label')}
+      onClick={handleDownload}
+      disabled={isDownloading}
+    >
+      {isDownloading ? <Spinner className="size-5" /> : <DownloadSimpleIcon className="size-6" />}
+    </Button>
   );
 }

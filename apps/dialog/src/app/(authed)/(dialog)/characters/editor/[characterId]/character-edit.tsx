@@ -54,7 +54,7 @@ import CustomShareSection from '@/components/custom-chat/custom-chat-share-secti
 import { FormField } from '@ui/components/form/FormField';
 import { createNewCharacterAction } from '../../actions';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
-import RichText from '@/components/common/rich-text';
+import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
 
@@ -414,10 +414,7 @@ export function CharacterEdit({
                     }
                   />
                 }
-                placeholder={t
-                  .raw('instructions-placeholder')
-                  .replaceAll('<b>', '')
-                  .replaceAll('</b>', '')}
+                placeholder={stripRichTextTags(t.raw('instructions-placeholder'))}
                 testId="character-instructions-input"
                 onBlur={handleAutoSave}
                 type="textArea"

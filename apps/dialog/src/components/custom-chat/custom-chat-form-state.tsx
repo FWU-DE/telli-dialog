@@ -92,33 +92,34 @@ export function CustomChatFormState({
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <div className="ml-auto flex min-h-10 shrink-0 items-center text-sm justify-end">
-          {displayedStatus === 'saving' && (
-            <span className="flex gap-1 leading-tight">
-              <SpinnerIcon className="size-5 shrink-0 animate-spin" />
-              <span className="whitespace-break-spaces text-right">{t('saving')}</span>
-            </span>
-          )}
-          {displayedStatus === 'save-error' && (
-            <span className="flex gap-1 leading-tight">
-              <WarningCircleIcon className="size-5 shrink-0 text-warning" />
-              <span className="whitespace-break-spaces text-right">{t('save-error')}</span>
-            </span>
-          )}
-          {displayedStatus === 'unsaved-changes' && (
-            <span className="flex gap-1 leading-tight">
-              <WarningCircleIcon className="size-5 shrink-0 text-icon" />
-              <span className="whitespace-break-spaces text-right">{t('unsaved-changes')}</span>
-            </span>
-          )}
-          {displayedStatus === 'saved' && (
-            <span className="flex gap-1 leading-tight" data-testid="autosave-saved">
-              <CheckCircleIcon className="size-5 shrink-0 text-success" />
-              <span className="whitespace-break-spaces text-right">{t('saved')}</span>
-            </span>
-          )}
-        </div>
+      <TooltipTrigger
+        type="button"
+        className="ml-auto flex min-h-10 shrink-0 items-center justify-end rounded-lg border border-transparent bg-clip-padding bg-transparent p-0 text-right text-sm outline-none transition-all focus-visible:outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+      >
+        {displayedStatus === 'saving' && (
+          <span className="flex gap-1 leading-tight">
+            <SpinnerIcon className="size-5 shrink-0 animate-spin" />
+            <span className="whitespace-break-spaces text-right">{t('saving')}</span>
+          </span>
+        )}
+        {displayedStatus === 'save-error' && (
+          <span className="flex gap-1 leading-tight">
+            <WarningCircleIcon className="size-5 shrink-0 text-warning" />
+            <span className="whitespace-break-spaces text-right">{t('save-error')}</span>
+          </span>
+        )}
+        {displayedStatus === 'unsaved-changes' && (
+          <span className="flex gap-1 leading-tight">
+            <WarningCircleIcon className="size-5 shrink-0 text-icon" />
+            <span className="whitespace-break-spaces text-right">{t('unsaved-changes')}</span>
+          </span>
+        )}
+        {displayedStatus === 'saved' && (
+          <span className="flex gap-1 leading-tight" data-testid="autosave-saved">
+            <CheckCircleIcon className="size-5 shrink-0 text-success" />
+            <span className="whitespace-break-spaces text-right">{t('saved')}</span>
+          </span>
+        )}
       </TooltipTrigger>
       <TooltipContent>{t('tooltip')}</TooltipContent>
     </Tooltip>

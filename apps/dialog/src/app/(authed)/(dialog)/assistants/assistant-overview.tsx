@@ -10,7 +10,7 @@ import CreateNewAssistantButton from './create-new-assistant-button';
 import { useOverviewFilter } from '@/components/hooks/use-overview-filter';
 import { getAssistantsByFilterAction } from '../actions/entity-filter-actions';
 import { filterAndSortEntities } from '@/components/entity-overview/utils';
-import RichText from '@/components/common/rich-text';
+import { RichText } from '@/components/common/rich-text';
 
 type AssistantOverviewProps = {
   currentUserId: string;

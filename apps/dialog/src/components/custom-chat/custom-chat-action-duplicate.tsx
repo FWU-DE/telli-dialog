@@ -8,6 +8,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogTitle,
+  DialogTrigger,
 } from '@ui/components/Dialog';
 import { useTranslations } from 'next-intl';
 
@@ -17,14 +18,16 @@ export function CustomChatActionDuplicate({ onClick }: { onClick: () => void }) 
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <Button
-        variant="outline"
-        onClick={() => setOpen(true)}
-        data-testid="custom-chat-duplicate-button"
-      >
-        <CopyIcon className="size-5" />
-        {t('duplicate')}
-      </Button>
+      <DialogTrigger asChild>
+        <Button
+          variant="outline"
+          onClick={() => setOpen(true)}
+          data-testid="custom-chat-duplicate-button"
+        >
+          <CopyIcon className="size-5" />
+          {t('duplicate')}
+        </Button>
+      </DialogTrigger>
       <DialogContent>
         <DialogTitle>{t('duplicate-dialog.title')}</DialogTitle>
         <DialogDescription>{t('duplicate-dialog.description')}</DialogDescription>

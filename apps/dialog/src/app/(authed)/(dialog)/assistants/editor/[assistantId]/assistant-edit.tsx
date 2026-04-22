@@ -45,7 +45,7 @@ import { WebsearchSource } from '@shared/db/types';
 import CustomShareSection from '@/components/custom-chat/custom-chat-share-section';
 import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-chat-prompt-suggestions';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
-import RichText from '@/components/common/rich-text';
+import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
@@ -372,10 +372,7 @@ export function AssistantEdit({
                     }
                   />
                 }
-                placeholder={t
-                  .raw('instructions-placeholder')
-                  .replaceAll('<b>', '')
-                  .replaceAll('</b>', '')}
+                placeholder={stripRichTextTags(t.raw('instructions-placeholder'))}
                 testId="assistant-instructions-input"
                 onBlur={handleAutoSave}
                 type="textArea"

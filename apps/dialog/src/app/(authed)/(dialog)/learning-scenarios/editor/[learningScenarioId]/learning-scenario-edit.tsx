@@ -52,7 +52,7 @@ import { telliPointsPercentageValues, usageTimeValuesInMinutes } from './schema'
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 import { FormField } from '@ui/components/form/FormField';
-import RichText from '@/components/common/rich-text';
+import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 
 type LearningScenarioTranslator = ReturnType<typeof useTranslations<'learning-scenarios'>>;
 
@@ -421,10 +421,7 @@ export function LearningScenarioEdit({
                       }
                     />
                   }
-                  placeholder={t
-                    .raw('instructions-placeholder')
-                    .replaceAll('<b>', '')
-                    .replaceAll('</b>', '')}
+                  placeholder={stripRichTextTags(t.raw('instructions-placeholder'))}
                   testId="learning-scenario-instructions-input"
                   onBlur={handleAutoSave}
                   type="textArea"

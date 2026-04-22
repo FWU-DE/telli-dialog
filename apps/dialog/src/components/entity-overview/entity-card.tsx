@@ -71,13 +71,13 @@ export default function EntityCard({
 
       {chatHref && (
         <Tooltip>
-          <TooltipTrigger asChild>
+          <TooltipTrigger asChild disableKeyboardToggle>
             <Button
               asChild
               data-testid="chat-button"
               variant="ghost"
               size="icon-round"
-              className=" mx-4"
+              className="mx-4"
             >
               <Link href={chatHref} aria-label={tCommon('new-chat')}>
                 <ChatTextIcon aria-hidden="true" className="size-6   text-primary" />

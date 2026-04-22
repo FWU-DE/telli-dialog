@@ -36,7 +36,9 @@ function TooltipProvider({
 }
 
 type TooltipProps = Omit<React.ComponentProps<typeof TooltipPrimitive.Root>, 'open'>;
-type TooltipTriggerProps = React.ComponentProps<typeof TooltipPrimitive.Trigger>;
+type TooltipTriggerProps = React.ComponentProps<typeof TooltipPrimitive.Trigger> & {
+  disableKeyboardToggle?: boolean;
+};
 
 function Tooltip({ onOpenChange, defaultOpen, ...props }: TooltipProps) {
   const [isOpen, setIsOpen] = React.useState(Boolean(defaultOpen));
@@ -61,7 +63,14 @@ function Tooltip({ onOpenChange, defaultOpen, ...props }: TooltipProps) {
   );
 }
 
-function TooltipTrigger({ onKeyDown, onClick, onFocus, onBlur, ...props }: TooltipTriggerProps) {
+function TooltipTrigger({
+  onKeyDown,
+  onClick,
+  onFocus,
+  onBlur,
+  disableKeyboardToggle = false,
+  ...props
+}: TooltipTriggerProps) {
   const { isOpen, setIsOpen } = useTooltip();
   const focusTimerRef = React.useRef<number | null>(null);
 
@@ -79,13 +88,13 @@ function TooltipTrigger({ onKeyDown, onClick, onFocus, onBlur, ...props }: Toolt
   const handleKeyDown = React.useCallback<NonNullable<TooltipTriggerProps['onKeyDown']>>(
     (event) => {
       // Allow toggling tooltip with Enter or Space key for key navigation accessibility
-      if (event.key === 'Enter' || event.key === ' ') {
+      if (!disableKeyboardToggle && (event.key === 'Enter' || event.key === ' ')) {
         event.preventDefault();
         setIsOpen(!isOpen);
       }
       onKeyDown?.(event);
     },
-    [isOpen, setIsOpen, onKeyDown],
+    [disableKeyboardToggle, isOpen, setIsOpen, onKeyDown],
   );
 
   const handleClick = React.useCallback<NonNullable<TooltipTriggerProps['onClick']>>(
@@ -161,16 +170,20 @@ function TooltipContent({
   );
 }
 
-type InfoTooltipProps = {
-  tooltip: React.ReactNode;
-  ariaLabel?: string;
-  icon?: React.ReactNode;
-  iconClassName?: string;
-  triggerClassName?: string;
-  contentClassName?: string;
+type InfoTooltipBaseProps = {
   delayDuration?: number;
   skipDelayDuration?: number;
 };
+
+type InfoTooltipProps =
+  | (InfoTooltipBaseProps & {
+      tooltip: string;
+      ariaLabel?: string;
+    })
+  | (InfoTooltipBaseProps & {
+      tooltip: React.ReactNode;
+      ariaLabel: string;
+    });
 
 function resolveAriaLabel(tooltip: React.ReactNode, ariaLabel?: string) {
   if (ariaLabel) {

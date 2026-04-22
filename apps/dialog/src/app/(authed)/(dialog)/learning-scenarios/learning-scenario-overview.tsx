@@ -10,7 +10,7 @@ import { CreateNewLearningScenarioButton } from './create-new-learning-scenario-
 import { useOverviewFilter } from '@/components/hooks/use-overview-filter';
 import { getLearningScenariosByFilterAction } from '../actions/entity-filter-actions';
 import { filterAndSortEntities } from '@/components/entity-overview/utils';
-import RichText from '@/components/common/rich-text';
+import { RichText } from '@/components/common/rich-text';
 
 type LearningScenarioOverviewProps = {
   currentUserId: string;
