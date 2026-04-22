@@ -340,11 +340,13 @@ export function LearningScenarioEdit({
         <CustomChatTitle title={name} />
         <div className="flex flex-wrap items-start gap-3">
           {actionButtons}
-          <CustomChatFormState
-            isDirty={isDirty}
-            isSubmitting={isSaving}
-            hasSaveError={hasSaveError}
-          />
+          <div ref={formStateRef}>
+            <CustomChatFormState
+              isDirty={isDirty}
+              isSubmitting={isSaving}
+              hasSaveError={hasSaveError}
+            />
+          </div>
         </div>
         {showShareInfo && (
           <CustomChatShareInfo

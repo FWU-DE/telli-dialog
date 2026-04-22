@@ -323,11 +323,13 @@ export function AssistantEdit({
         <CustomChatTitle title={name} />
         <div className="flex flex-wrap items-start gap-3">
           {assistantActions}
-          <CustomChatFormState
-            isDirty={isDirty}
-            isSubmitting={isSaving}
-            hasSaveError={hasSaveError}
-          />
+          <div ref={formStateRef}>
+            <CustomChatFormState
+              isDirty={isDirty}
+              isSubmitting={isSaving}
+              hasSaveError={hasSaveError}
+            />
+          </div>
         </div>
         {showShareInfo && (
           <CustomChatShareInfo
