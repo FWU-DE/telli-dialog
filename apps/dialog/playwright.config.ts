@@ -9,7 +9,9 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 4 : 1,
+  workers: process.env.CI ? 3 : 1,
+  // Limit the number of failures on CI to save resources
+  maxFailures: process.env.CI ? 10 : undefined,
   reporter: [['html', { outputFolder: './playwright-report' }], ['json'], ['github'], ['list']],
   timeout: 90_000,
   use: {
@@ -42,6 +44,7 @@ export default defineConfig({
     {
       name: 'api test',
       testMatch: /.*api.test.ts/,
+      fullyParallel: true,
     },
     /* Test against mobile viewports. */
     // {
