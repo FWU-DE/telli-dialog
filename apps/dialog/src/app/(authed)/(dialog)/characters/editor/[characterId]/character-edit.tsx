@@ -45,6 +45,7 @@ import {
 import { useToast } from '@/components/common/toast';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useRef } from 'react';
+import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
 import { useLlmModels } from '@/components/providers/llm-model-provider';
 import { getDefaultModel } from '@shared/llm-models/llm-model-service';
 import { useForm, useWatch } from 'react-hook-form';
@@ -55,6 +56,7 @@ import { FormField } from '@ui/components/form/FormField';
 import { createNewCharacterAction } from '../../actions';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
+import { useElementVisibility } from '@/hooks/use-element-visibility';
 
 type CharacterTranslator = ReturnType<typeof useTranslations<'characters'>>;
 
@@ -178,6 +180,8 @@ export function CharacterEdit({
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
+  const { elementRef: formStateRef, isVisible: isFormStateVisible } =
+    useElementVisibility<HTMLDivElement>();
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -301,167 +305,178 @@ export function CharacterEdit({
   );
 
   return (
-    <CustomChatLayoutContainer>
-      <BackButton
-        href="/characters"
-        text={t('back-button')}
-        aria-label={t('back-button-aria-label')}
-        onClick={() => {
-          guardNavigation(() => {
-            router.push('/characters');
-          });
-        }}
-      />
-      <CustomChatTitle title={name} />
-      <div className="flex flex-wrap items-start gap-3">
-        {actionButtons}
-        <CustomChatFormState
-          isDirty={isDirty}
-          isSubmitting={isSaving}
-          hasSaveError={hasSaveError}
-        />
-      </div>
-      {showShareInfo && (
-        <CustomChatShareInfo
-          href="#share-settings"
-          info={t('sharing-info')}
-          linkText={t('sharing-settings')}
-        />
+    <>
+      {!isFormStateVisible && (
+        <CustomChatHeaderContent>
+          <CustomChatFormState
+            isDirty={isDirty}
+            isSubmitting={isSaving}
+            hasSaveError={hasSaveError}
+          />
+        </CustomChatHeaderContent>
       )}
-
-      <CustomChatShareWithLearners
-        startedAt={character.startedAt ?? null}
-        maxUsageTimeLimit={character.maxUsageTimeLimit ?? null}
-        pointsPercentageValues={telliPointsPercentageValues}
-        usageTimeValues={usageTimeValuesInMinutes}
-        onShare={async (data) => {
-          const result = await shareCharacterAction({
-            id: character.id,
-            telliPointsPercentageLimit: data.telliPointsPercentageLimit,
-            usageTimeLimit: data.usageTimeLimit,
-          });
-          return result;
-        }}
-        onUnshare={async () => {
-          const result = await unshareCharacterAction({
-            characterId: character.id,
-          });
-          return result;
-        }}
-        shareUILink={`/characters/editor/${character.id}/share`}
-        sharingDisabled={!name || name.trim().length === 0}
-      />
-
-      <div className="flex flex-col gap-3">
-        <CustomChatHeading2 text={t('configuration-heading')} />
-
-        <CustomChatImageUpload
-          avatarPictureUrl={avatarPictureUrl}
-          onUploadPicture={handleUploadPicture}
+      <CustomChatLayoutContainer>
+        <BackButton
+          href="/characters"
+          text={t('back-button')}
+          aria-label={t('back-button-aria-label')}
+          onClick={() => {
+            guardNavigation(() => {
+              router.push('/characters');
+            });
+          }}
         />
-      </div>
+        <CustomChatTitle title={name} />
+        <div className="flex flex-wrap items-start gap-3">
+          {actionButtons}
+          <CustomChatFormState
+            isDirty={isDirty}
+            isSubmitting={isSaving}
+            hasSaveError={hasSaveError}
+          />
+        </div>
+        {showShareInfo && (
+          <CustomChatShareInfo
+            href="#share-settings"
+            info={t('sharing-info')}
+            linkText={t('sharing-settings')}
+          />
+        )}
 
-      <form
-        id="character-edit-form"
-        onSubmit={(event) => {
-          event.preventDefault();
-          handleAutoSave();
-        }}
-      >
-        <Card>
-          <CardContent>
-            <FieldGroup>
-              <FormField
-                name="name"
-                control={control}
-                {...createCharacterFieldValidationConfig(t).name}
-                label={t('name-label')}
-                placeholder={t('name-placeholder')}
-                autoFocusWhenEmpty
-                testId="character-name-input"
-                onBlur={handleAutoSave}
-              />
-              <FormField
-                name="description"
-                control={control}
-                {...createCharacterFieldValidationConfig(t).description}
-                label={t('description-label')}
-                placeholder={t('description-placeholder')}
-                testId="character-description-input"
-                onBlur={handleAutoSave}
-                type="textArea"
-                className="h-27 resize-none"
-              />
-              <CustomChatModelSelect
-                models={models}
-                selectedModelId={selectedModelId ?? undefined}
-                onValueChange={(value) => {
-                  setValue('modelId', value, { shouldDirty: true });
-                  void flushAutoSave();
-                }}
-              />
-              <FormField
-                name="instructions"
-                control={control}
-                {...createCharacterFieldValidationConfig(t).instructions}
-                label={t('instructions-label')}
-                labelAction={
-                  <CustomChatInstructionsExampleDialog
-                    descriptionContent={
-                      <div className="whitespace-pre-line">
-                        <RichText>{(tags) => t.rich('instructions-placeholder', tags)}</RichText>
-                      </div>
-                    }
-                  />
-                }
-                placeholder={stripRichTextTags(t.raw('instructions-placeholder'))}
-                testId="character-instructions-input"
-                onBlur={handleAutoSave}
-                type="textArea"
-                className="h-125"
-              />
-              <FormField
-                name="initialMessage"
-                control={control}
-                {...createCharacterFieldValidationConfig(t).initialMessage}
-                label={t('initial-message-label')}
-                tooltip={t('initial-message-tooltip')}
-                placeholder={t('initial-message-placeholder')}
-                testId="character-initial-message-input"
-                onBlur={handleAutoSave}
-                type="textArea"
-                className="h-27 resize-none"
-              />
-            </FieldGroup>
-          </CardContent>
-        </Card>
-
-        <CustomChatFilesAndLinks
-          initialFiles={relatedFiles}
-          onFileUploaded={handleFileUploaded}
-          onDeleteFile={handleDeleteFile}
-          initialLinks={initialLinks}
-          onLinksChange={handleLinksChange}
-          onDownloadFile={handleDownloadFile}
+        <CustomChatShareWithLearners
+          startedAt={character.startedAt ?? null}
+          maxUsageTimeLimit={character.maxUsageTimeLimit ?? null}
+          pointsPercentageValues={telliPointsPercentageValues}
+          usageTimeValues={usageTimeValuesInMinutes}
+          onShare={async (data) => {
+            const result = await shareCharacterAction({
+              id: character.id,
+              telliPointsPercentageLimit: data.telliPointsPercentageLimit,
+              usageTimeLimit: data.usageTimeLimit,
+            });
+            return result;
+          }}
+          onUnshare={async () => {
+            const result = await unshareCharacterAction({
+              characterId: character.id,
+            });
+            return result;
+          }}
+          shareUILink={`/characters/editor/${character.id}/share`}
+          sharingDisabled={!name || name.trim().length === 0}
         />
 
-        <CustomShareSection
-          control={control}
-          schoolSharingName="isSchoolShared"
-          linkSharingName="hasLinkAccess"
-          linkToShare={`/characters/${character.id}`}
-          onShareChange={handleSharingChange}
-        />
-      </form>
+        <div className="flex flex-col gap-3">
+          <CustomChatHeading2 text={t('configuration-heading')} />
 
-      <div className="flex flex-wrap items-start gap-3">
-        {actionButtons}
-        <CustomChatFormState
-          isDirty={isDirty}
-          isSubmitting={isSaving}
-          hasSaveError={hasSaveError}
-        />
-      </div>
-    </CustomChatLayoutContainer>
+          <CustomChatImageUpload
+            avatarPictureUrl={avatarPictureUrl}
+            onUploadPicture={handleUploadPicture}
+          />
+        </div>
+
+        <form
+          id="character-edit-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleAutoSave();
+          }}
+        >
+          <Card>
+            <CardContent>
+              <FieldGroup>
+                <FormField
+                  name="name"
+                  control={control}
+                  {...createCharacterFieldValidationConfig(t).name}
+                  label={t('name-label')}
+                  placeholder={t('name-placeholder')}
+                  autoFocusWhenEmpty
+                  testId="character-name-input"
+                  onBlur={handleAutoSave}
+                />
+                <FormField
+                  name="description"
+                  control={control}
+                  {...createCharacterFieldValidationConfig(t).description}
+                  label={t('description-label')}
+                  placeholder={t('description-placeholder')}
+                  testId="character-description-input"
+                  onBlur={handleAutoSave}
+                  type="textArea"
+                  className="h-27 resize-none"
+                />
+                <CustomChatModelSelect
+                  models={models}
+                  selectedModelId={selectedModelId ?? undefined}
+                  onValueChange={(value) => {
+                    setValue('modelId', value, { shouldDirty: true });
+                    void flushAutoSave();
+                  }}
+                />
+                <FormField
+                  name="instructions"
+                  control={control}
+                  {...createCharacterFieldValidationConfig(t).instructions}
+                  label={t('instructions-label')}
+                  labelAction={
+                    <CustomChatInstructionsExampleDialog
+                      descriptionContent={
+                        <div className="whitespace-pre-line">
+                          <RichText>{(tags) => t.rich('instructions-placeholder', tags)}</RichText>
+                        </div>
+                      }
+                    />
+                  }
+                  placeholder={stripRichTextTags(t.raw('instructions-placeholder'))}
+                  testId="character-instructions-input"
+                  onBlur={handleAutoSave}
+                  type="textArea"
+                  className="h-125"
+                />
+                <FormField
+                  name="initialMessage"
+                  control={control}
+                  {...createCharacterFieldValidationConfig(t).initialMessage}
+                  label={t('initial-message-label')}
+                  tooltip={t('initial-message-tooltip')}
+                  placeholder={t('initial-message-placeholder')}
+                  testId="character-initial-message-input"
+                  onBlur={handleAutoSave}
+                  type="textArea"
+                  className="h-27 resize-none"
+                />
+              </FieldGroup>
+            </CardContent>
+          </Card>
+
+          <CustomChatFilesAndLinks
+            initialFiles={relatedFiles}
+            onFileUploaded={handleFileUploaded}
+            onDeleteFile={handleDeleteFile}
+            initialLinks={initialLinks}
+            onLinksChange={handleLinksChange}
+            onDownloadFile={handleDownloadFile}
+          />
+
+          <CustomShareSection
+            control={control}
+            schoolSharingName="isSchoolShared"
+            linkSharingName="hasLinkAccess"
+            linkToShare={`/characters/${character.id}`}
+            onShareChange={handleSharingChange}
+          />
+        </form>
+
+        <div className="flex flex-wrap items-start gap-3">
+          {actionButtons}
+          <CustomChatFormState
+            isDirty={isDirty}
+            isSubmitting={isSaving}
+            hasSaveError={hasSaveError}
+          />
+        </div>
+      </CustomChatLayoutContainer>
+    </>
   );
 }

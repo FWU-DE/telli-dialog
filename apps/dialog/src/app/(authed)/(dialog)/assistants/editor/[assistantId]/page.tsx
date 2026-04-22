@@ -3,7 +3,6 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { getAssistantByUser } from '@shared/assistants/assistant-service';
 import { AssistantEdit } from './assistant-edit';
 import { buildLegacyUserAndContext } from '@/auth/types';
-import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
@@ -24,8 +23,7 @@ export default async function Page(props: PageProps<'/assistants/editor/[assista
     .map((url) => ({ link: url }));
 
   return (
-    <DefaultPageLayout>
-      <CustomChatHeader userAndContext={userAndContext} />
+    <DefaultPageLayout userAndContext={userAndContext}>
       <AssistantEdit
         assistant={assistant}
         relatedFiles={fileMappings}

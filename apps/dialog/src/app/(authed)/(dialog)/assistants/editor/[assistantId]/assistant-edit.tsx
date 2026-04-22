@@ -46,6 +46,8 @@ import CustomShareSection from '@/components/custom-chat/custom-chat-share-secti
 import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-chat-prompt-suggestions';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
+import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
+import { useElementVisibility } from '@/hooks/use-element-visibility';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
@@ -174,6 +176,8 @@ export function AssistantEdit({
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
+  const { elementRef: formStateRef, isVisible: isFormStateVisible } =
+    useElementVisibility<HTMLDivElement>();
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -295,119 +299,130 @@ export function AssistantEdit({
   );
 
   return (
-    <CustomChatLayoutContainer>
-      <BackButton
-        href="/custom"
-        text={t('back-button')}
-        aria-label={t('back-button-aria-label')}
-        onClick={() => {
-          guardNavigation(() => {
-            router.push('/custom');
-          });
-        }}
-      />
-      <CustomChatTitle title={name} />
-      <div className="flex flex-wrap items-start gap-3">
-        {assistantActions}
-        <CustomChatFormState
-          isDirty={isDirty}
-          isSubmitting={isSaving}
-          hasSaveError={hasSaveError}
-        />
-      </div>
-      {showShareInfo && (
-        <CustomChatShareInfo
-          href="#share-settings"
-          info={t('sharing-info')}
-          linkText={t('sharing-settings')}
-        />
+    <>
+      {!isFormStateVisible && (
+        <CustomChatHeaderContent>
+          <CustomChatFormState
+            isDirty={isDirty}
+            isSubmitting={isSaving}
+            hasSaveError={hasSaveError}
+          />
+        </CustomChatHeaderContent>
       )}
-      <CustomChatImageUpload
-        avatarPictureUrl={avatarPictureUrl}
-        onUploadPicture={handleUploadPicture}
-      />
-
-      <form
-        id="assistant-edit-form"
-        onSubmit={(event) => {
-          event.preventDefault();
-          handleAutoSave();
-        }}
-      >
-        <Card>
-          <CardContent>
-            <FieldGroup>
-              <FormField
-                name="name"
-                control={control}
-                {...assistantFieldValidationConfig.name}
-                label={t('name-label')}
-                placeholder={t('name-placeholder')}
-                autoFocusWhenEmpty
-                testId="assistant-name-input"
-                onBlur={handleAutoSave}
-              />
-              <FormField
-                name="description"
-                control={control}
-                {...assistantFieldValidationConfig.description}
-                label={t('description-label')}
-                placeholder={t('description-placeholder')}
-                testId="assistant-description-input"
-                onBlur={handleAutoSave}
-                type="textArea"
-                className="h-27 resize-none"
-              />
-              <FormField
-                name="instructions"
-                control={control}
-                {...assistantFieldValidationConfig.instructions}
-                label={t('instructions-label')}
-                labelAction={
-                  <CustomChatInstructionsExampleDialog
-                    descriptionContent={
-                      <div className="whitespace-pre-line">
-                        <RichText>{(tags) => t.rich('instructions-placeholder', tags)}</RichText>
-                      </div>
-                    }
-                  />
-                }
-                placeholder={stripRichTextTags(t.raw('instructions-placeholder'))}
-                testId="assistant-instructions-input"
-                onBlur={handleAutoSave}
-                type="textArea"
-                className="h-125"
-              />
-              <CustomChatPromptSuggestions control={control} onBlur={handleAutoSave} />
-            </FieldGroup>
-          </CardContent>
-        </Card>
-
-        <CustomChatFilesAndLinks
-          initialFiles={relatedFiles}
-          onFileUploaded={handleFileUploaded}
-          onDeleteFile={handleDeleteFile}
-          onDownloadFile={handleDownloadFile}
-          initialLinks={initialLinks}
-          onLinksChange={handleLinksChange}
+      <CustomChatLayoutContainer>
+        <BackButton
+          href="/custom"
+          text={t('back-button')}
+          aria-label={t('back-button-aria-label')}
+          onClick={() => {
+            guardNavigation(() => {
+              router.push('/custom');
+            });
+          }}
+        />
+        <CustomChatTitle title={name} />
+        <div className="flex flex-wrap items-start gap-3">
+          {assistantActions}
+          <CustomChatFormState
+            isDirty={isDirty}
+            isSubmitting={isSaving}
+            hasSaveError={hasSaveError}
+          />
+        </div>
+        {showShareInfo && (
+          <CustomChatShareInfo
+            href="#share-settings"
+            info={t('sharing-info')}
+            linkText={t('sharing-settings')}
+          />
+        )}
+        <CustomChatImageUpload
+          avatarPictureUrl={avatarPictureUrl}
+          onUploadPicture={handleUploadPicture}
         />
 
-        <CustomShareSection
-          control={control}
-          schoolSharingName="isSchoolShared"
-          linkSharingName="hasLinkAccess"
-          linkToShare={`/assistants/${assistant.id}`}
-          onShareChange={handleSharingChange}
-        />
-      </form>
-      <div className="flex flex-wrap items-start gap-3">
-        {assistantActions}
-        <CustomChatFormState
-          isDirty={isDirty}
-          isSubmitting={isSaving}
-          hasSaveError={hasSaveError}
-        />
-      </div>
-    </CustomChatLayoutContainer>
+        <form
+          id="assistant-edit-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleAutoSave();
+          }}
+        >
+          <Card>
+            <CardContent>
+              <FieldGroup>
+                <FormField
+                  name="name"
+                  control={control}
+                  {...assistantFieldValidationConfig.name}
+                  label={t('name-label')}
+                  placeholder={t('name-placeholder')}
+                  autoFocusWhenEmpty
+                  testId="assistant-name-input"
+                  onBlur={handleAutoSave}
+                />
+                <FormField
+                  name="description"
+                  control={control}
+                  {...assistantFieldValidationConfig.description}
+                  label={t('description-label')}
+                  placeholder={t('description-placeholder')}
+                  testId="assistant-description-input"
+                  onBlur={handleAutoSave}
+                  type="textArea"
+                  className="h-27 resize-none"
+                />
+                <FormField
+                  name="instructions"
+                  control={control}
+                  {...assistantFieldValidationConfig.instructions}
+                  label={t('instructions-label')}
+                  labelAction={
+                    <CustomChatInstructionsExampleDialog
+                      descriptionContent={
+                        <div className="whitespace-pre-line">
+                          <RichText>{(tags) => t.rich('instructions-placeholder', tags)}</RichText>
+                        </div>
+                      }
+                    />
+                  }
+                  placeholder={stripRichTextTags(t.raw('instructions-placeholder'))}
+                  testId="assistant-instructions-input"
+                  onBlur={handleAutoSave}
+                  type="textArea"
+                  className="h-125"
+                />
+                <CustomChatPromptSuggestions control={control} onBlur={handleAutoSave} />
+              </FieldGroup>
+            </CardContent>
+          </Card>
+
+          <CustomChatFilesAndLinks
+            initialFiles={relatedFiles}
+            onFileUploaded={handleFileUploaded}
+            onDeleteFile={handleDeleteFile}
+            onDownloadFile={handleDownloadFile}
+            initialLinks={initialLinks}
+            onLinksChange={handleLinksChange}
+          />
+
+          <CustomShareSection
+            control={control}
+            schoolSharingName="isSchoolShared"
+            linkSharingName="hasLinkAccess"
+            linkToShare={`/assistants/${assistant.id}`}
+            onShareChange={handleSharingChange}
+          />
+        </form>
+        <div className="flex flex-wrap items-start gap-3">
+          {assistantActions}
+          <CustomChatFormState
+            isDirty={isDirty}
+            isSubmitting={isSaving}
+            hasSaveError={hasSaveError}
+          />
+        </div>
+      </CustomChatLayoutContainer>
+    </>
   );
 }

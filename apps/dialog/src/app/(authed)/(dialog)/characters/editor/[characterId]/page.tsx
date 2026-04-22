@@ -38,8 +38,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
   }
 
   return (
-    <DefaultPageLayout>
-      <CustomChatHeader userAndContext={userAndContext} />
+    <DefaultPageLayout userAndContext={userAndContext}>
       <CharacterEdit
         character={character}
         relatedFiles={relatedFiles}

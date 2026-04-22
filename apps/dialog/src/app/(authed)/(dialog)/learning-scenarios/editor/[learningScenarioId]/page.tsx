@@ -39,8 +39,7 @@ export default async function Page(
     );
 
   return (
-    <DefaultPageLayout>
-      <CustomChatHeader userAndContext={userAndContext} />
+    <DefaultPageLayout userAndContext={userAndContext}>
       <LearningScenarioEdit
         learningScenario={learningScenario}
         relatedFiles={relatedFiles}

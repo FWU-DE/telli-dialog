@@ -51,6 +51,8 @@ import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-cha
 import { telliPointsPercentageValues, usageTimeValuesInMinutes } from './schema';
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
+import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
+import { useElementVisibility } from '@/hooks/use-element-visibility';
 import { FormField } from '@ui/components/form/FormField';
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 
@@ -184,6 +186,8 @@ export function LearningScenarioEdit({
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
+  const { elementRef: formStateRef, isVisible: isFormStateVisible } =
+    useElementVisibility<HTMLDivElement>();
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -312,163 +316,176 @@ export function LearningScenarioEdit({
   );
 
   return (
-    <CustomChatLayoutContainer>
-      <BackButton
-        href="/learning-scenarios"
-        text={t('back-button')}
-        aria-label={t('back-button-aria-label')}
-        onClick={() => {
-          guardNavigation(() => {
-            router.push('/learning-scenarios');
-          });
-        }}
-      />
-      <CustomChatTitle title={name} />
-      <div className="flex flex-wrap items-start gap-3">
-        {actionButtons}
-        <CustomChatFormState
-          isDirty={isDirty}
-          isSubmitting={isSaving}
-          hasSaveError={hasSaveError}
-        />
-      </div>
-      {showShareInfo && (
-        <CustomChatShareInfo
-          href="#share-settings"
-          info={t('sharing-info')}
-          linkText={t('sharing-settings')}
-        />
+    <>
+      {!isFormStateVisible && (
+        <CustomChatHeaderContent>
+          <CustomChatFormState
+            isDirty={isDirty}
+            isSubmitting={isSaving}
+            hasSaveError={hasSaveError}
+          />
+        </CustomChatHeaderContent>
       )}
-
-      <CustomChatShareWithLearners
-        startedAt={learningScenario.startedAt ?? null}
-        maxUsageTimeLimit={learningScenario.maxUsageTimeLimit ?? null}
-        pointsPercentageValues={telliPointsPercentageValues}
-        usageTimeValues={usageTimeValuesInMinutes}
-        onShare={async (data) =>
-          await shareLearningScenarioAction({
-            learningScenarioId: learningScenario.id,
-            data: data as Parameters<typeof shareLearningScenarioAction>[0]['data'],
-          })
-        }
-        onUnshare={async () =>
-          await unshareLearningScenarioAction({
-            learningScenarioId: learningScenario.id,
-          })
-        }
-        shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}
-        sharingDisabled={!name || name.trim().length === 0}
-      />
-
-      <div className="flex flex-col gap-3">
-        <CustomChatHeading2 text={t('configuration-heading')} />
-
-        <CustomChatImageUpload
-          avatarPictureUrl={avatarPictureUrl}
-          onUploadPicture={handleUploadPicture}
-        />
-
-        <form
-          id="learning-scenario-edit-form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            handleAutoSave();
+      <CustomChatLayoutContainer>
+        <BackButton
+          href="/learning-scenarios"
+          text={t('back-button')}
+          aria-label={t('back-button-aria-label')}
+          onClick={() => {
+            guardNavigation(() => {
+              router.push('/learning-scenarios');
+            });
           }}
-        >
-          <Card>
-            <CardContent>
-              <FieldGroup>
-                <FormField
-                  name="name"
-                  control={control}
-                  {...createLearningScenarioFieldValidationConfig(t).name}
-                  label={t('name-label')}
-                  placeholder={t('name-placeholder')}
-                  autoFocusWhenEmpty
-                  testId="learning-scenario-name-input"
-                  onBlur={handleAutoSave}
-                />
-                <FormField
-                  name="description"
-                  control={control}
-                  {...createLearningScenarioFieldValidationConfig(t).description}
-                  label={t('description-label')}
-                  placeholder={t('description-placeholder')}
-                  testId="learning-scenario-description-input"
-                  onBlur={handleAutoSave}
-                  type="textArea"
-                  className="h-27 resize-none"
-                />
-                <CustomChatModelSelect
-                  models={models}
-                  selectedModelId={selectedModelId ?? undefined}
-                  onValueChange={(value) => {
-                    setValue('modelId', value, { shouldDirty: true });
-                    void flushAutoSave();
-                  }}
-                />
-                <FormField
-                  name="additionalInstructions"
-                  control={control}
-                  {...createLearningScenarioFieldValidationConfig(t).additionalInstructions}
-                  label={t('instructions-label')}
-                  labelAction={
-                    <CustomChatInstructionsExampleDialog
-                      descriptionContent={
-                        <div className="whitespace-pre-line">
-                          <RichText>{(tags) => t.rich('instructions-placeholder', tags)}</RichText>
-                        </div>
-                      }
-                    />
-                  }
-                  placeholder={stripRichTextTags(t.raw('instructions-placeholder'))}
-                  testId="learning-scenario-instructions-input"
-                  onBlur={handleAutoSave}
-                  type="textArea"
-                  className="h-125"
-                />
-                <FormField
-                  name="studentExercise"
-                  control={control}
-                  {...createLearningScenarioFieldValidationConfig(t).studentExercise}
-                  label={t('student-exercise-label')}
-                  tooltip={t('student-exercise-tooltip')}
-                  placeholder={t('student-exercise-placeholder')}
-                  testId="learning-scenario-student-exercise-input"
-                  onBlur={handleAutoSave}
-                  type="textArea"
-                  className="h-27 resize-none"
-                />
-              </FieldGroup>
-            </CardContent>
-          </Card>
-
-          <CustomChatFilesAndLinks
-            initialFiles={relatedFiles}
-            onFileUploaded={handleFileUploaded}
-            onDeleteFile={handleDeleteFile}
-            initialLinks={initialLinks}
-            onLinksChange={handleLinksChange}
-            onDownloadFile={handleDownloadFile}
-          />
-
-          <CustomShareSection
-            control={control}
-            schoolSharingName="isSchoolShared"
-            linkSharingName="hasLinkAccess"
-            linkToShare={`/learning-scenarios/${learningScenario.id}`}
-            onShareChange={handleSharingChange}
-          />
-        </form>
-      </div>
-      <div className="flex flex-wrap items-start gap-3">
-        {actionButtons}
-        <CustomChatFormState
-          isDirty={isDirty}
-          isSubmitting={isSaving}
-          hasSaveError={hasSaveError}
         />
-      </div>
-    </CustomChatLayoutContainer>
+        <CustomChatTitle title={name} />
+        <div className="flex flex-wrap items-start gap-3">
+          {actionButtons}
+          <CustomChatFormState
+            isDirty={isDirty}
+            isSubmitting={isSaving}
+            hasSaveError={hasSaveError}
+          />
+        </div>
+        {showShareInfo && (
+          <CustomChatShareInfo
+            href="#share-settings"
+            info={t('sharing-info')}
+            linkText={t('sharing-settings')}
+          />
+        )}
+
+        <CustomChatShareWithLearners
+          startedAt={learningScenario.startedAt ?? null}
+          maxUsageTimeLimit={learningScenario.maxUsageTimeLimit ?? null}
+          pointsPercentageValues={telliPointsPercentageValues}
+          usageTimeValues={usageTimeValuesInMinutes}
+          onShare={async (data) =>
+            await shareLearningScenarioAction({
+              learningScenarioId: learningScenario.id,
+              data: data as Parameters<typeof shareLearningScenarioAction>[0]['data'],
+            })
+          }
+          onUnshare={async () =>
+            await unshareLearningScenarioAction({
+              learningScenarioId: learningScenario.id,
+            })
+          }
+          shareUILink={`/learning-scenarios/editor/${learningScenario.id}/share`}
+          sharingDisabled={!name || name.trim().length === 0}
+        />
+
+        <div className="flex flex-col gap-3">
+          <CustomChatHeading2 text={t('configuration-heading')} />
+
+          <CustomChatImageUpload
+            avatarPictureUrl={avatarPictureUrl}
+            onUploadPicture={handleUploadPicture}
+          />
+
+          <form
+            id="learning-scenario-edit-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleAutoSave();
+            }}
+          >
+            <Card>
+              <CardContent>
+                <FieldGroup>
+                  <FormField
+                    name="name"
+                    control={control}
+                    {...createLearningScenarioFieldValidationConfig(t).name}
+                    label={t('name-label')}
+                    placeholder={t('name-placeholder')}
+                    autoFocusWhenEmpty
+                    testId="learning-scenario-name-input"
+                    onBlur={handleAutoSave}
+                  />
+                  <FormField
+                    name="description"
+                    control={control}
+                    {...createLearningScenarioFieldValidationConfig(t).description}
+                    label={t('description-label')}
+                    placeholder={t('description-placeholder')}
+                    testId="learning-scenario-description-input"
+                    onBlur={handleAutoSave}
+                    type="textArea"
+                    className="h-27 resize-none"
+                  />
+                  <CustomChatModelSelect
+                    models={models}
+                    selectedModelId={selectedModelId ?? undefined}
+                    onValueChange={(value) => {
+                      setValue('modelId', value, { shouldDirty: true });
+                      void flushAutoSave();
+                    }}
+                  />
+                  <FormField
+                    name="additionalInstructions"
+                    control={control}
+                    {...createLearningScenarioFieldValidationConfig(t).additionalInstructions}
+                    label={t('instructions-label')}
+                    labelAction={
+                      <CustomChatInstructionsExampleDialog
+                        descriptionContent={
+                          <div className="whitespace-pre-line">
+                            <RichText>
+                              {(tags) => t.rich('instructions-placeholder', tags)}
+                            </RichText>
+                          </div>
+                        }
+                      />
+                    }
+                    placeholder={stripRichTextTags(t.raw('instructions-placeholder'))}
+                    testId="learning-scenario-instructions-input"
+                    onBlur={handleAutoSave}
+                    type="textArea"
+                    className="h-125"
+                  />
+                  <FormField
+                    name="studentExercise"
+                    control={control}
+                    {...createLearningScenarioFieldValidationConfig(t).studentExercise}
+                    label={t('student-exercise-label')}
+                    tooltip={t('student-exercise-tooltip')}
+                    placeholder={t('student-exercise-placeholder')}
+                    testId="learning-scenario-student-exercise-input"
+                    onBlur={handleAutoSave}
+                    type="textArea"
+                    className="h-27 resize-none"
+                  />
+                </FieldGroup>
+              </CardContent>
+            </Card>
+
+            <CustomChatFilesAndLinks
+              initialFiles={relatedFiles}
+              onFileUploaded={handleFileUploaded}
+              onDeleteFile={handleDeleteFile}
+              initialLinks={initialLinks}
+              onLinksChange={handleLinksChange}
+              onDownloadFile={handleDownloadFile}
+            />
+
+            <CustomShareSection
+              control={control}
+              schoolSharingName="isSchoolShared"
+              linkSharingName="hasLinkAccess"
+              linkToShare={`/learning-scenarios/${learningScenario.id}`}
+              onShareChange={handleSharingChange}
+            />
+          </form>
+        </div>
+        <div className="flex flex-wrap items-start gap-3">
+          {actionButtons}
+          <CustomChatFormState
+            isDirty={isDirty}
+            isSubmitting={isSaving}
+            hasSaveError={hasSaveError}
+          />
+        </div>
+      </CustomChatLayoutContainer>
+    </>
   );
 }
