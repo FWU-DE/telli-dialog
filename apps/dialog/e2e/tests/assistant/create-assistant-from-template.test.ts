@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
 import { configureAssistant } from '../../utils/assistant';
 import { nanoid } from 'nanoid';
+import { confirmDuplicate } from '../../utils/utils';
 
 test.use({ storageState: AUTH_FILES.teacher });
 
@@ -20,6 +21,7 @@ test('create assistant from template', async ({ page }) => {
   await expect(copyButton).toBeVisible({ timeout: 15000 });
   await expect(copyButton).toBeEnabled();
   await copyButton.click();
+  await confirmDuplicate(page);
   await page.waitForURL('/assistants/editor/**');
 
   const assistantName = 'Assistent Individuell ' + nanoid(8);
