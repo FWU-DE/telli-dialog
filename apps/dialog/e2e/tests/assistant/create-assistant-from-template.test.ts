@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { AUTH_FILES } from '../../utils/const';
 import { configureAssistant } from '../../utils/assistant';
+import { nanoid } from 'nanoid';
 
 test.use({ storageState: AUTH_FILES.teacher });
 
@@ -21,12 +22,13 @@ test('create assistant from template', async ({ page }) => {
   await copyButton.click();
   await page.waitForURL('/assistants/editor/**');
 
+  const assistantName = 'Assistent Individuell ' + nanoid(8);
   await configureAssistant(page, {
-    name: 'Schulorganisationsassistent Individuell',
+    name: assistantName,
     description: 'Individueller Planer für organisatorische Aufgaben an meiner Schule',
     instructions: 'Speziell angepasst für die Bedürfnisse meiner Schule und Klassenstufen.',
   });
   await page.getByTestId('assistant-edit-back-button').click();
   await page.waitForURL('/assistants**');
-  await expect(page.locator('body')).toContainText('Schulorganisationsassistent Individuell');
+  await expect(page.locator('body')).toContainText(assistantName);
 });

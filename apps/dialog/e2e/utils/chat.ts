@@ -8,6 +8,7 @@ export async function regenerateMessage(page: Page) {
 }
 
 export async function enterMessage(page: Page, message: string) {
+  await page.getByPlaceholder('Wie kann ich Dir helfen?').waitFor();
   await page.getByPlaceholder('Wie kann ich Dir helfen?').fill(message);
 }
 
