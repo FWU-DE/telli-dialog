@@ -67,9 +67,7 @@ export default function InfoBannerListView() {
     <Card>
       <CardHeader>
         <CardTitle>Info-Banner</CardTitle>
-        <CardDescription>
-          Liste aller Info- und Warnbanner für telli-dialog.
-        </CardDescription>
+        <CardDescription>Liste aller Info- und Warnbanner für telli-dialog.</CardDescription>
         <CardAction>
           <Link href={ROUTES.dialog.infoBannerNew}>
             <Button>Neues Info-Banner</Button>

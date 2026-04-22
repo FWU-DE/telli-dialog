@@ -21,9 +21,7 @@ const {
   mockTxInsertValues,
   mockTxInsert,
   mockTxDeleteWhere,
-  mockTxDelete,
   mockTxUpdateReturning,
-  mockTxUpdate,
   mockDbTransaction,
 } = vi.hoisted(() => {
   const mockDbOrderBy = vi.fn();
@@ -137,7 +135,13 @@ describe('info-banner-service', () => {
     expect(whereQuery.sql).toContain(
       '("info_banner"."max_login_count" is null or "info_banner"."max_login_count" >= $5)',
     );
-    expect(whereQuery.params).toEqual(['BY', false, fixedNow, fixedNow, 3]);
+    expect(whereQuery.params).toEqual([
+      'BY',
+      false,
+      fixedNow.toISOString(),
+      fixedNow.toISOString(),
+      3,
+    ]);
 
     const [typeOrder, startsAtOrder, createdAtOrder] = mockDbOrderBy.mock.calls[0] as SQL[];
     expect(dialect.sqlToQuery(typeOrder).sql).toContain(
@@ -211,8 +215,8 @@ describe('info-banner-service', () => {
   it('throws NotFoundError when deleting an unknown info banner', async () => {
     mockDbUpdateReturning.mockResolvedValue([]);
 
-    await expect(
-      deleteInfoBanner('00000000-0000-4000-8000-000000000004'),
-    ).rejects.toThrow(NotFoundError);
+    await expect(deleteInfoBanner('00000000-0000-4000-8000-000000000004')).rejects.toThrow(
+      NotFoundError,
+    );
   });
 });
