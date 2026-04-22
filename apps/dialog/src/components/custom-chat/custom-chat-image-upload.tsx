@@ -79,7 +79,7 @@ export function CustomChatImageUpload({
               fill
               unoptimized
               alt={t('profile-picture')}
-              className="rounded-full object-contain"
+              className="rounded-full"
             />
           ) : (
             <div className="rounded-full bg-primary/7 flex items-center justify-center w-full h-full">
