@@ -54,7 +54,7 @@ export default function InfoBannerListView() {
             ? loadError.message
             : 'Ein unbekannter Fehler ist aufgetreten.';
         setError(message);
-        toast.error(`Fehler beim Laden der Info-Banners: ${message}`);
+        toast.error(`Fehler beim Laden der Info-Banner: ${message}`);
       }
     });
   }
@@ -68,7 +68,7 @@ export default function InfoBannerListView() {
       <CardHeader>
         <CardTitle>Info-Banner</CardTitle>
         <CardDescription>
-          Liste aller aktiven Info- und Warnbanner für telli-dialog.
+          Liste aller Info- und Warnbanner für telli-dialog.
         </CardDescription>
         <CardAction>
           <Link href={ROUTES.dialog.infoBannerNew}>
@@ -103,7 +103,10 @@ export default function InfoBannerListView() {
                 <TableCell>{infoBanner.startsAt.toLocaleString()}</TableCell>
                 <TableCell>{infoBanner.endsAt.toLocaleString()}</TableCell>
                 <TableCell>
-                  <Link href={ROUTES.dialog.infoBannerDetails(infoBanner.id)}>
+                  <Link
+                    href={ROUTES.dialog.infoBannerDetails(infoBanner.id)}
+                    aria-label={`Details für ${getTypeLabel(infoBanner.type)}-Banner anzeigen`}
+                  >
                     <Search className="text-primary" />
                   </Link>
                 </TableCell>

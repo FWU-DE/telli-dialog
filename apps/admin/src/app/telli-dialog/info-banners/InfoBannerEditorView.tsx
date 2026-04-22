@@ -194,7 +194,7 @@ export default function InfoBannerEditorView({
       return;
     }
 
-    const confirmed = window.confirm('Soll diese Info-Banner wirklich gelöscht werden?');
+    const confirmed = window.confirm('Soll dieses Info-Banner wirklich gelöscht werden?');
     if (!confirmed) {
       return;
     }
@@ -257,7 +257,7 @@ export default function InfoBannerEditorView({
           <FormField
             name="startsAt"
             label="Start"
-            description="Ab diesem Zeitpunkt darf die Info-Banner angezeigt werden."
+            description="Ab diesem Zeitpunkt darf das Info-Banner angezeigt werden."
             control={formControl}
             type="datetime-local"
           />
@@ -265,7 +265,7 @@ export default function InfoBannerEditorView({
           <FormField
             name="endsAt"
             label="Ende"
-            description="Nach diesem Zeitpunkt wird die Info-Banner nicht mehr angezeigt."
+            description="Nach diesem Zeitpunkt wird das Info-Banner nicht mehr angezeigt."
             control={formControl}
             type="datetime-local"
           />
@@ -296,7 +296,7 @@ export default function InfoBannerEditorView({
           <FieldSet>
             <FieldLegend variant="label">Bundesländer</FieldLegend>
             <FieldDescription>
-              Legt fest, in welchen Bundesländern die Info-Banner sichtbar ist.
+              Legt fest, in welchen Bundesländern das Info-Banner sichtbar ist.
             </FieldDescription>
             <div className="flex gap-2">
               <Button

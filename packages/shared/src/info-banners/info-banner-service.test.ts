@@ -1,0 +1,218 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { SQL } from 'drizzle-orm';
+import { PgDialect } from 'drizzle-orm/pg-core';
+import { NotFoundError } from '@shared/error';
+import type { InfoBanner } from './info-banner';
+import {
+  createInfoBanner,
+  deleteInfoBanner,
+  getActiveBannersForUser,
+  updateInfoBanner,
+} from './info-banner-service';
+
+const {
+  mockDbOrderBy,
+  mockDbWhere,
+  mockDbInnerJoin,
+  mockDbSelect,
+  mockDbUpdateReturning,
+  mockDbUpdate,
+  mockTxInsertReturning,
+  mockTxInsertValues,
+  mockTxInsert,
+  mockTxDeleteWhere,
+  mockTxDelete,
+  mockTxUpdateReturning,
+  mockTxUpdate,
+  mockDbTransaction,
+} = vi.hoisted(() => {
+  const mockDbOrderBy = vi.fn();
+  const mockDbWhere = vi.fn(() => ({ orderBy: mockDbOrderBy }));
+  const mockDbInnerJoin = vi.fn(() => ({ where: mockDbWhere }));
+  const mockDbFrom = vi.fn(() => ({ innerJoin: mockDbInnerJoin, where: mockDbWhere }));
+  const mockDbSelect = vi.fn(() => ({ from: mockDbFrom }));
+
+  const mockDbUpdateReturning = vi.fn();
+  const mockDbUpdateWhere = vi.fn(() => ({ returning: mockDbUpdateReturning }));
+  const mockDbUpdateSet = vi.fn(() => ({ where: mockDbUpdateWhere }));
+  const mockDbUpdate = vi.fn(() => ({ set: mockDbUpdateSet }));
+
+  const mockTxInsertReturning = vi.fn();
+  const mockTxInsertValues = vi.fn(() => ({ returning: mockTxInsertReturning }));
+  const mockTxInsert = vi.fn(() => ({ values: mockTxInsertValues }));
+  const mockTxDeleteWhere = vi.fn();
+  const mockTxDelete = vi.fn(() => ({ where: mockTxDeleteWhere }));
+  const mockTxUpdateReturning = vi.fn();
+  const mockTxUpdateWhere = vi.fn(() => ({ returning: mockTxUpdateReturning }));
+  const mockTxUpdateSet = vi.fn(() => ({ where: mockTxUpdateWhere }));
+  const mockTxUpdate = vi.fn(() => ({ set: mockTxUpdateSet }));
+  const mockDbTransaction = vi.fn(async (callback) =>
+    callback({
+      insert: mockTxInsert,
+      delete: mockTxDelete,
+      update: mockTxUpdate,
+    }),
+  );
+
+  return {
+    mockDbOrderBy,
+    mockDbWhere,
+    mockDbInnerJoin,
+    mockDbSelect,
+    mockDbUpdateReturning,
+    mockDbUpdate,
+    mockTxInsertReturning,
+    mockTxInsertValues,
+    mockTxInsert,
+    mockTxDeleteWhere,
+    mockTxDelete,
+    mockTxUpdateReturning,
+    mockTxUpdate,
+    mockDbTransaction,
+  };
+});
+
+vi.mock('@shared/db', () => ({
+  db: {
+    select: mockDbSelect,
+    update: mockDbUpdate,
+    transaction: mockDbTransaction,
+  },
+}));
+
+const dialect = new PgDialect();
+const fixedNow = new Date('2026-04-22T11:00:00.000Z');
+
+function buildInfoBanner(overrides: Partial<InfoBanner> = {}): InfoBanner {
+  return {
+    id: '00000000-0000-4000-8000-000000000001',
+    type: 'info' as const,
+    message: 'Hinweis',
+    ctaLabel: null,
+    ctaUrl: null,
+    startsAt: new Date('2026-04-20T00:00:00.000Z'),
+    endsAt: new Date('2026-04-30T00:00:00.000Z'),
+    maxLoginCount: null,
+    createdAt: new Date('2026-04-19T00:00:00.000Z'),
+    updatedAt: new Date('2026-04-19T00:00:00.000Z'),
+    isDeleted: false,
+    ...overrides,
+  };
+}
+
+describe('info-banner-service', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(fixedNow);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('filters active banners for a user and orders warnings before info banners', async () => {
+    const warningBanner = buildInfoBanner({
+      id: '00000000-0000-4000-8000-000000000002',
+      type: 'warning',
+      message: 'Warnung',
+      startsAt: new Date('2026-04-21T00:00:00.000Z'),
+    });
+    const infoBanner = buildInfoBanner();
+    mockDbOrderBy.mockResolvedValue([warningBanner, infoBanner]);
+
+    const result = await getActiveBannersForUser({
+      federalStateId: 'BY',
+      loginCount: 3,
+    });
+
+    expect(result).toEqual([warningBanner, infoBanner]);
+    expect(mockDbInnerJoin).toHaveBeenCalledOnce();
+
+    const whereQuery = dialect.sqlToQuery(mockDbWhere.mock.calls[0][0] as SQL);
+    expect(whereQuery.sql).toContain('"info_banner_federal_state_mapping"."federal_state_id" = $1');
+    expect(whereQuery.sql).toContain('"info_banner"."is_deleted" = $2');
+    expect(whereQuery.sql).toContain('"info_banner"."starts_at" <= $3');
+    expect(whereQuery.sql).toContain('"info_banner"."ends_at" > $4');
+    expect(whereQuery.sql).toContain(
+      '("info_banner"."max_login_count" is null or "info_banner"."max_login_count" >= $5)',
+    );
+    expect(whereQuery.params).toEqual(['BY', false, fixedNow, fixedNow, 3]);
+
+    const [typeOrder, startsAtOrder, createdAtOrder] = mockDbOrderBy.mock.calls[0] as SQL[];
+    expect(dialect.sqlToQuery(typeOrder).sql).toContain(
+      `case when "info_banner"."type" = 'warning' then 0 else 1 end`,
+    );
+    expect(dialect.sqlToQuery(startsAtOrder).sql).toContain('"info_banner"."starts_at" desc');
+    expect(dialect.sqlToQuery(createdAtOrder).sql).toContain('"info_banner"."created_at" desc');
+  });
+
+  it('creates an info banner with mapped federal states only', async () => {
+    const createdInfoBanner = buildInfoBanner();
+    mockTxInsertReturning.mockResolvedValue([createdInfoBanner]);
+
+    const result = await createInfoBanner(
+      {
+        type: 'info',
+        message: 'Hinweis',
+        ctaLabel: null,
+        ctaUrl: null,
+        startsAt: new Date('2026-04-20T00:00:00.000Z'),
+        endsAt: new Date('2026-04-30T00:00:00.000Z'),
+        maxLoginCount: null,
+      },
+      [
+        { federalStateId: 'BY', isMapped: true },
+        { federalStateId: 'BW', isMapped: false },
+        { federalStateId: 'BE', isMapped: true },
+      ],
+    );
+
+    expect(result).toEqual(createdInfoBanner);
+    expect(mockDbTransaction).toHaveBeenCalledOnce();
+    expect(mockTxInsert).toHaveBeenCalledTimes(2);
+    expect(mockTxInsertValues.mock.calls[1][0]).toEqual([
+      { infoBannerId: createdInfoBanner.id, federalStateId: 'BY' },
+      { infoBannerId: createdInfoBanner.id, federalStateId: 'BE' },
+    ]);
+  });
+
+  it('updates an info banner and replaces its federal state mappings', async () => {
+    const updatedInfoBanner = buildInfoBanner({
+      id: '00000000-0000-4000-8000-000000000003',
+      message: 'Aktualisiert',
+    });
+    mockTxUpdateReturning.mockResolvedValue([updatedInfoBanner]);
+
+    const result = await updateInfoBanner(
+      updatedInfoBanner.id,
+      {
+        type: 'warning',
+        message: 'Aktualisiert',
+        ctaLabel: null,
+        ctaUrl: null,
+        startsAt: new Date('2026-04-20T00:00:00.000Z'),
+        endsAt: new Date('2026-04-30T00:00:00.000Z'),
+        maxLoginCount: 5,
+      },
+      [
+        { federalStateId: 'BY', isMapped: false },
+        { federalStateId: 'BW', isMapped: true },
+      ],
+    );
+
+    expect(result).toEqual(updatedInfoBanner);
+    expect(mockTxDeleteWhere).toHaveBeenCalledOnce();
+    expect(mockTxInsertValues.mock.calls[0][0]).toEqual([
+      { infoBannerId: updatedInfoBanner.id, federalStateId: 'BW' },
+    ]);
+  });
+
+  it('throws NotFoundError when deleting an unknown info banner', async () => {
+    mockDbUpdateReturning.mockResolvedValue([]);
+
+    await expect(
+      deleteInfoBanner('00000000-0000-4000-8000-000000000004'),
+    ).rejects.toThrow(NotFoundError);
+  });
+});

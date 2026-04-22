@@ -60,21 +60,15 @@ function useDismissedInfoBannerIds() {
   const dismissedInfoBannerIdsSnapshot = useSyncExternalStore(
     subscribeToDismissedInfoBanners,
     getDismissedInfoBannerIdsSnapshot,
-    () => null,
+    () => EMPTY_DISMISSED_INFO_BANNERS_SNAPSHOT,
   );
 
-  return dismissedInfoBannerIdsSnapshot === null
-    ? null
-    : getDismissedInfoBannerIds(dismissedInfoBannerIdsSnapshot);
+  return getDismissedInfoBannerIds(dismissedInfoBannerIdsSnapshot);
 }
 
 export default function ActiveInfoBanners({ infoBanners }: { infoBanners: InfoBanner[] }) {
   const dismissedInfoBannerIds = useDismissedInfoBannerIds();
   const tInfoBanner = useTranslations('info-banner');
-
-  if (dismissedInfoBannerIds === null) {
-    return null;
-  }
 
   const dismissedIds = new Set(dismissedInfoBannerIds);
   const currentInfoBanner = infoBanners.find((infoBanner) => !dismissedIds.has(infoBanner.id));
