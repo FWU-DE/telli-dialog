@@ -32,7 +32,7 @@ export function CustomChatShareInfo({
       <span>{info}</span>
       <a href={href} className="text-primary" onClick={handleClick}>
         {linkText}
-        <CaretRightIcon className="inline-block size-4 text-primary mb-0.5" />
+        <CaretRightIcon className="inline-block size-4 text-primary mb-0.5 ml-1" />
       </a>
     </div>
   );

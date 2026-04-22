@@ -35,7 +35,7 @@ export function CustomChatInstructionsExampleDialog({
           aria-label={t('button')}
         >
           {t('button')}
-          <CaretRightIcon className="size-3.5 text-primary" />
+          <CaretRightIcon className="size-3.5 text-primary ml-1" />
         </Button>
       </DialogTrigger>
       <DialogContent showCloseButton={false} className="overflow-hidden">

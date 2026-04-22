@@ -143,7 +143,7 @@ export function FileDrop({
           multiple
           aria-label={t('upload.upload-input-aria-label')}
         />
-        <div className="mt-4 flex flex-col text-sm gap-4 items-center">
+        <div className="flex flex-col text-sm gap-4 items-center">
           <span className="text-base">
             <RichText>
               {(tags) =>
