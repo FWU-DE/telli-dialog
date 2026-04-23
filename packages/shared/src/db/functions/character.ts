@@ -26,6 +26,7 @@ function baseCharacterWithShareQuery() {
       inviteCode: sharedCharacterConversation.inviteCode,
       maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
       startedAt: sharedCharacterConversation.startedAt,
+      stoppedAt: sharedCharacterConversation.stoppedAt,
       startedBy: sharedCharacterConversation.userId,
     })
     .from(characterTable);
@@ -79,6 +80,7 @@ export async function dbGetCharacterByIdWithShareData({
       and(
         eq(sharedCharacterConversation.characterId, characterTable.id),
         eq(sharedCharacterConversation.userId, userId),
+        isNull(sharedCharacterConversation.stoppedAt),
       ),
     )
     .where(eq(characterTable.id, characterId));
@@ -98,6 +100,7 @@ export async function dbGetCharacterByIdOptionalShareData({
       and(
         eq(sharedCharacterConversation.characterId, characterTable.id),
         eq(sharedCharacterConversation.userId, userId),
+        isNull(sharedCharacterConversation.stoppedAt),
       ),
     )
     .where(eq(characterTable.id, characterId));
@@ -165,6 +168,7 @@ export async function dbGetGlobalCharacters({
       and(
         eq(sharedCharacterConversation.characterId, characterTable.id),
         eq(sharedCharacterConversation.userId, userId),
+        isNull(sharedCharacterConversation.stoppedAt),
       ),
     )
     .leftJoin(
@@ -211,6 +215,7 @@ export async function dbGetCharactersBySchoolId({
       and(
         eq(sharedCharacterConversation.characterId, characterTable.id),
         eq(sharedCharacterConversation.userId, userId), // this ensures we get the user-specific shared data, or null if not shared by this user
+        isNull(sharedCharacterConversation.stoppedAt),
       ),
     )
     .where(
@@ -236,7 +241,11 @@ export async function dbGetCharactersByUserId({
   const characters = await baseCharacterWithShareQuery()
     .leftJoin(
       sharedCharacterConversation,
-      eq(sharedCharacterConversation.characterId, characterTable.id),
+      and(
+        eq(sharedCharacterConversation.characterId, characterTable.id),
+        eq(sharedCharacterConversation.userId, userId),
+        isNull(sharedCharacterConversation.stoppedAt),
+      ),
     )
     .where(and(eq(characterTable.userId, userId), eq(characterTable.accessLevel, 'private')))
     .orderBy(desc(characterTable.createdAt));
@@ -255,6 +264,7 @@ export async function dbGetAllCharactersByUserId({
       and(
         eq(sharedCharacterConversation.characterId, characterTable.id),
         eq(sharedCharacterConversation.userId, userId),
+        isNull(sharedCharacterConversation.stoppedAt),
       ),
     )
     .where(eq(characterTable.userId, userId))
@@ -278,6 +288,7 @@ export async function dbGetAllAccessibleCharacters({
       and(
         eq(sharedCharacterConversation.characterId, characterTable.id),
         eq(sharedCharacterConversation.userId, userId),
+        isNull(sharedCharacterConversation.stoppedAt),
       ),
     )
     .leftJoin(
@@ -310,6 +321,7 @@ export async function dbGetCharacterByIdAndUserId({
       and(
         eq(sharedCharacterConversation.characterId, characterTable.id),
         eq(sharedCharacterConversation.userId, userId),
+        isNull(sharedCharacterConversation.stoppedAt),
       ),
     )
     .where(and(eq(characterTable.id, characterId), eq(sharedCharacterConversation.userId, userId)));
@@ -433,7 +445,7 @@ export async function dbGetGlobalCharacterByName({
 }
 
 /**
- * Returns all shared character conversations for a given character and user.
+ * Returns all active (non-stopped) shared character conversations for a given character and user.
  */
 export async function dbGetSharedCharacterConversations({
   characterId,
@@ -449,6 +461,7 @@ export async function dbGetSharedCharacterConversations({
       and(
         eq(sharedCharacterConversation.characterId, characterId),
         eq(sharedCharacterConversation.userId, userId),
+        isNull(sharedCharacterConversation.stoppedAt),
       ),
     );
 }

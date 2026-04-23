@@ -435,6 +435,13 @@
       "when": 1776262365188,
       "tag": "0061_open_absorbing_man",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1745403328000,
+      "tag": "0062_add_stopped_at_to_shared_tables",
+      "breakpoints": true
     }
   ]
 }

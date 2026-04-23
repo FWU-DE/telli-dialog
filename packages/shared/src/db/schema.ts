@@ -623,9 +623,9 @@ export const sharedLearningScenarioTable = pgTable(
     maxUsageTimeLimit: integer('max_usage_time_limit'),
     inviteCode: text('invite_code').unique(),
     startedAt: timestamp('started_at', { withTimezone: true }).defaultNow(),
+    stoppedAt: timestamp('stopped_at', { withTimezone: true }),
   },
   (table) => [
-    unique().on(table.learningScenarioId, table.userId),
     foreignKey({
       columns: [table.learningScenarioId],
       foreignColumns: [learningScenarioTable.id],
@@ -640,6 +640,7 @@ export const sharedLearningScenarioSelectSchema = createSelectSchema(
   sharedLearningScenarioTable,
 ).extend({
   startedAt: z.coerce.date().nullable(),
+  stoppedAt: z.coerce.date().nullable(),
 });
 export const sharedLearningScenarioInsertSchema = createInsertSchema(
   sharedLearningScenarioTable,
@@ -647,6 +648,7 @@ export const sharedLearningScenarioInsertSchema = createInsertSchema(
   id: true,
   inviteCode: true,
   startedAt: true,
+  stoppedAt: true,
 });
 export const sharedLearningScenarioUpdateSchema = createUpdateSchema(sharedLearningScenarioTable)
   .omit({ learningScenarioId: true, userId: true, startedAt: true })
@@ -799,14 +801,16 @@ export const sharedCharacterConversation = pgTable(
     maxUsageTimeLimit: integer('max_usage_time_limit'),
     inviteCode: text('invite_code').unique(),
     startedAt: timestamp('started_at', { withTimezone: true }),
+    stoppedAt: timestamp('stopped_at', { withTimezone: true }),
   },
-  (table) => [unique().on(table.characterId, table.userId)],
+  () => [],
 );
 
 export const sharedCharacterConversationSelectSchema = createSelectSchema(
   sharedCharacterConversation,
 ).extend({
   startedAt: z.coerce.date().nullable(),
+  stoppedAt: z.coerce.date().nullable(),
 });
 export const sharedCharacterConversationInsertSchema = createInsertSchema(
   sharedCharacterConversation,

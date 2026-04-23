@@ -97,10 +97,17 @@ export async function sharedCharacterChatHasReachedTelliPointsLimit({
 export function sharedChatHasExpired({
   startedAt,
   maxUsageTimeLimit,
+  stoppedAt,
 }: {
   startedAt: Date | null;
   maxUsageTimeLimit: number | null;
+  stoppedAt?: Date | null;
 }) {
+  // Manually stopped by the teacher
+  if (stoppedAt != null) {
+    return true;
+  }
+
   const timeLeft = calculateTimeLeft({ startedAt, maxUsageTimeLimit });
 
   if (startedAt === null || timeLeft < 1 || maxUsageTimeLimit === null) {

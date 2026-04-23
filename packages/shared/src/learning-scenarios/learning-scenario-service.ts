@@ -40,7 +40,7 @@ import { buildLearningScenarioPictureKey } from '@shared/utils/picture-key';
 import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { OverviewFilter } from '@shared/overview-filter';
 import z from 'zod';
 import { duplicateLearningScenario } from '@shared/learning-scenarios/learning-scenario-admin-service';
@@ -300,6 +300,19 @@ export async function shareLearningScenario({
 
   const inviteCode = generateInviteCode();
   const startedAt = new Date();
+
+  // Stop any existing active share before creating a new one
+  await db
+    .update(sharedLearningScenarioTable)
+    .set({ stoppedAt: new Date() })
+    .where(
+      and(
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
+        eq(sharedLearningScenarioTable.userId, user.id),
+        isNull(sharedLearningScenarioTable.stoppedAt),
+      ),
+    );
+
   const sharedLearningScenario = await dbCreateLearningScenarioShare({
     userId: user.id,
     learningScenarioId,
@@ -341,11 +354,12 @@ export async function unshareLearningScenario({
 
   const [updatedShare] = await db
     .update(sharedLearningScenarioTable)
-    .set({ startedAt: null, maxUsageTimeLimit: null, telliPointsLimit: null })
+    .set({ stoppedAt: new Date() })
     .where(
       and(
         eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
         eq(sharedLearningScenarioTable.userId, user.id),
+        isNull(sharedLearningScenarioTable.stoppedAt),
       ),
     )
     .returning();
