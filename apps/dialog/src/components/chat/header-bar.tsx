@@ -5,10 +5,10 @@ import SelectLlmModel from '../conversation/select-llm-model';
 import { NewChatButton, ToggleSidebarButton } from '../navigation/sidebar/collapsible-sidebar';
 import DownloadConversationButton from '@/app/(authed)/(dialog)/download-conversation-button';
 import ProfileMenu, { ThreeDotsProfileMenu } from '../navigation/profile-menu';
-import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
 import useBreakpoints from '../hooks/use-breakpoints';
 import { useLlmModels } from '../providers/llm-model-provider';
+import { DialogHeaderContent } from '@/components/layout/dialog-header';
 
 export function ChatHeaderBar({
   userAndContext,
@@ -29,7 +29,7 @@ export function ChatHeaderBar({
     downloadConversationEnabledProp || downloadConversationEnabledFromContext;
 
   return (
-    <HeaderPortal>
+    <DialogHeaderContent>
       <div className="flex flex-col w-full">
         <div className="flex w-full gap-4 justify-center items-center">
           <ToggleSidebarButton />
@@ -71,6 +71,6 @@ export function ChatHeaderBar({
           <span className="font-normal text-xl">{title}</span>
         </div>
       </div>
-    </HeaderPortal>
+    </DialogHeaderContent>
   );
 }
