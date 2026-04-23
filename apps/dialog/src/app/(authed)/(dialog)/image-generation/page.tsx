@@ -1,6 +1,5 @@
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
 import ProfileMenu from '@/components/navigation/profile-menu';
-import HeaderPortal from '../header-portal';
 import { ImageModelsProvider } from '@/components/providers/image-model-provider';
 import { ImageStyleProvider } from '@/components/providers/image-style-provider';
 import ImageGenerationChat from '@/components/image-generation/image-generation-chat';
@@ -14,6 +13,7 @@ import { redirect } from 'next/navigation';
 import { requireAuth } from '@/auth/requireAuth';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
+import { DialogHeaderContent } from '@/components/layout/dialog-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +33,7 @@ export default async function ImageGenerationPage() {
   return (
     <ImageModelsProvider models={imageModels} defaultImageModel={selectedModel}>
       <ImageStyleProvider>
-        <HeaderPortal>
+        <DialogHeaderContent>
           <div className="flex w-full gap-4 justify-center items-center z-30">
             <ToggleSidebarButton />
             <SelectImageModel />
@@ -41,7 +41,7 @@ export default async function ImageGenerationPage() {
             <div className="grow"></div>
             <ProfileMenu userAndContext={userAndContext} />
           </div>
-        </HeaderPortal>
+        </DialogHeaderContent>
         <DefaultPageLayout>
           <ImageGenerationChat />
         </DefaultPageLayout>

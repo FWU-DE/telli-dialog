@@ -1,6 +1,5 @@
 import { getUser, userHasCompletedTraining } from '@/auth/utils';
 import React from 'react';
-import { HEADER_PORTAL_ID } from './header-portal';
 import { LlmModelsProvider } from '@/components/providers/llm-model-provider';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { getPriceInCentByUser, getPriceLimitInCentByUser } from '@/app/school';
@@ -19,6 +18,7 @@ import { FederalStateProvider } from '@/components/providers/federal-state-provi
 import AppSidebar from '@/components/navigation/sidebar/app-sidebar';
 import { SidebarProvider } from '@telli/ui/components/Sidebar';
 import SessionWatcher from '@/auth/SessionWatcher';
+import { DialogHeader, DialogHeaderProvider } from '@/components/layout/dialog-header';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations('errors');
@@ -56,14 +56,12 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
               currentModelCosts={priceInCent ?? 0}
               userPriceLimit={userPriceLimit ?? 500}
             />
-            <div className="relative flex flex-col h-dvh w-dvw overflow-hidden bg-background-2">
-              {/* Todo: Refactor HeaderPortal and header components to not rely on style of this div */}
-              <header
-                id={HEADER_PORTAL_ID}
-                className="h-19 flex-none px-6 py-4 flex items-center justify-between gap-4"
-              ></header>
-              <main className="min-h-0 w-full mx-auto flex-1 overflow-auto">{children}</main>
-            </div>
+            <DialogHeaderProvider>
+              <div className="relative flex flex-col h-dvh w-dvw overflow-hidden bg-background-2">
+                <DialogHeader />
+                <main className="min-h-0 w-full mx-auto flex-1 overflow-auto">{children}</main>
+              </div>
+            </DialogHeaderProvider>
           </LlmModelsProvider>
         </SidebarProvider>
         {!productAccess.hasAccess && (
