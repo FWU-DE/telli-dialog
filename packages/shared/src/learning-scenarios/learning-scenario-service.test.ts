@@ -642,4 +642,127 @@ describe('learning-scenario-service', () => {
       });
     });
   });
+
+  describe('unshareLearningScenario – ForbiddenError when no active share', () => {
+    const learningScenarioId = generateUUID();
+    const user = mockUser('teacher');
+
+    beforeEach(() => {
+      (
+        dbGetSharedLearningScenarioConversations as MockedFunction<
+          typeof dbGetSharedLearningScenarioConversations
+        >
+      ).mockResolvedValue([] as never);
+    });
+
+    it('throws ForbiddenError when the teacher has no active share to stop', async () => {
+      await expect(
+        unshareLearningScenario({ learningScenarioId, user }),
+      ).rejects.toThrow(ForbiddenError);
+    });
+  });
+
+  describe('shareLearningScenario – success', () => {
+    const userId = generateUUID();
+    const learningScenarioId = generateUUID();
+    const user = { ...mockUser(), id: userId };
+    const mockLearningScenario: Partial<LearningScenarioSelectModel> = {
+      id: learningScenarioId,
+      userId,
+      accessLevel: 'private',
+      hasLinkAccess: false,
+      name: 'Test Scenario',
+    };
+    const newShare = {
+      id: generateUUID(),
+      learningScenarioId,
+      userId,
+      telliPointsLimit: 50,
+      maxUsageTimeLimit: 60,
+      inviteCode: 'ABCD1234',
+      startedAt: new Date(),
+      stoppedAt: null,
+    };
+
+    beforeEach(() => {
+      (
+        dbGetLearningScenarioById as MockedFunction<typeof dbGetLearningScenarioById>
+      ).mockResolvedValue(mockLearningScenario as never);
+      (
+        dbGetLearningScenarioByIdOptionalShareData as MockedFunction<
+          typeof dbGetLearningScenarioByIdOptionalShareData
+        >
+      ).mockResolvedValue(mockLearningScenario as never);
+      (
+        dbCreateLearningScenarioShare as MockedFunction<typeof dbCreateLearningScenarioShare>
+      ).mockResolvedValue(newShare as never);
+    });
+
+    it('stops any existing active share (calls db.update) before creating the new share', async () => {
+      await shareLearningScenario({
+        learningScenarioId,
+        data: { telliPointsPercentageLimit: 50, usageTimeLimit: 60 },
+        user,
+      });
+
+      expect(mockDbUpdate).toHaveBeenCalled();
+    });
+
+    it('creates a new share row (calls dbCreateLearningScenarioShare)', async () => {
+      await shareLearningScenario({
+        learningScenarioId,
+        data: { telliPointsPercentageLimit: 50, usageTimeLimit: 60 },
+        user,
+      });
+
+      expect(dbCreateLearningScenarioShare).toHaveBeenCalled();
+    });
+
+    it('returns the newly created share', async () => {
+      const result = await shareLearningScenario({
+        learningScenarioId,
+        data: { telliPointsPercentageLimit: 50, usageTimeLimit: 60 },
+        user,
+      });
+
+      expect(result).toEqual(newShare);
+    });
+  });
+
+  describe('unshareLearningScenario – success', () => {
+    const userId = generateUUID();
+    const learningScenarioId = generateUUID();
+    const user = { ...mockUser(), id: userId };
+    const stoppedShare = {
+      id: generateUUID(),
+      learningScenarioId,
+      userId,
+      telliPointsLimit: 50,
+      maxUsageTimeLimit: 60,
+      inviteCode: 'ABCD1234',
+      startedAt: new Date(Date.now() - 30 * 60_000),
+      stoppedAt: new Date(),
+    };
+
+    beforeEach(() => {
+      (
+        dbGetSharedLearningScenarioConversations as MockedFunction<
+          typeof dbGetSharedLearningScenarioConversations
+        >
+      ).mockResolvedValue([stoppedShare] as never);
+      mockDbReturning.mockResolvedValue([stoppedShare]);
+    });
+
+    it('sets stoppedAt on the active share row (calls db.update)', async () => {
+      await unshareLearningScenario({ learningScenarioId, user });
+
+      expect(mockDbUpdate).toHaveBeenCalled();
+    });
+
+    it('returns the updated share with stoppedAt set', async () => {
+      const result = await unshareLearningScenario({ learningScenarioId, user });
+
+      expect(result).toEqual(stoppedShare);
+    });
+  });
 });
