@@ -40,7 +40,6 @@ export const userTable = pgTable('user_entity', {
   email: text('email').notNull().unique(),
   lastUsedModel: text('last_used_model'),
   versionAcceptedConditions: integer(),
-  loginCount: integer('login_count').notNull().default(0),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -377,6 +376,32 @@ export type InfoBannerFederalStateMappingSelectModel = z.infer<
 export type InfoBannerFederalStateMappingInsertModel = z.infer<
   typeof infoBannerFederalStateMappingInsertSchema
 >;
+
+/**
+ * Schema for table info_banner_user_state
+ */
+export const infoBannerUserStateTable = pgTable(
+  'info_banner_user_state',
+  {
+    infoBannerId: uuid('info_banner_id')
+      .notNull()
+      .references(() => infoBannerTable.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => userTable.id, { onDelete: 'cascade' }),
+    loginCount: integer('login_count').notNull().default(0),
+  },
+  (table) => [
+    primaryKey({ columns: [table.infoBannerId, table.userId] }),
+    index().on(table.userId),
+  ],
+);
+
+export const infoBannerUserStateSelectSchema = createSelectSchema(infoBannerUserStateTable);
+export const infoBannerUserStateInsertSchema = createInsertSchema(infoBannerUserStateTable);
+
+export type InfoBannerUserStateSelectModel = z.infer<typeof infoBannerUserStateSelectSchema>;
+export type InfoBannerUserStateInsertModel = z.infer<typeof infoBannerUserStateInsertSchema>;
 
 /**
  * Schema for table character

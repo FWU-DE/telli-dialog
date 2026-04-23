@@ -38,7 +38,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
       userHasCompletedTraining(),
       getActiveBannersForUser({
         federalStateId: user.federalState.id,
-        loginCount: user.loginCount,
+        userId: user.id,
       }),
     ]);
 

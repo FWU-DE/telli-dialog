@@ -44,7 +44,6 @@ describe('checkProductAccess', () => {
     createdAt: new Date(),
     lastUsedModel: null,
     versionAcceptedConditions: null,
-    loginCount: 0,
   } satisfies UserSelectModel;
 
   it('should allow access when all conditions are met', () => {

@@ -7,14 +7,19 @@ import {
   createInfoBanner,
   deleteInfoBanner,
   getActiveBannersForUser,
+  trackInfoBannerView,
   updateInfoBanner,
 } from './info-banner-service';
 
 const {
   mockDbOrderBy,
   mockDbWhere,
+  mockDbLeftJoin,
   mockDbInnerJoin,
   mockDbSelect,
+  mockDbInsertOnConflictDoUpdate,
+  mockDbInsertValues,
+  mockDbInsert,
   mockDbUpdateReturning,
   mockDbUpdate,
   mockTxInsertReturning,
@@ -26,9 +31,14 @@ const {
 } = vi.hoisted(() => {
   const mockDbOrderBy = vi.fn();
   const mockDbWhere = vi.fn(() => ({ orderBy: mockDbOrderBy }));
-  const mockDbInnerJoin = vi.fn(() => ({ where: mockDbWhere }));
+  const mockDbLeftJoin = vi.fn(() => ({ where: mockDbWhere }));
+  const mockDbInnerJoin = vi.fn(() => ({ leftJoin: mockDbLeftJoin, where: mockDbWhere }));
   const mockDbFrom = vi.fn(() => ({ innerJoin: mockDbInnerJoin, where: mockDbWhere }));
   const mockDbSelect = vi.fn(() => ({ from: mockDbFrom }));
+
+  const mockDbInsertOnConflictDoUpdate = vi.fn();
+  const mockDbInsertValues = vi.fn(() => ({ onConflictDoUpdate: mockDbInsertOnConflictDoUpdate }));
+  const mockDbInsert = vi.fn(() => ({ values: mockDbInsertValues }));
 
   const mockDbUpdateReturning = vi.fn();
   const mockDbUpdateWhere = vi.fn(() => ({ returning: mockDbUpdateReturning }));
@@ -55,8 +65,12 @@ const {
   return {
     mockDbOrderBy,
     mockDbWhere,
+    mockDbLeftJoin,
     mockDbInnerJoin,
     mockDbSelect,
+    mockDbInsertOnConflictDoUpdate,
+    mockDbInsertValues,
+    mockDbInsert,
     mockDbUpdateReturning,
     mockDbUpdate,
     mockTxInsertReturning,
@@ -73,6 +87,7 @@ const {
 vi.mock('@shared/db', () => ({
   db: {
     select: mockDbSelect,
+    insert: mockDbInsert,
     update: mockDbUpdate,
     transaction: mockDbTransaction,
   },
@@ -134,11 +149,24 @@ describe('info-banner-service', () => {
 
     const result = await getActiveBannersForUser({
       federalStateId: 'BY',
-      loginCount: 3,
+      userId: '00000000-0000-4000-8000-000000000099',
     });
 
     expect(result).toEqual([warningBanner, infoBanner]);
     expect(mockDbInnerJoin).toHaveBeenCalledOnce();
+    expect(mockDbLeftJoin).toHaveBeenCalledOnce();
+
+    const [, leftJoinClause] = getRequiredMockCall<[unknown, SQL]>(
+      mockDbLeftJoin.mock.calls,
+      0,
+      'leftJoin',
+    );
+    const leftJoinQuery = dialect.sqlToQuery(leftJoinClause);
+    expect(leftJoinQuery.sql).toContain(
+      '"info_banner_user_state"."info_banner_id" = "info_banner"."id"',
+    );
+    expect(leftJoinQuery.sql).toContain('"info_banner_user_state"."user_id" = $1');
+    expect(leftJoinQuery.params).toEqual(['00000000-0000-4000-8000-000000000099']);
 
     const [whereClause] = getRequiredMockCall<[SQL]>(mockDbWhere.mock.calls, 0, 'where');
     const whereQuery = dialect.sqlToQuery(whereClause);
@@ -147,14 +175,13 @@ describe('info-banner-service', () => {
     expect(whereQuery.sql).toContain('"info_banner"."starts_at" <= $3');
     expect(whereQuery.sql).toContain('"info_banner"."ends_at" > $4');
     expect(whereQuery.sql).toContain(
-      '("info_banner"."max_login_count" is null or "info_banner"."max_login_count" >= $5)',
+      '("info_banner"."max_login_count" is null or coalesce("info_banner_user_state"."login_count", 0) < "info_banner"."max_login_count")',
     );
     expect(whereQuery.params).toEqual([
       'BY',
       false,
       fixedNow.toISOString(),
       fixedNow.toISOString(),
-      3,
     ]);
 
     const [typeOrder, startsAtOrder, createdAtOrder] = getRequiredMockCall<[SQL, SQL, SQL]>(
@@ -167,6 +194,36 @@ describe('info-banner-service', () => {
     );
     expect(dialect.sqlToQuery(startsAtOrder).sql).toContain('"info_banner"."starts_at" desc');
     expect(dialect.sqlToQuery(createdAtOrder).sql).toContain('"info_banner"."created_at" desc');
+  });
+
+  it('tracks a banner view per user and increments the existing counter on conflict', async () => {
+    await trackInfoBannerView({
+      infoBannerId: '00000000-0000-4000-8000-000000000010',
+      userId: '00000000-0000-4000-8000-000000000011',
+    });
+
+    expect(mockDbInsert).toHaveBeenCalledOnce();
+    const [insertValues] = getRequiredMockCall<
+      [{ infoBannerId: string; userId: string; loginCount: number }]
+    >(mockDbInsertValues.mock.calls, 0, 'insert values');
+    expect(insertValues).toEqual({
+      infoBannerId: '00000000-0000-4000-8000-000000000010',
+      userId: '00000000-0000-4000-8000-000000000011',
+      loginCount: 1,
+    });
+
+    const [conflictConfig] = getRequiredMockCall<
+      [
+        {
+          target: unknown[];
+          set: { loginCount: SQL };
+        },
+      ]
+    >(mockDbInsertOnConflictDoUpdate.mock.calls, 0, 'onConflictDoUpdate');
+    expect(conflictConfig.target).toHaveLength(2);
+    expect(dialect.sqlToQuery(conflictConfig.set.loginCount).sql).toContain(
+      '"info_banner_user_state"."login_count" + 1',
+    );
   });
 
   it('creates an info banner with mapped federal states only', async () => {

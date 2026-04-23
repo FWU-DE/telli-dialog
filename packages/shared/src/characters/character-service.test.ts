@@ -76,7 +76,6 @@ const mockUser = (userRole: 'student' | 'teacher' = 'teacher') => ({
   userRole,
   lastUsedModel: null,
   versionAcceptedConditions: null,
-  loginCount: 0,
   createdAt: new Date(),
 });
 

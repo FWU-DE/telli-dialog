@@ -272,8 +272,8 @@ export default function InfoBannerEditorView({
 
           <FormField
             name="maxLoginCount"
-            label="Maximale Login-Anzahl"
-            description="Optional: Nur während der ersten x Logins eines Users anzeigen."
+            label="Maximale Anzeigen pro Benutzer"
+            description="Optional: Begrenzt, wie oft das Info-Banner einem Benutzer angezeigt wird."
             control={formControl}
             type="number"
           />

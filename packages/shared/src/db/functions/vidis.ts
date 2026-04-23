@@ -1,5 +1,4 @@
 import { VidisUserInfo } from '../../auth/vidis';
-import { sql } from 'drizzle-orm';
 import { db } from '..';
 import {
   UserInsertModel,
@@ -61,12 +60,8 @@ export async function dbGetOrCreateVidisUser(userInfo: VidisUserInfo) {
           firstName: '',
           lastName: '',
           email: `${userInfo.sub}@vidis.schule`,
-          loginCount: 1,
         })
-        .onConflictDoUpdate({
-          target: [userTable.id],
-          set: { loginCount: sql`${userTable.loginCount} + 1` },
-        })
+        .onConflictDoUpdate({ target: [userTable.id], set: { id: userInfo.sub } })
         .returning()
     )[0];
 

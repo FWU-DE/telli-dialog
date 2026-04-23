@@ -1,16 +1,19 @@
 'use client';
 
-import { useSyncExternalStore } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { XIcon } from '@phosphor-icons/react';
 import { Button } from '@ui/components/Button';
 import { useTranslations } from 'next-intl';
 import type { InfoBanner } from '@shared/info-banners/info-banner';
+import { trackInfoBannerViewAction } from '@/app/(authed)/(dialog)/actions';
 import { cn } from '@/utils/tailwind';
 
 const DISMISSED_INFO_BANNERS_STORAGE_KEY = 'dismissed-info-banner-ids';
+const TRACKED_INFO_BANNERS_STORAGE_KEY = 'tracked-info-banner-ids';
 const DISMISSED_INFO_BANNERS_EVENT = 'telli:info-banner-dismissed';
 const EMPTY_DISMISSED_INFO_BANNERS_SNAPSHOT = '[]';
+const pendingTrackedInfoBannerIds = new Set<string>();
 
 function subscribeToDismissedInfoBanners(callback: () => void) {
   window.addEventListener(DISMISSED_INFO_BANNERS_EVENT, callback);
@@ -20,7 +23,7 @@ function subscribeToDismissedInfoBanners(callback: () => void) {
   };
 }
 
-function getDismissedInfoBannerIds(snapshot: string): string[] {
+function parseInfoBannerIds(snapshot: string): string[] {
   try {
     const parsedValue = JSON.parse(snapshot);
     return Array.isArray(parsedValue)
@@ -31,39 +34,41 @@ function getDismissedInfoBannerIds(snapshot: string): string[] {
   }
 }
 
-function getDismissedInfoBannerIdsSnapshot(): string {
+function getStoredInfoBannerIdsSnapshot(storageKey: string): string {
   try {
-    return (
-      window.sessionStorage.getItem(DISMISSED_INFO_BANNERS_STORAGE_KEY) ??
-      EMPTY_DISMISSED_INFO_BANNERS_SNAPSHOT
-    );
+    return window.sessionStorage.getItem(storageKey) ?? EMPTY_DISMISSED_INFO_BANNERS_SNAPSHOT;
   } catch {
     return EMPTY_DISMISSED_INFO_BANNERS_SNAPSHOT;
   }
 }
 
-function persistDismissedInfoBannerId(infoBannerId: string) {
+function getStoredInfoBannerIds(storageKey: string): string[] {
+  return parseInfoBannerIds(getStoredInfoBannerIdsSnapshot(storageKey));
+}
+
+function persistStoredInfoBannerId(storageKey: string, infoBannerId: string) {
   try {
-    const dismissedIds = new Set(getDismissedInfoBannerIds(getDismissedInfoBannerIdsSnapshot()));
-    dismissedIds.add(infoBannerId);
-    window.sessionStorage.setItem(
-      DISMISSED_INFO_BANNERS_STORAGE_KEY,
-      JSON.stringify(Array.from(dismissedIds)),
-    );
-    window.dispatchEvent(new Event(DISMISSED_INFO_BANNERS_EVENT));
+    const storedIds = new Set(getStoredInfoBannerIds(storageKey));
+    storedIds.add(infoBannerId);
+    window.sessionStorage.setItem(storageKey, JSON.stringify(Array.from(storedIds)));
   } catch {
     // Ignore storage failures and still dismiss in memory for the current render tree.
   }
 }
 
+function persistDismissedInfoBannerId(infoBannerId: string) {
+  persistStoredInfoBannerId(DISMISSED_INFO_BANNERS_STORAGE_KEY, infoBannerId);
+  window.dispatchEvent(new Event(DISMISSED_INFO_BANNERS_EVENT));
+}
+
 function useDismissedInfoBannerIds() {
   const dismissedInfoBannerIdsSnapshot = useSyncExternalStore(
     subscribeToDismissedInfoBanners,
-    getDismissedInfoBannerIdsSnapshot,
+    () => getStoredInfoBannerIdsSnapshot(DISMISSED_INFO_BANNERS_STORAGE_KEY),
     () => EMPTY_DISMISSED_INFO_BANNERS_SNAPSHOT,
   );
 
-  return getDismissedInfoBannerIds(dismissedInfoBannerIdsSnapshot);
+  return parseInfoBannerIds(dismissedInfoBannerIdsSnapshot);
 }
 
 export default function ActiveInfoBanners({ infoBanners }: { infoBanners: InfoBanner[] }) {
@@ -72,11 +77,34 @@ export default function ActiveInfoBanners({ infoBanners }: { infoBanners: InfoBa
 
   const dismissedIds = new Set(dismissedInfoBannerIds);
   const currentInfoBanner = infoBanners.find((infoBanner) => !dismissedIds.has(infoBanner.id));
+  const currentInfoBannerId = currentInfoBanner?.id ?? null;
+
+  useEffect(() => {
+    if (!currentInfoBannerId) {
+      return;
+    }
+
+    if (
+      pendingTrackedInfoBannerIds.has(currentInfoBannerId) ||
+      getStoredInfoBannerIds(TRACKED_INFO_BANNERS_STORAGE_KEY).includes(currentInfoBannerId)
+    ) {
+      return;
+    }
+
+    pendingTrackedInfoBannerIds.add(currentInfoBannerId);
+
+    void trackInfoBannerViewAction(currentInfoBannerId)
+      .then(() => {
+        persistStoredInfoBannerId(TRACKED_INFO_BANNERS_STORAGE_KEY, currentInfoBannerId);
+      })
+      .finally(() => {
+        pendingTrackedInfoBannerIds.delete(currentInfoBannerId);
+      });
+  }, [currentInfoBannerId]);
+
   if (!currentInfoBanner) {
     return null;
   }
-
-  const currentInfoBannerId = currentInfoBanner.id;
 
   function handleDismiss() {
     persistDismissedInfoBannerId(currentInfoBannerId);

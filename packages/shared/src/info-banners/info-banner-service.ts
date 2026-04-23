@@ -3,6 +3,7 @@ import {
   federalStateTable,
   infoBannerFederalStateMappingTable,
   infoBannerTable,
+  infoBannerUserStateTable,
 } from '@shared/db/schema';
 import { InvalidArgumentError, NotFoundError } from '@shared/error';
 import {
@@ -164,10 +165,10 @@ export async function deleteInfoBanner(infoBannerId: string): Promise<void> {
 
 export async function getActiveBannersForUser({
   federalStateId,
-  loginCount,
+  userId,
 }: {
   federalStateId: string;
-  loginCount: number;
+  userId: string;
 }): Promise<InfoBanner[]> {
   const now = new Date();
 
@@ -178,6 +179,13 @@ export async function getActiveBannersForUser({
       infoBannerFederalStateMappingTable,
       eq(infoBannerFederalStateMappingTable.infoBannerId, infoBannerTable.id),
     )
+    .leftJoin(
+      infoBannerUserStateTable,
+      and(
+        eq(infoBannerUserStateTable.infoBannerId, infoBannerTable.id),
+        eq(infoBannerUserStateTable.userId, userId),
+      ),
+    )
     .where(
       and(
         eq(infoBannerFederalStateMappingTable.federalStateId, federalStateId),
@@ -186,7 +194,7 @@ export async function getActiveBannersForUser({
         gt(infoBannerTable.endsAt, now),
         or(
           isNull(infoBannerTable.maxLoginCount),
-          sql`${infoBannerTable.maxLoginCount} >= ${loginCount}`,
+          sql`coalesce(${infoBannerUserStateTable.loginCount}, 0) < ${infoBannerTable.maxLoginCount}`,
         ),
       ),
     )
@@ -197,6 +205,28 @@ export async function getActiveBannersForUser({
     );
 
   return infoBannerSchema.array().parse(infoBanners);
+}
+
+export async function trackInfoBannerView({
+  infoBannerId,
+  userId,
+}: {
+  infoBannerId: string;
+  userId: string;
+}): Promise<void> {
+  await db
+    .insert(infoBannerUserStateTable)
+    .values({
+      infoBannerId,
+      userId,
+      loginCount: 1,
+    })
+    .onConflictDoUpdate({
+      target: [infoBannerUserStateTable.infoBannerId, infoBannerUserStateTable.userId],
+      set: {
+        loginCount: sql`${infoBannerUserStateTable.loginCount} + 1`,
+      },
+    });
 }
 
 export async function getInfoBannersByIds(infoBannerIds: string[]): Promise<InfoBanner[]> {
