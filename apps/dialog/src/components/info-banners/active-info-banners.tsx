@@ -107,7 +107,9 @@ export default function ActiveInfoBanners({ infoBanners }: { infoBanners: InfoBa
   }
 
   function handleDismiss() {
-    persistDismissedInfoBannerId(currentInfoBannerId);
+    if (currentInfoBannerId) {
+      persistDismissedInfoBannerId(currentInfoBannerId);
+    }
   }
 
   return (
