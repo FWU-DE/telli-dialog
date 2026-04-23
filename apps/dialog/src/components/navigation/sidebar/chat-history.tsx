@@ -35,8 +35,6 @@ export function ChatHistory() {
   } = useQuery({
     queryKey: ['conversations'],
     queryFn: fetchClientSideConversations,
-    staleTime: Infinity,
-    refetchOnWindowFocus: true,
   });
 
   const refetchConversations = useCallback(() => {
