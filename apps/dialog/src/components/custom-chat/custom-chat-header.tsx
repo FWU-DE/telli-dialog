@@ -1,3 +1,5 @@
+'use client';
+
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import { UserAndContext } from '@/auth/types';
 import { ReactNode } from 'react';

@@ -4,7 +4,6 @@ import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { WebsearchSource } from '@shared/db/types';
 import { CharacterEdit } from './character-edit';
-import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 import { redirect } from 'next/navigation';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 

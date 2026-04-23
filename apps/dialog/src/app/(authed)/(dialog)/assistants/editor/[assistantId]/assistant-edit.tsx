@@ -47,7 +47,6 @@ import { CustomChatPromptSuggestions } from '@/components/custom-chat/custom-cha
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
-import { useElementVisibility } from '@/hooks/use-element-visibility';
 
 type AssistantTranslator = ReturnType<typeof useTranslations<'assistants'>>;
 
@@ -176,8 +175,6 @@ export function AssistantEdit({
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
-  const { elementRef: formStateRef, isVisible: isFormStateVisible } =
-    useElementVisibility<HTMLDivElement>();
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -300,7 +297,7 @@ export function AssistantEdit({
 
   return (
     <>
-      <CustomChatHeaderContent centered isVisible={!isFormStateVisible}>
+      <CustomChatHeaderContent>
         <CustomChatFormState
           isDirty={isDirty}
           isSubmitting={isSaving}
@@ -319,19 +316,7 @@ export function AssistantEdit({
           }}
         />
         <CustomChatTitle title={name} />
-        <div className="flex flex-wrap items-start gap-3">
-          {assistantActions}
-          <div
-            ref={formStateRef}
-            className={`transition-opacity duration-200 ${isFormStateVisible ? 'opacity-100' : 'opacity-0'}`}
-          >
-            <CustomChatFormState
-              isDirty={isDirty}
-              isSubmitting={isSaving}
-              hasSaveError={hasSaveError}
-            />
-          </div>
-        </div>
+        <div className="flex flex-wrap items-start gap-3">{assistantActions}</div>
         {showShareInfo && (
           <CustomChatShareInfo
             href="#share-settings"
@@ -417,14 +402,6 @@ export function AssistantEdit({
             onShareChange={handleSharingChange}
           />
         </form>
-        <div className="flex flex-wrap items-start gap-3">
-          {assistantActions}
-          <CustomChatFormState
-            isDirty={isDirty}
-            isSubmitting={isSaving}
-            hasSaveError={hasSaveError}
-          />
-        </div>
       </CustomChatLayoutContainer>
     </>
   );

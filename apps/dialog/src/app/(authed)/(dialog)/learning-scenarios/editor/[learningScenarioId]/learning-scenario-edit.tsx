@@ -52,7 +52,6 @@ import { telliPointsPercentageValues, usageTimeValuesInMinutes } from './schema'
 import { CustomChatHeading2 } from '@/components/custom-chat/custom-chat-heading2';
 import { CustomChatInstructionsExampleDialog } from '@/components/custom-chat/custom-chat-instructions-example-dialog';
 import { CustomChatHeaderContent } from '@/components/custom-chat/custom-chat-header-content';
-import { useElementVisibility } from '@/hooks/use-element-visibility';
 import { FormField } from '@ui/components/form/FormField';
 import { RichText, stripRichTextTags } from '@/components/common/rich-text';
 
@@ -186,8 +185,6 @@ export function LearningScenarioEdit({
   const isSchoolShared = useWatch({ control, name: 'isSchoolShared' });
   const hasLinkAccess = useWatch({ control, name: 'hasLinkAccess' });
   const showShareInfo = isSchoolShared || hasLinkAccess;
-  const { elementRef: formStateRef, isVisible: isFormStateVisible } =
-    useElementVisibility<HTMLDivElement>();
 
   const saveBeforeLeave = useCallback(async (): Promise<void> => {
     if (!isDirty) {
@@ -317,7 +314,7 @@ export function LearningScenarioEdit({
 
   return (
     <>
-      <CustomChatHeaderContent centered isVisible={!isFormStateVisible}>
+      <CustomChatHeaderContent>
         <CustomChatFormState
           isDirty={isDirty}
           isSubmitting={isSaving}
@@ -336,19 +333,7 @@ export function LearningScenarioEdit({
           }}
         />
         <CustomChatTitle title={name} />
-        <div className="flex flex-wrap items-start gap-3">
-          {actionButtons}
-          <div
-            ref={formStateRef}
-            className={`transition-opacity duration-200 ${isFormStateVisible ? 'opacity-100' : 'opacity-0'}`}
-          >
-            <CustomChatFormState
-              isDirty={isDirty}
-              isSubmitting={isSaving}
-              hasSaveError={hasSaveError}
-            />
-          </div>
-        </div>
+        <div className="flex flex-wrap items-start gap-3">{actionButtons}</div>
         {showShareInfo && (
           <CustomChatShareInfo
             href="#share-settings"
@@ -479,14 +464,6 @@ export function LearningScenarioEdit({
               onShareChange={handleSharingChange}
             />
           </form>
-        </div>
-        <div className="flex flex-wrap items-start gap-3">
-          {actionButtons}
-          <CustomChatFormState
-            isDirty={isDirty}
-            isSubmitting={isSaving}
-            hasSaveError={hasSaveError}
-          />
         </div>
       </CustomChatLayoutContainer>
     </>
