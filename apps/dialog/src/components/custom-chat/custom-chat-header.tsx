@@ -1,8 +1,8 @@
 'use client';
 
 import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
-import { UserAndContext } from '@/auth/types';
-import { ReactNode } from 'react';
+import type { UserAndContext } from '@/auth/types';
+import type { ReactNode } from 'react';
 import ProfileMenu from '../navigation/profile-menu';
 import { ToggleSidebarButton } from '../navigation/sidebar/collapsible-sidebar';
 

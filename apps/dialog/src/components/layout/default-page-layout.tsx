@@ -1,6 +1,6 @@
 'use client';
 
-import { UserAndContext } from '@/auth/types';
+import type { UserAndContext } from '@/auth/types';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 import {
   CustomChatHeaderContentProvider,
