@@ -45,14 +45,15 @@ export function CustomChatHeaderContent({ children }: { children: ReactNode }) {
   const { setHeaderContent } = useCustomChatHeaderContent();
 
   useEffect(() => {
-    const content: ReactNode = children;
+    setHeaderContent(children);
+  }, [children, setHeaderContent]);
 
-    setHeaderContent(content);
-
+  // Clear on unmount only
+  useEffect(() => {
     return () => {
       setHeaderContent(null);
     };
-  }, [children, setHeaderContent]);
+  }, [setHeaderContent]);
 
   return null;
 }

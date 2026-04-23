@@ -312,15 +312,16 @@ export function LearningScenarioEdit({
     </CustomChatActions>
   );
 
+  const headerContent = useMemo(
+    () => (
+      <CustomChatFormState isDirty={isDirty} isSubmitting={isSaving} hasSaveError={hasSaveError} />
+    ),
+    [isDirty, isSaving, hasSaveError],
+  );
+
   return (
     <>
-      <CustomChatHeaderContent>
-        <CustomChatFormState
-          isDirty={isDirty}
-          isSubmitting={isSaving}
-          hasSaveError={hasSaveError}
-        />
-      </CustomChatHeaderContent>
+      <CustomChatHeaderContent>{headerContent}</CustomChatHeaderContent>
       <CustomChatLayoutContainer>
         <BackButton
           href="/learning-scenarios"

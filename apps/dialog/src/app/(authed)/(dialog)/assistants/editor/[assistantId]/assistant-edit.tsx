@@ -220,7 +220,7 @@ export function AssistantEdit({
       toast.error(t('toasts.delete-toast-error'));
     }
     guardNavigation(() => {
-      router.push('/custom');
+      router.push('/assistants');
     });
   };
 
@@ -295,15 +295,16 @@ export function AssistantEdit({
     </CustomChatActions>
   );
 
+  const headerContent = useMemo(
+    () => (
+      <CustomChatFormState isDirty={isDirty} isSubmitting={isSaving} hasSaveError={hasSaveError} />
+    ),
+    [isDirty, isSaving, hasSaveError],
+  );
+
   return (
     <>
-      <CustomChatHeaderContent>
-        <CustomChatFormState
-          isDirty={isDirty}
-          isSubmitting={isSaving}
-          hasSaveError={hasSaveError}
-        />
-      </CustomChatHeaderContent>
+      <CustomChatHeaderContent>{headerContent}</CustomChatHeaderContent>
       <CustomChatLayoutContainer>
         <BackButton
           href="/custom"
@@ -311,7 +312,7 @@ export function AssistantEdit({
           aria-label={t('back-button-aria-label')}
           onClick={() => {
             guardNavigation(() => {
-              router.push('/custom');
+              router.push('/assistants');
             });
           }}
         />
