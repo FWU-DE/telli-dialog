@@ -101,6 +101,7 @@ export default function ModelSelect({
                       )}
                       onClick={() => handleSelectModel(model)}
                       aria-label={`Select ${model.name} Model`}
+                      data-testid={model.displayName}
                     >
                       <ModelSpan model={model} modelType={modelType} />
                     </button>

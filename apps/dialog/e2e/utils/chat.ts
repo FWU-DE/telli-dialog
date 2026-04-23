@@ -15,6 +15,9 @@ export async function enterMessage(page: Page, message: string) {
 export async function sendMessage(page: Page, message: string) {
   await test.step('send message and wait for response', async () => {
     const loadingSpinner = page.getByAltText('Ladeanimation');
+    const reloadButton = page.getByLabel('Reload');
+    const errorText = page.getByText('Ein Fehler ist aufgetreten');
+
     await enterMessage(page, message);
     const waitForLoadingSpinner = loadingSpinner.waitFor();
     await page.keyboard.press('Enter');
@@ -22,8 +25,15 @@ export async function sendMessage(page: Page, message: string) {
     await waitForLoadingSpinner;
     // Wait for the loading spinner to disappear, which indicates that the response has started streaming
     await loadingSpinner.waitFor({ state: 'detached', timeout: 60_000 });
-    // Wait for the "reload" button to appear, which indicates that the response has finished streaming
-    await page.getByLabel('Reload').waitFor({ timeout: 20_000 });
+
+    // Either the response finishes successfully and shows the Reload button,
+    // or an error message appears and the test should fail.
+    await Promise.race([
+      reloadButton.waitFor({ timeout: 20_000 }),
+      errorText.waitFor({ timeout: 20_000 }).then(() => {
+        throw new Error('Error message appeared after sending message');
+      }),
+    ]);
   });
 }
 
@@ -50,7 +60,7 @@ export async function selectDifferentModel(page: Page, modelName?: string) {
   if (isDisabled) return;
 
   const selectedModel = await dropdown.innerText();
-  if (modelName && selectedModel.includes(modelName)) {
+  if (modelName && selectedModel === modelName) {
     // requested model is already selected
     return;
   }
@@ -58,7 +68,7 @@ export async function selectDifferentModel(page: Page, modelName?: string) {
   await dropdown.click();
 
   if (modelName) {
-    const option = page.getByRole('menuitem').filter({ hasText: modelName });
+    const option = page.getByTestId(modelName);
     await option.click();
   } else {
     // The selected model is not listed in the dropdown

@@ -32,7 +32,7 @@ test('should successfully upload a file and get response about its contents', as
   // Verify the response contains the expected content
   const assistantMessage = page.getByLabel('assistant message 1');
   await expect(assistantMessage).toBeVisible();
-  await expect(assistantMessage).toContainText('Napoleon Bonaparte');
+  await expect(assistantMessage).toContainText(/Napol[eé]on Bonaparte/i);
 
   // Clean up by deleting the conversation
   await deleteChat(page, path.basename(page.url()));
