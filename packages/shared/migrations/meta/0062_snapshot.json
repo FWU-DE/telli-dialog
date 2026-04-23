@@ -1,5 +1,5 @@
 {
-  "id": "2c7d77ca-75fd-4314-be31-9be3f833290e",
+  "id": "f37785c4-1baf-4d42-a0d3-2bbb93c2ef04",
   "prevId": "3da9e4e7-60d9-4158-ac7f-4e14e26ab3ef",
   "version": "7",
   "dialect": "postgresql",
@@ -1935,14 +1935,14 @@
           "primaryKey": false,
           "notNull": true
         },
-        "cta_label": {
-          "name": "cta_label",
+        "button_label": {
+          "name": "button_label",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "cta_url": {
-          "name": "cta_url",
+        "button_url": {
+          "name": "button_url",
           "type": "text",
           "primaryKey": false,
           "notNull": false

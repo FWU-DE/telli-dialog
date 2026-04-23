@@ -92,23 +92,25 @@ export default function ActiveInfoBanners({ infoBanners }: { infoBanners: InfoBa
       <div className="relative flex min-h-8 items-center justify-center">
         <div className="flex max-w-full flex-wrap items-center justify-center gap-2 pr-10 text-center">
           <p className="text-sm leading-5 xs:text-xs font-medium">{currentInfoBanner.message}</p>
-          {currentInfoBanner.ctaLabel && currentInfoBanner.ctaUrl ? (
+          {currentInfoBanner.buttonLabel && currentInfoBanner.buttonUrl ? (
             <Button asChild size="sm" className="shrink-0">
-              <Link href={currentInfoBanner.ctaUrl} target="_blank" rel="noopener noreferrer">
-                {currentInfoBanner.ctaLabel}
+              <Link href={currentInfoBanner.buttonUrl} target="_blank" rel="noopener noreferrer">
+                {currentInfoBanner.buttonLabel}
               </Link>
             </Button>
           ) : null}
         </div>
         <div className="absolute right-0 top-1/2 flex -translate-y-1/2 items-center justify-center gap-1">
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-sm"
             onClick={handleDismiss}
             aria-label={tInfoBanner('close')}
-            className="inline-flex items-center justify-center rounded-full transition-colors"
+            className="rounded-full"
           >
             <XIcon className="size-4" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

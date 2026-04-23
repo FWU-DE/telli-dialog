@@ -27,8 +27,8 @@ export type InfoBannerToFederalStateMapping = z.infer<typeof infoBannerToFederal
 export const manageInfoBannerBaseSchema = z.object({
   type: infoBannerTypeSchema,
   message: z.string().trim().min(1, 'Bitte geben Sie eine Nachricht ein.').max(2000),
-  ctaLabel: nullableString(120),
-  ctaUrl: z.preprocess((value) => {
+  buttonLabel: nullableString(120),
+  buttonUrl: z.preprocess((value) => {
     if (value === null || value === undefined) {
       return null;
     }
@@ -59,8 +59,8 @@ export function validateManageInfoBanner(
   value: {
     startsAt: Date;
     endsAt: Date;
-    ctaLabel: string | null;
-    ctaUrl: string | null;
+    buttonLabel: string | null;
+    buttonUrl: string | null;
   },
   ctx: z.RefinementCtx,
 ) {
@@ -72,14 +72,14 @@ export function validateManageInfoBanner(
     });
   }
 
-  const hasCtaLabel = value.ctaLabel !== null;
-  const hasCtaUrl = value.ctaUrl !== null;
+  const hasButtonLabel = value.buttonLabel !== null;
+  const hasButtonUrl = value.buttonUrl !== null;
 
-  if (hasCtaLabel !== hasCtaUrl) {
+  if (hasButtonLabel !== hasButtonUrl) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: 'Button-Beschriftung und Link müssen gemeinsam gesetzt werden.',
-      path: hasCtaLabel ? ['ctaUrl'] : ['ctaLabel'],
+      path: hasButtonLabel ? ['buttonUrl'] : ['buttonLabel'],
     });
   }
 }

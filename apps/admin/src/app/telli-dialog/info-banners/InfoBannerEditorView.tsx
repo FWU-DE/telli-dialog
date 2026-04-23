@@ -110,8 +110,8 @@ function buildFormValues({
   return {
     type: infoBanner?.type ?? 'info',
     message: infoBanner?.message ?? '',
-    ctaLabel: infoBanner?.ctaLabel ?? '',
-    ctaUrl: infoBanner?.ctaUrl ?? '',
+    buttonLabel: infoBanner?.buttonLabel ?? '',
+    buttonUrl: infoBanner?.buttonUrl ?? '',
     startsAt: toDateTimeLocalString(infoBanner?.startsAt ?? now),
     endsAt: toDateTimeLocalString(infoBanner?.endsAt ?? addDays(now, 7)),
     maxLoginCount: infoBanner?.maxLoginCount ?? null,
@@ -279,14 +279,14 @@ export default function InfoBannerEditorView({
           />
 
           <FormField
-            name="ctaLabel"
+            name="buttonLabel"
             label="Button-Beschriftung"
             description="Optional: Beschriftung des Buttons im Banner."
             control={formControl}
           />
 
           <FormField
-            name="ctaUrl"
+            name="buttonUrl"
             label="Button-Link"
             description="Optional: Link, der in einem neuen Tab geöffnet wird."
             control={formControl}
