@@ -14,8 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@ui/components/DropdownMenu';
 import Link from 'next/link';
-import { useCustomPathname } from '@/hooks/use-custom-pathname';
-import { cloneElement, type ReactElement, useEffect, useRef, useState } from 'react';
+import { cloneElement, memo, type ReactElement, useEffect, useRef, useState } from 'react';
 import { ConversationModel } from '@shared/db/types';
 import {
   CheckSquareIcon,
@@ -41,31 +40,78 @@ type RenameChatHistoryValues = z.infer<typeof renameChatHistorySchema>;
 
 type ChatHistoryItemProps = {
   conversation: ConversationModel;
-  onUpdateConversation(name: string): void;
+  pathname: string;
+  onUpdateConversation(update: { id: string; name: string }): void;
   onDeleteConversation(conversationId: string): void;
 };
 
-export function ChatHistoryItem({
+type RenameFormProps = {
+  defaultName: string;
+  onSubmit(name: string): void;
+  onAbort(): void;
+};
+
+function RenameForm({ defaultName, onSubmit, onAbort }: RenameFormProps) {
+  const t = useTranslations('sidebar');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const renameForm = useForm<RenameChatHistoryValues>({
+    resolver: zodResolver(renameChatHistorySchema),
+    defaultValues: { name: defaultName },
+  });
+  const { ref: registerRef, ...registerFieldProps } = renameForm.register('name');
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  return (
+    <form
+      className="w-full flex gap-1"
+      onSubmit={renameForm.handleSubmit((data) => onSubmit(data.name))}
+    >
+      <Input
+        {...registerFieldProps}
+        wrapperClassName="flex-1"
+        className="min-w-0 p-1 text-foreground border border-foreground rounded-md"
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') {
+            onAbort();
+          }
+        }}
+        ref={(node) => {
+          registerRef(node);
+          (inputRef as React.RefObject<HTMLInputElement | null>).current = node;
+        }}
+      />
+
+      <button
+        type="submit"
+        aria-label={t('rename-save')}
+        className="px-2 border border-foreground rounded-md"
+      >
+        <CheckSquareIcon className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        onClick={onAbort}
+        aria-label={t('rename-cancel')}
+        className="px-2 border border-foreground rounded-md"
+      >
+        <XSquareIcon className="h-4 w-4" />
+      </button>
+    </form>
+  );
+}
+
+export const ChatHistoryItem = memo(function ChatHistoryItem({
   conversation,
+  pathname,
   onUpdateConversation,
   onDeleteConversation,
 }: ChatHistoryItemProps) {
   const [isEditable, setIsEditable] = useState(false);
-  const pathname = useCustomPathname();
   const { isMobile, setOpenMobile } = useSidebar();
   const t = useTranslations('sidebar');
-  const renameForm = useForm({
-    resolver: zodResolver(renameChatHistorySchema),
-    defaultValues: { name: conversation.name ?? '' },
-  });
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { ref: registerRef, ...registerFieldProps } = renameForm.register('name');
-
-  useEffect(() => {
-    if (isEditable) {
-      inputRef.current?.focus();
-    }
-  }, [isEditable]);
 
   const href = buildConversationUrl({ conversation });
   const icon = determineConversationIcon(conversation);
@@ -76,15 +122,6 @@ export function ChatHistoryItem({
 
     return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
   };
-
-  async function onSubmit(data: RenameChatHistoryValues) {
-    setIsEditable(false);
-    onUpdateConversation(data.name);
-  }
-
-  async function onAbort() {
-    setIsEditable(false);
-  }
 
   function closeOnMobile() {
     if (isMobile) {
@@ -99,38 +136,14 @@ export function ChatHistoryItem({
   return (
     <SidebarMenuItem>
       {isEditable && (
-        <form className="w-full flex gap-1" onSubmit={renameForm.handleSubmit(onSubmit)}>
-          <Input
-            {...registerFieldProps}
-            wrapperClassName="flex-1"
-            className="min-w-0 p-1 text-foreground border border-foreground rounded-md"
-            onKeyDown={(event) => {
-              if (event.key === 'Escape') {
-                onAbort();
-              }
-            }}
-            ref={(node) => {
-              registerRef(node);
-              (inputRef as React.RefObject<HTMLInputElement | null>).current = node;
-            }}
-          />
-
-          <button
-            type="submit"
-            aria-label={t('rename-save')}
-            className="px-2 border border-foreground rounded-md"
-          >
-            <CheckSquareIcon className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={onAbort}
-            aria-label={t('rename-cancel')}
-            className="px-2 border border-foreground rounded-md"
-          >
-            <XSquareIcon className="h-4 w-4" />
-          </button>
-        </form>
+        <RenameForm
+          defaultName={conversation.name ?? ''}
+          onSubmit={(name) => {
+            setIsEditable(false);
+            onUpdateConversation({ id: conversation.id, name });
+          }}
+          onAbort={() => setIsEditable(false)}
+        />
       )}
 
       {!isEditable && (
@@ -179,7 +192,7 @@ export function ChatHistoryItem({
       )}
     </SidebarMenuItem>
   );
-}
+});
 
 function buildConversationUrl({ conversation }: { conversation: ConversationModel }) {
   if (conversation.characterId !== null) {

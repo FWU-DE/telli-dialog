@@ -10,7 +10,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useCustomPathname } from '@/hooks/use-custom-pathname';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { SidebarGroup, SidebarMenu } from '@ui/components/Sidebar';
 import { ChatHistoryItem } from './chat-history-item';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@ui/components/InputGroup';
@@ -39,37 +39,39 @@ export function ChatHistory() {
     refetchOnWindowFocus: true,
   });
 
-  function refetchConversations() {
+  const refetchConversations = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ['conversations'] });
-  }
+  }, [queryClient]);
 
-  async function handleUpdateConversation({ id, name }: { id: string; name: string }) {
-    const result = await updateConversationTitleAction({ conversationId: id, name });
+  const handleUpdateConversation = useCallback(
+    async ({ id, name }: { id: string; name: string }) => {
+      const result = await updateConversationTitleAction({ conversationId: id, name });
 
-    if (result.success) {
-      refetchConversations();
-    } else {
-      toast.error(t('chats-error'));
-    }
-  }
-
-  async function handleDeleteConversation(conversationId: string) {
-    const result = await deleteConversationAction({ conversationId });
-    if (result.success) {
-      toast.success(t('conversation-delete-toast-success'));
-      refetchConversations();
-      // call router.replace only if the deleted conversation is currently open
-      if (isCurrentConversation(conversationId)) {
-        router.replace('/');
+      if (result.success) {
+        refetchConversations();
+      } else {
+        toast.error(t('chats-error'));
       }
-    } else {
-      toast.error(t('conversation-delete-toast-error'));
-    }
-  }
+    },
+    [refetchConversations, toast, t],
+  );
 
-  function isCurrentConversation(conversationId: string) {
-    return pathname.includes(conversationId);
-  }
+  const handleDeleteConversation = useCallback(
+    async (conversationId: string) => {
+      const result = await deleteConversationAction({ conversationId });
+      if (result.success) {
+        toast.success(t('conversation-delete-toast-success'));
+        refetchConversations();
+        // call router.replace only if the deleted conversation is currently open
+        if (pathname.includes(conversationId)) {
+          router.replace('/');
+        }
+      } else {
+        toast.error(t('conversation-delete-toast-error'));
+      }
+    },
+    [pathname, router, refetchConversations, toast, t],
+  );
 
   const filteredConversations = useMemo(() => {
     const normalizedSearch = searchText.trim().toLowerCase();
@@ -124,10 +126,9 @@ export function ChatHistory() {
               <ChatHistoryItem
                 key={conversation.id}
                 conversation={conversation}
+                pathname={pathname}
                 onDeleteConversation={handleDeleteConversation}
-                onUpdateConversation={(name) =>
-                  handleUpdateConversation({ id: conversation.id, name })
-                }
+                onUpdateConversation={handleUpdateConversation}
               />
             ))}
           </SidebarMenu>
