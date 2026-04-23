@@ -3,7 +3,6 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { getLearningScenario } from '@shared/learning-scenarios/learning-scenario-service';
 import { LearningScenarioView } from './learning-scenario-view';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
-import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 import { buildLegacyUserAndContext } from '@/auth/types';
 
 export const dynamic = 'force-dynamic';
@@ -22,8 +21,7 @@ export default async function Page(props: PageProps<'/learning-scenarios/[learni
   const initialLinks = learningScenario.attachedLinks.map((url) => ({ link: url }));
 
   return (
-    <DefaultPageLayout>
-      <CustomChatHeader userAndContext={userAndContext} />
+    <DefaultPageLayout userAndContext={userAndContext}>
       <LearningScenarioView
         learningScenario={learningScenario}
         fileMappings={relatedFiles}
