@@ -37,7 +37,7 @@
     "eslint": "9.39.4",
     "eslint-config-turbo": "2.9.6",
     "tsx": "4.21.0",
-    "typescript": "6.0.2",
+    "typescript": "6.0.3",
     "typescript-eslint": "8.58.2"
   }
 }
