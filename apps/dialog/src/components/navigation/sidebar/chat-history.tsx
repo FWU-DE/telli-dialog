@@ -35,6 +35,7 @@ export function ChatHistory() {
   } = useQuery({
     queryKey: ['conversations'],
     queryFn: fetchClientSideConversations,
+    staleTime: Infinity,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
