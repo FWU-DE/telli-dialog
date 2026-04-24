@@ -7,15 +7,17 @@ type FormStateStatus = 'saving' | 'save-error' | 'unsaved-changes' | 'saved';
 
 const MIN_STATUS_VISIBLE_MS = 600;
 
+export type CustomChatFormStateProps = {
+  isDirty: boolean;
+  isSubmitting: boolean;
+  hasSaveError?: boolean;
+};
+
 export function CustomChatFormState({
   isDirty,
   isSubmitting,
   hasSaveError,
-}: {
-  isDirty: boolean;
-  isSubmitting: boolean;
-  hasSaveError?: boolean;
-}) {
+}: CustomChatFormStateProps) {
   const t = useTranslations('custom-chat.form');
 
   const targetStatus: FormStateStatus = isSubmitting

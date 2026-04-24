@@ -26,7 +26,6 @@ import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions'
 import { CustomChatActionUse } from '@/components/custom-chat/custom-chat-action-use';
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
-import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
 import { CustomChatShareInfo } from '@/components/custom-chat/custom-chat-share-info';
 import { CustomChatShareWithLearners } from '@/components/custom-chat/custom-chat-share-with-learners';
 import {
@@ -301,16 +300,13 @@ export function CharacterEdit({
     </CustomChatActions>
   );
 
-  const headerContent = useMemo(
-    () => (
-      <CustomChatFormState isDirty={isDirty} isSubmitting={isSaving} hasSaveError={hasSaveError} />
-    ),
-    [isDirty, isSaving, hasSaveError],
-  );
-
   return (
     <>
-      <CustomChatHeaderContent>{headerContent}</CustomChatHeaderContent>
+      <CustomChatHeaderContent
+        isDirty={isDirty}
+        isSubmitting={isSaving}
+        hasSaveError={hasSaveError}
+      />
       <CustomChatLayoutContainer>
         <BackButton
           href="/characters"

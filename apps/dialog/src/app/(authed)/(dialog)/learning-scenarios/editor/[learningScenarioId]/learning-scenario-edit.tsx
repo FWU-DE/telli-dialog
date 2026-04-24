@@ -18,7 +18,6 @@ import { CustomChatTitle } from '@/components/custom-chat/custom-chat-title';
 import { CustomChatActions } from '@/components/custom-chat/custom-chat-actions';
 import { CustomChatActionDuplicate } from '@/components/custom-chat/custom-chat-action-duplicate';
 import { CustomChatActionDelete } from '@/components/custom-chat/custom-chat-action-delete';
-import { CustomChatFormState } from '@/components/custom-chat/custom-chat-form-state';
 import { useRouter } from 'next/navigation';
 import {
   removeFileFromLearningScenarioAction,
@@ -312,16 +311,13 @@ export function LearningScenarioEdit({
     </CustomChatActions>
   );
 
-  const headerContent = useMemo(
-    () => (
-      <CustomChatFormState isDirty={isDirty} isSubmitting={isSaving} hasSaveError={hasSaveError} />
-    ),
-    [isDirty, isSaving, hasSaveError],
-  );
-
   return (
     <>
-      <CustomChatHeaderContent>{headerContent}</CustomChatHeaderContent>
+      <CustomChatHeaderContent
+        isDirty={isDirty}
+        isSubmitting={isSaving}
+        hasSaveError={hasSaveError}
+      />
       <CustomChatLayoutContainer>
         <BackButton
           href="/learning-scenarios"

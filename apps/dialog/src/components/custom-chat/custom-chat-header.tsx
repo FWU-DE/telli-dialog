@@ -1,11 +1,22 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import {
+  CustomChatFormState,
+  type CustomChatFormStateProps,
+} from '@/components/custom-chat/custom-chat-form-state';
 
 type CustomChatHeaderProps = {
-  children?: ReactNode;
+  showFormState?: boolean;
+  formStateProps?: CustomChatFormStateProps;
 };
 
-export default function CustomChatHeader({ children }: CustomChatHeaderProps) {
-  return <div className="flex items-center justify-end gap-4">{children}</div>;
+export default function CustomChatHeader({
+  showFormState = false,
+  formStateProps,
+}: CustomChatHeaderProps) {
+  return (
+    <div className="flex items-center justify-end gap-4">
+      {showFormState && formStateProps ? <CustomChatFormState {...formStateProps} /> : null}
+    </div>
+  );
 }

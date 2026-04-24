@@ -10,7 +10,7 @@ import { DialogHeaderContent } from '@/components/layout/dialog-header';
 import { ReactNode } from 'react';
 
 function DefaultPageHeader({ userAndContext }: { userAndContext?: UserAndContext }) {
-  const { headerContent } = useCustomChatHeaderContent();
+  const { formStateProps } = useCustomChatHeaderContent();
 
   if (!userAndContext) {
     return null;
@@ -18,7 +18,10 @@ function DefaultPageHeader({ userAndContext }: { userAndContext?: UserAndContext
 
   return (
     <DialogHeaderContent>
-      <CustomChatHeader>{headerContent}</CustomChatHeader>
+      <CustomChatHeader
+        showFormState={Boolean(formStateProps)}
+        formStateProps={formStateProps ?? undefined}
+      />
     </DialogHeaderContent>
   );
 }

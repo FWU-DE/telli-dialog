@@ -41,7 +41,7 @@ export default async function Page(
   return (
     <div className="w-full px-4 sm:px-8 overflow-auto flex flex-col h-full">
       <CollapseSidebar />
-      <CustomChatHeader userAndContext={userAndContext} />
+      <CustomChatHeader />
       <Link
         href={`/learning-scenarios/editor/${learningScenario.id}`}
         className="flex gap-2 items-center text-primary w-full"
