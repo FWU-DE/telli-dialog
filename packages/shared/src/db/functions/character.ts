@@ -40,11 +40,16 @@ function baseCharacterWithShareQuery() {
  */
 export async function dbGetCharacters({
   userId,
-  schoolId,
+  schoolIds,
 }: {
   userId: string;
-  schoolId: string;
+  schoolIds: string[];
 }): Promise<CharacterSelectModel[]> {
+  const schoolCondition =
+    schoolIds.length > 0
+      ? and(inArray(characterTable.schoolId, schoolIds), eq(characterTable.accessLevel, 'school'))
+      : undefined;
+
   const characters = await db
     .select()
     .from(characterTable)
@@ -52,7 +57,7 @@ export async function dbGetCharacters({
       and(
         or(
           eq(characterTable.userId, userId),
-          and(eq(characterTable.schoolId, schoolId), eq(characterTable.accessLevel, 'school')),
+          schoolCondition,
           eq(characterTable.accessLevel, 'global'),
         ),
         eq(characterTable.isDeleted, false),
@@ -199,12 +204,16 @@ export async function dbGetGlobalCharacters({
  *
  */
 export async function dbGetCharactersBySchoolId({
-  schoolId,
+  schoolIds,
   userId,
 }: {
-  schoolId: string;
+  schoolIds: string[];
   userId: string;
 }): Promise<CharacterOptionalShareDataModel[]> {
+  if (schoolIds.length === 0) {
+    return [];
+  }
+
   const characters = await baseCharacterWithShareQuery()
     .leftJoin(
       sharedCharacterConversation,
@@ -215,7 +224,7 @@ export async function dbGetCharactersBySchoolId({
     )
     .where(
       and(
-        eq(characterTable.schoolId, schoolId),
+        inArray(characterTable.schoolId, schoolIds),
         eq(characterTable.accessLevel, 'school'),
         or(
           eq(sharedCharacterConversation.userId, userId),
@@ -265,13 +274,18 @@ export async function dbGetAllCharactersByUserId({
 
 export async function dbGetAllAccessibleCharacters({
   userId,
-  schoolId,
+  schoolIds,
   federalStateId,
 }: {
   userId: string;
-  schoolId: string;
+  schoolIds: string[];
   federalStateId: string;
 }): Promise<CharacterOptionalShareDataModel[]> {
+  const schoolCondition =
+    schoolIds.length > 0
+      ? and(inArray(characterTable.schoolId, schoolIds), eq(characterTable.accessLevel, 'school'))
+      : undefined;
+
   return baseCharacterWithShareQuery()
     .leftJoin(
       sharedCharacterConversation,
@@ -287,7 +301,7 @@ export async function dbGetAllAccessibleCharacters({
     .where(
       or(
         and(eq(characterTable.userId, userId), eq(characterTable.accessLevel, 'private')),
-        and(eq(characterTable.schoolId, schoolId), eq(characterTable.accessLevel, 'school')),
+        schoolCondition,
         and(
           eq(characterTable.accessLevel, 'global'),
           eq(characterTemplateMappingTable.federalStateId, federalStateId),

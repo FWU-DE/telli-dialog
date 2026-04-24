@@ -8,7 +8,7 @@ import {
   dbDeleteAssistantByIdAndUserId,
   dbGetAssistantById,
   dbGetGlobalGpts,
-  dbGetGptsBySchoolId,
+  dbGetGptsBySchoolIds,
   dbGetGptsByUserId,
   dbInsertAssistantFileMapping,
 } from '@shared/db/functions/assistants';
@@ -63,10 +63,12 @@ function buildAvatarFilename(hash: string) {
 export async function getAssistantByUser({
   assistantId,
   schoolId,
+  schoolIds,
   userId,
 }: {
   assistantId: string;
-  schoolId: string;
+  schoolId?: string;
+  schoolIds?: string[];
   userId: string;
 }): Promise<{
   assistant: AssistantSelectModel;
@@ -75,7 +77,11 @@ export async function getAssistantByUser({
 }> {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  verifyReadAccess({ item: assistant, schoolId, userId });
+  verifyReadAccess({
+    item: assistant,
+    schoolIds: schoolIds ?? (schoolId ? [schoolId] : []),
+    userId,
+  });
 
   const [fileMappings, pictureUrl] = await Promise.all([
     dbGetRelatedAssistantFiles(assistantId),
@@ -98,16 +104,22 @@ export async function getAssistantForNewChat({
   assistantId,
   userId,
   schoolId,
+  schoolIds,
 }: {
   assistantId: string;
   userId: string;
-  schoolId: string;
+  schoolId?: string;
+  schoolIds?: string[];
 }) {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({
     assistantId,
   });
-  verifyReadAccess({ item: assistant, schoolId, userId });
+  verifyReadAccess({
+    item: assistant,
+    schoolIds: schoolIds ?? (schoolId ? [schoolId] : []),
+    userId,
+  });
 
   return assistant;
 }
@@ -139,24 +151,28 @@ export async function getConversationWithMessagesAndAssistant({
 
 /**
  * Returns a list of custom gpts for the user based on
- * userId, schoolId, federalStateId and access level.
+ * userId, schoolIds, federalStateId and access level.
  */
 export async function getAssistantByAccessLevel({
   accessLevel,
   schoolId,
+  schoolIds,
   userId,
   federalStateId,
 }: {
   accessLevel: AccessLevel;
-  schoolId: string;
+  schoolId?: string;
+  schoolIds?: string[];
   userId: string;
   federalStateId: string;
 }): Promise<AssistantSelectModel[]> {
+  const resolvedSchoolIds = schoolIds ?? (schoolId ? [schoolId] : []);
+
   switch (accessLevel) {
     case 'global':
       return await dbGetGlobalGpts({ federalStateId });
     case 'school':
-      return await dbGetGptsBySchoolId({ schoolId });
+      return await dbGetGptsBySchoolIds({ schoolIds: resolvedSchoolIds });
     case 'private':
       return await dbGetGptsByUserId({ userId });
     default:
@@ -167,19 +183,23 @@ export async function getAssistantByAccessLevel({
 export async function getAssistantsByOverviewFilter({
   filter,
   schoolId,
+  schoolIds,
   userId,
   federalStateId,
 }: {
   filter: OverviewFilter;
-  schoolId: string;
+  schoolId?: string;
+  schoolIds?: string[];
   userId: string;
   federalStateId: string;
 }): Promise<AssistantSelectModel[]> {
+  const resolvedSchoolIds = schoolIds ?? (schoolId ? [schoolId] : []);
+
   switch (filter) {
     case 'all': {
       const [privateAssistants, schoolAssistants, globalAssistants] = await Promise.all([
         dbGetGptsByUserId({ userId }),
-        dbGetGptsBySchoolId({ schoolId }),
+        dbGetGptsBySchoolIds({ schoolIds: resolvedSchoolIds }),
         dbGetGlobalGpts({ federalStateId }),
       ]);
       return [...privateAssistants, ...schoolAssistants, ...globalAssistants];
@@ -189,7 +209,7 @@ export async function getAssistantsByOverviewFilter({
     case 'official':
       return await dbGetGlobalGpts({ federalStateId });
     case 'school':
-      return await dbGetGptsBySchoolId({ schoolId });
+      return await dbGetGptsBySchoolIds({ schoolIds: resolvedSchoolIds });
     default:
       return [];
   }
@@ -333,15 +353,21 @@ export async function deleteFileMappingAndEntity({
 export async function getFileMappings({
   assistantId,
   schoolId,
+  schoolIds,
   userId,
 }: {
   assistantId: string;
-  schoolId: string;
+  schoolId?: string;
+  schoolIds?: string[];
   userId: string;
 }): Promise<FileModel[]> {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  verifyReadAccess({ item: assistant, schoolId, userId });
+  verifyReadAccess({
+    item: assistant,
+    schoolIds: schoolIds ?? (schoolId ? [schoolId] : []),
+    userId,
+  });
 
   return await dbGetRelatedAssistantFiles(assistantId);
 }
@@ -540,16 +566,22 @@ export async function downloadFileFromAssistant({
   assistantId,
   fileId,
   schoolId,
+  schoolIds,
   user,
 }: {
   assistantId: string;
   fileId: string;
-  schoolId: string;
+  schoolId?: string;
+  schoolIds?: string[];
   user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
   checkParameterUUID(assistantId);
   const assistant = await dbGetAssistantById({ assistantId });
-  verifyReadAccess({ item: assistant, schoolId, userId: user.id });
+  verifyReadAccess({
+    item: assistant,
+    schoolIds: schoolIds ?? (schoolId ? [schoolId] : []),
+    userId: user.id,
+  });
 
   const file = await dbGetFileForAssistant({ fileId, assistantId });
   if (!file) {

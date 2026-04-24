@@ -12,14 +12,17 @@ import {
 } from '@shared/image-generation/image-generation-service';
 import { redirect } from 'next/navigation';
 import { requireAuth } from '@/auth/requireAuth';
-import { buildLegacyUserAndContext } from '@/auth/types';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ImageGenerationPage() {
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user, federalState } = await requireAuth();
+  const userAndContext = {
+    ...user,
+    federalState,
+    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
+  };
 
   if (!(federalState.featureToggles.isImageGenerationEnabled ?? false)) {
     redirect('/');

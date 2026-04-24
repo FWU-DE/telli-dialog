@@ -9,7 +9,6 @@ import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
 import { requireAuth } from '@/auth/requireAuth';
-import { buildLegacyUserAndContext } from '@/auth/types';
 import { getConversationWithMessagesAndAssistant } from '@shared/assistants/assistant-service';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
@@ -24,8 +23,12 @@ export default async function Page(
 ) {
   const { assistantId, conversationId } = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user, federalState } = await requireAuth();
+  const userAndContext = {
+    ...user,
+    federalState,
+    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
+  };
 
   const { conversation, messages, assistant } = await getConversationWithMessagesAndAssistant({
     conversationId: conversationId,

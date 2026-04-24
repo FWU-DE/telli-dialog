@@ -2,7 +2,6 @@ import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAssistantByUser } from '@shared/assistants/assistant-service';
 import { AssistantEdit } from './assistant-edit';
-import { buildLegacyUserAndContext } from '@/auth/types';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
@@ -10,12 +9,16 @@ export const dynamic = 'force-dynamic';
 
 export default async function Page(props: PageProps<'/assistants/editor/[assistantId]'>) {
   const { assistantId } = await props.params;
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user, federalState } = await requireAuth();
+  const userAndContext = {
+    ...user,
+    federalState,
+    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
+  };
 
   const { assistant, fileMappings, pictureUrl } = await getAssistantByUser({
     assistantId: assistantId,
-    schoolId: school.id,
+    schoolIds: user.schoolIds ?? [],
     userId: user.id,
   }).catch(handleErrorInServerComponent);
 

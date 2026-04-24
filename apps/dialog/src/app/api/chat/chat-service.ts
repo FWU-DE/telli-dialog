@@ -189,7 +189,7 @@ export async function sendChatMessage({
   const systemPrompt = await constructChatSystemPrompt({
     characterId,
     assistantId: assistantId,
-    isTeacher: user.school.userRole === 'teacher',
+    isTeacher: user.userRole === 'teacher',
     federalState: user.federalState,
     chunks,
     errorUrls,

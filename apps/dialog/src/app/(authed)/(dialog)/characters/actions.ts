@@ -16,12 +16,12 @@ export async function createNewCharacterAction({
   templateId?: string;
   duplicateCharacterName?: string;
 }) {
-  const { user, school, federalState } = await requireAuth();
+  const { user, federalState } = await requireAuth();
 
   return runServerAction(createNewCharacter)({
     federalStateId: federalState.id,
     modelId: modelId,
-    schoolId: school.id,
+    schoolId: user.schoolIds?.[0] ?? '',
     user,
     templateId,
     duplicateCharacterName,
@@ -35,12 +35,12 @@ export async function downloadFileFromCharacterAction({
   characterId: string;
   fileId: string;
 }) {
-  const { user, school } = await requireAuth();
+  const { user } = await requireAuth();
 
   return runServerAction(downloadFileFromCharacter)({
     characterId,
     fileId,
-    schoolId: school.id,
+    schoolIds: user.schoolIds ?? [],
     user,
   });
 }

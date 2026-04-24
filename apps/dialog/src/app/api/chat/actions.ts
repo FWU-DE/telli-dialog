@@ -1,7 +1,6 @@
 'use server';
 
 import { requireAuth } from '@/auth/requireAuth';
-import { buildLegacyUserAndContext } from '@/auth/types';
 import { userHasCompletedTraining } from '@/auth/utils';
 
 import { sendChatMessage } from './chat-service';
@@ -25,11 +24,15 @@ export async function sendChatMessageAction({
   assistantId?: string;
   fileIds?: string[];
 }): Promise<SendMessageResult> {
-  const [{ user, school, federalState }, hasCompletedTraining] = await Promise.all([
+  const [{ user, federalState }, hasCompletedTraining] = await Promise.all([
     requireAuth(),
     userHasCompletedTraining(),
   ]);
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const userAndContext = {
+    ...user,
+    federalState,
+    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
+  };
   const productAccess = checkProductAccess({ ...userAndContext, hasCompletedTraining });
 
   if (!productAccess.hasAccess) {

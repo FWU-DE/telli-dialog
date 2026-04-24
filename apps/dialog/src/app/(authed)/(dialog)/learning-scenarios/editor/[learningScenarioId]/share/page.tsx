@@ -14,14 +14,17 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { notFound } from 'next/navigation';
 import CollapseSidebar from '@/components/common/collapse-sidebar';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
-import { buildLegacyUserAndContext } from '@/auth/types';
 
 export default async function Page(
   props: PageProps<'/learning-scenarios/editor/[learningScenarioId]/share'>,
 ) {
   const { learningScenarioId } = await props.params;
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user, federalState } = await requireAuth();
+  const userAndContext = {
+    ...user,
+    federalState,
+    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
+  };
 
   const learningScenario = await getSharedLearningScenario({
     learningScenarioId: learningScenarioId,

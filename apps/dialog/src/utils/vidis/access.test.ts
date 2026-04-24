@@ -44,13 +44,15 @@ describe('checkProductAccess', () => {
     createdAt: new Date(),
     lastUsedModel: null,
     versionAcceptedConditions: null,
+    schoolIds: [baseSchool.id],
+    federalStateId: baseSchool.federalStateId,
+    userRole: baseSchool.userRole,
   } satisfies UserSelectModel;
 
   it('should allow access when all conditions are met', () => {
     const context: UserAndContext = {
       ...baseUser,
       federalState: baseFederalState,
-      school: baseSchool,
       hasApiKeyAssigned: true,
     };
 
@@ -68,10 +70,7 @@ describe('checkProductAccess', () => {
           isStudentAccessEnabled: false,
         },
       },
-      school: {
-        ...baseSchool,
-        userRole: 'student',
-      },
+      userRole: 'student',
       hasApiKeyAssigned: true,
     };
 
@@ -93,10 +92,7 @@ describe('checkProductAccess', () => {
           isStudentAccessEnabled: true,
         },
       },
-      school: {
-        ...baseSchool,
-        userRole: 'student',
-      },
+      userRole: 'student',
       hasApiKeyAssigned: true,
     };
 
@@ -111,7 +107,6 @@ describe('checkProductAccess', () => {
         ...baseFederalState,
         mandatoryCertificationTeacher: true,
       },
-      school: baseSchool,
       hasApiKeyAssigned: true,
     };
 
@@ -133,7 +128,6 @@ describe('checkProductAccess', () => {
         mandatoryCertificationTeacher: true,
         trainingLink,
       },
-      school: baseSchool,
       hasApiKeyAssigned: true,
     };
 
@@ -156,10 +150,7 @@ describe('checkProductAccess', () => {
         },
         mandatoryCertificationTeacher: true,
       },
-      school: {
-        ...baseSchool,
-        userRole: 'student',
-      },
+      userRole: 'student',
       hasApiKeyAssigned: true,
     };
 
@@ -181,10 +172,7 @@ describe('checkProductAccess', () => {
         },
         mandatoryCertificationTeacher: true,
       },
-      school: {
-        ...baseSchool,
-        userRole: 'student',
-      },
+      userRole: 'student',
       hasApiKeyAssigned: true,
     };
 
@@ -205,10 +193,7 @@ describe('checkProductAccess', () => {
       const context: UserAndContext = {
         ...baseUser,
         federalState: baseFederalState,
-        school: {
-          ...baseSchool,
-          userRole: role,
-        },
+        userRole: role,
         hasApiKeyAssigned: true,
       };
 
@@ -235,10 +220,7 @@ describe('checkProductAccess', () => {
             isStudentAccessEnabled: state.studentAccess,
           },
         },
-        school: {
-          ...baseSchool,
-          userRole: 'student',
-        },
+        userRole: 'student',
         hasApiKeyAssigned: true,
       };
 

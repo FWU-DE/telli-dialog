@@ -73,12 +73,16 @@ export function dbGetGlobalLearningScenarios({
  * @returns A promise that resolves to an array of learning scenario models with associated sharing metadata
  */
 export function dbGetLearningScenariosBySchoolId({
-  schoolId,
+  schoolIds,
   userId,
 }: {
-  schoolId: string;
+  schoolIds: string[];
   userId: string;
 }): Promise<LearningScenarioOptionalShareDataModel[]> {
+  if (schoolIds.length === 0) {
+    return Promise.resolve([]);
+  }
+
   return baseLearningScenarioWithShareQuery()
     .leftJoin(
       sharedLearningScenarioTable,
@@ -89,7 +93,7 @@ export function dbGetLearningScenariosBySchoolId({
     )
     .where(
       and(
-        eq(learningScenarioTable.schoolId, schoolId),
+        inArray(learningScenarioTable.schoolId, schoolIds),
         eq(learningScenarioTable.accessLevel, 'school'),
         or(
           eq(sharedLearningScenarioTable.userId, userId),
@@ -147,13 +151,21 @@ export async function dbGetAllLearningScenariosByUserId({
 
 export async function dbGetAllAccessibleLearningScenarios({
   userId,
-  schoolId,
+  schoolIds,
   federalStateId,
 }: {
   userId: string;
-  schoolId: string;
+  schoolIds: string[];
   federalStateId: string;
 }): Promise<LearningScenarioOptionalShareDataModel[]> {
+  const schoolCondition =
+    schoolIds.length > 0
+      ? and(
+          inArray(learningScenarioTable.schoolId, schoolIds),
+          eq(learningScenarioTable.accessLevel, 'school'),
+        )
+      : undefined;
+
   return baseLearningScenarioWithShareQuery()
     .leftJoin(
       sharedLearningScenarioTable,
@@ -172,10 +184,7 @@ export async function dbGetAllAccessibleLearningScenarios({
           eq(learningScenarioTable.userId, userId),
           eq(learningScenarioTable.accessLevel, 'private'),
         ),
-        and(
-          eq(learningScenarioTable.schoolId, schoolId),
-          eq(learningScenarioTable.accessLevel, 'school'),
-        ),
+        schoolCondition,
         and(
           eq(learningScenarioTable.accessLevel, 'global'),
           eq(learningScenarioTemplateMappingTable.federalStateId, federalStateId),

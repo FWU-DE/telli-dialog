@@ -56,9 +56,7 @@ WITH updated_conversations AS (
   UPDATE conversation c
   SET deleted_at = CURRENT_TIMESTAMP
   FROM user_entity u
-  JOIN user_school_mapping usm ON u.id = usm.user_id
-  JOIN school s ON usm.school_id = s.id
-  JOIN federal_state fs ON s.federal_state_id = fs.id
+  JOIN federal_state fs ON u.federal_state_id = fs.id
   WHERE c.user_id = u.id
     AND c.deleted_at IS NULL
     AND c.created_at < CURRENT_TIMESTAMP - (fs.chat_storage_time * INTERVAL '1 day')

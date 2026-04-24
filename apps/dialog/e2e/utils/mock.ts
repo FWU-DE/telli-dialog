@@ -11,20 +11,17 @@ import {
 } from '@shared/db/schema';
 
 export const mockUserAndContext = (): UserAndContext => {
+  const schoolId = generateUUID();
+  const federalStateId = generateUUID();
+
   return {
     id: generateUUID(),
-    firstName: generateRandomString(10),
-    lastName: generateRandomString(10),
-    email: `mock.user@${generateRandomString(5)}.com`,
     lastUsedModel: null,
     versionAcceptedConditions: null,
+    schoolIds: [schoolId],
+    federalStateId,
+    userRole: 'teacher',
     hasApiKeyAssigned: true,
-    school: {
-      id: generateUUID(),
-      userRole: 'teacher',
-      federalStateId: generateUUID(),
-      createdAt: new Date(),
-    },
     federalState: {
       id: generateUUID(),
       teacherPriceLimit: 500,

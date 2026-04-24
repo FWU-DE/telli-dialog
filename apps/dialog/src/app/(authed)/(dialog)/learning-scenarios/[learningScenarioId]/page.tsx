@@ -4,18 +4,21 @@ import { getLearningScenario } from '@shared/learning-scenarios/learning-scenari
 import { LearningScenarioView } from './learning-scenario-view';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
-import { buildLegacyUserAndContext } from '@/auth/types';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Page(props: PageProps<'/learning-scenarios/[learningScenarioId]'>) {
   const { learningScenarioId } = await props.params;
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user, federalState } = await requireAuth();
+  const userAndContext = {
+    ...user,
+    federalState,
+    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
+  };
 
   const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenario({
     learningScenarioId,
-    schoolId: school.id,
+    schoolIds: user.schoolIds ?? [],
     user,
   }).catch(handleErrorInServerComponent);
 

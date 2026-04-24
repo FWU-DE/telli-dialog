@@ -1,5 +1,4 @@
 import { requireAuth } from '@/auth/requireAuth';
-import { buildLegacyUserAndContext } from '@/auth/types';
 import LearningScenarioOverview from './learning-scenario-overview';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
@@ -7,8 +6,12 @@ import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user, federalState } = await requireAuth();
+  const userAndContext = {
+    ...user,
+    federalState,
+    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
+  };
 
   return (
     <DefaultPageLayout>

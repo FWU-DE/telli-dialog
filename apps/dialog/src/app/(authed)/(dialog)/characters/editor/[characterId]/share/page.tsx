@@ -14,12 +14,15 @@ import { notFound } from 'next/navigation';
 import { calculateTimeLeft } from '@shared/sharing/calculate-time-left';
 import CollapseSidebar from '@/components/common/collapse-sidebar';
 import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
-import { buildLegacyUserAndContext } from '@/auth/types';
 
 export default async function Page(props: PageProps<'/characters/editor/[characterId]/share'>) {
   const params = await props.params;
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user, federalState } = await requireAuth();
+  const userAndContext = {
+    ...user,
+    federalState,
+    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
+  };
 
   const character = await getSharedCharacter({
     userId: user.id,

@@ -21,10 +21,10 @@ export async function createNewAssistantAction({
   templateId?: string;
   duplicateAssistantName?: string;
 }) {
-  const { user, school } = await requireAuth();
+  const { user } = await requireAuth();
 
   return runServerAction(createNewAssistant)({
-    schoolId: school.id,
+    schoolId: user.schoolIds?.[0] ?? '',
     templateId,
     user: user,
     duplicateAssistantName,
@@ -113,12 +113,12 @@ export async function downloadFileFromAssistantAction({
   assistantId: string;
   fileId: string;
 }) {
-  const { user, school } = await requireAuth();
+  const { user } = await requireAuth();
 
   return runServerAction(downloadFileFromAssistant)({
     assistantId,
     fileId,
-    schoolId: school.id,
+    schoolIds: user.schoolIds ?? [],
     user,
   });
 }

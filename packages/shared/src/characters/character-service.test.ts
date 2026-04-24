@@ -77,6 +77,8 @@ const mockUser = (userRole: 'student' | 'teacher' = 'teacher') => ({
   lastUsedModel: null,
   versionAcceptedConditions: null,
   createdAt: new Date(),
+  federalStateId: generateUUID(),
+  schoolIds: [generateUUID()],
 });
 
 describe('character-service', () => {

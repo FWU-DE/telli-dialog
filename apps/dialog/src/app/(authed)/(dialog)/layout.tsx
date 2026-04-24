@@ -23,7 +23,11 @@ import SessionWatcher from '@/auth/SessionWatcher';
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations('errors');
   const user = await getUser();
-  const userWithRole = { ...user, userRole: user.school.userRole };
+  const userWithRole = {
+    ...user,
+    userRole: user.userRole,
+    federalStateId: user.federalStateId ?? undefined,
+  };
   if (!user.hasApiKeyAssigned) throw new Error(t('no-api-key'));
 
   const [federalState, models, priceInCent, userPriceLimit, hasCompletedTraining] =
@@ -37,7 +41,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
 
   const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
   const federalStateDisclaimer =
-    federalStateDisclaimers[user.school.federalStateId as FederalStateId];
+    federalStateDisclaimers[(user.federalStateId ?? user.federalState.id) as FederalStateId];
   const userMustAccept =
     federalStateDisclaimer !== undefined &&
     (user.versionAcceptedConditions === null || user.versionAcceptedConditions < VERSION);
