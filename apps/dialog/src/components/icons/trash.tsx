@@ -14,7 +14,7 @@ export default function TrashIcon({
   return (
     <svg
       preserveAspectRatio="xMidYMid meet"
-      viewBox="0 0 32 32"
+      viewBox="7 7 18 18"
       fill={props.fill}
       xmlns="http://www.w3.org/2000/svg"
       {...props}

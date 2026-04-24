@@ -12,6 +12,16 @@ import DotsHorizontalIcon from '@/components/icons/dots-horizontal';
 import { usePortalContainer } from '@ui/components/portal-container';
 import { Button } from '@ui/components/Button';
 
+function MenuActionRow({ action }: { action: React.ReactNode }) {
+  return (
+    <DropdownMenu.Item>
+      <div className="flex p-2 pl-4 [&_button]:h-auto [&_button]:justify-start [&_button]:border-none [&_button]:bg-transparent [&_button]:px-0 [&_button]:py-0 [&_button]:flex-row [&_button]:gap-2 [&_button]:text-base [&_button]:font-normal [&_button:hover]:bg-transparent [&_button:hover]:underline [&_button:hover]:text-primary">
+        {action}
+      </div>
+    </DropdownMenu.Item>
+  );
+}
+
 function ProfileMenuContent({ userAndContext }: { userAndContext?: UserAndContext }) {
   const t = useTranslations('legal');
 
@@ -108,8 +118,8 @@ export function ThreeDotsProfileMenu({
           sideOffset={10}
           className="z-20 flex flex-col gap-2 py-2 w-[256px] rounded-enterprise-md mb-4 bg-white shadow-dropdown"
         >
-          {deleteButtonJSX && <DropdownMenu.Item asChild>{deleteButtonJSX}</DropdownMenu.Item>}
-          {downloadButtonJSX && <DropdownMenu.Item asChild>{downloadButtonJSX}</DropdownMenu.Item>}
+          {deleteButtonJSX && <MenuActionRow action={deleteButtonJSX} />}
+          {downloadButtonJSX && <MenuActionRow action={downloadButtonJSX} />}
           {(deleteButtonJSX || downloadButtonJSX) && <hr className="border-gray-200 mx-2" />}
           <ProfileMenuContent userAndContext={userAndContext} />
         </DropdownMenu.Content>
