@@ -16,37 +16,26 @@ function vidisRoleToUserSchoolRole(role: string): UserSchoolRole {
   }
 }
 
-// TODO RL: Typ checken, sollte nicht optional sein
-export async function dbCreateVidisUser(
+export async function dbCreateOrUpdateVidisUser(
   user: Pick<UserInsertModel, 'firstName' | 'lastName' | 'email'> & {
     id: string;
-    schoolIds?: string[];
-    federalStateId?: string;
-    userRole?: UserSchoolRole;
+    schoolIds: string[];
+    federalStateId: string;
+    userRole: UserSchoolRole;
   },
 ) {
-  const values = {
-    id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    schoolIds: user.schoolIds ?? [],
-    federalStateId: user.federalStateId ?? null,
-    userRole: user.userRole ?? 'student',
-  } as const;
-
   const insertedUser = await db
     .insert(userTable)
-    .values(values)
+    .values(user)
     .onConflictDoUpdate({
       target: userTable.id,
       set: {
-        firstName: values.firstName,
-        lastName: values.lastName,
-        email: values.email,
-        schoolIds: values.schoolIds,
-        federalStateId: values.federalStateId,
-        userRole: values.userRole,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        schoolIds: user.schoolIds,
+        federalStateId: user.federalStateId,
+        userRole: user.userRole,
       },
     })
     .returning();

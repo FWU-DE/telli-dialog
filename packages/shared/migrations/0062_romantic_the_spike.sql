@@ -6,7 +6,7 @@ ALTER TABLE "learning_scenario" DROP CONSTRAINT "learning_scenario_school_id_sch
 --> statement-breakpoint
 ALTER TABLE "user_entity" ADD COLUMN "school_ids" text[] DEFAULT '{}'::text[] NOT NULL;--> statement-breakpoint
 ALTER TABLE "user_entity" ADD COLUMN "federal_state_id" text;--> statement-breakpoint
-ALTER TABLE "user_entity" ADD COLUMN "user_role" "user_school_role" DEFAULT 'teacher' NOT NULL;--> statement-breakpoint
+ALTER TABLE "user_entity" ADD COLUMN "user_role" "user_school_role" DEFAULT 'student' NOT NULL;--> statement-breakpoint
 WITH mapped_user_data AS (
 	SELECT
 		usm.user_id,

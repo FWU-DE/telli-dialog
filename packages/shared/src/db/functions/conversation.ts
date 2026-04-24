@@ -56,10 +56,13 @@ WITH updated_conversations AS (
   UPDATE conversation c
   SET deleted_at = CURRENT_TIMESTAMP
   FROM user_entity u
-  JOIN federal_state fs ON u.federal_state_id = fs.id
+  LEFT JOIN federal_state fs ON u.federal_state_id = fs.id
   WHERE c.user_id = u.id
     AND c.deleted_at IS NULL
-    AND c.created_at < CURRENT_TIMESTAMP - (fs.chat_storage_time * INTERVAL '1 day')
+    AND (
+      u.federal_state_id IS NULL
+      OR c.created_at < CURRENT_TIMESTAMP - (fs.chat_storage_time * INTERVAL '1 day')
+    )
   RETURNING c.id
 ),
 updated_messages AS (

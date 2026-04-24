@@ -34,6 +34,7 @@ export async function createNewLearningScenarioFromTemplateAction({
 }) {
   const { user } = await requireAuth();
 
+  // Todo: Will be implemented in TD-701
   return runServerAction(createNewLearningScenarioFromTemplate)({
     originalLearningScenarioId: templateId,
     user,
