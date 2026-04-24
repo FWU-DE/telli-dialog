@@ -35,7 +35,12 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
       userHasCompletedTraining(),
     ]);
 
-  const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
+  const productAccess = checkProductAccess({ ...userWithRole, hasCompletedTraining });
+  const userAndContext = {
+    ...user,
+    userRole: user.school.userRole,
+    federalState,
+  };
   const federalStateDisclaimer =
     federalStateDisclaimers[user.school.federalStateId as FederalStateId];
   const userMustAccept =
@@ -56,7 +61,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
               currentModelCosts={priceInCent ?? 0}
               userPriceLimit={userPriceLimit ?? 500}
             />
-            <DialogWrapper>{children}</DialogWrapper>
+            <DialogWrapper userAndContext={userAndContext}>{children}</DialogWrapper>
           </LlmModelsProvider>
         </SidebarProvider>
         {!productAccess.hasAccess && (
