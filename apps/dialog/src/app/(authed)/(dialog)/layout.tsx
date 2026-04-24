@@ -18,7 +18,7 @@ import { FederalStateProvider } from '@/components/providers/federal-state-provi
 import AppSidebar from '@/components/navigation/sidebar/app-sidebar';
 import { SidebarProvider } from '@telli/ui/components/Sidebar';
 import SessionWatcher from '@/auth/SessionWatcher';
-import { DialogHeader, DialogHeaderProvider } from '@/components/layout/dialog-header';
+import { DialogWrapper } from '@/components/layout/dialog-header';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations('errors');
@@ -56,12 +56,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
               currentModelCosts={priceInCent ?? 0}
               userPriceLimit={userPriceLimit ?? 500}
             />
-            <DialogHeaderProvider>
-              <div className="relative flex flex-col h-dvh w-dvw overflow-hidden bg-background-2">
-                <DialogHeader />
-                <main className="min-h-0 w-full mx-auto flex-1 overflow-auto">{children}</main>
-              </div>
-            </DialogHeaderProvider>
+            <DialogWrapper>{children}</DialogWrapper>
           </LlmModelsProvider>
         </SidebarProvider>
         {!productAccess.hasAccess && (
