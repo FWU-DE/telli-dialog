@@ -43,6 +43,17 @@ export function DialogHeader() {
   );
 }
 
+export function DialogWrapper({ children }: { children: ReactNode }) {
+  return (
+    <DialogHeaderProvider>
+      <div className="relative flex flex-col h-dvh w-dvw overflow-hidden bg-background-2">
+        <DialogHeader />
+        <main className="min-h-0 w-full mx-auto flex-1 overflow-auto">{children}</main>
+      </div>
+    </DialogHeaderProvider>
+  );
+}
+
 export function DialogHeaderContent({ children }: { children: ReactNode }) {
   const { setHeaderContent } = useDialogHeader();
 

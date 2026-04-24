@@ -16,7 +16,11 @@ function DefaultPageHeader({ userAndContext }: { userAndContext?: UserAndContext
     return null;
   }
 
-  return <CustomChatHeader userAndContext={userAndContext}>{headerContent}</CustomChatHeader>;
+  return (
+    <DialogHeaderContent>
+      <CustomChatHeader userAndContext={userAndContext}>{headerContent}</CustomChatHeader>
+    </DialogHeaderContent>
+  );
 }
 
 export function DefaultPageLayoutClient({
@@ -28,11 +32,7 @@ export function DefaultPageLayoutClient({
 }) {
   return (
     <CustomChatHeaderContentProvider>
-      {userAndContext ? (
-        <DialogHeaderContent>
-          <DefaultPageHeader userAndContext={userAndContext} />
-        </DialogHeaderContent>
-      ) : null}
+      {userAndContext ? <DefaultPageHeader userAndContext={userAndContext} /> : null}
       {children}
     </CustomChatHeaderContentProvider>
   );

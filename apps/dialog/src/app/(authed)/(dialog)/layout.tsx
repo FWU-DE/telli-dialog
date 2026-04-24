@@ -21,6 +21,7 @@ import SessionWatcher from '@/auth/SessionWatcher';
 import { getActiveBannersForUser } from '@shared/info-banners/info-banner-service';
 import ActiveInfoBanners from '@/components/info-banners/active-info-banners';
 import { DialogHeader, DialogHeaderProvider } from '@/components/layout/dialog-header';
+import { DialogWrapper } from '@/components/layout/dialog-header';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations('errors');
@@ -61,13 +62,8 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
               currentModelCosts={priceInCent ?? 0}
               userPriceLimit={userPriceLimit ?? 500}
             />
-            <DialogHeaderProvider>
-              <div className="relative flex flex-col h-dvh w-dvw overflow-hidden bg-background-2">
-              <ActiveInfoBanners infoBanners={activeBanners} />
-                <DialogHeader />
-                <main className="min-h-0 w-full mx-auto flex-1 overflow-auto">{children}</main>
-              </div>
-            </DialogHeaderProvider>
+            <ActiveInfoBanners infoBanners={activeBanners} />
+            <DialogWrapper>{children}</DialogWrapper>
           </LlmModelsProvider>
         </SidebarProvider>
         {!productAccess.hasAccess && (
