@@ -19,6 +19,8 @@ import { FederalStateProvider } from '@/components/providers/federal-state-provi
 import AppSidebar from '@/components/navigation/sidebar/app-sidebar';
 import { SidebarProvider } from '@telli/ui/components/Sidebar';
 import SessionWatcher from '@/auth/SessionWatcher';
+import { getActiveBannersForUser } from '@shared/info-banners/info-banner-service';
+import ActiveInfoBanners from '@/components/info-banners/active-info-banners';
 
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations('errors');
@@ -26,13 +28,17 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
   const userWithRole = { ...user, userRole: user.school.userRole };
   if (!user.hasApiKeyAssigned) throw new Error(t('no-api-key'));
 
-  const [federalState, models, priceInCent, userPriceLimit, hasCompletedTraining] =
+  const [federalState, models, priceInCent, userPriceLimit, hasCompletedTraining, activeBanners] =
     await Promise.all([
       getFederalStateById(user.federalState.id),
       dbGetLlmModelsByFederalStateId({ federalStateId: user.federalState.id }),
       getPriceInCentByUser(user),
       getPriceLimitInCentByUser(user),
       userHasCompletedTraining(),
+      getActiveBannersForUser({
+        federalStateId: user.federalState.id,
+        userId: user.id,
+      }),
     ]);
 
   const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
@@ -57,6 +63,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
               userPriceLimit={userPriceLimit ?? 500}
             />
             <div className="relative flex flex-col h-dvh w-dvw overflow-hidden bg-background-2">
+              <ActiveInfoBanners infoBanners={activeBanners} />
               {/* Todo: Refactor HeaderPortal and header components to not rely on style of this div */}
               <header
                 id={HEADER_PORTAL_ID}
