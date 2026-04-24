@@ -791,7 +791,8 @@
             "lightweight.claim": "false",
             "access.token.claim": "true",
             "claim.name": "schulkennung",
-            "jsonType.label": "String"
+            "jsonType.label": "String",
+            "multivalued": "true"
           }
         },
         {
@@ -2698,7 +2699,25 @@
       "lastName": "Teacher",
       "email": "teacher2@example.com",
       "attributes": {
-        "schulnummer": ["test_school1"],
+        "schulnummer": ["test_school1", "test_school2"],
+        "federal_state": ["DE-TEST"],
+        "role": ["LEHR"]
+      },
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password"
+        }
+      ]
+    },
+    {
+      "username": "teacher3",
+      "firstName": "Teacher",
+      "lastName": "Teacher",
+      "email": "teacher3@example.com",
+      "attributes": {
+        "schulnummer": ["test_school2", "test_school3"],
         "federal_state": ["DE-TEST"],
         "role": ["LEHR"]
       },
