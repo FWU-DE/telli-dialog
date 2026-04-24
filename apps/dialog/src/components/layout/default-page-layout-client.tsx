@@ -18,7 +18,7 @@ function DefaultPageHeader({ userAndContext }: { userAndContext?: UserAndContext
 
   return (
     <DialogHeaderContent>
-      <CustomChatHeader userAndContext={userAndContext}>{headerContent}</CustomChatHeader>
+      <CustomChatHeader>{headerContent}</CustomChatHeader>
     </DialogHeaderContent>
   );
 }
