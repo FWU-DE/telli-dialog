@@ -39,7 +39,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
   return (
     <div className="w-full px-4 sm:px-8 overflow-auto flex flex-col h-full">
       <CollapseSidebar />
-      <CustomChatHeader userAndContext={userAndContext} />
+      <CustomChatHeader />
       <Link
         href={`/characters/editor/${character.id}`}
         className="flex gap-2 items-center text-primary w-full"
