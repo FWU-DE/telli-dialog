@@ -72,7 +72,7 @@ export default function DownloadConversationButton({
       onClick={handleDownload}
       disabled={disabled}
     >
-      {isLoading ? <Spinner className="p-2 size-8" /> : <WebDownloadIcon className="size-8" />}
+      {isLoading ? <Spinner className="p-2 size-8" /> : <WebDownloadIcon className="size-5" />}
       {showText && tCommon('conversation-download')}
     </Button>
   );
