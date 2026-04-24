@@ -43,7 +43,7 @@
     "prettier": "3.8.3",
     "prettier-eslint": "16.4.2",
     "tsx": "4.21.0",
-    "typescript": "6.0.2",
+    "typescript": "6.0.3",
     "vitest": "4.1.4"
   }
 }
