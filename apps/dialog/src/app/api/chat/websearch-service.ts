@@ -1,67 +1,22 @@
-import { parseHyperlinks } from '@/utils/web-search/parsing';
-import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character';
-import { dbGetAssistantById } from '@shared/db/functions/assistants';
-import { MAX_WEBSEARCH_SOURCES_PER_CONVERSATION } from '@/configuration-text-inputs/const';
-import { UserAndContext } from '@/auth/types';
-import { ChatMessage } from './actions';
-
-// Extract unique URLs from message content
-function extractUniqueUrls(content: string): string[] {
-  return [...new Set(parseHyperlinks(content) ?? [])].filter((l) => l !== '');
-}
-
-// Get attached links from assistant or character
-async function getAttachedLinks(
-  assistantId: string | undefined,
-  characterId: string | undefined,
-  userId: string,
-): Promise<string[] | null> {
-  if (assistantId) {
-    const assistant = await dbGetAssistantById({ assistantId: assistantId });
-    return assistant?.attachedLinks.filter((l) => l !== '') ?? [];
-  }
-  if (characterId) {
-    const character = await dbGetCharacterByIdWithShareData({ characterId, userId });
-    return character?.attachedLinks.filter((l) => l !== '') ?? [];
-  }
-  return null;
-}
+import { LinkupClient, TextSearchResult } from 'linkup-sdk';
 
 /**
- * Collects URLs based on the conversation context.
- * For characters, only the attached links are returned.
- * For assistants, both attached links and URLs from user messages are included.
- * For regular chat, only URLs from user messages are included.
+ * Performs a web search using the Linkup API and returns text search results.
+ * Search results can be used in the rag context of the system prompt.
  *
- * @param assistantId The ID of the assistant, if applicable.
- * @param characterId The ID of the character, if applicable.
- * @param user The user and context information.
- * @param messages The conversation history messages.
- * @returns The aggregated websearch sources.
+ * @param query The search query string.
+ * @returns An array of text search results from the Linkup API.
  */
-export async function extractUrls(
-  assistantId: string | undefined,
-  characterId: string | undefined,
-  user: UserAndContext,
-  messages: ChatMessage[],
-): Promise<string[]> {
-  const attachedLinks = await getAttachedLinks(assistantId, characterId, user.id);
+export async function searchWeb(query: string): Promise<TextSearchResult[]> {
+  const linkupClient = new LinkupClient({
+    apiKey: process.env.LINKUP_API_KEY || '',
+  });
 
-  // For characters, just return their attached links
-  if (characterId) {
-    return attachedLinks ?? [];
-  }
+  const searchResults = await linkupClient.search({
+    query: query,
+    depth: 'standard',
+    outputType: 'searchResults',
+  });
 
-  const userMessageUrls = [
-    ...new Set(
-      messages.filter((m) => m.role === 'user').flatMap((m) => extractUniqueUrls(m.content)),
-    ),
-  ];
-
-  const urls = [...new Set([...(attachedLinks ?? []), ...userMessageUrls])].slice(
-    0,
-    MAX_WEBSEARCH_SOURCES_PER_CONVERSATION,
-  );
-
-  return urls;
+  return searchResults.results as TextSearchResult[];
 }
