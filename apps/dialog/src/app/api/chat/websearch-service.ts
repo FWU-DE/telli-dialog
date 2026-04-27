@@ -8,6 +8,11 @@ import { LinkupClient, TextSearchResult } from 'linkup-sdk';
  * @returns An array of text search results from the Linkup API.
  */
 export async function searchWeb(query: string): Promise<TextSearchResult[]> {
+  if (!process.env.LINKUP_API_KEY) {
+    // will be replaced by federal state feature flag
+    return [];
+  }
+
   const linkupClient = new LinkupClient({
     apiKey: process.env.LINKUP_API_KEY || '',
   });
