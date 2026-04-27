@@ -24,8 +24,16 @@ export type FormFieldProps<
   labelAction?: ReactNode;
   /** Optional wrapper function rendered around the input, allowing consumers to place elements alongside it */
   children?: (input: ReactNode) => ReactNode;
-  /** Input type: 'text', 'textArea', 'number', 'email', 'password', or 'checkbox' */
-  type?: 'text' | 'textArea' | 'number' | 'email' | 'password' | 'checkbox';
+  /** Input type: 'text', 'textArea', 'number', 'email', 'password', 'checkbox', 'url', or 'datetime-local' */
+  type?:
+    | 'text'
+    | 'textArea'
+    | 'number'
+    | 'email'
+    | 'password'
+    | 'checkbox'
+    | 'url'
+    | 'datetime-local';
   /** Whether the field is required */
   required?: boolean;
   /** Maximum number of characters allowed */

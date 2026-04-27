@@ -4,7 +4,6 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { WebsearchSource } from '@shared/db/types';
 import { CharacterView } from './character-view';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
-import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,9 +33,7 @@ export default async function Page(props: PageProps<'/characters/[characterId]'>
     );
 
   return (
-    <DefaultPageLayout>
-      <CustomChatHeader userAndContext={userAndContext} />
-
+    <DefaultPageLayout userAndContext={userAndContext}>
       <CharacterView
         character={character}
         relatedFiles={relatedFiles}

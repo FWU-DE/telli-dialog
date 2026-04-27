@@ -3,7 +3,6 @@ import { requireAuth } from '@/auth/requireAuth';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { WebsearchSource } from '@shared/db/types';
 import { CharacterEdit } from './character-edit';
-import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 import { redirect } from 'next/navigation';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
@@ -41,8 +40,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
   }
 
   return (
-    <DefaultPageLayout>
-      <CustomChatHeader userAndContext={userAndContext} />
+    <DefaultPageLayout userAndContext={userAndContext}>
       <CharacterEdit
         character={character}
         relatedFiles={relatedFiles}

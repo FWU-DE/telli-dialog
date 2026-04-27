@@ -26,6 +26,9 @@ export const ROUTES = {
     federalStates: `/telli-dialog/federal-states`,
     federalStateDetails: (federalStateId: string) =>
       `/telli-dialog/federal-states/${federalStateId}`,
+    infoBanners: '/telli-dialog/info-banners',
+    infoBannerNew: '/telli-dialog/info-banners/new',
+    infoBannerDetails: (infoBannerId: string) => `/telli-dialog/info-banners/${infoBannerId}`,
     templates: '/telli-dialog/templates',
     template: (templateType: TemplateTypes, templateId: string) =>
       `/telli-dialog/templates/${templateType}/${templateId}`,

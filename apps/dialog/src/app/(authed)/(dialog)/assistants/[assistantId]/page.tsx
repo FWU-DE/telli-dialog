@@ -3,7 +3,6 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { getAssistantByUser } from '@shared/assistants/assistant-service';
 import { AssistantView } from './assistant-view';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
-import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,8 +22,7 @@ export default async function Page(props: PageProps<'/assistants/[assistantId]'>
   }).catch(handleErrorInServerComponent);
 
   return (
-    <DefaultPageLayout>
-      <CustomChatHeader userAndContext={userAndContext} />
+    <DefaultPageLayout userAndContext={userAndContext}>
       <AssistantView assistant={assistant} fileMappings={fileMappings} pictureUrl={pictureUrl} />
     </DefaultPageLayout>
   );

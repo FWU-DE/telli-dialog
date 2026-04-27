@@ -40,6 +40,9 @@
   "errors": {
     "no-api-key": "Dem Bundesland wurde noch kein API-Schlüssel zugewiesen."
   },
+  "info-banner": {
+    "close": "Hinweis schließen"
+  },
   "sharing": {
     "label": "Freigabe",
     "school": "Schulintern",
