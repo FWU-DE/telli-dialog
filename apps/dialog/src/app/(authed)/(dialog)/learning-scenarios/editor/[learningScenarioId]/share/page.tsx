@@ -19,11 +19,7 @@ export default async function Page(
   props: PageProps<'/learning-scenarios/editor/[learningScenarioId]/share'>,
 ) {
   const { learningScenarioId } = await props.params;
-  const { user, federalState } = await requireAuth();
-  const userAndContext = {
-    ...user,
-    federalState,
-  };
+  const { user } = await requireAuth();
 
   const learningScenario = await getSharedLearningScenario({
     learningScenarioId: learningScenarioId,

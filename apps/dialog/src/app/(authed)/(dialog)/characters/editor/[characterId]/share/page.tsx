@@ -17,11 +17,7 @@ import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 
 export default async function Page(props: PageProps<'/characters/editor/[characterId]/share'>) {
   const params = await props.params;
-  const { user, federalState } = await requireAuth();
-  const userAndContext = {
-    ...user,
-    federalState,
-  };
+  const { user } = await requireAuth();
 
   const character = await getSharedCharacter({
     userId: user.id,

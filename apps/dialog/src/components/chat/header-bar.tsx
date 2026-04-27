@@ -10,56 +10,80 @@ import {
   DialogHeaderCompactMenuContent,
 } from '@/components/layout/dialog-header';
 
-export function ChatHeaderBar({
-  userAndContext,
-  title,
-  downloadConversationEnabled: downloadConversationEnabledProp,
-  chatId,
-}: {
+export type ChatHeaderBarProps = {
   userAndContext: UserAndContext;
   title?: string;
   downloadConversationEnabled: boolean;
   chatId: string;
-}) {
+};
+
+export function ChatHeaderBarContent({
+  userAndContext,
+  title,
+  downloadConversationEnabled: downloadConversationEnabledProp,
+  chatId,
+}: ChatHeaderBarProps) {
   const { downloadConversationEnabled: downloadConversationEnabledFromContext } = useLlmModels();
   // Either the server-provided prop or the client-side context (updated after first message sent)
   const downloadConversationEnabled =
     downloadConversationEnabledProp || downloadConversationEnabledFromContext;
 
   return (
-    <>
-      <DialogHeaderCompactMenuContent>
+    <div className="flex flex-col w-full">
+      <div className="flex w-full gap-4 justify-center items-center">
+        <NewChatButton />
+        <SelectLlmModel isStudent={userAndContext.school.userRole === 'student'} />
+        <div className="grow"></div>
+        {title !== undefined && (
+          <div className="hidden sm:flex sm:w-1/3 lg:w-1/2">
+            <span className="font-normal text-xl truncate">{title}</span>
+          </div>
+        )}
         <DownloadConversationButton
           conversationId={chatId}
           characterName={title}
           disabled={!downloadConversationEnabled}
-          showText={true}
+          showText={false}
+        />
+      </div>
+      <div className="flex flex-1 w-full sm:hidden">
+        <span className="font-normal text-xl">{title}</span>
+      </div>
+    </div>
+  );
+}
+
+export function ChatHeaderBarCompactMenuContent({
+  title,
+  downloadConversationEnabled: downloadConversationEnabledProp,
+  chatId,
+}: Pick<ChatHeaderBarProps, 'title' | 'downloadConversationEnabled' | 'chatId'>) {
+  const { downloadConversationEnabled: downloadConversationEnabledFromContext } = useLlmModels();
+  const downloadConversationEnabled =
+    downloadConversationEnabledProp || downloadConversationEnabledFromContext;
+
+  return (
+    <DownloadConversationButton
+      conversationId={chatId}
+      characterName={title}
+      disabled={!downloadConversationEnabled}
+      showText={true}
+    />
+  );
+}
+
+export function ChatHeaderBar(props: ChatHeaderBarProps) {
+  return (
+    <>
+      <DialogHeaderCompactMenuContent>
+        <ChatHeaderBarCompactMenuContent
+          title={props.title}
+          chatId={props.chatId}
+          downloadConversationEnabled={props.downloadConversationEnabled}
         />
       </DialogHeaderCompactMenuContent>
       <DialogHeaderContent>
-        <div className="flex flex-col w-full">
-          <div className="flex w-full gap-4 justify-center items-center">
-            <NewChatButton />
-            <SelectLlmModel isStudent={userAndContext.userRole === 'student'} />
-            <div className="grow"></div>
-            {title !== undefined && (
-              <div className="hidden sm:flex sm:w-1/3 lg:w-1/2">
-                <span className="font-normal text-xl truncate">{title}</span>
-              </div>
-            )}
-            <div className="hidden sm:flex">
-              <DownloadConversationButton
-                conversationId={chatId}
-                characterName={title}
-                disabled={!downloadConversationEnabled}
-                showText={false}
-              />
-            </div>
-          </div>
-          <div className="flex flex-1 w-full sm:hidden">
-            <span className="font-normal text-xl">{title}</span>
-          </div>
-        </div>
+        <ChatHeaderBarContent {...props} />
       </DialogHeaderContent>
     </>
   );

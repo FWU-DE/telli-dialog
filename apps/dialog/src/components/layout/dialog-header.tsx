@@ -3,31 +3,46 @@
 import type { UserAndContext } from '@/auth/types';
 import ProfileMenu, { ThreeDotsProfileMenu } from '@/components/navigation/profile-menu';
 import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { createPortal } from 'react-dom';
 import useBreakpoints from '@/components/hooks/use-breakpoints';
 import { reductionBreakpoint } from '@/utils/tailwind/layout';
 
 type DialogHeaderContextValue = {
-  headerContent: ReactNode;
-  setHeaderContent: (content: ReactNode) => void;
-  compactMenuContent: ReactNode;
-  setCompactMenuContent: (content: ReactNode) => void;
+  headerMountNode: HTMLDivElement | null;
+  setHeaderMountNode: (node: HTMLDivElement | null) => void;
+  compactMenuMountNode: HTMLDivElement | null;
+  setCompactMenuMountNode: (node: HTMLDivElement | null) => void;
+  hasCompactMenuContent: boolean;
+  setHasCompactMenuContent: (hasCompactMenuContent: boolean) => void;
 };
 
 const DialogHeaderContext = createContext<DialogHeaderContextValue | null>(null);
 
 export function DialogHeaderProvider({ children }: { children: ReactNode }) {
-  const [headerContent, setHeaderContent] = useState<ReactNode>(null);
-  const [compactMenuContent, setCompactMenuContent] = useState<ReactNode>(null);
+  const [headerMountNode, setHeaderMountNode] = useState<HTMLDivElement | null>(null);
+  const [compactMenuMountNode, setCompactMenuMountNode] = useState<HTMLDivElement | null>(null);
+  const [hasCompactMenuContent, setHasCompactMenuContent] = useState(false);
 
   const value = useMemo(
     () => ({
-      headerContent,
-      setHeaderContent,
-      compactMenuContent,
-      setCompactMenuContent,
+      headerMountNode,
+      setHeaderMountNode,
+      compactMenuMountNode,
+      setCompactMenuMountNode,
+      hasCompactMenuContent,
+      setHasCompactMenuContent,
     }),
-    [headerContent, compactMenuContent],
+    [headerMountNode, compactMenuMountNode, hasCompactMenuContent],
   );
 
   return <DialogHeaderContext.Provider value={value}>{children}</DialogHeaderContext.Provider>;
@@ -44,17 +59,45 @@ function useDialogHeader() {
 }
 
 export function DialogHeader({ userAndContext }: { userAndContext?: UserAndContext }) {
-  const { headerContent, compactMenuContent } = useDialogHeader();
+  const { setHeaderMountNode, setCompactMenuMountNode, hasCompactMenuContent } = useDialogHeader();
   const { isBelow } = useBreakpoints();
   const isCompact = isBelow[reductionBreakpoint];
+  const headerMountNodeRef = useRef<HTMLDivElement | null>(null);
+  const compactMenuMountNodeRef = useRef<HTMLDivElement | null>(null);
+
+  const headerMountRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (headerMountNodeRef.current === node) {
+        return;
+      }
+
+      headerMountNodeRef.current = node;
+      setHeaderMountNode(node);
+    },
+    [setHeaderMountNode],
+  );
+
+  const compactMenuMountRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (compactMenuMountNodeRef.current === node) {
+        return;
+      }
+
+      compactMenuMountNodeRef.current = node;
+      setCompactMenuMountNode(node);
+    },
+    [setCompactMenuMountNode],
+  );
 
   return (
     <header className="h-19 flex-none px-6 py-4 flex items-center justify-between gap-4">
       <ToggleSidebarButton />
-      <div className="min-w-0 flex-1">{headerContent}</div>
-      {isCompact && compactMenuContent ? (
+      <div className="min-w-0 flex-1">
+        <div className="w-full" ref={headerMountRef} />
+      </div>
+      {isCompact && hasCompactMenuContent ? (
         <ThreeDotsProfileMenu
-          downloadButtonJSX={compactMenuContent}
+          downloadButtonJSX={<div ref={compactMenuMountRef} />}
           userAndContext={userAndContext}
         />
       ) : (
@@ -82,19 +125,13 @@ export function DialogWrapper({
 }
 
 export function DialogHeaderContent({ children }: { children: ReactNode }) {
-  const { setHeaderContent } = useDialogHeader();
+  const { headerMountNode } = useDialogHeader();
 
-  useEffect(() => {
-    setHeaderContent(children);
-  }, [children, setHeaderContent]);
+  if (!headerMountNode) {
+    return null;
+  }
 
-  useEffect(() => {
-    return () => {
-      setHeaderContent(null);
-    };
-  }, [setHeaderContent]);
-
-  return null;
+  return createPortal(children, headerMountNode);
 }
 
 /**
@@ -102,17 +139,18 @@ export function DialogHeaderContent({ children }: { children: ReactNode }) {
  * (below the reductionBreakpoint). If nothing is set, a plain ProfileMenu is shown instead.
  */
 export function DialogHeaderCompactMenuContent({ children }: { children: ReactNode }) {
-  const { setCompactMenuContent } = useDialogHeader();
+  const { compactMenuMountNode, setHasCompactMenuContent } = useDialogHeader();
 
   useEffect(() => {
-    setCompactMenuContent(children);
-  }, [children, setCompactMenuContent]);
-
-  useEffect(() => {
+    setHasCompactMenuContent(true);
     return () => {
-      setCompactMenuContent(null);
+      setHasCompactMenuContent(false);
     };
-  }, [setCompactMenuContent]);
+  }, [setHasCompactMenuContent]);
 
-  return null;
+  if (!compactMenuMountNode) {
+    return null;
+  }
+
+  return createPortal(children, compactMenuMountNode);
 }

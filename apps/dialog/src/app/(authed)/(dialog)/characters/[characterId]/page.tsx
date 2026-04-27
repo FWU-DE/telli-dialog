@@ -9,11 +9,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function Page(props: PageProps<'/characters/[characterId]'>) {
   const { characterId } = await props.params;
-  const { user, federalState } = await requireAuth();
-  const userAndContext = {
-    ...user,
-    federalState,
-  };
+  const { user } = await requireAuth();
 
   const { character, relatedFiles, maybeSignedPictureUrl } = await getCharacterForEditView({
     characterId,
@@ -32,7 +28,7 @@ export default async function Page(props: PageProps<'/characters/[characterId]'>
     );
 
   return (
-    <DefaultPageLayout userAndContext={userAndContext}>
+    <DefaultPageLayout>
       <CharacterView
         character={character}
         relatedFiles={relatedFiles}

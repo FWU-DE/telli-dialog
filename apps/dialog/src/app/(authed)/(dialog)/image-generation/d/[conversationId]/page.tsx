@@ -4,18 +4,12 @@ import { redirect } from 'next/navigation';
 import ImageGenerationChat from '@/components/image-generation/image-generation-chat';
 import { ImageModelsProvider } from '@/components/providers/image-model-provider';
 import { ImageStyleProvider } from '@/components/providers/image-style-provider';
-import { ToggleSidebarButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import { NewChatButton } from '@/components/navigation/sidebar/collapsible-sidebar';
-import ProfileMenu from '@/components/navigation/profile-menu';
-import SelectImageModel from '@/components/image-generation/select-image-model';
-import SelectImageStyle from '@/components/image-generation/select-image-style';
 import {
   getAvailableImageModelsForFederalState,
   getDefaultImageModel,
 } from '@shared/image-generation/image-generation-service';
 import { requireAuth } from '@/auth/requireAuth';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
-import { DialogHeaderContent } from '@/components/layout/dialog-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,10 +20,6 @@ interface PageProps {
 export default async function Page(props: PageProps) {
   const { conversationId } = await props.params;
   const { user, federalState } = await requireAuth();
-  const userAndContext = {
-    ...user,
-    federalState,
-  };
 
   if (!federalState.featureToggles.isImageGenerationEnabled) {
     redirect('/');
@@ -70,22 +60,16 @@ export default async function Page(props: PageProps) {
   return (
     <ImageModelsProvider models={imageModels} defaultImageModel={selectedModel}>
       <ImageStyleProvider defaultImageStyle={lastUsedStyleInChat}>
-        <DialogHeaderContent>
-          <div className="flex w-full gap-4 justify-center items-center z-30">
-            <ToggleSidebarButton />
-            <NewChatButton />
-            <SelectImageModel />
-            <SelectImageStyle />
-            <div className="grow"></div>
-            <ProfileMenu userAndContext={userAndContext} />
+        <DefaultPageLayout header={{ headerType: 'image' }}>
+          <div className="flex flex-col h-full">
+            <div className="flex-1 overflow-auto">
+              <ImageGenerationChat
+                conversationId={conversationId}
+                initialMessages={messages}
+                fileMapping={fileMapping}
+              />
+            </div>
           </div>
-        </DialogHeaderContent>
-        <DefaultPageLayout>
-          <ImageGenerationChat
-            conversationId={conversationId}
-            initialMessages={messages}
-            fileMapping={fileMapping}
-          />
         </DefaultPageLayout>
       </ImageStyleProvider>
     </ImageModelsProvider>

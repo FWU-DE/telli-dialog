@@ -1,16 +1,34 @@
-import type { UserAndContext } from '@/auth/types';
 import { ReactNode } from 'react';
 import { DefaultPageLayoutClient } from '@/components/layout/default-page-layout-client';
+import type { UserAndContext } from '@/auth/types';
+
+export type DefaultPageLayoutHeaderConfig =
+  | {
+      headerType: 'chat';
+      chatId: string;
+      downloadConversationEnabled: boolean;
+      userAndContext: UserAndContext;
+      title?: string;
+    }
+  | {
+      headerType: 'image';
+    }
+  | {
+      headerType: 'form';
+    }
+  | {
+      headerType?: undefined;
+    };
 
 export function DefaultPageLayout({
   children,
-  userAndContext,
+  header,
 }: {
   children: ReactNode;
-  userAndContext?: UserAndContext;
+  header?: DefaultPageLayoutHeaderConfig;
 }) {
   return (
-    <DefaultPageLayoutClient userAndContext={userAndContext}>
+    <DefaultPageLayoutClient header={header}>
       <div className="data-page-layout h-full max-w-5xl mx-auto px-6 pb-8">{children}</div>
     </DefaultPageLayoutClient>
   );

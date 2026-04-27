@@ -1,5 +1,4 @@
 import { generateUUID } from '@shared/utils/uuid';
-import { ChatHeaderBar } from '@/components/chat/header-bar';
 import { notFound } from 'next/navigation';
 import Chat from '@/components/chat/chat';
 import Logo from '@/components/common/logo';
@@ -52,13 +51,15 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
   const logoElement = <Logo logoPath={userAndContext.federalState.pictureUrls?.logo} />;
   return (
     <LlmModelsProvider models={models} defaultLlmModelByCookie={currentModel}>
-      <ChatHeaderBar
-        chatId={id}
-        title={character.name}
-        downloadConversationEnabled={false}
-        userAndContext={userAndContext}
-      />
-      <DefaultPageLayout>
+      <DefaultPageLayout
+        header={{
+          headerType: 'chat',
+          chatId: id,
+          title: character.name,
+          downloadConversationEnabled: false,
+          userAndContext,
+        }}
+      >
         <Chat
           id={id}
           initialMessages={initialMessages}
