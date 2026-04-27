@@ -1,4 +1,5 @@
 import { LinkupClient, TextSearchResult } from 'linkup-sdk';
+import { env } from '@/env';
 
 /**
  * Performs a web search using the Linkup API and returns text search results.
@@ -8,13 +9,13 @@ import { LinkupClient, TextSearchResult } from 'linkup-sdk';
  * @returns An array of text search results from the Linkup API.
  */
 export async function searchWeb(query: string): Promise<TextSearchResult[]> {
-  if (!process.env.LINKUP_API_KEY) {
+  if (!env.linkupApiKey) {
     // will be replaced by federal state feature flag
     return [];
   }
 
   const linkupClient = new LinkupClient({
-    apiKey: process.env.LINKUP_API_KEY || '',
+    apiKey: env.linkupApiKey,
   });
 
   const searchResults = await linkupClient.search({
