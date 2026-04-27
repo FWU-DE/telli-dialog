@@ -30,6 +30,7 @@ import {
   copyEntityPictureIfExists,
   copyRelatedTemplateFiles,
 } from '../templates/template-service';
+import { dbGetUserIdsWithSharedSchools } from '@shared/db/helpers/school-sharing';
 
 vi.mock('../db/functions/assistants', () => ({
   dbGetAssistantById: vi.fn(),
@@ -56,6 +57,9 @@ vi.mock('../templates/template-service', () => ({
   copyRelatedTemplateFiles: vi.fn(),
   copyEntityPictureIfExists: vi.fn(),
 }));
+vi.mock('@shared/db/helpers/school-sharing', () => ({
+  dbGetUserIdsWithSharedSchools: vi.fn(),
+}));
 const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
   const mockDbWhere = vi.fn(() => ({ returning: mockDbReturning }));
@@ -78,6 +82,9 @@ const mockUser = (userRole: 'student' | 'teacher' = 'teacher'): UserModel => ({
 describe('assistant-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (
+      dbGetUserIdsWithSharedSchools as MockedFunction<typeof dbGetUserIdsWithSharedSchools>
+    ).mockResolvedValue([]);
   });
 
   describe('NotFoundError scenarios', () => {

@@ -28,6 +28,7 @@ import { LearningScenarioSelectModel } from '@shared/db/schema';
 import { ForbiddenError, InvalidArgumentError, NotFoundError } from '@shared/error';
 import { UserModel } from '@shared/auth/user-model';
 import { getReadOnlySignedUrl, uploadFileToS3 } from '../s3';
+import { dbGetUserIdsWithSharedSchools } from '@shared/db/helpers/school-sharing';
 
 vi.mock('../db/functions/learning-scenario', () => ({
   dbCreateLearningScenarioShare: vi.fn(),
@@ -52,6 +53,9 @@ vi.mock('../s3', () => ({
   getReadOnlySignedUrl: vi.fn(),
   uploadFileToS3: vi.fn(),
   deleteFileFromS3: vi.fn(),
+}));
+vi.mock('@shared/db/helpers/school-sharing', () => ({
+  dbGetUserIdsWithSharedSchools: vi.fn(),
 }));
 const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
@@ -209,6 +213,9 @@ function buildFunctionList(
 describe('learning-scenario-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (
+      dbGetUserIdsWithSharedSchools as MockedFunction<typeof dbGetUserIdsWithSharedSchools>
+    ).mockResolvedValue([]);
   });
 
   describe('NotFoundError scenarios', () => {
@@ -543,6 +550,9 @@ describe('learning-scenario-service', () => {
 
       beforeEach(() => {
         mockLearningScenario.accessLevel = 'school';
+        (
+          dbGetUserIdsWithSharedSchools as MockedFunction<typeof dbGetUserIdsWithSharedSchools>
+        ).mockResolvedValue([userId]);
       });
 
       it.each(buildFunctionList({ learningScenarioId, user: differentUser }, 'read'))(

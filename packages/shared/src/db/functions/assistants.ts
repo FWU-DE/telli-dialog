@@ -111,7 +111,7 @@ export async function dbGetGptsByUserId({
 }
 
 export async function dbGetAssistantByIdOrAssociatedSchool({
-  assistantId: characterId,
+  assistantId,
   userId,
 }: {
   assistantId: string;
@@ -119,19 +119,19 @@ export async function dbGetAssistantByIdOrAssociatedSchool({
 }) {
   const sharedUserIds = await dbGetUserIdsWithSharedSchools(userId);
 
-  const [character] = await db
+  const [assistant] = await db
     .select()
     .from(assistantTable)
     .where(
       or(
         and(
-          eq(assistantTable.id, characterId),
+          eq(assistantTable.id, assistantId),
           eq(assistantTable.userId, userId),
           eq(assistantTable.accessLevel, 'private'),
         ),
         sharedUserIds.length > 0
           ? and(
-              eq(assistantTable.id, characterId),
+              eq(assistantTable.id, assistantId),
               inArray(assistantTable.userId, sharedUserIds),
               eq(assistantTable.accessLevel, 'school'),
             )
@@ -140,7 +140,7 @@ export async function dbGetAssistantByIdOrAssociatedSchool({
       ),
     );
 
-  return character;
+  return assistant;
 }
 
 export async function dbUpsertAssistant({

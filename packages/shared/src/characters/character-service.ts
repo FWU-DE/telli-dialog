@@ -13,6 +13,7 @@ import {
   dbGetGlobalCharacters,
   dbGetSharedCharacterConversations,
 } from '@shared/db/functions/character';
+import { dbGetUserIdsWithSharedSchools } from '@shared/db/helpers/school-sharing';
 import { dbGetFileForCharacter, dbGetRelatedCharacterFiles } from '@shared/db/functions/files';
 import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import {
@@ -181,9 +182,11 @@ export const deleteFileMappingAndEntity = async ({
 export const fetchFileMappings = async ({
   characterId,
   userId,
+  sharedSchoolUserIds,
 }: {
   characterId: string;
   userId: string;
+  sharedSchoolUserIds?: ReadonlySet<string>;
 }): Promise<FileModel[]> => {
   checkParameterUUID(characterId);
   // Authorization check
@@ -191,6 +194,7 @@ export const fetchFileMappings = async ({
   await verifyReadAccess({
     item: character,
     userId,
+    sharedSchoolUserIds,
   });
 
   // Fetch and return related files
@@ -506,11 +510,19 @@ export const getCharacterForEditView = async ({
   checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdOptionalShareData({ characterId, userId });
   if (!character) throw new NotFoundError('Character not found');
-  await verifyReadAccess({ item: character, userId });
+  const sharedSchoolUserIds =
+    !character.hasLinkAccess &&
+    character.accessLevel === 'school' &&
+    character.userId &&
+    character.userId !== userId
+      ? new Set(await dbGetUserIdsWithSharedSchools(userId))
+      : undefined;
+  await verifyReadAccess({ item: character, userId, sharedSchoolUserIds });
 
   const relatedFiles = await fetchFileMappings({
     characterId,
     userId,
+    sharedSchoolUserIds,
   });
   const maybeSignedPictureUrl = await getReadOnlySignedUrl({
     key: character.pictureId,

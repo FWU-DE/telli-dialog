@@ -17,6 +17,7 @@ import {
   dbGetLearningScenariosByUserId,
   dbGetSharedLearningScenarioConversations,
 } from '@shared/db/functions/learning-scenario';
+import { dbGetUserIdsWithSharedSchools } from '@shared/db/helpers/school-sharing';
 import {
   AccessLevel,
   accessLevelSchema,
@@ -385,11 +386,19 @@ export async function getLearningScenario({
     userId: user.id,
   });
   if (!learningScenario) throw new NotFoundError('Learning scenario not found');
-  await verifyReadAccess({ item: learningScenario, userId: user.id });
+  const sharedSchoolUserIds =
+    !learningScenario.hasLinkAccess &&
+    learningScenario.accessLevel === 'school' &&
+    learningScenario.userId &&
+    learningScenario.userId !== user.id
+      ? new Set(await dbGetUserIdsWithSharedSchools(user.id))
+      : undefined;
+  await verifyReadAccess({ item: learningScenario, userId: user.id, sharedSchoolUserIds });
 
   const relatedFiles = await getFilesForLearningScenario({
     learningScenarioId,
     user,
+    sharedSchoolUserIds,
   });
   const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
   return { learningScenario, relatedFiles, avatarPictureUrl };
@@ -408,9 +417,11 @@ export async function getLearningScenario({
 export async function getFilesForLearningScenario({
   learningScenarioId,
   user,
+  sharedSchoolUserIds,
 }: {
   learningScenarioId: string;
   user: Pick<UserModel, 'id' | 'userRole'>;
+  sharedSchoolUserIds?: ReadonlySet<string>;
 }): Promise<FileModel[]> {
   checkParameterUUID(learningScenarioId);
   requireTeacherRole(user.userRole);
@@ -418,6 +429,7 @@ export async function getFilesForLearningScenario({
   await verifyReadAccess({
     item: learningScenario,
     userId: user.id,
+    sharedSchoolUserIds,
   });
 
   return dbGetFilesForLearningScenario(learningScenarioId);

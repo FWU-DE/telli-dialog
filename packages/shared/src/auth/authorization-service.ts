@@ -8,13 +8,17 @@ type AuthorizedItem = {
   userId: string | null;
 };
 
+type VerifyReadAccessParams<T extends AuthorizedItem> = {
+  item: T;
+  userId?: string;
+  sharedSchoolUserIds?: ReadonlySet<string>;
+};
+
 export async function verifyReadAccess<T extends AuthorizedItem>({
   item,
   userId,
-}: {
-  item: T;
-  userId?: string;
-}) {
+  sharedSchoolUserIds,
+}: VerifyReadAccessParams<T>) {
   // allow access if shared by link
   if (item.hasLinkAccess) return;
   // allow access if shared globally
@@ -23,12 +27,14 @@ export async function verifyReadAccess<T extends AuthorizedItem>({
   if (item.userId && item.userId === userId) return;
   // allow if school-shared
   if (item.accessLevel === 'school') {
-    if (
-      userId &&
-      item.userId &&
-      (await dbGetUserIdsWithSharedSchools(userId)).includes(item.userId)
-    )
-      return;
+    if (!userId || !item.userId) {
+      throw new ForbiddenError('Not authorized for read access');
+    }
+
+    const schoolSharedUserIds =
+      sharedSchoolUserIds ?? new Set(await dbGetUserIdsWithSharedSchools(userId));
+
+    if (schoolSharedUserIds.has(item.userId)) return;
   }
 
   throw new ForbiddenError('Not authorized for read access');

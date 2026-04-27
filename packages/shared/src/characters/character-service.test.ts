@@ -32,6 +32,7 @@ import {
   copyEntityPictureIfExists,
   copyRelatedTemplateFiles,
 } from '../templates/template-service';
+import { dbGetUserIdsWithSharedSchools } from '@shared/db/helpers/school-sharing';
 
 vi.mock('../db/functions/character', () => ({
   dbGetSharedCharacterConversations: vi.fn(),
@@ -62,6 +63,9 @@ vi.mock('../templates/template-service', () => ({
   copyEntityPictureIfExists: vi.fn(),
   copyRelatedTemplateFiles: vi.fn(),
 }));
+vi.mock('@shared/db/helpers/school-sharing', () => ({
+  dbGetUserIdsWithSharedSchools: vi.fn(),
+}));
 const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
   const mockDbWhere = vi.fn(() => ({ returning: mockDbReturning }));
@@ -84,6 +88,9 @@ const mockUser = (userRole: 'student' | 'teacher' = 'teacher') => ({
 describe('character-service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (
+      dbGetUserIdsWithSharedSchools as MockedFunction<typeof dbGetUserIdsWithSharedSchools>
+    ).mockResolvedValue([]);
   });
 
   describe('NotFoundError scenarios', () => {
@@ -285,6 +292,9 @@ describe('character-service', () => {
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
         mockCharacter as never,
       );
+      (
+        dbGetUserIdsWithSharedSchools as MockedFunction<typeof dbGetUserIdsWithSharedSchools>
+      ).mockResolvedValue([]);
 
       await expect(
         fetchFileMappings({
@@ -292,6 +302,35 @@ describe('character-service', () => {
           userId: 'different-user-id',
         }),
       ).rejects.toThrow(ForbiddenError);
+    });
+    it('should allow access when character access level is school and users share school - fetchFileMappings', async () => {
+      const characterId = generateUUID();
+      const ownerUserId = generateUUID();
+      const viewerUserId = generateUUID();
+
+      const mockCharacter: Partial<CharacterSelectModel> = {
+        userId: ownerUserId,
+        accessLevel: 'school',
+      };
+
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        mockCharacter as never,
+      );
+      (
+        dbGetUserIdsWithSharedSchools as MockedFunction<typeof dbGetUserIdsWithSharedSchools>
+      ).mockResolvedValue([ownerUserId]);
+      (
+        dbGetRelatedCharacterFiles as MockedFunction<typeof dbGetRelatedCharacterFiles>
+      ).mockResolvedValue([]);
+
+      await expect(
+        fetchFileMappings({
+          characterId,
+          userId: viewerUserId,
+        }),
+      ).resolves.toEqual([]);
+
+      expect(dbGetUserIdsWithSharedSchools).toHaveBeenCalledWith(viewerUserId);
     });
   });
 
@@ -607,7 +646,29 @@ describe('character-service', () => {
 
         expect(result.character).toBe(mockCharacter);
       });
+      it('getCharacterForChatSession - school character without link sharing but shared school', async () => {
+        const mockCharacter = {
+          id: characterId,
+          userId: ownerUserId,
+          accessLevel: 'school' as const,
+          hasLinkAccess: false,
+        };
 
+        (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+          mockCharacter as never,
+        );
+        (
+          dbGetUserIdsWithSharedSchools as MockedFunction<typeof dbGetUserIdsWithSharedSchools>
+        ).mockResolvedValue([ownerUserId]);
+
+        const result = await getCharacterForChatSession({
+          characterId,
+          userId: differentUserId,
+        });
+
+        expect(result).toBe(mockCharacter);
+        expect(dbGetUserIdsWithSharedSchools).toHaveBeenCalledWith(differentUserId);
+      });
       it.each([
         {
           accessLevel: 'private' as const,
