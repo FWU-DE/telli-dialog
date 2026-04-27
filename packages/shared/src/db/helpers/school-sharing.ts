@@ -1,4 +1,4 @@
-import { eq, sql } from 'drizzle-orm';
+import { arrayOverlaps, eq } from 'drizzle-orm';
 import { db } from '..';
 import { userTable } from '../schema';
 
@@ -26,17 +26,7 @@ export async function dbGetUserIdsWithSharedSchools(requestingUserId: string): P
   const users = await db
     .select({ id: userTable.id })
     .from(userTable)
-    // Compare against scalar placeholders to avoid array-cast placeholder issues in some runtimes.
-    .where(
-      sql`EXISTS (
-        SELECT 1
-        FROM unnest(${userTable.schoolIds}) AS school_id
-        WHERE school_id IN (${sql.join(
-          userSchoolIds.map((schoolId) => sql`${schoolId}`),
-          sql`, `,
-        )})
-      )`,
-    );
+    .where(arrayOverlaps(userTable.schoolIds, userSchoolIds));
 
   return users.map((user) => user.id);
 }
