@@ -43,12 +43,14 @@ type ChatHistoryItemProps = {
   conversation: ConversationModel;
   onUpdateConversation(name: string): void;
   onDeleteConversation(conversationId: string): void;
+  style?: React.CSSProperties;
 };
 
 export function ChatHistoryItem({
   conversation,
   onUpdateConversation,
   onDeleteConversation,
+  style,
 }: ChatHistoryItemProps) {
   const [isEditable, setIsEditable] = useState(false);
   const pathname = useCustomPathname();
@@ -97,7 +99,7 @@ export function ChatHistoryItem({
     : undefined;
 
   return (
-    <SidebarMenuItem>
+    <SidebarMenuItem style={style}>
       {isEditable && (
         <form className="w-full flex gap-1" onSubmit={renameForm.handleSubmit(onSubmit)}>
           <Input
