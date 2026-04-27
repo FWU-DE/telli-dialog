@@ -1,6 +1,6 @@
 {
-  "id": "c8526302-b8b7-49c6-a1ea-918a8cd843c2",
-  "prevId": "3da9e4e7-60d9-4158-ac7f-4e14e26ab3ef",
+  "id": "c15ef220-672c-47ae-826f-d815ec7f706c",
+  "prevId": "c8526302-b8b7-49c6-a1ea-918a8cd843c2",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -2701,6 +2701,12 @@
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
+        },
+        "stopped_at": {
+          "name": "stopped_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -2726,14 +2732,6 @@
           "nullsNotDistinct": false,
           "columns": [
             "invite_code"
-          ]
-        },
-        "shared_character_conversation_character_id_user_id_unique": {
-          "name": "shared_character_conversation_character_id_user_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "character_id",
-            "user_id"
           ]
         }
       },
@@ -2788,6 +2786,12 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+        },
+        "stopped_at": {
+          "name": "stopped_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -2826,14 +2830,6 @@
           "nullsNotDistinct": false,
           "columns": [
             "invite_code"
-          ]
-        },
-        "shared_learning_scenario_learning_scenario_id_user_id_unique": {
-          "name": "shared_learning_scenario_learning_scenario_id_user_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "learning_scenario_id",
-            "user_id"
           ]
         }
       },

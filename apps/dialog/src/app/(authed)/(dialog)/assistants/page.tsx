@@ -1,6 +1,5 @@
 import { requireAuth } from '@/auth/requireAuth';
 import AssistantOverview from './assistant-overview';
-import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 import { buildLegacyUserAndContext } from '@/auth/types';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
@@ -11,9 +10,7 @@ export default async function Page() {
   const userAndContext = buildLegacyUserAndContext(user, school, federalState);
 
   return (
-    <DefaultPageLayout>
-      <CustomChatHeader userAndContext={userAndContext} />
-
+    <DefaultPageLayout userAndContext={userAndContext}>
       <AssistantOverview currentUserId={user.id} />
     </DefaultPageLayout>
   );

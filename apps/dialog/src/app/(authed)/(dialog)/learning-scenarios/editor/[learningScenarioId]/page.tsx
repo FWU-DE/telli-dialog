@@ -5,7 +5,6 @@ import { handleErrorInServerComponent } from '@/error/handle-error-in-server-com
 import { WebsearchSource } from '@shared/db/types';
 import { LearningScenarioEdit } from './learning-scenario-edit';
 import { redirect } from 'next/navigation';
-import CustomChatHeader from '@/components/custom-chat/custom-chat-header';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
@@ -39,8 +38,7 @@ export default async function Page(
     );
 
   return (
-    <DefaultPageLayout>
-      <CustomChatHeader userAndContext={userAndContext} />
+    <DefaultPageLayout userAndContext={userAndContext}>
       <LearningScenarioEdit
         learningScenario={learningScenario}
         relatedFiles={relatedFiles}
