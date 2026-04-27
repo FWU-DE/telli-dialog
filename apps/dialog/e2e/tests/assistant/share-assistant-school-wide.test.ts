@@ -1,0 +1,107 @@
+import { expect, test } from '@playwright/test';
+import { AUTH_FILES } from '../../utils/const';
+import { configureAssistant } from '../../utils/assistant';
+import { nanoid } from 'nanoid';
+
+const assistantTeacher = 'Assistant by teacher - ' + nanoid(8);
+const assistantTeacher2 = 'Assistant by teacher2 - ' + nanoid(8);
+const assistantTeacher3 = 'Assistant by teacher3 - ' + nanoid(8);
+
+test.describe('share assistant school-wide', () => {
+  test.beforeAll(async ({ browser }) => {
+    // Create assistant as teacher (shared to school1)
+    let page = await browser.newPage({ storageState: AUTH_FILES.teacher });
+    await page.goto('/assistants');
+    await page.waitForURL('/assistants');
+    const createButton = page.getByRole('button', { name: 'Assistent erstellen' });
+    await expect(createButton).toBeVisible();
+    await createButton.click();
+    await page.waitForURL('/assistants/editor/**');
+    await configureAssistant(page, {
+      name: assistantTeacher,
+      description: 'Created by teacher',
+      instructions: 'Teacher assistant',
+    });
+    await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await page.close();
+
+    // Create assistant as teacher2 (shared to school1 & school2)
+    page = await browser.newPage({ storageState: AUTH_FILES.teacher2 });
+    await page.goto('/assistants');
+    await page.waitForURL('/assistants');
+    await expect(page.getByRole('button', { name: 'Assistent erstellen' })).toBeVisible();
+    await page.getByRole('button', { name: 'Assistent erstellen' }).click();
+    await page.waitForURL('/assistants/editor/**');
+    await configureAssistant(page, {
+      name: assistantTeacher2,
+      description: 'Created by teacher2',
+      instructions: 'Teacher2 assistant',
+    });
+    await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await page.close();
+
+    // Create assistant as teacher3 (shared to school2 & school3)
+    page = await browser.newPage({ storageState: AUTH_FILES.teacher3 });
+    await page.goto('/assistants');
+    await page.waitForURL('/assistants');
+    await expect(page.getByRole('button', { name: 'Assistent erstellen' })).toBeVisible();
+    await page.getByRole('button', { name: 'Assistent erstellen' }).click();
+    await page.waitForURL('/assistants/editor/**');
+    await configureAssistant(page, {
+      name: assistantTeacher3,
+      description: 'Created by teacher3',
+      instructions: 'Teacher3 assistant',
+    });
+    await page.getByRole('checkbox', { name: 'Schulintern' }).click();
+    await page.close();
+  });
+
+  // Teacher's perspective (school1)
+  test.use({ storageState: AUTH_FILES.teacher });
+
+  test('teacher sees assistant shared by teacher2 (same school)', async ({ page }) => {
+    await page.goto('/assistants');
+    await page.waitForURL('/assistants');
+    await expect(page.getByText(assistantTeacher2).first()).toBeVisible();
+  });
+
+  test('teacher does not see assistant shared by teacher3 (different schools)', async ({
+    page,
+  }) => {
+    await page.goto('/assistants');
+    await page.waitForURL('/assistants');
+    await expect(page.getByText(assistantTeacher3).first()).not.toBeVisible();
+  });
+
+  // Teacher2's perspective (school1 & school2)
+  test.use({ storageState: AUTH_FILES.teacher2 });
+
+  test('teacher2 sees assistant shared by teacher (shared school)', async ({ page }) => {
+    await page.goto('/assistants');
+    await page.waitForURL('/assistants');
+    await expect(page.getByText(assistantTeacher).first()).toBeVisible();
+  });
+
+  test('teacher2 sees assistant shared by teacher3 (shared school)', async ({ page }) => {
+    await page.goto('/assistants');
+    await page.waitForURL('/assistants');
+    await expect(page.getByText(assistantTeacher3).first()).toBeVisible();
+  });
+
+  // Teacher3's perspective (school2 & school3)
+  test.use({ storageState: AUTH_FILES.teacher3 });
+
+  test('teacher3 sees assistant shared by teacher2 (shared school)', async ({ page }) => {
+    await page.goto('/assistants');
+    await page.waitForURL('/assistants');
+    await expect(page.getByText(assistantTeacher2).first()).toBeVisible();
+  });
+
+  test('teacher3 does not see assistant shared by teacher (different schools)', async ({
+    page,
+  }) => {
+    await page.goto('/assistants');
+    await page.waitForURL('/assistants');
+    await expect(page.getByText(assistantTeacher).first()).not.toBeVisible();
+  });
+});
