@@ -656,9 +656,9 @@ describe('learning-scenario-service', () => {
     });
 
     it('throws ForbiddenError when the teacher has no active share to stop', async () => {
-      await expect(
-        unshareLearningScenario({ learningScenarioId, user }),
-      ).rejects.toThrow(ForbiddenError);
+      await expect(unshareLearningScenario({ learningScenarioId, user })).rejects.toThrow(
+        ForbiddenError,
+      );
     });
   });
 

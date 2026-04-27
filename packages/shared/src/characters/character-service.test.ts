@@ -849,7 +849,9 @@ describe('character-service', () => {
 
     beforeEach(() => {
       (
-        dbGetSharedCharacterConversations as MockedFunction<typeof dbGetSharedCharacterConversations>
+        dbGetSharedCharacterConversations as MockedFunction<
+          typeof dbGetSharedCharacterConversations
+        >
       ).mockResolvedValue([stoppedShare] as never);
       mockDbReturning.mockResolvedValue([stoppedShare]);
     });

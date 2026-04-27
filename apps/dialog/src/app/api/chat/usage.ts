@@ -104,7 +104,7 @@ export function sharedChatHasExpired({
   stoppedAt?: Date | null;
 }) {
   // Manually stopped by the teacher
-  if (stoppedAt != null) {
+  if (stoppedAt !== null) {
     return true;
   }
 

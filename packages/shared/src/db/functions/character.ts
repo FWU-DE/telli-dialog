@@ -36,16 +36,11 @@ function latestActiveCharacterShare(userId: string) {
         isNull(sharedCharacterConversation.stoppedAt),
       ),
     )
-    .orderBy(
-      sharedCharacterConversation.characterId,
-      desc(sharedCharacterConversation.startedAt),
-    )
+    .orderBy(sharedCharacterConversation.characterId, desc(sharedCharacterConversation.startedAt))
     .as('latest_active_char_share');
 }
 
-function baseCharacterWithShareQuery(
-  activeShare: ReturnType<typeof latestActiveCharacterShare>,
-) {
+function baseCharacterWithShareQuery(activeShare: ReturnType<typeof latestActiveCharacterShare>) {
   return db
     .select({
       ...getTableColumns(characterTable),
@@ -217,12 +212,7 @@ export async function dbGetCharactersBySchoolId({
   const activeShare = latestActiveCharacterShare(userId);
   const characters = await baseCharacterWithShareQuery(activeShare)
     .leftJoin(activeShare, eq(activeShare.characterId, characterTable.id))
-    .where(
-      and(
-        eq(characterTable.schoolId, schoolId),
-        eq(characterTable.accessLevel, 'school'),
-      ),
-    )
+    .where(and(eq(characterTable.schoolId, schoolId), eq(characterTable.accessLevel, 'school')))
     .orderBy(desc(characterTable.createdAt));
 
   return characters;

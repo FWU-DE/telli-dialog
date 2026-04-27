@@ -11,7 +11,7 @@ export function calculateTimeLeft({
   maxUsageTimeLimit: number | null;
   stoppedAt?: Date | null;
 }) {
-  if (stoppedAt != null) {
+  if (stoppedAt !== null) {
     return -1;
   }
 
