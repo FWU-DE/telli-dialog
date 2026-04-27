@@ -25,14 +25,12 @@ import { buildLearningScenarioPictureKey } from '@shared/utils/picture-key';
  */
 export async function duplicateLearningScenario({
   accessLevel,
-  schoolId,
   userId,
   originalLearningScenarioId,
   duplicateLearningScenarioName,
 }: {
   accessLevel: AccessLevel | undefined;
   originalLearningScenarioId: string;
-  schoolId: string;
   userId: string;
   duplicateLearningScenarioName?: string;
 }) {
@@ -63,7 +61,6 @@ export async function duplicateLearningScenario({
     name: duplicateLearningScenarioName ?? expectedValues.name,
     originalLearningScenarioId,
     pictureId: avatarPictureUrl,
-    schoolId,
     userId,
   };
 

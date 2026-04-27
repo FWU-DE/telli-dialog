@@ -8,7 +8,7 @@ import {
   dbGetCharacterByIdOptionalShareData,
   dbGetCharacterByIdWithShareData,
   dbGetCharacters,
-  dbGetCharactersBySchoolId,
+  dbGetCharactersByAssociatedSchools,
   dbGetCharactersByUserId,
   dbGetGlobalCharacters,
   dbGetSharedCharacterConversations,
@@ -48,7 +48,7 @@ import { OverviewFilter } from '@shared/overview-filter';
 import { addDays } from '@shared/utils/date';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
-import { and, eq, inArray, lt } from 'drizzle-orm';
+import { and, eq, lt } from 'drizzle-orm';
 import z from 'zod';
 import { computeBlobHash } from '@telli/shared-core/crypto/blob-hash';
 import {
@@ -67,14 +67,12 @@ function buildAvatarFilename(hash: string) {
 export const createNewCharacter = async ({
   federalStateId,
   modelId: _modelId,
-  schoolId,
   user,
   templateId,
   duplicateCharacterName,
 }: {
   federalStateId: string;
   modelId?: string;
-  schoolId: string;
   user: UserModel;
   templateId?: string;
   duplicateCharacterName?: string;
@@ -86,7 +84,6 @@ export const createNewCharacter = async ({
       templateId,
       'private',
       user.id,
-      schoolId,
       duplicateCharacterName,
     );
 
@@ -133,7 +130,6 @@ export const createNewCharacter = async ({
       id: characterId,
       name: '',
       userId: user.id,
-      schoolId: schoolId,
       modelId: model.id,
     })
     .returning();
@@ -185,18 +181,15 @@ export const deleteFileMappingAndEntity = async ({
 export const fetchFileMappings = async ({
   characterId,
   userId,
-  schoolIds,
 }: {
   characterId: string;
   userId: string;
-  schoolIds?: string[];
 }): Promise<FileModel[]> => {
   checkParameterUUID(characterId);
   // Authorization check
   const { character } = await getCharacterInfo(characterId, userId);
-  verifyReadAccess({
+  await verifyReadAccess({
     item: character,
-    schoolIds,
     userId,
   });
 
@@ -280,7 +273,6 @@ const updateCharacterSchema = characterUpdateSchema.omit({
   isDeleted: true,
   originalCharacterId: true,
   pictureId: true,
-  schoolId: true,
 });
 export type UpdateCharacterActionModel = z.infer<typeof updateCharacterSchema>;
 
@@ -354,22 +346,19 @@ export const shareCharacter = async ({
   user,
   telliPointsPercentageLimit,
   usageTimeLimitMinutes,
-  schoolIds,
 }: {
   characterId: string;
   user: Pick<UserModel, 'id' | 'userRole'>;
   telliPointsPercentageLimit: number;
   usageTimeLimitMinutes: number;
-  schoolIds?: string[];
 }) => {
   checkParameterUUID(characterId);
   // Authorization check: user must be a teacher and owner of the character or it is global
   requireTeacherRole(user.userRole);
 
   const { character } = await getCharacterInfo(characterId, user.id);
-  verifyReadAccess({
+  await verifyReadAccess({
     item: character,
-    schoolIds,
     userId: user.id,
   });
 
@@ -381,17 +370,25 @@ export const shareCharacter = async ({
     throw new Error('usage time limit must be between 1 and 43200 minutes');
   }
 
-  const activeShares = await dbGetSharedCharacterConversations({ characterId, userId: user.id });
-  if (activeShares.length > 0) throw new Error('There can only be one active share at a time');
+  // share character instance
+  const [maybeExistingEntry] = await db
+    .select()
+    .from(sharedCharacterConversation)
+    .where(
+      and(
+        eq(sharedCharacterConversation.userId, user.id),
+        eq(sharedCharacterConversation.characterId, characterId),
+      ),
+    );
 
   const telliPointsLimit = telliPointsPercentageLimit;
   const maxUsageTimeLimit = usageTimeLimitMinutes;
   const inviteCode = generateInviteCode();
   const startedAt = new Date();
-
-  const [newSharedChat] = await db
+  const [updatedSharedChat] = await db
     .insert(sharedCharacterConversation)
     .values({
+      id: maybeExistingEntry?.id,
       userId: user.id,
       characterId,
       telliPointsLimit,
@@ -399,13 +396,17 @@ export const shareCharacter = async ({
       inviteCode,
       startedAt,
     })
+    .onConflictDoUpdate({
+      target: sharedCharacterConversation.id,
+      set: { inviteCode, startedAt, maxUsageTimeLimit, telliPointsLimit },
+    })
     .returning();
 
-  if (newSharedChat === undefined) {
+  if (updatedSharedChat === undefined) {
     throw new Error('Could not share character chat');
   }
 
-  return newSharedChat;
+  return updatedSharedChat;
 };
 
 /**
@@ -427,14 +428,18 @@ export const unshareCharacter = async ({
     userId: user.id,
   });
   if (sharedConversations.length === 0)
-    throw new NotFoundError('No active sharing found for this character');
+    throw new ForbiddenError('Not authorized to stop this shared character instance');
 
-  // unshare character instance by setting manuallyStoppedAt
-  const sharedConversationIds = sharedConversations.map((s) => s.id);
+  // unshare character instance by setting startedAt to null
   const [updatedCharacter] = await db
     .update(sharedCharacterConversation)
-    .set({ manuallyStoppedAt: new Date() })
-    .where(inArray(sharedCharacterConversation.id, sharedConversationIds))
+    .set({ startedAt: null, maxUsageTimeLimit: null, telliPointsLimit: null })
+    .where(
+      and(
+        eq(sharedCharacterConversation.characterId, characterId),
+        eq(sharedCharacterConversation.userId, user.id),
+      ),
+    )
     .returning();
 
   if (!updatedCharacter) {
@@ -459,18 +464,15 @@ export const unshareCharacter = async ({
 export const getCharacterForChatSession = async ({
   characterId,
   userId,
-  schoolIds,
 }: {
   characterId: string;
   userId: string;
-  schoolIds?: string[];
 }) => {
   checkParameterUUID(characterId);
   const character = await dbGetCharacterById({ characterId });
   if (!character) throw new NotFoundError('Character not found');
-  verifyReadAccess({
+  await verifyReadAccess({
     item: character,
-    schoolIds,
     userId,
   });
 
@@ -490,11 +492,11 @@ export const getCharacterForChatSession = async ({
  */
 export const getCharacterForEditView = async ({
   characterId,
-  schoolIds,
+
   userId,
 }: {
   characterId: string;
-  schoolIds?: string[];
+
   userId: string;
 }): Promise<{
   character: CharacterOptionalShareDataModel;
@@ -504,12 +506,11 @@ export const getCharacterForEditView = async ({
   checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdOptionalShareData({ characterId, userId });
   if (!character) throw new NotFoundError('Character not found');
-  verifyReadAccess({ item: character, schoolIds, userId });
+  await verifyReadAccess({ item: character, userId });
 
   const relatedFiles = await fetchFileMappings({
     characterId,
     userId,
-    schoolIds,
   });
   const maybeSignedPictureUrl = await getReadOnlySignedUrl({
     key: character.pictureId,
@@ -543,31 +544,24 @@ export const getSharedCharacter = async ({
  * - character is not deleted
  */
 export async function getCharacters({
-  schoolIds,
   userId,
 }: {
-  schoolIds?: string[];
   userId: string;
 }): Promise<CharacterSelectModel[]> {
-  const characters = await dbGetCharacters({
-    userId,
-    schoolIds: schoolIds ?? [],
-  });
+  const characters = await dbGetCharacters({ userId });
   return characters;
 }
 
 /**
  * Returns the list of available characters that the user can access
- * based on userId, schoolIds, federalStateId and access level.
+ * based on userId, schools associated with the user, federalStateId and access level.
  */
 export async function getCharacterByAccessLevel({
   accessLevel,
-  schoolIds,
   userId,
   federalStateId,
 }: {
   accessLevel: AccessLevel;
-  schoolIds?: string[];
   userId: string;
   federalStateId: string;
 }): Promise<CharacterOptionalShareDataModel[]> {
@@ -575,7 +569,7 @@ export async function getCharacterByAccessLevel({
     case 'global':
       return dbGetGlobalCharacters({ userId, federalStateId });
     case 'school':
-      return dbGetCharactersBySchoolId({ schoolIds: schoolIds ?? [], userId });
+      return dbGetCharactersByAssociatedSchools({ userId });
     case 'private':
       return dbGetCharactersByUserId({ userId });
     default:
@@ -585,24 +579,22 @@ export async function getCharacterByAccessLevel({
 
 export async function getCharactersByOverviewFilter({
   filter,
-  schoolIds,
   userId,
   federalStateId,
 }: {
   filter: OverviewFilter;
-  schoolIds?: string[];
   userId: string;
   federalStateId: string;
 }): Promise<CharacterOptionalShareDataModel[]> {
   switch (filter) {
     case 'all':
-      return dbGetAllAccessibleCharacters({ userId, schoolIds: schoolIds ?? [], federalStateId });
+      return dbGetAllAccessibleCharacters({ userId, federalStateId });
     case 'mine':
       return await dbGetAllCharactersByUserId({ userId });
     case 'official':
       return await dbGetGlobalCharacters({ userId, federalStateId });
     case 'school':
-      return await dbGetCharactersBySchoolId({ schoolIds: schoolIds ?? [], userId });
+      return await dbGetCharactersByAssociatedSchools({ userId });
     default:
       return [];
   }
@@ -714,21 +706,20 @@ export async function uploadAvatarPictureForCharacter({
 export async function downloadFileFromCharacter({
   characterId,
   fileId,
-  schoolIds,
+
   user,
 }: {
   characterId: string;
   fileId: string;
-  schoolIds?: string[];
+
   user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
   checkParameterUUID(characterId);
   requireTeacherRole(user.userRole);
   const { character } = await getCharacterInfo(characterId, user.id);
   if (!character) throw new NotFoundError('Character not found');
-  verifyReadAccess({
+  await verifyReadAccess({
     item: character,
-    schoolIds,
     userId: user.id,
   });
 

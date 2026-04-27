@@ -11,6 +11,7 @@ import {
   fileTable,
 } from '../schema';
 import { NotFoundError } from '@shared/error';
+import { dbGetUserIdsWithSharedSchools } from '../helpers/school-sharing';
 
 export async function dbGetAssistantsByUserId({
   userId,
@@ -76,12 +77,15 @@ export async function dbGetGlobalAssistantByName({
   return assistant;
 }
 
-export async function dbGetGptsBySchoolIds({
-  schoolIds,
+export async function dbGetGptsByAssociatedSchools({
+  userId,
 }: {
-  schoolIds: string[];
+  userId: string;
 }): Promise<AssistantSelectModel[]> {
-  if (schoolIds.length === 0) {
+  // Get all users who share at least one school with the requesting user
+  const sharedUserIds = await dbGetUserIdsWithSharedSchools(userId);
+
+  if (sharedUserIds.length === 0) {
     return [];
   }
 
@@ -89,7 +93,7 @@ export async function dbGetGptsBySchoolIds({
     .select()
     .from(assistantTable)
     .where(
-      and(inArray(assistantTable.schoolId, schoolIds), eq(assistantTable.accessLevel, 'school')),
+      and(inArray(assistantTable.userId, sharedUserIds), eq(assistantTable.accessLevel, 'school')),
     )
     .orderBy(desc(assistantTable.createdAt));
 }
@@ -106,15 +110,15 @@ export async function dbGetGptsByUserId({
     .orderBy(desc(assistantTable.createdAt));
 }
 
-export async function dbGetAssistantByIdOrSchoolId({
+export async function dbGetAssistantByIdOrAssociatedSchool({
   assistantId: characterId,
   userId,
-  schoolIds,
 }: {
   assistantId: string;
   userId: string;
-  schoolIds: string[];
 }) {
+  const sharedUserIds = await dbGetUserIdsWithSharedSchools(userId);
+
   const [character] = await db
     .select()
     .from(assistantTable)
@@ -125,10 +129,10 @@ export async function dbGetAssistantByIdOrSchoolId({
           eq(assistantTable.userId, userId),
           eq(assistantTable.accessLevel, 'private'),
         ),
-        schoolIds.length > 0
+        sharedUserIds.length > 0
           ? and(
               eq(assistantTable.id, characterId),
-              inArray(assistantTable.schoolId, schoolIds),
+              inArray(assistantTable.userId, sharedUserIds),
               eq(assistantTable.accessLevel, 'school'),
             )
           : undefined,

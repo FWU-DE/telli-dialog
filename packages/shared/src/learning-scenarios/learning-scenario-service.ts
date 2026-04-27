@@ -13,7 +13,7 @@ import {
   dbGetLearningScenarioById,
   dbGetLearningScenarioByIdOptionalShareData,
   dbGetLearningScenarioByIdWithShareData,
-  dbGetLearningScenariosBySchoolId,
+  dbGetLearningScenariosByAssociatedSchools,
   dbGetLearningScenariosByUserId,
   dbGetSharedLearningScenarioConversations,
 } from '@shared/db/functions/learning-scenario';
@@ -40,7 +40,7 @@ import { buildLearningScenarioPictureKey } from '@shared/utils/picture-key';
 import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { OverviewFilter } from '@shared/overview-filter';
 import z from 'zod';
 import { duplicateLearningScenario } from '@shared/learning-scenarios/learning-scenario-admin-service';
@@ -79,16 +79,14 @@ export async function getLearningScenariosForUser({
 
 /**
  * Returns the list of available learning scenarios that the user can access
- * based on userId, schoolIds, federalStateId, and access level.
+ * based on userId, schools associated with the user, federalStateId, and access level.
  */
 export async function getLearningScenariosByAccessLevel({
   accessLevel,
-  schoolIds,
   userId,
   federalStateId,
 }: {
   accessLevel: AccessLevel;
-  schoolIds?: string[];
   userId: string;
   federalStateId: string;
 }): Promise<LearningScenarioOptionalShareDataModel[]> {
@@ -96,7 +94,7 @@ export async function getLearningScenariosByAccessLevel({
     case 'global':
       return dbGetGlobalLearningScenarios({ userId, federalStateId });
     case 'school':
-      return dbGetLearningScenariosBySchoolId({ schoolIds: schoolIds ?? [], userId });
+      return dbGetLearningScenariosByAssociatedSchools({ userId });
     case 'private':
       return dbGetLearningScenariosByUserId({ userId });
     default:
@@ -106,12 +104,10 @@ export async function getLearningScenariosByAccessLevel({
 
 export async function getLearningScenariosByOverviewFilter({
   filter,
-  schoolIds,
   userId,
   federalStateId,
 }: {
   filter: OverviewFilter;
-  schoolIds?: string[];
   userId: string;
   federalStateId: string;
 }): Promise<LearningScenarioOptionalShareDataModel[]> {
@@ -119,7 +115,6 @@ export async function getLearningScenariosByOverviewFilter({
     case 'all':
       return dbGetAllAccessibleLearningScenarios({
         userId,
-        schoolIds: schoolIds ?? [],
         federalStateId,
       });
     case 'mine':
@@ -127,7 +122,7 @@ export async function getLearningScenariosByOverviewFilter({
     case 'official':
       return await dbGetGlobalLearningScenarios({ userId, federalStateId });
     case 'school':
-      return await dbGetLearningScenariosBySchoolId({ schoolIds: schoolIds ?? [], userId });
+      return await dbGetLearningScenariosByAssociatedSchools({ userId });
     default:
       return [];
   }
@@ -190,7 +185,6 @@ const updateLearningScenarioSchema = learningScenarioUpdateSchema.omit({
   isDeleted: true,
   originalLearningScenarioId: true,
   pictureId: true,
-  schoolId: true,
 });
 export type UpdateLearningScenarioActionModel = z.infer<typeof updateLearningScenarioSchema>;
 
@@ -285,11 +279,11 @@ export type LearningScenarioShareValues = z.infer<typeof learningScenarioShareVa
 export async function shareLearningScenario({
   learningScenarioId,
   data,
-  schoolIds,
   user,
 }: {
   learningScenarioId: string;
   data: LearningScenarioShareValues;
+  schoolId?: string;
   schoolIds?: string[];
   user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
@@ -298,23 +292,15 @@ export async function shareLearningScenario({
   requireTeacherRole(user.userRole);
 
   const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
-  verifyReadAccess({
+  await verifyReadAccess({
     item: learningScenario,
-    schoolIds,
     userId: user.id,
   });
 
   const parsedValues = learningScenarioShareValuesSchema.parse(data);
 
-  const activeShares = await dbGetSharedLearningScenarioConversations({
-    learningScenarioId,
-    userId: user.id,
-  });
-  if (activeShares.length > 0) throw new Error('There can only be one active share at a time');
-
   const inviteCode = generateInviteCode();
   const startedAt = new Date();
-
   const sharedLearningScenario = await dbCreateLearningScenarioShare({
     userId: user.id,
     learningScenarioId,
@@ -352,13 +338,17 @@ export async function unshareLearningScenario({
     userId: user.id,
   });
   if (sharedConversations.length === 0)
-    throw new NotFoundError('No active sharing found for this learning scenario');
+    throw new ForbiddenError('Not authorized to stop this shared learning scenario instance');
 
-  const sharedConversationIds = sharedConversations.map((s) => s.id);
   const [updatedShare] = await db
     .update(sharedLearningScenarioTable)
-    .set({ manuallyStoppedAt: new Date() })
-    .where(inArray(sharedLearningScenarioTable.id, sharedConversationIds))
+    .set({ startedAt: null, maxUsageTimeLimit: null, telliPointsLimit: null })
+    .where(
+      and(
+        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
+        eq(sharedLearningScenarioTable.userId, user.id),
+      ),
+    )
     .returning();
 
   if (!updatedShare) {
@@ -381,11 +371,9 @@ export async function unshareLearningScenario({
  */
 export async function getLearningScenario({
   learningScenarioId,
-  schoolIds,
   user,
 }: {
   learningScenarioId: string;
-  schoolIds?: string[];
   user: Pick<UserModel, 'id' | 'userRole'>;
 }): Promise<{
   learningScenario: LearningScenarioOptionalShareDataModel;
@@ -399,11 +387,10 @@ export async function getLearningScenario({
     userId: user.id,
   });
   if (!learningScenario) throw new NotFoundError('Learning scenario not found');
-  verifyReadAccess({ item: learningScenario, schoolIds, userId: user.id });
+  await verifyReadAccess({ item: learningScenario, userId: user.id });
 
   const relatedFiles = await getFilesForLearningScenario({
     learningScenarioId,
-    schoolIds,
     user,
   });
   const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
@@ -422,19 +409,16 @@ export async function getLearningScenario({
  */
 export async function getFilesForLearningScenario({
   learningScenarioId,
-  schoolIds,
   user,
 }: {
   learningScenarioId: string;
-  schoolIds?: string[];
   user: Pick<UserModel, 'id' | 'userRole'>;
 }): Promise<FileModel[]> {
   checkParameterUUID(learningScenarioId);
   requireTeacherRole(user.userRole);
   const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
-  verifyReadAccess({
+  await verifyReadAccess({
     item: learningScenario,
-    schoolIds,
     userId: user.id,
   });
 
@@ -447,7 +431,6 @@ export async function getFilesForLearningScenario({
 export async function createNewLearningScenario({
   modelId,
   user,
-  schoolId,
 }: {
   modelId: string;
   user: Pick<UserModel, 'id' | 'userRole'>;
@@ -462,7 +445,6 @@ export async function createNewLearningScenario({
       pictureId: '',
       modelId,
       userId: user.id,
-      schoolId,
     })
     .returning();
 
@@ -654,31 +636,26 @@ export async function uploadAvatarPictureForLearningScenario({
  * @returns the newly created learning scenario
  */
 export async function createNewLearningScenarioFromTemplate({
-  schoolId,
-  schoolIds,
   user,
   originalLearningScenarioId,
   duplicateLearningScenarioName,
 }: {
   originalLearningScenarioId: string;
-  schoolId: string;
-  schoolIds?: string[];
+
   user: Pick<UserModel, 'id' | 'userRole'>;
   duplicateLearningScenarioName?: string;
 }) {
   checkParameterUUID(originalLearningScenarioId);
   requireTeacherRole(user.userRole);
   const { learningScenario } = await getLearningScenarioInfo(originalLearningScenarioId, user.id);
-  verifyReadAccess({
+  await verifyReadAccess({
     item: learningScenario,
-    schoolIds: schoolIds ?? (schoolId ? [schoolId] : []),
     userId: user.id,
   });
 
   return duplicateLearningScenario({
     accessLevel: 'private',
     originalLearningScenarioId,
-    schoolId,
     userId: user.id,
     duplicateLearningScenarioName,
   });
@@ -694,20 +671,17 @@ export async function createNewLearningScenarioFromTemplate({
 export async function downloadFileFromLearningScenario({
   learningScenarioId,
   fileId,
-  schoolIds,
   user,
 }: {
   learningScenarioId: string;
   fileId: string;
-  schoolIds?: string[];
   user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
   checkParameterUUID(learningScenarioId);
   requireTeacherRole(user.userRole);
   const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
-  verifyReadAccess({
+  await verifyReadAccess({
     item: learningScenario,
-    schoolIds,
     userId: user.id,
   });
 

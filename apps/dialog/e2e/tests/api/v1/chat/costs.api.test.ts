@@ -201,7 +201,6 @@ test.describe('costs', () => {
       ...mockCharacter(),
       userId: user.id,
       modelId: model.id,
-      schoolId: 'test_school1',
       accessLevel: 'private' as const,
       startedAt: new Date(),
       manuallyStoppedAt: null,
