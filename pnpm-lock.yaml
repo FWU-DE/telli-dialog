@@ -379,7 +379,7 @@ importers:
         specifier: 0.16.45
         version: 0.16.45
       linkup-sdk:
-        specifier: ^2.7.0
+        specifier: 2.7.0
         version: 2.7.0
       mammoth:
         specifier: 1.12.0
