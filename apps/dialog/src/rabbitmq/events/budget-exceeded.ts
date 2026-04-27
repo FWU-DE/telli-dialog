@@ -26,7 +26,6 @@ export function constructTelliBudgetExceededEvent(
   return {
     event_type: 'telli_monthly_token_budget_exceeded' as const,
     pseudonym_id: hashWithoutSalt(props.user.id),
-    school_id: props.user.schoolIds?.[0] ?? '',
     federal_state: props.user.federalState.id,
     timestamp: new Date(),
     user_role: props.user.userRole,

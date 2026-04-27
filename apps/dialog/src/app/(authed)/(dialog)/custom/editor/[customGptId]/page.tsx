@@ -20,7 +20,6 @@ export default async function Page(props: PageProps<'/custom/editor/[customGptId
 
   const { assistant } = await getAssistantByUser({
     assistantId,
-    schoolIds: user.schoolIds ?? [],
     userId: user.id,
   }).catch(handleErrorInServerComponent);
 

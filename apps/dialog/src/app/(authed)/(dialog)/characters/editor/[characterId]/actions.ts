@@ -63,7 +63,6 @@ export async function shareCharacterAction({
     telliPointsPercentageLimit: telliPointsPercentageLimit,
     usageTimeLimitMinutes: usageTimeLimit,
     user: user,
-    schoolIds: user.schoolIds ?? [],
   });
 }
 
@@ -132,7 +131,6 @@ export async function downloadFileFromCharacterAction({
   return runServerAction(downloadFileFromCharacter)({
     characterId,
     fileId,
-    schoolIds: user.schoolIds ?? [],
     user,
   });
 }

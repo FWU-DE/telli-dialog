@@ -16,7 +16,6 @@ export default async function Page(
 
   const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenario({
     learningScenarioId: learningScenarioId,
-    schoolIds: user.schoolIds ?? [],
     user,
   }).catch(handleErrorInServerComponent);
   const readOnly = user.id !== learningScenario.userId;

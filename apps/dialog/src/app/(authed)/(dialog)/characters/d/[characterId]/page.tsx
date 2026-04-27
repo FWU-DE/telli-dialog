@@ -30,7 +30,6 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
   const character = await getCharacterForChatSession({
     characterId,
     userId: user.id,
-    schoolIds: user.schoolIds ?? [],
   }).catch(() => {
     notFound();
   });

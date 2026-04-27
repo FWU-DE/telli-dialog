@@ -12,7 +12,6 @@ export default async function Page(props: PageProps<'/learning-scenarios/[learni
 
   const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenario({
     learningScenarioId,
-    schoolIds: user.schoolIds ?? [],
     user,
   }).catch(handleErrorInServerComponent);
 

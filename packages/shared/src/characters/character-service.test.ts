@@ -40,7 +40,7 @@ vi.mock('../db/functions/character', () => ({
   dbGetCharacterByIdOptionalShareData: vi.fn(),
   dbGetCharacterByIdWithShareData: vi.fn(),
   dbDeleteCharacterByIdAndUserId: vi.fn(),
-  dbGetCharactersBySchoolId: vi.fn(),
+  dbGetCharactersByAssociatedSchools: vi.fn(),
   dbGetCharactersByUserId: vi.fn(),
   dbGetGlobalCharacters: vi.fn(),
 }));
@@ -102,7 +102,6 @@ describe('character-service', () => {
           downloadFileFromCharacter({
             characterId: generateUUID(),
             fileId: generateUUID(),
-            schoolIds: [generateUUID()],
             user: mockUser(),
           }),
       },
@@ -272,7 +271,6 @@ describe('character-service', () => {
         fetchFileMappings({
           characterId: generateUUID(),
           userId: 'different-user-id',
-          schoolIds: ['school-id'],
         }),
       ).rejects.toThrow(ForbiddenError);
     });
@@ -281,7 +279,6 @@ describe('character-service', () => {
       const userId = generateUUID();
       const mockCharacter: Partial<CharacterSelectModel> = {
         userId: userId,
-        schoolId: 'school-1',
         accessLevel: 'school',
       };
 
@@ -293,7 +290,6 @@ describe('character-service', () => {
         fetchFileMappings({
           characterId: generateUUID(),
           userId: 'different-user-id',
-          schoolIds: ['different-school-id'],
         }),
       ).rejects.toThrow(ForbiddenError);
     });
@@ -353,7 +349,6 @@ describe('character-service', () => {
       const mockCharacter: Partial<CharacterSelectModel> = {
         userId: userId,
         accessLevel: 'school',
-        schoolId: 'school-1',
       };
 
       (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
@@ -366,12 +361,11 @@ describe('character-service', () => {
           user: mockUser('teacher'),
           telliPointsPercentageLimit: 10,
           usageTimeLimitMinutes: 60,
-          schoolIds: ['different-school-id'],
         }),
       ).rejects.toThrow(ForbiddenError);
     });
 
-    it('should throw NotFoundError when there is no active sharing to unshare - unshareCharacter', async () => {
+    it('should throw ForbiddenError when user can only unshare a character they started sharing - unshareCharacter', async () => {
       (
         dbGetSharedCharacterConversations as MockedFunction<
           typeof dbGetSharedCharacterConversations
@@ -383,56 +377,12 @@ describe('character-service', () => {
           characterId: generateUUID(),
           user: mockUser('teacher'),
         }),
-      ).rejects.toThrow(NotFoundError);
-    });
-  });
-
-  describe('shareCharacter – duplicate share', () => {
-    const userId = generateUUID();
-    const characterId = generateUUID();
-    const user = { ...mockUser('teacher'), id: userId };
-    const existingShare = {
-      id: generateUUID(),
-      characterId,
-      userId,
-      telliPointsLimit: 50,
-      maxUsageTimeLimit: 60,
-      inviteCode: 'ABCD1234',
-      startedAt: new Date(),
-      manuallyStoppedAt: null,
-    };
-
-    beforeEach(() => {
-      const mockCharacter: Partial<CharacterSelectModel> = {
-        id: characterId,
-        userId,
-        accessLevel: 'private',
-      };
-      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
-        mockCharacter as never,
-      );
-      (
-        dbGetSharedCharacterConversations as MockedFunction<
-          typeof dbGetSharedCharacterConversations
-        >
-      ).mockResolvedValue([existingShare] as never);
-    });
-
-    it('throws when there is already an active share', async () => {
-      await expect(
-        shareCharacter({
-          characterId,
-          user,
-          telliPointsPercentageLimit: 10,
-          usageTimeLimitMinutes: 60,
-        }),
-      ).rejects.toThrow('There can only be one active share at a time');
+      ).rejects.toThrow(ForbiddenError);
     });
   });
 
   describe('createNewCharacter', () => {
     const federalStateId = generateUUID();
-    const schoolId = generateUUID();
     const templateId = generateUUID();
     const duplicateCharacterName = 'Copied Character';
 
@@ -457,7 +407,6 @@ describe('character-service', () => {
 
       const result = await createNewCharacter({
         federalStateId,
-        schoolId,
         templateId,
         user: mockUser('teacher'),
         duplicateCharacterName,
@@ -467,7 +416,6 @@ describe('character-service', () => {
         templateId,
         'private',
         expect.any(String),
-        schoolId,
         duplicateCharacterName,
       );
       expect(copyEntityPictureIfExists).toHaveBeenCalledWith({
@@ -504,7 +452,6 @@ describe('character-service', () => {
 
       const result = await createNewCharacter({
         federalStateId,
-        schoolId,
         templateId,
         user: mockUser('teacher'),
       });
@@ -530,7 +477,6 @@ describe('character-service', () => {
           fetchFileMappings({
             characterId: 'invalid-uuid',
             userId: 'user-id',
-            schoolIds: ['school-id'],
           }),
       },
       {
@@ -587,9 +533,7 @@ describe('character-service', () => {
   describe('Link sharing bypass scenarios', () => {
     const characterId = generateUUID();
     const ownerUserId = generateUUID();
-    const ownerSchoolId = generateUUID();
     const differentUserId = generateUUID();
-    const differentSchoolId = generateUUID();
 
     describe('should allow access when hasLinkAccess is true - bypassing normal restrictions', () => {
       it.each([
@@ -605,7 +549,6 @@ describe('character-service', () => {
         const mockCharacter = {
           id: characterId,
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel,
           hasLinkAccess: true,
         };
@@ -618,7 +561,6 @@ describe('character-service', () => {
         const result = await getCharacterForChatSession({
           characterId,
           userId: differentUserId,
-          schoolIds: [differentSchoolId],
         });
 
         expect(result).toBe(mockCharacter);
@@ -637,7 +579,6 @@ describe('character-service', () => {
         const mockCharacter = {
           id: characterId,
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel,
           hasLinkAccess: true,
         };
@@ -662,7 +603,6 @@ describe('character-service', () => {
         const result = await getCharacterForEditView({
           characterId,
           userId: differentUserId,
-          schoolIds: [differentSchoolId],
         });
 
         expect(result.character).toBe(mockCharacter);
@@ -680,7 +620,6 @@ describe('character-service', () => {
       ])('fetchFileMappings - $description', async ({ accessLevel }) => {
         const mockCharacter: Partial<CharacterSelectModel> = {
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel,
           hasLinkAccess: true,
         };
@@ -697,7 +636,6 @@ describe('character-service', () => {
           fetchFileMappings({
             characterId,
             userId: differentUserId,
-            schoolIds: [differentSchoolId],
           }),
         ).resolves.not.toThrow();
       });
@@ -708,7 +646,6 @@ describe('character-service', () => {
         const mockCharacter = {
           id: characterId,
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel: 'private' as const,
           hasLinkAccess: false,
         };
@@ -721,7 +658,6 @@ describe('character-service', () => {
           getCharacterForChatSession({
             characterId,
             userId: differentUserId,
-            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -730,7 +666,6 @@ describe('character-service', () => {
         const mockCharacter = {
           id: characterId,
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel: 'private' as const,
           hasLinkAccess: false,
         };
@@ -745,7 +680,6 @@ describe('character-service', () => {
           getCharacterForEditView({
             characterId,
             userId: differentUserId,
-            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -753,7 +687,6 @@ describe('character-service', () => {
       it('fetchFileMappings - private character without link sharing', async () => {
         const mockCharacter: Partial<CharacterSelectModel> = {
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel: 'private',
           hasLinkAccess: false,
         };
@@ -766,7 +699,6 @@ describe('character-service', () => {
           fetchFileMappings({
             characterId,
             userId: differentUserId,
-            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });

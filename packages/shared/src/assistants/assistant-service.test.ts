@@ -82,18 +82,17 @@ describe('assistant-service', () => {
 
   describe('NotFoundError scenarios', () => {
     const assistantId = generateUUID();
-    const schoolId = generateUUID();
     const userId = generateUUID();
     const fileId = generateUUID();
 
     it.each([
       {
         functionName: 'getAssistantByUser',
-        testFunction: () => getAssistantByUser({ assistantId, schoolIds: [schoolId], userId }),
+        testFunction: () => getAssistantByUser({ assistantId, userId }),
       },
       {
         functionName: 'getAssistantForNewChat',
-        testFunction: () => getAssistantForNewChat({ assistantId, schoolIds: [schoolId], userId }),
+        testFunction: () => getAssistantForNewChat({ assistantId, userId }),
       },
       {
         functionName: 'linkFileToAssistant',
@@ -105,7 +104,7 @@ describe('assistant-service', () => {
       },
       {
         functionName: 'getFileMappings',
-        testFunction: () => getFileMappings({ assistantId, schoolIds: [schoolId], userId }),
+        testFunction: () => getFileMappings({ assistantId, userId }),
       },
       {
         functionName: 'updateAssistantAccessLevel',
@@ -135,7 +134,6 @@ describe('assistant-service', () => {
           downloadFileFromAssistant({
             assistantId,
             fileId,
-            schoolIds: [generateUUID()],
             user: mockUser(),
           }),
       },
@@ -203,11 +201,9 @@ describe('assistant-service', () => {
     const userId = generateUUID();
     const assistantId = generateUUID();
     const fileId = generateUUID();
-    const schoolId = generateUUID();
 
     const mockAssistant: Partial<AssistantSelectModel> = {
       userId,
-      schoolId,
       accessLevel: 'private',
     };
 
@@ -224,7 +220,6 @@ describe('assistant-service', () => {
           getAssistantByUser({
             assistantId,
             userId: 'different-user-id',
-            schoolIds: ['school-id'],
           }),
       },
       {
@@ -291,7 +286,6 @@ describe('assistant-service', () => {
   describe('ForbiddenError scenarios - access restrictions', () => {
     const userId = generateUUID();
     const assistantId = generateUUID();
-    const schoolId = generateUUID();
 
     it.each([
       {
@@ -300,7 +294,6 @@ describe('assistant-service', () => {
           getAssistantByUser({
             assistantId,
             userId: 'different-user-id',
-            schoolIds: ['school-id'],
           }),
       },
       {
@@ -309,7 +302,6 @@ describe('assistant-service', () => {
           getAssistantForNewChat({
             assistantId,
             userId: 'different-user-id',
-            schoolIds: ['school-id'],
           }),
       },
     ])(
@@ -317,7 +309,6 @@ describe('assistant-service', () => {
       async ({ testFunction }) => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId,
-          schoolId,
           accessLevel: 'private',
         };
 
@@ -336,7 +327,6 @@ describe('assistant-service', () => {
           getAssistantByUser({
             assistantId,
             userId: 'different-user-id',
-            schoolIds: ['different-school-id'],
           }),
       },
       {
@@ -345,7 +335,6 @@ describe('assistant-service', () => {
           getAssistantForNewChat({
             assistantId,
             userId: 'different-user-id',
-            schoolIds: ['different-school-id'],
           }),
       },
     ])(
@@ -353,7 +342,6 @@ describe('assistant-service', () => {
       async ({ testFunction }) => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId,
-          schoolId,
           accessLevel: 'school',
         };
 
@@ -401,7 +389,6 @@ describe('assistant-service', () => {
       await expect(
         getFileMappings({
           assistantId,
-          schoolIds: ['school-id'],
           userId: 'different-user-id',
         }),
       ).rejects.toThrow(ForbiddenError);
@@ -412,7 +399,6 @@ describe('assistant-service', () => {
       const assistantId = generateUUID();
       const mockAssistant: Partial<AssistantSelectModel> = {
         accessLevel: 'school',
-        schoolId: 'school-1',
         userId,
       };
 
@@ -423,7 +409,6 @@ describe('assistant-service', () => {
       await expect(
         getFileMappings({
           assistantId,
-          schoolIds: ['different-school-id'],
           userId: 'different-user-id',
         }),
       ).rejects.toThrow(ForbiddenError);
@@ -452,7 +437,6 @@ describe('assistant-service', () => {
     it('should throw ForbiddenError when user is not a teacher - createNewAssistant', async () => {
       await expect(
         createNewAssistant({
-          schoolId: 'school-id',
           user: mockUser('student'),
         }),
       ).rejects.toThrow(ForbiddenError);
@@ -460,7 +444,6 @@ describe('assistant-service', () => {
   });
 
   describe('createNewAssistant', () => {
-    const schoolId = generateUUID();
     const templateId = generateUUID();
     const duplicatedAssistantName = 'Copy of Biology Assistant';
 
@@ -484,7 +467,6 @@ describe('assistant-service', () => {
       ).mockResolvedValue(undefined as never);
 
       const result = await createNewAssistant({
-        schoolId,
         templateId,
         user: mockUser('teacher'),
         duplicateAssistantName: duplicatedAssistantName,
@@ -494,7 +476,6 @@ describe('assistant-service', () => {
         templateId,
         'private',
         expect.any(String),
-        schoolId,
         duplicatedAssistantName,
       );
       expect(copyEntityPictureIfExists).toHaveBeenCalledWith({
@@ -524,7 +505,6 @@ describe('assistant-service', () => {
       ).mockResolvedValue(undefined as never);
 
       await createNewAssistant({
-        schoolId,
         templateId,
         user: mockUser('teacher'),
       });
@@ -533,7 +513,6 @@ describe('assistant-service', () => {
         templateId,
         'private',
         expect.any(String),
-        schoolId,
         undefined,
       );
     });
@@ -558,7 +537,6 @@ describe('assistant-service', () => {
       mockDbReturning.mockResolvedValue([updatedAssistant]);
 
       const result = await createNewAssistant({
-        schoolId,
         templateId,
         user: mockUser('teacher'),
       });
@@ -585,7 +563,6 @@ describe('assistant-service', () => {
       ).mockResolvedValue(undefined as never);
 
       const result = await createNewAssistant({
-        schoolId,
         templateId,
         user: mockUser('teacher'),
       });
@@ -602,7 +579,6 @@ describe('assistant-service', () => {
           getAssistantByUser({
             assistantId: 'invalid-uuid',
             userId: 'user-id',
-            schoolIds: ['school-id'],
           }),
       },
       {
@@ -611,7 +587,6 @@ describe('assistant-service', () => {
           getAssistantForNewChat({
             assistantId: 'invalid-uuid',
             userId: 'user-id',
-            schoolIds: ['school-id'],
           }),
       },
       {
@@ -656,7 +631,6 @@ describe('assistant-service', () => {
           getFileMappings({
             assistantId: 'invalid-uuid',
             userId: 'user-id',
-            schoolIds: ['school-id'],
           }),
       },
       {
@@ -686,22 +660,15 @@ describe('assistant-service', () => {
 
   describe('getAssistantForNewChat', () => {
     const assistantId = generateUUID();
-    const schoolIdOfOwner = generateUUID();
     const userIdOfOwner = generateUUID();
 
     describe.each([
-      { accessLevel: 'private' as const, schoolIds: ['any'], userId: userIdOfOwner },
-      { accessLevel: 'school' as const, schoolIds: [schoolIdOfOwner], userId: 'different-user-id' },
-      {
-        accessLevel: 'global' as const,
-        schoolIds: ['different-school-id'],
-        userId: 'different-user-id',
-      },
-    ])('accessLevel=$accessLevel', ({ accessLevel, schoolIds, userId }) => {
+      { accessLevel: 'private', userId: userIdOfOwner },
+      { accessLevel: 'global', userId: 'different-user-id' },
+    ] as const)('accessLevel=$accessLevel', ({ accessLevel, userId }) => {
       it(`should return assistant with accessLevel=${accessLevel} - getAssistantForNewChat`, async () => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId: userIdOfOwner,
-          schoolId: schoolIdOfOwner,
           accessLevel,
         };
 
@@ -711,7 +678,6 @@ describe('assistant-service', () => {
 
         const assistant = await getAssistantForNewChat({
           assistantId,
-          schoolIds,
           userId,
         });
 
@@ -722,22 +688,15 @@ describe('assistant-service', () => {
 
   describe('getAssistantByUser', () => {
     const assistantId = generateUUID();
-    const schoolIdOfOwner = generateUUID();
     const userIdOfOwner = generateUUID();
 
     describe.each([
-      { accessLevel: 'private' as const, schoolIds: ['any'], userId: userIdOfOwner },
-      { accessLevel: 'school' as const, schoolIds: [schoolIdOfOwner], userId: 'different-user-id' },
-      {
-        accessLevel: 'global' as const,
-        schoolIds: ['different-school-id'],
-        userId: 'different-user-id',
-      },
-    ])('accessLevel=$accessLevel', ({ accessLevel, schoolIds, userId }) => {
+      { accessLevel: 'private', userId: userIdOfOwner },
+      { accessLevel: 'global', userId: 'different-user-id' },
+    ] as const)('accessLevel=$accessLevel', ({ accessLevel, userId }) => {
       it(`should return assistant with accessLevel=${accessLevel} - getAssistantByUser`, async () => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId: userIdOfOwner,
-          schoolId: schoolIdOfOwner,
           accessLevel,
         };
 
@@ -747,7 +706,6 @@ describe('assistant-service', () => {
 
         const { assistant } = await getAssistantByUser({
           assistantId,
-          schoolIds,
           userId,
         });
 
@@ -759,9 +717,7 @@ describe('assistant-service', () => {
   describe('Link sharing bypass scenarios', () => {
     const assistantId = generateUUID();
     const ownerUserId = generateUUID();
-    const ownerSchoolId = generateUUID();
     const differentUserId = generateUUID();
-    const differentSchoolId = generateUUID();
 
     describe('should allow access when hasLinkAccess is true - bypassing normal restrictions', () => {
       it.each([
@@ -776,7 +732,6 @@ describe('assistant-service', () => {
       ])('getAssistantByUser - $description', async ({ accessLevel }) => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel,
           hasLinkAccess: true,
         };
@@ -789,7 +744,6 @@ describe('assistant-service', () => {
         const result = await getAssistantByUser({
           assistantId,
           userId: differentUserId,
-          schoolIds: [differentSchoolId],
         });
 
         expect(result.assistant).toBe(mockAssistant);
@@ -807,7 +761,6 @@ describe('assistant-service', () => {
       ])('getAssistantForNewChat - $description', async ({ accessLevel }) => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel,
           hasLinkAccess: true,
         };
@@ -820,7 +773,6 @@ describe('assistant-service', () => {
         const result = await getAssistantForNewChat({
           assistantId,
           userId: differentUserId,
-          schoolIds: [differentSchoolId],
         });
 
         expect(result).toBe(mockAssistant);
@@ -838,7 +790,6 @@ describe('assistant-service', () => {
       ])('getFileMappings - $description', async ({ accessLevel }) => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel,
           hasLinkAccess: true,
         };
@@ -855,7 +806,6 @@ describe('assistant-service', () => {
           getFileMappings({
             assistantId,
             userId: differentUserId,
-            schoolIds: [differentSchoolId],
           }),
         ).resolves.not.toThrow();
       });
@@ -865,7 +815,6 @@ describe('assistant-service', () => {
       it('getAssistantByUser - private assistant without link sharing', async () => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel: 'private',
           hasLinkAccess: false,
         };
@@ -878,7 +827,6 @@ describe('assistant-service', () => {
           getAssistantByUser({
             assistantId,
             userId: differentUserId,
-            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -886,7 +834,6 @@ describe('assistant-service', () => {
       it('getAssistantForNewChat - private assistant without link sharing', async () => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId: ownerUserId,
-          schoolId: ownerSchoolId,
           accessLevel: 'private',
           hasLinkAccess: false,
         };
@@ -899,7 +846,6 @@ describe('assistant-service', () => {
           getAssistantForNewChat({
             assistantId,
             userId: differentUserId,
-            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });

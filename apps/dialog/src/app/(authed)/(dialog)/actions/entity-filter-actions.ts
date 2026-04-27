@@ -29,7 +29,6 @@ export async function getCharactersByFilterAction(
   const characters = await getCharactersByOverviewFilter({
     filter: effectiveFilter,
     userId: user.id,
-    schoolIds: user.schoolIds ?? [],
     federalStateId: federalState.id,
   });
 
@@ -48,7 +47,6 @@ export async function getLearningScenariosByFilterAction(
   const learningScenarios = await getLearningScenariosByOverviewFilter({
     filter: effectiveFilter,
     userId: user.id,
-    schoolIds: user.schoolIds ?? [],
     federalStateId: federalState.id,
   });
 
@@ -69,7 +67,6 @@ export async function getAssistantsByFilterAction(
   const assistants = await getAssistantsByOverviewFilter({
     filter: effectiveFilter,
     userId: user.id,
-    schoolIds: user.schoolIds ?? [],
     federalStateId: federalState.id,
   });
 

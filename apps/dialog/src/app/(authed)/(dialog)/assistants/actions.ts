@@ -25,7 +25,6 @@ export async function createNewAssistantAction({
 
   // TODO: Will be implemented in TD-701
   return runServerAction(createNewAssistant)({
-    schoolId: user.schoolIds?.[0] ?? '',
     templateId,
     user: user,
     duplicateAssistantName,
@@ -119,7 +118,6 @@ export async function downloadFileFromAssistantAction({
   return runServerAction(downloadFileFromAssistant)({
     assistantId,
     fileId,
-    schoolIds: user.schoolIds ?? [],
     user,
   });
 }

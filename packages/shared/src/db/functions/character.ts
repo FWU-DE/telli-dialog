@@ -279,7 +279,6 @@ export async function dbGetAllAccessibleCharacters({
   federalStateId,
 }: {
   userId: string;
-  schoolIds?: string[]; // Deprecated parameter, kept for backward compatibility
   federalStateId: string;
 }): Promise<CharacterOptionalShareDataModel[]> {
   // Get all users who share at least one school with the requesting user

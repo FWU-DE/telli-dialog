@@ -283,8 +283,6 @@ export async function shareLearningScenario({
 }: {
   learningScenarioId: string;
   data: LearningScenarioShareValues;
-  schoolId?: string;
-  schoolIds?: string[];
   user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
   checkParameterUUID(learningScenarioId);
@@ -434,7 +432,6 @@ export async function createNewLearningScenario({
 }: {
   modelId: string;
   user: Pick<UserModel, 'id' | 'userRole'>;
-  schoolId: string;
 }) {
   requireTeacherRole(user.userRole);
 

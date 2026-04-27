@@ -9,7 +9,6 @@ export const telliNewChatMessageEventSchema = z.object({
   federal_state: z.string(),
   provider: z.string(),
   cost_in_cent: z.coerce.number(),
-  school_id: z.string(),
   user_role: z.string(),
   chat_type: z.string(),
   timestamp: z.coerce.date(),
@@ -20,7 +19,6 @@ export const telliMonthlyTokenBudgetExceededEventSchema = z.object({
   event_type: z.literal('telli_monthly_token_budget_exceeded'),
   pseudonym_id: z.string(),
   federal_state: z.string(),
-  school_id: z.string(),
   user_role: z.string(),
   timestamp: z.coerce.date(),
 });
