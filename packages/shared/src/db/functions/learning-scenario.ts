@@ -1,4 +1,4 @@
-import { and, desc, eq, getTableColumns, inArray, isNull, or } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, inArray, isNull, or, sql } from 'drizzle-orm';
 import { db } from '..';
 import {
   conversationMessageTable,
@@ -16,9 +16,14 @@ import {
 } from '../schema';
 
 /**
- * Returns a subquery that selects only the single latest active share per learning scenario for a
- * given user. "Active" means stopped_at IS NULL. When multiple such rows exist (e.g. legacy data or
- * expired-but-never-stopped shares), DISTINCT ON (learning_scenario_id) ORDER BY started_at DESC
+ * Returns a subquery that selects only the single latest non-expired share per learning scenario
+ * for a given user.
+ *
+ * A share is expired if either:
+ * - `manually_stopped_at IS NOT NULL` (explicitly stopped), or
+ * - `started_at + maxUsageTimeLimit < now` (time limit elapsed; `manually_stopped_at` may still be NULL for these)
+ *
+ * When multiple non-expired rows exist, `DISTINCT ON (learning_scenario_id) ORDER BY started_at DESC`
  * ensures only the most-recent row is returned, preventing duplicate entity rows in JOINs.
  */
 function latestActiveLearningScenarioShare(userId: string) {
@@ -30,7 +35,11 @@ function latestActiveLearningScenarioShare(userId: string) {
     .where(
       and(
         eq(sharedLearningScenarioTable.userId, userId),
-        isNull(sharedLearningScenarioTable.stoppedAt),
+        isNull(sharedLearningScenarioTable.manuallyStoppedAt),
+        or(
+          isNull(sharedLearningScenarioTable.maxUsageTimeLimit),
+          sql`${sharedLearningScenarioTable.startedAt} + ${sharedLearningScenarioTable.maxUsageTimeLimit} * interval '1 minute' >= now()`,
+        ),
       ),
     )
     .orderBy(
@@ -50,7 +59,7 @@ function baseLearningScenarioWithShareQuery(
       inviteCode: activeShare.inviteCode,
       maxUsageTimeLimit: activeShare.maxUsageTimeLimit,
       startedAt: activeShare.startedAt,
-      stoppedAt: activeShare.stoppedAt,
+      manuallyStoppedAt: activeShare.manuallyStoppedAt,
       startedBy: activeShare.userId,
     })
     .from(learningScenarioTable);
@@ -246,7 +255,7 @@ export async function dbGetLearningScenarioByIdAndInviteCode({
       inviteCode: sharedLearningScenarioTable.inviteCode,
       maxUsageTimeLimit: sharedLearningScenarioTable.maxUsageTimeLimit,
       startedAt: sharedLearningScenarioTable.startedAt,
-      stoppedAt: sharedLearningScenarioTable.stoppedAt,
+      manuallyStoppedAt: sharedLearningScenarioTable.manuallyStoppedAt,
       startedBy: sharedLearningScenarioTable.userId,
     })
     .from(learningScenarioTable)
@@ -366,7 +375,7 @@ export function dbGetSharedLearningScenarioConversations({
       and(
         eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
         eq(sharedLearningScenarioTable.userId, userId),
-        isNull(sharedLearningScenarioTable.stoppedAt),
+        isNull(sharedLearningScenarioTable.manuallyStoppedAt),
       ),
     );
 }

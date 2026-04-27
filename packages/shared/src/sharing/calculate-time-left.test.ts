@@ -13,43 +13,43 @@ describe('calculateTimeLeft', () => {
     vi.useRealTimers();
   });
 
-  describe('stoppedAt behavior', () => {
-    it('returns -1 when stoppedAt is set, regardless of remaining time', () => {
+  describe('manuallyStoppedAt behavior', () => {
+    it('returns -1 when manuallyStoppedAt is set, regardless of remaining time', () => {
       const startedAt = new Date(now.getTime() - 5 * 60_000); // started 5 min ago
       const result = calculateTimeLeft({
         startedAt,
         maxUsageTimeLimit: 60, // 60-minute limit – plenty of time remaining
-        stoppedAt: new Date(now.getTime() - 1000),
+        manuallyStoppedAt: new Date(now.getTime() - 1000),
       });
       expect(result).toBe(-1);
     });
 
-    it('returns -1 when stoppedAt is set even when the time limit would not be reached', () => {
+    it('returns -1 when manuallyStoppedAt is set even when the time limit would not be reached', () => {
       const startedAt = new Date(now.getTime() - 1000); // started 1 second ago
       const result = calculateTimeLeft({
         startedAt,
         maxUsageTimeLimit: 30 * 24 * 60, // maximum 30-day limit
-        stoppedAt: now,
+        manuallyStoppedAt: now,
       });
       expect(result).toBe(-1);
     });
 
-    it('proceeds to time-based calculation when stoppedAt is null', () => {
+    it('proceeds to time-based calculation when manuallyStoppedAt is null', () => {
       const startedAt = new Date(now.getTime() - 10 * 60_000); // started 10 min ago
       const result = calculateTimeLeft({
         startedAt,
         maxUsageTimeLimit: 30, // 30-minute limit → 20 minutes remaining
-        stoppedAt: null,
+        manuallyStoppedAt: null,
       });
       expect(result).toBe(20 * 60); // 1200 seconds
     });
 
-    it('proceeds to time-based calculation when stoppedAt is undefined', () => {
+    it('proceeds to time-based calculation when manuallyStoppedAt is undefined', () => {
       const startedAt = new Date(now.getTime() - 10 * 60_000);
       const result = calculateTimeLeft({
         startedAt,
         maxUsageTimeLimit: 30,
-        // stoppedAt not provided
+        // manuallyStoppedAt not provided
       });
       expect(result).toBe(20 * 60);
     });

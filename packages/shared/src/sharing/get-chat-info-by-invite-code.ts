@@ -33,7 +33,7 @@ async function tryGetLearningScenarioIdByInviteCode({ inviteCode }: { inviteCode
       and(
         eq(sharedLearningScenarioTable.inviteCode, inviteCode),
         isNotNull(sharedLearningScenarioTable.startedAt),
-        isNull(sharedLearningScenarioTable.stoppedAt),
+        isNull(sharedLearningScenarioTable.manuallyStoppedAt),
       ),
     );
   return maybeSharedChat?.learningScenarioId;
@@ -47,7 +47,7 @@ async function tryGetCharacterIdByInviteCode({ inviteCode }: { inviteCode: strin
       and(
         eq(sharedCharacterConversation.inviteCode, inviteCode),
         isNotNull(sharedCharacterConversation.startedAt),
-        isNull(sharedCharacterConversation.stoppedAt),
+        isNull(sharedCharacterConversation.manuallyStoppedAt),
       ),
     );
   return maybeCharacterChat?.characterId;

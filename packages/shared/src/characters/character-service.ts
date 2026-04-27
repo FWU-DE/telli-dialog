@@ -381,12 +381,12 @@ export const shareCharacter = async ({
   // Stop any existing active share before creating a new one
   await db
     .update(sharedCharacterConversation)
-    .set({ stoppedAt: new Date() })
+    .set({ manuallyStoppedAt: new Date() })
     .where(
       and(
         eq(sharedCharacterConversation.userId, user.id),
         eq(sharedCharacterConversation.characterId, characterId),
-        isNull(sharedCharacterConversation.stoppedAt),
+        isNull(sharedCharacterConversation.manuallyStoppedAt),
       ),
     );
 
@@ -430,15 +430,15 @@ export const unshareCharacter = async ({
   if (sharedConversations.length === 0)
     throw new ForbiddenError('Not authorized to stop this shared character instance');
 
-  // unshare character instance by setting stoppedAt
+  // unshare character instance by setting manuallyStoppedAt
   const [updatedCharacter] = await db
     .update(sharedCharacterConversation)
-    .set({ stoppedAt: new Date() })
+    .set({ manuallyStoppedAt: new Date() })
     .where(
       and(
         eq(sharedCharacterConversation.characterId, characterId),
         eq(sharedCharacterConversation.userId, user.id),
-        isNull(sharedCharacterConversation.stoppedAt),
+        isNull(sharedCharacterConversation.manuallyStoppedAt),
       ),
     )
     .returning();

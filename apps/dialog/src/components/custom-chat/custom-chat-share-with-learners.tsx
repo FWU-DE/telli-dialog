@@ -29,7 +29,7 @@ const shareFormSchema = z.object({
 
 interface CustomChatShareWithLearnersProps {
   startedAt: Date | null;
-  stoppedAt?: Date | null;
+  manuallyStoppedAt?: Date | null;
   maxUsageTimeLimit: number | null;
   telliPointsLimit?: number | null;
   pointsPercentageValues: number[];
@@ -42,7 +42,7 @@ interface CustomChatShareWithLearnersProps {
 
 export function CustomChatShareWithLearners({
   startedAt,
-  stoppedAt,
+  manuallyStoppedAt,
   maxUsageTimeLimit,
   telliPointsLimit,
   pointsPercentageValues,
@@ -61,7 +61,7 @@ export function CustomChatShareWithLearners({
   const sharedChatTimeLeft = calculateTimeLeft({
     startedAt,
     maxUsageTimeLimit,
-    stoppedAt,
+    manuallyStoppedAt,
   });
   const sharedChatActive = sharedChatTimeLeft > 0;
 

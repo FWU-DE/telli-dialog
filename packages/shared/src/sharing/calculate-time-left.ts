@@ -1,17 +1,17 @@
 /**
  * Calculates the time left (in seconds) for a shared chat (either learning scenario or character).
- * Returns -1 if the chat has been manually stopped (stoppedAt is set) or if required fields are missing.
+ * Returns -1 if the chat has been manually stopped (manuallyStoppedAt is set) or if required fields are missing.
  */
 export function calculateTimeLeft({
   startedAt,
   maxUsageTimeLimit,
-  stoppedAt,
+  manuallyStoppedAt,
 }: {
   startedAt: Date | null;
   maxUsageTimeLimit: number | null;
-  stoppedAt?: Date | null;
+  manuallyStoppedAt?: Date | null;
 }) {
-  if (stoppedAt !== null) {
+  if (manuallyStoppedAt) {
     return -1;
   }
 

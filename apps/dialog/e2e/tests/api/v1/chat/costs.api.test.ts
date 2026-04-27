@@ -102,7 +102,7 @@ test.describe('costs', () => {
       modelId: model.id,
       inviteCode: generateRandomString(8),
       startedAt: new Date(),
-      stoppedAt: null,
+      manuallyStoppedAt: null,
       startedBy: user.id,
     };
 
@@ -176,7 +176,7 @@ test.describe('costs', () => {
       schoolId: 'test_school1',
       accessLevel: 'private' as const,
       startedAt: new Date(),
-      stoppedAt: null,
+      manuallyStoppedAt: null,
       telliPointsLimit: telliPointsLimit,
       maxUsageTimeLimit: maxUsageTimeLimit,
       inviteCode: generateRandomString(8),

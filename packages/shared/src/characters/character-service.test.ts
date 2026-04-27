@@ -789,7 +789,7 @@ describe('character-service', () => {
       maxUsageTimeLimit: 60,
       inviteCode: 'ABCD1234',
       startedAt: new Date(),
-      stoppedAt: null,
+      manuallyStoppedAt: null,
     };
 
     beforeEach(() => {
@@ -844,7 +844,7 @@ describe('character-service', () => {
       maxUsageTimeLimit: 60,
       inviteCode: 'ABCD1234',
       startedAt: new Date(Date.now() - 30 * 60_000),
-      stoppedAt: new Date(),
+      manuallyStoppedAt: new Date(),
     };
 
     beforeEach(() => {
@@ -856,13 +856,13 @@ describe('character-service', () => {
       mockDbReturning.mockResolvedValue([stoppedShare]);
     });
 
-    it('sets stoppedAt on the active share row (calls db.update)', async () => {
+    it('sets manuallyStoppedAt on the active share row (calls db.update)', async () => {
       await unshareCharacter({ characterId, user });
 
       expect(mockDbUpdate).toHaveBeenCalled();
     });
 
-    it('returns the updated share with stoppedAt set', async () => {
+    it('returns the updated share with manuallyStoppedAt set', async () => {
       const result = await unshareCharacter({ characterId, user });
 
       expect(result).toEqual(stoppedShare);

@@ -1,4 +1,4 @@
-import { and, desc, eq, getTableColumns, inArray, isNull, or } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, inArray, isNull, or, sql } from 'drizzle-orm';
 import { db } from '..';
 import {
   CharacterFileMapping,
@@ -19,10 +19,14 @@ import { dbGetModelByName } from './llm-model';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 
 /**
- * Returns a subquery that selects only the single latest active share per character for a given
- * user. "Active" means stopped_at IS NULL. When multiple such rows exist (e.g. legacy data or
- * expired-but-never-stopped shares), DISTINCT ON (character_id) ORDER BY started_at DESC ensures
- * only the most-recent row is returned, preventing duplicate entity rows in JOINs.
+ * Returns a subquery that selects only the single latest non-expired share per character for a given user.
+ *
+ * A share is expired if either:
+ * - `manually_stopped_at IS NOT NULL` (explicitly stopped), or
+ * - `started_at + maxUsageTimeLimit < now` (time limit elapsed; `manually_stopped_at` may still be NULL for these)
+ *
+ * When multiple non-expired rows exist, `DISTINCT ON (character_id) ORDER BY started_at DESC`
+ * ensures only the most-recent row is returned, preventing duplicate entity rows in JOINs.
  */
 function latestActiveCharacterShare(userId: string) {
   return db
@@ -33,11 +37,15 @@ function latestActiveCharacterShare(userId: string) {
     .where(
       and(
         eq(sharedCharacterConversation.userId, userId),
-        isNull(sharedCharacterConversation.stoppedAt),
+        isNull(sharedCharacterConversation.manuallyStoppedAt),
+        or(
+          isNull(sharedCharacterConversation.maxUsageTimeLimit),
+          sql`${sharedCharacterConversation.startedAt} + ${sharedCharacterConversation.maxUsageTimeLimit} * interval '1 minute' >= now()`,
+        ),
       ),
     )
     .orderBy(sharedCharacterConversation.characterId, desc(sharedCharacterConversation.startedAt))
-    .as('latest_active_char_share');
+    .as('latest_active_character_share');
 }
 
 function baseCharacterWithShareQuery(activeShare: ReturnType<typeof latestActiveCharacterShare>) {
@@ -48,7 +56,7 @@ function baseCharacterWithShareQuery(activeShare: ReturnType<typeof latestActive
       inviteCode: activeShare.inviteCode,
       maxUsageTimeLimit: activeShare.maxUsageTimeLimit,
       startedAt: activeShare.startedAt,
-      stoppedAt: activeShare.stoppedAt,
+      manuallyStoppedAt: activeShare.manuallyStoppedAt,
       startedBy: activeShare.userId,
     })
     .from(characterTable);
@@ -362,7 +370,7 @@ export async function dbGetCharacterByIdAndInviteCode({
       inviteCode: sharedCharacterConversation.inviteCode,
       maxUsageTimeLimit: sharedCharacterConversation.maxUsageTimeLimit,
       startedAt: sharedCharacterConversation.startedAt,
-      stoppedAt: sharedCharacterConversation.stoppedAt,
+      manuallyStoppedAt: sharedCharacterConversation.manuallyStoppedAt,
       startedBy: sharedCharacterConversation.userId,
     })
     .from(characterTable)
@@ -431,7 +439,7 @@ export async function dbGetSharedCharacterConversations({
       and(
         eq(sharedCharacterConversation.characterId, characterId),
         eq(sharedCharacterConversation.userId, userId),
-        isNull(sharedCharacterConversation.stoppedAt),
+        isNull(sharedCharacterConversation.manuallyStoppedAt),
       ),
     );
 }

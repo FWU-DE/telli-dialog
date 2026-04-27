@@ -89,7 +89,7 @@ export function CharacterView({
 
       <CustomChatShareWithLearners
         startedAt={character.startedAt ?? null}
-        stoppedAt={character.stoppedAt ?? null}
+        manuallyStoppedAt={character.manuallyStoppedAt ?? null}
         maxUsageTimeLimit={character.maxUsageTimeLimit ?? null}
         telliPointsLimit={character.telliPointsLimit ?? null}
         pointsPercentageValues={telliPointsPercentageValues}

@@ -304,12 +304,12 @@ export async function shareLearningScenario({
   // Stop any existing active share before creating a new one
   await db
     .update(sharedLearningScenarioTable)
-    .set({ stoppedAt: new Date() })
+    .set({ manuallyStoppedAt: new Date() })
     .where(
       and(
         eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
         eq(sharedLearningScenarioTable.userId, user.id),
-        isNull(sharedLearningScenarioTable.stoppedAt),
+        isNull(sharedLearningScenarioTable.manuallyStoppedAt),
       ),
     );
 
@@ -354,12 +354,12 @@ export async function unshareLearningScenario({
 
   const [updatedShare] = await db
     .update(sharedLearningScenarioTable)
-    .set({ stoppedAt: new Date() })
+    .set({ manuallyStoppedAt: new Date() })
     .where(
       and(
         eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
         eq(sharedLearningScenarioTable.userId, user.id),
-        isNull(sharedLearningScenarioTable.stoppedAt),
+        isNull(sharedLearningScenarioTable.manuallyStoppedAt),
       ),
     )
     .returning();

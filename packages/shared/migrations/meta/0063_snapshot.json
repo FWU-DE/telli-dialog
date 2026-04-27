@@ -1,5 +1,5 @@
 {
-  "id": "c15ef220-672c-47ae-826f-d815ec7f706c",
+  "id": "aeaf91fd-ba90-4f53-ac97-5fb14db6f8ea",
   "prevId": "c8526302-b8b7-49c6-a1ea-918a8cd843c2",
   "version": "7",
   "dialect": "postgresql",
@@ -2702,8 +2702,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "stopped_at": {
-          "name": "stopped_at",
+        "manually_stopped_at": {
+          "name": "manually_stopped_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
@@ -2787,8 +2787,8 @@
           "notNull": false,
           "default": "now()"
         },
-        "stopped_at": {
-          "name": "stopped_at",
+        "manually_stopped_at": {
+          "name": "manually_stopped_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
