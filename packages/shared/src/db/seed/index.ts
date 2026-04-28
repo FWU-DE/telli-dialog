@@ -8,7 +8,8 @@ import { insertHelpModeGpt } from './help-mode';
 import { insertDummyUser } from './user-entity';
 
 async function add() {
-  await Promise.all([insertFederalStates({ skip: false }), insertDummyUser()]);
+  await insertFederalStates({ skip: false });
+  await insertDummyUser();
   await Promise.all([
     insertHelpModeGpt({ skip: false }),
     insertTemplateCharacters(),
