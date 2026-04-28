@@ -29,7 +29,6 @@ export default async function Page(props: PageProps) {
   const userAndContext = {
     ...user,
     federalState,
-    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
   };
 
   if (!federalState.featureToggles.isImageGenerationEnabled) {

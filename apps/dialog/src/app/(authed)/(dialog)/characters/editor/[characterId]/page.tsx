@@ -14,7 +14,6 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
   const userAndContext = {
     ...user,
     federalState,
-    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
   };
 
   const { character, relatedFiles, maybeSignedPictureUrl } = await getCharacterForEditView({

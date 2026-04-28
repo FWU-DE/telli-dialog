@@ -31,7 +31,6 @@ export async function sendChatMessageAction({
   const userAndContext = {
     ...user,
     federalState,
-    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
   };
   const productAccess = checkProductAccess({ ...userAndContext, hasCompletedTraining });
 

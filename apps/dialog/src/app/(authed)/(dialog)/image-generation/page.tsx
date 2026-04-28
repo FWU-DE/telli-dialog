@@ -21,7 +21,6 @@ export default async function ImageGenerationPage() {
   const userAndContext = {
     ...user,
     federalState,
-    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
   };
 
   if (!(federalState.featureToggles.isImageGenerationEnabled ?? false)) {

@@ -31,7 +31,6 @@ export default async function Page(
   const userAndContext = {
     ...user,
     federalState,
-    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
   };
 
   const [chat, rawChatMessages, character] = await Promise.all([

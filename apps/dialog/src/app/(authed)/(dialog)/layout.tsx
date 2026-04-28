@@ -30,7 +30,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
     userRole: user.userRole,
     federalStateId: user.federalStateId ?? undefined,
   };
-  if (!user.hasApiKeyAssigned) throw new Error(t('no-api-key'));
+  if (!user.federalState.hasApiKeyAssigned) throw new Error(t('no-api-key'));
 
   const [federalState, models, priceInCent, userPriceLimit, hasCompletedTraining, activeBanners] =
     await Promise.all([

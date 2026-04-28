@@ -12,7 +12,6 @@ export default async function Page(props: PageProps<'/assistants/editor/[assista
   const userAndContext = {
     ...user,
     federalState,
-    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
   };
 
   const { assistant, fileMappings, pictureUrl } = await getAssistantByUser({

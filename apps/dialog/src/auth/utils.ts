@@ -93,8 +93,10 @@ export async function getUserAndContextByUserId({
   return {
     ...userAndContext.user,
     federalStateId: userAndContext.user.federalStateId,
-    federalState: obscureFederalState(userAndContext.federalState),
-    hasApiKeyAssigned: !!userAndContext.federalState.encryptedApiKey,
+    federalState: {
+      ...obscureFederalState(userAndContext.federalState),
+      hasApiKeyAssigned: !!userAndContext.federalState.encryptedApiKey,
+    },
   };
 }
 

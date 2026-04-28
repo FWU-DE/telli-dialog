@@ -20,7 +20,6 @@ export default async function Page(props: PageProps<'/assistants/d/[assistantId]
   const userAndContext = {
     ...user,
     federalState,
-    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
   };
 
   const assistant = await getAssistantForNewChat({

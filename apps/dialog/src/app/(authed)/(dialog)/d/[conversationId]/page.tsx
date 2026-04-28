@@ -27,7 +27,6 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
   const userAndContext = {
     ...user,
     federalState,
-    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
   };
 
   const conversationObject = await dbGetConversationAndMessages({

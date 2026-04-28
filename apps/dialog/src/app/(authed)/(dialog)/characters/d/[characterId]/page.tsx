@@ -27,7 +27,6 @@ export default async function Page(props: PageProps<'/characters/d/[characterId]
   const userAndContext = {
     ...user,
     federalState,
-    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
   };
 
   const character = await getCharacterForChatSession({

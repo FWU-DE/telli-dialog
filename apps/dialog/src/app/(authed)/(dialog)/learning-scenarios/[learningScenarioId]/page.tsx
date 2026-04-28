@@ -12,7 +12,6 @@ export default async function Page(props: PageProps<'/learning-scenarios/[learni
   const userAndContext = {
     ...user,
     federalState,
-    hasApiKeyAssigned: federalState.hasApiKeyAssigned,
   };
 
   const { learningScenario, relatedFiles, avatarPictureUrl } = await getLearningScenario({
