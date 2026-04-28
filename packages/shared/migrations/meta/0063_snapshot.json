@@ -1,5 +1,5 @@
 {
-  "id": "34874d00-c25e-406f-85d5-c1ad59905995",
+  "id": "19dbf086-9555-4621-9bc9-c6cfbed1c0ea",
   "prevId": "c8526302-b8b7-49c6-a1ea-918a8cd843c2",
   "version": "7",
   "dialect": "postgresql",
@@ -667,19 +667,6 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
-        },
-        "assistant_school_id_school_id_fk": {
-          "name": "assistant_school_id_school_id_fk",
-          "tableFrom": "assistant",
-          "tableTo": "school",
-          "columnsFrom": [
-            "school_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -954,19 +941,6 @@
           "tableTo": "llm_model",
           "columnsFrom": [
             "model_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "character_school_id_school_id_fk": {
-          "name": "character_school_id_school_id_fk",
-          "tableFrom": "character",
-          "tableTo": "school",
-          "columnsFrom": [
-            "school_id"
           ],
           "columnsTo": [
             "id"
@@ -2302,19 +2276,6 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
-        },
-        "learning_scenario_school_id_school_id_fk": {
-          "name": "learning_scenario_school_id_school_id_fk",
-          "tableFrom": "learning_scenario",
-          "tableTo": "school",
-          "columnsFrom": [
-            "school_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2465,68 +2426,6 @@
           ]
         }
       },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.school": {
-      "name": "school",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "federal_state_id": {
-          "name": "federal_state_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "school_federal_state_id_index": {
-          "name": "school_federal_state_id_index",
-          "columns": [
-            {
-              "expression": "federal_state_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "school_federal_state_id_federal_state_id_fk": {
-          "name": "school_federal_state_id_federal_state_id_fk",
-          "tableFrom": "school",
-          "tableTo": "federal_state",
-          "columnsFrom": [
-            "federal_state_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -2682,29 +2581,22 @@
           "name": "telli_points_limit",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "max_usage_time_limit": {
           "name": "max_usage_time_limit",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "invite_code": {
           "name": "invite_code",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "started_at": {
           "name": "started_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "manually_stopped_at": {
-          "name": "manually_stopped_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
@@ -2733,6 +2625,14 @@
           "nullsNotDistinct": false,
           "columns": [
             "invite_code"
+          ]
+        },
+        "shared_character_conversation_character_id_user_id_unique": {
+          "name": "shared_character_conversation_character_id_user_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "character_id",
+            "user_id"
           ]
         }
       },
@@ -2767,32 +2667,26 @@
           "name": "telli_points_limit",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "max_usage_time_limit": {
           "name": "max_usage_time_limit",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "invite_code": {
           "name": "invite_code",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "started_at": {
           "name": "started_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": "now()"
-        },
-        "manually_stopped_at": {
-          "name": "manually_stopped_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},
@@ -2831,6 +2725,14 @@
           "nullsNotDistinct": false,
           "columns": [
             "invite_code"
+          ]
+        },
+        "shared_learning_scenario_learning_scenario_id_user_id_unique": {
+          "name": "shared_learning_scenario_learning_scenario_id_user_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "learning_scenario_id",
+            "user_id"
           ]
         }
       },
@@ -2962,87 +2864,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.user_school_mapping": {
-      "name": "user_school_mapping",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "school_id": {
-          "name": "school_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "role": {
-          "name": "role",
-          "type": "user_school_role",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "user_school_mapping_user_id_user_entity_id_fk": {
-          "name": "user_school_mapping_user_id_user_entity_id_fk",
-          "tableFrom": "user_school_mapping",
-          "tableTo": "user_entity",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "user_school_mapping_school_id_school_id_fk": {
-          "name": "user_school_mapping_school_id_school_id_fk",
-          "tableFrom": "user_school_mapping",
-          "tableTo": "school",
-          "columnsFrom": [
-            "school_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "user_school_mapping_user_id_school_id_unique": {
-          "name": "user_school_mapping_user_id_school_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "school_id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.user_entity": {
       "name": "user_entity",
       "schema": "",
@@ -3084,6 +2905,26 @@
           "primaryKey": false,
           "notNull": false
         },
+        "school_ids": {
+          "name": "school_ids",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "federal_state_id": {
+          "name": "federal_state_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_role": {
+          "name": "user_role",
+          "type": "user_school_role",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'student'"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -3093,7 +2934,21 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "user_entity_federal_state_id_federal_state_id_fk": {
+          "name": "user_entity_federal_state_id_federal_state_id_fk",
+          "tableFrom": "user_entity",
+          "tableTo": "federal_state",
+          "columnsFrom": [
+            "federal_state_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "user_entity_email_unique": {

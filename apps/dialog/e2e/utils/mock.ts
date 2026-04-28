@@ -9,22 +9,18 @@ import {
   SharedCharacterChatUsageTrackingSelectModel,
   SharedLearningScenarioUsageTrackingSelectModel,
 } from '@shared/db/schema';
+import { E2E_FEDERAL_STATE } from './const';
 
 export const mockUserAndContext = (): UserAndContext => {
+  const schoolId = generateUUID();
+
   return {
     id: generateUUID(),
-    firstName: generateRandomString(10),
-    lastName: generateRandomString(10),
-    email: `mock.user@${generateRandomString(5)}.com`,
     lastUsedModel: null,
     versionAcceptedConditions: null,
-    hasApiKeyAssigned: true,
-    school: {
-      id: generateUUID(),
-      userRole: 'teacher',
-      federalStateId: generateUUID(),
-      createdAt: new Date(),
-    },
+    schoolIds: [schoolId],
+    federalStateId: E2E_FEDERAL_STATE,
+    userRole: 'teacher',
     federalState: {
       id: generateUUID(),
       teacherPriceLimit: 500,
@@ -45,6 +41,7 @@ export const mockUserAndContext = (): UserAndContext => {
         isNewUiDesignEnabled: false,
       },
       pictureUrls: null,
+      hasApiKeyAssigned: true,
     },
     createdAt: new Date(),
   };

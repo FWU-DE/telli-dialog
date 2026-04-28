@@ -1,11 +1,14 @@
-import { dbCreateVidisUser } from '../functions/vidis';
+import { dbCreateOrUpdateVidisUser } from '../functions/vidis';
 
 export async function insertDummyUser() {
-  await dbCreateVidisUser({
+  await dbCreateOrUpdateVidisUser({
     id: DUMMY_USER_ID,
     email: DUMMY_USER_EMAIL,
     firstName: DUMMY_USER_FIRST_NAME,
     lastName: DUMMY_USER_LAST_NAME,
+    federalStateId: DUMMY_USER_FEDERAL_STATE_ID,
+    userRole: 'teacher',
+    schoolIds: [],
   });
 
   console.log('Dummy user seed successful');
@@ -15,3 +18,4 @@ export const DUMMY_USER_ID = 'e7cdbdd7-f950-47c5-9955-61e5172b39b0';
 const DUMMY_USER_EMAIL = '2950cc44-c056-43c3-80cc-207ebc2bce2f@vidis.schule';
 const DUMMY_USER_FIRST_NAME = 'DO_NOT_DELETE';
 const DUMMY_USER_LAST_NAME = 'GLOBAL_DEFAULT';
+const DUMMY_USER_FEDERAL_STATE_ID = 'DE-TEST';

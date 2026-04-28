@@ -10,7 +10,6 @@ import { parseHyperlinks } from '@/utils/web-search/parsing';
 import Logo from '@/components/common/logo';
 import z from 'zod';
 import { parseSearchParams } from '@/utils/parse-search-params';
-import { buildLegacyUserAndContext } from '@/auth/types';
 import { requireAuth } from '@/auth/requireAuth';
 import { ChatHeaderBar } from '@/components/chat/header-bar';
 import { WebsearchSource } from '@shared/db/types';
@@ -24,8 +23,11 @@ export default async function Page(props: PageProps<'/d/[conversationId]'>) {
   const { conversationId } = await props.params;
   const searchParams = parseSearchParams(searchParamsSchema, await props.searchParams);
 
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user, federalState } = await requireAuth();
+  const userAndContext = {
+    ...user,
+    federalState,
+  };
 
   const conversationObject = await dbGetConversationAndMessages({
     conversationId,

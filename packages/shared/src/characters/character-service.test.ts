@@ -77,6 +77,8 @@ const mockUser = (userRole: 'student' | 'teacher' = 'teacher') => ({
   lastUsedModel: null,
   versionAcceptedConditions: null,
   createdAt: new Date(),
+  federalStateId: generateUUID(),
+  schoolIds: [generateUUID()],
 });
 
 describe('character-service', () => {
@@ -100,7 +102,7 @@ describe('character-service', () => {
           downloadFileFromCharacter({
             characterId: generateUUID(),
             fileId: generateUUID(),
-            schoolId: generateUUID(),
+            schoolIds: [generateUUID()],
             user: mockUser(),
           }),
       },
@@ -270,7 +272,7 @@ describe('character-service', () => {
         fetchFileMappings({
           characterId: generateUUID(),
           userId: 'different-user-id',
-          schoolId: 'school-id',
+          schoolIds: ['school-id'],
         }),
       ).rejects.toThrow(ForbiddenError);
     });
@@ -291,7 +293,7 @@ describe('character-service', () => {
         fetchFileMappings({
           characterId: generateUUID(),
           userId: 'different-user-id',
-          schoolId: 'different-school-id',
+          schoolIds: ['different-school-id'],
         }),
       ).rejects.toThrow(ForbiddenError);
     });
@@ -364,7 +366,7 @@ describe('character-service', () => {
           user: mockUser('teacher'),
           telliPointsPercentageLimit: 10,
           usageTimeLimitMinutes: 60,
-          schoolId: 'different-school-id',
+          schoolIds: ['different-school-id'],
         }),
       ).rejects.toThrow(ForbiddenError);
     });
@@ -528,7 +530,7 @@ describe('character-service', () => {
           fetchFileMappings({
             characterId: 'invalid-uuid',
             userId: 'user-id',
-            schoolId: 'school-id',
+            schoolIds: ['school-id'],
           }),
       },
       {
@@ -616,7 +618,7 @@ describe('character-service', () => {
         const result = await getCharacterForChatSession({
           characterId,
           userId: differentUserId,
-          schoolId: differentSchoolId,
+          schoolIds: [differentSchoolId],
         });
 
         expect(result).toBe(mockCharacter);
@@ -660,7 +662,7 @@ describe('character-service', () => {
         const result = await getCharacterForEditView({
           characterId,
           userId: differentUserId,
-          schoolId: differentSchoolId,
+          schoolIds: [differentSchoolId],
         });
 
         expect(result.character).toBe(mockCharacter);
@@ -695,7 +697,7 @@ describe('character-service', () => {
           fetchFileMappings({
             characterId,
             userId: differentUserId,
-            schoolId: differentSchoolId,
+            schoolIds: [differentSchoolId],
           }),
         ).resolves.not.toThrow();
       });
@@ -719,7 +721,7 @@ describe('character-service', () => {
           getCharacterForChatSession({
             characterId,
             userId: differentUserId,
-            schoolId: differentSchoolId,
+            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -743,7 +745,7 @@ describe('character-service', () => {
           getCharacterForEditView({
             characterId,
             userId: differentUserId,
-            schoolId: differentSchoolId,
+            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -764,7 +766,7 @@ describe('character-service', () => {
           fetchFileMappings({
             characterId,
             userId: differentUserId,
-            schoolId: differentSchoolId,
+            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });

@@ -68,6 +68,8 @@ const mockUser = (userRole: 'student' | 'teacher' = 'teacher'): UserModel => ({
   versionAcceptedConditions: null,
   createdAt: new Date(),
   userRole,
+  federalStateId: generateUUID(),
+  schoolIds: [generateUUID()],
 });
 
 function buildFunctionList(
@@ -148,7 +150,7 @@ function buildFunctionList(
       testFunction: () =>
         getLearningScenario({
           learningScenarioId,
-          schoolId,
+          schoolIds: [schoolId],
           user,
         }),
     },
@@ -167,7 +169,7 @@ function buildFunctionList(
         shareLearningScenario({
           data: { telliPointsPercentageLimit: 50, usageTimeLimit: 60 },
           learningScenarioId,
-          schoolId,
+          schoolIds: [schoolId],
           user,
         }),
     },
@@ -177,7 +179,7 @@ function buildFunctionList(
         downloadFileFromLearningScenario({
           learningScenarioId,
           fileId,
-          schoolId,
+          schoolIds: [schoolId],
           user,
         }),
     },
@@ -410,7 +412,7 @@ describe('learning-scenario-service', () => {
         const result = await getLearningScenario({
           learningScenarioId,
           user: differentUser,
-          schoolId: differentSchoolId,
+          schoolIds: [differentSchoolId],
         });
 
         expect(result.learningScenario).toBe(mockLearningScenario);
@@ -445,7 +447,7 @@ describe('learning-scenario-service', () => {
           getFilesForLearningScenario({
             learningScenarioId,
             user: differentUser,
-            schoolId: differentSchoolId,
+            schoolIds: [differentSchoolId],
           }),
         ).resolves.not.toThrow();
       });
@@ -471,7 +473,7 @@ describe('learning-scenario-service', () => {
           getLearningScenario({
             learningScenarioId,
             user: differentUser,
-            schoolId: differentSchoolId,
+            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -492,7 +494,7 @@ describe('learning-scenario-service', () => {
           getFilesForLearningScenario({
             learningScenarioId,
             user: differentUser,
-            schoolId: differentSchoolId,
+            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });

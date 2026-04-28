@@ -76,15 +76,21 @@ export async function dbGetGlobalAssistantByName({
   return assistant;
 }
 
-export async function dbGetGptsBySchoolId({
-  schoolId,
+export async function dbGetGptsBySchoolIds({
+  schoolIds,
 }: {
-  schoolId: string;
+  schoolIds: string[];
 }): Promise<AssistantSelectModel[]> {
+  if (schoolIds.length === 0) {
+    return [];
+  }
+
   return db
     .select()
     .from(assistantTable)
-    .where(and(eq(assistantTable.schoolId, schoolId), eq(assistantTable.accessLevel, 'school')))
+    .where(
+      and(inArray(assistantTable.schoolId, schoolIds), eq(assistantTable.accessLevel, 'school')),
+    )
     .orderBy(desc(assistantTable.createdAt));
 }
 
@@ -103,11 +109,11 @@ export async function dbGetGptsByUserId({
 export async function dbGetAssistantByIdOrSchoolId({
   assistantId: characterId,
   userId,
-  schoolId,
+  schoolIds,
 }: {
   assistantId: string;
   userId: string;
-  schoolId: string | null;
+  schoolIds: string[];
 }) {
   const [character] = await db
     .select()
@@ -119,10 +125,10 @@ export async function dbGetAssistantByIdOrSchoolId({
           eq(assistantTable.userId, userId),
           eq(assistantTable.accessLevel, 'private'),
         ),
-        schoolId !== null
+        schoolIds.length > 0
           ? and(
               eq(assistantTable.id, characterId),
-              eq(assistantTable.schoolId, schoolId),
+              inArray(assistantTable.schoolId, schoolIds),
               eq(assistantTable.accessLevel, 'school'),
             )
           : undefined,

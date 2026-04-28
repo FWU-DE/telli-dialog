@@ -88,7 +88,21 @@ test.describe('costs', () => {
       ...user,
       federalState: { ...user.federalState, teacherPriceLimit: teacherPriceLimit },
     };
-    await db.insert(userTable).values(user);
+    const [insertedUser] = await db
+      .insert(userTable)
+      .values({
+        firstName: 'test',
+        lastName: 'user',
+        email: `${generateRandomString(8)}@example.com`,
+        lastUsedModel: user.lastUsedModel,
+        versionAcceptedConditions: user.versionAcceptedConditions,
+        schoolIds: user.schoolIds,
+        federalStateId: user.federalStateId,
+        userRole: 'teacher',
+      })
+      .returning({ id: userTable.id });
+    if (!insertedUser) throw new Error('Failed to insert test user');
+    user = { ...user, id: insertedUser.id, userRole: 'teacher' };
 
     const model = mockLlmModel();
     await db.insert(llmModelTable).values(model);
@@ -164,7 +178,21 @@ test.describe('costs', () => {
       ...user,
       federalState: { ...user.federalState, teacherPriceLimit: teacherPriceLimit },
     };
-    await db.insert(userTable).values(user);
+    const [insertedUser] = await db
+      .insert(userTable)
+      .values({
+        firstName: 'test',
+        lastName: 'user',
+        email: `${generateRandomString(8)}@example.com`,
+        lastUsedModel: user.lastUsedModel,
+        versionAcceptedConditions: user.versionAcceptedConditions,
+        schoolIds: user.schoolIds,
+        federalStateId: user.federalStateId,
+        userRole: 'teacher',
+      })
+      .returning({ id: userTable.id });
+    if (!insertedUser) throw new Error('Failed to insert test user');
+    user = { ...user, id: insertedUser.id, userRole: 'teacher' };
 
     const model = mockLlmModel();
     await db.insert(llmModelTable).values(model);

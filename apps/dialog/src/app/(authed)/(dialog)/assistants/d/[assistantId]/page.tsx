@@ -6,7 +6,6 @@ import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import Logo from '@/components/common/logo';
 import { getAssistantForNewChat } from '@shared/assistants/assistant-service';
 import { requireAuth } from '@/auth/requireAuth';
-import { buildLegacyUserAndContext } from '@/auth/types';
 import { handleErrorInServerComponent } from '@/error/handle-error-in-server-component';
 import { getAvatarPictureUrl } from '@shared/files/fileService';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
@@ -17,13 +16,16 @@ export const dynamic = 'force-dynamic';
 export default async function Page(props: PageProps<'/assistants/d/[assistantId]'>) {
   const { assistantId } = await props.params;
   const id = generateUUID();
-  const { user, school, federalState } = await requireAuth();
-  const userAndContext = buildLegacyUserAndContext(user, school, federalState);
+  const { user, federalState } = await requireAuth();
+  const userAndContext = {
+    ...user,
+    federalState,
+  };
 
   const assistant = await getAssistantForNewChat({
     assistantId: assistantId,
     userId: user.id,
-    schoolId: school.id,
+    schoolIds: user.schoolIds ?? [],
   }).catch(handleErrorInServerComponent);
 
   const logoElement = <Logo logoPath={federalState.pictureUrls?.logo} />;
