@@ -34,7 +34,7 @@ describe('calculateTimeLeft', () => {
       expect(result).toBe(-1);
     });
 
-    it('proceeds to time-based calculation when manuallyStoppedAt is null', () => {
+    it('proceeds to time-based calculation when manuallyStoppedAt is undefined', () => {
       const startedAt = new Date(now.getTime() - 10 * 60_000); // started 10 min ago
       const result = calculateTimeLeft({
         startedAt,
@@ -56,26 +56,18 @@ describe('calculateTimeLeft', () => {
   });
 
   describe('missing fields', () => {
-    it('returns -1 when startedAt is null', () => {
+    it('returns -1 when startedAt is undefined', () => {
       const result = calculateTimeLeft({
-        startedAt: null,
+        startedAt: undefined,
         maxUsageTimeLimit: 60,
       });
       expect(result).toBe(-1);
     });
 
-    it('returns -1 when maxUsageTimeLimit is null', () => {
+    it('returns -1 when maxUsageTimeLimit is undefined', () => {
       const result = calculateTimeLeft({
         startedAt: now,
-        maxUsageTimeLimit: null,
-      });
-      expect(result).toBe(-1);
-    });
-
-    it('returns -1 when both startedAt and maxUsageTimeLimit are null', () => {
-      const result = calculateTimeLeft({
-        startedAt: null,
-        maxUsageTimeLimit: null,
+        maxUsageTimeLimit: undefined,
       });
       expect(result).toBe(-1);
     });

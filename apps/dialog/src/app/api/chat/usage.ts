@@ -36,10 +36,6 @@ export async function sharedChatHasReachedTelliPointsLimit({
     return true;
   }
 
-  if (sharedChat.startedAt === null || sharedChat.maxUsageTimeLimit === null) {
-    return true;
-  }
-
   const sharedChatUsageInCent = await dbGetSharedChatUsageInCentBySharedChatId({
     sharedChatId: sharedChat.id,
     maxUsageTimeLimit: sharedChat.maxUsageTimeLimit,
@@ -48,7 +44,6 @@ export async function sharedChatHasReachedTelliPointsLimit({
 
   if (
     user.school.userRole === 'teacher' &&
-    sharedChat.telliPointsLimit !== null &&
     sharedChatUsageInCent <
       (await calculateSharedChatLimitInCent(user, sharedChat.telliPointsLimit))
   ) {
@@ -73,10 +68,6 @@ export async function sharedCharacterChatHasReachedTelliPointsLimit({
     return true;
   }
 
-  if (character.startedAt === null || character.maxUsageTimeLimit === null) {
-    return true;
-  }
-
   const characterUsageInCent = await dbGetSharedCharacterChatUsageInCentByCharacterId({
     characterId: character.id,
     maxUsageTimeLimit: character.maxUsageTimeLimit,
@@ -85,7 +76,6 @@ export async function sharedCharacterChatHasReachedTelliPointsLimit({
 
   if (
     user.school.userRole === 'teacher' &&
-    character.telliPointsLimit !== null &&
     characterUsageInCent < (await calculateSharedChatLimitInCent(user, character.telliPointsLimit))
   ) {
     return false;
@@ -99,18 +89,17 @@ export function sharedChatHasExpired({
   maxUsageTimeLimit,
   manuallyStoppedAt,
 }: {
-  startedAt: Date | null;
-  maxUsageTimeLimit: number | null;
+  startedAt: Date;
+  maxUsageTimeLimit: number;
   manuallyStoppedAt?: Date | null;
 }) {
-  // Manually stopped by the teacher
+  // Manually stopped by the user
   if (manuallyStoppedAt) {
     return true;
   }
 
   const timeLeft = calculateTimeLeft({ startedAt, maxUsageTimeLimit });
-
-  if (startedAt === null || timeLeft < 1 || maxUsageTimeLimit === null) {
+  if (timeLeft < 1) {
     // the shared chat is no viable anymore so the limit is reached
     return true;
   }

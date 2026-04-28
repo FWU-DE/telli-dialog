@@ -36,10 +36,7 @@ function latestActiveLearningScenarioShare(userId: string) {
       and(
         eq(sharedLearningScenarioTable.userId, userId),
         isNull(sharedLearningScenarioTable.manuallyStoppedAt),
-        or(
-          isNull(sharedLearningScenarioTable.maxUsageTimeLimit),
-          sql`${sharedLearningScenarioTable.startedAt} + ${sharedLearningScenarioTable.maxUsageTimeLimit} * interval '1 minute' >= now()`,
-        ),
+        sql`${sharedLearningScenarioTable.startedAt} + ${sharedLearningScenarioTable.maxUsageTimeLimit} * interval '1 minute' >= now()`,
       ),
     )
     .orderBy(
@@ -359,7 +356,7 @@ export async function dbDeleteLearningScenarioByIdAndUserId({
 }
 
 /**
- * Returns all active (non-stopped) shared learning scenarios for a given learning scenario and user.
+ * Returns all active (non-stopped, non-expired) shared learning scenarios for a given learning scenario and user.
  */
 export function dbGetSharedLearningScenarioConversations({
   learningScenarioId,
@@ -368,16 +365,11 @@ export function dbGetSharedLearningScenarioConversations({
   learningScenarioId: string;
   userId: string;
 }): Promise<SharedLearningScenarioSelectModel[]> {
+  const activeShare = latestActiveLearningScenarioShare(userId);
   return db
     .select()
-    .from(sharedLearningScenarioTable)
-    .where(
-      and(
-        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
-        eq(sharedLearningScenarioTable.userId, userId),
-        isNull(sharedLearningScenarioTable.manuallyStoppedAt),
-      ),
-    );
+    .from(activeShare)
+    .where(eq(activeShare.learningScenarioId, learningScenarioId));
 }
 
 /**
@@ -394,8 +386,8 @@ export async function dbCreateLearningScenarioShare({
 }: {
   userId: string;
   learningScenarioId: string;
-  telliPointsLimit: number | null;
-  maxUsageTimeLimit: number | null;
+  telliPointsLimit: number;
+  maxUsageTimeLimit: number;
   inviteCode: string;
   startedAt: Date;
 }) {

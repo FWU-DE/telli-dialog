@@ -28,10 +28,10 @@ const shareFormSchema = z.object({
 });
 
 interface CustomChatShareWithLearnersProps {
-  startedAt: Date | null;
+  startedAt: Date;
   manuallyStoppedAt?: Date | null;
-  maxUsageTimeLimit: number | null;
-  telliPointsLimit?: number | null;
+  maxUsageTimeLimit?: number;
+  telliPointsLimit?: number;
   pointsPercentageValues: number[];
   usageTimeValues: number[];
   onShare: (data: z.infer<typeof shareFormSchema>) => Promise<{ success: boolean }>;

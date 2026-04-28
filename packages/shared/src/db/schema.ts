@@ -735,10 +735,10 @@ export const sharedLearningScenarioTable = pgTable(
     userId: uuid('user_id')
       .references(() => userTable.id)
       .notNull(),
-    telliPointsLimit: integer('telli_points_limit'),
-    maxUsageTimeLimit: integer('max_usage_time_limit'),
-    inviteCode: text('invite_code').unique(),
-    startedAt: timestamp('started_at', { withTimezone: true }).defaultNow(),
+    telliPointsLimit: integer('telli_points_limit').notNull(),
+    maxUsageTimeLimit: integer('max_usage_time_limit').notNull(),
+    inviteCode: text('invite_code').unique().notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
     manuallyStoppedAt: timestamp('manually_stopped_at', { withTimezone: true }),
   },
   (table) => [
@@ -755,7 +755,7 @@ export const sharedLearningScenarioTable = pgTable(
 export const sharedLearningScenarioSelectSchema = createSelectSchema(
   sharedLearningScenarioTable,
 ).extend({
-  startedAt: z.coerce.date().nullable(),
+  startedAt: z.coerce.date(),
   manuallyStoppedAt: z.coerce.date().nullable(),
 });
 export const sharedLearningScenarioInsertSchema = createInsertSchema(
@@ -785,7 +785,11 @@ export const learningScenarioWithShareDataModel = learningScenarioSelectSchema.a
 );
 export const learningScenarioOptionalShareDataModel = learningScenarioSelectSchema.and(
   sharedLearningScenarioTransformedSchema.extend({
+    inviteCode: z.string().nullable(),
+    maxUsageTimeLimit: z.number().nullable(),
+    startedAt: z.coerce.date().nullable(),
     startedBy: z.string().nullable(),
+    telliPointsLimit: z.number().nullable(),
   }),
 );
 export type LearningScenarioWithShareDataModel = z.infer<typeof learningScenarioWithShareDataModel>;
@@ -911,17 +915,17 @@ export const sharedCharacterConversation = pgTable('shared_character_conversatio
   userId: uuid('user_id')
     .references(() => userTable.id)
     .notNull(),
-  telliPointsLimit: integer('telli_points_limit'),
-  maxUsageTimeLimit: integer('max_usage_time_limit'),
-  inviteCode: text('invite_code').unique(),
-  startedAt: timestamp('started_at', { withTimezone: true }),
+  telliPointsLimit: integer('telli_points_limit').notNull(),
+  maxUsageTimeLimit: integer('max_usage_time_limit').notNull(),
+  inviteCode: text('invite_code').unique().notNull(),
+  startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
   manuallyStoppedAt: timestamp('manually_stopped_at', { withTimezone: true }),
 });
 
 export const sharedCharacterConversationSelectSchema = createSelectSchema(
   sharedCharacterConversation,
 ).extend({
-  startedAt: z.coerce.date().nullable(),
+  startedAt: z.coerce.date(),
   manuallyStoppedAt: z.coerce.date().nullable(),
 });
 export const sharedCharacterConversationInsertSchema = createInsertSchema(
@@ -954,7 +958,11 @@ export const characterWithShareDataModel = characterSelectSchema.and(
 );
 export const characterOptionalShareDataModel = characterSelectSchema.and(
   sharedCharacterTransformedSchema.extend({
+    inviteCode: z.string().nullable(),
+    maxUsageTimeLimit: z.number().nullable(),
+    startedAt: z.coerce.date().nullable(),
     startedBy: z.string().nullable(),
+    telliPointsLimit: z.number().nullable(),
   }),
 );
 export type CharacterWithShareDataModel = z.infer<typeof characterWithShareDataModel>;

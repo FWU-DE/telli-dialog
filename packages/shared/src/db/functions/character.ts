@@ -38,10 +38,7 @@ function latestActiveCharacterShare(userId: string) {
       and(
         eq(sharedCharacterConversation.userId, userId),
         isNull(sharedCharacterConversation.manuallyStoppedAt),
-        or(
-          isNull(sharedCharacterConversation.maxUsageTimeLimit),
-          sql`${sharedCharacterConversation.startedAt} + ${sharedCharacterConversation.maxUsageTimeLimit} * interval '1 minute' >= now()`,
-        ),
+        sql`${sharedCharacterConversation.startedAt} + ${sharedCharacterConversation.maxUsageTimeLimit} * interval '1 minute' >= now()`,
       ),
     )
     .orderBy(sharedCharacterConversation.characterId, desc(sharedCharacterConversation.startedAt))
@@ -423,23 +420,15 @@ export async function dbGetGlobalCharacterByName({
 }
 
 /**
- * Returns all active (non-stopped) shared character conversations for a given character and user.
+ * Returns all active (non-stopped, non-expired) shared character conversations for a given character and user.
  */
-export async function dbGetSharedCharacterConversations({
+export function dbGetSharedCharacterConversations({
   characterId,
   userId,
 }: {
   characterId: string;
   userId: string;
 }) {
-  return await db
-    .select()
-    .from(sharedCharacterConversation)
-    .where(
-      and(
-        eq(sharedCharacterConversation.characterId, characterId),
-        eq(sharedCharacterConversation.userId, userId),
-        isNull(sharedCharacterConversation.manuallyStoppedAt),
-      ),
-    );
+  const activeShare = latestActiveCharacterShare(userId);
+  return db.select().from(activeShare).where(eq(activeShare.characterId, characterId));
 }

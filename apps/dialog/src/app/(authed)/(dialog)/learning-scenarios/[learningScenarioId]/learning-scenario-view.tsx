@@ -103,10 +103,10 @@ export function LearningScenarioView({
       </CustomChatActions>
 
       <CustomChatShareWithLearners
-        startedAt={learningScenario.startedAt ?? null}
-        manuallyStoppedAt={learningScenario.manuallyStoppedAt ?? null}
-        maxUsageTimeLimit={learningScenario.maxUsageTimeLimit ?? null}
-        telliPointsLimit={learningScenario.telliPointsLimit ?? null}
+        startedAt={learningScenario.startedAt}
+        manuallyStoppedAt={learningScenario.manuallyStoppedAt}
+        maxUsageTimeLimit={learningScenario.maxUsageTimeLimit}
+        telliPointsLimit={learningScenario.telliPointsLimit}
         pointsPercentageValues={telliPointsPercentageValues}
         usageTimeValues={usageTimeValuesInMinutes}
         onShare={handleShareLearningScenario}

@@ -15,8 +15,8 @@ export function CopyContainer({
   Parameters<typeof CreateNewInstanceFromTemplate>[0],
   'redirectPath' | 'createInstanceCallbackAction' | 'templateId'
 > & {
-  startedAt: Date | null;
-  maxUsageTimeLimit: number | null;
+  startedAt: Date;
+  maxUsageTimeLimit: number;
   translationPath: Parameters<typeof useTranslations>[0];
 }) {
   const sharedChatTimeLeft = calculateTimeLeft({ startedAt, maxUsageTimeLimit });

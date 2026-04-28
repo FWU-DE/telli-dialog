@@ -7,15 +7,15 @@ export function calculateTimeLeft({
   maxUsageTimeLimit,
   manuallyStoppedAt,
 }: {
-  startedAt: Date | null;
-  maxUsageTimeLimit: number | null;
+  startedAt?: Date;
+  maxUsageTimeLimit?: number;
   manuallyStoppedAt?: Date | null;
 }) {
   if (manuallyStoppedAt) {
     return -1;
   }
 
-  if (startedAt === null || maxUsageTimeLimit === null) {
+  if (startedAt === undefined || maxUsageTimeLimit === undefined) {
     return -1;
   }
 

@@ -88,10 +88,10 @@ export function CharacterView({
       </CustomChatActions>
 
       <CustomChatShareWithLearners
-        startedAt={character.startedAt ?? null}
-        manuallyStoppedAt={character.manuallyStoppedAt ?? null}
-        maxUsageTimeLimit={character.maxUsageTimeLimit ?? null}
-        telliPointsLimit={character.telliPointsLimit ?? null}
+        startedAt={character.startedAt}
+        manuallyStoppedAt={character.manuallyStoppedAt}
+        maxUsageTimeLimit={character.maxUsageTimeLimit}
+        telliPointsLimit={character.telliPointsLimit}
         pointsPercentageValues={telliPointsPercentageValues}
         usageTimeValues={usageTimeValuesInMinutes}
         onShare={async (data) => {
