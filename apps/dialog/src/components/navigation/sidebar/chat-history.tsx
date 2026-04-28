@@ -10,7 +10,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useCustomPathname } from '@/hooks/use-custom-pathname';
-import { useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { SidebarGroup, SidebarMenu } from '@ui/components/Sidebar';
 import { ChatHistoryItem } from './chat-history-item';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@ui/components/InputGroup';
@@ -18,7 +19,17 @@ import { MagnifyingGlassIcon, XCircleIcon } from '@phosphor-icons/react';
 import { Button } from '@ui/components/Button';
 import { Spinner } from '@ui/components/Spinner';
 
-export function ChatHistory() {
+/**
+ * ChatHistory component handles rendering a virtual-scrolled list of conversations.
+ *
+ * Note: This component is not memoized (not wrapped in `React.memo`) because:
+ * - It relies on external scroll container measurements that can change frequently
+ * - The virtualizer needs to respond to real-time scroll events
+ * - Memoization would prevent proper synchronization with scroll position changes
+ */
+export function ChatHistory({ scrollContainer }: { scrollContainer: HTMLDivElement | null }) {
+  'use no memo';
+
   const router = useRouter();
   const pathname = useCustomPathname();
   const toast = useToast();
@@ -79,6 +90,31 @@ export function ChatHistory() {
     );
   }, [conversations, searchText]);
 
+  const navRef = useRef<HTMLElement>(null);
+
+  // scrollMargin is used for the vertical offset of the navigation element within the scroll container (i.e., the space for the menu items above the chat history)
+  const [scrollMargin, setScrollMargin] = useState(0);
+
+  // useLayoutEffect is used instead of useEffect to be able to call getBoundingClientRect()
+  useLayoutEffect(() => {
+    const navEl = navRef.current;
+    if (!scrollContainer || !navEl) return;
+    setScrollMargin(
+      navEl.getBoundingClientRect().top -
+        scrollContainer.getBoundingClientRect().top +
+        scrollContainer.scrollTop,
+    );
+  }, [scrollContainer]);
+
+  // eslint-disable-next-line react-hooks/incompatible-library -- opted out of memoization via "use no memo"
+  const virtualizer = useVirtualizer({
+    count: filteredConversations.length,
+    getScrollElement: () => scrollContainer,
+    estimateSize: () => 40,
+    overscan: 10,
+    scrollMargin,
+  });
+
   return (
     <>
       <SidebarGroup className="p-0">
@@ -118,18 +154,29 @@ export function ChatHistory() {
             )}
           </InputGroupAddon>
         </InputGroup>
-        <nav aria-label={t('aria.chat-history')}>
-          <SidebarMenu>
-            {filteredConversations.map((conversation) => (
-              <ChatHistoryItem
-                key={conversation.id}
-                conversation={conversation}
-                onDeleteConversation={handleDeleteConversation}
-                onUpdateConversation={(name) =>
-                  handleUpdateConversation({ id: conversation.id, name })
-                }
-              />
-            ))}
+        <nav ref={navRef} aria-label={t('aria.chat-history')}>
+          <SidebarMenu style={{ position: 'relative', height: virtualizer.getTotalSize() }}>
+            {virtualizer.getVirtualItems().map((virtualItem) => {
+              const conversation = filteredConversations[virtualItem.index];
+              if (!conversation) return null;
+              return (
+                <ChatHistoryItem
+                  key={conversation.id}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualItem.start - scrollMargin}px)`,
+                  }}
+                  conversation={conversation}
+                  onDeleteConversation={handleDeleteConversation}
+                  onUpdateConversation={(name) =>
+                    handleUpdateConversation({ id: conversation.id, name })
+                  }
+                />
+              );
+            })}
           </SidebarMenu>
         </nav>
       </SidebarGroup>
