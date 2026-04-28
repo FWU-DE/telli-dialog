@@ -50,6 +50,14 @@ export type WebsearchSource = {
   error?: boolean;
 };
 
+export type TextSearchResult = {
+  name: string;
+  url: string;
+  content: string;
+  type: string;
+  favicon?: string;
+};
+
 export type DbTransactionObject = PgTransaction<
   PostgresJsQueryResultHKT,
   Record<string, never>,

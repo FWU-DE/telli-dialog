@@ -1,0 +1,1 @@
+ALTER TABLE "conversation_message" ADD COLUMN "text_search_results" json;
