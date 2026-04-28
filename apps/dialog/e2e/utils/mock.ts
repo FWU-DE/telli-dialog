@@ -9,17 +9,17 @@ import {
   SharedCharacterChatUsageTrackingSelectModel,
   SharedLearningScenarioUsageTrackingSelectModel,
 } from '@shared/db/schema';
+import { E2E_FEDERAL_STATE } from './const';
 
 export const mockUserAndContext = (): UserAndContext => {
   const schoolId = generateUUID();
-  const federalStateId = generateUUID();
 
   return {
     id: generateUUID(),
     lastUsedModel: null,
     versionAcceptedConditions: null,
     schoolIds: [schoolId],
-    federalStateId,
+    federalStateId: E2E_FEDERAL_STATE,
     userRole: 'teacher',
     hasApiKeyAssigned: true,
     federalState: {
