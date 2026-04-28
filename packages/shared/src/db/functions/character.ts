@@ -42,7 +42,23 @@ function latestActiveCharacterShare(userId: string) {
       ),
     )
     .orderBy(sharedCharacterConversation.characterId, desc(sharedCharacterConversation.startedAt))
-    .as('latest_active_character_share');
+    .as('latest_share');
+}
+
+/**
+ * Returns a subquery that selects the single most-recent share per character for a given user,
+ * regardless of whether it is active or expired. Used to surface the last share's settings
+ * (telliPointsLimit, maxUsageTimeLimit) as defaults when no active share exists.
+ */
+function latestCharacterShare(userId: string): ReturnType<typeof latestActiveCharacterShare> {
+  return db
+    .selectDistinctOn([sharedCharacterConversation.characterId], {
+      ...getTableColumns(sharedCharacterConversation),
+    })
+    .from(sharedCharacterConversation)
+    .where(eq(sharedCharacterConversation.userId, userId))
+    .orderBy(sharedCharacterConversation.characterId, desc(sharedCharacterConversation.startedAt))
+    .as('latest_share');
 }
 
 function baseCharacterWithShareQuery(activeShare: ReturnType<typeof latestActiveCharacterShare>) {
@@ -120,9 +136,9 @@ export async function dbGetCharacterByIdOptionalShareData({
   characterId: string;
   userId: string;
 }): Promise<CharacterOptionalShareDataModel | undefined> {
-  const activeShare = latestActiveCharacterShare(userId);
-  const [row] = await baseCharacterWithShareQuery(activeShare)
-    .leftJoin(activeShare, eq(activeShare.characterId, characterTable.id))
+  const latestShare = latestCharacterShare(userId);
+  const [row] = await baseCharacterWithShareQuery(latestShare)
+    .leftJoin(latestShare, eq(latestShare.characterId, characterTable.id))
     .where(eq(characterTable.id, characterId));
   return row;
 }

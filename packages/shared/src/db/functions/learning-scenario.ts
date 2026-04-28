@@ -43,7 +43,28 @@ function latestActiveLearningScenarioShare(userId: string) {
       sharedLearningScenarioTable.learningScenarioId,
       desc(sharedLearningScenarioTable.startedAt),
     )
-    .as('latest_active_ls_share');
+    .as('latest_share');
+}
+
+/**
+ * Returns a subquery that selects the single most-recent share per learning scenario for a given
+ * user, regardless of whether it is active or expired. Used to surface the last share's settings
+ * (telliPointsLimit, maxUsageTimeLimit) as defaults when no active share exists.
+ */
+function latestLearningScenarioShare(
+  userId: string,
+): ReturnType<typeof latestActiveLearningScenarioShare> {
+  return db
+    .selectDistinctOn([sharedLearningScenarioTable.learningScenarioId], {
+      ...getTableColumns(sharedLearningScenarioTable),
+    })
+    .from(sharedLearningScenarioTable)
+    .where(eq(sharedLearningScenarioTable.userId, userId))
+    .orderBy(
+      sharedLearningScenarioTable.learningScenarioId,
+      desc(sharedLearningScenarioTable.startedAt),
+    )
+    .as('latest_share');
 }
 
 function baseLearningScenarioWithShareQuery(
@@ -237,9 +258,9 @@ export async function dbGetLearningScenarioByIdOptionalShareData({
   learningScenarioId: string;
   userId: string;
 }): Promise<LearningScenarioOptionalShareDataModel | undefined> {
-  const activeShare = latestActiveLearningScenarioShare(userId);
-  const [row] = await baseLearningScenarioWithShareQuery(activeShare)
-    .leftJoin(activeShare, eq(activeShare.learningScenarioId, learningScenarioTable.id))
+  const latestShare = latestLearningScenarioShare(userId);
+  const [row] = await baseLearningScenarioWithShareQuery(latestShare)
+    .leftJoin(latestShare, eq(latestShare.learningScenarioId, learningScenarioTable.id))
     .where(eq(learningScenarioTable.id, learningScenarioId));
   return row;
 }
