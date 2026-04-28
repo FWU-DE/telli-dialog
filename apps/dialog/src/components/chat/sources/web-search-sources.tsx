@@ -123,11 +123,9 @@ export function WebSearchSourcesPanel({
 }
 
 export function WebSearchSourcesButton({
-  isOpen,
   panelId,
   onClick,
 }: {
-  isOpen: boolean;
   panelId: string;
   onClick: () => void;
 }) {
@@ -138,7 +136,6 @@ export function WebSearchSourcesButton({
       title={tWebsearch('results.show')}
       onClick={onClick}
       aria-label={tWebsearch('results.show')}
-      aria-expanded={isOpen}
       aria-controls={panelId}
       variant={'ghost'}
       size={'icon'}

@@ -157,7 +157,6 @@ export function ChatBox({
         </button>
         {assistantWebsearchSources.length > 0 && (
           <WebSearchSourcesButton
-            isOpen={isAssistantSourcesOpen}
             panelId={`assistant-web-sources-${children.id}`}
             onClick={openOrScrollIntoView}
           />
