@@ -1,5 +1,5 @@
 {
-  "id": "aeaf91fd-ba90-4f53-ac97-5fb14db6f8ea",
+  "id": "34874d00-c25e-406f-85d5-c1ad59905995",
   "prevId": "c8526302-b8b7-49c6-a1ea-918a8cd843c2",
   "version": "7",
   "dialect": "postgresql",
@@ -2682,25 +2682,26 @@
           "name": "telli_points_limit",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "max_usage_time_limit": {
           "name": "max_usage_time_limit",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "invite_code": {
           "name": "invite_code",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "started_at": {
           "name": "started_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "now()"
         },
         "manually_stopped_at": {
           "name": "manually_stopped_at",
@@ -2766,25 +2767,25 @@
           "name": "telli_points_limit",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "max_usage_time_limit": {
           "name": "max_usage_time_limit",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "invite_code": {
           "name": "invite_code",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "started_at": {
           "name": "started_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "now()"
         },
         "manually_stopped_at": {
