@@ -28,7 +28,7 @@ export async function sharedChatHasReachedTelliPointsLimit({
   user: UserAndContext | undefined;
   sharedChat: LearningScenarioWithShareDataModel;
 }) {
-  if (user === undefined || user.school === undefined || user.federalState === undefined) {
+  if (user === undefined || user.federalState === undefined) {
     return true;
   }
 
@@ -47,7 +47,7 @@ export async function sharedChatHasReachedTelliPointsLimit({
   });
 
   if (
-    user.school.userRole === 'teacher' &&
+    user.userRole === 'teacher' &&
     sharedChat.telliPointsLimit !== null &&
     sharedChatUsageInCent <
       (await calculateSharedChatLimitInCent(user, sharedChat.telliPointsLimit))
@@ -65,7 +65,7 @@ export async function sharedCharacterChatHasReachedTelliPointsLimit({
   user: UserAndContext | undefined;
   character: CharacterWithShareDataModel;
 }) {
-  if (user === undefined || user.school === undefined || user.federalState === undefined) {
+  if (user === undefined || user.federalState === undefined) {
     return true;
   }
 
@@ -84,7 +84,7 @@ export async function sharedCharacterChatHasReachedTelliPointsLimit({
   });
 
   if (
-    user.school.userRole === 'teacher' &&
+    user.userRole === 'teacher' &&
     character.telliPointsLimit !== null &&
     characterUsageInCent < (await calculateSharedChatLimitInCent(user, character.telliPointsLimit))
   ) {
@@ -115,7 +115,7 @@ export async function userHasReachedTelliPointsLimit({
 }: {
   user: UserAndContext | undefined;
 }) {
-  if (user === undefined || user.school === undefined || user.federalState === undefined) {
+  if (user === undefined || user.federalState === undefined) {
     return false;
   }
 

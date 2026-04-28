@@ -30,6 +30,10 @@ export type FileMetadata = {
   height?: number;
 };
 
+export const userSchoolRoleSchema = z.enum(['student', 'teacher']);
+export const userSchoolRoleEnum = pgEnum('user_school_role', userSchoolRoleSchema.enum);
+export type UserSchoolRole = z.infer<typeof userSchoolRoleSchema>;
+
 /**
  * Schema for table user_entity
  */
@@ -40,6 +44,12 @@ export const userTable = pgTable('user_entity', {
   email: text('email').notNull().unique(),
   lastUsedModel: text('last_used_model'),
   versionAcceptedConditions: integer(),
+  schoolIds: text('school_ids')
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
+  federalStateId: text('federal_state_id').references(() => federalStateTable.id),
+  userRole: userSchoolRoleEnum('user_role').notNull().default('student'),
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -155,77 +165,6 @@ export const conversationMessageUpdateSchema = createUpdateSchema(conversationMe
 export type ConversationMessageSelectModel = z.infer<typeof conversationMessageSelectSchema>;
 export type ConversationMessageInsertModel = z.infer<typeof conversationMessageInsertSchema>;
 export type ConversationMessageUpdateModel = z.infer<typeof conversationMessageUpdateSchema>;
-
-/**
- * Schema for table user_school_mapping
- */
-export const userSchoolRoleSchema = z.enum(['student', 'teacher']);
-export const userSchoolRoleEnum = pgEnum('user_school_role', userSchoolRoleSchema.enum);
-export type UserSchoolRole = z.infer<typeof userSchoolRoleSchema>;
-
-export const userSchoolMappingTable = pgTable(
-  'user_school_mapping',
-  {
-    id: uuid('id').defaultRandom().primaryKey(),
-    userId: uuid('user_id')
-      .references(() => userTable.id)
-      .notNull(),
-    schoolId: text('school_id')
-      .references(() => schoolTable.id)
-      .notNull(),
-    role: userSchoolRoleEnum('role').notNull(),
-    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [unique().on(table.userId, table.schoolId)],
-);
-
-export const userSchoolMappingSelectSchema = createSelectSchema(userSchoolMappingTable);
-export const userSchoolMappingInsertSchema = createInsertSchema(userSchoolMappingTable).omit({
-  id: true,
-  createdAt: true,
-});
-export const userSchoolMappingUpdateSchema = createUpdateSchema(userSchoolMappingTable)
-  .omit({
-    userId: true,
-    schoolId: true,
-    createdAt: true,
-  })
-  .extend({
-    id: z.string(),
-  });
-
-export type UserSchoolMappingSelectModel = z.infer<typeof userSchoolMappingSelectSchema>;
-export type UserSchoolMappingInsertModel = z.infer<typeof userSchoolMappingInsertSchema>;
-export type UserSchoolMappingUpdateModel = z.infer<typeof userSchoolMappingUpdateSchema>;
-
-/**
- * Schema for table school
- */
-export const schoolTable = pgTable(
-  'school',
-  {
-    id: text('id').primaryKey(),
-    federalStateId: text('federal_state_id')
-      .references(() => federalStateTable.id)
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [index().on(table.federalStateId)],
-);
-
-export const schoolSelectSchema = createSelectSchema(schoolTable).extend({
-  createdAt: z.coerce.date(),
-});
-export const schoolInsertSchema = createInsertSchema(schoolTable).omit({
-  createdAt: true,
-});
-export const schoolUpdateSchema = createUpdateSchema(schoolTable).omit({ createdAt: true }).extend({
-  id: z.string(),
-});
-
-export type SchoolSelectModel = z.infer<typeof schoolSelectSchema>;
-export type SchoolInsertModel = z.infer<typeof schoolInsertSchema>;
-export type SchoolUpdateModel = z.infer<typeof schoolUpdateSchema>;
 
 /**
  * Schema for table federal_state
@@ -437,7 +376,7 @@ export const characterTable = pgTable(
     initialMessage: text('initial_message'),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
-    schoolId: text('school_id').references(() => schoolTable.id),
+    schoolId: text('school_id'),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
       .defaultNow()
@@ -650,7 +589,7 @@ export const learningScenarioTable = pgTable(
       .notNull(),
     isDeleted: boolean('is_deleted').notNull().default(false),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
-    schoolId: text('school_id').references(() => schoolTable.id),
+    schoolId: text('school_id'),
     originalLearningScenarioId: uuid('original_learning_scenario_id'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
   },
@@ -1021,7 +960,7 @@ export const assistantTable = pgTable(
       .defaultNow()
       .$onUpdateFn(() => new Date())
       .notNull(),
-    schoolId: text('school_id').references(() => schoolTable.id),
+    schoolId: text('school_id'),
     accessLevel: accessLevelEnum('access_level').notNull().default('private'),
     hasLinkAccess: boolean('has_link_access').notNull().default(false),
     pictureId: text('picture_id'),

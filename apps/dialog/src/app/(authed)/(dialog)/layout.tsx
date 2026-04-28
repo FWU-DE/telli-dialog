@@ -25,8 +25,7 @@ import ActiveInfoBanners from '@/components/info-banners/active-info-banners';
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations('errors');
   const user = await getUser();
-  const userWithRole = { ...user, userRole: user.school.userRole };
-  if (!user.hasApiKeyAssigned) throw new Error(t('no-api-key'));
+  if (!user.federalState.hasApiKeyAssigned) throw new Error(t('no-api-key'));
 
   const [federalState, models, priceInCent, userPriceLimit, hasCompletedTraining, activeBanners] =
     await Promise.all([
@@ -43,7 +42,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
 
   const productAccess = checkProductAccess({ ...user, hasCompletedTraining });
   const federalStateDisclaimer =
-    federalStateDisclaimers[user.school.federalStateId as FederalStateId];
+    federalStateDisclaimers[(user.federalStateId ?? user.federalState.id) as FederalStateId];
   const userMustAccept =
     federalStateDisclaimer !== undefined &&
     (user.versionAcceptedConditions === null || user.versionAcceptedConditions < VERSION);
@@ -57,7 +56,7 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
             defaultLlmModelByCookie={user.lastUsedModel ?? DEFAULT_CHAT_MODEL}
           >
             <AppSidebar
-              user={userWithRole}
+              user={user}
               federalState={federalState}
               currentModelCosts={priceInCent ?? 0}
               userPriceLimit={userPriceLimit ?? 500}

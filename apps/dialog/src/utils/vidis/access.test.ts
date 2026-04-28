@@ -27,6 +27,7 @@ describe('checkProductAccess', () => {
       isNewUiDesignEnabled: true,
     },
     pictureUrls: null,
+    hasApiKeyAssigned: true,
   };
 
   const baseSchool = {
@@ -44,14 +45,15 @@ describe('checkProductAccess', () => {
     createdAt: new Date(),
     lastUsedModel: null,
     versionAcceptedConditions: null,
+    schoolIds: [baseSchool.id],
+    federalStateId: baseSchool.federalStateId,
+    userRole: baseSchool.userRole,
   } satisfies UserSelectModel;
 
   it('should allow access when all conditions are met', () => {
     const context: UserAndContext = {
       ...baseUser,
       federalState: baseFederalState,
-      school: baseSchool,
-      hasApiKeyAssigned: true,
     };
 
     const result = checkProductAccess({ ...context, hasCompletedTraining: true });
@@ -68,11 +70,7 @@ describe('checkProductAccess', () => {
           isStudentAccessEnabled: false,
         },
       },
-      school: {
-        ...baseSchool,
-        userRole: 'student',
-      },
-      hasApiKeyAssigned: true,
+      userRole: 'student',
     };
 
     const result = checkProductAccess({ ...context, hasCompletedTraining: true });
@@ -93,11 +91,7 @@ describe('checkProductAccess', () => {
           isStudentAccessEnabled: true,
         },
       },
-      school: {
-        ...baseSchool,
-        userRole: 'student',
-      },
-      hasApiKeyAssigned: true,
+      userRole: 'student',
     };
 
     const result = checkProductAccess({ ...context, hasCompletedTraining: true });
@@ -111,8 +105,6 @@ describe('checkProductAccess', () => {
         ...baseFederalState,
         mandatoryCertificationTeacher: true,
       },
-      school: baseSchool,
-      hasApiKeyAssigned: true,
     };
 
     const result = checkProductAccess({ ...context, hasCompletedTraining: false });
@@ -133,8 +125,6 @@ describe('checkProductAccess', () => {
         mandatoryCertificationTeacher: true,
         trainingLink,
       },
-      school: baseSchool,
-      hasApiKeyAssigned: true,
     };
 
     const result = checkProductAccess({ ...context, hasCompletedTraining: true });
@@ -156,11 +146,7 @@ describe('checkProductAccess', () => {
         },
         mandatoryCertificationTeacher: true,
       },
-      school: {
-        ...baseSchool,
-        userRole: 'student',
-      },
-      hasApiKeyAssigned: true,
+      userRole: 'student',
     };
 
     const result = checkProductAccess({ ...context, hasCompletedTraining: true });
@@ -181,11 +167,7 @@ describe('checkProductAccess', () => {
         },
         mandatoryCertificationTeacher: true,
       },
-      school: {
-        ...baseSchool,
-        userRole: 'student',
-      },
-      hasApiKeyAssigned: true,
+      userRole: 'student',
     };
 
     // We're testing the implementation detail that training is not checked for students
@@ -205,11 +187,7 @@ describe('checkProductAccess', () => {
       const context: UserAndContext = {
         ...baseUser,
         federalState: baseFederalState,
-        school: {
-          ...baseSchool,
-          userRole: role,
-        },
-        hasApiKeyAssigned: true,
+        userRole: role,
       };
 
       const result = checkProductAccess({ ...context, hasCompletedTraining: true });
@@ -235,11 +213,7 @@ describe('checkProductAccess', () => {
             isStudentAccessEnabled: state.studentAccess,
           },
         },
-        school: {
-          ...baseSchool,
-          userRole: 'student',
-        },
-        hasApiKeyAssigned: true,
+        userRole: 'student',
       };
 
       const result = checkProductAccess({ ...context, hasCompletedTraining: true });
