@@ -3,7 +3,7 @@ import { dbGetCharacterByIdWithShareData } from '@shared/db/functions/character'
 import { dbGetAssistantById } from '@shared/db/functions/assistants';
 import { MAX_WEBSEARCH_SOURCES_PER_CONVERSATION } from '@/configuration-text-inputs/const';
 import { UserAndContext } from '@/auth/types';
-import { ChatMessage } from './actions';
+import { ChatMessage } from '../chat/actions';
 
 // Extract unique URLs from message content
 function extractUniqueUrls(content: string): string[] {
