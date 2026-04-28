@@ -38,7 +38,6 @@ export const mockUserAndContext = (): UserAndContext => {
         isCustomGptEnabled: false,
         isSharedChatEnabled: false,
         isShareTemplateWithSchoolEnabled: false,
-        isNewUiDesignEnabled: false,
       },
       pictureUrls: null,
       hasApiKeyAssigned: true,
