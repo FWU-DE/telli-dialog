@@ -62,19 +62,14 @@ vi.mock('../templates/template-service', () => ({
   copyEntityPictureIfExists: vi.fn(),
   copyRelatedTemplateFiles: vi.fn(),
 }));
-const { mockDbReturning, mockDbUpdate, mockDbInsert, mockDbInsertReturning } = vi.hoisted(() => {
+const { mockDbReturning, mockDbUpdate } = vi.hoisted(() => {
   const mockDbReturning = vi.fn();
   const mockDbWhere = vi.fn(() => ({ returning: mockDbReturning }));
   const mockDbSet = vi.fn(() => ({ where: mockDbWhere }));
   const mockDbUpdate = vi.fn(() => ({ set: mockDbSet }));
-
-  const mockDbInsertReturning = vi.fn();
-  const mockDbValues = vi.fn(() => ({ returning: mockDbInsertReturning }));
-  const mockDbInsert = vi.fn(() => ({ values: mockDbValues }));
-
-  return { mockDbReturning, mockDbUpdate, mockDbInsert, mockDbInsertReturning };
+  return { mockDbReturning, mockDbUpdate };
 });
-vi.mock('@shared/db', () => ({ db: { update: mockDbUpdate, insert: mockDbInsert } }));
+vi.mock('@shared/db', () => ({ db: { update: mockDbUpdate } }));
 
 const mockUser = (userRole: 'student' | 'teacher' = 'teacher') => ({
   id: generateUUID(),
@@ -374,7 +369,7 @@ describe('character-service', () => {
       ).rejects.toThrow(ForbiddenError);
     });
 
-    it('should throw ForbiddenError when user can only unshare a character they started sharing - unshareCharacter', async () => {
+    it('should throw NotFoundError when there is no active sharing to unshare - unshareCharacter', async () => {
       (
         dbGetSharedCharacterConversations as MockedFunction<
           typeof dbGetSharedCharacterConversations
@@ -386,7 +381,50 @@ describe('character-service', () => {
           characterId: generateUUID(),
           user: mockUser('teacher'),
         }),
-      ).rejects.toThrow(ForbiddenError);
+      ).rejects.toThrow(NotFoundError);
+    });
+  });
+
+  describe('shareCharacter – duplicate share', () => {
+    const userId = generateUUID();
+    const characterId = generateUUID();
+    const user = { ...mockUser('teacher'), id: userId };
+    const existingShare = {
+      id: generateUUID(),
+      characterId,
+      userId,
+      telliPointsLimit: 50,
+      maxUsageTimeLimit: 60,
+      inviteCode: 'ABCD1234',
+      startedAt: new Date(),
+      manuallyStoppedAt: null,
+    };
+
+    beforeEach(() => {
+      const mockCharacter: Partial<CharacterSelectModel> = {
+        id: characterId,
+        userId,
+        accessLevel: 'private',
+      };
+      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
+        mockCharacter as never,
+      );
+      (
+        dbGetSharedCharacterConversations as MockedFunction<
+          typeof dbGetSharedCharacterConversations
+        >
+      ).mockResolvedValue([existingShare] as never);
+    });
+
+    it('throws when there is already an active share', async () => {
+      await expect(
+        shareCharacter({
+          characterId,
+          user,
+          telliPointsPercentageLimit: 10,
+          usageTimeLimitMinutes: 60,
+        }),
+      ).rejects.toThrow('There can only be one active share at a time');
     });
   });
 
@@ -770,102 +808,6 @@ describe('character-service', () => {
         picturePath: `characters/${characterId}/avatar_3a6eb0790f39`,
         signedUrl: 'https://signed-url',
       });
-    });
-  });
-
-  describe('shareCharacter – success', () => {
-    const characterId = generateUUID();
-    const user = mockUser('teacher');
-    const mockCharacter: Partial<CharacterSelectModel> = {
-      id: characterId,
-      userId: user.id,
-      accessLevel: 'private',
-    };
-    const newShare = {
-      id: generateUUID(),
-      characterId,
-      userId: user.id,
-      telliPointsLimit: 10,
-      maxUsageTimeLimit: 60,
-      inviteCode: 'ABCD1234',
-      startedAt: new Date(),
-      manuallyStoppedAt: null,
-    };
-
-    beforeEach(() => {
-      (dbGetCharacterById as MockedFunction<typeof dbGetCharacterById>).mockResolvedValue(
-        mockCharacter as never,
-      );
-      mockDbInsertReturning.mockResolvedValue([newShare]);
-    });
-
-    it('stops any existing active share (calls db.update) before inserting the new share', async () => {
-      await shareCharacter({
-        characterId,
-        user,
-        telliPointsPercentageLimit: 10,
-        usageTimeLimitMinutes: 60,
-      });
-
-      expect(mockDbUpdate).toHaveBeenCalled();
-    });
-
-    it('inserts a new share row (calls db.insert)', async () => {
-      await shareCharacter({
-        characterId,
-        user,
-        telliPointsPercentageLimit: 10,
-        usageTimeLimitMinutes: 60,
-      });
-
-      expect(mockDbInsert).toHaveBeenCalled();
-    });
-
-    it('returns the newly created share', async () => {
-      const result = await shareCharacter({
-        characterId,
-        user,
-        telliPointsPercentageLimit: 10,
-        usageTimeLimitMinutes: 60,
-      });
-
-      expect(result).toEqual(newShare);
-    });
-  });
-
-  describe('unshareCharacter – success', () => {
-    const characterId = generateUUID();
-    const user = mockUser('teacher');
-    const stoppedShare = {
-      id: generateUUID(),
-      characterId,
-      userId: user.id,
-      telliPointsLimit: 10,
-      maxUsageTimeLimit: 60,
-      inviteCode: 'ABCD1234',
-      startedAt: new Date(Date.now() - 30 * 60_000),
-      manuallyStoppedAt: new Date(),
-    };
-
-    beforeEach(() => {
-      (
-        dbGetSharedCharacterConversations as MockedFunction<
-          typeof dbGetSharedCharacterConversations
-        >
-      ).mockResolvedValue([stoppedShare] as never);
-      mockDbReturning.mockResolvedValue([stoppedShare]);
-    });
-
-    it('sets manuallyStoppedAt on the active share row (calls db.update)', async () => {
-      await unshareCharacter({ characterId, user });
-
-      expect(mockDbUpdate).toHaveBeenCalled();
-    });
-
-    it('returns the updated share with manuallyStoppedAt set', async () => {
-      const result = await unshareCharacter({ characterId, user });
-
-      expect(result).toEqual(stoppedShare);
     });
   });
 });
