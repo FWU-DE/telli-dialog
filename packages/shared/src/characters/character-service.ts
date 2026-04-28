@@ -373,22 +373,13 @@ export const shareCharacter = async ({
     throw new Error('usage time limit must be between 1 and 43200 minutes');
   }
 
+  const activeShares = await dbGetSharedCharacterConversations({ characterId, userId: user.id });
+  if (activeShares.length > 0) throw new Error('There can only be one active share at a time');
+
   const telliPointsLimit = telliPointsPercentageLimit;
   const maxUsageTimeLimit = usageTimeLimitMinutes;
   const inviteCode = generateInviteCode();
   const startedAt = new Date();
-
-  // Stop any existing active share before creating a new one
-  await db
-    .update(sharedCharacterConversation)
-    .set({ manuallyStoppedAt: new Date() })
-    .where(
-      and(
-        eq(sharedCharacterConversation.userId, user.id),
-        eq(sharedCharacterConversation.characterId, characterId),
-        isNull(sharedCharacterConversation.manuallyStoppedAt),
-      ),
-    );
 
   const [newSharedChat] = await db
     .insert(sharedCharacterConversation)
@@ -428,7 +419,7 @@ export const unshareCharacter = async ({
     userId: user.id,
   });
   if (sharedConversations.length === 0)
-    throw new ForbiddenError('Not authorized to stop this shared character instance');
+    throw new NotFoundError('No active sharing found for this character');
 
   // unshare character instance by setting manuallyStoppedAt
   const [updatedCharacter] = await db

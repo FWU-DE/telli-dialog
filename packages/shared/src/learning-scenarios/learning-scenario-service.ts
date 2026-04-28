@@ -298,20 +298,14 @@ export async function shareLearningScenario({
 
   const parsedValues = learningScenarioShareValuesSchema.parse(data);
 
+  const activeShares = await dbGetSharedLearningScenarioConversations({
+    learningScenarioId,
+    userId: user.id,
+  });
+  if (activeShares.length > 0) throw new Error('There can only be one active share at a time');
+
   const inviteCode = generateInviteCode();
   const startedAt = new Date();
-
-  // Stop any existing active share before creating a new one
-  await db
-    .update(sharedLearningScenarioTable)
-    .set({ manuallyStoppedAt: new Date() })
-    .where(
-      and(
-        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
-        eq(sharedLearningScenarioTable.userId, user.id),
-        isNull(sharedLearningScenarioTable.manuallyStoppedAt),
-      ),
-    );
 
   const sharedLearningScenario = await dbCreateLearningScenarioShare({
     userId: user.id,
@@ -350,7 +344,7 @@ export async function unshareLearningScenario({
     userId: user.id,
   });
   if (sharedConversations.length === 0)
-    throw new ForbiddenError('Not authorized to stop this shared learning scenario instance');
+    throw new NotFoundError('No active sharing found for this learning scenario');
 
   const [updatedShare] = await db
     .update(sharedLearningScenarioTable)
