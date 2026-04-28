@@ -24,7 +24,6 @@ describe('checkProductAccess', () => {
       isCustomGptEnabled: true,
       isSharedChatEnabled: true,
       isShareTemplateWithSchoolEnabled: true,
-      isNewUiDesignEnabled: true,
     },
     pictureUrls: null,
     hasApiKeyAssigned: true,
