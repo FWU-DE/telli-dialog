@@ -62,12 +62,10 @@ function buildAvatarFilename(hash: string) {
  */
 export async function getAssistantByUser({
   assistantId,
-  schoolId,
   schoolIds,
   userId,
 }: {
   assistantId: string;
-  schoolId?: string;
   schoolIds?: string[];
   userId: string;
 }): Promise<{
@@ -79,7 +77,7 @@ export async function getAssistantByUser({
   const assistant = await dbGetAssistantById({ assistantId });
   verifyReadAccess({
     item: assistant,
-    schoolIds: schoolIds ?? (schoolId ? [schoolId] : []),
+    schoolIds,
     userId,
   });
 
@@ -103,12 +101,10 @@ export async function getAssistantByUser({
 export async function getAssistantForNewChat({
   assistantId,
   userId,
-  schoolId,
   schoolIds,
 }: {
   assistantId: string;
   userId: string;
-  schoolId?: string;
   schoolIds?: string[];
 }) {
   checkParameterUUID(assistantId);
@@ -117,7 +113,7 @@ export async function getAssistantForNewChat({
   });
   verifyReadAccess({
     item: assistant,
-    schoolIds: schoolIds ?? (schoolId ? [schoolId] : []),
+    schoolIds,
     userId,
   });
 
@@ -155,24 +151,20 @@ export async function getConversationWithMessagesAndAssistant({
  */
 export async function getAssistantByAccessLevel({
   accessLevel,
-  schoolId,
   schoolIds,
   userId,
   federalStateId,
 }: {
   accessLevel: AccessLevel;
-  schoolId?: string;
   schoolIds?: string[];
   userId: string;
   federalStateId: string;
 }): Promise<AssistantSelectModel[]> {
-  const resolvedSchoolIds = schoolIds ?? (schoolId ? [schoolId] : []);
-
   switch (accessLevel) {
     case 'global':
       return await dbGetGlobalGpts({ federalStateId });
     case 'school':
-      return await dbGetGptsBySchoolIds({ schoolIds: resolvedSchoolIds });
+      return await dbGetGptsBySchoolIds({ schoolIds: schoolIds ?? [] });
     case 'private':
       return await dbGetGptsByUserId({ userId });
     default:
@@ -182,24 +174,20 @@ export async function getAssistantByAccessLevel({
 
 export async function getAssistantsByOverviewFilter({
   filter,
-  schoolId,
   schoolIds,
   userId,
   federalStateId,
 }: {
   filter: OverviewFilter;
-  schoolId?: string;
   schoolIds?: string[];
   userId: string;
   federalStateId: string;
 }): Promise<AssistantSelectModel[]> {
-  const resolvedSchoolIds = schoolIds ?? (schoolId ? [schoolId] : []);
-
   switch (filter) {
     case 'all': {
       const [privateAssistants, schoolAssistants, globalAssistants] = await Promise.all([
         dbGetGptsByUserId({ userId }),
-        dbGetGptsBySchoolIds({ schoolIds: resolvedSchoolIds }),
+        dbGetGptsBySchoolIds({ schoolIds: schoolIds ?? [] }),
         dbGetGlobalGpts({ federalStateId }),
       ]);
       return [...privateAssistants, ...schoolAssistants, ...globalAssistants];
@@ -209,7 +197,7 @@ export async function getAssistantsByOverviewFilter({
     case 'official':
       return await dbGetGlobalGpts({ federalStateId });
     case 'school':
-      return await dbGetGptsBySchoolIds({ schoolIds: resolvedSchoolIds });
+      return await dbGetGptsBySchoolIds({ schoolIds: schoolIds ?? [] });
     default:
       return [];
   }
@@ -352,12 +340,10 @@ export async function deleteFileMappingAndEntity({
  */
 export async function getFileMappings({
   assistantId,
-  schoolId,
   schoolIds,
   userId,
 }: {
   assistantId: string;
-  schoolId?: string;
   schoolIds?: string[];
   userId: string;
 }): Promise<FileModel[]> {
@@ -365,7 +351,7 @@ export async function getFileMappings({
   const assistant = await dbGetAssistantById({ assistantId });
   verifyReadAccess({
     item: assistant,
-    schoolIds: schoolIds ?? (schoolId ? [schoolId] : []),
+    schoolIds,
     userId,
   });
 
@@ -565,13 +551,11 @@ export async function uploadAvatarPictureForAssistant({
 export async function downloadFileFromAssistant({
   assistantId,
   fileId,
-  schoolId,
   schoolIds,
   user,
 }: {
   assistantId: string;
   fileId: string;
-  schoolId?: string;
   schoolIds?: string[];
   user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
@@ -579,7 +563,7 @@ export async function downloadFileFromAssistant({
   const assistant = await dbGetAssistantById({ assistantId });
   verifyReadAccess({
     item: assistant,
-    schoolIds: schoolIds ?? (schoolId ? [schoolId] : []),
+    schoolIds,
     userId: user.id,
   });
 

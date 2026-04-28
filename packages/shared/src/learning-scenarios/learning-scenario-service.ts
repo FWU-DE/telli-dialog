@@ -83,24 +83,20 @@ export async function getLearningScenariosForUser({
  */
 export async function getLearningScenariosByAccessLevel({
   accessLevel,
-  schoolId,
   schoolIds,
   userId,
   federalStateId,
 }: {
   accessLevel: AccessLevel;
-  schoolId?: string;
   schoolIds?: string[];
   userId: string;
   federalStateId: string;
 }): Promise<LearningScenarioOptionalShareDataModel[]> {
-  const resolvedSchoolIds = schoolIds ?? (schoolId ? [schoolId] : []);
-
   switch (accessLevel) {
     case 'global':
       return dbGetGlobalLearningScenarios({ userId, federalStateId });
     case 'school':
-      return dbGetLearningScenariosBySchoolId({ schoolIds: resolvedSchoolIds, userId });
+      return dbGetLearningScenariosBySchoolId({ schoolIds: schoolIds ?? [], userId });
     case 'private':
       return dbGetLearningScenariosByUserId({ userId });
     default:
@@ -110,24 +106,20 @@ export async function getLearningScenariosByAccessLevel({
 
 export async function getLearningScenariosByOverviewFilter({
   filter,
-  schoolId,
   schoolIds,
   userId,
   federalStateId,
 }: {
   filter: OverviewFilter;
-  schoolId?: string;
   schoolIds?: string[];
   userId: string;
   federalStateId: string;
 }): Promise<LearningScenarioOptionalShareDataModel[]> {
-  const resolvedSchoolIds = schoolIds ?? (schoolId ? [schoolId] : []);
-
   switch (filter) {
     case 'all':
       return dbGetAllAccessibleLearningScenarios({
         userId,
-        schoolIds: resolvedSchoolIds,
+        schoolIds: schoolIds ?? [],
         federalStateId,
       });
     case 'mine':
@@ -135,7 +127,7 @@ export async function getLearningScenariosByOverviewFilter({
     case 'official':
       return await dbGetGlobalLearningScenarios({ userId, federalStateId });
     case 'school':
-      return await dbGetLearningScenariosBySchoolId({ schoolIds: resolvedSchoolIds, userId });
+      return await dbGetLearningScenariosBySchoolId({ schoolIds: schoolIds ?? [], userId });
     default:
       return [];
   }
@@ -293,13 +285,11 @@ export type LearningScenarioShareValues = z.infer<typeof learningScenarioShareVa
 export async function shareLearningScenario({
   learningScenarioId,
   data,
-  schoolId,
   schoolIds,
   user,
 }: {
   learningScenarioId: string;
   data: LearningScenarioShareValues;
-  schoolId?: string;
   schoolIds?: string[];
   user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
@@ -310,7 +300,7 @@ export async function shareLearningScenario({
   const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
   verifyReadAccess({
     item: learningScenario,
-    schoolIds: schoolIds ?? (schoolId ? [schoolId] : []),
+    schoolIds,
     userId: user.id,
   });
 
@@ -388,12 +378,10 @@ export async function unshareLearningScenario({
  */
 export async function getLearningScenario({
   learningScenarioId,
-  schoolId,
   schoolIds,
   user,
 }: {
   learningScenarioId: string;
-  schoolId?: string;
   schoolIds?: string[];
   user: Pick<UserModel, 'id' | 'userRole'>;
 }): Promise<{
@@ -408,12 +396,11 @@ export async function getLearningScenario({
     userId: user.id,
   });
   if (!learningScenario) throw new NotFoundError('Learning scenario not found');
-  const resolvedSchoolIds = schoolIds ?? (schoolId ? [schoolId] : []);
-  verifyReadAccess({ item: learningScenario, schoolIds: resolvedSchoolIds, userId: user.id });
+  verifyReadAccess({ item: learningScenario, schoolIds, userId: user.id });
 
   const relatedFiles = await getFilesForLearningScenario({
     learningScenarioId,
-    schoolIds: resolvedSchoolIds,
+    schoolIds,
     user,
   });
   const avatarPictureUrl = await getAvatarPictureUrl(learningScenario.pictureId);
@@ -432,12 +419,10 @@ export async function getLearningScenario({
  */
 export async function getFilesForLearningScenario({
   learningScenarioId,
-  schoolId,
   schoolIds,
   user,
 }: {
   learningScenarioId: string;
-  schoolId?: string;
   schoolIds?: string[];
   user: Pick<UserModel, 'id' | 'userRole'>;
 }): Promise<FileModel[]> {
@@ -446,7 +431,7 @@ export async function getFilesForLearningScenario({
   const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
   verifyReadAccess({
     item: learningScenario,
-    schoolIds: schoolIds ?? (schoolId ? [schoolId] : []),
+    schoolIds,
     userId: user.id,
   });
 
@@ -706,13 +691,11 @@ export async function createNewLearningScenarioFromTemplate({
 export async function downloadFileFromLearningScenario({
   learningScenarioId,
   fileId,
-  schoolId,
   schoolIds,
   user,
 }: {
   learningScenarioId: string;
   fileId: string;
-  schoolId?: string;
   schoolIds?: string[];
   user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
@@ -721,7 +704,7 @@ export async function downloadFileFromLearningScenario({
   const { learningScenario } = await getLearningScenarioInfo(learningScenarioId, user.id);
   verifyReadAccess({
     item: learningScenario,
-    schoolIds: schoolIds ?? (schoolId ? [schoolId] : []),
+    schoolIds,
     userId: user.id,
   });
 

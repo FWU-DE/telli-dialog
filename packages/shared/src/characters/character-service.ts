@@ -185,12 +185,10 @@ export const deleteFileMappingAndEntity = async ({
 export const fetchFileMappings = async ({
   characterId,
   userId,
-  schoolId,
   schoolIds,
 }: {
   characterId: string;
   userId: string;
-  schoolId?: string;
   schoolIds?: string[];
 }): Promise<FileModel[]> => {
   checkParameterUUID(characterId);
@@ -198,7 +196,7 @@ export const fetchFileMappings = async ({
   const { character } = await getCharacterInfo(characterId, userId);
   verifyReadAccess({
     item: character,
-    schoolIds: schoolIds ?? (schoolId ? [schoolId] : []),
+    schoolIds,
     userId,
   });
 
@@ -356,14 +354,12 @@ export const shareCharacter = async ({
   user,
   telliPointsPercentageLimit,
   usageTimeLimitMinutes,
-  schoolId,
   schoolIds,
 }: {
   characterId: string;
   user: Pick<UserModel, 'id' | 'userRole'>;
   telliPointsPercentageLimit: number;
   usageTimeLimitMinutes: number;
-  schoolId?: string;
   schoolIds?: string[];
 }) => {
   checkParameterUUID(characterId);
@@ -373,7 +369,7 @@ export const shareCharacter = async ({
   const { character } = await getCharacterInfo(characterId, user.id);
   verifyReadAccess({
     item: character,
-    schoolIds: schoolIds ?? (schoolId ? [schoolId] : []),
+    schoolIds,
     userId: user.id,
   });
 
@@ -479,12 +475,10 @@ export const unshareCharacter = async ({
 export const getCharacterForChatSession = async ({
   characterId,
   userId,
-  schoolId,
   schoolIds,
 }: {
   characterId: string;
   userId: string;
-  schoolId?: string;
   schoolIds?: string[];
 }) => {
   checkParameterUUID(characterId);
@@ -492,7 +486,7 @@ export const getCharacterForChatSession = async ({
   if (!character) throw new NotFoundError('Character not found');
   verifyReadAccess({
     item: character,
-    schoolIds: schoolIds ?? (schoolId ? [schoolId] : []),
+    schoolIds,
     userId,
   });
 
@@ -512,12 +506,10 @@ export const getCharacterForChatSession = async ({
  */
 export const getCharacterForEditView = async ({
   characterId,
-  schoolId,
   schoolIds,
   userId,
 }: {
   characterId: string;
-  schoolId?: string;
   schoolIds?: string[];
   userId: string;
 }): Promise<{
@@ -528,13 +520,12 @@ export const getCharacterForEditView = async ({
   checkParameterUUID(characterId);
   const character = await dbGetCharacterByIdOptionalShareData({ characterId, userId });
   if (!character) throw new NotFoundError('Character not found');
-  const resolvedSchoolIds = schoolIds ?? (schoolId ? [schoolId] : []);
-  verifyReadAccess({ item: character, schoolIds: resolvedSchoolIds, userId });
+  verifyReadAccess({ item: character, schoolIds, userId });
 
   const relatedFiles = await fetchFileMappings({
     characterId,
     userId,
-    schoolIds: resolvedSchoolIds,
+    schoolIds,
   });
   const maybeSignedPictureUrl = await getReadOnlySignedUrl({
     key: character.pictureId,
@@ -568,17 +559,15 @@ export const getSharedCharacter = async ({
  * - character is not deleted
  */
 export async function getCharacters({
-  schoolId,
   schoolIds,
   userId,
 }: {
-  schoolId?: string;
   schoolIds?: string[];
   userId: string;
 }): Promise<CharacterSelectModel[]> {
   const characters = await dbGetCharacters({
     userId,
-    schoolIds: schoolIds ?? (schoolId ? [schoolId] : []),
+    schoolIds: schoolIds ?? [],
   });
   return characters;
 }
@@ -589,24 +578,20 @@ export async function getCharacters({
  */
 export async function getCharacterByAccessLevel({
   accessLevel,
-  schoolId,
   schoolIds,
   userId,
   federalStateId,
 }: {
   accessLevel: AccessLevel;
-  schoolId?: string;
   schoolIds?: string[];
   userId: string;
   federalStateId: string;
 }): Promise<CharacterOptionalShareDataModel[]> {
-  const resolvedSchoolIds = schoolIds ?? (schoolId ? [schoolId] : []);
-
   switch (accessLevel) {
     case 'global':
       return dbGetGlobalCharacters({ userId, federalStateId });
     case 'school':
-      return dbGetCharactersBySchoolId({ schoolIds: resolvedSchoolIds, userId });
+      return dbGetCharactersBySchoolId({ schoolIds: schoolIds ?? [], userId });
     case 'private':
       return dbGetCharactersByUserId({ userId });
     default:
@@ -616,28 +601,24 @@ export async function getCharacterByAccessLevel({
 
 export async function getCharactersByOverviewFilter({
   filter,
-  schoolId,
   schoolIds,
   userId,
   federalStateId,
 }: {
   filter: OverviewFilter;
-  schoolId?: string;
   schoolIds?: string[];
   userId: string;
   federalStateId: string;
 }): Promise<CharacterOptionalShareDataModel[]> {
-  const resolvedSchoolIds = schoolIds ?? (schoolId ? [schoolId] : []);
-
   switch (filter) {
     case 'all':
-      return dbGetAllAccessibleCharacters({ userId, schoolIds: resolvedSchoolIds, federalStateId });
+      return dbGetAllAccessibleCharacters({ userId, schoolIds: schoolIds ?? [], federalStateId });
     case 'mine':
       return await dbGetAllCharactersByUserId({ userId });
     case 'official':
       return await dbGetGlobalCharacters({ userId, federalStateId });
     case 'school':
-      return await dbGetCharactersBySchoolId({ schoolIds: resolvedSchoolIds, userId });
+      return await dbGetCharactersBySchoolId({ schoolIds: schoolIds ?? [], userId });
     default:
       return [];
   }
@@ -749,13 +730,11 @@ export async function uploadAvatarPictureForCharacter({
 export async function downloadFileFromCharacter({
   characterId,
   fileId,
-  schoolId,
   schoolIds,
   user,
 }: {
   characterId: string;
   fileId: string;
-  schoolId?: string;
   schoolIds?: string[];
   user: Pick<UserModel, 'id' | 'userRole'>;
 }) {
@@ -765,7 +744,7 @@ export async function downloadFileFromCharacter({
   if (!character) throw new NotFoundError('Character not found');
   verifyReadAccess({
     item: character,
-    schoolIds: schoolIds ?? (schoolId ? [schoolId] : []),
+    schoolIds,
     userId: user.id,
   });
 

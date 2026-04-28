@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const { userId, schoolId } = getCharactersSchema.parse(Object.fromEntries(searchParams));
 
     const characters = await getCharacters({
-      schoolId,
+      schoolIds: [schoolId],
       userId,
     });
 

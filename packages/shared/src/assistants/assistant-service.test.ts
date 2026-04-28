@@ -89,11 +89,11 @@ describe('assistant-service', () => {
     it.each([
       {
         functionName: 'getAssistantByUser',
-        testFunction: () => getAssistantByUser({ assistantId, schoolId, userId }),
+        testFunction: () => getAssistantByUser({ assistantId, schoolIds: [schoolId], userId }),
       },
       {
         functionName: 'getAssistantForNewChat',
-        testFunction: () => getAssistantForNewChat({ assistantId, schoolId, userId }),
+        testFunction: () => getAssistantForNewChat({ assistantId, schoolIds: [schoolId], userId }),
       },
       {
         functionName: 'linkFileToAssistant',
@@ -105,7 +105,7 @@ describe('assistant-service', () => {
       },
       {
         functionName: 'getFileMappings',
-        testFunction: () => getFileMappings({ assistantId, schoolId, userId }),
+        testFunction: () => getFileMappings({ assistantId, schoolIds: [schoolId], userId }),
       },
       {
         functionName: 'updateAssistantAccessLevel',
@@ -135,7 +135,7 @@ describe('assistant-service', () => {
           downloadFileFromAssistant({
             assistantId,
             fileId,
-            schoolId: generateUUID(),
+            schoolIds: [generateUUID()],
             user: mockUser(),
           }),
       },
@@ -224,7 +224,7 @@ describe('assistant-service', () => {
           getAssistantByUser({
             assistantId,
             userId: 'different-user-id',
-            schoolId: 'school-id',
+            schoolIds: ['school-id'],
           }),
       },
       {
@@ -300,7 +300,7 @@ describe('assistant-service', () => {
           getAssistantByUser({
             assistantId,
             userId: 'different-user-id',
-            schoolId: 'school-id',
+            schoolIds: ['school-id'],
           }),
       },
       {
@@ -309,7 +309,7 @@ describe('assistant-service', () => {
           getAssistantForNewChat({
             assistantId,
             userId: 'different-user-id',
-            schoolId: 'school-id',
+            schoolIds: ['school-id'],
           }),
       },
     ])(
@@ -336,7 +336,7 @@ describe('assistant-service', () => {
           getAssistantByUser({
             assistantId,
             userId: 'different-user-id',
-            schoolId: 'different-school-id',
+            schoolIds: ['different-school-id'],
           }),
       },
       {
@@ -345,7 +345,7 @@ describe('assistant-service', () => {
           getAssistantForNewChat({
             assistantId,
             userId: 'different-user-id',
-            schoolId: 'different-school-id',
+            schoolIds: ['different-school-id'],
           }),
       },
     ])(
@@ -401,7 +401,7 @@ describe('assistant-service', () => {
       await expect(
         getFileMappings({
           assistantId,
-          schoolId: 'school-id',
+          schoolIds: ['school-id'],
           userId: 'different-user-id',
         }),
       ).rejects.toThrow(ForbiddenError);
@@ -423,7 +423,7 @@ describe('assistant-service', () => {
       await expect(
         getFileMappings({
           assistantId,
-          schoolId: 'different-school-id',
+          schoolIds: ['different-school-id'],
           userId: 'different-user-id',
         }),
       ).rejects.toThrow(ForbiddenError);
@@ -602,7 +602,7 @@ describe('assistant-service', () => {
           getAssistantByUser({
             assistantId: 'invalid-uuid',
             userId: 'user-id',
-            schoolId: 'school-id',
+            schoolIds: ['school-id'],
           }),
       },
       {
@@ -611,7 +611,7 @@ describe('assistant-service', () => {
           getAssistantForNewChat({
             assistantId: 'invalid-uuid',
             userId: 'user-id',
-            schoolId: 'school-id',
+            schoolIds: ['school-id'],
           }),
       },
       {
@@ -656,7 +656,7 @@ describe('assistant-service', () => {
           getFileMappings({
             assistantId: 'invalid-uuid',
             userId: 'user-id',
-            schoolId: 'school-id',
+            schoolIds: ['school-id'],
           }),
       },
       {
@@ -690,10 +690,14 @@ describe('assistant-service', () => {
     const userIdOfOwner = generateUUID();
 
     describe.each([
-      { accessLevel: 'private', schoolId: 'any', userId: userIdOfOwner },
-      { accessLevel: 'school', schoolId: schoolIdOfOwner, userId: 'different-user-id' },
-      { accessLevel: 'global', schoolId: 'different-school-id', userId: 'different-user-id' },
-    ] as const)('accessLevel=$accessLevel', ({ accessLevel, schoolId, userId }) => {
+      { accessLevel: 'private' as const, schoolIds: ['any'], userId: userIdOfOwner },
+      { accessLevel: 'school' as const, schoolIds: [schoolIdOfOwner], userId: 'different-user-id' },
+      {
+        accessLevel: 'global' as const,
+        schoolIds: ['different-school-id'],
+        userId: 'different-user-id',
+      },
+    ])('accessLevel=$accessLevel', ({ accessLevel, schoolIds, userId }) => {
       it(`should return assistant with accessLevel=${accessLevel} - getAssistantForNewChat`, async () => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId: userIdOfOwner,
@@ -707,7 +711,7 @@ describe('assistant-service', () => {
 
         const assistant = await getAssistantForNewChat({
           assistantId,
-          schoolId,
+          schoolIds,
           userId,
         });
 
@@ -722,10 +726,14 @@ describe('assistant-service', () => {
     const userIdOfOwner = generateUUID();
 
     describe.each([
-      { accessLevel: 'private', schoolId: 'any', userId: userIdOfOwner },
-      { accessLevel: 'school', schoolId: schoolIdOfOwner, userId: 'different-user-id' },
-      { accessLevel: 'global', schoolId: 'different-school-id', userId: 'different-user-id' },
-    ] as const)('accessLevel=$accessLevel', ({ accessLevel, schoolId, userId }) => {
+      { accessLevel: 'private' as const, schoolIds: ['any'], userId: userIdOfOwner },
+      { accessLevel: 'school' as const, schoolIds: [schoolIdOfOwner], userId: 'different-user-id' },
+      {
+        accessLevel: 'global' as const,
+        schoolIds: ['different-school-id'],
+        userId: 'different-user-id',
+      },
+    ])('accessLevel=$accessLevel', ({ accessLevel, schoolIds, userId }) => {
       it(`should return assistant with accessLevel=${accessLevel} - getAssistantByUser`, async () => {
         const mockAssistant: Partial<AssistantSelectModel> = {
           userId: userIdOfOwner,
@@ -739,7 +747,7 @@ describe('assistant-service', () => {
 
         const { assistant } = await getAssistantByUser({
           assistantId,
-          schoolId,
+          schoolIds,
           userId,
         });
 
@@ -781,7 +789,7 @@ describe('assistant-service', () => {
         const result = await getAssistantByUser({
           assistantId,
           userId: differentUserId,
-          schoolId: differentSchoolId,
+          schoolIds: [differentSchoolId],
         });
 
         expect(result.assistant).toBe(mockAssistant);
@@ -812,7 +820,7 @@ describe('assistant-service', () => {
         const result = await getAssistantForNewChat({
           assistantId,
           userId: differentUserId,
-          schoolId: differentSchoolId,
+          schoolIds: [differentSchoolId],
         });
 
         expect(result).toBe(mockAssistant);
@@ -847,7 +855,7 @@ describe('assistant-service', () => {
           getFileMappings({
             assistantId,
             userId: differentUserId,
-            schoolId: differentSchoolId,
+            schoolIds: [differentSchoolId],
           }),
         ).resolves.not.toThrow();
       });
@@ -870,7 +878,7 @@ describe('assistant-service', () => {
           getAssistantByUser({
             assistantId,
             userId: differentUserId,
-            schoolId: differentSchoolId,
+            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });
@@ -891,7 +899,7 @@ describe('assistant-service', () => {
           getAssistantForNewChat({
             assistantId,
             userId: differentUserId,
-            schoolId: differentSchoolId,
+            schoolIds: [differentSchoolId],
           }),
         ).rejects.toThrow(ForbiddenError);
       });
