@@ -1,0 +1,34 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "format",
+      "type": "shell",
+      "command": "pnpm run format",
+      "group": "test"
+    },
+    {
+      "label": "lint",
+      "type": "shell",
+      "command": "pnpm run lint",
+      "group": "test"
+    },
+    {
+      "label": "check-types",
+      "type": "shell",
+      "command": "pnpm run check-types",
+      "group": "test"
+    },
+    {
+      "label": "test",
+      "type": "shell",
+      "command": "pnpm run test",
+      "group": "test"
+    },
+    {
+      "label": "verify",
+      "dependsOn": ["format", "lint", "check-types", "test"],
+      "dependsOrder": "parallel"
+    }
+  ]
+}
