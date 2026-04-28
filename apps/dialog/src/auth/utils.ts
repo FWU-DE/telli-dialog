@@ -5,6 +5,7 @@ import { auth, unstable_update } from '.';
 import { type UserAndContext } from './types';
 import { dbGetUserAndFederalStateByUserId } from '@shared/db/functions/school';
 import { FederalStateSelectModel } from '@shared/db/schema';
+import { FederalStateModel } from '@shared/federal-states/types';
 import { LOGOUT_URL } from '@/app/api/auth/const';
 import { getSafeCallbackUrl } from './callback-url';
 
@@ -106,4 +107,4 @@ function obscureFederalState(federalState: FederalStateSelectModel) {
 
   return rest;
 }
-export type ObscuredFederalState = ReturnType<Awaited<typeof obscureFederalState>>;
+export type ObscuredFederalState = Omit<FederalStateModel, 'apiKeyId'>;

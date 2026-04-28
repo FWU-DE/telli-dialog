@@ -21,7 +21,6 @@ export const mockUserAndContext = (): UserAndContext => {
     schoolIds: [schoolId],
     federalStateId: E2E_FEDERAL_STATE,
     userRole: 'teacher',
-    hasApiKeyAssigned: true,
     federalState: {
       id: generateUUID(),
       teacherPriceLimit: 500,
@@ -42,6 +41,7 @@ export const mockUserAndContext = (): UserAndContext => {
         isNewUiDesignEnabled: false,
       },
       pictureUrls: null,
+      hasApiKeyAssigned: true,
     },
     createdAt: new Date(),
   };

@@ -16,9 +16,6 @@ export async function requireAuth(): Promise<{
   }
 
   const user = userSchema.parse(session.user);
-  const federalState = federalStateSchema.parse({
-    ...session.user?.federalState,
-    hasApiKeyAssigned: session.user?.hasApiKeyAssigned,
-  });
+  const federalState = federalStateSchema.parse(session.user?.federalState);
   return { user: user, federalState: federalState };
 }
