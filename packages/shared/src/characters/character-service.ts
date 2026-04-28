@@ -48,7 +48,7 @@ import { OverviewFilter } from '@shared/overview-filter';
 import { addDays } from '@shared/utils/date';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
-import { and, eq, isNull, lt } from 'drizzle-orm';
+import { and, eq, inArray, lt } from 'drizzle-orm';
 import z from 'zod';
 import { computeBlobHash } from '@telli/shared-core/crypto/blob-hash';
 import {
@@ -430,16 +430,11 @@ export const unshareCharacter = async ({
     throw new NotFoundError('No active sharing found for this character');
 
   // unshare character instance by setting manuallyStoppedAt
+  const sharedConversationIds = sharedConversations.map((s) => s.id);
   const [updatedCharacter] = await db
     .update(sharedCharacterConversation)
     .set({ manuallyStoppedAt: new Date() })
-    .where(
-      and(
-        eq(sharedCharacterConversation.characterId, characterId),
-        eq(sharedCharacterConversation.userId, user.id),
-        isNull(sharedCharacterConversation.manuallyStoppedAt),
-      ),
-    )
+    .where(inArray(sharedCharacterConversation.id, sharedConversationIds))
     .returning();
 
   if (!updatedCharacter) {

@@ -40,7 +40,7 @@ import { buildLearningScenarioPictureKey } from '@shared/utils/picture-key';
 import { deleteFileFromS3, getReadOnlySignedUrl, uploadFileToS3 } from '@shared/s3';
 import { ONE_HOUR } from '@shared/s3/const';
 import { generateInviteCode } from '@shared/sharing/generate-invite-code';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { OverviewFilter } from '@shared/overview-filter';
 import z from 'zod';
 import { duplicateLearningScenario } from '@shared/learning-scenarios/learning-scenario-admin-service';
@@ -354,16 +354,11 @@ export async function unshareLearningScenario({
   if (sharedConversations.length === 0)
     throw new NotFoundError('No active sharing found for this learning scenario');
 
+  const sharedConversationIds = sharedConversations.map((s) => s.id);
   const [updatedShare] = await db
     .update(sharedLearningScenarioTable)
     .set({ manuallyStoppedAt: new Date() })
-    .where(
-      and(
-        eq(sharedLearningScenarioTable.learningScenarioId, learningScenarioId),
-        eq(sharedLearningScenarioTable.userId, user.id),
-        isNull(sharedLearningScenarioTable.manuallyStoppedAt),
-      ),
-    )
+    .where(inArray(sharedLearningScenarioTable.id, sharedConversationIds))
     .returning();
 
   if (!updatedShare) {
