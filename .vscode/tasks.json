@@ -26,9 +26,14 @@
       "group": "test"
     },
     {
-      "label": "verify",
-      "dependsOn": ["format", "lint", "check-types", "test"],
+      "label": "verify-checks",
+      "dependsOn": ["lint", "check-types", "test"],
       "dependsOrder": "parallel"
+    },
+    {
+      "label": "verify",
+      "dependsOn": ["format", "verify-checks"],
+      "dependsOrder": "sequence"
     }
   ]
 }
