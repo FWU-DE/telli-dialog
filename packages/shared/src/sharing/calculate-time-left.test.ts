@@ -34,40 +34,33 @@ describe('calculateTimeLeft', () => {
       expect(result).toBe(-1);
     });
 
-    it('proceeds to time-based calculation when manuallyStoppedAt is undefined', () => {
-      const startedAt = new Date(now.getTime() - 10 * 60_000); // started 10 min ago
-      const result = calculateTimeLeft({
-        startedAt,
-        maxUsageTimeLimit: 30, // 30-minute limit → 20 minutes remaining
-        manuallyStoppedAt: null,
-      });
-      expect(result).toBe(20 * 60); // 1200 seconds
-    });
-
-    it('proceeds to time-based calculation when manuallyStoppedAt is undefined', () => {
-      const startedAt = new Date(now.getTime() - 10 * 60_000);
-      const result = calculateTimeLeft({
-        startedAt,
-        maxUsageTimeLimit: 30,
-        // manuallyStoppedAt not provided
-      });
-      expect(result).toBe(20 * 60);
-    });
+    it.each([null, undefined])(
+      'proceeds to time-based calculation when manuallyStoppedAt is $0',
+      (manuallyStoppedAt) => {
+        const startedAt = new Date(now.getTime() - 10 * 60_000); // started 10 min ago
+        const result = calculateTimeLeft({
+          startedAt,
+          maxUsageTimeLimit: 30, // 30-minute limit → 20 minutes remaining
+          manuallyStoppedAt,
+        });
+        expect(result).toBe(20 * 60); // 1200 seconds
+      },
+    );
   });
 
   describe('missing fields', () => {
-    it('returns -1 when startedAt is undefined', () => {
+    it('returns -1 when startedAt is null', () => {
       const result = calculateTimeLeft({
-        startedAt: undefined,
+        startedAt: null,
         maxUsageTimeLimit: 60,
       });
       expect(result).toBe(-1);
     });
 
-    it('returns -1 when maxUsageTimeLimit is undefined', () => {
+    it('returns -1 when maxUsageTimeLimit is null', () => {
       const result = calculateTimeLeft({
         startedAt: now,
-        maxUsageTimeLimit: undefined,
+        maxUsageTimeLimit: null,
       });
       expect(result).toBe(-1);
     });

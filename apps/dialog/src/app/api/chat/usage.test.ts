@@ -75,7 +75,7 @@ describe('sharedChatHasExpired', () => {
   });
 
   describe('manuallyStoppedAt=null does not trigger manual-stop path', () => {
-    it('returns false when manuallyStoppedAt is undefined and time limit is not reached', () => {
+    it('returns false when manuallyStoppedAt is null and time limit is not reached', () => {
       const startedAt = new Date(now.getTime() - 5 * 60_000); // 5 min ago
       const result = sharedChatHasExpired({
         startedAt,
@@ -85,7 +85,7 @@ describe('sharedChatHasExpired', () => {
       expect(result).toBe(false);
     });
 
-    it('returns true when manuallyStoppedAt is undefined but time limit is exceeded', () => {
+    it('returns true when manuallyStoppedAt is null but time limit is exceeded', () => {
       const startedAt = new Date(now.getTime() - 60 * 60_000); // 60 min ago
       const result = sharedChatHasExpired({
         startedAt,
