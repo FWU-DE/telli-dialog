@@ -99,6 +99,12 @@
     "action": {
       "delete": "Link entfernen"
     },
+    "results": {
+      "title": "Internetquellen",
+      "show": "Internetquellen einblenden",
+      "toggle": "Internetquellen ein-/ausblenden",
+      "open-source": "Quelle öffnen: {source}"
+    },
     "toasts": {
       "error-loading-page": "Verarbeitung des Links fehlgeschlagen"
     }

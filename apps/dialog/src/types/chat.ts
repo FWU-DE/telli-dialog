@@ -1,5 +1,13 @@
 import type { SharedChatExpiredError, TelliPointsExceededError } from '@telli/ai-core/errors';
 
+export type TextSearchResult = {
+  name: string;
+  url: string;
+  content: string;
+  type: string;
+  favicon?: string;
+};
+
 /**
  * Serialized error that can be safely transmitted across the Server Action boundary.
  */
@@ -37,6 +45,7 @@ export type ChatMessage = {
   content: string;
   createdAt?: Date;
   experimental_attachments?: ChatAttachment[];
+  textSearchResults?: TextSearchResult[];
 };
 
 /**
@@ -46,6 +55,7 @@ export type ChatMessage = {
 export type SendMessageResult = {
   stream: ReadableStream<string>;
   messageId: string;
+  textSearchResults?: TextSearchResult[];
   error?: SerializedError;
 };
 
