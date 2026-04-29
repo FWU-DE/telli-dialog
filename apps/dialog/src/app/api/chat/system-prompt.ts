@@ -13,9 +13,14 @@ import {
   SUGGESTION_GUIDELINES,
   TOOL_GUIDELINES,
 } from '../utils/system-prompt';
+import { TextSearchResult } from 'linkup-sdk';
 
-function constructTelliSystemPrompt(chunks: RetrievedChunk[], errorUrls: string[]) {
-  const ragContext = constructRagContext(chunks, errorUrls);
+function constructTelliSystemPrompt(
+  chunks: RetrievedChunk[],
+  errorUrls: string[],
+  webSearchResults: TextSearchResult[],
+) {
+  const ragContext = constructRagContext(chunks, errorUrls, webSearchResults);
 
   return `Du bist telli, der datenschutzkonforme KI-Chatbot für den Schulunterricht. 
 Du unterstützt Lehrkräfte bei der Unterrichtsgestaltung und Schülerinnen und Schüler beim Lernen. 
@@ -122,6 +127,7 @@ export async function constructChatSystemPrompt({
   federalState,
   chunks,
   errorUrls,
+  webSearchResults,
 }: {
   characterId?: string;
   assistantId?: string;
@@ -129,6 +135,7 @@ export async function constructChatSystemPrompt({
   federalState: ObscuredFederalState;
   chunks: RetrievedChunk[];
   errorUrls: string[];
+  webSearchResults: TextSearchResult[];
 }) {
   if (characterId !== undefined) {
     const character = await dbGetCharacterById({ characterId });
@@ -160,5 +167,5 @@ export async function constructChatSystemPrompt({
     }
   }
 
-  return constructTelliSystemPrompt(chunks, errorUrls);
+  return constructTelliSystemPrompt(chunks, errorUrls, webSearchResults);
 }

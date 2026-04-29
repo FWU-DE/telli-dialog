@@ -1,5 +1,6 @@
 import { LinkupClient, TextSearchResult } from 'linkup-sdk';
 import { env } from '@/env';
+import { WEBSEARCH_RESULTS_LIMIT } from '@/configuration-text-inputs/const';
 
 /**
  * Performs a web search using the Linkup API and returns text search results.
@@ -24,5 +25,5 @@ export async function searchWeb(query: string): Promise<TextSearchResult[]> {
     outputType: 'searchResults',
   });
 
-  return searchResults.results as TextSearchResult[];
+  return (searchResults.results as TextSearchResult[]).slice(0, WEBSEARCH_RESULTS_LIMIT);
 }

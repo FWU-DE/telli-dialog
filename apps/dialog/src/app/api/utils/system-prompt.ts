@@ -1,5 +1,6 @@
 import { SUPPORTED_DOCUMENTS_EXTENSIONS, SUPPORTED_IMAGE_EXTENSIONS } from '@/const';
 import { RetrievedChunk } from '../rag/types';
+import { TextSearchResult } from 'linkup-sdk';
 
 export const LANGUAGE_GUIDELINES = `
 ## Sprachliche Richtlinien
@@ -45,28 +46,61 @@ Wenn du möchtest, kann ich jetzt Folgendes tun:
 👉 Sag mir kurz: A, B oder C
 \`\`\``;
 
-export function constructRagContext(chunks: RetrievedChunk[], errorUrls: string[] = []) {
-  if (chunks.length === 0 && errorUrls.length === 0) return '';
+export function constructRagContext(
+  chunks: RetrievedChunk[],
+  errorUrls: string[] = [],
+  webSearchResults: TextSearchResult[] = [],
+) {
+  if (chunks.length === 0 && errorUrls.length === 0 && webSearchResults.length === 0) return '';
 
-  const chunkTexts = chunks
-    .map((chunk) => {
-      if (chunk.sourceType === 'webpage') {
-        return `Url: ${chunk.sourceUrl} - Abschnitt: ${chunk.orderIndex + 1}\n${chunk.content}`;
-      }
-      return `${chunk.fileName ? `Dateiname: ${chunk.fileName} - Abschnitt: ${chunk.orderIndex + 1}\n` : ''}${chunk.content}`;
-    })
-    .join('\n\n');
+  const fileChunks = chunks
+    .filter((chunk) => chunk.sourceType === 'file')
+    .sort((a, b) => a.orderIndex - b.orderIndex);
+  const webpageChunks = chunks
+    .filter((chunk) => chunk.sourceType === 'webpage')
+    .sort((a, b) => a.orderIndex - b.orderIndex);
 
-  const errorText =
-    errorUrls.length > 0
-      ? `\n\n## Es gab Probleme beim Zugriff auf die folgenden URLs:\n${errorUrls
-          .map((url) => `- ${url}`)
-          .join('\n')}`
-      : '';
+  const sections: string[] = [];
 
-  return `
-## Die folgenden Inhalte stammen aus Dateien oder Links, die der Nutzer bereitgestellt hat. Nutze diese Informationen, falls sinnvoll, für deine Antwort:
-${chunkTexts}${errorText}`;
+  if (fileChunks.length > 0) {
+    const fileTexts = fileChunks
+      .map(
+        (chunk) =>
+          `${chunk.fileName ? `Dateiname: ${chunk.fileName} - Abschnitt: ${chunk.orderIndex + 1}\n` : ''}${chunk.content}`,
+      )
+      .join('\n\n');
+    sections.push(
+      `### Hochgeladene Dateien\nDie folgenden Inhalte stammen aus Dateien, die für den Chat bereitgestellt wurden:\n\n${fileTexts}`,
+    );
+  }
+
+  if (webpageChunks.length > 0) {
+    const linkTexts = webpageChunks
+      .map(
+        (chunk) => `Url: ${chunk.sourceUrl} - Abschnitt: ${chunk.orderIndex + 1}\n${chunk.content}`,
+      )
+      .join('\n\n');
+    sections.push(
+      `### Verlinkte Webseiten\nDie folgenden Inhalte stammen aus Links, die zum Chat gehören:\n\n${linkTexts}`,
+    );
+  }
+
+  if (webSearchResults.length > 0) {
+    const webSearchText = webSearchResults
+      .map((result) => `Url: ${result.url}\n${result.content}`)
+      .join('\n\n');
+    sections.push(
+      `### Websuche\nDie folgenden Inhalte stammen aus einer live Websuche:\n\n${webSearchText}`,
+    );
+  }
+
+  if (errorUrls.length > 0) {
+    sections.push(
+      `### Fehler beim Zugriff\nEs gab Probleme beim Zugriff auf die folgenden URLs:\n${errorUrls.map((url) => `- ${url}`).join('\n')}`,
+    );
+  }
+
+  return `\n## Kontextinformationen\nNutze die folgenden Informationen, falls sinnvoll, für deine Antwort:\n\n${sections.join('\n\n')}`;
 }
 
 // Helper to format optional fields in a list
