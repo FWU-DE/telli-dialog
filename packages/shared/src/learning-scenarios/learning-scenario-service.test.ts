@@ -4,6 +4,9 @@ import {
   deleteLearningScenario,
   downloadFileFromLearningScenario,
   getFilesForLearningScenario,
+  getLearningScenariosByAccessLevel,
+  getLearningScenariosByOverviewFilter,
+  getLearningScenariosForUser,
   getLearningScenario,
   getSharedLearningScenario,
   linkFileToLearningScenario,
@@ -15,10 +18,15 @@ import {
   uploadAvatarPictureForLearningScenario,
 } from './learning-scenario-service';
 import {
+  dbGetAllAccessibleLearningScenarios,
+  dbGetAllLearningScenariosByUser,
   dbCreateLearningScenarioShare,
+  dbGetGlobalLearningScenarios,
   dbGetLearningScenarioById,
   dbGetLearningScenarioByIdOptionalShareData,
   dbGetLearningScenarioByIdWithShareData,
+  dbGetLearningScenariosByAssociatedSchools,
+  dbGetLearningScenariosByUser,
   dbGetSharedLearningScenarioConversations,
 } from '../db/functions/learning-scenario';
 import { dbGetFileForLearningScenario, dbGetFilesForLearningScenario } from '../db/functions/files';
@@ -30,10 +38,15 @@ import { UserModel } from '@shared/auth/user-model';
 import { getReadOnlySignedUrl, uploadFileToS3 } from '../s3';
 
 vi.mock('../db/functions/learning-scenario', () => ({
+  dbGetAllAccessibleLearningScenarios: vi.fn(),
+  dbGetAllLearningScenariosByUser: vi.fn(),
   dbCreateLearningScenarioShare: vi.fn(),
+  dbGetGlobalLearningScenarios: vi.fn(),
   dbGetLearningScenarioById: vi.fn(),
   dbGetLearningScenarioByIdOptionalShareData: vi.fn(),
   dbGetLearningScenarioByIdWithShareData: vi.fn(),
+  dbGetLearningScenariosByAssociatedSchools: vi.fn(),
+  dbGetLearningScenariosByUser: vi.fn(),
   dbGetSharedLearningScenarioConversations: vi.fn(),
 }));
 vi.mock('./learning-scenario-admin-service', () => ({
@@ -613,6 +626,110 @@ describe('learning-scenario-service', () => {
         picturePath: `shared-chats/${learningScenarioId}/avatar_3a6eb0790f39`,
         signedUrl: 'https://signed-url',
       });
+    });
+  });
+
+  describe('learning scenario discovery filters', () => {
+    const user = mockUser('teacher');
+    const scenarios = [{ id: generateUUID(), name: 'Scenario 1' } as LearningScenarioSelectModel];
+
+    it('filters out unnamed scenarios and enriches with picture URLs', async () => {
+      const namedScenario = {
+        id: generateUUID(),
+        name: 'Visible scenario',
+        pictureId: 'shared-chats/a/picture.png',
+      } as LearningScenarioSelectModel;
+      const unnamedScenario = {
+        id: generateUUID(),
+        name: '',
+        pictureId: 'shared-chats/b/picture.png',
+      } as LearningScenarioSelectModel;
+
+      (
+        dbGetLearningScenariosByUser as MockedFunction<typeof dbGetLearningScenariosByUser>
+      ).mockResolvedValue([namedScenario, unnamedScenario] as never);
+      (getAvatarPictureUrl as MockedFunction<typeof getAvatarPictureUrl>).mockResolvedValue(
+        'https://signed-url',
+      );
+
+      const result = await getLearningScenariosForUser({ user });
+
+      expect(dbGetLearningScenariosByUser).toHaveBeenCalledWith({ user });
+      expect(result).toEqual([
+        {
+          ...namedScenario,
+          maybeSignedPictureUrl: 'https://signed-url',
+        },
+      ]);
+    });
+
+    it.each([
+      {
+        accessLevel: 'global' as const,
+        expectedMock: dbGetGlobalLearningScenarios,
+      },
+      {
+        accessLevel: 'school' as const,
+        expectedMock: dbGetLearningScenariosByAssociatedSchools,
+      },
+      {
+        accessLevel: 'private' as const,
+        expectedMock: dbGetLearningScenariosByUser,
+      },
+    ])(
+      'routes accessLevel=$accessLevel to the correct db function',
+      async ({ accessLevel, expectedMock }) => {
+        (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(scenarios as never);
+
+        const result = await getLearningScenariosByAccessLevel({ accessLevel, user });
+
+        expect(result).toEqual(scenarios);
+        expect(expectedMock).toHaveBeenCalledWith({ user });
+      },
+    );
+
+    it('returns an empty list for unsupported access levels', async () => {
+      const result = await getLearningScenariosByAccessLevel({
+        accessLevel: 'invalid' as never,
+        user,
+      });
+
+      expect(result).toEqual([]);
+    });
+
+    it('routes filter=all to dbGetAllAccessibleLearningScenarios', async () => {
+      (
+        dbGetAllAccessibleLearningScenarios as MockedFunction<
+          typeof dbGetAllAccessibleLearningScenarios
+        >
+      ).mockResolvedValue(scenarios as never);
+
+      const result = await getLearningScenariosByOverviewFilter({ filter: 'all', user });
+
+      expect(result).toEqual(scenarios);
+      expect(dbGetAllAccessibleLearningScenarios).toHaveBeenCalledWith({ user });
+    });
+
+    it.each([
+      { filter: 'mine' as const, expectedMock: dbGetAllLearningScenariosByUser },
+      { filter: 'official' as const, expectedMock: dbGetGlobalLearningScenarios },
+      { filter: 'school' as const, expectedMock: dbGetLearningScenariosByAssociatedSchools },
+    ])('routes filter=$filter to the correct db function', async ({ filter, expectedMock }) => {
+      (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(scenarios as never);
+
+      const result = await getLearningScenariosByOverviewFilter({ filter, user });
+
+      expect(result).toEqual(scenarios);
+      expect(expectedMock).toHaveBeenCalledWith({ user });
+    });
+
+    it('returns an empty list for unsupported overview filters', async () => {
+      const result = await getLearningScenariosByOverviewFilter({
+        filter: 'invalid' as never,
+        user,
+      });
+
+      expect(result).toEqual([]);
     });
   });
 });

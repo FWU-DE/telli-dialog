@@ -3,8 +3,10 @@ import {
   createNewAssistant,
   deleteAssistant,
   deleteFileMappingAndEntity,
+  getAssistantByAccessLevel,
   getConversationWithMessagesAndAssistant,
   getAssistantForNewChat,
+  getAssistantsByOverviewFilter,
   getFileMappings,
   linkFileToAssistant,
   updateAssistant,
@@ -15,7 +17,12 @@ import {
 } from './assistant-service';
 import { ForbiddenError, NotFoundError, InvalidArgumentError } from '@shared/error';
 import { generateUUID } from '@shared/utils/uuid';
-import { dbGetAssistantById } from '@shared/db/functions/assistants';
+import {
+  dbGetAssistantById,
+  dbGetGlobalGpts,
+  dbGetGptsByAssociatedSchools,
+  dbGetGptsByUser,
+} from '@shared/db/functions/assistants';
 import { dbGetRelatedAssistantFiles } from '@shared/db/functions/files';
 import { AssistantSelectModel } from '@shared/db/schema';
 import { UserModel } from '@shared/auth/user-model';
@@ -33,6 +40,9 @@ import {
 
 vi.mock('../db/functions/assistants', () => ({
   dbGetAssistantById: vi.fn(),
+  dbGetGlobalGpts: vi.fn(),
+  dbGetGptsByAssociatedSchools: vi.fn(),
+  dbGetGptsByUser: vi.fn(),
 }));
 vi.mock('../db/functions/files', () => ({
   dbGetRelatedAssistantFiles: vi.fn(),
@@ -853,6 +863,89 @@ describe('assistant-service', () => {
           }),
         ).rejects.toThrow(ForbiddenError);
       });
+    });
+  });
+
+  describe('assistant discovery filters', () => {
+    const user = mockUser('teacher');
+    const assistants = [{ id: generateUUID() } as AssistantSelectModel];
+
+    it.each([
+      {
+        accessLevel: 'global' as const,
+        expectedMock: dbGetGlobalGpts,
+      },
+      {
+        accessLevel: 'school' as const,
+        expectedMock: dbGetGptsByAssociatedSchools,
+      },
+      {
+        accessLevel: 'private' as const,
+        expectedMock: dbGetGptsByUser,
+      },
+    ])(
+      'routes accessLevel=$accessLevel to the correct db function',
+      async ({ accessLevel, expectedMock }) => {
+        (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(
+          assistants as never,
+        );
+
+        const result = await getAssistantByAccessLevel({ accessLevel, user });
+
+        expect(result).toEqual(assistants);
+        expect(expectedMock).toHaveBeenCalledWith({ user });
+      },
+    );
+
+    it('returns an empty list for unsupported access levels', async () => {
+      const result = await getAssistantByAccessLevel({
+        accessLevel: 'invalid' as never,
+        user,
+      });
+
+      expect(result).toEqual([]);
+    });
+
+    it('returns combined lists for filter=all', async () => {
+      const privateAssistant = { id: generateUUID() } as AssistantSelectModel;
+      const schoolAssistant = { id: generateUUID() } as AssistantSelectModel;
+      const officialAssistant = { id: generateUUID() } as AssistantSelectModel;
+
+      (dbGetGptsByUser as MockedFunction<typeof dbGetGptsByUser>).mockResolvedValue([
+        privateAssistant,
+      ] as never);
+      (
+        dbGetGptsByAssociatedSchools as MockedFunction<typeof dbGetGptsByAssociatedSchools>
+      ).mockResolvedValue([schoolAssistant] as never);
+      (dbGetGlobalGpts as MockedFunction<typeof dbGetGlobalGpts>).mockResolvedValue([
+        officialAssistant,
+      ] as never);
+
+      const result = await getAssistantsByOverviewFilter({ filter: 'all', user });
+
+      expect(result).toEqual([privateAssistant, schoolAssistant, officialAssistant]);
+    });
+
+    it.each([
+      { filter: 'mine' as const, expectedMock: dbGetGptsByUser },
+      { filter: 'official' as const, expectedMock: dbGetGlobalGpts },
+      { filter: 'school' as const, expectedMock: dbGetGptsByAssociatedSchools },
+    ])('routes filter=$filter to the correct db function', async ({ filter, expectedMock }) => {
+      (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(assistants as never);
+
+      const result = await getAssistantsByOverviewFilter({ filter, user });
+
+      expect(result).toEqual(assistants);
+      expect(expectedMock).toHaveBeenCalledWith({ user });
+    });
+
+    it('returns an empty list for unsupported overview filters', async () => {
+      const result = await getAssistantsByOverviewFilter({
+        filter: 'invalid' as never,
+        user,
+      });
+
+      expect(result).toEqual([]);
     });
   });
 

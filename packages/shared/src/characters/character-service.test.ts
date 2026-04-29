@@ -5,8 +5,10 @@ import {
   deleteFileMappingAndEntity,
   downloadFileFromCharacter,
   fetchFileMappings,
+  getCharacterByAccessLevel,
   getCharacterForChatSession,
   getCharacterForEditView,
+  getCharactersByOverviewFilter,
   getSharedCharacter,
   linkFileToCharacter,
   shareCharacter,
@@ -16,9 +18,14 @@ import {
   uploadAvatarPictureForCharacter,
 } from './character-service';
 import {
+  dbGetAllAccessibleCharacters,
+  dbGetAllCharactersByUser,
   dbGetCharacterById,
   dbGetCharacterByIdOptionalShareData,
   dbGetCharacterByIdWithShareData,
+  dbGetCharactersByAssociatedSchools,
+  dbGetCharactersByUser,
+  dbGetGlobalCharacters,
   dbGetSharedCharacterConversations,
 } from '../db/functions/character';
 import { dbGetRelatedCharacterFiles } from '../db/functions/files';
@@ -35,13 +42,15 @@ import {
 
 vi.mock('../db/functions/character', () => ({
   dbGetSharedCharacterConversations: vi.fn(),
+  dbGetAllAccessibleCharacters: vi.fn(),
+  dbGetAllCharactersByUser: vi.fn(),
   dbGetCharacterById: vi.fn(),
   dbGetCharacterByIdAndUserId: vi.fn(),
   dbGetCharacterByIdOptionalShareData: vi.fn(),
   dbGetCharacterByIdWithShareData: vi.fn(),
-  dbDeleteCharacterByIdAndUserId: vi.fn(),
+  dbDeleteCharacterByIdAndUser: vi.fn(),
   dbGetCharactersByAssociatedSchools: vi.fn(),
-  dbGetCharactersByUserId: vi.fn(),
+  dbGetCharactersByUser: vi.fn(),
   dbGetGlobalCharacters: vi.fn(),
 }));
 vi.mock('../db/functions/files', () => ({
@@ -745,6 +754,80 @@ describe('character-service', () => {
           }),
         ).rejects.toThrow(ForbiddenError);
       });
+    });
+  });
+
+  describe('character discovery filters', () => {
+    const user = mockUser('teacher');
+    const characters = [{ id: generateUUID() } as CharacterSelectModel];
+
+    it.each([
+      {
+        accessLevel: 'global' as const,
+        expectedMock: dbGetGlobalCharacters,
+      },
+      {
+        accessLevel: 'school' as const,
+        expectedMock: dbGetCharactersByAssociatedSchools,
+      },
+      {
+        accessLevel: 'private' as const,
+        expectedMock: dbGetCharactersByUser,
+      },
+    ])(
+      'routes accessLevel=$accessLevel to the correct db function',
+      async ({ accessLevel, expectedMock }) => {
+        (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(
+          characters as never,
+        );
+
+        const result = await getCharacterByAccessLevel({ accessLevel, user });
+
+        expect(result).toEqual(characters);
+        expect(expectedMock).toHaveBeenCalledWith({ user });
+      },
+    );
+
+    it('returns an empty list for unsupported access levels', async () => {
+      const result = await getCharacterByAccessLevel({
+        accessLevel: 'invalid' as never,
+        user,
+      });
+
+      expect(result).toEqual([]);
+    });
+
+    it('routes filter=all to dbGetAllAccessibleCharacters', async () => {
+      (
+        dbGetAllAccessibleCharacters as MockedFunction<typeof dbGetAllAccessibleCharacters>
+      ).mockResolvedValue(characters as never);
+
+      const result = await getCharactersByOverviewFilter({ filter: 'all', user });
+
+      expect(result).toEqual(characters);
+      expect(dbGetAllAccessibleCharacters).toHaveBeenCalledWith({ user });
+    });
+
+    it.each([
+      { filter: 'mine' as const, expectedMock: dbGetAllCharactersByUser },
+      { filter: 'official' as const, expectedMock: dbGetGlobalCharacters },
+      { filter: 'school' as const, expectedMock: dbGetCharactersByAssociatedSchools },
+    ])('routes filter=$filter to the correct db function', async ({ filter, expectedMock }) => {
+      (expectedMock as MockedFunction<typeof expectedMock>).mockResolvedValue(characters as never);
+
+      const result = await getCharactersByOverviewFilter({ filter, user });
+
+      expect(result).toEqual(characters);
+      expect(expectedMock).toHaveBeenCalledWith({ user });
+    });
+
+    it('returns an empty list for unsupported overview filters', async () => {
+      const result = await getCharactersByOverviewFilter({
+        filter: 'invalid' as never,
+        user,
+      });
+
+      expect(result).toEqual([]);
     });
   });
 
