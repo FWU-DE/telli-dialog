@@ -69,5 +69,5 @@ function generateFileName({
     return `${currentDate}-Dialog über ${sharedConversationName}.docx`;
   }
 
-  return 'Telli-Konversation.docx';
+  return 'AIS-chat-Konversation.docx';
 }
