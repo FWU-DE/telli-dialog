@@ -1,12 +1,5 @@
 import type { SharedChatExpiredError, TelliPointsExceededError } from '@telli/ai-core/errors';
-
-export type TextSearchResult = {
-  name: string;
-  url: string;
-  content: string;
-  type: string;
-  favicon?: string;
-};
+import { TextSearchResult } from 'linkup-sdk';
 
 /**
  * Serialized error that can be safely transmitted across the Server Action boundary.
