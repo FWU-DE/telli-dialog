@@ -6,6 +6,7 @@ import Spinner from '@/components/icons/spinner';
 import { useToast } from '@/components/common/toast';
 import { useTranslations } from 'next-intl';
 import { Button } from '@ui/components/Button';
+import { cn } from '@/utils/tailwind';
 
 type DownloadConversationButtonProps = {
   conversationId: string;
@@ -69,7 +70,7 @@ export default function DownloadConversationButton({
     <Button
       variant="ghost"
       size="icon-round"
-      className={['text-primary', className].filter(Boolean).join(' ')}
+      className={cn('text-primary', className)}
       title={t('conversation-download')}
       onClick={handleDownload}
       disabled={disabled}

@@ -9,20 +9,19 @@ import Link from 'next/link';
 import { IMPRESSUM_URL, PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from './const';
 import { useTranslations } from 'next-intl';
 import DotsHorizontalIcon from '@/components/icons/dots-horizontal';
+import { cn } from '@/utils/tailwind';
 import { usePortalContainer } from '@ui/components/portal-container';
 import { Button } from '@ui/components/Button';
 
-
 function MenuActionRow({ action }: { action: React.ReactElement<{ className?: string }> }) {
-  const className = [
+  const className = cn(
     'flex w-full h-auto items-center justify-start gap-2 p-2 pl-4 text-base font-normal bg-transparent border-none hover:bg-transparent hover:underline hover:text-primary',
     action.props.className,
-  ]
-    .filter(Boolean)
-    .join(' ');
-  const actionWithClasses = React.cloneElement(action, { className });
+  );
 
-  return <DropdownMenu.Item asChild>{actionWithClasses}</DropdownMenu.Item>;
+  const actionElement = React.cloneElement(action, { className });
+
+  return <DropdownMenu.Item asChild>{actionElement}</DropdownMenu.Item>;
 }
 
 function ProfileMenuContent({ userAndContext }: { userAndContext?: UserAndContext }) {
@@ -98,8 +97,8 @@ export function ThreeDotsProfileMenu({
   deleteButtonJSX,
   userAndContext,
 }: {
-  downloadButtonJSX?: ActionMenuElement;
-  deleteButtonJSX?: ActionMenuElement;
+  downloadButtonJSX?: React.ReactElement<{ className?: string }>;
+  deleteButtonJSX?: React.ReactElement<{ className?: string }>;
   userAndContext?: UserAndContext;
 }) {
   const container = usePortalContainer();
