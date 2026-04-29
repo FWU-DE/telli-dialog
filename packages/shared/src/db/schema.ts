@@ -15,11 +15,7 @@ import {
   vector,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
-import {
-  type DesignConfiguration,
-  type LlmModelPriceMetadata,
-  type TextSearchResult,
-} from './types';
+import { type DesignConfiguration, type LlmModelPriceMetadata } from './types';
 import {
   conversationRoleSchema,
   conversationTypeSchema,
@@ -27,6 +23,7 @@ import {
 } from '../utils/chat';
 import { isNull, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod';
+import type { TextSearchResult } from 'linkup-sdk';
 
 // can be expanded to include other metadata of other file types
 export type FileMetadata = {
@@ -146,7 +143,7 @@ export const conversationMessageTable = pgTable(
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
     deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
     parameters: json('parameters').$type<ConversationMessageParameters>(),
-    textSearchResults: json('text_search_results').$type<TextSearchResult[]>(),
+    webSearchResults: json('web_search_results').$type<TextSearchResult[]>(),
   },
   (table) => [index().on(table.conversationId), index().on(table.userId)],
 );

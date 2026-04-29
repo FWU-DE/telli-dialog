@@ -143,7 +143,6 @@ export async function sendChatMessage({
 
   // Web search
   const webSearchResults = await searchWeb(userMessage.content);
-  //const textSearchResults = webSearchResults.length > 0 ? webSearchResults : undefined;
 
   // Save user message to DB
   await dbInsertChatContent({
@@ -239,8 +238,7 @@ export async function sendChatMessage({
             orderNumber: messages.length + 2,
             modelName: definedModel.name,
             conversationId: conversation.id,
-            textSearchResults: undefined,
-            // This needs to be updated when web search is implemented
+            webSearchResults: webSearchResults,
           });
 
           // Generate title if needed
@@ -310,6 +308,6 @@ export async function sendChatMessage({
   return {
     stream,
     messageId: assistantMessageId,
-    textSearchResults: webSearchResults,
+    webSearchResults,
   };
 }
