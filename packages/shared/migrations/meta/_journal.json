@@ -442,13 +442,6 @@
       "when": 1776945795168,
       "tag": "0062_orange_chat",
       "breakpoints": true
-    },
-    {
-      "idx": 63,
-      "version": "7",
-      "when": 1777368995827,
-      "tag": "0063_tranquil_ted_forrester",
-      "breakpoints": true
     }
   ]
 }
