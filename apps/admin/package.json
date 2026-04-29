@@ -14,23 +14,23 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.1030.0",
-    "@aws-sdk/s3-request-presigner": "3.1030.0",
+    "@aws-sdk/client-s3": "3.1036.0",
+    "@aws-sdk/s3-request-presigner": "3.1036.0",
     "@hookform/resolvers": "5.2.2",
     "@opentelemetry/api": "1.9.1",
-    "@sentry/nextjs": "10.48.0",
+    "@sentry/nextjs": "10.50.0",
     "@t3-oss/env-nextjs": "0.13.11",
     "@telli/api-database": "workspace:*",
     "@telli/ui": "workspace:*",
     "@telli/shared": "workspace:*",
-    "lucide-react": "1.8.0",
+    "lucide-react": "1.9.0",
     "next": "16.2.4",
     "next-auth": "5.0.0-beta.31",
     "pg": "8.20.0",
     "react": "19.2.5",
     "react-csv": "2.2.2",
     "react-dom": "19.2.5",
-    "react-hook-form": "7.72.1",
+    "react-hook-form": "7.73.1",
     "require-in-the-middle": "8.0.1",
     "sonner": "2.0.7",
     "tailwind-merge": "3.5.0",
@@ -52,8 +52,8 @@
     "postcss": "8.5.11",
     "prettier": "3.8.3",
     "prettier-eslint": "16.4.2",
-    "tailwindcss": "4.2.2",
+    "tailwindcss": "4.2.4",
     "tailwindcss-animate": "1.0.7",
-    "typescript": "6.0.2"
+    "typescript": "6.0.3"
   }
 }
