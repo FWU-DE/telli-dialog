@@ -1,7 +1,7 @@
-import { dbCreateOrUpdateVidisUser } from '../functions/vidis';
+import { dbCreateOrUpdateUser } from '../functions/user';
 
 export async function insertDummyUser() {
-  await dbCreateOrUpdateVidisUser({
+  await dbCreateOrUpdateUser({
     id: DUMMY_USER_ID,
     email: DUMMY_USER_EMAIL,
     firstName: DUMMY_USER_FIRST_NAME,

@@ -1,10 +1,10 @@
 import NextAuth, { NextAuthResult } from 'next-auth';
-import { handleVidisJWTCallback, vidisConfig } from './providers/vidis';
+import { handleVidisJWTCallback, validateAndSyncVidisUser, vidisConfig } from './providers/vidis';
 import { getUserAndContextByUserId } from './utils';
 import { UserAndContext, userAndContextSchema } from './types';
 import { logDebug, logError, logInfo, logWarning } from '@shared/logging';
 import { sessionBlockList } from './session';
-import { generateErrorUrl, validateAndSyncVidisUser } from '@shared/auth/authentication-service';
+import { generateErrorUrl } from '@shared/auth/authentication-service';
 
 declare module 'next-auth' {
   interface Session {

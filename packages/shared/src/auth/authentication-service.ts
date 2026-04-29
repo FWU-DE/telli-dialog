@@ -1,23 +1,11 @@
 import z from 'zod';
 import { vidisProfileSchema } from './vidis';
-import { dbGetFederalStateById } from '../db/functions/federal-state';
-import { dbGetUserById } from '../db/functions/user';
-import {
-  dbCreateVidisUser,
-  dbUpdateVidisUserById,
-  normalizeVidisSchoolIds,
-  vidisRoleToUserSchoolRole,
-} from '../db/functions/vidis';
+import { normalizeVidisSchoolIds } from '../db/functions/vidis';
 
 const authErrorCodeSchema = z.enum(['federal_state_not_found', 'federal_state_changed']);
 export type AuthErrorCode = z.infer<typeof authErrorCodeSchema>;
 
 type OidcValidationResult = { success: true } | { success: false; fieldErrors: string[] };
-
-type VidisSignInResult =
-  | { success: true }
-  | { success: false; fieldErrors: string[] }
-  | { success: false; authError: AuthErrorCode };
 
 function isEmptyString(value: string): boolean {
   return value.trim().length === 0;
@@ -63,57 +51,6 @@ export function validateOidcProfile(profile: unknown): OidcValidationResult {
   if (fieldErrors.length > 0) {
     return { success: false, fieldErrors };
   }
-
-  return { success: true };
-}
-
-export async function validateAndSyncVidisUser(profile: unknown): Promise<VidisSignInResult> {
-  const profileValidationResult = validateOidcProfile(profile);
-  if (!profileValidationResult.success) {
-    return profileValidationResult;
-  }
-
-  const parsedProfile = vidisProfileSchema.parse(profile);
-  const federalState = await dbGetFederalStateById(parsedProfile.bundesland.trim());
-  if (!federalState) {
-    return { success: false, authError: 'federal_state_not_found' };
-  }
-
-  const existingUser = await dbGetUserById({ userId: parsedProfile.sub });
-  if (
-    existingUser &&
-    existingUser.federalStateId &&
-    existingUser.federalStateId !== federalState.id
-  ) {
-    return { success: false, authError: 'federal_state_changed' };
-  }
-
-  const schoolIds = normalizeVidisSchoolIds(parsedProfile.schulkennung);
-  const userRole = vidisRoleToUserSchoolRole(parsedProfile.rolle.trim());
-
-  if (!existingUser) {
-    await dbCreateVidisUser({
-      id: parsedProfile.sub,
-      firstName: '',
-      lastName: '',
-      email: `${parsedProfile.sub}@vidis.schule`,
-      schoolIds,
-      federalStateId: federalState.id,
-      userRole,
-    });
-
-    return { success: true };
-  }
-
-  await dbUpdateVidisUserById({
-    id: existingUser.id,
-    firstName: existingUser.firstName,
-    lastName: existingUser.lastName,
-    email: existingUser.email,
-    schoolIds,
-    federalStateId: existingUser.federalStateId ?? federalState.id,
-    userRole,
-  });
 
   return { success: true };
 }

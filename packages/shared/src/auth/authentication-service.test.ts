@@ -4,41 +4,8 @@ import {
   generateErrorUrl,
   getAuthErrorFromUrl,
   getFieldErrorsFromUrl,
-  validateAndSyncVidisUser,
   validateOidcProfile,
 } from './authentication-service';
-
-const {
-  mockDbGetFederalStateById,
-  mockDbGetUserById,
-  mockDbCreateVidisUser,
-  mockDbUpdateVidisUserById,
-} = vi.hoisted(() => {
-  return {
-    mockDbGetFederalStateById: vi.fn(),
-    mockDbGetUserById: vi.fn(),
-    mockDbCreateVidisUser: vi.fn(),
-    mockDbUpdateVidisUserById: vi.fn(),
-  };
-});
-
-vi.mock('../db/functions/federal-state', () => ({
-  dbGetFederalStateById: mockDbGetFederalStateById,
-}));
-
-vi.mock('../db/functions/user', () => ({
-  dbGetUserById: mockDbGetUserById,
-}));
-
-vi.mock('../db/functions/vidis', async () => {
-  const actual = await vi.importActual('../db/functions/vidis');
-
-  return {
-    ...actual,
-    dbCreateVidisUser: mockDbCreateVidisUser,
-    dbUpdateVidisUserById: mockDbUpdateVidisUserById,
-  };
-});
 
 const buildValidProfile = (overrides: Partial<VidisProfile> = {}): VidisProfile => ({
   sub: 'user-123',
@@ -91,93 +58,6 @@ describe('authentication-service', () => {
     it('should return error when schulkennung array has only empty values', () => {
       const result = validateOidcProfile(buildValidProfile({ schulkennung: [' ', ''] }));
       expect(result).toEqual({ success: false, fieldErrors: ['schulkennung'] });
-    });
-  });
-
-  describe('validateAndSyncVidisUser', () => {
-    it('should return field errors for invalid profile payload', async () => {
-      const result = await validateAndSyncVidisUser({ sid: 'session-123' });
-
-      expect(result).toEqual({
-        success: false,
-        fieldErrors: ['sub', 'rolle', 'schulkennung', 'bundesland'],
-      });
-      expect(mockDbGetFederalStateById).not.toHaveBeenCalled();
-    });
-
-    it('should return auth error when federal state does not exist', async () => {
-      mockDbGetFederalStateById.mockResolvedValue(undefined);
-
-      const result = await validateAndSyncVidisUser(buildValidProfile());
-
-      expect(result).toEqual({ success: false, authError: 'federal_state_not_found' });
-      expect(mockDbCreateVidisUser).not.toHaveBeenCalled();
-      expect(mockDbUpdateVidisUserById).not.toHaveBeenCalled();
-    });
-
-    it('should create a user when it does not exist', async () => {
-      mockDbGetFederalStateById.mockResolvedValue({ id: 'DE-TEST' });
-      mockDbGetUserById.mockResolvedValue(undefined);
-
-      const result = await validateAndSyncVidisUser(
-        buildValidProfile({ schulkennung: [' A ', 'B'] }),
-      );
-
-      expect(result).toEqual({ success: true });
-      expect(mockDbCreateVidisUser).toHaveBeenCalledWith({
-        id: 'user-123',
-        firstName: '',
-        lastName: '',
-        email: 'user-123@vidis.schule',
-        schoolIds: ['A', 'B'],
-        federalStateId: 'DE-TEST',
-        userRole: 'teacher',
-      });
-      expect(mockDbUpdateVidisUserById).not.toHaveBeenCalled();
-    });
-
-    it('should return auth error when federal state changed for existing user', async () => {
-      mockDbGetFederalStateById.mockResolvedValue({ id: 'DE-TEST' });
-      mockDbGetUserById.mockResolvedValue({
-        id: 'user-123',
-        email: 'user-123@vidis.schule',
-        firstName: '',
-        lastName: '',
-        federalStateId: 'BY',
-      });
-
-      const result = await validateAndSyncVidisUser(buildValidProfile());
-
-      expect(result).toEqual({ success: false, authError: 'federal_state_changed' });
-      expect(mockDbCreateVidisUser).not.toHaveBeenCalled();
-      expect(mockDbUpdateVidisUserById).not.toHaveBeenCalled();
-    });
-
-    it('should update an existing user without changing federal state', async () => {
-      mockDbGetFederalStateById.mockResolvedValue({ id: 'DE-TEST' });
-      mockDbGetUserById.mockResolvedValue({
-        id: 'user-123',
-        email: 'existing@vidis.schule',
-        firstName: 'First',
-        lastName: 'Last',
-        federalStateId: 'DE-TEST',
-      });
-
-      const result = await validateAndSyncVidisUser(
-        buildValidProfile({ rolle: 'LERN', schulkennung: [' school-1 ', ''] }),
-      );
-
-      expect(result).toEqual({ success: true });
-      expect(mockDbUpdateVidisUserById).toHaveBeenCalledWith({
-        id: 'user-123',
-        email: 'existing@vidis.schule',
-        firstName: 'First',
-        lastName: 'Last',
-        schoolIds: ['school-1'],
-        federalStateId: 'DE-TEST',
-        userRole: 'student',
-      });
-      expect(mockDbCreateVidisUser).not.toHaveBeenCalled();
     });
   });
 
