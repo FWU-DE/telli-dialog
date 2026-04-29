@@ -126,8 +126,8 @@ importers:
         specifier: 5.5.5
         version: 5.5.5(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@9.39.4(jiti@2.6.1)))(eslint@9.39.4(jiti@2.6.1))(prettier@3.8.3)
       postcss:
-        specifier: 8.5.10
-        version: 8.5.10
+        specifier: 8.5.11
+        version: 8.5.11
       prettier:
         specifier: 3.8.3
         version: 3.8.3
@@ -378,6 +378,9 @@ importers:
       katex:
         specifier: 0.16.45
         version: 0.16.45
+      linkup-sdk:
+        specifier: 2.7.0
+        version: 2.7.0
       mammoth:
         specifier: 1.12.0
         version: 1.12.0
@@ -536,8 +539,8 @@ importers:
         specifier: 1.59.1
         version: 1.59.1
       postcss:
-        specifier: 8.5.10
-        version: 8.5.10
+        specifier: 8.5.11
+        version: 8.5.11
       prettier:
         specifier: 3.8.3
         version: 3.8.3
@@ -936,8 +939,8 @@ importers:
         specifier: 5.5.5
         version: 5.5.5(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@9.39.4(jiti@2.6.1)))(eslint@9.39.4(jiti@2.6.1))(prettier@3.8.3)
       postcss:
-        specifier: 8.5.10
-        version: 8.5.10
+        specifier: 8.5.11
+        version: 8.5.11
       prettier:
         specifier: 3.8.3
         version: 3.8.3
@@ -5514,6 +5517,9 @@ packages:
     resolution: {integrity: sha512-byD6KPdvo72y/wj2T/4zGEvvlis+PsZsn/yPS3pEO+sFpcrqRpX/TJCxvVaEsNeMrfQbCr7w163YqoD9IYwHXw==}
     engines: {node: '>=4'}
 
+  axios@1.15.2:
+    resolution: {integrity: sha512-wLrXxPtcrPTsNlJmKjkPnNPK2Ihe0hn0wGSaTEiHRPxwjvJwT3hKmXF4dpqxmPO9SoNb2FsYXj/xEo0gHN+D5A==}
+
   axobject-query@4.1.0:
     resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
     engines: {node: '>= 0.4'}
@@ -6456,6 +6462,15 @@ packages:
   flatted@3.4.2:
     resolution: {integrity: sha512-PjDse7RzhcPkIJwy5t7KPWQSZ9cAbzQXcafsetQoD7sOJRQlGikNbx7yZp2OotDnJyrDcbyRq3Ttb18iYOqkxA==}
 
+  follow-redirects@1.16.0:
+    resolution: {integrity: sha512-y5rN/uOsadFT/JfYwhxRS5R7Qce+g3zG97+JrtFZlC9klX/W5hD7iiLzScI4nZqUS7DNUdhPgw4xI8W2LuXlUw==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+
   for-each@0.3.5:
     resolution: {integrity: sha512-dKx12eRCVIzqCxFGplyFKJMPvLEWgmNtUrpTiJIR5u97zEhRG8ySrtboPHZXx7daLxQVrl643cTzbab2tkQjxg==}
     engines: {node: '>= 0.4'}
@@ -7199,6 +7214,10 @@ packages:
   linkify-it@5.0.0:
     resolution: {integrity: sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==}
 
+  linkup-sdk@2.7.0:
+    resolution: {integrity: sha512-X/EvibI045zDY+n5SRNlKmmo7rCf9B/krAvuf4Jj6axatIPwufq8LqEi49ScVmgNBMp68wTB19gETK+jPzfl3A==}
+    engines: {node: '>=20.19.0'}
+
   load-tsconfig@0.2.5:
     resolution: {integrity: sha512-IXO6OCs9yg8tMKzfPZ1YmheJbZCiEsnBdcB03l0OcfK9prKnJb96siuHCr5Fl37/yo9DnKU+TLpxzTUspw9shg==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
@@ -7906,8 +7925,8 @@ packages:
     resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postcss@8.5.10:
-    resolution: {integrity: sha512-pMMHxBOZKFU6HgAZ4eyGnwXF/EvPGGqUr0MnZ5+99485wwW41kW91A4LOGxSHhgugZmSChL5AlElNdwlNgcnLQ==}
+  postcss@8.5.11:
+    resolution: {integrity: sha512-5dDj8+lmvA8XB78SmzGI8NlQoksv7IfutGWeVZxiixHbO+p4LDPT3wuG/D9sM/wrjZZ9I+Siy/e117vbFPxSZg==}
     engines: {node: ^10 || ^12 || >=14}
 
   postcss@8.5.12:
@@ -7996,6 +8015,10 @@ packages:
 
   proxy-from-env@1.1.0:
     resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
+
+  proxy-from-env@2.1.0:
+    resolution: {integrity: sha512-cJ+oHTW1VAEa8cJslgmUZrc+sjRKgAKl3Zyse6+PV38hZe/V6Z14TbCuXcan9F9ghlz4QrFr2c92TNF82UkYHA==}
+    engines: {node: '>=10'}
 
   pump@3.0.4:
     resolution: {integrity: sha512-VS7sjc6KR7e1ukRFhQSY5LM2uBWAUPiOPa/A3mkKmiMwSmRFUITt0xuj+/lesgnCv+dPIEYlkzrcyXgquIHMcA==}
@@ -8610,15 +8633,15 @@ packages:
   tldts-core@6.1.86:
     resolution: {integrity: sha512-Je6p7pkk+KMzMv2XXKmAE3McmolOQFdxkKw0R8EYNr7sELW46JqnNeTX8ybPiQgvg1ymCoF8LXs5fzFaZvJPTA==}
 
-  tldts-core@7.0.28:
-    resolution: {integrity: sha512-7W5Efjhsc3chVdFhqtaU0KtK32J37Zcr9RKtID54nG+tIpcY79CQK/veYPODxtD/LJ4Lue66jvrQzIX2Z2/pUQ==}
+  tldts-core@7.0.29:
+    resolution: {integrity: sha512-W99NuU7b1DcG3uJ3v9k9VztCH3WialNbBkBft5wCs8V8mexu0XQqaZEYb9l9RNNzK8+3EJ9PKWB0/RUtTQ/o+Q==}
 
   tldts@6.1.86:
     resolution: {integrity: sha512-WMi/OQ2axVTf/ykqCQgXiIct+mSQDFdH2fkwhPwgEwvJ1kSzZRiinb0zF2Xb8u4+OqPChmyI6MEu4EezNJz+FQ==}
     hasBin: true
 
-  tldts@7.0.28:
-    resolution: {integrity: sha512-+Zg3vWhRUv8B1maGSTFdev9mjoo8Etn2Ayfs4cnjlD3CsGkxXX4QyW3j2WJ0wdjYcYmy7Lx2RDsZMhgCWafKIw==}
+  tldts@7.0.29:
+    resolution: {integrity: sha512-JIXCerhudr/N6OWLwLF1HVsTTUo7ry6qHa5eWZEkiMuxsIiAACL55tGLfqfHfoH7QaMQUW8fngD7u7TxWexYQg==}
     hasBin: true
 
   to-regex-range@5.0.1:
@@ -9258,11 +9281,19 @@ packages:
     resolution: {integrity: sha512-CzhO+pFNo8ajLM2d2IW/R93ipy99LWjtwblvC1RsoSUMZgyLbYFr221TnSNT7GjGdYui6P459mw9JH/g/zW2ug==}
     engines: {node: '>=18'}
 
+  zod-to-json-schema@3.25.2:
+    resolution: {integrity: sha512-O/PgfnpT1xKSDeQYSCfRI5Gy3hPf91mKVDuYLUHZJMiDFptvP41MSnWofm8dnCm0256ZNfZIM7DSzuSMAFnjHA==}
+    peerDependencies:
+      zod: ^3.25.28 || ^4
+
   zod-validation-error@4.0.2:
     resolution: {integrity: sha512-Q6/nZLe6jxuU80qb/4uJ4t5v2VEZ44lzQjPDhYJNztRQ4wyWc6VF3D3Kb/fAuPetZQnhS3hnajCf9CsWesghLQ==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
+
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
   zod@4.3.6:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
@@ -13364,7 +13395,7 @@ snapshots:
       '@alloc/quick-lru': 5.2.0
       '@tailwindcss/node': 4.2.2
       '@tailwindcss/oxide': 4.2.2
-      postcss: 8.5.10
+      postcss: 8.5.11
       tailwindcss: 4.2.2
 
   '@tanstack/query-core@5.99.0': {}
@@ -14180,6 +14211,14 @@ snapshots:
       fastq: 1.20.1
 
   axe-core@4.11.2: {}
+
+  axios@1.15.2:
+    dependencies:
+      follow-redirects: 1.16.0
+      form-data: 4.0.5
+      proxy-from-env: 2.1.0
+    transitivePeerDependencies:
+      - debug
 
   axobject-query@4.1.0: {}
 
@@ -15401,6 +15440,8 @@ snapshots:
 
   flatted@3.4.2: {}
 
+  follow-redirects@1.16.0: {}
+
   for-each@0.3.5:
     dependencies:
       is-callable: 1.2.7
@@ -16244,6 +16285,14 @@ snapshots:
   linkify-it@5.0.0:
     dependencies:
       uc.micro: 2.1.0
+
+  linkup-sdk@2.7.0:
+    dependencies:
+      axios: 1.15.2
+      zod: 3.25.76
+      zod-to-json-schema: 3.25.2(zod@3.25.76)
+    transitivePeerDependencies:
+      - debug
 
   load-tsconfig@0.2.5: {}
 
@@ -17167,7 +17216,7 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postcss@8.5.10:
+  postcss@8.5.11:
     dependencies:
       nanoid: 3.3.11
       picocolors: 1.1.1
@@ -17262,6 +17311,8 @@ snapshots:
       long: 5.3.2
 
   proxy-from-env@1.1.0: {}
+
+  proxy-from-env@2.1.0: {}
 
   pump@3.0.4:
     dependencies:
@@ -18052,16 +18103,16 @@ snapshots:
 
   tldts-core@6.1.86: {}
 
-  tldts-core@7.0.28:
+  tldts-core@7.0.29:
     optional: true
 
   tldts@6.1.86:
     dependencies:
       tldts-core: 6.1.86
 
-  tldts@7.0.28:
+  tldts@7.0.29:
     dependencies:
-      tldts-core: 7.0.28
+      tldts-core: 7.0.29
     optional: true
 
   to-regex-range@5.0.1:
@@ -18078,7 +18129,7 @@ snapshots:
 
   tough-cookie@6.0.1:
     dependencies:
-      tldts: 7.0.28
+      tldts: 7.0.29
     optional: true
 
   tr46@0.0.3: {}
@@ -18416,7 +18467,7 @@ snapshots:
       esbuild: 0.27.7
       fdir: 6.5.0(picomatch@4.0.4)
       picomatch: 4.0.4
-      postcss: 8.5.10
+      postcss: 8.5.11
       rollup: 4.60.2
       tinyglobby: 0.2.16
     optionalDependencies:
@@ -18735,9 +18786,15 @@ snapshots:
 
   yoctocolors@2.1.2: {}
 
+  zod-to-json-schema@3.25.2(zod@3.25.76):
+    dependencies:
+      zod: 3.25.76
+
   zod-validation-error@4.0.2(zod@4.3.6):
     dependencies:
       zod: 4.3.6
+
+  zod@3.25.76: {}
 
   zod@4.3.6: {}
 
