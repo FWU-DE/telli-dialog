@@ -238,7 +238,7 @@ export async function sendChatMessage({
             orderNumber: messages.length + 2,
             modelName: definedModel.name,
             conversationId: conversation.id,
-            webSearchResults: webSearchResults,
+            webSearchResults,
           });
 
           // Generate title if needed
