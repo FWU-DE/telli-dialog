@@ -32,7 +32,7 @@ import { extractUrls } from '../utils/extract-urls';
 import { UserAndContext } from '@/auth/types';
 import { extractImagesAndUrl } from '../file-operations/preprocess-image';
 import { ingestWebContent } from '../rag/ingestWebContent';
-//import { searchWeb } from './websearch';
+import { searchWeb } from './websearch';
 
 /**
  * Converts frontend messages to ai-core message format
@@ -142,7 +142,7 @@ export async function sendChatMessage({
   });
 
   // Web search
-  //const webSearchResults = await searchWeb(userMessage.content);
+  const webSearchResults = await searchWeb(userMessage.content);
 
   // Save user message to DB
   await dbInsertChatContent({
@@ -307,5 +307,6 @@ export async function sendChatMessage({
   return {
     stream,
     messageId: assistantMessageId,
+    textSearchResults: webSearchResults,
   };
 }

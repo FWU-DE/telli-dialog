@@ -132,6 +132,7 @@ export function useTelliChat({
                 id: result.messageId,
                 role: 'assistant',
                 content: '',
+                textSearchResults: result.textSearchResults,
               };
 
               setMessages((prev) => [...prev, assistantMessage]);
