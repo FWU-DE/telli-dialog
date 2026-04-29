@@ -48,7 +48,7 @@ import { OverviewFilter } from '@shared/overview-filter';
 import { addDays } from '@shared/utils/date';
 import { removeNullishValues } from '@shared/utils/remove-nullish-values';
 import { generateUUID } from '@shared/utils/uuid';
-import { and, eq, lt } from 'drizzle-orm';
+import { and, eq, inArray, lt } from 'drizzle-orm';
 import z from 'zod';
 import { computeBlobHash } from '@telli/shared-core/crypto/blob-hash';
 import {
@@ -381,25 +381,17 @@ export const shareCharacter = async ({
     throw new Error('usage time limit must be between 1 and 43200 minutes');
   }
 
-  // share character instance
-  const [maybeExistingEntry] = await db
-    .select()
-    .from(sharedCharacterConversation)
-    .where(
-      and(
-        eq(sharedCharacterConversation.userId, user.id),
-        eq(sharedCharacterConversation.characterId, characterId),
-      ),
-    );
+  const activeShares = await dbGetSharedCharacterConversations({ characterId, userId: user.id });
+  if (activeShares.length > 0) throw new Error('There can only be one active share at a time');
 
   const telliPointsLimit = telliPointsPercentageLimit;
   const maxUsageTimeLimit = usageTimeLimitMinutes;
   const inviteCode = generateInviteCode();
   const startedAt = new Date();
-  const [updatedSharedChat] = await db
+
+  const [newSharedChat] = await db
     .insert(sharedCharacterConversation)
     .values({
-      id: maybeExistingEntry?.id,
       userId: user.id,
       characterId,
       telliPointsLimit,
@@ -407,17 +399,13 @@ export const shareCharacter = async ({
       inviteCode,
       startedAt,
     })
-    .onConflictDoUpdate({
-      target: sharedCharacterConversation.id,
-      set: { inviteCode, startedAt, maxUsageTimeLimit, telliPointsLimit },
-    })
     .returning();
 
-  if (updatedSharedChat === undefined) {
+  if (newSharedChat === undefined) {
     throw new Error('Could not share character chat');
   }
 
-  return updatedSharedChat;
+  return newSharedChat;
 };
 
 /**
@@ -439,18 +427,14 @@ export const unshareCharacter = async ({
     userId: user.id,
   });
   if (sharedConversations.length === 0)
-    throw new ForbiddenError('Not authorized to stop this shared character instance');
+    throw new NotFoundError('No active sharing found for this character');
 
-  // unshare character instance by setting startedAt to null
+  // unshare character instance by setting manuallyStoppedAt
+  const sharedConversationIds = sharedConversations.map((s) => s.id);
   const [updatedCharacter] = await db
     .update(sharedCharacterConversation)
-    .set({ startedAt: null, maxUsageTimeLimit: null, telliPointsLimit: null })
-    .where(
-      and(
-        eq(sharedCharacterConversation.characterId, characterId),
-        eq(sharedCharacterConversation.userId, user.id),
-      ),
-    )
+    .set({ manuallyStoppedAt: new Date() })
+    .where(inArray(sharedCharacterConversation.id, sharedConversationIds))
     .returning();
 
   if (!updatedCharacter) {

@@ -51,7 +51,7 @@ export default async function Page(props: PageProps<'/characters/editor/[charact
         <h1 className="text-4xl sm:text-5xl font-medium mb-10">{t('join')}</h1>
         <CountDownTimer
           leftTime={Math.max(leftTime, 0)}
-          totalTime={character.maxUsageTimeLimit ?? 0}
+          totalTime={character.maxUsageTimeLimit}
           stopWatchClassName="w-4 h-4"
         />
         <main className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] w-full gap-6 mt-6 sm:mt-8 mb-12 sm:mb-16">
