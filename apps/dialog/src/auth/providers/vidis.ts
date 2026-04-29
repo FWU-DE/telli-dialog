@@ -1,4 +1,4 @@
-import { dbGetOrCreateVidisUser } from '@telli/shared/db/functions/vidis';
+import { dbGetUserById } from '@telli/shared/db/functions/user';
 import { env } from '@/env';
 import { Account, NextAuthConfig, Profile } from 'next-auth';
 import { customFetch } from 'next-auth';
@@ -19,14 +19,13 @@ export async function handleVidisJWTCallback({
   const parsedProfile = vidisProfileSchema.parse(profile);
   const parsedAccount = vidisAccountSchema.parse(account);
 
-  const createdUser = await dbGetOrCreateVidisUser({ ...parsedProfile });
-
-  if (createdUser === undefined) {
-    throw new Error('Could not create user');
+  const syncedUser = await dbGetUserById({ userId: parsedProfile.sub });
+  if (!syncedUser) {
+    throw new Error('Could not find synchronized VIDIS user');
   }
 
-  token.userId = createdUser.id;
-  token.email = createdUser.email;
+  token.userId = syncedUser.id;
+  token.email = syncedUser.email;
   token.id_token = parsedAccount.id_token;
   token.hasCompletedTraining = parsedProfile.is_ai_chat_eligible ?? false;
   return token;
