@@ -6,7 +6,6 @@ import { dbGetLlmModelsByFederalStateId } from '@shared/db/functions/llm-model';
 import { DEFAULT_CHAT_MODEL } from '@shared/llm-models/default-llm-models';
 import Logo from '@/components/common/logo';
 import { requireAuth } from '@/auth/requireAuth';
-import { ChatHeaderBar } from '@/components/chat/header-bar';
 import { DefaultPageLayout } from '@/components/layout/default-page-layout';
 
 export const dynamic = 'force-dynamic';
@@ -35,12 +34,14 @@ export default async function Page() {
       models={models}
       defaultLlmModelByCookie={userAndContext.lastUsedModel ?? DEFAULT_CHAT_MODEL}
     >
-      <DefaultPageLayout>
-        <ChatHeaderBar
-          chatId={id}
-          downloadConversationEnabled={false}
-          userAndContext={userAndContext}
-        />
+      <DefaultPageLayout
+        header={{
+          headerType: 'chat',
+          chatId: id,
+          downloadConversationEnabled: false,
+          userAndContext,
+        }}
+      >
         <Chat
           id={id}
           initialMessages={[]}

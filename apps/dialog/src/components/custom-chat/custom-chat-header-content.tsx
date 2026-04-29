@@ -1,10 +1,11 @@
 'use client';
 
+import { CustomChatFormStateProps } from '@/components/custom-chat/custom-chat-form-state';
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 
 type CustomChatHeaderContentContextValue = {
-  headerContent: ReactNode;
-  setHeaderContent: (content: ReactNode) => void;
+  formStateProps: CustomChatFormStateProps | null;
+  setFormStateProps: (value: CustomChatFormStateProps | null) => void;
 };
 
 const CustomChatHeaderContentContext = createContext<CustomChatHeaderContentContextValue | null>(
@@ -12,14 +13,14 @@ const CustomChatHeaderContentContext = createContext<CustomChatHeaderContentCont
 );
 
 export function CustomChatHeaderContentProvider({ children }: { children: ReactNode }) {
-  const [headerContent, setHeaderContent] = useState<ReactNode>(null);
+  const [formStateProps, setFormStateProps] = useState<CustomChatFormStateProps | null>(null);
 
   const value = useMemo(
     () => ({
-      headerContent,
-      setHeaderContent,
+      formStateProps,
+      setFormStateProps,
     }),
-    [headerContent],
+    [formStateProps],
   );
 
   return (
@@ -41,19 +42,23 @@ export function useCustomChatHeaderContent() {
   return context;
 }
 
-export function CustomChatHeaderContent({ children }: { children: ReactNode }) {
-  const { setHeaderContent } = useCustomChatHeaderContent();
+export function CustomChatHeaderContent({
+  isDirty,
+  isSubmitting,
+  hasSaveError,
+}: CustomChatFormStateProps) {
+  const { setFormStateProps } = useCustomChatHeaderContent();
 
   useEffect(() => {
-    setHeaderContent(children);
-  }, [children, setHeaderContent]);
+    setFormStateProps({ isDirty, isSubmitting, hasSaveError });
+  }, [hasSaveError, isDirty, isSubmitting, setFormStateProps]);
 
   // Clear on unmount only
   useEffect(() => {
     return () => {
-      setHeaderContent(null);
+      setFormStateProps(null);
     };
-  }, [setHeaderContent]);
+  }, [setFormStateProps]);
 
   return null;
 }

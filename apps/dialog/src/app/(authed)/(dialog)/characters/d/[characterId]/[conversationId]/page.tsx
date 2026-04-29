@@ -1,6 +1,4 @@
-import HeaderPortal from '@/app/(authed)/(dialog)/header-portal';
 import Chat from '@/components/chat/chat';
-import { ChatHeaderBar } from '@/components/chat/header-bar';
 import Logo from '@/components/common/logo';
 import { convertMessageModelToMessage } from '@/utils/chat/messages';
 import { requireAuth } from '@/auth/requireAuth';
@@ -76,15 +74,15 @@ export default async function Page(
       defaultLlmModelByCookie={currentModel}
       initialDownloadConversationEnabled={rawChatMessages.length > 0}
     >
-      <HeaderPortal>
-        <ChatHeaderBar
-          chatId={chat.id}
-          title={character.name}
-          downloadConversationEnabled={rawChatMessages.length > 0}
-          userAndContext={userAndContext}
-        />
-      </HeaderPortal>
-      <DefaultPageLayout>
+      <DefaultPageLayout
+        header={{
+          headerType: 'chat',
+          chatId: chat.id,
+          title: character.name,
+          downloadConversationEnabled: rawChatMessages.length > 0,
+          userAndContext,
+        }}
+      >
         <Chat
           id={chat.id}
           initialMessages={chatMessages}

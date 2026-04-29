@@ -85,7 +85,7 @@ export default function DownloadSharedConversationButton({
         disabled={disabled}
       >
         <div className="flex items-center gap-1">
-          {isLoading ? <Spinner className="p-2 size-8" /> : <WebDownloadIcon className="size-8" />}
+          {isLoading ? <Spinner className="p-2 size-8" /> : <WebDownloadIcon className="size-5" />}
           {showText && tCommon('conversation-download')}
         </div>
       </Button>
@@ -101,7 +101,7 @@ export default function DownloadSharedConversationButton({
       onClick={handleDownload}
       disabled={disabled}
     >
-      {isLoading ? <Spinner className="p-2 size-8" /> : <WebDownloadIcon className="size-8" />}
+      {isLoading ? <Spinner className="p-2 size-8" /> : <WebDownloadIcon className="size-5" />}
       {showText && tCommon('conversation-download')}
     </Button>
   );
