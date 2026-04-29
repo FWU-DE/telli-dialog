@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { VidisProfile } from '@shared/auth/vidis';
-import { validateAndSyncVidisUser } from './vidis';
-
-vi.mock('next-auth', () => ({
-  customFetch: Symbol('customFetch'),
-}));
+import { validateAndSyncVidisUser } from './validate-and-sync-vidis-user';
 
 const { mockDbGetFederalStateById, mockDbGetUserById, mockDbCreateUser, mockDbUpdateUserById } =
   vi.hoisted(() => {
